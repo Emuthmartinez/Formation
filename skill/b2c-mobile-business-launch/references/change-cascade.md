@@ -23,6 +23,23 @@ The full set of surfaces a B2C mobile launch maintains. A cascade check walks th
 
 For each change type, the surfaces most likely to need an update. Treat these as "check and update or justify," not "always edit."
 
+This table has a machine-readable twin: [`cascade-edges.yaml`](cascade-edges.yaml) carries the same surface inventory and the same change-type edges as data, and `check:change-cascade` grades recorded cascades against it. **Change both in the same edit** — the YAML's `mirrors` field names the row each change type comes from, so drift is visible.
+
+Record what you actually touched in `PROJECT_STATE.yaml`:
+
+```yaml
+change_cascade:
+  - id: "rename-streaks-to-runs"
+    type: "lexicon_change"          # a change_types key in cascade-edges.yaml
+    recorded_at: "2026-07-25"
+    surfaces:
+      app_in_app: { status: "updated", evidence: "ONBOARDING.md" }
+      asc_listing: { status: "updated", evidence: "APP_STORE_LISTING.md" }
+      content_ugc_ads: { status: "unaffected", reason: "no ad creative names the term yet" }
+```
+
+Every surface the map says the change type touches must be accounted for: `updated` needs `evidence`, `unaffected` needs a `reason`, `blocked` needs a `blocker`. A surface left out by omission fails the gate as `change_cascade.<id>.<surface>.unaccounted` — which is the `change-cascade-incomplete` failure card, caught mechanically instead of at review time. The edge set ships with the skill and is never copied into a business repo, so a launch run records against the map but cannot edit it.
+
 | Change type | Cascade to |
 | --- | --- |
 | **Feature added / changed / removed** | in-app copy → App Store description + keywords + "What's New" + screenshots/captions + App Preview + in-app events → custom product pages → landing (hero/method/FAQ + meta + JSON-LD) → SEO/GEO keywords → lifecycle email feature mentions → analytics events → privacy/Data safety (if new data/SDK) → ad creative |

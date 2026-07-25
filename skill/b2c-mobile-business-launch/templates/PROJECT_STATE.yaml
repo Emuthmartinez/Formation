@@ -513,6 +513,26 @@ open_questions:
     question: "What decisions still require founder approval?"
     blocks:
       - "store submission"
+# Recorded change cascades for a launched (or near-launch) app. Empty until the
+# first post-launch change ships; check:change-cascade grades each entry against
+# references/cascade-edges.yaml (the data form of the Change Cascade Map, which
+# ships with the skill and is not editable from here).
+#
+# Every surface the map says a change type touches must be accounted for:
+#   status: updated    -> needs `evidence`
+#   status: unaffected -> needs `reason` (one line of why it is untouched)
+#   status: blocked    -> needs `blocker`
+# A surface left out by omission is the change-cascade-incomplete failure card.
+#
+# change_cascade:
+#   - id: "rename-streaks-to-runs"
+#     type: "lexicon_change"        # see cascade-edges.yaml change_types
+#     recorded_at: "2026-07-25"
+#     surfaces:
+#       app_in_app: { status: "updated", evidence: "ONBOARDING.md" }
+#       asc_listing: { status: "updated", evidence: "APP_STORE_LISTING.md" }
+#       content_ugc_ads: { status: "unaffected", reason: "no ad creative names the term yet" }
+change_cascade: []
 failure_cards:
   active:
     - id: "doppler-docs-stale"

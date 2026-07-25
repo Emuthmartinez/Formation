@@ -1,10 +1,10 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "validate:skill": "uv run --with pyyaml python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .",
+    "validate:skill": "f=\"$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py\"; if [ -f \"$f\" ]; then uv run --with pyyaml python \"$f\" .; else echo 'skill-creator quick_validate not installed; skipping maintainer-only skill lint (expected outside the author machine)'; fi",
     "validate:launch-state": "tsx scripts/validate-project-state.ts",
     "check:attribution": "tsx scripts/check-attribution-contract.ts",
     "check:apple-signing": "tsx scripts/check-apple-signing-packet.ts",
@@ -66,6 +66,7 @@
     "check:localization-research": "tsx scripts/check-localization-research.ts",
     "check:emotional-design": "tsx scripts/check-emotional-design.ts",
     "check:lane-coverage": "tsx scripts/check-lane-coverage.ts",
+    "check:change-cascade": "tsx scripts/check-change-cascade.ts",
     "check:research": "tsx scripts/check-research-evidence.ts",
     "check:product-spec": "tsx scripts/check-product-spec.ts",
     "check:launch-trace": "tsx scripts/check-launch-trace.ts",

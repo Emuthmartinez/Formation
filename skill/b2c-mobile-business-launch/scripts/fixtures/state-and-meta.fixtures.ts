@@ -535,4 +535,87 @@ export function register(h: Harness): void {
   withLane(depOverrideThin, "product", { status: "partial", evidence: ["SPEC.md"] });
   withLane(depOverrideThin, "design", { status: "done", evidence: ["DESIGN.md"], dependency_override: "not needed" });
   runFixture("undated dependency_override is flagged as thin", depOverrideThin, "check-lane-coverage.ts", 0, "lanes.design.reason_undated_or_trivial");
+
+  // --- check-change-cascade: recorded cascade surface coverage ---
+  // Grades PROJECT_STATE.yaml change_cascade entries against the shipped
+  // references/cascade-edges.yaml map (the data form of the Change Cascade Map).
+
+  /** Write a change_cascade block into a fixture's PROJECT_STATE.yaml. */
+  const withCascade = (root: string, block: unknown): void => {
+    const state = readState(root);
+    state.change_cascade = block;
+    writeState(root, state);
+  };
+
+  // Shipped template has an empty block — inert until a change is recorded.
+  runFixture("shipped template passes the change cascade gate", makeFixture("cascade-baseline"), "check-change-cascade.ts", 0);
+
+  // A fully accounted lexicon cascade passes: every mapped surface is either
+  // updated with evidence or unaffected with a reason.
+  const cascadeComplete = makeFixture("cascade-complete");
+  withCascade(cascadeComplete, [
+    {
+      id: "rename-streaks-to-runs",
+      type: "lexicon_change",
+      recorded_at: "2026-07-25",
+      surfaces: {
+        app_in_app: { status: "updated", evidence: "ONBOARDING.md" },
+        asc_listing: { status: "updated", evidence: "APP_STORE_LISTING.md" },
+        asc_products: { status: "updated", evidence: "REVENUE_OPS.md" },
+        revenuecat_billing: { status: "updated", evidence: "REVENUE_OPS.md" },
+        landing_web: { status: "updated", evidence: "landing/index.html" },
+        lifecycle_email: { status: "updated", evidence: "EMAIL_OPS.md" },
+        content_ugc_ads: { status: "unaffected", reason: "no ad creative names the term yet" },
+      },
+    },
+  ]);
+  runFixture("fully accounted lexicon cascade passes", cascadeComplete, "check-change-cascade.ts", 0);
+
+  // The core miss: a mapped surface left out entirely.
+  const cascadeMissingSurface = makeFixture("cascade-missing-surface");
+  withCascade(cascadeMissingSurface, [{ id: "rename", type: "lexicon_change", surfaces: { app_in_app: { status: "updated", evidence: "ONBOARDING.md" } } }]);
+  runFixture("cascade omitting a mapped surface fails", cascadeMissingSurface, "check-change-cascade.ts", 1, "change_cascade.rename.asc_listing.unaccounted");
+
+  const cascadeUnknownType = makeFixture("cascade-unknown-type");
+  withCascade(cascadeUnknownType, [{ id: "vibes", type: "vibes_change", surfaces: {} }]);
+  runFixture("cascade with an unclassified change type fails", cascadeUnknownType, "check-change-cascade.ts", 1, "change_cascade.vibes.unknown_type");
+
+  // "unaffected" without a reason is an omission wearing a status.
+  const cascadeNoReason = makeFixture("cascade-unaffected-no-reason");
+  withCascade(cascadeNoReason, [
+    {
+      id: "onboard",
+      type: "onboarding_change",
+      surfaces: {
+        app_in_app: { status: "unaffected" },
+        asc_listing: { status: "updated", evidence: "SCREENSHOTS.md" },
+        analytics: { status: "updated", evidence: "ANALYTICS.md" },
+        landing_web: { status: "updated", evidence: "landing/index.html" },
+      },
+    },
+  ]);
+  runFixture(
+    "cascade marking a surface unaffected without a reason fails",
+    cascadeNoReason,
+    "check-change-cascade.ts",
+    1,
+    "change_cascade.onboard.app_in_app.reason_missing",
+  );
+
+  // A mistyped surface id would otherwise read as diligence while being ungraded.
+  const cascadeTypo = makeFixture("cascade-typo-surface");
+  withCascade(cascadeTypo, [
+    {
+      id: "typo",
+      type: "onboarding_change",
+      surfaces: {
+        app_in_app: { status: "updated", evidence: "ONBOARDING.md" },
+        asc_listing: { status: "updated", evidence: "SCREENSHOTS.md" },
+        analytics: { status: "updated", evidence: "ANALYTICS.md" },
+        landing_web: { status: "updated", evidence: "landing/index.html" },
+        asc_listng: { status: "updated", evidence: "typo id nobody grades" },
+      },
+    },
+  ]);
+  runFixture("cascade recording an unknown surface id fails", cascadeTypo, "check-change-cascade.ts", 1, "change_cascade.typo.asc_listng.unknown_surface");
 }

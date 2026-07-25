@@ -72,6 +72,7 @@ npm run check:post-launch -- --root skill/b2c-mobile-business-launch/templates -
 npm run check:google-play -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
 npm run check:backend-contract -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
 npm run check:analytics-catalog -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
+npm run check:change-cascade -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml --skill-root skill/b2c-mobile-business-launch
 npm run check:app-archetype -- --skill-root skill/b2c-mobile-business-launch
 npm run check:archetype-starter -- --skill-root skill/b2c-mobile-business-launch
 npm run check:reference-size -- --skill-root skill/b2c-mobile-business-launch

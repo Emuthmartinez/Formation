@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "private": false,
   "license": "MIT",
   "type": "module",
@@ -69,6 +69,7 @@
     "check:paid-tool-decisions": "tsx skill/b2c-mobile-business-launch/scripts/check-paid-tool-decisions.ts",
     "check:landing-funnel": "tsx skill/b2c-mobile-business-launch/scripts/check-landing-funnel.ts",
     "check:lane-coverage": "tsx skill/b2c-mobile-business-launch/scripts/check-lane-coverage.ts",
+    "check:change-cascade": "tsx skill/b2c-mobile-business-launch/scripts/check-change-cascade.ts",
     "check:research": "tsx skill/b2c-mobile-business-launch/scripts/check-research-evidence.ts",
     "check:product-spec": "tsx skill/b2c-mobile-business-launch/scripts/check-product-spec.ts",
     "check:launch-trace": "tsx skill/b2c-mobile-business-launch/scripts/check-launch-trace.ts",

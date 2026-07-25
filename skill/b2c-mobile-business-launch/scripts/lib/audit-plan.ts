@@ -124,6 +124,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:localization-research", kind: "script", args: stateArgs },
     { id: "check:paid-tool-decisions", kind: "script", args: stateArgs },
     { id: "check:lane-coverage", kind: "script", args: stateArgs },
+    { id: "check:change-cascade", kind: "script", args: [...stateArgs, "--skill-root", S] },
     { id: "check:research", kind: "script", args: stateArgs },
     { id: "check:product-spec", kind: "script", args: stateArgs },
     { id: "check:launch-trace", kind: "script", args: stateArgs },
