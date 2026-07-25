@@ -5,14 +5,18 @@
 # This automates the "Runtime Sync" sequence in AGENTS.md. It is maintainer-only:
 # on a machine without an installed runtime (clones, CI, cloud sessions) it exits
 # 0 after saying so, because `npm run audit:ci` is the readiness gate there.
+# Pass --bootstrap to create one deliberately instead of skipping.
 #
 # Claude and Agents read the Codex runtime copy through symlinks, so syncing
-# ~/.codex/skills/ updates every consumer at once.
+# ~/.codex/skills/ updates every consumer at once. That also means deleting the
+# Codex runtime leaves those symlinks DANGLING and the skill silently resolves
+# to nothing in both tools — --bootstrap is the repair for exactly that state.
 #
 # Usage:
-#   npm run sync:runtime              # full sync + verification
-#   npm run sync:runtime -- --dry-run # preview changes, mutate nothing
-#   npm run sync:runtime -- --no-pull # skip the git pull (use the working tree as-is)
+#   npm run sync:runtime                # full sync + verification
+#   npm run sync:runtime -- --dry-run   # preview changes, mutate nothing
+#   npm run sync:runtime -- --no-pull   # skip the git pull (use the working tree as-is)
+#   npm run sync:runtime -- --bootstrap # create the runtime when none exists yet
 
 set -euo pipefail
 
@@ -23,11 +27,14 @@ CONSUMER_LINKS=("${HOME}/.claude/skills/${SKILL_NAME}" "${HOME}/.agents/skills/$
 
 DRY_RUN=0
 DO_PULL=1
+BOOTSTRAP=0
+BOOTSTRAPPED=0
 for arg in "$@"; do
   case "$arg" in
     --dry-run) DRY_RUN=1 ;;
     --no-pull) DO_PULL=0 ;;
-    -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --bootstrap) BOOTSTRAP=1 ;;
+    -h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown flag: $arg (try --help)" >&2; exit 2 ;;
   esac
 done
@@ -41,11 +48,48 @@ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || fail "not inside a g
 cd "$REPO_ROOT"
 [ -f "${SOURCE_REL}/SKILL.md" ] || fail "no ${SOURCE_REL}/SKILL.md here — this is not the skill repo"
 
-# --- 1. Skip cleanly where there is no installed runtime ---------------------
+# --- 1. Missing runtime: skip by default, create under --bootstrap -----------
+# Skipping is right for clones, CI, and cloud sessions, which legitimately have
+# no install. It is wrong when the install was deleted on a maintainer machine:
+# the consumer symlinks survive as dangling links, so Claude and Codex keep
+# listing the skill while every read of it resolves to nothing. --bootstrap
+# makes recovering from that an explicit, one-flag operation instead of a
+# hand-run rsync nobody remembers the arguments for.
 if [ ! -d "$RUNTIME" ]; then
-  echo "No installed runtime at ${RUNTIME}."
-  echo "Runtime sync is maintainer-machine only; 'npm run audit:ci' is the readiness gate here."
-  exit 0
+  # A dangling consumer link is the tell that this machine HAD a runtime.
+  DANGLING=()
+  for link in "${CONSUMER_LINKS[@]}"; do
+    if [ -L "$link" ] && [ ! -e "$link" ]; then DANGLING+=("$link"); fi
+  done
+
+  if [ "$BOOTSTRAP" -eq 0 ]; then
+    echo "No installed runtime at ${RUNTIME}."
+    echo "Runtime sync is maintainer-machine only; 'npm run audit:ci' is the readiness gate here."
+    if [ "${#DANGLING[@]}" -gt 0 ]; then
+      printf '\n\033[33mBut this machine has %d dangling consumer symlink(s):\033[0m\n' "${#DANGLING[@]}"
+      printf '  %s\n' "${DANGLING[@]}"
+      echo "They point at the missing runtime, so the skill resolves to nothing in those tools."
+      echo "Create the runtime and repair them with:"
+      echo "    npm run sync:runtime -- --bootstrap"
+    fi
+    exit 0
+  fi
+
+  BOOTSTRAPPED=1
+  step "Bootstrapping a new runtime at ${RUNTIME}"
+  if [ "${#DANGLING[@]}" -gt 0 ]; then
+    echo "repairing ${#DANGLING[@]} dangling consumer symlink(s):"
+    printf '  %s\n' "${DANGLING[@]}"
+  fi
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "(--dry-run: would create ${RUNTIME}; the mirror preview below lists it as all-new)"
+  else
+    # rsync creates the leaf directory but not missing parents.
+    mkdir -p "$RUNTIME"
+    echo "created ${RUNTIME}"
+  fi
+elif [ "$BOOTSTRAP" -eq 1 ]; then
+  echo "(--bootstrap given, but a runtime already exists at ${RUNTIME} — syncing it normally)"
 fi
 
 # --- 2. Sync source from origin/main ----------------------------------------
@@ -153,4 +197,9 @@ done
 step "Skill version freshness"
 npm run check:skill-version --silent -- --source "$SOURCE_REL" --installed "$RUNTIME"
 
-step "Runtime sync complete"
+if [ "$BOOTSTRAPPED" -eq 1 ]; then
+  step "Runtime bootstrap complete"
+  echo "Created ${RUNTIME} and pointed every consumer at it."
+else
+  step "Runtime sync complete"
+fi
