@@ -81,7 +81,7 @@ Do not parallelize these unless they are isolated in separate worktrees and the 
 
 - edits to `PROJECT_STATE.yaml`, `launch-cockpit.html`, `AGENTS.md`, `ENGINEERING_PLAN.md`, `PRODUCTION_READINESS.md`, or release notes
 - migrations plus code depending on the migration state
-- MobAI, Codex Desktop native iOS, XcodeBuildMCP, serve-sim, or simulator/device automation on the same target device
+- MobAI, in-app iOS Simulator panes, XcodeBuildMCP, serve-sim, or simulator/device automation on the same target device — and note that an in-app simulator device belongs to the session that launched it (max 4 panes per session), so a subagent cannot inherit the orchestrator's simulator; the orchestrator runs the device flow itself
 - App Store Connect, Google Play, RevenueCat, Stripe, Resend, PostHog, DNS, domain, Fastlane, or social-account mutations
 - git staging, committing, merging, rebasing, tagging, pushing, release submission, or public posting
 - final production-readiness, pricing, legal, security acceptance, or launch decisions
@@ -179,7 +179,7 @@ orchestration:
     - "PROJECT_STATE.yaml updates"
     - "git staging, commits, merges, pushes, and releases"
     - "provider/account mutations"
-    - "MobAI, Codex Desktop native iOS, XcodeBuildMCP, serve-sim, or simulator/device control"
+    - "MobAI, in-app iOS Simulator panes, XcodeBuildMCP, serve-sim, or simulator/device control"
   spawned_agents: []
   focused_validators_run: []
   full_suites_run: []

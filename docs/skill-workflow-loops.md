@@ -65,7 +65,7 @@ Status legend: ✅ covered by exactly one loop · ⬜ uncovered.
 | 36 | Backend data contract | Before schema/auth prompts or `TECH_SPEC.md` data/API sections harden | L36 | ✅ |
 | 37 | App agent roster & repo entrypoints | Before builder handoff bundles, `AGENTS.md`/`CLAUDE.md`, `APP_AGENTS.md`, `agents/` | L37 | ✅ |
 | 38 | MobAI device automation & demo videos | Before device automation, app-flow demo videos, app previews, bug-repro recordings | L38 | ✅ |
-| 39 | Native iOS / XcodeBuildMCP proof | Before Codex Desktop native iOS / XcodeBuildMCP / serve-sim / SnapshotPreviews proof | L39 | ✅ |
+| 39 | Native iOS proof (Route Ladder) | Before in-app iOS Simulator / Codex Desktop native iOS / XcodeBuildMCP / serve-sim / SnapshotPreviews proof | L39 | ✅ |
 | 40 | Revenue monetization | Before RevenueCat/Stripe/web billing, products, paywall, entitlement, webhooks, pricing | L40 | ✅ |
 | 41 | Privacy & terms | Before privacy policy, terms, EULA, subscription terms, account-deletion, store disclosures | L41 | ✅ |
 | 42 | Resend email ops | Before Resend domains/keys, transactional/lifecycle/broadcast email, deliverability | L42 | ✅ |
@@ -452,7 +452,7 @@ that grounds them. Conventions used in every loop:
 ### L33 — Store screenshots production
 - **Trigger:** Store screenshots needed (raw app capture → composed iPhone/iPad/Play assets).
 - **Action:**
-  1. Capture raw app screens via MobAI / Codex Desktop native iOS / XcodeBuildMCP / serve-sim / SnapshotPreviews (preview-only when used) per the screenshot matrix. → `Start Here` step 17; Phase 3 (screenshot matrix).
+  1. Capture raw app screens via the in-app iOS Simulator / MobAI / Codex Desktop native iOS / XcodeBuildMCP / serve-sim / SnapshotPreviews (preview-only when used) per the screenshot matrix. → `Start Here` step 17; Phase 3 (screenshot matrix).
   2. Produce `SCREENSHOTS.md`; compose copy-led iPhone/iPad/Play assets via ParthJadhav/app-store-screenshots or an equivalent export board with current device wells; validate and visual-QA. → `Start Here` step 17.
 - **Proof:** `npm run check:store-screenshots` + `npm run grade:screenshots`; composed assets pass device-well validation + visual QA.
 - **Memory:** `SCREENSHOTS.md` + `PROJECT_STATE.yaml` screenshots lane.
@@ -504,11 +504,11 @@ that grounds them. Conventions used in every loop:
 - **Memory:** `DEMO_VIDEO.md`/`CONTENT_ASSETS.md` + `PROJECT_STATE.yaml` demo lane.
 - **Stopping condition:** At least one demo artifact row exists in `DEMO_VIDEO.md`/`CONTENT_ASSETS.md` with non-empty `source`/`rerender` fields (grep), **or** the MobAI-access blocker is recorded in `PROJECT_STATE.yaml`; no free-fallback downgrade without `check:paid-tool-decisions` approval.
 
-### L39 — Native iOS / XcodeBuildMCP proof
-- **Trigger:** Before Codex Desktop native iOS / XcodeBuildMCP / serve-sim / SnapshotPreviews proof or command examples.
+### L39 — Native iOS proof (Route Ladder)
+- **Trigger:** Before any Apple simulator/device proof — in-app iOS Simulator (rung 0), Codex Desktop native iOS, XcodeBuildMCP, serve-sim, or SnapshotPreviews — or command examples.
 - **Action:**
-  1. Load `references/xcodebuildmcp-testing.md`; refresh official docs + local `xcodebuildmcp --help`, tool lists, SnapshotPreviews + serve-sim READMEs before writing commands. → `Start Here` step 13; *Source Freshness*.
-  2. Run device/simulator E2E and capture proof, marking SnapshotPreviews exports preview-only. → `Start Here` step 13; Phase 5b.
+  1. Load `references/xcodebuildmcp-testing.md` and start at its Route Ladder; on a local Mac, rung 0 (the in-app iOS Simulator) needs no install at all. Refresh official docs + local `xcodebuildmcp --help`, tool lists, SnapshotPreviews + serve-sim READMEs before writing commands for the higher rungs. → `Start Here` step 13; *Source Freshness*.
+  2. Run device/simulator E2E and capture proof, marking SnapshotPreviews exports preview-only. For rung 0, record the local session, the simulated device and OS, the fixture account, and the coverage the route does not provide. → `Start Here` step 13; Phase 5b.
 - **Proof:** `scripts/check-native-ios-proof.ts` (run via `npm run audit`); E2E/screenshot proof attached with the docs/CLI basis recorded.
 - **Memory:** `PRODUCTION_READINESS.md` native-iOS proof section + `PROJECT_STATE.yaml`.
 - **Stopping condition:** `scripts/check-native-ios-proof.ts` passes under `audit:ci` — `PRODUCTION_READINESS.md` carries E2E/screenshot proof with the recorded docs/CLI basis (SnapshotPreviews rows marked preview-only), or the blocker is recorded.

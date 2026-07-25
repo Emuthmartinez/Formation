@@ -48,7 +48,7 @@
       "id": "native-device",
       "kind": "native_device",
       "provider": "",
-      "route": "MobAI or XcodeBuildMCP/current native tools",
+      "route": "in-app iOS Simulator (Claude Code Desktop pane / Codex build-ios-apps), MobAI, or XcodeBuildMCP/current native tools",
       "status": "not_checked",
       "checkedAt": "",
       "account": "",

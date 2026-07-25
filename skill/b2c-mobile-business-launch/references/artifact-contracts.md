@@ -490,6 +490,7 @@ Must include:
 - build/typecheck/lint/test commands and outcomes for every touched repo
 - frontend/browser E2E evidence when web surfaces exist
 - MobAI mobile E2E evidence when app flows exist: independently checked desktop/MCP/CLI versions, selected Free/Plus/Pro tier, an existing `.mob` flow and run artifact for every supported platform, provider correlation, reviewed AI-heal diff plus passing rerun when used, explicit repeat bounds, and host-script endpoint/secret/cleanup/backend-proof attestation; or Codex Desktop native iOS/XcodeBuildMCP evidence with founder-confirmed coverage limitations when MobAI is unavailable
+- in-app iOS Simulator evidence (rung 0) when used: agent surface and app version, the plan/policy gate cleared, that the session was local (not cloud or SSH), the simulated device and OS, the fixture or sandbox account used instead of a real account, screenshot/recording paths committed into the repo, backend/provider correlation for any flow that mutates state, and the coverage the route does not provide — no Android, no physical device, no distribution readiness
 - SnapshotPreviews preview proof when used: package/version/commit, `SnapshotTest` or `PreviewLayoutTest`, `TEST_RUNNER_SNAPSHOTS_EXPORT_DIR`, exported PNG/JSON paths, and preview-only limitation
 - serve-sim simulator proof when used: booted simulator/device, preview URL/port, actions/logs, stream evidence paths, and provider/signing limitations
 - backend/database proof for frontend actions, including real test records or provider logs

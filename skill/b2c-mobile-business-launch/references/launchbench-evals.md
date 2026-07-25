@@ -8,9 +8,9 @@ Use LaunchBench for failure modes that have happened before or would be expensiv
 
 - attribution screen emits an event but does not persist a stable key, PostHog person property, backend/profile value, or `other` free text
 - simulator build passes but Apple distribution signing, Team ID, bundle ID, app record, certificate/profile, archive/export/upload, or TestFlight state is unknown
-- iOS readiness ignores Codex Desktop native iOS/XcodeBuildMCP tools when exposed, or CLI proof names SnapshotPreviews/serve-sim without exported PNG/JSON paths, simulator URL/port, provider-proof pairing, and simulator/preview/distribution limitations
+- iOS readiness skips the in-app iOS Simulator (rung 0) on a local Mac and installs or requests a heavier route for a one-off screen/flow check, ignores exposed native tools, claims a simulator run from a cloud/SSH session, signs a driven device into a real account, or names SnapshotPreviews/serve-sim without exported PNG/JSON paths, simulator URL/port, provider-proof pairing, and simulator/preview/distribution limitations
 - App Store Connect app name is taken and the CLI proposes a fallback name without founder approval
-- MobAI is unavailable and the agent silently switches to XcodeBuildMCP without recording the lost Android/cross-platform coverage; MobAI Free itself does not need spend approval
+- MobAI is unavailable and the agent silently switches to XcodeBuildMCP or the in-app iOS Simulator without recording the lost Android/repeatable-suite/CI/physical-device coverage; neither MobAI Free nor the built-in in-app simulator needs spend approval
 - MobAI desktop, MCP, and CLI versions are collapsed into one number, 2.5-era repeat/host-script safety is omitted, or AI-healed flows are accepted without diff review and a passing rerun
 - RevenueCat products exist but entitlement grant, restore, webhook, or backend projection is unproven
 - Resend templates ignore `DESIGN.md`, unsubscribe rules, sender-domain proof, or support reply paths

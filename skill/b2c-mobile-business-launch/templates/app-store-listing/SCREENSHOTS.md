@@ -16,6 +16,7 @@ Raw device captures prove the product exists. Final store screenshots are compos
 | `APP_STORE_LISTING.md` | metadata, privacy, pricing, CPP/event alignment | Pending | Copy and offers must match listing truth |
 | `CONTENT_ASSETS.md` | Higgsfield/Remotion route, license, outputs, approvals | Pending | Required when generated/rendered assets are used |
 | MobAI raw captures | real app proof layer | Pending | Use approved fallback only after founder approval |
+| In-app iOS Simulator (Claude Code Desktop pane / Codex `build-ios-apps`) | zero-setup raw capture layer | Pending | Local macOS session only. Capture with the pane's screenshot/record shortcuts (Cmd+S / Cmd+R), copy off the Desktop into `screenshots/raw/`, and record the device, OS, and fixture account in `PRODUCTION_READINESS.md`. Fixture or sandbox accounts only — the agent's device screenshots leave the machine. Simulated devices only: no physical-device and no Android capture |
 | Codex Desktop native iOS / XcodeBuildMCP | Apple simulator/device proof layer | Pending | Record `session_show_defaults`, project/scheme/simulator, tool names, and output paths in `PRODUCTION_READINESS.md` |
 | SnapshotPreviews | preview snapshot proof layer | Pending | Preview-only PNG/JSON evidence via `TEST_RUNNER_SNAPSHOTS_EXPORT_DIR`; not runtime E2E proof |
 | serve-sim | browser-visible simulator proof layer | Pending | Record booted simulator/device, `http://localhost:3200` or chosen port, actions, logs, and limitations |
@@ -58,8 +59,8 @@ Store assets are not generic marketing — they are engineered from everything t
 
 | Slot | Platform | Device | Locale | Source screen | Capture tool | Raw path | Version localization ID | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | iOS | iPhone 6.9 | en-US | Pending | MobAI, Codex Desktop native iOS, XcodeBuildMCP, serve-sim, or approved fallback; SnapshotPreviews only for preview/component proof | `screenshots/raw/iphone-69-slot-1.png` | Pending | blocked |
-| 1 | iOS | iPad 13 | en-US | Pending | MobAI, Codex Desktop native iOS, XcodeBuildMCP, serve-sim, or approved fallback; SnapshotPreviews only for preview/component proof | `screenshots/raw/ipad-13-slot-1.png` | Pending | blocked |
+| 1 | iOS | iPhone 6.9 | en-US | Pending | in-app iOS Simulator (Cmd+S, fixture account), MobAI, Codex Desktop native iOS, XcodeBuildMCP, serve-sim, or approved fallback; SnapshotPreviews only for preview/component proof | `screenshots/raw/iphone-69-slot-1.png` | Pending | blocked |
+| 1 | iOS | iPad 13 | en-US | Pending | in-app iOS Simulator (Cmd+S, fixture account), MobAI, Codex Desktop native iOS, XcodeBuildMCP, serve-sim, or approved fallback; SnapshotPreviews only for preview/component proof | `screenshots/raw/ipad-13-slot-1.png` | Pending | blocked |
 | 1 | Google Play | phone | en-US | Pending | MobAI or approved fallback | `screenshots/raw/play-phone-slot-1.png` | n/a | optional |
 
 ## Production Composition Matrix
@@ -117,7 +118,7 @@ The app preview video is the most underused growth lever on the App Store. Treat
 - You can upload **up to 3 app previews** per device size and language, and **app previews always precede screenshots** at the top of the product page.
 - On the product page, **app previews autoplay with muted audio** — Apple's own guidance: "make sure the first few seconds of your video are visually compelling." The first preview is a hook the user watches whether they intended to or not.
 - Length is **up to 30 seconds** (Apple's accepted range is 15–30s; confirm the current min/max in the app preview specifications before render). The **poster frame** displays whenever the video does not autoplay, so it must sell on its own.
-- Source MUST be real in-app footage (captured via MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, or on-device), never generated UI. SnapshotPreviews can support preview/component regression evidence but does not replace runtime App Preview footage.
+- Source MUST be real in-app footage (captured via the in-app iOS Simulator (Cmd+R recording), MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, or on-device), never generated UI. SnapshotPreviews can support preview/component regression evidence but does not replace runtime App Preview footage.
 
 ### The 5-Second Muted Hook (required spec)
 
@@ -135,7 +136,7 @@ Because the first preview plays silent and unrequested, its first ~3–5 seconds
 Both screenshots and the app preview run through the screenshot ASO skill; they are never hand-composed one-offs:
 
 - **Screenshots:** `ParthJadhav/app-store-screenshots` (the screenshot ASO skill), `ios-screenshots`, and `aso-skills:screenshot-optimization`, from real UI, App Icon, and design tokens.
-- **App preview:** script/storyboard via `aso-skills:app-preview-video`; capture real footage via MobAI, Codex Desktop native iOS/XcodeBuildMCP, or serve-sim; edit and caption via Remotion; produce all Apple/Play resolution variants (9:16 / 1:1 / 16:9) from a single master via the Higgsfield `reframe` MCP tool (Master → All Platforms recipe in `references/tool-recipes.md`) — reframe reformats aspect ratio only, never substitutes UI.
+- **App preview:** script/storyboard via `aso-skills:app-preview-video`; capture real footage via the in-app iOS Simulator (Cmd+R), MobAI, Codex Desktop native iOS/XcodeBuildMCP, or serve-sim — MobAI stays the route for a polished multi-device recording; edit and caption via Remotion; produce all Apple/Play resolution variants (9:16 / 1:1 / 16:9) from a single master via the Higgsfield `reframe` MCP tool (Master → All Platforms recipe in `references/tool-recipes.md`) — reframe reformats aspect ratio only, never substitutes UI.
 - A/B test variants with `aso-skills:ab-test-store-listing` (Product Page Optimization) where available.
 
 | Preview | Knowledge-leveraged hook (first 3–5s) | Emotion / Card | Poster frame | Captions (muted) | Skill route | Output | Status |
@@ -194,7 +195,7 @@ A slot with no score entry at all is an error when the lane is "done" and a warn
 This is the canonical end-to-end pipeline. Every step must be evidenced before the lane can be "done".
 
 ```
-Capture (MobAI / ios-screenshots / XcodeBuildMCP / serve-sim)
+Capture (in-app iOS Simulator / MobAI / ios-screenshots / XcodeBuildMCP / serve-sim)
   → real app frames at screenshots/raw/<device>/<locale>/
 
 Compose (ParthJadhav/app-store-screenshots)
@@ -230,6 +231,8 @@ Upload (asc-shots-pipeline)
 - [ ] Headlines are readable at App Store search thumbnail size.
 - [ ] Copy overlay uses one idea per slide and matches `APP_STORE_LISTING.md`.
 - [ ] Real app UI remains visible and truthful in every production composition.
+- [ ] Captures taken from an agent-driven simulator used a fixture or sandbox account. No real founder, customer, store, bank, or provider account was signed in on a device the agent controlled, and no real user data, real payment state, or production credential appears in any frame.
+- [ ] Cmd+S / Cmd+R captures were exported off the macOS Desktop into `screenshots/raw/` and committed, and their native pixel dimensions were verified against the target display well; no store asset cites a frame that exists only in a conversation.
 - [ ] Generated Higgsfield assets are supporting visuals, not fake product proof.
 - [ ] Remotion or HTML compositions record source inputs, license status, render proof, and outputs in `CONTENT_ASSETS.md`.
 - [ ] ParthJadhav/app-store-screenshots deck state or equivalent export board is saved when used, including app icon, locale, iPhone/iPad deck, and final PNG paths.

@@ -113,8 +113,12 @@ if (toolDecisions) {
     },
     {
       name: "MobAI",
+      // The in-app simulator alternations matter as much as the XcodeBuildMCP
+      // ones: it is now the documented default route, it costs nothing, and
+      // substituting it for MobAI drops all Android coverage — the most likely
+      // silent downgrade in practice.
       fallbackSignals:
-        /\b(mobai unavailable|mobai missing|mobai blocked|no mobai|without mobai|mobai fallback|xcodebuildmcp fallback|xcodebuildmcp instead of mobai)\b/i,
+        /\b(mobai unavailable|mobai missing|mobai blocked|no mobai|without mobai|mobai fallback|xcodebuildmcp fallback|xcodebuildmcp instead of mobai|in-app simulator|in-app ios simulator|simulator pane|build-ios-apps|instead of mobai)\b/i,
       entrySignals: /\bmobai\b/i,
       code: "mobai",
     },

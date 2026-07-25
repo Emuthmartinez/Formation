@@ -85,6 +85,52 @@ sources:
       - skill/b2c-mobile-business-launch/references/parallel-agent-orchestration.md
       - skill/b2c-mobile-business-launch/references/dynamic-workflows.md
     notes: Official Claude Code subagent documentation for context preservation, tool limitation, and reusable specialists.
+  - id: code-claude-com-docs-en-desktop-ios-simulator
+    name: Claude Code Desktop iOS Simulator pane
+    source_type: official_docs
+    url: https://code.claude.com/docs/en/desktop-ios-simulator
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/xcodebuildmcp-testing.md
+      - skill/b2c-mobile-business-launch/references/tool-recipes.md
+    notes: Official documentation for the in-app iOS Simulator pane — the rung-0 path-of-least-resistance native iOS proof route. Carries the version/plan/policy gates, the local-session-only constraint, the per-device consent and screenshot-retention rules, and the simulated-devices-only limitation. Public beta, so re-check gates before promising the route.
+  - id: code-claude-com-docs-en-computer-use
+    name: Claude Code CLI computer use
+    source_type: official_docs
+    url: https://code.claude.com/docs/en/computer-use
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/xcodebuildmcp-testing.md
+    notes: Official documentation for how the Claude Code CLI reaches the iOS Simulator (screen control via the built-in computer-use MCP server) when there is no desktop pane. Research preview with heavier plan/permission gating than the pane.
+  - id: learn-chatgpt-com-use-cases-ios-simulator-bug-debugging
+    name: Codex iOS Simulator debugging loop
+    source_type: official_docs
+    url: https://learn.chatgpt.com/use-cases/ios-simulator-bug-debugging
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/xcodebuildmcp-testing.md
+    notes: Official OpenAI use-case doc for Codex's in-app iOS Simulator reproduce-debug-verify loop, its XcodeBuildMCP plus build-ios-apps prerequisites, capability list, and best practices. Canonical URL; the developers.openai.com/codex form redirects here.
+  - id: learn-chatgpt-com-use-cases-collections-native-development
+    name: Codex native development collection
+    source_type: official_docs
+    url: https://learn.chatgpt.com/use-cases/collections/native-development
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/xcodebuildmcp-testing.md
+    notes: Official OpenAI collection of Codex iOS/macOS native development use cases and the Build iOS Apps / Build macOS Apps plugins.
+  - id: github-com-openai-plugins-build-ios-apps
+    name: Codex Build iOS Apps plugin
+    source_type: github
+    url: https://github.com/openai/plugins/tree/main/plugins/build-ios-apps
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/xcodebuildmcp-testing.md
+    notes: Codex plugin that wires XcodeBuildMCP and ships the iOS debugger agent plus simulator-browser, performance-trace, memory-leak, App Intents, and SwiftUI skills. Check its skill list before adding serve-sim or tracing tools separately.
   - id: openai-com-business-guides-building-ai-agents
     name: OpenAI practical guide to building agents
     source_type: official_docs

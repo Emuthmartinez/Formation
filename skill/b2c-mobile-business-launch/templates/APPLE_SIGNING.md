@@ -4,7 +4,7 @@ Status: scaffold
 
 This packet records distribution readiness for iOS. Keep it aligned with the Xcode project, App Store Connect app record, CI signing setup, `APPLE_APP_STORE_REQUIREMENTS.md`, and founder approval before TestFlight or App Store submission.
 
-Native iOS proof from Codex Desktop, XcodeBuildMCP, SnapshotPreviews, serve-sim, MobAI, or simulator/device screenshots supports implementation, screenshot, and app-preview evidence in `PRODUCTION_READINESS.md` and `SCREENSHOTS.md`. It does not satisfy this distribution packet unless archive/export/upload/TestFlight gates below are also proven.
+Native iOS proof from the in-app iOS Simulator (Claude Code Desktop pane, Claude Code CLI `computer-use`, or Codex `build-ios-apps`), Codex Desktop, XcodeBuildMCP, SnapshotPreviews, serve-sim, MobAI, or simulator/device screenshots supports implementation, screenshot, and app-preview evidence in `PRODUCTION_READINESS.md` and `SCREENSHOTS.md`. It does not satisfy this distribution packet unless archive/export/upload/TestFlight gates below are also proven. The in-app simulator in particular drives simulated devices only and cannot control a physical iPhone or iPad, so the release-device row and every gate in this packet stay outside its reach.
 
 ## Account And Identifiers
 

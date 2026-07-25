@@ -229,7 +229,7 @@ First run: "rows carry non-empty `source`/`rerender` fields (grep), or blocker r
 **Fix:** require "at least one demo artifact row exists with non-empty `source`/`rerender`" OR blocker recorded.
 Re-run: one `.mob` row with source+rerender path → **fires once**; alternate path (MobAI access blocked) → blocker recorded → also fires once. ✅ **TERMINATES.**
 
-### L39 — Native iOS / XcodeBuildMCP proof
+### L39 — Native iOS proof (Route Ladder)
 Task: capture E2E proof.
 Trigger ✓. Proof: `check-native-ios-proof.ts` passes under `audit:ci`, OR blocker recorded.
 Stop: script green OR blocker → fires once. ✅ **TERMINATES.**

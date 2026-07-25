@@ -58,7 +58,17 @@ if (skipAppleSigning) {
     }
   }
 
-  if (/simulator build (succeeded|passes|passed)/i.test(text) && !/simulator build alone is not|not release proof|distribution readiness/i.test(text)) {
+  // The in-app simulator makes a successful run trivially easy to reach, and
+  // people describe it in prose ("ran it in the pane and onboarding works")
+  // rather than as a "simulator build passed" line — so the trigger has to
+  // recognise those phrasings too, or the easiest route evades the guard.
+  const simulatorSuccessClaim =
+    /simulator build (succeeded|passes|passed)/i.test(text) ||
+    /\b(?:ran|run|launched|tested|verified|works?(?:ed)?|working)\b[^.\n]{0,80}\b(?:in|on|through|via)\b[^.\n]{0,40}\b(?:the\s+)?(?:in-app\s+)?(?:iOS\s+)?simulator(?:\s+pane)?\b/i.test(
+      text,
+    ) ||
+    /\b(?:simulator pane|in-app simulator|in-app iOS Simulator|build_run_sim|build-ios-apps)\b/i.test(text);
+  if (simulatorSuccessClaim && !/simulator build alone is not|not release proof|distribution readiness/i.test(text)) {
     issues.push(
       issue(
         "error",

@@ -14,7 +14,7 @@ Own:
 - RevenueCat, Stripe, PostHog, Resend, Sentry, and backend verification paths
 - secret injection, public/server-only classification, CI/deploy env routing, and bundle-safety checks
 - backend/API security controls, app integrity, webhook signatures, idempotency, rate limits, accepted-risk fixes, and security release proof
-- Apple signing/release readiness, tests, MobAI/Codex Desktop native iOS/XcodeBuildMCP/SnapshotPreviews/serve-sim proof, and production-readiness evidence
+- Apple signing/release readiness, tests, in-app iOS Simulator/MobAI/Codex Desktop native iOS/XcodeBuildMCP/SnapshotPreviews/serve-sim proof, and production-readiness evidence
 
 Audit gates:
 - frontend actions persist to backend/provider state
@@ -22,7 +22,8 @@ Audit gates:
 - purchase/restore maps to entitlement
 - support/privacy/delete/refund paths reach real backends or email routes
 - new `process.env`, mobile build config, provider key, or webhook secret is represented in `SECRETS.md`
-- Doppler, XcodeBuildMCP, SnapshotPreviews, and serve-sim setup/proof use current official docs plus local CLI/tool help, with docs/version basis recorded
+- Doppler, the in-app iOS Simulator, XcodeBuildMCP, SnapshotPreviews, and serve-sim setup/proof use current official docs plus local CLI/tool help, with docs/version basis recorded — for the in-app simulator that means the runtime version, the plan/policy gate, and that the session was local
+- the mobile proof route is a recorded decision, not a default: `TOOL_DECISIONS.md` names the rung chosen, why, and the coverage given up, and no lane claims Android or physical-device proof from a simulator-only route
 - Apple distribution readiness is not inferred from simulator success; `APPLE_SIGNING.md` proves Team ID, bundle ID/App ID, app record, signing strategy, and archive/export/upload state or names the blocker
 - `SECURITY.md` proves threat model, platform hardening, entitlement/webhook abuse controls, scanner/review route, Sentry/release health, and accepted risks or names the blocker
 - tests cover happy path, edge cases, error paths, and integration paths

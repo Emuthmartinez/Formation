@@ -108,7 +108,28 @@ function validateProjectProof(state: unknown): void {
     );
     return;
   }
-  if (!section) return;
+  if (!section) {
+    // Deleting the section used to skip validatePlatformMatrix entirely, so an
+    // Android-in-scope launch whose only device evidence came from an iOS-only
+    // route (the in-app simulator, XcodeBuildMCP) passed with no Android proof
+    // and no recorded decision. Cross-platform scope has to be answered, even
+    // if the answer is a dated "not needed".
+    const platforms = asArray(getPath(state, "project.platforms"))
+      .map((item) => asString(item)?.toLowerCase())
+      .filter(Boolean);
+    const androidBundleId = asString(getPath(state, "project.bundle_ids.android"))?.trim();
+    if (platforms.includes("android") || androidBundleId) {
+      issues.push(
+        issue(
+          "error",
+          "mobai.proof.cross_platform_section_missing",
+          "Android is in scope and engineering is done, but PRODUCTION_READINESS.md has no MobAI Cross-Platform Proof section. An iOS-only route cannot prove Android: record the Android evidence, or a dated blocked/not-needed tier with the replacement coverage.",
+          readiness.relativePath,
+        ),
+      );
+    }
+    return;
+  }
 
   const selectedTier = field(section, "Selected tier");
   const tierCategory = selectedTier?.match(/^\s*(free|plus|pro|blocked|not needed|not_needed)\b/i)?.[1]?.toLowerCase();

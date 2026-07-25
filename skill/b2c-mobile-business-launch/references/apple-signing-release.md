@@ -371,7 +371,7 @@ Minimum accepted native widths before any upscale:
 | iPad Pro 13 in | 2048 px |
 | iPad Pro 11 in | 1668 px |
 
-If any raw capture is below the minimum width for its target well (for example, a MobAI or XcodeBuildMCP capture at 368 px or 393 px), do not upscale it. Re-capture at the correct simulator or device resolution, or use the ParthJadhav/app-store-screenshots export board to compose at the required output size from a higher-resolution source. Record the actual capture dimensions in `SCREENSHOTS.md` before marking any well as ready.
+If any raw capture is below the minimum width for its target well (for example, a MobAI or XcodeBuildMCP capture at 368 px or 393 px, an in-app simulator pane capture taken at a reduced stream Resolution, or any CLI computer-use screenshot — those are downscaled automatically with no target-size setting and are never valid store artwork), do not upscale it. For the in-app simulator pane, re-capture at full stream resolution and verify the exported pixel dimensions before treating it as a store asset. Re-capture at the correct simulator or device resolution, or use the ParthJadhav/app-store-screenshots export board to compose at the required output size from a higher-resolution source. Record the actual capture dimensions in `SCREENSHOTS.md` before marking any well as ready.
 
 Record result:
 
@@ -472,7 +472,7 @@ Run `npm run check:apple-signing -- --root .` or the installed-skill equivalent 
 ## Common Failure Modes
 
 - Skipping the pre-archive/export/upload preflight checklist and discovering broken configuration only after upload — causes extra full archive/export/upload cycles. Add or activate the `apple-pre-upload-preflight-skipped` failure card in `PROJECT_STATE.yaml` and run `npm run check:apple-signing -- --root .` before each upload attempt.
-- Treating `xcodebuild` simulator success as proof the app can be uploaded.
+- Treating `xcodebuild` simulator success, or an in-app simulator run, as proof the app can be uploaded. The easier the simulator run is to reach, the easier this mistake is to make.
 - `DEVELOPMENT_TEAM` is blank but the agent claims signing is configured.
 - Only an `Apple Development` identity exists locally, but the agent claims App Store distribution is ready.
 - App Store Connect shows no app record and no bundle ID, but the agent starts RevenueCat production product setup or TestFlight upload steps.

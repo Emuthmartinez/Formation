@@ -88,6 +88,7 @@ const requiredBehavioral = new Set([
   "browser-capability-skipped",
   "founder-zero-operator-skipped",
   "founder-gate-jargon-without-choice",
+  "in-app-simulator-route-mishandled",
 ]);
 
 if (!existsSync(scenarioDir)) {

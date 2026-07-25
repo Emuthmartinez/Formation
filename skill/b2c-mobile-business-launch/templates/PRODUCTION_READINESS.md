@@ -29,12 +29,32 @@ Run `npm run check:mobai-proof -- --root . --state PROJECT_STATE.yaml` and attac
 
 Use this section for iOS/iPadOS implementation proof when native Apple tooling is in scope. Simulator, preview, and browser-stream proof must be paired with `PROVIDER_PROOF.md` when app actions depend on RevenueCat, PostHog, Stripe, Resend, Sentry, databases, or store-console state. A simulator build alone is not distribution readiness and does not prove App Store signing, archive, export, upload, TestFlight, or founder approval; keep those gates in `APPLE_SIGNING.md`.
 
+Start at the lightest route that can produce the evidence this lane needs (see the Route Ladder in `xcodebuildmcp-testing.md`) and record why any escalation happened. Choosing an easier route that drops Android coverage, suite repeatability, CI, or physical-device reach is a coverage decision for `TOOL_DECISIONS.md`, not a convenience.
+
 | Route | Required evidence | Output path | Limitation | Status |
 | --- | --- | --- | --- | --- |
+| In-app iOS Simulator (Claude Code Desktop pane / Codex `build-ios-apps`) | agent surface and app version; plan/policy gate cleared; local session confirmed (the pane is unavailable in cloud and SSH sessions); simulated device and OS, e.g. iPhone 17 Pro / iOS 26; fixture or sandbox account only, never a real founder/customer/provider account, because device screenshots leave the machine under normal conversation retention; what was built, launched, and tapped | `proof/ios-simulator/<date>/` — screenshots and recordings land on the macOS Desktop; copy them into this path and commit before citing them (pending) | Simulated devices only: no physical device, no Android coverage, no signing/archive/upload/TestFlight proof, and not a repeatable regression suite or CI gate | Pending |
 | Codex Desktop native iOS / XcodeBuildMCP | `session_show_defaults`; MCP tool route such as `build_run_sim`, `test_sim`, screenshot, UI snapshot, or logs; project/workspace; scheme; simulator/device; OS/runtime; configuration | screenshots/logs/xcresult path pending | Apple simulator/device proof only; does not replace MobAI Android proof, provider proof, or distribution readiness | Pending |
 | XcodeBuildMCP CLI | docs checked date; `xcodebuildmcp --help` or `xcodebuildmcp tools`; project/workspace; scheme; simulator/device or destination; command output | CLI output path pending | Apple-only CLI proof; record docs-vs-skill mismatch and missing MobAI coverage | Pending |
 | SnapshotPreviews | package URL/version/commit; `SnapshotTest` or `PreviewLayoutTest`; `TEST_RUNNER_SNAPSHOTS_EXPORT_DIR`; exported `.png` and `.json` under `snapshot-images`; deterministic preview fixtures | `snapshot-images/` pending | preview-only coverage; not runtime E2E and not real app E2E/provider proof | Pending |
 | serve-sim | package/version or `npx serve-sim` resolution; booted simulator/device; preview URL/port such as `http://localhost:3200`; actions from `serve-sim gesture`/`button`/`type`; stream/log evidence | browser capture/log path pending | simulator stream only; does not replace backend/provider proof or App Store signing readiness | Pending |
+
+### In-App Simulator Evidence Capture
+
+The simulator pane produces evidence the founder can capture without any tooling. Nothing streamed into the conversation is evidence until it exists as a committed file.
+
+| Capture | How | Lands at | Move it to |
+| --- | --- | --- | --- |
+| Still frame | the pane's screenshot shortcut with the simulator pane focused | macOS Desktop | `proof/ios-simulator/<date>/<screen>.png` |
+| Screen recording | the pane's record shortcut to start and stop | macOS Desktop | `proof/ios-simulator/<date>/<flow>.mov` |
+| Agent-taken screenshot | the agent captures it while driving the device | conversation only | re-capture or export it to a file before citing it |
+
+Also record for this route:
+
+- Consent is per device and covers control plus screenshots; the first use of each device prompts for it.
+- Two actions follow the session permission mode rather than that one-time consent, so name them when they happen: opening a URL on the device (a deep link or Safari test can carry data off the device) and building the app (`xcodebuild` runs the project's build scripts on the Mac).
+- Agent-booted devices shut down on app quit, on session archive, or about 10 minutes after detach. Export captures before detaching; a device that is gone cannot be re-screenshotted.
+- Founder taps and agent taps share one device. State changed by a founder tap mid-run invalidates the step it landed in; re-run that step.
 
 Run `npm run check:native-ios -- --root .` and attach the result before marking iOS engineering, screenshot, app-preview, or production-readiness lanes done.
 
@@ -44,7 +64,7 @@ Name the prerelease `.xctestplan`, its unit/integration/UI/performance targets, 
 
 | Risk / journey | Required variants | Runtime route | Evidence path | Provider correlation | Result |
 | --- | --- | --- | --- | --- | --- |
-| cold launch and core value journey | smallest/largest supported device, supported OS matrix | XcodeBuildMCP or MobAI runtime E2E | pending | backend/PostHog pending | Pending |
+| cold launch and core value journey | smallest/largest supported device, supported OS matrix | in-app simulator, XcodeBuildMCP, or MobAI runtime E2E | pending | backend/PostHog pending | Pending |
 | account lifecycle | create/login/logout plus account deletion | UI + integration tests | pending | auth/backend pending | Pending |
 | purchase lifecycle | StoreKit local purchase, sandbox/TestFlight entitlement, restore, refund/cancel state | StoreKit + real provider read-back | pending | RevenueCat/store pending | Pending |
 | permissions | allowed and denied paths with alternate UX | UI tests on device/simulator | pending | analytics pending | Pending |
@@ -54,7 +74,7 @@ Name the prerelease `.xctestplan`, its unit/integration/UI/performance targets, 
 | performance | cold-start, memory, FPS/jank, network, battery, crash/log budget | XCTest performance + MobAI metrics | pending | Sentry/performance pending | Pending |
 | release device | Release configuration on a physical device, or explicit blocked/not-applicable reason | signed device build | pending | APPLE_SIGNING.md/TestFlight pending | Pending |
 
-Record device/OS/locale/appearance/account-fixture coverage, skipped conditions, and the limitation of each route. SnapshotPreviews remains preview-only; simulator proof does not replace provider, signing, TestFlight, or physical-device release behavior.
+Record device/OS/locale/appearance/account-fixture coverage, skipped conditions, and the limitation of each route. SnapshotPreviews remains preview-only; simulator proof does not replace provider, signing, TestFlight, or physical-device release behavior. In-app simulator rows additionally record that the run used a fixture or sandbox account: the agent's device screenshots are sent to the model provider and kept under normal conversation retention, so a real founder, customer, store, bank, or provider account may never be signed in on a device the agent drives.
 
 ## Experience Cards (Bright-Line Evidence)
 

@@ -8,6 +8,16 @@ const loaded = loadProjectState(args);
 const issues: Issue[] = [...loaded.issues];
 const state = loaded.state;
 
+/**
+ * The in-app simulator (Claude Code Desktop's iOS Simulator pane, the CLI
+ * computer-use route, and Codex's build-ios-apps plugin) is the lightest native
+ * iOS proof route: no MCP install, no third-party account. That is exactly why
+ * it needs its own evidence contract — it is the route an agent will reach for
+ * by default, and it silently drops physical-device reach and all Android
+ * coverage, while its device screenshots leave the machine.
+ */
+const IN_APP_SIMULATOR_TERMS = ["iOS Simulator pane", "simulator pane", "in-app simulator", "in-app iOS Simulator", "build-ios-apps", "computer-use"];
+
 const readiness = firstExistingText(["PRODUCTION_READINESS.md", "engineering/PRODUCTION_READINESS.md"]);
 const screenshots = firstExistingText(["SCREENSHOTS.md", "screenshots/SCREENSHOTS.md", "app-store-listing/SCREENSHOTS.md"]);
 
@@ -104,9 +114,9 @@ function validateReadiness(text: string, file: string): void {
   );
   requireAny(
     text,
-    ["Codex Desktop", "XcodeBuildMCP", "MobAI", "SnapshotPreviews", "serve-sim"],
+    ["Codex Desktop", "XcodeBuildMCP", "MobAI", "SnapshotPreviews", "serve-sim", ...IN_APP_SIMULATOR_TERMS],
     "native_ios_proof.route_missing",
-    "Native iOS readiness must name the actual proof route: Codex Desktop/XcodeBuildMCP, MobAI, SnapshotPreviews, or serve-sim.",
+    "Native iOS readiness must name the actual proof route: the in-app iOS Simulator, Codex Desktop/XcodeBuildMCP, MobAI, SnapshotPreviews, or serve-sim.",
     file,
   );
   requireAny(
@@ -130,6 +140,41 @@ function validateReadiness(text: string, file: string): void {
     "Native iOS proof must state that simulator/preview proof does not replace Apple signing, archive, upload, or distribution readiness.",
     file,
   );
+
+  if (includesAny(text, IN_APP_SIMULATOR_TERMS)) {
+    // Scoped to the lines that actually claim the route (plus a small window)
+    // so the row itself carries its gates and limits, instead of borrowing a
+    // stray "Android" from an unrelated MobAI table elsewhere in the document.
+    const scope = scopedLines(text, IN_APP_SIMULATOR_TERMS);
+    requireAny(
+      scope,
+      ["local session", "not available in cloud", "cloud and SSH", "cloud/SSH", "SSH session", "local Mac"],
+      "native_ios_proof.in_app_simulator_session_missing",
+      "In-app simulator proof must record that it ran in a local session; the pane and computer-use routes cannot reach a Mac's simulators from cloud, SSH, or container sessions.",
+      file,
+    );
+    requireAny(
+      scope,
+      ["iPhone", "iPad", "UDID", "simulator name", "device and OS"],
+      "native_ios_proof.in_app_simulator_device_missing",
+      "In-app simulator proof must name the simulated device and OS it ran on.",
+      file,
+    );
+    requireAny(
+      scope,
+      ["fixture account", "fixture or sandbox account", "sandbox account", "test account", "no real account", "never a real"],
+      "native_ios_proof.in_app_simulator_fixture_account_missing",
+      "In-app simulator device screenshots leave the machine under normal conversation retention, so the proof must record that a fixture or sandbox account was used instead of a real founder, customer, or provider account.",
+      file,
+    );
+    requireAll(
+      scope,
+      ["Android", "physical device"],
+      "native_ios_proof.in_app_simulator_coverage_limit_missing",
+      "In-app simulator proof must state the coverage it does not provide: no Android and no physical-device reach. An easier route that silently narrows platform coverage is a paid-tool-routing decision, not a convenience.",
+      file,
+    );
+  }
 
   if (includesAny(text, ["Codex Desktop", "native iOS capabilities in Codex", "Codex native iOS"])) {
     requireAny(
@@ -312,11 +357,24 @@ function isGroundedEvidence(candidate: string): boolean {
 function validateScreenshotCaptureRoute(text: string, file: string): void {
   requireAny(
     text,
-    ["MobAI", "Codex Desktop", "XcodeBuildMCP", "serve-sim", "on-device", "device capture", "real app capture"],
+    ["MobAI", "Codex Desktop", "XcodeBuildMCP", "serve-sim", "on-device", "device capture", "real app capture", ...IN_APP_SIMULATOR_TERMS],
     "native_ios_proof.screenshot_capture_route_missing",
     "Ready iOS screenshot work must name the real app, simulator, or device capture route used for raw UI.",
     file,
   );
+  if (includesAny(text, IN_APP_SIMULATOR_TERMS)) {
+    // Store screenshots are the likeliest place to sign a driven device into a
+    // real account "to make the flow look real" — and those device screenshots
+    // leave the machine. The readiness doc carries this rule; so must this one.
+    requireAny(
+      scopedLines(text, IN_APP_SIMULATOR_TERMS),
+      ["fixture account", "fixture or sandbox account", "sandbox account", "test account", "no real account", "never a real"],
+      "native_ios_proof.screenshot_in_app_simulator_fixture_account_missing",
+      "Raw captures from an agent-driven simulator must record that a fixture or sandbox account was used; the agent's device screenshots leave the machine, so a real founder, customer, store, or provider account must never appear in store artwork.",
+      file,
+    );
+  }
+
   if (includesAny(text, ["SnapshotPreviews", "SnapshotTest", "PreviewLayoutTest"])) {
     requireAny(
       text,
@@ -329,7 +387,32 @@ function validateScreenshotCaptureRoute(text: string, file: string): void {
 }
 
 function shouldValidateReadiness(text: string, laneStatus?: string): boolean {
-  return laneStatus === "done" || hasReadyClaim(text) || includesAny(text, ["Native iOS Proof", "Codex Desktop", "SnapshotPreviews", "serve-sim"]);
+  return (
+    laneStatus === "done" ||
+    hasReadyClaim(text) ||
+    includesAny(text, ["Native iOS Proof", "Codex Desktop", "SnapshotPreviews", "serve-sim", ...IN_APP_SIMULATOR_TERMS])
+  );
+}
+
+/**
+ * Returns the lines that mention any of `terms`, plus two lines of context on
+ * each side, so a route-specific requirement is checked against the claim that
+ * triggered it rather than against the whole document.
+ */
+function scopedLines(text: string, terms: string[]): string {
+  const lines = text.split(/\r?\n/);
+  const keep = new Set<number>();
+  for (const [index, line] of lines.entries()) {
+    if (!includesAny(line, terms)) continue;
+    for (let offset = -2; offset <= 2; offset += 1) {
+      const target = index + offset;
+      if (target >= 0 && target < lines.length) keep.add(target);
+    }
+  }
+  return Array.from(keep)
+    .sort((left, right) => left - right)
+    .map((index) => lines[index])
+    .join("\n");
 }
 
 function hasReadyClaim(text: string): boolean {

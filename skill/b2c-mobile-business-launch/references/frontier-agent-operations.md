@@ -40,6 +40,7 @@ At session start, or before the first external operation after continuity recove
 - inspect installed skills for the named platform
 - check local CLI presence and current `--help` for fast-moving tools
 - record browser availability without inspecting cookies, local storage, profiles, passwords, session stores, or secret values
+- record whether the session can reach a local Mac at all before planning device work: a cloud, SSH, or container session cannot see the simulators on the founder's machine, so the in-app simulator rung is unavailable and the proof must route elsewhere or be marked blocked
 - list connected simulators/devices through the exposed native tool or current MobAI/XcodeBuildMCP help
 - record capability status, checked-at time, account scope, environment, and supported action classes in `operations/agent-operations.json`
 
@@ -127,18 +128,24 @@ For App Store Connect, `asc status`, `asc account status`, metadata validation/d
 
 Native tool control is another serialized external surface:
 
-- load `mobai-toolbelt.md` for cross-platform device work and `xcodebuildmcp-testing.md` for Apple-platform proof
+- load `mobai-toolbelt.md` for cross-platform device work and `xcodebuildmcp-testing.md` for Apple-platform proof, starting at that reference's Route Ladder rung 0
 - use current tool schemas or CLI `--help`; do not mix MCP names with CLI commands
 - observe the accessibility/UI tree before acting, prefer stable IDs/selectors, and use screenshots for visual evidence rather than target discovery
 - record device/simulator ID, OS/runtime, app build/configuration, locale, appearance, account fixture, action, result, and evidence paths
 - pair UI proof with backend/provider correlation where the flow crosses a service
 - keep simulator, preview, physical-device, provider, signing, TestFlight, and distribution claims separate
 
+The in-app simulator adds three approval-envelope items that no other device route has:
+
+- **Per-device consent, granted once.** The runtime asks before the agent first controls a simulated device, and that consent covers both control and screenshots of it from then on. Treat the grant as scoped to that device, and re-state what the agent will do when the device changes.
+- **Screenshots leave the machine.** Device screenshots the agent takes are sent to the model provider and retained under normal conversation retention. Fixture and sandbox accounts only: never sign a driven device into a real founder, customer, store, bank, or provider account, and never put a live payment method or real credential on it. This is an extension of the secrets rule below, not an exception to it.
+- **Two actions escalate past that consent.** Opening a URL on the device (a deep-link or Safari check can carry data off it) and building the app (`xcodebuild` runs the project's own build scripts on the founder's Mac) follow the session's permission mode instead. Name both before running them rather than folding them into a "run the app" step.
+
 ## Secrets And Authentication
 
 Use `secrets-management.md` before any credential flow. Doppler is the default for API keys, OAuth/refresh tokens, service credentials, and automation secrets; it is not browser password/passkey storage or a channel for copying passwords, recovery codes, or 2FA into the transcript.
 
-Record secret names and storage routes only. Never capture raw secrets in `AGENT_OPERATIONS.md`, JSON state, screenshots, browser exports, console logs, shell history, or proof files. Prefer existing signed-in sessions, keychain/provider profiles, scoped service tokens, OAuth, and secure founder entry.
+Record secret names and storage routes only. Never capture raw secrets in `AGENT_OPERATIONS.md`, JSON state, screenshots, browser exports, console logs, shell history, or proof files. Device screenshots taken by the agent leave the machine, so a real account, real payment method, or live credential must never be placed on a device the agent drives. Prefer existing signed-in sessions, keychain/provider profiles, scoped service tokens, OAuth, and secure founder entry.
 
 ## Proof And Reconciliation
 

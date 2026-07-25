@@ -15,7 +15,7 @@ Record the current connector, API, CLI, authenticated-browser, and native-device
 | purpose-built connector | connector | not checked | none | pending | discover current tool catalog |
 | provider API or CLI | api_or_cli | not checked | none | pending | refresh official docs and local help |
 | authenticated browser | browser | not checked | none | pending | never inspect cookies, storage, profiles, passwords, or sessions |
-| native mobile | native_device | not checked | none | pending | keep simulator/device/provider/signing proof separate |
+| native mobile | native_device | not checked | none | pending | keep simulator/device/provider/signing proof separate; the in-app simulator is simulated-devices-only and its screenshots leave the machine, so fixture accounts only |
 
 ## Approval Envelopes
 

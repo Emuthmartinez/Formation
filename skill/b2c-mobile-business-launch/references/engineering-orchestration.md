@@ -216,7 +216,7 @@ Required proof, adjusted to the product:
 - unit tests for pure logic and edge cases
 - integration tests for app-to-backend, provider callbacks, database writes, entitlement projection, email sends, and analytics wrappers
 - browser E2E for web funnels, checkout, privacy/terms pages, support flows, and dashboards where applicable
-- MobAI E2E for mobile onboarding, attribution, paywall, restore, activation, settings, account deletion, and screenshot-critical flows; if MobAI is unavailable and the founder approves, XcodeBuildMCP Apple-platform proof with explicit limitations
+- mobile E2E for onboarding, attribution, paywall, restore, activation, settings, account deletion, and screenshot-critical flows: in-app iOS Simulator (rung 0) for iOS-only walkthroughs and repro, MobAI for Android coverage and repeatable suites, XcodeBuildMCP when the lane needs scripted/CI builds or physical hardware — record the rung used and the coverage it does not provide
 - backend proof that frontend actions create the expected records/events in the real test backend, database, Firestore/Supabase/Postgres, RevenueCat, Stripe, Resend, or PostHog target
 - app integrity, rate-limit, idempotency, and abuse-path proof when paid access, user accounts, sensitive data, or backend mutation are in scope
 - release-build or staging-build verification that mocks are disabled, production flags are sane, and secrets are not bundled
@@ -243,13 +243,13 @@ Attribution-specific production-readiness proof is mandatory when onboarding, si
 - backend/profile storage contains the source once identity exists
 - anonymous attribution is stitched to the identified user after signup/login
 
-## 8. MobAI, Native iOS Proof, And Device Testing
+## 8. In-App Simulator, MobAI, Native iOS Proof, And Device Testing
 
-Use MobAI MCP when available for advanced multi-step device automation. Use the local `using-mobai-cli` skill when only CLI access is available or the environment is unfamiliar.
+Start at rung 0. On a local Mac with Xcode, the in-app iOS Simulator (Claude Code Desktop's simulator pane, or Codex with the `build-ios-apps` plugin) builds, installs, launches, taps, reads the screen, screenshots, records, and streams logs with no install and no account — use it for "run the app", "check this screen", "walk this flow", and "reproduce this bug". Escalate per the Route Ladder in `xcodebuildmcp-testing.md`. Use MobAI MCP for Android, repeatable `.mob` suites, multi-device runs, performance gates, and polished demo recording. Use the local `using-mobai-cli` skill when only CLI access is available or the environment is unfamiliar.
 
 MobAI is a freemium third-party tool. Use its free tier without a spend gate when one device and the current quota satisfy the lane. Ask before any Plus/Pro upgrade or before replacing the intended cross-platform route; continue after the founder confirms paid capability, provides exports/screenshots, or approves a fallback with recorded platform limits.
 
-When running in Codex Desktop and native Apple/XcodeBuildMCP tools are exposed, use `xcodebuildmcp-testing.md` before Apple simulator/device proof. The Codex Desktop native iOS route should call `session_show_defaults` before the first build/run/test, use exposed MCP tools such as `build_run_sim` when defaults are set, and record project/workspace, scheme, simulator/device, tool names, screenshots/logs, and limitations in `PRODUCTION_READINESS.md`.
+Load `xcodebuildmcp-testing.md` before any Apple simulator/device proof, in either runtime. In Claude Code Desktop the simulator pane opens automatically when the agent runs the app in a simulator — local sessions only, per-device consent, fixture accounts only because device screenshots leave the machine. In Codex, call `session_show_defaults` before the first build/run/test and use exposed MCP tools such as `build_run_sim` when defaults are set. Either way record runtime and version, project/workspace, scheme, simulated device and OS, tool names, screenshot/log paths, and the simulator-only limitation in `PRODUCTION_READINESS.md`.
 
 Use XcodeBuildMCP after confirmation for Apple-platform build/run/test/UI automation/screenshots/logs/video:
 - load `xcodebuildmcp-testing.md`
@@ -279,7 +279,7 @@ For store screenshots, keep raw captures separate from composed assets. For E2E 
 - support/privacy/delete action reaches the intended backend/email route
 - lifecycle email/webhook appears in provider logs when expected
 
-If device access is blocked, mark production readiness as blocked for that flow. Do not replace live-device proof with screenshots, preview snapshots, or unit tests. If XcodeBuildMCP, SnapshotPreviews, or serve-sim is used, write the exact simulator/device, OS, workflow, output paths, and limitation into `PRODUCTION_READINESS.md`.
+If device access is blocked, mark production readiness as blocked for that flow. A cloud, SSH, or container session cannot reach a local Mac's simulators at all, so rung 0 is simply unavailable there: record that as the blocker and route the proof to a machine that can, rather than narrating a simulator run that did not happen. Do not replace live-device proof with screenshots, preview snapshots, or unit tests. If XcodeBuildMCP, SnapshotPreviews, or serve-sim is used, write the exact simulator/device, OS, workflow, output paths, and limitation into `PRODUCTION_READINESS.md`.
 
 ## 9. LaunchBench And Failure Cards
 
@@ -316,7 +316,7 @@ Engineering-heavy work is done only when:
 - Parallel agents were considered by default, used where safe, and serialized where required.
 - Specialist audit agents or equivalent independent review checked the build against attribution, onboarding, analytics, revenue, store, privacy, design, and production-readiness requirements where in scope.
 - frontend, backend, analytics, revenue, email, and mobile-device paths were tested end to end where in scope.
-- MobAI proof, Codex Desktop native iOS/XcodeBuildMCP proof, serve-sim simulator proof, or SnapshotPreviews preview proof is paired with backend/provider verification where app flows mutate state, and preview/simulator limits are explicit.
+- In-app simulator proof (rung 0), MobAI proof, XcodeBuildMCP proof, serve-sim simulator proof, or SnapshotPreviews preview proof is paired with backend/provider verification where app flows mutate state, and the simulator-only/preview-only/no-Android/no-distribution limits are explicit.
 - production-readiness evidence is written down.
 - deterministic validators or LaunchBench scenarios were run where applicable, and active failure cards are explicit.
 - remaining blockers are explicit founder-only gates, access gaps, platform review waits, or external service issues.
