@@ -10,6 +10,7 @@ Classify each lane as `done`, `partial`, `blocked`, `not needed`, or `deferred w
 - Must-Have For Any Real Launch
 - Optional But High-Leverage
 - Common Missing Pieces
+- Handoff Completeness Checklist
 - Audit Output
 
 ## Coverage Matrix
@@ -206,6 +207,81 @@ Flag these aggressively:
 - UGC is planned as generic content ideas instead of a 90-day fit-gated format-discovery experiment with creator sourcing, rights, payment, tracking, and stop/scale rules.
 - Short-form content is scheduled without founder approval, warmup, platform limits, or app-store/legal claim review.
 - No post-launch weekly monitoring loop is assigned.
+
+## Handoff Completeness Checklist
+
+The Coverage Matrix above asks "does this lane have evidence?". This checklist asks the harder question `SKILL.md`'s Deliverable Standard sets: **can a future agent pick this package up without re-deciding the business?** Walk it before any launch-readiness claim or handoff. Every item must be answerable from durable files, not chat memory.
+
+**Business and scope**
+
+- what the app is and who it is for
+- what category it competes in and why
+- what the app must ship in V1, what is explicitly V2/V3, and what is banned
+- what `project.launch_tier` says about confirmed scope, which lanes a lite tier deferred with dated reasons, and when they revisit
+
+**State and operating record**
+
+- what `PROJECT_STATE.yaml` says about phase, autonomy mode, lane statuses, provider state, orchestration strategy, proof, active failure cards, and current blockers, plus what `launch-cockpit.html` shows the founder
+- what paid/account-gated tools were intended, whether the founder confirmed paid access or fallback use, and what `TOOL_DECISIONS.md` says
+- what `SECRETS.md` says about Doppler or approved secret-provider routing, local/staging/production configs, service tokens, command wrappers, and new-secret handling
+- what `AGENT_OPERATIONS.md` and its ledger say about capability inventory, approval envelopes, exact account/environment targeting, before/after proof, and state reconciliation
+- what `BUSINESS_ACCESS.md` and its ledger say about business identity, account ownership, delegated access, recovery/MFA ownership, and the open founder gate
+
+**Product and experience**
+
+- what `11_STAR_EXPERIENCE.md` and `11-star-experience.html` say about the 1/2/5/6/7/10/11-star ladder, line of feasibility, V1 scalable slice, and surface translation
+- what `LAUNCH_TRACE.md` says about how research became product, 11-star experience, paid UA, viral growth, brand, design, build, store, legal, revenue, analytics, and verification decisions
+- what product decisions were resolved after research, and whether `ce-brainstorm` produced the requirements source before implementation planning
+- what `EMOTIONAL_DESIGN.md` (or `EMOTIONAL_AUDIT.md`) says about the Emotional North Star, target curve, Card Application Map, per-card events, ethics attestations, HIGH-risk escape hatches, and reduced-motion fallbacks
+- what onboarding sequence sells the value, collects personalization/attribution data, times review prompts, and routes to the right paywall/offer
+
+**Brand and design**
+
+- what the brand sounds and looks like
+- what `DESIGN.md` tokens/components govern the UI, what `UX_PATTERNS.md` says about Refero/fallback research, flow maps, state matrices, and bug traps, and what HTML proofs demonstrate the system in use
+
+**Measurement and growth**
+
+- what analytics and attribution plan is visible to the founder upfront, which current PostHog docs informed it, and what `analytics-plan.html` shows
+- what self-reported attribution data contract exists: early screen, stable source keys, `other` free text, PostHog person property, backend/profile persistence, anonymous-to-identified reconciliation, and verification evidence
+- what analytics events, identity links, attribution properties, funnels, dashboards, experiments, session replay/survey settings, and QA probes define activation, conversion, retention, and growth
+- what `PAID_UA.md` says about fit, one-channel choice, creative production, tracking baseline, blended report, RevenueCat LTV/CPA review, weekly cadence, stop/scale rules, and founder-only spend gates
+- what `VIRAL_GROWTH.md` says about fit, product loop, content loop, referral/share mechanics, monetization timing, abuse controls, format tests, analytics proof, stop/scale rules, and founder-only gates
+- what `growth/LAUNCH_NARRATIVE.md` says about the feeling-first launch thesis and emotional angle, the tentpole and weekly feature-launch cadence and how they compound into a standing audience, the launch-day run-of-show, post copy that passes the 2026 copy guardrails, measurement, stop/scale rules, and founder-only posting gates
+- what UGC fit decision, 90-day creator plan, creator budget, sourcing approach, script/format loop, disclosure rules, and stop/scale thresholds exist
+- what Fastlane workspace, social connections, content angles, Blitz preferences, approved media inputs, schedule, and analytics loop exist after launch
+
+**Store and release**
+
+- what App Store listing, screenshot, ad, and launch sequence to use
+- what `LOCALIZATION_MARKET_RESEARCH.md` says about the market opportunity matrix, priority tiers (Tier 1 full localize / Tier 2 metadata-only / Tier 3 defer), native-keyword sourcing, which surfaces each market localizes, and the post-launch refresh — so localization follows search demand instead of translating into every language
+- what the App Store listing preparation packet says about default listing fields, App Privacy answers, pricing/subscription setup, RevenueCat/Stripe/web-funnel alignment, in-app events, custom product pages, localization, generated or rendered marketing assets, and founder-only approval gates
+- what `APPLE_APP_STORE_REQUIREMENTS.md` says about official Apple source basis, `PrivacyInfo.xcprivacy`, `NSPrivacyCollectedDataTypes`, `NSPrivacyAccessedAPITypes`, required reason API reasons, tracking domains, third-party SDK manifests/signatures, Xcode privacy report, App Privacy labels, protected-resource purpose strings, ATT, account deletion, review notes, archive/upload warnings, and founder approval before ASC upload/submission
+- what Apple Developer account, Team ID, bundle ID/App ID, app record, signing, certificate/profile, archive/export/upload, and TestFlight state exists, including why simulator builds (in-app pane included) do or do not prove distribution readiness
+- what exact App Store Connect and Google Play Console pages the founder must visit, what to paste in each field, which ASC CLI/skill-pack route applies to each ASC task, and which items require founder approval
+- what store-console, screenshot, ASO, ratings/reviews, localization, and post-launch monitoring loops are required
+- what device screenshots must be captured with the in-app iOS Simulator (fixture accounts only), MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, SnapshotPreviews preview proof, or equivalent tooling; how raw captures become composed iPhone/iPad/Play screenshots through ParthJadhav/app-store-screenshots or equivalent export boards with copy overlays, App Icon/App Preview route, final upload wells, ASC validation, and visual QA; and which screenshots are still blocked
+- what `GOOGLE_PLAY_RELEASE.md` says (when Android is in scope) about the developer account type, Data Safety reconciliation with the iOS labels, content rating, Play App Signing/AAB, target API level, release tracks, the closed-testing gate, and the pre-launch report
+
+**Money, legal, and lifecycle**
+
+- what RevenueCat/Stripe/app-store products unlock, how purchases map to entitlements, and how web purchases redeem in app
+- what privacy, terms, account deletion, subscription, and app-store data disclosures say
+- what support/privacy/security email addresses exist, route to, and have been tested
+- what transactional, lifecycle, broadcast, unsubscribe, and inbound/reply email paths exist, how Resend is configured, which starter templates were copied or adapted, and how those templates map to `DESIGN.md`
+- what public pages are crawlable, citeable, schema-marked, and discoverable by AI/search systems
+
+**Build, security, and proof**
+
+- what `SECURITY.md` and `security-review.html` say about threat model, data classification, platform hardening, app integrity, entitlement/webhook abuse controls, supply-chain checks, monitoring, incident response, paid-security-tool routing, accepted risks, and release proof
+- what `TECH_SPEC.md` says about data model, API contracts, app states, permissions, integrations, feature flags, app integrity, and fixtures when implementation is in scope
+- what the `TECH_SPEC.md` Data Contract says about backend selection (and its reason), data model, tested authorization model, and migrations/environments — and how archetype prompts were adapted when the route is not Supabase
+- what `ORCHESTRATION.md`, `AGENTS.md`, `CLAUDE.md`, `APP_AGENTS.md`, and `agents/` say, including security-architect ownership, what `ENGINEERING_PLAN.md` and `PRODUCTION_READINESS.md` require, what Compound Engineering plan/execution path applies, where parallel agents/worktrees are safe, which shared resources are serialized, and what production-readiness proof is required
+- what MobAI mobile recorder, desktop recorder, or Remotion artifacts exist in `DEMO_VIDEO.md` or `CONTENT_ASSETS.md`: `.mob` or `screenplay.json`, Remotion composition IDs, raw capture, final export, captions, upload copy, and rerender path
+- what repo/docs/assets a builder should read first
+- what LaunchBench scenarios or deterministic validators were run, what failure cards remain active, and why no known miss is being hidden by prose
+- what `POST_LAUNCH_OPS.md` and `LAUNCH_RETRO.md` say about the weekly operating rhythm, crash route and release gate, review-response SLA, retention cohort source, support routing, and which retro findings became failure cards or LaunchBench candidates
+- what is live, what was verified, and what still requires founder action
 
 ## Audit Output
 
