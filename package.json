@@ -82,6 +82,7 @@
     "probe:revenuecat": "tsx skill/b2c-mobile-business-launch/scripts/probe-revenuecat.ts",
     "probe:posthog": "tsx skill/b2c-mobile-business-launch/scripts/probe-posthog.ts",
     "grade:screenshots": "tsx skill/b2c-mobile-business-launch/scripts/grade-screenshots.ts",
+    "sync:runtime": "bash scripts/sync-skill-runtime.sh",
     "lint:format": "prettier --check \"skill/b2c-mobile-business-launch/scripts/**/*.ts\"",
     "format": "prettier --write \"skill/b2c-mobile-business-launch/scripts/**/*.ts\""
   },
