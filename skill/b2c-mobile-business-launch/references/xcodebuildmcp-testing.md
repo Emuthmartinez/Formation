@@ -140,6 +140,8 @@ Gates to confirm before promising it (2026-07-25 docs basis):
 
 The docs do not publish tool names for the simulator tools. Describe the route by what it did — built, launched, tapped, screenshotted — and never invent a tool identifier to make proof look more precise than it is.
 
+**Rung 0 is a do-it action, not a proposal.** "Can you run it and show me the new screen?" is answered by running it and showing the screen, not by describing the route you would take and asking whether to start — that is the Autopilot Run Contract's "do not stop with instructions", and it bites hardest here because this is the one route with no setup to negotiate. Skip the pre-work a heavier rung would need: no tool install, no tier choice, no `check:skill-version` gate (a one-screen look is not the "substantial launch/design/store/revenue/build work" that gate covers), and no repo archaeology beyond finding the scheme. Build, run, capture, report. Contract follow-ups — the onboarding review-prompt placement, the analytics catalog, `SCREENSHOTS.md` — come after the founder has seen the screen, not before.
+
 There is no command or setting that opens the pane. Ask for the outcome and it opens when the app launches:
 
 ```text

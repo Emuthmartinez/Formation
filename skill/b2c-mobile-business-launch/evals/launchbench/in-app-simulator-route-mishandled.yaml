@@ -15,6 +15,7 @@ validators:
   - check-store-screenshots
 must_catch:
   - a zero-setup in-app simulator was available and the agent handed back an install checklist instead
+  - the agent described the route it would take and asked whether to start, instead of running the app and showing the screen
   - real founder/customer/provider accounts were signed in on a device whose screenshots leave the machine
   - the proof omits the surface, local-session fact, simulated device/OS, and fixture-account decision
   - the proof does not state that the route covers no Android and no physical device, so the coverage narrowing is silent
