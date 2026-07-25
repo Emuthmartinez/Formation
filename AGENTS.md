@@ -20,6 +20,7 @@ New contributor (human or agent)? Start with [`CONTRIBUTING.md`](CONTRIBUTING.md
 - `skill/b2c-mobile-business-launch/scripts/`: deterministic validators, renderers, LaunchBench harness, and source freshness tooling.
 - `skill/b2c-mobile-business-launch/evals/launchbench/`: known failure-mode scenarios.
 - `skill/b2c-mobile-business-launch/agents/openai.yaml`: UI metadata.
+- `scripts/sync-skill-runtime.sh`: maintainer-only installed-runtime sync (`npm run sync:runtime`); see [Runtime Sync](#runtime-sync).
 
 ## First Reads
 
@@ -104,6 +105,15 @@ ls -ld ~/.codex/skills/b2c-mobile-business-launch \
 ## Runtime Sync
 
 Edit the repo source first. Runtime sync applies only on the maintainer machine, where `~/.codex/skills/b2c-mobile-business-launch` exists: before claiming the skill is installed there, mirror the current checkout's `skill/b2c-mobile-business-launch/` into `~/.codex/skills/b2c-mobile-business-launch/`, run the runtime audit there, and verify the Claude/Agents symlinks (`~/.claude/skills/b2c-mobile-business-launch` and `~/.agents/skills/b2c-mobile-business-launch` point to the Codex runtime copy). In clones, CI, or cloud sessions without that installed copy, do not attempt runtime sync; `npm run audit:ci` is the readiness gate.
+
+`scripts/sync-skill-runtime.sh` performs that whole sequence and is the preferred way to run it:
+
+```bash
+npm run sync:runtime              # pull main, audit source, mirror, audit runtime, prove parity + symlinks
+npm run sync:runtime -- --dry-run # preview the mirror without mutating anything
+```
+
+It exits 0 with an explanatory message on machines with no installed runtime, refuses to sync from a non-`main` branch or a dirty tree without an explicit choice, fails on post-sync drift, and fails if a consumer path is a real directory instead of a symlink (that copy would silently keep serving stale content).
 
 Broad launch/design/store/revenue/build work should first run `npm run check:skill-version -- --source skill/b2c-mobile-business-launch --installed ~/.codex/skills/b2c-mobile-business-launch` from the source repo, or the equivalent command from the installed runtime. If the installed copy is stale, use AskUserQuestion or a plain founder choice before continuing the original request.
 
