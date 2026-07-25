@@ -195,7 +195,7 @@ Route generated art by surface:
 
 - **Paywall hero / background art** — use `soul_location` (environment/scene, prompt-only) or `gpt_image_2` via the `higgsfield-generate` skill. These are decorative backgrounds embedded in HTML proofs; they are never substitutes for real app UI.
 - **Onboarding illustrations, empty-state art, and celebration frames** — use the `higgsfield-generate` skill. Every prompt must carry `DESIGN.md` tokens (palette, type mood, shapes, texture, banned aesthetics, intended surface); generating without the brief is a named failure mode.
-- **Direction iteration before committing production-model credits** — route through the **Cheap-First Direction** recipe in `tool-recipes.md`. Per that recipe's Rule-5 reconciliation, cheap-first is offered as a spend-reduction option at the `paid-tool-routing.md` spend-confirmation prompt — never applied silently.
+- **Direction iteration before committing production-model credits** — route through the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md`. Per that recipe's Rule-5 reconciliation, cheap-first is offered as a spend-reduction option at the `paid-tool-routing.md` spend-confirmation prompt — never applied silently.
 
 Guardrails:
 - Generated art is decoration embedded in HTML proofs; it is **never** a substitute for truthful real app UI in store screenshots or product claims.

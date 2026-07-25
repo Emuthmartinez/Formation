@@ -93,7 +93,7 @@ Checklist:
 - use current iPhone, iPad, Google Play, and app-target device sizes/upload wells required for the current platform
 - route App Icon work through `app-icon-optimization` or equivalent, and verify 1024x1024 output, no alpha, no rounded corners, thumbnail contrast, and category differentiation
 - route App Preview or Play promo videos through `app-preview-video` plus MobAI/Remotion/Higgsfield/owned-media production rules when video is in scope
-- for seasonal CPP background / event media / IAP promo art / seasonal icon treatment refreshes, see the **Seasonal restyle Refresh** recipe in `references/tool-recipes.md`; this lane uses `product-photoshoot --mode restyle` on LOCKED supporting/CPP art only — it must never touch the real-UI screenshot layer; gate behind spend confirmation per `references/paid-tool-routing.md`
+- for seasonal CPP background / event media / IAP promo art / seasonal icon treatment refreshes, see the **Seasonal restyle Refresh** recipe in `references/tool-recipes/visual-and-motion-production.md`; this lane uses `product-photoshoot --mode restyle` on LOCKED supporting/CPP art only — it must never touch the real-UI screenshot layer; gate behind spend confirmation per `references/paid-tool-routing.md`
 - ensure screenshots do not imply unavailable features, unsupported claims, free trials, prices, competitor comparisons, or endorsements without approval
 - localize screenshot copy when localized metadata is shipped
 - mark reference art separately from production upload assets

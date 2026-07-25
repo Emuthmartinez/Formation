@@ -13,10 +13,16 @@
  * an excluded file that drops back under budget warns so the exclusion gets
  * removed.
  *
+ * It also enforces the split it recommends: every `references/<name>/`
+ * directory needs a `references/<name>.md` index that links each topic file,
+ * and every routing link out of that index must resolve. Without this, a split
+ * rots silently — an unlinked topic file is unreachable and a dangling row
+ * sends agents nowhere.
+ *
  * npm script: check:reference-size
  * Usage: tsx scripts/check-reference-size.ts --skill-root /path/to/skill [--budget-bytes N]
  */
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { flagNumber, flagString, issue, parseFlags, reportAndExit, type Issue } from "./lib/launch-state.js";
@@ -47,8 +53,6 @@ const ENTRYPOINT_BUDGET_BYTES = 45 * 1024;
  * per-topic files (see references/experience-cards.md).
  */
 const EXCLUSIONS: Record<string, string> = {
-  "tool-recipes.md":
-    "single lookup surface for ~20 third-party tool recipes; recipes are loaded together by design at setup time. Split into per-tool files is tracked as a follow-up candidate.",
   "artifact-contracts.md":
     "the canonical registry of every launch artifact's acceptance criteria; contracts are cross-referenced as one document during handoff audits and per-artifact splitting would fragment the acceptance pass.",
   "source-registry.yaml":
@@ -91,6 +95,68 @@ if (!existsSync(referencesDir)) {
   }
 }
 
+/**
+ * Index completeness for split references.
+ *
+ * The remedy this gate recommends is "split into an index plus per-topic
+ * files", so the split itself needs enforcement: a topic file no index links
+ * to is unreachable by progressive disclosure, and a routing row pointing at a
+ * deleted file sends agents to a 404. Every `references/<name>/` directory
+ * must therefore have a `references/<name>.md` index that links each of its
+ * files, and every link out of that index must resolve.
+ */
+if (existsSync(referencesDir)) {
+  for (const entry of readdirSync(referencesDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const topicDir = path.join(referencesDir, entry.name);
+    const indexPath = path.join(referencesDir, `${entry.name}.md`);
+    const indexRelative = `references/${entry.name}.md`;
+
+    if (!existsSync(indexPath)) {
+      issues.push(
+        issue(
+          "error",
+          "reference_size.index_missing",
+          `references/${entry.name}/ has no ${indexRelative} index. A split reference needs an index that routes to each topic file, or nothing can load it on demand.`,
+          indexRelative,
+        ),
+      );
+      continue;
+    }
+
+    const indexText = readFileSync(indexPath, "utf8");
+    // Reachability means a real markdown link, not a mention. A filename that
+    // only appears in prose or backticks reads as routed to a human skimming
+    // the index but is not something an agent can follow, so both directions
+    // below are checked against parsed link targets rather than raw text.
+    const linked = new Set(linkedHrefs(indexText));
+
+    for (const file of collectFilesRecursive(topicDir)) {
+      const href = path.relative(referencesDir, file).split(path.sep).join("/");
+      if (!linked.has(href)) {
+        issues.push(
+          issue(
+            "error",
+            "reference_size.index_incomplete",
+            `${indexRelative} does not link references/${href}. Add a routing row with a load-when trigger (a bare mention is not a link), or delete the unreachable file.`,
+            indexRelative,
+          ),
+        );
+      }
+    }
+
+    for (const href of linked) {
+      if (href.startsWith(`${entry.name}/`) && !existsSync(path.join(referencesDir, href))) {
+        issues.push(
+          issue("error", "reference_size.index_dangling_link", `${indexRelative} routes to references/${href}, which does not exist.`, indexRelative),
+        );
+      }
+    }
+  }
+}
+
 const entrypointPath = path.join(args.skillRoot, "SKILL.md");
 if (!existsSync(entrypointPath)) {
   issues.push(issue("error", "reference_size.entrypoint_missing", `SKILL.md is missing at ${entrypointPath}.`, "SKILL.md"));
@@ -125,6 +191,26 @@ function parseArgs(argv: string[]): Args {
     skillRoot: flagString(flags, "skillRoot") ?? defaultSkillRoot,
     budgetBytes: flagNumber(flags, "budgetBytes") ?? DEFAULT_BUDGET_BYTES,
   };
+}
+
+/**
+ * Local markdown link targets, normalized: `#fragment` and an optional
+ * `"title"` are stripped, and `./` prefixes collapsed. External links and
+ * pure anchors are dropped so only routable file paths remain.
+ */
+function linkedHrefs(text: string): string[] {
+  const hrefs: string[] = [];
+  for (const match of text.matchAll(/\]\(([^)]+)\)/g)) {
+    const raw = match[1]?.trim();
+    if (!raw || raw.startsWith("#") || /^[a-z][a-z0-9+.-]*:/i.test(raw)) {
+      continue;
+    }
+    const target = raw.split(/\s+/)[0]?.split("#")[0]?.replace(/^\.\//, "");
+    if (target) {
+      hrefs.push(target);
+    }
+  }
+  return hrefs;
 }
 
 function collectFilesRecursive(root: string): string[] {

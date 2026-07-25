@@ -16,15 +16,20 @@
  * GitHub Actions workflow or locally. See references/launchbench-evals.md
  * "Behavioral Eval Harness" for the honest split.
  *
- * Model ids come from the claude-api skill (checked 2026-06-10): default
- * agent and grader model is claude-opus-4-8; override with --model /
+ * Model ids come from the claude-api skill (checked 2026-07-25): default
+ * agent and grader model is claude-opus-5; override with --model /
  * --grader-model. Never hardcode date-suffixed ids.
+ *
+ * Credentials: ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN, or --use-profile to
+ * spend against an `ant auth login` profile. The gate is deliberately explicit
+ * because check:agent-evals runs this script credential-free — without it the
+ * SDK would resolve a local profile and bill a full run from the fixtures.
  *
  * npm script: evals:behavioral (root and runtime packages)
  * Usage:
  *   tsx scripts/run-behavioral-evals.ts --list
  *   ANTHROPIC_API_KEY=... tsx scripts/run-behavioral-evals.ts [--only id1,id2]
- *     [--model claude-opus-4-8] [--grader-model claude-opus-4-8] [--out results.json]
+ *     [--model claude-opus-5] [--grader-model claude-opus-5] [--out results.json]
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -34,7 +39,7 @@ import { asArray, asString, flagBoolean, flagString, isRecord, parseFlags } from
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, "..");
-const DEFAULT_MODEL = "claude-opus-4-8";
+const DEFAULT_MODEL = "claude-opus-5";
 
 type AssertionKind = "must_catch" | "should_say" | "must_use" | "forbidden";
 
@@ -79,8 +84,15 @@ if (args.list) {
   process.exit(0);
 }
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error("ANTHROPIC_API_KEY is required to run behavioral evals against a live agent. Use --list to inspect the subset without credentials.");
+// This gate is also a spend guard: check:agent-evals runs this script with no
+// credentials, so the no-credential path must never reach the network. The SDK
+// would otherwise silently resolve an `ant auth login` profile and bill a full
+// flagship run from the fixture suite. ANTHROPIC_AUTH_TOKEN counts as an
+// explicit credential; a profile requires the explicit --use-profile opt-in.
+if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN && !args.useProfile) {
+  console.error(
+    "ANTHROPIC_API_KEY is required to run behavioral evals against a live agent (ANTHROPIC_AUTH_TOKEN also works, or pass --use-profile to spend against an `ant auth login` profile). Use --list to inspect the subset without credentials.",
+  );
   process.exit(1);
 }
 
@@ -118,18 +130,43 @@ async function run(toRun: BehavioralScenario[]): Promise<void> {
   ].join("\n");
 
   const results: ScenarioResult[] = [];
+  const invalid: InvalidRun[] = [];
   for (const scenario of toRun) {
     console.log(`Running ${scenario.id} ...`);
     const agentMessage = await createMessage({
       model: args.model,
-      max_tokens: 8192, // deliberate cost cap for eval answers
+      // Adaptive thinking is on by default on current models and shares this
+      // ceiling with the answer text, so 8192 truncated multi-assertion
+      // scenarios. 16000 keeps a non-streaming request under SDK HTTP timeouts.
+      max_tokens: 16000,
       thinking: { type: "adaptive" },
       system: systemPrompt,
       messages: [{ role: "user", content: scenario.prompt }],
     });
     const responseText = textBlocks(agentMessage.content);
 
-    const grades = await grade(createMessage, scenario, responseText);
+    // A refusal or a truncated answer is a broken run, not a failing agent:
+    // grading either one silently reports every assertion as a miss.
+    const stopReason = asString(agentMessage.stop_reason);
+    if (stopReason === "refusal" || stopReason === "max_tokens" || responseText.trim().length === 0) {
+      const detail =
+        stopReason === "refusal"
+          ? "the safety classifiers declined the prompt"
+          : stopReason === "max_tokens"
+            ? "the answer hit max_tokens"
+            : "the response carried no text";
+      console.log(`  INVALID (${detail}) — not graded`);
+      invalid.push({ id: scenario.id, source: scenario.source, stop_reason: stopReason ?? "none", response: responseText });
+      continue;
+    }
+
+    const outcome = await grade(createMessage, scenario, responseText);
+    if (!outcome.ok) {
+      console.log(`  INVALID (${outcome.invalidReason}) — not graded`);
+      invalid.push({ id: scenario.id, source: scenario.source, stop_reason: outcome.invalidReason, response: responseText });
+      continue;
+    }
+    const grades = outcome.grades;
     const hardFailures = grades.filter(
       (grade) => (grade.kind === "must_catch" || grade.kind === "must_use" || grade.kind === "forbidden") && !grade.pass,
     ).length;
@@ -144,22 +181,40 @@ async function run(toRun: BehavioralScenario[]): Promise<void> {
     generated_at: new Date().toISOString(),
     agent_model: args.model,
     grader_model: args.graderModel,
-    summary: { total: results.length, passed: results.length - failed.length, failed: failed.length },
+    summary: { total: toRun.length, graded: results.length, passed: results.length - failed.length, failed: failed.length, invalid: invalid.length },
     results,
+    invalid,
   };
   mkdirSync(path.dirname(args.out), { recursive: true });
   writeFileSync(args.out, `${JSON.stringify(artifact, null, 2)}\n`, "utf8");
 
-  console.log(`\nBehavioral eval run: ${results.length - failed.length}/${results.length} passed. Results artifact: ${args.out}`);
+  console.log(`\nBehavioral eval run: ${results.length - failed.length}/${results.length} graded scenario(s) passed. Results artifact: ${args.out}`);
   if (failed.length > 0) {
     for (const result of failed) {
       console.log(`- FAIL ${result.id}: ${result.hard_failures} hard failure(s)`);
     }
     process.exitCode = 1;
   }
+  if (invalid.length > 0) {
+    // Ungraded scenarios mean the run did not measure what it claims to; fail
+    // rather than reporting a clean pass over a shrunken subset.
+    for (const run of invalid) {
+      console.log(`- INVALID ${run.id}: stop_reason=${run.stop_reason} (not graded)`);
+    }
+    console.log(`${invalid.length} of ${toRun.length} scenario(s) produced no gradeable answer — this run is not a complete flagship pass.`);
+    process.exitCode = 1;
+  }
 }
 
-type CreateMessage = (params: Record<string, unknown>) => Promise<{ content: unknown }>;
+type CreateMessage = (params: Record<string, unknown>) => Promise<{ content: unknown; stop_reason?: unknown }>;
+
+/** A run that produced no gradeable answer — a harness/model problem, not an agent miss. */
+interface InvalidRun {
+  id: string;
+  source: string;
+  stop_reason: string;
+  response: string;
+}
 
 /** Concatenated text blocks from a Messages API response content array. */
 function textBlocks(content: unknown): string {
@@ -169,7 +224,10 @@ function textBlocks(content: unknown): string {
     .join("\n");
 }
 
-async function grade(createMessage: CreateMessage, scenario: BehavioralScenario, responseText: string): Promise<GradedAssertion[]> {
+/** Either a full set of verdicts, or the reason this scenario could not be graded. */
+type GradeOutcome = { ok: true; grades: GradedAssertion[] } | { ok: false; invalidReason: string };
+
+async function grade(createMessage: CreateMessage, scenario: BehavioralScenario, responseText: string): Promise<GradeOutcome> {
   const gradeSchema = {
     type: "object",
     properties: {
@@ -201,7 +259,12 @@ async function grade(createMessage: CreateMessage, scenario: BehavioralScenario,
 
   const graderMessage = await createMessage({
     model: args.graderModel,
-    max_tokens: 4096,
+    // Same ceiling reasoning as the agent call: adaptive thinking is on by
+    // default on current models and shares max_tokens with the JSON payload,
+    // which here is one {index, pass, evidence} object per assertion. Declared
+    // explicitly rather than relying on the model default.
+    max_tokens: 8192,
+    thinking: { type: "adaptive" },
     output_config: { format: { type: "json_schema", schema: gradeSchema } },
     system:
       "You are a strict, literal eval grader. Judge only what the response text actually says; paraphrases count, vibes do not. Quote short evidence for every verdict.",
@@ -225,21 +288,31 @@ async function grade(createMessage: CreateMessage, scenario: BehavioralScenario,
     ],
   });
 
+  // A refused or truncated grader must not take the whole run down with it:
+  // results are only written to disk after the loop, so throwing here would
+  // discard every scenario already graded (and paid for) in this run.
+  const graderStop = asString(graderMessage.stop_reason);
+  if (graderStop === "refusal" || graderStop === "max_tokens") {
+    return { ok: false, invalidReason: `grader stopped with ${graderStop}` };
+  }
   const graderText = textBlocks(graderMessage.content);
   let parsed: unknown;
   try {
     parsed = JSON.parse(graderText);
   } catch {
-    throw new Error(`Grader returned non-JSON output for ${scenario.id}`);
+    return { ok: false, invalidReason: "grader returned non-JSON output" };
   }
   const verdicts = isRecord(parsed) ? asArray(parsed.results) : [];
 
-  return scenario.assertions.map((assertion, index) => {
-    const verdict = verdicts.find((item) => isRecord(item) && item.index === index);
-    const pass = isRecord(verdict) && verdict.pass === true;
-    const evidence = isRecord(verdict) ? (asString(verdict.evidence) ?? "") : "grader returned no verdict for this item";
-    return { kind: assertion.kind, item: assertion.item, pass, evidence };
-  });
+  return {
+    ok: true,
+    grades: scenario.assertions.map((assertion, index) => {
+      const verdict = verdicts.find((item) => isRecord(item) && item.index === index);
+      const pass = isRecord(verdict) && verdict.pass === true;
+      const evidence = isRecord(verdict) ? (asString(verdict.evidence) ?? "") : "grader returned no verdict for this item";
+      return { kind: assertion.kind, item: assertion.item, pass, evidence };
+    }),
+  };
 }
 
 function collectScenarios(): BehavioralScenario[] {
@@ -288,6 +361,8 @@ interface Args {
   model: string;
   graderModel: string;
   out: string;
+  /** Explicit opt-in to spend against an `ant auth login` profile with no key exported. */
+  useProfile: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -296,6 +371,7 @@ function parseArgs(argv: string[]): Args {
     { flags: ["--only"], key: "only", kind: "string" },
     { flags: ["--model"], key: "model", kind: "string" },
     { flags: ["--grader-model"], key: "graderModel", kind: "string" },
+    { flags: ["--use-profile"], key: "useProfile", kind: "boolean" },
     { flags: ["--out"], key: "out" },
   ]);
   return {
@@ -304,5 +380,6 @@ function parseArgs(argv: string[]): Args {
     model: flagString(flags, "model") ?? DEFAULT_MODEL,
     graderModel: flagString(flags, "graderModel") ?? DEFAULT_MODEL,
     out: flagString(flags, "out") ?? path.join(skillRoot, "evals", "behavioral-results", `behavioral-${new Date().toISOString().replace(/[:.]/g, "-")}.json`),
+    useProfile: flagBoolean(flags, "useProfile"),
   };
 }

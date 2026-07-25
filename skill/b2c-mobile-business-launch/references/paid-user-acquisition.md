@@ -75,7 +75,7 @@ Use `remotion-content-assets.md` when repeatable ad variants, motion screenshots
 
 Before generating any Higgsfield asset: confirm spend with the founder per `paid-tool-routing.md`, carry `DESIGN.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface) in every prompt, and record every output in `CONTENT_ASSETS.md`.
 
-**Routed recipes** (bodies in `tool-recipes.md` — do not re-copy here):
+**Routed recipes** (bodies in `tool-recipes/visual-and-motion-production.md` — do not re-copy here):
 - **App Store URL → UGC Ad Batch (Click-to-Ad)** — webproducts fetch → avatar pick → parallel mode batch → score → save winners → founder approval.
 - **Virality Closed Loop** — generate → score → decision rules → iterate → record → paid distribution only after a score is recorded.
 - **Cheap-First Direction** — z_image drafts → pick direction → production model → founder selects. Apply only when presented as a spend-reduction option at the spend-confirmation prompt; never silently.

@@ -380,7 +380,7 @@ that grounds them. Conventions used in every loop:
 ### L25 — Content assets / Remotion / generated visuals
 - **Trigger:** Before rendered videos/stills, app-preview clips, ad/social/content variants, or claiming local rendered content assets are ready.
 - **Action:**
-  1. Load `references/remotion-content-assets.md` (and Higgsfield recipes in `tool-recipes.md`); decide Higgsfield vs Remotion local rendering per `paid-tool-routing.md`. → `Start Here` steps 15/22; `When To Load` (remotion-content-assets).
+  1. Load `references/remotion-content-assets.md` (and Higgsfield recipes in `tool-recipes/visual-and-motion-production.md`); decide Higgsfield vs Remotion local rendering per `paid-tool-routing.md`. → `Start Here` steps 15/22; `When To Load` (remotion-content-assets).
   2. Produce assets carrying current `DESIGN.md` tokens; record each in `CONTENT_ASSETS.md` with `prompt_brief`, `source_job_id`, `virality_score`, marking superseded entries. → `change-cascade.md` *Generated-Asset Regeneration* guardrails.
   3. Keep generated output as supporting art only — never substituting for truthful real app UI in screenshots/App Preview. → `change-cascade.md` guardrails.
 - **Proof:** `npm run check:content-assets`; assets recorded with briefs/job ids and token basis.
