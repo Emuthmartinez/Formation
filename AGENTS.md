@@ -37,7 +37,9 @@ When changing generated business-repo guidance, edit the shipped templates and v
 
 ## Agent Legibility
 
-Keep this file as a concise map, not a duplicate manual. Put detailed launch policy in `SKILL.md` and `references/`, reusable generated output in `templates/`, and deterministic enforcement in `scripts/` plus LaunchBench. When an agent miss repeats, add or tighten a validator/eval instead of relying on a longer reminder.
+Keep this file as a concise map, not a duplicate manual. Put detailed launch policy in `references/`, reusable generated output in `templates/`, and deterministic enforcement in `scripts/` plus LaunchBench. When an agent miss repeats, add or tighten a validator/eval instead of relying on a longer reminder.
+
+`SKILL.md` is a **router, not a manual** — it loads on every trigger, so its job is the always-on contracts plus one Lane Routing index (route here when / load / produce / gate). Detail belongs in the reference the row points at. `check:reference-size` holds a 45KB entrypoint budget on freeze-and-subtract terms: a new lane row is paid for by compressing or relocating existing entrypoint text, never by raising the ceiling. Do not reintroduce a second enumeration of the same routing (the old "Start Here" narrative and "When To Load References" list said the same thing twice and drifted).
 
 ## Commands
 

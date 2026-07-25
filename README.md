@@ -185,7 +185,7 @@ The scripts are intentionally simple:
 - `check-artifact-templates.ts` checks that every template `PROJECT_STATE.yaml` evidence path has a starter artifact.
 - `run-agent-evals.ts` validates behavior eval definitions for routing choices that deterministic validators cannot fully simulate.
 - `check-archetype-starter.ts` checks the runnable starter scaffolds inside the archetype packs: structure completeness with lockfiles, names-only `.env.example`, no secret patterns, RLS migrations plus pgTAP tests, snake_case event catalogs, and a prompt-to-scaffold map covering every pack prompt.
-- `check-reference-size.ts` enforces a per-file context budget (64KB) over `references/`, with an explicit reasoned exclusion list, so oversized references become deliberate split/index decisions.
+- `check-reference-size.ts` enforces a per-file context budget (64KB) over `references/` plus a tighter budget (45KB) on `SKILL.md`, which loads on every trigger, with an explicit reasoned exclusion list — so oversized references become deliberate split/index decisions and entrypoint additions must be paid for by subtraction.
 - `check-analytics-catalog.ts` reconciles events named in `ONBOARDING.md`/`EMOTIONAL_DESIGN.md`/`VIRAL_GROWTH.md` against `ANALYTICS.md`'s catalog (warning at partial, error at done).
 - `run-behavioral-evals.ts` is the manual live execution layer: it runs the opt-in `behavioral: true` flagship scenarios against a live Claude agent and grades must_catch/should_say/forbidden with a structured grader — outside the PR gate by design (see the behavioral-evals workflow).
 - `promote-design-tokens.ts` and `check-token-promotion.ts` promote `state/theme.tokens.json` into `design-system/` and block stale token handoff.

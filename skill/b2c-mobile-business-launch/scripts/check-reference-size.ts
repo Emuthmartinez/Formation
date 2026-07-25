@@ -34,8 +34,12 @@ const DEFAULT_BUDGET_BYTES = 64 * 1024;
  * ceiling sits just above the current size so any addition must be paid for
  * by subtraction elsewhere in SKILL.md. Ratchet it DOWN as SKILL.md shrinks;
  * raising it is a reviewed decision, not a workaround.
+ *
+ * Ratcheted 68KB -> 45KB when SKILL.md's duplicated Start Here / When To Load
+ * References enumerations were merged into one Lane Routing index and the
+ * per-lane handoff checklist moved into launch-coverage.md.
  */
-const ENTRYPOINT_BUDGET_BYTES = 68 * 1024;
+const ENTRYPOINT_BUDGET_BYTES = 45 * 1024;
 
 /**
  * Files allowed over budget, each with a concrete reason. Adding an entry is a
