@@ -173,17 +173,17 @@ Before filming:
 
 Use Higgsfield only for supporting visuals, mascots, backgrounds, hooks, or motion after `DESIGN.md` exists. Do not use generated visuals as a substitute for truthful app UI in store screenshots or product claims.
 
-**Synthetic founder-voice content (before real creators are onboarded).** Marketing Studio supports four UGC-family modes suited to pre-roster founder-led content: `ugc`, `ugc_how_to`, `ugc_unboxing`, and `product_review`. Use these to generate synthetic founder-voice ads during format discovery before a real creator roster is running. Synthetic UGC complements real creator content — it does not replace it; real creators produce authentic human variability, comment-bait tension, and niche credibility that generated video cannot replicate. See the **Soul-Once Founder-Face Ads** recipe in `tool-recipes.md`.
+**Synthetic founder-voice content (before real creators are onboarded).** Marketing Studio supports four UGC-family modes suited to pre-roster founder-led content: `ugc`, `ugc_how_to`, `ugc_unboxing`, and `product_review`. Use these to generate synthetic founder-voice ads during format discovery before a real creator roster is running. Synthetic UGC complements real creator content — it does not replace it; real creators produce authentic human variability, comment-bait tension, and niche credibility that generated video cannot replicate. See the **Soul-Once Founder-Face Ads** recipe in `tool-recipes/visual-and-motion-production.md`.
 
 Guardrails for synthetic UGC:
-- Requires a trained founder Soul (`soul-cinematic` variant) and a custom avatar; see `tool-recipes.md`.
+- Requires a trained founder Soul (`soul-cinematic` variant) and a custom avatar; see `tool-recipes/visual-and-motion-production.md`.
 - Every generation prompt must carry `DESIGN.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface). Generating without this brief is a named failure mode.
 - Gate every generation behind spend confirmation per `paid-tool-routing.md`; surface current balance first (`mcp__claude_ai_Higgsfield__balance`).
 - Record all generated assets in `CONTENT_ASSETS.md` / `content-assets/manifest.json` with `prompt_brief`, `soul_reference_id`, `avatar_id`, and `virality_score` fields.
-- Synthetic ads must pass brain-activity virality scoring before paid distribution (see **Virality Closed Loop** recipe in `tool-recipes.md`).
+- Synthetic ads must pass brain-activity virality scoring before paid distribution (see **Virality Closed Loop** recipe in `tool-recipes/visual-and-motion-production.md`).
 - Public posting and paid campaign launch remain founder-gated.
 
-**Long recordings → short clips (`personal_clipper`).** Use `personal_clipper` to cut long founder recordings, podcast appearances, demo walkthroughs, or app explainers into short-form clips for UGC distribution. `personal_clipper` is an MCP-tool capability only (`mcp__claude_ai_Higgsfield__personal_clipper_create` / `_jobs` / `_status`); confirm the exact invocation via the `higgsfield-generate` skill before running. Gate behind spend confirmation per `paid-tool-routing.md`. See the **Master → All Platforms** recipe in `tool-recipes.md`.
+**Long recordings → short clips (`personal_clipper`).** Use `personal_clipper` to cut long founder recordings, podcast appearances, demo walkthroughs, or app explainers into short-form clips for UGC distribution. `personal_clipper` is an MCP-tool capability only (`mcp__claude_ai_Higgsfield__personal_clipper_create` / `_jobs` / `_status`); confirm the exact invocation via the `higgsfield-generate` skill before running. Gate behind spend confirmation per `paid-tool-routing.md`. See the **Master → All Platforms** recipe in `tool-recipes/visual-and-motion-production.md`.
 
 Use Remotion when founder-led or creator-led content needs repeatable local variants: product-demo loops, hook overlays, captions, cutdowns, screenshot motion, before/after frames, or app-preview clips. Load `remotion-content-assets.md` first, record Remotion license status, keep real app UI visible, and add each rendered output to `CONTENT_ASSETS.md` and `content-assets/manifest.json`. Remotion is especially useful before Fastlane because the same composition can render many hook, CTA, locale, and dimension variants without paying for net-new generative media.
 

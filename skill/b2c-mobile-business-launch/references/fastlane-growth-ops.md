@@ -221,7 +221,7 @@ Native iOS fallback/proof:
 
 ### Multi-Format Delivery
 
-Once a master video exists (real app footage from MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, or a Higgsfield-generated supporting creative), convert it to all required aspect ratios at near-zero incremental cost versus three separate generations. See the **Master → All Platforms** recipe in `tool-recipes.md` for the full workflow.
+Once a master video exists (real app footage from MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, or a Higgsfield-generated supporting creative), convert it to all required aspect ratios at near-zero incremental cost versus three separate generations. See the **Master → All Platforms** recipe in `tool-recipes/visual-and-motion-production.md` for the full workflow.
 
 Key points for this surface:
 - `mcp__claude_ai_Higgsfield__reframe` is MCP-only — there is no `higgsfield reframe ...` CLI command. Confirm exact invocation via the `higgsfield-generate` skill or MCP tool help before running.

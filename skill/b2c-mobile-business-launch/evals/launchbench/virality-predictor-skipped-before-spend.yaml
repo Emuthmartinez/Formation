@@ -19,6 +19,6 @@ must_catch:
   - No pre-spend gate blocked low-hook or high-Default-Mode-risk creatives.
   - Scoring is cheaper than wasted ad spend; score before, not after, distribution.
 should_say:
-  - Run the Virality Closed Loop recipe in tool-recipes.md before spending.
+  - Run the Virality Closed Loop recipe in tool-recipes/visual-and-motion-production.md before spending.
   - Record virality_score and hook_dmn_risk per creative in PAID_UA.md and CONTENT_ASSETS.md.
   - Revise creatives scoring under 50 or with HIGH Default Mode risk before paid distribution.

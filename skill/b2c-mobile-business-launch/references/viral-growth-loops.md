@@ -95,7 +95,7 @@ Use `ugc-creator-engine.md` when creators, payments, contracts, or UGC operation
 Personalized share cards (score result, milestone badge, referral-unlock reveal) are social artifacts — they are not store screenshots and do not trigger the real-screenshots-only store-truthfulness guardrail. Produce them via `higgsfield-generate` with the `gpt_image_2` model:
 
 - Embed on-image user data (score, badge label, referral unlock text) in the `--prompt` alongside the full `DESIGN.md` brief (palette, type mood, shapes, texture, banned aesthetics).
-- Generate 9:16 first (Stories/Reels primary surface); produce the 1:1 feed variant via the `mcp__claude_ai_Higgsfield__reframe` MCP tool — do not re-generate a separate 1:1 from scratch. Confirm exact reframe invocation via the `higgsfield-generate` skill or MCP tool help before running; see the **Master → All Platforms (reframe + personal_clipper)** recipe in `tool-recipes.md`.
+- Generate 9:16 first (Stories/Reels primary surface); produce the 1:1 feed variant via the `mcp__claude_ai_Higgsfield__reframe` MCP tool — do not re-generate a separate 1:1 from scratch. Confirm exact reframe invocation via the `higgsfield-generate` skill or MCP tool help before running; see the **Master → All Platforms (reframe + personal_clipper)** recipe in `tool-recipes/visual-and-motion-production.md`.
 - For referral-reveal carousels, use `higgsfield product-photoshoot` with `--mode social_carousel`; see the `higgsfield-product-photoshoot` skill.
 
 Guardrails:

@@ -193,7 +193,7 @@ Win-back, trial-reminder, and billing-recovery emails can carry Higgsfield-gener
 - **`hero_banner`** mode — wide email header art (use for top-of-email brand moment).
 - **`lifestyle_scene`** mode — product-in-context body image (use for mid-email engagement shot).
 
-Generate both via the `higgsfield-product-photoshoot` skill. See the **Seasonal restyle Refresh** and **Cheap-First Direction** recipes in `tool-recipes.md` for the generation workflow; use `--mode hero_banner` or `--mode lifestyle_scene` in the `higgsfield product-photoshoot create` call.
+Generate both via the `higgsfield-product-photoshoot` skill. See the **Seasonal restyle Refresh** and **Cheap-First Direction** recipes in `tool-recipes/visual-and-motion-production.md` for the generation workflow; use `--mode hero_banner` or `--mode lifestyle_scene` in the `higgsfield product-photoshoot create` call.
 
 Rules:
 - Every prompt must carry DESIGN.md brand tokens (palette, type mood, shapes, texture, banned aesthetics). DESIGN.md tokens are already pulled for email `LaunchEmailBrand.designSystem`; reuse the same token set.

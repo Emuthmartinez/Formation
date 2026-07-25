@@ -45,13 +45,13 @@ Higgsfield-generated assets embed design tokens, feature names, copy, and pricin
 
 | Surface | Regeneration path |
 | --- | --- |
-| **Ad creative** (UGC video, DTC static, Marketing Studio) | See the **App Store URL → UGC Ad Batch (Click-to-Ad)** and **Soul-Once Founder-Face Ads** recipes in `tool-recipes.md` |
-| **Screenshot supporting art** (backgrounds, mascots, illustration overlays — not the real-UI layer) | See the **Cheap-First Direction** recipe in `tool-recipes.md`; real-UI screenshot layer is re-rendered separately per the Visual/UI row in the cascade map |
-| **App Preview B-roll** (motion backdrops, intro/outro art — NOT the real app footage layer) | See the **Master → All Platforms** recipe in `tool-recipes.md`; real app footage source must remain unchanged |
-| **Promoted-IAP promotional images** | See the **Cheap-First Direction** recipe in `tool-recipes.md`; re-upload via `app-store-connect-cli.md` after founder approval |
-| **CPP and in-app-event art** | See the **Seasonal restyle Refresh** recipe in `tool-recipes.md` as a model; re-upload via `app-store-connect-cli.md` after founder approval |
-| **Viral share cards** | See the **Cheap-First Direction** recipe in `tool-recipes.md`; update `CONTENT_ASSETS.md` and linked `viral-growth-loops.md` surfaces |
-| **Lifecycle-email header art** | See the **Cheap-First Direction** recipe in `tool-recipes.md`; update `resend-email-ops.md` template references |
+| **Ad creative** (UGC video, DTC static, Marketing Studio) | See the **App Store URL → UGC Ad Batch (Click-to-Ad)** and **Soul-Once Founder-Face Ads** recipes in `tool-recipes/visual-and-motion-production.md` |
+| **Screenshot supporting art** (backgrounds, mascots, illustration overlays — not the real-UI layer) | See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md`; real-UI screenshot layer is re-rendered separately per the Visual/UI row in the cascade map |
+| **App Preview B-roll** (motion backdrops, intro/outro art — NOT the real app footage layer) | See the **Master → All Platforms** recipe in `tool-recipes/visual-and-motion-production.md`; real app footage source must remain unchanged |
+| **Promoted-IAP promotional images** | See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md`; re-upload via `app-store-connect-cli.md` after founder approval |
+| **CPP and in-app-event art** | See the **Seasonal restyle Refresh** recipe in `tool-recipes/visual-and-motion-production.md` as a model; re-upload via `app-store-connect-cli.md` after founder approval |
+| **Viral share cards** | See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md`; update `CONTENT_ASSETS.md` and linked `viral-growth-loops.md` surfaces |
+| **Lifecycle-email header art** | See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md`; update `resend-email-ops.md` template references |
 
 **Guardrails that apply to every regeneration:**
 

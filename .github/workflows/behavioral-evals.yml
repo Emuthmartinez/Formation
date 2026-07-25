@@ -12,11 +12,11 @@ on:
       model:
         description: "Agent model id (from the claude-api skill; never date-suffixed)"
         required: false
-        default: "claude-opus-4-8"
+        default: "claude-opus-5"
       grader_model:
         description: "Grader model id"
         required: false
-        default: "claude-opus-4-8"
+        default: "claude-opus-5"
       only:
         description: "Comma-separated scenario ids (default: full behavioral subset)"
         required: false

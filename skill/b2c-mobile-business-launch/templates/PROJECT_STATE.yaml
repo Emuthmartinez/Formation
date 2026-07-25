@@ -416,7 +416,7 @@ tools:
     fallback: "Remotion, HTML/CSS composition, founder-owned media, public-domain assets, or raw screenshots only after founder approval and limitation notes."
     identity:
       # Trained-once Soul/presenter identity, reused across ads, UGC, and presenter video.
-      # Run show_characters before training to avoid duplicate runs. See tool-recipes.md "Soul-Once Founder-Face Ads".
+      # Run show_characters before training to avoid duplicate runs. See tool-recipes/visual-and-motion-production.md "Soul-Once Founder-Face Ads".
       soul_reference_id: ""
       soul_variant: ""
       avatar_id: ""

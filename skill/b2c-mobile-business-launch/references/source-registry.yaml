@@ -8,7 +8,6 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/references/compound-engineering-routing.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
     notes: Tracks latest Compound Engineering plugin releases for ce-update and local freshness checks.
   - id: github-raw-b2c-launch-skill-version-main
     name: b2c-mobile-business-launch skill version manifest
@@ -93,7 +92,6 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/references/xcodebuildmcp-testing.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
     notes: Official documentation for the in-app iOS Simulator pane — the rung-0 path-of-least-resistance native iOS proof route. Carries the version/plan/policy gates, the local-session-only constraint, the per-device consent and screenshot-retention rules, and the simulated-devices-only limitation. Public beta, so re-check gates before promising the route.
   - id: code-claude-com-docs-en-computer-use
     name: Claude Code CLI computer use
@@ -207,7 +205,7 @@ sources:
     locations:
       - skill/b2c-mobile-business-launch/references/design-visual-system.md
       - skill/b2c-mobile-business-launch/references/refero-ux-patterns.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
+      - skill/b2c-mobile-business-launch/references/tool-recipes/research-intelligence.md
     notes: Auto-discovered from recently added repository content.
   - id: app-usefastlane-ai-guide
     name: app.usefastlane.ai
@@ -677,7 +675,7 @@ sources:
       - skill/b2c-mobile-business-launch/references/design-visual-system.md
       - skill/b2c-mobile-business-launch/references/onboarding-conversion.md
       - skill/b2c-mobile-business-launch/references/refero-ux-patterns.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
+      - skill/b2c-mobile-business-launch/references/tool-recipes/research-intelligence.md
       - skill/b2c-mobile-business-launch/templates/ux-patterns/UX_PATTERNS.md
     notes: Auto-discovered from recently added repository content.
   - id: doc-refero-design-mcp-data-model
@@ -779,7 +777,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/references/secrets-management.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
+      - skill/b2c-mobile-business-launch/references/tool-recipes/secrets-and-environment.md
       - skill/b2c-mobile-business-launch/templates/secrets/SECRETS.md
     notes: Auto-discovered from recently added repository content.
   - id: docs-stripe-com-billing-subscriptions-webhooks
@@ -826,7 +824,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/references/app-store-listing-prep.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
+      - skill/b2c-mobile-business-launch/references/tool-recipes/growth-and-store-routing.md
     notes: Auto-discovered from recently added repository content.
   - id: github-com-eronred-aso-skills-tree-main-skills
     name: github.com
@@ -899,7 +897,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/references/mobai-toolbelt.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
+      - skill/b2c-mobile-business-launch/references/tool-recipes/device-capture-and-proof.md
     notes: Auto-discovered from recently added repository content.
   - id: github-com-mobai-app-ios-builder
     name: github.com
@@ -927,7 +925,6 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/references/mobai-toolbelt.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
     notes: Reviewed 2026-07-13; authoritative public diff for repeat, run_script, eval_script, loop caps, repeat_index, and the restricted host-side JavaScript VM.
   - id: github-com-mobai-app-mobai-ci
     name: github.com
@@ -974,7 +971,7 @@ sources:
     locations:
       - skill/b2c-mobile-business-launch/references/mobai-toolbelt.md
       - skill/b2c-mobile-business-launch/references/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
+      - skill/b2c-mobile-business-launch/references/tool-recipes/device-capture-and-proof.md
     notes: Auto-discovered from recently added repository content.
   - id: github-com-mobai-app-releases-v2-5-1
     name: MobAI desktop v2.5.1 release
@@ -984,7 +981,6 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/references/mobai-toolbelt.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
     notes: Reviewed 2026-07-13; official desktop tag published 2026-07-12 with platform assets and a tag-only release body, so no undocumented desktop feature claims are inferred.
   - id: github-com-mobai-app-releases-v2-5-0
     name: MobAI desktop v2.5.0 comparison baseline
@@ -1759,7 +1755,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/references/xcodebuildmcp-testing.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
+      - skill/b2c-mobile-business-launch/references/tool-recipes/device-capture-and-proof.md
     notes: Sentry/EmergeTools SnapshotPreviews repository used for SwiftUI/UIKit/AppKit preview snapshot export guidance. Treat output as preview-only proof, not runtime E2E or distribution readiness.
   - id: github-com-emerge-tools-snapshotpreviews
     name: SnapshotPreviews package URL
@@ -1778,7 +1774,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/references/xcodebuildmcp-testing.md
-      - skill/b2c-mobile-business-launch/references/tool-recipes.md
+      - skill/b2c-mobile-business-launch/references/tool-recipes/device-capture-and-proof.md
     notes: Open-source CLI for browser-visible iOS Simulator streaming/control used by CLI agents. Treat output as simulator proof, not provider or App Store signing proof.
   - id: github-com-nextlevelbuilder-ui-ux-pro-max-skill
     name: github.com

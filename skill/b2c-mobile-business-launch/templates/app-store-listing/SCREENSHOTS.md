@@ -136,7 +136,7 @@ Because the first preview plays silent and unrequested, its first ~3–5 seconds
 Both screenshots and the app preview run through the screenshot ASO skill; they are never hand-composed one-offs:
 
 - **Screenshots:** `ParthJadhav/app-store-screenshots` (the screenshot ASO skill), `ios-screenshots`, and `aso-skills:screenshot-optimization`, from real UI, App Icon, and design tokens.
-- **App preview:** script/storyboard via `aso-skills:app-preview-video`; capture real footage via the in-app iOS Simulator (Cmd+R), MobAI, Codex Desktop native iOS/XcodeBuildMCP, or serve-sim — MobAI stays the route for a polished multi-device recording; edit and caption via Remotion; produce all Apple/Play resolution variants (9:16 / 1:1 / 16:9) from a single master via the Higgsfield `reframe` MCP tool (Master → All Platforms recipe in `references/tool-recipes.md`) — reframe reformats aspect ratio only, never substitutes UI.
+- **App preview:** script/storyboard via `aso-skills:app-preview-video`; capture real footage via the in-app iOS Simulator (Cmd+R), MobAI, Codex Desktop native iOS/XcodeBuildMCP, or serve-sim — MobAI stays the route for a polished multi-device recording; edit and caption via Remotion; produce all Apple/Play resolution variants (9:16 / 1:1 / 16:9) from a single master via the Higgsfield `reframe` MCP tool (Master → All Platforms recipe in `references/tool-recipes/visual-and-motion-production.md`) — reframe reformats aspect ratio only, never substitutes UI.
 - A/B test variants with `aso-skills:ab-test-store-listing` (Product Page Optimization) where available.
 
 | Preview | Knowledge-leveraged hook (first 3–5s) | Emotion / Card | Poster frame | Captions (muted) | Skill route | Output | Status |
@@ -145,7 +145,7 @@ Both screenshots and the app preview run through the screenshot ASO skill; they 
 | iOS Preview 2–3 (optional) | secondary proof / breadth | secondary beat | Pending | required | same | `previews/ios-preview-2.mp4` | optional |
 | Google Play promo | hook payoff, YouTube-hosted | North Star feeling | n/a | recommended | same | YouTube URL pending | optional |
 
-Produce required resolution variants by `reframe`-ing one master rather than re-rendering per size; the source must be real app footage. See the Master → All Platforms recipe in `references/tool-recipes.md`.
+Produce required resolution variants by `reframe`-ing one master rather than re-rendering per size; the source must be real app footage. See the Master → All Platforms recipe in `references/tool-recipes/visual-and-motion-production.md`.
 
 ## Definition of Good: Present / Proven / Optimized
 

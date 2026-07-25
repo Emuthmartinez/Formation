@@ -23,4 +23,4 @@ must_catch:
 should_say:
   - Call show_characters and read tools.higgsfield.identity before training.
   - Reuse the existing soul_reference_id and avatar_id; skip to generation.
-  - Follow the Soul-Once Founder-Face Ads recipe in tool-recipes.md.
+  - Follow the Soul-Once Founder-Face Ads recipe in tool-recipes/visual-and-motion-production.md.

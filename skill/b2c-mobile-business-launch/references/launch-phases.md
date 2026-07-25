@@ -490,7 +490,7 @@ Default stack from the model session:
 Do:
 - Load `analytics-attribution.md` before building the funnel, waitlist/referral loop, PostHog setup, GA4 setup, web checkout, or campaign links.
 - Load `secrets-management.md` before adding backend, email, analytics, deploy, database, or CI environment variables.
-- Build the landing page around the locked brand, not a generic marketing template; hero, lifestyle, and feature-illustration art route through Higgsfield (`hero_banner` / `lifestyle_scene` modes) using a `DESIGN.md` brief, after confirming spend per `paid-tool-routing.md`, with every generated asset recorded in `CONTENT_ASSETS.md` (see the App Store URL → UGC Ad Batch recipe and the Cheap-First Direction recipe in `tool-recipes.md`).
+- Build the landing page around the locked brand, not a generic marketing template; hero, lifestyle, and feature-illustration art route through Higgsfield (`hero_banner` / `lifestyle_scene` modes) using a `DESIGN.md` brief, after confirming spend per `paid-tool-routing.md`, with every generated asset recorded in `CONTENT_ASSETS.md` (see the App Store URL → UGC Ad Batch recipe and the Cheap-First Direction recipe in `tool-recipes/visual-and-motion-production.md`).
 - Add email waitlist and optional referral loop; avoid fake scarcity.
 - Load `resend-email-ops.md` before configuring Resend, transactional sends, waitlist confirmations, lifecycle automations, broadcasts, inbound email, unsubscribe handling, or email webhooks.
 - If monetization is active, wire only the approved checkout path: RevenueCat Web Purchase Link, RevenueCat Web Funnel, RevenueCat Web SDK, Stripe Checkout/Payment Link, or no checkout. Do not mix billing engines casually.

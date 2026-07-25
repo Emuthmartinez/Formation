@@ -106,7 +106,7 @@ Use this table to fill the three-choice Confirmation Prompt; do not send it as a
 | Higgsfield | generated visuals, icons, mascots, ads, and demo clips | provision access or provide existing assets | founder-owned assets or approved Remotion output after a license check | no equivalent generative exploration; revisit before final creative production |
 | Refero | UX screen and flow references | provision Refero Pro or provide exported screens | bundled baseline pattern pack | no live Refero corpus; revisit before the design direction freezes |
 
-Higgsfield credit use is a separate protected spend gate. Call `mcp__claude_ai_Higgsfield__balance`, show the current balance and estimated credits, then use AskUserQuestion: **full-quality exact batch** (recommended only when the evidence warrants the quoted spend), **cheap-first draft batch** with its lower credit estimate, or **defer generation** while non-spend preparation continues. No selection means no credits are used. `reframe` and `personal_clipper` are MCP-only and use the same spend gate; see `tool-recipes.md`.
+Higgsfield credit use is a separate protected spend gate. Call `mcp__claude_ai_Higgsfield__balance`, show the current balance and estimated credits, then use AskUserQuestion: **full-quality exact batch** (recommended only when the evidence warrants the quoted spend), **cheap-first draft batch** with its lower credit estimate, or **defer generation** while non-spend preparation continues. No selection means no credits are used. `reframe` and `personal_clipper` are MCP-only and use the same spend gate; see `tool-recipes/visual-and-motion-production.md`.
 
 ## Common Failure Modes
 
