@@ -123,6 +123,14 @@ compound_engineering:
 lanes:
   # Lane status: not_started (honest default) -> partial -> blocked/not_needed/deferred -> done.
   # "done" requires evidence paths; do not leave lanes at not_started past phase_0c (see check-lane-coverage).
+  #
+  # Lanes also have dependency edges ("Lock phase outputs before depending on them"):
+  # a lane cannot be "done" while an upstream lane is not_started/partial/blocked.
+  # done/not_needed/deferred upstream all satisfy the edge. The edge set ships with
+  # the skill (scripts/lib/launch-state.ts, laneDependencies) and is not editable
+  # from here. To finish a lane over an open upstream, add a dated
+  #   dependency_override: "YYYY-MM-DD why this lane is genuinely independent of it"
+  # which downgrades the error to a standing warning. See references/project-state.md.
   paid_tool_routing:
     status: "not_started"
     evidence:

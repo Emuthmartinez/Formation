@@ -24,10 +24,13 @@ import {
   isPastOrientPhase,
   issue,
   Issue,
+  laneDependencies,
   loadProjectState,
   parseCliArgs,
   reportAndExit,
   requiredLanes,
+  satisfiedDependencyStatuses,
+  validateLaneDependencyGraph,
   validateReason,
 } from "./lib/launch-state.js";
 
@@ -42,10 +45,70 @@ function validateReasonAndCount(reason: string | undefined, lanePath: string, co
   return issues.slice(before).filter((i) => i.severity === "warning").length;
 }
 
+/**
+ * Edge rule: a lane may not claim `done` while an upstream lane it depends on
+ * is still not_started, partial, or blocked.
+ *
+ * This is the machine-readable form of "Lock phase outputs before depending on
+ * them" (SKILL.md, Operating Posture) and the Flow Gates in
+ * flow-traceability.md — previously prose only, and therefore self-attestable.
+ *
+ * The escape hatch is `lanes.<lane>.dependency_override`: a dated reason
+ * downgrades the error to a warning and is itself checked for staleness. Silent
+ * bypass is not available, which is the point.
+ */
+function checkLaneDependencies(state: unknown, lane: string, issues: Issue[]): { errors: number; warnings: number } {
+  const dependencies = laneDependencies[lane] ?? [];
+  if (dependencies.length === 0) return { errors: 0, warnings: 0 };
+
+  const unlocked = dependencies
+    .map((dep) => ({ dep, status: asString(getPath(state, `lanes.${dep}.status`)) ?? "missing" }))
+    .filter(({ status }) => !satisfiedDependencyStatuses.has(status));
+
+  if (unlocked.length === 0) return { errors: 0, warnings: 0 };
+
+  const detail = unlocked.map(({ dep, status }) => `${dep} (${status})`).join(", ");
+  const override = asString(getPath(state, `lanes.${lane}.dependency_override`));
+  const hasOverride = Boolean(override?.trim());
+
+  if (hasOverride) {
+    // Overridden: surface it as a warning that never goes quiet, and hold the
+    // reason to the same dated/substantive/stale bar as every other reason.
+    issues.push(
+      issue(
+        "warning",
+        `lane_coverage.${lane}.dependency_overridden`,
+        `lanes.${lane} is done while upstream ${detail} is unlocked, permitted by dependency_override. ` +
+          `Confirm the override still holds; an upstream lane that never locks means this lane's evidence rests on a moving input.`,
+        "PROJECT_STATE.yaml",
+      ),
+    );
+    const reasonWarnings = validateReasonAndCount(override, `lanes.${lane}`, "dependency override", issues);
+    return { errors: 0, warnings: 1 + reasonWarnings };
+  }
+
+  issues.push(
+    issue(
+      "error",
+      `lane_coverage.${lane}.dependency_unlocked`,
+      `lanes.${lane} is done but upstream ${detail} is not locked. ` +
+        `A lane cannot be finished on an input that is still moving (SKILL.md: "Lock phase outputs before depending on them"). ` +
+        `Advance the upstream lane to done/not_needed/deferred, or record a dated lanes.${lane}.dependency_override explaining why this lane is genuinely independent of it.`,
+      "PROJECT_STATE.yaml",
+    ),
+  );
+  return { errors: 1, warnings: 0 };
+}
+
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
 const state = loaded.state;
+
+// Authoring-integrity guard on the shipped edge map itself (unknown lane ids,
+// self-edges, cycles). Cheap, and it fails loudly for the maintainer editing
+// laneDependencies rather than silently for the founder running a launch.
+validateLaneDependencyGraph(issues);
 
 if (state) {
   const currentPhase = asString(getPath(state, "project.phase")) ?? "";
@@ -159,6 +222,12 @@ if (state) {
       } else {
         counts.clean += 1;
       }
+
+      // Edge check runs regardless of the evidence outcome: "done with evidence"
+      // on an unlocked upstream is exactly the drift this rule exists to catch.
+      const edge = checkLaneDependencies(state, lane, issues);
+      counts.error += edge.errors;
+      counts.warning += edge.warnings;
       continue;
     }
 
