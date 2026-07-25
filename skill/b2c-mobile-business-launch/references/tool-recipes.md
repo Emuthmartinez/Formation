@@ -14,7 +14,7 @@ Use current tools and live data whenever possible. Treat this file as workflow, 
 - Remotion Content Asset Production
 - Name And Keyword Collision
 - ASO Skill Routing
-- MobAI Toolbelt, Recorders, And XcodeBuildMCP Capture
+- In-App Simulator, MobAI Toolbelt, Recorders, Native iOS, And CLI Simulator Capture
 - UGC Creator Engine Routing
 - Fastlane Organic Growth Routing
 - GEO/SEO Skill Routing
@@ -377,7 +377,7 @@ Purpose: score every creative before distribution; never pay for a campaign with
 
 Purpose: produce one high-quality master video then derive all platform ratios and short clips without re-generating.
 
-1. **Source master.** For App Preview: MUST be real app footage (MobAI or XcodeBuildMCP capture per `mobai-toolbelt.md`). For ads/social: generated or captured footage is acceptable.
+1. **Source master.** For App Preview: MUST be real app footage — an in-app simulator recording (rung 0), MobAI, or XcodeBuildMCP capture per `xcodebuildmcp-testing.md` / `mobai-toolbelt.md`; verify the capture's native resolution against the target well before compositing. For ads/social: generated or captured footage is acceptable.
 2. **Long-recording trim (optional).** For recordings longer than 60 seconds, use `mcp__claude_ai_Higgsfield__personal_clipper_create` to extract short clips, then poll `mcp__claude_ai_Higgsfield__personal_clipper_status` until complete. Confirm the exact invocation via the `higgsfield-generate` skill or MCP tool help before running.
 3. **Spend confirm.** Surface balance via `mcp__claude_ai_Higgsfield__balance`. Confirm reframe spend with the founder per `paid-tool-routing.md`.
 4. **Reframe to all platform ratios.** Use `mcp__claude_ai_Higgsfield__reframe` with the master video to produce 9:16, 1:1, and 16:9 variants. Confirm the exact invocation via the `higgsfield-generate` skill or MCP tool help before running. Veo 3.1 format limits (16:9 or 9:16 only; 4/6/8s only) do NOT apply to `reframe` — reframe operates on existing footage.
@@ -523,11 +523,11 @@ Fallback:
 - If the Eronred ASO skill set is relevant, refresh `https://github.com/Eronred/aso-skills` and prefer installed or vendored skill docs over memory.
 - If no ASO skill pack is installed, use `paid-tool-routing.md` before replacing paid ASO tooling with AppKittie, public App Store/Play Console research, manual keyword sheets, and the same outputs: context, keyword map, metadata variants, `APP_STORE_LISTING.md`, `STORE_CONSOLE.md`, `app-store-listing.html`, `store-console.html`, `SCREENSHOTS.md`, launch calendar, and post-launch monitoring loop.
 
-## MobAI Toolbelt, Recorders, Native iOS, And CLI Simulator Capture
+## In-App Simulator, MobAI Toolbelt, Recorders, Native iOS, And CLI Simulator Capture
 
 Purpose: capture truthful app UI for App Store and Google Play screenshots, record polished demo videos, create app-preview/social proof, and compose final assets with the design system.
 
-Always load `mobai-toolbelt.md` before MobAI device automation, recorder skills, app previews, bug-repro recordings, mobile harness work, or MobAI-adjacent build/test tooling. Load `xcodebuildmcp-testing.md` before Codex Desktop native iOS/XcodeBuildMCP proof, SnapshotPreviews preview exports, serve-sim simulator streaming, or Apple simulator/device command examples. Refresh the MobAI org and relevant repo docs before installing or naming commands.
+Load `xcodebuildmcp-testing.md` first for any "run the app / check this screen / walk this flow / reproduce this bug" request: its Route Ladder starts at the in-app iOS Simulator (rung 0 — Claude Code Desktop's simulator pane or Codex with the `build-ios-apps` plugin), which needs no install and no account, and it also covers the CLI `computer-use` route, XcodeBuildMCP, SnapshotPreviews preview exports, serve-sim streaming, and Apple simulator/device command examples. Always load `mobai-toolbelt.md` before MobAI device automation, recorder skills, Android coverage, repeatable `.mob` suites, polished demo/app-preview recording, or MobAI-adjacent build/test tooling. Refresh the MobAI org and relevant repo docs before installing or naming commands.
 
 Use when:
 - a local iOS or Android build exists
@@ -537,7 +537,8 @@ Use when:
 - launch, store, Fastlane, UGC, support, or investor materials need a polished app-flow video
 
 Preferred routing:
-- Use the MobAI MCP tools when exposed in the current runtime.
+- For a single screen check, flow walk, or bug repro on a local Mac, use the in-app iOS Simulator (rung 0) and stop there — no MCP server, no CLI install, no founder gate.
+- Use the MobAI MCP tools when exposed in the current runtime and the lane needs Android, a repeatable suite, multi-device runs, or polished demo recording.
 - Before any device interaction, read the MobAI device automation reference or the local `using-mobai-cli` skill.
 - Observe the UI tree before tapping, prefer accessibility IDs, wait for stable UI after each navigation, then observe again.
 - Save raw full-quality screenshots before composition.
@@ -570,15 +571,15 @@ Recorder-skill route:
 - Create `DEMO_VIDEO.md` for launch demo videos and link `.mob` or `screenplay.json`, raw captures, final exports, captions, and upload copy.
 
 Confirmed free fallback:
-- MobAI is freemium: use its free tier without a spend gate when one device/current quotas fit, but ask before Plus/Pro spend. If MobAI is unavailable, load `paid-tool-routing.md` and ask before using XcodeBuildMCP because that fallback is Apple-only.
+- MobAI is freemium: use its free tier without a spend gate when one device/current quotas fit, but ask before Plus/Pro spend. If MobAI is unavailable and the lane is iOS-only, the in-app iOS Simulator (rung 0) is the first fallback — free, zero-setup, no spend gate — and only the lost Android/suite/CI/physical-device coverage needs recording per `paid-tool-routing.md`. Escalate to XcodeBuildMCP when the lane needs scripted builds, CI, or physical hardware, and record the Apple-only limitation either way.
 - After confirmation, load `xcodebuildmcp-testing.md` for iOS/iPadOS/macOS/tvOS/watchOS/visionOS build, run, UI automation, screenshot, video, and log workflows.
 - Refresh official XcodeBuildMCP docs and local `xcodebuildmcp --help`/`xcodebuildmcp tools` output before setup commands, CLI syntax, MCP tool names, screenshot captures, or readiness proof.
 - Use XcodeBuildMCP for Apple simulator/device captures and record the missing MobAI coverage. Use Android emulator/ADB or mark Android proof blocked for Android-only flows.
 
-Codex Desktop native iOS route:
-- When Codex Desktop exposes native Apple/XcodeBuildMCP tools, use those tools instead of shelling out first.
-- Call `session_show_defaults` before the first build/run/test, use `build_run_sim` when defaults are set, and capture screenshots/logs/UI snapshots through the exposed tools.
-- Record project/workspace, scheme, simulator/device, OS/runtime, tool names, output paths, and the simulator/signing limitation in `PRODUCTION_READINESS.md`.
+In-app native iOS route (rung 0, both runtimes):
+- In Claude Code Desktop on a Mac (local sessions only — never cloud or SSH), state the goal plainly ("run the app in the iOS Simulator and tap through the signup flow"); the simulator pane opens itself when the app runs. Consent is per device, and screenshots of the device leave the machine — use fixture/sandbox accounts only, never a real account.
+- In Codex with the `build-ios-apps` plugin, call `session_show_defaults` before the first build/run/test, use `build_run_sim` when defaults are set, read the accessibility hierarchy before interacting, and prefer stable labels over raw coordinates.
+- Record the runtime and app version, the plan/policy gate cleared, that the session was local, the simulated device and OS, the fixture account, output paths, and the simulator-only/no-Android/no-distribution limitation in `PRODUCTION_READINESS.md`.
 
 CLI proof tools:
 - SnapshotPreviews (`https://github.com/getsentry/SnapshotPreviews`) exports preview PNG/JSON proof from XCTest. Link `SnapshottingTests`, use `SnapshotTest` or `PreviewLayoutTest`, set `TEST_RUNNER_SNAPSHOTS_EXPORT_DIR`, and record that this is preview-only coverage.
@@ -871,7 +872,7 @@ Record in `PRODUCTION_READINESS.md`:
 Rules:
 - `AGENTS.md` is mandatory for real app builds and builder handoffs; start from `templates/repo-agent-entrypoints/AGENTS.md` so future agents keep using `b2c-mobile-business-launch` without another founder prompt. `CLAUDE.md` should start from `templates/repo-agent-entrypoints/CLAUDE.md` and point back to `AGENTS.md` instead of duplicating product truth. Keep these files as maps to source docs, active plans, validators, and failure cards.
 - Unit tests are not enough for production readiness.
-- MobAI screenshot proof is not backend proof; pair device actions with database/provider/dashboard evidence.
+- Screenshot proof from any device route — in-app simulator, MobAI, XcodeBuildMCP — is not backend proof; pair device actions with database/provider/dashboard evidence.
 - Do not use generated builders from a prompt alone. Include repo-local instructions and artifacts so later agents can continue without reconstructing the launch logic.
 
 ## Founder-Only Gates

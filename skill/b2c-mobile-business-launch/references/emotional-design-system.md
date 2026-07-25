@@ -43,7 +43,7 @@ Four questions drive this system:
 
 The system does not teach manipulation. Every card has a bright line (serves the user's real goal) and a dark line (extracts value against the user's interest). The dark line is a compliance veto: implementation stops until it is resolved.
 
-The emotional layer is not separate from product, onboarding, and analytics. It is a constraint on how those systems are designed and measured. A card that does not emit a PostHog event does not exist. A card that cannot be verified on a real device via MobAI does not ship.
+The emotional layer is not separate from product, onboarding, and analytics. It is a constraint on how those systems are designed and measured. A card that does not emit a PostHog event does not exist. A card that cannot be verified on a running app — the in-app iOS Simulator (rung 0) is sufficient for a bright-line check such as "is this editable at any time", MobAI or a real device when Android, haptics, thermals, real-network latency, or a repeatable suite are in scope — does not ship.
 
 ---
 
@@ -94,7 +94,7 @@ Use this table as a navigation surface. Full card specs — including psychologi
 
 ## Emotional Review Framework
 
-Use this framework on any feature, screen, or user journey before committing to build. Run it on a real device via MobAI when auditing an existing app. Run it on rendered HTML proofs when auditing a spec in progress.
+Use this framework on any feature, screen, or user journey before committing to build. Run it on the running app when auditing an existing app: the in-app iOS Simulator (rung 0) pre-walks a journey quickly, while the audit of record needs a real device via MobAI, because haptics, thermals, and real-network latency drive the emotional read. Run it on rendered HTML proofs when auditing a spec in progress.
 
 Score each lens 0–2 (0 = absent or harmful, 1 = present but weak, 2 = deliberate and strong). Total out of 12. Score ≥9 = build-ready. Score <7 = redesign before build. Score 7–8 = proceed with named blockers tracked as failure cards.
 
@@ -190,7 +190,7 @@ This protocol produces `EMOTIONAL_DESIGN.md` updates, card applications, measure
 
 11. **Run the validator.** `npm run check:emotional-design -- --root .` must pass before claiming any card is applied.
 
-12. **Update `PRODUCTION_READINESS.md`.** Add the card application as an evidence row. Mark it `pending verification` until a real-device MobAI audit confirms the behavior.
+12. **Update `PRODUCTION_READINESS.md`.** Add the card application as an evidence row. Mark it `pending verification` until a running-app audit — in-app iOS Simulator (rung 0) or MobAI — confirms the behavior on the device class the card targets.
 
 **Output.** The producer protocol modifies existing artifacts, does not create new standalone documents. The one exception is the first run: create `EMOTIONAL_DESIGN.md` from the template if it does not exist.
 
@@ -200,13 +200,13 @@ This protocol produces `EMOTIONAL_DESIGN.md` updates, card applications, measure
 
 Use this when the task is to audit an existing app's emotional design ("audit this app's emotional design", "score this flow", "find where we're leaving emotional value on the table").
 
-This protocol runs on a real device via MobAI, scores each screen against the Emotional Review Framework, and produces `EMOTIONAL_AUDIT.md` with a pathway to a better state.
+This protocol runs against the live app, scores each screen against the Emotional Review Framework, and produces `EMOTIONAL_AUDIT.md` with a pathway to a better state. The in-app iOS Simulator (rung 0) is the fast way to pre-walk a journey and draft the step list, but it does not satisfy `EMOTIONAL_AUDIT.md`'s real-device checkbox: haptics, thermal behavior, and real-network latency are exactly the inputs a simulator cannot reproduce, and they are what the emotional read depends on. Use MobAI or a real device for the audit of record.
 
 ### Ordered Steps
 
 1. **Load context.** Read `eleven-star-experience.md`, `emotional-experience-design.md`, `mobai-toolbelt.md`, and `ethics-guardrail.md`. Read the existing `11_STAR_EXPERIENCE.md` and `EMOTIONAL_DESIGN.md` if present.
 
-2. **List screens.** Read the active MobAI MCP resources or current CLI help, then use the exposed app/device/bridge route to reach the live app. Navigate each screen in the primary journey (onboarding → first value → paywall → core loop → re-engagement). Use the currently exposed screenshot tool or `mobai screenshot` form from live help to capture each state. Do not pre-choreograph multi-step chains without per-step screen verification (see `mobai-onboarding-chain-unverified` failure card).
+2. **List screens.** On rung 0, ask the runtime to run the app in the simulator and read the screen; on MobAI, read the active MCP resources or current CLI help and use the exposed app/device/bridge route. Navigate each screen in the primary journey (onboarding → first value → paywall → core loop → re-engagement). Use the route's screenshot tool — the pane's capture shortcut, the Codex screenshot tool, or the `mobai screenshot` form from live help — to capture each state. Do not pre-choreograph multi-step chains without per-step screen verification; that applies to a rung-0 tap sequence exactly as it does to a MobAI DSL block (see `mobai-onboarding-chain-unverified` failure card).
 
 3. **Score each screen.** Apply the six-lens framework to each captured screen. Record: lens scores, which cards are present / missing / misused, the emotional curve impact of this screen, and any dark-pattern signals.
 
@@ -381,7 +381,7 @@ When the founder says "turn this feature into an emotional experience", "charge 
 
 **Hard ordered output sequence for an Auditor run:**
 
-1. Attach to a real device via MobAI. Capture screenshots of every screen in the primary journey.
+1. Attach to the running app. Rung 0 (the in-app iOS Simulator) is fine for drafting the step list; the audit of record attaches to a real device via MobAI. Capture screenshots of every screen in the primary journey.
 2. Score each screen against the six-lens framework.
 3. Plot the actual Emotional Curve and compare to the target from `11_STAR_EXPERIENCE.md`.
 4. Write findings per the Audit Output Contract (see below).

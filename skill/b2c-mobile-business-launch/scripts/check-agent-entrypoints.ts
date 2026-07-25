@@ -103,6 +103,9 @@ if (templateAgents) {
       "Doppler",
       "Compound Engineering",
       "MobAI",
+      // The zero-setup route is the one a later edit is likeliest to drop, so
+      // hold it in the generated entrypoint the same way MobAI is held.
+      "in-app iOS Simulator",
       "RevenueCat",
       "PostHog",
       "EMOTIONAL_DESIGN.md",

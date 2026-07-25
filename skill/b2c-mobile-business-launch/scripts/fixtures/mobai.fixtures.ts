@@ -75,6 +75,31 @@ export function register(h: Harness): void {
     skillRoot,
   ]);
 
+  // Deleting the section entirely used to skip the platform matrix, so an
+  // Android-in-scope launch proved on an iOS-only route (in-app simulator,
+  // XcodeBuildMCP) passed with no Android evidence and no recorded decision.
+  const crossPlatformSectionDeleted = makeFixture("mobai-proof-cross-platform-section-deleted");
+  writeCompleteMobaiProof(crossPlatformSectionDeleted);
+  writeFileSync(
+    path.join(crossPlatformSectionDeleted, "PRODUCTION_READINESS.md"),
+    [
+      "# Production Readiness",
+      "Status: ready.",
+      "Implementation proof: ce-work completed. Review proof: ce-code-review passed. Proof artifact: ce-proof exists.",
+      "Native iOS Proof: ran the app in the iOS Simulator pane in a local session on iPhone 17 Pro / iOS 26 with a fixture account.",
+      "That route covers no Android and no physical device.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "Android in scope with no cross-platform proof section fails",
+    crossPlatformSectionDeleted,
+    "check-mobai-proof.ts",
+    1,
+    "mobai.proof.cross_platform_section_missing",
+    ["--skill-root", skillRoot],
+  );
+
   const healedUnreviewed = makeFixture("mobai-proof-healed-unreviewed");
   writeCompleteMobaiProof(healedUnreviewed);
   replaceInFile(healedUnreviewed, "PRODUCTION_READINESS.md", "- AI-healed flow: not used", "- AI-healed flow: generated fix accepted");

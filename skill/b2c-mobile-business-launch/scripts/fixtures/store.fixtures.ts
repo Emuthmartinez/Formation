@@ -42,6 +42,20 @@ export function register(h: Harness): void {
   );
   runFixture("simulator-only Apple signing claim fails", simulatorOnly, "check-apple-signing-packet.ts", 1, "simulator_only_risk");
 
+  // The in-app route makes people describe success in prose rather than as a
+  // "simulator build passed" line; the guard has to catch that phrasing too.
+  const paneRunOnly = makeFixture("apple-signing-pane-run-only");
+  writeFileSync(
+    path.join(paneRunOnly, "APPLE_SIGNING.md"),
+    [
+      "# Apple Signing",
+      "Apple Developer Team ID DEVELOPMENT_TEAM Bundle ID App ID App Store Connect ASC CLI auth status app creation route App Record Creation Preflight certificate provisioning archive export upload TestFlight founder approval.",
+      "Claude ran the app in the iOS Simulator pane and onboarding works, so the app is good to ship.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("in-app simulator run treated as Apple signing proof fails", paneRunOnly, "check-apple-signing-packet.ts", 1, "simulator_only_risk");
+
   const nativeIosProofThin = makeFixture("native-ios-proof-thin");
   writeFileSync(
     path.join(nativeIosProofThin, "PRODUCTION_READINESS.md"),
@@ -61,6 +75,104 @@ export function register(h: Harness): void {
     "check-native-ios-proof.ts",
     1,
     "native_ios_proof.codex_desktop_session_defaults_missing",
+  );
+
+  // The in-app simulator is the route an agent reaches for by default, so the
+  // easy path must still carry its gates: local session, named device, fixture
+  // account (device screenshots leave the machine), and the coverage it drops.
+  const inAppSimulatorUngated = makeFixture("native-ios-in-app-simulator-ungated");
+  writeFileSync(
+    path.join(inAppSimulatorUngated, "PRODUCTION_READINESS.md"),
+    [
+      "# Production Readiness",
+      "Status: ready.",
+      "Native iOS Proof: ran the app in the iOS Simulator pane and tapped through onboarding.",
+      "Launch-Critical Test Matrix covers the prerelease .xctestplan with unit, integration, UI, and performance targets across device, OS, locale, Dynamic Type, light and dark.",
+      "Coverage includes permission denied, offline retry, background, foreground, deep link, notification, and interruption paths, an accessibility audit, and StoreKit entitlement, restore, and refund states.",
+      "Release configuration on a physical device is deferred.",
+      "Screenshots at screenshots/raw/home.png. Paired with PROVIDER_PROOF.md. A simulator build alone is not distribution readiness; see APPLE_SIGNING.md.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "in-app simulator proof without the fixture-account rule fails",
+    inAppSimulatorUngated,
+    "check-native-ios-proof.ts",
+    1,
+    "native_ios_proof.in_app_simulator_fixture_account_missing",
+  );
+  runFixture(
+    "in-app simulator proof without the local-session record fails",
+    inAppSimulatorUngated,
+    "check-native-ios-proof.ts",
+    1,
+    "native_ios_proof.in_app_simulator_session_missing",
+  );
+  runFixture(
+    "in-app simulator proof without its dropped-coverage statement fails",
+    inAppSimulatorUngated,
+    "check-native-ios-proof.ts",
+    1,
+    "native_ios_proof.in_app_simulator_coverage_limit_missing",
+  );
+  runFixture(
+    "in-app simulator proof without a named simulated device fails",
+    inAppSimulatorUngated,
+    "check-native-ios-proof.ts",
+    1,
+    "native_ios_proof.in_app_simulator_device_missing",
+  );
+
+  // The template is the other witness for the happy path; this one proves a
+  // hand-written in-app row passes on its own, so tightening scopedLines later
+  // cannot silently start rejecting real-world readiness docs.
+  const inAppSimulatorGated = makeFixture("native-ios-in-app-simulator-gated");
+  writeFileSync(
+    path.join(inAppSimulatorGated, "PRODUCTION_READINESS.md"),
+    [
+      "# Production Readiness",
+      "Status: ready.",
+      "Native iOS Proof: ran the app in the iOS Simulator pane in a local session on iPhone 17 Pro / iOS 26 with a fixture account, never a real founder or provider login.",
+      "That route covers no Android and no physical device, so cross-platform and release-device proof stay open.",
+      "Launch-Critical Test Matrix covers the prerelease .xctestplan with unit, integration, UI, and performance targets across device, OS, locale, Dynamic Type, light and dark.",
+      "Coverage includes permission denied, offline retry, background, foreground, deep link, notification, and interruption paths, an accessibility audit, and StoreKit entitlement, restore, and refund states.",
+      "Release configuration on a physical device is deferred.",
+      "Screenshots at screenshots/raw/home.png. Paired with PROVIDER_PROOF.md. A simulator build alone is not distribution readiness; see APPLE_SIGNING.md.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("fully gated in-app simulator proof passes", inAppSimulatorGated, "check-native-ios-proof.ts", 0);
+
+  const inAppSimulatorScreenshots = makeFixture("native-ios-in-app-simulator-screenshots");
+  writeFileSync(
+    path.join(inAppSimulatorScreenshots, "SCREENSHOTS.md"),
+    [
+      "# Store Screenshots",
+      "Status: ready.",
+      "Raw Capture Matrix: captured from the in-app simulator pane on iPhone 17 Pro / iOS 26 in a local session with a fixture account, exported to screenshots/raw/home.png.",
+      "Production Composition Matrix: final upload path screenshots/final/iphone.png.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("in-app simulator captures satisfy the raw screenshot capture route", inAppSimulatorScreenshots, "check-native-ios-proof.ts", 0);
+
+  const inAppSimulatorRealAccountScreenshots = makeFixture("native-ios-in-app-simulator-real-account-screenshots");
+  writeFileSync(
+    path.join(inAppSimulatorRealAccountScreenshots, "SCREENSHOTS.md"),
+    [
+      "# Store Screenshots",
+      "Status: ready.",
+      "Raw Capture Matrix: captured from the in-app simulator pane on iPhone 17 Pro / iOS 26, signed in as the founder so the flow looks real, exported to screenshots/raw/home.png.",
+      "Production Composition Matrix: final upload path screenshots/final/iphone.png.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "in-app simulator captures without the fixture-account rule fail",
+    inAppSimulatorRealAccountScreenshots,
+    "check-native-ios-proof.ts",
+    1,
+    "native_ios_proof.screenshot_in_app_simulator_fixture_account_missing",
   );
 
   const nativeIosUngrounded = makeFixture("native-ios-proof-ungrounded");

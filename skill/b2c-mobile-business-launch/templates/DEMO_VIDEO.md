@@ -3,7 +3,7 @@
 Status: partial
 Owner: design-guru + marketing-guru + orchestrator
 
-`DEMO_VIDEO.md` records app-preview, launch-demo, support-demo, and social-demo proof. Use it when MobAI recorder, native iOS capture, desktop recorder, Remotion, Higgsfield reframe, or store App Preview work is in scope. Source footage must show the real app or explicitly approved prototype footage.
+`DEMO_VIDEO.md` records app-preview, launch-demo, support-demo, and social-demo proof. Use it when in-app iOS Simulator recording (Cmd+R), MobAI recorder, native iOS capture, desktop recorder, Remotion, Higgsfield reframe, or store App Preview work is in scope. Source footage must show the real app or explicitly approved prototype footage.
 
 ## Source Inputs
 
@@ -14,7 +14,7 @@ Owner: design-guru + marketing-guru + orchestrator
 | `BRAND.md` | voice, owned words, banned claims | blocked |
 | `DESIGN.md` | tokens, type, motion, caption style | blocked |
 | `SCREENSHOTS.md` | App Preview and screenshot story | blocked |
-| MobAI / native iOS / device capture | real in-app footage | blocked |
+| In-app iOS Simulator (Cmd+R) / MobAI / native iOS / device capture | real in-app footage | blocked |
 | `CONTENT_ASSETS.md` + manifest | route, license, output registry | blocked |
 
 ## Storyboard
@@ -28,7 +28,7 @@ Owner: design-guru + marketing-guru + orchestrator
 
 | Step | Tool/route | Input | Output | Proof | Status |
 | --- | --- | --- | --- | --- | --- |
-| Raw capture | MobAI recorder, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, or approved fallback | device/session | `demo/raw/` | command or recording log | blocked |
+| Raw capture | in-app iOS Simulator Cmd+R (Desktop → `demo/raw/`), MobAI recorder, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, or approved fallback | device/session | `demo/raw/` | command or recording log | blocked |
 | Edit/render | Remotion or approved editor | raw capture + captions | `demo/final/` | render command/log | blocked |
 | Reframe | Higgsfield reframe or local render variants | master clip | store/social aspect variants | output manifest | blocked |
 | QA | visual + claims review | final clips | approval notes | founder gate | blocked |
@@ -38,6 +38,7 @@ Owner: design-guru + marketing-guru + orchestrator
 - [ ] First 3-5 seconds work muted and show the product payoff, not a logo/splash.
 - [ ] Captions are readable on mobile and do not cover critical UI.
 - [ ] No fake UI, unsupported claim, fabricated count, fake urgency, or bait-and-switch appears.
+- [ ] Footage recorded from an agent-driven simulator used a fixture or sandbox account; no real account, real user data, or production credential is visible in any frame.
 - [ ] Reduced-motion or low-motion alternative exists when animated effects carry meaning.
 - [ ] Output paths, license status, source inputs, and approval status are mirrored in `content-assets/manifest.json`.
 - [ ] Founder approval is recorded before public posting, paid ads, store upload, or final App Preview submission.

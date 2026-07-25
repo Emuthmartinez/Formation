@@ -118,7 +118,7 @@ npm run check:source-registry
 npm run refresh:source-freshness
 ```
 
-For Doppler, PostHog, RevenueCat, Stripe, Resend, Apple/App Store Connect, Google Play, XcodeBuildMCP, MobAI, Refero, Higgsfield, Fastlane, Remotion, and similar fast-moving tools, do not trust memory or old transcripts for command syntax. Refresh official docs or local CLI `--help`/version output before changing setup guidance.
+For Doppler, PostHog, RevenueCat, Stripe, Resend, Apple/App Store Connect, Google Play, the in-app iOS Simulator surfaces (the Claude Code Desktop pane is in public beta and CLI computer use is a research preview, so their version, plan, and policy gates move fastest of all), XcodeBuildMCP, MobAI, Refero, Higgsfield, Fastlane, Remotion, and similar fast-moving tools, do not trust memory or old transcripts for command syntax. Refresh official docs or local CLI `--help`/version output before changing setup guidance.
 
 The weekly freshness workflow may auto-add candidate URLs, but candidates are not accepted launch policy until reviewed and backed by reference/template/validator/eval updates when relevant.
 

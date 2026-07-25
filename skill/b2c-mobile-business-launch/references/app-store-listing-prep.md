@@ -193,8 +193,8 @@ For localization:
 Screenshots and previews should start from real app UI. When marketing compositions need more than raw screenshots:
 - use `DESIGN.md` and `design.md` for tokens, typography, voice, screen specs, and asset constraints
 - use `11_STAR_EXPERIENCE.md` for the magical moment and line of feasibility so screenshots and ads do not overpromise
-- use MobAI for real iOS/Android captures when available
-- use Codex Desktop native iOS/XcodeBuildMCP when Apple simulator/device tools are exposed or when founder-approved fallback from MobAI is recorded; capture project/scheme/simulator/device/output paths in `PRODUCTION_READINESS.md`
+- use the in-app iOS Simulator (rung 0, Claude Code Desktop pane or Codex `build-ios-apps`) for real iOS captures on a local Mac; record device, OS, locale, fixture account, and native capture dimensions, and copy files off the Desktop into `screenshots/raw/`
+- use MobAI for real iOS/Android captures when Android or a repeatable capture matrix is in scope; use XcodeBuildMCP for scripted/CI capture and record project/scheme/simulator/device/output paths in `PRODUCTION_READINESS.md`
 - use serve-sim for browser-visible booted-simulator capture/control when CLI users need a URL; record URL/port, actions, logs, and limitations
 - use SnapshotPreviews for preview/component PNG/JSON evidence via `TEST_RUNNER_SNAPSHOTS_EXPORT_DIR`; keep it labeled preview-only, not runtime App Preview footage
 - use ParthJadhav/app-store-screenshots as the preferred local composition/export editor when App Store or Play Store screenshot decks need production layouts, locale/device/theme variants, or bulk PNG export from real app captures plus design-system copy

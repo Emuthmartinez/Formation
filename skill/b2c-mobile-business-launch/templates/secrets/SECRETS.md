@@ -1,6 +1,6 @@
 # {{APP_NAME}} Secrets
 
-No raw secrets: raw secret values must not be committed, pasted into docs, or included in screenshots/logs. Record names, locations, owners, and verification only.
+No raw secrets: raw secret values must not be committed, pasted into docs, or included in screenshots/logs. Record names, locations, owners, and verification only. This includes device screens: never sign a simulator the agent drives into a real account or paste a production key into it — the agent's screenshots of that device leave the machine and are retained with the conversation. Use fixture or sandbox credentials on any agent-driven device.
 
 Founder-zero setup: the agent explains one secure action at a time and performs the project/config/routing work. Doppler stores automation secrets (API/OAuth/service/webhook/store/CI credentials), not browser passwords, passkeys, 2FA, recovery codes, cookies, or sessions; those stay with delegated platform access, the founder's password manager, or a founder-authenticated browser session.
 

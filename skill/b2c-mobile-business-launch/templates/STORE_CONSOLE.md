@@ -21,7 +21,7 @@ This packet is the copy-paste operator surface for App Store Connect and Google 
 ## Store Asset Rules
 
 - App Store Connect work should route through the ASC CLI/skill pack first when credentials are configured or the founder asked for ASC work. App creation, `asc-id-resolver`, metadata, screenshots, TestFlight, products, subscriptions, review status, and `asc-revenuecat-catalog-sync` are CLI/skill-pack candidates; blocked auth, 2FA, missing agreements, or unapproved sticky fields are blockers, not "cannot do it" answers.
-- Screenshots use `SCREENSHOTS.md` as the canonical packet; raw MobAI captures are proof inputs, while final iPhone, iPad, and Google Play assets need copy overlay, production composition, validation, and visual QA.
+- Screenshots use `SCREENSHOTS.md` as the canonical packet; raw in-app simulator, MobAI, or device captures are proof inputs, while final iPhone, iPad, and Google Play assets need copy overlay, production composition, validation, and visual QA.
 - Use ParthJadhav/app-store-screenshots when a reusable local screenshot editor/export board is useful for iPhone/iPad/Play decks, locale variants, app icon placement, and final PNG export from real UI plus design-system copy.
 - Higgsfield can support app icons, backgrounds, CPP media, In-App Event media, and thumbnails when tied to `DESIGN.md` and `11_STAR_EXPERIENCE.md`.
 - App Icon output records `app-icon/app-icon-1024.png`, thumbnail contrast, no alpha, no rounded corners, and category differentiation.

@@ -196,7 +196,7 @@ Use real app media before generic generated visuals:
 - MobAI screen recordings for actual flows and app demos
 - MobAI `mobile-recorder-skill` for polished iOS/Android app-flow videos with `.mob` choreography, tap ripples, finger overlay, phone bezel/background, zoom, variable speed, captions, final mp4, and upload copy
 - MobAI `desktop-recorder-skill` for polished macOS/web app-flow videos with `screenplay.json`, click ripples, cursor sprite, captions, zoom, variable speed, final mp4, and upload copy
-- Codex Desktop native iOS/XcodeBuildMCP screenshots, videos, and logs when Apple simulator/device proof is available or the founder confirmed the Apple-platform fallback from MobAI
+- in-app iOS Simulator screenshots, recordings, and logs (rung 0, either runtime) when the session is on a local Mac, or XcodeBuildMCP captures for scripted/CI work; record the coverage decision when an Apple-only rung replaces MobAI
 - serve-sim browser-visible simulator streams for CLI proof, with URL/port, actions, logs, and limitations recorded
 - SnapshotPreviews PNG/JSON preview exports for component/preview evidence only; do not treat them as runtime app-demo footage
 - app preview clips and store screenshots from `SCREENSHOTS.md`
@@ -227,7 +227,7 @@ Key points for this surface:
 - `mcp__claude_ai_Higgsfield__reframe` is MCP-only — there is no `higgsfield reframe ...` CLI command. Confirm exact invocation via the `higgsfield-generate` skill or MCP tool help before running.
 - `mcp__claude_ai_Higgsfield__personal_clipper_create` / `_jobs` / `_status` extracts shorts from long recordings before reframing. Same MCP-only constraint applies.
 - Targets: 9:16 (TikTok / Reels), 1:1 (feed), 16:9 (YouTube / LinkedIn).
-- **App Preview guardrail:** any reframe intended as an App Preview must be sourced from REAL app footage (MobAI, Codex Desktop native iOS/XcodeBuildMCP, or serve-sim capture). Generated video and preview-only snapshots are never valid App Preview sources.
+- **App Preview guardrail:** any reframe intended as an App Preview must be sourced from REAL app footage (an in-app iOS Simulator recording, MobAI, XcodeBuildMCP, or serve-sim capture) captured at a resolution that meets the target well. Generated video and preview-only snapshots are never valid App Preview sources.
 - **Spend-confirmation gate:** reframe and personal_clipper consume paid credits. Confirm spend with the founder per `paid-tool-routing.md` and surface the current balance (`mcp__claude_ai_Higgsfield__balance`) before running.
 - **CONTENT_ASSETS.md traceability:** record all output URLs, source job IDs (`source_job_id`), and aspect-ratio variants in `CONTENT_ASSETS.md` / `content-assets/manifest.json`. Run `brain_activity` virality scoring on each variant and log the score before scheduling any paid distribution.
 - Do not schedule reframed variants until the founder approves each output.

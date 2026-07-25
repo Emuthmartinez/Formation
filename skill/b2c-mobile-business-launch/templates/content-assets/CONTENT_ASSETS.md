@@ -28,7 +28,7 @@ This packet records generated, rendered, edited, and source-backed launch media.
 
 | Input | Source | Rights/status | Used by | Notes |
 | --- | --- | --- | --- | --- |
-| `screenshots/raw/onboarding.png` | MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, simulator/device, SnapshotPreviews preview-only proof, or founder-owned capture | Must be verified before production | App preview and social demo | Real app UI must remain visible; preview-only proof does not replace runtime E2E |
+| `screenshots/raw/onboarding.png` | in-app iOS Simulator (Cmd+S / Cmd+R, exported from the Desktop), MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, simulator/device, SnapshotPreviews preview-only proof, or founder-owned capture | Must be verified before production | App preview and social demo | Real app UI must remain visible; preview-only proof does not replace runtime E2E; agent-driven simulator captures require a fixture account and must contain no real user data |
 | `11_STAR_EXPERIENCE.md` | Product experience contract | Required | Store, ads, UGC, demo clips | Use the V1 scalable slice and stay inside the line of feasibility |
 | `DESIGN.md` | Project design system | Required | All rendered assets | Tokens, type, voice, motion, banned aesthetics |
 | `copy/hooks.json` | Founder-approved or research-backed copy | Draft | Social and ad variants | Claims must match listing, revenue, privacy, and legal docs |
