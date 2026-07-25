@@ -25,6 +25,32 @@ Lane statuses must be one of:
 
 Never mark a lane `done` from prose alone. It needs evidence paths or live proof.
 
+## Lane Dependency Contract
+
+Lanes are not independent. `SKILL.md`'s Operating Posture rule — "Lock phase outputs before depending on them. No design from an unlocked spec, no ASO from an unlocked name" — and the Flow Gates in [`flow-traceability.md`](flow-traceability.md) describe real edges between them. `check:lane-coverage` enforces those edges mechanically:
+
+**A lane may not be `done` while an upstream lane it depends on is `not_started`, `partial`, or `blocked`.**
+
+- `done`, `not_needed`, and `deferred` all satisfy a dependency — the last two are resolved scope decisions (see launch tiers), not gaps.
+- Working a lane *ahead* of its upstream is fine and common. Declaring it *finished* on a moving input is the drift bug this catches.
+- The edge set ships in the skill (`scripts/lib/launch-state.ts`, `laneDependencies`) rather than in `PROJECT_STATE.yaml`, because an edge set a launch run can edit is an edge set a launch run can delete. It lists direct edges only; transitive ones are implied (`design → product → experience → research`).
+
+The escape hatch is per-lane and auditable, never silent:
+
+```yaml
+lanes:
+  design:
+    status: "done"
+    evidence:
+      - "DESIGN.md"
+    # Dated reason. Downgrades the edge error to a standing warning and is itself
+    # checked for staleness. Use only when the lane is genuinely independent of
+    # the open upstream work — not to clear a red validator.
+    dependency_override: "2026-07-25 Brand and type system locked from founder identity work; the open SPEC.md item is a V2 scope question that touches no design token."
+```
+
+If an override is still present weeks later, the upstream lane never locked and this lane's evidence rests on a moving input — that is the signal to revisit, not to re-date the override.
+
 ## Update Cadence
 
 Update `PROJECT_STATE.yaml`:

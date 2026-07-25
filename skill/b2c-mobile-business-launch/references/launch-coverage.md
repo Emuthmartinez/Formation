@@ -128,6 +128,7 @@ Add when the launch depends on paid acquisition, creators, web checkout, or rapi
 
 Flag these aggressively:
 - `PROJECT_STATE.yaml` is missing, stale, or inconsistent with actual docs/provider state.
+- A lane is marked `done` on top of an upstream lane that never locked — design signed off against a still-moving spec, ASO metadata locked before the name, content assets rendered from unlocked design tokens, engineering called ready without a locked `TECH_SPEC.md`. `check:lane-coverage` catches this; a `dependency_override` still sitting there weeks later is the same miss wearing a reason.
 - The agent assumes the founder knows business tooling, dumps a setup checklist, asks the founder to choose the next lane, or stops after access instructions instead of operating the business.
 - A password, passkey, 2FA/recovery code, cookie, or raw Doppler/social token is requested in chat; Doppler is misrepresented as browser-password storage; or shared personal credentials are used when delegation/OAuth exists.
 - `launch-cockpit.html` is missing, so the founder cannot see lane status, blockers, proof, or approval gates in one place.

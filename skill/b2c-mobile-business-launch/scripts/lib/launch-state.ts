@@ -104,6 +104,147 @@ export const requiredLanes = [
   "post_launch_ops",
 ];
 
+/**
+ * Lane dependency edges — the machine-readable form of "Lock phase outputs
+ * before depending on them" (SKILL.md, Operating Posture) and the Flow Gates in
+ * references/flow-traceability.md.
+ *
+ * Each entry lists a lane's DIRECT upstream lanes only; transitive edges are
+ * implied (design -> product -> experience -> research, so design does not
+ * relist research). Every edge here already existed as prose in a reference or
+ * a lane row — this map mechanizes them, it does not invent new sequencing.
+ *
+ * This map ships with the skill rather than living in PROJECT_STATE.yaml on
+ * purpose: an edge set a launch run can edit is an edge set a launch run can
+ * delete. The auditable escape hatch is the per-lane `dependency_override`
+ * dated reason, not silent removal.
+ *
+ * Edges are enforced only against a lane claiming `done` (see
+ * check-lane-coverage.ts). Working a lane ahead of its upstream is fine and
+ * common; declaring it finished on an unlocked upstream is the drift bug.
+ */
+export const laneDependencies: Record<string, string[]> = {
+  // Foundational lanes — no upstream.
+  paid_tool_routing: [],
+  secrets: [],
+  security: [],
+  apple_signing: [],
+  orchestration: [],
+
+  // Evidence spine: paid-tool routing decides what produced the evidence.
+  research: ["paid_tool_routing"],
+  // Flow Gate "Research To Spec" requires the 11-star ladder off research.
+  experience: ["research"],
+  // eleven-star-experience.md: the ladder lands before SPEC.md is treated as ready.
+  product: ["experience"],
+
+  // Phase 1b — the event catalog is named off the locked spec surfaces.
+  analytics_attribution: ["product"],
+  traceability: ["product"],
+
+  // analytics-attribution.md: events named in these docs must exist in the
+  // ANALYTICS.md catalog first (already enforced per-event by
+  // check-analytics-catalog; this is the lane-level form).
+  emotional_design: ["experience", "analytics_attribution"],
+  onboarding: ["analytics_attribution"],
+  paid_user_acquisition: ["analytics_attribution"],
+  growth: ["analytics_attribution"],
+
+  // Flow Gate "Spec To Brand And Design".
+  design: ["product"],
+  revenue: ["product"],
+  privacy_legal: ["product"],
+
+  // Surfaces that carry design tokens / brand vocabulary downstream.
+  content_assets: ["design"],
+  email: ["design"],
+  // SKILL.md Operating Posture: "no ASO from an unlocked name".
+  store_console: ["design"],
+
+  // Flow Gate "Design To Build" — needs the locked design plus TECH_SPEC.
+  engineering: ["design", "traceability"],
+
+  // post-launch-operations.md: operations begin on a shipped app.
+  post_launch_ops: ["engineering"],
+};
+
+/**
+ * Upstream statuses that satisfy a dependency. `not_needed` and `deferred` are
+ * legitimate resolved scope decisions (see launch tiers), so they unblock a
+ * downstream lane; `not_started`, `partial`, and `blocked` do not.
+ */
+export const satisfiedDependencyStatuses = new Set(["done", "not_needed", "deferred"]);
+
+/**
+ * Authoring-integrity check for the shipped edge map itself: unknown lane ids,
+ * self-edges, and cycles are maintainer bugs, not project state problems. A
+ * cycle would make every lane in it permanently undeclarable, so it is worth
+ * catching mechanically rather than by review.
+ */
+export function validateLaneDependencyGraph(issues: Issue[]): void {
+  const known = new Set(requiredLanes);
+
+  for (const [lane, deps] of Object.entries(laneDependencies)) {
+    if (!known.has(lane)) {
+      issues.push(
+        issue(
+          "error",
+          `lane_dependencies.${lane}.unknown_lane`,
+          `laneDependencies declares edges for "${lane}", which is not in requiredLanes.`,
+          "scripts/lib/launch-state.ts",
+        ),
+      );
+    }
+    for (const dep of deps) {
+      if (dep === lane) {
+        issues.push(issue("error", `lane_dependencies.${lane}.self_edge`, `laneDependencies["${lane}"] depends on itself.`, "scripts/lib/launch-state.ts"));
+      } else if (!known.has(dep)) {
+        issues.push(
+          issue(
+            "error",
+            `lane_dependencies.${lane}.unknown_dependency`,
+            `laneDependencies["${lane}"] names "${dep}", which is not a required lane.`,
+            "scripts/lib/launch-state.ts",
+          ),
+        );
+      }
+    }
+  }
+
+  // DFS with a colour map: unvisited / grey (on the current path) / black (settled).
+  // The graph is ~22 nodes, so recursion depth is a non-issue.
+  const colours = new Map<string, "grey" | "black">();
+  const activePath: string[] = [];
+
+  const walk = (lane: string): void => {
+    colours.set(lane, "grey");
+    activePath.push(lane);
+    for (const dep of laneDependencies[lane] ?? []) {
+      const colour = colours.get(dep);
+      if (colour === "grey") {
+        const from = activePath.indexOf(dep);
+        const cycle = [...activePath.slice(from < 0 ? 0 : from), dep].join(" -> ");
+        issues.push(
+          issue(
+            "error",
+            "lane_dependencies.cycle",
+            `laneDependencies contains a cycle: ${cycle}. A cycle makes every lane in it permanently undeclarable.`,
+            "scripts/lib/launch-state.ts",
+          ),
+        );
+        continue;
+      }
+      if (colour === undefined) walk(dep);
+    }
+    activePath.pop();
+    colours.set(lane, "black");
+  };
+
+  for (const lane of Object.keys(laneDependencies)) {
+    if (!colours.has(lane)) walk(lane);
+  }
+}
+
 const ignoredDirs = new Set([".git", "node_modules", ".next", "dist", "build", "DerivedData", ".expo", ".turbo", "coverage"]);
 
 export function parseCliArgs(argv: string[]): CliArgs {

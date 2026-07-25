@@ -467,4 +467,72 @@ export function register(h: Harness): void {
   delete expectRecord(laneCoverageState.lanes, "PROJECT_STATE.yaml lanes")["revenue"];
   writeState(laneCoverageMissingLane, laneCoverageState);
   runFixture("state missing a required lane fails coverage", laneCoverageMissingLane, "check-lane-coverage.ts", 1, "lane_coverage.revenue.missing");
+
+  // --- check-lane-coverage: lane dependency edges ---
+  // Mechanizes "Lock phase outputs before depending on them" (SKILL.md) — a lane
+  // may not claim done while an upstream lane is still not_started/partial/blocked.
+
+  /** Set a lane's status and evidence in one call, returning the mutated state. */
+  const withLane = (root: string, lane: string, patch: MutableRecord): MutableRecord => {
+    const state = readState(root);
+    Object.assign(getLane(state, lane), patch);
+    writeState(root, state);
+    return state;
+  };
+
+  // done on a partial upstream = error.
+  const depUnlocked = makeFixture("lane-dependency-unlocked");
+  const depUnlockedState = readState(depUnlocked);
+  expectRecord(depUnlockedState.project, "PROJECT_STATE.yaml project").phase = "phase_2_design";
+  Object.assign(getLane(depUnlockedState, "design"), { status: "done", evidence: ["DESIGN.md"] });
+  Object.assign(getLane(depUnlockedState, "product"), { status: "partial", evidence: ["SPEC.md"] });
+  writeState(depUnlocked, depUnlockedState);
+  runFixture("lane done on a partial upstream lane fails coverage", depUnlocked, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
+
+  // done on a blocked upstream = error (blocked is not a resolved scope decision).
+  const depBlocked = makeFixture("lane-dependency-blocked-upstream");
+  const depBlockedState = readState(depBlocked);
+  expectRecord(depBlockedState.project, "PROJECT_STATE.yaml project").phase = "phase_2_design";
+  Object.assign(getLane(depBlockedState, "design"), { status: "done", evidence: ["DESIGN.md"] });
+  Object.assign(getLane(depBlockedState, "product"), { status: "blocked", blockers: ["Awaiting founder call on the V2 boundary."] });
+  writeState(depBlocked, depBlockedState);
+  runFixture("lane done on a blocked upstream lane fails coverage", depBlocked, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
+
+  // deferred/not_needed upstream IS a resolved scope decision (launch tiers), so
+  // it unblocks a downstream lane. Uses the content_assets -> design edge, whose
+  // upstream chain is otherwise untouched.
+  const depDeferred = makeFixture("lane-dependency-deferred-upstream");
+  const depDeferredState = readState(depDeferred);
+  Object.assign(getLane(depDeferredState, "design"), {
+    status: "deferred",
+    reason: "2026-07-25 Lite tier: shipping on the archetype starter's default system, so no bespoke design pass. Revisit at day 30.",
+  });
+  Object.assign(getLane(depDeferredState, "content_assets"), { status: "done", evidence: ["CONTENT_ASSETS.md"] });
+  writeState(depDeferred, depDeferredState);
+  runFixture("deferred upstream lane does not block a downstream done lane", depDeferred, "check-lane-coverage.ts", 0);
+
+  // A dated override downgrades the error to a warning (exit 0, still visible).
+  const depOverride = makeFixture("lane-dependency-override");
+  const depOverrideState = readState(depOverride);
+  Object.assign(getLane(depOverrideState, "design"), {
+    status: "done",
+    evidence: ["DESIGN.md"],
+    dependency_override:
+      "2026-07-25 Brand and type system locked from founder identity work; the open SPEC.md item is a V2 scope question that does not touch any design token.",
+  });
+  Object.assign(getLane(depOverrideState, "product"), { status: "partial", evidence: ["SPEC.md"] });
+  writeState(depOverride, depOverrideState);
+  runFixture(
+    "dated dependency_override downgrades the edge error to a warning",
+    depOverride,
+    "check-lane-coverage.ts",
+    0,
+    "lane_coverage.design.dependency_overridden",
+  );
+
+  // An undated/trivial override still records the warning but is itself flagged.
+  const depOverrideThin = makeFixture("lane-dependency-override-thin");
+  withLane(depOverrideThin, "product", { status: "partial", evidence: ["SPEC.md"] });
+  withLane(depOverrideThin, "design", { status: "done", evidence: ["DESIGN.md"], dependency_override: "not needed" });
+  runFixture("undated dependency_override is flagged as thin", depOverrideThin, "check-lane-coverage.ts", 0, "lanes.design.reason_undated_or_trivial");
 }
