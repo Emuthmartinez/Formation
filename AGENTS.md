@@ -112,11 +112,14 @@ Edit the repo source first. Runtime sync applies only on the maintainer machine,
 `scripts/sync-skill-runtime.sh` performs that whole sequence and is the preferred way to run it:
 
 ```bash
-npm run sync:runtime              # pull main, audit source, mirror, audit runtime, prove parity + symlinks
-npm run sync:runtime -- --dry-run # preview the mirror without mutating anything
+npm run sync:runtime                # pull main, audit source, mirror, audit runtime, prove parity + symlinks
+npm run sync:runtime -- --dry-run   # preview the mirror without mutating anything
+npm run sync:runtime -- --bootstrap  # create the runtime when this machine has none yet
 ```
 
 It exits 0 with an explanatory message on machines with no installed runtime, refuses to sync from a non-`main` branch or a dirty tree without an explicit choice, fails on post-sync drift, and fails if a consumer path is a real directory instead of a symlink (that copy would silently keep serving stale content).
+
+**When the runtime goes missing.** Deleting `~/.codex/skills/<skill>` leaves `~/.claude/skills/<skill>` and `~/.agents/skills/<skill>` as *dangling* symlinks: both tools keep listing the skill while every read of it resolves to nothing. Plain `sync:runtime` cannot fix that — skipping is correct for clones, CI, and cloud sessions, which legitimately have no install. The no-runtime message now names any dangling links it finds so the state is visible instead of silent, and `--bootstrap` creates the runtime and repairs them in one step. Note that `[ -e ]` follows symlinks, so it reports a dangling link as *absent*; use `[ -L ]` (or `ls -ld`) when checking whether a consumer link exists.
 
 Broad launch/design/store/revenue/build work should first run `npm run check:skill-version -- --source skill/b2c-mobile-business-launch --installed ~/.codex/skills/b2c-mobile-business-launch` from the source repo, or the equivalent command from the installed runtime. If the installed copy is stale, use AskUserQuestion or a plain founder choice before continuing the original request.
 
