@@ -149,6 +149,7 @@ Choose one template strategy:
 - Starter TypeScript templates from `templates/resend/email-templates.ts` when the app needs common support, lifecycle, billing, entitlement, waitlist, or privacy messages quickly.
 
 Every template needs:
+- before drafting subject, preview text, or body copy: load `references/no-slop-writing.md` — its §7 covers push/lifecycle email subject-line limits specifically; keep the tone `11_STAR_EXPERIENCE.md`/`BRAND.md` set for this product, not generic transactional-email English
 - subject, preview text where supported, HTML, plain text, sender, reply-to, purpose, owner
 - brand fields and required email-safe design tokens derived from `DESIGN.md`: logo, app name, accent color, text colors, surface/border colors, typography, radius, spacing, max width, logo height, and footer rules
 - experience tone derived from `11_STAR_EXPERIENCE.md`, especially lifecycle copy that should feel like the product remembered the user's goal
@@ -314,3 +315,4 @@ Record each result in `EMAIL_OPS.md`:
 - Automation trigger and run status checked
 - Inbound webhook tested if receiving is enabled
 - privacy/terms/vendor inventory updated
+- subject/preview/body copy for each template passes the `no-slop-writing.md` self-check (§6) in the project's brand voice, and `check:no-slop` passes

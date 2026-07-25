@@ -27,7 +27,7 @@ The skill now has two layers:
 - Human-readable launch playbooks in `skill/b2c-mobile-business-launch/references/`.
 - Machine-checkable launch state and validators through `PROJECT_STATE.yaml`, `launch-cockpit.html`, LaunchBench scenarios, and TypeScript scripts.
 
-That means future agents do not just "remember" the launch process. They can inspect state, render a founder-facing cockpit, run checks, and keep known failure modes visible as failure cards.
+That means future agents do not just "remember" the launch process. They can inspect state, render a plain-language dashboard the founder actually reads, run checks, and keep known failure modes visible.
 
 ## Autopilot Usage
 
@@ -41,19 +41,21 @@ The skill should not require repeated "now use this skill" prompts. Once activat
 
 ## What It Produces
 
-| Lane | Output |
+| Area | What you get |
 | --- | --- |
-| State | `PROJECT_STATE.yaml`, `launch-cockpit.html`, `skill-version.json`, runtime freshness checks, autonomy mode, lane statuses, provider state, proof, and failure cards |
-| Founder-Zero Operator | `BUSINESS_ACCESS.md`, `operations/business-access.json`, phase-labeled AskUserQuestion choices, plain-language definitions, skip/fallback/defer behavior, gate lifecycle, business identity, Doppler, account access, and founder/agent next actions |
+| State | `PROJECT_STATE.yaml`, `launch-cockpit.html`, `skill-version.json`, runtime freshness checks, how much latitude the agent has, per-area status, connected services, verification records, and known risks |
+| Founder-Zero Operator | `BUSINESS_ACCESS.md`, `operations/business-access.json`, one plain-language decision at a time with the recommendation first, terms defined before they are used, an always-available skip or defer route, business identity, Doppler, account access, and what happens next |
 | Agent Operations | `AGENT_OPERATIONS.md`, `operations/agent-operations.json`, capability discovery, account/environment targeting, scoped approval envelopes, authenticated-browser/API/CLI/native routing, prompt-injection quarantine, before/after proof, and state reconciliation |
-| Design Room | `state/business.json`, `state/theme.tokens.json`, `design-room.html`, React/Vite `dist/design-room/`, git-backed versions, baselines, diffs, restores, and wipe-slate operations |
+| Design Room | `state/business.json`, `state/theme.tokens.json`, `design-room.html`, React/Vite `dist/design-room/`, git-backed versions, baselines, diffs, restores, and start-over |
 | Research | AppKittie, XPOZ, Firecrawl, ASO, GEO/SEO, review mining, competitor positioning, and launch evidence |
-| Experience | `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, 1/2/5/6/7/10/11-star ladder, line of feasibility, V1 scalable slice, and surface translation |
+| Experience | `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, the star ladder from broken to unreasonable, the line between what can be built now and what cannot, the one magical moment version one can actually carry, and how that moment reaches every screen and page |
 | Product | `SPEC.md`, `TECH_SPEC.md`, `LAUNCH_TRACE.md`, scope locks, acceptance criteria, and builder prompts |
 | App Archetypes | Reusable packs for known B2C product shapes, enforced by `check:app-archetype` and `check:archetype-starter`: Social / Community Platform (`references/social-network-lane.md`), AI Chat / Companion (`references/ai-chat-companion-lane.md`), Habit Tracker / Utility (`references/habit-tracker-lane.md`), and Photo / AI Media (`references/photo-ai-media-lane.md`). Each does upfront AskUserQuestion archetype/variant detection (web vs native), names its core systems, ships a **runnable starter scaffold** (Next.js + Supabase with tested RLS, Stripe/RevenueCat stubs, PostHog event catalog, names-only env, CI) plus a dependency-ordered prompt sequence as the customization layer, and threads into the research, design, security, revenue, and growth lanes rather than bypassing them |
 | Security | `SECURITY.md`, `security-review.html`, threat model, paid/free security-tool routing, OWASP MASVS/ASVS basis, platform hardening, app integrity, abuse controls, scanner/review proof, and accepted risks |
 | Design | `DESIGN.md`, lowercase `design.md`, `UX_PATTERNS.md`, HTML visual proofs, Refero/fallback UX pattern research, Higgsfield visual guidance, Remotion content assets, screenshot systems, and audit gates |
 | Analytics | `ANALYTICS.md`, `analytics-plan.html`, PostHog event catalog, attribution contract, dashboards, and QA probes |
+| Writing quality | `references/no-slop-writing.md` governs every word this skill writes and every word it generates for your business: store listings, landing copy, paywall and onboarding copy, lifecycle email, launch posts, ad headlines, and UGC scripts. Banned words, named slop patterns, and per-channel limits, enforced by `check:no-slop`. Rules adapted from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT). Voice preservation comes first: the rules sharpen your brand voice from `BRAND.md` rather than flattening it into neutral corporate prose |
+| Plain language to the founder | `scripts/lib/founder-copy.ts` is the only path from internal state to anything a founder reads, so the dashboard says "Choosing your tools and services — Not started yet" instead of `paid_tool_routing / not_started`. `check:founder-copy` fails the build when a raw identifier, a phase code, a status value, or internal vocabulary reaches a founder-visible surface |
 | Paid UA | `PAID_UA.md`, one-channel paid acquisition system, creative cadence, tracking baseline, blended report, RevenueCat LTV/CPA review, weekly schedule, and founder-only spend gates |
 | Monetization | RevenueCat, Stripe, app-store products, web funnels, entitlement validation, webhooks, restore/refund flows, and proof |
 | Viral Growth | `VIRAL_GROWTH.md`, product-led referral/share loops, content format lab, monetization timing, abuse controls, analytics proof, and stop/scale rules |

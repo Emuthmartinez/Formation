@@ -218,7 +218,7 @@ The Coverage Matrix above asks "does this lane have evidence?". This checklist a
 - what the app is and who it is for
 - what category it competes in and why
 - what the app must ship in V1, what is explicitly V2/V3, and what is banned
-- what `project.launch_tier` says about confirmed scope, which lanes a lite tier deferred with dated reasons, and when they revisit
+- what `project.launch_scope` says about confirmed scope, which lanes a essentials scope deferred with dated reasons, and when they revisit
 
 **State and operating record**
 

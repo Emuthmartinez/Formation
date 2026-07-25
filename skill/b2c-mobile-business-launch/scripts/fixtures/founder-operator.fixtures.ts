@@ -906,7 +906,6 @@ function reconcileFixture(root: string, value: Record<string, unknown>): void {
 - Why now: ${String(gate.whyNow)}
 - Definitions: ${definitionText}
 - Founder action: ${String(founder.nextFounderAction)}
-- Question mode: AskUserQuestion when available; otherwise present the same choices in plain text and wait for an explicit selection.
 ${optionLines}
 - Skip/bypass policy: ${bypassModeLabel(bypass.mode)} through \`${String(bypass.optionId)}\`; ${String(bypass.reason)} ${String(bypass.fallbackAction)}
 - Revisit before: ${String(bypass.revisitTrigger)}
@@ -924,7 +923,7 @@ ${gateLines}
 - Next business operation: ${String(founder.nextBusinessOperation)}`;
   writeFileSync(humanPath, currentHuman.replace(/## One Next Action[\s\S]*?(?=\n## )/, section), "utf8");
 
-  const cockpit = `<!doctype html><html><body><section><h2>Business Operator Bootstrap</h2>${renderFounderGateMarkup(founder, operator)}</section></body></html>\n`;
+  const cockpit = `<!doctype html><html><body><section><h2>What I Need From You</h2>${renderFounderGateMarkup(founder, operator)}</section></body></html>\n`;
   writeFileSync(path.join(root, "launch-cockpit.html"), cockpit, "utf8");
 }
 

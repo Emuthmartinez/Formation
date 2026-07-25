@@ -37,7 +37,7 @@ Each prompt customizes a specific area. Run them in pack order (see [`../README.
 | `07-sharing-and-virality.md` | share/export surfaces emitting `media_shared`; viral loop into `VIRAL_GROWTH.md`. |
 | `08-content-safety-and-rights.md` | the moderation TODOs in `app/api/generate/route.ts` (`moderation_flagged`), consent/rights records, takedown path — a launch gate, not V2. |
 | `variants/avatar-headshot-studio.md` | training-set tables (consented selfies), identity-conditioned generation params, pack delivery in `app/library/`. |
-| `variants/photo-restoration.md` | single-asset transform flow (lite launch tier); the pipeline core carries over. |
+| `variants/photo-restoration.md` | single-asset transform flow (lite launch scope); the pipeline core carries over. |
 
 ## What is wired
 

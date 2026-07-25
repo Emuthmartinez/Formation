@@ -1022,6 +1022,15 @@ sources:
     locations:
       - .github/workflows/source-freshness.yml
     notes: Auto-discovered from repository content.
+  - id: github-com-petergyang-no-ai-slop
+    name: github.com
+    source_type: github
+    url: https://github.com/petergyang/no-ai-slop
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/no-slop-writing.md
+    notes: MIT-licensed AI-slop editing skill. Source basis for no-slop-writing.md's banned-word list, empty-adverb/phrase lists, named patterns, and eval.md self-check, adapted for this skill's founder-facing copy and generated marketing copy. Stable rules repo; recheck for drift on the normal cadence rather than a fast-moving one.
   - id: github-com-remotion-dev-remotion
     name: github.com
     source_type: github

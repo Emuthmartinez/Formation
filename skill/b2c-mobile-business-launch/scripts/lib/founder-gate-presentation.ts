@@ -7,11 +7,10 @@ export function renderFounderGateMarkup(founderModel: Record<string, unknown>, b
   const activeOptions = asArray(activeQuestion.options).filter(isRecord);
   const activeDefinitions = asArray(activeFounderGate.definitions).filter(isRecord);
   const activeBypass = isRecord(activeFounderGate.bypassPolicy) ? activeFounderGate.bypassPolicy : {};
-  const activeLifecycle = isRecord(activeFounderGate.lifecycle) ? activeFounderGate.lifecycle : {};
   const founderOptionMarkup = activeOptions
     .map(
       (option) =>
-        `<article class="card"><h3>${escapeHtml(option.label)}${option.recommended === true ? " (Recommended)" : ""}</h3><p>${escapeHtml(option.description)}</p><p><strong>Consequence:</strong> ${escapeHtml(option.consequence)}</p><p><strong>Agent next:</strong> ${escapeHtml(option.agentActionNext)}</p><p class="muted">Evidence: ${escapeHtml(option.evidenceEffect)}</p></article>`,
+        `<article class="card"><h3>${escapeHtml(option.label)}${option.recommended === true ? " (Recommended)" : ""}</h3><p>${escapeHtml(option.description)}</p><p><strong>If you pick this:</strong> ${escapeHtml(option.consequence)}</p><p><strong>Then I will:</strong> ${escapeHtml(option.agentActionNext)}</p><p class="muted">What it means for how solid this is: ${escapeHtml(option.evidenceEffect)}</p></article>`,
     )
     .join("");
   const founderDefinitionsMarkup =
@@ -21,16 +20,57 @@ export function renderFounderGateMarkup(founderModel: Record<string, unknown>, b
         ? '<p class="muted">No unfamiliar terms are needed for this decision.</p>'
         : '<p class="muted">No founder decision is pending, so no definitions are needed.</p>';
 
+  // Founder-visible copy only. Machine values (status enums, phase ids, gate ids, the
+  // founder_experience and agent_role settings, ledger file paths, and the name of the
+  // tool used to ask the question) are deliberately not rendered here — they exist for
+  // the agent and for validators, and printing them turned this card into a database
+  // row. check-founder-copy.ts enforces that.
   return `<div class="grid">
-    <article class="card"><h3>Status</h3><p><span class="status ${escapeHtml(businessOperator.status ?? "not_started")}">${escapeHtml(businessOperator.status ?? "not_started")}</span></p><p class="muted">Founder model: ${escapeHtml(businessOperator.founder_experience ?? "beginner_assumed")}</p><p>Agent role: ${escapeHtml(businessOperator.agent_role ?? "business_operator")}</p></article>
-    <article class="card"><h3>Access</h3><p>Doppler: ${escapeHtml(businessOperator.doppler_status ?? "not_started")}</p><p>Social access: ${escapeHtml(businessOperator.social_access_status ?? "not_started")}</p><p>Ready accounts: ${escapeHtml(businessOperator.access_ready_count ?? 0)}</p></article>
-    <article class="card"><h3>Current Phase</h3><p><strong>${escapeHtml(activePhase.label ?? businessOperator.current_phase_label ?? "Not recorded")}</strong></p><p>${escapeHtml(activePhase.outcome ?? businessOperator.current_phase_outcome ?? "Not recorded")}</p><p class="muted">${escapeHtml(activePhase.id ?? businessOperator.current_phase ?? "unknown")}${hasActiveFounderGate ? ` | Decision type: ${escapeHtml(gateClassLabel(activeFounderGate.gateClass))} | Requested by: ${escapeHtml(gateOriginLabel(activeFounderGate.origin))}` : " | Agent is continuing without a founder decision"}</p></article>
-    <article class="card"><h3>Definitions</h3>${founderDefinitionsMarkup}</article>
-    <article class="card"><h3>Founder: One Decision</h3>${hasActiveFounderGate ? `<p>${escapeHtml(activeQuestion.prompt ?? businessOperator.next_founder_action ?? "Not recorded")}</p><p class="muted">AskUserQuestion when available; an explicit selection is required. Status: ${escapeHtml(activeLifecycle.status ?? businessOperator.active_gate_status ?? "unknown")}</p>` : "<p>No founder decision is pending. The agent continues the recorded next action.</p>"}</article>
+    <article class="card"><h3>The decision</h3>${
+      hasActiveFounderGate
+        ? `<p>${escapeHtml(activeQuestion.prompt ?? businessOperator.next_founder_action ?? "Not recorded")}</p><p class="muted">Pick one below. I will wait, and I never read silence as a yes.</p>`
+        : "<p>No founder decision is pending. I am carrying on with the next piece of work.</p>"
+    }</article>
+    <article class="card"><h3>What this unlocks</h3><p><strong>${escapeHtml(activePhase.label ?? businessOperator.current_phase_label ?? "Not recorded")}</strong></p><p>${escapeHtml(
+      activePhase.outcome ?? businessOperator.current_phase_outcome ?? "Not recorded",
+    )}</p>${hasActiveFounderGate ? `<p class="muted">This is a ${escapeHtml(gateClassLabel(activeFounderGate.gateClass).toLowerCase())} decision. It came up because of ${escapeHtml(gateOriginLabel(activeFounderGate.origin).toLowerCase())}.</p>` : ""}</article>
+    <article class="card"><h3>Words worth knowing</h3>${founderDefinitionsMarkup}</article>
     ${founderOptionMarkup}
-    ${hasActiveFounderGate ? `<article class="card"><h3>Skip Or Defer</h3><p><strong>${escapeHtml(bypassModeLabel(activeBypass.mode))}</strong></p><p><strong>Why safe:</strong> ${escapeHtml(activeBypass.reason ?? "Not recorded")}</p><p>${escapeHtml(activeBypass.fallbackAction ?? "Not recorded")}</p><p><strong>Revisit:</strong> ${escapeHtml(activeBypass.revisitTrigger ?? "Not recorded")}</p><p class="muted">${escapeHtml(activeFounderGate.safeWorkWhileWaiting ?? "No safe work recorded")}</p></article>` : ""}
-    <article class="card"><h3>Agent: Immediate Next Action</h3><p>${escapeHtml(businessOperator.next_agent_action ?? "Not recorded")}</p><p><strong>Then operate:</strong> ${escapeHtml(businessOperator.next_business_operation ?? "Not recorded")}</p><p class="muted">${escapeHtml(businessOperator.human_log ?? "BUSINESS_ACCESS.md")} | ${escapeHtml(businessOperator.structured_ledger ?? "operations/business-access.json")}</p></article>
+    ${
+      hasActiveFounderGate
+        ? `<article class="card"><h3>If You Are Not Ready</h3><p><strong>${escapeHtml(bypassModeLabel(activeBypass.mode))}</strong></p><p><strong>Why that is safe:</strong> ${escapeHtml(
+            activeBypass.reason ?? "Not recorded",
+          )}</p><p>${escapeHtml(activeBypass.fallbackAction ?? "Not recorded")}</p><p><strong>I will ask again:</strong> ${escapeHtml(
+            activeBypass.revisitTrigger ?? "Not recorded",
+          )}</p><p class="muted">Meanwhile: ${escapeHtml(activeFounderGate.safeWorkWhileWaiting ?? "No safe work recorded")}</p></article>`
+        : ""
+    }
+    <article class="card"><h3>What I am doing next</h3><p>${escapeHtml(businessOperator.next_agent_action ?? "Not recorded")}</p><p><strong>Then:</strong> ${escapeHtml(
+      businessOperator.next_business_operation ?? "Not recorded",
+    )}</p></article>
+    <article class="card"><h3>Where your accounts stand</h3><p>Setup so far: ${escapeHtml(accessLabel(businessOperator.status))}</p><p>Secure key storage: ${escapeHtml(
+      accessLabel(businessOperator.doppler_status),
+    )}</p><p>Social accounts: ${escapeHtml(accessLabel(businessOperator.social_access_status))}</p><p>Accounts ready to use: ${escapeHtml(
+      businessOperator.access_ready_count ?? 0,
+    )}</p></article>
   </div>`;
+}
+
+/**
+ * Access sub-status enum to plain language. Exported because check-founder-operator-
+ * bootstrap.ts asserts that the cockpit reflects ledger state, and it must compare the
+ * translated label rather than the raw enum now that founders read this section.
+ */
+export function accessLabel(value: unknown): string {
+  const labels: Record<string, string> = {
+    not_started: "Not set up yet",
+    partial: "Partly set up",
+    blocked: "Waiting on you",
+    deferred: "Postponed on purpose",
+    not_needed: "Not needed",
+    done: "Ready",
+  };
+  return labels[String(value ?? "")] ?? "Not set up yet";
 }
 
 function asArray(value: unknown): unknown[] {

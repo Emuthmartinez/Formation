@@ -6,7 +6,7 @@ At each founder decision, translate the internal phase into a plain-language lab
 
 ## Contents
 
-- Launch Tiers
+- Launch Scopes
 - Phase 0: Orientation And Scaffold
 - Phase 0a: Project State And Autonomy
 - Phase 0b: Tool Access And Fallback Decisions
@@ -27,9 +27,9 @@ At each founder decision, translate the internal phase into a plain-language lab
 - Phase 6: Post-Launch UGC/Fastlane Growth Engine
 - Phase 6b: Post-Launch Operations
 
-## Launch Tiers
+## Launch Scopes
 
-The full phase flow below produces thirty-plus artifacts. That is right for a flagship subscription launch; it is overproduction for a simple utility shipped to learn. Scope the artifact burden to the product with an explicit tier, confirmed with the founder at orient (AskUserQuestion when available) and recorded as `project.launch_tier` in `PROJECT_STATE.yaml`:
+The full phase flow below produces thirty-plus artifacts. That is right for a flagship subscription launch; it is overproduction for a simple utility shipped to learn. Scope the artifact burden to the product with an explicit tier, confirmed with the founder at orient (AskUserQuestion when available) and recorded as `project.launch_scope` in `PROJECT_STATE.yaml`:
 
 - **full** (default): every lane runs; the Deliverable Standard in `SKILL.md` applies in full.
 - **lite**: the core spine runs — state/cockpit, paid-tool routing, secrets, security baseline, research-backed spec, 11-star slice, design, onboarding, store readiness (including signing and the privacy packet), revenue, privacy/terms, engineering with proof, and post-launch ops. The breadth lanes are deferred *through the normal deferral mechanics* — `deferred` status with a dated reason — typically: paid UA, viral growth loop, launch narrative, localization market research beyond the home storefront, UGC/Fastlane engine, lifecycle email beyond transactional, and GEO/SEO beyond the basic landing metadata.
@@ -51,7 +51,7 @@ Do:
 - Identify current phase, business name, target platform, monetization model, data/backend assumptions, and launch surface.
 - Load `project-state.md` and `autonomy-modes.md`.
 - Create or refresh `PROJECT_STATE.yaml` from `templates/PROJECT_STATE.yaml`, set the current autonomy mode, and record lane status honestly.
-- Confirm the launch tier with the founder (see Launch Tiers above) and record `project.launch_tier`; defer lite-tier breadth lanes with dated reasons.
+- Confirm the launch scope with the founder (see Launch Scopes above) and record `project.launch_scope`; defer essentials-scope breadth lanes with dated reasons.
 - Render `launch-cockpit.html` once the first state pass exists.
 - Create `BUSINESS_ACCESS.md` and `operations/business-access.json`; present one phase-labeled founder question with selectable choices, consequences, a safe defer route, and the agent action that follows it.
 - Create tasks/checkpoints for the engagement; block later phases on the right prior outputs.
@@ -739,7 +739,7 @@ Do:
 - Run the retention review: D0/D7/D30 cohorts, first-renewal inflection, voluntary-vs-involuntary churn split, reactivation posture.
 - Verify support routing end to end (support@ alias, refund path, FAQ, escalation, data-deletion requests).
 - Hand growth tactics to the existing lanes: `paid-user-acquisition.md` stop/scale rules, `fastlane-growth-ops.md` weekly loop, `aso-store-ops.md` monitoring.
-- Fill `LAUNCH_RETRO.md` at launch +7 days; refresh at day 30 and day 90; revisit lite-tier deferred lanes at the day-30 retro.
+- Fill `LAUNCH_RETRO.md` at launch +7 days; refresh at day 30 and day 90; revisit essentials-scope deferred lanes at the day-30 retro.
 - Run `npm run check:post-launch -- --root . --state PROJECT_STATE.yaml` before calling the lane done.
 
 Outputs:

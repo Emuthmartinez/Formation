@@ -79,6 +79,35 @@ export const autonomyModes = new Set(["scout", "draft", "prepare", "apply", "mut
  */
 export const launchTiers = new Set(["full", "lite"]);
 
+/**
+ * Launch scope, the founder-facing name for the same idea. "Tier" collided with the
+ * founder's own app pricing tiers, which is a completely different decision that happened
+ * to share a word.
+ *
+ * Both keys and both value sets stay valid on read. A business repo launched before this
+ * rename still has `project.launch_tier: lite` on disk, and silently failing its state
+ * file to gain a nicer word would be a bad trade. New state files use
+ * `project.launch_scope` with "full" or "essentials"; readers go through
+ * resolveLaunchScope.
+ */
+export const launchScopes = new Set(["full", "essentials"]);
+
+/** Legacy value → current value, so "lite" keeps working wherever it is already written. */
+export const launchScopeAliases: Record<string, string> = { lite: "essentials" };
+
+/** Every accepted spelling, for validation messages and error text. */
+export const acceptedLaunchScopeValues = [...launchScopes, ...Object.keys(launchScopeAliases)];
+
+/**
+ * Reads the launch scope from either key and normalizes legacy values. Returns undefined
+ * when neither key is present, which is a valid state (the scope is confirmed at orient).
+ */
+export function resolveLaunchScope(scopeValue: string | undefined, tierValue: string | undefined): { raw: string; normalized: string } | undefined {
+  const raw = scopeValue ?? tierValue;
+  if (raw === undefined) return undefined;
+  return { raw, normalized: launchScopeAliases[raw] ?? raw };
+}
+
 export const requiredLanes = [
   "paid_tool_routing",
   "secrets",

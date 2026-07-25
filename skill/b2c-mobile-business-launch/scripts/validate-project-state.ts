@@ -9,7 +9,9 @@ import {
   isRecord,
   isPastOrientPhase,
   issue,
-  launchTiers,
+  launchScopes,
+  acceptedLaunchScopeValues,
+  resolveLaunchScope,
   loadProjectState,
   parseCliArgs,
   reportAndExit,
@@ -40,15 +42,18 @@ if (state) {
     issues.push(issue("error", "autonomy.mode.invalid", `autonomy.mode must be one of ${Array.from(autonomyModes).join(", ")}.`, "PROJECT_STATE.yaml"));
   }
 
-  // Launch tier is optional (defaults to full) but must be a known value when present,
-  // so a typo cannot silently exempt lanes from coverage expectations.
-  const launchTier = asString(getPath(state, "project.launch_tier"));
-  if (launchTier !== undefined && !launchTiers.has(launchTier)) {
+  // Launch scope is optional (defaults to full) but must be a known value when present,
+  // so a typo cannot silently exempt lanes from coverage expectations. Both the current
+  // key (project.launch_scope) and the legacy one (project.launch_tier) are read, and
+  // "lite" still resolves to "essentials", so a business repo launched before the rename
+  // keeps validating.
+  const launchScope = resolveLaunchScope(asString(getPath(state, "project.launch_scope")), asString(getPath(state, "project.launch_tier")));
+  if (launchScope !== undefined && !launchScopes.has(launchScope.normalized)) {
     issues.push(
       issue(
         "error",
-        "project.launch_tier.invalid",
-        `project.launch_tier must be one of ${Array.from(launchTiers).join(", ")} when present.`,
+        "project.launch_scope.invalid",
+        `project.launch_scope must be one of ${acceptedLaunchScopeValues.join(", ")} when present.`,
         "PROJECT_STATE.yaml",
       ),
     );

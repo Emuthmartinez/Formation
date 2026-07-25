@@ -82,6 +82,8 @@ Automation: asc metadata dry-run path or manual only
 Status: ready | blocked | founder approval needed | verified in console
 ```
 
+Before filling in any pasted field above — promotional text, description, keyword terms, or What's New copy — load `references/no-slop-writing.md`; its §7 covers the App Store title/subtitle/keyword character and byte limits specifically, and the description body should read in the business's `BRAND.md` voice, not generic ASO copy.
+
 Cover at minimum:
 - app information: name, subtitle, category, age rating, privacy policy URL, privacy choices URL, license/EULA, content rights, support URL, marketing URL
 - version page: promotional text, description, keyword field, screenshots, app previews, build, review notes, demo account, version release option
@@ -236,6 +238,7 @@ Do not call the App Store listing ready unless:
 - required reason API declarations, third-party SDK privacy manifests/signatures, Xcode privacy report, protected-resource purpose strings, ATT, App Privacy labels, account deletion, review notes, and archive/upload warnings are reconciled before App Store Connect upload
 - the App Review Information Notes packet is written (purpose+audience, setup/access instructions, demo credentials OR an explicit no-login "no account, no demo needed" confirmation with the demo-account-required flag cleared, test devices+OS, external services, regional differences, regulated-material proof) — empty notes or a missing no-login confirmation cause a Guideline 2.1 "Information Needed" rejection (failure card: `asc-review-information-missing`)
 - every **promoted** in-app purchase/subscription has a unique 1024×1024 promotional image that depicts that specific product — never the app icon and never a duplicate across products — or the promotional image is removed for products that will not be promoted (failure card: `asc-promoted-iap-image-duplicate`; Guideline 2.3.2). Produce each image via `higgsfield generate create gpt_image_2 --aspect_ratio 1:1` with a per-product DESIGN.md brief (palette, product name, key benefit, banned aesthetics, intended surface: promoted-IAP). Spend-confirm before generating; record each output in `CONTENT_ASSETS.md` with `prompt_brief` and approval gate. Cross-ref `app-store-connect-cli.md` for the ASC upload route and `revenue-monetization.md` for product/entitlement source of truth. See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md` as a spend-reduction option at the spend-confirmation prompt.
+- listing copy (promotional text, description, keywords, What's New notes) passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` in the business's `BRAND.md` voice before the packet is called ready
 - default listing fields are paste-ready with character/byte counts
 - App Privacy answers are derived from real data inventory and third-party partners
 - pricing/subscriptions/products match RevenueCat/Stripe/web funnel/paywall/legal copy

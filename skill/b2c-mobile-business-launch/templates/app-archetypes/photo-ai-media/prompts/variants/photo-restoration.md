@@ -1,6 +1,6 @@
 # Variant — Photo Restoration
 
-Apply after the base. Slims the product to a single-image enhance/restore utility: upload a damaged, blurry, or faded photo → get a restored version. No prompts, no styles, no identity training — one input, one transformation, one reveal. The simplest shape in the category and deliberately **lite-tier friendly**: it pairs with `launch_tier: lite` when the founder wants a focused utility instead of a studio.
+Apply after the base. Slims the product to a single-image enhance/restore utility: upload a damaged, blurry, or faded photo → get a restored version. No prompts, no styles, no identity training — one input, one transformation, one reveal. The simplest shape in the category and deliberately **essentials-scope friendly**: it pairs with `launch_scope: lite` when the founder wants a focused utility instead of a studio.
 
 ```
 Slim the generation product into a single-purpose photo restoration utility.
@@ -26,7 +26,7 @@ Changes from the base:
 
 ## Skill-integration notes
 
-- This is the variant to suggest when the founder's request and budget point at `launch_tier: lite`: fewest systems (prompts 00–04 + 08, with 06 in its simplest pack form), fastest path to the wow moment, and the easiest store-review story. Record the tier in `PROJECT_STATE.yaml`.
+- This is the variant to suggest when the founder's request and budget point at `launch_scope: lite`: fewest systems (prompts 00–04 + 08, with 06 in its simplest pack form), fastest path to the wow moment, and the easiest store-review story. Record the tier in `PROJECT_STATE.yaml`.
 - The fixed-parameter, no-re-roll design *lowers* the Variable Reward exposure — say so in the ethics artifact rather than skipping the card: the reveal is still emotionally engineered (family photos cut deep) and still needs its attestation, escape hatch, and honest progress per `ethics-guardrail.md`.
 - Old family photos are often of deceased or non-consenting relatives; keep the rights attestation from prompt 08 in its simplified form and the takedown path intact (`privacy-terms.md`).
 - Sharing restored family photos is a strong organic loop — the prompt 07 before/after share formats apply unchanged if the founder selects sharing.

@@ -1,6 +1,6 @@
 # Variant — Simple Counter / Tracker Utility
 
-Apply *instead of* growing the base — this variant **strips, not adds**. For a single-purpose tracker (water intake, days-since-X, pushups, "did I take my meds"), most of the pack is overproduction. Pair it with `launch_tier: lite` in `PROJECT_STATE.yaml`: one tracked thing, one screen, shipped fast to learn.
+Apply *instead of* growing the base — this variant **strips, not adds**. For a single-purpose tracker (water intake, days-since-X, pushups, "did I take my meds"), most of the pack is overproduction. Pair it with `launch_scope: lite` in `PROJECT_STATE.yaml`: one tracked thing, one screen, shipped fast to learn.
 
 ```
 Strip the habit app down to a single-purpose counter/tracker utility.
@@ -21,7 +21,7 @@ Cut:
 - Social accountability (prompt 07), programs, weekly review
 - Streak mechanics by default: show a simple total and a 30-day mini-history
   instead. If the founder explicitly wants a streak, it carries the full
-  prompt 03/04 ethics contract (free recovery, no guilt copy) — a lite tier
+  prompt 03/04 ethics contract (free recovery, no guilt copy) — a essentials scope
   does not waive it
 
 The result should be one screen a user can open, tap, and close in three
@@ -30,7 +30,7 @@ seconds. Resist re-adding features; the speed IS the product.
 
 ## Skill-integration notes
 
-- This is the `launch_tier: lite` shape (`launch-phases.md`): defer breadth lanes with dated reasons in `PROJECT_STATE.yaml`, but remember the never-deferred set — revenue (if it charges), privacy/legal, security (RLS still tested), signing, and store lanes still apply in full.
+- This is the `launch_scope: lite` shape (`launch-phases.md`): defer breadth lanes with dated reasons in `PROJECT_STATE.yaml`, but remember the never-deferred set — revenue (if it charges), privacy/legal, security (RLS still tested), signing, and store lanes still apply in full.
 - Dropping streaks by default removes the HIGH-risk card and its attestation burden — the main reason this variant ships faster. Re-adding a streak re-adds the full `ethics-guardrail.md` contract; the tier does not waive ethics.
 - Timezone-correct local dates still matter (a water counter that resets at the wrong midnight is broken), so prompts 01/02's day model survives the strip.
 - A utility this small is a strong one-time-purchase or low-friction-paywall candidate rather than a subscription — surface the `revenue-monetization.md` trade-offs and let the founder decide; do not default to a subscription out of habit.

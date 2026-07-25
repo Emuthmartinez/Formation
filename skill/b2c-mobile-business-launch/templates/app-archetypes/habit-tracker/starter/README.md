@@ -36,7 +36,7 @@ Each prompt customizes a specific area. Run them in pack order (see [`../README.
 | `06-paywall-and-monetization.md` | `lib/billing/stripe.ts`, `app/api/stripe/checkout/route.ts`, `app/api/stripe/webhook/route.ts`; native IAP path via `lib/billing/revenuecat.ts` + `app/api/revenuecat/webhook/route.ts`. |
 | `07-social-accountability.md` | new shared-habit/buddy tables (owner + member RLS with tests) and invite events. |
 | `variants/wellness-coach.md` | adds program/day-plan tables and guided content on top of the same check-in loop. |
-| `variants/simple-counter-utility.md` | strips to a single-habit counter (lite launch tier); the schema core carries over. |
+| `variants/simple-counter-utility.md` | strips to a single-habit counter (lite launch scope); the schema core carries over. |
 
 ## What is wired
 

@@ -17,12 +17,12 @@ Before building, confirm the product shape with the founder via **AskUserQuestio
 1. **Habit model** — what is the user tracking?
    - **Flexible self-defined habits** (Streaks/Habitica model): the user creates habits with cadences. The pack's base.
    - **Guided program** (coach model): the app supplies structured programs and day plans; content is the product. → `variants/wellness-coach`.
-   - **Single-purpose counter** (utility model): one tracked thing, one screen. Pairs with `launch_tier: lite`. → `variants/simple-counter-utility`.
+   - **Single-purpose counter** (utility model): one tracked thing, one screen. Pairs with `launch_scope: lite`. → `variants/simple-counter-utility`.
 2. **Primary surface** — **Web / PWA** (the pack's default stack: Next.js App Router + Supabase + Vercel) or **native mobile**? Be honest here: habit apps live on phones. Reliable reminders, lock-screen widgets, and local notifications are the retention surface and they push toward native — if the founder picks native, the Apple/Play store lanes in `SKILL.md` apply in full and digital subscriptions go through IAP/RevenueCat. The schema, RLS, and server-side streak engine carry over unchanged; the client prompts are web prompts and must be adapted.
 3. **Which optional systems are in V1?** (multi-select) — stats/insights (prompt 05), monetization (prompt 06), social accountability (prompt 07).
 4. **Niche** — who is this for, and which habit or routine? (Free text. Feeds prompt 00 positioning. A specific niche is the whole strategy; "track anything" loses to free incumbents and the phone's built-in reminders.)
 
-Record the answers in `PROJECT_STATE.yaml` (e.g. `lanes.product.archetype: habit-tracker`, `habit_model`, `primary_surface`, `optional_systems`, plus `project.launch_tier: lite` if the counter-utility variant is chosen) so later sessions do not re-litigate the shape.
+Record the answers in `PROJECT_STATE.yaml` (e.g. `lanes.product.archetype: habit-tracker`, `habit_model`, `primary_surface`, `optional_systems`, plus `project.launch_scope: lite` if the counter-utility variant is chosen) so later sessions do not re-litigate the shape.
 
 ## Runnable Starter
 
@@ -53,7 +53,7 @@ Build one system at a time and test it. Prompts live in [`../templates/app-arche
 | 06 | `06-paywall-and-monetization` (optional) | revenue | `revenue-monetization.md` §10, `REVENUE_OPS.md` |
 | 07 | `07-social-accountability` (optional) | accountability + growth | `viral-growth-loops.md`, abuse controls |
 
-Variants: [`variants/wellness-coach`](../templates/app-archetypes/habit-tracker/prompts/variants/wellness-coach.md) (guided programs, content as product) and [`variants/simple-counter-utility`](../templates/app-archetypes/habit-tracker/prompts/variants/simple-counter-utility.md) (strip to a lite-tier single-purpose utility).
+Variants: [`variants/wellness-coach`](../templates/app-archetypes/habit-tracker/prompts/variants/wellness-coach.md) (guided programs, content as product) and [`variants/simple-counter-utility`](../templates/app-archetypes/habit-tracker/prompts/variants/simple-counter-utility.md) (strip to a essentials-scope single-purpose utility).
 
 Step 0 (positioning) is strategic work for the **web interface / Claude.ai**. The rest are Claude Code build prompts.
 
@@ -79,7 +79,7 @@ Step 0 (positioning) is strategic work for the **web interface / Claude.ai**. Th
 
 Before calling a habit-tracker build ready:
 
-- [ ] Habit model, primary surface, optional systems, and niche confirmed via AskUserQuestion and recorded in `PROJECT_STATE.yaml` (with `launch_tier: lite` if the counter variant applies).
+- [ ] Habit model, primary surface, optional systems, and niche confirmed via AskUserQuestion and recorded in `PROJECT_STATE.yaml` (with `launch_scope: lite` if the counter variant applies).
 - [ ] Schema (prompt 01) reconciled with `TECH_SPEC.md`; every user-data table has a tested owner-only RLS policy referenced from `SECURITY.md`; one-check-in-per-day uniqueness enforced in the database.
 - [ ] Timezone captured at signup; streaks computed server-side from local dates; DST/timezone-change/late-night test cases pass in CI.
 - [ ] The check-in loop is run through `11_STAR_EXPERIENCE.md`; Commitment and Streak/Loss-Aversion cards have complete attestation blocks (escape hatch, counter-metric, truthfulness proof, recovery mechanism) passing `check:emotional-design`.

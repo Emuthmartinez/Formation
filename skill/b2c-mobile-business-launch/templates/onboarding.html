@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Onboarding Flow Proof</title>
+    <title>How We Checked The Onboarding Flow</title>
     <style>
       :root {
         --bg: #f6f2ea;
@@ -84,7 +84,7 @@
   <body>
     <main>
       <div class="copy">
-        <p class="eyebrow">Onboarding proof</p>
+        <p class="eyebrow">Onboarding check</p>
         <h1>First value before paywall, App Review popup immediately after value reveal.</h1>
       </div>
       <section class="flow" aria-label="Onboarding sequence">
@@ -94,7 +94,7 @@
             <h2>Show the app's value promise</h2>
             <p class="muted">Use product-specific copy and truthful app UI or demo media.</p>
           </div>
-          <p class="pill">onboarding_started</p>
+          <p class="pill"><code>onboarding_started</code></p>
         </article>
         <article class="screen">
           <p class="eyebrow">02 Personalization</p>
@@ -102,7 +102,7 @@
             <h2>Ask only useful setup questions</h2>
             <p class="muted">Include attribution with stable source keys and Other text.</p>
           </div>
-          <p class="pill">attribution_source_selected</p>
+          <p class="pill"><code>attribution_source_selected</code></p>
         </article>
         <article class="screen">
           <p class="eyebrow">03 First value / value-reveal</p>
@@ -110,7 +110,7 @@
             <h2>Reveal the personalized plan or first win</h2>
             <p class="muted">The user sees enough value to judge the product before paywall or activation detours.</p>
           </div>
-          <p class="pill">personalized_plan_viewed</p>
+          <p class="pill"><code>personalized_plan_viewed</code></p>
         </article>
         <article class="screen">
           <p class="eyebrow">04 App Review popup</p>
@@ -118,7 +118,7 @@
             <h2>Request native App Review after first value</h2>
             <p class="muted">Automatically call SKStoreReviewController or Google Play In-App Review after the value screen is mounted and visible.</p>
           </div>
-          <p class="pill">review_prompt_eligible -> review_prompt_requested</p>
+          <p class="pill"><code>review_prompt_eligible</code> -> <code>review_prompt_requested</code></p>
         </article>
         <article class="screen">
           <p class="eyebrow">05 Paywall or activation</p>
@@ -126,7 +126,7 @@
             <h2>Convert or complete the first action</h2>
             <p class="muted">Continue normally if the platform suppresses the native review sheet.</p>
           </div>
-          <p class="pill">paywall_viewed / activation_task_completed</p>
+          <p class="pill"><code>paywall_viewed</code> / <code>activation_task_completed</code></p>
         </article>
       </section>
     </main>

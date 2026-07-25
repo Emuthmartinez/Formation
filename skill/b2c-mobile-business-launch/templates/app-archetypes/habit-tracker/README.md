@@ -35,4 +35,4 @@ Next.js App Router + Supabase (Postgres, Auth) + Vercel, shipped as web/PWA — 
 | File | Turns the base into |
 |---|---|
 | [`prompts/variants/wellness-coach.md`](prompts/variants/wellness-coach.md) | Guided wellness/coaching program app (programs, day plans, content) |
-| [`prompts/variants/simple-counter-utility.md`](prompts/variants/simple-counter-utility.md) | Single-purpose counter/tracker utility (pairs with `launch_tier: lite`) |
+| [`prompts/variants/simple-counter-utility.md`](prompts/variants/simple-counter-utility.md) | Single-purpose counter/tracker utility (pairs with `launch_scope: lite`) |

@@ -42,7 +42,7 @@
             "description": "Use a working name now so account and product research can stay organized.",
             "consequence": "The name remains provisional until collision and storefront checks are complete.",
             "agentActionNext": "Inspect current repo and public identity state, then guide the first secure business account step.",
-            "evidenceEffect": "The business identity gate can move forward with a clearly provisional name.",
+            "evidenceEffect": "We can keep moving with a working name and change it later.",
             "recommended": true
           },
           {
@@ -52,7 +52,7 @@
             "description": "Keep the name open while the agent continues work that does not depend on public identity.",
             "consequence": "Account creation and public naming remain blocked, but reversible product inspection continues.",
             "agentActionNext": "Continue repo and product-state inspection without creating identity-bound accounts or public assets.",
-            "evidenceEffect": "The identity lane remains partial and cannot be used as launch-ready proof.",
+            "evidenceEffect": "Naming stays unfinished, so we cannot call this part done yet.",
             "recommended": false
           }
         ]
@@ -76,7 +76,7 @@
     "gateHistory": [],
     "nextFounderAction": "Tell me the working business or app name you want to use; I will explain and handle the rest one step at a time.",
     "nextAgentAction": "Inspect current repo and public identity state, then guide the first secure business account step.",
-    "nextBusinessOperation": "After the identity gate clears, continue into secure account setup, research, social profiles, content, support, analytics, store work, and launch operations in priority order."
+    "nextBusinessOperation": "Once we have a working name, I move on to secure account setup, market research, your social profiles, content, support, analytics, store work, and launch, in that order."
   },
   "security": {
     "delegatedAccessFirst": true,

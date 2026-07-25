@@ -409,7 +409,7 @@ function reconcileFixture(root: string, ledger: Record<string, unknown>): void {
   );
   const cockpitPath = path.join(root, "launch-cockpit.html");
   const cockpitSource = readFileSync(cockpitPath, "utf8");
-  const marker = "<h2>Agent Operations</h2>";
+  const marker = "<h2>Behind The Scenes</h2>";
   const markerIndex = cockpitSource.indexOf(marker);
   const cockpitHead = cockpitSource.slice(0, markerIndex + marker.length);
   const cockpitTail = cockpitSource

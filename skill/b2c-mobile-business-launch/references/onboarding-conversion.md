@@ -36,6 +36,8 @@ Create or update `ONBOARDING.md` when an app has more than one setup screen, ask
 
 Use Refero as evidence, not as replacement doctrine. The onboarding playbook in this file remains the default conversion contract. Refero should help find concrete examples for sequencing, copy density, state handling, and recovery paths; it should not remove early self-reported attribution, the native App Review popup immediately after first value, paywall proof, restore purchases, privacy/terms links, or backend attribution persistence unless a deliberate experiment is documented.
 
+Before drafting any onboarding question copy, mascot line, demo-video caption, paywall headline, or closing-offer copy, load `references/no-slop-writing.md`; keep the tone `11_STAR_EXPERIENCE.md` and `BRAND.md` set for this product, not generic onboarding copy.
+
 Onboarding is where most of the Experience Cards fire. When the 11-star target is 6-star or higher, load [`emotional-design-system.md`](emotional-design-system.md) for the card-timing contract and reflect it here: the Commitment Card fires at the first personalization/goal question; the Perceived Effort Delay Card fires at plan/result generation; the Intent Mirroring Card fires after first value and immediately before the paywall (never on the paywall screen itself or any cancel flow); the native App Review popup fires at or just after the emotional peak. These moments belong in `EMOTIONAL_DESIGN.md`'s Card Application Map with a PostHog event each, and the onboarding curve must cross positive before the paywall.
 
 Recommended Refero searches when access is available:
@@ -266,3 +268,4 @@ Include dimensions: step_id, answer_key, attribution_source, source_key, source_
 - Analytics events are named before implementation, and every proposed event name is present in `ANALYTICS.md`; no event name is invented during implementation without a prior `ANALYTICS.md` entry.
 - `analytics-plan.html` shows the onboarding and paywall funnel before build handoff.
 - Self-reported attribution passes the data contract: early visible screen, stable source keys, `other` free text, analytics event, PostHog person property, backend/profile persistence, anonymous-to-identified reconciliation, and verification evidence.
+- Onboarding, paywall, and closing-offer copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` in the product's `BRAND.md`/`11_STAR_EXPERIENCE.md` voice.

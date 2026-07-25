@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "private": false,
   "license": "MIT",
   "type": "module",
@@ -15,6 +15,8 @@
     "check:native-ios": "tsx skill/b2c-mobile-business-launch/scripts/check-native-ios-proof.ts",
     "check:agent-operations": "tsx skill/b2c-mobile-business-launch/scripts/check-agent-operations.ts",
     "check:founder-operator": "tsx skill/b2c-mobile-business-launch/scripts/check-founder-operator-bootstrap.ts",
+    "check:founder-copy": "tsx skill/b2c-mobile-business-launch/scripts/check-founder-copy.ts",
+    "check:no-slop": "tsx skill/b2c-mobile-business-launch/scripts/check-no-slop.ts",
     "migrate:founder-gates": "tsx skill/b2c-mobile-business-launch/scripts/migrate-founder-gates.ts",
     "check:asc-command-contract": "tsx skill/b2c-mobile-business-launch/scripts/check-asc-command-contract.ts",
     "check:mobai-proof": "tsx skill/b2c-mobile-business-launch/scripts/check-mobai-proof.ts",

@@ -3,6 +3,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { Ajv2020, type AnySchema, type ErrorObject } from "ajv/dist/2020.js";
 import { asArray, asString, getPath, isRecord, issue, loadProjectState, parseCliArgs, readText, reportAndExit, type Issue } from "./lib/launch-state.js";
+import { accessLabel } from "./lib/founder-gate-presentation.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
@@ -686,11 +687,18 @@ function validateState(
       ),
     );
   }
-  const cockpitSection = cockpit?.split("<h2>Business Operator Bootstrap</h2>")[1]?.split("</section>")[0] ?? "";
+  // Heading is founder-visible copy, so it reads as plain language ("What I Need From
+  // You") rather than as the internal bootstrap name. Renaming it here and in
+  // render-launch-cockpit.ts must stay a single coordinated change: this split is the
+  // only anchor the check has on that section.
+  const cockpitSection = cockpit?.split("<h2>What I Need From You</h2>")[1]?.split("</section>")[0] ?? "";
   if (
-    !cockpitSection.includes(`>${asString(value.status) ?? ""}</span>`) ||
-    !cockpitSection.includes(`Doppler: ${asString(doppler.status) ?? ""}`) ||
-    !cockpitSection.includes(`Social access: ${socialStatus}`) ||
+    // The cockpit still has to reflect ledger state, but a founder reads this section, so
+    // it shows the translated label rather than the raw enum. Compare through the same
+    // accessLabel the renderer uses: the check stays real and the page stays readable.
+    !cockpitSection.includes(`Setup so far: ${accessLabel(value.status)}`) ||
+    !cockpitSection.includes(`Secure key storage: ${accessLabel(doppler.status)}`) ||
+    !cockpitSection.includes(`Social accounts: ${accessLabel(socialStatus)}`) ||
     (hasActiveGate && !cockpitSection.includes(escapeHtml(founderAction))) ||
     !cockpitSection.includes(escapeHtml(agentAction)) ||
     !cockpitSection.includes(escapeHtml(nextBusinessOperation)) ||

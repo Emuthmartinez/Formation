@@ -343,15 +343,39 @@ export function register(h: Harness): void {
     "analytics_catalog.invented_share_event.uncataloged",
   );
 
-  // ── Launch tier state field ───────────────────────────────────────────────
+  // ── Launch scope state field ──────────────────────────────────────────────
+  // Renamed from launch_tier because "tier" collided with the founder's own app pricing
+  // tiers. Three cases matter: an invalid current value fails, an invalid LEGACY value
+  // still fails (a pre-rename business repo is not silently exempted), and the legacy
+  // "lite" value still resolves to a valid scope so those repos keep validating.
 
-  const invalidTier = makeFixture("launch-tier-invalid");
+  const invalidScope = makeFixture("launch-scope-invalid");
   {
-    const state = readState(invalidTier);
-    expectRecord(state.project, "project")["launch_tier"] = "minimal";
-    writeState(invalidTier, state);
+    const state = readState(invalidScope);
+    expectRecord(state.project, "project")["launch_scope"] = "minimal";
+    writeState(invalidScope, state);
   }
-  runFixture("invalid launch tier fails", invalidTier, "validate-project-state.ts", 1, "project.launch_tier.invalid");
+  runFixture("invalid launch scope fails", invalidScope, "validate-project-state.ts", 1, "project.launch_scope.invalid");
+
+  const invalidLegacyTier = makeFixture("launch-tier-legacy-invalid");
+  {
+    const state = readState(invalidLegacyTier);
+    const project = expectRecord(state.project, "project");
+    delete project["launch_scope"];
+    project["launch_tier"] = "minimal";
+    writeState(invalidLegacyTier, state);
+  }
+  runFixture("invalid legacy launch tier still fails", invalidLegacyTier, "validate-project-state.ts", 1, "project.launch_scope.invalid");
+
+  const legacyLiteTier = makeFixture("launch-tier-legacy-lite");
+  {
+    const state = readState(legacyLiteTier);
+    const project = expectRecord(state.project, "project");
+    delete project["launch_scope"];
+    project["launch_tier"] = "lite";
+    writeState(legacyLiteTier, state);
+  }
+  runFixture("legacy lite launch tier still validates", legacyLiteTier, "validate-project-state.ts", 0);
 
   // ── Scope-skip exit regression ────────────────────────────────────────────
   // The skip paths used process.exit(0), which discarded the

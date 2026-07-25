@@ -65,6 +65,7 @@ Acceptance:
 ## 3. Metadata And Keyword Gates
 
 Before locking metadata:
+- load `references/no-slop-writing.md` before drafting name, subtitle, keyword-field terms, or description copy, and run the finished draft through its self-check (§6) before treating metadata as locked; `check:no-slop` gates the mechanical rules
 - run keyword and name collision checks in the target country
 - separate brand language from search language
 - preserve App Store character counts and Play Store indexed-description strategy
@@ -83,6 +84,7 @@ Output:
 Screenshots must sell the product and satisfy platform rules.
 
 Checklist:
+- load `references/no-slop-writing.md` before writing screenshot headline/copy-overlay text — a thumbnail-size overlay has no room for puffery or synonym cycling; keep the app's `BRAND.md` voice, not generic ad copy
 - define the first 3 screenshots as the search/product-page conversion set
 - treat raw app screenshots as proof inputs, not final store creative
 - produce composed final assets with headline, copy overlay, device frame or intentional frameless layout, background/supporting visuals, export dimensions, and visual QA

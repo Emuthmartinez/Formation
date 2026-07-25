@@ -120,6 +120,8 @@ Test:
 
 Define a format as a repeatable structure, not a topic. A format includes hook shape, beat order, product insertion, tension, and CTA mechanic. Steal the skeleton from proven patterns, not the skin, lines, scenes, or copyrighted material.
 
+Before writing scripts for `ugc/script-bank.md`, load `references/no-slop-writing.md` for banned words/patterns and weasel-attribution claims — but the voice being protected here is the creator's own natural spoken voice, not this skill's tone or the app's `BRAND.md`. A script that reads like brand copy instead of a real person talking on camera fails before any slop check does.
+
 Daily research habit:
 - scout TikTok and adjacent niches for 20-30 minutes
 - save repeated structural patterns, not one-off viral videos
@@ -194,7 +196,7 @@ Create these when UGC is in scope:
 - `VIRAL_GROWTH.md`: product-led loop, referral/share mechanics, content format lab, monetization timing, analytics proof, abuse controls, and stop/scale rules when creator content is expected to compound
 - `CONTENT_ASSETS.md`: Remotion/Higgsfield/raw-media route, source inputs, license status, render proof, and output registry when rendered or generated media supports the UGC lane
 - `ugc/creator-list.csv`: creators, platform, handle, geography, personal followers, notes, outreach status
-- `ugc/script-bank.md`: format IDs, hooks, scripts, CTA notes, product insertion notes
+- `ugc/script-bank.md`: format IDs, hooks, scripts, CTA notes, product insertion notes — scripts pass the `no-slop-writing.md` self-check (§6) and `check:no-slop` for claims and patterns while preserving natural creator speech
 - `ugc/tracker.csv` or sheet link: posts, metrics, payouts, format results
 - `ugc/creator-brief.md`: filming rules, disclosure rules, approval flow, account handling, product truth constraints
 - `ugc/weekly-review.md`: current winners, failed hooks, next tests, spend, install/search signals

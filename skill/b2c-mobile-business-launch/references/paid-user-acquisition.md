@@ -62,6 +62,7 @@ Document:
 ## Creative Production System
 
 Before spend, define the first creative batch:
+- before drafting ad headlines or primary/body text, load `references/no-slop-writing.md` — its §7 covers ad headline/primary-text limits; verify current platform character limits via the `ad-creative` skill or platform docs, and lead with the concrete benefit or hook, not a throat-clearing opener
 - 3-5 new assets per week for an early solo cadence
 - one ad group or equivalent simple structure for the first test
 - angle map: pain, aspiration, identity, objection, comparison, proof, result, or use case
@@ -211,6 +212,7 @@ npm run check:paid-ua -- --root .
 - Using RevenueCat products and paywalls without checking whether CPA can fit LTV and trial conversion.
 - Scaling creative volume before the app has real product UI, clear claims, and repeatable angle evidence.
 - Copying a big-team MMP/reporting stack when the first solo test only needs a small complete system.
+- Shipping ad copy that reads like generic ad-speak (weasel attribution, importance puffery) instead of passing the `no-slop-writing.md` self-check and `check:no-slop`.
 
 ## Anti-Patterns (Spend And Sequencing Traps)
 

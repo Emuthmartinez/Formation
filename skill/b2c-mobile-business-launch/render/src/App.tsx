@@ -135,7 +135,6 @@ function DesignRoom({
               <p className="eyebrow">Design Brief</p>
               <h2>{business.designBrief.recommendedStyle || "Style not set"}</h2>
             </div>
-            <span className="stamp">source: {business.designBrief.source}</span>
           </div>
           {business.designBrief.paletteMood ? (
             <p>
@@ -154,6 +153,12 @@ function DesignRoom({
               ))}
             </div>
           ) : null}
+          {business.designBrief.source ? (
+            <details className="techDetails">
+              <summary>Technical details</summary>
+              <p>Style research source: {business.designBrief.source}</p>
+            </details>
+          ) : null}
         </motion.section>
       ) : null}
 
@@ -163,7 +168,7 @@ function DesignRoom({
             <p className="eyebrow">Surface Model</p>
             <h2>Cross-surface state</h2>
           </div>
-          <span className="stamp">{"STATE -> MUTATE -> VERSION -> RENDER"}</span>
+          <span className="stamp">Every screen and page below stays in sync automatically</span>
         </div>
         <motion.div className="metrics" variants={container} initial="hidden" animate="visible">
           {summaries.map(([label, count]) => (
@@ -206,10 +211,10 @@ function DesignRoom({
           <p>{latest?.createdAt ?? ""}</p>
         </article>
         <article className="panel tokenPanel">
-          <p className="eyebrow">Theme Tokens</p>
+          <p className="eyebrow">Colors</p>
           {Object.entries(tokens.tokens.color).slice(0, 8).map(([name, value]) => (
             <span key={name} className="swatch" style={{ ["--swatch" as string]: value }}>
-              {name}
+              {toLabel(name)}
             </span>
           ))}
         </article>
@@ -264,4 +269,10 @@ function msToSeconds(value: string | undefined, fallback: number): number {
 
 function toKebab(value: string) {
   return value.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
+}
+
+/** Turns a camelCase token key (e.g. "surfaceElevated") into a plain label ("Surface elevated") for founder-facing display. */
+function toLabel(value: string) {
+  const spaced = value.replace(/[A-Z]/g, (match) => ` ${match.toLowerCase()}`);
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }

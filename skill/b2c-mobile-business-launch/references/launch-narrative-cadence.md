@@ -116,6 +116,12 @@ Most good companies fail here. The animation is clean and the product is fine, b
 you feel nothing — you read it, think "okay," and scroll. No reaction reads to the algorithm as no
 value. **Shape every launch around a feeling first, the feature second.**
 
+Before drafting the hook, the reply-chain seeds, or any post copy, load `references/no-slop-writing.md`
+for the banned-outright words, empty phrases, and slop patterns (weasel attribution, importance
+puffery, fake-strong verbs). Its channel-specific limits (§7) point back here for post structure and
+defer to this file's stronger no-hashtags/no-emojis/no-link-in-root-post guardrail below — do not let
+a "cut formatting slop" edit soften that rule to "use emoji sparingly."
+
 - **Lead with the emotional state or the broken status quo, then name the product/mechanism.**
   Koji: "AI is making kids dumber" (indictment) → "should be making them geniuses" (hope) → product.
   ChatGPT: "Paperwork is better when you can just talk through it" (use-case feeling) → feature.
@@ -330,4 +336,6 @@ Before calling the launch-narrative lane ready:
 - [ ] All post copy lives in fenced code blocks and passes the copy guardrails (no hashtags, no
       emojis, no link in the main post).
 - [ ] Public claims are limited to what is true and attributable; no unverified view/revenue/credential claims.
+- [ ] All post copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` — banned words, empty phrases, and
+      named patterns removed while the feeling-first hook and POV stay intact.
 - [ ] `npm run check:launch-narrative -- --root .` passes.

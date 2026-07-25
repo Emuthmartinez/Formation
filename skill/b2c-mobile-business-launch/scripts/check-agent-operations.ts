@@ -546,7 +546,10 @@ function validateCrossArtifactState(value: Record<string, unknown>, actions: Rec
   if (!new RegExp(`Status:\\s*${escapeRegex(asString(value.status) ?? "")}`, "i").test(human ?? "")) {
     issues.push(issue("error", "agent_operations.human_status_stale", "AGENT_OPERATIONS.md status must match the structured ledger.", "AGENT_OPERATIONS.md"));
   }
-  const cockpitOps = cockpit?.split("<h2>Agent Operations</h2>")[1]?.split("</section>")[0] ?? "";
+  // Agent bookkeeping now lives behind the cockpit's collapsed technical-details block
+  // under a plainer heading. Renaming it here and in render-launch-cockpit.ts must stay
+  // a single coordinated change: this split is the only anchor the check has.
+  const cockpitOps = cockpit?.split("<h2>Behind The Scenes</h2>")[1]?.split("</section>")[0] ?? "";
   if (
     !cockpitOps.includes(`>${asString(value.status) ?? ""}</span>`) ||
     !cockpitOps.includes(`Capability checked: ${asString(value.capabilityCheckedAt) ?? ""}`) ||

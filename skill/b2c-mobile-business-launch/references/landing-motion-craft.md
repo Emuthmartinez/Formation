@@ -17,6 +17,8 @@ Remotion is the wrong *primary* tool for landing motion: it renders frames, not 
 
 `templates/landing/` ships the reusable sections — Hero (mesh/video, parallax, word stagger, tilt), Marquee, Bento, Scrollytelling, Stats count-up, Testimonials spotlight, Pricing glass + billing toggle, CTA gradient morph — plus `lib/motion-tokens.ts` (SSR-safe token reader) and `motion.css` (js-gated reveal utilities, reduced-motion collapse). Start from the library and customize copy/layout; do not improvise section choreography from scratch. The pack is aesthetic-neutral: warm-editorial and dark-glass brands come out of the same components purely via tokens.
 
+Before drafting copy for any section slot — hero headline/subhead, testimonial spotlight quotes, stats captions, or CTA button/microcopy — load `references/no-slop-writing.md`; keep the brand's voice from `BRAND.md`/`11_STAR_EXPERIENCE.md`, not a flattened landing-page register.
+
 Host: a Next.js App Router project (the archetype starters are the expected hosts) or any React SSR site; Astro via client islands. `motion/react` is mandated for the web surface and **must never be imported by the mobile binary** — `check:template-safety` enforces the boundary (the `templates/landing/` exception is deliberate and web-only).
 
 ## The progressive-enhancement contract (enforceable)
@@ -47,4 +49,5 @@ These live in `state/theme.tokens.json` → promoted into `design-system/tokens.
 - **Type:** self-host the real display webfont (subset, `font-display: swap`, preload). The token fallback stack is for dependency-free proofs only.
 - **Baked hero video:** opt-in per launch through the Remotion lane; always ship a poster and keep the mesh fallback.
 - **Smooth scroll (Lenis):** optional; if adopted it must degrade cleanly, respect reduced motion, and be registered in `source-registry.yaml` before use.
+- **Copy:** section copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` before `check:landing-funnel` runs — brand voice from `BRAND.md` wins over generic landing-page register.
 - **Verification:** run `check:landing-funnel` (deploy gates + GEO/SEO files + copy guardrails + motion craft) before calling the landing lane ready; the LaunchBench scenario `landing-motion-progressive-enhancement-missing` locks the failure mode.

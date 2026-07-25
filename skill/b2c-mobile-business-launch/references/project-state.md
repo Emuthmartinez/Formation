@@ -31,7 +31,7 @@ Lanes are not independent. `SKILL.md`'s Operating Posture rule — "Lock phase o
 
 **A lane may not be `done` while an upstream lane it depends on is `not_started`, `partial`, or `blocked`.**
 
-- `done`, `not_needed`, and `deferred` all satisfy a dependency — the last two are resolved scope decisions (see launch tiers), not gaps.
+- `done`, `not_needed`, and `deferred` all satisfy a dependency — the last two are resolved scope decisions (see launch scopes), not gaps.
 - Working a lane *ahead* of its upstream is fine and common. Declaring it *finished* on a moving input is the drift bug this catches.
 - The edge set ships in the skill (`scripts/lib/launch-state.ts`, `laneDependencies`) rather than in `PROJECT_STATE.yaml`, because an edge set a launch run can edit is an edge set a launch run can delete. It lists direct edges only; transitive ones are implied (`design → product → experience → research`).
 
@@ -72,7 +72,7 @@ If `PRODUCTION_READINESS.md` evidence is produced during an audit session, write
 ## State Rules
 
 - `autonomy.mode` controls what the agent may do without founder approval. See `autonomy-modes.md`.
-- `project.launch_tier` scopes the artifact burden: `full` (default) runs every lane; `lite` defers the named breadth lanes with dated reasons through normal deferral mechanics (see `launch-phases.md` "Launch Tiers"). Only `full`/`lite` are valid; the tier never silently disables a validator.
+- `project.launch_scope` sizes the work to the product: `full` (default) runs every lane; `essentials` defers the named breadth lanes with dated reasons through normal deferral mechanics (see `launch-phases.md` "Launch Scopes"). Only `full`/`essentials` are valid, and the scope never silently disables a validator. It is named scope rather than tier because "tier" collided with the founder's own app pricing tiers, which is an unrelated decision. **Backward compatible:** the legacy `project.launch_tier` key is still read and the legacy value `lite` still resolves to `essentials`, so a business repo launched before the rename keeps validating without a migration. New state files use `launch_scope`.
 - top-level `orchestration` records preflight, strategy, candidate units, parallel-safe units, serialized units, spawned agents, collision checks, output review, state reconciliation, and validators.
 - top-level `compound_engineering` records whether Compound Engineering skills were available, used, blocked, or replaced with an equivalent fallback.
 - top-level `agent_operations` points to the human log and structured ledger, records capability freshness and active approvals, and confirms state reconciliation; use `frontier-agent-operations.md` rather than treating account access as blanket permission.

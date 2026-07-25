@@ -1,14 +1,29 @@
 schema_version: "1"
 updated_at: "2026-07-12"
+# The narrated update the founder reads first, above any table, on launch-cockpit.html.
+# Write these in plain language, in the second person, with no lane ids, phase codes, or
+# status values. Refresh them whenever state changes; check:founder-copy fails on empty
+# or placeholder text once the project is past the orient phase.
+narrative:
+  # What changed since the founder last looked. Name the concrete thing that got done.
+  since_last_time: ""
+  # What the agent is working on right now, in one sentence.
+  right_now: ""
+  # The single thing the founder needs to decide or provide, or that nothing is needed.
+  your_call: ""
+  # The progress beat already spoken, so a milestone is never celebrated twice.
+  last_celebrated_phase: ""
 project:
   name: "App Name"
   slug: "app-name"
   owner: "Founder or team"
   phase: "phase_0_orient"
-  # Launch tier scopes the artifact burden to the product: "full" runs every lane;
-  # "lite" defers the named optional lanes with dated reasons (see launch-phases.md
-  # "Launch Tiers"). Confirm the tier with the founder at orient; record changes here.
-  launch_tier: "full"
+  # Launch scope sizes the work to the product: "full" runs every area; "essentials"
+  # defers the named optional areas with dated reasons (see launch-phases.md). Confirm the
+  # scope with the founder at orient; record changes here. Named "scope" rather than "tier"
+  # because "tier" collides with the founder's own app pricing tiers. The legacy
+  # project.launch_tier key and its "lite" value are still read, so older state files work.
+  launch_scope: "full"
   platforms:
     - ios
   bundle_ids:
@@ -53,7 +68,7 @@ business_operator:
   question_mode: "ask_user_question_when_available"
   next_founder_action: "Tell me the working business or app name you want to use; I will explain and handle the rest one step at a time."
   next_agent_action: "Inspect current repo and public identity state, then guide the first secure business account step."
-  next_business_operation: "After the identity gate clears, continue into secure account setup, research, social profiles, content, support, analytics, store work, and launch operations in priority order."
+  next_business_operation: "Once we have a working name, I move on to secure account setup, market research, your social profiles, content, support, analytics, store work, and launch, in that order."
   state_reconciled: true
 agent_operations:
   status: "not_started"
@@ -397,7 +412,12 @@ tools:
     route: "optional_local_skill_pack"
     docs_checked_at: ""
     required_secrets: []
-    selected_route: "ParthJadhav/app-store-screenshots | equivalent local export board | blocked"
+    # One value, not a pipe-delimited triple. The old form rendered a GitHub username and
+    # two alternatives into a single founder-visible cell.
+    selected_route: "blocked"
+    route_options:
+      - "ParthJadhav/app-store-screenshots"
+      - "equivalent local export board"
     preflight: "Refresh ParthJadhav/app-store-screenshots, confirm real UI captures, app icon, design tokens, 11-star slice, locales/themes, iPhone/iPad support, and whether Higgsfield/Remotion supporting assets need approval."
     board_path: "screenshots/index.html or generated app-store-screenshots workspace"
     state_path: "app-store-screenshots.json"
@@ -503,11 +523,9 @@ proof:
     last_run: ""
     scenarios_passed: []
     scenarios_failed: []
-  commands:
-    - command: ""
-      expected: ""
-      actual: ""
-      evidence: ""
+  # Empty list, not one blank entry. A single all-empty entry defeated the cockpit's own
+  # "not checked yet" fallback and rendered an unlabeled empty box to the founder.
+  commands: []
 open_questions:
   - owner: "founder"
     question: "What decisions still require founder approval?"

@@ -41,6 +41,12 @@ Keep this file as a concise map, not a duplicate manual. Put detailed launch pol
 
 `SKILL.md` is a **router, not a manual** — it loads on every trigger, so its job is the always-on contracts plus one Lane Routing index (route here when / load / produce / gate). Detail belongs in the reference the row points at. `check:reference-size` holds a 45KB entrypoint budget on freeze-and-subtract terms: a new lane row is paid for by compressing or relocating existing entrypoint text, never by raising the ceiling. Do not reintroduce a second enumeration of the same routing (the old "Start Here" narrative and "When To Load References" list said the same thing twice and drifted).
 
+## Founder-Facing Copy
+
+Internal vocabulary is for agents and validators, never for founders. `scripts/lib/founder-copy.ts` is the only sanctioned path from machine state to founder-visible text; every founder-facing renderer imports from it. Adding a lane, status, phase, autonomy mode, or provider route means adding its label there **in the same commit** — `check:founder-copy` proves coverage and fails the build when a raw identifier, phase code, status enum, or banned internal word reaches a founder-visible surface. When a founder-visible heading is renamed, grep `scripts/` first: `check-founder-operator-bootstrap.ts` and `check-agent-operations.ts` both split the rendered cockpit on a literal `<h2>` string, so the rename and the validator update are one commit or the audit breaks.
+
+Writing quality is enforced, not advised. `references/no-slop-writing.md` holds the banned words, named slop patterns, and per-channel limits for everything this skill writes and everything it generates for a launched business; the rules are adapted from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT). `check:no-slop` **parses its rule table out of that reference** rather than duplicating it, so edit the reference and the gate follows. It errors on shipped copy surfaces and warns on guidance prose, and it deliberately does not enforce the judgment-dependent rules — turning "cut the adverb when it adds nothing" into a regex would flatten brand voice, which is the failure the source skill warns about.
+
 ## Commands
 
 From repo root:
@@ -67,6 +73,8 @@ npm run check:asc-command-contract -- --skill-root skill/b2c-mobile-business-lau
 npm run check:mobai-proof -- --skill-root skill/b2c-mobile-business-launch --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
 npm run check:token-promotion -- --root skill/b2c-mobile-business-launch/templates
 npm run check:template-safety
+npm run check:founder-copy -- --root skill/b2c-mobile-business-launch/templates --skill-root skill/b2c-mobile-business-launch
+npm run check:no-slop -- --root skill/b2c-mobile-business-launch/templates --skill-root skill/b2c-mobile-business-launch
 npm run check:onboarding -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
 npm run check:post-launch -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
 npm run check:google-play -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml

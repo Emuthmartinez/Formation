@@ -49,6 +49,7 @@ Write content for both humans and AI answer engines:
 - cite or link evidence for claims; unsupported claims become risks in `LEGAL_REVIEW.md` or `LAUNCH.md`
 - keep brand/entity names consistent across site, App Store metadata, schema, `llms.txt`, and social profiles
 - avoid thin marketing pages that have no extractable factual answers
+- before drafting title tags, meta descriptions, or answer-style sections, load `references/no-slop-writing.md`; weasel attribution and importance puffery here are also a copy-compliance risk (see §4 below), not just style noise
 
 ## 3a. Landing Craft: Motion And UI Generation
 
@@ -61,7 +62,7 @@ Landing pages and funnels are web surfaces, so framer-motion / the `motion` libr
 
 ## 4. Copy Compliance Pre-Edit Scan
 
-Run this scan before writing or accepting any landing copy, not only before deploy. These are trust-breaking patterns that have required founder corrections after deployment.
+Run this scan before writing or accepting any landing copy, not only before deploy. These are trust-breaking patterns that have required founder corrections after deployment. Run `references/no-slop-writing.md`'s self-check (§6) and `check:no-slop` alongside this scan — weasel attribution and importance puffery are both style slop and a compliance risk here.
 
 **False or unverifiable claims — do not write without live proof:**
 - Superlatives tied to a ranked cohort: "Top N unlock", "Top 100 referrers get", "first N users receive". Remove unless the waitlist system actively enforces the cutoff and the size is not invented.
