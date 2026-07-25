@@ -8,7 +8,9 @@ New contributor (human or agent)? Start with [`CONTRIBUTING.md`](CONTRIBUTING.md
 
 ## Repo Map
 
-- `README.md`: public overview and maintainer commands.
+- `README.md`: public overview. Keep it short and route depth elsewhere; the full command and gate reference lives in `docs/VALIDATORS.md`.
+- `docs/VALIDATORS.md`: every validator, renderer, and eval command with what it checks. Add a row here when you add a gate.
+- `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`: contributor-facing surfaces. Root `SECURITY.md` covers this repo's validators, workflows, and dependency chain, and is a different document from the shipped `templates/SECURITY.md` security release plan.
 - `skill/b2c-mobile-business-launch/SKILL.md`: skill entrypoint and progressive-disclosure routing.
 - `skill/b2c-mobile-business-launch/skill-version.json`: installed-runtime freshness manifest.
 - `skill/b2c-mobile-business-launch/references/`: detailed launch, provider, source freshness, and maintenance references.
@@ -45,7 +47,7 @@ Keep this file as a concise map, not a duplicate manual. Put detailed launch pol
 
 Internal vocabulary is for agents and validators, never for founders. `scripts/lib/founder-copy.ts` is the only sanctioned path from machine state to founder-visible text; every founder-facing renderer imports from it. Adding a lane, status, phase, autonomy mode, or provider route means adding its label there **in the same commit** — `check:founder-copy` proves coverage and fails the build when a raw identifier, phase code, status enum, or banned internal word reaches a founder-visible surface. When a founder-visible heading is renamed, grep `scripts/` first: `check-founder-operator-bootstrap.ts` and `check-agent-operations.ts` both split the rendered cockpit on a literal `<h2>` string, so the rename and the validator update are one commit or the audit breaks.
 
-Writing quality is enforced, not advised. `references/no-slop-writing.md` holds the banned words, named slop patterns, and per-channel limits for everything this skill writes and everything it generates for a launched business; the rules are adapted from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT). `check:no-slop` **parses its rule table out of that reference** rather than duplicating it, so edit the reference and the gate follows. It errors on shipped copy surfaces and warns on guidance prose, and it deliberately does not enforce the judgment-dependent rules — turning "cut the adverb when it adds nothing" into a regex would flatten brand voice, which is the failure the source skill warns about.
+Writing quality is enforced, not advised. `references/no-slop-writing.md` holds the banned words, named slop patterns, and per-channel limits for everything this skill writes and everything it generates for a launched business; the rules are adapted from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT). `check:no-slop` **parses its rule table out of that reference** rather than duplicating it, so edit the reference and the gate follows. It errors on shipped copy surfaces, errors on this repo's own public docs (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, scanned via `--repo-root`), warns on guidance prose and on `AGENTS.md`/`CLAUDE.md`, and it deliberately does not enforce the judgment-dependent rules — turning "cut the adverb when it adds nothing" into a regex would flatten brand voice, which is the failure the source skill warns about.
 
 ## Commands
 

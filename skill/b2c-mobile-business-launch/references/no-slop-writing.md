@@ -31,6 +31,8 @@ Brand voice sets the target. This file's job is removing what an AI defaults to 
 
 Run the same rules against both. The difference is whose voice you are protecting (this skill's own vs. the launched business's `BRAND.md`) and which channel limits apply.
 
+There is a third surface the gate also covers: this repo's own public docs (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` at error, `AGENTS.md` and `CLAUDE.md` at warning). A skill that ships a writing standard and exempts its own front door from it is enforcing words rather than work. Same rules, same voice as founder-facing copy: direct, concrete, no filler.
+
 ## 3. Editing Principles — Adapted
 
 - **Preserve the writer's real voice.** Notice the draft's vocabulary, cadence, bluntness, humor, and level of polish before touching it. Keep what is personal to the writer or the brand; do not make every line equally tidy.

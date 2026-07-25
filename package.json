@@ -1,9 +1,34 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.25.0",
+  "version": "0.26.0",
+  "description": "An agent skill that takes a consumer mobile app from idea to a launched business, with deterministic validators between every claim and done.",
+  "keywords": [
+    "claude-code",
+    "codex",
+    "agent-skill",
+    "mobile",
+    "ios",
+    "app-store",
+    "launch",
+    "b2c",
+    "revenuecat",
+    "posthog"
+  ],
+  "homepage": "https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/issues"
+  },
+  "author": "Emuthmartinez",
   "private": false,
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "validate:skill": "f=\"$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py\"; if [ -f \"$f\" ]; then uv run --with pyyaml python \"$f\" skill/b2c-mobile-business-launch; else echo 'skill-creator quick_validate not installed; skipping maintainer-only skill lint (expected outside the author machine)'; fi",
     "validate:launch-state": "tsx skill/b2c-mobile-business-launch/scripts/validate-project-state.ts",

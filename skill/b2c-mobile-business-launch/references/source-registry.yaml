@@ -2075,3 +2075,115 @@ sources:
     locations:
       - skill/b2c-mobile-business-launch/references/founder-zero-operator.md
     notes: Official YouTube guidance for managing a channel without sharing the Google Account login.
+  - id: github-repo-b2c-launch-skill
+    name: This repository on GitHub
+    source_type: repository
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - README.md
+      - package.json
+    notes: Canonical repo URL used by the README clone command and the package.json homepage field. Self-referential; tracked so the registry stays exhaustive rather than because it can drift upstream.
+  - id: github-repo-b2c-launch-skill-git
+    name: This repository, git clone URL
+    source_type: repository
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill.git
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - package.json
+    notes: package.json repository.url. Update alongside github-repo-b2c-launch-skill if the repo is ever renamed or transferred.
+  - id: github-repo-b2c-launch-skill-issues
+    name: This repository, issue tracker
+    source_type: repository
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/issues
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - package.json
+    notes: package.json bugs.url, so npm surfaces the right place to file a report.
+  - id: github-repo-b2c-launch-skill-ci-workflow
+    name: This repository, audit workflow run history
+    source_type: repository
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/actions/workflows/source-freshness.yml
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Target of the README audit:ci badge. The audit job inside this workflow runs npm run audit:ci on every push and pull request; rename the workflow file and this URL and the badge both need updating.
+  - id: github-repo-b2c-launch-skill-security-advisory
+    name: This repository, private vulnerability reporting
+    source_type: repository
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/security/advisories/new
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - SECURITY.md
+      - CODE_OF_CONDUCT.md
+      - .github/ISSUE_TEMPLATE/config.yml
+    notes: The private disclosure channel for both security reports and code-of-conduct reports. Requires GitHub private vulnerability reporting to stay enabled on the repo.
+  - id: github-repo-b2c-launch-skill-contributing
+    name: This repository, CONTRIBUTING.md on main
+    source_type: repository
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/CONTRIBUTING.md
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - .github/ISSUE_TEMPLATE/config.yml
+      - .github/ISSUE_TEMPLATE/feature_request.yml
+    notes: Issue forms cannot use repo-relative links, so they need the absolute blob URL.
+  - id: github-repo-b2c-launch-skill-validators-doc
+    name: This repository, docs/VALIDATORS.md on main
+    source_type: repository
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/docs/VALIDATORS.md
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - .github/ISSUE_TEMPLATE/config.yml
+    notes: Linked from the issue-form contact links so a reporter can check what a gate actually asserts before filing.
+  - id: shields-io-badge-audit-ci
+    name: Shields.io badge, audit:ci workflow status
+    source_type: badge_endpoint
+    url: https://img.shields.io/github/actions/workflow/status/Emuthmartinez/b2c-mobile-business-launch-skill/source-freshness.yml?branch=main&label=audit%3Aci
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Uses an explicit label override because the workflow is named "Skill Source Freshness" while the job it gates is the full audit:ci suite. A default GitHub badge would mislabel it.
+  - id: shields-io-badge-package-version
+    name: Shields.io badge, package.json version
+    source_type: badge_endpoint
+    url: https://img.shields.io/github/package-json/v/Emuthmartinez/b2c-mobile-business-launch-skill?label=skill
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Reads the version straight from package.json on main, so it cannot drift from the release the way a hardcoded badge would.
+  - id: shields-io-badge-node-version
+    name: Shields.io badge, Node 22
+    source_type: badge_endpoint
+    url: https://img.shields.io/badge/node-22-informational
+    refresh_cadence_days: 180
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Static badge. Update it in the same change that moves the Node version in CI and CONTRIBUTING.md.
+  - id: shields-io-badge-license
+    name: Shields.io badge, repository license
+    source_type: badge_endpoint
+    url: https://img.shields.io/github/license/Emuthmartinez/b2c-mobile-business-launch-skill
+    refresh_cadence_days: 180
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Reads the detected license from the repo, so it tracks LICENSE automatically.
+  - id: contributor-covenant-2-1
+    name: Contributor Covenant 2.1
+    source_type: official_docs
+    url: https://www.contributor-covenant.org/version/2/1/code_of_conduct
+    refresh_cadence_days: 180
+    owner: maintainer
+    locations:
+      - CODE_OF_CONDUCT.md
+    notes: The basis this repo's code of conduct is adapted from. Wording and reporting process were rewritten for a single-maintainer project, so an upstream revision is informational rather than a required sync.

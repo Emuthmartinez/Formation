@@ -15,6 +15,9 @@
  *    and does not practice.
  * 2. GUIDANCE PROSE (warn). references/ and the maintainer docs. These are read by agents,
  *    not customers, and precision there sometimes needs a word the marketing rules ban.
+ * 3. THIS REPO'S PUBLIC DOCS (error for README/CONTRIBUTING/SECURITY/CODE_OF_CONDUCT,
+ *    warn for AGENTS/CLAUDE), scanned only when --repo-root is given. README.md claims
+ *    these rules govern every word the skill writes; this is what makes that true.
  *
  * What this gate deliberately does NOT enforce: the judgment-dependent rules. "Cut the
  * adverb when it adds nothing, keep it when it carries the writer's rhythm" is not a
@@ -23,7 +26,7 @@
  * itself against them. This gate catches the mechanical patterns only.
  *
  * npm script: check:no-slop
- * Usage: tsx scripts/check-no-slop.ts --skill-root /path/to/skill [--root /path/to/templates]
+ * Usage: tsx scripts/check-no-slop.ts --skill-root /path/to/skill [--root /path/to/templates] [--repo-root /path/to/repo]
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
@@ -37,9 +40,12 @@ const defaultSkillRoot = path.resolve(scriptDir, "..");
 const flags = parseFlags(process.argv.slice(2), [
   { flags: ["--skill-root"], key: "skillRoot" },
   { flags: ["--root"], key: "root" },
+  { flags: ["--repo-root"], key: "repoRoot" },
 ]);
 const skillRoot = path.resolve(flagString(flags, "skillRoot") ?? defaultSkillRoot);
 const templatesRoot = path.resolve(flagString(flags, "root") ?? path.join(skillRoot, "templates"));
+const repoRootFlag = flagString(flags, "repoRoot");
+const repoRoot = repoRootFlag ? path.resolve(repoRootFlag) : undefined;
 const issues: Issue[] = [];
 
 const referenceRelative = "references/no-slop-writing.md";
@@ -86,6 +92,36 @@ for (const surface of shippedSurfaces) {
   const absolute = path.join(templatesRoot, surface.relative);
   if (!existsSync(absolute)) continue;
   scan(readFileSync(absolute, "utf8"), surface.relative, "error", surface.shortCopy);
+}
+
+/**
+ * This repo's own public docs. README.md tells readers that references/no-slop-writing.md
+ * governs every word this skill writes, so the front door is held to the same gate it
+ * advertises. Without this the repo would preach a standard its own CI never reaches —
+ * the "enforcement over reminders" rule applied to everyone except the rule's author.
+ *
+ * README/CONTRIBUTING/SECURITY/CODE_OF_CONDUCT are public-facing copy and error. AGENTS.md
+ * and CLAUDE.md are maintainer prose read by agents, so they warn like references/ does:
+ * precision there sometimes needs a word the marketing rules ban ("test harness").
+ *
+ * Skipped entirely when --repo-root is absent, which is the case for an installed runtime
+ * copy that has no checkout around it.
+ */
+const repoDocs: { relative: string; severity: "error" | "warning" }[] = [
+  { relative: "README.md", severity: "error" },
+  { relative: "CONTRIBUTING.md", severity: "error" },
+  { relative: "SECURITY.md", severity: "error" },
+  { relative: "CODE_OF_CONDUCT.md", severity: "error" },
+  { relative: "AGENTS.md", severity: "warning" },
+  { relative: "CLAUDE.md", severity: "warning" },
+];
+
+if (repoRoot) {
+  for (const doc of repoDocs) {
+    const absolute = path.join(repoRoot, doc.relative);
+    if (!existsSync(absolute)) continue;
+    scan(readFileSync(absolute, "utf8"), doc.relative, doc.severity, false);
+  }
 }
 
 // Guidance prose: same rules, reported as warnings so precision is never blocked.

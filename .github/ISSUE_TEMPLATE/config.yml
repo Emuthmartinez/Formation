@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Setup, commands, and the CI gate
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/CONTRIBUTING.md
+    about: How to install, run the audit, and open a PR that passes.
+  - name: What each validator checks
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/docs/VALIDATORS.md
+    about: Every gate, its flags, and the failure it exists to catch.
+  - name: Report a security vulnerability
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/security/advisories/new
+    about: Private disclosure. Do not open a public issue for security problems.
