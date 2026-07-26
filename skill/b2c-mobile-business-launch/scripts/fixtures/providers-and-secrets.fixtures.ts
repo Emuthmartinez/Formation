@@ -139,6 +139,21 @@ export function register(h: Harness): void {
     "revenue.missing_metadata.unresolved",
   );
 
+  // The clearance column itself: a row answering "no" in "MISSING_METADATA
+  // cleared?" never repeats the MISSING_METADATA string, so the literal row
+  // check cannot see it — the column parse must.
+  const revenueClearanceNo = makeFixture("revenue-clearance-column-no");
+  const revenueClearanceNoState = readState(revenueClearanceNo);
+  getLane(revenueClearanceNoState, "revenue")["status"] = "done";
+  writeState(revenueClearanceNo, revenueClearanceNoState);
+  const clearanceOps = readFileSync(path.join(revenueClearanceNo, "REVENUE_OPS.md"), "utf8");
+  writeFileSync(
+    path.join(revenueClearanceNo, "REVENUE_OPS.md"),
+    clearanceOps.replace(/(\| Store Product ID \|[^\n]*\n\|[ \-|]*\n)/, "$1| com.app.pro.monthly | pro_monthly | auto_renewable | premium | monthly | no |\n"),
+    "utf8",
+  );
+  runFixture("done revenue lane with a clearance column answering no fails", revenueClearanceNo, "check-revenue.ts", 1, "revenue.missing_metadata.unresolved");
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

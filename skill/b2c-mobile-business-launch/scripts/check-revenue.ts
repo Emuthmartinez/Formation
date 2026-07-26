@@ -433,16 +433,36 @@ if (revenueDone && revenueOpsText) {
     .filter((line) => !line.includes("---") && !line.toLowerCase().includes("store product id"));
 
   // 3. MISSING_METADATA check — no product row may still be in MISSING_METADATA.
-  //    Resolution is judged per row: the same row must say cleared/yes.
+  //    Two reads: a row that records the state literally, and — when the shipped
+  //    table schema is present — the "MISSING_METADATA cleared?" column itself,
+  //    where a "no", a negative phrase, or an unanswered cell is unresolved even
+  //    though the row never repeats the MISSING_METADATA string.
   const unresolvedMetadataRows = tableDataRows
     .filter((line) => /MISSING_METADATA/i.test(line))
     .filter((line) => !/cleared|yes/i.test(line.replace(/MISSING_METADATA/gi, " ")));
-  if (unresolvedMetadataRows.length > 0) {
+
+  const clearanceColumnUnresolved = ((): boolean => {
+    const lines = revenueOpsText.split(/\r?\n/);
+    const headerIndex = lines.findIndex((line) => line.trim().startsWith("|") && /MISSING_METADATA\s+cleared/i.test(line));
+    if (headerIndex === -1) return false;
+    const clearanceCell = (lines[headerIndex] ?? "").split("|").findIndex((cell) => /MISSING_METADATA\s+cleared/i.test(cell));
+    for (let i = headerIndex + 1; i < lines.length; i += 1) {
+      const line = lines[i] ?? "";
+      if (!line.trim().startsWith("|")) break;
+      if (line.includes("---")) continue;
+      if (/_example_|_example:/i.test(line)) continue;
+      const cell = (line.split("|")[clearanceCell] ?? "").trim();
+      if (cell === "" || /^(no\b|not\b|pending|blocked|missing)/i.test(cell)) return true;
+    }
+    return false;
+  })();
+
+  if (unresolvedMetadataRows.length > 0 || clearanceColumnUnresolved) {
     issues.push(
       issue(
         "error",
         "revenue.missing_metadata.unresolved",
-        "REVENUE_OPS.md contains a product in MISSING_METADATA state. All App Store subscription products must clear MISSING_METADATA (subscription-group localizations created) before the revenue lane is marked done.",
+        'REVENUE_OPS.md contains a product in MISSING_METADATA state (a row recording the state, or a product table row whose "MISSING_METADATA cleared?" column is negative or unanswered). All App Store subscription products must clear MISSING_METADATA (subscription-group localizations created) before the revenue lane is marked done.',
         revenueOpsPath,
       ),
     );
