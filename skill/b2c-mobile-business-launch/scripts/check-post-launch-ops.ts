@@ -149,7 +149,11 @@ if (laneDone) {
     // "keep investing in this app or move to the next one" is forced, and a
     // rhythm with no exit question runs zombie apps indefinitely.
     const retroRaw = readText(args.root, retroPath) ?? "";
-    if (!retroRaw.toLowerCase().includes("kill, hold, or scale")) {
+    // Section presence is judged on the actual heading, not a prose mention —
+    // "we should think about kill, hold, or scale" in Surprises is not a
+    // verdict surface.
+    const verdictSection = markdownSection(retroRaw, "Kill, Hold, Or Scale");
+    if (!verdictSection) {
       issues.push(
         issue(
           "error",
@@ -167,7 +171,6 @@ if (laneDone) {
       // Before the first checkpoint completes, the section's presence is enough
       // (done at launch +7 days is legitimate).
       const windowSection = markdownSection(retroRaw, "Retro Window");
-      const verdictSection = markdownSection(retroRaw, "Kill, Hold, Or Scale");
       const verdictColumn = tableColumnIndex(verdictSection, /verdict/i);
       const completedCheckpoints = ["Day 30", "Day 90"].filter((checkpoint) => Boolean(tableRowCells(windowSection, checkpoint)[2]?.trim()));
 

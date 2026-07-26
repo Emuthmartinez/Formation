@@ -66,6 +66,29 @@ export function register(h: Harness): void {
     "post_launch_ops.kill_or_scale_missing",
   );
 
+  // Mentioning the phrase in prose is not the section: only the real heading
+  // (and its table) counts as the verdict surface.
+  const postLaunchProsePhrase = makeFixture("post-launch-retro-prose-phrase-only");
+  {
+    const state = readState(postLaunchProsePhrase);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchProsePhrase, state);
+    writeFileSync(
+      path.join(postLaunchProsePhrase, "LAUNCH_RETRO.md"),
+      ["# Launch Retro", "", "## Surprises", "", "We should think about kill, hold, or scale at some point.", "", "## Failure Card Candidates"].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "retro mentioning the verdict phrase in prose without the section fails",
+    postLaunchProsePhrase,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_missing",
+  );
+
   // The heading alone is words-not-work: once the Retro Window records a
   // completed Day 30/Day 90 pass, the checkpoint's verdict row and the state
   // mirror must both carry the decision.
