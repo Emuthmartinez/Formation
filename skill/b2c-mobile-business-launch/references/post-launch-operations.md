@@ -152,7 +152,7 @@ A Kill verdict is a wind-down, not an abandonment:
 - File the final `LAUNCH_RETRO.md` pass while the evidence is fresh — what the category taught, what the funnel numbers were, which plays transfer. That retro is the highest-value asset the app produces on its way out; it seeds the next launch per `control-plane.md`'s portfolio layer.
 - What carries forward: learnings, reusable engineering patterns, and any audience the founder owns outright (their own email list, their own social following) where the published terms allow. What never carries forward: the app's name, brand vocabulary, tokens, domains, or credentials — the "Nothing carries over" rule holds in both directions.
 
-Record the verdict and date in `LAUNCH_RETRO.md` (Kill, Hold, Or Scale section) and in `PROJECT_STATE.yaml` under `lanes.post_launch_ops.kill_or_scale_decision` / `kill_or_scale_decided_at`. `check:post-launch` fails a done lane whose retro has no verdict section — an operating rhythm with no exit question is the zombie-app failure mode wearing a green check.
+Record the verdict and date in `LAUNCH_RETRO.md` (Kill, Hold, Or Scale section) and in `PROJECT_STATE.yaml` under `lanes.post_launch_ops.kill_or_scale_decision` / `kill_or_scale_decided_at`. `check:post-launch` enforces the substance, not just the heading: a done lane needs the verdict section, and once the Retro Window records a completed Day 30 or Day 90 pass, that checkpoint's row must carry an actual verdict and the state mirror must hold a valid decision and ISO date — an operating rhythm with no exit question is the zombie-app failure mode wearing a green check.
 
 ## 10. Launch Retro Loop
 

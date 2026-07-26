@@ -66,6 +66,63 @@ export function register(h: Harness): void {
     "post_launch_ops.kill_or_scale_missing",
   );
 
+  // The heading alone is words-not-work: once the Retro Window records a
+  // completed Day 30/Day 90 pass, the checkpoint's verdict row and the state
+  // mirror must both carry the decision.
+  const verdictTemplateRetro = (root: string, options: { day30Date: string; day30Verdict: string }): void => {
+    const retro = readFileSync(path.join(root, "LAUNCH_RETRO.md"), "utf8")
+      .replace("| Day 30 | | |", `| Day 30 | ${options.day30Date} | founder |`)
+      .replace("| Day 30 | | | | | | |", `| Day 30 | flat | declining | n/a | 8 | ${options.day30Verdict} | |`);
+    writeFileSync(path.join(root, "LAUNCH_RETRO.md"), retro, "utf8");
+  };
+
+  const postLaunchVerdictEmpty = makeFixture("post-launch-checkpoint-verdict-empty");
+  {
+    const state = readState(postLaunchVerdictEmpty);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchVerdictEmpty, state);
+    verdictTemplateRetro(postLaunchVerdictEmpty, { day30Date: "2026-06-28", day30Verdict: "" });
+  }
+  runFixture(
+    "completed day-30 checkpoint with an empty verdict row fails",
+    postLaunchVerdictEmpty,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_verdict_unfilled",
+  );
+
+  const postLaunchVerdictNoState = makeFixture("post-launch-verdict-without-state-mirror");
+  {
+    const state = readState(postLaunchVerdictNoState);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchVerdictNoState, state);
+    verdictTemplateRetro(postLaunchVerdictNoState, { day30Date: "2026-06-28", day30Verdict: "Hold" });
+  }
+  runFixture(
+    "recorded verdict without the PROJECT_STATE mirror fails",
+    postLaunchVerdictNoState,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_state_missing",
+  );
+
+  const postLaunchVerdictComplete = makeFixture("post-launch-verdict-complete");
+  {
+    const state = readState(postLaunchVerdictComplete);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "hold";
+    lane["kill_or_scale_decided_at"] = "2026-06-28";
+    writeState(postLaunchVerdictComplete, state);
+    verdictTemplateRetro(postLaunchVerdictComplete, { day30Date: "2026-06-28", day30Verdict: "Hold — flat but positive, low founder cost" });
+  }
+  runFixture("completed checkpoint with verdict and state mirror passes", postLaunchVerdictComplete, "check-post-launch-ops.ts", 0);
+
   // ── Portfolio registry ────────────────────────────────────────────────────
 
   // Optional surface: single-business founders have no registry and stay clean.
