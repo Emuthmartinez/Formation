@@ -123,8 +123,11 @@ Founder approved: <!-- YYYY-MM-DD — pricing is founder-only (revenue-monetizat
 
 ### Cancellation-Reason Mix
 
-<!-- Aggregated from `cancellation_reason_selected` (taxonomy in revenue-monetization.md §8b).
-     Reviewed at each kill-or-scale checkpoint; a too_expensive majority is pricing evidence. -->
+Aggregated from the event below (taxonomy in `revenue-monetization.md` §8b); reviewed at
+each kill-or-scale checkpoint — a too_expensive majority is pricing evidence. The event
+must stay in the `ANALYTICS.md` Event Contract; `check:analytics-catalog` reconciles it:
+
+- `cancellation_reason_selected`
 
 | Period | too_expensive | missing_feature | found_alternative | not_needed | technical_issue | other |
 | --- | --- | --- | --- | --- | --- | --- |

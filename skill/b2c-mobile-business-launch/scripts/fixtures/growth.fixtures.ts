@@ -239,6 +239,26 @@ export function register(h: Harness): void {
   );
   runFixture("paid UA without decision thresholds fails", paidUaNoThresholds, "check-paid-user-acquisition.ts", 1, "paid_ua.decision_thresholds.missing");
 
+  // Labels without values are not thresholds: a done lane whose numbers still
+  // sit in template comments fails per label.
+  const paidUaBlankThresholds = makeFixture("paid-ua-blank-threshold-values");
+  writeCompletePaidUserAcquisition(paidUaBlankThresholds);
+  writeFileSync(
+    path.join(paidUaBlankThresholds, "growth", "PAID_UA.md"),
+    readFileSync(path.join(paidUaBlankThresholds, "growth", "PAID_UA.md"), "utf8").replace(
+      /^Decision Thresholds:.*$/m,
+      ["Decision Thresholds:", "Attribution tolerance:", "Payback window:", "Creative signal floor:", "Scale trigger:"].join("\n"),
+    ),
+    "utf8",
+  );
+  runFixture(
+    "done paid UA with valueless thresholds fails",
+    paidUaBlankThresholds,
+    "check-paid-user-acquisition.ts",
+    1,
+    "paid_ua.attribution_tolerance.value_missing",
+  );
+
   const paidUaDonePlaceholder = makeFixture("paid-ua-done-placeholder");
   writeCompletePaidUserAcquisition(paidUaDonePlaceholder);
   writeFileSync(
