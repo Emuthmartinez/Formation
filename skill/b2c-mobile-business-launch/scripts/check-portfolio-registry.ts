@@ -53,6 +53,47 @@ if (existsSync(registryPath)) {
       ),
     );
   }
+
+  // Headings alone are not a board. Real business rows are the substance; the
+  // shipped template's _example:_ row marks the not-yet-in-use state and stays
+  // inert, but a registry someone "filled" by stripping the example while
+  // listing nothing is a blank board claiming to exist.
+  const raw = readText(args.root, registryRelative) ?? "";
+  const businessesSection = markdownSection(raw, "Businesses");
+  const realBusinessRows = businessesSection
+    .split(/\r?\n/)
+    .filter((line) => line.trim().startsWith("|"))
+    .filter((line) => !line.includes("---"))
+    .filter((line) => !/^\|\s*business\s*\|/i.test(line.trim()))
+    .filter((line) => !/_example_|_example:/i.test(line))
+    .filter((line) => line.split("|").some((cell, index) => index > 0 && cell.trim().length > 0));
+  const hasExampleMarker = /_example:/i.test(businessesSection);
+  if (realBusinessRows.length === 0 && !hasExampleMarker) {
+    issues.push(
+      issue(
+        "error",
+        "portfolio_registry.businesses_empty",
+        `${registryRelative} lists no businesses. Fill the Businesses table from each app's own records, or delete the file until a second business exists.`,
+        registryRelative,
+      ),
+    );
+  }
 }
 
 reportAndExit("Portfolio registry check", issues);
+
+/** The block from a `## <heading>` line to the next `## ` heading (or EOF). */
+function markdownSection(markdown: string, heading: string): string {
+  const lines = markdown.split(/\r?\n/);
+  const headingPattern = new RegExp(`^##\\s*${heading}`, "i");
+  const start = lines.findIndex((line) => headingPattern.test(line.trim()));
+  if (start === -1) return "";
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i += 1) {
+    if (/^## /.test(lines[i] ?? "")) {
+      end = i;
+      break;
+    }
+  }
+  return lines.slice(start, end).join("\n");
+}

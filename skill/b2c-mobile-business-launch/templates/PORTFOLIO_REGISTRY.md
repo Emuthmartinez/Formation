@@ -11,6 +11,7 @@ Two rules keep the registry honest:
 
 | Business | Repo | Live since | Stage | MRR (trend) | Last verdict (date) | Founder hrs/wk | Next review |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| _example: Ocho_ | _example: ~/code/rork-ocho_ | _2026-05-29_ | _live_ | _$180 flat_ | _hold (2026-06-28)_ | _8_ | _day-90 retro_ |
 
 Stage is the app's current phase in plain words (building, in review, live, winding down). Last verdict is the most recent Kill, Hold, Or Scale decision from that app's `LAUNCH_RETRO.md`.
 

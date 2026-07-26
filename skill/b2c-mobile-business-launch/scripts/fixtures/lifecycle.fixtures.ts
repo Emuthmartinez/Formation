@@ -1,6 +1,6 @@
 import { appendFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { type Harness, type MutableRecord, expectRecord, getLane, readState, writeCompleteCompoundEngineering, writeState } from "./_harness.js";
+import { type Harness, type MutableRecord, expectRecord, getLane, readState, skillRoot, writeCompleteCompoundEngineering, writeState } from "./_harness.js";
 
 /**
  * Lifecycle fixtures: post-launch operations, Google Play readiness, the
@@ -143,6 +143,56 @@ export function register(h: Harness): void {
     1,
     "portfolio_registry.section_missing.allocation",
   );
+
+  // A board with every heading and zero real business rows is a blank board
+  // claiming to exist — token presence is not substance. The shipped template
+  // stays inert through its _example:_ row, exercised by the audit-plan step.
+  const portfolioBlank = makeEmptyFixture("portfolio-registry-blank-board");
+  writeFileSync(
+    path.join(portfolioBlank, "PORTFOLIO_REGISTRY.md"),
+    [
+      "# Portfolio Registry",
+      "",
+      "## Businesses",
+      "",
+      "| Business | Repo | Stage | MRR (trend) | Last verdict (date) |",
+      "| --- | --- | --- | --- | --- |",
+      "",
+      "## Allocation",
+      "",
+      "Hours go where the verdicts point.",
+      "",
+      "## Cross-App Learnings",
+      "",
+      "| Learning | Source app | Date | Applied where next |",
+      "| --- | --- | --- | --- |",
+      "",
+      "## Next Launch Pipeline",
+      "",
+      "| Idea | Evidence so far | Starts when |",
+      "| --- | --- | --- |",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "portfolio registry with headings but no business rows fails",
+    portfolioBlank,
+    "check-portfolio-registry.ts",
+    1,
+    "portfolio_registry.businesses_empty",
+  );
+
+  const portfolioFilled = makeEmptyFixture("portfolio-registry-filled");
+  const shippedPortfolio = readFileSync(path.join(skillRoot, "templates", "PORTFOLIO_REGISTRY.md"), "utf8");
+  writeFileSync(
+    path.join(portfolioFilled, "PORTFOLIO_REGISTRY.md"),
+    shippedPortfolio.replace(
+      /\| _example: Ocho_[^\n]*\n/,
+      "| Ocho | ~/code/rork-ocho | 2026-05-29 | live | $180 flat | hold (2026-06-28) | 8 | day-90 retro |\n",
+    ),
+    "utf8",
+  );
+  runFixture("portfolio registry with a real business row passes", portfolioFilled, "check-portfolio-registry.ts", 0);
 
   const postLaunchThin = makeFixture("post-launch-thin-runbook");
   {
