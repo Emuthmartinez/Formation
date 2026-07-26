@@ -1,5 +1,13 @@
 # Technical Audit — b2c-mobile-business-launch-skill
 
+> **Historical record. Reflects skill v0.9.0 on 2026-06-09; the repo is now v0.26.0.** Read the Executive Summary below as the state of the repo in June 2026, not as the state today.
+>
+> Every finding it opens with was resolved on 2026-06-10 — the [Resolution Log](#resolution-log-2026-06-10) at the end of this file is that record. The headline finding has moved furthest. The audit pipeline no longer lives in `package.json`: `audit` and `audit:ci` both call [`scripts/run-audit.ts`](../../skill/b2c-mobile-business-launch/scripts/run-audit.ts) over the declarative plan in [`scripts/lib/audit-plan.ts`](../../skill/b2c-mobile-business-launch/scripts/lib/audit-plan.ts), and `check:package-parity` now fails when a `check:*` or `validate:*` script is neither a plan step nor a recorded exclusion.
+>
+> One item the Resolution Log left open has since closed. Open Question 1 asked whether LaunchBench should stay a definition lint or also execute scenarios against an agent; the answer was both. `npm run launchbench` lints the definitions inside the PR gate, and `npm run evals:behavioral` runs flagged scenarios against a live agent outside it (needs `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, or `--use-profile`).
+>
+> This file lives under `docs/history/` and is kept out of `README.md` deliberately. A dated audit linked from the front door reads as current, and the filename carries the version so a reader knows before opening it. For what the repo enforces today see [`docs/VALIDATORS.md`](../VALIDATORS.md); for the maintainer map see [`AGENTS.md`](../../AGENTS.md).
+
 Date: 2026-06-09 · Auditor: principal-level review session · Scope: full repo at commit `e9ad92e` · Method: read-only analysis; all repo gates were executed to verify claims (`tsc --noEmit`, `audit:links`, `check:source-registry`, `launchbench`, `test:validators` — all green).
 
 ---

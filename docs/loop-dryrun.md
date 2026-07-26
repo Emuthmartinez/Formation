@@ -1,5 +1,11 @@
 # Loop Dry-Run Log — `b2c-mobile-business-launch`
 
+> **Reconciled against skill v0.26.0 on 2026-07-26.** 56 loops dry-run, all terminating.
+>
+> Five loops this log originally listed as validator-less have since acquired a fail-closed gate — L08 `check:change-cascade`, L09 `check:research`, L18 `check:launch-trace`, L38 `check:mobai-proof`, L41 `check:privacy-terms` — leaving only L28, L45, and L46 on the grep-plus-state pattern. L39 reads better too: its stop cites `check-native-ios-proof.ts` passing under `audit:ci`, which was untrue when written and is true now that the validator has an npm binding and an audit-plan step.
+>
+> Nothing in the repo reads this file, and no entrypoint links it. See [`skill-workflow-loops.md`](skill-workflow-loops.md) for the inventory it audits.
+
 Each loop in `docs/skill-workflow-loops.md` is dry-run once on a representative
 task. A loop is modeled as a control cycle: **trigger fires → action runs →
 proof observed → stop evaluated**. I watch the stop for three failure modes:
@@ -21,11 +27,12 @@ outcome and the re-run are recorded.
 
 ## Summary
 
-- 50/50 loops terminate correctly after fixes — stop fires once, proof observable.
-- **9 loops failed the first dry-run and were fixed, then re-ran green:**
+- 56/56 loops terminate correctly after fixes — stop fires once, proof observable.
+- **10 loops failed the first dry-run and were fixed, then re-ran green:**
   - **L03** — ∞ (byte-identical render never settles) → dropped byte-identical; stop on `validate:launch-state` + render exit 0 + `launch_tier` set.
   - **L08, L09, L18, L28, L38, L41, L45, L46** — ⊘ (grep "finds none" is vacuously true on an absent/empty artifact) → each stop now requires the artifact to exist and be non-empty before the grep clause counts.
-- 41 loops passed the first dry-run unchanged (each already terminated on a validator that fails-closed when its artifact is absent, or on an "or blocker recorded" escape branch).
+  - **L53** — ⊘ (a zero-error writing gate is vacuously true when the copy surface does not exist yet) → stop now requires the edited surface to exist and be non-empty before the error-count clause counts.
+- 46 loops passed the first dry-run unchanged (each already terminated on a validator that fails-closed when its artifact is absent, or on an "or blocker recorded" escape branch).
 
 ---
 
@@ -292,21 +299,62 @@ Task: bump after a skill change (in this cloud session).
 Trigger ✓. Proof: `check:skill-version` + `check:version-discipline` + `audit:ci` pass; `diff -qr` empty on maintainer machine, else non-maintainer skip recorded.
 Stop: validators green + (diff empty OR skip recorded) → fires once. In a cloud session the **skip branch** fires → not infinite (no installed runtime to forever-diff against). ✅ **TERMINATES.**
 
+### L51 — Founder-zero operator bootstrap
+Task: founder says "launch this" with no accounts set up yet.
+Trigger ✓ (broad launch start). Action: load `founder-zero-operator.md`, seed access state, record identity and the one-decision-at-a-time gates. Proof: `check:founder-operator` passes; the rendered cockpit phase label equals `PROJECT_STATE.yaml` `phase`.
+Stop: validator green + phase labels equal → fires once. At entry the validator fails closed on an absent `BUSINESS_ACCESS.md`, so not vacuous; the required-section set is finite, so not infinite. ✅ **TERMINATES.**
+
+### L52 — Agent operations ledger
+Task: agent signs into RevenueCat to read the entitlement config.
+Trigger ✓ (authenticated provider action). Action: load `frontier-agent-operations.md`; record the action, its authorization basis, and its outcome. Proof: `check:agent-operations` passes; provider claims resolve to `PROVIDER_PROOF.md`.
+Stop: validator green → fires once. Fails closed on an absent ledger, so the stop cannot fire before the first entry exists; one action produces one row, so the write is bounded. ✅ **TERMINATES.**
+
+### L53 — Writing-quality gate (no-slop)  ⚠️→✅
+Task: draft paywall copy for a habit app.
+First run: stop was "`check:no-slop` exits 0 with zero errors." On a run where the paywall copy file was never created, the gate scans nothing, reports zero errors, and the stop is **⊘ vacuously true** — the same failure class as the eight grep-based stops above, reached through an error count instead of a grep.
+**Fix:** stop now requires the edited copy surface to exist and be non-empty before the zero-errors clause counts.
+Re-run: paywall copy present and non-empty, banned words and named patterns cut, channel limits applied, gate exits 0 → **fires once.** Not infinite: the terminator is an integer error count, not an assessment of whether the copy reads well. ✅ **TERMINATES.**
+
+### L54 — Founder-language translation
+Task: add a `growth_experiments` lane to `launch-state.ts`.
+Trigger ✓ (new lane). Action: add its founder label in `lib/founder-copy.ts` in the same commit; route the renderer through it. Proof: `check:founder-copy` passes.
+Stop: validator green → fires once. Coverage is computed *from* `launch-state.ts`, so adding the lane makes the gate fail until the label lands — the stop is false at entry by construction, which is the strongest anti-vacuity property in this log. Lane set is finite → not infinite. ✅ **TERMINATES.**
+
+### L55 — Skill triggering contract
+Task: reword the skill description to name Google Play.
+Trigger ✓ (frontmatter change). Action: keep the description present, within length, angle-bracket-free, carrying required terms; update `evals/triggering/autopilot-triggering.yaml` in the same commit. Proof: `check:autopilot` passes.
+Stop: validator green → fires once. Each constraint is a discrete pass/fail (parses / present / length / bracket / required term), so the stop is checkable, not a judgment; fails closed when either file is missing. ✅ **TERMINATES.**
+
+### L56 — ASC command contract
+Task: document `asc review submissions-list` in the ASC reference.
+Trigger ✓ (changing a documented third-party command). Action: refresh the installed CLI's `--help`/version output, reconcile every documented command against it. Proof: `check:asc-command-contract` exits 0.
+Stop: zero errors → fires once. A missing reference is an **error**, so the stop cannot fire on an absent artifact. Observed on this machine during the 2026-07-26 pass: installed `asc` 0.x against the stored 2.x contract emits a named `asc_command_contract.live_cli_stale` warning and still exits 0 — the shadowed-CLI case degrades to a warning rather than an unsatisfiable stop, so the loop stays reachable. ✅ **TERMINATES.**
+
 ---
 
 ## Re-audit after fixes
 
-All 9 fixed loops re-ran to a single, observable stop. Re-checking the two
-failure-mode classes mechanically:
+All 10 fixed loops re-ran to a single, observable stop. Re-checking the failure-mode
+classes mechanically:
 
 - **No infinite loops:** every stop is reachable — validator-gated loops fire when
   the named `check:*` passes; the rest carry an explicit "or blocker/skip
   recorded" escape (L07, L32, L33, L34, L38, L39, L49, L50) or a bounded finite
-  set (L14 journey steps, L24 checklist rows, L35 five stages).
+  set (L14 journey steps, L24 checklist rows, L35 five stages). L56 is the one
+  loop whose gate depends on an external binary, and it degrades to a named
+  warning rather than an unsatisfiable stop when the local `asc` is behind.
 - **No immediate/vacuous fires:** every grep-"finds none" clause is now preceded
   by an existence + non-empty requirement, or paired with a validator that
-  fails-closed when its artifact is absent. The 8 no-validator loops (L08, L09,
-  L18, L28, L38, L41, L45, L46) were the vacuous-risk set and are all fixed.
+  fails-closed when its artifact is absent. Two vacuity classes were found across
+  the passes: the 8 grep-based no-validator loops (L08, L09, L18, L28, L38, L41,
+  L45, L46), and one error-count-based gate (L53) where a zero-error result over
+  an absent copy surface read as success. Both are fixed the same way — existence
+  before counting. **The general rule: any terminator that counts violations is
+  vacuous on an empty input set, whether it counts via grep or via a validator.**
+- **Strongest anti-vacuity shape:** L54, where the gate computes its own coverage
+  requirement from `launch-state.ts`, so adding a lane makes the stop false by
+  construction. Gates that derive what they demand from the thing being changed
+  cannot fire vacuously; prefer that shape when adding a validator.
 - **No uncheckable stops:** the one nondeterministic terminator (L03
   byte-identical render) was removed; every remaining stop is a command exit, a
   grep/`diff`/`curl`/HTTP observation, a git-tag existence check, or a discrete
