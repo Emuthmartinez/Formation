@@ -33,15 +33,7 @@ export interface LaneCopy {
 }
 
 export type MilestoneId =
-  | "foundation"
-  | "know_the_market"
-  | "decide_the_product"
-  | "look_and_feel"
-  | "build_it"
-  | "store_ready"
-  | "money_and_legal"
-  | "go_live"
-  | "keep_growing";
+  "foundation" | "know_the_market" | "decide_the_product" | "look_and_feel" | "build_it" | "store_ready" | "money_and_legal" | "go_live" | "keep_growing";
 
 /**
  * The founder's progress spine. Nine named milestones replace a 22-row table of lane
