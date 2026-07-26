@@ -40,7 +40,7 @@ Attribute every claim to its source. Do not invent citations.
 - **Dopamine reward-prediction-error / anticipation-not-reward**: Wolfram Schultz, "A Neural Substrate of Prediction and Reward," _Science_ 275 (1997). Dopamine fires on the anticipation signal, not the reward delivery. The Variable Reward Card exploits the build-up phase, not the dopamine of the prize itself.
 - **Variable-ratio reinforcement schedule**: B.F. Skinner, operant conditioning research. Unpredictable reward timing produces stronger and more persistent response than fixed intervals. Bright-line: variability must be genuine, not simulated.
 - **Labor Illusion / operational transparency**: Ryan Buell and Michael Norton, "The Labor Illusion: How Operational Transparency Increases Perceived Value," _Management Science_ (2011). Users value outcomes more when they can see effort expended on their behalf. The Perceived Effort Delay Card operationalizes this.
-- **IKEA effect**: Norton, Mochon, and Ariely, "The IKEA Effect: When Labor Leads to Love," _Journal of Consumer Psychology_ (2012). Users place higher value on outcomes they participate in creating. Perceived Effort Delay elevates this when users see the system working through their specific inputs.
+- **IKEA effect**: Norton, Mochon, and Ariely, "The IKEA Effect: When Labor Leads to Love," _Journal of Consumer Psychology_ (2012). Users place higher value on outcomes they participate in creating. Perceived Effort Delay strengthens this when users see the system working through their specific inputs.
 - **Implementation intentions**: Peter Gollwitzer, "Implementation Intentions: Strong Effects of Simple Plans," _American Psychologist_ (1999). Stating when/where you will do something significantly increases follow-through. The Intent Mirroring Card makes a user's stated intention explicit and specific.
 - **Goal-gradient effect / endowed progress**: Clark Hull (1932); Kivetz, Urminsky, and Zheng, "The Goal-Gradient Hypothesis Resurrected," _Journal of Marketing Research_ (2006). Users accelerate effort as they approach a goal, especially when shown they have already made progress.
 - **Wanting-vs-liking dissociation**: Kent Berridge, motivational neuroscience. "Wanting" (incentive salience) and "liking" (hedonic pleasure) are distinct systems. The Variable Reward Card targets wanting; dark patterns suppress liking to inflate wanting, which is a compliance veto.
@@ -179,7 +179,7 @@ A moment of deliberate anticipation before a reward is revealed. The user takes 
 | D1 / D7 return rate | Up — anticipation creates a "what will I get tomorrow?" pull | Schultz: anticipation primes next-session return |
 | `core_action_completed` frequency (sessions per week) | Up — variable schedule drives more triggering actions | Skinner variable-ratio |
 | Share rate (`share_completed`) | Up — reward-of-tribe payoffs create social sharing | Eyal tribe reward |
-| `activation_task_completed` in first session | Up — first reward reveal in onboarding elevates activation | |
+| `activation_task_completed` in first session | Up — first reward reveal in onboarding raises activation | |
 | Streak length (median) | Up — streak itself is a variable-reward delivery channel | |
 
 Person property to set: `last_reward_type_received`, `reward_reveals_total`, `highest_reward_rarity_seen`. These allow personalization: adjust reward pool composition for users who have plateaued.

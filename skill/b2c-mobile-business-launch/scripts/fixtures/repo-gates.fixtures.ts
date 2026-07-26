@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, skillRoot } from "./_harness.js";
 import { auditExcludedScripts, buildAuditPlan, type AuditLayout } from "../lib/audit-plan.js";
@@ -59,6 +59,21 @@ function writeParityPair(root: string, options: { rootVersion: string; skillVers
   writeFileSync(path.join(parityScriptRoot, "package-lock.json"), lockFor("parity-runtime", options.skillVersion), "utf8");
   writeFileSync(path.join(parityScriptRoot, "skill-version.json"), JSON.stringify({ version: options.skillVersion }, null, 2), "utf8");
   return { repoRoot, parityScriptRoot };
+}
+
+/**
+ * Synthetic skill-root + templates-root pair for check-no-slop. The real banned-word list is
+ * copied in rather than invented, so these fixtures fail if the reference and the matcher
+ * ever stop agreeing. BRAND.md is a shipped surface, which makes every finding an error.
+ */
+function writeNoSlopRoots(root: string, brandCopy: string): { fixtureSkillRoot: string; fixtureTemplates: string } {
+  const fixtureSkillRoot = path.join(root, "skill");
+  mkdirSync(path.join(fixtureSkillRoot, "references"), { recursive: true });
+  cpSync(path.join(skillRoot, "references", "no-slop-writing.md"), path.join(fixtureSkillRoot, "references", "no-slop-writing.md"));
+  const fixtureTemplates = path.join(root, "templates");
+  mkdirSync(fixtureTemplates, { recursive: true });
+  writeFileSync(path.join(fixtureTemplates, "BRAND.md"), `# Brand\n\n${brandCopy}\n`, "utf8");
+  return { fixtureSkillRoot, fixtureTemplates };
 }
 
 export function register(h: Harness): void {
@@ -242,5 +257,48 @@ export function register(h: Harness): void {
     ["--root", path.join(skillRoot, "templates"), "--out", staleWorkspacePath, "--check"],
     1,
     "business_workspace.output.drift",
+  );
+
+  // --- check-no-slop ---
+  /**
+   * Inflected banned words. The matcher's trailing boundary excluded letters until v0.26.1,
+   * so "leverage" failed the gate and "leverages" walked straight through it: the same word
+   * doing the same damage, waved past on one letter. Each fixture below carries the inflected
+   * form ONLY, never the base word, so a passing run can only come from suffix tolerance.
+   */
+  const noSlopInflections: { label: string; copy: string; word: string }[] = [
+    { label: "-ing after a dropped e", copy: "The copy engine leveraging a founder transcript beats copy written from a blank page.", word: "leverage" },
+    { label: "-s", copy: "Onboarding that empowers the first session is the one worth shipping.", word: "empower" },
+    { label: "-d on an e-final verb", copy: "The paywall streamlined into a single screen after the first round of testing.", word: "streamline" },
+    { label: "-ies", copy: "Store copy reads as tapestries of adjectives instead of one plain promise.", word: "tapestry" },
+    { label: "-s on a multi-word term", copy: "Two paradigm shifts in one release note is two too many.", word: "paradigm shift" },
+  ];
+
+  for (const inflection of noSlopInflections) {
+    const roots = writeNoSlopRoots(makeEmptyFixture(`no-slop-inflection-${inflection.word.replace(/\s+/g, "-")}`), inflection.copy);
+    runScriptArgs(
+      `no-slop catches "${inflection.word}" inflected with ${inflection.label}`,
+      "check-no-slop.ts",
+      ["--skill-root", roots.fixtureSkillRoot, "--root", roots.fixtureTemplates],
+      1,
+      `"${inflection.word}" is banned`,
+    );
+  }
+
+  /**
+   * The other half of the contract. Suffix tolerance stops at the regular inflections, so a
+   * word that merely starts with a banned word keeps its own meaning: an elevator is not an
+   * elevation, and robustness is a property rather than the adjective the rules ban.
+   */
+  const noSlopNearMisses = writeNoSlopRoots(
+    makeEmptyFixture("no-slop-near-misses"),
+    "Write the elevator pitch first. Judge the robustness of a gate by what it catches. Utilization stays flat until the second session, and embarkation is a word nobody says out loud.",
+  );
+  runScriptArgs(
+    "no-slop leaves words that only begin with a banned word alone",
+    "check-no-slop.ts",
+    ["--skill-root", noSlopNearMisses.fixtureSkillRoot, "--root", noSlopNearMisses.fixtureTemplates],
+    0,
+    "0 error(s)",
   );
 }

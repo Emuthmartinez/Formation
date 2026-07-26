@@ -41,7 +41,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 
 **PostHog events.** `commitment_made` with `commitment_type`, `commitment_value`, `flow_id`, `step_id`; `commitment_echoed` with `surface`, `commitment_type`, `commitment_value`.
 
-**11-star mapping.** Elevates from 5-star (neutral setup form) to 6-star (product remembers me) or 7-star (product feels made for me). The commitment is evidence for the 7-star label in `11_STAR_EXPERIENCE.md`.
+**11-star mapping.** Moves from 5-star (neutral setup form) to 6-star (product remembers me) or 7-star (product feels made for me). The commitment is evidence for the 7-star label in `11_STAR_EXPERIENCE.md`.
 
 ---
 
@@ -61,7 +61,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 
 **PostHog events.** `variable_reward_anticipation_started` with `surface`, `reward_type`, `flow_id`; `variable_reward_revealed` with `surface`, `reward_type`, `reward_variant`, `anticipation_duration_ms`.
 
-**11-star mapping.** Elevates from 5-star (expected result shown immediately) to 6-star (result delivery feels meaningful) or 7-star (result feels personally discovered). Maps directly to the "dopamine pulse" moment in the experience ladder.
+**11-star mapping.** Moves from 5-star (expected result shown immediately) to 6-star (result delivery feels meaningful) or 7-star (result feels personally discovered). Maps directly to the "dopamine pulse" moment in the experience ladder.
 
 ---
 
@@ -81,7 +81,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 
 **PostHog events.** `perceived_effort_started` with `surface`, `effort_type`, `step_count`; `perceived_effort_completed` with `surface`, `effort_type`, `step_count`, `total_duration_ms`, `real_step_ratio`.
 
-**11-star mapping.** Elevates from 5-star (instant generic result) to 6-star (result feels assembled for me) or 7-star (I believe the product worked hard on my behalf). Maps to the "higher perceived value" behavior on the star ladder.
+**11-star mapping.** Moves from 5-star (instant generic result) to 6-star (result feels assembled for me) or 7-star (I believe the product worked hard on my behalf). Maps to the "higher perceived value" behavior on the star ladder.
 
 ---
 

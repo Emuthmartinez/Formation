@@ -30,7 +30,7 @@ unexpected gift is a peak-motivation window for prompting an action that would o
 require significant persuasion. The prompt must fire inside this window, not minutes later.
 If the gift is personalised to the user's stated goal (captured via the Commitment Card or
 Intent Mirroring Card), the obligation intensifies further, because the user recognises the
-product understood them — elevating the gift from a marketing tactic to a relational signal.
+product understood them, which turns the gift from a marketing tactic into a relational signal.
 
 | Source | Finding | Confidence |
 |---|---|---|
