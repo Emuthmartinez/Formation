@@ -136,9 +136,11 @@ reportAndExit("No-slop writing", issues);
 /**
  * Scans one file. Code fences, inline code, link targets, and YAML frontmatter are
  * stripped first: an identifier or a command is not prose and must not be judged as prose.
+ * HTML surfaces route through their own extractor — in rendered HTML a backtick is a
+ * literal character the reader sees, so backtick spans there stay in scope for the rules.
  */
 function scan(source: string, relative: string, severity: "error" | "warning", shortCopy: boolean): void {
-  const prose = proseOnly(source);
+  const prose = relative.endsWith(".html") ? proseFromHtml(source) : proseOnly(source);
 
   for (const word of rules.bannedWords) {
     if (!matchesTerm(prose, word)) continue;
@@ -186,6 +188,21 @@ function proseOnly(source: string): string {
     .replace(/<!--[\s\S]*?-->/g, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/\]\([^)]*\)/g, "] ")
+    .replace(/https?:\/\/\S+/g, " ");
+}
+
+/**
+ * Prose from an HTML surface. <code>/<pre> bodies are code and out of scope, but a bare
+ * backtick has no syntax meaning in rendered HTML — the founder reads straight through it,
+ * so backtick-wrapped words stay subject to every rule.
+ */
+function proseFromHtml(source: string): string {
+  return source
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(code|pre)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
     .replace(/https?:\/\/\S+/g, " ");
 }
 

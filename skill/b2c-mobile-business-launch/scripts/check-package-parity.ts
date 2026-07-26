@@ -95,6 +95,7 @@ if (rootPackage.value && runtimePackage.value) {
 
   checkAuditPlanCoverage("root", "repo", rootScripts);
   checkAuditPlanCoverage("runtime", "skill", runtimeScripts);
+  checkLaunchbenchValidatorParity(runtimeScripts);
 
   const rootDevDeps = rootPackage.value.devDependencies ?? {};
   const runtimeDevDeps = runtimePackage.value.devDependencies ?? {};
@@ -185,6 +186,62 @@ function checkAuditPlanCoverage(label: string, layout: AuditLayout, scripts: Rec
         ),
       );
     }
+  }
+}
+
+/**
+ * run-launchbench.ts rejects any scenario citing a validator outside its
+ * knownValidators literal — which means a validator missing from that literal
+ * can never gain scenario coverage, silently. This cross-check keeps the
+ * literal in lockstep with reality in both directions: every wired check/validate
+ * script must be listed, and every listed name must have a
+ * backing scripts/<name>.ts file. Skipped quietly when run-launchbench.ts is
+ * absent (synthetic fixture roots); the real skill always ships it, and the
+ * launchbench audit step itself fails if it goes missing there.
+ */
+function checkLaunchbenchValidatorParity(runtimeScripts: Record<string, string>): void {
+  const launchbenchPath = path.join(args.skillRoot, "scripts", "run-launchbench.ts");
+  if (!existsSync(launchbenchPath)) return;
+
+  const source = readFileSync(launchbenchPath, "utf8");
+  const literal = source.match(/const knownValidators = new Set\(\[([\s\S]*?)\]\);/);
+  if (!literal) {
+    issues.push(
+      issue(
+        "error",
+        "package_parity.launchbench_allowlist_unparseable",
+        "run-launchbench.ts no longer contains a parseable `const knownValidators = new Set([...])` literal; this parity check needs it to keep scenario coverage honest.",
+        "scripts/run-launchbench.ts",
+      ),
+    );
+    return;
+  }
+  const known = new Set([...(literal[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1] ?? ""));
+
+  for (const [name, script] of Object.entries(runtimeScripts)) {
+    if (!name.startsWith("check:") && !name.startsWith("validate:")) continue;
+    const basename = script.match(/scripts\/([a-z0-9-]+)\.ts/)?.[1];
+    if (!basename || known.has(basename)) continue;
+    issues.push(
+      issue(
+        "error",
+        "package_parity.launchbench_validator_missing",
+        `${basename} (${name}) is a wired validator but is absent from knownValidators in run-launchbench.ts — no LaunchBench scenario can cite it until it is added.`,
+        "scripts/run-launchbench.ts",
+      ),
+    );
+  }
+
+  for (const name of known) {
+    if (existsSync(path.join(args.skillRoot, "scripts", `${name}.ts`))) continue;
+    issues.push(
+      issue(
+        "error",
+        "package_parity.launchbench_validator_dead",
+        `knownValidators entry ${name} has no backing scripts/${name}.ts — scenarios citing it would pass lint while pointing at nothing.`,
+        "scripts/run-launchbench.ts",
+      ),
+    );
   }
 }
 

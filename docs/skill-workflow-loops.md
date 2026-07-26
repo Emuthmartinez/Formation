@@ -90,7 +90,7 @@ Status legend: ✅ covered by exactly one loop · ⬜ uncovered.
 | 55 | Skill triggering contract (maintainer) | Changing `SKILL.md` frontmatter, the skill description, or the trigger phrasing | L55 | ✅ |
 | 56 | ASC command contract (maintainer) | Before changing any documented `asc` command in `references/app-store-connect-cli.md` | L56 | ✅ |
 
-**Coverage:** 50 / 50 workflows mapped to exactly one loop. No uncovered rows; no
+**Coverage:** 56 / 56 workflows mapped to exactly one loop. No uncovered rows; no
 two loops share trigger + primary artifact + validator (see Distinctness Notes).
 
 ---

@@ -75,6 +75,11 @@ const knownValidators = new Set([
   "check-product-spec",
   "check-launch-trace",
   "check-privacy-terms",
+  "check-revenue",
+  "check-no-slop",
+  "check-change-cascade",
+  "check-founder-copy",
+  "check-template-safety",
 ]);
 
 // Flagship scenarios that must stay in the live behavioral subset

@@ -51,6 +51,9 @@ jobs:
       - name: Audit after refresh
         run: npm run audit:ci
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        # Surface the refresh output even when the post-refresh audit fails —
+        # seven scheduled runs failed with zero artifacts and nobody noticed.
+        if: always()
         with:
           name: source-freshness-report
           path: |
@@ -59,7 +62,10 @@ jobs:
             docs/source-freshness/source-snapshots/current.json
       # Source freshness tracks this third-party action:
       # https://github.com/peter-evans/create-pull-request
+      # if: always() — a refresh whose audit fails must still land as a visible
+      # (red) PR for review, not vanish into a failed run log.
       - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        if: always()
         with:
           branch: chore/source-freshness-refresh
           title: "Refresh skill source freshness"

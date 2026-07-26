@@ -6,6 +6,7 @@ expected_guardrail: >
   A TestFlight build must not be marked paywall-ready until: every App Store subscription product has cleared MISSING_METADATA (subscription-group localizations created), all RevenueCat product types match their App Store counterparts (lifetime = non_consumable), the default RC offering returns non-empty packages in a Release build or sandbox, and the compiled Info.plist confirms the correct RC key was injected.
 validators:
   - validate-project-state
+  - check-revenue
 must_catch:
   - TestFlight upload marked paywall-ready while an App Store subscription is in MISSING_METADATA
   - a lifetime product mapped as non_renewing_subscription instead of non_consumable

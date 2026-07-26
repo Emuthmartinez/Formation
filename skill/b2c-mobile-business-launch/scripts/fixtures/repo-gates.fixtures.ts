@@ -132,6 +132,27 @@ export function register(h: Harness): void {
     "must match skill-version.json",
   );
 
+  // A wired validator absent from run-launchbench.ts's knownValidators literal
+  // is structurally barred from scenario coverage — the drift that let five real
+  // PR-blocking gates go scenario-invisible. The parity check now reads the
+  // literal and fails on the gap.
+  const parityAllowlist = makeEmptyFixture("package-parity-launchbench-allowlist-gap");
+  const allowlistPair = writeParityPair(parityAllowlist, { rootVersion: "0.0.1", skillVersion: "0.0.1" });
+  mkdirSync(path.join(allowlistPair.parityScriptRoot, "scripts"), { recursive: true });
+  writeFileSync(path.join(allowlistPair.parityScriptRoot, "scripts", "validate-project-state.ts"), "// stub\n", "utf8");
+  writeFileSync(
+    path.join(allowlistPair.parityScriptRoot, "scripts", "run-launchbench.ts"),
+    'const knownValidators = new Set(["validate-project-state"]);\nexport { knownValidators };\n',
+    "utf8",
+  );
+  runScriptArgs(
+    "package parity fails when a wired validator is missing from the launchbench allowlist",
+    "check-package-parity.ts",
+    ["--repo-root", allowlistPair.repoRoot, "--skill-root", allowlistPair.parityScriptRoot],
+    1,
+    "package_parity.launchbench_validator_missing",
+  );
+
   // --- audit-skill-links ---
   const wireLinkRoot = (root: string): void => {
     mkdirSync(path.join(root, "references"), { recursive: true });
@@ -298,6 +319,38 @@ export function register(h: Harness): void {
     "no-slop leaves words that only begin with a banned word alone",
     "check-no-slop.ts",
     ["--skill-root", noSlopNearMisses.fixtureSkillRoot, "--root", noSlopNearMisses.fixtureTemplates],
+    0,
+    "0 error(s)",
+  );
+
+  /**
+   * Backticks mean code in markdown and nothing at all in rendered HTML. A banned word
+   * wrapped in backticks on an HTML surface reaches the founder's eyes verbatim, so the
+   * gate must still catch it there — while the same span in a markdown surface stays out
+   * of scope as code. One fixture per side pins the asymmetry.
+   */
+  const noSlopHtmlBackticks = writeNoSlopRoots(makeEmptyFixture("no-slop-html-backtick-banned-word"), "Plain brand copy with nothing banned.");
+  writeFileSync(
+    path.join(noSlopHtmlBackticks.fixtureTemplates, "onboarding.html"),
+    "<html><body><p>We `leverage` your first session to unlock the plan.</p></body></html>\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "no-slop catches a backtick-wrapped banned word on a shipped HTML surface",
+    "check-no-slop.ts",
+    ["--skill-root", noSlopHtmlBackticks.fixtureSkillRoot, "--root", noSlopHtmlBackticks.fixtureTemplates],
+    1,
+    '"leverage" is banned',
+  );
+
+  const noSlopMarkdownBackticks = writeNoSlopRoots(
+    makeEmptyFixture("no-slop-markdown-backtick-code-span"),
+    "The setup step runs `leverage --dry-run` before anything ships.",
+  );
+  runScriptArgs(
+    "no-slop still exempts backtick code spans on markdown surfaces",
+    "check-no-slop.ts",
+    ["--skill-root", noSlopMarkdownBackticks.fixtureSkillRoot, "--root", noSlopMarkdownBackticks.fixtureTemplates],
     0,
     "0 error(s)",
   );
