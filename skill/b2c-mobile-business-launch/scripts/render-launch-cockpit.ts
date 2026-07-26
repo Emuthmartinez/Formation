@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-import { asArray, asString, getPath, isRecord, loadProjectState, parseCliArgs, readText, reportAndExit, writeText } from "./lib/launch-state.js";
+import { asArray, asString, getPath, isRecord, loadProjectState, parseCliArgs, phaseOrder, readText, reportAndExit, writeText } from "./lib/launch-state.js";
 import { renderFounderGateMarkup } from "./lib/founder-gate-presentation.js";
 import {
+  celebrationBeats,
+  celebrationFor,
   emptyCopy,
   laneBlurb,
   laneLabel,
@@ -74,6 +76,22 @@ if (!loaded.state) {
   const hasOpenDecision =
     (asString(businessOperator.next_founder_action) ?? "").trim().length > 0 && asString(businessOperator.active_gate_status) !== "resolved";
   const yourCallFallback = hasOpenDecision ? "One decision, spelled out just below." : emptyCopy.noDecision;
+
+  /**
+   * The earned-but-unspoken progress beat. A beat is earned once the project has
+   * moved past the phase whose exit it marks; the latest earned beat renders as a
+   * celebration card until the agent records it as spoken in
+   * narrative.last_celebrated_phase — the beats existed in the dictionary long
+   * before anything showed them to the founder, which defeated their whole point.
+   */
+  const currentPhaseIndex = phaseOrder.indexOf(asString(getPath(state, "project.phase")) ?? "");
+  const lastCelebratedPhase = asString(narrative.last_celebrated_phase) ?? "";
+  const latestEarnedBeatPhase = celebrationBeats
+    .map((beat) => beat.phase)
+    .filter((phase) => currentPhaseIndex !== -1 && phaseOrder.indexOf(phase) !== -1 && phaseOrder.indexOf(phase) < currentPhaseIndex)
+    .sort((a, b) => phaseOrder.indexOf(a) - phaseOrder.indexOf(b))
+    .pop();
+  const unspokenCelebration = latestEarnedBeatPhase && latestEarnedBeatPhase !== lastCelebratedPhase ? celebrationFor(latestEarnedBeatPhase) : undefined;
 
   const laneEntries = Object.entries(lanes).map(([name, value]) => ({
     id: name,
@@ -233,6 +251,7 @@ if (!loaded.state) {
     .beat h3 { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 4px; }
     .beat p { margin: 0; font-size: 16px; }
     .your-call { border-left-color: var(--accent); }
+    .celebrate { border-left-color: #2e9e5b; background: #f2faf5; border-radius: 0 var(--radius) var(--radius) 0; padding-right: 14px; }
     .tech { background: transparent; border-style: dashed; }
     .tech summary { cursor: pointer; color: var(--muted); font-size: 14px; }
     .tech-body { padding-top: 14px; display: grid; gap: 14px; }
@@ -253,6 +272,7 @@ if (!loaded.state) {
   <main>
     <section class="narrative">
       <h2>Where We Are</h2>
+      ${unspokenCelebration ? `<article class="beat celebrate"><h3>Worth a moment</h3><p>${escapeHtml(unspokenCelebration)}</p></article>` : ""}
       <article class="beat"><h3>Since last time</h3><p>${text(narrative.since_last_time, "This is the first update, so there is nothing to catch up on yet.")}</p></article>
       <article class="beat"><h3>What I am doing now</h3><p>${text(narrative.right_now, asString(businessOperator.next_agent_action) ?? emptyCopy.notRecorded)}</p></article>
       <article class="beat your-call"><h3>What I need from you</h3><p>${text(narrative.your_call, yourCallFallback)}</p></article>

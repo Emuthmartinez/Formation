@@ -31,7 +31,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { flagString, issue, parseFlags, reportAndExit, type Issue } from "./lib/launch-state.js";
+import { parse as parseYaml } from "yaml";
+import { asString, flagString, getPath, isPastOrientPhase, issue, parseFlags, reportAndExit, type Issue } from "./lib/launch-state.js";
 import { bannedFounderVocabulary, coverageGaps, milestones } from "./lib/founder-copy.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -120,6 +121,53 @@ for (const beatPhase of ["phase_1", "phase_2", "phase_3b", "phase_6"]) {
         "scripts/lib/founder-copy.ts",
       ),
     );
+  }
+}
+
+// The beats must be wired, not just defined: the dictionary carried them for a
+// full release cycle while the renderer never imported them, so the founder
+// was never actually shown a milestone. Source-level check, same technique as
+// the beat-presence check above.
+const rendererSource = readFileSync(path.join(skillRoot, "scripts/render-launch-cockpit.ts"), "utf8");
+if (!rendererSource.includes("celebrationFor") && !rendererSource.includes("celebrationBeats")) {
+  issues.push(
+    issue(
+      "error",
+      "founder_copy.celebration_unwired",
+      "render-launch-cockpit.ts never references celebrationFor/celebrationBeats — the progress beats exist in the dictionary but nothing shows them to the founder. Wire the earned-but-unspoken beat into the cockpit.",
+      "scripts/render-launch-cockpit.ts",
+    ),
+  );
+}
+
+// Narrative freshness: the PROJECT_STATE.yaml template has promised this
+// enforcement in its own comment since v0.25.0 ("check:founder-copy fails on
+// empty or placeholder text once the project is past the orient phase") —
+// this makes the promise true. The shipped template stays in orient, so it is
+// exempt by its own phase.
+const statePath = path.join(root, "PROJECT_STATE.yaml");
+if (existsSync(statePath)) {
+  try {
+    const state: unknown = parseYaml(readFileSync(statePath, "utf8"));
+    const phase = asString(getPath(state, "project.phase")) ?? "";
+    if (isPastOrientPhase(phase)) {
+      for (const field of ["since_last_time", "right_now", "your_call"] as const) {
+        const value = (asString(getPath(state, `narrative.${field}`)) ?? "").trim();
+        if (value.length === 0 || /^(todo|tbd|n\/a|placeholder|\.\.\.)$/i.test(value)) {
+          issues.push(
+            issue(
+              "error",
+              `founder_copy.narrative_stale.${field}`,
+              `narrative.${field} is empty or placeholder text while the project is past orient (${phase}). ` +
+                `The narrated update is the founder's first read on the cockpit — write what actually happened, in plain language.`,
+              "PROJECT_STATE.yaml",
+            ),
+          );
+        }
+      }
+    }
+  } catch {
+    // Malformed state is validate-project-state's finding, not this gate's.
   }
 }
 
