@@ -2187,3 +2187,31 @@ sources:
     locations:
       - CODE_OF_CONDUCT.md
     notes: The basis this repo's code of conduct is adapted from. Wording and reporting process were rewritten for a single-maintainer project, so an upstream revision is informational rather than a required sync.
+  - id: github-com-coreyhaines31-marketingskills
+    name: github.com
+    source_type: skill_pack
+    url: https://github.com/coreyhaines31/marketingskills
+    refresh_cadence_days: 90
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/conversion-copy.md
+      - skill/b2c-mobile-business-launch/references/cro-landing.md
+    notes: MIT-licensed marketing skill pack (© Corey Haines 2025). Conversion-copywriting/copy-editing craft and landing-page CRO discipline adapted with attribution and reframed for B2C mobile surfaces. Reference-and-adapt only; do not vendor its skill files into templates or business repos. Most other skills in the pack (paid ads, referrals, onboarding, ASO, email, social, SEO/GEO, pricing) are already covered by deeper B2C-mobile references here and were intentionally not duplicated; its B2B skills (cold-email, prospecting, revops, sales-enablement) are out of scope.
+  - id: support-google-com-play-developer-listing-policy
+    name: support.google.com
+    source_type: support_docs
+    url: https://support.google.com/googleplay/android-developer/answer/9859455
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/conversion-copy.md
+    notes: Google Play store listing metadata policy (title/description constraints, prohibited promotional and keyword-stuffing patterns). Refresh before locking Play listing copy rules.
+  - id: web-dev-articles-vitals
+    name: web.dev
+    source_type: docs
+    url: https://web.dev/articles/vitals
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/cro-landing.md
+    notes: Core Web Vitals (LCP/INP/CLS) current thresholds; a slow landing page caps conversion regardless of copy. Refresh before quoting specific vitals targets in CRO guidance.
