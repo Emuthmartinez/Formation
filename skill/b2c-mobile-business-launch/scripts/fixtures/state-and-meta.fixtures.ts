@@ -136,6 +136,24 @@ export function register(h: Harness): void {
   const sourceRegistryClean = makeEmptyFixture("source-registry-clean");
   writeSourceRegistryFixture(sourceRegistryClean);
   runFixture("source registry with registered URL passes", sourceRegistryClean, "check-source-freshness.ts", 0);
+
+  // Regression pin: the weekly refresh renders source-refresh.html with
+  // HTML-escaped URLs (&amp;). Re-scanning that generated artifact flagged its
+  // own output as unregistered sources and kept the scheduled CI job red for
+  // seven straight weeks. Generated freshness outputs are excluded from the scan.
+  const sourceRegistryGenerated = makeEmptyFixture("source-registry-generated-artifact");
+  writeSourceRegistryFixture(sourceRegistryGenerated);
+  mkdirSync(path.join(sourceRegistryGenerated, "docs", "source-freshness"), { recursive: true });
+  // The URL is assembled from parts so the repo-level registry scan cannot see
+  // a literal in THIS file, while the written HTML carries a full unregistered
+  // URL — the fixture only passes because the generated report is excluded.
+  const escapedRefreshUrl = ["https:/", "/registry-drift.example.dev/repos?per_page=100&amp;type=public"].join("");
+  writeFileSync(
+    path.join(sourceRegistryGenerated, "docs", "source-freshness", "source-refresh.html"),
+    `<html><body><a href="${escapedRefreshUrl}">weekly diff</a></body></html>\n`,
+    "utf8",
+  );
+  runFixture("generated source-refresh.html is not rescanned as a new source", sourceRegistryGenerated, "check-source-freshness.ts", 0);
   runFixture("template secret docs pass from bundled template path", path.join(skillRoot, "templates"), "check-secret-routing.ts", 0);
   const cockpitPath = path.join(clean, "launch-cockpit.html");
   runFixture("launch cockpit renders", clean, "render-launch-cockpit.ts", 0, undefined, ["--out", cockpitPath]);
@@ -530,11 +548,32 @@ export function register(h: Harness): void {
     "lane_coverage.design.dependency_overridden",
   );
 
-  // An undated/trivial override still records the warning but is itself flagged.
+  // An undated/trivial override buys nothing: the edge error stands, and the
+  // override itself is flagged as thin. Any non-empty string used to downgrade
+  // the error — the exact words-not-work bypass this gate exists to refuse.
   const depOverrideThin = makeFixture("lane-dependency-override-thin");
   withLane(depOverrideThin, "product", { status: "partial", evidence: ["SPEC.md"] });
   withLane(depOverrideThin, "design", { status: "done", evidence: ["DESIGN.md"], dependency_override: "not needed" });
-  runFixture("undated dependency_override is flagged as thin", depOverrideThin, "check-lane-coverage.ts", 0, "lanes.design.reason_undated_or_trivial");
+  runFixture("undated dependency_override does not unlock the edge", depOverrideThin, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
+  runFixture("undated dependency_override is itself flagged as thin", depOverrideThin, "check-lane-coverage.ts", 1, "lanes.design.reason_undated_or_trivial");
+
+  // A dated-but-stale override still downgrades (drift to revisit, not a bypass),
+  // and the staleness warning rides along so it never goes quiet.
+  const depOverrideStale = makeFixture("lane-dependency-override-stale");
+  withLane(depOverrideStale, "product", { status: "partial", evidence: ["SPEC.md"] });
+  withLane(depOverrideStale, "design", {
+    status: "done",
+    evidence: ["DESIGN.md"],
+    dependency_override:
+      "2025-01-05 Brand and type system locked from founder identity work; the open SPEC.md item is a V2 scope question that does not touch any design token.",
+  });
+  runFixture(
+    "stale dated dependency_override still downgrades but surfaces staleness",
+    depOverrideStale,
+    "check-lane-coverage.ts",
+    0,
+    "lanes.design.stall_reason_stale",
+  );
 
   // --- check-change-cascade: recorded cascade surface coverage ---
   // Grades PROJECT_STATE.yaml change_cascade entries against the shipped

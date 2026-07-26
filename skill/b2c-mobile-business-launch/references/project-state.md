@@ -43,9 +43,11 @@ lanes:
     status: "done"
     evidence:
       - "DESIGN.md"
-    # Dated reason. Downgrades the edge error to a standing warning and is itself
-    # checked for staleness. Use only when the lane is genuinely independent of
-    # the open upstream work — not to clear a red validator.
+    # Dated, substantive reason. Downgrades the edge error to a standing warning
+    # and is itself checked for staleness. An undated or trivial override buys
+    # nothing — the edge error stands until the reason carries an ISO date and
+    # the concrete independence rationale. Use only when the lane is genuinely
+    # independent of the open upstream work — not to clear a red validator.
     dependency_override: "2026-07-25 Brand and type system locked from founder identity work; the open SPEC.md item is a V2 scope question that touches no design token."
 ```
 

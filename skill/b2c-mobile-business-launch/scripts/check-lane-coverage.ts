@@ -69,11 +69,17 @@ function checkLaneDependencies(state: unknown, lane: string, issues: Issue[]): {
 
   const detail = unlocked.map(({ dep, status }) => `${dep} (${status})`).join(", ");
   const override = asString(getPath(state, `lanes.${lane}.dependency_override`));
-  const hasOverride = Boolean(override?.trim());
 
-  if (hasOverride) {
-    // Overridden: surface it as a warning that never goes quiet, and hold the
-    // reason to the same dated/substantive/stale bar as every other reason.
+  // The override only buys the downgrade when it clears the same dated/substantive
+  // bar as every other reason. A one-character override is the bypass this gate
+  // exists to refuse. Staleness stays a warning: a once-valid override going old is
+  // drift to surface, not proof the lanes were never independent.
+  const overrideIssues: Issue[] = [];
+  if (override?.trim()) validateReason(override, `lanes.${lane}`, "dependency override", overrideIssues);
+  const overrideIsSubstantive = Boolean(override?.trim()) && !overrideIssues.some((i) => i.code.endsWith("reason_undated_or_trivial"));
+
+  if (overrideIsSubstantive) {
+    // Overridden: surface it as a warning that never goes quiet.
     issues.push(
       issue(
         "warning",
@@ -83,21 +89,24 @@ function checkLaneDependencies(state: unknown, lane: string, issues: Issue[]): {
         "PROJECT_STATE.yaml",
       ),
     );
-    const reasonWarnings = validateReasonAndCount(override, `lanes.${lane}`, "dependency override", issues);
-    return { errors: 0, warnings: 1 + reasonWarnings };
+    issues.push(...overrideIssues);
+    return { errors: 0, warnings: 1 + overrideIssues.filter((i) => i.severity === "warning").length };
   }
 
+  issues.push(...overrideIssues);
   issues.push(
     issue(
       "error",
       `lane_coverage.${lane}.dependency_unlocked`,
       `lanes.${lane} is done but upstream ${detail} is not locked. ` +
         `A lane cannot be finished on an input that is still moving (SKILL.md: "Lock phase outputs before depending on them"). ` +
-        `Advance the upstream lane to done/not_needed/deferred, or record a dated lanes.${lane}.dependency_override explaining why this lane is genuinely independent of it.`,
+        (override?.trim()
+          ? `The recorded dependency_override is undated or too thin to count — rewrite it with an ISO date and the concrete independence rationale.`
+          : `Advance the upstream lane to done/not_needed/deferred, or record a dated lanes.${lane}.dependency_override explaining why this lane is genuinely independent of it.`),
       "PROJECT_STATE.yaml",
     ),
   );
-  return { errors: 1, warnings: 0 };
+  return { errors: 1, warnings: overrideIssues.filter((i) => i.severity === "warning").length };
 }
 
 const args = parseCliArgs(process.argv.slice(2));

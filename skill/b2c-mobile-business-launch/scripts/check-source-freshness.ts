@@ -88,6 +88,12 @@ function shouldScan(filePath: string, root: string, registryPath: string): boole
   if (relative.startsWith("docs/source-freshness/SOURCE_REFRESH_REPORT")) {
     return false;
   }
+  // Generated build artifact, same as the two above. Its HTML-escaped URLs
+  // (&amp;) re-enter the scan as "new" unregistered sources otherwise — the
+  // exact loop that kept the weekly refresh job red for seven straight runs.
+  if (relative.startsWith("docs/source-freshness/source-refresh.html")) {
+    return false;
+  }
   if (relative.split(path.sep).some((part) => ignoredPathParts.has(part))) {
     return false;
   }

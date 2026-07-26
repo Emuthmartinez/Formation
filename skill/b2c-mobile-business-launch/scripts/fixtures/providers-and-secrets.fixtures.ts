@@ -115,4 +115,62 @@ export function register(h: Harness): void {
     1,
     "revenue.proof_json.tier1_example_copy",
   );
+
+  // The three RevenueCat traps documented in failure-cards.md each have a code
+  // branch; these fixtures prove the branches actually fire. MISSING_METADATA
+  // left unresolved empties the live offering; non_renewing_subscription
+  // silently expires a "lifetime" unlock; an unconfirmed Release build is the
+  // classic sandbox-only proof.
+  const revenueMissingMetadata = makeFixture("revenue-missing-metadata-unresolved");
+  const revenueMissingMetadataState = readState(revenueMissingMetadata);
+  getLane(revenueMissingMetadataState, "revenue")["status"] = "done";
+  writeState(revenueMissingMetadata, revenueMissingMetadataState);
+  const missingMetadataOps = readFileSync(path.join(revenueMissingMetadata, "REVENUE_OPS.md"), "utf8");
+  writeFileSync(
+    path.join(revenueMissingMetadata, "REVENUE_OPS.md"),
+    `${missingMetadataOps}\n| com.app.pro.monthly | RevenueCat | auto_renewable | MISSING_METADATA |\n`,
+    "utf8",
+  );
+  runFixture(
+    "done revenue lane with a product still in MISSING_METADATA fails",
+    revenueMissingMetadata,
+    "check-revenue.ts",
+    1,
+    "revenue.missing_metadata.unresolved",
+  );
+
+  const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
+  const revenueWrongTypeState = readState(revenueWrongType);
+  getLane(revenueWrongTypeState, "revenue")["status"] = "done";
+  writeState(revenueWrongType, revenueWrongTypeState);
+  const wrongTypeOps = readFileSync(path.join(revenueWrongType, "REVENUE_OPS.md"), "utf8");
+  writeFileSync(
+    path.join(revenueWrongType, "REVENUE_OPS.md"),
+    `${wrongTypeOps}\n| com.app.lifetime | RevenueCat | non_renewing_subscription | Ready |\n`,
+    "utf8",
+  );
+  runFixture(
+    "done revenue lane with a lifetime product typed non_renewing_subscription fails",
+    revenueWrongType,
+    "check-revenue.ts",
+    1,
+    "revenue.product_type.non_renewing_subscription",
+  );
+
+  const revenueSandboxOnly = makeFixture("revenue-release-build-unconfirmed");
+  const revenueSandboxOnlyState = readState(revenueSandboxOnly);
+  getLane(revenueSandboxOnlyState, "revenue")["status"] = "done";
+  writeState(revenueSandboxOnly, revenueSandboxOnlyState);
+  writeFileSync(
+    path.join(revenueSandboxOnly, "revenue", "revenuecat-proof.md"),
+    ["# RevenueCat Proof", "", "Sandbox purchase confirmed: entitlement active and access granted inside the app.", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "revenuecat-proof.md without Release-build confirmation surfaces the sandbox-only warning",
+    revenueSandboxOnly,
+    "check-revenue.ts",
+    1,
+    "revenue.proof_md.release_unconfirmed",
+  );
 }
