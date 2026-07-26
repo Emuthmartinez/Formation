@@ -135,6 +135,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:email", kind: "script", args: stateArgs },
     { id: "check:analytics-catalog", kind: "script", args: stateArgs },
     { id: "check:post-launch", kind: "script", args: stateArgs },
+    { id: "check:portfolio-registry", kind: "script", args: rootArgs },
     { id: "check:google-play", kind: "script", args: stateArgs },
     { id: "check:backend-contract", kind: "script", args: stateArgs },
     {

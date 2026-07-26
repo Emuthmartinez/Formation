@@ -1,6 +1,6 @@
 import { appendFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { type Harness, type MutableRecord, expectRecord, getLane, readState, writeCompleteCompoundEngineering, writeState } from "./_harness.js";
+import { type Harness, type MutableRecord, expectRecord, getLane, readState, skillRoot, writeCompleteCompoundEngineering, writeState } from "./_harness.js";
 
 /**
  * Lifecycle fixtures: post-launch operations, Google Play readiness, the
@@ -42,6 +42,223 @@ export function register(h: Harness): void {
     rmSync(path.join(postLaunchNoRetro, "LAUNCH_RETRO.md"));
   }
   runFixture("post-launch done without launch retro fails", postLaunchNoRetro, "check-post-launch-ops.ts", 1, "post_launch_ops.launch_retro_missing");
+
+  // A retro with no whole-app verdict surface is the zombie-app setup: the
+  // weekly rhythm runs forever and no checkpoint ever asks kill, hold, or scale.
+  const postLaunchNoVerdict = makeFixture("post-launch-retro-no-verdict");
+  {
+    const state = readState(postLaunchNoVerdict);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchNoVerdict, state);
+    writeFileSync(
+      path.join(postLaunchNoVerdict, "LAUNCH_RETRO.md"),
+      ["# Launch Retro", "", "## Lane Usage", "", "## Stalls And Blockers", "", "## Surprises", "", "## Failure Card Candidates"].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "post-launch done with a retro missing the kill-or-scale verdict fails",
+    postLaunchNoVerdict,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_missing",
+  );
+
+  // Mentioning the phrase in prose is not the section: only the real heading
+  // (and its table) counts as the verdict surface.
+  const postLaunchProsePhrase = makeFixture("post-launch-retro-prose-phrase-only");
+  {
+    const state = readState(postLaunchProsePhrase);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchProsePhrase, state);
+    writeFileSync(
+      path.join(postLaunchProsePhrase, "LAUNCH_RETRO.md"),
+      ["# Launch Retro", "", "## Surprises", "", "We should think about kill, hold, or scale at some point.", "", "## Failure Card Candidates"].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "retro mentioning the verdict phrase in prose without the section fails",
+    postLaunchProsePhrase,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_missing",
+  );
+
+  // The heading alone is words-not-work: once the Retro Window records a
+  // completed Day 30/Day 90 pass, the checkpoint's verdict row and the state
+  // mirror must both carry the decision.
+  const verdictTemplateRetro = (root: string, options: { day30Date: string; day30Verdict: string }): void => {
+    const retro = readFileSync(path.join(root, "LAUNCH_RETRO.md"), "utf8")
+      .replace("| Day 30 | | |", `| Day 30 | ${options.day30Date} | founder |`)
+      .replace("| Day 30 | | | | | | |", `| Day 30 | flat | declining | n/a | 8 | ${options.day30Verdict} | |`);
+    writeFileSync(path.join(root, "LAUNCH_RETRO.md"), retro, "utf8");
+  };
+
+  const postLaunchVerdictEmpty = makeFixture("post-launch-checkpoint-verdict-empty");
+  {
+    const state = readState(postLaunchVerdictEmpty);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchVerdictEmpty, state);
+    verdictTemplateRetro(postLaunchVerdictEmpty, { day30Date: "2026-06-28", day30Verdict: "" });
+  }
+  runFixture(
+    "completed day-30 checkpoint with an empty verdict row fails",
+    postLaunchVerdictEmpty,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_verdict_unfilled",
+  );
+
+  const postLaunchVerdictNoState = makeFixture("post-launch-verdict-without-state-mirror");
+  {
+    const state = readState(postLaunchVerdictNoState);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchVerdictNoState, state);
+    verdictTemplateRetro(postLaunchVerdictNoState, { day30Date: "2026-06-28", day30Verdict: "Hold" });
+  }
+  runFixture(
+    "recorded verdict without the PROJECT_STATE mirror fails",
+    postLaunchVerdictNoState,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_state_missing",
+  );
+
+  const postLaunchVerdictComplete = makeFixture("post-launch-verdict-complete");
+  {
+    const state = readState(postLaunchVerdictComplete);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "hold";
+    lane["kill_or_scale_decided_at"] = "2026-06-28";
+    writeState(postLaunchVerdictComplete, state);
+    verdictTemplateRetro(postLaunchVerdictComplete, { day30Date: "2026-06-28", day30Verdict: "Hold — flat but positive, low founder cost" });
+  }
+  runFixture("completed checkpoint with verdict and state mirror passes", postLaunchVerdictComplete, "check-post-launch-ops.ts", 0);
+
+  // A verdict without its evidence pack is a mood, not a decision.
+  const postLaunchVerdictNoEvidence = makeFixture("post-launch-verdict-without-evidence");
+  {
+    const state = readState(postLaunchVerdictNoEvidence);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "hold";
+    lane["kill_or_scale_decided_at"] = "2026-06-28";
+    writeState(postLaunchVerdictNoEvidence, state);
+    const retro = readFileSync(path.join(postLaunchVerdictNoEvidence, "LAUNCH_RETRO.md"), "utf8")
+      .replace("| Day 30 | | |", "| Day 30 | 2026-06-28 | founder |")
+      .replace("| Day 30 | | | | | | |", "| Day 30 | | | | | Hold | |");
+    writeFileSync(path.join(postLaunchVerdictNoEvidence, "LAUNCH_RETRO.md"), retro, "utf8");
+  }
+  runFixture(
+    "verdict recorded without the evidence pack fails",
+    postLaunchVerdictNoEvidence,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_evidence_unfilled",
+  );
+
+  // The state mirror must agree with the latest completed checkpoint's verdict.
+  const postLaunchVerdictMismatch = makeFixture("post-launch-verdict-state-mismatch");
+  {
+    const state = readState(postLaunchVerdictMismatch);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "scale";
+    lane["kill_or_scale_decided_at"] = "2026-06-28";
+    writeState(postLaunchVerdictMismatch, state);
+    verdictTemplateRetro(postLaunchVerdictMismatch, { day30Date: "2026-06-28", day30Verdict: "Hold" });
+  }
+  runFixture(
+    "state mirror disagreeing with the retro verdict fails",
+    postLaunchVerdictMismatch,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_state_mismatch",
+  );
+
+  // ── Portfolio registry ────────────────────────────────────────────────────
+
+  // Optional surface: single-business founders have no registry and stay clean.
+  const portfolioAbsent = makeEmptyFixture("portfolio-registry-absent");
+  runFixture("missing portfolio registry is a clean no-op", portfolioAbsent, "check-portfolio-registry.ts", 0);
+
+  // Once the registry exists it must carry the whole board, not just app rows.
+  const portfolioThin = makeEmptyFixture("portfolio-registry-thin");
+  writeFileSync(
+    path.join(portfolioThin, "PORTFOLIO_REGISTRY.md"),
+    ["# Portfolio Registry", "", "## Businesses", "", "| Business | Repo | Stage |", "| --- | --- | --- |", "| Ocho | ~/code/rork-ocho | live |"].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "portfolio registry without allocation, learnings, and pipeline fails",
+    portfolioThin,
+    "check-portfolio-registry.ts",
+    1,
+    "portfolio_registry.section_missing.allocation",
+  );
+
+  // A board with every heading and zero real business rows is a blank board
+  // claiming to exist — token presence is not substance. The shipped template
+  // stays inert through its _example:_ row, exercised by the audit-plan step.
+  const portfolioBlank = makeEmptyFixture("portfolio-registry-blank-board");
+  writeFileSync(
+    path.join(portfolioBlank, "PORTFOLIO_REGISTRY.md"),
+    [
+      "# Portfolio Registry",
+      "",
+      "## Businesses",
+      "",
+      "| Business | Repo | Stage | MRR (trend) | Last verdict (date) |",
+      "| --- | --- | --- | --- | --- |",
+      "",
+      "## Allocation",
+      "",
+      "Hours go where the verdicts point.",
+      "",
+      "## Cross-App Learnings",
+      "",
+      "| Learning | Source app | Date | Applied where next |",
+      "| --- | --- | --- | --- |",
+      "",
+      "## Next Launch Pipeline",
+      "",
+      "| Idea | Evidence so far | Starts when |",
+      "| --- | --- | --- |",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "portfolio registry with headings but no business rows fails",
+    portfolioBlank,
+    "check-portfolio-registry.ts",
+    1,
+    "portfolio_registry.businesses_empty",
+  );
+
+  const portfolioFilled = makeEmptyFixture("portfolio-registry-filled");
+  const shippedPortfolio = readFileSync(path.join(skillRoot, "templates", "PORTFOLIO_REGISTRY.md"), "utf8");
+  writeFileSync(
+    path.join(portfolioFilled, "PORTFOLIO_REGISTRY.md"),
+    shippedPortfolio.replace(
+      /\| _example: Ocho_[^\n]*\n/,
+      "| Ocho | ~/code/rork-ocho | 2026-05-29 | live | $180 flat | hold (2026-06-28) | 8 | day-90 retro |\n",
+    ),
+    "utf8",
+  );
+  runFixture("portfolio registry with a real business row passes", portfolioFilled, "check-portfolio-registry.ts", 0);
 
   const postLaunchThin = makeFixture("post-launch-thin-runbook");
   {

@@ -37,6 +37,15 @@ Misses that should become durable failure cards or LaunchBench scenarios so they
 | Miss | Failure card or LaunchBench candidate | Filed? |
 | --- | --- | --- |
 
+## Kill, Hold, Or Scale
+
+The whole-app verdict, per `post-launch-operations.md` §9. The agent fills the evidence columns from RevenueCat, PostHog cohorts, the paid-UA baseline, and the weekly log; the verdict itself is the founder's decision, recorded here and in `PROJECT_STATE.yaml` (`lanes.post_launch_ops.kill_or_scale_decision`). A checkpoint that passes with these columns empty is the zombie-app failure mode.
+
+| Checkpoint | MRR trend (4 wks) | Retention trend (D7/D30 cohorts) | CAC:LTV or payback | Founder hrs/wk | Verdict (Scale / Hold / Fix / Kill) | Rationale |
+| --- | --- | --- | --- | --- | --- | --- |
+| Day 30 | | | | | | |
+| Day 90 | | | | | | |
+
 ## Next-Launch Changes
 
-The three highest-leverage changes for the next launch (or the next 90 days of this one).
+The three highest-value changes for the next launch (or the next 90 days of this one).

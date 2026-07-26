@@ -80,6 +80,7 @@ const knownValidators = new Set([
   "check-change-cascade",
   "check-founder-copy",
   "check-template-safety",
+  "check-portfolio-registry",
 ]);
 
 // Flagship scenarios that must stay in the live behavioral subset

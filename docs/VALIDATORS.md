@@ -109,7 +109,8 @@ npm run validate:launch-state -- --root /path/to/app
 | `check:launch-narrative` | `growth/LAUNCH_NARRATIVE.md` launch thesis, tentpole-plus-weekly cadence, run-of-show, traceability, and the deterministic copy guardrails scanned against the fenced post copy |
 | `check:landing-funnel` | Landing and funnel structure against the launch funnel contract |
 | `check:email` | Resend DNS, sender map, webhooks, audiences, lifecycle automations, inbound handling, and unsubscribe rules |
-| `check:post-launch` | `POST_LAUNCH_OPS.md` operating cadence after release |
+| `check:post-launch` | `POST_LAUNCH_OPS.md` operating cadence after release, including the day-30/day-90 Kill, Hold, Or Scale verdict in `LAUNCH_RETRO.md` |
+| `check:portfolio-registry` | `PORTFOLIO_REGISTRY.md` multi-app board (businesses, allocation, cross-app learnings, next-launch pipeline); no-op until the registry exists |
 | `probe:revenuecat` | Live probe against a configured RevenueCat project |
 
 ## Analytics

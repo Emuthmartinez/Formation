@@ -313,6 +313,11 @@ lanes:
       - "POST_LAUNCH_OPS.md"
       - "LAUNCH_RETRO.md"
     blockers: []
+    # Whole-app verdict from the Kill-Or-Scale Review (post-launch-operations.md §9),
+    # recorded at the day-30/day-90 retro checkpoints. Founder-decided, never automatic.
+    # Values: scale | hold | fix | kill. Date is the ISO day the founder decided.
+    kill_or_scale_decision: ""
+    kill_or_scale_decided_at: ""
 tools:
   doppler:
     route: "intended_paid_or_account_tool"

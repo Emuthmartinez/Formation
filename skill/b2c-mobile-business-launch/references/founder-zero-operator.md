@@ -41,6 +41,8 @@ Do not ask the founder to choose between two ordinary implementation approaches.
 
 A direct request authorizes the reversible preparation it names. Draft the guide, comparison, copy, or plan first; use choices afterward to explain rigor, evidence treatment, or optional next routes. Do not convert already-requested preparation into a new permission gate.
 
+The protocol above covers moments that need a decision. Routine progress needs telling too: whenever the cockpit is re-rendered or a session wraps up, say in the reply what happened, what is next, and what (if anything) waits on the founder — do not leave good news and open questions sitting inside a rendered file the founder does not know to open.
+
 ## Business Bootstrap Sequence
 
 Create `BUSINESS_ACCESS.md` and `operations/business-access.json` during orient, before provider setup sprawls. Keep `currentPhase` visible and at most one structured `activeFounderGate` with phase, origin, class, definitions, choices, bypass/defer policy, lifecycle, next actions, and proof. Set the active gate to `null` while no founder decision is needed; the agent keeps working from `nextAgentAction`. Also record the next business operation so access setup cannot become a dead end. Run the sequence continuously:
