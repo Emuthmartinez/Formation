@@ -57,6 +57,13 @@ if (markdown) {
     "Stop And Scale Rules",
     "Founder-Only Gates",
     "Traceability",
+    // The four numbers stop/scale evaluates against — without them the rules
+    // are vibes, and a weekly report cannot be judged mechanically.
+    "Decision Thresholds",
+    "Attribution tolerance",
+    "Payback window",
+    "Creative signal floor",
+    "Scale trigger",
   ];
   for (const phrase of requiredPhrases) {
     if (!includes(markdown.text, phrase)) {

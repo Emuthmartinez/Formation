@@ -39,10 +39,15 @@ if (laneSkipped) {
 const severity: "error" | "warning" = laneDone ? "error" : "warning";
 
 // Surface docs that name events (first existing path wins per doc).
+// REVENUE_OPS.md joined the list when the billing-lifecycle events prescribed
+// in revenue-monetization.md §8a/§8b turned out to live only in reference
+// prose — a revenue doc naming an event the catalog does not carry is the
+// same invented-inline miss as an onboarding doc doing it.
 const SOURCE_DOCS: Array<{ label: string; paths: string[] }> = [
   { label: "ONBOARDING.md", paths: ["ONBOARDING.md"] },
   { label: "EMOTIONAL_DESIGN.md", paths: ["EMOTIONAL_DESIGN.md", "emotional-design/EMOTIONAL_DESIGN.md"] },
   { label: "VIRAL_GROWTH.md", paths: ["VIRAL_GROWTH.md", "growth/VIRAL_GROWTH.md"] },
+  { label: "REVENUE_OPS.md", paths: ["REVENUE_OPS.md"] },
 ];
 
 const analyticsText = readText(args.root, "ANALYTICS.md") ?? readText(args.root, "analytics/ANALYTICS.md");

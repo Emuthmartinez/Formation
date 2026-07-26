@@ -113,6 +113,7 @@ export function writeCompletePaidUserAcquisition(root: string): void {
       "Blended Report: growth/paid-ua-report.csv records spend, impressions, clicks, installs or app opens, paywall views, trials, purchases, entitlement active count, revenue, CPA, LTV window, winning angle, and next action.",
       "Weekly Schedule: Monday report review, Tuesday 3-5 asset production, Wednesday delivery check, Thursday anomaly check, Friday scale/hold/reduce/pause decision, and daily 15-minute pacing checks.",
       "Stop And Scale Rules: stop when baseline is missing, CPA cannot fit LTV, paywall or retention quality drops, or only clicks/installs improve; scale after one channel and repeatable creative angles show downstream revenue evidence.",
+      "Decision Thresholds: Attribution tolerance ±20% across RevenueCat, store console, PostHog, and self-reported; Payback window 90 days against realized LTV; Creative signal floor 2x target CPA or 7 days per creative; Scale trigger 14 consecutive days at or under target CPA at approved spend.",
       "Founder-Only Gates: founder approval is required for ad account connection, budget, spend, automated rules, paid MMP/ad tooling, ad-network SDK privacy changes, custom product pages, public creative, pricing, trials, offers, and legal copy.",
       "Traceability: LAUNCH_TRACE.md maps PUA-001 from RESEARCH.md to CONTENT_ASSETS.md, REVENUE_OPS.md, ANALYTICS.md, APP_STORE_LISTING.md, PRIVACY.md, TERMS.md, and PRODUCTION_READINESS.md.",
     ].join("\n"),

@@ -560,6 +560,19 @@ export function register(h: Harness): void {
     "analytics_catalog.invented_share_event.uncataloged",
   );
 
+  // REVENUE_OPS.md is a surface doc too: a billing/cancellation event named
+  // there without a catalog row is the same invented-inline miss.
+  const catalogRevenueDrift = makeFixture("analytics-catalog-revenue-drift");
+  setAnalyticsDone(catalogRevenueDrift);
+  appendFileSync(path.join(catalogRevenueDrift, "REVENUE_OPS.md"), "\n- `invented_billing_event`\n", "utf8");
+  runFixture(
+    "analytics done with an uncataloged revenue-doc event fails",
+    catalogRevenueDrift,
+    "check-analytics-catalog.ts",
+    1,
+    "analytics_catalog.invented_billing_event.uncataloged",
+  );
+
   // ── Launch scope state field ──────────────────────────────────────────────
   // Renamed from launch_tier because "tier" collided with the founder's own app pricing
   // tiers. Three cases matter: an invalid current value fails, an invalid LEGACY value

@@ -172,6 +172,30 @@ export function register(h: Harness): void {
     "revenue.product_type.non_renewing_subscription",
   );
 
+  // Pricing decision floor (§7a): heading, real anchor rows, dated approval.
+  // The shipped template carries the structure with example-only content, so a
+  // done lane on the untouched template fails the anchor and approval checks.
+  const revenuePricingUnfilled = makeFixture("revenue-pricing-unfilled");
+  const revenuePricingUnfilledState = readState(revenuePricingUnfilled);
+  getLane(revenuePricingUnfilledState, "revenue")["status"] = "done";
+  writeState(revenuePricingUnfilled, revenuePricingUnfilledState);
+  runFixture("done revenue lane with example-only competitor anchor fails", revenuePricingUnfilled, "check-revenue.ts", 1, "revenue.pricing_anchor.empty");
+  runFixture(
+    "done revenue lane without dated founder pricing approval fails",
+    revenuePricingUnfilled,
+    "check-revenue.ts",
+    1,
+    "revenue.pricing_approval.undated",
+  );
+
+  const revenuePricingMissing = makeFixture("revenue-pricing-section-missing");
+  const revenuePricingMissingState = readState(revenuePricingMissing);
+  getLane(revenuePricingMissingState, "revenue")["status"] = "done";
+  writeState(revenuePricingMissing, revenuePricingMissingState);
+  const pricingOps = readFileSync(path.join(revenuePricingMissing, "REVENUE_OPS.md"), "utf8");
+  writeFileSync(path.join(revenuePricingMissing, "REVENUE_OPS.md"), pricingOps.replace("## Trial And Pricing Decision", "## Trial Notes"), "utf8");
+  runFixture("done revenue lane without a pricing decision section fails", revenuePricingMissing, "check-revenue.ts", 1, "revenue.pricing_decision.missing");
+
   const revenueSandboxOnly = makeFixture("revenue-release-build-unconfirmed");
   const revenueSandboxOnlyState = readState(revenueSandboxOnly);
   getLane(revenueSandboxOnlyState, "revenue")["status"] = "done";
