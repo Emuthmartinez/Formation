@@ -200,10 +200,57 @@ function extractList(source: string, marker: string, referencePath: string, mini
   return items;
 }
 
-/** Whole-word, case-insensitive match that tolerates hyphenated multi-word terms. */
+/**
+ * Regular suffixes an inflected form takes. The gate matched base forms only until v0.26.1,
+ * which meant "leverage" failed and "leverages" passed: the same word, the same damage to
+ * the same sentence, waved through because of one letter. A banned word is banned in every
+ * form it appears in.
+ *
+ * "d" is listed separately from "ed" because most of the banned verbs end in e, so their
+ * past tense is base + "d" ("leveraged", "elevated"). Those same verbs drop the e before
+ * "-ing", which no flat suffix table can produce — hence the stem rules below.
+ *
+ * Irregular forms are deliberately absent. Every word on the banned list inflects
+ * regularly, and guessing at irregulars would mean encoding a conjugation table in a
+ * writing gate.
+ */
+const INFLECTION_SUFFIXES = ["s", "es", "ed", "d", "ing"] as const;
+
+/**
+ * Every form of a term the gate treats as the term itself, longest first so the regex
+ * alternation prefers "leveraging" over "leverage" without relying on backtracking.
+ *
+ * The forms are generated, not curated, because the word lists are parsed out of the
+ * reference and a maintainer can add a word any day. That makes false positives the risk
+ * worth naming: a generated form is only dangerous if it spells an unrelated real word.
+ * Checked against the 235k-headword system dictionary, the current list generates exactly
+ * five real words — "fostering", "streamlined", "elevated", "elevating", "supercharged" —
+ * and all five are inflections of their own base word. Suffixes stop at the five regular
+ * ones for the same reason: "-ness" would turn "robust" into "robustness", which is a
+ * different word doing a different job.
+ */
+export function inflectedForms(term: string): string[] {
+  const forms = new Set<string>([term]);
+  for (const suffix of INFLECTION_SUFFIXES) forms.add(term + suffix);
+  // "leverage" -> "leveraging". An e-final verb drops the e before "-ing".
+  if (/e$/i.test(term)) forms.add(`${term.slice(0, -1)}ing`);
+  // "tapestry" -> "tapestries". Consonant + y pluralizes as "-ies", not "-ys".
+  if (/[^aeiou]y$/i.test(term)) forms.add(`${term.slice(0, -1)}ies`);
+  return [...forms].sort((left, right) => right.length - left.length);
+}
+
+/**
+ * Whole-word, case-insensitive match that tolerates hyphenated multi-word terms and the
+ * inflected forms above. Multi-word terms inflect on their last word, which is the form
+ * that matters: "paradigm shift" catches "paradigm shifts".
+ */
 export function matchesTerm(text: string, term: string): boolean {
-  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
-  return new RegExp(`(^|[^A-Za-z0-9'-])${escaped}([^A-Za-z0-9'-]|$)`, "i").test(text);
+  const alternatives = inflectedForms(term).map(escapeTerm).join("|");
+  return new RegExp(`(^|[^A-Za-z0-9'-])(?:${alternatives})([^A-Za-z0-9'-]|$)`, "i").test(text);
+}
+
+function escapeTerm(term: string): string {
+  return term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
 }
 
 /**

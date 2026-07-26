@@ -34,7 +34,7 @@ strengthens the user's mental ownership of the result before they have even seen
 | Source | Finding | Confidence |
 |---|---|---|
 | Buell & Norton, _Management Science_ (2011) | Users value outcomes more and rate service quality higher when they observe the effort behind them — even when delay is partly artificial. | solid |
-| Norton, Mochon & Ariely, _Journal of Consumer Psychology_ (2012) | IKEA Effect: users place higher value on outputs they participated in creating; perceived effort delay elevates this when users see the system working through their specific inputs. | solid |
+| Norton, Mochon & Ariely, _Journal of Consumer Psychology_ (2012) | IKEA Effect: users place higher value on outputs they participated in creating; perceived effort delay strengthens this when users see the system working through their specific inputs. | solid |
 | Gollwitzer, _American Psychologist_ (1999) | When the processing screen names the user's own inputs, it converts them into an implementation intention for the revealed result. | solid |
 | Buell, attribution-uncertain follow-on work circa 2016–2019 | Extensions of operational transparency to algorithmic/mobile contexts; narration of algorithmic steps produces similar quality-perception lifts. | attribution-uncertain |
 
