@@ -123,6 +123,49 @@ export function register(h: Harness): void {
   }
   runFixture("completed checkpoint with verdict and state mirror passes", postLaunchVerdictComplete, "check-post-launch-ops.ts", 0);
 
+  // A verdict without its evidence pack is a mood, not a decision.
+  const postLaunchVerdictNoEvidence = makeFixture("post-launch-verdict-without-evidence");
+  {
+    const state = readState(postLaunchVerdictNoEvidence);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "hold";
+    lane["kill_or_scale_decided_at"] = "2026-06-28";
+    writeState(postLaunchVerdictNoEvidence, state);
+    const retro = readFileSync(path.join(postLaunchVerdictNoEvidence, "LAUNCH_RETRO.md"), "utf8")
+      .replace("| Day 30 | | |", "| Day 30 | 2026-06-28 | founder |")
+      .replace("| Day 30 | | | | | | |", "| Day 30 | | | | | Hold | |");
+    writeFileSync(path.join(postLaunchVerdictNoEvidence, "LAUNCH_RETRO.md"), retro, "utf8");
+  }
+  runFixture(
+    "verdict recorded without the evidence pack fails",
+    postLaunchVerdictNoEvidence,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_evidence_unfilled",
+  );
+
+  // The state mirror must agree with the latest completed checkpoint's verdict.
+  const postLaunchVerdictMismatch = makeFixture("post-launch-verdict-state-mismatch");
+  {
+    const state = readState(postLaunchVerdictMismatch);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "scale";
+    lane["kill_or_scale_decided_at"] = "2026-06-28";
+    writeState(postLaunchVerdictMismatch, state);
+    verdictTemplateRetro(postLaunchVerdictMismatch, { day30Date: "2026-06-28", day30Verdict: "Hold" });
+  }
+  runFixture(
+    "state mirror disagreeing with the retro verdict fails",
+    postLaunchVerdictMismatch,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_state_mismatch",
+  );
+
   // ── Portfolio registry ────────────────────────────────────────────────────
 
   // Optional surface: single-business founders have no registry and stay clean.

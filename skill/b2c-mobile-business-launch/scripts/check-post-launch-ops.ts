@@ -172,7 +172,8 @@ if (laneDone) {
       const completedCheckpoints = ["Day 30", "Day 90"].filter((checkpoint) => Boolean(tableRowCells(windowSection, checkpoint)[2]?.trim()));
 
       for (const checkpoint of completedCheckpoints) {
-        const verdictCell = verdictColumn === -1 ? "" : (tableRowCells(verdictSection, checkpoint)[verdictColumn] ?? "");
+        const cells = tableRowCells(verdictSection, checkpoint);
+        const verdictCell = verdictColumn === -1 ? "" : (cells[verdictColumn] ?? "");
         if (!/^(scale|hold|fix|kill)\b/i.test(verdictCell.trim())) {
           issues.push(
             issue(
@@ -180,6 +181,22 @@ if (laneDone) {
               "post_launch_ops.kill_or_scale_verdict_unfilled",
               `${retroPath} records the ${checkpoint} checkpoint as completed, but its Kill, Hold, Or Scale row carries no verdict. ` +
                 `A completed checkpoint with an empty verdict is the zombie-app miss the section exists to stop — record Scale, Hold, Fix, or Kill.`,
+              retroPath,
+            ),
+          );
+        }
+        // The verdict is only as good as its evidence pack: every column
+        // between the checkpoint and the verdict (MRR trend, retention trend,
+        // unit economics, founder hours) must be filled before the decision
+        // counts. Rationale stays the founder's optional words.
+        const evidenceCells = verdictColumn > 2 ? cells.slice(2, verdictColumn) : [];
+        if (verdictColumn !== -1 && (cells.length === 0 || evidenceCells.some((cell) => cell.trim().length === 0))) {
+          issues.push(
+            issue(
+              "error",
+              "post_launch_ops.kill_or_scale_evidence_unfilled",
+              `${retroPath}'s ${checkpoint} Kill, Hold, Or Scale row is missing evidence cells (MRR trend, retention trend, unit economics, founder hours). ` +
+                `A verdict without the evidence pack is a mood, not a decision — fill every evidence column from RevenueCat, PostHog, and the weekly log.`,
               retroPath,
             ),
           );
@@ -199,6 +216,27 @@ if (laneDone) {
               "PROJECT_STATE.yaml",
             ),
           );
+        } else {
+          // The mirror must agree with the latest completed checkpoint: future
+          // sessions and the portfolio registry read the state value, so a
+          // retro saying Kill while state says scale drives the wrong
+          // allocation and skips the wind-down.
+          const latest = completedCheckpoints[completedCheckpoints.length - 1] ?? "";
+          const latestVerdict = (verdictColumn === -1 ? "" : (tableRowCells(verdictSection, latest)[verdictColumn] ?? ""))
+            .trim()
+            .match(/^(scale|hold|fix|kill)\b/i)?.[1]
+            ?.toLowerCase();
+          if (latestVerdict && latestVerdict !== decision.toLowerCase()) {
+            issues.push(
+              issue(
+                "error",
+                "post_launch_ops.kill_or_scale_state_mismatch",
+                `lanes.post_launch_ops.kill_or_scale_decision ("${decision}") disagrees with the latest completed checkpoint's verdict in ${retroPath} ("${latestVerdict}"). ` +
+                  `Update the state mirror when the verdict changes — it is what future sessions and the portfolio registry act on.`,
+                "PROJECT_STATE.yaml",
+              ),
+            );
+          }
         }
       }
     }
