@@ -26,6 +26,8 @@ interface Args {
   schemaPath: string;
   outputPath?: string;
   check: boolean;
+  /** Aggregate mode: one business dir per repeated --business flag. */
+  businessDirs: string[];
 }
 
 interface Workspace {
@@ -88,27 +90,65 @@ const skillRoot = path.resolve(scriptDir, "..");
 const args = parseArgs(process.argv.slice(2));
 const issues: Issue[] = [];
 
-const businessStateResult = readJson(args.businessStatePath, "business_state");
-const projectStateResult = loadProjectState({
-  root: args.root,
-  statePath: args.launchStatePath,
-});
 const schemaResult = readJson(args.schemaPath, "workspace_schema");
+issues.push(...schemaResult.issues);
 
-issues.push(...businessStateResult.issues, ...projectStateResult.issues, ...schemaResult.issues);
+/**
+ * One state pair per business. Single-root mode (the default, unchanged) reads
+ * the pair from --root; aggregate mode reads one pair per repeated --business
+ * dir and concatenates the resulting business entries into one board — the
+ * portfolio read model over the exact same per-business adapter.
+ */
+const businessPairs: Array<{ businessState: Record<string, unknown>; projectState: Record<string, unknown> }> = [];
+const pairSources =
+  args.businessDirs.length > 0
+    ? args.businessDirs.map((dir) => ({
+        root: dir,
+        businessStatePath: resolveFrom(dir, "state/business.json"),
+        launchStatePath: resolveFrom(dir, "PROJECT_STATE.yaml"),
+      }))
+    : [{ root: args.root, businessStatePath: args.businessStatePath, launchStatePath: args.launchStatePath }];
 
-if (!isRecord(businessStateResult.value)) {
-  issues.push(issue("error", "business_workspace.business_state.invalid", "Business state must be a JSON object.", args.businessStatePath));
-}
-if (!isRecord(projectStateResult.state)) {
-  issues.push(issue("error", "business_workspace.project_state.invalid", "Project state must be a YAML object.", args.launchStatePath));
+for (const source of pairSources) {
+  const businessStateResult = readJson(source.businessStatePath, "business_state");
+  const projectStateResult = loadProjectState({
+    root: source.root,
+    statePath: source.launchStatePath,
+  });
+  issues.push(...businessStateResult.issues, ...projectStateResult.issues);
+  if (!isRecord(businessStateResult.value)) {
+    issues.push(issue("error", "business_workspace.business_state.invalid", "Business state must be a JSON object.", source.businessStatePath));
+  }
+  if (!isRecord(projectStateResult.state)) {
+    issues.push(issue("error", "business_workspace.project_state.invalid", "Project state must be a YAML object.", source.launchStatePath));
+  }
+  if (isRecord(businessStateResult.value) && isRecord(projectStateResult.state)) {
+    businessPairs.push({ businessState: businessStateResult.value, projectState: projectStateResult.state });
+  }
 }
 
 if (issues.some((item) => item.severity === "error")) {
   reportAndExit("Business Control Plane workspace render", issues);
 }
 
-const workspace = buildWorkspace(businessStateResult.value as Record<string, unknown>, projectStateResult.state as Record<string, unknown>);
+const workspace = buildWorkspace(businessPairs);
+
+// One row per business means one id per business: two dirs resolving to the
+// same slug would silently overlay each other on the board.
+const seenIds = new Set<string>();
+for (const entry of workspace.businesses) {
+  if (seenIds.has(entry.id)) {
+    issues.push(
+      issue(
+        "error",
+        "business_workspace.duplicate_business_id",
+        `Two aggregated businesses resolve to the same id "${entry.id}". Give each business its own slug in state/business.json before aggregating.`,
+        entry.id,
+      ),
+    );
+  }
+  seenIds.add(entry.id);
+}
 
 issues.push(...validateWorkspace(workspace, schemaResult.value, args.schemaPath));
 const rendered = `${JSON.stringify(workspace, null, 2)}\n`;
@@ -155,6 +195,17 @@ function parseArgs(argv: string[]): Args {
   const schemaPath = flagString(flags, "schema") ?? path.join(skillRoot, "state/schema/workspace.schema.json");
   const outputPath = flagString(flags, "output");
 
+  // Aggregate mode: parseFlags keeps only the last value of a repeated flag,
+  // so --business dirs are collected straight from argv. Each names one
+  // business workspace (containing state/business.json + PROJECT_STATE.yaml).
+  const businessDirs: string[] = [];
+  for (let index = 0; index < argv.length; index += 1) {
+    if (argv[index] === "--business") {
+      const value = argv[index + 1];
+      if (value && !value.startsWith("--")) businessDirs.push(path.resolve(expandHome(value)));
+    }
+  }
+
   return {
     root,
     businessStatePath: resolveFrom(root, businessStatePath),
@@ -162,10 +213,31 @@ function parseArgs(argv: string[]): Args {
     schemaPath: path.resolve(expandHome(schemaPath)),
     outputPath: outputPath ? resolveFrom(root, outputPath) : undefined,
     check: flagBoolean(flags, "check"),
+    businessDirs,
   };
 }
 
-function buildWorkspace(businessState: Record<string, unknown>, projectState: Record<string, unknown>): Workspace {
+function buildWorkspace(pairs: Array<{ businessState: Record<string, unknown>; projectState: Record<string, unknown> }>): Workspace {
+  const businesses = pairs.map((pair) => buildBusiness(pair.businessState, pair.projectState));
+  const updatedAt =
+    businesses
+      .map((business) => business.updated)
+      .sort()
+      .pop() ?? new Date().toISOString().slice(0, 10);
+
+  return {
+    schemaVersion: "0.1.0",
+    updatedAt,
+    product: {
+      name: "Business Control",
+      subtitle: "Local-first control plane for repo-backed businesses",
+    },
+    businesses,
+    templates: defaultTemplates(),
+  };
+}
+
+function buildBusiness(businessState: Record<string, unknown>, projectState: Record<string, unknown>): WorkspaceBusiness {
   const business = businessState.business;
   const project = getPath(projectState, "project");
   const businessName = concreteString(getPath(business, "name")) || concreteString(getPath(project, "name")) || "Unnamed Business";
@@ -189,33 +261,22 @@ function buildWorkspace(businessState: Record<string, unknown>, projectState: Re
   const riskCount = blockedCount + driftRiskCount + activeFailureCards;
 
   return {
-    schemaVersion: "0.1.0",
-    updatedAt,
-    product: {
-      name: "Business Control",
-      subtitle: "Local-first control plane for repo-backed businesses",
-    },
-    businesses: [
-      {
-        id: businessSlug,
-        name: businessName,
-        type: productType || platformType(platforms),
-        updated: updatedAt,
-        badge: stageBadge(businessStage),
-        mark: initials(businessName),
-        subtitle,
-        metrics: [
-          { label: "Stage", value: stageBadge(businessStage), note: businessStage },
-          { label: "Lanes", value: `${doneCount}/${launchLanes.length}`, note: `${blockedCount} blocked` },
-          { label: "Artifacts", value: String(evidenceCount), note: "evidence refs" },
-          { label: "Risk", value: String(riskCount), note: "blockers + drift + cards" },
-        ],
-        readiness: readinessItems(businessState, projectState),
-        agents: agentLanes(businessState, projectState, launchLanes, blockedCount),
-        lanes: workspaceLanes(businessState, projectState, launchLanes),
-      },
+    id: businessSlug,
+    name: businessName,
+    type: productType || platformType(platforms),
+    updated: updatedAt,
+    badge: stageBadge(businessStage),
+    mark: initials(businessName),
+    subtitle,
+    metrics: [
+      { label: "Stage", value: stageBadge(businessStage), note: businessStage },
+      { label: "Lanes", value: `${doneCount}/${launchLanes.length}`, note: `${blockedCount} blocked` },
+      { label: "Artifacts", value: String(evidenceCount), note: "evidence refs" },
+      { label: "Risk", value: String(riskCount), note: "blockers + drift + cards" },
     ],
-    templates: defaultTemplates(),
+    readiness: readinessItems(businessState, projectState),
+    agents: agentLanes(businessState, projectState, launchLanes, blockedCount),
+    lanes: workspaceLanes(businessState, projectState, launchLanes),
   };
 }
 
