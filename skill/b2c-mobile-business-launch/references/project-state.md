@@ -130,6 +130,8 @@ Render `launch-cockpit.html` whenever state changes materially. It should show:
 
 The cockpit is not a replacement for canonical docs. It is a dashboard over them.
 
+Rendering the file is necessary but not sufficient. The founder does not sit refreshing an HTML file in a git repo — in autopilot runs, subagent dispatches, and long workflow sessions nobody may be watching anything when the render lands. Whenever the cockpit is (re)rendered or a launch session ends, say the narrative in the reply itself: what changed since last time, what is happening now, and what needs the founder (the same three beats the cockpit's `narrative` block carries). A milestone the founder was never told about did not land as a milestone.
+
 ## Acceptance
 
 - A future agent can tell what to work on next without rereading every artifact.

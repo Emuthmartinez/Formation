@@ -132,8 +132,8 @@ if (laneDone) {
       ),
     );
   }
-  const retroExists = ["LAUNCH_RETRO.md", "post-launch/LAUNCH_RETRO.md"].some((candidate) => existsSync(path.join(args.root, candidate)));
-  if (!retroExists) {
+  const retroPath = ["LAUNCH_RETRO.md", "post-launch/LAUNCH_RETRO.md"].find((candidate) => existsSync(path.join(args.root, candidate)));
+  if (!retroPath) {
     issues.push(
       issue(
         "error",
@@ -143,6 +143,23 @@ if (laneDone) {
         "LAUNCH_RETRO.md",
       ),
     );
+  } else {
+    // The retro must carry the whole-app verdict surface. Channel-level
+    // stop/scale rules exist elsewhere; this is the only place the question
+    // "keep investing in this app or move to the next one" is forced, and a
+    // rhythm with no exit question runs zombie apps indefinitely.
+    const retro = (readText(args.root, retroPath) ?? "").toLowerCase();
+    if (!retro.includes("kill, hold, or scale")) {
+      issues.push(
+        issue(
+          "error",
+          "post_launch_ops.kill_or_scale_missing",
+          `${retroPath} has no "Kill, Hold, Or Scale" section. The day-30/day-90 retro must carry the whole-app verdict ` +
+            `(post-launch-operations.md §9) — evidence columns filled by the agent, verdict decided by the founder.`,
+          retroPath,
+        ),
+      );
+    }
   }
 }
 

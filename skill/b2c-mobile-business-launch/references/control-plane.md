@@ -40,6 +40,16 @@ Each shell must live in `state/business.json` under `controlPlane.panels`, inclu
 - Add validators before adding new panels so the Control Plane does not become another long prose checklist.
 - Run `check-control-plane-contract` and `check:business-control-plane-workspace` whenever panel state changes.
 
+## Portfolio Layer
+
+Everything above is one business deep. The portfolio layer is the surface for the founder's second launch onward — the point where "is this app working" becomes "which of my apps deserves the next hour".
+
+- `templates/PORTFOLIO_REGISTRY.md` is the artifact: one row per business (stage, MRR trend, latest Kill, Hold, Or Scale verdict, founder hours), an allocation paragraph, a cross-app learnings table fed by each `LAUNCH_RETRO.md`, and the next-launch pipeline. It lives in the founder's own workspace, never inside a single app's repo, and refreshes at each app's day-30/day-90 retro checkpoints.
+- The verdict feeding each row comes from the Kill-Or-Scale Review in `post-launch-operations.md` §9; the registry is where verdicts across apps turn into an allocation decision.
+- The per-business rules still hold at portfolio scope: names, brand vocabulary, tokens, domains, and credentials never move between businesses; learnings, engineering patterns, and audiences the founder owns outright do.
+- Gate: `check:portfolio-registry` — a no-op until the registry exists, structural once it does.
+- Read-model note: `docs/fixtures/business-control-plane-workspace.json` already models a multi-business `businesses[]` array against `state/schema/workspace.schema.json`. Aggregating several live businesses' workspace objects into one rendered board is the natural next panel; build it on `render-business-control-plane-workspace.ts` rather than a new pipeline, per the Architectural Rules above.
+
 ## Promotion Path
 
 When a Design Room decision is accepted:

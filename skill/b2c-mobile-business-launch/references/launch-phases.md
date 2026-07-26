@@ -752,4 +752,7 @@ Acceptance:
 - The weekly rhythm has run at least once on the live app with evidence in the weekly log.
 - Crash, review, retention, and support routes are proven, not planned.
 - The retro exists and its misses are filed as failure cards or LaunchBench candidates, not oral lore.
+- The day-30 and day-90 retro checkpoints each carry a founder-decided Kill, Hold, Or Scale verdict (`post-launch-operations.md` §9).
 - `check:post-launch` passes with the lane status the state claims.
+
+Once a second business exists, open the portfolio layer in `control-plane.md`: `PORTFOLIO_REGISTRY.md` is where per-app verdicts become a cross-app allocation decision, and where each launch's retro compounds into the next one.

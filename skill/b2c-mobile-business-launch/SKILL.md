@@ -24,7 +24,7 @@ Never speak this file's internal vocabulary to a founder: no lane ids, no phase 
 
 ### Autopilot Run Contract
 
-When this skill activates for broad launch/business work, keep running the launch workflow without asking the user to re-invoke this skill. Load the next needed reference yourself, update `PROJECT_STATE.yaml`, render `launch-cockpit.html`, and run the relevant validators before readiness claims. Do not stop with instructions.
+When this skill activates for broad launch/business work, keep running the launch workflow without asking the user to re-invoke this skill. Load the next needed reference yourself, update `PROJECT_STATE.yaml`, render `launch-cockpit.html`, and run the relevant validators before readiness claims. Do not stop with instructions. When the cockpit changes or the session ends, say the narrative in your reply — what happened, what is next, what needs the founder; a rendered file nobody opens is not a status update.
 
 Assume a beginner founder. Load [`references/founder-zero-operator.md`](references/founder-zero-operator.md), seed access state, present one plain-language action, do the rest, and continue when access clears.
 
@@ -180,7 +180,7 @@ Shipped packs live under [`templates/app-archetypes/`](templates/app-archetypes/
 | Launch narrative | before drafting the announcement, the launch-day sequence, the tentpole-vs-weekly-cadence plan, or launch post copy | [`references/launch-narrative-cadence.md`](references/launch-narrative-cadence.md) | `growth/LAUNCH_NARRATIVE.md`: feeling-first thesis and named emotional angle, the two launch types (rare tentpole + weekly feature-launch heartbeat) and how they compound into a standing audience, launch-day run-of-show, post copy in fenced blocks passing the 2026 guardrails (no hashtags, no emojis, link in the first reply not the main post), measurement, stop/scale rules, founder-only gates · `check:launch-narrative` |
 | UGC and creators | before founder-led organic social, TikTok/Reels/Shorts UGC, creator sourcing/contracts/payments, creator-marketplace use, or format-discovery tests. Load `viral-growth-loops.md` first when the plan depends on referrals, share-to-unlock, comment loops, or paywall timing | [`references/ugc-creator-engine.md`](references/ugc-creator-engine.md) | `UGC_PLAYBOOK.md` |
 | Fastlane ops | after launch approval or public beta; on any usefastlane.ai request — workspace setup, social account connections, Blitz campaigns, generated organic content, scheduling, canceling posts, short-form analytics | [`references/fastlane-growth-ops.md`](references/fastlane-growth-ops.md) | `FASTLANE_OPS.md` |
-| Post-launch operations | once the app is live (phase_6/phase_6b); after first store approval; on "what now"; for weekly ops, incident response, review responses, retention reviews, or resuming a live app | [`references/post-launch-operations.md`](references/post-launch-operations.md) | `POST_LAUNCH_OPS.md` (Weekly Operating Rhythm, Crash Triage, Review Responses with an SLA, Release And Hotfix Cadence, Retention Review, Support Operations, Launch Retro) and `LAUNCH_RETRO.md` at launch +7/30/90 days, feeding failure cards and LaunchBench candidates. "Approved for sale" is the handoff into operations, not the end of the launch package · `check:post-launch` |
+| Post-launch operations | once the app is live (phase_6/phase_6b); after first store approval; on "what now"; for weekly ops, incident response, review responses, retention reviews, kill-or-scale reviews, or resuming a live app; when a second business exists (portfolio registry) | [`references/post-launch-operations.md`](references/post-launch-operations.md) | `POST_LAUNCH_OPS.md` (Weekly Operating Rhythm, Crash Triage, Review Responses with an SLA, Release And Hotfix Cadence, Retention Review, Support Operations, Launch Retro) and `LAUNCH_RETRO.md` at launch +7/30/90 days, feeding failure cards and LaunchBench candidates. "Approved for sale" is the handoff into operations, not the end of the launch package · `check:post-launch` |
 
 ## Ground Rules
 
@@ -197,8 +197,8 @@ Shipped packs live under [`templates/app-archetypes/`](templates/app-archetypes/
 - **Treat public claims as liabilities.** Avoid unsupported endorsement, revenue, neuroscience, health, urgency, scarcity, and pricing claims.
 - **Treat security as a release lane.** Working screens are not launch-ready; threat model, secret routing, platform hardening, entitlement/webhook abuse controls, monitoring, and incident response need evidence or explicit blockers.
 - **Verify what shipped.** For landing and funnel work: local build, deploy checks, live HTTP checks, form submission smoke tests, analytics event verification, crawl checks, GEO/SEO and AI-crawler checks, and mobile/desktop visual QA.
-- **Recommend the runtime split, do not enforce it.** Surface the Claude-for-pre-build tip once to a non-Claude runtime, record it and the lane owner, and never skip the adversarial-verification or quarantine shape when workflows are unavailable.
-- **Treat versioning as git state, not prose labels.** Design Room baselines, diffs, restores, and wipes operate on `state/` and the rendered Design Room.
+- **Recommend the runtime split, do not enforce it.** The full contract is in Runtime Routing And Dynamic Workflows above.
+- **Treat versioning as git state, not prose labels.** Baselines, diffs, restores, and wipes operate on `state/`.
 - **Treat Control Plane, the Business Control workspace read model, live-provider proof, behavior evals, artifact starters, and token promotion as mechanically enforced contracts.** Run their validators before claiming the skill or a generated launch package complete.
 
 ## Phase Spine

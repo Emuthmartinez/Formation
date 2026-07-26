@@ -43,6 +43,50 @@ export function register(h: Harness): void {
   }
   runFixture("post-launch done without launch retro fails", postLaunchNoRetro, "check-post-launch-ops.ts", 1, "post_launch_ops.launch_retro_missing");
 
+  // A retro with no whole-app verdict surface is the zombie-app setup: the
+  // weekly rhythm runs forever and no checkpoint ever asks kill, hold, or scale.
+  const postLaunchNoVerdict = makeFixture("post-launch-retro-no-verdict");
+  {
+    const state = readState(postLaunchNoVerdict);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchNoVerdict, state);
+    writeFileSync(
+      path.join(postLaunchNoVerdict, "LAUNCH_RETRO.md"),
+      ["# Launch Retro", "", "## Lane Usage", "", "## Stalls And Blockers", "", "## Surprises", "", "## Failure Card Candidates"].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "post-launch done with a retro missing the kill-or-scale verdict fails",
+    postLaunchNoVerdict,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_missing",
+  );
+
+  // ── Portfolio registry ────────────────────────────────────────────────────
+
+  // Optional surface: single-business founders have no registry and stay clean.
+  const portfolioAbsent = makeEmptyFixture("portfolio-registry-absent");
+  runFixture("missing portfolio registry is a clean no-op", portfolioAbsent, "check-portfolio-registry.ts", 0);
+
+  // Once the registry exists it must carry the whole board, not just app rows.
+  const portfolioThin = makeEmptyFixture("portfolio-registry-thin");
+  writeFileSync(
+    path.join(portfolioThin, "PORTFOLIO_REGISTRY.md"),
+    ["# Portfolio Registry", "", "## Businesses", "", "| Business | Repo | Stage |", "| --- | --- | --- |", "| Ocho | ~/code/rork-ocho | live |"].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "portfolio registry without allocation, learnings, and pipeline fails",
+    portfolioThin,
+    "check-portfolio-registry.ts",
+    1,
+    "portfolio_registry.section_missing.allocation",
+  );
+
   const postLaunchThin = makeFixture("post-launch-thin-runbook");
   {
     const state = readState(postLaunchThin);
