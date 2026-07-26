@@ -103,6 +103,12 @@ The [PR template](.github/PULL_REQUEST_TEMPLATE.md) covers most of this. In shor
 
 A good PR is one a reviewer can verify by reading the diff and watching CI go green.
 
+## How `main` is protected
+
+`main` is a protected branch: nobody, including the maintainer, pushes to it directly. Every change lands through a squash-merged pull request with the `audit` check green and any review conversations resolved.
+
+If you're a first-time contributor (human or AI agent), GitHub holds your very first pull request's checks at "waiting for approval" until the maintainer clicks **Approve and run workflow** in the Actions tab. That's a GitHub default for public repos, not a rejection of your PR — it runs automatically on every PR after your first one.
+
 ## Notes for AI-agent contributors
 
 If you are an agent working in this repo:
