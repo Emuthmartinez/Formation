@@ -163,7 +163,7 @@ These run against this repo rather than a target app.
 | `check:artifact-templates` | Every template `PROJECT_STATE.yaml` evidence path has a starter artifact |
 | `check:app-archetype` | The archetype packs cover their advertised shapes |
 | `check:archetype-starter` | Starter scaffolds: structure completeness with lockfiles, names-only `.env.example`, no secret patterns, RLS migrations plus pgTAP tests, snake_case event catalogs, and a prompt-to-scaffold map |
-| `check:source-registry` | External docs, tools, and sites referenced anywhere in the repo are registered for weekly freshness tracking |
+| `check:source-registry` | External docs, tools, and sites referenced anywhere in the repo are registered for weekly freshness tracking; generated freshness reports and machine-local `.claude/worktrees/` checkouts are excluded from the scan |
 | `refresh:source-freshness` | Fetches registered sources, writes a report, and lets the weekly workflow open a reviewable PR |
 | `audit:links` | Bundled markdown files have no broken local links |
 | `validate:skill` | Maintainer-only skill lint, skipped when its tooling is absent |
