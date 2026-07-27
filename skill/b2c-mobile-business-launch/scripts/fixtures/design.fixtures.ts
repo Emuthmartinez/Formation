@@ -159,7 +159,7 @@ export function register(h: Harness): void {
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
       "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
-      "Push permission: prime after first value at an earned moment; never on launch.",
+      "Push permission: prime after first value at an earned moment, system dialog user-initiated from the prime screen; never on launch.",
       "Attribution: How did you hear about us? after the value promise.",
       "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
       "Fallback: flow continues if the review sheet is suppressed.",
@@ -459,6 +459,62 @@ export function register(h: Harness): void {
   runFixture(
     "a well-timed direct system dialog without a soft prime fails",
     onboardingPushDialogNoPrime,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_priming_missing",
+  );
+
+  // An automatic delayed hard ask is still a hard ask.
+  const onboardingPushAutoDialog = makeFixture("onboarding-push-auto-dialog");
+  {
+    const state = readState(onboardingPushAutoDialog);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushAutoDialog, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushAutoDialog, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push permission: soft-prime after first value, then automatically show the system dialog.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a soft prime that auto-opens the system dialog without a tap fails",
+    onboardingPushAutoDialog,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_priming_missing",
+  );
+
+  // The exemption line itself cannot smuggle an ask after the reason.
+  const onboardingPushNaInlineAsk = makeFixture("onboarding-push-na-inline-ask");
+  {
+    const state = readState(onboardingPushNaInlineAsk);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushNaInlineAsk, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushNaInlineAsk, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push permission: not applicable — desktop has no surface; on iOS request the system dialog on launch.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an exemption whose reason carries an inline cold ask fails",
+    onboardingPushNaInlineAsk,
     "check-onboarding-conversion.ts",
     1,
     "onboarding.push_priming_missing",

@@ -647,6 +647,25 @@ export function register(h: Harness): void {
   );
   runFixture("a recorded creator-content exemption stands with the template present", viralGrowthUgcExempt, "check-viral-growth-loop.ts", 0);
 
+  // The digit must belong to the cycle-time phrase, not a nearby k value.
+  const viralGrowthCycleUnavailable = makeFixture("viral-growth-cycle-unavailable");
+  writeCompleteViralGrowth(viralGrowthCycleUnavailable);
+  writeFileSync(
+    path.join(viralGrowthCycleUnavailable, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthCycleUnavailable, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: measured k = 0.4 in week 1; cycle time unavailable; trend: flat.",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "an unavailable cycle time beside a measured k fails",
+    viralGrowthCycleUnavailable,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

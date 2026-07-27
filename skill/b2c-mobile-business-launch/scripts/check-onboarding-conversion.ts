@@ -57,10 +57,14 @@ if (onboardingDone && markdown) {
   const affirmativePushInstruction = pushLines
     .filter((line) => !/not applicable/i.test(line))
     .some((line) => /\b(request|requested|ask|asked|prompt|prime|primed|priming|show|present)\b/i.test(affirmativeOf(line)));
+  // The exemption line itself may smuggle an ask after the reason — the
+  // reason's affirmative residue must carry no instruction verbs.
+  const reasonCarriesAsk = /\b(request|requested|ask|asked|prompt|show|present|display)\b/i.test(affirmativeOf(notApplicableReason));
   const notApplicable =
     Boolean(notApplicableMatch) &&
     notApplicableReason.replace(/[^a-z0-9]/gi, "").length >= 12 &&
     !NA_PLACEHOLDER.test(notApplicableReason) &&
+    !reasonCarriesAsk &&
     !affirmativePushInstruction;
   // Mention is not placement: the prime must sit at an earned post-value
   // moment, and a cold ask on launch is the contract violation itself.
@@ -71,8 +75,17 @@ if (onboardingDone && markdown) {
   // Timing alone is not the prime-first flow: the contract needs an owned
   // soft-prime surface before the system dialog, not a well-timed cold ask.
   const primeEvidence = pushLines.some((line) => /\b(soft[- ]?primes?|pre[- ]?permission|priming|primed?)\b/i.test(affirmativeOf(line)));
+  // The native dialog appears only after an affirmative tap on the owned
+  // prime surface — an automatic delayed hard ask is still a hard ask.
+  const userInitiated = pushLines.some((line) =>
+    /user[- ]initiated|affirmative tap|opt[- ]in tap|from the prime screen|after (the user )?(taps|accepts|agrees)|taps? (yes|allow|enable|continue)/i.test(
+      affirmativeOf(line),
+    ),
+  );
   const placementOk =
-    primeEvidence && pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(affirmativeOf(line)));
+    primeEvidence &&
+    userInitiated &&
+    pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(affirmativeOf(line)));
   const coldAsk = pushLines.some((line) =>
     /\bcold\b|first launch|on launch|at startup|app start|before (the )?(first )?value([- ]reveal)?/i.test(affirmativeOf(line)),
   );

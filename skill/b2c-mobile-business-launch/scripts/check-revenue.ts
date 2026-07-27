@@ -595,8 +595,14 @@ if (revenueDone && revenueOpsText) {
         // A completed test is judged on cohort economics over a renewal
         // window (§7b) — a day-one conversion delta alone is not a decision.
         const resultCell = cells[resultColumn] ?? "";
+        // Clause-scoped polarity: "No cohort evidence was collected" names the
+        // economics noun while negating it — the keyword must survive the
+        // negation strip.
+        const affirmativeResult = resultCell.replace(/\b(no|not|never|without|none)\b[^.;,—–:()|]*/gi, "");
         const decided =
-          resultColumn > 0 && substantiveCell(resultCell) && /cohort|renewal|trial[- ]?start|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(resultCell);
+          resultColumn > 0 &&
+          substantiveCell(resultCell) &&
+          /cohort|renewal|trial[- ]?start|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(affirmativeResult);
         return { statusCell, startedDate, dateReal, clean, defined, decided };
       });
       const startedInPast = (row: (typeof backlogRows)[number]): boolean => row.dateReal && (row.startedDate as Date).getTime() <= Date.now();

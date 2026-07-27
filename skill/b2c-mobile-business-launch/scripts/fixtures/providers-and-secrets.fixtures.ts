@@ -428,6 +428,28 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog.empty",
   );
 
+  // Naming the economics noun while negating it is not evidence.
+  const revenueExperimentNegatedCohort = makeFixture("revenue-experiment-negated-cohort");
+  {
+    const state = readState(revenueExperimentNegatedCohort);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentNegatedCohort, state);
+    const opsPath = path.join(revenueExperimentNegatedCohort, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | No cohort or renewal evidence was collected |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a completed row with negated cohort evidence does not satisfy the cadence",
+    revenueExperimentNegatedCohort,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

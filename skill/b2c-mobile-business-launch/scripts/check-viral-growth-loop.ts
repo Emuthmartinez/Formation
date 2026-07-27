@@ -181,7 +181,11 @@ if (growthStatus === "done" && markdown) {
   // The contract is weekly k, cycle time, and trend — a k number alone is a
   // partial measurement. The dated-commitment alternative stays for a loop
   // not yet measured.
-  const cycleTimeMeasured = /cycle[- ]?time[^\n]{0,30}\d|\d[^\n]{0,30}cycle[- ]?time/i.test(loopRegion);
+  // The number must belong to the cycle-time phrase itself — "k = 0.4 …
+  // cycle time unavailable" has a digit near the words but no measurement.
+  const cycleTimeMeasured = /\b\d+(\.\d+)?[- ](?:day|hour|week)s?[- ]cycle[- ]?time|cycle[- ]?time\s*(?:\(days\))?\s*(?:[:=]|is|was|of)?\s*\d+(\.\d+)?/i.test(
+    loopRegion,
+  );
   // An explicit trend/decision value, not the section's own guidance prose:
   // "the rules key on k and its trend" records no trend.
   const trendRecorded =
