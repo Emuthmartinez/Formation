@@ -369,7 +369,7 @@ export function register(h: Harness): void {
     const opsPath = path.join(revenueExperimentShortMetric, "REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
-      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | +9% CVR, founder kept it |\n\n## Founder-Gated Probe Step`,
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | +9% CVR with trial-to-paid steady over one renewal window; founder kept it |\n\n## Founder-Gated Probe Step`,
     );
     writeFileSync(opsPath, ops, "utf8");
   }
@@ -401,6 +401,28 @@ export function register(h: Harness): void {
   runFixture(
     "a completed row of unknown/NA cells does not satisfy the cadence",
     revenueExperimentNegativeCells,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
+  // Day-one conversion alone is not a completed test.
+  const revenueExperimentDayOne = makeFixture("revenue-experiment-day-one-result");
+  {
+    const state = readState(revenueExperimentDayOne);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentDayOne, state);
+    const opsPath = path.join(revenueExperimentDayOne, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | +9% day-one conversion, kept |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a completed row judged on day-one conversion alone does not satisfy the cadence",
+    revenueExperimentDayOne,
     "check-revenue.ts",
     1,
     "revenue.experiment_backlog.empty",

@@ -596,6 +596,57 @@ export function register(h: Harness): void {
     "viral_growth.loop_economics_unmeasured",
   );
 
+  // Guidance prose mentioning "trend" records no trend.
+  const viralGrowthGenericTrend = makeFixture("viral-growth-generic-trend");
+  writeCompleteViralGrowth(viralGrowthGenericTrend);
+  writeFileSync(
+    path.join(viralGrowthGenericTrend, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthGenericTrend, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: measured k = 0.4 in week 1; cycle time: 6 days; the stop/scale rules key on k and its trend.",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "a measured k whose only trend language is guidance prose fails",
+    viralGrowthGenericTrend,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // Negative measurement cells record nothing.
+  const viralGrowthNegativeRow = makeFixture("viral-growth-negative-row-cells");
+  writeCompleteViralGrowth(viralGrowthNegativeRow);
+  writeFileSync(
+    path.join(viralGrowthNegativeRow, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthNegativeRow, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      loopTable("| 2026-07-20 | 3.1 | 0.2 | 0.62 | not measured in week 1 | no decision yet |"),
+    ),
+    "utf8",
+  );
+  runFixture(
+    "a dated row with negative cycle and trend cells fails",
+    viralGrowthNegativeRow,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // The recorded exemption stands even when the shipped template remains.
+  const viralGrowthUgcExempt = makeFixture("viral-growth-ugc-exempt-template");
+  const shippedUgcPlaybookExempt = readFileSync(path.join(viralGrowthUgcExempt, "UGC_PLAYBOOK.md"), "utf8");
+  writeCompleteViralGrowth(viralGrowthUgcExempt);
+  writeFileSync(path.join(viralGrowthUgcExempt, "UGC_PLAYBOOK.md"), shippedUgcPlaybookExempt, "utf8");
+  writeFileSync(
+    path.join(viralGrowthUgcExempt, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthUgcExempt, "growth", "VIRAL_GROWTH.md"), "utf8") +
+      "\nCreator content: not in scope — the founder rejected the creator loop for v1; product-loop referrals only.\n",
+    "utf8",
+  );
+  runFixture("a recorded creator-content exemption stands with the template present", viralGrowthUgcExempt, "check-viral-growth-loop.ts", 0);
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

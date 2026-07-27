@@ -68,7 +68,11 @@ if (onboardingDone && markdown) {
   // boundary (including dashes and colons), so "not after first value—request
   // on launch" keeps its affirmative cold ask, and "never on launch" keeps its
   // affirmative placement language intact for the placement test.
-  const placementOk = pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(affirmativeOf(line)));
+  // Timing alone is not the prime-first flow: the contract needs an owned
+  // soft-prime surface before the system dialog, not a well-timed cold ask.
+  const primeEvidence = pushLines.some((line) => /\b(soft[- ]?primes?|pre[- ]?permission|priming|primed?)\b/i.test(affirmativeOf(line)));
+  const placementOk =
+    primeEvidence && pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(affirmativeOf(line)));
   const coldAsk = pushLines.some((line) =>
     /\bcold\b|first launch|on launch|at startup|app start|before (the )?(first )?value([- ]reveal)?/i.test(affirmativeOf(line)),
   );

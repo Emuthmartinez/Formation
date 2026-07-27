@@ -182,7 +182,11 @@ if (growthStatus === "done" && markdown) {
   // partial measurement. The dated-commitment alternative stays for a loop
   // not yet measured.
   const cycleTimeMeasured = /cycle[- ]?time[^\n]{0,30}\d|\d[^\n]{0,30}cycle[- ]?time/i.test(loopRegion);
-  const trendRecorded = /\btrend\b\s*(:|is|was|=)|\b(hold|stop|scale|rising|falling|flat|improving|declining|compounding)\b/i.test(loopRegion);
+  // An explicit trend/decision value, not the section's own guidance prose:
+  // "the rules key on k and its trend" records no trend.
+  const trendRecorded =
+    /\btrend\b\s*(:|=|is|was)?\s*(flat|rising|falling|improving|declining|holding|hold|compounding|up|down)\b/i.test(loopRegion) ||
+    /\bdecision\b\s*(:|=)\s*\S/i.test(loopRegion);
   const commitmentMatch = loopRegion.match(/first (?:weekly )?k (?:computation|measurement)[^\n]*?(\d{4}-\d{2}-\d{2})/i);
   const commitmentValid = Boolean(commitmentMatch && validCalendarDate(commitmentMatch[1] ?? "", true));
   // A dated row is a measurement only when it carries a numeric k — a date
@@ -202,8 +206,13 @@ if (growthStatus === "done" && markdown) {
       const kNumeric = kColumn > 0 ? /^\d+(\.\d+)?\b/.test(kCell) : /\bk\s*[=:]?\s*\d+(\.\d+)?/i.test(row);
       // A full measurement row records cycle time and trend/decision too;
       // missing columns fail closed.
-      const cycleNumeric = cycleColumn > 0 && /\d/.test(cells[cycleColumn] ?? "");
-      const trendSubstantive = trendColumn > 0 && (cells[trendColumn] ?? "").replace(/[^a-z0-9]/gi, "").length >= 3;
+      // "not measured in week 1" contains a digit and "no decision yet" has
+      // letters — a measurement cell must lead with its number and a trend
+      // cell must not be a negative.
+      const NEGATIVE_TREND = /^(no decision( yet)?|none|n\/?a|unknown|not (yet|measured|available|decided)|tbd|todo|pending)/i;
+      const cycleNumeric = cycleColumn > 0 && /^\d+(\.\d+)?\b/.test(cells[cycleColumn] ?? "");
+      const trendCell = (cells[trendColumn] ?? "").trim();
+      const trendSubstantive = trendColumn > 0 && trendCell.replace(/[^a-z0-9]/gi, "").length >= 3 && !NEGATIVE_TREND.test(trendCell);
       if (kNumeric && cycleNumeric && trendSubstantive) return true;
     }
     return false;
@@ -288,7 +297,7 @@ if (growthStatus === "done" && markdown) {
     const operativeBand = bandTablePresent ? populatedBandRow : proseBudgetNumbered;
     return numberedBands >= 3 && /founder[- ]?gated|budget/i.test(region) && /install[- ]per[- ]video|fatigue/i.test(region) && operativeBand;
   })();
-  if (ugcPlaybook && !ugcScaleSubstantive) {
+  if (ugcPlaybook && !ugcNotApplicable && !ugcScaleSubstantive) {
     issues.push(
       issue(
         "error",

@@ -592,7 +592,11 @@ if (revenueDone && revenueOpsText) {
           substantiveCell(cells[hypothesisColumn] ?? "") &&
           substantiveCell(cells[variantColumn] ?? "") &&
           identifierCell(cells[metricColumn] ?? "");
-        const decided = resultColumn > 0 && substantiveCell(cells[resultColumn] ?? "");
+        // A completed test is judged on cohort economics over a renewal
+        // window (§7b) — a day-one conversion delta alone is not a decision.
+        const resultCell = cells[resultColumn] ?? "";
+        const decided =
+          resultColumn > 0 && substantiveCell(resultCell) && /cohort|renewal|trial[- ]?start|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(resultCell);
         return { statusCell, startedDate, dateReal, clean, defined, decided };
       });
       const startedInPast = (row: (typeof backlogRows)[number]): boolean => row.dateReal && (row.startedDate as Date).getTime() <= Date.now();

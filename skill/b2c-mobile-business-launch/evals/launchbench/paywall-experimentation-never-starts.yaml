@@ -1,4 +1,5 @@
 id: paywall-experimentation-never-starts
+behavioral: true
 title: One reasonable paywall ships at launch and is never touched again while revenue plateaus
 prompt: >
   The app launched six weeks ago with a competent paywall: hard gate after onboarding, annual

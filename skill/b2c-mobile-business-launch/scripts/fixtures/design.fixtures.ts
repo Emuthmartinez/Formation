@@ -436,6 +436,34 @@ export function register(h: Harness): void {
     "onboarding.push_priming_missing",
   );
 
+  // Timing alone is not the prime-first flow.
+  const onboardingPushDialogNoPrime = makeFixture("onboarding-push-dialog-no-prime");
+  {
+    const state = readState(onboardingPushDialogNoPrime);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushDialogNoPrime, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushDialogNoPrime, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push permission: request the native system dialog directly after first value at an earned moment.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a well-timed direct system dialog without a soft prime fails",
+    onboardingPushDialogNoPrime,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_priming_missing",
+  );
+
   // "Push permission" is the same canonical noun as "push notifications" for
   // the not-applicable exemption.
   const onboardingPushPermissionNa = makeFixture("onboarding-push-permission-na");
