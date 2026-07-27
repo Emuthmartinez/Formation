@@ -160,6 +160,7 @@ Do:
 - Use Firecrawl or an equivalent crawler/scraper to inspect competitor landing pages, pricing pages, help centers, policy pages, SEO pages, and funnel claims.
 - Mine social language with XPOZ from Reddit, TikTok, X/Twitter, Instagram, and creator content for the pain users already name.
 - Run keyword and name collision checks before locking a name, subtitle, or ASO angle.
+- Judge the category against a stated revenue bar: top-competitor revenue estimates into RESEARCH.md's Category Revenue Reality table with an explicit pass/fail — data collection without a judgment is not evidence.
 - Convert findings into a revised product spec, with evidence cited inline or in an appendix.
 - Separate identity from storefront when needed: e.g. list where users search, position against the category if that is the wedge.
 - Update `PROJECT_STATE.yaml` research/product/traceability lane statuses and active failure cards when evidence gaps remain.
@@ -168,10 +169,12 @@ Outputs:
 - `SPEC.md` with positioning, category strategy, competitor threat model, core loop, onboarding, monetization, roadmap, metrics, risks, and decisions
 - evidence ledger with AppKittie tables, review summaries, XPOZ/social-language evidence, Firecrawl/web evidence, and keyword scan
 - initial `LAUNCH_TRACE.md` rows or equivalent trace section tying evidence to product decisions, claims, scope, and rejected alternatives
+- the Go, Pivot, Or Kill verdict: agent-assembled evidence, founder-decided, in `RESEARCH.md`, mirrored to `lanes.research.go_pivot_kill_decision`
 - short decision checkpoint for founder-only calls
 
 Acceptance:
 - A skeptical agent can tell why this category, this wedge, this price posture, and this name won.
+- The founder has recorded a Go verdict over the category-revenue, wedge, and demand evidence. A Pivot re-enters this phase; a Kill here is the process succeeding — a research doc instead of a shipped app. `check:research` refuses a done lane without it, and every downstream lane depends on research.
 - V1/V2/V3 boundaries are explicit.
 - Unsupported claims are either removed or marked as needing validation.
 - Competitor app-store, social, and web evidence are separated instead of blended into vague market claims.
