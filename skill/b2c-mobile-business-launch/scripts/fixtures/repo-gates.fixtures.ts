@@ -508,6 +508,33 @@ export function register(h: Harness): void {
     "motion_contract.canon.outside_band",
   );
 
+  const motionPresetDrift = writeMotionContractRoot("motion-contract-preset-duration-drift", (rel, text) =>
+    rel.endsWith("PremiumCraft.swift") ? text.replace("duration: DesignTokens.Motion.durationFast,", "duration: DesignTokens.Motion.durationBase,") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a preset rides a different duration token than the table maps",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPresetDrift],
+    1,
+    "motion_contract.preset.duration_mismatch",
+  );
+
+  const motionRowLost = writeMotionContractRoot("motion-contract-table-row-lost", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text
+          .split("\n")
+          .filter((line) => !line.startsWith("| `durationSlow` |"))
+          .join("\n")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the token table silently loses a required row",
+    "check-motion-contract.ts",
+    ["--skill-root", motionRowLost],
+    1,
+    "motion_contract.token_table.row_missing",
+  );
+
   const motionCinematicLeak = writeMotionContractRoot("motion-contract-cinematic-leak", (rel, text) =>
     rel.endsWith("premium-mobile-craft.md") ? `${text}\nUse durationCinematic for hero moments.\n` : text,
   );

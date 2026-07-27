@@ -89,10 +89,11 @@ if (swift !== undefined) {
 // --- 1. The benchmarks token table must match tokens.json values exactly. ---
 if (bench !== undefined) {
   const rowRe = /^\|\s*`(\w+)`\s*\|\s*(\d+)ms\s*\|([^|]*)\|/gm;
-  let rows = 0;
+  const REQUIRED_ROWS = ["durationFast", "durationBase", "durationSlow", "durationReveal", "durationCinematic", "stagger"];
+  const seenRows: string[] = [];
   for (const m of bench.matchAll(rowRe)) {
-    rows += 1;
     const name = g(m, 1);
+    seenRows.push(name);
     const ms = g(m, 2);
     const presetCell = g(m, 3);
     const actual = motionTokens[name];
@@ -117,6 +118,15 @@ if (bench !== undefined) {
             BENCH,
           ),
         );
+      } else if (preset.durationMember !== name) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.preset.duration_mismatch",
+            `Benchmarks token table maps PremiumMotion.${g(presetRef, 1)} to motion.${name} but PremiumCraft.swift rides DesignTokens.Motion.${preset.durationMember}.`,
+            BENCH,
+          ),
+        );
       } else if (preset.bounce !== Number(g(presetRef, 2))) {
         issues.push(
           issue(
@@ -129,9 +139,26 @@ if (bench !== undefined) {
       }
     }
   }
-  if (rows < 5) {
+  for (const required of REQUIRED_ROWS) {
+    if (!seenRows.includes(required)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.token_table.row_missing",
+          `Benchmarks token table lost its motion.${required} row; the mapping must stay complete.`,
+          BENCH,
+        ),
+      );
+    }
+  }
+  for (const dup of seenRows.filter((name, i) => seenRows.indexOf(name) !== i)) {
     issues.push(
-      issue("error", "motion_contract.token_table.missing", `Benchmarks token table parsed only ${rows} rows; expected the full motion scale.`, BENCH),
+      issue(
+        "error",
+        "motion_contract.token_table.duplicate_row",
+        `Benchmarks token table lists motion.${dup} more than once; duplicates can mask omissions.`,
+        BENCH,
+      ),
     );
   }
 
