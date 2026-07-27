@@ -587,6 +587,30 @@ export function register(h: Harness): void {
     "motion_contract.family_table.duplicate",
   );
 
+  const motionPunctuatedRef = writeMotionContractRoot("motion-contract-punctuated-token-ref", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? `${text}\nStaged loops may also ride \`motion.durationReveal-extra\` cycles.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a punctuated token reference the closing-backtick rule now captures",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPunctuatedRef],
+    1,
+    "motion_contract.token_reference.unknown",
+  );
+
+  const motionMalformedSpring = writeMotionContractRoot("motion-contract-malformed-spring-literal", (rel, text) =>
+    rel.endsWith("mastery-and-status-card.md")
+      ? text.replace(".spring(response: 0.5, dampingFraction: 0.7)", ".spring(response: 0..5, dampingFraction: 0.7)")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a canon spring literal does not parse as a valid decimal",
+    "check-motion-contract.ts",
+    ["--skill-root", motionMalformedSpring],
+    1,
+    "motion_contract.canon.spring_malformed",
+  );
+
   const motionCinematicLeak = writeMotionContractRoot("motion-contract-cinematic-leak", (rel, text) =>
     rel.endsWith("premium-mobile-craft.md") ? `${text}\nUse durationCinematic for hero moments.\n` : text,
   );

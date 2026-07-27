@@ -194,7 +194,9 @@ if (bench !== undefined) {
   }
 
   // Every motion.<name> reference in the benchmarks must resolve to a shipped token.
-  for (const m of bench.matchAll(/`motion\.([A-Za-z0-9_]+)`/g)) {
+  for (const m of bench.matchAll(/`motion\.([^`]+)`/g)) {
+    // `motion.*` is the namespace label (table header prose), not a token reference.
+    if (g(m, 1) === "*") continue;
     if (!(g(m, 1) in motionTokens)) {
       issues.push(
         issue("error", "motion_contract.token_reference.unknown", `Benchmarks reference motion.${g(m, 1)}, which does not exist in tokens.json.`, BENCH),
@@ -209,7 +211,7 @@ for (const [rel, text] of [
   [CRAFT, craft],
 ] as const) {
   if (text === undefined || swift === undefined) continue;
-  for (const m of text.matchAll(/PremiumMotion\.([A-Za-z0-9_]+)/g)) {
+  for (const m of text.matchAll(/PremiumMotion\.([A-Za-z0-9_-]+)/g)) {
     if (!swiftPresets.has(g(m, 1))) {
       issues.push(
         issue("error", "motion_contract.premium_motion.unknown", `${rel} references PremiumMotion.${g(m, 1)}, which PremiumCraft.swift does not define.`, rel),
@@ -227,7 +229,8 @@ interface Band {
 }
 const bands = new Map<string, Band>();
 if (craft !== undefined) {
-  const familyRe = /\|\s*\*\*(press|celebrate)\*\*\s*\|\s*response\s+([\d.]+)[–-]([\d.]+),\s*dampingFraction\s+([\d.]+)[–-]([\d.]+)/g;
+  const familyRe =
+    /\|\s*\*\*(press|celebrate)\*\*\s*\|\s*response\s+(\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?),\s*dampingFraction\s+(\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)/g;
   for (const m of craft.matchAll(familyRe)) {
     const family = g(m, 1);
     if (bands.has(family)) {
@@ -254,7 +257,7 @@ if (craft !== undefined) {
 
 if (bench !== undefined && bands.has("press") && bands.has("celebrate")) {
   const mirrorRe =
-    /press \(response ([\d.]+)[–-]([\d.]+) \/ damping ([\d.]+)[–-]([\d.]+)\) and celebrate \(response ([\d.]+)[–-]([\d.]+) \/ damping ([\d.]+)[–-]([\d.]+)\)/;
+    /press \(response (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?) \/ damping (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)\) and celebrate \(response (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?) \/ damping (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)\)/;
   const m = bench.match(mirrorRe);
   if (!m) {
     issues.push(
@@ -295,7 +298,21 @@ if (celebrateBand) {
   for (const rel of CANON_CARDS) {
     const text = read(rel);
     if (text === undefined) continue;
-    const springs = [...text.matchAll(/\.spring\(response:\s*([\d.]+|DesignTokens\.Motion\.[A-Za-z0-9_]+),\s*dampingFraction:\s*([\d.]+)\)/g)];
+    const NUM = "\\d+(?:\\.\\d+)?";
+    const springs = [
+      ...text.matchAll(new RegExp(`\\.spring\\(response:\\s*(${NUM}|DesignTokens\\.Motion\\.[A-Za-z0-9_]+),\\s*dampingFraction:\\s*(${NUM})\\)`, "g")),
+    ];
+    const springSites = (text.match(/\.spring\(response:/g) ?? []).length;
+    if (springSites > springs.length) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.canon.spring_malformed",
+          `${rel} contains ${springSites - springs.length} .spring(response:...) recipe(s) that do not parse as valid numeric or DesignTokens.Motion springs — a malformed literal like 0..5 would not compile.`,
+          rel,
+        ),
+      );
+    }
     if (springs.length === 0) {
       issues.push(
         issue("error", "motion_contract.canon.spring_missing", `${rel} no longer contains a parseable .spring(response:dampingFraction:) canon value.`, rel),
