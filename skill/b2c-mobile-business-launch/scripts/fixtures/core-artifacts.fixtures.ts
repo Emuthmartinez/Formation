@@ -699,6 +699,48 @@ export function register(h: Harness): void {
   );
   runFixture("a V1 exception without the day-30 revisit fails", specMoatV1NoRetro, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
+  // Naming the class before the negation is the same disclaimer.
+  const specMoatClassPostNegated = makeFixture("product-spec-moat-post-negated");
+  setLaneDone(specMoatClassPostNegated, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatClassPostNegated, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data is not a moat",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a taxonomy word preceding its negation fails", specMoatClassPostNegated, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // "Can ship it in a week" concedes the test without the word copy.
+  const specCopyCanShip = makeFixture("product-spec-copy-can-ship");
+  setLaneDone(specCopyCanShip, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specCopyCanShip, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "The incumbent can ship this feature in a week.",
+    }),
+    "utf8",
+  );
+  runFixture("a can-ship-in-a-week concession fails", specCopyCanShip, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
+
+  // The revisit must be the day-30 one.
+  const specMoatV1AnnualRetro = makeFixture("product-spec-moat-v1-annual-retro");
+  setLaneDone(specMoatV1AnnualRetro, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatV1AnnualRetro, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "no moat yet, racing to build data by 2026-08-25; revisit at the annual retro",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a V1 exception deferring to an annual retro fails", specMoatV1AnnualRetro, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
   // ── check-launch-trace ────────────────────────────────────────────────────
 
   const traceBaseline = makeFixture("launch-trace-baseline");

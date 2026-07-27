@@ -138,12 +138,22 @@ if (text) {
         v1ExceptionMatch &&
         !Number.isNaN(v1ExceptionParsed.getTime()) &&
         v1ExceptionParsed.toISOString().slice(0, 10) === v1ExceptionDate &&
-        // Named, dated, AND revisited — the doctrine's three conditions.
-        /\b(retro|revisit)/i.test(moatClassValue),
+        // Named, dated, AND revisited at day 30 — an annual retro is the
+        // "moat someday" state wearing a commitment.
+        /\b(day[- ]?30|30[- ]day|d-?30)\b[^\n]{0,30}\b(retro|revisit)|\b(retro|revisit)\w*\b[^\n]{0,30}\b(day[- ]?30|30[- ]day|d-?30)\b/i.test(moatClassValue),
       );
-      const affirmativeMoatValue = moatClassValue.replace(/\b(no|not|none|without|never)\b[^.;,—–:()|]*/gi, "");
+      // Clause-level polarity: the taxonomy word must sit in a clause with no
+      // negation at all — "data is not a moat" names the class while
+      // disclaiming it, in either order.
       const moatClassAffirmed =
-        !/^(none|no\b|n\/?a)/i.test(moatClassValue) && /\b(data|workflow|community|taste|model|distribution)\b/i.test(affirmativeMoatValue);
+        !/^(none|no\b|n\/?a)/i.test(moatClassValue) &&
+        moatClassValue
+          .split(/[.;,—–:()|]/)
+          .some(
+            (clause) =>
+              /\b(data|workflow|community|taste|model|distribution)\b/i.test(clause) &&
+              !/\b(no|not|none|never|without|isn'?t|aren'?t|cannot|can'?t|won'?t)\b/i.test(clause),
+          );
       if (!v1ExceptionValid && !moatClassAffirmed) {
         issues.push(
           issue(
@@ -164,7 +174,7 @@ if (text) {
       const CONCESSION_RAW =
         /^\s*(nothing|none|no)\b|\b(nothing|nobody|no one) (stops|prevents|blocks)|\bno (real |structural )?(moat|barrier|blocker)|\b(has|have) not thought of (it|this)\b/i;
       const CONCESSION_AFFIRMATIVE =
-        /\bcop(?:y|ied|yable)\b[^.\n]{0,30}\b(week|sprint|days?)\b|\banyone (can|could) (copy|build|ship)\b|\b(better|nicer|cleaner) design(ed)?\b|\bbetter (ux|ui|execution)\b|\bfirst[- ]mover\b/i;
+        /\bcop(?:y|ied|yable)\b[^.\n]{0,30}\b(week|sprint|days?)\b|\banyone (can|could) (copy|build|ship)\b|\b(can|could|will|would) (ship|build|clone|replicate|match)\b[^.\n]{0,40}\b(week|sprint|days?)\b|\b(better|nicer|cleaner) design(ed)?\b|\bbetter (ux|ui|execution)\b|\bfirst[- ]mover\b/i;
       const affirmativeCopyAnswer = copyTestAnswer.replace(/\b(cannot|can not|can't|won't|will not|not|no|never|unable to)\b[^.;,—–:()|]*/gi, "");
       const copyTestSubstantive =
         copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 &&
