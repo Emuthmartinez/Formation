@@ -516,6 +516,147 @@ export function register(h: Harness): void {
   writeState(depBlocked, depBlockedState);
   runFixture("lane done on a blocked upstream lane fails coverage", depBlocked, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
 
+  // --- check-lane-coverage: founder-gate re-engagement ---
+  // A founder-gated blocker is a pause awaiting a decision, not a termination.
+  // Undated gates warn (nobody can ever call them stale); gates older than the
+  // 30-day re-engagement window warn pre-launch and error once the app is live.
+  const gateIsoDaysAgo = (days: number): string => {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() - days);
+    return date.toISOString().slice(0, 10);
+  };
+
+  const founderGateUndated = makeFixture("founder-gate-undated");
+  withLane(founderGateUndated, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: ["founder-gated: paid campaign launch and budget spend"],
+  });
+  runFixture(
+    "undated founder-gated blocker surfaces a warning",
+    founderGateUndated,
+    "check-lane-coverage.ts",
+    0,
+    "lane_coverage.paid_user_acquisition.founder_gate_undated",
+  );
+
+  const founderGateStalePre = makeFixture("founder-gate-stale-prelaunch");
+  withLane(founderGateStalePre, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated ${gateIsoDaysAgo(45)}: paid campaign launch and budget spend`],
+  });
+  runFixture(
+    "stale founder gate pre-launch surfaces the re-engagement warning",
+    founderGateStalePre,
+    "check-lane-coverage.ts",
+    0,
+    "lane_coverage.paid_user_acquisition.founder_gate_reengagement_due",
+  );
+
+  // Live app + a growth lever parked behind a forgotten question = the
+  // distribution-never-turns-on failure mode. Error, not warning.
+  const founderGateStaleLive = makeFixture("founder-gate-stale-postlaunch");
+  {
+    const state = readState(founderGateStaleLive);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    writeState(founderGateStaleLive, state);
+  }
+  withLane(founderGateStaleLive, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated ${gateIsoDaysAgo(60)}: paid campaign launch and budget spend`],
+  });
+  runFixture(
+    "stale founder gate on a live app fails coverage",
+    founderGateStaleLive,
+    "check-lane-coverage.ts",
+    1,
+    "lane_coverage.paid_user_acquisition.founder_gate_reengagement_due",
+  );
+
+  // A standing policy note is a reminder, not a presented gate: the shipped
+  // template's own "Founder approval is required before..." blocker must never
+  // age into a false stale-gate error on a live app. Every lane is deferred
+  // with a fresh dated reason so the only possible phase_6 error would be the
+  // misfire this fixture exists to rule out.
+  const founderGateStandingPolicy = makeFixture("founder-gate-standing-policy");
+  {
+    const state = readState(founderGateStandingPolicy);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    const lanes = expectRecord(state.lanes, "PROJECT_STATE.yaml lanes");
+    for (const laneName of Object.keys(lanes)) {
+      const lane = expectRecord(lanes[laneName], `lanes.${laneName}`);
+      lane["status"] = "deferred";
+      lane["reason"] = `${gateIsoDaysAgo(3)} scope pass: deferred while the live app runs its weekly rhythm; revisit at the day-30 retro.`;
+    }
+    const paidUa = expectRecord(lanes["paid_user_acquisition"], "lanes.paid_user_acquisition");
+    paidUa["blockers"] = ["Founder approval is required before ad account connection, paid spend, budget changes, or live campaign launch."];
+    writeState(founderGateStandingPolicy, state);
+  }
+  runFixture("standing policy blocker on a live app is not an aged gate", founderGateStandingPolicy, "check-lane-coverage.ts", 0);
+
+  // Same-day east of UTC: a gate recorded with today's local date before UTC
+  // midnight is fresh, not forward-dated.
+  const founderGateSameDayEast = makeFixture("founder-gate-same-day-east");
+  {
+    const state = readState(founderGateSameDayEast);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    const lanes = expectRecord(state.lanes, "PROJECT_STATE.yaml lanes");
+    for (const laneName of Object.keys(lanes)) {
+      const lane = expectRecord(lanes[laneName], `lanes.${laneName}`);
+      lane["status"] = "deferred";
+      lane["reason"] = `${gateIsoDaysAgo(3)} scope pass: deferred while the live app runs its weekly rhythm; revisit at the day-30 retro.`;
+    }
+    const paidUa = expectRecord(lanes["paid_user_acquisition"], "lanes.paid_user_acquisition");
+    paidUa["blockers"] = [`founder-gated ${gateIsoDaysAgo(-1)}: paid campaign launch and budget spend`];
+    writeState(founderGateSameDayEast, state);
+  }
+  runFixture("same-day local date east of UTC is fresh, not forward-dated", founderGateSameDayEast, "check-lane-coverage.ts", 0);
+
+  // A date outside the documented presentation slot (between keyword and
+  // colon) is a campaign date, not a presentation date.
+  const founderGateDateAfterColon = makeFixture("founder-gate-date-after-colon");
+  {
+    const state = readState(founderGateDateAfterColon);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    writeState(founderGateDateAfterColon, state);
+  }
+  withLane(founderGateDateAfterColon, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated: campaign prepared ${gateIsoDaysAgo(1)}; spend awaiting approval`],
+  });
+  runFixture(
+    "a date after the colon does not count as the presentation date",
+    founderGateDateAfterColon,
+    "check-lane-coverage.ts",
+    1,
+    "lane_coverage.paid_user_acquisition.founder_gate_undated",
+  );
+
+  // A forward-dated gate would disarm the clock exactly like an undated one.
+  const founderGateFutureDate = makeFixture("founder-gate-future-date");
+  {
+    const state = readState(founderGateFutureDate);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    writeState(founderGateFutureDate, state);
+  }
+  withLane(founderGateFutureDate, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated ${gateIsoDaysAgo(-30)}: paid campaign launch and budget spend`],
+  });
+  runFixture(
+    "forward-dated founder gate on a live app fails as undated",
+    founderGateFutureDate,
+    "check-lane-coverage.ts",
+    1,
+    "lane_coverage.paid_user_acquisition.founder_gate_undated",
+  );
+
+  const founderGateFresh = makeFixture("founder-gate-fresh");
+  withLane(founderGateFresh, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated ${gateIsoDaysAgo(5)}: paid campaign launch and budget spend; founder chose to revisit after the day-30 retro`],
+  });
+  runFixture("freshly dated founder gate passes without gate findings", founderGateFresh, "check-lane-coverage.ts", 0);
+
   // deferred/not_needed upstream IS a resolved scope decision (launch tiers), so
   // it unblocks a downstream lane. Uses the content_assets -> design edge, whose
   // upstream chain is otherwise untouched.

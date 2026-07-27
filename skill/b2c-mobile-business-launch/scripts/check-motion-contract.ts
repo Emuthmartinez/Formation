@@ -172,10 +172,20 @@ if (bench !== undefined) {
         issue("error", "motion_contract.token_row.value_drift", `Benchmarks token table says motion.${name} = ${ms}ms but tokens.json ships ${actual}.`, BENCH),
       );
     }
-    // Every numeric row must also match the Swift enum value, preset or not —
+    // Every numeric row must also exist in and match the Swift enum, preset or not —
     // durationReveal/durationCinematic/stagger have no PremiumMotion mapping but
-    // apps still compile against their Swift members.
-    if (swiftMotionMembers.has(name) && Math.round((swiftMotionMembers.get(name) ?? 0) * 1000) !== Number(ms)) {
+    // apps still compile against their Swift members, and a member deleted from the
+    // enum breaks that compile even while doc/JSON parity stays green.
+    if (swiftMotionMembers.size > 0 && !swiftMotionMembers.has(name)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.token_row.swift_member_missing",
+          `Benchmarks token table documents motion.${name} but DesignTokens.Motion defines no numeric ${name} member — code referencing it will not compile.`,
+          BENCH,
+        ),
+      );
+    } else if (swiftMotionMembers.has(name) && Math.round((swiftMotionMembers.get(name) ?? 0) * 1000) !== Number(ms)) {
       issues.push(
         issue(
           "error",

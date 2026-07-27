@@ -661,6 +661,22 @@ export function register(h: Harness): void {
     "motion_contract.family_table.inverted_range",
   );
 
+  const motionSwiftMemberLost = writeMotionContractRoot("motion-contract-swift-member-lost", (rel, text) =>
+    rel.endsWith("DesignTokens.swift")
+      ? text
+          .split("\n")
+          .filter((line) => !line.includes("static let stagger: Double"))
+          .join("\n")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a documented token member is deleted from the Swift enum",
+    "check-motion-contract.ts",
+    ["--skill-root", motionSwiftMemberLost],
+    1,
+    "motion_contract.token_row.swift_member_missing",
+  );
+
   const motionCinematicLeak = writeMotionContractRoot("motion-contract-cinematic-leak", (rel, text) =>
     rel.endsWith("premium-mobile-craft.md") ? `${text}\nUse durationCinematic for hero moments.\n` : text,
   );
