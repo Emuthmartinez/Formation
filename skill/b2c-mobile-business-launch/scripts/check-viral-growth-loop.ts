@@ -191,6 +191,29 @@ if (growthStatus === "done" && markdown) {
   const trendRecorded =
     /\btrend\b\s*(:|=|is|was)?\s*(flat|rising|falling|improving|declining|holding|hold|compounding|up|down)\b/i.test(loopRegion) ||
     /\bdecision\b\s*(:|=)\s*\S/i.test(loopRegion);
+  // Recency: once the app has been live five weeks the loop is running, and
+  // the weekly contract needs a dated measurement inside the current window —
+  // "week one" prose or a fossil row cannot stay green indefinitely.
+  const liveSinceRaw = asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "";
+  const liveSinceDate = liveSinceRaw ? new Date(`${liveSinceRaw}T00:00:00Z`) : undefined;
+  const liveDays =
+    liveSinceDate &&
+    !Number.isNaN(liveSinceDate.getTime()) &&
+    liveSinceDate.toISOString().slice(0, 10) === liveSinceRaw &&
+    liveSinceDate.getTime() <= Date.now()
+      ? Math.floor((Date.now() - liveSinceDate.getTime()) / 86_400_000)
+      : 0;
+  const MEASUREMENT_RECENCY_DAYS = 21;
+  const MEASUREMENT_ABSOLUTE_FLOOR_DAYS = 90;
+  const loopRunning = liveDays >= 35;
+  const dateWithinDays = (raw: string, days: number): boolean => {
+    const date = new Date(`${raw}T00:00:00Z`);
+    return !Number.isNaN(date.getTime()) && Date.now() - date.getTime() <= days * 86_400_000;
+  };
+  const recentDatedLine = loopLines.some((line) => {
+    const dateMatch = line.match(/(\d{4}-\d{2}-\d{2})/);
+    return Boolean(dateMatch && validCalendarDate(dateMatch[1] ?? "", false) && dateWithinDays(dateMatch[1] ?? "", MEASUREMENT_RECENCY_DAYS));
+  });
   const commitmentMatch = loopRegion.match(/first (?:weekly )?k (?:computation|measurement)[^\n]*?(\d{4}-\d{2}-\d{2})/i);
   const commitmentValid = Boolean(commitmentMatch && validCalendarDate(commitmentMatch[1] ?? "", true));
   // A dated row is a measurement only when it carries a numeric k — a date
@@ -202,12 +225,34 @@ if (growthStatus === "done" && markdown) {
     const kColumn = headerCells.findIndex((cell) => /^k\b/.test(cell));
     const cycleColumn = headerCells.findIndex((cell) => /cycle/.test(cell));
     const trendColumn = headerCells.findIndex((cell) => /trend|decision/.test(cell));
+    const invitesColumn = headerCells.findIndex((cell) => /invit/.test(cell));
+    const conversionColumn = headerCells.findIndex((cell) => /conver/.test(cell));
     for (const row of tableLines.slice(1)) {
       const dateMatch = row.match(/(\d{4}-\d{2}-\d{2})/);
       if (!dateMatch || !validCalendarDate(dateMatch[1] ?? "", false)) continue;
+      // A fossil row is not a current measurement: 90-day absolute floor, and
+      // the weekly window once the loop is running.
+      if (!dateWithinDays(dateMatch[1] ?? "", loopRunning ? MEASUREMENT_RECENCY_DAYS : MEASUREMENT_ABSOLUTE_FLOOR_DAYS)) continue;
       const cells = row.split("|").map((cell) => cell.trim());
       const kCell = kColumn > 0 ? (cells[kColumn] ?? "") : "";
       const kNumeric = kColumn > 0 ? /^\d+(\.\d+)?\b/.test(kCell) : /\bk\s*[=:]?\s*\d+(\.\d+)?/i.test(row);
+      // k is a formula, not a free variable: when the input columns are
+      // present the recorded k must equal invites × conversion within a
+      // rounding tolerance.
+      const parseLeadingNumber = (cell: string): number | undefined => {
+        const numberMatch = cell.match(/^\d+(\.\d+)?/);
+        return numberMatch ? Number(numberMatch[0]) : undefined;
+      };
+      const invitesValue = invitesColumn > 0 ? parseLeadingNumber(cells[invitesColumn] ?? "") : undefined;
+      const conversionValue = conversionColumn > 0 ? parseLeadingNumber(cells[conversionColumn] ?? "") : undefined;
+      const kValue = parseLeadingNumber(kCell);
+      const kConsistent =
+        invitesColumn <= 0 ||
+        conversionColumn <= 0 ||
+        (invitesValue !== undefined &&
+          conversionValue !== undefined &&
+          kValue !== undefined &&
+          Math.abs(invitesValue * conversionValue - kValue) <= Math.max(0.02, 0.1 * invitesValue * conversionValue));
       // A full measurement row records cycle time and trend/decision too;
       // missing columns fail closed.
       // "not measured in week 1" contains a digit and "no decision yet" has
@@ -217,11 +262,12 @@ if (growthStatus === "done" && markdown) {
       const cycleNumeric = cycleColumn > 0 && /^\d+(\.\d+)?\b/.test(cells[cycleColumn] ?? "");
       const trendCell = (cells[trendColumn] ?? "").trim();
       const trendSubstantive = trendColumn > 0 && trendCell.replace(/[^a-z0-9]/gi, "").length >= 3 && !NEGATIVE_TREND.test(trendCell);
-      if (kNumeric && cycleNumeric && trendSubstantive) return true;
+      if (kNumeric && kConsistent && cycleNumeric && trendSubstantive) return true;
     }
     return false;
   })();
-  const loopMeasured = (measuredKLine && cycleTimeMeasured && trendRecorded) || commitmentValid || measuredRowValid;
+  const measuredKLineCurrent = measuredKLine && cycleTimeMeasured && trendRecorded && (!loopRunning || recentDatedLine);
+  const loopMeasured = measuredKLineCurrent || commitmentValid || measuredRowValid;
   if (loopIndex !== -1 && !loopMeasured) {
     issues.push(
       issue(

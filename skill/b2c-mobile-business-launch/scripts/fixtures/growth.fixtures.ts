@@ -358,6 +358,11 @@ export function register(h: Harness): void {
   );
 
   // A dated row without a numeric k is a no-data row, not a measurement.
+  const growthIsoDaysAgo = (days: number): string => {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() - days);
+    return date.toISOString().slice(0, 10);
+  };
   const loopTable = (row: string): string =>
     [
       "Loop Economics:",
@@ -385,7 +390,7 @@ export function register(h: Harness): void {
     path.join(viralGrowthMeasuredRow, "growth", "VIRAL_GROWTH.md"),
     readFileSync(path.join(viralGrowthMeasuredRow, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
       /^Loop Economics:.*$/m,
-      loopTable("| 2026-07-20 | 3.1 | 0.2 | 0.62 | 6 | hold and retest the share moment |"),
+      loopTable(`| ${growthIsoDaysAgo(7)} | 3.1 | 0.2 | 0.62 | 6 | hold and retest the share moment |`),
     ),
     "utf8",
   );
@@ -661,6 +666,72 @@ export function register(h: Harness): void {
   runFixture(
     "an unavailable cycle time beside a measured k fails",
     viralGrowthCycleUnavailable,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // k is a formula, not a free variable.
+  const viralGrowthKMismatch = makeFixture("viral-growth-k-mismatch");
+  writeCompleteViralGrowth(viralGrowthKMismatch);
+  writeFileSync(
+    path.join(viralGrowthKMismatch, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthKMismatch, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      loopTable(`| ${growthIsoDaysAgo(7)} | 3.1 | 0.2 | 9.9 | 6 | hold |`),
+    ),
+    "utf8",
+  );
+  runFixture("a k value inconsistent with its inputs fails", viralGrowthKMismatch, "check-viral-growth-loop.ts", 1, "viral_growth.loop_economics_unmeasured");
+
+  // A week-one prose measurement cannot stay green once the loop is running.
+  const viralGrowthStaleMeasurement = makeFixture("viral-growth-stale-measurement");
+  writeCompleteViralGrowth(viralGrowthStaleMeasurement);
+  {
+    const state = readState(viralGrowthStaleMeasurement);
+    getLane(state, "post_launch_ops")["live_since"] = growthIsoDaysAgo(60);
+    writeState(viralGrowthStaleMeasurement, state);
+  }
+  runFixture(
+    "an undated week-one measurement on a long-live app fails",
+    viralGrowthStaleMeasurement,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // A dated current-window row keeps a running loop green.
+  const viralGrowthLiveCurrentRow = makeFixture("viral-growth-live-current-row");
+  writeCompleteViralGrowth(viralGrowthLiveCurrentRow);
+  {
+    const state = readState(viralGrowthLiveCurrentRow);
+    getLane(state, "post_launch_ops")["live_since"] = growthIsoDaysAgo(60);
+    writeState(viralGrowthLiveCurrentRow, state);
+  }
+  writeFileSync(
+    path.join(viralGrowthLiveCurrentRow, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthLiveCurrentRow, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      loopTable(`| ${growthIsoDaysAgo(5)} | 3.1 | 0.2 | 0.62 | 6 | hold and retest the share moment |`),
+    ),
+    "utf8",
+  );
+  runFixture("a current-window dated row keeps a running loop green", viralGrowthLiveCurrentRow, "check-viral-growth-loop.ts", 0);
+
+  // A fossil row from years ago is not a measurement even pre-live.
+  const viralGrowthAncientRow = makeFixture("viral-growth-ancient-row");
+  writeCompleteViralGrowth(viralGrowthAncientRow);
+  writeFileSync(
+    path.join(viralGrowthAncientRow, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthAncientRow, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      loopTable("| 2020-01-01 | 3.1 | 0.2 | 0.62 | 6 | hold |"),
+    ),
+    "utf8",
+  );
+  runFixture(
+    "a fossil measured row fails the absolute floor",
+    viralGrowthAncientRow,
     "check-viral-growth-loop.ts",
     1,
     "viral_growth.loop_economics_unmeasured",

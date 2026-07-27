@@ -595,14 +595,14 @@ if (revenueDone && revenueOpsText) {
         // A completed test is judged on cohort economics over a renewal
         // window (§7b) — a day-one conversion delta alone is not a decision.
         const resultCell = cells[resultColumn] ?? "";
-        // Clause-scoped polarity: "No cohort evidence was collected" names the
-        // economics noun while negating it — the keyword must survive the
-        // negation strip.
-        const affirmativeResult = resultCell.replace(/\b(no|not|never|without|none)\b[^.;,—–:()|]*/gi, "");
-        const decided =
-          resultColumn > 0 &&
-          substantiveCell(resultCell) &&
-          /cohort|renewal|trial[- ]?start|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(affirmativeResult);
+        // Clause-level polarity: a cohort noun counts only in a clause with no
+        // negation or availability negative — "No cohort evidence was
+        // collected; renewal window unavailable" affirms nothing.
+        const NEGATIVE_CLAUSE = /\b(no|not|never|without|none|unavailable|missing|uncollected|unmeasured|pending|awaiting|unknown|n\/?a|tbd)\b/i;
+        const cohortAffirmed = resultCell
+          .split(/[.;,—–:()|]/)
+          .some((clause) => /cohort|renewal|trial[- ]?start|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(clause) && !NEGATIVE_CLAUSE.test(clause));
+        const decided = resultColumn > 0 && substantiveCell(resultCell) && cohortAffirmed;
         return { statusCell, startedDate, dateReal, clean, defined, decided };
       });
       const startedInPast = (row: (typeof backlogRows)[number]): boolean => row.dateReal && (row.startedDate as Date).getTime() <= Date.now();

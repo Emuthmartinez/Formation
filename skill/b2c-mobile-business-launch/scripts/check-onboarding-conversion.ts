@@ -50,7 +50,8 @@ if (onboardingDone && markdown) {
   const notApplicableMatch = markdown.text.match(/push (?:notifications?|permissions?):?[ \t]*not applicable\b[ \t:;—–,-]*(.*)$/im);
   const NA_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
   const notApplicableReason = (notApplicableMatch?.[1] ?? "").trim();
-  const pushLines = markdown.text.split(/\r?\n/).filter((line) => /push (permission|priming|prime)|notification permission/i.test(line));
+  const pushLinePattern = /push (notifications? )?(permission|priming|prime)|notification permission/i;
+  const pushLines = markdown.text.split(/\r?\n/).filter((line) => pushLinePattern.test(line));
   // The exemption is mutually exclusive with an actual push flow: a document
   // that both declares push not applicable and instructs an ask must stand on
   // the instructions, which the gates below then judge on their own terms.
@@ -126,7 +127,6 @@ if (onboardingDone && markdown) {
     }
     return undefined;
   };
-  const pushLinePattern = /push (permission|priming|prime)|notification permission/i;
   const reviewSteps = markdown.text
     .split(/\r?\n/)
     .filter((line) => !pushLinePattern.test(line) && reviewTermPattern.test(affirmativeOf(line)))

@@ -450,6 +450,28 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog.empty",
   );
 
+  // An availability negative after the semicolon affirms nothing either.
+  const revenueExperimentUnavailableCohort = makeFixture("revenue-experiment-unavailable-cohort");
+  {
+    const state = readState(revenueExperimentUnavailableCohort);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentUnavailableCohort, state);
+    const opsPath = path.join(revenueExperimentUnavailableCohort, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | No cohort evidence was collected; renewal window unavailable |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a completed row whose renewal window is unavailable does not satisfy the cadence",
+    revenueExperimentUnavailableCohort,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

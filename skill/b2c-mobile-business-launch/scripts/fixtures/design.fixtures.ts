@@ -520,6 +520,28 @@ export function register(h: Harness): void {
     "onboarding.push_priming_missing",
   );
 
+  // "Push notification priming" is the same canonical subject.
+  const onboardingPushNotificationPriming = makeFixture("onboarding-push-notification-priming");
+  {
+    const state = readState(onboardingPushNotificationPriming);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushNotificationPriming, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushNotificationPriming, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push notification priming: soft-prime after first value; the system dialog is user-initiated after the user taps Allow; never on launch.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("push-notification-priming wording passes the gate", onboardingPushNotificationPriming, "check-onboarding-conversion.ts", 0);
+
   // "Push permission" is the same canonical noun as "push notifications" for
   // the not-applicable exemption.
   const onboardingPushPermissionNa = makeFixture("onboarding-push-permission-na");
