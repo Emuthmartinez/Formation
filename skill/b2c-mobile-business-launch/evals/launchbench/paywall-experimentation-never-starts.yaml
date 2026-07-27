@@ -17,7 +17,8 @@ expected_guardrail: >
   judge on cohort economics over at least one renewal-decision window. The founder approves
   price/offer changes per §9; completed tests land their decision back into the pricing record
   through change-cascade.md. check:revenue fails a done revenue lane on a live app whose
-  backlog has no dated active or completed row — a backlog of empty headers is the
+  backlog shows no current activity — no active row, no completed row started within eight
+  weeks, and no planned row dated to start within 60 days; a backlog of empty headers is the
   one-and-done plateau wearing a green check.
 validators:
   - check-revenue
@@ -30,4 +31,4 @@ should_say:
   - Stand up the §7b cadence — propose the first experiment from the ordered test menu and put it in front of the founder.
   - Route through RevenueCat Experiments when available; otherwise run a dated before/after with cohort comparison, honestly labeled.
   - Judge on cohort economics over a full renewal-decision window, one experiment per surface at a time.
-  - Run npm run check:revenue -- --root . — it fails a live app's done revenue lane with no dated active or completed experiment row.
+  - Run npm run check:revenue -- --root . — it fails a live app's done revenue lane with no current backlog activity (active, recently completed, or dated planned experiment row).

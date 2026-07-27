@@ -91,7 +91,7 @@ export function writeCompleteViralGrowth(root: string): void {
   );
   writeFileSync(
     path.join(root, "UGC_PLAYBOOK.md"),
-    "# UGC Playbook\n\nCreator scripts use GROW-001 and the format lab.\n\nPost-Breakout Scale Model: roster grows in bands (3-5 discovery, ~10 proven, ~30 scale, 75+ volume), each band a founder-gated budget step with install-per-video fatigue measured weekly.\n",
+    "# UGC Playbook\n\nCreator scripts use GROW-001 and the format lab.\n\nPost-Breakout Scale Model: roster grows in bands (3-5 discovery, ~10 proven, ~30 scale, 75+ volume), each band a founder-gated budget step with install-per-video fatigue measured weekly. Current band: Discovery, entered 2026-07-01, budget $300/week founder-approved with the prior band's install-per-video and payback numbers in front of the decision.\n",
     "utf8",
   );
   writeFileSync(path.join(root, "FASTLANE_OPS.md"), "# Fastlane Ops\n\nFastlane reuses approved format IDs after launch approval.\n", "utf8");

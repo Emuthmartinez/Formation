@@ -154,7 +154,9 @@ if (growthStatus === "done" && markdown) {
   const validCalendarDate = (raw: string, allowFuture: boolean): boolean => {
     const date = new Date(`${raw}T00:00:00Z`);
     if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== raw) return false;
-    if (allowFuture) return date.getTime() <= Date.now() + 60 * 86_400_000; // a due date defers at most 60 days
+    // A due date lives in a current window: at most 60 days out and not
+    // already missed — an overdue commitment must not keep the lane green.
+    if (allowFuture) return date.getTime() >= Date.now() - 86_400_000 && date.getTime() <= Date.now() + 60 * 86_400_000;
     return date.getTime() <= Date.now();
   };
   const loopLines = loopRegion.split(/\r?\n/);
@@ -220,7 +222,32 @@ if (growthStatus === "done" && markdown) {
     const numberedBands = ["discovery", "proven", "scale", "volume"].filter((band) =>
       new RegExp(`(\\d[^\\n]{0,20}\\b${band}\\b|\\b${band}\\b[^\\n]{0,20}\\d)`, "i").test(region),
     ).length;
-    return numberedBands >= 3 && /founder[- ]?gated|budget/i.test(region) && /install[- ]per[- ]video|fatigue/i.test(region);
+    // Structure is not state: the shipped template's band table satisfies the
+    // keyword checks with every Budget and Entered/evidence cell empty. An
+    // operative record is required — a populated band row when the table
+    // shape is used, or a numeric budget plus a dated current-band entry in
+    // prose form.
+    const CELL_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
+    const bandTableRows = region
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith("|") && !line.includes("---"));
+    const bandHeaderCells = (bandTableRows[0] ?? "").split("|").map((cell) => cell.trim().toLowerCase());
+    const budgetColumn = bandHeaderCells.findIndex((cell) => /budget/.test(cell));
+    const evidenceColumn = bandHeaderCells.findIndex((cell) => /entered|evidence/.test(cell));
+    const bandTablePresent = budgetColumn > 0 && evidenceColumn > 0;
+    const populatedBandRow =
+      bandTablePresent &&
+      bandTableRows.slice(1).some((row) => {
+        const cells = row.split("|").map((cell) => cell.trim());
+        const budgetCell = cells[budgetColumn] ?? "";
+        const evidenceCell = cells[evidenceColumn] ?? "";
+        return budgetCell !== "" && evidenceCell !== "" && !CELL_PLACEHOLDER.test(budgetCell) && !CELL_PLACEHOLDER.test(evidenceCell);
+      });
+    const proseBudgetNumbered =
+      /budget[^\n]{0,40}\$\s*\d|\$\s*\d[^\n]{0,40}budget/i.test(region) && /(current band|entered)[^\n]{0,60}\d{4}-\d{2}-\d{2}/i.test(region);
+    const operativeBand = bandTablePresent ? populatedBandRow : proseBudgetNumbered;
+    return numberedBands >= 3 && /founder[- ]?gated|budget/i.test(region) && /install[- ]per[- ]video|fatigue/i.test(region) && operativeBand;
   })();
   if (ugcPlaybook && !ugcScaleSubstantive) {
     issues.push(

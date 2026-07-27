@@ -391,6 +391,58 @@ export function register(h: Harness): void {
   );
   runFixture("a dated loop row with a numeric k passes", viralGrowthMeasuredRow, "check-viral-growth-loop.ts", 0);
 
+  // The shipped template's band table has structure but no state: empty
+  // Budget and Entered/evidence cells must not satisfy the scale model.
+  const viralGrowthTemplateUntouched = makeFixture("viral-growth-template-untouched");
+  const shippedUgcPlaybook = readFileSync(path.join(viralGrowthTemplateUntouched, "UGC_PLAYBOOK.md"), "utf8");
+  writeCompleteViralGrowth(viralGrowthTemplateUntouched);
+  writeFileSync(path.join(viralGrowthTemplateUntouched, "UGC_PLAYBOOK.md"), shippedUgcPlaybook, "utf8");
+  runFixture(
+    "the untouched UGC template's empty band cells fail the scale model",
+    viralGrowthTemplateUntouched,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_scale_model_missing",
+  );
+
+  // A populated band row (budget + entered/evidence) is the operative state.
+  const viralGrowthBandPopulated = makeFixture("viral-growth-band-table-populated");
+  writeCompleteViralGrowth(viralGrowthBandPopulated);
+  writeFileSync(
+    path.join(viralGrowthBandPopulated, "UGC_PLAYBOOK.md"),
+    [
+      "# UGC Playbook",
+      "",
+      "Creator scripts use GROW-001 and the format lab.",
+      "",
+      "## Post-Breakout Scale Model",
+      "",
+      "| Band | Roster | Weekly video volume | Budget (founder-gated) | Entered on / evidence |",
+      "| --- | --- | --- | --- | --- |",
+      "| Discovery | 3-5 | 9-15 | $300/week founder-approved | 2026-07-01 — install-per-video 210 |",
+      "| Proven format | ~10 | 30-40 | | |",
+      "| Scale | ~30 | 90-120 | | |",
+      "| Volume | 75+ | 200+ | | |",
+      "",
+      "- Control format install-per-video (weekly): fatigue check — two consecutive declines trigger the next variant test.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("a populated band row satisfies the scale model", viralGrowthBandPopulated, "check-viral-growth-loop.ts", 0);
+
+  // A commitment already missed must not keep the lane green.
+  const viralGrowthOverdue = makeFixture("viral-growth-overdue-commitment");
+  writeCompleteViralGrowth(viralGrowthOverdue);
+  writeFileSync(
+    path.join(viralGrowthOverdue, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthOverdue, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: first weekly k computation due 2020-01-01.",
+    ),
+    "utf8",
+  );
+  runFixture("an overdue first-measurement commitment fails", viralGrowthOverdue, "check-viral-growth-loop.ts", 1, "viral_growth.loop_economics_unmeasured");
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");
