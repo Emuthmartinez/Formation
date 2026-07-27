@@ -94,7 +94,18 @@ function shouldScan(filePath: string, root: string, registryPath: string): boole
   if (relative.startsWith("docs/source-freshness/source-refresh.html")) {
     return false;
   }
-  if (relative.split(path.sep).some((part) => ignoredPathParts.has(part))) {
+  const segments = relative.split(path.sep);
+  // Machine-local agent worktrees are concurrent checkouts of other branches,
+  // not this checkout's content. A sibling agent's in-progress copy carrying a
+  // not-yet-registered URL would turn the local audit red while CI (clean
+  // checkout, no nested worktrees) stays green; that branch's own audit is
+  // where the URL gets registered. Same class of exclusion as the npm-pack
+  // .claude rule and the generated report above. Compared as path segments so
+  // the exclusion holds on Windows separators too.
+  if (segments[0] === ".claude" && segments[1] === "worktrees") {
+    return false;
+  }
+  if (segments.some((part) => ignoredPathParts.has(part))) {
     return false;
   }
   return textExtensions.has(path.extname(filePath));

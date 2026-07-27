@@ -154,6 +154,26 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("generated source-refresh.html is not rescanned as a new source", sourceRegistryGenerated, "check-source-freshness.ts", 0);
+
+  // Regression pin: `.claude/worktrees/*` are machine-local concurrent agent
+  // checkouts of other branches, not this checkout's content. A sibling
+  // agent's in-progress copy carrying a not-yet-registered URL turned the
+  // maintainer's local audit red while CI (clean checkout) stayed green.
+  // Nested worktrees are excluded from the scan.
+  const sourceRegistryWorktree = makeEmptyFixture("source-registry-worktree-copy");
+  writeSourceRegistryFixture(sourceRegistryWorktree);
+  mkdirSync(path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "references"), { recursive: true });
+  // Assembled from parts for the same reason as above: the worktree copy must
+  // carry a full unregistered URL while THIS file stays invisible to the
+  // repo-level registry scan. The fixture only passes because nested worktrees
+  // are excluded.
+  const worktreeUrl = ["https:/", "/worktree-drift.example.dev/design-visual-system"].join("");
+  writeFileSync(
+    path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "references", "design-visual-system.md"),
+    `# Visual System Swipe File\n\nSource: ${worktreeUrl}\n`,
+    "utf8",
+  );
+  runFixture("machine-local .claude worktree copies are not scanned as sources", sourceRegistryWorktree, "check-source-freshness.ts", 0);
   runFixture("template secret docs pass from bundled template path", path.join(skillRoot, "templates"), "check-secret-routing.ts", 0);
   const cockpitPath = path.join(clean, "launch-cockpit.html");
   runFixture("launch cockpit renders", clean, "render-launch-cockpit.ts", 0, undefined, ["--out", cockpitPath]);
