@@ -550,7 +550,7 @@ export function register(h: Harness): void {
   );
 
   const motionMalformedRef = writeMotionContractRoot("motion-contract-malformed-token-ref", (rel, text) =>
-    rel.endsWith("motion-craft-benchmarks.md") ? `${text}\nWeb loops may also ride \`motion.durationReveal2\` when staged.\n` : text,
+    rel.endsWith("motion-craft-benchmarks.md") ? `${text}\nWeb loops may also ride \`motion.durationReveal2\` or \`motion.constructor\` when staged.\n` : text,
   );
   runScriptArgs(
     "motion contract fails on a malformed token reference that truncation used to let pass",

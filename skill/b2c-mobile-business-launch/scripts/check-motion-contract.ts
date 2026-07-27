@@ -265,7 +265,7 @@ if (bench !== undefined) {
   for (const m of bench.matchAll(/`motion\.([^`]+)`/g)) {
     // `motion.*` is the namespace label (table header prose), not a token reference.
     if (g(m, 1) === "*") continue;
-    if (!(g(m, 1) in motionTokens)) {
+    if (!Object.hasOwn(motionTokens, g(m, 1))) {
       issues.push(
         issue("error", "motion_contract.token_reference.unknown", `Benchmarks reference motion.${g(m, 1)}, which does not exist in tokens.json.`, BENCH),
       );
