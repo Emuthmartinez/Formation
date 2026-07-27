@@ -582,12 +582,13 @@ if (revenueDone && revenueOpsText) {
           (row.startedDate as Date).getTime() >= Date.now() - 7 * 86_400_000 &&
           (row.startedDate as Date).getTime() <= Date.now() + NEXT_EXPERIMENT_HORIZON_DAYS * 86_400_000,
       );
-      if (activeRows.length === 0 && completedRows.length === 0) {
+      if (activeRows.length === 0 && completedRows.length === 0 && datedNext.length === 0) {
         issues.push(
           issue(
             "error",
             "revenue.experiment_backlog.empty",
-            `The Paywall Experiment Backlog has no dated active or completed experiment row and the app has been live ${liveDays} days. ` +
+            `The Paywall Experiment Backlog has no dated active or completed experiment row, no planned row dated to start within ` +
+              `${NEXT_EXPERIMENT_HORIZON_DAYS} days, and the app has been live ${liveDays} days. ` +
               "A backlog of empty headers is the one-and-done plateau wearing a green check — start the first timing/packaging/trial test " +
               "(revenue-monetization.md §7b) and record it with its start date.",
             revenueOpsPath,

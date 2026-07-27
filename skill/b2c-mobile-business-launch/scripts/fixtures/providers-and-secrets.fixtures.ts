@@ -312,6 +312,31 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog",
   );
 
+  // A live app recording its FIRST dated planned experiment must be able to pass.
+  const revenueExperimentFirstPlanned = makeFixture("revenue-experiment-first-planned");
+  {
+    const state = readState(revenueExperimentFirstPlanned);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentFirstPlanned, state);
+    const opsPath = path.join(revenueExperimentFirstPlanned, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(-14)} | paywall after value reveal beats paywall-first | delayed paywall | trial-start rate | planned | |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a first planned experiment dated within the horizon satisfies the cadence",
+    revenueExperimentFirstPlanned,
+    "check-revenue.ts",
+    1,
+    undefined,
+    [],
+    undefined,
+    "revenue.experiment_backlog",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

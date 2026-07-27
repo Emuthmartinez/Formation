@@ -163,8 +163,23 @@ if (growthStatus === "done" && markdown) {
   const measuredKLine = loopLines.some((line) => /\bk\s*(=|at|:)\s*\d/i.test(line) && !/\b(target|goal|aim|aspir\w*|hope|planned? for)\b/i.test(line));
   const commitmentMatch = loopRegion.match(/first (?:weekly )?k (?:computation|measurement)[^\n]*?(\d{4}-\d{2}-\d{2})/i);
   const commitmentValid = Boolean(commitmentMatch && validCalendarDate(commitmentMatch[1] ?? "", true));
-  const measuredRowMatch = loopRegion.match(/\|\s*(\d{4}-\d{2}-\d{2})\s*\|[^\n]*\d/);
-  const measuredRowValid = Boolean(measuredRowMatch && validCalendarDate(measuredRowMatch[1] ?? "", false));
+  // A dated row is a measurement only when it carries a numeric k — a date
+  // beside "no result for week 1" is a no-data row, not economics.
+  const measuredRowValid = ((): boolean => {
+    const tableLines = loopLines.map((line) => line.trim()).filter((line) => line.startsWith("|") && !line.includes("---"));
+    if (tableLines.length < 2) return false;
+    const headerCells = (tableLines[0] ?? "").split("|").map((cell) => cell.trim().toLowerCase());
+    const kColumn = headerCells.findIndex((cell) => /^k\b/.test(cell));
+    for (const row of tableLines.slice(1)) {
+      const dateMatch = row.match(/(\d{4}-\d{2}-\d{2})/);
+      if (!dateMatch || !validCalendarDate(dateMatch[1] ?? "", false)) continue;
+      const cells = row.split("|").map((cell) => cell.trim());
+      const kCell = kColumn > 0 ? (cells[kColumn] ?? "") : "";
+      const kNumeric = kColumn > 0 ? /^\d+(\.\d+)?\b/.test(kCell) : /\bk\s*[=:]?\s*\d+(\.\d+)?/i.test(row);
+      if (kNumeric) return true;
+    }
+    return false;
+  })();
   const loopMeasured = measuredKLine || commitmentValid || measuredRowValid;
   if (loopIndex !== -1 && !loopMeasured) {
     issues.push(

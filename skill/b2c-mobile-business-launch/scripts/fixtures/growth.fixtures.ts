@@ -357,6 +357,40 @@ export function register(h: Harness): void {
     "viral_growth.ugc_scale_model_missing",
   );
 
+  // A dated row without a numeric k is a no-data row, not a measurement.
+  const loopTable = (row: string): string =>
+    [
+      "Loop Economics:",
+      "",
+      "| Week | Invites / active user | Recipient conversion | k | Cycle time (days) | Trend / decision |",
+      "| --- | --- | --- | --- | --- | --- |",
+      row,
+    ].join("\n");
+  const viralGrowthNoDataRow = makeFixture("viral-growth-no-data-row");
+  writeCompleteViralGrowth(viralGrowthNoDataRow);
+  writeFileSync(
+    path.join(viralGrowthNoDataRow, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthNoDataRow, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      loopTable("| 2026-07-01 | no result for week 1 | | | | |"),
+    ),
+    "utf8",
+  );
+  runFixture("a dated loop row with no numeric k fails", viralGrowthNoDataRow, "check-viral-growth-loop.ts", 1, "viral_growth.loop_economics_unmeasured");
+
+  // A dated row with a numeric k in the k column is the real measurement.
+  const viralGrowthMeasuredRow = makeFixture("viral-growth-measured-row");
+  writeCompleteViralGrowth(viralGrowthMeasuredRow);
+  writeFileSync(
+    path.join(viralGrowthMeasuredRow, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthMeasuredRow, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      loopTable("| 2026-07-20 | 3.1 | 0.2 | 0.62 | 6 | hold and retest the share moment |"),
+    ),
+    "utf8",
+  );
+  runFixture("a dated loop row with a numeric k passes", viralGrowthMeasuredRow, "check-viral-growth-loop.ts", 0);
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

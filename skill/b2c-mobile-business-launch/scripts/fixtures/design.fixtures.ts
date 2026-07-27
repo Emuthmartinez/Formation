@@ -275,6 +275,63 @@ export function register(h: Harness): void {
   );
   runFixture("a reasoned push-not-applicable decision passes", onboardingPushNaReasoned, "check-onboarding-conversion.ts", 0);
 
+  // Step-level correlation: separate rows sharing a numbered step are the same
+  // back-to-back flow even though no single line says "same step".
+  const onboardingPushStepTable = makeFixture("onboarding-push-review-step-table");
+  {
+    const state = readState(onboardingPushStepTable);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushStepTable, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushStepTable, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "",
+      "| Step | Prompt |",
+      "| --- | --- |",
+      "| 3 | App Review popup via the native review prompt |",
+      "| 3 | Push permission prime — only after value is visible |",
+      "",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "review and push assigned to the same numbered step on separate rows fails",
+    onboardingPushStepTable,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_review_same_step",
+  );
+
+  // "Push permission" is the same canonical noun as "push notifications" for
+  // the not-applicable exemption.
+  const onboardingPushPermissionNa = makeFixture("onboarding-push-permission-na");
+  {
+    const state = readState(onboardingPushPermissionNa);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushPermissionNa, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushPermissionNa, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push permission: not applicable — desktop companion has no notification surface; the email lifecycle owns re-engagement.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("a reasoned push-permission not-applicable decision passes", onboardingPushPermissionNa, "check-onboarding-conversion.ts", 0);
+
   const elevenStarMissing = makeFixture("eleven-star-missing");
   rmSync(path.join(elevenStarMissing, "11-star-experience"), { recursive: true, force: true });
   runFixture("missing 11-star experience packet fails", elevenStarMissing, "check-eleven-star-experience.ts", 1, "eleven_star.markdown_missing");

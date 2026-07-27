@@ -42,7 +42,7 @@ if (onboardingDone && markdown) {
   // substantive, non-placeholder reason after the declaration.
   // Separators stay on the declaration line ([ \t], not \s): a newline must
   // not let the next line masquerade as the reason.
-  const notApplicableMatch = markdown.text.match(/push notifications?:?[ \t]*not applicable\b[ \t:;—–,-]*(.*)$/im);
+  const notApplicableMatch = markdown.text.match(/push (?:notifications?|permissions?):?[ \t]*not applicable\b[ \t:;—–,-]*(.*)$/im);
   const NA_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
   const notApplicableReason = (notApplicableMatch?.[1] ?? "").trim();
   const notApplicable = Boolean(notApplicableMatch) && notApplicableReason.replace(/[^a-z0-9]/gi, "").length >= 12 && !NA_PLACEHOLDER.test(notApplicableReason);
@@ -64,10 +64,26 @@ if (onboardingDone && markdown) {
   const reviewTermPattern = /(app\s+)?review (popup|prompt)|skstorereview/i;
   const adjacencyPattern =
     /same (session )?(step|screen|moment|dialog)|alongside|back[- ]to[- ]back|together with|immediately (after|before)|right (after|before)|in the same/i;
-  const sameStepAsReview = pushLines.some((line) => {
+  const sameLineCollision = pushLines.some((line) => {
     const affirmative = affirmativeOf(line);
     return reviewTermPattern.test(affirmative) && adjacencyPattern.test(affirmative);
   });
+  // Structured contracts assign prompts to numbered steps on separate rows —
+  // correlate by step label so a shared step fails without the words
+  // "same step" ever appearing on one line.
+  const stepOf = (line: string): string | undefined => {
+    const affirmative = affirmativeOf(line);
+    const match = affirmative.match(/step\s*#?\s*(\d+)/i) ?? affirmative.match(/^\s*\|\s*(\d+)\s*\|/);
+    return match ? match[1] : undefined;
+  };
+  const pushLinePattern = /push (permission|priming|prime)|notification permission/i;
+  const reviewSteps = markdown.text
+    .split(/\r?\n/)
+    .filter((line) => !pushLinePattern.test(line) && reviewTermPattern.test(affirmativeOf(line)))
+    .map(stepOf)
+    .filter((step): step is string => Boolean(step));
+  const pushSteps = pushLines.map(stepOf).filter((step): step is string => Boolean(step));
+  const sameStepAsReview = sameLineCollision || pushSteps.some((step) => reviewSteps.includes(step));
   if (!notApplicable && sameStepAsReview) {
     issues.push(
       issue(
