@@ -92,10 +92,17 @@ if (text) {
     const moatSection = markdownSection(text, "Differentiation And Moat");
     if (moatSection) {
       const MOAT_PLACEHOLDER = /\b(unverified|tbd|todo|pending|placeholder)\b/i;
-      const incumbentRows = moatSection
+      // Data rows only: the first pipe line is the header and is dropped by
+      // position, not by keyword — a real competitor whose row mentions
+      // "incumbent" must not be skipped, and a data cell echoing a header
+      // keyword must not be promoted.
+      const moatTableLines = moatSection
         .split(/\r?\n/)
         .map((line) => line.trim())
-        .filter((line) => line.startsWith("|") && !/^\|\s*:?-+/.test(line) && !/incumbent/i.test(line) && !/_example/i.test(line))
+        .filter((line) => line.startsWith("|") && !/^\|\s*:?-+/.test(line));
+      const incumbentRows = moatTableLines
+        .slice(1)
+        .filter((line) => !/_example/i.test(line))
         .map((line) => line.split("|").map((cell) => cell.trim()));
       const realRow = incumbentRows.some((cells) => cells.length >= 6 && cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell)));
       if (!realRow) {
