@@ -59,6 +59,45 @@ if (state) {
     );
   }
 
+  // The pre-build clock: kickoff_date is recorded when orient completes, and a
+  // launch still in the planning/design phases (0-2) 45+ days later is the most
+  // common way a business dies — quietly, in artifact work, with nobody ever
+  // deciding to stop. Warning, not error: a slow burn is a legitimate founder
+  // choice, but it has to be a choice someone can see being made.
+  const PRE_BUILD_STALL_DAYS = 45;
+  const kickoffRaw = (asString(getPath(state, "project.kickoff_date")) ?? "").trim();
+  if (kickoffRaw) {
+    const kickoffValid =
+      /^\d{4}-\d{2}-\d{2}$/.test(kickoffRaw) &&
+      !Number.isNaN(new Date(`${kickoffRaw}T00:00:00Z`).getTime()) &&
+      new Date(`${kickoffRaw}T00:00:00Z`).toISOString().slice(0, 10) === kickoffRaw &&
+      new Date(`${kickoffRaw}T00:00:00Z`).getTime() <= Date.now();
+    if (!kickoffValid) {
+      issues.push(
+        issue(
+          "error",
+          "project.kickoff_date.invalid",
+          `project.kickoff_date ("${kickoffRaw}") must be a real past ISO date (YYYY-MM-DD). An invalid or future date disarms the pre-build clock.`,
+          "PROJECT_STATE.yaml",
+        ),
+      );
+    } else if (/^phase_[0-2]/.test((asString(getPath(state, "project.phase")) ?? "").toLowerCase())) {
+      const kickoffAgeDays = Math.floor((Date.now() - new Date(`${kickoffRaw}T00:00:00Z`).getTime()) / 86_400_000);
+      if (kickoffAgeDays > PRE_BUILD_STALL_DAYS) {
+        issues.push(
+          issue(
+            "warning",
+            "project.pre_build_stall",
+            `This launch has been in pre-build phases for ${kickoffAgeDays} days (kickoff ${kickoffRaw}). Pre-build work is a means, not a residence — ` +
+              `cut scope to essentials, re-run the Go/Pivot/Kill checkpoint, or record the deliberate founder choice to continue with a dated reason ` +
+              `(see launch-phases.md "The Pre-Build Clock").`,
+            "PROJECT_STATE.yaml",
+          ),
+        );
+      }
+    }
+  }
+
   // Phase-gated coverage: used inside the lane loop below.
   const currentPhase = asString(getPath(state, "project.phase")) ?? "";
   const pastOrient = isPastOrientPhase(currentPhase);

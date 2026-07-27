@@ -1116,6 +1116,55 @@ export function register(h: Harness): void {
   }
   runFixture("legacy lite launch tier still validates", legacyLiteTier, "validate-project-state.ts", 0);
 
+  // ── The pre-build clock ───────────────────────────────────────────────────
+  // kickoff_date starts the pre-build clock at orient; a launch still in
+  // phases 0-2 past 45 days is surfaced as a stall, because most dead launches
+  // die in planning with nobody ever deciding to stop.
+  const clockIsoDaysAgo = (days: number): string => {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() - days);
+    return date.toISOString().slice(0, 10);
+  };
+
+  const kickoffStalled = makeFixture("kickoff-pre-build-stall");
+  {
+    const state = readState(kickoffStalled);
+    const project = expectRecord(state.project, "project");
+    project["phase"] = "phase_1_research";
+    project["kickoff_date"] = clockIsoDaysAgo(60);
+    writeState(kickoffStalled, state);
+  }
+  runFixture("launch still pre-build 60 days after kickoff surfaces the stall", kickoffStalled, "validate-project-state.ts", 0, "project.pre_build_stall");
+
+  const kickoffFresh = makeFixture("kickoff-fresh");
+  {
+    const state = readState(kickoffFresh);
+    const project = expectRecord(state.project, "project");
+    project["phase"] = "phase_1_research";
+    project["kickoff_date"] = clockIsoDaysAgo(10);
+    writeState(kickoffFresh, state);
+  }
+  runFixture("fresh kickoff in pre-build passes without stall findings", kickoffFresh, "validate-project-state.ts", 0);
+
+  const kickoffPastBuild = makeFixture("kickoff-past-build");
+  {
+    const state = readState(kickoffPastBuild);
+    const project = expectRecord(state.project, "project");
+    project["phase"] = "phase_5b_engineering";
+    project["kickoff_date"] = clockIsoDaysAgo(90);
+    writeState(kickoffPastBuild, state);
+  }
+  runFixture("old kickoff past the pre-build phases raises no stall", kickoffPastBuild, "validate-project-state.ts", 0);
+
+  const kickoffInvalid = makeFixture("kickoff-invalid-date");
+  {
+    const state = readState(kickoffInvalid);
+    const project = expectRecord(state.project, "project");
+    project["kickoff_date"] = "2026-99-99";
+    writeState(kickoffInvalid, state);
+  }
+  runFixture("invalid kickoff date fails", kickoffInvalid, "validate-project-state.ts", 1, "project.kickoff_date.invalid");
+
   // ── Scope-skip exit regression ────────────────────────────────────────────
   // The skip paths used process.exit(0), which discarded the
   // project_state.missing error reportAndExit had already emitted (exit 0 with

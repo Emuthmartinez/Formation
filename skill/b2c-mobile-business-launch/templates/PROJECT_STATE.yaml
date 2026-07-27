@@ -24,6 +24,11 @@ project:
   # because "tier" collides with the founder's own app pricing tiers. The legacy
   # project.launch_tier key and its "lite" value are still read, so older state files work.
   launch_scope: "full"
+  # ISO date orient completed — the pre-build clock. validate:launch-state warns
+  # when the project is still in phases 0-2 more than 45 days after kickoff
+  # (project.pre_build_stall): cut scope, re-run Go/Pivot/Kill, or record the
+  # deliberate founder choice to continue. Most dead launches die in planning.
+  kickoff_date: ""
   platforms:
     - ios
   bundle_ids:

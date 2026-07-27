@@ -29,17 +29,25 @@ At each founder decision, translate the internal phase into a plain-language lab
 
 ## Launch Scopes
 
-The full phase flow below produces thirty-plus artifacts. That is right for a flagship subscription launch; it is overproduction for a simple utility shipped to learn. Scope the artifact burden to the product with an explicit tier, confirmed with the founder at orient (AskUserQuestion when available) and recorded as `project.launch_scope` in `PROJECT_STATE.yaml`:
+The full phase flow below produces thirty-plus artifacts. That is right for a flagship subscription launch; it is overproduction for a simple utility shipped to learn — and on real launches, overproduction is how businesses die: the majority of attempted launches stall in the planning phases, buried in artifact work nobody decided to stop. Scope the artifact burden to the product with an explicit scope, confirmed with the founder at orient (AskUserQuestion when available) and recorded as `project.launch_scope` in `PROJECT_STATE.yaml`:
 
-- **full** (default): every lane runs; the Deliverable Standard in `SKILL.md` applies in full.
-- **lite**: the core spine runs — state/cockpit, paid-tool routing, secrets, security baseline, research-backed spec, 11-star slice, design, onboarding, store readiness (including signing and the privacy packet), revenue, privacy/terms, engineering with proof, and post-launch ops. The breadth lanes are deferred *through the normal deferral mechanics* — `deferred` status with a dated reason — typically: paid UA, viral growth loop, launch narrative, localization market research beyond the home storefront, UGC/Fastlane engine, lifecycle email beyond transactional, and GEO/SEO beyond the basic landing metadata.
+- **essentials** (recommended for a first launch in a category): the core spine runs — state/cockpit, paid-tool routing, secrets, security baseline, research-backed spec with its Go/Pivot/Kill verdict, 11-star slice, design, onboarding, store readiness (including signing and the privacy packet), revenue, privacy/terms, engineering with proof, and post-launch ops. The breadth lanes are deferred *through the normal deferral mechanics* — `deferred` status with a dated reason — typically: paid UA, viral growth loop, launch narrative, localization market research beyond the home storefront, UGC/Fastlane engine, lifecycle email beyond transactional, and GEO/SEO beyond the basic landing metadata. Market contact beats artifact completeness: a shipped essentials app producing real numbers teaches more than a full-scope plan that never ships.
+- **full**: every lane runs; the Deliverable Standard in `SKILL.md` applies in full. Choose it deliberately — for a flagship bet, a proven category re-entry, or scaling a winner — not as a default. (Legacy name: `lite` for essentials; the old key and value still validate.)
 
 Rules:
 
-- The tier never silently disables a validator. Lite defers lanes with dated reasons that `check:lane-coverage` and `validate:launch-state` can see; a deferred lane revisits at the Phase 6b day-30 retro.
-- A typo'd tier is an error (`validate:launch-state` accepts only `full` or `lite`).
-- Moving lite → full (or back) is a founder decision recorded in `PROJECT_STATE.yaml` with the date.
-- Revenue, privacy/legal, security, signing, and store-console lanes are never deferred by tier — a lite launch still charges money, handles data, and passes review.
+- The scope never silently disables a validator. Essentials defers lanes with dated reasons that `check:lane-coverage` and `validate:launch-state` can see; a deferred lane revisits at the Phase 6b day-30 retro.
+- A typo'd scope is an error (`validate:launch-state` accepts `full` or `essentials`; legacy `lite` resolves to essentials).
+- Moving essentials → full (or back) is a founder decision recorded in `PROJECT_STATE.yaml` with the date.
+- Revenue, privacy/legal, security, signing, and store-console lanes are never deferred by scope — an essentials launch still charges money, handles data, and passes review.
+
+### The Consumer-Norm Evidence Bar
+
+The evidence bar for a consumer app is consumer-app norms: store and competitor data, review mining, social language, keyword demand, and a live waitlist or purchase funnel. It is **not** research governance. Do not invent formative-interview programs gated behind privacy reviewers, external encrypted data planes, participant compensation approvals, or role-separated dry runs for a consumer utility — that apparatus produced zero customer proof in two months on a real launch before the founder retired it by hand. A friendly user conversation is a conversation (see the plain-language research example in `founder-zero-operator.md`). Escalate the bar only when a hard constraint forces it — medical or health claims, minors as a target audience, a regulated category — and even then propose the minimum that satisfies the constraint, as a founder decision with the cost stated.
+
+### The Pre-Build Clock
+
+Record `project.kickoff_date` (ISO) when orient completes. Pre-build work — research through design, phases 0–2 — is a means, not a residence: on an essentials scope the target is a submitted build within about six founder-weeks. `validate:launch-state` warns when a launch is still in phases 0–2 more than 45 days after kickoff (`project.pre_build_stall`); the response is a founder decision, not silence — cut scope to essentials, run the Go/Pivot/Kill checkpoint again, or record the deliberate choice to continue with a dated reason. Most launches that die do so here, quietly; the clock makes the quiet visible.
 
 ## Phase 0: Orientation And Scaffold
 
@@ -51,7 +59,7 @@ Do:
 - Identify current phase, business name, target platform, monetization model, data/backend assumptions, and launch surface.
 - Load `project-state.md` and `autonomy-modes.md`.
 - Create or refresh `PROJECT_STATE.yaml` from `templates/PROJECT_STATE.yaml`, set the current autonomy mode, and record lane status honestly.
-- Confirm the launch scope with the founder (see Launch Scopes above) and record `project.launch_scope`; defer essentials-scope breadth lanes with dated reasons.
+- Confirm the launch scope with the founder (see Launch Scopes above; recommend essentials for a first launch) and record `project.launch_scope`; defer essentials-scope breadth lanes with dated reasons. Record `project.kickoff_date` — the pre-build clock starts now.
 - Render `launch-cockpit.html` once the first state pass exists.
 - Create `BUSINESS_ACCESS.md` and `operations/business-access.json`; present one phase-labeled founder question with selectable choices, consequences, a safe defer route, and the agent action that follows it.
 - Create tasks/checkpoints for the engagement; block later phases on the right prior outputs.

@@ -9,12 +9,12 @@ metadata:
 
 Turn an app idea, transcript, spec, or half-built repo into a launchable business: evidence, positioning, 11-star experience, design, build, store, revenue, growth, and verification. A run leaves durable state behind — `PROJECT_STATE.yaml`, a founder-visible `launch-cockpit.html`, a versioned Design Room over `state/business.json`, and validator/LaunchBench proof for known failure modes.
 
-Two rules shape everything below. **Evidence first:** AppKittie/category economics, then social-language research, then canonical docs, then a builder-ready bundle and a live waitlist or purchase funnel. **Nothing carries over:** never copy names, prices, tokens, domains, or credentials from a prior launch unless this project explicitly owns them.
+Two rules shape everything. **Evidence first:** AppKittie/category economics, then social-language research, then canonical docs, then a builder-ready bundle and a live waitlist or purchase funnel. **Nothing carries over:** never copy names, prices, tokens, domains, or credentials from a prior launch unless this project explicitly owns them.
 
 ## How To Use This File
 
 1. **Always-On Contracts** govern every session — read once, apply throughout.
-2. **Start Here** is the opening sequence: six moves that come before any lane work.
+2. **Start Here** is the opening sequence: six moves before any lane work.
 3. **Lane Routing** is the index. Find the row matching the work in front of you, load only that row's references, produce its artifacts, run its gate. Do not preload the table.
 4. This file *routes*. Phase detail lives in [`references/launch-phases.md`](references/launch-phases.md); artifact acceptance criteria live in [`references/artifact-contracts.md`](references/artifact-contracts.md); completeness auditing lives in [`references/launch-coverage.md`](references/launch-coverage.md).
 
@@ -73,7 +73,7 @@ Six moves, in order, before lane work begins.
 
 1. **Recover source truth.** Read the transcript/spec/repo; identify business, platform, and phase. Load `founder-zero-operator.md`, seed access state, ask only when a decision genuinely remains.
 2. **Detect the app archetype.** If the request matches a shipped product shape, route its pack instead of improvising schema and core loop — see the App Archetypes table below. Confirm the shape via AskUserQuestion (variant, primary surface web vs native, optional systems) and record it in `PROJECT_STATE.yaml`.
-3. **Create or refresh durable state.** Use [`references/project-state.md`](references/project-state.md), [`references/autonomy-modes.md`](references/autonomy-modes.md), and [`templates/PROJECT_STATE.yaml`](templates/PROJECT_STATE.yaml). Resume from `AGENTS.md`, state, cockpit, `BUSINESS_ACCESS.md`, both operations ledgers, readiness/failure docs, and git status — repo truth beats chat memory. Render the cockpit early and again after state or gates change. Confirm the launch tier (full vs lite) now, per [`references/launch-phases.md`](references/launch-phases.md).
+3. **Create or refresh durable state.** Use [`references/project-state.md`](references/project-state.md), [`references/autonomy-modes.md`](references/autonomy-modes.md), and [`templates/PROJECT_STATE.yaml`](templates/PROJECT_STATE.yaml). Resume from `AGENTS.md`, state, cockpit, `BUSINESS_ACCESS.md`, both operations ledgers, readiness/failure docs, and git status — repo truth beats chat memory. Render the cockpit early and again after state or gates change. Confirm the launch scope now (essentials is the first-launch default) per [`references/launch-phases.md`](references/launch-phases.md).
 4. **Resolve paid-tool routing before any fallback.** Use [`references/paid-tool-routing.md`](references/paid-tool-routing.md) before replacing AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI Plus/Pro capability or cross-platform coverage, Fastlane, paid ASO/MMP tools, creator marketplaces, or RevenueCat/Stripe/PostHog/Resend account features with a free route. MobAI Free needs no spend gate when its one-device/quota limits fit. Missing runtime access is never permission to narrow platform coverage silently — and the zero-setup in-app simulator is a rung, not a replacement: choosing it where the lane needs Android, a repeatable suite, CI, or distribution proof is the same downgrade and needs the same ask.
 5. **Route secrets before service setup.** Use [`references/secrets-management.md`](references/secrets-management.md) and [`references/provider-state-recipes.md`](references/provider-state-recipes.md) plus [`templates/secrets/`](templates/secrets/) before any API key, token, OAuth credential, webhook signing secret, service-account file, CI/deploy env var, or local `.env`. Default to Doppler and `doppler run --` unless the founder approves another path. Refresh current provider docs and local CLI help before install/setup commands, and record the docs basis in `SECRETS.md` and `PROJECT_STATE.yaml`.
 6. **Plan security before architecture hardens.** Use [`references/security-release-hardening.md`](references/security-release-hardening.md) before threat modeling, security-tool routing, OWASP MASVS/ASVS checks, MobSF/static scans, app-integrity decisions, Sentry/release-health setup, `SECURITY.md`, `security-review.html`, public `security.txt`, or any security readiness claim.
@@ -99,7 +99,7 @@ Shipped packs live under [`templates/app-archetypes/`](templates/app-archetypes/
 
 | Lane | Route here when | Load | Produce / gate |
 | --- | --- | --- | --- |
-| Phases | any multi-phase launch or continuation; deciding where work starts | [`references/launch-phases.md`](references/launch-phases.md) | launch tier confirmed in `PROJECT_STATE.yaml` |
+| Phases | any multi-phase launch or continuation; deciding where work starts | [`references/launch-phases.md`](references/launch-phases.md) | launch scope and `kickoff_date` in `PROJECT_STATE.yaml` |
 | Founder-zero operating | every broad launch start; before account/social/Doppler bootstrap; when the founder is unsure; whenever an agent is about to hand back a checklist instead of operating the business | [`references/founder-zero-operator.md`](references/founder-zero-operator.md) | `BUSINESS_ACCESS.md`, `operations/business-access.json` · `check:founder-operator` |
 | State and orchestration | start of multi-lane work; resuming a prior session; before provider/store mutations, handoff, or subagent dispatch; when rendering the cockpit | [`references/project-state.md`](references/project-state.md), [`references/autonomy-modes.md`](references/autonomy-modes.md), [`references/parallel-agent-orchestration.md`](references/parallel-agent-orchestration.md) | `PROJECT_STATE.yaml`, `launch-cockpit.html`, `ORCHESTRATION.md` · `check:orchestration` |
 | Agent operations | before authenticated browser/API/CLI/native action on any provider, social, or store account | [`references/frontier-agent-operations.md`](references/frontier-agent-operations.md) | `AGENT_OPERATIONS.md`, `operations/agent-operations.json` · `check:agent-operations` |
@@ -188,7 +188,7 @@ Shipped packs live under [`templates/app-archetypes/`](templates/app-archetypes/
 - **Design the extreme before cutting scope.** The 11-star ladder chooses the one magical V1 moment every downstream lane must carry.
 - **Charge every user-facing moment before specs harden.** Experience Cards are mechanics that fill the 6/7-star levels, not decoration; each needs a PostHog event, a bright-line guardrail, and a reduced-motion fallback before build handoff. Engineered emotion serving the user's real goal builds durable retention; the same mechanics aimed at extraction are dark patterns and a compliance veto.
 - **Lock phase outputs before depending on them.** No design from an unlocked spec, no ASO from an unlocked name, no landing page from drifting pricing or voice.
-- **Scope before producing.** Confirm the launch tier at orient; let lite launches defer breadth lanes with dated reasons. Overproduction and silent lane-skipping are both misses. The tier makes scope visible to validators.
+- **Scope before producing.** Confirm the launch scope at orient; essentials defers breadth lanes with dated reasons. Overproduction and silent lane-skipping are both misses — and most dead launches die in planning.
 - **Keep `PROJECT_STATE.yaml` current.** It is the compact state contract validators, subagents, and future sessions read instead of re-reading every doc.
 - **Treat session continuity as a validator-backed contract.** New sessions, resumes, status checks, and handoffs reconstruct state from durable files, route broad work through `APP_AGENTS.md` role prompts or record why subagents were unavailable, and leave the next action in state before pausing.
 - **Never silently downgrade paid or account-gated tooling.** Missing runtime access means ask, wait for access/export, or use a founder-approved fallback.
@@ -214,7 +214,7 @@ Full entry criteria, work, and exit criteria for each phase are in [`references/
 | 1b | Analytics and attribution blueprint | `ANALYTICS.md`, `analytics-plan.html` |
 | 1c | 11-star experience and product brainstorm | `11_STAR_EXPERIENCE.md`, `11-star-experience.html` (use `ce-brainstorm` when research leaves multiple valid shapes) |
 | 1d | Paid user acquisition system | `PAID_UA.md` |
-| 1e | Viral growth loop contract | `VIRAL_GROWTH.md`, then `growth/LAUNCH_NARRATIVE.md` (refined again at Phase 3 and Phase 6) |
+| 1e | Viral growth loop contract | `VIRAL_GROWTH.md`, then `growth/LAUNCH_NARRATIVE.md` (refined at Phases 3 and 6) |
 | 1f | Launch trace and build contracts | `LAUNCH_TRACE.md`, `TECH_SPEC.md` |
 | 1g | Security architecture | `SECURITY.md`, `security-review.html` |
 | 2 | Brand and design | `BRAND.md`, `DESIGN.md`, lowercase `design.md`, rendered HTML proofs, key assets |
@@ -233,9 +233,9 @@ A launch package is complete when a future agent can pick it up **without re-dec
 
 - what the app is, who it is for, what category it competes in and why
 - what ships in V1, what is explicitly V2/V3, and what is banned
-- what `PROJECT_STATE.yaml` says about phase, autonomy mode, lane statuses, launch tier and its dated deferrals, provider state, orchestration strategy, proof, active failure cards, and current blockers — and what `launch-cockpit.html` shows the founder
+- what `PROJECT_STATE.yaml` says about phase, autonomy mode, lane statuses, launch scope and its dated deferrals, provider state, orchestration strategy, proof, active failure cards, and current blockers — and what `launch-cockpit.html` shows the founder
 - how research became product, experience, brand, design, build, store, legal, revenue, analytics, and verification decisions (`LAUNCH_TRACE.md`)
 - which founder-only gates are open and whether each intended paid tool was approved, fell back, or is blocked
-- what is live, what was verified with live provider proof, and what still requires founder action
+- what is live, what has live provider proof, and what still requires founder action
 
 The full per-lane evidence checklist — every artifact, what it must contain, and which validator gates it — is the Coverage Matrix and Handoff Completeness Checklist in [`references/launch-coverage.md`](references/launch-coverage.md); per-artifact acceptance criteria are in [`references/artifact-contracts.md`](references/artifact-contracts.md). Audit against those before claiming readiness, and let no known miss hide behind prose.
