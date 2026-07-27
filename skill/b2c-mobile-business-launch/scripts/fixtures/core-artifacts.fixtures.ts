@@ -203,6 +203,75 @@ export function register(h: Harness): void {
     "research.go_pivot_kill_state_mismatch",
   );
 
+  // Deferring research out of existence is not a route around the checkpoint:
+  // at phase_2+ the artifact and its verdict are mandatory regardless of status.
+  const researchDeferredPhase2 = makeFixture("research-deferred-phase2");
+  {
+    const state = readState(researchDeferredPhase2);
+    expectRecord(state.project, "project")["phase"] = "phase_2_design";
+    const lane = getLane(state, "research");
+    lane["status"] = "deferred";
+    lane["reason"] = "2026-07-20 essentials scope defers deep research; revisit at day 30.";
+    writeState(researchDeferredPhase2, state);
+    rmSync(path.join(researchDeferredPhase2, "RESEARCH.md"), { force: true });
+  }
+  runFixture("phase_2 with deferred research and no RESEARCH.md fails", researchDeferredPhase2, "check-research-evidence.ts", 1, "research.markdown_missing");
+
+  // Later table rows win date ties: a same-day follow-up Kill supersedes the
+  // Go recorded above it, and a mirror still saying go must fail.
+  const researchSameDayReversal = makeFixture("research-same-day-reversal");
+  setLaneDone(researchSameDayReversal, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchSameDayReversal, "go", "2026-07-21");
+  writeResearch(researchSameDayReversal, [
+    ...researchCoreSections,
+    ...categoryRevenueSection(revenueRow),
+    ...goPivotKillSection(goRow),
+    "| 2026-07-21 | fail on re-read — $180K top-10 | wedge collapsed under teardown | waitlist was bot-inflated | Kill | founder |",
+  ]);
+  runFixture(
+    "same-day follow-up verdict supersedes the earlier row",
+    researchSameDayReversal,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_state_mismatch",
+  );
+
+  // The founder counts by recorded name, not only by the literal role word.
+  const researchNamedFounder = makeFixture("research-done-named-founder");
+  {
+    const state = readState(researchNamedFounder);
+    expectRecord(state.project, "project")["owner"] = "Daisy Rivera";
+    writeState(researchNamedFounder, state);
+  }
+  setLaneDone(researchNamedFounder, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchNamedFounder, "go", "2026-07-21");
+  writeResearch(researchNamedFounder, [
+    ...researchCoreSections,
+    ...categoryRevenueSection(revenueRow),
+    ...goPivotKillSection("| 2026-07-21 | pass — $14.2M top-10 | streak-insurance wedge | 412-person waitlist | Go | Daisy Rivera |"),
+  ]);
+  runFixture("verdict decided by the recorded owner name passes", researchNamedFounder, "check-research-evidence.ts", 0);
+
+  // Renamed evidence columns carry cells, not the required inputs.
+  const researchRenamedColumns = makeFixture("research-done-renamed-columns");
+  setLaneDone(researchRenamedColumns, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchRenamedColumns, "go", "2026-07-21");
+  writeResearch(researchRenamedColumns, [
+    ...researchCoreSections,
+    ...categoryRevenueSection(revenueRow),
+    "## Go, Pivot, Or Kill",
+    "| Date | Notes | Opinion | Summary | Verdict (Go / Pivot / Kill) | Decided by |",
+    "| --- | --- | --- | --- | --- | --- |",
+    "| 2026-07-21 | fine | strong | looks good | Go | founder |",
+  ]);
+  runFixture(
+    "verdict table with renamed evidence columns fails",
+    researchRenamedColumns,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_evidence_columns_missing",
+  );
+
   // The gate cannot wait for the lane to claim done: a project in phase_2 with
   // research still partial is the bypass the checkpoint exists to stop.
   const researchPhase2Partial = makeFixture("research-phase2-partial-no-verdict");

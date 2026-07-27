@@ -25,15 +25,22 @@ const done = laneStatus === "done";
 // bypass the checkpoint exists to stop, so the verdict is enforced from
 // phase_2 onward regardless of lane status.
 const projectPhase = state ? (asString(getPath(state, "project.phase")) ?? "").toLowerCase() : "";
-const verdictRequired = done || /^phase_[2-6]/.test(projectPhase);
+const buildPhase = /^phase_[2-6]/.test(projectPhase);
+const verdictRequired = done || buildPhase;
 const text = readText(args.root, "RESEARCH.md");
 
-if (!skip && !text) {
+// A deferred/not_needed research lane suppresses the missing-file error only
+// before the build phases: from phase_2 onward the verdict is mandatory, so
+// the artifact that carries it is too — deferring research out of existence
+// is not a route around the pre-build checkpoint.
+if ((!skip || buildPhase) && !text) {
   issues.push(
     issue(
       "error",
       "research.markdown_missing",
-      "RESEARCH.md is required: it is the evidence root that SPEC.md, brand, ASO, pricing, and funnel decisions trace back to. Seed it from templates/RESEARCH.md.",
+      "RESEARCH.md is required: it is the evidence root that SPEC.md, brand, ASO, pricing, and funnel decisions trace back to" +
+        (buildPhase && skip ? ", and from phase_2 onward the Go/Pivot/Kill verdict it carries is mandatory even for a deferred research lane" : "") +
+        ". Seed it from templates/RESEARCH.md.",
       "RESEARCH.md",
     ),
   );
@@ -187,15 +194,21 @@ if (text) {
       );
     } else {
       const verdictColumn = tableColumnIndex(verdictSection, /verdict/i);
-      // A verdict table stripped of its evidence columns (Date | Verdict |
-      // Decided by) would make every evidence check vacuously pass.
-      if (verdictColumn !== -1 && verdictColumn < 5) {
+      // The three named evidence columns must exist between Date and Verdict:
+      // a table renamed to Notes | Opinion | Summary carries cells, not the
+      // required inputs, and a stripped table carries nothing at all.
+      const evidenceColumnPatterns: RegExp[] = [/category revenue|revenue reality/i, /wedge/i, /demand/i];
+      const evidenceColumnsPresent = evidenceColumnPatterns.every((pattern) => {
+        const index = tableColumnIndex(verdictSection, pattern);
+        return index > 1 && (verdictColumn === -1 || index < verdictColumn);
+      });
+      if (verdictColumn !== -1 && !evidenceColumnsPresent) {
         issues.push(
           issue(
             "error",
             "research.go_pivot_kill_evidence_columns_missing",
-            "The Go, Pivot, Or Kill table is missing its evidence columns. Keep category revenue reality, wedge, and demand signal between " +
-              "Date and Verdict — a verdict table with no evidence columns is a decision with the reasons removed.",
+            "The Go, Pivot, Or Kill table is missing its named evidence columns. Category revenue reality, wedge, and demand signal must " +
+              "each have a column between Date and Verdict — a verdict table with the reasons renamed or removed is a decision without its inputs.",
             "RESEARCH.md",
           ),
         );
@@ -224,17 +237,18 @@ if (text) {
           ),
         );
       } else {
-        const latest = verdictRows.reduce((a, b) => ((a.date ?? "") >= (b.date ?? "") ? a : b));
+        // Later table rows win date ties: a same-day follow-up verdict
+        // supersedes the row above it.
+        const latest = verdictRows.reduce((a, b) => ((b.date ?? "") >= (a.date ?? "") ? b : a));
         // The gate is founder-only: a verdict row that names no decision-maker
         // is an agent deciding to build and moving on.
         const decidedByCell = (latest.cells[verdictColumn + 1] ?? "").trim();
         const AUTOMATION_IDENTITY = /\b(agent|codex|claude|gpt|assistant|bot|automation|autopilot|ai)\b/i;
-        if (
-          decidedByCell.length === 0 ||
-          PLACEHOLDER_TEXT.test(decidedByCell) ||
-          AUTOMATION_IDENTITY.test(decidedByCell) ||
-          !/\b(founder|owner)\b/i.test(decidedByCell)
-        ) {
+        // The founder counts by role or by their recorded name (project.owner).
+        const ownerName = (asString(getPath(state, "project.owner")) ?? "").trim();
+        const namedFounder =
+          /\b(founder|owner)\b/i.test(decidedByCell) || (ownerName.length > 2 && decidedByCell.toLowerCase().includes(ownerName.toLowerCase()));
+        if (decidedByCell.length === 0 || PLACEHOLDER_TEXT.test(decidedByCell) || AUTOMATION_IDENTITY.test(decidedByCell) || !namedFounder) {
           issues.push(
             issue(
               "error",
