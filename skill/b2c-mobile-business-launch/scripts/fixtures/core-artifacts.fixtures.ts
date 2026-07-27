@@ -918,6 +918,85 @@ export function register(h: Harness): void {
   );
   runFixture("an indented continuation answer passes", specIndentedAnswer, "check-product-spec.ts", 0);
 
+  // A blocker cell that concedes the week-one copy is not a blocker.
+  const specBlockerConceded = makeFixture("product-spec-blocker-conceded");
+  setLaneDone(specBlockerConceded, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specBlockerConceded, "SPEC.md"),
+    specSections({
+      row: "| HabitKit | fast logging | streak-insurance moment | Nothing; they can ship this in a week |\n| Streaks | native polish | repair flow | No blocker; this is copied in days |",
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("conceding blocker cells fail the incumbent benchmark", specBlockerConceded, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
+
+  // The V1 build verb must target the named class, not any taxonomy word.
+  const specMoatV1UnboundBuild = makeFixture("product-spec-moat-v1-unbound-build");
+  setLaneDone(specMoatV1UnboundBuild, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatV1UnboundBuild, "SPEC.md"),
+    specSections({
+      row: twoIncumbentRows,
+      moatClass: "no moat yet, racing to build better execution; we send requests to the same model API by 2026-08-25; revisit at the day-30 retro",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a V1 build commitment unbound from its class fails", specMoatV1UnboundBuild, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // Guidance prose cannot shadow the labeled copy-test field.
+  const specCopyLabelShadow = makeFixture("product-spec-copy-label-shadow");
+  setLaneDone(specCopyLabelShadow, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specCopyLabelShadow, "SPEC.md"),
+    specSections({
+      row: twoIncumbentRows,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "",
+    }).replace("## Differentiation And Moat", "## Differentiation And Moat\n\nThe one-week-copy test answer: should identify accumulated history."),
+    "utf8",
+  );
+  runFixture(
+    "prose mentioning the copy-test label does not shadow the blank field",
+    specCopyLabelShadow,
+    "check-product-spec.ts",
+    1,
+    "product_spec.copy_test_missing",
+  );
+
+  // Non-Latin incumbent names are distinct incumbents.
+  const specUnicodeIncumbents = makeFixture("product-spec-unicode-incumbents");
+  setLaneDone(specUnicodeIncumbents, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specUnicodeIncumbents, "SPEC.md"),
+    specSections({
+      row: "| あすけん | photo food logging at scale | our miss-repair moment | per-user history their fresh install lacks |\n| カロミル | broad nutrient database | our miss-repair moment | per-user history their fresh install lacks |",
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("non-Latin incumbent names count as distinct rows", specUnicodeIncumbents, "check-product-spec.ts", 0);
+
+  // The moat-class field accepts the same continuation form as the copy test.
+  const specMoatClassIndented = makeFixture("product-spec-moat-class-indented");
+  setLaneDone(specMoatClassIndented, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatClassIndented, "SPEC.md"),
+    specSections({
+      row: twoIncumbentRows,
+      moatClass: "",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }).replace(
+      /^- Moat class.*$/m,
+      "- Moat class (data / workflow / community / taste / model / distribution) and build plan:\n  data — per-user miss history compounds weekly.",
+    ),
+    "utf8",
+  );
+  runFixture("an indented moat-class continuation passes", specMoatClassIndented, "check-product-spec.ts", 0);
+
   // ── check-launch-trace ────────────────────────────────────────────────────
 
   const traceBaseline = makeFixture("launch-trace-baseline");

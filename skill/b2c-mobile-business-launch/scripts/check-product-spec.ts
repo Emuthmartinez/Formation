@@ -112,15 +112,36 @@ if (text) {
         .map((line) => splitCells(line));
       // "N/A" and "none" are empty cells wearing characters.
       const MOAT_NEGATIVE_CELL = /^(unknown|n\/?a|none|nil|null|not applicable|not yet|no result|[-—–]+)$/i;
+      // Concession machinery, shared by the blocker column and the copy-test
+      // answer: negation-phrased concessions on the raw text, affirmative
+      // concessions checked against an immediately preceding negation.
+      const CONCESSION_RAW =
+        /^\s*(nothing|none)\b|^\s*no\b(?!\s+\w+\s+(can|could)\b)|\b(nothing|nobody|no one) (stops|prevents|blocks)|\bno (real |structural )?(moat|barrier|blocker)|\b(has|have) not thought of (it|this)\b/i;
+      const CONCESSION_AFFIRMATIVE =
+        /\bcop(?:y|ied|yable)\b[^.\n]{0,30}\b(week|sprint|days?)\b|\banyone (can|could) (copy|build|ship)\b|\b(can|could|will|would) (ship|build|clone|replicate|match)\b[^.\n]{0,40}\b(week|sprint|days?)\b|\b(better|nicer|cleaner) design(ed)?\b|\bbetter (ux|ui|execution)\b|\bfirst[- ]mover\b/i;
+      const concedesTest = (value: string): boolean => {
+        if (CONCESSION_RAW.test(value)) return true;
+        const pattern = new RegExp(CONCESSION_AFFIRMATIVE.source, "gi");
+        let match: RegExpExecArray | null;
+        while ((match = pattern.exec(value)) !== null) {
+          const prefix = value.slice(Math.max(0, match.index - 18), match.index);
+          if (!/(\b(cannot|can not|can'?t|won'?t|will not|not|never|no|unable to)\s*(be\s+)?|\b(no|not|never)\s+\w+\s*)$/i.test(prefix)) return true;
+        }
+        return false;
+      };
       // Distinct incumbents only: the same row twice is still a category of
       // one.
       const realRowCount = new Set(
         incumbentRows
           .filter(
             (cells) =>
-              cells.length >= 6 && cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell) && !MOAT_NEGATIVE_CELL.test(cell)),
+              cells.length >= 6 &&
+              cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell) && !MOAT_NEGATIVE_CELL.test(cell)) &&
+              // A blocker cell that concedes the week-one copy is not a
+              // blocker.
+              !concedesTest(cells[4] ?? ""),
           )
-          .map((cells) => (cells[1] ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")),
+          .map((cells) => (cells[1] ?? "").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")),
       ).size;
       // §3 benchmarks the top 2–3 incumbents — one row compares against a
       // category of one.
@@ -137,13 +158,23 @@ if (text) {
       }
       // The labeled field only: the section's guidance prose also contains
       // "moat class" and a colon, and must never shadow the answer line.
-      const moatClassLine = moatSection.split(/\r?\n/).find((line) => /^\s*[-*]?\s*moat class\b/i.test(line) && line.includes(":"));
-      const moatClassValue = moatClassLine ? (moatClassLine.split(/:(.*)/s)[1] ?? "").trim() : "";
+      const moatClassValue = ((): string => {
+        const lines = moatSection.split(/\r?\n/);
+        const labelIndex = lines.findIndex((line) => /^\s*[-*]?\s*moat class\b/i.test(line) && line.includes(":"));
+        if (labelIndex === -1) return "";
+        const sameLine = ((lines[labelIndex] ?? "").split(/:(.*)/s)[1] ?? "").trim();
+        if (sameLine) return sameLine;
+        // Markdown continuation fills the field the normal way.
+        const nextLine = lines[labelIndex + 1] ?? "";
+        return /^\s+\S/.test(nextLine) && !/^\s*[-|#]/.test(nextLine) ? nextLine.trim() : "";
+      })();
       // The class must be affirmed, not disclaimed: "none — there is no data,
       // workflow, … moat" names every taxonomy word while conceding all of
       // them. The doctrine's V1 exception ("no moat yet, racing to build X")
       // is honored only when X is a named class with a real date.
-      const v1ExceptionMatch = moatClassValue.match(/no moat yet[^\n]*?\b(data|workflow|community|taste|model|distribution)\b[^\n]*?(\d{4}-\d{2}-\d{2})/i);
+      const v1ExceptionMatch = moatClassValue.match(
+        /no moat yet[^\n]*?\b(?:build\w*|racing|accru\w*|grow\w*)\b[^\n]{0,15}?\b(data|workflow|community|taste|model|distribution)\b[^\n]*?(\d{4}-\d{2}-\d{2})/i,
+      );
       const v1ExceptionDate = v1ExceptionMatch?.[2] ?? "";
       // The exception commits to building the class — "we will not build
       // data by <date>" captures the same words while refusing the plan.
@@ -205,41 +236,15 @@ if (text) {
       // label line carries no answer, the indented next line is the answer.
       const copyTestAnswer = ((): string => {
         const lines = moatSection.split(/\r?\n/);
-        const labelIndex = lines.findIndex((line) => /one-week-copy test answer:/i.test(line));
+        const labelIndex = lines.findIndex((line) => /^\s*[-*]\s*one-week-copy test answer:/i.test(line));
         if (labelIndex === -1) return "";
         const sameLine = (lines[labelIndex] ?? "").replace(/^.*one-week-copy test answer:/i, "").trim();
         if (sameLine) return sameLine;
         const nextLine = lines[labelIndex + 1] ?? "";
         return /^\s+\S/.test(nextLine) && !/^\s*[-|#]/.test(nextLine) ? nextLine.trim() : "";
       })();
-      // An answer that concedes the test is a failed test, not a recorded one.
-      // Concessions phrased as negations stay on the raw answer; affirmative
-      // concessions (including the doctrine's named nonanswers) are tested on
-      // the negation-stripped residue so "cannot be copied in a week" — a
-      // legitimate structural answer — survives.
-      // "No incumbent can reproduce…" is a structural claim, not a
-      // concession — the leading-no arm excludes negated-subject sentences.
-      const CONCESSION_RAW =
-        /^\s*(nothing|none)\b|^\s*no\b(?!\s+\w+\s+(can|could)\b)|\b(nothing|nobody|no one) (stops|prevents|blocks)|\bno (real |structural )?(moat|barrier|blocker)|\b(has|have) not thought of (it|this)\b/i;
-      const CONCESSION_AFFIRMATIVE =
-        /\bcop(?:y|ied|yable)\b[^.\n]{0,30}\b(week|sprint|days?)\b|\banyone (can|could) (copy|build|ship)\b|\b(can|could|will|would) (ship|build|clone|replicate|match)\b[^.\n]{0,40}\b(week|sprint|days?)\b|\b(better|nicer|cleaner) design(ed)?\b|\bbetter (ux|ui|execution)\b|\bfirst[- ]mover\b/i;
-      // Negation is scoped to the predicate it negates: "cannot be copied in
-      // a week" is a structural answer, but an unrelated "not" earlier in
-      // the sentence must not erase a live shipping concession.
-      const concessionStands = ((): boolean => {
-        const pattern = new RegExp(CONCESSION_AFFIRMATIVE.source, "gi");
-        let match: RegExpExecArray | null;
-        while ((match = pattern.exec(copyTestAnswer)) !== null) {
-          const prefix = copyTestAnswer.slice(Math.max(0, match.index - 18), match.index);
-          if (!/(\b(cannot|can not|can'?t|won'?t|will not|not|never|no|unable to)\s*(be\s+)?|\b(no|not|never)\s+\w+\s*)$/i.test(prefix)) return true;
-        }
-        return false;
-      })();
       const copyTestSubstantive =
-        copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 &&
-        !MOAT_PLACEHOLDER.test(copyTestAnswer) &&
-        !CONCESSION_RAW.test(copyTestAnswer) &&
-        !concessionStands;
+        copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 && !MOAT_PLACEHOLDER.test(copyTestAnswer) && !concedesTest(copyTestAnswer);
       if (!copyTestSubstantive) {
         issues.push(
           issue(
