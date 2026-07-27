@@ -107,8 +107,21 @@ if (swiftTokens !== undefined && templateSwiftTokens !== undefined) {
 const swiftMotionMembers = new Map<string, number>();
 if (swiftTokens !== undefined) {
   const motionEnum = swiftTokens.match(/enum Motion \{([\s\S]*?)\n {2}\}/);
-  for (const m of (motionEnum ? (motionEnum[1] ?? "") : "").matchAll(/static let (\w+): Double = ([\d.]+)/g)) {
+  const enumBody = motionEnum ? (motionEnum[1] ?? "") : "";
+  for (const m of enumBody.matchAll(/static let (\w+): Double = (\d+(?:\.\d+)?)\n/g)) {
     swiftMotionMembers.set(g(m, 1), Number(g(m, 2)));
+  }
+  for (const m of enumBody.matchAll(/static let (\w+): Double = ([^\n]+)/g)) {
+    if (!swiftMotionMembers.has(g(m, 1))) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.swift_tokens.member_malformed",
+          `DesignTokens.Motion.${g(m, 1)} declares a Double that does not parse as a valid decimal (${g(m, 2).trim()}) — the enum would not compile.`,
+          SWIFT_TOKENS,
+        ),
+      );
+    }
   }
   if (swiftMotionMembers.size === 0) {
     issues.push(
@@ -279,7 +292,7 @@ for (const [rel, text] of [
   [CRAFT, craft],
 ] as const) {
   if (text === undefined || swift === undefined) continue;
-  for (const m of text.matchAll(/PremiumMotion\.([A-Za-z0-9_-]+)/g)) {
+  for (const m of text.matchAll(/PremiumMotion\.([A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*)/g)) {
     if (!swiftPresets.has(g(m, 1))) {
       issues.push(
         issue("error", "motion_contract.premium_motion.unknown", `${rel} references PremiumMotion.${g(m, 1)}, which PremiumCraft.swift does not define.`, rel),
