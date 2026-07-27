@@ -2,8 +2,8 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { Ajv2020, type AnySchema, type ErrorObject } from "ajv/dist/2020.js";
+import { accessLabel } from "./lib/founder-copy.js";
 import { asArray, asString, getPath, isRecord, issue, loadProjectState, parseCliArgs, readText, reportAndExit, type Issue } from "./lib/launch-state.js";
-import { accessLabel } from "./lib/founder-gate-presentation.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
