@@ -32,6 +32,25 @@ if (onboardingHtml) {
   validateHtml(onboardingHtml.text, onboardingHtml.relativePath);
 }
 
+// Push permission priming (push-notification-lifecycle.md): a done onboarding
+// contract either places the primed push ask at an earned moment or records
+// push as not applicable with a reason — a full email lifecycle with no push
+// strategy is the low-open-channel default the audit found.
+if (onboardingDone && markdown) {
+  const pushCovered = /push (permission|priming|prime)|notification permission|push notifications?:? not applicable/i.test(markdown.text);
+  if (!pushCovered) {
+    issues.push(
+      issue(
+        "error",
+        "onboarding.push_priming_missing",
+        "ONBOARDING.md places no push permission prime and records no push-not-applicable decision. Place the soft-prime after a first " +
+          "value moment (never the same step as the review popup) per push-notification-lifecycle.md, or record why push does not apply.",
+        markdown.relativePath,
+      ),
+    );
+  }
+}
+
 reportAndExit("Onboarding conversion check", issues);
 
 function firstText(candidates: string[]): { relativePath: string; text: string } | undefined {

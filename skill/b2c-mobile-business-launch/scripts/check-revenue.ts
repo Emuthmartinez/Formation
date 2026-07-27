@@ -540,14 +540,29 @@ if (revenueDone && revenueOpsText) {
         ),
       );
     } else {
-      const backlogRows = backlogSection
+      // The Status and Started cells are parsed by their header columns:
+      // "completed" inside a hypothesis must not satisfy the cadence, and a
+      // legitimately active row must not be disqualified by a pending result.
+      const backlogLines = backlogSection
         .split(/\r?\n/)
         .map((line) => line.trim())
-        .filter((line) => line.startsWith("|") && !line.includes("---") && !/hypothesis/i.test(line));
-      const BACKLOG_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
-      const activeOrCompleted = backlogRows.filter(
-        (line) => /\b(active|completed)\b/i.test(line) && /\d{4}-\d{2}-\d{2}/.test(line) && !BACKLOG_PLACEHOLDER.test(line),
-      );
+        .filter((line) => line.startsWith("|") && !line.includes("---"));
+      const backlogHeader = backlogLines[0] ?? "";
+      const backlogHeaderCells = backlogHeader.split("|");
+      const statusColumn = backlogHeaderCells.findIndex((cell) => /status/i.test(cell));
+      const startedColumn = backlogHeaderCells.findIndex((cell) => /started/i.test(cell));
+      const BACKLOG_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|placeholder)\b/i;
+      const activeOrCompleted = backlogLines.slice(1).filter((line) => {
+        const cells = line.split("|").map((cell) => cell.trim());
+        const statusCell = statusColumn > 0 ? (cells[statusColumn] ?? "") : "";
+        const startedCell = startedColumn > 0 ? (cells[startedColumn] ?? "") : "";
+        return (
+          /^(active|completed)\b/i.test(statusCell) &&
+          /\d{4}-\d{2}-\d{2}/.test(startedCell) &&
+          !BACKLOG_PLACEHOLDER.test(statusCell) &&
+          !BACKLOG_PLACEHOLDER.test(startedCell)
+        );
+      });
       if (activeOrCompleted.length === 0) {
         issues.push(
           issue(

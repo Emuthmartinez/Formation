@@ -229,6 +229,37 @@ export function register(h: Harness): void {
     "viral_growth.loop_economics.missing",
   );
 
+  // The heading without the number is counting shares with extra steps.
+  const viralGrowthLoopUnmeasured = makeFixture("viral-growth-loop-unmeasured");
+  writeCompleteViralGrowth(viralGrowthLoopUnmeasured);
+  writeFileSync(
+    path.join(viralGrowthLoopUnmeasured, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthLoopUnmeasured, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: we will track the loop as it matures.",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "loop economics without a measured k or dated commitment fails",
+    viralGrowthLoopUnmeasured,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // A playbook that stops at the Day-0 roster leaves the scaled state undefined.
+  const viralGrowthNoUgcScale = makeFixture("viral-growth-no-ugc-scale");
+  writeCompleteViralGrowth(viralGrowthNoUgcScale);
+  writeFileSync(path.join(viralGrowthNoUgcScale, "UGC_PLAYBOOK.md"), "# UGC Playbook\n\nCreator scripts use GROW-001 and the format lab.\n", "utf8");
+  runFixture(
+    "UGC playbook without the post-breakout scale model fails",
+    viralGrowthNoUgcScale,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_scale_model_missing",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

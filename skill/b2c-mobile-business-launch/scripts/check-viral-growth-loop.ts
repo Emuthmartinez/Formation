@@ -132,6 +132,49 @@ if (markdown) {
   }
 }
 
+if (growthStatus === "done" && markdown) {
+  // Heading-only loop economics preserves the exact regression this contract
+  // prevents: shares counted without computing whether the loop compounds. At
+  // done, the Loop Economics region needs a measured k, a dated measured row,
+  // or a dated first-measurement commitment — guidance prose with incidental
+  // digits satisfies nothing.
+  const loopIndex = markdown.text.toLowerCase().indexOf("loop economics");
+  const loopRegion = loopIndex === -1 ? "" : markdown.text.slice(loopIndex, loopIndex + 1200);
+  const loopMeasured =
+    /\bk\s*(=|at|:)\s*\d/i.test(loopRegion) ||
+    /first (weekly )?k (computation|measurement)[^\n]*\d{4}-\d{2}-\d{2}/i.test(loopRegion) ||
+    /\|\s*\d{4}-\d{2}-\d{2}\s*\|[^\n]*\d/.test(loopRegion);
+  if (loopIndex !== -1 && !loopMeasured) {
+    issues.push(
+      issue(
+        "error",
+        "viral_growth.loop_economics_unmeasured",
+        "The Loop Economics section carries no measured k, dated measured row, or dated first-measurement commitment. " +
+          "The heading without the number is counting shares with extra steps — record k = <value>, a dated weekly row, or " +
+          "'first weekly k computation due YYYY-MM-DD'.",
+        markdown.relativePath,
+      ),
+    );
+  }
+
+  // Post-breakout scale contract: a UGC playbook that stops at the Day-0
+  // roster is the known miss. When the playbook exists, it must carry the
+  // scale-band model with founder-gated budget steps.
+  const ugcPlaybook = firstExistingText(["UGC_PLAYBOOK.md", "ugc/UGC_PLAYBOOK.md"]);
+  if (ugcPlaybook && !(/post-breakout|scale model/i.test(ugcPlaybook.text) && /band/i.test(ugcPlaybook.text) && /founder/i.test(ugcPlaybook.text))) {
+    issues.push(
+      issue(
+        "error",
+        "viral_growth.ugc_scale_model_missing",
+        `${ugcPlaybook.relativePath} has no Post-Breakout Scale Model (roster bands with founder-gated budget steps and fatigue measurement, ` +
+          `per ugc-creator-engine.md). A playbook that stops at the 3-5 creator discovery roster leaves the scaled state undefined — ` +
+          `the exact Day-0 ceiling the audit found.`,
+        ugcPlaybook.relativePath,
+      ),
+    );
+  }
+}
+
 if (growthStatus === "done" && !formatLabPath) {
   issues.push(
     issue(

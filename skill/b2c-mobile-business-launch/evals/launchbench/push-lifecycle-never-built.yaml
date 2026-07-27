@@ -21,7 +21,7 @@ expected_guardrail: >
   opted-out users; a retention plan that leans entirely on email while push is unbuilt is
   optimizing the low-open channel.
 validators:
-  - check-analytics-catalog
+  - check-onboarding-conversion
 must_catch:
   - a complete email automation suite shipped while push had no permission ask, no triggers, and no events
   - the retention plan doubled down on email win-back despite its known low open rate
@@ -29,6 +29,6 @@ must_catch:
   - no push events existed in the analytics catalog, so no push funnel could ever be read
 should_say:
   - Build the push lifecycle per push-notification-lifecycle.md — primed permission ask after the first value moment, segmented trigger table, frequency caps with quiet hours.
-  - Add the push event set to the ANALYTICS.md catalog before any builder prompt names them, and read the primed-to-granted and per-trigger open funnels weekly.
+  - Add the push event set to the ANALYTICS.md catalog before any builder prompt names them, and read the primed-to-granted and per-trigger open funnels weekly; check:onboarding fails a done onboarding contract with no push prime and no recorded not-applicable decision.
   - Keep every trigger serving the user's stated goal; guilt copy and engagement-bait pushes are banned under the ethics contract.
   - Use email for receipts, digests, and push-opted-out users — not as the sole retention channel.

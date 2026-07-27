@@ -17,6 +17,7 @@ Status: partial until the flow is product-specific and visually verified.
 | Personalization | Collect useful setup | Product-specific question | optional or required per matrix | accessible form controls | `onboarding_answer_selected` | back allowed |
 | First value / value-reveal | Show the personalized plan, analysis, demo result, aha moment, or first win | Product-specific first value | visible before paywall | stable mounted screen | `personalized_plan_viewed` | continue allowed |
 | App Review popup | Immediately after the first value/value-reveal screen | Native App Review request | eligible only after value is visible | automatic 1-2 second delay while mounted | `review_prompt_eligible`, `review_prompt_requested` | flow continues if suppressed |
+| Push permission prime | The next earned moment after first value — never the same step as the review popup | soft-prime screen, then the system dialog (`push-notification-lifecycle.md`) | only after value is visible; hard denial falls back to email lifecycle | user-initiated from the prime screen | `push_permission_primed`, `push_permission_granted`, `push_permission_denied` | flow continues either way |
 | Paywall or activation | Convert or complete first action | Product-specific offer or task | after first value and review request | RevenueCat or activation UI | `paywall_viewed`, `activation_task_completed` | restore/support visible |
 
 ## Data Collection Matrix

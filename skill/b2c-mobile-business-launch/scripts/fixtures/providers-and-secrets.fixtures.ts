@@ -195,6 +195,29 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog.missing",
   );
 
+  // "completed" inside a hypothesis must not satisfy the cadence: the Status
+  // cell is parsed by its header column.
+  const revenueExperimentWordDrift = makeFixture("revenue-experiment-status-word-drift");
+  {
+    const state = readState(revenueExperimentWordDrift);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentWordDrift, state);
+    const opsPath = path.join(revenueExperimentWordDrift, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | users completed checkout faster with the annual anchor | anchor-first paywall | trial-start rate | planned | |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "planned backlog row with 'completed' in its hypothesis does not satisfy the cadence",
+    revenueExperimentWordDrift,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";
