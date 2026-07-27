@@ -517,8 +517,14 @@ if (revenueDone && revenueOpsText) {
   //     this makes it a red check instead of a prose warning.
   const liveSinceRaw = state ? (asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "").trim() : "";
   const liveSinceDate = /^\d{4}-\d{2}-\d{2}$/.test(liveSinceRaw) ? new Date(`${liveSinceRaw}T00:00:00Z`) : undefined;
+  // Same strict validation as check:post-launch's clock: round-tripped real
+  // calendar date, never in the future — a typo'd month must not disarm the
+  // experiment cadence.
   const liveDays =
-    liveSinceDate && !Number.isNaN(liveSinceDate.getTime()) && liveSinceDate.getTime() <= Date.now()
+    liveSinceDate &&
+    !Number.isNaN(liveSinceDate.getTime()) &&
+    liveSinceDate.toISOString().slice(0, 10) === liveSinceRaw &&
+    liveSinceDate.getTime() <= Date.now()
       ? Math.floor((Date.now() - liveSinceDate.getTime()) / 86_400_000)
       : 0;
   if (liveDays >= 28) {
@@ -538,7 +544,10 @@ if (revenueDone && revenueOpsText) {
         .split(/\r?\n/)
         .map((line) => line.trim())
         .filter((line) => line.startsWith("|") && !line.includes("---") && !/hypothesis/i.test(line));
-      const activeOrCompleted = backlogRows.filter((line) => /\b(active|completed)\b/i.test(line) && /\d{4}-\d{2}-\d{2}/.test(line));
+      const BACKLOG_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
+      const activeOrCompleted = backlogRows.filter(
+        (line) => /\b(active|completed)\b/i.test(line) && /\d{4}-\d{2}-\d{2}/.test(line) && !BACKLOG_PLACEHOLDER.test(line),
+      );
       if (activeOrCompleted.length === 0) {
         issues.push(
           issue(
