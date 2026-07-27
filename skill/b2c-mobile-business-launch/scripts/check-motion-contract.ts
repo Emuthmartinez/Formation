@@ -534,10 +534,31 @@ const PROMOTED_MOTION_CSS_VARS = new Set([
   "--motion-easing-spring",
   "--motion-stagger",
 ]);
-// Backticked `motion.<x>` spans that are not token references: the motion/react JSX
-// namespace (motion.div and friends), the motion.dev docs domain, and the landing
-// pack's motion.css file.
-const MOTION_NAMESPACE_SKIP = new Set(["a", "button", "css", "dev", "div", "img", "li", "p", "section", "span", "svg", "ul"]);
+// The retired card vocabulary stays hard-banned by name: these are the aliases the
+// 2026-07-27 sweep removed (the benchmarks table's "Retired card alias" column), and
+// they are the one class of lowercase word that must never read as a component name.
+const RETIRED_MOTION_ALIASES = new Set(["brief", "moderate", "expressive", "deliberate"]);
+/**
+ * Validate one motion.<name> occurrence found inside code (inline span or fenced block).
+ * Tokens resolve against tokens.json. A first segment that is a pure-lowercase word and
+ * not a shipped token is a component namespace, not a token: motion/react exposes every
+ * intrinsic element as motion.<tag> (motion.div, motion.article, motion.nav, ...), and
+ * motion.dev / motion.css ride the same prefix — a shape rule covers them all without
+ * enumerating a partial HTML tag list. Shipped lowercase tokens (easing, stagger) resolve
+ * before the shape rule, and the retired aliases are banned before it, so token-shaped
+ * names (any uppercase or punctuation in the first segment) and alias reintroductions
+ * still fail. Residual: a brand-new all-lowercase phantom word reads as a component
+ * namespace — acceptable because the shipped naming convention is camelCase and any
+ * lowercase token added to tokens.json resolves before this rule.
+ */
+function checkMotionTokenName(rel: string, name: string): void {
+  if (Object.hasOwn(motionTokens, name)) return;
+  const firstSegment = name.split(".")[0] ?? "";
+  if (!RETIRED_MOTION_ALIASES.has(firstSegment) && /^[a-z][a-z0-9]*$/.test(firstSegment) && !Object.hasOwn(motionTokens, firstSegment)) {
+    return;
+  }
+  issues.push(issue("error", "motion_contract.vocabulary.token_unknown", `${rel} references motion.${name}, which does not exist in tokens.json.`, rel));
+}
 const mdFilesUnder = (relDir: string): string[] => {
   const fullDir = path.join(skillRoot, relDir);
   if (!existsSync(fullDir)) return [];
@@ -567,25 +588,23 @@ for (const rel of [...mdFilesUnder("references"), ...mdFilesUnder("templates")])
   }
   // The benchmarks' motion.<name> references are already resolved by check 1.
   if (rel !== BENCH && Object.keys(motionTokens).length > 0) {
-    // Scan token occurrences anywhere inside inline code spans, not just span-initial
-    // ones, so `transition={{ duration: motion.moderate }}` fails the same way
-    // `motion.moderate` does. Fenced blocks are removed first so a fence's backticks
-    // cannot pair with prose backticks and swallow paragraphs. The name class captures
-    // punctuated typos whole (motion.durationReveal-extra cannot pass as a prefix).
+    // Scan token occurrences anywhere inside code, not just span-initial ones, so
+    // `transition={{ duration: motion.moderate }}` fails the same way `motion.moderate`
+    // does. Fenced blocks are scanned independently (a fenced `const d = motion.moderate`
+    // example must fail too), then removed before inline-span pairing so a fence's
+    // backticks cannot pair with prose backticks and swallow paragraphs. The name class
+    // captures punctuated typos whole (motion.durationReveal-extra is not its prefix).
+    const scanCodeForTokens = (code: string): void => {
+      for (const m of code.matchAll(/\bmotion\.([A-Za-z0-9_.-]+)/g)) {
+        checkMotionTokenName(rel, g(m, 1));
+      }
+    };
+    for (const fence of text.matchAll(/```[^\n]*\n([\s\S]*?)```/g)) {
+      scanCodeForTokens(g(fence, 1));
+    }
     const inlineText = text.replace(/```[\s\S]*?```/g, "");
     for (const span of inlineText.matchAll(/`([^`]+)`/g)) {
-      for (const m of g(span, 1).matchAll(/\bmotion\.([A-Za-z0-9_.-]+)/g)) {
-        const name = g(m, 1);
-        // motion/react JSX (motion.div ...), motion.dev, and motion.css ride the same
-        // prefix; skip on the first dotted segment so motion.div.style stays skipped
-        // while motion.durationReveal.extra still fails on its full name.
-        if (MOTION_NAMESPACE_SKIP.has(name.split(".")[0] ?? "")) continue;
-        if (!Object.hasOwn(motionTokens, name)) {
-          issues.push(
-            issue("error", "motion_contract.vocabulary.token_unknown", `${rel} references motion.${name}, which does not exist in tokens.json.`, rel),
-          );
-        }
-      }
+      scanCodeForTokens(g(span, 1));
     }
   }
   // Capture the full CSS identifier so an undefined variable that merely extends a
@@ -598,6 +617,71 @@ for (const rel of [...mdFilesUnder("references"), ...mdFilesUnder("templates")])
           "motion_contract.vocabulary.css_var_unknown",
           `${rel} references ${m[0]}, which promote-design-tokens.ts does not mint — the variable would be undefined at runtime.`,
           rel,
+        ),
+      );
+    }
+  }
+}
+
+// --- 6. The two seeded templates must prescribe the same per-moment motion tokens. ---
+// DESIGN.md's "Card motion spec" table and EMOTIONAL_DESIGN.md's DESIGN.md integration
+// row describe the SAME four card moments; when both seed a business repo they must
+// agree on the tokens per moment, or the generated artifacts contradict each other
+// (the pre-reconciliation state: 120ms vs 220ms steps, celebrate vs 360ms reveals).
+// Soft-skipped when either template is absent, matching check 5's fixture tolerance.
+const CARD_MOMENTS = ["Commitment echo", "Perceived Effort", "Variable Reward", "Intent Mirror"];
+const DESIGN_TPL = "templates/DESIGN.md";
+const EMOTIONAL_TPL = "templates/emotional-design/EMOTIONAL_DESIGN.md";
+const designTplPath = path.join(skillRoot, DESIGN_TPL);
+const emotionalTplPath = path.join(skillRoot, EMOTIONAL_TPL);
+if (existsSync(designTplPath) && existsSync(emotionalTplPath)) {
+  const tokensCited = (chunk: string): string[] => [...chunk.matchAll(/`motion\.([A-Za-z0-9_]+)`/g)].map((m) => g(m, 1)).sort();
+
+  // DESIGN.md: one table row per moment; the row's cells carry its tokens.
+  const designText = readFileSync(designTplPath, "utf8");
+  const designMoments = new Map<string, string[]>();
+  for (const line of designText.split("\n")) {
+    if (!line.startsWith("|")) continue;
+    const moment = CARD_MOMENTS.find((name) => line.includes(name));
+    if (moment) designMoments.set(moment, tokensCited(line));
+  }
+
+  // EMOTIONAL_DESIGN.md: all four moments live in one integration-table cell; slice
+  // the cell at each moment name and read the tokens up to the next moment.
+  const emotionalText = readFileSync(emotionalTplPath, "utf8");
+  const emotionalRow = emotionalText.split("\n").find((line) => line.includes("Motion tokens for each card moment"));
+  const emotionalMoments = new Map<string, string[]>();
+  if (emotionalRow !== undefined) {
+    const positions = CARD_MOMENTS.map((name) => ({ name, at: emotionalRow.indexOf(name) }))
+      .filter((entry) => entry.at >= 0)
+      .sort((a, b) => a.at - b.at);
+    positions.forEach((entry, index) => {
+      const end = positions[index + 1]?.at ?? emotionalRow.length;
+      emotionalMoments.set(entry.name, tokensCited(emotionalRow.slice(entry.at, end)));
+    });
+  }
+
+  for (const moment of CARD_MOMENTS) {
+    const inDesign = designMoments.get(moment);
+    const inEmotional = emotionalMoments.get(moment);
+    if (inDesign === undefined || inEmotional === undefined) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.card_moments.missing",
+          `The "${moment}" card moment is missing from ${inDesign === undefined ? DESIGN_TPL : EMOTIONAL_TPL}'s motion mapping; both seeded templates must state every moment.`,
+          inDesign === undefined ? DESIGN_TPL : EMOTIONAL_TPL,
+        ),
+      );
+      continue;
+    }
+    if (JSON.stringify(inDesign) !== JSON.stringify(inEmotional)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.card_moments.drift",
+          `The "${moment}" card moment cites motion tokens [${inDesign.join(", ")}] in ${DESIGN_TPL} but [${inEmotional.join(", ")}] in ${EMOTIONAL_TPL} — the seeded artifacts would contradict each other.`,
+          DESIGN_TPL,
         ),
       );
     }

@@ -462,6 +462,8 @@ export function register(h: Harness): void {
     "references/experience-cards/peak-end-card.md",
     "references/experience-cards/mastery-and-status-card.md",
     "references/experience-cards/variable-reward-card.md",
+    "templates/DESIGN.md",
+    "templates/emotional-design/EMOTIONAL_DESIGN.md",
   ];
   const writeMotionContractRoot = (name: string, mutate?: (rel: string, text: string) => string): string => {
     const root = makeEmptyFixture(name);
@@ -626,6 +628,42 @@ export function register(h: Harness): void {
     ["--skill-root", motionVocabEmbeddedToken],
     1,
     "motion_contract.vocabulary.token_unknown",
+  );
+
+  const motionVocabFencedToken = writeMotionContractRoot("motion-contract-vocab-fenced-token", (rel, text) =>
+    rel.endsWith("peak-end-card.md") ? `${text}\n\`\`\`swift\nlet duration = motion.moderate\n\`\`\`\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a phantom token inside a fenced code block",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabFencedToken],
+    1,
+    "motion_contract.vocabulary.token_unknown",
+  );
+
+  const motionVocabIntrinsics = writeMotionContractRoot("motion-contract-vocab-intrinsic-elements", (rel, text) =>
+    rel.endsWith("peak-end-card.md")
+      ? `${text}\nWrap the section in \`motion.article\` or \`<motion.nav layout>\`; \`motion.form\` and \`motion.main\` also animate.\n`
+      : text,
+  );
+  runScriptArgs(
+    "motion contract accepts motion/react intrinsic elements beyond a fixed tag list",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabIntrinsics],
+    0,
+  );
+
+  const motionCardMomentDrift = writeMotionContractRoot("motion-contract-card-moment-drift", (rel, text) =>
+    rel.endsWith("templates/DESIGN.md")
+      ? text.replace("| Intent Mirror entrance | `motion.durationReveal` |", "| Intent Mirror entrance | `motion.durationSlow` |")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the two seeded templates disagree on a card moment's tokens",
+    "check-motion-contract.ts",
+    ["--skill-root", motionCardMomentDrift],
+    1,
+    "motion_contract.card_moments.drift",
   );
 
   const motionVocabCssVarSuffix = writeMotionContractRoot("motion-contract-vocab-css-var-suffix", (rel, text) =>
