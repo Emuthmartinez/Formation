@@ -535,6 +535,28 @@ export function register(h: Harness): void {
     "motion_contract.token_table.row_missing",
   );
 
+  const motionAnnotationLost = writeMotionContractRoot("motion-contract-preset-annotation-lost", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("`PremiumMotion.press` (bounce 0.18)", "`PremiumMotion.press`") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a preset row loses its bounce annotation",
+    "check-motion-contract.ts",
+    ["--skill-root", motionAnnotationLost],
+    1,
+    "motion_contract.preset.annotation_missing",
+  );
+
+  const motionMalformedRef = writeMotionContractRoot("motion-contract-malformed-token-ref", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? `${text}\nWeb loops may also ride \`motion.durationReveal2\` when staged.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a malformed token reference that truncation used to let pass",
+    "check-motion-contract.ts",
+    ["--skill-root", motionMalformedRef],
+    1,
+    "motion_contract.token_reference.unknown",
+  );
+
   const motionCinematicLeak = writeMotionContractRoot("motion-contract-cinematic-leak", (rel, text) =>
     rel.endsWith("premium-mobile-craft.md") ? `${text}\nUse durationCinematic for hero moments.\n` : text,
   );

@@ -107,6 +107,16 @@ if (bench !== undefined) {
       );
     }
     const presetRef = presetCell.match(/PremiumMotion\.(\w+)`?\s*\(bounce ([\d.]+)\)/);
+    if (presetCell.includes("PremiumMotion") && !presetRef) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.preset.annotation_missing",
+          `Benchmarks token table row for motion.${name} names a PremiumMotion preset without its (bounce N) annotation; the stated bounce is what the gate keeps synchronized.`,
+          BENCH,
+        ),
+      );
+    }
     if (presetRef) {
       const preset = swiftPresets.get(g(presetRef, 1));
       if (!preset) {
@@ -163,7 +173,7 @@ if (bench !== undefined) {
   }
 
   // Every motion.<name> reference in the benchmarks must resolve to a shipped token.
-  for (const m of bench.matchAll(/`motion\.([A-Za-z]+)`/g)) {
+  for (const m of bench.matchAll(/`motion\.([A-Za-z0-9_]+)`/g)) {
     if (!(g(m, 1) in motionTokens)) {
       issues.push(
         issue("error", "motion_contract.token_reference.unknown", `Benchmarks reference motion.${g(m, 1)}, which does not exist in tokens.json.`, BENCH),
@@ -178,7 +188,7 @@ for (const [rel, text] of [
   [CRAFT, craft],
 ] as const) {
   if (text === undefined || swift === undefined) continue;
-  for (const m of text.matchAll(/PremiumMotion\.([A-Za-z]+)/g)) {
+  for (const m of text.matchAll(/PremiumMotion\.([A-Za-z0-9_]+)/g)) {
     if (!swiftPresets.has(g(m, 1))) {
       issues.push(
         issue("error", "motion_contract.premium_motion.unknown", `${rel} references PremiumMotion.${g(m, 1)}, which PremiumCraft.swift does not define.`, rel),
