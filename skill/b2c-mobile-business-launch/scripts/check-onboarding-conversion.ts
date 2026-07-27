@@ -41,8 +41,8 @@ if (onboardingDone && markdown) {
   const pushLines = markdown.text.split(/\r?\n/).filter((line) => /push (permission|priming|prime)|notification permission/i.test(line));
   // Mention is not placement: the prime must sit at an earned post-value
   // moment, and a cold ask on launch is the contract violation itself.
-  const placementOk = pushLines.some((line) => /after (the )?first value|earned moment|value[- ]reveal|value is visible/i.test(line));
-  const coldAsk = pushLines.some((line) => /\bcold\b|first launch|on launch|at startup|app start/i.test(line));
+  const placementOk = pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(line));
+  const coldAsk = pushLines.some((line) => /\bcold\b|first launch|on launch|at startup|app start|before (the )?(first )?value([- ]reveal)?/i.test(line));
   if (!notApplicable && (pushLines.length === 0 || !placementOk || coldAsk)) {
     issues.push(
       issue(

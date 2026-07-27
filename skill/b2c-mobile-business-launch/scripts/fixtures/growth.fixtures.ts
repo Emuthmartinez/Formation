@@ -273,6 +273,31 @@ export function register(h: Harness): void {
     "viral_growth.ugc_scale_model_missing",
   );
 
+  // A deleted playbook is the Day-0 ceiling with the evidence removed.
+  const viralGrowthNoPlaybook = makeFixture("viral-growth-no-ugc-playbook");
+  writeCompleteViralGrowth(viralGrowthNoPlaybook);
+  rmSync(path.join(viralGrowthNoPlaybook, "UGC_PLAYBOOK.md"), { force: true });
+  runFixture("done growth lane without UGC_PLAYBOOK.md fails", viralGrowthNoPlaybook, "check-viral-growth-loop.ts", 1, "viral_growth.ugc_playbook_missing");
+
+  // A dated numeric row in a LATER section must not read as a loop measurement.
+  const viralGrowthLoopCrossSection = makeFixture("viral-growth-loop-cross-section");
+  writeCompleteViralGrowth(viralGrowthLoopCrossSection);
+  writeFileSync(
+    path.join(viralGrowthLoopCrossSection, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthLoopCrossSection, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "## Loop Economics\n\n## Ledger Extras\n| 2026-07-01 | GROW-001 | 5 |",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "dated numbers in a later section do not count as loop measurements",
+    viralGrowthLoopCrossSection,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

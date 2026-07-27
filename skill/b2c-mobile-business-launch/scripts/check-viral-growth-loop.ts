@@ -139,7 +139,15 @@ if (growthStatus === "done" && markdown) {
   // or a dated first-measurement commitment — guidance prose with incidental
   // digits satisfies nothing.
   const loopIndex = markdown.text.toLowerCase().indexOf("loop economics");
-  const loopRegion = loopIndex === -1 ? "" : markdown.text.slice(loopIndex, loopIndex + 1200);
+  // The region ends at the next section boundary — a dated numeric row in a
+  // later section (Traceability) must not read as a loop measurement.
+  const loopRegion = ((): string => {
+    if (loopIndex === -1) return "";
+    const lower = markdown.text.toLowerCase();
+    const boundaries = [markdown.text.indexOf("\n## ", loopIndex + 1), lower.indexOf("stop and scale rules", loopIndex + 14)].filter((index) => index !== -1);
+    const end = boundaries.length > 0 ? Math.min(...boundaries) : markdown.text.length;
+    return markdown.text.slice(loopIndex, end);
+  })();
   const loopMeasured =
     /\bk\s*(=|at|:)\s*\d/i.test(loopRegion) ||
     /first (weekly )?k (computation|measurement)[^\n]*\d{4}-\d{2}-\d{2}/i.test(loopRegion) ||
@@ -161,6 +169,18 @@ if (growthStatus === "done" && markdown) {
   // roster is the known miss. When the playbook exists, it must carry the
   // scale-band model with founder-gated budget steps.
   const ugcPlaybook = firstExistingText(["UGC_PLAYBOOK.md", "ugc/UGC_PLAYBOOK.md"]);
+  const ugcNotApplicable = /creator (content|loop)[^\n]*\b(not in scope|not applicable|rejected)\b/i.test(markdown.text);
+  if (!ugcPlaybook && !ugcNotApplicable) {
+    issues.push(
+      issue(
+        "error",
+        "viral_growth.ugc_playbook_missing",
+        "The growth lane is done but UGC_PLAYBOOK.md is absent. Create it (with its Post-Breakout Scale Model), or record creator " +
+          "content as not in scope in VIRAL_GROWTH.md — a missing playbook is the Day-0 ceiling with the evidence deleted.",
+        "UGC_PLAYBOOK.md",
+      ),
+    );
+  }
   const ugcScaleSubstantive = ((): boolean => {
     if (!ugcPlaybook) return true;
     const scaleIndex = ugcPlaybook.text.toLowerCase().search(/post-breakout|scale model/);
