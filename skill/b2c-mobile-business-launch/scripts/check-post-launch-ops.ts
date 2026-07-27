@@ -156,17 +156,26 @@ const retroText = retroFile ? (readText(args.root, retroFile) ?? "") : "";
 // The wind-down exemption must be earned, not typed: a one-string state edit
 // (kill_or_scale_decision: kill) with no retro behind it would otherwise skip
 // every checkpoint and weekly-log gate. Kill counts only when the state mirror
-// is complete AND a completed retro checkpoint actually carries a Kill verdict.
+// is complete AND some retro checkpoint was actually completed (a valid past
+// date in the Retro Window) AND that same checkpoint carries a Kill verdict
+// over a filled, non-placeholder evidence pack.
 const killDecided = ((): boolean => {
   if (!state) return false;
   const decision = (asString(getPath(state, "lanes.post_launch_ops.kill_or_scale_decision")) ?? "").trim();
   const decidedAt = (asString(getPath(state, "lanes.post_launch_ops.kill_or_scale_decided_at")) ?? "").trim();
   if (!/^kill$/i.test(decision) || !parseLiveDate(decidedAt)) return false;
   const verdictSection = markdownSection(retroText, "Kill, Hold, Or Scale");
-  if (!verdictSection) return false;
+  const windowSection = markdownSection(retroText, "Retro Window");
+  if (!verdictSection || !windowSection) return false;
   const verdictColumn = tableColumnIndex(verdictSection, /verdict/i);
   if (verdictColumn === -1) return false;
-  return ["Day 30", "Day 90"].some((checkpoint) => /^kill\b/i.test((tableRowCells(verdictSection, checkpoint)[verdictColumn] ?? "").trim()));
+  return ["Day 30", "Day 90"].some((checkpoint) => {
+    if (!parseLiveDate((tableRowCells(windowSection, checkpoint)[2] ?? "").trim())) return false;
+    const cells = tableRowCells(verdictSection, checkpoint);
+    if (!/^kill\b/i.test((cells[verdictColumn] ?? "").trim())) return false;
+    const evidenceCells = verdictColumn > 2 ? cells.slice(2, verdictColumn) : [];
+    return evidenceCells.length > 0 && evidenceCells.every((cell) => cell.trim().length > 0 && !PLACEHOLDER_TEXT.test(cell));
+  });
 })();
 
 if (liveSince && !killDecided) {
@@ -180,7 +189,10 @@ if (liveSince && !killDecided) {
     { label: "Day 90", dueDays: 90, code: "day_90", severity: numbersSeverity },
   ];
   for (const checkpoint of checkpoints) {
-    const completed = Boolean(tableRowCells(retroWindow, checkpoint.label)[2]?.trim());
+    // Completion requires a valid, non-future calendar date — "TBD" or an
+    // impossible date in the Date cell is not a completed checkpoint and must
+    // not suppress the overdue error.
+    const completed = Boolean(parseLiveDate((tableRowCells(retroWindow, checkpoint.label)[2] ?? "").trim()));
     if (!completed && daysLive > checkpoint.dueDays + CHECKPOINT_GRACE_DAYS) {
       issues.push(
         issue(
@@ -223,7 +235,10 @@ if (liveSince && !killDecided) {
         const line = runbookLines[i]?.trim() ?? "";
         if (!line.startsWith("|")) break;
         const match = line.match(/^\|\s*(\d{4}-\d{2}-\d{2})\s*\|/);
-        if (match) dateRows.push({ date: new Date(`${match[1]}T00:00:00Z`), cells: line.split("|").map((cell) => cell.trim()) });
+        // Same strict past-date validation as live_since: a future-dated or
+        // impossible row must not anchor the freshness math.
+        const rowDate = match ? parseLiveDate(match[1] ?? "") : undefined;
+        if (rowDate) dateRows.push({ date: rowDate, cells: line.split("|").map((cell) => cell.trim()) });
       }
       if (dateRows.length === 0) {
         issues.push(
@@ -249,14 +264,20 @@ if (liveSince && !killDecided) {
             ),
           );
         }
+        // A measured value is a percentage (crash-free and D7 are both rates),
+        // or the documented dated-blocker form. An incidental digit inside an
+        // adjective sentence ("iOS 17 looks fine") is not a metric.
+        const MEASURED_VALUE = /\d+(?:\.\d+)?\s*%/;
+        const DATED_BLOCKER = /blocked\b[^|]*\d{4}-\d{2}-\d{2}/i;
         const metricCells = [crashColumn, retentionColumn].filter((index) => index > 0).map((index) => latest.cells[index] ?? "");
-        if (metricCells.some((cell) => !/\d/.test(cell) || PLACEHOLDER_TEXT.test(cell))) {
+        if (metricCells.some((cell) => !(MEASURED_VALUE.test(cell) || DATED_BLOCKER.test(cell)) || PLACEHOLDER_TEXT.test(cell))) {
           issues.push(
             issue(
               numbersSeverity,
               "post_launch_ops.weekly_numbers_missing",
-              `The latest weekly log row in ${runbookPath} holds no real numbers in its crash-free/retention cells. "unverified" and adjectives ` +
-                `are not a metrics review — pull the values from Sentry, PostHog, and RevenueCat, or record the dated blocker that prevents the pull.`,
+              `The latest weekly log row in ${runbookPath} holds no measured values in its crash-free/retention cells. A metric is a ` +
+                `percentage ("99.6%", "31%") or a dated blocker ("blocked: PostHog auth 2026-07-20") — adjectives with incidental digits are ` +
+                `not a metrics review. Pull the values from Sentry, PostHog, and RevenueCat.`,
               runbookPath,
             ),
           );

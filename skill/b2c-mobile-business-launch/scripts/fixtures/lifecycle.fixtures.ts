@@ -411,6 +411,100 @@ export function register(h: Harness): void {
     "post_launch_ops.weekly_log_missing",
   );
 
+  // A Kill verdict typed into the verdict table without the Retro Window ever
+  // recording a completed checkpoint is still a dodge: the exemption requires
+  // the checkpoint to have actually happened.
+  const postLaunchKillNoCheckpoint = makeFixture("post-launch-kill-uncompleted-checkpoint");
+  {
+    const state = readState(postLaunchKillNoCheckpoint);
+    expectRecord(state.project, "project")["phase"] = "phase_6";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "partial";
+    lane["kill_or_scale_decision"] = "kill";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(10);
+    writeState(postLaunchKillNoCheckpoint, state);
+    setPostLaunchLive(postLaunchKillNoCheckpoint, 120);
+    const retroPath = path.join(postLaunchKillNoCheckpoint, "LAUNCH_RETRO.md");
+    const retro = readFileSync(retroPath, "utf8").replace(
+      "| Day 90 | | | | | | |",
+      "| Day 90 | $60 MRR declining | D30 under 5% | n/a — organic only | 8 | Kill | |",
+    );
+    writeFileSync(retroPath, retro, "utf8");
+  }
+  runFixture(
+    "kill verdict without a completed retro checkpoint does not exempt the gates",
+    postLaunchKillNoCheckpoint,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.checkpoint_overdue.day_30",
+  );
+
+  // "TBD" or an impossible value in the Date cell is not a completed checkpoint.
+  const postLaunchCheckpointTbd = makeFixture("post-launch-checkpoint-tbd-date");
+  {
+    const state = readState(postLaunchCheckpointTbd);
+    expectRecord(state.project, "project")["phase"] = "phase_6";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "partial";
+    writeState(postLaunchCheckpointTbd, state);
+    setPostLaunchLive(postLaunchCheckpointTbd, 45);
+    appendWeeklyLogRow(postLaunchCheckpointTbd, { daysAgo: 3 });
+    const retroPath = path.join(postLaunchCheckpointTbd, "LAUNCH_RETRO.md");
+    writeFileSync(retroPath, readFileSync(retroPath, "utf8").replace("| Day 30 | | |", "| Day 30 | TBD | founder |"), "utf8");
+  }
+  runFixture(
+    "TBD in the checkpoint date cell does not suppress the overdue error",
+    postLaunchCheckpointTbd,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.checkpoint_overdue.day_30",
+  );
+
+  // A future-dated weekly row must not anchor the freshness math.
+  const postLaunchWeeklyFutureRow = makeFixture("post-launch-weekly-future-row");
+  {
+    const state = readState(postLaunchWeeklyFutureRow);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "hold";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
+    writeState(postLaunchWeeklyFutureRow, state);
+    setPostLaunchLive(postLaunchWeeklyFutureRow, 45);
+    appendWeeklyLogRow(postLaunchWeeklyFutureRow, { daysAgo: -5 });
+    completeCheckpoint(postLaunchWeeklyFutureRow, "Day 30", {
+      daysAgo: 8,
+      verdict: "Hold",
+      evidence: ["$310 MRR, flat", "D7 27% stable", "n/a — organic only", "5"],
+    });
+  }
+  runFixture(
+    "a future-dated weekly row does not satisfy the freshness gate",
+    postLaunchWeeklyFutureRow,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_log_missing",
+  );
+
+  // Incidental digits inside adjectives are not measured values.
+  const postLaunchWeeklyAdjective = makeFixture("post-launch-weekly-adjective-numbers");
+  {
+    const state = readState(postLaunchWeeklyAdjective);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchWeeklyAdjective, state);
+    setPostLaunchLive(postLaunchWeeklyAdjective, 20);
+    appendWeeklyLogRow(postLaunchWeeklyAdjective, { daysAgo: 2, crashFree: "iOS 17 looks fine", d7: "D7 looks fine 4 sure" });
+  }
+  runFixture(
+    "adjectives with incidental digits fail the measured-value bar",
+    postLaunchWeeklyAdjective,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_numbers_missing",
+  );
+
   // A recorded Kill verdict is the one legitimate way for the rhythm to stop:
   // wind-down quiet must not read as launch-and-vanish.
   const postLaunchKilledQuiet = makeFixture("post-launch-killed-app-quiet");
