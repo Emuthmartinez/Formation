@@ -140,14 +140,21 @@ if (growthStatus === "done" && markdown) {
   // digits satisfies nothing.
   // Anchor to the real section start — a table-of-contents mention must not
   // open the region early and orphan the measured section below it.
-  const loopHeading = /^#{1,3}\s*loop economics|^loop economics\s*:/im.exec(markdown.text);
+  const loopHeading = /^(#{1,3})\s*loop economics|^loop economics\s*:/im.exec(markdown.text);
   const loopIndex = loopHeading ? loopHeading.index : markdown.text.toLowerCase().indexOf("loop economics");
   // The region ends at the next section boundary — a dated numeric row in a
-  // later section (Traceability) must not read as a loop measurement.
+  // later section (Traceability) must not read as a loop measurement. The
+  // boundary honors the opening heading's level: a ### section ends at the
+  // next # / ## / ### heading, not only at a level-two one.
   const loopRegion = ((): string => {
     if (loopIndex === -1) return "";
     const lower = markdown.text.toLowerCase();
-    const boundaries = [markdown.text.indexOf("\n## ", loopIndex + 1), lower.indexOf("stop and scale rules", loopIndex + 14)].filter((index) => index !== -1);
+    const headingLevel = loopHeading?.[1]?.length ?? 0;
+    const boundaryPattern = headingLevel > 0 ? new RegExp(`\\n#{1,${headingLevel}}\\s`) : /\n##\s/;
+    const boundaryMatch = boundaryPattern.exec(markdown.text.slice(loopIndex + 1));
+    const boundaries = [boundaryMatch ? loopIndex + 1 + boundaryMatch.index : -1, lower.indexOf("stop and scale rules", loopIndex + 14)].filter(
+      (index) => index !== -1,
+    );
     const end = boundaries.length > 0 ? Math.min(...boundaries) : markdown.text.length;
     return markdown.text.slice(loopIndex, end);
   })();
@@ -171,6 +178,11 @@ if (growthStatus === "done" && markdown) {
       !/\b(target|goal|aim|aspir\w*|hope|planned? for|example|e\.g\.|benchmark|assum\w*|hypothetic\w*|illustrat\w*|self-compound\w*|would)\b/i.test(line) &&
       /\b(measured|observed|computed|actual|current)\b|\d{4}-\d{2}-\d{2}|\bweek\s+(one|two|three|four|\d+)\b/i.test(line),
   );
+  // The contract is weekly k, cycle time, and trend — a k number alone is a
+  // partial measurement. The dated-commitment alternative stays for a loop
+  // not yet measured.
+  const cycleTimeMeasured = /cycle[- ]?time[^\n]{0,30}\d|\d[^\n]{0,30}cycle[- ]?time/i.test(loopRegion);
+  const trendRecorded = /\btrend\b\s*(:|is|was|=)|\b(hold|stop|scale|rising|falling|flat|improving|declining|compounding)\b/i.test(loopRegion);
   const commitmentMatch = loopRegion.match(/first (?:weekly )?k (?:computation|measurement)[^\n]*?(\d{4}-\d{2}-\d{2})/i);
   const commitmentValid = Boolean(commitmentMatch && validCalendarDate(commitmentMatch[1] ?? "", true));
   // A dated row is a measurement only when it carries a numeric k — a date
@@ -180,17 +192,23 @@ if (growthStatus === "done" && markdown) {
     if (tableLines.length < 2) return false;
     const headerCells = (tableLines[0] ?? "").split("|").map((cell) => cell.trim().toLowerCase());
     const kColumn = headerCells.findIndex((cell) => /^k\b/.test(cell));
+    const cycleColumn = headerCells.findIndex((cell) => /cycle/.test(cell));
+    const trendColumn = headerCells.findIndex((cell) => /trend|decision/.test(cell));
     for (const row of tableLines.slice(1)) {
       const dateMatch = row.match(/(\d{4}-\d{2}-\d{2})/);
       if (!dateMatch || !validCalendarDate(dateMatch[1] ?? "", false)) continue;
       const cells = row.split("|").map((cell) => cell.trim());
       const kCell = kColumn > 0 ? (cells[kColumn] ?? "") : "";
       const kNumeric = kColumn > 0 ? /^\d+(\.\d+)?\b/.test(kCell) : /\bk\s*[=:]?\s*\d+(\.\d+)?/i.test(row);
-      if (kNumeric) return true;
+      // A full measurement row records cycle time and trend/decision too;
+      // missing columns fail closed.
+      const cycleNumeric = cycleColumn > 0 && /\d/.test(cells[cycleColumn] ?? "");
+      const trendSubstantive = trendColumn > 0 && (cells[trendColumn] ?? "").replace(/[^a-z0-9]/gi, "").length >= 3;
+      if (kNumeric && cycleNumeric && trendSubstantive) return true;
     }
     return false;
   })();
-  const loopMeasured = measuredKLine || commitmentValid || measuredRowValid;
+  const loopMeasured = (measuredKLine && cycleTimeMeasured && trendRecorded) || commitmentValid || measuredRowValid;
   if (loopIndex !== -1 && !loopMeasured) {
     issues.push(
       issue(
@@ -241,6 +259,7 @@ if (growthStatus === "done" && markdown) {
       .map((line) => line.trim())
       .filter((line) => line.startsWith("|") && !line.includes("---"));
     const bandHeaderCells = (bandTableRows[0] ?? "").split("|").map((cell) => cell.trim().toLowerCase());
+    const bandColumn = bandHeaderCells.findIndex((cell) => /band/.test(cell));
     const budgetColumn = bandHeaderCells.findIndex((cell) => /budget/.test(cell));
     const evidenceColumn = bandHeaderCells.findIndex((cell) => /entered|evidence/.test(cell));
     const bandTablePresent = budgetColumn > 0 && evidenceColumn > 0;
@@ -248,6 +267,10 @@ if (growthStatus === "done" && markdown) {
       bandTablePresent &&
       bandTableRows.slice(1).some((row) => {
         const cells = row.split("|").map((cell) => cell.trim());
+        // Only a modeled band's row is operative evidence — an unrelated
+        // "Notes" row with a budget number enters no band.
+        const bandCell = bandColumn > 0 ? (cells[bandColumn] ?? "") : "";
+        if (!/(discovery|proven|scale|volume)/i.test(bandCell)) return false;
         const budgetCell = cells[budgetColumn] ?? "";
         const evidenceCell = cells[evidenceColumn] ?? "";
         // Punctuation is not evidence: the budget cell needs its number and

@@ -46,18 +46,28 @@ if (onboardingDone && markdown) {
   // substantive, non-placeholder reason after the declaration.
   // Separators stay on the declaration line ([ \t], not \s): a newline must
   // not let the next line masquerade as the reason.
+  const affirmativeOf = (line: string): string => line.replace(/\b(never|not|don't|do not|no)\b[^.;,—–:()|]*/gi, "");
   const notApplicableMatch = markdown.text.match(/push (?:notifications?|permissions?):?[ \t]*not applicable\b[ \t:;—–,-]*(.*)$/im);
   const NA_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
   const notApplicableReason = (notApplicableMatch?.[1] ?? "").trim();
-  const notApplicable = Boolean(notApplicableMatch) && notApplicableReason.replace(/[^a-z0-9]/gi, "").length >= 12 && !NA_PLACEHOLDER.test(notApplicableReason);
   const pushLines = markdown.text.split(/\r?\n/).filter((line) => /push (permission|priming|prime)|notification permission/i.test(line));
+  // The exemption is mutually exclusive with an actual push flow: a document
+  // that both declares push not applicable and instructs an ask must stand on
+  // the instructions, which the gates below then judge on their own terms.
+  const affirmativePushInstruction = pushLines
+    .filter((line) => !/not applicable/i.test(line))
+    .some((line) => /\b(request|requested|ask|asked|prompt|prime|primed|priming|show|present)\b/i.test(affirmativeOf(line)));
+  const notApplicable =
+    Boolean(notApplicableMatch) &&
+    notApplicableReason.replace(/[^a-z0-9]/gi, "").length >= 12 &&
+    !NA_PLACEHOLDER.test(notApplicableReason) &&
+    !affirmativePushInstruction;
   // Mention is not placement: the prime must sit at an earned post-value
   // moment, and a cold ask on launch is the contract violation itself.
   // Polarity is evaluated per clause: negation strips only to the next clause
   // boundary (including dashes and colons), so "not after first value—request
   // on launch" keeps its affirmative cold ask, and "never on launch" keeps its
   // affirmative placement language intact for the placement test.
-  const affirmativeOf = (line: string): string => line.replace(/\b(never|not|don't|do not|no)\b[^.;,—–:()|]*/gi, "");
   const placementOk = pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(affirmativeOf(line)));
   const coldAsk = pushLines.some((line) =>
     /\bcold\b|first launch|on launch|at startup|app start|before (the )?(first )?value([- ]reveal)?/i.test(affirmativeOf(line)),

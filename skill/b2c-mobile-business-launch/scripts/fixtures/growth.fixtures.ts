@@ -524,6 +524,78 @@ export function register(h: Harness): void {
     "viral_growth.ugc_scale_model_missing",
   );
 
+  // A k number alone is a partial measurement — cycle time and trend complete it.
+  const viralGrowthKNoCycle = makeFixture("viral-growth-k-without-cycle");
+  writeCompleteViralGrowth(viralGrowthKNoCycle);
+  writeFileSync(
+    path.join(viralGrowthKNoCycle, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthKNoCycle, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: measured k = 0.4 in week 1.",
+    ),
+    "utf8",
+  );
+  runFixture("a measured k without cycle time and trend fails", viralGrowthKNoCycle, "check-viral-growth-loop.ts", 1, "viral_growth.loop_economics_unmeasured");
+
+  // Only a modeled band's row is operative evidence.
+  const viralGrowthNotesRow = makeFixture("viral-growth-band-notes-row");
+  writeCompleteViralGrowth(viralGrowthNotesRow);
+  writeFileSync(
+    path.join(viralGrowthNotesRow, "UGC_PLAYBOOK.md"),
+    [
+      "# UGC Playbook",
+      "",
+      "Creator scripts use GROW-001 and the format lab.",
+      "",
+      "## Post-Breakout Scale Model",
+      "",
+      "| Band | Roster | Weekly video volume | Budget (founder-gated) | Entered on / evidence |",
+      "| --- | --- | --- | --- | --- |",
+      "| Discovery | 3-5 | 9-15 | | |",
+      "| Proven format | ~10 | 30-40 | | |",
+      "| Scale | ~30 | 90-120 | | |",
+      "| Volume | 75+ | 200+ | | |",
+      "| Notes | | | $300 | contract saved |",
+      "",
+      "- Control format install-per-video (weekly): fatigue check — two consecutive declines trigger the next variant test.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an unrelated notes row with a budget number does not enter a band",
+    viralGrowthNotesRow,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_scale_model_missing",
+  );
+
+  // A ### section ends at the next heading of any accepted level.
+  const viralGrowthHeadingBoundary = makeFixture("viral-growth-heading-boundary");
+  writeCompleteViralGrowth(viralGrowthHeadingBoundary);
+  writeFileSync(
+    path.join(viralGrowthHeadingBoundary, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthHeadingBoundary, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      [
+        "### Loop Economics",
+        "",
+        "### Traceability",
+        "",
+        "| Week | Invites / active user | Recipient conversion | k | Cycle time (days) | Trend / decision |",
+        "| --- | --- | --- | --- | --- | --- |",
+        "| 2026-07-20 | 3.1 | 0.2 | 0.62 | 6 | hold |",
+      ].join("\n"),
+    ),
+    "utf8",
+  );
+  runFixture(
+    "a dated k table in the next same-level section does not measure the loop",
+    viralGrowthHeadingBoundary,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");
