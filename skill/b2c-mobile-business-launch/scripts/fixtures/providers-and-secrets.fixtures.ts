@@ -472,6 +472,28 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog.empty",
   );
 
+  // A future plan is not an observed result.
+  const revenueExperimentFuturePlan = makeFixture("revenue-experiment-future-plan");
+  {
+    const state = readState(revenueExperimentFuturePlan);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentFuturePlan, state);
+    const opsPath = path.join(revenueExperimentFuturePlan, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | Cohort economics will be measured during the renewal window |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a completed row whose result is a future measurement plan does not satisfy the cadence",
+    revenueExperimentFuturePlan,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

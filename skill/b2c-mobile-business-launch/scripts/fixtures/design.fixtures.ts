@@ -564,6 +564,63 @@ export function register(h: Harness): void {
   );
   runFixture("a capability-based push exemption passes", onboardingPushCapabilityNa, "check-onboarding-conversion.ts", 0);
 
+  // A dialog after the user taps Decline is a hard ask after a refusal.
+  const onboardingPushDeclineTap = makeFixture("onboarding-push-decline-tap");
+  {
+    const state = readState(onboardingPushDeclineTap);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushDeclineTap, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushDeclineTap, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push permission priming: soft-prime after first value; after the user taps Decline, show the system dialog.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a system dialog after the user taps Decline fails",
+    onboardingPushDeclineTap,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_priming_missing",
+  );
+
+  // Declarative dialog behavior conflicts with the exemption too.
+  const onboardingPushNaDeclarative = makeFixture("onboarding-push-na-declarative");
+  {
+    const state = readState(onboardingPushNaDeclarative);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushNaDeclarative, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushNaDeclarative, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push notifications: not applicable — desktop has no notification surface.",
+      "Push permission on iOS: the native system dialog opens on launch.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an exemption beside a declarative launch dialog fails",
+    onboardingPushNaDeclarative,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_priming_missing",
+  );
+
   // "Push permission" is the same canonical noun as "push notifications" for
   // the not-applicable exemption.
   const onboardingPushPermissionNa = makeFixture("onboarding-push-permission-na");

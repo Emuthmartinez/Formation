@@ -824,6 +824,55 @@ export function register(h: Harness): void {
     "viral_growth.loop_economics_unmeasured",
   );
 
+  // An unrelated dated line cannot re-arm a stale measurement.
+  const viralGrowthUnrelatedDate = makeFixture("viral-growth-unrelated-date");
+  writeCompleteViralGrowth(viralGrowthUnrelatedDate);
+  {
+    const state = readState(viralGrowthUnrelatedDate);
+    getLane(state, "post_launch_ops")["live_since"] = growthIsoDaysAgo(60);
+    writeState(viralGrowthUnrelatedDate, state);
+  }
+  writeFileSync(
+    path.join(viralGrowthUnrelatedDate, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthUnrelatedDate, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      ["Loop Economics: measured k = 0.4 in week 1 with a 6-day cycle time, trend flat.", `Notes reviewed: ${growthIsoDaysAgo(1)}.`].join("\n"),
+    ),
+    "utf8",
+  );
+  runFixture(
+    "an unrelated dated note does not make a stale measurement current",
+    viralGrowthUnrelatedDate,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // Shares and activation are the documented aliases — the formula still holds.
+  const viralGrowthAliasMismatch = makeFixture("viral-growth-alias-k-mismatch");
+  writeCompleteViralGrowth(viralGrowthAliasMismatch);
+  writeFileSync(
+    path.join(viralGrowthAliasMismatch, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthAliasMismatch, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      [
+        "Loop Economics:",
+        "",
+        "| Week | Shares / active user | Activation rate | k | Cycle time (days) | Trend / decision |",
+        "| --- | --- | --- | --- | --- | --- |",
+        `| ${growthIsoDaysAgo(7)} | 3.1 | 0.2 | 9.9 | 6 | hold |`,
+      ].join("\n"),
+    ),
+    "utf8",
+  );
+  runFixture(
+    "an alias-headed row with inconsistent k fails",
+    viralGrowthAliasMismatch,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

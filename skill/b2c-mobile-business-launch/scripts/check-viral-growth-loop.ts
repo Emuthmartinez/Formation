@@ -210,7 +210,10 @@ if (growthStatus === "done" && markdown) {
     const date = new Date(`${raw}T00:00:00Z`);
     return !Number.isNaN(date.getTime()) && Date.now() - date.getTime() <= days * 86_400_000;
   };
+  // The recent date must sit on the measurement line itself — an unrelated
+  // "notes reviewed" date cannot re-arm a stale measurement.
   const recentDatedLine = loopLines.some((line) => {
+    if (!/\bk\s*(=|at|:)\s*\d/i.test(line)) return false;
     const dateMatch = line.match(/(\d{4}-\d{2}-\d{2})/);
     return Boolean(dateMatch && validCalendarDate(dateMatch[1] ?? "", false) && dateWithinDays(dateMatch[1] ?? "", MEASUREMENT_RECENCY_DAYS));
   });
@@ -228,8 +231,8 @@ if (growthStatus === "done" && markdown) {
     const kColumn = headerCells.findIndex((cell) => /^k\b/.test(cell));
     const cycleColumn = headerCells.findIndex((cell) => /cycle/.test(cell));
     const trendColumn = headerCells.findIndex((cell) => /trend|decision/.test(cell));
-    const invitesColumn = headerCells.findIndex((cell) => /invit/.test(cell));
-    const conversionColumn = headerCells.findIndex((cell) => /conver/.test(cell));
+    const invitesColumn = headerCells.findIndex((cell) => /invit|shares?\b/.test(cell));
+    const conversionColumn = headerCells.findIndex((cell) => /conver|activation|install/.test(cell));
     for (const row of tableLines.slice(1)) {
       const dateMatch = row.match(/(\d{4}-\d{2}-\d{2})/);
       if (!dateMatch || !validCalendarDate(dateMatch[1] ?? "", false)) continue;

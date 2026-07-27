@@ -58,7 +58,11 @@ if (onboardingDone && markdown) {
   // the instructions, which the gates below then judge on their own terms.
   const affirmativePushInstruction = pushLines
     .filter((line) => !/not applicable/i.test(line))
-    .some((line) => /\b(request|requested|ask|asked|prompt|prime|primed|priming|show|present)\b/i.test(affirmativeOf(line)));
+    .some((line) =>
+      /\b(request|requested|ask|asked|prompt|prime|primed|priming|show|shown|present|presented|display|displayed|opens?|appears?|pops? up|launches?)\b/i.test(
+        affirmativeOf(line),
+      ),
+    );
   // The exemption line itself may smuggle an ask after the reason — the
   // reason's affirmative residue must carry no instruction verbs.
   const reasonCarriesAsk = /\b(request|requested|ask|asked|prompt|show|present|display)\b/i.test(affirmativeOf(notApplicableReason));
@@ -79,8 +83,10 @@ if (onboardingDone && markdown) {
   const primeEvidence = pushLines.some((line) => /\b(soft[- ]?primes?|pre[- ]?permission|priming|primed?)\b/i.test(affirmativeOf(line)));
   // The native dialog appears only after an affirmative tap on the owned
   // prime surface — an automatic delayed hard ask is still a hard ask.
+  // The tap must be an affirmative choice — a dialog that follows the user
+  // tapping Decline is a hard ask after a refusal.
   const userInitiated = pushLines.some((line) =>
-    /user[- ]initiated|affirmative tap|opt[- ]in tap|from the prime screen|after (the user )?(taps|accepts|agrees)|taps? (yes|allow|enable|continue)/i.test(
+    /user[- ]initiated|affirmative tap|opt[- ]in tap|from the prime screen|after (the user )?(accepts|agrees|opts[- ]?in)|taps? (yes|allow|enable|accept|continue|turn[- ]?on)/i.test(
       affirmativeOf(line),
     ),
   );

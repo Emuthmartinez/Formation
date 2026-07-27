@@ -599,9 +599,18 @@ if (revenueDone && revenueOpsText) {
         // negation or availability negative — "No cohort evidence was
         // collected; renewal window unavailable" affirms nothing.
         const NEGATIVE_CLAUSE = /\b(no|not|never|without|none|unavailable|missing|uncollected|unmeasured|pending|awaiting|unknown|n\/?a|tbd)\b/i;
+        // Future tense is a plan, not a result — and an observed result
+        // carries its number.
+        const FUTURE_CLAUSE = /\b(will|shall|going to|to be|planned?|plans? to)\b/i;
         const cohortAffirmed = resultCell
           .split(/[.;,—–:()|]/)
-          .some((clause) => /cohort|renewal|trial[- ]?start|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(clause) && !NEGATIVE_CLAUSE.test(clause));
+          .some(
+            (clause) =>
+              /cohort|renewal|trial[- ]?start|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(clause) &&
+              !NEGATIVE_CLAUSE.test(clause) &&
+              !FUTURE_CLAUSE.test(clause) &&
+              /\d/.test(clause),
+          );
         const decided = resultColumn > 0 && substantiveCell(resultCell) && cohortAffirmed;
         return { statusCell, startedDate, dateReal, clean, defined, decided };
       });
