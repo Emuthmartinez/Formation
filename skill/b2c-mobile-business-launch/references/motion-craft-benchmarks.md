@@ -22,13 +22,15 @@ Every recipe rides the shipped motion scale — no ad-hoc millisecond values. Th
 | `durationCinematic` | 1200ms | — (web/brand lane only) | — | brand liveness, baked loops |
 | `stagger` | 60ms | — | — | per-item cascade step |
 
+One reconciliation note: the cards' `expressive` name is overloaded — `experience-cards/peak-end-card.md` and `experience-cards/variable-reward-card.md` use it as the celebrate spring *response* (0.45–0.5s), `experience-cards/streak-and-loss-aversion-card.md` as a ~500ms choreography *duration*. Read it as the celebrate family: the spring response stays 0.45–0.5s, and `durationReveal` (600ms) bounds the full choreography — two different quantities, not a contradiction.
+
 The two spring families — press (response 0.3–0.4 / damping 0.7–0.8) and celebrate (response 0.45–0.5 / damping 0.5–0.7) — are defined once, in `premium-mobile-craft.md` §1; recipes cite the family, not fresh numbers. A dedicated `Motion.celebrate` token is a deliberate non-goal for now: promoting one means updating `state/theme.tokens.json`, `PremiumCraft.swift`, and `check:token-promotion` together, as its own reviewed change.
 
 ## The Recipes
 
 ### R1 — Asynchronous-grid liveness
 
-**Serves:** brand reels, landing heroes, App Store preview loops, ambient non-scrolling in-app dashboards. No experience card owns this pattern — it belongs to the brand-motion family, whose full lane is deliberately deferred; web surfaces route via `landing-motion-craft.md`. **Rides:** `motion.durationCinematic` per swap; phase offsets in multiples of `motion.stagger`.
+**Serves:** brand reels, landing heroes, App Store preview loops, ambient non-scrolling in-app dashboards. No experience card owns this pattern — it belongs to the brand-motion family, whose full lane is deliberately deferred; web surfaces route via `landing-motion-craft.md`. **Rides:** `motion.durationCinematic` per swap on web/brand surfaces; in-app ambient variants pace swaps at 1–2× `motion.durationReveal` instead (the same 0.6–1.2s band — the cinematic token stays web/brand-lane); phase offsets in multiples of `motion.stagger`.
 
 A composition feels alive when its regions run on independent clocks inside one fixed grid: each cell swaps its fill or content every 0.6–1.2s, deliberately out of phase, while layout never moves.
 
@@ -146,7 +148,7 @@ The catalog's hardest-bookmarked family per post (rollout wheel scrub eng 3,037;
 
 **The two clocks rule.** While a finger is down, the gesture owns the clock: the surface tracks the finger 1:1 with zero added easing or duration (direct manipulation). Duration and spring tokens govern only what happens after release. Easing a surface *toward* the finger reads as lag.
 
-**Velocity handoff.** On release, feed the gesture's ending velocity into the settle spring's initial velocity — SwiftUI `.spring` with the gesture's predicted end translation, Reanimated `withSpring(target, { velocity })`, Flutter `SpringSimulation` with the drag velocity. A settle that ignores release velocity visibly "resets" and breaks the physical illusion.
+**Velocity handoff.** On release, feed the gesture's ending velocity into the settle spring's initial velocity — SwiftUI: read `velocity` off the final `DragGesture.Value` (iOS 17+) and start the settle with `.interpolatingSpring(..., initialVelocity:)`, normalized by the remaining travel (a projected end *target* alone does not carry velocity into the spring); Reanimated `withSpring(target, { velocity })`; Flutter `SpringSimulation` with the drag velocity. A settle that ignores release velocity visibly "resets" and breaks the physical illusion.
 
 **Rubber-band overscroll.** Content dragged past its bounds follows with diminishing returns, never a hard stop — iOS's classic resistance constant is ≈0.55, with displacement asymptotically approaching a limit proportional to the container dimension. Match the platform default; never disable overscroll bounce on scrolling content to make it "feel tight."
 
