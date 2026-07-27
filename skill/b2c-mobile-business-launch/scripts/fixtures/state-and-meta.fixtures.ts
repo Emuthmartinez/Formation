@@ -593,6 +593,24 @@ export function register(h: Harness): void {
   }
   runFixture("standing policy blocker on a live app is not an aged gate", founderGateStandingPolicy, "check-lane-coverage.ts", 0);
 
+  // Same-day east of UTC: a gate recorded with today's local date before UTC
+  // midnight is fresh, not forward-dated.
+  const founderGateSameDayEast = makeFixture("founder-gate-same-day-east");
+  {
+    const state = readState(founderGateSameDayEast);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    const lanes = expectRecord(state.lanes, "PROJECT_STATE.yaml lanes");
+    for (const laneName of Object.keys(lanes)) {
+      const lane = expectRecord(lanes[laneName], `lanes.${laneName}`);
+      lane["status"] = "deferred";
+      lane["reason"] = `${gateIsoDaysAgo(3)} scope pass: deferred while the live app runs its weekly rhythm; revisit at the day-30 retro.`;
+    }
+    const paidUa = expectRecord(lanes["paid_user_acquisition"], "lanes.paid_user_acquisition");
+    paidUa["blockers"] = [`founder-gated ${gateIsoDaysAgo(-1)}: paid campaign launch and budget spend`];
+    writeState(founderGateSameDayEast, state);
+  }
+  runFixture("same-day local date east of UTC is fresh, not forward-dated", founderGateSameDayEast, "check-lane-coverage.ts", 0);
+
   // A date outside the documented presentation slot (between keyword and
   // colon) is a campaign date, not a presentation date.
   const founderGateDateAfterColon = makeFixture("founder-gate-date-after-colon");

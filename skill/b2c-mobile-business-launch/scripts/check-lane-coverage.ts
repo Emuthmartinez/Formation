@@ -191,12 +191,14 @@ if (state) {
         const beforeColon = afterKeyword.split(":")[0] ?? "";
         const presentedAtRaw = extractIsoDate(beforeColon);
         const presentedDate = presentedAtRaw ? new Date(`${presentedAtRaw}T00:00:00Z`) : undefined;
+        // One day of forward tolerance: a founder east of UTC recording
+        // today's local date before UTC midnight is same-day, not forward-dated.
         const presentedAt =
           presentedAtRaw &&
           presentedDate &&
           !Number.isNaN(presentedDate.getTime()) &&
           presentedDate.toISOString().slice(0, 10) === presentedAtRaw &&
-          presentedDate.getTime() <= Date.now()
+          presentedDate.getTime() <= Date.now() + 86_400_000
             ? presentedAtRaw
             : undefined;
         if (!presentedAt) {
