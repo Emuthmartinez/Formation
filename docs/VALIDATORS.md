@@ -103,8 +103,8 @@ npm run validate:launch-state -- --root /path/to/app
 
 | Command | What it checks |
 | --- | --- |
-| `check:revenue` | RevenueCat and Stripe wiring, products, entitlement validation, webhooks, and restore/refund flows |
-| `check:paid-ua` | `PAID_UA.md` one-channel focus, creative cadence, tracking baseline, blended report, LTV/CPA review, weekly schedule, stop/scale rules, and founder-only spend gates |
+| `check:revenue` | RevenueCat and Stripe wiring, products, entitlement validation, webhooks, restore/refund flows, and the pricing decision floor (competitor anchor rows plus a dated founder approval) |
+| `check:paid-ua` | `PAID_UA.md` one-channel focus, creative cadence, tracking baseline, blended report, LTV/CPA review, weekly schedule, stop/scale rules with recorded decision thresholds, and founder-only spend gates |
 | `check:viral-growth` | `VIRAL_GROWTH.md` product, referral, and content loops, monetization timing, analytics proof, abuse controls, and stop/scale rules |
 | `check:launch-narrative` | `growth/LAUNCH_NARRATIVE.md` launch thesis, tentpole-plus-weekly cadence, run-of-show, traceability, and the deterministic copy guardrails scanned against the fenced post copy |
 | `check:landing-funnel` | Landing and funnel structure against the launch funnel contract |
@@ -118,7 +118,7 @@ npm run validate:launch-state -- --root /path/to/app
 | Command | What it checks |
 | --- | --- |
 | `check:attribution` | Attribution as a data contract: stable keys, `other` free text, PostHog person properties, backend persistence, anonymous-to-identified reconciliation, and proof |
-| `check:analytics-catalog` | Events named in `ONBOARDING.md`, `EMOTIONAL_DESIGN.md`, and `VIRAL_GROWTH.md` reconcile against the `ANALYTICS.md` catalog. Warns at partial, errors at done |
+| `check:analytics-catalog` | Events named in `ONBOARDING.md`, `EMOTIONAL_DESIGN.md`, `VIRAL_GROWTH.md`, and `REVENUE_OPS.md` reconcile against the `ANALYTICS.md` catalog. Warns at partial, errors at done |
 | `probe:posthog` | Live probe against a configured PostHog project |
 
 ## Store operations and release

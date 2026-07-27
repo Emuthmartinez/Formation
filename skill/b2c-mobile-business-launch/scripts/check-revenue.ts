@@ -79,6 +79,24 @@ function textHasPattern(text: string, pattern: RegExp): boolean {
   return pattern.test(text);
 }
 
+/**
+ * The block from the first `## `-level heading whose text matches `pattern`
+ * to the next `## ` heading (or EOF). Sub-headings (###) stay inside the block.
+ */
+function markdownSectionLoose(markdown: string, pattern: RegExp): string {
+  const lines = markdown.split(/\r?\n/);
+  const start = lines.findIndex((line) => /^##\s/.test(line) && pattern.test(line));
+  if (start === -1) return "";
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i += 1) {
+    if (/^##\s/.test(lines[i] ?? "")) {
+      end = i;
+      break;
+    }
+  }
+  return lines.slice(start, end).join("\n");
+}
+
 /** Return true when a path value looks like a placeholder rather than a real path. */
 function isPlaceholderPath(value: string): boolean {
   return /MISSING|TODO|TBD|placeholder|example|_example_/i.test(value);
@@ -405,20 +423,90 @@ if (revenueDone && revenueOpsText) {
   }
 
   // 2. At least one real product table row (not the example/placeholder row).
-  const productTableRows = revenueOpsText
-    .split(/\r?\n/)
-    .filter((line) => line.trim().startsWith("|"))
-    .filter((line) => !line.includes("---") && !line.toLowerCase().includes("store product id"))
-    .filter((line) => !/_example_|_example:/i.test(line));
+  //    Counted inside the product table itself — the one whose header names
+  //    "Store Product ID" — so rows in the anchor, cancellation, or snapshot
+  //    tables cannot stand in for a real product.
+  const productTableRows = ((): string[] => {
+    const lines = revenueOpsText.split(/\r?\n/);
+    const headerIndex = lines.findIndex((line) => line.trim().startsWith("|") && line.toLowerCase().includes("store product id"));
+    if (headerIndex === -1) return [];
+    const rows: string[] = [];
+    for (let i = headerIndex + 1; i < lines.length; i += 1) {
+      const line = lines[i] ?? "";
+      if (!line.trim().startsWith("|")) break;
+      if (line.includes("---")) continue;
+      if (/_example_|_example:/i.test(line)) continue;
+      rows.push(line);
+    }
+    return rows;
+  })();
   if (productTableRows.length === 0) {
     issues.push(
       issue(
         "error",
         "revenue.product_table.empty",
-        "REVENUE_OPS.md must contain at least one product table row with real product IDs before the revenue lane is marked done.",
+        "REVENUE_OPS.md must contain at least one product table row with real product IDs (in the Store Product ID table) before the revenue lane is marked done.",
         revenueOpsPath,
       ),
     );
+  }
+
+  // 2b. Pricing decision floor — the §7a procedure's output. The heading, at
+  //     least one real competitor row in the anchor table, and a dated founder
+  //     approval must all be present before the lane is done: a price chosen
+  //     with no anchor and no recorded approval is a default, not a decision.
+  // Comments are stripped first: a date or an anchor row sitting inside an
+  // HTML comment is template guidance the founder never confirmed, not a
+  // recorded decision.
+  const pricingSection = markdownSectionLoose(revenueOpsText, /pricing decision/i).replace(/<!--[\s\S]*?-->/g, " ");
+  if (!pricingSection) {
+    issues.push(
+      issue(
+        "error",
+        "revenue.pricing_decision.missing",
+        'REVENUE_OPS.md has no "Pricing Decision" section. Run the price-point decision procedure (revenue-monetization.md §7a) and record the anchor table, candidates, and founder approval before the revenue lane is marked done.',
+        revenueOpsPath,
+      ),
+    );
+  } else {
+    // Anchor rows live under the Competitor Anchor sub-heading specifically —
+    // rows in the cancellation-mix table (same parent section) do not count.
+    const anchorLines = pricingSection.split(/\r?\n/);
+    const anchorStart = anchorLines.findIndex((line) => /^###\s/.test(line) && /competitor anchor/i.test(line));
+    let anchorEnd = anchorLines.length;
+    for (let i = anchorStart + 1; anchorStart !== -1 && i < anchorLines.length; i += 1) {
+      if (/^###?\s/.test(anchorLines[i] ?? "")) {
+        anchorEnd = i;
+        break;
+      }
+    }
+    const anchorRows = (anchorStart === -1 ? [] : anchorLines.slice(anchorStart + 1, anchorEnd))
+      .filter((line) => line.trim().startsWith("|"))
+      .filter((line) => !line.includes("---"))
+      .filter((line) => !/^\|\s*competitor\s*\|/i.test(line.trim()))
+      .filter((line) => !/_example_|_example:/i.test(line))
+      .filter((line) => line.split("|").some((cell, index) => index > 0 && cell.trim().length > 0));
+    if (anchorRows.length === 0) {
+      issues.push(
+        issue(
+          "error",
+          "revenue.pricing_anchor.empty",
+          "The Pricing Decision section has no real competitor anchor rows. Price against the category (revenue-monetization.md §7a step 1) — an empty anchor table means the price was picked from air.",
+          revenueOpsPath,
+        ),
+      );
+    }
+    const approvalLine = pricingSection.split(/\r?\n/).find((line) => /founder approved/i.test(line));
+    if (!approvalLine || !/\d{4}-\d{2}-\d{2}/.test(approvalLine)) {
+      issues.push(
+        issue(
+          "error",
+          "revenue.pricing_approval.undated",
+          "The Pricing Decision section records no dated founder approval. Pricing is founder-only (revenue-monetization.md §9) — record the ISO date the founder approved the chosen points.",
+          revenueOpsPath,
+        ),
+      );
+    }
   }
 
   // Table data rows only: not separators, not header rows, not guidance prose.

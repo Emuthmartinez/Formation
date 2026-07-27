@@ -5,7 +5,7 @@
  * ANALYTICS.md is the single event catalog (analytics-attribution.md): any
  * event a surface doc names must exist there before the surface locks.
  * This validator reconciles the event names declared in ONBOARDING.md,
- * EMOTIONAL_DESIGN.md, and VIRAL_GROWTH.md against ANALYTICS.md.
+ * EMOTIONAL_DESIGN.md, VIRAL_GROWTH.md, and REVENUE_OPS.md against ANALYTICS.md.
  *
  * Extraction is deliberately narrow so property names never count as events:
  *   - markdown table cells under a header containing "event" or "analytics"
@@ -38,11 +38,25 @@ if (laneSkipped) {
 
 const severity: "error" | "warning" = laneDone ? "error" : "warning";
 
+// REVENUE_OPS.md drift hardens with the REVENUE lane too: a done revenue lane
+// naming an uncataloged event is an error even while analytics is still
+// partial — the revenue claim is what makes the event name load-bearing.
+const revenueDone = state ? asString(getPath(state, "lanes.revenue.status"))?.toLowerCase() === "done" : false;
+function severityFor(docLabel: string): "error" | "warning" {
+  if (docLabel === "REVENUE_OPS.md" && revenueDone) return "error";
+  return severity;
+}
+
 // Surface docs that name events (first existing path wins per doc).
+// REVENUE_OPS.md joined the list when the billing-lifecycle events prescribed
+// in revenue-monetization.md §8a/§8b turned out to live only in reference
+// prose — a revenue doc naming an event the catalog does not carry is the
+// same invented-inline miss as an onboarding doc doing it.
 const SOURCE_DOCS: Array<{ label: string; paths: string[] }> = [
   { label: "ONBOARDING.md", paths: ["ONBOARDING.md"] },
   { label: "EMOTIONAL_DESIGN.md", paths: ["EMOTIONAL_DESIGN.md", "emotional-design/EMOTIONAL_DESIGN.md"] },
   { label: "VIRAL_GROWTH.md", paths: ["VIRAL_GROWTH.md", "growth/VIRAL_GROWTH.md"] },
+  { label: "REVENUE_OPS.md", paths: ["REVENUE_OPS.md"] },
 ];
 
 const analyticsText = readText(args.root, "ANALYTICS.md") ?? readText(args.root, "analytics/ANALYTICS.md");
@@ -69,7 +83,7 @@ for (const doc of SOURCE_DOCS) {
   if (analyticsText === undefined) {
     issues.push(
       issue(
-        severity,
+        severityFor(doc.label),
         "analytics_catalog.analytics_doc_missing",
         `${doc.label} names ${events.size} analytics event(s) but ANALYTICS.md does not exist. Create the event catalog before surfaces lock (analytics-attribution.md).`,
         "ANALYTICS.md",
@@ -82,7 +96,7 @@ for (const doc of SOURCE_DOCS) {
     if (!analyticsText.includes(eventName)) {
       issues.push(
         issue(
-          severity,
+          severityFor(doc.label),
           `analytics_catalog.${eventName}.uncataloged`,
           `${doc.label} names the event ${eventName} but ANALYTICS.md's catalog does not contain it. Add it to the Event Contract (or Emotion Card Events) table before the surface locks — events are named in the catalog first, never invented inline.`,
           doc.label,

@@ -225,6 +225,40 @@ export function register(h: Harness): void {
   );
   runFixture("thin paid UA packet fails", paidUaThin, "check-paid-user-acquisition.ts", 1, "paid_ua.creative_production.missing");
 
+  // Stop/scale rules without recorded numbers are vibes: the four Decision
+  // Thresholds must be present so a weekly report can be judged mechanically.
+  const paidUaNoThresholds = makeFixture("paid-ua-no-decision-thresholds");
+  writeCompletePaidUserAcquisition(paidUaNoThresholds);
+  writeFileSync(
+    path.join(paidUaNoThresholds, "growth", "PAID_UA.md"),
+    readFileSync(path.join(paidUaNoThresholds, "growth", "PAID_UA.md"), "utf8")
+      .split("\n")
+      .filter((line) => !line.startsWith("Decision Thresholds:"))
+      .join("\n"),
+    "utf8",
+  );
+  runFixture("paid UA without decision thresholds fails", paidUaNoThresholds, "check-paid-user-acquisition.ts", 1, "paid_ua.decision_thresholds.missing");
+
+  // Labels without values are not thresholds: a done lane whose numbers still
+  // sit in template comments fails per label.
+  const paidUaBlankThresholds = makeFixture("paid-ua-blank-threshold-values");
+  writeCompletePaidUserAcquisition(paidUaBlankThresholds);
+  writeFileSync(
+    path.join(paidUaBlankThresholds, "growth", "PAID_UA.md"),
+    readFileSync(path.join(paidUaBlankThresholds, "growth", "PAID_UA.md"), "utf8").replace(
+      /^Decision Thresholds:.*$/m,
+      ["Decision Thresholds:", "Attribution tolerance:", "Payback window:", "Creative signal floor:", "Scale trigger:"].join("\n"),
+    ),
+    "utf8",
+  );
+  runFixture(
+    "done paid UA with valueless thresholds fails",
+    paidUaBlankThresholds,
+    "check-paid-user-acquisition.ts",
+    1,
+    "paid_ua.attribution_tolerance.value_missing",
+  );
+
   const paidUaDonePlaceholder = makeFixture("paid-ua-done-placeholder");
   writeCompletePaidUserAcquisition(paidUaDonePlaceholder);
   writeFileSync(

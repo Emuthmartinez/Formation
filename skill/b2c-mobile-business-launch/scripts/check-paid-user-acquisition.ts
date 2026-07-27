@@ -57,6 +57,13 @@ if (markdown) {
     "Stop And Scale Rules",
     "Founder-Only Gates",
     "Traceability",
+    // The four numbers stop/scale evaluates against — without them the rules
+    // are vibes, and a weekly report cannot be judged mechanically.
+    "Decision Thresholds",
+    "Attribution tolerance",
+    "Payback window",
+    "Creative signal floor",
+    "Scale trigger",
   ];
   for (const phrase of requiredPhrases) {
     if (!includes(markdown.text, phrase)) {
@@ -159,6 +166,25 @@ if (markdown) {
         markdown.relativePath,
       ),
     );
+  }
+
+  // A done lane needs threshold VALUES, not labels: the template ships the
+  // defaults inside HTML comments, so label presence alone proves nothing.
+  // Comments are stripped first, then each threshold must carry a number on
+  // its line — ±20%, 90 days, 2x, 14 days all satisfy a bare digit check.
+  if (status === "done") {
+    const withoutComments = markdown.text.replace(/<!--[\s\S]*?-->/g, " ");
+    for (const label of ["Attribution tolerance", "Payback window", "Creative signal floor", "Scale trigger"]) {
+      if (new RegExp(`${label}[^\\n]*\\d`, "i").test(withoutComments)) continue;
+      issues.push(
+        issue(
+          "error",
+          `paid_ua.${codeFor(label)}.value_missing`,
+          `${label} has no recorded value. A done paid-UA lane needs the actual number (defaults live in paid-user-acquisition.md, Stop And Scale Rules) — a label with the value still in a template comment is not a threshold.`,
+          markdown.relativePath,
+        ),
+      );
+    }
   }
 }
 

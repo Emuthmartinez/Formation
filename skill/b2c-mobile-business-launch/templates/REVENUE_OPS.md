@@ -106,6 +106,54 @@ Price (monthly): <!-- e.g. $9.99/month -->
 
 Benchmark cited: <!-- e.g. RevenueCat State of Subscription Apps 2026 §4c -->
 
+### Competitor Anchor
+
+<!-- 5-10 direct competitors from RESEARCH.md, per revenue-monetization.md §7a.
+     Prices from AppKittie IAP data plus the live store listing, with the date checked. -->
+
+| Competitor | Store | Monthly | Annual | Checked |
+| --- | --- | --- | --- | --- |
+| _example: CompetitorName_ | _example: iOS_ | _example: $9.99_ | _example: $59.99_ | _example: YYYY-MM-DD_ |
+
+Category range and median: <!-- e.g. $4.99-$14.99 monthly, median $9.99 -->
+
+Candidate points considered: <!-- 2-3 candidates and the one-line rationale for each -->
+
+Founder approved: <!-- YYYY-MM-DD — pricing is founder-only (revenue-monetization.md §9) -->
+
+### Cancellation-Reason Mix
+
+Aggregated from `cancellation_reason_selected` (taxonomy in `revenue-monetization.md` §8b);
+reviewed at each kill-or-scale checkpoint — a too_expensive majority is pricing evidence.
+
+### Billing And Reactivation Events
+
+The revenue lifecycle events this document depends on (`revenue-monetization.md` §8a/§8b).
+Every name below must stay in the `ANALYTICS.md` Event Contract — `check:analytics-catalog`
+reconciles this list against the catalog, so a rename or removal fails instead of drifting:
+
+- `billing_issue_detected`
+- `billing_recovery_prompt_shown`
+- `payment_method_update_started`
+- `billing_recovered`
+- `billing_issue_churned`
+- `cancellation_reason_selected`
+- `subscription_paused`
+- `reactivation_offer_shown`
+- `reactivated`
+
+| Period | too_expensive | missing_feature | found_alternative | not_needed | technical_issue | other |
+| --- | --- | --- | --- | --- | --- | --- |
+
+## Economics Snapshot
+
+<!-- Pulled from RevenueCat charts per the Economics Pull recipe
+     (tool-recipes/revenue-email-analytics.md) before each kill-or-scale checkpoint.
+     Record the docs basis and chart names used alongside the numbers. -->
+
+| Date | MRR | Realized LTV (paying) | Download-to-paid | Churn (voluntary / involuntary) | Source |
+| --- | --- | --- | --- | --- | --- |
+
 ## Founder-Gated Probe Step
 
 The revenue lane requires a live RevenueCat API probe to confirm offerings and

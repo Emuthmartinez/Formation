@@ -21,6 +21,7 @@ Load `paid-user-acquisition.md` before using paid ads, Apple Search Ads, web-to-
 - 5. Stripe Required Setup
 - 6. RevenueCat Web Billing, Purchase Links, And Funnels
 - 7. Pricing And Disclosure Rules
+- 7a. Price-Point Decision Procedure
 - 8. Backend And Analytics Contract
 - 9. Founder-Only Gates
 - 10. Anti-Patterns (Monetization And Growth Decision Traps)
@@ -218,6 +219,16 @@ Before publishing pricing:
 - avoid fake scarcity, hidden renewal mechanics, or unsupported savings claims
 - include platform billing caveats: App Store/Google Play manage in-app purchases; Stripe/RevenueCat/Paddle manage web purchases depending on chosen engine
 
+## 7a. Price-Point Decision Procedure
+
+§7 governs how an approved price is disclosed; this section is how the price gets chosen. "Do pricing research" is not a procedure — this is, and its output lands in `REVENUE_OPS.md` under a "Pricing Decision" heading that `check:revenue` requires before the lane is done.
+
+1. **Anchor against the category.** Pull the subscription prices of 5–10 direct competitors from `RESEARCH.md`'s competitor set — AppKittie app details (IAP lists) plus the live store listings are the sources. Record each competitor's monthly and annual price with the date checked, and compute the category range and median. An anchor table with fewer than five real rows means the research lane is not done enough to price against.
+2. **Choose two or three candidate points, biased high.** The benchmarks already in §10 are the prior: higher-priced apps show ~5.4x monthly realized LTV and *higher* download-to-paid conversion, because price reads as a quality signal. Default candidates: the category median, and one point meaningfully above it justified by the 11-star slice. Only go below median with a written reason (deliberate land-grab, network-effect freemium per §4c). Anchor annual as the highlighted plan per §4c and anti-pattern #5.
+3. **Design the trial against the value moment, not the calendar.** Trial length and paywall placement route through `onboarding-conversion.md` (Plan And Trial Mix, Paywall Timing) — the trial must be long enough to reach the magical moment from `11_STAR_EXPERIENCE.md` at a realistic usage cadence, and trial length is an experiment, not a constant.
+4. **Record the decision.** The chosen points, the anchor table, the rationale, and the founder's approval date go in `REVENUE_OPS.md` ("Pricing Decision"). Pricing is founder-only (§9); the procedure prepares the decision, it never makes it.
+5. **Revisit on evidence, not anniversaries.** Post-launch price changes are driven by the cancellation-reason mix (§8b), realized LTV vs. the anchor assumptions (Economics Snapshot in `REVENUE_OPS.md`), and the kill-or-scale evidence pack — and every change routes through `change-cascade.md` so store products, RevenueCat offerings, screenshots, landing, and legal move together.
+
 ## 8. Backend And Analytics Contract
 
 Create or update `ANALYTICS.md` and backend docs with:
@@ -253,8 +264,9 @@ Design implications:
 - **Don't bank win-back on annual churners.** Once an annual subscriber leaves, the data says they almost never come back inside a year. Put win-back energy where it pays off (monthly/weekly cohorts), and price/position annual to *prevent* the churn rather than chase the return.
 - **Reactivation fires when the problem recurs, not when the email lands.** For cyclical-need categories (dating, fitness, entertainment, seasonal/shopping), the durable move is staying useful after cancellation and making return frictionless — not campaign spam. Pair with the lifecycle/`payment.failed`/win-back sequences in `resend-email-ops.md`, but treat the email as a reminder for users whose need already returned, consistent with `onboarding-conversion.md` anti-pattern #4.
 - **Offer pause instead of cancel, and keep return one tap.** Let users pause a subscription rather than fully cancel, and don't force them to re-enter payment details to come back. Surface this in the cancellation flow alongside the transparent downsell/closing offer (`onboarding-conversion.md`), without dark patterns.
+- **Capture the cancellation reason at the moment of cancellation.** One screen in the in-app cancellation/pause flow — before the store-managed cancel handoff — with a fixed reason-code taxonomy: `too_expensive`, `missing_feature`, `found_alternative`, `not_needed`, `technical_issue`, `other` (free text optional, never required). Emit `cancellation_reason_selected` with `reason_code` and `plan_duration`. A delayed exit-survey email measures who answers email, not why people cancel — same Day-0 logic as the rest of this file. The aggregated mix feeds the Pricing Decision revisit (§7a step 5: a `too_expensive` majority is pricing evidence), win-back targeting here in §8b (`missing_feature` churners are the reachable cohort when the feature ships), and the kill-or-scale evidence pack. Never gate the actual cancellation on answering — the screen is skippable in one tap, per the ethics guardrail.
 
-Analytics: track `subscription_paused`, `reactivation_offer_shown`, and `reactivated` with `prior_plan_duration`, `days_since_churn`, and `price_tier` so reactivation is measured by plan duration (where the leverage actually is) rather than as a single blended rate.
+Analytics: track `subscription_paused`, `reactivation_offer_shown`, `reactivated`, and `cancellation_reason_selected` with `prior_plan_duration`, `days_since_churn`, `price_tier`, and `reason_code` so reactivation is measured by plan duration (where the real gains are) rather than as a single blended rate. All §8a/§8b event names live in the `ANALYTICS.md` Event Contract first — `check:analytics-catalog` reconciles `REVENUE_OPS.md` against the catalog the same way it does onboarding and growth docs.
 
 ## 9. Founder-Only Gates
 

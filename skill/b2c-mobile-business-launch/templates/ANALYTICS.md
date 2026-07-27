@@ -130,8 +130,17 @@ Record the following when optimizing attribution quality. These do not block lau
 | share_completed | share confirmed by OS/platform callback | surface, format | growth proof |
 | creator_code_applied | creator/referral code redeemed | code_source, campaign | growth proof |
 | viral_format_signal_detected | a content format shows outlier traction | format_id, platform | growth proof |
+| billing_issue_detected | RevenueCat billing-issue webhook received | platform, store, grace_state, failure_reason | revenue proof |
+| billing_recovery_prompt_shown | in-app banner or push before the grace period ends | platform, grace_state, surface | revenue proof |
+| payment_method_update_started | user opens the update-payment path | platform, store | revenue proof |
+| billing_recovered | failed renewal recovered inside grace/hold | platform, store, days_in_grace | revenue proof |
+| billing_issue_churned | grace/hold lapsed without recovery | platform, store, failure_reason | revenue proof |
+| cancellation_reason_selected | reason picked in the in-app cancellation or pause flow | reason_code, plan_duration, surface | revenue proof |
+| subscription_paused | user chooses pause instead of cancel | prior_plan_duration, surface | revenue proof |
+| reactivation_offer_shown | win-back offer rendered to a churned subscriber | prior_plan_duration, days_since_churn, price_tier | revenue proof |
+| reactivated | churned subscriber becomes active again | prior_plan_duration, days_since_churn, price_tier | revenue proof |
 
-Cross-doc rule: every event named in `ONBOARDING.md`, `EMOTIONAL_DESIGN.md`, or `VIRAL_GROWTH.md` must have a row here first — `check:analytics-catalog` reconciles them (warning while the analytics lane is partial, error at done).
+Cross-doc rule: every event named in `ONBOARDING.md`, `EMOTIONAL_DESIGN.md`, `VIRAL_GROWTH.md`, or `REVENUE_OPS.md` must have a row here first — `check:analytics-catalog` reconciles them (warning while the analytics lane is partial, error at done).
 
 ## Emotion Card Events
 

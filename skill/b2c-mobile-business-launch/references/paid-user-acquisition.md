@@ -153,16 +153,23 @@ Automated ad-platform rules may be planned when supported, but live setup or bud
 
 ## Stop And Scale Rules
 
+Every rule below evaluates against a number recorded in `growth/PAID_UA.md` under **Decision Thresholds** — an agent (or the founder at 11pm) must be able to read the week's report and know which side of each line it landed on. The defaults are starting points to adjust per category evidence, the same way the crash-free threshold works in `post-launch-operations.md`; changing a threshold is a recorded edit with a reason, never a silent re-read:
+
+- **Attribution tolerance** — default ±20%. The maximum disagreement between RevenueCat, ASC/Play console, PostHog, and self-reported attribution before the numbers stop being readable.
+- **Payback window** — default 90 days. Blended CPA must be recoverable from realized LTV (Economics Snapshot in `REVENUE_OPS.md`) inside this window.
+- **Creative signal floor** — default 2x target CPA in spend, or 7 days, per creative — whichever comes first — before a creative may be judged or killed.
+- **Scale trigger** — default 14 consecutive days at or under target CPA at the founder-approved spend level before any budget increase is proposed.
+
 Stop, hold, or reposition when:
 - baseline cannot be established
-- spend is active but RevenueCat, ASC/Play, PostHog, and self-reported attribution disagree beyond the documented tolerance
-- CPA cannot plausibly fit LTV, trial conversion, or payback window
+- spend is active but the attribution sources disagree beyond the recorded tolerance for a full reporting week
+- blended CPA exceeds what the recorded payback window supports against realized LTV, or trial conversion breaks the payback math
 - paywall reach, purchase conversion, entitlement activation, or retention drops versus organic traffic
-- creatives are being changed faster than the budget can generate useful signal
+- creatives are being killed before reaching the signal floor — churning creative faster than the budget can generate readable signal
 - the only positive metric is impressions, clicks, or installs
 
 Scale only after:
-- one channel works at a meaningful founder-approved spend level
+- the scale trigger has held — target CPA or better, at the approved spend level, for the recorded number of consecutive days
 - one or more creative angles repeat with downstream revenue or activation evidence
 - weekly creative production can keep up without lowering quality
 - onboarding/paywall/revenue experiments and support paths are stable

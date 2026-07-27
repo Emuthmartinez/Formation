@@ -82,6 +82,17 @@ Tolerance for attribution discrepancy:
 
 ## Stop And Scale Rules
 
+### Decision Thresholds
+
+<!-- The numbers the weekly report is judged against (paid-user-acquisition.md,
+     Stop And Scale Rules). Defaults are starting points; record the chosen
+     number and adjust only with a dated reason. -->
+
+Attribution tolerance: <!-- default ±20% disagreement between RevenueCat / store console / PostHog / self-reported -->
+Payback window: <!-- default 90 days: blended CPA recoverable from realized LTV inside this window -->
+Creative signal floor: <!-- default 2x target CPA in spend or 7 days per creative before judging it -->
+Scale trigger: <!-- default 14 consecutive days at/under target CPA at approved spend before proposing an increase -->
+
 Stop:
 Hold:
 Scale:
