@@ -77,8 +77,21 @@ if (onboardingDone && markdown) {
   // "same step" ever appearing on one line.
   const stepOf = (line: string): string | undefined => {
     const affirmative = affirmativeOf(line);
-    const match = affirmative.match(/step\s*#?\s*(\d+)/i) ?? affirmative.match(/^\s*\|\s*(\d+)\s*\|/);
-    return match ? match[1] : undefined;
+    const numbered = affirmative.match(/step\s*#?\s*(\d+)/i);
+    if (numbered) return numbered[1];
+    // Table rows carry their step in the first cell — numeric or named. A
+    // normalized textual label correlates "Value reveal" rows the same way
+    // numbered ones do; structural header words are not labels.
+    const trimmed = line.trim();
+    if (trimmed.startsWith("|") && !trimmed.includes("---")) {
+      const firstCell = (trimmed.split("|")[1] ?? "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+      if (firstCell && !/^(step|stage|screen|moment|phase|prompt)s?$/.test(firstCell)) return firstCell;
+    }
+    return undefined;
   };
   const pushLinePattern = /push (permission|priming|prime)|notification permission/i;
   const reviewSteps = markdown.text

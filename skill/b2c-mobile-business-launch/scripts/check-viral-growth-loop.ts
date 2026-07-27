@@ -162,7 +162,15 @@ if (growthStatus === "done" && markdown) {
   const loopLines = loopRegion.split(/\r?\n/);
   // A target is not a measurement: k-value lines carrying aspiration language
   // do not count.
-  const measuredKLine = loopLines.some((line) => /\bk\s*(=|at|:)\s*\d/i.test(line) && !/\b(target|goal|aim|aspir\w*|hope|planned? for)\b/i.test(line));
+  // A number is a measurement only in a measurement sentence: illustrative
+  // and aspirational copy is excluded, and the line must carry a measured/
+  // observed qualifier, a date, or a week reference.
+  const measuredKLine = loopLines.some(
+    (line) =>
+      /\bk\s*(=|at|:)\s*\d/i.test(line) &&
+      !/\b(target|goal|aim|aspir\w*|hope|planned? for|example|e\.g\.|benchmark|assum\w*|hypothetic\w*|illustrat\w*|self-compound\w*|would)\b/i.test(line) &&
+      /\b(measured|observed|computed|actual|current)\b|\d{4}-\d{2}-\d{2}|\bweek\s+(one|two|three|four|\d+)\b/i.test(line),
+  );
   const commitmentMatch = loopRegion.match(/first (?:weekly )?k (?:computation|measurement)[^\n]*?(\d{4}-\d{2}-\d{2})/i);
   const commitmentValid = Boolean(commitmentMatch && validCalendarDate(commitmentMatch[1] ?? "", true));
   // A dated row is a measurement only when it carries a numeric k — a date
@@ -242,7 +250,12 @@ if (growthStatus === "done" && markdown) {
         const cells = row.split("|").map((cell) => cell.trim());
         const budgetCell = cells[budgetColumn] ?? "";
         const evidenceCell = cells[evidenceColumn] ?? "";
-        return budgetCell !== "" && evidenceCell !== "" && !CELL_PLACEHOLDER.test(budgetCell) && !CELL_PLACEHOLDER.test(evidenceCell);
+        // Punctuation is not evidence: the budget cell needs its number and
+        // the evidence cell needs a date or substantive content.
+        const budgetSubstantive = /\d/.test(budgetCell) && !CELL_PLACEHOLDER.test(budgetCell);
+        const evidenceSubstantive =
+          (/\d{4}-\d{2}-\d{2}/.test(evidenceCell) || evidenceCell.replace(/[^a-z0-9]/gi, "").length >= 6) && !CELL_PLACEHOLDER.test(evidenceCell);
+        return budgetSubstantive && evidenceSubstantive;
       });
     const proseBudgetNumbered =
       /budget[^\n]{0,40}\$\s*\d|\$\s*\d[^\n]{0,40}budget/i.test(region) && /(current band|entered)[^\n]{0,60}\d{4}-\d{2}-\d{2}/i.test(region);

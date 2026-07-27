@@ -342,6 +342,39 @@ export function register(h: Harness): void {
     "onboarding.push_review_same_step",
   );
 
+  // Named step labels correlate the same way numbered ones do.
+  const onboardingPushNamedStep = makeFixture("onboarding-push-review-named-step");
+  {
+    const state = readState(onboardingPushNamedStep);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushNamedStep, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushNamedStep, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "",
+      "| Step | Prompt |",
+      "| --- | --- |",
+      "| Value reveal | App Review popup via the native review prompt |",
+      "| Value reveal | Push permission prime — only after value is visible |",
+      "",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "review and push sharing a named step label fails",
+    onboardingPushNamedStep,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_review_same_step",
+  );
+
   // "Push permission" is the same canonical noun as "push notifications" for
   // the not-applicable exemption.
   const onboardingPushPermissionNa = makeFixture("onboarding-push-permission-na");

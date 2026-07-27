@@ -443,6 +443,56 @@ export function register(h: Harness): void {
   );
   runFixture("an overdue first-measurement commitment fails", viralGrowthOverdue, "check-viral-growth-loop.ts", 1, "viral_growth.loop_economics_unmeasured");
 
+  // Illustrative copy is not a measurement.
+  const viralGrowthIllustrativeK = makeFixture("viral-growth-illustrative-k");
+  writeCompleteViralGrowth(viralGrowthIllustrativeK);
+  writeFileSync(
+    path.join(viralGrowthIllustrativeK, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthIllustrativeK, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: Example: k = 0.5; at k = 1 the loop self-compounds.",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "illustrative k copy does not count as a measurement",
+    viralGrowthIllustrativeK,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // Punctuation is not band evidence.
+  const viralGrowthDashCells = makeFixture("viral-growth-band-dash-cells");
+  writeCompleteViralGrowth(viralGrowthDashCells);
+  writeFileSync(
+    path.join(viralGrowthDashCells, "UGC_PLAYBOOK.md"),
+    [
+      "# UGC Playbook",
+      "",
+      "Creator scripts use GROW-001 and the format lab.",
+      "",
+      "## Post-Breakout Scale Model",
+      "",
+      "| Band | Roster | Weekly video volume | Budget (founder-gated) | Entered on / evidence |",
+      "| --- | --- | --- | --- | --- |",
+      "| Discovery | 3-5 | 9-15 | — | — |",
+      "| Proven format | ~10 | 30-40 | - | - |",
+      "| Scale | ~30 | 90-120 | | |",
+      "| Volume | 75+ | 200+ | | |",
+      "",
+      "- Control format install-per-video (weekly): fatigue check — two consecutive declines trigger the next variant test.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "dash-filled band cells do not satisfy the scale model",
+    viralGrowthDashCells,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_scale_model_missing",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

@@ -561,6 +561,9 @@ if (revenueDone && revenueOpsText) {
       // completed row must record its result/decision. Missing definition
       // columns fail closed.
       const substantiveCell = (cell: string): boolean => cell.replace(/[^a-z0-9]/gi, "").length >= 6 && !BACKLOG_PLACEHOLDER.test(cell);
+      // Metric cells are identifiers, not prose: CVR/ARPU/LTV are defined
+      // experiments — only emptiness and placeholders disqualify.
+      const identifierCell = (cell: string): boolean => cell.replace(/[^a-z0-9]/gi, "").length >= 2 && !BACKLOG_PLACEHOLDER.test(cell);
       // One historical row must not satisfy the cadence forever (§7b is a
       // standing program): current activity means an active experiment, a
       // completed one started inside the recency window, or a planned row
@@ -583,7 +586,7 @@ if (revenueDone && revenueOpsText) {
           metricColumn > 0 &&
           substantiveCell(cells[hypothesisColumn] ?? "") &&
           substantiveCell(cells[variantColumn] ?? "") &&
-          substantiveCell(cells[metricColumn] ?? "");
+          identifierCell(cells[metricColumn] ?? "");
         const decided = resultColumn > 0 && substantiveCell(cells[resultColumn] ?? "");
         return { statusCell, startedDate, dateReal, clean, defined, decided };
       });

@@ -359,6 +359,31 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog.empty",
   );
 
+  // Short standard metric identifiers are defined experiments.
+  const revenueExperimentShortMetric = makeFixture("revenue-experiment-short-metric");
+  {
+    const state = readState(revenueExperimentShortMetric);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentShortMetric, state);
+    const opsPath = path.join(revenueExperimentShortMetric, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | +9% CVR, founder kept it |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a defined experiment measured on CVR satisfies the cadence",
+    revenueExperimentShortMetric,
+    "check-revenue.ts",
+    1,
+    undefined,
+    [],
+    undefined,
+    "revenue.experiment_backlog",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";
