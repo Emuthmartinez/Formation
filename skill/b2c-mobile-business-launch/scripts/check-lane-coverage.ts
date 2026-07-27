@@ -19,6 +19,7 @@
 import {
   asArray,
   asString,
+  extractIsoDate,
   getPath,
   isRecord,
   isPastOrientPhase,
@@ -33,6 +34,11 @@ import {
   validateLaneDependencyGraph,
   validateReason,
 } from "./lib/launch-state.js";
+
+// Founder gates get a tighter re-engagement window than the general 60-day
+// stall bar: a gate is a decision waiting to be re-asked, not a scope note.
+const FOUNDER_GATE_STALE_DAYS = 30;
+const FOUNDER_GATE_PATTERN = /founder[-\s]?gated|founder[-\s]?only|founder approval|awaiting (?:the )?founder/i;
 
 /**
  * Calls validateReason and returns the count of new warnings pushed (0 or 1+).
@@ -155,6 +161,54 @@ if (state) {
     const hasReason = Boolean(reason?.trim());
     const hasAnyEvidence = nonEmptyEvidence.length > 0;
     const hasAnyBlocker = nonEmptyBlockers.length > 0;
+
+    // --- founder-gate re-engagement ---
+    // A founder gate is a pause awaiting a decision, not a termination. On
+    // real launches, "founder-gated: paid campaign launch and budget spend"
+    // sat in blockers for months while the fully planned spend never turned
+    // on — because nothing ever brought the decision back to the founder.
+    // Founder-gated blockers carry the ISO date they were last presented;
+    // past the re-engagement window the agent re-presents the gate with what
+    // changed since and re-dates the blocker with the founder's response.
+    // Silence defers again — it never converts to approval, and it never
+    // means forever. Stale founder gates are errors once the app is live:
+    // a live app with its growth levers parked behind a forgotten question
+    // is the distribution-never-turns-on failure mode.
+    if (status === "partial" || status === "blocked" || status === "deferred") {
+      const postLaunch = /^phase_6/.test(currentPhase.toLowerCase());
+      for (const blocker of nonEmptyBlockers) {
+        if (!FOUNDER_GATE_PATTERN.test(blocker)) continue;
+        const presentedAt = extractIsoDate(blocker);
+        if (!presentedAt) {
+          counts.warning += 1;
+          issues.push(
+            issue(
+              "warning",
+              `lane_coverage.${lane}.founder_gate_undated`,
+              `lanes.${lane} carries a founder-gated blocker with no ISO date ("${blocker.slice(0, 80)}"). ` +
+                `Record the date the gate was last presented so the re-engagement window is checkable — an undated founder gate is one nobody can ever call stale.`,
+              "PROJECT_STATE.yaml",
+            ),
+          );
+          continue;
+        }
+        const ageDays = Math.floor((Date.now() - new Date(`${presentedAt}T00:00:00Z`).getTime()) / 86_400_000);
+        if (ageDays > FOUNDER_GATE_STALE_DAYS) {
+          const severity = postLaunch ? "error" : "warning";
+          counts[severity === "error" ? "error" : "warning"] += 1;
+          issues.push(
+            issue(
+              severity,
+              `lane_coverage.${lane}.founder_gate_reengagement_due`,
+              `lanes.${lane}'s founder gate was last presented ${ageDays} days ago (${presentedAt}) with no recorded refresh. ` +
+                `Re-present it to the founder with what changed since, and re-date the blocker with their response — approve, defer again, or drop the lane. ` +
+                `A founder gate is a pause, not a termination; silence is not a decision.`,
+              "PROJECT_STATE.yaml",
+            ),
+          );
+        }
+      }
+    }
 
     // --- not_started ---
     if (status === "not_started") {

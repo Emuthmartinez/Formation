@@ -516,6 +516,69 @@ export function register(h: Harness): void {
   writeState(depBlocked, depBlockedState);
   runFixture("lane done on a blocked upstream lane fails coverage", depBlocked, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
 
+  // --- check-lane-coverage: founder-gate re-engagement ---
+  // A founder-gated blocker is a pause awaiting a decision, not a termination.
+  // Undated gates warn (nobody can ever call them stale); gates older than the
+  // 30-day re-engagement window warn pre-launch and error once the app is live.
+  const gateIsoDaysAgo = (days: number): string => {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() - days);
+    return date.toISOString().slice(0, 10);
+  };
+
+  const founderGateUndated = makeFixture("founder-gate-undated");
+  withLane(founderGateUndated, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: ["founder-gated: paid campaign launch and budget spend"],
+  });
+  runFixture(
+    "undated founder-gated blocker surfaces a warning",
+    founderGateUndated,
+    "check-lane-coverage.ts",
+    0,
+    "lane_coverage.paid_user_acquisition.founder_gate_undated",
+  );
+
+  const founderGateStalePre = makeFixture("founder-gate-stale-prelaunch");
+  withLane(founderGateStalePre, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated ${gateIsoDaysAgo(45)}: paid campaign launch and budget spend`],
+  });
+  runFixture(
+    "stale founder gate pre-launch surfaces the re-engagement warning",
+    founderGateStalePre,
+    "check-lane-coverage.ts",
+    0,
+    "lane_coverage.paid_user_acquisition.founder_gate_reengagement_due",
+  );
+
+  // Live app + a growth lever parked behind a forgotten question = the
+  // distribution-never-turns-on failure mode. Error, not warning.
+  const founderGateStaleLive = makeFixture("founder-gate-stale-postlaunch");
+  {
+    const state = readState(founderGateStaleLive);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    writeState(founderGateStaleLive, state);
+  }
+  withLane(founderGateStaleLive, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated ${gateIsoDaysAgo(60)}: paid campaign launch and budget spend`],
+  });
+  runFixture(
+    "stale founder gate on a live app fails coverage",
+    founderGateStaleLive,
+    "check-lane-coverage.ts",
+    1,
+    "lane_coverage.paid_user_acquisition.founder_gate_reengagement_due",
+  );
+
+  const founderGateFresh = makeFixture("founder-gate-fresh");
+  withLane(founderGateFresh, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated ${gateIsoDaysAgo(5)}: paid campaign launch and budget spend; founder chose to revisit after the day-30 retro`],
+  });
+  runFixture("freshly dated founder gate passes without gate findings", founderGateFresh, "check-lane-coverage.ts", 0);
+
   // deferred/not_needed upstream IS a resolved scope decision (launch tiers), so
   // it unblocks a downstream lane. Uses the content_assets -> design edge, whose
   // upstream chain is otherwise untouched.

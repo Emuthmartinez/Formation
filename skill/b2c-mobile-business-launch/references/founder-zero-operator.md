@@ -36,6 +36,7 @@ For each founder gate, use this question contract:
 4. **Consequences:** for every choice state what happens, what the agent does next, and how readiness/evidence changes.
 5. **Skip, fallback, or defer:** make the safe route explicit and say when the gate returns. Access, money, legal, pricing, public voice, release, and destructive gates can be deferred while safe preparation continues, but never bypassed.
 6. **Lifecycle:** no answer means `pending`, never consent. Move resolved, stale, or superseded gates to `gateHistory`. If a new direct founder instruction changes the task, archive the old gate and re-evaluate it instead of defending an agent-created blocker.
+7. **Re-engagement:** a deferred gate comes back. Lane-level founder gates (spend, public posting, release) carry the ISO date they were last presented; at session start, re-present any gate older than 30 days with what changed since — new numbers, new evidence, new deadline — and re-date it with the founder's response. Silence defers again; it never converts to approval and never means forever (see `project-state.md` "Founder-Gate Re-Engagement").
 
 Do not ask the founder to choose between two ordinary implementation approaches. Resolve bounded choices internally. Ask only when ownership, money, credentials, legal identity, public voice, platform policy, or irreversible consequences require the founder.
 
