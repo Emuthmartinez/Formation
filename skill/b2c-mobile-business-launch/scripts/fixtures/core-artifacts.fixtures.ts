@@ -769,6 +769,54 @@ export function register(h: Harness): void {
   );
   runFixture("a V1 exception refusing to build its class fails", specMoatV1NegatedBuild, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
+  // A plan that refuses the moat it names is not a build plan.
+  const specMoatPlanNegated = makeFixture("product-spec-moat-plan-negated");
+  setLaneDone(specMoatPlanNegated, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatPlanNegated, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — we will never collect any user history",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a negated moat build plan fails", specMoatPlanNegated, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // Contractions negate the commitment the same as full forms.
+  const specMoatV1Contraction = makeFixture("product-spec-moat-v1-contraction");
+  setLaneDone(specMoatV1Contraction, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatV1Contraction, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "no moat yet; we aren't building data by 2026-08-25; revisit at the day-30 retro",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a contraction-negated V1 build commitment fails", specMoatV1Contraction, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // An unrelated negation earlier in the sentence does not erase a live concession.
+  const specCopyUnrelatedNegation = makeFixture("product-spec-copy-unrelated-negation");
+  setLaneDone(specCopyUnrelatedNegation, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specCopyUnrelatedNegation, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "Our design is not unique and the incumbent can ship this feature in a week.",
+    }),
+    "utf8",
+  );
+  runFixture(
+    "an unrelated negation does not erase a shipping concession",
+    specCopyUnrelatedNegation,
+    "check-product-spec.ts",
+    1,
+    "product_spec.copy_test_missing",
+  );
+
   // ── check-launch-trace ────────────────────────────────────────────────────
 
   const traceBaseline = makeFixture("launch-trace-baseline");

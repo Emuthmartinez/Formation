@@ -138,7 +138,7 @@ if (text) {
       const v1ExceptionSpan = (v1ExceptionMatch?.[0] ?? "").replace(/^no moat yet/i, "");
       const v1CommitmentAffirmed =
         /\b(build|building|racing|accru\w*|grow\w*)\b/i.test(v1ExceptionSpan) &&
-        !/\b(not|never|won'?t|will not|cannot|can'?t|no plans? to)\b/i.test(v1ExceptionSpan);
+        !/\b(not|never|won'?t|will not|cannot|can'?t|aren'?t|isn'?t|don'?t|doesn'?t|no plans? to)\b/i.test(v1ExceptionSpan);
       const v1ExceptionParsed = new Date(`${v1ExceptionDate}T00:00:00Z`);
       const v1ExceptionValid = Boolean(
         v1ExceptionMatch &&
@@ -164,9 +164,16 @@ if (text) {
               !/\b(no|not|none|never|without|isn'?t|aren'?t|cannot|can'?t|won'?t)\b/i.test(clause),
           );
       // The field is class AND build plan: a bare taxonomy word explains
-      // nothing about how the advantage accrues.
-      const moatPlanResidue = moatClassValue.replace(/\b(data|workflow|community|taste|model|distribution)\b/gi, " ");
-      const moatPlanSubstantive = moatPlanResidue.replace(/[^a-z0-9]/gi, "").length >= 15;
+      // nothing, and a negated plan ("we will never collect any user
+      // history") refuses the moat it names — the plan must have at least
+      // one negation-free clause of real text.
+      const moatPlanSubstantive = moatClassValue
+        .split(/[.;,—–:()|]/)
+        .some(
+          (clause) =>
+            !/\b(no|not|none|never|without|isn'?t|aren'?t|don'?t|doesn'?t|cannot|can'?t|won'?t)\b/i.test(clause) &&
+            clause.replace(/\b(data|workflow|community|taste|model|distribution)\b/gi, " ").replace(/[^a-z0-9]/gi, "").length >= 15,
+        );
       if (!v1ExceptionValid && !(moatClassAffirmed && moatPlanSubstantive)) {
         issues.push(
           issue(
@@ -188,12 +195,23 @@ if (text) {
         /^\s*(nothing|none|no)\b|\b(nothing|nobody|no one) (stops|prevents|blocks)|\bno (real |structural )?(moat|barrier|blocker)|\b(has|have) not thought of (it|this)\b/i;
       const CONCESSION_AFFIRMATIVE =
         /\bcop(?:y|ied|yable)\b[^.\n]{0,30}\b(week|sprint|days?)\b|\banyone (can|could) (copy|build|ship)\b|\b(can|could|will|would) (ship|build|clone|replicate|match)\b[^.\n]{0,40}\b(week|sprint|days?)\b|\b(better|nicer|cleaner) design(ed)?\b|\bbetter (ux|ui|execution)\b|\bfirst[- ]mover\b/i;
-      const affirmativeCopyAnswer = copyTestAnswer.replace(/\b(cannot|can not|can't|won't|will not|not|no|never|unable to)\b[^.;,—–:()|]*/gi, "");
+      // Negation is scoped to the predicate it negates: "cannot be copied in
+      // a week" is a structural answer, but an unrelated "not" earlier in
+      // the sentence must not erase a live shipping concession.
+      const concessionStands = ((): boolean => {
+        const pattern = new RegExp(CONCESSION_AFFIRMATIVE.source, "gi");
+        let match: RegExpExecArray | null;
+        while ((match = pattern.exec(copyTestAnswer)) !== null) {
+          const prefix = copyTestAnswer.slice(Math.max(0, match.index - 18), match.index);
+          if (!/\b(cannot|can not|can'?t|won'?t|will not|not|never|no|unable to)\s*(be\s+)?$/i.test(prefix)) return true;
+        }
+        return false;
+      })();
       const copyTestSubstantive =
         copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 &&
         !MOAT_PLACEHOLDER.test(copyTestAnswer) &&
         !CONCESSION_RAW.test(copyTestAnswer) &&
-        !CONCESSION_AFFIRMATIVE.test(affirmativeCopyAnswer);
+        !concessionStands;
       if (!copyTestSubstantive) {
         issues.push(
           issue(
