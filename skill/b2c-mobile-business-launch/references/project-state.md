@@ -132,6 +132,8 @@ The cockpit is not a replacement for canonical docs. It is a dashboard over them
 
 Rendering the file is necessary but not sufficient. The founder does not sit refreshing an HTML file in a git repo — in autopilot runs, subagent dispatches, and long workflow sessions nobody may be watching anything when the render lands. Whenever the cockpit is (re)rendered or a launch session ends, say the narrative in the reply itself: what changed since last time, what is happening now, and what needs the founder (the same three beats the cockpit's `narrative` block carries). A milestone the founder was never told about did not land as a milestone.
 
+Progress beats follow the same say-then-record loop: when a phase exit earns a celebration beat, the cockpit shows it as a "Worth a moment" card until `narrative.last_celebrated_phase` records it as spoken. Say the beat in the reply, then set the field — never set the field without having said it, and never re-celebrate a phase the field already names.
+
 ## Acceptance
 
 - A future agent can tell what to work on next without rereading every artifact.

@@ -323,6 +323,59 @@ export function register(h: Harness): void {
     "0 error(s)",
   );
 
+  // --- check-founder-copy ---
+  // The gate had zero fixture coverage: nothing proved it could fail.
+  runScriptArgs(
+    "founder copy passes on the shipped skill and templates",
+    "check-founder-copy.ts",
+    ["--root", path.join(skillRoot, "templates"), "--skill-root", skillRoot],
+    0,
+  );
+
+  const founderCopyRawId = makeEmptyFixture("founder-copy-raw-identifier");
+  writeFileSync(
+    path.join(founderCopyRawId, "launch-cockpit.html"),
+    "<html><body><h2>Progress</h2><p>paid_tool_routing | not_started</p></body></html>\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "raw snake_case on a founder surface fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyRawId, "--skill-root", skillRoot],
+    1,
+    "founder_copy.raw_identifier",
+  );
+
+  // The narrative-freshness rule the PROJECT_STATE template comment has
+  // promised since v0.25.0: empty narrative past orient is an error.
+  const founderCopyStaleNarrative = makeEmptyFixture("founder-copy-stale-narrative");
+  writeFileSync(
+    path.join(founderCopyStaleNarrative, "PROJECT_STATE.yaml"),
+    ["narrative:", '  since_last_time: ""', '  right_now: ""', '  your_call: ""', "project:", '  phase: "phase_1"'].join("\n"),
+    "utf8",
+  );
+  runScriptArgs(
+    "empty narrative past orient fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyStaleNarrative, "--skill-root", skillRoot],
+    1,
+    "founder_copy.narrative_stale.since_last_time",
+  );
+
+  // Beats defined but never rendered was the original miss — a skill root
+  // whose renderer lacks the celebration wiring must fail.
+  const founderCopyUnwired = makeEmptyFixture("founder-copy-celebration-unwired");
+  mkdirSync(path.join(founderCopyUnwired, "skill", "scripts", "lib"), { recursive: true });
+  cpSync(path.join(skillRoot, "scripts", "lib", "founder-copy.ts"), path.join(founderCopyUnwired, "skill", "scripts", "lib", "founder-copy.ts"));
+  writeFileSync(path.join(founderCopyUnwired, "skill", "scripts", "render-launch-cockpit.ts"), "// stub renderer with no beat wiring\n", "utf8");
+  runScriptArgs(
+    "renderer without celebration wiring fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyUnwired, "--skill-root", path.join(founderCopyUnwired, "skill")],
+    1,
+    "founder_copy.celebration_unwired",
+  );
+
   /**
    * Backticks mean code in markdown and nothing at all in rendered HTML. A banned word
    * wrapped in backticks on an HTML surface reaches the founder's eyes verbatim, so the
