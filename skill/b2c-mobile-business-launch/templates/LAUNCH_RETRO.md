@@ -6,6 +6,8 @@ The retro is how this launch improves the next one. Findings here feed `PROJECT_
 
 ## Retro Window
 
+Due dates count from `lanes.post_launch_ops.live_since` (launch +7/+30/+90, one week of grace). `check:post-launch` flags a day-30 or day-90 checkpoint that is still uncompleted past its due date — an untouched row is how the kill-or-scale question gets dodged, not a neutral state.
+
 | Checkpoint | Date | Completed by |
 | --- | --- | --- |
 | Launch +7 days | | |

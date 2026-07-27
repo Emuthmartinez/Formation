@@ -38,7 +38,7 @@ If the app is live and `lanes.post_launch_ops` is still not_started, that is the
 
 Run one named weekly session — the **Weekly Ops Review** — and record each pass in `POST_LAUNCH_OPS.md` with the date and what changed. The fixed order matters: read reality first, fix what is broken, then grow.
 
-1. **Metrics review.** PostHog (activation, retention cohorts, funnel deltas), RevenueCat (trials, conversions, renewals, refunds, MRR), App Store Connect / Play Console (impressions, page views, conversion rate, downloads by territory).
+1. **Metrics review.** PostHog (activation, retention cohorts, funnel deltas), RevenueCat (trials, conversions, renewals, refunds, MRR), App Store Connect / Play Console (impressions, page views, conversion rate, downloads by territory). The session opens with the live pull and the weekly log row records the actual values — MRR and its delta, crash-free %, D7 — not adjectives. "Checked dashboards" is not a metrics review, and "unverified" is not a value; when a pull is blocked, the cell records the dated blocker and the blocker goes in front of the founder that session.
 2. **Crash and review triage.** Sentry release health and new issues (§3); new store reviews on both consoles (§4). Severity-route before anything else gets attention.
 3. **Support sweep.** Clear the support inbox to zero or to documented escalations (§7).
 4. **ASO and rankings delta.** Keyword rankings, category rank, conversion-rate movement, competitor deltas via AppKittie and first-party console data — route the tactics through `aso-store-ops.md` §10.
@@ -47,10 +47,11 @@ Run one named weekly session — the **Weekly Ops Review** — and record each p
 
 Keep the session under one focused pass. The rhythm is the product: each step feeds the next, and the weekly improvement is how the loop compounds instead of just observing.
 
-Two cadence rules:
+Three cadence rules:
 
 - The Weekly Ops Review runs even in a "quiet" week. Quiet weeks are where regressions hide; the review is how you know it was actually quiet.
 - Record a one-line delta per step ("D7 cohort -3pts", "2 new launch-blockers triaged", "inbox cleared", "ranked #4 → #6 on primary keyword", "spend held", "shipped 1.2.1 paywall copy fix") so the next session — or the next agent — can read the trend in seconds.
+- The clock is `lanes.post_launch_ops.live_since` — record the first approved-for-sale date there the day approval lands. From it hang the retro due dates (§10) and the weekly-log freshness bar `check:post-launch` enforces: a live app whose latest log row is older than two weeks, or whose metric cells hold no numbers, fails. The one legitimate way for the rhythm to stop is a recorded Kill verdict (§9).
 
 ## 3. Crash Triage
 
@@ -156,7 +157,7 @@ Record the verdict and date in `LAUNCH_RETRO.md` (Kill, Hold, Or Scale section) 
 
 ## 10. Launch Retro Loop
 
-The retro is how each real launch improves the skill. Fill `LAUNCH_RETRO.md` three times: shortly after launch (first 1–2 weeks live), at day 30, and at day 90. Each pass records:
+The retro is how each real launch improves the skill. Fill `LAUNCH_RETRO.md` three times: shortly after launch (first 1–2 weeks live), at day 30, and at day 90 — due dates count from `lanes.post_launch_ops.live_since` with one week of grace, and `check:post-launch` flags a day-30/day-90 checkpoint still uncompleted past its due date. A checkpoint that never runs is not a neutral state; it is the kill-or-scale question being dodged. Each pass records:
 
 - **Lanes used vs skipped.** Which references/lanes were actually loaded and which were skipped or marked not_needed — and whether any skip turned out to be a mistake.
 - **Where the agent stalled.** Steps that took multiple attempts, blocked on missing access, or required the founder to unstick — with enough detail to reproduce the stall.
@@ -177,7 +178,7 @@ The day-30 and day-90 passes also grade the operating rhythm itself: was the wee
 - "Support Operations"
 - "Launch Retro"
 
-Lane entry in `PROJECT_STATE.yaml` (same shape as every other lane):
+Lane entry in `PROJECT_STATE.yaml` (same shape as every other lane, plus the live-date anchor):
 
 ```yaml
 lanes:
@@ -187,6 +188,9 @@ lanes:
       - "POST_LAUNCH_OPS.md"
       - "LAUNCH_RETRO.md"
     blockers: []
+    live_since: ""            # ISO date of first approved-for-sale; recorded once
+    kill_or_scale_decision: ""
+    kill_or_scale_decided_at: ""
 ```
 
 `lanes.post_launch_ops` may be marked done only when:
@@ -195,8 +199,10 @@ lanes:
 - A review-response SLA is stated.
 - A retention cohort source is named (PostHog by default).
 - `LAUNCH_RETRO.md` exists with at least the post-launch pass filled.
+- `live_since` records the first approved-for-sale date.
+- Once live past two weeks: the weekly log carries dated rows whose latest is at most two weeks old, whose crash-free/retention cells hold percentages, and whose Notes cell carries an MRR-labeled dollar amount ("MRR $412 (+3%)"; "MRR $0" counts) — or dated blockers in their place. No day-30/day-90 retro checkpoint sits uncompleted past its due date. Placeholder text ("unverified", "TBD") and adjectives ("flat", "looks fine") fail in weekly metric cells and kill-or-scale evidence cells alike: the verdict's MRR-trend cell needs a dollar amount and its retention cell a percentage. A recorded Kill verdict — completed checkpoint, measured evidence, agreeing state mirror — exempts a wound-down app from the freshness gates.
 
-Validator: `npm run check:post-launch -- --root . --state PROJECT_STATE.yaml`. The validator checks structure and the done-status facts above; it cannot verify that the rhythm is actually being run, that replies are non-boilerplate, or that monitoring windows are honored — the founder's weekly review of `POST_LAUNCH_OPS.md` session notes is the backstop for those.
+Validator: `npm run check:post-launch -- --root . --state PROJECT_STATE.yaml`. The validator checks structure, the done-status facts above, and the numbers loop (due dates, freshness, placeholder text); it cannot verify that replies are non-boilerplate or that monitoring windows are honored — the founder's weekly review of `POST_LAUNCH_OPS.md` session notes is the backstop for those.
 
 ## 12. Founder-Only Gates
 
@@ -211,6 +217,7 @@ Pause and obtain explicit founder approval before:
 ## 13. Anti-Patterns
 
 - **Launch-and-vanish.** The app is approved, the cockpit says done, and no weekly rhythm exists. Crash regressions, unanswered reviews, and billing leaks compound silently. This is the failure `check:post-launch` exists to catch.
+- **Metrics theater.** The evidence files fill with machinery proof — deploys verified, uploads `COMPLETE`, review states — while no dollar or user number is ever recorded. A retro row reading "unverified — confirm in RevenueCat" weeks past its checkpoint is this miss in table form: the process executed, reality was never read. The weekly log's numbers, not its existence, are the contract.
 - **Boilerplate review replies.** Templated responses pasted across reviews — reads as automated, converts nobody, and wastes the public-reply surface.
 - **Hotfix without monitoring.** Shipping the fix and disengaging before the 24–48-hour window confirms crash-free sessions held and the funnel did not regress.
 - **Involuntary churn treated as inevitable.** Failed payments written off as normal churn instead of routed through the recovery levers in `revenue-monetization.md` §8a.

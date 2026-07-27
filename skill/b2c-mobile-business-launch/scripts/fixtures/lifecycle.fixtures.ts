@@ -12,6 +12,41 @@ export function register(h: Harness): void {
 
   // ── Post-launch operations ────────────────────────────────────────────────
 
+  // The numbers-loop gates are anchored on lanes.post_launch_ops.live_since and
+  // compare against the real current date, so fixtures compute their dates
+  // relative to now — a fixed date would silently change meaning as time passes.
+  const isoDaysAgo = (days: number): string => {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() - days);
+    return date.toISOString().slice(0, 10);
+  };
+
+  const setPostLaunchLive = (root: string, daysLive: number): void => {
+    const state = readState(root);
+    getLane(state, "post_launch_ops")["live_since"] = isoDaysAgo(daysLive);
+    writeState(root, state);
+  };
+
+  const appendWeeklyLogRow = (root: string, options: { daysAgo: number; crashFree?: string; d7?: string; notes?: string }): void => {
+    const runbookPath = path.join(root, "POST_LAUNCH_OPS.md");
+    const header = "| Date | Crash-free % | New reviews (avg rating) | D7 retention | Decision shipped | Notes |\n| --- | --- | --- | --- | --- | --- |";
+    const row = `| ${isoDaysAgo(options.daysAgo)} | ${options.crashFree ?? "99.7%"} | 4.8 (3 new) | ${options.d7 ?? "31%"} | shipped paywall copy fix | ${options.notes ?? "MRR $412 (+3%)"} |`;
+    writeFileSync(path.join(runbookPath), readFileSync(runbookPath, "utf8").replace(header, `${header}\n${row}`), "utf8");
+  };
+
+  const completeCheckpoint = (
+    root: string,
+    checkpoint: "Day 30" | "Day 90",
+    options: { daysAgo: number; verdict: string; evidence?: [string, string, string, string] },
+  ): void => {
+    const retroPath = path.join(root, "LAUNCH_RETRO.md");
+    const ev = options.evidence ?? ["$412 MRR, flat 4 wks", "D7 31% → 29% → 31%", "n/a — organic only", "6"];
+    const retro = readFileSync(retroPath, "utf8")
+      .replace(`| ${checkpoint} | | |`, `| ${checkpoint} | ${isoDaysAgo(options.daysAgo)} | founder |`)
+      .replace(`| ${checkpoint} | | | | | | |`, `| ${checkpoint} | ${ev[0]} | ${ev[1]} | ${ev[2]} | ${ev[3]} | ${options.verdict} | |`);
+    writeFileSync(retroPath, retro, "utf8");
+  };
+
   const postLaunchComplete = makeFixture("post-launch-complete");
   {
     const state = readState(postLaunchComplete);
@@ -20,8 +55,65 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
     writeState(postLaunchComplete, state);
+    setPostLaunchLive(postLaunchComplete, 10);
   }
   runFixture("post-launch lane done with complete runbook passes", postLaunchComplete, "check-post-launch-ops.ts", 0);
+
+  // The live date is the anchor for every due-date and freshness gate; a live
+  // app with no recorded live_since has no clock, so nothing can ever be overdue.
+  const postLaunchNoLiveDate = makeFixture("post-launch-live-date-missing");
+  {
+    const state = readState(postLaunchNoLiveDate);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchNoLiveDate, state);
+  }
+  runFixture("post-launch done without a live_since date fails", postLaunchNoLiveDate, "check-post-launch-ops.ts", 1, "post_launch_ops.live_since_missing");
+
+  // A typo'd calendar value (2026-99-99) must not silently disarm the clock:
+  // Invalid Date math would turn every overdue comparison into NaN === false.
+  const postLaunchBadLiveDate = makeFixture("post-launch-live-date-invalid");
+  {
+    const state = readState(postLaunchBadLiveDate);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["live_since"] = "2026-99-99";
+    writeState(postLaunchBadLiveDate, state);
+  }
+  runFixture("post-launch done with an invalid live_since fails", postLaunchBadLiveDate, "check-post-launch-ops.ts", 1, "post_launch_ops.live_since_missing");
+
+  // A forward-dated launch (negative days live) would suppress every gate too.
+  const postLaunchFutureLiveDate = makeFixture("post-launch-live-date-future");
+  {
+    const state = readState(postLaunchFutureLiveDate);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["live_since"] = isoDaysAgo(-30);
+    writeState(postLaunchFutureLiveDate, state);
+  }
+  runFixture("post-launch done with a future live_since fails", postLaunchFutureLiveDate, "check-post-launch-ops.ts", 1, "post_launch_ops.live_since_missing");
+
+  // A phase_6 project cannot dodge the numbers by leaving the lane partial:
+  // the launch-and-vanish repos observed in the wild never marked the lane done.
+  const postLaunchPhaseVanish = makeFixture("post-launch-phase-vanish");
+  {
+    const state = readState(postLaunchPhaseVanish);
+    expectRecord(state.project, "project")["phase"] = "phase_6";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "partial";
+    writeState(postLaunchPhaseVanish, state);
+    setPostLaunchLive(postLaunchPhaseVanish, 20);
+  }
+  runFixture(
+    "post-launch phase with a partial lane and an empty weekly log fails",
+    postLaunchPhaseVanish,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_log_missing",
+  );
 
   const postLaunchNoRunbook = makeFixture("post-launch-no-runbook");
   {
@@ -39,6 +131,7 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md"];
     writeState(postLaunchNoRetro, state);
+    setPostLaunchLive(postLaunchNoRetro, 10);
     rmSync(path.join(postLaunchNoRetro, "LAUNCH_RETRO.md"));
   }
   runFixture("post-launch done without launch retro fails", postLaunchNoRetro, "check-post-launch-ops.ts", 1, "post_launch_ops.launch_retro_missing");
@@ -52,6 +145,7 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
     writeState(postLaunchNoVerdict, state);
+    setPostLaunchLive(postLaunchNoVerdict, 10);
     writeFileSync(
       path.join(postLaunchNoVerdict, "LAUNCH_RETRO.md"),
       ["# Launch Retro", "", "## Lane Usage", "", "## Stalls And Blockers", "", "## Surprises", "", "## Failure Card Candidates"].join("\n"),
@@ -75,6 +169,7 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
     writeState(postLaunchProsePhrase, state);
+    setPostLaunchLive(postLaunchProsePhrase, 10);
     writeFileSync(
       path.join(postLaunchProsePhrase, "LAUNCH_RETRO.md"),
       ["# Launch Retro", "", "## Surprises", "", "We should think about kill, hold, or scale at some point.", "", "## Failure Card Candidates"].join("\n"),
@@ -92,13 +187,6 @@ export function register(h: Harness): void {
   // The heading alone is words-not-work: once the Retro Window records a
   // completed Day 30/Day 90 pass, the checkpoint's verdict row and the state
   // mirror must both carry the decision.
-  const verdictTemplateRetro = (root: string, options: { day30Date: string; day30Verdict: string }): void => {
-    const retro = readFileSync(path.join(root, "LAUNCH_RETRO.md"), "utf8")
-      .replace("| Day 30 | | |", `| Day 30 | ${options.day30Date} | founder |`)
-      .replace("| Day 30 | | | | | | |", `| Day 30 | flat | declining | n/a | 8 | ${options.day30Verdict} | |`);
-    writeFileSync(path.join(root, "LAUNCH_RETRO.md"), retro, "utf8");
-  };
-
   const postLaunchVerdictEmpty = makeFixture("post-launch-checkpoint-verdict-empty");
   {
     const state = readState(postLaunchVerdictEmpty);
@@ -106,7 +194,9 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
     writeState(postLaunchVerdictEmpty, state);
-    verdictTemplateRetro(postLaunchVerdictEmpty, { day30Date: "2026-06-28", day30Verdict: "" });
+    setPostLaunchLive(postLaunchVerdictEmpty, 40);
+    appendWeeklyLogRow(postLaunchVerdictEmpty, { daysAgo: 3 });
+    completeCheckpoint(postLaunchVerdictEmpty, "Day 30", { daysAgo: 8, verdict: "" });
   }
   runFixture(
     "completed day-30 checkpoint with an empty verdict row fails",
@@ -123,7 +213,9 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
     writeState(postLaunchVerdictNoState, state);
-    verdictTemplateRetro(postLaunchVerdictNoState, { day30Date: "2026-06-28", day30Verdict: "Hold" });
+    setPostLaunchLive(postLaunchVerdictNoState, 40);
+    appendWeeklyLogRow(postLaunchVerdictNoState, { daysAgo: 3 });
+    completeCheckpoint(postLaunchVerdictNoState, "Day 30", { daysAgo: 8, verdict: "Hold" });
   }
   runFixture(
     "recorded verdict without the PROJECT_STATE mirror fails",
@@ -140,9 +232,15 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "hold";
-    lane["kill_or_scale_decided_at"] = "2026-06-28";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
     writeState(postLaunchVerdictComplete, state);
-    verdictTemplateRetro(postLaunchVerdictComplete, { day30Date: "2026-06-28", day30Verdict: "Hold — flat but positive, low founder cost" });
+    setPostLaunchLive(postLaunchVerdictComplete, 40);
+    appendWeeklyLogRow(postLaunchVerdictComplete, { daysAgo: 3 });
+    completeCheckpoint(postLaunchVerdictComplete, "Day 30", {
+      daysAgo: 8,
+      verdict: "Hold — flat but positive, low founder cost",
+      evidence: ["$412 MRR, flat 4 wks", "D7 31% → 29% → 31%", "n/a — organic only", "6"],
+    });
   }
   runFixture("completed checkpoint with verdict and state mirror passes", postLaunchVerdictComplete, "check-post-launch-ops.ts", 0);
 
@@ -154,10 +252,12 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "hold";
-    lane["kill_or_scale_decided_at"] = "2026-06-28";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
     writeState(postLaunchVerdictNoEvidence, state);
+    setPostLaunchLive(postLaunchVerdictNoEvidence, 40);
+    appendWeeklyLogRow(postLaunchVerdictNoEvidence, { daysAgo: 3 });
     const retro = readFileSync(path.join(postLaunchVerdictNoEvidence, "LAUNCH_RETRO.md"), "utf8")
-      .replace("| Day 30 | | |", "| Day 30 | 2026-06-28 | founder |")
+      .replace("| Day 30 | | |", `| Day 30 | ${isoDaysAgo(8)} | founder |`)
       .replace("| Day 30 | | | | | | |", "| Day 30 | | | | | Hold | |");
     writeFileSync(path.join(postLaunchVerdictNoEvidence, "LAUNCH_RETRO.md"), retro, "utf8");
   }
@@ -169,6 +269,33 @@ export function register(h: Harness): void {
     "post_launch_ops.kill_or_scale_evidence_unfilled",
   );
 
+  // The clueless-clothing miss: every evidence cell filled with "unverified —
+  // confirm in RevenueCat". Non-empty placeholder text is still not a number.
+  const postLaunchEvidencePlaceholder = makeFixture("post-launch-evidence-placeholder");
+  {
+    const state = readState(postLaunchEvidencePlaceholder);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "hold";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
+    writeState(postLaunchEvidencePlaceholder, state);
+    setPostLaunchLive(postLaunchEvidencePlaceholder, 40);
+    appendWeeklyLogRow(postLaunchEvidencePlaceholder, { daysAgo: 3 });
+    completeCheckpoint(postLaunchEvidencePlaceholder, "Day 30", {
+      daysAgo: 8,
+      verdict: "Hold",
+      evidence: ["unverified — confirm in RevenueCat", "unverified — confirm in PostHog", "n/a", "8"],
+    });
+  }
+  runFixture(
+    "evidence cells filled with unverified placeholders fail",
+    postLaunchEvidencePlaceholder,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_evidence_placeholder",
+  );
+
   // The state mirror must agree with the latest completed checkpoint's verdict.
   const postLaunchVerdictMismatch = makeFixture("post-launch-verdict-state-mismatch");
   {
@@ -177,9 +304,11 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "scale";
-    lane["kill_or_scale_decided_at"] = "2026-06-28";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
     writeState(postLaunchVerdictMismatch, state);
-    verdictTemplateRetro(postLaunchVerdictMismatch, { day30Date: "2026-06-28", day30Verdict: "Hold" });
+    setPostLaunchLive(postLaunchVerdictMismatch, 40);
+    appendWeeklyLogRow(postLaunchVerdictMismatch, { daysAgo: 3 });
+    completeCheckpoint(postLaunchVerdictMismatch, "Day 30", { daysAgo: 8, verdict: "Hold" });
   }
   runFixture(
     "state mirror disagreeing with the retro verdict fails",
@@ -188,6 +317,367 @@ export function register(h: Harness): void {
     1,
     "post_launch_ops.kill_or_scale_state_mismatch",
   );
+
+  // The zombie dodge the day-30 gate cannot see: never complete the checkpoint
+  // at all. Once the app has been live past the due date plus grace, an
+  // untouched Retro Window row is itself the failure.
+  const postLaunchDay30Overdue = makeFixture("post-launch-day30-overdue");
+  {
+    const state = readState(postLaunchDay30Overdue);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchDay30Overdue, state);
+    setPostLaunchLive(postLaunchDay30Overdue, 45);
+    appendWeeklyLogRow(postLaunchDay30Overdue, { daysAgo: 3 });
+  }
+  runFixture(
+    "day-30 checkpoint never completed past its due date fails",
+    postLaunchDay30Overdue,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.checkpoint_overdue.day_30",
+  );
+
+  // Launch-and-vanish in its purest form: live past two weeks, weekly log empty.
+  const postLaunchWeeklyMissing = makeFixture("post-launch-weekly-log-missing");
+  {
+    const state = readState(postLaunchWeeklyMissing);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchWeeklyMissing, state);
+    setPostLaunchLive(postLaunchWeeklyMissing, 20);
+  }
+  runFixture(
+    "live past two weeks with an empty weekly log fails",
+    postLaunchWeeklyMissing,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_log_missing",
+  );
+
+  const postLaunchWeeklyStale = makeFixture("post-launch-weekly-log-stale");
+  {
+    const state = readState(postLaunchWeeklyStale);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "hold";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(10);
+    writeState(postLaunchWeeklyStale, state);
+    setPostLaunchLive(postLaunchWeeklyStale, 45);
+    appendWeeklyLogRow(postLaunchWeeklyStale, { daysAgo: 20 });
+    completeCheckpoint(postLaunchWeeklyStale, "Day 30", {
+      daysAgo: 10,
+      verdict: "Hold",
+      evidence: ["$210 MRR, flat", "D7 24% stable", "n/a — organic only", "5"],
+    });
+  }
+  runFixture("latest weekly log row older than two weeks fails", postLaunchWeeklyStale, "check-post-launch-ops.ts", 1, "post_launch_ops.weekly_log_stale");
+
+  // A fresh row whose metric cells hold adjectives or "unverified" instead of
+  // numbers is the metrics-theater variant of the same miss.
+  const postLaunchWeeklyPlaceholder = makeFixture("post-launch-weekly-numbers-placeholder");
+  {
+    const state = readState(postLaunchWeeklyPlaceholder);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchWeeklyPlaceholder, state);
+    setPostLaunchLive(postLaunchWeeklyPlaceholder, 20);
+    appendWeeklyLogRow(postLaunchWeeklyPlaceholder, { daysAgo: 2, crashFree: "unverified", d7: "looks fine" });
+  }
+  runFixture("weekly log row without real numbers fails", postLaunchWeeklyPlaceholder, "check-post-launch-ops.ts", 1, "post_launch_ops.weekly_numbers_missing");
+
+  // A recycled pre-launch date in the Retro Window is not a completion: the
+  // window is anchored to live_since, so a date before launch suppresses nothing.
+  const postLaunchPrelaunchDate = makeFixture("post-launch-checkpoint-prelaunch-date");
+  {
+    const state = readState(postLaunchPrelaunchDate);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchPrelaunchDate, state);
+    setPostLaunchLive(postLaunchPrelaunchDate, 45);
+    appendWeeklyLogRow(postLaunchPrelaunchDate, { daysAgo: 3 });
+    const retroPath = path.join(postLaunchPrelaunchDate, "LAUNCH_RETRO.md");
+    writeFileSync(retroPath, readFileSync(retroPath, "utf8").replace("| Day 30 | | |", `| Day 30 | ${isoDaysAgo(60)} | founder |`), "utf8");
+  }
+  runFixture(
+    "checkpoint dated before the launch does not suppress the overdue error",
+    postLaunchPrelaunchDate,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.checkpoint_overdue.day_30",
+  );
+
+  // Every evidence column is typed: founder hours must be a number, not prose.
+  const postLaunchKillHoursAdjective = makeFixture("post-launch-kill-hours-adjective");
+  {
+    const state = readState(postLaunchKillHoursAdjective);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "kill";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(25);
+    writeState(postLaunchKillHoursAdjective, state);
+    setPostLaunchLive(postLaunchKillHoursAdjective, 120);
+    completeCheckpoint(postLaunchKillHoursAdjective, "Day 30", { daysAgo: 88, verdict: "Fix" });
+    completeCheckpoint(postLaunchKillHoursAdjective, "Day 90", {
+      daysAgo: 25,
+      verdict: "Kill",
+      evidence: ["$60 MRR declining 4 wks", "D30 4% two cohorts", "n/a — organic only", "looks healthy"],
+    });
+  }
+  runFixture(
+    "kill verdict with prose in the founder-hours cell neither exempts nor passes",
+    postLaunchKillHoursAdjective,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_evidence_unmeasured",
+  );
+
+  // A blocker with an impossible embedded date is a placeholder in disguise.
+  const postLaunchBogusBlocker = makeFixture("post-launch-weekly-bogus-blocker");
+  {
+    const state = readState(postLaunchBogusBlocker);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchBogusBlocker, state);
+    setPostLaunchLive(postLaunchBogusBlocker, 20);
+    appendWeeklyLogRow(postLaunchBogusBlocker, { daysAgo: 2, crashFree: "blocked: Sentry auth 2026-99-99" });
+  }
+  runFixture(
+    "weekly blocker with an impossible date fails the measured-value bar",
+    postLaunchBogusBlocker,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_numbers_missing",
+  );
+
+  // Adjectives in the verdict evidence pack are not measurements: a Kill row
+  // reading "declining / bad" must neither earn the wind-down exemption nor
+  // pass the substance bar.
+  const postLaunchKillAdjectives = makeFixture("post-launch-kill-adjective-evidence");
+  {
+    const state = readState(postLaunchKillAdjectives);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "kill";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(25);
+    writeState(postLaunchKillAdjectives, state);
+    setPostLaunchLive(postLaunchKillAdjectives, 120);
+    completeCheckpoint(postLaunchKillAdjectives, "Day 30", { daysAgo: 88, verdict: "Fix" });
+    completeCheckpoint(postLaunchKillAdjectives, "Day 90", {
+      daysAgo: 25,
+      verdict: "Kill",
+      evidence: ["declining", "bad", "n/a", "8"],
+    });
+  }
+  runFixture(
+    "kill verdict over adjective evidence neither exempts nor passes substance",
+    postLaunchKillAdjectives,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_evidence_unmeasured",
+  );
+
+  // A dollar amount that is not MRR does not satisfy the revenue contract.
+  const postLaunchWrongMoney = makeFixture("post-launch-weekly-wrong-money");
+  {
+    const state = readState(postLaunchWrongMoney);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchWrongMoney, state);
+    setPostLaunchLive(postLaunchWrongMoney, 20);
+    appendWeeklyLogRow(postLaunchWrongMoney, { daysAgo: 2, notes: "ad spend $500 this week" });
+  }
+  runFixture("weekly Notes with a non-MRR dollar amount fails", postLaunchWrongMoney, "check-post-launch-ops.ts", 1, "post_launch_ops.weekly_revenue_missing");
+
+  // The wind-down exemption must be earned: a one-string state edit
+  // (kill_or_scale_decision: kill) with no dated mirror and no Kill verdict in
+  // the retro must not skip the weekly and checkpoint gates.
+  const postLaunchKillStringOnly = makeFixture("post-launch-kill-string-only");
+  {
+    const state = readState(postLaunchKillStringOnly);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "kill";
+    writeState(postLaunchKillStringOnly, state);
+    setPostLaunchLive(postLaunchKillStringOnly, 20);
+  }
+  runFixture(
+    "kill decision without a dated mirror and retro verdict does not exempt the gates",
+    postLaunchKillStringOnly,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_log_missing",
+  );
+
+  // A Kill verdict typed into the verdict table without the Retro Window ever
+  // recording a completed checkpoint is still a dodge: the exemption requires
+  // the checkpoint to have actually happened.
+  const postLaunchKillNoCheckpoint = makeFixture("post-launch-kill-uncompleted-checkpoint");
+  {
+    const state = readState(postLaunchKillNoCheckpoint);
+    expectRecord(state.project, "project")["phase"] = "phase_6";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "partial";
+    lane["kill_or_scale_decision"] = "kill";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(10);
+    writeState(postLaunchKillNoCheckpoint, state);
+    setPostLaunchLive(postLaunchKillNoCheckpoint, 120);
+    const retroPath = path.join(postLaunchKillNoCheckpoint, "LAUNCH_RETRO.md");
+    const retro = readFileSync(retroPath, "utf8").replace(
+      "| Day 90 | | | | | | |",
+      "| Day 90 | $60 MRR declining | D30 under 5% | n/a — organic only | 8 | Kill | |",
+    );
+    writeFileSync(retroPath, retro, "utf8");
+  }
+  runFixture(
+    "kill verdict without a completed retro checkpoint does not exempt the gates",
+    postLaunchKillNoCheckpoint,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.checkpoint_overdue.day_30",
+  );
+
+  // "TBD" or an impossible value in the Date cell is not a completed checkpoint.
+  const postLaunchCheckpointTbd = makeFixture("post-launch-checkpoint-tbd-date");
+  {
+    const state = readState(postLaunchCheckpointTbd);
+    expectRecord(state.project, "project")["phase"] = "phase_6";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "partial";
+    writeState(postLaunchCheckpointTbd, state);
+    setPostLaunchLive(postLaunchCheckpointTbd, 45);
+    appendWeeklyLogRow(postLaunchCheckpointTbd, { daysAgo: 3 });
+    const retroPath = path.join(postLaunchCheckpointTbd, "LAUNCH_RETRO.md");
+    writeFileSync(retroPath, readFileSync(retroPath, "utf8").replace("| Day 30 | | |", "| Day 30 | TBD | founder |"), "utf8");
+  }
+  runFixture(
+    "TBD in the checkpoint date cell does not suppress the overdue error",
+    postLaunchCheckpointTbd,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.checkpoint_overdue.day_30",
+  );
+
+  // A future-dated weekly row must not anchor the freshness math.
+  const postLaunchWeeklyFutureRow = makeFixture("post-launch-weekly-future-row");
+  {
+    const state = readState(postLaunchWeeklyFutureRow);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "hold";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
+    writeState(postLaunchWeeklyFutureRow, state);
+    setPostLaunchLive(postLaunchWeeklyFutureRow, 45);
+    appendWeeklyLogRow(postLaunchWeeklyFutureRow, { daysAgo: -5 });
+    completeCheckpoint(postLaunchWeeklyFutureRow, "Day 30", {
+      daysAgo: 8,
+      verdict: "Hold",
+      evidence: ["$310 MRR, flat", "D7 27% stable", "n/a — organic only", "5"],
+    });
+  }
+  runFixture(
+    "a future-dated weekly row does not satisfy the freshness gate",
+    postLaunchWeeklyFutureRow,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_log_missing",
+  );
+
+  // The substance bar travels with the phase: a live app whose lane is still
+  // partial cannot record a checkpoint date over an empty verdict row.
+  const postLaunchPhaseEmptyVerdict = makeFixture("post-launch-phase-checkpoint-empty-verdict");
+  {
+    const state = readState(postLaunchPhaseEmptyVerdict);
+    expectRecord(state.project, "project")["phase"] = "phase_6";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "partial";
+    writeState(postLaunchPhaseEmptyVerdict, state);
+    setPostLaunchLive(postLaunchPhaseEmptyVerdict, 45);
+    appendWeeklyLogRow(postLaunchPhaseEmptyVerdict, { daysAgo: 3 });
+    const retroPath = path.join(postLaunchPhaseEmptyVerdict, "LAUNCH_RETRO.md");
+    writeFileSync(retroPath, readFileSync(retroPath, "utf8").replace("| Day 30 | | |", `| Day 30 | ${isoDaysAgo(10)} | founder |`), "utf8");
+  }
+  runFixture(
+    "live phase with a completed checkpoint over an empty verdict row fails",
+    postLaunchPhaseEmptyVerdict,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_verdict_unfilled",
+  );
+
+  // Rates without dollars are not a metrics review: the Notes cell carries MRR.
+  const postLaunchWeeklyNoRevenue = makeFixture("post-launch-weekly-no-revenue");
+  {
+    const state = readState(postLaunchWeeklyNoRevenue);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchWeeklyNoRevenue, state);
+    setPostLaunchLive(postLaunchWeeklyNoRevenue, 20);
+    appendWeeklyLogRow(postLaunchWeeklyNoRevenue, { daysAgo: 2, notes: "quiet week" });
+  }
+  runFixture(
+    "weekly row without an MRR figure in Notes fails",
+    postLaunchWeeklyNoRevenue,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_revenue_missing",
+  );
+
+  // Incidental digits inside adjectives are not measured values.
+  const postLaunchWeeklyAdjective = makeFixture("post-launch-weekly-adjective-numbers");
+  {
+    const state = readState(postLaunchWeeklyAdjective);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchWeeklyAdjective, state);
+    setPostLaunchLive(postLaunchWeeklyAdjective, 20);
+    appendWeeklyLogRow(postLaunchWeeklyAdjective, { daysAgo: 2, crashFree: "iOS 17 looks fine", d7: "D7 looks fine 4 sure" });
+  }
+  runFixture(
+    "adjectives with incidental digits fail the measured-value bar",
+    postLaunchWeeklyAdjective,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_numbers_missing",
+  );
+
+  // A recorded Kill verdict is the one legitimate way for the rhythm to stop:
+  // wind-down quiet must not read as launch-and-vanish.
+  const postLaunchKilledQuiet = makeFixture("post-launch-killed-app-quiet");
+  {
+    const state = readState(postLaunchKilledQuiet);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "kill";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(25);
+    writeState(postLaunchKilledQuiet, state);
+    setPostLaunchLive(postLaunchKilledQuiet, 120);
+    completeCheckpoint(postLaunchKilledQuiet, "Day 30", {
+      daysAgo: 88,
+      verdict: "Fix",
+      evidence: ["$95 MRR declining", "D7 18% → 14%", "n/a — organic only", "9"],
+    });
+    completeCheckpoint(postLaunchKilledQuiet, "Day 90", {
+      daysAgo: 25,
+      verdict: "Kill",
+      evidence: ["$60 MRR declining 4 wks", "D30 under 5% two cohorts", "n/a — organic only", "8"],
+    });
+  }
+  runFixture("killed app in wind-down with a quiet weekly log passes", postLaunchKilledQuiet, "check-post-launch-ops.ts", 0);
 
   // ── Portfolio registry ────────────────────────────────────────────────────
 
@@ -267,6 +757,7 @@ export function register(h: Harness): void {
     lane["status"] = "done";
     lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
     writeState(postLaunchThin, state);
+    setPostLaunchLive(postLaunchThin, 10);
     writeFileSync(
       path.join(postLaunchThin, "POST_LAUNCH_OPS.md"),
       ["# Post-Launch Operations", "We will check Sentry sometimes and reply to reviews when there is time."].join("\n"),
