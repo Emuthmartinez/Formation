@@ -540,6 +540,37 @@ export function register(h: Harness): void {
   );
   runFixture("done product spec without a named moat class fails", specNoMoatClass, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
+  // A prose mention satisfies the section-name scan but carries no section —
+  // the substance checks run against nothing and fail.
+  const specMoatProseMention = makeFixture("product-spec-moat-prose-mention");
+  setLaneDone(specMoatProseMention, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatProseMention, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }).replace("## Differentiation And Moat", "Differentiation And Moat: covered in the strategy docs."),
+    "utf8",
+  );
+  runFixture(
+    "a prose mention of the moat section without the section fails",
+    specMoatProseMention,
+    "check-product-spec.ts",
+    1,
+    "product_spec.incumbent_row_missing",
+  );
+
+  // "pending" is not a copy-test answer.
+  const specCopyTestPending = makeFixture("product-spec-copy-test-pending");
+  setLaneDone(specCopyTestPending, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specCopyTestPending, "SPEC.md"),
+    specSections({ row: realIncumbentRow, moatClass: "data — per-user miss history compounds weekly", copyTest: "pending" }),
+    "utf8",
+  );
+  runFixture("a placeholder one-week-copy answer fails", specCopyTestPending, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
+
   // ── check-launch-trace ────────────────────────────────────────────────────
 
   const traceBaseline = makeFixture("launch-trace-baseline");

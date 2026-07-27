@@ -89,8 +89,11 @@ if (text) {
   // one-week-copy test answer. Section-header presence alone is the
   // positioning-theater miss the 2026-07-26 audit found on real launches.
   if (done) {
+    // An absent or empty section runs the same substance checks against
+    // nothing — a prose mention or an off-level heading must not skip the
+    // gate the section exists to carry.
     const moatSection = markdownSection(text, "Differentiation And Moat");
-    if (moatSection) {
+    {
       const MOAT_PLACEHOLDER = /\b(unverified|tbd|todo|pending|placeholder)\b/i;
       // Data rows only: the first pipe line is the header and is dropped by
       // position, not by keyword — a real competitor whose row mentions
@@ -129,7 +132,9 @@ if (text) {
           ),
         );
       }
-      if (!/one-week-copy test answer:\s*\S/i.test(moatSection)) {
+      const copyTestAnswer = (moatSection.match(/one-week-copy test answer:\s*(.*)$/im)?.[1] ?? "").trim();
+      const copyTestSubstantive = copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 && !MOAT_PLACEHOLDER.test(copyTestAnswer);
+      if (!copyTestSubstantive) {
         issues.push(
           issue(
             "error",
