@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, skillRoot } from "./_harness.js";
 import { auditExcludedScripts, buildAuditPlan, type AuditLayout } from "../lib/audit-plan.js";
@@ -267,6 +267,45 @@ export function register(h: Harness): void {
     "render-business-control-plane-workspace.ts",
     ["--root", path.join(skillRoot, "templates"), "--out", path.join(skillRoot, "state", "workspace.generated.json"), "--check"],
     0,
+  );
+
+  // Aggregate mode: repeated --business dirs concatenate into one board over
+  // the same per-business adapter. Distinct slugs render; colliding slugs fail
+  // loudly instead of silently overlaying rows.
+  const aggregateRoot = makeEmptyFixture("workspace-aggregate");
+  const aggregateA = path.join(aggregateRoot, "business-a");
+  const aggregateB = path.join(aggregateRoot, "business-b");
+  cpSync(path.join(skillRoot, "templates"), aggregateA, { recursive: true });
+  cpSync(path.join(skillRoot, "templates"), aggregateB, { recursive: true });
+  writeFileSync(
+    path.join(aggregateB, "state", "business.json"),
+    readFileSync(path.join(aggregateB, "state", "business.json"), "utf8").replace(/"slug": "[^"]*"/, '"slug": "second-app"'),
+    "utf8",
+  );
+  runScriptArgs(
+    "aggregate render concatenates two businesses onto one board",
+    "render-business-control-plane-workspace.ts",
+    ["--business", aggregateA, "--business", aggregateB, "--out", path.join(aggregateRoot, "board.json")],
+    0,
+  );
+  runScriptArgs(
+    "aggregate check passes against the freshly rendered board",
+    "render-business-control-plane-workspace.ts",
+    ["--business", aggregateA, "--business", aggregateB, "--out", path.join(aggregateRoot, "board.json"), "--check"],
+    0,
+  );
+
+  const aggregateDupRoot = makeEmptyFixture("workspace-aggregate-duplicate-id");
+  const aggregateDupA = path.join(aggregateDupRoot, "business-a");
+  const aggregateDupB = path.join(aggregateDupRoot, "business-b");
+  cpSync(path.join(skillRoot, "templates"), aggregateDupA, { recursive: true });
+  cpSync(path.join(skillRoot, "templates"), aggregateDupB, { recursive: true });
+  runScriptArgs(
+    "aggregate render fails when two businesses share a slug",
+    "render-business-control-plane-workspace.ts",
+    ["--business", aggregateDupA, "--business", aggregateDupB, "--out", path.join(aggregateDupRoot, "board.json")],
+    1,
+    "business_workspace.duplicate_business_id",
   );
 
   const workspaceDrift = makeEmptyFixture("workspace-check-drift");
