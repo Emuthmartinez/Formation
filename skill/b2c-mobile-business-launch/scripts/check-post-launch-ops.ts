@@ -13,6 +13,12 @@
  *   3. done additionally requires: a named crash route (Sentry or store crash
  *      reports), a stated review-response SLA, a retention cohort source, and
  *      LAUNCH_RETRO.md on disk so the retro loop feeds failure cards.
+ *   4. The numbers loop: lanes.post_launch_ops.live_since anchors the clock;
+ *      day-30/day-90 retro checkpoints cannot sit uncompleted past their due
+ *      date, evidence cells cannot hold placeholder text ("unverified — confirm
+ *      in RevenueCat"), and the weekly log must carry dated rows with real
+ *      numbers once the app has been live past two weeks. A recorded Kill
+ *      verdict is the one legitimate way for the rhythm to go quiet.
  *
  * Launch-and-vanish — shipping the store release with no operating rhythm —
  * is the failure this catches. See references/post-launch-operations.md.
@@ -99,7 +105,139 @@ for (const section of requiredSections) {
   }
 }
 
-// ── Check 2: done-status proof floor ────────────────────────────────────────
+// ── Check 2: the numbers loop ───────────────────────────────────────────────
+// A live app is measured in dollars and users, not deploy logs. Everything
+// below hangs off lanes.post_launch_ops.live_since: checkpoint due dates and
+// weekly-log freshness compare against the current date. Severity is error on
+// a done lane and warning while the lane is still being claimed, so the gap is
+// visible early and blocking at readiness.
+
+const numbersSeverity = laneDone ? "error" : "warning";
+const MS_PER_DAY = 86_400_000;
+const CHECKPOINT_GRACE_DAYS = 7;
+const WEEKLY_STALE_DAYS = 14;
+// The lazy fills observed on real launches: text that occupies the cell so the
+// row looks done while the number never arrived.
+const PLACEHOLDER_TEXT = /\b(unverified|tbd|todo|to be filled|pending|confirm in|placeholder)\b/i;
+
+const liveSinceRaw = state ? (asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "").trim() : "";
+const liveSince = /^\d{4}-\d{2}-\d{2}$/.test(liveSinceRaw) ? new Date(`${liveSinceRaw}T00:00:00Z`) : undefined;
+const daysLive = liveSince ? Math.floor((Date.now() - liveSince.getTime()) / MS_PER_DAY) : 0;
+const killDecided = state ? /^kill$/i.test((asString(getPath(state, "lanes.post_launch_ops.kill_or_scale_decision")) ?? "").trim()) : false;
+
+if (!liveSince) {
+  issues.push(
+    issue(
+      numbersSeverity,
+      "post_launch_ops.live_since_missing",
+      "lanes.post_launch_ops.live_since records no ISO date for when the app went live. Without it nothing can ever be overdue — " +
+        "no retro checkpoint has a due date and the weekly log has no freshness bar. Record the first approved-for-sale date once; it never changes.",
+      "PROJECT_STATE.yaml",
+    ),
+  );
+}
+
+const retroFile = ["LAUNCH_RETRO.md", "post-launch/LAUNCH_RETRO.md"].find((candidate) => existsSync(path.join(args.root, candidate)));
+const retroText = retroFile ? (readText(args.root, retroFile) ?? "") : "";
+
+if (liveSince && !killDecided) {
+  // Checkpoints that were never completed are the dodge the verdict gates
+  // cannot see: every existing check fires only after a completion date is
+  // recorded. Past due-plus-grace, the untouched row is itself the miss.
+  const retroWindow = markdownSection(retroText, "Retro Window");
+  const checkpoints: Array<{ label: string; dueDays: number; code: string; severity: "error" | "warning" }> = [
+    { label: "Launch \\+7 days", dueDays: 7, code: "launch_7", severity: "warning" },
+    { label: "Day 30", dueDays: 30, code: "day_30", severity: numbersSeverity },
+    { label: "Day 90", dueDays: 90, code: "day_90", severity: numbersSeverity },
+  ];
+  for (const checkpoint of checkpoints) {
+    const completed = Boolean(tableRowCells(retroWindow, checkpoint.label)[2]?.trim());
+    if (!completed && daysLive > checkpoint.dueDays + CHECKPOINT_GRACE_DAYS) {
+      issues.push(
+        issue(
+          checkpoint.severity,
+          `post_launch_ops.checkpoint_overdue.${checkpoint.code}`,
+          `The app has been live ${daysLive} days and the ${checkpoint.label.replaceAll("\\", "")} retro checkpoint in ${retroFile ?? "LAUNCH_RETRO.md"} ` +
+            `is still not completed (due at day ${checkpoint.dueDays}, grace ${CHECKPOINT_GRACE_DAYS} days). An uncompleted checkpoint is how the ` +
+            `kill-or-scale question gets dodged indefinitely — run the checkpoint now and record its date in the Retro Window.`,
+          retroFile ?? "LAUNCH_RETRO.md",
+        ),
+      );
+    }
+  }
+
+  // The weekly log is where the Weekly Ops Review proves it read reality.
+  // Once the app has been live past two weeks, the log needs dated rows, the
+  // latest row must be recent, and its metric cells must hold numbers — not
+  // adjectives, not "unverified".
+  if (daysLive >= WEEKLY_STALE_DAYS) {
+    const runbookLines = runbook.split(/\r?\n/);
+    const headerIndex = runbookLines.findIndex(
+      (line) => line.trim().startsWith("|") && /date/i.test(line) && /crash-free/i.test(line) && /retention|d7/i.test(line),
+    );
+    if (headerIndex === -1) {
+      issues.push(
+        issue(
+          numbersSeverity,
+          "post_launch_ops.weekly_log_missing",
+          `${runbookPath} no longer carries the weekly log table (Date | Crash-free % | … | D7 retention). The log is the proof the ` +
+            `Weekly Ops Review reads real numbers each week — keep the table and add one dated row per session.`,
+          runbookPath,
+        ),
+      );
+    } else {
+      const headerCells = runbookLines[headerIndex]!.split("|");
+      const crashColumn = headerCells.findIndex((cell) => /crash-free/i.test(cell));
+      const retentionColumn = headerCells.findIndex((cell) => /d7|retention/i.test(cell));
+      const dateRows: Array<{ date: Date; cells: string[] }> = [];
+      for (let i = headerIndex + 1; i < runbookLines.length; i += 1) {
+        const line = runbookLines[i]?.trim() ?? "";
+        if (!line.startsWith("|")) break;
+        const match = line.match(/^\|\s*(\d{4}-\d{2}-\d{2})\s*\|/);
+        if (match) dateRows.push({ date: new Date(`${match[1]}T00:00:00Z`), cells: line.split("|").map((cell) => cell.trim()) });
+      }
+      if (dateRows.length === 0) {
+        issues.push(
+          issue(
+            numbersSeverity,
+            "post_launch_ops.weekly_log_missing",
+            `The app has been live ${daysLive} days and the weekly log in ${runbookPath} has no dated rows. A live business with an empty ` +
+              `weekly log is launch-and-vanish in progress — run the Weekly Ops Review and record the numbers (or record the Kill verdict if the app is wound down).`,
+            runbookPath,
+          ),
+        );
+      } else {
+        const latest = dateRows.reduce((a, b) => (a.date.getTime() >= b.date.getTime() ? a : b));
+        const rowAgeDays = Math.floor((Date.now() - latest.date.getTime()) / MS_PER_DAY);
+        if (rowAgeDays > WEEKLY_STALE_DAYS) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.weekly_log_stale",
+              `The latest weekly log row in ${runbookPath} is ${rowAgeDays} days old. The Weekly Ops Review runs even in a quiet week — ` +
+                `a stale log means the rhythm stopped and nobody recorded why. Run the session, or record the Kill verdict if the app is wound down.`,
+              runbookPath,
+            ),
+          );
+        }
+        const metricCells = [crashColumn, retentionColumn].filter((index) => index > 0).map((index) => latest.cells[index] ?? "");
+        if (metricCells.some((cell) => !/\d/.test(cell) || PLACEHOLDER_TEXT.test(cell))) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.weekly_numbers_missing",
+              `The latest weekly log row in ${runbookPath} holds no real numbers in its crash-free/retention cells. "unverified" and adjectives ` +
+                `are not a metrics review — pull the values from Sentry, PostHog, and RevenueCat, or record the dated blocker that prevents the pull.`,
+              runbookPath,
+            ),
+          );
+        }
+      }
+    }
+  }
+}
+
+// ── Check 3: done-status proof floor ────────────────────────────────────────
 
 if (laneDone) {
   if (!includesAny(runbook, ["sentry", "store crash reports", "crash reports in app store connect", "play console vitals"])) {
@@ -200,6 +338,19 @@ if (laneDone) {
               "post_launch_ops.kill_or_scale_evidence_unfilled",
               `${retroPath}'s ${checkpoint} Kill, Hold, Or Scale row is missing evidence cells (MRR trend, retention trend, unit economics, founder hours). ` +
                 `A verdict without the evidence pack is a mood, not a decision — fill every evidence column from RevenueCat, PostHog, and the weekly log.`,
+              retroPath,
+            ),
+          );
+        } else if (evidenceCells.some((cell) => PLACEHOLDER_TEXT.test(cell))) {
+          // Non-empty is not the bar: "unverified — confirm in RevenueCat" fills
+          // the cell while dodging the pull. The number, or the dated blocker
+          // that prevents it, is the only content that counts.
+          issues.push(
+            issue(
+              "error",
+              "post_launch_ops.kill_or_scale_evidence_placeholder",
+              `${retroPath}'s ${checkpoint} Kill, Hold, Or Scale row carries placeholder text ("unverified", "TBD", "confirm in …") in its evidence cells. ` +
+                `Pull the actual values from RevenueCat and PostHog before recording the verdict — a decision made over placeholders is the metrics-theater miss.`,
               retroPath,
             ),
           );
