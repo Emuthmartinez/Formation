@@ -18,12 +18,19 @@ project:
   slug: "app-name"
   owner: "Founder or team"
   phase: "phase_0_orient"
-  # Launch scope sizes the work to the product: "full" runs every area; "essentials"
-  # defers the named optional areas with dated reasons (see launch-phases.md). Confirm the
-  # scope with the founder at orient; record changes here. Named "scope" rather than "tier"
-  # because "tier" collides with the founder's own app pricing tiers. The legacy
-  # project.launch_tier key and its "lite" value are still read, so older state files work.
-  launch_scope: "full"
+  # Launch scope sizes the work to the product: "essentials" (the recommended default
+  # for a first launch) runs the core spine and defers the named breadth areas with
+  # dated reasons; "full" runs every area and is a deliberate flagship choice (see
+  # launch-phases.md "Launch Scopes"). Confirm the scope with the founder at orient;
+  # record changes here. Named "scope" rather than "tier" because "tier" collides with
+  # the founder's own app pricing tiers. The legacy project.launch_tier key and its
+  # "lite" value are still read, so older state files work.
+  launch_scope: "essentials"
+  # ISO date orient completed — the pre-build clock. validate:launch-state warns
+  # when the project is still in phases 0-2 more than 45 days after kickoff
+  # (project.pre_build_stall): cut scope, re-run Go/Pivot/Kill, or record the
+  # deliberate founder choice to continue. Most dead launches die in planning.
+  kickoff_date: ""
   platforms:
     - ios
   bundle_ids:
