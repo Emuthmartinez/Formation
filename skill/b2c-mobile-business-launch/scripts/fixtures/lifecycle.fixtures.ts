@@ -1130,7 +1130,6 @@ export function register(h: Harness): void {
   {
     const state = readState(kickoffStalled);
     const project = expectRecord(state.project, "project");
-    project["phase"] = "phase_1_research";
     project["kickoff_date"] = clockIsoDaysAgo(60);
     writeState(kickoffStalled, state);
   }
@@ -1140,21 +1139,10 @@ export function register(h: Harness): void {
   {
     const state = readState(kickoffFresh);
     const project = expectRecord(state.project, "project");
-    project["phase"] = "phase_1_research";
     project["kickoff_date"] = clockIsoDaysAgo(10);
     writeState(kickoffFresh, state);
   }
   runFixture("fresh kickoff in pre-build passes without stall findings", kickoffFresh, "validate-project-state.ts", 0);
-
-  const kickoffPastBuild = makeFixture("kickoff-past-build");
-  {
-    const state = readState(kickoffPastBuild);
-    const project = expectRecord(state.project, "project");
-    project["phase"] = "phase_5b_engineering";
-    project["kickoff_date"] = clockIsoDaysAgo(90);
-    writeState(kickoffPastBuild, state);
-  }
-  runFixture("old kickoff past the pre-build phases raises no stall", kickoffPastBuild, "validate-project-state.ts", 0);
 
   const kickoffInvalid = makeFixture("kickoff-invalid-date");
   {

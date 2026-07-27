@@ -68,6 +68,10 @@ Do not turn "prepare an interview for my friend" into an unexplained formal-rese
 
 The founder's request to prepare the friend conversation is authorization to prepare the reversible guide, not to spend money, recruit strangers, or claim formal validation. An unpaid informal chat that stores no sensitive data is not automatically a protected legal/privacy gate; apply stricter review only when the actual topic, population, claims, recording, or data handling requires it.
 
+### The Consumer-Norm Evidence Bar
+
+The example above generalizes. The evidence bar for a consumer app is consumer-app norms: store and competitor data, review mining, social language, keyword demand, and a live waitlist or purchase funnel. It is **not** research governance. Do not invent formative-interview programs gated behind privacy reviewers, external encrypted data planes, participant compensation approvals, or role-separated dry runs for a consumer utility — that apparatus produced zero customer proof in two months on a real launch before the founder retired it by hand. Escalate the bar only when a hard constraint forces it — medical or health claims, minors as a target audience, a regulated category — and even then propose the minimum that satisfies the constraint, as a founder decision with the cost stated.
+
 ## Doppler And Login Model
 
 Refresh official Doppler docs and local CLI help before setup. Current source anchors:

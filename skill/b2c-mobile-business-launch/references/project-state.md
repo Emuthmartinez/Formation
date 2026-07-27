@@ -25,6 +25,10 @@ Lane statuses must be one of:
 
 Never mark a lane `done` from prose alone. It needs evidence paths or live proof.
 
+## The Pre-Build Clock
+
+Record `project.kickoff_date` (ISO) when orient completes. Pre-build work — research through design, phases 0–2 — is a means, not a residence: on an essentials scope the target is a submitted build within about six founder-weeks. `validate:launch-state` errors on an invalid or future kickoff date and warns (`project.pre_build_stall`) when a launch is still in phases 0–2 more than 45 days after kickoff. The response is a founder decision, not silence — cut scope to essentials, run the Go/Pivot/Kill checkpoint again, or record the deliberate choice to continue with a dated reason. Most launches that die do so here, quietly; the clock makes the quiet visible.
+
 ## Lane Dependency Contract
 
 Lanes are not independent. `SKILL.md`'s Operating Posture rule — "Lock phase outputs before depending on them. No design from an unlocked spec, no ASO from an unlocked name" — and the Flow Gates in [`flow-traceability.md`](flow-traceability.md) describe real edges between them. `check:lane-coverage` enforces those edges mechanically:
