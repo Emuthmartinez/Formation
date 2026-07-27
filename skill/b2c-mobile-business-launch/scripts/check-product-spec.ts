@@ -114,7 +114,15 @@ if (text) {
       })();
       // Escaped pipes are content, not column breaks — "iOS \\| Android"
       // must stay one cell so later columns do not shift.
-      const splitCells = (line: string): string[] => line.split(/(?<!\\)\|/).map((cell) => cell.replace(/\\\|/g, "|").trim());
+      // Boundary pipes are table syntax, not cells — a row without the
+      // optional trailing pipe has the same four logical cells.
+      const splitCells = (line: string): string[] =>
+        line
+          .trim()
+          .replace(/^\|/, "")
+          .replace(/\|$/, "")
+          .split(/(?<!\\)\|/)
+          .map((cell) => cell.replace(/\\\|/g, "|").trim());
       const incumbentRows = moatTableLines
         .slice(1)
         .filter((line) => !/_example/i.test(line))
@@ -140,17 +148,24 @@ if (text) {
       };
       // Distinct incumbents only: the same row twice is still a category of
       // one.
+      // The incumbents are grounded in research: an invented competitor with
+      // filled cells benchmarks nothing. When RESEARCH.md is readable, each
+      // counted name must appear in it.
+      const researchText = readText(args.root, "RESEARCH.md") ?? readText(args.root, "research/RESEARCH.md");
+      const normalizeName = (value: string): string => value.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+      const normalizedResearch = researchText ? normalizeName(researchText) : undefined;
       const realRowCount = new Set(
         incumbentRows
           .filter(
             (cells) =>
-              cells.length >= 6 &&
-              cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell) && !MOAT_NEGATIVE_CELL.test(cell)) &&
+              cells.length >= 4 &&
+              cells.slice(0, 4).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell) && !MOAT_NEGATIVE_CELL.test(cell)) &&
               // A blocker cell that concedes the week-one copy is not a
               // blocker.
-              !concedesTest(cells[4] ?? ""),
+              !concedesTest(cells[3] ?? "") &&
+              (!normalizedResearch || normalizedResearch.includes(normalizeName(cells[0] ?? ""))),
           )
-          .map((cells) => (cells[1] ?? "").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")),
+          .map((cells) => normalizeName(cells[0] ?? "")),
       ).size;
       // §3 benchmarks the top 2–3 incumbents — one row compares against a
       // category of one.
@@ -160,7 +175,7 @@ if (text) {
             "error",
             "product_spec.incumbent_row_missing",
             "Differentiation And Moat has fewer than two real incumbent rows (top 2-3 competitors by revenue, what each does well, the beat moment, what stops " +
-              "a week-one copy — every cell filled). Benchmarking against nobody is how a commodity idea ships with excellent process compliance.",
+              "a week-one copy — every cell filled, each incumbent named in RESEARCH.md). Benchmarking against nobody is how a commodity idea ships with excellent process compliance.",
             "SPEC.md",
           ),
         );
@@ -181,27 +196,32 @@ if (text) {
       // workflow, … moat" names every taxonomy word while conceding all of
       // them. The doctrine's V1 exception ("no moat yet, racing to build X")
       // is honored only when X is a named class with a real date.
-      const v1ExceptionMatch = moatClassValue.match(
-        /no moat yet[^\n]*?\b(?:build\w*|racing|accru\w*|grow\w*)\b[^\n]{0,15}?\b(data|workflow|community|taste|model|distribution)\b[^\n]*?(\d{4}-\d{2}-\d{2})/i,
-      );
-      const v1ExceptionDate = v1ExceptionMatch?.[2] ?? "";
-      // The exception commits to building the class — "we will not build
-      // data by <date>" captures the same words while refusing the plan.
-      const v1ExceptionSpan = (v1ExceptionMatch?.[0] ?? "").replace(/^no moat yet/i, "");
-      const v1CommitmentAffirmed =
-        /\b(build|building|racing|accru\w*|grow\w*)\b/i.test(v1ExceptionSpan) &&
-        !/\b(not|never|won'?t|will not|cannot|can'?t|aren'?t|isn'?t|don'?t|doesn'?t|no plans? to)\b/i.test(v1ExceptionSpan);
+      // The exception commits, in one clause, to building the named class —
+      // no character ceiling, no riding on taxonomy words elsewhere, no
+      // negated commitments or negated revisits.
+      const v1Applies = /no moat yet/i.test(moatClassValue);
+      const v1BuildClause = moatClassValue
+        .split(/[.;,()|]/)
+        .find(
+          (clause) =>
+            /\b(build\w*|racing|accru\w*|grow\w*)\b/i.test(clause) &&
+            /\b(data|workflow|community|taste|model|distribution)\b/i.test(clause) &&
+            !/\b(not|never|won'?t|will not|cannot|can'?t|aren'?t|isn'?t|don'?t|doesn'?t|no plans? to)\b/i.test(clause),
+        );
+      const v1DateMatch = moatClassValue.match(/(\d{4}-\d{2}-\d{2})/);
+      const v1ExceptionDate = v1DateMatch?.[1] ?? "";
       const v1ExceptionParsed = new Date(`${v1ExceptionDate}T00:00:00Z`);
-      const v1ExceptionValid = Boolean(
-        v1ExceptionMatch &&
-        !Number.isNaN(v1ExceptionParsed.getTime()) &&
-        v1ExceptionParsed.toISOString().slice(0, 10) === v1ExceptionDate &&
-        // Named, dated, AND revisited at day 30 — an annual retro is the
-        // "moat someday" state wearing a commitment.
+      const v1RevisitOk =
         /\b(day[- ]?30|30[- ]day|d-?30)\b[^\n]{0,30}\b(retro|revisit)|\b(retro|revisit)\w*\b[^\n]{0,30}\b(day[- ]?30|30[- ]day|d-?30)\b/i.test(
           moatClassValue,
-        ) &&
-        v1CommitmentAffirmed,
+        ) && !/\b(not|never|won'?t|will not|aren'?t|don'?t)\b[^.;\n]{0,15}\b(revisit|retro)/i.test(moatClassValue);
+      const v1ExceptionValid = Boolean(
+        v1Applies &&
+        v1BuildClause &&
+        v1DateMatch &&
+        !Number.isNaN(v1ExceptionParsed.getTime()) &&
+        v1ExceptionParsed.toISOString().slice(0, 10) === v1ExceptionDate &&
+        v1RevisitOk,
       );
       // Clause-level polarity: the taxonomy word must sit in a clause with no
       // negation at all — "data is not a moat" names the class while
@@ -223,8 +243,11 @@ if (text) {
       // collect user history" is a refusal.
       const REFUSED_BUILD =
         /\b(no|not|none|never|without|isn'?t|aren'?t|don'?t|doesn'?t|cannot|can'?t|won'?t)\b\s+(?:\w+\s+){0,2}?(build\w*|collect\w*|accru\w*|grow\w*|gather\w*|store|stor\w*|creat\w*|invest\w*|ship\w*)\b/i;
+      // The head clause is the declared class — praise of the class is not a
+      // plan, so substance is measured on the remaining clauses only.
       const moatPlanSubstantive = moatClassValue
         .split(/[.;,—–:()|]/)
+        .slice(1)
         .some(
           (clause) =>
             !REFUSED_BUILD.test(clause) &&

@@ -20,6 +20,11 @@ Also define:
 - The platform's name direction (3 options with rationale)
 - The tagline (under 8 words)
 - The first 100 users — where do I find them and what do I say?
+- The moat contract for `SPEC.md`'s Differentiation And Moat section: the top 2-3
+  incumbents by revenue (what each does well, the moment we beat them, what stops
+  each shipping a copy in a week), the moat class being built (data / workflow /
+  community / taste / model / distribution) with its concrete build plan, and the
+  one-week-copy test answer
 ```
 
 ## Skill-integration notes

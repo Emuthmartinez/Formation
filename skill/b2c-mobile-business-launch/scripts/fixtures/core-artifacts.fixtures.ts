@@ -511,18 +511,30 @@ export function register(h: Harness): void {
   const secondIncumbentRow =
     "| Streaks | polished native logging, wide device sync | our repair flow at the broken-streak moment | miss-history depth their local-only storage cannot mirror |";
   const twoIncumbentRows = `${realIncumbentRow}\n${secondIncumbentRow}`;
+  // Writes the spec AND grounds its incumbent names in RESEARCH.md — the
+  // validator now cross-checks names against research competitor evidence.
+  const groundIncumbents = (root: string, row: string | null): void => {
+    const names = (row ?? "")
+      .split("\n")
+      .map((line) => (line.replace(/^\|/, "").split(/(?<!\\)\|/)[0] ?? "").trim())
+      .filter(Boolean);
+    if (names.length === 0) return;
+    const researchPath = path.join(root, "RESEARCH.md");
+    const existing = readFileSync(researchPath, "utf8");
+    writeFileSync(researchPath, `${existing}\nCompetitor evidence: ${names.join(", ")} lead the category by revenue.\n`, "utf8");
+  };
+  const writeMoatSpec = (root: string, moat: { row: string | null; moatClass: string; copyTest: string }): void => {
+    writeFileSync(path.join(root, "SPEC.md"), specSections(moat), "utf8");
+    groundIncumbents(root, moat.row);
+  };
 
   const specDoneReal = makeFixture("product-spec-done-real");
   setLaneDone(specDoneReal, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specDoneReal, "SPEC.md"),
-    specSections({
-      row: twoIncumbentRows,
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specDoneReal, {
+    row: twoIncumbentRows,
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("done product spec with a real incumbent row and moat class passes", specDoneReal, "check-product-spec.ts", 0);
 
   const specNoIncumbent = makeFixture("product-spec-done-no-incumbent-row");
@@ -577,57 +589,41 @@ export function register(h: Harness): void {
   // An answer that concedes the copy test is a failed test.
   const specCopyTestConceded = makeFixture("product-spec-copy-test-conceded");
   setLaneDone(specCopyTestConceded, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specCopyTestConceded, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "Nothing stops them; this is copied in a sprint.",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specCopyTestConceded, {
+    row: realIncumbentRow,
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "Nothing stops them; this is copied in a sprint.",
+  });
   runFixture("a conceding one-week-copy answer fails", specCopyTestConceded, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
 
   // Disclaiming every class while naming them all is not a moat class.
   const specMoatClassNone = makeFixture("product-spec-moat-class-none");
   setLaneDone(specMoatClassNone, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatClassNone, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "none — there is no data, workflow, community, taste, model, or distribution moat",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatClassNone, {
+    row: realIncumbentRow,
+    moatClass: "none — there is no data, workflow, community, taste, model, or distribution moat",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a negated moat-class declaration fails", specMoatClassNone, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // The doctrine's V1 exception: no moat yet, racing to build a named, dated class.
   const specMoatV1Exception = makeFixture("product-spec-moat-v1-exception");
   setLaneDone(specMoatV1Exception, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatV1Exception, "SPEC.md"),
-    specSections({
-      row: twoIncumbentRows,
-      moatClass: "no moat yet, racing to build data — miss-history compounding by 2026-08-25, revisited at the day-30 retro",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatV1Exception, {
+    row: twoIncumbentRows,
+    moatClass: "no moat yet, racing to build data — miss-history compounding by 2026-08-25, revisited at the day-30 retro",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("the named-and-dated V1 no-moat exception passes", specMoatV1Exception, "check-product-spec.ts", 0);
 
   // N/A cells name no incumbent.
   const specIncumbentNaCells = makeFixture("product-spec-incumbent-na-cells");
   setLaneDone(specIncumbentNaCells, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specIncumbentNaCells, "SPEC.md"),
-    specSections({
-      row: "| N/A | none | unknown | N/A |",
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specIncumbentNaCells, {
+    row: "| N/A | none | unknown | N/A |",
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("an incumbent row of N/A cells fails", specIncumbentNaCells, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
 
   // The filled shipped template must pass: its guidance prose contains "moat
@@ -645,173 +641,126 @@ export function register(h: Harness): void {
       .replace(/<!--[^>]*replace with[^>]*-->/gi, "");
     writeFileSync(path.join(specTemplateFilled, "SPEC.md"), templateSpec.replace(/\breplace with\b|\b(TODO|TBD)\b/gi, "filled"), "utf8");
   }
+  groundIncumbents(specTemplateFilled, twoIncumbentRows);
   runFixture("the filled shipped template passes the moat gate", specTemplateFilled, "check-product-spec.ts", 0);
 
   // The doctrine's named nonanswers are copied in a sprint.
   const specCopyBetterDesigned = makeFixture("product-spec-copy-better-designed");
   setLaneDone(specCopyBetterDesigned, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specCopyBetterDesigned, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "Ours is better designed for this audience.",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specCopyBetterDesigned, {
+    row: realIncumbentRow,
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "Ours is better designed for this audience.",
+  });
   runFixture("the better-designed nonanswer fails", specCopyBetterDesigned, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
 
   const specCopyNotThought = makeFixture("product-spec-copy-not-thought");
   setLaneDone(specCopyNotThought, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specCopyNotThought, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "They have not thought of it yet.",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specCopyNotThought, {
+    row: realIncumbentRow,
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "They have not thought of it yet.",
+  });
   runFixture("the not-thought-of-it nonanswer fails", specCopyNotThought, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
 
   // A negated structural answer is the direct, legitimate answer.
   const specCopyNegatedStructural = makeFixture("product-spec-copy-negated-structural");
   setLaneDone(specCopyNegatedStructural, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specCopyNegatedStructural, "SPEC.md"),
-    specSections({
-      row: twoIncumbentRows,
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "The accumulated user history cannot be copied in a week.",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specCopyNegatedStructural, {
+    row: twoIncumbentRows,
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "The accumulated user history cannot be copied in a week.",
+  });
   runFixture("a negated structural copy answer passes", specCopyNegatedStructural, "check-product-spec.ts", 0);
 
   // The V1 exception needs its day-30 revisit, not just a name and a date.
   const specMoatV1NoRetro = makeFixture("product-spec-moat-v1-no-retro");
   setLaneDone(specMoatV1NoRetro, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatV1NoRetro, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "no moat yet, racing to build data by 2026-08-25",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatV1NoRetro, {
+    row: realIncumbentRow,
+    moatClass: "no moat yet, racing to build data by 2026-08-25",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a V1 exception without the day-30 revisit fails", specMoatV1NoRetro, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // Naming the class before the negation is the same disclaimer.
   const specMoatClassPostNegated = makeFixture("product-spec-moat-post-negated");
   setLaneDone(specMoatClassPostNegated, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatClassPostNegated, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "data is not a moat",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatClassPostNegated, {
+    row: realIncumbentRow,
+    moatClass: "data is not a moat",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a taxonomy word preceding its negation fails", specMoatClassPostNegated, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // "Can ship it in a week" concedes the test without the word copy.
   const specCopyCanShip = makeFixture("product-spec-copy-can-ship");
   setLaneDone(specCopyCanShip, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specCopyCanShip, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "The incumbent can ship this feature in a week.",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specCopyCanShip, {
+    row: realIncumbentRow,
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "The incumbent can ship this feature in a week.",
+  });
   runFixture("a can-ship-in-a-week concession fails", specCopyCanShip, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
 
   // The revisit must be the day-30 one.
   const specMoatV1AnnualRetro = makeFixture("product-spec-moat-v1-annual-retro");
   setLaneDone(specMoatV1AnnualRetro, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatV1AnnualRetro, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "no moat yet, racing to build data by 2026-08-25; revisit at the annual retro",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatV1AnnualRetro, {
+    row: realIncumbentRow,
+    moatClass: "no moat yet, racing to build data by 2026-08-25; revisit at the annual retro",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a V1 exception deferring to an annual retro fails", specMoatV1AnnualRetro, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // A bare taxonomy word explains nothing about how the advantage accrues.
   const specMoatClassBare = makeFixture("product-spec-moat-class-bare");
   setLaneDone(specMoatClassBare, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatClassBare, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "data",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatClassBare, {
+    row: realIncumbentRow,
+    moatClass: "data",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a bare moat class without a build plan fails", specMoatClassBare, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // Refusing to build the class is not the exception's commitment.
   const specMoatV1NegatedBuild = makeFixture("product-spec-moat-v1-negated-build");
   setLaneDone(specMoatV1NegatedBuild, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatV1NegatedBuild, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "no moat yet; we will not build data by 2026-08-25; revisit at the day-30 retro",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatV1NegatedBuild, {
+    row: realIncumbentRow,
+    moatClass: "no moat yet; we will not build data by 2026-08-25; revisit at the day-30 retro",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a V1 exception refusing to build its class fails", specMoatV1NegatedBuild, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // A plan that refuses the moat it names is not a build plan.
   const specMoatPlanNegated = makeFixture("product-spec-moat-plan-negated");
   setLaneDone(specMoatPlanNegated, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatPlanNegated, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "data — we will never collect any user history",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatPlanNegated, {
+    row: realIncumbentRow,
+    moatClass: "data — we will never collect any user history",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a negated moat build plan fails", specMoatPlanNegated, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // Contractions negate the commitment the same as full forms.
   const specMoatV1Contraction = makeFixture("product-spec-moat-v1-contraction");
   setLaneDone(specMoatV1Contraction, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatV1Contraction, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "no moat yet; we aren't building data by 2026-08-25; revisit at the day-30 retro",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatV1Contraction, {
+    row: realIncumbentRow,
+    moatClass: "no moat yet; we aren't building data by 2026-08-25; revisit at the day-30 retro",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a contraction-negated V1 build commitment fails", specMoatV1Contraction, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // An unrelated negation earlier in the sentence does not erase a live concession.
   const specCopyUnrelatedNegation = makeFixture("product-spec-copy-unrelated-negation");
   setLaneDone(specCopyUnrelatedNegation, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specCopyUnrelatedNegation, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "Our design is not unique and the incumbent can ship this feature in a week.",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specCopyUnrelatedNegation, {
+    row: realIncumbentRow,
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "Our design is not unique and the incumbent can ship this feature in a week.",
+  });
   runFixture(
     "an unrelated negation does not erase a shipping concession",
     specCopyUnrelatedNegation,
@@ -823,57 +772,41 @@ export function register(h: Harness): void {
   // One row benchmarks against a category of one.
   const specSingleIncumbentRow = makeFixture("product-spec-single-incumbent-row");
   setLaneDone(specSingleIncumbentRow, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specSingleIncumbentRow, "SPEC.md"),
-    specSections({
-      row: realIncumbentRow,
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specSingleIncumbentRow, {
+    row: realIncumbentRow,
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a single incumbent row fails the two-row floor", specSingleIncumbentRow, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
 
   // A taxonomy word inside the plan cannot bless an invalid declared class.
   const specMoatClassExecution = makeFixture("product-spec-moat-class-execution");
   setLaneDone(specMoatClassExecution, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatClassExecution, "SPEC.md"),
-    specSections({
-      row: twoIncumbentRows,
-      moatClass: "execution — we send user data to the same model API",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatClassExecution, {
+    row: twoIncumbentRows,
+    moatClass: "execution — we send user data to the same model API",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("an execution class with taxonomy words in the plan fails", specMoatClassExecution, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // "No incumbent can reproduce…" is the structural claim, not a concession.
   const specCopyLeadingNo = makeFixture("product-spec-copy-leading-no");
   setLaneDone(specCopyLeadingNo, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specCopyLeadingNo, "SPEC.md"),
-    specSections({
-      row: twoIncumbentRows,
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "No incumbent can reproduce our accumulated user history in one week.",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specCopyLeadingNo, {
+    row: twoIncumbentRows,
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "No incumbent can reproduce our accumulated user history in one week.",
+  });
   runFixture("a leading-no structural copy answer passes", specCopyLeadingNo, "check-product-spec.ts", 0);
 
   // An escaped pipe is content — later columns must not shift over the gap.
   const specEscapedPipe = makeFixture("product-spec-escaped-pipe");
   setLaneDone(specEscapedPipe, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specEscapedPipe, "SPEC.md"),
-    specSections({
-      row: "| HabitKit | iOS \\| Android logging | repair moment | |\n| Streaks | iOS \\| watchOS habits | repair flow | |",
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specEscapedPipe, {
+    row: "| HabitKit | iOS \\| Android logging | repair moment | |\n| Streaks | iOS \\| watchOS habits | repair flow | |",
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("escaped pipes do not shift empty cells into validity", specEscapedPipe, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
 
   // The same incumbent twice is still a category of one.
@@ -893,15 +826,11 @@ export function register(h: Harness): void {
   // "Without requiring setup" is a plan, not a refusal.
   const specPlanFriendlyNegative = makeFixture("product-spec-plan-friendly-negative");
   setLaneDone(specPlanFriendlyNegative, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specPlanFriendlyNegative, "SPEC.md"),
-    specSections({
-      row: twoIncumbentRows,
-      moatClass: "data — automatic history accrues without requiring setup",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specPlanFriendlyNegative, {
+    row: twoIncumbentRows,
+    moatClass: "data — automatic history accrues without requiring setup",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a friendly negative qualifier in the plan passes", specPlanFriendlyNegative, "check-product-spec.ts", 0);
 
   // Markdown continuation fills the field the normal way.
@@ -916,34 +845,27 @@ export function register(h: Harness): void {
     }).replace(/^- One-week-copy test answer:.*$/m, "- One-week-copy test answer:\n  the repair model needs miss-history no fresh install has."),
     "utf8",
   );
+  groundIncumbents(specIndentedAnswer, twoIncumbentRows);
   runFixture("an indented continuation answer passes", specIndentedAnswer, "check-product-spec.ts", 0);
 
   // A blocker cell that concedes the week-one copy is not a blocker.
   const specBlockerConceded = makeFixture("product-spec-blocker-conceded");
   setLaneDone(specBlockerConceded, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specBlockerConceded, "SPEC.md"),
-    specSections({
-      row: "| HabitKit | fast logging | streak-insurance moment | Nothing; they can ship this in a week |\n| Streaks | native polish | repair flow | No blocker; this is copied in days |",
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specBlockerConceded, {
+    row: "| HabitKit | fast logging | streak-insurance moment | Nothing; they can ship this in a week |\n| Streaks | native polish | repair flow | No blocker; this is copied in days |",
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("conceding blocker cells fail the incumbent benchmark", specBlockerConceded, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
 
   // The V1 build verb must target the named class, not any taxonomy word.
   const specMoatV1UnboundBuild = makeFixture("product-spec-moat-v1-unbound-build");
   setLaneDone(specMoatV1UnboundBuild, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specMoatV1UnboundBuild, "SPEC.md"),
-    specSections({
-      row: twoIncumbentRows,
-      moatClass: "no moat yet, racing to build better execution; we send requests to the same model API by 2026-08-25; revisit at the day-30 retro",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specMoatV1UnboundBuild, {
+    row: twoIncumbentRows,
+    moatClass: "no moat yet, racing to build better execution; we send requests to the same model API by 2026-08-25; revisit at the day-30 retro",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a V1 build commitment unbound from its class fails", specMoatV1UnboundBuild, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // Guidance prose cannot shadow the labeled copy-test field.
@@ -958,6 +880,7 @@ export function register(h: Harness): void {
     }).replace("## Differentiation And Moat", "## Differentiation And Moat\n\nThe one-week-copy test answer: should identify accumulated history."),
     "utf8",
   );
+  groundIncumbents(specCopyLabelShadow, twoIncumbentRows);
   runFixture(
     "prose mentioning the copy-test label does not shadow the blank field",
     specCopyLabelShadow,
@@ -969,15 +892,11 @@ export function register(h: Harness): void {
   // Non-Latin incumbent names are distinct incumbents.
   const specUnicodeIncumbents = makeFixture("product-spec-unicode-incumbents");
   setLaneDone(specUnicodeIncumbents, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specUnicodeIncumbents, "SPEC.md"),
-    specSections({
-      row: "| あすけん | photo food logging at scale | our miss-repair moment | per-user history their fresh install lacks |\n| カロミル | broad nutrient database | our miss-repair moment | per-user history their fresh install lacks |",
-      moatClass: "data — per-user miss history compounds weekly",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specUnicodeIncumbents, {
+    row: "| あすけん | photo food logging at scale | our miss-repair moment | per-user history their fresh install lacks |\n| カロミル | broad nutrient database | our miss-repair moment | per-user history their fresh install lacks |",
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("non-Latin incumbent names count as distinct rows", specUnicodeIncumbents, "check-product-spec.ts", 0);
 
   // The moat-class field accepts the same continuation form as the copy test.
@@ -995,6 +914,7 @@ export function register(h: Harness): void {
     ),
     "utf8",
   );
+  groundIncumbents(specMoatClassIndented, twoIncumbentRows);
   runFixture("an indented moat-class continuation passes", specMoatClassIndented, "check-product-spec.ts", 0);
 
   // A later table's header is not an incumbent.
@@ -1017,30 +937,76 @@ export function register(h: Harness): void {
   // A pending build plan is a placeholder, not a plan.
   const specPlanPending = makeFixture("product-spec-plan-pending");
   setLaneDone(specPlanPending, "product", ["SPEC.md"]);
-  writeFileSync(
-    path.join(specPlanPending, "SPEC.md"),
-    specSections({
-      row: twoIncumbentRows,
-      moatClass: "data — build details are still pending",
-      copyTest: "the repair model needs miss-history no fresh install has",
-    }),
-    "utf8",
-  );
+  writeMoatSpec(specPlanPending, {
+    row: twoIncumbentRows,
+    moatClass: "data — build details are still pending",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
   runFixture("a pending moat build plan fails", specPlanPending, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // Localized specs are complete specs.
   const specJapaneseAnswers = makeFixture("product-spec-japanese-answers");
   setLaneDone(specJapaneseAnswers, "product", ["SPEC.md"]);
+  writeMoatSpec(specJapaneseAnswers, {
+    row: "| あすけん | photo food logging at scale | our miss-repair moment | per-user history their fresh install lacks |\n| カロミル | broad nutrient database | our miss-repair moment | per-user history their fresh install lacks |",
+    moatClass: "data — 蓄積された利用履歴が毎週複利で強くなり、新規インストールには再現できない",
+    copyTest: "蓄積された利用履歴は競合が一週間では再現できない。",
+  });
+  runFixture("a localized non-Latin spec passes", specJapaneseAnswers, "check-product-spec.ts", 0);
+
+  // Invented competitors with filled cells benchmark nothing.
+  const specInventedIncumbents = makeFixture("product-spec-invented-incumbents");
+  setLaneDone(specInventedIncumbents, "product", ["SPEC.md"]);
   writeFileSync(
-    path.join(specJapaneseAnswers, "SPEC.md"),
+    path.join(specInventedIncumbents, "SPEC.md"),
     specSections({
-      row: "| あすけん | photo food logging at scale | our miss-repair moment | per-user history their fresh install lacks |\n| カロミル | broad nutrient database | our miss-repair moment | per-user history their fresh install lacks |",
-      moatClass: "data — 蓄積された利用履歴が毎週複利で強くなり、新規インストールには再現できない",
-      copyTest: "蓄積された利用履歴は競合が一週間では再現できない。",
+      row: "| FocusFlow | fast logging | our repair moment | history their install lacks |\n| MindBloom | broad templates | our repair moment | history their install lacks |",
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
     }),
     "utf8",
   );
-  runFixture("a localized non-Latin spec passes", specJapaneseAnswers, "check-product-spec.ts", 0);
+  runFixture("incumbents absent from research evidence do not count", specInventedIncumbents, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
+
+  // Refusing the day-30 revisit voids the exception.
+  const specMoatV1NegatedRevisit = makeFixture("product-spec-moat-v1-negated-revisit");
+  setLaneDone(specMoatV1NegatedRevisit, "product", ["SPEC.md"]);
+  writeMoatSpec(specMoatV1NegatedRevisit, {
+    row: twoIncumbentRows,
+    moatClass: "no moat yet, racing to build data by 2026-08-25; we will not revisit at day 30",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
+  runFixture("a negated day-30 revisit voids the V1 exception", specMoatV1NegatedRevisit, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // Praise of the class is not a plan.
+  const specMoatHeadPraise = makeFixture("product-spec-moat-head-praise");
+  setLaneDone(specMoatHeadPraise, "product", ["SPEC.md"]);
+  writeMoatSpec(specMoatHeadPraise, {
+    row: twoIncumbentRows,
+    moatClass: "data is unquestionably the primary moat class",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
+  runFixture("class praise without a plan fails", specMoatHeadPraise, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // Rows without the optional trailing pipe are the same four cells.
+  const specNoTrailingPipe = makeFixture("product-spec-no-trailing-pipe");
+  setLaneDone(specNoTrailingPipe, "product", ["SPEC.md"]);
+  writeMoatSpec(specNoTrailingPipe, {
+    row: "| HabitKit | fast logging, wide templates | streak-insurance at the miss moment | miss-history data accrues day one\n| Streaks | polished native logging | our repair flow | miss-history depth their storage cannot mirror",
+    moatClass: "data — per-user miss history compounds weekly",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
+  runFixture("rows without trailing pipes pass", specNoTrailingPipe, "check-product-spec.ts", 0);
+
+  // Natural concrete build descriptions bind within their clause.
+  const specMoatV1Natural = makeFixture("product-spec-moat-v1-natural");
+  setLaneDone(specMoatV1Natural, "product", ["SPEC.md"]);
+  writeMoatSpec(specMoatV1Natural, {
+    row: twoIncumbentRows,
+    moatClass: "no moat yet, racing to build an accumulated per-user data corpus by 2026-08-25; revisit at the day-30 retro",
+    copyTest: "the repair model needs miss-history no fresh install has",
+  });
+  runFixture("a natural long-form V1 build commitment passes", specMoatV1Natural, "check-product-spec.ts", 0);
 
   // ── check-launch-trace ────────────────────────────────────────────────────
 
