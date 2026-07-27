@@ -35,6 +35,7 @@ When the design needs stronger direction, inspect the relevant source and summar
 - Layers-style product clarity before surface polish
 - Impeccable-style visual QA for typography, spacing, contrast, motion, responsive behavior, and UX writing
 - `ui-ux-pro-max` skill for senior-grade UI direction, palette/typography pairings, and motion/anti-pattern checklists when web-surface or design-system direction needs a stronger start (reference-only; adapt, do not copy its data). Capture the adapted result in `state.designBrief` via `npm run seed:design-brief` so the theme stops being provisional.
+- 60fps.design catalog via `motion-craft-benchmarks.md` for named, numeric in-app motion recipes — celebrations, reveals, gesture physics — when a magical-moment surface needs motion direction beyond adjectives
 - Higgsfield for production-quality visuals when the founder approves paid/account-gated generation
 - Remotion for repeatable local rendered assets from real UI, captions, and tokens
 

@@ -1804,6 +1804,19 @@ sources:
       - skill/b2c-mobile-business-launch/references/landing-motion-craft.md
       - docs/brainstorms/landing-motion-craft.md
     notes: Visual quality benchmark for the landing motion craft lane (animated landing-page section gallery). Inspiration reference only, never a command-syntax source.
+  - id: x-com-60fpsdesign-catalog
+    name: 60fps.design best-in-class app details catalog
+    source_type: inspiration_benchmark
+    url: https://60fps.design/
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/motion-craft-benchmarks.md
+      - skill/b2c-mobile-business-launch/references/design-visual-system.md
+    notes: Curated catalog (X @60fpsdesign, 1800+ entries) of motion/interaction
+      details from best-in-class consumer apps. Inspiration benchmark for the
+      in-app motion lane — the mobile counterpart to motionsites-ai for landing.
+      Engagement figures cited from it are point-in-time and unverified.
   - id: motion-dev-docs-react
     name: motion.dev
     source_type: docs
