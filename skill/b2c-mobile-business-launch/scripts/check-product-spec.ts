@@ -103,15 +103,25 @@ if (text) {
         .split(/\r?\n/)
         .map((line) => line.trim())
         .filter((line) => line.startsWith("|") && !/^\|\s*:?-+/.test(line));
+      // Escaped pipes are content, not column breaks — "iOS \\| Android"
+      // must stay one cell so later columns do not shift.
+      const splitCells = (line: string): string[] => line.split(/(?<!\\)\|/).map((cell) => cell.replace(/\\\|/g, "|").trim());
       const incumbentRows = moatTableLines
         .slice(1)
         .filter((line) => !/_example/i.test(line))
-        .map((line) => line.split("|").map((cell) => cell.trim()));
+        .map((line) => splitCells(line));
       // "N/A" and "none" are empty cells wearing characters.
       const MOAT_NEGATIVE_CELL = /^(unknown|n\/?a|none|nil|null|not applicable|not yet|no result|[-—–]+)$/i;
-      const realRowCount = incumbentRows.filter(
-        (cells) => cells.length >= 6 && cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell) && !MOAT_NEGATIVE_CELL.test(cell)),
-      ).length;
+      // Distinct incumbents only: the same row twice is still a category of
+      // one.
+      const realRowCount = new Set(
+        incumbentRows
+          .filter(
+            (cells) =>
+              cells.length >= 6 && cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell) && !MOAT_NEGATIVE_CELL.test(cell)),
+          )
+          .map((cells) => (cells[1] ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")),
+      ).size;
       // §3 benchmarks the top 2–3 incumbents — one row compares against a
       // category of one.
       if (realRowCount < 2) {
@@ -168,11 +178,16 @@ if (text) {
       // nothing, and a negated plan ("we will never collect any user
       // history") refuses the moat it names — the plan must have at least
       // one negation-free clause of real text.
+      // Negation invalidates a refused build commitment, not a friendly
+      // qualifier — "accrues without requiring setup" is a plan; "never
+      // collect user history" is a refusal.
+      const REFUSED_BUILD =
+        /\b(no|not|none|never|without|isn'?t|aren'?t|don'?t|doesn'?t|cannot|can'?t|won'?t)\b\s+(?:\w+\s+){0,2}?(build\w*|collect\w*|accru\w*|grow\w*|gather\w*|store|stor\w*|creat\w*|invest\w*|ship\w*)\b/i;
       const moatPlanSubstantive = moatClassValue
         .split(/[.;,—–:()|]/)
         .some(
           (clause) =>
-            !/\b(no|not|none|never|without|isn'?t|aren'?t|don'?t|doesn'?t|cannot|can'?t|won'?t)\b/i.test(clause) &&
+            !REFUSED_BUILD.test(clause) &&
             clause.replace(/\b(data|workflow|community|taste|model|distribution)\b/gi, " ").replace(/[^a-z0-9]/gi, "").length >= 15,
         );
       if (!v1ExceptionValid && !(moatClassAffirmed && moatPlanSubstantive)) {
@@ -186,7 +201,17 @@ if (text) {
           ),
         );
       }
-      const copyTestAnswer = (moatSection.match(/one-week-copy test answer:\s*(.*)$/im)?.[1] ?? "").trim();
+      // Markdown continuation is a normal way to fill the field: when the
+      // label line carries no answer, the indented next line is the answer.
+      const copyTestAnswer = ((): string => {
+        const lines = moatSection.split(/\r?\n/);
+        const labelIndex = lines.findIndex((line) => /one-week-copy test answer:/i.test(line));
+        if (labelIndex === -1) return "";
+        const sameLine = (lines[labelIndex] ?? "").replace(/^.*one-week-copy test answer:/i, "").trim();
+        if (sameLine) return sameLine;
+        const nextLine = lines[labelIndex + 1] ?? "";
+        return /^\s+\S/.test(nextLine) && !/^\s*[-|#]/.test(nextLine) ? nextLine.trim() : "";
+      })();
       // An answer that concedes the test is a failed test, not a recorded one.
       // Concessions phrased as negations stay on the raw answer; affirmative
       // concessions (including the doctrine's named nonanswers) are tested on

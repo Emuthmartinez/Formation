@@ -862,6 +862,62 @@ export function register(h: Harness): void {
   );
   runFixture("a leading-no structural copy answer passes", specCopyLeadingNo, "check-product-spec.ts", 0);
 
+  // An escaped pipe is content — later columns must not shift over the gap.
+  const specEscapedPipe = makeFixture("product-spec-escaped-pipe");
+  setLaneDone(specEscapedPipe, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specEscapedPipe, "SPEC.md"),
+    specSections({
+      row: "| HabitKit | iOS \\| Android logging | repair moment | |\n| Streaks | iOS \\| watchOS habits | repair flow | |",
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("escaped pipes do not shift empty cells into validity", specEscapedPipe, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
+
+  // The same incumbent twice is still a category of one.
+  const specDuplicateRows = makeFixture("product-spec-duplicate-rows");
+  setLaneDone(specDuplicateRows, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specDuplicateRows, "SPEC.md"),
+    specSections({
+      row: `${realIncumbentRow}\n${realIncumbentRow}`,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a duplicated incumbent row fails the two-incumbent floor", specDuplicateRows, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
+
+  // "Without requiring setup" is a plan, not a refusal.
+  const specPlanFriendlyNegative = makeFixture("product-spec-plan-friendly-negative");
+  setLaneDone(specPlanFriendlyNegative, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specPlanFriendlyNegative, "SPEC.md"),
+    specSections({
+      row: twoIncumbentRows,
+      moatClass: "data — automatic history accrues without requiring setup",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a friendly negative qualifier in the plan passes", specPlanFriendlyNegative, "check-product-spec.ts", 0);
+
+  // Markdown continuation fills the field the normal way.
+  const specIndentedAnswer = makeFixture("product-spec-indented-answer");
+  setLaneDone(specIndentedAnswer, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specIndentedAnswer, "SPEC.md"),
+    specSections({
+      row: twoIncumbentRows,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "",
+    }).replace(/^- One-week-copy test answer:.*$/m, "- One-week-copy test answer:\n  the repair model needs miss-history no fresh install has."),
+    "utf8",
+  );
+  runFixture("an indented continuation answer passes", specIndentedAnswer, "check-product-spec.ts", 0);
+
   // ── check-launch-trace ────────────────────────────────────────────────────
 
   const traceBaseline = makeFixture("launch-trace-baseline");
