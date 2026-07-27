@@ -94,9 +94,10 @@ and one deliberate close per session is the ceiling for most apps.
    name, goal, or commitment value. Pull from the Commitment Card value if available. "You
    translated 47 words in 4 minutes — your fastest session yet." is reflective-tier. "Great
    job!" is visceral-tier only.
-3. **Animate the peak at the reflective tier:** use a spring reveal (`DesignTokens.Motion`
-   expressive easing on mobile; motion/react with the tokenized `motion.expressive` value on
-   web) for the result number or badge. Follow with a brief (`motion.brief`, ~150 ms) ambient
+3. **Animate the peak at the reflective tier:** use a spring reveal (celebrate-family spring
+   on mobile — response 0.45–0.5, dampingFraction 0.5–0.7; motion/react with the tokenized
+   `motion.easingSpring` value on web) for the result number or badge. Follow with a brief
+   (`motion.durationFast`, 120 ms) ambient
    glow or particle emission. Implement OS reduce-motion fallback: static result text with no
    animation, identical copy.
 4. **Design the session close:** after the primary action (save, share, continue), the close
@@ -163,13 +164,13 @@ and one deliberate close per session is the ceiling for most apps.
 
 ### Mobile Implementation + Reduced-Motion
 
-**SwiftUI.** Wrap the peak result view in `.transition(.scale(scale: 0.85).combined(with: .opacity))` with a spring animation using `DesignTokens.Motion.expressive` spring (response ~0.45, dampingFraction ~0.7). For ambient glow, use a `.shadow` modifier animated with `withAnimation(.spring(response: 0.45, dampingFraction: 0.7))`. Detect reduce-motion with `@Environment(\.accessibilityReduceMotion)` and skip the spring/glow entirely if true — render result text statically. The close-state streak stamp uses `.transition(.opacity)` with `motion.brief` (~150 ms linear).
+**SwiftUI.** Wrap the peak result view in `.transition(.scale(scale: 0.85).combined(with: .opacity))` with a celebrate-family spring (response ~0.45, dampingFraction ~0.7). For ambient glow, use a `.shadow` modifier animated with `withAnimation(.spring(response: 0.45, dampingFraction: 0.7))`. Detect reduce-motion with `@Environment(\.accessibilityReduceMotion)` and skip the spring/glow entirely if true — render result text statically. The close-state streak stamp uses `.transition(.opacity)` with `DesignTokens.Motion.durationFast` (120 ms linear).
 
 **Flutter.** `AnimatedContainer` with `Curves.elasticOut` for the peak reveal; `FadeTransition` for the close stamp. Check `MediaQuery.of(context).disableAnimations`.
 
 **React Native.** `withSpring(value, { damping: 14, stiffness: 180 })` for the peak; fade `withTiming` for the close. Gate on `useReducedMotion()` from the react-native-reanimated API.
 
-**Web (motion/react).** `motion.div` with `initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}` driven by the `--motion-spring-expressive` token. Close stamp uses a simple `opacity` transition with `--motion-duration-brief`. Wrap with `useReducedMotion()` from motion/react; when true, set `transition={{ duration: 0 }}`. Record both native and web fallback states in `TECH_SPEC.md`.
+**Web (motion/react).** `motion.div` with `initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}` driven by the `--motion-easing-spring` token. Close stamp uses a simple `opacity` transition with `--motion-duration-fast`. Wrap with `useReducedMotion()` from motion/react; when true, set `transition={{ duration: 0 }}`. Record both native and web fallback states in `TECH_SPEC.md`.
 
 ### Bright Line / Dark Line / Guardrail
 

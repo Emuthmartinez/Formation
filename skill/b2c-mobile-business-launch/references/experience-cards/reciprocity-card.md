@@ -181,10 +181,10 @@ distressed state (failed payment, subscription lapse, error screen).
 ### Mobile Implementation + Reduced-Motion
 
 **Native mobile (SwiftUI / Flutter / React Native Reanimated).** The gift reveal uses a spring
-entrance animation driven by `DesignTokens.Motion.expressive` easing (same token as the
-Variable Reward Card reveal). The CTA hold is implemented as an async `Task.sleep` in SwiftUI
+entrance animation driven by the celebrate-family spring (response 0.45–0.5, dampingFraction
+0.5–0.7 — same family as the Variable Reward Card reveal). The CTA hold is implemented as an async `Task.sleep` in SwiftUI
 or `Future.delayed` in Flutter — a fixed 2–4 second delay before the CTA view mounts. The CTA
-fades in with `DesignTokens.Motion.brief` (~150 ms). The full gift card enters with a vertical
+fades in with `DesignTokens.Motion.durationFast` (120 ms). The full gift card enters with a vertical
 spring (offset Y from +40 to 0, spring stiffness 300, damping 28 in SwiftUI `withSpring`).
 
 **Reduced-motion fallback.** When `UIAccessibility.isReduceMotionEnabled` (iOS) or
@@ -192,9 +192,9 @@ spring (offset Y from +40 to 0, spring stiffness 300, damping 28 in SwiftUI `wit
 animations; the gift card and CTA appear instantly at full opacity with no motion. Record
 `reduce_motion_active: true` in all emitted events.
 
-**Web (motion/react).** Read `state/theme.tokens.json` `motion.expressive` and `motion.brief`
-tokens promoted to `--motion-expressive-*` CSS variables. Drive the gift card entrance with
-`<motion.div initial={{opacity:0, y:40}} animate={{opacity:1, y:0}} transition={{type:'spring', stiffness:300, damping:28}}>`. CTA mount uses `<motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration: var(--motion-brief-duration, 0.15s)}} style={{transitionDelay: '2.5s'}}>`. Implement `prefers-reduced-motion` via `useReducedMotion()` from motion/react.
+**Web (motion/react).** Read `state/theme.tokens.json` `motion.durationReveal` and `motion.durationFast`
+tokens promoted to `--motion-duration-reveal`/`--motion-duration-fast` CSS variables. Drive the gift card entrance with
+`<motion.div initial={{opacity:0, y:40}} animate={{opacity:1, y:0}} transition={{type:'spring', stiffness:300, damping:28}}>`. CTA mount uses `<motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration: var(--motion-duration-fast, 120ms)}} style={{transitionDelay: '2.5s'}}>`. Implement `prefers-reduced-motion` via `useReducedMotion()` from motion/react.
 
 ### Bright Line / Dark Line / Guardrail
 

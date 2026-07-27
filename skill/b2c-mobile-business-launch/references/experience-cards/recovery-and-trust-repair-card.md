@@ -174,10 +174,10 @@ failures the system or infrastructure caused.
 **iOS (SwiftUI).** Use a custom error view modifier presenting recovery UI as a bottom sheet
 (`.sheet` with `.presentationDetents([.medium])`) rather than a full-screen modal. The sheet
 preserves the underlying content view in context, signaling continuity rather than failure.
-Animate the sheet presentation using `DesignTokens.Motion.spring`. For prefers-reduced-motion:
+Animate the sheet presentation with a press-family spring (`.spring(response: 0.4, dampingFraction: 0.8)` — `premium-mobile-craft.md` §1). For prefers-reduced-motion:
 check `UIAccessibility.isReduceMotionEnabled`; if true, present the sheet instantly with
 `animation: nil`. For payment-failure banners, use a pinned top banner with
-`DesignTokens.Motion.brief` fade-in (~150 ms). Reduced-motion: instant alpha swap, no fade.
+`DesignTokens.Motion.durationFast` fade-in (120 ms). Reduced-motion: instant alpha swap, no fade.
 
 **Flutter.** `showModalBottomSheet` with `useSafeArea: true`. Check
 `MediaQuery.of(context).disableAnimations` and pass `Duration.zero` when true.
@@ -186,7 +186,7 @@ check `UIAccessibility.isReduceMotionEnabled`; if true, present the sheet instan
 project's design token map. Check `AccessibilityInfo.isReduceMotionEnabled()`. Recovery
 banners use `react-native-toast-message` or an equivalent overlay — never a navigation push.
 
-**Web (motion/react).** Drive recovery banners with `motion.div` using the `--motion-brief`
+**Web (motion/react).** Drive recovery banners with `motion.div` using the `--motion-duration-fast`
 CSS variable. Wrap the animation in `useReducedMotion()` from motion/react; when true,
 substitute `initial={false}` and `animate={false}` to produce an instant, accessible state
 change.

@@ -185,7 +185,7 @@ actions after the user has already seen the card multiple times in the same sess
 ### Mobile Implementation + Reduced-Motion
 
 **SwiftUI.** Full-screen overlay with a `VStack` of narration labels that fade in sequentially
-using `withAnimation(.easeInOut(duration: DesignTokens.Motion.stepFadeDuration))`. Advance
+using `withAnimation(.easeInOut(duration: DesignTokens.Motion.durationBase))`. Advance
 steps using a timer tied to real async task state, not a fixed `DispatchQueue.asyncAfter`
 chain. Reduced-motion: check `UIAccessibility.isReduceMotionEnabled`; when true, render all
 steps as a static list with instant text replacement, no opacity transitions, no progress bar
@@ -203,7 +203,7 @@ from a `StreamController` that emits on real computation milestones. Check
 y: 8 → 0, transition: { duration: 0.3, ease: 'easeOut' }). Gate all variants behind the
 `prefers-reduced-motion` media query via `useReducedMotion()` from motion/react. Progress bar:
 use a stepped indicator that advances only when a real step fires — not an indeterminate
-spinner. Each segment lights up with a short fill animation (`DesignTokens.Motion.progressSegmentDuration`, typically 300–500 ms).
+spinner. Each segment lights up with a short fill animation (`DesignTokens.Motion.durationSlow`, 360 ms).
 
 ### Bright Line / Dark Line / Guardrail
 

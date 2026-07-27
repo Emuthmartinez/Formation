@@ -101,7 +101,8 @@ children.
    enough for the dopamine cue to fire, short enough not to feel like a load error. Use a
    breathing or pulsing animation driven by `DesignTokens.Motion`. Implement prefers-reduced-
    motion fallback: collapse to a single static state with no animation.
-3. Design the reveal animation with a spring easing at `motion.expressive` timing. The reveal
+3. Design the reveal animation with a celebrate-family spring (response 0.45–0.5,
+   dampingFraction 0.5–0.7 — `premium-mobile-craft.md` §1). The reveal
    should feel like an arrival. Use scale + opacity entrance for the result card; for milestone
    unlocks, add a particle or confetti burst using native canvas or SwiftUI Canvas.
 4. Add the escape hatch in Settings > Accessibility: a toggle that disables animated reward
@@ -165,15 +166,15 @@ children.
 
 ### Mobile Implementation + Reduced-Motion
 
-**SwiftUI.** Anticipation: `.scaleEffect(isAnticipating ? 1.05 : 1.0).animation(.easeInOut(duration: DesignTokens.Motion.moderate).repeatForever(autoreverses: true), value: isAnticipating)`. Reveal: `.spring(response: 0.5, dampingFraction: 0.6)` (0.5 is the `expressive` celebrate-response reading — see the reconciliation note in `motion-craft-benchmarks.md`; `DesignTokens.Motion` ships no `expressive` member, so the symbolic form would not compile). Reduced-motion: check `UIAccessibility.isReduceMotionEnabled` before setting up the repeat animation; if true, skip directly to the reveal state with a 0-duration transition.
+**SwiftUI.** Anticipation: `.scaleEffect(isAnticipating ? 1.05 : 1.0).animation(.easeInOut(duration: DesignTokens.Motion.durationBase).repeatForever(autoreverses: true), value: isAnticipating)`. Reveal: `.spring(response: 0.5, dampingFraction: 0.6)` (0.5 is the celebrate-family response reading — see the reconciliation note in `motion-craft-benchmarks.md`; `DesignTokens.Motion` ships durations, not spring responses, so the response stays numeric). Reduced-motion: check `UIAccessibility.isReduceMotionEnabled` before setting up the repeat animation; if true, skip directly to the reveal state with a 0-duration transition.
 
 **Flutter.** `AnimationController` with `CurvedAnimation(curve: Curves.easeInOut)` for
 anticipation; `AnimatedContainer` or `AnimatedScale` for reveal. Check
 `MediaQuery.of(context).disableAnimations` for the reduced-motion gate.
 
-**React Native (Reanimated 2).** `useSharedValue + withRepeat(withTiming(1.05, { duration: DesignTokens.Motion.moderate }), -1, true)` for anticipation; `withSpring` for reveal. Check `AccessibilityInfo.isReduceMotionEnabled` async on mount; skip the `withRepeat` call when true.
+**React Native (Reanimated 2).** `useSharedValue + withRepeat(withTiming(1.05, { duration: DesignTokens.Motion.durationBase }), -1, true)` for anticipation; `withSpring` for reveal. Check `AccessibilityInfo.isReduceMotionEnabled` async on mount; skip the `withRepeat` call when true.
 
-**Web (motion/react).** `animate={{ scale: [1, 1.05, 1] }}` with `transition={{ repeat: Infinity, duration: motion.moderate }}` for anticipation; `whileInView` + spring for reveal. Wrap in `useReducedMotion()` from motion/react — if true, use `animate={{ opacity: [0, 1] }}` with duration 0 as fallback. All durations reference promoted `--motion-*` CSS variables.
+**Web (motion/react).** `animate={{ scale: [1, 1.05, 1] }}` with `transition={{ repeat: Infinity, duration: motion.durationBase }}` for anticipation; `whileInView` + spring for reveal. Wrap in `useReducedMotion()` from motion/react — if true, use `animate={{ opacity: [0, 1] }}` with duration 0 as fallback. All durations reference promoted `--motion-*` CSS variables.
 
 ### Bright Line / Dark Line / Guardrail
 

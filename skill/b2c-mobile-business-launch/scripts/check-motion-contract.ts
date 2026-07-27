@@ -9,11 +9,13 @@
  * inspect a generated app's UI code (that adherence is covered behaviorally by the
  * motion-craft-prose-never-applied LaunchBench scenario); what it CAN do is make the
  * contract itself undriftable: every numeric band, token value, and preset the two
- * references state must agree with the files that ship those numbers. The celebrate-band
+ * references state must agree with the files that ship those numbers, and every motion
+ * name any reference or template cites (DesignTokens.Motion members, motion.* tokens,
+ * --motion-* CSS variables) must resolve to a shipped definition. The celebrate-band
  * blocker the 2026-07-26 pre-PR review caught by hand (a band that excluded a canon
  * card's own values) is exactly the class of failure this gate automates.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { flagString, issue, parseFlags, reportAndExit, type Issue } from "./lib/launch-state.js";
@@ -494,6 +496,93 @@ if (bench !== undefined) {
           "motion_contract.cinematic.unrouted",
           `Benchmarks line mentions durationCinematic without routing it to the web/brand lane: "${line.trim().slice(0, 120)}"`,
           BENCH,
+        ),
+      );
+    }
+  }
+}
+
+// --- 5. Motion vocabulary must resolve to shipped names on every guidance surface. ---
+// The 2026-07-27 sweep retired a phantom vocabulary (motion.brief/moderate/expressive/
+// deliberate token names, DesignTokens.Motion.spring/stepFadeDuration-style members,
+// --motion-brief-style CSS variables) that the canon checks above cannot see: prose
+// references outside .spring(response:) forms compile nowhere, so they drifted silently.
+// Every DesignTokens.Motion member, backticked motion.<name> token, and --motion-<name>
+// CSS variable cited by reference or template markdown must exist in the shipped
+// sources. Files are scanned when present so partial fixture trees stay valid.
+const swiftMotionMemberNames = new Set<string>(swiftMotionMembers.keys());
+if (swiftTokens !== undefined) {
+  const motionEnum = swiftTokens.match(/enum Motion \{([\s\S]*?)\n {2}\}/);
+  // String members (easing/easingEmphasis/easingSpring) are valid reference targets
+  // even though only numeric members can carry a spring response.
+  for (const m of (motionEnum ? (motionEnum[1] ?? "") : "").matchAll(/static let (\w+) = "/g)) {
+    swiftMotionMemberNames.add(g(m, 1));
+  }
+}
+// Mirrors the cssName column promote-design-tokens.ts mints (check:token-promotion
+// proves the promoted artifacts agree with it). Promotion is the only pipeline that
+// creates --motion-* names, so a reference outside this set resolves to nothing.
+const PROMOTED_MOTION_CSS_VARS = new Set([
+  "--motion-duration-fast",
+  "--motion-duration-base",
+  "--motion-duration-slow",
+  "--motion-duration-reduced",
+  "--motion-easing",
+  "--motion-duration-reveal",
+  "--motion-duration-cinematic",
+  "--motion-easing-emphasis",
+  "--motion-easing-spring",
+  "--motion-stagger",
+]);
+// Backticked `motion.<x>` spans that are not token references: the motion/react JSX
+// namespace (motion.div and friends), the motion.dev docs domain, and the landing
+// pack's motion.css file.
+const MOTION_NAMESPACE_SKIP = new Set(["a", "button", "css", "dev", "div", "img", "li", "p", "section", "span", "svg", "ul"]);
+const mdFilesUnder = (relDir: string): string[] => {
+  const fullDir = path.join(skillRoot, relDir);
+  if (!existsSync(fullDir)) return [];
+  const found: string[] = [];
+  for (const entry of readdirSync(fullDir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const rel = `${relDir}/${entry.name}`;
+    if (entry.isDirectory()) found.push(...mdFilesUnder(rel));
+    else if (entry.name.endsWith(".md")) found.push(rel);
+  }
+  return found;
+};
+for (const rel of [...mdFilesUnder("references"), ...mdFilesUnder("templates")]) {
+  const text = readFileSync(path.join(skillRoot, rel), "utf8");
+  if (swiftMotionMemberNames.size > 0) {
+    for (const m of text.matchAll(/DesignTokens\.Motion\.([A-Za-z0-9_]+)/g)) {
+      if (!swiftMotionMemberNames.has(g(m, 1))) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.vocabulary.member_unknown",
+            `${rel} references DesignTokens.Motion.${g(m, 1)}, which the shipped Motion enum does not define — code following it would not compile.`,
+            rel,
+          ),
+        );
+      }
+    }
+  }
+  // The benchmarks' motion.<name> references are already resolved by check 1.
+  if (rel !== BENCH && Object.keys(motionTokens).length > 0) {
+    for (const m of text.matchAll(/`motion\.([A-Za-z0-9_]+)`/g)) {
+      const name = g(m, 1);
+      if (MOTION_NAMESPACE_SKIP.has(name)) continue;
+      if (!Object.hasOwn(motionTokens, name)) {
+        issues.push(issue("error", "motion_contract.vocabulary.token_unknown", `${rel} references motion.${name}, which does not exist in tokens.json.`, rel));
+      }
+    }
+  }
+  for (const m of text.matchAll(/--motion-[a-z][a-z0-9-]*/g)) {
+    if (!PROMOTED_MOTION_CSS_VARS.has(m[0])) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.vocabulary.css_var_unknown",
+          `${rel} references ${m[0]}, which promote-design-tokens.ts does not mint — the variable would be undefined at runtime.`,
+          rel,
         ),
       );
     }

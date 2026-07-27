@@ -573,6 +573,39 @@ export function register(h: Harness): void {
     "motion_contract.canon.symbol_unresolvable",
   );
 
+  const motionVocabMember = writeMotionContractRoot("motion-contract-vocab-phantom-member", (rel, text) =>
+    rel.endsWith("mastery-and-status-card.md") ? `${text}\nThe badge scale-in rides \`DesignTokens.Motion.expressive\` timing.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a prose reference to a Motion member the enum does not define",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabMember],
+    1,
+    "motion_contract.vocabulary.member_unknown",
+  );
+
+  const motionVocabToken = writeMotionContractRoot("motion-contract-vocab-phantom-token", (rel, text) =>
+    rel.endsWith("peak-end-card.md") ? `${text}\nThe stamp fade rides \`motion.brief\` timing.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a card token reference tokens.json does not define",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabToken],
+    1,
+    "motion_contract.vocabulary.token_unknown",
+  );
+
+  const motionVocabCssVar = writeMotionContractRoot("motion-contract-vocab-phantom-css-var", (rel, text) =>
+    rel.endsWith("variable-reward-card.md") ? `${text}\nWeb pulses read the \`--motion-brief\` variable.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a CSS variable the token promotion pipeline does not mint",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabCssVar],
+    1,
+    "motion_contract.vocabulary.css_var_unknown",
+  );
+
   const motionFamilyDuplicate = writeMotionContractRoot("motion-contract-family-duplicate", (rel, text) =>
     rel.endsWith("premium-mobile-craft.md")
       ? text.replace(
