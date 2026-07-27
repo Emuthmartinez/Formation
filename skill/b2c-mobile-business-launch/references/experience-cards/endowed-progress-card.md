@@ -175,9 +175,9 @@ resolved to a localized string.
 **React Native (Reanimated / Moti).** `Moti's useAnimationState` to drive fill width from
 0 → `pre_fill_pct` on mount. Guard with `useReducedMotion()`.
 
-**Web (motion/react).** `motion.div` with `transition={{ duration: var(--motion-base), ease: 'easeOut' }}`. Use `useReducedMotion()` from motion/react; when true, set `animate={{ width: pre_fill_pct + '%' }}` without a transition. Credit labels in a `<ul>` with `role="list"` and `aria-label="Your head-start steps"`.
+**Web (motion/react).** `motion.div` with `transition={{ duration: var(--motion-duration-base), ease: 'easeOut' }}`. Use `useReducedMotion()` from motion/react; when true, set `animate={{ width: pre_fill_pct + '%' }}` without a transition. Credit labels in a `<ul>` with `role="list"` and `aria-label="Your head-start steps"`.
 
-Token references: `--motion-fast` (~150 ms) for step-by-step user-progress fill; `--motion-base` (~250 ms) for the initial pre-credit fill on mount; `--motion-slow` (~400 ms) for the completion pulse animation. Completion fill-and-pulse uses a spring (stiffness 200, damping 20) on mobile and `motion.div whileInView={{ scale: [1, 1.03, 1] }}` on web.
+Token references: `--motion-duration-fast` (120 ms) for step-by-step user-progress fill; `--motion-duration-base` (220 ms) for the initial pre-credit fill on mount; `--motion-duration-slow` (360 ms) for the completion pulse animation. Completion fill-and-pulse uses a spring (stiffness 200, damping 20) on mobile and `motion.div whileInView={{ scale: [1, 1.03, 1] }}` on web.
 
 ### Bright Line / Dark Line / Guardrail
 

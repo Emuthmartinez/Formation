@@ -270,10 +270,10 @@ Every emotional moment must be expressed in motion. Motion is a delight lever pe
 **Reduced-motion requirement.** Every delight moment that uses animation must implement a `prefers-reduced-motion` / OS reduce-motion check. The fallback must be a functional, non-animated version of the same interaction. Record fallback implementation for each card in `TECH_SPEC.md`.
 
 **Timing guidance for each card:**
-- Commitment Card echo: use a soft fade or gentle highlight (duration: `motion.brief`, ~150ms) when the commitment value is reflected back.
-- Variable Reward anticipation: use a pulsing or breathing animation during the anticipation window (duration: 1.5–3s, loop `motion.moderate` easing); reveal uses a spring with `motion.expressive` easing.
-- Perceived Effort steps: step transitions use `motion.brief` between steps; the final reveal uses `motion.expressive` spring.
-- Intent Mirror: slow fade-in with a pause (duration: `motion.deliberate`, ~600ms) to signal this is a meaningful moment, not a transition.
+- Commitment Card echo: use a soft fade or gentle highlight (duration: `motion.durationFast`, 120ms) when the commitment value is reflected back.
+- Variable Reward anticipation: use a pulsing or breathing animation during the anticipation window (window: 1.5–3s; each pulse rides `motion.durationBase` with the standard `motion.easing` curve); reveal uses a celebrate-family spring (response 0.45–0.5, dampingFraction 0.5–0.7 — `premium-mobile-craft.md` §1).
+- Perceived Effort steps: step transitions use `motion.durationFast` between steps; the final reveal uses a celebrate-family spring.
+- Intent Mirror: slow fade-in with a pause (duration: `motion.durationReveal`, 600ms) to signal this is a meaningful moment, not a transition.
 
 ---
 

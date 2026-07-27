@@ -176,10 +176,10 @@ real calendar or personal event.
 
 **Native mobile.** Full-bleed, low-information layout — landmark label at top, one line of
 personalized commitment echo, and a single primary action button. Animate entry with a spring
-transition reading `DesignTokens.Motion.durationSlow` (~400 ms) and
-`DesignTokens.Motion.easingExpressive`; the screen fades in from slight scale-up (1.04 → 1.0)
+transition reading `DesignTokens.Motion.durationSlow` (360 ms) and
+`DesignTokens.Motion.easingEmphasis`; the screen fades in from slight scale-up (1.04 → 1.0)
 to signal a meaningful arrival. Exit on CTA tap uses `DesignTokens.Motion.durationBase`
-(~250 ms) with a dissolve.
+(220 ms) with a dissolve.
 
 **iOS.** Implement prefers-reduced-motion by checking `UIAccessibility.isReduceMotionEnabled`;
 fallback is an instant opacity transition with no scale transform.
@@ -197,7 +197,7 @@ push) for lapse-based triggers. Notification copy must fit in 65 characters for 
 via a Universal Link / App Link.
 
 **Web (motion/react).** Use `AnimatePresence` for the fresh-start section entry. Duration
-values must read from promoted `--motion-slow` CSS variable (from `state/theme.tokens.json`).
+values must read from the promoted `--motion-duration-slow` CSS variable (from `state/theme.tokens.json`).
 Add `@media (prefers-reduced-motion: reduce) { transition: none; animation: none; }` at the
 global level.
 

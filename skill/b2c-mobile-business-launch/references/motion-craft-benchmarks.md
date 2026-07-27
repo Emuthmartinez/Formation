@@ -11,9 +11,9 @@ Engagement figures below (`eng = likes + 2×bookmarks`, bookmarks weighted as th
 
 ## How Recipes Bind To The Token Scale
 
-Every recipe rides the shipped motion scale — no ad-hoc millisecond values. Three vocabularies are in circulation and resolve to one spine:
+Every recipe rides the shipped motion scale — no ad-hoc millisecond values. Two vocabularies name that spine today: the tokens.json members and the SwiftUI presets. A third — the card aliases `brief`/`moderate`/`expressive` — was retired from every shipped reference on 2026-07-27; the alias column below stays only as a translation table for repos generated before that date:
 
-| tokens.json (`motion.*`) | Value | SwiftUI preset (`PremiumCraft.swift`) | Experience-card name | Governs |
+| tokens.json (`motion.*`) | Value | SwiftUI preset (`PremiumCraft.swift`) | Retired card alias | Governs |
 | --- | --- | --- | --- | --- |
 | `durationFast` | 120ms | `PremiumMotion.press` (bounce 0.18) | `brief` | press feedback, micro-ticks |
 | `durationBase` | 220ms | `PremiumMotion.standard` (bounce 0.12) | `moderate` | state changes, content arrival |
@@ -22,7 +22,7 @@ Every recipe rides the shipped motion scale — no ad-hoc millisecond values. Th
 | `durationCinematic` | 1200ms | — (web/brand lane only) | — | brand liveness, baked loops |
 | `stagger` | 60ms | — | — | per-item cascade step |
 
-One reconciliation note: the cards' `expressive` name is overloaded — `experience-cards/peak-end-card.md` and `experience-cards/variable-reward-card.md` use it as the celebrate spring *response* (0.45–0.5s), `experience-cards/streak-and-loss-aversion-card.md` as a ~500ms choreography *duration*. Read it as the celebrate family: the spring response stays 0.45–0.5s, and `durationReveal` (600ms) bounds the full choreography — two different quantities, not a contradiction.
+One reconciliation note: the retired `expressive` alias was overloaded — `experience-cards/peak-end-card.md` and `experience-cards/variable-reward-card.md` used it as the celebrate spring *response* (0.45–0.5s), `experience-cards/streak-and-loss-aversion-card.md` as a ~500ms choreography *duration*. Both readings survive without the alias: the spring response stays 0.45–0.5s, and `durationReveal` (600ms) bounds the full choreography — two different quantities, not a contradiction.
 
 The two spring families — press (response 0.3–0.4 / damping 0.7–0.8) and celebrate (response 0.45–0.5 / damping 0.5–0.7) — are defined once, in `premium-mobile-craft.md` §1; recipes cite the family, not fresh numbers. A dedicated `Motion.celebrate` token is a deliberate non-goal for now: promoting one means updating `state/theme.tokens.json`, `PremiumCraft.swift`, and `check:token-promotion` together, as its own reviewed change.
 

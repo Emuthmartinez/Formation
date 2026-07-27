@@ -169,9 +169,9 @@ static leaderboard signals abandonment).
 ### Mobile Implementation + Reduced-Motion
 
 **SwiftUI.** Level-up reveal is a full-screen or sheet-level modal. Use
-`withAnimation(.spring(response: 0.5, dampingFraction: 0.7))` from
-`DesignTokens.Motion.expressive` for the badge scale-in, and a soft fade
-(`DesignTokens.Motion.brief`, ~150 ms) for the level-label text appearance.
+`withAnimation(.spring(response: 0.5, dampingFraction: 0.7))` — the celebrate
+family from `premium-mobile-craft.md` §1 — for the badge scale-in, and a soft fade
+(`DesignTokens.Motion.durationFast`, 120 ms) for the level-label text appearance.
 
 **Flutter.** `AnimationController` with `CurvedAnimation(curve: Curves.elasticOut)` reading
 `durationBase` from the token map.
@@ -179,7 +179,7 @@ static leaderboard signals abandonment).
 **React Native.** Reanimated `withSpring` with the exported motion token values.
 
 **Web (motion/react).** Drive the reveal with motion/react using the promoted
-`--motion-expressive` CSS variable for spring easing and `--motion-base` for the text reveal.
+`--motion-easing-spring` CSS variable for spring easing and `--motion-duration-fast` for the text reveal.
 `AnimatePresence` wraps the level-up sheet.
 
 **Reduced-motion fallback (mandatory).** Check `UIAccessibility.isReduceMotionEnabled`
