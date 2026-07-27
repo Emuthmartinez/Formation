@@ -21,6 +21,11 @@ Also define:
 - The product name direction (3 options with rationale)
 - The tagline (under 8 words)
 - The single sharpest use case to feature in onboarding and the App Store
+- The moat contract for `SPEC.md`'s Differentiation And Moat section: the top 2-3
+  incumbents by revenue (what each does well, the moment we beat them, what stops
+  each shipping a copy in a week), the moat class being built (data / workflow /
+  community / taste / model / distribution) with its concrete build plan, and the
+  one-week-copy test answer
 ```
 
 ## Skill-integration notes
@@ -31,3 +36,4 @@ Also define:
 - Answer 5 feeds `VIRAL_GROWTH.md` and `growth/LAUNCH_NARRATIVE.md`.
 - Name directions feed naming/collision checks; the tagline and featured use case feed `APP_STORE_LISTING.md` and landing copy (run `geo-seo.md` before editing landing copy).
 </content>
+- **Transcribe the wedge into the spec:** the answers above land verbatim in `SPEC.md`'s Differentiation And Moat section and are held to `product-moat.md`'s tests (one-week-copy, moat class, incumbent beat moment). `check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a wedge that lives only in this chat is invisible to every gate.

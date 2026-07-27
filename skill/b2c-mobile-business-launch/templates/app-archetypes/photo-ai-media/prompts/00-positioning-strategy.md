@@ -27,6 +27,11 @@ Also define:
 - The product name direction (3 options with rationale)
 - The tagline (under 8 words)
 - The single before/after example to feature in onboarding and the App Store
+- The moat contract for `SPEC.md`'s Differentiation And Moat section: the top 2-3
+  incumbents by revenue (what each does well, the moment we beat them, what stops
+  each shipping a copy in a week), the moat class being built (data / workflow /
+  community / taste / model / distribution) with its concrete build plan, and the
+  one-week-copy test answer
 ```
 
 ## Skill-integration notes
@@ -37,3 +42,4 @@ Also define:
 - Answer 5 constrains metering (prompt 01's credits) and monetization (prompt 06) — per-generation COGS means the free tier is a real cost line, not a marketing default.
 - Answer 6 feeds `VIRAL_GROWTH.md` and `growth/LAUNCH_NARRATIVE.md`; the before/after share format is the loop in prompt 07.
 - Name directions feed naming/collision checks; the tagline and featured before/after feed `APP_STORE_LISTING.md` and landing copy (run `geo-seo.md` before editing landing copy).
+- **Transcribe the wedge into the spec:** the answers above land verbatim in `SPEC.md`'s Differentiation And Moat section and are held to `product-moat.md`'s tests (one-week-copy, moat class, incumbent beat moment). `check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a wedge that lives only in this chat is invisible to every gate.

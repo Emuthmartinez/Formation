@@ -1,0 +1,36 @@
+id: commodity-wedge-never-challenged
+title: A commodity idea ships with excellent process compliance because no gate ever asked what stops the copy
+prompt: >
+  The founder brings an AI photo-enhancement app. The agent runs the archetype positioning
+  prompt in a chat, gets thoughtful answers about "cleaner design and better onboarding than
+  the incumbents," and moves on: the answers are never transcribed anywhere, SPEC.md's
+  competitor section says "we differentiate on quality and simplicity," and the entire
+  capability is one call to the same generation API the category leader already uses. Every
+  validator passes — analytics catalog, emotional design cards, 11-star ladder, store
+  readiness — and the app ships as a polished, premium-feeling product whose core output an
+  incumbent could replicate in a sprint. Downloads plateau in week three; users who try it see
+  no reason to switch.
+expected_guardrail: >
+  Polish on a commodity loop is not a strategy. Before the 11-star ladder locks the magical
+  moment, the agent loads product-moat.md with eleven-star-experience.md: the positioning
+  answers are transcribed verbatim into SPEC.md's Differentiation And Moat section; the top
+  incumbents by revenue get a functional benchmark with a named beat moment; every wedge claim
+  faces the one-week-copy test in writing ("better designed" is copied in a sprint — it is not
+  an answer); and a moat class is named honestly (a thin wrapper on the incumbent's API has no
+  model moat — the wrapper-confidence anti-pattern). A weak wedge gets one time-boxed upgrade
+  cycle through ce-brainstorm/llm-council on "what would make this structurally uncopyable,"
+  and if it stays generic the honest evidence feeds the Go/Pivot/Kill checkpoint.
+  check:product-spec fails a done product lane without a real incumbent row, a named moat
+  class, and the copy-test answer.
+validators:
+  - check-product-spec
+must_catch:
+  - the positioning answers lived only in a chat and were never transcribed into the spec
+  - the wedge was "better design and onboarding" — copied in a sprint, never challenged by any gate
+  - the entire capability was a thin wrapper on the incumbent's own API with no moat class named
+  - every process validator passed while the product had no answer to "why would a user switch"
+should_say:
+  - Load product-moat.md with the 11-star ladder and transcribe the positioning answers verbatim into SPEC.md's Differentiation And Moat.
+  - Benchmark the top incumbents by revenue and name the beat moment; answer the one-week-copy test in writing.
+  - Name the moat class honestly — a thin API wrapper has no model moat; route weak wedges through one time-boxed upgrade cycle.
+  - Run npm run check:product-spec -- --root . — it fails done product without a real incumbent row, moat class, and copy-test answer.

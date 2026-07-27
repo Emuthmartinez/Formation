@@ -68,7 +68,7 @@ npm run validate:launch-state -- --root /path/to/app
 | Command | What it checks |
 | --- | --- |
 | `check:research` | Launch evidence exists and is attributable |
-| `check:product-spec` | `SPEC.md` scope locks and acceptance criteria |
+| `check:product-spec` | `SPEC.md` scope locks, acceptance criteria, and — at a done product lane — the Differentiation And Moat contract: two research-grounded incumbent rows, an affirmed moat class with its build plan (or the named-dated-day-30 V1 exception), and a substantive one-week-copy answer |
 | `check:11-star` | The experience ladder, line of feasibility, V1 scalable slice, surface matrix, visual board, and build links |
 | `check:onboarding` | Onboarding contract: attribution, App Review popup after first value, paywall proof, and the push permission prime at an earned post-value moment — never in the same step as the review popup (or a not-applicable decision with a substantive reason) |
 | `check:ux-patterns` | Refero or approved-fallback UX pattern packets, flow maps, state matrices, and HTML proof routing |

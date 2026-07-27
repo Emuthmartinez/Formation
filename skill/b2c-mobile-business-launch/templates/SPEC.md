@@ -12,7 +12,18 @@ Pointer to `11_STAR_EXPERIENCE.md` and `11-star-experience.html`: the ladder, th
 
 ## Category And Competitors
 
-Category/storefront strategy grounded in store data (not internal language), the competitor threat model, and the moat stated as a bundle of advantages.
+Category/storefront strategy grounded in store data (not internal language) and the competitor threat model. The wedge itself lives in Differentiation And Moat below.
+
+## Differentiation And Moat
+
+Why a user who knows the incumbent switches, held to `product-moat.md`'s tests. The archetype positioning answers are transcribed here verbatim — a wedge that lives only in a chat is invisible to every gate. `check:product-spec` fails a done product lane without a real incumbent row and a named moat class.
+
+| Incumbent (top by revenue) | What it does well | The beat moment (where we win) | What stops a week-one copy |
+| --- | --- | --- | --- |
+| _example: HabitKit_ | _fast logging, wide templates_ | _our streak-insurance mechanic at the miss moment_ | _repair pricing their subscription mix cannot follow; miss-history data accrues from day one_ |
+
+- Moat class (data / workflow / community / taste / model / distribution) and build plan:
+- One-week-copy test answer:
 
 ## Core Product Loop
 

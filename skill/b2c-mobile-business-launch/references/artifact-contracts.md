@@ -513,7 +513,7 @@ Acceptance:
 
 ## `SPEC.md`
 
-Validator: `npm run check:product-spec -- --root . --state PROJECT_STATE.yaml` enforces the structural floor (Promise, 11-Star Experience, Category And Competitors, Core Product Loop, V1 Scalable Slice, Monetization Posture, Metrics, Acceptance Contract, Risks And Open Questions; no placeholders when the product lane is done).
+Validator: `npm run check:product-spec -- --root . --state PROJECT_STATE.yaml` enforces the structural floor (Promise, 11-Star Experience, Category And Competitors, Differentiation And Moat, Core Product Loop, V1 Scalable Slice, Monetization Posture, Metrics, Acceptance Contract, Risks And Open Questions; at done, no placeholders plus a real incumbent row, a named moat class, and the one-week-copy test answer).
 
 Must include:
 - one-line promise
@@ -522,6 +522,7 @@ Must include:
 - evidence for the language
 - category/storefront strategy
 - competitor threat model
+- Differentiation And Moat: incumbent table (top by revenue, beat moment, week-one-copy blocker), named moat class with build plan, one-week-copy test answer — held to `product-moat.md`
 - core product loop
 - aha moment and onboarding sequence
 - monetization and paywall posture

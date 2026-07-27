@@ -20,6 +20,11 @@ Also define:
 - The platform's name direction (3 options with rationale)
 - The tagline (under 8 words)
 - The first 100 users — where do I find them and what do I say?
+- The moat contract for `SPEC.md`'s Differentiation And Moat section: the top 2-3
+  incumbents by revenue (what each does well, the moment we beat them, what stops
+  each shipping a copy in a week), the moat class being built (data / workflow /
+  community / taste / model / distribution) with its concrete build plan, and the
+  one-week-copy test answer
 ```
 
 ## Skill-integration notes
@@ -30,3 +35,4 @@ Also define:
 - The "first 100 users" plan feeds `growth/LAUNCH_NARRATIVE.md` and `viral-growth-loops.md` (build-in-public → invite-only beta → referral codes).
 - The monetization-fit answer constrains prompt 07: pick the model that matches the community's values, do not bolt on a generic paywall.
 </content>
+- **Transcribe the wedge into the spec:** the answers above land verbatim in `SPEC.md`'s Differentiation And Moat section and are held to `product-moat.md`'s tests (one-week-copy, moat class, incumbent beat moment). `check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a wedge that lives only in this chat is invisible to every gate.
