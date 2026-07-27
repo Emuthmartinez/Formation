@@ -203,6 +203,65 @@ export function register(h: Harness): void {
     "research.go_pivot_kill_state_mismatch",
   );
 
+  // The gate fires the moment downstream design work becomes active, whatever
+  // the recorded phase says.
+  const researchDesignActive = makeFixture("research-phase1-design-active");
+  {
+    const state = readState(researchDesignActive);
+    const research = getLane(state, "research");
+    research["status"] = "partial";
+    const design = getLane(state, "design");
+    design["status"] = "partial";
+    design["evidence"] = ["DESIGN.md"];
+    writeState(researchDesignActive, state);
+  }
+  runFixture(
+    "active design work at phase_1 with no verdict fails the gate",
+    researchDesignActive,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_row_missing",
+  );
+
+  // A malformed later decision must never silently lose to an older one.
+  const researchMalformedFollowup = makeFixture("research-done-malformed-followup");
+  setLaneDone(researchMalformedFollowup, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchMalformedFollowup, "go", "2026-07-21");
+  writeResearch(researchMalformedFollowup, [
+    ...researchCoreSections,
+    ...categoryRevenueSection(revenueRow),
+    ...goPivotKillSection(goRow),
+    "| 07/22/2026 | fail on re-read | wedge collapsed | waitlist bot-inflated | Kill | founder |",
+  ]);
+  runFixture(
+    "mistyped date on a follow-up verdict row fails instead of being dropped",
+    researchMalformedFollowup,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_row_malformed",
+  );
+
+  // The decision-maker reads from the named column: a Notes cell after Verdict
+  // containing "founder" must not satisfy the gate.
+  const researchNotesAfterVerdict = makeFixture("research-done-notes-after-verdict");
+  setLaneDone(researchNotesAfterVerdict, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchNotesAfterVerdict, "go", "2026-07-21");
+  writeResearch(researchNotesAfterVerdict, [
+    ...researchCoreSections,
+    ...categoryRevenueSection(revenueRow),
+    "## Go, Pivot, Or Kill",
+    "| Date | Category revenue reality | Wedge | Demand signal | Verdict (Go / Pivot / Kill) | Notes |",
+    "| --- | --- | --- | --- | --- | --- |",
+    "| 2026-07-21 | pass — $14.2M top-10 | streak-insurance wedge | 412-person waitlist | Go | founder said fine |",
+  ]);
+  runFixture(
+    "notes column after the verdict does not satisfy the decided-by gate",
+    researchNotesAfterVerdict,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_decider_missing",
+  );
+
   // Deferring research out of existence is not a route around the checkpoint:
   // at phase_2+ the artifact and its verdict are mandatory regardless of status.
   const researchDeferredPhase2 = makeFixture("research-deferred-phase2");

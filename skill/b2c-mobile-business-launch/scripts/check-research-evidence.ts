@@ -26,14 +26,22 @@ const done = laneStatus === "done";
 // phase_2 onward regardless of lane status.
 const projectPhase = state ? (asString(getPath(state, "project.phase")) ?? "").toLowerCase() : "";
 const buildPhase = /^phase_[2-6]/.test(projectPhase);
-const verdictRequired = done || buildPhase;
+// The gate also fires the moment downstream product/design/build work becomes
+// active, whatever the recorded phase says: design effort spent before the
+// founder's Go is the exact cost the checkpoint exists to prevent.
+const DOWNSTREAM_OF_VERDICT = ["experience", "product", "design", "content_assets", "engineering"];
+const downstreamActive = DOWNSTREAM_OF_VERDICT.some((lane) => {
+  const status = state ? asString(getPath(state, `lanes.${lane}.status`))?.toLowerCase() : undefined;
+  return status === "partial" || status === "done";
+});
+const verdictRequired = done || buildPhase || downstreamActive;
 const text = readText(args.root, "RESEARCH.md");
 
 // A deferred/not_needed research lane suppresses the missing-file error only
 // before the build phases: from phase_2 onward the verdict is mandatory, so
 // the artifact that carries it is too — deferring research out of existence
 // is not a route around the pre-build checkpoint.
-if ((!skip || buildPhase) && !text) {
+if ((!skip || buildPhase || downstreamActive) && !text) {
   issues.push(
     issue(
       "error",
@@ -213,19 +221,33 @@ if (text) {
           ),
         );
       }
-      const verdictRows = tableDataRows(verdictSection)
-        .map((cells) => ({
-          cells,
-          date: /^\d{4}-\d{2}-\d{2}$/.test(cells[1]?.trim() ?? "") ? (cells[1]?.trim() ?? "") : undefined,
-          verdict:
-            verdictColumn === -1
-              ? undefined
-              : (cells[verdictColumn] ?? "")
-                  .trim()
-                  .match(/^(go|pivot|kill)\b/i)?.[1]
-                  ?.toLowerCase(),
-        }))
-        .filter((row) => row.date && row.verdict);
+      const parsedRows = tableDataRows(verdictSection).map((cells) => ({
+        cells,
+        date: /^\d{4}-\d{2}-\d{2}$/.test(cells[1]?.trim() ?? "") ? (cells[1]?.trim() ?? "") : undefined,
+        verdict:
+          verdictColumn === -1
+            ? undefined
+            : (cells[verdictColumn] ?? "")
+                .trim()
+                .match(/^(go|pivot|kill)\b/i)?.[1]
+                ?.toLowerCase(),
+      }));
+      const verdictRows = parsedRows.filter((row) => row.date && row.verdict);
+      // A malformed decision row (mistyped date, missing verdict keyword) is
+      // reported, never silently dropped — dropping it would fall back to an
+      // older verdict the founder already superseded.
+      const malformedRows = parsedRows.filter((row) => !(row.date && row.verdict) && row.cells.some((cell) => cell.trim().length > 0));
+      if (malformedRows.length > 0) {
+        issues.push(
+          issue(
+            "error",
+            "research.go_pivot_kill_row_malformed",
+            `The Go, Pivot, Or Kill table has ${malformedRows.length} row(s) with a mistyped date (ISO YYYY-MM-DD required) or verdict ` +
+              `(Go/Pivot/Kill required). Fix the row — a malformed later decision must never silently lose to an older one.`,
+            "RESEARCH.md",
+          ),
+        );
+      }
       if (verdictRows.length === 0) {
         issues.push(
           issue(
@@ -242,7 +264,11 @@ if (text) {
         const latest = verdictRows.reduce((a, b) => ((b.date ?? "") >= (a.date ?? "") ? b : a));
         // The gate is founder-only: a verdict row that names no decision-maker
         // is an agent deciding to build and moving on.
-        const decidedByCell = (latest.cells[verdictColumn + 1] ?? "").trim();
+        // The decision-maker is read from the named "Decided by" column, never
+        // positionally — an unrelated Notes column sitting after Verdict must
+        // not be able to satisfy the founder-only gate.
+        const decidedColumn = tableColumnIndex(verdictSection, /decided by/i);
+        const decidedByCell = decidedColumn === -1 ? "" : (latest.cells[decidedColumn] ?? "").trim();
         const AUTOMATION_IDENTITY = /\b(agent|codex|claude|gpt|assistant|bot|automation|autopilot|ai)\b/i;
         // The founder counts by role or by their recorded name (project.owner).
         const ownerName = (asString(getPath(state, "project.owner")) ?? "").trim();
@@ -400,9 +426,11 @@ function tableDataRows(section: string): string[][] {
   return rows;
 }
 
-/** Index of the header column matching `pattern` in the section's first table header row, or -1. */
+/** Index of the column matching `pattern` in the section's first table HEADER
+ * row only — data cells that happen to contain a header keyword must never
+ * satisfy a column requirement. */
 function tableColumnIndex(section: string, pattern: RegExp): number {
-  const header = section.split(/\r?\n/).find((line) => line.trim().startsWith("|") && pattern.test(line));
-  if (!header) return -1;
+  const header = section.split(/\r?\n/).find((line) => line.trim().startsWith("|"));
+  if (!header || !pattern.test(header)) return -1;
   return header.split("|").findIndex((cell) => pattern.test(cell));
 }
