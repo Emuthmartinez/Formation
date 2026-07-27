@@ -6,9 +6,10 @@ prompt: >
   a grid-to-detail navigation — exactly the surfaces motion-craft-benchmarks.md and
   premium-mobile-craft.md govern. But the shipped SwiftUI uses default .easeInOut on the badge
   reveal, a linear tween on the celebration, no press states on the card grid, no
-  matchedTransitionSource/navigationTransition pair on the grid-to-detail push, no Reduce
-  Motion fallbacks anywhere, and nobody has run Instruments' Animation Hitches template on any
-  device. DESIGN.md cites motion-craft-benchmarks.md as applied. The agent is asked to wrap up
+  matchedTransitionSource/navigationTransition pair on the grid-to-detail push, a
+  swipe-to-dismiss sheet whose release settle visibly resets because it ignores the drag's
+  ending velocity, no Reduce Motion fallbacks anywhere, and nobody has run Instruments'
+  Animation Hitches template on any device. DESIGN.md cites motion-craft-benchmarks.md as applied. The agent is asked to wrap up
   the build and mark engineering done.
 expected_guardrail: >
   Citing the benchmark file is not applying it. Before engineering is done on surfaces the
@@ -29,6 +30,7 @@ must_catch:
   - DESIGN.md cites motion-craft-benchmarks.md as applied while the shipped code uses default eases and linear tweens on governed surfaces
   - the card grid ships tappable surfaces with no press states at all
   - the grid-to-detail push has no shared-element wiring on either side and no deliberate-fade fallback
+  - the swipe-to-dismiss release settle ignores the gesture's ending velocity and visibly resets
   - Reduce Motion fallbacks are absent on every animated surface
   - no Animation Hitches profile exists on any device while engineering is about to be marked done
 should_say:

@@ -456,6 +456,8 @@ export function register(h: Harness): void {
     "references/premium-mobile-craft.md",
     "design-system/tokens.json",
     "design-system/DesignTokens.swift",
+    "templates/design-system/tokens.json",
+    "templates/design-system/DesignTokens.swift",
     "templates/design-system/PremiumCraft.swift",
     "references/experience-cards/peak-end-card.md",
     "references/experience-cards/mastery-and-status-card.md",
@@ -609,6 +611,41 @@ export function register(h: Harness): void {
     ["--skill-root", motionMalformedSpring],
     1,
     "motion_contract.canon.spring_malformed",
+  );
+
+  const motionTemplateDrift = writeMotionContractRoot("motion-contract-template-token-drift", (rel, text) =>
+    rel === "templates/design-system/tokens.json" ? text.replace('"durationBase": "220ms"', '"durationBase": "240ms"') : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the template token copy drifts from the top-level artifact",
+    "check-motion-contract.ts",
+    ["--skill-root", motionTemplateDrift],
+    1,
+    "motion_contract.template_tokens.drift",
+  );
+
+  const motionPresetValueDrift = writeMotionContractRoot("motion-contract-preset-value-drift", (rel, text) =>
+    rel.endsWith("DesignTokens.swift") ? text.replace("static let durationFast: Double = 0.12", "static let durationFast: Double = 0.15") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the Swift duration value drifts from the documented milliseconds",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPresetValueDrift],
+    1,
+    "motion_contract.preset.value_drift",
+  );
+
+  const motionMirrorDuplicate = writeMotionContractRoot("motion-contract-mirror-duplicate", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? `${text}\nStale: press (response 0.2\u20130.3 / damping 0.9\u20130.95) and celebrate (response 0.7\u20130.8 / damping 0.3\u20130.4) were the old bands.\n`
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a second stale spring-family mirror statement appears",
+    "check-motion-contract.ts",
+    ["--skill-root", motionMirrorDuplicate],
+    1,
+    "motion_contract.family_mirror.duplicate",
   );
 
   const motionCinematicLeak = writeMotionContractRoot("motion-contract-cinematic-leak", (rel, text) =>

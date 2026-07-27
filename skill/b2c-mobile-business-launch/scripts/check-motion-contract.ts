@@ -37,6 +37,8 @@ const CRAFT = "references/premium-mobile-craft.md";
 const TOKENS = "design-system/tokens.json";
 const SWIFT = "templates/design-system/PremiumCraft.swift";
 const SWIFT_TOKENS = "design-system/DesignTokens.swift";
+const TEMPLATE_TOKENS = "templates/design-system/tokens.json";
+const TEMPLATE_SWIFT_TOKENS = "templates/design-system/DesignTokens.swift";
 const CANON_CARDS = [
   "references/experience-cards/peak-end-card.md",
   "references/experience-cards/mastery-and-status-card.md",
@@ -57,6 +59,49 @@ const craft = read(CRAFT);
 const tokensRaw = read(TOKENS);
 const swift = read(SWIFT);
 const swiftTokens = read(SWIFT_TOKENS);
+const templateTokensRaw = read(TEMPLATE_TOKENS);
+const templateSwiftTokens = read(TEMPLATE_SWIFT_TOKENS);
+
+// PremiumCraft.swift ships from templates/design-system/ next to its own copies of the
+// token artifacts; a generated app compiles against THOSE, not the top-level pair. The
+// two copies must agree on every motion value or the doc-side checks are checking the
+// wrong binary truth.
+if (tokensRaw !== undefined && templateTokensRaw !== undefined) {
+  try {
+    const top = JSON.parse(tokensRaw) as { tokens?: { motion?: unknown }; motion?: unknown };
+    const tpl = JSON.parse(templateTokensRaw) as { tokens?: { motion?: unknown }; motion?: unknown };
+    const topMotion = JSON.stringify(top.tokens?.motion ?? top.motion ?? null);
+    const tplMotion = JSON.stringify(tpl.tokens?.motion ?? tpl.motion ?? null);
+    if (topMotion !== tplMotion) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.template_tokens.drift",
+          "templates/design-system/tokens.json motion block differs from design-system/tokens.json — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
+          TEMPLATE_TOKENS,
+        ),
+      );
+    }
+  } catch {
+    issues.push(issue("error", "motion_contract.template_tokens.invalid_json", "templates/design-system/tokens.json failed to parse.", TEMPLATE_TOKENS));
+  }
+}
+if (swiftTokens !== undefined && templateSwiftTokens !== undefined) {
+  const motionOf = (text: string): string => {
+    const m = text.match(/enum Motion \{([\s\S]*?)\n {2}\}/);
+    return m ? (m[1] ?? "") : "";
+  };
+  if (motionOf(swiftTokens).trim() !== motionOf(templateSwiftTokens).trim()) {
+    issues.push(
+      issue(
+        "error",
+        "motion_contract.template_tokens.drift",
+        "templates/design-system/DesignTokens.swift Motion enum differs from design-system/DesignTokens.swift — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
+        TEMPLATE_SWIFT_TOKENS,
+      ),
+    );
+  }
+}
 
 /** Numeric members of the shipped DesignTokens.Motion enum, for resolving symbolic spring responses. */
 const swiftMotionMembers = new Map<string, number>();
@@ -155,6 +200,15 @@ if (bench !== undefined) {
             "error",
             "motion_contract.preset.duration_mismatch",
             `Benchmarks token table maps PremiumMotion.${g(presetRef, 1)} to motion.${name} but PremiumCraft.swift rides DesignTokens.Motion.${preset.durationMember}.`,
+            BENCH,
+          ),
+        );
+      } else if (swiftMotionMembers.has(preset.durationMember) && Math.round((swiftMotionMembers.get(preset.durationMember) ?? 0) * 1000) !== Number(ms)) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.preset.value_drift",
+            `Benchmarks token table documents motion.${name} = ${ms}ms but DesignTokens.Motion.${preset.durationMember} ships ${(swiftMotionMembers.get(preset.durationMember) ?? 0) * 1000}ms — the preset would run at the drifted value.`,
             BENCH,
           ),
         );
@@ -258,7 +312,18 @@ if (craft !== undefined) {
 if (bench !== undefined && bands.has("press") && bands.has("celebrate")) {
   const mirrorRe =
     /press \(response (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?) \/ damping (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)\) and celebrate \(response (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?) \/ damping (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)\)/;
-  const m = bench.match(mirrorRe);
+  const mirrors = [...bench.matchAll(new RegExp(mirrorRe, "g"))];
+  if (mirrors.length > 1) {
+    issues.push(
+      issue(
+        "error",
+        "motion_contract.family_mirror.duplicate",
+        `Benchmarks state the spring-family mirror ${mirrors.length} times; a stale second statement could publish an incompatible canon.`,
+        BENCH,
+      ),
+    );
+  }
+  const m = mirrors[0];
   if (!m) {
     issues.push(
       issue("error", "motion_contract.family_mirror.missing", "Benchmarks no longer state the two spring families in the expected mirror form.", BENCH),
