@@ -446,4 +446,245 @@ export function register(h: Harness): void {
     0,
     "0 error(s)",
   );
+
+  // --- check-motion-contract ---
+  // The real contract files are copied in rather than invented, so each failing
+  // fixture is the shipped skill plus exactly one seeded drift — if the shipped
+  // files and the parser ever stop agreeing, the passing fixture goes red too.
+  const motionContractFiles = [
+    "references/motion-craft-benchmarks.md",
+    "references/premium-mobile-craft.md",
+    "design-system/tokens.json",
+    "design-system/DesignTokens.swift",
+    "templates/design-system/tokens.json",
+    "templates/design-system/DesignTokens.swift",
+    "templates/design-system/PremiumCraft.swift",
+    "references/experience-cards/peak-end-card.md",
+    "references/experience-cards/mastery-and-status-card.md",
+    "references/experience-cards/variable-reward-card.md",
+  ];
+  const writeMotionContractRoot = (name: string, mutate?: (rel: string, text: string) => string): string => {
+    const root = makeEmptyFixture(name);
+    for (const rel of motionContractFiles) {
+      const target = path.join(root, rel);
+      mkdirSync(path.dirname(target), { recursive: true });
+      const text = readFileSync(path.join(skillRoot, rel), "utf8");
+      writeFileSync(target, mutate ? mutate(rel, text) : text, "utf8");
+    }
+    return root;
+  };
+
+  runScriptArgs("motion contract passes on the shipped skill", "check-motion-contract.ts", ["--skill-root", skillRoot], 0);
+
+  const motionMirrorDrift = writeMotionContractRoot("motion-contract-mirror-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text.replace("celebrate (response 0.45–0.5 / damping 0.5–0.7)", "celebrate (response 0.45–0.6 / damping 0.5–0.7)")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the benchmarks spring-family mirror drifts from the craft table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionMirrorDrift],
+    1,
+    "motion_contract.family_mirror.drift",
+  );
+
+  const motionTokenDrift = writeMotionContractRoot("motion-contract-token-drift", (rel, text) =>
+    rel.endsWith("tokens.json") ? text.replace('"durationBase": "220ms"', '"durationBase": "200ms"') : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a documented token value drifts from tokens.json",
+    "check-motion-contract.ts",
+    ["--skill-root", motionTokenDrift],
+    1,
+    "motion_contract.token_row.value_drift",
+  );
+
+  const motionCanonDrift = writeMotionContractRoot("motion-contract-canon-outside-band", (rel, text) =>
+    rel.endsWith("peak-end-card.md") ? text.replace(".spring(response: 0.45, dampingFraction: 0.7)", ".spring(response: 0.45, dampingFraction: 0.85)") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a canon card's spring falls outside the stated celebrate band",
+    "check-motion-contract.ts",
+    ["--skill-root", motionCanonDrift],
+    1,
+    "motion_contract.canon.outside_band",
+  );
+
+  const motionPresetDrift = writeMotionContractRoot("motion-contract-preset-duration-drift", (rel, text) =>
+    rel.endsWith("PremiumCraft.swift") ? text.replace("duration: DesignTokens.Motion.durationFast,", "duration: DesignTokens.Motion.durationBase,") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a preset rides a different duration token than the table maps",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPresetDrift],
+    1,
+    "motion_contract.preset.duration_mismatch",
+  );
+
+  const motionRowLost = writeMotionContractRoot("motion-contract-table-row-lost", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text
+          .split("\n")
+          .filter((line) => !line.startsWith("| `durationSlow` |"))
+          .join("\n")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the token table silently loses a required row",
+    "check-motion-contract.ts",
+    ["--skill-root", motionRowLost],
+    1,
+    "motion_contract.token_table.row_missing",
+  );
+
+  const motionAnnotationLost = writeMotionContractRoot("motion-contract-preset-annotation-lost", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("`PremiumMotion.press` (bounce 0.18)", "`PremiumMotion.press`") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a preset row loses its bounce annotation",
+    "check-motion-contract.ts",
+    ["--skill-root", motionAnnotationLost],
+    1,
+    "motion_contract.preset.annotation_missing",
+  );
+
+  const motionMalformedRef = writeMotionContractRoot("motion-contract-malformed-token-ref", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? `${text}\nWeb loops may also ride \`motion.durationReveal2\` or \`motion.constructor\` when staged.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a malformed token reference that truncation used to let pass",
+    "check-motion-contract.ts",
+    ["--skill-root", motionMalformedRef],
+    1,
+    "motion_contract.token_reference.unknown",
+  );
+
+  const motionSymbolUnresolvable = writeMotionContractRoot("motion-contract-symbol-unresolvable", (rel, text) =>
+    rel.endsWith("variable-reward-card.md")
+      ? text.replace(".spring(response: 0.5, dampingFraction: 0.6)", ".spring(response: DesignTokens.Motion.expressive, dampingFraction: 0.6)")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a canon spring cites a Motion member the enum does not define",
+    "check-motion-contract.ts",
+    ["--skill-root", motionSymbolUnresolvable],
+    1,
+    "motion_contract.canon.symbol_unresolvable",
+  );
+
+  const motionFamilyDuplicate = writeMotionContractRoot("motion-contract-family-duplicate", (rel, text) =>
+    rel.endsWith("premium-mobile-craft.md")
+      ? text.replace(
+          "| **celebrate** | response 0.45\u20130.5, dampingFraction 0.5\u20130.7",
+          "| **press** | response 0.2\u20130.3, dampingFraction 0.9\u20130.95 | stale contradictory row | none |\n| **celebrate** | response 0.45\u20130.5, dampingFraction 0.5\u20130.7",
+        )
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the spring table states a family twice",
+    "check-motion-contract.ts",
+    ["--skill-root", motionFamilyDuplicate],
+    1,
+    "motion_contract.family_table.duplicate",
+  );
+
+  const motionPunctuatedRef = writeMotionContractRoot("motion-contract-punctuated-token-ref", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? `${text}\nStaged loops may also ride \`motion.durationReveal-extra\` cycles.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a punctuated token reference the closing-backtick rule now captures",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPunctuatedRef],
+    1,
+    "motion_contract.token_reference.unknown",
+  );
+
+  const motionMalformedSpring = writeMotionContractRoot("motion-contract-malformed-spring-literal", (rel, text) =>
+    rel.endsWith("mastery-and-status-card.md")
+      ? text.replace(".spring(response: 0.5, dampingFraction: 0.7)", ".spring(response: 0..5, dampingFraction: 0.7)")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a canon spring literal does not parse as a valid decimal",
+    "check-motion-contract.ts",
+    ["--skill-root", motionMalformedSpring],
+    1,
+    "motion_contract.canon.spring_malformed",
+  );
+
+  const motionTemplateDrift = writeMotionContractRoot("motion-contract-template-token-drift", (rel, text) =>
+    rel === "templates/design-system/tokens.json" ? text.replace('"durationBase": "220ms"', '"durationBase": "240ms"') : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the template token copy drifts from the top-level artifact",
+    "check-motion-contract.ts",
+    ["--skill-root", motionTemplateDrift],
+    1,
+    "motion_contract.template_tokens.drift",
+  );
+
+  const motionPresetValueDrift = writeMotionContractRoot("motion-contract-preset-value-drift", (rel, text) =>
+    rel.endsWith("DesignTokens.swift") ? text.replace("static let durationFast: Double = 0.12", "static let durationFast: Double = 0.15") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the Swift duration value drifts from the documented milliseconds",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPresetValueDrift],
+    1,
+    "motion_contract.token_row.swift_value_drift",
+  );
+
+  const motionMirrorDuplicate = writeMotionContractRoot("motion-contract-mirror-duplicate", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? `${text}\nStale: press (response 0.2\u20130.3 / damping 0.9\u20130.95) and celebrate (response 0.7\u20130.8 / damping 0.3\u20130.4) were the old bands.\n`
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a second stale spring-family mirror statement appears",
+    "check-motion-contract.ts",
+    ["--skill-root", motionMirrorDuplicate],
+    1,
+    "motion_contract.family_mirror.duplicate",
+  );
+
+  const motionInvertedRange = writeMotionContractRoot("motion-contract-inverted-range", (rel, text) =>
+    rel.endsWith("premium-mobile-craft.md")
+      ? text.replace("| **press** | response 0.3\u20130.4, dampingFraction 0.7\u20130.8", "| **press** | response 0.4\u20130.3, dampingFraction 0.7\u20130.8")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a spring-family range is inverted",
+    "check-motion-contract.ts",
+    ["--skill-root", motionInvertedRange],
+    1,
+    "motion_contract.family_table.inverted_range",
+  );
+
+  const motionSwiftMemberLost = writeMotionContractRoot("motion-contract-swift-member-lost", (rel, text) =>
+    rel.endsWith("DesignTokens.swift")
+      ? text
+          .split("\n")
+          .filter((line) => !line.includes("static let stagger: Double"))
+          .join("\n")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a documented token member is deleted from the Swift enum",
+    "check-motion-contract.ts",
+    ["--skill-root", motionSwiftMemberLost],
+    1,
+    "motion_contract.token_row.swift_member_missing",
+  );
+
+  const motionCinematicLeak = writeMotionContractRoot("motion-contract-cinematic-leak", (rel, text) =>
+    rel.endsWith("premium-mobile-craft.md") ? `${text}\nUse durationCinematic for hero moments.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the cinematic token leaks into the in-app craft doctrine",
+    "check-motion-contract.ts",
+    ["--skill-root", motionCinematicLeak],
+    1,
+    "motion_contract.cinematic.in_craft_doctrine",
+  );
 }

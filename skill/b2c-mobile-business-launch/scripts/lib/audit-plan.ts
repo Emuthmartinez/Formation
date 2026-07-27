@@ -74,6 +74,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "audit:links", kind: "script" },
     { id: "check:source-registry", kind: "script" },
     { id: "check:asc-command-contract", kind: "script", args: ["--skill-root", S] },
+    { id: "check:motion-contract", kind: "script", args: ["--skill-root", S] },
     { id: "check:mobai-proof", kind: "script", args: ["--skill-root", S, ...stateArgs] },
     { id: "check:agent-entrypoints", kind: "script" },
     { id: "check:workflow-adherence", kind: "script" },
