@@ -18,7 +18,7 @@ One fixed weekly session, every week, in this order. Skipping a week is recorded
 | Growth and spend review | growth/PAID_UA.md stop/scale rules, FASTLANE_OPS.md loop | scale/hold/stop decision |
 | Ship one improvement | this runbook + PROJECT_STATE.yaml | release-train entry or explicit skip reason |
 
-Weekly log:
+Weekly log — one dated row per session, numbers not adjectives. "unverified" is not a value; if a pull is blocked, record the dated blocker in the cell (e.g. "blocked: PostHog auth 2026-07-20") and surface it to the founder. `check:post-launch` fails a live app whose latest row is older than two weeks or whose metric cells hold no numbers. Put MRR and its delta in Notes each week.
 
 | Date | Crash-free % | New reviews (avg rating) | D7 retention | Decision shipped | Notes |
 | --- | --- | --- | --- | --- | --- |

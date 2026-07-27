@@ -313,6 +313,10 @@ lanes:
       - "POST_LAUNCH_OPS.md"
       - "LAUNCH_RETRO.md"
     blockers: []
+    # ISO date the app first went approved-for-sale on either store. Recorded once,
+    # never changed. This is the clock every post-launch gate hangs off: day-30/day-90
+    # retro due dates and the weekly-log freshness bar in check:post-launch.
+    live_since: ""
     # Whole-app verdict from the Kill-Or-Scale Review (post-launch-operations.md §9),
     # recorded at the day-30/day-90 retro checkpoints. Founder-decided, never automatic.
     # Values: scale | hold | fix | kill. Date is the ISO day the founder decided.
