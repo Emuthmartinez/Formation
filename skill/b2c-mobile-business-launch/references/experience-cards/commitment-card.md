@@ -167,9 +167,9 @@ contexts where consistency pressure could become coercive.
 ### Mobile Implementation + Reduced-Motion
 
 **Web (motion/react).** `import { motion } from "motion/react" }`. Use `whileTap` scale pulse
-on selection tile (scale 0.97 → 1.0, duration: `--motion-fast` ~150 ms), then
+on selection tile (scale 0.97 → 1.0, duration: `--motion-duration-fast` 120 ms), then
 `AnimatePresence` to transition the selected value into the next screen's header (y: 8px → 0,
-opacity 0 → 1, duration: `--motion-base` ~200 ms, easing: ease-out). Reduced-motion: use
+opacity 0 → 1, duration: `--motion-duration-base` 220 ms, easing: ease-out). Reduced-motion: use
 `useReducedMotion()` hook; when true, skip the scale pulse and apply an instant opacity swap
 — no translate, no scale.
 

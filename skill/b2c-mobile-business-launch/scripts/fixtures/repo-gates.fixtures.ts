@@ -462,6 +462,8 @@ export function register(h: Harness): void {
     "references/experience-cards/peak-end-card.md",
     "references/experience-cards/mastery-and-status-card.md",
     "references/experience-cards/variable-reward-card.md",
+    "templates/DESIGN.md",
+    "templates/emotional-design/EMOTIONAL_DESIGN.md",
   ];
   const writeMotionContractRoot = (name: string, mutate?: (rel: string, text: string) => string): string => {
     const root = makeEmptyFixture(name);
@@ -571,6 +573,108 @@ export function register(h: Harness): void {
     ["--skill-root", motionSymbolUnresolvable],
     1,
     "motion_contract.canon.symbol_unresolvable",
+  );
+
+  const motionVocabMember = writeMotionContractRoot("motion-contract-vocab-phantom-member", (rel, text) =>
+    rel.endsWith("mastery-and-status-card.md") ? `${text}\nThe badge scale-in rides \`DesignTokens.Motion.expressive\` timing.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a prose reference to a Motion member the enum does not define",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabMember],
+    1,
+    "motion_contract.vocabulary.member_unknown",
+  );
+
+  const motionVocabToken = writeMotionContractRoot("motion-contract-vocab-phantom-token", (rel, text) =>
+    rel.endsWith("peak-end-card.md") ? `${text}\nThe stamp fade rides \`motion.brief\` timing.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a card token reference tokens.json does not define",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabToken],
+    1,
+    "motion_contract.vocabulary.token_unknown",
+  );
+
+  const motionVocabCssVar = writeMotionContractRoot("motion-contract-vocab-phantom-css-var", (rel, text) =>
+    rel.endsWith("variable-reward-card.md") ? `${text}\nWeb pulses read the \`--motion-brief\` variable.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a CSS variable the token promotion pipeline does not mint",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabCssVar],
+    1,
+    "motion_contract.vocabulary.css_var_unknown",
+  );
+
+  const motionVocabPunctuatedToken = writeMotionContractRoot("motion-contract-vocab-punctuated-token", (rel, text) =>
+    rel.endsWith("peak-end-card.md") ? `${text}\nStaged loops may also ride \`motion.durationReveal-extra\` cycles.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a punctuated card token reference outside the benchmarks",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabPunctuatedToken],
+    1,
+    "motion_contract.vocabulary.token_unknown",
+  );
+
+  const motionVocabEmbeddedToken = writeMotionContractRoot("motion-contract-vocab-embedded-token", (rel, text) =>
+    rel.endsWith("variable-reward-card.md") ? `${text}\nWeb: \`transition={{ repeat: Infinity, duration: motion.moderate }}\` for anticipation.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a phantom token embedded in an implementation code span",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabEmbeddedToken],
+    1,
+    "motion_contract.vocabulary.token_unknown",
+  );
+
+  const motionVocabFencedToken = writeMotionContractRoot("motion-contract-vocab-fenced-token", (rel, text) =>
+    rel.endsWith("peak-end-card.md") ? `${text}\n\`\`\`swift\nlet duration = motion.moderate\n\`\`\`\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a phantom token inside a fenced code block",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabFencedToken],
+    1,
+    "motion_contract.vocabulary.token_unknown",
+  );
+
+  const motionVocabIntrinsics = writeMotionContractRoot("motion-contract-vocab-intrinsic-elements", (rel, text) =>
+    rel.endsWith("peak-end-card.md")
+      ? `${text}\nWrap the section in \`motion.article\` or \`<motion.nav layout>\`; \`motion.form\` and \`motion.main\` also animate.\n`
+      : text,
+  );
+  runScriptArgs(
+    "motion contract accepts motion/react intrinsic elements beyond a fixed tag list",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabIntrinsics],
+    0,
+  );
+
+  const motionCardMomentDrift = writeMotionContractRoot("motion-contract-card-moment-drift", (rel, text) =>
+    rel.endsWith("templates/DESIGN.md")
+      ? text.replace("| Intent Mirror entrance | `motion.durationReveal` |", "| Intent Mirror entrance | `motion.durationSlow` |")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the two seeded templates disagree on a card moment's tokens",
+    "check-motion-contract.ts",
+    ["--skill-root", motionCardMomentDrift],
+    1,
+    "motion_contract.card_moments.drift",
+  );
+
+  const motionVocabCssVarSuffix = writeMotionContractRoot("motion-contract-vocab-css-var-suffix", (rel, text) =>
+    rel.endsWith("variable-reward-card.md") ? `${text}\nWeb pulses may read the \`--motion-duration-fast_extra\` variable.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a CSS variable that extends a promoted name past an identifier boundary",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabCssVarSuffix],
+    1,
+    "motion_contract.vocabulary.css_var_unknown",
   );
 
   const motionFamilyDuplicate = writeMotionContractRoot("motion-contract-family-duplicate", (rel, text) =>

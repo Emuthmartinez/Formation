@@ -56,7 +56,7 @@ positioned before the paywall so the subscription decision is made from a peak e
    or, if free text, their verbatim words. Do not paraphrase, generalize, or psychologically
    escalate.
 4. Design a deliberate pause — animate the mirror text with a slow fade-in using
-   `motion.deliberate` (~600 ms) so the screen has a quiet, considered energy distinct from
+   `motion.durationReveal` (600 ms) so the screen has a quiet, considered energy distinct from
    transition screens.
 5. Confirm forward motion — after the mirror, provide a single, goal-aligned CTA: "Let's
    build your plan" / "Start your first session." The CTA must NOT be a paywall trigger on
@@ -119,7 +119,7 @@ a user's stated distress back to them without clinical support could cause harm.
    Confirm the paywall does not appear on the same screen.
 3. **Write the mirror template using the user's own language.** Use the user's exact selection
    text, not a paraphrase. Test every combination of onboarding answers.
-4. **Design the motion spec** — slow fade-in using `motion.deliberate` (~600 ms) with a brief
+4. **Design the motion spec** — slow fade-in using `motion.durationReveal` (600 ms) with a brief
    pause before the CTA appears (~300 ms after text is fully visible). Specify the reduced-
    motion fallback in `TECH_SPEC.md`.
 5. **Implement the PostHog events** — add `intent_mirror_shown` (with `surface`,
@@ -196,7 +196,7 @@ a user's stated distress back to them without clinical support could cause harm.
 `withAnimation(.easeInOut(duration: 0.6)) { isVisible = true }` in `onAppear`. Use
 `UIAccessibility.isReduceMotionEnabled` to gate: if reduce-motion is on, set
 `isVisible = true` immediately in `onAppear` with no animation. Text fades in first; CTA
-appears after a 0.9 s delay. Token: `DesignTokens.Motion.deliberate` (600 ms).
+appears after a 0.9 s delay. Token: `DesignTokens.Motion.durationReveal` (600 ms).
 
 **Flutter.** `AnimatedOpacity(opacity: _visible ? 1.0 : 0.0, duration: const Duration(milliseconds: 600), curve: Curves.easeInOut)`. Reduced-motion gate: `MediaQuery.of(context).disableAnimations`.
 

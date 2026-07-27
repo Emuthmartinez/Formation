@@ -191,11 +191,11 @@ information reliably.
 ### Mobile Implementation + Reduced-Motion
 
 **SwiftUI.** Render the identity anchor capture screen as a full-bleed card stack. On
-selection, use a spring animation referencing `DesignTokens.Motion.expressive` (scale from
-0.95 to 1.0, opacity 0 to 1, duration `DesignTokens.Motion.durationBase` ~300 ms) to confirm
+selection, use a celebrate-family spring (scale from
+0.95 to 1.0, opacity 0 to 1, duration `DesignTokens.Motion.durationBase`, 220 ms) to confirm
 authorship. Apply the chosen theme token immediately to the navigation bar and background so
 the user sees the ownership effect in real time. For the milestone reflection full-screen, use
-a slow fade-in with `DesignTokens.Motion.deliberate` (~600 ms) plus a one-line text reveal
+a slow fade-in with `DesignTokens.Motion.durationReveal` (600 ms) plus a one-line text reveal
 with a stagger. Reduced-motion fallback: check `UIAccessibility.isReduceMotionEnabled` and
 fall back to `.easeIn(duration: 0.1)` opacity only, no scale or stagger.
 
@@ -206,7 +206,7 @@ fall back to `.easeIn(duration: 0.1)` opacity only, no scale or stagger.
 `AccessibilityInfo.isReduceMotionEnabled()`.
 
 **Web (motion/react).** Drive durations from `--motion-duration-base` and
-`--motion-easing-expressive` CSS variables. Use `useReducedMotion()` hook; when true, set
+`--motion-easing-spring` CSS variables. Use `useReducedMotion()` hook; when true, set
 `transition={{ duration: 0 }}` on all identity-reveal animations. The ownership artifact
 share card should use `AnimatePresence` for mount/unmount.
 

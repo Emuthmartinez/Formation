@@ -53,9 +53,9 @@ Required when `EMOTIONAL_DESIGN.md` is in scope. Translate the Emotional North S
 | Card moment | Motion token | Web (`motion/react`) | Reduced-motion fallback |
 | --- | --- | --- | --- |
 | Commitment echo | `motion.durationFast` | opacity/position highlight | instant static text, no fade |
-| Perceived Effort step transitions | `motion.durationBase` + final `motion.durationSlow` reveal | staged step list + spring reveal | static step list, count only |
-| Variable Reward anticipation → reveal | `motion.durationBase` loop + `motion.durationSlow` spring | anticipation loop then reveal | instant plain-text result |
-| Intent Mirror entrance | `motion.durationSlow` | deliberate fade-in | static block appears instantly |
+| Perceived Effort step transitions | `motion.durationFast` between steps + celebrate-family final reveal | staged step list + spring reveal | static step list, count only |
+| Variable Reward anticipation → reveal | `motion.durationBase` loop + celebrate-family spring reveal | anticipation loop then reveal | instant plain-text result |
+| Intent Mirror entrance | `motion.durationReveal` | deliberate fade-in | static block appears instantly |
 
 Every animated card moment must declare its `prefers-reduced-motion` / OS reduce-motion behavior here and in `TECH_SPEC.md`.
 

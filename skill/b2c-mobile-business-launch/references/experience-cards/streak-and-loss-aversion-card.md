@@ -202,26 +202,26 @@ Streak state is a four-value enum (`healthy`, `atRisk`, `endangered`, `broken`) 
 state and persisted to the backend. Each state maps to a distinct visual token from
 `DesignTokens.Motion`.
 
-**Healthy.** Streak counter pulse spring on increment: duration `DesignTokens.Motion.brief`
-~150 ms, spring response 0.4, damping 0.7.
+**Healthy.** Streak counter pulse spring on increment: duration `DesignTokens.Motion.durationFast`
+(120 ms), spring response 0.4, damping 0.7.
 
 **At-risk.** Flame or badge icon transitions to muted color via cross-fade (duration
-`DesignTokens.Motion.moderate` ~300 ms); no animation loop — urgency is conveyed through color
+`DesignTokens.Motion.durationBase`, 220 ms); no animation loop — urgency is conveyed through color
 and copy, not motion.
 
 **Endangered.** Streak container softly breathes (opacity oscillates 1.0 to 0.7, loop,
-duration `DesignTokens.Motion.moderate`, easing: `easeInOut`) — one pulse every 2 seconds
+duration `DesignTokens.Motion.durationBase`, easing: `easeInOut`) — one pulse every 2 seconds
 maximum.
 
 **Broken.** Counter resets with a deflate spring (scale 1.0 to 0.85 to 1.0, duration
-`DesignTokens.Motion.brief`).
+`DesignTokens.Motion.durationFast`).
 
 **Milestone celebration.** Spring scale-up on the milestone badge (scale 0.8 to 1.15 to 1.0,
-duration `DesignTokens.Motion.expressive` ~500 ms) followed by a particle or confetti burst
-using the app's primary palette tokens.
+choreography ~500 ms, bounded by `DesignTokens.Motion.durationReveal` at 600 ms) followed by
+a particle or confetti burst using the app's primary palette tokens.
 
-**Web (motion/react).** Use tokenized `--motion-brief`, `--motion-moderate`,
-`--motion-expressive` CSS variables. Drive the counter increment with a spring animation.
+**Web (motion/react).** Use tokenized `--motion-duration-fast`, `--motion-duration-base`,
+`--motion-duration-reveal` CSS variables. Drive the counter increment with a spring animation.
 At-risk breathing uses `animate` with `repeat: Infinity, repeatType: 'mirror'`.
 
 **Reduced-motion fallback (REQUIRED).** Wrap every animated streak state change in a
