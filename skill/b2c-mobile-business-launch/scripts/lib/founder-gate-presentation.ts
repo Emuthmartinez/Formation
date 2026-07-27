@@ -1,3 +1,5 @@
+import { accessLabel } from "./founder-copy.js";
+
 export function renderFounderGateMarkup(founderModel: Record<string, unknown>, businessOperator: Record<string, unknown>): string {
   const activeFounderGateValue = founderModel.activeFounderGate;
   const hasActiveFounderGate = isRecord(activeFounderGateValue);
@@ -54,23 +56,6 @@ export function renderFounderGateMarkup(founderModel: Record<string, unknown>, b
       businessOperator.access_ready_count ?? 0,
     )}</p></article>
   </div>`;
-}
-
-/**
- * Access sub-status enum to plain language. Exported because check-founder-operator-
- * bootstrap.ts asserts that the cockpit reflects ledger state, and it must compare the
- * translated label rather than the raw enum now that founders read this section.
- */
-export function accessLabel(value: unknown): string {
-  const labels: Record<string, string> = {
-    not_started: "Not set up yet",
-    partial: "Partly set up",
-    blocked: "Waiting on you",
-    deferred: "Postponed on purpose",
-    not_needed: "Not needed",
-    done: "Ready",
-  };
-  return labels[String(value ?? "")] ?? "Not set up yet";
 }
 
 function asArray(value: unknown): unknown[] {

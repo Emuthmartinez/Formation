@@ -1,10 +1,23 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { accessLabel } from "../lib/founder-copy.js";
 import { renderFounderGateMarkup } from "../lib/founder-gate-presentation.js";
 import { type Harness, readState, writeState } from "./_harness.js";
 
 export function register(h: Harness): void {
   const { makeFixture, runFixture: runFixtureBase, runScriptArgs } = h;
+  const literalAccessLabels: Record<string, string> = {
+    active: "Active",
+    ready: "Ready",
+    founder_action_needed: "Needs your help",
+    access_pending: "Waiting for access",
+    access_ready: "Ready",
+  };
+  for (const [status, expected] of Object.entries(literalAccessLabels)) {
+    if (accessLabel(status) !== expected) {
+      throw new Error(`Founder-visible access label drifted for ${status}: expected "${expected}", got "${accessLabel(status)}".`);
+    }
+  }
   const keepTemp = process.argv.includes("--keep-temp");
   const runFixture: Harness["runFixture"] = (...args) => {
     try {
@@ -610,12 +623,19 @@ export function register(h: Harness): void {
   const value = completeValue(complete);
   writeLedger(complete, value);
   reconcileFixture(complete, value);
+  const completeCockpit = readFileSync(path.join(complete, "launch-cockpit.html"), "utf8");
+  if (!completeCockpit.includes("Setup so far: Active") || !completeCockpit.includes("Secure key storage: Ready")) {
+    throw new Error("The founder cockpit must render active setup and ready key storage literally; shared fallback labels cannot certify themselves.");
+  }
   runFixture("founder-zero operator with Doppler and delegated social proof passes", complete, "check-founder-operator-bootstrap.ts", 0);
 
   const ready = makeFixture("founder-operator-ready");
   const readyLedger = readyValue(ready);
   writeLedger(ready, readyLedger);
   reconcileFixture(ready, readyLedger);
+  if (!readFileSync(path.join(ready, "launch-cockpit.html"), "utf8").includes("Setup so far: Ready")) {
+    throw new Error('The founder cockpit must render a ready operator as "Ready".');
+  }
   runFixture("resolved founder-owned operator bootstrap passes ready state", ready, "check-founder-operator-bootstrap.ts", 0);
 
   const escapedAction = makeFixture("founder-operator-escaped-action");

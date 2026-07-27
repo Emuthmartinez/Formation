@@ -183,6 +183,32 @@ export const statusCopy: Record<string, string> = {
 };
 
 /**
+ * Business-access sub-status enum → what a founder reads in the account card.
+ *
+ * This belongs beside the rest of the founder-visible vocabulary so every renderer
+ * shares the same presentation boundary. The founder-operator fixtures pin the
+ * shipped enum values to literal expectations independently of this table.
+ */
+export const accessCopy: Record<string, string> = {
+  not_started: "Not set up yet",
+  active: "Active",
+  partial: "Partly set up",
+  blocked: "Waiting on you",
+  founder_action_needed: "Needs your help",
+  access_pending: "Waiting for access",
+  access_ready: "Ready",
+  deferred: "Postponed on purpose",
+  not_needed: "Not needed",
+  done: "Ready",
+  ready: "Ready",
+};
+
+/** Founder-visible label for a business-access sub-status. */
+export function accessLabel(value: unknown): string {
+  return accessCopy[String(value ?? "")] ?? "Not set up yet";
+}
+
+/**
  * Phase code → the stage name a founder would use. Sub-phases share their parent's
  * plain name where a founder would not distinguish them; the code still identifies
  * them precisely for the agent.
