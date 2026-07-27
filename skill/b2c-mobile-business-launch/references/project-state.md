@@ -59,7 +59,7 @@ A founder gate is a pause awaiting a decision, not a termination. The observed f
 
 The contract:
 
-- Every founder-gated blocker carries the ISO date it was **last presented**: `founder-gated 2026-07-26: paid campaign launch and budget spend`. Re-dating happens only when the gate is actually re-presented and the founder responds — never to quiet a validator.
+- Every founder-gated blocker carries the ISO date it was **last presented**, in the documented position — between the gate keyword and the colon: `founder-gated 2026-07-26: paid campaign launch and budget spend`. A date elsewhere in the text (a campaign date, a deadline) does not count; `check:lane-coverage` reads only the presentation slot. Re-dating happens only when the gate is actually re-presented and the founder responds — never to quiet a validator.
 - At session start and in the weekly ops review, re-present any founder gate older than 30 days: what the gate is, what changed since it was last asked (new numbers, new evidence, new deadline), and the same choices as before with a recommendation. The founder may approve, defer again (re-date), or drop the lane (`not_needed` with a dated reason).
 - Silence defers again; it never converts to approval, and it never means forever.
 - `check:lane-coverage` warns on undated founder gates and on gates past the 30-day window, and errors on stale gates once the app is live (`phase_6`/`phase_6b`) — a live app with its growth levers parked behind a forgotten question is the distribution-never-turns-on failure mode.

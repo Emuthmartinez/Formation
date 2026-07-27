@@ -572,6 +572,26 @@ export function register(h: Harness): void {
     "lane_coverage.paid_user_acquisition.founder_gate_reengagement_due",
   );
 
+  // A date outside the documented presentation slot (between keyword and
+  // colon) is a campaign date, not a presentation date.
+  const founderGateDateAfterColon = makeFixture("founder-gate-date-after-colon");
+  {
+    const state = readState(founderGateDateAfterColon);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    writeState(founderGateDateAfterColon, state);
+  }
+  withLane(founderGateDateAfterColon, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated: campaign prepared ${gateIsoDaysAgo(1)}; spend awaiting approval`],
+  });
+  runFixture(
+    "a date after the colon does not count as the presentation date",
+    founderGateDateAfterColon,
+    "check-lane-coverage.ts",
+    1,
+    "lane_coverage.paid_user_acquisition.founder_gate_undated",
+  );
+
   // A forward-dated gate would disarm the clock exactly like an undated one.
   const founderGateFutureDate = makeFixture("founder-gate-future-date");
   {

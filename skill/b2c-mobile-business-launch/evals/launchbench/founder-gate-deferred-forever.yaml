@@ -16,9 +16,9 @@ expected_guardrail: >
   conversion numbers from the weekly log, the paid-UA plan's own thresholds), and offer the
   same choices with a recommendation — approve the spend, defer again with a new date, or drop
   the lane with a dated reason. The blocker is re-dated only with the founder's actual
-  response; silence defers again and never converts to approval. check:lane-coverage warns on
-  undated founder gates, warns past the 30-day window pre-launch, and errors on a live app —
-  the distribution-never-turns-on failure mode is a red check, not a quiet default.
+  response; silence defers again and never converts to approval. check:lane-coverage fails an
+  undated or stale founder gate on a live app (and warns pre-launch) — the
+  distribution-never-turns-on failure mode is a red check, not a quiet default.
 validators:
   - check-lane-coverage
 must_catch:
@@ -30,4 +30,4 @@ should_say:
   - List founder gates older than 30 days at session start and re-present the top one before new optional work.
   - Show what changed since the gate was recorded and offer approve / defer again / drop with a recommendation.
   - Re-date the blocker only with the founder's actual response; silence defers again and never converts to approval.
-  - Run npm run check:lane-coverage -- --root . — undated founder gates warn, and stale gates on a live app fail.
+  - Run npm run check:lane-coverage -- --root . — on this live app the undated gate is already a failing check; pre-launch the same findings warn.

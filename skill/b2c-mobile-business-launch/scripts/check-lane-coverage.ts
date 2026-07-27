@@ -178,10 +178,14 @@ if (state) {
       const postLaunch = /^phase_6/.test(currentPhase.toLowerCase());
       for (const blocker of nonEmptyBlockers) {
         if (!FOUNDER_GATE_PATTERN.test(blocker)) continue;
-        // The presented-at date must be a real, non-future calendar date: a
-        // typo'd month or a forward-dated gate would disarm the re-engagement
-        // clock exactly like an undated one, so both take the same path.
-        const presentedAtRaw = extractIsoDate(blocker);
+        // The presented-at date is read from the documented position only —
+        // "founder-gated YYYY-MM-DD: <what>" — i.e. between the gate keyword
+        // and the colon. A campaign or deadline date later in the free text
+        // must neither keep a stale gate looking fresh nor age a fresh one.
+        const keywordMatch = FOUNDER_GATE_PATTERN.exec(blocker);
+        const afterKeyword = keywordMatch ? blocker.slice(keywordMatch.index + keywordMatch[0].length) : "";
+        const beforeColon = afterKeyword.split(":")[0] ?? "";
+        const presentedAtRaw = extractIsoDate(beforeColon);
         const presentedDate = presentedAtRaw ? new Date(`${presentedAtRaw}T00:00:00Z`) : undefined;
         const presentedAt =
           presentedAtRaw &&
