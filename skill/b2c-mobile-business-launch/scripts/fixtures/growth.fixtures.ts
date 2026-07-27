@@ -873,6 +873,77 @@ export function register(h: Harness): void {
     "viral_growth.loop_economics_unmeasured",
   );
 
+  // A prose computation that contradicts its own factors is not a measurement.
+  const viralGrowthProseKMismatch = makeFixture("viral-growth-prose-k-mismatch");
+  writeCompleteViralGrowth(viralGrowthProseKMismatch);
+  writeFileSync(
+    path.join(viralGrowthProseKMismatch, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthProseKMismatch, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: measured k = 9.9 in week 1 from 3.1 shares per active user and 20% recipient conversion; cycle time: 6 days; trend: flat.",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "a prose k contradicting its own factors fails",
+    viralGrowthProseKMismatch,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // Goal lines cannot supply the cycle time and trend for a measured k.
+  const viralGrowthGoalCycleTrend = makeFixture("viral-growth-goal-cycle-trend");
+  writeCompleteViralGrowth(viralGrowthGoalCycleTrend);
+  writeFileSync(
+    path.join(viralGrowthGoalCycleTrend, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthGoalCycleTrend, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      ["Loop Economics: measured k = 0.4 in week 1.", "Goal: cycle time: 6 days; trend: rising."].join("\n"),
+    ),
+    "utf8",
+  );
+  runFixture(
+    "goal-line cycle time and trend do not complete a measurement",
+    viralGrowthGoalCycleTrend,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // Budget digits size no roster.
+  const viralGrowthBudgetDigitBands = makeFixture("viral-growth-budget-digit-bands");
+  writeCompleteViralGrowth(viralGrowthBudgetDigitBands);
+  writeFileSync(
+    path.join(viralGrowthBudgetDigitBands, "UGC_PLAYBOOK.md"),
+    [
+      "# UGC Playbook",
+      "",
+      "Creator scripts use GROW-001 and the format lab.",
+      "",
+      "## Post-Breakout Scale Model",
+      "",
+      "Each band is a founder-gated budget step with install-per-video fatigue measured weekly.",
+      "",
+      "| Band | Roster | Weekly video volume | Budget (founder-gated) | Entered on / evidence |",
+      "| --- | --- | --- | --- | --- |",
+      `| Discovery | | | $300 | ${growthIsoDaysAgo(7)} — install-per-video 210 |`,
+      "| Proven format | | | $500 | |",
+      "| Scale | | | $1000 | |",
+      "| Volume | | | $2500 | |",
+      "",
+      "- Control format install-per-video (weekly): fatigue check — two consecutive declines trigger the next variant test.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "budget digits without roster or volume numbers define no bands",
+    viralGrowthBudgetDigitBands,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_scale_model_missing",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

@@ -250,7 +250,7 @@ export function register(h: Harness): void {
     const opsPath = path.join(revenueExperimentStale, "REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
-      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(120)} | anchor-first paywall lifts trials | anchor-first | trial-start rate | completed | +12% trial starts, kept |\n\n## Founder-Gated Probe Step`,
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(120)} | anchor-first paywall lifts trials | anchor-first | trial-start rate | completed | +12% trial starts, trial-to-paid held at 20% over one renewal window; kept |\n\n## Founder-Gated Probe Step`,
     );
     writeFileSync(opsPath, ops, "utf8");
   }
@@ -272,7 +272,7 @@ export function register(h: Harness): void {
     const opsPath = path.join(revenueExperimentCurrent, "REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
-      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts trial starts | anchor-first layout | trial-start rate | completed | +18% trial starts, founder kept it |\n\n## Founder-Gated Probe Step`,
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts trial starts | anchor-first layout | trial-start rate | completed | +18% trial starts, trial-to-paid held at 22% over one renewal window; founder kept it |\n\n## Founder-Gated Probe Step`,
     );
     writeFileSync(opsPath, ops, "utf8");
   }
@@ -281,7 +281,7 @@ export function register(h: Harness): void {
     revenueExperimentCurrent,
     "check-revenue.ts",
     1,
-    undefined,
+    "error(s),",
     [],
     undefined,
     "revenue.experiment_backlog",
@@ -297,7 +297,7 @@ export function register(h: Harness): void {
     const opsPath = path.join(revenueExperimentDatedNext, "REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
-      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(80)} | anchor-first paywall lifts trials | anchor-first | trial-start rate | completed | +12% trial starts, kept |\n| ${experimentIsoDaysAgo(-14)} | reverse trial beats opt-in | reverse-trial | trial-to-paid | planned | |\n\n## Founder-Gated Probe Step`,
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(80)} | anchor-first paywall lifts trials | anchor-first | trial-start rate | completed | +12% trial starts, trial-to-paid held at 20% over one renewal window; kept |\n| ${experimentIsoDaysAgo(-14)} | reverse trial beats opt-in | reverse-trial | trial-to-paid | planned | |\n\n## Founder-Gated Probe Step`,
     );
     writeFileSync(opsPath, ops, "utf8");
   }
@@ -306,7 +306,7 @@ export function register(h: Harness): void {
     revenueExperimentDatedNext,
     "check-revenue.ts",
     1,
-    undefined,
+    "error(s),",
     [],
     undefined,
     "revenue.experiment_backlog",
@@ -331,7 +331,7 @@ export function register(h: Harness): void {
     revenueExperimentFirstPlanned,
     "check-revenue.ts",
     1,
-    undefined,
+    "error(s),",
     [],
     undefined,
     "revenue.experiment_backlog",
@@ -378,7 +378,7 @@ export function register(h: Harness): void {
     revenueExperimentShortMetric,
     "check-revenue.ts",
     1,
-    undefined,
+    "error(s),",
     [],
     undefined,
     "revenue.experiment_backlog",
@@ -489,6 +489,28 @@ export function register(h: Harness): void {
   runFixture(
     "a completed row whose result is a future measurement plan does not satisfy the cadence",
     revenueExperimentFuturePlan,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
+  // Top-of-funnel alone is not cohort economics.
+  const revenueExperimentTrialStartOnly = makeFixture("revenue-experiment-trial-start-only");
+  {
+    const state = readState(revenueExperimentTrialStartOnly);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentTrialStartOnly, state);
+    const opsPath = path.join(revenueExperimentTrialStartOnly, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts trial starts | anchor-first layout | trial-start rate | completed | Trial-start rate +9%; kept |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a completed row with trial-start-only evidence does not satisfy the cadence",
+    revenueExperimentTrialStartOnly,
     "check-revenue.ts",
     1,
     "revenue.experiment_backlog.empty",

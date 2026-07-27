@@ -606,7 +606,7 @@ if (revenueDone && revenueOpsText) {
           .split(/[.;,—–:()|]/)
           .some(
             (clause) =>
-              /cohort|renewal|trial[- ]?start|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(clause) &&
+              /cohort|renewal|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(clause) &&
               !NEGATIVE_CLAUSE.test(clause) &&
               !FUTURE_CLAUSE.test(clause) &&
               /\d/.test(clause),

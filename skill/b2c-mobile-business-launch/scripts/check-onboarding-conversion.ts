@@ -65,7 +65,9 @@ if (onboardingDone && markdown) {
     );
   // The exemption line itself may smuggle an ask after the reason — the
   // reason's affirmative residue must carry no instruction verbs.
-  const reasonCarriesAsk = /\b(request|requested|ask|asked|prompt|show|present|display)\b/i.test(affirmativeOf(notApplicableReason));
+  const reasonCarriesAsk = /\b(request|requested|ask|asked|prompt|show|shown|present|presented|display|displayed|opens?|appears?|pops? up|launches?)\b/i.test(
+    affirmativeOf(notApplicableReason),
+  );
   const notApplicable =
     Boolean(notApplicableMatch) &&
     notApplicableReason.replace(/[^a-z0-9]/gi, "").length >= 12 &&
@@ -90,9 +92,16 @@ if (onboardingDone && markdown) {
       affirmativeOf(line),
     ),
   );
+  // An automatically opening dialog is a hard ask regardless of what the
+  // user taps afterward — the tap must come first, and "automatic" plus a
+  // dialog on one push line is the inverted order.
+  const autoDialog = pushLines.some((line) =>
+    /automatic\w*[^.;\n]{0,40}\b(dialog|ask|prompt)\b|\b(dialog|ask|prompt)\b[^.;\n]{0,40}automatic\w*/i.test(affirmativeOf(line)),
+  );
   const placementOk =
     primeEvidence &&
     userInitiated &&
+    !autoDialog &&
     pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(affirmativeOf(line)));
   const coldAsk = pushLines.some((line) =>
     /\bcold\b|first launch|on launch|at startup|app start|before (the )?(first )?value([- ]reveal)?/i.test(affirmativeOf(line)),

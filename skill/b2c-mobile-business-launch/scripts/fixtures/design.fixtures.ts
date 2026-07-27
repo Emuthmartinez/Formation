@@ -621,6 +621,62 @@ export function register(h: Harness): void {
     "onboarding.push_priming_missing",
   );
 
+  // The exemption line itself cannot smuggle a declarative flow either.
+  const onboardingPushNaInlineDeclarative = makeFixture("onboarding-push-na-inline-declarative");
+  {
+    const state = readState(onboardingPushNaInlineDeclarative);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushNaInlineDeclarative, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushNaInlineDeclarative, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push notifications: not applicable — desktop has no surface; on iOS the native system dialog opens on launch.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an exemption whose reason declares a launch dialog fails",
+    onboardingPushNaInlineDeclarative,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_priming_missing",
+  );
+
+  // A dialog that opens before the consent tap is the inverted order.
+  const onboardingPushDialogBeforeTap = makeFixture("onboarding-push-dialog-before-tap");
+  {
+    const state = readState(onboardingPushDialogBeforeTap);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushDialogBeforeTap, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushDialogBeforeTap, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push permission priming: soft-prime after first value; the system dialog opens automatically; the user taps Continue afterward.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a dialog that opens automatically before the consent tap fails",
+    onboardingPushDialogBeforeTap,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_priming_missing",
+  );
+
   // "Push permission" is the same canonical noun as "push notifications" for
   // the not-applicable exemption.
   const onboardingPushPermissionNa = makeFixture("onboarding-push-permission-na");

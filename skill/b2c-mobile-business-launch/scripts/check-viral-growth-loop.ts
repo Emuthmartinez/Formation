@@ -183,14 +183,20 @@ if (growthStatus === "done" && markdown) {
   // not yet measured.
   // The number must belong to the cycle-time phrase itself — "k = 0.4 …
   // cycle time unavailable" has a digit near the words but no measurement.
-  const cycleTimeMeasured = /\b\d+(\.\d+)?[- ](?:day|hour|week)s?[- ]cycle[- ]?time|cycle[- ]?time\s*(?:\(days\))?\s*(?:[:=]|is|was|of)?\s*\d+(\.\d+)?/i.test(
-    loopRegion,
+  // Cycle time and trend must live on measurement lines, not goal lines —
+  // the three values are one measurement record.
+  const ASPIRATION_LINE = /\b(target|goal|aim|aspir\w*|hope|planned? for|example|e\.g\.|benchmark|assum\w*|hypothetic\w*|illustrat\w*|would)\b/i;
+  const measurementLines = loopLines.filter((line) => !ASPIRATION_LINE.test(line));
+  const cycleTimeMeasured = measurementLines.some((line) =>
+    /\b\d+(\.\d+)?[- ](?:day|hour|week)s?[- ]cycle[- ]?time|cycle[- ]?time\s*(?:\(days\))?\s*(?:[:=]|is|was|of)?\s*\d+(\.\d+)?/i.test(line),
   );
   // An explicit trend/decision value, not the section's own guidance prose:
   // "the rules key on k and its trend" records no trend.
-  const trendRecorded =
-    /\btrend\b\s*(:|=|is|was)?\s*(flat|rising|falling|improving|declining|holding|hold|compounding|up|down)\b/i.test(loopRegion) ||
-    /\bdecision\b\s*(:|=)\s*(?!no\b|none\b|not\b|pending\b|tbd\b|todo\b|unknown\b|n\/?a\b|awaiting\b)\S/i.test(loopRegion);
+  const trendRecorded = measurementLines.some(
+    (line) =>
+      /\btrend\b\s*(:|=|is|was)?\s*(flat|rising|falling|improving|declining|holding|hold|compounding|up|down)\b/i.test(line) ||
+      /\bdecision\b\s*(:|=)\s*(?!no\b|none\b|not\b|pending\b|tbd\b|todo\b|unknown\b|n\/?a\b|awaiting\b)\S/i.test(line),
+  );
   // Recency: once the app has been live five weeks the loop is running, and
   // the weekly contract needs a dated measurement inside the current window —
   // "week one" prose or a fossil row cannot stay green indefinitely.
@@ -275,7 +281,20 @@ if (growthStatus === "done" && markdown) {
     }
     return false;
   })();
-  const measuredKLineCurrent = measuredKLine && cycleTimeMeasured && trendRecorded && (!loopRunning || recentDatedLine);
+  // When the k line states its own factors, the arithmetic must hold there
+  // too — a contradictory prose computation cannot drive stop/scale.
+  const kLineFactorsInconsistent = loopLines.some((line) => {
+    const kMatch = line.match(/\bk\s*(?:=|at|:)\s*(\d+(?:\.\d+)?)/i);
+    if (!kMatch || !kMatch[1]) return false;
+    const factorMatch = line.match(/(\d+(?:\.\d+)?)\s*(?:shares?|invites?)\b[^;.\n]*?(\d+(?:\.\d+)?)(\s*%)?\s*(?:recipient\s+)?(?:conversion|activation)/i);
+    if (!factorMatch || !factorMatch[1] || !factorMatch[2]) return false;
+    const kValue = Number(kMatch[1]);
+    const factorA = Number(factorMatch[1]);
+    const factorB = factorMatch[3] ? Number(factorMatch[2]) / 100 : Number(factorMatch[2]);
+    const product = factorA * factorB;
+    return Math.abs(product - kValue) > Math.max(0.02, 0.1 * product);
+  });
+  const measuredKLineCurrent = measuredKLine && !kLineFactorsInconsistent && cycleTimeMeasured && trendRecorded && (!loopRunning || recentDatedLine);
   const loopMeasured = measuredKLineCurrent || commitmentValid || measuredRowValid;
   if (loopIndex !== -1 && !loopMeasured) {
     issues.push(
@@ -311,11 +330,6 @@ if (growthStatus === "done" && markdown) {
     const scaleIndex = ugcPlaybook.text.toLowerCase().search(/post-breakout|scale model/);
     if (scaleIndex === -1) return false;
     const region = ugcPlaybook.text.slice(scaleIndex, scaleIndex + 1500);
-    // A band counts only with a roster/volume number beside it — labels
-    // without numbers define nothing, and bare "founder" is not a budget gate.
-    const numberedBands = ["discovery", "proven", "scale", "volume"].filter((band) =>
-      new RegExp(`(\\d[^\\n]{0,20}\\b${band}\\b|\\b${band}\\b[^\\n]{0,20}\\d)`, "i").test(region),
-    ).length;
     // Structure is not state: the shipped template's band table satisfies the
     // keyword checks with every Budget and Entered/evidence cell empty. An
     // operative record is required — a populated band row when the table
@@ -330,7 +344,25 @@ if (growthStatus === "done" && markdown) {
     const bandColumn = bandHeaderCells.findIndex((cell) => /band/.test(cell));
     const budgetColumn = bandHeaderCells.findIndex((cell) => /budget/.test(cell));
     const evidenceColumn = bandHeaderCells.findIndex((cell) => /entered|evidence/.test(cell));
+    const rosterColumn = bandHeaderCells.findIndex((cell) => /roster/.test(cell));
+    const volumeColumn = bandHeaderCells.findIndex((cell) => /volume/.test(cell));
     const bandTablePresent = budgetColumn > 0 && evidenceColumn > 0;
+    // A band counts only with a roster/volume number in its own columns —
+    // budget digits in a neighboring cell size no roster. Prose form keeps
+    // the proximity rule.
+    const numberedBands = bandTablePresent
+      ? ["discovery", "proven", "scale", "volume"].filter((band) =>
+          bandTableRows.slice(1).some((row) => {
+            const cells = row.split("|").map((cell) => cell.trim());
+            const bandCell = bandColumn > 0 ? (cells[bandColumn] ?? "") : "";
+            if (!new RegExp(`\\b${band}\\b`, "i").test(bandCell)) return false;
+            const rosterCell = rosterColumn > 0 ? (cells[rosterColumn] ?? "") : "";
+            const volumeCell = volumeColumn > 0 ? (cells[volumeColumn] ?? "") : "";
+            return /^[~]?\d/.test(rosterCell) || /^[~]?\d/.test(volumeCell);
+          }),
+        ).length
+      : ["discovery", "proven", "scale", "volume"].filter((band) => new RegExp(`(\\d[^\\n]{0,20}\\b${band}\\b|\\b${band}\\b[^\\n]{0,20}\\d)`, "i").test(region))
+          .length;
     const populatedBandRow =
       bandTablePresent &&
       bandTableRows.slice(1).some((row) => {
