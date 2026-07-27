@@ -741,6 +741,34 @@ export function register(h: Harness): void {
   );
   runFixture("a V1 exception deferring to an annual retro fails", specMoatV1AnnualRetro, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
+  // A bare taxonomy word explains nothing about how the advantage accrues.
+  const specMoatClassBare = makeFixture("product-spec-moat-class-bare");
+  setLaneDone(specMoatClassBare, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatClassBare, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a bare moat class without a build plan fails", specMoatClassBare, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // Refusing to build the class is not the exception's commitment.
+  const specMoatV1NegatedBuild = makeFixture("product-spec-moat-v1-negated-build");
+  setLaneDone(specMoatV1NegatedBuild, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatV1NegatedBuild, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "no moat yet; we will not build data by 2026-08-25; revisit at the day-30 retro",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a V1 exception refusing to build its class fails", specMoatV1NegatedBuild, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
   // ── check-launch-trace ────────────────────────────────────────────────────
 
   const traceBaseline = makeFixture("launch-trace-baseline");

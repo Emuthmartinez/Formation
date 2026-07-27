@@ -133,6 +133,12 @@ if (text) {
       // is honored only when X is a named class with a real date.
       const v1ExceptionMatch = moatClassValue.match(/no moat yet[^\n]*?\b(data|workflow|community|taste|model|distribution)\b[^\n]*?(\d{4}-\d{2}-\d{2})/i);
       const v1ExceptionDate = v1ExceptionMatch?.[2] ?? "";
+      // The exception commits to building the class — "we will not build
+      // data by <date>" captures the same words while refusing the plan.
+      const v1ExceptionSpan = (v1ExceptionMatch?.[0] ?? "").replace(/^no moat yet/i, "");
+      const v1CommitmentAffirmed =
+        /\b(build|building|racing|accru\w*|grow\w*)\b/i.test(v1ExceptionSpan) &&
+        !/\b(not|never|won'?t|will not|cannot|can'?t|no plans? to)\b/i.test(v1ExceptionSpan);
       const v1ExceptionParsed = new Date(`${v1ExceptionDate}T00:00:00Z`);
       const v1ExceptionValid = Boolean(
         v1ExceptionMatch &&
@@ -140,7 +146,10 @@ if (text) {
         v1ExceptionParsed.toISOString().slice(0, 10) === v1ExceptionDate &&
         // Named, dated, AND revisited at day 30 — an annual retro is the
         // "moat someday" state wearing a commitment.
-        /\b(day[- ]?30|30[- ]day|d-?30)\b[^\n]{0,30}\b(retro|revisit)|\b(retro|revisit)\w*\b[^\n]{0,30}\b(day[- ]?30|30[- ]day|d-?30)\b/i.test(moatClassValue),
+        /\b(day[- ]?30|30[- ]day|d-?30)\b[^\n]{0,30}\b(retro|revisit)|\b(retro|revisit)\w*\b[^\n]{0,30}\b(day[- ]?30|30[- ]day|d-?30)\b/i.test(
+          moatClassValue,
+        ) &&
+        v1CommitmentAffirmed,
       );
       // Clause-level polarity: the taxonomy word must sit in a clause with no
       // negation at all — "data is not a moat" names the class while
@@ -154,7 +163,11 @@ if (text) {
               /\b(data|workflow|community|taste|model|distribution)\b/i.test(clause) &&
               !/\b(no|not|none|never|without|isn'?t|aren'?t|cannot|can'?t|won'?t)\b/i.test(clause),
           );
-      if (!v1ExceptionValid && !moatClassAffirmed) {
+      // The field is class AND build plan: a bare taxonomy word explains
+      // nothing about how the advantage accrues.
+      const moatPlanResidue = moatClassValue.replace(/\b(data|workflow|community|taste|model|distribution)\b/gi, " ");
+      const moatPlanSubstantive = moatPlanResidue.replace(/[^a-z0-9]/gi, "").length >= 15;
+      if (!v1ExceptionValid && !(moatClassAffirmed && moatPlanSubstantive)) {
         issues.push(
           issue(
             "error",
