@@ -37,14 +37,20 @@ if (onboardingHtml) {
 // push as not applicable with a reason — a full email lifecycle with no push
 // strategy is the low-open-channel default the audit found.
 if (onboardingDone && markdown) {
-  const pushCovered = /push (permission|priming|prime)|notification permission|push notifications?:? not applicable/i.test(markdown.text);
-  if (!pushCovered) {
+  const notApplicable = /push notifications?:? not applicable/i.test(markdown.text);
+  const pushLines = markdown.text.split(/\r?\n/).filter((line) => /push (permission|priming|prime)|notification permission/i.test(line));
+  // Mention is not placement: the prime must sit at an earned post-value
+  // moment, and a cold ask on launch is the contract violation itself.
+  const placementOk = pushLines.some((line) => /after (the )?first value|earned moment|value[- ]reveal|value is visible/i.test(line));
+  const coldAsk = pushLines.some((line) => /\bcold\b|first launch|on launch|at startup|app start/i.test(line));
+  if (!notApplicable && (pushLines.length === 0 || !placementOk || coldAsk)) {
     issues.push(
       issue(
         "error",
         "onboarding.push_priming_missing",
-        "ONBOARDING.md places no push permission prime and records no push-not-applicable decision. Place the soft-prime after a first " +
-          "value moment (never the same step as the review popup) per push-notification-lifecycle.md, or record why push does not apply.",
+        "ONBOARDING.md does not place the push permission prime at an earned post-value moment (or places it cold on launch), and records " +
+          "no push-not-applicable decision. The soft-prime sits after a first value moment — never cold, never the same step as the review " +
+          "popup — per push-notification-lifecycle.md; a raw ask on launch converts most installs into permanent opt-outs.",
         markdown.relativePath,
       ),
     );

@@ -218,6 +218,28 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog.empty",
   );
 
+  // A bogus Started date must not silence the cadence forever.
+  const revenueExperimentBogusStart = makeFixture("revenue-experiment-bogus-start");
+  {
+    const state = readState(revenueExperimentBogusStart);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentBogusStart, state);
+    const opsPath = path.join(revenueExperimentBogusStart, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      "| --- | --- | --- | --- | --- | --- |\n| 2026-99-99 | anchor-first paywall lifts trials | anchor-first | trial-start rate | active | |\n\n## Founder-Gated Probe Step",
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "active backlog row with an impossible start date does not satisfy the cadence",
+    revenueExperimentBogusStart,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

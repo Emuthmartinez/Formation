@@ -60,7 +60,7 @@ Push events live in the `ANALYTICS.md` Event Contract before any builder prompt 
 - `push_permission_granted` / `push_permission_denied` — system dialog outcome
 - `push_sent` — server-side, per send (properties: trigger, campaign_id)
 - `notification_opened` — existing catalog event; properties gain trigger/campaign_id
-- `push_disabled` — user turned pushes off in Settings or in-app
+- `notification_disabled` — user turned pushes off in Settings or in-app
 
 The funnel that matters weekly: primed → granted rate, per-trigger open rate, opened → same-session core-action rate, and disable rate per trigger. A trigger whose open rate decays across cohorts is retired or rewritten, not louder.
 

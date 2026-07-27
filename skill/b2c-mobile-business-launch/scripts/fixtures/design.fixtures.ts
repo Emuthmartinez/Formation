@@ -89,6 +89,35 @@ export function register(h: Harness): void {
     "onboarding.app_review_before_first_value",
   );
 
+  // Mention is not placement: a cold push ask on launch is the contract
+  // violation the lifecycle reference forbids.
+  const onboardingColdPush = makeFixture("onboarding-cold-push-ask");
+  {
+    const state = readState(onboardingColdPush);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingColdPush, state);
+  }
+  writeFileSync(
+    path.join(onboardingColdPush, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen, native App Review request, automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push permission: request cold on first launch so we never miss a user.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "cold push ask on launch fails the priming placement gate",
+    onboardingColdPush,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_priming_missing",
+  );
+
   const elevenStarMissing = makeFixture("eleven-star-missing");
   rmSync(path.join(elevenStarMissing, "11-star-experience"), { recursive: true, force: true });
   runFixture("missing 11-star experience packet fails", elevenStarMissing, "check-eleven-star-experience.ts", 1, "eleven_star.markdown_missing");

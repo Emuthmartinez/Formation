@@ -161,7 +161,15 @@ if (growthStatus === "done" && markdown) {
   // roster is the known miss. When the playbook exists, it must carry the
   // scale-band model with founder-gated budget steps.
   const ugcPlaybook = firstExistingText(["UGC_PLAYBOOK.md", "ugc/UGC_PLAYBOOK.md"]);
-  if (ugcPlaybook && !(/post-breakout|scale model/i.test(ugcPlaybook.text) && /band/i.test(ugcPlaybook.text) && /founder/i.test(ugcPlaybook.text))) {
+  const ugcScaleSubstantive = ((): boolean => {
+    if (!ugcPlaybook) return true;
+    const scaleIndex = ugcPlaybook.text.toLowerCase().search(/post-breakout|scale model/);
+    if (scaleIndex === -1) return false;
+    const region = ugcPlaybook.text.slice(scaleIndex, scaleIndex + 1500);
+    const bandNames = ["discovery", "proven", "scale", "volume"].filter((band) => new RegExp(`\\b${band}\\b`, "i").test(region)).length;
+    return bandNames >= 3 && /founder/i.test(region) && /install[- ]per[- ]video|fatigue/i.test(region);
+  })();
+  if (ugcPlaybook && !ugcScaleSubstantive) {
     issues.push(
       issue(
         "error",

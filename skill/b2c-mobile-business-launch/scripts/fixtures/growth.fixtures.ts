@@ -260,6 +260,19 @@ export function register(h: Harness): void {
     "viral_growth.ugc_scale_model_missing",
   );
 
+  // Keyword confetti is not a scale model: bands, budgets, and fatigue must
+  // actually be defined.
+  const viralGrowthUgcScaleThin = makeFixture("viral-growth-ugc-scale-thin");
+  writeCompleteViralGrowth(viralGrowthUgcScaleThin);
+  writeFileSync(path.join(viralGrowthUgcScaleThin, "UGC_PLAYBOOK.md"), "# UGC Playbook\n\nPost-breakout band founder.\n", "utf8");
+  runFixture(
+    "keyword-only scale model without bands and fatigue fails",
+    viralGrowthUgcScaleThin,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_scale_model_missing",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

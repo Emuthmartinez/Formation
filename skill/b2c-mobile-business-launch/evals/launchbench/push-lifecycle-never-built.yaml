@@ -14,7 +14,7 @@ expected_guardrail: >
   value moment (never cold on launch, never in the same step as the review popup), a segmented
   trigger table (activation nudge, habit anchor, at-risk save, milestone, dormant win-back,
   billing), server-enforced frequency caps with quiet hours, and the push event set
-  (push_permission_primed/granted/denied, push_sent, notification_opened, push_disabled) in the
+  (push_permission_primed/granted/denied, push_sent, notification_opened, notification_disabled) in the
   ANALYTICS.md catalog before any builder prompt names them. Every trigger serves the user's
   stated goal — guilt copy and engagement-bait pushes are the dark-pattern variant and stay
   banned under the ethics contract. Email remains the channel for receipts, digests, and

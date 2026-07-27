@@ -556,12 +556,16 @@ if (revenueDone && revenueOpsText) {
         const cells = line.split("|").map((cell) => cell.trim());
         const statusCell = statusColumn > 0 ? (cells[statusColumn] ?? "") : "";
         const startedCell = startedColumn > 0 ? (cells[startedColumn] ?? "") : "";
-        return (
-          /^(active|completed)\b/i.test(statusCell) &&
-          /\d{4}-\d{2}-\d{2}/.test(startedCell) &&
-          !BACKLOG_PLACEHOLDER.test(statusCell) &&
-          !BACKLOG_PLACEHOLDER.test(startedCell)
+        const startedMatch = startedCell.match(/(\d{4}-\d{2}-\d{2})/);
+        const startedDate = startedMatch ? new Date(`${startedMatch[1]}T00:00:00Z`) : undefined;
+        const startedValid = Boolean(
+          startedMatch &&
+          startedDate &&
+          !Number.isNaN(startedDate.getTime()) &&
+          startedDate.toISOString().slice(0, 10) === startedMatch[1] &&
+          startedDate.getTime() <= Date.now(),
         );
+        return /^(active|completed)\b/i.test(statusCell) && startedValid && !BACKLOG_PLACEHOLDER.test(statusCell) && !BACKLOG_PLACEHOLDER.test(startedCell);
       });
       if (activeOrCompleted.length === 0) {
         issues.push(
