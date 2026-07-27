@@ -129,20 +129,35 @@ const PLACEHOLDER_TEXT = /\b(unverified|tbd|todo|to be filled|pending|confirm in
 const MEASURED_RATE = /\d+(?:\.\d+)?\s*%/;
 const MEASURED_MONEY = /\$\s*\d[\d,]*(?:\.\d+)?/;
 const MEASURED_MRR = /\bMRR\b[^|]*\$\s*\d[\d,]*(?:\.\d+)?/i;
-const DATED_BLOCKER = /blocked\b[^|]*\d{4}-\d{2}-\d{2}/i;
+/** A dated blocker earns its pass only when its embedded date is a real,
+ * non-future calendar date — "blocked: RevenueCat auth 2026-99-99" is a
+ * placeholder wearing a blocker's clothes. */
+function datedBlockerValid(cell: string): boolean {
+  const match = cell.match(/blocked\b[^|]*?(\d{4}-\d{2}-\d{2})/i);
+  return Boolean(match && parseLiveDate(match[1] ?? ""));
+}
 
 /** Column-appropriate measured evidence for a Kill/Hold/Scale row: every cell
- * filled and non-placeholder, the MRR-trend cell carrying a dollar amount and
- * the retention-trend cell a percentage (or a dated blocker in their place). */
+ * filled and non-placeholder, the MRR-trend cell carrying a dollar amount, the
+ * retention-trend cell a percentage, the founder-hours cell a number, and the
+ * unit-economics cell a number or an explained n/a (or a valid dated blocker
+ * in any of their places). */
 function verdictEvidenceMeasured(verdictSection: string, cells: string[], verdictColumn: number): boolean {
   const evidenceCells = verdictColumn > 2 ? cells.slice(2, verdictColumn) : [];
   if (evidenceCells.length === 0) return false;
   if (evidenceCells.some((cell) => cell.trim().length === 0 || PLACEHOLDER_TEXT.test(cell))) return false;
-  const mrrColumn = tableColumnIndex(verdictSection, /mrr/i);
-  const retentionColumn = tableColumnIndex(verdictSection, /retention/i);
-  const moneyOk = mrrColumn <= 1 || MEASURED_MONEY.test(cells[mrrColumn] ?? "") || DATED_BLOCKER.test(cells[mrrColumn] ?? "");
-  const rateOk = retentionColumn <= 1 || MEASURED_RATE.test(cells[retentionColumn] ?? "") || DATED_BLOCKER.test(cells[retentionColumn] ?? "");
-  return moneyOk && rateOk;
+  const columnOk = (pattern: RegExp, valid: (cell: string) => boolean): boolean => {
+    const index = tableColumnIndex(verdictSection, pattern);
+    if (index <= 1 || index >= verdictColumn) return true;
+    const cell = cells[index] ?? "";
+    return valid(cell) || datedBlockerValid(cell);
+  };
+  return (
+    columnOk(/mrr/i, (cell) => MEASURED_MONEY.test(cell)) &&
+    columnOk(/retention/i, (cell) => MEASURED_RATE.test(cell)) &&
+    columnOk(/hrs|hours/i, (cell) => /\d/.test(cell)) &&
+    columnOk(/cac|ltv|payback/i, (cell) => /\d/.test(cell) || /\bn\/a\b/i.test(cell))
+  );
 }
 
 /** Strict calendar date: shape, round-trip, and not in the future. A typo'd
@@ -183,6 +198,16 @@ const retroText = retroFile ? (readText(args.root, retroFile) ?? "") : "";
 // is complete AND some retro checkpoint was actually completed (a valid past
 // date in the Retro Window) AND that same checkpoint carries a Kill verdict
 // over a filled, non-placeholder evidence pack.
+/** A completion date suppresses gates only when it is a real, non-future
+ * calendar date inside the launch-anchored window: on or after live_since plus
+ * the checkpoint's due day minus grace, so an early-but-plausible run counts
+ * and a recycled pre-launch date does not. */
+function checkpointCompletionValid(cell: string, dueDays: number): boolean {
+  const date = parseLiveDate(cell.trim());
+  if (!date || !liveSince) return false;
+  return date.getTime() >= liveSince.getTime() + (dueDays - CHECKPOINT_GRACE_DAYS) * MS_PER_DAY;
+}
+
 const killDecided = ((): boolean => {
   if (!state) return false;
   const decision = (asString(getPath(state, "lanes.post_launch_ops.kill_or_scale_decision")) ?? "").trim();
@@ -194,7 +219,7 @@ const killDecided = ((): boolean => {
   const verdictColumn = tableColumnIndex(verdictSection, /verdict/i);
   if (verdictColumn === -1) return false;
   return ["Day 30", "Day 90"].some((checkpoint) => {
-    if (!parseLiveDate((tableRowCells(windowSection, checkpoint)[2] ?? "").trim())) return false;
+    if (!checkpointCompletionValid(tableRowCells(windowSection, checkpoint)[2] ?? "", checkpoint === "Day 90" ? 90 : 30)) return false;
     const cells = tableRowCells(verdictSection, checkpoint);
     if (!/^kill\b/i.test((cells[verdictColumn] ?? "").trim())) return false;
     return verdictEvidenceMeasured(verdictSection, cells, verdictColumn);
@@ -215,7 +240,7 @@ if (liveSince && !killDecided) {
     // Completion requires a valid, non-future calendar date — "TBD" or an
     // impossible date in the Date cell is not a completed checkpoint and must
     // not suppress the overdue error.
-    const completed = Boolean(parseLiveDate((tableRowCells(retroWindow, checkpoint.label)[2] ?? "").trim()));
+    const completed = checkpointCompletionValid(tableRowCells(retroWindow, checkpoint.label)[2] ?? "", checkpoint.dueDays);
     if (!completed && daysLive > checkpoint.dueDays + CHECKPOINT_GRACE_DAYS) {
       issues.push(
         issue(
@@ -291,7 +316,7 @@ if (liveSince && !killDecided) {
         // or the documented dated-blocker form. An incidental digit inside an
         // adjective sentence ("iOS 17 looks fine") is not a metric.
         const metricCells = [crashColumn, retentionColumn].filter((index) => index > 0).map((index) => latest.cells[index] ?? "");
-        if (metricCells.some((cell) => !(MEASURED_RATE.test(cell) || DATED_BLOCKER.test(cell)) || PLACEHOLDER_TEXT.test(cell))) {
+        if (metricCells.some((cell) => !(MEASURED_RATE.test(cell) || datedBlockerValid(cell)) || PLACEHOLDER_TEXT.test(cell))) {
           issues.push(
             issue(
               numbersSeverity,
@@ -308,7 +333,7 @@ if (liveSince && !killDecided) {
         // alone cannot satisfy it, and neither can an unrelated dollar amount.
         const notesColumn = headerCells.findIndex((cell) => /notes/i.test(cell));
         const notesCell = notesColumn > 0 ? (latest.cells[notesColumn] ?? "") : "";
-        if (notesColumn === -1 || !(MEASURED_MRR.test(notesCell) || DATED_BLOCKER.test(notesCell)) || PLACEHOLDER_TEXT.test(notesCell)) {
+        if (notesColumn === -1 || !(MEASURED_MRR.test(notesCell) || datedBlockerValid(notesCell)) || PLACEHOLDER_TEXT.test(notesCell)) {
           issues.push(
             issue(
               numbersSeverity,

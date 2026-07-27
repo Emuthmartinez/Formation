@@ -390,6 +390,73 @@ export function register(h: Harness): void {
   }
   runFixture("weekly log row without real numbers fails", postLaunchWeeklyPlaceholder, "check-post-launch-ops.ts", 1, "post_launch_ops.weekly_numbers_missing");
 
+  // A recycled pre-launch date in the Retro Window is not a completion: the
+  // window is anchored to live_since, so a date before launch suppresses nothing.
+  const postLaunchPrelaunchDate = makeFixture("post-launch-checkpoint-prelaunch-date");
+  {
+    const state = readState(postLaunchPrelaunchDate);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchPrelaunchDate, state);
+    setPostLaunchLive(postLaunchPrelaunchDate, 45);
+    appendWeeklyLogRow(postLaunchPrelaunchDate, { daysAgo: 3 });
+    const retroPath = path.join(postLaunchPrelaunchDate, "LAUNCH_RETRO.md");
+    writeFileSync(retroPath, readFileSync(retroPath, "utf8").replace("| Day 30 | | |", `| Day 30 | ${isoDaysAgo(60)} | founder |`), "utf8");
+  }
+  runFixture(
+    "checkpoint dated before the launch does not suppress the overdue error",
+    postLaunchPrelaunchDate,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.checkpoint_overdue.day_30",
+  );
+
+  // Every evidence column is typed: founder hours must be a number, not prose.
+  const postLaunchKillHoursAdjective = makeFixture("post-launch-kill-hours-adjective");
+  {
+    const state = readState(postLaunchKillHoursAdjective);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "kill";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(25);
+    writeState(postLaunchKillHoursAdjective, state);
+    setPostLaunchLive(postLaunchKillHoursAdjective, 120);
+    completeCheckpoint(postLaunchKillHoursAdjective, "Day 30", { daysAgo: 88, verdict: "Fix" });
+    completeCheckpoint(postLaunchKillHoursAdjective, "Day 90", {
+      daysAgo: 25,
+      verdict: "Kill",
+      evidence: ["$60 MRR declining 4 wks", "D30 4% two cohorts", "n/a — organic only", "looks healthy"],
+    });
+  }
+  runFixture(
+    "kill verdict with prose in the founder-hours cell neither exempts nor passes",
+    postLaunchKillHoursAdjective,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_evidence_unmeasured",
+  );
+
+  // A blocker with an impossible embedded date is a placeholder in disguise.
+  const postLaunchBogusBlocker = makeFixture("post-launch-weekly-bogus-blocker");
+  {
+    const state = readState(postLaunchBogusBlocker);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchBogusBlocker, state);
+    setPostLaunchLive(postLaunchBogusBlocker, 20);
+    appendWeeklyLogRow(postLaunchBogusBlocker, { daysAgo: 2, crashFree: "blocked: Sentry auth 2026-99-99" });
+  }
+  runFixture(
+    "weekly blocker with an impossible date fails the measured-value bar",
+    postLaunchBogusBlocker,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_numbers_missing",
+  );
+
   // Adjectives in the verdict evidence pack are not measurements: a Kill row
   // reading "declining / bad" must neither earn the wind-down exemption nor
   // pass the substance bar.
