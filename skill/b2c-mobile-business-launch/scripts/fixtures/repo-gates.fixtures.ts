@@ -455,6 +455,7 @@ export function register(h: Harness): void {
     "references/motion-craft-benchmarks.md",
     "references/premium-mobile-craft.md",
     "design-system/tokens.json",
+    "design-system/DesignTokens.swift",
     "templates/design-system/PremiumCraft.swift",
     "references/experience-cards/peak-end-card.md",
     "references/experience-cards/mastery-and-status-card.md",
@@ -555,6 +556,35 @@ export function register(h: Harness): void {
     ["--skill-root", motionMalformedRef],
     1,
     "motion_contract.token_reference.unknown",
+  );
+
+  const motionSymbolUnresolvable = writeMotionContractRoot("motion-contract-symbol-unresolvable", (rel, text) =>
+    rel.endsWith("variable-reward-card.md")
+      ? text.replace(".spring(response: 0.5, dampingFraction: 0.6)", ".spring(response: DesignTokens.Motion.expressive, dampingFraction: 0.6)")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a canon spring cites a Motion member the enum does not define",
+    "check-motion-contract.ts",
+    ["--skill-root", motionSymbolUnresolvable],
+    1,
+    "motion_contract.canon.symbol_unresolvable",
+  );
+
+  const motionFamilyDuplicate = writeMotionContractRoot("motion-contract-family-duplicate", (rel, text) =>
+    rel.endsWith("premium-mobile-craft.md")
+      ? text.replace(
+          "| **celebrate** | response 0.45\u20130.5, dampingFraction 0.5\u20130.7",
+          "| **press** | response 0.2\u20130.3, dampingFraction 0.9\u20130.95 | stale contradictory row | none |\n| **celebrate** | response 0.45\u20130.5, dampingFraction 0.5\u20130.7",
+        )
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the spring table states a family twice",
+    "check-motion-contract.ts",
+    ["--skill-root", motionFamilyDuplicate],
+    1,
+    "motion_contract.family_table.duplicate",
   );
 
   const motionCinematicLeak = writeMotionContractRoot("motion-contract-cinematic-leak", (rel, text) =>

@@ -36,6 +36,7 @@ const BENCH = "references/motion-craft-benchmarks.md";
 const CRAFT = "references/premium-mobile-craft.md";
 const TOKENS = "design-system/tokens.json";
 const SWIFT = "templates/design-system/PremiumCraft.swift";
+const SWIFT_TOKENS = "design-system/DesignTokens.swift";
 const CANON_CARDS = [
   "references/experience-cards/peak-end-card.md",
   "references/experience-cards/mastery-and-status-card.md",
@@ -55,6 +56,26 @@ const bench = read(BENCH);
 const craft = read(CRAFT);
 const tokensRaw = read(TOKENS);
 const swift = read(SWIFT);
+const swiftTokens = read(SWIFT_TOKENS);
+
+/** Numeric members of the shipped DesignTokens.Motion enum, for resolving symbolic spring responses. */
+const swiftMotionMembers = new Map<string, number>();
+if (swiftTokens !== undefined) {
+  const motionEnum = swiftTokens.match(/enum Motion \{([\s\S]*?)\n {2}\}/);
+  for (const m of (motionEnum ? (motionEnum[1] ?? "") : "").matchAll(/static let (\w+): Double = ([\d.]+)/g)) {
+    swiftMotionMembers.set(g(m, 1), Number(g(m, 2)));
+  }
+  if (swiftMotionMembers.size === 0) {
+    issues.push(
+      issue(
+        "error",
+        "motion_contract.swift_tokens.motion_unparseable",
+        "No numeric DesignTokens.Motion members could be parsed from DesignTokens.swift.",
+        SWIFT_TOKENS,
+      ),
+    );
+  }
+}
 
 let motionTokens: Record<string, string> = {};
 if (tokensRaw !== undefined) {
@@ -208,7 +229,19 @@ const bands = new Map<string, Band>();
 if (craft !== undefined) {
   const familyRe = /\|\s*\*\*(press|celebrate)\*\*\s*\|\s*response\s+([\d.]+)[–-]([\d.]+),\s*dampingFraction\s+([\d.]+)[–-]([\d.]+)/g;
   for (const m of craft.matchAll(familyRe)) {
-    bands.set(g(m, 1), { respLo: Number(g(m, 2)), respHi: Number(g(m, 3)), dampLo: Number(g(m, 4)), dampHi: Number(g(m, 5)) });
+    const family = g(m, 1);
+    if (bands.has(family)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.family_table.duplicate",
+          `premium-mobile-craft.md's spring table states the ${family} family more than once; two incompatible canons could coexist silently.`,
+          CRAFT,
+        ),
+      );
+      continue;
+    }
+    bands.set(family, { respLo: Number(g(m, 2)), respHi: Number(g(m, 3)), dampLo: Number(g(m, 4)), dampHi: Number(g(m, 5)) });
   }
   for (const family of ["press", "celebrate"]) {
     if (!bands.has(family)) {
@@ -262,7 +295,7 @@ if (celebrateBand) {
   for (const rel of CANON_CARDS) {
     const text = read(rel);
     if (text === undefined) continue;
-    const springs = [...text.matchAll(/\.spring\(response:\s*([\d.]+|DesignTokens\.Motion\.expressive),\s*dampingFraction:\s*([\d.]+)\)/g)];
+    const springs = [...text.matchAll(/\.spring\(response:\s*([\d.]+|DesignTokens\.Motion\.[A-Za-z0-9_]+),\s*dampingFraction:\s*([\d.]+)\)/g)];
     if (springs.length === 0) {
       issues.push(
         issue("error", "motion_contract.canon.spring_missing", `${rel} no longer contains a parseable .spring(response:dampingFraction:) canon value.`, rel),
@@ -270,10 +303,29 @@ if (celebrateBand) {
       continue;
     }
     for (const s of springs) {
-      // A symbolic DesignTokens.Motion.expressive response is in-band by definition:
-      // the benchmarks' reconciliation note reads the overloaded name as the celebrate
-      // spring response. Only numeric responses are range-checked.
-      const response = g(s, 1).includes("expressive") ? NaN : Number(g(s, 1));
+      // A symbolic response must resolve to a real numeric member of the shipped
+      // DesignTokens.Motion enum — a name the enum does not define would not even
+      // compile in the card's SwiftUI snippet, so it can never be treated as in-band.
+      let response: number;
+      const rawResponse = g(s, 1);
+      if (rawResponse.startsWith("DesignTokens.Motion.")) {
+        const member = rawResponse.slice("DesignTokens.Motion.".length);
+        const resolved = swiftMotionMembers.get(member);
+        if (resolved === undefined) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.canon.symbol_unresolvable",
+              `${rel} ships a canon spring response ${rawResponse}, but DesignTokens.Motion defines no numeric ${member} member — the snippet would not compile.`,
+              rel,
+            ),
+          );
+          continue;
+        }
+        response = resolved;
+      } else {
+        response = Number(rawResponse);
+      }
       const damping = Number(g(s, 2));
       if (Number.isFinite(response) && (response < celebrate.respLo || response > celebrate.respHi)) {
         issues.push(

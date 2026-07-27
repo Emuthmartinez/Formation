@@ -165,7 +165,7 @@ children.
 
 ### Mobile Implementation + Reduced-Motion
 
-**SwiftUI.** Anticipation: `.scaleEffect(isAnticipating ? 1.05 : 1.0).animation(.easeInOut(duration: DesignTokens.Motion.moderate).repeatForever(autoreverses: true), value: isAnticipating)`. Reveal: `.spring(response: DesignTokens.Motion.expressive, dampingFraction: 0.6)`. Reduced-motion: check `UIAccessibility.isReduceMotionEnabled` before setting up the repeat animation; if true, skip directly to the reveal state with a 0-duration transition.
+**SwiftUI.** Anticipation: `.scaleEffect(isAnticipating ? 1.05 : 1.0).animation(.easeInOut(duration: DesignTokens.Motion.moderate).repeatForever(autoreverses: true), value: isAnticipating)`. Reveal: `.spring(response: 0.5, dampingFraction: 0.6)` (0.5 is the `expressive` celebrate-response reading — see the reconciliation note in `motion-craft-benchmarks.md`; `DesignTokens.Motion` ships no `expressive` member, so the symbolic form would not compile). Reduced-motion: check `UIAccessibility.isReduceMotionEnabled` before setting up the repeat animation; if true, skip directly to the reveal state with a 0-duration transition.
 
 **Flutter.** `AnimationController` with `CurvedAnimation(curve: Curves.easeInOut)` for
 anticipation; `AnimatedContainer` or `AnimatedScale` for reveal. Check
