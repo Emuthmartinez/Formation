@@ -252,9 +252,12 @@ if (growthStatus === "done" && markdown) {
         const evidenceCell = cells[evidenceColumn] ?? "";
         // Punctuation is not evidence: the budget cell needs its number and
         // the evidence cell needs a date or substantive content.
+        const NEGATIVE_CELL = /^(unknown|n\/?a|none|nil|null|not yet|not applicable|no result|no evidence|pending)$/i;
         const budgetSubstantive = /\d/.test(budgetCell) && !CELL_PLACEHOLDER.test(budgetCell);
         const evidenceSubstantive =
-          (/\d{4}-\d{2}-\d{2}/.test(evidenceCell) || evidenceCell.replace(/[^a-z0-9]/gi, "").length >= 6) && !CELL_PLACEHOLDER.test(evidenceCell);
+          (/\d{4}-\d{2}-\d{2}/.test(evidenceCell) || evidenceCell.replace(/[^a-z0-9]/gi, "").length >= 6) &&
+          !CELL_PLACEHOLDER.test(evidenceCell) &&
+          !NEGATIVE_CELL.test(evidenceCell.trim());
         return budgetSubstantive && evidenceSubstantive;
       });
     const proseBudgetNumbered =

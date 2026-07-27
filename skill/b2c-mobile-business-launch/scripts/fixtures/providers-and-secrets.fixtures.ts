@@ -384,6 +384,28 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog",
   );
 
+  // "unknown"/"NA" cells are empty states wearing characters.
+  const revenueExperimentNegativeCells = makeFixture("revenue-experiment-negative-cells");
+  {
+    const state = readState(revenueExperimentNegativeCells);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentNegativeCells, state);
+    const opsPath = path.join(revenueExperimentNegativeCells, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | unknown | unknown | NA | completed | unknown |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a completed row of unknown/NA cells does not satisfy the cadence",
+    revenueExperimentNegativeCells,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

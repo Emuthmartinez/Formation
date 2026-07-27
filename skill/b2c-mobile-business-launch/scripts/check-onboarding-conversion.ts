@@ -70,7 +70,13 @@ if (onboardingDone && markdown) {
     /same (session )?(step|screen|moment|dialog)|alongside|back[- ]to[- ]back|together with|immediately (after|before)|right (after|before)|in the same/i;
   const sameLineCollision = pushLines.some((line) => {
     const affirmative = affirmativeOf(line);
-    return reviewTermPattern.test(affirmative) && adjacencyPattern.test(affirmative);
+    if (!reviewTermPattern.test(affirmative)) return false;
+    if (adjacencyPattern.test(affirmative)) return true;
+    // A push line that names the review prompt affirmatively without
+    // sequencing language (a combined step row like "App Review popup; push
+    // permission prime") is the same-step collision itself; only an explicit
+    // next-moment ordering escapes.
+    return !/next (natural |earned )?(moment|step|session)/i.test(affirmative);
   });
   // Structured contracts assign prompts to numbered steps on separate rows —
   // correlate by step label so a shared step fails without the words

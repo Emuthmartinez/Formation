@@ -375,6 +375,38 @@ export function register(h: Harness): void {
     "onboarding.push_review_same_step",
   );
 
+  // Both prompts inside one combined step row are the collision itself.
+  const onboardingPushCombinedRow = makeFixture("onboarding-push-review-combined-row");
+  {
+    const state = readState(onboardingPushCombinedRow);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushCombinedRow, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushCombinedRow, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "",
+      "| Step | Prompts |",
+      "| --- | --- |",
+      "| After first value | App Review popup; push permission prime — only after value is visible |",
+      "",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "review and push combined in one step row fails",
+    onboardingPushCombinedRow,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_review_same_step",
+  );
+
   // "Push permission" is the same canonical noun as "push notifications" for
   // the not-applicable exemption.
   const onboardingPushPermissionNa = makeFixture("onboarding-push-permission-na");

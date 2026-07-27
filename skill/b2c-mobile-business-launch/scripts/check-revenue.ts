@@ -560,10 +560,15 @@ if (revenueDone && revenueOpsText) {
       // what is being tested (hypothesis, variant, primary metric), and a
       // completed row must record its result/decision. Missing definition
       // columns fail closed.
-      const substantiveCell = (cell: string): boolean => cell.replace(/[^a-z0-9]/gi, "").length >= 6 && !BACKLOG_PLACEHOLDER.test(cell);
+      // "unknown" and "NA" are empty states wearing characters — a whole-cell
+      // negative value defines nothing regardless of length.
+      const NEGATIVE_CELL = /^(unknown|n\/?a|none|nil|null|not yet|not applicable|no result|no decision|pending|[-—–]+)$/i;
+      const substantiveCell = (cell: string): boolean =>
+        cell.replace(/[^a-z0-9]/gi, "").length >= 6 && !BACKLOG_PLACEHOLDER.test(cell) && !NEGATIVE_CELL.test(cell.trim());
       // Metric cells are identifiers, not prose: CVR/ARPU/LTV are defined
       // experiments — only emptiness and placeholders disqualify.
-      const identifierCell = (cell: string): boolean => cell.replace(/[^a-z0-9]/gi, "").length >= 2 && !BACKLOG_PLACEHOLDER.test(cell);
+      const identifierCell = (cell: string): boolean =>
+        cell.replace(/[^a-z0-9]/gi, "").length >= 2 && !BACKLOG_PLACEHOLDER.test(cell) && !NEGATIVE_CELL.test(cell.trim());
       // One historical row must not satisfy the cadence forever (§7b is a
       // standing program): current activity means an active experiment, a
       // completed one started inside the recency window, or a planned row

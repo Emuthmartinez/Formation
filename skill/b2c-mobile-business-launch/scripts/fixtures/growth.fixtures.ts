@@ -493,6 +493,37 @@ export function register(h: Harness): void {
     "viral_growth.ugc_scale_model_missing",
   );
 
+  // "not yet" is a non-entry, not evidence.
+  const viralGrowthNegativeEvidence = makeFixture("viral-growth-band-negative-evidence");
+  writeCompleteViralGrowth(viralGrowthNegativeEvidence);
+  writeFileSync(
+    path.join(viralGrowthNegativeEvidence, "UGC_PLAYBOOK.md"),
+    [
+      "# UGC Playbook",
+      "",
+      "Creator scripts use GROW-001 and the format lab.",
+      "",
+      "## Post-Breakout Scale Model",
+      "",
+      "| Band | Roster | Weekly video volume | Budget (founder-gated) | Entered on / evidence |",
+      "| --- | --- | --- | --- | --- |",
+      "| Discovery | 3-5 | 9-15 | $300/week | not yet |",
+      "| Proven format | ~10 | 30-40 | | |",
+      "| Scale | ~30 | 90-120 | | |",
+      "| Volume | 75+ | 200+ | | |",
+      "",
+      "- Control format install-per-video (weekly): fatigue check — two consecutive declines trigger the next variant test.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a band row with negative evidence does not satisfy the scale model",
+    viralGrowthNegativeEvidence,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_scale_model_missing",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");
