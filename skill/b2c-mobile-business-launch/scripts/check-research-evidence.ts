@@ -20,6 +20,12 @@ const state = loaded.state;
 const laneStatus = state ? asString(getPath(state, "lanes.research.status"))?.toLowerCase() : undefined;
 const skip = laneStatus === "not_needed" || laneStatus === "deferred";
 const done = laneStatus === "done";
+// The pre-build gate cannot wait for the lane to claim done: a project that
+// advances to design/build phases with research still partial is exactly the
+// bypass the checkpoint exists to stop, so the verdict is enforced from
+// phase_2 onward regardless of lane status.
+const projectPhase = state ? (asString(getPath(state, "project.phase")) ?? "").toLowerCase() : "";
+const verdictRequired = done || /^phase_[2-6]/.test(projectPhase);
 const text = readText(args.root, "RESEARCH.md");
 
 if (!skip && !text) {
@@ -100,7 +106,10 @@ if (text) {
         ),
       );
     }
-    // ── Pre-build Go/Pivot/Kill gate ────────────────────────────────────────
+  }
+
+  // ── Pre-build Go/Pivot/Kill gate ──────────────────────────────────────────
+  if (verdictRequired) {
     // Research that never converts evidence into a build-or-not decision is
     // the expensive miss the 2026-07-26 audit named: the launch machinery will
     // polish and ship any input idea, so the one evidence-gated exit ramp is
@@ -219,13 +228,19 @@ if (text) {
         // The gate is founder-only: a verdict row that names no decision-maker
         // is an agent deciding to build and moving on.
         const decidedByCell = (latest.cells[verdictColumn + 1] ?? "").trim();
-        if (decidedByCell.length === 0 || PLACEHOLDER_TEXT.test(decidedByCell)) {
+        const AUTOMATION_IDENTITY = /\b(agent|codex|claude|gpt|assistant|bot|automation|autopilot|ai)\b/i;
+        if (
+          decidedByCell.length === 0 ||
+          PLACEHOLDER_TEXT.test(decidedByCell) ||
+          AUTOMATION_IDENTITY.test(decidedByCell) ||
+          !/\b(founder|owner)\b/i.test(decidedByCell)
+        ) {
           issues.push(
             issue(
               "error",
               "research.go_pivot_kill_decider_missing",
-              'The latest Go, Pivot, Or Kill row names nobody in "Decided by". The verdict is founder-only, never automatic — ' +
-                "record who made the call. An agent recording Go for itself is the exact bypass this gate exists to stop.",
+              'The latest Go, Pivot, Or Kill row does not name the founder in "Decided by" (empty, placeholder, or an automation identity). ' +
+                "The verdict is founder-only, never automatic — record the founder by name or role. An agent recording Go for itself is the exact bypass this gate exists to stop.",
               "RESEARCH.md",
             ),
           );
@@ -280,7 +295,9 @@ if (text) {
         }
       }
     }
+  }
 
+  if (done) {
     const rows = sourceLedgerRows(text);
     const completeRows = rows.filter((row) => {
       if (row.length < 10) return false;

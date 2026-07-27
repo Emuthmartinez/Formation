@@ -1,6 +1,6 @@
 import { rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { type Harness, getLane, readState, writeState } from "./_harness.js";
+import { type Harness, expectRecord, getLane, readState, writeState } from "./_harness.js";
 
 /**
  * Fixtures for the four lane content validators added after the deep audit
@@ -201,6 +201,42 @@ export function register(h: Harness): void {
     "check-research-evidence.ts",
     1,
     "research.go_pivot_kill_state_mismatch",
+  );
+
+  // The gate cannot wait for the lane to claim done: a project in phase_2 with
+  // research still partial is the bypass the checkpoint exists to stop.
+  const researchPhase2Partial = makeFixture("research-phase2-partial-no-verdict");
+  {
+    const state = readState(researchPhase2Partial);
+    expectRecord(state.project, "project")["phase"] = "phase_2_design";
+    const lane = getLane(state, "research");
+    lane["status"] = "partial";
+    writeState(researchPhase2Partial, state);
+  }
+  runFixture(
+    "phase_2 with partial research and no verdict fails the pre-build gate",
+    researchPhase2Partial,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_row_missing",
+  );
+
+  // The verdict is founder-only: an automation identity in Decided by is the
+  // agent approving its own build.
+  const researchAgentDecider = makeFixture("research-done-agent-decider");
+  setLaneDone(researchAgentDecider, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchAgentDecider, "go", "2026-07-21");
+  writeResearch(researchAgentDecider, [
+    ...researchCoreSections,
+    ...categoryRevenueSection(revenueRow),
+    ...goPivotKillSection("| 2026-07-21 | pass — $14.2M top-10 | streak-insurance wedge | 412-person waitlist | Go | Claude agent |"),
+  ]);
+  runFixture(
+    "Go verdict decided by an automation identity fails",
+    researchAgentDecider,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_decider_missing",
   );
 
   // The phrase in prose is not the section: mentioning both gates informally

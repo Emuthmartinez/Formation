@@ -35,7 +35,7 @@ Is this market big enough to be worth building in at all? Pull top-competitor re
 
 ## Go, Pivot, Or Kill
 
-The pre-build twin of the post-launch Kill-Or-Scale Review: before any Phase 2 design or build work, the agent assembles the evidence and the founder decides whether this idea earns a build. The verdict is the founder's call, never automatic. A Kill or Pivot here is the process working — it costs a research doc instead of a shipped app. Record the verdict here and mirror it in `PROJECT_STATE.yaml` (`lanes.research.go_pivot_kill_decision` / `go_pivot_kill_decided_at`); `check:research` refuses a done lane whose latest verdict is not Go.
+The pre-build twin of the post-launch Kill-Or-Scale Review: before any Phase 2 design or build work, the agent assembles the evidence and the founder decides whether this idea earns a build. The verdict is the founder's call, never automatic. A Kill or Pivot here is the process working — it costs a research doc instead of a shipped app. Record the verdict here and mirror it in `PROJECT_STATE.yaml` (`lanes.research.go_pivot_kill_decision` / `go_pivot_kill_decided_at`). "Decided by" names the founder (by name or role) — never an agent or automation identity. `check:research` refuses a done lane whose latest verdict is not Go, and enforces the verdict from phase_2 onward even while the lane is still partial — advancing to design without the checkpoint is the bypass, not a shortcut.
 
 | Date | Category revenue reality | Wedge | Demand signal | Verdict (Go / Pivot / Kill) | Decided by |
 | --- | --- | --- | --- | --- | --- |
