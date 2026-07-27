@@ -508,13 +508,16 @@ export function register(h: Harness): void {
     ].join("\n");
   const realIncumbentRow =
     "| HabitKit | fast logging, wide templates | streak-insurance at the miss moment | miss-history data accrues day one; repair pricing their mix cannot follow |";
+  const secondIncumbentRow =
+    "| Streaks | polished native logging, wide device sync | our repair flow at the broken-streak moment | miss-history depth their local-only storage cannot mirror |";
+  const twoIncumbentRows = `${realIncumbentRow}\n${secondIncumbentRow}`;
 
   const specDoneReal = makeFixture("product-spec-done-real");
   setLaneDone(specDoneReal, "product", ["SPEC.md"]);
   writeFileSync(
     path.join(specDoneReal, "SPEC.md"),
     specSections({
-      row: realIncumbentRow,
+      row: twoIncumbentRows,
       moatClass: "data — per-user miss history compounds weekly",
       copyTest: "the repair model needs miss-history no fresh install has",
     }),
@@ -605,7 +608,7 @@ export function register(h: Harness): void {
   writeFileSync(
     path.join(specMoatV1Exception, "SPEC.md"),
     specSections({
-      row: realIncumbentRow,
+      row: twoIncumbentRows,
       moatClass: "no moat yet, racing to build data — miss-history compounding by 2026-08-25, revisited at the day-30 retro",
       copyTest: "the repair model needs miss-history no fresh install has",
     }),
@@ -633,7 +636,7 @@ export function register(h: Harness): void {
   setLaneDone(specTemplateFilled, "product", ["SPEC.md"]);
   {
     const templateSpec = readFileSync(path.join(specTemplateFilled, "SPEC.md"), "utf8")
-      .replace(/^\| _example:.*$/m, realIncumbentRow)
+      .replace(/^\| _example:.*$/m, twoIncumbentRows)
       .replace(
         "- Moat class (data / workflow / community / taste / model / distribution) and build plan:",
         "- Moat class (data / workflow / community / taste / model / distribution) and build plan: data — per-user miss history compounds weekly.",
@@ -677,7 +680,7 @@ export function register(h: Harness): void {
   writeFileSync(
     path.join(specCopyNegatedStructural, "SPEC.md"),
     specSections({
-      row: realIncumbentRow,
+      row: twoIncumbentRows,
       moatClass: "data — per-user miss history compounds weekly",
       copyTest: "The accumulated user history cannot be copied in a week.",
     }),
@@ -816,6 +819,48 @@ export function register(h: Harness): void {
     1,
     "product_spec.copy_test_missing",
   );
+
+  // One row benchmarks against a category of one.
+  const specSingleIncumbentRow = makeFixture("product-spec-single-incumbent-row");
+  setLaneDone(specSingleIncumbentRow, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specSingleIncumbentRow, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a single incumbent row fails the two-row floor", specSingleIncumbentRow, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
+
+  // A taxonomy word inside the plan cannot bless an invalid declared class.
+  const specMoatClassExecution = makeFixture("product-spec-moat-class-execution");
+  setLaneDone(specMoatClassExecution, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatClassExecution, "SPEC.md"),
+    specSections({
+      row: twoIncumbentRows,
+      moatClass: "execution — we send user data to the same model API",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("an execution class with taxonomy words in the plan fails", specMoatClassExecution, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // "No incumbent can reproduce…" is the structural claim, not a concession.
+  const specCopyLeadingNo = makeFixture("product-spec-copy-leading-no");
+  setLaneDone(specCopyLeadingNo, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specCopyLeadingNo, "SPEC.md"),
+    specSections({
+      row: twoIncumbentRows,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "No incumbent can reproduce our accumulated user history in one week.",
+    }),
+    "utf8",
+  );
+  runFixture("a leading-no structural copy answer passes", specCopyLeadingNo, "check-product-spec.ts", 0);
 
   // ── check-launch-trace ────────────────────────────────────────────────────
 

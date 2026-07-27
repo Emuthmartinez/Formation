@@ -109,15 +109,17 @@ if (text) {
         .map((line) => line.split("|").map((cell) => cell.trim()));
       // "N/A" and "none" are empty cells wearing characters.
       const MOAT_NEGATIVE_CELL = /^(unknown|n\/?a|none|nil|null|not applicable|not yet|no result|[-—–]+)$/i;
-      const realRow = incumbentRows.some(
+      const realRowCount = incumbentRows.filter(
         (cells) => cells.length >= 6 && cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell) && !MOAT_NEGATIVE_CELL.test(cell)),
-      );
-      if (!realRow) {
+      ).length;
+      // §3 benchmarks the top 2–3 incumbents — one row compares against a
+      // category of one.
+      if (realRowCount < 2) {
         issues.push(
           issue(
             "error",
             "product_spec.incumbent_row_missing",
-            "Differentiation And Moat has no real incumbent row (top competitor by revenue, what it does well, the beat moment, what stops " +
+            "Differentiation And Moat has fewer than two real incumbent rows (top 2-3 competitors by revenue, what each does well, the beat moment, what stops " +
               "a week-one copy — every cell filled). Benchmarking against nobody is how a commodity idea ships with excellent process compliance.",
             "SPEC.md",
           ),
@@ -154,15 +156,14 @@ if (text) {
       // Clause-level polarity: the taxonomy word must sit in a clause with no
       // negation at all — "data is not a moat" names the class while
       // disclaiming it, in either order.
+      // The declared class is the head clause — a taxonomy word later in the
+      // plan ("…the same model API") must not bless an invalid declared
+      // class like "execution".
+      const declaredClass = (moatClassValue.split(/[.;,—–:()|]|\s--\s|\s-\s/)[0] ?? "").trim();
       const moatClassAffirmed =
         !/^(none|no\b|n\/?a)/i.test(moatClassValue) &&
-        moatClassValue
-          .split(/[.;,—–:()|]/)
-          .some(
-            (clause) =>
-              /\b(data|workflow|community|taste|model|distribution)\b/i.test(clause) &&
-              !/\b(no|not|none|never|without|isn'?t|aren'?t|cannot|can'?t|won'?t)\b/i.test(clause),
-          );
+        /\b(data|workflow|community|taste|model|distribution)\b/i.test(declaredClass) &&
+        !/\b(no|not|none|never|without|isn'?t|aren'?t|cannot|can'?t|won'?t)\b/i.test(declaredClass);
       // The field is class AND build plan: a bare taxonomy word explains
       // nothing, and a negated plan ("we will never collect any user
       // history") refuses the moat it names — the plan must have at least
@@ -191,8 +192,10 @@ if (text) {
       // concessions (including the doctrine's named nonanswers) are tested on
       // the negation-stripped residue so "cannot be copied in a week" — a
       // legitimate structural answer — survives.
+      // "No incumbent can reproduce…" is a structural claim, not a
+      // concession — the leading-no arm excludes negated-subject sentences.
       const CONCESSION_RAW =
-        /^\s*(nothing|none|no)\b|\b(nothing|nobody|no one) (stops|prevents|blocks)|\bno (real |structural )?(moat|barrier|blocker)|\b(has|have) not thought of (it|this)\b/i;
+        /^\s*(nothing|none)\b|^\s*no\b(?!\s+\w+\s+(can|could)\b)|\b(nothing|nobody|no one) (stops|prevents|blocks)|\bno (real |structural )?(moat|barrier|blocker)|\b(has|have) not thought of (it|this)\b/i;
       const CONCESSION_AFFIRMATIVE =
         /\bcop(?:y|ied|yable)\b[^.\n]{0,30}\b(week|sprint|days?)\b|\banyone (can|could) (copy|build|ship)\b|\b(can|could|will|would) (ship|build|clone|replicate|match)\b[^.\n]{0,40}\b(week|sprint|days?)\b|\b(better|nicer|cleaner) design(ed)?\b|\bbetter (ux|ui|execution)\b|\bfirst[- ]mover\b/i;
       // Negation is scoped to the predicate it negates: "cannot be copied in
@@ -203,7 +206,7 @@ if (text) {
         let match: RegExpExecArray | null;
         while ((match = pattern.exec(copyTestAnswer)) !== null) {
           const prefix = copyTestAnswer.slice(Math.max(0, match.index - 18), match.index);
-          if (!/\b(cannot|can not|can'?t|won'?t|will not|not|never|no|unable to)\s*(be\s+)?$/i.test(prefix)) return true;
+          if (!/(\b(cannot|can not|can'?t|won'?t|will not|not|never|no|unable to)\s*(be\s+)?|\b(no|not|never)\s+\w+\s*)$/i.test(prefix)) return true;
         }
         return false;
       })();
