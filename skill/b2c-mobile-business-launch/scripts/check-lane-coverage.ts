@@ -38,7 +38,11 @@ import {
 // Founder gates get a tighter re-engagement window than the general 60-day
 // stall bar: a gate is a decision waiting to be re-asked, not a scope note.
 const FOUNDER_GATE_STALE_DAYS = 30;
-const FOUNDER_GATE_PATTERN = /founder[-\s]?gated|founder[-\s]?only|founder approval|awaiting (?:the )?founder/i;
+// Active gates only — the canonical prefix syntax ("founder-gated <date>: …",
+// "awaiting founder …"). A standing policy note like "Founder approval is
+// required before paid spend" is a reminder, not a presented decision, and
+// must never age into a false stale-gate error.
+const FOUNDER_GATE_PATTERN = /^\s*(?:founder[-\s]?gated|founder[-\s]?only|awaiting (?:the )?founder)\b/i;
 
 /**
  * Calls validateReason and returns the count of new warnings pushed (0 or 1+).

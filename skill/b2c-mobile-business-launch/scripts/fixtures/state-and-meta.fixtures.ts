@@ -572,6 +572,27 @@ export function register(h: Harness): void {
     "lane_coverage.paid_user_acquisition.founder_gate_reengagement_due",
   );
 
+  // A standing policy note is a reminder, not a presented gate: the shipped
+  // template's own "Founder approval is required before..." blocker must never
+  // age into a false stale-gate error on a live app. Every lane is deferred
+  // with a fresh dated reason so the only possible phase_6 error would be the
+  // misfire this fixture exists to rule out.
+  const founderGateStandingPolicy = makeFixture("founder-gate-standing-policy");
+  {
+    const state = readState(founderGateStandingPolicy);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    const lanes = expectRecord(state.lanes, "PROJECT_STATE.yaml lanes");
+    for (const laneName of Object.keys(lanes)) {
+      const lane = expectRecord(lanes[laneName], `lanes.${laneName}`);
+      lane["status"] = "deferred";
+      lane["reason"] = `${gateIsoDaysAgo(3)} scope pass: deferred while the live app runs its weekly rhythm; revisit at the day-30 retro.`;
+    }
+    const paidUa = expectRecord(lanes["paid_user_acquisition"], "lanes.paid_user_acquisition");
+    paidUa["blockers"] = ["Founder approval is required before ad account connection, paid spend, budget changes, or live campaign launch."];
+    writeState(founderGateStandingPolicy, state);
+  }
+  runFixture("standing policy blocker on a live app is not an aged gate", founderGateStandingPolicy, "check-lane-coverage.ts", 0);
+
   // A date outside the documented presentation slot (between keyword and
   // colon) is a campaign date, not a presentation date.
   const founderGateDateAfterColon = makeFixture("founder-gate-date-after-colon");
