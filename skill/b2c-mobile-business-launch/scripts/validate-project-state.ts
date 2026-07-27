@@ -66,6 +66,20 @@ if (state) {
   // choice, but it has to be a choice someone can see being made.
   const PRE_BUILD_STALL_DAYS = 45;
   const kickoffRaw = (asString(getPath(state, "project.kickoff_date")) ?? "").trim();
+  // The blank seed is legitimate only during orientation: past orient, a
+  // missing kickoff date is a clock that can never fire — the exact omission
+  // that lets a launch sit in planning indefinitely.
+  if (!kickoffRaw && isPastOrientPhase(asString(getPath(state, "project.phase")) ?? "")) {
+    issues.push(
+      issue(
+        "error",
+        "project.kickoff_date.missing",
+        "project.kickoff_date is blank but the project is past orientation. Record the ISO date orient completed — without it the " +
+          'pre-build clock can never surface a stall (launch-phases.md "The Pre-Build Clock").',
+        "PROJECT_STATE.yaml",
+      ),
+    );
+  }
   if (kickoffRaw) {
     const kickoffValid =
       /^\d{4}-\d{2}-\d{2}$/.test(kickoffRaw) &&

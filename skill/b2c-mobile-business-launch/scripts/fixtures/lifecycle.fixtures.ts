@@ -1144,6 +1144,16 @@ export function register(h: Harness): void {
   }
   runFixture("fresh kickoff in pre-build passes without stall findings", kickoffFresh, "validate-project-state.ts", 0);
 
+  // The blank seed is legitimate only during orientation: past orient, a
+  // missing kickoff date is a clock that can never fire.
+  const kickoffMissingPastOrient = makeFixture("kickoff-missing-past-orient");
+  {
+    const state = readState(kickoffMissingPastOrient);
+    expectRecord(state.project, "project")["phase"] = "phase_1_research";
+    writeState(kickoffMissingPastOrient, state);
+  }
+  runFixture("blank kickoff date past orientation fails", kickoffMissingPastOrient, "validate-project-state.ts", 1, "project.kickoff_date.missing");
+
   const kickoffInvalid = makeFixture("kickoff-invalid-date");
   {
     const state = readState(kickoffInvalid);
