@@ -71,6 +71,50 @@ export function register(h: Harness): void {
   }
   runFixture("post-launch done without a live_since date fails", postLaunchNoLiveDate, "check-post-launch-ops.ts", 1, "post_launch_ops.live_since_missing");
 
+  // A typo'd calendar value (2026-99-99) must not silently disarm the clock:
+  // Invalid Date math would turn every overdue comparison into NaN === false.
+  const postLaunchBadLiveDate = makeFixture("post-launch-live-date-invalid");
+  {
+    const state = readState(postLaunchBadLiveDate);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["live_since"] = "2026-99-99";
+    writeState(postLaunchBadLiveDate, state);
+  }
+  runFixture("post-launch done with an invalid live_since fails", postLaunchBadLiveDate, "check-post-launch-ops.ts", 1, "post_launch_ops.live_since_missing");
+
+  // A forward-dated launch (negative days live) would suppress every gate too.
+  const postLaunchFutureLiveDate = makeFixture("post-launch-live-date-future");
+  {
+    const state = readState(postLaunchFutureLiveDate);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["live_since"] = isoDaysAgo(-30);
+    writeState(postLaunchFutureLiveDate, state);
+  }
+  runFixture("post-launch done with a future live_since fails", postLaunchFutureLiveDate, "check-post-launch-ops.ts", 1, "post_launch_ops.live_since_missing");
+
+  // A phase_6 project cannot dodge the numbers by leaving the lane partial:
+  // the launch-and-vanish repos observed in the wild never marked the lane done.
+  const postLaunchPhaseVanish = makeFixture("post-launch-phase-vanish");
+  {
+    const state = readState(postLaunchPhaseVanish);
+    expectRecord(state.project, "project")["phase"] = "phase_6";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "partial";
+    writeState(postLaunchPhaseVanish, state);
+    setPostLaunchLive(postLaunchPhaseVanish, 20);
+  }
+  runFixture(
+    "post-launch phase with a partial lane and an empty weekly log fails",
+    postLaunchPhaseVanish,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_log_missing",
+  );
+
   const postLaunchNoRunbook = makeFixture("post-launch-no-runbook");
   {
     const state = readState(postLaunchNoRunbook);
@@ -345,6 +389,27 @@ export function register(h: Harness): void {
     appendWeeklyLogRow(postLaunchWeeklyPlaceholder, { daysAgo: 2, crashFree: "unverified", d7: "looks fine" });
   }
   runFixture("weekly log row without real numbers fails", postLaunchWeeklyPlaceholder, "check-post-launch-ops.ts", 1, "post_launch_ops.weekly_numbers_missing");
+
+  // The wind-down exemption must be earned: a one-string state edit
+  // (kill_or_scale_decision: kill) with no dated mirror and no Kill verdict in
+  // the retro must not skip the weekly and checkpoint gates.
+  const postLaunchKillStringOnly = makeFixture("post-launch-kill-string-only");
+  {
+    const state = readState(postLaunchKillStringOnly);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "kill";
+    writeState(postLaunchKillStringOnly, state);
+    setPostLaunchLive(postLaunchKillStringOnly, 20);
+  }
+  runFixture(
+    "kill decision without a dated mirror and retro verdict does not exempt the gates",
+    postLaunchKillStringOnly,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_log_missing",
+  );
 
   // A recorded Kill verdict is the one legitimate way for the rhythm to stop:
   // wind-down quiet must not read as launch-and-vanish.

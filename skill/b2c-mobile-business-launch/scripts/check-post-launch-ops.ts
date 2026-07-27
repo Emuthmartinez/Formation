@@ -108,11 +108,12 @@ for (const section of requiredSections) {
 // ── Check 2: the numbers loop ───────────────────────────────────────────────
 // A live app is measured in dollars and users, not deploy logs. Everything
 // below hangs off lanes.post_launch_ops.live_since: checkpoint due dates and
-// weekly-log freshness compare against the current date. Severity is error on
-// a done lane and warning while the lane is still being claimed, so the gap is
-// visible early and blocking at readiness.
+// weekly-log freshness compare against the current date. Severity is error
+// whenever the app is actually live (done lane OR post-launch phase) — a
+// phase_6 project cannot dodge the numbers by leaving the lane partial — and
+// warning only for a lane claimed early, before the project reaches launch.
 
-const numbersSeverity = laneDone ? "error" : "warning";
+const numbersSeverity = laneDone || postLaunchPhase ? "error" : "warning";
 const MS_PER_DAY = 86_400_000;
 const CHECKPOINT_GRACE_DAYS = 7;
 const WEEKLY_STALE_DAYS = 14;
@@ -120,18 +121,30 @@ const WEEKLY_STALE_DAYS = 14;
 // row looks done while the number never arrived.
 const PLACEHOLDER_TEXT = /\b(unverified|tbd|todo|to be filled|pending|confirm in|placeholder)\b/i;
 
+/** Strict calendar date: shape, round-trip, and not in the future. A typo'd
+ * month (2026-99-99) or a forward-dated launch would otherwise turn every
+ * comparison into silent NaN/negative math and disarm the clock entirely. */
+function parseLiveDate(raw: string): Date | undefined {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return undefined;
+  const date = new Date(`${raw}T00:00:00Z`);
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== raw) return undefined;
+  if (date.getTime() > Date.now()) return undefined;
+  return date;
+}
+
 const liveSinceRaw = state ? (asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "").trim() : "";
-const liveSince = /^\d{4}-\d{2}-\d{2}$/.test(liveSinceRaw) ? new Date(`${liveSinceRaw}T00:00:00Z`) : undefined;
+const liveSince = parseLiveDate(liveSinceRaw);
 const daysLive = liveSince ? Math.floor((Date.now() - liveSince.getTime()) / MS_PER_DAY) : 0;
-const killDecided = state ? /^kill$/i.test((asString(getPath(state, "lanes.post_launch_ops.kill_or_scale_decision")) ?? "").trim()) : false;
 
 if (!liveSince) {
   issues.push(
     issue(
       numbersSeverity,
       "post_launch_ops.live_since_missing",
-      "lanes.post_launch_ops.live_since records no ISO date for when the app went live. Without it nothing can ever be overdue — " +
-        "no retro checkpoint has a due date and the weekly log has no freshness bar. Record the first approved-for-sale date once; it never changes.",
+      "lanes.post_launch_ops.live_since does not record a valid past ISO date for when the app went live " +
+        (liveSinceRaw ? `(current value: "${liveSinceRaw}"). ` : ". ") +
+        "Without a real calendar date nothing can ever be overdue — no retro checkpoint has a due date and the weekly log has no " +
+        "freshness bar. Record the first approved-for-sale date once; it never changes.",
       "PROJECT_STATE.yaml",
     ),
   );
@@ -139,6 +152,22 @@ if (!liveSince) {
 
 const retroFile = ["LAUNCH_RETRO.md", "post-launch/LAUNCH_RETRO.md"].find((candidate) => existsSync(path.join(args.root, candidate)));
 const retroText = retroFile ? (readText(args.root, retroFile) ?? "") : "";
+
+// The wind-down exemption must be earned, not typed: a one-string state edit
+// (kill_or_scale_decision: kill) with no retro behind it would otherwise skip
+// every checkpoint and weekly-log gate. Kill counts only when the state mirror
+// is complete AND a completed retro checkpoint actually carries a Kill verdict.
+const killDecided = ((): boolean => {
+  if (!state) return false;
+  const decision = (asString(getPath(state, "lanes.post_launch_ops.kill_or_scale_decision")) ?? "").trim();
+  const decidedAt = (asString(getPath(state, "lanes.post_launch_ops.kill_or_scale_decided_at")) ?? "").trim();
+  if (!/^kill$/i.test(decision) || !parseLiveDate(decidedAt)) return false;
+  const verdictSection = markdownSection(retroText, "Kill, Hold, Or Scale");
+  if (!verdictSection) return false;
+  const verdictColumn = tableColumnIndex(verdictSection, /verdict/i);
+  if (verdictColumn === -1) return false;
+  return ["Day 30", "Day 90"].some((checkpoint) => /^kill\b/i.test((tableRowCells(verdictSection, checkpoint)[verdictColumn] ?? "").trim()));
+})();
 
 if (liveSince && !killDecided) {
   // Checkpoints that were never completed are the dodge the verdict gates
