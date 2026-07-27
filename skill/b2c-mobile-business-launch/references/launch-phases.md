@@ -1,8 +1,8 @@
 # Launch Phases
 
-Use these phases as a reusable playbook. Skip phases that are already complete, but verify their artifacts before building on them.
+Use these phases as a reusable playbook: skip phases already complete, but verify their artifacts before building on them.
 
-At each founder decision, translate the internal phase into a plain-language label and outcome. Use the Founder Question Contract in `founder-zero-operator.md`: AskUserQuestion when available, two or three choices with one recommendation, explicit consequences, a safe skip/fallback/defer route, and a revisit trigger. Do not expose lane names, staffing roles, proof jargon, or internal checklists without definitions.
+At each founder decision, translate the internal phase into a plain-language label and outcome. Use the Founder Question Contract in `founder-zero-operator.md`: two or three choices with one recommendation, explicit consequences, a safe skip/fallback/defer route, and a revisit trigger. Do not expose lane names, staffing roles, proof jargon, or internal checklists without definitions.
 
 ## Contents
 
@@ -106,7 +106,7 @@ Goal: avoid wasting tokens on weak free fallbacks when the founder may have, wan
 
 Do:
 - Load `paid-tool-routing.md`.
-- List paid/account-gated lanes that affect the launch: AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI Plus/Pro capabilities, Fastlane AI, ASO/MMP/ad tools, Sideshift/creator marketplaces, RevenueCat, Stripe, PostHog, Resend, and App Store/Play accounts. Record separately when MobAI Free covers the lane and when a fallback narrows cross-platform proof.
+- List paid/account-gated lanes that affect the launch: AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI Plus/Pro capabilities, Fastlane AI, ASO/MMP/ad tools, Sideshift/creator marketplaces, RevenueCat, Stripe, PostHog, Resend, and App Store/Play accounts. Record when MobAI Free covers the lane and when a fallback narrows cross-platform proof.
 - Check current runtime access, local installs, user-provided exports, screenshots, PDFs, CSVs, API keys, and account sessions.
 - Ask before replacing any paid/account-gated tool with a free fallback.
 - Record selected routes, limitations, and blocked access in `TOOL_DECISIONS.md` or the relevant ops doc.
@@ -461,8 +461,8 @@ Do:
 - Decide the monetization path: waitlist-only, mobile app stores only, RevenueCat Web Billing, Stripe Billing through RevenueCat Web, existing Stripe sync, or no paid checkout yet.
 - Create the product matrix: monthly, annual, lifetime, trial, intro offer, renewal price, store product IDs, RevenueCat products, entitlement, offering, Stripe price IDs, and supported markets.
 - Set up RevenueCat concepts in order: project, app/web configs, products, `premium` entitlement, `default` offering, packages, platform credentials, server notifications, SDK keys, and webhooks when needed.
-- Set up Stripe when web checkout or Stripe Billing is in scope: account/business profile, products/prices, Checkout/Payment Links or Customer Portal, tax posture, webhooks, branding, live/sandbox keys, and go-live checklist.
-- Configure optional RevenueCat Web surfaces: Web Purchase Links, Web SDK, Web Paywalls, Web Funnels, Web Purchase Button, and Redemption Links when web-to-app purchase is part of the funnel.
+- Set up Stripe when web checkout or Stripe Billing is in scope: account/business profile, products/prices, Checkout/Payment Links or Customer Portal, tax posture, webhooks, branding, keys, and go-live checklist.
+- Configure optional RevenueCat Web surfaces (Purchase Links, SDK, Paywalls, Funnels, Purchase Button, Redemption Links) when web-to-app purchase is part of the funnel.
 - Verify identity and access: app user ID, RevenueCat App User ID, Stripe customer ID, anonymous web purchase, redemption link, restore purchases, backend projection, analytics, and support lookup.
 - Update legal/privacy/subscription copy so paywall, web funnel, store products, terms, privacy, App Store/Play metadata, and checkout agree.
 - Keep all live pricing, live checkout, tax, and store submission actions behind founder approval.
@@ -501,23 +501,23 @@ Do:
 - Build the landing page around the locked brand, not a generic marketing template; hero, lifestyle, and feature-illustration art route through Higgsfield (`hero_banner` / `lifestyle_scene` modes) using a `DESIGN.md` brief, after confirming spend per `paid-tool-routing.md`, with every generated asset recorded in `CONTENT_ASSETS.md` (see the App Store URL → UGC Ad Batch recipe and the Cheap-First Direction recipe in `tool-recipes/visual-and-motion-production.md`).
 - Add email waitlist and optional referral loop; avoid fake scarcity.
 - Load `resend-email-ops.md` before configuring Resend, transactional sends, waitlist confirmations, lifecycle automations, broadcasts, inbound email, unsubscribe handling, or email webhooks.
-- If monetization is active, wire only the approved checkout path: RevenueCat Web Purchase Link, RevenueCat Web Funnel, RevenueCat Web SDK, Stripe Checkout/Payment Link, or no checkout. Do not mix billing engines casually.
+- If monetization is active, wire only the approved checkout path (RevenueCat Web Purchase Link / Web Funnel / Web SDK, Stripe Checkout/Payment Link, or none); do not mix billing engines casually.
 - Keep public keys public-only and secrets server-side.
 - Route new secrets to Doppler or the approved provider as they appear; do not leave provider keys as shell-only setup.
 - Add bot/rate-limit defenses proportional to launch stage.
-- Configure and test domain contact routes before public submission: `support@`, `privacy@`, and any `hello@`/founder/security aliases required by the launch. If using Cloudflare Email Routing, destination addresses must be verified, Email Routing must be connected/enabled at the zone level, DNS records must be configured, and inbound tests must pass.
-- Configure outbound email deliberately: use a verified Resend sending subdomain, server-only API key, idempotent transactional send wrapper, webhook observability, and unsubscribe handling for lifecycle/marketing messages.
+- Configure and test domain contact routes before public submission: `support@`, `privacy@`, and any `hello@`/founder/security aliases required by the launch. With Cloudflare Email Routing: verified destinations, routing enabled at the zone, DNS configured, inbound tests passing.
+- Configure outbound email deliberately: verified Resend sending subdomain, server-only API key, idempotent transactional sends, webhook observability, unsubscribe handling for lifecycle/marketing.
 - Load `geo-seo.md` and add GEO/SEO files: schema, `robots.txt`, `sitemap.xml`, `llms.txt`, OG/Twitter metadata, canonical links, entity facts, and citeable question-answer sections.
-- Use GEO specialist skills when available: full audit, technical SEO, AI crawler access, `llms.txt`, schema, citability, content quality, brand mentions, platform optimization, and monthly compare.
+- Use GEO specialist skills when available: full audit, technical SEO, AI crawler access, `llms.txt`, schema, citability, content, brand mentions, platform optimization, monthly compare.
 - Publish privacy policy, terms, privacy choices/account deletion pages, and footer/app links when the funnel collects email, account, subscription, analytics, or referral data.
 - Add security headers: CSP, HSTS after domain is stable, X-Frame-Options/frame-ancestors, Referrer-Policy, Permissions-Policy, X-Content-Type-Options.
-- When using Alpine.js with a strict Content Security Policy (CSP), use the `@alpinejs/csp` build. The CSP-safe Alpine build prohibits inline assignment expressions and `x-model`; replace with method calls and explicit event bindings. Discover and resolve this before the first deploy, not after observing broken form interactions.
+- With a strict CSP, use the `@alpinejs/csp` build: it prohibits inline assignment expressions and `x-model` (use method calls and explicit event bindings). Resolve this before the first deploy, not after broken forms.
 - **Pre-deploy gate (Cloudflare Pages/Workers via wrangler):** before any `wrangler deploy` or `npm run deploy` invocation, run all five gates in order:
-  1. `git status --porcelain` — abort if the working tree is dirty; commit all changes first. Never deploy with uncommitted changes; wrangler warns but proceeds, making the live state unauditable.
-  2. `wrangler --version` — if the major version is behind the latest (check `npm show wrangler version`), upgrade to the current major release before continuing. Running stale major versions silently limits deploy capabilities and surfaces repeated update warnings.
-  3. `wrangler whoami` — confirm the active API token has the required scope (Pages:Edit for Pages projects, Workers:Edit for Workers projects) before the first deploy. A scope-insufficient token causes deploy failures that look like network or config errors.
-  4. Confirm the local build artifact is up to date (`npm run build` or equivalent) before invoking wrangler.
-  5. After deploy, wait for the Cloudflare dashboard or CLI to confirm the deployment is active before running any verification.
+  1. `git status --porcelain` — abort if dirty; never deploy uncommitted changes (wrangler warns but proceeds, leaving the live state unauditable).
+  2. `wrangler --version` — upgrade if the major version is behind `npm show wrangler version`; stale majors silently limit deploy capabilities.
+  3. `wrangler whoami` — confirm the token has Pages:Edit or Workers:Edit as required; a scope-insufficient token fails in ways that look like network or config errors.
+  4. Rebuild (`npm run build` or equivalent) so the artifact is current before invoking wrangler.
+  5. After deploy, confirm the deployment is active (dashboard or CLI) before verification.
 - Deploy and verify both preview and custom domain.
 - Smoke test signup, referral redirect, leaderboard/share state, analytics events, and mobile layout. **For any page containing an email capture or form, the smoke test must be browser-rendered, not curl or API-only.** Open the live URL in a real browser (or use MobAI/Playwright if available), fill in the form fields, click submit, and assert the success state is visible on screen. An API-level curl that returns 200 does not prove the browser form works; Alpine rendering bugs, CSP violations, and JS event-binding errors are invisible to curl. Do not declare the funnel ready until a browser-rendered form submission has succeeded end to end.
 
