@@ -40,7 +40,7 @@ export function register(h: Harness): void {
     options: { daysAgo: number; verdict: string; evidence?: [string, string, string, string] },
   ): void => {
     const retroPath = path.join(root, "LAUNCH_RETRO.md");
-    const ev = options.evidence ?? ["flat", "declining", "n/a", "8"];
+    const ev = options.evidence ?? ["$412 MRR, flat 4 wks", "D7 31% → 29% → 31%", "n/a — organic only", "6"];
     const retro = readFileSync(retroPath, "utf8")
       .replace(`| ${checkpoint} | | |`, `| ${checkpoint} | ${isoDaysAgo(options.daysAgo)} | founder |`)
       .replace(`| ${checkpoint} | | | | | | |`, `| ${checkpoint} | ${ev[0]} | ${ev[1]} | ${ev[2]} | ${ev[3]} | ${options.verdict} | |`);
@@ -389,6 +389,47 @@ export function register(h: Harness): void {
     appendWeeklyLogRow(postLaunchWeeklyPlaceholder, { daysAgo: 2, crashFree: "unverified", d7: "looks fine" });
   }
   runFixture("weekly log row without real numbers fails", postLaunchWeeklyPlaceholder, "check-post-launch-ops.ts", 1, "post_launch_ops.weekly_numbers_missing");
+
+  // Adjectives in the verdict evidence pack are not measurements: a Kill row
+  // reading "declining / bad" must neither earn the wind-down exemption nor
+  // pass the substance bar.
+  const postLaunchKillAdjectives = makeFixture("post-launch-kill-adjective-evidence");
+  {
+    const state = readState(postLaunchKillAdjectives);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["kill_or_scale_decision"] = "kill";
+    lane["kill_or_scale_decided_at"] = isoDaysAgo(25);
+    writeState(postLaunchKillAdjectives, state);
+    setPostLaunchLive(postLaunchKillAdjectives, 120);
+    completeCheckpoint(postLaunchKillAdjectives, "Day 30", { daysAgo: 88, verdict: "Fix" });
+    completeCheckpoint(postLaunchKillAdjectives, "Day 90", {
+      daysAgo: 25,
+      verdict: "Kill",
+      evidence: ["declining", "bad", "n/a", "8"],
+    });
+  }
+  runFixture(
+    "kill verdict over adjective evidence neither exempts nor passes substance",
+    postLaunchKillAdjectives,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_evidence_unmeasured",
+  );
+
+  // A dollar amount that is not MRR does not satisfy the revenue contract.
+  const postLaunchWrongMoney = makeFixture("post-launch-weekly-wrong-money");
+  {
+    const state = readState(postLaunchWrongMoney);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchWrongMoney, state);
+    setPostLaunchLive(postLaunchWrongMoney, 20);
+    appendWeeklyLogRow(postLaunchWrongMoney, { daysAgo: 2, notes: "ad spend $500 this week" });
+  }
+  runFixture("weekly Notes with a non-MRR dollar amount fails", postLaunchWrongMoney, "check-post-launch-ops.ts", 1, "post_launch_ops.weekly_revenue_missing");
 
   // The wind-down exemption must be earned: a one-string state edit
   // (kill_or_scale_decision: kill) with no dated mirror and no Kill verdict in

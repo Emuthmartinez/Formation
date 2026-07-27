@@ -120,6 +120,30 @@ const WEEKLY_STALE_DAYS = 14;
 // The lazy fills observed on real launches: text that occupies the cell so the
 // row looks done while the number never arrived.
 const PLACEHOLDER_TEXT = /\b(unverified|tbd|todo|to be filled|pending|confirm in|placeholder)\b/i;
+// Measured-value contracts, shared by the weekly log and the verdict evidence
+// pack: a rate is a percentage, money is an MRR-labeled dollar amount with at
+// least one digit ("MRR $0" counts; "ad spend $500" and "MRR $..." do not),
+// and the one legitimate substitute is a dated blocker naming what stopped the
+// pull. Adjectives — "flat", "declining", "looks healthy" — are directions,
+// not measurements.
+const MEASURED_RATE = /\d+(?:\.\d+)?\s*%/;
+const MEASURED_MONEY = /\$\s*\d[\d,]*(?:\.\d+)?/;
+const MEASURED_MRR = /\bMRR\b[^|]*\$\s*\d[\d,]*(?:\.\d+)?/i;
+const DATED_BLOCKER = /blocked\b[^|]*\d{4}-\d{2}-\d{2}/i;
+
+/** Column-appropriate measured evidence for a Kill/Hold/Scale row: every cell
+ * filled and non-placeholder, the MRR-trend cell carrying a dollar amount and
+ * the retention-trend cell a percentage (or a dated blocker in their place). */
+function verdictEvidenceMeasured(verdictSection: string, cells: string[], verdictColumn: number): boolean {
+  const evidenceCells = verdictColumn > 2 ? cells.slice(2, verdictColumn) : [];
+  if (evidenceCells.length === 0) return false;
+  if (evidenceCells.some((cell) => cell.trim().length === 0 || PLACEHOLDER_TEXT.test(cell))) return false;
+  const mrrColumn = tableColumnIndex(verdictSection, /mrr/i);
+  const retentionColumn = tableColumnIndex(verdictSection, /retention/i);
+  const moneyOk = mrrColumn <= 1 || MEASURED_MONEY.test(cells[mrrColumn] ?? "") || DATED_BLOCKER.test(cells[mrrColumn] ?? "");
+  const rateOk = retentionColumn <= 1 || MEASURED_RATE.test(cells[retentionColumn] ?? "") || DATED_BLOCKER.test(cells[retentionColumn] ?? "");
+  return moneyOk && rateOk;
+}
 
 /** Strict calendar date: shape, round-trip, and not in the future. A typo'd
  * month (2026-99-99) or a forward-dated launch would otherwise turn every
@@ -173,8 +197,7 @@ const killDecided = ((): boolean => {
     if (!parseLiveDate((tableRowCells(windowSection, checkpoint)[2] ?? "").trim())) return false;
     const cells = tableRowCells(verdictSection, checkpoint);
     if (!/^kill\b/i.test((cells[verdictColumn] ?? "").trim())) return false;
-    const evidenceCells = verdictColumn > 2 ? cells.slice(2, verdictColumn) : [];
-    return evidenceCells.length > 0 && evidenceCells.every((cell) => cell.trim().length > 0 && !PLACEHOLDER_TEXT.test(cell));
+    return verdictEvidenceMeasured(verdictSection, cells, verdictColumn);
   });
 })();
 
@@ -267,10 +290,8 @@ if (liveSince && !killDecided) {
         // A measured value is a percentage (crash-free and D7 are both rates),
         // or the documented dated-blocker form. An incidental digit inside an
         // adjective sentence ("iOS 17 looks fine") is not a metric.
-        const MEASURED_VALUE = /\d+(?:\.\d+)?\s*%/;
-        const DATED_BLOCKER = /blocked\b[^|]*\d{4}-\d{2}-\d{2}/i;
         const metricCells = [crashColumn, retentionColumn].filter((index) => index > 0).map((index) => latest.cells[index] ?? "");
-        if (metricCells.some((cell) => !(MEASURED_VALUE.test(cell) || DATED_BLOCKER.test(cell)) || PLACEHOLDER_TEXT.test(cell))) {
+        if (metricCells.some((cell) => !(MEASURED_RATE.test(cell) || DATED_BLOCKER.test(cell)) || PLACEHOLDER_TEXT.test(cell))) {
           issues.push(
             issue(
               numbersSeverity,
@@ -284,18 +305,17 @@ if (liveSince && !killDecided) {
         }
         // The runbook contract puts MRR and its delta in Notes each week — the
         // dollar figure is the whole point of the numbers loop, so rate columns
-        // alone cannot satisfy it.
-        const MEASURED_MONEY = /\$\s*[\d,.]+/;
+        // alone cannot satisfy it, and neither can an unrelated dollar amount.
         const notesColumn = headerCells.findIndex((cell) => /notes/i.test(cell));
         const notesCell = notesColumn > 0 ? (latest.cells[notesColumn] ?? "") : "";
-        if (notesColumn === -1 || !(MEASURED_MONEY.test(notesCell) || DATED_BLOCKER.test(notesCell)) || PLACEHOLDER_TEXT.test(notesCell)) {
+        if (notesColumn === -1 || !(MEASURED_MRR.test(notesCell) || DATED_BLOCKER.test(notesCell)) || PLACEHOLDER_TEXT.test(notesCell)) {
           issues.push(
             issue(
               numbersSeverity,
               "post_launch_ops.weekly_revenue_missing",
-              `The latest weekly log row in ${runbookPath} records no revenue figure. The Notes column carries MRR and its delta as a dollar ` +
-                `amount ("MRR $412 (+3%)"; "MRR $0" is a legitimate value) or a dated blocker — a metrics review that never touches money is ` +
-                `metrics theater with extra steps. Pull it from RevenueCat.`,
+              `The latest weekly log row in ${runbookPath} records no MRR figure. The Notes column carries an MRR-labeled dollar amount ` +
+                `("MRR $412 (+3%)"; "MRR $0" is a legitimate value) or a dated blocker — "ad spend $500" is not MRR, and a metrics review ` +
+                `that never touches revenue is metrics theater with extra steps. Pull it from RevenueCat.`,
               runbookPath,
             ),
           );
@@ -428,6 +448,17 @@ if (laneDone || postLaunchPhase) {
               "post_launch_ops.kill_or_scale_evidence_placeholder",
               `${retroPath}'s ${checkpoint} Kill, Hold, Or Scale row carries placeholder text ("unverified", "TBD", "confirm in …") in its evidence cells. ` +
                 `Pull the actual values from RevenueCat and PostHog before recording the verdict — a decision made over placeholders is the metrics-theater miss.`,
+              retroPath,
+            ),
+          );
+        } else if (!verdictEvidenceMeasured(verdictSection, cells, verdictColumn)) {
+          issues.push(
+            issue(
+              "error",
+              "post_launch_ops.kill_or_scale_evidence_unmeasured",
+              `${retroPath}'s ${checkpoint} Kill, Hold, Or Scale row holds no measured values: the MRR-trend cell needs a dollar amount ` +
+                `("$412 MRR, flat 4 wks") and the retention cell a percentage ("D7 31% → 29%"), or a dated blocker in their place. ` +
+                `"flat" and "declining" are directions, not measurements — a verdict decided over adjectives is still a mood.`,
               retroPath,
             ),
           );

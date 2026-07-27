@@ -200,7 +200,7 @@ lanes:
 - A retention cohort source is named (PostHog by default).
 - `LAUNCH_RETRO.md` exists with at least the post-launch pass filled.
 - `live_since` records the first approved-for-sale date.
-- Once live past two weeks: the weekly log carries dated rows whose latest is at most two weeks old and whose crash-free/retention cells hold real numbers (or dated blockers), and no day-30/day-90 retro checkpoint sits uncompleted past its due date. Placeholder text — "unverified", "TBD", "confirm in RevenueCat" — fails in weekly metric cells and kill-or-scale evidence cells alike. A recorded Kill verdict exempts a wound-down app from the freshness gates.
+- Once live past two weeks: the weekly log carries dated rows whose latest is at most two weeks old, whose crash-free/retention cells hold percentages, and whose Notes cell carries an MRR-labeled dollar amount ("MRR $412 (+3%)"; "MRR $0" counts) — or dated blockers in their place. No day-30/day-90 retro checkpoint sits uncompleted past its due date. Placeholder text ("unverified", "TBD") and adjectives ("flat", "looks fine") fail in weekly metric cells and kill-or-scale evidence cells alike: the verdict's MRR-trend cell needs a dollar amount and its retention cell a percentage. A recorded Kill verdict — completed checkpoint, measured evidence, agreeing state mirror — exempts a wound-down app from the freshness gates.
 
 Validator: `npm run check:post-launch -- --root . --state PROJECT_STATE.yaml`. The validator checks structure, the done-status facts above, and the numbers loop (due dates, freshness, placeholder text); it cannot verify that replies are non-boilerplate or that monitoring windows are honored — the founder's weekly review of `POST_LAUNCH_OPS.md` session notes is the backstop for those.
 
