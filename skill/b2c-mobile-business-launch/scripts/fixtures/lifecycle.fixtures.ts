@@ -27,10 +27,10 @@ export function register(h: Harness): void {
     writeState(root, state);
   };
 
-  const appendWeeklyLogRow = (root: string, options: { daysAgo: number; crashFree?: string; d7?: string }): void => {
+  const appendWeeklyLogRow = (root: string, options: { daysAgo: number; crashFree?: string; d7?: string; notes?: string }): void => {
     const runbookPath = path.join(root, "POST_LAUNCH_OPS.md");
     const header = "| Date | Crash-free % | New reviews (avg rating) | D7 retention | Decision shipped | Notes |\n| --- | --- | --- | --- | --- | --- |";
-    const row = `| ${isoDaysAgo(options.daysAgo)} | ${options.crashFree ?? "99.7%"} | 4.8 (3 new) | ${options.d7 ?? "31%"} | shipped paywall copy fix | MRR $412 (+3%) |`;
+    const row = `| ${isoDaysAgo(options.daysAgo)} | ${options.crashFree ?? "99.7%"} | 4.8 (3 new) | ${options.d7 ?? "31%"} | shipped paywall copy fix | ${options.notes ?? "MRR $412 (+3%)"} |`;
     writeFileSync(path.join(runbookPath), readFileSync(runbookPath, "utf8").replace(header, `${header}\n${row}`), "utf8");
   };
 
@@ -484,6 +484,47 @@ export function register(h: Harness): void {
     "check-post-launch-ops.ts",
     1,
     "post_launch_ops.weekly_log_missing",
+  );
+
+  // The substance bar travels with the phase: a live app whose lane is still
+  // partial cannot record a checkpoint date over an empty verdict row.
+  const postLaunchPhaseEmptyVerdict = makeFixture("post-launch-phase-checkpoint-empty-verdict");
+  {
+    const state = readState(postLaunchPhaseEmptyVerdict);
+    expectRecord(state.project, "project")["phase"] = "phase_6";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "partial";
+    writeState(postLaunchPhaseEmptyVerdict, state);
+    setPostLaunchLive(postLaunchPhaseEmptyVerdict, 45);
+    appendWeeklyLogRow(postLaunchPhaseEmptyVerdict, { daysAgo: 3 });
+    const retroPath = path.join(postLaunchPhaseEmptyVerdict, "LAUNCH_RETRO.md");
+    writeFileSync(retroPath, readFileSync(retroPath, "utf8").replace("| Day 30 | | |", `| Day 30 | ${isoDaysAgo(10)} | founder |`), "utf8");
+  }
+  runFixture(
+    "live phase with a completed checkpoint over an empty verdict row fails",
+    postLaunchPhaseEmptyVerdict,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.kill_or_scale_verdict_unfilled",
+  );
+
+  // Rates without dollars are not a metrics review: the Notes cell carries MRR.
+  const postLaunchWeeklyNoRevenue = makeFixture("post-launch-weekly-no-revenue");
+  {
+    const state = readState(postLaunchWeeklyNoRevenue);
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    writeState(postLaunchWeeklyNoRevenue, state);
+    setPostLaunchLive(postLaunchWeeklyNoRevenue, 20);
+    appendWeeklyLogRow(postLaunchWeeklyNoRevenue, { daysAgo: 2, notes: "quiet week" });
+  }
+  runFixture(
+    "weekly row without an MRR figure in Notes fails",
+    postLaunchWeeklyNoRevenue,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.weekly_revenue_missing",
   );
 
   // Incidental digits inside adjectives are not measured values.

@@ -282,6 +282,24 @@ if (liveSince && !killDecided) {
             ),
           );
         }
+        // The runbook contract puts MRR and its delta in Notes each week — the
+        // dollar figure is the whole point of the numbers loop, so rate columns
+        // alone cannot satisfy it.
+        const MEASURED_MONEY = /\$\s*[\d,.]+/;
+        const notesColumn = headerCells.findIndex((cell) => /notes/i.test(cell));
+        const notesCell = notesColumn > 0 ? (latest.cells[notesColumn] ?? "") : "";
+        if (notesColumn === -1 || !(MEASURED_MONEY.test(notesCell) || DATED_BLOCKER.test(notesCell)) || PLACEHOLDER_TEXT.test(notesCell)) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.weekly_revenue_missing",
+              `The latest weekly log row in ${runbookPath} records no revenue figure. The Notes column carries MRR and its delta as a dollar ` +
+                `amount ("MRR $412 (+3%)"; "MRR $0" is a legitimate value) or a dated blocker — a metrics review that never touches money is ` +
+                `metrics theater with extra steps. Pull it from RevenueCat.`,
+              runbookPath,
+            ),
+          );
+        }
       }
     }
   }
@@ -320,13 +338,22 @@ if (laneDone) {
       ),
     );
   }
+}
+
+// ── Check 4: retro verdict substance ────────────────────────────────────────
+// Runs for done lanes AND live phases: a phase_6 project with the lane still
+// partial must not be able to record a checkpoint date over an empty or
+// placeholder verdict row — the substance bar travels with the phase, not
+// only with the lane status.
+
+if (laneDone || postLaunchPhase) {
   const retroPath = ["LAUNCH_RETRO.md", "post-launch/LAUNCH_RETRO.md"].find((candidate) => existsSync(path.join(args.root, candidate)));
   if (!retroPath) {
     issues.push(
       issue(
         "error",
         "post_launch_ops.launch_retro_missing",
-        "LAUNCH_RETRO.md is required before post_launch_ops is done. The retro is how this launch's misses become failure cards " +
+        "LAUNCH_RETRO.md is required once the app is live or post_launch_ops is done. The retro is how this launch's misses become failure cards " +
           "and LaunchBench scenarios instead of oral lore.",
         "LAUNCH_RETRO.md",
       ),
