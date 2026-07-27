@@ -160,6 +160,49 @@ export function register(h: Harness): void {
     "research.category_revenue_row_missing",
   );
 
+  // A dollar amount drifting outside the revenue column, or a blank source,
+  // is data-shaped text rather than a sourced estimate.
+  const researchRevenueUnsourced = makeFixture("research-done-revenue-unsourced");
+  setLaneDone(researchRevenueUnsourced, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchRevenueUnsourced, "go", "2026-07-21");
+  writeResearch(researchRevenueUnsourced, [
+    ...researchCoreSections,
+    ...categoryRevenueSection("| 1 | HabitKit ($2.4M/yr claimed) | strong | |"),
+    ...goPivotKillSection(goRow),
+  ]);
+  runFixture(
+    "revenue estimate outside its column with a blank source fails",
+    researchRevenueUnsourced,
+    "check-research-evidence.ts",
+    1,
+    "research.category_revenue_row_missing",
+  );
+
+  // The gate is founder-only: a Go row naming no decision-maker is the agent
+  // deciding to build for itself.
+  const researchNoDecider = makeFixture("research-done-no-decider");
+  setLaneDone(researchNoDecider, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchNoDecider, "go", "2026-07-21");
+  writeResearch(researchNoDecider, [
+    ...researchCoreSections,
+    ...categoryRevenueSection(revenueRow),
+    ...goPivotKillSection("| 2026-07-21 | pass — $14.2M top-10 | streak-insurance wedge | 412-person waitlist | Go | |"),
+  ]);
+  runFixture("Go verdict with an empty decided-by cell fails", researchNoDecider, "check-research-evidence.ts", 1, "research.go_pivot_kill_decider_missing");
+
+  // The mirror's date must match the verdict row, not merely be date-shaped.
+  const researchDateMismatch = makeFixture("research-done-decided-at-mismatch");
+  setLaneDone(researchDateMismatch, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchDateMismatch, "go", "2026-07-01");
+  writeResearch(researchDateMismatch, [...researchCoreSections, ...categoryRevenueSection(revenueRow), ...goPivotKillSection(goRow)]);
+  runFixture(
+    "state mirror dated differently from the verdict row fails",
+    researchDateMismatch,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_state_mismatch",
+  );
+
   // A verdict decided over placeholder evidence is the metrics-theater miss
   // moved pre-build: the row exists, the evidence never arrived.
   const researchVerdictThin = makeFixture("research-done-verdict-thin-evidence");

@@ -111,15 +111,30 @@ if (text) {
 
     const revenueSection = markdownSection(text, "Category Revenue Reality");
     if (revenueSection) {
+      // The revenue estimate and its source are parsed from their intended
+      // columns: a dollar amount drifting in an unrelated cell, or a blank
+      // source, is data-shaped text rather than a sourced estimate.
+      const revenueColumn = tableColumnIndex(revenueSection, /revenue/i);
+      const sourceColumn = tableColumnIndex(revenueSection, /source/i);
       const revenueRows = tableDataRows(revenueSection).filter((row) => !/_example/i.test(row.join(" ")));
-      if (!revenueRows.some((row) => row.some((cell) => /\$\s*[\d,.]+/.test(cell)))) {
+      const sourcedRow = (row: string[]): boolean => {
+        const revenueCell = revenueColumn > 0 ? (row[revenueColumn] ?? "") : "";
+        const sourceCell = sourceColumn > 0 ? (row[sourceColumn] ?? "") : "";
+        return (
+          /\$\s*\d[\d,]*(?:\.\d+)?/.test(revenueCell) &&
+          sourceCell.trim().length > 0 &&
+          !PLACEHOLDER_TEXT.test(sourceCell) &&
+          /\d{4}-\d{2}-\d{2}/.test(sourceCell)
+        );
+      };
+      if (revenueColumn <= 0 || sourceColumn <= 0 || !revenueRows.some(sourcedRow)) {
         issues.push(
           issue(
             "error",
             "research.category_revenue_row_missing",
-            "Done research needs at least one real competitor revenue row in Category Revenue Reality (a dollar estimate with its source). " +
-              "Collecting AppKittie data is not the gate — the judged number is: a category whose top apps gross too little cannot " +
-              "become a real business no matter how well the launch executes.",
+            "Done research needs at least one real competitor revenue row in Category Revenue Reality: a dollar estimate in the revenue " +
+              "column AND a dated, non-placeholder source in the source column. Collecting AppKittie data is not the gate — the judged, " +
+              "sourced number is: a category whose top apps gross too little cannot become a real business however well the launch executes.",
             "RESEARCH.md",
           ),
         );
@@ -165,6 +180,20 @@ if (text) {
         );
       } else {
         const latest = verdictRows.reduce((a, b) => ((a.date ?? "") >= (b.date ?? "") ? a : b));
+        // The gate is founder-only: a verdict row that names no decision-maker
+        // is an agent deciding to build and moving on.
+        const decidedByCell = (latest.cells[verdictColumn + 1] ?? "").trim();
+        if (decidedByCell.length === 0 || PLACEHOLDER_TEXT.test(decidedByCell)) {
+          issues.push(
+            issue(
+              "error",
+              "research.go_pivot_kill_decider_missing",
+              'The latest Go, Pivot, Or Kill row names nobody in "Decided by". The verdict is founder-only, never automatic — ' +
+                "record who made the call. An agent recording Go for itself is the exact bypass this gate exists to stop.",
+              "RESEARCH.md",
+            ),
+          );
+        }
         const evidenceCells = verdictColumn > 2 ? latest.cells.slice(2, verdictColumn) : [];
         if (evidenceCells.some((cell) => cell.trim().length === 0 || PLACEHOLDER_TEXT.test(cell))) {
           issues.push(
@@ -201,13 +230,14 @@ if (text) {
               "PROJECT_STATE.yaml",
             ),
           );
-        } else if (decision !== latest.verdict) {
+        } else if (decision !== latest.verdict || decidedAt !== latest.date) {
           issues.push(
             issue(
               "error",
               "research.go_pivot_kill_state_mismatch",
-              `lanes.research.go_pivot_kill_decision ("${decision}") disagrees with the latest verdict row in RESEARCH.md ("${latest.verdict}"). ` +
-                `Update the mirror when the verdict changes — a build proceeding on a stale state verdict is the exact miss this gate exists to stop.`,
+              `lanes.research.go_pivot_kill_decision/decided_at ("${decision}" on ${decidedAt}) disagree with the latest verdict row in RESEARCH.md ` +
+                `("${latest.verdict}" on ${latest.date}). Both the verdict and its date must match — a stale or forward-dated mirror is what downstream ` +
+                `lanes and the portfolio pipeline would act on.`,
               "PROJECT_STATE.yaml",
             ),
           );
