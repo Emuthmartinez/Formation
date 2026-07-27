@@ -509,6 +509,51 @@ if (revenueDone && revenueOpsText) {
     }
   }
 
+  // 2c. Paywall experiment cadence — the §7b program's output. The first
+  //     paywall is a hypothesis; once the app has been live four weeks with the
+  //     revenue lane done, the backlog must show at least one active or
+  //     completed experiment row. One reasonable paywall shipped and never
+  //     touched again is the plateau the skill's own anti-pattern list names —
+  //     this makes it a red check instead of a prose warning.
+  const liveSinceRaw = state ? ((asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "").trim()) : "";
+  const liveSinceDate = /^\d{4}-\d{2}-\d{2}$/.test(liveSinceRaw) ? new Date(`${liveSinceRaw}T00:00:00Z`) : undefined;
+  const liveDays =
+    liveSinceDate && !Number.isNaN(liveSinceDate.getTime()) && liveSinceDate.getTime() <= Date.now()
+      ? Math.floor((Date.now() - liveSinceDate.getTime()) / 86_400_000)
+      : 0;
+  if (liveDays >= 28) {
+    const backlogSection = markdownSectionLoose(revenueOpsText, /paywall experiment backlog/i).replace(/<!--[\s\S]*?-->/g, " ");
+    if (!backlogSection) {
+      issues.push(
+        issue(
+          "error",
+          "revenue.experiment_backlog.missing",
+          'REVENUE_OPS.md has no "Paywall Experiment Backlog" section and the app has been live four-plus weeks. The first paywall is a ' +
+            "hypothesis, not a decision — stand up the experiment program (revenue-monetization.md §7b) before the plateau sets in.",
+          revenueOpsPath,
+        ),
+      );
+    } else {
+      const backlogRows = backlogSection
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith("|") && !line.includes("---") && !/hypothesis/i.test(line));
+      const activeOrCompleted = backlogRows.filter((line) => /\b(active|completed)\b/i.test(line) && /\d{4}-\d{2}-\d{2}/.test(line));
+      if (activeOrCompleted.length === 0) {
+        issues.push(
+          issue(
+            "error",
+            "revenue.experiment_backlog.empty",
+            `The Paywall Experiment Backlog has no dated active or completed experiment row and the app has been live ${liveDays} days. ` +
+              "A backlog of empty headers is the one-and-done plateau wearing a green check — start the first timing/packaging/trial test " +
+              "(revenue-monetization.md §7b) and record it with its start date.",
+            revenueOpsPath,
+          ),
+        );
+      }
+    }
+  }
+
   // Table data rows only: not separators, not header rows, not guidance prose.
   // Both checks below must judge what the table STATES, never what the template's
   // own guidance text or column headers merely mention — the old document-wide

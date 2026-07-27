@@ -229,6 +229,16 @@ Before publishing pricing:
 4. **Record the decision.** The chosen points, the anchor table, the rationale, and the founder's approval date go in `REVENUE_OPS.md` ("Pricing Decision"). Pricing is founder-only (§9); the procedure prepares the decision, it never makes it.
 5. **Revisit on evidence, not anniversaries.** Post-launch price changes are driven by the cancellation-reason mix (§8b), realized LTV vs. the anchor assumptions (Economics Snapshot in `REVENUE_OPS.md`), and the kill-or-scale evidence pack — and every change routes through `change-cascade.md` so store products, RevenueCat offerings, screenshots, landing, and legal move together.
 
+## 7b. Paywall Experiment Cadence
+
+The first paywall is a hypothesis, not a decision. The apps that clear the $1K-to-$10K climb run continuous paywall/pricing experiments — timing, packaging, trial shape, offer — while the ~75% that never clear it typically shipped one reasonable paywall and stopped (anti-pattern #10 in `onboarding-conversion.md` names this; this section is its procedure). The cadence is a standing program, not a launch task:
+
+- **The backlog is a living artifact.** `REVENUE_OPS.md`'s Paywall Experiment Backlog carries planned/active/completed rows: hypothesis, variant, primary metric, start date, result, decision. `check:revenue` requires at least one active or completed experiment row once the app has been live four weeks with the revenue lane done — a backlog of empty headers is the one-and-done plateau wearing a green check.
+- **One experiment at a time per surface,** measured on cohort economics (trial-start rate × trial-to-paid × early churn — §10's guidance), never on day-one conversion alone. Minimum one full renewal-decision window before judging.
+- **The test menu, in rough order of historical lift:** paywall timing/placement in onboarding, packaging mix (annual anchor, lifetime presence), trial length and type (opt-in vs opt-out, reverse trial), price point per §7a's revisit procedure, closing offer, and paywall design/copy last.
+- **Route by tooling:** RevenueCat Experiments when available (it randomizes and reads revenue truth); otherwise a dated before/after with cohort comparison, honestly labeled as weaker evidence.
+- **Founder gates hold:** price changes and new offers are founder-approved per §9; the experiment program proposes, the founder disposes, and every completed test lands its decision back into §7a's pricing record through `change-cascade.md`.
+
 ## 8. Backend And Analytics Contract
 
 Create or update `ANALYTICS.md` and backend docs with:

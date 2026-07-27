@@ -202,6 +202,24 @@ Create these when UGC is in scope:
 - `ugc/weekly-review.md`: current winners, failed hooks, next tests, spend, install/search signals
 - updated `FASTLANE_OPS.md` when Fastlane becomes the generation/scheduling engine after launch
 
+## Post-Breakout Scale Model
+
+Everything above is the Day-0 discovery experiment: 3–5 creators finding a format. Discovery is not the destination — UGC-driven consumer apps at real chart positions run volume, and volume is the mechanism that turns one proven hook into a sustained install stream. Once the breakout bar holds (2–3 hits from the same structure across 2+ creators, with downstream install/paywall/revenue evidence), the roster grows in bands, each a founder-gated budget step:
+
+| Band | Roster | Weekly video volume | What changes operationally |
+| --- | --- | --- | --- |
+| Discovery (Day 0) | 3–5 | 9–15 | founder writes scripts, judges hooks personally |
+| Proven format | ~10 | 30–40 | script bank templatizes the winning structure; per-creator briefs; weekly winners review drives the bank |
+| Scale | ~30 | 90–120 | a lead creator or coordinator owns briefing/QA; payment ops move to batch; format variants tested against the control format |
+| Volume | 75+ | 200+ | agency or marketplace layer runs sourcing/payments; the founder owns format strategy and brand truth only; Fastlane or equivalent handles scheduling/analytics at volume |
+
+Rules that keep scale honest:
+
+- Advance one band at a time; each band's budget is a separate founder gate with the prior band's install-per-video and payback numbers in front of the decision.
+- The breakout bar re-proves per band: a format that worked at 5 creators must hold its install economics at 10 before 30 exists.
+- Fatigue is measured, not feared: when the control format's install-per-video decays across two consecutive weekly reviews, the next variant test is the priority, not more volume on the decaying control.
+- Disclosure, claim review, and brand-truth constraints from the Day-0 contract apply at every band — volume never dilutes the compliance floor.
+
 ## Common Failure Modes
 
 - Scaling to 20+ creators before one format works.

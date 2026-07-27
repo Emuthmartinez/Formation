@@ -130,7 +130,16 @@ Use `analytics-attribution.md` before implementation. `ANALYTICS.md` should incl
 - dashboard cards for attention, install/open, referral/share, paywall reach, conversion, revenue, retention, content format results, and platform/device mix
 - QA proof that referrals or unlocks affect backend/provider truth, not only local UI state
 
-Do not call viral growth working from views alone. Views become launch learning only when connected to app opens, attribution, referrals, paywall reach, purchases, retention, or a deliberate awareness-only goal.
+### Loop Economics
+
+Counting shares is not measuring a loop. The one number that distinguishes a compounding engine from an amplifier of paid/organic top-ups is the viral coefficient:
+
+- **k = (invites or shares sent per active user in the period) × (recipient conversion rate to install/activation).** Compute it weekly from the catalog events above (`referral_invite_started` → `referral_invite_completed` → attributed installs), alongside **cycle time** — median days from a user's activation to their referred user's activation.
+- Read k honestly: **k ≥ 1** compounds on its own (rare; most consumer apps never get there); **k 0.3–0.7** is a meaningful acquisition multiplier on other channels (each paid install brings a fraction of a free one); **k < 0.15** means the loop is decoration and the effort belongs elsewhere. Shorter cycle time compounds whatever k you have, faster.
+- Record k, cycle time, and the trend in `VIRAL_GROWTH.md`'s Loop Economics section each week the loop runs. The stop/scale rules key on this number and its trend — not on gross share counts, which can rise while k falls.
+- A worked example: 1,000 weekly actives send 300 invites (0.3/user); 60 convert (20%) → k = 0.06. That loop is not a growth engine yet; it needs a stronger share moment or a better landing conversion before more traffic is poured through it.
+
+Do not call viral growth working from views alone. Views become launch learning only when connected to app opens, attribution, referrals, paywall reach, purchases, retention, or a deliberate awareness-only goal — and never from share counts without the k computation above.
 
 ## Outputs
 

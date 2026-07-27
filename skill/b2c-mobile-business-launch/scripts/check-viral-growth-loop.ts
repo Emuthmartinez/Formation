@@ -63,6 +63,7 @@ if (markdown) {
     "Format Lab",
     "Monetization Timing",
     "Measurement Plan",
+    "Loop Economics",
     "Stop And Scale Rules",
     "Founder-Only Gates",
     "Traceability",
