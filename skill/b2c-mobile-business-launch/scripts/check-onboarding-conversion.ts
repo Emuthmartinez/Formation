@@ -41,13 +41,15 @@ if (onboardingDone && markdown) {
   const pushLines = markdown.text.split(/\r?\n/).filter((line) => /push (permission|priming|prime)|notification permission/i.test(line));
   // Mention is not placement: the prime must sit at an earned post-value
   // moment, and a cold ask on launch is the contract violation itself.
-  const placementOk = pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(line));
-  // Negated guidance ("never on launch") documents the prohibition — only an
-  // affirmative cold placement is the violation.
-  const coldAsk = pushLines.some((line) => {
-    const affirmative = line.replace(/\b(never|not|don't|do not|no)\b[^.;,]*/gi, "");
-    return /\bcold\b|first launch|on launch|at startup|app start|before (the )?(first )?value([- ]reveal)?/i.test(affirmative);
-  });
+  // Polarity is evaluated per clause: negation strips only to the next clause
+  // boundary (including dashes and colons), so "not after first value—request
+  // on launch" keeps its affirmative cold ask, and "never on launch" keeps its
+  // affirmative placement language intact for the placement test.
+  const affirmativeOf = (line: string): string => line.replace(/\b(never|not|don't|do not|no)\b[^.;,—–:()]*/gi, "");
+  const placementOk = pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(affirmativeOf(line)));
+  const coldAsk = pushLines.some((line) =>
+    /\bcold\b|first launch|on launch|at startup|app start|before (the )?(first )?value([- ]reveal)?/i.test(affirmativeOf(line)),
+  );
   if (!notApplicable && (pushLines.length === 0 || !placementOk || coldAsk)) {
     issues.push(
       issue(

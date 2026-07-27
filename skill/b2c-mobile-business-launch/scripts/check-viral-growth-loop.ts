@@ -151,10 +151,21 @@ if (growthStatus === "done" && markdown) {
     const end = boundaries.length > 0 ? Math.min(...boundaries) : markdown.text.length;
     return markdown.text.slice(loopIndex, end);
   })();
-  const loopMeasured =
-    /\bk\s*(=|at|:)\s*\d/i.test(loopRegion) ||
-    /first (weekly )?k (computation|measurement)[^\n]*\d{4}-\d{2}-\d{2}/i.test(loopRegion) ||
-    /\|\s*\d{4}-\d{2}-\d{2}\s*\|[^\n]*\d/.test(loopRegion);
+  const validCalendarDate = (raw: string, allowFuture: boolean): boolean => {
+    const date = new Date(`${raw}T00:00:00Z`);
+    if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== raw) return false;
+    if (allowFuture) return date.getTime() <= Date.now() + 60 * 86_400_000; // a due date defers at most 60 days
+    return date.getTime() <= Date.now();
+  };
+  const loopLines = loopRegion.split(/\r?\n/);
+  // A target is not a measurement: k-value lines carrying aspiration language
+  // do not count.
+  const measuredKLine = loopLines.some((line) => /\bk\s*(=|at|:)\s*\d/i.test(line) && !/\b(target|goal|aim|aspir\w*|hope|planned? for)\b/i.test(line));
+  const commitmentMatch = loopRegion.match(/first (?:weekly )?k (?:computation|measurement)[^\n]*?(\d{4}-\d{2}-\d{2})/i);
+  const commitmentValid = Boolean(commitmentMatch && validCalendarDate(commitmentMatch[1] ?? "", true));
+  const measuredRowMatch = loopRegion.match(/\|\s*(\d{4}-\d{2}-\d{2})\s*\|[^\n]*\d/);
+  const measuredRowValid = Boolean(measuredRowMatch && validCalendarDate(measuredRowMatch[1] ?? "", false));
+  const loopMeasured = measuredKLine || commitmentValid || measuredRowValid;
   if (loopIndex !== -1 && !loopMeasured) {
     issues.push(
       issue(
@@ -189,8 +200,12 @@ if (growthStatus === "done" && markdown) {
     const scaleIndex = ugcPlaybook.text.toLowerCase().search(/post-breakout|scale model/);
     if (scaleIndex === -1) return false;
     const region = ugcPlaybook.text.slice(scaleIndex, scaleIndex + 1500);
-    const bandNames = ["discovery", "proven", "scale", "volume"].filter((band) => new RegExp(`\\b${band}\\b`, "i").test(region)).length;
-    return bandNames >= 3 && /founder/i.test(region) && /install[- ]per[- ]video|fatigue/i.test(region);
+    // A band counts only with a roster/volume number beside it — labels
+    // without numbers define nothing, and bare "founder" is not a budget gate.
+    const numberedBands = ["discovery", "proven", "scale", "volume"].filter((band) =>
+      new RegExp(`(\\d[^\\n]{0,20}\\b${band}\\b|\\b${band}\\b[^\\n]{0,20}\\d)`, "i").test(region),
+    ).length;
+    return numberedBands >= 3 && /founder[- ]?gated|budget/i.test(region) && /install[- ]per[- ]video|fatigue/i.test(region);
   })();
   if (ugcPlaybook && !ugcScaleSubstantive) {
     issues.push(

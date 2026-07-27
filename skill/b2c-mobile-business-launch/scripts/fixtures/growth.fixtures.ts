@@ -309,6 +309,54 @@ export function register(h: Harness): void {
   );
   runFixture("a contents-line mention does not orphan the measured loop section", viralGrowthLoopToc, "check-viral-growth-loop.ts", 0);
 
+  // A target is not a measurement.
+  const viralGrowthAspirationalK = makeFixture("viral-growth-aspirational-k");
+  writeCompleteViralGrowth(viralGrowthAspirationalK);
+  writeFileSync(
+    path.join(viralGrowthAspirationalK, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthAspirationalK, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: target for launch is k: 1 with weekly cycle-time tracking.",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "aspirational k target does not count as a measurement",
+    viralGrowthAspirationalK,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // A due date must be a real calendar date and cannot defer forever.
+  const viralGrowthBogusDue = makeFixture("viral-growth-bogus-due-date");
+  writeCompleteViralGrowth(viralGrowthBogusDue);
+  writeFileSync(
+    path.join(viralGrowthBogusDue, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthBogusDue, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: first weekly k computation due 2026-99-99.",
+    ),
+    "utf8",
+  );
+  runFixture("impossible loop-measurement due date fails", viralGrowthBogusDue, "check-viral-growth-loop.ts", 1, "viral_growth.loop_economics_unmeasured");
+
+  // Band labels without roster numbers define nothing.
+  const viralGrowthLabelsOnly = makeFixture("viral-growth-band-labels-only");
+  writeCompleteViralGrowth(viralGrowthLabelsOnly);
+  writeFileSync(
+    path.join(viralGrowthLabelsOnly, "UGC_PLAYBOOK.md"),
+    "# UGC Playbook\n\nPost-Breakout Scale Model: discovery, proven, scale; founder reviews; track fatigue.\n",
+    "utf8",
+  );
+  runFixture(
+    "band labels without numbers or budget gates fail",
+    viralGrowthLabelsOnly,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_scale_model_missing",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");
