@@ -154,6 +154,13 @@ reconciles this list against the catalog, so a rename or removal fails instead o
 | Date | MRR | Realized LTV (paying) | Download-to-paid | Churn (voluntary / involuntary) | Source |
 | --- | --- | --- | --- | --- | --- |
 
+## Paywall Experiment Backlog
+
+The first paywall is a hypothesis. This backlog is the standing program that iterates it (`revenue-monetization.md` §7b): one experiment at a time per surface, judged on cohort economics over at least one renewal-decision window, price/offer changes founder-approved. `check:revenue` requires current activity once the app has been live four weeks with this lane done: an active row, a completed row started within the last eight weeks, or a planned row dated to start within 60 days.
+
+| Started | Hypothesis | Variant | Primary metric | Status (planned / active / completed) | Result / decision |
+| --- | --- | --- | --- | --- | --- |
+
 ## Founder-Gated Probe Step
 
 The revenue lane requires a live RevenueCat API probe to confirm offerings and

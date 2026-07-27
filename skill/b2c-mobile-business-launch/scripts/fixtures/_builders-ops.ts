@@ -77,7 +77,8 @@ export function writeCompleteViralGrowth(root: string): void {
       "Format Lab: growth/format-lab.csv records format ID, hook, first frame, product insertion, CTA, variables, signal windows, and status.",
       "Monetization Timing: ONBOARDING.md previews value before paywall, REVENUE_OPS.md owns RevenueCat and Stripe package rules, paywall timing, purchase proof, restore purchases, and transparent terms.",
       "Measurement Plan: ANALYTICS.md and analytics-plan.html define PostHog events, dashboard proof, referral_invite_started, referral_invite_completed, referral_unlock_earned, share_started, share_completed, creator_code_applied, viral_format_signal_detected, paywall_viewed, purchase_completed, entitlement_active, and retention checks.",
-      "Stop And Scale Rules: one viral post is not a format; scale after 2-3 repeatable hits plus downstream app opens, paywall reach, purchases, and retention evidence.",
+      "Loop Economics: k = invites per active user times recipient conversion, computed weekly; k at 0.06 in week one with a 6-day cycle time, trend flat — the loop is not yet a growth engine and the share moment is the next test.",
+      "Stop And Scale Rules: one viral post is not a format; scale after 2-3 repeatable hits plus downstream app opens, paywall reach, purchases, and retention evidence, keyed on k and its trend rather than gross share counts.",
       "Founder-Only Gates: creator payments, paid tools, public posting, social account connections, pricing changes, legal approval, and platform-policy approval.",
       "Traceability: LAUNCH_TRACE.md maps GROW-001 from research to SPEC.md, 11_STAR_EXPERIENCE.md, ONBOARDING.md, UGC_PLAYBOOK.md, CONTENT_ASSETS.md, FASTLANE_OPS.md, REVENUE_OPS.md, ANALYTICS.md, PRIVACY.md, TERMS.md, and PRODUCTION_READINESS.md.",
     ].join("\n"),
@@ -88,7 +89,11 @@ export function writeCompleteViralGrowth(root: string): void {
     "format_id,hook_structure,first_frame,product_insertion,cta,signal_window,status\nFMT-001,personal reveal,real app result,result preview,share referral code,24h/72h/7d,active\n",
     "utf8",
   );
-  writeFileSync(path.join(root, "UGC_PLAYBOOK.md"), "# UGC Playbook\n\nCreator scripts use GROW-001 and the format lab.\n", "utf8");
+  writeFileSync(
+    path.join(root, "UGC_PLAYBOOK.md"),
+    "# UGC Playbook\n\nCreator scripts use GROW-001 and the format lab.\n\nPost-Breakout Scale Model: roster grows in bands (3-5 discovery, ~10 proven, ~30 scale, 75+ volume), each band a founder-gated budget step with install-per-video fatigue measured weekly. Current band: Discovery, entered 2026-07-01, budget $300/week founder-approved with the prior band's install-per-video and payback numbers in front of the decision.\n",
+    "utf8",
+  );
   writeFileSync(path.join(root, "FASTLANE_OPS.md"), "# Fastlane Ops\n\nFastlane reuses approved format IDs after launch approval.\n", "utf8");
 }
 

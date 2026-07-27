@@ -70,7 +70,7 @@ npm run validate:launch-state -- --root /path/to/app
 | `check:research` | Launch evidence exists and is attributable |
 | `check:product-spec` | `SPEC.md` scope locks and acceptance criteria |
 | `check:11-star` | The experience ladder, line of feasibility, V1 scalable slice, surface matrix, visual board, and build links |
-| `check:onboarding` | `ONBOARDING.md` App Review prompt timing, cooldown, analytics, and suppressed-prompt fallback |
+| `check:onboarding` | Onboarding contract: attribution, App Review popup after first value, paywall proof, and the push permission prime at an earned post-value moment — never in the same step as the review popup (or a not-applicable decision with a substantive reason) |
 | `check:ux-patterns` | Refero or approved-fallback UX pattern packets, flow maps, state matrices, and HTML proof routing |
 | `check:localization-research` | Market and locale research behind localization decisions |
 
@@ -103,9 +103,9 @@ npm run validate:launch-state -- --root /path/to/app
 
 | Command | What it checks |
 | --- | --- |
-| `check:revenue` | RevenueCat and Stripe wiring, products, entitlement validation, webhooks, restore/refund flows, and the pricing decision floor (competitor anchor rows plus a dated founder approval) |
+| `check:revenue` | RevenueCat/Stripe products, offering, pricing decision, live probe proof, and — once live four-plus weeks — current Paywall Experiment Backlog activity (active row, completed row within eight weeks, or a dated next experiment) |
 | `check:paid-ua` | `PAID_UA.md` one-channel focus, creative cadence, tracking baseline, blended report, LTV/CPA review, weekly schedule, stop/scale rules with recorded decision thresholds, and founder-only spend gates |
-| `check:viral-growth` | `VIRAL_GROWTH.md` product, referral, and content loops, monetization timing, analytics proof, abuse controls, and stop/scale rules |
+| `check:viral-growth` | Viral loop contract: mechanics, abuse controls, analytics proof, measured Loop Economics (k) at done, and the UGC playbook with its Post-Breakout Scale Model |
 | `check:launch-narrative` | `growth/LAUNCH_NARRATIVE.md` launch thesis, tentpole-plus-weekly cadence, run-of-show, traceability, and the deterministic copy guardrails scanned against the fenced post copy |
 | `check:landing-funnel` | Landing and funnel structure against the launch funnel contract |
 | `check:email` | Resend DNS, sender map, webhooks, audiences, lifecycle automations, inbound handling, and unsubscribe rules |

@@ -132,6 +132,12 @@ Record the following when optimizing attribution quality. These do not block lau
 | viral_format_signal_detected | a content format shows outlier traction | format_id, platform | growth proof |
 | billing_issue_detected | RevenueCat billing-issue webhook received | platform, store, grace_state, failure_reason | revenue proof |
 | billing_recovery_prompt_shown | in-app banner or push before the grace period ends | platform, grace_state, surface | revenue proof |
+| push_permission_primed | soft-prime screen shown before the system dialog | placement, session_number | push proof |
+| push_permission_granted | system push dialog accepted | placement, session_number | push proof |
+| push_permission_denied | system push dialog declined | placement, session_number | push proof |
+| push_sent | server-side dispatch of a lifecycle push | trigger, campaign_id | push proof |
+| notification_opened | user opened a push notification | trigger, campaign_id, surface | push proof |
+| notification_disabled | pushes turned off in Settings or in-app | source_surface | push proof |
 | payment_method_update_started | user opens the update-payment path | platform, store | revenue proof |
 | billing_recovered | failed renewal recovered inside grace/hold | platform, store, days_in_grace | revenue proof |
 | billing_issue_churned | grace/hold lapsed without recovery | platform, store, failure_reason | revenue proof |

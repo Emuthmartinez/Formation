@@ -55,6 +55,7 @@ Recommended Refero searches when access is available:
 - attribution question: "How did you hear about us?" options, UTM/referrer capture, and free-text/other handling
 - attribution source mapping to `ANALYTICS.md`: stored key, display label, PostHog person property, event property, lifecycle-message use, and privacy note
 - App Review popup gate: first-value/value-reveal trigger, native platform API, automatic mounted-screen timing, cooldown, analytics, and fallback if the platform does not show the prompt
+- push permission priming: the soft-prime screen and system-dialog placement per `push-notification-lifecycle.md` — after a first value moment, never cold on launch, and never in the same step as the review popup (value moment → one of the two; the other waits for the next earned moment)
 - paywall placement and access model: hard paywall, soft paywall, reverse trial, freemium limit, or no paywall yet
 - closing-offer behavior after paywall dismissal, if any
 - pricing/trial package matrix and RevenueCat offering/experiment names

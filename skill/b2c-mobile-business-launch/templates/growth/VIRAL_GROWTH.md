@@ -100,6 +100,13 @@ Metrics:
 - D1/D7 retention and first-session activation
 - platform/device mix and traffic quality
 
+## Loop Economics
+
+The number that separates a compounding loop from decoration (`viral-growth-loops.md` Loop Economics): k = invites-per-active-user × recipient conversion. Compute weekly once the loop is live; the stop/scale rules key on k and its trend, never on gross share counts. k ≥ 1 self-compounds; 0.3–0.7 meaningfully multiplies other channels; under 0.15 the loop is not a growth engine yet.
+
+| Week | Invites / active user | Recipient conversion | k | Cycle time (days) | Trend / decision |
+| --- | --- | --- | --- | --- | --- |
+
 ## Stop And Scale Rules
 
 - One viral post is not a format.

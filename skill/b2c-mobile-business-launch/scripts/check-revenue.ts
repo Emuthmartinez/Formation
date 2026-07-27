@@ -509,6 +509,152 @@ if (revenueDone && revenueOpsText) {
     }
   }
 
+  // 2c. Paywall experiment cadence — the §7b program's output. The first
+  //     paywall is a hypothesis; once the app has been live four weeks with the
+  //     revenue lane done, the backlog must show at least one active or
+  //     completed experiment row. One reasonable paywall shipped and never
+  //     touched again is the plateau the skill's own anti-pattern list names —
+  //     this makes it a red check instead of a prose warning.
+  const liveSinceRaw = state ? (asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "").trim() : "";
+  const liveSinceDate = /^\d{4}-\d{2}-\d{2}$/.test(liveSinceRaw) ? new Date(`${liveSinceRaw}T00:00:00Z`) : undefined;
+  // Same strict validation as check:post-launch's clock: round-tripped real
+  // calendar date, never in the future — a typo'd month must not disarm the
+  // experiment cadence.
+  const liveDays =
+    liveSinceDate &&
+    !Number.isNaN(liveSinceDate.getTime()) &&
+    liveSinceDate.toISOString().slice(0, 10) === liveSinceRaw &&
+    liveSinceDate.getTime() <= Date.now()
+      ? Math.floor((Date.now() - liveSinceDate.getTime()) / 86_400_000)
+      : 0;
+  if (liveDays >= 28) {
+    const backlogSection = markdownSectionLoose(revenueOpsText, /paywall experiment backlog/i).replace(/<!--[\s\S]*?-->/g, " ");
+    if (!backlogSection) {
+      issues.push(
+        issue(
+          "error",
+          "revenue.experiment_backlog.missing",
+          'REVENUE_OPS.md has no "Paywall Experiment Backlog" section and the app has been live four-plus weeks. The first paywall is a ' +
+            "hypothesis, not a decision — stand up the experiment program (revenue-monetization.md §7b) before the plateau sets in.",
+          revenueOpsPath,
+        ),
+      );
+    } else {
+      // The Status and Started cells are parsed by their header columns:
+      // "completed" inside a hypothesis must not satisfy the cadence, and a
+      // legitimately active row must not be disqualified by a pending result.
+      const backlogLines = backlogSection
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith("|") && !line.includes("---"));
+      const backlogHeader = backlogLines[0] ?? "";
+      const backlogHeaderCells = backlogHeader.split("|");
+      const statusColumn = backlogHeaderCells.findIndex((cell) => /status/i.test(cell));
+      const startedColumn = backlogHeaderCells.findIndex((cell) => /started/i.test(cell));
+      const hypothesisColumn = backlogHeaderCells.findIndex((cell) => /hypothesis/i.test(cell));
+      const variantColumn = backlogHeaderCells.findIndex((cell) => /variant/i.test(cell));
+      const metricColumn = backlogHeaderCells.findIndex((cell) => /metric/i.test(cell));
+      const resultColumn = backlogHeaderCells.findIndex((cell) => /result|decision/i.test(cell));
+      const BACKLOG_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|placeholder)\b/i;
+      // A date plus a status word is not an experiment: the row must define
+      // what is being tested (hypothesis, variant, primary metric), and a
+      // completed row must record its result/decision. Missing definition
+      // columns fail closed.
+      // "unknown" and "NA" are empty states wearing characters — a whole-cell
+      // negative value defines nothing regardless of length.
+      const NEGATIVE_CELL = /^(unknown|n\/?a|none|nil|null|not yet|not applicable|no result|no decision|pending|[-—–]+)$/i;
+      const substantiveCell = (cell: string): boolean =>
+        cell.replace(/[^a-z0-9]/gi, "").length >= 6 && !BACKLOG_PLACEHOLDER.test(cell) && !NEGATIVE_CELL.test(cell.trim());
+      // Metric cells are identifiers, not prose: CVR/ARPU/LTV are defined
+      // experiments — only emptiness and placeholders disqualify.
+      const identifierCell = (cell: string): boolean =>
+        cell.replace(/[^a-z0-9]/gi, "").length >= 2 && !BACKLOG_PLACEHOLDER.test(cell) && !NEGATIVE_CELL.test(cell.trim());
+      // One historical row must not satisfy the cadence forever (§7b is a
+      // standing program): current activity means an active experiment, a
+      // completed one started inside the recency window, or a planned row
+      // dated to start soon — each on a round-tripped real calendar date.
+      const EXPERIMENT_RECENCY_DAYS = 56;
+      const NEXT_EXPERIMENT_HORIZON_DAYS = 60;
+      const backlogRows = backlogLines.slice(1).map((line) => {
+        const cells = line.split("|").map((cell) => cell.trim());
+        const statusCell = statusColumn > 0 ? (cells[statusColumn] ?? "") : "";
+        const startedCell = startedColumn > 0 ? (cells[startedColumn] ?? "") : "";
+        const startedMatch = startedCell.match(/(\d{4}-\d{2}-\d{2})/);
+        const startedDate = startedMatch ? new Date(`${startedMatch[1]}T00:00:00Z`) : undefined;
+        const dateReal = Boolean(
+          startedMatch && startedDate && !Number.isNaN(startedDate.getTime()) && startedDate.toISOString().slice(0, 10) === startedMatch[1],
+        );
+        const clean = !BACKLOG_PLACEHOLDER.test(statusCell) && !BACKLOG_PLACEHOLDER.test(startedCell);
+        const defined =
+          hypothesisColumn > 0 &&
+          variantColumn > 0 &&
+          metricColumn > 0 &&
+          substantiveCell(cells[hypothesisColumn] ?? "") &&
+          substantiveCell(cells[variantColumn] ?? "") &&
+          identifierCell(cells[metricColumn] ?? "");
+        // A completed test is judged on cohort economics over a renewal
+        // window (§7b) — a day-one conversion delta alone is not a decision.
+        const resultCell = cells[resultColumn] ?? "";
+        // Clause-level polarity: a cohort noun counts only in a clause with no
+        // negation or availability negative — "No cohort evidence was
+        // collected; renewal window unavailable" affirms nothing.
+        const NEGATIVE_CLAUSE = /\b(no|not|never|without|none|unavailable|missing|uncollected|unmeasured|pending|awaiting|unknown|n\/?a|tbd)\b/i;
+        // Future tense is a plan, not a result — and an observed result
+        // carries its number.
+        const FUTURE_CLAUSE = /\b(will|shall|going to|to be|planned?|plans? to)\b/i;
+        const cohortAffirmed = resultCell
+          .split(/[.;,—–:()|]/)
+          .some(
+            (clause) =>
+              /cohort|renewal|trial[- ]to[- ]paid|churn|ltv|payback|window/i.test(clause) &&
+              !NEGATIVE_CLAUSE.test(clause) &&
+              !FUTURE_CLAUSE.test(clause) &&
+              /\d/.test(clause),
+          );
+        const decided = resultColumn > 0 && substantiveCell(resultCell) && cohortAffirmed;
+        return { statusCell, startedDate, dateReal, clean, defined, decided };
+      });
+      const startedInPast = (row: (typeof backlogRows)[number]): boolean => row.dateReal && (row.startedDate as Date).getTime() <= Date.now();
+      const activeRows = backlogRows.filter((row) => row.clean && row.defined && /^active\b/i.test(row.statusCell) && startedInPast(row));
+      const completedRows = backlogRows.filter((row) => row.clean && row.defined && row.decided && /^completed\b/i.test(row.statusCell) && startedInPast(row));
+      const recentCompleted = completedRows.filter((row) => Date.now() - (row.startedDate as Date).getTime() <= EXPERIMENT_RECENCY_DAYS * 86_400_000);
+      const datedNext = backlogRows.filter(
+        (row) =>
+          row.clean &&
+          row.defined &&
+          /^planned\b/i.test(row.statusCell) &&
+          row.dateReal &&
+          (row.startedDate as Date).getTime() >= Date.now() - 7 * 86_400_000 &&
+          (row.startedDate as Date).getTime() <= Date.now() + NEXT_EXPERIMENT_HORIZON_DAYS * 86_400_000,
+      );
+      if (activeRows.length === 0 && completedRows.length === 0 && datedNext.length === 0) {
+        issues.push(
+          issue(
+            "error",
+            "revenue.experiment_backlog.empty",
+            `The Paywall Experiment Backlog has no dated active or completed experiment row, no planned row dated to start within ` +
+              `${NEXT_EXPERIMENT_HORIZON_DAYS} days, and the app has been live ${liveDays} days. ` +
+              "A backlog of empty headers is the one-and-done plateau wearing a green check — start the first timing/packaging/trial test " +
+              "(revenue-monetization.md §7b) and record it with its start date.",
+            revenueOpsPath,
+          ),
+        );
+      } else if (activeRows.length === 0 && recentCompleted.length === 0 && datedNext.length === 0) {
+        issues.push(
+          issue(
+            "error",
+            "revenue.experiment_backlog.stale",
+            `The Paywall Experiment Backlog's most recent completed experiment started more than ${EXPERIMENT_RECENCY_DAYS} days ago, nothing is active, ` +
+              `and no planned row is dated to start within ${NEXT_EXPERIMENT_HORIZON_DAYS} days. The cadence is a standing program, not a one-time checkbox ` +
+              "(revenue-monetization.md §7b) — one historical test satisfying this gate forever recreates the one-and-done plateau. Start the next " +
+              "experiment or date the next planned row.",
+            revenueOpsPath,
+          ),
+        );
+      }
+    }
+  }
+
   // Table data rows only: not separators, not header rows, not guidance prose.
   // Both checks below must judge what the table STATES, never what the template's
   // own guidance text or column headers merely mention — the old document-wide
