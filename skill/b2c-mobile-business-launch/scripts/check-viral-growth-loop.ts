@@ -138,7 +138,10 @@ if (growthStatus === "done" && markdown) {
   // done, the Loop Economics region needs a measured k, a dated measured row,
   // or a dated first-measurement commitment — guidance prose with incidental
   // digits satisfies nothing.
-  const loopIndex = markdown.text.toLowerCase().indexOf("loop economics");
+  // Anchor to the real section start — a table-of-contents mention must not
+  // open the region early and orphan the measured section below it.
+  const loopHeading = /^#{1,3}\s*loop economics|^loop economics\s*:/im.exec(markdown.text);
+  const loopIndex = loopHeading ? loopHeading.index : markdown.text.toLowerCase().indexOf("loop economics");
   // The region ends at the next section boundary — a dated numeric row in a
   // later section (Traceability) must not read as a loop measurement.
   const loopRegion = ((): string => {

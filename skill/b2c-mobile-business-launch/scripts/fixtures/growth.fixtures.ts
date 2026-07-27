@@ -298,6 +298,17 @@ export function register(h: Harness): void {
     "viral_growth.loop_economics_unmeasured",
   );
 
+  // A table-of-contents mention must not orphan the measured section below it.
+  const viralGrowthLoopToc = makeFixture("viral-growth-loop-toc-mention");
+  writeCompleteViralGrowth(viralGrowthLoopToc);
+  writeFileSync(
+    path.join(viralGrowthLoopToc, "growth", "VIRAL_GROWTH.md"),
+    "Contents: Fit Gate, Product Loop, Loop Economics, Stop And Scale Rules\n" +
+      readFileSync(path.join(viralGrowthLoopToc, "growth", "VIRAL_GROWTH.md"), "utf8"),
+    "utf8",
+  );
+  runFixture("a contents-line mention does not orphan the measured loop section", viralGrowthLoopToc, "check-viral-growth-loop.ts", 0);
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

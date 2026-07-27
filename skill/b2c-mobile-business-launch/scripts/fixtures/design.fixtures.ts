@@ -146,6 +146,28 @@ export function register(h: Harness): void {
     "onboarding.push_priming_missing",
   );
 
+  // Documenting the prohibition ("never on launch") is compliance, not violation.
+  const onboardingPushNegated = makeFixture("onboarding-push-negated-cold");
+  {
+    const state = readState(onboardingPushNegated);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushNegated, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushNegated, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push permission: prime after first value at an earned moment; never on launch.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("negated cold-start guidance passes the priming gate", onboardingPushNegated, "check-onboarding-conversion.ts", 0);
+
   const elevenStarMissing = makeFixture("eleven-star-missing");
   rmSync(path.join(elevenStarMissing, "11-star-experience"), { recursive: true, force: true });
   runFixture("missing 11-star experience packet fails", elevenStarMissing, "check-eleven-star-experience.ts", 1, "eleven_star.markdown_missing");
