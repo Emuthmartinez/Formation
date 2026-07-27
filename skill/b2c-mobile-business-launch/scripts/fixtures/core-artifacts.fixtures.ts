@@ -571,6 +571,62 @@ export function register(h: Harness): void {
   );
   runFixture("a placeholder one-week-copy answer fails", specCopyTestPending, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
 
+  // An answer that concedes the copy test is a failed test.
+  const specCopyTestConceded = makeFixture("product-spec-copy-test-conceded");
+  setLaneDone(specCopyTestConceded, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specCopyTestConceded, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "Nothing stops them; this is copied in a sprint.",
+    }),
+    "utf8",
+  );
+  runFixture("a conceding one-week-copy answer fails", specCopyTestConceded, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
+
+  // Disclaiming every class while naming them all is not a moat class.
+  const specMoatClassNone = makeFixture("product-spec-moat-class-none");
+  setLaneDone(specMoatClassNone, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatClassNone, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "none — there is no data, workflow, community, taste, model, or distribution moat",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a negated moat-class declaration fails", specMoatClassNone, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // The doctrine's V1 exception: no moat yet, racing to build a named, dated class.
+  const specMoatV1Exception = makeFixture("product-spec-moat-v1-exception");
+  setLaneDone(specMoatV1Exception, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatV1Exception, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "no moat yet, racing to build data — miss-history compounding by 2026-08-25, revisited at the day-30 retro",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("the named-and-dated V1 no-moat exception passes", specMoatV1Exception, "check-product-spec.ts", 0);
+
+  // N/A cells name no incumbent.
+  const specIncumbentNaCells = makeFixture("product-spec-incumbent-na-cells");
+  setLaneDone(specIncumbentNaCells, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specIncumbentNaCells, "SPEC.md"),
+    specSections({
+      row: "| N/A | none | unknown | N/A |",
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("an incumbent row of N/A cells fails", specIncumbentNaCells, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
+
   // ── check-launch-trace ────────────────────────────────────────────────────
 
   const traceBaseline = makeFixture("launch-trace-baseline");

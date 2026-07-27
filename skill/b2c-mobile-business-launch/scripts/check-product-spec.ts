@@ -107,7 +107,11 @@ if (text) {
         .slice(1)
         .filter((line) => !/_example/i.test(line))
         .map((line) => line.split("|").map((cell) => cell.trim()));
-      const realRow = incumbentRows.some((cells) => cells.length >= 6 && cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell)));
+      // "N/A" and "none" are empty cells wearing characters.
+      const MOAT_NEGATIVE_CELL = /^(unknown|n\/?a|none|nil|null|not applicable|not yet|no result|[-—–]+)$/i;
+      const realRow = incumbentRows.some(
+        (cells) => cells.length >= 6 && cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell) && !MOAT_NEGATIVE_CELL.test(cell)),
+      );
       if (!realRow) {
         issues.push(
           issue(
@@ -121,7 +125,20 @@ if (text) {
       }
       const moatClassLine = moatSection.split(/\r?\n/).find((line) => /moat class/i.test(line) && line.includes(":"));
       const moatClassValue = moatClassLine ? (moatClassLine.split(/:(.*)/s)[1] ?? "").trim() : "";
-      if (!moatClassValue || !/\b(data|workflow|community|taste|model|distribution)\b/i.test(moatClassValue)) {
+      // The class must be affirmed, not disclaimed: "none — there is no data,
+      // workflow, … moat" names every taxonomy word while conceding all of
+      // them. The doctrine's V1 exception ("no moat yet, racing to build X")
+      // is honored only when X is a named class with a real date.
+      const v1ExceptionMatch = moatClassValue.match(/no moat yet[^\n]*?\b(data|workflow|community|taste|model|distribution)\b[^\n]*?(\d{4}-\d{2}-\d{2})/i);
+      const v1ExceptionDate = v1ExceptionMatch?.[2] ?? "";
+      const v1ExceptionParsed = new Date(`${v1ExceptionDate}T00:00:00Z`);
+      const v1ExceptionValid = Boolean(
+        v1ExceptionMatch && !Number.isNaN(v1ExceptionParsed.getTime()) && v1ExceptionParsed.toISOString().slice(0, 10) === v1ExceptionDate,
+      );
+      const affirmativeMoatValue = moatClassValue.replace(/\b(no|not|none|without|never)\b[^.;,—–:()|]*/gi, "");
+      const moatClassAffirmed =
+        !/^(none|no\b|n\/?a)/i.test(moatClassValue) && /\b(data|workflow|community|taste|model|distribution)\b/i.test(affirmativeMoatValue);
+      if (!v1ExceptionValid && !moatClassAffirmed) {
         issues.push(
           issue(
             "error",
@@ -133,7 +150,11 @@ if (text) {
         );
       }
       const copyTestAnswer = (moatSection.match(/one-week-copy test answer:\s*(.*)$/im)?.[1] ?? "").trim();
-      const copyTestSubstantive = copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 && !MOAT_PLACEHOLDER.test(copyTestAnswer);
+      // An answer that concedes the test is a failed test, not a recorded one.
+      const COPY_CONCESSION =
+        /^\s*(nothing|none|no)\b|\b(nothing|nobody|no one) (stops|prevents|blocks)|\bcop(?:y|ied|yable)\b[^.\n]{0,30}\b(week|sprint|days?)\b|anyone (can|could) (copy|build|ship)|no (real |structural )?(moat|barrier|blocker)/i;
+      const copyTestSubstantive =
+        copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 && !MOAT_PLACEHOLDER.test(copyTestAnswer) && !COPY_CONCESSION.test(copyTestAnswer);
       if (!copyTestSubstantive) {
         issues.push(
           issue(
