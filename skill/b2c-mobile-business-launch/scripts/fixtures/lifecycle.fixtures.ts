@@ -573,6 +573,24 @@ export function register(h: Harness): void {
     "analytics_catalog.invented_billing_event.uncataloged",
   );
 
+  // A done REVENUE lane makes revenue-doc drift an error even while the
+  // analytics lane is still partial — the revenue claim is what makes the
+  // event name load-bearing.
+  const catalogRevenueDoneDrift = makeFixture("analytics-catalog-revenue-done-drift");
+  {
+    const state = readState(catalogRevenueDoneDrift);
+    getLane(state, "revenue")["status"] = "done";
+    writeState(catalogRevenueDoneDrift, state);
+  }
+  appendFileSync(path.join(catalogRevenueDoneDrift, "REVENUE_OPS.md"), "\n- `invented_billing_event`\n", "utf8");
+  runFixture(
+    "done revenue lane with an uncataloged revenue-doc event fails even while analytics is partial",
+    catalogRevenueDoneDrift,
+    "check-analytics-catalog.ts",
+    1,
+    "analytics_catalog.invented_billing_event.uncataloged",
+  );
+
   // ── Launch scope state field ──────────────────────────────────────────────
   // Renamed from launch_tier because "tier" collided with the founder's own app pricing
   // tiers. Three cases matter: an invalid current value fails, an invalid LEGACY value

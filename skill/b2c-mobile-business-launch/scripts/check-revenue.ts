@@ -455,7 +455,10 @@ if (revenueDone && revenueOpsText) {
   //     least one real competitor row in the anchor table, and a dated founder
   //     approval must all be present before the lane is done: a price chosen
   //     with no anchor and no recorded approval is a default, not a decision.
-  const pricingSection = markdownSectionLoose(revenueOpsText, /pricing decision/i);
+  // Comments are stripped first: a date or an anchor row sitting inside an
+  // HTML comment is template guidance the founder never confirmed, not a
+  // recorded decision.
+  const pricingSection = markdownSectionLoose(revenueOpsText, /pricing decision/i).replace(/<!--[\s\S]*?-->/g, " ");
   if (!pricingSection) {
     issues.push(
       issue(

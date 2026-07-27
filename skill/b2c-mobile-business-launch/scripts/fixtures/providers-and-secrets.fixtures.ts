@@ -188,6 +188,26 @@ export function register(h: Harness): void {
     "revenue.pricing_approval.undated",
   );
 
+  // A real ISO date typed inside the template's HTML comment is guidance the
+  // founder never confirmed — comments are stripped before the approval check.
+  const revenuePricingCommentedDate = makeFixture("revenue-pricing-approval-in-comment");
+  const revenuePricingCommentedDateState = readState(revenuePricingCommentedDate);
+  getLane(revenuePricingCommentedDateState, "revenue")["status"] = "done";
+  writeState(revenuePricingCommentedDate, revenuePricingCommentedDateState);
+  const commentedDateOps = readFileSync(path.join(revenuePricingCommentedDate, "REVENUE_OPS.md"), "utf8");
+  writeFileSync(
+    path.join(revenuePricingCommentedDate, "REVENUE_OPS.md"),
+    commentedDateOps.replace(/^Founder approved:.*$/m, "Founder approved: <!-- 2026-07-26 -->"),
+    "utf8",
+  );
+  runFixture(
+    "founder approval date hidden inside an HTML comment still fails",
+    revenuePricingCommentedDate,
+    "check-revenue.ts",
+    1,
+    "revenue.pricing_approval.undated",
+  );
+
   const revenuePricingMissing = makeFixture("revenue-pricing-section-missing");
   const revenuePricingMissingState = readState(revenuePricingMissing);
   getLane(revenuePricingMissingState, "revenue")["status"] = "done";

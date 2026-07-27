@@ -123,11 +123,24 @@ Founder approved: <!-- YYYY-MM-DD — pricing is founder-only (revenue-monetizat
 
 ### Cancellation-Reason Mix
 
-Aggregated from the event below (taxonomy in `revenue-monetization.md` §8b); reviewed at
-each kill-or-scale checkpoint — a too_expensive majority is pricing evidence. The event
-must stay in the `ANALYTICS.md` Event Contract; `check:analytics-catalog` reconciles it:
+Aggregated from `cancellation_reason_selected` (taxonomy in `revenue-monetization.md` §8b);
+reviewed at each kill-or-scale checkpoint — a too_expensive majority is pricing evidence.
 
+### Billing And Reactivation Events
+
+The revenue lifecycle events this document depends on (`revenue-monetization.md` §8a/§8b).
+Every name below must stay in the `ANALYTICS.md` Event Contract — `check:analytics-catalog`
+reconciles this list against the catalog, so a rename or removal fails instead of drifting:
+
+- `billing_issue_detected`
+- `billing_recovery_prompt_shown`
+- `payment_method_update_started`
+- `billing_recovered`
+- `billing_issue_churned`
 - `cancellation_reason_selected`
+- `subscription_paused`
+- `reactivation_offer_shown`
+- `reactivated`
 
 | Period | too_expensive | missing_feature | found_alternative | not_needed | technical_issue | other |
 | --- | --- | --- | --- | --- | --- | --- |
