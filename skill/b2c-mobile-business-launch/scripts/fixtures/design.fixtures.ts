@@ -542,6 +542,28 @@ export function register(h: Harness): void {
   );
   runFixture("push-notification-priming wording passes the gate", onboardingPushNotificationPriming, "check-onboarding-conversion.ts", 0);
 
+  // A negated capability statement is an exemption reason, not an ask.
+  const onboardingPushCapabilityNa = makeFixture("onboarding-push-capability-na");
+  {
+    const state = readState(onboardingPushCapabilityNa);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushCapabilityNa, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushCapabilityNa, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push notifications: not applicable — this web-only product cannot show native notifications.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("a capability-based push exemption passes", onboardingPushCapabilityNa, "check-onboarding-conversion.ts", 0);
+
   // "Push permission" is the same canonical noun as "push notifications" for
   // the not-applicable exemption.
   const onboardingPushPermissionNa = makeFixture("onboarding-push-permission-na");

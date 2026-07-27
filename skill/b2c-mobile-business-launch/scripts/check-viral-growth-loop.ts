@@ -190,7 +190,7 @@ if (growthStatus === "done" && markdown) {
   // "the rules key on k and its trend" records no trend.
   const trendRecorded =
     /\btrend\b\s*(:|=|is|was)?\s*(flat|rising|falling|improving|declining|holding|hold|compounding|up|down)\b/i.test(loopRegion) ||
-    /\bdecision\b\s*(:|=)\s*\S/i.test(loopRegion);
+    /\bdecision\b\s*(:|=)\s*(?!no\b|none\b|not\b|pending\b|tbd\b|todo\b|unknown\b|n\/?a\b|awaiting\b)\S/i.test(loopRegion);
   // Recency: once the app has been live five weeks the loop is running, and
   // the weekly contract needs a dated measurement inside the current window —
   // "week one" prose or a fossil row cannot stay green indefinitely.
@@ -215,7 +215,10 @@ if (growthStatus === "done" && markdown) {
     return Boolean(dateMatch && validCalendarDate(dateMatch[1] ?? "", false) && dateWithinDays(dateMatch[1] ?? "", MEASUREMENT_RECENCY_DAYS));
   });
   const commitmentMatch = loopRegion.match(/first (?:weekly )?k (?:computation|measurement)[^\n]*?(\d{4}-\d{2}-\d{2})/i);
-  const commitmentValid = Boolean(commitmentMatch && validCalendarDate(commitmentMatch[1] ?? "", true));
+  // The commitment alternative exists for a loop not yet running — once the
+  // app has been live five weeks, postponing the first measurement again is
+  // the miss, not a plan.
+  const commitmentValid = !loopRunning && Boolean(commitmentMatch && validCalendarDate(commitmentMatch[1] ?? "", true));
   // A dated row is a measurement only when it carries a numeric k — a date
   // beside "no result for week 1" is a no-data row, not economics.
   const measuredRowValid = ((): boolean => {
@@ -240,8 +243,11 @@ if (growthStatus === "done" && markdown) {
       // present the recorded k must equal invites × conversion within a
       // rounding tolerance.
       const parseLeadingNumber = (cell: string): number | undefined => {
-        const numberMatch = cell.match(/^\d+(\.\d+)?/);
-        return numberMatch ? Number(numberMatch[0]) : undefined;
+        const numberMatch = cell.match(/^(\d+(?:\.\d+)?)(\s*%)?/);
+        if (!numberMatch || !numberMatch[1]) return undefined;
+        const value = Number(numberMatch[1]);
+        // "20%" is the same rate as 0.20 — normalize before the formula check.
+        return numberMatch[2] ? value / 100 : value;
       };
       const invitesValue = invitesColumn > 0 ? parseLeadingNumber(cells[invitesColumn] ?? "") : undefined;
       const conversionValue = conversionColumn > 0 ? parseLeadingNumber(cells[conversionColumn] ?? "") : undefined;
@@ -345,7 +351,9 @@ if (growthStatus === "done" && markdown) {
     const proseBudgetNumbered =
       /budget[^\n]{0,40}\$\s*\d|\$\s*\d[^\n]{0,40}budget/i.test(region) && /(current band|entered)[^\n]{0,60}\d{4}-\d{2}-\d{2}/i.test(region);
     const operativeBand = bandTablePresent ? populatedBandRow : proseBudgetNumbered;
-    return numberedBands >= 3 && /founder[- ]?gated|budget/i.test(region) && /install[- ]per[- ]video|fatigue/i.test(region) && operativeBand;
+    // The word "budget" alone authorizes nothing: the region must state the
+    // founder gate itself.
+    return numberedBands >= 3 && /founder[- ]?(gated|approv\w*|sign[- ]?off)/i.test(region) && /install[- ]per[- ]video|fatigue/i.test(region) && operativeBand;
   })();
   if (ugcPlaybook && !ugcNotApplicable && !ugcScaleSubstantive) {
     issues.push(

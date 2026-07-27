@@ -737,6 +737,93 @@ export function register(h: Harness): void {
     "viral_growth.loop_economics_unmeasured",
   );
 
+  // A running loop cannot keep postponing its first measurement.
+  const viralGrowthLiveCommitment = makeFixture("viral-growth-live-commitment");
+  writeCompleteViralGrowth(viralGrowthLiveCommitment);
+  {
+    const state = readState(viralGrowthLiveCommitment);
+    getLane(state, "post_launch_ops")["live_since"] = growthIsoDaysAgo(60);
+    writeState(viralGrowthLiveCommitment, state);
+  }
+  writeFileSync(
+    path.join(viralGrowthLiveCommitment, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthLiveCommitment, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      `Loop Economics: first weekly k computation due ${growthIsoDaysAgo(-14)}.`,
+    ),
+    "utf8",
+  );
+  runFixture(
+    "a first-measurement commitment on a long-live app fails",
+    viralGrowthLiveCommitment,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
+  // Percentage conversion rates are the same rate.
+  const viralGrowthPercentRow = makeFixture("viral-growth-percent-row");
+  writeCompleteViralGrowth(viralGrowthPercentRow);
+  writeFileSync(
+    path.join(viralGrowthPercentRow, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthPercentRow, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      loopTable(`| ${growthIsoDaysAgo(7)} | 3.1 | 20% | 0.62 | 6 | hold and retest the share moment |`),
+    ),
+    "utf8",
+  );
+  runFixture("a percentage-form conversion rate recomputes correctly", viralGrowthPercentRow, "check-viral-growth-loop.ts", 0);
+
+  // The word "budget" alone authorizes nothing.
+  const viralGrowthBudgetNoGate = makeFixture("viral-growth-budget-no-gate");
+  writeCompleteViralGrowth(viralGrowthBudgetNoGate);
+  writeFileSync(
+    path.join(viralGrowthBudgetNoGate, "UGC_PLAYBOOK.md"),
+    [
+      "# UGC Playbook",
+      "",
+      "Creator scripts use GROW-001 and the format lab.",
+      "",
+      "## Post-Breakout Scale Model",
+      "",
+      "| Band | Roster | Weekly video volume | Budget | Entered on / evidence |",
+      "| --- | --- | --- | --- | --- |",
+      `| Discovery | 3-5 | 9-15 | $300/week | ${growthIsoDaysAgo(7)} — install-per-video 210 |`,
+      "| Proven format | ~10 | 30-40 | | |",
+      "| Scale | ~30 | 90-120 | | |",
+      "| Volume | 75+ | 200+ | | |",
+      "",
+      "- Control format install-per-video (weekly): fatigue check — two consecutive declines trigger the next variant test.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a populated band table without a founder gate fails",
+    viralGrowthBudgetNoGate,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_scale_model_missing",
+  );
+
+  // An explicitly undecided loop is not a recorded decision.
+  const viralGrowthNoDecisionProse = makeFixture("viral-growth-no-decision-prose");
+  writeCompleteViralGrowth(viralGrowthNoDecisionProse);
+  writeFileSync(
+    path.join(viralGrowthNoDecisionProse, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthNoDecisionProse, "growth", "VIRAL_GROWTH.md"), "utf8").replace(
+      /^Loop Economics:.*$/m,
+      "Loop Economics: measured k = 0.4 in week 1; cycle time: 6 days; decision: no decision yet.",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "a prose measurement with an undecided decision fails",
+    viralGrowthNoDecisionProse,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics_unmeasured",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

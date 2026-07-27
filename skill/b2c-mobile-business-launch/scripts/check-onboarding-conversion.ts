@@ -46,7 +46,8 @@ if (onboardingDone && markdown) {
   // substantive, non-placeholder reason after the declaration.
   // Separators stay on the declaration line ([ \t], not \s): a newline must
   // not let the next line masquerade as the reason.
-  const affirmativeOf = (line: string): string => line.replace(/\b(never|not|don't|do not|no)\b[^.;,—–:()|]*/gi, "");
+  const affirmativeOf = (line: string): string =>
+    line.replace(/\b(cannot|can not|can't|won't|will not|unable to|unsupported|never|not|don't|do not|no)\b[^.;,—–:()|]*/gi, "");
   const notApplicableMatch = markdown.text.match(/push (?:notifications?|permissions?):?[ \t]*not applicable\b[ \t:;—–,-]*(.*)$/im);
   const NA_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
   const notApplicableReason = (notApplicableMatch?.[1] ?? "").trim();
