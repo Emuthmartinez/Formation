@@ -572,6 +572,25 @@ export function register(h: Harness): void {
     "lane_coverage.paid_user_acquisition.founder_gate_reengagement_due",
   );
 
+  // A forward-dated gate would disarm the clock exactly like an undated one.
+  const founderGateFutureDate = makeFixture("founder-gate-future-date");
+  {
+    const state = readState(founderGateFutureDate);
+    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    writeState(founderGateFutureDate, state);
+  }
+  withLane(founderGateFutureDate, "paid_user_acquisition", {
+    status: "deferred",
+    blockers: [`founder-gated ${gateIsoDaysAgo(-30)}: paid campaign launch and budget spend`],
+  });
+  runFixture(
+    "forward-dated founder gate on a live app fails as undated",
+    founderGateFutureDate,
+    "check-lane-coverage.ts",
+    1,
+    "lane_coverage.paid_user_acquisition.founder_gate_undated",
+  );
+
   const founderGateFresh = makeFixture("founder-gate-fresh");
   withLane(founderGateFresh, "paid_user_acquisition", {
     status: "deferred",

@@ -178,15 +178,29 @@ if (state) {
       const postLaunch = /^phase_6/.test(currentPhase.toLowerCase());
       for (const blocker of nonEmptyBlockers) {
         if (!FOUNDER_GATE_PATTERN.test(blocker)) continue;
-        const presentedAt = extractIsoDate(blocker);
+        // The presented-at date must be a real, non-future calendar date: a
+        // typo'd month or a forward-dated gate would disarm the re-engagement
+        // clock exactly like an undated one, so both take the same path.
+        const presentedAtRaw = extractIsoDate(blocker);
+        const presentedDate = presentedAtRaw ? new Date(`${presentedAtRaw}T00:00:00Z`) : undefined;
+        const presentedAt =
+          presentedAtRaw &&
+          presentedDate &&
+          !Number.isNaN(presentedDate.getTime()) &&
+          presentedDate.toISOString().slice(0, 10) === presentedAtRaw &&
+          presentedDate.getTime() <= Date.now()
+            ? presentedAtRaw
+            : undefined;
         if (!presentedAt) {
-          counts.warning += 1;
+          const undatedSeverity = postLaunch ? "error" : "warning";
+          counts[undatedSeverity] += 1;
           issues.push(
             issue(
-              "warning",
+              undatedSeverity,
               `lane_coverage.${lane}.founder_gate_undated`,
-              `lanes.${lane} carries a founder-gated blocker with no ISO date ("${blocker.slice(0, 80)}"). ` +
-                `Record the date the gate was last presented so the re-engagement window is checkable — an undated founder gate is one nobody can ever call stale.`,
+              `lanes.${lane} carries a founder-gated blocker with no valid past ISO date ("${blocker.slice(0, 80)}"). ` +
+                `Record the real date the gate was last presented so the re-engagement window is checkable — an undated, typo'd, or ` +
+                `forward-dated founder gate is one nobody can ever call stale, and on a live app that is an error, not a nit.`,
               "PROJECT_STATE.yaml",
             ),
           );
