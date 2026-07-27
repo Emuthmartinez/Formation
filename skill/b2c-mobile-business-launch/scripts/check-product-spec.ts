@@ -38,6 +38,7 @@ if (text) {
     "Promise",
     "11-Star Experience",
     "Category And Competitors",
+    "Differentiation And Moat",
     "Core Product Loop",
     "V1 Scalable Slice",
     "Monetization Posture",
@@ -81,6 +82,76 @@ if (text) {
       ),
     );
   }
+
+  // Differentiation substance (product-moat.md §5): the wedge lives in the
+  // spec, not in a chat. A done product lane needs a real incumbent row —
+  // every cell filled, none placeholder — plus a named moat class and the
+  // one-week-copy test answer. Section-header presence alone is the
+  // positioning-theater miss the 2026-07-26 audit found on real launches.
+  if (done) {
+    const moatSection = markdownSection(text, "Differentiation And Moat");
+    if (moatSection) {
+      const MOAT_PLACEHOLDER = /\b(unverified|tbd|todo|pending|placeholder)\b/i;
+      const incumbentRows = moatSection
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith("|") && !/^\|\s*:?-+/.test(line) && !/incumbent/i.test(line) && !/_example/i.test(line))
+        .map((line) => line.split("|").map((cell) => cell.trim()));
+      const realRow = incumbentRows.some((cells) => cells.length >= 6 && cells.slice(1, 5).every((cell) => cell.length > 0 && !MOAT_PLACEHOLDER.test(cell)));
+      if (!realRow) {
+        issues.push(
+          issue(
+            "error",
+            "product_spec.incumbent_row_missing",
+            "Differentiation And Moat has no real incumbent row (top competitor by revenue, what it does well, the beat moment, what stops " +
+              "a week-one copy — every cell filled). Benchmarking against nobody is how a commodity idea ships with excellent process compliance.",
+            "SPEC.md",
+          ),
+        );
+      }
+      const moatClassLine = moatSection.split(/\r?\n/).find((line) => /moat class/i.test(line) && line.includes(":"));
+      const moatClassValue = moatClassLine ? (moatClassLine.split(/:(.*)/s)[1] ?? "").trim() : "";
+      if (!moatClassValue || !/\b(data|workflow|community|taste|model|distribution)\b/i.test(moatClassValue)) {
+        issues.push(
+          issue(
+            "error",
+            "product_spec.moat_class_missing",
+            "Differentiation And Moat names no moat class. Pick one honestly from product-moat.md §2 (data / workflow / community / taste / " +
+              'model / distribution) with its build plan — "our execution will be better" is not a moat class.',
+            "SPEC.md",
+          ),
+        );
+      }
+      if (!/one-week-copy test answer:\s*\S/i.test(moatSection)) {
+        issues.push(
+          issue(
+            "error",
+            "product_spec.copy_test_missing",
+            "Differentiation And Moat records no one-week-copy test answer. Write down what structurally stops the incumbent from shipping " +
+              "this wedge in a sprint (product-moat.md §1) — an unanswered copy test is a wedge on borrowed time.",
+            "SPEC.md",
+          ),
+        );
+      }
+    }
+  }
 }
 
 reportAndExit("Product spec check", issues);
+
+/** The block from a `## <heading>` line to the next `## ` heading (or EOF). */
+function markdownSection(markdown: string, heading: string): string {
+  const lines = markdown.split(/\r?\n/);
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const headingPattern = new RegExp(`^##\\s*${escaped}`, "i");
+  const start = lines.findIndex((line) => headingPattern.test(line.trim()));
+  if (start === -1) return "";
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i += 1) {
+    if (/^## /.test(lines[i] ?? "")) {
+      end = i;
+      break;
+    }
+  }
+  return lines.slice(start, end).join("\n");
+}

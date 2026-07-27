@@ -33,3 +33,4 @@ Also define:
 - Answers 5–6 feed `VIRAL_GROWTH.md` and `growth/LAUNCH_NARRATIVE.md`; the first-100-users plan is the launch narrative's opening beat.
 - Name directions feed naming/collision checks; the tagline and featured use case feed `APP_STORE_LISTING.md` and landing copy (run `geo-seo.md` before editing landing copy).
 - Keep the positioning honest about motivation: the app helps users keep a goal they already own. Copy that promises transformation it cannot deliver fails the truthfulness test in `ethics-guardrail.md`.
+- **Transcribe the wedge into the spec:** the answers above land verbatim in `SPEC.md`'s Differentiation And Moat section and are held to `product-moat.md`'s tests (one-week-copy, moat class, incumbent beat moment). `check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a wedge that lives only in this chat is invisible to every gate.

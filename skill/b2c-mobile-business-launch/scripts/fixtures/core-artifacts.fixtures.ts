@@ -474,6 +474,72 @@ export function register(h: Harness): void {
   rmSync(path.join(specMissing, "SPEC.md"), { force: true });
   runFixture("active product lane without SPEC.md fails", specMissing, "check-product-spec.ts", 1, "product_spec.markdown_missing");
 
+  // Differentiation substance: the wedge lives in the spec, held to
+  // product-moat.md's tests — not in a positioning chat.
+  const specSections = (moat: { row: string | null; moatClass: string; copyTest: string }): string =>
+    [
+      "# Product Spec",
+      "## Promise",
+      "One tap turns a missed habit into a repair plan.",
+      "## 11-Star Experience",
+      "Ladder and magical moment per 11_STAR_EXPERIENCE.md and 11-star-experience.html.",
+      "## Category And Competitors",
+      "Health & Fitness storefront per RESEARCH.md category evidence; threat model below.",
+      "## Differentiation And Moat",
+      "| Incumbent (top by revenue) | What it does well | The beat moment (where we win) | What stops a week-one copy |",
+      "| --- | --- | --- | --- |",
+      ...(moat.row ? [moat.row] : []),
+      `- Moat class (data / workflow / community / taste / model / distribution) and build plan: ${moat.moatClass}`,
+      `- One-week-copy test answer: ${moat.copyTest}`,
+      "## Core Product Loop",
+      "Check in, see drift, repair the week.",
+      "## V1 Scalable Slice",
+      "Three habits, one weekly ritual; V2 holds social features; bans fake streaks.",
+      "## Monetization Posture",
+      "Hard paywall after first value; pricing reconciled with REVENUE_OPS.md.",
+      "## Metrics",
+      "Activation and D7 defined in ANALYTICS.md.",
+      "## Acceptance Contract",
+      "| Flow | User value | Data needed | Edge states | Proof |",
+      "| --- | --- | --- | --- | --- |",
+      "| First value | repair plan | onboarding answers | loading, retry, empty | ONBOARDING.md |",
+      "## Risks And Open Questions",
+      "Evidence appendix: RESEARCH.md, LAUNCH_TRACE.md.",
+    ].join("\n");
+  const realIncumbentRow =
+    "| HabitKit | fast logging, wide templates | streak-insurance at the miss moment | miss-history data accrues day one; repair pricing their mix cannot follow |";
+
+  const specDoneReal = makeFixture("product-spec-done-real");
+  setLaneDone(specDoneReal, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specDoneReal, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("done product spec with a real incumbent row and moat class passes", specDoneReal, "check-product-spec.ts", 0);
+
+  const specNoIncumbent = makeFixture("product-spec-done-no-incumbent-row");
+  setLaneDone(specNoIncumbent, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specNoIncumbent, "SPEC.md"),
+    specSections({ row: null, moatClass: "data — per-user miss history", copyTest: "history the copy lacks" }),
+    "utf8",
+  );
+  runFixture("done product spec without a real incumbent row fails", specNoIncumbent, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
+
+  const specNoMoatClass = makeFixture("product-spec-done-no-moat-class");
+  setLaneDone(specNoMoatClass, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specNoMoatClass, "SPEC.md"),
+    specSections({ row: realIncumbentRow, moatClass: "we will out-execute them", copyTest: "history the copy lacks" }),
+    "utf8",
+  );
+  runFixture("done product spec without a named moat class fails", specNoMoatClass, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
   // ── check-launch-trace ────────────────────────────────────────────────────
 
   const traceBaseline = makeFixture("launch-trace-baseline");

@@ -30,3 +30,4 @@ Also define:
 - The "first 100 users" plan feeds `growth/LAUNCH_NARRATIVE.md` and `viral-growth-loops.md` (build-in-public → invite-only beta → referral codes).
 - The monetization-fit answer constrains prompt 07: pick the model that matches the community's values, do not bolt on a generic paywall.
 </content>
+- **Transcribe the wedge into the spec:** the answers above land verbatim in `SPEC.md`'s Differentiation And Moat section and are held to `product-moat.md`'s tests (one-week-copy, moat class, incumbent beat moment). `check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a wedge that lives only in this chat is invisible to every gate.
