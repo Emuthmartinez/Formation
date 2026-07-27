@@ -1,4 +1,4 @@
-import { rmSync, writeFileSync } from "node:fs";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, expectRecord, getLane, readState, writeState } from "./_harness.js";
 
@@ -626,6 +626,78 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("an incumbent row of N/A cells fails", specIncumbentNaCells, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
+
+  // The filled shipped template must pass: its guidance prose contains "moat
+  // class" and a colon, and must never shadow the labeled answer line.
+  const specTemplateFilled = makeFixture("product-spec-template-filled");
+  setLaneDone(specTemplateFilled, "product", ["SPEC.md"]);
+  {
+    const templateSpec = readFileSync(path.join(specTemplateFilled, "SPEC.md"), "utf8")
+      .replace(/^\| _example:.*$/m, realIncumbentRow)
+      .replace(
+        "- Moat class (data / workflow / community / taste / model / distribution) and build plan:",
+        "- Moat class (data / workflow / community / taste / model / distribution) and build plan: data — per-user miss history compounds weekly.",
+      )
+      .replace("- One-week-copy test answer:", "- One-week-copy test answer: the repair model needs miss-history no fresh install has.")
+      .replace(/<!--[^>]*replace with[^>]*-->/gi, "");
+    writeFileSync(path.join(specTemplateFilled, "SPEC.md"), templateSpec.replace(/\breplace with\b|\b(TODO|TBD)\b/gi, "filled"), "utf8");
+  }
+  runFixture("the filled shipped template passes the moat gate", specTemplateFilled, "check-product-spec.ts", 0);
+
+  // The doctrine's named nonanswers are copied in a sprint.
+  const specCopyBetterDesigned = makeFixture("product-spec-copy-better-designed");
+  setLaneDone(specCopyBetterDesigned, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specCopyBetterDesigned, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "Ours is better designed for this audience.",
+    }),
+    "utf8",
+  );
+  runFixture("the better-designed nonanswer fails", specCopyBetterDesigned, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
+
+  const specCopyNotThought = makeFixture("product-spec-copy-not-thought");
+  setLaneDone(specCopyNotThought, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specCopyNotThought, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "They have not thought of it yet.",
+    }),
+    "utf8",
+  );
+  runFixture("the not-thought-of-it nonanswer fails", specCopyNotThought, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
+
+  // A negated structural answer is the direct, legitimate answer.
+  const specCopyNegatedStructural = makeFixture("product-spec-copy-negated-structural");
+  setLaneDone(specCopyNegatedStructural, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specCopyNegatedStructural, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "The accumulated user history cannot be copied in a week.",
+    }),
+    "utf8",
+  );
+  runFixture("a negated structural copy answer passes", specCopyNegatedStructural, "check-product-spec.ts", 0);
+
+  // The V1 exception needs its day-30 revisit, not just a name and a date.
+  const specMoatV1NoRetro = makeFixture("product-spec-moat-v1-no-retro");
+  setLaneDone(specMoatV1NoRetro, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specMoatV1NoRetro, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "no moat yet, racing to build data by 2026-08-25",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a V1 exception without the day-30 revisit fails", specMoatV1NoRetro, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
 
   // ── check-launch-trace ────────────────────────────────────────────────────
 

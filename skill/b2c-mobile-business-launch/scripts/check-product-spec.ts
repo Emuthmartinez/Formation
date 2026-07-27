@@ -123,7 +123,9 @@ if (text) {
           ),
         );
       }
-      const moatClassLine = moatSection.split(/\r?\n/).find((line) => /moat class/i.test(line) && line.includes(":"));
+      // The labeled field only: the section's guidance prose also contains
+      // "moat class" and a colon, and must never shadow the answer line.
+      const moatClassLine = moatSection.split(/\r?\n/).find((line) => /^\s*[-*]?\s*moat class\b/i.test(line) && line.includes(":"));
       const moatClassValue = moatClassLine ? (moatClassLine.split(/:(.*)/s)[1] ?? "").trim() : "";
       // The class must be affirmed, not disclaimed: "none — there is no data,
       // workflow, … moat" names every taxonomy word while conceding all of
@@ -133,7 +135,11 @@ if (text) {
       const v1ExceptionDate = v1ExceptionMatch?.[2] ?? "";
       const v1ExceptionParsed = new Date(`${v1ExceptionDate}T00:00:00Z`);
       const v1ExceptionValid = Boolean(
-        v1ExceptionMatch && !Number.isNaN(v1ExceptionParsed.getTime()) && v1ExceptionParsed.toISOString().slice(0, 10) === v1ExceptionDate,
+        v1ExceptionMatch &&
+        !Number.isNaN(v1ExceptionParsed.getTime()) &&
+        v1ExceptionParsed.toISOString().slice(0, 10) === v1ExceptionDate &&
+        // Named, dated, AND revisited — the doctrine's three conditions.
+        /\b(retro|revisit)/i.test(moatClassValue),
       );
       const affirmativeMoatValue = moatClassValue.replace(/\b(no|not|none|without|never)\b[^.;,—–:()|]*/gi, "");
       const moatClassAffirmed =
@@ -151,10 +157,20 @@ if (text) {
       }
       const copyTestAnswer = (moatSection.match(/one-week-copy test answer:\s*(.*)$/im)?.[1] ?? "").trim();
       // An answer that concedes the test is a failed test, not a recorded one.
-      const COPY_CONCESSION =
-        /^\s*(nothing|none|no)\b|\b(nothing|nobody|no one) (stops|prevents|blocks)|\bcop(?:y|ied|yable)\b[^.\n]{0,30}\b(week|sprint|days?)\b|anyone (can|could) (copy|build|ship)|no (real |structural )?(moat|barrier|blocker)/i;
+      // Concessions phrased as negations stay on the raw answer; affirmative
+      // concessions (including the doctrine's named nonanswers) are tested on
+      // the negation-stripped residue so "cannot be copied in a week" — a
+      // legitimate structural answer — survives.
+      const CONCESSION_RAW =
+        /^\s*(nothing|none|no)\b|\b(nothing|nobody|no one) (stops|prevents|blocks)|\bno (real |structural )?(moat|barrier|blocker)|\b(has|have) not thought of (it|this)\b/i;
+      const CONCESSION_AFFIRMATIVE =
+        /\bcop(?:y|ied|yable)\b[^.\n]{0,30}\b(week|sprint|days?)\b|\banyone (can|could) (copy|build|ship)\b|\b(better|nicer|cleaner) design(ed)?\b|\bbetter (ux|ui|execution)\b|\bfirst[- ]mover\b/i;
+      const affirmativeCopyAnswer = copyTestAnswer.replace(/\b(cannot|can not|can't|won't|will not|not|no|never|unable to)\b[^.;,—–:()|]*/gi, "");
       const copyTestSubstantive =
-        copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 && !MOAT_PLACEHOLDER.test(copyTestAnswer) && !COPY_CONCESSION.test(copyTestAnswer);
+        copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 &&
+        !MOAT_PLACEHOLDER.test(copyTestAnswer) &&
+        !CONCESSION_RAW.test(copyTestAnswer) &&
+        !CONCESSION_AFFIRMATIVE.test(affirmativeCopyAnswer);
       if (!copyTestSubstantive) {
         issues.push(
           issue(
