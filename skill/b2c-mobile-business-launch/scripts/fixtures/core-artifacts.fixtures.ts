@@ -997,6 +997,51 @@ export function register(h: Harness): void {
   );
   runFixture("an indented moat-class continuation passes", specMoatClassIndented, "check-product-spec.ts", 0);
 
+  // A later table's header is not an incumbent.
+  const specSecondTableHeader = makeFixture("product-spec-second-table-header");
+  setLaneDone(specSecondTableHeader, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specSecondTableHeader, "SPEC.md"),
+    specSections({
+      row: realIncumbentRow,
+      moatClass: "data — per-user miss history compounds weekly",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }).replace(
+      "- Moat class",
+      "\n| Assumption | Evidence | Owner | Status |\n| --- | --- | --- | --- |\n| history matters | interviews | founder | open |\n\n- Moat class",
+    ),
+    "utf8",
+  );
+  runFixture("a second table's header does not count as an incumbent", specSecondTableHeader, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
+
+  // A pending build plan is a placeholder, not a plan.
+  const specPlanPending = makeFixture("product-spec-plan-pending");
+  setLaneDone(specPlanPending, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specPlanPending, "SPEC.md"),
+    specSections({
+      row: twoIncumbentRows,
+      moatClass: "data — build details are still pending",
+      copyTest: "the repair model needs miss-history no fresh install has",
+    }),
+    "utf8",
+  );
+  runFixture("a pending moat build plan fails", specPlanPending, "check-product-spec.ts", 1, "product_spec.moat_class_missing");
+
+  // Localized specs are complete specs.
+  const specJapaneseAnswers = makeFixture("product-spec-japanese-answers");
+  setLaneDone(specJapaneseAnswers, "product", ["SPEC.md"]);
+  writeFileSync(
+    path.join(specJapaneseAnswers, "SPEC.md"),
+    specSections({
+      row: "| あすけん | photo food logging at scale | our miss-repair moment | per-user history their fresh install lacks |\n| カロミル | broad nutrient database | our miss-repair moment | per-user history their fresh install lacks |",
+      moatClass: "data — 蓄積された利用履歴が毎週複利で強くなり、新規インストールには再現できない",
+      copyTest: "蓄積された利用履歴は競合が一週間では再現できない。",
+    }),
+    "utf8",
+  );
+  runFixture("a localized non-Latin spec passes", specJapaneseAnswers, "check-product-spec.ts", 0);
+
   // ── check-launch-trace ────────────────────────────────────────────────────
 
   const traceBaseline = makeFixture("launch-trace-baseline");

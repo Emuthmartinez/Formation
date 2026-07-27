@@ -99,10 +99,19 @@ if (text) {
       // position, not by keyword — a real competitor whose row mentions
       // "incumbent" must not be skipped, and a data cell echoing a header
       // keyword must not be promoted.
-      const moatTableLines = moatSection
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter((line) => line.startsWith("|") && !/^\|\s*:?-+/.test(line));
+      // Only the FIRST contiguous table is the incumbent table — a later
+      // table's header must not count as an incumbent row.
+      const moatTableLines = ((): string[] => {
+        const lines = moatSection.split(/\r?\n/).map((line) => line.trim());
+        const start = lines.findIndex((line) => line.startsWith("|"));
+        if (start === -1) return [];
+        const block: string[] = [];
+        for (let i = start; i < lines.length && (lines[i] ?? "").startsWith("|"); i += 1) {
+          const line = lines[i] ?? "";
+          if (!/^\|\s*:?-+/.test(line)) block.push(line);
+        }
+        return block;
+      })();
       // Escaped pipes are content, not column breaks — "iOS \\| Android"
       // must stay one cell so later columns do not shift.
       const splitCells = (line: string): string[] => line.split(/(?<!\\)\|/).map((cell) => cell.replace(/\\\|/g, "|").trim());
@@ -219,7 +228,8 @@ if (text) {
         .some(
           (clause) =>
             !REFUSED_BUILD.test(clause) &&
-            clause.replace(/\b(data|workflow|community|taste|model|distribution)\b/gi, " ").replace(/[^a-z0-9]/gi, "").length >= 15,
+            !MOAT_PLACEHOLDER.test(clause) &&
+            clause.replace(/\b(data|workflow|community|taste|model|distribution)\b/gi, " ").replace(/[^\p{L}\p{N}]/gu, "").length >= 15,
         );
       if (!v1ExceptionValid && !(moatClassAffirmed && moatPlanSubstantive)) {
         issues.push(
@@ -244,7 +254,7 @@ if (text) {
         return /^\s+\S/.test(nextLine) && !/^\s*[-|#]/.test(nextLine) ? nextLine.trim() : "";
       })();
       const copyTestSubstantive =
-        copyTestAnswer.replace(/[^a-z0-9]/gi, "").length >= 12 && !MOAT_PLACEHOLDER.test(copyTestAnswer) && !concedesTest(copyTestAnswer);
+        copyTestAnswer.replace(/[^\p{L}\p{N}]/gu, "").length >= 12 && !MOAT_PLACEHOLDER.test(copyTestAnswer) && !concedesTest(copyTestAnswer);
       if (!copyTestSubstantive) {
         issues.push(
           issue(
