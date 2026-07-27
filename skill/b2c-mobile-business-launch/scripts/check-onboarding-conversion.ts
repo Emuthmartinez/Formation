@@ -11,6 +11,10 @@ const onboardingEvidence = asArray(state ? getPath(state, "lanes.onboarding.evid
   .map((item) => asString(item))
   .filter((item): item is string => Boolean(item?.trim()));
 
+// The one canonical review-term set: the position checks (findReviewIndex)
+// and the push/review step-collision check must recognize the same aliases.
+const CANONICAL_REVIEW_TERM = /app review|review (popup|prompt)|native review|rating prompt|skstorereviewcontroller|requestreview|google play in-app review/i;
+
 const markdown = firstText(["ONBOARDING.md", "onboarding/ONBOARDING.md"]);
 const onboardingHtml = firstText(["onboarding.html", "onboarding/onboarding.html"]);
 const onboardingDone = onboardingStatus === "done";
@@ -61,7 +65,7 @@ if (onboardingDone && markdown) {
   // The after-first-value slot belongs to ONE prompt: a push line that pairs
   // itself with the review prompt in the same step is the violation the
   // lifecycle contract names, even when the shared placement is post-value.
-  const reviewTermPattern = /(app\s+)?review (popup|prompt)|skstorereview/i;
+  const reviewTermPattern = CANONICAL_REVIEW_TERM;
   const adjacencyPattern =
     /same (session )?(step|screen|moment|dialog)|alongside|back[- ]to[- ]back|together with|immediately (after|before)|right (after|before)|in the same/i;
   const sameLineCollision = pushLines.some((line) => {
@@ -278,15 +282,7 @@ function findFirstValueIndex(text: string): number {
 }
 
 function findReviewIndex(text: string): number {
-  return findAnyIndex(text, [
-    /app review/,
-    /review prompt/,
-    /native review/,
-    /rating prompt/,
-    /skstorereviewcontroller/,
-    /requestreview/,
-    /google play in-app review/,
-  ]);
+  return findAnyIndex(text, [CANONICAL_REVIEW_TERM]);
 }
 
 function findAnyIndex(text: string, patterns: RegExp[]): number {

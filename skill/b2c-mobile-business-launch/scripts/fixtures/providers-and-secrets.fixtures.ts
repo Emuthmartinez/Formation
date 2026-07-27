@@ -337,6 +337,28 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog",
   );
 
+  // A date plus a status word is not an experiment.
+  const revenueExperimentBlankRow = makeFixture("revenue-experiment-blank-row");
+  {
+    const state = readState(revenueExperimentBlankRow);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentBlankRow, state);
+    const opsPath = path.join(revenueExperimentBlankRow, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | | | | active | |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a dated status-only row with blank experiment cells does not satisfy the cadence",
+    revenueExperimentBlankRow,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

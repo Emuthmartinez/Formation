@@ -309,6 +309,39 @@ export function register(h: Harness): void {
     "onboarding.push_review_same_step",
   );
 
+  // Canonical review aliases participate in the step correlation too.
+  const onboardingPushStepAlias = makeFixture("onboarding-push-review-step-alias");
+  {
+    const state = readState(onboardingPushStepAlias);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushStepAlias, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushStepAlias, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "",
+      "| Step | Prompt |",
+      "| --- | --- |",
+      "| 3 | Native review — rating prompt at the value milestone |",
+      "| 3 | Push permission prime — only after value is visible |",
+      "",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a review alias sharing the push prime's numbered step fails",
+    onboardingPushStepAlias,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_review_same_step",
+  );
+
   // "Push permission" is the same canonical noun as "push notifications" for
   // the not-applicable exemption.
   const onboardingPushPermissionNa = makeFixture("onboarding-push-permission-na");

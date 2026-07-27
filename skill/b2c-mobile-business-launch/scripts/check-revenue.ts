@@ -551,7 +551,16 @@ if (revenueDone && revenueOpsText) {
       const backlogHeaderCells = backlogHeader.split("|");
       const statusColumn = backlogHeaderCells.findIndex((cell) => /status/i.test(cell));
       const startedColumn = backlogHeaderCells.findIndex((cell) => /started/i.test(cell));
+      const hypothesisColumn = backlogHeaderCells.findIndex((cell) => /hypothesis/i.test(cell));
+      const variantColumn = backlogHeaderCells.findIndex((cell) => /variant/i.test(cell));
+      const metricColumn = backlogHeaderCells.findIndex((cell) => /metric/i.test(cell));
+      const resultColumn = backlogHeaderCells.findIndex((cell) => /result|decision/i.test(cell));
       const BACKLOG_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|placeholder)\b/i;
+      // A date plus a status word is not an experiment: the row must define
+      // what is being tested (hypothesis, variant, primary metric), and a
+      // completed row must record its result/decision. Missing definition
+      // columns fail closed.
+      const substantiveCell = (cell: string): boolean => cell.replace(/[^a-z0-9]/gi, "").length >= 6 && !BACKLOG_PLACEHOLDER.test(cell);
       // One historical row must not satisfy the cadence forever (§7b is a
       // standing program): current activity means an active experiment, a
       // completed one started inside the recency window, or a planned row
@@ -568,15 +577,24 @@ if (revenueDone && revenueOpsText) {
           startedMatch && startedDate && !Number.isNaN(startedDate.getTime()) && startedDate.toISOString().slice(0, 10) === startedMatch[1],
         );
         const clean = !BACKLOG_PLACEHOLDER.test(statusCell) && !BACKLOG_PLACEHOLDER.test(startedCell);
-        return { statusCell, startedDate, dateReal, clean };
+        const defined =
+          hypothesisColumn > 0 &&
+          variantColumn > 0 &&
+          metricColumn > 0 &&
+          substantiveCell(cells[hypothesisColumn] ?? "") &&
+          substantiveCell(cells[variantColumn] ?? "") &&
+          substantiveCell(cells[metricColumn] ?? "");
+        const decided = resultColumn > 0 && substantiveCell(cells[resultColumn] ?? "");
+        return { statusCell, startedDate, dateReal, clean, defined, decided };
       });
       const startedInPast = (row: (typeof backlogRows)[number]): boolean => row.dateReal && (row.startedDate as Date).getTime() <= Date.now();
-      const activeRows = backlogRows.filter((row) => row.clean && /^active\b/i.test(row.statusCell) && startedInPast(row));
-      const completedRows = backlogRows.filter((row) => row.clean && /^completed\b/i.test(row.statusCell) && startedInPast(row));
+      const activeRows = backlogRows.filter((row) => row.clean && row.defined && /^active\b/i.test(row.statusCell) && startedInPast(row));
+      const completedRows = backlogRows.filter((row) => row.clean && row.defined && row.decided && /^completed\b/i.test(row.statusCell) && startedInPast(row));
       const recentCompleted = completedRows.filter((row) => Date.now() - (row.startedDate as Date).getTime() <= EXPERIMENT_RECENCY_DAYS * 86_400_000);
       const datedNext = backlogRows.filter(
         (row) =>
           row.clean &&
+          row.defined &&
           /^planned\b/i.test(row.statusCell) &&
           row.dateReal &&
           (row.startedDate as Date).getTime() >= Date.now() - 7 * 86_400_000 &&

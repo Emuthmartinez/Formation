@@ -1,4 +1,5 @@
 id: push-lifecycle-never-built
+behavioral: true
 title: Full email automation ships while push — the higher-open in-app channel — never gets a strategy
 prompt: >
   The launch package is thorough on email: Resend domain verified, SPF/DKIM proven, welcome and
