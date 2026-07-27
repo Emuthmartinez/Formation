@@ -42,7 +42,7 @@ Run one named weekly session — the **Weekly Ops Review** — and record each p
 2. **Crash and review triage.** Sentry release health and new issues (§3); new store reviews on both consoles (§4). Severity-route before anything else gets attention.
 3. **Support sweep.** Clear the support inbox to zero or to documented escalations (§7).
 4. **ASO and rankings delta.** Keyword rankings, category rank, conversion-rate movement, competitor deltas via AppKittie and first-party console data — route the tactics through `aso-store-ops.md` §10.
-5. **Growth and spend review.** Paid performance against the stop/scale rules in `paid-user-acquisition.md`; organic cadence per `fastlane-growth-ops.md` (§8).
+5. **Growth and spend review.** Paid performance against the stop/scale rules in `paid-user-acquisition.md`; organic cadence per `fastlane-growth-ops.md` (§8). List founder gates older than 30 days (`project-state.md` "Founder-Gate Re-Engagement") and re-present the top one with what changed since — a live app with its growth levers parked behind a forgotten question is the distribution-never-turns-on failure mode, and `check:lane-coverage` errors on it.
 6. **Ship one improvement.** Every week ships at least one user-visible or measurable improvement — a fix, a copy change, a paywall tweak, a metadata refresh — chosen from what steps 1–5 surfaced. A week with no shipped improvement is a recorded exception with a reason, not a silent skip.
 
 Keep the session under one focused pass. The rhythm is the product: each step feeds the next, and the weekly improvement is how the loop compounds instead of just observing.
@@ -210,7 +210,7 @@ Pause and obtain explicit founder approval before:
 
 - **Refunds beyond store-automatic handling** — goodwill refunds, comped subscriptions, or anything touching money outside the stores' own flows.
 - **Public replies posted under the business identity** — store review responses and public support posts speak as the business; the founder approves the first occurrences and the standing tone, after which routine replies within that approved pattern may proceed per the autonomy mode.
-- **Paid spend changes** — any budget increase, new channel, or restart of paused spend (route through `paid-user-acquisition.md` gates).
+- **Paid spend changes** — any budget increase, new channel, or restart of paused spend (route through `paid-user-acquisition.md` gates). Deferred spend gates carry the date last presented and come back every 30 days with fresh numbers — silence defers again; it never converts to approval, and it never means forever.
 - **Killing or rolling back a live release** — halting a phased rollout, expediting a replacement build, or flipping a kill switch affects every live user.
 - **Policy appeals** — review-removal requests, store policy disputes, or anything filed formally with Apple or Google.
 

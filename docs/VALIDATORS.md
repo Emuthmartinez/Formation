@@ -46,7 +46,7 @@ npm run validate:launch-state -- --root /path/to/app
 | Command | What it checks |
 | --- | --- |
 | `validate:launch-state` | `PROJECT_STATE.yaml` structure, statuses, provider fields, evidence, blockers, and failure cards |
-| `check:lane-coverage` | Every lane is represented and its dependency edges are satisfied |
+| `check:lane-coverage` | Every lane is represented, its dependency edges are satisfied, and founder-gated blockers carry a dated presentation that is re-presented past 30 days (warnings pre-launch, errors on a live app) |
 | `check:change-cascade` | A change in one lane propagates to the lanes the Change Cascade Map says it must |
 | `check:launch-trace` | Research reaches product, brand, design, store copy, revenue, privacy, and verification through `LAUNCH_TRACE.md` |
 | `check:continuity-contract` | A run can be picked up by a different agent without losing state |
