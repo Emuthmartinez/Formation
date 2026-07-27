@@ -240,6 +240,78 @@ export function register(h: Harness): void {
     "revenue.experiment_backlog.empty",
   );
 
+  // One historical test must not satisfy the cadence forever.
+  const revenueExperimentStale = makeFixture("revenue-experiment-stale");
+  {
+    const state = readState(revenueExperimentStale);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(180);
+    writeState(revenueExperimentStale, state);
+    const opsPath = path.join(revenueExperimentStale, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(120)} | anchor-first paywall lifts trials | anchor-first | trial-start rate | completed | +12% trial starts, kept |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a single completed experiment from four months ago does not satisfy the cadence",
+    revenueExperimentStale,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.stale",
+  );
+
+  // A recently completed experiment is current activity — the backlog codes stay silent.
+  const revenueExperimentCurrent = makeFixture("revenue-experiment-current");
+  {
+    const state = readState(revenueExperimentCurrent);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentCurrent, state);
+    const opsPath = path.join(revenueExperimentCurrent, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts trial starts | anchor-first layout | trial-start rate | completed | +18% trial starts, founder kept it |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "a recently completed experiment satisfies the cadence",
+    revenueExperimentCurrent,
+    "check-revenue.ts",
+    1,
+    undefined,
+    [],
+    undefined,
+    "revenue.experiment_backlog",
+  );
+
+  // An old completed test plus a dated next experiment is also current activity.
+  const revenueExperimentDatedNext = makeFixture("revenue-experiment-dated-next");
+  {
+    const state = readState(revenueExperimentDatedNext);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(90);
+    writeState(revenueExperimentDatedNext, state);
+    const opsPath = path.join(revenueExperimentDatedNext, "REVENUE_OPS.md");
+    const ops = readFileSync(opsPath, "utf8").replace(
+      "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
+      `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(80)} | anchor-first paywall lifts trials | anchor-first | trial-start rate | completed | +12% trial starts, kept |\n| ${experimentIsoDaysAgo(-14)} | reverse trial beats opt-in | reverse-trial | trial-to-paid | planned | |\n\n## Founder-Gated Probe Step`,
+    );
+    writeFileSync(opsPath, ops, "utf8");
+  }
+  runFixture(
+    "an old completed test with a dated next experiment satisfies the cadence",
+    revenueExperimentDatedNext,
+    "check-revenue.ts",
+    1,
+    undefined,
+    [],
+    undefined,
+    "revenue.experiment_backlog",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

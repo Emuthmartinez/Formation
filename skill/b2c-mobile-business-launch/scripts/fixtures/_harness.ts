@@ -44,6 +44,7 @@ export interface Harness {
     expectedText?: string,
     extraArgs?: string[],
     env?: Record<string, string>,
+    forbiddenText?: string,
   ) => void;
   runScriptArgs: (label: string, script: string, args: string[], expectedCode: number, expectedText?: string, env?: Record<string, string>) => void;
   cleanupFixtures: () => void;
@@ -68,7 +69,14 @@ export function createHarness(): Harness {
     return fixtureRoot;
   };
 
-  const runScript = (label: string, scriptArgs: string[], expectedCode: number, expectedText?: string, env?: Record<string, string>): void => {
+  const runScript = (
+    label: string,
+    scriptArgs: string[],
+    expectedCode: number,
+    expectedText?: string,
+    env?: Record<string, string>,
+    forbiddenText?: string,
+  ): void => {
     const result = spawnSync(tsxBin, scriptArgs, {
       cwd: skillRoot,
       encoding: "utf8",
@@ -77,7 +85,7 @@ export function createHarness(): Harness {
     const output = `${result.stdout}\n${result.stderr}`;
     results.push({
       label,
-      ok: result.status === expectedCode && (!expectedText || output.includes(expectedText)),
+      ok: result.status === expectedCode && (!expectedText || output.includes(expectedText)) && (!forbiddenText || !output.includes(forbiddenText)),
       expectedCode,
       actualCode: result.status,
       expectedText,
@@ -93,8 +101,9 @@ export function createHarness(): Harness {
     expectedText?: string,
     extraArgs: string[] = [],
     env?: Record<string, string>,
+    forbiddenText?: string,
   ): void => {
-    runScript(label, [path.join("scripts", script), "--root", root, ...extraArgs], expectedCode, expectedText, env);
+    runScript(label, [path.join("scripts", script), "--root", root, ...extraArgs], expectedCode, expectedText, env, forbiddenText);
   };
 
   const runScriptArgs = (label: string, script: string, args: string[], expectedCode: number, expectedText?: string, env?: Record<string, string>): void => {

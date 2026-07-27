@@ -37,7 +37,15 @@ if (onboardingHtml) {
 // push as not applicable with a reason — a full email lifecycle with no push
 // strategy is the low-open-channel default the audit found.
 if (onboardingDone && markdown) {
-  const notApplicable = /push notifications?:? not applicable/i.test(markdown.text);
+  // The not-applicable exemption must be earned: a bare label would let a run
+  // silence the email-only lifecycle miss, so the line has to carry a
+  // substantive, non-placeholder reason after the declaration.
+  // Separators stay on the declaration line ([ \t], not \s): a newline must
+  // not let the next line masquerade as the reason.
+  const notApplicableMatch = markdown.text.match(/push notifications?:?[ \t]*not applicable\b[ \t:;—–,-]*(.*)$/im);
+  const NA_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
+  const notApplicableReason = (notApplicableMatch?.[1] ?? "").trim();
+  const notApplicable = Boolean(notApplicableMatch) && notApplicableReason.replace(/[^a-z0-9]/gi, "").length >= 12 && !NA_PLACEHOLDER.test(notApplicableReason);
   const pushLines = markdown.text.split(/\r?\n/).filter((line) => /push (permission|priming|prime)|notification permission/i.test(line));
   // Mention is not placement: the prime must sit at an earned post-value
   // moment, and a cold ask on launch is the contract violation itself.
@@ -45,19 +53,42 @@ if (onboardingDone && markdown) {
   // boundary (including dashes and colons), so "not after first value—request
   // on launch" keeps its affirmative cold ask, and "never on launch" keeps its
   // affirmative placement language intact for the placement test.
-  const affirmativeOf = (line: string): string => line.replace(/\b(never|not|don't|do not|no)\b[^.;,—–:()]*/gi, "");
+  const affirmativeOf = (line: string): string => line.replace(/\b(never|not|don't|do not|no)\b[^.;,—–:()|]*/gi, "");
   const placementOk = pushLines.some((line) => /after (the )?(first )?value([- ]reveal)?|earned moment|only after value is visible/i.test(affirmativeOf(line)));
   const coldAsk = pushLines.some((line) =>
     /\bcold\b|first launch|on launch|at startup|app start|before (the )?(first )?value([- ]reveal)?/i.test(affirmativeOf(line)),
   );
+  // The after-first-value slot belongs to ONE prompt: a push line that pairs
+  // itself with the review prompt in the same step is the violation the
+  // lifecycle contract names, even when the shared placement is post-value.
+  const reviewTermPattern = /(app\s+)?review (popup|prompt)|skstorereview/i;
+  const adjacencyPattern =
+    /same (session )?(step|screen|moment|dialog)|alongside|back[- ]to[- ]back|together with|immediately (after|before)|right (after|before)|in the same/i;
+  const sameStepAsReview = pushLines.some((line) => {
+    const affirmative = affirmativeOf(line);
+    return reviewTermPattern.test(affirmative) && adjacencyPattern.test(affirmative);
+  });
+  if (!notApplicable && sameStepAsReview) {
+    issues.push(
+      issue(
+        "error",
+        "onboarding.push_review_same_step",
+        "ONBOARDING.md places the push permission prime and the App Review popup in the same step. The after-first-value slot goes to one " +
+          "prompt — value moment, then review prompt OR push prime; the other waits for the next natural moment (push-notification-lifecycle.md). " +
+          "Back-to-back system prompts turn one earned moment into two denials.",
+        markdown.relativePath,
+      ),
+    );
+  }
   if (!notApplicable && (pushLines.length === 0 || !placementOk || coldAsk)) {
     issues.push(
       issue(
         "error",
         "onboarding.push_priming_missing",
         "ONBOARDING.md does not place the push permission prime at an earned post-value moment (or places it cold on launch), and records " +
-          "no push-not-applicable decision. The soft-prime sits after a first value moment — never cold, never the same step as the review " +
-          "popup — per push-notification-lifecycle.md; a raw ask on launch converts most installs into permanent opt-outs.",
+          "no push-not-applicable decision with a substantive reason. The soft-prime sits after a first value moment — never cold, never the " +
+          "same step as the review popup — per push-notification-lifecycle.md; a raw ask on launch converts most installs into permanent " +
+          "opt-outs, and a bare 'not applicable' label without a reason does not earn the exemption.",
         markdown.relativePath,
       ),
     );

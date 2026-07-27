@@ -196,6 +196,85 @@ export function register(h: Harness): void {
     "onboarding.push_priming_missing",
   );
 
+  // The after-first-value slot belongs to one prompt: pairing push with the
+  // review popup in the same step is the violation even though it is post-value.
+  const onboardingPushSameStep = makeFixture("onboarding-push-review-same-step");
+  {
+    const state = readState(onboardingPushSameStep);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushSameStep, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushSameStep, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push permission prime: shown together with the App Review popup immediately after the first value screen.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested, push_permission_primed.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "push prime in the same step as the review popup fails",
+    onboardingPushSameStep,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_review_same_step",
+  );
+
+  // A bare not-applicable label does not earn the exemption.
+  const onboardingPushNaBare = makeFixture("onboarding-push-na-bare");
+  {
+    const state = readState(onboardingPushNaBare);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushNaBare, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushNaBare, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push notifications: not applicable",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a bare push-not-applicable label without a reason fails",
+    onboardingPushNaBare,
+    "check-onboarding-conversion.ts",
+    1,
+    "onboarding.push_priming_missing",
+  );
+
+  // A reasoned not-applicable decision earns the exemption.
+  const onboardingPushNaReasoned = makeFixture("onboarding-push-na-reasoned");
+  {
+    const state = readState(onboardingPushNaReasoned);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(onboardingPushNaReasoned, state);
+  }
+  writeFileSync(
+    path.join(onboardingPushNaReasoned, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "First value / value-reveal step: the user sees a personalized plan.",
+      "App Review popup: immediately after the first value/value-reveal screen via SKStoreReviewController.requestReview(in:), automatic 1-2 second delay while mounted, cooldown per milestone.",
+      "Push notifications: not applicable — companion web app with no notification surface; the email lifecycle owns re-engagement.",
+      "Attribution: How did you hear about us? after the value promise.",
+      "Analytics: review_prompt_eligible, review_prompt_requested.",
+      "Fallback: flow continues if the review sheet is suppressed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("a reasoned push-not-applicable decision passes", onboardingPushNaReasoned, "check-onboarding-conversion.ts", 0);
+
   const elevenStarMissing = makeFixture("eleven-star-missing");
   rmSync(path.join(elevenStarMissing, "11-star-experience"), { recursive: true, force: true });
   runFixture("missing 11-star experience packet fails", elevenStarMissing, "check-eleven-star-experience.ts", 1, "eleven_star.markdown_missing");

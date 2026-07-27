@@ -552,22 +552,37 @@ if (revenueDone && revenueOpsText) {
       const statusColumn = backlogHeaderCells.findIndex((cell) => /status/i.test(cell));
       const startedColumn = backlogHeaderCells.findIndex((cell) => /started/i.test(cell));
       const BACKLOG_PLACEHOLDER = /\b(unverified|tbd|todo|to be filled|placeholder)\b/i;
-      const activeOrCompleted = backlogLines.slice(1).filter((line) => {
+      // One historical row must not satisfy the cadence forever (§7b is a
+      // standing program): current activity means an active experiment, a
+      // completed one started inside the recency window, or a planned row
+      // dated to start soon — each on a round-tripped real calendar date.
+      const EXPERIMENT_RECENCY_DAYS = 56;
+      const NEXT_EXPERIMENT_HORIZON_DAYS = 60;
+      const backlogRows = backlogLines.slice(1).map((line) => {
         const cells = line.split("|").map((cell) => cell.trim());
         const statusCell = statusColumn > 0 ? (cells[statusColumn] ?? "") : "";
         const startedCell = startedColumn > 0 ? (cells[startedColumn] ?? "") : "";
         const startedMatch = startedCell.match(/(\d{4}-\d{2}-\d{2})/);
         const startedDate = startedMatch ? new Date(`${startedMatch[1]}T00:00:00Z`) : undefined;
-        const startedValid = Boolean(
-          startedMatch &&
-          startedDate &&
-          !Number.isNaN(startedDate.getTime()) &&
-          startedDate.toISOString().slice(0, 10) === startedMatch[1] &&
-          startedDate.getTime() <= Date.now(),
+        const dateReal = Boolean(
+          startedMatch && startedDate && !Number.isNaN(startedDate.getTime()) && startedDate.toISOString().slice(0, 10) === startedMatch[1],
         );
-        return /^(active|completed)\b/i.test(statusCell) && startedValid && !BACKLOG_PLACEHOLDER.test(statusCell) && !BACKLOG_PLACEHOLDER.test(startedCell);
+        const clean = !BACKLOG_PLACEHOLDER.test(statusCell) && !BACKLOG_PLACEHOLDER.test(startedCell);
+        return { statusCell, startedDate, dateReal, clean };
       });
-      if (activeOrCompleted.length === 0) {
+      const startedInPast = (row: (typeof backlogRows)[number]): boolean => row.dateReal && (row.startedDate as Date).getTime() <= Date.now();
+      const activeRows = backlogRows.filter((row) => row.clean && /^active\b/i.test(row.statusCell) && startedInPast(row));
+      const completedRows = backlogRows.filter((row) => row.clean && /^completed\b/i.test(row.statusCell) && startedInPast(row));
+      const recentCompleted = completedRows.filter((row) => Date.now() - (row.startedDate as Date).getTime() <= EXPERIMENT_RECENCY_DAYS * 86_400_000);
+      const datedNext = backlogRows.filter(
+        (row) =>
+          row.clean &&
+          /^planned\b/i.test(row.statusCell) &&
+          row.dateReal &&
+          (row.startedDate as Date).getTime() >= Date.now() - 7 * 86_400_000 &&
+          (row.startedDate as Date).getTime() <= Date.now() + NEXT_EXPERIMENT_HORIZON_DAYS * 86_400_000,
+      );
+      if (activeRows.length === 0 && completedRows.length === 0) {
         issues.push(
           issue(
             "error",
@@ -575,6 +590,18 @@ if (revenueDone && revenueOpsText) {
             `The Paywall Experiment Backlog has no dated active or completed experiment row and the app has been live ${liveDays} days. ` +
               "A backlog of empty headers is the one-and-done plateau wearing a green check — start the first timing/packaging/trial test " +
               "(revenue-monetization.md §7b) and record it with its start date.",
+            revenueOpsPath,
+          ),
+        );
+      } else if (activeRows.length === 0 && recentCompleted.length === 0 && datedNext.length === 0) {
+        issues.push(
+          issue(
+            "error",
+            "revenue.experiment_backlog.stale",
+            `The Paywall Experiment Backlog's most recent completed experiment started more than ${EXPERIMENT_RECENCY_DAYS} days ago, nothing is active, ` +
+              `and no planned row is dated to start within ${NEXT_EXPERIMENT_HORIZON_DAYS} days. The cadence is a standing program, not a one-time checkbox ` +
+              "(revenue-monetization.md §7b) — one historical test satisfying this gate forever recreates the one-and-done plateau. Start the next " +
+              "experiment or date the next planned row.",
             revenueOpsPath,
           ),
         );
