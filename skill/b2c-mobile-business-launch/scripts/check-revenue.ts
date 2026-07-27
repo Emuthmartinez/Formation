@@ -515,7 +515,7 @@ if (revenueDone && revenueOpsText) {
   //     completed experiment row. One reasonable paywall shipped and never
   //     touched again is the plateau the skill's own anti-pattern list names —
   //     this makes it a red check instead of a prose warning.
-  const liveSinceRaw = state ? ((asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "").trim()) : "";
+  const liveSinceRaw = state ? (asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "").trim() : "";
   const liveSinceDate = /^\d{4}-\d{2}-\d{2}$/.test(liveSinceRaw) ? new Date(`${liveSinceRaw}T00:00:00Z`) : undefined;
   const liveDays =
     liveSinceDate && !Number.isNaN(liveSinceDate.getTime()) && liveSinceDate.getTime() <= Date.now()

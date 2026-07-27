@@ -154,6 +154,47 @@ export function register(h: Harness): void {
   );
   runFixture("done revenue lane with a clearance column answering no fails", revenueClearanceNo, "check-revenue.ts", 1, "revenue.missing_metadata.unresolved");
 
+  // Paywall experiment cadence (§7b): once the app has been live four weeks
+  // with the revenue lane done, the backlog needs a dated active or completed
+  // row — the one-and-done paywall is the plateau the gate exists to stop.
+  const experimentIsoDaysAgo = (days: number): string => {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() - days);
+    return date.toISOString().slice(0, 10);
+  };
+
+  const revenueExperimentEmpty = makeFixture("revenue-experiment-backlog-empty");
+  {
+    const state = readState(revenueExperimentEmpty);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentEmpty, state);
+  }
+  runFixture(
+    "done revenue lane live four-plus weeks with an empty experiment backlog fails",
+    revenueExperimentEmpty,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.empty",
+  );
+
+  const revenueExperimentMissing = makeFixture("revenue-experiment-backlog-missing");
+  {
+    const state = readState(revenueExperimentMissing);
+    getLane(state, "revenue")["status"] = "done";
+    getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
+    writeState(revenueExperimentMissing, state);
+    const opsPath = path.join(revenueExperimentMissing, "REVENUE_OPS.md");
+    writeFileSync(opsPath, readFileSync(opsPath, "utf8").replace("## Paywall Experiment Backlog", "## Old Notes"), "utf8");
+  }
+  runFixture(
+    "done revenue lane live four-plus weeks without the backlog section fails",
+    revenueExperimentMissing,
+    "check-revenue.ts",
+    1,
+    "revenue.experiment_backlog.missing",
+  );
+
   const revenueWrongType = makeFixture("revenue-lifetime-wrong-product-type");
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";

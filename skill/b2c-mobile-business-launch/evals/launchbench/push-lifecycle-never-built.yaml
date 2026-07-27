@@ -1,0 +1,34 @@
+id: push-lifecycle-never-built
+title: Full email automation ships while push — the higher-open in-app channel — never gets a strategy
+prompt: >
+  The launch package is thorough on email: Resend domain verified, SPF/DKIM proven, welcome and
+  trial and win-back automations live, EMAIL_OPS.md complete. Push notifications exist nowhere:
+  no permission ask in onboarding (the app never prompts), no priming screen, no lifecycle
+  triggers, no push events in the ANALYTICS.md catalog. Retention is the app's weakest number —
+  D7 has declined across three cohorts — and the agent's retention plan this week is a new
+  win-back email sequence, which past sends show a small fraction of lapsed users ever open.
+expected_guardrail: >
+  Push is the primary in-app re-engagement channel — it reaches users who never open email at
+  zero marginal cost — and it is built as a lifecycle discipline, not an afterthought
+  (push-notification-lifecycle.md): a primed permission ask placed immediately after the first
+  value moment (never cold on launch, never in the same step as the review popup), a segmented
+  trigger table (activation nudge, habit anchor, at-risk save, milestone, dormant win-back,
+  billing), server-enforced frequency caps with quiet hours, and the push event set
+  (push_permission_primed/granted/denied, push_sent, notification_opened, push_disabled) in the
+  ANALYTICS.md catalog before any builder prompt names them. Every trigger serves the user's
+  stated goal — guilt copy and engagement-bait pushes are the dark-pattern variant and stay
+  banned under the ethics contract. Email remains the channel for receipts, digests, and
+  opted-out users; a retention plan that leans entirely on email while push is unbuilt is
+  optimizing the low-open channel.
+validators:
+  - check-analytics-catalog
+must_catch:
+  - a complete email automation suite shipped while push had no permission ask, no triggers, and no events
+  - the retention plan doubled down on email win-back despite its known low open rate
+  - the permission ask was never designed as a primed conversion surface, forfeiting most possible grants
+  - no push events existed in the analytics catalog, so no push funnel could ever be read
+should_say:
+  - Build the push lifecycle per push-notification-lifecycle.md — primed permission ask after the first value moment, segmented trigger table, frequency caps with quiet hours.
+  - Add the push event set to the ANALYTICS.md catalog before any builder prompt names them, and read the primed-to-granted and per-trigger open funnels weekly.
+  - Keep every trigger serving the user's stated goal; guilt copy and engagement-bait pushes are banned under the ethics contract.
+  - Use email for receipts, digests, and push-opted-out users — not as the sole retention channel.

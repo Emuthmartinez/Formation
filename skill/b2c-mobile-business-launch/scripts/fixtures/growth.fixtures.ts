@@ -212,6 +212,23 @@ export function register(h: Harness): void {
   );
   runFixture("done viral growth with placeholders fails", viralGrowthDonePlaceholder, "check-viral-growth-loop.ts", 1, "viral_growth.placeholder_complete");
 
+  // Counting shares is not measuring a loop: the contract needs the Loop
+  // Economics section (k = invites/user × recipient conversion, cycle time).
+  const viralGrowthNoLoopEconomics = makeFixture("viral-growth-no-loop-economics");
+  writeCompleteViralGrowth(viralGrowthNoLoopEconomics);
+  writeFileSync(
+    path.join(viralGrowthNoLoopEconomics, "growth", "VIRAL_GROWTH.md"),
+    readFileSync(path.join(viralGrowthNoLoopEconomics, "growth", "VIRAL_GROWTH.md"), "utf8").replace(/^Loop Economics:.*$/m, ""),
+    "utf8",
+  );
+  runFixture(
+    "viral growth without the loop economics contract fails",
+    viralGrowthNoLoopEconomics,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.loop_economics.missing",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");
