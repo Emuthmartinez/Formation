@@ -617,6 +617,17 @@ export function register(h: Harness): void {
     "motion_contract.vocabulary.token_unknown",
   );
 
+  const motionVocabEmbeddedToken = writeMotionContractRoot("motion-contract-vocab-embedded-token", (rel, text) =>
+    rel.endsWith("variable-reward-card.md") ? `${text}\nWeb: \`transition={{ repeat: Infinity, duration: motion.moderate }}\` for anticipation.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a phantom token embedded in an implementation code span",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabEmbeddedToken],
+    1,
+    "motion_contract.vocabulary.token_unknown",
+  );
+
   const motionVocabCssVarSuffix = writeMotionContractRoot("motion-contract-vocab-css-var-suffix", (rel, text) =>
     rel.endsWith("variable-reward-card.md") ? `${text}\nWeb pulses may read the \`--motion-duration-fast_extra\` variable.\n` : text,
   );

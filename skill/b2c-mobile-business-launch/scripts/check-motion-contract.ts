@@ -567,17 +567,24 @@ for (const rel of [...mdFilesUnder("references"), ...mdFilesUnder("templates")])
   }
   // The benchmarks' motion.<name> references are already resolved by check 1.
   if (rel !== BENCH && Object.keys(motionTokens).length > 0) {
-    // Capture through the closing backtick so punctuated names (motion.durationReveal-extra)
-    // cannot slip past a narrower character class.
-    for (const m of text.matchAll(/`motion\.([^`]+)`/g)) {
-      const name = g(m, 1);
-      if (MOTION_NAMESPACE_SKIP.has(name)) continue;
-      // A span like `motion.div whileInView={{ ... }}` is inline code riding the
-      // motion/react namespace, not a token citation; everything token-shaped
-      // (word characters plus punctuated typos) is validated.
-      if (!/^[A-Za-z0-9_.-]+$/.test(name)) continue;
-      if (!Object.hasOwn(motionTokens, name)) {
-        issues.push(issue("error", "motion_contract.vocabulary.token_unknown", `${rel} references motion.${name}, which does not exist in tokens.json.`, rel));
+    // Scan token occurrences anywhere inside inline code spans, not just span-initial
+    // ones, so `transition={{ duration: motion.moderate }}` fails the same way
+    // `motion.moderate` does. Fenced blocks are removed first so a fence's backticks
+    // cannot pair with prose backticks and swallow paragraphs. The name class captures
+    // punctuated typos whole (motion.durationReveal-extra cannot pass as a prefix).
+    const inlineText = text.replace(/```[\s\S]*?```/g, "");
+    for (const span of inlineText.matchAll(/`([^`]+)`/g)) {
+      for (const m of g(span, 1).matchAll(/\bmotion\.([A-Za-z0-9_.-]+)/g)) {
+        const name = g(m, 1);
+        // motion/react JSX (motion.div ...), motion.dev, and motion.css ride the same
+        // prefix; skip on the first dotted segment so motion.div.style stays skipped
+        // while motion.durationReveal.extra still fails on its full name.
+        if (MOTION_NAMESPACE_SKIP.has(name.split(".")[0] ?? "")) continue;
+        if (!Object.hasOwn(motionTokens, name)) {
+          issues.push(
+            issue("error", "motion_contract.vocabulary.token_unknown", `${rel} references motion.${name}, which does not exist in tokens.json.`, rel),
+          );
+        }
       }
     }
   }
