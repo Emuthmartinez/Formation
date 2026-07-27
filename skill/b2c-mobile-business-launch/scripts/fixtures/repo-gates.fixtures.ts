@@ -606,6 +606,28 @@ export function register(h: Harness): void {
     "motion_contract.vocabulary.css_var_unknown",
   );
 
+  const motionVocabPunctuatedToken = writeMotionContractRoot("motion-contract-vocab-punctuated-token", (rel, text) =>
+    rel.endsWith("peak-end-card.md") ? `${text}\nStaged loops may also ride \`motion.durationReveal-extra\` cycles.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a punctuated card token reference outside the benchmarks",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabPunctuatedToken],
+    1,
+    "motion_contract.vocabulary.token_unknown",
+  );
+
+  const motionVocabCssVarSuffix = writeMotionContractRoot("motion-contract-vocab-css-var-suffix", (rel, text) =>
+    rel.endsWith("variable-reward-card.md") ? `${text}\nWeb pulses may read the \`--motion-duration-fast_extra\` variable.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails on a CSS variable that extends a promoted name past an identifier boundary",
+    "check-motion-contract.ts",
+    ["--skill-root", motionVocabCssVarSuffix],
+    1,
+    "motion_contract.vocabulary.css_var_unknown",
+  );
+
   const motionFamilyDuplicate = writeMotionContractRoot("motion-contract-family-duplicate", (rel, text) =>
     rel.endsWith("premium-mobile-craft.md")
       ? text.replace(

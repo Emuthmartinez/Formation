@@ -567,15 +567,23 @@ for (const rel of [...mdFilesUnder("references"), ...mdFilesUnder("templates")])
   }
   // The benchmarks' motion.<name> references are already resolved by check 1.
   if (rel !== BENCH && Object.keys(motionTokens).length > 0) {
-    for (const m of text.matchAll(/`motion\.([A-Za-z0-9_]+)`/g)) {
+    // Capture through the closing backtick so punctuated names (motion.durationReveal-extra)
+    // cannot slip past a narrower character class.
+    for (const m of text.matchAll(/`motion\.([^`]+)`/g)) {
       const name = g(m, 1);
       if (MOTION_NAMESPACE_SKIP.has(name)) continue;
+      // A span like `motion.div whileInView={{ ... }}` is inline code riding the
+      // motion/react namespace, not a token citation; everything token-shaped
+      // (word characters plus punctuated typos) is validated.
+      if (!/^[A-Za-z0-9_.-]+$/.test(name)) continue;
       if (!Object.hasOwn(motionTokens, name)) {
         issues.push(issue("error", "motion_contract.vocabulary.token_unknown", `${rel} references motion.${name}, which does not exist in tokens.json.`, rel));
       }
     }
   }
-  for (const m of text.matchAll(/--motion-[a-z][a-z0-9-]*/g)) {
+  // Capture the full CSS identifier so an undefined variable that merely extends a
+  // promoted name (--motion-duration-fast_extra) fails instead of passing as its prefix.
+  for (const m of text.matchAll(/--motion-[A-Za-z0-9_-]+/g)) {
     if (!PROMOTED_MOTION_CSS_VARS.has(m[0])) {
       issues.push(
         issue(
