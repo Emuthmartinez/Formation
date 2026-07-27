@@ -24,6 +24,7 @@ const knownValidators = new Set([
   "check-store-screenshots",
   "check-native-ios-proof",
   "check-mobai-proof",
+  "check-motion-contract",
   "check-agent-operations",
   "check-founder-operator-bootstrap",
   "check-asc-command-contract",

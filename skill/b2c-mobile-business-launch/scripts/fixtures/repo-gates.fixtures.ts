@@ -446,4 +446,76 @@ export function register(h: Harness): void {
     0,
     "0 error(s)",
   );
+
+  // --- check-motion-contract ---
+  // The real contract files are copied in rather than invented, so each failing
+  // fixture is the shipped skill plus exactly one seeded drift — if the shipped
+  // files and the parser ever stop agreeing, the passing fixture goes red too.
+  const motionContractFiles = [
+    "references/motion-craft-benchmarks.md",
+    "references/premium-mobile-craft.md",
+    "design-system/tokens.json",
+    "templates/design-system/PremiumCraft.swift",
+    "references/experience-cards/peak-end-card.md",
+    "references/experience-cards/mastery-and-status-card.md",
+    "references/experience-cards/variable-reward-card.md",
+  ];
+  const writeMotionContractRoot = (name: string, mutate?: (rel: string, text: string) => string): string => {
+    const root = makeEmptyFixture(name);
+    for (const rel of motionContractFiles) {
+      const target = path.join(root, rel);
+      mkdirSync(path.dirname(target), { recursive: true });
+      const text = readFileSync(path.join(skillRoot, rel), "utf8");
+      writeFileSync(target, mutate ? mutate(rel, text) : text, "utf8");
+    }
+    return root;
+  };
+
+  runScriptArgs("motion contract passes on the shipped skill", "check-motion-contract.ts", ["--skill-root", skillRoot], 0);
+
+  const motionMirrorDrift = writeMotionContractRoot("motion-contract-mirror-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text.replace("celebrate (response 0.45–0.5 / damping 0.5–0.7)", "celebrate (response 0.45–0.6 / damping 0.5–0.7)")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the benchmarks spring-family mirror drifts from the craft table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionMirrorDrift],
+    1,
+    "motion_contract.family_mirror.drift",
+  );
+
+  const motionTokenDrift = writeMotionContractRoot("motion-contract-token-drift", (rel, text) =>
+    rel.endsWith("tokens.json") ? text.replace('"durationBase": "220ms"', '"durationBase": "200ms"') : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a documented token value drifts from tokens.json",
+    "check-motion-contract.ts",
+    ["--skill-root", motionTokenDrift],
+    1,
+    "motion_contract.token_row.value_drift",
+  );
+
+  const motionCanonDrift = writeMotionContractRoot("motion-contract-canon-outside-band", (rel, text) =>
+    rel.endsWith("peak-end-card.md") ? text.replace(".spring(response: 0.45, dampingFraction: 0.7)", ".spring(response: 0.45, dampingFraction: 0.85)") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a canon card's spring falls outside the stated celebrate band",
+    "check-motion-contract.ts",
+    ["--skill-root", motionCanonDrift],
+    1,
+    "motion_contract.canon.outside_band",
+  );
+
+  const motionCinematicLeak = writeMotionContractRoot("motion-contract-cinematic-leak", (rel, text) =>
+    rel.endsWith("premium-mobile-craft.md") ? `${text}\nUse durationCinematic for hero moments.\n` : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the cinematic token leaks into the in-app craft doctrine",
+    "check-motion-contract.ts",
+    ["--skill-root", motionCinematicLeak],
+    1,
+    "motion_contract.cinematic.in_craft_doctrine",
+  );
 }
