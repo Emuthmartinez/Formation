@@ -169,6 +169,12 @@ lanes:
       - "localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
       - "localization-market-research/localization-market-research.html"
     blockers: []
+    # Pre-build verdict from the Go, Pivot, Or Kill checkpoint (RESEARCH.md,
+    # launch-phases.md Phase 1): founder-decided over category-revenue, wedge,
+    # and demand evidence, before design/build work is spent on the idea.
+    # Values: go | pivot | kill. Date is the ISO day the founder decided.
+    go_pivot_kill_decision: ""
+    go_pivot_kill_decided_at: ""
   traceability:
     status: "not_started"
     evidence:

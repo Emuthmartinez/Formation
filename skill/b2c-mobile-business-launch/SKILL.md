@@ -210,7 +210,7 @@ Full entry criteria, work, and exit criteria for each phase are in [`references/
 | 0 | Founder-zero orient and scaffold | `BUSINESS_ACCESS.md` + ledger, `PROJECT_STATE.yaml`, autonomy/tier, first cockpit |
 | 0b | Paid-tool access and fallback routing | `TOOL_DECISIONS.md` |
 | 0c | Secrets baseline | `SECRETS.md`, `doppler.yaml`, names-only `.env.example` |
-| 1 | Research-backed spec | `RESEARCH.md`, `LOCALIZATION_MARKET_RESEARCH.md`, revised `SPEC.md` with an evidence ledger |
+| 1 | Research-backed spec | `RESEARCH.md` (with its Go/Pivot/Kill verdict), `LOCALIZATION_MARKET_RESEARCH.md`, revised `SPEC.md` |
 | 1b | Analytics and attribution blueprint | `ANALYTICS.md`, `analytics-plan.html` |
 | 1c | 11-star experience and product brainstorm | `11_STAR_EXPERIENCE.md`, `11-star-experience.html` (use `ce-brainstorm` when research leaves multiple valid shapes) |
 | 1d | Paid user acquisition system | `PAID_UA.md` |
@@ -235,7 +235,7 @@ A launch package is complete when a future agent can pick it up **without re-dec
 - what ships in V1, what is explicitly V2/V3, and what is banned
 - what `PROJECT_STATE.yaml` says about phase, autonomy mode, lane statuses, launch tier and its dated deferrals, provider state, orchestration strategy, proof, active failure cards, and current blockers — and what `launch-cockpit.html` shows the founder
 - how research became product, experience, brand, design, build, store, legal, revenue, analytics, and verification decisions (`LAUNCH_TRACE.md`)
-- which founder-only gates are open, which paid tools were intended, and whether each was approved, fell back, or is blocked
+- which founder-only gates are open and whether each intended paid tool was approved, fell back, or is blocked
 - what is live, what was verified with live provider proof, and what still requires founder action
 
 The full per-lane evidence checklist — every artifact, what it must contain, and which validator gates it — is the Coverage Matrix and Handoff Completeness Checklist in [`references/launch-coverage.md`](references/launch-coverage.md); per-artifact acceptance criteria are in [`references/artifact-contracts.md`](references/artifact-contracts.md). Audit against those before claiming readiness, and let no known miss hide behind prose.

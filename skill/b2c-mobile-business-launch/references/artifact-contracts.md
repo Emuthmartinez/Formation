@@ -541,12 +541,14 @@ Acceptance:
 
 ## `RESEARCH.md`
 
-Validator: `npm run check:research -- --root . --state PROJECT_STATE.yaml` enforces the structural floor (Source Ledger, Decision Inputs, Decision Log, Rejected Claims, trace pointers; dated evidence and no placeholders when the research lane is done).
+Validator: `npm run check:research -- --root . --state PROJECT_STATE.yaml` enforces the structural floor (Source Ledger, Decision Inputs, Decision Log, Rejected Claims, Category Revenue Reality, Go, Pivot, Or Kill, trace pointers; dated evidence, a judged revenue bar, a founder-decided verdict mirrored to state, and no placeholders when the research lane is done).
 
 Use when research spans app stores, social platforms, competitor websites, reviews, creators, keywords, pricing, or paid acquisition signals.
 
 Must include:
 - research date, target country/market, tool/source, query, and limits/credit budget
+- Category Revenue Reality: top-competitor revenue rows with sources, a stated bar, and an explicit pass/fail judgment
+- Go, Pivot, Or Kill: the pre-build verdict row (date, evidence cells, founder's verdict), mirrored to `lanes.research.go_pivot_kill_decision`
 - AppKittie findings: category economics, competitors, downloads/revenue estimates, IAP/pricing, screenshots, ad presence, creator partnerships, contact/social links, review themes, and keyword results
 - XPOZ findings: platform, query, creator/subreddit/handle, post/comment evidence, user language, emotional register, objections, and ad/organic content formats
 - Firecrawl/web findings: competitor pages crawled, pricing, plans, claims, CTAs, FAQ/help/policy pages, SEO/GEO patterns, and source URLs
