@@ -172,6 +172,19 @@ if (bench !== undefined) {
         issue("error", "motion_contract.token_row.value_drift", `Benchmarks token table says motion.${name} = ${ms}ms but tokens.json ships ${actual}.`, BENCH),
       );
     }
+    // Every numeric row must also match the Swift enum value, preset or not —
+    // durationReveal/durationCinematic/stagger have no PremiumMotion mapping but
+    // apps still compile against their Swift members.
+    if (swiftMotionMembers.has(name) && Math.round((swiftMotionMembers.get(name) ?? 0) * 1000) !== Number(ms)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.token_row.swift_value_drift",
+          `Benchmarks token table says motion.${name} = ${ms}ms but DesignTokens.Motion.${name} ships ${(swiftMotionMembers.get(name) ?? 0) * 1000}ms.`,
+          BENCH,
+        ),
+      );
+    }
     const presetRef = presetCell.match(/PremiumMotion\.(\w+)`?\s*\(bounce ([\d.]+)\)/);
     if (presetCell.includes("PremiumMotion") && !presetRef) {
       issues.push(
@@ -200,15 +213,6 @@ if (bench !== undefined) {
             "error",
             "motion_contract.preset.duration_mismatch",
             `Benchmarks token table maps PremiumMotion.${g(presetRef, 1)} to motion.${name} but PremiumCraft.swift rides DesignTokens.Motion.${preset.durationMember}.`,
-            BENCH,
-          ),
-        );
-      } else if (swiftMotionMembers.has(preset.durationMember) && Math.round((swiftMotionMembers.get(preset.durationMember) ?? 0) * 1000) !== Number(ms)) {
-        issues.push(
-          issue(
-            "error",
-            "motion_contract.preset.value_drift",
-            `Benchmarks token table documents motion.${name} = ${ms}ms but DesignTokens.Motion.${preset.durationMember} ships ${(swiftMotionMembers.get(preset.durationMember) ?? 0) * 1000}ms — the preset would run at the drifted value.`,
             BENCH,
           ),
         );
@@ -301,9 +305,21 @@ if (craft !== undefined) {
     bands.set(family, { respLo: Number(g(m, 2)), respHi: Number(g(m, 3)), dampLo: Number(g(m, 4)), dampHi: Number(g(m, 5)) });
   }
   for (const family of ["press", "celebrate"]) {
-    if (!bands.has(family)) {
+    const band = bands.get(family);
+    if (!band) {
       issues.push(
         issue("error", "motion_contract.family_table.missing", `premium-mobile-craft.md's spring table has no parseable ${family} family row.`, CRAFT),
+      );
+      continue;
+    }
+    if (band.respLo > band.respHi || band.dampLo > band.dampHi) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.family_table.inverted_range",
+          `premium-mobile-craft.md's ${family} family states an inverted range (response ${band.respLo}-${band.respHi}, damping ${band.dampLo}-${band.dampHi}) — an empty valid range gates nothing.`,
+          CRAFT,
+        ),
       );
     }
   }
@@ -365,9 +381,11 @@ if (celebrateBand) {
     if (text === undefined) continue;
     const NUM = "\\d+(?:\\.\\d+)?";
     const springs = [
-      ...text.matchAll(new RegExp(`\\.spring\\(response:\\s*(${NUM}|DesignTokens\\.Motion\\.[A-Za-z0-9_]+),\\s*dampingFraction:\\s*(${NUM})\\)`, "g")),
+      ...text.matchAll(
+        new RegExp(`\\.spring\\(\\s*response:\\s*(${NUM}|DesignTokens\\.Motion\\.[A-Za-z0-9_]+)\\s*,\\s*dampingFraction:\\s*(${NUM})\\s*\\)`, "g"),
+      ),
     ];
-    const springSites = (text.match(/\.spring\(response:/g) ?? []).length;
+    const springSites = (text.match(/\.spring\(\s*response:/g) ?? []).length;
     if (springSites > springs.length) {
       issues.push(
         issue(

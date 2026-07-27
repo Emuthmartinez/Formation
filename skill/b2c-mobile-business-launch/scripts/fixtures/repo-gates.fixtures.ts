@@ -632,7 +632,7 @@ export function register(h: Harness): void {
     "check-motion-contract.ts",
     ["--skill-root", motionPresetValueDrift],
     1,
-    "motion_contract.preset.value_drift",
+    "motion_contract.token_row.swift_value_drift",
   );
 
   const motionMirrorDuplicate = writeMotionContractRoot("motion-contract-mirror-duplicate", (rel, text) =>
@@ -646,6 +646,19 @@ export function register(h: Harness): void {
     ["--skill-root", motionMirrorDuplicate],
     1,
     "motion_contract.family_mirror.duplicate",
+  );
+
+  const motionInvertedRange = writeMotionContractRoot("motion-contract-inverted-range", (rel, text) =>
+    rel.endsWith("premium-mobile-craft.md")
+      ? text.replace("| **press** | response 0.3\u20130.4, dampingFraction 0.7\u20130.8", "| **press** | response 0.4\u20130.3, dampingFraction 0.7\u20130.8")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a spring-family range is inverted",
+    "check-motion-contract.ts",
+    ["--skill-root", motionInvertedRange],
+    1,
+    "motion_contract.family_table.inverted_range",
   );
 
   const motionCinematicLeak = writeMotionContractRoot("motion-contract-cinematic-leak", (rel, text) =>
