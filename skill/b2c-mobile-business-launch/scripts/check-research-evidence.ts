@@ -110,7 +110,18 @@ if (text) {
     const PLACEHOLDER_TEXT = /\b(unverified|tbd|todo|to be filled|pending|placeholder)\b/i;
 
     const revenueSection = markdownSection(text, "Category Revenue Reality");
-    if (revenueSection) {
+    if (!revenueSection) {
+      // The phrase in prose is not the section: a done lane needs the parsed
+      // heading, or every substance check below silently skips.
+      issues.push(
+        issue(
+          "error",
+          "research.category_revenue_reality.section_missing",
+          'RESEARCH.md mentions Category Revenue Reality but has no "## Category Revenue Reality" section. The gate reads the section, not the phrase.',
+          "RESEARCH.md",
+        ),
+      );
+    } else {
       // The revenue estimate and its source are parsed from their intended
       // columns: a dollar amount drifting in an unrelated cell, or a blank
       // source, is data-shaped text rather than a sourced estimate.
@@ -139,13 +150,16 @@ if (text) {
           ),
         );
       }
-      if (!/pass or fail[^:\n]*:\s*(pass|fail)/i.test(revenueSection)) {
+      const barLine = revenueSection.split(/\r?\n/).find((line) => /stated bar/i.test(line) && line.includes(":"));
+      const barValue = barLine ? (barLine.split(/:(.*)/s)[1] ?? "").trim() : "";
+      const barStated = barValue.length > 0 && /\d/.test(barValue) && !PLACEHOLDER_TEXT.test(barValue);
+      if (!barStated || !/pass or fail[^:\n]*:\s*(pass|fail)/i.test(revenueSection)) {
         issues.push(
           issue(
             "error",
             "research.category_revenue_bar_unjudged",
-            "Category Revenue Reality states no pass/fail judgment against the recorded bar. The table without the verdict line is " +
-              "data collection wearing a gate's clothes — write the bar and judge the category against it.",
+            "Category Revenue Reality needs a substantive stated bar (a number, not a blank or placeholder) AND an explicit pass/fail judgment " +
+              "against it. A pass verdict over no stated threshold, or a table without the judgment line, is data collection wearing a gate's clothes.",
             "RESEARCH.md",
           ),
         );
@@ -153,8 +167,30 @@ if (text) {
     }
 
     const verdictSection = markdownSection(text, "Go, Pivot, Or Kill");
-    if (verdictSection) {
+    if (!verdictSection) {
+      issues.push(
+        issue(
+          "error",
+          "research.go_pivot_or_kill.section_missing",
+          'RESEARCH.md mentions Go, Pivot, Or Kill but has no "## Go, Pivot, Or Kill" section. The gate reads the section, not the phrase.',
+          "RESEARCH.md",
+        ),
+      );
+    } else {
       const verdictColumn = tableColumnIndex(verdictSection, /verdict/i);
+      // A verdict table stripped of its evidence columns (Date | Verdict |
+      // Decided by) would make every evidence check vacuously pass.
+      if (verdictColumn !== -1 && verdictColumn < 5) {
+        issues.push(
+          issue(
+            "error",
+            "research.go_pivot_kill_evidence_columns_missing",
+            "The Go, Pivot, Or Kill table is missing its evidence columns. Keep category revenue reality, wedge, and demand signal between " +
+              "Date and Verdict — a verdict table with no evidence columns is a decision with the reasons removed.",
+            "RESEARCH.md",
+          ),
+        );
+      }
       const verdictRows = tableDataRows(verdictSection)
         .map((cells) => ({
           cells,

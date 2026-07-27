@@ -203,6 +203,53 @@ export function register(h: Harness): void {
     "research.go_pivot_kill_state_mismatch",
   );
 
+  // The phrase in prose is not the section: mentioning both gates informally
+  // must not skip their substance checks.
+  const researchProseSections = makeFixture("research-done-prose-sections");
+  setLaneDone(researchProseSections, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchProseSections, "go", "2026-07-21");
+  writeResearch(researchProseSections, [...researchCoreSections, "We considered Category Revenue Reality and ran Go, Pivot, Or Kill informally over coffee."]);
+  runFixture(
+    "prose mention of the gate sections without the headings fails",
+    researchProseSections,
+    "check-research-evidence.ts",
+    1,
+    "research.category_revenue_reality.section_missing",
+  );
+
+  // A verdict table stripped of its evidence columns makes every evidence
+  // check vacuously pass.
+  const researchNoEvidenceColumns = makeFixture("research-done-no-evidence-columns");
+  setLaneDone(researchNoEvidenceColumns, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchNoEvidenceColumns, "go", "2026-07-21");
+  writeResearch(researchNoEvidenceColumns, [
+    ...researchCoreSections,
+    ...categoryRevenueSection(revenueRow),
+    "## Go, Pivot, Or Kill",
+    "| Date | Verdict (Go / Pivot / Kill) | Decided by |",
+    "| --- | --- | --- |",
+    "| 2026-07-21 | Go | founder |",
+  ]);
+  runFixture(
+    "verdict table without evidence columns fails",
+    researchNoEvidenceColumns,
+    "check-research-evidence.ts",
+    1,
+    "research.go_pivot_kill_evidence_columns_missing",
+  );
+
+  // A pass verdict over no stated threshold is an arbitrary judgment.
+  const researchBarBlank = makeFixture("research-done-bar-blank");
+  setLaneDone(researchBarBlank, "research", ["RESEARCH.md"]);
+  setResearchVerdictState(researchBarBlank, "go", "2026-07-21");
+  writeResearch(
+    researchBarBlank,
+    [...researchCoreSections, ...categoryRevenueSection(revenueRow), ...goPivotKillSection(goRow)].map((line) =>
+      line.startsWith("- Stated bar and why:") ? "- Stated bar and why:" : line,
+    ),
+  );
+  runFixture("pass judgment over a blank stated bar fails", researchBarBlank, "check-research-evidence.ts", 1, "research.category_revenue_bar_unjudged");
+
   // A verdict decided over placeholder evidence is the metrics-theater miss
   // moved pre-build: the row exists, the evidence never arrived.
   const researchVerdictThin = makeFixture("research-done-verdict-thin-evidence");
