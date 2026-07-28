@@ -9,7 +9,18 @@ const args = parseDesignCliArgs(process.argv.slice(2));
 const loaded = loadDesignState(args);
 const issues: Issue[] = [...loaded.issues];
 
-if (loaded.tokens) {
+// motion.durationCelebrate joined the scale in v0.43.0. A pre-v0.43 state file
+// would otherwise promote a zero-duration celebrate spring and an empty CSS
+// variable silently — require the token before writing anything.
+const celebrateRaw = String(getToken(loaded.tokens, "motion.durationCelebrate") ?? "").trim();
+if (loaded.tokens && !/^\d+(?:\.\d+)?ms$/i.test(celebrateRaw)) {
+  issues.push({
+    severity: "error",
+    code: "token_promotion.celebrate_token_missing",
+    message:
+      'state/theme.tokens.json must define motion.durationCelebrate (e.g. "500ms"; added in v0.43.0) before promotion — a missing value would silently disable celebration motion.',
+  });
+} else if (loaded.tokens) {
   const outputDir = path.join(args.root, "design-system");
   const tokenHash = hashTokens(loaded.tokens);
   mkdirSync(outputDir, { recursive: true });

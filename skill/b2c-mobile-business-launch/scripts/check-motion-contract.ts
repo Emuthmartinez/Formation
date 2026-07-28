@@ -170,7 +170,7 @@ if (swift !== undefined) {
 // --- 1. The benchmarks token table must match tokens.json values exactly. ---
 if (bench !== undefined) {
   const rowRe = /^\|\s*`(\w+)`\s*\|\s*(\d+)ms\s*\|([^|]*)\|/gm;
-  const REQUIRED_ROWS = ["durationFast", "durationBase", "durationSlow", "durationReveal", "durationCinematic", "stagger"];
+  const REQUIRED_ROWS = ["durationFast", "durationBase", "durationSlow", "durationCelebrate", "durationReveal", "durationCinematic", "stagger"];
   const seenRows: string[] = [];
   for (const m of bench.matchAll(rowRe)) {
     const name = g(m, 1);
@@ -210,8 +210,12 @@ if (bench !== undefined) {
         ),
       );
     }
-    const presetRef = presetCell.match(/PremiumMotion\.(\w+)`?\s*\(bounce ([\d.]+)\)/);
-    if (presetCell.includes("PremiumMotion") && !presetRef) {
+    // Validate EVERY preset annotation in the cell, not just the first — a
+    // two-preset row (durationCelebrate) must keep both presets synchronized,
+    // and an un-annotated mention must fail rather than ride along unchecked.
+    const presetRefs = [...presetCell.matchAll(/PremiumMotion\.(\w+)`?\s*\(bounce ([\d.]+)\)/g)];
+    const presetMentions = (presetCell.match(/PremiumMotion\./g) ?? []).length;
+    if (presetMentions > presetRefs.length) {
       issues.push(
         issue(
           "error",
@@ -221,7 +225,7 @@ if (bench !== undefined) {
         ),
       );
     }
-    if (presetRef) {
+    for (const presetRef of presetRefs) {
       const preset = swiftPresets.get(g(presetRef, 1));
       if (!preset) {
         issues.push(

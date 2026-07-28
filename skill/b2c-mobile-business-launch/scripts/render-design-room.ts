@@ -3,6 +3,7 @@ import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { getToken, loadDesignState, parseDesignCliArgs, rel, skillRoot, summarizeSurfaces } from "./lib/design-state.js";
+import { panelBlurb, panelLabel } from "./lib/founder-copy.js";
 import { asArray, asString, isRecord, reportAndExit } from "./lib/launch-state.js";
 
 const args = parseDesignCliArgs(process.argv.slice(2));
@@ -65,19 +66,9 @@ function resolveViteBin(): string | undefined {
  * machine reads/renders detail moves into the technical-details disclosure
  * (check:founder-copy enforces both halves of that split).
  */
+/** Founder translation for a control-plane panel, from the shared founder-copy layer. */
 function panelCopy(id: string, name: string): { label: string; blurb: string } {
-  // Declared inside the (hoisted) function because the module's top level
-  // renders before later const initializers run.
-  const map: Record<string, { label: string; blurb: string }> = {
-    "design-room": { label: "Design Room", blurb: "Your look and feel: colors, type, and every screen." },
-    "agent-ops": { label: "Business overview", blurb: "A running summary of where the business stands." },
-    "operator-bootstrap": { label: "Access and setup", blurb: "Your accounts, keys, and who owns what." },
-    analytics: { label: "Analytics", blurb: "What people do in the app, tracked over time." },
-    monetization: { label: "Payments", blurb: "Prices, subscriptions, and purchase history." },
-    "store-ops": { label: "Store listing", blurb: "What shoppers see on the App Store and Google Play." },
-    growth: { label: "Growth", blurb: "Ads, campaigns, and how people find the app." },
-  };
-  return map[id] ?? { label: name || id, blurb: "Part of the launch, tracked here." };
+  return { label: panelLabel(id, name), blurb: panelBlurb(id) };
 }
 
 function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): string {

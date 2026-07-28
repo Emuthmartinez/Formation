@@ -321,6 +321,31 @@ export const celebrationBeats: { phase: string; earnedBy: string; say: string }[
   },
 ];
 
+/**
+ * Founder-facing copy for control-plane panels rendered into the Design Room.
+ * Registered here — not in the renderer — so every surface that shows a panel
+ * shares one translation and a new panel id gets founder copy in one place.
+ */
+export const panelCopy: Record<string, { label: string; blurb: string }> = {
+  "design-room": { label: "Design Room", blurb: "Your look and feel: colors, type, and every screen." },
+  "agent-ops": { label: "Business overview", blurb: "A running summary of where the business stands." },
+  "operator-bootstrap": { label: "Access and setup", blurb: "Your accounts, keys, and who owns what." },
+  analytics: { label: "Analytics", blurb: "What people do in the app, tracked over time." },
+  monetization: { label: "Payments", blurb: "Prices, subscriptions, and purchase history." },
+  "store-ops": { label: "Store listing", blurb: "What shoppers see on the App Store and Google Play." },
+  growth: { label: "Growth", blurb: "Ads, campaigns, and how people find the app." },
+};
+
+/** Founder-visible label for a control-plane panel. Unknown panels read as plain words, never machine ids. */
+export function panelLabel(id: string, name?: string): string {
+  return panelCopy[id]?.label ?? humanizeIdentifier(name || id);
+}
+
+/** One founder-readable line on what a control-plane panel holds. */
+export function panelBlurb(id: string): string {
+  return panelCopy[id]?.blurb ?? "Part of the launch, tracked here.";
+}
+
 /** Founder-visible label for a lane id. Unknown ids fall back to a readable form. */
 export function laneLabel(id: string): string {
   return laneCopy[id]?.label ?? humanizeIdentifier(id);

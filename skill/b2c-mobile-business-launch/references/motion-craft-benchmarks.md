@@ -118,7 +118,7 @@ A decelerating tween reads as "panel animating in"; an oscillating overshoot rea
 - [ ] Exactly one hero/content object per composition carries saturated color; remaining chrome stays neutral or rides the same brand hue quieter than the hero — never a second saturated hue.
 - [ ] Chroma and type-weight concentrate on the same element — attention has a single address.
 - [ ] In celebration moments the saturated hero is the earned thing itself, not the chrome around it.
-- [ ] During a landing or celebration, brand-hued chrome holds still and arrives only after the hold (R3, R10) — the full motion budget stays on the hero.
+- [ ] During a landing or celebration, brand-hued chrome holds still; CTAs and chrome arrive only after the hero settles — via R10's post-reveal reflow, or after R2's hold when the moment choreographs one — so the full motion budget stays on the hero.
 
 **Exemplars:** consistent across the catalog's top reveals — Nuvion (eng 1,568), mymind (eng 1,540), Melius.
 
