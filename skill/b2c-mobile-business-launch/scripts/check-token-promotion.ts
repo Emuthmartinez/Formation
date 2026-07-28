@@ -59,6 +59,7 @@ if (loaded.tokens) {
     for (const motionVar of [
       "--motion-duration-fast",
       "--motion-duration-base",
+      "--motion-duration-celebrate",
       "--motion-easing",
       "--motion-duration-reveal",
       "--motion-duration-cinematic",

@@ -59,6 +59,10 @@ function renderCss(tokens: unknown, tokenHash: string): string {
     ["motion-duration-fast", "motion.durationFast"],
     ["motion-duration-base", "motion.durationBase"],
     ["motion-duration-slow", "motion.durationSlow"],
+    // Celebrate-family spring duration (premium-mobile-craft.md §1): carried by
+    // the PremiumMotion.celebrate/.celebrateLanding presets on mobile; promoted
+    // to CSS so web celebration moments read the same 500ms spine.
+    ["motion-duration-celebrate", "motion.durationCelebrate"],
     ["motion-duration-reduced", "motion.reducedMotionDuration"],
     ["motion-easing", "motion.easing"],
     // Landing/web cinematic lane (references/landing-motion-craft.md): hero
@@ -110,6 +114,9 @@ function renderSwift(tokens: unknown, tokenHash: string): string {
     `    static let durationFast: Double = ${msToSeconds(getToken(tokens, "motion.durationFast"))}`,
     `    static let durationBase: Double = ${msToSeconds(getToken(tokens, "motion.durationBase"))}`,
     `    static let durationSlow: Double = ${msToSeconds(getToken(tokens, "motion.durationSlow"))}`,
+    "    // Celebrate-family spring duration: earned moments only, carried by the",
+    "    // PremiumMotion.celebrate / .celebrateLanding presets (PremiumCraft.swift).",
+    `    static let durationCelebrate: Double = ${msToSeconds(getToken(tokens, "motion.durationCelebrate"))}`,
     `    static let reducedMotionDuration: Double = ${msToSeconds(getToken(tokens, "motion.reducedMotionDuration"))}`,
     `    static let easing = "${String(getToken(tokens, "motion.easing") ?? "")}"`,
     "    // Landing/web cinematic lane tokens. The mobile binary keeps to the",

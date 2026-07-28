@@ -526,6 +526,7 @@ const PROMOTED_MOTION_CSS_VARS = new Set([
   "--motion-duration-fast",
   "--motion-duration-base",
   "--motion-duration-slow",
+  "--motion-duration-celebrate",
   "--motion-duration-reduced",
   "--motion-easing",
   "--motion-duration-reveal",
