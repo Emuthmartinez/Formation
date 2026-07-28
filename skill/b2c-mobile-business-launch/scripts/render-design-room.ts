@@ -59,6 +59,27 @@ function resolveViteBin(): string | undefined {
   return candidates.find((candidate) => existsSync(candidate));
 }
 
+/**
+ * Founder translation for control-plane panels. The Design Room is text a
+ * founder reads, so panel rows carry plain-language labels and blurbs; the
+ * machine reads/renders detail moves into the technical-details disclosure
+ * (check:founder-copy enforces both halves of that split).
+ */
+function panelCopy(id: string, name: string): { label: string; blurb: string } {
+  // Declared inside the (hoisted) function because the module's top level
+  // renders before later const initializers run.
+  const map: Record<string, { label: string; blurb: string }> = {
+    "design-room": { label: "Design Room", blurb: "Your look and feel: colors, type, and every screen." },
+    "agent-ops": { label: "Business overview", blurb: "A running summary of where the business stands." },
+    "operator-bootstrap": { label: "Access and setup", blurb: "Your accounts, keys, and who owns what." },
+    analytics: { label: "Analytics", blurb: "What people do in the app, tracked over time." },
+    monetization: { label: "Payments", blurb: "Prices, subscriptions, and purchase history." },
+    "store-ops": { label: "Store listing", blurb: "What shoppers see on the App Store and Google Play." },
+    growth: { label: "Growth", blurb: "Ads, campaigns, and how people find the app." },
+  };
+  return map[id] ?? { label: name || id, blurb: "Part of the launch, tracked here." };
+}
+
 function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): string {
   const business = isRecord(state) && isRecord(state.business) ? state.business : {};
   const designBrief = isRecord(state) && isRecord(state.designBrief) ? state.designBrief : undefined;
@@ -141,6 +162,9 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
     .row:last-child { border-bottom: 0; }
     .status { color: var(--color-primary); font-weight: 700; }
     @media (max-width: 680px) { .row { grid-template-columns: 1fr; } }
+    details.techDetails { border: 1px dashed var(--color-border); background: transparent; }
+    details.techDetails summary { cursor: pointer; color: var(--color-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+    details.techDetails p { margin-top: 8px; color: var(--color-muted); font-size: 13px; }
   </style>
 </head>
 <body>
@@ -150,7 +174,6 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
     <div class="meta">
       <span class="pill">Stage: ${escapeHtml(business.stage ?? "unknown")}</span>
       <span class="pill">Theme: ${escapeHtml(isRecord(state) && isRecord(state.theme) ? state.theme.status : "unknown")}</span>
-      <span class="pill">State hash: ${escapeHtml(stateHash)}</span>
     </div>
   </header>
   <main>
@@ -166,7 +189,7 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
       designBrief
         ? `<section>
       <h2>Design Brief</h2>
-      <p class="muted">source: ${escapeHtml(designBrief.source)} · web surfaces animate with framer-motion from motion.* tokens; mobile uses native animation</p>
+      <p class="muted">Web surfaces animate with framer-motion from motion.* tokens; mobile uses native animation.</p>
       <div class="grid">
         <article class="panel"><h3>Style</h3><p>${escapeHtml(designBrief.recommendedStyle) || '<span class="muted">Not set</span>'}</p></article>
         <article class="panel"><h3>Palette</h3><p>${escapeHtml(designBrief.paletteMood) || '<span class="muted">Not set</span>'}</p></article>
@@ -180,20 +203,15 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
       <div class="deck">${surfaceCards}</div>
     </section>
     <section>
-      <h2>Business Control Plane</h2>
+      <h2>Your business dashboard</h2>
       <div class="list">
         ${panels
           .map((panel) => {
-            const stateRefs = asArray(panel.stateRefs)
-              .map((entry) => asString(entry))
-              .filter(Boolean);
-            const artifacts = asArray(panel.renderedArtifacts)
-              .map((entry) => asString(entry))
-              .filter(Boolean);
+            const copy = panelCopy(asString(panel.id) ?? "", asString(panel.name) ?? "");
             return `<article class="row">
               <div>
-                <h3>${escapeHtml(panel.name ?? panel.id)}</h3>
-                <p class="muted">Reads ${escapeHtml(stateRefs.join(", ") || "no state refs")} and renders ${escapeHtml(artifacts.join(", ") || "no artifacts")}.</p>
+                <h3>${escapeHtml(copy.label)}</h3>
+                <p class="muted">${escapeHtml(copy.blurb)}</p>
               </div>
               <span class="status">${escapeHtml(panel.status ?? "unknown")}</span>
             </article>`;
@@ -206,20 +224,44 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
       <div class="grid">
         <article class="panel"><h3>Custom Product Pages</h3><p>${customPages.length} / 70 planned</p><p class="muted">Each page needs an audience, traffic source, media, keywords, URL, and measurement reason.</p></article>
         <article class="panel"><h3>PPO Tests</h3><p>${ppoTests.length} planned</p><p class="muted">Treatments are limited to alternate icon, screenshots, and app previews.</p></article>
-        <article class="panel"><h3>In-App Events</h3><p>${inAppEvents.length} / 15 approved slots modeled</p><p class="muted">Only real timed in-app content should enter this lane.</p></article>
+        <article class="panel"><h3>In-App Events</h3><p>${inAppEvents.length} / 15 approved slots modeled</p><p class="muted">Only real timed in-app content belongs here.</p></article>
       </div>
     </section>
     <section>
-      <h2>Theme Tokens</h2>
+      <h2>Colors</h2>
       <div class="deck">
-        ${["color.background", "color.primary", "color.accent", "color.text", "color.border"]
+        ${(
+          [
+            ["Background", "color.background"],
+            ["Primary", "color.primary"],
+            ["Accent", "color.accent"],
+            ["Text", "color.text"],
+            ["Border", "color.border"],
+          ] as const
+        )
           .map(
-            (tokenPath) =>
-              `<article class="metric"><span>${escapeHtml(tokenPath)}</span><strong style="font-size:18px">${escapeHtml(String(getToken(tokens, tokenPath) ?? ""))}</strong></article>`,
+            ([label, tokenPath]) =>
+              `<article class="metric"><span>${escapeHtml(label)}</span><strong style="font-size:18px">${escapeHtml(String(getToken(tokens, tokenPath) ?? ""))}</strong></article>`,
           )
           .join("")}
       </div>
     </section>
+    <details class="techDetails">
+      <summary>Technical details</summary>
+      <p>State hash: ${escapeHtml(stateHash)}</p>
+      ${designBrief ? `<p>Design brief source: ${escapeHtml(designBrief.source)}</p>\n      ` : ""}${panels
+        .map((panel) => {
+          const copy = panelCopy(asString(panel.id) ?? "", asString(panel.name) ?? "");
+          const stateRefs = asArray(panel.stateRefs)
+            .map((entry) => asString(entry))
+            .filter(Boolean);
+          const artifacts = asArray(panel.renderedArtifacts)
+            .map((entry) => asString(entry))
+            .filter(Boolean);
+          return `<p>${escapeHtml(copy.label)}: reads ${escapeHtml(stateRefs.join(", ") || "no state refs")} and renders ${escapeHtml(artifacts.join(", ") || "no artifacts")}.</p>`;
+        })
+        .join("\n      ")}
+    </details>
   </main>
 </body>
 </html>
