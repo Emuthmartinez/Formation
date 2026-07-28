@@ -18,13 +18,14 @@ Every recipe rides the shipped motion scale — no ad-hoc millisecond values. Tw
 | `durationFast` | 120ms | `PremiumMotion.press` (bounce 0.18) | `brief` | press feedback, micro-ticks |
 | `durationBase` | 220ms | `PremiumMotion.standard` (bounce 0.12) | `moderate` | state changes, content arrival |
 | `durationSlow` | 360ms | `PremiumMotion.emphasized` (bounce 0.10) | — | deliberate transitions |
-| `durationReveal` | 600ms | — (celebrate-family spring) | `expressive` (~500ms) | celebrations, earned-object landings |
+| `durationCelebrate` | 500ms | `PremiumMotion.celebrate` (bounce 0.3), `PremiumMotion.celebrateLanding` (bounce 0.45) | — | celebrate-family springs: soft-settle reveals and R3 landings |
+| `durationReveal` | 600ms | — (bounds celebrate choreography) | `expressive` (~500ms) | celebrations, earned-object landings |
 | `durationCinematic` | 1200ms | — (web/brand lane only) | — | brand liveness, baked loops |
 | `stagger` | 60ms | — | — | per-item cascade step |
 
 One reconciliation note: the retired `expressive` alias was overloaded — `experience-cards/peak-end-card.md` and `experience-cards/variable-reward-card.md` used it as the celebrate spring *response* (0.45–0.5s), `experience-cards/streak-and-loss-aversion-card.md` as a ~500ms choreography *duration*. Both readings survive without the alias: the spring response stays 0.45–0.5s, and `durationReveal` (600ms) bounds the full choreography — two different quantities, not a contradiction.
 
-The two spring families — press (response 0.3–0.4 / damping 0.7–0.8) and celebrate (response 0.45–0.5 / damping 0.5–0.7) — are defined once, in `premium-mobile-craft.md` §1; recipes cite the family, not fresh numbers. A dedicated `Motion.celebrate` token is a deliberate non-goal for now: promoting one means updating `state/theme.tokens.json`, `PremiumCraft.swift`, and `check:token-promotion` together, as its own reviewed change.
+The two spring families — press (response 0.3–0.4 / damping 0.7–0.8) and celebrate (response 0.45–0.5 / damping 0.5–0.7) — are defined once, in `premium-mobile-craft.md` §1; recipes cite the family, not fresh numbers. Since 2026-07-28 the family ships in the preset layer: `motion.durationCelebrate` (500ms) carries `PremiumMotion.celebrate` (bounce 0.3, the soft-settle end) and `PremiumMotion.celebrateLanding` (bounce 0.45, the visible-oscillation end R3 rides). App code reads the presets — a hand-typed spring literal in view code is drift, and the first live output test (2026-07-28) confirmed builders hand-type numbers whenever no preset exists. The cards' `.spring(response:dampingFraction:)` literals remain the spec notation those presets implement.
 
 ## The Recipes
 
@@ -55,7 +56,7 @@ The hero contracts slightly (3–5% scale), spawns 15–20 miniature variant clo
 
 ### R3 — Overshoot-and-settle object landing
 
-**Serves:** `experience-cards/mastery-and-status-card.md` (badge/level reveal), `experience-cards/variable-reward-card.md`, collectible and earned-object reveals. **Rides:** celebrate-family spring at damping 0.5–0.6 (the visible-oscillation end of the family); the reveal completes within `motion.durationReveal`.
+**Serves:** `experience-cards/mastery-and-status-card.md` (badge/level reveal), `experience-cards/variable-reward-card.md`, collectible and earned-object reveals. **Rides:** celebrate-family spring at damping 0.5–0.6 (the visible-oscillation end — ships as `PremiumMotion.celebrateLanding`); the reveal completes within `motion.durationReveal`.
 
 A decelerating tween reads as "panel animating in"; an oscillating overshoot reads as "physical object landing." That distinction is the whole recipe.
 
@@ -112,9 +113,12 @@ A decelerating tween reads as "panel animating in"; an oscillating overshoot rea
 
 **Serves:** `quality-lens.md` anti-generic checks; every celebration and reveal composition. **Rides:** the design-token palette — this is color discipline, not a duration.
 
-- [ ] Exactly one hero/content object per composition carries saturated color; nav, frames, and inputs stay neutral.
+**Scope.** The rule governs where attention goes, not whether chrome may carry the brand hue. Conventional interactive chrome — the primary CTA fill, progress indicators, selected-state tints — may ride the single brand hue; what the rule bans is a second saturated hue competing for attention, and chrome that outshouts or moves against the hero. The first live output test (2026-07-28) read the old wording literally and graded every brand-colored CTA a violation — that reading is wrong; judge the content composition, not the existence of a colored button.
+
+- [ ] Exactly one hero/content object per composition carries saturated color; remaining chrome stays neutral or rides the same brand hue quieter than the hero — never a second saturated hue.
 - [ ] Chroma and type-weight concentrate on the same element — attention has a single address.
 - [ ] In celebration moments the saturated hero is the earned thing itself, not the chrome around it.
+- [ ] During a landing or celebration, brand-hued chrome holds still; CTAs and chrome arrive only after the hero settles — via R10's post-reveal reflow, or after R2's hold when the moment choreographs one — so the full motion budget stays on the hero.
 
 **Exemplars:** consistent across the catalog's top reveals — Nuvion (eng 1,568), mymind (eng 1,540), Melius.
 

@@ -50,6 +50,22 @@ enum PremiumMotion {
         duration: DesignTokens.Motion.durationSlow,
         bounce: 0.1
     )
+
+    /// Celebrate family, soft-settle end (~500ms, damping ≈0.7): one gentle
+    /// overshoot — sheet-level reveals and the experience-card canon moments.
+    /// Earned moments only; ordinary state changes stay on `standard`.
+    static let celebrate = Animation.spring(
+        duration: DesignTokens.Motion.durationCelebrate,
+        bounce: 0.3
+    )
+
+    /// Celebrate family, visible-oscillation end (~500ms, damping ≈0.55): the
+    /// object overshoots and reverses 1-2 times — R3 earned-object landings
+    /// (motion-craft-benchmarks.md) only. Anything bouncier reads as a toy.
+    static let celebrateLanding = Animation.spring(
+        duration: DesignTokens.Motion.durationCelebrate,
+        bounce: 0.45
+    )
 }
 
 extension View {
@@ -267,7 +283,14 @@ struct ShimmerModifier: ViewModifier {
                 .overlay { highlight }
                 .mask(content)
                 .onAppear {
-                    withAnimation(.linear(duration: 1.1).repeatForever(autoreverses: false)) {
+                    // Ambient loop pacing rides the reveal token's 0.6-1.2s
+                    // band (2x durationReveal), keeping every duration on the
+                    // shared motion scale — no ad-hoc values, per the doctrine
+                    // this file exists to enforce.
+                    withAnimation(
+                        .linear(duration: DesignTokens.Motion.durationReveal * 2)
+                            .repeatForever(autoreverses: false)
+                    ) {
                         phase = 2
                     }
                 }

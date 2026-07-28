@@ -1,4 +1,4 @@
-// design-token-hash: f6005646081f20e6
+// design-token-hash: 1733e29983a172fb
 import Foundation
 
 enum DesignTokens {
@@ -24,6 +24,9 @@ enum DesignTokens {
     static let durationFast: Double = 0.12
     static let durationBase: Double = 0.22
     static let durationSlow: Double = 0.36
+    // Celebrate-family spring duration: earned moments only, carried by the
+    // PremiumMotion.celebrate / .celebrateLanding presets (PremiumCraft.swift).
+    static let durationCelebrate: Double = 0.5
     static let reducedMotionDuration: Double = 0.0
     static let easing = "cubic-bezier(0.2, 0, 0, 1)"
     // Landing/web cinematic lane tokens. The mobile binary keeps to the

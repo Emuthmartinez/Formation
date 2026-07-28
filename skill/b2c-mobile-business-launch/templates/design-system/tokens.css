@@ -1,4 +1,4 @@
-/* design-token-hash: f6005646081f20e6 */
+/* design-token-hash: 1733e29983a172fb */
 :root {
   --color-background: #f7f3ec;
   --color-surface: #fffdfa;
@@ -24,6 +24,7 @@
   --motion-duration-fast: 120ms;
   --motion-duration-base: 220ms;
   --motion-duration-slow: 360ms;
+  --motion-duration-celebrate: 500ms;
   --motion-duration-reduced: 0ms;
   --motion-easing: cubic-bezier(0.2, 0, 0, 1);
   --motion-duration-reveal: 600ms;

@@ -540,6 +540,35 @@ export function register(h: Harness): void {
     "motion_contract.token_table.row_missing",
   );
 
+  // The durationCelebrate row carries TWO presets; the gate must validate the
+  // second annotation, not just the first, and must notice the row vanishing.
+  const motionLandingBounceDrift = writeMotionContractRoot("motion-contract-landing-bounce-drift", (rel, text) =>
+    rel.endsWith("PremiumCraft.swift") ? text.replace("bounce: 0.45", "bounce: 0.5") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the celebrateLanding preset bounce drifts from the table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLandingBounceDrift],
+    1,
+    "motion_contract.preset.bounce_drift",
+  );
+
+  const motionCelebrateRowLost = writeMotionContractRoot("motion-contract-celebrate-row-lost", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text
+          .split("\n")
+          .filter((line) => !line.startsWith("| `durationCelebrate` |"))
+          .join("\n")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the celebrate mapping row is removed from the table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionCelebrateRowLost],
+    1,
+    "motion_contract.token_table.row_missing",
+  );
+
   const motionAnnotationLost = writeMotionContractRoot("motion-contract-preset-annotation-lost", (rel, text) =>
     rel.endsWith("motion-craft-benchmarks.md") ? text.replace("`PremiumMotion.press` (bounce 0.18)", "`PremiumMotion.press`") : text,
   );

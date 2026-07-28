@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "updatedAt": "2026-07-07",
+  "updatedAt": "2026-07-28",
   "tokens": {
     "color": {
       "background": "#f7f3ec",
@@ -41,6 +41,7 @@
       "durationFast": "120ms",
       "durationBase": "220ms",
       "durationSlow": "360ms",
+      "durationCelebrate": "500ms",
       "reducedMotionDuration": "0ms",
       "easing": "cubic-bezier(0.2, 0, 0, 1)",
       "durationReveal": "600ms",

@@ -56,9 +56,26 @@ if (loaded.tokens) {
         issues.push(issue("error", "token_promotion.css_var_missing", `tokens.css must include ${varName}.`, "design-system/tokens.css"));
       }
     }
+    // The celebrate duration is value-checked, not just name-checked: a
+    // pre-v0.43 state file promoted with a lenient renderer would emit
+    // "--motion-duration-celebrate: ;" and a zero Swift member, silently
+    // disabling celebration motion.
+    const celebrateCss = css.match(/--motion-duration-celebrate:\s*([^;]*);/);
+    const celebrateCssValue = celebrateCss ? (celebrateCss[1] ?? "").trim() : "";
+    if (!/^\d+(?:\.\d+)?ms$/i.test(celebrateCssValue) || Number.parseFloat(celebrateCssValue) <= 0) {
+      issues.push(
+        issue(
+          "error",
+          "token_promotion.celebrate_css_invalid",
+          `tokens.css must promote --motion-duration-celebrate with a positive millisecond value (found "${celebrateCssValue || "nothing"}").`,
+          "design-system/tokens.css",
+        ),
+      );
+    }
     for (const motionVar of [
       "--motion-duration-fast",
       "--motion-duration-base",
+      "--motion-duration-celebrate",
       "--motion-easing",
       "--motion-duration-reveal",
       "--motion-duration-cinematic",
@@ -92,6 +109,17 @@ if (loaded.tokens) {
           "error",
           "token_promotion.swift_contract_missing",
           "DesignTokens.swift must expose DesignTokens and the current primary color.",
+          "design-system/DesignTokens.swift",
+        ),
+      );
+    }
+    const celebrateSwift = swift.match(/static let durationCelebrate: Double = (\d+(?:\.\d+)?)/);
+    if (!celebrateSwift || Number(celebrateSwift[1]) <= 0) {
+      issues.push(
+        issue(
+          "error",
+          "token_promotion.celebrate_swift_invalid",
+          "DesignTokens.swift must expose a positive DesignTokens.Motion.durationCelebrate — a zero value silently disables celebration motion.",
           "design-system/DesignTokens.swift",
         ),
       );
