@@ -5,19 +5,23 @@ app. These cards are the canonical deck for the b2c-mobile-business-launch skill
 names a psychological mechanism, draws a bright/dark line, and gives you a deterministic
 checklist for audit and ship.
 
-**This file is the index.** The full per-card specs (psychology + canonical research,
+**This file is the index.** Each file under [`experience-cards/`](experience-cards/commitment-card.md)
+is a compact routing stub — title, one-liner, risk tier, bright/dark lines, and a
+served-by-MCP pointer (the three motion-bearing cards also pin their celebrate-family spring
+canon for `check:motion-contract`). The full per-card specs (psychology + canonical research,
 mechanism steps, real app examples, producer recipe, auditor signals, measurement events,
-mobile implementation + reduced-motion, bright/dark lines, pairings) live in one file per card
-under [`experience-cards/`](experience-cards/commitment-card.md). Load **only the cards in
-scope for the current moment** — each card file is a complete, self-contained spec, and
-loading the whole deck for a single paywall pause wastes the context the launch work needs.
+mobile implementation + reduced-motion, pairings) are served by the Retention Mechanics MCP —
+see Live deck access below. Load **only the cards in scope for the current moment**; the
+stubs are cheap, and the MCP serves full depth per card so loading the whole deck for a
+single paywall pause is never necessary.
 
 **Live deck access (Retention Mechanics MCP).** The deck behind this index is queryable live
 when a `retention-mechanics` MCP server is connected (first-party; tools named
 `retention_*`; registered as `retention-mechanics-mcp`). When it is connected, prefer it for
 card routing and per-card content — it serves the maintained, versioned deck (per-card
-`card_version`/`last_reviewed`, canonicalized risk tiers, attestation scaffolds) and grows
-past the bundled twelve:
+`card_version`/`last_reviewed`, canonicalized risk tiers, attestation scaffolds) and exceeds
+the bundled twelve in both count and depth: the bundled files route, the MCP serves the full
+annotation for every card:
 
 - `retention_search_mechanics` — search the deck by product moment, with funnel-stage and
   ethics-risk-ceiling filters; every result carries the card's do-not-use conditions, so a
@@ -28,10 +32,13 @@ past the bundled twelve:
   the validator requires at that tier, and a scaffold whose narrative fields are
   intentionally empty (the applying team writes them for its own surface).
 
-The bundled files under `experience-cards/` are the frozen snapshot of the deck's twelve
-foundational cards and remain the offline contract: every validator and `npm run audit:ci`
-run reads the bundled snapshot, never the network, and when the server is not connected this
-index and the card files are authoritative exactly as before.
+The bundled files under `experience-cards/` are the frozen free-layer stubs of the deck's
+twelve foundational cards and remain the offline contract at stub depth: every validator and
+`npm run audit:ci` run reads the bundled files, never the network, and when the server is not
+connected this index and the stubs stay authoritative for routing, risk tiers, the bright/dark
+ship-gates, and the pinned motion canon. The full per-card spec is authoritative only through
+a live MCP connection — the content boundary between the free layer and the maintained deck
+is explicit as of Phase 3 of the deck migration.
 
 **Pre-requisites.** Load these references before applying any card; do not duplicate their
 content here:
@@ -69,12 +76,21 @@ One line per card: when to load it, and where the full spec lives.
 
 ## Card Shape
 
-Every card in this deck uses the same field set. Audit tools and validators check for these
-stable headers.
+**Bundled stub field set** — what each file under `experience-cards/` carries on disk:
 
 | Field | Meaning |
 |---|---|
 | **One-liner** | Single-sentence description of what the card does |
+| **Risk tier** | LOW/MEDIUM/HIGH, mirroring this index's routing table and `ethics-guardrail.md` §3 (the canonical pair the parity gate checks) |
+| **Bright line / Dark line** | The ethics ship-gate summary; the full guardrail contract is MCP-served and in `ethics-guardrail.md` |
+| **Served-by-MCP pointer** | The `retention_get_mechanic` / `retention_get_ethics_ladder` calls that return the full card |
+| **Motion binding (canon)** | Motion-bearing cards only: the pinned celebrate-family spring literal `check:motion-contract` keeps undriftable |
+
+**Full deck field set** — served per card by the Retention Mechanics MCP (not shipped in this
+repo; the maintained deck is versioned per card):
+
+| Field | Meaning |
+|---|---|
 | **Emotional beat** | The precise feeling the card engineers, in the user's voice |
 | **Psychology + canonical research** | Mechanism explanation with named sources; `attribution-uncertain` flags where replication is partial |
 | **Mechanism steps** | Numbered implementation sequence |
