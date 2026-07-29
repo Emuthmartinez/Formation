@@ -112,6 +112,11 @@ if (templateAgents) {
       "EMOTIONAL_AUDIT.md",
       "check:emotional-design",
       "BRAND.md",
+      // The copy route: builders type deck rows, never spec vocabulary. Held
+      // here so a later edit cannot drop the deck from the read-first list.
+      "COPY_BRIEF.md",
+      "COPY_DECK.md",
+      "check:app-copy",
       "DEMO_VIDEO.md",
       "app-store-connect-cli.md",
       "ASC CLI/skill routes can cover app creation",
@@ -259,7 +264,9 @@ if (customerSuccess) {
 }
 
 if (engineeringLeader) {
-  requireTerms(engineeringLeader, ["Session Continuity", "Do not rely on chat memory"], "engineering_leader", engineeringLeaderPath, issues);
+  // COPY_DECK.md is in the read-first list because engineering types the
+  // strings; the gate holds it so a roster edit cannot silently drop it.
+  requireTerms(engineeringLeader, ["Session Continuity", "Do not rely on chat memory", "COPY_DECK.md"], "engineering_leader", engineeringLeaderPath, issues);
 }
 
 if (securityArchitect) {

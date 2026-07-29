@@ -572,4 +572,32 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: Android strings.xml is an accepted mechanism", androidMechanism, "check-app-copy.ts", 0);
+
+  // A missing state file fails loudly — with no lanes, every requirement
+  // would silently resolve to "not required" on a business root.
+  const stateMissing = h.makeEmptyFixture("app-copy-state-missing");
+  runFixture("App copy: missing PROJECT_STATE.yaml fails loudly", stateMissing, "check-app-copy.ts", 1, "project_state.missing");
+
+  // Full ICU MessageFormat plurals are the localization contract working —
+  // the argument name inside must not read as a raw identifier.
+  const icuPlural = makeFixture("app-copy-icu-plural-clean");
+  writeFileSync(path.join(icuPlural, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(icuPlural, "COPY_DECK.md"),
+    [...DECK_HEADER, "| today.done.headline | After check-in | {item_count, plural, one {# walk logged} other {# walks logged}} | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(icuPlural, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Done | Celebrate | `today.done.headline` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: ICU plural argument names stay clean", icuPlural, "check-app-copy.ts", 0);
 }

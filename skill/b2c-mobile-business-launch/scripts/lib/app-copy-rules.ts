@@ -256,7 +256,14 @@ export function copyColumnCells(markdownText: string): CopyColumn {
  * a named placeholder is the localization contract working, not a leak.
  */
 export function identifierShapes(text: string): string[] {
-  const stripped = text.replace(/\{[a-zA-Z0-9_]+\}/g, " ").replace(/`[^`\n]*`/g, " ");
+  // Strip full ICU MessageFormat expressions, nested braces included —
+  // {item_count, plural, one {# item} other {# items}} is the localization
+  // contract working, and its argument name must not read as an identifier.
+  let stripped = text;
+  while (/\{[^{}]*\}/.test(stripped)) {
+    stripped = stripped.replace(/\{[^{}]*\}/g, " ");
+  }
+  stripped = stripped.replace(/`[^`\n]*`/g, " ");
   const found = new Set<string>();
   for (const match of stripped.matchAll(/\b[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+\b/g)) {
     found.add(match[0]);

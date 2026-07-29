@@ -91,7 +91,10 @@ const rules = loadAppCopyRules(referencePath);
 
 const loaded = loadProjectState({ root, statePath });
 const state = loaded.state;
-// State problems are already every state-gate's job; this gate only needs lanes.
+// A missing or unparseable state file must fail loudly: with no lanes, every
+// requirement below silently resolves to "not required" and the standalone
+// command would pass a business root with no deck at all.
+issues.push(...loaded.issues);
 // project.phase is the canonical location (see check-lane-coverage, founder-copy).
 const phase = state ? (asString(getPath(state, "project.phase")) ?? "") : "";
 const live = /^phase_6/.test(phase);
