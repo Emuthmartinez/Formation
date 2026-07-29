@@ -358,10 +358,18 @@ const LOCAL_SOCIAL_PROOF_PATTERN =
 const LOCAL_SEPARATION_PROOF_PATTERN =
   /\b(separate (screen|surface|flow|session)|different screen|not (on|shown on|displayed on) the same screen|never on the same screen|one (user )?interaction (later|after|between)|interaction between|after (the user )?(leaves|dismisses|closes|returns)|next session|spend[- ]free)\b/i;
 // Compliant copy often states the rule itself ("Never show the paywall inside a streak-break
-// grief screen") — a negation followed sentence-locally by a spend/reward word is a
-// prohibition, not a placement.
-const LOCAL_PROHIBITION_PATTERN =
-  /\b(never|no|not|do not|don'?t|must not|avoid|without|prohibit(?:s|ed)?|forbidden|ban(?:s|ned)?|block(?:s|ed)?)\b[^.\n]{0,80}\b(spend|paywall|purchase|subscribe|upgrade|iap|prompt|streak|reward|grief)/i;
+// grief screen") — but the negation must bind to *placing the spend surface*, clause-locally
+// (a semicolon ends the clause), so "Do not animate the streak; show the paywall on the same
+// screen" cannot ride an unrelated negation past the veto. Two shapes: negation → placement
+// verb → spend object, and spend object → negation → placement verb (passive).
+const PROHIBITION_NEGATION = String.raw`(?:never|no|not|do not|don'?t|must not|cannot|may not|won'?t|avoid|without|prohibit(?:s|ed)?|forbidden|ban(?:s|ned)?|block(?:s|ed)?)`;
+const PROHIBITION_VERB = String.raw`(?:show(?:s|n|ing)?|display(?:s|ed|ing)?|present(?:s|ed|ing)?|place(?:s|d|ment)?|pair(?:s|ed|ing)?|co-?locate[sd]?|prompt(?:s|ed|ing)?|trigger(?:s|ed|ing)?|surface[sd]?|appear(?:s|ed|ing)?)`;
+const PROHIBITION_SPEND = String.raw`(?:spend|paywall|purchase|subscri(?:be|ption)|upgrade|iap|offer(?:ing)?)`;
+const LOCAL_PROHIBITION_PATTERN = new RegExp(
+  `\\b${PROHIBITION_NEGATION}\\b[^.;\\n]{0,60}?\\b${PROHIBITION_VERB}\\b[^.;\\n]{0,60}?\\b${PROHIBITION_SPEND}\\b` +
+    `|\\b${PROHIBITION_SPEND}s?\\b[^.;\\n]{0,60}?\\b${PROHIBITION_NEGATION}\\b[^.;\\n]{0,40}?\\b${PROHIBITION_VERB}\\b`,
+  "i",
+);
 
 function hasLocalProof(lines: string[], lineIndex: number, proofPattern: RegExp): boolean {
   const start = Math.max(0, lineIndex - 2);
@@ -646,8 +654,10 @@ if (audit) {
 }
 
 // Live-copy docs (actual app/store copy) — scan for dark patterns INCLUDING the
-// spend-near-reward co-location, which the guardrail names ONBOARDING/SPEC/listing as targets for.
-if (!skip) {
+// spend-near-reward co-location, which the guardrail names ONBOARDING/SPEC/listing as targets
+// for. Deliberately NOT gated on the lane skip: deferring the emotional-design lane skips its
+// deliverables, never the non-negotiable ethics veto over copy that already exists.
+{
   for (const doc of ["ONBOARDING.md", "SPEC.md", "APP_STORE_LISTING.md", "app-store-listing/APP_STORE_LISTING.md", "PAYWALL.md"]) {
     const liveText = readText(args.root, doc);
     if (liveText) {
@@ -744,7 +754,9 @@ function tierKey(tiers: Set<string>): string {
   return [...tiers].sort().join("-");
 }
 
-/** The motion-fallback row legitimately carries no tier ("—"); anything else unparseable is a typo the gate must not skip. */
+/** A placeholder tier ("—") is legitimate ONLY on the motion-fallback row — callers must pair
+ * this with a motion-row name check; anywhere else an unparseable cell is a typo the gate must
+ * not skip. */
 function isTierPlaceholder(raw: string): boolean {
   const cleaned = raw.replace(/[*`]/g, "").replace(/[–—]/g, "-").trim();
   return cleaned === "" || /^-+$/.test(cleaned) || /^n\/?a$/i.test(cleaned);
@@ -802,12 +814,14 @@ if (ethicsRef) {
   for (const row of riskRows) {
     const tiers = parseTierSet(row.tierRaw);
     if (!tiers) {
-      if (!isTierPlaceholder(row.tierRaw)) {
+      // Only the motion-fallback row may carry a placeholder tier; a canonical mechanism
+      // with "—" or a typo would silently vanish from parity.
+      if (!(isTierPlaceholder(row.tierRaw) && /motion/i.test(row.name))) {
         issues.push(
           issue(
             "error",
             "emotional_design.risk_tier_unrecognized",
-            `references/ethics-guardrail.md §3 tier "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range. Fix the cell — otherwise the parity gate silently skips this mechanism.`,
+            `references/ethics-guardrail.md §3 tier "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range (a placeholder tier is allowed only on the motion-fallback row). Fix the cell — otherwise the parity gate silently skips this mechanism.`,
             "references/ethics-guardrail.md",
           ),
         );
@@ -818,7 +832,20 @@ if (ethicsRef) {
     if (bucket) {
       for (const member of (bucket[1] ?? "").split(",")) {
         const key = normalizeCardName(member);
-        if (key) bucketTiers.set(key, tiers);
+        if (!key) continue;
+        const existingBucket = bucketTiers.get(key);
+        if (existingBucket && tierKey(existingBucket) !== tierKey(tiers)) {
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.risk_tier_conflict",
+              `references/ethics-guardrail.md §3 assigns "${member.trim()}" disagreeing tiers across two bucket rows. One tier per mechanism.`,
+              "references/ethics-guardrail.md",
+            ),
+          );
+        } else if (!existingBucket) {
+          bucketTiers.set(key, tiers);
+        }
       }
       continue;
     }
@@ -847,6 +874,22 @@ if (ethicsRef) {
     }
   }
 
+  // An explicit row may narrow a bucket range (Rating Prompt MEDIUM inside LOW-MEDIUM) but
+  // must not contradict it — order-independent, so checked after the full table is read.
+  for (const [bucketKey, bucketSet] of bucketTiers) {
+    const explicit = [...explicitTiers.entries()].find(([tableKey]) => nameMatches(bucketKey, tableKey))?.[1];
+    if (explicit && ![...explicit.tiers].every((tier) => bucketSet.has(tier))) {
+      issues.push(
+        issue(
+          "error",
+          "emotional_design.risk_tier_conflict",
+          `references/ethics-guardrail.md §3 tiers "${bucketKey}" ${explicit.tierRaw} in its explicit row but ${[...bucketSet].sort().join("-")} in a bucket row. One tier per mechanism.`,
+          "references/ethics-guardrail.md",
+        ),
+      );
+    }
+  }
+
   if (cardsIndexRef) {
     const indexRows = parseTableRows(cardsIndexRef, /^\|\s*Card\s*\|\s*Load when\s*\|\s*Risk\s*\|/i, 1, 3);
     if (indexRows.length === 0) {
@@ -862,16 +905,15 @@ if (ethicsRef) {
     for (const row of indexRows) {
       const indexTiers = parseTierSet(row.tierRaw);
       if (!indexTiers) {
-        if (!isTierPlaceholder(row.tierRaw)) {
-          issues.push(
-            issue(
-              "error",
-              "emotional_design.risk_tier_unrecognized",
-              `references/experience-cards.md Risk cell "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range. Fix the cell — otherwise the parity gate silently skips this card.`,
-              "references/experience-cards.md",
-            ),
-          );
-        }
+        // The index routes real cards only — no row there may plead a placeholder tier.
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.risk_tier_unrecognized",
+            `references/experience-cards.md Risk cell "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range. Fix the cell — otherwise the parity gate silently skips this card.`,
+            "references/experience-cards.md",
+          ),
+        );
         continue;
       }
       const key = normalizeCardName(row.name);

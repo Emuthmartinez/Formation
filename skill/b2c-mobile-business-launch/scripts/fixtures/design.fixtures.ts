@@ -864,6 +864,47 @@ experience_card:
     "emotional_design.spend_prompt_after_reward",
   );
 
+  // The negation must bind to placing the spend surface — an unrelated negation in the same
+  // sentence must not ride past the veto.
+  const emotionalSpendUnrelatedNegation = makeFixture("emotional-spend-unrelated-negation");
+  writeFileSync(
+    path.join(emotionalSpendUnrelatedNegation, "ONBOARDING.md"),
+    ["# Onboarding", "Do not animate the streak; show the paywall on the same screen.", "Analytics: streak_celebrated, paywall_viewed."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an unrelated negation does not suppress the spend veto",
+    emotionalSpendUnrelatedNegation,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // Lane deferral skips deliverables, never the ethics veto over copy that already exists.
+  const emotionalSpendDeferredLane = makeFixture("emotional-spend-deferred-lane");
+  {
+    const state = readState(emotionalSpendDeferredLane);
+    getLane(state, "emotional_design")["status"] = "deferred";
+    writeState(emotionalSpendDeferredLane, state);
+  }
+  writeFileSync(
+    path.join(emotionalSpendDeferredLane, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak reveal: day 7 celebration with the weekly progress recap.",
+      "Paywall: present the RevenueCat offering right here.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a deferred emotional-design lane still runs the spend veto",
+    emotionalSpendDeferredLane,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
   const guardrailFixtureHeader = [
     "# Ethics And Dark-Pattern Guardrail",
     "## 1. Bright-Line Vs Dark-Line Distinction",
@@ -998,6 +1039,53 @@ experience_card:
     "check-emotional-design.ts",
     1,
     "emotional_design.risk_tier_duplicate_row",
+  );
+
+  // A placeholder tier is legitimate only on the motion-fallback row.
+  const emotionalTierPlaceholderAbuse = makeFixture("emotional-risk-tier-placeholder-abuse");
+  {
+    const refDir = path.join(emotionalTierPlaceholderAbuse, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | — | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a placeholder tier on a canonical mechanism fails",
+    emotionalTierPlaceholderAbuse,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
+  );
+
+  // An explicit row may narrow a bucket range but must not contradict it.
+  const emotionalTierBucketConflict = makeFixture("emotional-risk-tier-bucket-conflict");
+  {
+    const refDir = path.join(emotionalTierBucketConflict, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| All other deck cards (Rating Prompt) | LOW–MEDIUM | Card-specific | The card's own bright-line test | base fields |",
+        "| Rating Prompt | HIGH | Platform policy violation | Native API only | `bright_line`, `platform_api_used` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "an explicit row contradicting its bucket range fails",
+    emotionalTierBucketConflict,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_conflict",
   );
 
   const elevenStarThin = makeFixture("eleven-star-thin");
