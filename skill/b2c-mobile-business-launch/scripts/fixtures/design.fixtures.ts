@@ -843,6 +843,44 @@ experience_card:
     "spend_prompt_after_reward",
   );
 
+  // IAP is the guardrail's own spend terminology — it must trip the veto vocabulary.
+  const emotionalSpendIap = makeFixture("emotional-spend-iap");
+  writeFileSync(
+    path.join(emotionalSpendIap, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak reveal: day 7 celebration with the weekly progress recap.",
+      "IAP offer: surface the premium IAP offer right here.",
+      "Analytics: streak_celebrated, iap_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an IAP offer beside a streak moment without stated separation fails",
+    emotionalSpendIap,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // Markdown wrapping must not turn a compliant prohibition into a false veto.
+  const emotionalSpendWrappedProhibition = makeFixture("emotional-spend-wrapped-prohibition");
+  writeFileSync(
+    path.join(emotionalSpendWrappedProhibition, "ONBOARDING.md"),
+    ["# Onboarding", "Never show the", "paywall inside a streak-break grief screen.", "Analytics: streak_celebrated, paywall_viewed."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a prohibition wrapped across two lines still earns its escape",
+    emotionalSpendWrappedProhibition,
+    "check-emotional-design.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "spend_prompt_after_reward",
+  );
+
   // A separation note for one compliant flow must not bless a different dark flow beside it.
   const emotionalSpendBorrowedProof = makeFixture("emotional-spend-borrowed-proof");
   writeFileSync(
@@ -1100,6 +1138,76 @@ experience_card:
     "check-emotional-design.ts",
     1,
     "emotional_design.risk_tier_unrecognized",
+  );
+
+  // A descending or multi-endpoint range must be malformed, not laundered into a
+  // permissive full range by min/max.
+  const emotionalTierDescendingRange = makeFixture("emotional-risk-tier-descending-range");
+  {
+    const refDir = path.join(emotionalTierDescendingRange, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | HIGH-LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a descending risk-tier range fails instead of expanding to all tiers",
+    emotionalTierDescendingRange,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
+  );
+
+  // The placeholder allowance identifies the motion-fallback row by its full normalized
+  // name — the word "motion" inside an unrelated row name earns no exemption.
+  const emotionalTierMotionWordAbuse = makeFixture("emotional-risk-tier-motion-word-abuse");
+  {
+    const refDir = path.join(emotionalTierMotionWordAbuse, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [...guardrailFixtureHeader, "| Variable Reward Motion | — | Compulsion loop | User can always stop | `bright_line` |", ...guardrailFixtureFooter].join(
+        "\n",
+      ),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a placeholder tier on a non-fallback row containing the word motion fails",
+    emotionalTierMotionWordAbuse,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
+  );
+
+  // Equal-tier duplicates across bucket rows are still duplicate assignments.
+  const emotionalTierBucketDuplicate = makeFixture("emotional-risk-tier-bucket-duplicate");
+  {
+    const refDir = path.join(emotionalTierBucketDuplicate, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| All other deck cards (Reciprocity, Fresh Start) | LOW–MEDIUM | Card-specific | The card's own bright-line test | base fields |",
+        "| All other deck cards (Reciprocity) | LOW–MEDIUM | Card-specific | The card's own bright-line test | base fields |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "the same member in two equal-tier bucket rows fails as a duplicate",
+    emotionalTierBucketDuplicate,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_duplicate_row",
   );
 
   // An explicit row may narrow a bucket range but must not contradict it.

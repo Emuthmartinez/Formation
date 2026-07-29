@@ -348,7 +348,8 @@ const COMMITMENT_GUILT_PATTERNS = [
   /remember why you started/i,
   /don'?t give up now/i,
 ];
-const SPEND_KEYWORDS = /\b(paywall|purchase|upgrade now|subscribe|buy now|unlock for|renew now|start (your )?(trial|subscription))\b/i;
+const SPEND_KEYWORDS =
+  /\b(paywall|purchase|upgrade now|subscribe|buy now|unlock for|renew now|iap|in[- ]app purchase(s)?|(purchase|upgrade|subscription|paid) offer|start (your )?(trial|subscription))\b/i;
 const REWARD_STREAK_KEYWORDS = /\b(streak|variable reward|reward reveal|reward screen|loss aversion|streak[- ]break)\b/i;
 
 const LOCAL_SCARCITY_PROOF_PATTERN =
@@ -487,9 +488,21 @@ function scanLiveCopy(relativePath: string, rawText: string, spendScan: boolean)
       line
         .split(/[.;]|\b(?:but|however|whereas)\b/i)
         .some((clause) => (SPEND_KEYWORDS.test(clause) || REWARD_STREAK_KEYWORDS.test(clause)) && LOCAL_PROHIBITION_PATTERN.test(clause));
+    // Markdown wrapping can split one prohibitive sentence across physical lines ("Never show
+    // the" / "paywall inside a streak-break grief screen."). The clause test also runs on the
+    // line joined with each adjacent neighbor, so a wrapped compliant policy still earns its
+    // escape — clause scoping still applies to the joined text, so an unrelated prohibition
+    // in the neighbor cannot bless a live spend line.
+    const prohibitsAtLine = (index: number): boolean => {
+      const line = lines[index] ?? "";
+      if (lineProhibitsSpend(line)) return true;
+      const prev = lines[index - 1] ?? "";
+      const next = lines[index + 1] ?? "";
+      return (prev !== "" && lineProhibitsSpend(`${prev} ${line}`)) || (next !== "" && lineProhibitsSpend(`${line} ${next}`));
+    };
     const unprovenPair = rewardLines
       .flatMap((r) => spendLines.map((s) => ({ r, s })))
-      .find(({ r, s }) => Math.abs(r - s) <= 4 && !pairHasSeparationProof(r, s) && !lineProhibitsSpend(lines[r] ?? "") && !lineProhibitsSpend(lines[s] ?? ""));
+      .find(({ r, s }) => Math.abs(r - s) <= 4 && !pairHasSeparationProof(r, s) && !prohibitsAtLine(r) && !prohibitsAtLine(s));
     if (unprovenPair) {
       issues.push(
         issue(
@@ -767,13 +780,21 @@ const TIER_ORDER = ["LOW", "MEDIUM", "HIGH"];
 // risk is carried per-card; the table covers it only via the untiered motion-fallback row.
 const GUARDRAIL_UNMAPPED_INDEX_CARDS = new Set(["peak end"]);
 
+// The one row in §3 allowed to carry a placeholder tier, matched by full normalized name.
+const MOTION_FALLBACK_ROW_NAME = "commitment intent mirroring peak end and other motion";
+
 function parseTierSet(raw: string): Set<string> | undefined {
   const cleaned = raw.replace(/\*/g, "").replace(/[–—]/g, "-").trim().toUpperCase();
   if (!cleaned) return undefined;
   const parts = cleaned.split(/\s*-\s*/).filter(Boolean);
   if (parts.length === 0 || parts.some((part) => !TIER_WORDS.has(part))) return undefined;
-  // A range spans every tier between its endpoints: LOW-HIGH admits MEDIUM too.
+  // A range is a single tier or exactly two ASCENDING endpoints, spanning every tier between
+  // them (LOW-HIGH admits MEDIUM too). Descending (HIGH-LOW) or multi-endpoint (LOW-HIGH-LOW)
+  // cells are malformed — min/max would silently launder them into a permissive full range,
+  // so they must fall through to risk_tier_unrecognized instead.
+  if (parts.length > 2) return undefined;
   const indices = parts.map((part) => TIER_ORDER.indexOf(part));
+  if (indices.length === 2 && (indices[0] ?? -1) >= (indices[1] ?? -1)) return undefined;
   return new Set(TIER_ORDER.slice(Math.min(...indices), Math.max(...indices) + 1));
 }
 
@@ -863,8 +884,10 @@ if (ethicsRef) {
     const tiers = parseTierSet(row.tierRaw);
     if (!tiers) {
       // Only the motion-fallback row may carry a placeholder tier; a canonical mechanism
-      // with "—" or a typo would silently vanish from parity.
-      if (!(isTierPlaceholder(row.tierRaw) && /\bmotion\b/i.test(row.name))) {
+      // with "—" or a typo would silently vanish from parity. The row is identified by its
+      // normalized name, not by the word "motion" anywhere in the cell — "Variable Reward
+      // Motion | —" must error, not silently exit the parity gate.
+      if (!(isTierPlaceholder(row.tierRaw) && normalizeCardName(row.name) === MOTION_FALLBACK_ROW_NAME)) {
         issues.push(
           issue(
             "error",
@@ -891,7 +914,19 @@ if (ethicsRef) {
               "references/ethics-guardrail.md",
             ),
           );
-        } else if (!existingBucket) {
+        } else if (existingBucket) {
+          // Same member, same tier set, two bucket rows: still a duplicate assignment —
+          // risk_tier_duplicate_row promises one row per mechanism, and equal-tier
+          // duplicates are how tier drift starts.
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.risk_tier_duplicate_row",
+              `references/ethics-guardrail.md §3 lists "${member.trim()}" in two bucket rows (both ${tierKey(tiers)}). Duplicate rows are how tier drift starts — merge into a single row.`,
+              "references/ethics-guardrail.md",
+            ),
+          );
+        } else {
           bucketTiers.set(key, tiers);
         }
       }
