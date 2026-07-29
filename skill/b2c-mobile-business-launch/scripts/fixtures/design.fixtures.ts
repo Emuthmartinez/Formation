@@ -785,6 +785,113 @@ experience_card:
     "emotional_design.variable_reward_missing_user_control_escape_hatch",
   );
 
+  const emotionalSpendNearReward = makeFixture("emotional-spend-near-reward");
+  writeFileSync(
+    path.join(emotionalSpendNearReward, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak reveal: day 7 celebration with the weekly progress recap.",
+      "Paywall: present the RevenueCat offering right here.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "spend prompt beside a streak moment without stated separation fails",
+    emotionalSpendNearReward,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  const emotionalSpendSeparated = makeFixture("emotional-spend-separated");
+  writeFileSync(
+    path.join(emotionalSpendSeparated, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak reveal: day 7 celebration with the weekly progress recap.",
+      "Paywall: presented on a separate screen, one interaction after the streak reveal resolves.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "spend prompt with a stated separation from the streak moment passes",
+    emotionalSpendSeparated,
+    "check-emotional-design.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "spend_prompt_after_reward",
+  );
+
+  const guardrailFixtureHeader = [
+    "# Ethics And Dark-Pattern Guardrail",
+    "## 1. Bright-Line Vs Dark-Line Distinction",
+    "## 2. Regulatory And Platform Landscape",
+    "## 3. Per-Mechanism Risk Table",
+    "| Mechanism | Risk Tier | Primary Risk | Bright-Line Test | Required Attestation Fields |",
+    "|---|---|---|---|---|",
+  ];
+  const guardrailFixtureFooter = ["## 5. Guardrail Contract", "## 7. Acceptance Checklist"];
+
+  const emotionalTierMismatch = makeFixture("emotional-risk-tier-mismatch");
+  {
+    const refDir = path.join(emotionalTierMismatch, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Endowed Progress | Real prior progress exists to surface | MEDIUM | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "index risk tier disagreeing with the guardrail table fails",
+    emotionalTierMismatch,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_mismatch",
+  );
+
+  const emotionalTierConflict = makeFixture("emotional-risk-tier-conflict");
+  {
+    const refDir = path.join(emotionalTierConflict, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Intent Mirroring | MEDIUM | Retention friction on cancel | Never on cancel/downgrade | `bright_line` |",
+        "| Intent Mirroring | LOW-MEDIUM | Cancellation friction disguised as confirmation | Pause serves the user | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "duplicate risk-table rows with disagreeing tiers fail",
+    emotionalTierConflict,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_conflict",
+  );
+
   const elevenStarThin = makeFixture("eleven-star-thin");
   writeFileSync(
     path.join(elevenStarThin, "11-star-experience", "11_STAR_EXPERIENCE.md"),
