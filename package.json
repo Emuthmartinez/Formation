@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.44.0",
+  "version": "0.45.0",
   "description": "An agent skill that takes a consumer mobile app from idea to a launched business, with deterministic validators between every claim and done.",
   "keywords": [
     "claude-code",

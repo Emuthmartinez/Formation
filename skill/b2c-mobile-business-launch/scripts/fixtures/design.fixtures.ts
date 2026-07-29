@@ -785,6 +785,709 @@ experience_card:
     "emotional_design.variable_reward_missing_user_control_escape_hatch",
   );
 
+  const emotionalSpendNearReward = makeFixture("emotional-spend-near-reward");
+  writeFileSync(
+    path.join(emotionalSpendNearReward, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak reveal: day 7 celebration with the weekly progress recap.",
+      "Paywall: present the RevenueCat offering right here.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "spend prompt beside a streak moment without stated separation fails",
+    emotionalSpendNearReward,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  const emotionalSpendSeparated = makeFixture("emotional-spend-separated");
+  writeFileSync(
+    path.join(emotionalSpendSeparated, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak reveal: day 7 celebration with the weekly progress recap.",
+      "Paywall: presented on a separate screen, one interaction after the streak reveal resolves.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "spend prompt with a stated separation from the streak moment passes",
+    emotionalSpendSeparated,
+    "check-emotional-design.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "spend_prompt_after_reward",
+  );
+
+  const emotionalSpendProhibited = makeFixture("emotional-spend-prohibited");
+  writeFileSync(
+    path.join(emotionalSpendProhibited, "ONBOARDING.md"),
+    ["# Onboarding", "Never show the paywall inside a streak-break grief screen.", "Analytics: streak_celebrated, paywall_viewed."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "copy that prohibits the spend-near-reward pattern passes",
+    emotionalSpendProhibited,
+    "check-emotional-design.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "spend_prompt_after_reward",
+  );
+
+  // IAP is the guardrail's own spend terminology — it must trip the veto vocabulary.
+  const emotionalSpendIap = makeFixture("emotional-spend-iap");
+  writeFileSync(
+    path.join(emotionalSpendIap, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak reveal: day 7 celebration with the weekly progress recap.",
+      "IAP offer: surface the premium IAP offer right here.",
+      "Analytics: streak_celebrated, iap_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an IAP offer beside a streak moment without stated separation fails",
+    emotionalSpendIap,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // Markdown wrapping must not turn a compliant prohibition into a false veto.
+  const emotionalSpendWrappedProhibition = makeFixture("emotional-spend-wrapped-prohibition");
+  writeFileSync(
+    path.join(emotionalSpendWrappedProhibition, "ONBOARDING.md"),
+    ["# Onboarding", "Never show the", "paywall inside a streak-break grief screen.", "Analytics: streak_celebrated, paywall_viewed."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a prohibition wrapped across two lines still earns its escape",
+    emotionalSpendWrappedProhibition,
+    "check-emotional-design.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "spend_prompt_after_reward",
+  );
+
+  // A separation note for one compliant flow must not bless a different dark flow beside it.
+  const emotionalSpendBorrowedProof = makeFixture("emotional-spend-borrowed-proof");
+  writeFileSync(
+    path.join(emotionalSpendBorrowedProof, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak recap flow: the weekly recap celebrates the run so far.",
+      "Paywall: presented on a separate screen, one interaction after the recap resolves.",
+      "Streak-break grief screen: shows the lost streak with the recovery path.",
+      "Paywall: present the RevenueCat offering right here on this screen.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a separation note for one flow does not bless the dark flow beside it",
+    emotionalSpendBorrowedProof,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // The negation must bind to placing the spend surface — an unrelated negation in the same
+  // sentence must not ride past the veto.
+  const emotionalSpendUnrelatedNegation = makeFixture("emotional-spend-unrelated-negation");
+  writeFileSync(
+    path.join(emotionalSpendUnrelatedNegation, "ONBOARDING.md"),
+    ["# Onboarding", "Do not animate the streak; show the paywall on the same screen.", "Analytics: streak_celebrated, paywall_viewed."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an unrelated negation does not suppress the spend veto",
+    emotionalSpendUnrelatedNegation,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // "there is no separate screen" is an admission, not separation proof.
+  const emotionalSpendNegatedProof = makeFixture("emotional-spend-negated-proof");
+  writeFileSync(
+    path.join(emotionalSpendNegatedProof, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak-break grief screen and paywall share one view; there is no separate screen.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a negated separation phrase does not count as proof",
+    emotionalSpendNegatedProof,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // The prohibitive clause must be the one holding the spend/reward keywords.
+  const emotionalSpendOtherClause = makeFixture("emotional-spend-other-clause");
+  writeFileSync(
+    path.join(emotionalSpendOtherClause, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Show the paywall on the streak screen, but do not display an upgrade after dismissal.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a prohibition in an unrelated clause does not suppress the spend veto",
+    emotionalSpendOtherClause,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // A prohibited clause about a different spend surface must not bless the violating clause.
+  const emotionalSpendSecondClause = makeFixture("emotional-spend-second-clause");
+  writeFileSync(
+    path.join(emotionalSpendSecondClause, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Show the paywall on the streak screen, but do not show a purchase offer after dismissal.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a prohibited second clause with its own spend word does not suppress the veto",
+    emotionalSpendSecondClause,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // Checkout screens are spend surfaces — the guardrail's own vocabulary.
+  const emotionalSpendCheckout = makeFixture("emotional-spend-checkout");
+  writeFileSync(
+    path.join(emotionalSpendCheckout, "ONBOARDING.md"),
+    ["# Onboarding", "Streak-break grief screen opens Stripe Checkout here.", "Analytics: streak_celebrated."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a checkout surface beside a streak moment fails the spend veto",
+    emotionalSpendCheckout,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // Lane deferral skips deliverables, never the ethics veto over copy that already exists.
+  const emotionalSpendDeferredLane = makeFixture("emotional-spend-deferred-lane");
+  {
+    const state = readState(emotionalSpendDeferredLane);
+    getLane(state, "emotional_design")["status"] = "deferred";
+    writeState(emotionalSpendDeferredLane, state);
+  }
+  writeFileSync(
+    path.join(emotionalSpendDeferredLane, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak reveal: day 7 celebration with the weekly progress recap.",
+      "Paywall: present the RevenueCat offering right here.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a deferred emotional-design lane still runs the spend veto",
+    emotionalSpendDeferredLane,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  const guardrailFixtureHeader = [
+    "# Ethics And Dark-Pattern Guardrail",
+    "## 1. Bright-Line Vs Dark-Line Distinction",
+    "## 2. Regulatory And Platform Landscape",
+    "## 3. Per-Mechanism Risk Table",
+    "| Mechanism | Risk Tier | Primary Risk | Bright-Line Test | Required Attestation Fields |",
+    "|---|---|---|---|---|",
+  ];
+  const guardrailFixtureFooter = ["## 5. Guardrail Contract", "## 7. Acceptance Checklist"];
+
+  const emotionalTierMismatch = makeFixture("emotional-risk-tier-mismatch");
+  {
+    const refDir = path.join(emotionalTierMismatch, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Endowed Progress | Real prior progress exists to surface | MEDIUM | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "index risk tier disagreeing with the guardrail table fails",
+    emotionalTierMismatch,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_mismatch",
+  );
+
+  const emotionalTierConflict = makeFixture("emotional-risk-tier-conflict");
+  {
+    const refDir = path.join(emotionalTierConflict, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Intent Mirroring | MEDIUM | Retention friction on cancel | Never on cancel/downgrade | `bright_line` |",
+        "| Intent Mirroring | LOW-MEDIUM | Cancellation friction disguised as confirmation | Pause serves the user | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "duplicate risk-table rows with disagreeing tiers fail",
+    emotionalTierConflict,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_conflict",
+  );
+
+  const emotionalTierDuplicate = makeFixture("emotional-risk-tier-duplicate");
+  {
+    const refDir = path.join(emotionalTierDuplicate, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line`, `posthog_event` |",
+        "| Endowed Progress | LOW | Manufactured progress on fake tasks | Starting progress reflects real investment | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "duplicate risk-table rows with agreeing tiers fail",
+    emotionalTierDuplicate,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_duplicate_row",
+  );
+
+  const emotionalTierTypo = makeFixture("emotional-risk-tier-typo");
+  {
+    const refDir = path.join(emotionalTierTypo, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | MEDUM | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a misspelled risk tier fails instead of silently dropping the row",
+    emotionalTierTypo,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
+  );
+
+  // A blank line mid-table must not silently drop the rows below it from parity.
+  const emotionalTierInterrupted = makeFixture("emotional-risk-tier-interrupted");
+  {
+    const refDir = path.join(emotionalTierInterrupted, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line`, `posthog_event` |",
+        "",
+        "| Endowed Progress | LOW | Manufactured progress on fake tasks | Starting progress reflects real investment | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "rows below a mid-table interruption still reach the parity gate",
+    emotionalTierInterrupted,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_duplicate_row",
+  );
+
+  // A placeholder tier is legitimate only on the motion-fallback row.
+  const emotionalTierPlaceholderAbuse = makeFixture("emotional-risk-tier-placeholder-abuse");
+  {
+    const refDir = path.join(emotionalTierPlaceholderAbuse, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | — | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a placeholder tier on a canonical mechanism fails",
+    emotionalTierPlaceholderAbuse,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
+  );
+
+  // A descending or multi-endpoint range must be malformed, not laundered into a
+  // permissive full range by min/max.
+  const emotionalTierDescendingRange = makeFixture("emotional-risk-tier-descending-range");
+  {
+    const refDir = path.join(emotionalTierDescendingRange, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | HIGH-LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a descending risk-tier range fails instead of expanding to all tiers",
+    emotionalTierDescendingRange,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
+  );
+
+  // The placeholder allowance identifies the motion-fallback row by its full normalized
+  // name — the word "motion" inside an unrelated row name earns no exemption.
+  const emotionalTierMotionWordAbuse = makeFixture("emotional-risk-tier-motion-word-abuse");
+  {
+    const refDir = path.join(emotionalTierMotionWordAbuse, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [...guardrailFixtureHeader, "| Variable Reward Motion | — | Compulsion loop | User can always stop | `bright_line` |", ...guardrailFixtureFooter].join(
+        "\n",
+      ),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a placeholder tier on a non-fallback row containing the word motion fails",
+    emotionalTierMotionWordAbuse,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
+  );
+
+  // Equal-tier duplicates across bucket rows are still duplicate assignments.
+  const emotionalTierBucketDuplicate = makeFixture("emotional-risk-tier-bucket-duplicate");
+  {
+    const refDir = path.join(emotionalTierBucketDuplicate, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| All other deck cards (Reciprocity, Fresh Start) | LOW–MEDIUM | Card-specific | The card's own bright-line test | base fields |",
+        "| All other deck cards (Reciprocity) | LOW–MEDIUM | Card-specific | The card's own bright-line test | base fields |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "the same member in two equal-tier bucket rows fails as a duplicate",
+    emotionalTierBucketDuplicate,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_duplicate_row",
+  );
+
+  // An explicit row may narrow a bucket range but must not contradict it.
+  const emotionalTierBucketConflict = makeFixture("emotional-risk-tier-bucket-conflict");
+  {
+    const refDir = path.join(emotionalTierBucketConflict, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| All other deck cards (Rating Prompt) | LOW–MEDIUM | Card-specific | The card's own bright-line test | base fields |",
+        "| Rating Prompt | HIGH | Platform policy violation | Native API only | `bright_line`, `platform_api_used` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "an explicit row contradicting its bucket range fails",
+    emotionalTierBucketConflict,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_conflict",
+  );
+
+  // A row that lost its leading pipe is a broken row, not prose.
+  const emotionalTierBrokenRow = makeFixture("emotional-risk-tier-broken-row");
+  {
+    const refDir = path.join(emotionalTierBrokenRow, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Variable Reward | HIGH | Compulsion loop | User can always stop | `bright_line` |",
+        "Endowed Progress | HIGH | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a risk row missing its leading pipe fails instead of vanishing",
+    emotionalTierBrokenRow,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_table_malformed_row",
+  );
+
+  // An ordered range spans its intermediate tiers: LOW-HIGH admits MEDIUM.
+  const emotionalTierRangeSpan = makeFixture("emotional-risk-tier-range-span");
+  {
+    const refDir = path.join(emotionalTierRangeSpan, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW–HIGH | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Endowed Progress | Real prior progress exists to surface | MEDIUM | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "an index tier inside an ordered guardrail range passes",
+    emotionalTierRangeSpan,
+    "check-emotional-design.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "risk_tier_mismatch",
+  );
+
+  // "Emotional Commitment" contains "motion" only as a substring — no placeholder pass.
+  const emotionalTierMotionSubstring = makeFixture("emotional-risk-tier-motion-substring");
+  {
+    const refDir = path.join(emotionalTierMotionSubstring, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [...guardrailFixtureHeader, "| Emotional Commitment | — | Confirmshaming | Exit path is frictionless | `bright_line` |", ...guardrailFixtureFooter].join(
+        "\n",
+      ),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a motion substring in the name does not license a placeholder tier",
+    emotionalTierMotionSubstring,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
+  );
+
+  // A misspelled index card name must not silently skip parity.
+  const emotionalTierNameDrift = makeFixture("emotional-risk-tier-name-drift");
+  {
+    const refDir = path.join(emotionalTierNameDrift, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Endowed Progres | Real prior progress exists to surface | MEDIUM | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a drifted index card name fails instead of skipping parity",
+    emotionalTierNameDrift,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unmapped_card",
+  );
+
+  // A truncated index name cannot inherit a canonical tier by prefix.
+  const emotionalTierTruncatedName = makeFixture("emotional-risk-tier-truncated-name");
+  {
+    const refDir = path.join(emotionalTierTruncatedName, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Endowed | Real prior progress exists | LOW | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a truncated index card name fails instead of inheriting a tier",
+    emotionalTierTruncatedName,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unmapped_card",
+  );
+
+  // Deleting canonical cards from the index must not pass on the survivor.
+  const emotionalTierIndexTruncated = makeFixture("emotional-risk-tier-index-truncated");
+  {
+    const refDir = path.join(emotionalTierIndexTruncated, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Variable Reward | HIGH | Compulsion loop | User can always stop | `bright_line` |",
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Variable Reward | An outcome genuinely varies | HIGH | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "an index missing a canonical tiered card fails reverse coverage",
+    emotionalTierIndexTruncated,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_index_missing_card",
+  );
+
+  // The routing index must not retain two Risk values for one card.
+  const emotionalTierIndexDuplicate = makeFixture("emotional-risk-tier-index-duplicate");
+  {
+    const refDir = path.join(emotionalTierIndexDuplicate, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| All other deck cards (Reciprocity) | LOW–MEDIUM | Card-specific | The card's own bright-line test | base fields |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Reciprocity | An unprompted, real gift can precede any ask | LOW | link |",
+        "| Reciprocity | An unprompted, real gift can precede any ask | MEDIUM | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "duplicate routing rows for one card fail even inside a bucket range",
+    emotionalTierIndexDuplicate,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_duplicate_row",
+  );
+
   const elevenStarThin = makeFixture("eleven-star-thin");
   writeFileSync(
     path.join(elevenStarThin, "11-star-experience", "11_STAR_EXPERIENCE.md"),

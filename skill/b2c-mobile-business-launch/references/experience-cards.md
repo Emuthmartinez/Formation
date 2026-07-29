@@ -35,7 +35,7 @@ One line per card: when to load it, and where the full spec lives.
 | Variable Reward | An outcome genuinely varies and a reveal moment exists (results, generations, daily pulls) | **HIGH** | [`experience-cards/variable-reward-card.md`](experience-cards/variable-reward-card.md) |
 | Perceived Effort Delay | Real computation runs on the user's behalf and can be shown honestly (plan generation, analysis) | MEDIUM | [`experience-cards/perceived-effort-delay-card.md`](experience-cards/perceived-effort-delay-card.md) |
 | Intent Mirroring | A pause can reflect the user's own stated goal back (pre-paywall, return sessions) | MEDIUM | [`experience-cards/intent-mirroring-card.md`](experience-cards/intent-mirroring-card.md) |
-| Endowed Progress | Real prior progress exists to surface before a multi-step task (setup, levels, profiles) | MEDIUM | [`experience-cards/endowed-progress-card.md`](experience-cards/endowed-progress-card.md) |
+| Endowed Progress | Real prior progress exists to surface before a multi-step task (setup, levels, profiles) | LOW | [`experience-cards/endowed-progress-card.md`](experience-cards/endowed-progress-card.md) |
 | Peak-End | A session has a natural emotional peak and a designable ending (completions, summaries) | MEDIUM | [`experience-cards/peak-end-card.md`](experience-cards/peak-end-card.md) |
 | Streak & Loss Aversion | Continuity itself is the value and a free recovery path will ship (habits, daily practice) | **HIGH** | [`experience-cards/streak-and-loss-aversion-card.md`](experience-cards/streak-and-loss-aversion-card.md) |
 | Reciprocity | An unprompted, real gift can precede any ask (bonus content, surprise upgrades) | MEDIUM | [`experience-cards/reciprocity-card.md`](experience-cards/reciprocity-card.md) |

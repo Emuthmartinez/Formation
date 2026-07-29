@@ -21,6 +21,10 @@
  * skips artifact checks. Missing lanes are errors so migrated and new repos
  * cannot bypass the emotional-design contract accidentally. The ethics phrase
  * scans always run when the artifacts exist.
+ *
+ * Reference integrity: when references/ethics-guardrail.md (and the
+ * experience-cards.md index) resolve next to the root, the §3 risk table must
+ * keep one tier per mechanism and the index Risk column must agree with it.
  */
 
 import { asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit, type Issue, type Severity } from "./lib/launch-state.js";
@@ -344,13 +348,47 @@ const COMMITMENT_GUILT_PATTERNS = [
   /remember why you started/i,
   /don'?t give up now/i,
 ];
-const SPEND_KEYWORDS = /\b(paywall|purchase|upgrade now|subscribe|buy now|unlock for|renew now|start (your )?(trial|subscription))\b/i;
+const SPEND_KEYWORDS =
+  /\b(paywall|purchase|checkout|upgrade now|subscribe|buy now|unlock for|renew now|iap|in[- ]app purchase(s)?|(purchase|upgrade|subscription|paid) offer|start (your )?(trial|subscription))\b/i;
 const REWARD_STREAK_KEYWORDS = /\b(streak|variable reward|reward reveal|reward screen|loss aversion|streak[- ]break)\b/i;
 
 const LOCAL_SCARCITY_PROOF_PATTERN =
   /\b(scarcity_enforcement_proof|backend[- ]enforced|server[- ]enforced|real[- ]time (inventory|capacity|slots?)|database[- ]backed|founder[- ]verified|source:|evidence:|as of \d{4}-\d{2}-\d{2})\b/i;
 const LOCAL_SOCIAL_PROOF_PATTERN =
   /\b(social_proof_truthfulness_proof|App Store|Google Play|store data|verified (count|source)|source:|evidence:|as of \d{4}-\d{2}-\d{2})\b|\b(PostHog|analytics)\b.{0,48}\b(count|users|members|downloads|source|verified)\b/i;
+const LOCAL_SEPARATION_PROOF_PATTERN =
+  /\b(separate (screen|surface|flow|session)|different screen|not (on|shown on|displayed on) the same screen|never on the same screen|one (user )?interaction (later|after|between)|interaction between|after (the user )?(leaves|dismisses|closes|returns)|next session|spend[- ]free)\b/i;
+// "there is no separate screen" is an admission, not proof — a separation phrase counts only
+// when the words directly before it do not negate it.
+const SEPARATION_NEGATION_BEFORE = /\b(?:no|not|without|never|isn'?t|aren'?t|lacks?|lacking)\s+(?:a\s+|the\s+|any\s+)?$/i;
+
+function hasAffirmativeSeparationProof(text: string): boolean {
+  const global = new RegExp(LOCAL_SEPARATION_PROOF_PATTERN.source, "gi");
+  let match: RegExpExecArray | null;
+  while ((match = global.exec(text)) !== null) {
+    const before = text.slice(Math.max(0, match.index - 24), match.index);
+    if (!SEPARATION_NEGATION_BEFORE.test(before)) return true;
+  }
+  return false;
+}
+
+// Compliant copy often states the rule itself ("Never show the paywall inside a streak-break
+// grief screen") — but the negation must bind to *placing the spend surface*, clause-locally:
+// sentence punctuation, commas, and coordinating conjunctions end the clause, so neither
+// "Do not animate the streak; show the paywall on the same screen" nor "Show the paywall on
+// the streak screen, but do not display an upgrade after dismissal" can ride an unrelated
+// negation past the veto. Two shapes: negation → placement verb → spend object, and spend
+// object → negation → placement verb (passive).
+const PROHIBITION_NEGATION = String.raw`(?:never|no|not|do not|don'?t|must not|cannot|may not|won'?t|avoid|without|prohibit(?:s|ed)?|forbidden|ban(?:s|ned)?|block(?:s|ed)?)`;
+const PROHIBITION_VERB = String.raw`(?:show(?:s|n|ing)?|display(?:s|ed|ing)?|present(?:s|ed|ing)?|place(?:s|d|ment)?|pair(?:s|ed|ing)?|co-?locate[sd]?|prompt(?:s|ed|ing)?|trigger(?:s|ed|ing)?|surface[sd]?|appear(?:s|ed|ing)?)`;
+const PROHIBITION_SPEND = String.raw`(?:spend|paywall|purchase|subscri(?:be|ption)|upgrade|iap|offer(?:ing)?)`;
+const PROHIBITION_GAP = String.raw`(?:(?!\b(?:but|and|however|while|whereas)\b)[^.;,\n]){0,60}?`;
+const PROHIBITION_GAP_SHORT = String.raw`(?:(?!\b(?:but|and|however|while|whereas)\b)[^.;,\n]){0,40}?`;
+const LOCAL_PROHIBITION_PATTERN = new RegExp(
+  `\\b${PROHIBITION_NEGATION}\\b${PROHIBITION_GAP}\\b${PROHIBITION_VERB}\\b${PROHIBITION_GAP}\\b${PROHIBITION_SPEND}\\b` +
+    `|\\b${PROHIBITION_SPEND}s?\\b${PROHIBITION_GAP}\\b${PROHIBITION_NEGATION}\\b${PROHIBITION_GAP_SHORT}\\b${PROHIBITION_VERB}\\b`,
+  "i",
+);
 
 function hasLocalProof(lines: string[], lineIndex: number, proofPattern: RegExp): boolean {
   const start = Math.max(0, lineIndex - 2);
@@ -425,7 +463,9 @@ function scanLiveCopy(relativePath: string, rawText: string, spendScan: boolean)
   }
 
   // Spend prompt co-located with a streak/reward moment (ethics-guardrail.md Non-Negotiable
-  // Prohibition: "spend prompts inside streak-break grief screens"). Heuristic → warning.
+  // Prohibition 4: "spend prompts inside streak-break grief screens"). The prohibition allows
+  // no founder override, so co-location is an error unless the surrounding lines state the
+  // separation (same trust model as the scarcity/social-proof local-proof escapes).
   if (spendScan) {
     const rewardLines: number[] = [];
     const spendLines: number[] = [];
@@ -433,13 +473,52 @@ function scanLiveCopy(relativePath: string, rawText: string, spendScan: boolean)
       if (REWARD_STREAK_KEYWORDS.test(line)) rewardLines.push(index);
       if (SPEND_KEYWORDS.test(line)) spendLines.push(index);
     });
-    const tooClose = rewardLines.some((r) => spendLines.some((s) => Math.abs(r - s) <= 4));
-    if (tooClose) {
+    // Separation proof binds to the pair's own span (plus the line right after, where a
+    // trailing "shown on a separate screen" note lands) — a note for one compliant flow
+    // must not bless a different dark flow beside it.
+    const pairHasSeparationProof = (r: number, s: number): boolean => {
+      const lo = Math.min(r, s);
+      const hi = Math.max(r, s);
+      return hasAffirmativeSeparationProof(lines.slice(lo, hi + 2).join("\n"));
+    };
+    // The prohibition escape is clause-quantified, not clause-any: every clause that
+    // co-locates both keyword classes must itself be prohibitive (falling back to all
+    // reward-bearing or all spend-bearing clauses when no clause holds both) — "Show the
+    // paywall on the streak screen, but do not show a purchase offer after dismissal" gets
+    // no escape from its prohibited-but-unrelated second clause.
+    const CLAUSE_SPLIT = /[.;]|\b(?:but|however|whereas)\b/i;
+    const variantProhibited = (text: string): boolean => {
+      const clauses = text.split(CLAUSE_SPLIT);
+      const coLocated = clauses.filter((clause) => REWARD_STREAK_KEYWORDS.test(clause) && SPEND_KEYWORDS.test(clause));
+      if (coLocated.length > 0) return coLocated.every((clause) => LOCAL_PROHIBITION_PATTERN.test(clause));
+      const rewardClauses = clauses.filter((clause) => REWARD_STREAK_KEYWORDS.test(clause));
+      const spendClauses = clauses.filter((clause) => SPEND_KEYWORDS.test(clause));
+      return (
+        (rewardClauses.length > 0 && rewardClauses.every((clause) => LOCAL_PROHIBITION_PATTERN.test(clause))) ||
+        (spendClauses.length > 0 && spendClauses.every((clause) => LOCAL_PROHIBITION_PATTERN.test(clause)))
+      );
+    };
+    // Markdown wrapping can split one prohibitive sentence across physical lines ("Never show
+    // the" / "paywall inside a streak-break grief screen."). The clause test also runs on the
+    // line joined with each adjacent neighbor, so a wrapped compliant policy still earns its
+    // escape — clause quantification still applies to the joined text, so an unrelated
+    // prohibition in the neighbor cannot bless a live spend line.
+    const prohibitsAtLine = (index: number): boolean => {
+      const line = lines[index] ?? "";
+      if (variantProhibited(line)) return true;
+      const prev = lines[index - 1] ?? "";
+      const next = lines[index + 1] ?? "";
+      return (prev !== "" && variantProhibited(`${prev} ${line}`)) || (next !== "" && variantProhibited(`${line} ${next}`));
+    };
+    const unprovenPair = rewardLines
+      .flatMap((r) => spendLines.map((s) => ({ r, s })))
+      .find(({ r, s }) => Math.abs(r - s) <= 4 && !pairHasSeparationProof(r, s) && !prohibitsAtLine(r) && !prohibitsAtLine(s));
+    if (unprovenPair) {
       issues.push(
         issue(
-          "warning",
+          "error",
           "emotional_design.spend_prompt_after_reward",
-          `${relativePath} places a spend prompt (paywall/purchase/subscribe) within a few lines of a streak or reward moment. Spend prompts inside streak-break or reward screens are a non-negotiable dark pattern — separate them by at least one user interaction and confirm they are not on the same screen.`,
+          `${relativePath}:${unprovenPair.s + 1} places a spend prompt (paywall/purchase/subscribe) within a few lines of a streak or reward moment. Spend prompts inside streak-break or reward screens are a non-negotiable dark pattern — move the prompt at least one user interaction away and state the separation next to the copy (e.g. "separate screen, one interaction between").`,
           relativePath,
         ),
       );
@@ -617,8 +696,10 @@ if (audit) {
 }
 
 // Live-copy docs (actual app/store copy) — scan for dark patterns INCLUDING the
-// spend-near-reward co-location, which the guardrail names ONBOARDING/SPEC/listing as targets for.
-if (!skip) {
+// spend-near-reward co-location, which the guardrail names ONBOARDING/SPEC/listing as targets
+// for. Deliberately NOT gated on the lane skip: deferring the emotional-design lane skips its
+// deliverables, never the non-negotiable ethics veto over copy that already exists.
+{
   for (const doc of ["ONBOARDING.md", "SPEC.md", "APP_STORE_LISTING.md", "app-store-listing/APP_STORE_LISTING.md", "PAYWALL.md"]) {
     const liveText = readText(args.root, doc);
     if (liveText) {
@@ -681,6 +762,328 @@ if (ethicsRef) {
           "references/ethics-guardrail.md",
         ),
       );
+    }
+  }
+}
+
+// Cross-file risk-tier parity — the experience-cards.md index Risk column must agree with
+// the ethics-guardrail.md §3 Per-Mechanism Risk Table, and the risk table must not carry two
+// explicit rows for one mechanism with different tiers (the 2026-07-28 drift class). Range
+// tiers (LOW-MEDIUM) admit any tier inside the range. Cards without a table row (and rows
+// with no tier, like the motion-fallback row) are out of parity scope. Skipped entirely when
+// the reference files are not present (business repos without vendored references).
+
+const TIER_WORDS = new Set(["LOW", "MEDIUM", "HIGH"]);
+
+function normalizeCardName(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/\bcards?\b/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const TIER_ORDER = ["LOW", "MEDIUM", "HIGH"];
+
+// Index cards deliberately absent from the §3 risk table (normalized names). Peak-End's
+// risk is carried per-card; the table covers it only via the untiered motion-fallback row.
+const GUARDRAIL_UNMAPPED_INDEX_CARDS = new Set(["peak end"]);
+
+// §3 mechanisms that are deliberately not deck cards in the routing index.
+const TABLE_ONLY_MECHANISMS = new Set(["scarcity urgency", "social proof", "goal gradient", "rating prompt"]);
+
+// The one row in §3 allowed to carry a placeholder tier, matched by full normalized name.
+const MOTION_FALLBACK_ROW_NAME = "commitment intent mirroring peak end and other motion";
+
+function parseTierSet(raw: string): Set<string> | undefined {
+  const cleaned = raw.replace(/\*/g, "").replace(/[–—]/g, "-").trim().toUpperCase();
+  if (!cleaned) return undefined;
+  const parts = cleaned.split(/\s*-\s*/).filter(Boolean);
+  if (parts.length === 0 || parts.some((part) => !TIER_WORDS.has(part))) return undefined;
+  // A range is a single tier or exactly two ASCENDING endpoints, spanning every tier between
+  // them (LOW-HIGH admits MEDIUM too). Descending (HIGH-LOW) or multi-endpoint (LOW-HIGH-LOW)
+  // cells are malformed — min/max would silently launder them into a permissive full range,
+  // so they must fall through to risk_tier_unrecognized instead.
+  if (parts.length > 2) return undefined;
+  const indices = parts.map((part) => TIER_ORDER.indexOf(part));
+  if (indices.length === 2 && (indices[0] ?? -1) >= (indices[1] ?? -1)) return undefined;
+  return new Set(TIER_ORDER.slice(Math.min(...indices), Math.max(...indices) + 1));
+}
+
+function tierKey(tiers: Set<string>): string {
+  return [...tiers].sort().join("-");
+}
+
+/** A placeholder tier ("—") is legitimate ONLY on the motion-fallback row — callers must pair
+ * this with a motion-row name check; anywhere else an unparseable cell is a typo the gate must
+ * not skip. */
+function isTierPlaceholder(raw: string): boolean {
+  const cleaned = raw.replace(/[*`]/g, "").replace(/[–—]/g, "-").trim();
+  return cleaned === "" || /^-+$/.test(cleaned) || /^n\/?a$/i.test(cleaned);
+}
+
+interface TableRow {
+  name: string;
+  tierRaw: string;
+}
+
+interface ParsedTable {
+  rows: TableRow[];
+  malformed: string[];
+}
+
+function parseTableRows(text: string, headerPattern: RegExp, nameCell: number, tierCell: number): ParsedTable {
+  const rows: TableRow[] = [];
+  const malformed: string[] = [];
+  let inTable = false;
+  for (const line of text.split("\n")) {
+    if (!inTable) {
+      if (headerPattern.test(line)) inTable = true;
+      continue;
+    }
+    const trimmed = line.trim();
+    // Only the next section heading ends the scan — a blank or prose interruption
+    // mid-table must not silently drop the rows below it from the parity gate.
+    if (trimmed.startsWith("#")) break;
+    if (!trimmed.startsWith("|")) {
+      // A table-shaped line that lost its leading pipe is a broken row, not prose —
+      // silently skipping it would hide its mechanism from the gate.
+      if ((trimmed.match(/\|/g) ?? []).length >= 2) malformed.push(trimmed.slice(0, 80));
+      continue;
+    }
+    if (/^\|[\s|:-]+\|?$/.test(trimmed)) continue;
+    const cells = line.split("|").map((cell) => cell.trim());
+    const name = cells[nameCell] ?? "";
+    if (name) rows.push({ name, tierRaw: cells[tierCell] ?? "" });
+  }
+  return { rows, malformed };
+}
+
+/** Bucket members are short names ("Identity") for longer index cards ("Identity &
+ * Self-Expression") — the index name may extend the member, never the reverse, so a
+ * truncated index name ("Endowed") cannot inherit a canonical tier. Explicit mechanisms
+ * match by exact normalized name only. */
+function bucketCovers(bucketKey: string, indexName: string): boolean {
+  return indexName === bucketKey || indexName.startsWith(`${bucketKey} `);
+}
+
+const cardsIndexRef = readText(path.join(args.root, ".."), "references/experience-cards.md") ?? readText(args.root, "references/experience-cards.md");
+
+if (ethicsRef) {
+  const { rows: riskRows, malformed: riskMalformed } = parseTableRows(ethicsRef, /^\|\s*Mechanism\s*\|\s*Risk Tier\s*\|/i, 1, 2);
+  for (const broken of riskMalformed) {
+    issues.push(
+      issue(
+        "error",
+        "emotional_design.risk_table_malformed_row",
+        `references/ethics-guardrail.md §3 has a table-shaped line that does not parse as a row (missing leading pipe?): "${broken}". Fix it — its mechanism is invisible to the parity gate.`,
+        "references/ethics-guardrail.md",
+      ),
+    );
+  }
+  if (riskRows.length === 0 && includesPhrase(ethicsRef, "Per-Mechanism Risk Table")) {
+    issues.push(
+      issue(
+        "error",
+        "emotional_design.risk_table_unparsed",
+        "references/ethics-guardrail.md §3 declares a Per-Mechanism Risk Table but no `| Mechanism | Risk Tier |` rows parse — the risk-tier parity gate has gone blind.",
+        "references/ethics-guardrail.md",
+      ),
+    );
+  }
+
+  // Explicit rows assign one tier per mechanism; bucket rows ("All other deck cards (A, B)")
+  // constrain a named list with a shared (often range) tier.
+  const explicitTiers = new Map<string, { tierRaw: string; tiers: Set<string> }>();
+  const bucketTiers = new Map<string, Set<string>>();
+  for (const row of riskRows) {
+    const tiers = parseTierSet(row.tierRaw);
+    if (!tiers) {
+      // Only the motion-fallback row may carry a placeholder tier; a canonical mechanism
+      // with "—" or a typo would silently vanish from parity. The row is identified by its
+      // normalized name, not by the word "motion" anywhere in the cell — "Variable Reward
+      // Motion | —" must error, not silently exit the parity gate.
+      if (!(isTierPlaceholder(row.tierRaw) && normalizeCardName(row.name) === MOTION_FALLBACK_ROW_NAME)) {
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.risk_tier_unrecognized",
+            `references/ethics-guardrail.md §3 tier "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range (a placeholder tier is allowed only on the motion-fallback row). Fix the cell — otherwise the parity gate silently skips this mechanism.`,
+            "references/ethics-guardrail.md",
+          ),
+        );
+      }
+      continue;
+    }
+    const bucket = row.name.match(/^all other deck cards\s*\(([^)]*)\)/i);
+    if (bucket) {
+      for (const member of (bucket[1] ?? "").split(",")) {
+        const key = normalizeCardName(member);
+        if (!key) continue;
+        const existingBucket = bucketTiers.get(key);
+        if (existingBucket && tierKey(existingBucket) !== tierKey(tiers)) {
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.risk_tier_conflict",
+              `references/ethics-guardrail.md §3 assigns "${member.trim()}" disagreeing tiers across two bucket rows. One tier per mechanism.`,
+              "references/ethics-guardrail.md",
+            ),
+          );
+        } else if (existingBucket) {
+          // Same member, same tier set, two bucket rows: still a duplicate assignment —
+          // risk_tier_duplicate_row promises one row per mechanism, and equal-tier
+          // duplicates are how tier drift starts.
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.risk_tier_duplicate_row",
+              `references/ethics-guardrail.md §3 lists "${member.trim()}" in two bucket rows (both ${tierKey(tiers)}). Duplicate rows are how tier drift starts — merge into a single row.`,
+              "references/ethics-guardrail.md",
+            ),
+          );
+        } else {
+          bucketTiers.set(key, tiers);
+        }
+      }
+      continue;
+    }
+    const key = normalizeCardName(row.name);
+    const existing = explicitTiers.get(key);
+    if (existing && tierKey(existing.tiers) !== tierKey(tiers)) {
+      issues.push(
+        issue(
+          "error",
+          "emotional_design.risk_tier_conflict",
+          `references/ethics-guardrail.md §3 lists "${row.name}" twice with disagreeing risk tiers (${existing.tierRaw} vs ${row.tierRaw}). Dedupe to a single row with one tier.`,
+          "references/ethics-guardrail.md",
+        ),
+      );
+    } else if (existing) {
+      issues.push(
+        issue(
+          "error",
+          "emotional_design.risk_tier_duplicate_row",
+          `references/ethics-guardrail.md §3 lists "${row.name}" twice (both ${row.tierRaw}). Duplicate rows are how tier drift starts — merge into a single row.`,
+          "references/ethics-guardrail.md",
+        ),
+      );
+    } else {
+      explicitTiers.set(key, { tierRaw: row.tierRaw, tiers });
+    }
+  }
+
+  // An explicit row may narrow a bucket range (Rating Prompt MEDIUM inside LOW-MEDIUM) but
+  // must not contradict it — order-independent, so checked after the full table is read.
+  for (const [bucketKey, bucketSet] of bucketTiers) {
+    const explicit = explicitTiers.get(bucketKey);
+    if (explicit && ![...explicit.tiers].every((tier) => bucketSet.has(tier))) {
+      issues.push(
+        issue(
+          "error",
+          "emotional_design.risk_tier_conflict",
+          `references/ethics-guardrail.md §3 tiers "${bucketKey}" ${explicit.tierRaw} in its explicit row but ${[...bucketSet].sort().join("-")} in a bucket row. One tier per mechanism.`,
+          "references/ethics-guardrail.md",
+        ),
+      );
+    }
+  }
+
+  if (cardsIndexRef) {
+    const { rows: indexRows, malformed: indexMalformed } = parseTableRows(cardsIndexRef, /^\|\s*Card\s*\|\s*Load when\s*\|\s*Risk\s*\|/i, 1, 3);
+    for (const broken of indexMalformed) {
+      issues.push(
+        issue(
+          "error",
+          "emotional_design.risk_table_malformed_row",
+          `references/experience-cards.md has a table-shaped routing line that does not parse as a row (missing leading pipe?): "${broken}". Fix it — its card is invisible to the parity gate.`,
+          "references/experience-cards.md",
+        ),
+      );
+    }
+    if (indexRows.length === 0) {
+      issues.push(
+        issue(
+          "error",
+          "emotional_design.card_index_unparsed",
+          "references/experience-cards.md exists but no `| Card | Load when | Risk |` routing rows parse — the risk-tier parity gate has gone blind.",
+          "references/experience-cards.md",
+        ),
+      );
+    }
+    const seenIndexCards = new Map<string, string>();
+    for (const row of indexRows) {
+      const indexTiers = parseTierSet(row.tierRaw);
+      if (!indexTiers) {
+        // The index routes real cards only — no row there may plead a placeholder tier.
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.risk_tier_unrecognized",
+            `references/experience-cards.md Risk cell "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range. Fix the cell — otherwise the parity gate silently skips this card.`,
+            "references/experience-cards.md",
+          ),
+        );
+        continue;
+      }
+      const key = normalizeCardName(row.name);
+      const priorIndexTier = seenIndexCards.get(key);
+      if (priorIndexTier !== undefined) {
+        // The routing index must not retain two Risk values for one card.
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.risk_tier_duplicate_row",
+            `references/experience-cards.md routes "${row.name}" twice (${priorIndexTier} and ${row.tierRaw}). One routing row per card.`,
+            "references/experience-cards.md",
+          ),
+        );
+        continue;
+      }
+      seenIndexCards.set(key, row.tierRaw);
+      const explicit = explicitTiers.get(key);
+      const allowed = explicit?.tiers ?? [...bucketTiers.entries()].find(([tableKey]) => bucketCovers(tableKey, key))?.[1];
+      if (allowed && ![...indexTiers].every((tier) => allowed.has(tier))) {
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.risk_tier_mismatch",
+            `references/experience-cards.md routes "${row.name}" as ${row.tierRaw} but references/ethics-guardrail.md §3 tiers it ${explicit?.tierRaw ?? [...allowed].join("-")}. The guardrail table is canonical — make both files agree.`,
+            "references/experience-cards.md",
+          ),
+        );
+      } else if (!allowed && !GUARDRAIL_UNMAPPED_INDEX_CARDS.has(key)) {
+        // Name drift ("Endowed Progres") must not silently skip parity.
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.risk_tier_unmapped_card",
+            `references/experience-cards.md routes "${row.name}" (${row.tierRaw}) but no §3 row or bucket in references/ethics-guardrail.md covers it. Add a §3 row or fix the name — only deliberately unmapped cards (${[...GUARDRAIL_UNMAPPED_INDEX_CARDS].join(", ")}) may skip.`,
+            "references/experience-cards.md",
+          ),
+        );
+      }
+    }
+
+    // Reverse coverage: every canonical §3 mechanism that is a deck card must still appear
+    // in the routing index — deleting eleven of twelve rows must not pass on the survivor.
+    if (indexRows.length > 0) {
+      const indexKeys = indexRows.map((row) => normalizeCardName(row.name));
+      const uncoveredByIndex = (tableKey: string): boolean =>
+        !TABLE_ONLY_MECHANISMS.has(tableKey) && !indexKeys.some((indexKey) => bucketCovers(tableKey, indexKey));
+      for (const tableKey of [...explicitTiers.keys(), ...bucketTiers.keys()]) {
+        if (uncoveredByIndex(tableKey)) {
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.risk_tier_index_missing_card",
+              `references/ethics-guardrail.md §3 tiers "${tableKey}" but no references/experience-cards.md routing row covers it. Restore the index row, or add the mechanism to the table-only allowlist if it is deliberately not a deck card.`,
+              "references/experience-cards.md",
+            ),
+          );
+        }
+      }
     }
   }
 }
