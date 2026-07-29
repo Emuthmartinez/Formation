@@ -742,12 +742,16 @@ function normalizeCardName(raw: string): string {
     .trim();
 }
 
+const TIER_ORDER = ["LOW", "MEDIUM", "HIGH"];
+
 function parseTierSet(raw: string): Set<string> | undefined {
   const cleaned = raw.replace(/\*/g, "").replace(/[–—]/g, "-").trim().toUpperCase();
   if (!cleaned) return undefined;
   const parts = cleaned.split(/\s*-\s*/).filter(Boolean);
   if (parts.length === 0 || parts.some((part) => !TIER_WORDS.has(part))) return undefined;
-  return new Set(parts);
+  // A range spans every tier between its endpoints: LOW-HIGH admits MEDIUM too.
+  const indices = parts.map((part) => TIER_ORDER.indexOf(part));
+  return new Set(TIER_ORDER.slice(Math.min(...indices), Math.max(...indices) + 1));
 }
 
 function tierKey(tiers: Set<string>): string {
@@ -767,8 +771,14 @@ interface TableRow {
   tierRaw: string;
 }
 
-function parseTableRows(text: string, headerPattern: RegExp, nameCell: number, tierCell: number): TableRow[] {
+interface ParsedTable {
+  rows: TableRow[];
+  malformed: string[];
+}
+
+function parseTableRows(text: string, headerPattern: RegExp, nameCell: number, tierCell: number): ParsedTable {
   const rows: TableRow[] = [];
+  const malformed: string[] = [];
   let inTable = false;
   for (const line of text.split("\n")) {
     if (!inTable) {
@@ -779,13 +789,18 @@ function parseTableRows(text: string, headerPattern: RegExp, nameCell: number, t
     // Only the next section heading ends the scan — a blank or prose interruption
     // mid-table must not silently drop the rows below it from the parity gate.
     if (trimmed.startsWith("#")) break;
-    if (!trimmed.startsWith("|")) continue;
+    if (!trimmed.startsWith("|")) {
+      // A table-shaped line that lost its leading pipe is a broken row, not prose —
+      // silently skipping it would hide its mechanism from the gate.
+      if ((trimmed.match(/\|/g) ?? []).length >= 2) malformed.push(trimmed.slice(0, 80));
+      continue;
+    }
     if (/^\|[\s|:-]+\|?$/.test(trimmed)) continue;
     const cells = line.split("|").map((cell) => cell.trim());
     const name = cells[nameCell] ?? "";
     if (name) rows.push({ name, tierRaw: cells[tierCell] ?? "" });
   }
-  return rows;
+  return { rows, malformed };
 }
 
 function nameMatches(indexName: string, tableName: string): boolean {
@@ -795,7 +810,17 @@ function nameMatches(indexName: string, tableName: string): boolean {
 const cardsIndexRef = readText(path.join(args.root, ".."), "references/experience-cards.md") ?? readText(args.root, "references/experience-cards.md");
 
 if (ethicsRef) {
-  const riskRows = parseTableRows(ethicsRef, /^\|\s*Mechanism\s*\|\s*Risk Tier\s*\|/i, 1, 2);
+  const { rows: riskRows, malformed: riskMalformed } = parseTableRows(ethicsRef, /^\|\s*Mechanism\s*\|\s*Risk Tier\s*\|/i, 1, 2);
+  for (const broken of riskMalformed) {
+    issues.push(
+      issue(
+        "error",
+        "emotional_design.risk_table_malformed_row",
+        `references/ethics-guardrail.md §3 has a table-shaped line that does not parse as a row (missing leading pipe?): "${broken}". Fix it — its mechanism is invisible to the parity gate.`,
+        "references/ethics-guardrail.md",
+      ),
+    );
+  }
   if (riskRows.length === 0 && includesPhrase(ethicsRef, "Per-Mechanism Risk Table")) {
     issues.push(
       issue(
@@ -891,7 +916,17 @@ if (ethicsRef) {
   }
 
   if (cardsIndexRef) {
-    const indexRows = parseTableRows(cardsIndexRef, /^\|\s*Card\s*\|\s*Load when\s*\|\s*Risk\s*\|/i, 1, 3);
+    const { rows: indexRows, malformed: indexMalformed } = parseTableRows(cardsIndexRef, /^\|\s*Card\s*\|\s*Load when\s*\|\s*Risk\s*\|/i, 1, 3);
+    for (const broken of indexMalformed) {
+      issues.push(
+        issue(
+          "error",
+          "emotional_design.risk_table_malformed_row",
+          `references/experience-cards.md has a table-shaped routing line that does not parse as a row (missing leading pipe?): "${broken}". Fix it — its card is invisible to the parity gate.`,
+          "references/experience-cards.md",
+        ),
+      );
+    }
     if (indexRows.length === 0) {
       issues.push(
         issue(

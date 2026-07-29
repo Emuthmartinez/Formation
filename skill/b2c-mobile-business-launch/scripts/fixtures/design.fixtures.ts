@@ -1088,6 +1088,67 @@ experience_card:
     "emotional_design.risk_tier_conflict",
   );
 
+  // A row that lost its leading pipe is a broken row, not prose.
+  const emotionalTierBrokenRow = makeFixture("emotional-risk-tier-broken-row");
+  {
+    const refDir = path.join(emotionalTierBrokenRow, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Variable Reward | HIGH | Compulsion loop | User can always stop | `bright_line` |",
+        "Endowed Progress | HIGH | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a risk row missing its leading pipe fails instead of vanishing",
+    emotionalTierBrokenRow,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_table_malformed_row",
+  );
+
+  // An ordered range spans its intermediate tiers: LOW-HIGH admits MEDIUM.
+  const emotionalTierRangeSpan = makeFixture("emotional-risk-tier-range-span");
+  {
+    const refDir = path.join(emotionalTierRangeSpan, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW–HIGH | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Endowed Progress | Real prior progress exists to surface | MEDIUM | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "an index tier inside an ordered guardrail range passes",
+    emotionalTierRangeSpan,
+    "check-emotional-design.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "risk_tier_mismatch",
+  );
+
   const elevenStarThin = makeFixture("eleven-star-thin");
   writeFileSync(
     path.join(elevenStarThin, "11-star-experience", "11_STAR_EXPERIENCE.md"),
