@@ -127,6 +127,21 @@ if (deckText && deckIsTemplate && deckRequired) {
   );
 }
 
+// A done lane needs a deck that says it is done: "Status: draft" or a missing
+// status is the deck's own workflow state calling itself unfinished.
+const deckIsAuthored = Boolean(deckText && /^Status:\s*authored\b/im.test(deckText));
+if (deckText && !deckIsTemplate && !deckIsAuthored && deckRequired) {
+  issues.push(
+    issue(
+      sev("error"),
+      "app_copy.deck_status_unauthored",
+      "COPY_DECK.md does not declare 'Status: authored <date>' while the design/onboarding lane claims done — a draft or unlabeled deck is " +
+        "unfinished by its own account. Finish the cells, then set the status.",
+      "COPY_DECK.md",
+    ),
+  );
+}
+
 // Cell rules apply to authored decks. The shipped template is exempt by its own
 // declaration — its cells are deliberately example copy from a fictional brand
 // that the placeholder list detects the moment it leaks into an authored deck.
@@ -291,10 +306,12 @@ if (onboarding) {
   }
   for (const cell of copyColumn.cells) {
     const where = `ONBOARDING.md:${cell.line}`;
-    // Backticked spans are deck keys and file references, not prose the user reads.
+    // Backticked spans are deck keys and file references, not prose the user
+    // reads — a legitimate key like `onboarding.email.placeholder` must not
+    // trip the placeholder scan, so every prose rule reads the stripped text.
     const prose = cell.text.replace(/`[^`\n]*`/g, " ");
     for (const shape of rules.placeholderShapes) {
-      if (cell.text.toLowerCase().includes(shape.toLowerCase())) {
+      if (prose.toLowerCase().includes(shape.toLowerCase())) {
         issues.push(
           issue(
             sev("error"),

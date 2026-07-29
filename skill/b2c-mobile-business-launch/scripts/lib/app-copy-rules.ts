@@ -144,7 +144,11 @@ export function keyPrefixReferences(text: string): string[] {
   const prefixes = new Set<string>();
   for (const match of text.matchAll(/`([a-z0-9]+(?:[._-][a-z0-9]+)*)(\.\*)?`/g)) {
     const token = match[1] ?? "";
-    if (!token.includes(".")) continue;
+    // A single-segment token is a key reference only with the wildcard —
+    // `paywall.*` names a namespace; a bare `paywall` is just a word in code
+    // formatting. Dotted tokens are references either way.
+    const isWildcard = Boolean(match[2]);
+    if (!token.includes(".") && !isWildcard) continue;
     if (FILE_REFERENCE.test(token)) continue;
     prefixes.add(token);
   }
@@ -164,7 +168,8 @@ export function malformedKeyReferences(text: string): string[] {
   const bad = new Set<string>();
   for (const match of text.matchAll(/`([A-Za-z0-9._-]+?)(\.\*)?`/g)) {
     const token = match[1] ?? "";
-    if (!token.includes(".")) continue;
+    const isWildcard = Boolean(match[2]);
+    if (!token.includes(".") && !isWildcard) continue;
     if (FILE_REFERENCE.test(token)) continue;
     const full = token + (match[2] ?? "");
     const wellFormed = new RegExp(/^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\.\*)?$/).test(full);

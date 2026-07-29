@@ -267,4 +267,84 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: mistyped deck-key reference is reported", onboardingBadRef, "check-app-copy.ts", 1, "app_copy.onboarding_key_reference_malformed");
+
+  // A single-segment wildcard (`paywall.*`) is a namespace reference — an
+  // authored deck with no paywall rows must fail coverage for it.
+  const paywallUncovered = makeFixture("app-copy-paywall-wildcard-uncovered");
+  writeFileSync(path.join(paywallUncovered, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(paywallUncovered, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(paywallUncovered, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy (from `COPY_DECK.md`) | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "| Paywall | Convert | `paywall.*` | after value |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: uncovered paywall.* wildcard fails coverage", paywallUncovered, "check-app-copy.ts", 1, 'names "paywall" strings');
+
+  // A legitimate key that contains a placeholder-ish namespace stays clean —
+  // backticked spans are references, not prose the user reads.
+  const placeholderKey = makeFixture("app-copy-placeholder-in-key-name");
+  writeFileSync(path.join(placeholderKey, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(placeholderKey, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.email.placeholder | Email field | you@example.com | input hint | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(placeholderKey, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy (from `COPY_DECK.md`) | State |",
+      "| --- | --- | --- | --- |",
+      "| Email | Collect email | `onboarding.email.placeholder` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: backticked key containing 'placeholder' stays clean", placeholderKey, "check-app-copy.ts", 0);
+
+  // A deck declaring draft (or nothing) is unfinished by its own account.
+  const deckDraft = makeFixture("app-copy-deck-draft-status");
+  writeFileSync(path.join(deckDraft, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckDraft, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: draft",
+      "",
+      "## Onboarding",
+      "",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(deckDraft, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: draft-status deck with done lane fails", deckDraft, "check-app-copy.ts", 1, "app_copy.deck_status_unauthored");
 }

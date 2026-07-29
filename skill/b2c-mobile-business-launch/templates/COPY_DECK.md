@@ -81,4 +81,4 @@ Rows mirror the `ONBOARDING.md` screen sequence — one row per string, includin
 - Every screen the build plan names has its rows here before the build starts.
 - Keys ship unchanged into the string resources (`TECH_SPEC.md` names the mechanism).
 - Read each surface aloud once; rewrite anything that sounds like a system explaining itself.
-- `npm run check:app-copy -- --root <app> --state <app>/PROJECT_STATE.yaml` passes.
+- `npm run check:app-copy -- --root <app> --state PROJECT_STATE.yaml` passes (a relative state path joins the root).
