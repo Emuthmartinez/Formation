@@ -12,6 +12,27 @@ under [`experience-cards/`](experience-cards/commitment-card.md). Load **only th
 scope for the current moment** — each card file is a complete, self-contained spec, and
 loading the whole deck for a single paywall pause wastes the context the launch work needs.
 
+**Live deck access (Retention Mechanics MCP).** The deck behind this index is queryable live
+when a `retention-mechanics` MCP server is connected (first-party; tools named
+`retention_*`; registered as `retention-mechanics-mcp`). When it is connected, prefer it for
+card routing and per-card content — it serves the maintained, versioned deck (per-card
+`card_version`/`last_reviewed`, canonicalized risk tiers, attestation scaffolds) and grows
+past the bundled twelve:
+
+- `retention_search_mechanics` — search the deck by product moment, with funnel-stage and
+  ethics-risk-ceiling filters; every result carries the card's do-not-use conditions, so a
+  vocabulary match cannot pass as a situation-fit diagnosis.
+- `retention_get_mechanic` — one full card, citation confidence passed through verbatim and
+  real-app examples marked `illustrative_unverified`.
+- `retention_get_ethics_ladder` — the risk tier, bright/dark lines, the attestation fields
+  the validator requires at that tier, and a scaffold whose narrative fields are
+  intentionally empty (the applying team writes them for its own surface).
+
+The bundled files under `experience-cards/` are the frozen snapshot of the deck's twelve
+foundational cards and remain the offline contract: every validator and `npm run audit:ci`
+run reads the bundled snapshot, never the network, and when the server is not connected this
+index and the card files are authoritative exactly as before.
+
 **Pre-requisites.** Load these references before applying any card; do not duplicate their
 content here:
 - `references/eleven-star-experience.md` — star-ladder; every card maps to a level

@@ -1817,6 +1817,22 @@ sources:
       details from best-in-class consumer apps. Inspiration benchmark for the
       in-app motion lane — the mobile counterpart to motionsites-ai for landing.
       Engagement figures cited from it are point-in-time and unverified.
+  - id: retention-mechanics-mcp
+    name: Retention Mechanics MCP server
+    source_type: api
+    url: https://github.com/Emuthmartinez/retention-mechanics-mcp
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/experience-cards.md
+      - skill/b2c-mobile-business-launch/references/emotional-design-system.md
+      - skill/b2c-mobile-business-launch/references/paid-tool-routing.md
+    notes: First-party MCP over the Experience Card deck (mechanic search with
+      risk ceilings, versioned card content, ethics attestation scaffolds).
+      Optional tooling - the bundled deck under references/experience-cards/
+      is the frozen offline contract and every validator reads it; the server
+      is preferred only when connected. Private repo; local stdio during
+      development.
   - id: sixty-fps-design-mcp
     name: 60fps.design MCP server
     source_type: api

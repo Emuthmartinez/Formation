@@ -73,6 +73,8 @@ Twelve cards cover the full behavioral arc from first session through churn reco
 
 Use this table as a navigation surface. Full card specs — including psychological basis, trigger timing, motion spec, guardrail, PostHog events, and dark-pattern tests — live in one file per card under `references/experience-cards/` (e.g. `references/experience-cards/commitment-card.md`), routed by the index at `references/experience-cards.md`. Load only the cards in scope; the index carries the card shape, summary table, and Ethics Ladder.
 
+When a `retention-mechanics` MCP server is connected, prefer it over loading card files directly: `retention_search_mechanics` routes a product moment to candidate cards without loading the whole deck, and `retention_get_mechanic` / `retention_get_ethics_ladder` serve the maintained, versioned card content and the tier-appropriate attestation scaffold. The bundled deck stays the frozen offline snapshot — validators always read it, and it is authoritative whenever the server is not connected (see the index's live-deck-access note).
+
 | Card | Thesis | 11-Star Level | Bright-Line Guardrail | Spec Pointer |
 |---|---|---|---|---|
 | **Commitment Card** | A voluntary, user-authored goal statement creates ownership; the product echoes it back throughout the experience, making future behavior self-consistent. (Cialdini commitment/consistency; Locke & Latham goal-setting; Gollwitzer implementation intentions.) | 6–7 star | Commitment must be user-authored, revisable from settings at any time, and used only to serve the stated goal — not to guilt-trigger re-subscription. | `experience-cards/commitment-card.md` |
