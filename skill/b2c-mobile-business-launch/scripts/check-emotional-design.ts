@@ -446,13 +446,20 @@ function scanLiveCopy(relativePath: string, rawText: string, spendScan: boolean)
       if (REWARD_STREAK_KEYWORDS.test(line)) rewardLines.push(index);
       if (SPEND_KEYWORDS.test(line)) spendLines.push(index);
     });
+    // Separation proof binds to the pair's own span (plus the line right after, where a
+    // trailing "shown on a separate screen" note lands) — a note for one compliant flow
+    // must not bless a different dark flow beside it.
+    const pairHasSeparationProof = (r: number, s: number): boolean => {
+      const lo = Math.min(r, s);
+      const hi = Math.max(r, s);
+      return LOCAL_SEPARATION_PROOF_PATTERN.test(lines.slice(lo, hi + 2).join("\n"));
+    };
     const unprovenPair = rewardLines
       .flatMap((r) => spendLines.map((s) => ({ r, s })))
       .find(
         ({ r, s }) =>
           Math.abs(r - s) <= 4 &&
-          !hasLocalProof(lines, r, LOCAL_SEPARATION_PROOF_PATTERN) &&
-          !hasLocalProof(lines, s, LOCAL_SEPARATION_PROOF_PATTERN) &&
+          !pairHasSeparationProof(r, s) &&
           !LOCAL_PROHIBITION_PATTERN.test(lines[r] ?? "") &&
           !LOCAL_PROHIBITION_PATTERN.test(lines[s] ?? ""),
       );
@@ -752,13 +759,16 @@ function parseTableRows(text: string, headerPattern: RegExp, nameCell: number, t
   const rows: TableRow[] = [];
   let inTable = false;
   for (const line of text.split("\n")) {
-    if (headerPattern.test(line)) {
-      inTable = true;
+    if (!inTable) {
+      if (headerPattern.test(line)) inTable = true;
       continue;
     }
-    if (!inTable) continue;
-    if (!line.trim().startsWith("|")) break;
-    if (/^\|[\s|:-]+\|?$/.test(line.trim())) continue;
+    const trimmed = line.trim();
+    // Only the next section heading ends the scan — a blank or prose interruption
+    // mid-table must not silently drop the rows below it from the parity gate.
+    if (trimmed.startsWith("#")) break;
+    if (!trimmed.startsWith("|")) continue;
+    if (/^\|[\s|:-]+\|?$/.test(trimmed)) continue;
     const cells = line.split("|").map((cell) => cell.trim());
     const name = cells[nameCell] ?? "";
     if (name) rows.push({ name, tierRaw: cells[tierCell] ?? "" });

@@ -843,6 +843,27 @@ experience_card:
     "spend_prompt_after_reward",
   );
 
+  // A separation note for one compliant flow must not bless a different dark flow beside it.
+  const emotionalSpendBorrowedProof = makeFixture("emotional-spend-borrowed-proof");
+  writeFileSync(
+    path.join(emotionalSpendBorrowedProof, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak recap flow: the weekly recap celebrates the run so far.",
+      "Paywall: presented on a separate screen, one interaction after the recap resolves.",
+      "Streak-break grief screen: shows the lost streak with the recovery path.",
+      "Paywall: present the RevenueCat offering right here on this screen.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a separation note for one flow does not bless the dark flow beside it",
+    emotionalSpendBorrowedProof,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
   const guardrailFixtureHeader = [
     "# Ethics And Dark-Pattern Guardrail",
     "## 1. Bright-Line Vs Dark-Line Distinction",
@@ -952,6 +973,31 @@ experience_card:
     "check-emotional-design.ts",
     1,
     "emotional_design.risk_tier_unrecognized",
+  );
+
+  // A blank line mid-table must not silently drop the rows below it from parity.
+  const emotionalTierInterrupted = makeFixture("emotional-risk-tier-interrupted");
+  {
+    const refDir = path.join(emotionalTierInterrupted, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line`, `posthog_event` |",
+        "",
+        "| Endowed Progress | LOW | Manufactured progress on fake tasks | Starting progress reflects real investment | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "rows below a mid-table interruption still reach the parity gate",
+    emotionalTierInterrupted,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_duplicate_row",
   );
 
   const elevenStarThin = makeFixture("eleven-star-thin");
