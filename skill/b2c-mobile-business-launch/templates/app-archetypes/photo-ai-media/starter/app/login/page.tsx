@@ -35,7 +35,7 @@ export default function LoginPage() {
   return (
     <form onSubmit={signIn}>
       <label>
-        {strings.auth.emailLabel}
+        {strings.auth.email_label}
         <input type="email" value={email} onChange={(changeEvent) => setEmail(changeEvent.target.value)} required />
       </label>
       <button type="submit">{strings.auth.submit}</button>

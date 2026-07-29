@@ -8,7 +8,7 @@ export const strings = {
   landing: {
     headline: "Small wins, every day",
     body: "Fernpath turns one small daily check-in into a streak you can watch grow.",
-    signIn: "Sign in",
+    sign_in: "Sign in",
     today: "Today",
   },
   meta: {
@@ -16,7 +16,7 @@ export const strings = {
     description: "One small check-in a day. A streak you can watch grow.",
   },
   auth: {
-    emailLabel: "Email",
+    email_label: "Email",
     submit: "Send sign-in link",
     sent: "Check your email for the sign-in link.",
   },

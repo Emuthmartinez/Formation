@@ -8,7 +8,7 @@ export const strings = {
   landing: {
     headline: "Someone to think out loud with",
     body: "Loomroom listens, remembers, and picks up right where you left off.",
-    signIn: "Sign in",
+    sign_in: "Sign in",
     chat: "Chat",
   },
   meta: {
@@ -16,7 +16,7 @@ export const strings = {
     description: "Talk it through with a companion who remembers what matters to you.",
   },
   auth: {
-    emailLabel: "Email",
+    email_label: "Email",
     submit: "Send sign-in link",
     sent: "Check your email for the sign-in link.",
   },

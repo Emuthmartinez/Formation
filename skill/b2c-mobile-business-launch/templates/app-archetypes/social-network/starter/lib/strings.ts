@@ -8,7 +8,7 @@ export const strings = {
   landing: {
     headline: "Your people, in one place",
     body: "Wrenfeed is a calm feed for the people you already know.",
-    signIn: "Sign in",
+    sign_in: "Sign in",
     feed: "Feed",
   },
   meta: {
@@ -16,7 +16,7 @@ export const strings = {
     description: "A calm feed for the people you already know.",
   },
   auth: {
-    emailLabel: "Email",
+    email_label: "Email",
     submit: "Send sign-in link",
     sent: "Check your email for the sign-in link.",
   },

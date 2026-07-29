@@ -98,7 +98,9 @@ const live = /^phase_6/.test(phase);
 /** Live apps launched before this contract get warnings while their backfill is tracked. */
 const sev = (base: Severity): Severity => (live ? "warning" : base);
 const laneStatus = (lane: string): string => (state ? (asString(getPath(state, `lanes.${lane}.status`)) ?? "") : "").toLowerCase();
-const deckRequired = laneStatus("design") === "done" || laneStatus("onboarding") === "done";
+// Engineering is the lane that types the strings, so a done build needs the
+// deck even when design/onboarding were deferred or resolved another way.
+const deckRequired = laneStatus("design") === "done" || laneStatus("onboarding") === "done" || laneStatus("engineering") === "done";
 
 const deckText = readText(root, "COPY_DECK.md");
 const deckIsTemplate = Boolean(deckText && /^Status:\s*template\b/im.test(deckText));
@@ -409,18 +411,23 @@ if (onboarding) {
     }
   }
 
-  // Coverage: the screen table names its strings as deck-key prefixes. An
-  // authored deck that resolves none of them is a one-row deck wearing an
-  // authored status — the incomplete-deck bypass, reconciled here.
+  // Coverage: the screen table names its strings as deck-key references. A
+  // namespace reference (`onboarding.promise.*`) accepts any key under the
+  // prefix; an exact reference must resolve to that exact key — the build's
+  // localization lookup is exact, so a descendant key is not a substitute.
   if (deckText && !deckIsTemplate) {
-    for (const prefix of keyPrefixReferences(copyColumn.cells.map((cell) => cell.text).join("\n"))) {
-      const covered = [...authoredDeckKeys].some((key) => key === prefix || key.startsWith(`${prefix}.`));
+    for (const reference of keyPrefixReferences(copyColumn.cells.map((cell) => cell.text).join("\n"))) {
+      const covered = reference.wildcard
+        ? [...authoredDeckKeys].some((key) => key === reference.key || key.startsWith(`${reference.key}.`))
+        : authoredDeckKeys.has(reference.key);
       if (!covered) {
         issues.push(
           issue(
             sev("error"),
             "app_copy.deck_coverage_missing",
-            `ONBOARDING.md names "${prefix}" strings but COPY_DECK.md has no key under that prefix. Author the rows before the build reaches that screen.`,
+            reference.wildcard
+              ? `ONBOARDING.md names "${reference.key}" strings but COPY_DECK.md has no key under that prefix. Author the rows before the build reaches that screen.`
+              : `ONBOARDING.md references the exact key "${reference.key}" but COPY_DECK.md has no such row — the localization lookup at build time is exact. Author the row before the build reaches that screen.`,
             "COPY_DECK.md",
           ),
         );

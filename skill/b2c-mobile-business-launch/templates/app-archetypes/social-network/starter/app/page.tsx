@@ -10,7 +10,7 @@ export default function Home() {
       <h1>{strings.landing.headline}</h1>
       <p>{strings.landing.body}</p>
       <p>
-        <Link href="/login">{strings.landing.signIn}</Link> · <Link href="/feed">{strings.landing.feed}</Link>
+        <Link href="/login">{strings.landing.sign_in}</Link> · <Link href="/feed">{strings.landing.feed}</Link>
       </p>
     </main>
   );

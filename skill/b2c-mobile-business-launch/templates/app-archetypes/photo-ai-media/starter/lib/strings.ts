@@ -8,7 +8,7 @@ export const strings = {
   landing: {
     headline: "Everyday photos, gallery looks",
     body: "Glimmerjar turns the shots already on your camera roll into art you'll want to share.",
-    signIn: "Sign in",
+    sign_in: "Sign in",
     library: "Library",
   },
   meta: {
@@ -16,7 +16,7 @@ export const strings = {
     description: "Turn everyday shots into art you'll want to share.",
   },
   auth: {
-    emailLabel: "Email",
+    email_label: "Email",
     submit: "Send sign-in link",
     sent: "Check your email for the sign-in link.",
   },

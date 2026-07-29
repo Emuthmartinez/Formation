@@ -432,4 +432,45 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: template-status brief with done lane fails", briefTemplate, "check-app-copy.ts", 1, "app_copy.brief_unauthored");
+
+  // Engineering is the lane that types the strings — a done build with no
+  // deck bypasses the contract even when design/onboarding were deferred.
+  const engineeringNeedsDeck = makeFixture("app-copy-engineering-needs-deck");
+  writeFileSync(path.join(engineeringNeedsDeck, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  rmSync(path.join(engineeringNeedsDeck, "COPY_DECK.md"));
+  runFixture("App copy: engineering done without a deck fails", engineeringNeedsDeck, "check-app-copy.ts", 1, "app_copy.deck_missing");
+
+  // An exact key reference must resolve exactly — the build's localization
+  // lookup is exact, so a descendant key is not a substitute.
+  const exactKeyMissing = makeFixture("app-copy-exact-key-missing");
+  writeFileSync(path.join(exactKeyMissing, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(exactKeyMissing, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline.body | Promise | Small wins, every day | | 1 |", ...NA_SURFACES, ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(exactKeyMissing, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(exactKeyMissing, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.headline` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: exact key reference unmet by descendant fails", exactKeyMissing, "check-app-copy.ts", 1, "references the exact key");
+
+  // Escaped pipes render as literal pipes — serialized state in a sentence.
+  const deckPipeState = makeFixture("app-copy-deck-pipe-state");
+  writeFileSync(path.join(deckPipeState, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckPipeState, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | high \\| founder \\| open | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: pipe-delimited state in a deck cell fails", deckPipeState, "check-app-copy.ts", 1, "app_copy.deck_raw_identifier");
 }

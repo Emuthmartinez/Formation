@@ -140,8 +140,14 @@ export function parseDeck(deckText: string): ParsedDeck {
  * Returned as prefixes (the trailing .* stripped) so coverage can be reconciled
  * against the authored deck's actual keys.
  */
-export function keyPrefixReferences(text: string): string[] {
-  const prefixes = new Set<string>();
+export interface KeyReference {
+  key: string;
+  /** True for `ns.*` namespace references; false for exact-key references, which must resolve to that exact key. */
+  wildcard: boolean;
+}
+
+export function keyPrefixReferences(text: string): KeyReference[] {
+  const references = new Map<string, KeyReference>();
   for (const match of text.matchAll(/`([a-z0-9]+(?:[._-][a-z0-9]+)*)(\.\*)?`/g)) {
     const token = match[1] ?? "";
     // A single-segment token is a key reference only with the wildcard —
@@ -150,9 +156,11 @@ export function keyPrefixReferences(text: string): string[] {
     const isWildcard = Boolean(match[2]);
     if (!token.includes(".") && !isWildcard) continue;
     if (FILE_REFERENCE.test(token)) continue;
-    prefixes.add(token);
+    // A namespace reference subsumes an exact one for the same token.
+    const existing = references.get(token);
+    references.set(token, { key: token, wildcard: isWildcard || Boolean(existing?.wildcard) });
   }
-  return [...prefixes];
+  return [...references.values()];
 }
 
 /** Backticked tokens that are files, not deck keys. */
@@ -252,6 +260,14 @@ export function identifierShapes(text: string): string[] {
   const found = new Set<string>();
   for (const match of stripped.matchAll(/\b[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+\b/g)) {
     found.add(match[0]);
+  }
+  // Pipe-delimited serialized state ("high | founder | open"), same detector
+  // check:founder-copy uses — an escaped \| in a deck cell renders to the user
+  // as a literal pipe, so a three-segment pipe value is a record in a sentence.
+  for (const match of stripped.matchAll(/[^\n|]{2,60}\|[^\n|]{2,60}\|[^\n|]{2,60}/g)) {
+    const token = match[0].trim().replace(/\s+/g, " ");
+    if (/^[\s|:-]+$/.test(token)) continue;
+    found.add(token.length > 60 ? `${token.slice(0, 57)}...` : token);
   }
   return [...found];
 }
