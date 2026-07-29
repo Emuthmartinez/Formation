@@ -93,7 +93,7 @@ Deck rules:
 - **One row per string.** `| key | screen / moment | copy (source language) | voice notes | locale tier |`. The copy cell holds the exact words that ship. A literal pipe in copy is escaped (`\|`); a row that does not parse into five cells is an error, never a silent skip.
 - **Keys are localization keys.** Lowercase dot-namespaced (`onboarding.promise.headline`, `paywall.cta`, `errors.network.body`), and unique — string resources keep one value per key, so a duplicate silently overwrites another row's copy. The key in the deck is the key in the String Catalog / i18next resource / ARB file — one name from author to translator.
 - **Coverage is reconciled, not assumed.** Every deck-key prefix the `ONBOARDING.md` screen table names (`onboarding.promise.*`, `paywall.*`, …) must resolve to authored rows — a one-row deck wearing an authored status fails `check:app-copy`. References follow the same lowercase key shape; a mistyped reference and a screen-table row whose cells shifted are errors, not silent skips.
-- **Sections follow surfaces**, at minimum: onboarding (every screen in the `ONBOARDING.md` sequence), paywall, core loop screens, empty states, errors, permission primes, settings, dialogs. Push and email copy live in their own artifacts (`POST_LAUNCH_OPS.md`, `EMAIL_OPS.md`) — the deck may point there, not duplicate.
+- **Sections follow surfaces**, at minimum: onboarding (every screen in the `ONBOARDING.md` sequence, permission primes included), paywall, core loop, empty states, errors, settings and dialogs. Keep those canonical section headings so `check:app-copy` can hold the set; a surface this product genuinely lacks keeps its heading with one line — `Not applicable — <reason>` — instead of rows. Push and email copy live in their own artifacts (`POST_LAUNCH_OPS.md`, `EMAIL_OPS.md`) — the deck may point there, not duplicate.
 - **Locale tier per row** from `LOCALIZATION_MARKET_RESEARCH.md`: `1` ships translated at launch, `2` ships source-language, `3` deferred. Tier decisions belong to that reference; the deck records them.
 - **Brand terms are declared, not smuggled.** Words the product owns that could look like violations (a coined feature name, a stylized lowercase brand) go under the deck's `**Allowed terms**` list so `check:app-copy` can tell voice from leakage.
 - **The deck is spec-blind.** Spec vocabulary, schema identifiers, lane/gate/phase words, and placeholder filler never appear in a copy cell — see Banned In App Copy. A deck cell that says "Product-specific value promise" is an unfilled deck, and `check:app-copy` fails it.
@@ -166,7 +166,7 @@ Before copy is called ready:
 
 ## Gates Before Handoff
 
-- `COPY_BRIEF.md` exists for any launch with a landing page, store listing, paywall, or lifecycle email
+- `COPY_BRIEF.md` exists for any launch with a landing page, store listing, paywall, or lifecycle email — and is authored (its own status set, not the shipped template) before the design/onboarding lane is done, because the deck inherits its voice from the brief
 - `COPY_DECK.md` exists and covers every screen before the build starts; `npm run check:app-copy` passes (deck coverage, banned vocabulary, placeholder shapes, identifier shapes; live apps launched before the deck contract get warnings while their backfill is tracked)
 - the build plan names the string-externalization mechanism (Localization Readiness above) and `TECH_SPEC.md` carries it
 - claims ledger has no unsubstantiated quantified/comparative/health/earnings claim

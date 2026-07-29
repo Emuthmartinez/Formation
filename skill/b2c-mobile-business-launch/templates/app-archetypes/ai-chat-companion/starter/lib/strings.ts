@@ -15,4 +15,17 @@ export const strings = {
     title: "Loomroom — a companion who remembers",
     description: "Talk it through with a companion who remembers what matters to you.",
   },
+  auth: {
+    emailLabel: "Email",
+    submit: "Send sign-in link",
+    sent: "Check your email for the sign-in link.",
+  },
+  chat: {
+    title: "Chat",
+    placeholder: "Say something",
+    send: "Send",
+    error: "Something went wrong. Try again.",
+    you: "You",
+    companion: "Companion",
+  },
 } as const;

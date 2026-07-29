@@ -15,4 +15,12 @@ export const strings = {
     title: "Fernpath — daily habits",
     description: "One small check-in a day. A streak you can watch grow.",
   },
+  auth: {
+    emailLabel: "Email",
+    submit: "Send sign-in link",
+    sent: "Check your email for the sign-in link.",
+  },
+  today: {
+    title: "Today",
+  },
 } as const;

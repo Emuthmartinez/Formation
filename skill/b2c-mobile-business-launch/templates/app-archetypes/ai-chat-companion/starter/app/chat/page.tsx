@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { capture, EVENTS } from "@/lib/analytics/posthog-client";
+import { strings } from "@/lib/strings";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -35,7 +36,7 @@ export default function ChatPage() {
       body: JSON.stringify({ messages: nextMessages }),
     });
     if (!response.ok || !response.body) {
-      setMessages([...nextMessages, { role: "assistant", content: "Something went wrong. Try again." }]);
+      setMessages([...nextMessages, { role: "assistant", content: strings.chat.error }]);
       setBusy(false);
       return;
     }
@@ -58,18 +59,18 @@ export default function ChatPage() {
 
   return (
     <main>
-      <h1>Chat</h1>
+      <h1>{strings.chat.title}</h1>
       <ul>
         {messages.map((message, index) => (
           <li key={index}>
-            <strong>{message.role}:</strong> {message.content}
+            <strong>{message.role === "user" ? strings.chat.you : strings.chat.companion}:</strong> {message.content}
           </li>
         ))}
       </ul>
       <form onSubmit={send}>
-        <input value={input} onChange={(changeEvent) => setInput(changeEvent.target.value)} placeholder="Say something" />
+        <input value={input} onChange={(changeEvent) => setInput(changeEvent.target.value)} placeholder={strings.chat.placeholder} />
         <button type="submit" disabled={busy}>
-          Send
+          {strings.chat.send}
         </button>
       </form>
     </main>

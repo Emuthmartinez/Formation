@@ -142,6 +142,24 @@ if (deckText && !deckIsTemplate && !deckIsAuthored && deckRequired) {
   );
 }
 
+// The deck inherits its voice from the brief; a done design/onboarding lane
+// whose COPY_BRIEF.md is missing, template-status, or unlabeled shipped its
+// strings without the voice source they are supposed to speak.
+if (deckRequired) {
+  const brief = readText(root, "COPY_BRIEF.md");
+  if (!brief || !/^Status:\s*authored\b/im.test(brief)) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.brief_unauthored",
+        "COPY_BRIEF.md is missing or not authored ('Status: authored <date>') while the design/onboarding lane claims done. The deck's voice " +
+          "comes from the brief — author the promise, voice rules, and claims ledger before the lane is done (references/conversion-copy.md).",
+        "COPY_BRIEF.md",
+      ),
+    );
+  }
+}
+
 // Cell rules apply to authored decks. The shipped template is exempt by its own
 // declaration — its cells are deliberately example copy from a fictional brand
 // that the placeholder list detects the moment it leaks into an authored deck.
@@ -270,6 +288,48 @@ if (deckText && !deckIsTemplate) {
         "COPY_DECK.md",
       ),
     );
+  }
+
+  // The documented minimum surface set (conversion-copy.md §The Copy Deck):
+  // each canonical section carries rows, or keeps its heading with an explicit
+  // "Not applicable — reason" line. ONBOARDING-prefix coverage alone would let
+  // a deck skip every error, empty state, and settings string.
+  if (deckRequired) {
+    const requiredSurfaces: { name: string; heading: RegExp }[] = [
+      { name: "Onboarding", heading: /^onboarding\b/i },
+      { name: "Paywall", heading: /^paywall\b/i },
+      { name: "Core loop", heading: /^core loop\b/i },
+      { name: "Empty states", heading: /^empty states?\b/i },
+      { name: "Errors", heading: /^errors?\b/i },
+      { name: "Settings and dialogs", heading: /^(settings|dialogs)\b/i },
+    ];
+    const sectionsWithRows = new Set(rows.map((row) => row.section));
+    const sectionBodies = new Map<string, string>();
+    let currentHeading = "";
+    for (const line of deckText.split(/\r?\n/)) {
+      const heading = line.match(/^##\s+(.+)$/);
+      if (heading?.[1]) {
+        currentHeading = heading[1].trim();
+        if (!sectionBodies.has(currentHeading)) sectionBodies.set(currentHeading, "");
+        continue;
+      }
+      if (currentHeading) sectionBodies.set(currentHeading, `${sectionBodies.get(currentHeading) ?? ""}${line}\n`);
+    }
+    for (const surface of requiredSurfaces) {
+      const matchingHeadings = [...sectionBodies.keys()].filter((name) => surface.heading.test(name));
+      const hasRows = matchingHeadings.some((name) => sectionsWithRows.has(name));
+      const notApplicable = matchingHeadings.some((name) => /not applicable\s*[—–:-]\s*\S.{11,}/i.test(sectionBodies.get(name) ?? ""));
+      if (!hasRows && !notApplicable) {
+        issues.push(
+          issue(
+            sev("error"),
+            "app_copy.deck_surface_missing",
+            `COPY_DECK.md has no "${surface.name}" strings — the surface set is the contract (onboarding, paywall, core loop, empty states, errors, settings and dialogs). Author the rows, or keep the heading with a "Not applicable — <reason>" line when this product genuinely lacks the surface.`,
+            "COPY_DECK.md",
+          ),
+        );
+      }
+    }
   }
 }
 

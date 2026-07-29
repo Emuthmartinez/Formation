@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { capture, EVENTS } from "@/lib/analytics/posthog-client";
+import { strings } from "@/lib/strings";
 
 // Minimal email magic-link sign-in (prompt 02 replaces this with the full
 // auth system: OAuth providers, profile setup, username claims).
@@ -28,16 +29,16 @@ export default function LoginPage() {
   }
 
   if (sent) {
-    return <p>Check your email for the sign-in link.</p>;
+    return <p>{strings.auth.sent}</p>;
   }
 
   return (
     <form onSubmit={signIn}>
       <label>
-        Email
+        {strings.auth.emailLabel}
         <input type="email" value={email} onChange={(changeEvent) => setEmail(changeEvent.target.value)} required />
       </label>
-      <button type="submit">Send sign-in link</button>
+      <button type="submit">{strings.auth.submit}</button>
       {error ? <p role="alert">{error}</p> : null}
     </form>
   );

@@ -19,6 +19,41 @@ const DECK_HEADER = [
   "| --- | --- | --- | --- | --- |",
 ];
 
+/** The canonical non-onboarding surfaces, marked not applicable so a fixture can pass the surface-set check with one authored row. */
+const NA_SURFACES = [
+  "",
+  "## Paywall",
+  "",
+  "Not applicable — this fixture app is free with no purchase surface.",
+  "",
+  "## Core loop",
+  "",
+  "Not applicable — single-screen fixture with no core loop yet.",
+  "",
+  "## Empty states",
+  "",
+  "Not applicable — the fixture's one screen always has content.",
+  "",
+  "## Errors",
+  "",
+  "Not applicable — the fixture performs no fallible operations.",
+  "",
+  "## Settings and dialogs",
+  "",
+  "Not applicable — the fixture ships no settings surface.",
+];
+
+const AUTHORED_BRIEF = [
+  "# Copy Brief",
+  "",
+  "Status: authored 2026-07-29",
+  "",
+  "## Value proposition",
+  "",
+  "One small win a day, traced to RESEARCH.md.",
+  "",
+].join("\n");
+
 function stateWith(phase: string, lanes: Record<string, string>): string {
   const laneLines = Object.entries(lanes).flatMap(([lane, status]) => [`  ${lane}:`, `    status: "${status}"`, "    evidence:", '      - "COPY_DECK.md"']);
   // project.phase is the canonical path — the same one the gate reads. A fixture
@@ -67,10 +102,12 @@ export function register(h: Harness): void {
       "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
       "| --- | --- | --- | --- | --- |",
       "| onboarding.promise.headline | Promise | Pick your lane and row | | 1 |",
+      ...NA_SURFACES,
       "",
     ].join("\n"),
     "utf8",
   );
+  writeFileSync(path.join(deckAllowlisted, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
   // The copied template ONBOARDING.md names prefixes this one-row deck cannot
   // cover; the fixture pins the allowlist behavior, so its screen table
   // references only the covered prefix.
@@ -347,4 +384,52 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: draft-status deck with done lane fails", deckDraft, "check-app-copy.ts", 1, "app_copy.deck_status_unauthored");
+
+  // The surface set is the contract: an authored deck that covers the
+  // onboarding references but ships no error/empty-state/settings strings
+  // fails until each surface has rows or an explicit not-applicable line.
+  const deckSurfaceMissing = makeFixture("app-copy-deck-surface-missing");
+  writeFileSync(path.join(deckSurfaceMissing, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckSurfaceMissing, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(deckSurfaceMissing, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(deckSurfaceMissing, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: authored deck missing a required surface fails", deckSurfaceMissing, "check-app-copy.ts", 1, "app_copy.deck_surface_missing");
+
+  // A brief left at template status while lanes claim done never got the
+  // product's promise/voice authored — the deck has no voice source.
+  const briefTemplate = makeFixture("app-copy-brief-still-template");
+  writeFileSync(path.join(briefTemplate, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(briefTemplate, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |", ...NA_SURFACES, ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(briefTemplate, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: template-status brief with done lane fails", briefTemplate, "check-app-copy.ts", 1, "app_copy.brief_unauthored");
 }

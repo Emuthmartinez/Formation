@@ -15,4 +15,12 @@ export const strings = {
     title: "Glimmerjar — a photo studio in your pocket",
     description: "Turn everyday shots into art you'll want to share.",
   },
+  auth: {
+    emailLabel: "Email",
+    submit: "Send sign-in link",
+    sent: "Check your email for the sign-in link.",
+  },
+  library: {
+    title: "Library",
+  },
 } as const;

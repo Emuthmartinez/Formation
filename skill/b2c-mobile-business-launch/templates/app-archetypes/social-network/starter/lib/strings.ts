@@ -15,4 +15,12 @@ export const strings = {
     title: "Wrenfeed — your people's feed",
     description: "A calm feed for the people you already know.",
   },
+  auth: {
+    emailLabel: "Email",
+    submit: "Send sign-in link",
+    sent: "Check your email for the sign-in link.",
+  },
+  feed: {
+    title: "Feed",
+  },
 } as const;
