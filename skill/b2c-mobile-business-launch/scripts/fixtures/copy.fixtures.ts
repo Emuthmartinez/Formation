@@ -69,7 +69,82 @@ export function register(h: Harness): void {
     ].join("\n"),
     "utf8",
   );
+  // The copied template ONBOARDING.md names prefixes this one-row deck cannot
+  // cover; the fixture pins the allowlist behavior, so its screen table
+  // references only the covered prefix.
+  writeFileSync(
+    path.join(deckAllowlisted, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy (from `COPY_DECK.md`) | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
   runFixture("App copy: deck-local allowlist clears a product-owned word", deckAllowlisted, "check-app-copy.ts", 0);
+
+  // A one-row deck wearing authored status fails coverage reconciliation when
+  // the screen table names prefixes it never authored.
+  const deckIncomplete = makeFixture("app-copy-deck-incomplete");
+  writeFileSync(path.join(deckIncomplete, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckIncomplete, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: authored deck missing referenced surfaces fails coverage", deckIncomplete, "check-app-copy.ts", 1, "app_copy.deck_coverage_missing");
+
+  // Copy-pasted deck keys collide in the string resources.
+  const deckDuplicate = makeFixture("app-copy-deck-duplicate-key");
+  writeFileSync(path.join(deckDuplicate, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckDuplicate, "COPY_DECK.md"),
+    [
+      ...DECK_HEADER,
+      "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |",
+      "| onboarding.promise.headline | Promise | A second promise | | 1 |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: duplicate deck key fails", deckDuplicate, "check-app-copy.ts", 1, "app_copy.deck_key_duplicate");
+
+  // An unescaped literal pipe splits the row into six cells; the row is
+  // reported as malformed instead of silently escaping validation.
+  const deckMalformed = makeFixture("app-copy-deck-malformed-row");
+  writeFileSync(path.join(deckMalformed, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckMalformed, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | Small wins | every day | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: malformed deck row is reported, not skipped", deckMalformed, "check-app-copy.ts", 1, "app_copy.deck_row_malformed");
+
+  // Internal vocabulary in the ONBOARDING Copy column fails even without placeholders.
+  const onboardingVocabulary = makeFixture("app-copy-onboarding-vocabulary");
+  writeFileSync(path.join(onboardingVocabulary, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(onboardingVocabulary, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | Welcome to the launch lane from the spec | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "App copy: internal vocabulary in ONBOARDING Copy column fails",
+    onboardingVocabulary,
+    "check-app-copy.ts",
+    1,
+    "app_copy.onboarding_internal_vocabulary",
+  );
 
   // A raw identifier shown to a user fails; an ICU interpolation does not.
   const deckIdentifier = makeFixture("app-copy-deck-identifier");
@@ -130,4 +205,10 @@ export function register(h: Harness): void {
     1,
     "app_copy.externalization_missing",
   );
+
+  // The untouched template option menu ("Record the choice here.") is not a
+  // chosen mechanism, even though it names every mechanism.
+  const externalizationUnchosen = makeFixture("app-copy-externalization-unchosen");
+  writeFileSync(path.join(externalizationUnchosen, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  runFixture("App copy: untouched externalization option menu fails", externalizationUnchosen, "check-app-copy.ts", 1, "app_copy.externalization_missing");
 }

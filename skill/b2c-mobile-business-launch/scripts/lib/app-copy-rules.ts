@@ -78,13 +78,32 @@ export interface DeckRow {
 /** Deck keys are localization keys: lowercase dot-namespaced segments. */
 export const DECK_KEY_SHAPE = /^[a-z0-9]+(?:[._-][a-z0-9]+)+$/;
 
+export interface ParsedDeck {
+  rows: DeckRow[];
+  /** Pipe rows that are not header/separator and did not split into 5 cells — a dropped row is a validation bypass, so they are reported, never skipped. */
+  malformed: { line: number; cells: number }[];
+}
+
+/** Escaped pipes (\|) are literal characters in the cell, not column breaks. */
+const ESCAPED_PIPE = "\u0000";
+function splitRow(line: string): string[] {
+  return line
+    .replace(/\\\|/g, ESCAPED_PIPE)
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.replaceAll(ESCAPED_PIPE, "|").trim());
+}
+
 /**
- * Reads every 5-column table row out of a COPY_DECK.md. Header rows (first cell
- * "Key") and separator rows are skipped; everything else in a 5-column row is a
- * deck row, because the deck's only 5-column tables are string tables.
+ * Reads every string-table row out of a COPY_DECK.md. Header rows (first cell
+ * "Key") and separator rows are skipped; a well-formed row has exactly 5 cells,
+ * and every deck table is a string table, so anything else pipe-shaped is
+ * reported as malformed rather than silently ignored.
  */
-export function parseDeckRows(deckText: string): DeckRow[] {
+export function parseDeck(deckText: string): ParsedDeck {
   const rows: DeckRow[] = [];
+  const malformed: { line: number; cells: number }[] = [];
   let section = "";
   deckText.split(/\r?\n/).forEach((rawLine, index) => {
     const heading = rawLine.match(/^##\s+(.+)$/);
@@ -94,15 +113,14 @@ export function parseDeckRows(deckText: string): DeckRow[] {
     }
     const line = rawLine.trim();
     if (!line.startsWith("|")) return;
-    const cells = line
-      .replace(/^\|/, "")
-      .replace(/\|$/, "")
-      .split("|")
-      .map((cell) => cell.trim());
-    if (cells.length !== 5) return;
-    if (cells.every((cell) => /^:?-+:?$/.test(cell))) return;
+    const cells = splitRow(line);
+    if (cells.every((cell) => /^:?-+:?$/.test(cell) || cell.length === 0)) return;
+    if ((cells[0] ?? "").toLowerCase() === "key") return;
+    if (cells.length !== 5) {
+      malformed.push({ line: index + 1, cells: cells.length });
+      return;
+    }
     const [key = "", moment = "", copy = "", notes = "", tier = ""] = cells;
-    if (key.toLowerCase() === "key") return;
     rows.push({
       key: key.replace(/`/g, ""),
       moment,
@@ -113,7 +131,24 @@ export function parseDeckRows(deckText: string): DeckRow[] {
       section,
     });
   });
-  return rows;
+  return { rows, malformed };
+}
+
+/**
+ * Backticked deck-key references in guidance cells, e.g. `onboarding.promise.*`
+ * or `paywall.cta` — the ONBOARDING.md screen table names its strings this way.
+ * Returned as prefixes (the trailing .* stripped) so coverage can be reconciled
+ * against the authored deck's actual keys.
+ */
+export function keyPrefixReferences(text: string): string[] {
+  const prefixes = new Set<string>();
+  for (const match of text.matchAll(/`([a-z0-9]+(?:[._-][a-z0-9]+)*)(\.\*)?`/g)) {
+    const token = match[1] ?? "";
+    if (!token.includes(".")) continue;
+    if (/\.(md|html|ts|tsx|yaml|json)$/.test(token)) continue;
+    prefixes.add(token);
+  }
+  return [...prefixes];
 }
 
 /**
@@ -150,11 +185,7 @@ export function copyColumnCells(markdownText: string): { text: string; line: num
       inCopyTable = false;
       return;
     }
-    const rowCells = line
-      .replace(/^\|/, "")
-      .replace(/\|$/, "")
-      .split("|")
-      .map((cell) => cell.trim());
+    const rowCells = splitRow(line);
     const third = rowCells[2];
     if (rowCells.length < 3 || third === undefined) return;
     if (/^copy\b/i.test(third)) {

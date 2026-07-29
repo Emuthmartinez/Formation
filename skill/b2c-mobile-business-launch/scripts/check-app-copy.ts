@@ -43,7 +43,7 @@ import {
   type Issue,
   type Severity,
 } from "./lib/launch-state.js";
-import { copyColumnCells, DECK_KEY_SHAPE, deckAllowedTerms, identifierShapes, loadAppCopyRules, parseDeckRows } from "./lib/app-copy-rules.js";
+import { copyColumnCells, DECK_KEY_SHAPE, deckAllowedTerms, identifierShapes, keyPrefixReferences, loadAppCopyRules, parseDeck } from "./lib/app-copy-rules.js";
 import { matchesTerm } from "./lib/no-slop-rules.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -120,8 +120,19 @@ if (deckText && deckIsTemplate && deckRequired) {
 // Cell rules apply to authored decks. The shipped template is exempt by its own
 // declaration — its cells are deliberately example copy from a fictional brand
 // that the placeholder list detects the moment it leaks into an authored deck.
+const authoredDeckKeys = new Set<string>();
 if (deckText && !deckIsTemplate) {
-  const rows = parseDeckRows(deckText);
+  const { rows, malformed } = parseDeck(deckText);
+  for (const bad of malformed) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.deck_row_malformed",
+        `COPY_DECK.md line ${bad.line} is a table row with ${bad.cells} cells instead of 5 — a dropped row is a string nobody validates. Fix the row (escape literal pipes as \\|).`,
+        `COPY_DECK.md:${bad.line}`,
+      ),
+    );
+  }
   if (rows.length === 0) {
     issues.push(
       issue(
@@ -137,6 +148,19 @@ if (deckText && !deckIsTemplate) {
   const ctaCases = new Set<string>();
   for (const row of rows) {
     const where = `COPY_DECK.md:${row.line}`;
+    // Deck keys ship unchanged into the string resources, where a duplicate
+    // key silently overwrites another row's copy.
+    if (authoredDeckKeys.has(row.key)) {
+      issues.push(
+        issue(
+          sev("error"),
+          "app_copy.deck_key_duplicate",
+          `Deck key "${row.key}" appears more than once. Localization resources keep one value per key, so the second row's copy would silently replace the first.`,
+          where,
+        ),
+      );
+    }
+    authoredDeckKeys.add(row.key);
     if (!DECK_KEY_SHAPE.test(row.key)) {
       issues.push(
         issue(
@@ -229,8 +253,11 @@ if (deckText && !deckIsTemplate) {
 // banned vocabulary, and raw identifiers are the leak this gate exists for.
 const onboarding = readText(root, "ONBOARDING.md") ?? readText(root, "onboarding/ONBOARDING.md");
 if (onboarding) {
+  const onboardingAllowed = new Set((deckText ? deckAllowedTerms(deckText) : []).map((term) => term.toLowerCase()));
   for (const cell of copyColumnCells(onboarding)) {
     const where = `ONBOARDING.md:${cell.line}`;
+    // Backticked spans are deck keys and file references, not prose the user reads.
+    const prose = cell.text.replace(/`[^`\n]*`/g, " ");
     for (const shape of rules.placeholderShapes) {
       if (cell.text.toLowerCase().includes(shape.toLowerCase())) {
         issues.push(
@@ -238,6 +265,21 @@ if (onboarding) {
             sev("error"),
             "app_copy.onboarding_placeholder",
             `ONBOARDING.md's Copy column still says "${shape}" — the screen has no authored words. Name the COPY_DECK.md keys that hold them (references/conversion-copy.md).`,
+            where,
+          ),
+        );
+      }
+    }
+    // The Copy column was the original leak site, so it gets the same
+    // internal-vocabulary scan the deck gets, with the same deck allowlist.
+    for (const term of rules.bannedTerms) {
+      if (onboardingAllowed.has(term.toLowerCase())) continue;
+      if (matchesTerm(prose, term)) {
+        issues.push(
+          issue(
+            sev("error"),
+            "app_copy.onboarding_internal_vocabulary",
+            `ONBOARDING.md's Copy column says "${term}" — internal vocabulary where a screen's words belong. Copy cells carry deck keys or final human words.`,
             where,
           ),
         );
@@ -254,6 +296,29 @@ if (onboarding) {
       );
     }
   }
+
+  // Coverage: the screen table names its strings as deck-key prefixes. An
+  // authored deck that resolves none of them is a one-row deck wearing an
+  // authored status — the incomplete-deck bypass, reconciled here.
+  if (deckText && !deckIsTemplate) {
+    for (const prefix of keyPrefixReferences(
+      copyColumnCells(onboarding)
+        .map((cell) => cell.text)
+        .join("\n"),
+    )) {
+      const covered = [...authoredDeckKeys].some((key) => key === prefix || key.startsWith(`${prefix}.`));
+      if (!covered) {
+        issues.push(
+          issue(
+            sev("error"),
+            "app_copy.deck_coverage_missing",
+            `ONBOARDING.md names "${prefix}" strings but COPY_DECK.md has no key under that prefix. Author the rows before the build reaches that screen.`,
+            "COPY_DECK.md",
+          ),
+        );
+      }
+    }
+  }
 }
 
 // TECH_SPEC.md: localization readiness is a day-one engineering property. When
@@ -263,14 +328,18 @@ if (laneStatus("engineering") === "done") {
   if (techSpec) {
     const hasSection = /##\s+Strings And Localization Readiness/i.test(techSpec);
     const namesMechanism = /(xcstrings|string catalog|i18next|expo-localization|\barb\b|gen-l10n|next-intl|strings module)/i.test(techSpec);
-    if (!hasSection || !namesMechanism) {
+    // The shipped template lists every mechanism as an option menu ending in
+    // "Record the choice here." — that sentinel surviving means nobody chose.
+    const choiceStillOpen = /record the choice here/i.test(techSpec);
+    if (!hasSection || !namesMechanism || choiceStillOpen) {
       issues.push(
         issue(
           sev("error"),
           "app_copy.externalization_missing",
-          "TECH_SPEC.md does not carry the Strings And Localization Readiness contract (section plus a named mechanism such as String Catalogs, " +
-            "i18next + expo-localization, ARB + gen-l10n, or next-intl). Externalized strings are decided on day one, not retrofitted — " +
-            "references/conversion-copy.md §Localization Readiness.",
+          "TECH_SPEC.md does not commit to a string-externalization mechanism: the Strings And Localization Readiness section must exist and name " +
+            "ONE concrete choice for this stack (String Catalogs, i18next + expo-localization, ARB + gen-l10n, or next-intl) — the template's " +
+            "untouched option menu does not count. Externalized strings are decided on day one, not retrofitted — references/conversion-copy.md " +
+            "§Localization Readiness.",
           "TECH_SPEC.md",
         ),
       );
@@ -305,7 +374,17 @@ if (root === path.join(skillRoot, "templates")) {
         ),
       );
     }
-    const rows = parseDeckRows(deckText);
+    const { rows, malformed } = parseDeck(deckText);
+    for (const bad of malformed) {
+      issues.push(
+        issue(
+          "error",
+          "app_copy.deck_template_row_malformed",
+          `templates/COPY_DECK.md line ${bad.line} splits into ${bad.cells} cells instead of 5 — the template must demonstrate well-formed rows.`,
+          `templates/COPY_DECK.md:${bad.line}`,
+        ),
+      );
+    }
     if (rows.length < 20) {
       issues.push(
         issue(

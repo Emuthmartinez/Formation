@@ -90,8 +90,9 @@ The strongest conversion copy is not written — it is found. Mine the words rea
 
 Deck rules:
 
-- **One row per string.** `| key | screen / moment | copy (source language) | voice notes | locale tier |`. The copy cell holds the exact words that ship.
-- **Keys are localization keys.** Lowercase dot-namespaced (`onboarding.promise.headline`, `paywall.cta`, `errors.network.body`). The key in the deck is the key in the String Catalog / i18next resource / ARB file — one name from author to translator.
+- **One row per string.** `| key | screen / moment | copy (source language) | voice notes | locale tier |`. The copy cell holds the exact words that ship. A literal pipe in copy is escaped (`\|`); a row that does not parse into five cells is an error, never a silent skip.
+- **Keys are localization keys.** Lowercase dot-namespaced (`onboarding.promise.headline`, `paywall.cta`, `errors.network.body`), and unique — string resources keep one value per key, so a duplicate silently overwrites another row's copy. The key in the deck is the key in the String Catalog / i18next resource / ARB file — one name from author to translator.
+- **Coverage is reconciled, not assumed.** Every deck-key prefix the `ONBOARDING.md` screen table names (`onboarding.promise.*`, `paywall.*`, …) must resolve to authored rows — a one-row deck wearing an authored status fails `check:app-copy`.
 - **Sections follow surfaces**, at minimum: onboarding (every screen in the `ONBOARDING.md` sequence), paywall, core loop screens, empty states, errors, permission primes, settings, dialogs. Push and email copy live in their own artifacts (`POST_LAUNCH_OPS.md`, `EMAIL_OPS.md`) — the deck may point there, not duplicate.
 - **Locale tier per row** from `LOCALIZATION_MARKET_RESEARCH.md`: `1` ships translated at launch, `2` ships source-language, `3` deferred. Tier decisions belong to that reference; the deck records them.
 - **Brand terms are declared, not smuggled.** Words the product owns that could look like violations (a coined feature name, a stylized lowercase brand) go under the deck's `**Allowed terms**` list so `check:app-copy` can tell voice from leakage.
@@ -130,7 +131,7 @@ Say instead: the human sentence the moment needs, authored in the deck. If a ban
 
 Localize-ready is an engineering property decided on day one, not a retrofit. Which locales ship is [`localization-market-research.md`](localization-market-research.md)'s call; this section makes the app able to ship them.
 
-- **Every user-facing string is externalized from the first commit.** iOS: String Catalogs (`.xcstrings`). React Native/Expo: `expo-localization` + i18next resources. Flutter: ARB + `gen-l10n`. Next.js landing/web: a typed strings module or `next-intl` messages. Deck keys are the resource keys.
+- **Every user-facing string is externalized from the first commit.** iOS: String Catalogs (`.xcstrings`). React Native/Expo: `expo-localization` + i18next resources. Flutter: ARB + `gen-l10n`. Next.js landing/web: a typed strings module or `next-intl` messages. Deck keys are the resource keys. `TECH_SPEC.md` records ONE concrete choice for the stack — leaving the template's option menu untouched fails `check:app-copy`.
 - **No sentence assembly by concatenation.** A translated language will reorder the sentence; use full-sentence templates with named interpolations (`"You've logged {count} days"`), never `"You've logged " + count`.
 - **Plurals and gender go through ICU MessageFormat** (or the platform's plural rules: `.xcstrings` variants, ARB plurals, i18next plural keys) — English's two forms are the exception, not the rule.
 - **Dates, numbers, and prices format through locale APIs**, never hand-built strings. Paywall prices come from StoreKit/RevenueCat locale-formatted values.
