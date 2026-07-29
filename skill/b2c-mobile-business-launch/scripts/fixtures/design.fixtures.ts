@@ -880,6 +880,44 @@ experience_card:
     "emotional_design.spend_prompt_after_reward",
   );
 
+  // "there is no separate screen" is an admission, not separation proof.
+  const emotionalSpendNegatedProof = makeFixture("emotional-spend-negated-proof");
+  writeFileSync(
+    path.join(emotionalSpendNegatedProof, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Streak-break grief screen and paywall share one view; there is no separate screen.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a negated separation phrase does not count as proof",
+    emotionalSpendNegatedProof,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // The prohibitive clause must be the one holding the spend/reward keywords.
+  const emotionalSpendOtherClause = makeFixture("emotional-spend-other-clause");
+  writeFileSync(
+    path.join(emotionalSpendOtherClause, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Show the paywall on the streak screen, but do not display an upgrade after dismissal.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a prohibition in an unrelated clause does not suppress the spend veto",
+    emotionalSpendOtherClause,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
   // Lane deferral skips deliverables, never the ethics veto over copy that already exists.
   const emotionalSpendDeferredLane = makeFixture("emotional-spend-deferred-lane");
   {
@@ -1147,6 +1185,61 @@ experience_card:
     [],
     undefined,
     "risk_tier_mismatch",
+  );
+
+  // "Emotional Commitment" contains "motion" only as a substring — no placeholder pass.
+  const emotionalTierMotionSubstring = makeFixture("emotional-risk-tier-motion-substring");
+  {
+    const refDir = path.join(emotionalTierMotionSubstring, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [...guardrailFixtureHeader, "| Emotional Commitment | — | Confirmshaming | Exit path is frictionless | `bright_line` |", ...guardrailFixtureFooter].join(
+        "\n",
+      ),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a motion substring in the name does not license a placeholder tier",
+    emotionalTierMotionSubstring,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
+  );
+
+  // A misspelled index card name must not silently skip parity.
+  const emotionalTierNameDrift = makeFixture("emotional-risk-tier-name-drift");
+  {
+    const refDir = path.join(emotionalTierNameDrift, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Endowed Progres | Real prior progress exists to surface | MEDIUM | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a drifted index card name fails instead of skipping parity",
+    emotionalTierNameDrift,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unmapped_card",
   );
 
   const elevenStarThin = makeFixture("eleven-star-thin");

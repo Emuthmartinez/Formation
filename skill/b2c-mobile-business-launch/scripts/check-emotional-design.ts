@@ -357,17 +357,35 @@ const LOCAL_SOCIAL_PROOF_PATTERN =
   /\b(social_proof_truthfulness_proof|App Store|Google Play|store data|verified (count|source)|source:|evidence:|as of \d{4}-\d{2}-\d{2})\b|\b(PostHog|analytics)\b.{0,48}\b(count|users|members|downloads|source|verified)\b/i;
 const LOCAL_SEPARATION_PROOF_PATTERN =
   /\b(separate (screen|surface|flow|session)|different screen|not (on|shown on|displayed on) the same screen|never on the same screen|one (user )?interaction (later|after|between)|interaction between|after (the user )?(leaves|dismisses|closes|returns)|next session|spend[- ]free)\b/i;
+// "there is no separate screen" is an admission, not proof — a separation phrase counts only
+// when the words directly before it do not negate it.
+const SEPARATION_NEGATION_BEFORE = /\b(?:no|not|without|never|isn'?t|aren'?t|lacks?|lacking)\s+(?:a\s+|the\s+|any\s+)?$/i;
+
+function hasAffirmativeSeparationProof(text: string): boolean {
+  const global = new RegExp(LOCAL_SEPARATION_PROOF_PATTERN.source, "gi");
+  let match: RegExpExecArray | null;
+  while ((match = global.exec(text)) !== null) {
+    const before = text.slice(Math.max(0, match.index - 24), match.index);
+    if (!SEPARATION_NEGATION_BEFORE.test(before)) return true;
+  }
+  return false;
+}
+
 // Compliant copy often states the rule itself ("Never show the paywall inside a streak-break
-// grief screen") — but the negation must bind to *placing the spend surface*, clause-locally
-// (a semicolon ends the clause), so "Do not animate the streak; show the paywall on the same
-// screen" cannot ride an unrelated negation past the veto. Two shapes: negation → placement
-// verb → spend object, and spend object → negation → placement verb (passive).
+// grief screen") — but the negation must bind to *placing the spend surface*, clause-locally:
+// sentence punctuation, commas, and coordinating conjunctions end the clause, so neither
+// "Do not animate the streak; show the paywall on the same screen" nor "Show the paywall on
+// the streak screen, but do not display an upgrade after dismissal" can ride an unrelated
+// negation past the veto. Two shapes: negation → placement verb → spend object, and spend
+// object → negation → placement verb (passive).
 const PROHIBITION_NEGATION = String.raw`(?:never|no|not|do not|don'?t|must not|cannot|may not|won'?t|avoid|without|prohibit(?:s|ed)?|forbidden|ban(?:s|ned)?|block(?:s|ed)?)`;
 const PROHIBITION_VERB = String.raw`(?:show(?:s|n|ing)?|display(?:s|ed|ing)?|present(?:s|ed|ing)?|place(?:s|d|ment)?|pair(?:s|ed|ing)?|co-?locate[sd]?|prompt(?:s|ed|ing)?|trigger(?:s|ed|ing)?|surface[sd]?|appear(?:s|ed|ing)?)`;
 const PROHIBITION_SPEND = String.raw`(?:spend|paywall|purchase|subscri(?:be|ption)|upgrade|iap|offer(?:ing)?)`;
+const PROHIBITION_GAP = String.raw`(?:(?!\b(?:but|and|however|while|whereas)\b)[^.;,\n]){0,60}?`;
+const PROHIBITION_GAP_SHORT = String.raw`(?:(?!\b(?:but|and|however|while|whereas)\b)[^.;,\n]){0,40}?`;
 const LOCAL_PROHIBITION_PATTERN = new RegExp(
-  `\\b${PROHIBITION_NEGATION}\\b[^.;\\n]{0,60}?\\b${PROHIBITION_VERB}\\b[^.;\\n]{0,60}?\\b${PROHIBITION_SPEND}\\b` +
-    `|\\b${PROHIBITION_SPEND}s?\\b[^.;\\n]{0,60}?\\b${PROHIBITION_NEGATION}\\b[^.;\\n]{0,40}?\\b${PROHIBITION_VERB}\\b`,
+  `\\b${PROHIBITION_NEGATION}\\b${PROHIBITION_GAP}\\b${PROHIBITION_VERB}\\b${PROHIBITION_GAP}\\b${PROHIBITION_SPEND}\\b` +
+    `|\\b${PROHIBITION_SPEND}s?\\b${PROHIBITION_GAP}\\b${PROHIBITION_NEGATION}\\b${PROHIBITION_GAP_SHORT}\\b${PROHIBITION_VERB}\\b`,
   "i",
 );
 
@@ -460,17 +478,18 @@ function scanLiveCopy(relativePath: string, rawText: string, spendScan: boolean)
     const pairHasSeparationProof = (r: number, s: number): boolean => {
       const lo = Math.min(r, s);
       const hi = Math.max(r, s);
-      return LOCAL_SEPARATION_PROOF_PATTERN.test(lines.slice(lo, hi + 2).join("\n"));
+      return hasAffirmativeSeparationProof(lines.slice(lo, hi + 2).join("\n"));
     };
+    // The prohibition escape is clause-scoped: the clause holding the spend/reward keyword
+    // must itself be prohibitive — "Show the paywall on the streak screen, but do not
+    // display an upgrade after dismissal" gets no escape from its unrelated second clause.
+    const lineProhibitsSpend = (line: string): boolean =>
+      line
+        .split(/[.;]|\b(?:but|however|whereas)\b/i)
+        .some((clause) => (SPEND_KEYWORDS.test(clause) || REWARD_STREAK_KEYWORDS.test(clause)) && LOCAL_PROHIBITION_PATTERN.test(clause));
     const unprovenPair = rewardLines
       .flatMap((r) => spendLines.map((s) => ({ r, s })))
-      .find(
-        ({ r, s }) =>
-          Math.abs(r - s) <= 4 &&
-          !pairHasSeparationProof(r, s) &&
-          !LOCAL_PROHIBITION_PATTERN.test(lines[r] ?? "") &&
-          !LOCAL_PROHIBITION_PATTERN.test(lines[s] ?? ""),
-      );
+      .find(({ r, s }) => Math.abs(r - s) <= 4 && !pairHasSeparationProof(r, s) && !lineProhibitsSpend(lines[r] ?? "") && !lineProhibitsSpend(lines[s] ?? ""));
     if (unprovenPair) {
       issues.push(
         issue(
@@ -744,6 +763,10 @@ function normalizeCardName(raw: string): string {
 
 const TIER_ORDER = ["LOW", "MEDIUM", "HIGH"];
 
+// Index cards deliberately absent from the §3 risk table (normalized names). Peak-End's
+// risk is carried per-card; the table covers it only via the untiered motion-fallback row.
+const GUARDRAIL_UNMAPPED_INDEX_CARDS = new Set(["peak end"]);
+
 function parseTierSet(raw: string): Set<string> | undefined {
   const cleaned = raw.replace(/\*/g, "").replace(/[–—]/g, "-").trim().toUpperCase();
   if (!cleaned) return undefined;
@@ -841,7 +864,7 @@ if (ethicsRef) {
     if (!tiers) {
       // Only the motion-fallback row may carry a placeholder tier; a canonical mechanism
       // with "—" or a typo would silently vanish from parity.
-      if (!(isTierPlaceholder(row.tierRaw) && /motion/i.test(row.name))) {
+      if (!(isTierPlaceholder(row.tierRaw) && /\bmotion\b/i.test(row.name))) {
         issues.push(
           issue(
             "error",
@@ -960,6 +983,16 @@ if (ethicsRef) {
             "error",
             "emotional_design.risk_tier_mismatch",
             `references/experience-cards.md routes "${row.name}" as ${row.tierRaw} but references/ethics-guardrail.md §3 tiers it ${explicit?.tierRaw ?? [...allowed].join("-")}. The guardrail table is canonical — make both files agree.`,
+            "references/experience-cards.md",
+          ),
+        );
+      } else if (!allowed && !GUARDRAIL_UNMAPPED_INDEX_CARDS.has(key)) {
+        // Name drift ("Endowed Progres") must not silently skip parity.
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.risk_tier_unmapped_card",
+            `references/experience-cards.md routes "${row.name}" (${row.tierRaw}) but no §3 row or bucket in references/ethics-guardrail.md covers it. Add a §3 row or fix the name — only deliberately unmapped cards (${[...GUARDRAIL_UNMAPPED_INDEX_CARDS].join(", ")}) may skip.`,
             "references/experience-cards.md",
           ),
         );
