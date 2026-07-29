@@ -693,4 +693,174 @@ if (existsSync(designTplPath) && existsSync(emotionalTplPath)) {
   }
 }
 
+// --- 8. The motion-catalog pack's copied presets must match PremiumCraft. ---
+// TokenSpring.swift (native procedural scenes) and motion-tokens.ts (Remotion)
+// each restate the preset bounces and duration members so procedural and video
+// surfaces ride the same physics as withAnimation. The pack README says a
+// bounce change is a three-file commit; this section is that instruction as a
+// gate (PR #71 review) — prose alone would go stale the first time
+// PremiumCraft moved.
+const TOKEN_SPRING = "templates/motion-catalog/TokenSpring.swift";
+const MOTION_TOKENS_TS = "templates/motion-catalog/motion-tokens.ts";
+
+const tokenSpringRaw = read(TOKEN_SPRING);
+if (tokenSpringRaw !== undefined && swiftPresets.size > 0) {
+  const copies = new Map<string, { durationMember: string; bounce: number }>();
+  const re = /static let (\w+) = TokenSpring\(duration: DesignTokens\.Motion\.(\w+), bounce: ([\d.]+)\)/g;
+  for (const m of tokenSpringRaw.matchAll(re)) {
+    copies.set(g(m, 1), { durationMember: g(m, 2), bounce: Number(g(m, 3)) });
+  }
+  if (copies.size === 0) {
+    issues.push(
+      issue(
+        "error",
+        "motion_contract.token_spring.presets_unparseable",
+        "No TokenSpring(duration: DesignTokens.Motion.<member>, bounce: N) presets could be parsed from TokenSpring.swift.",
+        TOKEN_SPRING,
+      ),
+    );
+  } else {
+    for (const [name, preset] of swiftPresets) {
+      const copy = copies.get(name);
+      if (copy === undefined) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.token_spring.preset_missing",
+            `PremiumCraft.swift ships PremiumMotion.${name} but TokenSpring.swift has no ${name} preset — procedural scenes would silently lack it.`,
+            TOKEN_SPRING,
+          ),
+        );
+        continue;
+      }
+      if (copy.durationMember !== preset.durationMember) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.token_spring.duration_drift",
+            `TokenSpring.${name} rides DesignTokens.Motion.${copy.durationMember} but PremiumMotion.${name} rides ${preset.durationMember}.`,
+            TOKEN_SPRING,
+          ),
+        );
+      }
+      if (copy.bounce !== preset.bounce) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.token_spring.bounce_drift",
+            `TokenSpring.${name} states bounce ${copy.bounce} but PremiumMotion.${name} ships bounce ${preset.bounce} — the procedural curve would diverge from withAnimation.`,
+            TOKEN_SPRING,
+          ),
+        );
+      }
+    }
+    for (const name of copies.keys()) {
+      if (!swiftPresets.has(name)) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.token_spring.preset_unknown",
+            `TokenSpring.swift defines a ${name} preset that PremiumCraft.swift does not ship — the pack must restate the canon, never extend it.`,
+            TOKEN_SPRING,
+          ),
+        );
+      }
+    }
+  }
+}
+
+const motionTokensTsRaw = read(MOTION_TOKENS_TS);
+if (motionTokensTsRaw !== undefined) {
+  if (Object.keys(motionTokens).length > 0) {
+    const msRe = /^\s*(durationFast|durationBase|durationSlow|durationCelebrate|durationReveal|durationCinematic|stagger):\s*(\d+),/gm;
+    const seen = new Set<string>();
+    for (const m of motionTokensTsRaw.matchAll(msRe)) {
+      const name = g(m, 1);
+      seen.add(name);
+      const actual = motionTokens[name];
+      if (actual !== undefined && actual !== `${g(m, 2)}ms`) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.motion_tokens.token_value_drift",
+            `motion-tokens.ts states ${name} = ${g(m, 2)}ms but tokens.json ships ${actual}.`,
+            MOTION_TOKENS_TS,
+          ),
+        );
+      }
+    }
+    for (const name of ["durationFast", "durationBase", "durationSlow", "durationCelebrate", "durationReveal", "durationCinematic", "stagger"]) {
+      if (!seen.has(name)) {
+        issues.push(
+          issue("error", "motion_contract.motion_tokens.token_missing", `motion-tokens.ts's Motion table has no parseable ${name} entry.`, MOTION_TOKENS_TS),
+        );
+      }
+    }
+  }
+  if (swiftPresets.size > 0) {
+    const copies = new Map<string, { durationMember: string; bounce: number }>();
+    const re = /(\w+): springFromPreset\(Motion\.(\w+), ([\d.]+)\)/g;
+    for (const m of motionTokensTsRaw.matchAll(re)) {
+      copies.set(g(m, 1), { durationMember: g(m, 2), bounce: Number(g(m, 3)) });
+    }
+    if (copies.size === 0) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.motion_tokens.presets_unparseable",
+          "No springFromPreset(Motion.<member>, N) presets could be parsed from motion-tokens.ts.",
+          MOTION_TOKENS_TS,
+        ),
+      );
+    } else {
+      for (const [name, preset] of swiftPresets) {
+        const copy = copies.get(name);
+        if (copy === undefined) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.motion_tokens.preset_missing",
+              `PremiumCraft.swift ships PremiumMotion.${name} but motion-tokens.ts has no ${name} preset — video renders would silently lack it.`,
+              MOTION_TOKENS_TS,
+            ),
+          );
+          continue;
+        }
+        if (copy.durationMember !== preset.durationMember) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.motion_tokens.duration_drift",
+              `motion-tokens.ts ${name} rides Motion.${copy.durationMember} but PremiumMotion.${name} rides ${preset.durationMember}.`,
+              MOTION_TOKENS_TS,
+            ),
+          );
+        }
+        if (copy.bounce !== preset.bounce) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.motion_tokens.bounce_drift",
+              `motion-tokens.ts ${name} states bounce ${copy.bounce} but PremiumMotion.${name} ships bounce ${preset.bounce} — the rendered curve would diverge from the native preset.`,
+              MOTION_TOKENS_TS,
+            ),
+          );
+        }
+      }
+      for (const name of copies.keys()) {
+        if (!swiftPresets.has(name)) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.motion_tokens.preset_unknown",
+              `motion-tokens.ts defines a ${name} preset that PremiumCraft.swift does not ship — the pack must restate the canon, never extend it.`,
+              MOTION_TOKENS_TS,
+            ),
+          );
+        }
+      }
+    }
+  }
+}
+
 reportAndExit("Motion craft contract check", issues);

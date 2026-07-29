@@ -32,6 +32,8 @@ struct DemoCardRevealView: View {
     @State private var heroLanded = false
     @State private var sheenPhase: CGFloat = -0.6
     @State private var reflowIn = false
+    /// Reduce Motion only: the one animated value — the settled scene fades in.
+    @State private var settledFade = false
     @State private var runToken = 0
 
     private let words = ["Your streak,", "minted", "in a", "card."]
@@ -59,6 +61,7 @@ struct DemoCardRevealView: View {
                 .padding(.bottom, LabTheme.spaceXl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .opacity(reduceMotion && !settledFade ? 0 : 1)
         .background(LabTheme.background.ignoresSafeArea())
         .navigationTitle("Card reveal")
         .toolbar {
@@ -74,10 +77,16 @@ struct DemoCardRevealView: View {
     // MARK: beats
 
     private func run() async {
-        await resetStates()
+        resetStates()
 
         if reduceMotion {
-            withAnimation(.easeInOut(duration: DesignTokens.Motion.durationSlow)) {
+            // Reduce Motion = a cross-fade to the settled state, nothing
+            // spatial: every choreography value jumps instantly inside a
+            // no-animation transaction, and only the whole-scene opacity
+            // animates.
+            var t = Transaction()
+            t.disablesAnimations = true
+            withTransaction(t) {
                 wordsShown = words.count
                 packageIn = true
                 flipProgress = 1
@@ -85,40 +94,51 @@ struct DemoCardRevealView: View {
                 heroLanded = true
                 reflowIn = true
             }
+            withAnimation(.easeInOut(duration: DesignTokens.Motion.durationSlow)) {
+                settledFade = true
+            }
             return
         }
 
-        try? await sleep(leadIn)
-        for i in 1...words.count {
-            withAnimation(PremiumMotion.standard) { wordsShown = i }
-            try? await sleep(cascadeStep)
+        // Cancellation contract: Replay bumps `runToken`, SwiftUI cancels
+        // this task, and the FIRST cancelled sleep exits the runner — a
+        // cancelled runner must never keep mutating the stage the new
+        // runner just reset.
+        do {
+            try await sleep(leadIn)
+            for i in 1...words.count {
+                withAnimation(PremiumMotion.standard) { wordsShown = i }
+                try await sleep(cascadeStep)
+            }
+
+            try await sleep(beatHold)
+            withAnimation(PremiumMotion.standard) { packageIn = true }
+
+            try await sleep(longHold)
+            withAnimation(.emphasized(duration: DesignTokens.Motion.durationReveal)) {
+                flipProgress = 1
+            }
+
+            try await sleep(longHold)
+            for i in 0..<4 {
+                withAnimation(PremiumMotion.celebrate) { flapOpen[i] = true }
+                try await sleep(DesignTokens.Motion.stagger * 2)
+            }
+
+            try await sleep(beatHold)
+            withAnimation(PremiumMotion.celebrateLanding) { heroLanded = true }
+            withAnimation(.emphasized(duration: DesignTokens.Motion.durationReveal)) {
+                sheenPhase = 1.6
+            }
+
+            try await sleep(DesignTokens.Motion.durationCelebrate + cascadeStep)
+            withAnimation(.emphasized(duration: cascadeStep)) { reflowIn = true }
+        } catch {
+            return // cancelled — the replacement runner owns the stage now
         }
-
-        try? await sleep(beatHold)
-        withAnimation(PremiumMotion.standard) { packageIn = true }
-
-        try? await sleep(longHold)
-        withAnimation(.emphasized(duration: DesignTokens.Motion.durationReveal)) {
-            flipProgress = 1
-        }
-
-        try? await sleep(longHold)
-        for i in 0..<4 {
-            withAnimation(PremiumMotion.celebrate) { flapOpen[i] = true }
-            try? await sleep(DesignTokens.Motion.stagger * 2)
-        }
-
-        try? await sleep(beatHold)
-        withAnimation(PremiumMotion.celebrateLanding) { heroLanded = true }
-        withAnimation(.emphasized(duration: DesignTokens.Motion.durationReveal)) {
-            sheenPhase = 1.6
-        }
-
-        try? await sleep(DesignTokens.Motion.durationCelebrate + cascadeStep)
-        withAnimation(.emphasized(duration: cascadeStep)) { reflowIn = true }
     }
 
-    private func resetStates() async {
+    private func resetStates() {
         var t = Transaction()
         t.disablesAnimations = true
         withTransaction(t) {
@@ -129,6 +149,7 @@ struct DemoCardRevealView: View {
             heroLanded = false
             sheenPhase = -0.6
             reflowIn = false
+            settledFade = false
         }
     }
 

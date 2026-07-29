@@ -29,7 +29,11 @@ import SwiftUI
 struct DemoSphereCloudView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var startDate = Date()
-    @State private var heroHaptic = false
+    /// One-shot landing latch: the underdamped spring crosses 1.0 on every
+    /// positive oscillation, so the success trigger fires only on the FIRST
+    /// crossing per run and Replay re-arms it without firing.
+    @State private var heroDidLand = false
+    @State private var heroLandCount = 0
 
     private static let cardCount = 30
     private static let sphereRadius: CGFloat = 150
@@ -103,12 +107,12 @@ struct DemoSphereCloudView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Replay") {
                     startDate = Date()
-                    heroHaptic.toggle()
+                    heroDidLand = false // re-arm; feedback fires at the landing
                 }
                 .buttonStyle(.premiumPress)
             }
         }
-        .sensoryFeedback(for: .success, trigger: heroHaptic)
+        .sensoryFeedback(for: .success, trigger: heroLandCount)
     }
 
     // MARK: scene pieces
@@ -226,7 +230,10 @@ struct DemoSphereCloudView: View {
             .opacity(visible ? min(1, p * 3) : 0)
             .offset(y: -130)
             .onChange(of: p > 1.0) { _, crossed in
-                if crossed { heroHaptic.toggle() }
+                if crossed && !heroDidLand {
+                    heroDidLand = true
+                    heroLandCount += 1
+                }
             }
     }
 

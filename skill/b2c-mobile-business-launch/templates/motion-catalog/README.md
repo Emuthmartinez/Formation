@@ -42,7 +42,8 @@ adapting.
    bindings and beat pacing stay.
 4. `PremiumCraft.swift` is the canonical preset layer. `TokenSpring.swift` and
    `motion-tokens.ts` restate its bounce values; a bounce change is a
-   three-file commit.
+   three-file commit, and `check:motion-contract` fails the build when the
+   copies drift from the canon.
 
 ## Traps these files already avoid
 
