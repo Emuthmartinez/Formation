@@ -892,6 +892,29 @@ experience_card:
     "emotional_design.risk_tier_conflict",
   );
 
+  const emotionalTierDuplicate = makeFixture("emotional-risk-tier-duplicate");
+  {
+    const refDir = path.join(emotionalTierDuplicate, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line`, `posthog_event` |",
+        "| Endowed Progress | LOW | Manufactured progress on fake tasks | Starting progress reflects real investment | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "duplicate risk-table rows with agreeing tiers fail",
+    emotionalTierDuplicate,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_duplicate_row",
+  );
+
   const elevenStarThin = makeFixture("eleven-star-thin");
   writeFileSync(
     path.join(elevenStarThin, "11-star-experience", "11_STAR_EXPERIENCE.md"),

@@ -796,7 +796,16 @@ if (ethicsRef) {
           "references/ethics-guardrail.md",
         ),
       );
-    } else if (!existing) {
+    } else if (existing) {
+      issues.push(
+        issue(
+          "error",
+          "emotional_design.risk_tier_duplicate_row",
+          `references/ethics-guardrail.md §3 lists "${row.name}" twice (both ${row.tierRaw}). Duplicate rows are how tier drift starts — merge into a single row.`,
+          "references/ethics-guardrail.md",
+        ),
+      );
+    } else {
       explicitTiers.set(key, { tierRaw: row.tierRaw, tiers });
     }
   }
