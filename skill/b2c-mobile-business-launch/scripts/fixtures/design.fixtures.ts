@@ -826,6 +826,23 @@ experience_card:
     "spend_prompt_after_reward",
   );
 
+  const emotionalSpendProhibited = makeFixture("emotional-spend-prohibited");
+  writeFileSync(
+    path.join(emotionalSpendProhibited, "ONBOARDING.md"),
+    ["# Onboarding", "Never show the paywall inside a streak-break grief screen.", "Analytics: streak_celebrated, paywall_viewed."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "copy that prohibits the spend-near-reward pattern passes",
+    emotionalSpendProhibited,
+    "check-emotional-design.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "spend_prompt_after_reward",
+  );
+
   const guardrailFixtureHeader = [
     "# Ethics And Dark-Pattern Guardrail",
     "## 1. Bright-Line Vs Dark-Line Distinction",
@@ -913,6 +930,28 @@ experience_card:
     "check-emotional-design.ts",
     1,
     "emotional_design.risk_tier_duplicate_row",
+  );
+
+  const emotionalTierTypo = makeFixture("emotional-risk-tier-typo");
+  {
+    const refDir = path.join(emotionalTierTypo, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | MEDUM | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a misspelled risk tier fails instead of silently dropping the row",
+    emotionalTierTypo,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unrecognized",
   );
 
   const elevenStarThin = makeFixture("eleven-star-thin");

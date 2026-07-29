@@ -357,6 +357,11 @@ const LOCAL_SOCIAL_PROOF_PATTERN =
   /\b(social_proof_truthfulness_proof|App Store|Google Play|store data|verified (count|source)|source:|evidence:|as of \d{4}-\d{2}-\d{2})\b|\b(PostHog|analytics)\b.{0,48}\b(count|users|members|downloads|source|verified)\b/i;
 const LOCAL_SEPARATION_PROOF_PATTERN =
   /\b(separate (screen|surface|flow|session)|different screen|not (on|shown on|displayed on) the same screen|never on the same screen|one (user )?interaction (later|after|between)|interaction between|after (the user )?(leaves|dismisses|closes|returns)|next session|spend[- ]free)\b/i;
+// Compliant copy often states the rule itself ("Never show the paywall inside a streak-break
+// grief screen") — a negation followed sentence-locally by a spend/reward word is a
+// prohibition, not a placement.
+const LOCAL_PROHIBITION_PATTERN =
+  /\b(never|no|not|do not|don'?t|must not|avoid|without|prohibit(?:s|ed)?|forbidden|ban(?:s|ned)?|block(?:s|ed)?)\b[^.\n]{0,80}\b(spend|paywall|purchase|subscribe|upgrade|iap|prompt|streak|reward|grief)/i;
 
 function hasLocalProof(lines: string[], lineIndex: number, proofPattern: RegExp): boolean {
   const start = Math.max(0, lineIndex - 2);
@@ -445,7 +450,11 @@ function scanLiveCopy(relativePath: string, rawText: string, spendScan: boolean)
       .flatMap((r) => spendLines.map((s) => ({ r, s })))
       .find(
         ({ r, s }) =>
-          Math.abs(r - s) <= 4 && !hasLocalProof(lines, r, LOCAL_SEPARATION_PROOF_PATTERN) && !hasLocalProof(lines, s, LOCAL_SEPARATION_PROOF_PATTERN),
+          Math.abs(r - s) <= 4 &&
+          !hasLocalProof(lines, r, LOCAL_SEPARATION_PROOF_PATTERN) &&
+          !hasLocalProof(lines, s, LOCAL_SEPARATION_PROOF_PATTERN) &&
+          !LOCAL_PROHIBITION_PATTERN.test(lines[r] ?? "") &&
+          !LOCAL_PROHIBITION_PATTERN.test(lines[s] ?? ""),
       );
     if (unprovenPair) {
       issues.push(
@@ -728,6 +737,12 @@ function tierKey(tiers: Set<string>): string {
   return [...tiers].sort().join("-");
 }
 
+/** The motion-fallback row legitimately carries no tier ("—"); anything else unparseable is a typo the gate must not skip. */
+function isTierPlaceholder(raw: string): boolean {
+  const cleaned = raw.replace(/[*`]/g, "").replace(/[–—]/g, "-").trim();
+  return cleaned === "" || /^-+$/.test(cleaned) || /^n\/?a$/i.test(cleaned);
+}
+
 interface TableRow {
   name: string;
   tierRaw: string;
@@ -776,7 +791,19 @@ if (ethicsRef) {
   const bucketTiers = new Map<string, Set<string>>();
   for (const row of riskRows) {
     const tiers = parseTierSet(row.tierRaw);
-    if (!tiers) continue;
+    if (!tiers) {
+      if (!isTierPlaceholder(row.tierRaw)) {
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.risk_tier_unrecognized",
+            `references/ethics-guardrail.md §3 tier "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range. Fix the cell — otherwise the parity gate silently skips this mechanism.`,
+            "references/ethics-guardrail.md",
+          ),
+        );
+      }
+      continue;
+    }
     const bucket = row.name.match(/^all other deck cards\s*\(([^)]*)\)/i);
     if (bucket) {
       for (const member of (bucket[1] ?? "").split(",")) {
@@ -824,7 +851,19 @@ if (ethicsRef) {
     }
     for (const row of indexRows) {
       const indexTiers = parseTierSet(row.tierRaw);
-      if (!indexTiers) continue;
+      if (!indexTiers) {
+        if (!isTierPlaceholder(row.tierRaw)) {
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.risk_tier_unrecognized",
+              `references/experience-cards.md Risk cell "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range. Fix the cell — otherwise the parity gate silently skips this card.`,
+              "references/experience-cards.md",
+            ),
+          );
+        }
+        continue;
+      }
       const key = normalizeCardName(row.name);
       const explicit = [...explicitTiers.entries()].find(([tableKey]) => nameMatches(key, tableKey))?.[1];
       const allowed = explicit?.tiers ?? [...bucketTiers.entries()].find(([tableKey]) => nameMatches(key, tableKey))?.[1];
