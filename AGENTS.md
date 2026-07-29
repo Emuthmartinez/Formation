@@ -77,6 +77,7 @@ npm run check:token-promotion -- --root skill/b2c-mobile-business-launch/templat
 npm run check:template-safety
 npm run check:founder-copy -- --root skill/b2c-mobile-business-launch/templates --skill-root skill/b2c-mobile-business-launch
 npm run check:no-slop -- --root skill/b2c-mobile-business-launch/templates --skill-root skill/b2c-mobile-business-launch
+npm run check:app-copy -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml --skill-root skill/b2c-mobile-business-launch
 npm run check:onboarding -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
 npm run check:post-launch -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
 npm run check:google-play -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml

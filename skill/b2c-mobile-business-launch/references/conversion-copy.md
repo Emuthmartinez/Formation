@@ -1,6 +1,11 @@
-# Conversion Copywriting And Copy Editing
+# Conversion Copywriting, App Copy, And Localization Readiness
 
-Use this before writing or editing any conversion-critical words: landing hero/subhead/CTA, App Store title/subtitle/keywords/description/promo text, paywall headline and plan copy, onboarding question and value-reveal strings, push/email subject and body, screenshot captions, and ad hooks. Copy is the one input shared by almost every B2C surface, so it gets a craft contract instead of being improvised per screen.
+Use this before writing or editing any words a user reads. That is two jobs with one voice:
+
+1. **Conversion-critical words** — landing hero/subhead/CTA, App Store title/subtitle/keywords/description/promo text, paywall headline and plan copy, onboarding question and value-reveal strings, push/email subject and body, screenshot captions, and ad hooks.
+2. **Every other user-facing string in the app** — buttons, tab labels, empty states, errors, permission primes, confirmation dialogs, loading and success moments, settings, tooltips. These are where internal vocabulary leaks: a builder with no authored copy fills the screen from the spec, and the user reads the plan instead of the product.
+
+Copy is the one input shared by almost every B2C surface, so it gets a craft contract instead of being improvised per screen. The words are authored in `COPY_DECK.md` before they are typed into code; builders consume the deck, they do not invent strings.
 
 This reference governs the *words*. Load [`cro-landing.md`](cro-landing.md) for landing-page *structure* (above-the-fold layout, CTA hierarchy, trust blocks, friction audit). Load [`onboarding-conversion.md`](onboarding-conversion.md) for in-app flow sequencing and paywall timing, [`aso-store-ops.md`](aso-store-ops.md) and [`app-store-listing-prep.md`](app-store-listing-prep.md) for store-field character limits and metadata rules, [`resend-email-ops.md`](resend-email-ops.md) for lifecycle email mechanics, [`geo-seo.md`](geo-seo.md) before editing any public page copy, and [`emotional-design-system.md`](emotional-design-system.md) when copy carries an Experience Card moment. Do not duplicate those contracts here; this file decides whether the sentence converts.
 
@@ -13,6 +18,10 @@ This reference governs the *words*. Load [`cro-landing.md`](cro-landing.md) for 
 - Voice-Of-Customer Mining
 - Copy Craft Rules
 - Surface Recipes
+- The Copy Deck (All User-Facing Strings)
+- App Surface Recipes
+- Banned In App Copy (Machine-Parsed)
+- Localization Readiness
 - Copy QA Checklist
 - Analytics Events
 - Gates Before Handoff
@@ -24,11 +33,20 @@ Refresh current craft and platform-constraint sources before locking copy:
 - Apple App Store product page character limits and editorial guidelines: `https://developer.apple.com/app-store/product-page/`
 - Apple App Store Review Guidelines (metadata, claims, pricing language): `https://developer.apple.com/app-store/review/guidelines/`
 - Google Play listing policy and metadata rules: `https://support.google.com/googleplay/android-developer/answer/9859455`
+- Apple HIG writing guidance (in-app voice, dialogs, errors): `https://developer.apple.com/design/human-interface-guidelines/writing`
+- Material 3 writing guidance (Android in-app voice; mandates sentence case): `https://m3.material.io/foundations/content-design/style-guide`
+- Xcode String Catalogs (`.xcstrings`) for iOS string externalization: `https://developer.apple.com/documentation/xcode/localizing-and-varying-text-with-a-string-catalog`
+- Expo localization guidance (RN string externalization with `expo-localization` + i18next): `https://docs.expo.dev/guides/localization/`
+- Flutter i18n (ARB + `gen-l10n`): `https://docs.flutter.dev/ui/internationalization`
 - The project's own `RESEARCH.md` review-mining and `11_STAR_EXPERIENCE.md` north-star language as the primary voice-of-customer source (prefer real user words over invented ones)
+- 60fps.design shot library for how premium consumer apps actually phrase these moments (see the pattern citations in App Surface Recipes)
 
 ## Required Artifacts
 
-Create or update `COPY_BRIEF.md` when a launch ships any landing page, App Store listing, paywall, lifecycle email, or onboarding copy that conversion depends on. It is the single source of truth for the product's words, so the same promise appears on every surface.
+Two artifacts, two layers:
+
+- **`COPY_BRIEF.md`** — the promise and the voice. Create or update it when a launch ships any landing page, App Store listing, paywall, lifecycle email, or onboarding copy that conversion depends on. It is the single source of truth for the product's message, so the same promise appears on every surface. Start from [`templates/COPY_BRIEF.md`](../templates/COPY_BRIEF.md).
+- **`COPY_DECK.md`** — every user-facing string, authored screen by screen before the build consumes it. The deck is the bridge between the brief and the code: keys in the deck become the app's localization keys. Start from [`templates/COPY_DECK.md`](../templates/COPY_DECK.md); the contract lives in The Copy Deck section below. `check:app-copy` gates it.
 
 Load [`flow-traceability.md`](flow-traceability.md) before locking copy: every headline claim must trace to evidence in `RESEARCH.md` or `11_STAR_EXPERIENCE.md`, not to taste. Load [`analytics-attribution.md`](analytics-attribution.md) before naming copy-test events so variants implement the approved catalog. Load [`change-cascade.md`](change-cascade.md) whenever a core promise, name, or price changes — copy lives on many surfaces and must be reconciled, not patched on one screen.
 
@@ -66,6 +84,61 @@ The strongest conversion copy is not written — it is found. Mine the words rea
 - **Lifecycle email:** subject earns the open with curiosity or value; first line delivers it; one CTA. Mechanics belong to [`resend-email-ops.md`](resend-email-ops.md).
 - **Screenshot captions:** each caption sells one benefit in 3-5 words; the sequence tells the value story. Production belongs to [`app-store-listing-prep.md`](app-store-listing-prep.md).
 
+## The Copy Deck (All User-Facing Strings)
+
+`COPY_DECK.md` carries the final words for every screen and moment, keyed so the same entry drives the code and the translations. Builders read the deck and type its strings; a builder who reaches a screen with no deck row stops and authors the row first (voice from `COPY_BRIEF.md` and `BRAND.md`), rather than improvising a label from the spec.
+
+Deck rules:
+
+- **One row per string.** `| key | screen / moment | copy (source language) | voice notes | locale tier |`. The copy cell holds the exact words that ship.
+- **Keys are localization keys.** Lowercase dot-namespaced (`onboarding.promise.headline`, `paywall.cta`, `errors.network.body`). The key in the deck is the key in the String Catalog / i18next resource / ARB file — one name from author to translator.
+- **Sections follow surfaces**, at minimum: onboarding (every screen in the `ONBOARDING.md` sequence), paywall, core loop screens, empty states, errors, permission primes, settings, dialogs. Push and email copy live in their own artifacts (`POST_LAUNCH_OPS.md`, `EMAIL_OPS.md`) — the deck may point there, not duplicate.
+- **Locale tier per row** from `LOCALIZATION_MARKET_RESEARCH.md`: `1` ships translated at launch, `2` ships source-language, `3` deferred. Tier decisions belong to that reference; the deck records them.
+- **Brand terms are declared, not smuggled.** Words the product owns that could look like violations (a coined feature name, a stylized lowercase brand) go under the deck's `**Allowed terms**` list so `check:app-copy` can tell voice from leakage.
+- **The deck is spec-blind.** Spec vocabulary, schema identifiers, lane/gate/phase words, and placeholder filler never appear in a copy cell — see Banned In App Copy. A deck cell that says "Product-specific value promise" is an unfilled deck, and `check:app-copy` fails it.
+- **Change cascade applies.** A promise, name, or price change reconciles through [`change-cascade.md`](change-cascade.md); the deck is one of the surfaces the cascade must touch.
+
+## App Surface Recipes
+
+How premium consumer apps phrase these moments, mined from the 60fps.design shot library (shot slugs cited so the source stays checkable). Write to the formula, then re-voice per `COPY_BRIEF.md`.
+
+- **CTA = verb + what the user gets.** "Allow Location", "Try three days for free", "Get my plan" — never "Submit", "Continue" alone when the tap has a consequence worth naming (`sesame-allow-location-permission-pulse-animation`, `whistle-value-prop-animation`).
+- **Onboarding headline claims agency for the user.** Verb + possessive: "Experiment your way" — the app adapts to them, not the reverse (`easlo-experiments-onboarding`).
+- **Permission prime = the benefit first, then the OS dialog.** "Stay on track" before the notification alert; the system prompt fires only from an affirmative tap on the prime screen (`duolingo-allow-notifications-sheet`; timing contract in [`push-notification-lifecycle.md`](push-notification-lifecycle.md)).
+- **Empty state = name it, reframe it, point at the next tap.** "Empty." / "But so full of possibilities." plus a cue aimed at the exact control that fills it (`riveo-projects-empty-state`).
+- **Error = what happened + why + what to do next.** Never blame the user, never show a code or identifier. "Couldn't save your entry — you're offline. It will retry when you're back."
+- **Loading = conversational narration; success = spoken-out-loud confirmation.** "setting things up", then "all done!" — not "Processing request" / "Operation complete" (`push-setup-to-pricing-sheet`).
+- **Destructive dialogs name the consequence on the button.** "Delete 3 entries", not "OK". The neutral option stays neutral: "Cancel", "Not now" — no shame copy, per [`ethics-guardrail.md`](ethics-guardrail.md) (`carrot-pricing`).
+- **Plan names are identities, not commodity tiers.** "Peak" / "Plus" / "The everyday package" — the user self-selects by identity, not by feature count (`alltrails-plan-selection-interaction`, `amie-pricing`).
+- **Milestones celebrate briefly, then point forward.** Big number as the hero, one forward CTA — momentum over dwelling (`duolingo-14-day-streak-goal-checkpoint-reveal-animation`).
+- **Capitalization is a consistency contract, not a universal rule.** Apple says pick title case or sentence case and hold it; Material mandates sentence case. Choose per platform convention, record the choice in `COPY_BRIEF.md`, and never mix within a surface. `check:app-copy` warns on mixing; it never hard-fails case, because the platforms genuinely disagree.
+- **Second person, present tense, one reading level.** The app talks to "you" like a person who respects your time. If a string sounds like a system explaining itself, rewrite it as a person helping.
+
+## Banned In App Copy (Machine-Parsed)
+
+`check:app-copy` parses the two lists below from this file — edit the reference and the gate follows; do not duplicate them in code. Identifier shapes (snake_case, SCREAMING_SNAKE, pipe-delimited state) are detected structurally by the gate itself, same as `check:founder-copy`.
+
+**Banned in app copy** (internal vocabulary that must never reach a user's screen; whole-word, case-insensitive)
+lane, gate, artifact, archetype, scaffold, prompt pack, value reveal, value-reveal, spec, backlog, milestone gate, launch lane, frontstage, backstage, attribution question, personalization matrix, state file, project state, autonomy mode, founder approval
+
+**Placeholder shapes** (filler that means the deck row was never authored; substring, case-insensitive; `fernpath`, `wrenfeed`, `loomroom`, and `glimmerjar` are the fictional example brands in the deck template and archetype starters, so their survival means example copy shipped verbatim)
+product-specific, tbd, todo, to be filled, lorem ipsum, placeholder, insert copy, your headline here, app name here, archetype scaffold, runnable starter, customize it with the prompt, fernpath, wrenfeed, loomroom, glimmerjar
+
+Say instead: the human sentence the moment needs, authored in the deck. If a banned term is genuinely part of the product's own voice (an app about racing "lanes", say), declare it under `**Allowed terms**` in `COPY_DECK.md` with a one-line reason — the gate honors deck-local allowlists, mirroring `check:founder-copy`.
+
+## Localization Readiness
+
+Localize-ready is an engineering property decided on day one, not a retrofit. Which locales ship is [`localization-market-research.md`](localization-market-research.md)'s call; this section makes the app able to ship them.
+
+- **Every user-facing string is externalized from the first commit.** iOS: String Catalogs (`.xcstrings`). React Native/Expo: `expo-localization` + i18next resources. Flutter: ARB + `gen-l10n`. Next.js landing/web: a typed strings module or `next-intl` messages. Deck keys are the resource keys.
+- **No sentence assembly by concatenation.** A translated language will reorder the sentence; use full-sentence templates with named interpolations (`"You've logged {count} days"`), never `"You've logged " + count`.
+- **Plurals and gender go through ICU MessageFormat** (or the platform's plural rules: `.xcstrings` variants, ARB plurals, i18next plural keys) — English's two forms are the exception, not the rule.
+- **Dates, numbers, and prices format through locale APIs**, never hand-built strings. Paywall prices come from StoreKit/RevenueCat locale-formatted values.
+- **No text baked into images.** A screenshot caption or hero word rendered into a PNG cannot be translated; keep text in the text layer.
+- **RTL is a layout decision made early**: leading/trailing instead of left/right, mirrored navigation, tested once with an RTL pseudo-locale even when no RTL market is in Tier 1.
+- **Pseudo-localization pass before store submission.** Run the app once in a length-doubling pseudo-locale (Xcode Double-Length Pseudolanguage; Android `en-XA`/`ar-XB`) and fix truncation and clipped layouts.
+- **String freeze before submission.** Lock the deck's source copy before store screenshots and translations start; late edits reconcile through [`change-cascade.md`](change-cascade.md), not ad-hoc patches.
+
 ## Analytics Events
 
 When copy is under test, declare events in `ANALYTICS.md` first (do not invent here):
@@ -83,12 +156,18 @@ Before copy is called ready:
 - headlines use voice-of-customer language, not invented jargon
 - each CTA is a single value-named verb
 - reading level and tone match the `COPY_BRIEF.md` rules
+- every screen in the build has its strings in `COPY_DECK.md` — no string invented at the keyboard
+- deck copy cells carry no banned internal vocabulary, placeholder shapes, or raw identifiers (`check:app-copy`)
+- read the deck aloud surface by surface: anything that sounds like a system explaining itself gets rewritten as a person helping
+- capitalization follows the one case system recorded in `COPY_BRIEF.md`
 - store fields respect platform character limits and policy
 - public-page copy was routed through [`geo-seo.md`](geo-seo.md) before the edit
 
 ## Gates Before Handoff
 
 - `COPY_BRIEF.md` exists for any launch with a landing page, store listing, paywall, or lifecycle email
+- `COPY_DECK.md` exists and covers every screen before the build starts; `npm run check:app-copy` passes (deck coverage, banned vocabulary, placeholder shapes, identifier shapes; live apps launched before the deck contract get warnings while their backfill is tracked)
+- the build plan names the string-externalization mechanism (Localization Readiness above) and `TECH_SPEC.md` carries it
 - claims ledger has no unsubstantiated quantified/comparative/health/earnings claim
 - the primary promise is reconciled across surfaces via [`change-cascade.md`](change-cascade.md)
 - any copy test is registered as an experiment with a hypothesis and stop rule

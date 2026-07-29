@@ -102,7 +102,7 @@ Every real app build or builder handoff should create or update a business-speci
 - 60-second product brief
 - explicit instruction to keep using `b2c-mobile-business-launch` for broad launch/business work without requiring another founder prompt
 - repo map and first files to read
-- source-of-truth docs: `SPEC.md`, `RESEARCH.md`, `LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `TECH_SPEC.md`, `DESIGN.md`, `design.md`, `ANALYTICS.md`, `ONBOARDING.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `APPLE_SIGNING.md`, `STORE_CONSOLE.md`
+- source-of-truth docs: `SPEC.md`, `RESEARCH.md`, `LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `TECH_SPEC.md`, `DESIGN.md`, `design.md`, `COPY_DECK.md` (every user-facing string; builders type deck rows, never spec vocabulary — `conversion-copy.md`), `ANALYTICS.md`, `ONBOARDING.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `APPLE_SIGNING.md`, `STORE_CONSOLE.md`
 - `PROJECT_STATE.yaml`, `launch-cockpit.html`, active failure cards, and autonomy mode
 - V1 scope, V2/V3 scope, and banned scope
 - design-system and HTML proof rules
@@ -192,6 +192,7 @@ The plan must include:
 - 11-star V1 scalable slice, line of feasibility, and magical-moment proof requirements
 - `PROJECT_STATE.yaml` phase, autonomy mode, active blockers, and failure cards that constrain implementation
 - `TECH_SPEC.md` pointer or inline technical contracts when data/API/state/integration behavior is in scope
+- `COPY_DECK.md` coverage for every screen the units build, and the string-externalization mechanism from `TECH_SPEC.md` §Strings And Localization Readiness
 - implementation units with repo-relative file paths
 - orchestration strategy, candidate units, safe parallel lanes, serialized lanes, worktree needs, shared resources, and subagent forbidden actions from `ORCHESTRATION.md`
 - frontend, backend, database, analytics, revenue, email, and store-console impacts

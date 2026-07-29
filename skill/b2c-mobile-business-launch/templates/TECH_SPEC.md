@@ -34,6 +34,15 @@ The backend-agnostic contract the build must satisfy regardless of provider. See
 - Seed data / fixtures for tests; backup and restore posture.
 - A migration has been applied to a fresh environment as proof before the engineering lane is done.
 
+## Strings And Localization Readiness
+
+Every user-facing string is consumed from `COPY_DECK.md`, never invented at the keyboard, and externalized from the first commit so localization is a content decision later, not a rebuild. Rules live in `references/conversion-copy.md` §Localization Readiness; which locales ship is `LOCALIZATION_MARKET_RESEARCH.md`'s call.
+
+- String externalization mechanism for this stack: String Catalogs (`.xcstrings`) for iOS | i18next + `expo-localization` for React Native/Expo | ARB + `gen-l10n` for Flutter | typed strings module or `next-intl` for the web funnel. Record the choice here.
+- Resource keys are the `COPY_DECK.md` keys, unchanged.
+- Full-sentence templates with named interpolations; plurals through ICU/platform plural rules; no sentence concatenation; dates, numbers, and prices through locale APIs (paywall prices from StoreKit/RevenueCat locale-formatted values).
+- Pseudo-localization pass (length-doubling locale) and a string freeze before store submission, recorded in `PRODUCTION_READINESS.md`.
+
 ## Experience Card Frontstage / Backstage
 
 Required when `EMOTIONAL_DESIGN.md` applies Experience Cards. For each card-carrying screen, name the frontstage (what the user sees) and the backstage (the real operation behind it). This is what makes the Perceived Effort Delay honest and the Variable Reward genuinely variable — the bright-line proof lives here and in `PRODUCTION_READINESS.md`.

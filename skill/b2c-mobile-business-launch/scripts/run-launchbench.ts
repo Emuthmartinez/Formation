@@ -78,6 +78,7 @@ const knownValidators = new Set([
   "check-privacy-terms",
   "check-revenue",
   "check-no-slop",
+  "check-app-copy",
   "check-change-cascade",
   "check-founder-copy",
   "check-template-safety",

@@ -76,6 +76,8 @@ const shippedSurfaces: { relative: string; shortCopy: boolean }[] = [
   { relative: "design-room.html", shortCopy: true },
   { relative: "BRAND.md", shortCopy: false },
   { relative: "DESIGN.md", shortCopy: false },
+  { relative: "COPY_BRIEF.md", shortCopy: false },
+  { relative: "COPY_DECK.md", shortCopy: false },
   { relative: "ONBOARDING.md", shortCopy: false },
   { relative: "REVENUE_OPS.md", shortCopy: false },
   { relative: "EMAIL_OPS.md", shortCopy: false },

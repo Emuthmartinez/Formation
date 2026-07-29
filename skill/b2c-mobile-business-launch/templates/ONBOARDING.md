@@ -10,15 +10,17 @@ Status: partial until the flow is product-specific and visually verified.
 
 ## Screen Sequence
 
-| Step | Purpose | Copy / question | State | Visual / motion | Analytics | Back / skip |
+The Copy column names the `COPY_DECK.md` keys that hold each screen's final words — author the deck rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then build from them. A build that reaches a screen whose deck rows are missing stops and authors them; it never improvises a label from the spec.
+
+| Step | Purpose | Copy (from `COPY_DECK.md`) | State | Visual / motion | Analytics | Back / skip |
 | --- | --- | --- | --- | --- | --- | --- |
-| Promise | Show what the app does | Product-specific value promise | visible | product demo or truthful prototype | `onboarding_started`, `onboarding_step_viewed` | back allowed |
-| Attribution | Capture launch learning | How did you hear about us? | required unless not applicable | simple source list with Other text | `attribution_source_selected` | no skip unless documented |
-| Personalization | Collect useful setup | Product-specific question | optional or required per matrix | accessible form controls | `onboarding_answer_selected` | back allowed |
-| First value / value-reveal | Show the personalized plan, analysis, demo result, aha moment, or first win | Product-specific first value | visible before paywall | stable mounted screen | `personalized_plan_viewed` | continue allowed |
+| Promise | Show what the app does | `onboarding.promise.*` — the outcome in the user's words | visible | product demo or truthful prototype | `onboarding_started`, `onboarding_step_viewed` | back allowed |
+| Attribution | Capture launch learning | `onboarding.attribution.*` — "How did you hear about us?" | required unless not applicable | simple source list with Other text | `attribution_source_selected` | no skip unless documented |
+| Personalization | Collect useful setup | `onboarding.personalize.*` — one question per screen | optional or required per matrix | accessible form controls | `onboarding_answer_selected` | back allowed |
+| First value / value-reveal | Show the personalized plan, analysis, demo result, aha moment, or first win | `onboarding.plan.*` — restate the promise as delivered | visible before paywall | stable mounted screen | `personalized_plan_viewed` | continue allowed |
 | App Review popup | Immediately after the first value/value-reveal screen | Native App Review request | eligible only after value is visible | automatic 1-2 second delay while mounted | `review_prompt_eligible`, `review_prompt_requested` | flow continues if suppressed |
-| Push permission prime | The next earned moment after first value — never the same step as the review popup | soft-prime screen, then the system dialog (`push-notification-lifecycle.md`) | only after value is visible; hard denial falls back to email lifecycle | user-initiated from the prime screen | `push_permission_primed`, `push_permission_granted`, `push_permission_denied` | flow continues either way |
-| Paywall or activation | Convert or complete first action | Product-specific offer or task | after first value and review request | RevenueCat or activation UI | `paywall_viewed`, `activation_task_completed` | restore/support visible |
+| Push permission prime | The next earned moment after first value — never the same step as the review popup | `onboarding.push.prime.*` — benefit first, then the system dialog (`push-notification-lifecycle.md`) | only after value is visible; hard denial falls back to email lifecycle | user-initiated from the prime screen | `push_permission_primed`, `push_permission_granted`, `push_permission_denied` | flow continues either way |
+| Paywall or activation | Convert or complete first action | `paywall.*` — restate the felt value, plan choice obvious | after first value and review request | RevenueCat or activation UI | `paywall_viewed`, `activation_task_completed` | restore/support visible |
 
 ## Data Collection Matrix
 
@@ -49,6 +51,7 @@ The onboarding emotional curve must cross positive (+2) at or before the paywall
 
 ## Build Handoff Gates
 
+- `COPY_DECK.md` carries authored rows for every screen above — final words, not descriptions — and `npm run check:app-copy` passes.
 - `onboarding.html` shows the value-reveal screen followed by the App Review popup placeholder.
 - `ANALYTICS.md` includes all onboarding, attribution, review prompt, paywall, and activation events.
 - `EMOTIONAL_DESIGN.md` Card Application Map covers the onboarding card moments above with a measurement event each (when the emotional_design lane is in scope).

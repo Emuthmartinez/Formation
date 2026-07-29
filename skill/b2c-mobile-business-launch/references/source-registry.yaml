@@ -2258,3 +2258,48 @@ sources:
     locations:
       - skill/b2c-mobile-business-launch/references/cro-landing.md
     notes: Core Web Vitals (LCP/INP/CLS) current thresholds; a slow landing page caps conversion regardless of copy. Refresh before quoting specific vitals targets in CRO guidance.
+  - id: developer-apple-com-hig-writing
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/design/human-interface-guidelines/writing
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/conversion-copy.md
+    notes: Apple HIG writing guidance for in-app voice, dialogs, and errors; Apple's capitalization stance is pick-one-and-hold-it, which is why check:app-copy warns on mixed case instead of mandating one style. JS-rendered page — verify via a browser-capable fetch when quoting exact phrasing.
+  - id: m3-material-io-content-design-style-guide
+    name: m3.material.io
+    source_type: official_docs
+    url: https://m3.material.io/foundations/content-design/style-guide
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/conversion-copy.md
+    notes: Material 3 writing style guide; mandates sentence case on Android, the other half of the case-consistency contract. JS-rendered page — verify via a browser-capable fetch when quoting exact phrasing.
+  - id: developer-apple-com-xcode-string-catalog
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/xcode/localizing-and-varying-text-with-a-string-catalog
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/conversion-copy.md
+    notes: Xcode String Catalogs (.xcstrings), the current iOS string-externalization mechanism the localization-readiness contract names. Refresh before changing iOS externalization guidance.
+  - id: docs-expo-dev-guides-localization
+    name: docs.expo.dev
+    source_type: official_docs
+    url: https://docs.expo.dev/guides/localization/
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/conversion-copy.md
+    notes: Expo localization guide (expo-localization + i18next), the React Native externalization route the localization-readiness contract names. Refresh before changing RN externalization guidance.
+  - id: docs-flutter-dev-ui-internationalization
+    name: docs.flutter.dev
+    source_type: official_docs
+    url: https://docs.flutter.dev/ui/internationalization
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/conversion-copy.md
+    notes: Flutter internationalization (ARB + gen-l10n), the Flutter externalization route the localization-readiness contract names. Refresh before changing Flutter externalization guidance.
