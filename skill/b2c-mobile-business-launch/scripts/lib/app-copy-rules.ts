@@ -145,10 +145,32 @@ export function keyPrefixReferences(text: string): string[] {
   for (const match of text.matchAll(/`([a-z0-9]+(?:[._-][a-z0-9]+)*)(\.\*)?`/g)) {
     const token = match[1] ?? "";
     if (!token.includes(".")) continue;
-    if (/\.(md|html|ts|tsx|yaml|json)$/.test(token)) continue;
+    if (FILE_REFERENCE.test(token)) continue;
     prefixes.add(token);
   }
   return [...prefixes];
+}
+
+/** Backticked tokens that are files, not deck keys. */
+const FILE_REFERENCE = /\.(md|html|ts|tsx|js|jsx|mjs|yaml|yml|json|swift|kt)$/i;
+
+/**
+ * Backticked spans that look like deck-key references but break the lowercase
+ * key shape (`onboarding.Promise.*`). The lowercase matcher above would return
+ * nothing for them, so coverage would silently skip the reference — a mistyped
+ * pointer at a nonexistent key must be reported, not ignored.
+ */
+export function malformedKeyReferences(text: string): string[] {
+  const bad = new Set<string>();
+  for (const match of text.matchAll(/`([A-Za-z0-9._-]+?)(\.\*)?`/g)) {
+    const token = match[1] ?? "";
+    if (!token.includes(".")) continue;
+    if (FILE_REFERENCE.test(token)) continue;
+    const full = token + (match[2] ?? "");
+    const wellFormed = new RegExp(/^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\.\*)?$/).test(full);
+    if (!wellFormed) bad.add(full);
+  }
+  return [...bad];
 }
 
 /**
@@ -170,15 +192,25 @@ export function deckAllowedTerms(deckText: string): string[] {
   return terms;
 }
 
+export interface CopyColumn {
+  cells: { text: string; line: number }[];
+  /** Body rows whose cell count differs from the header's — a lost or shifted cell can hide copy from the scan, so they are reported, never skipped. */
+  malformed: { line: number; cells: number; expected: number }[];
+}
+
 /**
  * Extracts the Copy-column cells from any markdown table whose third column
  * header starts with "Copy" — the ONBOARDING.md screen-sequence shape. Returns
- * the cell text with its 1-indexed line so a placeholder can be pointed at.
+ * each cell with its 1-indexed line, plus every body row whose cell count
+ * breaks the header's column count (an unescaped pipe or missing cell moves
+ * text out of the scanned column).
  */
-export function copyColumnCells(markdownText: string): { text: string; line: number }[] {
+export function copyColumnCells(markdownText: string): CopyColumn {
   const cells: { text: string; line: number }[] = [];
+  const malformed: { line: number; cells: number; expected: number }[] = [];
   const lines = markdownText.split(/\r?\n/);
   let inCopyTable = false;
+  let expectedCells = 0;
   lines.forEach((rawLine, index) => {
     const line = rawLine.trim();
     if (!line.startsWith("|")) {
@@ -186,17 +218,22 @@ export function copyColumnCells(markdownText: string): { text: string; line: num
       return;
     }
     const rowCells = splitRow(line);
-    const third = rowCells[2];
-    if (rowCells.length < 3 || third === undefined) return;
-    if (/^copy\b/i.test(third)) {
-      inCopyTable = true;
+    if (!inCopyTable) {
+      const third = rowCells[2];
+      if (rowCells.length >= 3 && third !== undefined && /^copy\b/i.test(third)) {
+        inCopyTable = true;
+        expectedCells = rowCells.length;
+      }
       return;
     }
-    if (!inCopyTable) return;
     if (rowCells.every((cell) => /^:?-+:?$/.test(cell))) return;
-    cells.push({ text: third, line: index + 1 });
+    if (rowCells.length !== expectedCells) {
+      malformed.push({ line: index + 1, cells: rowCells.length, expected: expectedCells });
+      return;
+    }
+    cells.push({ text: rowCells[2] ?? "", line: index + 1 });
   });
-  return cells;
+  return { cells, malformed };
 }
 
 /**

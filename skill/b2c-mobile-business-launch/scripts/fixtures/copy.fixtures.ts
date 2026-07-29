@@ -231,4 +231,40 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: fictional starter brand in business source fails", brandShipped, "check-app-copy.ts", 1, "app_copy.fictional_brand_shipped");
+
+  // A screen-table row that lost a cell (unescaped pipe, missing column) moves
+  // text out of the scanned Copy column — reported, never silently skipped.
+  const onboardingMalformedRow = makeFixture("app-copy-onboarding-malformed-row");
+  writeFileSync(path.join(onboardingMalformedRow, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(onboardingMalformedRow, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Product-specific value promise | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: malformed ONBOARDING screen row is reported", onboardingMalformedRow, "check-app-copy.ts", 1, "app_copy.onboarding_row_malformed");
+
+  // A mistyped backticked key reference would match nothing in coverage and
+  // point builders at a nonexistent key — reported as malformed.
+  const onboardingBadRef = makeFixture("app-copy-onboarding-bad-key-ref");
+  writeFileSync(path.join(onboardingBadRef, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(onboardingBadRef, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.Promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: mistyped deck-key reference is reported", onboardingBadRef, "check-app-copy.ts", 1, "app_copy.onboarding_key_reference_malformed");
 }

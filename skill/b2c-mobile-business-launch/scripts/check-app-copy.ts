@@ -43,7 +43,16 @@ import {
   type Issue,
   type Severity,
 } from "./lib/launch-state.js";
-import { copyColumnCells, DECK_KEY_SHAPE, deckAllowedTerms, identifierShapes, keyPrefixReferences, loadAppCopyRules, parseDeck } from "./lib/app-copy-rules.js";
+import {
+  copyColumnCells,
+  DECK_KEY_SHAPE,
+  deckAllowedTerms,
+  identifierShapes,
+  keyPrefixReferences,
+  loadAppCopyRules,
+  malformedKeyReferences,
+  parseDeck,
+} from "./lib/app-copy-rules.js";
 import { matchesTerm } from "./lib/no-slop-rules.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -255,7 +264,32 @@ if (deckText && !deckIsTemplate) {
 const onboarding = readText(root, "ONBOARDING.md") ?? readText(root, "onboarding/ONBOARDING.md");
 if (onboarding) {
   const onboardingAllowed = new Set((deckText ? deckAllowedTerms(deckText) : []).map((term) => term.toLowerCase()));
-  for (const cell of copyColumnCells(onboarding)) {
+  const copyColumn = copyColumnCells(onboarding);
+  // A row that lost or gained a cell moves text out of the scanned column —
+  // reported as malformed so a broken row cannot hide copy from the scan.
+  for (const bad of copyColumn.malformed) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.onboarding_row_malformed",
+        `ONBOARDING.md line ${bad.line} is a screen-table row with ${bad.cells} cells where the header has ${bad.expected} — a shifted or missing cell hides copy from this scan. Fix the row (escape literal pipes as \\|).`,
+        `ONBOARDING.md:${bad.line}`,
+      ),
+    );
+  }
+  // A mistyped backticked key reference would silently match nothing in the
+  // coverage loop — a pointer at a nonexistent key is reported, not skipped.
+  for (const badRef of malformedKeyReferences(copyColumn.cells.map((cell) => cell.text).join("\n"))) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.onboarding_key_reference_malformed",
+        `ONBOARDING.md's Copy column references \`${badRef}\`, which is not a localization key shape (lowercase dot-namespaced, optional trailing .*). Fix the reference so coverage can reconcile it against COPY_DECK.md.`,
+        "ONBOARDING.md",
+      ),
+    );
+  }
+  for (const cell of copyColumn.cells) {
     const where = `ONBOARDING.md:${cell.line}`;
     // Backticked spans are deck keys and file references, not prose the user reads.
     const prose = cell.text.replace(/`[^`\n]*`/g, " ");
@@ -302,11 +336,7 @@ if (onboarding) {
   // authored deck that resolves none of them is a one-row deck wearing an
   // authored status — the incomplete-deck bypass, reconciled here.
   if (deckText && !deckIsTemplate) {
-    for (const prefix of keyPrefixReferences(
-      copyColumnCells(onboarding)
-        .map((cell) => cell.text)
-        .join("\n"),
-    )) {
+    for (const prefix of keyPrefixReferences(copyColumn.cells.map((cell) => cell.text).join("\n"))) {
       const covered = [...authoredDeckKeys].some((key) => key === prefix || key.startsWith(`${prefix}.`));
       if (!covered) {
         issues.push(
