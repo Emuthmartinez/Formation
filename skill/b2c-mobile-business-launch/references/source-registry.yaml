@@ -1817,6 +1817,20 @@ sources:
       details from best-in-class consumer apps. Inspiration benchmark for the
       in-app motion lane — the mobile counterpart to motionsites-ai for landing.
       Engagement figures cited from it are point-in-time and unverified.
+  - id: sixty-fps-design-mcp
+    name: 60fps.design MCP server
+    source_type: api
+    url: https://60fps.design/mcp
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/references/motion-craft-benchmarks.md
+      - skill/b2c-mobile-business-launch/references/design-visual-system.md
+    notes: Live MCP endpoint over the 60fps.design catalog (shot search, motion
+      breakdowns, SwiftUI starter code). Optional tooling — the distilled
+      recipes in motion-craft-benchmarks.md remain the contract when the
+      server is not connected. Generated code must be rewritten onto the
+      token scale before shipping.
   - id: motion-dev-docs-react
     name: motion.dev
     source_type: docs
