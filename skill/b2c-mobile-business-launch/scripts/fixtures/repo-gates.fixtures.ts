@@ -464,6 +464,8 @@ export function register(h: Harness): void {
     "references/experience-cards/variable-reward-card.md",
     "templates/DESIGN.md",
     "templates/emotional-design/EMOTIONAL_DESIGN.md",
+    "templates/motion-catalog/TokenSpring.swift",
+    "templates/motion-catalog/motion-tokens.ts",
   ];
   const writeMotionContractRoot = (name: string, mutate?: (rel: string, text: string) => string): string => {
     const root = makeEmptyFixture(name);
@@ -680,6 +682,44 @@ export function register(h: Harness): void {
     "check-motion-contract.ts",
     ["--skill-root", motionVocabIntrinsics],
     0,
+  );
+
+  const motionPackBounceDrift = writeMotionContractRoot("motion-contract-pack-bounce-drift", (rel, text) =>
+    rel.endsWith("TokenSpring.swift")
+      ? text.replace(
+          "TokenSpring(duration: DesignTokens.Motion.durationCelebrate, bounce: 0.45)",
+          "TokenSpring(duration: DesignTokens.Motion.durationCelebrate, bounce: 0.5)",
+        )
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when TokenSpring.swift's copied bounce drifts from PremiumCraft",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPackBounceDrift],
+    1,
+    "motion_contract.token_spring.bounce_drift",
+  );
+
+  const motionPackTsValueDrift = writeMotionContractRoot("motion-contract-pack-ts-value-drift", (rel, text) =>
+    rel.endsWith("motion-tokens.ts") ? text.replace("durationCelebrate: 500,", "durationCelebrate: 450,") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when motion-tokens.ts's ms table drifts from tokens.json",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPackTsValueDrift],
+    1,
+    "motion_contract.motion_tokens.token_value_drift",
+  );
+
+  const motionPackPresetMissing = writeMotionContractRoot("motion-contract-pack-preset-missing", (rel, text) =>
+    rel.endsWith("motion-tokens.ts") ? text.replace("  celebrateLanding: springFromPreset(Motion.durationCelebrate, 0.45),\n", "") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when motion-tokens.ts drops a PremiumCraft preset",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPackPresetMissing],
+    1,
+    "motion_contract.motion_tokens.preset_missing",
   );
 
   const motionCardMomentDrift = writeMotionContractRoot("motion-contract-card-moment-drift", (rel, text) =>

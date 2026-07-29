@@ -45,7 +45,7 @@ A composition feels alive when its regions run on independent clocks inside one 
 
 **Serves:** `experience-cards/peak-end-card.md` (engineered peak), `experience-cards/variable-reward-card.md` (reveal), system-reveal moments. **Rides:** celebrate-family spring for contraction and reconvergence; each phase bounded by `motion.durationReveal`; hold 1–1.5s.
 
-The hero contracts slightly (3–5% scale), spawns 15–20 miniature variant clones (varied hue or silhouette) scattering outward, holds, then reconverges to one settled shape.
+The hero contracts slightly (3–5% scale), spawns 15–20 miniature variant clones (varied hue or silhouette) scattering outward, holds, then reconverges to one settled shape. The clones' hue variation is R8's documented composition-level exemption — see R8's scope notes for its boundary.
 
 - [ ] Two phases, then rest: contract → burst → hold 1–1.5s → reconverge. Never an endless particle loop.
 - [ ] 15–20 clones with visible variation; per-clone stagger ≤15ms so the burst reads as one event, not a sequence (the 60ms `motion.stagger` step is for content cascades, not particle bursts).
@@ -115,6 +115,11 @@ A decelerating tween reads as "panel animating in"; an oscillating overshoot rea
 
 **Scope.** The rule governs where attention goes, not whether chrome may carry the brand hue. Conventional interactive chrome — the primary CTA fill, progress indicators, selected-state tints — may ride the single brand hue; what the rule bans is a second saturated hue competing for attention, and chrome that outshouts or moves against the hero. The first live output test (2026-07-28) read the old wording literally and graded every brand-colored CTA a violation — that reading is wrong; judge the content composition, not the existence of a colored button.
 
+Two more scope boundaries, both caught when the 2026-07-28 adversarial review graded the first runnable reproductions of this file's own recipes:
+
+- **R2's clone burst is the one composition-level exemption.** A celebration bloom's 15–20 clones scatter "varied hue or silhouette" by R2's own spec — during the burst's bounded phases (contract → burst → hold → reconverge) the multi-hue scatter *is* the hero. The single-hue discipline resumes the moment the clones reconverge; an ambient surface that keeps multiple saturated hues after the celebration ends is a violation, not an exemption.
+- **User content is not chrome.** A collage, cloud, or grid of the user's own saved items — photo thumbnails, album art, imported cards — carries whatever colors the content has. The rule governs *designed* composition elements: hero objects, chrome, brand surfaces. Grade the frame around the content, never the content itself.
+
 - [ ] Exactly one hero/content object per composition carries saturated color; remaining chrome stays neutral or rides the same brand hue quieter than the hero — never a second saturated hue.
 - [ ] Chroma and type-weight concentrate on the same element — attention has a single address.
 - [ ] In celebration moments the saturated hero is the earned thing itself, not the chrome around it.
@@ -182,9 +187,23 @@ From the full 300-post mine (123 showcase posts):
 - **Gesture physics is the most-bookmarked family per post** — designers save mechanics for reuse, which is why the physics rules above are stated as numbers.
 - **Brand-motion posts are the catalog's top outliers** (SarvamAI eng 4,375; Nuvion 1,568): living brand systems outdraw UI tricks. R1 is the entry point; a full brand-motion lane is deliberately out of scope here.
 
+## Live Catalog Access (60fps.design MCP)
+
+The catalog behind this file is queryable live when the 60fps.design MCP server is connected (`https://60fps.design/mcp` — tools named `60fps_*`). Use it to ground a specific surface in a real exemplar before applying a recipe:
+
+- `60fps_search_shots` — semantic search over the shot library (~2,000 iOS interaction clips) by natural-language description, filter slugs, app, or platform.
+- `60fps_get_shot` — full detail for one shot: keyframe images at 1s intervals, interaction pattern, motion behaviors, intensity, mood.
+- `60fps_get_motion_breakdown` — the shot's motion anatomy: trigger, start → transition → end states, why it works. The right tool when recreating, not just finding.
+- `60fps_get_motion_code` — starter SwiftUI tuned by the shot's motion parameters. Treat the output as a sketch to rewrite onto the token scale: replace its raw timing values with `DesignTokens.Motion` members and `PremiumMotion` presets before it ships.
+- `60fps_get_related_shots` — nearest-neighbour variations of an interaction.
+
+Ground rules carry over unchanged: mechanics only, never a featured app's branded asset, mascot, or copy; every recipe still binds to the token scale exactly as this file states. The MCP is a live convenience over the registered catalog source (`x-com-60fpsdesign-catalog`); when it is not connected, this file's recipes remain the distilled contract and searching the catalog is not required. Two shots newer than the library's index were reproduced by frame-reading the source videos directly — the same fallback applies to any shot the MCP cannot return.
+
+Runnable reproductions of these recipes ship in [`templates/motion-catalog/`](../templates/motion-catalog/README.md): two full-screen choreography exemplars (declarative and procedural modes), the closed-form `TokenSpring` evaluator, and the Remotion twin for token-true video renders.
+
 ## Provenance & Refresh
 
-- Source: the 60fps.design catalog, mined 2026-07-26 (300 posts, 123 showcase). Registered as `x-com-60fpsdesign-catalog` (`inspiration_benchmark`) in `source-registry.yaml` with a 30-day refresh cadence.
+- Source: the 60fps.design catalog, mined 2026-07-26 (300 posts, 123 showcase). Registered as `x-com-60fpsdesign-catalog` (`inspiration_benchmark`) in `source-registry.yaml` with a 30-day refresh cadence. The live MCP endpoint (`https://60fps.design/mcp`) is registered separately as `sixty-fps-design-mcp`.
 - Recipe timings and damping values come from frame-reads of the catalog's top videos, estimated from sampled frames (±1 frame-interval). Where a frame-read gave only a qualitative cue, this file states an operational threshold so reviews have a number to check — R1's ~200ms adjacency window, R2's 3–5% contraction and ≤15ms clone stagger are that kind of operationalization, not catalog measurements.
 - The Gesture & Scroll Physics numbers (rubber-band ≈0.55, 60–80pt refresh threshold, ~1,000pt/s dismiss velocity, 1/3 displacement) are platform-behavior defaults from iOS convention, stated here as the baseline to match; the catalog motivates the section but did not produce those constants.
 - Engagement numbers rank patterns within this catalog only; never repeat them as external claims.
