@@ -20,6 +20,7 @@ Assume the founder is new to business operations. The agent runs the workflow an
 - State and cockpit: `PROJECT_STATE.yaml`, `launch-cockpit.html`
 - Design Room: `state/business.json`, `state/theme.tokens.json`, `design-room.html`
 - Product and trace: `SPEC.md`, `LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `EMOTIONAL_DESIGN.md`, `BRAND.md`
+- Words users read: `COPY_BRIEF.md` (promise and voice), `COPY_DECK.md` (every user-facing string — builders type deck rows, never spec vocabulary; `check:app-copy` gates it)
 - Build and operations: `TECH_SPEC.md`, `DESIGN.md`, `ANALYTICS.md`, `SECRETS.md`, `SECURITY.md`, `BUSINESS_ACCESS.md`, `operations/business-access.json`, `AGENT_OPERATIONS.md`, `operations/agent-operations.json`
 - Orchestration and readiness: `ORCHESTRATION.md`, `PRODUCTION_READINESS.md`, `APP_AGENTS.md`
 

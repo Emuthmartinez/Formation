@@ -22,7 +22,9 @@ export default function LoginPage() {
       options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/confirm` },
     });
     if (signInError) {
-      setError(signInError.message);
+      // The provider's message is for the console; the user reads authored copy.
+      console.error(signInError.message);
+      setError(strings.auth.error);
       return;
     }
     setSent(true);

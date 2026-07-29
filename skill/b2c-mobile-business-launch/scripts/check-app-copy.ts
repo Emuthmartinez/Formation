@@ -191,6 +191,15 @@ if (deckText && !deckIsTemplate) {
   const allowed = deckAllowedTerms(deckText);
   const allowedSet = new Set(allowed.map((term) => term.toLowerCase()));
   const ctaCases = new Set<string>();
+  // Allowed terms clear placeholder shapes too — "Todoist" declared as a
+  // product-owned word must not keep tripping the "todo" shape.
+  const scrubAllowed = (text: string): string => {
+    let out = text;
+    for (const term of allowed) {
+      out = out.replace(new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), " ");
+    }
+    return out;
+  };
   for (const row of rows) {
     const where = `COPY_DECK.md:${row.line}`;
     // Deck keys ship unchanged into the string resources, where a duplicate
@@ -227,8 +236,10 @@ if (deckText && !deckIsTemplate) {
       );
       continue;
     }
+    // Whole-word matching, not substring: "Todoist" must not trip "todo".
+    const scrubbedCopy = scrubAllowed(row.copy);
     for (const shape of rules.placeholderShapes) {
-      if (row.copy.toLowerCase().includes(shape.toLowerCase())) {
+      if (matchesTerm(scrubbedCopy, shape)) {
         issues.push(
           issue(
             sev("error"),
@@ -320,7 +331,12 @@ if (deckText && !deckIsTemplate) {
     for (const surface of requiredSurfaces) {
       const matchingHeadings = [...sectionBodies.keys()].filter((name) => surface.heading.test(name));
       const hasRows = matchingHeadings.some((name) => sectionsWithRows.has(name));
-      const notApplicable = matchingHeadings.some((name) => /not applicable\s*[—–:-]\s*\S.{11,}/i.test(sectionBodies.get(name) ?? ""));
+      // The exemption is earned by a real reason: placeholder filler in the
+      // reason ("Not applicable — todo") does not waive the surface.
+      const notApplicable = matchingHeadings.some((name) => {
+        const reason = (sectionBodies.get(name) ?? "").match(/not applicable\s*[—–:-]\s*(\S.{11,})/i)?.[1] ?? "";
+        return reason.length > 0 && !rules.placeholderShapes.some((shape) => matchesTerm(reason, shape));
+      });
       if (!hasRows && !notApplicable) {
         issues.push(
           issue(
@@ -340,8 +356,28 @@ if (deckText && !deckIsTemplate) {
 // banned vocabulary, and raw identifiers are the leak this gate exists for.
 const onboarding = readText(root, "ONBOARDING.md") ?? readText(root, "onboarding/ONBOARDING.md");
 if (onboarding) {
-  const onboardingAllowed = new Set((deckText ? deckAllowedTerms(deckText) : []).map((term) => term.toLowerCase()));
+  const onboardingAllowedTerms = deckText ? deckAllowedTerms(deckText) : [];
+  const onboardingAllowed = new Set(onboardingAllowedTerms.map((term) => term.toLowerCase()));
+  const scrubOnboarding = (text: string): string => {
+    let out = text;
+    for (const term of onboardingAllowedTerms) {
+      out = out.replace(new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), " ");
+    }
+    return out;
+  };
   const copyColumn = copyColumnCells(onboarding);
+  // A done onboarding lane with no recognized Copy table has nothing for any
+  // of these scans to hold — the table is the contract, so its absence fails.
+  if (laneStatus("onboarding") === "done" && copyColumn.cells.length === 0) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.onboarding_copy_table_missing",
+        "ONBOARDING.md has no screen table with a Copy column while the onboarding lane claims done. The screen sequence names its COPY_DECK.md keys in that column (references/conversion-copy.md) — without it, no string is reconciled.",
+        "ONBOARDING.md",
+      ),
+    );
+  }
   // A row that lost or gained a cell moves text out of the scanned column —
   // reported as malformed so a broken row cannot hide copy from the scan.
   for (const bad of copyColumn.malformed) {
@@ -368,12 +404,25 @@ if (onboarding) {
   }
   for (const cell of copyColumn.cells) {
     const where = `ONBOARDING.md:${cell.line}`;
+    // An empty Copy cell is a screen with no words and nothing to reconcile.
+    if (!cell.text.trim()) {
+      issues.push(
+        issue(
+          sev("error"),
+          "app_copy.onboarding_copy_cell_empty",
+          "ONBOARDING.md has a screen row with an empty Copy cell — name the COPY_DECK.md keys that hold the screen's words, or the final words themselves.",
+          where,
+        ),
+      );
+      continue;
+    }
     // Backticked spans are deck keys and file references, not prose the user
     // reads — a legitimate key like `onboarding.email.placeholder` must not
     // trip the placeholder scan, so every prose rule reads the stripped text.
-    const prose = cell.text.replace(/`[^`\n]*`/g, " ");
+    // Whole-word matching plus the deck allowlist keep "Todoist" clear of "todo".
+    const prose = scrubOnboarding(cell.text.replace(/`[^`\n]*`/g, " "));
     for (const shape of rules.placeholderShapes) {
-      if (prose.toLowerCase().includes(shape.toLowerCase())) {
+      if (matchesTerm(prose, shape)) {
         issues.push(
           issue(
             sev("error"),
@@ -470,7 +519,10 @@ if (laneStatus("engineering") === "done") {
   const techSpec = readText(root, "TECH_SPEC.md");
   const hasSection = Boolean(techSpec) && /##\s+Strings And Localization Readiness/i.test(techSpec ?? "");
   const namesMechanism =
-    Boolean(techSpec) && /(xcstrings|string catalog|i18next|expo-localization|\barb\b|gen-l10n|next-intl|strings module)/i.test(techSpec ?? "");
+    Boolean(techSpec) &&
+    /(xcstrings|string catalog|i18next|expo-localization|\barb\b|gen-l10n|next-intl|strings module|strings\.xml|string resources|localizable\.strings)/i.test(
+      techSpec ?? "",
+    );
   // The shipped template lists every mechanism as an option menu ending in
   // "Record the choice here." — that sentinel surviving means nobody chose.
   // A missing TECH_SPEC.md is the same failure: no committed mechanism.

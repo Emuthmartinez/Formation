@@ -19,6 +19,7 @@ export const strings = {
     email_label: "Email",
     submit: "Send sign-in link",
     sent: "Check your email for the sign-in link.",
+    error: "That didn't send. Check the address and try again.",
   },
   feed: {
     title: "Feed",

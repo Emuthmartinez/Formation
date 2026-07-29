@@ -473,4 +473,103 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: pipe-delimited state in a deck cell fails", deckPipeState, "check-app-copy.ts", 1, "app_copy.deck_raw_identifier");
+
+  // "Todoist" must not trip the "todo" placeholder shape: whole-word matching
+  // plus the deck allowlist keep real product names clean.
+  const todoistClean = makeFixture("app-copy-todoist-not-todo");
+  writeFileSync(path.join(todoistClean, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(todoistClean, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.import.body | Import screen | Bring your tasks over from Todoist in one tap. | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(todoistClean, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Import | Bring data | `onboarding.import.body` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: product name containing a placeholder token stays clean", todoistClean, "check-app-copy.ts", 0);
+
+  // A placeholder-filled not-applicable reason does not waive a surface.
+  const naPlaceholder = makeFixture("app-copy-na-placeholder-reason");
+  writeFileSync(path.join(naPlaceholder, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(naPlaceholder, "COPY_DECK.md"),
+    [
+      ...DECK_HEADER,
+      "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |",
+      "",
+      "## Paywall",
+      "",
+      "Not applicable — todo todo todo todo",
+      ...NA_SURFACES.slice(4),
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(naPlaceholder, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(naPlaceholder, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: placeholder not-applicable reason does not waive a surface", naPlaceholder, "check-app-copy.ts", 1, "app_copy.deck_surface_missing");
+
+  // A done onboarding lane needs the Copy table itself.
+  const noCopyTable = makeFixture("app-copy-onboarding-no-copy-table");
+  writeFileSync(path.join(noCopyTable, "PROJECT_STATE.yaml"), stateWith("phase_2", { onboarding: "done" }), "utf8");
+  writeFileSync(path.join(noCopyTable, "ONBOARDING.md"), "# Onboarding\n\nFirst value then review popup, no table here.\n", "utf8");
+  runFixture("App copy: onboarding done without a Copy table fails", noCopyTable, "check-app-copy.ts", 1, "app_copy.onboarding_copy_table_missing");
+
+  // An empty Copy cell is a screen with no words.
+  const emptyCopyCell = makeFixture("app-copy-onboarding-empty-cell");
+  writeFileSync(path.join(emptyCopyCell, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(emptyCopyCell, "ONBOARDING.md"),
+    ["# Onboarding", "", "| Step | Purpose | Copy / question | State |", "| --- | --- | --- | --- |", "| Promise | Show value | | visible |", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: empty ONBOARDING Copy cell fails", emptyCopyCell, "check-app-copy.ts", 1, "app_copy.onboarding_copy_cell_empty");
+
+  // Native Android string resources are an accepted externalization mechanism.
+  const androidMechanism = makeFixture("app-copy-android-mechanism");
+  writeFileSync(path.join(androidMechanism, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(androidMechanism, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |", ...NA_SURFACES, ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(androidMechanism, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(androidMechanism, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(androidMechanism, "TECH_SPEC.md"),
+    "# Technical Spec\n\n## Strings And Localization Readiness\n\nMechanism: res/values/strings.xml with per-locale values folders.\n",
+    "utf8",
+  );
+  runFixture("App copy: Android strings.xml is an accepted mechanism", androidMechanism, "check-app-copy.ts", 0);
 }
