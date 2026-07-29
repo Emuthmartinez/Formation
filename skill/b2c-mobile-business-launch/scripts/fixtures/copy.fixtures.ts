@@ -1,4 +1,4 @@
-import { rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness } from "./_harness.js";
 
@@ -21,7 +21,9 @@ const DECK_HEADER = [
 
 function stateWith(phase: string, lanes: Record<string, string>): string {
   const laneLines = Object.entries(lanes).flatMap(([lane, status]) => [`  ${lane}:`, `    status: "${status}"`, "    evidence:", '      - "COPY_DECK.md"']);
-  return ["product:", `  phase: "${phase}"`, "lanes:", ...laneLines, ""].join("\n");
+  // project.phase is the canonical path — the same one the gate reads. A fixture
+  // inventing its own path would mask a path regression (it did once).
+  return ["project:", `  phase: "${phase}"`, "lanes:", ...laneLines, ""].join("\n");
 }
 
 export function register(h: Harness): void {
@@ -211,4 +213,22 @@ export function register(h: Harness): void {
   const externalizationUnchosen = makeFixture("app-copy-externalization-unchosen");
   writeFileSync(path.join(externalizationUnchosen, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
   runFixture("App copy: untouched externalization option menu fails", externalizationUnchosen, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // No TECH_SPEC at all is the same failure as a spec without the contract.
+  const externalizationNoSpec = makeFixture("app-copy-externalization-no-spec");
+  writeFileSync(path.join(externalizationNoSpec, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  rmSync(path.join(externalizationNoSpec, "TECH_SPEC.md"));
+  runFixture("App copy: engineering done with no TECH_SPEC at all fails", externalizationNoSpec, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // A business repo that copied a starter and never ran the copy pass still
+  // shows the fictional example brand in user-visible source — the tripwire.
+  const brandShipped = makeFixture("app-copy-fictional-brand-shipped");
+  writeFileSync(path.join(brandShipped, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  mkdirSync(path.join(brandShipped, "lib"), { recursive: true });
+  writeFileSync(
+    path.join(brandShipped, "lib", "strings.ts"),
+    'export const strings = { landing: { headline: "Fernpath turns one small daily check-in into a streak" } } as const;\n',
+    "utf8",
+  );
+  runFixture("App copy: fictional starter brand in business source fails", brandShipped, "check-app-copy.ts", 1, "app_copy.fictional_brand_shipped");
 }

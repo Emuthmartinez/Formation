@@ -20,7 +20,7 @@
  * copy, and AST-scanning every stack is a different tool. The deck is the source
  * of truth the build types from; LaunchBench covers the behavioral side.
  *
- * Grandfathering (live apps): when product.phase is a post-launch phase
+ * Grandfathering (live apps): when project.phase is a post-launch phase
  * (phase_6*), business-repo findings downgrade to warnings — a shipped app gets
  * a tracked backfill, not a broken build. New launches get errors.
  *
@@ -83,7 +83,8 @@ const rules = loadAppCopyRules(referencePath);
 const loaded = loadProjectState({ root, statePath });
 const state = loaded.state;
 // State problems are already every state-gate's job; this gate only needs lanes.
-const phase = state ? (asString(getPath(state, "product.phase")) ?? "") : "";
+// project.phase is the canonical location (see check-lane-coverage, founder-copy).
+const phase = state ? (asString(getPath(state, "project.phase")) ?? "") : "";
 const live = /^phase_6/.test(phase);
 /** Live apps launched before this contract get warnings while their backfill is tracked. */
 const sev = (base: Severity): Severity => (live ? "warning" : base);
@@ -321,29 +322,57 @@ if (onboarding) {
   }
 }
 
+// The starters ship example copy under fictional brands so that shipping it
+// verbatim is detectable. In a business repo, those names surviving anywhere a
+// user can see them means the copy pass never ran on the copied starter.
+const fictionalBrands = ["fernpath", "wrenfeed", "loomroom", "glimmerjar"];
+if (root !== path.join(skillRoot, "templates")) {
+  for (const dir of ["app", "lib", "components", "src"]) {
+    const sourceDir = path.join(root, dir);
+    if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) continue;
+    for (const file of walkCodeFiles(sourceDir)) {
+      const relative = path.relative(root, file);
+      for (const visible of visibleStrings(readFileSync(file, "utf8"))) {
+        for (const brand of fictionalBrands) {
+          if (visible.toLowerCase().includes(brand)) {
+            issues.push(
+              issue(
+                sev("error"),
+                "app_copy.fictional_brand_shipped",
+                `${relative} still shows the starter's fictional example brand "${brand}" in user-visible text ("${visible.slice(0, 60)}"). The copy pass replaces starter example copy from COPY_DECK.md before anything ships.`,
+                relative,
+              ),
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
 // TECH_SPEC.md: localization readiness is a day-one engineering property. When
 // the engineering lane claims done, the spec names the externalization mechanism.
 if (laneStatus("engineering") === "done") {
   const techSpec = readText(root, "TECH_SPEC.md");
-  if (techSpec) {
-    const hasSection = /##\s+Strings And Localization Readiness/i.test(techSpec);
-    const namesMechanism = /(xcstrings|string catalog|i18next|expo-localization|\barb\b|gen-l10n|next-intl|strings module)/i.test(techSpec);
-    // The shipped template lists every mechanism as an option menu ending in
-    // "Record the choice here." — that sentinel surviving means nobody chose.
-    const choiceStillOpen = /record the choice here/i.test(techSpec);
-    if (!hasSection || !namesMechanism || choiceStillOpen) {
-      issues.push(
-        issue(
-          sev("error"),
-          "app_copy.externalization_missing",
-          "TECH_SPEC.md does not commit to a string-externalization mechanism: the Strings And Localization Readiness section must exist and name " +
-            "ONE concrete choice for this stack (String Catalogs, i18next + expo-localization, ARB + gen-l10n, or next-intl) — the template's " +
-            "untouched option menu does not count. Externalized strings are decided on day one, not retrofitted — references/conversion-copy.md " +
-            "§Localization Readiness.",
-          "TECH_SPEC.md",
-        ),
-      );
-    }
+  const hasSection = Boolean(techSpec) && /##\s+Strings And Localization Readiness/i.test(techSpec ?? "");
+  const namesMechanism =
+    Boolean(techSpec) && /(xcstrings|string catalog|i18next|expo-localization|\barb\b|gen-l10n|next-intl|strings module)/i.test(techSpec ?? "");
+  // The shipped template lists every mechanism as an option menu ending in
+  // "Record the choice here." — that sentinel surviving means nobody chose.
+  // A missing TECH_SPEC.md is the same failure: no committed mechanism.
+  const choiceStillOpen = /record the choice here/i.test(techSpec ?? "");
+  if (!hasSection || !namesMechanism || choiceStillOpen) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.externalization_missing",
+        "TECH_SPEC.md does not commit to a string-externalization mechanism: the Strings And Localization Readiness section must exist and name " +
+          "ONE concrete choice for this stack (String Catalogs, i18next + expo-localization, ARB + gen-l10n, or next-intl) — a missing spec or " +
+          "the template's untouched option menu does not count. Externalized strings are decided on day one, not retrofitted — " +
+          "references/conversion-copy.md §Localization Readiness.",
+        "TECH_SPEC.md",
+      ),
+    );
   }
 }
 
@@ -423,8 +452,8 @@ if (root === path.join(skillRoot, "templates")) {
   // in lib/strings.ts (the externalization convention seed); the old internal
   // copy ("archetype scaffold", "customize it with the prompt pack") is banned
   // by the placeholder list. The fictional example brands are allowed HERE —
-  // they are the tripwire that fires when a business ships them.
-  const fictionalBrands = new Set(["fernpath", "wrenfeed", "loomroom", "glimmerjar"]);
+  // they are the tripwire the business-root scan above fires on.
+  const templateBrandAllowlist = new Set(fictionalBrands);
   const archetypesDir = path.join(root, "app-archetypes");
   if (existsSync(archetypesDir)) {
     for (const pack of readdirSync(archetypesDir)) {
@@ -448,7 +477,7 @@ if (root === path.join(skillRoot, "templates")) {
         const relative = path.relative(skillRoot, file);
         for (const visible of visibleStrings(readFileSync(file, "utf8"))) {
           for (const shape of rules.placeholderShapes) {
-            if (fictionalBrands.has(shape.toLowerCase())) continue;
+            if (templateBrandAllowlist.has(shape.toLowerCase())) continue;
             if (visible.toLowerCase().includes(shape.toLowerCase())) {
               issues.push(
                 issue(
