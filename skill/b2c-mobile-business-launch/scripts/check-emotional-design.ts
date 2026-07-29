@@ -349,7 +349,7 @@ const COMMITMENT_GUILT_PATTERNS = [
   /don'?t give up now/i,
 ];
 const SPEND_KEYWORDS =
-  /\b(paywall|purchase|upgrade now|subscribe|buy now|unlock for|renew now|iap|in[- ]app purchase(s)?|(purchase|upgrade|subscription|paid) offer|start (your )?(trial|subscription))\b/i;
+  /\b(paywall|purchase|checkout|upgrade now|subscribe|buy now|unlock for|renew now|iap|in[- ]app purchase(s)?|(purchase|upgrade|subscription|paid) offer|start (your )?(trial|subscription))\b/i;
 const REWARD_STREAK_KEYWORDS = /\b(streak|variable reward|reward reveal|reward screen|loss aversion|streak[- ]break)\b/i;
 
 const LOCAL_SCARCITY_PROOF_PATTERN =
@@ -481,24 +481,34 @@ function scanLiveCopy(relativePath: string, rawText: string, spendScan: boolean)
       const hi = Math.max(r, s);
       return hasAffirmativeSeparationProof(lines.slice(lo, hi + 2).join("\n"));
     };
-    // The prohibition escape is clause-scoped: the clause holding the spend/reward keyword
-    // must itself be prohibitive — "Show the paywall on the streak screen, but do not
-    // display an upgrade after dismissal" gets no escape from its unrelated second clause.
-    const lineProhibitsSpend = (line: string): boolean =>
-      line
-        .split(/[.;]|\b(?:but|however|whereas)\b/i)
-        .some((clause) => (SPEND_KEYWORDS.test(clause) || REWARD_STREAK_KEYWORDS.test(clause)) && LOCAL_PROHIBITION_PATTERN.test(clause));
+    // The prohibition escape is clause-quantified, not clause-any: every clause that
+    // co-locates both keyword classes must itself be prohibitive (falling back to all
+    // reward-bearing or all spend-bearing clauses when no clause holds both) — "Show the
+    // paywall on the streak screen, but do not show a purchase offer after dismissal" gets
+    // no escape from its prohibited-but-unrelated second clause.
+    const CLAUSE_SPLIT = /[.;]|\b(?:but|however|whereas)\b/i;
+    const variantProhibited = (text: string): boolean => {
+      const clauses = text.split(CLAUSE_SPLIT);
+      const coLocated = clauses.filter((clause) => REWARD_STREAK_KEYWORDS.test(clause) && SPEND_KEYWORDS.test(clause));
+      if (coLocated.length > 0) return coLocated.every((clause) => LOCAL_PROHIBITION_PATTERN.test(clause));
+      const rewardClauses = clauses.filter((clause) => REWARD_STREAK_KEYWORDS.test(clause));
+      const spendClauses = clauses.filter((clause) => SPEND_KEYWORDS.test(clause));
+      return (
+        (rewardClauses.length > 0 && rewardClauses.every((clause) => LOCAL_PROHIBITION_PATTERN.test(clause))) ||
+        (spendClauses.length > 0 && spendClauses.every((clause) => LOCAL_PROHIBITION_PATTERN.test(clause)))
+      );
+    };
     // Markdown wrapping can split one prohibitive sentence across physical lines ("Never show
     // the" / "paywall inside a streak-break grief screen."). The clause test also runs on the
     // line joined with each adjacent neighbor, so a wrapped compliant policy still earns its
-    // escape — clause scoping still applies to the joined text, so an unrelated prohibition
-    // in the neighbor cannot bless a live spend line.
+    // escape — clause quantification still applies to the joined text, so an unrelated
+    // prohibition in the neighbor cannot bless a live spend line.
     const prohibitsAtLine = (index: number): boolean => {
       const line = lines[index] ?? "";
-      if (lineProhibitsSpend(line)) return true;
+      if (variantProhibited(line)) return true;
       const prev = lines[index - 1] ?? "";
       const next = lines[index + 1] ?? "";
-      return (prev !== "" && lineProhibitsSpend(`${prev} ${line}`)) || (next !== "" && lineProhibitsSpend(`${line} ${next}`));
+      return (prev !== "" && variantProhibited(`${prev} ${line}`)) || (next !== "" && variantProhibited(`${line} ${next}`));
     };
     const unprovenPair = rewardLines
       .flatMap((r) => spendLines.map((s) => ({ r, s })))
@@ -780,6 +790,9 @@ const TIER_ORDER = ["LOW", "MEDIUM", "HIGH"];
 // risk is carried per-card; the table covers it only via the untiered motion-fallback row.
 const GUARDRAIL_UNMAPPED_INDEX_CARDS = new Set(["peak end"]);
 
+// §3 mechanisms that are deliberately not deck cards in the routing index.
+const TABLE_ONLY_MECHANISMS = new Set(["scarcity urgency", "social proof", "goal gradient", "rating prompt"]);
+
 // The one row in §3 allowed to carry a placeholder tier, matched by full normalized name.
 const MOTION_FALLBACK_ROW_NAME = "commitment intent mirroring peak end and other motion";
 
@@ -847,8 +860,12 @@ function parseTableRows(text: string, headerPattern: RegExp, nameCell: number, t
   return { rows, malformed };
 }
 
-function nameMatches(indexName: string, tableName: string): boolean {
-  return indexName === tableName || indexName.startsWith(`${tableName} `) || tableName.startsWith(`${indexName} `);
+/** Bucket members are short names ("Identity") for longer index cards ("Identity &
+ * Self-Expression") — the index name may extend the member, never the reverse, so a
+ * truncated index name ("Endowed") cannot inherit a canonical tier. Explicit mechanisms
+ * match by exact normalized name only. */
+function bucketCovers(bucketKey: string, indexName: string): boolean {
+  return indexName === bucketKey || indexName.startsWith(`${bucketKey} `);
 }
 
 const cardsIndexRef = readText(path.join(args.root, ".."), "references/experience-cards.md") ?? readText(args.root, "references/experience-cards.md");
@@ -960,7 +977,7 @@ if (ethicsRef) {
   // An explicit row may narrow a bucket range (Rating Prompt MEDIUM inside LOW-MEDIUM) but
   // must not contradict it — order-independent, so checked after the full table is read.
   for (const [bucketKey, bucketSet] of bucketTiers) {
-    const explicit = [...explicitTiers.entries()].find(([tableKey]) => nameMatches(bucketKey, tableKey))?.[1];
+    const explicit = explicitTiers.get(bucketKey);
     if (explicit && ![...explicit.tiers].every((tier) => bucketSet.has(tier))) {
       issues.push(
         issue(
@@ -995,6 +1012,7 @@ if (ethicsRef) {
         ),
       );
     }
+    const seenIndexCards = new Map<string, string>();
     for (const row of indexRows) {
       const indexTiers = parseTierSet(row.tierRaw);
       if (!indexTiers) {
@@ -1010,8 +1028,22 @@ if (ethicsRef) {
         continue;
       }
       const key = normalizeCardName(row.name);
-      const explicit = [...explicitTiers.entries()].find(([tableKey]) => nameMatches(key, tableKey))?.[1];
-      const allowed = explicit?.tiers ?? [...bucketTiers.entries()].find(([tableKey]) => nameMatches(key, tableKey))?.[1];
+      const priorIndexTier = seenIndexCards.get(key);
+      if (priorIndexTier !== undefined) {
+        // The routing index must not retain two Risk values for one card.
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.risk_tier_duplicate_row",
+            `references/experience-cards.md routes "${row.name}" twice (${priorIndexTier} and ${row.tierRaw}). One routing row per card.`,
+            "references/experience-cards.md",
+          ),
+        );
+        continue;
+      }
+      seenIndexCards.set(key, row.tierRaw);
+      const explicit = explicitTiers.get(key);
+      const allowed = explicit?.tiers ?? [...bucketTiers.entries()].find(([tableKey]) => bucketCovers(tableKey, key))?.[1];
       if (allowed && ![...indexTiers].every((tier) => allowed.has(tier))) {
         issues.push(
           issue(
@@ -1031,6 +1063,26 @@ if (ethicsRef) {
             "references/experience-cards.md",
           ),
         );
+      }
+    }
+
+    // Reverse coverage: every canonical §3 mechanism that is a deck card must still appear
+    // in the routing index — deleting eleven of twelve rows must not pass on the survivor.
+    if (indexRows.length > 0) {
+      const indexKeys = indexRows.map((row) => normalizeCardName(row.name));
+      const uncoveredByIndex = (tableKey: string): boolean =>
+        !TABLE_ONLY_MECHANISMS.has(tableKey) && !indexKeys.some((indexKey) => bucketCovers(tableKey, indexKey));
+      for (const tableKey of [...explicitTiers.keys(), ...bucketTiers.keys()]) {
+        if (uncoveredByIndex(tableKey)) {
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.risk_tier_index_missing_card",
+              `references/ethics-guardrail.md §3 tiers "${tableKey}" but no references/experience-cards.md routing row covers it. Restore the index row, or add the mechanism to the table-only allowlist if it is deliberately not a deck card.`,
+              "references/experience-cards.md",
+            ),
+          );
+        }
       }
     }
   }

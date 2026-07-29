@@ -956,6 +956,40 @@ experience_card:
     "emotional_design.spend_prompt_after_reward",
   );
 
+  // A prohibited clause about a different spend surface must not bless the violating clause.
+  const emotionalSpendSecondClause = makeFixture("emotional-spend-second-clause");
+  writeFileSync(
+    path.join(emotionalSpendSecondClause, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "Show the paywall on the streak screen, but do not show a purchase offer after dismissal.",
+      "Analytics: streak_celebrated, paywall_viewed.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a prohibited second clause with its own spend word does not suppress the veto",
+    emotionalSpendSecondClause,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
+  // Checkout screens are spend surfaces — the guardrail's own vocabulary.
+  const emotionalSpendCheckout = makeFixture("emotional-spend-checkout");
+  writeFileSync(
+    path.join(emotionalSpendCheckout, "ONBOARDING.md"),
+    ["# Onboarding", "Streak-break grief screen opens Stripe Checkout here.", "Analytics: streak_celebrated."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a checkout surface beside a streak moment fails the spend veto",
+    emotionalSpendCheckout,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.spend_prompt_after_reward",
+  );
+
   // Lane deferral skips deliverables, never the ethics veto over copy that already exists.
   const emotionalSpendDeferredLane = makeFixture("emotional-spend-deferred-lane");
   {
@@ -1348,6 +1382,110 @@ experience_card:
     "check-emotional-design.ts",
     1,
     "emotional_design.risk_tier_unmapped_card",
+  );
+
+  // A truncated index name cannot inherit a canonical tier by prefix.
+  const emotionalTierTruncatedName = makeFixture("emotional-risk-tier-truncated-name");
+  {
+    const refDir = path.join(emotionalTierTruncatedName, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Endowed | Real prior progress exists | LOW | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a truncated index card name fails instead of inheriting a tier",
+    emotionalTierTruncatedName,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_unmapped_card",
+  );
+
+  // Deleting canonical cards from the index must not pass on the survivor.
+  const emotionalTierIndexTruncated = makeFixture("emotional-risk-tier-index-truncated");
+  {
+    const refDir = path.join(emotionalTierIndexTruncated, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Variable Reward | HIGH | Compulsion loop | User can always stop | `bright_line` |",
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Variable Reward | An outcome genuinely varies | HIGH | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "an index missing a canonical tiered card fails reverse coverage",
+    emotionalTierIndexTruncated,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_index_missing_card",
+  );
+
+  // The routing index must not retain two Risk values for one card.
+  const emotionalTierIndexDuplicate = makeFixture("emotional-risk-tier-index-duplicate");
+  {
+    const refDir = path.join(emotionalTierIndexDuplicate, "references");
+    mkdirSync(refDir, { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| All other deck cards (Reciprocity) | LOW–MEDIUM | Card-specific | The card's own bright-line test | base fields |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      [
+        "# Experience Cards",
+        "## Card Routing",
+        "| Card | Load when | Risk | Spec |",
+        "|---|---|---|---|",
+        "| Reciprocity | An unprompted, real gift can precede any ask | LOW | link |",
+        "| Reciprocity | An unprompted, real gift can precede any ask | MEDIUM | link |",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "duplicate routing rows for one card fail even inside a bucket range",
+    emotionalTierIndexDuplicate,
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.risk_tier_duplicate_row",
   );
 
   const elevenStarThin = makeFixture("eleven-star-thin");
