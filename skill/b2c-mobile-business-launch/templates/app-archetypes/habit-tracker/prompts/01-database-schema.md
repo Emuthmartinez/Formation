@@ -46,3 +46,7 @@ Output as SQL I can run directly in Supabase's SQL editor.
 - Streaks are **derived, never stored as a mutable counter** — a stored counter drifts and then the product lies, which fails the truthfulness test in `ethics-guardrail.md`.
 - Cadence-aware streaks matter: punishing a "Mon/Wed/Fri" habit for Tuesday is a correctness bug that users read as cruelty.
 - Seed data is development-only.
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

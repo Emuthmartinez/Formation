@@ -29,3 +29,7 @@ Track:
 - The "invites become optional after public launch" toggle is a config/feature flag — record it so it is a deliberate switch, not a code change.
 - Add `invite_code_generated`, `invite_code_redeemed`, `invite_accepted` to `ANALYTICS.md`. The invitation tree feeds the launch cohort story in `growth/LAUNCH_NARRATIVE.md`.
 </content>
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

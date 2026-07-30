@@ -649,6 +649,30 @@ if (root === path.join(skillRoot, "templates")) {
     );
   }
 
+  // Archetype build prompts drive implementation directly, so each one must
+  // carry the deck route — a prompt that invents strings inline is the exact
+  // improvisation path this gate exists to close.
+  const archetypePromptsDir = path.join(root, "app-archetypes");
+  if (existsSync(archetypePromptsDir)) {
+    for (const pack of readdirSync(archetypePromptsDir)) {
+      const promptsDir = path.join(archetypePromptsDir, pack, "prompts");
+      if (!existsSync(promptsDir) || !statSync(promptsDir).isDirectory()) continue;
+      for (const file of walkMarkdown(promptsDir)) {
+        if (!readFileSync(file, "utf8").includes("COPY_DECK.md")) {
+          const relative = path.relative(skillRoot, file);
+          issues.push(
+            issue(
+              "error",
+              "app_copy.prompt_deck_route_missing",
+              `${relative} does not route strings through COPY_DECK.md. Every archetype build prompt carries the deck rule so a builder following it in isolation cannot invent copy inline.`,
+              relative,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   // Starters: user-visible position is held to the same standard. Strings live
   // in lib/strings.ts (the externalization convention seed); the old internal
   // copy ("archetype scaffold", "customize it with the prompt pack") is banned
@@ -719,6 +743,20 @@ function visibleStrings(source: string): string[] {
   for (const match of withoutComments.matchAll(/>([^<>{}\n]+)</g)) {
     const text = (match[1] ?? "").trim();
     if (text.length > 1) out.push(text);
+  }
+  return out;
+}
+
+function walkMarkdown(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    if (entry.startsWith(".")) continue;
+    const full = path.join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      out.push(...walkMarkdown(full));
+    } else if (entry.endsWith(".md")) {
+      out.push(full);
+    }
   }
   return out;
 }

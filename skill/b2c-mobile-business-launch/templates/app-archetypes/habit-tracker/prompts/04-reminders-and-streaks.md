@@ -50,3 +50,7 @@ Notification copy rules (hard rules, do not remove):
 - Push credentials (VAPID keys / APNs / FCM) and cron secrets route via `SECRETS.md` (`secrets-management.md`); reminder email goes through `resend-email-ops.md`. Treat the reminder job as an abuse/cost surface in `SECURITY.md` (rate limits, idempotent delivery).
 - On native surfaces, local notifications replace web push and are a major reason the founder may choose native (see the lane reference); the server-side streak engine carries over unchanged.
 - Add `reminder_scheduled`, `reminder_sent`, `reminder_muted`, `streak_recovered`, `streak_freeze_applied` to `ANALYTICS.md`; pair `streak_extended` vs `streak_recovered` with the counter-metric from prompt 03's attestation.
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

@@ -32,3 +32,7 @@ validation with clear error messages.
 - Username availability check needs a debounced, rate-limited endpoint — note it as an abuse surface in `SECURITY.md`.
 - Add auth events (`sign_up_started`, `sign_up_completed`, `oauth_used`, `profile_setup_completed`) to `ANALYTICS.md` before build.
 </content>
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

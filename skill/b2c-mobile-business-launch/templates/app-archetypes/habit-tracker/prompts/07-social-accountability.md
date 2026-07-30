@@ -41,3 +41,7 @@ Never notify a circle that a member missed a day.
 - Block/report, data removal on leave, and the invite-only posture are launch gates for any social surface (`security-release-hardening.md`); reflect shared-data handling in `privacy-terms.md`.
 - Free circles are the classic deliberate-freemium argument in prompt 06 — if circles drive word of mouth, that is a reason to choose freemium *on purpose*.
 - Add `buddy_invite_sent`, `buddy_invite_accepted`, `circle_created`, `circle_joined`, `nudge_sent`, `member_blocked` to `ANALYTICS.md`.
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

@@ -26,3 +26,7 @@ Implement:
 - Entitlement identity (which user a Stripe customer maps to) must be reconciled with `revenue-monetization.md`; the metering check reads a cached entitlement, not Stripe live.
 - Add `checkout_started`, `subscription_activated`, `subscription_cancelled`, `payment_failed` to `ANALYTICS.md`; pair with the usage funnel for LTV/CPA.
 </content>
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

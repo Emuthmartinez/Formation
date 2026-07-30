@@ -42,3 +42,7 @@ Hard rules:
 - Billing path follows the surface: Stripe for web, RevenueCat + IAP for native (`revenue-monetization.md`). Do not ship the web Stripe paywall inside a native binary without resolving store policy first. Webhook signing secrets and API keys route via `SECRETS.md`; webhooks are an abuse surface in `SECURITY.md` and updates must be idempotent.
 - Paywall timing relative to the first check-in and any review prompt is governed by `onboarding-conversion.md`; the emotional peak (first check-in) belongs before the paywall.
 - Add `paywall_shown`, `checkout_started`, `trial_started`, `subscription_activated`, `subscription_cancelled`, `payment_failed` to `ANALYTICS.md`; judge the model on cohort LTV and renewal, not install-day conversion alone.
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

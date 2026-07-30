@@ -42,3 +42,7 @@ prefers-reduced-motion with a non-animated completed state.
 - The all-done state is the session close (peak-end rule) — a completion signal, not an engagement hook. Do not add "one more thing" mechanics there.
 - The optimistic write needs a rollback path and an honest failure state (`TECH_SPEC.md`); a check-in that silently fails and breaks a streak is the worst bug this product can have.
 - Add `habit_created`, `habit_checked_in`, `streak_extended`, `streak_recovered` to `ANALYTICS.md` before this surface locks (`analytics-attribution.md`); `streak_recovered` is emitted by prompt 04's recovery flow.
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

@@ -24,3 +24,7 @@ Keep it simple for MVP: text only, no group chats, no media in DMs (add later).
 - Add `dm_conversation_started`, `dm_sent`, `dm_read` to `ANALYTICS.md`.
 - If the founder later wants media in DMs, route uploads through Supabase Storage with the same moderation gate as posts.
 </content>
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

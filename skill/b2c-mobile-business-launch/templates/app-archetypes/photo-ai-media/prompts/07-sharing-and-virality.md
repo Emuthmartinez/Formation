@@ -31,3 +31,7 @@ Requirements:
 - Privacy boundary: the library is private (signed URLs, prompt 03); a share mints a deliberate public copy. Never let referral mechanics leak private assets, and let users revoke a shared copy (takedown path threads into prompt 08). Likeness consent matters doubly here — sharing someone else's face is the user's action, but the example images *you* show on the landing page need explicit consent (`privacy-terms.md`).
 - Shared content must already have passed output safety screening (prompt 08) — the share surface is where unsafe output becomes a public incident.
 - Add `media_shared` (the lane's required event; with format + frame properties), `share_link_clicked`, `referral_signup_attributed`, `shared_copy_revoked` to `ANALYTICS.md`. Self-referral and incentive-abuse controls per `viral-growth-loops.md`.
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

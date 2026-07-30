@@ -31,3 +31,7 @@ needed) and make the policy and thresholds config-driven.
 - Add `input_moderation_blocked`, `output_moderation_blocked`, `crisis_protocol_triggered`, `jailbreak_attempt_detected` to `ANALYTICS.md` (counts, not raw content).
 - Treat safety as a release gate in `PRODUCTION_READINESS.md`: do not call the app launch-ready from working chat alone.
 </content>
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

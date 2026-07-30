@@ -792,4 +792,15 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: rejected-mechanism line is not an affirmative choice", mechanismRejected, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // GFM permits omitting outer pipes — such rows are parsed (and validated),
+  // never silently excluded from every scan.
+  const deckNoOuterPipes = makeFixture("app-copy-deck-no-outer-pipes");
+  writeFileSync(path.join(deckNoOuterPipes, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(deckNoOuterPipes, "COPY_DECK.md"),
+    [...DECK_HEADER, "onboarding.promise.headline | Promise | Product-specific value promise | | 1", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: outer-pipe-less deck row is still validated", deckNoOuterPipes, "check-app-copy.ts", 1, "app_copy.deck_placeholder");
 }

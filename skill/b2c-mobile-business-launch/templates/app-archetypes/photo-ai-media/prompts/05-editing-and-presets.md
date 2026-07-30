@@ -32,3 +32,7 @@ Keep preset definitions data-driven so adding a style is a row, not a deploy.
 - Watermark-free as a premium lever is a `revenue-monetization.md` decision (it shapes the free tier's shareability — the watermark is also organic attribution for prompt 07). Surface the tradeoff; the founder picks.
 - Premium presets shown-but-labeled is paywall surface design (`onboarding-conversion.md`): the upgrade moment should land when the user wants a specific style, a real value moment.
 - Add `preset_selected`, `generation_rerun`, `variation_compared`, `watermark_removed_export` to `ANALYTICS.md`.
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

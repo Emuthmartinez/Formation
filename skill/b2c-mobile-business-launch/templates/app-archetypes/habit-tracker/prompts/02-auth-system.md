@@ -34,3 +34,7 @@ Design: clean, calm, fast. Form validation with clear error messages.
 - The first-run "create your first habit" step is an onboarding surface (`onboarding-conversion.md`) and a Commitment moment (`consumer-product-design-agency.md`): the user states a goal in their own words, which seeds the today view (prompt 03) and reminder copy (prompt 04).
 - Reconcile the look with Design Room tokens (`design-room.md`); don't invent a one-off style.
 - Add `sign_up_completed`, `oauth_used`, `timezone_confirmed`, `first_run_completed` to `ANALYTICS.md`.
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

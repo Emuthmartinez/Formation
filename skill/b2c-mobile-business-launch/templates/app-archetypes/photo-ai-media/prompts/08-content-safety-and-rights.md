@@ -41,3 +41,7 @@ and categories, never retaining blocked content beyond legal requirements.
 - The rights posture and likeness-consent policy live in `privacy-terms.md`: training-data answers, output ownership, the no-training-on-uploads default, retention/deletion of faces (biometric-adjacent data), and provider-side copy handling from prompt 04.
 - Deceptive intimate imagery and impersonation are `ethics-guardrail.md` compliance vetoes — a product that knowingly enables them does not ship, regardless of revenue. The takedown path is the user-facing escape hatch and threads back to shared-copy revocation in prompt 07.
 - Add `upload_blocked`, `output_blocked`, `prompt_blocked`, `report_submitted`, `takedown_completed` to `ANALYTICS.md` (counts and categories, never content).
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

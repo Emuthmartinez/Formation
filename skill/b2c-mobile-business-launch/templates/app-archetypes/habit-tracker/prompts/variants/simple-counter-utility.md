@@ -35,3 +35,7 @@ seconds. Resist re-adding features; the speed IS the product.
 - Timezone-correct local dates still matter (a water counter that resets at the wrong midnight is broken), so prompts 01/02's day model survives the strip.
 - A utility this small is a strong one-time-purchase or low-friction-paywall candidate rather than a subscription — surface the `revenue-monetization.md` trade-offs and let the founder decide; do not default to a subscription out of habit.
 - Keep `habit_checked_in` (or a `counter_logged` alias mapped in `ANALYTICS.md`) plus `reminder_sent` — even a lite launch needs its activation funnel measured.
+
+## Strings
+
+Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

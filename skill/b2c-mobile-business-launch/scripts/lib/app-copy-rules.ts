@@ -115,7 +115,11 @@ export function parseDeck(deckText: string): ParsedDeck {
       return;
     }
     const line = rawLine.trim();
-    if (!line.startsWith("|")) return;
+    // GFM permits omitting the outer pipes: a line with interior pipe structure
+    // is a table row (or a malformed one) — silently excluding it would skip
+    // every scan for that string.
+    const maskedPipes = (line.replace(/\\\|/g, " ").match(/\|/g) ?? []).length;
+    if (!line.startsWith("|") && maskedPipes < 2) return;
     const cells = splitRow(line);
     if (cells.every((cell) => /^:?-+:?$/.test(cell) || cell.length === 0)) return;
     if ((cells[0] ?? "").toLowerCase() === "key") return;
@@ -240,7 +244,8 @@ export function copyColumnCells(markdownText: string): CopyColumn {
   let expectedCells = 0;
   lines.forEach((rawLine, index) => {
     const line = rawLine.trim();
-    if (!line.startsWith("|")) {
+    const maskedPipes = (line.replace(/\\\|/g, " ").match(/\|/g) ?? []).length;
+    if (!line.startsWith("|") && maskedPipes < 2) {
       inCopyTable = false;
       return;
     }
