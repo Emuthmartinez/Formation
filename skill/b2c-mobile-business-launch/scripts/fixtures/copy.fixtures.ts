@@ -979,4 +979,42 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: commented-out deck rows do not count as authored", deckCommentedRows, "check-app-copy.ts", 1, "app_copy.deck_surface_missing");
+
+  // "Status: authored" without the date is unfinished paperwork.
+  const deckNoDate = makeFixture("app-copy-deck-authored-no-date");
+  writeFileSync(path.join(deckNoDate, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckNoDate, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: authored",
+      "",
+      "## Onboarding",
+      "",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: authored status without a date fails", deckNoDate, "check-app-copy.ts", 1, "app_copy.deck_status_unauthored");
+
+  // A whitespace-corrupted key reference is an attempted reference, reported.
+  const spacedKeyRef = makeFixture("app-copy-spaced-key-reference");
+  writeFileSync(path.join(spacedKeyRef, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(spacedKeyRef, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise .headline` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: whitespace-corrupted key reference is reported", spacedKeyRef, "check-app-copy.ts", 1, "app_copy.onboarding_key_reference_malformed");
 }

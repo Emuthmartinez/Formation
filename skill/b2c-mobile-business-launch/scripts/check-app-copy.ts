@@ -136,7 +136,8 @@ if (deckText && deckIsTemplate && deckRequired) {
 
 // A done lane needs a deck that says it is done: "Status: draft" or a missing
 // status is the deck's own workflow state calling itself unfinished.
-const deckIsAuthored = Boolean(deckText && /^Status:\s*authored\b/im.test(deckText));
+// The date is the handoff provenance: "Status: authored" alone is unfinished paperwork.
+const deckIsAuthored = Boolean(deckText && /^Status:\s*authored\s+\d{4}-\d{2}-\d{2}\b/im.test(deckText));
 if (deckText && !deckIsTemplate && !deckIsAuthored && deckRequired) {
   issues.push(
     issue(
@@ -171,7 +172,7 @@ if (briefRequired) {
     const body = (brief ?? "").match(new RegExp(`##\\s+${section}\\s*\\n([\\s\\S]*?)(?=\\n##\\s|$)`, "i"))?.[1] ?? "";
     return body.replace(/[^A-Za-z0-9]/g, "").length < 40;
   });
-  if (brief && /^Status:\s*authored\b/im.test(brief) && hollowSections.length > 0) {
+  if (brief && /^Status:\s*authored\s+\d{4}-\d{2}-\d{2}\b/im.test(brief) && hollowSections.length > 0) {
     issues.push(
       issue(
         sev("error"),
@@ -181,7 +182,7 @@ if (briefRequired) {
       ),
     );
   }
-  if (!brief || !/^Status:\s*authored\b/im.test(brief)) {
+  if (!brief || !/^Status:\s*authored\s+\d{4}-\d{2}-\d{2}\b/im.test(brief)) {
     issues.push(
       issue(
         sev("error"),
@@ -799,6 +800,20 @@ if (root === path.join(skillRoot, "templates")) {
               "error",
               "app_copy.starter_hardcoded_text",
               `${relative} hardcodes the JSX text "${text.slice(0, 50)}" — starter UI strings live in lib/strings.ts so externalization cannot silently regress.`,
+              relative,
+            ),
+          );
+        }
+        // User-visible attribute literals are copy too: placeholder="Say
+        // something" bypasses lib/strings.ts the same way JSX text does.
+        for (const match of source.matchAll(/\b(placeholder|title|alt|aria-label|aria-description)\s*=\s*(["'])((?:(?!\2)[^\n]){2,})\2/g)) {
+          const value = match[3] ?? "";
+          if (!/[A-Za-z0-9]{2}/.test(value)) continue;
+          issues.push(
+            issue(
+              "error",
+              "app_copy.starter_hardcoded_text",
+              `${relative} hardcodes the ${match[1]} attribute "${value.slice(0, 50)}" — user-visible attribute strings live in lib/strings.ts too.`,
               relative,
             ),
           );

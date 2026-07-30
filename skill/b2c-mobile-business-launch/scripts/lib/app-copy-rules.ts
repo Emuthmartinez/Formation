@@ -192,7 +192,18 @@ export function malformedKeyReferences(text: string): string[] {
   // span that escapes both this check and coverage is a silent bypass.
   for (const match of text.matchAll(/`([^`\n]+)`/g)) {
     const span = (match[1] ?? "").trim();
-    if (!span || /[\s({]/.test(span)) continue;
+    if (!span) continue;
+    // A whitespace-corrupted key (`onboarding.promise .headline`) is still an
+    // attempted reference: if removing the spaces yields the strict key shape,
+    // report it — coverage would otherwise silently skip the screen.
+    if (/\s/.test(span)) {
+      const despaced = span.replace(/\s+/g, "");
+      if (despaced.includes(".") && !FILE_REFERENCE.test(despaced.replace(/\.\*$/, "")) && /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\.\*)?$/.test(despaced)) {
+        bad.add(span);
+      }
+      continue;
+    }
+    if (/[({]/.test(span)) continue;
     // Key-like: dotted, wildcarded, or a flat multi-segment snake/kebab token —
     // `onboarding_promise_headline` is a mistyped key, not a word in code style.
     const keyLike = span.includes(".") || span.endsWith("*") || /^[A-Za-z0-9]+(?:[_-][A-Za-z0-9]+)+$/.test(span);
