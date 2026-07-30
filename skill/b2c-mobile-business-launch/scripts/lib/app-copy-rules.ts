@@ -192,7 +192,10 @@ export function malformedKeyReferences(text: string): string[] {
     const keyLike = span.includes(".") || span.endsWith("*") || /^[A-Za-z0-9]+(?:[_-][A-Za-z0-9]+)+$/.test(span);
     if (!keyLike) continue;
     if (FILE_REFERENCE.test(span.replace(/\.\*$/, ""))) continue;
-    const wellFormed = /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\.\*)?$/.test(span);
+    // Well-formed = the dotted namespace shape; a wildcard's ".*" supplies the
+    // dot for single-segment namespaces (`paywall.*`). A flat snake token is a
+    // mistyped key, not a valid reference.
+    const wellFormed = span.includes(".") && /^[a-z0-9]+(?:[_-][a-z0-9]+)*(?:\.[a-z0-9]+(?:[_-][a-z0-9]+)*)*(?:\.\*)?$/.test(span);
     if (!wellFormed) bad.add(span);
   }
   return [...bad];
