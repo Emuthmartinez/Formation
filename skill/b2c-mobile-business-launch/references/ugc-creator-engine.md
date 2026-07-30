@@ -6,6 +6,8 @@ The Day 0 frame: do not build a mature creator machine before a format works. Ru
 
 Load `viral-growth-loops.md` first when UGC depends on product-led referral/share mechanics, social-comment loops, paywall timing, creator codes, or share-to-unlock behavior. This file owns creator operations; `viral-growth-loops.md` owns the product/content/revenue/analytics system that makes attention compound.
 
+Load `influencer-sponsorship-engine.md` instead when the plan is paying creators who already have an audience to integrate the app into their own content — sponsorship outreach, CPM/view-guarantee deals, brand-account credibility, meme-page amplification. This file's creator ops assume the program owns new niche accounts and the algorithm is the distribution engine; sponsorships rent an existing audience and price on views, and the two lanes use different payment shapes and qualification filters.
+
 ## Contents
 
 - Fit Gate
