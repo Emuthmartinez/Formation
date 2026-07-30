@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.51.0",
+  "version": "0.52.0",
   "description": "An agent skill that takes a consumer mobile app from idea to a launched business, with deterministic validators between every claim and done.",
   "keywords": [
     "claude-code",
@@ -64,6 +64,8 @@
     "check:source-freshness": "tsx skill/b2c-mobile-business-launch/scripts/check-source-freshness.ts --root . --registry skill/b2c-mobile-business-launch/references/source-registry.yaml",
     "refresh:source-freshness": "tsx skill/b2c-mobile-business-launch/scripts/check-source-freshness.ts --root . --registry skill/b2c-mobile-business-launch/references/source-registry.yaml --write-discovered && tsx skill/b2c-mobile-business-launch/scripts/refresh-source-freshness.ts --root . --registry skill/b2c-mobile-business-launch/references/source-registry.yaml",
     "check:agent-entrypoints": "tsx skill/b2c-mobile-business-launch/scripts/check-agent-entrypoints.ts --skill-root skill/b2c-mobile-business-launch --repo-root .",
+    "check:hooks-installed": "tsx skill/b2c-mobile-business-launch/scripts/check-hooks-installed.ts --skill-root skill/b2c-mobile-business-launch",
+    "install:hooks": "tsx skill/b2c-mobile-business-launch/scripts/install-hooks.ts --skill-root skill/b2c-mobile-business-launch",
     "check:workflow-adherence": "tsx skill/b2c-mobile-business-launch/scripts/check-workflow-adherence.ts --skill-root skill/b2c-mobile-business-launch --repo-root .",
     "check:continuity-contract": "tsx skill/b2c-mobile-business-launch/scripts/check-continuity-contract.ts --skill-root skill/b2c-mobile-business-launch",
     "check:autopilot": "tsx skill/b2c-mobile-business-launch/scripts/check-autopilot-contract.ts",

@@ -150,7 +150,17 @@ if (!skip && !htmlPath) {
 
 if (htmlPath) {
   const htmlText = readFileSync(path.join(args.root, htmlPath), "utf8");
-  for (const phrase of ["11-Star", "Line Of Feasibility", "V1 Scalable Slice", "Surface Translation"]) {
+  /**
+   * The founder reads this page; the agent reads 11_STAR_EXPERIENCE.md. So the
+   * two are held to different vocabularies on purpose.
+   *
+   * This list used to require the internal terms verbatim ("11-Star", "Line Of
+   * Feasibility", "V1 Scalable Slice") — which meant the gate was mandating
+   * exactly the jargon SKILL.md's Always-On Contracts forbid speaking to a
+   * founder. The doc keeps the precise vocabulary; the page has to carry the
+   * same four ideas in words a founder recognizes on sight.
+   */
+  for (const phrase of ["Standout Moment", "What We Can Actually Build", "Smallest First Version", "Every Screen"]) {
     if (!includesPhrase(htmlText, phrase)) {
       issues.push(issue("warning", `eleven_star.html_${codeFor(phrase)}.missing`, `The HTML proof should render ${phrase}.`, htmlPath));
     }

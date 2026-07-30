@@ -21,7 +21,7 @@ Every real app build needs a backend-agnostic data contract before implementatio
 Load this reference:
 
 - Before writing the data model or API sections of `TECH_SPEC.md`.
-- Before running any schema or auth prompt from an archetype pack (`social-network-lane.md`, `ai-chat-companion-lane.md`) — the packs assume Supabase and must be adapted first if the route differs.
+- Before running any schema or auth prompt from an archetype pack (`social-network.md`, `ai-chat-companion.md`) — the packs assume Supabase and must be adapted first if the route differs.
 - When the founder asks for Firebase or a custom backend instead of the Supabase default, or questions the backend choice at any point.
 - Before claiming the engineering lane done; the contract and its proof are part of done status (`engineering-orchestration.md`).
 - When auditing an existing app's data layer for drift, untested authorization, or undocumented backend coupling.

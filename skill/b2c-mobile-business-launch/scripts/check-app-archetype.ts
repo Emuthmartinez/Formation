@@ -9,7 +9,7 @@
  *   - each archetype dir has a README.md and a prompts/ dir with >=1 prompt
  *   - every prompt file (except README.md) carries a fenced copy-paste block
  *   - the shipped `social-network` pack has its required core prompts
- *   - the social-network lane is wired: references/social-network-lane.md exists,
+ *   - the social-network lane is wired: references/social-network.md exists,
  *     SKILL.md routes to it, and the agent-behavior eval is present
  *
  * Runs against the skill root (not a generated business repo). The harness may
@@ -40,28 +40,28 @@ const SHIPPED_PACKS: ShippedPack[] = [
   {
     name: "social-network",
     requiredPrompts: ["01-database-schema.md", "02-auth-system.md", "03-feed-and-posts.md", "04-profiles-and-follow.md"],
-    reference: "references/social-network-lane.md",
+    reference: "references/social-network.md",
     eval: "evals/agent-behavior/social-network-archetype-prompt-pack.yaml",
     starter: true,
   },
   {
     name: "ai-chat-companion",
     requiredPrompts: ["01-database-schema.md", "02-auth-system.md", "03-chat-core-loop.md", "04-model-integration.md"],
-    reference: "references/ai-chat-companion-lane.md",
+    reference: "references/ai-chat-companion.md",
     eval: "evals/agent-behavior/ai-chat-companion-archetype-prompt-pack.yaml",
     starter: true,
   },
   {
     name: "habit-tracker",
     requiredPrompts: ["01-database-schema.md", "02-auth-system.md", "03-habit-core-loop.md", "04-reminders-and-streaks.md"],
-    reference: "references/habit-tracker-lane.md",
+    reference: "references/habit-tracker.md",
     eval: "evals/agent-behavior/habit-tracker-archetype-prompt-pack.yaml",
     starter: true,
   },
   {
     name: "photo-ai-media",
     requiredPrompts: ["01-database-schema.md", "02-auth-system.md", "03-capture-and-library.md", "04-ai-generation-pipeline.md"],
-    reference: "references/photo-ai-media-lane.md",
+    reference: "references/photo-ai-media.md",
     eval: "evals/agent-behavior/photo-ai-media-archetype-prompt-pack.yaml",
     starter: true,
   },

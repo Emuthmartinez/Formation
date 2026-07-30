@@ -1,9 +1,9 @@
 id: social-network-archetype-prompt-pack
 title: Social-platform request detects the archetype and routes the prompt pack
 prompt: "I want to build a social network for indie game developers — people post updates, follow each other, and have a feed."
-expected_route: "Detect the social/community app archetype, load social-network-lane.md, confirm content format / primary surface / optional systems / niche via AskUserQuestion, record the archetype in PROJECT_STATE.yaml, then route the bundled boilerplate prompt pack (schema first, then auth, feed, profiles) instead of improvising the schema and feed."
+expected_route: "Detect the social/community app archetype, load social-network.md, confirm content format / primary surface / optional systems / niche via AskUserQuestion, record the archetype in PROJECT_STATE.yaml, then route the bundled boilerplate prompt pack (schema first, then auth, feed, profiles) instead of improvising the schema and feed."
 must_use:
-  - "social-network-lane.md"
+  - "social-network.md"
   - "templates/app-archetypes/social-network"
   - "AskUserQuestion"
   - "PROJECT_STATE.yaml"

@@ -1,6 +1,6 @@
 # Photo / AI Media Build Lane
 
-Use this reference when the founder wants to build a **photo / AI-media product** — "an AI avatar app", "a headshot generator", "a photo enhancer/restorer", "an AI art app", "an app that turns photos into X". It is an **app-archetype prompt pack** (peer to [`social-network-lane.md`](social-network-lane.md) and [`ai-chat-companion-lane.md`](ai-chat-companion-lane.md)), shipped as reusable boilerplate under [`../templates/app-archetypes/photo-ai-media/`](../templates/app-archetypes/photo-ai-media/README.md).
+Use this reference when the founder wants to build a **photo / AI-media product** — "an AI avatar app", "a headshot generator", "a photo enhancer/restorer", "an AI art app", "an app that turns photos into X". It is an **app-archetype prompt pack** (peer to [`social-network.md`](social-network.md) and [`ai-chat-companion.md`](ai-chat-companion.md)), shipped as reusable boilerplate under [`../templates/app-archetypes/photo-ai-media/`](../templates/app-archetypes/photo-ai-media/README.md).
 
 Like the other archetype lanes, this is a layer on top of the launch workflow, not a replacement. It gives the engineering stages a proven sequence and ready prompts for one product shape and routes each piece back into the existing lanes (research, 11-star, emotional design, security/privacy, revenue, analytics, safety). It does not skip evidence, design, safety, or provider-proof gates.
 

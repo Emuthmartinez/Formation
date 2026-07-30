@@ -1,6 +1,6 @@
 # Habit Tracker — Boilerplate Prompt Pack
 
-The **app-archetype prompt pack** for B2C habit and daily-utility apps: habit trackers, streak apps, daily routine and wellness utilities. Routing, the upfront archetype question, and how each prompt threads into the launch lanes live in [`../../../references/habit-tracker-lane.md`](../../../references/habit-tracker-lane.md). Read that first.
+The **app-archetype prompt pack** for B2C habit and daily-utility apps: habit trackers, streak apps, daily routine and wellness utilities. Routing, the upfront archetype question, and how each prompt threads into the launch lanes live in [`../../../references/habit-tracker.md`](../../../references/habit-tracker.md). Read that first.
 
 These are **starting prompts**, not final code. Each file has a copy-paste block plus skill-integration notes. The streak mechanic at this archetype's center is a HIGH-risk Experience Card — the ethics contract in the lane reference is not optional.
 

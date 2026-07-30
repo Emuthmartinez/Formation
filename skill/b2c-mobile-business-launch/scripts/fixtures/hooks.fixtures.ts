@@ -8,10 +8,11 @@
  *   - benign payloads pass through (exit 0)
  *   - missing SKILL_ROOT and missing jq warn loudly instead of no-opping
  */
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { skillRoot, type Harness } from "./_harness.js";
+import { readHookTemplate } from "../lib/hook-contract.js";
 
 interface HookSettings {
   hooks: { PostToolUse: Array<{ matcher: string; hooks: Array<{ command: string }> }> };
@@ -119,5 +120,102 @@ export function register(harness: Harness): void {
     "jq is not on PATH",
     businessRepo,
     { ...baseEnv, PATH: "/nonexistent-bin" },
+  );
+
+  registerInstallation(harness);
+}
+
+/**
+ * Installation round-trip for check-hooks-installed.
+ *
+ * The hooks above are proven to behave correctly; these prove they are
+ * actually delivered. Before install-hooks.ts existed, the only instruction
+ * was a prose line inside the template's JSON comment, so a business repo
+ * could pass every gate with no enforcement running at all.
+ *
+ * The reinstall cases matter most: a merge that duplicated our entries or
+ * dropped the founder's own hooks would be a silent, repo-corrupting bug that
+ * no other gate would catch.
+ */
+function registerInstallation(harness: Harness): void {
+  const installer = "install-hooks.ts";
+  const validator = "check-hooks-installed.ts";
+  const repo = harness.makeEmptyFixture("hooks-install-roundtrip");
+  const settingsPath = path.join(repo, ".claude", "settings.json");
+
+  harness.runScriptArgs(
+    "check:hooks-installed fails on a repo with no .claude/settings.json",
+    validator,
+    ["--skill-root", skillRoot, "--root", repo],
+    1,
+    "settings_missing",
+  );
+
+  // A hook the founder wrote themselves, plus unrelated settings: both must
+  // survive every reinstall.
+  mkdirSync(path.dirname(settingsPath), { recursive: true });
+  writeFileSync(
+    settingsPath,
+    JSON.stringify(
+      {
+        permissions: { allow: ["Bash(npm run test)"] },
+        hooks: { PostToolUse: [{ matcher: "Write", hooks: [{ type: "command", command: "echo founder-owned-hook" }] }] },
+      },
+      null,
+      2,
+    ),
+  );
+
+  harness.runScriptArgs(
+    "install:hooks installs into a repo with pre-existing settings",
+    installer,
+    ["--skill-root", skillRoot, "--target", repo],
+    0,
+    "managed hook entries installed",
+  );
+  harness.runScriptArgs("check:hooks-installed passes after install", validator, ["--skill-root", skillRoot, "--root", repo], 0);
+
+  // Idempotency: a second install must replace, not append.
+  harness.runScriptArgs("install:hooks is idempotent", installer, ["--skill-root", skillRoot, "--target", repo], 0, "managed hook entries installed");
+
+  const afterReinstall = JSON.parse(readFileSync(settingsPath, "utf8")) as {
+    permissions?: unknown;
+    hooks: { PostToolUse: Array<{ hooks?: Array<{ command?: string }> }> };
+  };
+  // Derived from the template, not hardcoded: adding a fourth shipped hook
+  // should not silently invalidate this assertion.
+  const shippedCount = readHookTemplate(skillRoot).entries.length;
+  const foreignSurvived = afterReinstall.hooks.PostToolUse.some((entry) => entry.hooks?.[0]?.command === "echo founder-owned-hook");
+  harness.results.push({
+    label: "install:hooks replaces its own entries and preserves foreign ones",
+    ok: afterReinstall.hooks.PostToolUse.length === shippedCount + 1 && foreignSurvived && afterReinstall.permissions !== undefined,
+    expectedCode: 0,
+    actualCode: 0,
+    expectedText: `${shippedCount + 1} entries, founder hook and permissions intact`,
+    output: `entries=${afterReinstall.hooks.PostToolUse.length} foreignSurvived=${foreignSurvived} permissions=${JSON.stringify(afterReinstall.permissions)}`,
+  });
+
+  // Drift: an installed command that no longer matches the shipped one must
+  // fail, because a stale hook can call a validator that no longer exists.
+  const drifted = JSON.parse(readFileSync(settingsPath, "utf8")) as { hooks: { PostToolUse: Array<{ hooks?: Array<{ command?: string }> }> } };
+  const managedIndex = drifted.hooks.PostToolUse.findIndex((entry) => entry.hooks?.[0]?.command?.includes("b2c-mobile-business-launch"));
+  if (managedIndex >= 0 && drifted.hooks.PostToolUse[managedIndex]?.hooks?.[0]) {
+    drifted.hooks.PostToolUse[managedIndex].hooks[0].command = "echo b2c-mobile-business-launch stale-command";
+    writeFileSync(settingsPath, JSON.stringify(drifted, null, 2));
+  }
+  // Asserting the issue code, not just exit 1: a crashing validator also exits
+  // 1, so a bare exit-code assertion here would pass for the wrong reason.
+  harness.runScriptArgs("check:hooks-installed fails on a drifted hook command", validator, ["--skill-root", skillRoot, "--root", repo], 1, "command_drift");
+  harness.runScriptArgs("install:hooks refreshes a drifted hook", installer, ["--skill-root", skillRoot, "--target", repo], 0);
+  harness.runScriptArgs("check:hooks-installed passes after refresh", validator, ["--skill-root", skillRoot, "--root", repo], 0);
+
+  // The audit runs this gate against templates/, which is not a business
+  // repo. It must say so rather than assert installation vacuously.
+  harness.runScriptArgs(
+    "check:hooks-installed skips installation checks against the skill template tree",
+    validator,
+    ["--skill-root", skillRoot, "--root", path.join(skillRoot, "templates")],
+    0,
+    "not a business repo",
   );
 }

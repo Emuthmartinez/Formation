@@ -1,6 +1,6 @@
 # AI Chat / Companion — Boilerplate Prompt Pack
 
-The second **app-archetype prompt pack** for this skill: a dependency-ordered set of copy-paste-ready prompts for building a B2C AI chat product (assistant, companion/character, or domain copilot). Routing, the upfront archetype question, and how each prompt threads into the launch lanes live in [`../../../references/ai-chat-companion-lane.md`](../../../references/ai-chat-companion-lane.md). Read that first.
+The second **app-archetype prompt pack** for this skill: a dependency-ordered set of copy-paste-ready prompts for building a B2C AI chat product (assistant, companion/character, or domain copilot). Routing, the upfront archetype question, and how each prompt threads into the launch lanes live in [`../../../references/ai-chat-companion.md`](../../../references/ai-chat-companion.md). Read that first.
 
 These are **starting prompts**, not final code. Each file has a copy-paste block plus skill-integration notes.
 

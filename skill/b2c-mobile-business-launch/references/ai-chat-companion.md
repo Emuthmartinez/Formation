@@ -1,6 +1,6 @@
 # AI Chat / Companion Build Lane
 
-Use this reference when the founder wants to build an **AI chat product** — "an AI assistant app", "a chatbot for <domain>", "an AI companion/character", "a coach/tutor/therapist-style chat app", "talk to an AI that remembers me". It is the second **app-archetype prompt pack** (peer to [`social-network-lane.md`](social-network-lane.md)), shipped as reusable boilerplate under [`../templates/app-archetypes/ai-chat-companion/`](../templates/app-archetypes/ai-chat-companion/README.md).
+Use this reference when the founder wants to build an **AI chat product** — "an AI assistant app", "a chatbot for <domain>", "an AI companion/character", "a coach/tutor/therapist-style chat app", "talk to an AI that remembers me". It is the second **app-archetype prompt pack** (peer to [`social-network.md`](social-network.md)), shipped as reusable boilerplate under [`../templates/app-archetypes/ai-chat-companion/`](../templates/app-archetypes/ai-chat-companion/README.md).
 
 Like the social lane, this is a layer on top of the launch workflow, not a replacement. It gives the engineering stages a proven sequence and ready prompts for one product shape and routes each piece back into the existing lanes (research, 11-star, emotional design, security/safety, revenue, analytics). It does not skip evidence, design, safety, or provider-proof gates.
 
