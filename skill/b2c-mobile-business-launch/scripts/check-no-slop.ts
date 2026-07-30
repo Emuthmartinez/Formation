@@ -214,8 +214,12 @@ function collapse(value: string): string {
 }
 
 function listReferences(): string[] {
-  const referencesRoot = path.join(skillRoot, "playbook");
-  if (!existsSync(referencesRoot)) return [];
+  // Both knowledge roots, not just playbook/. The maintainer guidance documents
+  // moved to machine/ when references/ was split; scanning only playbook/ would
+  // silently drop banned wording in launchbench-evals.md, skill-versioning.md,
+  // and source-freshness-maintenance.md from guidance-prose coverage.
+  const roots = ["playbook", "machine"].map((name) => path.join(skillRoot, name)).filter((dir) => existsSync(dir));
+  if (roots.length === 0) return [];
   const found: string[] = [];
   const walk = (dir: string): void => {
     for (const entry of readdirSync(dir)) {
@@ -227,6 +231,6 @@ function listReferences(): string[] {
       if (entry.endsWith(".md")) found.push(path.relative(skillRoot, absolute));
     }
   };
-  walk(referencesRoot);
+  for (const root of roots) walk(root);
   return found.sort();
 }

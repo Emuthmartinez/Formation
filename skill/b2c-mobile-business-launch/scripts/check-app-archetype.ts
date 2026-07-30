@@ -169,19 +169,22 @@ for (const pack of SHIPPED_PACKS) {
    * entrypoint, which is the accretion the collapse just undid. What has to
    * hold is that a reachable chain exists: SKILL.md -> index -> pack.
    */
+  // Markdown paths are always forward-slashed; path.join yields backslashes on
+  // Windows, so the filesystem read and the SKILL.md text match use different forms.
   const indexRelative = path.join(path.dirname(pack.reference), "README.md");
+  const indexRelativePosix = indexRelative.split(path.sep).join("/");
   const indexPath = path.join(args.skillRoot, indexRelative);
   const indexText = existsSync(indexPath) ? readFileSync(indexPath, "utf8") : undefined;
   const packBasename = path.basename(pack.reference);
   const routedDirectly = skillText?.includes(pack.reference) ?? false;
-  const routedViaIndex = (skillText?.includes(indexRelative) ?? false) && (indexText?.includes(packBasename) ?? false);
+  const routedViaIndex = (skillText?.includes(indexRelativePosix) ?? false) && (indexText?.includes(packBasename) ?? false);
 
   if (skillText !== undefined && !routedDirectly && !routedViaIndex) {
     issues.push(
       issue(
         "error",
         `app_archetype.${pack.name}.skill_routing_missing`,
-        `${pack.name} is unreachable: SKILL.md must route to ${indexRelative} and that index must link ${packBasename} (or SKILL.md must name ${pack.reference} directly).`,
+        `${pack.name} is unreachable: SKILL.md must route to ${indexRelativePosix} and that index must link ${packBasename} (or SKILL.md must name ${pack.reference} directly).`,
         "SKILL.md",
       ),
     );
