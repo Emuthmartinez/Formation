@@ -1,6 +1,6 @@
 # Landing Section Library
 
-Motionsites-grade landing sections on the project's own brand tokens. This pack is the reusable abstraction of the practice proof in `docs/landing-motion-lab.html`; the doctrine lives in [`references/landing-motion-craft.md`](../../references/landing-motion-craft.md). It is a **web-only** surface: `motion/react` is mandated here and must never be imported by the mobile binary (`check:template-safety` enforces the boundary).
+Motionsites-grade landing sections on the project's own brand tokens. This pack is the reusable abstraction of the practice proof in `docs/landing-motion-lab.html`; the doctrine lives in [`playbook/design/landing-motion-craft.md`](../../playbook/design/landing-motion-craft.md). It is a **web-only** surface: `motion/react` is mandated here and must never be imported by the mobile binary (`check:template-safety` enforces the boundary).
 
 ## What ships
 
@@ -33,7 +33,7 @@ Motionsites-grade landing sections on the project's own brand tokens. This pack 
 
 ## Baked-video hero (opt-in)
 
-`Hero.tsx` exposes a `videoSrc`/`poster` slot for a Remotion-rendered loop (the Mux-style hero). It is **opt-in per launch** and license-gated: route through [`references/remotion-content-assets.md`](../../references/remotion-content-assets.md) and `TOOL_DECISIONS.md` before rendering. Without the slot the CSS gradient mesh carries the hero — lighter and still premium.
+`Hero.tsx` exposes a `videoSrc`/`poster` slot for a Remotion-rendered loop (the Mux-style hero). It is **opt-in per launch** and license-gated: route through [`playbook/design/remotion-content-assets.md`](../../playbook/design/remotion-content-assets.md) and `TOOL_DECISIONS.md` before rendering. Without the slot the CSS gradient mesh carries the hero — lighter and still premium.
 
 ## Production notes
 

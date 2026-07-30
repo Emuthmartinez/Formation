@@ -8,7 +8,7 @@
  * this class for founder-facing surfaces; this gate closes it for the app's own
  * strings by holding the artifact that carries them: COPY_DECK.md.
  *
- * Rule lists are parsed from references/conversion-copy.md §Banned In App Copy
+ * Rule lists are parsed from playbook/words/conversion-copy.md §Banned In App Copy
  * (see lib/app-copy-rules.ts), so the doc an agent reads and the gate that fails
  * the build cannot drift. Identifier shapes are detected structurally, same as
  * check:founder-copy. The judgment rules — tone, warmth, case taste — stay
@@ -75,7 +75,7 @@ const statePath = hasRootFlag ? cli.statePath : path.join(root, "PROJECT_STATE.y
 
 const issues: Issue[] = [];
 
-const referenceRelative = "references/conversion-copy.md";
+const referenceRelative = "playbook/words/conversion-copy.md";
 const referencePath = path.join(skillRoot, referenceRelative);
 if (!existsSync(referencePath)) {
   issues.push(
@@ -125,7 +125,7 @@ if (!deckText && deckRequired) {
       sev("error"),
       "app_copy.deck_missing",
       "COPY_DECK.md is missing while the design/onboarding lane claims done. Every user-facing string is authored in the deck before the build " +
-        "types it (references/conversion-copy.md §The Copy Deck); a build with no deck improvises labels from the spec.",
+        "types it (playbook/words/conversion-copy.md §The Copy Deck); a build with no deck improvises labels from the spec.",
       "COPY_DECK.md",
     ),
   );
@@ -233,7 +233,7 @@ if (briefRequired) {
         sev("error"),
         "app_copy.brief_unauthored",
         "COPY_BRIEF.md is missing or not authored ('Status: authored <date>') while the design/onboarding lane claims done. The deck's voice " +
-          "comes from the brief — author the promise, voice rules, and claims ledger before the lane is done (references/conversion-copy.md).",
+          "comes from the brief — author the promise, voice rules, and claims ledger before the lane is done (playbook/words/conversion-copy.md).",
         "COPY_BRIEF.md",
       ),
     );
@@ -492,7 +492,7 @@ if (onboarding) {
       issue(
         sev("error"),
         "app_copy.onboarding_copy_table_missing",
-        "ONBOARDING.md has no screen table with a Copy column while the onboarding lane claims done. The screen sequence names its COPY_DECK.md keys in that column (references/conversion-copy.md) — without it, no string is reconciled.",
+        "ONBOARDING.md has no screen table with a Copy column while the onboarding lane claims done. The screen sequence names its COPY_DECK.md keys in that column (playbook/words/conversion-copy.md) — without it, no string is reconciled.",
         "ONBOARDING.md",
       ),
     );
@@ -547,7 +547,7 @@ if (onboarding) {
           issue(
             sev("error"),
             "app_copy.onboarding_placeholder",
-            `ONBOARDING.md's Copy column still says "${shape}" — the screen has no authored words. Name the COPY_DECK.md keys that hold them (references/conversion-copy.md).`,
+            `ONBOARDING.md's Copy column still says "${shape}" — the screen has no authored words. Name the COPY_DECK.md keys that hold them (playbook/words/conversion-copy.md).`,
             where,
           ),
         );
@@ -741,7 +741,7 @@ if (engineeringActive) {
         "TECH_SPEC.md does not commit to a string-externalization mechanism: the Strings And Localization Readiness section must exist and name " +
           "ONE concrete choice for this stack (String Catalogs, i18next + expo-localization, ARB + gen-l10n, or next-intl) — a missing spec or " +
           "the template's untouched option menu does not count. Externalized strings are decided on day one, not retrofitted — " +
-          "references/conversion-copy.md §Localization Readiness.",
+          "playbook/words/conversion-copy.md §Localization Readiness.",
         "TECH_SPEC.md",
       ),
     );

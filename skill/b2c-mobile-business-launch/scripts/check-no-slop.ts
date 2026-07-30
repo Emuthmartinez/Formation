@@ -3,7 +3,7 @@
  * check-no-slop.ts — the writing-quality gate for founder copy and generated marketing copy.
  *
  * Rules adapted from petergyang/no-ai-slop (MIT) — https://github.com/petergyang/no-ai-slop
- * The rule lists live in references/no-slop-writing.md and are parsed from there, so the
+ * The rule lists live in playbook/words/no-slop-writing.md and are parsed from there, so the
  * doc an agent reads and the gate that fails the build cannot drift apart.
  *
  * Two scopes, deliberately different in strictness:
@@ -48,7 +48,7 @@ const repoRootFlag = flagString(flags, "repoRoot");
 const repoRoot = repoRootFlag ? path.resolve(repoRootFlag) : undefined;
 const issues: Issue[] = [];
 
-const referenceRelative = "references/no-slop-writing.md";
+const referenceRelative = "playbook/words/no-slop-writing.md";
 const referencePath = path.join(skillRoot, referenceRelative);
 
 if (!existsSync(referencePath)) {
@@ -97,7 +97,7 @@ for (const surface of shippedSurfaces) {
 }
 
 /**
- * This repo's own public docs. README.md tells readers that references/no-slop-writing.md
+ * This repo's own public docs. README.md tells readers that playbook/words/no-slop-writing.md
  * governs every word this skill writes, so the front door is held to the same gate it
  * advertises. Without this the repo would preach a standard its own CI never reaches —
  * the "enforcement over reminders" rule applied to everyone except the rule's author.
@@ -214,7 +214,7 @@ function collapse(value: string): string {
 }
 
 function listReferences(): string[] {
-  const referencesRoot = path.join(skillRoot, "references");
+  const referencesRoot = path.join(skillRoot, "playbook");
   if (!existsSync(referencesRoot)) return [];
   const found: string[] = [];
   const walk = (dir: string): void => {

@@ -68,8 +68,8 @@ function writeParityPair(root: string, options: { rootVersion: string; skillVers
  */
 function writeNoSlopRoots(root: string, brandCopy: string): { fixtureSkillRoot: string; fixtureTemplates: string } {
   const fixtureSkillRoot = path.join(root, "skill");
-  mkdirSync(path.join(fixtureSkillRoot, "references"), { recursive: true });
-  cpSync(path.join(skillRoot, "references", "no-slop-writing.md"), path.join(fixtureSkillRoot, "references", "no-slop-writing.md"));
+  mkdirSync(path.join(fixtureSkillRoot, "playbook", "words"), { recursive: true });
+  cpSync(path.join(skillRoot, "playbook", "words", "no-slop-writing.md"), path.join(fixtureSkillRoot, "playbook", "words", "no-slop-writing.md"));
   const fixtureTemplates = path.join(root, "templates");
   mkdirSync(fixtureTemplates, { recursive: true });
   writeFileSync(path.join(fixtureTemplates, "BRAND.md"), `# Brand\n\n${brandCopy}\n`, "utf8");
@@ -155,9 +155,9 @@ export function register(h: Harness): void {
 
   // --- audit-skill-links ---
   const wireLinkRoot = (root: string): void => {
-    mkdirSync(path.join(root, "references"), { recursive: true });
+    mkdirSync(path.join(root, "playbook"), { recursive: true });
     mkdirSync(path.join(root, "templates"), { recursive: true });
-    writeFileSync(path.join(root, "references", "guide.md"), "See [the template](../templates/artifact.md) for the artifact contract.\n", "utf8");
+    writeFileSync(path.join(root, "playbook", "guide.md"), "See [the template](../templates/artifact.md) for the artifact contract.\n", "utf8");
     writeFileSync(path.join(root, "templates", "artifact.md"), "# Artifact\nRouted from references/guide.md — keep both sides linked.\n", "utf8");
   };
 
@@ -167,25 +167,25 @@ export function register(h: Harness): void {
 
   const linksBroken = makeEmptyFixture("skill-links-broken");
   wireLinkRoot(linksBroken);
-  writeFileSync(path.join(linksBroken, "references", "guide.md"), "See [the template](../templates/missing.md); artifact.md still routes.\n", "utf8");
+  writeFileSync(path.join(linksBroken, "playbook", "guide.md"), "See [the template](../templates/missing.md); artifact.md still routes.\n", "utf8");
   runScriptArgs("link audit fails on a broken local link", "audit-skill-links.ts", ["--skill-root", linksBroken], 1, "skill_links.broken_local_link");
 
   const linksOrphan = makeEmptyFixture("skill-links-orphan");
   wireLinkRoot(linksOrphan);
-  writeFileSync(path.join(linksOrphan, "references", "unrouted.md"), "No other file mentions this reference, so no agent can load it.\n", "utf8");
+  writeFileSync(path.join(linksOrphan, "playbook", "unrouted.md"), "No other file mentions this reference, so no agent can load it.\n", "utf8");
   runScriptArgs("link audit fails on an orphaned reference file", "audit-skill-links.ts", ["--skill-root", linksOrphan], 1, "skill_links.orphan_file");
 
   // Regression (verification pass): a basename that is a substring of another
   // mentioned file's basename ("lane.md" inside "sub-lane.md") is not a mention.
   const linksSubstringOrphan = makeEmptyFixture("skill-links-substring-orphan");
   wireLinkRoot(linksSubstringOrphan);
-  writeFileSync(path.join(linksSubstringOrphan, "references", "lane.md"), "Nothing references this file by its own name.\n", "utf8");
+  writeFileSync(path.join(linksSubstringOrphan, "playbook", "lane.md"), "Nothing references this file by its own name.\n", "utf8");
   writeFileSync(
-    path.join(linksSubstringOrphan, "references", "guide.md"),
+    path.join(linksSubstringOrphan, "playbook", "guide.md"),
     "See [the template](../templates/artifact.md); also read sub-lane.md notes.\n",
     "utf8",
   );
-  writeFileSync(path.join(linksSubstringOrphan, "references", "sub-lane.md"), "Routed from references/guide.md.\n", "utf8");
+  writeFileSync(path.join(linksSubstringOrphan, "playbook", "sub-lane.md"), "Routed from references/guide.md.\n", "utf8");
   runScriptArgs("link audit flags a basename-substring orphan", "audit-skill-links.ts", ["--skill-root", linksSubstringOrphan], 1, "skill_links.orphan_file");
 
   const linksDuplicate = makeEmptyFixture("skill-links-duplicate");
@@ -194,11 +194,7 @@ export function register(h: Harness): void {
     "# Duplicate body\nThis exact content is shipped twice under templates/, which will drift apart silently over time once one copy is edited and the other is forgotten.\n";
   writeFileSync(path.join(linksDuplicate, "templates", "copy-one.md"), duplicateBody, "utf8");
   writeFileSync(path.join(linksDuplicate, "templates", "copy-two.md"), duplicateBody, "utf8");
-  writeFileSync(
-    path.join(linksDuplicate, "references", "guide.md"),
-    "See [the template](../templates/artifact.md), plus copy-one.md and copy-two.md.\n",
-    "utf8",
-  );
+  writeFileSync(path.join(linksDuplicate, "playbook", "guide.md"), "See [the template](../templates/artifact.md), plus copy-one.md and copy-two.md.\n", "utf8");
   runScriptArgs(
     "link audit fails on byte-identical template duplicates",
     "audit-skill-links.ts",
@@ -233,7 +229,7 @@ export function register(h: Harness): void {
   );
 
   // The landing section library is a web-only surface where motion/react is
-  // mandated (references/landing-motion-craft.md); the same import outside
+  // mandated (playbook/design/landing-motion-craft.md); the same import outside
   // landing/ still fails above.
   const templateSafetyLanding = makeEmptyFixture("template-safety-landing-pack");
   mkdirSync(path.join(templateSafetyLanding, "landing", "sections"), { recursive: true });
@@ -452,16 +448,16 @@ export function register(h: Harness): void {
   // fixture is the shipped skill plus exactly one seeded drift — if the shipped
   // files and the parser ever stop agreeing, the passing fixture goes red too.
   const motionContractFiles = [
-    "references/motion-craft-benchmarks.md",
-    "references/premium-mobile-craft.md",
+    "playbook/design/motion-craft-benchmarks.md",
+    "playbook/design/premium-mobile-craft.md",
     "design-system/tokens.json",
     "design-system/DesignTokens.swift",
     "templates/design-system/tokens.json",
     "templates/design-system/DesignTokens.swift",
     "templates/design-system/PremiumCraft.swift",
-    "references/experience-cards/peak-end-card.md",
-    "references/experience-cards/mastery-and-status-card.md",
-    "references/experience-cards/variable-reward-card.md",
+    "playbook/experience/experience-cards/peak-end-card.md",
+    "playbook/experience/experience-cards/mastery-and-status-card.md",
+    "playbook/experience/experience-cards/variable-reward-card.md",
     "templates/DESIGN.md",
     "templates/emotional-design/EMOTIONAL_DESIGN.md",
     "templates/motion-catalog/TokenSpring.swift",

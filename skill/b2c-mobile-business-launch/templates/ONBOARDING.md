@@ -10,7 +10,7 @@ Status: partial until the flow is product-specific and visually verified.
 
 ## Screen Sequence
 
-The Copy column names the `COPY_DECK.md` keys that hold each screen's final words — author the deck rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then build from them. A build that reaches a screen whose deck rows are missing stops and authors them; it never improvises a label from the spec.
+The Copy column names the `COPY_DECK.md` keys that hold each screen's final words — author the deck rows first (voice from `COPY_BRIEF.md`, craft from `playbook/words/conversion-copy.md`), then build from them. A build that reaches a screen whose deck rows are missing stops and authors them; it never improvises a label from the spec.
 
 | Step | Purpose | Copy (from `COPY_DECK.md`) | State | Visual / motion | Analytics | Back / skip |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -40,7 +40,7 @@ The Copy column names the `COPY_DECK.md` keys that hold each screen's final word
 
 ## Emotional Card Timing
 
-Onboarding is where most Experience Cards fire. When the 11-star target is 6-star or higher, mirror the card-timing contract from `references/emotional-design-system.md §Integration §Onboarding Conversion` and record each moment in the `EMOTIONAL_DESIGN.md` Card Application Map with a PostHog event:
+Onboarding is where most Experience Cards fire. When the 11-star target is 6-star or higher, mirror the card-timing contract from `playbook/experience/emotional-design-system.md §Integration §Onboarding Conversion` and record each moment in the `EMOTIONAL_DESIGN.md` Card Application Map with a PostHog event:
 
 - **Commitment Card** — at the first personalization / goal question; echoed (not used as friction) on the plan reveal and paywall. Event: `commitment_made`.
 - **Perceived Effort Delay Card** — at plan / result generation, narrating real computation (≥50% real-step ratio). Event: `perceived_effort_started` / `perceived_effort_completed`.

@@ -115,7 +115,7 @@ When the `ui-ux-pro-max` skill is available, adapt its senior-grade pattern, mot
 
 ## Premium Craft Details
 
-Premium is not flashy; it is the compounding effect of many invisible decisions. These five details ship as boilerplate (`design-system/PremiumCraft.swift` for SwiftUI/latest Swift, with React Native and Flutter parity notes) and must be honored on every in-app surface. Full doctrine: `references/premium-mobile-craft.md`.
+Premium is not flashy; it is the compounding effect of many invisible decisions. These five details ship as boilerplate (`design-system/PremiumCraft.swift` for SwiftUI/latest Swift, with React Native and Flutter parity notes) and must be honored on every in-app surface. Full doctrine: `playbook/design/premium-mobile-craft.md`.
 
 | Detail | Premium bar | Boilerplate | Reduced-motion / accessibility |
 | --- | --- | --- | --- |

@@ -10,5 +10,5 @@ must_catch:
   - "The recommendation optimizes for 'addiction' rather than the user's real goal, with no bright-line/dark-line."
   - "No measurement event ties the emotional moment to a falsifiable signal."
 should_say:
-  - "Ground each mechanism in references/experience-cards.md with correct attribution; mark uncertain citations 'attribution-uncertain' rather than inventing studies."
+  - "Ground each mechanism in playbook/experience/experience-cards.md with correct attribution; mark uncertain citations 'attribution-uncertain' rather than inventing studies."
   - "Replace the sleep timer with real computation or a transparent ui_composition step, add bright-line/dark-line and a PostHog event, then run check:emotional-design."

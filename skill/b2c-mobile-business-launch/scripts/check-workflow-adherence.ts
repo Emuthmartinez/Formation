@@ -44,12 +44,12 @@ function warnIfTooLong(text: string, maxLines: number, label: string, filePath: 
 const { skillRoot, repoRoot } = parseArgs(process.argv.slice(2));
 const issues: Issue[] = [];
 
-const parallelPath = path.join(skillRoot, "references", "parallel-agent-orchestration.md");
-const engineeringPath = path.join(skillRoot, "references", "engineering-orchestration.md");
+const parallelPath = path.join(skillRoot, "playbook", "process", "parallel-agent-orchestration.md");
+const engineeringPath = path.join(skillRoot, "playbook", "engineering", "engineering-orchestration.md");
 // The CE routing contract lives in the engineering lane of the split
 // tool-recipes surface; the index only routes to it.
-const toolRecipesPath = path.join(skillRoot, "references", "tool-recipes", "engineering-and-agent-orchestration.md");
-const compoundEngineeringPath = path.join(skillRoot, "references", "compound-engineering-routing.md");
+const toolRecipesPath = path.join(skillRoot, "playbook", "process", "tool-recipes", "engineering-and-agent-orchestration.md");
+const compoundEngineeringPath = path.join(skillRoot, "playbook", "process", "compound-engineering-routing.md");
 const templateAgentsPath = path.join(skillRoot, "templates", "repo-agent-entrypoints", "AGENTS.md");
 const templateClaudePath = path.join(skillRoot, "templates", "repo-agent-entrypoints", "CLAUDE.md");
 const orchestrationTemplatePath = path.join(skillRoot, "templates", "ORCHESTRATION.md");

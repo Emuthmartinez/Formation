@@ -162,14 +162,14 @@ export function register(h: Harness): void {
   // Nested worktrees are excluded from the scan.
   const sourceRegistryWorktree = makeEmptyFixture("source-registry-worktree-copy");
   writeSourceRegistryFixture(sourceRegistryWorktree);
-  mkdirSync(path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "references"), { recursive: true });
+  mkdirSync(path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "playbook"), { recursive: true });
   // Assembled from parts for the same reason as above: the worktree copy must
   // carry a full unregistered URL while THIS file stays invisible to the
   // repo-level registry scan. The fixture only passes because nested worktrees
   // are excluded.
   const worktreeUrl = ["https:/", "/worktree-drift.example.dev/design-visual-system"].join("");
   writeFileSync(
-    path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "references", "design-visual-system.md"),
+    path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "playbook", "design-visual-system.md"),
     `# Visual System Swipe File\n\nSource: ${worktreeUrl}\n`,
     "utf8",
   );
@@ -375,7 +375,7 @@ export function register(h: Harness): void {
   const landingNoState = makeEmptyFixture("landing-funnel-missing-state");
   runFixture("landing funnel fails loudly when project state is missing", landingNoState, "check-landing-funnel.ts", 1, "project_state.missing");
 
-  // --- landing motion craft (references/landing-motion-craft.md) ---
+  // --- landing motion craft (playbook/design/landing-motion-craft.md) ---
   const animatedIndexHtml = (options: { reducedMotion: boolean; tokenized: boolean; staticHero: boolean }): string =>
     [
       "<!doctype html>",
@@ -738,7 +738,7 @@ export function register(h: Harness): void {
 
   // --- check-change-cascade: recorded cascade surface coverage ---
   // Grades PROJECT_STATE.yaml change_cascade entries against the shipped
-  // references/cascade-edges.yaml map (the data form of the Change Cascade Map).
+  // playbook/process/cascade-edges.yaml map (the data form of the Change Cascade Map).
 
   /** Write a change_cascade block into a fixture's PROJECT_STATE.yaml. */
   const withCascade = (root: string, block: unknown): void => {

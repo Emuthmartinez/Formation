@@ -2,7 +2,7 @@
 
 Research-first localization for this app. **Demand → Prioritize → Localize → Measure.** We do not translate into every language and hope for downloads; we research search demand per market, rank markets into priority tiers, and localize only what clears the bar — then refresh from first-party analytics after launch.
 
-See [`references/localization-market-research.md`](../../references/localization-market-research.md) for the full method. Produce this in the research phase, before any metadata, keyword field, screenshot, or paywall copy locks.
+See [`playbook/research/localization-market-research.md`](../../playbook/research/localization-market-research.md) for the full method. Produce this in the research phase, before any metadata, keyword field, screenshot, or paywall copy locks.
 
 Status: partial — replace the example rows with researched markets for this app and record the data basis for each cell.
 
@@ -40,7 +40,7 @@ One row per candidate country/storefront. Keywords are the **native** terms user
 
 Effort scales with opportunity, not with the number of languages available.
 
-- **Tier 1 — full localize:** metadata + keyword field + screenshots + App Preview + paywall/offer adaptation + landing + lifecycle email + optional market custom product page. Adapt paywall layout, plan anchoring, and offers — not word-for-word translation (see [`references/revenue-monetization.md`](../../references/revenue-monetization.md)).
+- **Tier 1 — full localize:** metadata + keyword field + screenshots + App Preview + paywall/offer adaptation + landing + lifecycle email + optional market custom product page. Adapt paywall layout, plan anchoring, and offers — not word-for-word translation (see [`playbook/money/revenue-monetization.md`](../../playbook/money/revenue-monetization.md)).
 - **Tier 2 — metadata-only:** localized title/subtitle/keyword field/description; English (or nearest Tier 1) screenshots, recorded here as an intentional gap.
 - **Tier 3 — defer / track:** no localization yet; revisit from real App Analytics in the post-launch refresh.
 
@@ -48,7 +48,7 @@ Do not localize a surface into a market with no Tier 1/2 entry. Do not ship tran
 
 ## Cross-Surface Rollout (Mobile And App)
 
-Each market's tier cascades via [`references/change-cascade.md`](../../references/change-cascade.md):
+Each market's tier cascades via [`playbook/process/change-cascade.md`](../../playbook/process/change-cascade.md):
 
 | Surface | Tier 1 markets | Tier 2 markets | Owner artifact |
 | --- | --- | --- | --- |

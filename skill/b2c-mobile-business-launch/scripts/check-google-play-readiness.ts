@@ -16,7 +16,7 @@
  *      or an organization account recorded), and Data Safety reconciliation
  *      with the iOS privacy answers stated.
  *
- * See references/google-play-release.md.
+ * See playbook/store/google-play-release.md.
  *
  * Run:
  *   npm run check:google-play -- --root <app-repo-root>
@@ -69,7 +69,7 @@ if (!packet || !packetPath) {
       "google_play.packet_missing",
       "Android is in scope (platforms/bundle id) but GOOGLE_PLAY_RELEASE.md does not exist. " +
         "Plan the Play side early — the personal-account closed-testing gate (12 testers for 14 continuous days) " +
-        "can slip a launch date by weeks when discovered late. See references/google-play-release.md.",
+        "can slip a launch date by weeks when discovered late. See playbook/store/google-play-release.md.",
       "GOOGLE_PLAY_RELEASE.md",
     ),
   );

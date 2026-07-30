@@ -1,5 +1,5 @@
 /**
- * app-copy-rules.ts — the machine-readable form of references/conversion-copy.md
+ * app-copy-rules.ts — the machine-readable form of playbook/words/conversion-copy.md
  * §Banned In App Copy, plus the COPY_DECK.md table reader.
  *
  * The rule lists are PARSED OUT OF THE REFERENCE rather than duplicated here, the

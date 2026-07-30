@@ -47,7 +47,7 @@ function parseArgs(argv: string[]): Args {
     { flags: ["--timeout-ms"], key: "timeoutMs", kind: "number" },
   ]);
   const root = flagString(flags, "root") ?? process.cwd();
-  const registryPath = flagString(flags, "registry") ?? "references/source-registry.yaml";
+  const registryPath = flagString(flags, "registry") ?? "machine/source-registry.yaml";
   const outDir = flagString(flags, "outDir") ?? "docs/source-freshness";
   const timeoutMs = flagNumber(flags, "timeoutMs") ?? 15000;
 

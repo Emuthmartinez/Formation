@@ -75,5 +75,5 @@ jobs:
 
             Review auto-discovered sources as candidates before treating them as canonical launch policy. If upstream changes affect behavior, update references/templates/validators/evals in this PR before merging.
           add-paths: |
-            skill/b2c-mobile-business-launch/references/source-registry.yaml
+            skill/b2c-mobile-business-launch/machine/source-registry.yaml
             docs/source-freshness/

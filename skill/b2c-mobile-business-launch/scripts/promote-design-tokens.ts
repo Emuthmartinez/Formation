@@ -76,7 +76,7 @@ function renderCss(tokens: unknown, tokenHash: string): string {
     ["motion-duration-celebrate", "motion.durationCelebrate"],
     ["motion-duration-reduced", "motion.reducedMotionDuration"],
     ["motion-easing", "motion.easing"],
-    // Landing/web cinematic lane (references/landing-motion-craft.md): hero
+    // Landing/web cinematic lane (playbook/design/landing-motion-craft.md): hero
     // word reveals, scroll choreography, and stagger share these tokens with
     // the Remotion baked-asset lane so one brand timing system spans both.
     ["motion-duration-reveal", "motion.durationReveal"],
@@ -132,7 +132,7 @@ function renderSwift(tokens: unknown, tokenHash: string): string {
     `    static let easing = "${String(getToken(tokens, "motion.easing") ?? "")}"`,
     "    // Landing/web cinematic lane tokens. The mobile binary keeps to the",
     "    // 120-360ms micro-motion band above; these ship so cross-surface tools",
-    "    // read one timing contract (see references/landing-motion-craft.md).",
+    "    // read one timing contract (see playbook/design/landing-motion-craft.md).",
     `    static let durationReveal: Double = ${msToSeconds(getToken(tokens, "motion.durationReveal"))}`,
     `    static let durationCinematic: Double = ${msToSeconds(getToken(tokens, "motion.durationCinematic"))}`,
     `    static let stagger: Double = ${msToSeconds(getToken(tokens, "motion.stagger"))}`,

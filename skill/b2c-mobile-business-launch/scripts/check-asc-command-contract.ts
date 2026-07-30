@@ -9,7 +9,7 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "..");
 const flags = parseFlags(process.argv.slice(2), [{ flags: ["--skill-root", "--root"], key: "skillRoot" }]);
 const skillRoot = flagString(flags, "skillRoot") ?? defaultSkillRoot;
-const referencePath = path.join(skillRoot, "references", "app-store-connect-cli.md");
+const referencePath = path.join(skillRoot, "playbook", "store", "app-store-connect-cli.md");
 const issues: Issue[] = [];
 
 if (!existsSync(referencePath)) {
@@ -66,7 +66,7 @@ if (!version.error && version.status === 0) {
         "warning",
         "asc_command_contract.live_cli_stale",
         `Installed asc ${installedMajor}.x predates the stored 2.x contract; update the shadowed CLI before using executable guidance.`,
-        "references/app-store-connect-cli.md",
+        "playbook/store/app-store-connect-cli.md",
       ),
     );
     verifyLiveHelp(["review", "--help"], ["submissions-list"]);
@@ -88,7 +88,7 @@ function verifyLiveHelp(args: string[], required: string[]): void {
         "error",
         `asc_command_contract.live_help_${code(args.join("_"))}_failed`,
         `Installed asc ${args.join(" ")} failed; refresh the CLI/reference before release.`,
-        "references/app-store-connect-cli.md",
+        "playbook/store/app-store-connect-cli.md",
       ),
     );
     return;
@@ -100,7 +100,7 @@ function verifyLiveHelp(args: string[], required: string[]): void {
           "error",
           `asc_command_contract.live_help_${code(term)}_missing`,
           `Installed asc ${args.join(" ")} no longer exposes ${term}; update the stored command contract.`,
-          "references/app-store-connect-cli.md",
+          "playbook/store/app-store-connect-cli.md",
         ),
       );
     }
@@ -109,7 +109,7 @@ function verifyLiveHelp(args: string[], required: string[]): void {
 
 function collectGuidanceFiles(): string[] {
   const files: string[] = [];
-  for (const base of [path.join(skillRoot, "references"), path.join(skillRoot, "templates")]) {
+  for (const base of [path.join(skillRoot, "playbook"), path.join(skillRoot, "templates")]) {
     if (!existsSync(base)) continue;
     const visit = (directory: string): void => {
       for (const name of readdirSync(directory)) {

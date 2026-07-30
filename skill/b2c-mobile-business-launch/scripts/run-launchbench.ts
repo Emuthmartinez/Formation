@@ -165,7 +165,7 @@ if (!existsSync(scenarioDir)) {
 // Honest naming: this gate lints scenario definitions (fields + known-validator
 // references) and then runs the deterministic validator fixtures. Scenario
 // prompts are NOT executed against a live agent here — see
-// references/launchbench-evals.md "Harness Shape".
+// machine/launchbench-evals.md "Harness Shape".
 reportAndExit("LaunchBench scenario definition lint (prompts are not executed against an agent)", issues);
 
 if (issues.some((item) => item.severity === "error")) {

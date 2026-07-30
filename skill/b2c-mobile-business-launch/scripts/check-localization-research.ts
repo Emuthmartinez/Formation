@@ -104,7 +104,7 @@ if (!research) {
         "LOCALIZATION_MARKET_RESEARCH.md is required before localization when a store launch is in scope. " +
           "Produce the market opportunity matrix (popularity, difficulty, priority tiers) in the research phase, " +
           "or set lanes.store_console.status to deferred/not_needed with a reason. " +
-          "See references/localization-market-research.md.",
+          "See playbook/research/localization-market-research.md.",
         "LOCALIZATION_MARKET_RESEARCH.md",
       ),
     );

@@ -34,17 +34,17 @@ const { skillRoot } = parseArgs(process.argv.slice(2));
 const g = (m: RegExpMatchArray, i: number): string => m[i] ?? "";
 const issues: Issue[] = [];
 
-const BENCH = "references/motion-craft-benchmarks.md";
-const CRAFT = "references/premium-mobile-craft.md";
+const BENCH = "playbook/design/motion-craft-benchmarks.md";
+const CRAFT = "playbook/design/premium-mobile-craft.md";
 const TOKENS = "design-system/tokens.json";
 const SWIFT = "templates/design-system/PremiumCraft.swift";
 const SWIFT_TOKENS = "design-system/DesignTokens.swift";
 const TEMPLATE_TOKENS = "templates/design-system/tokens.json";
 const TEMPLATE_SWIFT_TOKENS = "templates/design-system/DesignTokens.swift";
 const CANON_CARDS = [
-  "references/experience-cards/peak-end-card.md",
-  "references/experience-cards/mastery-and-status-card.md",
-  "references/experience-cards/variable-reward-card.md",
+  "playbook/experience/experience-cards/peak-end-card.md",
+  "playbook/experience/experience-cards/mastery-and-status-card.md",
+  "playbook/experience/experience-cards/variable-reward-card.md",
 ];
 
 function read(rel: string): string | undefined {
@@ -575,7 +575,7 @@ const mdFilesUnder = (relDir: string): string[] => {
   }
   return found;
 };
-for (const rel of [...mdFilesUnder("references"), ...mdFilesUnder("templates")]) {
+for (const rel of [...mdFilesUnder("playbook"), ...mdFilesUnder("templates")]) {
   const text = readFileSync(path.join(skillRoot, rel), "utf8");
   if (swiftMotionMemberNames.size > 0) {
     for (const m of text.matchAll(/DesignTokens\.Motion\.([A-Za-z0-9_]+)/g)) {
