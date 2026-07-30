@@ -157,6 +157,30 @@ if (deckText && !deckIsTemplate && !deckIsAuthored && deckRequired) {
 const briefRequired = deckRequired || ["store_console", "revenue", "email"].some((lane) => laneStatus(lane) === "done");
 if (briefRequired) {
   const brief = readText(root, "COPY_BRIEF.md");
+  // A hollow status stub is not a brief: the sections the deck inherits from
+  // must exist and carry content, not just headings.
+  const REQUIRED_BRIEF_SECTIONS = [
+    "Value proposition",
+    "Message hierarchy",
+    "Voice and tone",
+    "Voice-of-customer phrase bank",
+    "Per-surface copy blocks",
+    "Claims ledger",
+  ];
+  const hollowSections = REQUIRED_BRIEF_SECTIONS.filter((section) => {
+    const body = (brief ?? "").match(new RegExp(`##\\s+${section}\\s*\\n([\\s\\S]*?)(?=\\n##\\s|$)`, "i"))?.[1] ?? "";
+    return body.replace(/[^A-Za-z0-9]/g, "").length < 40;
+  });
+  if (brief && /^Status:\s*authored\b/im.test(brief) && hollowSections.length > 0) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.brief_hollow",
+        `COPY_BRIEF.md declares itself authored but these sections are missing or empty: ${hollowSections.join(", ")}. The deck inherits its voice from the brief — a status line with no source material grants nothing.`,
+        "COPY_BRIEF.md",
+      ),
+    );
+  }
   if (!brief || !/^Status:\s*authored\b/im.test(brief)) {
     issues.push(
       issue(
@@ -552,6 +576,18 @@ if (root !== path.join(skillRoot, "templates")) {
 // gate here closes, so the route is held in the plan itself.
 if (deckRequired) {
   const plan = readText(root, "ENGINEERING_PLAN.md");
+  // With engineering underway, a missing plan is the same failure as a plan
+  // without the route: the builder has nothing directing strings to the deck.
+  if (engineeringActive && !plan) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.plan_deck_route_missing",
+        "ENGINEERING_PLAN.md is missing while engineering is underway — there is no plan directing builders to type strings from COPY_DECK.md.",
+        "ENGINEERING_PLAN.md",
+      ),
+    );
+  }
   if (plan && !plan.includes("COPY_DECK.md")) {
     issues.push(
       issue(
@@ -582,10 +618,22 @@ if (engineeringActive) {
   // none — we rejected i18next" negates the choice, while "Mechanism: i18next
   // — no strings remain inline" is a compliant declaration with a compliance
   // note after it.
+  // A choice is exactly ONE mechanism group ("i18next + expo-localization"
+  // is one pairing; "i18next or next-intl" is two), with nothing pending.
+  const MECHANISM_GROUPS = [
+    /xcstrings|string catalog|localizable\.strings/i,
+    /i18next|expo-localization/i,
+    /\barb\b|gen-l10n/i,
+    /next-intl/i,
+    /strings module/i,
+    /strings\.xml|string resources/i,
+  ];
   const namesMechanism = readinessSection.split(/\r?\n/).some((line) => {
     if (!/mechanism[^:\n]*:/i.test(line)) return false;
+    if (/\b(tbd|to be decided|undecided|decide (later|after)|pending|after the spike)\b/i.test(line)) return false;
     const mechanismAt = line.search(MECHANISM);
     if (mechanismAt === -1) return false;
+    if (MECHANISM_GROUPS.filter((group) => group.test(line)).length !== 1) return false;
     // Negation counts inside the CLAUSE that carries the choice: "Mechanism:
     // i18next was rejected; ..." negates it, while a compliance note in a
     // later clause ("— no strings remain inline") does not.
@@ -695,7 +743,10 @@ if (root === path.join(skillRoot, "templates")) {
       const promptsDir = path.join(archetypePromptsDir, pack, "prompts");
       if (!existsSync(promptsDir) || !statSync(promptsDir).isDirectory()) continue;
       for (const file of walkMarkdown(promptsDir)) {
-        if (!readFileSync(file, "utf8").includes("COPY_DECK.md")) {
+        // The rule must live INSIDE the runnable fenced block — that block is
+        // what a builder copies; prose around it never reaches the build.
+        const fenced = (readFileSync(file, "utf8").match(/```[\s\S]*?```/g) ?? []).join("\n");
+        if (!fenced.includes("COPY_DECK.md")) {
           const relative = path.relative(skillRoot, file);
           issues.push(
             issue(

@@ -21,6 +21,12 @@ Create:
 5. A lightweight first-run step (display name) before the first conversation
 
 Design: clean, modern, dark theme. Form validation with clear error messages.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -30,7 +36,3 @@ Design: clean, modern, dark theme. Form validation with clear error messages.
 - Reconcile the dark-theme look with Design Room tokens (`design-room.md`), don't invent a one-off style.
 - Add `sign_up_completed`, `oauth_used`, `first_run_completed` to `ANALYTICS.md`.
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

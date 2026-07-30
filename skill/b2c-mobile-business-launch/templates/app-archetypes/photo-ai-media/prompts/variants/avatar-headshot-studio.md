@@ -26,6 +26,12 @@ Changes from the base:
   reference, and any provider-side copies have a documented retention window
   and a one-tap "delete my identity data" action that destroys all three;
   deletion is verified, not best-effort
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -35,7 +41,3 @@ Changes from the base:
 - The "pack is ready" reveal is the 11-star moment at its strongest — and the strongest Variable Reward exposure (M outputs of your own face): the prompt-04 HIGH-risk contract applies in full, and partial re-rolls must not be engineered near-misses (`reward_variation_proof`).
 - Training jobs run minutes, not seconds: honest progress (Perceived Effort Delay with `computation_type: real_api_call`) plus a leave-and-notify path via `resend-email-ops.md` — never a captive fake progress bar.
 - Add `training_set_created`, `identity_training_completed`, `pack_delivered`, `identity_data_deleted` to `ANALYTICS.md`.
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

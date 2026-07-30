@@ -22,6 +22,12 @@ Algorithm for feed:
 - Show a mix of followed accounts (40%) and algorithmic recommendations (60%)
 - Track watch completion rate as primary engagement signal
 - Videos watched past 80% get heavily weighted in recommendations
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -32,7 +38,3 @@ Algorithm for feed:
 - The 40/60 follow-vs-recommend mix is a starting heuristic, not a law — make it a tunable config and revisit with real watch data.
 - Auto-play with sound off and tap-to-unmute must honor reduced-motion / data-saver preferences; specify fallbacks (`design-visual-system.md`).
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

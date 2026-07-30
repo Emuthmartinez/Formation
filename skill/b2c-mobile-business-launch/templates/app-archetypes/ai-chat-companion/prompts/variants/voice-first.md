@@ -20,6 +20,12 @@ Changes from the text version:
 
 Pick STT and TTS providers and tell me the trade-offs (latency, cost, quality);
 keep provider choices in config.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -29,7 +35,3 @@ keep provider choices in config.
 - Audio is sensitive PII; document capture, retention, and deletion in `privacy-terms.md` and apply the same RLS/owner-only rules as messages.
 - Add `voice_input_started`, `transcription_completed`, `tts_playback_started`, `voice_fallback_to_text` to `ANALYTICS.md`.
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

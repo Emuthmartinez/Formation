@@ -22,6 +22,12 @@ Changes from the base:
   packs; watermark-free and full-resolution download as the paid unlock
 - Cut everything the utility does not need from the UI: no studio chrome, no
   feed — library, restore, account
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -31,7 +37,3 @@ Changes from the base:
 - Old family photos are often of deceased or non-consenting relatives; keep the rights attestation from prompt 08 in its simplified form and the takedown path intact (`privacy-terms.md`).
 - Sharing restored family photos is a strong organic loop — the prompt 07 before/after share formats apply unchanged if the founder selects sharing.
 - Keep the four lane events (`media_uploaded`, `generation_started`, `generation_completed`, `media_shared`) plus `restore_mode_selected` in `ANALYTICS.md`.
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

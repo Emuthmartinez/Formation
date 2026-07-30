@@ -23,6 +23,12 @@ Notifications:
 - Notification feed: new followers, likes, reposts, replies
 - Mark all as read button
 - Real-time updates via Supabase subscriptions
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -33,7 +39,3 @@ Notifications:
 - Follow / new-follower is the first viral surface — connect it to `viral-growth-loops.md` (a new follower can trigger a welcome/notification email via `resend-email-ops.md`).
 - Profile header design pulls from the Design Room tokens, not a one-off look.
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

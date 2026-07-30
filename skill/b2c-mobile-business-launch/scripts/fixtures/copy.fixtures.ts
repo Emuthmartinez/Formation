@@ -50,7 +50,31 @@ const AUTHORED_BRIEF = [
   "",
   "## Value proposition",
   "",
-  "One small win a day, traced to RESEARCH.md.",
+  "One small win a day, traced to the RESEARCH.md review-mining evidence rows.",
+  "",
+  "## Message hierarchy",
+  "",
+  "Primary promise: a streak you can watch grow. Benefits: quick check-ins, honest streaks, gentle recovery.",
+  "",
+  "## Voice and tone",
+  "",
+  "Second person, plain words, sentence case everywhere except proper nouns.",
+  "",
+  "## Voice-of-customer phrase bank",
+  "",
+  "| Their words | Where it came from | Cluster |",
+  "| --- | --- | --- |",
+  "| I always fall off after a week | review mining | problem |",
+  "",
+  "## Per-surface copy blocks",
+  "",
+  "Landing hero: Small wins, every day. Store subtitle: One small check-in a day.",
+  "",
+  "## Claims ledger",
+  "",
+  "| Claim | Where it appears | Substantiation |",
+  "| --- | --- | --- |",
+  "| none shipped | n/a | no quantified claims at launch |",
   "",
 ].join("\n");
 
@@ -896,4 +920,63 @@ export function register(h: Harness): void {
     1,
     "app_copy.externalization_missing",
   );
+
+  // A hollow status stub is not a brief.
+  const briefHollow = makeFixture("app-copy-brief-hollow");
+  writeFileSync(path.join(briefHollow, "PROJECT_STATE.yaml"), stateWith("phase_2", { revenue: "done" }), "utf8");
+  writeFileSync(path.join(briefHollow, "COPY_BRIEF.md"), "# Copy Brief\n\nStatus: authored 2026-07-29\n", "utf8");
+  runFixture("App copy: hollow authored brief fails", briefHollow, "check-app-copy.ts", 1, "app_copy.brief_hollow");
+
+  // Engineering underway with NO plan at all is the same missing-route failure.
+  const planMissing = makeFixture("app-copy-plan-missing");
+  writeFileSync(path.join(planMissing, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "partial" }), "utf8");
+  rmSync(path.join(planMissing, "ENGINEERING_PLAN.md"));
+  runFixture("App copy: engineering underway without any plan fails", planMissing, "check-app-copy.ts", 1, "app_copy.plan_deck_route_missing");
+
+  // A disjunctive or pending mechanism line is not a decision.
+  const mechanismUndecided = makeFixture("app-copy-mechanism-undecided");
+  writeFileSync(path.join(mechanismUndecided, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(mechanismUndecided, "TECH_SPEC.md"),
+    ["# Technical Spec", "", "## Strings And Localization Readiness", "", "Mechanism: i18next or next-intl — decide after the spike.", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: disjunctive pending mechanism is not a choice", mechanismUndecided, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // Commented-out rows are hidden from the rendered deck and from parsing.
+  const deckCommentedRows = makeFixture("app-copy-deck-commented-rows");
+  writeFileSync(path.join(deckCommentedRows, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckCommentedRows, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: authored 2026-07-29",
+      "",
+      "## Onboarding",
+      "",
+      "<!--",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |",
+      "-->",
+      ...NA_SURFACES,
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(deckCommentedRows, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(deckCommentedRows, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: commented-out deck rows do not count as authored", deckCommentedRows, "check-app-copy.ts", 1, "app_copy.deck_surface_missing");
 }

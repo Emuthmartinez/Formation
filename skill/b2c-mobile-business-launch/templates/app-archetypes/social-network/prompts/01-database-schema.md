@@ -19,6 +19,12 @@ Create:
 4. A seed script with 5 test users and sample posts for development
 
 Output as SQL I can run directly in Supabase's SQL editor.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -29,7 +35,3 @@ Output as SQL I can run directly in Supabase's SQL editor.
 - Keep the schema stable across variants — the image-first and video-first variants add columns/tables (media, aspect ratio, stories, video duration) rather than reshaping the core.
 - Seed data is for development only; never seed production with test users.
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

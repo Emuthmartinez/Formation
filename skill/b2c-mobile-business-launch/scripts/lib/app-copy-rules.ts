@@ -104,7 +104,13 @@ function splitRow(line: string): string[] {
  * and every deck table is a string table, so anything else pipe-shaped is
  * reported as malformed rather than silently ignored.
  */
-export function parseDeck(deckText: string): ParsedDeck {
+/** Markdown comments hide rows from the rendered deck; they must hide them from parsing too — with line numbers preserved. */
+function stripMarkdownComments(text: string): string {
+  return text.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\n]/g, " "));
+}
+
+export function parseDeck(rawDeckText: string): ParsedDeck {
+  const deckText = stripMarkdownComments(rawDeckText);
   const rows: DeckRow[] = [];
   const malformed: { line: number; cells: number }[] = [];
   let section = "";
@@ -241,7 +247,8 @@ export interface CopyColumn {
  * breaks the header's column count (an unescaped pipe or missing cell moves
  * text out of the scanned column).
  */
-export function copyColumnCells(markdownText: string): CopyColumn {
+export function copyColumnCells(rawMarkdownText: string): CopyColumn {
+  const markdownText = stripMarkdownComments(rawMarkdownText);
   const cells: { text: string; line: number }[] = [];
   const malformed: { line: number; cells: number; expected: number }[] = [];
   const lines = markdownText.split(/\r?\n/);

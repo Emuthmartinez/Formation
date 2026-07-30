@@ -22,6 +22,12 @@ Requirements:
 
 Tell me the exact current Claude model ID and parameters to use (confirm against
 current Anthropic docs), and keep the model name in one config constant.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -32,7 +38,3 @@ current Anthropic docs), and keep the model name in one config constant.
 - Context summarization is a real backend step — document it in `TECH_SPEC.md` (it also justifies an honest "thinking/summarizing" perceived-effort moment, not a fake loader; see `consumer-product-design-agency.md`).
 - Add `model_response_succeeded`, `model_response_errored`, `context_summarized` (with token counts) to `ANALYTICS.md`.
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

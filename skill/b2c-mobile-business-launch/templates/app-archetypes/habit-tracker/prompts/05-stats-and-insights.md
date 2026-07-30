@@ -27,6 +27,12 @@ Weekly review:
 Performance:
 - Compute aggregates with SQL (the prompt 01 indexes cover habit_id + date);
   don't ship a year of raw rows to the client
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -36,7 +42,3 @@ Performance:
 - The weekly review email routes through `resend-email-ops.md` with an unsubscribe path; respect the user's quiet hours and mute settings from prompt 04.
 - This surface is the standard upgrade hook for prompt 06 (full history and insights behind the paid tier, current week free) — decide the split with the founder there, not here.
 - Add `stats_viewed`, `heatmap_viewed`, `weekly_review_opened` to `ANALYTICS.md`.
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

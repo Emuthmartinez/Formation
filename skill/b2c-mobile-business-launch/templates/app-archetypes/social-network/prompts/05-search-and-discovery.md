@@ -19,6 +19,12 @@ Explore/Discovery page:
 Hashtag support:
 - Detect #hashtags in post text and make them clickable
 - Clicking a hashtag shows all posts containing it
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -28,7 +34,3 @@ Hashtag support:
 - Trending = most-used words in the last 24h; keep it a cheap materialized/aggregated query, not a per-request scan. Strip stopwords.
 - Suggested-users and recent-popular-posts are discovery loops — feed them into `viral-growth-loops.md` and add `search_performed`, `explore_viewed`, `suggested_user_followed`, `hashtag_clicked` to `ANALYTICS.md`.
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

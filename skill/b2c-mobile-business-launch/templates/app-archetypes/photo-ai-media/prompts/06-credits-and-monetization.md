@@ -28,6 +28,12 @@ Implement:
 
 All grants/spends/refunds flow through the append-only ledger; entitlement
 reads come from a cached status, not a live billing-provider call per request.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -39,7 +45,3 @@ reads come from a cached status, not a live billing-provider call per request.
 - Webhook signing secrets route through `SECRETS.md`; webhooks are an abuse surface (`SECURITY.md`) and ledger writes must be idempotent. Handle involuntary billing-failure churn (grace period, dunning) per `revenue-monetization.md` §8a.
 - The out-of-credits upgrade moment is paywall timing (`onboarding-conversion.md`) and sits next to the Variable Reward loop — an honest price at a real value moment, never a spend-compulsion nudge (`ethics-guardrail.md`).
 - Add `checkout_started`, `credits_purchased`, `subscription_activated`, `out_of_credits_shown`, `payment_failed` to `ANALYTICS.md`; pair with per-generation cost for margin dashboards.
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

@@ -17,6 +17,12 @@ Keep the same backend schema but add:
 - Required image field on posts
 - Image aspect ratio stored (for proper grid display)
 - Story table with created_at and 24h expiry logic
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -26,7 +32,3 @@ Keep the same backend schema but add:
 - Stories are a high-engagement, time-boxed surface — a strong 11-star moment. Run `eleven-star-experience.md` and add `story_created`, `story_viewed`, `story_expired` to `ANALYTICS.md`.
 - Image moderation is non-negotiable before public launch (see the reference's moderation note).
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

@@ -25,6 +25,12 @@ Post interactions:
 
 Use Supabase real-time subscriptions so new posts from followed users appear
 without refresh.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -35,7 +41,3 @@ without refresh.
 - The follows-join feed query is the hot path — confirm it uses the indexes from prompt 01. Naive is fine early; record the scale threshold to revisit.
 - Optimistic UI needs a rollback path on server failure — specify the error/retry state in `TECH_SPEC.md`.
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

@@ -27,6 +27,12 @@ Content rules (do not remove):
   clear disclaimer and never claim diagnosis, treatment, or guaranteed outcomes
 - Program copy follows the prompt 04 rules: no guilt, no fear, no shame for
   pausing or quitting a program; quitting is one tap and judgment-free
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -36,7 +42,3 @@ Content rules (do not remove):
 - The pause-don't-punish progression is the program-level expression of the streak escape hatch (`ethics-guardrail.md`): progress reflects real completed days (endowed-progress truthfulness), and resuming is always free.
 - Program completion is a strong reflective peak (`emotional-design-system.md`) and the natural paywall position for prompt 06 (first program free, library behind the subscription is a common split — founder-gated).
 - Add `program_enrolled`, `program_day_completed`, `program_paused`, `program_resumed`, `program_completed` to `ANALYTICS.md`.
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

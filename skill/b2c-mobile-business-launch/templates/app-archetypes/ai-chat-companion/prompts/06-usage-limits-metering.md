@@ -19,6 +19,12 @@ Requirements:
 
 Make the cap, rate limit, and model-per-tier values config constants so they are
 easy to tune.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -28,7 +34,3 @@ easy to tune.
 - The "limit reached → upgrade" state is a paywall-timing moment (`onboarding-conversion.md`): it should arrive at a real value moment (the user wanted to keep going), not on first open.
 - Add `usage_incremented`, `free_limit_reached`, `upgrade_prompt_shown`, `rate_limited` to `ANALYTICS.md`. These feed the conversion funnel and the cost model.
 </content>
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.

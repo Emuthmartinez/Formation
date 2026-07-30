@@ -37,6 +37,12 @@ Create:
    one failed generation, and matching credit-ledger rows
 
 Output as SQL I can run directly in Supabase's SQL editor.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes
@@ -47,7 +53,3 @@ Output as SQL I can run directly in Supabase's SQL editor.
 - `generations.provider` / `model` are recorded values, not hardcoded choices — the provider decision is founder-gated (`paid-tool-routing.md`, `TOOL_DECISIONS.md`); the schema must survive a provider swap.
 - Uploaded faces are biometric-adjacent personal data — note retention and deletion (asset rows AND storage objects AND any provider-side copies) in `privacy-terms.md`.
 - Seed data is development-only.
-
-## Strings
-
-Every label, headline, button, empty state, and error a user reads comes from `COPY_DECK.md` — author missing rows first (voice from `COPY_BRIEF.md`, craft from `references/conversion-copy.md`), then type the rows into the externalized string resource named in `TECH_SPEC.md`. Example copy in this prompt is voice guidance, not shipping strings; `check:app-copy` gates the result.
