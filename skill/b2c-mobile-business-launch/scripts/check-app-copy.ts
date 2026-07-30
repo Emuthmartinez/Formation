@@ -151,8 +151,11 @@ if (deckText && !deckIsTemplate && !deckIsAuthored && deckRequired) {
 
 // The deck inherits its voice from the brief; a done design/onboarding lane
 // whose COPY_BRIEF.md is missing, template-status, or unlabeled shipped its
-// strings without the voice source they are supposed to speak.
-if (deckRequired) {
+// strings without the voice source they are supposed to speak. Conversion
+// surfaces (store listing, paywall, lifecycle email) require the brief on
+// their own — conversion-copy.md ties it to those surfaces, not to the deck.
+const briefRequired = deckRequired || ["store_console", "revenue", "email"].some((lane) => laneStatus(lane) === "done");
+if (briefRequired) {
   const brief = readText(root, "COPY_BRIEF.md");
   if (!brief || !/^Status:\s*authored\b/im.test(brief)) {
     issues.push(
@@ -583,7 +586,14 @@ if (engineeringActive) {
     if (!/mechanism[^:\n]*:/i.test(line)) return false;
     const mechanismAt = line.search(MECHANISM);
     if (mechanismAt === -1) return false;
-    return !/\b(reject(ed|s)?|declin(ed|es|e)|none|not|no|won't|inline)\b/i.test(line.slice(0, mechanismAt));
+    // Negation counts inside the CLAUSE that carries the choice: "Mechanism:
+    // i18next was rejected; ..." negates it, while a compliance note in a
+    // later clause ("— no strings remain inline") does not.
+    const matched = line.slice(mechanismAt).match(MECHANISM)?.[0] ?? "";
+    const clauseEndOffset = line.slice(mechanismAt + matched.length).search(/[;.—–]/);
+    const clauseEnd = clauseEndOffset === -1 ? line.length : mechanismAt + matched.length + clauseEndOffset;
+    const clause = line.slice(0, clauseEnd);
+    return !/\b(reject(ed|s)?|declin(ed|es|e)|none|not|no|won't|inline)\b/i.test(clause);
   });
   // The shipped template lists every mechanism as an option menu ending in
   // "Record the choice here." — that sentinel surviving means nobody chose.
@@ -721,6 +731,27 @@ if (root === path.join(skillRoot, "templates")) {
             `templates/app-archetypes/${pack}/starter/lib/strings.ts`,
           ),
         );
+      }
+      // Externalization cannot silently regress: a JSX text node with real
+      // words is hardcoded copy that bypassed lib/strings.ts, even when the
+      // words themselves are benign.
+      for (const file of walkCodeFiles(path.join(starterApp, "app"))) {
+        const relative = path.relative(skillRoot, file);
+        const source = readFileSync(file, "utf8")
+          .replace(/\/\*[\s\S]*?\*\//g, " ")
+          .replace(/^\s*\/\/.*$/gm, " ");
+        for (const match of source.matchAll(/>([^<>{}\n]+)</g)) {
+          const text = (match[1] ?? "").trim();
+          if (!/[A-Za-z0-9]{2}/.test(text)) continue;
+          issues.push(
+            issue(
+              "error",
+              "app_copy.starter_hardcoded_text",
+              `${relative} hardcodes the JSX text "${text.slice(0, 50)}" — starter UI strings live in lib/strings.ts so externalization cannot silently regress.`,
+              relative,
+            ),
+          );
+        }
       }
       // Only what a user can see counts as copy: JSX text nodes and string
       // literal values. Whole-file scanning would flag code TODO comments and

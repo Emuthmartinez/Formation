@@ -187,7 +187,9 @@ export function malformedKeyReferences(text: string): string[] {
   for (const match of text.matchAll(/`([^`\n]+)`/g)) {
     const span = (match[1] ?? "").trim();
     if (!span || /[\s({]/.test(span)) continue;
-    const keyLike = span.includes(".") || span.endsWith("*");
+    // Key-like: dotted, wildcarded, or a flat multi-segment snake/kebab token —
+    // `onboarding_promise_headline` is a mistyped key, not a word in code style.
+    const keyLike = span.includes(".") || span.endsWith("*") || /^[A-Za-z0-9]+(?:[_-][A-Za-z0-9]+)+$/.test(span);
     if (!keyLike) continue;
     if (FILE_REFERENCE.test(span.replace(/\.\*$/, ""))) continue;
     const wellFormed = /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\.\*)?$/.test(span);

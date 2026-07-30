@@ -847,4 +847,53 @@ export function register(h: Harness): void {
   writeFileSync(path.join(planRouteDropped, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "partial" }), "utf8");
   writeFileSync(path.join(planRouteDropped, "ENGINEERING_PLAN.md"), "# Engineering Plan\n\nBuild the screens per SPEC.md.\n", "utf8");
   runFixture("App copy: engineering plan without the deck route fails", planRouteDropped, "check-app-copy.ts", 1, "app_copy.plan_deck_route_missing");
+
+  // Conversion lanes require the brief on their own — a done paywall lane
+  // without an authored COPY_BRIEF.md shipped conversion copy voice-blind.
+  const briefConversionLane = makeFixture("app-copy-brief-conversion-lane");
+  writeFileSync(path.join(briefConversionLane, "PROJECT_STATE.yaml"), stateWith("phase_2", { revenue: "done" }), "utf8");
+  runFixture("App copy: done conversion lane without authored brief fails", briefConversionLane, "check-app-copy.ts", 1, "app_copy.brief_unauthored");
+
+  // "phase" is in the parsed banned list — the deck rule names it explicitly.
+  const deckPhaseWord = makeFixture("app-copy-deck-phase-word");
+  writeFileSync(path.join(deckPhaseWord, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(deckPhaseWord, "COPY_DECK.md"),
+    [...DECK_HEADER, "| today.progress.body | Today | You're in phase 2 of your plan | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: phase vocabulary in a deck cell fails", deckPhaseWord, "check-app-copy.ts", 1, "app_copy.deck_internal_vocabulary");
+
+  // A flat snake reference in backticks is a mistyped key, not a code word.
+  const flatKeyRef = makeFixture("app-copy-flat-key-reference");
+  writeFileSync(path.join(flatKeyRef, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(flatKeyRef, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding_promise_headline` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: flat snake key reference is reported", flatKeyRef, "check-app-copy.ts", 1, "app_copy.onboarding_key_reference_malformed");
+
+  // A rejection in the same clause as the mechanism is not a choice.
+  const mechanismSuffixNegation = makeFixture("app-copy-mechanism-suffix-negation");
+  writeFileSync(path.join(mechanismSuffixNegation, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(mechanismSuffixNegation, "TECH_SPEC.md"),
+    ["# Technical Spec", "", "## Strings And Localization Readiness", "", "Mechanism: i18next was rejected; strings remain inline.", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "App copy: rejection in the mechanism clause is not a choice",
+    mechanismSuffixNegation,
+    "check-app-copy.ts",
+    1,
+    "app_copy.externalization_missing",
+  );
 }

@@ -120,7 +120,7 @@ How premium consumer apps phrase these moments, mined from the 60fps.design shot
 `check:app-copy` parses the two lists below from this file — edit the reference and the gate follows; do not duplicate them in code. Identifier shapes (snake_case, SCREAMING_SNAKE, pipe-delimited state) are detected structurally by the gate itself, same as `check:founder-copy`.
 
 **Banned in app copy** (internal vocabulary that must never reach a user's screen; whole-word, case-insensitive)
-lane, gate, artifact, archetype, scaffold, prompt pack, value reveal, value-reveal, spec, backlog, milestone gate, launch lane, frontstage, backstage, attribution question, personalization matrix, state file, project state, autonomy mode, founder approval
+lane, gate, phase, artifact, archetype, scaffold, prompt pack, value reveal, value-reveal, spec, backlog, milestone gate, launch lane, frontstage, backstage, attribution question, personalization matrix, state file, project state, autonomy mode, founder approval
 
 **Placeholder shapes** (filler that means the deck row was never authored; substring, case-insensitive; `fernpath`, `wrenfeed`, `loomroom`, and `glimmerjar` are the fictional example brands in the deck template and archetype starters, so their survival means example copy shipped verbatim)
 product-specific, tbd, todo, to be filled, lorem ipsum, placeholder, insert copy, your headline here, app name here, archetype scaffold, runnable starter, customize it with the prompt, fernpath, wrenfeed, loomroom, glimmerjar
