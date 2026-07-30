@@ -4,7 +4,7 @@ prompt: "I want to build an AI companion app — users chat with an AI character
 expected_route: "Detect the AI-chat/companion archetype, load ai-chat-companion.md, confirm chat type / primary surface / modality / memory depth / safety scope via AskUserQuestion, record the archetype in PROJECT_STATE.yaml, then route the bundled prompt pack (schema, auth, chat core loop, model integration) and treat safety as a launch gate — instead of improvising the schema and a client-side model call."
 must_use:
   - "ai-chat-companion.md"
-  - "templates/app-archetypes/ai-chat-companion"
+  - "starters/ai-chat-companion"
   - "AskUserQuestion"
   - "PROJECT_STATE.yaml"
 must_catch:

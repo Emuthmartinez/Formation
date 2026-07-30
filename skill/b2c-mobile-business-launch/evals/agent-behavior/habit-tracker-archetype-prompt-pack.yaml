@@ -4,7 +4,7 @@ prompt: "I want to build a habit tracker for runners — daily training habits, 
 expected_route: "Detect the habit-tracker archetype, load habit-tracker.md, confirm habit model / primary surface / optional systems / niche via one batched AskUserQuestion, record the archetype in PROJECT_STATE.yaml, copy the runnable starter as the floor, then route the bundled prompt pack in order (schema, auth + timezone, check-in core loop, reminders + streaks) with the streak ethics contract treated as a ship gate — instead of improvising the schema and a client-side streak counter."
 must_use:
   - "habit-tracker.md"
-  - "templates/app-archetypes/habit-tracker"
+  - "starters/habit-tracker"
   - "AskUserQuestion"
   - "PROJECT_STATE.yaml"
 must_catch:

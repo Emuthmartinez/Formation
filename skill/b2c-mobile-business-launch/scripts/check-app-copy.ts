@@ -823,7 +823,7 @@ if (root === path.join(skillRoot, "templates")) {
   // Archetype build prompts drive implementation directly, so each one must
   // carry the deck route — a prompt that invents strings inline is the exact
   // improvisation path this gate exists to close.
-  const archetypePromptsDir = path.join(root, "app-archetypes");
+  const archetypePromptsDir = path.join(skillRoot, "starters");
   if (existsSync(archetypePromptsDir)) {
     for (const pack of readdirSync(archetypePromptsDir)) {
       const promptsDir = path.join(archetypePromptsDir, pack, "prompts");
@@ -860,7 +860,7 @@ if (root === path.join(skillRoot, "templates")) {
   // by the placeholder list. The fictional example brands are allowed HERE —
   // they are the tripwire the business-root scan above fires on.
   const templateBrandAllowlist = new Set(fictionalBrands);
-  const archetypesDir = path.join(root, "app-archetypes");
+  const archetypesDir = path.join(skillRoot, "starters");
   if (existsSync(archetypesDir)) {
     for (const pack of readdirSync(archetypesDir)) {
       const starterApp = path.join(archetypesDir, pack, "starter");
@@ -871,8 +871,8 @@ if (root === path.join(skillRoot, "templates")) {
           issue(
             "error",
             `app_copy.starter_strings_missing`,
-            `templates/app-archetypes/${pack}/starter/lib/strings.ts is missing. Starters seed the externalized-strings convention; pages import their words instead of hardcoding them.`,
-            `templates/app-archetypes/${pack}/starter/lib/strings.ts`,
+            `starters/${pack}/starter/lib/strings.ts is missing. Starters seed the externalized-strings convention; pages import their words instead of hardcoding them.`,
+            `starters/${pack}/starter/lib/strings.ts`,
           ),
         );
       }
@@ -1002,17 +1002,17 @@ function walkMarkdown(dir: string): string[] {
 function walkCodeFiles(dir: string): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir)) {
-    // app-archetypes is the skill's own template payload: when a fixture or a
+    // starters is the skill's own template payload: when a fixture or a
     // business repo carries the templates, the starters inside deliberately
     // hold the fictional brands. Real app source copied FROM a starter lands
-    // at the repo root (app/, lib/, ios/), never under app-archetypes/.
+    // at the repo root (app/, lib/, ios/), never under starters/.
     if (
       entry === "node_modules" ||
       entry === "dist" ||
       entry === "build" ||
       entry === "Pods" ||
       entry === "DerivedData" ||
-      entry === "app-archetypes" ||
+      entry === "starters" ||
       entry.startsWith(".")
     )
       continue;

@@ -1,6 +1,6 @@
 # Photo / AI Media Build Lane
 
-Use this reference when the founder wants to build a **photo / AI-media product** — "an AI avatar app", "a headshot generator", "a photo enhancer/restorer", "an AI art app", "an app that turns photos into X". It is an **app-archetype prompt pack** (peer to [`social-network.md`](social-network.md) and [`ai-chat-companion.md`](ai-chat-companion.md)), shipped as reusable boilerplate under [`../templates/app-archetypes/photo-ai-media/`](../templates/app-archetypes/photo-ai-media/README.md).
+Use this reference when the founder wants to build a **photo / AI-media product** — "an AI avatar app", "a headshot generator", "a photo enhancer/restorer", "an AI art app", "an app that turns photos into X". It is an **app-archetype prompt pack** (peer to [`social-network.md`](social-network.md) and [`ai-chat-companion.md`](ai-chat-companion.md)), shipped as reusable boilerplate under [`../starters/photo-ai-media/`](../starters/photo-ai-media/README.md).
 
 Like the other archetype lanes, this is a layer on top of the launch workflow, not a replacement. It gives the engineering stages a proven sequence and ready prompts for one product shape and routes each piece back into the existing lanes (research, 11-star, emotional design, security/privacy, revenue, analytics, safety). It does not skip evidence, design, safety, or provider-proof gates.
 
@@ -28,7 +28,7 @@ Honesty note on the stack: the bundled prompts target **web (Next.js + Supabase 
 
 ## Runnable Starter
 
-The pack ships a runnable scaffold at [`../templates/app-archetypes/photo-ai-media/starter/`](../templates/app-archetypes/photo-ai-media/starter/README.md): Next.js App Router + Supabase pre-wired with magic-link auth, owner-only schema migrations with **tested** RLS (pgTAP, per `backend-data-contract.md`), private Storage wiring, Stripe and RevenueCat stubs, a PostHog event catalog matching the analytics lane's snake_case conventions, a names-only `.env.example`, and a CI workflow. The **generation provider is deliberately unbound** in the starter: the provider adapter is a stub, because which image model/provider to pay for is a founder-gated decision routed through `paid-tool-routing.md`, recorded in `TOOL_DECISIONS.md`, with its key server-side via `SECRETS.md`. Copy the starter into the business repo as the floor and customize it with the prompts below — its README maps each prompt to the scaffold area it customizes. Do not improvise the same wiring from scratch; `check:archetype-starter` enforces the starter contract. If the founder selects Firebase or a custom backend, adapt through the data-contract lane instead of running the Supabase pieces verbatim.
+The pack ships a runnable scaffold at [`../starters/photo-ai-media/starter/`](../starters/photo-ai-media/starter/README.md): Next.js App Router + Supabase pre-wired with magic-link auth, owner-only schema migrations with **tested** RLS (pgTAP, per `backend-data-contract.md`), private Storage wiring, Stripe and RevenueCat stubs, a PostHog event catalog matching the analytics lane's snake_case conventions, a names-only `.env.example`, and a CI workflow. The **generation provider is deliberately unbound** in the starter: the provider adapter is a stub, because which image model/provider to pay for is a founder-gated decision routed through `paid-tool-routing.md`, recorded in `TOOL_DECISIONS.md`, with its key server-side via `SECRETS.md`. Copy the starter into the business repo as the floor and customize it with the prompts below — its README maps each prompt to the scaffold area it customizes. Do not improvise the same wiring from scratch; `check:archetype-starter` enforces the starter contract. If the founder selects Firebase or a custom backend, adapt through the data-contract lane instead of running the Supabase pieces verbatim.
 
 ## The Core Systems
 
@@ -42,7 +42,7 @@ Every photo/AI-media product is built on five systems. The generation pipeline a
 
 ## The Build Sequence
 
-Build one system at a time and test it. Prompts live in [`../templates/app-archetypes/photo-ai-media/prompts/`](../templates/app-archetypes/photo-ai-media/README.md):
+Build one system at a time and test it. Prompts live in [`../starters/photo-ai-media/prompts/`](../starters/photo-ai-media/README.md):
 
 | # | Prompt | Core system | Threads into |
 |---|---|---|---|
@@ -56,7 +56,7 @@ Build one system at a time and test it. Prompts live in [`../templates/app-arche
 | 07 | `07-sharing-and-virality` (optional) | sharing/growth | `viral-growth-loops.md`, `VIRAL_GROWTH.md` |
 | 08 | `08-content-safety-and-rights` | safety/rights | `security-release-hardening.md`, `ethics-guardrail.md`, `privacy-terms.md`, store review |
 
-Variants (apply after the base): [`variants/avatar-headshot-studio`](../templates/app-archetypes/photo-ai-media/prompts/variants/avatar-headshot-studio.md) and [`variants/photo-restoration`](../templates/app-archetypes/photo-ai-media/prompts/variants/photo-restoration.md).
+Variants (apply after the base): [`variants/avatar-headshot-studio`](../starters/photo-ai-media/prompts/variants/avatar-headshot-studio.md) and [`variants/photo-restoration`](../starters/photo-ai-media/prompts/variants/photo-restoration.md).
 
 Step 0 (positioning) is strategic work for the **web interface / Claude.ai**. The rest are Claude Code build prompts. Prompt 08 is required **before any public launch**, regardless of which optional prompts ship.
 
@@ -81,7 +81,7 @@ Step 0 (positioning) is strategic work for the **web interface / Claude.ai**. Th
 
 ## Extending / Acceptance
 
-This pack follows the archetype contract enforced by `check-app-archetype.ts` (README + numbered prompts with fenced blocks + reference + SKILL.md routing + agent-behavior eval). To add another archetype, mirror this shape under `templates/app-archetypes/<archetype>/`.
+This pack follows the archetype contract enforced by `check-app-archetype.ts` (README + numbered prompts with fenced blocks + reference + SKILL.md routing + agent-behavior eval). To add another archetype, mirror this shape under `starters/<archetype>/`.
 
 Before calling a photo/AI-media build ready:
 

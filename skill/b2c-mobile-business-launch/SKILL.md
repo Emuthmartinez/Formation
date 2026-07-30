@@ -86,7 +86,7 @@ Load a row's references when its trigger fires — not before. Run its gate befo
 
 ### App Archetypes
 
-Shipped packs live under [`templates/app-archetypes/`](templates/app-archetypes/social-network/README.md). Each ships a **runnable starter scaffold** at `templates/app-archetypes/<pack>/starter/` (Next.js App Router + Supabase with auth, tested RLS migrations, Stripe/RevenueCat stubs, a PostHog event catalog, names-only `.env.example`, CI) plus a dependency-ordered prompt sequence as the customization layer. Copy the starter as the floor; customize with the pack's prompts. Packs feed the normal research, 11-star, design, security, revenue, and growth lanes — they never bypass them. The Supabase default stays adaptable per `backend-data-contract.md`. Gates: `check:app-archetype`, `check:archetype-starter`.
+Shipped packs live under [`starters/`](starters/social-network/README.md). Each ships a **runnable starter scaffold** at `starters/<pack>/starter/` (Next.js App Router + Supabase with auth, tested RLS migrations, Stripe/RevenueCat stubs, a PostHog event catalog, names-only `.env.example`, CI) plus a dependency-ordered prompt sequence as the customization layer. Copy the starter as the floor; customize with the pack's prompts. Packs feed the normal research, 11-star, design, security, revenue, and growth lanes — they never bypass them. The Supabase default stays adaptable per `backend-data-contract.md`. Gates: `check:app-archetype`, `check:archetype-starter`.
 
 | Pack | Route here when | Load | Pack-specific gate |
 | --- | --- | --- | --- |

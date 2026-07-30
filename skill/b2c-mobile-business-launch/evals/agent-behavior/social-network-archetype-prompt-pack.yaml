@@ -4,7 +4,7 @@ prompt: "I want to build a social network for indie game developers — people p
 expected_route: "Detect the social/community app archetype, load social-network.md, confirm content format / primary surface / optional systems / niche via AskUserQuestion, record the archetype in PROJECT_STATE.yaml, then route the bundled boilerplate prompt pack (schema first, then auth, feed, profiles) instead of improvising the schema and feed."
 must_use:
   - "social-network.md"
-  - "templates/app-archetypes/social-network"
+  - "starters/social-network"
   - "AskUserQuestion"
   - "PROJECT_STATE.yaml"
 must_catch:

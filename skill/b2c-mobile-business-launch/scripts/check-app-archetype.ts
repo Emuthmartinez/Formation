@@ -2,7 +2,7 @@
 /**
  * check-app-archetype.ts — skill-integrity gate for the app-archetype prompt-pack layer.
  *
- * Every archetype pack under templates/app-archetypes/ must be structurally
+ * Every archetype pack under starters/ must be structurally
  * complete so a future agent (or a new archetype contributor) can rely on the
  * same shape:
  *
@@ -69,16 +69,11 @@ const SHIPPED_PACKS: ShippedPack[] = [
 
 const args = parseArgs(process.argv.slice(2));
 const issues: Issue[] = [];
-const archetypesDir = path.join(args.skillRoot, "templates", "app-archetypes");
+const archetypesDir = path.join(args.skillRoot, "starters");
 
 if (!existsSync(archetypesDir)) {
   issues.push(
-    issue(
-      "error",
-      "app_archetype.dir_missing",
-      `templates/app-archetypes is missing at ${archetypesDir}. The app-archetype prompt-pack layer must exist.`,
-      "templates/app-archetypes",
-    ),
+    issue("error", "app_archetype.dir_missing", `starters is missing at ${archetypesDir}. The app-archetype prompt-pack layer must exist.`, "starters"),
   );
 } else {
   const archetypes = readdirSync(archetypesDir, { withFileTypes: true })
@@ -87,19 +82,12 @@ if (!existsSync(archetypesDir)) {
     .sort();
 
   if (archetypes.length === 0) {
-    issues.push(
-      issue(
-        "error",
-        "app_archetype.no_archetypes",
-        "templates/app-archetypes has no archetype packs. Add at least one (e.g. social-network).",
-        "templates/app-archetypes",
-      ),
-    );
+    issues.push(issue("error", "app_archetype.no_archetypes", "starters has no archetype packs. Add at least one (e.g. social-network).", "starters"));
   }
 
   for (const name of archetypes) {
     const packDir = path.join(archetypesDir, name);
-    const rel = `templates/app-archetypes/${name}`;
+    const rel = `starters/${name}`;
 
     if (!existsSync(path.join(packDir, "README.md"))) {
       issues.push(issue("error", `app_archetype.${name}.readme_missing`, `${rel} must have a README.md index.`, rel));
@@ -163,7 +151,7 @@ if (skillText === undefined) {
 }
 
 for (const pack of SHIPPED_PACKS) {
-  const packRel = `templates/app-archetypes/${pack.name}`;
+  const packRel = `starters/${pack.name}`;
   if (!existsSync(path.join(archetypesDir, pack.name))) {
     issues.push(issue("error", `app_archetype.${pack.name}.pack_missing`, `Shipped pack ${packRel} is missing.`, packRel));
   }

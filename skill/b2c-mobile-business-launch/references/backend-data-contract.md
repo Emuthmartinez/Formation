@@ -110,7 +110,7 @@ Mobile-client considerations apply on every route:
 
 ## Archetype Pack Adaptation
 
-The shipped archetype prompt packs (`templates/app-archetypes/social-network`, `templates/app-archetypes/ai-chat-companion`) assume Supabase. When the founder selects Firebase or a custom backend, **adapt each schema/auth prompt to the selected route before running it** — do not run the Supabase prompts verbatim and patch the output later. Use this parity table when rewriting a prompt:
+The shipped archetype prompt packs (`starters/social-network`, `starters/ai-chat-companion`) assume Supabase. When the founder selects Firebase or a custom backend, **adapt each schema/auth prompt to the selected route before running it** — do not run the Supabase prompts verbatim and patch the output later. Use this parity table when rewriting a prompt:
 
 | Supabase concept (as shipped) | Firebase equivalent | Custom-backend equivalent |
 |---|---|---|

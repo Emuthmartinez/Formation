@@ -1,6 +1,6 @@
 # Social / Community Platform Build Lane
 
-Use this reference when the founder's request is to build a **social or community platform** — "build a social network", "X/Twitter clone", "Instagram clone", "TikTok clone", "a community app for <niche>", "a forum/feed app", "people post and follow each other". It is the first **app-archetype prompt pack**: a recognizable B2C product shape with a known set of core systems and a battle-tested build sequence, shipped as reusable boilerplate prompts under [`../templates/app-archetypes/social-network/`](../templates/app-archetypes/social-network/README.md).
+Use this reference when the founder's request is to build a **social or community platform** — "build a social network", "X/Twitter clone", "Instagram clone", "TikTok clone", "a community app for <niche>", "a forum/feed app", "people post and follow each other". It is the first **app-archetype prompt pack**: a recognizable B2C product shape with a known set of core systems and a battle-tested build sequence, shipped as reusable boilerplate prompts under [`../starters/social-network/`](../starters/social-network/README.md).
 
 This lane does **not** replace the launch workflow in `SKILL.md`. It is a layer on top of it: it gives the engineering/build stages a proven sequence and ready prompts for one product shape, and it routes each piece back into the existing lanes (research, 11-star, design, security, revenue, growth, analytics). Do not use it to skip evidence, design, security, or provider-proof gates.
 
@@ -36,7 +36,7 @@ Honesty note on the stack: the bundled prompts target **web (Next.js + Supabase 
 
 ## Runnable Starter
 
-The pack ships a runnable scaffold at [`../templates/app-archetypes/social-network/starter/`](../templates/app-archetypes/social-network/starter/README.md): Next.js App Router + Supabase pre-wired with magic-link auth, schema migrations with **tested** RLS (pgTAP, per `backend-data-contract.md`), Stripe and RevenueCat stubs, a PostHog event catalog matching the analytics lane's snake_case conventions, a names-only `.env.example`, and a CI workflow. Copy it into the business repo as the floor and customize it with the prompts below — its README maps each prompt to the scaffold area it customizes. Do not improvise the same wiring from scratch; `check:archetype-starter` enforces the starter contract. If the founder selects Firebase or a custom backend, adapt through the data-contract lane instead of running the Supabase pieces verbatim.
+The pack ships a runnable scaffold at [`../starters/social-network/starter/`](../starters/social-network/starter/README.md): Next.js App Router + Supabase pre-wired with magic-link auth, schema migrations with **tested** RLS (pgTAP, per `backend-data-contract.md`), Stripe and RevenueCat stubs, a PostHog event catalog matching the analytics lane's snake_case conventions, a names-only `.env.example`, and a CI workflow. Copy it into the business repo as the floor and customize it with the prompts below — its README maps each prompt to the scaffold area it customizes. Do not improvise the same wiring from scratch; `check:archetype-starter` enforces the starter contract. If the founder selects Firebase or a custom backend, adapt through the data-contract lane instead of running the Supabase pieces verbatim.
 
 ## The Five Core Systems
 
@@ -50,7 +50,7 @@ Every social platform — text, image, or video — is built on the same five sy
 
 ## The Build Sequence
 
-Build **one system at a time, test it, then move on**. A solid identity + feed beats ten half-built features. Run the prompts in this order; each lives in [`../templates/app-archetypes/social-network/prompts/`](../templates/app-archetypes/social-network/README.md):
+Build **one system at a time, test it, then move on**. A solid identity + feed beats ten half-built features. Run the prompts in this order; each lives in [`../starters/social-network/prompts/`](../starters/social-network/README.md):
 
 | # | Prompt | Core system | Threads into |
 |---|---|---|---|
@@ -64,7 +64,7 @@ Build **one system at a time, test it, then move on**. A solid identity + feed b
 | 07 | `07-stripe-monetization` (optional) | revenue | `revenue-monetization.md`, `REVENUE_OPS.md` |
 | 08 | `08-invite-system` (optional) | growth | `viral-growth-loops.md`, `VIRAL_GROWTH.md` |
 
-Variants (apply after the text-first base, or fold into prompt 01/03 if chosen upfront): [`variants/image-first-instagram`](../templates/app-archetypes/social-network/prompts/variants/image-first-instagram.md) and [`variants/video-first-tiktok`](../templates/app-archetypes/social-network/prompts/variants/video-first-tiktok.md).
+Variants (apply after the text-first base, or fold into prompt 01/03 if chosen upfront): [`variants/image-first-instagram`](../starters/social-network/prompts/variants/image-first-instagram.md) and [`variants/video-first-tiktok`](../starters/social-network/prompts/variants/video-first-tiktok.md).
 
 Step 0 (niche strategy) is strategic work for the **web interface / Claude.ai**, not Claude Code — it is about people, not systems. The rest are Claude Code build prompts.
 
@@ -95,7 +95,7 @@ These are the pack's default choices; confirm and record them in `TOOL_DECISIONS
 
 This is the first archetype pack. To add another (e.g. marketplace, dating, journaling, habit-tracker):
 
-1. Add `templates/app-archetypes/<archetype>/README.md` + `prompts/` with the same shape (numbered, dependency-ordered, copy-paste-ready prompts with skill-integration notes).
+1. Add `starters/<archetype>/README.md` + `prompts/` with the same shape (numbered, dependency-ordered, copy-paste-ready prompts with skill-integration notes).
 2. Add a peer reference (or a section here) describing its core systems, the AskUserQuestion shape, and how each prompt threads into the existing lanes.
 3. Wire it into `SKILL.md` (archetype-detection step + a When-To-Load rule) and add an agent-behavior eval that locks in "detect archetype → confirm via AskUserQuestion → load the pack → sequence the prompts".
 4. Keep the prompts faithful to their source but improve them to match this skill's contracts (RLS, analytics events, reduced-motion, provider proof).

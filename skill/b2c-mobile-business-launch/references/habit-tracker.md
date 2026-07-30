@@ -1,6 +1,6 @@
 # Habit Tracker / Daily Utility Build Lane
 
-Use this reference when the founder wants to build a **habit or daily-utility app** — "a habit tracker", "a streak app", "a daily routine app", "build a habit app for <niche>", or a wellness/productivity utility whose core is a small daily action logged against a goal (water, meditation, workouts, meds, journaling-as-checkbox). It is an **app-archetype prompt pack** (peer to [`social-network.md`](social-network.md) and [`ai-chat-companion.md`](ai-chat-companion.md)), shipped as reusable boilerplate under [`../templates/app-archetypes/habit-tracker/`](../templates/app-archetypes/habit-tracker/README.md).
+Use this reference when the founder wants to build a **habit or daily-utility app** — "a habit tracker", "a streak app", "a daily routine app", "build a habit app for <niche>", or a wellness/productivity utility whose core is a small daily action logged against a goal (water, meditation, workouts, meds, journaling-as-checkbox). It is an **app-archetype prompt pack** (peer to [`social-network.md`](social-network.md) and [`ai-chat-companion.md`](ai-chat-companion.md)), shipped as reusable boilerplate under [`../starters/habit-tracker/`](../starters/habit-tracker/README.md).
 
 Like the other archetype lanes, this is a layer on top of the launch workflow, not a replacement. It gives the engineering stages a proven sequence and ready prompts for one product shape and routes each piece back into the existing lanes (research, 11-star, emotional design, security, revenue, analytics). It does not skip evidence, design, ethics, or provider-proof gates — and in this archetype the **ethics gate is load-bearing**, because the streak mechanic at its center is a HIGH-risk Experience Card.
 
@@ -26,7 +26,7 @@ Record the answers in `PROJECT_STATE.yaml` (e.g. `lanes.product.archetype: habit
 
 ## Runnable Starter
 
-The pack ships a runnable scaffold at [`../templates/app-archetypes/habit-tracker/starter/`](../templates/app-archetypes/habit-tracker/starter/README.md): Next.js App Router + Supabase pre-wired with magic-link auth, schema migrations with **tested** RLS (pgTAP, per `backend-data-contract.md`), Stripe and RevenueCat stubs, a PostHog event catalog matching the analytics lane's snake_case conventions, a names-only `.env.example`, and a CI workflow. Copy it into the business repo as the floor and customize it with the prompts below — its README maps each prompt to the scaffold area it customizes. Do not improvise the same wiring from scratch; `check:archetype-starter` enforces the starter contract. If the founder selects Firebase or a custom backend, adapt through the data-contract lane instead of running the Supabase pieces verbatim.
+The pack ships a runnable scaffold at [`../starters/habit-tracker/starter/`](../starters/habit-tracker/starter/README.md): Next.js App Router + Supabase pre-wired with magic-link auth, schema migrations with **tested** RLS (pgTAP, per `backend-data-contract.md`), Stripe and RevenueCat stubs, a PostHog event catalog matching the analytics lane's snake_case conventions, a names-only `.env.example`, and a CI workflow. Copy it into the business repo as the floor and customize it with the prompts below — its README maps each prompt to the scaffold area it customizes. Do not improvise the same wiring from scratch; `check:archetype-starter` enforces the starter contract. If the founder selects Firebase or a custom backend, adapt through the data-contract lane instead of running the Supabase pieces verbatim.
 
 ## The Core Systems
 
@@ -40,7 +40,7 @@ Every habit app is built on five systems. The streak/reminder engine is the one 
 
 ## The Build Sequence
 
-Build one system at a time and test it. Prompts live in [`../templates/app-archetypes/habit-tracker/prompts/`](../templates/app-archetypes/habit-tracker/README.md):
+Build one system at a time and test it. Prompts live in [`../starters/habit-tracker/prompts/`](../starters/habit-tracker/README.md):
 
 | # | Prompt | Core system | Threads into |
 |---|---|---|---|
@@ -53,7 +53,7 @@ Build one system at a time and test it. Prompts live in [`../templates/app-arche
 | 06 | `06-paywall-and-monetization` (optional) | revenue | `revenue-monetization.md` §10, `REVENUE_OPS.md` |
 | 07 | `07-social-accountability` (optional) | accountability + growth | `viral-growth-loops.md`, abuse controls |
 
-Variants: [`variants/wellness-coach`](../templates/app-archetypes/habit-tracker/prompts/variants/wellness-coach.md) (guided programs, content as product) and [`variants/simple-counter-utility`](../templates/app-archetypes/habit-tracker/prompts/variants/simple-counter-utility.md) (strip to a essentials-scope single-purpose utility).
+Variants: [`variants/wellness-coach`](../starters/habit-tracker/prompts/variants/wellness-coach.md) (guided programs, content as product) and [`variants/simple-counter-utility`](../starters/habit-tracker/prompts/variants/simple-counter-utility.md) (strip to a essentials-scope single-purpose utility).
 
 Step 0 (positioning) is strategic work for the **web interface / Claude.ai**. The rest are Claude Code build prompts.
 
