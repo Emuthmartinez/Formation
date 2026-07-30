@@ -648,22 +648,24 @@ if (engineeringActive) {
   // note after it.
   // A choice is exactly ONE mechanism group ("i18next + expo-localization"
   // is one pairing; "i18next or next-intl" is two), with nothing pending.
-  const MECHANISM_GROUPS = [
-    /xcstrings|string catalog|localizable\.strings/i,
+  const MECHANISM_GROUPS: ((line: string) => boolean)[] = [
+    (line) => /xcstrings|string catalog|localizable\.strings/i.test(line),
     // expo-localization alone is locale detection with no string resources —
     // the RN mechanism is i18next (expo-localization rides along).
-    /i18next/i,
-    /\barb\b|gen-l10n/i,
-    /next-intl/i,
-    /strings module/i,
-    /strings\.xml|string resources/i,
+    (line) => /i18next/i.test(line),
+    // ARB is only the resource format and gen-l10n only the generator — the
+    // Flutter mechanism is the pair.
+    (line) => /\barb\b/i.test(line) && /gen-l10n/i.test(line),
+    (line) => /next-intl/i.test(line),
+    (line) => /strings module/i.test(line),
+    (line) => /strings\.xml|string resources/i.test(line),
   ];
   const namesMechanism = readinessSection.split(/\r?\n/).some((line) => {
     if (!/mechanism[^:\n]*:/i.test(line)) return false;
     if (/\b(tbd|to be decided|undecided|decide (later|after)|pending|after the spike)\b/i.test(line)) return false;
     const mechanismAt = line.search(MECHANISM);
     if (mechanismAt === -1) return false;
-    if (MECHANISM_GROUPS.filter((group) => group.test(line)).length !== 1) return false;
+    if (MECHANISM_GROUPS.filter((group) => group(line)).length !== 1) return false;
     // Negation counts inside the CLAUSE that carries the choice: "Mechanism:
     // i18next was rejected; ..." negates it, while a compliance note in a
     // later clause ("— no strings remain inline") does not.

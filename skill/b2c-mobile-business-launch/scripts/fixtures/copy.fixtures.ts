@@ -1173,4 +1173,15 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: fictional brand in native source fails", nativeBrand, "check-app-copy.ts", 1, "app_copy.fictional_brand_shipped");
+
+  // ARB alone is a resource format; gen-l10n alone is a generator. The
+  // Flutter mechanism is the pair.
+  const mechanismArbOnly = makeFixture("app-copy-mechanism-arb-only");
+  writeFileSync(path.join(mechanismArbOnly, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(mechanismArbOnly, "TECH_SPEC.md"),
+    ["# Technical Spec", "", "## Strings And Localization Readiness", "", "Mechanism: ARB.", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: ARB alone is not the Flutter mechanism", mechanismArbOnly, "check-app-copy.ts", 1, "app_copy.externalization_missing");
 }

@@ -4,7 +4,7 @@ Status: template — every copy cell below is example voice from Fernpath, a fic
 
 The deck is the single source for every string a user reads in the app. Builders type what a row says; a screen with no row stops the build until the row is authored. Voice comes from `COPY_BRIEF.md` and `BRAND.md`; craft rules and surface formulas live in `references/conversion-copy.md`; which locales ship comes from `LOCALIZATION_MARKET_RESEARCH.md`.
 
-Keys are the app's localization keys — the same name flows from this deck into the String Catalog / i18next resources / ARB file untouched. Locale tier: `1` ships translated at launch, `2` ships source language, `3` deferred.
+Keys are the app's localization keys — the same name flows from this deck into the string resources unchanged where the format allows dots (String Catalogs, i18next); for ARB + `gen-l10n` and Android `strings.xml`, dots become underscores (the mechanical transform recorded in `TECH_SPEC.md`). Locale tier: `1` ships translated at launch, `2` ships source language, `3` deferred.
 
 Case system (from `COPY_BRIEF.md`): sentence case everywhere except proper nouns.
 
@@ -79,6 +79,6 @@ Rows mirror the `ONBOARDING.md` screen sequence — one row per string, includin
 ## Handoff checks
 
 - Every screen the build plan names has its rows here before the build starts.
-- Keys ship unchanged into the string resources (`TECH_SPEC.md` names the mechanism).
+- Keys ship into the string resources via the mechanism and key transform `TECH_SPEC.md` records (unchanged where dots are allowed; dots→underscores for ARB and `strings.xml`).
 - Read each surface aloud once; rewrite anything that sounds like a system explaining itself.
 - `npm run check:app-copy -- --root <app> --state PROJECT_STATE.yaml` passes (a relative state path joins the root).
