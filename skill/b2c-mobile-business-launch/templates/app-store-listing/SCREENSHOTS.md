@@ -31,7 +31,7 @@ Store assets are not generic marketing — they are engineered from everything t
 | --- | --- |
 | `RESEARCH.md` | target user, the problem in their own pain language, top objections to answer, competitor visual conventions to break from |
 | `11_STAR_EXPERIENCE.md` | the one magical V1 moment — this is the hook payoff and Screenshot 1 |
-| `EMOTIONAL_DESIGN.md` + `references/experience-cards.md` | the Emotional North Star (the feeling the 5-second hook must create), the target emotional curve, and which Experience Card the hook instantiates |
+| `EMOTIONAL_DESIGN.md` + `playbook/experience/experience-cards.md` | the Emotional North Star (the feeling the 5-second hook must create), the target emotional curve, and which Experience Card the hook instantiates |
 | `DESIGN.md` + `BRAND.md` | tokens, type, color, motion, and voice so every asset is design-aligned |
 | `APP_STORE_LISTING.md` | keyword/positioning alignment so captions reinforce the metadata |
 
@@ -113,7 +113,7 @@ Run current sizing before export. Record ready, blocked, or not needed for each 
 
 ## App Preview Video (Autoplay Hook)
 
-The app preview video is the most underused growth lever on the App Store. Treat it as a **required** asset for any iOS launch (mark `deferred` only with a founder-approved reason). Verified Apple behavior (refresh against the App Store sources in `references/source-registry.yaml` before upload):
+The app preview video is the most underused growth lever on the App Store. Treat it as a **required** asset for any iOS launch (mark `deferred` only with a founder-approved reason). Verified Apple behavior (refresh against the App Store sources in `machine/source-registry.yaml` before upload):
 
 - You can upload **up to 3 app previews** per device size and language, and **app previews always precede screenshots** at the top of the product page.
 - On the product page, **app previews autoplay with muted audio** — Apple's own guidance: "make sure the first few seconds of your video are visually compelling." The first preview is a hook the user watches whether they intended to or not.
@@ -126,7 +126,7 @@ Because the first preview plays silent and unrequested, its first ~3–5 seconds
 
 - Communicate the core value with **no audio dependency** — on-screen text/captions carry the message.
 - **Show the payoff first** — the magical V1 moment from `11_STAR_EXPERIENCE.md` — not a logo, splash, or slow intro.
-- Land the **Emotional North Star** feeling instantly and instantiate the hook's Experience Card from the Asset Knowledge Brief (`EMOTIONAL_DESIGN.md` + `references/experience-cards.md`).
+- Land the **Emotional North Star** feeling instantly and instantiate the hook's Experience Card from the Asset Knowledge Brief (`EMOTIONAL_DESIGN.md` + `playbook/experience/experience-cards.md`).
 - Read at a glance with motion that is legible muted.
 - Have a **poster frame** that already sells if autoplay is blocked.
 - Be **truthful** — the hook must match what the app actually does; no bait-and-switch, fake UI, or oversold outcome.
@@ -136,7 +136,7 @@ Because the first preview plays silent and unrequested, its first ~3–5 seconds
 Both screenshots and the app preview run through the screenshot ASO skill; they are never hand-composed one-offs:
 
 - **Screenshots:** `ParthJadhav/app-store-screenshots` (the screenshot ASO skill), `ios-screenshots`, and `aso-skills:screenshot-optimization`, from real UI, App Icon, and design tokens.
-- **App preview:** script/storyboard via `aso-skills:app-preview-video`; capture real footage via the in-app iOS Simulator (Cmd+R), MobAI, Codex Desktop native iOS/XcodeBuildMCP, or serve-sim — MobAI stays the route for a polished multi-device recording; edit and caption via Remotion; produce all Apple/Play resolution variants (9:16 / 1:1 / 16:9) from a single master via the Higgsfield `reframe` MCP tool (Master → All Platforms recipe in `references/tool-recipes/visual-and-motion-production.md`) — reframe reformats aspect ratio only, never substitutes UI.
+- **App preview:** script/storyboard via `aso-skills:app-preview-video`; capture real footage via the in-app iOS Simulator (Cmd+R), MobAI, Codex Desktop native iOS/XcodeBuildMCP, or serve-sim — MobAI stays the route for a polished multi-device recording; edit and caption via Remotion; produce all Apple/Play resolution variants (9:16 / 1:1 / 16:9) from a single master via the Higgsfield `reframe` MCP tool (Master → All Platforms recipe in `playbook/process/tool-recipes/visual-and-motion-production.md`) — reframe reformats aspect ratio only, never substitutes UI.
 - A/B test variants with `aso-skills:ab-test-store-listing` (Product Page Optimization) where available.
 
 | Preview | Knowledge-leveraged hook (first 3–5s) | Emotion / Card | Poster frame | Captions (muted) | Skill route | Output | Status |
@@ -145,7 +145,7 @@ Both screenshots and the app preview run through the screenshot ASO skill; they 
 | iOS Preview 2–3 (optional) | secondary proof / breadth | secondary beat | Pending | required | same | `previews/ios-preview-2.mp4` | optional |
 | Google Play promo | hook payoff, YouTube-hosted | North Star feeling | n/a | recommended | same | YouTube URL pending | optional |
 
-Produce required resolution variants by `reframe`-ing one master rather than re-rendering per size; the source must be real app footage. See the Master → All Platforms recipe in `references/tool-recipes/visual-and-motion-production.md`.
+Produce required resolution variants by `reframe`-ing one master rather than re-rendering per size; the source must be real app footage. See the Master → All Platforms recipe in `playbook/process/tool-recipes/visual-and-motion-production.md`.
 
 ## Definition of Good: Present / Proven / Optimized
 

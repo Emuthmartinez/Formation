@@ -2,7 +2,7 @@
 
 Date: 2026-06-10
 Status: decided (implemented in the same change-set)
-Compound Engineering note: CE tooling (`ce-brainstorm`/`ce-plan`/`ce-work`) is unavailable in this cloud session; per `references/engineering-orchestration.md` §1b this design pass plus the validator/fixture/eval coverage below is the Standalone Engineering Loop equivalent (plan → bounded slices → adversarial review via validators → test via fixtures → proof via `npm run audit:ci`).
+Compound Engineering note: CE tooling (`ce-brainstorm`/`ce-plan`/`ce-work`) is unavailable in this cloud session; per `playbook/engineering/engineering-orchestration.md` §1b this design pass plus the validator/fixture/eval coverage below is the Standalone Engineering Loop equivalent (plan → bounded slices → adversarial review via validators → test via fixtures → proof via `npm run audit:ci`).
 
 ## Problem
 
@@ -18,10 +18,10 @@ Each starter is a minimal, pinned, installable Next.js App Router + Supabase pro
 
 - `package.json` + `package-lock.json` (lockfile generated with `npm install --package-lock-only`; dependency versions pinned from the npm registry at authoring time, recorded in the starter README with the refresh date).
 - Supabase wiring per the current `@supabase/ssr` docs (browser client, server client, `proxy.ts` session refresh — Next.js 16 renamed `middleware.ts` to `proxy.ts`; verified against the v16 upgrade guide).
-- `supabase/migrations/*.sql` schema with RLS enabled and per-table policies, plus `supabase/tests/*.sql` pgTAP tests exercising owner access and cross-user/anonymous denial — "tested RLS" per `references/backend-data-contract.md`, not prose.
+- `supabase/migrations/*.sql` schema with RLS enabled and per-table policies, plus `supabase/tests/*.sql` pgTAP tests exercising owner access and cross-user/anonymous denial — "tested RLS" per `playbook/engineering/backend-data-contract.md`, not prose.
 - Stripe stub (checkout + webhook routes, server-only key) and RevenueCat stub (webhook → entitlement projection) so the revenue lane has a place to land; both are inert without keys.
 - PostHog wiring with a typed event catalog (`lib/analytics/events.ts`) using the analytics lane's snake_case names (`app_opened`, `signup_completed`, `paywall_viewed`, `purchase_completed`, `attribution_source_selected`, …) plus pack-specific core-loop events.
-- `.env.example` names-only (every line `NAME=`), routed per `references/secrets-management.md`; every secret-shaped name is registered in `templates/secrets/SECRETS.md` so `check:secrets` sees it as routed.
+- `.env.example` names-only (every line `NAME=`), routed per `playbook/operations/secrets-management.md`; every secret-shaped name is registered in `templates/secrets/SECRETS.md` so `check:secrets` sees it as routed.
 - A CI workflow (`.github/workflows/ci.yml`) running typecheck + build (placeholder public env only — never secrets).
 - A starter README that maps **each existing prompt file** to the scaffold area it customizes.
 
@@ -47,7 +47,7 @@ New deterministic validator `check:archetype-starter` (`scripts/check-archetype-
 
 ### Backend adaptability
 
-The Supabase default stays adaptable per `references/backend-data-contract.md`: the starter README states plainly that if the founder selects Firebase or a custom backend, the migrations/RLS/auth pieces are replaced via the data-contract lane (Backend Selection with a reason, Data Model, tested Authorization Model, Migrations And Environments) and the archetype prompts are adapted — the starter is the supabase-route artifact, not a backend mandate.
+The Supabase default stays adaptable per `playbook/engineering/backend-data-contract.md`: the starter README states plainly that if the founder selects Firebase or a custom backend, the migrations/RLS/auth pieces are replaced via the data-contract lane (Backend Selection with a reason, Data Model, tested Authorization Model, Migrations And Environments) and the archetype prompts are adapted — the starter is the supabase-route artifact, not a backend mandate.
 
 ## Alternatives considered
 

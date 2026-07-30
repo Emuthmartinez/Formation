@@ -2,7 +2,7 @@
 
 Status: partial until the weekly rhythm has run at least once on the live app and crash, review, retention, and support routes are proven with evidence.
 
-The launch is not the end state; it is the handoff into operations. This runbook keeps the live business compounding: crash health, store reviews, retention economics, support, and growth reviewed on a fixed cadence with evidence. See `references/post-launch-operations.md` for the full lane playbook and `npm run check:post-launch -- --root . --state PROJECT_STATE.yaml` for the readiness gate.
+The launch is not the end state; it is the handoff into operations. This runbook keeps the live business compounding: crash health, store reviews, retention economics, support, and growth reviewed on a fixed cadence with evidence. See `playbook/operations/post-launch-operations.md` for the full lane playbook and `npm run check:post-launch -- --root . --state PROJECT_STATE.yaml` for the readiness gate.
 
 ## Weekly Operating Rhythm
 
@@ -47,10 +47,10 @@ Weekly log — one dated row per session, numbers not adjectives. "unverified" i
 ## Retention Review
 
 - Retention cohort source: PostHog cohorts (D0 activation, D7, D30) plus RevenueCat renewal data.
-- Watch the first-renewal inflection: most subscription loss happens before renewal #1 — accelerate time-to-value rather than gating harder (see `references/revenue-monetization.md`).
+- Watch the first-renewal inflection: most subscription loss happens before renewal #1 — accelerate time-to-value rather than gating harder (see `playbook/money/revenue-monetization.md`).
 - Split churn voluntary vs involuntary; involuntary churn gets the billing-recovery loop (grace period, dunning email, update-payment path), not resignation.
 - Reactivation/win-back runs plan-segmented; pause-instead-of-cancel is offered before the cancel completes.
-- Retention findings that change product, copy, pricing, or paywall behavior cascade through `references/change-cascade.md`.
+- Retention findings that change product, copy, pricing, or paywall behavior cascade through `playbook/process/change-cascade.md`.
 
 ## Support Operations
 

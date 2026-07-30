@@ -49,7 +49,7 @@ Keep this file as a concise map, not a duplicate manual. Put detailed launch pol
 
 Internal vocabulary is for agents and validators, never for founders. `scripts/lib/founder-copy.ts` is the only sanctioned path from machine state to founder-visible text; every founder-facing renderer imports from it. Adding a lane, status, phase, autonomy mode, or provider route means adding its label there **in the same commit** — `check:founder-copy` proves coverage and fails the build when a raw identifier, phase code, status enum, or banned internal word reaches a founder-visible surface. When a founder-visible heading is renamed, grep `scripts/` first: `check-founder-operator-bootstrap.ts` and `check-agent-operations.ts` both split the rendered cockpit on a literal `<h2>` string, so the rename and the validator update are one commit or the audit breaks.
 
-Writing quality is enforced, not advised. `references/no-slop-writing.md` holds the banned words, named slop patterns, and per-channel limits for everything this skill writes and everything it generates for a launched business; the rules are adapted from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT). `check:no-slop` **parses its rule table out of that reference** rather than duplicating it, so edit the reference and the gate follows. It errors on shipped copy surfaces, errors on this repo's own public docs (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, scanned via `--repo-root`), warns on guidance prose and on `AGENTS.md`/`CLAUDE.md`, and it deliberately does not enforce the judgment-dependent rules — turning "cut the adverb when it adds nothing" into a regex would flatten brand voice, which is the failure the source skill warns about.
+Writing quality is enforced, not advised. `playbook/words/no-slop-writing.md` holds the banned words, named slop patterns, and per-channel limits for everything this skill writes and everything it generates for a launched business; the rules are adapted from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT). `check:no-slop` **parses its rule table out of that reference** rather than duplicating it, so edit the reference and the gate follows. It errors on shipped copy surfaces, errors on this repo's own public docs (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, scanned via `--repo-root`), warns on guidance prose and on `AGENTS.md`/`CLAUDE.md`, and it deliberately does not enforce the judgment-dependent rules — turning "cut the adverb when it adds nothing" into a regex would flatten brand voice, which is the failure the source skill warns about.
 
 ## Commands
 
@@ -138,7 +138,7 @@ Broad launch/design/store/revenue/build work should first run `npm run check:ski
 
 ## Source Freshness
 
-New external URLs must be tracked in `skill/b2c-mobile-business-launch/references/source-registry.yaml`.
+New external URLs must be tracked in `skill/b2c-mobile-business-launch/machine/source-registry.yaml`.
 
 Use:
 

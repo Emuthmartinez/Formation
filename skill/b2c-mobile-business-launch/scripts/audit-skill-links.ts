@@ -124,7 +124,7 @@ function isReachable(candidate: string): boolean {
   return false;
 }
 
-for (const subtree of ["references", "templates"]) {
+for (const subtree of ["playbook", "machine", "templates", "starters"]) {
   const subtreeRoot = path.join(skillRoot, subtree);
   if (!existsSync(subtreeRoot)) {
     continue;

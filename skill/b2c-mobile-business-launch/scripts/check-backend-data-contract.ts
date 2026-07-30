@@ -18,7 +18,7 @@
  *      least one artifact that exists on disk (test file, migration, or
  *      proof doc). A bare "RLS" in prose cannot mark engineering done.
  *
- * See references/backend-data-contract.md.
+ * See playbook/engineering/backend-data-contract.md.
  *
  * Run:
  *   npm run check:backend-contract -- --root <app-repo-root>
@@ -54,7 +54,7 @@ if (!spec || !specPath) {
         "error",
         "backend_contract.tech_spec_missing",
         "lanes.engineering is done but TECH_SPEC.md does not exist, so no data contract was ever recorded. " +
-          "Create TECH_SPEC.md with the Data Contract section (see references/backend-data-contract.md).",
+          "Create TECH_SPEC.md with the Data Contract section (see playbook/engineering/backend-data-contract.md).",
         "TECH_SPEC.md",
       ),
     );
@@ -71,7 +71,7 @@ if (!includes(spec, "Data Contract")) {
       engineeringDone ? "error" : "warning",
       "backend_contract.section_missing",
       `${specPath} has no "Data Contract" section. Record schema, authorization, and migration contracts before the build couples ` +
-        "to a default provider. See references/backend-data-contract.md.",
+        "to a default provider. See playbook/engineering/backend-data-contract.md.",
       specPath,
     ),
   );

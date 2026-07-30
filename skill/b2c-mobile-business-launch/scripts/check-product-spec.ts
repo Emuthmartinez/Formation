@@ -4,7 +4,7 @@
  *
  * SPEC.md is where research becomes a product decision; the lane previously
  * had no dedicated validator. Structure follows the SPEC.md contract in
- * references/artifact-contracts.md: the spec must explain why the app can
+ * playbook/process/artifact-contracts.md: the spec must explain why the app can
  * win, name the magical V1 moment, and bound V1 before engineering planning.
  *
  * npm script: check:product-spec

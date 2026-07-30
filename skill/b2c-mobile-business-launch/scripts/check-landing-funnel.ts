@@ -211,7 +211,7 @@ if (!findStaticFile("robots.txt")) {
     issue(
       "error",
       "landing_funnel.geo_seo.robots_txt.missing",
-      "robots.txt is missing from the public directory. AI and search crawlers need explicit access rules. See references/geo-seo.md section 5.",
+      "robots.txt is missing from the public directory. AI and search crawlers need explicit access rules. See playbook/growth/geo-seo.md section 5.",
       "public/robots.txt",
     ),
   );
@@ -222,7 +222,7 @@ if (!findStaticFile("llms.txt")) {
     issue(
       "error",
       "landing_funnel.geo_seo.llms_txt.missing",
-      "llms.txt is missing. Add it so AI answer engines can discover and cite the product. See references/geo-seo.md section 1 (geo-llmstxt skill).",
+      "llms.txt is missing. Add it so AI answer engines can discover and cite the product. See playbook/growth/geo-seo.md section 1 (geo-llmstxt skill).",
       "public/llms.txt",
     ),
   );
@@ -264,7 +264,7 @@ for (const filePath of htmlFiles) {
         issue(
           "error",
           "landing_funnel.geo_seo.json_ld.parse_error",
-          `JSON-LD in ${relativePath} is not valid JSON: ${msg}. Invalid schema blocks structured-data rich results silently. See references/geo-seo.md section 4.`,
+          `JSON-LD in ${relativePath} is not valid JSON: ${msg}. Invalid schema blocks structured-data rich results silently. See playbook/growth/geo-seo.md section 4.`,
           relativePath,
         ),
       );
@@ -279,37 +279,37 @@ const bannedCopyPatterns: Array<[RegExp, string, string]> = [
   [
     /top\s+\d+\s+(unlock|get|receive|earn|referr)/i,
     "landing_funnel.copy.ranked_cohort_claim",
-    "Landing copy contains a ranked-cohort claim (e.g. 'Top 10 unlock', 'Top 100 referrers get'). Remove or ensure the waitlist system actively enforces the cutoff. See references/geo-seo.md section 4.",
+    "Landing copy contains a ranked-cohort claim (e.g. 'Top 10 unlock', 'Top 100 referrers get'). Remove or ensure the waitlist system actively enforces the cutoff. See playbook/growth/geo-seo.md section 4.",
   ],
   [
     /free\s+(first\s+year|lifetime|forever|always)\s+(of\s+)?(pro|premium|plus|access)/i,
     "landing_funnel.copy.unverified_free_tier_promise",
-    "Landing copy promises free or lifetime access not reflected in REVENUE_OPS.md. Cross-check before shipping. See references/geo-seo.md section 4.",
+    "Landing copy promises free or lifetime access not reflected in REVENUE_OPS.md. Cross-check before shipping. See playbook/growth/geo-seo.md section 4.",
   ],
   [
     /lifetime\s+(access|membership|pro|premium)/i,
     "landing_funnel.copy.lifetime_promise",
-    "Landing copy promises lifetime access. Verify against REVENUE_OPS.md pricing and entitlement design. See references/geo-seo.md section 4.",
+    "Landing copy promises lifetime access. Verify against REVENUE_OPS.md pricing and entitlement design. See playbook/growth/geo-seo.md section 4.",
   ],
   [
     /tested\s+by\s+(applied\s+)?(performance\s+)?researcher/i,
     "landing_funnel.copy.unverified_authority_claim",
-    "Landing copy includes an implied researcher/authority endorsement without a citable source. Remove or add a verifiable citation. See references/geo-seo.md section 4.",
+    "Landing copy includes an implied researcher/authority endorsement without a citable source. Remove or add a verifiable citation. See playbook/growth/geo-seo.md section 4.",
   ],
   [
     /clinically\s+validated|clinically\s+proven|neuroscience.backed|scientifically\s+proven/i,
     "landing_funnel.copy.unverified_clinical_claim",
-    "Landing copy includes a clinical/neuroscience claim. Remove or supply verifiable citations for legal review. See references/geo-seo.md section 4.",
+    "Landing copy includes a clinical/neuroscience claim. Remove or supply verifiable citations for legal review. See playbook/growth/geo-seo.md section 4.",
   ],
   [
     /when\s+they\s+ship/i,
     "landing_funnel.copy.unshipped_feature_promise",
-    "Landing copy promises a device/integration that has not shipped yet ('when they ship'). Move to a clearly labeled roadmap section or remove. See references/geo-seo.md section 4.",
+    "Landing copy promises a device/integration that has not shipped yet ('when they ship'). Move to a clearly labeled roadmap section or remove. See playbook/growth/geo-seo.md section 4.",
   ],
   [
     /spots?\s+(are\s+)?(almost\s+)?gone|limited\s+(availability|spots?)/i,
     "landing_funnel.copy.unverified_scarcity_claim",
-    "Landing copy uses scarcity language without a live enforcement mechanism. Remove or wire to real inventory logic. See references/geo-seo.md section 4.",
+    "Landing copy uses scarcity language without a live enforcement mechanism. Remove or wire to real inventory logic. See playbook/growth/geo-seo.md section 4.",
   ],
 ];
 
@@ -333,7 +333,7 @@ for (const filePath of landingSourceFiles) {
   }
 }
 
-// ── Landing motion craft (references/landing-motion-craft.md) ────────────────
+// ── Landing motion craft (playbook/design/landing-motion-craft.md) ────────────────
 // Cinematic and GEO/perf-safe is not a tradeoff; when landing sources animate,
 // the progressive-enhancement contract is enforceable:
 
@@ -384,7 +384,7 @@ if (animatedSources.length > 0) {
         "error",
         "landing_funnel.motion.reduced_motion_missing",
         `Landing sources animate (${animatedSources[0]?.relativePath ?? "landing"}) but nothing handles prefers-reduced-motion/useReducedMotion. ` +
-          "Every landing animation must collapse to its calm final state. See references/landing-motion-craft.md.",
+          "Every landing animation must collapse to its calm final state. See playbook/design/landing-motion-craft.md.",
         animatedSources[0]?.relativePath,
       ),
     );
@@ -400,7 +400,7 @@ if (animatedSources.length > 0) {
         "error",
         "landing_funnel.motion.hero_text_not_static",
         "Animated landing HTML has no <h1> with static text content — above-the-fold copy must exist in the HTML, never gated behind an animation " +
-          "or injected by JavaScript. See references/landing-motion-craft.md.",
+          "or injected by JavaScript. See playbook/design/landing-motion-craft.md.",
         animatedHtml[0]?.relativePath,
       ),
     );
@@ -418,7 +418,7 @@ if (animatedSources.length > 0) {
         landingStatus === "done" ? "error" : "warning",
         "landing_funnel.motion.untokenized_duration",
         `Landing motion uses raw duration literals without the tokenized --motion-* scale (${untokenized[0]?.relativePath ?? "landing"}). ` +
-          "Read durations/easings from design-system/tokens.css so the brand retimes in one place. See references/landing-motion-craft.md.",
+          "Read durations/easings from design-system/tokens.css so the brand retimes in one place. See playbook/design/landing-motion-craft.md.",
         untokenized[0]?.relativePath,
       ),
     );
@@ -448,7 +448,7 @@ if (hasWaitlistSurface) {
       issue(
         "error",
         "landing_funnel.waitlist.idempotency_undocumented",
-        "A waitlist surface exists but docs do not confirm duplicate-email idempotency (HTTP 200 for repeated submits). Add idempotency proof or a test note before marking the funnel ready. See references/geo-seo.md section 4.",
+        "A waitlist surface exists but docs do not confirm duplicate-email idempotency (HTTP 200 for repeated submits). Add idempotency proof or a test note before marking the funnel ready. See playbook/growth/geo-seo.md section 4.",
         primaryDoc,
       ),
     );

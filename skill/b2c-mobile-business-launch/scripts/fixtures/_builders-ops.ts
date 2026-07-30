@@ -336,10 +336,10 @@ export function writeCompletePaidToolDecisions(root: string): void {
 }
 
 export function writeSourceRegistryFixture(root: string, includeUrl = true): void {
-  mkdirSync(path.join(root, "references"), { recursive: true });
+  mkdirSync(path.join(root, "machine"), { recursive: true });
   writeFileSync(path.join(root, "README.md"), ["# Source Fixture", "Use current docs from https://docs.doppler.com/docs/cli before setup."].join("\n"), "utf8");
   writeFileSync(
-    path.join(root, "references", "source-registry.yaml"),
+    path.join(root, "machine", "source-registry.yaml"),
     stringifyYaml({
       schema_version: 1,
       sources: includeUrl

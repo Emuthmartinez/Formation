@@ -109,7 +109,7 @@ if ((ceAvailability === "unavailable" || ceRoute === "ce_fallback") && engineeri
       "compound_engineering.standalone_loop_missing",
       "Compound Engineering is unavailable (or routed to ce_fallback) but ENGINEERING_PLAN.md does not record the Standalone Engineering Loop. " +
         "A fallback reason alone is documentation, not a path — record the plan/bounded-slices/adversarial-review/test/proof loop from " +
-        "references/engineering-orchestration.md so the readiness bar does not silently drop with CE missing.",
+        "playbook/engineering/engineering-orchestration.md so the readiness bar does not silently drop with CE missing.",
       engineeringPlan.relativePath,
     ),
   );

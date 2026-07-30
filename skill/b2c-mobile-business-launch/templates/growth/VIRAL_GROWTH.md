@@ -49,7 +49,7 @@ Policy constraints:
 ### Share Artifact Production
 
 - Route personalized share cards (score, milestone badge, referral-unlock confirmation) through `higgsfield generate create gpt_image_2` with on-image user data and `DESIGN.md` palette; produce 9:16 for Stories/Reels and 1:1 for feed via `reframe`. Use `product-photoshoot --mode social_carousel` for referral-reveal carousels.
-- Share cards are social artifacts, not store screenshots — the real-screenshots-only store guardrail does not apply, but the `DESIGN.md` brief and spend-confirmation gate do, public posting stays founder-gated, and outputs are recorded in `CONTENT_ASSETS.md`. See the share-card guidance in `references/viral-growth-loops.md`.
+- Share cards are social artifacts, not store screenshots — the real-screenshots-only store guardrail does not apply, but the `DESIGN.md` brief and spend-confirmation gate do, public posting stays founder-gated, and outputs are recorded in `CONTENT_ASSETS.md`. See the share-card guidance in `playbook/growth/viral-growth-loops.md`.
 
 ## Content Loop
 

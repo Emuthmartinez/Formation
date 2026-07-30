@@ -5,7 +5,7 @@
  * PRIVACY.md and TERMS.md are the source drafts for the public policy pages
  * and store disclosures; the lane previously had no dedicated validator.
  * Structure follows the PRIVACY.md / TERMS.md contracts in
- * references/artifact-contracts.md. Founder/legal approval remains the final
+ * playbook/process/artifact-contracts.md. Founder/legal approval remains the final
  * gate — this validator enforces the structural floor, not legal adequacy.
  *
  * npm script: check:privacy-terms

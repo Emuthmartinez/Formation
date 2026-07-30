@@ -20,10 +20,10 @@ if (!contractOnly) {
 reportAndExit("MobAI contract and proof check", issues);
 
 function validateStoredContract(): void {
-  const relative = "references/mobai-toolbelt.md";
+  const relative = "playbook/engineering/mobai-toolbelt.md";
   const fullPath = path.join(skillRoot, relative);
   if (!existsSync(fullPath)) {
-    issues.push(issue("error", "mobai.contract.reference_missing", "references/mobai-toolbelt.md is required.", relative));
+    issues.push(issue("error", "mobai.contract.reference_missing", "playbook/engineering/mobai-toolbelt.md is required.", relative));
     return;
   }
   const text = readFileSync(fullPath, "utf8");

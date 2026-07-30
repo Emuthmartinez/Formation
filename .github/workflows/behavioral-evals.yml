@@ -3,7 +3,7 @@ name: Behavioral Evals (manual)
 # The live execution layer for the flagship LaunchBench subset
 # (behavioral: true). Deliberately manual-only: live agent runs cost money and
 # carry model variance, so they never gate PRs — `npm run audit:ci` remains the
-# deterministic gate. See references/launchbench-evals.md "Behavioral Eval
+# deterministic gate. See machine/launchbench-evals.md "Behavioral Eval
 # Harness".
 
 on:

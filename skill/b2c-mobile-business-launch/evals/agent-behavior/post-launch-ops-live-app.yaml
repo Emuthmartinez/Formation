@@ -5,7 +5,7 @@ prompt: >
   now?". PROJECT_STATE.yaml shows phase_6, lanes.post_launch_ops is not_started, there is
   no POST_LAUNCH_OPS.md, and Sentry plus App Store Connect reviews have never been swept.
 expected_route: >
-  Load references/post-launch-operations.md, create POST_LAUNCH_OPS.md from the template
+  Load playbook/operations/post-launch-operations.md, create POST_LAUNCH_OPS.md from the template
   with the Weekly Operating Rhythm, Crash Triage, Review Responses, Release And Hotfix
   Cadence, Retention Review, Support Operations, and Launch Retro sections, create
   LAUNCH_RETRO.md for the +7/30/90-day passes, set lanes.post_launch_ops honestly, run the

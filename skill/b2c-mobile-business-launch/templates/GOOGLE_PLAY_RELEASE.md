@@ -2,7 +2,7 @@
 
 Status: partial until the package name, track state, declarations, and signing posture are recorded against the live Play Console — not assumed from the iOS packet.
 
-Android distribution readiness for Google Play. This packet is the Play-side parity of `APPLE_SIGNING.md` + `APPLE_APP_STORE_REQUIREMENTS.md`; it must be reconciled with them, never copied from them. See `references/google-play-release.md` and `npm run check:google-play -- --root . --state PROJECT_STATE.yaml`.
+Android distribution readiness for Google Play. This packet is the Play-side parity of `APPLE_SIGNING.md` + `APPLE_APP_STORE_REQUIREMENTS.md`; it must be reconciled with them, never copied from them. See `playbook/store/google-play-release.md` and `npm run check:google-play -- --root . --state PROJECT_STATE.yaml`.
 
 ## Developer Account
 
@@ -63,7 +63,7 @@ Android distribution readiness for Google Play. This packet is the Play-side par
 ## Monetization Reconciliation
 
 - Play Billing products/subscriptions (base plans + offers) reconciled with the RevenueCat catalog and `REVENUE_OPS.md` product table.
-- Grace period / account hold enabled for involuntary-churn recovery per `references/revenue-monetization.md`.
+- Grace period / account hold enabled for involuntary-churn recovery per `playbook/money/revenue-monetization.md`.
 
 ## Review And Policy
 

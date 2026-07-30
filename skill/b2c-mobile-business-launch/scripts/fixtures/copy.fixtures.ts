@@ -1280,8 +1280,8 @@ export function register(h: Harness): void {
     // starters/ is a sibling of templates/ now, so the self-scan root has to
     // mirror the skill's own shape: the prompt-pack checks read from here.
     cpSync(path.join(skillRoot, "starters"), path.join(fakeRoot, "starters"), { recursive: true });
-    mkdirSync(path.join(fakeRoot, "references"), { recursive: true });
-    cpSync(path.join(skillRoot, "references", "conversion-copy.md"), path.join(fakeRoot, "references", "conversion-copy.md"));
+    mkdirSync(path.join(fakeRoot, "playbook", "words"), { recursive: true });
+    cpSync(path.join(skillRoot, "playbook", "words", "conversion-copy.md"), path.join(fakeRoot, "playbook", "words", "conversion-copy.md"));
     return fakeRoot;
   };
 

@@ -150,7 +150,7 @@ Cross-doc rule: every event named in `ONBOARDING.md`, `EMOTIONAL_DESIGN.md`, `VI
 
 ## Emotion Card Events
 
-Required when the Emotional Experience System is in scope (`EMOTIONAL_DESIGN.md`). Every card applied in the Card Application Map must name one of these events here before implementation; see `references/emotional-experience-measurement.md` for the full per-card catalog and counter-metrics. Do not invent new names — extend this table.
+Required when the Emotional Experience System is in scope (`EMOTIONAL_DESIGN.md`). Every card applied in the Card Application Map must name one of these events here before implementation; see `playbook/experience/emotional-experience-measurement.md` for the full per-card catalog and counter-metrics. Do not invent new names — extend this table.
 
 | Event | When | Properties | Counter-metric role |
 | --- | --- | --- | --- |

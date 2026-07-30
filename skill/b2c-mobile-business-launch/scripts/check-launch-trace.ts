@@ -4,7 +4,7 @@
  *
  * LAUNCH_TRACE.md is the chain from research to implementation; the lane
  * previously had no dedicated validator. Structure follows the
- * LAUNCH_TRACE.md contract in references/artifact-contracts.md.
+ * LAUNCH_TRACE.md contract in playbook/process/artifact-contracts.md.
  *
  * npm script: check:launch-trace
  * Usage: tsx scripts/check-launch-trace.ts --root <app-repo-root>

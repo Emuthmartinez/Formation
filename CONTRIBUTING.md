@@ -74,7 +74,7 @@ Keep versions in parity across `package.json` (root), `skill/b2c-mobile-business
 
 ### Source freshness
 
-Any new external URL you reference anywhere in the repo must be registered in `skill/b2c-mobile-business-launch/references/source-registry.yaml` with an `id`, `url`, `owner`, and the `locations` it appears in. `check:source-registry` enforces this at error severity, and it scans markdown, YAML, JSON, and TypeScript alike.
+Any new external URL you reference anywhere in the repo must be registered in `skill/b2c-mobile-business-launch/machine/source-registry.yaml` with an `id`, `url`, `owner`, and the `locations` it appears in. `check:source-registry` enforces this at error severity, and it scans markdown, YAML, JSON, and TypeScript alike.
 
 For fast-moving third-party tools (Doppler, RevenueCat, Stripe, PostHog, Resend, Apple and App Store Connect, Google Play, Fastlane, Remotion), refresh the official docs or local CLI `--help` before changing command guidance. Do not rely on memory or old transcripts.
 
@@ -84,7 +84,7 @@ Never commit secrets. `.env.example` files are names-only. State files, cockpits
 
 ### Writing quality
 
-`check:no-slop` reads its banned words and slop patterns out of [`references/no-slop-writing.md`](skill/b2c-mobile-business-launch/references/no-slop-writing.md) and scans shipped copy templates, guidance references, and this repo's own root docs including `README.md` and `CONTRIBUTING.md`. Edit the reference and the gate follows. The judgment-dependent rules stay advisory on purpose, because turning "cut the adverb when it adds nothing" into a regex would flatten brand voice.
+`check:no-slop` reads its banned words and slop patterns out of [`playbook/words/no-slop-writing.md`](skill/b2c-mobile-business-launch/playbook/words/no-slop-writing.md) and scans shipped copy templates, guidance references, and this repo's own root docs including `README.md` and `CONTRIBUTING.md`. Edit the reference and the gate follows. The judgment-dependent rules stay advisory on purpose, because turning "cut the adverb when it adds nothing" into a regex would flatten brand voice.
 
 ### Prefer enforcement over reminders
 

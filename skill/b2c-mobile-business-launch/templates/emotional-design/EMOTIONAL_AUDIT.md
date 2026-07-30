@@ -3,12 +3,12 @@
 Use this when you need a systematic record of the emotional quality of each user journey — onboarding, core loop, paywall, return sessions, failure states — against the four required Experience Cards and the Six-Lens Design Review Framework. Complete this artifact before marking any journey "build-ready" or "launch-ready." Discoveries map back to `eleven-star-experience.md` (star level), `analytics-attribution.md` (missing events), `failure-cards.md` (open cards), and `PRODUCTION_READINESS.md` (compliance evidence).
 
 Load before this audit:
-- `references/emotional-experience-design.md` — Six-Lens Framework, four required cards, bright-line checklist
-- `references/emotional-experience-measurement.md` — per-card PostHog event catalog
-- `references/eleven-star-experience.md` — star ladder and UX audit output contract
-- `references/analytics-attribution.md` — master event catalog; do not invent event names outside it
-- `references/onboarding-conversion.md` — paywall timing and card sequencing rules
-- `references/design-room.md` and `references/design-visual-system.md` — motion tokens and `prefers-reduced-motion` requirements
+- `playbook/experience/emotional-experience-design.md` — Six-Lens Framework, four required cards, bright-line checklist
+- `playbook/experience/emotional-experience-measurement.md` — per-card PostHog event catalog
+- `playbook/experience/eleven-star-experience.md` — star ladder and UX audit output contract
+- `playbook/data/analytics-attribution.md` — master event catalog; do not invent event names outside it
+- `playbook/experience/onboarding-conversion.md` — paywall timing and card sequencing rules
+- `playbook/design/design-room.md` and `playbook/design/design-visual-system.md` — motion tokens and `prefers-reduced-motion` requirements
 
 **Auditor:** {{AUDITOR_NAME}}
 **App version audited:** {{APP_VERSION}}
@@ -552,7 +552,7 @@ Before marking this audit complete and the emotional design lane ready:
 
 ## Device Walk Protocol (MobAI Operationalization)
 
-Use this protocol to walk each journey on a real device and collect per-screen evidence. Follow the MobAI guidance in `references/mobai-toolbelt.md` before starting. Do not pre-choreograph multi-step blocks without a clean dry-run.
+Use this protocol to walk each journey on a real device and collect per-screen evidence. Follow the MobAI guidance in `playbook/engineering/mobai-toolbelt.md` before starting. Do not pre-choreograph multi-step blocks without a clean dry-run.
 
 ### Pre-Walk Setup
 

@@ -2,7 +2,7 @@
 
 Status: template — fill every section from this product's evidence, then set the status to `authored` with the date.
 
-The brief is the product's message in one place: the promise, the proof, and the voice. Every conversion surface (landing, store listing, paywall, lifecycle email, onboarding value-reveal) writes from here so the user meets one product, not five. The full string surface lives in `COPY_DECK.md`, which inherits this voice. Craft rules live in `references/conversion-copy.md`.
+The brief is the product's message in one place: the promise, the proof, and the voice. Every conversion surface (landing, store listing, paywall, lifecycle email, onboarding value-reveal) writes from here so the user meets one product, not five. The full string surface lives in `COPY_DECK.md`, which inherits this voice. Craft rules live in `playbook/words/conversion-copy.md`.
 
 ## Value proposition
 
@@ -24,7 +24,7 @@ _Replace this line with this product's content — the gate fails a brief that s
 - Reading level and person: second person, plain words, short sentences.
 - Case system: pick sentence case or title case once, record it here, hold it everywhere (`COPY_DECK.md` repeats the choice).
 - Words we own: the product's coined terms, with one line on what each means.
-- Words we never use: jargon, internal vocabulary, and any term from the banned lists in `references/conversion-copy.md`.
+- Words we never use: jargon, internal vocabulary, and any term from the banned lists in `playbook/words/conversion-copy.md`.
 
 ## Voice-of-customer phrase bank
 

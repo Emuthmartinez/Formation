@@ -136,7 +136,7 @@ export const requiredLanes = [
 /**
  * Lane dependency edges — the machine-readable form of "Lock phase outputs
  * before depending on them" (SKILL.md, Operating Posture) and the Flow Gates in
- * references/flow-traceability.md.
+ * playbook/process/flow-traceability.md.
  *
  * Each entry lists a lane's DIRECT upstream lanes only; transitive edges are
  * implied (design -> product -> experience -> research, so design does not

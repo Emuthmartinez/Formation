@@ -16,7 +16,7 @@ The one feeling {{APP_NAME}} exists to create:
 - **When it fires:** (which moment in the core loop produces it)
 - **Why a user retells it:** (the sentence a delighted user says to a friend — the word-of-mouth trigger)
 - **11-star ladder level this represents:** (reference the 7-star or 11-star label in `11_STAR_EXPERIENCE.md`)
-- **What makes it specific to {{APP_NAME}}, not a generic SaaS wrapper:** (per `references/quality-lens.md`)
+- **What makes it specific to {{APP_NAME}}, not a generic SaaS wrapper:** (per `playbook/design/quality-lens.md`)
 
 Emotional North Star must survive the quality-lens test: it must describe an emotion specific to this user's emotional job-to-be-done, not a generic category statement like "users feel happy."
 
@@ -64,14 +64,14 @@ All four cards are required. Mark a card `deferred` only with a founder-approved
 
 | Feature / Moment | Card Applied | Emotional Beat Intended | Producer Recipe Ref | Measurement Event | Bright-Line Guardrail | Reduced-Motion Fallback |
 | --- | --- | --- | --- | --- | --- | --- |
-| Goal-setting question in onboarding | Commitment Card | Ownership — user feels the product is now working toward their goal | `references/emotional-experience-design.md §Commitment Card` | `commitment_made`, `commitment_echoed` | Commitment editable from Settings at any time; never used as cancellation friction | Soft fade on echo replaced with instant text highlight; no animation |
-| Plan generation / personalization reveal | Perceived Effort Delay Card | Valued — user believes the plan was crafted for them | `references/emotional-experience-design.md §Perceived Effort Delay Card` | `perceived_effort_started`, `perceived_effort_completed` | ≥50% of displayed steps correspond to real computation; step-to-operation map in `TECH_SPEC.md` | Static step list with no animation; progress count visible without motion |
-| First result / value reveal | Variable Reward Card | Energized — the result varies and the anticipation makes the reveal meaningful | `references/emotional-experience-design.md §Variable Reward Card` | `variable_reward_anticipation_started`, `variable_reward_revealed` | Variation is genuine (content differs, not only framing); no spend prompt on same screen | Instant reveal with static badge; no anticipation animation; plain text summary always available |
-| Pre-paywall pause | Intent Mirroring Card | Ready — the user sees their own goal before the purchase ask | `references/emotional-experience-design.md §Intent Mirroring Card` | `intent_mirror_shown`, `intent_mirror_continued` | Mirror uses only fields the user explicitly provided; not placed on cancel/downgrade path | Static text block fades in instantly; no deliberate slow-fade entrance |
-| Return session after N-day absence | Intent Mirroring Card (return) | Recommitted — the product remembers them without nagging | `references/emotional-experience-design.md §Intent Mirroring Card` | `intent_mirror_shown` (surface: re_engagement), `intent_mirror_continued` | Mirror copy is warm, not guilt-laden; user can dismiss without penalty | Static welcome text; no transition animation |
-| Core loop completion | Variable Reward Card (core loop) | Surprised / rewarded — the result quality varies across a positive range | `references/emotional-experience-design.md §Variable Reward Card` | `variable_reward_anticipation_started`, `variable_reward_revealed` | No near-miss mechanics; escape hatch in Settings > Accessibility | Static reveal; plain result text without reveal animation |
+| Goal-setting question in onboarding | Commitment Card | Ownership — user feels the product is now working toward their goal | `playbook/experience/emotional-experience-design.md §Commitment Card` | `commitment_made`, `commitment_echoed` | Commitment editable from Settings at any time; never used as cancellation friction | Soft fade on echo replaced with instant text highlight; no animation |
+| Plan generation / personalization reveal | Perceived Effort Delay Card | Valued — user believes the plan was crafted for them | `playbook/experience/emotional-experience-design.md §Perceived Effort Delay Card` | `perceived_effort_started`, `perceived_effort_completed` | ≥50% of displayed steps correspond to real computation; step-to-operation map in `TECH_SPEC.md` | Static step list with no animation; progress count visible without motion |
+| First result / value reveal | Variable Reward Card | Energized — the result varies and the anticipation makes the reveal meaningful | `playbook/experience/emotional-experience-design.md §Variable Reward Card` | `variable_reward_anticipation_started`, `variable_reward_revealed` | Variation is genuine (content differs, not only framing); no spend prompt on same screen | Instant reveal with static badge; no anticipation animation; plain text summary always available |
+| Pre-paywall pause | Intent Mirroring Card | Ready — the user sees their own goal before the purchase ask | `playbook/experience/emotional-experience-design.md §Intent Mirroring Card` | `intent_mirror_shown`, `intent_mirror_continued` | Mirror uses only fields the user explicitly provided; not placed on cancel/downgrade path | Static text block fades in instantly; no deliberate slow-fade entrance |
+| Return session after N-day absence | Intent Mirroring Card (return) | Recommitted — the product remembers them without nagging | `playbook/experience/emotional-experience-design.md §Intent Mirroring Card` | `intent_mirror_shown` (surface: re_engagement), `intent_mirror_continued` | Mirror copy is warm, not guilt-laden; user can dismiss without penalty | Static welcome text; no transition animation |
+| Core loop completion | Variable Reward Card (core loop) | Surprised / rewarded — the result quality varies across a positive range | `playbook/experience/emotional-experience-design.md §Variable Reward Card` | `variable_reward_anticipation_started`, `variable_reward_revealed` | No near-miss mechanics; escape hatch in Settings > Accessibility | Static reveal; plain result text without reveal animation |
 
-Add product-specific rows below. Every row must have a populated Measurement Event — unmeasured moments are not in scope per `references/analytics-attribution.md`.
+Add product-specific rows below. Every row must have a populated Measurement Event — unmeasured moments are not in scope per `playbook/data/analytics-attribution.md`.
 
 ---
 
@@ -81,7 +81,7 @@ One attestation block per applied card instance. Required before engineering han
 
 Dark-line acknowledgements, guardrails, and user-control escape hatches must be product-specific — generic text copied from references without adaptation is insufficient.
 
-See `references/ethics-guardrail.md §Guardrail Contract` for the full field specification and the three-question operational test (goal alignment, truthfulness, informed exit). All three must resolve YES.
+See `playbook/experience/ethics-guardrail.md §Guardrail Contract` for the full field specification and the three-question operational test (goal alignment, truthfulness, informed exit). All three must resolve YES.
 
 ---
 
@@ -252,7 +252,7 @@ experience_card:
 
 ### Emotional Moment Events
 
-Add all events below to `ANALYTICS.md` before implementation. Do not invent names; use the stable catalog from `references/emotional-experience-design.md §Analytics Events` and `references/emotional-experience-measurement.md §System Events`.
+Add all events below to `ANALYTICS.md` before implementation. Do not invent names; use the stable catalog from `playbook/experience/emotional-experience-design.md §Analytics Events` and `playbook/experience/emotional-experience-measurement.md §System Events`.
 
 | Event Name | Trigger | Required Properties | Counter-Metric Role |
 | --- | --- | --- | --- |
@@ -272,7 +272,7 @@ Add all events below to `ANALYTICS.md` before implementation. Do not invent name
 
 ### Counter-Metrics (Dark-Pattern Backfire Signals)
 
-These metrics detect whether an emotional card is serving users or extracting from them. Monitor weekly while any card experiment is active. If any threshold is breached for two consecutive weeks, open `emotional-card-dark-line-crossed` from `references/emotional-experience-measurement.md §Failure Card Shape`.
+These metrics detect whether an emotional card is serving users or extracting from them. Monitor weekly while any card experiment is active. If any threshold is breached for two consecutive weeks, open `emotional-card-dark-line-crossed` from `playbook/experience/emotional-experience-measurement.md §Failure Card Shape`.
 
 | Counter-Metric | Card | Threshold To Investigate | Action |
 | --- | --- | --- | --- |
@@ -316,9 +316,9 @@ This artifact integrates with the following surfaces. Do not duplicate their con
 | `ONBOARDING.md` | Commitment Card fires during onboarding personalization. Perceived Effort Delay fires at plan generation. Intent Mirroring fires before the paywall. The onboarding sequence must reflect the Target Emotional Journey curve from this document: curve peaks before the paywall marker. |
 | `ANALYTICS.md` | All events in the Measurement Plan must appear in `ANALYTICS.md` before implementation. Do not implement events that are absent from the catalog. |
 | `DESIGN.md` | Motion tokens for each card moment: Commitment echo uses `motion.durationFast` (120ms fade); Variable Reward anticipation uses a pulse loop timed on `motion.durationBase` + a celebrate-family spring reveal; Perceived Effort step transitions use `motion.durationFast` + a celebrate-family final reveal; Intent Mirror entrance uses `motion.durationReveal` (600ms). Web surfaces use `motion/react` with CSS `--motion-*` variables. Mobile binary uses `DesignTokens.Motion`. Every delight moment has a `prefers-reduced-motion` / OS reduce-motion fallback declared in `TECH_SPEC.md`. |
-| `references/emotional-experience-design.md` | Producer recipes for all four cards, Six-Lens Design Review framework, Emotional Curve artifact format, bright-line governance. |
-| `references/emotional-experience-measurement.md` | Full per-card event catalogs, counter-metric thresholds, A/B experiment templates, dark-pattern detection protocol. |
-| `references/ethics-guardrail.md` | Guardrail Contract, per-mechanism risk table, non-negotiable prohibitions, validator rules for `check:emotional-design`. |
+| `playbook/experience/emotional-experience-design.md` | Producer recipes for all four cards, Six-Lens Design Review framework, Emotional Curve artifact format, bright-line governance. |
+| `playbook/experience/emotional-experience-measurement.md` | Full per-card event catalogs, counter-metric thresholds, A/B experiment templates, dark-pattern detection protocol. |
+| `playbook/experience/ethics-guardrail.md` | Guardrail Contract, per-mechanism risk table, non-negotiable prohibitions, validator rules for `check:emotional-design`. |
 | `PRODUCTION_READINESS.md` | Evidence for each card's bright-line compliance: commitment editability verified on device; variable reward variation proven (30% differentiation or personalization convergence documented); effort step-to-operation map verified; intent mirror content sources confirmed. |
 
 ---
@@ -333,12 +333,12 @@ Before any feature that applies an Experience Card is called build-ready:
 - [ ] Card Application Map covers all four required cards or records a founder-approved deferral in `PROJECT_STATE.yaml lanes.emotional_design.deferred_cards`.
 - [ ] Every row in Card Application Map has a populated Measurement Event. Unmeasured moments are not accepted.
 - [ ] All four Ethics Attestation blocks are filled. Every field is product-specific. `bright_line`, `dark_line`, and `guardrail` fields are non-empty.
-- [ ] Variable Reward Card: `user_control_escape_hatch` and `ethics_attestation` filled (HIGH-tier card — required by `references/ethics-guardrail.md`).
+- [ ] Variable Reward Card: `user_control_escape_hatch` and `ethics_attestation` filled (HIGH-tier card — required by `playbook/experience/ethics-guardrail.md`).
 - [ ] Perceived Effort Delay Card: `effort_truthfulness_attestation` filled with actual real-operation ratio (≥50%).
 - [ ] Three-question operational test (goal alignment, truthfulness, informed exit) resolves YES for every applied card. Recorded in attestation blocks.
 - [ ] All Measurement Plan events added to `ANALYTICS.md` before implementation.
 - [ ] PostHog "Emotional Experience — Card Signals" dashboard exists with Dark-Pattern Watch insight configured with alerts.
-- [ ] Counter-metric thresholds recorded; weekly dark-pattern watch protocol active (`references/emotional-experience-measurement.md §Dark-Pattern Detection Protocol`).
+- [ ] Counter-metric thresholds recorded; weekly dark-pattern watch protocol active (`playbook/experience/emotional-experience-measurement.md §Dark-Pattern Detection Protocol`).
 - [ ] Reduced-motion fallback declared for every animated card moment in `TECH_SPEC.md`. Web: `prefers-reduced-motion` check on `motion/react` animations. Mobile: OS reduce-motion flag check via `DesignTokens.Motion`.
 - [ ] Intent Mirroring: mirror content sources only from fields user explicitly provided. Not placed on cancel / downgrade / unsubscribe flows. Verified in `PRODUCTION_READINESS.md`.
 - [ ] Commitment: editable by user from Settings at any time. Verified on device.

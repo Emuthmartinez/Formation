@@ -1,7 +1,7 @@
 # Motion Catalog — Runnable Choreography Exemplars
 
 Full-screen choreography templates that bind the recipes in
-[`references/motion-craft-benchmarks.md`](../../references/motion-craft-benchmarks.md)
+[`playbook/design/motion-craft-benchmarks.md`](../../playbook/design/motion-craft-benchmarks.md)
 to the shipped token scale as compilable code. The 2026-07-28 live output test
 showed builders drift whenever a rule exists only as prose; this pack is the
 code half of that contract — copy a file, swap the placeholder content, keep
@@ -48,7 +48,7 @@ adapting.
 2. Replace the placeholder asset names (`card-foil`, `card-emblem`,
    `cloud-item-1`…`cloud-item-7`, `hero-emblem`) with brand art in the app's
    asset catalog — generate via the Higgsfield routing in
-   `references/design-visual-system.md`. Adding the app's first asset catalog
+   `playbook/design/design-visual-system.md`. Adding the app's first asset catalog
    makes the asset compiler require an `AppIcon` set in the same catalog.
 3. Replace the demo copy and scene hex colors with the brand's own; the token
    bindings and beat pacing stay.

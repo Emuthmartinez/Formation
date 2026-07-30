@@ -13,7 +13,7 @@
  *
  * It is intentionally NOT part of the PR-gating audit pipeline (cost and
  * model variance); it runs via the manually-triggered behavioral-evals
- * GitHub Actions workflow or locally. See references/launchbench-evals.md
+ * GitHub Actions workflow or locally. See machine/launchbench-evals.md
  * "Behavioral Eval Harness" for the honest split.
  *
  * Model ids come from the claude-api skill (checked 2026-07-25): default

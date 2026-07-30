@@ -22,7 +22,7 @@
  * cannot bypass the emotional-design contract accidentally. The ethics phrase
  * scans always run when the artifacts exist.
  *
- * Reference integrity: when references/ethics-guardrail.md (and the
+ * Reference integrity: when playbook/experience/ethics-guardrail.md (and the
  * experience-cards.md index) resolve next to the root, the §3 risk table must
  * keep one tier per mechanism and the index Risk column must agree with it.
  */
@@ -242,7 +242,7 @@ function checkCardBlock(block: CardBlock): void {
         issue(
           "error",
           `emotional_design.${codeFor(mechanism)}_missing_${f}`,
-          `${label} in ${where} requires a non-empty "${f}" field per references/ethics-guardrail.md §Guardrail Contract.`,
+          `${label} in ${where} requires a non-empty "${f}" field per playbook/experience/ethics-guardrail.md §Guardrail Contract.`,
           where,
         ),
       );
@@ -744,7 +744,8 @@ if (!skip && design && targetsMinors) {
 }
 
 // Reference integrity — ethics-guardrail.md must keep its load-bearing sections.
-const ethicsRef = readText(path.join(args.root, ".."), "references/ethics-guardrail.md") ?? readText(args.root, "references/ethics-guardrail.md");
+const ethicsRef =
+  readText(path.join(args.root, ".."), "playbook/experience/ethics-guardrail.md") ?? readText(args.root, "playbook/experience/ethics-guardrail.md");
 if (ethicsRef) {
   for (const section of [
     "Bright-Line Vs Dark-Line Distinction",
@@ -758,8 +759,8 @@ if (ethicsRef) {
         issue(
           "error",
           `emotional_design.reference_${codeFor(section)}_missing`,
-          `references/ethics-guardrail.md must contain a section with the phrase "${section}".`,
-          "references/ethics-guardrail.md",
+          `playbook/experience/ethics-guardrail.md must contain a section with the phrase "${section}".`,
+          "playbook/experience/ethics-guardrail.md",
         ),
       );
     }
@@ -868,7 +869,8 @@ function bucketCovers(bucketKey: string, indexName: string): boolean {
   return indexName === bucketKey || indexName.startsWith(`${bucketKey} `);
 }
 
-const cardsIndexRef = readText(path.join(args.root, ".."), "references/experience-cards.md") ?? readText(args.root, "references/experience-cards.md");
+const cardsIndexRef =
+  readText(path.join(args.root, ".."), "playbook/experience/experience-cards.md") ?? readText(args.root, "playbook/experience/experience-cards.md");
 
 if (ethicsRef) {
   const { rows: riskRows, malformed: riskMalformed } = parseTableRows(ethicsRef, /^\|\s*Mechanism\s*\|\s*Risk Tier\s*\|/i, 1, 2);
@@ -877,8 +879,8 @@ if (ethicsRef) {
       issue(
         "error",
         "emotional_design.risk_table_malformed_row",
-        `references/ethics-guardrail.md §3 has a table-shaped line that does not parse as a row (missing leading pipe?): "${broken}". Fix it — its mechanism is invisible to the parity gate.`,
-        "references/ethics-guardrail.md",
+        `playbook/experience/ethics-guardrail.md §3 has a table-shaped line that does not parse as a row (missing leading pipe?): "${broken}". Fix it — its mechanism is invisible to the parity gate.`,
+        "playbook/experience/ethics-guardrail.md",
       ),
     );
   }
@@ -887,8 +889,8 @@ if (ethicsRef) {
       issue(
         "error",
         "emotional_design.risk_table_unparsed",
-        "references/ethics-guardrail.md §3 declares a Per-Mechanism Risk Table but no `| Mechanism | Risk Tier |` rows parse — the risk-tier parity gate has gone blind.",
-        "references/ethics-guardrail.md",
+        "playbook/experience/ethics-guardrail.md §3 declares a Per-Mechanism Risk Table but no `| Mechanism | Risk Tier |` rows parse — the risk-tier parity gate has gone blind.",
+        "playbook/experience/ethics-guardrail.md",
       ),
     );
   }
@@ -909,8 +911,8 @@ if (ethicsRef) {
           issue(
             "error",
             "emotional_design.risk_tier_unrecognized",
-            `references/ethics-guardrail.md §3 tier "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range (a placeholder tier is allowed only on the motion-fallback row). Fix the cell — otherwise the parity gate silently skips this mechanism.`,
-            "references/ethics-guardrail.md",
+            `playbook/experience/ethics-guardrail.md §3 tier "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range (a placeholder tier is allowed only on the motion-fallback row). Fix the cell — otherwise the parity gate silently skips this mechanism.`,
+            "playbook/experience/ethics-guardrail.md",
           ),
         );
       }
@@ -927,8 +929,8 @@ if (ethicsRef) {
             issue(
               "error",
               "emotional_design.risk_tier_conflict",
-              `references/ethics-guardrail.md §3 assigns "${member.trim()}" disagreeing tiers across two bucket rows. One tier per mechanism.`,
-              "references/ethics-guardrail.md",
+              `playbook/experience/ethics-guardrail.md §3 assigns "${member.trim()}" disagreeing tiers across two bucket rows. One tier per mechanism.`,
+              "playbook/experience/ethics-guardrail.md",
             ),
           );
         } else if (existingBucket) {
@@ -939,8 +941,8 @@ if (ethicsRef) {
             issue(
               "error",
               "emotional_design.risk_tier_duplicate_row",
-              `references/ethics-guardrail.md §3 lists "${member.trim()}" in two bucket rows (both ${tierKey(tiers)}). Duplicate rows are how tier drift starts — merge into a single row.`,
-              "references/ethics-guardrail.md",
+              `playbook/experience/ethics-guardrail.md §3 lists "${member.trim()}" in two bucket rows (both ${tierKey(tiers)}). Duplicate rows are how tier drift starts — merge into a single row.`,
+              "playbook/experience/ethics-guardrail.md",
             ),
           );
         } else {
@@ -956,8 +958,8 @@ if (ethicsRef) {
         issue(
           "error",
           "emotional_design.risk_tier_conflict",
-          `references/ethics-guardrail.md §3 lists "${row.name}" twice with disagreeing risk tiers (${existing.tierRaw} vs ${row.tierRaw}). Dedupe to a single row with one tier.`,
-          "references/ethics-guardrail.md",
+          `playbook/experience/ethics-guardrail.md §3 lists "${row.name}" twice with disagreeing risk tiers (${existing.tierRaw} vs ${row.tierRaw}). Dedupe to a single row with one tier.`,
+          "playbook/experience/ethics-guardrail.md",
         ),
       );
     } else if (existing) {
@@ -965,8 +967,8 @@ if (ethicsRef) {
         issue(
           "error",
           "emotional_design.risk_tier_duplicate_row",
-          `references/ethics-guardrail.md §3 lists "${row.name}" twice (both ${row.tierRaw}). Duplicate rows are how tier drift starts — merge into a single row.`,
-          "references/ethics-guardrail.md",
+          `playbook/experience/ethics-guardrail.md §3 lists "${row.name}" twice (both ${row.tierRaw}). Duplicate rows are how tier drift starts — merge into a single row.`,
+          "playbook/experience/ethics-guardrail.md",
         ),
       );
     } else {
@@ -983,8 +985,8 @@ if (ethicsRef) {
         issue(
           "error",
           "emotional_design.risk_tier_conflict",
-          `references/ethics-guardrail.md §3 tiers "${bucketKey}" ${explicit.tierRaw} in its explicit row but ${[...bucketSet].sort().join("-")} in a bucket row. One tier per mechanism.`,
-          "references/ethics-guardrail.md",
+          `playbook/experience/ethics-guardrail.md §3 tiers "${bucketKey}" ${explicit.tierRaw} in its explicit row but ${[...bucketSet].sort().join("-")} in a bucket row. One tier per mechanism.`,
+          "playbook/experience/ethics-guardrail.md",
         ),
       );
     }
@@ -997,8 +999,8 @@ if (ethicsRef) {
         issue(
           "error",
           "emotional_design.risk_table_malformed_row",
-          `references/experience-cards.md has a table-shaped routing line that does not parse as a row (missing leading pipe?): "${broken}". Fix it — its card is invisible to the parity gate.`,
-          "references/experience-cards.md",
+          `playbook/experience/experience-cards.md has a table-shaped routing line that does not parse as a row (missing leading pipe?): "${broken}". Fix it — its card is invisible to the parity gate.`,
+          "playbook/experience/experience-cards.md",
         ),
       );
     }
@@ -1007,8 +1009,8 @@ if (ethicsRef) {
         issue(
           "error",
           "emotional_design.card_index_unparsed",
-          "references/experience-cards.md exists but no `| Card | Load when | Risk |` routing rows parse — the risk-tier parity gate has gone blind.",
-          "references/experience-cards.md",
+          "playbook/experience/experience-cards.md exists but no `| Card | Load when | Risk |` routing rows parse — the risk-tier parity gate has gone blind.",
+          "playbook/experience/experience-cards.md",
         ),
       );
     }
@@ -1021,8 +1023,8 @@ if (ethicsRef) {
           issue(
             "error",
             "emotional_design.risk_tier_unrecognized",
-            `references/experience-cards.md Risk cell "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range. Fix the cell — otherwise the parity gate silently skips this card.`,
-            "references/experience-cards.md",
+            `playbook/experience/experience-cards.md Risk cell "${row.tierRaw}" for "${row.name}" is not LOW/MEDIUM/HIGH or a LOW-MEDIUM range. Fix the cell — otherwise the parity gate silently skips this card.`,
+            "playbook/experience/experience-cards.md",
           ),
         );
         continue;
@@ -1035,8 +1037,8 @@ if (ethicsRef) {
           issue(
             "error",
             "emotional_design.risk_tier_duplicate_row",
-            `references/experience-cards.md routes "${row.name}" twice (${priorIndexTier} and ${row.tierRaw}). One routing row per card.`,
-            "references/experience-cards.md",
+            `playbook/experience/experience-cards.md routes "${row.name}" twice (${priorIndexTier} and ${row.tierRaw}). One routing row per card.`,
+            "playbook/experience/experience-cards.md",
           ),
         );
         continue;
@@ -1049,8 +1051,8 @@ if (ethicsRef) {
           issue(
             "error",
             "emotional_design.risk_tier_mismatch",
-            `references/experience-cards.md routes "${row.name}" as ${row.tierRaw} but references/ethics-guardrail.md §3 tiers it ${explicit?.tierRaw ?? [...allowed].join("-")}. The guardrail table is canonical — make both files agree.`,
-            "references/experience-cards.md",
+            `playbook/experience/experience-cards.md routes "${row.name}" as ${row.tierRaw} but playbook/experience/ethics-guardrail.md §3 tiers it ${explicit?.tierRaw ?? [...allowed].join("-")}. The guardrail table is canonical — make both files agree.`,
+            "playbook/experience/experience-cards.md",
           ),
         );
       } else if (!allowed && !GUARDRAIL_UNMAPPED_INDEX_CARDS.has(key)) {
@@ -1059,8 +1061,8 @@ if (ethicsRef) {
           issue(
             "error",
             "emotional_design.risk_tier_unmapped_card",
-            `references/experience-cards.md routes "${row.name}" (${row.tierRaw}) but no §3 row or bucket in references/ethics-guardrail.md covers it. Add a §3 row or fix the name — only deliberately unmapped cards (${[...GUARDRAIL_UNMAPPED_INDEX_CARDS].join(", ")}) may skip.`,
-            "references/experience-cards.md",
+            `playbook/experience/experience-cards.md routes "${row.name}" (${row.tierRaw}) but no §3 row or bucket in playbook/experience/ethics-guardrail.md covers it. Add a §3 row or fix the name — only deliberately unmapped cards (${[...GUARDRAIL_UNMAPPED_INDEX_CARDS].join(", ")}) may skip.`,
+            "playbook/experience/experience-cards.md",
           ),
         );
       }
@@ -1078,8 +1080,8 @@ if (ethicsRef) {
             issue(
               "error",
               "emotional_design.risk_tier_index_missing_card",
-              `references/ethics-guardrail.md §3 tiers "${tableKey}" but no references/experience-cards.md routing row covers it. Restore the index row, or add the mechanism to the table-only allowlist if it is deliberately not a deck card.`,
-              "references/experience-cards.md",
+              `playbook/experience/ethics-guardrail.md §3 tiers "${tableKey}" but no playbook/experience/experience-cards.md routing row covers it. Restore the index row, or add the mechanism to the table-only allowlist if it is deliberately not a deck card.`,
+              "playbook/experience/experience-cards.md",
             ),
           );
         }

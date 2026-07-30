@@ -5,7 +5,7 @@
  * RESEARCH.md is the evidence root every downstream lane traces back to, yet
  * the lane previously had no dedicated validator: only the generic
  * lane-coverage status floor saw it. Structure follows the RESEARCH.md
- * contract in references/artifact-contracts.md.
+ * contract in playbook/process/artifact-contracts.md.
  *
  * npm script: check:research
  * Usage: tsx scripts/check-research-evidence.ts --root <app-repo-root>

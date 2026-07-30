@@ -2,13 +2,13 @@
 /**
  * check-change-cascade.ts — surface-coverage gate for recorded change cascades.
  *
- * references/change-cascade.md says a change to a launched app is not done
+ * playbook/process/change-cascade.md says a change to a launched app is not done
  * until every impacted surface is "updated or explicitly marked unaffected".
  * That was an honour system: the map lived in a markdown table no validator
  * could read, so a cascade could silently skip a surface and still read as
  * complete.
  *
- * This validator reads the same map as data (references/cascade-edges.yaml)
+ * This validator reads the same map as data (playbook/process/cascade-edges.yaml)
  * and grades the `change_cascade` block a launch run records in its own
  * PROJECT_STATE.yaml:
  *
@@ -57,13 +57,13 @@ function resolveSkillRoot(argv: string[]): string {
 
 /** Load and shape-check the shipped edge map. A broken map is a maintainer bug. */
 function loadCascadeMap(skillRoot: string, issues: Issue[]): CascadeMap | undefined {
-  const mapPath = path.join(skillRoot, "references", "cascade-edges.yaml");
+  const mapPath = path.join(skillRoot, "playbook", "process", "cascade-edges.yaml");
   if (!existsSync(mapPath)) {
     issues.push(
       issue(
         "error",
         "change_cascade.map_missing",
-        `references/cascade-edges.yaml is missing at ${mapPath}. It is the data form of the Change Cascade Map.`,
+        `playbook/process/cascade-edges.yaml is missing at ${mapPath}. It is the data form of the Change Cascade Map.`,
         mapPath,
       ),
     );
@@ -75,7 +75,7 @@ function loadCascadeMap(skillRoot: string, issues: Issue[]): CascadeMap | undefi
     parsed = parseYaml(readFileSync(mapPath, "utf8"));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    issues.push(issue("error", "change_cascade.map_parse_error", `references/cascade-edges.yaml is invalid YAML: ${message}`, mapPath));
+    issues.push(issue("error", "change_cascade.map_parse_error", `playbook/process/cascade-edges.yaml is invalid YAML: ${message}`, mapPath));
     return undefined;
   }
 
@@ -83,7 +83,7 @@ function loadCascadeMap(skillRoot: string, issues: Issue[]): CascadeMap | undefi
   const typesRaw = getPath(parsed, "change_types");
   if (!isRecord(surfacesRaw) || !isRecord(typesRaw)) {
     issues.push(
-      issue("error", "change_cascade.map_malformed", "references/cascade-edges.yaml must define both `surfaces` and `change_types` mappings.", mapPath),
+      issue("error", "change_cascade.map_malformed", "playbook/process/cascade-edges.yaml must define both `surfaces` and `change_types` mappings.", mapPath),
     );
     return undefined;
   }

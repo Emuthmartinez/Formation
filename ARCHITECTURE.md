@@ -39,9 +39,9 @@ Today *kind* is the top level, *domain* is nowhere, and *stage* exists only as p
   spine.md                 the ordered walk through a launch; stages live here
 
   playbook/                agent knowledge, grouped by domain
-    research/  product/  experience/  design/  words/  build/
-    store/  money/  growth/  data/  trust/  operations/
-      <domain>.md          index: load-when triggers, one row per file
+    research/  product/  experience/  design/  words/  engineering/
+    store/  money/  growth/  data/  trust/  operations/  process/
+      README.md            index: load-when triggers, one row per file
       *.md                 the lane references themselves
 
   business/                what a launch produces
@@ -53,6 +53,12 @@ Today *kind* is the top level, *domain* is nowhere, and *stage* exists only as p
   machine/                 the skill's own upkeep: versioning, evals, parity, fixtures
   state/                   the state store and its schemas
 ```
+
+Two of those domains are easy to confuse and are deliberately separate. **`operations/`** is running the *business* — founder access, secrets, paid-tool routing, agent operations, post-launch rhythm. **`process/`** is running the *launch* — phases, state, coverage, artifact contracts, traceability, orchestration, change cascade. Both are cross-cutting; neither is machinery, because an agent loads them mid-launch and a maintainer rarely opens them.
+
+`machine/` is narrower than "everything self-referential": it is only what the maintainer touches to keep the skill green — versioning, the eval harness, the source registry, parity, fixtures. A file about *how a launch is run* is method and belongs in `playbook/process/`, not here. Mixing the two is what made "the skill talking about itself" measure at 22% when much of that is really the method the skill exists to carry.
+
+Each domain folder carries its own `README.md` index rather than a sibling `<domain>.md`. A folder that explains itself on its front page needs no convention to be learned, and it keeps the domain self-contained when it moves.
 
 ## The rules that make it hold
 
@@ -79,13 +85,19 @@ Today *kind* is the top level, *domain* is nowhere, and *stage* exists only as p
 
 Safest first; each step keeps `npm run audit:ci` green and lands as its own commit.
 
-1. **`starters/`** — move `templates/app-archetypes/`. Largest file-count win, smallest reference surface.
-2. **`business/`** — split `templates/` into founder documents and generated pages; agent bookkeeping moves to `playbook/` or `machine/`.
-3. **`playbook/`** — regroup `references/` by domain, each with its index, collapsing `SKILL.md` rows as each domain lands.
+1. **`starters/`** — move `templates/app-archetypes/`. Largest file-count win, smallest reference surface. **Done, v0.52.0.**
+2. **`playbook/`** — regroup `references/` by domain, each with its `README.md`, collapsing `SKILL.md` rows as each domain lands.
+3. **`business/`** — split `templates/` into founder documents and generated pages; agent bookkeeping moves to `playbook/` or `machine/`.
 4. **`gates/`** — move `scripts/check-*.ts`; the audit runner globs rather than naming paths.
 5. **`machine/`** — versioning, evals, parity, fixtures.
+
+`playbook/` moved ahead of `business/` deliberately: it is the step that answers the original complaint (domains are invisible in a directory listing), its classification is already decided, and its `SKILL.md` collapse *frees* budget rather than spending it. `business/` needs a judgment call per file about whether a founder reads it, and touches far more hardcoded paths, so it benefits from going second.
 
 ## Open decisions
 
 - **The name.** The root directory is named for the product. Renaming costs a one-time sync across `~/.codex`, `~/.claude`, `~/.agents` plus `skill-version.json`, so it is deferred until the name is chosen, not blocked on it.
 - **Card and technique naming.** Whether the twelve engagement-technique names get plain-language equivalents or stay internal labels behind one umbrella term a founder sees.
+
+## Naming traps
+
+Domain folder names have to survive `.gitignore`. `playbook/build/` was silently untracked for a whole CI run because the root `.gitignore` carries `build/`, which matches at any depth — the moved files were tracked (`git mv` forces already-tracked files) but the new index was dropped by `git add` without a word. The domain is `engineering/` for that reason. Check any future domain name against `git check-ignore -v` before committing to it; `dist`, `build`, `tmp`, `out`, and `target` are all landmines.

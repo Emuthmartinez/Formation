@@ -8,12 +8,12 @@ For core engineering work, check Compound Engineering freshness, route through C
 
 ## Data Contract
 
-The backend-agnostic contract the build must satisfy regardless of provider. See `references/backend-data-contract.md`; gate with `npm run check:backend-contract -- --root . --state PROJECT_STATE.yaml`.
+The backend-agnostic contract the build must satisfy regardless of provider. See `playbook/engineering/backend-data-contract.md`; gate with `npm run check:backend-contract -- --root . --state PROJECT_STATE.yaml`.
 
 ### Backend Selection
 
 - Route: supabase (default) | firebase | custom — record the route and the reason it fits this product; switching later is a change-cascade event, never a silent substitution.
-- Archetype prompt packs assume Supabase; when another route is selected, adapt the schema/auth prompts via the parity table in `references/backend-data-contract.md` instead of running them verbatim.
+- Archetype prompt packs assume Supabase; when another route is selected, adapt the schema/auth prompts via the parity table in `playbook/engineering/backend-data-contract.md` instead of running them verbatim.
 
 ### Data Model
 
@@ -36,7 +36,7 @@ The backend-agnostic contract the build must satisfy regardless of provider. See
 
 ## Strings And Localization Readiness
 
-Every user-facing string is consumed from `COPY_DECK.md`, never invented at the keyboard, and externalized from the first commit so localization is a content decision later, not a rebuild. Rules live in `references/conversion-copy.md` §Localization Readiness; which locales ship is `LOCALIZATION_MARKET_RESEARCH.md`'s call.
+Every user-facing string is consumed from `COPY_DECK.md`, never invented at the keyboard, and externalized from the first commit so localization is a content decision later, not a rebuild. Rules live in `playbook/words/conversion-copy.md` §Localization Readiness; which locales ship is `LOCALIZATION_MARKET_RESEARCH.md`'s call.
 
 - String externalization mechanism for this stack: String Catalogs (`.xcstrings`) for iOS | `res/values/strings.xml` for native Android | i18next + `expo-localization` for React Native/Expo | ARB + `gen-l10n` for Flutter | typed strings module or `next-intl` for the web funnel. Record the choice here.
 - Resource keys are the `COPY_DECK.md` keys — unchanged where the format allows dots (String Catalogs, i18next); for ARB + `gen-l10n` and Android `strings.xml`, dots become underscores (mechanical, reversible; record the transform here).

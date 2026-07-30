@@ -32,7 +32,7 @@ function parseArgs(argv: string[]): Args {
     { flags: ["--write-discovered"], key: "writeDiscovered", kind: "boolean" },
   ]);
   const root = flagString(flags, "root") ?? process.cwd();
-  const registryPath = flagString(flags, "registry") ?? "references/source-registry.yaml";
+  const registryPath = flagString(flags, "registry") ?? "machine/source-registry.yaml";
   const sinceDays = flagNumber(flags, "sinceDays") ?? 8;
 
   return {

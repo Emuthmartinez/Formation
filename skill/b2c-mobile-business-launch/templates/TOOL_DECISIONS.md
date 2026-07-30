@@ -16,7 +16,7 @@ Record paid, account-gated, and fallback tooling decisions before using or downg
 
 ## Mobile Proof Route Decision
 
-One row per decision point. The ladder lives in `references/xcodebuildmcp-testing.md`; this records which rung this launch actually stood on and why. Moving *down* the ladder — rung 0 instead of rung 2 or 4 — is a coverage decision, not a convenience: it must name what coverage was given up and what would force an escalation.
+One row per decision point. The ladder lives in `playbook/engineering/xcodebuildmcp-testing.md`; this records which rung this launch actually stood on and why. Moving *down* the ladder — rung 0 instead of rung 2 or 4 — is a coverage decision, not a convenience: it must name what coverage was given up and what would force an escalation.
 
 | Decided at | Lane / question | Rung chosen | Runtime | Why this rung | Coverage given up | Escalation trigger |
 | --- | --- | --- | --- | --- | --- | --- |

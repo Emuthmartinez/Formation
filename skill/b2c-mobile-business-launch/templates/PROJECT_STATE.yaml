@@ -152,7 +152,7 @@ lanes:
   # the skill (scripts/lib/launch-state.ts, laneDependencies) and is not editable
   # from here. To finish a lane over an open upstream, add a dated
   #   dependency_override: "YYYY-MM-DD why this lane is genuinely independent of it"
-  # which downgrades the error to a standing warning. See references/project-state.md.
+  # which downgrades the error to a standing warning. See playbook/process/project-state.md.
   paid_tool_routing:
     status: "not_started"
     evidence:
@@ -557,7 +557,7 @@ open_questions:
       - "store submission"
 # Recorded change cascades for a launched (or near-launch) app. Empty until the
 # first post-launch change ships; check:change-cascade grades each entry against
-# references/cascade-edges.yaml (the data form of the Change Cascade Map, which
+# playbook/process/cascade-edges.yaml (the data form of the Change Cascade Map, which
 # ships with the skill and is not editable from here).
 #
 # Every surface the map says a change type touches must be accounted for:

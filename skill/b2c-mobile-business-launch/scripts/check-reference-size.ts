@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * check-reference-size.ts — per-file context budget for references/.
+ * check-reference-size.ts — per-file context budget for playbook/ and machine/.
  *
- * References are loaded into agent context on demand; a single oversized file
+ * Knowledge files load into agent context on demand; a single oversized file
  * silently taxes every launch session that routes through it (the
  * experience-cards.md deck reached ~200KB before it was split into an index
  * plus per-card files). This gate keeps each reference under a generous
@@ -13,9 +13,9 @@
  * an excluded file that drops back under budget warns so the exclusion gets
  * removed.
  *
- * It also enforces the split it recommends: every `references/<name>/`
- * directory needs a `references/<name>.md` index that links each topic file,
- * and every routing link out of that index must resolve. Without this, a split
+ * It also enforces the split it recommends: every directory holding knowledge
+ * files needs an index linking each child — `<dir>/README.md` for a domain
+ * folder, a sibling `<name>.md` for a sub-split — and every link must resolve. Without this, a split
  * rots silently — an unlinked topic file is unreachable and a dangling row
  * sends agents nowhere.
  *
@@ -50,7 +50,7 @@ const ENTRYPOINT_BUDGET_BYTES = 45 * 1024;
 /**
  * Files allowed over budget, each with a concrete reason. Adding an entry is a
  * reviewed decision, not a workaround — prefer splitting into an index plus
- * per-topic files (see references/experience-cards.md).
+ * per-topic files (see playbook/experience/experience-cards.md).
  */
 const EXCLUSIONS: Record<string, string> = {
   "artifact-contracts.md":
@@ -61,12 +61,24 @@ const EXCLUSIONS: Record<string, string> = {
 
 const args = parseArgs(process.argv.slice(2));
 const issues: Issue[] = [];
-const referencesDir = path.join(args.skillRoot, "references");
 
-if (!existsSync(referencesDir)) {
-  issues.push(issue("error", "reference_size.dir_missing", `references/ is missing at ${referencesDir}.`, "references"));
-} else {
-  for (const file of collectFilesRecursive(referencesDir)) {
+/**
+ * ARCHITECTURE.md: knowledge lives in playbook/ grouped by domain, and the
+ * skill's own upkeep lives in machine/. Both are loaded into agent or
+ * maintainer context, so both carry the per-file budget. `references/` no
+ * longer exists.
+ */
+const KNOWLEDGE_ROOTS = ["playbook", "machine"];
+const presentRoots = KNOWLEDGE_ROOTS.map((name) => ({ name, dir: path.join(args.skillRoot, name) })).filter((root) => existsSync(root.dir));
+
+if (presentRoots.length === 0) {
+  issues.push(
+    issue("error", "reference_size.dir_missing", `No knowledge roots found; expected ${KNOWLEDGE_ROOTS.join(" and ")} under ${args.skillRoot}.`, "playbook"),
+  );
+}
+
+for (const root of presentRoots) {
+  for (const file of collectFilesRecursive(root.dir)) {
     const relative = path.relative(args.skillRoot, file).split(path.sep).join("/");
     const basename = path.basename(file);
     const size = statSync(file).size;
@@ -77,7 +89,7 @@ if (!existsSync(referencesDir)) {
         issue(
           "error",
           "reference_size.over_budget",
-          `${relative} is ${size} bytes (> ${args.budgetBytes} byte budget). Split it into an index plus per-topic files (see references/experience-cards.md), or add an exclusion with a concrete reason in check-reference-size.ts.`,
+          `${relative} is ${size} bytes (> ${args.budgetBytes} byte budget). Split it into an index plus per-topic files (see playbook/experience/experience-cards.md), or add an exclusion with a concrete reason in check-reference-size.ts.`,
           relative,
         ),
       );
@@ -96,65 +108,89 @@ if (!existsSync(referencesDir)) {
 }
 
 /**
- * Index completeness for split references.
+ * Index completeness.
  *
- * The remedy this gate recommends is "split into an index plus per-topic
- * files", so the split itself needs enforcement: a topic file no index links
- * to is unreachable by progressive disclosure, and a routing row pointing at a
- * deleted file sends agents to a 404. Every `references/<name>/` directory
- * must therefore have a `references/<name>.md` index that links each of its
- * files, and every link out of that index must resolve.
+ * Progressive disclosure only works if every file is reachable from an index:
+ * a topic file nothing links to cannot be loaded on demand, and a routing row
+ * pointing at a deleted file sends agents to a 404. So every directory holding
+ * knowledge files needs an index that links each of its immediate children.
+ *
+ * Two index shapes are accepted, because both are load-bearing:
+ *   - `<dir>/README.md`      — a domain folder explaining itself on its front
+ *                              page (ARCHITECTURE.md's convention for playbook
+ *                              domains; needs no convention to be learned)
+ *   - `<parent>/<name>.md`   — a sub-split inside a domain, where the index
+ *                              sits beside the folder it routes into
+ *
+ * Reachability means a real markdown link, not a mention. A filename that only
+ * appears in prose or backticks reads as routed to a human skimming the index
+ * but is not something an agent can follow, so both directions below are
+ * checked against parsed link targets rather than raw text.
  */
-if (existsSync(referencesDir)) {
-  for (const entry of readdirSync(referencesDir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) {
-      continue;
-    }
-    const topicDir = path.join(referencesDir, entry.name);
-    const indexPath = path.join(referencesDir, `${entry.name}.md`);
-    const indexRelative = `references/${entry.name}.md`;
+function checkDirectoryIndex(dir: string): void {
+  const children = readdirSync(dir, { withFileTypes: true });
+  const files = children.filter((e) => e.isFile() && (e.name.endsWith(".md") || e.name.endsWith(".yaml")) && e.name !== "README.md");
+  const subdirs = children.filter((e) => e.isDirectory());
 
-    if (!existsSync(indexPath)) {
+  for (const sub of subdirs) {
+    checkDirectoryIndex(path.join(dir, sub.name));
+  }
+  if (files.length === 0) {
+    return;
+  }
+
+  const dirRelative = path.relative(args.skillRoot, dir).split(path.sep).join("/");
+  const readmePath = path.join(dir, "README.md");
+  const siblingPath = path.join(path.dirname(dir), `${path.basename(dir)}.md`);
+
+  // hrefs in each shape resolve from a different base, so carry the base along.
+  const candidate = existsSync(readmePath)
+    ? { indexPath: readmePath, base: dir }
+    : existsSync(siblingPath)
+      ? { indexPath: siblingPath, base: path.dirname(dir) }
+      : undefined;
+
+  if (!candidate) {
+    issues.push(
+      issue(
+        "error",
+        "reference_size.index_missing",
+        `${dirRelative}/ has no index. Add ${dirRelative}/README.md routing to each file, or a sibling ${path.basename(dir)}.md — without one, nothing here can be loaded on demand.`,
+        `${dirRelative}/README.md`,
+      ),
+    );
+    return;
+  }
+
+  const indexRelative = path.relative(args.skillRoot, candidate.indexPath).split(path.sep).join("/");
+  const linked = new Set(linkedHrefs(readFileSync(candidate.indexPath, "utf8")));
+
+  for (const file of files) {
+    const href = path.relative(candidate.base, path.join(dir, file.name)).split(path.sep).join("/");
+    if (!linked.has(href)) {
       issues.push(
         issue(
           "error",
-          "reference_size.index_missing",
-          `references/${entry.name}/ has no ${indexRelative} index. A split reference needs an index that routes to each topic file, or nothing can load it on demand.`,
+          "reference_size.index_incomplete",
+          `${indexRelative} does not link ${href}. Add a routing row with a load-when trigger (a bare mention is not a link), or delete the unreachable file.`,
           indexRelative,
         ),
       );
-      continue;
-    }
-
-    const indexText = readFileSync(indexPath, "utf8");
-    // Reachability means a real markdown link, not a mention. A filename that
-    // only appears in prose or backticks reads as routed to a human skimming
-    // the index but is not something an agent can follow, so both directions
-    // below are checked against parsed link targets rather than raw text.
-    const linked = new Set(linkedHrefs(indexText));
-
-    for (const file of collectFilesRecursive(topicDir)) {
-      const href = path.relative(referencesDir, file).split(path.sep).join("/");
-      if (!linked.has(href)) {
-        issues.push(
-          issue(
-            "error",
-            "reference_size.index_incomplete",
-            `${indexRelative} does not link references/${href}. Add a routing row with a load-when trigger (a bare mention is not a link), or delete the unreachable file.`,
-            indexRelative,
-          ),
-        );
-      }
-    }
-
-    for (const href of linked) {
-      if (href.startsWith(`${entry.name}/`) && !existsSync(path.join(referencesDir, href))) {
-        issues.push(
-          issue("error", "reference_size.index_dangling_link", `${indexRelative} routes to references/${href}, which does not exist.`, indexRelative),
-        );
-      }
     }
   }
+
+  for (const href of linked) {
+    if (href.startsWith("http") || href.startsWith("#")) {
+      continue;
+    }
+    if (!existsSync(path.join(candidate.base, href))) {
+      issues.push(issue("error", "reference_size.index_dangling_link", `${indexRelative} routes to ${href}, which does not exist.`, indexRelative));
+    }
+  }
+}
+
+for (const root of presentRoots) {
+  checkDirectoryIndex(root.dir);
 }
 
 const entrypointPath = path.join(args.skillRoot, "SKILL.md");

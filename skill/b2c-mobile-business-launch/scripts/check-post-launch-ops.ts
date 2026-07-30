@@ -21,7 +21,7 @@
  *      verdict is the one legitimate way for the rhythm to go quiet.
  *
  * Launch-and-vanish — shipping the store release with no operating rhythm —
- * is the failure this catches. See references/post-launch-operations.md.
+ * is the failure this catches. See playbook/operations/post-launch-operations.md.
  *
  * Run:
  *   npm run check:post-launch -- --root <app-repo-root>
@@ -72,7 +72,7 @@ if (!runbook || !runbookPath) {
       "post_launch_ops.runbook_missing",
       "POST_LAUNCH_OPS.md is required once the project is post-launch (phase_6/phase_6b) or the post_launch_ops lane is claimed. " +
         "A launched app with no operating runbook is the launch-and-vanish anti-pattern. " +
-        "See references/post-launch-operations.md.",
+        "See playbook/operations/post-launch-operations.md.",
       "POST_LAUNCH_OPS.md",
     ),
   );

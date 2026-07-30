@@ -59,8 +59,8 @@ npm run validate:launch-state -- --root /path/to/app
 | --- | --- |
 | `check:founder-operator` | Business identity, Doppler, account access, and one-decision-at-a-time bootstrap |
 | `check:founder-copy` | No raw identifier, phase code, status value, or internal vocabulary reaches a founder-visible surface. `scripts/lib/founder-copy.ts` is the only sanctioned path from state to founder text |
-| `check:no-slop` | Banned words and named slop patterns in shipped copy and repo docs, with rules parsed from `references/no-slop-writing.md` |
-| `check:app-copy` | No internal vocabulary, placeholder filler, or raw identifier in the words a user reads: `COPY_DECK.md` cells, the `ONBOARDING.md` Copy column, `TECH_SPEC.md`'s string-externalization contract, and the shipped starters. Rules parsed from `references/conversion-copy.md`; live apps (phase_6*) warn while their backfill is tracked |
+| `check:no-slop` | Banned words and named slop patterns in shipped copy and repo docs, with rules parsed from `playbook/words/no-slop-writing.md` |
+| `check:app-copy` | No internal vocabulary, placeholder filler, or raw identifier in the words a user reads: `COPY_DECK.md` cells, the `ONBOARDING.md` Copy column, `TECH_SPEC.md`'s string-externalization contract, and the shipped starters. Rules parsed from `playbook/words/conversion-copy.md`; live apps (phase_6*) warn while their backfill is tracked |
 | `check:agent-operations` | Capability inventory, approval envelopes, exact account and environment targeting, prompt-injection policy, before/after evidence, redaction, and state reconciliation |
 | `migrate:founder-gates` | One-time migration of older founder-gate shapes |
 

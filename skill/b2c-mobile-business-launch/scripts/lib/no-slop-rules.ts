@@ -1,5 +1,5 @@
 /**
- * no-slop-rules.ts — the machine-readable form of references/no-slop-writing.md.
+ * no-slop-rules.ts — the machine-readable form of playbook/words/no-slop-writing.md.
  *
  * The rule lists are PARSED OUT OF THE REFERENCE rather than duplicated here. That is
  * deliberate: a second copy of a 26-word banned list drifts from the first the moment
@@ -145,7 +145,7 @@ export const slopPatterns: SlopPattern[] = [
   },
 ];
 
-/** Section markers in references/no-slop-writing.md that carry the word lists. */
+/** Section markers in playbook/words/no-slop-writing.md that carry the word lists. */
 const WORD_LIST_MARKERS = {
   bannedWords: "**Banned outright**",
   emptyAdverbs: "**Often-empty adverbs**",

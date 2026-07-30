@@ -40,7 +40,7 @@ Per-surface implementation:
 
 ## Emotional Tone And Card Motion
 
-Required when `EMOTIONAL_DESIGN.md` is in scope. Translate the Emotional North Star into Norman's three levels, then bind each Experience Card moment to a motion token and a reduced-motion fallback. Web surfaces animate with `motion/react` reading `--motion-*` variables; the mobile binary uses `DesignTokens.Motion`. See `references/emotional-design-system.md §Integration §Design Room`.
+Required when `EMOTIONAL_DESIGN.md` is in scope. Translate the Emotional North Star into Norman's three levels, then bind each Experience Card moment to a motion token and a reduced-motion fallback. Web surfaces animate with `motion/react` reading `--motion-*` variables; the mobile binary uses `DesignTokens.Motion`. See `playbook/experience/emotional-design-system.md §Integration §Design Room`.
 
 **Three-level tone (fill product-specific):**
 

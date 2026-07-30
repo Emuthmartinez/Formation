@@ -11,7 +11,7 @@
  *
  * Deliberate exception: templates/landing/ is the landing-page section library
  * — a web-only surface where `motion/react` is the mandated animation library
- * (references/landing-motion-craft.md). Those files are copied into a web
+ * (playbook/design/landing-motion-craft.md). Those files are copied into a web
  * project, never into the mobile binary, so the import is correct there.
  */
 import { readFileSync } from "node:fs";
