@@ -88,7 +88,7 @@ Before scaling creators or Fastlane, make formats testable:
 - result windows: 24h, 72h, 7d, 30d
 - install, branded-search, store-rank, referral, paywall, and purchase signal
 
-Use `ugc-creator-engine.md` when creators, payments, contracts, or UGC operations are in scope. Use `fastlane-growth-ops.md` after launch approval or public beta when Fastlane is the generation or scheduling engine. Use `remotion-content-assets.md` when repeatable local video/still variants are needed.
+Use `ugc-creator-engine.md` when creators, payments, contracts, or UGC operations are in scope; use `influencer-sponsorship-engine.md` when the content comes from paying creators with existing audiences (sponsorship deals, meme-page amplification). Use `fastlane-growth-ops.md` after launch approval or public beta when Fastlane is the generation or scheduling engine. Use `remotion-content-assets.md` when repeatable local video/still variants are needed.
 
 ### Share Artifact Production
 

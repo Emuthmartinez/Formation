@@ -182,6 +182,18 @@ Show value before the paywall whenever possible:
 
 RevenueCat 2026 data supports testing hard paywalls seriously: hard paywall apps show much higher Day 35 download-to-paid conversion than freemium, but the right choice still depends on product dynamics and acquisition strategy.
 
+### Held Value Reveal
+
+The strongest pre-paywall moment for analysis/result products runs the magical moment and holds the reveal: the user submits real input (a photo, a video, a plan request), the app runs the **real** computation with an honest progress state, and the personalized result unlocks at the paywall. By the time the price appears, the user has invested input and is waiting on an answer about themselves — that is engineered suspense on top of genuine value, and it converts far better than a cold paywall after setup questions.
+
+Rules that keep it honest:
+
+- the computation must actually run; a progress animation over nothing is deception, not suspense (see Rejected Tactics in `influencer-sponsorship-engine.md`)
+- offer a visible skip path for users who want to defer the demo input
+- the held result must be delivered in full immediately on purchase or trial start
+- this is the Perceived Effort Delay Card operating at the paywall boundary — when the 6-star+ card contract applies, map it in `EMOTIONAL_DESIGN.md`
+- instrument with the approved catalog: `personalized_plan_viewed` (or the value-reveal equivalent), `paywall_viewed`, and the paywall variant dimension; add any new event name to `ANALYTICS.md` first
+
 ### Closing Offer Or Reverse Trial
 
 Treat paywall close as a second conversion moment:
@@ -214,6 +226,8 @@ Default candidate package set for subscription apps:
 - trial length tested against product cost and learning speed; do not default to very short trials without a reason
 
 RevenueCat 2026 benchmarks show longer trials can convert better, but shorter trials can improve experiment velocity and cash-flow feedback. Pick an initial hypothesis, then test with RevenueCat experiments or an equivalent feature flag.
+
+**Trial placement steers plan mix.** Where the trial sits is a lever independent of its length: attaching the free trial to the annual plan only funnels trial-seekers into the annual package and pulls a year of cash forward on conversion instead of one month — a major cash-flow accelerant for bootstrapped launches (see `revenue-monetization.md` §4c). It is a legitimate structure when the renewal price, term, and cancellation are disclosed clearly on the paywall; treat it as a plan-mix experiment, not a default.
 
 **Paid intro offers as a free-trial alternative.** The 2026 report flags a structural shift: paid intro offers (e.g. `$0.99` for the first month/week, then auto-renewing to full price) are increasingly replacing free trials because they create commitment, reduce trial abuse, improve early cash flow, and often convert at higher quality. Context to calibrate against, not copy blindly: only ~9.3% of apps currently use promotional offers, yet ~30% of new subscribers (median) enter through an intro discount — and reliance is inverted by scale (hobby-tier apps often run 65–99% of new subs through intro offers, while top performers rely on them for ~0–10%). Treat a low-priced paid intro as one candidate alongside a free trial in the plan-mix hypothesis, disclose the renewal price/terms clearly (see `revenue-monetization.md` §7), and avoid building a business that *depends* on permanent heavy discounting. This is a founder-approved pricing decision (`revenue-monetization.md` §9).
 
