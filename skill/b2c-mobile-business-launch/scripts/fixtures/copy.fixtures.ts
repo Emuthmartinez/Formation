@@ -1184,4 +1184,42 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: ARB alone is not the Flutter mechanism", mechanismArbOnly, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // A status line hidden in a comment declares nothing.
+  const deckCommentedStatus = makeFixture("app-copy-deck-commented-status");
+  writeFileSync(path.join(deckCommentedStatus, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckCommentedStatus, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: draft",
+      "",
+      "<!-- Status: authored 2026-07-29 -->",
+      "",
+      "## Onboarding",
+      "",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: commented authored status declares nothing", deckCommentedStatus, "check-app-copy.ts", 1, "app_copy.deck_status_unauthored");
+
+  // "cannot use" is a rejection in the plan and in the mechanism line alike.
+  const planCannotUse = makeFixture("app-copy-plan-cannot-use");
+  writeFileSync(path.join(planCannotUse, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "partial" }), "utf8");
+  writeFileSync(path.join(planCannotUse, "ENGINEERING_PLAN.md"), "# Engineering Plan\n\nWe cannot use COPY_DECK.md for this sprint.\n", "utf8");
+  runFixture("App copy: cannot-use plan mention is not a route", planCannotUse, "check-app-copy.ts", 1, "app_copy.plan_deck_route_missing");
+
+  const mechanismCannotUse = makeFixture("app-copy-mechanism-cannot-use");
+  writeFileSync(path.join(mechanismCannotUse, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(mechanismCannotUse, "TECH_SPEC.md"),
+    ["# Technical Spec", "", "## Strings And Localization Readiness", "", "Mechanism: cannot use i18next.", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: cannot-use mechanism line selects nothing", mechanismCannotUse, "check-app-copy.ts", 1, "app_copy.externalization_missing");
 }

@@ -109,7 +109,10 @@ const laneStatus = (lane: string): string => (state ? (asString(getPath(state, `
 const engineeringActive = ["partial", "blocked", "done"].includes(laneStatus("engineering"));
 const deckRequired = laneStatus("design") === "done" || laneStatus("onboarding") === "done" || engineeringActive;
 
-const deckText = readText(root, "COPY_DECK.md");
+// Status detection reads the rendered document: a status line hidden in a
+// Markdown comment declares nothing.
+const rawDeckText = readText(root, "COPY_DECK.md");
+const deckText = rawDeckText === undefined ? undefined : stripMarkdownComments(rawDeckText);
 const deckIsTemplate = Boolean(deckText && /^Status:\s*template\b/im.test(deckText));
 
 if (!deckText && deckRequired) {
@@ -615,7 +618,7 @@ if (deckRequired) {
   // filename while reopening the improvisation path.
   const planRoutesToDeck = (plan ?? "")
     .split(/\r?\n/)
-    .some((line) => line.includes("COPY_DECK.md") && !/\b(do not|don't|never|avoid|skip|without|instead of)\b/i.test(line));
+    .some((line) => line.includes("COPY_DECK.md") && !/\b(do not|don't|never|avoid|skip|without|instead of|cannot|can't|won't|will not)\b/i.test(line));
   if (plan && !planRoutesToDeck) {
     issues.push(
       issue(
@@ -673,7 +676,7 @@ if (engineeringActive) {
     const clauseEndOffset = line.slice(mechanismAt + matched.length).search(/[;.—–]/);
     const clauseEnd = clauseEndOffset === -1 ? line.length : mechanismAt + matched.length + clauseEndOffset;
     const clause = line.slice(0, clauseEnd);
-    return !/\b(reject(ed|s)?|declin(ed|es|e)|none|not|no|won't|inline)\b/i.test(clause);
+    return !/\b(reject(ed|s)?|declin(ed|es|e)|none|not|no|won't|cannot|can't|inline)\b/i.test(clause);
   });
   // The shipped template lists every mechanism as an option menu ending in
   // "Record the choice here." — that sentinel surviving means nobody chose.
