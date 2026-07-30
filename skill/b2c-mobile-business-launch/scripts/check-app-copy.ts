@@ -544,6 +544,24 @@ if (root !== path.join(skillRoot, "templates")) {
   }
 }
 
+// ENGINEERING_PLAN.md is what a builder follows in isolation — a customized
+// plan that drops the deck route reopens the improvisation path every other
+// gate here closes, so the route is held in the plan itself.
+if (deckRequired) {
+  const plan = readText(root, "ENGINEERING_PLAN.md");
+  if (plan && !plan.includes("COPY_DECK.md")) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.plan_deck_route_missing",
+        "ENGINEERING_PLAN.md does not route strings through COPY_DECK.md. Builders follow the plan in isolation — restore the rule that work " +
+          "units type deck rows (and stop to author missing ones) so screens are never implemented from spec vocabulary.",
+        "ENGINEERING_PLAN.md",
+      ),
+    );
+  }
+}
+
 // TECH_SPEC.md: localization readiness is a day-one engineering property. When
 // the engineering lane claims done, the spec names the externalization mechanism.
 if (engineeringActive) {

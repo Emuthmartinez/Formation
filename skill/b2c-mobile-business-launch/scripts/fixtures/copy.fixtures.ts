@@ -840,4 +840,11 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: compliance note after a chosen mechanism passes", mechanismComplianceNote, "check-app-copy.ts", 0);
+
+  // A customized plan that drops the deck route reopens the improvisation
+  // path — the route is held in the plan itself.
+  const planRouteDropped = makeFixture("app-copy-plan-route-dropped");
+  writeFileSync(path.join(planRouteDropped, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "partial" }), "utf8");
+  writeFileSync(path.join(planRouteDropped, "ENGINEERING_PLAN.md"), "# Engineering Plan\n\nBuild the screens per SPEC.md.\n", "utf8");
+  runFixture("App copy: engineering plan without the deck route fails", planRouteDropped, "check-app-copy.ts", 1, "app_copy.plan_deck_route_missing");
 }
