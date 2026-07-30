@@ -89,7 +89,7 @@ landing/                  # optional pre-launch funnel
 screenshots/              # raw MobAI/native iOS/device captures, compositions, and final store upload assets
 content-assets/           # Remotion/local media workspace, manifest, copy inputs, render inputs, and rendered outputs
 fastlane/                 # campaign brief, prompts, angles, preferences, sanitized API logs, runs, schedules, metrics
-ugc/                      # creator list, briefs, scripts, tracker, weekly review, rights/disclosure notes
+ugc/                      # creator list, briefs, scripts, tracker, weekly review, sponsorship ledger, rights/disclosure notes
 assets/                   # visual references, screenshot mockups, production assets embedded into HTML proofs
 AUDIT_PROMPT.md           # independent audit brief for public funnel or app
 agents/                   # simple role prompts/configs: orchestrator, marketing, engineering, security, product, design, customer success
@@ -934,7 +934,7 @@ Acceptance:
 
 ## `UGC_PLAYBOOK.md`
 
-Use when founder-led or creator-led organic TikTok/Reels/Shorts, Sideshift/creator marketplaces, creator payments, UGC scripts, or post-launch content engines are in scope.
+Use when founder-led or creator-led organic TikTok/Reels/Shorts, Sideshift/creator marketplaces, creator payments, UGC scripts, paid influencer sponsorships, or post-launch content engines are in scope.
 
 Must include:
 - UGC fit decision: visible product moment, emotional hook, audience size, comment/share potential, compliance risks, and source evidence
@@ -949,10 +949,11 @@ Must include:
 - format tracker: format IDs, hooks, angles, product insertion, CTA mechanic, views, comments, install/search signal, payout status
 - stop and scale rules: replace creator by day 7 if inactive, give formats 5-8 reps, clone breakout hooks within 24 hours, scale only after repeatable format hits, stop after 3 months with no breakout/improvement/lift
 - legal/store/brand guardrails: partner disclosure, unsupported claims, app-store consistency, privacy/terms constraints
+- sponsorship track when established creators are paid for integrations (`influencer-sponsorship-engine.md`): brand-account setup, outreach volume targets, deal-structure defaults (CPM anchor, view guarantee, tracking window, upfront split), disclosure rules, saturation/rotation rules, and the `ugc/sponsorship-ledger.csv` per-deal economics ledger
 
 Acceptance:
 - The channel is marked fit, blocked, deferred, or not a fit before spend starts.
-- Creator operations are not confused with influencer marketing.
+- Creator operations are not confused with influencer marketing: founder-run creator ops and paid sponsorships of established creators are separate tracks with separate payment shapes, qualification filters, and ledgers.
 - The program can run without inventing contracts, payment rules, scripts, or tracking from scratch.
 - Fastlane or paid ads consume only approved and rights-cleared UGC inputs.
 

@@ -95,6 +95,8 @@ Every important product and launch surface must carry the same experience thesis
 
 If a surface is not in scope, mark it `not needed` with a reason. Do not leave it blank.
 
+**The five-second demo test.** When creator or paid distribution is in scope, the magical moment carries an extra bar: it must be showable in about five seconds of screen time inside someone else's content, understood without narration, and truthful without staged data (photograph the food → see the calories; upload the match → see what went wrong). Run the test while the ladder is still soft — a magical moment that cannot pass it either gets redesigned before the spec hardens or the launch plans distribution around channels that do not need it. `influencer-sponsorship-engine.md` owns the sponsorship-side consequences.
+
 ## Product Document Section
 
 `SPEC.md` should include a concise section:

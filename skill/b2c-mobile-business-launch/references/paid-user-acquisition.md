@@ -52,6 +52,8 @@ Default channel choice:
 - **Google web-to-app**: consider when search/demand capture or web funnels matter and the app can preserve campaign context into checkout or install.
 - **Apple Ads**: consider when search intent is clear, keyword economics are plausible, and App Store listing/custom product pages are ready.
 
+Sequencing against creator sponsorships: hand-negotiated creator deals (`influencer-sponsorship-engine.md`) are typically the higher-multiple channel at small budgets, while ad platforms return lower multiples but scale without per-deal effort. When sponsorships have proven the demo moment and payback economics, their winning creative and creators become the seed for the first paid channel — including paying one proven creator to make ads directly rather than posting to their own page.
+
 Document:
 - selected channel and why
 - rejected channels and why now is too early
@@ -71,6 +73,8 @@ Before spend, define the first creative batch:
 - each creative tied to `11_STAR_EXPERIENCE.md`, `CONTENT_ASSETS.md`, and `LAUNCH_TRACE.md`
 
 Use `remotion-content-assets.md` when repeatable ad variants, motion screenshots, captions, cutdowns, or local render proof are needed. Use Higgsfield only after design-system constraints and paid-tool routing are recorded. Use real app UI wherever a user must inspect the actual product.
+
+**Competitor ad-library mining.** Before inventing angles, mine the platform's public ad library (Meta Ad Library for Meta/Instagram) for the incumbent and adjacent apps: filter for ads with high impressions and long run time — nobody keeps paying for an ad that does not return — and for each winner ask why it works and how the structure maps to this app's truthful claims. Replicate the angle and structure with this app's real UI and claims, never the competitor's assets, footage, or claims verbatim. Authentic low-production formats frequently outperform polished ones; test them before assuming production value is the constraint. Record mined angles in the angle map above.
 
 ### Higgsfield Creative Production
 
