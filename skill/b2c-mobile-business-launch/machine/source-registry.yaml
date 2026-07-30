@@ -1829,7 +1829,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/operations/paid-tool-routing.md
     notes: First-party MCP over the Experience Card deck (mechanic search with
       risk ceilings, versioned card content, ethics attestation scaffolds).
-      Optional tooling - the bundled deck under references/experience-cards/
+      Optional tooling - the bundled deck under playbook/experience/experience-cards/
       is the frozen offline contract and every validator reads it; the server
       is preferred only when connected. Private repo; local stdio during
       development.

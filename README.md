@@ -19,7 +19,7 @@ Give the agent one broad request and it works through the launch instead of hand
 
 > "Get this iOS app ready for TestFlight, App Store Connect, RevenueCat, PostHog, Resend, and launch."
 
-Two layers make that repeatable. The playbooks under [`references/`](skill/b2c-mobile-business-launch/references/) hold the launch process a human can read. `PROJECT_STATE.yaml` holds the same process as machine-checkable state, which the validators grade and `launch-cockpit.html` renders as a dashboard written in founder language rather than internal status codes. Future agents inspect state and run checks rather than remembering what happened.
+Two layers make that repeatable. The playbooks under [`playbook/`](skill/b2c-mobile-business-launch/playbook/), grouped by area of the business, hold the launch process a human can read. `PROJECT_STATE.yaml` holds the same process as machine-checkable state, which the validators grade and `launch-cockpit.html` renders as a dashboard written in founder language rather than internal status codes. Future agents inspect state and run checks rather than remembering what happened.
 
 The skill pauses for founder-only decisions: credentials, spend, legal and pricing approval, public posting, destructive actions, and final submission.
 
@@ -127,7 +127,7 @@ npm run check:skill-version -- \
 
 ## Archetypes and LaunchBench
 
-Four **app archetype packs** cover the B2C product shapes this skill sees most: [social and community](skill/b2c-mobile-business-launch/references/social-network-lane.md), [AI chat and companion](skill/b2c-mobile-business-launch/references/ai-chat-companion-lane.md), [habit tracker and utility](skill/b2c-mobile-business-launch/references/habit-tracker-lane.md), and [photo and AI media](skill/b2c-mobile-business-launch/references/photo-ai-media-lane.md). Each ships a runnable starter scaffold, not just prompts: Next.js and Supabase with tested RLS policies, Stripe and RevenueCat stubs, a PostHog event catalog, names-only env, and CI. `check:archetype-starter` verifies the scaffold still builds the shape it advertises.
+Four **app archetype packs** cover the B2C product shapes this skill sees most: [social and community](skill/b2c-mobile-business-launch/playbook/product/social-network.md), [AI chat and companion](skill/b2c-mobile-business-launch/playbook/product/ai-chat-companion.md), [habit tracker and utility](skill/b2c-mobile-business-launch/playbook/product/habit-tracker.md), and [photo and AI media](skill/b2c-mobile-business-launch/playbook/product/photo-ai-media.md). Each ships a runnable starter scaffold, not just prompts: Next.js and Supabase with tested RLS policies, Stripe and RevenueCat stubs, a PostHog event catalog, names-only env, and CI. `check:archetype-starter` verifies the scaffold still builds the shape it advertises.
 
 **LaunchBench** holds the regression scenarios under [`evals/launchbench/`](skill/b2c-mobile-business-launch/evals/launchbench/), one per launch failure mode worth never repeating. `npm run launchbench` lints the definitions and runs the deterministic validator fixtures. A separate opt-in layer, `npm run evals:behavioral`, grades flagged scenarios against a live agent and stays outside the PR gate on purpose, because live runs cost money and carry model variance.
 
@@ -137,13 +137,16 @@ Four **app archetype packs** cover the B2C product shapes this skill sees most: 
 skill/b2c-mobile-business-launch/
   SKILL.md              # entrypoint and lane routing
   skill-version.json    # runtime freshness manifest
-  references/           # launch playbooks, one per lane
+  playbook/             # launch playbooks, grouped by area of the business
+  machine/              # the skill's own upkeep: versioning, evals, sources
+  starters/             # runnable app scaffolds for the four archetypes
   templates/            # artifacts copied into your app repo
   scripts/              # validators, renderers, LaunchBench runner
   evals/                # LaunchBench, agent-behavior, triggering
   state/                # Design Room seed state and schema
   render/               # React/Vite Design Room renderer
 docs/VALIDATORS.md      # full validator reference
+ARCHITECTURE.md         # the target layout every refactor moves toward
 AGENTS.md               # maintainer guide and repo map
 ```
 
