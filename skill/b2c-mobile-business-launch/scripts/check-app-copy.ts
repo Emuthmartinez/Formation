@@ -948,7 +948,20 @@ function walkMarkdown(dir: string): string[] {
 function walkCodeFiles(dir: string): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir)) {
-    if (entry === "node_modules" || entry === "dist" || entry === "build" || entry === "Pods" || entry === "DerivedData" || entry.startsWith(".")) continue;
+    // app-archetypes is the skill's own template payload: when a fixture or a
+    // business repo carries the templates, the starters inside deliberately
+    // hold the fictional brands. Real app source copied FROM a starter lands
+    // at the repo root (app/, lib/, ios/), never under app-archetypes/.
+    if (
+      entry === "node_modules" ||
+      entry === "dist" ||
+      entry === "build" ||
+      entry === "Pods" ||
+      entry === "DerivedData" ||
+      entry === "app-archetypes" ||
+      entry.startsWith(".")
+    )
+      continue;
     const full = path.join(dir, entry);
     const stats = statSync(full);
     if (stats.isDirectory()) {
