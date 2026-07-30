@@ -101,9 +101,11 @@ const live = /^phase_6/.test(phase);
 /** Live apps launched before this contract get warnings while their backfill is tracked. */
 const sev = (base: Severity): Severity => (live ? "warning" : base);
 const laneStatus = (lane: string): string => (state ? (asString(getPath(state, `lanes.${lane}.status`)) ?? "") : "").toLowerCase();
-// Engineering is the lane that types the strings, so a done build needs the
-// deck even when design/onboarding were deferred or resolved another way.
-const deckRequired = laneStatus("design") === "done" || laneStatus("onboarding") === "done" || laneStatus("engineering") === "done";
+// Engineering is the lane that types the strings, so the deck is required the
+// moment the build STARTS (partial), not only when it finishes — the window
+// between "building" and "done" is exactly where improvised copy gets typed.
+const engineeringActive = laneStatus("engineering") === "partial" || laneStatus("engineering") === "done";
+const deckRequired = laneStatus("design") === "done" || laneStatus("onboarding") === "done" || engineeringActive;
 
 const deckText = readText(root, "COPY_DECK.md");
 const deckIsTemplate = Boolean(deckText && /^Status:\s*template\b/im.test(deckText));
@@ -544,7 +546,7 @@ if (root !== path.join(skillRoot, "templates")) {
 
 // TECH_SPEC.md: localization readiness is a day-one engineering property. When
 // the engineering lane claims done, the spec names the externalization mechanism.
-if (laneStatus("engineering") === "done") {
+if (engineeringActive) {
   const techSpec = readText(root, "TECH_SPEC.md");
   const hasSection = Boolean(techSpec) && /##\s+Strings And Localization Readiness/i.test(techSpec ?? "");
   // The decision lives in its section: "we rejected i18next" elsewhere in the
@@ -555,9 +557,16 @@ if (laneStatus("engineering") === "done") {
   // that declares a mechanism and carries no negation.
   const MECHANISM =
     /(xcstrings|string catalog|i18next|expo-localization|\barb\b|gen-l10n|next-intl|strings module|strings\.xml|string resources|localizable\.strings)/i;
-  const namesMechanism = readinessSection
-    .split(/\r?\n/)
-    .some((line) => /mechanism[^:\n]*:/i.test(line) && MECHANISM.test(line) && !/\b(reject(ed|s)?|declin(ed|es|e)|none|not|no|won't|inline)\b/i.test(line));
+  // Negation is scoped to the text BEFORE the mechanism choice: "Mechanism:
+  // none — we rejected i18next" negates the choice, while "Mechanism: i18next
+  // — no strings remain inline" is a compliant declaration with a compliance
+  // note after it.
+  const namesMechanism = readinessSection.split(/\r?\n/).some((line) => {
+    if (!/mechanism[^:\n]*:/i.test(line)) return false;
+    const mechanismAt = line.search(MECHANISM);
+    if (mechanismAt === -1) return false;
+    return !/\b(reject(ed|s)?|declin(ed|es|e)|none|not|no|won't|inline)\b/i.test(line.slice(0, mechanismAt));
+  });
   // The shipped template lists every mechanism as an option menu ending in
   // "Record the choice here." — that sentinel surviving means nobody chose.
   // A missing TECH_SPEC.md is the same failure: no committed mechanism.

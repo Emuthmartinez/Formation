@@ -803,4 +803,41 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: outer-pipe-less deck row is still validated", deckNoOuterPipes, "check-app-copy.ts", 1, "app_copy.deck_placeholder");
+
+  // The deck is required the moment the build starts — engineering "partial"
+  // without a deck is the improvisation window, not a free pass.
+  const engineeringPartial = makeFixture("app-copy-engineering-partial-needs-deck");
+  writeFileSync(path.join(engineeringPartial, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "partial" }), "utf8");
+  rmSync(path.join(engineeringPartial, "COPY_DECK.md"));
+  runFixture("App copy: engineering partial without a deck fails", engineeringPartial, "check-app-copy.ts", 1, "app_copy.deck_missing");
+
+  // A compliance note after the chosen mechanism is not a negation of it.
+  const mechanismComplianceNote = makeFixture("app-copy-mechanism-compliance-note");
+  writeFileSync(path.join(mechanismComplianceNote, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(mechanismComplianceNote, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |", ...NA_SURFACES, ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(mechanismComplianceNote, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(mechanismComplianceNote, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(mechanismComplianceNote, "TECH_SPEC.md"),
+    ["# Technical Spec", "", "## Strings And Localization Readiness", "", "Mechanism: i18next with expo-localization — no strings remain inline.", ""].join(
+      "\n",
+    ),
+    "utf8",
+  );
+  runFixture("App copy: compliance note after a chosen mechanism passes", mechanismComplianceNote, "check-app-copy.ts", 0);
 }
