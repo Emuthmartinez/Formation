@@ -1116,4 +1116,50 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: expo-localization alone is not a string mechanism", mechanismExpoOnly, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // Commented-out brief sections render nothing and count for nothing.
+  const briefCommented = makeFixture("app-copy-brief-commented-sections");
+  writeFileSync(path.join(briefCommented, "PROJECT_STATE.yaml"), stateWith("phase_2", { revenue: "done" }), "utf8");
+  writeFileSync(
+    path.join(briefCommented, "COPY_BRIEF.md"),
+    ["# Copy Brief", "", "Status: authored 2026-07-29", "", "<!--", AUTHORED_BRIEF, "-->", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: commented-out brief sections grant nothing", briefCommented, "check-app-copy.ts", 1, "app_copy.brief_hollow");
+
+  // An unterminated comment hides the rendered tail — and the parseable one.
+  const deckUnterminatedComment = makeFixture("app-copy-deck-unterminated-comment");
+  writeFileSync(path.join(deckUnterminatedComment, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckUnterminatedComment, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: authored 2026-07-29",
+      "",
+      "<!--",
+      "## Onboarding",
+      "",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |",
+      ...NA_SURFACES,
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(deckUnterminatedComment, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(deckUnterminatedComment, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: unterminated comment hides the parseable tail too", deckUnterminatedComment, "check-app-copy.ts", 1, "app_copy.deck_surface_missing");
 }

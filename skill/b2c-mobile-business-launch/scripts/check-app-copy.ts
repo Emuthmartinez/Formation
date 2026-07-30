@@ -159,7 +159,9 @@ if (deckText && !deckIsTemplate && !deckIsAuthored && deckRequired) {
 // their own — conversion-copy.md ties it to those surfaces, not to the deck.
 const briefRequired = deckRequired || ["store_console", "revenue", "email"].some((lane) => laneStatus(lane) === "done");
 if (briefRequired) {
-  const brief = readText(root, "COPY_BRIEF.md");
+  // Commented-out sections render nothing and count for nothing.
+  const rawBrief = readText(root, "COPY_BRIEF.md");
+  const brief = rawBrief === undefined ? undefined : stripMarkdownComments(rawBrief);
   // A hollow status stub is not a brief: the sections the deck inherits from
   // must exist and carry content, not just headings.
   const REQUIRED_BRIEF_SECTIONS = [
@@ -821,7 +823,7 @@ if (root === path.join(skillRoot, "templates")) {
         const source = readFileSync(file, "utf8")
           .replace(/\/\*[\s\S]*?\*\//g, " ")
           .replace(/^\s*\/\/.*$/gm, " ");
-        for (const match of source.matchAll(/>([^<>{}\n]+)</g)) {
+        for (const match of source.matchAll(/>([^<>{}]+)</g)) {
           const text = (match[1] ?? "").trim();
           if (!/[A-Za-z0-9]{2}/.test(text)) continue;
           issues.push(
@@ -907,7 +909,7 @@ function visibleStrings(source: string): string[] {
     if (/from\s*$|import\s*\($/.test(before)) continue;
     if (literal.trim().length > 1) out.push(literal);
   }
-  for (const match of withoutComments.matchAll(/>([^<>{}\n]+)</g)) {
+  for (const match of withoutComments.matchAll(/>([^<>{}]+)</g)) {
     const text = (match[1] ?? "").trim();
     if (text.length > 1) out.push(text);
   }

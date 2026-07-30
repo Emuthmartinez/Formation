@@ -106,7 +106,12 @@ function splitRow(line: string): string[] {
  */
 /** Markdown comments hide rows from the rendered deck; they must hide them from parsing too — with line numbers preserved. */
 export function stripMarkdownComments(text: string): string {
-  return text.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\n]/g, " "));
+  const stripped = text.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\n]/g, " "));
+  // An unterminated opener hides the remainder of the rendered document —
+  // the parseable tail must disappear the same way.
+  const unterminated = stripped.indexOf("<!--");
+  if (unterminated === -1) return stripped;
+  return stripped.slice(0, unterminated) + stripped.slice(unterminated).replace(/[^\n]/g, " ");
 }
 
 export function parseDeck(rawDeckText: string): ParsedDeck {
