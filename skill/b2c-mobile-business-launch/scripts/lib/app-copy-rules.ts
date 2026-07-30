@@ -76,7 +76,10 @@ export interface DeckRow {
 }
 
 /** Deck keys are localization keys: lowercase dot-namespaced segments. */
-export const DECK_KEY_SHAPE = /^[a-z0-9]+(?:[._-][a-z0-9]+)+$/;
+// At least one DOT is required: keys are namespaced (onboarding.promise.headline),
+// and segments may use _ or - internally (landing.sign_in). An underscore-only
+// token is a flat identifier, not the promised resource-key hierarchy.
+export const DECK_KEY_SHAPE = /^[a-z0-9]+(?:[_-][a-z0-9]+)*(?:\.[a-z0-9]+(?:[_-][a-z0-9]+)*)+$/;
 
 export interface ParsedDeck {
   rows: DeckRow[];

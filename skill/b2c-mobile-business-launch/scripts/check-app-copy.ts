@@ -272,7 +272,9 @@ if (deckText && !deckIsTemplate) {
       }
     }
     for (const term of rules.bannedTerms) {
-      if (allowedSet.has(term.toLowerCase())) continue;
+      // Inflection-aware exemption: declaring "lanes" clears the banned "lane"
+      // the same way the banned list matches inflections of its own entries.
+      if (allowed.some((granted) => matchesTerm(granted, term) || matchesTerm(term, granted))) continue;
       if (matchesTerm(row.copy, term)) {
         issues.push(
           issue(
@@ -295,9 +297,11 @@ if (deckText && !deckIsTemplate) {
       );
     }
     if (!/^[123]$/.test(row.tier)) {
+      // Tier decisions are the translation-handoff contract: on a required
+      // deck a missing tier blocks; on an early draft it only warns.
       issues.push(
         issue(
-          "warning",
+          deckRequired ? sev("error") : "warning",
           "app_copy.deck_tier_missing",
           `Deck row "${row.key}" has locale tier "${row.tier}"; expected 1, 2, or 3 from LOCALIZATION_MARKET_RESEARCH.md.`,
           where,
@@ -461,7 +465,7 @@ if (onboarding) {
     // The Copy column was the original leak site, so it gets the same
     // internal-vocabulary scan the deck gets, with the same deck allowlist.
     for (const term of rules.bannedTerms) {
-      if (onboardingAllowed.has(term.toLowerCase())) continue;
+      if (onboardingAllowedTerms.some((granted) => matchesTerm(granted, term) || matchesTerm(term, granted))) continue;
       if (matchesTerm(prose, term)) {
         issues.push(
           issue(
@@ -546,10 +550,14 @@ if (laneStatus("engineering") === "done") {
   // The decision lives in its section: "we rejected i18next" elsewhere in the
   // spec is not a selected mechanism, so only the section body can satisfy.
   const readinessSection = (techSpec ?? "").match(/##\s+Strings And Localization Readiness\s*\n([\s\S]*?)(?=\n##\s|$)/i)?.[1] ?? "";
-  const namesMechanism =
-    /(xcstrings|string catalog|i18next|expo-localization|\barb\b|gen-l10n|next-intl|strings module|strings\.xml|string resources|localizable\.strings)/i.test(
-      readinessSection,
-    );
+  // An affirmative declaration line, not a mention: "we rejected i18next"
+  // names a mechanism while selecting nothing. The choice lives on a line
+  // that declares a mechanism and carries no negation.
+  const MECHANISM =
+    /(xcstrings|string catalog|i18next|expo-localization|\barb\b|gen-l10n|next-intl|strings module|strings\.xml|string resources|localizable\.strings)/i;
+  const namesMechanism = readinessSection
+    .split(/\r?\n/)
+    .some((line) => /mechanism[^:\n]*:/i.test(line) && MECHANISM.test(line) && !/\b(reject(ed|s)?|declin(ed|es|e)|none|not|no|won't|inline)\b/i.test(line));
   // The shipped template lists every mechanism as an option menu ending in
   // "Record the choice here." — that sentinel surviving means nobody chose.
   // A missing TECH_SPEC.md is the same failure: no committed mechanism.

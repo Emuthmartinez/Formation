@@ -712,4 +712,84 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: allowed-term substring cannot conceal a placeholder", allowlistSubstring, "check-app-copy.ts", 1, "app_copy.deck_placeholder");
+
+  // Declaring the inflected form ("lanes") clears the banned base ("lane").
+  const allowlistInflected = makeFixture("app-copy-allowlist-inflected");
+  writeFileSync(path.join(allowlistInflected, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(allowlistInflected, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: authored 2026-07-29",
+      "",
+      "## Allowed terms",
+      "",
+      "- lanes — this racing app's own word for its courses",
+      "",
+      "## Onboarding",
+      "",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| onboarding.promise.headline | Promise | Race your favorite lanes today | | 1 |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(allowlistInflected, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: inflected allowlist declaration clears the base term", allowlistInflected, "check-app-copy.ts", 0);
+
+  // Keys need a dotted namespace: an underscore-only token is a flat identifier.
+  const deckUnderscoreKey = makeFixture("app-copy-deck-underscore-key");
+  writeFileSync(path.join(deckUnderscoreKey, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(deckUnderscoreKey, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding_promise_headline | Promise | Small wins, every day | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: underscore-only deck key fails the namespace shape", deckUnderscoreKey, "check-app-copy.ts", 1, "app_copy.deck_key_shape");
+
+  // On a required deck, missing locale tiers block the translation handoff.
+  const tierRequired = makeFixture("app-copy-tier-required");
+  writeFileSync(path.join(tierRequired, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(tierRequired, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | Small wins, every day | | |", ...NA_SURFACES, ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(tierRequired, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(tierRequired, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: missing locale tier on a required deck fails", tierRequired, "check-app-copy.ts", 1, "app_copy.deck_tier_missing");
+
+  // A negative mention inside the readiness section is not a choice.
+  const mechanismRejected = makeFixture("app-copy-mechanism-rejected");
+  writeFileSync(path.join(mechanismRejected, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(mechanismRejected, "TECH_SPEC.md"),
+    ["# Technical Spec", "", "## Strings And Localization Readiness", "", "Mechanism: none — we rejected i18next and will keep strings inline.", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: rejected-mechanism line is not an affirmative choice", mechanismRejected, "check-app-copy.ts", 1, "app_copy.externalization_missing");
 }
