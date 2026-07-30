@@ -1075,4 +1075,45 @@ export function register(h: Harness): void {
   writeFileSync(path.join(engineeringBlocked, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "blocked" }), "utf8");
   rmSync(path.join(engineeringBlocked, "COPY_DECK.md"));
   runFixture("App copy: blocked engineering keeps the deck requirement", engineeringBlocked, "check-app-copy.ts", 1, "app_copy.deck_missing");
+
+  // A placeholder-shaped allowlist rationale grants nothing.
+  const allowlistPlaceholderReason = makeFixture("app-copy-allowlist-placeholder-reason");
+  writeFileSync(path.join(allowlistPlaceholderReason, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(allowlistPlaceholderReason, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: authored 2026-07-29",
+      "",
+      "## Allowed terms",
+      "",
+      "- phase — Product-specific reason goes here later",
+      "",
+      "## Onboarding",
+      "",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| today.progress.body | Today | You're in phase 2 of your plan | | 1 |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "App copy: placeholder allowlist rationale grants nothing",
+    allowlistPlaceholderReason,
+    "check-app-copy.ts",
+    1,
+    "app_copy.deck_internal_vocabulary",
+  );
+
+  // expo-localization alone is locale detection, not a string mechanism.
+  const mechanismExpoOnly = makeFixture("app-copy-mechanism-expo-only");
+  writeFileSync(path.join(mechanismExpoOnly, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(mechanismExpoOnly, "TECH_SPEC.md"),
+    ["# Technical Spec", "", "## Strings And Localization Readiness", "", "Mechanism: expo-localization.", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: expo-localization alone is not a string mechanism", mechanismExpoOnly, "check-app-copy.ts", 1, "app_copy.externalization_missing");
 }

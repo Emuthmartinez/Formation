@@ -238,8 +238,10 @@ if (deckText && !deckIsTemplate) {
   // The exemption is earned by the reason: a reasonless bullet is reported
   // and NOT honored, so a bare "- lane" cannot silently suppress the scan.
   const declaredTerms = deckAllowedTerms(deckText);
+  const reasonIsSubstantive = (reason: string): boolean =>
+    reason.replace(/[^a-z0-9]/gi, "").length >= 12 && !rules.placeholderShapes.some((shape) => matchesTerm(reason, shape));
   for (const declared of declaredTerms) {
-    if (declared.reason.replace(/[^a-z0-9]/gi, "").length < 12) {
+    if (!reasonIsSubstantive(declared.reason)) {
       issues.push(
         issue(
           sev("error"),
@@ -250,7 +252,7 @@ if (deckText && !deckIsTemplate) {
       );
     }
   }
-  const allowed = declaredTerms.filter((declared) => declared.reason.replace(/[^a-z0-9]/gi, "").length >= 12).map((declared) => declared.term);
+  const allowed = declaredTerms.filter((declared) => reasonIsSubstantive(declared.reason)).map((declared) => declared.term);
   const allowedSet = new Set(allowed.map((term) => term.toLowerCase()));
   const ctaCases = new Set<string>();
   // Allowed terms clear placeholder shapes too — "Todoist" declared as a
@@ -429,7 +431,9 @@ const onboarding = readText(root, "ONBOARDING.md") ?? readText(root, "onboarding
 if (onboarding) {
   // Same earned-exemption rule as the deck: reasonless bullets grant nothing.
   const onboardingAllowedTerms = (deckText ? deckAllowedTerms(deckText) : [])
-    .filter((declared) => declared.reason.replace(/[^a-z0-9]/gi, "").length >= 12)
+    .filter(
+      (declared) => declared.reason.replace(/[^a-z0-9]/gi, "").length >= 12 && !rules.placeholderShapes.some((shape) => matchesTerm(declared.reason, shape)),
+    )
     .map((declared) => declared.term);
   const onboardingAllowed = new Set(onboardingAllowedTerms.map((term) => term.toLowerCase()));
   const scrubOnboarding = (text: string): string => {
@@ -644,7 +648,9 @@ if (engineeringActive) {
   // is one pairing; "i18next or next-intl" is two), with nothing pending.
   const MECHANISM_GROUPS = [
     /xcstrings|string catalog|localizable\.strings/i,
-    /i18next|expo-localization/i,
+    // expo-localization alone is locale detection with no string resources —
+    // the RN mechanism is i18next (expo-localization rides along).
+    /i18next/i,
     /\barb\b|gen-l10n/i,
     /next-intl/i,
     /strings module/i,
@@ -829,6 +835,20 @@ if (root === path.join(skillRoot, "templates")) {
         }
         // User-visible attribute literals are copy too: placeholder="Say
         // something" bypasses lib/strings.ts the same way JSX text does.
+        // A string literal wrapped in a JSX expression ({"Welcome back"}) is
+        // the same hardcoded copy with braces around it.
+        for (const match of source.matchAll(/\{\s*(["'])((?:(?!\1)[^\n]){2,})\1\s*\}/g)) {
+          const value = match[2] ?? "";
+          if (!/[A-Za-z0-9]{2}/.test(value)) continue;
+          issues.push(
+            issue(
+              "error",
+              "app_copy.starter_hardcoded_text",
+              `${relative} hardcodes the JSX expression literal "${value.slice(0, 50)}" — starter UI strings live in lib/strings.ts.`,
+              relative,
+            ),
+          );
+        }
         for (const match of source.matchAll(/\b(placeholder|title|alt|aria-label|aria-description)\s*=\s*(["'])((?:(?!\2)[^\n]){2,})\2/g)) {
           const value = match[3] ?? "";
           if (!/[A-Za-z0-9]{2}/.test(value)) continue;
