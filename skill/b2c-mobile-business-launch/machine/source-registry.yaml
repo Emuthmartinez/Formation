@@ -157,8 +157,8 @@ sources:
       - AGENTS.md
       - CLAUDE.md
       - skill/b2c-mobile-business-launch/playbook/process/parallel-agent-orchestration.md
-      - skill/b2c-mobile-business-launch/templates/repo-agent-entrypoints/AGENTS.md
-      - skill/b2c-mobile-business-launch/templates/repo-agent-entrypoints/CLAUDE.md
+      - skill/b2c-mobile-business-launch/business/repo-agent-entrypoints/AGENTS.md
+      - skill/b2c-mobile-business-launch/business/repo-agent-entrypoints/CLAUDE.md
     notes: Official OpenAI writeup informing short AGENTS.md maps, repo-local instructions, and mechanical harness checks.
   - id: openai-com-index-agents-sdk-evolution
     name: OpenAI Agents SDK evolution
@@ -254,7 +254,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/apple-signing-release.md
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Auto-discovered from recently added repository content.
   - id: developer-apple-com-app-store-product-page
     name: developer.apple.com
@@ -285,7 +285,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/experience/onboarding-conversion.md
       - skill/b2c-mobile-business-launch/playbook/money/revenue-monetization.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Auto-discovered from recently added repository content.
   - id: developer-apple-com-documentation-bundleresources-adding-a-privacy-manifest-to
     name: developer.apple.com
@@ -297,7 +297,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/apple-signing-release.md
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Official Apple documentation for adding privacy manifest files to apps and third-party SDKs.
   - id: developer-apple-com-documentation-bundleresources-describing-data-use-in-privac
     name: developer.apple.com
@@ -309,7 +309,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/apple-signing-release.md
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Official Apple documentation for privacy manifest data-use declarations.
   - id: developer-apple-com-documentation-bundleresources-describing-use-of-required-rea
     name: developer.apple.com
@@ -321,7 +321,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/apple-signing-release.md
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Auto-discovered from recently added repository content.
   - id: developer-apple-com-documentation-bundleresources-protected-resources
     name: developer.apple.com
@@ -333,7 +333,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/apple-signing-release.md
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Official Apple documentation for protected-resource purpose strings and related Info.plist keys.
   - id: developer-apple-com-documentation-bundleresources-privacy-manifest-files
     name: developer.apple.com
@@ -345,7 +345,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/apple-signing-release.md
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Auto-discovered from recently added repository content.
   - id: developer-apple-com-documentation-bundleresources-information-property-list-nsu
     name: developer.apple.com
@@ -357,7 +357,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/apple-signing-release.md
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Official Apple Info.plist key documentation for ATT tracking usage description copy.
   - id: developer-apple-com-support-third-party-sdk-requirements
     name: developer.apple.com
@@ -369,7 +369,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/apple-signing-release.md
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Official Apple list of third-party SDKs requiring privacy manifests and SDK signatures.
   - id: developer-apple-com-documentation-xcode-changing-the-bundle-identifier
     name: developer.apple.com
@@ -575,7 +575,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/store/apple-signing-release.md
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/APPLE_APP_STORE_REQUIREMENTS.md
+      - skill/b2c-mobile-business-launch/business/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Official App Store Connect documentation for uploading and processing builds.
   - id: developer-apple-com-help-app-store-connect-manage-in-app-purchases-set-a-price-f
     name: developer.apple.com
@@ -676,7 +676,7 @@ sources:
       - skill/b2c-mobile-business-launch/playbook/experience/onboarding-conversion.md
       - skill/b2c-mobile-business-launch/playbook/design/refero-ux-patterns.md
       - skill/b2c-mobile-business-launch/playbook/process/tool-recipes/research-intelligence.md
-      - skill/b2c-mobile-business-launch/templates/ux-patterns/UX_PATTERNS.md
+      - skill/b2c-mobile-business-launch/business/ux-patterns/UX_PATTERNS.md
     notes: Auto-discovered from recently added repository content.
   - id: doc-refero-design-mcp-data-model
     name: doc.refero.design
@@ -686,7 +686,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/playbook/design/refero-ux-patterns.md
-      - skill/b2c-mobile-business-launch/templates/ux-patterns/UX_PATTERNS.md
+      - skill/b2c-mobile-business-launch/business/ux-patterns/UX_PATTERNS.md
     notes: Auto-discovered from recently added repository content.
   - id: doc-refero-design-mcp-examples
     name: doc.refero.design
@@ -696,7 +696,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/playbook/design/refero-ux-patterns.md
-      - skill/b2c-mobile-business-launch/templates/ux-patterns/UX_PATTERNS.md
+      - skill/b2c-mobile-business-launch/business/ux-patterns/UX_PATTERNS.md
     notes: Auto-discovered from recently added repository content.
   - id: doc-refero-design-mcp-getting-started
     name: doc.refero.design
@@ -706,7 +706,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/playbook/design/refero-ux-patterns.md
-      - skill/b2c-mobile-business-launch/templates/ux-patterns/UX_PATTERNS.md
+      - skill/b2c-mobile-business-launch/business/ux-patterns/UX_PATTERNS.md
     notes: Auto-discovered from recently added repository content.
   - id: doc-refero-design-mcp-tools
     name: doc.refero.design
@@ -716,7 +716,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/playbook/design/refero-ux-patterns.md
-      - skill/b2c-mobile-business-launch/templates/ux-patterns/UX_PATTERNS.md
+      - skill/b2c-mobile-business-launch/business/ux-patterns/UX_PATTERNS.md
     notes: Auto-discovered from recently added repository content.
   - id: doc-refero-design-skill-overview
     name: doc.refero.design
@@ -736,7 +736,7 @@ sources:
     locations:
       - skill/b2c-mobile-business-launch/playbook/operations/secrets-management.md
       - skill/b2c-mobile-business-launch/playbook/operations/founder-zero-operator.md
-      - skill/b2c-mobile-business-launch/templates/secrets/SECRETS.md
+      - skill/b2c-mobile-business-launch/business/secrets/SECRETS.md
     notes: Auto-discovered from recently added repository content.
   - id: docs-doppler-com-docs-install-cli
     name: docs.doppler.com
@@ -746,7 +746,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/playbook/operations/secrets-management.md
-      - skill/b2c-mobile-business-launch/templates/secrets/SECRETS.md
+      - skill/b2c-mobile-business-launch/business/secrets/SECRETS.md
     notes: Auto-discovered from recently added repository content.
   - id: docs-doppler-com-docs-secrets-setup-guide
     name: docs.doppler.com
@@ -756,7 +756,7 @@ sources:
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/playbook/operations/secrets-management.md
-      - skill/b2c-mobile-business-launch/templates/secrets/SECRETS.md
+      - skill/b2c-mobile-business-launch/business/secrets/SECRETS.md
     notes: Auto-discovered from recently added repository content.
   - id: docs-doppler-com-docs-service-tokens
     name: docs.doppler.com
@@ -767,7 +767,7 @@ sources:
     locations:
       - skill/b2c-mobile-business-launch/playbook/operations/secrets-management.md
       - skill/b2c-mobile-business-launch/playbook/operations/founder-zero-operator.md
-      - skill/b2c-mobile-business-launch/templates/secrets/SECRETS.md
+      - skill/b2c-mobile-business-launch/business/secrets/SECRETS.md
     notes: Auto-discovered from recently added repository content.
   - id: docs-doppler-com-llms-txt
     name: docs.doppler.com
@@ -778,7 +778,7 @@ sources:
     locations:
       - skill/b2c-mobile-business-launch/playbook/operations/secrets-management.md
       - skill/b2c-mobile-business-launch/playbook/process/tool-recipes/secrets-and-environment.md
-      - skill/b2c-mobile-business-launch/templates/secrets/SECRETS.md
+      - skill/b2c-mobile-business-launch/business/secrets/SECRETS.md
     notes: Auto-discovered from recently added repository content.
   - id: docs-stripe-com-billing-subscriptions-webhooks
     name: docs.stripe.com
@@ -1009,7 +1009,7 @@ sources:
     locations:
       - skill/b2c-mobile-business-launch/playbook/store/app-store-listing-prep.md
       - skill/b2c-mobile-business-launch/playbook/store/store-console-workflow.md
-      - skill/b2c-mobile-business-launch/templates/app-store-listing/SCREENSHOTS.md
+      - skill/b2c-mobile-business-launch/business/app-store-listing/SCREENSHOTS.md
       - skill/b2c-mobile-business-launch/scripts/check-store-screenshots.ts
       - skill/b2c-mobile-business-launch/evals/launchbench/app-store-screenshots-unvalidated.yaml
     notes: AI-agent screenshot editor/export skill used for App Store and Play screenshot composition; verify current iPad and export behavior before relying on final upload assets.
@@ -1990,7 +1990,7 @@ sources:
     refresh_cadence_days: 365
     owner: source-freshness
     locations:
-      - skill/b2c-mobile-business-launch/templates/ANALYTICS.md
+      - skill/b2c-mobile-business-launch/business/ANALYTICS.md
     notes: Template placeholder URL illustrating the POSTHOG_HOST variable for self-hosted PostHog deployments. Not a real endpoint — founder replaces with their actual self-hosted host.
   - id: api-revenuecat-com
     name: RevenueCat REST API v2 — API host

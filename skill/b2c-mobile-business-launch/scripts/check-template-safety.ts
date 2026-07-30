@@ -9,7 +9,7 @@
  * templates copied into business repos. Markdown/HTML docs are excluded so that
  * documentation examples remain allowed.
  *
- * Deliberate exception: templates/landing/ is the landing-page section library
+ * Deliberate exception: business/landing/ is the landing-page section library
  * — a web-only surface where `motion/react` is the mandated animation library
  * (playbook/design/landing-motion-craft.md). Those files are copied into a web
  * project, never into the mobile binary, so the import is correct there.
@@ -26,7 +26,7 @@ function parseRoot(argv: string[]): string {
       return path.resolve(value);
     }
   }
-  return path.join(skillRoot, "templates");
+  return path.join(skillRoot, "business");
 }
 
 const root = parseRoot(process.argv.slice(2));

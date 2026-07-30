@@ -10,4 +10,4 @@ must_catch:
   - "unsubscribe/support/legal footer posture is missing"
   - "Resend API key and webhook secret routing must be in SECRETS.md"
 should_say:
-  - "Adapt templates/resend/email-templates.ts to the app's design system before production sends."
+  - "Adapt business/resend/email-templates.ts to the app's design system before production sends."

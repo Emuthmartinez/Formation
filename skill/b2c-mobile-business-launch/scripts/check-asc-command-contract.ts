@@ -109,7 +109,7 @@ function verifyLiveHelp(args: string[], required: string[]): void {
 
 function collectGuidanceFiles(): string[] {
   const files: string[] = [];
-  for (const base of [path.join(skillRoot, "playbook"), path.join(skillRoot, "templates")]) {
+  for (const base of [path.join(skillRoot, "playbook"), path.join(skillRoot, "business")]) {
     if (!existsSync(base)) continue;
     const visit = (directory: string): void => {
       for (const name of readdirSync(directory)) {

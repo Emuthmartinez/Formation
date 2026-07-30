@@ -52,18 +52,18 @@ function rejectTerms(text: string, terms: string[], label: string, filePath: str
 const { skillRoot, repoRoot } = parseArgs(process.argv.slice(2));
 const issues: Issue[] = [];
 
-const templateRoot = path.join(skillRoot, "templates", "repo-agent-entrypoints");
+const templateRoot = path.join(skillRoot, "business", "repo-agent-entrypoints");
 const templateAgentsPath = path.join(templateRoot, "AGENTS.md");
 const templateClaudePath = path.join(templateRoot, "CLAUDE.md");
 const templateAgents = requireFile(templateAgentsPath, "template_agents", issues);
 const templateClaude = requireFile(templateClaudePath, "template_claude", issues);
-const appAgentsPath = path.join(skillRoot, "templates", "app-agent-roster", "APP_AGENTS.md");
-const designGuruPath = path.join(skillRoot, "templates", "app-agent-roster", "agents", "design-guru.md");
-const productLeaderPath = path.join(skillRoot, "templates", "app-agent-roster", "agents", "product-leader.md");
-const marketingGuruPath = path.join(skillRoot, "templates", "app-agent-roster", "agents", "marketing-guru.md");
-const customerSuccessPath = path.join(skillRoot, "templates", "app-agent-roster", "agents", "customer-success.md");
-const engineeringLeaderPath = path.join(skillRoot, "templates", "app-agent-roster", "agents", "engineering-leader.md");
-const securityArchitectPath = path.join(skillRoot, "templates", "app-agent-roster", "agents", "security-architect.md");
+const appAgentsPath = path.join(skillRoot, "business", "app-agent-roster", "APP_AGENTS.md");
+const designGuruPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "design-guru.md");
+const productLeaderPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "product-leader.md");
+const marketingGuruPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "marketing-guru.md");
+const customerSuccessPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "customer-success.md");
+const engineeringLeaderPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "engineering-leader.md");
+const securityArchitectPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "security-architect.md");
 const appAgents = requireFile(appAgentsPath, "app_agents", issues);
 const designGuru = requireFile(designGuruPath, "design_guru", issues);
 const productLeader = requireFile(productLeaderPath, "product_leader", issues);
@@ -286,7 +286,7 @@ if (repoRoot) {
       [
         "This file is for maintaining this skill repo itself",
         "Do not copy these instructions into a launched business or generated app repo",
-        "templates/repo-agent-entrypoints",
+        "business/repo-agent-entrypoints",
         "Runtime Sync",
         "Source Freshness",
       ],
@@ -299,7 +299,7 @@ if (repoRoot) {
   if (repoClaude) {
     requireTerms(
       repoClaude,
-      ["maintainer-only", "Do not copy it into businesses created by the skill", "templates/repo-agent-entrypoints/CLAUDE.md"],
+      ["maintainer-only", "Do not copy it into businesses created by the skill", "business/repo-agent-entrypoints/CLAUDE.md"],
       "repo_claude",
       repoClaudePath,
       issues,

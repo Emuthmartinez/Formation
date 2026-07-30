@@ -35,7 +35,7 @@ export interface HookSettings {
 }
 
 /** Relative location of the shipped hook payload inside the skill. */
-export const HOOK_TEMPLATE_RELATIVE = path.join("templates", "repo-agent-entrypoints", "settings.json");
+export const HOOK_TEMPLATE_RELATIVE = path.join("business", "repo-agent-entrypoints", "settings.json");
 
 /**
  * An entry belongs to this skill when it carries the marker, or — for repos

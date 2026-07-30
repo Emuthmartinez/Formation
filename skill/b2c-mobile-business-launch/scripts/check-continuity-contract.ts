@@ -55,16 +55,16 @@ function parseArgs(argv: string[]): Args {
 function contractPaths(args: Args): ContractPaths {
   if (args.mode === "skill") {
     return {
-      agents: path.join(args.skillRoot, "templates/repo-agent-entrypoints/AGENTS.md"),
-      claude: path.join(args.skillRoot, "templates/repo-agent-entrypoints/CLAUDE.md"),
-      appAgents: path.join(args.skillRoot, "templates/app-agent-roster/APP_AGENTS.md"),
+      agents: path.join(args.skillRoot, "business/repo-agent-entrypoints/AGENTS.md"),
+      claude: path.join(args.skillRoot, "business/repo-agent-entrypoints/CLAUDE.md"),
+      appAgents: path.join(args.skillRoot, "business/app-agent-roster/APP_AGENTS.md"),
       specialistPrompts: specialistPromptNames().map((fileName) => ({
         label: fileName,
-        filePath: path.join(args.skillRoot, "templates/app-agent-roster/agents", fileName),
+        filePath: path.join(args.skillRoot, "business/app-agent-roster/agents", fileName),
       })),
-      orchestrator: path.join(args.skillRoot, "templates/app-agent-roster/agents/orchestrator.md"),
-      orchestration: path.join(args.skillRoot, "templates/ORCHESTRATION.md"),
-      projectState: path.join(args.skillRoot, "templates/PROJECT_STATE.yaml"),
+      orchestrator: path.join(args.skillRoot, "business/app-agent-roster/agents/orchestrator.md"),
+      orchestration: path.join(args.skillRoot, "business/ORCHESTRATION.md"),
+      projectState: path.join(args.skillRoot, "business/PROJECT_STATE.yaml"),
     };
   }
 

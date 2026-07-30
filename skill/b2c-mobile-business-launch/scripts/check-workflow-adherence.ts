@@ -50,10 +50,10 @@ const engineeringPath = path.join(skillRoot, "playbook", "engineering", "enginee
 // tool-recipes surface; the index only routes to it.
 const toolRecipesPath = path.join(skillRoot, "playbook", "process", "tool-recipes", "engineering-and-agent-orchestration.md");
 const compoundEngineeringPath = path.join(skillRoot, "playbook", "process", "compound-engineering-routing.md");
-const templateAgentsPath = path.join(skillRoot, "templates", "repo-agent-entrypoints", "AGENTS.md");
-const templateClaudePath = path.join(skillRoot, "templates", "repo-agent-entrypoints", "CLAUDE.md");
-const orchestrationTemplatePath = path.join(skillRoot, "templates", "ORCHESTRATION.md");
-const projectStateTemplatePath = path.join(skillRoot, "templates", "PROJECT_STATE.yaml");
+const templateAgentsPath = path.join(skillRoot, "business", "repo-agent-entrypoints", "AGENTS.md");
+const templateClaudePath = path.join(skillRoot, "business", "repo-agent-entrypoints", "CLAUDE.md");
+const orchestrationTemplatePath = path.join(skillRoot, "business", "ORCHESTRATION.md");
+const projectStateTemplatePath = path.join(skillRoot, "business", "PROJECT_STATE.yaml");
 const launchbenchDir = path.join(skillRoot, "evals", "launchbench");
 
 const parallel = readRequired(parallelPath, "parallel_agent_reference", issues);
@@ -240,7 +240,7 @@ if (repoRoot) {
   const repoClaudePath = path.join(repoRoot, "CLAUDE.md");
   const repoAgents = readRequired(repoAgentsPath, "repo_agents", issues);
   const repoClaude = readRequired(repoClaudePath, "repo_claude", issues);
-  requireTerms(repoAgents, ["concise map", "validator/eval", "templates/"], "repo_agents", repoAgentsPath, issues);
+  requireTerms(repoAgents, ["concise map", "validator/eval", "business/"], "repo_agents", repoAgentsPath, issues);
   requireTerms(repoClaude, ["Claude-specific pointer", "validators, and LaunchBench"], "repo_claude", repoClaudePath, issues);
   warnIfTooLong(repoAgents, 140, "repo_agents", repoAgentsPath, issues);
   warnIfTooLong(repoClaude, 40, "repo_claude", repoClaudePath, issues);

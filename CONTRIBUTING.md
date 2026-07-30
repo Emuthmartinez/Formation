@@ -22,7 +22,7 @@ Read these first, in order:
 3. [`CLAUDE.md`](CLAUDE.md): Claude-specific maintainer notes.
 4. [`docs/VALIDATORS.md`](docs/VALIDATORS.md): every gate and what it checks.
 5. `skill/b2c-mobile-business-launch/SKILL.md`: the skill entrypoint and routing.
-6. The specific `references/`, `templates/`, `scripts/`, or `evals/` file you intend to change.
+6. The specific `references/`, `business/`, `scripts/`, or `evals/` file you intend to change.
 
 All real content lives under `skill/b2c-mobile-business-launch/`. The author's machine mirrors that into an installed runtime at `~/.codex/skills/...`; that sync is maintainer-only and external contributors never need to do it. Always edit the repo source.
 

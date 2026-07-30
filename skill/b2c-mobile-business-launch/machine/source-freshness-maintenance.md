@@ -46,7 +46,7 @@ Use subagents for independent review when available:
 
 - `source-scout`: summarize changed upstream content and likely impact.
 - `capability-analyst`: decide whether new upstream capabilities improve this skill.
-- `skill-maintainer`: update references/templates/scripts in a bounded patch.
+- `skill-maintainer`: update references/business/scripts in a bounded patch.
 - `eval-maintainer`: add or update LaunchBench and fixture coverage.
 - `release-auditor`: run audit and inspect the diff for regressions.
 

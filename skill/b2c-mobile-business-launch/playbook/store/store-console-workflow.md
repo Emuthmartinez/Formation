@@ -220,7 +220,7 @@ Packet sections:
 Never answer App Privacy from generic policy text alone. Use the real data inventory and SDK/vendor behavior.
 
 Interactive worksheet:
-- Use `templates/app-store-listing/app-privacy-questionnaire.html` or a project-specific equivalent when the founder needs to review answers manually.
+- Use `business/app-store-listing/app-privacy-questionnaire.html` or a project-specific equivalent when the founder needs to review answers manually.
 - The worksheet should let the founder inspect selected data types, linked/tracking/purpose answers, vendors, proof paths, and unanswered items before publishing in App Store Connect.
 - Treat payment information entered through Apple, Stripe, or RevenueCat-hosted flows as collected only if the developer/app actually receives or stores it; otherwise document the payment provider and disclosure rationale.
 

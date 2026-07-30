@@ -90,7 +90,7 @@ if (!proofText.trim()) {
       issue(
         "warning",
         "provider_proof.file_missing",
-        "PRODUCTION_READINESS.md carries readiness language but PROVIDER_PROOF.md does not exist yet. Seed it from templates/PROVIDER_PROOF.md before any provider-backed lane is marked done.",
+        "PRODUCTION_READINESS.md carries readiness language but PROVIDER_PROOF.md does not exist yet. Seed it from business/PROVIDER_PROOF.md before any provider-backed lane is marked done.",
         "PROVIDER_PROOF.md",
       ),
     );

@@ -11,7 +11,7 @@ The top level splits by **file kind**, not by meaning:
 | Directory | What it actually holds |
 | --- | --- |
 | `references/` | prose |
-| `templates/` | founder artifacts, agent bookkeeping, and 161 files of starter app code, at the same level |
+| `business/` | founder artifacts, agent bookkeeping, and 161 files of starter app code, at the same level |
 | `scripts/` | validators, renderers, and the skill's own upkeep |
 | `evals/`, `state/` | machinery, state |
 
@@ -21,7 +21,7 @@ A 2026-07-30 catalogue of all 447 tracked files measured the consequences:
 
 - **Domains are invisible.** 95 reference files across 2 subfolders; 75 sit flat.
 - **Between a fifth and a quarter of the skill is the skill checking itself** — 22.1% of tracked bytes, and 36% of the validators check byte budgets, version discipline, and orchestration wording rather than the business.
-- **Founder documents are indistinguishable from agent bookkeeping.** Of 297 files under `templates/` and `state/`, about a dozen are things a founder would ever open.
+- **Founder documents are indistinguishable from agent bookkeeping.** Of 297 files under `business/` and `state/`, about a dozen are things a founder would ever open.
 
 ## Three axes, two of them can be folders
 
@@ -66,18 +66,18 @@ Each domain folder carries its own `README.md` index rather than a sibling `<dom
 
 **One subject, one folder.** Everything about money — the knowledge, the artifact it produces, the gate that proves it — is reachable from one place. Adding a domain is adding a folder; removing one is removing a folder.
 
-**Audience separation is load-bearing.** `business/` is what a founder reads. `playbook/` is what an agent reads. `machine/` is what only the maintainer touches. Mixing them is what made the skill feel large: a founder browsing `templates/` sees 291 files when about a dozen concern them.
+**Audience separation is load-bearing.** `business/` is what a founder reads. `playbook/` is what an agent reads. `machine/` is what only the maintainer touches. Mixing them is what made the skill feel large: a founder browsing `business/` sees 291 files when about a dozen concern them.
 
 **`SKILL.md` routes and nothing else.** Every domain gets one row pointing at its index. Detail lives one level down. Measured on the store domain: collapsing nine verbose routing rows into three index-pointing rows freed 2,787 bytes while the folder move cost 120 — the entrypoint's fullness is a symptom of detail living too high, not a budget problem.
 
-**HTML is generated, never authored.** Every page in `business/pages/` renders from `state/`. Hand-authored HTML twins go stale silently with no signal; six such pairs exist today.
+**HTML is generated, never authored.** Every page in `business/` renders from `state/`. Hand-authored HTML twins go stale silently with no signal; six such pairs exist today.
 
 **Merge duplicates as you move, in the same commit.** Moving duplicated content into a tidy folder gives the duplication a nicer address. The known clusters: four emotional-design files restating the same citations, twelve near-identical card files, the six HTML/Markdown twins.
 
 ## What this deliberately drops
 
-- The `references/` vs `templates/` distinction, which means nothing to any of the three audiences
-- Starter app code living under `templates/` — 161 files that are neither templates nor read as prose
+- The `references/` vs `business/` distinction, which means nothing to any of the three audiences
+- Starter app code living under `business/` — 161 files that are neither templates nor read as prose
 - Hand-authored HTML that duplicates a Markdown source
 - Validators that exist to check other validators' wording, where a single gate would do
 
@@ -85,9 +85,9 @@ Each domain folder carries its own `README.md` index rather than a sibling `<dom
 
 Safest first; each step keeps `npm run audit:ci` green and lands as its own commit.
 
-1. **`starters/`** — move `templates/app-archetypes/`. Largest file-count win, smallest reference surface. **Done, v0.52.0.**
+1. **`starters/`** — move `business/app-archetypes/`. Largest file-count win, smallest reference surface. **Done, v0.52.0.**
 2. **`playbook/`** — regroup `references/` by domain, each with its `README.md`, collapsing `SKILL.md` rows as each domain lands.
-3. **`business/`** — split `templates/` into founder documents and generated pages; agent bookkeeping moves to `playbook/` or `machine/`.
+3. **`business/`** — split `business/` into founder documents and generated pages; agent bookkeeping moves to `playbook/` or `machine/`.
 4. **`gates/`** — move `scripts/check-*.ts`; the audit runner globs rather than naming paths.
 5. **`machine/`** — versioning, evals, parity, fixtures.
 

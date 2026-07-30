@@ -457,7 +457,7 @@ export function loadProjectState(args: CliArgs): { state?: unknown; raw?: string
         issue(
           "error",
           "project_state.missing",
-          "PROJECT_STATE.yaml is missing. Copy templates/PROJECT_STATE.yaml and update it before claiming launch readiness.",
+          "PROJECT_STATE.yaml is missing. Copy business/PROJECT_STATE.yaml and update it before claiming launch readiness.",
           path.relative(args.root, args.statePath),
         ),
       ],

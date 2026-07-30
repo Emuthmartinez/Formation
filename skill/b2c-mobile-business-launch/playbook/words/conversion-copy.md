@@ -45,8 +45,8 @@ Refresh current craft and platform-constraint sources before locking copy:
 
 Two artifacts, two layers:
 
-- **`COPY_BRIEF.md`** — the promise and the voice. Create or update it when a launch ships any landing page, App Store listing, paywall, lifecycle email, or onboarding copy that conversion depends on. It is the single source of truth for the product's message, so the same promise appears on every surface. Start from [`templates/COPY_BRIEF.md`](../../templates/COPY_BRIEF.md).
-- **`COPY_DECK.md`** — every user-facing string, authored screen by screen before the build consumes it. The deck is the bridge between the brief and the code: keys in the deck become the app's localization keys. Start from [`templates/COPY_DECK.md`](../../templates/COPY_DECK.md); the contract lives in The Copy Deck section below. `check:app-copy` gates it.
+- **`COPY_BRIEF.md`** — the promise and the voice. Create or update it when a launch ships any landing page, App Store listing, paywall, lifecycle email, or onboarding copy that conversion depends on. It is the single source of truth for the product's message, so the same promise appears on every surface. Start from [`business/COPY_BRIEF.md`](../../business/COPY_BRIEF.md).
+- **`COPY_DECK.md`** — every user-facing string, authored screen by screen before the build consumes it. The deck is the bridge between the brief and the code: keys in the deck become the app's localization keys. Start from [`business/COPY_DECK.md`](../../business/COPY_DECK.md); the contract lives in The Copy Deck section below. `check:app-copy` gates it.
 
 Load [`flow-traceability.md`](../process/flow-traceability.md) before locking copy: every headline claim must trace to evidence in `RESEARCH.md` or `11_STAR_EXPERIENCE.md`, not to taste. Load [`analytics-attribution.md`](../data/analytics-attribution.md) before naming copy-test events so variants implement the approved catalog. Load [`change-cascade.md`](../process/change-cascade.md) whenever a core promise, name, or price changes — copy lives on many surfaces and must be reconciled, not patched on one screen.
 

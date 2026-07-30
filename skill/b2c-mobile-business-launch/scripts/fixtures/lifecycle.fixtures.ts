@@ -739,7 +739,7 @@ export function register(h: Harness): void {
   );
 
   const portfolioFilled = makeEmptyFixture("portfolio-registry-filled");
-  const shippedPortfolio = readFileSync(path.join(skillRoot, "templates", "PORTFOLIO_REGISTRY.md"), "utf8");
+  const shippedPortfolio = readFileSync(path.join(skillRoot, "business", "PORTFOLIO_REGISTRY.md"), "utf8");
   writeFileSync(
     path.join(portfolioFilled, "PORTFOLIO_REGISTRY.md"),
     shippedPortfolio.replace(

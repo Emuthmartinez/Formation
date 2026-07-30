@@ -76,7 +76,7 @@ export function register(h: Harness): void {
     "--skill-root",
     skillRoot,
   ]);
-  runFixture("artifact template coverage passes", path.join(skillRoot, "templates"), "check-artifact-templates.ts", 0, undefined, ["--skill-root", skillRoot]);
+  runFixture("artifact template coverage passes", path.join(skillRoot, "business"), "check-artifact-templates.ts", 0, undefined, ["--skill-root", skillRoot]);
   runFixture("continuity contract templates pass", skillRoot, "check-continuity-contract.ts", 0, undefined, ["--skill-root", skillRoot]);
   runFixture("generated business continuity contract passes", clean, "check-continuity-contract.ts", 0);
   const emptyBusinessForContinuity = makeEmptyFixture("continuity-empty-business");
@@ -174,7 +174,7 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("machine-local .claude worktree copies are not scanned as sources", sourceRegistryWorktree, "check-source-freshness.ts", 0);
-  runFixture("template secret docs pass from bundled template path", path.join(skillRoot, "templates"), "check-secret-routing.ts", 0);
+  runFixture("template secret docs pass from bundled template path", path.join(skillRoot, "business"), "check-secret-routing.ts", 0);
   const cockpitPath = path.join(clean, "launch-cockpit.html");
   runFixture("launch cockpit renders", clean, "render-launch-cockpit.ts", 0, undefined, ["--out", cockpitPath]);
   if (!existsSync(cockpitPath)) {
@@ -347,7 +347,7 @@ export function register(h: Harness): void {
   ].join("\n");
 
   const landingInScopePass = makeEmptyFixture("landing-funnel-in-scope-pass");
-  writeFileSync(path.join(landingInScopePass, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "templates", "PROJECT_STATE.yaml"), "utf8"), "utf8");
+  writeFileSync(path.join(landingInScopePass, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "business", "PROJECT_STATE.yaml"), "utf8"), "utf8");
   mkdirSync(path.join(landingInScopePass, "landing"), { recursive: true });
   writeFileSync(path.join(landingInScopePass, "landing", "README.md"), landingGateEvidence, "utf8");
   mkdirSync(path.join(landingInScopePass, "public"), { recursive: true });
@@ -357,7 +357,7 @@ export function register(h: Harness): void {
   runFixture("landing funnel in scope with full gate evidence passes", landingInScopePass, "check-landing-funnel.ts", 0);
 
   const landingInScopeFail = makeEmptyFixture("landing-funnel-in-scope-missing-gates");
-  writeFileSync(path.join(landingInScopeFail, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "templates", "PROJECT_STATE.yaml"), "utf8"), "utf8");
+  writeFileSync(path.join(landingInScopeFail, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "business", "PROJECT_STATE.yaml"), "utf8"), "utf8");
   mkdirSync(path.join(landingInScopeFail, "landing"), { recursive: true });
   writeFileSync(path.join(landingInScopeFail, "landing", "index.html"), "<h1>Launch page</h1>\n", "utf8");
   writeFileSync(path.join(landingInScopeFail, "landing", "README.md"), "# Landing\nDeployed.\n", "utf8");
@@ -366,7 +366,7 @@ export function register(h: Harness): void {
   // A copied-in section library (no index.html/public/wrangler.toml) is not a
   // deployed site and must not trigger the deploy gates.
   const landingPackOnly = makeEmptyFixture("landing-funnel-pack-only");
-  writeFileSync(path.join(landingPackOnly, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "templates", "PROJECT_STATE.yaml"), "utf8"), "utf8");
+  writeFileSync(path.join(landingPackOnly, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "business", "PROJECT_STATE.yaml"), "utf8"), "utf8");
   mkdirSync(path.join(landingPackOnly, "landing", "sections"), { recursive: true });
   writeFileSync(path.join(landingPackOnly, "landing", "README.md"), "# Landing section library (not a deployed site yet).\n", "utf8");
   writeFileSync(path.join(landingPackOnly, "landing", "sections", "Hero.tsx"), '"use client";\nexport function Hero() {\n  return null;\n}\n', "utf8");
@@ -391,7 +391,7 @@ export function register(h: Harness): void {
     ].join("\n");
 
   const withLandingSite = (root: string, html: string): void => {
-    writeFileSync(path.join(root, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "templates", "PROJECT_STATE.yaml"), "utf8"), "utf8");
+    writeFileSync(path.join(root, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "business", "PROJECT_STATE.yaml"), "utf8"), "utf8");
     mkdirSync(path.join(root, "landing"), { recursive: true });
     writeFileSync(path.join(root, "landing", "index.html"), html, "utf8");
     writeFileSync(path.join(root, "landing", "README.md"), landingGateEvidence, "utf8");

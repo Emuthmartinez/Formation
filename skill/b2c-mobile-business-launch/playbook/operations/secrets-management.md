@@ -63,7 +63,7 @@ Recommended repo files:
 - `.env.example`: committed names only, no values
 - `.env`, `.env.local`, `.env.*.local`, service-account JSON, `.p8`, `.p12`, `.mobileprovision`, raw keys, tokens, and downloaded credential files: ignored or stored outside git
 
-Use `templates/secrets/` as a starting point when available.
+Use `business/secrets/` as a starting point when available.
 
 ## Secret Discovery Loop
 

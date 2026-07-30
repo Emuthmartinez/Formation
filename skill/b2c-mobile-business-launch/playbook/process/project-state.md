@@ -11,7 +11,7 @@ Use this when starting, continuing, auditing, or handing off a launch. The goal 
 - `state/business.json`, `state/theme.tokens.json`, and `design-room.html`: separate Design Room state/render artifacts for cross-surface design. Update these through `design-room.md` when design changes affect launch surfaces.
 - `LAUNCHBENCH.md` or `proof.launchbench` in `PROJECT_STATE.yaml`: eval/check history for known failure modes.
 
-Use `templates/PROJECT_STATE.yaml` as the starting point. Keep it names-only for secrets and credentials.
+Use `business/PROJECT_STATE.yaml` as the starting point. Keep it names-only for secrets and credentials.
 
 ## Status Contract
 

@@ -48,7 +48,7 @@ if ((!skip || buildPhase || downstreamActive) && !text) {
       "research.markdown_missing",
       "RESEARCH.md is required: it is the evidence root that SPEC.md, brand, ASO, pricing, and funnel decisions trace back to" +
         (buildPhase && skip ? ", and from phase_2 onward the Go/Pivot/Kill verdict it carries is mandatory even for a deferred research lane" : "") +
-        ". Seed it from templates/RESEARCH.md.",
+        ". Seed it from business/RESEARCH.md.",
       "RESEARCH.md",
     ),
   );

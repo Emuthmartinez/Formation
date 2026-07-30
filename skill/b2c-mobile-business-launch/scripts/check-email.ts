@@ -98,7 +98,7 @@ if (!emailOpsText) {
     issue(
       presentSeverity(),
       "email.doc_missing",
-      "EMAIL_OPS.md is required for the email lane. Copy templates/EMAIL_OPS.md and fill in the sender map, domain, and template inventory.",
+      "EMAIL_OPS.md is required for the email lane. Copy business/EMAIL_OPS.md and fill in the sender map, domain, and template inventory.",
       emailOpsPath,
     ),
   );
@@ -180,7 +180,7 @@ if (!emailOpsText) {
   }
 
   // Brand tokens: production templates pull their design system from DESIGN.md
-  // (templates/resend/email-templates.ts LaunchEmailDesignSystem contract).
+  // (business/resend/email-templates.ts LaunchEmailDesignSystem contract).
   if (!emailOpsText.includes("DESIGN.md")) {
     issues.push(
       issue(
@@ -194,7 +194,7 @@ if (!emailOpsText) {
 
   // Check template inventory has at least one entry.
   const hasTemplate =
-    /email-templates\.ts|resend\/|\.tsx?|hosted.?template|resend templates/i.test(emailOpsText) &&
+    /email-templates\.ts|resend\/|\.tsx?|hosted.?template|resend business/i.test(emailOpsText) &&
     // Must appear in a table row, not just in a comment.
     emailOpsText.split(/\r?\n/).some((line) => /\|/.test(line) && /email-templates|\.tsx?|hosted.?template/i.test(line) && !line.includes("<!--"));
   if (!hasTemplate) {

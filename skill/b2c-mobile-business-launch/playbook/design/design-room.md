@@ -6,7 +6,7 @@ Use this reference before designing, changing, comparing, baselining, restoring,
 
 **STATE -> MUTATE -> VERSION -> RENDER** is mandatory for design work.
 
-1. **STATE**: read `state/business.json` and `state/theme.tokens.json` in the app repo. If missing, copy the skill's `state/` seed or `templates/state/` into the app repo.
+1. **STATE**: read `state/business.json` and `state/theme.tokens.json` in the app repo. If missing, copy the skill's `state/` seed or `business/state/` into the app repo.
 2. **MUTATE**: make one coherent change to the JSON state. Keep the mutation small enough to review: one audience, one surface cluster, one token pass, one store experiment, or one wipe.
 3. **VERSION**: validate, render, and commit the state change. A design version is a git commit over `state/` and `design-room.html`, not a Markdown label.
 4. **RENDER**: run the renderer and show the user `design-room.html` or `dist/design-room/index.html`. Do not freehand a one-off `DESIGN_PROPOSAL.md`, mood board, or ad-hoc HTML proof.

@@ -195,7 +195,7 @@ function checkTier1Floor(proofContent: string): boolean {
   // repo's copy AND the copy shipped inside this skill: an app repo that never
   // seeded the example used to silently skip this floor, so pasting the
   // shipped example's content as "proof" evaded detection.
-  const shippedExamplePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "templates", proofJsonExampleRelPath);
+  const shippedExamplePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "business", proofJsonExampleRelPath);
   const exampleContents = [rawContent(proofJsonExampleRelPath), existsSync(shippedExamplePath) ? readFileSync(shippedExamplePath, "utf8") : undefined];
   for (const exampleContent of exampleContents) {
     if (exampleContent === undefined) {
@@ -394,7 +394,7 @@ if (!revenueSkipped) {
       issue(
         revenueDone ? "error" : "warning",
         "revenue.ops_doc.missing",
-        "REVENUE_OPS.md is required for the revenue lane. Copy templates/REVENUE_OPS.md and fill in products, offering, and paywall model.",
+        "REVENUE_OPS.md is required for the revenue lane. Copy business/REVENUE_OPS.md and fill in products, offering, and paywall model.",
         revenueOpsPath,
       ),
     );

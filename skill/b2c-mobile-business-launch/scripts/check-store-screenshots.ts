@@ -516,7 +516,7 @@ function checkPngDimensions(slot: RubricSlot, storeStatus: string | undefined): 
  * or agent pastes screenshot-rubric-scores.example.json as their proof.
  * Returns true if the file should be rejected (issues already pushed).
  */
-const RUBRIC_EXAMPLE_REL_PATH = "templates/app-store-listing/screenshot-rubric-scores.example.json";
+const RUBRIC_EXAMPLE_REL_PATH = "business/app-store-listing/screenshot-rubric-scores.example.json";
 const RUBRIC_MIN_BYTES = 200;
 
 function checkRubricLedgerNotExampleCopy(ledgerRelPath: string, ledgerRaw: string): boolean {

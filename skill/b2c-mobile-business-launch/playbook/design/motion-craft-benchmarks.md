@@ -199,7 +199,7 @@ The catalog behind this file is queryable live when the 60fps.design MCP server 
 
 Ground rules carry over unchanged: mechanics only, never a featured app's branded asset, mascot, or copy; every recipe still binds to the token scale exactly as this file states. The MCP is a live convenience over the registered catalog source (`x-com-60fpsdesign-catalog`); when it is not connected, this file's recipes remain the distilled contract and searching the catalog is not required. Two shots newer than the library's index were reproduced by frame-reading the source videos directly — the same fallback applies to any shot the MCP cannot return.
 
-Runnable reproductions of these recipes ship in [`templates/motion-catalog/`](../../templates/motion-catalog/README.md): two full-screen choreography exemplars (declarative and procedural modes), the closed-form `TokenSpring` evaluator, and the Remotion twin for token-true video renders.
+Runnable reproductions of these recipes ship in [`business/motion-catalog/`](../../business/motion-catalog/README.md): two full-screen choreography exemplars (declarative and procedural modes), the closed-form `TokenSpring` evaluator, and the Remotion twin for token-true video renders.
 
 ## Provenance & Refresh
 

@@ -180,7 +180,7 @@ Acceptance:
 
 ## `AGENTS.md`
 
-Use the shipped `templates/repo-agent-entrypoints/AGENTS.md` as the starting point for generated business repos. Do not copy the skill repo's root maintainer `AGENTS.md` into a launch repo.
+Use the shipped `business/repo-agent-entrypoints/AGENTS.md` as the starting point for generated business repos. Do not copy the skill repo's root maintainer `AGENTS.md` into a launch repo.
 
 Must include:
 - 60-second project brief
@@ -418,7 +418,7 @@ Acceptance:
 
 Use when Claude Code, Rork, or another builder expects Claude-specific guidance.
 
-Use the shipped `templates/repo-agent-entrypoints/CLAUDE.md` as the starting point for generated business repos. Do not copy this skill repo's root maintainer `CLAUDE.md`.
+Use the shipped `business/repo-agent-entrypoints/CLAUDE.md` as the starting point for generated business repos. Do not copy this skill repo's root maintainer `CLAUDE.md`.
 
 Must include:
 - one-line pointer that `AGENTS.md` is canonical

@@ -22,13 +22,13 @@ const POSTHOG_PROOF_EXAMPLE_REL = "analytics/posthog-proof.example.json";
 /**
  * Return true when the given file is byte-identical to the shipped example.
  * We locate the example by walking up from __dirname (scripts/) to the skill
- * root (templates/analytics/posthog-proof.example.json).
+ * root (business/analytics/posthog-proof.example.json).
  */
 function isExampleIdentical(filePath: string): boolean {
   try {
     // __dirname is the compiled scripts/ directory inside the skill package.
-    // The templates/ directory lives one level up.
-    const examplePath = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..", "templates", POSTHOG_PROOF_EXAMPLE_REL);
+    // The business/ directory lives one level up.
+    const examplePath = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..", "business", POSTHOG_PROOF_EXAMPLE_REL);
     if (!existsSync(examplePath)) {
       return false; // can't compare — skip
     }
@@ -503,7 +503,7 @@ function findImplementationText(root: string, needles: string[]): Map<string, st
     const relative = path.relative(root, file);
     if (
       ignoredFiles.has(relative) ||
-      relative.startsWith("templates/") ||
+      relative.startsWith("business/") ||
       relative.startsWith("repo-agent-entrypoints/") ||
       relative.startsWith("agents/") ||
       relative.startsWith("app-agent-roster/") ||

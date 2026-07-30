@@ -16,7 +16,7 @@ export function register(h: Harness): void {
   // Build a fake skill root carrying only the archetype packs, then break it.
   function makeArchetypeSkillRoot(name: string): string {
     const fakeRoot = makeEmptyFixture(name);
-    mkdirSync(path.join(fakeRoot, "templates"), { recursive: true });
+    mkdirSync(path.join(fakeRoot, "business"), { recursive: true });
     cpSync(path.join(skillRoot, "starters"), path.join(fakeRoot, "starters"), { recursive: true });
     return fakeRoot;
   }

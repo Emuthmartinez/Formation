@@ -26,7 +26,7 @@ if (!skip && !text) {
     issue(
       "error",
       "launch_trace.markdown_missing",
-      "LAUNCH_TRACE.md is required for multi-artifact launches so the chain from research to implementation does not drift. Seed it from templates/LAUNCH_TRACE.md.",
+      "LAUNCH_TRACE.md is required for multi-artifact launches so the chain from research to implementation does not drift. Seed it from business/LAUNCH_TRACE.md.",
       "LAUNCH_TRACE.md",
     ),
   );

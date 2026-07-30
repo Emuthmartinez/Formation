@@ -1276,8 +1276,8 @@ export function register(h: Harness): void {
   // the self-scan section activates. Each mutation pins a shipped-surface hold.
   const makeSelfScanRoot = (name: string): string => {
     const fakeRoot = h.makeEmptyFixture(name);
-    cpSync(path.join(skillRoot, "templates"), path.join(fakeRoot, "templates"), { recursive: true });
-    // starters/ is a sibling of templates/ now, so the self-scan root has to
+    cpSync(path.join(skillRoot, "business"), path.join(fakeRoot, "business"), { recursive: true });
+    // starters/ is a sibling of business/ now, so the self-scan root has to
     // mirror the skill's own shape: the prompt-pack checks read from here.
     cpSync(path.join(skillRoot, "starters"), path.join(fakeRoot, "starters"), { recursive: true });
     mkdirSync(path.join(fakeRoot, "playbook", "words"), { recursive: true });
@@ -1296,7 +1296,7 @@ export function register(h: Harness): void {
   );
   runFixture(
     "App copy: negated deck route in a runnable fence fails",
-    path.join(promptNegatedRoute, "templates"),
+    path.join(promptNegatedRoute, "business"),
     "check-app-copy.ts",
     1,
     "app_copy.prompt_deck_route_missing",
@@ -1313,7 +1313,7 @@ export function register(h: Harness): void {
   );
   runFixture(
     "App copy: template-literal JSX expression is hardcoded copy",
-    path.join(starterTemplateLiteral, "templates"),
+    path.join(starterTemplateLiteral, "business"),
     "check-app-copy.ts",
     1,
     "app_copy.starter_hardcoded_text",
@@ -1328,7 +1328,7 @@ export function register(h: Harness): void {
     "export function within(value: number, lower: number, upper: number): boolean {\n  return value > lower && value < upper;\n}\n",
     "utf8",
   );
-  runFixture("App copy: starter range comparison is not JSX text", path.join(starterComparison, "templates"), "check-app-copy.ts", 0, undefined, [
+  runFixture("App copy: starter range comparison is not JSX text", path.join(starterComparison, "business"), "check-app-copy.ts", 0, undefined, [
     "--skill-root",
     starterComparison,
   ]);
@@ -1343,7 +1343,7 @@ export function register(h: Harness): void {
   );
   runFixture(
     "App copy: JSX text node after a tag is still hardcoded copy",
-    path.join(starterTextNode, "templates"),
+    path.join(starterTextNode, "business"),
     "check-app-copy.ts",
     1,
     "app_copy.starter_hardcoded_text",

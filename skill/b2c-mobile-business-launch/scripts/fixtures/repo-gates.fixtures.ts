@@ -70,7 +70,7 @@ function writeNoSlopRoots(root: string, brandCopy: string): { fixtureSkillRoot: 
   const fixtureSkillRoot = path.join(root, "skill");
   mkdirSync(path.join(fixtureSkillRoot, "playbook", "words"), { recursive: true });
   cpSync(path.join(skillRoot, "playbook", "words", "no-slop-writing.md"), path.join(fixtureSkillRoot, "playbook", "words", "no-slop-writing.md"));
-  const fixtureTemplates = path.join(root, "templates");
+  const fixtureTemplates = path.join(root, "business");
   mkdirSync(fixtureTemplates, { recursive: true });
   writeFileSync(path.join(fixtureTemplates, "BRAND.md"), `# Brand\n\n${brandCopy}\n`, "utf8");
   return { fixtureSkillRoot, fixtureTemplates };
@@ -156,9 +156,9 @@ export function register(h: Harness): void {
   // --- audit-skill-links ---
   const wireLinkRoot = (root: string): void => {
     mkdirSync(path.join(root, "playbook"), { recursive: true });
-    mkdirSync(path.join(root, "templates"), { recursive: true });
-    writeFileSync(path.join(root, "playbook", "guide.md"), "See [the template](../templates/artifact.md) for the artifact contract.\n", "utf8");
-    writeFileSync(path.join(root, "templates", "artifact.md"), "# Artifact\nRouted from references/guide.md — keep both sides linked.\n", "utf8");
+    mkdirSync(path.join(root, "business"), { recursive: true });
+    writeFileSync(path.join(root, "playbook", "guide.md"), "See [the template](../business/artifact.md) for the artifact contract.\n", "utf8");
+    writeFileSync(path.join(root, "business", "artifact.md"), "# Artifact\nRouted from references/guide.md — keep both sides linked.\n", "utf8");
   };
 
   const linksClean = makeEmptyFixture("skill-links-clean");
@@ -167,7 +167,7 @@ export function register(h: Harness): void {
 
   const linksBroken = makeEmptyFixture("skill-links-broken");
   wireLinkRoot(linksBroken);
-  writeFileSync(path.join(linksBroken, "playbook", "guide.md"), "See [the template](../templates/missing.md); artifact.md still routes.\n", "utf8");
+  writeFileSync(path.join(linksBroken, "playbook", "guide.md"), "See [the template](../business/missing.md); artifact.md still routes.\n", "utf8");
   runScriptArgs("link audit fails on a broken local link", "audit-skill-links.ts", ["--skill-root", linksBroken], 1, "skill_links.broken_local_link");
 
   const linksOrphan = makeEmptyFixture("skill-links-orphan");
@@ -180,21 +180,17 @@ export function register(h: Harness): void {
   const linksSubstringOrphan = makeEmptyFixture("skill-links-substring-orphan");
   wireLinkRoot(linksSubstringOrphan);
   writeFileSync(path.join(linksSubstringOrphan, "playbook", "lane.md"), "Nothing references this file by its own name.\n", "utf8");
-  writeFileSync(
-    path.join(linksSubstringOrphan, "playbook", "guide.md"),
-    "See [the template](../templates/artifact.md); also read sub-lane.md notes.\n",
-    "utf8",
-  );
+  writeFileSync(path.join(linksSubstringOrphan, "playbook", "guide.md"), "See [the template](../business/artifact.md); also read sub-lane.md notes.\n", "utf8");
   writeFileSync(path.join(linksSubstringOrphan, "playbook", "sub-lane.md"), "Routed from references/guide.md.\n", "utf8");
   runScriptArgs("link audit flags a basename-substring orphan", "audit-skill-links.ts", ["--skill-root", linksSubstringOrphan], 1, "skill_links.orphan_file");
 
   const linksDuplicate = makeEmptyFixture("skill-links-duplicate");
   wireLinkRoot(linksDuplicate);
   const duplicateBody =
-    "# Duplicate body\nThis exact content is shipped twice under templates/, which will drift apart silently over time once one copy is edited and the other is forgotten.\n";
-  writeFileSync(path.join(linksDuplicate, "templates", "copy-one.md"), duplicateBody, "utf8");
-  writeFileSync(path.join(linksDuplicate, "templates", "copy-two.md"), duplicateBody, "utf8");
-  writeFileSync(path.join(linksDuplicate, "playbook", "guide.md"), "See [the template](../templates/artifact.md), plus copy-one.md and copy-two.md.\n", "utf8");
+    "# Duplicate body\nThis exact content is shipped twice under business/, which will drift apart silently over time once one copy is edited and the other is forgotten.\n";
+  writeFileSync(path.join(linksDuplicate, "business", "copy-one.md"), duplicateBody, "utf8");
+  writeFileSync(path.join(linksDuplicate, "business", "copy-two.md"), duplicateBody, "utf8");
+  writeFileSync(path.join(linksDuplicate, "playbook", "guide.md"), "See [the template](../business/artifact.md), plus copy-one.md and copy-two.md.\n", "utf8");
   runScriptArgs(
     "link audit fails on byte-identical template duplicates",
     "audit-skill-links.ts",
@@ -261,7 +257,7 @@ export function register(h: Harness): void {
   runScriptArgs(
     "workspace render check passes against the committed output",
     "render-business-control-plane-workspace.ts",
-    ["--root", path.join(skillRoot, "templates"), "--out", path.join(skillRoot, "state", "workspace.generated.json"), "--check"],
+    ["--root", path.join(skillRoot, "business"), "--out", path.join(skillRoot, "state", "workspace.generated.json"), "--check"],
     0,
   );
 
@@ -271,8 +267,8 @@ export function register(h: Harness): void {
   const aggregateRoot = makeEmptyFixture("workspace-aggregate");
   const aggregateA = path.join(aggregateRoot, "business-a");
   const aggregateB = path.join(aggregateRoot, "business-b");
-  cpSync(path.join(skillRoot, "templates"), aggregateA, { recursive: true });
-  cpSync(path.join(skillRoot, "templates"), aggregateB, { recursive: true });
+  cpSync(path.join(skillRoot, "business"), aggregateA, { recursive: true });
+  cpSync(path.join(skillRoot, "business"), aggregateB, { recursive: true });
   writeFileSync(
     path.join(aggregateB, "state", "business.json"),
     readFileSync(path.join(aggregateB, "state", "business.json"), "utf8").replace(/"slug": "[^"]*"/, '"slug": "second-app"'),
@@ -294,8 +290,8 @@ export function register(h: Harness): void {
   const aggregateDupRoot = makeEmptyFixture("workspace-aggregate-duplicate-id");
   const aggregateDupA = path.join(aggregateDupRoot, "business-a");
   const aggregateDupB = path.join(aggregateDupRoot, "business-b");
-  cpSync(path.join(skillRoot, "templates"), aggregateDupA, { recursive: true });
-  cpSync(path.join(skillRoot, "templates"), aggregateDupB, { recursive: true });
+  cpSync(path.join(skillRoot, "business"), aggregateDupA, { recursive: true });
+  cpSync(path.join(skillRoot, "business"), aggregateDupB, { recursive: true });
   runScriptArgs(
     "aggregate render fails when two businesses share a slug",
     "render-business-control-plane-workspace.ts",
@@ -310,7 +306,7 @@ export function register(h: Harness): void {
   runScriptArgs(
     "workspace render check fails on stale committed output",
     "render-business-control-plane-workspace.ts",
-    ["--root", path.join(skillRoot, "templates"), "--out", staleWorkspacePath, "--check"],
+    ["--root", path.join(skillRoot, "business"), "--out", staleWorkspacePath, "--check"],
     1,
     "business_workspace.output.drift",
   );
@@ -363,7 +359,7 @@ export function register(h: Harness): void {
   runScriptArgs(
     "founder copy passes on the shipped skill and templates",
     "check-founder-copy.ts",
-    ["--root", path.join(skillRoot, "templates"), "--skill-root", skillRoot],
+    ["--root", path.join(skillRoot, "business"), "--skill-root", skillRoot],
     0,
   );
 
@@ -452,16 +448,16 @@ export function register(h: Harness): void {
     "playbook/design/premium-mobile-craft.md",
     "design-system/tokens.json",
     "design-system/DesignTokens.swift",
-    "templates/design-system/tokens.json",
-    "templates/design-system/DesignTokens.swift",
-    "templates/design-system/PremiumCraft.swift",
+    "business/design-system/tokens.json",
+    "business/design-system/DesignTokens.swift",
+    "business/design-system/PremiumCraft.swift",
     "playbook/experience/experience-cards/peak-end-card.md",
     "playbook/experience/experience-cards/mastery-and-status-card.md",
     "playbook/experience/experience-cards/variable-reward-card.md",
-    "templates/DESIGN.md",
-    "templates/emotional-design/EMOTIONAL_DESIGN.md",
-    "templates/motion-catalog/TokenSpring.swift",
-    "templates/motion-catalog/motion-tokens.ts",
+    "business/DESIGN.md",
+    "business/emotional-design/EMOTIONAL_DESIGN.md",
+    "business/motion-catalog/TokenSpring.swift",
+    "business/motion-catalog/motion-tokens.ts",
   ];
   const writeMotionContractRoot = (name: string, mutate?: (rel: string, text: string) => string): string => {
     const root = makeEmptyFixture(name);
@@ -719,7 +715,7 @@ export function register(h: Harness): void {
   );
 
   const motionCardMomentDrift = writeMotionContractRoot("motion-contract-card-moment-drift", (rel, text) =>
-    rel.endsWith("templates/DESIGN.md")
+    rel.endsWith("business/DESIGN.md")
       ? text.replace("| Intent Mirror entrance | `motion.durationReveal` |", "| Intent Mirror entrance | `motion.durationSlow` |")
       : text,
   );
@@ -783,7 +779,7 @@ export function register(h: Harness): void {
   );
 
   const motionTemplateDrift = writeMotionContractRoot("motion-contract-template-token-drift", (rel, text) =>
-    rel === "templates/design-system/tokens.json" ? text.replace('"durationBase": "220ms"', '"durationBase": "240ms"') : text,
+    rel === "business/design-system/tokens.json" ? text.replace('"durationBase": "220ms"', '"durationBase": "240ms"') : text,
   );
   runScriptArgs(
     "motion contract fails when the template token copy drifts from the top-level artifact",

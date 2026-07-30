@@ -43,8 +43,8 @@ adapting.
 
 ## Copying into an app repo
 
-1. The pack compiles beside `templates/design-system/DesignTokens.swift` and
-   `templates/design-system/PremiumCraft.swift`; copy those first.
+1. The pack compiles beside `business/design-system/DesignTokens.swift` and
+   `business/design-system/PremiumCraft.swift`; copy those first.
 2. Replace the placeholder asset names (`card-foil`, `card-emblem`,
    `cloud-item-1`…`cloud-item-7`, `hero-emblem`) with brand art in the app's
    asset catalog — generate via the Higgsfield routing in

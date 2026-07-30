@@ -1,6 +1,6 @@
 /**
  * Executes the shipped Claude Code hooks from
- * templates/repo-agent-entrypoints/settings.json with sample tool payloads.
+ * business/repo-agent-entrypoints/settings.json with sample tool payloads.
  * These hooks are the enforcement layer copied into generated business repos;
  * before this module nothing tested them, and their documented failure modes
  * (missing jq, missing SKILL_ROOT) used to be silent. Asserts:
@@ -19,7 +19,7 @@ interface HookSettings {
 }
 
 function loadHookCommands(): { writeEditDepth: string; bashHook: string; finalPng: string } {
-  const settingsPath = path.join(skillRoot, "templates", "repo-agent-entrypoints", "settings.json");
+  const settingsPath = path.join(skillRoot, "business", "repo-agent-entrypoints", "settings.json");
   const parsed = JSON.parse(readFileSync(settingsPath, "utf8")) as HookSettings;
   const postToolUse = parsed.hooks.PostToolUse;
   const command = (index: number): string => {
@@ -209,12 +209,12 @@ function registerInstallation(harness: Harness): void {
   harness.runScriptArgs("install:hooks refreshes a drifted hook", installer, ["--skill-root", skillRoot, "--target", repo], 0);
   harness.runScriptArgs("check:hooks-installed passes after refresh", validator, ["--skill-root", skillRoot, "--root", repo], 0);
 
-  // The audit runs this gate against templates/, which is not a business
+  // The audit runs this gate against business/, which is not a business
   // repo. It must say so rather than assert installation vacuously.
   harness.runScriptArgs(
     "check:hooks-installed skips installation checks against the skill template tree",
     validator,
-    ["--skill-root", skillRoot, "--root", path.join(skillRoot, "templates")],
+    ["--skill-root", skillRoot, "--root", path.join(skillRoot, "business")],
     0,
     "not a business repo",
   );

@@ -2,7 +2,7 @@
 
 Read `AGENTS.md` first; it is the canonical maintainer guide for this skill repo.
 
-This file is maintainer-only. Do not copy it into businesses created by the skill; launched business repos should use the shipped `templates/repo-agent-entrypoints/CLAUDE.md` addendum after it has been filled with the app-specific context.
+This file is maintainer-only. Do not copy it into businesses created by the skill; launched business repos should use the shipped `business/repo-agent-entrypoints/CLAUDE.md` addendum after it has been filled with the app-specific context.
 
 Claude-specific notes:
 

@@ -4,7 +4,7 @@ Use this before drafting or publishing privacy policy, terms of service, EULA, s
 
 This is a workflow, not legal advice. Agents may research, draft, implement pages, and prepare review packets. Founder/legal approval is required before publishing final legal terms or making material privacy promises.
 
-When store submission is in scope, also load `store-console-workflow.md`. For Apple App Store listings, also load `app-store-listing-prep.md` and use `templates/app-store-listing/app-privacy-questionnaire.html` or an equivalent interactive worksheet when the founder needs to review privacy answers. Privacy/terms work must produce the public pages and the console answers: Apple App Privacy data types, Google Play Data safety answers, account deletion URLs, reviewer access notes, and source evidence.
+When store submission is in scope, also load `store-console-workflow.md`. For Apple App Store listings, also load `app-store-listing-prep.md` and use `business/app-store-listing/app-privacy-questionnaire.html` or an equivalent interactive worksheet when the founder needs to review privacy answers. Privacy/terms work must produce the public pages and the console answers: Apple App Privacy data types, Google Play Data safety answers, account deletion URLs, reviewer access notes, and source evidence.
 
 ## Contents
 

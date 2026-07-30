@@ -96,7 +96,7 @@ If the research already makes the product direction obvious, skip the brainstorm
 
 ## 4. Agent Entrypoints
 
-Every real app build or builder handoff should create or update a business-specific `AGENTS.md` from `templates/repo-agent-entrypoints/AGENTS.md`. Do not copy the skill repo's maintainer `AGENTS.md`. Keep `AGENTS.md` as a map to source docs, active plans, validation commands, and failure cards instead of a duplicate manual.
+Every real app build or builder handoff should create or update a business-specific `AGENTS.md` from `business/repo-agent-entrypoints/AGENTS.md`. Do not copy the skill repo's maintainer `AGENTS.md`. Keep `AGENTS.md` as a map to source docs, active plans, validation commands, and failure cards instead of a duplicate manual.
 
 `AGENTS.md` must include:
 - 60-second product brief
@@ -118,7 +118,7 @@ Every real app build or builder handoff should create or update a business-speci
 - exact verification commands or scripts when known
 - bundled validator/LaunchBench commands when copied into or callable from the repo
 
-`CLAUDE.md` should exist when Claude Code or a builder expects it. Start from `templates/repo-agent-entrypoints/CLAUDE.md` and keep it short:
+`CLAUDE.md` should exist when Claude Code or a builder expects it. Start from `business/repo-agent-entrypoints/CLAUDE.md` and keep it short:
 - point to `AGENTS.md` as canonical
 - remind Claude to keep using `b2c-mobile-business-launch` for launch/business work
 - list Claude-specific skills/plugins/tools if useful

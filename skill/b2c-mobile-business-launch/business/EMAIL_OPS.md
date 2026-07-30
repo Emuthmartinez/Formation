@@ -45,7 +45,7 @@ Automation statuses are freeform. The validator scans for the string `done` or `
 
 ## Brand Tokens
 
-Production templates pull their design system from `DESIGN.md` — never hardcoded hex values. `templates/resend/email-templates.ts` documents the contract (`LaunchEmailDesignSystem`: colors, typography, radius, spacing, email layout). Record the mapping here before production sends; `check:email` flags a missing mapping.
+Production templates pull their design system from `DESIGN.md` — never hardcoded hex values. `business/resend/email-templates.ts` documents the contract (`LaunchEmailDesignSystem`: colors, typography, radius, spacing, email layout). Record the mapping here before production sends; `check:email` flags a missing mapping.
 
 | LaunchEmailDesignSystem field | DESIGN.md token | Value basis |
 | --- | --- | --- |
