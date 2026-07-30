@@ -818,52 +818,53 @@ if (root === path.join(skillRoot, "templates")) {
       // Externalization cannot silently regress: a JSX text node with real
       // words is hardcoded copy that bypassed lib/strings.ts, even when the
       // words themselves are benign.
-      for (const file of walkCodeFiles(path.join(starterApp, "app"))) {
-        const relative = path.relative(skillRoot, file);
-        const source = readFileSync(file, "utf8")
-          .replace(/\/\*[\s\S]*?\*\//g, " ")
-          .replace(/^\s*\/\/.*$/gm, " ");
-        for (const match of source.matchAll(/>([^<>{}]+)</g)) {
-          const text = (match[1] ?? "").trim();
-          if (!/[A-Za-z0-9]{2}/.test(text)) continue;
-          issues.push(
-            issue(
-              "error",
-              "app_copy.starter_hardcoded_text",
-              `${relative} hardcodes the JSX text "${text.slice(0, 50)}" — starter UI strings live in lib/strings.ts so externalization cannot silently regress.`,
-              relative,
-            ),
-          );
+      for (const dir of ["app", "components", "lib"])
+        for (const file of existsSync(path.join(starterApp, dir)) ? walkCodeFiles(path.join(starterApp, dir)) : []) {
+          const relative = path.relative(skillRoot, file);
+          const source = readFileSync(file, "utf8")
+            .replace(/\/\*[\s\S]*?\*\//g, " ")
+            .replace(/^\s*\/\/.*$/gm, " ");
+          for (const match of source.matchAll(/>([^<>{}]+)</g)) {
+            const text = (match[1] ?? "").trim();
+            if (!/[A-Za-z0-9]{2}/.test(text)) continue;
+            issues.push(
+              issue(
+                "error",
+                "app_copy.starter_hardcoded_text",
+                `${relative} hardcodes the JSX text "${text.slice(0, 50)}" — starter UI strings live in lib/strings.ts so externalization cannot silently regress.`,
+                relative,
+              ),
+            );
+          }
+          // User-visible attribute literals are copy too: placeholder="Say
+          // something" bypasses lib/strings.ts the same way JSX text does.
+          // A string literal wrapped in a JSX expression ({"Welcome back"}) is
+          // the same hardcoded copy with braces around it.
+          for (const match of source.matchAll(/\{\s*(["'])((?:(?!\1)[^\n]){2,})\1\s*\}/g)) {
+            const value = match[2] ?? "";
+            if (!/[A-Za-z0-9]{2}/.test(value)) continue;
+            issues.push(
+              issue(
+                "error",
+                "app_copy.starter_hardcoded_text",
+                `${relative} hardcodes the JSX expression literal "${value.slice(0, 50)}" — starter UI strings live in lib/strings.ts.`,
+                relative,
+              ),
+            );
+          }
+          for (const match of source.matchAll(/\b(placeholder|title|alt|aria-label|aria-description)\s*=\s*(["'])((?:(?!\2)[^\n]){2,})\2/g)) {
+            const value = match[3] ?? "";
+            if (!/[A-Za-z0-9]{2}/.test(value)) continue;
+            issues.push(
+              issue(
+                "error",
+                "app_copy.starter_hardcoded_text",
+                `${relative} hardcodes the ${match[1]} attribute "${value.slice(0, 50)}" — user-visible attribute strings live in lib/strings.ts too.`,
+                relative,
+              ),
+            );
+          }
         }
-        // User-visible attribute literals are copy too: placeholder="Say
-        // something" bypasses lib/strings.ts the same way JSX text does.
-        // A string literal wrapped in a JSX expression ({"Welcome back"}) is
-        // the same hardcoded copy with braces around it.
-        for (const match of source.matchAll(/\{\s*(["'])((?:(?!\1)[^\n]){2,})\1\s*\}/g)) {
-          const value = match[2] ?? "";
-          if (!/[A-Za-z0-9]{2}/.test(value)) continue;
-          issues.push(
-            issue(
-              "error",
-              "app_copy.starter_hardcoded_text",
-              `${relative} hardcodes the JSX expression literal "${value.slice(0, 50)}" — starter UI strings live in lib/strings.ts.`,
-              relative,
-            ),
-          );
-        }
-        for (const match of source.matchAll(/\b(placeholder|title|alt|aria-label|aria-description)\s*=\s*(["'])((?:(?!\2)[^\n]){2,})\2/g)) {
-          const value = match[3] ?? "";
-          if (!/[A-Za-z0-9]{2}/.test(value)) continue;
-          issues.push(
-            issue(
-              "error",
-              "app_copy.starter_hardcoded_text",
-              `${relative} hardcodes the ${match[1]} attribute "${value.slice(0, 50)}" — user-visible attribute strings live in lib/strings.ts too.`,
-              relative,
-            ),
-          );
-        }
-      }
       // Only what a user can see counts as copy: JSX text nodes and string
       // literal values. Whole-file scanning would flag code TODO comments and
       // the JSX attribute NAME `placeholder=`, which are code, not copy.
@@ -938,7 +939,7 @@ function walkCodeFiles(dir: string): string[] {
     const stats = statSync(full);
     if (stats.isDirectory()) {
       out.push(...walkCodeFiles(full));
-    } else if (/\.(tsx?|jsx?)$/.test(entry)) {
+    } else if (/\.(tsx?|jsx?|swift|kt|kts|dart)$/.test(entry)) {
       out.push(full);
     }
   }

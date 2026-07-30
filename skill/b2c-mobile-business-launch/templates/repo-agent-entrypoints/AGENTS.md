@@ -138,6 +138,7 @@ npm run check:apple-requirements -- --root /path/to/{{APP_SLUG}} --state PROJECT
 npm run check:store-console -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:native-ios -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:11-star -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
+npm run check:app-copy -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:emotional-design -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:content-assets -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:paid-ua -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml

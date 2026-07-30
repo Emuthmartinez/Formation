@@ -1162,4 +1162,15 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: unterminated comment hides the parseable tail too", deckUnterminatedComment, "check-app-copy.ts", 1, "app_copy.deck_surface_missing");
+
+  // The fictional-brand tripwire covers native and Flutter source too.
+  const nativeBrand = makeFixture("app-copy-native-brand-shipped");
+  writeFileSync(path.join(nativeBrand, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  mkdirSync(path.join(nativeBrand, "src"), { recursive: true });
+  writeFileSync(
+    path.join(nativeBrand, "src", "HomeView.swift"),
+    'import SwiftUI\n\nstruct HomeView: View {\n  var body: some View {\n    Text("Fernpath turns one small daily check-in into a streak")\n  }\n}\n',
+    "utf8",
+  );
+  runFixture("App copy: fictional brand in native source fails", nativeBrand, "check-app-copy.ts", 1, "app_copy.fictional_brand_shipped");
 }

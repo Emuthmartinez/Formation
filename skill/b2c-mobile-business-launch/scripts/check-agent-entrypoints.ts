@@ -116,7 +116,8 @@ if (templateAgents) {
       // here so a later edit cannot drop the deck from the read-first list.
       "COPY_BRIEF.md",
       "COPY_DECK.md",
-      "check:app-copy",
+      // Held as the runnable verification command, not just a prose mention.
+      "npm run check:app-copy -- --root",
       "DEMO_VIDEO.md",
       "app-store-connect-cli.md",
       "ASC CLI/skill routes can cover app creation",
