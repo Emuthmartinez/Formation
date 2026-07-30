@@ -266,7 +266,7 @@ export function copyColumnCells(markdownText: string): CopyColumn {
  * column, not the copy cell. ICU interpolations like {count} are stripped first:
  * a named placeholder is the localization contract working, not a leak.
  */
-export function identifierShapes(text: string): string[] {
+export function identifierShapes(text: string, options: { stripInlineCode?: boolean } = {}): string[] {
   // Strip full ICU MessageFormat expressions, nested braces included —
   // {item_count, plural, one {# item} other {# items}} is the localization
   // contract working, and its argument name must not read as an identifier.
@@ -274,7 +274,14 @@ export function identifierShapes(text: string): string[] {
   while (/\{[^{}]*\}/.test(stripped)) {
     stripped = stripped.replace(/\{[^{}]*\}/g, " ");
   }
-  stripped = stripped.replace(/`[^`\n]*`/g, " ");
+  // Inline code is exempt only where backticks mean "reference" (the
+  // ONBOARDING Copy column). In a deck cell the backticked value is text the
+  // user reads — `founder_approval` in copy is still the leak.
+  if (options.stripInlineCode) {
+    stripped = stripped.replace(/`[^`\n]*`/g, " ");
+  } else {
+    stripped = stripped.replace(/`/g, " ");
+  }
   const found = new Set<string>();
   for (const match of stripped.matchAll(/\b[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+\b/g)) {
     found.add(match[0]);

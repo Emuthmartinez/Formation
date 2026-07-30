@@ -214,7 +214,10 @@ if (deckText && !deckIsTemplate) {
   const scrubAllowed = (text: string): string => {
     let out = text;
     for (const term of allowed) {
-      out = out.replace(new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), " ");
+      // Whole-word scrub with the matchesTerm boundary: an allowed "run" must
+      // not eat the middle of "runnable starter" and conceal the placeholder.
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      out = out.replace(new RegExp(`(^|[^A-Za-z0-9'-])(?:${escaped})(?=[^A-Za-z0-9'-]|$)`, "gi"), "$1 ");
     }
     return out;
   };
@@ -382,7 +385,8 @@ if (onboarding) {
   const scrubOnboarding = (text: string): string => {
     let out = text;
     for (const term of onboardingAllowedTerms) {
-      out = out.replace(new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), " ");
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      out = out.replace(new RegExp(`(^|[^A-Za-z0-9'-])(?:${escaped})(?=[^A-Za-z0-9'-]|$)`, "gi"), "$1 ");
     }
     return out;
   };
@@ -469,7 +473,7 @@ if (onboarding) {
         );
       }
     }
-    for (const token of identifierShapes(cell.text)) {
+    for (const token of identifierShapes(cell.text, { stripInlineCode: true })) {
       issues.push(
         issue(
           sev("error"),

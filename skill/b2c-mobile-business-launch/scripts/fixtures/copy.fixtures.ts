@@ -675,4 +675,41 @@ export function register(h: Harness): void {
     1,
     "app_copy.allowlist_reason_missing",
   );
+
+  // Inline code in a deck cell is text the user reads — a backticked machine
+  // value is still the leak.
+  const deckInlineCode = makeFixture("app-copy-deck-inline-code-identifier");
+  writeFileSync(path.join(deckInlineCode, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(deckInlineCode, "COPY_DECK.md"),
+    [...DECK_HEADER, "| settings.mode.body | Settings | Current mode: `founder_approval` | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: backticked identifier in deck cell fails", deckInlineCode, "check-app-copy.ts", 1, "app_copy.deck_raw_identifier");
+
+  // An allowed term that is a substring of placeholder text must not conceal
+  // the placeholder — the scrub is whole-word.
+  const allowlistSubstring = makeFixture("app-copy-allowlist-substring");
+  writeFileSync(path.join(allowlistSubstring, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(allowlistSubstring, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: authored 2026-07-29",
+      "",
+      "## Allowed terms",
+      "",
+      "- run — the product's own word for its core action",
+      "",
+      "## Onboarding",
+      "",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| onboarding.promise.headline | Promise | This runnable starter ships today | | 1 |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: allowed-term substring cannot conceal a placeholder", allowlistSubstring, "check-app-copy.ts", 1, "app_copy.deck_placeholder");
 }
