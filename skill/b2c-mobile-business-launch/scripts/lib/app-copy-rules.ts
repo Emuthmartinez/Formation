@@ -105,7 +105,7 @@ function splitRow(line: string): string[] {
  * reported as malformed rather than silently ignored.
  */
 /** Markdown comments hide rows from the rendered deck; they must hide them from parsing too — with line numbers preserved. */
-function stripMarkdownComments(text: string): string {
+export function stripMarkdownComments(text: string): string {
   return text.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\n]/g, " "));
 }
 
@@ -230,7 +230,9 @@ export interface AllowedTerm {
   reason: string;
 }
 
-export function deckAllowedTerms(deckText: string): AllowedTerm[] {
+export function deckAllowedTerms(rawDeckText: string): AllowedTerm[] {
+  // A commented-out bullet grants nothing: the rendered deck declares no term.
+  const deckText = stripMarkdownComments(rawDeckText);
   const match = deckText.match(/^##\s+Allowed terms\s*$([\s\S]*?)(?=^##\s|\n*$(?![\s\S]))/im);
   if (!match?.[1]) return [];
   const terms: AllowedTerm[] = [];

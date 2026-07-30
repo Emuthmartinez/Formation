@@ -52,6 +52,7 @@ import {
   loadAppCopyRules,
   malformedKeyReferences,
   parseDeck,
+  stripMarkdownComments,
 } from "./lib/app-copy-rules.js";
 import { matchesTerm } from "./lib/no-slop-rules.js";
 
@@ -104,7 +105,8 @@ const laneStatus = (lane: string): string => (state ? (asString(getPath(state, `
 // Engineering is the lane that types the strings, so the deck is required the
 // moment the build STARTS (partial), not only when it finishes — the window
 // between "building" and "done" is exactly where improvised copy gets typed.
-const engineeringActive = laneStatus("engineering") === "partial" || laneStatus("engineering") === "done";
+// A blocked build already started — its copy obligations do not un-happen.
+const engineeringActive = ["partial", "blocked", "done"].includes(laneStatus("engineering"));
 const deckRequired = laneStatus("design") === "done" || laneStatus("onboarding") === "done" || engineeringActive;
 
 const deckText = readText(root, "COPY_DECK.md");
@@ -168,6 +170,18 @@ if (briefRequired) {
     "Per-surface copy blocks",
     "Claims ledger",
   ];
+  // The template's per-section instruction line surviving means the section
+  // was never authored, no matter how many characters surround it.
+  if (brief && /^Status:\s*authored\s+\d{4}-\d{2}-\d{2}\b/im.test(brief) && /Replace this line with this product's content/i.test(brief)) {
+    issues.push(
+      issue(
+        sev("error"),
+        "app_copy.brief_hollow",
+        "COPY_BRIEF.md declares itself authored but still carries the template's replace-this-line instruction — the sections were never filled with this product's content.",
+        "COPY_BRIEF.md",
+      ),
+    );
+  }
   const hollowSections = REQUIRED_BRIEF_SECTIONS.filter((section) => {
     const body = (brief ?? "").match(new RegExp(`##\\s+${section}\\s*\\n([\\s\\S]*?)(?=\\n##\\s|$)`, "i"))?.[1] ?? "";
     return body.replace(/[^A-Za-z0-9]/g, "").length < 40;
@@ -374,7 +388,9 @@ if (deckText && !deckIsTemplate) {
     const sectionsWithRows = new Set(rows.map((row) => row.section));
     const sectionBodies = new Map<string, string>();
     let currentHeading = "";
-    for (const line of deckText.split(/\r?\n/)) {
+    // Commented-out headings and exemptions are invisible in the rendered deck
+    // and grant nothing here either.
+    for (const line of stripMarkdownComments(deckText).split(/\r?\n/)) {
       const heading = line.match(/^##\s+(.+)$/);
       if (heading?.[1]) {
         currentHeading = heading[1].trim();
@@ -589,7 +605,12 @@ if (deckRequired) {
       ),
     );
   }
-  if (plan && !plan.includes("COPY_DECK.md")) {
+  // The route must be affirmative: "Do not use COPY_DECK.md" contains the
+  // filename while reopening the improvisation path.
+  const planRoutesToDeck = (plan ?? "")
+    .split(/\r?\n/)
+    .some((line) => line.includes("COPY_DECK.md") && !/\b(do not|don't|never|avoid|skip|without|instead of)\b/i.test(line));
+  if (plan && !planRoutesToDeck) {
     issues.push(
       issue(
         sev("error"),
@@ -746,8 +767,10 @@ if (root === path.join(skillRoot, "templates")) {
       for (const file of walkMarkdown(promptsDir)) {
         // The rule must live INSIDE the runnable fenced block — that block is
         // what a builder copies; prose around it never reaches the build.
-        const fenced = (readFileSync(file, "utf8").match(/```[\s\S]*?```/g) ?? []).join("\n");
-        if (!fenced.includes("COPY_DECK.md")) {
+        // The FIRST fenced block is the runnable prompt a builder copies; a
+        // rule parked in a later example fence never reaches the build.
+        const firstFence = readFileSync(file, "utf8").match(/```[\s\S]*?```/)?.[0] ?? "";
+        if (!firstFence.includes("COPY_DECK.md")) {
           const relative = path.relative(skillRoot, file);
           issues.push(
             issue(

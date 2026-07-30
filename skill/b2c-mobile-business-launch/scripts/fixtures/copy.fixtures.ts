@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness } from "./_harness.js";
 
@@ -1017,4 +1017,62 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: whitespace-corrupted key reference is reported", spacedKeyRef, "check-app-copy.ts", 1, "app_copy.onboarding_key_reference_malformed");
+
+  // Changing only the status line of the shipped brief template is boilerplate,
+  // not authorship — the replace-this-line instructions survive and fail.
+  const briefBoilerplate = makeFixture("app-copy-brief-boilerplate");
+  writeFileSync(path.join(briefBoilerplate, "PROJECT_STATE.yaml"), stateWith("phase_2", { revenue: "done" }), "utf8");
+  const templateBrief = readFileSync(path.join(briefBoilerplate, "COPY_BRIEF.md"), "utf8");
+  writeFileSync(path.join(briefBoilerplate, "COPY_BRIEF.md"), templateBrief.replace(/^Status:.*$/m, "Status: authored 2026-07-29"), "utf8");
+  runFixture("App copy: status-only edit of the brief template fails", briefBoilerplate, "check-app-copy.ts", 1, "app_copy.brief_hollow");
+
+  // Commented-out surface exemptions and allowlist bullets grant nothing.
+  const deckCommentedExemptions = makeFixture("app-copy-deck-commented-exemptions");
+  writeFileSync(path.join(deckCommentedExemptions, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(deckCommentedExemptions, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: authored 2026-07-29",
+      "",
+      "## Onboarding",
+      "",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |",
+      "",
+      "<!--",
+      ...NA_SURFACES,
+      "-->",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(deckCommentedExemptions, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(deckCommentedExemptions, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: commented-out surface exemptions grant nothing", deckCommentedExemptions, "check-app-copy.ts", 1, "app_copy.deck_surface_missing");
+
+  // A negated mention of the deck in the plan is not a route.
+  const planNegatedRoute = makeFixture("app-copy-plan-negated-route");
+  writeFileSync(path.join(planNegatedRoute, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "partial" }), "utf8");
+  writeFileSync(path.join(planNegatedRoute, "ENGINEERING_PLAN.md"), "# Engineering Plan\n\nDo not use COPY_DECK.md; hardcode the strings for speed.\n", "utf8");
+  runFixture("App copy: negated deck mention in the plan is not a route", planNegatedRoute, "check-app-copy.ts", 1, "app_copy.plan_deck_route_missing");
+
+  // A blocked build already started — its copy obligations remain.
+  const engineeringBlocked = makeFixture("app-copy-engineering-blocked");
+  writeFileSync(path.join(engineeringBlocked, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "blocked" }), "utf8");
+  rmSync(path.join(engineeringBlocked, "COPY_DECK.md"));
+  runFixture("App copy: blocked engineering keeps the deck requirement", engineeringBlocked, "check-app-copy.ts", 1, "app_copy.deck_missing");
 }
