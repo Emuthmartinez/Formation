@@ -600,4 +600,79 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: ICU plural argument names stay clean", icuPlural, "check-app-copy.ts", 0);
+
+  // A technology mention outside the readiness section is not a decision.
+  const mechanismOutOfSection = makeFixture("app-copy-mechanism-out-of-section");
+  writeFileSync(path.join(mechanismOutOfSection, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(mechanismOutOfSection, "TECH_SPEC.md"),
+    [
+      "# Technical Spec",
+      "",
+      "## Data Contract",
+      "",
+      "We rejected i18next for the data layer.",
+      "",
+      "## Strings And Localization Readiness",
+      "",
+      "Pending.",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: mechanism mention outside its section fails", mechanismOutOfSection, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // Punctuation-invalid key-like references bypass nothing.
+  const badPunctuationRef = makeFixture("app-copy-bad-punctuation-ref");
+  writeFileSync(path.join(badPunctuationRef, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(badPunctuationRef, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding/promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "App copy: punctuation-invalid key reference is reported",
+    badPunctuationRef,
+    "check-app-copy.ts",
+    1,
+    "app_copy.onboarding_key_reference_malformed",
+  );
+
+  // A reasonless allowlist bullet grants nothing and is reported.
+  const allowlistNoReason = makeFixture("app-copy-allowlist-no-reason");
+  writeFileSync(path.join(allowlistNoReason, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(allowlistNoReason, "COPY_DECK.md"),
+    [
+      "# Copy Deck",
+      "",
+      "Status: authored 2026-07-29",
+      "",
+      "## Allowed terms",
+      "",
+      "- lane",
+      "",
+      "## Onboarding",
+      "",
+      "| Key | Screen / moment | Copy (source language) | Voice notes | Locale tier |",
+      "| --- | --- | --- | --- | --- |",
+      "| onboarding.promise.headline | Promise | Pick your lane and row | | 1 |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "App copy: reasonless allowlist bullet is reported and not honored",
+    allowlistNoReason,
+    "check-app-copy.ts",
+    1,
+    "app_copy.allowlist_reason_missing",
+  );
 }

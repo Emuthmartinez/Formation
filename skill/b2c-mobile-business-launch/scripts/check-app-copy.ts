@@ -191,7 +191,22 @@ if (deckText && !deckIsTemplate) {
       ),
     );
   }
-  const allowed = deckAllowedTerms(deckText);
+  // The exemption is earned by the reason: a reasonless bullet is reported
+  // and NOT honored, so a bare "- lane" cannot silently suppress the scan.
+  const declaredTerms = deckAllowedTerms(deckText);
+  for (const declared of declaredTerms) {
+    if (declared.reason.replace(/[^a-z0-9]/gi, "").length < 12) {
+      issues.push(
+        issue(
+          sev("error"),
+          "app_copy.allowlist_reason_missing",
+          `Allowed term "${declared.term}" has no substantive reason. The exemption is earned by one line on why this product owns the word — a bare bullet grants nothing.`,
+          "COPY_DECK.md",
+        ),
+      );
+    }
+  }
+  const allowed = declaredTerms.filter((declared) => declared.reason.replace(/[^a-z0-9]/gi, "").length >= 12).map((declared) => declared.term);
   const allowedSet = new Set(allowed.map((term) => term.toLowerCase()));
   const ctaCases = new Set<string>();
   // Allowed terms clear placeholder shapes too — "Todoist" declared as a
@@ -359,7 +374,10 @@ if (deckText && !deckIsTemplate) {
 // banned vocabulary, and raw identifiers are the leak this gate exists for.
 const onboarding = readText(root, "ONBOARDING.md") ?? readText(root, "onboarding/ONBOARDING.md");
 if (onboarding) {
-  const onboardingAllowedTerms = deckText ? deckAllowedTerms(deckText) : [];
+  // Same earned-exemption rule as the deck: reasonless bullets grant nothing.
+  const onboardingAllowedTerms = (deckText ? deckAllowedTerms(deckText) : [])
+    .filter((declared) => declared.reason.replace(/[^a-z0-9]/gi, "").length >= 12)
+    .map((declared) => declared.term);
   const onboardingAllowed = new Set(onboardingAllowedTerms.map((term) => term.toLowerCase()));
   const scrubOnboarding = (text: string): string => {
     let out = text;
@@ -521,10 +539,12 @@ if (root !== path.join(skillRoot, "templates")) {
 if (laneStatus("engineering") === "done") {
   const techSpec = readText(root, "TECH_SPEC.md");
   const hasSection = Boolean(techSpec) && /##\s+Strings And Localization Readiness/i.test(techSpec ?? "");
+  // The decision lives in its section: "we rejected i18next" elsewhere in the
+  // spec is not a selected mechanism, so only the section body can satisfy.
+  const readinessSection = (techSpec ?? "").match(/##\s+Strings And Localization Readiness\s*\n([\s\S]*?)(?=\n##\s|$)/i)?.[1] ?? "";
   const namesMechanism =
-    Boolean(techSpec) &&
     /(xcstrings|string catalog|i18next|expo-localization|\barb\b|gen-l10n|next-intl|strings module|strings\.xml|string resources|localizable\.strings)/i.test(
-      techSpec ?? "",
+      readinessSection,
     );
   // The shipped template lists every mechanism as an option menu ending in
   // "Record the choice here." — that sentinel surviving means nobody chose.

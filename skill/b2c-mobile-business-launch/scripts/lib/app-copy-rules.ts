@@ -174,14 +174,17 @@ const FILE_REFERENCE = /\.(md|html|ts|tsx|js|jsx|mjs|yaml|yml|json|swift|kt)$/i;
  */
 export function malformedKeyReferences(text: string): string[] {
   const bad = new Set<string>();
-  for (const match of text.matchAll(/`([A-Za-z0-9._-]+?)(\.\*)?`/g)) {
-    const token = match[1] ?? "";
-    const isWildcard = Boolean(match[2]);
-    if (!token.includes(".") && !isWildcard) continue;
-    if (FILE_REFERENCE.test(token)) continue;
-    const full = token + (match[2] ?? "");
-    const wellFormed = new RegExp(/^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\.\*)?$/).test(full);
-    if (!wellFormed) bad.add(full);
+  // Inspect EVERY backticked span: a mistyped reference can contain characters
+  // a charset-limited matcher would never see (`onboarding/promise.*`), and a
+  // span that escapes both this check and coverage is a silent bypass.
+  for (const match of text.matchAll(/`([^`\n]+)`/g)) {
+    const span = (match[1] ?? "").trim();
+    if (!span || /[\s({]/.test(span)) continue;
+    const keyLike = span.includes(".") || span.endsWith("*");
+    if (!keyLike) continue;
+    if (FILE_REFERENCE.test(span.replace(/\.\*$/, ""))) continue;
+    const wellFormed = /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\.\*)?$/.test(span);
+    if (!wellFormed) bad.add(span);
   }
   return [...bad];
 }
@@ -192,15 +195,23 @@ export function malformedKeyReferences(text: string): string[] {
  * allowlist so a product whose voice genuinely owns a flagged word can say so
  * in the artifact itself.
  */
-export function deckAllowedTerms(deckText: string): string[] {
+export interface AllowedTerm {
+  term: string;
+  /** The one-line rationale; the exemption is earned by the reason, so a reasonless bullet is reported, not honored. */
+  reason: string;
+}
+
+export function deckAllowedTerms(deckText: string): AllowedTerm[] {
   const match = deckText.match(/^##\s+Allowed terms\s*$([\s\S]*?)(?=^##\s|\n*$(?![\s\S]))/im);
   if (!match?.[1]) return [];
-  const terms: string[] = [];
+  const terms: AllowedTerm[] = [];
   for (const line of match[1].split(/\r?\n/)) {
     const bullet = line.match(/^\s*[-*]\s+(.+)$/);
     if (!bullet?.[1]) continue;
-    const term = (bullet[1].split(/\s+[—–:-]\s+/)[0] ?? "").replace(/`/g, "").trim();
-    if (term) terms.push(term);
+    const parts = bullet[1].split(/\s+[—–:-]\s+/);
+    const term = (parts[0] ?? "").replace(/`/g, "").trim();
+    const reason = parts.slice(1).join(" ").trim();
+    if (term) terms.push({ term, reason });
   }
   return terms;
 }
