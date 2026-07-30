@@ -181,8 +181,14 @@ export function keyPrefixReferences(text: string): KeyReference[] {
   return [...references.values()];
 }
 
-/** Backticked tokens that are files, not deck keys. */
-const FILE_REFERENCE = /\.(md|html|ts|tsx|js|jsx|mjs|yaml|yml|json|swift|kt)$/i;
+/**
+ * Backticked tokens that are files, not deck keys. Localization source and
+ * resource files (`strings.dart`, `app_en.arb`, `strings.xml`, `.xcstrings`)
+ * are legitimate references in guidance cells — treating them as exact deck
+ * keys would fail coverage for the very files the mechanisms this validator
+ * accepts are built from.
+ */
+const FILE_REFERENCE = /\.(md|html|ts|tsx|js|jsx|mjs|yaml|yml|json|swift|kt|kts|dart|arb|xml|xcstrings)$/i;
 
 /**
  * Backticked spans that look like deck-key references but break the lowercase
@@ -333,4 +339,91 @@ export function identifierShapes(text: string, options: { stripInlineCode?: bool
     found.add(token.length > 60 ? `${token.slice(0, 57)}...` : token);
   }
   return [...found];
+}
+
+/**
+ * One negation lexicon for every affirmative-route check: the engineering
+ * plan's deck route, the runnable prompt fence's deck route, and the
+ * TECH_SPEC mechanism clause all reject a line that negates its own subject
+ * ("Do not use COPY_DECK.md", "Mechanism: don't use i18next"). One shared
+ * list, so a form added for one check can never lag the others. Bare
+ * "no"/"not"/"none" stay out — they appear inside legitimate affirmative
+ * lines ("typed from COPY_DECK.md, not the spec"); the mechanism check adds
+ * them separately because its scope is a single clause, not a whole line.
+ */
+const NEGATION_FORMS = [
+  "do not",
+  "don't",
+  "does not",
+  "doesn't",
+  "never",
+  "avoid(?:s|ed|ing)?",
+  "skip(?:s|ped|ping)?",
+  "without",
+  "instead of",
+  "cannot",
+  "can't",
+  "can not",
+  "won't",
+  "will not",
+  "refus(?:e|es|ed|ing)",
+  "reject(?:s|ed|ing)?",
+  "declin(?:e|es|ed|ing)",
+];
+export const NEGATION = new RegExp(`\\b(?:${NEGATION_FORMS.join("|")})\\b`, "i");
+
+/**
+ * The text a deck cell actually renders. Markdown tables render inline HTML,
+ * so `&nbsp;`, `&#32;`, or `<br>` in a cell paints no words — a cell holding
+ * only markup and whitespace entities is an empty cell wearing markup. The
+ * emptiness check reads this rendered form, never the raw source.
+ */
+export function renderedCellText(cell: string): string {
+  return (
+    cell
+      // Tags render no glyphs of their own (<br>, <br/>, <b>, <span ...>).
+      .replace(/<\/?[a-z][^<>\n]*>/gi, " ")
+      // Numeric character references render the code point they name.
+      .replace(/&#x([0-9a-f]{1,6});/gi, (_entity, hex: string) => codePointOrSpace(Number.parseInt(hex, 16)))
+      .replace(/&#([0-9]{1,7});/g, (_entity, dec: string) => codePointOrSpace(Number.parseInt(dec, 10)))
+      // Named spacing and invisible entities render no ink.
+      .replace(/&(?:nbsp|ensp|emsp|thinsp|zwnj|zwj|shy);/gi, " ")
+      // Unicode spaces and invisibles are whitespace, not authored copy.
+      .replace(/[\u00a0\u2000-\u200f\u2028\u2029\u202f\u205f\u3000\ufeff]/g, " ")
+  );
+}
+
+function codePointOrSpace(code: number): string {
+  try {
+    return String.fromCodePoint(code);
+  } catch {
+    return " ";
+  }
+}
+
+/** Prose comparison form: lowercase alphanumerics only, so punctuation or whitespace edits cannot dodge a verbatim match. */
+export function normalizeProse(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/**
+ * The brief template's per-section instruction lines — the prose that tells
+ * an author what to write instead of saying it. Parsed from the shipped
+ * template (the same doc-is-the-gate contract the rule lists hold) so the
+ * sentinel follows template edits instead of drifting from them. Markers,
+ * headings, and table rows are excluded: the replace-this-line marker has
+ * its own check, and an authored brief legitimately keeps the table headers.
+ */
+export function briefTemplateInstructionLines(templateText: string, sectionNames: string[]): string[] {
+  const template = stripMarkdownComments(templateText);
+  const lines: string[] = [];
+  for (const section of sectionNames) {
+    const body = template.match(new RegExp(`##\\s+${section}\\s*\\n([\\s\\S]*?)(?=\\n##\\s|$)`, "i"))?.[1] ?? "";
+    for (const raw of body.split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!line || line.startsWith("|") || line.startsWith("#") || /^_Replace this line/i.test(line)) continue;
+      if (normalizeProse(line).length >= 30) lines.push(line);
+    }
+  }
+  return lines;
 }

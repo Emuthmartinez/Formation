@@ -1,6 +1,6 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { type Harness } from "./_harness.js";
+import { type Harness, skillRoot } from "./_harness.js";
 
 /**
  * Fixtures for check:app-copy — the gate that keeps internal vocabulary and
@@ -1259,4 +1259,191 @@ export function register(h: Harness): void {
   mkdirSync(path.join(nativeNestedBrand, "ios", "MyApp"), { recursive: true });
   writeFileSync(path.join(nativeNestedBrand, "ios", "MyApp", "HomeView.swift"), 'let title = "Fernpath turns your daily walk into a streak"\n', "utf8");
   runFixture("App copy: fictional brand under ios/ is reachable", nativeNestedBrand, "check-app-copy.ts", 1, "app_copy.fictional_brand_shipped");
+
+  // "don't use i18next" selects the group while rejecting it — the shared
+  // negation lexicon covers the forms the old clause regex missed.
+  const mechanismDontUse = makeFixture("app-copy-mechanism-dont-use");
+  writeFileSync(path.join(mechanismDontUse, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(mechanismDontUse, "TECH_SPEC.md"),
+    ["# Technical Spec", "", "## Strings And Localization Readiness", "", "Mechanism: don't use i18next.", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: don't-use mechanism line selects nothing", mechanismDontUse, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // ---- Self-scan fixtures: a faithful copy of the skill's own templates and
+  // reference, run with --skill-root so root === <skill-root>/templates and
+  // the self-scan section activates. Each mutation pins a shipped-surface hold.
+  const makeSelfScanRoot = (name: string): string => {
+    const fakeRoot = h.makeEmptyFixture(name);
+    cpSync(path.join(skillRoot, "templates"), path.join(fakeRoot, "templates"), { recursive: true });
+    mkdirSync(path.join(fakeRoot, "references"), { recursive: true });
+    cpSync(path.join(skillRoot, "references", "conversion-copy.md"), path.join(fakeRoot, "references", "conversion-copy.md"));
+    return fakeRoot;
+  };
+
+  // A first fence whose only COPY_DECK.md mention is negated certifies the
+  // improvisation path — the fence route must be affirmative.
+  const promptNegatedRoute = makeSelfScanRoot("app-copy-prompt-negated-route");
+  const negatedPromptPath = path.join(promptNegatedRoute, "templates", "app-archetypes", "habit-tracker", "prompts", "03-habit-core-loop.md");
+  writeFileSync(
+    negatedPromptPath,
+    readFileSync(negatedPromptPath, "utf8").replace(/```[\s\S]*?```/, ["```", "Do not use COPY_DECK.md; hardcode the strings.", "```"].join("\n")),
+    "utf8",
+  );
+  runFixture(
+    "App copy: negated deck route in a runnable fence fails",
+    path.join(promptNegatedRoute, "templates"),
+    "check-app-copy.ts",
+    1,
+    "app_copy.prompt_deck_route_missing",
+    ["--skill-root", promptNegatedRoute],
+  );
+
+  // Hardcoded copy in a template-literal JSX expression ({`Welcome back`})
+  // bypasses lib/strings.ts the same way a quoted expression does.
+  const starterTemplateLiteral = makeSelfScanRoot("app-copy-starter-template-literal");
+  writeFileSync(
+    path.join(starterTemplateLiteral, "templates", "app-archetypes", "habit-tracker", "starter", "components", "fixture-copy.tsx"),
+    "export function FixtureCopy() {\n  return <p>{`Welcome back`}</p>;\n}\n",
+    "utf8",
+  );
+  runFixture(
+    "App copy: template-literal JSX expression is hardcoded copy",
+    path.join(starterTemplateLiteral, "templates"),
+    "check-app-copy.ts",
+    1,
+    "app_copy.starter_hardcoded_text",
+    ["--skill-root", starterTemplateLiteral],
+  );
+
+  // A range comparison in a starter utility is code, not copy — the JSX text
+  // matcher is scoped to JSX files and tag-adjacent text.
+  const starterComparison = makeSelfScanRoot("app-copy-starter-comparison-clean");
+  writeFileSync(
+    path.join(starterComparison, "templates", "app-archetypes", "habit-tracker", "starter", "lib", "range.ts"),
+    "export function within(value: number, lower: number, upper: number): boolean {\n  return value > lower && value < upper;\n}\n",
+    "utf8",
+  );
+  runFixture("App copy: starter range comparison is not JSX text", path.join(starterComparison, "templates"), "check-app-copy.ts", 0, undefined, [
+    "--skill-root",
+    starterComparison,
+  ]);
+
+  // The scoped matcher still catches real JSX text nodes — the narrowing must
+  // not un-hold the externalization regression it exists for.
+  const starterTextNode = makeSelfScanRoot("app-copy-starter-jsx-text-node");
+  writeFileSync(
+    path.join(starterTextNode, "templates", "app-archetypes", "habit-tracker", "starter", "components", "fixture-text.tsx"),
+    "export function FixtureText() {\n  return <p>Welcome back friend</p>;\n}\n",
+    "utf8",
+  );
+  runFixture(
+    "App copy: JSX text node after a tag is still hardcoded copy",
+    path.join(starterTextNode, "templates"),
+    "check-app-copy.ts",
+    1,
+    "app_copy.starter_hardcoded_text",
+    ["--skill-root", starterTextNode],
+  );
+
+  // A guidance cell naming a localization source file (`strings.dart`) is a
+  // file reference, not an exact deck key — coverage must not demand a row.
+  const dartFileReference = makeFixture("app-copy-strings-dart-reference");
+  writeFileSync(path.join(dartFileReference, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(dartFileReference, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(dartFileReference, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.headline` from `strings.dart` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: localization file reference is not a deck key", dartFileReference, "check-app-copy.ts", 0);
+
+  // "Not applicable —" with the rationale on the NEXT line is a reasonless
+  // exemption: the documented shape is one line — heading, dash, reason.
+  const naNextLine = makeFixture("app-copy-na-reason-next-line");
+  writeFileSync(path.join(naNextLine, "PROJECT_STATE.yaml"), stateWith("phase_2", { design: "done" }), "utf8");
+  writeFileSync(
+    path.join(naNextLine, "COPY_DECK.md"),
+    [
+      ...DECK_HEADER,
+      "| onboarding.promise.headline | Promise | Small wins, every day | | 1 |",
+      "",
+      "## Paywall",
+      "",
+      "Not applicable —",
+      "The onboarding flow explains the value on its own screens.",
+      ...NA_SURFACES.slice(4),
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(path.join(naNextLine, "COPY_BRIEF.md"), AUTHORED_BRIEF, "utf8");
+  writeFileSync(
+    path.join(naNextLine, "ONBOARDING.md"),
+    [
+      "# Onboarding",
+      "",
+      "| Step | Purpose | Copy / question | State |",
+      "| --- | --- | --- | --- |",
+      "| Promise | Show value | `onboarding.promise.*` | visible |",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: next-line exemption reason does not waive a surface", naNextLine, "check-app-copy.ts", 1, "app_copy.deck_surface_missing");
+
+  // `&nbsp;`/`<br>`/`&#32;` render no words — a markup-only cell is empty.
+  const markupEmptyCell = makeFixture("app-copy-deck-markup-empty-cell");
+  writeFileSync(path.join(markupEmptyCell, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(markupEmptyCell, "COPY_DECK.md"),
+    [...DECK_HEADER, "| onboarding.promise.headline | Promise | &nbsp;<br>&#32; | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: markup-only deck cell is an empty cell", markupEmptyCell, "check-app-copy.ts", 1, "app_copy.deck_cell_empty");
+
+  // A test asserting the starter brand is gone mentions the brand by name —
+  // that is a check on shipped copy, not shipped copy itself.
+  const testLiteralClean = makeFixture("app-copy-test-literal-clean");
+  writeFileSync(path.join(testLiteralClean, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  mkdirSync(path.join(testLiteralClean, "__tests__"), { recursive: true });
+  writeFileSync(
+    path.join(testLiteralClean, "__tests__", "branding.test.ts"),
+    [
+      'import { strings } from "../lib/strings";',
+      'import { expect, test } from "vitest";',
+      "",
+      'test("no starter brand ships", () => {',
+      '  expect(strings.landing.headline).not.toContain("Fernpath");',
+      "});",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: fictional brand in a test file is not shipped copy", testLiteralClean, "check-app-copy.ts", 0);
+
+  // Deleting only the replace-this-line markers keeps the template's
+  // instruction paragraphs — that is still boilerplate, not authorship.
+  const briefMarkersDeleted = makeFixture("app-copy-brief-markers-deleted");
+  writeFileSync(path.join(briefMarkersDeleted, "PROJECT_STATE.yaml"), stateWith("phase_2", { revenue: "done" }), "utf8");
+  writeFileSync(
+    path.join(briefMarkersDeleted, "COPY_BRIEF.md"),
+    readFileSync(path.join(briefMarkersDeleted, "COPY_BRIEF.md"), "utf8")
+      .replace(/^Status:.*$/m, "Status: authored 2026-07-30")
+      .replace(/^_Replace this line[^\n]*$\n?/gm, ""),
+    "utf8",
+  );
+  runFixture("App copy: marker-only deletion of the brief template fails", briefMarkersDeleted, "check-app-copy.ts", 1, "app_copy.brief_hollow");
 }
