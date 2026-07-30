@@ -36,7 +36,7 @@
       "lanes": [
         { "title": "Design Room", "summary": "Review product, market, audience, promise, screenshots, and visual direction from state files.", "path": "design-room.html", "status": "Ready" },
         { "title": "Launch Cockpit", "summary": "See launch stage, blockers, milestones, provider proof, and next agent actions.", "path": "launch-cockpit.html", "status": "Ready" },
-        { "title": "Store Ops", "summary": "Inspect ASC metadata, screenshots, TestFlight notes, and release-readiness proof.", "path": "templates/store/", "status": "Watch" },
+        { "title": "Store Ops", "summary": "Inspect ASC metadata, screenshots, TestFlight notes, and release-readiness proof.", "path": "business/store/", "status": "Watch" },
         { "title": "Growth", "summary": "Review viral loops, referral assets, paid UA notes, and source freshness.", "path": "references/PAID_UA.md", "status": "Draft" },
         { "title": "Analytics", "summary": "Check PostHog event contract, attribution status, retention events, and red/yellow gates.", "path": "scripts/check-provider-proof.ts", "status": "Gate" },
         { "title": "Failure Cards", "summary": "Known misses and eval-backed regressions future agents should avoid.", "path": "evals/launchbench/", "status": "Active" }
@@ -72,9 +72,9 @@
       "lanes": [
         { "title": "Experience Audit", "summary": "Target-user walkthrough, onboarding gaps, AI-stack flow, and release risks.", "path": "audits/ocho/", "status": "Ready" },
         { "title": "Native Build", "summary": "Xcode generation, build number, simulator, and TestFlight proof.", "path": "code/rork-ocho", "status": "Ready" },
-        { "title": "Revenue", "summary": "RevenueCat entitlement checks and paywall alignment.", "path": "templates/revenue/", "status": "Watch" },
-        { "title": "Store Ops", "summary": "ASC validation, What to Test, screenshots, and metadata.", "path": "templates/store/", "status": "Gate" },
-        { "title": "Analytics", "summary": "Activation and retention events for the first real cohort.", "path": "templates/analytics/", "status": "Draft" },
+        { "title": "Revenue", "summary": "RevenueCat entitlement checks and paywall alignment.", "path": "business/revenue/", "status": "Watch" },
+        { "title": "Store Ops", "summary": "ASC validation, What to Test, screenshots, and metadata.", "path": "business/store/", "status": "Gate" },
+        { "title": "Analytics", "summary": "Activation and retention events for the first real cohort.", "path": "business/analytics/", "status": "Draft" },
         { "title": "Failure Cards", "summary": "Known launch regressions and proof expectations.", "path": "evals/launchbench/", "status": "Active" }
       ]
     },
@@ -109,8 +109,8 @@
         { "title": "Offer Pages", "summary": "Public pricing, copy, route, and Cloudflare Pages proof.", "path": "web/src/pages/", "status": "Ready" },
         { "title": "Subscription", "summary": "RevenueCat gating, account identity, and entitlement checks.", "path": "flutter/lib/", "status": "Watch" },
         { "title": "Android Build", "summary": "AAB generation, versioning, and Play upload handoff.", "path": "scripts/build-android", "status": "Ready" },
-        { "title": "Analytics", "summary": "Checkout intent, purchase events, and retention reporting.", "path": "templates/analytics/", "status": "Draft" },
-        { "title": "Support", "summary": "Customer-facing docs, receipts, and account recovery.", "path": "templates/support/", "status": "Draft" },
+        { "title": "Analytics", "summary": "Checkout intent, purchase events, and retention reporting.", "path": "business/analytics/", "status": "Draft" },
+        { "title": "Support", "summary": "Customer-facing docs, receipts, and account recovery.", "path": "business/support/", "status": "Draft" },
         { "title": "Failure Cards", "summary": "Repeated pricing and entitlement misses.", "path": "evals/launchbench/", "status": "Active" }
       ]
     },
@@ -151,7 +151,7 @@
       ]
     }
   ],
-  "templates": [
+  "business": [
     {
       "name": "B2C Mobile Launch",
       "summary": "Design Room, Launch Cockpit, App Store Ops, RevenueCat, PostHog, onboarding, retention, and failure-card evals.",

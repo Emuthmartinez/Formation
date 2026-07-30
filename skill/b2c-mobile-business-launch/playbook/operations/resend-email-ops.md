@@ -146,7 +146,7 @@ Choose one template strategy:
 - React Email/TSX templates in the product repo.
 - Resend hosted Templates for Automations and non-developer editing.
 - Simple inline HTML/text only for tiny early-stage transactional messages.
-- Starter TypeScript templates from `templates/resend/email-templates.ts` when the app needs common support, lifecycle, billing, entitlement, waitlist, or privacy messages quickly.
+- Starter TypeScript templates from `business/resend/email-templates.ts` when the app needs common support, lifecycle, billing, entitlement, waitlist, or privacy messages quickly.
 
 Every template needs:
 - before drafting subject, preview text, or body copy: load `playbook/words/no-slop-writing.md` — its §7 covers push/lifecycle email subject-line limits specifically; keep the tone `11_STAR_EXPERIENCE.md`/`BRAND.md` set for this product, not generic transactional-email English
@@ -275,7 +275,7 @@ Before public traffic:
 
 ## Starter Template Pack
 
-Use `templates/resend/email-templates.ts` as the out-of-the-box pack for B2C app launches. Copy it into the product repo when Resend is selected, then adapt brand copy, links, legal footer, support SLAs, `LaunchEmailBrand.designSystem` from the project's canonical `DESIGN.md`, and lifecycle tone from `11_STAR_EXPERIENCE.md`.
+Use `business/resend/email-templates.ts` as the out-of-the-box pack for B2C app launches. Copy it into the product repo when Resend is selected, then adapt brand copy, links, legal footer, support SLAs, `LaunchEmailBrand.designSystem` from the project's canonical `DESIGN.md`, and lifecycle tone from `11_STAR_EXPERIENCE.md`.
 
 Included templates:
 - `waitlistConfirmationEmail` - confirms waitlist signup and optional referral link.

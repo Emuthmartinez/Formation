@@ -10,5 +10,5 @@ must_catch:
   - "No Card Application Map ties onboarding/core-loop moments to the four named cards with PostHog events."
   - "The Commitment, Variable Reward, Perceived Effort Delay, and Intent Mirroring cards are not applied or deferred with a reason."
 should_say:
-  - "Create EMOTIONAL_DESIGN.md from templates/emotional-design/ and render emotional-design.html before engineering handoff."
+  - "Create EMOTIONAL_DESIGN.md from business/emotional-design/ and render emotional-design.html before engineering handoff."
   - "Map each 6/7-star magical moment to an Experience Card with a measurement event and a bright-line guardrail, then run check:emotional-design."

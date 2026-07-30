@@ -22,12 +22,12 @@ function resolveTsxBin(): string {
 }
 
 export function writeBusinessEntrypoints(root: string): void {
-  cpSync(path.join(skillRoot, "templates", "repo-agent-entrypoints", "AGENTS.md"), path.join(root, "AGENTS.md"));
-  cpSync(path.join(skillRoot, "templates", "repo-agent-entrypoints", "CLAUDE.md"), path.join(root, "CLAUDE.md"));
-  cpSync(path.join(skillRoot, "templates", "app-agent-roster", "APP_AGENTS.md"), path.join(root, "APP_AGENTS.md"));
-  cpSync(path.join(skillRoot, "templates", "app-agent-roster", "agents"), path.join(root, "agents"), { recursive: true });
-  cpSync(path.join(skillRoot, "templates", "ORCHESTRATION.md"), path.join(root, "ORCHESTRATION.md"));
-  cpSync(path.join(skillRoot, "templates", "orchestration.html"), path.join(root, "orchestration.html"));
+  cpSync(path.join(skillRoot, "business", "repo-agent-entrypoints", "AGENTS.md"), path.join(root, "AGENTS.md"));
+  cpSync(path.join(skillRoot, "business", "repo-agent-entrypoints", "CLAUDE.md"), path.join(root, "CLAUDE.md"));
+  cpSync(path.join(skillRoot, "business", "app-agent-roster", "APP_AGENTS.md"), path.join(root, "APP_AGENTS.md"));
+  cpSync(path.join(skillRoot, "business", "app-agent-roster", "agents"), path.join(root, "agents"), { recursive: true });
+  cpSync(path.join(skillRoot, "business", "ORCHESTRATION.md"), path.join(root, "ORCHESTRATION.md"));
+  cpSync(path.join(skillRoot, "business", "orchestration.html"), path.join(root, "orchestration.html"));
   writeFileSync(path.join(root, "launch-cockpit.html"), "<!doctype html><html><body>Launch cockpit fixture</body></html>", "utf8");
 }
 
@@ -58,13 +58,13 @@ export function createHarness(): Harness {
 
   const makeFixture = (name: string): string => {
     const fixtureRoot = path.join(tempRoot, name);
-    cpSync(path.join(skillRoot, "templates"), fixtureRoot, { recursive: true });
-    // starters/ used to live under templates/ and came along with the copy
+    cpSync(path.join(skillRoot, "business"), fixtureRoot, { recursive: true });
+    // starters/ used to live under business/ and came along with the copy
     // above. It is a sibling now (ARCHITECTURE.md: starter app code is not a
     // template), so the fixture root has to pull it in explicitly — several
     // validators scan a business root for starter prompts and shipped copy.
     cpSync(path.join(skillRoot, "starters"), path.join(fixtureRoot, "starters"), { recursive: true });
-    cpSync(path.join(skillRoot, "templates", "secrets", "SECRETS.md"), path.join(fixtureRoot, "SECRETS.md"));
+    cpSync(path.join(skillRoot, "business", "secrets", "SECRETS.md"), path.join(fixtureRoot, "SECRETS.md"));
     return fixtureRoot;
   };
 

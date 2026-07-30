@@ -12,12 +12,12 @@ workflow with its trigger, then emit exactly one grounded five-part loop
 coverage is complete with no gaps or overlaps.
 
 - **Skill read:** `skill/b2c-mobile-business-launch/SKILL.md` (full, 239 lines) +
-  directory listings of `references/`, `templates/`, `scripts/`, and
+  directory listings of `references/`, `business/`, `scripts/`, and
   `package.json` scripts. Spot-read references: `change-cascade.md`,
   `control-plane.md`, `premium-mobile-craft.md`, `consumer-product-design-agency.md`.
 - **Grounding rule:** every loop's **action** steps cite a named section of the
   skill — a SKILL.md `Start Here` step, a `Phase Spine` phase, a named
-  contract section, a `references/*.md` file, a `templates/*` artifact, and/or a
+  contract section, a `references/*.md` file, a `business/*` artifact, and/or a
   `package.json` validator script. Nothing in an action step is invented; if the
   skill does not name it, it is not in the loop.
 - **Distinctness rule:** a workflow is "distinct" when it has its own trigger +
@@ -176,7 +176,7 @@ that grounds them. Conventions used in every loop:
 - **Trigger:** Broad "launch this app / turn this transcript into a business" request; or any lane/provider/proof/blocker status change thereafter.
 - **Action:**
   1. Recover source truth: business name, wedge, platform, monetization intent, current phase. → `Start Here`; Phase 0.
-  2. Create/refresh `PROJECT_STATE.yaml` from `templates/PROJECT_STATE.yaml`; set autonomy mode and confirm `project.launch_tier` (full/lite) with the founder. → `Start Here`; Phase 0; Launch Tiers.
+  2. Create/refresh `PROJECT_STATE.yaml` from `business/PROJECT_STATE.yaml`; set autonomy mode and confirm `project.launch_tier` (full/lite) with the founder. → `Start Here`; Phase 0; Launch Tiers.
   3. Render `launch-cockpit.html` early and re-render whenever lane/provider/orchestration/proof/gate state changes (`npm run render:launch-cockpit`). → `Start Here`; *Operating Posture*.
 - **Proof:** `npm run validate:launch-state`; `launch-cockpit.html` re-rendered and reflects current lanes.
 - **Memory:** `PROJECT_STATE.yaml` + `launch-cockpit.html` are the durable state contract.
@@ -196,7 +196,7 @@ that grounds them. Conventions used in every loop:
 - **Trigger:** Before any new API key, token, OAuth credential, webhook signing secret, service-account file, CI/deploy env var, or local `.env`.
 - **Action:**
   1. Load `playbook/operations/secrets-management.md` + `playbook/operations/provider-state-recipes.md`; default to Doppler and `doppler run --` unless the founder approves another path. → `Start Here`; Phase 0c.
-  2. Create/refresh `SECRETS.md`; map local/staging/production locations; add `doppler.yaml` / names-only `.env.example` from `templates/secrets/` when useful. → `Start Here`; Phase 0c.
+  2. Create/refresh `SECRETS.md`; map local/staging/production locations; add `doppler.yaml` / names-only `.env.example` from `business/secrets/` when useful. → `Start Here`; Phase 0c.
   3. Refresh current provider docs / CLI `--help` before any setup command and record the docs/version basis. → `Start Here`; *Source Freshness*.
 - **Proof:** `npm run check:secrets` (secret-routing); `SECRETS.md` records the docs basis and no secret values are committed.
 - **Memory:** `SECRETS.md` + `PROJECT_STATE.yaml` secrets entries.
@@ -207,7 +207,7 @@ that grounds them. Conventions used in every loop:
 - **Action:**
   1. Detect the shape and load the matching lane reference (`social-network-lane.md` / `ai-chat-companion-lane.md` / `habit-tracker-lane.md` / `photo-ai-media-lane.md`). → `Start Here`.
   2. Confirm the archetype-specific variant (content/surface/optional systems) via AskUserQuestion and record it in `PROJECT_STATE.yaml`. → `Start Here`.
-  3. Copy the runnable starter from `templates/app-archetypes/<pack>/starter/` as the floor and customize with the pack's prompts instead of improvising the wiring. → `Start Here`.
+  3. Copy the runnable starter from `business/app-archetypes/<pack>/starter/` as the floor and customize with the pack's prompts instead of improvising the wiring. → `Start Here`.
 - **Proof:** `npm run check:app-archetype` and `npm run check:archetype-starter`.
 - **Memory:** `PROJECT_STATE.yaml` archetype field + the copied starter scaffold.
 - **Stopping condition:** `check:app-archetype` and `check:archetype-starter` both pass **and** the archetype field in `PROJECT_STATE.yaml` is set (the pack feeds the normal lanes; it does not bypass them).
@@ -344,7 +344,7 @@ that grounds them. Conventions used in every loop:
 ### L20 — Design Room (state → mutate → version → render)
 - **Trigger:** Any design, visual-system, cross-surface, App Store creative, landing, onboarding, paywall, or marketing-surface work.
 - **Action:**
-  1. **STATE:** read `state/business.json` + `state/theme.tokens.json` (seed from `state/` or `templates/state/` if missing). → SKILL.md *Design Room Contract* step 1.
+  1. **STATE:** read `state/business.json` + `state/theme.tokens.json` (seed from `state/` or `business/state/` if missing). → SKILL.md *Design Room Contract* step 1.
   2. **MUTATE:** make one coherent JSON state mutation — no one-off proposal doc or ad-hoc HTML proof. → *Design Room Contract* step 2.
   3. **VERSION + RENDER:** `npm run validate:design-state`, `npm run render:design-room`, version with git (`git tag baseline/<name>`), and show `design-room.html` / `dist/design-room/`. → *Design Room Contract* steps 3–4; *Operating Posture* (design versioning is git state).
 - **Proof:** `npm run check:design-room` + `npm run validate:design-state`; rendered Design Room reflects the state mutation.
@@ -363,7 +363,7 @@ that grounds them. Conventions used in every loop:
 ### L22 — UX patterns (Refero)
 - **Trigger:** Before flow maps, state matrices, `UX_PATTERNS.md`, bug-trap coverage, or replacing Refero with a free fallback.
 - **Action:**
-  1. Load `playbook/design/refero-ux-patterns.md`; research web/mobile patterns via Refero, or a founder-approved free route using `templates/ux-patterns/`. → `Lane Routing`; `Lane Routing` (refero-ux-patterns).
+  1. Load `playbook/design/refero-ux-patterns.md`; research web/mobile patterns via Refero, or a founder-approved free route using `business/ux-patterns/`. → `Lane Routing`; `Lane Routing` (refero-ux-patterns).
   2. Produce `UX_PATTERNS.md` with flow maps, state matrices, a Premium Craft Details section, and bug traps. → `Lane Routing`; `premium-mobile-craft.md` pattern contract.
 - **Proof:** `npm run check:ux-patterns`; flow maps + state matrices + bug traps present.
 - **Memory:** `UX_PATTERNS.md` + `PROJECT_STATE.yaml` design/ux lane.
@@ -383,8 +383,8 @@ that grounds them. Conventions used in every loop:
 - **Trigger:** Before in-app UI build/polish, wiring press states/animation/haptics/keyboard/loading-empty states, or a "premium feel" request.
 - **Action:**
   1. Load `playbook/design/premium-mobile-craft.md`; apply the invisible-details layer under `design-visual-system.md`/`refero-ux-patterns.md`/`emotional-design-system.md`. → `Lane Routing` (premium craft).
-  2. Start from the shipped boilerplate `templates/design-system/PremiumCraft.swift` (with RN/Flutter parity), honoring Reduce Motion and reading `DesignTokens.Motion`. → `premium-mobile-craft.md` (boilerplate section).
-  3. Record the Premium Craft Details + bug traps in `templates/ux-patterns/UX_PATTERNS.md`. → `premium-mobile-craft.md` (pattern contract).
+  2. Start from the shipped boilerplate `business/design-system/PremiumCraft.swift` (with RN/Flutter parity), honoring Reduce Motion and reading `DesignTokens.Motion`. → `premium-mobile-craft.md` (boilerplate section).
+  3. Record the Premium Craft Details + bug traps in `business/ux-patterns/UX_PATTERNS.md`. → `premium-mobile-craft.md` (pattern contract).
 - **Proof:** Press-state/haptics/keyboard/skeleton/empty-state details are implemented from the boilerplate and reflected in `UX_PATTERNS.md`; reduced-motion fallback present.
 - **Memory:** `UX_PATTERNS.md` Premium Craft section + `PROJECT_STATE.yaml` design lane.
 - **Stopping condition:** `check:ux-patterns` passes **and** the Premium Craft Details checklist in `UX_PATTERNS.md` has every row marked `done|n-a` (grep finds no unresolved row), including the reduced-motion fallback.
@@ -501,7 +501,7 @@ that grounds them. Conventions used in every loop:
 ### L37 — App agent roster & repo entrypoints
 - **Trigger:** Before builder handoff bundles, business `AGENTS.md`/`CLAUDE.md`, `APP_AGENTS.md`, or `agents/` role prompts.
 - **Action:**
-  1. Load `playbook/engineering/app-agent-roster.md`; fill the shipped `templates/repo-agent-entrypoints/` `AGENTS.md`+`CLAUDE.md` with app-specific context so future agents keep using this skill without another founder prompt. → `Lane Routing`; Phase 5.
+  1. Load `playbook/engineering/app-agent-roster.md`; fill the shipped `business/repo-agent-entrypoints/` `AGENTS.md`+`CLAUDE.md` with app-specific context so future agents keep using this skill without another founder prompt. → `Lane Routing`; Phase 5.
   2. Create `APP_AGENTS.md` + the seven role prompts under `agents/` (orchestrator, marketing-guru, engineering-leader, product-leader, design-guru, customer-success, security-architect). → `Lane Routing`.
 - **Proof:** `npm run check:agent-entrypoints`; the entrypoints + roster + seven roles exist and route back to the skill.
 - **Memory:** business `AGENTS.md`/`CLAUDE.md`, `APP_AGENTS.md`, `agents/` + `PROJECT_STATE.yaml` handoff lane.
@@ -537,7 +537,7 @@ that grounds them. Conventions used in every loop:
 ### L41 — Privacy & terms
 - **Trigger:** Before drafting/publishing privacy policy, terms, EULA, subscription terms, data-deletion flows, or app-store privacy disclosures.
 - **Action:**
-  1. Load `playbook/trust/privacy-terms.md`; draft `PRIVACY.md` + `TERMS.md` (and account-deletion/subscription terms) from `templates/PRIVACY.md`/`TERMS.md`. → `Lane Routing`.
+  1. Load `playbook/trust/privacy-terms.md`; draft `PRIVACY.md` + `TERMS.md` (and account-deletion/subscription terms) from `business/PRIVACY.md`/`TERMS.md`. → `Lane Routing`.
   2. Reconcile App Store App Privacy answers + Play Data Safety with actual data collection/SDKs (pairs with L28/L30/L34). → `Lane Routing`; `change-cascade.md` privacy row.
 - **Proof:** `PRIVACY.md`/`TERMS.md` published; privacy answers reconcile with the manifest, Data Safety, and analytics/SDK reality.
 - **Memory:** `PRIVACY.md`, `TERMS.md` + `PROJECT_STATE.yaml` legal lane.
@@ -546,7 +546,7 @@ that grounds them. Conventions used in every loop:
 ### L42 — Resend email ops
 - **Trigger:** Before Resend domains/keys, transactional/lifecycle/broadcast email, contacts/topics, webhooks, inbound, unsubscribe, or deliverability work.
 - **Action:**
-  1. Load `playbook/operations/resend-email-ops.md`; configure sender-domain DNS (SPF/DKIM), API keys (via L05), and starter templates from `templates/resend/email-templates.ts`. → `Lane Routing`; Phase 4.
+  1. Load `playbook/operations/resend-email-ops.md`; configure sender-domain DNS (SPF/DKIM), API keys (via L05), and starter templates from `business/resend/email-templates.ts`. → `Lane Routing`; Phase 4.
   2. Produce `EMAIL_OPS.md` recording the SPF/DKIM basis, unsubscribe handling, and the `DESIGN.md` brand-token mapping; populate brand/tone from `DESIGN.md`/`11_STAR_EXPERIENCE.md`. → `Lane Routing`; `Lane Routing` (resend).
 - **Proof:** `npm run check:email`; proof artifacts + `EMAIL_OPS.md` with DNS basis, unsubscribe, and brand-token mapping (provider-proof, L07).
 - **Memory:** `EMAIL_OPS.md` + `PROJECT_STATE.yaml` email lane.

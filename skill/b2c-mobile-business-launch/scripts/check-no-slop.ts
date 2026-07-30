@@ -43,7 +43,7 @@ const flags = parseFlags(process.argv.slice(2), [
   { flags: ["--repo-root"], key: "repoRoot" },
 ]);
 const skillRoot = path.resolve(flagString(flags, "skillRoot") ?? defaultSkillRoot);
-const templatesRoot = path.resolve(flagString(flags, "root") ?? path.join(skillRoot, "templates"));
+const templatesRoot = path.resolve(flagString(flags, "root") ?? path.join(skillRoot, "business"));
 const repoRootFlag = flagString(flags, "repoRoot");
 const repoRoot = repoRootFlag ? path.resolve(repoRootFlag) : undefined;
 const issues: Issue[] = [];

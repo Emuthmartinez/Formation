@@ -63,7 +63,7 @@ For iOS store submission or marketing prep, produce:
 - `STORE_CONSOLE.md` and `store-console.html`: manual console packet across App Store Connect and Play Console when relevant.
 - `REVENUE_OPS.md`: product, entitlement, offering, price, trial, intro offer, RevenueCat/Stripe/web funnel mapping, and sandbox proof.
 - `SCREENSHOTS.md`: slot-by-slot screenshot/app-preview plan, ParthJadhav/app-store-screenshots export route when used, iPhone/iPad device-well matrix, and ASC CLI upload proof.
-- `SCREENSHOT_RUBRIC.md`: the grading rubric and separate-pass grader protocol behind `grade-screenshots.ts` and `check:store-screenshots`. Seed it from [`templates/app-store-listing/SCREENSHOT_RUBRIC.md`](../../templates/app-store-listing/SCREENSHOT_RUBRIC.md) next to `SCREENSHOTS.md` so the grader agent scores against the same dimensions the validator enforces.
+- `SCREENSHOT_RUBRIC.md`: the grading rubric and separate-pass grader protocol behind `grade-screenshots.ts` and `check:store-screenshots`. Seed it from [`business/app-store-listing/SCREENSHOT_RUBRIC.md`](../../business/app-store-listing/SCREENSHOT_RUBRIC.md) next to `SCREENSHOTS.md` so the grader agent scores against the same dimensions the validator enforces.
 
 Small projects may merge the listing packet into `STORE_CONSOLE.md`, but keep the App Privacy questionnaire and HTML copy-paste surface when privacy, subscriptions, localization, screenshots, or custom product pages are in scope.
 
@@ -110,7 +110,7 @@ The worksheet should ask:
 - Are any SDK privacy manifests, required reason APIs, or third-party SDK signatures relevant?
 - Does `APPLE_APP_STORE_REQUIREMENTS.md` reconcile the Xcode privacy report, public App Privacy answers, privacy policy/choices URLs, SDK inventory, and actual bundled `PrivacyInfo.xcprivacy` before ASC upload?
 
-Use `templates/app-store-listing/app-privacy-questionnaire.html` as the local interactive worksheet or render an equivalent project-specific HTML page.
+Use `business/app-store-listing/app-privacy-questionnaire.html` as the local interactive worksheet or render an equivalent project-specific HTML page.
 
 ## Pricing, RevenueCat, And Web Funnel Alignment
 

@@ -27,7 +27,7 @@ if (!skip && !text) {
     issue(
       "error",
       "product_spec.markdown_missing",
-      "SPEC.md is required before design, store, or engineering work hardens. Seed it from templates/SPEC.md.",
+      "SPEC.md is required before design, store, or engineering work hardens. Seed it from business/SPEC.md.",
       "SPEC.md",
     ),
   );

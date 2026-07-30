@@ -105,7 +105,7 @@ export function register(h: Harness): void {
   const revenueExampleCopyState = readState(revenueExampleCopy);
   getLane(revenueExampleCopyState, "revenue")["status"] = "done";
   writeState(revenueExampleCopy, revenueExampleCopyState);
-  const shippedExample = readFileSync(path.join(skillRoot, "templates", "revenue", "revenuecat-proof.example.json"), "utf8");
+  const shippedExample = readFileSync(path.join(skillRoot, "business", "revenue", "revenuecat-proof.example.json"), "utf8");
   writeFileSync(path.join(revenueExampleCopy, "revenue", "revenuecat-proof.json"), shippedExample, "utf8");
   rmSync(path.join(revenueExampleCopy, "revenue", "revenuecat-proof.example.json"), { force: true });
   runFixture(

@@ -139,7 +139,7 @@ When the founder says "run an 11-star experience", "run it through the 11-star f
 **Ordered steps for any "11-star run" request:**
 
 1. Read `eleven-star-experience.md` (this file) if not already loaded.
-2. Read the existing `11_STAR_EXPERIENCE.md` if it exists; otherwise create it from `templates/11-star-experience/11_STAR_EXPERIENCE.md`.
+2. Read the existing `11_STAR_EXPERIENCE.md` if it exists; otherwise create it from `business/11-star-experience/11_STAR_EXPERIENCE.md`.
 3. Write or update `11_STAR_EXPERIENCE.md` with a complete ladder for this specific product. All seven star levels (1, 2, 5, 6, 7, 10, 11) must be present with product-specific labels, not Airbnb copy.
 4. Write or update `11-star-experience.html` with the visual ladder, line of feasibility, V1 scalable slice, and surface translation board.
 5. Update `PROJECT_STATE.yaml` `lanes.experience` status and evidence fields.

@@ -19,4 +19,4 @@ must_catch:
   - Future agents should continue using b2c-mobile-business-launch without asking the founder to re-invoke it.
   - PROJECT_STATE.yaml, launch-cockpit.html, APP_AGENTS.md, role prompts, ORCHESTRATION.md, and validators must be part of the handoff.
 should_say:
-  - Start from templates/repo-agent-entrypoints/AGENTS.md and CLAUDE.md, then fill placeholders for the current business.
+  - Start from business/repo-agent-entrypoints/AGENTS.md and CLAUDE.md, then fill placeholders for the current business.

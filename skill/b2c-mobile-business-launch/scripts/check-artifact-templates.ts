@@ -39,7 +39,7 @@ if (!existsSync(args.templatesRoot)) {
             "error",
             `artifact_templates.${laneName}.evidence_missing`,
             `${laneName} must list at least one starter evidence path.`,
-            "templates/PROJECT_STATE.yaml",
+            "business/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -52,8 +52,8 @@ if (!existsSync(args.templatesRoot)) {
           issue(
             "error",
             `artifact_templates.${laneName}.starter_missing`,
-            `${laneName} evidence ${evidencePath} has no exact starter template path. Keep PROJECT_STATE.yaml evidence aligned to templates/ paths instead of relying on basename matches.`,
-            "templates/PROJECT_STATE.yaml",
+            `${laneName} evidence ${evidencePath} has no exact starter template path. Keep PROJECT_STATE.yaml evidence aligned to business/ paths instead of relying on basename matches.`,
+            "business/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -79,7 +79,7 @@ function parseArgs(argv: string[]): Args {
 
   return {
     skillRoot,
-    templatesRoot: flagString(flags, "templatesRoot") ?? path.join(skillRoot, "templates"),
+    templatesRoot: flagString(flags, "templatesRoot") ?? path.join(skillRoot, "business"),
     statePath: flagString(flags, "statePath"),
   };
 }

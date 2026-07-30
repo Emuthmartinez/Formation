@@ -42,7 +42,7 @@ const flags = parseFlags(process.argv.slice(2), [
   { flags: ["--root"], key: "root" },
   { flags: ["--skill-root"], key: "skillRoot" },
 ]);
-const root = path.resolve(flagString(flags, "root") ?? path.join(defaultSkillRoot, "templates"));
+const root = path.resolve(flagString(flags, "root") ?? path.join(defaultSkillRoot, "business"));
 const skillRoot = path.resolve(flagString(flags, "skillRoot") ?? defaultSkillRoot);
 const issues: Issue[] = [];
 

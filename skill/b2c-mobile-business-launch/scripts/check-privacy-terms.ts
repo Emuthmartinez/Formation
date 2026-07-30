@@ -43,7 +43,7 @@ for (const document of documents) {
         issue(
           "error",
           `privacy_terms.${code}.missing`,
-          `${document.name} is required as the source draft for public policy pages and store disclosures. Seed it from templates/${document.name}.`,
+          `${document.name} is required as the source draft for public policy pages and store disclosures. Seed it from business/${document.name}.`,
           document.name,
         ),
       );

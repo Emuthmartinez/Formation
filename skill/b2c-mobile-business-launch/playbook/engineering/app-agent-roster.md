@@ -22,7 +22,7 @@ agents/
   security-architect.md
 ```
 
-Use `templates/repo-agent-entrypoints/` for the repo-root `AGENTS.md` and `CLAUDE.md`, then use `templates/app-agent-roster/` for `APP_AGENTS.md` and `agents/`. Fill placeholders with the current app's source-of-truth docs, stack, paid-tool decisions, and launch gates.
+Use `business/repo-agent-entrypoints/` for the repo-root `AGENTS.md` and `CLAUDE.md`, then use `business/app-agent-roster/` for `APP_AGENTS.md` and `agents/`. Fill placeholders with the current app's source-of-truth docs, stack, paid-tool decisions, and launch gates.
 
 ## Role Model
 

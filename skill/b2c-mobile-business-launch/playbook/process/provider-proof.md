@@ -26,7 +26,7 @@ For most B2C mobile launches, the proof ledger should cover:
 
 ## Minimum Ledger Shape
 
-Use `templates/PROVIDER_PROOF.md` as the starter. Each row needs:
+Use `business/PROVIDER_PROOF.md` as the starter. Each row needs:
 
 - provider name
 - current status

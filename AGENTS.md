@@ -12,15 +12,15 @@ Structural work follows [`ARCHITECTURE.md`](ARCHITECTURE.md), the target layout 
 
 - `README.md`: public overview. Keep it short and route depth elsewhere; the full command and gate reference lives in `docs/VALIDATORS.md`.
 - `docs/VALIDATORS.md`: every validator, renderer, and eval command with what it checks. Add a row here when you add a gate.
-- `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`: contributor-facing surfaces. Root `SECURITY.md` covers this repo's validators, workflows, and dependency chain, and is a different document from the shipped `templates/SECURITY.md` security release plan.
+- `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`: contributor-facing surfaces. Root `SECURITY.md` covers this repo's validators, workflows, and dependency chain, and is a different document from the shipped `business/SECURITY.md` security release plan.
 - `skill/b2c-mobile-business-launch/SKILL.md`: skill entrypoint and progressive-disclosure routing.
 - `skill/b2c-mobile-business-launch/skill-version.json`: installed-runtime freshness manifest.
 - `skill/b2c-mobile-business-launch/references/`: detailed launch, provider, source freshness, and maintenance references.
 - `skill/b2c-mobile-business-launch/state/`: Design Room seed state, theme tokens, and JSON schema.
 - `skill/b2c-mobile-business-launch/render/`: React/Vite Design Room renderer; `scripts/render-design-room.ts` also writes the static fallback.
-- `skill/b2c-mobile-business-launch/templates/`: reusable launch artifacts copied into app repos.
-- `skill/b2c-mobile-business-launch/templates/app-archetypes/`: per-product-shape packs (`social-network`, `ai-chat-companion`, `habit-tracker`, `photo-ai-media`) — each a lane-routed prompt pack plus a runnable `starter/` scaffold, enforced by `check-app-archetype` and `check-archetype-starter`.
-- `skill/b2c-mobile-business-launch/templates/repo-agent-entrypoints/`: business-repo `AGENTS.md` and `CLAUDE.md` templates that keep future agents on the launch skill workflow.
+- `skill/b2c-mobile-business-launch/business/`: reusable launch artifacts copied into app repos.
+- `skill/b2c-mobile-business-launch/business/app-archetypes/`: per-product-shape packs (`social-network`, `ai-chat-companion`, `habit-tracker`, `photo-ai-media`) — each a lane-routed prompt pack plus a runnable `starter/` scaffold, enforced by `check-app-archetype` and `check-archetype-starter`.
+- `skill/b2c-mobile-business-launch/business/repo-agent-entrypoints/`: business-repo `AGENTS.md` and `CLAUDE.md` templates that keep future agents on the launch skill workflow.
 - `skill/b2c-mobile-business-launch/scripts/`: deterministic validators, renderers, LaunchBench harness, and source freshness tooling.
 - `skill/b2c-mobile-business-launch/evals/launchbench/`: known failure-mode scenarios.
 - `skill/b2c-mobile-business-launch/agents/openai.yaml`: UI metadata.
@@ -41,7 +41,7 @@ When changing generated business-repo guidance, edit the shipped templates and v
 
 ## Agent Legibility
 
-Keep this file as a concise map, not a duplicate manual. Put detailed launch policy in `references/`, reusable generated output in `templates/`, and deterministic enforcement in `scripts/` plus LaunchBench. When an agent miss repeats, add or tighten a validator/eval instead of relying on a longer reminder.
+Keep this file as a concise map, not a duplicate manual. Put detailed launch policy in `references/`, reusable generated output in `business/`, and deterministic enforcement in `scripts/` plus LaunchBench. When an agent miss repeats, add or tighten a validator/eval instead of relying on a longer reminder.
 
 `SKILL.md` is a **router, not a manual** — it loads on every trigger, so its job is the always-on contracts plus one Lane Routing index (route here when / load / produce / gate). Detail belongs in the reference the row points at. `check:reference-size` holds a 45KB entrypoint budget on freeze-and-subtract terms: a new lane row is paid for by compressing or relocating existing entrypoint text, never by raising the ceiling. Do not reintroduce a second enumeration of the same routing (the old "Start Here" narrative and "When To Load References" list said the same thing twice and drifted).
 

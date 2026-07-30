@@ -37,7 +37,7 @@ Before using any fallback:
 1. Load `paid-tool-routing.md`.
 2. Ask the founder whether they have Refero, will provide an export/screenshots, want to sign up, or approve the free baseline route.
 3. Record the answer in `TOOL_DECISIONS.md` and `PROJECT_STATE.yaml.tools.refero`.
-4. If approved fallback is used, copy or adapt `templates/ux-patterns/UX_PATTERNS.md` and `templates/ux-patterns/ux-patterns.html`.
+4. If approved fallback is used, copy or adapt `business/ux-patterns/UX_PATTERNS.md` and `business/ux-patterns/ux-patterns.html`.
 
 ## Refero Research Workflow
 
@@ -77,8 +77,8 @@ Run or adapt these by product category:
 ## Baseline Pattern Pack
 
 If Refero is unavailable and fallback is founder-approved, still produce a useful UX pattern packet:
-- Copy `templates/ux-patterns/UX_PATTERNS.md` to the app root.
-- Copy `templates/ux-patterns/ux-patterns.html` or render the same pattern board inside `design.html`.
+- Copy `business/ux-patterns/UX_PATTERNS.md` to the app root.
+- Copy `business/ux-patterns/ux-patterns.html` or render the same pattern board inside `design.html`.
 - Keep `ONBOARDING.md` based on `onboarding-conversion.md`, not generic inspiration.
 - Use public or first-party references only as evidence summaries; do not paste copyrighted screenshots unless permitted.
 

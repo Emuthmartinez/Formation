@@ -1,7 +1,7 @@
 # Brainstorm: motionsites-grade landing motion as a skill lane
 
 Date: 2026-06-13
-Status: **implemented** (founder greenlit the full change-set 2026-07-07; shipped as v0.15.0 — `playbook/design/landing-motion-craft.md`, `templates/landing/`, the landing motion-token promotion, the `check:landing-funnel` motion-craft gates, and the `landing-motion-progressive-enhancement-missing` LaunchBench scenario)
+Status: **implemented** (founder greenlit the full change-set 2026-07-07; shipped as v0.15.0 — `playbook/design/landing-motion-craft.md`, `business/landing/`, the landing motion-token promotion, the `check:landing-funnel` motion-craft gates, and the `landing-motion-progressive-enhancement-missing` LaunchBench scenario)
 Compound Engineering note: CE tooling (`ce-brainstorm`/`ce-plan`/`ce-work`) is unavailable in this cloud session; per `playbook/engineering/engineering-orchestration.md` §1b this design pass is the Standalone Engineering Loop equivalent (plan → bounded slice → adversarial review via the existing validators → proof via `npm run audit:ci`). The proof artifact is committed; the validator/eval/template work below is scoped but deliberately not yet written, because the founder asked to "practice making some here and **see if we can match the level of quality** to abstract it into a skill" — i.e. evaluate first, then abstract.
 
 ## The ask
@@ -51,7 +51,7 @@ The "wow" of motionsites is ~85% the **live** lane and ~15% the **baked** lane. 
 
 ## Gap analysis — where the skill currently undershoots
 
-1. **No section library.** `templates/` has design/onboarding/store HTML proofs but **no landing-page section catalog**. Landing pages are improvised per launch; `check-landing-funnel.ts` even fingerprints an **Alpine.js + static HTML** funnel (CSP gate), i.e. the current floor is a simple form page, not a motionsites-grade site.
+1. **No section library.** `business/` has design/onboarding/store HTML proofs but **no landing-page section catalog**. Landing pages are improvised per launch; `check-landing-funnel.ts` even fingerprints an **Alpine.js + static HTML** funnel (CSP gate), i.e. the current floor is a simple form page, not a motionsites-grade site.
 2. **Motion doctrine is tuned for in-app micro-motion, not cinematic web.** `design-system/tokens.css` tops out at `--motion-duration-slow: 360ms` with one easing. Correct for the shipped binary; too short/flat for hero word-reveals and scroll choreography. There is no expo-out / spring easing and no stagger token for web.
 3. **Landing validator checks plumbing, not craft.** `check-landing-funnel.ts` enforces deploy gates, GEO/SEO files, copy compliance, waitlist idempotency — **zero** checks on motion quality, reduced-motion fallback, or that animation didn't gate LCP/hide text from crawlers.
 4. **The cinematic-vs-GEO tension is unresolved in guidance.** §3a says "motion is progressive enhancement, don't delay LCP" — right, but it reads as a brake. Nothing shows a team _how_ to be cinematic **and** crawlable/fast at once.
@@ -90,7 +90,7 @@ Coverage vs the motionsites catalog:
 If we greenlight, the change-set (each piece earns its place per AGENTS.md "add a validator/eval, not prose"):
 
 1. **`playbook/design/landing-motion-craft.md`** — the two-lane model, the section catalog with technique + the "progressive-enhancement contract" (SSR text, `js`-gated reveals, reduced-motion collapse, no LCP gate), and the Remotion↔motion handoff. Routed from `geo-seo.md` §3a and `design-visual-system.md`.
-2. **`templates/landing/`** — a runnable **section library** (Next or Astro + `motion/react`) mirroring the proof's sections, each a typed, token-driven component reading `--motion-*`. Ships `robots.txt`/`llms.txt`/`sitemap.xml` (already required) and a baked-video slot wired to the Remotion content-assets lane.
+2. **`business/landing/`** — a runnable **section library** (Next or Astro + `motion/react`) mirroring the proof's sections, each a typed, token-driven component reading `--motion-*`. Ships `robots.txt`/`llms.txt`/`sitemap.xml` (already required) and a baked-video slot wired to the Remotion content-assets lane.
 3. **Motion-token promotion** — add `--motion-duration-reveal`, `--motion-duration-cinematic`, `--motion-easing-emphasis` (expo-out), `--motion-easing-spring`, `--motion-stagger` to `design-system/tokens.css` + `tokens.json` (the proof prototypes them in `:root`), so Remotion ads and the landing page share one timing system. Bumps the design-token hash → run `promote-design-tokens`.
 4. **Extend `check-landing-funnel.ts`** — when a landing site is in scope, additionally assert: `prefers-reduced-motion` block present; no animation library imported into the shipped mobile binary; above-the-fold text exists in static HTML (anti-LCP-gate / anti-crawler-hiding heuristic); motion reads tokenized `--motion-*` rather than magic numbers.
 5. **LaunchBench eval** — `landing-motion-progressive-enhancement-missing.yaml`: a landing site that hides hero copy until JS / ignores reduced-motion must fail.
@@ -100,7 +100,7 @@ If we greenlight, the change-set (each piece earns its place per AGENTS.md "add 
 ## Open decisions for the founder
 
 1. **Scope now:** ship the full lane (1–7) in one change-set, or land `playbook/design/landing-motion-craft.md` + the section-library template first and add validator/eval coverage second?
-2. **Library:** standardize the section library on **Next.js + `motion/react`** (matches the archetype starters) — or Astro for the lightest static-first landing? (Recommend Next, for parity with `templates/app-archetypes/*/starter`.)
+2. **Library:** standardize the section library on **Next.js + `motion/react`** (matches the archetype starters) — or Astro for the lightest static-first landing? (Recommend Next, for parity with `business/app-archetypes/*/starter`.)
 3. **Baked hero video:** make the Remotion hero-loop slot a default in the template, or opt-in per launch (license-gated as today)?
 4. **Default aesthetic:** keep the section library brand-token-driven and aesthetic-neutral (proven here on the warm editorial brand), confirming we are _not_ hard-coding the dark/glass motionsites look.
 

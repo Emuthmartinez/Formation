@@ -4,12 +4,12 @@
  *
  * Three gates:
  *   1. Broken local markdown links ([text](path) targets that do not exist).
- *   2. Orphaned files under references/ and templates/: a shipped file that no
+ *   2. Orphaned files under references/ and business/: a shipped file that no
  *      other file mentions by relative path, basename, or ancestor directory
  *      is dead weight no agent can ever route to. Basename and ancestor-dir
  *      matching keep validator-constructed paths (path.join(root, "tokens.json"))
  *      and copy-the-directory scaffolds (archetype starter/) from false-failing.
- *   3. Byte-identical duplicate files under templates/ (outside the archetype
+ *   3. Byte-identical duplicate files under business/ (outside the archetype
  *      starters, which intentionally share scaffold files): duplicates drift
  *      apart silently, and basename reachability cannot catch them.
  */
@@ -75,11 +75,11 @@ for (const file of collectAllFiles(skillRoot)) {
   corpus.set(file, readFileSync(file, "utf8"));
 }
 
-// ── Gate 2: orphaned references/ and templates/ files ────────────────────────
+// ── Gate 2: orphaned references/ and business/ files ────────────────────────
 
 /**
  * Boundary-aware containment: "lane.md" inside "sub-lane.md" is NOT a mention
- * of lane.md. A preceding path separator ("skill/templates/lane.md") still
+ * of lane.md. A preceding path separator ("skill/business/lane.md") still
  * counts — a longer path ending in the needle references the same file.
  */
 function mentionsNeedle(text: string, needle: string): boolean {
@@ -104,7 +104,7 @@ function isReachable(candidate: string): boolean {
   const needles = new Set<string>([relative, path.basename(candidate)]);
   // Ancestor directories (copy-the-directory reachability), e.g.
   // "starters/social-network/starter" covers every file below
-  // it. Stop above the bare subtree name ("templates"/"references"), which
+  // it. Stop above the bare subtree name ("business"/"references"), which
   // appears in prose everywhere and would mark everything reachable.
   let ancestor = path.dirname(relative);
   while (ancestor.includes("/")) {
@@ -124,7 +124,7 @@ function isReachable(candidate: string): boolean {
   return false;
 }
 
-for (const subtree of ["playbook", "machine", "templates", "starters"]) {
+for (const subtree of ["playbook", "machine", "business", "starters"]) {
   const subtreeRoot = path.join(skillRoot, subtree);
   if (!existsSync(subtreeRoot)) {
     continue;
@@ -150,10 +150,10 @@ for (const subtree of ["playbook", "machine", "templates", "starters"]) {
   }
 }
 
-// ── Gate 3: byte-identical duplicates under templates/ ───────────────────────
+// ── Gate 3: byte-identical duplicates under business/ ───────────────────────
 
 const duplicateGroups = new Map<string, string[]>();
-const templatesRoot = path.join(skillRoot, "templates");
+const templatesRoot = path.join(skillRoot, "business");
 if (existsSync(templatesRoot)) {
   for (const file of collectAllFiles(templatesRoot)) {
     const relative = path.relative(skillRoot, file).split(path.sep).join("/");

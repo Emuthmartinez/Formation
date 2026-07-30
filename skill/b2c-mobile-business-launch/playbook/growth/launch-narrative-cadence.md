@@ -3,7 +3,7 @@
 Use this reference when planning how a B2C mobile launch shows up in public: the tentpole
 announcement, the weekly feature-launch heartbeat, the launch-day run-of-show, and the copy
 craft that decides whether a release lands or dies on arrival. It produces
-[`growth/LAUNCH_NARRATIVE.md`](../../templates/growth/LAUNCH_NARRATIVE.md) and is enforced by
+[`growth/LAUNCH_NARRATIVE.md`](../../business/growth/LAUNCH_NARRATIVE.md) and is enforced by
 `npm run check:launch-narrative`.
 
 It is a peer reference to [`viral-growth-loops.md`](viral-growth-loops.md) (in-product sharing
@@ -80,7 +80,7 @@ repositioning). Prerequisites:
 - **Lead time of ~4–6 weeks** end to end. Do not expect a tentpole on a 3-day turnaround.
 - **A credible human principal**, not the faceless brand handle. Koji = Sue Khim; Moda = Anvisha.
   The principal's face/voice is the trust anchor.
-- **A hero asset** (video/clip) from [`content-assets/CONTENT_ASSETS.md`](../../templates/content-assets/CONTENT_ASSETS.md)
+- **A hero asset** (video/clip) from [`content-assets/CONTENT_ASSETS.md`](../../business/content-assets/CONTENT_ASSETS.md)
   / `DEMO_VIDEO.md`.
 
 ### Feature Launch Cadence (the heartbeat)

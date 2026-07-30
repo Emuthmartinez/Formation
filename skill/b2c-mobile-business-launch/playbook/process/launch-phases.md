@@ -55,7 +55,7 @@ Do:
 - Inspect the provided transcript/spec/repo and list existing artifacts.
 - Identify current phase, business name, target platform, monetization model, data/backend assumptions, and launch surface.
 - Load `project-state.md` and `autonomy-modes.md`.
-- Create or refresh `PROJECT_STATE.yaml` from `templates/PROJECT_STATE.yaml`, set the current autonomy mode, and record lane status honestly.
+- Create or refresh `PROJECT_STATE.yaml` from `business/PROJECT_STATE.yaml`, set the current autonomy mode, and record lane status honestly.
 - Confirm the launch scope (see Launch Scopes above; recommend essentials for a first launch), record `project.launch_scope` and `project.kickoff_date` — the pre-build clock starts now — and defer essentials breadth lanes with dated reasons.
 - Render `launch-cockpit.html` once the first state pass exists.
 - Create `BUSINESS_ACCESS.md` and `operations/business-access.json`; present one phase-labeled founder question with selectable choices, consequences, a safe defer route, and the agent action that follows it.
@@ -85,7 +85,7 @@ Do:
 - Use `BUSINESS_ACCESS.md` as the ownership/account spine and keep Doppler, social, store, email, domain, recovery, and 2FA state current.
 - Load `project-state.md`, `autonomy-modes.md`, `provider-state-recipes.md`, `launchbench-evals.md`, and `failure-cards.md` only as needed.
 - Set `autonomy.mode` to the least-powerful useful mode: usually `scout`, `draft`, `prepare`, or `apply`.
-- Copy `templates/PROJECT_STATE.yaml` if no state file exists.
+- Copy `business/PROJECT_STATE.yaml` if no state file exists.
 - Fill phase, platform, bundle/package IDs when known, source-truth files, lane statuses, tool/provider routes, required secret names, founder-only gates, proof commands, and active failure cards.
 - Render `launch-cockpit.html` after the first meaningful state pass.
 
@@ -557,11 +557,11 @@ Do:
 - Load `project-state.md`, `autonomy-modes.md`, `launchbench-evals.md`, and `failure-cards.md` before the handoff is considered complete.
 - Load `app-agent-roster.md` before writing repo-root `AGENTS.md`/`CLAUDE.md`, `APP_AGENTS.md`, app-local `agents/`, or specialist audit prompts.
 - Use `launch-coverage.md` before moving from docs to implementation or submission.
-- Create a business-specific `AGENTS.md` from `templates/repo-agent-entrypoints/AGENTS.md` as canonical source of truth: brief, stack, business model, brand rules, doc map, V1/V2/V3 scope, implementation conventions, analytics rules, continued `b2c-mobile-business-launch` routing, Compound Engineering routing, `ORCHESTRATION.md`, parallel-agent/worktree rules, MobAI/native iOS/device testing, and production-readiness gates.
+- Create a business-specific `AGENTS.md` from `business/repo-agent-entrypoints/AGENTS.md` as canonical source of truth: brief, stack, business model, brand rules, doc map, V1/V2/V3 scope, implementation conventions, analytics rules, continued `b2c-mobile-business-launch` routing, Compound Engineering routing, `ORCHESTRATION.md`, parallel-agent/worktree rules, MobAI/native iOS/device testing, and production-readiness gates.
 - Include `PROJECT_STATE.yaml`, `launch-cockpit.html`, active failure cards, and LaunchBench/validator instructions in the first-read docs.
 - Create `APP_AGENTS.md` and the seven-file `agents/` roster so future app work has an orchestrator plus marketing, engineering, security, product, design, and customer-success specialist entrypoints.
 - Include paid-tool routing, approved fallbacks, and `TOOL_DECISIONS.md` so future agents do not silently downgrade AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI, Fastlane, ASO, RevenueCat, Stripe, PostHog, Resend, or ASC/Play work.
-- Add a tool-specific `CLAUDE.md`, `CURSOR.md`, or equivalent only as a pointer/addendum; start `CLAUDE.md` from `templates/repo-agent-entrypoints/CLAUDE.md` when Claude/Rork compatibility is needed.
+- Add a tool-specific `CLAUDE.md`, `CURSOR.md`, or equivalent only as a pointer/addendum; start `CLAUDE.md` from `business/repo-agent-entrypoints/CLAUDE.md` when Claude/Rork compatibility is needed.
 - Include `LAUNCH_TRACE.md` and `11_STAR_EXPERIENCE.md` so builders can follow evidence-to-product-experience-to-design-to-build decisions.
 - Include `TECH_SPEC.md` when data, API, state, permissions, platform capabilities, app integrity, feature flags, or integration behavior is in scope.
 - Write an `ANALYTICS.md` event catalog and `analytics-plan.html` before build prompts. Do not let builders invent event names screen by screen.

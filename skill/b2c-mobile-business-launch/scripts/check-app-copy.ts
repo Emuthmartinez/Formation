@@ -70,7 +70,7 @@ const flags = parseFlags(process.argv.slice(2), [{ flags: ["--skill-root"], key:
 const skillRoot = path.resolve(flagString(flags, "skillRoot") ?? defaultSkillRoot);
 const hasRootFlag = process.argv.includes("--root");
 const cli = parseCliArgs(process.argv.slice(2));
-const root = hasRootFlag ? cli.root : path.join(skillRoot, "templates");
+const root = hasRootFlag ? cli.root : path.join(skillRoot, "business");
 const statePath = hasRootFlag ? cli.statePath : path.join(root, "PROJECT_STATE.yaml");
 
 const issues: Issue[] = [];
@@ -210,7 +210,7 @@ if (briefRequired) {
   // verbatim in an authored brief mean the sections still carry the
   // template's prose instead of this product's. The sentinel lines are
   // parsed from the shipped template so they can never drift from it.
-  const briefTemplatePath = path.join(skillRoot, "templates", "COPY_BRIEF.md");
+  const briefTemplatePath = path.join(skillRoot, "business", "COPY_BRIEF.md");
   if (brief && /^Status:\s*authored\s+\d{4}-\d{2}-\d{2}\b/im.test(brief) && existsSync(briefTemplatePath)) {
     const normalizedBrief = normalizeProse(brief);
     const surviving = briefTemplateInstructionLines(readFileSync(briefTemplatePath, "utf8"), REQUIRED_BRIEF_SECTIONS).filter((line) =>
@@ -613,7 +613,7 @@ const fictionalBrands = ["fernpath", "wrenfeed", "loomroom", "glimmerjar"];
 // expect(name).toBe("Fernpath") is an assertion ABOUT the brand (often that it
 // is gone), and a config constant is plumbing — neither is shipped copy.
 const NON_SHIPPING_PATH = /(^|\/)(__tests__|__mocks__|tests?|androidTest|[^/]*Tests)(\/|$)|\.(test|spec)\.[^/.]+$|\.config\.[^/.]+$/;
-if (root !== path.join(skillRoot, "templates")) {
+if (root !== path.join(skillRoot, "business")) {
   {
     // Walk the whole business root: native sources live under ios/, android/,
     // or an app-named directory no fixed list can predict. walkCodeFiles skips
@@ -754,14 +754,14 @@ if (engineeringActive) {
 // templates directory; always hard errors — this repo has no grandfather.
 // ---------------------------------------------------------------------------
 
-if (root === path.join(skillRoot, "templates")) {
+if (root === path.join(skillRoot, "business")) {
   if (!deckText) {
     issues.push(
       issue(
         "error",
         "app_copy.deck_template_missing",
-        "templates/COPY_DECK.md is missing — the deck contract has no starting artifact.",
-        "templates/COPY_DECK.md",
+        "business/COPY_DECK.md is missing — the deck contract has no starting artifact.",
+        "business/COPY_DECK.md",
       ),
     );
   } else {
@@ -770,8 +770,8 @@ if (root === path.join(skillRoot, "templates")) {
         issue(
           "error",
           "app_copy.deck_template_status",
-          "templates/COPY_DECK.md must declare 'Status: template' — the shipped deck is example voice, and the status line is what exempts it from cell rules.",
-          "templates/COPY_DECK.md",
+          "business/COPY_DECK.md must declare 'Status: template' — the shipped deck is example voice, and the status line is what exempts it from cell rules.",
+          "business/COPY_DECK.md",
         ),
       );
     }
@@ -781,8 +781,8 @@ if (root === path.join(skillRoot, "templates")) {
         issue(
           "error",
           "app_copy.deck_template_row_malformed",
-          `templates/COPY_DECK.md line ${bad.line} splits into ${bad.cells} cells instead of 5 — the template must demonstrate well-formed rows.`,
-          `templates/COPY_DECK.md:${bad.line}`,
+          `business/COPY_DECK.md line ${bad.line} splits into ${bad.cells} cells instead of 5 — the template must demonstrate well-formed rows.`,
+          `business/COPY_DECK.md:${bad.line}`,
         ),
       );
     }
@@ -791,8 +791,8 @@ if (root === path.join(skillRoot, "templates")) {
         issue(
           "error",
           "app_copy.deck_template_thin",
-          `templates/COPY_DECK.md has ${rows.length} example rows; the template demonstrates the full surface set (expected at least 20 across onboarding, paywall, core loop, empty states, errors, settings).`,
-          "templates/COPY_DECK.md",
+          `business/COPY_DECK.md has ${rows.length} example rows; the template demonstrates the full surface set (expected at least 20 across onboarding, paywall, core loop, empty states, errors, settings).`,
+          "business/COPY_DECK.md",
         ),
       );
     }
@@ -802,8 +802,8 @@ if (root === path.join(skillRoot, "templates")) {
           issue(
             "error",
             "app_copy.deck_template_key_shape",
-            `templates/COPY_DECK.md example key "${row.key}" breaks the localization-key shape it exists to demonstrate.`,
-            `templates/COPY_DECK.md:${row.line}`,
+            `business/COPY_DECK.md example key "${row.key}" breaks the localization-key shape it exists to demonstrate.`,
+            `business/COPY_DECK.md:${row.line}`,
           ),
         );
       }
@@ -814,8 +814,8 @@ if (root === path.join(skillRoot, "templates")) {
       issue(
         "error",
         "app_copy.brief_template_missing",
-        "templates/COPY_BRIEF.md is missing — conversion-copy.md requires the brief and the skill ships its starting artifact.",
-        "templates/COPY_BRIEF.md",
+        "business/COPY_BRIEF.md is missing — conversion-copy.md requires the brief and the skill ships its starting artifact.",
+        "business/COPY_BRIEF.md",
       ),
     );
   }

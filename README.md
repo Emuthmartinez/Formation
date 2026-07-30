@@ -140,7 +140,7 @@ skill/b2c-mobile-business-launch/
   playbook/             # launch playbooks, grouped by area of the business
   machine/              # the skill's own upkeep: versioning, evals, sources
   starters/             # runnable app scaffolds for the four archetypes
-  templates/            # artifacts copied into your app repo
+  business/            # artifacts copied into your app repo
   scripts/              # validators, renderers, LaunchBench runner
   evals/                # LaunchBench, agent-behavior, triggering
   state/                # Design Room seed state and schema

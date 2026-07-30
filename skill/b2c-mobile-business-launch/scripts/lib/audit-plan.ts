@@ -41,14 +41,14 @@ export interface AuditStep {
  */
 export const auditExcludedScripts: Record<string, string> = {
   "check:landing-funnel":
-    "requires a generated business repo with a deployed landing funnel; the shipped templates contain no deployable funnel (templates/landing/ is a section component library, deliberately not site-shaped, and the validator's scope check ignores it)",
+    "requires a generated business repo with a deployed landing funnel; the shipped templates contain no deployable funnel (business/landing/ is a section component library, deliberately not site-shaped, and the validator's scope check ignores it)",
   "check:source-freshness": "alias of check:source-registry (same script and registry); running both would duplicate the step",
   "test:validators": "executed by the launchbench step, which lints scenario definitions and then runs the validator fixture suite",
 };
 
-/** Relative templates root for the layout. */
+/** Relative business-artifact root for the layout. */
 function templatesRoot(layout: AuditLayout): string {
-  return layout === "repo" ? "skill/b2c-mobile-business-launch/templates" : "templates";
+  return layout === "repo" ? "skill/b2c-mobile-business-launch/business" : "business";
 }
 
 /** Relative skill root for the layout. */
@@ -78,7 +78,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:mobai-proof", kind: "script", args: ["--skill-root", S, ...stateArgs] },
     { id: "check:agent-entrypoints", kind: "script" },
     // Template mode only: --root is deliberately omitted. The pipeline's --root
-    // is templates/, which is not a business repo, so an installation
+    // is business/, which is not a business repo, so an installation
     // assertion there would pass vacuously. This step proves the shipped hook
     // payload is well-formed and reinstallable; installation itself is checked
     // against a real repo with --root.

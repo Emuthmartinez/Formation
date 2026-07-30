@@ -15,13 +15,13 @@ Remotion is the wrong *primary* tool for landing motion: it renders frames, not 
 
 ## The section library
 
-`templates/landing/` ships the reusable sections — Hero (mesh/video, parallax, word stagger, tilt), Marquee, Bento, Scrollytelling, Stats count-up, Testimonials spotlight, Pricing glass + billing toggle, CTA gradient morph — plus `lib/motion-tokens.ts` (SSR-safe token reader) and `motion.css` (js-gated reveal utilities, reduced-motion collapse). Start from the library and customize copy/layout; do not improvise section choreography from scratch. The pack is aesthetic-neutral: warm-editorial and dark-glass brands come out of the same components purely via tokens.
+`business/landing/` ships the reusable sections — Hero (mesh/video, parallax, word stagger, tilt), Marquee, Bento, Scrollytelling, Stats count-up, Testimonials spotlight, Pricing glass + billing toggle, CTA gradient morph — plus `lib/motion-tokens.ts` (SSR-safe token reader) and `motion.css` (js-gated reveal utilities, reduced-motion collapse). Start from the library and customize copy/layout; do not improvise section choreography from scratch. The pack is aesthetic-neutral: warm-editorial and dark-glass brands come out of the same components purely via tokens.
 
 Two web-lane recipes live in the in-app benchmark file [`motion-craft-benchmarks.md`](motion-craft-benchmarks.md): R9, the contained edge-warp scroll transition (margin, channel-split, and edge-proximity rules), and R1, asynchronous-grid hero liveness. Load it when a landing hero or scroll moment calls for either.
 
 Before drafting copy for any section slot — hero headline/subhead, testimonial spotlight quotes, stats captions, or CTA button/microcopy — load `playbook/words/no-slop-writing.md`; keep the brand's voice from `BRAND.md`/`11_STAR_EXPERIENCE.md`, not a flattened landing-page register.
 
-Host: a Next.js App Router project (the archetype starters are the expected hosts) or any React SSR site; Astro via client islands. `motion/react` is mandated for the web surface and **must never be imported by the mobile binary** — `check:template-safety` enforces the boundary (the `templates/landing/` exception is deliberate and web-only).
+Host: a Next.js App Router project (the archetype starters are the expected hosts) or any React SSR site; Astro via client islands. `motion/react` is mandated for the web surface and **must never be imported by the mobile binary** — `check:template-safety` enforces the boundary (the `business/landing/` exception is deliberate and web-only).
 
 ## The progressive-enhancement contract (enforceable)
 

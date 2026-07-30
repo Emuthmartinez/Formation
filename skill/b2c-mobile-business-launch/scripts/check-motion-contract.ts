@@ -3,7 +3,7 @@
  * check:motion-contract — deterministic consistency gate for the motion craft
  * contract (premium-mobile-craft.md two-family spring canon + motion-craft-benchmarks.md
  * recipes) against the shipped token sources (design-system/tokens.json,
- * templates/design-system/PremiumCraft.swift) and the experience-card canon files.
+ * business/design-system/PremiumCraft.swift) and the experience-card canon files.
  *
  * This is the machine-checkable half of the motion acceptance contract. It cannot
  * inspect a generated app's UI code (that adherence is covered behaviorally by the
@@ -37,10 +37,10 @@ const issues: Issue[] = [];
 const BENCH = "playbook/design/motion-craft-benchmarks.md";
 const CRAFT = "playbook/design/premium-mobile-craft.md";
 const TOKENS = "design-system/tokens.json";
-const SWIFT = "templates/design-system/PremiumCraft.swift";
+const SWIFT = "business/design-system/PremiumCraft.swift";
 const SWIFT_TOKENS = "design-system/DesignTokens.swift";
-const TEMPLATE_TOKENS = "templates/design-system/tokens.json";
-const TEMPLATE_SWIFT_TOKENS = "templates/design-system/DesignTokens.swift";
+const TEMPLATE_TOKENS = "business/design-system/tokens.json";
+const TEMPLATE_SWIFT_TOKENS = "business/design-system/DesignTokens.swift";
 const CANON_CARDS = [
   "playbook/experience/experience-cards/peak-end-card.md",
   "playbook/experience/experience-cards/mastery-and-status-card.md",
@@ -64,7 +64,7 @@ const swiftTokens = read(SWIFT_TOKENS);
 const templateTokensRaw = read(TEMPLATE_TOKENS);
 const templateSwiftTokens = read(TEMPLATE_SWIFT_TOKENS);
 
-// PremiumCraft.swift ships from templates/design-system/ next to its own copies of the
+// PremiumCraft.swift ships from business/design-system/ next to its own copies of the
 // token artifacts; a generated app compiles against THOSE, not the top-level pair. The
 // two copies must agree on every motion value or the doc-side checks are checking the
 // wrong binary truth.
@@ -79,13 +79,13 @@ if (tokensRaw !== undefined && templateTokensRaw !== undefined) {
         issue(
           "error",
           "motion_contract.template_tokens.drift",
-          "templates/design-system/tokens.json motion block differs from design-system/tokens.json — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
+          "business/design-system/tokens.json motion block differs from design-system/tokens.json — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
           TEMPLATE_TOKENS,
         ),
       );
     }
   } catch {
-    issues.push(issue("error", "motion_contract.template_tokens.invalid_json", "templates/design-system/tokens.json failed to parse.", TEMPLATE_TOKENS));
+    issues.push(issue("error", "motion_contract.template_tokens.invalid_json", "business/design-system/tokens.json failed to parse.", TEMPLATE_TOKENS));
   }
 }
 if (swiftTokens !== undefined && templateSwiftTokens !== undefined) {
@@ -98,7 +98,7 @@ if (swiftTokens !== undefined && templateSwiftTokens !== undefined) {
       issue(
         "error",
         "motion_contract.template_tokens.drift",
-        "templates/design-system/DesignTokens.swift Motion enum differs from design-system/DesignTokens.swift — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
+        "business/design-system/DesignTokens.swift Motion enum differs from design-system/DesignTokens.swift — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
         TEMPLATE_SWIFT_TOKENS,
       ),
     );
@@ -575,7 +575,7 @@ const mdFilesUnder = (relDir: string): string[] => {
   }
   return found;
 };
-for (const rel of [...mdFilesUnder("playbook"), ...mdFilesUnder("templates")]) {
+for (const rel of [...mdFilesUnder("playbook"), ...mdFilesUnder("business")]) {
   const text = readFileSync(path.join(skillRoot, rel), "utf8");
   if (swiftMotionMemberNames.size > 0) {
     for (const m of text.matchAll(/DesignTokens\.Motion\.([A-Za-z0-9_]+)/g)) {
@@ -635,8 +635,8 @@ for (const rel of [...mdFilesUnder("playbook"), ...mdFilesUnder("templates")]) {
 // (the pre-reconciliation state: 120ms vs 220ms steps, celebrate vs 360ms reveals).
 // Soft-skipped when either template is absent, matching check 5's fixture tolerance.
 const CARD_MOMENTS = ["Commitment echo", "Perceived Effort", "Variable Reward", "Intent Mirror"];
-const DESIGN_TPL = "templates/DESIGN.md";
-const EMOTIONAL_TPL = "templates/emotional-design/EMOTIONAL_DESIGN.md";
+const DESIGN_TPL = "business/DESIGN.md";
+const EMOTIONAL_TPL = "business/emotional-design/EMOTIONAL_DESIGN.md";
 const designTplPath = path.join(skillRoot, DESIGN_TPL);
 const emotionalTplPath = path.join(skillRoot, EMOTIONAL_TPL);
 if (existsSync(designTplPath) && existsSync(emotionalTplPath)) {
@@ -700,8 +700,8 @@ if (existsSync(designTplPath) && existsSync(emotionalTplPath)) {
 // bounce change is a three-file commit; this section is that instruction as a
 // gate (PR #71 review) — prose alone would go stale the first time
 // PremiumCraft moved.
-const TOKEN_SPRING = "templates/motion-catalog/TokenSpring.swift";
-const MOTION_TOKENS_TS = "templates/motion-catalog/motion-tokens.ts";
+const TOKEN_SPRING = "business/motion-catalog/TokenSpring.swift";
+const MOTION_TOKENS_TS = "business/motion-catalog/motion-tokens.ts";
 
 const tokenSpringRaw = read(TOKEN_SPRING);
 if (tokenSpringRaw !== undefined && swiftPresets.size > 0) {

@@ -37,7 +37,7 @@ const landingStatus = laneStatus("landing") ?? laneStatus("funnel");
 // marks it in progress/done, or landing artifacts exist on disk. Skip cleanly
 // otherwise so the validator never false-positives on a non-landing repo.
 // Scope needs SITE-shaped signals: a bare landing/ directory can be just the
-// copied-in templates/landing section library (components, no deployable
+// copied-in business/landing section library (components, no deployable
 // funnel yet), which must not trigger the deploy gates.
 const hasLandingArtifacts =
   existsSync(path.join(args.root, "landing", "index.html")) ||

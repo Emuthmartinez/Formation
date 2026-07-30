@@ -3,7 +3,7 @@
  * check-hooks-installed.ts — the hooks are the enforcement layer; this proves
  * they were actually delivered.
  *
- * templates/repo-agent-entrypoints/settings.json ships PostToolUse hooks that
+ * business/repo-agent-entrypoints/settings.json ships PostToolUse hooks that
  * fire depth-check validators after artifact writes and block the screenshot
  * grading pass. scripts/fixtures/hooks.fixtures.ts proves those commands
  * behave correctly. Nothing proved a generated business repo had installed
@@ -15,7 +15,7 @@
  *
  *   TEMPLATE MODE (--skill-root only) — validates the shipped payload is
  *   well-formed and reinstallable. This is what the maintainer audit runs,
- *   and it is real work: the audit's --root is templates/, which is not a
+ *   and it is real work: the audit's --root is business/, which is not a
  *   business repo, so asserting "hooks installed" there would always pass
  *   vacuously.
  *
@@ -112,7 +112,7 @@ if (template.error) {
 /* ----------------------------------------------------------- business repo */
 
 /**
- * templates/ carries PROJECT_STATE.yaml like a real business repo does, so
+ * business/ carries PROJECT_STATE.yaml like a real business repo does, so
  * the discriminator is repo-agent-entrypoints/ — a directory that only exists
  * inside the skill's own template tree.
  */

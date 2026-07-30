@@ -158,7 +158,7 @@ Object.assign(operator, {
 
 writeFileSync(ledgerPath, `${JSON.stringify(parsedLedger, null, 2)}\n`, "utf8");
 writeFileSync(args.statePath, stringifyYaml(parsedState, { lineWidth: 160 }), "utf8");
-copyFileSync(path.join(scriptDir, "../templates/operations/business-access.schema.json"), schemaPath);
+copyFileSync(path.join(scriptDir, "../business/operations/business-access.schema.json"), schemaPath);
 const migratedHuman = replaceOneNextAction(readFileSync(humanPath, "utf8"), migratedGate, founder).replace(
   /^Status:.*$/m,
   `Status: ${String(parsedLedger.status)}. The agent assumes the founder is new to business operations and leads one plain-language step at a time.`,

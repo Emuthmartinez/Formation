@@ -2,7 +2,7 @@
 /**
  * install-hooks.ts — install this skill's PostToolUse hooks into a business repo.
  *
- * The hooks in templates/repo-agent-entrypoints/settings.json are the skill's
+ * The hooks in business/repo-agent-entrypoints/settings.json are the skill's
  * only automatic enforcement layer: they fire depth-check validators after the
  * agent writes an artifact, and they block the screenshot grading pass when a
  * final PNG lands. scripts/fixtures/hooks.fixtures.ts already proves those
