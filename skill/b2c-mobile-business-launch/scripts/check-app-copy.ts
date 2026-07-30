@@ -44,6 +44,7 @@ import {
   type Severity,
 } from "./lib/launch-state.js";
 import {
+  briefTemplateInstructionLines,
   copyColumnCells,
   DECK_KEY_SHAPE,
   deckAllowedTerms,
@@ -51,7 +52,10 @@ import {
   keyPrefixReferences,
   loadAppCopyRules,
   malformedKeyReferences,
+  NEGATION,
+  normalizeProse,
   parseDeck,
+  renderedCellText,
   stripMarkdownComments,
 } from "./lib/app-copy-rules.js";
 import { matchesTerm } from "./lib/no-slop-rules.js";
@@ -201,6 +205,28 @@ if (briefRequired) {
       ),
     );
   }
+  // Deleting only the markers is the same non-authorship: the template's
+  // instruction lines describe what to write, so two or more surviving
+  // verbatim in an authored brief mean the sections still carry the
+  // template's prose instead of this product's. The sentinel lines are
+  // parsed from the shipped template so they can never drift from it.
+  const briefTemplatePath = path.join(skillRoot, "templates", "COPY_BRIEF.md");
+  if (brief && /^Status:\s*authored\s+\d{4}-\d{2}-\d{2}\b/im.test(brief) && existsSync(briefTemplatePath)) {
+    const normalizedBrief = normalizeProse(brief);
+    const surviving = briefTemplateInstructionLines(readFileSync(briefTemplatePath, "utf8"), REQUIRED_BRIEF_SECTIONS).filter((line) =>
+      normalizedBrief.includes(normalizeProse(line)),
+    );
+    if (surviving.length >= 2) {
+      issues.push(
+        issue(
+          sev("error"),
+          "app_copy.brief_hollow",
+          `COPY_BRIEF.md declares itself authored but still carries ${surviving.length} of the template's instruction lines verbatim (e.g. "${(surviving[0] ?? "").slice(0, 70)}"). Deleting the replace-this-line markers is not authorship — write this product's promise, proof, and voice in their place.`,
+          "COPY_BRIEF.md",
+        ),
+      );
+    }
+  }
   if (!brief || !/^Status:\s*authored\s+\d{4}-\d{2}-\d{2}\b/im.test(brief)) {
     issues.push(
       issue(
@@ -302,12 +328,14 @@ if (deckText && !deckIsTemplate) {
         ),
       );
     }
-    if (!row.copy) {
+    // Emptiness reads the rendered text: `&nbsp;`, `&#32;`, or `<br>` render
+    // no words, so a markup-only cell is an empty cell wearing markup.
+    if (!/\S/.test(renderedCellText(row.copy))) {
       issues.push(
         issue(
           sev("error"),
           "app_copy.deck_cell_empty",
-          `Deck row "${row.key}" has an empty copy cell — the row exists but the words were never authored.`,
+          `Deck row "${row.key}" has an empty copy cell (or one rendering only markup like &nbsp; or <br>) — the row exists but the words were never authored.`,
           where,
         ),
       );
@@ -414,10 +442,12 @@ if (deckText && !deckIsTemplate) {
     for (const surface of requiredSurfaces) {
       const matchingHeadings = [...sectionBodies.keys()].filter((name) => surface.heading.test(name));
       const hasRows = matchingHeadings.some((name) => sectionsWithRows.has(name));
-      // The exemption is earned by a real reason: placeholder filler in the
-      // reason ("Not applicable — todo") does not waive the surface.
+      // The exemption is earned by a real reason ON THE SAME LINE: placeholder
+      // filler ("Not applicable — todo") does not waive the surface, and
+      // neither does "Not applicable —" borrowing an unrelated sentence from
+      // the next line — the documented exemption is one line, dash, reason.
       const notApplicable = matchingHeadings.some((name) => {
-        const reason = (sectionBodies.get(name) ?? "").match(/not applicable\s*[—–:-]\s*(\S.{11,})/i)?.[1] ?? "";
+        const reason = (sectionBodies.get(name) ?? "").match(/not applicable[^\S\n]*[—–:-][^\S\n]*(\S[^\n]{11,})/i)?.[1] ?? "";
         return reason.length > 0 && !rules.placeholderShapes.some((shape) => matchesTerm(reason, shape));
       });
       if (!hasRows && !notApplicable) {
@@ -493,8 +523,9 @@ if (onboarding) {
   }
   for (const cell of copyColumn.cells) {
     const where = `ONBOARDING.md:${cell.line}`;
-    // An empty Copy cell is a screen with no words and nothing to reconcile.
-    if (!cell.text.trim()) {
+    // An empty Copy cell is a screen with no words and nothing to reconcile —
+    // and a cell rendering only markup (&nbsp;, <br>) is the same emptiness.
+    if (!/\S/.test(renderedCellText(cell.text))) {
       issues.push(
         issue(
           sev("error"),
@@ -578,14 +609,20 @@ if (onboarding) {
 // verbatim is detectable. In a business repo, those names surviving anywhere a
 // user can see them means the copy pass never ran on the copied starter.
 const fictionalBrands = ["fernpath", "wrenfeed", "loomroom", "glimmerjar"];
+// Tests, mocks, and build configuration never render on a user's screen:
+// expect(name).toBe("Fernpath") is an assertion ABOUT the brand (often that it
+// is gone), and a config constant is plumbing — neither is shipped copy.
+const NON_SHIPPING_PATH = /(^|\/)(__tests__|__mocks__|tests?|androidTest|[^/]*Tests)(\/|$)|\.(test|spec)\.[^/.]+$|\.config\.[^/.]+$/;
 if (root !== path.join(skillRoot, "templates")) {
   {
     // Walk the whole business root: native sources live under ios/, android/,
     // or an app-named directory no fixed list can predict. walkCodeFiles skips
-    // node_modules, build output, and dot directories.
+    // node_modules, build output, and dot directories; non-shipping paths
+    // (tests, mocks, config) are excluded by name.
     const sourceDir = root;
     for (const file of walkCodeFiles(sourceDir)) {
       const relative = path.relative(root, file);
+      if (NON_SHIPPING_PATH.test(relative.split(path.sep).join("/"))) continue;
       for (const visible of visibleStrings(readFileSync(file, "utf8"))) {
         for (const brand of fictionalBrands) {
           if (visible.toLowerCase().includes(brand)) {
@@ -622,10 +659,12 @@ if (deckRequired) {
     );
   }
   // The route must be affirmative: "Do not use COPY_DECK.md" contains the
-  // filename while reopening the improvisation path.
+  // filename while reopening the improvisation path. NEGATION is the shared
+  // lexicon (lib/app-copy-rules.ts), so the plan, the prompt fences, and the
+  // mechanism clause all reject the same forms.
   const planRoutesToDeck = stripMarkdownComments(plan ?? "")
     .split(/\r?\n/)
-    .some((line) => line.includes("COPY_DECK.md") && !/\b(do not|don't|never|avoid|skip|without|instead of|cannot|can't|won't|will not)\b/i.test(line));
+    .some((line) => line.includes("COPY_DECK.md") && !NEGATION.test(line));
   if (plan && !planRoutesToDeck) {
     issues.push(
       issue(
@@ -680,12 +719,15 @@ if (engineeringActive) {
     if (MECHANISM_GROUPS.filter((group) => group(line)).length !== 1) return false;
     // Negation counts inside the CLAUSE that carries the choice: "Mechanism:
     // i18next was rejected; ..." negates it, while a compliance note in a
-    // later clause ("— no strings remain inline") does not.
+    // later clause ("— no strings remain inline") does not. The shared
+    // NEGATION lexicon covers the route-negating forms ("don't", "never",
+    // "refuses"); "none"/"not"/"no"/"inline" stay clause-local because they
+    // are too ambiguous for the whole-line route checks.
     const matched = line.slice(mechanismAt).match(MECHANISM)?.[0] ?? "";
     const clauseEndOffset = line.slice(mechanismAt + matched.length).search(/[;.—–]/);
     const clauseEnd = clauseEndOffset === -1 ? line.length : mechanismAt + matched.length + clauseEndOffset;
     const clause = line.slice(0, clauseEnd);
-    return !/\b(reject(ed|s)?|declin(ed|es|e)|none|not|no|won't|cannot|can't|inline)\b/i.test(clause);
+    return !NEGATION.test(clause) && !/\b(none|not|no|inline)\b/i.test(clause);
   });
   // The shipped template lists every mechanism as an option menu ending in
   // "Record the choice here." — that sentinel surviving means nobody chose.
@@ -792,7 +834,12 @@ if (root === path.join(skillRoot, "templates")) {
         // The FIRST fenced block is the runnable prompt a builder copies; a
         // rule parked in a later example fence never reaches the build.
         const firstFence = readFileSync(file, "utf8").match(/```[\s\S]*?```/)?.[0] ?? "";
-        if (!firstFence.includes("COPY_DECK.md")) {
+        // The route must be affirmative inside the fence too: "Do not use
+        // COPY_DECK.md; hardcode the strings" carries the filename while
+        // certifying the exact improvisation path this block closes — the
+        // same shared negation lexicon the plan-route check reads.
+        const fenceRoutesToDeck = firstFence.split(/\r?\n/).some((line) => line.includes("COPY_DECK.md") && !NEGATION.test(line));
+        if (!fenceRoutesToDeck) {
           const relative = path.relative(skillRoot, file);
           issues.push(
             issue(
@@ -838,23 +885,30 @@ if (root === path.join(skillRoot, "templates")) {
           const source = readFileSync(file, "utf8")
             .replace(/\/\*[\s\S]*?\*\//g, " ")
             .replace(/^\s*\/\/.*$/gm, " ");
-          for (const match of source.matchAll(/>([^<>{}]+)</g)) {
-            const text = (match[1] ?? "").trim();
-            if (!/[A-Za-z0-9]{2}/.test(text)) continue;
-            issues.push(
-              issue(
-                "error",
-                "app_copy.starter_hardcoded_text",
-                `${relative} hardcodes the JSX text "${text.slice(0, 50)}" — starter UI strings live in lib/strings.ts so externalization cannot silently regress.`,
-                relative,
-              ),
-            );
+          // JSX text nodes exist only in JSX files, and only AFTER a complete
+          // tag or fragment: in `value > lower && value < upper` the >…< span
+          // is a comparison, not copy, so the matcher requires a tag before
+          // the text it captures and never runs on plain .ts/.js modules.
+          if (/\.(tsx|jsx)$/.test(file)) {
+            for (const match of source.matchAll(/<\/?(?:[A-Za-z][^<>]*)?>([^<>{}]+)</g)) {
+              const text = (match[1] ?? "").trim();
+              if (!/[A-Za-z0-9]{2}/.test(text)) continue;
+              issues.push(
+                issue(
+                  "error",
+                  "app_copy.starter_hardcoded_text",
+                  `${relative} hardcodes the JSX text "${text.slice(0, 50)}" — starter UI strings live in lib/strings.ts so externalization cannot silently regress.`,
+                  relative,
+                ),
+              );
+            }
           }
           // User-visible attribute literals are copy too: placeholder="Say
           // something" bypasses lib/strings.ts the same way JSX text does.
           // A string literal wrapped in a JSX expression ({"Welcome back"}) is
-          // the same hardcoded copy with braces around it.
-          for (const match of source.matchAll(/\{\s*(["'])((?:(?!\1)[^\n]){2,})\1\s*\}/g)) {
+          // the same hardcoded copy with braces around it — template literals
+          // ({`Welcome back`}) included.
+          for (const match of source.matchAll(/\{\s*(["'`])((?:(?!\1)[^\n]){2,})\1\s*\}/g)) {
             const value = match[2] ?? "";
             if (!/[A-Za-z0-9]{2}/.test(value)) continue;
             issues.push(
