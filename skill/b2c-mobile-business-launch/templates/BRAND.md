@@ -3,7 +3,7 @@
 Status: partial
 Owner: founder + design-guru + marketing-guru
 
-`BRAND.md` is the source of truth for voice, owned vocabulary, naming, claim boundaries, and reusable launch language. Keep it consistent with `DESIGN.md`, `RESEARCH.md`, `11_STAR_EXPERIENCE.md`, `EMOTIONAL_DESIGN.md`, `APP_STORE_LISTING.md`, lifecycle email, paywall copy, and support responses.
+`BRAND.md` is the source of truth for voice, owned vocabulary, naming, claim boundaries, and reusable launch language. Keep it consistent with `DESIGN.md`, `RESEARCH.md`, `11_STAR_EXPERIENCE.md`, `EMOTIONAL_DESIGN.md`, `APP_STORE_LISTING.md`, `COPY_DECK.md` (every in-app string speaks this voice), lifecycle email, paywall copy, and support responses.
 
 ## Positioning
 
@@ -43,5 +43,6 @@ Owner: founder + design-guru + marketing-guru
 - [ ] `DESIGN.md` tone, typography, color, and motion match this voice.
 - [ ] `APP_STORE_LISTING.md`, `SCREENSHOTS.md`, and `DEMO_VIDEO.md` use the same promise and owned words.
 - [ ] `ANALYTICS.md` event names and `LAUNCH_TRACE.md` trace IDs use canonical product terms.
+- [ ] `COPY_DECK.md` in-app strings — buttons, empty states, errors, permission primes, settings — carry this voice, not spec vocabulary (`check:app-copy`).
 - [ ] `EMAIL_OPS.md`, `PRIVACY.md`, `TERMS.md`, support copy, and review responses avoid banned language.
 - [ ] Founder approval is recorded before renaming the app, changing public positioning, or removing owned vocabulary.

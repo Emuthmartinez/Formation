@@ -6,6 +6,8 @@ Compound Engineering starter route: run or record a `ce-update` freshness check,
 
 When Compound Engineering is unavailable, record the fallback reason in `PROJECT_STATE.yaml` and run the Standalone Engineering Loop from `references/engineering-orchestration.md` instead — plan, bounded slices, adversarial review, test, proof — with the same evidence standard; a missing CE install never downgrades the readiness bar.
 
+Builders type strings from `COPY_DECK.md`, never from the spec: a work unit that reaches a screen with no deck rows stops and gets the rows authored first (`references/conversion-copy.md`). Strings land in the externalized resource named in `TECH_SPEC.md` §Strings And Localization Readiness.
+
 | Unit | Owner | Files | Validator | Proof |
 | --- | --- | --- | --- | --- |
-| first-value onboarding | orchestrator | ONBOARDING.md, app flow | check:onboarding | PRODUCTION_READINESS.md |
+| first-value onboarding | orchestrator | ONBOARDING.md, COPY_DECK.md, app flow | check:onboarding, check:app-copy | PRODUCTION_READINESS.md |

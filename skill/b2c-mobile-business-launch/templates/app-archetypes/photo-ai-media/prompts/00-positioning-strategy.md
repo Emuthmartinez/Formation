@@ -32,6 +32,12 @@ Also define:
   each shipping a copy in a week), the moat class being built (data / workflow /
   community / taste / model / distribution) with its concrete build plan, and the
   one-week-copy test answer
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes

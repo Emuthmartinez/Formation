@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { AnalyticsProvider } from "@/components/analytics-provider";
+import { strings } from "@/lib/strings";
 
-// Replace name/description from DESIGN.md and the locked spec — never ship
-// the placeholder metadata.
+// Metadata reads from lib/strings.ts; the copy pass replaces the fictional
+// example brand from COPY_DECK.md before anything ships.
 export const metadata: Metadata = {
-  title: "AI Chat Companion Starter",
-  description: "Archetype starter — customize via the prompt pack.",
+  title: strings.meta.title,
+  description: strings.meta.description,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

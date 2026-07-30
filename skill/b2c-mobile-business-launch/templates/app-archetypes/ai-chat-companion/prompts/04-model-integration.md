@@ -22,6 +22,12 @@ Requirements:
 
 Tell me the exact current Claude model ID and parameters to use (confirm against
 current Anthropic docs), and keep the model name in one config constant.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes

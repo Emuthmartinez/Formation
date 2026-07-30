@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { strings } from "@/lib/strings";
 
 // Today view stub (prompt 03 replaces this with the full core loop: one-tap
 // optimistic check-ins, streak display with the recovery escape hatch, and
@@ -15,7 +16,7 @@ export default async function TodayPage() {
 
   return (
     <main>
-      <h1>Today</h1>
+      <h1>{strings.today.title}</h1>
       <ul>
         {(habits ?? []).map((habit) => (
           <li key={habit.id}>{habit.name}</li>

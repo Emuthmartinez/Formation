@@ -20,6 +20,7 @@ Assume the founder is new to business operations. The agent runs the workflow an
 - State and cockpit: `PROJECT_STATE.yaml`, `launch-cockpit.html`
 - Design Room: `state/business.json`, `state/theme.tokens.json`, `design-room.html`
 - Product and trace: `SPEC.md`, `LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `EMOTIONAL_DESIGN.md`, `BRAND.md`
+- Words users read: `COPY_BRIEF.md` (promise and voice), `COPY_DECK.md` (every user-facing string — builders type deck rows, never spec vocabulary; `check:app-copy` gates it)
 - Build and operations: `TECH_SPEC.md`, `DESIGN.md`, `ANALYTICS.md`, `SECRETS.md`, `SECURITY.md`, `BUSINESS_ACCESS.md`, `operations/business-access.json`, `AGENT_OPERATIONS.md`, `operations/agent-operations.json`
 - Orchestration and readiness: `ORCHESTRATION.md`, `PRODUCTION_READINESS.md`, `APP_AGENTS.md`
 
@@ -137,6 +138,7 @@ npm run check:apple-requirements -- --root /path/to/{{APP_SLUG}} --state PROJECT
 npm run check:store-console -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:native-ios -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:11-star -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
+npm run check:app-copy -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:emotional-design -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:content-assets -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml
 npm run check:paid-ua -- --root /path/to/{{APP_SLUG}} --state PROJECT_STATE.yaml

@@ -1,14 +1,16 @@
 import Link from "next/link";
+import { strings } from "@/lib/strings";
 
 // Landing stub. The real landing page is owned by the launch funnel lane
 // (geo-seo.md + landing checks); this exists so the app boots end to end.
+// Words come from lib/strings.ts, which the copy pass fills from COPY_DECK.md.
 export default function Home() {
   return (
     <main>
-      <h1>Social Network Starter</h1>
-      <p>Runnable archetype scaffold. Customize it with the prompt pack — see starter/README.md.</p>
+      <h1>{strings.landing.headline}</h1>
+      <p>{strings.landing.body}</p>
       <p>
-        <Link href="/login">Sign in</Link> · <Link href="/feed">Feed</Link>
+        <Link href="/login">{strings.landing.sign_in}</Link> · <Link href="/feed">{strings.landing.feed}</Link>
       </p>
     </main>
   );

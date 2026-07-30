@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.49.0",
+  "version": "0.50.0",
   "description": "An agent skill that takes a consumer mobile app from idea to a launched business, with deterministic validators between every claim and done.",
   "keywords": [
     "claude-code",
@@ -42,6 +42,7 @@
     "check:founder-operator": "tsx skill/b2c-mobile-business-launch/scripts/check-founder-operator-bootstrap.ts",
     "check:founder-copy": "tsx skill/b2c-mobile-business-launch/scripts/check-founder-copy.ts",
     "check:no-slop": "tsx skill/b2c-mobile-business-launch/scripts/check-no-slop.ts",
+    "check:app-copy": "tsx skill/b2c-mobile-business-launch/scripts/check-app-copy.ts",
     "migrate:founder-gates": "tsx skill/b2c-mobile-business-launch/scripts/migrate-founder-gates.ts",
     "check:asc-command-contract": "tsx skill/b2c-mobile-business-launch/scripts/check-asc-command-contract.ts",
     "check:motion-contract": "tsx skill/b2c-mobile-business-launch/scripts/check-motion-contract.ts",

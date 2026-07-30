@@ -23,6 +23,12 @@ Requirements:
   only
 
 Keep preset definitions data-driven so adding a style is a row, not a deploy.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes

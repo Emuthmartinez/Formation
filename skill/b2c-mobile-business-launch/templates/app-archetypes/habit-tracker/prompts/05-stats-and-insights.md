@@ -27,6 +27,12 @@ Weekly review:
 Performance:
 - Compute aggregates with SQL (the prompt 01 indexes cover habit_id + date);
   don't ship a year of raw rows to the client
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes

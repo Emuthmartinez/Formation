@@ -40,6 +40,12 @@ Notification copy rules (hard rules, do not remove):
   manufacture urgency that isn't real
 - At most one reminder per habit per day; missing a day never triggers a
   guilt-trip follow-up, only the calm repair offer
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes

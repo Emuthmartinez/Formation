@@ -22,6 +22,12 @@ Changes from the base:
   packs; watermark-free and full-resolution download as the paid unlock
 - Cut everything the utility does not need from the UI: no studio chrome, no
   feed — library, restore, account
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes

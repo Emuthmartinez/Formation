@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { strings } from "@/lib/strings";
 
 // Chronological feed stub (prompt 03 replaces this with the full feed: post
 // composer, optimistic likes/reposts, realtime arrivals, engagement events).
@@ -18,7 +19,7 @@ export default async function FeedPage() {
 
   return (
     <main>
-      <h1>Feed</h1>
+      <h1>{strings.feed.title}</h1>
       <ul>
         {(posts ?? []).map((post) => (
           <li key={post.id}>{post.body}</li>

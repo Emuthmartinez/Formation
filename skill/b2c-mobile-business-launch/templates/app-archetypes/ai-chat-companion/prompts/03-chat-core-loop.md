@@ -25,6 +25,12 @@ placeholder; prompt 04 will replace it with the Claude API. Use Supabase to
 persist conversations and messages.
 
 Design: clean dark theme, calm and focused, fast.
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes

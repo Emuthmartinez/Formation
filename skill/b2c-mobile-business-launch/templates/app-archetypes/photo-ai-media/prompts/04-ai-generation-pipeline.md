@@ -28,6 +28,12 @@ Requirements:
   transient provider errors with backoff
 - Per-user rate limiting and a concurrent-jobs cap, enforced server-side
 - Never leak raw provider errors or provider identity strings to the client
+
+Strings: every user-facing label, headline, button, empty state, and error
+comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+craft from references/conversion-copy.md), typed via the externalized resource
+named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+shipping strings.
 ```
 
 ## Skill-integration notes

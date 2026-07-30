@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.49.0",
+  "version": "0.50.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,6 +16,7 @@
     "check:founder-operator": "tsx scripts/check-founder-operator-bootstrap.ts",
     "check:founder-copy": "tsx scripts/check-founder-copy.ts",
     "check:no-slop": "tsx scripts/check-no-slop.ts",
+    "check:app-copy": "tsx scripts/check-app-copy.ts",
     "migrate:founder-gates": "tsx scripts/migrate-founder-gates.ts",
     "check:asc-command-contract": "tsx scripts/check-asc-command-contract.ts",
     "check:motion-contract": "tsx scripts/check-motion-contract.ts",

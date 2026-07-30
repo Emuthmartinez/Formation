@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { strings } from "@/lib/strings";
 
 // Library stub (prompt 03 replaces this with the full capture/library flow:
 // upload to the owner-scoped storage bucket, signed-URL thumbnails, asset
@@ -15,7 +16,7 @@ export default async function LibraryPage() {
 
   return (
     <main>
-      <h1>Library</h1>
+      <h1>{strings.library.title}</h1>
       <ul>
         {(assets ?? []).map((asset) => (
           <li key={asset.id}>

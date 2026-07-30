@@ -102,6 +102,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:template-safety", kind: "script" },
     { id: "check:founder-copy", kind: "script", args: [...rootArgs, "--skill-root", S] },
     { id: "check:no-slop", kind: "script", args: [...rootArgs, "--skill-root", S, "--repo-root", "."] },
+    { id: "check:app-copy", kind: "script", args: [...stateArgs, "--skill-root", S] },
     { id: "check:founder-operator", kind: "script", args: stateArgs },
     { id: "check:agent-operations", kind: "script", args: stateArgs },
     { id: "check:provider-proof", kind: "script", args: stateArgs },

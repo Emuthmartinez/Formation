@@ -211,6 +211,8 @@ lanes:
     evidence:
       - "BRAND.md"
       - "DESIGN.md"
+      - "COPY_BRIEF.md"
+      - "COPY_DECK.md"
       - "screen-design/design.md"
       - "ux-patterns/UX_PATTERNS.md"
       - "design.html"
