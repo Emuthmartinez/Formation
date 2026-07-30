@@ -260,6 +260,32 @@ export const routeCopy: Record<string, string> = {
   not_needed: "Not needed for this app",
 };
 
+/**
+ * Agent role id → plain language.
+ *
+ * These ids are the role-prompt filenames in the generated business repo's
+ * `agents/` directory, and they are legitimate vocabulary between agents. They
+ * are not legitimate on a page the founder reads: "Owner: orchestrator" told a
+ * founder nothing and was, for a long time, the most visible violation of this
+ * file's own reason for existing — it rendered in the cockpit's "Things I am
+ * watching" cards, outside any technical-details section.
+ *
+ * Unknown values fall through unchanged rather than being blanked: a role this
+ * map has not learned yet is still more useful to a founder than an empty cell,
+ * and check-founder-copy will flag it.
+ */
+export const ownerCopy: Record<string, string> = {
+  orchestrator: "Me, coordinating the work",
+  "marketing-guru": "Me, on marketing",
+  "engineering-leader": "Me, on the build",
+  "product-leader": "Me, on product decisions",
+  "design-guru": "Me, on design",
+  "customer-success": "Me, on support and user trust",
+  "security-architect": "Me, on security",
+  founder: "You",
+  "Founder or team": "You",
+};
+
 /** Shared founder-facing empty states. Never leave a blank cell or a bare "unknown". */
 export const emptyCopy = {
   nothing: "Nothing yet",
@@ -374,6 +400,11 @@ export function phaseLabel(phase: string): string {
 /** Founder-visible sentence for an autonomy mode. */
 export function modeLabel(mode: string): string {
   return modeCopy[mode] ?? humanizeIdentifier(mode);
+}
+
+/** Founder-visible description of who owns a piece of work. */
+export function ownerLabel(owner: string): string {
+  return ownerCopy[owner] ?? humanizeIdentifier(owner);
 }
 
 /** Founder-visible label for a provider route value. */

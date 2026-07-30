@@ -1,6 +1,6 @@
 # Photo / AI Media — Boilerplate Prompt Pack
 
-An **app-archetype prompt pack** for this skill: a dependency-ordered set of copy-paste-ready prompts for building a B2C photo / AI-media product (AI avatar or headshot generator, photo enhancer/restorer, AI art/image studio, media-transform utility). Routing, the upfront archetype question, and how each prompt threads into the launch lanes live in [`../../../references/photo-ai-media-lane.md`](../../../references/photo-ai-media-lane.md). Read that first.
+An **app-archetype prompt pack** for this skill: a dependency-ordered set of copy-paste-ready prompts for building a B2C photo / AI-media product (AI avatar or headshot generator, photo enhancer/restorer, AI art/image studio, media-transform utility). Routing, the upfront archetype question, and how each prompt threads into the launch lanes live in [`../../../references/photo-ai-media.md`](../../references/photo-ai-media.md). Read that first.
 
 These are **starting prompts**, not final code. Each file has a copy-paste block plus skill-integration notes.
 

@@ -103,7 +103,7 @@ function isReachable(candidate: string): boolean {
   const relative = path.relative(skillRoot, candidate).split(path.sep).join("/");
   const needles = new Set<string>([relative, path.basename(candidate)]);
   // Ancestor directories (copy-the-directory reachability), e.g.
-  // "templates/app-archetypes/social-network/starter" covers every file below
+  // "starters/social-network/starter" covers every file below
   // it. Stop above the bare subtree name ("templates"/"references"), which
   // appears in prose everywhere and would mark everything reachable.
   let ancestor = path.dirname(relative);
@@ -157,7 +157,7 @@ const templatesRoot = path.join(skillRoot, "templates");
 if (existsSync(templatesRoot)) {
   for (const file of collectAllFiles(templatesRoot)) {
     const relative = path.relative(skillRoot, file).split(path.sep).join("/");
-    if (file.split(path.sep).includes("node_modules") || relative.startsWith("templates/app-archetypes/")) {
+    if (file.split(path.sep).includes("node_modules") || relative.startsWith("starters/")) {
       continue;
     }
     if (statSync(file).size < 100) {

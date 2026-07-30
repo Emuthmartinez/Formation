@@ -24,7 +24,7 @@ Founder-zero setup: the agent explains one secure action at a time and performs 
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `EXAMPLE_API_KEY` | Example | server_secret | local/staging/prod | backend | server-only | Doppler project/config | founder | before public launch | blocked |
 
-Archetype starter names (pre-routed by `templates/app-archetypes/*/starter/.env.example`; fill rows above as each service is provisioned — values always live in Doppler, never in the repo):
+Archetype starter names (pre-routed by `starters/*/starter/.env.example`; fill rows above as each service is provisioned — values always live in Doppler, never in the repo):
 
 | Name | Service | Public/server-only |
 | --- | --- | --- |

@@ -10,6 +10,7 @@ import {
   laneMilestone,
   milestones,
   modeLabel,
+  ownerLabel,
   phaseLabel,
   routeLabel,
   serviceLabel,
@@ -178,7 +179,11 @@ if (!loaded.state) {
       const record = isRecord(card) ? card : {};
       const severity = asString(record.severity) ?? "";
       const watching = severity.toLowerCase() === "high" ? "Worth your attention" : "Keeping an eye on this";
-      return `<article class="card"><h3>${escapeHtml(watching)}</h3><p>${text(record.next_action)}</p><p class="muted">Owner: ${text(record.owner)}</p></article>`;
+      // Role ids are agent vocabulary; ownerLabel translates them before they
+      // reach the founder. Raw "orchestrator" rendered here for a long time.
+      const owner = asString(record.owner);
+      const ownerText = owner ? escapeHtml(ownerLabel(owner)) : emptyCopy.notRecorded;
+      return `<article class="card"><h3>${escapeHtml(watching)}</h3><p>${text(record.next_action)}</p><p class="muted">Handled by: ${ownerText}</p></article>`;
     })
     .join("");
 

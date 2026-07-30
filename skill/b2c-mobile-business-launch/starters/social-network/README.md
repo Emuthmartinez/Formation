@@ -1,6 +1,6 @@
 # Social / Community Platform — Boilerplate Prompt Pack
 
-The first **app-archetype prompt pack** for this skill. It is a reusable, dependency-ordered set of copy-paste-ready prompts for building a B2C social/community platform (text-, image-, or video-first). Routing, the upfront archetype question, and how each prompt threads into the launch lanes live in [`../../../references/social-network-lane.md`](../../../references/social-network-lane.md). Read that first.
+The first **app-archetype prompt pack** for this skill. It is a reusable, dependency-ordered set of copy-paste-ready prompts for building a B2C social/community platform (text-, image-, or video-first). Routing, the upfront archetype question, and how each prompt threads into the launch lanes live in [`../../../references/social-network.md`](../../references/social-network.md). Read that first.
 
 These are **starting prompts**, not final code. Improve them per project. Each prompt file has a copy-paste block plus skill-integration notes (what to verify, which lane/artifact it feeds).
 

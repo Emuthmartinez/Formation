@@ -139,7 +139,7 @@ for (const pack of STARTER_PACKS) {
 reportAndExit("Archetype starter scaffold check", issues);
 
 function checkStarter(pack: StarterPack): void {
-  const packRel = `templates/app-archetypes/${pack.name}`;
+  const packRel = `starters/${pack.name}`;
   const starterDir = path.join(args.skillRoot, packRel, "starter");
   const starterRel = `${packRel}/starter`;
 

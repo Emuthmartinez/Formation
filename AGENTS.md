@@ -6,6 +6,8 @@ This file is for maintaining this skill repo itself. Do not copy these instructi
 
 New contributor (human or agent)? Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the CI gate, and PR expectations; this file is the deeper maintainer reference behind it.
 
+Structural work follows [`ARCHITECTURE.md`](ARCHITECTURE.md), the target layout every reorganization moves toward. Where the current directory shape and that document disagree, the document wins and the layout is what changes — do not shape a refactor around what today's structure or a validator currently expects.
+
 ## Repo Map
 
 - `README.md`: public overview. Keep it short and route depth elsewhere; the full command and gate reference lives in `docs/VALIDATORS.md`.

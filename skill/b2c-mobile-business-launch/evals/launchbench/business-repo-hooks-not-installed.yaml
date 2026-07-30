@@ -1,0 +1,24 @@
+id: business-repo-hooks-not-installed
+title: Generated business repo never installs the depth-check hooks
+prompt: >
+  The user asks the skill to scaffold a new B2C app business repo. The agent
+  writes AGENTS.md, CLAUDE.md, and the role prompts, mentions in prose that
+  PostToolUse hooks fire depth checks after artifact writes, and moves on to
+  lane work. It never copies the shipped hook payload into the repo's
+  .claude/settings.json, so no validator ever fires automatically for the rest
+  of the launch.
+expected_guardrail: >
+  The hooks are the skill's only automatic enforcement layer. Scaffolding a
+  business repo means installing them, not describing them: run install:hooks
+  against the new repo and verify with check:hooks-installed. Mentioning hooks
+  in a document is not installing them, and a repo whose .claude/settings.json
+  has no managed entries runs every remaining lane with no depth checks at all.
+validators:
+  - check-hooks-installed
+must_catch:
+  - Prose describing the hooks is not installation; the hook entries must exist in the repo's .claude/settings.json.
+  - Run install:hooks against the generated repo during scaffolding, then verify with check:hooks-installed.
+  - jq on PATH and a resolvable SKILL_ROOT are prerequisites; without either the hooks warn and exit 0, which looks identical to passing.
+  - Reinstall after a skill upgrade; hook commands that drift from the shipped payload can call validators that no longer exist.
+should_say:
+  - Install the hooks with install:hooks --target <repo>, then confirm with check:hooks-installed --root <repo>.

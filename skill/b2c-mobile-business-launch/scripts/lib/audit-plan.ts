@@ -77,6 +77,12 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:motion-contract", kind: "script", args: ["--skill-root", S] },
     { id: "check:mobai-proof", kind: "script", args: ["--skill-root", S, ...stateArgs] },
     { id: "check:agent-entrypoints", kind: "script" },
+    // Template mode only: --root is deliberately omitted. The pipeline's --root
+    // is templates/, which is not a business repo, so an installation
+    // assertion there would pass vacuously. This step proves the shipped hook
+    // payload is well-formed and reinstallable; installation itself is checked
+    // against a real repo with --root.
+    { id: "check:hooks-installed", kind: "script", args: ["--skill-root", S] },
     { id: "check:workflow-adherence", kind: "script" },
     { id: "check:continuity-contract", kind: "script" },
     { id: "check:autopilot", kind: "script" },

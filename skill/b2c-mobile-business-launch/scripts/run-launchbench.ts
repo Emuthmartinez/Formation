@@ -42,6 +42,7 @@ const knownValidators = new Set([
   "check-onboarding-conversion",
   "check-autopilot-contract",
   "check-agent-entrypoints",
+  "check-hooks-installed",
   "check-workflow-adherence",
   "check-continuity-contract",
   "check-skill-version",

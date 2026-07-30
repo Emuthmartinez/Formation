@@ -2,14 +2,14 @@
 /**
  * check-app-archetype.ts — skill-integrity gate for the app-archetype prompt-pack layer.
  *
- * Every archetype pack under templates/app-archetypes/ must be structurally
+ * Every archetype pack under starters/ must be structurally
  * complete so a future agent (or a new archetype contributor) can rely on the
  * same shape:
  *
  *   - each archetype dir has a README.md and a prompts/ dir with >=1 prompt
  *   - every prompt file (except README.md) carries a fenced copy-paste block
  *   - the shipped `social-network` pack has its required core prompts
- *   - the social-network lane is wired: references/social-network-lane.md exists,
+ *   - the social-network lane is wired: references/social-network.md exists,
  *     SKILL.md routes to it, and the agent-behavior eval is present
  *
  * Runs against the skill root (not a generated business repo). The harness may
@@ -40,28 +40,28 @@ const SHIPPED_PACKS: ShippedPack[] = [
   {
     name: "social-network",
     requiredPrompts: ["01-database-schema.md", "02-auth-system.md", "03-feed-and-posts.md", "04-profiles-and-follow.md"],
-    reference: "references/social-network-lane.md",
+    reference: "references/social-network.md",
     eval: "evals/agent-behavior/social-network-archetype-prompt-pack.yaml",
     starter: true,
   },
   {
     name: "ai-chat-companion",
     requiredPrompts: ["01-database-schema.md", "02-auth-system.md", "03-chat-core-loop.md", "04-model-integration.md"],
-    reference: "references/ai-chat-companion-lane.md",
+    reference: "references/ai-chat-companion.md",
     eval: "evals/agent-behavior/ai-chat-companion-archetype-prompt-pack.yaml",
     starter: true,
   },
   {
     name: "habit-tracker",
     requiredPrompts: ["01-database-schema.md", "02-auth-system.md", "03-habit-core-loop.md", "04-reminders-and-streaks.md"],
-    reference: "references/habit-tracker-lane.md",
+    reference: "references/habit-tracker.md",
     eval: "evals/agent-behavior/habit-tracker-archetype-prompt-pack.yaml",
     starter: true,
   },
   {
     name: "photo-ai-media",
     requiredPrompts: ["01-database-schema.md", "02-auth-system.md", "03-capture-and-library.md", "04-ai-generation-pipeline.md"],
-    reference: "references/photo-ai-media-lane.md",
+    reference: "references/photo-ai-media.md",
     eval: "evals/agent-behavior/photo-ai-media-archetype-prompt-pack.yaml",
     starter: true,
   },
@@ -69,16 +69,11 @@ const SHIPPED_PACKS: ShippedPack[] = [
 
 const args = parseArgs(process.argv.slice(2));
 const issues: Issue[] = [];
-const archetypesDir = path.join(args.skillRoot, "templates", "app-archetypes");
+const archetypesDir = path.join(args.skillRoot, "starters");
 
 if (!existsSync(archetypesDir)) {
   issues.push(
-    issue(
-      "error",
-      "app_archetype.dir_missing",
-      `templates/app-archetypes is missing at ${archetypesDir}. The app-archetype prompt-pack layer must exist.`,
-      "templates/app-archetypes",
-    ),
+    issue("error", "app_archetype.dir_missing", `starters is missing at ${archetypesDir}. The app-archetype prompt-pack layer must exist.`, "starters"),
   );
 } else {
   const archetypes = readdirSync(archetypesDir, { withFileTypes: true })
@@ -87,19 +82,12 @@ if (!existsSync(archetypesDir)) {
     .sort();
 
   if (archetypes.length === 0) {
-    issues.push(
-      issue(
-        "error",
-        "app_archetype.no_archetypes",
-        "templates/app-archetypes has no archetype packs. Add at least one (e.g. social-network).",
-        "templates/app-archetypes",
-      ),
-    );
+    issues.push(issue("error", "app_archetype.no_archetypes", "starters has no archetype packs. Add at least one (e.g. social-network).", "starters"));
   }
 
   for (const name of archetypes) {
     const packDir = path.join(archetypesDir, name);
-    const rel = `templates/app-archetypes/${name}`;
+    const rel = `starters/${name}`;
 
     if (!existsSync(path.join(packDir, "README.md"))) {
       issues.push(issue("error", `app_archetype.${name}.readme_missing`, `${rel} must have a README.md index.`, rel));
@@ -163,7 +151,7 @@ if (skillText === undefined) {
 }
 
 for (const pack of SHIPPED_PACKS) {
-  const packRel = `templates/app-archetypes/${pack.name}`;
+  const packRel = `starters/${pack.name}`;
   if (!existsSync(path.join(archetypesDir, pack.name))) {
     issues.push(issue("error", `app_archetype.${pack.name}.pack_missing`, `Shipped pack ${packRel} is missing.`, packRel));
   }

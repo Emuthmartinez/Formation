@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.51.0",
+  "version": "0.52.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -36,6 +36,8 @@
     "check:source-freshness": "tsx scripts/check-source-freshness.ts",
     "refresh:source-freshness": "tsx scripts/check-source-freshness.ts --write-discovered && tsx scripts/refresh-source-freshness.ts",
     "check:agent-entrypoints": "tsx scripts/check-agent-entrypoints.ts --skill-root .",
+    "check:hooks-installed": "tsx scripts/check-hooks-installed.ts --skill-root .",
+    "install:hooks": "tsx scripts/install-hooks.ts --skill-root .",
     "check:workflow-adherence": "tsx scripts/check-workflow-adherence.ts --skill-root .",
     "check:continuity-contract": "tsx scripts/check-continuity-contract.ts --skill-root .",
     "check:autopilot": "tsx scripts/check-autopilot-contract.ts",

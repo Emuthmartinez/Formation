@@ -17,12 +17,12 @@ export function register(h: Harness): void {
   function makeArchetypeSkillRoot(name: string): string {
     const fakeRoot = makeEmptyFixture(name);
     mkdirSync(path.join(fakeRoot, "templates"), { recursive: true });
-    cpSync(path.join(skillRoot, "templates", "app-archetypes"), path.join(fakeRoot, "templates", "app-archetypes"), { recursive: true });
+    cpSync(path.join(skillRoot, "starters"), path.join(fakeRoot, "starters"), { recursive: true });
     return fakeRoot;
   }
 
   const noLockfile = makeArchetypeSkillRoot("archetype-starter-no-lockfile");
-  rmSync(path.join(noLockfile, "templates", "app-archetypes", "social-network", "starter", "package-lock.json"));
+  rmSync(path.join(noLockfile, "starters", "social-network", "starter", "package-lock.json"));
   runScriptArgs(
     "starter without lockfile fails",
     "check-archetype-starter.ts",
@@ -33,7 +33,7 @@ export function register(h: Harness): void {
 
   const envWithValue = makeArchetypeSkillRoot("archetype-starter-env-value");
   appendFileSync(
-    path.join(envWithValue, "templates", "app-archetypes", "ai-chat-companion", "starter", ".env.example"),
+    path.join(envWithValue, "starters", "ai-chat-companion", "starter", ".env.example"),
     "STRIPE_SECRET_KEY=sk_test_fixtureonlyfixtureonly\n",
     "utf8",
   );
@@ -116,7 +116,7 @@ export function register(h: Harness): void {
   );
 
   const untestedRls = makeArchetypeSkillRoot("archetype-starter-untested-rls");
-  rmSync(path.join(untestedRls, "templates", "app-archetypes", "social-network", "starter", "supabase", "tests"), { recursive: true });
+  rmSync(path.join(untestedRls, "starters", "social-network", "starter", "supabase", "tests"), { recursive: true });
   runScriptArgs(
     "starter without RLS tests fails",
     "check-archetype-starter.ts",

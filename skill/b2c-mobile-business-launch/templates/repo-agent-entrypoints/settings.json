@@ -43,6 +43,7 @@
   "hooks": {
     "PostToolUse": [
       {
+        "_managed": "b2c-mobile-business-launch",
         "_comment": "Write/Edit hook: fires depth-check validators automatically after every relevant artifact write.",
         "matcher": "Write|Edit",
         "hooks": [
@@ -55,6 +56,7 @@
         ]
       },
       {
+        "_managed": "b2c-mobile-business-launch",
         "_comment": "Bash hook: (1) catches proof artifacts written via touch/echo/tee/bash redirection -- complements the Write|Edit hook above; (2) intercepts final PNG writes via Bash write verbs (cp, mv, tee, install, ditto, sips, magick/convert, or shell redirection > / >> targeting screenshots/final/*.png) and emits the BLOCKING grading-pass signal identical to the Write|Edit Final PNG hook below. Regex intent: match write-verb or redirection constructs whose destination lands in screenshots/final/*.png; read-only verbs (ls, cat, grep, find) never match because they do not appear as write-verb tokens. Honest limit: a carefully crafted command could evade the regex; founder review is the backstop.",
         "matcher": "Bash",
         "hooks": [
@@ -67,6 +69,7 @@
         ]
       },
       {
+        "_managed": "b2c-mobile-business-launch",
         "_comment": "Final PNG hook (BLOCKING): after any final screenshot PNG is written via the Write or Edit tool, routes to the SEPARATE grading pass and exits non-zero so the agent sees it as a hard requirement. store_console CANNOT be marked done until a separate-pass ledger exists. PREREQUISITES: jq on PATH; SKILL_ROOT set to skill root so npx resolves. The hook prints the exact grade-screenshots.ts command to run.",
         "matcher": "Write|Edit",
         "hooks": [

@@ -1094,8 +1094,8 @@ sources:
     refresh_cadence_days: 30
     owner: source-freshness
     locations:
-      - skill/b2c-mobile-business-launch/templates/app-archetypes/social-network/starter/lib/analytics/posthog-client.ts
-      - skill/b2c-mobile-business-launch/templates/app-archetypes/ai-chat-companion/starter/lib/analytics/posthog-client.ts
+      - skill/b2c-mobile-business-launch/starters/social-network/starter/lib/analytics/posthog-client.ts
+      - skill/b2c-mobile-business-launch/starters/ai-chat-companion/starter/lib/analytics/posthog-client.ts
     notes: Default api_host fallback in the archetype starter PostHog clients; overridden by NEXT_PUBLIC_POSTHOG_HOST.
   - id: posthog-com-docs-cdp
     name: posthog.com

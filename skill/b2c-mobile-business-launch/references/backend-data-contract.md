@@ -21,7 +21,7 @@ Every real app build needs a backend-agnostic data contract before implementatio
 Load this reference:
 
 - Before writing the data model or API sections of `TECH_SPEC.md`.
-- Before running any schema or auth prompt from an archetype pack (`social-network-lane.md`, `ai-chat-companion-lane.md`) — the packs assume Supabase and must be adapted first if the route differs.
+- Before running any schema or auth prompt from an archetype pack (`social-network.md`, `ai-chat-companion.md`) — the packs assume Supabase and must be adapted first if the route differs.
 - When the founder asks for Firebase or a custom backend instead of the Supabase default, or questions the backend choice at any point.
 - Before claiming the engineering lane done; the contract and its proof are part of done status (`engineering-orchestration.md`).
 - When auditing an existing app's data layer for drift, untested authorization, or undocumented backend coupling.
@@ -110,7 +110,7 @@ Mobile-client considerations apply on every route:
 
 ## Archetype Pack Adaptation
 
-The shipped archetype prompt packs (`templates/app-archetypes/social-network`, `templates/app-archetypes/ai-chat-companion`) assume Supabase. When the founder selects Firebase or a custom backend, **adapt each schema/auth prompt to the selected route before running it** — do not run the Supabase prompts verbatim and patch the output later. Use this parity table when rewriting a prompt:
+The shipped archetype prompt packs (`starters/social-network`, `starters/ai-chat-companion`) assume Supabase. When the founder selects Firebase or a custom backend, **adapt each schema/auth prompt to the selected route before running it** — do not run the Supabase prompts verbatim and patch the output later. Use this parity table when rewriting a prompt:
 
 | Supabase concept (as shipped) | Firebase equivalent | Custom-backend equivalent |
 |---|---|---|

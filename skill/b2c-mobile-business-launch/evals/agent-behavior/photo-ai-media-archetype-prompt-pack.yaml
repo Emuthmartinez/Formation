@@ -1,10 +1,10 @@
 id: photo-ai-media-archetype-prompt-pack
 title: Photo/AI-media request detects the archetype and routes the prompt pack
 prompt: "I want to build an app where people upload selfies and get professional AI headshots."
-expected_route: "Detect the photo/AI-media archetype, load photo-ai-media-lane.md, confirm media shape / primary surface / optional systems / niche via one batched AskUserQuestion, record the archetype in PROJECT_STATE.yaml, copy the runnable starter as the floor, then route the bundled prompt pack in order (schema, auth, capture/library, generation pipeline) with content safety & rights (prompt 08) before any public launch and the generation provider founder-gated via paid-tool routing — instead of improvising the schema and hardcoding an image provider."
+expected_route: "Detect the photo/AI-media archetype, load photo-ai-media.md, confirm media shape / primary surface / optional systems / niche via one batched AskUserQuestion, record the archetype in PROJECT_STATE.yaml, copy the runnable starter as the floor, then route the bundled prompt pack in order (schema, auth, capture/library, generation pipeline) with content safety & rights (prompt 08) before any public launch and the generation provider founder-gated via paid-tool routing — instead of improvising the schema and hardcoding an image provider."
 must_use:
-  - "photo-ai-media-lane.md"
-  - "templates/app-archetypes/photo-ai-media"
+  - "photo-ai-media.md"
+  - "starters/photo-ai-media"
   - "AskUserQuestion"
   - "PROJECT_STATE.yaml"
 must_catch:

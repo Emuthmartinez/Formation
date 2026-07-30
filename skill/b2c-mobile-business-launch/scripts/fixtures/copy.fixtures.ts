@@ -1277,6 +1277,9 @@ export function register(h: Harness): void {
   const makeSelfScanRoot = (name: string): string => {
     const fakeRoot = h.makeEmptyFixture(name);
     cpSync(path.join(skillRoot, "templates"), path.join(fakeRoot, "templates"), { recursive: true });
+    // starters/ is a sibling of templates/ now, so the self-scan root has to
+    // mirror the skill's own shape: the prompt-pack checks read from here.
+    cpSync(path.join(skillRoot, "starters"), path.join(fakeRoot, "starters"), { recursive: true });
     mkdirSync(path.join(fakeRoot, "references"), { recursive: true });
     cpSync(path.join(skillRoot, "references", "conversion-copy.md"), path.join(fakeRoot, "references", "conversion-copy.md"));
     return fakeRoot;
@@ -1285,7 +1288,7 @@ export function register(h: Harness): void {
   // A first fence whose only COPY_DECK.md mention is negated certifies the
   // improvisation path — the fence route must be affirmative.
   const promptNegatedRoute = makeSelfScanRoot("app-copy-prompt-negated-route");
-  const negatedPromptPath = path.join(promptNegatedRoute, "templates", "app-archetypes", "habit-tracker", "prompts", "03-habit-core-loop.md");
+  const negatedPromptPath = path.join(promptNegatedRoute, "starters", "habit-tracker", "prompts", "03-habit-core-loop.md");
   writeFileSync(
     negatedPromptPath,
     readFileSync(negatedPromptPath, "utf8").replace(/```[\s\S]*?```/, ["```", "Do not use COPY_DECK.md; hardcode the strings.", "```"].join("\n")),
@@ -1304,7 +1307,7 @@ export function register(h: Harness): void {
   // bypasses lib/strings.ts the same way a quoted expression does.
   const starterTemplateLiteral = makeSelfScanRoot("app-copy-starter-template-literal");
   writeFileSync(
-    path.join(starterTemplateLiteral, "templates", "app-archetypes", "habit-tracker", "starter", "components", "fixture-copy.tsx"),
+    path.join(starterTemplateLiteral, "starters", "habit-tracker", "starter", "components", "fixture-copy.tsx"),
     "export function FixtureCopy() {\n  return <p>{`Welcome back`}</p>;\n}\n",
     "utf8",
   );
@@ -1321,7 +1324,7 @@ export function register(h: Harness): void {
   // matcher is scoped to JSX files and tag-adjacent text.
   const starterComparison = makeSelfScanRoot("app-copy-starter-comparison-clean");
   writeFileSync(
-    path.join(starterComparison, "templates", "app-archetypes", "habit-tracker", "starter", "lib", "range.ts"),
+    path.join(starterComparison, "starters", "habit-tracker", "starter", "lib", "range.ts"),
     "export function within(value: number, lower: number, upper: number): boolean {\n  return value > lower && value < upper;\n}\n",
     "utf8",
   );
@@ -1334,7 +1337,7 @@ export function register(h: Harness): void {
   // not un-hold the externalization regression it exists for.
   const starterTextNode = makeSelfScanRoot("app-copy-starter-jsx-text-node");
   writeFileSync(
-    path.join(starterTextNode, "templates", "app-archetypes", "habit-tracker", "starter", "components", "fixture-text.tsx"),
+    path.join(starterTextNode, "starters", "habit-tracker", "starter", "components", "fixture-text.tsx"),
     "export function FixtureText() {\n  return <p>Welcome back friend</p>;\n}\n",
     "utf8",
   );
