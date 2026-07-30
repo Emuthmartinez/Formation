@@ -218,6 +218,7 @@ if (briefRequired) {
 // declaration — its cells are deliberately example copy from a fictional brand
 // that the placeholder list detects the moment it leaks into an authored deck.
 const authoredDeckKeys = new Set<string>();
+const transformedDeckKeys = new Set<string>();
 if (deckText && !deckIsTemplate) {
   const { rows, malformed } = parseDeck(deckText);
   for (const bad of malformed) {
@@ -276,17 +277,21 @@ if (deckText && !deckIsTemplate) {
     const where = `COPY_DECK.md:${row.line}`;
     // Deck keys ship unchanged into the string resources, where a duplicate
     // key silently overwrites another row's copy.
-    if (authoredDeckKeys.has(row.key)) {
+    // Two canonical keys that collapse to the same dots-to-underscores form
+    // (foo.bar_baz and foo_bar.baz) collide in ARB/strings.xml resources.
+    const transformedKey = row.key.replaceAll(".", "_");
+    if (authoredDeckKeys.has(row.key) || transformedDeckKeys.has(transformedKey)) {
       issues.push(
         issue(
           sev("error"),
           "app_copy.deck_key_duplicate",
-          `Deck key "${row.key}" appears more than once. Localization resources keep one value per key, so the second row's copy would silently replace the first.`,
+          `Deck key "${row.key}" collides with an earlier key (directly, or after the dots-to-underscores transform for ARB/strings.xml). Localization resources keep one value per key, so one row's copy would silently replace the other.`,
           where,
         ),
       );
     }
     authoredDeckKeys.add(row.key);
+    transformedDeckKeys.add(transformedKey);
     if (!DECK_KEY_SHAPE.test(row.key)) {
       issues.push(
         issue(
@@ -574,9 +579,11 @@ if (onboarding) {
 // user can see them means the copy pass never ran on the copied starter.
 const fictionalBrands = ["fernpath", "wrenfeed", "loomroom", "glimmerjar"];
 if (root !== path.join(skillRoot, "templates")) {
-  for (const dir of ["app", "lib", "components", "src"]) {
-    const sourceDir = path.join(root, dir);
-    if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) continue;
+  {
+    // Walk the whole business root: native sources live under ios/, android/,
+    // or an app-named directory no fixed list can predict. walkCodeFiles skips
+    // node_modules, build output, and dot directories.
+    const sourceDir = root;
     for (const file of walkCodeFiles(sourceDir)) {
       const relative = path.relative(root, file);
       for (const visible of visibleStrings(readFileSync(file, "utf8"))) {
@@ -616,7 +623,7 @@ if (deckRequired) {
   }
   // The route must be affirmative: "Do not use COPY_DECK.md" contains the
   // filename while reopening the improvisation path.
-  const planRoutesToDeck = (plan ?? "")
+  const planRoutesToDeck = stripMarkdownComments(plan ?? "")
     .split(/\r?\n/)
     .some((line) => line.includes("COPY_DECK.md") && !/\b(do not|don't|never|avoid|skip|without|instead of|cannot|can't|won't|will not)\b/i.test(line));
   if (plan && !planRoutesToDeck) {
@@ -635,7 +642,9 @@ if (deckRequired) {
 // TECH_SPEC.md: localization readiness is a day-one engineering property. When
 // the engineering lane claims done, the spec names the externalization mechanism.
 if (engineeringActive) {
-  const techSpec = readText(root, "TECH_SPEC.md");
+  const rawTechSpec = readText(root, "TECH_SPEC.md");
+  // A readiness section hidden in a comment renders nothing and counts for nothing.
+  const techSpec = rawTechSpec === undefined ? undefined : stripMarkdownComments(rawTechSpec);
   const hasSection = Boolean(techSpec) && /##\s+Strings And Localization Readiness/i.test(techSpec ?? "");
   // The decision lives in its section: "we rejected i18next" elsewhere in the
   // spec is not a selected mechanism, so only the section body can satisfy.
@@ -939,7 +948,7 @@ function walkMarkdown(dir: string): string[] {
 function walkCodeFiles(dir: string): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir)) {
-    if (entry === "node_modules" || entry.startsWith(".")) continue;
+    if (entry === "node_modules" || entry === "dist" || entry === "build" || entry === "Pods" || entry === "DerivedData" || entry.startsWith(".")) continue;
     const full = path.join(dir, entry);
     const stats = statSync(full);
     if (stats.isDirectory()) {

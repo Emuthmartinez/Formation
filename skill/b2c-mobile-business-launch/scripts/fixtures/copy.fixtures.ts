@@ -1222,4 +1222,41 @@ export function register(h: Harness): void {
     "utf8",
   );
   runFixture("App copy: cannot-use mechanism line selects nothing", mechanismCannotUse, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // Canonical keys that collapse to one dots-to-underscores form collide.
+  const deckTransformCollision = makeFixture("app-copy-deck-transform-collision");
+  writeFileSync(path.join(deckTransformCollision, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  writeFileSync(
+    path.join(deckTransformCollision, "COPY_DECK.md"),
+    [...DECK_HEADER, "| foo.bar_baz | Screen | First words here | | 1 |", "| foo_bar.baz | Screen | Second words here | | 1 |", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: transform-colliding deck keys fail", deckTransformCollision, "check-app-copy.ts", 1, "app_copy.deck_key_duplicate");
+
+  // A commented plan route renders nothing for builders.
+  const planCommentedRoute = makeFixture("app-copy-plan-commented-route");
+  writeFileSync(path.join(planCommentedRoute, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "partial" }), "utf8");
+  writeFileSync(
+    path.join(planCommentedRoute, "ENGINEERING_PLAN.md"),
+    "# Engineering Plan\n\n<!-- Builders use COPY_DECK.md -->\n\nBuild the screens.\n",
+    "utf8",
+  );
+  runFixture("App copy: commented plan route is not a route", planCommentedRoute, "check-app-copy.ts", 1, "app_copy.plan_deck_route_missing");
+
+  // A readiness section hidden in a comment certifies nothing.
+  const specCommentedSection = makeFixture("app-copy-spec-commented-section");
+  writeFileSync(path.join(specCommentedSection, "PROJECT_STATE.yaml"), stateWith("phase_2", { engineering: "done" }), "utf8");
+  writeFileSync(
+    path.join(specCommentedSection, "TECH_SPEC.md"),
+    ["# Technical Spec", "", "<!--", "## Strings And Localization Readiness", "", "Mechanism: i18next with expo-localization.", "-->", ""].join("\n"),
+    "utf8",
+  );
+  runFixture("App copy: commented readiness section certifies nothing", specCommentedSection, "check-app-copy.ts", 1, "app_copy.externalization_missing");
+
+  // Native sources under ios/ or an app-named directory are reachable.
+  const nativeNestedBrand = makeFixture("app-copy-native-nested-brand");
+  writeFileSync(path.join(nativeNestedBrand, "PROJECT_STATE.yaml"), stateWith("phase_2", {}), "utf8");
+  mkdirSync(path.join(nativeNestedBrand, "ios", "MyApp"), { recursive: true });
+  writeFileSync(path.join(nativeNestedBrand, "ios", "MyApp", "HomeView.swift"), 'let title = "Fernpath turns your daily walk into a streak"\n', "utf8");
+  runFixture("App copy: fictional brand under ios/ is reachable", nativeNestedBrand, "check-app-copy.ts", 1, "app_copy.fictional_brand_shipped");
 }
