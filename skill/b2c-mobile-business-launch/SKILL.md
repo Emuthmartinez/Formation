@@ -65,13 +65,19 @@ The skill recommends Claude for the pre-build stages through the spec and Codex 
 the core app build. This is a bias, not a gate: either runtime can do any stage, the
 founder decides, and the skill never blocks or refuses work in whichever runtime is
 in front of it. Record which runtime owns which lane in `ORCHESTRATION.md` and
-`PROJECT_STATE.yaml` so later sessions do not re-litigate it. Never downgrade quality
-because a runtime lacks workflows — run the same fan-out, adversarial-verification,
-and quarantine shapes as subagents or inline.
+`PROJECT_STATE.yaml` so later sessions do not re-litigate it.
 
-Load [`playbook/process/dynamic-workflows.md`](playbook/process/dynamic-workflows.md)
-before proposing or running a workflow: it carries which stages earn one, how to
-surface the runtime recommendation without nagging, and the subagent fallback.
+**On a non-Claude-Code runtime** (detectable because `ultracode`/`/workflows`/`/deep-research`
+are unavailable) doing a pre-build stage: surface the recommendation **once**, plainly, not as
+a founder-only gate; record that it was surfaced in `PROJECT_STATE.yaml`; then continue in the
+current runtime regardless. Never downgrade quality because a runtime lacks workflows — run the
+same fan-out, adversarial-verification, and quarantine shapes as subagents or inline.
+
+Load [`playbook/process/dynamic-workflows.md`](playbook/process/dynamic-workflows.md) before
+proposing or running a workflow, **and when starting any pre-build stage on a non-Claude
+runtime** — that protocol has to reach the runtime that cannot run workflows at all, so it
+cannot hang off a workflow-proposal trigger. The reference carries which stages earn one, the
+full surfacing protocol, and the subagent fallback.
 
 ## Start Here
 
