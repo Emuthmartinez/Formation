@@ -113,7 +113,7 @@ round after each push.
 
 ---
 
-## Step 6 — `check-gates-layout.ts`: make the layout self-defending
+## Step 6 — `check-gates-layout.ts`: make the layout self-defending — **DONE, v0.57.0**
 
 **Why first:** it is small, it is the only step that *prevents* future drift, and
 every later step moves files past the rule it enforces.
@@ -144,17 +144,17 @@ Expect `audit:ci` → **71 ok**.
 
 ---
 
-## Step 7 — the three validators with arguable homes
+## Step 7 — the validators with arguable homes — **DONE, v0.57.0**
 
-Left alone during steps 4–5 because none is a `check-*.ts`, so none was in scope.
-Decide and move:
+Left alone during steps 4–5 because none is a `check-*.ts`. Placed in v0.57.0
+by the subject-of-the-assertion rule:
 
 | File | Grades | Argues for |
 | --- | --- | --- |
 | `scripts/audit-skill-links.ts` | the skill's own markdown links + orphans | `machine/` |
 | `scripts/refresh-source-freshness.ts` | the source registry | `machine/` |
 | `scripts/validate-project-state.ts` | a business repo's PROJECT_STATE | `gates/process/` |
-| `scripts/validate-state.ts` | a business repo's design state | `gates/process/` |
+| `scripts/validate-state.ts` | a business repo's design state | `gates/design/` |
 
 Apply the settled rule (subject of the assertion). Note `validate-project-state.ts`
 is in `knownValidators` and is spawned by fixtures **by basename**, so

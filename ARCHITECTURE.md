@@ -93,7 +93,7 @@ Safest first; each step keeps `npm run audit:ci` green and lands as its own comm
 
 **The migration is complete.** Every top-level directory now answers *who reads it* rather than *what kind of file it holds*. `run-audit.ts` stays in `scripts/` deliberately: it is the pipeline orchestrator that runs gates, machine checks and renderers alike, not part of the eval harness. What remains in `scripts/` is coherent — everything executable that is neither a gate nor the eval harness, plus the shared `lib/`.
 
-Three files have arguable homes and were left alone rather than moved on the way past: `audit-skill-links.ts` and `refresh-source-freshness.ts` grade the skill and could sit in `machine/`; `validate-project-state.ts` and `validate-state.ts` grade a business and could sit in `gates/process/`. None is a `check-*.ts`, so none was in step 4's scope either. Moving them is a small, separate change.
+The last four files whose homes were arguable were placed in v0.57.0 by the same rule: `audit-skill-links.ts` and `refresh-source-freshness.ts` grade the skill, so they are in `machine/`; `validate-project-state.ts` grades a business repo's state and `validate-state.ts` grades its design state, so they are in `gates/process/` and `gates/design/`. `check:gates-layout` now enforces the shape they landed in.
 
 Steps 4 and 5 were originally separate. They were merged for the validators because a blanket move of all 61 to `gates/` would have sent parity and versioning there only for step 5 to move them out again — and this repo pays 8–18 review rounds per PR, so relocating a file twice is the expensive mistake. Step 5 keeps the evals and fixtures.
 
