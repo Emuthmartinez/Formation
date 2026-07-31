@@ -150,6 +150,30 @@ export function register(h: Harness): void {
     "gates_layout.duplicate_basename",
   );
 
+  // The runtime-routing protocol was routed out of SKILL.md in v0.58.0 behind a
+  // "before proposing or running a workflow" trigger — which never fires on the
+  // one runtime that cannot run workflows. audit:ci stayed green through it.
+  // Prose cannot stop the next compaction re-making that cut, so the trigger is
+  // pinned as required_terms and proven failable here.
+  const autopilotStripped = makeEmptyFixture("autopilot-runtime-routing-stripped");
+  mkdirSync(path.join(autopilotStripped, "machine", "evals", "triggering"), { recursive: true });
+  cpSync(
+    path.join(skillRoot, "machine", "evals", "triggering", "autopilot-triggering.yaml"),
+    path.join(autopilotStripped, "machine", "evals", "triggering", "autopilot-triggering.yaml"),
+  );
+  writeFileSync(
+    path.join(autopilotStripped, "SKILL.md"),
+    readFileSync(path.join(skillRoot, "SKILL.md"), "utf8").replace("non-Claude-Code runtime", "some other runtime"),
+    "utf8",
+  );
+  runScriptArgs(
+    "autopilot contract fails when SKILL.md drops the non-Claude runtime-routing trigger",
+    "check-autopilot-contract.ts",
+    ["--skill-root", autopilotStripped],
+    1,
+    "autopilot.body.required_term_missing",
+  );
+
   // --- check-agent-entrypoints ---
   runScriptArgs("agent entrypoints pass on the shipped skill", "check-agent-entrypoints.ts", ["--skill-root", skillRoot], 0);
   const entrypointsEmpty = makeEmptyFixture("agent-entrypoints-empty-skill-root");
