@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { asArray, asString, flagString, isRecord, issue, parseFlags, reportAndExit, type Issue } from "./lib/launch-state.js";
+import { asArray, asString, flagString, isRecord, issue, parseFlags, reportAndExit, type Issue } from "../scripts/lib/launch-state.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, "..");
@@ -92,7 +92,7 @@ function parseArgs(argv: string[]): Args {
   ]);
 
   return {
-    evalDir: flagString(flags, "evalDir") ?? path.join(skillRoot, "evals/agent-behavior"),
+    evalDir: flagString(flags, "evalDir") ?? path.join(skillRoot, "machine/evals/agent-behavior"),
     responsesDir: flagString(flags, "responsesDir"),
   };
 }

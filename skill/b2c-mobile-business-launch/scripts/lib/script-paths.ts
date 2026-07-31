@@ -23,7 +23,7 @@ import path from "node:path";
 
 /**
  * Directories holding spawnable scripts, in the order a tie would be reported.
- * `scripts/lib` and `scripts/fixtures` are deliberately excluded: they are
+ * `scripts/lib` and `machine/fixtures` are deliberately excluded: they are
  * imported, never spawned, and indexing them would let a module basename mask
  * a real collision between two runnable scripts.
  */

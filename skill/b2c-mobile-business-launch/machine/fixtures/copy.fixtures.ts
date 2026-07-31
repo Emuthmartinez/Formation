@@ -1425,7 +1425,7 @@ export function register(h: Harness): void {
   writeFileSync(
     path.join(testLiteralClean, "__tests__", "branding.test.ts"),
     [
-      'import { strings } from "../lib/strings";',
+      'import { strings } from "../../scripts/lib/strings";',
       'import { expect, test } from "vitest";',
       "",
       'test("no starter brand ships", () => {',

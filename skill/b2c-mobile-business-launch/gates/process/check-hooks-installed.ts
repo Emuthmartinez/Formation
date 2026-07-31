@@ -5,7 +5,7 @@
  *
  * business/repo-agent-entrypoints/settings.json ships PostToolUse hooks that
  * fire depth-check validators after artifact writes and block the screenshot
- * grading pass. scripts/fixtures/hooks.fixtures.ts proves those commands
+ * grading pass. machine/fixtures/hooks.fixtures.ts proves those commands
  * behave correctly. Nothing proved a generated business repo had installed
  * them: the instruction lived in a JSON comment ("Copy this file to
  * .claude/settings.json"), so a launch could pass every other gate with zero

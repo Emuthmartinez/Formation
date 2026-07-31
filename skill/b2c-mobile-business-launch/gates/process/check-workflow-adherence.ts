@@ -54,7 +54,7 @@ const templateAgentsPath = path.join(skillRoot, "business", "repo-agent-entrypoi
 const templateClaudePath = path.join(skillRoot, "business", "repo-agent-entrypoints", "CLAUDE.md");
 const orchestrationTemplatePath = path.join(skillRoot, "business", "ORCHESTRATION.md");
 const projectStateTemplatePath = path.join(skillRoot, "business", "PROJECT_STATE.yaml");
-const launchbenchDir = path.join(skillRoot, "evals", "launchbench");
+const launchbenchDir = path.join(skillRoot, "machine", "evals", "launchbench");
 
 const parallel = readRequired(parallelPath, "parallel_agent_reference", issues);
 const engineering = readRequired(engineeringPath, "engineering_orchestration_reference", issues);

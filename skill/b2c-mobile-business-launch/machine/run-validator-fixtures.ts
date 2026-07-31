@@ -2,8 +2,8 @@
 /**
  * Thin entrypoint for the validator fixture suite.
  *
- * The shared harness lives in scripts/fixtures/_harness.ts and the fixtures
- * themselves are grouped into domain modules under scripts/fixtures/. Modules
+ * The shared harness lives in machine/fixtures/_harness.ts and the fixtures
+ * themselves are grouped into domain modules under machine/fixtures/. Modules
  * are registered in sequence so the PASS/FAIL output order is stable.
  *
  * Flags:

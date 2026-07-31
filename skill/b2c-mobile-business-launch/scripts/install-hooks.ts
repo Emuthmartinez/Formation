@@ -5,7 +5,7 @@
  * The hooks in business/repo-agent-entrypoints/settings.json are the skill's
  * only automatic enforcement layer: they fire depth-check validators after the
  * agent writes an artifact, and they block the screenshot grading pass when a
- * final PNG lands. scripts/fixtures/hooks.fixtures.ts already proves those
+ * final PNG lands. machine/fixtures/hooks.fixtures.ts already proves those
  * commands behave correctly — what was never enforced is that a generated
  * business repo actually *has* them. Until this script existed, installation
  * was one prose line ("Copy this file to .claude/settings.json") inside a JSON

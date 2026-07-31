@@ -89,7 +89,11 @@ Safest first; each step keeps `npm run audit:ci` green and lands as its own comm
 2. **`playbook/`** — regroup `references/` by domain, each with its `README.md`, collapsing `SKILL.md` rows as each domain lands. **Done, v0.53.0.**
 3. **`business/`** — rename `templates/` for what it produces. **Done, v0.54.0.** The `docs/` and `pages/` sub-split is still pending.
 4. **`gates/` + the validator half of `machine/`** — move all 61 `scripts/check-*.ts` at once, split by what they grade. **Done, v0.55.0.**
-5. **`machine/`, the rest** — the eval harness and its 129 eval files, and `scripts/fixtures/`.
+5. **`machine/`, the rest** — the eval harness and its 129 eval files, and `scripts/fixtures/`. **Done, v0.56.0.**
+
+**The migration is complete.** Every top-level directory now answers *who reads it* rather than *what kind of file it holds*. `run-audit.ts` stays in `scripts/` deliberately: it is the pipeline orchestrator that runs gates, machine checks and renderers alike, not part of the eval harness. What remains in `scripts/` is coherent — everything executable that is neither a gate nor the eval harness, plus the shared `lib/`.
+
+Three files have arguable homes and were left alone rather than moved on the way past: `audit-skill-links.ts` and `refresh-source-freshness.ts` grade the skill and could sit in `machine/`; `validate-project-state.ts` and `validate-state.ts` grade a business and could sit in `gates/process/`. None is a `check-*.ts`, so none was in step 4's scope either. Moving them is a small, separate change.
 
 Steps 4 and 5 were originally separate. They were merged for the validators because a blanket move of all 61 to `gates/` would have sent parity and versioning there only for step 5 to move them out again — and this repo pays 8–18 review rounds per PR, so relocating a file twice is the expensive mistake. Step 5 keeps the evals and fixtures.
 

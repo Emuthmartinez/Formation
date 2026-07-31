@@ -129,7 +129,7 @@ npm run check:skill-version -- \
 
 Four **app archetype packs** cover the B2C product shapes this skill sees most: [social and community](skill/b2c-mobile-business-launch/playbook/product/social-network.md), [AI chat and companion](skill/b2c-mobile-business-launch/playbook/product/ai-chat-companion.md), [habit tracker and utility](skill/b2c-mobile-business-launch/playbook/product/habit-tracker.md), and [photo and AI media](skill/b2c-mobile-business-launch/playbook/product/photo-ai-media.md). Each ships a runnable starter scaffold, not just prompts: Next.js and Supabase with tested RLS policies, Stripe and RevenueCat stubs, a PostHog event catalog, names-only env, and CI. `check:archetype-starter` verifies the scaffold still builds the shape it advertises.
 
-**LaunchBench** holds the regression scenarios under [`evals/launchbench/`](skill/b2c-mobile-business-launch/evals/launchbench/), one per launch failure mode worth never repeating. `npm run launchbench` lints the definitions and runs the deterministic validator fixtures. A separate opt-in layer, `npm run evals:behavioral`, grades flagged scenarios against a live agent and stays outside the PR gate on purpose, because live runs cost money and carry model variance.
+**LaunchBench** holds the regression scenarios under [`evals/launchbench/`](skill/b2c-mobile-business-launch/machine/evals/launchbench/), one per launch failure mode worth never repeating. `npm run launchbench` lints the definitions and runs the deterministic validator fixtures. A separate opt-in layer, `npm run evals:behavioral`, grades flagged scenarios against a live agent and stays outside the PR gate on purpose, because live runs cost money and carry model variance.
 
 ## Repo layout
 

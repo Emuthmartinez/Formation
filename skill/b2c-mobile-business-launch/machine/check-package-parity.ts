@@ -208,7 +208,15 @@ function checkAuditPlanCoverage(label: string, layout: AuditLayout, scripts: Rec
  * exists to prevent, so it must not be reintroduced by a path assumption.
  */
 function checkLaunchbenchValidatorParity(runtimeScripts: Record<string, string>): void {
-  const launchbenchPath = path.join(args.skillRoot, "scripts", "run-launchbench.ts");
+  // Resolved, not assumed. This lookup used to hardcode scripts/, and when
+  // run-launchbench.ts moved to machine/ the existsSync went false and this
+  // whole function returned early — silently skipping the entire allowlist
+  // cross-check while still exiting 0. That is the same trap the comment above
+  // describes, one directory move later, at the file-locate step instead of
+  // inside the loop.
+  const launchbenchRel = findScriptPath(args.skillRoot, "run-launchbench");
+  if (!launchbenchRel) return;
+  const launchbenchPath = path.join(args.skillRoot, launchbenchRel);
   if (!existsSync(launchbenchPath)) return;
 
   const source = readFileSync(launchbenchPath, "utf8");

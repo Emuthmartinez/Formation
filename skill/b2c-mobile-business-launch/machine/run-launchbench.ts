@@ -4,11 +4,11 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { asArray, asString, isRecord, issue, reportAndExit, type Issue } from "./lib/launch-state.js";
+import { asArray, asString, isRecord, issue, reportAndExit, type Issue } from "../scripts/lib/launch-state.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, "..");
-const scenarioDir = path.resolve(scriptDir, "../evals/launchbench");
+const scenarioDir = path.resolve(scriptDir, "./evals/launchbench");
 const issues: Issue[] = [];
 function resolveTsxBin(): string {
   const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
