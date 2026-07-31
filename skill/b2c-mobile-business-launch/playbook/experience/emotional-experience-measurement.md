@@ -21,35 +21,23 @@ The goal: every emotional moment must be traceable from a named PostHog event �
 
 ## 1. Scope And Governance
 
-These cards are NOT dark patterns by design. Each card has a bright-line rule. The skill's compliance veto fires and blocks implementation if the dark-line is crossed. When in doubt, default to the bright line.
-
-| Card | Bright Line (Serves User's Real Goal) | Dark Line (Compliance Veto) |
-| --- | --- | --- |
-| Commitment Card | User explicitly chose and progressed; the app reflects that back honestly | Manufactured false progress; lock-in without delivered value; manufactured loss through guilt |
-| Variable Reward Card | Reward timing is honest and the user can opt out | Suppressed rewards to re-trigger distress; infinite scroll without exit; withdrawal-inducing withdrawal patterns |
-| Perceived Effort Delay Card | Delay reflects real computation or care; user can cancel; accuracy stated | Fake progress bars with random delays; no user benefit from the wait |
-| Intent Mirroring Card | Pause confirms the user's stated intent and offers a path forward | Pause adds friction to exit/cancel; pause used to dissuade unsubscribe |
-
-Add a failure card `emotional-card-dark-line-crossed` whenever a dark-line violation is detected (see Section 12).
+Scope and the bright/dark boundary for every card are defined in
+[`ethics-guardrail.md`](ethics-guardrail.md) §1 Bright-Line Vs Dark-Line Distinction, including
+the card-by-card bright/dark examples this section used to restate. What is measured here is
+the instrumentation; what is *permitted* is decided there.
 
 ## 2. Psychological Grounding
 
-Attribute every claim to its source. Do not invent citations.
+The academic grounding is not restated here. Two places already carry it, and a third copy is
+how citations drift:
 
-- **Commitment and consistency / foot-in-the-door**: Robert Cialdini, _Influence_ (1984). Small prior commitments increase follow-through on larger ones. The Commitment Card creates a visible micro-investment moment so the user's own choices create forward momentum.
-- **Dopamine reward-prediction-error / anticipation-not-reward**: Wolfram Schultz, "A Neural Substrate of Prediction and Reward," _Science_ 275 (1997). Dopamine fires on the anticipation signal, not the reward delivery. The Variable Reward Card exploits the build-up phase, not the dopamine of the prize itself.
-- **Variable-ratio reinforcement schedule**: B.F. Skinner, operant conditioning research. Unpredictable reward timing produces stronger and more persistent response than fixed intervals. Bright-line: variability must be genuine, not simulated.
-- **Labor Illusion / operational transparency**: Ryan Buell and Michael Norton, "The Labor Illusion: How Operational Transparency Increases Perceived Value," _Management Science_ (2011). Users value outcomes more when they can see effort expended on their behalf. The Perceived Effort Delay Card operationalizes this.
-- **IKEA effect**: Norton, Mochon, and Ariely, "The IKEA Effect: When Labor Leads to Love," _Journal of Consumer Psychology_ (2012). Users place higher value on outcomes they participate in creating. Perceived Effort Delay strengthens this when users see the system working through their specific inputs.
-- **Implementation intentions**: Peter Gollwitzer, "Implementation Intentions: Strong Effects of Simple Plans," _American Psychologist_ (1999). Stating when/where you will do something significantly increases follow-through. The Intent Mirroring Card makes a user's stated intention explicit and specific.
-- **Goal-gradient effect / endowed progress**: Clark Hull (1932); Kivetz, Urminsky, and Zheng, "The Goal-Gradient Hypothesis Resurrected," _Journal of Marketing Research_ (2006). Users accelerate effort as they approach a goal, especially when shown they have already made progress.
-- **Wanting-vs-liking dissociation**: Kent Berridge, motivational neuroscience. "Wanting" (incentive salience) and "liking" (hedonic pleasure) are distinct systems. The Variable Reward Card targets wanting; dark patterns suppress liking to inflate wanting, which is a compliance veto.
-- **Peak-end rule**: Daniel Kahneman and Barbara Fredrickson, "When More Pain Is Preferred to Less," _Psychological Science_ (1993). Users remember an experience by its peak emotion and its ending. Intent Mirroring creates a designed peak.
-- **Hook Model (Trigger → Action → Variable Reward → Investment)**: Nir Eyal, _Hooked_ (2014). Each card maps to one segment of this loop. The Investment phase (what the user puts in) is where Commitment Card lives. Variable Reward is its own explicit loop phase.
-- **Fogg Behavior Model (B = MAP)**: BJ Fogg, _Tiny Habits_ (2019). Behavior = Motivation × Ability × Prompt. Emotional cards work on the Motivation axis; they must not manufacture fake Ability signals (a dark-line).
-- **Visceral/behavioral/reflective design**: Don Norman, _Emotional Design_ (2004). The three levels map roughly: Variable Reward (visceral), Perceived Effort Delay (behavioral), Intent Mirroring (reflective).
-- **Affective computing / sensing user state**: Rosalind Picard, _Affective Computing_ (1997). Attribution-uncertain: no specific study cited; principle is that emotional context changes user receptivity. Used as rationale for timing cards to positive states, not distress.
-- **Fresh-start effect**: Hengchen Dai, Katherine Milkman, and Jason Riis, "The Fresh Start Effect," _Management Science_ (2014). Temporal landmarks increase motivation. Commitment Card timing at natural restart moments amplifies the effect.
+- the Tier 1–5 knowledge ladder, each tier paired with its failure mode, in
+  [`emotional-design-system.md`](emotional-design-system.md) §Knowledge Hierarchy
+- the per-card psychological basis — the specific studies behind each mechanic — at the head of
+  each card in [`experience-cards/`](experience-cards.md)
+
+This file measures whether those mechanics are working in a running app. It does not re-argue
+why they work.
 
 ## 3. System-Level Measurement Layer
 
@@ -381,18 +369,10 @@ Run this protocol weekly while any emotional card experiment is active. Record r
 
 ## 10. Ethics Guardrails And Compliance Veto
 
-The following actions are hard-blocked. Any agent proposing them must be stopped, the action logged in `FAILURE_CARDS.md`, and the founder notified before any code ships.
-
-| Blocked Action | Which Card | Why |
-| --- | --- | --- |
-| Manufacturing fake commitment progress (showing progress bars that do not reflect real user actions) | Commitment | Cialdini bright-line: the commitment must be real, not simulated |
-| Suppressing a legitimate cancel or back action during a commitment echo or intent mirror moment | Commitment, Intent Mirroring | Dark pattern: reducing ability to exit is manipulation, not design |
-| Showing a variable-ratio reward mechanic on content the user has already seen, to create false novelty | Variable Reward | Berridge wanting-vs-liking: manufactured wanting without liking is extraction |
-| Using a variable reward reveal to gate access to content that was already earned | Variable Reward | Skinner bright-line: variable timing is about schedule, not withholding earned value |
-| Adding artificial processing delays beyond what real computation requires, with no user benefit | Perceived Effort Delay | Labor Illusion bright-line: the visible effort must reflect real effort (Buell & Norton) |
-| Placing an intent mirror on a cancel / unsubscribe / downgrade flow to add friction | Intent Mirroring | Norman reflective design: mirrors are for amplifying value, not blocking exit |
-| Removing the opt-out or edit path from any emotional card UI | All cards | GDPR/consumer protection baseline; Fogg B=MAP: ability to stop must exist |
-| Firing any card in a distressed user state (e.g. after three failed payment attempts, after an error screen) | All cards | Affective computing principle (Picard): emotional design at distress points is exploitation |
+The guardrails and the compliance veto are [`ethics-guardrail.md`](ethics-guardrail.md)
+§1 Bright-Line Vs Dark-Line Distinction and §5 Guardrail Contract → Non-Negotiable Prohibitions. §9 above is the *detection* protocol — what a dark pattern looks
+like in telemetry; the prohibition itself, and the veto power, live in the guardrail file so
+there is exactly one place a rule can be changed.
 
 ## 11. Implementation And QA Checklist
 
