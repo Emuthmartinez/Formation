@@ -160,7 +160,8 @@ These run against this repo rather than a target app.
 | `check:skill-version` | Whether the installed runtime is behind local source, emitting the upgrade gate when stale |
 | `check:version-discipline` | Meaningful skill changes bump `skill-version.json` in the same release commit |
 | `check:package-parity` | Source-root and runtime package versions, lockfiles, critical scripts, audit coverage, and runtime dependency parity |
-| `check:reference-size` | A 64KB per-file budget over `references/` and a 45KB budget on `SKILL.md`, with a reasoned exclusion list |
+| `check:reference-size` | A 64KB per-file budget over `playbook/` and `machine/` and a 45KB budget on `SKILL.md`, with a reasoned exclusion list; `machine/evals/` and `machine/fixtures/` are exempt as machine-read data rather than agent-loaded prose |
+| `check:gates-layout` | `gates/` mirrors the `playbook/` domains: nothing sits at the `gates/` root, every gate folder names a real domain (read from `playbook/`, never hardcoded), and no basename is held by two script roots at once — a guarantee a flat `gates/` gave for free |
 | `check:artifact-templates` | Every template `PROJECT_STATE.yaml` evidence path has a starter artifact |
 | `check:app-archetype` | The archetype packs cover their advertised shapes |
 | `check:archetype-starter` | Starter scaffolds: structure completeness with lockfiles, names-only `.env.example`, no secret patterns, RLS migrations plus pgTAP tests, snake_case event catalogs, and a prompt-to-scaffold map |

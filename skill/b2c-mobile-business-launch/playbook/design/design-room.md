@@ -28,7 +28,7 @@ In the skill:
 
 ```text
 state/schema/business.schema.json
-scripts/validate-state.ts
+gates/design/validate-state.ts
 scripts/render-design-room.ts
 scripts/version.ts
 gates/design/check-design-room-contract.ts

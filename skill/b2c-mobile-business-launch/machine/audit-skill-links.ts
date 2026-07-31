@@ -16,7 +16,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
-import { collectAllFiles, collectFiles, issue, reportAndExit, type Issue } from "./lib/launch-state.js";
+import { collectAllFiles, collectFiles, issue, reportAndExit, type Issue } from "../scripts/lib/launch-state.js";
 
 let skillRoot = process.cwd();
 const argv = process.argv.slice(2);

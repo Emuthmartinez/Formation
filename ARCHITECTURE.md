@@ -93,7 +93,7 @@ Safest first; each step keeps `npm run audit:ci` green and lands as its own comm
 
 **The migration is complete.** Every top-level directory now answers *who reads it* rather than *what kind of file it holds*. `run-audit.ts` stays in `scripts/` deliberately: it is the pipeline orchestrator that runs gates, machine checks and renderers alike, not part of the eval harness. What remains in `scripts/` is coherent — everything executable that is neither a gate nor the eval harness, plus the shared `lib/`.
 
-Three files have arguable homes and were left alone rather than moved on the way past: `audit-skill-links.ts` and `refresh-source-freshness.ts` grade the skill and could sit in `machine/`; `validate-project-state.ts` and `validate-state.ts` grade a business and could sit in `gates/process/`. None is a `check-*.ts`, so none was in step 4's scope either. Moving them is a small, separate change.
+The last four files whose homes were arguable were placed in v0.57.0 by the same rule: `audit-skill-links.ts` and `refresh-source-freshness.ts` grade the skill, so they are in `machine/`; `validate-project-state.ts` grades a business repo's state and `validate-state.ts` grades its design state, so they are in `gates/process/` and `gates/design/`. `check:gates-layout` now enforces the shape they landed in.
 
 Steps 4 and 5 were originally separate. They were merged for the validators because a blanket move of all 61 to `gates/` would have sent parity and versioning there only for step 5 to move them out again — and this repo pays 8–18 review rounds per PR, so relocating a file twice is the expensive mistake. Step 5 keeps the evals and fixtures.
 
@@ -103,7 +103,15 @@ Steps 4 and 5 were originally separate. They were merged for the validators beca
 
 The operative test is the **subject of the assertion, not the root flag the validator takes**. Several gates run against the skill root — which argues `machine/` — while asserting something about the launch. `check:motion-contract` governs the numbers a launched app animates with; `check:asc-command-contract` the commands a submission runs; `check:app-archetype` and `check:archetype-starter` the scaffold a business is built from; `check:artifact-templates` the launch's artifact contract. Their subject is the launch, so they are gates.
 
-`machine/` stays narrow and is currently six files: package parity, skill version, version discipline, source-registry freshness, reference byte budgets, and the `SKILL.md` autopilot contract. A file about *how a launch is run* is method — its gate belongs in `gates/process/`, not here.
+`machine/` stays narrow: package parity, skill version, version discipline, source-registry freshness and its refresher, reference byte budgets, the `SKILL.md` autopilot contract, and the link-graph audit. A file about *how a launch is run* is method — its gate belongs in `gates/process/`, not here.
+
+**`skill-version.json` stays at the skill root and does not move into `machine/`.** It is the one file that has to be readable by something that has not loaded the skill yet:
+
+- `SKILL.md` instructs an agent to "compare `skill-version.json` manually if the helper is unavailable" — a fallback that only works at a stable, shallow, known path.
+- `check:skill-version` compares the manifest across two installs (`--source` and `--installed`). Burying it one level down makes that comparison depend on the installed copy having the same *internal* layout, which is precisely the drift a version check exists to detect.
+- It is a manifest describing the whole package, like `package.json` and `SKILL.md`. A manifest belongs at the root of the thing it describes.
+
+`machine/` holds what a maintainer *runs*; `skill-version.json` is what the outside world *reads*.
 
 `gates/` mirrors the `playbook/` domain names rather than staying flat. The two machine consumers of these paths are indifferent to the choice — the audit runner resolves steps by npm script name, the fixture harness by basename — so the decision rests on the reader who orients before grepping, and 55 files in one directory give that reader nothing. There is **no top-level exception bucket**: every gate nests, and genuinely cross-cutting ones go to `gates/process/`, which this document already describes as the cross-cutting launch-method domain. One placement rule, not two.
 

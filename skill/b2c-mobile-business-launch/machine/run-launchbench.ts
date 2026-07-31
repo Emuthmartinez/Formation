@@ -16,6 +16,7 @@ function resolveTsxBin(): string {
 }
 
 const knownValidators = new Set([
+  "check-gates-layout",
   "validate-project-state",
   "check-attribution-contract",
   "check-apple-signing-packet",
