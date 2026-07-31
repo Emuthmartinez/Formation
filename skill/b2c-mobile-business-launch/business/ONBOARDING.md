@@ -49,11 +49,15 @@ Onboarding is where most Experience Cards fire. When the 11-star target is 6-sta
 
 The onboarding emotional curve must cross positive (+2) at or before the paywall; a curve that first turns positive after the paywall is a conversion-design failure. Every animated card moment needs a `prefers-reduced-motion` fallback.
 
+## Screen Mockups
+
+`onboarding.html` is written from the sequence above, so it shows the flow as specified rather than as designed. Screen visuals, mascot states, motion, and the empty, loading, and offline states live in `design.html` and the rendered Design Room, and none of them exist until the design work lands. Read this page as the specification a builder works from, not as a picture of the finished screens.
+
 ## Build Handoff Gates
 
 - `COPY_DECK.md` carries authored rows for every screen above — final words, not descriptions — and `npm run check:app-copy` passes.
 - `onboarding.html` shows the value-reveal screen followed by the App Review popup placeholder.
 - `ANALYTICS.md` includes all onboarding, attribution, review prompt, paywall, and activation events.
-- `EMOTIONAL_DESIGN.md` Card Application Map covers the onboarding card moments above with a measurement event each (when the emotional_design lane is in scope).
+- `EMOTIONAL_DESIGN.md` Card Application Map covers the onboarding card moments above with a measurement event each (when emotional design is in scope).
 - `REVENUE_OPS.md`, `PRIVACY.md`, `TERMS.md`, and support links match the flow before implementation.
 - `npm run check:onboarding -- --root <app>` passes.

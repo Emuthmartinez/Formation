@@ -241,7 +241,7 @@ export function writeCompleteSecurity(root: string): void {
       "Email and Domain Security cover SPF, DKIM, DMARC, unsubscribe, Resend, support, privacy, security aliases, security.txt, and security headers.",
       "Supply Chain covers SDK inventory, dependency review, lockfiles, secret scan, build scripts, signing material, and no raw secrets.",
       "Monitoring and Incident Response cover Sentry, release health, alerts, support escalation, rollback, and vulnerability disclosure.",
-      "Release Proof requires check:security, check:secrets, mobile proof, webhook proof, scanner or blocked-route evidence, and security-review.html.",
+      "Release Checks require check:security, check:secrets, mobile evidence, webhook evidence, scanner or blocked-route evidence, and security-review.html.",
       "Accepted Risks list owner, reason, expiry, compensating control, evidence, and founder approval.",
       "Founder Approval gates paid scanners, hosted security tools, repo connections, public disclosure routes, and blocking App Attest, DeviceCheck, or Play Integrity enforcement.",
     ].join("\n"),

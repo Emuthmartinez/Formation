@@ -74,9 +74,9 @@ So the rule is a **ratchet, not a target**: `machine/check-reference-size.ts` ho
 
 **`SKILL.md` routes and nothing else.** Every domain gets one row pointing at its index. Detail lives one level down. Measured on the store domain: collapsing nine verbose routing rows into three index-pointing rows freed 2,787 bytes while the folder move cost 120 — the entrypoint's fullness is a symptom of detail living too high, not a budget problem.
 
-**HTML is generated, never authored.** Every page in `business/` renders from `state/`. Hand-authored HTML twins go stale silently with no signal; six such pairs exist today.
+**HTML is generated, never authored.** Every page in `business/` renders from `state/` or from the document it mirrors. Hand-authored HTML twins go stale silently with no signal, and the four root-level ones proved it before v0.61.0 generated them: `security-review.html` was missing ten of the fifteen sections its own opening line claimed, `store-console.html` had dropped the App Review checklist that prevents a Guideline 2.1 rejection, `onboarding.html` carried one screen's content under another's heading, and `orchestration.html` held a table row that was never real. `check:generated-pages` now holds the root of `business/`: every page there declares its provenance in `scripts/lib/artifact-pages.ts`, and every page written from Markdown must byte-match a fresh render. The twins inside the subject folders (`11-star-experience/`, `emotional-design/`, `ux-patterns/`, `content-assets/`, `app-store-listing/`, `localization-market-research/`) are still hand-authored and are the next set to bring under it.
 
-**Merge duplicates as you move, in the same commit.** Moving duplicated content into a tidy folder gives the duplication a nicer address. The known clusters: four emotional-design files restating the same citations, twelve near-identical card files, the six HTML/Markdown twins.
+**Merge duplicates as you move, in the same commit.** Moving duplicated content into a tidy folder gives the duplication a nicer address. The known clusters: four emotional-design files restating the same citations, twelve near-identical card files, the HTML/Markdown twins.
 
 ## What this deliberately drops
 

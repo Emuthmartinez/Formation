@@ -69,7 +69,7 @@ Missing runtime access is not approval to use the fallback. Ask or record the bl
 - Email and Domain Security: Resend, SPF, DKIM, DMARC, unsubscribe, inbound/reply, security alias, and webhook signing.
 - Supply Chain and Build Security: dependencies, SDK inventory, lockfiles, secret scans, signing material, CI, and generated code.
 - Monitoring and Incident Response: Sentry/release health, alerts, rollback, support escalation, store crash reports, public contact path.
-- Release Proof: command results, scanner evidence or blocked route, mobile/backend/provider proof, and accepted risks.
+- Release Checks: command results, scanner evidence or blocked route, mobile/backend/provider evidence, and accepted risks.
 - Founder Approval Gates.
 
 Do not mark security done from prose. Security is done only when `SECURITY.md`, `security-review.html`, relevant scanner/review evidence, secret routing, production-readiness proof, and remaining accepted risks are all current.

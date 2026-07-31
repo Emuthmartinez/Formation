@@ -74,7 +74,7 @@ function checkUnresolvedSecurityLines(text: string): void {
     "Sentry",
     "MobSF",
     "security.txt",
-    "release proof",
+    "release checks",
   ];
 
   for (const line of text.split(/\r?\n/)) {
@@ -143,7 +143,11 @@ if (markdown) {
     "Supply Chain",
     "Monitoring",
     "Incident Response",
-    "Release Proof",
+    // Renamed from "Release Proof" when security-review.html became a render of
+    // this document: "proof" is banned in founder-visible copy by
+    // check:founder-copy, and the hand-authored page had already been silently
+    // translating the heading to "Release Checks" for the founder.
+    "Release Checks",
     "Accepted Risks",
     "Founder Approval",
   ];
