@@ -19,7 +19,7 @@ import {
   requireStatus,
   requireString,
   validateReason,
-} from "./lib/launch-state.js";
+} from "../../scripts/lib/launch-state.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);

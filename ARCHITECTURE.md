@@ -103,7 +103,15 @@ Steps 4 and 5 were originally separate. They were merged for the validators beca
 
 The operative test is the **subject of the assertion, not the root flag the validator takes**. Several gates run against the skill root — which argues `machine/` — while asserting something about the launch. `check:motion-contract` governs the numbers a launched app animates with; `check:asc-command-contract` the commands a submission runs; `check:app-archetype` and `check:archetype-starter` the scaffold a business is built from; `check:artifact-templates` the launch's artifact contract. Their subject is the launch, so they are gates.
 
-`machine/` stays narrow and is currently six files: package parity, skill version, version discipline, source-registry freshness, reference byte budgets, and the `SKILL.md` autopilot contract. A file about *how a launch is run* is method — its gate belongs in `gates/process/`, not here.
+`machine/` stays narrow: package parity, skill version, version discipline, source-registry freshness and its refresher, reference byte budgets, the `SKILL.md` autopilot contract, and the link-graph audit. A file about *how a launch is run* is method — its gate belongs in `gates/process/`, not here.
+
+**`skill-version.json` stays at the skill root and does not move into `machine/`.** It is the one file that has to be readable by something that has not loaded the skill yet:
+
+- `SKILL.md` instructs an agent to "compare `skill-version.json` manually if the helper is unavailable" — a fallback that only works at a stable, shallow, known path.
+- `check:skill-version` compares the manifest across two installs (`--source` and `--installed`). Burying it one level down makes that comparison depend on the installed copy having the same *internal* layout, which is precisely the drift a version check exists to detect.
+- It is a manifest describing the whole package, like `package.json` and `SKILL.md`. A manifest belongs at the root of the thing it describes.
+
+`machine/` holds what a maintainer *runs*; `skill-version.json` is what the outside world *reads*.
 
 `gates/` mirrors the `playbook/` domain names rather than staying flat. The two machine consumers of these paths are indifferent to the choice — the audit runner resolves steps by npm script name, the fixture harness by basename — so the decision rests on the reader who orients before grepping, and 55 files in one directory give that reader nothing. There is **no top-level exception bucket**: every gate nests, and genuinely cross-cutting ones go to `gates/process/`, which this document already describes as the cross-cutting launch-method domain. One placement rule, not two.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { loadDesignState, parseDesignCliArgs, rel } from "./lib/design-state.js";
-import { reportAndExit } from "./lib/launch-state.js";
+import { loadDesignState, parseDesignCliArgs, rel } from "../../scripts/lib/design-state.js";
+import { reportAndExit } from "../../scripts/lib/launch-state.js";
 
 const args = parseDesignCliArgs(process.argv.slice(2));
 const loaded = loadDesignState(args);

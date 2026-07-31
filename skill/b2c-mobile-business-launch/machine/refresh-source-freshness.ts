@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { parse as parseYaml } from "yaml";
-import { flagNumber, flagString, isRecord, parseFlags } from "./lib/launch-state.js";
+import { flagNumber, flagString, isRecord, parseFlags } from "../scripts/lib/launch-state.js";
 
 interface SourceRecord {
   id: string;

@@ -90,6 +90,66 @@ export function register(h: Harness): void {
     "autopilot.skill_missing",
   );
 
+  // --- check-gates-layout ---
+  //
+  // The shipped tree must pass, and each of the three rules must be provably
+  // able to fail. A flat gates/ made duplicate basenames structurally
+  // impossible; the mirrored layout does not, so that rule in particular is
+  // the one carrying a guarantee the previous layout gave for free.
+  runScriptArgs("gates layout passes on the shipped skill", "check-gates-layout.ts", ["--skill-root", skillRoot], 0);
+
+  /** Minimal skill root: playbook domains define the permitted gate folders. */
+  const layoutRoot = (name: string, build: (root: string) => void): string => {
+    const root = makeEmptyFixture(name);
+    for (const domain of ["money", "process"]) {
+      mkdirSync(path.join(root, "playbook", domain), { recursive: true });
+    }
+    mkdirSync(path.join(root, "gates", "money"), { recursive: true });
+    writeFileSync(path.join(root, "gates", "money", "check-revenue.ts"), "// stub\n", "utf8");
+    build(root);
+    return root;
+  };
+
+  const layoutClean = layoutRoot("gates-layout-clean", () => {});
+  runScriptArgs("gates layout passes when every gate nests in a real domain", "check-gates-layout.ts", ["--skill-root", layoutClean], 0);
+
+  const layoutUngrouped = layoutRoot("gates-layout-ungrouped", (root) => {
+    writeFileSync(path.join(root, "gates", "check-stray.ts"), "// stub\n", "utf8");
+  });
+  runScriptArgs(
+    "gates layout fails on a gate left at the gates/ root",
+    "check-gates-layout.ts",
+    ["--skill-root", layoutUngrouped],
+    1,
+    "gates_layout.ungrouped_gate",
+  );
+
+  const layoutUnknownDomain = layoutRoot("gates-layout-unknown-domain", (root) => {
+    mkdirSync(path.join(root, "gates", "finance"), { recursive: true });
+    writeFileSync(path.join(root, "gates", "finance", "check-invoices.ts"), "// stub\n", "utf8");
+  });
+  runScriptArgs(
+    "gates layout fails on a folder that is not a playbook domain",
+    "check-gates-layout.ts",
+    ["--skill-root", layoutUnknownDomain],
+    1,
+    "gates_layout.unknown_domain",
+  );
+
+  const layoutDuplicate = layoutRoot("gates-layout-duplicate-basename", (root) => {
+    mkdirSync(path.join(root, "gates", "process"), { recursive: true });
+    // Same basename as gates/money/check-revenue.ts — impossible under a flat
+    // gates/, permitted by the filesystem once the domains are folders.
+    writeFileSync(path.join(root, "gates", "process", "check-revenue.ts"), "// stub\n", "utf8");
+  });
+  runScriptArgs(
+    "gates layout fails when two domains hold the same basename",
+    "check-gates-layout.ts",
+    ["--skill-root", layoutDuplicate],
+    1,
+    "gates_layout.duplicate_basename",
+  );
+
   // --- check-agent-entrypoints ---
   runScriptArgs("agent entrypoints pass on the shipped skill", "check-agent-entrypoints.ts", ["--skill-root", skillRoot], 0);
   const entrypointsEmpty = makeEmptyFixture("agent-entrypoints-empty-skill-root");
