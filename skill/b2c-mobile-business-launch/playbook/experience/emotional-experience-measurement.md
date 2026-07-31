@@ -135,7 +135,7 @@ Person property to set after `commitment_made`: `commitment_type`, `commitment_m
 
 **Counter-metric**: `emotion_card_abandoned` with `abandon_reason = rage_tap` during or within 60 s of `commitment_echo_shown`
 
-**Guardrail**: If counter-metric exceeds 3 % OR negative review cluster appears within 14 days, halt experiment, flag the `emotional-card-dark-line-crossed` failure card, and require a design review before re-enabling.
+**Guardrail**: If counter-metric exceeds 3 % OR negative review cluster appears within 14 days, halt experiment, flag the `experience-card-dark-pattern` failure card, and require a design review before re-enabling.
 
 ---
 
@@ -202,7 +202,7 @@ Person property to set: `last_reward_type_received`, `reward_reveals_total`, `hi
 
 **Counter-metric**: `variable_reward_opt_out` rate AND `notification_disabled` rate in the 48 h cohort
 
-**Guardrail**: If opt-out rate in `variable_full` exceeds `variable_low` by more than 10 percentage points, OR if "slot machine" / "addictive" appears in App Store reviews within 14 days, halt the experiment and file `emotional-card-dark-line-crossed`.
+**Guardrail**: If opt-out rate in `variable_full` exceeds `variable_low` by more than 10 percentage points, OR if "slot machine" / "addictive" appears in App Store reviews within 14 days, halt the experiment and file `experience-card-dark-pattern`.
 
 ---
 
@@ -354,7 +354,7 @@ Create a PostHog dashboard named "Emotional Experience — Card Signals." Includ
 | Intent Mirror → Purchase | Funnel | `intent_mirror_shown` → `intent_mirror_continued` → `trial_started` or `purchase_completed` |
 | Dark-Pattern Watch | Trend | `emotion_card_abandoned` where `abandon_reason = rage_tap` + `notification_disabled` (48-h cohort) + `subscription_cancelled` within 24 h of any card fire. Weekly. Alert if any metric exceeds threshold. |
 
-Dashboard description should state: "This dashboard is the audit surface. If any metric in Dark-Pattern Watch exceeds its threshold for two consecutive weeks, file `emotional-card-dark-line-crossed` and pause the relevant card variant."
+Dashboard description should state: "This dashboard is the audit surface. If any metric in Dark-Pattern Watch exceeds its threshold for two consecutive weeks, file `experience-card-dark-pattern` and pause the relevant card variant."
 
 ## 9. Dark-Pattern Detection Protocol
 
@@ -363,7 +363,7 @@ Run this protocol weekly while any emotional card experiment is active. Record r
 1. Pull the "Dark-Pattern Watch" dashboard for the past 7 days.
 2. For each card, check all counter-metrics against their thresholds (Sections 4c, 5c, 6c, 7c).
 3. Run an App Store review text scan for cluster terms: "addictive," "manipulative," "gambling," "guilt," "shame," "fake," "slot machine," "can't cancel," "won't let me," "trapped."
-4. If any threshold is breached OR any text cluster appears with ≥ 3 reviews: open the `emotional-card-dark-line-crossed` failure card (Section 12), pause the triggering experiment variant, notify the founder.
+4. If any threshold is breached OR any text cluster appears with ≥ 3 reviews: open the `experience-card-dark-pattern` failure card (Section 12), pause the triggering experiment variant, notify the founder.
 5. If all clear: record date and sign-off in `PROJECT_STATE.yaml`. Close any open watch cards.
 6. If a card has been paused for ≥ 14 days with no resolution, escalate to a design review. Do not silently re-enable paused variants.
 
@@ -401,7 +401,7 @@ Verify `emotion_card_fired` and at least one card-specific event appear in the e
 Use this shape when a dark-pattern signal is detected. Store in `PROJECT_STATE.yaml` and mirror in `FAILURE_CARDS.md` when the launch is large.
 
 ```yaml
-id: "emotional-card-dark-line-crossed"
+id: "experience-card-dark-pattern"
 severity: "critical"
 owner: "product-lead"
 status: "open"
@@ -418,7 +418,7 @@ validator: "npm run check:analytics -- --root . && PostHog dark-pattern-watch da
 Additionally, use this shape for a missing measurement layer:
 
 ```yaml
-id: "emotional-card-measurement-missing"
+id: "experience-card-measurement-missing"
 severity: "high"
 owner: "engineering-leader"
 status: "open"

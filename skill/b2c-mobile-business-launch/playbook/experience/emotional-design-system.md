@@ -310,11 +310,17 @@ Card-level failure shapes to open when violations are found:
 
 | ID | Trigger | Required Fix |
 |---|---|---|
-| `emotional-card-missing-on-key-screen` | A required card (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring) is absent on a screen that would benefit from it according to the JTBD and star-level target | Apply the card per the Producer Protocol; add PostHog event to `ANALYTICS.md`; run `check:emotional-design` |
-| `emotional-card-dark-line-crossed` | Any applied card fails the three-question bright-line test or uses a prohibited pattern from `ethics-guardrail.md §Non-Negotiable Prohibitions` | Stop implementation; remove or redesign the mechanism; run `check:emotional-design`; open as severity critical |
-| `emotional-curve-peaks-after-paywall` | The Emotional Curve plot in `EMOTIONAL_DESIGN.md` or `emotional-design.html` shows the emotional peak occurring after the paywall marker | Redesign the flow so the peak occurs before the paywall; re-render `emotional-design.html` |
-| `emotional-card-no-posthog-event` | A card is applied in `EMOTIONAL_DESIGN.md` but no corresponding event exists in `ANALYTICS.md` | Add the event to `ANALYTICS.md` before implementation; verify with `check:attribution` |
-| `emotional-card-motion-no-fallback` | A card's motion moment is specified in `DESIGN.md` without a `prefers-reduced-motion` fallback | Add the fallback; re-run `check:token-promotion` |
+<!-- Canonical failure-card definitions (full YAML shape, severity, owner, validator) live in
+     emotional-experience-design.md §Failure Cards. This table is a routing surface: the IDs
+     must match that file exactly. Until 2026-07-31 they did not — an `emotional-card-*` set
+     defined only here described the same violations under different names, and five of its
+     six IDs were referenced by nothing. -->
+
+| `experience-card-not-implemented` | A required card (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring) is absent on a screen that would benefit from it according to the JTBD and star-level target | Apply the card per the Producer Protocol; add PostHog event to `ANALYTICS.md`; run `check:emotional-design` |
+| `experience-card-dark-pattern` | Any applied card fails the three-question bright-line test or uses a prohibited pattern from `ethics-guardrail.md §Non-Negotiable Prohibitions` | Stop implementation; remove or redesign the mechanism; run `check:emotional-design`; open as severity critical |
+| `emotional-curve-peak-after-paywall` | The Emotional Curve plot in `EMOTIONAL_DESIGN.md` or `emotional-design.html` shows the emotional peak occurring after the paywall marker | Redesign the flow so the peak occurs before the paywall; re-render `emotional-design.html` |
+| `experience-card-event-missing` | A card is applied in `EMOTIONAL_DESIGN.md` but no corresponding event exists in `ANALYTICS.md` | Add the event to `ANALYTICS.md` before implementation; verify with `check:attribution` |
+| `experience-card-motion-no-fallback` | A card's motion moment is specified in `DESIGN.md` without a `prefers-reduced-motion` fallback | Add the fallback; re-run `check:token-promotion` |
 | `emotional-audit-unintegrated` | An audit (`EMOTIONAL_AUDIT.md`) exists but findings have not been converted to failure cards or `PROJECT_STATE.yaml` updates | Accept or reject each finding; open failure cards; update `PROJECT_STATE.yaml` |
 
 ---
