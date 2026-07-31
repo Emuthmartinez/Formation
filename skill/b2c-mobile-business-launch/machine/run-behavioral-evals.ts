@@ -35,7 +35,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { asArray, asString, flagBoolean, flagString, isRecord, parseFlags } from "./lib/launch-state.js";
+import { asArray, asString, flagBoolean, flagString, isRecord, parseFlags } from "../scripts/lib/launch-state.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, "..");
@@ -317,7 +317,7 @@ async function grade(createMessage: CreateMessage, scenario: BehavioralScenario,
 
 function collectScenarios(): BehavioralScenario[] {
   const collected: BehavioralScenario[] = [];
-  for (const source of ["evals/launchbench", "evals/agent-behavior"]) {
+  for (const source of ["machine/evals/launchbench", "machine/evals/agent-behavior"]) {
     const directory = path.join(skillRoot, source);
     if (!existsSync(directory)) {
       continue;
@@ -379,7 +379,9 @@ function parseArgs(argv: string[]): Args {
     only: flagString(flags, "only"),
     model: flagString(flags, "model") ?? DEFAULT_MODEL,
     graderModel: flagString(flags, "graderModel") ?? DEFAULT_MODEL,
-    out: flagString(flags, "out") ?? path.join(skillRoot, "evals", "behavioral-results", `behavioral-${new Date().toISOString().replace(/[:.]/g, "-")}.json`),
+    out:
+      flagString(flags, "out") ??
+      path.join(skillRoot, "machine", "evals", "behavioral-results", `behavioral-${new Date().toISOString().replace(/[:.]/g, "-")}.json`),
     useProfile: flagBoolean(flags, "useProfile"),
   };
 }

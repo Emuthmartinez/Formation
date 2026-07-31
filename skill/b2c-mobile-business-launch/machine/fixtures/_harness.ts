@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { resolveScriptPath } from "../lib/script-paths.js";
+import { resolveScriptPath } from "../../scripts/lib/script-paths.js";
 
 export interface FixtureResult {
   label: string;

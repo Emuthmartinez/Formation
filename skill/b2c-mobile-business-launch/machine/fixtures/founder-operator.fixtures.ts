@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { accessLabel } from "../lib/founder-copy.js";
-import { renderFounderGateMarkup } from "../lib/founder-gate-presentation.js";
+import { accessLabel } from "../../scripts/lib/founder-copy.js";
+import { renderFounderGateMarkup } from "../../scripts/lib/founder-gate-presentation.js";
 import { type Harness, readState, writeState } from "./_harness.js";
 
 export function register(h: Harness): void {

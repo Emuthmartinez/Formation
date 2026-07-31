@@ -12,7 +12,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { skillRoot, type Harness } from "./_harness.js";
-import { readHookTemplate } from "../lib/hook-contract.js";
+import { readHookTemplate } from "../../scripts/lib/hook-contract.js";
 
 interface HookSettings {
   hooks: { PostToolUse: Array<{ matcher: string; hooks: Array<{ command: string }> }> };

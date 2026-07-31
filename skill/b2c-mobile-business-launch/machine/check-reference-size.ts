@@ -69,6 +69,32 @@ const issues: Issue[] = [];
  * longer exists.
  */
 const KNOWLEDGE_ROOTS = ["playbook", "machine"];
+
+/**
+ * Directories inside a knowledge root that hold machine-read data or test code
+ * rather than agent-loaded prose, keyed by path relative to the skill root.
+ *
+ * These are exempt for the same reason `source-registry.yaml` is exempt above:
+ * nothing loads them into agent context, and nothing routes to an individual
+ * file — the eval harness globs the directory. Applying the index rule here
+ * would demand a README linking all 115 LaunchBench scenarios, which is
+ * generated make-work that rots, not progressive disclosure.
+ *
+ * This preserves behaviour rather than relaxing it: `evals/` and
+ * `scripts/fixtures/` were both outside every knowledge root before they moved
+ * under `machine/`. Bringing 129 files into scope as a side effect of a
+ * directory move is not a decision anyone made; widening these gates to cover
+ * fixtures would be its own change with its own evidence.
+ */
+const NON_KNOWLEDGE_DIRS = new Set(["machine/evals", "machine/fixtures"]);
+
+function isNonKnowledge(absolute: string): boolean {
+  const relative = path.relative(args.skillRoot, absolute).split(path.sep).join("/");
+  for (const excluded of NON_KNOWLEDGE_DIRS) {
+    if (relative === excluded || relative.startsWith(`${excluded}/`)) return true;
+  }
+  return false;
+}
 const presentRoots = KNOWLEDGE_ROOTS.map((name) => ({ name, dir: path.join(args.skillRoot, name) })).filter((root) => existsSync(root.dir));
 
 if (presentRoots.length === 0) {
@@ -133,7 +159,9 @@ function checkDirectoryIndex(dir: string): void {
   const subdirs = children.filter((e) => e.isDirectory());
 
   for (const sub of subdirs) {
-    checkDirectoryIndex(path.join(dir, sub.name));
+    const subPath = path.join(dir, sub.name);
+    if (isNonKnowledge(subPath)) continue;
+    checkDirectoryIndex(subPath);
   }
   if (files.length === 0) {
     return;
@@ -255,6 +283,7 @@ function collectFilesRecursive(root: string): string[] {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const fullPath = path.join(directory, entry.name);
       if (entry.isDirectory()) {
+        if (isNonKnowledge(fullPath)) continue;
         visit(fullPath);
       } else if (entry.isFile() && (entry.name.endsWith(".md") || entry.name.endsWith(".yaml"))) {
         files.push(fullPath);

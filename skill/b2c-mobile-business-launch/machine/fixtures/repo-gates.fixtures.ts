@@ -1,7 +1,7 @@
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, skillRoot } from "./_harness.js";
-import { auditExcludedScripts, buildAuditPlan, type AuditLayout } from "../lib/audit-plan.js";
+import { auditExcludedScripts, buildAuditPlan, type AuditLayout } from "../../scripts/lib/audit-plan.js";
 
 /**
  * Fixtures for the repo/skill-level gates that previously had zero fixture

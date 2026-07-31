@@ -42,7 +42,7 @@ function frontmatterAndBody(text: string): { frontmatter?: Record<string, unknow
 const { skillRoot } = parseArgs(process.argv.slice(2));
 const issues = [];
 const skillPath = path.join(skillRoot, "SKILL.md");
-const evalPath = path.join(skillRoot, "evals/triggering/autopilot-triggering.yaml");
+const evalPath = path.join(skillRoot, "machine/evals/triggering/autopilot-triggering.yaml");
 
 if (!existsSync(skillPath)) {
   issues.push(issue("error", "autopilot.skill_missing", `SKILL.md is missing at ${skillPath}.`, path.relative(skillRoot, skillPath)));
@@ -59,7 +59,9 @@ if (existsSync(skillPath) && existsSync(evalPath)) {
     issues.push(issue("error", "autopilot.frontmatter.invalid", parsedSkill.error, "SKILL.md"));
   }
   if (!isRecord(evals)) {
-    issues.push(issue("error", "autopilot.evals.invalid", "autopilot-triggering.yaml must parse to an object.", "evals/triggering/autopilot-triggering.yaml"));
+    issues.push(
+      issue("error", "autopilot.evals.invalid", "autopilot-triggering.yaml must parse to an object.", "machine/evals/triggering/autopilot-triggering.yaml"),
+    );
   }
 
   if (parsedSkill.frontmatter && isRecord(evals)) {
@@ -92,7 +94,12 @@ if (existsSync(skillPath) && existsSync(evalPath)) {
     for (const item of asArray(evals.should_trigger)) {
       if (!isRecord(item)) {
         issues.push(
-          issue("error", "autopilot.should_trigger.invalid", "Each should_trigger eval must be an object.", "evals/triggering/autopilot-triggering.yaml"),
+          issue(
+            "error",
+            "autopilot.should_trigger.invalid",
+            "Each should_trigger eval must be an object.",
+            "machine/evals/triggering/autopilot-triggering.yaml",
+          ),
         );
         continue;
       }
@@ -104,7 +111,7 @@ if (existsSync(skillPath) && existsSync(evalPath)) {
             "error",
             `autopilot.should_trigger.${id}.prompt_missing`,
             "Each should_trigger eval needs a realistic prompt.",
-            "evals/triggering/autopilot-triggering.yaml",
+            "machine/evals/triggering/autopilot-triggering.yaml",
           ),
         );
       }
@@ -131,7 +138,7 @@ if (existsSync(skillPath) && existsSync(evalPath)) {
             "error",
             "autopilot.should_not_trigger.invalid",
             "Each should_not_trigger eval must be an object.",
-            "evals/triggering/autopilot-triggering.yaml",
+            "machine/evals/triggering/autopilot-triggering.yaml",
           ),
         );
         continue;
@@ -144,7 +151,7 @@ if (existsSync(skillPath) && existsSync(evalPath)) {
             "error",
             `autopilot.should_not_trigger.${id}.prompt_missing`,
             "Each should_not_trigger eval needs a realistic prompt.",
-            "evals/triggering/autopilot-triggering.yaml",
+            "machine/evals/triggering/autopilot-triggering.yaml",
           ),
         );
       }
