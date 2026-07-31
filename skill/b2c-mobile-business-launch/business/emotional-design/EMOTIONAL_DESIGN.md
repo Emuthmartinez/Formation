@@ -272,7 +272,7 @@ Add all events below to `ANALYTICS.md` before implementation. Do not invent name
 
 ### Counter-Metrics (Dark-Pattern Backfire Signals)
 
-These metrics detect whether an emotional card is serving users or extracting from them. Monitor weekly while any card experiment is active. If any threshold is breached for two consecutive weeks, open `emotional-card-dark-line-crossed` from `playbook/experience/emotional-experience-measurement.md §Failure Card Shape`.
+These metrics detect whether an emotional card is serving users or extracting from them. Monitor weekly while any card experiment is active. If any threshold is breached for two consecutive weeks, open `experience-card-dark-pattern` from `playbook/experience/emotional-experience-measurement.md §Failure Card Shape`.
 
 | Counter-Metric | Card | Threshold To Investigate | Action |
 | --- | --- | --- | --- |
