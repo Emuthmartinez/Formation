@@ -61,11 +61,17 @@ The founder reviews the rendered Design Room; the agent edits the state. When th
 
 ### Runtime Routing And Dynamic Workflows
 
-The skill recommends Claude for the pre-build stages through the spec and Codex for the core app build. This is a bias, not a gate: either runtime can do any stage, the founder decides, and the skill never blocks or refuses work in whichever runtime is in front of it. Record which runtime owns which lane in `ORCHESTRATION.md` and `PROJECT_STATE.yaml` so later sessions do not re-litigate it.
+The skill recommends Claude for the pre-build stages through the spec and Codex for
+the core app build. This is a bias, not a gate: either runtime can do any stage, the
+founder decides, and the skill never blocks or refuses work in whichever runtime is
+in front of it. Record which runtime owns which lane in `ORCHESTRATION.md` and
+`PROJECT_STATE.yaml` so later sessions do not re-litigate it. Never downgrade quality
+because a runtime lacks workflows — run the same fan-out, adversarial-verification,
+and quarantine shapes as subagents or inline.
 
-**On a non-Claude-Code runtime** (detectable because `ultracode`/`/workflows`/`/deep-research` are unavailable) doing a pre-build stage: surface the recommendation **once**, plainly, not as a founder-only gate; record that it was surfaced in `PROJECT_STATE.yaml`; then continue in the current runtime regardless. Do not nag, do not pause, and never downgrade quality — run the same fan-out, adversarial-verification, and quarantine shapes as subagents or inline.
-
-**On Claude Code**, prefer a Dynamic Workflow for pre-build stages that are long-running, massively parallel, structured, or adversarial — deep research/social mining, 11-star and emotional design, analytics, paid UA, viral growth, launch narrative, localization research, design/taste exploration, naming, and spec/handoff readiness. Trigger with `ultracode` (or `/effort ultracode`, or `/deep-research`), set a token budget, pair loop patterns with `/goal`, quarantine untrusted public content, and keep producer and verifier agents separate. Workflows on the Claude side stop at the spec — do not spend one on the core engineering build when Codex owns that lane, and do not reach for one when a normal session would finish the stage in minutes. Load [`playbook/process/dynamic-workflows.md`](playbook/process/dynamic-workflows.md) before proposing or running a workflow; fall back to [`playbook/process/parallel-agent-orchestration.md`](playbook/process/parallel-agent-orchestration.md) subagents (recording the reason) when workflows are unavailable, disabled, or below Claude Code v2.1.154.
+Load [`playbook/process/dynamic-workflows.md`](playbook/process/dynamic-workflows.md)
+before proposing or running a workflow: it carries which stages earn one, how to
+surface the runtime recommendation without nagging, and the subagent fallback.
 
 ## Start Here
 
@@ -123,29 +129,10 @@ Maintaining this skill rather than running a launch — versioning, the eval har
 
 ## Phase Spine
 
-Full entry criteria, work, and exit criteria for each phase are in [`playbook/process/launch-phases.md`](playbook/process/launch-phases.md):
-
-| Phase | Focus | Primary output |
-| --- | --- | --- |
-| 0 | Founder-zero orient and scaffold | `BUSINESS_ACCESS.md` + ledger, `PROJECT_STATE.yaml`, autonomy/tier, first cockpit |
-| 0b | Paid-tool access and fallback routing | `TOOL_DECISIONS.md` |
-| 0c | Secrets baseline | `SECRETS.md`, `doppler.yaml`, names-only `.env.example` |
-| 1 | Research-backed spec | `RESEARCH.md` (with its Go/Pivot/Kill verdict), `LOCALIZATION_MARKET_RESEARCH.md`, revised `SPEC.md` |
-| 1b | Analytics and attribution blueprint | `ANALYTICS.md`, `analytics-plan.html` |
-| 1c | 11-star experience and product brainstorm | `11_STAR_EXPERIENCE.md`, `11-star-experience.html` (use `ce-brainstorm` when research leaves multiple valid shapes) |
-| 1d | Paid user acquisition system | `PAID_UA.md` |
-| 1e | Viral growth loop contract | `VIRAL_GROWTH.md`, then `growth/LAUNCH_NARRATIVE.md` (refined at Phases 3 and 6) |
-| 1f | Launch trace and build contracts | `LAUNCH_TRACE.md`, `TECH_SPEC.md` |
-| 1g | Security architecture | `SECURITY.md`, `security-review.html` |
-| 2 | Brand and design | `BRAND.md`, `DESIGN.md`, lowercase `design.md`, rendered HTML proofs, key assets |
-| 3 | Launch dossier and store ops | `APP_STORE_LISTING.md`, `APPLE_APP_STORE_REQUIREMENTS.md`, `APPLE_SIGNING.md`, `STORE_CONSOLE.md`, `SCREENSHOTS.md`, `CONTENT_ASSETS.md`, launch calendar |
-| 3b | Revenue and monetization ops | `REVENUE_OPS.md`, sandbox + production purchase validation |
-| 4 | Pre-launch funnel | landing page, waitlist/referral loop, domain, routed email aliases, backend, analytics, security headers, GEO/SEO, live deploy verification |
-| 5 | Builder/agent handoff | `AGENTS.md`, `CLAUDE.md`, `APP_AGENTS.md`, `agents/`, `PROMPTS.md`, asset bundle, `AUDIT_PROMPT.md` |
-| 5b | Engineering orchestration and production readiness | `ENGINEERING_PLAN.md`, `ORCHESTRATION.md`, `PRODUCTION_READINESS.md`, device/simulator E2E proof |
-| 5c | Security release gate | scan/review proof attached to `PRODUCTION_READINESS.md` |
-| 6 | Post-launch UGC/Fastlane growth engine | `UGC_PLAYBOOK.md`, `FASTLANE_OPS.md`, 90-day format-discovery plan |
-| 6b | Post-launch operations | `POST_LAUNCH_OPS.md`, `LAUNCH_RETRO.md`, day-30 revisit of lite-tier deferrals |
+The ordered walk lives in [`spine.md`](spine.md) — phases, focus, and primary
+output per phase. Load it when the question is *what comes next*; this file
+answers *what governs this*. Entry and exit criteria per phase are in
+[`playbook/process/launch-phases.md`](playbook/process/launch-phases.md).
 
 ## What Counts As Done
 
