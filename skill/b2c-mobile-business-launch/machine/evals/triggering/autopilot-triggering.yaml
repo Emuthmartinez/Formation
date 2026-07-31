@@ -39,6 +39,26 @@ body_contract:
     - "supersede stale gates"
     - "credentials, secrets, account access"
     - "final submission/release decisions"
+    # Runtime routing. These pin the non-Claude-Code protocol INTO the entrypoint.
+    # v0.58.0 routed it out behind a "before proposing or running a workflow"
+    # trigger, which never fires on the one runtime that cannot run workflows —
+    # a silent regression that audit:ci stayed green through. Prose alone cannot
+    # stop the next compaction re-making that cut; these terms can.
+    - "non-Claude-Code runtime"
+    - "surface the recommendation"
+    # Keep each term WITHIN one wrapped line — SKILL.md is hard-wrapped, and a
+    # term spanning a line break fails on reflow alone rather than on meaning.
+    - "current runtime regardless"
+    # The once-only marker itself: without this, a compaction could drop the
+    # recording instruction and every other term above still passes, letting a
+    # later session repeat the recommendation. The generic "update
+    # `PROJECT_STATE.yaml`" term is about the run contract, not this protocol.
+    - "record that it was surfaced in"
+    # The load trigger fires at STAGE START, not at workflow-proposal time —
+    # on Claude that would be after the selection decision the reference informs,
+    # and on Codex it would never fire at all. Both halves are pinned.
+    - "starting any pre-build stage"
+    - "on a non-Claude runtime to run the surfacing protocol"
 should_trigger:
   - id: transcript-to-business
     prompt: "Take this transcript and turn it into a business I can launch."
