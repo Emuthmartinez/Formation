@@ -46,7 +46,9 @@ if (!existsSync(businessRoot)) {
 } else {
   // 1. Every page on disk is declared.
   for (const page of listRootPages(businessRoot)) {
-    if (page in artifactPages) continue;
+    // hasOwn, not `in`: `in` walks the prototype chain, so a page whose name
+    // collided with an Object.prototype key would read as already declared.
+    if (Object.hasOwn(artifactPages, page)) continue;
     issues.push(
       issue(
         "error",

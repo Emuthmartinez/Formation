@@ -39,12 +39,19 @@ export function escapeHtml(value: string): string {
 export function renderArtifactPage(input: ArtifactPageInput): string {
   const blocks = parseMarkdownLite(input.markdown);
 
-  const heading = blocks.find((block) => block.kind === "heading" && block.level === 1);
+  const headingIndex = blocks.findIndex((block) => block.kind === "heading" && block.level === 1);
+  const heading = blocks[headingIndex];
   if (heading?.kind !== "heading") {
     throw new Error(`${input.markdownName} has no H1. The page title comes from the document's own first heading.`);
   }
   const title = inlineToPlainText(heading.text);
-  const status = blocks.find((block) => block.kind === "status");
+
+  // Only the line directly under the H1 is the document's status. Searching the
+  // whole document would silently lift a `Status:` line out of the section it
+  // belongs to and reprint it in the header, which is the same class of bug as
+  // the one this renderer exists to fix. A status line anywhere else stays put.
+  const following = blocks[headingIndex + 1];
+  const status = following?.kind === "status" ? following : undefined;
 
   const body = blocks.filter((block) => block !== heading && block !== status);
 
@@ -65,7 +72,7 @@ export function renderArtifactPage(input: ArtifactPageInput): string {
     `        <h1>${renderInline(heading.text)}</h1>`,
   ];
 
-  if (status?.kind === "status") {
+  if (status) {
     lines.push(`        <p class="status"><span class="status-label">Status</span> ${renderInline(status.text)}</p>`);
   }
 

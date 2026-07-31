@@ -265,6 +265,12 @@ function parseParagraph(lines: string[], start: number): { block: Block; next: n
       break;
     }
     if (index > start) {
+      // The main loop rejects indented lines, but a continuation line never
+      // reaches it. Without this an indented line is silently folded into the
+      // paragraph above, which is the quiet degrading this parser refuses to do.
+      if (/^\s/.test(raw)) {
+        throw new MarkdownLiteError(index + 1, "indented continuation line. Keep every block flush left; a wrapped paragraph line must not be indented.");
+      }
       rejectUnsupportedBlockStart(raw, index + 1);
     }
     collected.push(raw.trim());
