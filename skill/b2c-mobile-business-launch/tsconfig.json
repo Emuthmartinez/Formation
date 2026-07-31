@@ -10,6 +10,8 @@
     "noUncheckedIndexedAccess": true
   },
   "include": [
+    "gates/**/*.ts",
+    "machine/**/*.ts",
     "scripts/**/*.ts"
   ]
 }

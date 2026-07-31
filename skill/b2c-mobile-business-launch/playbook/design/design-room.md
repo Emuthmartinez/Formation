@@ -31,9 +31,9 @@ state/schema/business.schema.json
 scripts/validate-state.ts
 scripts/render-design-room.ts
 scripts/version.ts
-scripts/check-design-room-contract.ts
+gates/design/check-design-room-contract.ts
 scripts/promote-design-tokens.ts
-scripts/check-token-promotion.ts
+gates/design/check-token-promotion.ts
 render/
 ```
 

@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { resolveScriptPath } from "../lib/script-paths.js";
 
 export interface FixtureResult {
   label: string;
@@ -108,11 +109,11 @@ export function createHarness(): Harness {
     env?: Record<string, string>,
     forbiddenText?: string,
   ): void => {
-    runScript(label, [path.join("scripts", script), "--root", root, ...extraArgs], expectedCode, expectedText, env, forbiddenText);
+    runScript(label, [resolveScriptPath(skillRoot, script), "--root", root, ...extraArgs], expectedCode, expectedText, env, forbiddenText);
   };
 
   const runScriptArgs = (label: string, script: string, args: string[], expectedCode: number, expectedText?: string, env?: Record<string, string>): void => {
-    runScript(label, [path.join("scripts", script), ...args], expectedCode, expectedText, env);
+    runScript(label, [resolveScriptPath(skillRoot, script), ...args], expectedCode, expectedText, env);
   };
 
   const cleanup = (): void => {

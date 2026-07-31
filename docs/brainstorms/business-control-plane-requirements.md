@@ -22,7 +22,7 @@ Markdown should remain useful as artifact content, but not as the primary state 
 - `skill/b2c-mobile-business-launch/state/business.json` already models business identity, design state, surfaces, App Store state, and control-plane panels.
 - `skill/b2c-mobile-business-launch/state/schema/business.schema.json` already validates Design Room state with JSON Schema and AJV.
 - `skill/b2c-mobile-business-launch/playbook/process/control-plane.md` already says Design Room is the first panel in a larger Business Control Plane.
-- `skill/b2c-mobile-business-launch/scripts/check-control-plane-contract.ts` already enforces first-class control-plane panels, state refs, rendered artifacts, and kebab-case ids.
+- `skill/b2c-mobile-business-launch/gates/operations/check-control-plane-contract.ts` already enforces first-class control-plane panels, state refs, rendered artifacts, and kebab-case ids.
 
 ## Product Requirements
 

@@ -521,9 +521,9 @@ that grounds them. Conventions used in every loop:
 - **Action:**
   1. Load `playbook/engineering/xcodebuildmcp-testing.md` and start at its Route Ladder; on a local Mac, rung 0 (the in-app iOS Simulator) needs no install at all. Refresh official docs + local `xcodebuildmcp --help`, tool lists, SnapshotPreviews + serve-sim READMEs before writing commands for the higher rungs. → `Lane Routing`; *Source Freshness*.
   2. Run device/simulator E2E and capture proof, marking SnapshotPreviews exports preview-only. For rung 0, record the local session, the simulated device and OS, the fixture account, and the coverage the route does not provide. → `Lane Routing`; Phase 5b.
-- **Proof:** `scripts/check-native-ios-proof.ts` (run via `npm run audit`); E2E/screenshot proof attached with the docs/CLI basis recorded.
+- **Proof:** `gates/engineering/check-native-ios-proof.ts` (run via `npm run audit`); E2E/screenshot proof attached with the docs/CLI basis recorded.
 - **Memory:** `PRODUCTION_READINESS.md` native-iOS proof section + `PROJECT_STATE.yaml`.
-- **Stopping condition:** `scripts/check-native-ios-proof.ts` passes under `audit:ci` — `PRODUCTION_READINESS.md` carries E2E/screenshot proof with the recorded docs/CLI basis (SnapshotPreviews rows marked preview-only), or the blocker is recorded.
+- **Stopping condition:** `gates/engineering/check-native-ios-proof.ts` passes under `audit:ci` — `PRODUCTION_READINESS.md` carries E2E/screenshot proof with the recorded docs/CLI basis (SnapshotPreviews rows marked preview-only), or the blocker is recorded.
 
 ### L40 — Revenue monetization
 - **Trigger:** Before RevenueCat, Stripe, app-store products, web billing, paywalls, subscriptions, webhooks, taxes, pricing, or entitlement validation.

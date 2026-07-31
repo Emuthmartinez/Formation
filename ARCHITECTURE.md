@@ -86,10 +86,24 @@ Each domain folder carries its own `README.md` index rather than a sibling `<dom
 Safest first; each step keeps `npm run audit:ci` green and lands as its own commit.
 
 1. **`starters/`** — move `business/app-archetypes/`. Largest file-count win, smallest reference surface. **Done, v0.52.0.**
-2. **`playbook/`** — regroup `references/` by domain, each with its `README.md`, collapsing `SKILL.md` rows as each domain lands.
-3. **`business/`** — split `business/` into founder documents and generated pages; agent bookkeeping moves to `playbook/` or `machine/`.
-4. **`gates/`** — move `scripts/check-*.ts`; the audit runner globs rather than naming paths.
-5. **`machine/`** — versioning, evals, parity, fixtures.
+2. **`playbook/`** — regroup `references/` by domain, each with its `README.md`, collapsing `SKILL.md` rows as each domain lands. **Done, v0.53.0.**
+3. **`business/`** — rename `templates/` for what it produces. **Done, v0.54.0.** The `docs/` and `pages/` sub-split is still pending.
+4. **`gates/` + the validator half of `machine/`** — move all 61 `scripts/check-*.ts` at once, split by what they grade. **Done, v0.55.0.**
+5. **`machine/`, the rest** — the eval harness and its 129 eval files, and `scripts/fixtures/`.
+
+Steps 4 and 5 were originally separate. They were merged for the validators because a blanket move of all 61 to `gates/` would have sent parity and versioning there only for step 5 to move them out again — and this repo pays 8–18 review rounds per PR, so relocating a file twice is the expensive mistake. Step 5 keeps the evals and fixtures.
+
+## What decides `gates/` from `machine/`
+
+**`gates/` grades a business launch. `machine/` grades the skill itself.**
+
+The operative test is the **subject of the assertion, not the root flag the validator takes**. Several gates run against the skill root — which argues `machine/` — while asserting something about the launch. `check:motion-contract` governs the numbers a launched app animates with; `check:asc-command-contract` the commands a submission runs; `check:app-archetype` and `check:archetype-starter` the scaffold a business is built from; `check:artifact-templates` the launch's artifact contract. Their subject is the launch, so they are gates.
+
+`machine/` stays narrow and is currently six files: package parity, skill version, version discipline, source-registry freshness, reference byte budgets, and the `SKILL.md` autopilot contract. A file about *how a launch is run* is method — its gate belongs in `gates/process/`, not here.
+
+`gates/` mirrors the `playbook/` domain names rather than staying flat. The two machine consumers of these paths are indifferent to the choice — the audit runner resolves steps by npm script name, the fixture harness by basename — so the decision rests on the reader who orients before grepping, and 55 files in one directory give that reader nothing. There is **no top-level exception bucket**: every gate nests, and genuinely cross-cutting ones go to `gates/process/`, which this document already describes as the cross-cutting launch-method domain. One placement rule, not two.
+
+Nothing may assume a validator's directory. `scripts/lib/script-paths.ts` indexes `gates/`, `machine/` and `scripts/` and resolves a spawnable script by basename, throwing on an unknown or ambiguous name. It throws rather than falling back because a wrong path exits non-zero and roughly 700 fixtures assert exit 1 — a silent fallback turns the whole suite green while testing nothing.
 
 `playbook/` moved ahead of `business/` deliberately: it is the step that answers the original complaint (domains are invisible in a directory listing), its classification is already decided, and its `SKILL.md` collapse *frees* budget rather than spending it. `business/` needs a judgment call per file about whether a founder reads it, and touches far more hardcoded paths, so it benefits from going second.
 
