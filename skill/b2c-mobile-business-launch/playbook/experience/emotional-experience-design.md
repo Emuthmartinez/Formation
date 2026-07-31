@@ -107,7 +107,9 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 
 ## Six-Lens Design Review Framework
 
-Run this review per feature or per journey before build handoff. Each lens has an exact question, evidence to capture on a real device, and a sub-score (0–2). Total score: 0–12. A feature at 0–5 needs redesign. 6–8 needs refinement. 9–12 is ready for build handoff.
+Run this review per feature or per journey before build handoff. Each lens has an exact question, evidence to capture on a real device, and a sub-score (0–2). Total score: 0–12. **Score ≥9 = build-ready. Score 7–8 = proceed with named blockers tracked as failure cards. Score <7 = redesign before build.**
+
+These bands are canonical in [`emotional-design-system.md`](emotional-design-system.md) §Emotional Review Framework; this file must not restate them differently. Until 2026-07-31 it did — it read "0–5 needs redesign, 6–8 needs refinement", so a feature scoring exactly 6 was sent to redesign by one file and to refinement by the other, and 7–8 got a vague "refinement" here versus a concrete tracked-blocker instruction there. An agent's verdict depended on which file it happened to load.
 
 Use this framework as the operative tool for any UX or onboarding audit subagent. Each finding must reference its lens, its score change, and its star-ladder level per the UX And Onboarding Audit Output Contract in `eleven-star-experience.md`.
 
@@ -220,24 +222,10 @@ Habit formation check: does this action fit into a daily routine the user alread
 
 ## Emotional Curve Artifact
 
-The Emotional Curve is a required artifact for any feature or journey reviewed with this framework. It is produced from the Lens 3 journey map and must be rendered in `emotional-design.html` or the journey's dedicated design surface.
-
-**Format.** A line chart where:
-- X axis: ordered journey steps (screen labels or step IDs).
-- Y axis: emotional valence (−5 to +5, where −5 is strong negative emotion, 0 is neutral, +5 is strong positive emotion).
-- Each step plotted as a point connected by a line.
-- Peaks labeled with the target emotional state.
-- Valleys labeled with the friction source.
-- A horizontal reference line at y=0.
-- A vertical marker at the paywall / primary CTA step.
-
-**Acceptance rule.** The curve must peak at or before the paywall marker. A curve that first crosses above +2 after the paywall is a conversion design failure: the user is asked to buy before they feel the value.
-
-**How to produce.** Run Lens 3 on a real device, fill in the emotional journey table, assign numeric valence scores to each step, and plot the curve. Embed it in `emotional-design.html` using the project's design tokens (CSS variables from `DESIGN.md`). Do not leave it as a text table; it must be a visible rendered chart inspectable by the founder.
-
-**Reduced-motion fallback.** If the rendered Emotional Curve uses animation to draw the line, implement `prefers-reduced-motion` / OS reduce-motion check. Static chart is the fallback.
-
----
+The −5..+5 valence scale, the peak-before-paywall rule, and the curve artifact contract are
+defined once in [`emotional-design-system.md`](emotional-design-system.md) §Emotional Review
+Framework. Load that section rather than a second copy here — a curve spec that disagrees
+with itself across two files is worse than one that lives in a single place.
 
 ## Analytics Events For Emotional Moments
 
@@ -279,25 +267,10 @@ Every emotional moment must be expressed in motion. Motion is a delight lever pe
 
 ## Bright Line: Serve vs Exploit
 
-Every Experience Card has a bright line. This section collects the governing rule for the entire reference.
-
-**Serve the user's real goal.** The test: does this mechanic make the user more likely to achieve what they said they wanted to achieve when they opened the app? If yes, it is on the bright side.
-
-**Exploit against the user's interest.** The test: does this mechanic generate revenue, engagement, or retention by working against the user's stated goal, exploiting uncertainty, manufacturing urgency, or making it harder to leave? If yes, it is a dark pattern. Dark patterns are a compliance veto that blocks ship/merge decisions — same governance level as a `security-release-lane-missing` failure card.
-
-**Regulatory context.** As of 2024–2026, the EU Digital Services Act, FTC enforcement, and Apple/Google platform policy have all moved against deceptive UX patterns. The skill's dark-pattern veto is stricter than any single regulation.
-
-**Quick checklist.** Before shipping a feature that uses any card mechanic, answer:
-- [ ] The user can always choose to leave, cancel, or skip without a penalty or a guilt-laden interstitial.
-- [ ] The commitment is editable by the user at any time.
-- [ ] The variable reward variation is real, not cosmetic.
-- [ ] The perceived effort steps correspond to real operations (≥50% mapping documented in `TECH_SPEC.md`).
-- [ ] The intent mirror uses only content the user explicitly provided.
-- [ ] None of the four cards' triggers are coupled to a paywall CTA on the same screen.
-
-If any answer is no, fix the mechanic or remove it. Do not ship.
-
----
+The bright-line/dark-line test, the regulatory basis, and the unconditional vetoes live in
+[`ethics-guardrail.md`](ethics-guardrail.md) §1 Bright-Line Vs Dark-Line Distinction. This
+heading is kept because other files cite it by name; the rules themselves are not restated
+here, because an ethics rule that drifts between two copies is the failure it exists to prevent.
 
 ## Failure Cards
 
@@ -368,19 +341,6 @@ validator: "npm run check:design-room -- --root ."
 
 ## Acceptance Checklist
 
-Before any feature using an Experience Card is called build-ready:
-
-- [ ] All four Experience Cards are implemented or explicitly deferred with a founder-approved rationale in `PROJECT_STATE.yaml`.
-- [ ] Each implemented card emits its named PostHog event with required properties. Events are present in `ANALYTICS.md` before implementation.
-- [ ] Each card's bright-line compliance check passed. Evidence recorded in `PRODUCTION_READINESS.md`.
-- [ ] The Emotional Curve artifact exists in `emotional-design.html` for each reviewed feature or journey.
-- [ ] The Emotional Curve peaks at or before the paywall marker.
-- [ ] Every animated card moment has a `prefers-reduced-motion` / OS reduce-motion fallback. Documented in `TECH_SPEC.md`.
-- [ ] Web animations use `motion/react` with tokenized values from `state/theme.tokens.json`. Mobile uses `DesignTokens.Motion`.
-- [ ] Perceived Effort Delay Card: the step-to-operation map is documented in `TECH_SPEC.md` with ≥50% real operation ratio.
-- [ ] Intent Mirroring Card: the mirror content sources only from fields the user explicitly provided. Documented in `PRODUCTION_READINESS.md`.
-- [ ] Variable Reward Card: variation is real, not cosmetic. Proof method documented in `PRODUCTION_READINESS.md`.
-- [ ] Commitment Card: the commitment is editable by the user from a settings or profile screen. Verified on device.
-- [ ] Six-Lens Design Review completed for the feature. Score ≥9 or a remediation plan is recorded in `PROJECT_STATE.yaml`.
-- [ ] `check:emotional-design` validator passes (or is recorded as partial with an open failure card tracking the gap).
-- [ ] Star-ladder level mapped for each card in `11_STAR_EXPERIENCE.md`.
+The acceptance checklist is [`ethics-guardrail.md`](ethics-guardrail.md) §7 Acceptance
+Checklist. `check:emotional-design` is what actually enforces it — a checklist restated in a
+second file drifts from the validator without anything noticing.

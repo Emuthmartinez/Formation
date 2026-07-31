@@ -75,20 +75,12 @@ Use this table as a navigation surface. The files under `playbook/experience/exp
 
 When a `retention-mechanics` MCP server is connected, prefer it over loading card files directly: `retention_search_mechanics` routes a product moment to candidate cards without loading the whole deck, and `retention_get_mechanic` / `retention_get_ethics_ladder` serve the maintained, versioned card content and the tier-appropriate attestation scaffold. The bundled deck stays the frozen offline snapshot — validators always read it, and it is authoritative whenever the server is not connected (see the index's live-deck-access note).
 
-| Card | Thesis | 11-Star Level | Bright-Line Guardrail | Stub Pointer (full spec via MCP) |
-|---|---|---|---|---|
-| **Commitment Card** | A voluntary, user-authored goal statement creates ownership; the product echoes it back throughout the experience, making future behavior self-consistent. (Cialdini commitment/consistency; Locke & Latham goal-setting; Gollwitzer implementation intentions.) | 6–7 star | Commitment must be user-authored, revisable from settings at any time, and used only to serve the stated goal — not to guilt-trigger re-subscription. | `experience-cards/commitment-card.md` |
-| **Variable Reward Card** | Unpredictable, genuine variability in outcome produces stronger and more persistent approach behavior than fixed rewards. Dopamine fires on anticipation, not receipt. (Skinner variable-ratio; Schultz 1997; Berridge wanting-vs-liking; Eyal Hook Model.) | 6–7 star | Reward variability must be real in content (≥30% observable difference or documented convergence proof in `PRODUCTION_READINESS.md`); must not gate already-paid features; must have a non-variable fallback. | `experience-cards/variable-reward-card.md` |
-| **Perceived Effort Delay Card** | Users value outcomes more when they can see effort expended on their behalf. Participation in creation inflates perceived value further. (Buell & Norton labor illusion 2011; Norton-Mochon-Ariely IKEA effect 2012; Kahneman peak-end rule.) | 6–7 star | ≥50% of displayed steps must map to real computation; map documented in `TECH_SPEC.md`. No stage may claim a data source the app does not access. Delay ≤800ms with a single honest label if computation is cached. | `experience-cards/perceived-effort-delay-card.md` |
-| **Intent Mirroring Card** | A deliberate pause that reflects the user's stated intent back to them — using their own words — turns a tap into a meaningful moment and elevates perceived product trustworthiness. (Gollwitzer implementation intentions; Kahneman-Fredrickson peak-end; Norman reflective design; Picard affective computing.) | 7 star | Must use user-authored phrase from committed goal or last session action. Must not appear on the same screen as a paywall CTA. Dismissable in ≤1 tap. ≤once per session. | `experience-cards/intent-mirroring-card.md` |
-| **Endowed Progress Card** | Showing users they have already made progress before they begin raises completion rate significantly. The illusion of a head start lowers the psychological cost of starting. (Kivetz, Urminsky & Zheng goal-gradient hypothesis and endowed progress effect, _Journal of Marketing Research_ 2006.) | 6 star | Progress shown must reflect real onboarding inputs or real prior actions, not fabricated completions. No fake stamps or pre-filled loyalty cards. | `experience-cards/endowed-progress-card.md` |
-| **Peak-End Card** | Memory of an experience is dominated by its emotional peak and its final moment — not its duration or average quality. Designing both shapes what the user remembers and retells. (Kahneman & Fredrickson _Psychological Science_ 1993.) | 6–7 star | Peak must be a real product outcome, not a manufactured celebration. End moment must not be a paywall decline or an error state. | `emotional-experience-design.md §Peak-End Card` |
-| **Streak And Loss Aversion Card** | A maintained streak becomes a possession; losing it triggers loss aversion, which motivates return. Streaks are high-leverage for daily-return products. (Kahneman & Tversky prospect theory; Thaler endowment effect; Eyal Hook Model investment phase.) | 6 star | Streak loss must be real (not a countdown that resets). Spend prompt must never appear on a streak-break screen. Streak freeze / skip features are required at meaningful lengths (≥7 days) to prevent anxiety-driven churn. | `experience-cards/streak-and-loss-aversion-card.md` |
-| **Reciprocity Card** | An unexpected gift before a purchase request lowers psychological purchase resistance. The gift must be genuine value, not a teaser designed to create artificial scarcity. (Cialdini reciprocity, _Influence_ 1984.) | 6 star | Gift must be real, unconditional value the user can keep regardless of purchase decision. No gift that disappears after the paywall is dismissed. No fake countdown on the gift offer. | `experience-cards/reciprocity-card.md` |
-| **Identity And Self-Expression Card** | When users express preferences, customize a surface, or choose a persona, the product becomes part of their self-concept. Abandoning it then feels like self-contradiction. (Cialdini consistency; Norman reflective design; Cooper goal-directed design.) | 7–10 star | Customization must be real (genuinely changes product behavior or appearance). Must not lock expression behind a paywall that is shown before the user has experienced the value. | `emotional-experience-design.md §Identity And Self-Expression Card` |
-| **Fresh Start Card** | Temporal landmarks (new week, new month, post-milestone) lower the psychological cost of re-entry after a lapse. A "fresh start" frame re-activates dormant users without manufacturing guilt. (Hengchen Dai fresh-start effect; Cialdini commitment/consistency for re-entry framing.) | 6 star | Re-engagement copy must reference a real temporal landmark or a real user milestone, not a fabricated urgency trigger. Must not imply the user has lost progress they have not lost. | `experience-cards/fresh-start-card.md` |
-| **Mastery And Status Card** | Visible skill progression and earned-tier indicators provide the intrinsic motivation layer (competence, visible achievement) that sustains engagement after extrinsic novelty fades. (Deci & Ryan self-determination theory; Cooper goal-directed design.) | 7 star | Status must be earned through real product behavior, not purchased or inflated. Level labels must be calibrated so early levels are achievable, preventing the "forever beginner" drop-off. | `experience-cards/mastery-and-status-card.md` |
-| **Recovery And Trust Repair Card** | Failure states (errors, crashes, failed payments, lapsed streaks) are where trust is won or destroyed permanently. A thoughtful, honest recovery message converts a negative peak into a trust-building moment. (Kahneman-Fredrickson peak-end; Norman reflective design.) | 6–7 star | Recovery copy must not manufacture guilt. It must state what happened honestly and offer a clear, single next action. Spend prompts are prohibited on recovery screens. | `experience-cards/recovery-and-trust-repair-card.md` |
+The deck itself is [`experience-cards.md`](experience-cards.md) — its Card Routing table says
+which card to reach for when, and its Summary Table carries the thesis, 11-star level and
+bright-line guardrail per card. That index and the twelve card files under
+[`experience-cards/`](experience-cards.md) are the single source; a second copy of the same
+twelve rows here is the duplication ARCHITECTURE.md names, and it drifts silently because
+nothing compares the two tables.
 
 **Deck coverage rationale.** The four required cards (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring) are strongest at 6-star and 7-star and operate primarily within a single session or the onboarding funnel. The eight additional cards fill five gaps: temporal momentum and return-visit drive (Endowed Progress, Streak and Loss Aversion, Fresh Start); memory and word-of-mouth formation (Peak-End); intrinsic and social motivation (Mastery and Status); identity anchoring (Identity and Self-Expression); and pre-conversion motivation and failure resilience (Reciprocity, Recovery and Trust Repair). No card in the deck duplicates another's mechanism.
 
@@ -234,39 +226,15 @@ This section is a compliance surface. The full policy, regulatory basis, and per
 
 ### Bright-Line Vs Dark-Line
 
-Every card application must pass the three-question operational test:
-
-1. **Goal alignment.** Does this mechanism help the user move toward the goal they stated or implied when they opened the app?
-2. **Truthfulness.** Is every element of this mechanism (copy, progress label, reward, social proof, scarcity signal) factually accurate and verifiable?
-3. **Informed exit.** Can the user exit this mechanism, pause it, or opt out without penalty to already-earned value?
-
-All three must be YES. Any NO is a compliance veto. Implementation stops.
+[`ethics-guardrail.md`](ethics-guardrail.md) §1 Bright-Line Vs Dark-Line Distinction.
 
 ### Hard Gates (Unconditional Vetoes)
 
-The following are never permitted regardless of A/B test results, conversion uplift, or founder request. Each is a compliance veto enforced by `check:emotional-design`:
-
-- Fake scarcity: countdown timers that reset on reload; user counts that are fabricated or inflated.
-- Fake social proof: activity notifications that are synthetic ("Sarah just signed up") without real-time data backing.
-- Fake effort: progress stages that do not map to real computation; arbitrary sleep delays presented as analysis.
-- Spend prompt inside a grief screen: any purchase CTA adjacent to a streak-break, payment failure, error, or loss-of-progress message.
-- Confirmshaming: opt-out labels designed to induce shame ("No thanks, I don't want to improve" style).
-- Ratings outside the native API: custom pre-screening ("Would you rate us 5 stars?" before showing the native sheet).
-- Pre-ticked subscription boxes: any subscription pre-selected on any screen.
-- Hidden subscription terms: any paywall where the renewal price, renewal date, or cancellation path is not visible before purchase.
+[`ethics-guardrail.md`](ethics-guardrail.md) §5 Guardrail Contract → Non-Negotiable Prohibitions.
 
 ### Regulatory Basis
 
-Summarized from `playbook/experience/ethics-guardrail.md §2`:
-- **FTC Act §5** and FTC "Bringing Dark Patterns to Light" (Sept 2022): deceptive design practices are unfair or deceptive acts.
-- **FTC Click-to-Cancel Rule** (Oct 2024, 16 CFR Part 425): cancellation must be as easy as subscription.
-- **EU DSA Art. 25**: deceptive or manipulative techniques that distort autonomous decision-making are prohibited.
-- **Apple App Store Review Guidelines §4.0**: exploiting emotions is grounds for rejection.
-- **Google Play Deceptive Behavior policy**: misleading behavior, false information, or violations of user trust are policy violations.
-
-For full regulatory detail, per-card risk tables, and the Guardrail Contract attestation block shape, see `playbook/experience/ethics-guardrail.md`.
-
----
+[`ethics-guardrail.md`](ethics-guardrail.md) §2 Regulatory And Platform Landscape.
 
 ## Required Artifacts
 
@@ -369,31 +337,9 @@ When the founder says "turn this feature into an emotional experience", "charge 
 - "do an emotional design pass"
 - any equivalent instruction to evaluate existing emotional design
 
-**Hard ordered output sequence for a Producer run:**
-
-1. Create or update `EMOTIONAL_DESIGN.md` with the card applications, Emotional Curve, and ethics attestations.
-2. Update `ANALYTICS.md` with the new PostHog events.
-3. Update `DESIGN.md` with the three-level tone block and motion spec.
-4. Update `TECH_SPEC.md` with the frontstage/backstage dependency rows.
-5. Render or update `emotional-design.html` with the Emotional Curve.
-6. Run `npm run check:emotional-design -- --root .`. Fix all errors before continuing.
-7. Update `PRODUCTION_READINESS.md` evidence rows.
-8. Update `PROJECT_STATE.yaml` `lanes.emotional_design`.
-9. Only after the above eight steps: proceed to implementation changes or subagent build work.
-
-**Hard ordered output sequence for an Auditor run:**
-
-1. Attach to the running app. Rung 0 (the in-app iOS Simulator) is fine for drafting the step list; the audit of record attaches to a real device via MobAI. Capture screenshots of every screen in the primary journey.
-2. Score each screen against the six-lens framework.
-3. Plot the actual Emotional Curve and compare to the target from `11_STAR_EXPERIENCE.md`.
-4. Write findings per the Audit Output Contract (see below).
-5. Open failure cards for all critical and high findings.
-6. Update `PROJECT_STATE.yaml`.
-7. Run `npm run check:emotional-design -- --root .`.
-
-If the founder asks for both "charge this feature" and "make your changes" in a single turn, produce `EMOTIONAL_DESIGN.md` and pass the validators first, then apply implementation changes using the card applications as the governing constraint.
-
----
+The ordered output sequences are the Producer Protocol and Auditor Protocol above, in this same
+file. They were restated here in condensed form, which is how the two copies came to disagree on
+step count. Dispatch to a protocol using the table above, then follow that protocol as written.
 
 ## Audit Output Contract
 
@@ -417,20 +363,9 @@ When an auditor subagent or the Auditor Protocol produces findings, each finding
 
 ## Gates Before Build
 
-Do not move to engineering handoff for any feature with an emotional design component until:
-
-- `EMOTIONAL_DESIGN.md` exists with card applications for the feature.
-- The Emotional Curve is plotted and the peak falls before the paywall marker.
-- Every applied card has a bright-line attestation (three-question test answered YES) in `EMOTIONAL_DESIGN.md`.
-- Every applied card has a PostHog event in `ANALYTICS.md`.
-- Every card-level motion moment has a `prefers-reduced-motion` fallback in `DESIGN.md`.
-- Every card-carrying screen has a frontstage/backstage row in `TECH_SPEC.md`.
-- All four required cards (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring) are either applied or explicitly marked not-applicable with a reason in `EMOTIONAL_DESIGN.md`.
-- No dark-pattern flag is open in `FAILURE_CARDS.md` for this feature.
-- `npm run check:emotional-design -- --root .` passes.
-- `PROJECT_STATE.yaml` `lanes.emotional_design` status is `done` or `partial` with named blockers.
-
----
+The build-handoff gate is [`ethics-guardrail.md`](ethics-guardrail.md) §7 Acceptance Checklist,
+and `check:emotional-design` is what enforces it. Restating the list here gave it a second
+place to drift from the validator.
 
 ## Common Failures
 
