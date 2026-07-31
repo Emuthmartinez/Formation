@@ -332,7 +332,7 @@ Must include:
 - supply-chain and build controls: dependency review, SDK inventory, lockfiles, generated-code review, secret scans, CI, signing material, and no raw secrets
 - monitoring and incident response: release health, alerts, rollback/kill switch, support escalation, store crash reports, public reporting route
 - accepted risks: owner, reason, expiry or revisit date, compensating control, evidence, and founder approval where required
-- release proof: validator/scanner/review outputs or blocked-route evidence
+- release checks: validator/scanner/review outputs or blocked-route evidence
 
 Rules:
 - Do not call security done from prose alone.

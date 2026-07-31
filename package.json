@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.60.0",
+  "version": "0.61.0",
   "description": "An agent skill that takes a consumer mobile app from idea to a launched business, with deterministic validators between every claim and done.",
   "keywords": [
     "claude-code",
@@ -60,6 +60,7 @@
     "check:paid-ua": "tsx skill/b2c-mobile-business-launch/gates/growth/check-paid-user-acquisition.ts",
     "check:emotional-design": "tsx skill/b2c-mobile-business-launch/gates/experience/check-emotional-design.ts",
     "check:orchestration": "tsx skill/b2c-mobile-business-launch/gates/process/check-parallel-orchestration.ts",
+    "check:generated-pages": "tsx skill/b2c-mobile-business-launch/gates/process/check-generated-pages.ts",
     "check:source-registry": "tsx skill/b2c-mobile-business-launch/machine/check-source-freshness.ts --root . --registry skill/b2c-mobile-business-launch/machine/source-registry.yaml",
     "check:source-freshness": "tsx skill/b2c-mobile-business-launch/machine/check-source-freshness.ts --root . --registry skill/b2c-mobile-business-launch/machine/source-registry.yaml",
     "refresh:source-freshness": "tsx skill/b2c-mobile-business-launch/machine/check-source-freshness.ts --root . --registry skill/b2c-mobile-business-launch/machine/source-registry.yaml --write-discovered && tsx skill/b2c-mobile-business-launch/machine/refresh-source-freshness.ts --root . --registry skill/b2c-mobile-business-launch/machine/source-registry.yaml",
@@ -93,6 +94,7 @@
     "audit:links": "tsx skill/b2c-mobile-business-launch/machine/audit-skill-links.ts --skill-root skill/b2c-mobile-business-launch",
     "render:launch-cockpit": "tsx skill/b2c-mobile-business-launch/scripts/render-launch-cockpit.ts",
     "render:business-control-plane-workspace": "tsx skill/b2c-mobile-business-launch/scripts/render-business-control-plane-workspace.ts",
+    "render:artifact-pages": "tsx skill/b2c-mobile-business-launch/scripts/render-artifact-pages.ts",
     "test:validators": "tsx skill/b2c-mobile-business-launch/machine/run-validator-fixtures.ts",
     "launchbench": "tsx skill/b2c-mobile-business-launch/machine/run-launchbench.ts",
     "evals:behavioral": "tsx skill/b2c-mobile-business-launch/machine/run-behavioral-evals.ts",

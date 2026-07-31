@@ -1,6 +1,7 @@
-import { cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, skillRoot } from "./_harness.js";
+import { artifactPageEntries } from "../../scripts/lib/artifact-pages.js";
 import { auditExcludedScripts, buildAuditPlan, type AuditLayout } from "../../scripts/lib/audit-plan.js";
 
 /**
@@ -172,6 +173,105 @@ export function register(h: Harness): void {
     ["--skill-root", autopilotStripped],
     1,
     "autopilot.body.required_term_missing",
+  );
+
+  // --- check-generated-pages ---
+  //
+  // Four founder-facing pages had drifted from the documents they were written
+  // from while the audit stayed green, so every rule here has to be provably
+  // able to fail. All three assertions matter: page-is-declared alone misses a
+  // deleted page, declared-page-exists alone misses stale content, and the
+  // byte-match alone misses a new hand-authored page nobody declared.
+  runScriptArgs("generated pages pass on the shipped business documents", "check-generated-pages.ts", ["--root", path.join(skillRoot, "business")], 0);
+
+  /**
+   * A business root holding only what this gate reads: every declared page plus
+   * every Markdown source. Copying the whole of business/ would work and would
+   * cost ~300 files per fixture for no extra coverage.
+   */
+  const pagesRoot = (name: string, build: (root: string) => void): string => {
+    const root = makeEmptyFixture(name);
+    for (const [html, entry] of artifactPageEntries()) {
+      cpSync(path.join(skillRoot, "business", html), path.join(root, html));
+      if (entry.kind === "authored-from") {
+        cpSync(path.join(skillRoot, "business", entry.markdown), path.join(root, entry.markdown));
+      }
+    }
+    build(root);
+    return root;
+  };
+
+  runScriptArgs(
+    "generated pages fail when the business directory is absent",
+    "check-generated-pages.ts",
+    ["--root", path.join(skillRoot, "business", "no-such-directory")],
+    1,
+    "generated_pages.business_root_missing",
+  );
+
+  const pagesClean = pagesRoot("generated-pages-clean", () => {});
+  runScriptArgs("generated pages pass on a root holding exactly the declared set", "check-generated-pages.ts", ["--root", pagesClean], 0);
+
+  const pagesUndeclared = pagesRoot("generated-pages-undeclared", (root) => {
+    writeFileSync(path.join(root, "revenue-board.html"), "<!doctype html><html><body>hand written</body></html>", "utf8");
+  });
+  runScriptArgs(
+    "generated pages fail on a page added with no declared source",
+    "check-generated-pages.ts",
+    ["--root", pagesUndeclared],
+    1,
+    "generated_pages.undeclared_page",
+  );
+
+  const pagesDeleted = pagesRoot("generated-pages-deleted", (root) => {
+    rmSync(path.join(root, "store-console.html"));
+  });
+  runScriptArgs(
+    "generated pages fail when a declared page is deleted",
+    "check-generated-pages.ts",
+    ["--root", pagesDeleted],
+    1,
+    "generated_pages.missing_page",
+  );
+
+  const pagesSourceGone = pagesRoot("generated-pages-source-missing", (root) => {
+    rmSync(path.join(root, "SECURITY.md"));
+  });
+  runScriptArgs(
+    "generated pages fail when the document a page is written from is deleted",
+    "check-generated-pages.ts",
+    ["--root", pagesSourceGone],
+    1,
+    "generated_pages.source_missing",
+  );
+
+  // The drift case is the one the four broken pages would have been caught by:
+  // the file exists, is declared, and no longer says what its source says.
+  const pagesDrift = pagesRoot("generated-pages-drift", (root) => {
+    const page = path.join(root, "onboarding.html");
+    writeFileSync(page, readFileSync(page, "utf8").replace("Push permission prime", "Push permission (removed by hand)"), "utf8");
+  });
+  runScriptArgs(
+    "generated pages fail when a page is edited away from its source",
+    "check-generated-pages.ts",
+    ["--root", pagesDrift],
+    1,
+    "generated_pages.drift",
+  );
+
+  // markdown-lite rejects constructs outside its subset instead of rendering
+  // them as something else. A silent downgrade to a paragraph is exactly how a
+  // section turns to mush behind a green gate.
+  const pagesUnsupported = pagesRoot("generated-pages-unsupported-markdown", (root) => {
+    const source = path.join(root, "ORCHESTRATION.md");
+    writeFileSync(source, `${readFileSync(source, "utf8")}\n#### Too deep for this renderer\n`, "utf8");
+  });
+  runScriptArgs(
+    "generated pages fail on Markdown outside the subset rather than mangling it",
+    "check-generated-pages.ts",
+    ["--root", pagesUnsupported],
+    1,
+    "generated_pages.unsupported_markdown",
   );
 
   // --- check-agent-entrypoints ---

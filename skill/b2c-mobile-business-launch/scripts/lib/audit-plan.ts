@@ -94,6 +94,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     },
     { id: "check:package-parity", kind: "script", repoOnly: true },
     { id: "check:artifact-templates", kind: "script", args: ["--skill-root", S] },
+    { id: "check:generated-pages", kind: "script", args: rootArgs },
     { id: "check:app-archetype", kind: "script", args: ["--skill-root", S] },
     { id: "check:archetype-starter", kind: "script", args: ["--skill-root", S] },
     { id: "check:reference-size", kind: "script", args: ["--skill-root", S] },

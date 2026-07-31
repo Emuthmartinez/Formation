@@ -6,7 +6,7 @@ This packet is the copy-paste operator surface for App Store Connect and Google 
 
 ## Console Routes
 
-| Surface | Click path | Values to record | Proof | Gate |
+| Surface | Click path | Values to record | Evidence | Approval |
 | --- | --- | --- | --- | --- |
 | App Store Connect app creation | ASC CLI/skill-pack route, or App Store Connect > Apps > plus button > New App when blocked | platform, app name, primary locale, bundle ID, SKU, user access, developer-name implications | `APPLE_SIGNING.md`, `app-store-connect-cli.md` preflight, `asc-id-resolver` once created | founder approval before create |
 | App Store Connect app information | Apps > {{APP_NAME}} > App Information | name, subtitle, SKU, primary locale, bundle ID, category, privacy policy URL | `APP_STORE_LISTING.md` | founder approval before save |
@@ -15,13 +15,13 @@ This packet is the copy-paste operator surface for App Store Connect and Google 
 | App Store Connect pricing | Apps > {{APP_NAME}} > Pricing and Availability | base territory, price, trial or intro offer, subscription groups | `REVENUE_OPS.md`, RevenueCat catalog diff | founder approval before price changes |
 | App Store Connect localization | Apps > {{APP_NAME}} > Localizations | metadata, keywords, screenshots, App Preview, review notes | `APP_STORE_LISTING.md`, `SCREENSHOTS.md` | founder approval before upload |
 | App Store Connect marketing | Apps > {{APP_NAME}} > Product Page Optimization, Custom Product Pages, In-App Events | custom product page plan, In-App Event plan, campaign measurement | ASO research, App Analytics plan | founder approval before create |
-| Google Play main listing | Play Console > {{APP_NAME}} > Store presence > Main store listing | package name, short description, full description, graphics, screenshots | Play listing artifact | founder approval before save |
+| Google Play main listing | Play Console > {{APP_NAME}} > Store presence > Main store listing | package name, short description, full description, graphics, screenshots | Play listing document | founder approval before save |
 | Google Play Data safety | Play Console > {{APP_NAME}} > Policy > App content > Data safety | collected data, sharing, security practices, deletion route | `PRIVACY.md`, vendor inventory | founder approval before submit |
 
 ## Store Asset Rules
 
 - App Store Connect work should route through the ASC CLI/skill pack first when credentials are configured or the founder asked for ASC work. App creation, `asc-id-resolver`, metadata, screenshots, TestFlight, products, subscriptions, review status, and `asc-revenuecat-catalog-sync` are CLI/skill-pack candidates; blocked auth, 2FA, missing agreements, or unapproved sticky fields are blockers, not "cannot do it" answers.
-- Screenshots use `SCREENSHOTS.md` as the canonical packet; raw in-app simulator, MobAI, or device captures are proof inputs, while final iPhone, iPad, and Google Play assets need copy overlay, production composition, validation, and visual QA.
+- Screenshots use `SCREENSHOTS.md` as the canonical packet; raw in-app simulator, MobAI, or device captures are source inputs, while final iPhone, iPad, and Google Play assets need copy overlay, production composition, validation, and visual QA.
 - Use ParthJadhav/app-store-screenshots when a reusable local screenshot editor/export board is useful for iPhone/iPad/Play decks, locale variants, app icon placement, and final PNG export from real UI plus design-system copy.
 - Higgsfield can support app icons, backgrounds, CPP media, In-App Event media, and thumbnails when tied to `DESIGN.md` and `11_STAR_EXPERIENCE.md`.
 - App Icon output records `app-icon/app-icon-1024.png`, thumbnail contrast, no alpha, no rounded corners, and category differentiation.

@@ -413,7 +413,7 @@ tools:
     docs_checked_at: ""
     required_secrets: []
     preflight: "Confirm whether Claude Security, Codex Security, GitHub Advanced Security, Snyk/Semgrep/Socket, MobSF Cloud, or a free local route is approved before running scans."
-    validation: "SECURITY.md, security-review.html, LaunchBench, and security validator evidence show threat model, platform hardening, supply-chain checks, and release proof."
+    validation: "SECURITY.md, security-review.html, LaunchBench, and security validator evidence show threat model, platform hardening, supply-chain checks, and release checks."
     fallback: "Use local security skills, OWASP MASVS/ASVS, MobSF local, gitleaks/trufflehog, npm audit/osv-scanner, semgrep community rules, Xcode/Android static checks only after founder approval when replacing paid tools."
   app_store_connect:
     route: "intended_account_tool"

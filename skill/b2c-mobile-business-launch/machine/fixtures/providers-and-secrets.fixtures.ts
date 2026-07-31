@@ -81,7 +81,7 @@ export function register(h: Harness): void {
       "Revenue, Entitlements, RevenueCat, Stripe, restore, webhook, and idempotency are covered.",
       "Privacy and Analytics include PostHog, session replay, PII, PII scrubbing, and self-reported attribution.",
       "Email security includes SPF, DKIM, DMARC, unsubscribe, and Resend. Public web uses security.txt and security headers.",
-      "Supply Chain, Monitoring, Incident Response, Release Proof, Accepted Risks, Founder Approval, Sentry, release health, and MobSF are covered.",
+      "Supply Chain, Monitoring, Incident Response, Release Checks, Accepted Risks, Founder Approval, Sentry, release health, and MobSF are covered.",
       "App Attest is pending.",
     ].join("\n"),
     "utf8",

@@ -12,7 +12,7 @@ Status: partial until the app, backend, store, and provider evidence is verified
 
 ## Security Review Tool Routing
 
-| Route | Status | Use | Founder Gate | Free Fallback |
+| Route | Status | Use | Founder Approval | Free Fallback |
 | --- | --- | --- | --- | --- |
 | Claude Security | blocked until approved | semantic code review and targeted patch PRs | account access and repo authorization | local `security-threat-model` plus code review |
 | Codex Security | blocked until approved | threat-model-backed vulnerability scan and validated patches | workspace/RBAC access and repo authorization | local `security-best-practices` plus manual tests |
@@ -60,7 +60,7 @@ Status: partial until the app, backend, store, and provider evidence is verified
 - Keep App Transport Security enabled; document any exception with domain, owner, reason, and review date.
 - Use App Attest or DeviceCheck for high-value backend actions when fraud or entitlement abuse risk is material.
 - Review entitlements, associated domains, URL schemes, app groups, keychain access groups, push, iCloud, health, camera, location, and photo permissions against actual V1 scope.
-- Confirm release signing, provisioning, archive/export/upload, and TestFlight gates in `APPLE_SIGNING.md`; simulator success is not security or distribution proof.
+- Confirm release signing, provisioning, archive/export/upload, and TestFlight gates in `APPLE_SIGNING.md`; simulator success is not security or distribution evidence.
 
 ### Android
 
@@ -68,7 +68,7 @@ Status: partial until the app, backend, store, and provider evidence is verified
 - Use a Network Security Config that disallows cleartext production traffic unless a documented local/debug exception exists.
 - Use Play Integrity for high-value backend actions when fraud, abuse, entitlement spoofing, or tampered-client risk is material; enforce in tiers after telemetry shows impact.
 - Review exported activities, services, receivers, providers, intent filters, deep links, backup rules, permissions, and signing configs.
-- Confirm App Bundle signing, Play Console declarations, Data safety, and internal testing proof in store docs.
+- Confirm App Bundle signing, Play Console declarations, Data safety, and internal testing evidence in store docs.
 
 ## Authentication And Authorization
 
@@ -97,12 +97,12 @@ Status: partial until the app, backend, store, and provider evidence is verified
 
 - `PRIVACY.md`, App Privacy, Google Play Data safety, `ANALYTICS.md`, and `SECURITY.md` must describe the same data behavior.
 - PostHog session replay, surveys, and feature flags require masking, sampling, consent or opt-out posture, and store-disclosure review.
-- Sentry must scrub PII, include PII scrubbing in configuration proof, tag release/environment, and route alerts before release health is called ready.
+- Sentry must scrub PII, include PII scrubbing in configuration evidence, tag release/environment, and route alerts before release health is called ready.
 - Self-reported attribution uses stable keys, `other` free text handling, PostHog person properties, backend/profile persistence, and anonymous-to-identified reconciliation.
 
 ## Email And Domain Security
 
-- Resend or equivalent sender domains need SPF, DKIM, DMARC, sender identity, unsubscribe/preference handling, and webhook signing proof.
+- Resend or equivalent sender domains need SPF, DKIM, DMARC, sender identity, unsubscribe/preference handling, and webhook signature verification.
 - Support, privacy, and security email aliases must route and be tested from an external sender.
 - Public web funnels should publish `.well-known/security.txt` or an equivalent vulnerability-reporting route when accounts, payments, user content, or sensitive data exist.
 - Security headers should be checked for public web surfaces: HTTPS, HSTS only when deliberately approved, CSP where practical, frame protections, referrer policy, and permissions policy.
@@ -123,7 +123,7 @@ Status: partial until the app, backend, store, and provider evidence is verified
 - Define incident owner, support response path, app rollback/kill-switch path, provider status checks, and customer communication draft.
 - Keep a responsible disclosure route through `security@domain` or `.well-known/security.txt` when public users can create accounts, pay, or upload sensitive data.
 
-## Release Proof
+## Release Checks
 
 - `npm run check:security -- --root .` or the installed-skill equivalent passes.
 - `npm run check:secrets -- --root .` passes.
@@ -131,7 +131,7 @@ Status: partial until the app, backend, store, and provider evidence is verified
 - RevenueCat/Stripe restore and entitlement paths are verified when monetized.
 - Webhook signature, idempotency, and retry behavior are verified where state changes occur.
 - MobSF, SAST, dependency, or manual security-review evidence is attached or explicitly blocked with founder-approved route.
-- `security-review.html` renders the threat model, tool routing, platform checklist, open risks, and release proof for founder review.
+- `security-review.html` renders the threat model, tool routing, platform checklist, open risks, and release checks for founder review.
 
 ## Accepted Risks
 
