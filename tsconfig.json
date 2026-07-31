@@ -10,6 +10,8 @@
     "noUncheckedIndexedAccess": true
   },
   "include": [
+    "skill/b2c-mobile-business-launch/gates/**/*.ts",
+    "skill/b2c-mobile-business-launch/machine/**/*.ts",
     "skill/b2c-mobile-business-launch/scripts/**/*.ts"
   ]
 }

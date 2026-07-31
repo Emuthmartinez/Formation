@@ -4,6 +4,19 @@ What a maintainer touches to keep this skill green. Nothing here is about runnin
 
 The line matters: a file about *how a launch is run* is method and lives in [`../playbook/process/`](../playbook/process/README.md), not here. Mixing the two is what made "the skill talking about itself" measure at 22% of the repo when much of that was really the method the skill exists to carry.
 
+The same line decides where a validator lives. **`gates/` grades a business launch; `machine/` grades the skill itself** — judged by the subject of the assertion, not by whether the validator takes `--skill-root`. Six validators sit here for that reason:
+
+| Validator | Grades |
+| --- | --- |
+| `check-package-parity.ts` | the two package manifests and lockfiles agree with `skill-version.json` |
+| `check-skill-version.ts` | the installed runtime is not behind source |
+| `check-version-discipline.ts` | a pending change carries a matching version bump and release notes |
+| `check-source-freshness.ts` | every tracked external source in `source-registry.yaml` is current |
+| `check-reference-size.ts` | no knowledge file blows the per-file context budget, and every folder indexes its children |
+| `check-autopilot-contract.ts` | `SKILL.md`'s frontmatter still triggers, against the triggering eval |
+
+Everything else that grades a launch lives in [`../gates/`](../gates/), mirroring the playbook domains. Nothing may hardcode either directory: `../scripts/lib/script-paths.ts` resolves a script by basename and throws on an unknown or ambiguous name.
+
 | Load when | Reference | Produces / gate |
 | --- | --- | --- |
 | Writing or auditing a LaunchBench scenario, adding a failure mode to the regression suite, or deciding whether a miss deserves a new gate | [`launchbench-evals.md`](launchbench-evals.md) | `npm run launchbench` lints scenario definitions and runs the deterministic validator fixtures; `npm run evals:behavioral` is a different gate against a live agent — never claim one as the other |

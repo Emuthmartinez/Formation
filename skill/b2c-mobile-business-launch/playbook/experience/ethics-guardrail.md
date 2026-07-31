@@ -303,7 +303,7 @@ experience_card:
 The `check:emotional-design` script enforces the following. Any violation is an `error`
 unless marked as `warning`.
 
-All codes are emitted by `scripts/check-emotional-design.ts` with the prefix `emotional_design.` (audit-artifact codes use `emotional_audit.`).
+All codes are emitted by `gates/experience/check-emotional-design.ts` with the prefix `emotional_design.` (audit-artifact codes use `emotional_audit.`).
 
 | Rule ID (prefix `emotional_design.`) | Level | Description |
 |---|---|---|

@@ -3,6 +3,7 @@ import { cpSync, existsSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { parseDesignCliArgs, skillRoot } from "./lib/design-state.js";
+import { resolveScriptPath } from "./lib/script-paths.js";
 
 const args = parseDesignCliArgs(process.argv.slice(2));
 const [command, nameOrRef] = args.positionals;
@@ -72,8 +73,14 @@ function renderAndCheckDesignRoom(staticOnly: boolean): void {
   runSkillScript("check-design-room-contract.ts", ["--root", args.root]);
 }
 
+/**
+ * Spawn a sibling script by basename. The directory is resolved rather than
+ * assumed: renderers live in scripts/, gates live in gates/<domain>/, and
+ * `design:version` is not an audit-plan step — so a hardcoded "scripts" here
+ * would leave this command broken while the audit still reported green.
+ */
 function runSkillScript(scriptName: string, scriptArgs: string[]): void {
-  runChecked("tsx", [path.join("scripts", scriptName), ...scriptArgs], skillRoot);
+  runChecked("tsx", [resolveScriptPath(skillRoot, scriptName), ...scriptArgs], skillRoot);
 }
 
 function normalizeBaseline(value: string): string {

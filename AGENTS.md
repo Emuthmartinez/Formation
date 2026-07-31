@@ -15,13 +15,15 @@ Structural work follows [`ARCHITECTURE.md`](ARCHITECTURE.md), the target layout 
 - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`: contributor-facing surfaces. Root `SECURITY.md` covers this repo's validators, workflows, and dependency chain, and is a different document from the shipped `business/SECURITY.md` security release plan.
 - `skill/b2c-mobile-business-launch/SKILL.md`: skill entrypoint and progressive-disclosure routing.
 - `skill/b2c-mobile-business-launch/skill-version.json`: installed-runtime freshness manifest.
-- `skill/b2c-mobile-business-launch/references/`: detailed launch, provider, source freshness, and maintenance references.
+- `skill/b2c-mobile-business-launch/playbook/`: agent knowledge grouped by area of the business, one folder per domain with its own `README.md` index.
 - `skill/b2c-mobile-business-launch/state/`: Design Room seed state, theme tokens, and JSON schema.
 - `skill/b2c-mobile-business-launch/render/`: React/Vite Design Room renderer; `scripts/render-design-room.ts` also writes the static fallback.
 - `skill/b2c-mobile-business-launch/business/`: reusable launch artifacts copied into app repos.
-- `skill/b2c-mobile-business-launch/business/app-archetypes/`: per-product-shape packs (`social-network`, `ai-chat-companion`, `habit-tracker`, `photo-ai-media`) — each a lane-routed prompt pack plus a runnable `starter/` scaffold, enforced by `check-app-archetype` and `check-archetype-starter`.
+- `skill/b2c-mobile-business-launch/starters/`: per-product-shape packs (`social-network`, `ai-chat-companion`, `habit-tracker`, `photo-ai-media`) — each a lane-routed prompt pack plus a runnable `starter/` scaffold, enforced by `check-app-archetype` and `check-archetype-starter`.
 - `skill/b2c-mobile-business-launch/business/repo-agent-entrypoints/`: business-repo `AGENTS.md` and `CLAUDE.md` templates that keep future agents on the launch skill workflow.
-- `skill/b2c-mobile-business-launch/scripts/`: deterministic validators, renderers, LaunchBench harness, and source freshness tooling.
+- `skill/b2c-mobile-business-launch/gates/`: the deterministic validators that grade a business launch, mirroring the `playbook/` domains (`gates/store/`, `gates/money/`, …). Cross-cutting launch-method gates live in `gates/process/`.
+- `skill/b2c-mobile-business-launch/machine/`: what grades the skill itself — package parity, skill versioning, version discipline, the source registry, reference byte budgets, and the `SKILL.md` autopilot contract.
+- `skill/b2c-mobile-business-launch/scripts/`: everything executable that is not a gate — renderers, runners, probes, seeds, the LaunchBench harness, and the shared `lib/`.
 - `skill/b2c-mobile-business-launch/evals/launchbench/`: known failure-mode scenarios.
 - `skill/b2c-mobile-business-launch/agents/openai.yaml`: UI metadata.
 - `scripts/sync-skill-runtime.sh`: maintainer-only installed-runtime sync (`npm run sync:runtime`); see [Runtime Sync](#runtime-sync).
@@ -30,7 +32,7 @@ Structural work follows [`ARCHITECTURE.md`](ARCHITECTURE.md), the target layout 
 
 1. `README.md`
 2. `skill/b2c-mobile-business-launch/SKILL.md`
-3. Any directly relevant reference under `skill/b2c-mobile-business-launch/references/`
+3. Any directly relevant reference under `skill/b2c-mobile-business-launch/playbook/`
 4. The script/template/eval files you will change
 
 Use the skill-creator guidance when changing skill structure, trigger text, references, bundled scripts, or validation behavior.
@@ -41,13 +43,13 @@ When changing generated business-repo guidance, edit the shipped templates and v
 
 ## Agent Legibility
 
-Keep this file as a concise map, not a duplicate manual. Put detailed launch policy in `references/`, reusable generated output in `business/`, and deterministic enforcement in `scripts/` plus LaunchBench. When an agent miss repeats, add or tighten a validator/eval instead of relying on a longer reminder.
+Keep this file as a concise map, not a duplicate manual. Put detailed launch policy in `playbook/`, reusable generated output in `business/`, and deterministic enforcement in `gates/` (or `machine/`, when the thing being graded is the skill itself) plus LaunchBench. When an agent miss repeats, add or tighten a validator/eval instead of relying on a longer reminder.
 
 `SKILL.md` is a **router, not a manual** — it loads on every trigger, so its job is the always-on contracts plus one Lane Routing index (route here when / load / produce / gate). Detail belongs in the reference the row points at. `check:reference-size` holds a 45KB entrypoint budget on freeze-and-subtract terms: a new lane row is paid for by compressing or relocating existing entrypoint text, never by raising the ceiling. Do not reintroduce a second enumeration of the same routing (the old "Start Here" narrative and "When To Load References" list said the same thing twice and drifted).
 
 ## Founder-Facing Copy
 
-Internal vocabulary is for agents and validators, never for founders. `scripts/lib/founder-copy.ts` is the only sanctioned path from machine state to founder-visible text; every founder-facing renderer imports from it. Adding a lane, status, phase, autonomy mode, or provider route means adding its label there **in the same commit** — `check:founder-copy` proves coverage and fails the build when a raw identifier, phase code, status enum, or banned internal word reaches a founder-visible surface. When a founder-visible heading is renamed, grep `scripts/` first: `check-founder-operator-bootstrap.ts` and `check-agent-operations.ts` both split the rendered cockpit on a literal `<h2>` string, so the rename and the validator update are one commit or the audit breaks.
+Internal vocabulary is for agents and validators, never for founders. `scripts/lib/founder-copy.ts` is the only sanctioned path from machine state to founder-visible text; every founder-facing renderer imports from it. Adding a lane, status, phase, autonomy mode, or provider route means adding its label there **in the same commit** — `check:founder-copy` proves coverage and fails the build when a raw identifier, phase code, status enum, or banned internal word reaches a founder-visible surface. When a founder-visible heading is renamed, grep the whole skill tree for the literal heading rather than one directory: `gates/operations/check-founder-operator-bootstrap.ts` and `gates/operations/check-agent-operations.ts` both split the rendered cockpit on a literal `<h2>` string, so the rename and the validator update are one commit or the audit breaks. Scoping that grep to a single directory is how the rename silently misses a gate — these two have already moved once.
 
 Writing quality is enforced, not advised. `playbook/words/no-slop-writing.md` holds the banned words, named slop patterns, and per-channel limits for everything this skill writes and everything it generates for a launched business; the rules are adapted from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT). `check:no-slop` **parses its rule table out of that reference** rather than duplicating it, so edit the reference and the gate follows. It errors on shipped copy surfaces, errors on this repo's own public docs (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, scanned via `--repo-root`), warns on guidance prose and on `AGENTS.md`/`CLAUDE.md`, and it deliberately does not enforce the judgment-dependent rules — turning "cut the adverb when it adds nothing" into a regex would flatten brand voice, which is the failure the source skill warns about.
 

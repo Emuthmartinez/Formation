@@ -93,10 +93,10 @@ Most artifact validators are deterministic phrase/regex gates over Markdown and 
 
 Frequently-tripped literal tokens worth knowing before authoring artifacts by hand:
 
-- `ONBOARDING.md` (`check:onboarding`): must contain the literal analytics event names `review_prompt_eligible` and `review_prompt_requested`, a named native review API (`SKStoreReviewController`, `requestReview`, StoreKit, or Google Play In-App Review), a cooldown/frequency cap, and a suppressed-prompt fallback — see `scripts/check-onboarding-conversion.ts` for the full accepted lists.
-- `growth/LAUNCH_NARRATIVE.md` (`check:launch-narrative`): fenced post copy is scanned against the 2026 guardrails (no hashtags, no emojis, no link in the main post) — see `scripts/check-launch-narrative.ts`.
-- `ANALYTICS.md` (`check:attribution`): expects the stable event/person-property names (e.g. `attribution_source_selected`, `self_reported_source`) plus backend persistence and reconciliation language — see `scripts/check-attribution-contract.ts`.
-- `SCREENSHOTS.md` (`check:store-screenshots`): expects raw-vs-final separation, device wells, and composition routing phrases — see `scripts/check-store-screenshots.ts`.
+- `ONBOARDING.md` (`check:onboarding`): must contain the literal analytics event names `review_prompt_eligible` and `review_prompt_requested`, a named native review API (`SKStoreReviewController`, `requestReview`, StoreKit, or Google Play In-App Review), a cooldown/frequency cap, and a suppressed-prompt fallback — see `gates/experience/check-onboarding-conversion.ts` for the full accepted lists.
+- `growth/LAUNCH_NARRATIVE.md` (`check:launch-narrative`): fenced post copy is scanned against the 2026 guardrails (no hashtags, no emojis, no link in the main post) — see `gates/growth/check-launch-narrative.ts`.
+- `ANALYTICS.md` (`check:attribution`): expects the stable event/person-property names (e.g. `attribution_source_selected`, `self_reported_source`) plus backend persistence and reconciliation language — see `gates/data/check-attribution-contract.ts`.
+- `SCREENSHOTS.md` (`check:store-screenshots`): expects raw-vs-final separation, device wells, and composition routing phrases — see `gates/store/check-store-screenshots.ts`.
 
 When a new validator gains a phrase vocabulary, add the high-traffic literals here and to the shipped template so authors discover the contract before the red X.
 

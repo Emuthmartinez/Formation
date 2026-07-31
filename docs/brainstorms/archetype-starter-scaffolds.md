@@ -35,7 +35,7 @@ Single source of truth: the starter lives only under `business/app-archetypes/<p
 
 ### Validation
 
-New deterministic validator `check:archetype-starter` (`scripts/check-archetype-starter.ts`), registered in `scripts/lib/audit-plan.ts`, both package.json script sets, and `run-launchbench` knownValidators. Per starter it enforces:
+New deterministic validator `check:archetype-starter` (`gates/engineering/check-archetype-starter.ts`), registered in `scripts/lib/audit-plan.ts`, both package.json script sets, and `run-launchbench` knownValidators. Per starter it enforces:
 
 - structure completeness (package.json with the pinned core deps and dev/build/typecheck scripts, lockfile present and parseable, tsconfig, next config, `proxy.ts`, app routes, Supabase client/server helpers, Stripe + RevenueCat stubs, PostHog wiring, CI workflow);
 - migrations contain `enable row level security` and `create policy`, and an RLS test file exists under `supabase/tests/`;

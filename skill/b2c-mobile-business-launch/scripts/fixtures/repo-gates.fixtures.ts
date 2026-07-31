@@ -153,6 +153,35 @@ export function register(h: Harness): void {
     "package_parity.launchbench_validator_missing",
   );
 
+  // A wired validator whose command names no script under gates/, machine/ or
+  // scripts/ used to be skipped in silence: the basename regex simply failed to
+  // match and the loop moved on, so the allowlist cross-check above could grade
+  // nothing while still exiting 0. That is the exact shape of failure the
+  // gates/ + machine/ split could have reintroduced, so the unparseable command
+  // is now an error in its own right and is proven to fail here.
+  const parityUnparseable = makeEmptyFixture("package-parity-unparseable-validator-command");
+  const unparseablePair = writeParityPair(parityUnparseable, { rootVersion: "0.0.1", skillVersion: "0.0.1" });
+  mkdirSync(path.join(unparseablePair.parityScriptRoot, "scripts"), { recursive: true });
+  writeFileSync(path.join(unparseablePair.parityScriptRoot, "scripts", "validate-project-state.ts"), "// stub\n", "utf8");
+  writeFileSync(
+    path.join(unparseablePair.parityScriptRoot, "scripts", "run-launchbench.ts"),
+    'const knownValidators = new Set(["validate-project-state"]);\nexport { knownValidators };\n',
+    "utf8",
+  );
+  for (const packagePath of [path.join(unparseablePair.repoRoot, "package.json"), path.join(unparseablePair.parityScriptRoot, "package.json")]) {
+    const parsed = JSON.parse(readFileSync(packagePath, "utf8")) as { scripts: Record<string, string> };
+    // tools/ is not one of the three script roots, so no basename can be read.
+    parsed.scripts["check:revenue"] = "tsx tools/check-revenue.ts";
+    writeFileSync(packagePath, JSON.stringify(parsed, null, 2), "utf8");
+  }
+  runScriptArgs(
+    "package parity fails loudly when a wired validator command names no known script root",
+    "check-package-parity.ts",
+    ["--repo-root", unparseablePair.repoRoot, "--skill-root", unparseablePair.parityScriptRoot],
+    1,
+    "package_parity.launchbench_validator_unparseable",
+  );
+
   // --- audit-skill-links ---
   const wireLinkRoot = (root: string): void => {
     mkdirSync(path.join(root, "playbook"), { recursive: true });

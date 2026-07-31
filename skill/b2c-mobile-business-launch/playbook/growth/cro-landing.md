@@ -26,7 +26,7 @@ Load [`conversion-copy.md`](../words/conversion-copy.md) for the words on the pa
 
 ## Required Artifacts
 
-Create or update `CRO_AUDIT.md` when a launch ships any public conversion page. It records the page's conversion structure, the friction removed, and the test queue. The existing [`check-landing-funnel.ts`](../../scripts/check-landing-funnel.ts) gates still apply (live deploy, form smoke test); this artifact adds the *will-it-convert* layer the funnel validator does not check.
+Create or update `CRO_AUDIT.md` when a launch ships any public conversion page. It records the page's conversion structure, the friction removed, and the test queue. The existing [`check-landing-funnel.ts`](../../gates/growth/check-landing-funnel.ts) gates still apply (live deploy, form smoke test); this artifact adds the *will-it-convert* layer the funnel validator does not check.
 
 `CRO_AUDIT.md` must include:
 - the single conversion goal of the page (one primary action) and the secondary action if any
@@ -77,7 +77,7 @@ Tie every CRO test to the experiment discipline in [`analytics-attribution.md`](
 - `CRO_AUDIT.md` exists for any public conversion page
 - the page has one primary conversion goal and an above-the-fold promise + CTA + proof
 - [`geo-seo.md`](geo-seo.md) was loaded before the first file edit; AI-crawler/metadata/schema checks pass
-- the [`check-landing-funnel.ts`](../../scripts/check-landing-funnel.ts) gates (live deploy, form smoke test) pass and are recorded in `PRODUCTION_READINESS.md`
+- the [`check-landing-funnel.ts`](../../gates/growth/check-landing-funnel.ts) gates (live deploy, form smoke test) pass and are recorded in `PRODUCTION_READINESS.md`
 - mobile viewport and Core Web Vitals verified with visual QA proof
 - the top CRO hypothesis is registered as an experiment with a stop rule
 - copy on the page traces to `COPY_BRIEF.md`; the hero matches the driving ad
