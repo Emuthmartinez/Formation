@@ -73,11 +73,12 @@ a founder-only gate; record that it was surfaced in `PROJECT_STATE.yaml`; then c
 current runtime regardless. Never downgrade quality because a runtime lacks workflows — run the
 same fan-out, adversarial-verification, and quarantine shapes as subagents or inline.
 
-Load [`playbook/process/dynamic-workflows.md`](playbook/process/dynamic-workflows.md) before
-proposing or running a workflow, **and when starting any pre-build stage on a non-Claude
-runtime** — that protocol has to reach the runtime that cannot run workflows at all, so it
-cannot hang off a workflow-proposal trigger. The reference carries which stages earn one, the
-full surfacing protocol, and the subagent fallback.
+Load [`playbook/process/dynamic-workflows.md`](playbook/process/dynamic-workflows.md) **when
+starting any pre-build stage** — on Claude Code to decide whether that stage earns a workflow,
+and on a non-Claude runtime to run the surfacing protocol above. Not "before proposing a
+workflow": on Claude that is after the selection decision the reference exists to inform, and
+on Codex it never fires at all. The reference carries which stages qualify, the token-budget
+and quarantine rules, and the subagent fallback.
 
 ## Start Here
 

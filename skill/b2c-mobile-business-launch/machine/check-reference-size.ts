@@ -44,8 +44,14 @@ const DEFAULT_BUDGET_BYTES = 64 * 1024;
  * Ratcheted 68KB -> 45KB when SKILL.md's duplicated Start Here / When To Load
  * References enumerations were merged into one Lane Routing index and the
  * per-lane handoff checklist moved into launch-coverage.md.
+ *
+ * Ratcheted 45KB -> 20KB when the Phase Spine moved to spine.md and the runtime
+ * routing detail moved to playbook/process/dynamic-workflows.md (v0.58.0).
+ * Leaving it at 45KB would have let ~25KB flow straight back into the file that
+ * loads on every trigger while check:reference-size stayed green — which is the
+ * freeze-and-subtract policy this comment describes, defeated by not applying it.
  */
-const ENTRYPOINT_BUDGET_BYTES = 45 * 1024;
+const ENTRYPOINT_BUDGET_BYTES = 20 * 1024;
 
 /**
  * Files allowed over budget, each with a concrete reason. Adding an entry is a

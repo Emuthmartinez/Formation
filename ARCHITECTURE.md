@@ -35,7 +35,7 @@ Today *kind* is the top level, *domain* is nowhere, and *stage* exists only as p
 
 ```
 <skill-root>/
-  SKILL.md                 routing only — target ≤ 12KB, not 46KB
+  SKILL.md                 routing only — ceiling ratchets down, see below
   spine.md                 the ordered walk through a launch; stages live here
 
   playbook/                agent knowledge, grouped by domain
@@ -67,6 +67,10 @@ Each domain folder carries its own `README.md` index rather than a sibling `<dom
 **One subject, one folder.** Everything about money — the knowledge, the artifact it produces, the gate that proves it — is reachable from one place. Adding a domain is adding a folder; removing one is removing a folder.
 
 **Audience separation is load-bearing.** `business/` is what a founder reads. `playbook/` is what an agent reads. `machine/` is what only the maintainer touches. Mixing them is what made the skill feel large: a founder browsing `business/` sees 291 files when about a dozen concern them.
+
+**The entrypoint size is a consequence, not the goal.** The original ≤12KB target was written when `SKILL.md` was 46,975 bytes, before the `playbook/` collapse — an aspiration set before anyone tried it. Measured at v0.58.0 it is not reachable without deleting something real: at 20,057 bytes the remainder is Lane Routing (3,696, already collapsed to 15 index rows at ~246 bytes each with no slack), five always-on contracts (4,130), Ground Rules (3,073) and What Counts As Done (1,306). Reaching 12,288 means halving two of those, and the obvious-looking candidate is a trap — Start Here items 4–6 read like duplicates of the operations and trust routing rows, but Lane Routing indexes the *reference* while Start Here carries the *trigger* ("before any API key, token, OAuth credential…"), so collapsing them lets an agent touch a credential without loading secrets management.
+
+So the rule is a **ratchet, not a target**: `machine/check-reference-size.ts` holds `ENTRYPOINT_BUDGET_BYTES` just above the current size (20KB as of v0.58.0, down from 45KB and 68KB before that), and every extraction lowers it in the same commit. Leaving the ceiling high after an extraction is how the recovered space flows straight back while the gate stays green. The number goes down when detail genuinely moves one level down — never by deleting a contract to hit a figure.
 
 **`SKILL.md` routes and nothing else.** Every domain gets one row pointing at its index. Detail lives one level down. Measured on the store domain: collapsing nine verbose routing rows into three index-pointing rows freed 2,787 bytes while the folder move cost 120 — the entrypoint's fullness is a symptom of detail living too high, not a budget problem.
 
