@@ -107,16 +107,40 @@ export function register(h: Harness): void {
   );
 
   // Word boundaries exclude prefixed executables too, so the variants are
-  // enumerated. `gawk`/`gsed`/`ggrep` extract the same raw values and were only
-  // ever caught by substring luck; each one gets a line here so the enumeration
-  // cannot silently rot back to catching just the three bare names.
-  const extractionVariants = ["gawk", "mawk", "nawk", "gsed", "ggrep", "egrep", "fgrep", "rg", "ripgrep"];
+  // enumerated. GNU-prefixed (`gawk`, `gsed`, `ggrep`) and compression-wrapper
+  // (`zgrep`, `bzgrep`, `xzgrep`) forms extract the same raw values and were
+  // only ever caught by substring luck; each one gets a line here so the
+  // enumeration cannot silently rot back to catching just the three bare names.
+  // A prefix wildcard would be shorter and wrong — English words end in these
+  // tokens, which is the exact bug this gate just fixed.
+  const extractionVariants = [
+    "gawk",
+    "mawk",
+    "nawk",
+    "gsed",
+    "ggrep",
+    "egrep",
+    "fgrep",
+    "rg",
+    "ripgrep",
+    "zgrep",
+    "zegrep",
+    "zfgrep",
+    "bzgrep",
+    "bzegrep",
+    "bzfgrep",
+    "xzgrep",
+    "xzegrep",
+    "xzfgrep",
+    "lzgrep",
+    "zstdgrep",
+  ];
   for (const command of extractionVariants) {
     const variantRoot = makeFixture(`credential-extraction-${command}`);
     mkdirSync(path.join(variantRoot, "docs"), { recursive: true });
     writeFileSync(
       path.join(variantRoot, "docs", "store-notes.md"),
-      ["# Store notes", "", `VAR=$(${command} -F= '/^ASC_ISSUER=/{print $2}' /path/to/file.env)`, ""].join("\n"),
+      ["# Store notes", "", `VAR=$(${command} '^ASC_ISSUER=' /path/to/file.env)`, ""].join("\n"),
       "utf8",
     );
     runFixture(
@@ -138,12 +162,13 @@ export function register(h: Harness): void {
       "",
       "- awkward handling of credentials, and grepping around for credentials",
       "- our org rotated the rgb theme and its credentials",
+      "- a squawk about the mohawk build, and the credentials it used",
       "",
     ].join("\n"),
     "utf8",
   );
   runFixture(
-    "awkward/grepping/org/rgb near 'credentials' are not extraction commands",
+    "awkward/grepping/squawk/mohawk/org/rgb near 'credentials' are not extraction commands",
     extractionNearMiss,
     "check-secret-routing.ts",
     0,

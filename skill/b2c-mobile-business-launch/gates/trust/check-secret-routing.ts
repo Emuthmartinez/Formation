@@ -188,10 +188,16 @@ for (const wranglerFile of ["wrangler.toml", "wrangler.json"]) {
 //
 // Because the boundaries also exclude prefixed executables, the variants are
 // enumerated rather than left to substring luck: the unanchored form only ever
-// caught `gawk`/`gsed`/`ggrep` by accident, and those extract the same raw
-// values. Order matters — JS alternation is leftmost-first, not longest-match,
-// so `ripgrep` has to precede the `[efg]?grep` branch.
-const extractionCommand = String.raw`\b(?:ripgrep|[gmn]?awk|g?sed|[efg]?grep|rg)\b`;
+// caught `gawk`/`gsed`/`ggrep`/`zgrep` by accident, and those extract the same
+// raw values. Order matters — JS alternation is leftmost-first, not
+// longest-match — so `ripgrep` precedes the grep branch and `zstd` precedes `z`.
+//
+// Enumeration is deliberate, not laziness. The tempting generalisation is a
+// prefix wildcard (`[a-z]*(?:grep|awk|sed)`), and it reintroduces this gate's
+// original bug verbatim: English words END in these tokens — "closed",
+// "exposed", "parsed" for sed; "squawk", "mohawk" for awk. Only an explicit
+// command list separates the executables from the prose.
+const extractionCommand = String.raw`\b(?:ripgrep|[gmn]?awk|g?sed|(?:zstd|bz|xz|lz|z)?[efg]?grep|rg)\b`;
 const credentialExtractionPattern = new RegExp(`${extractionCommand}[^\`\\n]*(?:\\.env|\\.p8|\\.p12|\\.pem|clueless\\.env|credentials)[^\`\\n]*`, "i");
 const markdownExtensions = new Set([".md"]);
 for (const file of collectFiles(args.root, markdownExtensions, 5000)) {
