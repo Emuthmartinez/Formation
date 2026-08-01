@@ -179,7 +179,26 @@ for (const wranglerFile of ["wrangler.toml", "wrangler.json"]) {
 // These patterns print raw credential values (from .env, .p8, or similar files)
 // into a shell variable or stdout, which is unsafe in committed docs.
 // Allowed in SECRETS.md itself (which is about naming/locations) — flag everywhere else.
-const credentialExtractionPattern = /(?:awk|grep|sed)[^`\n]*(?:\.env|\.p8|\.p12|\.pem|clueless\.env|credentials)[^`\n]*/i;
+// The command names MUST stay word-bounded. Unanchored, `sed` matches inside
+// ordinary prose — "closed", "exposed", "compromised", "used", "parsed" — and
+// any such line that later says "credentials" gets flagged as an extraction
+// snippet. Incident write-ups and security notes say both words constantly, so
+// the unanchored form failed exactly the docs this gate is meant to protect.
+// The trailing \b matters too: it is what rules out "awkward" and "grepping".
+//
+// Because the boundaries also exclude prefixed executables, the variants are
+// enumerated rather than left to substring luck: the unanchored form only ever
+// caught `gawk`/`gsed`/`ggrep`/`zgrep` by accident, and those extract the same
+// raw values. Order matters — JS alternation is leftmost-first, not
+// longest-match — so `ripgrep` precedes the grep branch and `zstd` precedes `z`.
+//
+// Enumeration is deliberate, not laziness. The tempting generalisation is a
+// prefix wildcard (`[a-z]*(?:grep|awk|sed)`), and it reintroduces this gate's
+// original bug verbatim: English words END in these tokens — "closed",
+// "exposed", "parsed" for sed; "squawk", "mohawk" for awk. Only an explicit
+// command list separates the executables from the prose.
+const extractionCommand = String.raw`\b(?:ripgrep|[gmn]?awk|g?sed|(?:zstd|bz|xz|lz|z)?[efg]?grep|rg)\b`;
+const credentialExtractionPattern = new RegExp(`${extractionCommand}[^\`\\n]*(?:\\.env|\\.p8|\\.p12|\\.pem|clueless\\.env|credentials)[^\`\\n]*`, "i");
 const markdownExtensions = new Set([".md"]);
 for (const file of collectFiles(args.root, markdownExtensions, 5000)) {
   const relative = path.relative(args.root, file);
