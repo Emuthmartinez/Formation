@@ -106,6 +106,53 @@ export function register(h: Harness): void {
     "secrets.credential_extraction_in_markdown",
   );
 
+  // Word boundaries exclude prefixed executables too, so the variants are
+  // enumerated. `gawk`/`gsed`/`ggrep` extract the same raw values and were only
+  // ever caught by substring luck; each one gets a line here so the enumeration
+  // cannot silently rot back to catching just the three bare names.
+  const extractionVariants = ["gawk", "mawk", "nawk", "gsed", "ggrep", "egrep", "fgrep", "rg", "ripgrep"];
+  for (const command of extractionVariants) {
+    const variantRoot = makeFixture(`credential-extraction-${command}`);
+    mkdirSync(path.join(variantRoot, "docs"), { recursive: true });
+    writeFileSync(
+      path.join(variantRoot, "docs", "store-notes.md"),
+      ["# Store notes", "", `VAR=$(${command} -F= '/^ASC_ISSUER=/{print $2}' /path/to/file.env)`, ""].join("\n"),
+      "utf8",
+    );
+    runFixture(
+      `${command} extraction snippet in committed markdown still warns`,
+      variantRoot,
+      "check-secret-routing.ts",
+      0,
+      "secrets.credential_extraction_in_markdown",
+    );
+  }
+
+  // ...and the boundaries still hold against the prose that looks like them.
+  const extractionNearMiss = makeFixture("credential-extraction-near-miss");
+  mkdirSync(path.join(extractionNearMiss, "incidents"), { recursive: true });
+  writeFileSync(
+    path.join(extractionNearMiss, "incidents", "2026-07-16-review.md"),
+    [
+      "# Incident review",
+      "",
+      "- awkward handling of credentials, and grepping around for credentials",
+      "- our org rotated the rgb theme and its credentials",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "awkward/grepping/org/rgb near 'credentials' are not extraction commands",
+    extractionNearMiss,
+    "check-secret-routing.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "secrets.credential_extraction_in_markdown",
+  );
+
   const missingSecurity = makeFixture("missing-security");
   rmSync(path.join(missingSecurity, "SECURITY.md"), { force: true });
   runFixture("missing security packet fails", missingSecurity, "check-security-release.ts", 1, "security.markdown_missing");

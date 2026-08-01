@@ -185,7 +185,14 @@ for (const wranglerFile of ["wrangler.toml", "wrangler.json"]) {
 // snippet. Incident write-ups and security notes say both words constantly, so
 // the unanchored form failed exactly the docs this gate is meant to protect.
 // The trailing \b matters too: it is what rules out "awkward" and "grepping".
-const credentialExtractionPattern = /\b(?:awk|grep|sed)\b[^`\n]*(?:\.env|\.p8|\.p12|\.pem|clueless\.env|credentials)[^`\n]*/i;
+//
+// Because the boundaries also exclude prefixed executables, the variants are
+// enumerated rather than left to substring luck: the unanchored form only ever
+// caught `gawk`/`gsed`/`ggrep` by accident, and those extract the same raw
+// values. Order matters — JS alternation is leftmost-first, not longest-match,
+// so `ripgrep` has to precede the `[efg]?grep` branch.
+const extractionCommand = String.raw`\b(?:ripgrep|[gmn]?awk|g?sed|[efg]?grep|rg)\b`;
+const credentialExtractionPattern = new RegExp(`${extractionCommand}[^\`\\n]*(?:\\.env|\\.p8|\\.p12|\\.pem|clueless\\.env|credentials)[^\`\\n]*`, "i");
 const markdownExtensions = new Set([".md"]);
 for (const file of collectFiles(args.root, markdownExtensions, 5000)) {
   const relative = path.relative(args.root, file);
