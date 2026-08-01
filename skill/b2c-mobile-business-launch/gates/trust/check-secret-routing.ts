@@ -179,7 +179,13 @@ for (const wranglerFile of ["wrangler.toml", "wrangler.json"]) {
 // These patterns print raw credential values (from .env, .p8, or similar files)
 // into a shell variable or stdout, which is unsafe in committed docs.
 // Allowed in SECRETS.md itself (which is about naming/locations) — flag everywhere else.
-const credentialExtractionPattern = /(?:awk|grep|sed)[^`\n]*(?:\.env|\.p8|\.p12|\.pem|clueless\.env|credentials)[^`\n]*/i;
+// The command names MUST stay word-bounded. Unanchored, `sed` matches inside
+// ordinary prose — "closed", "exposed", "compromised", "used", "parsed" — and
+// any such line that later says "credentials" gets flagged as an extraction
+// snippet. Incident write-ups and security notes say both words constantly, so
+// the unanchored form failed exactly the docs this gate is meant to protect.
+// The trailing \b matters too: it is what rules out "awkward" and "grepping".
+const credentialExtractionPattern = /\b(?:awk|grep|sed)\b[^`\n]*(?:\.env|\.p8|\.p12|\.pem|clueless\.env|credentials)[^`\n]*/i;
 const markdownExtensions = new Set([".md"]);
 for (const file of collectFiles(args.root, markdownExtensions, 5000)) {
   const relative = path.relative(args.root, file);

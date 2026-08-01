@@ -59,6 +59,53 @@ export function register(h: Harness): void {
     "secrets.RESEND_API_KEY.unrouted",
   );
 
+  // The credential-extraction scan matches command names, and the command names
+  // have to be word-bounded. Unanchored, `sed` matched inside ordinary prose —
+  // "closed", "exposed", "compromised" — so any incident write-up that also said
+  // "credentials" was reported as an extraction snippet. The gate was failing the
+  // security docs it exists to protect, and the only ways out were editing shared
+  // tooling or doctoring a dated incident record.
+  const extractionProse = makeFixture("credential-extraction-prose");
+  mkdirSync(path.join(extractionProse, "incidents"), { recursive: true });
+  writeFileSync(
+    path.join(extractionProse, "incidents", "2026-07-15-review.md"),
+    [
+      "# Incident review",
+      "",
+      "- fail-closed guard | PASS — anonymous credentials rejected",
+      "- treat the exposed account as compromised and rotate its credentials",
+      "- we parsed the response before any credentials were stored",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "prose using closed/exposed/compromised near 'credentials' is not an extraction snippet",
+    extractionProse,
+    "check-secret-routing.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "secrets.credential_extraction_in_markdown",
+  );
+
+  // ...and the snippet the gate actually exists for still warns.
+  const extractionSnippet = makeFixture("credential-extraction-snippet");
+  mkdirSync(path.join(extractionSnippet, "docs"), { recursive: true });
+  writeFileSync(
+    path.join(extractionSnippet, "docs", "store-notes.md"),
+    ["# Store notes", "", "VAR=$(awk -F= '/^ASC_ISSUER=/{print $2}' /path/to/file.env)", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a real awk extraction snippet in committed markdown still warns",
+    extractionSnippet,
+    "check-secret-routing.ts",
+    0,
+    "secrets.credential_extraction_in_markdown",
+  );
+
   const missingSecurity = makeFixture("missing-security");
   rmSync(path.join(missingSecurity, "SECURITY.md"), { force: true });
   runFixture("missing security packet fails", missingSecurity, "check-security-release.ts", 1, "security.markdown_missing");
