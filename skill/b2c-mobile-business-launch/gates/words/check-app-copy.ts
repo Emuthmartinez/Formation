@@ -285,7 +285,6 @@ if (deckText && !deckIsTemplate) {
     }
   }
   const allowed = declaredTerms.filter((declared) => reasonIsSubstantive(declared.reason)).map((declared) => declared.term);
-  const allowedSet = new Set(allowed.map((term) => term.toLowerCase()));
   const ctaCases = new Set<string>();
   // Allowed terms clear placeholder shapes too — "Todoist" declared as a
   // product-owned word must not keep tripping the "todo" shape.
@@ -475,7 +474,6 @@ if (onboarding) {
       (declared) => declared.reason.replace(/[^a-z0-9]/gi, "").length >= 12 && !rules.placeholderShapes.some((shape) => matchesTerm(declared.reason, shape)),
     )
     .map((declared) => declared.term);
-  const onboardingAllowed = new Set(onboardingAllowedTerms.map((term) => term.toLowerCase()));
   const scrubOnboarding = (text: string): string => {
     let out = text;
     for (const term of onboardingAllowedTerms) {

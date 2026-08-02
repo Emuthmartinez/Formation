@@ -1,34 +1,21 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import {
   type Harness,
   type MutableRecord,
   expectRecord,
   getLane,
-  getTools,
   readState,
   skillRoot,
-  writeBusinessEntrypoints,
-  writeCompleteAppleRequirements,
-  writeCompleteAppleSigning,
-  writeCompleteAttribution,
   writeCompleteCompoundEngineering,
-  writeCompleteContentAssets,
-  writeCompleteElevenStar,
   writeCompleteOrchestration,
-  writeCompletePaidToolDecisions,
-  writeCompletePaidUserAcquisition,
   writeCompleteProviderProof,
-  writeCompleteSecurity,
-  writeCompleteStoreConsole,
-  writeCompleteStoreScreenshots,
-  writeCompleteViralGrowth,
   writeSourceRegistryFixture,
   writeState,
 } from "./_harness.js";
 
 export function register(h: Harness): void {
-  const { makeFixture, makeEmptyFixture, runFixture, runScriptArgs, results } = h;
+  const { makeFixture, makeEmptyFixture, runFixture } = h;
 
   const orchestrationNoPreflight = makeFixture("orchestration-no-preflight");
   const orchestrationNoPreflightState = readState(orchestrationNoPreflight);

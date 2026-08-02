@@ -1,34 +1,9 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import {
-  type Harness,
-  type MutableRecord,
-  expectRecord,
-  getLane,
-  getTools,
-  readState,
-  skillRoot,
-  writeBusinessEntrypoints,
-  writeCompleteAppleRequirements,
-  writeCompleteAppleSigning,
-  writeCompleteAttribution,
-  writeCompleteCompoundEngineering,
-  writeCompleteContentAssets,
-  writeCompleteElevenStar,
-  writeCompleteOrchestration,
-  writeCompletePaidToolDecisions,
-  writeCompletePaidUserAcquisition,
-  writeCompleteProviderProof,
-  writeCompleteSecurity,
-  writeCompleteStoreConsole,
-  writeCompleteStoreScreenshots,
-  writeCompleteViralGrowth,
-  writeSourceRegistryFixture,
-  writeState,
-} from "./_harness.js";
+import { type Harness, expectRecord, getLane, getTools, readState, skillRoot, writeCompleteSecurity, writeState } from "./_harness.js";
 
 export function register(h: Harness): void {
-  const { makeFixture, makeEmptyFixture, runFixture, runScriptArgs, results } = h;
+  const { makeFixture, runFixture } = h;
 
   const nestedEnv = makeFixture("nested-env");
   mkdirSync(path.join(nestedEnv, "config"), { recursive: true });
@@ -175,6 +150,48 @@ export function register(h: Harness): void {
     undefined,
     [],
     undefined,
+    "secrets.credential_extraction_in_markdown",
+  );
+
+  // The exemption for the skill's own guidance prose is named for the directory
+  // that prose lives in, so a rename can kill it silently. `references/` became
+  // `playbook/` in v0.53.0 and the exemption kept naming the old directory for
+  // eight releases: it matched nothing, and the gate warned about
+  // playbook/operations/secrets-management.md, the document whose whole job is to
+  // describe credential handling. These two fixtures pin the exemption to a name
+  // that exists and prove it is still scoped rather than blanket.
+  const extractionPlaybook = makeFixture("credential-extraction-playbook-exempt");
+  mkdirSync(path.join(extractionPlaybook, "playbook", "operations"), { recursive: true });
+  writeFileSync(
+    path.join(extractionPlaybook, "playbook", "operations", "secrets-management.md"),
+    ["# Secrets management", "", "Never do this:", "", "VAR=$(awk -F= '/^ASC_ISSUER=/{print $2}' /path/to/file.env)", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "the skill's own playbook prose may describe an extraction snippet",
+    extractionPlaybook,
+    "check-secret-routing.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "secrets.credential_extraction_in_markdown",
+  );
+
+  // The old name must not still buy a pass, or the rename would be cosmetic and
+  // an app repo could silence this gate by naming a directory `references/`.
+  const extractionOldName = makeFixture("credential-extraction-references-not-exempt");
+  mkdirSync(path.join(extractionOldName, "references"), { recursive: true });
+  writeFileSync(
+    path.join(extractionOldName, "references", "notes.md"),
+    ["# Notes", "", "VAR=$(awk -F= '/^ASC_ISSUER=/{print $2}' /path/to/file.env)", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an app-side references/ directory is not the skill's playbook and still warns",
+    extractionOldName,
+    "check-secret-routing.ts",
+    0,
     "secrets.credential_extraction_in_markdown",
   );
 

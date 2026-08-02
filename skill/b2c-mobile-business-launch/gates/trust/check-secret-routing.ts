@@ -204,7 +204,13 @@ for (const file of collectFiles(args.root, markdownExtensions, 5000)) {
   const relative = path.relative(args.root, file);
   if (relative.includes("node_modules")) continue;
   // Allow the skill's own reference docs to describe the pattern; flag app-side committed docs.
-  if (relative.startsWith("references/") || relative.startsWith("scripts/")) continue;
+  // The exemption is named for where that prose lives, so it had to be renamed with it:
+  // `references/` became `playbook/` in v0.53.0 and this line kept naming the old
+  // directory, which no longer matches anything. The exemption was dead for eight
+  // releases and playbook/operations/secrets-management.md — the one document whose
+  // job is to describe credential handling — was being warned about by the gate that
+  // exists to protect it. A stale path segment here fails open into noise, not silence.
+  if (relative.startsWith("playbook/") || relative.startsWith("scripts/")) continue;
   const text = readText(args.root, relative);
   if (text && credentialExtractionPattern.test(text)) {
     issues.push(
