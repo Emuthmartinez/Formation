@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { asArray, asString, getPath, isRecord, loadProjectState, parseCliArgs, phaseOrder, readText, reportAndExit, writeText } from "./lib/launch-state.js";
 import { renderFounderGateMarkup } from "./lib/founder-gate-presentation.js";
+import { escapeHtml } from "./lib/html.js";
 import {
   celebrationBeats,
   celebrationFor,
@@ -20,14 +21,6 @@ import {
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
-
-function escapeHtml(value: unknown): string {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
 
 function list(items: unknown[], empty: string = emptyCopy.nothing): string {
   if (items.length === 0) {

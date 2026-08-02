@@ -4,6 +4,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { getToken, loadDesignState, parseDesignCliArgs, rel, skillRoot, summarizeSurfaces } from "./lib/design-state.js";
 import { panelBlurb, panelLabel } from "./lib/founder-copy.js";
+import { escapeHtml } from "./lib/html.js";
 import { asArray, asString, isRecord, reportAndExit } from "./lib/launch-state.js";
 
 const args = parseDesignCliArgs(process.argv.slice(2));
@@ -64,9 +65,9 @@ function resolveViteBin(): string | undefined {
  * Founder translation for control-plane panels. The Design Room is text a
  * founder reads, so panel rows carry plain-language labels and blurbs; the
  * machine reads/renders detail moves into the technical-details disclosure
- * (check:founder-copy enforces both halves of that split).
+ * (check:founder-copy enforces both halves of that split). The labels themselves
+ * come from the shared founder-copy layer, not from here.
  */
-/** Founder translation for a control-plane panel, from the shared founder-copy layer. */
 function panelCopy(id: string, name: string): { label: string; blurb: string } {
   return { label: panelLabel(id, name), blurb: panelBlurb(id) };
 }
@@ -261,12 +262,4 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
 
 function cssToken(tokens: unknown, tokenPath: string): string {
   return String(getToken(tokens, tokenPath) ?? "initial");
-}
-
-function escapeHtml(value: unknown): string {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 }

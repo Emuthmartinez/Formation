@@ -3,6 +3,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { Ajv2020, type AnySchema, type ErrorObject } from "ajv/dist/2020.js";
 import { accessLabel } from "../../scripts/lib/founder-copy.js";
+import { escapeHtml } from "../../scripts/lib/html.js";
 import {
   asArray,
   asString,
@@ -851,10 +852,6 @@ function validateSingleFounderAction(value: string | undefined): void {
 function isMeaningfulReason(value: string | undefined): boolean {
   const reason = value?.trim() ?? "";
   return reason.length >= 30 && !/^(?:n\/?a|none|not needed|x)$/i.test(reason);
-}
-
-function escapeHtml(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
 function isDateTime(value: string | undefined): value is string {

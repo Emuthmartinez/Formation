@@ -12,12 +12,8 @@
  * One shell, so four pages read as one system and a change to the presentation is
  * a change in one place. Output is deterministic: no timestamps, no directory
  * iteration, nothing that makes two runs of the same input differ.
- *
- * escapeHtml is duplicated here rather than shared with render-launch-cockpit.ts,
- * render-design-room.ts and lib/founder-gate-presentation.ts. Collapsing all four
- * into one helper is a real cleanup and a separate review; doing it inside this
- * change would put three unrelated renderers in the diff.
  */
+import { escapeHtml } from "./html.js";
 import { inlineToPlainText, parseMarkdownLite, type Block, type Inline } from "./markdown-lite.js";
 
 export interface ArtifactPageInput {
@@ -25,10 +21,6 @@ export interface ArtifactPageInput {
   readonly markdown: string;
   /** Source path as a reader should see it, e.g. "ONBOARDING.md". */
   readonly markdownName: string;
-}
-
-export function escapeHtml(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
 /**

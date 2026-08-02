@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { parse as parseYaml } from "yaml";
+import { escapeHtml } from "../scripts/lib/html.js";
 import { flagNumber, flagString, isRecord, parseFlags } from "../scripts/lib/launch-state.js";
 
 interface SourceRecord {
@@ -176,10 +177,6 @@ function renderMarkdown(snapshots: SourceSnapshot[]): string {
     rows,
     "",
   ].join("\n");
-}
-
-function escapeHtml(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
 function renderHtml(snapshots: SourceSnapshot[]): string {
