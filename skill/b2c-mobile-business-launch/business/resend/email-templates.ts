@@ -188,6 +188,14 @@ function resolveDesignSystem(brand: LaunchEmailBrand): ResolvedEmailDesign {
   };
 }
 
+/**
+ * Deliberately local, not an import of `scripts/lib/html.ts`. This file is
+ * payload: it is copied into a launched business repo, where nothing under
+ * `scripts/` exists. The extra `&#39;` rule is also correct here and wrong
+ * there — email HTML passes through client rewriters that do not all agree on
+ * attribute quoting, while every page the skill renders is double-quoted and
+ * byte-compared against a fresh render.
+ */
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
