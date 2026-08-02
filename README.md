@@ -136,15 +136,18 @@ Four **app archetype packs** cover the B2C product shapes this skill sees most: 
 ```text
 skill/b2c-mobile-business-launch/
   SKILL.md              # entrypoint and lane routing
+  spine.md              # the always-on contracts SKILL.md routes from
   skill-version.json    # runtime freshness manifest
   playbook/             # launch playbooks, grouped by area of the business
-  machine/              # the skill's own upkeep: versioning, evals, sources
+  business/             # artifacts copied into your app repo
   starters/             # runnable app scaffolds for the four archetypes
-  business/            # artifacts copied into your app repo
-  scripts/              # validators, renderers, LaunchBench runner
-  evals/                # LaunchBench, agent-behavior, triggering
+  gates/                # validators that grade a business launch
+  machine/              # the skill's own upkeep: versioning, evals, sources
+  scripts/              # renderers, the audit runner, shared lib
   state/                # Design Room seed state and schema
+  design-system/        # shipped design tokens
   render/               # React/Vite Design Room renderer
+  agents/               # OpenAI connector manifest
 docs/VALIDATORS.md      # full validator reference
 ARCHITECTURE.md         # the target layout every refactor moves toward
 AGENTS.md               # maintainer guide and repo map

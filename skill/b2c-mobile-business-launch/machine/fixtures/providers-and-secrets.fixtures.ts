@@ -1,34 +1,9 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import {
-  type Harness,
-  type MutableRecord,
-  expectRecord,
-  getLane,
-  getTools,
-  readState,
-  skillRoot,
-  writeBusinessEntrypoints,
-  writeCompleteAppleRequirements,
-  writeCompleteAppleSigning,
-  writeCompleteAttribution,
-  writeCompleteCompoundEngineering,
-  writeCompleteContentAssets,
-  writeCompleteElevenStar,
-  writeCompleteOrchestration,
-  writeCompletePaidToolDecisions,
-  writeCompletePaidUserAcquisition,
-  writeCompleteProviderProof,
-  writeCompleteSecurity,
-  writeCompleteStoreConsole,
-  writeCompleteStoreScreenshots,
-  writeCompleteViralGrowth,
-  writeSourceRegistryFixture,
-  writeState,
-} from "./_harness.js";
+import { type Harness, expectRecord, getLane, getTools, readState, skillRoot, writeCompleteSecurity, writeState } from "./_harness.js";
 
 export function register(h: Harness): void {
-  const { makeFixture, makeEmptyFixture, runFixture, runScriptArgs, results } = h;
+  const { makeFixture, runFixture } = h;
 
   const nestedEnv = makeFixture("nested-env");
   mkdirSync(path.join(nestedEnv, "config"), { recursive: true });
@@ -57,6 +32,167 @@ export function register(h: Harness): void {
     "check-secret-routing.ts",
     1,
     "secrets.RESEND_API_KEY.unrouted",
+  );
+
+  // The credential-extraction scan matches command names, and the command names
+  // have to be word-bounded. Unanchored, `sed` matched inside ordinary prose —
+  // "closed", "exposed", "compromised" — so any incident write-up that also said
+  // "credentials" was reported as an extraction snippet. The gate was failing the
+  // security docs it exists to protect, and the only ways out were editing shared
+  // tooling or doctoring a dated incident record.
+  const extractionProse = makeFixture("credential-extraction-prose");
+  mkdirSync(path.join(extractionProse, "incidents"), { recursive: true });
+  writeFileSync(
+    path.join(extractionProse, "incidents", "2026-07-15-review.md"),
+    [
+      "# Incident review",
+      "",
+      "- fail-closed guard | PASS — anonymous credentials rejected",
+      "- treat the exposed account as compromised and rotate its credentials",
+      "- we parsed the response before any credentials were stored",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "prose using closed/exposed/compromised near 'credentials' is not an extraction snippet",
+    extractionProse,
+    "check-secret-routing.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "secrets.credential_extraction_in_markdown",
+  );
+
+  // ...and the snippet the gate actually exists for still warns.
+  const extractionSnippet = makeFixture("credential-extraction-snippet");
+  mkdirSync(path.join(extractionSnippet, "docs"), { recursive: true });
+  writeFileSync(
+    path.join(extractionSnippet, "docs", "store-notes.md"),
+    ["# Store notes", "", "VAR=$(awk -F= '/^ASC_ISSUER=/{print $2}' /path/to/file.env)", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a real awk extraction snippet in committed markdown still warns",
+    extractionSnippet,
+    "check-secret-routing.ts",
+    0,
+    "secrets.credential_extraction_in_markdown",
+  );
+
+  // Word boundaries exclude prefixed executables too, so the variants are
+  // enumerated. GNU-prefixed (`gawk`, `gsed`, `ggrep`) and compression-wrapper
+  // (`zgrep`, `bzgrep`, `xzgrep`) forms extract the same raw values and were
+  // only ever caught by substring luck; each one gets a line here so the
+  // enumeration cannot silently rot back to catching just the three bare names.
+  // A prefix wildcard would be shorter and wrong — English words end in these
+  // tokens, which is the exact bug this gate just fixed.
+  const extractionVariants = [
+    "gawk",
+    "mawk",
+    "nawk",
+    "gsed",
+    "ggrep",
+    "egrep",
+    "fgrep",
+    "rg",
+    "ripgrep",
+    "zgrep",
+    "zegrep",
+    "zfgrep",
+    "bzgrep",
+    "bzegrep",
+    "bzfgrep",
+    "xzgrep",
+    "xzegrep",
+    "xzfgrep",
+    "lzgrep",
+    "zstdgrep",
+  ];
+  for (const command of extractionVariants) {
+    const variantRoot = makeFixture(`credential-extraction-${command}`);
+    mkdirSync(path.join(variantRoot, "docs"), { recursive: true });
+    writeFileSync(
+      path.join(variantRoot, "docs", "store-notes.md"),
+      ["# Store notes", "", `VAR=$(${command} '^ASC_ISSUER=' /path/to/file.env)`, ""].join("\n"),
+      "utf8",
+    );
+    runFixture(
+      `${command} extraction snippet in committed markdown still warns`,
+      variantRoot,
+      "check-secret-routing.ts",
+      0,
+      "secrets.credential_extraction_in_markdown",
+    );
+  }
+
+  // ...and the boundaries still hold against the prose that looks like them.
+  const extractionNearMiss = makeFixture("credential-extraction-near-miss");
+  mkdirSync(path.join(extractionNearMiss, "incidents"), { recursive: true });
+  writeFileSync(
+    path.join(extractionNearMiss, "incidents", "2026-07-16-review.md"),
+    [
+      "# Incident review",
+      "",
+      "- awkward handling of credentials, and grepping around for credentials",
+      "- our org rotated the rgb theme and its credentials",
+      "- a squawk about the mohawk build, and the credentials it used",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "awkward/grepping/squawk/mohawk/org/rgb near 'credentials' are not extraction commands",
+    extractionNearMiss,
+    "check-secret-routing.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "secrets.credential_extraction_in_markdown",
+  );
+
+  // The exemption for the skill's own guidance prose is named for the directory
+  // that prose lives in, so a rename can kill it silently. `references/` became
+  // `playbook/` in v0.53.0 and the exemption kept naming the old directory for
+  // eight releases: it matched nothing, and the gate warned about
+  // playbook/operations/secrets-management.md, the document whose whole job is to
+  // describe credential handling. These two fixtures pin the exemption to a name
+  // that exists and prove it is still scoped rather than blanket.
+  const extractionPlaybook = makeFixture("credential-extraction-playbook-exempt");
+  mkdirSync(path.join(extractionPlaybook, "playbook", "operations"), { recursive: true });
+  writeFileSync(
+    path.join(extractionPlaybook, "playbook", "operations", "secrets-management.md"),
+    ["# Secrets management", "", "Never do this:", "", "VAR=$(awk -F= '/^ASC_ISSUER=/{print $2}' /path/to/file.env)", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "the skill's own playbook prose may describe an extraction snippet",
+    extractionPlaybook,
+    "check-secret-routing.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "secrets.credential_extraction_in_markdown",
+  );
+
+  // The old name must not still buy a pass, or the rename would be cosmetic and
+  // an app repo could silence this gate by naming a directory `references/`.
+  const extractionOldName = makeFixture("credential-extraction-references-not-exempt");
+  mkdirSync(path.join(extractionOldName, "references"), { recursive: true });
+  writeFileSync(
+    path.join(extractionOldName, "references", "notes.md"),
+    ["# Notes", "", "VAR=$(awk -F= '/^ASC_ISSUER=/{print $2}' /path/to/file.env)", ""].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "an app-side references/ directory is not the skill's playbook and still warns",
+    extractionOldName,
+    "check-secret-routing.ts",
+    0,
+    "secrets.credential_extraction_in_markdown",
   );
 
   const missingSecurity = makeFixture("missing-security");

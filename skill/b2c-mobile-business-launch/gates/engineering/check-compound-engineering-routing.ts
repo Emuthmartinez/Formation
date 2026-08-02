@@ -2,7 +2,6 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import {
-  asArray,
   asString,
   getPath,
   isRecord,

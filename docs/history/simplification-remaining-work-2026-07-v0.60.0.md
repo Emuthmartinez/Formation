@@ -1,5 +1,17 @@
 # Prompt: finish the simplification overhaul
 
+> **Historical record. Written against v0.60.0 on 2026-07-31; the work it asks for is done.**
+> Step 8 shipped as #87 (v0.61.0) — the same commit that added this file, so its "OPEN"
+> table row was already false when it landed. Do not action anything below. It is kept because the *reasoning*
+> is still worth reading: why the two starter stubs must not be generated, why
+> declare-and-verify was rejected as self-attestable, and the numbered trap list that
+> every later refactor in this repo has kept paying for.
+>
+> The only item it leaves genuinely open is step 11, the product name, which is a
+> founder decision and not an agent task. For current state see
+> [`ARCHITECTURE.md`](../../ARCHITECTURE.md); for the maintainer map see
+> [`AGENTS.md`](../../AGENTS.md).
+
 Paste into a fresh session in `/Users/eduardomuthmartinez/code/b2c-mobile-business-launch-skill`.
 
 ## Where this stands
