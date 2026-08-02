@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { accessLabel } from "../../scripts/lib/founder-copy.js";
 import { renderFounderGateMarkup } from "../../scripts/lib/founder-gate-presentation.js";
+import { isRecord } from "../../scripts/lib/launch-state.js";
 import { type Harness, readState, writeState } from "./_harness.js";
 
 export function register(h: Harness): void {
@@ -878,7 +879,7 @@ function reconcileFixture(root: string, value: Record<string, unknown>): void {
   const accounts = value.accounts as Array<Record<string, unknown>>;
   const founder = value.founderModel as Record<string, unknown>;
   const activeFounderGate = founder.activeFounderGate;
-  const hasActiveGate = isRecordValue(activeFounderGate);
+  const hasActiveGate = isRecord(activeFounderGate);
   const gate: Record<string, unknown> = hasActiveGate ? activeFounderGate : {};
   const state = readState(root);
   const operator = state.business_operator as Record<string, unknown>;
@@ -953,10 +954,6 @@ function deriveSocialStatus(accounts: Array<Record<string, unknown>>): string {
   if (statuses.every((status) => ["access_ready", "not_needed"].includes(status))) return "ready";
   if (statuses.some((status) => status === "blocked")) return "blocked";
   return "partial";
-}
-
-function isRecordValue(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function gateClassLabel(value: unknown): string {

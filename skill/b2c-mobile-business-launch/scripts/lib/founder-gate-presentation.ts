@@ -1,5 +1,6 @@
 import { accessLabel } from "./founder-copy.js";
 import { escapeHtml } from "./html.js";
+import { asArray, isRecord } from "./launch-state.js";
 
 export function renderFounderGateMarkup(founderModel: Record<string, unknown>, businessOperator: Record<string, unknown>): string {
   const activeFounderGateValue = founderModel.activeFounderGate;
@@ -57,14 +58,6 @@ export function renderFounderGateMarkup(founderModel: Record<string, unknown>, b
       businessOperator.access_ready_count ?? 0,
     )}</p></article>
   </div>`;
-}
-
-function asArray(value: unknown): unknown[] {
-  return Array.isArray(value) ? value : [];
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function gateClassLabel(value: unknown): string {

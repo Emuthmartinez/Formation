@@ -27,7 +27,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { collectAllFiles, flagString, issue, parseFlags, reportAndExit, type Issue } from "../../scripts/lib/launch-state.js";
+import { collectAllFiles, flagString, isRecord, issue, parseFlags, reportAndExit, type Issue } from "../../scripts/lib/launch-state.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "../..");
@@ -403,10 +403,6 @@ function parseArgs(argv: string[]): Args {
   // Only --skill-root is authoritative; ignore a stray --root from the fixture harness.
   const flags = parseFlags(argv, [{ flags: ["--skill-root"], key: "skillRoot" }]);
   return { skillRoot: flagString(flags, "skillRoot") ?? defaultSkillRoot };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function readJson(filePath: string): Record<string, unknown> | undefined {

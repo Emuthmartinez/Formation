@@ -9,6 +9,7 @@ import {
   isRecord,
   issue,
   loadProjectState,
+  missingPhraseCode,
   normalizedStringArray,
   parseCliArgs,
   readText,
@@ -38,10 +39,6 @@ function existsAny(candidates: string[]): string | undefined {
 
 function includes(text: string, phrase: string): boolean {
   return text.toLowerCase().includes(phrase.toLowerCase());
-}
-
-function missingPhraseCode(phrase: string): string {
-  return `orchestration.${phrase.replaceAll(" ", "_").toLowerCase()}.missing`;
 }
 
 function requiresParallelSafety(strategy: string | undefined, spawnedAgents: unknown[]): boolean {
@@ -97,7 +94,7 @@ if (markdown) {
   ];
   for (const phrase of requiredPhrases) {
     if (!includes(markdown.text, phrase)) {
-      issues.push(issue("error", missingPhraseCode(phrase), `ORCHESTRATION.md should include ${phrase}.`, markdown.relativePath));
+      issues.push(issue("error", missingPhraseCode("orchestration", phrase), `ORCHESTRATION.md should include ${phrase}.`, markdown.relativePath));
     }
   }
 

@@ -3,7 +3,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
-import { flagString, parseFlags } from "../../scripts/lib/launch-state.js";
+import { flagString, isRecord, parseFlags } from "../../scripts/lib/launch-state.js";
 
 type Issue = {
   code: string;
@@ -113,11 +113,13 @@ function requireTerms(label: string, text: string | undefined, terms: string[], 
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function asString(value: unknown): string | undefined {
+/**
+ * Deliberately not launch-state's asString, and deliberately not named like it. This one
+ * rejects whitespace-only values, which is the whole point here: a continuity field set to
+ * " " is an unreviewed field, not a reviewed one. It carried the shared name until v0.63.0,
+ * so a reader who knew asString elsewhere would have assumed " " passed.
+ */
+function asNonEmptyString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
 
@@ -154,14 +156,14 @@ function validateProjectState(text: string | undefined, issues: Issue[]): Record
     return undefined;
   }
 
-  if (!asString(continuity.last_state_review)) {
+  if (!asNonEmptyString(continuity.last_state_review)) {
     issues.push({
       code: "continuity.project_state_review_missing",
       message: "continuity.last_state_review must be present",
     });
   }
 
-  if (!asString(continuity.next_action)) {
+  if (!asNonEmptyString(continuity.next_action)) {
     issues.push({
       code: "continuity.project_state_next_action_missing",
       message: "continuity.next_action must be present",
@@ -182,7 +184,7 @@ function validateProjectState(text: string | undefined, issues: Issue[]): Record
     });
   }
 
-  if (asString(continuity.last_state_review) && continuity.last_state_review !== "not_reviewed" && continuity.git_status_reviewed !== true) {
+  if (asNonEmptyString(continuity.last_state_review) && continuity.last_state_review !== "not_reviewed" && continuity.git_status_reviewed !== true) {
     issues.push({
       code: "continuity.project_state_git_status_unreviewed",
       message: "continuity.git_status_reviewed must be true after a recorded state review",

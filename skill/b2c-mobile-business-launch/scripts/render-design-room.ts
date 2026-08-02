@@ -68,7 +68,7 @@ function resolveViteBin(): string | undefined {
  * (check:founder-copy enforces both halves of that split). The labels themselves
  * come from the shared founder-copy layer, not from here.
  */
-function panelCopy(id: string, name: string): { label: string; blurb: string } {
+function founderPanelCopy(id: string, name: string): { label: string; blurb: string } {
   return { label: panelLabel(id, name), blurb: panelBlurb(id) };
 }
 
@@ -199,7 +199,7 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
       <div class="list">
         ${panels
           .map((panel) => {
-            const copy = panelCopy(asString(panel.id) ?? "", asString(panel.name) ?? "");
+            const copy = founderPanelCopy(asString(panel.id) ?? "", asString(panel.name) ?? "");
             return `<article class="row">
               <div>
                 <h3>${escapeHtml(copy.label)}</h3>
@@ -243,7 +243,7 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
       <p>State hash: ${escapeHtml(stateHash)}</p>
       ${designBrief ? `<p>Design brief source: ${escapeHtml(designBrief.source)}</p>\n      ` : ""}${panels
         .map((panel) => {
-          const copy = panelCopy(asString(panel.id) ?? "", asString(panel.name) ?? "");
+          const copy = founderPanelCopy(asString(panel.id) ?? "", asString(panel.name) ?? "");
           const stateRefs = asArray(panel.stateRefs)
             .map((entry) => asString(entry))
             .filter(Boolean);
