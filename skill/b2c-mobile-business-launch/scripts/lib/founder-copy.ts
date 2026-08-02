@@ -505,6 +505,47 @@ export const bannedFounderVocabulary: { term: string; sayInstead: string }[] = [
 ];
 
 /**
+ * Experience-card technique names — the one vocabulary this file deliberately does
+ * NOT translate, and the reasoning is here because it argues against the move every
+ * other export above makes.
+ *
+ * ARCHITECTURE.md carried this as an open decision: whether the twelve
+ * engagement-technique names get plain-language founder equivalents, or stay
+ * internal labels behind one umbrella term. The answer is neither half of that
+ * framing.
+ *
+ * **No technique gets a founder alias.** Every other vocabulary here is a machine
+ * enum whose only other reader is a validator, so inventing a human label for it
+ * costs nothing and loses nothing. These twelve are not that. They are terms of art
+ * with literature behind them, and they are the live key set of the Retention
+ * Mechanics MCP (`retention_get_mechanic("peak-end")`). An alias would be a second
+ * vocabulary for one concept — the twin-file failure this repo has already been
+ * burned by — and it would take from the founder the one thing the real name gives
+ * them: the ability to look the technique up, read its critics, and recognize it
+ * when a designer says it out loud.
+ *
+ * **What a founder gets instead is one umbrella for the deck as a whole.** A
+ * beginner skimming their own launch does not need twelve new words; they need to
+ * know what this part of the work is. That phrase lives in the emotional_design
+ * lane blurb, so the umbrella a founder reads and the lane they see it on cannot
+ * drift apart.
+ *
+ * **The two HIGH-risk techniques stay literal where the founder attests to them.**
+ * Softening the name of the thing being signed is the one move that would be
+ * actively wrong: "Variable Reward" carries a warning that any friendlier synonym
+ * launders away, and the founder is attesting to the mechanic, not to a description
+ * of it. attestedTechniques is checked against the HIGH tier declared in the card
+ * stubs, so promoting a thirteenth card to HIGH cannot leave this list behind.
+ */
+export const experienceCardUmbrella = "moments that make the app satisfying to use";
+
+/** The HIGH-risk techniques a founder personally attests to, named as the literature names them. */
+export const attestedTechniques: readonly { id: string; name: string }[] = [
+  { id: "variable-reward", name: "Variable Reward" },
+  { id: "streak-and-loss-aversion", name: "Streak & Loss Aversion" },
+];
+
+/**
  * Machine vocabularies this module must cover completely. check-founder-copy.ts uses
  * this to prove every enum value has founder copy, so a new lane cannot ship unlabeled.
  */

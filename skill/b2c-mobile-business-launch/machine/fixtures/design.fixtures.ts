@@ -1463,6 +1463,110 @@ experience_card:
     "emotional_design.risk_tier_duplicate_row",
   );
 
+  /**
+   * The third leg of the tier triangle: the card stubs. The index and the guardrail table
+   * have been checked against each other since v0.45.0, but each stub declares its own
+   * "**Risk tier.**" line and nothing read it. check:founder-copy now derives the HIGH set
+   * from those lines to decide which technique names a founder attests to by name, so an
+   * unchecked stub tier is a forgeable input to a consent surface.
+   */
+  function writeCardDeck(name: string, indexRows: string[], stubs: { file: string; heading: string; tier: string }[]): string {
+    const root = makeFixture(name);
+    const refDir = path.join(root, "playbook", "experience");
+    mkdirSync(path.join(refDir, "experience-cards"), { recursive: true });
+    writeFileSync(
+      path.join(refDir, "ethics-guardrail.md"),
+      [
+        ...guardrailFixtureHeader,
+        "| Variable Reward | HIGH | Compulsion loop | User can always stop | `bright_line` |",
+        "| Endowed Progress | LOW | Fabricated head start | Progress reflects real inputs | `bright_line` |",
+        ...guardrailFixtureFooter,
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      path.join(refDir, "experience-cards.md"),
+      ["# Experience Cards", "## Card Routing", "| Card | Load when | Risk | Spec |", "|---|---|---|---|", ...indexRows].join("\n"),
+      "utf8",
+    );
+    for (const stub of stubs) {
+      writeFileSync(
+        path.join(refDir, "experience-cards", stub.file),
+        [`# ${stub.heading} Card`, "", `**Risk tier.** ${stub.tier} — canonical in the routing table.`, ""].join("\n"),
+        "utf8",
+      );
+    }
+    return root;
+  }
+
+  const variableRewardRow = "| Variable Reward | An outcome genuinely varies | HIGH | link |";
+  const endowedRow = "| Endowed Progress | Real prior progress exists to surface | LOW | link |";
+
+  runFixture(
+    "stub tiers agreeing with the routing index pass",
+    writeCardDeck(
+      "emotional-card-stub-clean",
+      [variableRewardRow, endowedRow],
+      [
+        { file: "variable-reward-card.md", heading: "Variable Reward", tier: "HIGH" },
+        { file: "endowed-progress-card.md", heading: "Endowed Progress", tier: "LOW" },
+      ],
+    ),
+    "check-emotional-design.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "card_stub",
+  );
+
+  runFixture(
+    "a stub tier disagreeing with its routing row fails",
+    writeCardDeck("emotional-card-stub-mismatch", [variableRewardRow], [{ file: "variable-reward-card.md", heading: "Variable Reward", tier: "MEDIUM" }]),
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.card_stub_tier_mismatch",
+  );
+
+  // An unparseable tier line drops the card out of parity AND out of the attestation set,
+  // so it must fail rather than skip — the same reasoning as risk_tier_unrecognized.
+  runFixture(
+    "a stub with no parseable risk tier fails instead of skipping",
+    writeCardDeck("emotional-card-stub-no-tier", [variableRewardRow], [{ file: "variable-reward-card.md", heading: "Variable Reward", tier: "SEVERE" }]),
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.card_stub_tier_unrecognized",
+  );
+
+  // A stub nobody routes still contributes its tier to the HIGH set.
+  runFixture(
+    "a stub with no routing row fails",
+    writeCardDeck(
+      "emotional-card-stub-unrouted",
+      [variableRewardRow],
+      [
+        { file: "variable-reward-card.md", heading: "Variable Reward", tier: "HIGH" },
+        { file: "invented-mechanic-card.md", heading: "Invented Mechanic", tier: "HIGH" },
+      ],
+    ),
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.card_stub_unmapped",
+  );
+
+  // Deleting a stub must not silently shrink the deck the founder attests against.
+  runFixture(
+    "a routed card with no stub file fails reverse coverage",
+    writeCardDeck(
+      "emotional-card-stub-deleted",
+      [variableRewardRow, endowedRow],
+      [{ file: "variable-reward-card.md", heading: "Variable Reward", tier: "HIGH" }],
+    ),
+    "check-emotional-design.ts",
+    1,
+    "emotional_design.card_stub_missing",
+  );
+
   const elevenStarThin = makeFixture("eleven-star-thin");
   writeFileSync(
     path.join(elevenStarThin, "11-star-experience", "11_STAR_EXPERIENCE.md"),

@@ -125,10 +125,23 @@ Nothing may assume a validator's directory. `scripts/lib/script-paths.ts` indexe
 
 `playbook/` moved ahead of `business/` deliberately: it is the step that answers the original complaint (domains are invisible in a directory listing), its classification is already decided, and its `SKILL.md` collapse *frees* budget rather than spending it. `business/` needs a judgment call per file about whether a founder reads it, and touches far more hardcoded paths, so it benefits from going second.
 
-## Open decisions
+## Settled decisions
 
-- **The name.** The root directory is named for the product. Renaming costs a one-time sync across `~/.codex`, `~/.claude`, `~/.agents` plus `skill-version.json`, so it is deferred until the name is chosen, not blocked on it.
-- **Card and technique naming.** Whether the twelve engagement-technique names get plain-language equivalents or stay internal labels behind one umbrella term a founder sees.
+Both decisions this document carried as open are closed. They are kept here rather than deleted because the reasoning is what stops each from being reopened by someone who only sees the outcome.
+
+**The name stays `b2c-mobile-business-launch`.** Founder call, 2026-08-02. The name is literal to the point of plainness, which is the argument for it as much as against: it says what the skill does to anyone reading a directory listing, and nothing in the layout work ever depended on changing it. The cost estimate stands if it is revisited — a one-time sync across `~/.codex`, `~/.claude`, `~/.agents` plus `skill-version.json` — so this is a decision that can be unmade cheaply, which is the reason not to spend anything on it now.
+
+**The twelve technique names are not translated for a founder.** Settled in v0.62.0. The question was whether the engagement-technique names get plain-language founder equivalents or stay internal labels behind one umbrella term. The answer is neither half of that framing:
+
+- **No technique gets a founder alias.** Every other vocabulary in `scripts/lib/founder-copy.ts` is a machine enum whose only other reader is a validator, so inventing a human label costs nothing and loses nothing. These twelve are not that. They are terms of art with literature behind them, and they are the live key set of the Retention Mechanics MCP — `retention_get_mechanic("peak-end")`. An alias would be a second vocabulary for one concept, which is the twin-file failure this document already records twice, and it would take from the founder the one thing the real name gives them: the ability to look the technique up, read its critics, and recognize it when a designer says it.
+- **The founder gets one umbrella instead of twelve new words**, carried in the `emotional_design` lane blurb so the phrase and the row a founder reads it on cannot drift apart.
+- **The two HIGH-risk techniques stay literal where the founder attests to them.** Softening the name of the thing being signed is the one move that would be actively wrong: "Variable Reward" carries a warning that any friendlier synonym launders away, and the founder is attesting to the mechanic, not to a description of it.
+
+A decision to leave something alone rots faster than a decision to change it, because nothing in the tree records that the absence was chosen. So `check:founder-copy` rule 4 is the record: it holds the umbrella phrase in the lane blurb, ties the attested HIGH set to the tiers the card stubs declare, and rejects any attempt to add a technique name to the banned-vocabulary table. That last rule matters most — the banned table's contract is "say this instead", so an entry there would force exactly the euphemism these names must not acquire.
+
+That tie is only as good as the tiers it reads, so `check:emotional-design` now closes the tier triangle. Risk tiers are declared in three places — the twelve card stubs, the `experience-cards.md` routing index, and `ethics-guardrail.md §3` — and until v0.62.0 only the last two were checked against each other. An unchecked stub tier was a forgeable input to a consent surface.
+
+**Still open, and not an agent's call: attestation durability.** The council that settled the naming question flagged one thing none of its options addressed. A signed ethics attestation is a point-in-time record, but nothing captures what the founder actually read at signature time — reword a blurb or a bright line afterward and the signed artifact silently claims something else was agreed to. That is a records-and-liability question rather than a naming one, so it is recorded here rather than solved.
 
 ## Naming traps
 
