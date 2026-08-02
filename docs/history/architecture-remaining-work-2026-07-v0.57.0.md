@@ -1,5 +1,18 @@
 # Prompt: finish ARCHITECTURE.md — the work after the directory migration
 
+> **Historical record. Written against v0.57.0 on 2026-07-31.** Steps 6–10 have all
+> shipped: v0.57.0 (#83), v0.58.0 (#84), v0.59.0 (#85), v0.60.0 (#86), v0.61.0 (#87).
+> Do not action the step list below.
+>
+> Two things it raises are still genuinely open, and both are decisions rather than
+> tasks. Step 9's second half — whether the twelve engagement-technique names get
+> plain-language founder equivalents or stay internal labels behind one umbrella term —
+> is still listed under *Open decisions* in [`ARCHITECTURE.md`](../../ARCHITECTURE.md);
+> the emotional-design half of step 9 merged in v0.59.0. Step 11, the product name, is
+> a founder decision and not an agent task.
+>
+> Kept for its reasoning, not its instructions.
+
 Paste this into a fresh session in `/Users/eduardomuthmartinez/code/b2c-mobile-business-launch-skill`.
 
 Steps 1–5 (the directory migration) are **merged**: v0.52.0 → v0.56.0, PRs #78–#82.

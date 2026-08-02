@@ -12,6 +12,7 @@ Structural work follows [`ARCHITECTURE.md`](ARCHITECTURE.md), the target layout 
 
 - `README.md`: public overview. Keep it short and route depth elsewhere; the full command and gate reference lives in `docs/VALIDATORS.md`.
 - `docs/VALIDATORS.md`: every validator, renderer, and eval command with what it checks. Add a row here when you add a gate.
+- `docs/history/`: point-in-time records — dated audits and finished work prompts. Nothing here is current, and nothing links to it from `README.md`, because a dated document reachable from the front door reads as live. Name the file `<topic>-<YYYY-MM>-v<version-it-describes>.md` and open it with a blockquote banner saying what it described, when, and what has since shipped. **Move a work prompt here the moment its work merges.** A finished prompt left in `docs/brainstorms/` is worse than a deleted one: the next session greps for open work, finds a confident step list, and re-does it. `docs/brainstorms/` is for ideas still being weighed; nothing in it should assert repo state.
 - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`: contributor-facing surfaces. Root `SECURITY.md` covers this repo's validators, workflows, and dependency chain, and is a different document from the shipped `business/SECURITY.md` security release plan.
 - `skill/b2c-mobile-business-launch/SKILL.md`: skill entrypoint and progressive-disclosure routing.
 - `skill/b2c-mobile-business-launch/skill-version.json`: installed-runtime freshness manifest.
@@ -64,30 +65,30 @@ npm run launchbench
 npm run test:validators
 npm run check:source-registry
 npm run check:agent-entrypoints
-npm run check:founder-operator -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
+npm run check:founder-operator -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
 npm run check:workflow-adherence
 npm run check:skill-version -- --source skill/b2c-mobile-business-launch --installed skill/b2c-mobile-business-launch
 npm run check:version-discipline -- --repo-root . --skill-root skill/b2c-mobile-business-launch
 npm run check:artifact-templates -- --skill-root skill/b2c-mobile-business-launch
 npm run check:agent-evals
-npm run check:compound-engineering -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
-npm run check:control-plane -- --root skill/b2c-mobile-business-launch/templates
+npm run check:compound-engineering -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
+npm run check:control-plane -- --root skill/b2c-mobile-business-launch/business
 npm run check:business-control-plane-workspace
-npm run check:provider-proof -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
-npm run check:agent-operations -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
+npm run check:provider-proof -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
+npm run check:agent-operations -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
 npm run check:asc-command-contract -- --skill-root skill/b2c-mobile-business-launch
-npm run check:mobai-proof -- --skill-root skill/b2c-mobile-business-launch --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
-npm run check:token-promotion -- --root skill/b2c-mobile-business-launch/templates
+npm run check:mobai-proof -- --skill-root skill/b2c-mobile-business-launch --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
+npm run check:token-promotion -- --root skill/b2c-mobile-business-launch/business
 npm run check:template-safety
-npm run check:founder-copy -- --root skill/b2c-mobile-business-launch/templates --skill-root skill/b2c-mobile-business-launch
-npm run check:no-slop -- --root skill/b2c-mobile-business-launch/templates --skill-root skill/b2c-mobile-business-launch
-npm run check:app-copy -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml --skill-root skill/b2c-mobile-business-launch
-npm run check:onboarding -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
-npm run check:post-launch -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
-npm run check:google-play -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
-npm run check:backend-contract -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
-npm run check:analytics-catalog -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml
-npm run check:change-cascade -- --root skill/b2c-mobile-business-launch/templates --state PROJECT_STATE.yaml --skill-root skill/b2c-mobile-business-launch
+npm run check:founder-copy -- --root skill/b2c-mobile-business-launch/business --skill-root skill/b2c-mobile-business-launch
+npm run check:no-slop -- --root skill/b2c-mobile-business-launch/business --skill-root skill/b2c-mobile-business-launch
+npm run check:app-copy -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml --skill-root skill/b2c-mobile-business-launch
+npm run check:onboarding -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
+npm run check:post-launch -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
+npm run check:google-play -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
+npm run check:backend-contract -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
+npm run check:analytics-catalog -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
+npm run check:change-cascade -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml --skill-root skill/b2c-mobile-business-launch
 npm run check:app-archetype -- --skill-root skill/b2c-mobile-business-launch
 npm run check:archetype-starter -- --skill-root skill/b2c-mobile-business-launch
 npm run check:reference-size -- --skill-root skill/b2c-mobile-business-launch
