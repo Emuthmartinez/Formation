@@ -1,7 +1,17 @@
 #!/usr/bin/env node
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { asArray, asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit } from "../../scripts/lib/launch-state.js";
+import {
+  asArray,
+  asString,
+  getPath,
+  issue,
+  loadProjectState,
+  missingPhraseCode,
+  parseCliArgs,
+  readText,
+  reportAndExit,
+} from "../../scripts/lib/launch-state.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
@@ -64,10 +74,6 @@ function hasAscBlockedReason(line: string): boolean {
   return /(ASC CLI|asc|skill[- ]pack).*(blocked|unavailable|unsupported|auth|2FA|agreement|role|permission|founder approval)|blocked.*(ASC CLI|asc|skill[- ]pack)/i.test(
     line,
   );
-}
-
-function missingPhraseCode(prefix: string, phrase: string): string {
-  return `${prefix}.${phrase.replaceAll(" ", "_").toLowerCase()}.missing`;
 }
 
 function requirePhrases(text: string, phrases: string[], prefix: string, file: string): void {

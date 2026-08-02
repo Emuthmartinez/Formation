@@ -1,7 +1,18 @@
 #!/usr/bin/env node
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { asArray, asString, getPath, isRecord, issue, loadProjectState, parseCliArgs, readText, reportAndExit } from "../../scripts/lib/launch-state.js";
+import {
+  asArray,
+  asString,
+  getPath,
+  isRecord,
+  issue,
+  loadProjectState,
+  missingPhraseCode,
+  parseCliArgs,
+  readText,
+  reportAndExit,
+} from "../../scripts/lib/launch-state.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
@@ -20,10 +31,6 @@ function firstExistingText(candidates: string[]): { relativePath: string; text: 
 
 function existsAny(candidates: string[]): string | undefined {
   return candidates.find((candidate) => existsSync(path.join(args.root, candidate)));
-}
-
-function missingPhraseCode(phrase: string): string {
-  return `content_assets.${phrase.replaceAll(" ", "_").toLowerCase()}.missing`;
 }
 
 function includes(text: string, phrase: string): boolean {
@@ -132,7 +139,7 @@ if (markdown) {
   ];
   for (const phrase of requiredPhrases) {
     if (!includes(markdown.text, phrase)) {
-      issues.push(issue("error", missingPhraseCode(phrase), `CONTENT_ASSETS.md should include ${phrase}.`, markdown.relativePath));
+      issues.push(issue("error", missingPhraseCode("content_assets", phrase), `CONTENT_ASSETS.md should include ${phrase}.`, markdown.relativePath));
     }
   }
 

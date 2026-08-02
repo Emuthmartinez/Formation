@@ -2,7 +2,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { flagString, issue, parseFlags, reportAndExit, type Issue } from "../scripts/lib/launch-state.js";
+import { flagString, isRecord, issue, parseFlags, reportAndExit, type Issue } from "../scripts/lib/launch-state.js";
 import { auditExcludedScripts, buildAuditPlan, type AuditLayout } from "../scripts/lib/audit-plan.js";
 import { SCRIPT_ROOTS, findScriptPath, scriptBasenameFromCommand } from "../scripts/lib/script-paths.js";
 
@@ -319,10 +319,6 @@ function checkLockVersion(label: string, pkg?: PackageJson, lock?: Record<string
       ),
     );
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function code(value: string): string {

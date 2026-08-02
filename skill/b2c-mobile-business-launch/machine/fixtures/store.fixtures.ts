@@ -519,12 +519,35 @@ export function register(h: Harness): void {
     ].join("\n"),
     "utf8",
   );
+  // Also the shape guard for missingPhraseCode. This gate carried its own slugifier until
+  // v0.63.0, one that only replaced spaces, so "app-store-screenshots.json" became the code
+  // store_screenshots.app-store-screenshots.json.missing — a hyphen and two extra segments
+  // inside what is supposed to be prefix.name.missing. The shared helper collapses every
+  // non-alphanumeric run, and this expectation is what fails if a local copy comes back.
   runFixture(
     "app-store-screenshots mention without board or upload orchestration fails",
     appStoreScreenshotsUnvalidated,
     "check-store-screenshots.ts",
     1,
-    "store_screenshots.app-store-screenshots.json.missing",
+    "store_screenshots.app_store_screenshots_json.missing",
+  );
+
+  // The worst of the malformed codes was a phrase carrying a slash, which put a path
+  // separator inside an issue code. Pinned separately because a slug that survives a slash
+  // is the case a space-only replacement can never produce.
+  const screenshotsMissingSkillCredit = makeFixture("screenshots-missing-skill-credit");
+  writeCompleteStoreConsole(screenshotsMissingSkillCredit);
+  writeFileSync(
+    path.join(screenshotsMissingSkillCredit, "SCREENSHOTS.md"),
+    ["# Store Screenshots", "Status: drafting.", "Raw Capture Matrix", "Production Composition Matrix", "Device Wells"].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "a required phrase containing a slash still yields a well-formed issue code",
+    screenshotsMissingSkillCredit,
+    "check-store-screenshots.ts",
+    1,
+    "store_screenshots.parthjadhav_app_store_screenshots.missing",
   );
 
   const appPreviewOptional = makeFixture("app-preview-optional");

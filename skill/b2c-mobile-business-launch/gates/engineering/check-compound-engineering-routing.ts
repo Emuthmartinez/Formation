@@ -19,7 +19,7 @@ const loaded = loadProjectState(args);
 const issues: Issue[] = [...loaded.issues];
 const state = loaded.state;
 
-const statusValues = new Set(["used", "skipped_with_reason", "fallback_equivalent", "blocked", "not_needed", "not_evaluated"]);
+const ceRoutingStatusValues = new Set(["used", "skipped_with_reason", "fallback_equivalent", "blocked", "not_needed", "not_evaluated"]);
 const availabilityValues = new Set(["available", "unavailable", "not_needed", "unknown"]);
 const routeValues = new Set(["ce_full_pipeline", "ce_plan_work", "ce_fallback", "not_needed", "not_evaluated"]);
 const freshnessValues = new Set(["checked", "ce_update_run", "source_registry_refresh_run", "unavailable_with_reason", "not_needed", "not_checked"]);
@@ -233,9 +233,14 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
   const fields = ["brainstorm_status", "plan_status", "work_status", "worktree_status", "review_status", "test_status", "proof_status"];
   for (const field of fields) {
     const value = asString(compound[field])?.trim() ?? "";
-    if (!statusValues.has(value)) {
+    if (!ceRoutingStatusValues.has(value)) {
       issues.push(
-        issue("error", `compound_engineering.${field}.invalid`, `${field} must be one of ${Array.from(statusValues).join(", ")}.`, "PROJECT_STATE.yaml"),
+        issue(
+          "error",
+          `compound_engineering.${field}.invalid`,
+          `${field} must be one of ${Array.from(ceRoutingStatusValues).join(", ")}.`,
+          "PROJECT_STATE.yaml",
+        ),
       );
     }
   }

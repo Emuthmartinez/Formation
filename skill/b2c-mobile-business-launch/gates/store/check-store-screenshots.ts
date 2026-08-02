@@ -1,7 +1,17 @@
 #!/usr/bin/env node
 import { closeSync, existsSync, openSync, readFileSync, readSync } from "node:fs";
 import path from "node:path";
-import { asArray, asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit } from "../../scripts/lib/launch-state.js";
+import {
+  asArray,
+  asString,
+  getPath,
+  issue,
+  loadProjectState,
+  missingPhraseCode,
+  parseCliArgs,
+  readText,
+  reportAndExit,
+} from "../../scripts/lib/launch-state.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
@@ -24,10 +34,6 @@ function firstExistingText(candidates: string[]): { relativePath: string; text: 
 
 function existsAny(candidates: string[]): string | undefined {
   return candidates.find((candidate) => existsSync(path.join(args.root, candidate)));
-}
-
-function missingPhraseCode(prefix: string, phrase: string): string {
-  return `${prefix}.${phrase.replaceAll(" ", "_").toLowerCase()}.missing`;
 }
 
 function includes(text: string, phrase: string): boolean {
@@ -950,6 +956,10 @@ if (screenshotPacket) {
     "autoplay",
     "poster frame",
     "Asset Knowledge Brief",
+    // "App Preview Video" above is the section a reader looks for; this is the asset-name
+    // convention the pipeline writes. Both are required, and both slugify to
+    // store_screenshots.app_preview_video.missing — the only colliding pair in this list.
+    // The issue message names the phrase, so a failure still says which one is absent.
     "app-preview-video",
     "RESEARCH.md",
     "EMOTIONAL_DESIGN.md",
