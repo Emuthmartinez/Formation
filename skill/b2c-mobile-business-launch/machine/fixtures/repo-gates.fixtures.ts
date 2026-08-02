@@ -621,6 +621,104 @@ export function register(h: Harness): void {
   );
 
   /**
+   * Rule 4 — the experience-card naming decision. The twelve technique names are
+   * deliberately NOT translated for a founder, which is a decision that leaves no trace in
+   * the tree and so rots faster than a change would. These four fixtures are the trace.
+   *
+   * Each builds a fake skill root: the real dictionary and renderer (so rules 1–3 stay
+   * quiet) plus a card-stub directory whose tiers and names the fixture controls.
+   */
+  function makeCardSkillRoot(name: string, stubs: { file: string; heading: string; tier: string }[], dictionary?: string): string {
+    const root = makeEmptyFixture(name);
+    const skill = path.join(root, "skill");
+    mkdirSync(path.join(skill, "scripts", "lib"), { recursive: true });
+    mkdirSync(path.join(skill, "playbook", "experience", "experience-cards"), { recursive: true });
+    writeFileSync(
+      path.join(skill, "scripts", "lib", "founder-copy.ts"),
+      dictionary ?? readFileSync(path.join(skillRoot, "scripts", "lib", "founder-copy.ts"), "utf8"),
+      "utf8",
+    );
+    cpSync(path.join(skillRoot, "scripts", "render-launch-cockpit.ts"), path.join(skill, "scripts", "render-launch-cockpit.ts"));
+    for (const stub of stubs) {
+      writeFileSync(
+        path.join(skill, "playbook", "experience", "experience-cards", stub.file),
+        [`# ${stub.heading} Card`, "", `**Risk tier.** ${stub.tier} — canonical in the routing table.`, ""].join("\n"),
+        "utf8",
+      );
+    }
+    return root;
+  }
+
+  /** The shipped HIGH set. A fixture that keeps both of these leaves rule 4a quiet. */
+  const attestedStubs = [
+    { file: "variable-reward-card.md", heading: "Variable Reward", tier: "HIGH" },
+    { file: "streak-and-loss-aversion-card.md", heading: "Streak and Loss Aversion", tier: "HIGH" },
+  ];
+
+  runScriptArgs(
+    "card stubs matching the attested HIGH set pass founder copy",
+    "check-founder-copy.ts",
+    ["--root", makeEmptyFixture("founder-copy-cards-clean"), "--skill-root", path.join(makeCardSkillRoot("cards-clean", attestedStubs), "skill")],
+    0,
+  );
+
+  // 4a — demoting a HIGH card in its stub must not silently shrink what the founder
+  // attests to by name. This is the rule that makes the stub tiers load-bearing.
+  const cardsDemoted = makeCardSkillRoot("cards-high-demoted", [
+    { file: "variable-reward-card.md", heading: "Variable Reward", tier: "MEDIUM" },
+    { file: "streak-and-loss-aversion-card.md", heading: "Streak and Loss Aversion", tier: "HIGH" },
+  ]);
+  runScriptArgs(
+    "a HIGH card demoted in its stub fails the attested-technique tie",
+    "check-founder-copy.ts",
+    ["--root", makeEmptyFixture("founder-copy-cards-demoted"), "--skill-root", path.join(cardsDemoted, "skill")],
+    1,
+    "founder_copy.attested_technique_drift",
+  );
+
+  // 4a, other direction — promoting a card to HIGH without adding it to attestedTechniques
+  // would leave a founder signing off on a mechanic the copy layer never named.
+  const cardsPromoted = makeCardSkillRoot("cards-extra-high", [...attestedStubs, { file: "peak-end-card.md", heading: "Peak-End", tier: "HIGH" }]);
+  runScriptArgs(
+    "a card promoted to HIGH without founder copy fails the attested-technique tie",
+    "check-founder-copy.ts",
+    ["--root", makeEmptyFixture("founder-copy-cards-promoted"), "--skill-root", path.join(cardsPromoted, "skill")],
+    1,
+    "founder_copy.attested_technique_drift",
+  );
+
+  // 4b — banning a technique name is how the decision gets reversed by accident: the
+  // banned list's contract is "say this instead", which is exactly the euphemism these
+  // names must not acquire. "Proof" is already banned vocabulary, so a technique that
+  // takes that name must fail rather than quietly inherit a replacement.
+  const cardsBannedName = makeCardSkillRoot("cards-banned-name", [...attestedStubs, { file: "proof-card.md", heading: "Proof", tier: "MEDIUM" }]);
+  runScriptArgs(
+    "a technique named as banned vocabulary fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", makeEmptyFixture("founder-copy-cards-banned"), "--skill-root", path.join(cardsBannedName, "skill")],
+    1,
+    "founder_copy.technique_alias_banned",
+  );
+
+  // 4c — the umbrella phrase is what a founder gets instead of twelve new words. Declaring
+  // it as a constant proves nothing; it has to survive in the lane blurb they read.
+  const cardsNoUmbrella = makeCardSkillRoot(
+    "cards-umbrella-reworded",
+    attestedStubs,
+    readFileSync(path.join(skillRoot, "scripts", "lib", "founder-copy.ts"), "utf8").replace(
+      "The moments that make the app satisfying to use, and the limits we hold ourselves to.",
+      "How we handle engagement mechanics and their limits.",
+    ),
+  );
+  runScriptArgs(
+    "an emotional-design blurb that drops the umbrella phrase fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", makeEmptyFixture("founder-copy-cards-umbrella"), "--skill-root", path.join(cardsNoUmbrella, "skill")],
+    1,
+    "founder_copy.umbrella_unreachable",
+  );
+
+  /**
    * Backticks mean code in markdown and nothing at all in rendered HTML. A banned word
    * wrapped in backticks on an HTML surface reaches the founder's eyes verbatim, so the
    * gate must still catch it there — while the same span in a markdown surface stays out

@@ -8,7 +8,7 @@
  * translation layer (scripts/lib/founder-copy.ts). This gate is what stops the fix from
  * rotting the next time someone adds a lane, a status, a phase, or a provider route.
  *
- * Three rules:
+ * Four rules:
  *
  * 1. COVERAGE. Every lane, status, phase, and autonomy mode in lib/launch-state.ts has
  *    founder copy in lib/founder-copy.ts. A new lane cannot ship unlabeled.
@@ -19,6 +19,11 @@
  * 3. NO INTERNAL VOCABULARY. The words in bannedFounderVocabulary do not appear in
  *    founder-visible prose. Each one has a plain-language replacement recorded next to
  *    it, so a failure tells the author what to say instead.
+ * 4. THE EXPERIENCE-CARD NAMES ARE NOT TRANSLATED. Rules 1–3 all push toward inventing a
+ *    friendlier word; for the twelve technique names that would be wrong, and rule 4 is
+ *    the record of that decision. It holds the umbrella phrase in the lane blurb a
+ *    founder reads, keeps the HIGH-risk set the founder attests to tied to the tiers the
+ *    card stubs declare, and rejects any attempt to ban a technique name outright.
  *
  * Scanning is deliberately text-only: HTML attributes (where `class="status
  * not_started"` legitimately carries the enum), <style> and <script> bodies, markdown
@@ -28,12 +33,12 @@
  * npm script: check:founder-copy
  * Usage: tsx gates/words/check-founder-copy.ts --root /path/to/templates [--skill-root /path/to/skill]
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { asString, flagString, getPath, isPastOrientPhase, issue, parseFlags, reportAndExit, type Issue } from "../../scripts/lib/launch-state.js";
-import { bannedFounderVocabulary, coverageGaps, milestones } from "../../scripts/lib/founder-copy.js";
+import { attestedTechniques, bannedFounderVocabulary, coverageGaps, experienceCardUmbrella, milestones } from "../../scripts/lib/founder-copy.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "../..");
@@ -110,8 +115,15 @@ if (milestones.length < 5 || milestones.length > 12) {
   );
 }
 
+/**
+ * The dictionary as text, not as an import. Every rule below reads the source under
+ * --skill-root rather than the module this gate itself imports, which is the only way a
+ * fixture can hand the gate a broken dictionary and prove the rule can fail.
+ */
+const founderCopySource = readFileSync(path.join(skillRoot, "scripts/lib/founder-copy.ts"), "utf8");
+
 for (const beatPhase of ["phase_1", "phase_2", "phase_3b", "phase_6"]) {
-  const found = readFileSync(path.join(skillRoot, "scripts/lib/founder-copy.ts"), "utf8").includes(`phase: "${beatPhase}"`);
+  const found = founderCopySource.includes(`phase: "${beatPhase}"`);
   if (!found) {
     issues.push(
       issue(
@@ -169,6 +181,93 @@ if (existsSync(statePath)) {
   } catch {
     // Malformed state is validate-project-state's finding, not this gate's.
   }
+}
+
+// ---------------------------------------------------------------------------
+// Rule 4: the experience-card naming decision
+//
+// The twelve technique names are deliberately NOT translated (see the reasoning on
+// experienceCardUmbrella in scripts/lib/founder-copy.ts). A decision to leave
+// something alone rots faster than a decision to change it, because nothing in the
+// tree records that the absence was chosen. These three rules are that record.
+//
+// Skipped when the card stubs are not present — a business repo does not vendor the
+// playbook, and the founder-copy half of the rule has nothing to compare against.
+// ---------------------------------------------------------------------------
+
+const cardStubDir = path.join(skillRoot, "playbook/experience/experience-cards");
+
+if (existsSync(cardStubDir)) {
+  const stubs = readdirSync(cardStubDir)
+    .filter((name) => name.endsWith("-card.md"))
+    .sort()
+    .map((name) => {
+      const source = readFileSync(path.join(cardStubDir, name), "utf8");
+      return {
+        // The filename minus "-card" is the technique's id everywhere it is addressed:
+        // the Retention Mechanics MCP key, the stub path, and the routing link.
+        id: name.replace(/-card\.md$/, ""),
+        name: (/^#\s+(.+?)\s+Card\s*$/m.exec(source)?.[1] ?? "").trim(),
+        tier: (/^\*\*Risk tier\.\*\*\s*([A-Za-z]+)/m.exec(source)?.[1] ?? "").toUpperCase(),
+      };
+    });
+
+  // 4a. attestedTechniques is the founder-facing half of the HIGH tier. If a card is
+  // promoted to HIGH in its stub and this list is not updated, a founder would attest
+  // to a mechanic whose name the copy layer no longer pins.
+  const highIds = stubs
+    .filter((stub) => stub.tier === "HIGH")
+    .map((stub) => stub.id)
+    .sort();
+  const attestedIds = attestedTechniques.map((technique) => technique.id).sort();
+  if (highIds.join(",") !== attestedIds.join(",")) {
+    issues.push(
+      issue(
+        "error",
+        "founder_copy.attested_technique_drift",
+        `attestedTechniques lists ${attestedIds.join(", ") || "nothing"} but the card stubs tier ${highIds.join(", ") || "nothing"} as HIGH. ` +
+          `A founder attests to the HIGH-risk techniques by name — the two lists are one decision and must move together.`,
+        "scripts/lib/founder-copy.ts",
+      ),
+    );
+  }
+
+  // 4b. Banning a technique name is how the aliasing decision would be reversed by
+  // accident: bannedFounderVocabulary's contract is "say this instead", so an entry
+  // here forces a euphemism onto exactly the surfaces that must not have one.
+  const techniqueNames = new Set(
+    [...stubs.map((stub) => stub.name), ...attestedTechniques.map((technique) => technique.name)].filter(Boolean).map((name) => name.toLowerCase()),
+  );
+  for (const { term } of bannedFounderVocabulary) {
+    if (!techniqueNames.has(term.toLowerCase())) continue;
+    issues.push(
+      issue(
+        "error",
+        "founder_copy.technique_alias_banned",
+        `"${term}" is an experience-card technique name and cannot be banned founder vocabulary. These twelve are terms of art and live MCP keys, ` +
+          `so a "say instead" entry would mint a second vocabulary for one concept. Use the umbrella phrase for the deck as a whole instead.`,
+        "scripts/lib/founder-copy.ts",
+      ),
+    );
+  }
+}
+
+// 4c. The umbrella is only real if a founder meets it. Declaring the phrase as a constant
+// proves nothing; it has to be in the emotional_design lane blurb, which is the row a
+// founder actually reads when this part of the launch comes up. Read from source for the
+// same reason as the beats above — an imported blurb cannot be varied by a fixture.
+const emotionalBlurb = /emotional_design:\s*\{[\s\S]*?blurb:\s*"([^"]*)"/.exec(founderCopySource)?.[1] ?? "";
+if (!emotionalBlurb.toLowerCase().includes(experienceCardUmbrella.toLowerCase())) {
+  issues.push(
+    issue(
+      "error",
+      "founder_copy.umbrella_unreachable",
+      `The emotional_design lane blurb does not contain the umbrella phrase "${experienceCardUmbrella}". ` +
+        `That blurb is where a founder meets this part of the launch as a whole — without it the twelve technique names have nothing to sit behind, ` +
+        `and the deck reads as twelve unexplained psychology terms.`,
+      "scripts/lib/founder-copy.ts",
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------

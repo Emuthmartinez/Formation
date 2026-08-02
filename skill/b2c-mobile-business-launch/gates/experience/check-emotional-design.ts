@@ -24,7 +24,11 @@
  *
  * Reference integrity: when playbook/experience/ethics-guardrail.md (and the
  * experience-cards.md index) resolve next to the root, the §3 risk table must
- * keep one tier per mechanism and the index Risk column must agree with it.
+ * keep one tier per mechanism, the index Risk column must agree with it, and each
+ * of the twelve card stubs must agree with its own routing row. The stubs are the
+ * third declaration site and were unchecked until v0.62.0 — check:founder-copy now
+ * derives the HIGH set from them to decide which technique names a founder attests
+ * to by name, so an unchecked stub tier is a forgeable input to a consent surface.
  */
 
 import {
@@ -38,7 +42,7 @@ import {
   type Issue,
   type Severity,
 } from "../../scripts/lib/launch-state.js";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 const args = parseCliArgs(process.argv.slice(2));
@@ -882,6 +886,30 @@ function bucketCovers(bucketKey: string, indexName: string): boolean {
 const cardsIndexRef =
   readText(path.join(args.root, ".."), "playbook/experience/experience-cards.md") ?? readText(args.root, "playbook/experience/experience-cards.md");
 
+// The directory holding the twelve card stubs, resolved the same two ways the index is.
+const cardStubDir = [path.join(args.root, "..", "playbook/experience/experience-cards"), path.join(args.root, "playbook/experience/experience-cards")].find(
+  (candidate) => existsSync(candidate),
+);
+
+/**
+ * A technique key that survives all three spellings a card's name is written in: the
+ * routing index ("Identity & Self-Expression"), the stub heading ("Identity and
+ * Self-Expression"), and the stub filename / MCP key ("identity-and-self-expression").
+ * normalizeCardName alone is not enough — it keeps "and" as a word, so the ampersand
+ * and spelled-out forms of the same card would not match and the parity gate would
+ * skip exactly the cards whose names are longest.
+ */
+function techniqueKey(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/&/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\band\b/g, " ")
+    .replace(/\bcards?\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 if (ethicsRef) {
   const { rows: riskRows, malformed: riskMalformed } = parseTableRows(ethicsRef, /^\|\s*Mechanism\s*\|\s*Risk Tier\s*\|/i, 1, 2);
   for (const broken of riskMalformed) {
@@ -1095,6 +1123,75 @@ if (ethicsRef) {
             ),
           );
         }
+      }
+    }
+
+    // Third leg of the tier triangle: the twelve card stubs. The index Risk column and the
+    // ethics-guardrail §3 table have been checked against each other since v0.45.0, but each
+    // stub also declares its own "**Risk tier.**" line and nothing read it. That gap matters
+    // more than a normal docs disagreement: check:founder-copy derives the HIGH set from the
+    // stubs to decide which technique names a founder attests to by name, so an unchecked stub
+    // tier is a forgeable input to a consent surface.
+    if (cardStubDir) {
+      const indexTierByKey = new Map(indexRows.map((row) => [techniqueKey(row.name), { name: row.name, tierRaw: row.tierRaw }]));
+      const seenStubKeys = new Set<string>();
+
+      for (const file of readdirSync(cardStubDir)
+        .filter((name) => name.endsWith("-card.md"))
+        .sort()) {
+        const source = readText(cardStubDir, file) ?? "";
+        const key = techniqueKey(file.replace(/\.md$/, ""));
+        seenStubKeys.add(key);
+        const stubTiers = parseTierSet(/^\*\*Risk tier\.\*\*\s*([^—\n]+)/m.exec(source)?.[1] ?? "");
+        if (!stubTiers) {
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.card_stub_tier_unrecognized",
+              `playbook/experience/experience-cards/${file} has no parseable "**Risk tier.**" line. Every stub declares its own tier and check:founder-copy reads it — an unparseable one drops this card out of both parity and the attestation set.`,
+              `playbook/experience/experience-cards/${file}`,
+            ),
+          );
+          continue;
+        }
+        const indexRow = indexTierByKey.get(key);
+        if (!indexRow) {
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.card_stub_unmapped",
+              `playbook/experience/experience-cards/${file} has no routing row in playbook/experience/experience-cards.md. Add the row or fix the name — an unrouted stub still contributes its tier and nothing checks it.`,
+              `playbook/experience/experience-cards/${file}`,
+            ),
+          );
+          continue;
+        }
+        const indexTiers = parseTierSet(indexRow.tierRaw);
+        if (indexTiers && ![...stubTiers].every((tier) => indexTiers.has(tier))) {
+          issues.push(
+            issue(
+              "error",
+              "emotional_design.card_stub_tier_mismatch",
+              `playbook/experience/experience-cards/${file} declares ${tierKey(stubTiers)} but playbook/experience/experience-cards.md routes "${indexRow.name}" as ${indexRow.tierRaw}. One tier per technique across all three files.`,
+              `playbook/experience/experience-cards/${file}`,
+            ),
+          );
+        }
+      }
+
+      // Reverse coverage: deleting a stub must not silently shrink the deck. A missing HIGH
+      // stub would quietly drop a technique out of the founder's attestation set.
+      for (const row of indexRows) {
+        const key = techniqueKey(row.name);
+        if (seenStubKeys.has(key)) continue;
+        issues.push(
+          issue(
+            "error",
+            "emotional_design.card_stub_missing",
+            `playbook/experience/experience-cards.md routes "${row.name}" but no stub file under playbook/experience/experience-cards/ carries it. Restore the stub — the index alone cannot answer what tier a founder is attesting to.`,
+            "playbook/experience/experience-cards.md",
+          ),
+        );
       }
     }
   }
