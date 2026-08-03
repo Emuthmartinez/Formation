@@ -164,7 +164,7 @@ for (const pack of SHIPPED_PACKS) {
    * Discoverability, not a literal SKILL.md link.
    *
    * SKILL.md routes to a domain index and the index routes to the file
-   * (ARCHITECTURE.md: the entrypoint routes and nothing else). Requiring the
+   * (docs/architecture.md: the entrypoint routes and nothing else). Requiring the
    * pack's own path in SKILL.md would pull every leaf back up into the
    * entrypoint, which is the accretion the collapse just undid. What has to
    * hold is that a reachable chain exists: SKILL.md -> index -> pack.

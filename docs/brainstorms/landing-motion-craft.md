@@ -56,7 +56,7 @@ The "wow" of motionsites is ~85% the **live** lane and ~15% the **baked** lane. 
 3. **Landing validator checks plumbing, not craft.** `check-landing-funnel.ts` enforces deploy gates, GEO/SEO files, copy compliance, waitlist idempotency — **zero** checks on motion quality, reduced-motion fallback, or that animation didn't gate LCP/hide text from crawlers.
 4. **The cinematic-vs-GEO tension is unresolved in guidance.** §3a says "motion is progressive enhancement, don't delay LCP" — right, but it reads as a brake. Nothing shows a team _how_ to be cinematic **and** crawlable/fast at once.
 
-## The practice proof: `docs/landing-motion-lab.html`
+## The practice proof: `docs/prototypes/landing-motion-lab.html`
 
 A single, **fully self-contained** file (zero external fonts/scripts/CDNs — required so it passes `check:source-registry`, and so it opens offline anywhere). It is built **entirely on the skill's real brand tokens** (the cream/green/coral + Fraunces/Source Sans system from `design-system/tokens.css`) to prove the section library is token-driven, not a generic dark SaaS skin. Open it in a browser and toggle "Pattern labels" to read each section's technique.
 
@@ -107,7 +107,7 @@ If we greenlight, the change-set (each piece earns its place per AGENTS.md "add 
 ## Try the proof
 
 ```bash
-open docs/landing-motion-lab.html      # macOS
-xdg-open docs/landing-motion-lab.html  # Linux
+open docs/prototypes/landing-motion-lab.html      # macOS
+xdg-open docs/prototypes/landing-motion-lab.html  # Linux
 # then toggle "Pattern labels" in the nav; test prefers-reduced-motion in devtools rendering pane
 ```

@@ -2,7 +2,7 @@
 /**
  * check-gates-layout.ts — the gates/ tree defends its own shape.
  *
- * ARCHITECTURE.md settled two rules when the validators split in v0.55.0:
+ * docs/architecture.md settled two rules when the validators split in v0.55.0:
  * `gates/` mirrors the playbook domains, and there is no top-level exception
  * bucket — a genuinely cross-cutting gate goes to `gates/process/`. Nothing
  * enforced either. A new gate filed under the wrong domain, or dropped at
@@ -66,7 +66,7 @@ if (!existsSync(gatesRoot)) {
         issue(
           "error",
           "gates_layout.ungrouped_gate",
-          `gates/${entry.name} sits at the gates/ root. Every gate nests in a domain folder — a genuinely cross-cutting gate belongs in gates/process/, which ARCHITECTURE.md defines as the cross-cutting launch-method domain. There is deliberately no top-level exception bucket.`,
+          `gates/${entry.name} sits at the gates/ root. Every gate nests in a domain folder — a genuinely cross-cutting gate belongs in gates/process/, which docs/architecture.md defines as the cross-cutting launch-method domain. There is deliberately no top-level exception bucket.`,
           `gates/${entry.name}`,
         ),
       );

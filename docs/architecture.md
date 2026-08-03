@@ -40,13 +40,13 @@ Today *kind* is the top level, *domain* is nowhere, and *stage* exists only as p
 
   playbook/                agent knowledge, grouped by domain
     research/  product/  experience/  design/  words/  engineering/
-    store/  money/  growth/  data/  trust/  operations/  process/
+    store/  money/  growth/  data/  trust/  operations/
+    process/  orchestration/
       README.md            index: load-when triggers, one row per file
       *.md                 the lane references themselves
 
-  business/                what a launch produces
-    docs/                  the documents a founder opens
-    pages/                 rendered HTML — generated from state, never hand-authored
+  business/                a launch repo's root, checked in — its layout is the
+                           artifact contract, not a folder to regroup
 
   starters/                runnable app scaffolds (not templates, not read as prose)
   gates/                   validators, mirroring playbook domains
@@ -54,9 +54,11 @@ Today *kind* is the top level, *domain* is nowhere, and *stage* exists only as p
   state/                   the state store and its schemas
 ```
 
-Two of those domains are easy to confuse and are deliberately separate. **`operations/`** is running the *business* — founder access, secrets, paid-tool routing, agent operations, post-launch rhythm. **`process/`** is running the *launch* — phases, state, coverage, artifact contracts, traceability, orchestration, change cascade. Both are cross-cutting; neither is machinery, because an agent loads them mid-launch and a maintainer rarely opens them.
+Three of those domains are easy to confuse and are deliberately separate. **`operations/`** is running the *business* — founder access, secrets, paid-tool routing, agent operations, post-launch rhythm. **`process/`** is running the *launch* — phases, coverage, artifact contracts, traceability, provider proof, change cascade. **`orchestration/`** is running the *work* — durable state, autonomy mode, subagents, dynamic workflows, engineering routing. All three are cross-cutting; none is machinery, because an agent loads them mid-launch and a maintainer rarely opens them.
 
-`machine/` is narrower than "everything self-referential": it is only what the maintainer touches to keep the skill green — versioning, the eval harness, the source registry, parity, fixtures. A file about *how a launch is run* is method and belongs in `playbook/process/`, not here. Mixing the two is what made "the skill talking about itself" measure at 22% when much of that is really the method the skill exists to carry.
+`process/` and `orchestration/` were one folder of fifteen files until v0.64.0, half again the next-largest lane, and it held two different jobs: deciding what a launch still owes versus deciding how the next hour of work gets dispatched. Three files — `project-state.md`, `autonomy-modes.md`, `parallel-agent-orchestration.md` — carry an identical load-when trigger and an identical gate, so they moved together rather than being distributed by subject, and `orchestration/README.md` says they load as a set. Left unexplained, three duplicate trigger rows read as an editing accident rather than a contract.
+
+`machine/` is narrower than "everything self-referential": it is only what the maintainer touches to keep the skill green — versioning, the eval harness, the source registry, parity, fixtures. A file about *how a launch is run* is method and belongs in `playbook/process/` or `playbook/orchestration/`, not here. Mixing the two is what made "the skill talking about itself" measure at 22% when much of that is really the method the skill exists to carry.
 
 Each domain folder carries its own `README.md` index rather than a sibling `<domain>.md`. A folder that explains itself on its front page needs no convention to be learned, and it keeps the domain self-contained when it moves.
 
@@ -66,7 +68,7 @@ Each domain folder carries its own `README.md` index rather than a sibling `<dom
 
 **One subject, one folder.** Everything about money — the knowledge, the artifact it produces, the gate that proves it — is reachable from one place. Adding a domain is adding a folder; removing one is removing a folder.
 
-**Audience separation is load-bearing.** `business/` is what a founder reads. `playbook/` is what an agent reads. `machine/` is what only the maintainer touches. Mixing them is what made the skill feel large: a founder browsing `business/` sees 291 files when about a dozen concern them.
+**Audience separation is load-bearing.** `playbook/` is what an agent reads. `machine/` is what only the maintainer touches. Mixing them is what made the skill feel large. The rule stops at `business/`: it is the one top-level directory whose shape is fixed from outside, because it is a launch repo's root rather than a view onto the skill, and sorting it by audience would change what every launched business looks like. Its audience separation happens in the launch repo, not here.
 
 **The entrypoint size is a consequence, not the goal.** The original ≤12KB target was written when `SKILL.md` was 46,975 bytes, before the `playbook/` collapse — an aspiration set before anyone tried it. Measured at v0.58.0 it is not reachable without deleting something real: at 20,057 bytes the remainder is Lane Routing (3,696, already collapsed to 15 index rows at ~246 bytes each with no slack), five always-on contracts (4,130), Ground Rules (3,073) and What Counts As Done (1,306). Reaching 12,288 means halving two of those, and the obvious-looking candidate is a trap — Start Here items 4–6 read like duplicates of the operations and trust routing rows, but Lane Routing indexes the *reference* while Start Here carries the *trigger* ("before any API key, token, OAuth credential…"), so collapsing them lets an agent touch a credential without loading secrets management.
 
@@ -91,9 +93,31 @@ Safest first; each step keeps `npm run audit:ci` green and lands as its own comm
 
 1. **`starters/`** — move `business/app-archetypes/`. Largest file-count win, smallest reference surface. **Done, v0.52.0.**
 2. **`playbook/`** — regroup `references/` by domain, each with its `README.md`, collapsing `SKILL.md` rows as each domain lands. **Done, v0.53.0.**
-3. **`business/`** — rename `templates/` for what it produces. **Done, v0.54.0.** The `docs/` and `pages/` sub-split is deferred, not forgotten: v0.61.0 froze the eight page filenames at the root of `business/` when it made four of them generated, and `check:generated-pages` reads that root non-recursively. Four of the eight are evidence paths in `PROJECT_STATE.yaml` and the set carries ~194 references repo-wide, so the sub-split is a rename of the whole reference surface rather than a folder move. It buys grouping only; take it when something else already needs those references touched.
+3. **`business/`** — rename `templates/` for what it produces. **Done, v0.54.0.** The `docs/` and `pages/` sub-split is **cancelled**, not deferred — see "Why `business/` does not get sub-folders" below. This step is complete as it stands.
 4. **`gates/` + the validator half of `machine/`** — move all 61 `scripts/check-*.ts` at once, split by what they grade. **Done, v0.55.0.**
 5. **`machine/`, the rest** — the eval harness and its 129 eval files, and `scripts/fixtures/`. **Done, v0.56.0.**
+
+## Why `business/` does not get sub-folders
+
+`business/` looks like the worst folder in the tree: 41 files flat at its root and twenty sub-folders mixing founder prose, Swift and TypeScript payload, JSON schemas, and example proofs. Grouping it into `docs/ pages/ app/ data/` was carried by this document as deferred work from v0.54.0 until v0.64.0, when it was attempted and reverted.
+
+**`business/` is not a folder of skill files. It is a launch repo's root, checked in.** Roughly twenty gates in the audit pipeline run with `--root business` and read it exactly as they read a real business repo:
+
+- `check:agent-operations` reads `<root>/operations/agent-operations.json`
+- `check:token-promotion` reads `<root>/design-system/tokens.css`
+- `validate:design-state` and `check:design-room` read `<root>/state/business.json`
+- `check:artifact-templates` resolves every `PROJECT_STATE.yaml` `evidence:` path against that root — `secrets/SECRETS.md`, `growth/paid-ua-report.csv`, `localization-market-research/LOCALIZATION_MARKET_RESEARCH.md`
+
+So `business/design-system/tokens.css` is not "the skill's copy of some tokens, filed under design"; it is the path `design-system/tokens.css` that a launched app compiles against, which is why `check:motion-contract` pins it byte-for-byte to the skill's own `design-system/`. Moving it to `business/app/design-system/` does not regroup a skill file — it changes where a launched business keeps its design tokens, and points every gate that grades a real launch at a path no launch repo has.
+
+That is why the earlier estimate here ("~194 references, a rename of the reference surface") understated it. The cost is not reference churn. The layout of `business/` **is** the public contract for what this skill produces, the same way `SKILL.md` is the contract for how it is loaded. Changing it is a product decision about every business already launched, and it buys grouping only.
+
+Two consequences worth stating, because both look like defects until the rule is known:
+
+- **`business/PROJECT_STATE.yaml` stays at that root**, for the same reason `skill-version.json` stays at the skill root: a manifest belongs at the root of the thing it describes, and its evidence paths resolve relative to it.
+- **`design-system/` at the skill root duplicating `business/design-system/` is deliberate**, not drift. The skill root is its own launch repo for self-render purposes; `business/` is the blank template a launch starts from. `check:motion-contract` holds them together on purpose.
+
+If the sub-split is ever wanted, it is a versioned migration of the artifact contract with a story for businesses already launched — not a cleanup, and not an agent's call.
 
 **The migration is complete.** Every top-level directory now answers *who reads it* rather than *what kind of file it holds*. `run-audit.ts` stays in `scripts/` deliberately: it is the pipeline orchestrator that runs gates, machine checks and renderers alike, not part of the eval harness. What remains in `scripts/` is coherent — everything executable that is neither a gate nor the eval harness, plus the shared `lib/`.
 

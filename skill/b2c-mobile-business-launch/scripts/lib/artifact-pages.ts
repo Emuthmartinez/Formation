@@ -1,7 +1,7 @@
 /**
  * artifact-pages.ts — every page at the root of business/ says where it comes from.
  *
- * ARCHITECTURE.md rules that HTML in business/ is generated rather than authored,
+ * docs/architecture.md rules that HTML in business/ is generated rather than authored,
  * because a hand-authored twin of a Markdown document goes stale with no signal.
  * It did. Four of these pages drifted far enough to be wrong rather than merely
  * thin, and nothing failed. This manifest is what makes a page's provenance a

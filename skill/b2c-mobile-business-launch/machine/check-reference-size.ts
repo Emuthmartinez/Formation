@@ -46,7 +46,7 @@ const DEFAULT_BUDGET_BYTES = 64 * 1024;
  * per-lane handoff checklist moved into launch-coverage.md.
  *
  * Ratcheted 45KB -> 20KB when the Phase Spine moved to spine.md and the runtime
- * routing detail moved to playbook/process/dynamic-workflows.md (v0.58.0).
+ * routing detail moved to playbook/orchestration/dynamic-workflows.md (v0.58.0).
  * Leaving it at 45KB would have let ~25KB flow straight back into the file that
  * loads on every trigger while check:reference-size stayed green — which is the
  * freeze-and-subtract policy this comment describes, defeated by not applying it.
@@ -69,7 +69,7 @@ const args = parseArgs(process.argv.slice(2));
 const issues: Issue[] = [];
 
 /**
- * ARCHITECTURE.md: knowledge lives in playbook/ grouped by domain, and the
+ * docs/architecture.md: knowledge lives in playbook/ grouped by domain, and the
  * skill's own upkeep lives in machine/. Both are loaded into agent or
  * maintainer context, so both carry the per-file budget. `references/` no
  * longer exists.
@@ -149,7 +149,7 @@ for (const root of presentRoots) {
  *
  * Two index shapes are accepted, because both are load-bearing:
  *   - `<dir>/README.md`      — a domain folder explaining itself on its front
- *                              page (ARCHITECTURE.md's convention for playbook
+ *                              page (docs/architecture.md's convention for playbook
  *                              domains; needs no convention to be learned)
  *   - `<parent>/<name>.md`   — a sub-split inside a domain, where the index
  *                              sits beside the folder it routes into

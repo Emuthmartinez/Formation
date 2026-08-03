@@ -1,6 +1,6 @@
 # Landing Section Library
 
-Motionsites-grade landing sections on the project's own brand tokens. This pack is the reusable abstraction of the practice proof in `docs/landing-motion-lab.html`; the doctrine lives in [`playbook/design/landing-motion-craft.md`](../../playbook/design/landing-motion-craft.md). It is a **web-only** surface: `motion/react` is mandated here and must never be imported by the mobile binary (`check:template-safety` enforces the boundary).
+Motionsites-grade landing sections on the project's own brand tokens. This pack is the reusable abstraction of the practice proof in `docs/prototypes/landing-motion-lab.html`; the doctrine lives in [`playbook/design/landing-motion-craft.md`](../../playbook/design/landing-motion-craft.md). It is a **web-only** surface: `motion/react` is mandated here and must never be imported by the mobile binary (`check:template-safety` enforces the boundary).
 
 ## What ships
 

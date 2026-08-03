@@ -1,6 +1,6 @@
 # Landing Motion Craft
 
-Motionsites-grade landing motion on the project's own brand tokens — cinematic AND crawlable/fast, proven (not asserted) by `docs/landing-motion-lab.html` in the skill repo. Load this reference before building or animating any landing page, funnel page, or web marketing surface; it is routed from `geo-seo.md` §3a and `design-visual-system.md`. The inspiration benchmark is motionsites.ai (`https://motionsites.ai`) — a visual reference, not a command-syntax source.
+Motionsites-grade landing motion on the project's own brand tokens — cinematic AND crawlable/fast, proven (not asserted) by `docs/prototypes/landing-motion-lab.html` in the skill repo. Load this reference before building or animating any landing page, funnel page, or web marketing surface; it is routed from `geo-seo.md` §3a and `design-visual-system.md`. The inspiration benchmark is motionsites.ai (`https://motionsites.ai`) — a visual reference, not a command-syntax source.
 
 ## The two-lane content model
 
