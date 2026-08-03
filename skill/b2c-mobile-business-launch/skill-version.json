@@ -1,11 +1,10 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.65.0",
+  "version": "0.65.1",
   "updatedAt": "2026-08-03",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "A typed definition graph now owns stable IDs and relationships for business areas, domains, 57 workflows, context packs, phases, readiness lanes, artifacts, gates, operators, and providers. SKILL.md domain routing, the phase spine, graph documentation, Mermaid topology, and context budgets are deterministic projections checked by check:skill-graph.",
-    "Phase order, required lanes, and lane dependencies now derive from the graph runtime instead of a second hard-coded topology in launch-state.ts. The Control Plane read model moves to schema 0.2.0 with stable operator and view IDs, and app-local role prompts declare their canonical operator identities.",
-    "PROJECT_STATE.yaml remains the compatible business-instance contract and now records definition_graph_version 1.0.0. The public business/ paths stay unchanged; immutable skill definitions remain outside mutable launch state."
+    "Dev-dependency maintenance only; no skill behaviour, definition, or contract changes. The dev-dependencies group moves in lockstep across both manifests: @types/node 26.1.2, @types/react 19.2.18, @types/react-dom 19.2.4, @vitejs/plugin-react 6.0.5, motion 12.43.0, and vite 8.2.0. Dependabot splits this group into one PR per manifest root, and either half alone trips check:package-parity, so the two are landed as a single change.",
+    "Cursor joins Claude and Agents as a verified consumer of the installed runtime. scripts/sync-skill-runtime.sh now carries ~/.cursor/skills/b2c-mobile-business-launch in CONSUMER_LINKS, so one sync creates, repoints, and proves that link on the same terms as the others, and a real directory there fails the run instead of silently serving stale content. Cursor's vendor-owned ~/.cursor/skills-cursor is never synced into."
   ]
 }

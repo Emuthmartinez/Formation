@@ -23,7 +23,15 @@ set -euo pipefail
 SKILL_NAME="b2c-mobile-business-launch"
 SOURCE_REL="skill/${SKILL_NAME}"
 RUNTIME="${HOME}/.codex/skills/${SKILL_NAME}"
-CONSUMER_LINKS=("${HOME}/.claude/skills/${SKILL_NAME}" "${HOME}/.agents/skills/${SKILL_NAME}")
+# Every tool that reads this skill points at the one Codex runtime copy, so a
+# single sync updates all of them. Cursor reads ~/.cursor/skills (its own
+# built-ins live in ~/.cursor/skills-cursor, which is vendor-owned — never sync
+# there). A consumer absent from this list is a consumer that silently goes stale.
+CONSUMER_LINKS=(
+  "${HOME}/.claude/skills/${SKILL_NAME}"
+  "${HOME}/.agents/skills/${SKILL_NAME}"
+  "${HOME}/.cursor/skills/${SKILL_NAME}"
+)
 
 DRY_RUN=0
 DO_PULL=1
@@ -166,7 +174,7 @@ else
   fail "runtime drifted from source after sync (see diff above)"
 fi
 
-# --- 7. Verify the Claude/Agents consumers point at the Codex runtime --------
+# --- 7. Verify the Claude/Agents/Cursor consumers point at the Codex runtime -
 step "Verifying consumer symlinks"
 for link in "${CONSUMER_LINKS[@]}"; do
   if [ -L "$link" ]; then

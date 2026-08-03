@@ -12,4 +12,4 @@ Claude-specific notes:
 - Refresh official docs and local CLI help before changing third-party command guidance.
 - Keep generated business-repo instructions in the shipped templates and validators, not in this root maintainer file.
 - Keep this file as a Claude-specific pointer; detailed policy belongs in `AGENTS.md`, skill references, validators, and LaunchBench.
-- Maintainer machine only: after any skill change, if `~/.codex/skills/b2c-mobile-business-launch` exists, sync and audit that installed runtime, because Claude and Agents consume that installed copy through symlinks there. In clones, CI, or cloud sessions without that installed copy, skip runtime sync entirely; `npm run audit:ci` is the readiness gate.
+- Maintainer machine only: after any skill change, if `~/.codex/skills/b2c-mobile-business-launch` exists, sync and audit that installed runtime, because Claude, Agents, and Cursor all consume that installed copy through symlinks there. In clones, CI, or cloud sessions without that installed copy, skip runtime sync entirely; `npm run audit:ci` is the readiness gate.
