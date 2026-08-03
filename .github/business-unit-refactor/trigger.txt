@@ -1,1 +1,1 @@
-trigger PR #99 publisher after protected workflow merge
+trigger PR #99 publisher after workflow_run publisher merge
