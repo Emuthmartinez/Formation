@@ -11,11 +11,9 @@ permissions:
 jobs:
   publish:
     if: >-
-      github.repository == 'Emuthmartinez/b2c-mobile-business-launch-skill' &&
       github.actor == 'Emuthmartinez' &&
       github.event.issue.number == 99 &&
-      github.event.issue.pull_request &&
-      github.event.comment.body == '/publish-v066'
+      github.event.comment.body == '/publish-v066-2'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
