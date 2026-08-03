@@ -61,7 +61,7 @@ export function createHarness(): Harness {
     const fixtureRoot = path.join(tempRoot, name);
     cpSync(path.join(skillRoot, "business"), fixtureRoot, { recursive: true });
     // starters/ used to live under business/ and came along with the copy
-    // above. It is a sibling now (ARCHITECTURE.md: starter app code is not a
+    // above. It is a sibling now (docs/architecture.md: starter app code is not a
     // template), so the fixture root has to pull it in explicitly — several
     // validators scan a business root for starter prompts and shipped copy.
     cpSync(path.join(skillRoot, "starters"), path.join(fixtureRoot, "starters"), { recursive: true });

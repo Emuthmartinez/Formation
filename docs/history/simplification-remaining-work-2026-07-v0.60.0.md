@@ -9,7 +9,7 @@
 >
 > The only item it leaves genuinely open is step 11, the product name, which is a
 > founder decision and not an agent task. For current state see
-> [`ARCHITECTURE.md`](../../ARCHITECTURE.md); for the maintainer map see
+> [`docs/architecture.md`](../architecture.md); for the maintainer map see
 > [`AGENTS.md`](../../AGENTS.md).
 
 Paste into a fresh session in `/Users/eduardomuthmartinez/code/b2c-mobile-business-launch-skill`.
@@ -19,7 +19,7 @@ Paste into a fresh session in `/Users/eduardomuthmartinez/code/b2c-mobile-busine
 `main` is at **v0.60.0**. The installed runtime at `~/.codex/skills/b2c-mobile-business-launch`
 is synced to v0.60.0 and audits clean (71 ok, 0 failed, 0 skipped).
 
-ARCHITECTURE.md's migration is complete and its follow-on work is mostly done:
+docs/architecture.md's migration is complete and its follow-on work is mostly done:
 
 | Step | State |
 | --- | --- |

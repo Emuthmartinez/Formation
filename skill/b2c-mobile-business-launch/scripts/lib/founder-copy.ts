@@ -509,7 +509,7 @@ export const bannedFounderVocabulary: { term: string; sayInstead: string }[] = [
  * NOT translate, and the reasoning is here because it argues against the move every
  * other export above makes.
  *
- * ARCHITECTURE.md carried this as an open decision: whether the twelve
+ * docs/architecture.md carried this as an open decision: whether the twelve
  * engagement-technique names get plain-language founder equivalents, or stay
  * internal labels behind one umbrella term. The answer is neither half of that
  * framing.

@@ -1,7 +1,7 @@
 /**
  * script-paths.ts — one source of truth for where a spawnable script lives.
  *
- * ARCHITECTURE.md splits the skill's executables three ways: `gates/` proves a
+ * docs/architecture.md splits the skill's executables three ways: `gates/` proves a
  * business launch, `machine/` proves the skill itself, and `scripts/` keeps the
  * renderers, runners, probes, seeds and shared lib. So no caller can spawn a
  * script by concatenating a directory onto a basename any more.

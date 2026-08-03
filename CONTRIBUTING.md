@@ -20,7 +20,7 @@ Read these first, in order:
 1. [`README.md`](README.md): what the skill is and who it's for.
 2. [`AGENTS.md`](AGENTS.md): the maintainer guide and repo map, canonical for how the repo is organized and maintained.
 3. [`CLAUDE.md`](CLAUDE.md): Claude-specific maintainer notes.
-4. [`docs/VALIDATORS.md`](docs/VALIDATORS.md): every gate and what it checks.
+4. [`docs/validators.md`](docs/validators.md): every gate and what it checks.
 5. `skill/b2c-mobile-business-launch/SKILL.md`: the skill entrypoint and routing.
 6. The specific `references/`, `business/`, `scripts/`, or `evals/` file you intend to change.
 
@@ -56,7 +56,7 @@ npm run audit:links            # internal link integrity
 npm run audit -- --only check:security
 ```
 
-[`docs/VALIDATORS.md`](docs/VALIDATORS.md) lists every gate, its flags, and what it checks.
+[`docs/validators.md`](docs/validators.md) lists every gate, its flags, and what it checks.
 
 ## The rules CI enforces
 
@@ -126,6 +126,6 @@ This skill is opinionated and targets subscription and freemium consumer mobile 
 
 ## Code of conduct and licensing
 
-Participation is governed by [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Report security issues through [`SECURITY.md`](SECURITY.md) rather than a public issue.
+Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Report security issues through [`.github/SECURITY.md`](.github/SECURITY.md) rather than a public issue.
 
 By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE) that covers this repository.

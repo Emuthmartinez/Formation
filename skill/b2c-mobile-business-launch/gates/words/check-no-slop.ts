@@ -112,8 +112,8 @@ for (const surface of shippedSurfaces) {
 const repoDocs: { relative: string; severity: "error" | "warning" }[] = [
   { relative: "README.md", severity: "error" },
   { relative: "CONTRIBUTING.md", severity: "error" },
-  { relative: "SECURITY.md", severity: "error" },
-  { relative: "CODE_OF_CONDUCT.md", severity: "error" },
+  { relative: ".github/SECURITY.md", severity: "error" },
+  { relative: ".github/CODE_OF_CONDUCT.md", severity: "error" },
   { relative: "AGENTS.md", severity: "warning" },
   { relative: "CLAUDE.md", severity: "warning" },
 ];

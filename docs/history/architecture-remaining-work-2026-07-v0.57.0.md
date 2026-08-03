@@ -1,4 +1,4 @@
-# Prompt: finish ARCHITECTURE.md — the work after the directory migration
+# Prompt: finish docs/architecture.md — the work after the directory migration
 
 > **Historical record. Written against v0.57.0 on 2026-07-31.** Steps 6–10 have all
 > shipped: v0.57.0 (#83), v0.58.0 (#84), v0.59.0 (#85), v0.60.0 (#86), v0.61.0 (#87).
@@ -8,7 +8,7 @@
 > in the step list below. Step 9's second half — whether the twelve engagement-technique
 > names get plain-language founder equivalents — was answered *no*, with the reasoning
 > and the gate that enforces it recorded under *Settled decisions* in
-> [`ARCHITECTURE.md`](../../ARCHITECTURE.md); the emotional-design half of step 9 merged
+> [`docs/architecture.md`](../architecture.md); the emotional-design half of step 9 merged
 > in v0.59.0. Step 11, the product name, was a founder call: the name stays.
 >
 > Kept for its reasoning, not its instructions.
@@ -17,16 +17,16 @@ Paste this into a fresh session in `/Users/eduardomuthmartinez/code/b2c-mobile-b
 
 Steps 1–5 (the directory migration) are **merged**: v0.52.0 → v0.56.0, PRs #78–#82.
 Every top-level directory now answers *who reads it*. What follows is everything
-ARCHITECTURE.md still describes but the layout does not yet do. Each step is
+docs/architecture.md still describes but the layout does not yet do. Each step is
 independently shippable — take them in order, or take one.
 
 ---
 
 ## Shared context (read once, applies to every step)
 
-Read `ARCHITECTURE.md` first. It is the north star, and where it and the layout
+Read `docs/architecture.md` first. It is the north star, and where it and the layout
 disagree, **the layout is what changes**. Deviating is allowed but must amend
-ARCHITECTURE.md in the same PR.
+docs/architecture.md in the same PR.
 
 Current shape, measured 2026-07-31 at `efa8532`:
 
@@ -181,7 +181,7 @@ Small step. Good warm-up. Do it after step 6 so the new layout gate covers the m
 
 ## Step 8 — HTML is generated, never authored
 
-ARCHITECTURE.md: *"Every page in `business/` renders from `state/`. Hand-authored
+docs/architecture.md: *"Every page in `business/` renders from `state/`. Hand-authored
 HTML twins go stale silently with no signal."*
 
 Eight HTML files sit at `business/` root. **None carries a generated-by marker.**
@@ -213,7 +213,7 @@ exactly the "words not work" failure the audit history keeps re-finding.
 
 ## Step 9 — merge the duplicate clusters
 
-ARCHITECTURE.md: *"Merge duplicates as you move, in the same commit. Moving
+docs/architecture.md: *"Merge duplicates as you move, in the same commit. Moving
 duplicated content into a tidy folder gives the duplication a nicer address."*
 The move happened; the merge did not. Two clusters remain.
 
@@ -226,20 +226,20 @@ playbook/experience/emotional-experience-design.md      29,617 B
 business/emotional-design/EMOTIONAL_DESIGN.md           28,813 B
 ```
 
-ARCHITECTURE.md says these restate the same citations. Read all four before
+docs/architecture.md says these restate the same citations. Read all four before
 deciding shape. Note the first three are all in one playbook domain and the
 fourth is a founder artifact — that boundary is real and should survive the
 merge. `check-reference-size`'s budget is 64KB/file, so a naive concatenation
 of the three playbook files would **break the budget** and need an index split.
 
 **Twelve experience cards** in `playbook/experience/experience-cards/`, indexed by
-`experience-cards.md`. ARCHITECTURE.md calls them "twelve near-identical card
+`experience-cards.md`. docs/architecture.md calls them "twelve near-identical card
 files". Determine whether the near-identity is boilerplate worth extracting into
 the index, or genuine per-card content. **Do not collapse them blindly** — the
 deck was deliberately split out of a ~200KB single file, and `check-reference-size`
 enforces that split.
 
-Related open decision, still unresolved in ARCHITECTURE.md: whether the twelve
+Related open decision, still unresolved in docs/architecture.md: whether the twelve
 technique names get plain-language founder equivalents or stay internal labels
 behind one umbrella term. Settle it here or explicitly defer it again.
 
@@ -247,7 +247,7 @@ behind one umbrella term. Settle it here or explicitly defer it again.
 
 ## Step 10 — `spine.md` and the `SKILL.md` collapse
 
-ARCHITECTURE.md's target layout names two things that do not exist yet:
+docs/architecture.md's target layout names two things that do not exist yet:
 
 ```
 SKILL.md      routing only — target ≤ 12KB, not 46KB
@@ -259,7 +259,7 @@ spine.md      the ordered walk through a launch; stages live here
 prose inside `SKILL.md`.
 
 The two are one job: extracting the ordered walk into `spine.md` is what pays for
-the `SKILL.md` reduction. ARCHITECTURE.md's rule is freeze-and-subtract — a new
+the `SKILL.md` reduction. docs/architecture.md's rule is freeze-and-subtract — a new
 entrypoint row is paid for by compressing or relocating existing text, never by
 raising the ceiling.
 
@@ -276,7 +276,7 @@ headroom the collapse just bought.
 
 ## Step 11 — the open decisions
 
-Two remain in ARCHITECTURE.md's "Open decisions". Both need the founder, not an
+Two remain in docs/architecture.md's "Open decisions". Both need the founder, not an
 agent, and neither blocks the steps above.
 
 - **The name.** The root directory is named for the product. Renaming costs a

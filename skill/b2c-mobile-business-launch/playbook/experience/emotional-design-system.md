@@ -79,7 +79,7 @@ The deck itself is [`experience-cards.md`](experience-cards.md) — its Card Rou
 which card to reach for when, and its Summary Table carries the thesis, 11-star level and
 bright-line guardrail per card. That index and the twelve card files under
 [`experience-cards/`](experience-cards.md) are the single source; a second copy of the same
-twelve rows here is the duplication ARCHITECTURE.md names, and it drifts silently because
+twelve rows here is the duplication docs/architecture.md names, and it drifts silently because
 nothing compares the two tables.
 
 **Deck coverage rationale.** The four required cards (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring) are strongest at 6-star and 7-star and operate primarily within a single session or the onboarding funnel. The eight additional cards fill five gaps: temporal momentum and return-visit drive (Endowed Progress, Streak and Loss Aversion, Fresh Start); memory and word-of-mouth formation (Peak-End); intrinsic and social motivation (Mastery and Status); identity anchoring (Identity and Self-Expression); and pre-conversion motivation and failure resilience (Reciprocity, Recovery and Trust Repair). No card in the deck duplicates another's mechanism.

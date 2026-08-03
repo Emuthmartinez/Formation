@@ -4,7 +4,7 @@ contact_links:
     url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/CONTRIBUTING.md
     about: How to install, run the audit, and open a PR that passes.
   - name: What each validator checks
-    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/docs/VALIDATORS.md
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/docs/validators.md
     about: Every gate, its flags, and the failure it exists to catch.
   - name: Report a security vulnerability
     url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/security/advisories/new

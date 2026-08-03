@@ -757,20 +757,20 @@ Reproduce the audit:
 
 ```bash
 # (1) must print nothing
-grep '^- \*\*Stopping condition:\*\*' docs/skill-workflow-loops.md \
+grep '^- \*\*Stopping condition:\*\*' docs/method/skill-workflow-loops.md \
   | grep -iE 'looks good|feels right|matches reality|evidence-backed|reconciles|is complete|are complete|seems|polished|good enough|until it'
 # (2) must print nothing (every stop carries a concrete anchor)
-grep '^- \*\*Stopping condition:\*\*' docs/skill-workflow-loops.md \
+grep '^- \*\*Stopping condition:\*\*' docs/method/skill-workflow-loops.md \
   | grep -vE 'check:|probe:|launchbench|audit:ci|validate:|render:|grep|diff|curl|exit 0|HTTP 200|PROJECT_STATE|lanes\.|\.md|\.yaml|asc |baseline/'
 
 # (3) must print nothing (every cited SKILL.md section still exists)
 SKILL=skill/b2c-mobile-business-launch/SKILL.md
 grep -ohE '`(Start Here|Lane Routing|Phase Spine|Always-On Contracts|Ground Rules|What Counts As Done|Autopilot Run Contract|Founder Question Contract|Prove It Before Calling It Done|Runtime Freshness Gate)`' \
-  docs/skill-workflow-loops.md | tr -d '`' | sort -u \
+  docs/method/skill-workflow-loops.md | tr -d '`' | sort -u \
   | while read -r s; do grep -q "^#\{2,3\} $s$" "$SKILL" || echo "DEAD SECTION: $s"; done
 
 # (4) must print nothing (every cited reference exists on disk)
-grep -ohE 'references/[a-z0-9-]+\.md' docs/skill-workflow-loops.md | sort -u \
+grep -ohE 'references/[a-z0-9-]+\.md' docs/method/skill-workflow-loops.md | sort -u \
   | while read -r r; do [ -f "skill/b2c-mobile-business-launch/$r" ] || echo "MISSING: $r"; done
 ```
 

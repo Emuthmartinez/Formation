@@ -2,7 +2,7 @@
  * render-artifact-page.ts — one page shell for every artifact page rendered from
  * a Markdown source, plus the block-to-HTML pass.
  *
- * ARCHITECTURE.md: "HTML is generated, never authored. Every page in business/
+ * docs/architecture.md: "HTML is generated, never authored. Every page in business/
  * renders from state. Hand-authored HTML twins go stale silently with no signal."
  * These four pages were the twins. Their drift was not cosmetic — security-review
  * claimed in its own opening line to cover sections it had dropped, store-console

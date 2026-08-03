@@ -6,7 +6,7 @@
 >
 > One item the Resolution Log left open has since closed. Open Question 1 asked whether LaunchBench should stay a definition lint or also execute scenarios against an agent; the answer was both. `npm run launchbench` lints the definitions inside the PR gate, and `npm run evals:behavioral` runs flagged scenarios against a live agent outside it (needs `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, or `--use-profile`).
 >
-> This file lives under `docs/history/` and is kept out of `README.md` deliberately. A dated audit linked from the front door reads as current, and the filename carries the version so a reader knows before opening it. For what the repo enforces today see [`docs/VALIDATORS.md`](../VALIDATORS.md); for the maintainer map see [`AGENTS.md`](../../AGENTS.md).
+> This file lives under `docs/history/` and is kept out of `README.md` deliberately. A dated audit linked from the front door reads as current, and the filename carries the version so a reader knows before opening it. For what the repo enforces today see [`docs/validators.md`](../validators.md); for the maintainer map see [`AGENTS.md`](../../AGENTS.md).
 
 Date: 2026-06-09 · Auditor: principal-level review session · Scope: full repo at commit `e9ad92e` · Method: read-only analysis; all repo gates were executed to verify claims (`tsc --noEmit`, `audit:links`, `check:source-registry`, `launchbench`, `test:validators` — all green).
 

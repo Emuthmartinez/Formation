@@ -68,8 +68,8 @@ Recommended schemas:
 
 The smallest useful experiment is a static local UI backed by a JSON fixture:
 
-- `docs/business-control-plane-prototype.html` renders the portfolio and drill-down UI.
-- `docs/fixtures/business-control-plane-workspace.json` provides the workspace state.
+- `docs/prototypes/business-control-plane-prototype.html` renders the portfolio and drill-down UI.
+- `docs/prototypes/fixtures/business-control-plane-workspace.json` provides the workspace state.
 - `skill/b2c-mobile-business-launch/state/schema/workspace.schema.json` documents the first portable read-model schema.
 
 After that, the next experiment should replace the fixture with an adapter that reads:

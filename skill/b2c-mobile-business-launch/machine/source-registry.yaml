@@ -1038,7 +1038,7 @@ sources:
     refresh_cadence_days: 7
     owner: source-freshness
     locations:
-      - docs/remotion-content-assets-plan.html
+      - docs/prototypes/remotion-content-assets-plan.html
     notes: Auto-discovered from recently added repository content.
   - id: github-com-remotion-dev-skills
     name: github.com
@@ -1047,7 +1047,7 @@ sources:
     refresh_cadence_days: 7
     owner: source-freshness
     locations:
-      - docs/remotion-content-assets-plan.html
+      - docs/prototypes/remotion-content-assets-plan.html
     notes: Auto-discovered from recently added repository content.
   - id: github-com-rorkai-app-store-connect-cli
     name: github.com
@@ -1275,7 +1275,7 @@ sources:
     refresh_cadence_days: 7
     owner: source-freshness
     locations:
-      - docs/remotion-content-assets-plan.html
+      - docs/prototypes/remotion-content-assets-plan.html
     notes: Auto-discovered from recently added repository content.
   - id: resend-com-docs
     name: resend.com
@@ -2162,8 +2162,8 @@ sources:
     refresh_cadence_days: 90
     owner: maintainer
     locations:
-      - SECURITY.md
-      - CODE_OF_CONDUCT.md
+      - .github/SECURITY.md
+      - .github/CODE_OF_CONDUCT.md
       - .github/ISSUE_TEMPLATE/config.yml
     notes: The private disclosure channel for both security reports and code-of-conduct reports. Requires GitHub private vulnerability reporting to stay enabled on the repo.
   - id: github-repo-b2c-launch-skill-contributing
@@ -2177,9 +2177,9 @@ sources:
       - .github/ISSUE_TEMPLATE/feature_request.yml
     notes: Issue forms cannot use repo-relative links, so they need the absolute blob URL.
   - id: github-repo-b2c-launch-skill-validators-doc
-    name: This repository, docs/VALIDATORS.md on main
+    name: This repository, docs/validators.md on main
     source_type: repository
-    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/docs/VALIDATORS.md
+    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/docs/validators.md
     refresh_cadence_days: 90
     owner: maintainer
     locations:
@@ -2228,7 +2228,7 @@ sources:
     refresh_cadence_days: 180
     owner: maintainer
     locations:
-      - CODE_OF_CONDUCT.md
+      - .github/CODE_OF_CONDUCT.md
     notes: The basis this repo's code of conduct is adapted from. Wording and reporting process were rewritten for a single-maintainer project, so an upstream revision is informational rather than a required sync.
   - id: github-com-coreyhaines31-marketingskills
     name: github.com

@@ -85,7 +85,7 @@ Artifacts land in your app repo, not in this one.
 | **Analytics and copy** | PostHog event catalog, attribution contract, and a writing gate over every word shipped |
 | **Engineering and proof** | Business-repo `AGENTS.md`, device tests, orchestration plan, `PRODUCTION_READINESS.md` |
 
-Each area routes through its own reference and its own validator. [`docs/VALIDATORS.md`](docs/VALIDATORS.md) maps every gate to what it checks.
+Each area routes through its own reference and its own validator. [`docs/validators.md`](docs/validators.md) maps every gate to what it checks.
 
 ## How it stays honest
 
@@ -115,7 +115,7 @@ npm run validate:launch-state -- --root /path/to/app
 npm run launchbench            # known failure-mode scenarios
 ```
 
-`check:package-parity` fails when a `check:*` or `validate:*` script is neither an audit step nor explicitly excluded with a reason, so gates cannot be quietly dropped from the pipeline. The full command and script reference is in [`docs/VALIDATORS.md`](docs/VALIDATORS.md).
+`check:package-parity` fails when a `check:*` or `validate:*` script is neither an audit step nor explicitly excluded with a reason, so gates cannot be quietly dropped from the pipeline. The full command and script reference is in [`docs/validators.md`](docs/validators.md).
 
 Before broad launch or design work, compare the installed runtime against source:
 
@@ -148,8 +148,13 @@ skill/b2c-mobile-business-launch/
   design-system/        # shipped design tokens
   render/               # React/Vite Design Room renderer
   agents/               # OpenAI connector manifest
-docs/VALIDATORS.md      # full validator reference
-ARCHITECTURE.md         # the target layout every refactor moves toward
+docs/
+  architecture.md       # the target layout every refactor moves toward
+  validators.md         # full validator reference
+  method/               # how the skill's own workflow loops were designed
+  prototypes/           # standalone HTML proofs and their fixtures
+  brainstorms/          # ideas still being weighed
+  history/              # dated, point-in-time records
 AGENTS.md               # maintainer guide and repo map
 ```
 
@@ -161,4 +166,4 @@ The house rule: when a mistake can recur, tighten a validator or add a LaunchBen
 
 ## Security, conduct, and license
 
-Report a vulnerability in this repo's validators, CI, or supply chain through [`SECURITY.md`](SECURITY.md). Participation is governed by [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Licensed under [MIT](LICENSE).
+Report a vulnerability in this repo's validators, CI, or supply chain through [`.github/SECURITY.md`](.github/SECURITY.md). Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Licensed under [MIT](LICENSE).
