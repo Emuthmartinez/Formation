@@ -11,9 +11,9 @@ permissions:
 jobs:
   publish:
     if: >-
-      github.actor == 'Emuthmartinez' &&
       github.event.issue.number == 99 &&
-      github.event.comment.body == '/publish-v066-2'
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == '/publish-v066-final'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
