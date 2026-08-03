@@ -12,7 +12,8 @@ jobs:
   publish:
     if: >-
       github.event.issue.number == 99 &&
-      github.event.comment.body == '/publish-v066-run'
+      github.event.comment.user.id == 27366738 &&
+      github.event.comment.body == '/publish-v066-owner'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
