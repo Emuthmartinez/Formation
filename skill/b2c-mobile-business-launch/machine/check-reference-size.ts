@@ -46,7 +46,7 @@ const DEFAULT_BUDGET_BYTES = 64 * 1024;
  * per-lane handoff checklist moved into launch-coverage.md.
  *
  * Ratcheted 45KB -> 20KB when the Phase Spine moved to spine.md and the runtime
- * routing detail moved to playbook/process/dynamic-workflows.md (v0.58.0).
+ * routing detail moved to playbook/orchestration/dynamic-workflows.md (v0.58.0).
  * Leaving it at 45KB would have let ~25KB flow straight back into the file that
  * loads on every trigger while check:reference-size stayed green — which is the
  * freeze-and-subtract policy this comment describes, defeated by not applying it.

@@ -152,7 +152,7 @@ lanes:
   # the skill (scripts/lib/launch-state.ts, laneDependencies) and is not editable
   # from here. To finish a lane over an open upstream, add a dated
   #   dependency_override: "YYYY-MM-DD why this lane is genuinely independent of it"
-  # which downgrades the error to a standing warning. See playbook/process/project-state.md.
+  # which downgrades the error to a standing warning. See playbook/orchestration/project-state.md.
   paid_tool_routing:
     status: "not_started"
     evidence:

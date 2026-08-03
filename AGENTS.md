@@ -17,7 +17,7 @@ Structural work follows [`docs/architecture.md`](docs/architecture.md), the targ
 - `CONTRIBUTING.md`, `.github/CODE_OF_CONDUCT.md`, `.github/SECURITY.md`, `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`: contributor-facing surfaces. `.github/SECURITY.md` covers this repo's validators, workflows, and dependency chain, and is a different document from the shipped `business/SECURITY.md` security release plan.
 - `skill/b2c-mobile-business-launch/SKILL.md`: skill entrypoint and progressive-disclosure routing.
 - `skill/b2c-mobile-business-launch/skill-version.json`: installed-runtime freshness manifest.
-- `skill/b2c-mobile-business-launch/playbook/`: agent knowledge grouped by area of the business, one folder per domain with its own `README.md` index.
+- `skill/b2c-mobile-business-launch/playbook/`: agent knowledge grouped by area of the business, one folder per domain with its own `README.md` index. `process/` is sequencing and proving a launch; `orchestration/` is driving the work (state, autonomy, subagents, workflows, engineering routing).
 - `skill/b2c-mobile-business-launch/state/`: Design Room seed state, theme tokens, and JSON schema.
 - `skill/b2c-mobile-business-launch/render/`: React/Vite Design Room renderer; `scripts/render-design-room.ts` also writes the static fallback.
 - `skill/b2c-mobile-business-launch/business/`: reusable launch artifacts copied into app repos.

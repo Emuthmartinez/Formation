@@ -31,7 +31,7 @@ Record `project.kickoff_date` (ISO) when orient completes. Pre-build work — re
 
 ## Lane Dependency Contract
 
-Lanes are not independent. `SKILL.md`'s Operating Posture rule — "Lock phase outputs before depending on them. No design from an unlocked spec, no ASO from an unlocked name" — and the Flow Gates in [`flow-traceability.md`](flow-traceability.md) describe real edges between them. `check:lane-coverage` enforces those edges mechanically:
+Lanes are not independent. `SKILL.md`'s Operating Posture rule — "Lock phase outputs before depending on them. No design from an unlocked spec, no ASO from an unlocked name" — and the Flow Gates in [`flow-traceability.md`](../process/flow-traceability.md) describe real edges between them. `check:lane-coverage` enforces those edges mechanically:
 
 **A lane may not be `done` while an upstream lane it depends on is `not_started`, `partial`, or `blocked`.**
 
