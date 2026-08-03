@@ -38,6 +38,10 @@ Today *kind* is the top level, *domain* is nowhere, and *stage* exists only as p
   SKILL.md                 routing only — ceiling ratchets down, see below
   spine.md                 the ordered walk through a launch; stages live here
 
+  graph/                    canonical typed semantic definitions
+    workflows/              trigger · action · proof · memory · stopping condition
+    generated/              JSON, Markdown, Mermaid, and context-budget projections
+
   playbook/                agent knowledge, grouped by domain
     research/  product/  experience/  design/  words/  engineering/
     store/  money/  growth/  data/  trust/  operations/
@@ -61,6 +65,23 @@ Three of those domains are easy to confuse and are deliberately separate. **`ope
 `machine/` is narrower than "everything self-referential": it is only what the maintainer touches to keep the skill green — versioning, the eval harness, the source registry, parity, fixtures. A file about *how a launch is run* is method and belongs in `playbook/process/` or `playbook/orchestration/`, not here. Mixing the two is what made "the skill talking about itself" measure at 22% when much of that is really the method the skill exists to carry.
 
 Each domain folder carries its own `README.md` index rather than a sibling `<domain>.md`. A folder that explains itself on its front page needs no convention to be learned, and it keeps the domain self-contained when it moves.
+
+
+## Typed definition graph
+
+The directory migration solved where humans and agents look. The typed definition graph solves which concepts exist and how they relate. It is authoritative for business areas, domains, workflows, context packs, phases, readiness lanes, artifacts, gates, operators, and providers.
+
+The graph has three deliberately separate layers:
+
+1. **Definition graph** — immutable skill-owned topology under `graph/`.
+2. **Business instance state** — mutable status, evidence, blockers, approvals, decisions, and selected provider routes in `PROJECT_STATE.yaml` and business artifacts.
+3. **Execution state** — session assignments, checkpoints, file ownership, retries, and integration proof in orchestration state.
+
+Stable IDs such as `workflow.design.design-room-state-mutate-version-render` and `operator.design-guru` are identities. Paths are attributes. A file can move without becoming a different workflow or operator.
+
+`SKILL.md` and `spine.md` remain direct, shallow runtime entrypoints. Only their bounded routing tables are generated from the graph. The graph does not add another required context hop, introduce a graph database, or replace the deterministic TypeScript validators.
+
+`check:skill-graph` rejects duplicate or unknown IDs, cycles, missing proof/memory/stopping conditions, unrouted references, unregistered gates, operator-prompt drift, and stale projections.
 
 ## The rules that make it hold
 

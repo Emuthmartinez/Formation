@@ -1,6 +1,12 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
+import {
+  PHASE_ORIENT_LAST_INDEX as graphOrientLastIndex,
+  laneDependencies as graphLaneDependencies,
+  phaseOrder as graphPhaseOrder,
+  requiredLanes as graphRequiredLanes,
+} from "../../graph/runtime.js";
 
 export type Severity = "error" | "warning";
 
@@ -29,31 +35,10 @@ export const statusValues = new Set(["done", "partial", "blocked", "not_needed",
  * The ordering mirrors launch-phases.md.  Phases not listed here fall into the
  * "orient" bucket (i.e. no coverage enforcement yet).
  */
-export const phaseOrder: string[] = [
-  "phase_0_orient",
-  "phase_0a",
-  "phase_0b",
-  "phase_0c",
-  "phase_1",
-  "phase_1b",
-  "phase_1c",
-  "phase_1d",
-  "phase_1e",
-  "phase_1f",
-  "phase_1g",
-  "phase_2",
-  "phase_3",
-  "phase_3b",
-  "phase_4",
-  "phase_5",
-  "phase_5b",
-  "phase_5c",
-  "phase_6",
-  "phase_6b",
-];
+export const phaseOrder: string[] = [...graphPhaseOrder];
 
 /** Index in phaseOrder at which the orient/scaffold window ends. */
-export const PHASE_ORIENT_LAST_INDEX = 3; // phase_0c is the last "orient" phase
+export const PHASE_ORIENT_LAST_INDEX = graphOrientLastIndex;
 
 /**
  * Returns true when the project is past the orient/scaffold phase window and
@@ -108,30 +93,7 @@ export function resolveLaunchScope(scopeValue: string | undefined, tierValue: st
   return { raw, normalized: launchScopeAliases[raw] ?? raw };
 }
 
-export const requiredLanes = [
-  "paid_tool_routing",
-  "secrets",
-  "security",
-  "research",
-  "traceability",
-  "experience",
-  "product",
-  "design",
-  "emotional_design",
-  "content_assets",
-  "analytics_attribution",
-  "paid_user_acquisition",
-  "onboarding",
-  "revenue",
-  "store_console",
-  "apple_signing",
-  "privacy_legal",
-  "email",
-  "orchestration",
-  "engineering",
-  "growth",
-  "post_launch_ops",
-];
+export const requiredLanes: string[] = [...graphRequiredLanes];
 
 /**
  * Lane dependency edges — the machine-readable form of "Lock phase outputs
@@ -152,50 +114,9 @@ export const requiredLanes = [
  * check-lane-coverage.ts). Working a lane ahead of its upstream is fine and
  * common; declaring it finished on an unlocked upstream is the drift bug.
  */
-export const laneDependencies: Record<string, string[]> = {
-  // Foundational lanes — no upstream.
-  paid_tool_routing: [],
-  secrets: [],
-  security: [],
-  apple_signing: [],
-  orchestration: [],
-
-  // Evidence spine: paid-tool routing decides what produced the evidence.
-  research: ["paid_tool_routing"],
-  // Flow Gate "Research To Spec" requires the 11-star ladder off research.
-  experience: ["research"],
-  // eleven-star-experience.md: the ladder lands before SPEC.md is treated as ready.
-  product: ["experience"],
-
-  // Phase 1b — the event catalog is named off the locked spec surfaces.
-  analytics_attribution: ["product"],
-  traceability: ["product"],
-
-  // analytics-attribution.md: events named in these docs must exist in the
-  // ANALYTICS.md catalog first (already enforced per-event by
-  // check-analytics-catalog; this is the lane-level form).
-  emotional_design: ["experience", "analytics_attribution"],
-  onboarding: ["analytics_attribution"],
-  paid_user_acquisition: ["analytics_attribution"],
-  growth: ["analytics_attribution"],
-
-  // Flow Gate "Spec To Brand And Design".
-  design: ["product"],
-  revenue: ["product"],
-  privacy_legal: ["product"],
-
-  // Surfaces that carry design tokens / brand vocabulary downstream.
-  content_assets: ["design"],
-  email: ["design"],
-  // SKILL.md Operating Posture: "no ASO from an unlocked name".
-  store_console: ["design"],
-
-  // Flow Gate "Design To Build" — needs the locked design plus TECH_SPEC.
-  engineering: ["design", "traceability"],
-
-  // post-launch-operations.md: operations begin on a shipped app.
-  post_launch_ops: ["engineering"],
-};
+export const laneDependencies: Record<string, string[]> = Object.fromEntries(
+  Object.entries(graphLaneDependencies).map(([lane, dependencies]) => [lane, [...dependencies]]),
+);
 
 /**
  * Upstream statuses that satisfy a dependency. `not_needed` and `deferred` are

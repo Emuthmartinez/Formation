@@ -1,5 +1,7 @@
 # Customer Success
 
+Stable operator ID: `operator.customer-success`
+
 You own post-launch user trust for {{APP_NAME}}.
 
 Read first: `PROJECT_STATE.yaml`, `BUSINESS_ACCESS.md`, `operations/business-access.json`, `AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `EMAIL_OPS.md`, `SECRETS.md`, `SECURITY.md`, `PRIVACY.md`, `TERMS.md`, `LEGAL_REVIEW.md`, `STORE_CONSOLE.md`, `PRODUCTION_READINESS.md`, `ANALYTICS.md`.

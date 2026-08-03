@@ -1,0 +1,216 @@
+{
+  "schemaVersion": "1.0.0",
+  "skillVersion": "0.65.0",
+  "counts": {
+    "areas": 6,
+    "domains": 15,
+    "workflows": 57,
+    "contextPacks": 15,
+    "references": 110,
+    "phases": 20,
+    "lanes": 22,
+    "artifacts": 88,
+    "gates": 78,
+    "operators": 11,
+    "providers": 21
+  },
+  "packs": [
+    {
+      "id": "context.process",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 108200,
+      "availableReferenceCount": 18,
+      "availableBytes": 340867,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/process/launch-coverage.md",
+        "playbook/process/launch-phases.md"
+      ]
+    },
+    {
+      "id": "context.orchestration",
+      "strategy": "load-all",
+      "initialReferenceCount": 3,
+      "initialBytes": 32530,
+      "availableReferenceCount": 5,
+      "availableBytes": 57478,
+      "selectionRule": "Load the entry set together, then select any additional reference whose trigger matches.",
+      "entryPaths": [
+        "playbook/orchestration/autonomy-modes.md",
+        "playbook/orchestration/parallel-agent-orchestration.md",
+        "playbook/orchestration/project-state.md"
+      ]
+    },
+    {
+      "id": "context.operations",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 30353,
+      "availableReferenceCount": 7,
+      "availableBytes": 110428,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/operations/founder-zero-operator.md",
+        "playbook/operations/frontier-agent-operations.md"
+      ]
+    },
+    {
+      "id": "context.research",
+      "strategy": "progressive",
+      "initialReferenceCount": 1,
+      "initialBytes": 10544,
+      "availableReferenceCount": 1,
+      "availableBytes": 10544,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/research/localization-market-research.md"
+      ]
+    },
+    {
+      "id": "context.product",
+      "strategy": "select-one",
+      "initialReferenceCount": 5,
+      "initialBytes": 57821,
+      "availableReferenceCount": 5,
+      "availableBytes": 57821,
+      "selectionRule": "Select the one reference matching the product or task shape; do not preload alternatives.",
+      "entryPaths": [
+        "playbook/product/ai-chat-companion.md",
+        "playbook/product/habit-tracker.md",
+        "playbook/product/photo-ai-media.md",
+        "playbook/product/product-moat.md",
+        "playbook/product/social-network.md"
+      ]
+    },
+    {
+      "id": "context.experience",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 44896,
+      "availableReferenceCount": 21,
+      "availableBytes": 240785,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/experience/eleven-star-experience.md",
+        "playbook/experience/emotional-design-system.md"
+      ]
+    },
+    {
+      "id": "context.design",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 29760,
+      "availableReferenceCount": 9,
+      "availableBytes": 102335,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/design/design-room.md",
+        "playbook/design/design-visual-system.md"
+      ]
+    },
+    {
+      "id": "context.words",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 37245,
+      "availableReferenceCount": 2,
+      "availableBytes": 37245,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/words/conversion-copy.md",
+        "playbook/words/no-slop-writing.md"
+      ]
+    },
+    {
+      "id": "context.engineering",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 43313,
+      "availableReferenceCount": 5,
+      "availableBytes": 109033,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/engineering/backend-data-contract.md",
+        "playbook/engineering/engineering-orchestration.md"
+      ]
+    },
+    {
+      "id": "context.store",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 58324,
+      "availableReferenceCount": 6,
+      "availableBytes": 157585,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/store/aso-store-ops.md",
+        "playbook/store/store-console-workflow.md"
+      ]
+    },
+    {
+      "id": "context.money",
+      "strategy": "progressive",
+      "initialReferenceCount": 1,
+      "initialBytes": 40061,
+      "availableReferenceCount": 1,
+      "availableBytes": 40061,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/money/revenue-monetization.md"
+      ]
+    },
+    {
+      "id": "context.growth",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 31878,
+      "availableReferenceCount": 8,
+      "availableBytes": 124109,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/growth/paid-user-acquisition.md",
+        "playbook/growth/viral-growth-loops.md"
+      ]
+    },
+    {
+      "id": "context.data",
+      "strategy": "progressive",
+      "initialReferenceCount": 1,
+      "initialBytes": 23167,
+      "availableReferenceCount": 1,
+      "availableBytes": 23167,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/data/analytics-attribution.md"
+      ]
+    },
+    {
+      "id": "context.trust",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 20406,
+      "availableReferenceCount": 2,
+      "availableBytes": 20406,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "playbook/trust/privacy-terms.md",
+        "playbook/trust/security-release-hardening.md"
+      ]
+    },
+    {
+      "id": "context.machine",
+      "strategy": "progressive",
+      "initialReferenceCount": 2,
+      "initialBytes": 17801,
+      "availableReferenceCount": 4,
+      "availableBytes": 135928,
+      "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
+      "entryPaths": [
+        "machine/launchbench-evals.md",
+        "machine/skill-versioning.md"
+      ]
+    }
+  ],
+  "sharedReferences": []
+}

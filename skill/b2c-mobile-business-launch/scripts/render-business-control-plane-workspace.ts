@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Ajv2020, type AnySchema, type ErrorObject } from "ajv/dist/2020.js";
+import { operators as operatorDefinitions } from "../graph/operators.js";
 import {
   asArray,
   asBoolean,
@@ -31,7 +32,7 @@ interface Args {
 }
 
 interface Workspace {
-  schemaVersion: "0.1.0";
+  schemaVersion: "0.2.0";
   updatedAt: string;
   product: {
     name: string;
@@ -68,11 +69,14 @@ interface ReadinessItem {
 }
 
 interface AgentLane {
+  id: string;
   name: string;
+  kind: "human" | "agent" | "system";
   summary: string;
 }
 
 interface WorkspaceLane {
+  id: string;
   title: string;
   summary: string;
   path: string;
@@ -226,7 +230,7 @@ function buildWorkspace(pairs: Array<{ businessState: Record<string, unknown>; p
       .pop() ?? new Date().toISOString().slice(0, 10);
 
   return {
-    schemaVersion: "0.1.0",
+    schemaVersion: "0.2.0",
     updatedAt,
     product: {
       name: "Business Control",
@@ -332,25 +336,18 @@ function agentLanes(
   const designRefs = asArray(designPanel?.stateRefs)
     .map((item) => asString(item))
     .filter((item): item is string => Boolean(item));
-
-  return [
-    {
-      name: "Orchestrator",
-      summary: `Owns integration through ${integrationOwner} and reconciles lane outputs into source state.`,
-    },
-    {
-      name: "Continuity sentinel",
-      summary: `Reviews ${sourceFiles.slice(0, 4).join(", ") || "continuity source files"} before selecting work.`,
-    },
-    {
-      name: "Design Room scout",
-      summary: `Audits ${designRefs.join(", ") || "design state"} and rendered Design Room proof.`,
-    },
-    {
-      name: "Launch lane auditor",
-      summary: `Checks ${launchLanes.length} launch lanes and surfaces ${blockedCount} blocked lane(s).`,
-    },
-  ];
+  const summaries: Record<string, string> = {
+    "operator.orchestrator": `Owns integration through ${integrationOwner} and reconstructs state from ${sourceFiles.slice(0, 4).join(", ") || "the continuity source set"}.`,
+    "operator.product-leader": `Audits ${launchLanes.length} launch lanes and keeps product, activation, and retention decisions tied to evidence.`,
+    "operator.design-guru": `Audits ${designRefs.join(", ") || "design state"} and rendered Design Room proof.`,
+    "operator.engineering-leader": `Owns build and provider proof while surfacing ${blockedCount} blocked launch lane(s).`,
+  };
+  const ids = ["operator.orchestrator", "operator.product-leader", "operator.design-guru", "operator.engineering-leader"];
+  return ids.map((id) => {
+    const definition = operatorDefinitions.find((operator) => operator.id === id);
+    if (!definition) throw new Error(`Unknown Control Plane operator ${id}`);
+    return { id, name: definition.name, kind: definition.kind, summary: summaries[id] ?? definition.goal };
+  });
 }
 
 function workspaceLanes(
@@ -367,7 +364,9 @@ function workspaceLanes(
       .filter((item): item is string => Boolean(item));
     const panelStatus = asString(panel.status) || "planned";
     const name = asString(panel.name) || titleize(asString(panel.id) || "panel");
+    const panelId = asString(panel.id) || slugify(name);
     return {
+      id: `panel.${panelId}`,
       title: name,
       summary: `${name} is ${statusTag(panelStatus)} and reads ${stateRefs.join(", ") || "business state"}.`,
       path: renderedArtifacts[0] || stateRefs[0] || "state/business.json",
@@ -383,18 +382,21 @@ function workspaceLanes(
   return [
     ...panels,
     {
+      id: "view.launch-cockpit",
       title: "Launch Cockpit",
       summary: `${doneCount} launch lane(s) done, ${blockedCount} blocked, ${launchLanes.length} tracked.`,
       path: "launch-cockpit.html",
       status: blockedCount > 0 ? "Gate" : "Watch",
     },
     {
+      id: "view.continuity",
       title: "Continuity",
       summary: nextAction,
       path: "PROJECT_STATE.yaml",
       status: asBoolean(getPath(projectState, "continuity.git_status_reviewed")) ? "Ready" : "Gate",
     },
     {
+      id: "view.failure-cards",
       title: "Failure Cards",
       summary: `${failureCards.length} active failure card(s) tracked for future agents.`,
       path: "FAILURE_CARDS.md",

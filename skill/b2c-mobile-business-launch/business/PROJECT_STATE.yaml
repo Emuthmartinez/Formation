@@ -1,4 +1,5 @@
 schema_version: "1"
+definition_graph_version: "1.0.0"
 updated_at: "2026-07-12"
 # The narrated update the founder reads first, above any table, on launch-cockpit.html.
 # Write these in plain language, in the second person, with no lane ids, phase codes, or

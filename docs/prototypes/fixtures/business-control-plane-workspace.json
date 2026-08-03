@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "0.1.0",
+  "schemaVersion": "0.2.0",
   "updatedAt": "2026-05-31",
   "product": {
     "name": "Business Control",
@@ -15,31 +15,123 @@
       "mark": "SD",
       "subtitle": "A mobile launch lane with Design Room, Launch Cockpit, onboarding proof, App Store tasks, attribution, and retention work in one local workspace.",
       "metrics": [
-        { "label": "Stage", "value": "Beta", "note": "TestFlight + funnel" },
-        { "label": "Artifacts", "value": "18", "note": "docs, prompts, renderers" },
-        { "label": "Risk", "value": "2", "note": "provider proof + continuity" },
-        { "label": "Next lane", "value": "ASC", "note": "store proof" }
+        {
+          "label": "Stage",
+          "value": "Beta",
+          "note": "TestFlight + funnel"
+        },
+        {
+          "label": "Artifacts",
+          "value": "18",
+          "note": "docs, prompts, renderers"
+        },
+        {
+          "label": "Risk",
+          "value": "2",
+          "note": "provider proof + continuity"
+        },
+        {
+          "label": "Next lane",
+          "value": "ASC",
+          "note": "store proof"
+        }
       ],
       "readiness": [
-        { "status": "green", "label": "PROJECT_STATE.yaml is current", "tag": "Fresh" },
-        { "status": "green", "label": "Design Room render exists", "tag": "Ready" },
-        { "status": "amber", "label": "PostHog attribution proof", "tag": "Founder" },
-        { "status": "amber", "label": "Continuity drift eval", "tag": "Needed" },
-        { "status": "green", "label": "Subagent routing required", "tag": "Enforced" }
+        {
+          "status": "green",
+          "label": "PROJECT_STATE.yaml is current",
+          "tag": "Fresh"
+        },
+        {
+          "status": "green",
+          "label": "Design Room render exists",
+          "tag": "Ready"
+        },
+        {
+          "status": "amber",
+          "label": "PostHog attribution proof",
+          "tag": "Founder"
+        },
+        {
+          "status": "amber",
+          "label": "Continuity drift eval",
+          "tag": "Needed"
+        },
+        {
+          "status": "green",
+          "label": "Subagent routing required",
+          "tag": "Enforced"
+        }
       ],
       "agents": [
-        { "name": "Design Room scout", "summary": "Audits state, theme tokens, screenshots, and visual proof." },
-        { "name": "Store Ops auditor", "summary": "Checks App Store evidence, What to Test, screenshots, and release notes." },
-        { "name": "Continuity sentinel", "summary": "Compares handoff, current state, git, and installed runtime before work starts." },
-        { "name": "Revenue analyst", "summary": "Reviews pricing, RevenueCat state, provider proof, and paywall claims." }
+        {
+          "name": "Design Room scout",
+          "summary": "Audits state, theme tokens, screenshots, and visual proof.",
+          "id": "operator.design-guru",
+          "kind": "agent"
+        },
+        {
+          "name": "Store Ops auditor",
+          "summary": "Checks App Store evidence, What to Test, screenshots, and release notes.",
+          "id": "operator.marketing-guru",
+          "kind": "agent"
+        },
+        {
+          "name": "Continuity sentinel",
+          "summary": "Compares handoff, current state, git, and installed runtime before work starts.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Revenue analyst",
+          "summary": "Reviews pricing, RevenueCat state, provider proof, and paywall claims.",
+          "id": "operator.engineering-leader",
+          "kind": "agent"
+        }
       ],
       "lanes": [
-        { "title": "Design Room", "summary": "Review product, market, audience, promise, screenshots, and visual direction from state files.", "path": "design-room.html", "status": "Ready" },
-        { "title": "Launch Cockpit", "summary": "See launch stage, blockers, milestones, provider proof, and next agent actions.", "path": "launch-cockpit.html", "status": "Ready" },
-        { "title": "Store Ops", "summary": "Inspect ASC metadata, screenshots, TestFlight notes, and release-readiness proof.", "path": "business/store/", "status": "Watch" },
-        { "title": "Growth", "summary": "Review viral loops, referral assets, paid UA notes, and source freshness.", "path": "references/PAID_UA.md", "status": "Draft" },
-        { "title": "Analytics", "summary": "Check PostHog event contract, attribution status, retention events, and red/yellow gates.", "path": "scripts/check-provider-proof.ts", "status": "Gate" },
-        { "title": "Failure Cards", "summary": "Known misses and eval-backed regressions future agents should avoid.", "path": "evals/launchbench/", "status": "Active" }
+        {
+          "title": "Design Room",
+          "summary": "Review product, market, audience, promise, screenshots, and visual direction from state files.",
+          "path": "design-room.html",
+          "status": "Ready",
+          "id": "panel.design-room"
+        },
+        {
+          "title": "Launch Cockpit",
+          "summary": "See launch stage, blockers, milestones, provider proof, and next agent actions.",
+          "path": "launch-cockpit.html",
+          "status": "Ready",
+          "id": "view.launch-cockpit"
+        },
+        {
+          "title": "Store Ops",
+          "summary": "Inspect ASC metadata, screenshots, TestFlight notes, and release-readiness proof.",
+          "path": "business/store/",
+          "status": "Watch",
+          "id": "panel.store-ops"
+        },
+        {
+          "title": "Growth",
+          "summary": "Review viral loops, referral assets, paid UA notes, and source freshness.",
+          "path": "references/PAID_UA.md",
+          "status": "Draft",
+          "id": "panel.growth"
+        },
+        {
+          "title": "Analytics",
+          "summary": "Check PostHog event contract, attribution status, retention events, and red/yellow gates.",
+          "path": "scripts/check-provider-proof.ts",
+          "status": "Gate",
+          "id": "panel.analytics"
+        },
+        {
+          "title": "Failure Cards",
+          "summary": "Known misses and eval-backed regressions future agents should avoid.",
+          "path": "evals/launchbench/",
+          "status": "Active",
+          "id": "view.failure-cards"
+        }
       ]
     },
     {
@@ -51,31 +143,123 @@
       "mark": "O8",
       "subtitle": "A focused app-control workspace for app audit findings, native build status, RevenueCat state, onboarding, and launch follow-through.",
       "metrics": [
-        { "label": "Stage", "value": "QA", "note": "native proof" },
-        { "label": "Artifacts", "value": "12", "note": "audit + app docs" },
-        { "label": "Risk", "value": "1", "note": "store metadata" },
-        { "label": "Next lane", "value": "Build", "note": "simulator proof" }
+        {
+          "label": "Stage",
+          "value": "QA",
+          "note": "native proof"
+        },
+        {
+          "label": "Artifacts",
+          "value": "12",
+          "note": "audit + app docs"
+        },
+        {
+          "label": "Risk",
+          "value": "1",
+          "note": "store metadata"
+        },
+        {
+          "label": "Next lane",
+          "value": "Build",
+          "note": "simulator proof"
+        }
       ],
       "readiness": [
-        { "status": "green", "label": "Native repo mapped", "tag": "Ready" },
-        { "status": "green", "label": "Audit notes attached", "tag": "Ready" },
-        { "status": "amber", "label": "RevenueCat proof", "tag": "Watch" },
-        { "status": "green", "label": "Build lane known", "tag": "Ready" },
-        { "status": "amber", "label": "Store copy refresh", "tag": "Needed" }
+        {
+          "status": "green",
+          "label": "Native repo mapped",
+          "tag": "Ready"
+        },
+        {
+          "status": "green",
+          "label": "Audit notes attached",
+          "tag": "Ready"
+        },
+        {
+          "status": "amber",
+          "label": "RevenueCat proof",
+          "tag": "Watch"
+        },
+        {
+          "status": "green",
+          "label": "Build lane known",
+          "tag": "Ready"
+        },
+        {
+          "status": "amber",
+          "label": "Store copy refresh",
+          "tag": "Needed"
+        }
       ],
       "agents": [
-        { "name": "Native app auditor", "summary": "Walks the real target-user flow before making code claims." },
-        { "name": "Revenue proof scout", "summary": "Checks entitlement, paywall, and provider handoff status." },
-        { "name": "Build release runner", "summary": "Keeps build numbers, simulator proof, and ASC state aligned." },
-        { "name": "Continuity sentinel", "summary": "Blocks stale handoff assumptions before resuming work." }
+        {
+          "name": "Native app auditor",
+          "summary": "Walks the real target-user flow before making code claims.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Revenue proof scout",
+          "summary": "Checks entitlement, paywall, and provider handoff status.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Build release runner",
+          "summary": "Keeps build numbers, simulator proof, and ASC state aligned.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Continuity sentinel",
+          "summary": "Blocks stale handoff assumptions before resuming work.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        }
       ],
       "lanes": [
-        { "title": "Experience Audit", "summary": "Target-user walkthrough, onboarding gaps, AI-stack flow, and release risks.", "path": "audits/ocho/", "status": "Ready" },
-        { "title": "Native Build", "summary": "Xcode generation, build number, simulator, and TestFlight proof.", "path": "code/rork-ocho", "status": "Ready" },
-        { "title": "Revenue", "summary": "RevenueCat entitlement checks and paywall alignment.", "path": "business/revenue/", "status": "Watch" },
-        { "title": "Store Ops", "summary": "ASC validation, What to Test, screenshots, and metadata.", "path": "business/store/", "status": "Gate" },
-        { "title": "Analytics", "summary": "Activation and retention events for the first real cohort.", "path": "business/analytics/", "status": "Draft" },
-        { "title": "Failure Cards", "summary": "Known launch regressions and proof expectations.", "path": "evals/launchbench/", "status": "Active" }
+        {
+          "title": "Experience Audit",
+          "summary": "Target-user walkthrough, onboarding gaps, AI-stack flow, and release risks.",
+          "path": "audits/ocho/",
+          "status": "Ready",
+          "id": "panel.experience-audit"
+        },
+        {
+          "title": "Native Build",
+          "summary": "Xcode generation, build number, simulator, and TestFlight proof.",
+          "path": "code/rork-ocho",
+          "status": "Ready",
+          "id": "panel.native-build"
+        },
+        {
+          "title": "Revenue",
+          "summary": "RevenueCat entitlement checks and paywall alignment.",
+          "path": "business/revenue/",
+          "status": "Watch",
+          "id": "panel.revenue"
+        },
+        {
+          "title": "Store Ops",
+          "summary": "ASC validation, What to Test, screenshots, and metadata.",
+          "path": "business/store/",
+          "status": "Gate",
+          "id": "panel.store-ops"
+        },
+        {
+          "title": "Analytics",
+          "summary": "Activation and retention events for the first real cohort.",
+          "path": "business/analytics/",
+          "status": "Draft",
+          "id": "panel.analytics"
+        },
+        {
+          "title": "Failure Cards",
+          "summary": "Known launch regressions and proof expectations.",
+          "path": "evals/launchbench/",
+          "status": "Active",
+          "id": "view.failure-cards"
+        }
       ]
     },
     {
@@ -87,31 +271,123 @@
       "mark": "CC",
       "subtitle": "A commerce cockpit for offer pages, subscription gating, Android builds, pricing alignment, and Cloudflare deploy proof.",
       "metrics": [
-        { "label": "Stage", "value": "Live", "note": "site + app" },
-        { "label": "Artifacts", "value": "15", "note": "offers + builds" },
-        { "label": "Risk", "value": "3", "note": "pricing + gating" },
-        { "label": "Next lane", "value": "Web", "note": "offer proof" }
+        {
+          "label": "Stage",
+          "value": "Live",
+          "note": "site + app"
+        },
+        {
+          "label": "Artifacts",
+          "value": "15",
+          "note": "offers + builds"
+        },
+        {
+          "label": "Risk",
+          "value": "3",
+          "note": "pricing + gating"
+        },
+        {
+          "label": "Next lane",
+          "value": "Web",
+          "note": "offer proof"
+        }
       ],
       "readiness": [
-        { "status": "green", "label": "Website deploy path known", "tag": "Ready" },
-        { "status": "amber", "label": "Subscription gating", "tag": "Watch" },
-        { "status": "green", "label": "Android build lane", "tag": "Ready" },
-        { "status": "amber", "label": "Pricing copy parity", "tag": "Needed" },
-        { "status": "green", "label": "Remote handoff clean", "tag": "Ready" }
+        {
+          "status": "green",
+          "label": "Website deploy path known",
+          "tag": "Ready"
+        },
+        {
+          "status": "amber",
+          "label": "Subscription gating",
+          "tag": "Watch"
+        },
+        {
+          "status": "green",
+          "label": "Android build lane",
+          "tag": "Ready"
+        },
+        {
+          "status": "amber",
+          "label": "Pricing copy parity",
+          "tag": "Needed"
+        },
+        {
+          "status": "green",
+          "label": "Remote handoff clean",
+          "tag": "Ready"
+        }
       ],
       "agents": [
-        { "name": "Offer page auditor", "summary": "Checks public pricing, SEO/GEO, and deploy evidence." },
-        { "name": "Subscription debugger", "summary": "Reviews client/server entitlement behavior." },
-        { "name": "Android release runner", "summary": "Builds and packages release candidates." },
-        { "name": "Continuity sentinel", "summary": "Keeps dirty worktrees isolated from quick ships." }
+        {
+          "name": "Offer page auditor",
+          "summary": "Checks public pricing, SEO/GEO, and deploy evidence.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Subscription debugger",
+          "summary": "Reviews client/server entitlement behavior.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Android release runner",
+          "summary": "Builds and packages release candidates.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Continuity sentinel",
+          "summary": "Keeps dirty worktrees isolated from quick ships.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        }
       ],
       "lanes": [
-        { "title": "Offer Pages", "summary": "Public pricing, copy, route, and Cloudflare Pages proof.", "path": "web/src/pages/", "status": "Ready" },
-        { "title": "Subscription", "summary": "RevenueCat gating, account identity, and entitlement checks.", "path": "flutter/lib/", "status": "Watch" },
-        { "title": "Android Build", "summary": "AAB generation, versioning, and Play upload handoff.", "path": "scripts/build-android", "status": "Ready" },
-        { "title": "Analytics", "summary": "Checkout intent, purchase events, and retention reporting.", "path": "business/analytics/", "status": "Draft" },
-        { "title": "Support", "summary": "Customer-facing docs, receipts, and account recovery.", "path": "business/support/", "status": "Draft" },
-        { "title": "Failure Cards", "summary": "Repeated pricing and entitlement misses.", "path": "evals/launchbench/", "status": "Active" }
+        {
+          "title": "Offer Pages",
+          "summary": "Public pricing, copy, route, and Cloudflare Pages proof.",
+          "path": "web/src/pages/",
+          "status": "Ready",
+          "id": "panel.offer-pages"
+        },
+        {
+          "title": "Subscription",
+          "summary": "RevenueCat gating, account identity, and entitlement checks.",
+          "path": "flutter/lib/",
+          "status": "Watch",
+          "id": "panel.subscription"
+        },
+        {
+          "title": "Android Build",
+          "summary": "AAB generation, versioning, and Play upload handoff.",
+          "path": "scripts/build-android",
+          "status": "Ready",
+          "id": "panel.android-build"
+        },
+        {
+          "title": "Analytics",
+          "summary": "Checkout intent, purchase events, and retention reporting.",
+          "path": "business/analytics/",
+          "status": "Draft",
+          "id": "panel.analytics"
+        },
+        {
+          "title": "Support",
+          "summary": "Customer-facing docs, receipts, and account recovery.",
+          "path": "business/support/",
+          "status": "Draft",
+          "id": "panel.support"
+        },
+        {
+          "title": "Failure Cards",
+          "summary": "Repeated pricing and entitlement misses.",
+          "path": "evals/launchbench/",
+          "status": "Active",
+          "id": "view.failure-cards"
+        }
       ]
     },
     {
@@ -123,64 +399,180 @@
       "mark": "CL",
       "subtitle": "A private workspace and public website split with business routes, artifact registry, custom-domain hardening, and local sync.",
       "metrics": [
-        { "label": "Stage", "value": "Platform", "note": "workspace" },
-        { "label": "Artifacts", "value": "21", "note": "routes + registry" },
-        { "label": "Risk", "value": "2", "note": "surface split" },
-        { "label": "Next lane", "value": "R2", "note": "artifact sync" }
+        {
+          "label": "Stage",
+          "value": "Platform",
+          "note": "workspace"
+        },
+        {
+          "label": "Artifacts",
+          "value": "21",
+          "note": "routes + registry"
+        },
+        {
+          "label": "Risk",
+          "value": "2",
+          "note": "surface split"
+        },
+        {
+          "label": "Next lane",
+          "value": "R2",
+          "note": "artifact sync"
+        }
       ],
       "readiness": [
-        { "status": "green", "label": "Public/private split documented", "tag": "Ready" },
-        { "status": "green", "label": "Business route model exists", "tag": "Ready" },
-        { "status": "amber", "label": "Artifact sync proof", "tag": "Watch" },
-        { "status": "amber", "label": "Custom-domain hardening", "tag": "Needed" },
-        { "status": "green", "label": "Submodule map known", "tag": "Ready" }
+        {
+          "status": "green",
+          "label": "Public/private split documented",
+          "tag": "Ready"
+        },
+        {
+          "status": "green",
+          "label": "Business route model exists",
+          "tag": "Ready"
+        },
+        {
+          "status": "amber",
+          "label": "Artifact sync proof",
+          "tag": "Watch"
+        },
+        {
+          "status": "amber",
+          "label": "Custom-domain hardening",
+          "tag": "Needed"
+        },
+        {
+          "status": "green",
+          "label": "Submodule map known",
+          "tag": "Ready"
+        }
       ],
       "agents": [
-        { "name": "Workspace architect", "summary": "Reviews business routes, private workspace, and artifact registry." },
-        { "name": "Security hardener", "summary": "Checks Worker routing, public config, and domain boundaries." },
-        { "name": "Artifact sync runner", "summary": "Moves local deliverables into durable storage with proof." },
-        { "name": "Continuity sentinel", "summary": "Prevents public site and private workspace drift." }
+        {
+          "name": "Workspace architect",
+          "summary": "Reviews business routes, private workspace, and artifact registry.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Security hardener",
+          "summary": "Checks Worker routing, public config, and domain boundaries.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Artifact sync runner",
+          "summary": "Moves local deliverables into durable storage with proof.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        },
+        {
+          "name": "Continuity sentinel",
+          "summary": "Prevents public site and private workspace drift.",
+          "id": "operator.orchestrator",
+          "kind": "agent"
+        }
       ],
       "lanes": [
-        { "title": "Workspace", "summary": "Private business routes, control plane, and authenticated surfaces.", "path": "workspace.clueless-creations.com", "status": "Ready" },
-        { "title": "Public Site", "summary": "Public funnel, personal/agency split, and SEO/GEO assets.", "path": "clueless-creations", "status": "Ready" },
-        { "title": "Artifacts", "summary": "R2/Supabase registry, local sync, and proof links.", "path": "scripts/workspace-sync", "status": "Watch" },
-        { "title": "Security", "summary": "Worker hardening, public config, and custom domain rules.", "path": "workers/", "status": "Gate" },
-        { "title": "Knowledge", "summary": "Business specs, generated docs, and repo handoff state.", "path": "businesses/", "status": "Ready" },
-        { "title": "Failure Cards", "summary": "Known surface-blur mistakes and validator targets.", "path": "evals/launchbench/", "status": "Active" }
+        {
+          "title": "Workspace",
+          "summary": "Private business routes, control plane, and authenticated surfaces.",
+          "path": "workspace.clueless-creations.com",
+          "status": "Ready",
+          "id": "panel.workspace"
+        },
+        {
+          "title": "Public Site",
+          "summary": "Public funnel, personal/agency split, and SEO/GEO assets.",
+          "path": "clueless-creations",
+          "status": "Ready",
+          "id": "panel.public-site"
+        },
+        {
+          "title": "Artifacts",
+          "summary": "R2/Supabase registry, local sync, and proof links.",
+          "path": "scripts/workspace-sync",
+          "status": "Watch",
+          "id": "panel.artifacts"
+        },
+        {
+          "title": "Security",
+          "summary": "Worker hardening, public config, and custom domain rules.",
+          "path": "workers/",
+          "status": "Gate",
+          "id": "panel.security"
+        },
+        {
+          "title": "Knowledge",
+          "summary": "Business specs, generated docs, and repo handoff state.",
+          "path": "businesses/",
+          "status": "Ready",
+          "id": "panel.knowledge"
+        },
+        {
+          "title": "Failure Cards",
+          "summary": "Known surface-blur mistakes and validator targets.",
+          "path": "evals/launchbench/",
+          "status": "Active",
+          "id": "view.failure-cards"
+        }
       ]
     }
   ],
-  "business": [
+  "templates": [
     {
       "name": "B2C Mobile Launch",
       "summary": "Design Room, Launch Cockpit, App Store Ops, RevenueCat, PostHog, onboarding, retention, and failure-card evals.",
-      "included": ["AGENTS.md", "CLAUDE.md", "Evals"]
+      "included": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "Evals"
+      ]
     },
     {
       "name": "Business Control Plane",
       "summary": "Top-level portfolio, business drill-downs, artifact registry, agent routing, source-of-truth docs, and runtime sync.",
-      "included": ["Workspace", "Adapters", "Schemas"]
+      "included": [
+        "Workspace",
+        "Adapters",
+        "Schemas"
+      ]
     },
     {
       "name": "Commerce Growth",
       "summary": "Offer pages, pricing parity, subscription gates, Android/iOS releases, analytics, and Cloudflare deploy proof.",
-      "included": ["Pricing", "Revenue", "Deploy"]
+      "included": [
+        "Pricing",
+        "Revenue",
+        "Deploy"
+      ]
     },
     {
       "name": "Workspace Platform",
       "summary": "Public/private route separation, tenant business routes, artifact storage, security checks, and local sync.",
-      "included": ["Routes", "Artifacts", "Security"]
+      "included": [
+        "Routes",
+        "Artifacts",
+        "Security"
+      ]
     },
     {
       "name": "Personal Brand Funnel",
       "summary": "Offer architecture, multilingual SEO/GEO, content pillars, lead capture, and private ICP docs.",
-      "included": ["Offers", "SEO", "ICP"]
+      "included": [
+        "Offers",
+        "SEO",
+        "ICP"
+      ]
     },
     {
       "name": "AI App Audit",
       "summary": "Target-user walkthroughs, native build proof, onboarding issues, paywall checks, and release follow-through.",
-      "included": ["Audit", "Build", "Proof"]
+      "included": [
+        "Audit",
+        "Build",
+        "Proof"
+      ]
     }
   ]
 }

@@ -35,6 +35,8 @@ Each shell must live in `state/business.json` under `controlPlane.panels`, inclu
 - Use JSON state when humans need line-level git diffs, baselines, and restore.
 - Render views from state; do not hand-author dashboard HTML.
 - Keep panel-specific detail in references and scripts, not `SKILL.md`.
+- Use stable graph IDs for operators, panels, views, lanes, artifacts, and gates; UI labels are projections and may change without changing identity.
+- Read operator capabilities and ownership from the typed definition graph rather than inventing renderer-only roles.
 - Let `PROJECT_STATE.yaml` remain the launch lane/status cockpit while `state/business.json` grows into the cross-surface business model.
 - Let `render-business-control-plane-workspace.ts` adapt both files into the open Business Control workspace schema instead of teaching UI code to scrape each source directly.
 - Add validators before adding new panels so the Control Plane does not become another long prose checklist.
