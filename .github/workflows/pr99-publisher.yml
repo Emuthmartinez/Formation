@@ -11,14 +11,17 @@ permissions:
 
 jobs:
   publish:
-    if: github.event.pull_request.head.ref == 'agent/business-unit-capabilities'
+    if: >-
+      github.event.pull_request.number == 99 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'agent/business-unit-capabilities'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Check out PR head
+      - name: Check out trusted PR head
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          repository: ${{ github.repository }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
@@ -48,7 +51,32 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git show origin/main:.github/workflows/agent-source-export.yml > .github/workflows/agent-source-export.yml
+          cat > .github/workflows/agent-source-export.yml <<'YAML'
+          name: Agent source export
+
+          on:
+            pull_request:
+              branches: [main]
+              paths:
+                - ".github/workflows/agent-source-export.yml"
+
+          permissions:
+            contents: read
+
+          jobs:
+            export:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v4
+                - name: Export checked-out source
+                  run: |
+                    tar --exclude=.git -czf /tmp/b2c-mobile-business-launch-skill.tar.gz .
+                - uses: actions/upload-artifact@v7
+                  with:
+                    name: agent-source-export
+                    path: /tmp/b2c-mobile-business-launch-skill.tar.gz
+                    retention-days: 1
+          YAML
           git apply --index --whitespace=nowarn /tmp/business-unit-refactor.patch
           rm -rf .github/business-unit-refactor
           git add -A
