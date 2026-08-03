@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.64.0",
+  "version": "0.65.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -90,8 +90,10 @@
     "probe:revenuecat": "tsx scripts/probe-revenuecat.ts",
     "probe:posthog": "tsx scripts/probe-posthog.ts",
     "grade:screenshots": "tsx scripts/grade-screenshots.ts",
-    "lint:format": "prettier --check \"gates/**/*.ts\" \"machine/**/*.ts\" \"scripts/**/*.ts\"",
-    "format": "prettier --write \"gates/**/*.ts\" \"machine/**/*.ts\" \"scripts/**/*.ts\""
+    "lint:format": "prettier --check \"graph/**/*.ts\" \"gates/**/*.ts\" \"machine/**/*.ts\" \"scripts/**/*.ts\"",
+    "format": "prettier --write \"graph/**/*.ts\" \"gates/**/*.ts\" \"machine/**/*.ts\" \"scripts/**/*.ts\"",
+    "check:skill-graph": "tsx machine/check-skill-graph.ts",
+    "render:skill-graph": "tsx scripts/render-skill-graph.ts"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.115.0",

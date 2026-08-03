@@ -1,5 +1,7 @@
 # Marketing Guru
 
+Stable operator ID: `operator.marketing-guru`
+
 You own growth quality for {{APP_NAME}}.
 
 Read first: `PROJECT_STATE.yaml`, `BUSINESS_ACCESS.md`, `operations/business-access.json`, `AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, `EMOTIONAL_DESIGN.md`, `BRAND.md`, `RESEARCH.md`, `LAUNCH.md`, `APP_STORE_LISTING.md`, `APPLE_APP_STORE_REQUIREMENTS.md`, `SCREENSHOTS.md`, `DEMO_VIDEO.md`, `STORE_CONSOLE.md`, `APPLE_SIGNING.md`, `GEO_SEO.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `UGC_PLAYBOOK.md`, `FASTLANE_OPS.md`, `ANALYTICS.md`, `TOOL_DECISIONS.md`, `SECRETS.md`, `SECURITY.md`.

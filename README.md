@@ -21,6 +21,8 @@ Give the agent one broad request and it works through the launch instead of hand
 
 Two layers make that repeatable. The playbooks under [`playbook/`](skill/b2c-mobile-business-launch/playbook/), grouped by area of the business, hold the launch process a human can read. `PROJECT_STATE.yaml` holds the same process as machine-checkable state, which the validators grade and `launch-cockpit.html` renders as a dashboard written in founder language rather than internal status codes. Future agents inspect state and run checks rather than remembering what happened.
 
+A typed definition graph under [`graph/`](skill/b2c-mobile-business-launch/graph/) gives those layers stable identities and explicit relationships. It owns the domain routing, 57 workflow contracts, context packs, phase and lane topology, artifacts, gates, operators, and providers. `PROJECT_STATE.yaml` remains the mutable state for one business rather than copying the skill-owned topology.
+
 The skill pauses for founder-only decisions: credentials, spend, legal and pricing approval, public posting, destructive actions, and final submission.
 
 ## Who it's for
@@ -110,6 +112,7 @@ npm run audit                  # full local pipeline
 npm run audit:ci               # exactly what CI runs
 npm run audit -- --list        # print the resolved plan
 npm run audit -- --only check:secrets
+npm run check:skill-graph       # graph identities, edges, workflows, context, projections
 
 npm run validate:launch-state -- --root /path/to/app
 npm run launchbench            # known failure-mode scenarios
@@ -138,6 +141,7 @@ skill/b2c-mobile-business-launch/
   SKILL.md              # entrypoint and lane routing
   spine.md              # the always-on contracts SKILL.md routes from
   skill-version.json    # runtime freshness manifest
+  graph/                # typed semantic graph and deterministic projections
   playbook/             # launch playbooks, grouped by area of the business
   business/             # artifacts copied into your app repo
   starters/             # runnable app scaffolds for the four archetypes

@@ -1,14 +1,20 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:business-control-plane:workspace:0.1.0",
+  "$id": "urn:business-control-plane:workspace:0.2.0",
   "title": "Business Control Plane Workspace",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "updatedAt", "product", "businesses", "templates"],
+  "required": [
+    "schemaVersion",
+    "updatedAt",
+    "product",
+    "businesses",
+    "templates"
+  ],
   "properties": {
     "schemaVersion": {
       "type": "string",
-      "const": "0.1.0"
+      "const": "0.2.0"
     },
     "updatedAt": {
       "type": "string",
@@ -17,7 +23,10 @@
     "product": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "subtitle"],
+      "required": [
+        "name",
+        "subtitle"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -120,7 +129,11 @@
     "metric": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["label", "value", "note"],
+      "required": [
+        "label",
+        "value",
+        "note"
+      ],
       "properties": {
         "label": {
           "type": "string",
@@ -138,11 +151,20 @@
     "readiness": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "label", "tag"],
+      "required": [
+        "status",
+        "label",
+        "tag"
+      ],
       "properties": {
         "status": {
           "type": "string",
-          "enum": ["green", "amber", "red", "quiet"]
+          "enum": [
+            "green",
+            "amber",
+            "red",
+            "quiet"
+          ]
         },
         "label": {
           "type": "string",
@@ -157,11 +179,28 @@
     "agent": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "summary"],
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "summary"
+      ],
       "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^operator\\.[a-z0-9][a-z0-9.-]*$"
+        },
         "name": {
           "type": "string",
           "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "human",
+            "agent",
+            "system"
+          ]
         },
         "summary": {
           "type": "string",
@@ -172,8 +211,18 @@
     "lane": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["title", "summary", "path", "status"],
+      "required": [
+        "id",
+        "title",
+        "summary",
+        "path",
+        "status"
+      ],
       "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*\\.[a-z0-9][a-z0-9.-]*$"
+        },
         "title": {
           "type": "string",
           "minLength": 1
@@ -188,14 +237,25 @@
         },
         "status": {
           "type": "string",
-          "enum": ["Ready", "Watch", "Draft", "Gate", "Active", "Blocked"]
+          "enum": [
+            "Ready",
+            "Watch",
+            "Draft",
+            "Gate",
+            "Active",
+            "Blocked"
+          ]
         }
       }
     },
     "template": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "summary", "included"],
+      "required": [
+        "name",
+        "summary",
+        "included"
+      ],
       "properties": {
         "name": {
           "type": "string",

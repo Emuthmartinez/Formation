@@ -51,6 +51,8 @@ npm run validate:launch-state -- --root /path/to/app
 | `check:launch-trace` | Research reaches product, brand, design, store copy, revenue, privacy, and verification through `LAUNCH_TRACE.md` |
 | `check:continuity-contract` | A run can be picked up by a different agent without losing state |
 | `check:autopilot` | Trigger coverage, negative-trigger guards, and the hands-off run contract |
+| `check:skill-graph` | Stable graph IDs and edges, workflow trigger/action/proof/memory/stopping contracts, phase and lane DAGs, context routing, artifact/gate/operator/provider references, and generated projection freshness |
+| `render:skill-graph` | Renders the graph JSON, Markdown inventory, Mermaid topology, context-budget report, and bounded routing blocks in `SKILL.md` and `spine.md` |
 | `render:launch-cockpit` | Renders `launch-cockpit.html` from `PROJECT_STATE.yaml` |
 
 ## Founder-facing surfaces

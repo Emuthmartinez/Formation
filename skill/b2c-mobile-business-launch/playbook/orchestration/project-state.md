@@ -13,6 +13,10 @@ Use this when starting, continuing, auditing, or handing off a launch. The goal 
 
 Use `business/PROJECT_STATE.yaml` as the starting point. Keep it names-only for secrets and credentials.
 
+## Definition Graph Version
+
+`definition_graph_version` records which immutable skill topology the business state was seeded against. It does not copy lane dependencies, provider contracts, operator permissions, or workflow definitions into mutable state. Existing business repos without the field remain readable; the next state reconciliation adds the current graph version without changing evidence, blockers, approvals, or decisions.
+
 ## Status Contract
 
 Lane statuses must be one of:

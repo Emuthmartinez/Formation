@@ -17,6 +17,7 @@ Structural work follows [`docs/architecture.md`](docs/architecture.md), the targ
 - `CONTRIBUTING.md`, `.github/CODE_OF_CONDUCT.md`, `.github/SECURITY.md`, `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`: contributor-facing surfaces. `.github/SECURITY.md` covers this repo's validators, workflows, and dependency chain, and is a different document from the shipped `business/SECURITY.md` security release plan.
 - `skill/b2c-mobile-business-launch/SKILL.md`: skill entrypoint and progressive-disclosure routing.
 - `skill/b2c-mobile-business-launch/skill-version.json`: installed-runtime freshness manifest.
+- `skill/b2c-mobile-business-launch/graph/`: canonical typed definitions for business areas, domains, workflows, context packs, phases, lanes, artifacts, gates, operators, and providers. Generated projections live under `graph/generated/`; edit definitions and run `render:skill-graph`, never edit projections directly.
 - `skill/b2c-mobile-business-launch/playbook/`: agent knowledge grouped by area of the business, one folder per domain with its own `README.md` index. `process/` is sequencing and proving a launch; `orchestration/` is driving the work (state, autonomy, subagents, workflows, engineering routing).
 - `skill/b2c-mobile-business-launch/state/`: Design Room seed state, theme tokens, and JSON schema.
 - `skill/b2c-mobile-business-launch/render/`: React/Vite Design Room renderer; `scripts/render-design-room.ts` also writes the static fallback.
@@ -45,7 +46,9 @@ When changing generated business-repo guidance, edit the shipped templates and v
 
 ## Agent Legibility
 
-Keep this file as a concise map, not a duplicate manual. Put detailed launch policy in `playbook/`, reusable generated output in `business/`, and deterministic enforcement in `gates/` (or `machine/`, when the thing being graded is the skill itself) plus LaunchBench. When an agent miss repeats, add or tighten a validator/eval instead of relying on a longer reminder.
+Keep this file as a concise map, not a duplicate manual. Put durable semantic relationships in `graph/`, detailed launch policy in `playbook/`, reusable generated output in `business/`, and deterministic enforcement in `gates/` (or `machine/`, when the thing being graded is the skill itself) plus LaunchBench. When an agent miss repeats, add or tighten a validator/eval instead of relying on a longer reminder.
+
+`graph/` is the semantic source of truth; the filesystem and generated routing blocks are projections. Paths may change, but stable graph IDs must not. `PROJECT_STATE.yaml` holds mutable business-instance state and must not become a second copy of the definition graph.
 
 `SKILL.md` is a **router, not a manual** — it loads on every trigger, so its job is the always-on contracts plus one Lane Routing index (route here when / load / produce / gate). Detail belongs in the reference the row points at. `check:reference-size` holds a 45KB entrypoint budget on freeze-and-subtract terms: a new lane row is paid for by compressing or relocating existing entrypoint text, never by raising the ceiling. Do not reintroduce a second enumeration of the same routing (the old "Start Here" narrative and "When To Load References" list said the same thing twice and drifted).
 
@@ -65,6 +68,8 @@ npm run audit
 npm run launchbench
 npm run test:validators
 npm run check:source-registry
+npm run check:skill-graph
+npm run render:skill-graph -- --check
 npm run check:agent-entrypoints
 npm run check:founder-operator -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
 npm run check:workflow-adherence

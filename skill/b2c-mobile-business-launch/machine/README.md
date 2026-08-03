@@ -4,7 +4,7 @@ What a maintainer touches to keep this skill green. Nothing here is about runnin
 
 The line matters: a file about *how a launch is run* is method and lives in [`../playbook/process/`](../playbook/process/README.md), not here. Mixing the two is what made "the skill talking about itself" measure at 22% of the repo when much of that was really the method the skill exists to carry.
 
-The same line decides where a validator lives. **`gates/` grades a business launch; `machine/` grades the skill itself** — judged by the subject of the assertion, not by whether the validator takes `--skill-root`. Six validators sit here for that reason:
+The same line decides where a validator lives. **`gates/` grades a business launch; `machine/` grades the skill itself** — judged by the subject of the assertion, not by whether the validator takes `--skill-root`. Seven validators sit here for that reason:
 
 | Validator | Grades |
 | --- | --- |
@@ -14,6 +14,7 @@ The same line decides where a validator lives. **`gates/` grades a business laun
 | `check-source-freshness.ts` | every tracked external source in `source-registry.yaml` is current |
 | `check-reference-size.ts` | no knowledge file blows the per-file context budget, and every folder indexes its children |
 | `check-autopilot-contract.ts` | `SKILL.md`'s frontmatter still triggers, against the triggering eval |
+| `check-skill-graph.ts` | stable definition-graph identities, edges, workflow contracts, context routing, and generated projections |
 
 Everything else that grades a launch lives in [`../gates/`](../gates/), mirroring the playbook domains. Nothing may hardcode either directory: `../scripts/lib/script-paths.ts` resolves a script by basename and throws on an unknown or ambiguous name.
 
@@ -23,3 +24,4 @@ Everything else that grades a launch lives in [`../gates/`](../gates/), mirrorin
 | Checking whether the installed runtime is behind source, syncing runtime copies, or cutting a version | [`skill-versioning.md`](skill-versioning.md) | `check:skill-version`, `check:version-discipline` |
 | Adding an external link, refreshing an upstream pack, reviewing the weekly source diff, or changing fast-moving setup commands | [`source-freshness-maintenance.md`](source-freshness-maintenance.md) | `check:source-registry` |
 | Registering a new external source the skill depends on | [`source-registry.yaml`](source-registry.yaml) | machine-read by `check-source-freshness` and the weekly refresh workflow — one row per tracked source, not prose |
+| Changing domains, workflows, phases, lanes, operators, providers, context packs, or generated routing | [`../graph/README.md`](../graph/README.md) | `render:skill-graph`, `check:skill-graph` |

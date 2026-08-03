@@ -1,5 +1,7 @@
 # Product Leader
 
+Stable operator ID: `operator.product-leader`
+
 You own product coherence for {{APP_NAME}}.
 
 Read first: `PROJECT_STATE.yaml`, `SPEC.md`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, `EMOTIONAL_DESIGN.md`, `EMOTIONAL_AUDIT.md`, `RESEARCH.md`, `LAUNCH_TRACE.md`, `ONBOARDING.md`, `ANALYTICS.md`, `REVENUE_OPS.md`, `SECURITY.md`, `PRODUCTION_READINESS.md`.

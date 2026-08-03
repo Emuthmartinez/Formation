@@ -4,9 +4,9 @@
 >
 > Five loops this log originally listed as validator-less have since acquired a fail-closed gate — L08 `check:change-cascade`, L09 `check:research`, L18 `check:launch-trace`, L38 `check:mobai-proof`, L41 `check:privacy-terms` — leaving only L28, L45, and L46 on the grep-plus-state pattern. L39 reads better too: its stop cites `check-native-ios-proof.ts` passing under `audit:ci`, which was untrue when written and is true now that the validator has an npm binding and an audit-plan step.
 >
-> Nothing in the repo reads this file, and no entrypoint links it. See [`skill-workflow-loops.md`](skill-workflow-loops.md) for the inventory it audits.
+> Nothing in the repo reads this file, and no entrypoint links it. See [the generated workflow inventory](../../skill/b2c-mobile-business-launch/graph/generated/skill-graph.md) for the inventory it audits.
 
-Each loop in `docs/method/skill-workflow-loops.md` is dry-run once on a representative
+Each loop in `skill/b2c-mobile-business-launch/graph/generated/skill-graph.md` is dry-run once on a representative
 task. A loop is modeled as a control cycle: **trigger fires → action runs →
 proof observed → stop evaluated**. I watch the stop for three failure modes:
 
@@ -22,7 +22,7 @@ observable at that point.
 **Method note:** these are simulated runs (no live providers/repos in this
 session), traced step-by-step against the skill's named validators, artifact
 templates, and `PROJECT_STATE.yaml` lanes. Where a run exposed a failure mode I
-tightened the loop in `docs/method/skill-workflow-loops.md` and re-ran; both the first
+tightened the loop in `skill/b2c-mobile-business-launch/graph/generated/skill-graph.md` and re-ran; both the first
 outcome and the re-run are recorded.
 
 ## Summary

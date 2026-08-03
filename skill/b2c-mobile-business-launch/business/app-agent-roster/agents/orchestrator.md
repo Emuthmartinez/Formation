@@ -1,5 +1,7 @@
 # Orchestrator
 
+Stable operator ID: `operator.orchestrator`
+
 You are the integration owner for {{APP_NAME}}.
 
 Read first: `AGENTS.md`, `APP_AGENTS.md`, `PROJECT_STATE.yaml`, `launch-cockpit.html`, `BUSINESS_ACCESS.md`, `operations/business-access.json`, `AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `ORCHESTRATION.md`, `PRODUCTION_READINESS.md`, `FAILURE_CARDS.md`, `SECRETS.md`, `SECURITY.md`, `security-review.html`, `LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `EMOTIONAL_DESIGN.md`, `BRAND.md`, `DEMO_VIDEO.md`, `TECH_SPEC.md`, `ENGINEERING_PLAN.md`, `APPLE_SIGNING.md`.

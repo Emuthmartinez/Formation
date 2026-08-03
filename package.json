@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.64.0",
+  "version": "0.65.0",
   "description": "An agent skill that takes a consumer mobile app from idea to a launched business, with deterministic validators between every claim and done.",
   "keywords": [
     "claude-code",
@@ -119,8 +119,10 @@
     "probe:posthog": "tsx skill/b2c-mobile-business-launch/scripts/probe-posthog.ts",
     "grade:screenshots": "tsx skill/b2c-mobile-business-launch/scripts/grade-screenshots.ts",
     "sync:runtime": "bash scripts/sync-skill-runtime.sh",
-    "lint:format": "prettier --check \"skill/b2c-mobile-business-launch/gates/**/*.ts\" \"skill/b2c-mobile-business-launch/machine/**/*.ts\" \"skill/b2c-mobile-business-launch/scripts/**/*.ts\"",
-    "format": "prettier --write \"skill/b2c-mobile-business-launch/gates/**/*.ts\" \"skill/b2c-mobile-business-launch/machine/**/*.ts\" \"skill/b2c-mobile-business-launch/scripts/**/*.ts\""
+    "lint:format": "prettier --check \"skill/b2c-mobile-business-launch/graph/**/*.ts\" \"skill/b2c-mobile-business-launch/gates/**/*.ts\" \"skill/b2c-mobile-business-launch/machine/**/*.ts\" \"skill/b2c-mobile-business-launch/scripts/**/*.ts\"",
+    "format": "prettier --write \"skill/b2c-mobile-business-launch/graph/**/*.ts\" \"skill/b2c-mobile-business-launch/gates/**/*.ts\" \"skill/b2c-mobile-business-launch/machine/**/*.ts\" \"skill/b2c-mobile-business-launch/scripts/**/*.ts\"",
+    "check:skill-graph": "tsx skill/b2c-mobile-business-launch/machine/check-skill-graph.ts",
+    "render:skill-graph": "tsx skill/b2c-mobile-business-launch/scripts/render-skill-graph.ts"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.115.0",

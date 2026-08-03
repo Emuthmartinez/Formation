@@ -97,22 +97,24 @@ From there, route by the work in front of you using Lane Routing below. When the
 
 Find the row matching the work in front of you and load that domain's index. Each index carries the per-file load-when triggers, the artifacts, and the gates — load only the row it names, never the whole domain. Do not preload this table's targets.
 
+<!-- graph-generated:start domain-routing -->
 | Area of the business | Route here when | Load |
 | --- | --- | --- |
 | Running the launch | starting or auditing a launch: phases, coverage, artifact contracts, traceability, provider proof, or propagating a change across surfaces | [`playbook/process/README.md`](playbook/process/README.md) |
 | Driving the work | resuming a session, durable state, how much to decide alone, subagents, dynamic workflows, engineering routing | [`playbook/orchestration/README.md`](playbook/orchestration/README.md) |
-| Running the business | founder access and accounts, credentials and secrets, which paid tools are approved and what happens when one is missing, authenticated browser/provider/store actions, lifecycle email, and life after launch | [`playbook/operations/README.md`](playbook/operations/README.md) |
+| Running the business | founder access and accounts, credentials and secrets, paid-tool decisions, authenticated actions, lifecycle email, and life after launch | [`playbook/operations/README.md`](playbook/operations/README.md) |
 | Market research | before the spec hardens: category economics, competitors, review mining, social language, and which storefronts and locales are worth shipping | [`playbook/research/README.md`](playbook/research/README.md) |
-| What you're building | scope, the core loop, V1 versus later, the copy-proof test — and the four shipped app shapes (social, AI chat, habit, photo/AI media) whose starter scaffolds live in [`starters/`](starters/social-network/README.md) | [`playbook/product/README.md`](playbook/product/README.md) |
-| How the app feels | the standout moment, onboarding and activation, engagement mechanics and their ethics limits, push lifecycle, and any work targeting better-than-expected | [`playbook/experience/README.md`](playbook/experience/README.md) |
+| What you're building | scope, the core loop, V1 versus later, the copy-proof test, and shipped app archetypes | [`playbook/product/README.md`](playbook/product/README.md) |
+| How the app feels | the standout moment, onboarding and activation, engagement mechanics and their ethics limits, push lifecycle, and work targeting better-than-expected | [`playbook/experience/README.md`](playbook/experience/README.md) |
 | Look and feel | brand, visual system, design tokens, motion, premium in-app craft, UX patterns, screen specs, rendered design state, and generated visual assets | [`playbook/design/README.md`](playbook/design/README.md) |
-| Every word a user reads | conversion copy and every in-app string, brand voice, and the writing-quality bar for anything a human reads | [`playbook/words/README.md`](playbook/words/README.md) |
-| Building the app | architecture, backend and data contract, engineering orchestration, device and simulator proof, and the agent roles a business repo hands to future sessions | [`playbook/engineering/README.md`](playbook/engineering/README.md) |
-| App Store and Google Play | metadata, ASO, keywords, screenshots, listing packets, privacy answers, locale choices, console walkthroughs, signing, uploads, TestFlight, release and rejection handling | [`playbook/store/README.md`](playbook/store/README.md) |
+| Every word a user reads | conversion copy, every in-app string, brand voice, and the writing-quality bar for anything a human reads | [`playbook/words/README.md`](playbook/words/README.md) |
+| Building the app | architecture, backend and data contract, engineering orchestration, device and simulator proof, and agent roles handed to future sessions | [`playbook/engineering/README.md`](playbook/engineering/README.md) |
+| App Store and Google Play | metadata, ASO, keywords, screenshots, listing packets, privacy answers, locale choices, console walkthroughs, signing, uploads, release and rejection handling | [`playbook/store/README.md`](playbook/store/README.md) |
 | Pricing and getting paid | RevenueCat, Stripe, store products, paywalls, subscriptions, entitlements, webhooks, taxes, restore purchases, and purchase proof | [`playbook/money/README.md`](playbook/money/README.md) |
-| Marketing and growth | paid acquisition, viral and referral loops, launch narrative and cadence, creators and sponsorships, scheduled social, landing and funnel pages, and search visibility | [`playbook/growth/README.md`](playbook/growth/README.md) |
-| Analytics and tracking | before anything names an event: the event catalog, attribution, dashboards, funnels, flags, experiments, replay | [`playbook/data/README.md`](playbook/data/README.md) |
-| Privacy, security, and legal | threat modeling, platform hardening, scans and release health, privacy policy and terms, account and data deletion, and store privacy disclosures | [`playbook/trust/README.md`](playbook/trust/README.md) |
+| Marketing and growth | paid acquisition, viral and referral loops, launch narrative, creators, scheduled social, landing and funnel pages, and search visibility | [`playbook/growth/README.md`](playbook/growth/README.md) |
+| Analytics and tracking | before anything names an event: the event catalog, attribution, dashboards, funnels, flags, experiments, and replay | [`playbook/data/README.md`](playbook/data/README.md) |
+| Privacy, security, and legal | threat modeling, platform hardening, scans, privacy policy and terms, account and data deletion, and store privacy disclosures | [`playbook/trust/README.md`](playbook/trust/README.md) |
+<!-- graph-generated:end domain-routing -->
 
 Maintaining this skill rather than running a launch — versioning, the eval harness, source freshness — is [`machine/README.md`](machine/README.md), not a lane.
 
