@@ -13,6 +13,10 @@ replacements = {
     'graph/**/*.json': 'runtime/graph/**/*.json',
     'playbook/**/*.md': 'knowledge/**/*.md',
     'business/**/*.md': 'workspace/business/**/*.md',
+    'skillRoot, "business"': 'skillRoot, "workspace", "business"',
+    "skillRoot, 'business'": "skillRoot, 'workspace', 'business'",
+    'SKILL_ROOT, "business"': 'SKILL_ROOT, "workspace", "business"',
+    "SKILL_ROOT, 'business'": "SKILL_ROOT, 'workspace', 'business'",
 }
 TARGET_ROOTS = {
     'graph': ('runtime', 'graph'),
