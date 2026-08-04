@@ -97,6 +97,35 @@ providers_text = providers_text.replace(
 )
 providers_fixture.write_text(providers_text)
 
+# Design fixtures mutate copied experience packets directly. Keep their local
+# reads/removals aligned with the new product/experience capability subtree.
+design_fixture = SKILL / "machine/fixtures/design.fixtures.ts"
+design_text = design_fixture.read_text()
+for old, new in [
+    ('path.join(emotionalDesignMissing, "emotional-design")', 'path.join(emotionalDesignMissing, "product", "experience", "emotional-design")'),
+    ('path.join(emotionalDesignGenericHtml, "emotional-design",', 'path.join(emotionalDesignGenericHtml, "product", "experience", "emotional-design",'),
+    ('path.join(emotionalSocialProofUnproven, "emotional-design",', 'path.join(emotionalSocialProofUnproven, "product", "experience", "emotional-design",'),
+    ('path.join(emotionalDesignUnguardedReward, "emotional-design",', 'path.join(emotionalDesignUnguardedReward, "product", "experience", "emotional-design",'),
+    ('path.join(elevenStarMissing, "11-star-experience")', 'path.join(elevenStarMissing, "product", "experience", "11-star-experience")'),
+]:
+    design_text = design_text.replace(old, new)
+design_text = re.sub(
+    r'path\.join\((?P<root>\w+), "emotional-design",',
+    r'path.join(\g<root>, "product", "experience", "emotional-design",',
+    design_text,
+)
+design_text = re.sub(
+    r'path\.join\((?P<root>\w+), "11-star-experience",',
+    r'path.join(\g<root>, "product", "experience", "11-star-experience",',
+    design_text,
+)
+design_text = re.sub(
+    r'path\.join\((?P<root>\w+), "ux-patterns",',
+    r'path.join(\g<root>, "product", "experience", "ux-patterns",',
+    design_text,
+)
+design_fixture.write_text(design_text)
+
 for rel in [
     "scripts/promote-design-tokens.ts",
     "gates/design/check-token-promotion.ts",
