@@ -28,7 +28,9 @@ jobs:
       - name: Repair migrated sources
         run: python3 scripts/repair-migrated-fixtures.py
       - name: Regenerate projections
-        run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
+        run: |
+          npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
+          npm run render:business-control-plane-workspace -- --root skill/b2c-mobile-business-launch/workspace/business --business-state ../../studio/seed/business.json --out ../../studio/seed/workspace.generated.json
       - name: Format
         run: npm run format --prefix skill/b2c-mobile-business-launch
       - name: Full audit
