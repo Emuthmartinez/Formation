@@ -27,7 +27,9 @@ jobs:
       - run: npm ci
       - run: npm ci --prefix skill/b2c-mobile-business-launch
       - name: Apply graph catalog cleanup candidate
-        run: python3 scripts/cleanup-graph-catalog.py
+        run: |
+          python3 scripts/cleanup-graph-catalog.py
+          python3 scripts/cleanup-graph-catalog-fixes.py
       - run: npm run format --prefix skill/b2c-mobile-business-launch
       - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
       - run: npm run audit:ci
@@ -39,6 +41,9 @@ jobs:
           path: |
             skill/b2c-mobile-business-launch/graph/
             skill/b2c-mobile-business-launch/machine/fixtures/graph.fixtures.ts
+            skill/b2c-mobile-business-launch/scripts/render-execution-plan.ts
+            skill/b2c-mobile-business-launch/SKILL.md
+            skill/b2c-mobile-business-launch/spine.md
 
   weekly-source-refresh:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
