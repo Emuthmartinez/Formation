@@ -45,8 +45,17 @@ function existingLocalDoc(relativePath: string): string | undefined {
 
 const experienceStatus = state ? asString(getPath(state, "lanes.experience.status")) : undefined;
 const skip = experienceStatus === "not_needed" || experienceStatus === "deferred";
-const markdown = firstExistingText(["11_STAR_EXPERIENCE.md", "11-star-experience/11_STAR_EXPERIENCE.md", "experience/11_STAR_EXPERIENCE.md"]);
-const htmlPath = existsAny(["11-star-experience.html", "11-star-experience/11-star-experience.html", "experience/11-star-experience.html", "design.html"]);
+const markdown = firstExistingText([
+  "11_STAR_EXPERIENCE.md",
+  "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+  "experience/11_STAR_EXPERIENCE.md",
+]);
+const htmlPath = existsAny([
+  "11-star-experience.html",
+  "product/experience/11-star-experience/11-star-experience.html",
+  "experience/11-star-experience.html",
+  "design/design.html",
+]);
 
 if (!skip && !markdown) {
   issues.push(
@@ -107,7 +116,7 @@ if (markdown) {
     }
   }
 
-  const requiredRefs = ["SPEC.md", "DESIGN.md", "ONBOARDING.md", "TECH_SPEC.md", "LAUNCH_TRACE.md"];
+  const requiredRefs = ["product/SPEC.md", "design/DESIGN.md", "product/ONBOARDING.md", "engineering/TECH_SPEC.md", "state/LAUNCH_TRACE.md"];
   for (const ref of requiredRefs) {
     if (!markdown.text.includes(ref)) {
       issues.push(issue("error", `eleven_star.ref_${codeFor(ref)}.missing`, `11_STAR_EXPERIENCE.md should reference ${ref}.`, markdown.relativePath));
@@ -142,7 +151,7 @@ if (!skip && !htmlPath) {
     issue(
       "error",
       "eleven_star.html_missing",
-      "11-star-experience.html or design.html should render the visual ladder and line of feasibility.",
+      "11-star-experience.html or design/design.html should render the visual ladder and line of feasibility.",
       "11-star-experience.html",
     ),
   );
@@ -168,7 +177,7 @@ if (htmlPath) {
 }
 
 if (experienceStatus === "done") {
-  const sourceDocs = ["SPEC.md", "DESIGN.md", "ONBOARDING.md", "TECH_SPEC.md", "LAUNCH_TRACE.md"];
+  const sourceDocs = ["product/SPEC.md", "design/DESIGN.md", "product/ONBOARDING.md", "engineering/TECH_SPEC.md", "state/LAUNCH_TRACE.md"];
   for (const doc of sourceDocs) {
     const text = existingLocalDoc(doc);
     if (text && !/\b(11_STAR_EXPERIENCE\.md|11-star|11 star|EXP-\d+)/i.test(text)) {

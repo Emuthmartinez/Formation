@@ -4,14 +4,14 @@ Use this when starting, continuing, auditing, or handing off a launch. The goal 
 
 ## Required Artifacts
 
-- `PROJECT_STATE.yaml`: compact source of truth for phase, autonomy mode, orchestration strategy, lane statuses, paid-tool routing, secrets, provider setup, proof, open questions, and active failure cards.
-- `launch-cockpit.html`: founder-visible rendered view of the same state.
-- `BUSINESS_ACCESS.md` plus `operations/business-access.json`: founder-zero identity/access state and the versioned founder gate with phase, choices, fallback/defer behavior, lifecycle, and next actions.
-- `AGENT_OPERATIONS.md` plus `operations/agent-operations.json`: human and machine state for current capabilities, exact account/environment scope, approval envelopes, authenticated actions, research/media provenance, and reconciliation.
-- `state/business.json`, `state/theme.tokens.json`, and `design-room.html`: separate Design Room state/render artifacts for cross-surface design. Update these through `design-room.md` when design changes affect launch surfaces.
-- `LAUNCHBENCH.md` or `proof.launchbench` in `PROJECT_STATE.yaml`: eval/check history for known failure modes.
+- `state/PROJECT_STATE.yaml`: compact source of truth for phase, autonomy mode, orchestration strategy, lane statuses, paid-tool routing, secrets, provider setup, proof, open questions, and active failure cards.
+- `state/launch-cockpit.html`: founder-visible rendered view of the same state.
+- `operations/BUSINESS_ACCESS.md` plus `operations/business-access.json`: founder-zero identity/access state and the versioned founder gate with phase, choices, fallback/defer behavior, lifecycle, and next actions.
+- `operations/AGENT_OPERATIONS.md` plus `operations/agent-operations.json`: human and machine state for current capabilities, exact account/environment scope, approval envelopes, authenticated actions, research/media provenance, and reconciliation.
+- `state/business.json`, `state/theme.tokens.json`, and `design/design-room.html`: separate Design Room state/render artifacts for cross-surface design. Update these through `design-room.md` when design changes affect launch surfaces.
+- `LAUNCHBENCH.md` or `proof.launchbench` in `state/PROJECT_STATE.yaml`: eval/check history for known failure modes.
 
-Use `business/PROJECT_STATE.yaml` as the starting point. Keep it names-only for secrets and credentials.
+Use `business/state/PROJECT_STATE.yaml` as the starting point. Keep it names-only for secrets and credentials.
 
 ## Definition Graph Version
 
@@ -41,7 +41,7 @@ Lanes are not independent. `SKILL.md`'s Operating Posture rule — "Lock phase o
 
 - `done`, `not_needed`, and `deferred` all satisfy a dependency — the last two are resolved scope decisions (see launch scopes), not gaps.
 - Working a lane *ahead* of its upstream is fine and common. Declaring it *finished* on a moving input is the drift bug this catches.
-- The edge set ships in the skill (`scripts/lib/launch-state.ts`, `laneDependencies`) rather than in `PROJECT_STATE.yaml`, because an edge set a launch run can edit is an edge set a launch run can delete. It lists direct edges only; transitive ones are implied (`design → product → experience → research`).
+- The edge set ships in the skill (`scripts/lib/launch-state.ts`, `laneDependencies`) rather than in `state/PROJECT_STATE.yaml`, because an edge set a launch run can edit is an edge set a launch run can delete. It lists direct edges only; transitive ones are implied (`design → product → experience → research`).
 
 The escape hatch is per-lane and auditable, never silent:
 
@@ -50,13 +50,13 @@ lanes:
   design:
     status: "done"
     evidence:
-      - "DESIGN.md"
+      - "design/DESIGN.md"
     # Dated, substantive reason. Downgrades the edge error to a standing warning
     # and is itself checked for staleness. An undated or trivial override buys
     # nothing — the edge error stands until the reason carries an ISO date and
     # the concrete independence rationale. Use only when the lane is genuinely
     # independent of the open upstream work — not to clear a red validator.
-    dependency_override: "2026-07-25 Brand and type system locked from founder identity work; the open SPEC.md item is a V2 scope question that touches no design token."
+    dependency_override: "2026-07-25 Brand and type system locked from founder identity work; the open product/SPEC.md item is a V2 scope question that touches no design token."
 ```
 
 If an override is still present weeks later, the upstream lane never locked and this lane's evidence rests on a moving input — that is the signal to revisit, not to re-date the override.
@@ -74,7 +74,7 @@ The contract:
 
 ## Update Cadence
 
-Update `PROJECT_STATE.yaml`:
+Update `state/PROJECT_STATE.yaml`:
 
 - at the start of a new session after source-truth recovery
 - before using a paid/account-gated fallback
@@ -88,7 +88,7 @@ Update `PROJECT_STATE.yaml`:
 - after any Design Room mutation that changes launch surfaces, App Store creative, onboarding, paywalls, landing pages, or marketing assets
 - before final handoff or commit
 
-If `PRODUCTION_READINESS.md` evidence is produced during an audit session, write it to the file in that session — do not defer the write. Verbal or in-chat readiness notes that are not written to `PRODUCTION_READINESS.md` are not counted as evidence by validators. (Failure card: `project-state-stale-after-upload`.)
+If `engineering/PRODUCTION_READINESS.md` evidence is produced during an audit session, write it to the file in that session — do not defer the write. Verbal or in-chat readiness notes that are not written to `engineering/PRODUCTION_READINESS.md` are not counted as evidence by validators. (Failure card: `project-state-stale-after-upload`.)
 
 ## State Rules
 
@@ -100,12 +100,12 @@ If `PRODUCTION_READINESS.md` evidence is produced during an audit session, write
 - top-level `business_operator` assumes beginner founder knowledge, makes the agent the operating lead, and mirrors Doppler/social readiness plus `current_phase*`, `active_gate_*`, `question_mode`, and the founder/agent next actions from the ledger.
 - `tools.*.docs_checked_at` records current-doc refresh dates for fast-moving CLIs and providers.
 - `tools.*.required_secrets` lists names only. Values belong in Doppler or the approved provider.
-- `lanes.security` tracks `SECURITY.md`, `security-review.html`, security tool routing, accepted risks, and release proof.
+- `lanes.security` tracks `trust/SECURITY.md`, `trust/security-review.html`, security tool routing, accepted risks, and release proof.
 - `lanes.experience` tracks `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, the line of feasibility, and the V1 scalable slice.
 - `lanes.analytics_attribution.attribution_contract` is a hard data contract, not a UI note.
 - `lanes.paid_user_acquisition` tracks `PAID_UA.md`, one-channel paid acquisition fit, creative cadence, tracking baseline, blended report, RevenueCat economics, stop/scale rules, and founder-only spend gates.
 - `lanes.growth` tracks `VIRAL_GROWTH.md`, product-led referral/share mechanics, content format evidence, UGC/Fastlane state, and growth proof.
-- `lanes.post_launch_ops` tracks `POST_LAUNCH_OPS.md` (the live-app operating runbook: weekly rhythm, crash triage, review responses, release cadence, retention review, support) and `LAUNCH_RETRO.md`; it stays not_started or deferred-with-reason until the app is live, then gates on `check:post-launch`.
+- `lanes.post_launch_ops` tracks `operations/POST_LAUNCH_OPS.md` (the live-app operating runbook: weekly rhythm, crash triage, review responses, release cadence, retention review, support) and `operations/LAUNCH_RETRO.md`; it stays not_started or deferred-with-reason until the app is live, then gates on `check:post-launch`.
 - `proof.commands` should include command, expected result, actual result, and evidence path.
 - `failure_cards.active` should point to concrete risks, not generic reminders.
 
@@ -135,7 +135,7 @@ If the scripts are executed directly from the installed skill, run them with `ts
 
 ## Launch Cockpit
 
-Render `launch-cockpit.html` whenever state changes materially. It should show:
+Render `state/launch-cockpit.html` whenever state changes materially. It should show:
 
 - project, phase, platform, bundle IDs, and autonomy mode
 - orchestration strategy, serialized resources, spawned-agent status, and collision/reconciliation proof

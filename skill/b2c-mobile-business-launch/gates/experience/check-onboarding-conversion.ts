@@ -15,16 +15,23 @@ const onboardingEvidence = asArray(state ? getPath(state, "lanes.onboarding.evid
 // and the push/review step-collision check must recognize the same aliases.
 const CANONICAL_REVIEW_TERM = /app review|review (popup|prompt)|native review|rating prompt|skstorereviewcontroller|requestreview|google play in-app review/i;
 
-const markdown = firstText(["ONBOARDING.md", "onboarding/ONBOARDING.md"]);
-const onboardingHtml = firstText(["onboarding.html", "onboarding/onboarding.html"]);
+const markdown = firstText(["product/ONBOARDING.md", "onboarding/product/ONBOARDING.md"]);
+const onboardingHtml = firstText(["product/onboarding.html", "onboarding/product/onboarding.html"]);
 const onboardingDone = onboardingStatus === "done";
 const onboardingExpected = onboardingDone || onboardingEvidence.some((item) => /(^|\/)ONBOARDING\.md$/i.test(item));
 
 if (onboardingDone && !markdown) {
-  issues.push(issue("error", "onboarding.markdown_missing", "ONBOARDING.md is required before the onboarding lane can be done.", "ONBOARDING.md"));
+  issues.push(
+    issue("error", "onboarding.markdown_missing", "product/ONBOARDING.md is required before the onboarding lane can be done.", "product/ONBOARDING.md"),
+  );
 } else if (onboardingExpected && !markdown) {
   issues.push(
-    issue("warning", "onboarding.markdown_missing_partial", "ONBOARDING.md is listed as onboarding evidence but is not present yet.", "ONBOARDING.md"),
+    issue(
+      "warning",
+      "onboarding.markdown_missing_partial",
+      "product/ONBOARDING.md is listed as onboarding evidence but is not present yet.",
+      "product/ONBOARDING.md",
+    ),
   );
 }
 
@@ -155,7 +162,7 @@ if (onboardingDone && markdown) {
       issue(
         "error",
         "onboarding.push_review_same_step",
-        "ONBOARDING.md places the push permission prime and the App Review popup in the same step. The after-first-value slot goes to one " +
+        "product/ONBOARDING.md places the push permission prime and the App Review popup in the same step. The after-first-value slot goes to one " +
           "prompt — value moment, then review prompt OR push prime; the other waits for the next natural moment (push-notification-lifecycle.md). " +
           "Back-to-back system prompts turn one earned moment into two denials.",
         markdown.relativePath,
@@ -167,7 +174,7 @@ if (onboardingDone && markdown) {
       issue(
         "error",
         "onboarding.push_priming_missing",
-        "ONBOARDING.md does not place the push permission prime at an earned post-value moment (or places it cold on launch), and records " +
+        "product/ONBOARDING.md does not place the push permission prime at an earned post-value moment (or places it cold on launch), and records " +
           "no push-not-applicable decision with a substantive reason. The soft-prime sits after a first value moment — never cold, never the " +
           "same step as the review popup — per push-notification-lifecycle.md; a raw ask on launch converts most installs into permanent " +
           "opt-outs, and a bare 'not applicable' label without a reason does not earn the exemption.",
@@ -199,7 +206,7 @@ function validateMarkdown(text: string, filePath: string): void {
       issue(
         "error",
         "onboarding.first_value_missing",
-        "ONBOARDING.md must name the first value, value-reveal, personalized plan, demo result, or aha moment before review/paywall timing.",
+        "product/ONBOARDING.md must name the first value, value-reveal, personalized plan, demo result, or aha moment before review/paywall timing.",
         filePath,
       ),
     );
@@ -210,7 +217,7 @@ function validateMarkdown(text: string, filePath: string): void {
       issue(
         "error",
         "onboarding.app_review_after_first_value.missing",
-        "ONBOARDING.md must include the native App Review popup immediately after the first-value/value-reveal step.",
+        "product/ONBOARDING.md must include the native App Review popup immediately after the first-value/value-reveal step.",
         filePath,
       ),
     );
@@ -236,7 +243,7 @@ function validateMarkdown(text: string, filePath: string): void {
       /(app review|review prompt|native review|rating prompt).{0,160}after (the )?(first value|first-value|value reveal|value-reveal|personalized plan|plan reveal|aha moment|first win|demo result)/,
     ],
     "onboarding.app_review_after_first_value.position_missing",
-    "ONBOARDING.md must say the App Review popup appears right after first value, not just somewhere in onboarding.",
+    "product/ONBOARDING.md must say the App Review popup appears right after first value, not just somewhere in onboarding.",
     filePath,
   );
 
@@ -244,7 +251,7 @@ function validateMarkdown(text: string, filePath: string): void {
     normalized,
     [/skstorereviewcontroller/, /requestreview/, /storekit/, /google play in-app review/, /reviewmanager/, /native review/],
     "onboarding.native_review_api.missing",
-    "ONBOARDING.md must name the native platform review API path, such as SKStoreReviewController or Google Play In-App Review.",
+    "product/ONBOARDING.md must name the native platform review API path, such as SKStoreReviewController or Google Play In-App Review.",
     filePath,
   );
 
@@ -252,7 +259,7 @@ function validateMarkdown(text: string, filePath: string): void {
     normalized,
     [/automatic/, /automatically/, /screen mount/, /screen mounts/, /fully displayed/, /visible.{0,80}(1-2|1 to 2|one to two)/],
     "onboarding.review_prompt_mount_timing.missing",
-    "ONBOARDING.md must specify an automatic trigger after the value screen is mounted and visible, with a short async delay.",
+    "product/ONBOARDING.md must specify an automatic trigger after the value screen is mounted and visible, with a short async delay.",
     filePath,
   );
 
@@ -260,7 +267,7 @@ function validateMarkdown(text: string, filePath: string): void {
     normalized,
     [/review_prompt_eligible/],
     "onboarding.review_prompt_eligible_event.missing",
-    "ONBOARDING.md must include review_prompt_eligible analytics before requesting the native prompt.",
+    "product/ONBOARDING.md must include review_prompt_eligible analytics before requesting the native prompt.",
     filePath,
   );
 
@@ -268,7 +275,7 @@ function validateMarkdown(text: string, filePath: string): void {
     normalized,
     [/review_prompt_requested/],
     "onboarding.review_prompt_requested_event.missing",
-    "ONBOARDING.md must include review_prompt_requested analytics for the native prompt request attempt.",
+    "product/ONBOARDING.md must include review_prompt_requested analytics for the native prompt request attempt.",
     filePath,
   );
 
@@ -276,7 +283,7 @@ function validateMarkdown(text: string, filePath: string): void {
     normalized,
     [/cooldown/, /frequency cap/, /rate limit/],
     "onboarding.review_prompt_cooldown.missing",
-    "ONBOARDING.md must document a cooldown or frequency cap for App Review prompt eligibility.",
+    "product/ONBOARDING.md must document a cooldown or frequency cap for App Review prompt eligibility.",
     filePath,
   );
 
@@ -284,7 +291,7 @@ function validateMarkdown(text: string, filePath: string): void {
     normalized,
     [/fallback.{0,120}(not show|not shown|does not show|not displayed|suppressed)/, /(may|might|can).{0,80}not show/, /platform.{0,80}not show/],
     "onboarding.review_prompt_fallback.missing",
-    "ONBOARDING.md must record the fallback path because platforms may choose not to show the review sheet.",
+    "product/ONBOARDING.md must record the fallback path because platforms may choose not to show the review sheet.",
     filePath,
   );
 
@@ -292,7 +299,9 @@ function validateMarkdown(text: string, filePath: string): void {
     /\b(todo|tbd|unknown|placeholder)\b/.test(normalized) &&
     /\b(status:\s*(done|complete|launch-ready)|launch-ready|ready for build|ready for handoff)\b/.test(normalized)
   ) {
-    issues.push(issue("error", "onboarding.placeholder_complete", "ONBOARDING.md cannot claim done/complete while placeholder language remains.", filePath));
+    issues.push(
+      issue("error", "onboarding.placeholder_complete", "product/ONBOARDING.md cannot claim done/complete while placeholder language remains.", filePath),
+    );
   }
 }
 
@@ -302,8 +311,8 @@ function validateHtml(text: string, filePath: string): void {
     issues.push(
       issue(
         "error",
-        "onboarding.html_app_review_missing",
-        "onboarding.html must visibly include the App Review popup placeholder in the onboarding flow.",
+        "product/onboarding.html_app_review_missing",
+        "product/onboarding.html must visibly include the App Review popup placeholder in the onboarding flow.",
         filePath,
       ),
     );
@@ -315,8 +324,8 @@ function validateHtml(text: string, filePath: string): void {
     issues.push(
       issue(
         "error",
-        "onboarding.html_app_review_before_first_value",
-        "onboarding.html shows the review prompt before the first-value screen; move it immediately after first value.",
+        "product/onboarding.html_app_review_before_first_value",
+        "product/onboarding.html shows the review prompt before the first-value screen; move it immediately after first value.",
         filePath,
       ),
     );

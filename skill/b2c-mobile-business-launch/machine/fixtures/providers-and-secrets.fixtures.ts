@@ -11,7 +11,8 @@ export function register(h: Harness): void {
   runFixture("nested .env fails secret routing", nestedEnv, "check-secret-routing.ts", 1, "secrets.forbidden_file..env");
 
   const rawEnvExample = makeFixture("raw-env-example");
-  writeFileSync(path.join(rawEnvExample, "secrets", ".env.example"), "STRIPE_SECRET_KEY=sk_test_1234567890abcdef\n", "utf8");
+  mkdirSync(path.join(rawEnvExample, "trust", "secrets"), { recursive: true });
+  writeFileSync(path.join(rawEnvExample, "trust", "secrets", ".env.example"), "STRIPE_SECRET_KEY=sk_test_1234567890abcdef\n", "utf8");
   runFixture("raw-looking test key in .env.example fails", rawEnvExample, "check-secret-routing.ts", 1, "secrets.raw_secret_pattern");
 
   const missingSecretEntry = makeFixture("missing-secret-entry");
@@ -196,23 +197,23 @@ export function register(h: Harness): void {
   );
 
   const missingSecurity = makeFixture("missing-security");
-  rmSync(path.join(missingSecurity, "SECURITY.md"), { force: true });
+  rmSync(path.join(missingSecurity, "trust/SECURITY.md"), { force: true });
   runFixture("missing security packet fails", missingSecurity, "check-security-release.ts", 1, "security.markdown_missing");
 
   const thinSecurity = makeFixture("thin-security");
-  writeFileSync(path.join(thinSecurity, "SECURITY.md"), ["# Security", "We will be secure.", "Sentry is planned."].join("\n"), "utf8");
+  writeFileSync(path.join(thinSecurity, "trust/SECURITY.md"), ["# Security", "We will be secure.", "Sentry is planned."].join("\n"), "utf8");
   runFixture("thin security packet fails", thinSecurity, "check-security-release.ts", 1, "security.source_basis.missing");
 
   const unresolvedSecurity = makeFixture("unresolved-security");
   writeCompleteSecurity(unresolvedSecurity);
   writeFileSync(
-    path.join(unresolvedSecurity, "SECURITY.md"),
+    path.join(unresolvedSecurity, "trust/SECURITY.md"),
     [
       "# Security Release Plan",
       "Source Basis: OWASP MASVS, OWASP ASVS, Apple Platform Security, Android security best practices, Claude Security, Codex Security, MobSF, Doppler, Sentry.",
       "Security Review Tool Routing: free fallback requires founder approval.",
       "Threat Model: Assets, Trust Boundaries, Attacker Capabilities, and Data Classification are present.",
-      "Mobile Hardening: Keychain, App Transport Security, App Attest, DeviceCheck, entitlements, APPLE_SIGNING.md, Android Keystore, Network Security Config, and Play Integrity are listed.",
+      "Mobile Hardening: Keychain, App Transport Security, App Attest, DeviceCheck, entitlements, store/APPLE_SIGNING.md, Android Keystore, Network Security Config, and Play Integrity are listed.",
       "Authentication and Authorization protect Backend and API routes. Secrets use Doppler.",
       "Revenue, Entitlements, RevenueCat, Stripe, restore, webhook, and idempotency are covered.",
       "Privacy and Analytics include PostHog, session replay, PII, PII scrubbing, and self-reported attribution.",
@@ -261,9 +262,9 @@ export function register(h: Harness): void {
   const revenueMissingMetadataState = readState(revenueMissingMetadata);
   getLane(revenueMissingMetadataState, "revenue")["status"] = "done";
   writeState(revenueMissingMetadata, revenueMissingMetadataState);
-  const missingMetadataOps = readFileSync(path.join(revenueMissingMetadata, "REVENUE_OPS.md"), "utf8");
+  const missingMetadataOps = readFileSync(path.join(revenueMissingMetadata, "revenue/REVENUE_OPS.md"), "utf8");
   writeFileSync(
-    path.join(revenueMissingMetadata, "REVENUE_OPS.md"),
+    path.join(revenueMissingMetadata, "revenue/REVENUE_OPS.md"),
     `${missingMetadataOps}\n| com.app.pro.monthly | RevenueCat | auto_renewable | MISSING_METADATA |\n`,
     "utf8",
   );
@@ -282,9 +283,9 @@ export function register(h: Harness): void {
   const revenueClearanceNoState = readState(revenueClearanceNo);
   getLane(revenueClearanceNoState, "revenue")["status"] = "done";
   writeState(revenueClearanceNo, revenueClearanceNoState);
-  const clearanceOps = readFileSync(path.join(revenueClearanceNo, "REVENUE_OPS.md"), "utf8");
+  const clearanceOps = readFileSync(path.join(revenueClearanceNo, "revenue/REVENUE_OPS.md"), "utf8");
   writeFileSync(
-    path.join(revenueClearanceNo, "REVENUE_OPS.md"),
+    path.join(revenueClearanceNo, "revenue/REVENUE_OPS.md"),
     clearanceOps.replace(/(\| Store Product ID \|[^\n]*\n\|[ \-|]*\n)/, "$1| com.app.pro.monthly | pro_monthly | auto_renewable | premium | monthly | no |\n"),
     "utf8",
   );
@@ -320,7 +321,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentMissing, state);
-    const opsPath = path.join(revenueExperimentMissing, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentMissing, "revenue/REVENUE_OPS.md");
     writeFileSync(opsPath, readFileSync(opsPath, "utf8").replace("## Paywall Experiment Backlog", "## Old Notes"), "utf8");
   }
   runFixture(
@@ -339,7 +340,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentWordDrift, state);
-    const opsPath = path.join(revenueExperimentWordDrift, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentWordDrift, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | users completed checkout faster with the annual anchor | anchor-first paywall | trial-start rate | planned | |\n\n## Founder-Gated Probe Step`,
@@ -361,7 +362,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentBogusStart, state);
-    const opsPath = path.join(revenueExperimentBogusStart, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentBogusStart, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       "| --- | --- | --- | --- | --- | --- |\n| 2026-99-99 | anchor-first paywall lifts trials | anchor-first | trial-start rate | active | |\n\n## Founder-Gated Probe Step",
@@ -383,7 +384,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(180);
     writeState(revenueExperimentStale, state);
-    const opsPath = path.join(revenueExperimentStale, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentStale, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(120)} | anchor-first paywall lifts trials | anchor-first | trial-start rate | completed | +12% trial starts, trial-to-paid held at 20% over one renewal window; kept |\n\n## Founder-Gated Probe Step`,
@@ -405,7 +406,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentCurrent, state);
-    const opsPath = path.join(revenueExperimentCurrent, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentCurrent, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts trial starts | anchor-first layout | trial-start rate | completed | +18% trial starts, trial-to-paid held at 22% over one renewal window; founder kept it |\n\n## Founder-Gated Probe Step`,
@@ -430,7 +431,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(90);
     writeState(revenueExperimentDatedNext, state);
-    const opsPath = path.join(revenueExperimentDatedNext, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentDatedNext, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(80)} | anchor-first paywall lifts trials | anchor-first | trial-start rate | completed | +12% trial starts, trial-to-paid held at 20% over one renewal window; kept |\n| ${experimentIsoDaysAgo(-14)} | reverse trial beats opt-in | reverse-trial | trial-to-paid | planned | |\n\n## Founder-Gated Probe Step`,
@@ -455,7 +456,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentFirstPlanned, state);
-    const opsPath = path.join(revenueExperimentFirstPlanned, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentFirstPlanned, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(-14)} | paywall after value reveal beats paywall-first | delayed paywall | trial-start rate | planned | |\n\n## Founder-Gated Probe Step`,
@@ -480,7 +481,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentBlankRow, state);
-    const opsPath = path.join(revenueExperimentBlankRow, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentBlankRow, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | | | | active | |\n\n## Founder-Gated Probe Step`,
@@ -502,7 +503,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentShortMetric, state);
-    const opsPath = path.join(revenueExperimentShortMetric, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentShortMetric, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | +9% CVR with trial-to-paid steady over one renewal window; founder kept it |\n\n## Founder-Gated Probe Step`,
@@ -527,7 +528,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentNegativeCells, state);
-    const opsPath = path.join(revenueExperimentNegativeCells, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentNegativeCells, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | unknown | unknown | NA | completed | unknown |\n\n## Founder-Gated Probe Step`,
@@ -549,7 +550,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentDayOne, state);
-    const opsPath = path.join(revenueExperimentDayOne, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentDayOne, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | +9% day-one conversion, kept |\n\n## Founder-Gated Probe Step`,
@@ -571,7 +572,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentNegatedCohort, state);
-    const opsPath = path.join(revenueExperimentNegatedCohort, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentNegatedCohort, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | No cohort or renewal evidence was collected |\n\n## Founder-Gated Probe Step`,
@@ -593,7 +594,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentUnavailableCohort, state);
-    const opsPath = path.join(revenueExperimentUnavailableCohort, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentUnavailableCohort, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | No cohort evidence was collected; renewal window unavailable |\n\n## Founder-Gated Probe Step`,
@@ -615,7 +616,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentFuturePlan, state);
-    const opsPath = path.join(revenueExperimentFuturePlan, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentFuturePlan, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts conversion | anchor-first layout | CVR | completed | Cohort economics will be measured during the renewal window |\n\n## Founder-Gated Probe Step`,
@@ -637,7 +638,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     getLane(state, "post_launch_ops")["live_since"] = experimentIsoDaysAgo(40);
     writeState(revenueExperimentTrialStartOnly, state);
-    const opsPath = path.join(revenueExperimentTrialStartOnly, "REVENUE_OPS.md");
+    const opsPath = path.join(revenueExperimentTrialStartOnly, "revenue/REVENUE_OPS.md");
     const ops = readFileSync(opsPath, "utf8").replace(
       "| --- | --- | --- | --- | --- | --- |\n\n## Founder-Gated Probe Step",
       `| --- | --- | --- | --- | --- | --- |\n| ${experimentIsoDaysAgo(10)} | annual anchor first lifts trial starts | anchor-first layout | trial-start rate | completed | Trial-start rate +9%; kept |\n\n## Founder-Gated Probe Step`,
@@ -656,9 +657,9 @@ export function register(h: Harness): void {
   const revenueWrongTypeState = readState(revenueWrongType);
   getLane(revenueWrongTypeState, "revenue")["status"] = "done";
   writeState(revenueWrongType, revenueWrongTypeState);
-  const wrongTypeOps = readFileSync(path.join(revenueWrongType, "REVENUE_OPS.md"), "utf8");
+  const wrongTypeOps = readFileSync(path.join(revenueWrongType, "revenue/REVENUE_OPS.md"), "utf8");
   writeFileSync(
-    path.join(revenueWrongType, "REVENUE_OPS.md"),
+    path.join(revenueWrongType, "revenue/REVENUE_OPS.md"),
     `${wrongTypeOps}\n| com.app.lifetime | RevenueCat | non_renewing_subscription | Ready |\n`,
     "utf8",
   );
@@ -692,9 +693,9 @@ export function register(h: Harness): void {
   const revenuePricingCommentedDateState = readState(revenuePricingCommentedDate);
   getLane(revenuePricingCommentedDateState, "revenue")["status"] = "done";
   writeState(revenuePricingCommentedDate, revenuePricingCommentedDateState);
-  const commentedDateOps = readFileSync(path.join(revenuePricingCommentedDate, "REVENUE_OPS.md"), "utf8");
+  const commentedDateOps = readFileSync(path.join(revenuePricingCommentedDate, "revenue/REVENUE_OPS.md"), "utf8");
   writeFileSync(
-    path.join(revenuePricingCommentedDate, "REVENUE_OPS.md"),
+    path.join(revenuePricingCommentedDate, "revenue/REVENUE_OPS.md"),
     commentedDateOps.replace(/^Founder approved:.*$/m, "Founder approved: <!-- 2026-07-26 -->"),
     "utf8",
   );
@@ -710,8 +711,8 @@ export function register(h: Harness): void {
   const revenuePricingMissingState = readState(revenuePricingMissing);
   getLane(revenuePricingMissingState, "revenue")["status"] = "done";
   writeState(revenuePricingMissing, revenuePricingMissingState);
-  const pricingOps = readFileSync(path.join(revenuePricingMissing, "REVENUE_OPS.md"), "utf8");
-  writeFileSync(path.join(revenuePricingMissing, "REVENUE_OPS.md"), pricingOps.replace("## Trial And Pricing Decision", "## Trial Notes"), "utf8");
+  const pricingOps = readFileSync(path.join(revenuePricingMissing, "revenue/REVENUE_OPS.md"), "utf8");
+  writeFileSync(path.join(revenuePricingMissing, "revenue/REVENUE_OPS.md"), pricingOps.replace("## Trial And Pricing Decision", "## Trial Notes"), "utf8");
   runFixture("done revenue lane without a pricing decision section fails", revenuePricingMissing, "check-revenue.ts", 1, "revenue.pricing_decision.missing");
 
   const revenueSandboxOnly = makeFixture("revenue-release-build-unconfirmed");

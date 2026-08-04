@@ -29,12 +29,17 @@ export function register(h: Harness): void {
 
   const pipedProviderCommand = makeFixture("mobai-proof-piped-provider-command");
   writeCompleteMobaiProof(pipedProviderCommand);
-  replaceInFile(pipedProviderCommand, "PROVIDER_PROOF.md", "mobai test flows/smoke.mob", "mobai test flows/smoke.mob | tee mobile/mobai-command.log");
+  replaceInFile(
+    pipedProviderCommand,
+    "operations/PROVIDER_PROOF.md",
+    "mobai test flows/smoke.mob",
+    "mobai test flows/smoke.mob | tee mobile/mobai-command.log",
+  );
   runFixture("MobAI provider row with a piped command still grounds", pipedProviderCommand, "check-mobai-proof.ts", 0, undefined, ["--skill-root", skillRoot]);
 
   const providerInputOnly = makeFixture("mobai-proof-provider-input-only");
   writeCompleteMobaiProof(providerInputOnly);
-  replaceInFile(providerInputOnly, "PROVIDER_PROOF.md", "mobile/mobai-proof.md", "mobile/missing-proof.md");
+  replaceInFile(providerInputOnly, "operations/PROVIDER_PROOF.md", "mobile/mobai-proof.md", "mobile/missing-proof.md");
   runFixture(
     "MobAI input flow cannot substitute for provider output evidence",
     providerInputOnly,
@@ -46,8 +51,8 @@ export function register(h: Harness): void {
 
   const tierPhraseBypass = makeFixture("mobai-proof-tier-phrase-bypass");
   writeCompleteMobaiProof(tierPhraseBypass);
-  replaceInFile(tierPhraseBypass, "PRODUCTION_READINESS.md", "- Selected tier: Free", "- Selected tier: Free; paid tier not needed");
-  replaceInFile(tierPhraseBypass, "PRODUCTION_READINESS.md", "- CLI package: 2.1.1", "- CLI package: Pending");
+  replaceInFile(tierPhraseBypass, "engineering/PRODUCTION_READINESS.md", "- Selected tier: Free", "- Selected tier: Free; paid tier not needed");
+  replaceInFile(tierPhraseBypass, "engineering/PRODUCTION_READINESS.md", "- CLI package: 2.1.1", "- CLI package: Pending");
   runFixture("Free tier wording cannot bypass component proof", tierPhraseBypass, "check-mobai-proof.ts", 1, "mobai.proof.component_version_missing", [
     "--skill-root",
     skillRoot,
@@ -55,8 +60,8 @@ export function register(h: Harness): void {
 
   const conflated = makeFixture("mobai-proof-conflated");
   writeCompleteMobaiProof(conflated);
-  replaceInFile(conflated, "PRODUCTION_READINESS.md", "- MCP server: 2.5.0", "- MCP server: 2.5.1");
-  replaceInFile(conflated, "PRODUCTION_READINESS.md", "- CLI package: 2.1.1", "- CLI package: 2.5.1");
+  replaceInFile(conflated, "engineering/PRODUCTION_READINESS.md", "- MCP server: 2.5.0", "- MCP server: 2.5.1");
+  replaceInFile(conflated, "engineering/PRODUCTION_READINESS.md", "- CLI package: 2.1.1", "- CLI package: 2.5.1");
   runFixture("conflated MobAI component versions fail", conflated, "check-mobai-proof.ts", 1, "mobai.proof.component_versions_conflated", [
     "--skill-root",
     skillRoot,
@@ -66,7 +71,7 @@ export function register(h: Harness): void {
   writeCompleteMobaiProof(xcodeOnly);
   replaceInFile(
     xcodeOnly,
-    "PRODUCTION_READINESS.md",
+    "engineering/PRODUCTION_READINESS.md",
     "| Android | Pixel 9 / Android 16 | `flows/smoke.mob` | `mobile/android-mobai.log` | PostHog event `mobile/android-provider.json` | Passed |",
     "",
   );
@@ -81,7 +86,7 @@ export function register(h: Harness): void {
   const crossPlatformSectionDeleted = makeFixture("mobai-proof-cross-platform-section-deleted");
   writeCompleteMobaiProof(crossPlatformSectionDeleted);
   writeFileSync(
-    path.join(crossPlatformSectionDeleted, "PRODUCTION_READINESS.md"),
+    path.join(crossPlatformSectionDeleted, "engineering/PRODUCTION_READINESS.md"),
     [
       "# Production Readiness",
       "Status: ready.",
@@ -102,7 +107,7 @@ export function register(h: Harness): void {
 
   const healedUnreviewed = makeFixture("mobai-proof-healed-unreviewed");
   writeCompleteMobaiProof(healedUnreviewed);
-  replaceInFile(healedUnreviewed, "PRODUCTION_READINESS.md", "- AI-healed flow: not used", "- AI-healed flow: generated fix accepted");
+  replaceInFile(healedUnreviewed, "engineering/PRODUCTION_READINESS.md", "- AI-healed flow: not used", "- AI-healed flow: generated fix accepted");
   runFixture(
     "AI-healed flow without diff review and passing rerun fails",
     healedUnreviewed,
@@ -121,7 +126,7 @@ export function register(h: Harness): void {
   );
   replaceInFile(
     unsafeFlow,
-    "PRODUCTION_READINESS.md",
+    "engineering/PRODUCTION_READINESS.md",
     "- Host-side script safety: not used",
     "- Host-side script safety: endpoint allowlist checked; no embedded secrets; cleanup verified; backend proof `mobile/mobai-proof.md`",
   );
@@ -132,8 +137,8 @@ export function register(h: Harness): void {
 
   const plainPathUnsafeFlow = makeFixture("mobai-proof-plain-path-unsafe-flow");
   writeCompleteMobaiProof(plainPathUnsafeFlow);
-  replaceInFile(plainPathUnsafeFlow, "PRODUCTION_READINESS.md", "`flows/smoke.mob`", "flows/smoke.mob");
-  replaceInFile(plainPathUnsafeFlow, "PRODUCTION_READINESS.md", "`flows/smoke.mob`", "flows/smoke.mob");
+  replaceInFile(plainPathUnsafeFlow, "engineering/PRODUCTION_READINESS.md", "`flows/smoke.mob`", "flows/smoke.mob");
+  replaceInFile(plainPathUnsafeFlow, "engineering/PRODUCTION_READINESS.md", "`flows/smoke.mob`", "flows/smoke.mob");
   writeFileSync(path.join(plainPathUnsafeFlow, "flows", "smoke.mob"), 'appId: com.example.app\nrepeat while "Loading" { delay 500 }\n', "utf8");
   runFixture("plain-path MobAI flow still receives safety scanning", plainPathUnsafeFlow, "check-mobai-proof.ts", 1, "mobai.proof.repeat_unbounded", [
     "--skill-root",
@@ -142,8 +147,8 @@ export function register(h: Harness): void {
 
   const bareProviderNa = makeFixture("mobai-proof-provider-na");
   writeCompleteMobaiProof(bareProviderNa);
-  replaceInFile(bareProviderNa, "PRODUCTION_READINESS.md", "PostHog event `mobile/ios-provider.json`", "N/A");
-  replaceInFile(bareProviderNa, "PRODUCTION_READINESS.md", "PostHog event `mobile/android-provider.json`", "N/A");
+  replaceInFile(bareProviderNa, "engineering/PRODUCTION_READINESS.md", "PostHog event `mobile/ios-provider.json`", "N/A");
+  replaceInFile(bareProviderNa, "engineering/PRODUCTION_READINESS.md", "PostHog event `mobile/android-provider.json`", "N/A");
   runFixture("bare provider n-a without dated reason fails", bareProviderNa, "check-mobai-proof.ts", 1, "mobai.proof.provider_correlation_reason_missing", [
     "--skill-root",
     skillRoot,
@@ -154,7 +159,7 @@ export function register(h: Harness): void {
   writeFileSync(path.join(inlinePassword, "flows", "smoke.mob"), "appId: com.example.app\neval \"const password = 'fixture-password-value'\"\n", "utf8");
   replaceInFile(
     inlinePassword,
-    "PRODUCTION_READINESS.md",
+    "engineering/PRODUCTION_READINESS.md",
     "- Host-side script safety: not used",
     "- Host-side script safety: endpoint allowlist checked; no embedded secrets; cleanup verified; backend proof `mobile/mobai-proof.md`",
   );
@@ -167,7 +172,7 @@ export function register(h: Harness): void {
   writeFileSync(path.join(externalScriptSecret, "flows", "scripts", "seed.js"), 'const token = "fixture-secret-value";\n', "utf8");
   replaceInFile(
     externalScriptSecret,
-    "PRODUCTION_READINESS.md",
+    "engineering/PRODUCTION_READINESS.md",
     "- Host-side script safety: not used",
     "- Host-side script safety: endpoint allowlist checked; no embedded secrets; cleanup verified; backend proof `mobile/mobai-proof.md`",
   );
@@ -185,7 +190,7 @@ function writeCompleteMobaiProof(root: string): void {
   bundleIds["android"] = "com.example.app";
   const engineering = getLane(state, "engineering");
   engineering["status"] = "done";
-  engineering["evidence"] = ["PRODUCTION_READINESS.md", "mobile/mobai-proof.md"];
+  engineering["evidence"] = ["engineering/PRODUCTION_READINESS.md", "mobile/mobai-proof.md"];
   engineering["blockers"] = [];
   writeState(root, state);
 
@@ -198,7 +203,7 @@ function writeCompleteMobaiProof(root: string): void {
   writeFileSync(path.join(root, "mobile", "android-provider.json"), '{"event":"core_value_completed"}\n', "utf8");
   writeFileSync(path.join(root, "mobile", "mobai-proof.md"), "# MobAI Proof\n\nBoth platform runs and provider events were correlated.\n", "utf8");
   writeFileSync(
-    path.join(root, "PRODUCTION_READINESS.md"),
+    path.join(root, "engineering/PRODUCTION_READINESS.md"),
     [
       "# Production Readiness",
       "Status: ready after grounded engineering proof.",
@@ -218,7 +223,7 @@ function writeCompleteMobaiProof(root: string): void {
     "utf8",
   );
   writeFileSync(
-    path.join(root, "PROVIDER_PROOF.md"),
+    path.join(root, "operations/PROVIDER_PROOF.md"),
     [
       "# Provider Proof",
       "| Provider | current status | proof command | evidence path | founder-only gate |",
@@ -228,7 +233,7 @@ function writeCompleteMobaiProof(root: string): void {
     "utf8",
   );
   writeFileSync(
-    path.join(root, "TOOL_DECISIONS.md"),
+    path.join(root, "strategy/TOOL_DECISIONS.md"),
     [
       "# Tool Decisions",
       "| Tool | Lane | Access status | Founder confirmation | Selected route | Fallback limitation |",

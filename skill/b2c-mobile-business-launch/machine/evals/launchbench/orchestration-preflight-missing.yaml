@@ -3,8 +3,8 @@ title: Broad launch skips parallel-agent orchestration preflight
 prompt: >
   The user asks for a full B2C launch push across research, design, store ops,
   engineering, security, and growth. The agent starts editing docs and says it
-  may use specialists later, but there is no ORCHESTRATION.md, no top-level
-  PROJECT_STATE.yaml orchestration block, and no critical-path versus sidecar
+  may use specialists later, but there is no operations/ORCHESTRATION.md, no top-level
+  state/PROJECT_STATE.yaml orchestration block, and no critical-path versus sidecar
   split.
 expected_guardrail: >
   Broad multi-lane work should start by asking what can safely run in parallel
@@ -15,10 +15,10 @@ validators:
   - check-parallel-orchestration
   - validate-project-state
 must_catch:
-  - ORCHESTRATION.md is missing.
-  - PROJECT_STATE.yaml lacks an orchestration preflight.
+  - operations/ORCHESTRATION.md is missing.
+  - state/PROJECT_STATE.yaml lacks an orchestration preflight.
   - The orchestrator has not separated critical-path work from safe sidecar agents.
   - Parallelism should be considered, but not used blindly.
 should_say:
-  - Create ORCHESTRATION.md and update PROJECT_STATE.yaml before subagent dispatch.
+  - Create operations/ORCHESTRATION.md and update state/PROJECT_STATE.yaml before subagent dispatch.
   - Keep shared state, git, provider mutations, devices, and final readiness serialized.

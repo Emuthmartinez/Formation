@@ -6,9 +6,9 @@
  * The shipped archetype prompt packs default to Supabase; without a recorded
  * contract a build silently couples to whichever provider the prompts named
  * (backend-by-default), authorization rules stay untested prose, and account
- * deletion stays a UI promise. When TECH_SPEC.md exists (or the engineering
+ * deletion stays a UI promise. When engineering/TECH_SPEC.md exists (or the engineering
  * lane is done), this validator requires:
- *   1. A "## Data Contract" section in TECH_SPEC.md.
+ *   1. A "## Data Contract" section in engineering/TECH_SPEC.md.
  *   2. Its sub-sections: Backend Selection, Data Model, Authorization Model,
  *      Migrations And Environments.
  *   3. engineering done additionally requires: a named backend route
@@ -43,7 +43,7 @@ function includesAny(text: string, phrases: string[]): boolean {
 const engineeringStatus = state ? asString(getPath(state, "lanes.engineering.status"))?.toLowerCase() : undefined;
 const engineeringDone = engineeringStatus === "done";
 
-const specCandidates = ["TECH_SPEC.md", "engineering/TECH_SPEC.md"];
+const specCandidates = ["engineering/TECH_SPEC.md", "engineering/engineering/TECH_SPEC.md"];
 const specPath = specCandidates.find((candidate) => Boolean(readText(args.root, candidate)));
 const spec = specPath ? readText(args.root, specPath) : undefined;
 
@@ -53,9 +53,9 @@ if (!spec || !specPath) {
       issue(
         "error",
         "backend_contract.tech_spec_missing",
-        "lanes.engineering is done but TECH_SPEC.md does not exist, so no data contract was ever recorded. " +
-          "Create TECH_SPEC.md with the Data Contract section (see playbook/engineering/backend-data-contract.md).",
-        "TECH_SPEC.md",
+        "lanes.engineering is done but engineering/TECH_SPEC.md does not exist, so no data contract was ever recorded. " +
+          "Create engineering/TECH_SPEC.md with the Data Contract section (see playbook/engineering/backend-data-contract.md).",
+        "engineering/TECH_SPEC.md",
       ),
     );
   }
@@ -139,7 +139,7 @@ if (engineeringDone) {
         issue(
           "error",
           "backend_contract.authorization_proof_missing",
-          `${specPath} Authorization Model names no on-disk artifact (RLS test file, migration, or proof doc such as PRODUCTION_READINESS.md). ` +
+          `${specPath} Authorization Model names no on-disk artifact (RLS test file, migration, or proof doc such as engineering/PRODUCTION_READINESS.md). ` +
             `Point the tested-authorization claim at a file that exists${authPaths.length > 0 ? ` (checked: ${authPaths.join(", ")})` : ""}.`,
           specPath,
         ),

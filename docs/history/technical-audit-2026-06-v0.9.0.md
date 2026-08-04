@@ -26,7 +26,7 @@ Date: 2026-06-09 · Auditor: principal-level review session · Scope: full repo 
 
 **Architecture sketch.** Three layers:
 1. **Playbooks** — `SKILL.md` (entrypoint, progressive-disclosure routing) → 50+ `references/*.md` lane guides.
-2. **State contract** — `business/PROJECT_STATE.yaml` (+ `state/business.json`, JSON schemas) is the machine-readable launch state that generated business repos carry.
+2. **State contract** — `business/state/PROJECT_STATE.yaml` (+ `state/business.json`, JSON schemas) is the machine-readable launch state that generated business repos carry.
 3. **Enforcement** — ~45 `scripts/check-*.ts` validators grep state + artifacts; `run-validator-fixtures.ts` exercises each with positive/negative fixtures; `run-launchbench.ts` schema-validates 78 failure-mode scenario YAMLs; `.github/workflows/source-freshness.yml` runs `audit:ci` on every PR and a weekly URL-freshness refresh over the 194-entry `source-registry.yaml`.
 
 **Key directories.**
@@ -45,7 +45,7 @@ Date: 2026-06-09 · Auditor: principal-level review session · Scope: full repo 
 
 **Surprises.**
 - Every advertised gate actually runs and passes; README's script inventory matches `package.json` exactly. Rare.
-- The repo is self-aware about its weakest point: validators carry "anti-gaming" helpers (`scripts/lib/launch-state.ts:319-437`) and "HONEST LIMIT" comments (`business/repo-agent-entrypoints/settings.json`, `scripts/probe-posthog.ts:20-24`).
+- The repo is self-aware about its weakest point: validators carry "anti-gaming" helpers (`scripts/lib/launch-state.ts:319-437`) and "HONEST LIMIT" comments (`business/engineering/repo-agent-entrypoints/settings.json`, `scripts/probe-posthog.ts:20-24`).
 - The eval harness names ("LaunchBench", "agent evals") oversell what is executed — see A3.
 
 ---
@@ -127,7 +127,7 @@ The `package.json:58` chain spawns each validator as a separate `npm run` (each:
 No ESLint/Prettier/Biome config anywhere in the repo; style consistency across 16k lines of TS is currently maintained by hand and by review. For a repo that explicitly invites agent contributors (CONTRIBUTING.md), a mechanical formatter is cheap drift insurance.
 
 **X2 · Medium · [fact] — Shipped Claude hooks are untestable ~3,000-character inline shell strings.**
-`business/repo-agent-entrypoints/settings.json` embeds three large shell one-liners as `PostToolUse` hooks. Its own `_comment_setup` admits: without `jq` on PATH or `SKILL_ROOT` set, hooks "fail silently" and "no validator fires" — i.e., the enforcement layer the template promises can no-op invisibly in generated repos. No fixture executes these hooks. Consequence: the most failure-prone shipped artifact is the least tested one.
+`business/engineering/repo-agent-entrypoints/settings.json` embeds three large shell one-liners as `PostToolUse` hooks. Its own `_comment_setup` admits: without `jq` on PATH or `SKILL_ROOT` set, hooks "fail silently" and "no validator fires" — i.e., the enforcement layer the template promises can no-op invisibly in generated repos. No fixture executes these hooks. Consequence: the most failure-prone shipped artifact is the least tested one.
 
 **X3 · Medium · [fact] — Maintainer docs give cloned/CI agents impossible, contradictory instructions.**
 `CLAUDE.md:15` tells every agent: "After any skill change, ensure the Codex installed runtime is synced … through symlinks on this machine." `AGENTS.md:94` likewise says "On this machine, `~/.claude/skills/…` point to the Codex runtime copy." But CONTRIBUTING.md:33 correctly states the runtime sync is "maintainer-only and not something external contributors need to do." Consequence: any agent working in a clone, codespace, or CI container (including this audit session) receives a standing instruction it cannot satisfy, and must guess which doc wins. These author-machine assumptions are a leftover that commit `e067304` ("remove author machine paths") missed.
@@ -166,7 +166,7 @@ Validators were grown by accretion; helpers got copy-pasted. **Target state:** `
 
 ### Explicitly NOT recommended (trade-offs)
 - **Do not replace regex-over-prose validation with LLM grading.** It is the repo's core design, its limits are documented, determinism is the feature. Cost/nondeterminism outweigh gains at this maturity.
-- **Do not stop committing generated artifacts** (`design-room.html`, `state/workspace.generated.json`): staleness is already CI-gated; committed copies serve agent consumers.
+- **Do not stop committing generated artifacts** (`design/design-room.html`, `state/workspace.generated.json`): staleness is already CI-gated; committed copies serve agent consumers.
 - **Do not collapse the dual package.json/lockfile structure.** The installed-runtime model requires it and parity is enforced.
 - **Do not chase major dependency upgrades (Vite 8, TS 6) now.** Zero vulns; upgrade when something needs it.
 - **Do not add unit tests to the React renderer.** 267 lines, smoke-rendered in CI; effort exceeds payoff.
@@ -214,7 +214,7 @@ Validators were grown by accretion; helpers got copy-pasted. **Target state:** `
 | # | Task | Files | Acceptance criteria | Effort | Risk | Deps |
 |---|---|---|---|---|---|---|
 | 3.1 | **Clean up fixture temp dirs.** `try/finally` + `rmSync(tempRoot, {recursive, force})` (keep on `--keep-temp` for debugging). | `run-validator-fixtures.ts:22` | `/tmp` clean after suite run | S | None | — |
-| 3.2 | **Extract shipped hooks from inline JSON to a tested script.** Move the shell logic from `settings.json` hooks into `scripts/hooks/post-tool-use.sh` (or `.ts`); hooks become short invocations; add a fixture that executes the script with sample `CLAUDE_TOOL_INPUT` payloads, including the no-`jq`/no-`SKILL_ROOT` paths (should warn loudly, not silently no-op). | `business/repo-agent-entrypoints/settings.json`, new script + fixture | Hook logic is testable; silent-failure modes produce visible warnings; `check:template-safety` passes | M | Medium (changes shipped behavior in generated repos; version-bump per discipline) | — |
+| 3.2 | **Extract shipped hooks from inline JSON to a tested script.** Move the shell logic from `settings.json` hooks into `scripts/hooks/post-tool-use.sh` (or `.ts`); hooks become short invocations; add a fixture that executes the script with sample `CLAUDE_TOOL_INPUT` payloads, including the no-`jq`/no-`SKILL_ROOT` paths (should warn loudly, not silently no-op). | `business/engineering/repo-agent-entrypoints/settings.json`, new script + fixture | Hook logic is testable; silent-failure modes produce visible warnings; `check:template-safety` passes | M | Medium (changes shipped behavior in generated repos; version-bump per discipline) | — |
 | 3.3 | **Add fixture coverage for `grade-screenshots.ts` and probe argument/artifact shapes.** Probes: golden-file test of the proof JSON writer with a mocked fetch; grader: template-emit and ledger-validation paths. | `scripts/fixtures/` | Proof-artifact shape changes break CI | M | Low | 2.3 |
 | 3.4 | **Concurrency pool for source refresh.** Pool of ~5 with per-host serialization; keep the politeness comment honest. | `refresh-source-freshness.ts:248-251` | Weekly job ≤ ~10 min at 194 sources; per-host sequential | S | Low | — |
 | 3.5 | **Document validator phrase vocabularies.** Per-validator "accepted phrases" section generated or hand-written next to each template, so authors know the contract before the red X (addresses A4). | `machine/launchbench-evals.md` or per-template notes | Each phrase-gated validator's vocabulary is discoverable without reading its source | M | None | — |
@@ -266,7 +266,7 @@ All findings from this audit were resolved on this branch (skill version bumped 
 | P1 ~50 sequential npm boots | Orchestrator spawns tsx directly with a concurrency pool (typecheck barrier first, launchbench serialized); full `audit:ci` measured at ~1m23s wall | `scripts/run-audit.ts` |
 | P2 ~49-minute worst-case weekly refresh | Per-host-serialized fetch pool (5 workers) keeps politeness per docs site | `refresh-source-freshness.ts` |
 | X1 no lint/format enforcement | Prettier adopted (printWidth 160), `lint:format` step in the audit plan, one-time mechanical reformat of `scripts/**/*.ts` | `.prettierrc.json`, audit plan |
-| X2 silent hook failure modes | Missing `jq`/`SKILL_ROOT` now warn loudly to stderr and exit 0; blocking screenshot gates still fire without `SKILL_ROOT`; behavior covered by executed-hook fixtures | `business/repo-agent-entrypoints/settings.json`, `fixtures/hooks.fixtures.ts` |
+| X2 silent hook failure modes | Missing `jq`/`SKILL_ROOT` now warn loudly to stderr and exit 0; blocking screenshot gates still fire without `SKILL_ROOT`; behavior covered by executed-hook fixtures | `business/engineering/repo-agent-entrypoints/settings.json`, `fixtures/hooks.fixtures.ts` |
 | X3 impossible maintainer-machine instructions | Runtime-sync guidance in root `AGENTS.md`/`CLAUDE.md` is now conditional on the maintainer machine; clones/CI are told `audit:ci` is the gate | AGENTS.md, CLAUDE.md |
 
 Additionally, `check-package-parity` now enforces audit-plan coverage structurally (every `check:*`/`validate:*` script must be a plan step or carry a recorded exclusion reason; every step must resolve in both packages; both audit entrypoints must route through `run-audit.ts`) — this supersedes and strengthens the old string-derived coverage check.

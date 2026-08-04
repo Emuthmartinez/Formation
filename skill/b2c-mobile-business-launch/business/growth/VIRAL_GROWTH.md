@@ -48,8 +48,8 @@ Policy constraints:
 
 ### Share Artifact Production
 
-- Route personalized share cards (score, milestone badge, referral-unlock confirmation) through `higgsfield generate create gpt_image_2` with on-image user data and `DESIGN.md` palette; produce 9:16 for Stories/Reels and 1:1 for feed via `reframe`. Use `product-photoshoot --mode social_carousel` for referral-reveal carousels.
-- Share cards are social artifacts, not store screenshots — the real-screenshots-only store guardrail does not apply, but the `DESIGN.md` brief and spend-confirmation gate do, public posting stays founder-gated, and outputs are recorded in `CONTENT_ASSETS.md`. See the share-card guidance in `playbook/growth/viral-growth-loops.md`.
+- Route personalized share cards (score, milestone badge, referral-unlock confirmation) through `higgsfield generate create gpt_image_2` with on-image user data and `design/DESIGN.md` palette; produce 9:16 for Stories/Reels and 1:1 for feed via `reframe`. Use `product-photoshoot --mode social_carousel` for referral-reveal carousels.
+- Share cards are social artifacts, not store screenshots — the real-screenshots-only store guardrail does not apply, but the `design/DESIGN.md` brief and spend-confirmation gate do, public posting stays founder-gated, and outputs are recorded in `CONTENT_ASSETS.md`. See the share-card guidance in `playbook/growth/viral-growth-loops.md`.
 
 ## Content Loop
 
@@ -78,8 +78,8 @@ Risk notes:
 
 ## Measurement Plan
 
-Analytics source: `ANALYTICS.md`
-Dashboard proof: `analytics-plan.html`
+Analytics source: `analytics/ANALYTICS.md`
+Dashboard proof: `analytics/analytics-plan.html`
 
 Events to consider:
 - `referral_invite_started`
@@ -123,8 +123,8 @@ The number that separates a compounding loop from decoration (`viral-growth-loop
 
 ## Traceability
 
-Launch trace source: `LAUNCH_TRACE.md`
+Launch trace source: `state/LAUNCH_TRACE.md`
 
 | Trace ID | Evidence | Growth decision | Product impact | Content impact | Revenue/analytics/privacy impact | Proof |
 | --- | --- | --- | --- | --- | --- | --- |
-| GROW-001 | `RESEARCH.md` | Pending | `SPEC.md`, `11_STAR_EXPERIENCE.md`, `ONBOARDING.md` | `UGC_PLAYBOOK.md`, `CONTENT_ASSETS.md`, `FASTLANE_OPS.md` | `REVENUE_OPS.md`, `ANALYTICS.md`, `PRIVACY.md`, `TERMS.md` | Pending |
+| GROW-001 | `strategy/RESEARCH.md` | Pending | `product/SPEC.md`, `11_STAR_EXPERIENCE.md`, `product/ONBOARDING.md` | `growth/UGC_PLAYBOOK.md`, `CONTENT_ASSETS.md`, `growth/FASTLANE_OPS.md` | `revenue/REVENUE_OPS.md`, `analytics/ANALYTICS.md`, `trust/PRIVACY.md`, `trust/TERMS.md` | Pending |

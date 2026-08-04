@@ -1,6 +1,6 @@
 # Backend Data Contract
 
-Every real app build needs a backend-agnostic data contract before implementation hardens: the schema, the authorization model, the migration story, and the environment layout, written down in terms the product owns rather than terms a provider rents out. Without it, the build silently couples to whichever backend the archetype prompt defaulted to — usually Supabase — and a later founder preference for Firebase or a custom backend becomes a rewrite instead of a route change. The contract lives in `TECH_SPEC.md` under a `## Data Contract` section; this reference defines how to fill that section for each backend route and how to prove it.
+Every real app build needs a backend-agnostic data contract before implementation hardens: the schema, the authorization model, the migration story, and the environment layout, written down in terms the product owns rather than terms a provider rents out. Without it, the build silently couples to whichever backend the archetype prompt defaulted to — usually Supabase — and a later founder preference for Firebase or a custom backend becomes a rewrite instead of a route change. The contract lives in `engineering/TECH_SPEC.md` under a `## Data Contract` section; this reference defines how to fill that section for each backend route and how to prove it.
 
 ## Contents
 
@@ -20,7 +20,7 @@ Every real app build needs a backend-agnostic data contract before implementatio
 
 Load this reference:
 
-- Before writing the data model or API sections of `TECH_SPEC.md`.
+- Before writing the data model or API sections of `engineering/TECH_SPEC.md`.
 - Before running any schema or auth prompt from an archetype pack (`social-network.md`, `ai-chat-companion.md`) — the packs assume Supabase and must be adapted first if the route differs.
 - When the founder asks for Firebase or a custom backend instead of the Supabase default, or questions the backend choice at any point.
 - Before claiming the engineering lane done; the contract and its proof are part of done status (`engineering-orchestration.md`).
@@ -34,16 +34,16 @@ Pick one route, record it, and never silently substitute another mid-build.
 - **Firebase.** Firestore + Auth + Cloud Functions + Storage. Choose it when the founder or team already prefers it, or when realtime-document sync (presence, collaborative state, fan-out listeners) fits the product better than relational queries. Accept the trade: no relational joins, no SQL migrations, security rules instead of RLS.
 - **Custom backend.** Node or Python service + Postgres. Choose it when the product needs server logic the BaaS models fight — heavy background processing, multi-step transactions across entities, third-party orchestration, or an authorization model too conditional for declarative rules.
 
-Record the selection in `TECH_SPEC.md` under "Backend Selection" with at least:
+Record the selection in `engineering/TECH_SPEC.md` under "Backend Selection" with at least:
 
 - route: `supabase` | `firebase` | `custom`
 - reason: one or two sentences tied to the product, not to habit
 - decided by / date: founder confirmation or the default-with-no-objection note
 - what would change the decision: the named condition under which the route gets revisited
 
-Mirror the provider status in `PROJECT_STATE.yaml` and the decision in `TOOL_DECISIONS.md` when that file exists. A selection without a reason is the backend-by-default anti-pattern, not a decision.
+Mirror the provider status in `state/PROJECT_STATE.yaml` and the decision in `strategy/TOOL_DECISIONS.md` when that file exists. A selection without a reason is the backend-by-default anti-pattern, not a decision.
 
-Switching backends after implementation starts is a **change-cascade event** (`change-cascade.md`): re-walk the data contract, the archetype prompt adaptations, `SECRETS.md`, `SECURITY.md`, and every client that touches data. Switching is also a founder-only gate — never migrate routes on inference.
+Switching backends after implementation starts is a **change-cascade event** (`change-cascade.md`): re-walk the data contract, the archetype prompt adaptations, `SECRETS.md`, `trust/SECURITY.md`, and every client that touches data. Switching is also a founder-only gate — never migrate routes on inference.
 
 ## Data Model
 
@@ -59,7 +59,7 @@ Rules for filling it:
 - **Entities and ownership.** List every entity, its owning user (or system ownership), and the fields it carries. Every row/document that holds user data must name its owner column or path — authorization depends on it.
 - **Relationships.** Name each relationship and its cardinality. On Supabase/custom this becomes foreign keys; on Firebase it becomes subcollections or reference fields plus the denormalization needed to query without joins. Write the relationship down once, route-agnostically, then note the route mapping.
 - **Retention and deletion.** For each entity, decide soft-delete (tombstone + purge window) or hard-delete, and map the choice to the account-deletion requirement: when a user deletes their account, the data layer must actually erase or anonymize their data on every entity, not just hide it in the UI. Cross-check `privacy-terms.md` — the privacy policy's deletion promise and the data model's deletion path must be the same fact.
-- **PII classification.** Tag each field as PII, sensitive, or operational. This classification feeds `SECURITY.md` (what needs encryption, access logging, and minimization) and the store privacy disclosures via `privacy-terms.md`.
+- **PII classification.** Tag each field as PII, sensitive, or operational. This classification feeds `trust/SECURITY.md` (what needs encryption, access logging, and minimization) and the store privacy disclosures via `privacy-terms.md`.
 
 ## Authorization Model
 
@@ -88,7 +88,7 @@ Rules for every route:
 The "Migrations And Environments" sub-section must name the migration tool, the environment map, and the backup posture. Fill it as follows.
 
 - **Migration tool per route.** Supabase: `supabase` CLI migrations, committed under `supabase/migrations/`, applied in order; never mutate production schema through a dashboard without a corresponding migration file. Firebase: Firestore has no schema migrations — document a data-shape version per collection instead (a `schemaVersion` field or documented shape changelog) plus a backfill plan for shape changes. Custom: pick and name a migration tool (e.g. Prisma Migrate, Alembic, node-pg-migrate) in the contract; "raw SQL applied by hand" is not a migration story.
-- **Environment separation.** Maintain distinct dev, staging, and production backends (separate Supabase projects, Firebase projects, or database instances). Never point a dev client at production data. Record the environment map in `TECH_SPEC.md` and the per-environment secret locations in `SECRETS.md`.
+- **Environment separation.** Maintain distinct dev, staging, and production backends (separate Supabase projects, Firebase projects, or database instances). Never point a dev client at production data. Record the environment map in `engineering/TECH_SPEC.md` and the per-environment secret locations in `SECRETS.md`.
 - **Secrets.** All connection strings, keys, and tokens route through Doppler (or the founder-approved alternative) per `secrets-management.md` — one config per environment, `doppler run --` wrappers in commands, no raw values in docs or proofs.
 - **Seed data and fixtures.** Ship a seed script that populates a fresh environment with enough realistic data to exercise the core loop and the authorization matrix (at least two distinct users plus anonymous). Tests and demos run against seeded environments, never production.
 - **Backup and restore posture.** Record what the route provides (Supabase point-in-time recovery tier, Firebase scheduled exports, custom `pg_dump`/managed snapshots), the retention window, and who can trigger a restore. Production restoration is a founder-only gate.
@@ -122,7 +122,7 @@ The shipped archetype prompt packs (`starters/social-network`, `starters/ai-chat
 | Storage buckets + storage policies | Cloud Storage + storage security rules | Object storage (e.g. S3-compatible) + signed URLs |
 | `supabase` CLI migrations | Data-shape versioning + backfill plan | Named migration tool |
 
-For each adapted prompt, keep the product content (entities, the authorization matrix, the core-loop behavior) identical and swap only the route mechanics. The adaptation happens at prompt time, not patch time: rewrite the prompt's schema/RLS/Realtime instructions through the table above, run the adapted prompt, then reconcile the output with the `## Data Contract` section as usual. Record in `PROJECT_STATE.yaml` that the pack was adapted and to which route, so later sessions do not re-run the Supabase originals. New archetype packs should cite this reference from their schema prompts instead of restating route mechanics.
+For each adapted prompt, keep the product content (entities, the authorization matrix, the core-loop behavior) identical and swap only the route mechanics. The adaptation happens at prompt time, not patch time: rewrite the prompt's schema/RLS/Realtime instructions through the table above, run the adapted prompt, then reconcile the output with the `## Data Contract` section as usual. Record in `state/PROJECT_STATE.yaml` that the pack was adapted and to which route, so later sessions do not re-run the Supabase originals. New archetype packs should cite this reference from their schema prompts instead of restating route mechanics.
 
 ## Proof
 
@@ -132,7 +132,7 @@ The data contract is proven, not prose. Before the engineering lane claims the d
 - **Migration proof.** Apply the full migration history (or, on Firebase, instantiate the documented data shapes) against a fresh environment and confirm the result matches the contract.
 - **Seed proof.** Run the seed script against that fresh environment and confirm the core loop works against seeded data.
 
-Record the commands and evidence paths in `PRODUCTION_READINESS.md`, and the backend-provider state (docs checked, preflight, validation, fallback) in `PROVIDER_PROOF.md` and `PROJECT_STATE.yaml` per `provider-proof.md`. Evidence means the exact command, its environment, and where the output lives — for example:
+Record the commands and evidence paths in `engineering/PRODUCTION_READINESS.md`, and the backend-provider state (docs checked, preflight, validation, fallback) in `operations/PROVIDER_PROOF.md` and `state/PROJECT_STATE.yaml` per `provider-proof.md`. Evidence means the exact command, its environment, and where the output lives — for example:
 
 ```
 authorization proof: npm test -- rls.spec.ts (dev Supabase project, seeded)
@@ -145,7 +145,7 @@ Never paste secret values or production data into proofs; reference secret-manag
 
 ## Artifact Contract
 
-`TECH_SPEC.md` must contain a `## Data Contract` section with these exact sub-section header strings — a deterministic validator greps for them:
+`engineering/TECH_SPEC.md` must contain a `## Data Contract` section with these exact sub-section header strings — a deterministic validator greps for them:
 
 - "Backend Selection"
 - "Data Model"
@@ -158,7 +158,7 @@ For done-status engineering, additionally:
 - "Authorization Model" names its enforcement mechanism: RLS, security rules, or middleware authz.
 - The Authorization Model states the rules are tested and points at at least one artifact that exists on disk (RLS/security-rules test file, migration, or the proof doc recording the test run). A bare "RLS" in prose fails the done gate.
 
-Validator: `npm run check:backend-contract -- --root . --state PROJECT_STATE.yaml`. Run it before claiming the engineering lane done; a failing run leaves the lane partial with a named blocker (`artifact-contracts.md`).
+Validator: `npm run check:backend-contract -- --root . --state state/PROJECT_STATE.yaml`. Run it before claiming the engineering lane done; a failing run leaves the lane partial with a named blocker (`artifact-contracts.md`).
 
 ## Founder-Only Gates
 

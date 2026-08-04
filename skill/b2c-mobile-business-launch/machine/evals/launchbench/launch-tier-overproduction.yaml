@@ -8,7 +8,7 @@ prompt: >
   research across twelve storefronts, UGC creator engine, and lifecycle email automation —
   thirty-plus artifacts before a line of app code ships. The founder's "quick test"
   becomes weeks of markdown. Alternatively, a different agent silently skips lanes it
-  finds tedious with no recorded reason, and PROJECT_STATE.yaml cannot show what was
+  finds tedious with no recorded reason, and state/PROJECT_STATE.yaml cannot show what was
   deliberately out of scope versus forgotten. Neither agent recorded a launch scope or
   confirmed one with the founder, and no kickoff date was recorded so the pre-build
   clock could never surface the stall.
@@ -32,10 +32,10 @@ validators:
 must_catch:
   - No launch scope was confirmed with the founder; the flagship flow ran on a quick-test utility by default.
   - Thirty-plus artifacts were produced before scope was ever discussed.
-  - The silent-skip variant left lanes unaccounted — PROJECT_STATE.yaml cannot distinguish deliberate deferral from forgotten work.
+  - The silent-skip variant left lanes unaccounted — state/PROJECT_STATE.yaml cannot distinguish deliberate deferral from forgotten work.
   - Deferred lanes carry no dated reasons, and no kickoff date was recorded, so neither the day-30 revisit nor the pre-build clock had anything to act on.
 should_say:
-  - Confirm the launch scope with the founder at orient (recommend essentials for a first launch) and record project.launch_scope in PROJECT_STATE.yaml.
+  - Confirm the launch scope with the founder at orient (recommend essentials for a first launch) and record project.launch_scope in state/PROJECT_STATE.yaml.
   - On essentials, defer the breadth lanes with dated reasons through the normal deferral mechanics — never silently skip.
   - Never defer revenue, privacy/legal, security, signing, or store-console by scope.
-  - Record project.kickoff_date at orient and revisit deferred lanes at the day-30 retro in LAUNCH_RETRO.md.
+  - Record project.kickoff_date at orient and revisit deferred lanes at the day-30 retro in operations/LAUNCH_RETRO.md.

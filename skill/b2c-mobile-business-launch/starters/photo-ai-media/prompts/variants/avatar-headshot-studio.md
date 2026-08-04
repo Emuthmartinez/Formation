@@ -28,9 +28,9 @@ Changes from the base:
   deletion is verified, not best-effort
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -40,4 +40,4 @@ shipping strings.
 - The tuned identity is the most sensitive artifact this skill's packs ever store: treat it as biometric-adjacent data with named retention, owner-only access, and provider-side deletion verified through the adapter (`privacy-terms.md`, `security-release-hardening.md`). The consent attestation and the anti-impersonation policy extend prompt 08 and are an `ethics-guardrail.md` compliance line — deepfaking a non-consenting person is a veto, not a setting.
 - The "pack is ready" reveal is the 11-star moment at its strongest — and the strongest Variable Reward exposure (M outputs of your own face): the prompt-04 HIGH-risk contract applies in full, and partial re-rolls must not be engineered near-misses (`reward_variation_proof`).
 - Training jobs run minutes, not seconds: honest progress (Perceived Effort Delay with `computation_type: real_api_call`) plus a leave-and-notify path via `resend-email-ops.md` — never a captive fake progress bar.
-- Add `training_set_created`, `identity_training_completed`, `pack_delivered`, `identity_data_deleted` to `ANALYTICS.md`.
+- Add `training_set_created`, `identity_training_completed`, `pack_delivered`, `identity_data_deleted` to `analytics/ANALYTICS.md`.

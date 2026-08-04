@@ -29,9 +29,9 @@ Performance:
   don't ship a year of raw rows to the client
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -41,4 +41,4 @@ shipping strings.
 - **Honesty is the design constraint.** Stats must reflect real check-ins; freezes are visually distinct; completion rates are cadence-aware. Inflated or massaged numbers fail the `ethics-guardrail.md` truthfulness test and poison the streak card's attestation.
 - The weekly review email routes through `resend-email-ops.md` with an unsubscribe path; respect the user's quiet hours and mute settings from prompt 04.
 - This surface is the standard upgrade hook for prompt 06 (full history and insights behind the paid tier, current week free) — decide the split with the founder there, not here.
-- Add `stats_viewed`, `heatmap_viewed`, `weekly_review_opened` to `ANALYTICS.md`.
+- Add `stats_viewed`, `heatmap_viewed`, `weekly_review_opened` to `analytics/ANALYTICS.md`.

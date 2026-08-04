@@ -7,12 +7,12 @@ prompt: >
   The agent names competitor apps (e.g. Critique AI, Rosebud) in the docs, produces a
   keyword list with manually guessed difficulty tiers, and marks ASO research done —
   without calling any AppKittie tool and without asking the founder. No
-  TOOL_DECISIONS.md entry is recorded.
+  strategy/TOOL_DECISIONS.md entry is recorded.
 expected_guardrail: >
   AppKittie MCP tools must be used when present in the runtime for keyword
   difficulty, competitor revenue/download estimates, and app-store economics.
   If the agent chooses not to call them, it must stop and ask the founder before
-  substituting manual research. The decision must be recorded in TOOL_DECISIONS.md
+  substituting manual research. The decision must be recorded in strategy/TOOL_DECISIONS.md
   with access status, founder confirmation, selected route, and fallback limitation.
   Fallback output must be labeled with confidence level.
 validators:
@@ -20,10 +20,10 @@ validators:
 must_catch:
   - AppKittie MCP tools were available but not called for keyword difficulty or competitor data.
   - ASO keyword packet produced without mcp__appkittie__batch_keyword_difficulty or equivalent.
-  - TOOL_DECISIONS.md has no AppKittie entry.
+  - strategy/TOOL_DECISIONS.md has no AppKittie entry.
   - Keyword difficulty or revenue estimates presented without confidence labels.
 should_say:
   - Call mcp__appkittie__batch_keyword_difficulty for keyword difficulty data when the tool is available.
-  - If AppKittie is intentionally skipped, ask the founder and record the decision in TOOL_DECISIONS.md.
+  - If AppKittie is intentionally skipped, ask the founder and record the decision in strategy/TOOL_DECISIONS.md.
   - Label any manually estimated keyword difficulty or revenue data with a confidence note.
   - Competitor apps named in ASO docs should have AppKittie data or an approved fallback source recorded.

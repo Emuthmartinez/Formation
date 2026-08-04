@@ -3,7 +3,7 @@
  * check-hooks-installed.ts — the hooks are the enforcement layer; this proves
  * they were actually delivered.
  *
- * business/repo-agent-entrypoints/settings.json ships PostToolUse hooks that
+ * business/engineering/repo-agent-entrypoints/settings.json ships PostToolUse hooks that
  * fire depth-check validators after artifact writes and block the screenshot
  * grading pass. machine/fixtures/hooks.fixtures.ts proves those commands
  * behave correctly. Nothing proved a generated business repo had installed
@@ -112,12 +112,12 @@ if (template.error) {
 /* ----------------------------------------------------------- business repo */
 
 /**
- * business/ carries PROJECT_STATE.yaml like a real business repo does, so
+ * business/ carries state/PROJECT_STATE.yaml like a real business repo does, so
  * the discriminator is repo-agent-entrypoints/ — a directory that only exists
  * inside the skill's own template tree.
  */
 function isSkillTemplateDir(root: string): boolean {
-  return existsSync(path.join(root, "repo-agent-entrypoints", "settings.json"));
+  return existsSync(path.join(root, "engineering/repo-agent-entrypoints", "settings.json"));
 }
 
 if (args.root && !template.error) {

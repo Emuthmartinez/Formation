@@ -13,7 +13,7 @@ functional goal — because earned identity is self-reinforcing and publicly dis
 ### Bright Line / Dark Line
 
 **Bright line.** The level label reflects genuine skill improvement measured by a real
-behavioral metric documented in `ANALYTICS.md` and `TECH_SPEC.md`; the vocabulary is drawn
+behavioral metric documented in `analytics/ANALYTICS.md` and `engineering/TECH_SPEC.md`; the vocabulary is drawn
 from the user's skill domain and feels earned; progress is always visible; and social display
 is optional, with a clear opt-out.
 

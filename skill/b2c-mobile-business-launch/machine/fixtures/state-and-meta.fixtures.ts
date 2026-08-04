@@ -94,14 +94,14 @@ export function register(h: Harness): void {
   runFixture("complete paid-tool decisions packet passes", clean, "check-paid-tool-decisions.ts", 0);
 
   const asoMissingListing = makeFixture("aso-missing-listing");
-  rmSync(path.join(asoMissingListing, "app-store-listing"), { recursive: true, force: true });
-  rmSync(path.join(asoMissingListing, "APP_STORE_LISTING.md"), { force: true });
+  rmSync(path.join(asoMissingListing, "store", "app-store-listing"), { recursive: true, force: true });
+  rmSync(path.join(asoMissingListing, "store", "APP_STORE_LISTING.md"), { force: true });
   runFixture("aso metadata without APP_STORE_LISTING fails", asoMissingListing, "check-aso-metadata.ts", 1, "aso_metadata.app_store_listing_missing");
 
   const paidToolMissing = makeFixture("paid-tool-missing-decisions");
-  rmSync(path.join(paidToolMissing, "TOOL_DECISIONS.md"), { force: true });
+  rmSync(path.join(paidToolMissing, "strategy/TOOL_DECISIONS.md"), { force: true });
   runFixture(
-    "missing TOOL_DECISIONS.md fails when paid tools in scope",
+    "missing strategy/TOOL_DECISIONS.md fails when paid tools in scope",
     paidToolMissing,
     "check-paid-tool-decisions.ts",
     1,
@@ -109,9 +109,9 @@ export function register(h: Harness): void {
   );
 
   const localizationTranslateFirst = makeFixture("localization-translate-first");
-  rmSync(path.join(localizationTranslateFirst, "localization-market-research"), { recursive: true, force: true });
+  rmSync(path.join(localizationTranslateFirst, "strategy", "localization-market-research"), { recursive: true, force: true });
   writeFileSync(
-    path.join(localizationTranslateFirst, "APP_STORE_LISTING.md"),
+    path.join(localizationTranslateFirst, "store", "APP_STORE_LISTING.md"),
     ["# App Store Listing", "Localization matrix: target locales ja, de, pt-BR.", "Localized keywords prepared for all locales."].join("\n"),
     "utf8",
   );
@@ -173,7 +173,7 @@ export function register(h: Harness): void {
   );
   runFixture("machine-local .claude worktree copies are not scanned as sources", sourceRegistryWorktree, "check-source-freshness.ts", 0);
   runFixture("template secret docs pass from bundled template path", path.join(skillRoot, "business"), "check-secret-routing.ts", 0);
-  const cockpitPath = path.join(clean, "launch-cockpit.html");
+  const cockpitPath = path.join(clean, "state/launch-cockpit.html");
   runFixture("launch cockpit renders", clean, "render-launch-cockpit.ts", 0, undefined, ["--out", cockpitPath]);
   if (!existsSync(cockpitPath)) {
     results.push({
@@ -203,7 +203,7 @@ export function register(h: Harness): void {
 
   const continuityMissingSourceFile = makeFixture("continuity-missing-source-file");
   writeBusinessEntrypoints(continuityMissingSourceFile);
-  rmSync(path.join(continuityMissingSourceFile, "PRODUCTION_READINESS.md"), { force: true });
+  rmSync(path.join(continuityMissingSourceFile, "engineering/PRODUCTION_READINESS.md"), { force: true });
   runFixture("business continuity without source file fails", continuityMissingSourceFile, "check-continuity-contract.ts", 1, "continuity.source_file_missing");
 
   const continuityMissingGitStatus = makeFixture("continuity-missing-git-status");
@@ -254,7 +254,7 @@ export function register(h: Harness): void {
   const missingStateEmotionalLane = makeFixture("state-missing-emotional-lane");
   {
     const state = readState(missingStateEmotionalLane);
-    const lanes = expectRecord(state.lanes, "PROJECT_STATE.yaml lanes");
+    const lanes = expectRecord(state.lanes, "state/PROJECT_STATE.yaml lanes");
     delete lanes.emotional_design;
     writeState(missingStateEmotionalLane, state);
   }
@@ -290,7 +290,7 @@ export function register(h: Harness): void {
   aliasContract["event_alias_reason"] = "Existing production dashboards map signup_attribution_selected to attribution_source_selected.";
   writeState(attributionAlias, attributionAliasState);
   writeFileSync(
-    path.join(attributionAlias, "ANALYTICS.md"),
+    path.join(attributionAlias, "analytics/ANALYTICS.md"),
     [
       "# Analytics",
       "signup_attribution_selected is the app event alias for attribution_source_selected.",
@@ -305,7 +305,7 @@ export function register(h: Harness): void {
   const missingContract = expectRecord(getLane(attributionMissingState, "analytics_attribution").attribution_contract, "attribution_contract");
   const missingAttributionLane = getLane(attributionMissingState, "analytics_attribution");
   missingAttributionLane["status"] = "done";
-  missingAttributionLane["evidence"] = ["ANALYTICS.md"];
+  missingAttributionLane["evidence"] = ["analytics/ANALYTICS.md"];
   missingContract["screen_early"] = true;
   missingContract["other_free_text"] = true;
   missingContract["backend_persistence"] = true;
@@ -313,7 +313,7 @@ export function register(h: Harness): void {
   missingContract["verified"] = true;
   writeState(attributionMissingImplementation, attributionMissingState);
   writeFileSync(
-    path.join(attributionMissingImplementation, "ANALYTICS.md"),
+    path.join(attributionMissingImplementation, "analytics/ANALYTICS.md"),
     "# Analytics\n\nAnalytics implementation details are intentionally absent in this fixture.\n",
     "utf8",
   );
@@ -345,9 +345,14 @@ export function register(h: Harness): void {
   ].join("\n");
 
   const landingInScopePass = makeEmptyFixture("landing-funnel-in-scope-pass");
-  writeFileSync(path.join(landingInScopePass, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "business", "PROJECT_STATE.yaml"), "utf8"), "utf8");
-  mkdirSync(path.join(landingInScopePass, "landing"), { recursive: true });
-  writeFileSync(path.join(landingInScopePass, "landing", "README.md"), landingGateEvidence, "utf8");
+  mkdirSync(path.join(landingInScopePass, "state"), { recursive: true });
+  writeFileSync(
+    path.join(landingInScopePass, "state/PROJECT_STATE.yaml"),
+    readFileSync(path.join(skillRoot, "business", "state/PROJECT_STATE.yaml"), "utf8"),
+    "utf8",
+  );
+  mkdirSync(path.join(landingInScopePass, "growth", "landing"), { recursive: true });
+  writeFileSync(path.join(landingInScopePass, "growth", "landing", "README.md"), landingGateEvidence, "utf8");
   mkdirSync(path.join(landingInScopePass, "public"), { recursive: true });
   for (const staticFile of ["robots.txt", "llms.txt", "sitemap.xml"]) {
     writeFileSync(path.join(landingInScopePass, "public", staticFile), "seeded by fixture\n", "utf8");
@@ -355,22 +360,37 @@ export function register(h: Harness): void {
   runFixture("landing funnel in scope with full gate evidence passes", landingInScopePass, "check-landing-funnel.ts", 0);
 
   const landingInScopeFail = makeEmptyFixture("landing-funnel-in-scope-missing-gates");
-  writeFileSync(path.join(landingInScopeFail, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "business", "PROJECT_STATE.yaml"), "utf8"), "utf8");
-  mkdirSync(path.join(landingInScopeFail, "landing"), { recursive: true });
-  writeFileSync(path.join(landingInScopeFail, "landing", "index.html"), "<h1>Launch page</h1>\n", "utf8");
-  writeFileSync(path.join(landingInScopeFail, "landing", "README.md"), "# Landing\nDeployed.\n", "utf8");
+  mkdirSync(path.join(landingInScopeFail, "state"), { recursive: true });
+  writeFileSync(
+    path.join(landingInScopeFail, "state/PROJECT_STATE.yaml"),
+    readFileSync(path.join(skillRoot, "business", "state/PROJECT_STATE.yaml"), "utf8"),
+    "utf8",
+  );
+  mkdirSync(path.join(landingInScopeFail, "growth", "landing"), { recursive: true });
+  writeFileSync(path.join(landingInScopeFail, "growth", "landing", "index.html"), "<h1>Launch page</h1>\n", "utf8");
+  writeFileSync(path.join(landingInScopeFail, "growth", "landing", "README.md"), "# Landing\nDeployed.\n", "utf8");
   runFixture("landing funnel in scope without gate evidence fails", landingInScopeFail, "check-landing-funnel.ts", 1, "landing_funnel.git_clean_gate.missing");
 
   // A copied-in section library (no index.html/public/wrangler.toml) is not a
   // deployed site and must not trigger the deploy gates.
   const landingPackOnly = makeEmptyFixture("landing-funnel-pack-only");
-  writeFileSync(path.join(landingPackOnly, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "business", "PROJECT_STATE.yaml"), "utf8"), "utf8");
-  mkdirSync(path.join(landingPackOnly, "landing", "sections"), { recursive: true });
-  writeFileSync(path.join(landingPackOnly, "landing", "README.md"), "# Landing section library (not a deployed site yet).\n", "utf8");
-  writeFileSync(path.join(landingPackOnly, "landing", "sections", "Hero.tsx"), '"use client";\nexport function Hero() {\n  return null;\n}\n', "utf8");
+  mkdirSync(path.join(landingPackOnly, "state"), { recursive: true });
+  writeFileSync(
+    path.join(landingPackOnly, "state/PROJECT_STATE.yaml"),
+    readFileSync(path.join(skillRoot, "business", "state/PROJECT_STATE.yaml"), "utf8"),
+    "utf8",
+  );
+  mkdirSync(path.join(landingPackOnly, "growth", "landing", "sections"), { recursive: true });
+  writeFileSync(path.join(landingPackOnly, "growth", "landing", "README.md"), "# Landing section library (not a deployed site yet).\n", "utf8");
+  writeFileSync(
+    path.join(landingPackOnly, "growth", "landing", "sections", "Hero.tsx"),
+    '"use client";\nexport function Hero() {\n  return null;\n}\n',
+    "utf8",
+  );
   runFixture("landing section pack without a site stays out of scope", landingPackOnly, "check-landing-funnel.ts", 0);
 
   const landingNoState = makeEmptyFixture("landing-funnel-missing-state");
+  mkdirSync(path.join(landingNoState, "state"), { recursive: true });
   runFixture("landing funnel fails loudly when project state is missing", landingNoState, "check-landing-funnel.ts", 1, "project_state.missing");
 
   // --- landing motion craft (playbook/design/landing-motion-craft.md) ---
@@ -389,10 +409,11 @@ export function register(h: Harness): void {
     ].join("\n");
 
   const withLandingSite = (root: string, html: string): void => {
-    writeFileSync(path.join(root, "PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "business", "PROJECT_STATE.yaml"), "utf8"), "utf8");
-    mkdirSync(path.join(root, "landing"), { recursive: true });
-    writeFileSync(path.join(root, "landing", "index.html"), html, "utf8");
-    writeFileSync(path.join(root, "landing", "README.md"), landingGateEvidence, "utf8");
+    mkdirSync(path.join(root, "state"), { recursive: true });
+    writeFileSync(path.join(root, "state/PROJECT_STATE.yaml"), readFileSync(path.join(skillRoot, "business", "state/PROJECT_STATE.yaml"), "utf8"), "utf8");
+    mkdirSync(path.join(root, "growth", "landing"), { recursive: true });
+    writeFileSync(path.join(root, "growth", "landing", "index.html"), html, "utf8");
+    writeFileSync(path.join(root, "growth", "landing", "README.md"), landingGateEvidence, "utf8");
     mkdirSync(path.join(root, "public"), { recursive: true });
     for (const staticFile of ["robots.txt", "llms.txt", "sitemap.xml"]) {
       writeFileSync(path.join(root, "public", staticFile), "seeded by fixture\n", "utf8");
@@ -437,7 +458,11 @@ export function register(h: Harness): void {
   // file is not animation and must not demand reduced-motion handling.
   const motionProseOnly = makeEmptyFixture("landing-motion-prose-only");
   withLandingSite(motionProseOnly, "<h1>Static launch page</h1>\n<p>No animation here.</p>\n");
-  writeFileSync(path.join(motionProseOnly, "landing", "notes.mdx"), "The onboarding transition: from waitlist to full access happens at launch.\n", "utf8");
+  writeFileSync(
+    path.join(motionProseOnly, "growth", "landing", "notes.mdx"),
+    "The onboarding transition: from waitlist to full access happens at launch.\n",
+    "utf8",
+  );
   runFixture("landing prose mentioning transition is not treated as animation", motionProseOnly, "check-landing-funnel.ts", 0);
 
   // Regression (verification pass): reduced-motion handling may live outside
@@ -456,8 +481,12 @@ export function register(h: Harness): void {
   // is still detected as motion.
   const motionJsOnly = makeEmptyFixture("landing-motion-js-only");
   withLandingSite(motionJsOnly, "<h1>Static launch page</h1>\n");
-  mkdirSync(path.join(motionJsOnly, "landing", "sections"), { recursive: true });
-  writeFileSync(path.join(motionJsOnly, "landing", "sections", "Reveal.tsx"), 'export const style = { opacity: 0, transitionDuration: "600ms" };\n', "utf8");
+  mkdirSync(path.join(motionJsOnly, "growth", "landing", "sections"), { recursive: true });
+  writeFileSync(
+    path.join(motionJsOnly, "growth", "landing", "sections", "Reveal.tsx"),
+    'export const style = { opacity: 0, transitionDuration: "600ms" };\n',
+    "utf8",
+  );
   runFixture(
     "JS-only animation without reduced-motion handling fails",
     motionJsOnly,
@@ -500,7 +529,7 @@ export function register(h: Harness): void {
 
   const laneCoverageMissingLane = makeFixture("lane-coverage-missing-lane");
   const laneCoverageState = readState(laneCoverageMissingLane);
-  delete expectRecord(laneCoverageState.lanes, "PROJECT_STATE.yaml lanes")["revenue"];
+  delete expectRecord(laneCoverageState.lanes, "state/PROJECT_STATE.yaml lanes")["revenue"];
   writeState(laneCoverageMissingLane, laneCoverageState);
   runFixture("state missing a required lane fails coverage", laneCoverageMissingLane, "check-lane-coverage.ts", 1, "lane_coverage.revenue.missing");
 
@@ -519,17 +548,17 @@ export function register(h: Harness): void {
   // done on a partial upstream = error.
   const depUnlocked = makeFixture("lane-dependency-unlocked");
   const depUnlockedState = readState(depUnlocked);
-  expectRecord(depUnlockedState.project, "PROJECT_STATE.yaml project").phase = "phase_2_design";
-  Object.assign(getLane(depUnlockedState, "design"), { status: "done", evidence: ["DESIGN.md"] });
-  Object.assign(getLane(depUnlockedState, "product"), { status: "partial", evidence: ["SPEC.md"] });
+  expectRecord(depUnlockedState.project, "state/PROJECT_STATE.yaml project").phase = "phase_2_design";
+  Object.assign(getLane(depUnlockedState, "design"), { status: "done", evidence: ["design/DESIGN.md"] });
+  Object.assign(getLane(depUnlockedState, "product"), { status: "partial", evidence: ["product/SPEC.md"] });
   writeState(depUnlocked, depUnlockedState);
   runFixture("lane done on a partial upstream lane fails coverage", depUnlocked, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
 
   // done on a blocked upstream = error (blocked is not a resolved scope decision).
   const depBlocked = makeFixture("lane-dependency-blocked-upstream");
   const depBlockedState = readState(depBlocked);
-  expectRecord(depBlockedState.project, "PROJECT_STATE.yaml project").phase = "phase_2_design";
-  Object.assign(getLane(depBlockedState, "design"), { status: "done", evidence: ["DESIGN.md"] });
+  expectRecord(depBlockedState.project, "state/PROJECT_STATE.yaml project").phase = "phase_2_design";
+  Object.assign(getLane(depBlockedState, "design"), { status: "done", evidence: ["design/DESIGN.md"] });
   Object.assign(getLane(depBlockedState, "product"), { status: "blocked", blockers: ["Awaiting founder call on the V2 boundary."] });
   writeState(depBlocked, depBlockedState);
   runFixture("lane done on a blocked upstream lane fails coverage", depBlocked, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
@@ -575,7 +604,7 @@ export function register(h: Harness): void {
   const founderGateStaleLive = makeFixture("founder-gate-stale-postlaunch");
   {
     const state = readState(founderGateStaleLive);
-    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    expectRecord(state.project, "state/PROJECT_STATE.yaml project").phase = "phase_6";
     writeState(founderGateStaleLive, state);
   }
   withLane(founderGateStaleLive, "paid_user_acquisition", {
@@ -598,8 +627,8 @@ export function register(h: Harness): void {
   const founderGateStandingPolicy = makeFixture("founder-gate-standing-policy");
   {
     const state = readState(founderGateStandingPolicy);
-    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
-    const lanes = expectRecord(state.lanes, "PROJECT_STATE.yaml lanes");
+    expectRecord(state.project, "state/PROJECT_STATE.yaml project").phase = "phase_6";
+    const lanes = expectRecord(state.lanes, "state/PROJECT_STATE.yaml lanes");
     for (const laneName of Object.keys(lanes)) {
       const lane = expectRecord(lanes[laneName], `lanes.${laneName}`);
       lane["status"] = "deferred";
@@ -616,8 +645,8 @@ export function register(h: Harness): void {
   const founderGateSameDayEast = makeFixture("founder-gate-same-day-east");
   {
     const state = readState(founderGateSameDayEast);
-    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
-    const lanes = expectRecord(state.lanes, "PROJECT_STATE.yaml lanes");
+    expectRecord(state.project, "state/PROJECT_STATE.yaml project").phase = "phase_6";
+    const lanes = expectRecord(state.lanes, "state/PROJECT_STATE.yaml lanes");
     for (const laneName of Object.keys(lanes)) {
       const lane = expectRecord(lanes[laneName], `lanes.${laneName}`);
       lane["status"] = "deferred";
@@ -634,7 +663,7 @@ export function register(h: Harness): void {
   const founderGateDateAfterColon = makeFixture("founder-gate-date-after-colon");
   {
     const state = readState(founderGateDateAfterColon);
-    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    expectRecord(state.project, "state/PROJECT_STATE.yaml project").phase = "phase_6";
     writeState(founderGateDateAfterColon, state);
   }
   withLane(founderGateDateAfterColon, "paid_user_acquisition", {
@@ -653,7 +682,7 @@ export function register(h: Harness): void {
   const founderGateFutureDate = makeFixture("founder-gate-future-date");
   {
     const state = readState(founderGateFutureDate);
-    expectRecord(state.project, "PROJECT_STATE.yaml project").phase = "phase_6";
+    expectRecord(state.project, "state/PROJECT_STATE.yaml project").phase = "phase_6";
     writeState(founderGateFutureDate, state);
   }
   withLane(founderGateFutureDate, "paid_user_acquisition", {
@@ -693,11 +722,11 @@ export function register(h: Harness): void {
   const depOverrideState = readState(depOverride);
   Object.assign(getLane(depOverrideState, "design"), {
     status: "done",
-    evidence: ["DESIGN.md"],
+    evidence: ["design/DESIGN.md"],
     dependency_override:
-      "2026-07-25 Brand and type system locked from founder identity work; the open SPEC.md item is a V2 scope question that does not touch any design token.",
+      "2026-07-25 Brand and type system locked from founder identity work; the open product/SPEC.md item is a V2 scope question that does not touch any design token.",
   });
-  Object.assign(getLane(depOverrideState, "product"), { status: "partial", evidence: ["SPEC.md"] });
+  Object.assign(getLane(depOverrideState, "product"), { status: "partial", evidence: ["product/SPEC.md"] });
   writeState(depOverride, depOverrideState);
   runFixture(
     "dated dependency_override downgrades the edge error to a warning",
@@ -711,20 +740,20 @@ export function register(h: Harness): void {
   // override itself is flagged as thin. Any non-empty string used to downgrade
   // the error — the exact words-not-work bypass this gate exists to refuse.
   const depOverrideThin = makeFixture("lane-dependency-override-thin");
-  withLane(depOverrideThin, "product", { status: "partial", evidence: ["SPEC.md"] });
-  withLane(depOverrideThin, "design", { status: "done", evidence: ["DESIGN.md"], dependency_override: "not needed" });
+  withLane(depOverrideThin, "product", { status: "partial", evidence: ["product/SPEC.md"] });
+  withLane(depOverrideThin, "design", { status: "done", evidence: ["design/DESIGN.md"], dependency_override: "not needed" });
   runFixture("undated dependency_override does not unlock the edge", depOverrideThin, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
   runFixture("undated dependency_override is itself flagged as thin", depOverrideThin, "check-lane-coverage.ts", 1, "lanes.design.reason_undated_or_trivial");
 
   // A dated-but-stale override still downgrades (drift to revisit, not a bypass),
   // and the staleness warning rides along so it never goes quiet.
   const depOverrideStale = makeFixture("lane-dependency-override-stale");
-  withLane(depOverrideStale, "product", { status: "partial", evidence: ["SPEC.md"] });
+  withLane(depOverrideStale, "product", { status: "partial", evidence: ["product/SPEC.md"] });
   withLane(depOverrideStale, "design", {
     status: "done",
-    evidence: ["DESIGN.md"],
+    evidence: ["design/DESIGN.md"],
     dependency_override:
-      "2025-01-05 Brand and type system locked from founder identity work; the open SPEC.md item is a V2 scope question that does not touch any design token.",
+      "2025-01-05 Brand and type system locked from founder identity work; the open product/SPEC.md item is a V2 scope question that does not touch any design token.",
   });
   runFixture(
     "stale dated dependency_override still downgrades but surfaces staleness",
@@ -735,10 +764,10 @@ export function register(h: Harness): void {
   );
 
   // --- check-change-cascade: recorded cascade surface coverage ---
-  // Grades PROJECT_STATE.yaml change_cascade entries against the shipped
+  // Grades state/PROJECT_STATE.yaml change_cascade entries against the shipped
   // playbook/process/cascade-edges.yaml map (the data form of the Change Cascade Map).
 
-  /** Write a change_cascade block into a fixture's PROJECT_STATE.yaml. */
+  /** Write a change_cascade block into a fixture's state/PROJECT_STATE.yaml. */
   const withCascade = (root: string, block: unknown): void => {
     const state = readState(root);
     state.change_cascade = block;
@@ -757,12 +786,12 @@ export function register(h: Harness): void {
       type: "lexicon_change",
       recorded_at: "2026-07-25",
       surfaces: {
-        app_in_app: { status: "updated", evidence: "ONBOARDING.md" },
+        app_in_app: { status: "updated", evidence: "product/ONBOARDING.md" },
         asc_listing: { status: "updated", evidence: "APP_STORE_LISTING.md" },
-        asc_products: { status: "updated", evidence: "REVENUE_OPS.md" },
-        revenuecat_billing: { status: "updated", evidence: "REVENUE_OPS.md" },
-        landing_web: { status: "updated", evidence: "landing/index.html" },
-        lifecycle_email: { status: "updated", evidence: "EMAIL_OPS.md" },
+        asc_products: { status: "updated", evidence: "revenue/REVENUE_OPS.md" },
+        revenuecat_billing: { status: "updated", evidence: "revenue/REVENUE_OPS.md" },
+        landing_web: { status: "updated", evidence: "growth/landing/index.html" },
+        lifecycle_email: { status: "updated", evidence: "growth/EMAIL_OPS.md" },
         content_ugc_ads: { status: "unaffected", reason: "no ad creative names the term yet" },
       },
     },
@@ -771,7 +800,9 @@ export function register(h: Harness): void {
 
   // The core miss: a mapped surface left out entirely.
   const cascadeMissingSurface = makeFixture("cascade-missing-surface");
-  withCascade(cascadeMissingSurface, [{ id: "rename", type: "lexicon_change", surfaces: { app_in_app: { status: "updated", evidence: "ONBOARDING.md" } } }]);
+  withCascade(cascadeMissingSurface, [
+    { id: "rename", type: "lexicon_change", surfaces: { app_in_app: { status: "updated", evidence: "product/ONBOARDING.md" } } },
+  ]);
   runFixture("cascade omitting a mapped surface fails", cascadeMissingSurface, "check-change-cascade.ts", 1, "change_cascade.rename.asc_listing.unaccounted");
 
   const cascadeUnknownType = makeFixture("cascade-unknown-type");
@@ -787,8 +818,8 @@ export function register(h: Harness): void {
       surfaces: {
         app_in_app: { status: "unaffected" },
         asc_listing: { status: "updated", evidence: "SCREENSHOTS.md" },
-        analytics: { status: "updated", evidence: "ANALYTICS.md" },
-        landing_web: { status: "updated", evidence: "landing/index.html" },
+        analytics: { status: "updated", evidence: "analytics/ANALYTICS.md" },
+        landing_web: { status: "updated", evidence: "growth/landing/index.html" },
       },
     },
   ]);
@@ -807,10 +838,10 @@ export function register(h: Harness): void {
       id: "typo",
       type: "onboarding_change",
       surfaces: {
-        app_in_app: { status: "updated", evidence: "ONBOARDING.md" },
+        app_in_app: { status: "updated", evidence: "product/ONBOARDING.md" },
         asc_listing: { status: "updated", evidence: "SCREENSHOTS.md" },
-        analytics: { status: "updated", evidence: "ANALYTICS.md" },
-        landing_web: { status: "updated", evidence: "landing/index.html" },
+        analytics: { status: "updated", evidence: "analytics/ANALYTICS.md" },
+        landing_web: { status: "updated", evidence: "growth/landing/index.html" },
         asc_listng: { status: "updated", evidence: "typo id nobody grades" },
       },
     },

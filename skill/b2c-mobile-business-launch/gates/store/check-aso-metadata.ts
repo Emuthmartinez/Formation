@@ -54,8 +54,8 @@ if (storeSkipped) {
 
 // ── File discovery ────────────────────────────────────────────────────────
 
-const appListing = firstExistingText(["APP_STORE_LISTING.md", "app-store-listing/APP_STORE_LISTING.md"]);
-const storeConsole = firstExistingText(["STORE_CONSOLE.md"]);
+const appListing = firstExistingText(["APP_STORE_LISTING.md", "store/app-store-listing/APP_STORE_LISTING.md"]);
+const storeConsole = firstExistingText(["store/STORE_CONSOLE.md"]);
 
 if (hasIos && !appListing) {
   issues.push(
@@ -256,7 +256,7 @@ if (storeConsole) {
 }
 
 // Also check any SCREENSHOTS.md for folder/dimension mismatches.
-const screenshotPacket = firstExistingText(["SCREENSHOTS.md", "screenshots/SCREENSHOTS.md", "app-store-listing/SCREENSHOTS.md"]);
+const screenshotPacket = firstExistingText(["SCREENSHOTS.md", "screenshots/SCREENSHOTS.md", "store/app-store-listing/SCREENSHOTS.md"]);
 if (screenshotPacket) {
   checkScreenshotFolderDimensionAlignment(screenshotPacket.text, screenshotPacket.relativePath);
 }

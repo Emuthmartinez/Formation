@@ -129,7 +129,7 @@ repo; the maintained deck is versioned per card):
 
 **Variable Reward, Streak / Loss Aversion, Scarcity / Urgency, and Social Proof** are
 HIGH-risk mechanisms per the risk table in `playbook/experience/ethics-guardrail.md`. Before any of
-these cards ships, the artifact doc (`ONBOARDING.md`, `SPEC.md`, or `ETHICS.md`) must contain
+these cards ships, the artifact doc (`product/ONBOARDING.md`, `product/SPEC.md`, or `ETHICS.md`) must contain
 an experience-card attestation block with all five HIGH-tier fields filled:
 
 ```yaml

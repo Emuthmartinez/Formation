@@ -12,7 +12,7 @@ expected_guardrail: >
   The agent must detect that design.md's "canonical visual targets" label for
   generated assets directly conflicts with the locked native component library.
   It must correct the label to "concept" or "direction" in design.md, add a
-  visual_lock block to DESIGN.md, update any manifest status fields from
+  visual_lock block to design/DESIGN.md, update any manifest status fields from
   "production" or "approved" to "concept" or "direction" for Higgsfield assets,
   and raise the design-canonical-conflict failure card — all before spending
   cycles comparing generated assets to the locked native implementation.
@@ -20,12 +20,12 @@ validators:
   - check-ux-patterns
 must_catch:
   - design.md must not label generated assets "canonical visual targets" when a locked native component is the true canonical source.
-  - A visual_lock block must be added to DESIGN.md documenting canonical_source, locked_properties, and generated_asset_role.
+  - A visual_lock block must be added to design/DESIGN.md documenting canonical_source, locked_properties, and generated_asset_role.
   - CONTENT_ASSETS.md manifest entries for Higgsfield routes must use concept/direction/draft status, not production/approved, when native code is locked.
   - The design-canonical-conflict failure card must be raised before iterating on asset comparisons.
 should_say:
   - Correct the "canonical visual targets" label in design.md before any audit work.
-  - Add visual_lock block to DESIGN.md naming OchoComponents.swift (or equivalent) as canonical_source.
+  - Add visual_lock block to design/DESIGN.md naming OchoComponents.swift (or equivalent) as canonical_source.
   - Update manifest asset status fields for Higgsfield-routed assets to concept or direction.
-  - Raise failure card design-canonical-conflict in PROJECT_STATE.yaml.
+  - Raise failure card design-canonical-conflict in state/PROJECT_STATE.yaml.
   - Ask the founder whether Higgsfield assets are still needed as concept references after the lock is established.

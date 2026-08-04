@@ -8,7 +8,7 @@ prompt: >
 expected_guardrail: >
   Generated business repos need their own app-specific AGENTS.md and CLAUDE.md
   from the shipped repo-agent-entrypoints templates. Those files should point to
-  PROJECT_STATE.yaml, launch-cockpit.html, APP_AGENTS.md, ORCHESTRATION.md, and
+  state/PROJECT_STATE.yaml, state/launch-cockpit.html, APP_AGENTS.md, operations/ORCHESTRATION.md, and
   role prompts, and should tell future agents to keep using the skill workflow
   until a founder-only gate.
 validators:
@@ -17,6 +17,6 @@ must_catch:
   - Do not copy skill-maintainer AGENTS.md or CLAUDE.md into a generated business repo.
   - Generated business repo entrypoints must be filled with product, stack, repo path, scope, and provider context.
   - Future agents should continue using b2c-mobile-business-launch without asking the founder to re-invoke it.
-  - PROJECT_STATE.yaml, launch-cockpit.html, APP_AGENTS.md, role prompts, ORCHESTRATION.md, and validators must be part of the handoff.
+  - state/PROJECT_STATE.yaml, state/launch-cockpit.html, APP_AGENTS.md, role prompts, operations/ORCHESTRATION.md, and validators must be part of the handoff.
 should_say:
-  - Start from business/repo-agent-entrypoints/AGENTS.md and CLAUDE.md, then fill placeholders for the current business.
+  - Start from business/engineering/repo-agent-entrypoints/AGENTS.md and CLAUDE.md, then fill placeholders for the current business.

@@ -6,8 +6,8 @@ Premium does not mean flashy. The apps people love do not have wild animations, 
 
 This skill ships these details as boilerplate so a launched app starts with them baked in:
 
-- SwiftUI: [`business/design-system/PremiumCraft.swift`](../../business/design-system/PremiumCraft.swift) — press-state button style, semantic haptics, keyboard behavior, shimmer/skeleton, and an empty-state view, all reading `DesignTokens.Motion` and honoring Reduce Motion.
-- The pattern contract: a **Premium Craft Details** section and bug traps in [`business/ux-patterns/UX_PATTERNS.md`](../../business/ux-patterns/UX_PATTERNS.md).
+- SwiftUI: [`business/design/system/PremiumCraft.swift`](../../business/design/system/PremiumCraft.swift) — press-state button style, semantic haptics, keyboard behavior, shimmer/skeleton, and an empty-state view, all reading `DesignTokens.Motion` and honoring Reduce Motion.
+- The pattern contract: a **Premium Craft Details** section and bug traps in [`business/product/experience/ux-patterns/UX_PATTERNS.md`](../../business/product/experience/ux-patterns/UX_PATTERNS.md).
 
 ## Platform Routing
 

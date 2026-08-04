@@ -19,7 +19,7 @@ import { inlineToPlainText, parseMarkdownLite, type Block, type Inline } from ".
 export interface ArtifactPageInput {
   /** Markdown source text. */
   readonly markdown: string;
-  /** Source path as a reader should see it, e.g. "ONBOARDING.md". */
+  /** Source path as a reader should see it, e.g. "product/ONBOARDING.md". */
   readonly markdownName: string;
 }
 

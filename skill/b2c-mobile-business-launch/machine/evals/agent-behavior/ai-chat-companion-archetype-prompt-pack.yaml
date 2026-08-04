@@ -1,12 +1,12 @@
 id: ai-chat-companion-archetype-prompt-pack
 title: AI-chat request detects the archetype and routes the prompt pack
 prompt: "I want to build an AI companion app — users chat with an AI character that remembers them across conversations."
-expected_route: "Detect the AI-chat/companion archetype, load ai-chat-companion.md, confirm chat type / primary surface / modality / memory depth / safety scope via AskUserQuestion, record the archetype in PROJECT_STATE.yaml, then route the bundled prompt pack (schema, auth, chat core loop, model integration) and treat safety as a launch gate — instead of improvising the schema and a client-side model call."
+expected_route: "Detect the AI-chat/companion archetype, load ai-chat-companion.md, confirm chat type / primary surface / modality / memory depth / safety scope via AskUserQuestion, record the archetype in state/PROJECT_STATE.yaml, then route the bundled prompt pack (schema, auth, chat core loop, model integration) and treat safety as a launch gate — instead of improvising the schema and a client-side model call."
 must_use:
   - "ai-chat-companion.md"
   - "starters/ai-chat-companion"
   - "AskUserQuestion"
-  - "PROJECT_STATE.yaml"
+  - "state/PROJECT_STATE.yaml"
 must_catch:
   - "the request is an AI-chat/companion archetype with a known build sequence"
   - "the Claude API key must stay server-side and current model IDs come from the claude-api skill, not memory"

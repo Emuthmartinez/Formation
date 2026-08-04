@@ -56,13 +56,13 @@ if (hasDesignState) {
   }
 
   if (loaded.state && loaded.stateHash) {
-    const renderPath = path.join(args.root, "design-room.html");
+    const renderPath = path.join(args.root, "design/design-room.html");
     if (!existsSync(renderPath)) {
       issues.push(
         issue(
           "error",
           "design_room.render_missing",
-          "design-room.html must be rendered from state before design is claimed ready.",
+          "design/design-room.html must be rendered from state before design is claimed ready.",
           rel(args.root, renderPath),
         ),
       );
@@ -71,14 +71,14 @@ if (hasDesignState) {
       const match = html.match(/<meta name="design-state-hash" content="([^"]+)"/);
       if (!match) {
         issues.push(
-          issue("error", "design_room.render_hash_missing", "design-room.html must include the design-state-hash meta tag.", rel(args.root, renderPath)),
+          issue("error", "design_room.render_hash_missing", "design/design-room.html must include the design-state-hash meta tag.", rel(args.root, renderPath)),
         );
       } else if (match[1] !== loaded.stateHash) {
         issues.push(
           issue(
             "error",
             "design_room.render_stale",
-            `design-room.html hash ${match[1]} does not match current state hash ${loaded.stateHash}. Re-run render-design-room.ts.`,
+            `design/design-room.html hash ${match[1]} does not match current state hash ${loaded.stateHash}. Re-run render-design-room.ts.`,
             rel(args.root, renderPath),
           ),
         );

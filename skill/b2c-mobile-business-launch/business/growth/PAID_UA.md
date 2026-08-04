@@ -47,9 +47,9 @@ Creative scoring gate: score every video creative with the Virality Predictor (`
 
 ## Tracking Baseline
 
-Analytics source: `ANALYTICS.md`
-Revenue source: `REVENUE_OPS.md`
-Store source: `APP_STORE_LISTING.md` or `STORE_CONSOLE.md`
+Analytics source: `analytics/ANALYTICS.md`
+Revenue source: `revenue/REVENUE_OPS.md`
+Store source: `APP_STORE_LISTING.md` or `store/STORE_CONSOLE.md`
 Baseline report: `growth/paid-ua-report.csv`
 
 Required data layers:
@@ -109,8 +109,8 @@ Outsource:
 
 ## Traceability
 
-Launch trace source: `LAUNCH_TRACE.md`
+Launch trace source: `state/LAUNCH_TRACE.md`
 
 | Trace ID | Evidence | Paid UA decision | Creative impact | Revenue/analytics impact | Store/privacy impact | Proof |
 | --- | --- | --- | --- | --- | --- | --- |
-| PUA-001 | `RESEARCH.md` | Pending | `CONTENT_ASSETS.md` | `REVENUE_OPS.md`, `ANALYTICS.md` | `APP_STORE_LISTING.md`, `PRIVACY.md`, `TERMS.md` | Pending |
+| PUA-001 | `strategy/RESEARCH.md` | Pending | `CONTENT_ASSETS.md` | `revenue/REVENUE_OPS.md`, `analytics/ANALYTICS.md` | `APP_STORE_LISTING.md`, `trust/PRIVACY.md`, `trust/TERMS.md` | Pending |

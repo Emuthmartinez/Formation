@@ -32,12 +32,12 @@ The point is not to ship the impossible version. The point is to make normal pro
 Create or update:
 
 - `11_STAR_EXPERIENCE.md`: the product experience contract.
-- `11-star-experience.html`: the visual ladder and surface storyboard. It can also be embedded into `design.html`, but the dedicated board is preferred for founder review.
-- `LAUNCH_TRACE.md`: trace rows that map the experience promise to product, design, engineering, analytics, revenue, store, content, and verification.
-- `SPEC.md`: a section named `11-Star Experience` or a clear pointer to `11_STAR_EXPERIENCE.md`.
-- `TECH_SPEC.md` or `ENGINEERING_PLAN.md`: implementation contracts for the V1 scalable slice.
+- `11-star-experience.html`: the visual ladder and surface storyboard. It can also be embedded into `design/design.html`, but the dedicated board is preferred for founder review.
+- `state/LAUNCH_TRACE.md`: trace rows that map the experience promise to product, design, engineering, analytics, revenue, store, content, and verification.
+- `product/SPEC.md`: a section named `11-Star Experience` or a clear pointer to `11_STAR_EXPERIENCE.md`.
+- `engineering/TECH_SPEC.md` or `engineering/ENGINEERING_PLAN.md`: implementation contracts for the V1 scalable slice.
 
-Update `PROJECT_STATE.yaml`:
+Update `state/PROJECT_STATE.yaml`:
 
 ```yaml
 lanes:
@@ -81,17 +81,17 @@ Every important product and launch surface must carry the same experience thesis
 
 | Surface | 11-star question | Output |
 | --- | --- | --- |
-| Product core loop | What is the end-to-end result the user would retell? | `SPEC.md`, `LAUNCH_TRACE.md`, `TECH_SPEC.md` |
-| Onboarding | What makes the user feel understood before payment or setup completes? | `ONBOARDING.md`, `onboarding.html`, analytics events |
-| Paywall | What makes purchase feel like unlocking momentum rather than hitting a toll booth? | `REVENUE_OPS.md`, paywall copy, restore/legal state |
-| Paid UA | What tiny paid creative can truthfully preview the V1 magic and be measured against revenue? | `PAID_UA.md`, `CONTENT_ASSETS.md`, `ANALYTICS.md`, `REVENUE_OPS.md` |
-| Viral growth loop | What product moment makes sharing, referral, or social participation feel natural? | `VIRAL_GROWTH.md`, `ANALYTICS.md`, `LAUNCH_TRACE.md` |
+| Product core loop | What is the end-to-end result the user would retell? | `product/SPEC.md`, `state/LAUNCH_TRACE.md`, `engineering/TECH_SPEC.md` |
+| Onboarding | What makes the user feel understood before payment or setup completes? | `product/ONBOARDING.md`, `product/onboarding.html`, analytics events |
+| Paywall | What makes purchase feel like unlocking momentum rather than hitting a toll booth? | `revenue/REVENUE_OPS.md`, paywall copy, restore/legal state |
+| Paid UA | What tiny paid creative can truthfully preview the V1 magic and be measured against revenue? | `PAID_UA.md`, `CONTENT_ASSETS.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md` |
+| Viral growth loop | What product moment makes sharing, referral, or social participation feel natural? | `VIRAL_GROWTH.md`, `analytics/ANALYTICS.md`, `state/LAUNCH_TRACE.md` |
 | App Store screenshots | What visual proof shows the magic in three frames? | `APP_STORE_LISTING.md`, `SCREENSHOTS.md`, `CONTENT_ASSETS.md` |
-| Ad or creator hook | What tiny version of the product experience can the ad itself deliver? | `UGC_PLAYBOOK.md`, `FASTLANE_OPS.md`, content scripts |
+| Ad or creator hook | What tiny version of the product experience can the ad itself deliver? | `growth/UGC_PLAYBOOK.md`, `growth/FASTLANE_OPS.md`, content scripts |
 | Landing page | What is the one scene that makes the visitor understand the promise instantly? | landing page, GEO/SEO, analytics |
-| Lifecycle email | What message would feel like the product remembered the user's goal? | `EMAIL_OPS.md`, Resend templates |
+| Lifecycle email | What message would feel like the product remembered the user's goal? | `growth/EMAIL_OPS.md`, Resend templates |
 | Support | What recovery path would make a frustrated user trust the product more? | support docs, customer-success prompts |
-| Engineering | What state, data, API, permission, analytics, or fixture is required to make the V1 slice real? | `TECH_SPEC.md`, `ENGINEERING_PLAN.md`, `PRODUCTION_READINESS.md` |
+| Engineering | What state, data, API, permission, analytics, or fixture is required to make the V1 slice real? | `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `engineering/PRODUCTION_READINESS.md` |
 
 If a surface is not in scope, mark it `not needed` with a reason. Do not leave it blank.
 
@@ -99,7 +99,7 @@ If a surface is not in scope, mark it `not needed` with a reason. Do not leave i
 
 ## Product Document Section
 
-`SPEC.md` should include a concise section:
+`product/SPEC.md` should include a concise section:
 
 ```markdown
 ## 11-Star Experience
@@ -124,11 +124,11 @@ The product doc should not duplicate the whole ladder unless the launch is tiny.
 
 Before implementation:
 
-- `DESIGN.md` translates the emotional tone, visual metaphor, and interaction energy into tokens and components.
+- `design/DESIGN.md` translates the emotional tone, visual metaphor, and interaction energy into tokens and components.
 - `design.md` maps the magical moment to concrete screens, states, copy, motion, and analytics hooks.
-- `ONBOARDING.md` reflects the user back to themselves before asking for payment or long setup.
-- `TECH_SPEC.md` specifies every data/state/API/permission contract needed to deliver the V1 scalable slice.
-- `PRODUCTION_READINESS.md` defines proof for the magical moment, not just generic build success.
+- `product/ONBOARDING.md` reflects the user back to themselves before asking for payment or long setup.
+- `engineering/TECH_SPEC.md` specifies every data/state/API/permission contract needed to deliver the V1 scalable slice.
+- `engineering/PRODUCTION_READINESS.md` defines proof for the magical moment, not just generic build success.
 
 Use real constraints. If the 7-star idea requires unavailable data, blocked permissions, unsafe claims, or unsupported AI quality, either redesign the slice or mark the blocker explicitly.
 
@@ -139,10 +139,10 @@ When the founder says "run an 11-star experience", "run it through the 11-star f
 **Ordered steps for any "11-star run" request:**
 
 1. Read `eleven-star-experience.md` (this file) if not already loaded.
-2. Read the existing `11_STAR_EXPERIENCE.md` if it exists; otherwise create it from `business/11-star-experience/11_STAR_EXPERIENCE.md`.
+2. Read the existing `11_STAR_EXPERIENCE.md` if it exists; otherwise create it from `business/product/experience/11-star-experience/11_STAR_EXPERIENCE.md`.
 3. Write or update `11_STAR_EXPERIENCE.md` with a complete ladder for this specific product. All seven star levels (1, 2, 5, 6, 7, 10, 11) must be present with product-specific labels, not Airbnb copy.
 4. Write or update `11-star-experience.html` with the visual ladder, line of feasibility, V1 scalable slice, and surface translation board.
-5. Update `PROJECT_STATE.yaml` `lanes.experience` status and evidence fields.
+5. Update `state/PROJECT_STATE.yaml` `lanes.experience` status and evidence fields.
 6. Run `npm run check:11-star -- --root .` and fix any errors before continuing.
 7. Only after the above six steps: proceed to implementation changes, subagent code audits, or UX audit work.
 
@@ -157,15 +157,15 @@ When a UX or onboarding audit subagent produces findings, each finding **must** 
 - **recommendation**: what to change and why, grounded in the V1 scalable slice
 - **failure-card flag**: "open failure card: yes/no" with reason — if yes, include a draft card shape from `failure-cards.md`
 
-Findings that do not map to a star-ladder level or do not reference `11_STAR_EXPERIENCE.md` are incomplete and must be rejected by the orchestrator. The orchestrator must convert starred findings into `PROJECT_STATE.yaml` updates or failure cards before claiming any progress.
+Findings that do not map to a star-ladder level or do not reference `11_STAR_EXPERIENCE.md` are incomplete and must be rejected by the orchestrator. The orchestrator must convert starred findings into `state/PROJECT_STATE.yaml` updates or failure cards before claiming any progress.
 
 ## Copy Output Brand-Voice Attestation
 
 Any copy recommendation output — onboarding copy, paywall copy, ad creative copy, store listing copy, email copy — must include a brand-voice attestation line:
 
-> Brand-voice attestation: verified against `BRAND.md §Voice` and `design.md §Copy Rules`. Hard rules: [list any violated or confirmed rules from those sections].
+> Brand-voice attestation: verified against `strategy/BRAND.md §Voice` and `design.md §Copy Rules`. Hard rules: [list any violated or confirmed rules from those sections].
 
-If `BRAND.md` or `design.md` does not exist yet, flag that attestation is blocked and list it as a blocker in `PROJECT_STATE.yaml` before producing copy that will be used in production.
+If `strategy/BRAND.md` or `design.md` does not exist yet, flag that attestation is blocked and list it as a blocker in `state/PROJECT_STATE.yaml` before producing copy that will be used in production.
 
 ## Gates Before Build
 
@@ -176,9 +176,9 @@ Do not move to engineering handoff until:
 - the `Line of Feasibility` is visible.
 - the V1 scalable slice is named.
 - at least product, onboarding, ad, App Store, and engineering surfaces are translated.
-- `SPEC.md`, `DESIGN.md`, `ONBOARDING.md`, and `TECH_SPEC.md` either reference the experience contract or are explicitly not ready yet.
-- `LAUNCH_TRACE.md` includes trace rows for the magical moment and V1 slice.
-- `11-star-experience.html` or `design.html` renders the ladder visually for founder review.
+- `product/SPEC.md`, `design/DESIGN.md`, `product/ONBOARDING.md`, and `engineering/TECH_SPEC.md` either reference the experience contract or are explicitly not ready yet.
+- `state/LAUNCH_TRACE.md` includes trace rows for the magical moment and V1 slice.
+- `11-star-experience.html` or `design/design.html` renders the ladder visually for founder review.
 
 Run:
 
@@ -191,12 +191,12 @@ npm run check:11-star -- --root .
 - The artifact says "11-star" but only describes premium styling.
 - The ladder copies Airbnb labels instead of mapping the current product's experience.
 - The impossible levels are skipped, so the V1 slice remains timid.
-- The visual board exists but does not affect `SPEC.md`, `DESIGN.md`, `ONBOARDING.md`, `TECH_SPEC.md`, or launch surfaces.
+- The visual board exists but does not affect `product/SPEC.md`, `design/DESIGN.md`, `product/ONBOARDING.md`, `engineering/TECH_SPEC.md`, or launch surfaces.
 - Ads and screenshots sell a different promise than the product can deliver.
 - The engineering plan implements screens but not the state/data/API behavior needed for the magical moment.
 - The 11-star board is prose-only and cannot be inspected visually.
 - The line of feasibility is vague, so agents keep overbuilding or underbuilding.
 - The founder asks for an "11-star run" and the agent loads this reference but proceeds directly to code audits or implementation without writing `11_STAR_EXPERIENCE.md` and `11-star-experience.html` first. The artifact is required before any downstream work, not after.
 - UX audit findings are produced as narrative prose with no star-ladder level mapping. Findings that cannot be mapped to a star level cannot be integrated into the experience contract.
-- Copy outputs include no brand-voice attestation. Copy changes produced without verifying `BRAND.md` and `design.md` hard rules drift from the experience voice immediately.
+- Copy outputs include no brand-voice attestation. Copy changes produced without verifying `strategy/BRAND.md` and `design.md` hard rules drift from the experience voice immediately.
 - The `check:11-star` validator is never run during an audit session, so known gaps accumulate invisibly.

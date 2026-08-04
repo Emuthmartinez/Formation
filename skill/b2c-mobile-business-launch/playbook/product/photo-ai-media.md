@@ -22,13 +22,13 @@ Before building, confirm the product shape with the founder via **AskUserQuestio
 3. **Which optional systems are in V1?** (multi-select) — editing/presets, credits/monetization, sharing/virality. These map to prompts 05–07.
 4. **Niche** — who is this for, and on what occasion? (Free text. Feeds prompt 00 positioning. A focused niche with a recurring occasion beats a general-purpose generator.)
 
-Record the answers in `PROJECT_STATE.yaml` (e.g. `lanes.product.archetype: photo-ai-media`, `media_shape`, `primary_surface`, `optional_systems`) so later sessions do not re-litigate the shape.
+Record the answers in `state/PROJECT_STATE.yaml` (e.g. `lanes.product.archetype: photo-ai-media`, `media_shape`, `primary_surface`, `optional_systems`) so later sessions do not re-litigate the shape.
 
 Honesty note on the stack: the bundled prompts target **web (Next.js + Supabase + Vercel)**. The storage, schema, RLS, and generation-pipeline prompts carry over unchanged to native; the capture/library/reveal client prompts must be re-expressed for the native stack, and camera-first products usually deserve that investment.
 
 ## Runnable Starter
 
-The pack ships a runnable scaffold at [`../starters/photo-ai-media/starter/`](../../starters/photo-ai-media/starter/README.md): Next.js App Router + Supabase pre-wired with magic-link auth, owner-only schema migrations with **tested** RLS (pgTAP, per `backend-data-contract.md`), private Storage wiring, Stripe and RevenueCat stubs, a PostHog event catalog matching the analytics lane's snake_case conventions, a names-only `.env.example`, and a CI workflow. The **generation provider is deliberately unbound** in the starter: the provider adapter is a stub, because which image model/provider to pay for is a founder-gated decision routed through `paid-tool-routing.md`, recorded in `TOOL_DECISIONS.md`, with its key server-side via `SECRETS.md`. Copy the starter into the business repo as the floor and customize it with the prompts below — its README maps each prompt to the scaffold area it customizes. Do not improvise the same wiring from scratch; `check:archetype-starter` enforces the starter contract. If the founder selects Firebase or a custom backend, adapt through the data-contract lane instead of running the Supabase pieces verbatim.
+The pack ships a runnable scaffold at [`../starters/photo-ai-media/starter/`](../../starters/photo-ai-media/starter/README.md): Next.js App Router + Supabase pre-wired with magic-link auth, owner-only schema migrations with **tested** RLS (pgTAP, per `backend-data-contract.md`), private Storage wiring, Stripe and RevenueCat stubs, a PostHog event catalog matching the analytics lane's snake_case conventions, a names-only `.env.example`, and a CI workflow. The **generation provider is deliberately unbound** in the starter: the provider adapter is a stub, because which image model/provider to pay for is a founder-gated decision routed through `paid-tool-routing.md`, recorded in `strategy/TOOL_DECISIONS.md`, with its key server-side via `SECRETS.md`. Copy the starter into the business repo as the floor and customize it with the prompts below — its README maps each prompt to the scaffold area it customizes. Do not improvise the same wiring from scratch; `check:archetype-starter` enforces the starter contract. If the founder selects Firebase or a custom backend, adapt through the data-contract lane instead of running the Supabase pieces verbatim.
 
 ## The Core Systems
 
@@ -46,13 +46,13 @@ Build one system at a time and test it. Prompts live in [`../starters/photo-ai-m
 
 | # | Prompt | Core system | Threads into |
 |---|---|---|---|
-| 00 | `00-positioning-strategy` (Claude.ai, not Claude Code) | positioning | `RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md` |
-| 01 | `01-database-schema` | media + generations + credits | `TECH_SPEC.md`, engineering, security (RLS + Storage policies) |
-| 02 | `02-auth-system` | identity | engineering, `SECURITY.md`, `SECRETS.md` |
-| 03 | `03-capture-and-library` | storage + library + reveal | `11_STAR_EXPERIENCE.md`, `ANALYTICS.md`, privacy |
-| 04 | `04-ai-generation-pipeline` | pipeline + metering | `TOOL_DECISIONS.md`, `SECRETS.md`, `ethics-guardrail.md`, `ANALYTICS.md` |
+| 00 | `00-positioning-strategy` (Claude.ai, not Claude Code) | positioning | `strategy/RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md` |
+| 01 | `01-database-schema` | media + generations + credits | `engineering/TECH_SPEC.md`, engineering, security (RLS + Storage policies) |
+| 02 | `02-auth-system` | identity | engineering, `trust/SECURITY.md`, `SECRETS.md` |
+| 03 | `03-capture-and-library` | storage + library + reveal | `11_STAR_EXPERIENCE.md`, `analytics/ANALYTICS.md`, privacy |
+| 04 | `04-ai-generation-pipeline` | pipeline + metering | `strategy/TOOL_DECISIONS.md`, `SECRETS.md`, `ethics-guardrail.md`, `analytics/ANALYTICS.md` |
 | 05 | `05-editing-and-presets` (optional) | reveal/editing | `consumer-product-design-agency.md`, revenue |
-| 06 | `06-credits-and-monetization` (optional) | metering + revenue | `revenue-monetization.md`, `REVENUE_OPS.md` |
+| 06 | `06-credits-and-monetization` (optional) | metering + revenue | `revenue-monetization.md`, `revenue/REVENUE_OPS.md` |
 | 07 | `07-sharing-and-virality` (optional) | sharing/growth | `viral-growth-loops.md`, `VIRAL_GROWTH.md` |
 | 08 | `08-content-safety-and-rights` | safety/rights | `security-release-hardening.md`, `ethics-guardrail.md`, `privacy-terms.md`, store review |
 
@@ -64,16 +64,16 @@ Step 0 (positioning) is strategic work for the **web interface / Claude.ai**. Th
 
 - **The before/after reveal is the 11-star moment.** Run `eleven-star-experience.md` over prompts 03/04: the second the user drags the slider and sees their photo transformed is the magical V1 slice — everything else sets it up. Name it as an engineered moment with a PostHog event and a reduced-motion fallback (`consumer-product-design-agency.md`, `emotional-design-system.md`).
 - **The reveal is a Variable Reward card — HIGH risk.** Output quality genuinely varies between runs, which is exactly the variable-ratio mechanism `ethics-guardrail.md` rates HIGH. The card's contract is mandatory: `ethics_attestation`, a `user_control_escape_hatch` (the user can always stop; no near-miss engineering, no "one more spin" pressure at the credit floor), a `counter_metric` (e.g. regeneration spirals per session), and `reward_variation_proof` (variation is the model's real output variance, never manufactured). The generation wait is a Perceived Effort Delay card: progress reflects the real job status (`computation_type: real_api_call`) — no fake work, no padded timers.
-- **The four lane events must exist in `ANALYTICS.md` before surfaces lock:** `media_uploaded`, `generation_started`, `generation_completed`, `media_shared` (per `analytics-attribution.md`; counts and metadata, never image content). Prompts 03–07 add their own surface events on top.
+- **The four lane events must exist in `analytics/ANALYTICS.md` before surfaces lock:** `media_uploaded`, `generation_started`, `generation_completed`, `media_shared` (per `analytics-attribution.md`; counts and metadata, never image content). Prompts 03–07 add their own surface events on top.
 - **Per-generation COGS reshapes the revenue lane.** Every generation has a provider invoice behind it, so **metering precedes monetization**: the credit ledger (prompt 01) and cost tracking (prompt 04) come before any paywall (prompt 06). Reconcile the model with `revenue-monetization.md` and treat its §10 SOSA 2026 figures (hard paywall ~5x freemium, yearly-dominant highest LTV, price as quality signal, AI apps earn more per payer but churn faster) as **defaults to test, not dogma**. Pricing, plan mix, and the free grant are founder-gated.
-- **The generation provider is a paid-tool decision, not a default.** Do not hardcode a model/provider: route the choice through `paid-tool-routing.md`, confirm with the founder, record it in `TOOL_DECISIONS.md`, and keep the key server-side via `SECRETS.md` (`secrets-management.md`). The pipeline's adapter interface exists so the decision stays swappable.
+- **The generation provider is a paid-tool decision, not a default.** Do not hardcode a model/provider: route the choice through `paid-tool-routing.md`, confirm with the founder, record it in `strategy/TOOL_DECISIONS.md`, and keep the key server-side via `SECRETS.md` (`secrets-management.md`). The pipeline's adapter interface exists so the decision stays swappable.
 - **Faces are biometric-adjacent PII.** Owner-scoped storage paths, signed URLs only (media never served from the app server, no public buckets), tested RLS on every user-data table, EXIF GPS stripping, and real retention/deletion paths (rows + storage objects + provider-side copies) are `security-release-hardening.md` and `privacy-terms.md` items, hardened further by the avatar variant's identity-retention rules.
 - **Safety and rights are a launch gate.** Prompt 08 — NSFW/CSAM screening on input AND output, likeness consent, the training-data/rights posture store review asks about, a takedown path, and age gating — is required before any public launch. App Review rejects AI-generation apps without a moderation story; deceptive intimate imagery and non-consensual likeness use are `ethics-guardrail.md` compliance vetoes.
 
 ## Infrastructure Defaults (record decisions, do not hardcode)
 
 - **Backend:** Supabase (Postgres + Auth + **Storage**). All media in private Storage buckets with owner-scoped paths and signed URLs; never serve media from the app server. At significant media volume, migrate to zero-egress object storage.
-- **Generation provider:** deliberately unbound — founder-gated via `paid-tool-routing.md`, recorded in `TOOL_DECISIONS.md`, key server-side via `SECRETS.md`. Generation runs as server-side jobs with status polling, idempotency, and per-generation cost recording.
+- **Generation provider:** deliberately unbound — founder-gated via `paid-tool-routing.md`, recorded in `strategy/TOOL_DECISIONS.md`, key server-side via `SECRETS.md`. Generation runs as server-side jobs with status polling, idempotency, and per-generation cost recording.
 - **Hosting:** Vercel (web). Long generations run as background jobs the client polls — do not hold serverless requests open for the provider.
 - **Moderation:** input AND output image screening (plus prompt screening for the studio shape) wired before public launch — a store-review requirement for this category, not a nicety.
 - **Monetization:** Stripe for web; RevenueCat over StoreKit/Play Billing for native IAP (packs are consumables). Credits/metering first.
@@ -85,12 +85,12 @@ This pack follows the archetype contract enforced by `check-app-archetype.ts` (R
 
 Before calling a photo/AI-media build ready:
 
-- [ ] Media shape, primary surface, optional systems, and niche confirmed via AskUserQuestion and recorded in `PROJECT_STATE.yaml`.
-- [ ] Generation provider chosen via `paid-tool-routing.md` with the founder, recorded in `TOOL_DECISIONS.md`; the provider key is server-side only via `SECRETS.md`; the pipeline route has ownership checks, credit checks, rate limits, and a concurrency cap in `SECURITY.md`.
-- [ ] Schema (prompt 01) reconciled with `TECH_SPEC.md`; every user-data table has a tested owner-only RLS policy and the Storage bucket policies enforce owner-scoped paths; media is served only via signed URLs.
+- [ ] Media shape, primary surface, optional systems, and niche confirmed via AskUserQuestion and recorded in `state/PROJECT_STATE.yaml`.
+- [ ] Generation provider chosen via `paid-tool-routing.md` with the founder, recorded in `strategy/TOOL_DECISIONS.md`; the provider key is server-side only via `SECRETS.md`; the pipeline route has ownership checks, credit checks, rate limits, and a concurrency cap in `trust/SECURITY.md`.
+- [ ] Schema (prompt 01) reconciled with `engineering/TECH_SPEC.md`; every user-data table has a tested owner-only RLS policy and the Storage bucket policies enforce owner-scoped paths; media is served only via signed URLs.
 - [ ] The before/after reveal is run through `11_STAR_EXPERIENCE.md`; the Variable Reward card carries `ethics_attestation`, `user_control_escape_hatch`, `counter_metric`, and `reward_variation_proof`; the wait state is honest progress (no fake work).
-- [ ] `media_uploaded`, `generation_started`, `generation_completed`, `media_shared` exist in `ANALYTICS.md` before surfaces lock.
+- [ ] `media_uploaded`, `generation_started`, `generation_completed`, `media_shared` exist in `analytics/ANALYTICS.md` before surfaces lock.
 - [ ] Credits/metering (with per-generation cost) precede any paywall; monetization reconciled with `revenue-monetization.md` (§10 defaults surfaced as tests) and the correct billing path for the surface (Stripe web / IAP native); pricing founder-gated.
 - [ ] Safety/rights pass (prompt 08) complete before public launch: input/output (and prompt) screening, CSAM detection + reporting, likeness consent, rights posture, takedown path, age gating; reconciled with `privacy-terms.md` and the store-review moderation story.
 - [ ] Retention/deletion paths for faces (rows + storage + provider-side copies; identity data for the avatar variant) documented and working.
-- [ ] Positioning outputs from prompt 00 flow into `RESEARCH.md`, naming, and `growth/LAUNCH_NARRATIVE.md`.
+- [ ] Positioning outputs from prompt 00 flow into `strategy/RESEARCH.md`, naming, and `growth/LAUNCH_NARRATIVE.md`.

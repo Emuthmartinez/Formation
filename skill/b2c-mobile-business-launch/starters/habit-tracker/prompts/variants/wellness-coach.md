@@ -29,16 +29,16 @@ Content rules (do not remove):
   pausing or quitting a program; quitting is one tap and judgment-free
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Program content is a product asset: version it, review tone against `BRAND.md §Voice`, and treat content changes as `change-cascade.md` events. Day-plan content tables are app content, not user data — RLS differs (read-only to users, write via admin role); enrollments and check-ins remain owner-only per prompt 01.
+- Program content is a product asset: version it, review tone against `strategy/BRAND.md §Voice`, and treat content changes as `change-cascade.md` events. Day-plan content tables are app content, not user data — RLS differs (read-only to users, write via admin role); enrollments and check-ins remain owner-only per prompt 01.
 - **Health-adjacent copy raises the compliance bar**: the no-medical-claims rule threads into `privacy-terms.md` and store review (health claims are a rejection risk on both stores — see the store lanes). If the niche touches a sensitive condition, confirm scope with the founder before writing content.
 - The pause-don't-punish progression is the program-level expression of the streak escape hatch (`ethics-guardrail.md`): progress reflects real completed days (endowed-progress truthfulness), and resuming is always free.
 - Program completion is a strong reflective peak (`emotional-design-system.md`) and the natural paywall position for prompt 06 (first program free, library behind the subscription is a common split — founder-gated).
-- Add `program_enrolled`, `program_day_completed`, `program_paused`, `program_resumed`, `program_completed` to `ANALYTICS.md`.
+- Add `program_enrolled`, `program_day_completed`, `program_paused`, `program_resumed`, `program_completed` to `analytics/ANALYTICS.md`.

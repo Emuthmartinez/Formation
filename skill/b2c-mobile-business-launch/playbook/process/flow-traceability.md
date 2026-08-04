@@ -2,15 +2,15 @@
 
 Use this for any multi-phase B2C app launch, especially before moving from research to 11-star experience, brand/design, or implementation. The goal is to keep evidence, product-experience decisions, visual decisions, security posture, build specs, and verification tied together.
 
-Create `PROJECT_STATE.yaml` first for phase/lane/provider/proof state. Create `LAUNCH_TRACE.md` when the launch has more than one serious artifact. Create `TECH_SPEC.md` when actual app/backend/web implementation is in scope and data, API, state, permissions, integrations, or platform behavior need to be precise.
+Create `state/PROJECT_STATE.yaml` first for phase/lane/provider/proof state. Create `state/LAUNCH_TRACE.md` when the launch has more than one serious artifact. Create `engineering/TECH_SPEC.md` when actual app/backend/web implementation is in scope and data, API, state, permissions, integrations, or platform behavior need to be precise.
 
 ## Contents
 
 - 1. Traceability Rule
-- 2. `PROJECT_STATE.yaml`
-- 3. `LAUNCH_TRACE.md`
+- 2. `state/PROJECT_STATE.yaml`
+- 3. `state/LAUNCH_TRACE.md`
 - 4. Flow Gates
-- 5. `TECH_SPEC.md`
+- 5. `engineering/TECH_SPEC.md`
 - 6. Build-Ready Checklist
 - 7. Common Failures
 
@@ -32,13 +32,13 @@ Do not move a claim, screen, onboarding question, paywall behavior, pricing stat
 
 ### Lexicon Lock (one vocabulary across every surface)
 
-Pick the canonical product nouns/verbs once (e.g. the core feature name, the unit users act on, the metric names) and use the **same words everywhere**: in-app copy, onboarding, landing page hero/method/FAQ, SEO meta description, JSON-LD/structured data, App Store listing, paywall, and email. Record the locked terms in `DESIGN.md` (or `BRAND.md`) as the single source of truth.
+Pick the canonical product nouns/verbs once (e.g. the core feature name, the unit users act on, the metric names) and use the **same words everywhere**: in-app copy, onboarding, landing page hero/method/FAQ, SEO meta description, JSON-LD/structured data, App Store listing, paywall, and email. Record the locked terms in `design/DESIGN.md` (or `strategy/BRAND.md`) as the single source of truth.
 
 When a term changes, grep every surface and update them together — including the landing page's component files, `<meta>` description, and JSON-LD `description`/FAQ blocks, which are easy to miss. A term that means one thing in the app and another on the landing page (or a stale value left in one surface) reads as a different, less-trustworthy product and is a recurring drift bug. Treat "eliminate cross-surface inconsistency" as a sweep across all surfaces, not a single-file edit.
 
-## 2. `PROJECT_STATE.yaml`
+## 2. `state/PROJECT_STATE.yaml`
 
-Use `PROJECT_STATE.yaml` as the current-state index over trace work:
+Use `state/PROJECT_STATE.yaml` as the current-state index over trace work:
 
 - phase and autonomy mode
 - lane statuses, evidence paths, and blockers
@@ -46,11 +46,11 @@ Use `PROJECT_STATE.yaml` as the current-state index over trace work:
 - active failure cards and LaunchBench/validator proof
 - founder-only gates and approval state
 
-Update it before crossing any flow gate. Render `launch-cockpit.html` when the founder needs to inspect state or when a provider/store/revenue/legal/readiness change materially changes launch risk.
+Update it before crossing any flow gate. Render `state/launch-cockpit.html` when the founder needs to inspect state or when a provider/store/revenue/legal/readiness change materially changes launch risk.
 
-`PROJECT_STATE.yaml` does not replace `LAUNCH_TRACE.md`. State tells the agent where the launch stands; trace explains why each decision exists.
+`state/PROJECT_STATE.yaml` does not replace `state/LAUNCH_TRACE.md`. State tells the agent where the launch stands; trace explains why each decision exists.
 
-## 3. `LAUNCH_TRACE.md`
+## 3. `state/LAUNCH_TRACE.md`
 
 Use this compact table shape:
 
@@ -60,8 +60,8 @@ Source: AppKittie competitor reviews, XPOZ TikTok query, Firecrawl pricing crawl
 Tool route: paid tool | user export | free fallback | blocked | founder decision
 Research finding: what we learned
 Experience decision: what changes in 11_STAR_EXPERIENCE.md or 11-star-experience.html
-Product decision: what changes in SPEC.md or ONBOARDING.md
-Brand/design decision: what changes in BRAND.md, DESIGN.md, design.md, PAID_UA.md, VIRAL_GROWTH.md, UGC_PLAYBOOK.md, or HTML proofs
+Product decision: what changes in product/SPEC.md or product/ONBOARDING.md
+Brand/design decision: what changes in strategy/BRAND.md, design/DESIGN.md, design.md, PAID_UA.md, VIRAL_GROWTH.md, growth/UGC_PLAYBOOK.md, or HTML proofs
 Build contract: screen/component/API/data/state/task that must exist
 Analytics/security/revenue/privacy/store impact: event, entitlement, threat/abuse control, data disclosure, screenshot, console field, signing/release gate, or legal note
 Verification: test, MobAI path, backend/provider proof, browser proof, dashboard check, or founder approval
@@ -77,7 +77,7 @@ Required sections:
 - implementation blockers
 - verification map
 
-Small launches can keep this inside `RESEARCH.md`, but the section must be easy to find and must be copied into builder handoffs.
+Small launches can keep this inside `strategy/RESEARCH.md`, but the section must be easy to find and must be copied into builder handoffs.
 
 ## 4. Flow Gates
 
@@ -89,7 +89,7 @@ Pass only when:
 - unsupported claims are removed or marked founder-only/legal-review
 - each core feature has a reason: demand, differentiation, monetization, retention, compliance, or operational need
 - open product alternatives are resolved through `ce-brainstorm` or documented as explicit assumptions
-- `PROJECT_STATE.yaml` marks research, paid-tool routing, and traceability status honestly
+- `state/PROJECT_STATE.yaml` marks research, paid-tool routing, and traceability status honestly
 
 ### Spec To Brand And Design
 
@@ -98,9 +98,9 @@ Pass only when:
 - `11_STAR_EXPERIENCE.md` defines the magical moment, and `11-star-experience.html` visually shows the ladder and line of feasibility
 - core loop, aha moment, onboarding, paywall, support/privacy, settings, and error states have screen implications
 - each public claim has an evidence/proof constraint
-- `DESIGN.md`, `design.md`, `design.html`, and `onboarding.html` cite the trace IDs they express
+- `design/DESIGN.md`, `design.md`, `design/design.html`, and `product/onboarding.html` cite the trace IDs they express
 - accessibility and localization constraints are visible before screenshots or implementation prompts
-- `launch-cockpit.html` shows the design lane as partial until `DESIGN.md`, `design.md`, and HTML proofs exist
+- `state/launch-cockpit.html` shows the design lane as partial until `design/DESIGN.md`, `design.md`, and HTML proofs exist
 
 ### Design To Build
 
@@ -108,9 +108,9 @@ Pass only when:
 - every build-critical screen has states, copy, components, analytics hooks, permissions, and backend/data expectations
 - the V1 scalable slice from `11_STAR_EXPERIENCE.md` is represented as concrete screen/state/data/API/analytics requirements
 - every onboarding question maps to personalization, attribution, lifecycle messaging, privacy, or setup
-- paywall and pricing surfaces match `REVENUE_OPS.md`, `TERMS.md`, store products, and analytics events
+- paywall and pricing surfaces match `revenue/REVENUE_OPS.md`, `trust/TERMS.md`, store products, and analytics events
 - account deletion, privacy choices, restore purchases, support, and settings paths are specified
-- `TECH_SPEC.md` or `ENGINEERING_PLAN.md` contains data/API/state contracts for every non-static flow
+- `engineering/TECH_SPEC.md` or `engineering/ENGINEERING_PLAN.md` contains data/API/state contracts for every non-static flow
 - failure cards are created for any unresolved attribution, security, revenue, store, privacy, email, or secret-routing risk
 
 ### Build To Proof
@@ -119,14 +119,14 @@ Pass only when:
 - frontend actions are proven against backend/provider state
 - MobAI or browser E2E covers critical user paths
 - analytics, entitlement, email, deletion, restore, and support paths are verified where in scope
-- `PRODUCTION_READINESS.md` records command outputs, fixtures, evidence paths, blockers, and founder-only gates
-- deterministic validators or LaunchBench scenarios run where they exist, with results recorded in `PROJECT_STATE.yaml`
+- `engineering/PRODUCTION_READINESS.md` records command outputs, fixtures, evidence paths, blockers, and founder-only gates
+- deterministic validators or LaunchBench scenarios run where they exist, with results recorded in `state/PROJECT_STATE.yaml`
 
-## 5. `TECH_SPEC.md`
+## 5. `engineering/TECH_SPEC.md`
 
 Create this when the app has backend APIs, database/storage, auth, subscriptions, email, analytics, AI, push, account deletion, or non-trivial platform behavior.
 
-For small builder handoffs, `TECH_SPEC.md` may be folded into `ENGINEERING_PLAN.md`, but the same sections must exist.
+For small builder handoffs, `engineering/TECH_SPEC.md` may be folded into `engineering/ENGINEERING_PLAN.md`, but the same sections must exist.
 
 Must include:
 - source docs and trace IDs
@@ -151,18 +151,18 @@ Acceptance:
 ## 6. Build-Ready Checklist
 
 Before sending to Rork, Claude, Codex, or another builder:
-- `PROJECT_STATE.yaml` exists and matches current artifacts
-- `launch-cockpit.html` renders current state for the founder
-- `LAUNCH_TRACE.md` exists or equivalent trace section exists in `RESEARCH.md`
+- `state/PROJECT_STATE.yaml` exists and matches current artifacts
+- `state/launch-cockpit.html` renders current state for the founder
+- `state/LAUNCH_TRACE.md` exists or equivalent trace section exists in `strategy/RESEARCH.md`
 - `PAID_UA.md` exists when growth depends on paid ads, Apple Search Ads, Meta/TikTok/Google campaigns, custom product pages, paid creative tests, MMP/ad-network SDK decisions, or paid-growth readiness claims
 - `VIRAL_GROWTH.md` exists when growth depends on referral/share loops, creator CTAs, TikTok/Reels/Shorts mechanics, or viral paywall/onboarding behavior
 - `11_STAR_EXPERIENCE.md` and `11-star-experience.html` exist unless the experience lane is explicitly deferred/not needed with a reason
-- `TOOL_DECISIONS.md` exists when paid/account-gated tools or fallbacks shaped evidence, screenshots, testing, store ops, or growth
-- `SPEC.md`, `BRAND.md`, `DESIGN.md`, `design.md`, `ANALYTICS.md`, `ONBOARDING.md`, `SECURITY.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `APPLE_SIGNING.md`, `APP_STORE_LISTING.md`, and `STORE_CONSOLE.md` are internally consistent for in-scope surfaces
-- `TECH_SPEC.md` exists when data/API/integration/state behavior is non-trivial
-- `ENGINEERING_PLAN.md` references trace IDs and breaks work into implementation units
+- `strategy/TOOL_DECISIONS.md` exists when paid/account-gated tools or fallbacks shaped evidence, screenshots, testing, store ops, or growth
+- `product/SPEC.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `design.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `trust/SECURITY.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `store/APPLE_SIGNING.md`, `APP_STORE_LISTING.md`, and `store/STORE_CONSOLE.md` are internally consistent for in-scope surfaces
+- `engineering/TECH_SPEC.md` exists when data/API/integration/state behavior is non-trivial
+- `engineering/ENGINEERING_PLAN.md` references trace IDs and breaks work into implementation units
 - `AGENTS.md` points builders to trace, design, analytics, technical contracts, and readiness gates
-- `PRODUCTION_READINESS.md` defines the proof expected before launch-ready is claimed
+- `engineering/PRODUCTION_READINESS.md` defines the proof expected before launch-ready is claimed
 - active failure cards are assigned, blocked, or resolved with evidence
 
 ## 7. Common Failures

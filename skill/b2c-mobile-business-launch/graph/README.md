@@ -47,7 +47,7 @@ npm run render:skill-graph
 npm run render:skill-graph -- --check
 npm run check:skill-graph
 
-npx tsx scripts/render-execution-plan.ts   --root /path/to/app   --state PROJECT_STATE.yaml   --runtime codex   --out /path/to/app/graph-run/execution-plan.json
+npx tsx scripts/render-execution-plan.ts   --root /path/to/app   --state state/PROJECT_STATE.yaml   --runtime codex   --out /path/to/app/graph-run/execution-plan.json
 ```
 
 ## Extension checklist

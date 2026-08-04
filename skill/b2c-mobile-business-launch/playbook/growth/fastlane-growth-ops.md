@@ -6,7 +6,7 @@ The goal is to turn the launch package into a repeatable short-form content engi
 
 Use `paid-tool-routing.md` before replacing Fastlane AI, MobAI Plus/Pro or intended cross-platform coverage, Higgsfield, XPOZ, AppKittie, or creator-marketplace tooling with a free/manual fallback. MobAI Free needs no spend gate when its device/quota limits fit. Use `viral-growth-loops.md` before Fastlane content depends on referral/share mechanics, creator codes, social-comment loops, or viral paywall timing. Use `ugc-creator-engine.md` before building creator-led organic growth, creator briefs, scripts, or Day 0 format-discovery loops.
 
-Load `founder-zero-operator.md` and reconcile `BUSINESS_ACCESS.md` before social connections. If accounts do not exist, the agent guides creation and security one step at a time; if they exist, prefer delegated roles/OAuth and verify exact handles, recovery/2FA ownership, and publishing/spend boundaries before Fastlane connection.
+Load `founder-zero-operator.md` and reconcile `operations/BUSINESS_ACCESS.md` before social connections. If accounts do not exist, the agent guides creation and security one step at a time; if they exist, prefer delegated roles/OAuth and verify exact handles, recovery/2FA ownership, and publishing/spend boundaries before Fastlane connection.
 
 ## Contents
 
@@ -35,8 +35,8 @@ Notes:
 
 Create these when Fastlane setup or campaign work is in scope:
 
-- `TOOL_DECISIONS.md` or a Fastlane tool-decision section: paid tool access, approved fallbacks, and blocked accounts.
-- `FASTLANE_OPS.md`: setup state, workspace, connected accounts, API status, content strategy, approval gates, and monitoring loop.
+- `strategy/TOOL_DECISIONS.md` or a Fastlane tool-decision section: paid tool access, approved fallbacks, and blocked accounts.
+- `growth/FASTLANE_OPS.md`: setup state, workspace, connected accounts, API status, content strategy, approval gates, and monitoring loop.
 - `fastlane/campaign-brief.md`: product, ICP, pains, hooks, proof, offers, claims to avoid, platforms, and conversion goal.
 - `fastlane/prompts.md`: reusable prompts for angles, Blitz generation, QA, captions, scheduling, and analytics.
 - `fastlane/angles.json`: planned or live Fastlane angle objects.
@@ -45,9 +45,9 @@ Create these when Fastlane setup or campaign work is in scope:
 - `fastlane/api-log.jsonl`: sanitized log of API calls. Store method, endpoint, status, counts, and non-sensitive IDs only when needed.
 - `fastlane/metrics-snapshot.json`: latest post/content analytics snapshot.
 - `fastlane/runs/<timestamp>/`: per-run generated content IDs, downloads, QA notes, and schedule results.
-- `UGC_PLAYBOOK.md` and `ugc/` artifacts when creator-led UGC is part of the growth plan rather than only Fastlane-generated content.
+- `growth/UGC_PLAYBOOK.md` and `ugc/` artifacts when creator-led UGC is part of the growth plan rather than only Fastlane-generated content.
 
-Small launches can summarize these in `FASTLANE_OPS.md`, but keep generated scripts/logs under `fastlane/` when live API automation is used.
+Small launches can summarize these in `growth/FASTLANE_OPS.md`, but keep generated scripts/logs under `fastlane/` when live API automation is used.
 
 ## UGC Input Layer
 
@@ -70,7 +70,7 @@ Do not treat one viral UGC video as a reusable Fastlane angle. Promote a structu
 Do not start public Fastlane posting until these are true or explicitly marked blocked/deferred:
 - public App Store/Play Store URL or TestFlight/beta URL exists
 - landing page exists when web funnel is part of acquisition
-- `11_STAR_EXPERIENCE.md`, `BRAND.md`, `DESIGN.md`, `LAUNCH.md`, and `ONBOARDING.md` are current enough to constrain content
+- `11_STAR_EXPERIENCE.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `LAUNCH.md`, and `product/ONBOARDING.md` are current enough to constrain content
 - privacy/terms/support links are live if content drives signups, purchases, or data collection
 - product claims, screenshots, pricing, and subscription disclosures match store/legal/revenue docs
 - UGC creator rights, disclosure rules, and account ownership are documented when creator content is reused or remixed
@@ -81,16 +81,16 @@ Do not start public Fastlane posting until these are true or explicitly marked b
 Click path:
 - `https://app.usefastlane.ai/home` > sign in > select or create workspace
 
-Capture in `FASTLANE_OPS.md`:
+Capture in `growth/FASTLANE_OPS.md`:
 - workspace name and owner, without exposing private IDs unless needed
 - business/product website
 - App Store and Google Play URLs
 - landing/funnel URLs and UTM convention
 - product category, ICP, promise, offer, and key proof points
 - banned claims and compliance notes
-- brand voice notes from `BRAND.md`
+- brand voice notes from `strategy/BRAND.md`
 - 11-star V1 scalable slice and line of feasibility from `11_STAR_EXPERIENCE.md`
-- visual constraints and asset sources from `DESIGN.md` and `design.html`
+- visual constraints and asset sources from `design/DESIGN.md` and `design/design.html`
 
 If the Fastlane guide/onboarding asks for product context, fill it from canonical launch docs instead of ad hoc copy.
 
@@ -149,15 +149,15 @@ Never use write endpoints as schema probes. Live API reads are the authority whe
 ### 5. Campaign Brief
 
 Build `fastlane/campaign-brief.md` from:
-- `SPEC.md`: problem, wedge, ICP, moat, V1 behavior
-- `BRAND.md`: voice, banned words, owned words
-- `DESIGN.md`/`design.html`: visual tone and asset constraints
+- `product/SPEC.md`: problem, wedge, ICP, moat, V1 behavior
+- `strategy/BRAND.md`: voice, banned words, owned words
+- `design/DESIGN.md`/`design/design.html`: visual tone and asset constraints
 - `LAUNCH.md`: ASO keywords, launch calendar, screenshot claims, ad angles
-- `ONBOARDING.md`: aha moment, personalization, paywall timing, review prompt
-- `REVENUE_OPS.md`: offer, pricing, trial, subscription restrictions
-- `PRIVACY.md`/`TERMS.md`: claims and disclosure boundaries
-- `RESEARCH.md`: XPOZ/AppKittie/review language and creator formats
-- `UGC_PLAYBOOK.md` and `ugc/script-bank.md`: creator-tested hooks, format IDs, stop/scale rules, and rights constraints when available
+- `product/ONBOARDING.md`: aha moment, personalization, paywall timing, review prompt
+- `revenue/REVENUE_OPS.md`: offer, pricing, trial, subscription restrictions
+- `trust/PRIVACY.md`/`trust/TERMS.md`: claims and disclosure boundaries
+- `strategy/RESEARCH.md`: XPOZ/AppKittie/review language and creator formats
+- `growth/UGC_PLAYBOOK.md` and `ugc/script-bank.md`: creator-tested hooks, format IDs, stop/scale rules, and rights constraints when available
 
 Include:
 - one campaign objective, for example installs, waitlist, trials, or reactivation
@@ -200,7 +200,7 @@ Use real app media before generic generated visuals:
 - serve-sim browser-visible simulator streams for CLI proof, with URL/port, actions, logs, and limitations recorded
 - SnapshotPreviews PNG/JSON preview exports for component/preview evidence only; do not treat them as runtime app-demo footage
 - app preview clips and store screenshots from `SCREENSHOTS.md`
-- Higgsfield assets for supporting characters, backgrounds, hooks, and motion when constrained by `DESIGN.md`
+- Higgsfield assets for supporting characters, backgrounds, hooks, and motion when constrained by `design/DESIGN.md`
 - founder/UGC clips only when the founder approves identity use
 
 MobAI capture rules:
@@ -212,12 +212,12 @@ MobAI capture rules:
 - use `mobai screenshot --full --path <dir> --name <name>` for production PNG screenshots
 - use `mobai record` for product-demo clips when supported by the current CLI
 - record device, OS, build, locale, theme, fixture, capture path, and proof constraints
-- record `DEMO_VIDEO.md` with choreography/screenplay, raw capture, final export, captions, upload copy, and rerender path when using recorder skills
+- record `growth/DEMO_VIDEO.md` with choreography/screenplay, raw capture, final export, captions, upload copy, and rerender path when using recorder skills
 
 Native iOS fallback/proof:
 - load `xcodebuildmcp-testing.md` before Codex Desktop native iOS/XcodeBuildMCP, SnapshotPreviews, or serve-sim proof
 - use XcodeBuildMCP as a MobAI replacement only after `paid-tool-routing.md` confirmation
-- record Apple-only coverage limits, preview-only limits, provider-proof pairing, and signing/distribution limits in `FASTLANE_OPS.md`, `SCREENSHOTS.md`, and `PRODUCTION_READINESS.md`
+- record Apple-only coverage limits, preview-only limits, provider-proof pairing, and signing/distribution limits in `growth/FASTLANE_OPS.md`, `SCREENSHOTS.md`, and `engineering/PRODUCTION_READINESS.md`
 
 ### Multi-Format Delivery
 
@@ -229,7 +229,7 @@ Key points for this surface:
 - Targets: 9:16 (TikTok / Reels), 1:1 (feed), 16:9 (YouTube / LinkedIn).
 - **App Preview guardrail:** any reframe intended as an App Preview must be sourced from REAL app footage (an in-app iOS Simulator recording, MobAI, XcodeBuildMCP, or serve-sim capture) captured at a resolution that meets the target well. Generated video and preview-only snapshots are never valid App Preview sources.
 - **Spend-confirmation gate:** reframe and personal_clipper consume paid credits. Confirm spend with the founder per `paid-tool-routing.md` and surface the current balance (`mcp__claude_ai_Higgsfield__balance`) before running.
-- **CONTENT_ASSETS.md traceability:** record all output URLs, source job IDs (`source_job_id`), and aspect-ratio variants in `CONTENT_ASSETS.md` / `content-assets/manifest.json`. Run `brain_activity` virality scoring on each variant and log the score before scheduling any paid distribution.
+- **CONTENT_ASSETS.md traceability:** record all output URLs, source job IDs (`source_job_id`), and aspect-ratio variants in `CONTENT_ASSETS.md` / `growth/content-assets/manifest.json`. Run `brain_activity` virality scoring on each variant and log the score before scheduling any paid distribution.
 - Do not schedule reframed variants until the founder approves each output.
 
 ### 8. Generate, QA, And Schedule
@@ -272,7 +272,7 @@ Weekly loop:
 - identify winning hooks, weak formats, failing CTAs, and content that drives low-quality traffic
 - update angles, preferences, `fastlane/prompts.md`, and next schedule
 
-Record in `FASTLANE_OPS.md`:
+Record in `growth/FASTLANE_OPS.md`:
 - winner/loser summary
 - next 7-day plan
 - changes made to angles/preferences
@@ -286,7 +286,7 @@ Record in `FASTLANE_OPS.md`:
 - Scaling UGC/Fastlane content from one viral video instead of repeatable format evidence.
 - Connecting accounts but never verifying `GET /connections`.
 - Storing `FASTLANE_API_KEY` in repo files.
-- Generating content from generic marketing claims instead of `SPEC.md`, `BRAND.md`, `LAUNCH.md`, and real user language.
+- Generating content from generic marketing claims instead of `product/SPEC.md`, `strategy/BRAND.md`, `LAUNCH.md`, and real user language.
 - Scheduling posts before QA or founder approval.
 - Using MobAI screenshots as low-quality JPEGs instead of full PNGs for production assets.
 - Reusing creator clips without documented disclosure, rights, or founder approval.

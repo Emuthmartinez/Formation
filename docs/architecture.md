@@ -8,7 +8,7 @@ This document describes the architecture that exists today. `AGENTS.md` explains
 2. **Domain-organized knowledge.** Each playbook domain owns a `README.md` index with load conditions. Stage order lives in `spine.md`; execution order lives in the graph.
 3. **Stable identity over filesystem location.** Graph IDs identify workflows, artifacts, operators, providers, gates, phases, lanes, domains, and areas. Paths are mutable bindings.
 4. **One execution model.** Workflow definitions compile into a runtime-neutral run graph. No compatibility scheduler, prose task list, or manual collision map competes with it.
-5. **Durable truth.** `PROJECT_STATE.yaml`, accepted artifact versions, run attempts, approvals, evidence, and fingerprints survive sessions. Chat history does not.
+5. **Durable truth.** `state/PROJECT_STATE.yaml`, accepted artifact versions, run attempts, approvals, evidence, and fingerprints survive sessions. Chat history does not.
 6. **Fail closed.** Missing nodes, missing outputs, partial fan-in, stale inputs, unverified claims, and resource conflicts cannot silently become success.
 
 ## Repository layout
@@ -56,7 +56,7 @@ Every accepted artifact records the producing node and attempt, input fingerprin
 
 ## State and mutation
 
-`PROJECT_STATE.yaml` is canonical mutable business state. Parallel workers never edit it directly. They return immutable outputs, evidence references, and proposed state patches. A single orchestrator-owned reducer validates and applies patches transactionally, renders the cockpit, and coordinates shared provider or git mutations.
+`state/PROJECT_STATE.yaml` is canonical mutable business state. Parallel workers never edit it directly. They return immutable outputs, evidence references, and proposed state patches. A single orchestrator-owned reducer validates and applies patches transactionally, renders the cockpit, and coordinates shared provider or git mutations.
 
 Shared resources are explicit claims, including canonical state, integration branches, devices, provider accounts, publishing surfaces, and paths. Two nodes that write the same resource are serialized even when their data dependencies are otherwise independent.
 
@@ -87,4 +87,10 @@ npm run check:skill-graph
 
 ## Public artifact contract
 
-The shape of `business/` is the root layout produced in a launch repository. Moving those paths is a versioned product migration, not cosmetic cleanup. The root `PROJECT_STATE.yaml`, business-relative evidence paths, state directory, design-system payload, and provider packets are public contracts consumed by gates and existing launches.
+The shape of `business/` is the root layout produced in a launch repository. Moving those paths is a versioned product migration, not cosmetic cleanup. The root `state/PROJECT_STATE.yaml`, business-relative evidence paths, state directory, design-system payload, and provider packets are public contracts consumed by gates and existing launches.
+
+## Business artifact information architecture
+
+The reusable `business/` workspace is a capability-owned projection of one launch instance. Its top-level directories are `state`, `strategy`, `product`, `design`, `engineering`, `analytics`, `growth`, `revenue`, `store`, `trust`, and `operations`. Directory placement expresses artifact ownership only; execution order remains graph-derived.
+
+Every moved or added artifact requires synchronized graph bindings, validator paths, fixtures, renderers, and documentation. Stable graph IDs do not change when paths move.

@@ -5,7 +5,7 @@ prompt: >
   evidence file records verified deploys, screenshot uploads returning COMPLETE, custom product
   pages in WAITING_FOR_REVIEW, and the exact asc commands to reproduce each check. The revenue
   lane is marked done with that file as evidence. But no file anywhere records MRR, subscriber
-  count, downloads, DAU, or a retention number; the weekly log in POST_LAUNCH_OPS.md has no
+  count, downloads, DAU, or a retention number; the weekly log in operations/POST_LAUNCH_OPS.md has no
   dated rows; the day-30 retro checkpoint is three weeks past due with every row reading
   "unverified — confirm in RevenueCat"; and lanes.post_launch_ops.live_since was never set.
   The agent resumes the session and proposes shipping a new App Store preview video next.

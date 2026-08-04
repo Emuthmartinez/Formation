@@ -6,7 +6,7 @@ These are **starting prompts**, not final code. Each file has a copy-paste block
 
 ## How to use
 
-1. Confirm the product shape via **AskUserQuestion** (media shape, primary surface, optional systems, niche) — see the reference. Record it in `PROJECT_STATE.yaml`.
+1. Confirm the product shape via **AskUserQuestion** (media shape, primary surface, optional systems, niche) — see the reference. Record it in `state/PROJECT_STATE.yaml`.
 2. **Copy the runnable starter** ([`starter/`](starter/README.md)) into the business repo and install it — it is the pre-wired floor (auth, tested owner-only RLS migrations, Supabase Storage wiring, PostHog event catalog, Stripe/RevenueCat stubs, names-only `.env.example`, CI). Do not regenerate this wiring from scratch; `check:archetype-starter` enforces its contract.
 3. Run prompt **00** strategy work on the web interface / Claude.ai.
 4. Run prompts **01 → 04** in order as Claude Code build prompts against the starter (the starter README maps each prompt to the scaffold area it customizes). Build one system, test it, then move on.
@@ -16,7 +16,7 @@ These are **starting prompts**, not final code. Each file has a copy-paste block
 
 ## Default stack
 
-Next.js App Router + Supabase (Postgres, Auth, **Storage for media**) + Vercel, with all generation calls behind server routes. The **AI generation provider is deliberately not hardcoded**: which image model/provider to use is a paid, founder-gated decision — route it through `paid-tool-routing.md`, record it in `TOOL_DECISIONS.md`, and keep its API key server-side only via `secrets-management.md` / `SECRETS.md`. Monetization: RevenueCat for native IAP, Stripe for web; per-generation COGS means **credits/metering must exist before monetization**. For a native-mobile surface (camera-first products often need it), the backend carries over but the client is adapted and the Apple/Play store lanes apply in full.
+Next.js App Router + Supabase (Postgres, Auth, **Storage for media**) + Vercel, with all generation calls behind server routes. The **AI generation provider is deliberately not hardcoded**: which image model/provider to use is a paid, founder-gated decision — route it through `paid-tool-routing.md`, record it in `strategy/TOOL_DECISIONS.md`, and keep its API key server-side only via `secrets-management.md` / `SECRETS.md`. Monetization: RevenueCat for native IAP, Stripe for web; per-generation COGS means **credits/metering must exist before monetization**. For a native-mobile surface (camera-first products often need it), the backend carries over but the client is adapted and the Apple/Play store lanes apply in full.
 
 ## Build order
 

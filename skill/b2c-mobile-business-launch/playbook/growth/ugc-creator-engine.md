@@ -37,7 +37,7 @@ Deprioritize UGC when:
 - the category is regulated and claims/compliance cannot be reviewed
 - the product cannot tolerate rough, fast, creator-native presentation
 
-Record the fit decision in `UGC_PLAYBOOK.md` and map it to `LAUNCH_TRACE.md` and `11_STAR_EXPERIENCE.md`. A creator hook should be a tiny, truthful version of the product's V1 scalable slice, not a separate marketing fantasy.
+Record the fit decision in `growth/UGC_PLAYBOOK.md` and map it to `state/LAUNCH_TRACE.md` and `11_STAR_EXPERIENCE.md`. A creator hook should be a tiny, truthful version of the product's V1 scalable slice, not a separate marketing fantasy.
 
 ## Day 0 Operating Model
 
@@ -122,7 +122,7 @@ Test:
 
 Define a format as a repeatable structure, not a topic. A format includes hook shape, beat order, product insertion, tension, and CTA mechanic. Steal the skeleton from proven patterns, not the skin, lines, scenes, or copyrighted material.
 
-Before writing scripts for `ugc/script-bank.md`, load `playbook/words/no-slop-writing.md` for banned words/patterns and weasel-attribution claims — but the voice being protected here is the creator's own natural spoken voice, not this skill's tone or the app's `BRAND.md`. A script that reads like brand copy instead of a real person talking on camera fails before any slop check does.
+Before writing scripts for `ugc/script-bank.md`, load `playbook/words/no-slop-writing.md` for banned words/patterns and weasel-attribution claims — but the voice being protected here is the creator's own natural spoken voice, not this skill's tone or the app's `strategy/BRAND.md`. A script that reads like brand copy instead of a real person talking on camera fails before any slop check does.
 
 Daily research habit:
 - scout TikTok and adjacent niches for 20-30 minutes
@@ -175,26 +175,26 @@ Before filming:
 - prepare a truthful demo account/fixture with realistic data
 - mark any generated or mock UI as non-production until the real app exists
 
-Use Higgsfield only for supporting visuals, mascots, backgrounds, hooks, or motion after `DESIGN.md` exists. Do not use generated visuals as a substitute for truthful app UI in store screenshots or product claims.
+Use Higgsfield only for supporting visuals, mascots, backgrounds, hooks, or motion after `design/DESIGN.md` exists. Do not use generated visuals as a substitute for truthful app UI in store screenshots or product claims.
 
 **Synthetic founder-voice content (before real creators are onboarded).** Marketing Studio supports four UGC-family modes suited to pre-roster founder-led content: `ugc`, `ugc_how_to`, `ugc_unboxing`, and `product_review`. Use these to generate synthetic founder-voice ads during format discovery before a real creator roster is running. Synthetic UGC complements real creator content — it does not replace it; real creators produce authentic human variability, comment-bait tension, and niche credibility that generated video cannot replicate. See the **Soul-Once Founder-Face Ads** recipe in `tool-recipes/visual-and-motion-production.md`.
 
 Guardrails for synthetic UGC:
 - Requires a trained founder Soul (`soul-cinematic` variant) and a custom avatar; see `tool-recipes/visual-and-motion-production.md`.
-- Every generation prompt must carry `DESIGN.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface). Generating without this brief is a named failure mode.
+- Every generation prompt must carry `design/DESIGN.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface). Generating without this brief is a named failure mode.
 - Gate every generation behind spend confirmation per `paid-tool-routing.md`; surface current balance first (`mcp__claude_ai_Higgsfield__balance`).
-- Record all generated assets in `CONTENT_ASSETS.md` / `content-assets/manifest.json` with `prompt_brief`, `soul_reference_id`, `avatar_id`, and `virality_score` fields.
+- Record all generated assets in `CONTENT_ASSETS.md` / `growth/content-assets/manifest.json` with `prompt_brief`, `soul_reference_id`, `avatar_id`, and `virality_score` fields.
 - Synthetic ads must pass brain-activity virality scoring before paid distribution (see **Virality Closed Loop** recipe in `tool-recipes/visual-and-motion-production.md`).
 - Public posting and paid campaign launch remain founder-gated.
 
 **Long recordings → short clips (`personal_clipper`).** Use `personal_clipper` to cut long founder recordings, podcast appearances, demo walkthroughs, or app explainers into short-form clips for UGC distribution. `personal_clipper` is an MCP-tool capability only (`mcp__claude_ai_Higgsfield__personal_clipper_create` / `_jobs` / `_status`); confirm the exact invocation via the `higgsfield-generate` skill before running. Gate behind spend confirmation per `paid-tool-routing.md`. See the **Master → All Platforms** recipe in `tool-recipes/visual-and-motion-production.md`.
 
-Use Remotion when founder-led or creator-led content needs repeatable local variants: product-demo loops, hook overlays, captions, cutdowns, screenshot motion, before/after frames, or app-preview clips. Load `remotion-content-assets.md` first, record Remotion license status, keep real app UI visible, and add each rendered output to `CONTENT_ASSETS.md` and `content-assets/manifest.json`. Remotion is especially useful before Fastlane because the same composition can render many hook, CTA, locale, and dimension variants without paying for net-new generative media.
+Use Remotion when founder-led or creator-led content needs repeatable local variants: product-demo loops, hook overlays, captions, cutdowns, screenshot motion, before/after frames, or app-preview clips. Load `remotion-content-assets.md` first, record Remotion license status, keep real app UI visible, and add each rendered output to `CONTENT_ASSETS.md` and `growth/content-assets/manifest.json`. Remotion is especially useful before Fastlane because the same composition can render many hook, CTA, locale, and dimension variants without paying for net-new generative media.
 
 ## Outputs
 
 Create these when UGC is in scope:
-- `UGC_PLAYBOOK.md`: fit decision, 90-day plan, budget, creator profile, sourcing channel, contract checklist, payment model, stop/scale rules
+- `growth/UGC_PLAYBOOK.md`: fit decision, 90-day plan, budget, creator profile, sourcing channel, contract checklist, payment model, stop/scale rules
 - `VIRAL_GROWTH.md`: product-led loop, referral/share mechanics, content format lab, monetization timing, analytics proof, abuse controls, and stop/scale rules when creator content is expected to compound
 - `CONTENT_ASSETS.md`: Remotion/Higgsfield/raw-media route, source inputs, license status, render proof, and output registry when rendered or generated media supports the UGC lane
 - `ugc/creator-list.csv`: creators, platform, handle, geography, personal followers, notes, outreach status
@@ -202,7 +202,7 @@ Create these when UGC is in scope:
 - `ugc/tracker.csv` or sheet link: posts, metrics, payouts, format results
 - `ugc/creator-brief.md`: filming rules, disclosure rules, approval flow, account handling, product truth constraints
 - `ugc/weekly-review.md`: current winners, failed hooks, next tests, spend, install/search signals
-- updated `FASTLANE_OPS.md` when Fastlane becomes the generation/scheduling engine after launch
+- updated `growth/FASTLANE_OPS.md` when Fastlane becomes the generation/scheduling engine after launch
 
 ## Post-Breakout Scale Model
 

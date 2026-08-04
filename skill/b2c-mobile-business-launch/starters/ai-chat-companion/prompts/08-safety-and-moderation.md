@@ -23,9 +23,9 @@ Log moderation decisions (without storing the raw harmful content beyond what is
 needed) and make the policy and thresholds config-driven.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -33,7 +33,7 @@ shipping strings.
 
 - This is both a `security-release-hardening.md` item and an `ethics-guardrail.md` item. A companion that fosters unhealthy dependency, manufactures emotional pressure to retain or upsell, or implies it is human/licensed is a **dark pattern and a compliance veto** — not a polish item.
 - Use the Claude API (or a dedicated classifier) for moderation; keep it server-side. Document the policy, thresholds, and escalation copy so they are reviewable, and reconcile AI-use, data-retention, and (if applicable) minor-safety disclosures in `privacy-terms.md`.
-- The "you are talking to an AI" disclosure and the no-false-credentials rule are copy constraints in `BRAND.md §Voice` (Human-Centered AI honesty tier, `consumer-product-design-agency.md`).
-- Add `input_moderation_blocked`, `output_moderation_blocked`, `crisis_protocol_triggered`, `jailbreak_attempt_detected` to `ANALYTICS.md` (counts, not raw content).
-- Treat safety as a release gate in `PRODUCTION_READINESS.md`: do not call the app launch-ready from working chat alone.
+- The "you are talking to an AI" disclosure and the no-false-credentials rule are copy constraints in `strategy/BRAND.md §Voice` (Human-Centered AI honesty tier, `consumer-product-design-agency.md`).
+- Add `input_moderation_blocked`, `output_moderation_blocked`, `crisis_protocol_triggered`, `jailbreak_attempt_detected` to `analytics/ANALYTICS.md` (counts, not raw content).
+- Treat safety as a release gate in `engineering/PRODUCTION_READINESS.md`: do not call the app launch-ready from working chat alone.
 </content>

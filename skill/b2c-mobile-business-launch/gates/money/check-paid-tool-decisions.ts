@@ -2,7 +2,7 @@
 /**
  * check-paid-tool-decisions
  *
- * Verifies that TOOL_DECISIONS.md exists and contains a decision entry for every
+ * Verifies that strategy/TOOL_DECISIONS.md exists and contains a decision entry for every
  * primary paid tool (AppKittie, XPOZ, Higgsfield, Refero, MobAI) whenever a
  * fallback was used in any lane doc.  Also checks that no fallback was taken
  * without a recorded founder approval.
@@ -27,9 +27,9 @@ function hasFallbackApproval(text: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Locate TOOL_DECISIONS.md
+// Locate strategy/TOOL_DECISIONS.md
 // ---------------------------------------------------------------------------
-const toolDecisions = readText(args.root, "TOOL_DECISIONS.md");
+const toolDecisions = readText(args.root, "strategy/TOOL_DECISIONS.md");
 
 const paidToolStatus = state ? asString(getPath(state, "lanes.paid_tool_routing.status"))?.toLowerCase() : undefined;
 const skip = paidToolStatus === "not_needed" || paidToolStatus === "deferred";
@@ -39,8 +39,8 @@ if (!skip && !toolDecisions) {
     issue(
       "error",
       "paid_tool_decisions.file_missing",
-      "TOOL_DECISIONS.md is required when paid or account-gated tools are in scope. Create it and record the access status and founder decision for every primary paid tool (AppKittie, XPOZ, Higgsfield, Refero, MobAI).",
-      "TOOL_DECISIONS.md",
+      "strategy/TOOL_DECISIONS.md is required when paid or account-gated tools are in scope. Create it and record the access status and founder decision for every primary paid tool (AppKittie, XPOZ, Higgsfield, Refero, MobAI).",
+      "strategy/TOOL_DECISIONS.md",
     ),
   );
 }
@@ -48,22 +48,22 @@ if (!skip && !toolDecisions) {
 if (toolDecisions) {
   // -------------------------------------------------------------------------
   // Check that every tool that appears in a fallback context has a decision entry.
-  // We scan a set of candidate lane docs plus TOOL_DECISIONS.md itself.
+  // We scan a set of candidate lane docs plus strategy/TOOL_DECISIONS.md itself.
   // -------------------------------------------------------------------------
   const laneDocs: Array<{ path: string; text: string }> = [];
   for (const candidate of [
-    "TOOL_DECISIONS.md",
-    "RESEARCH.md",
+    "strategy/TOOL_DECISIONS.md",
+    "strategy/RESEARCH.md",
     "CONTENT_ASSETS.md",
-    "content-assets/CONTENT_ASSETS.md",
+    "growth/content-assets/CONTENT_ASSETS.md",
     "UX_PATTERNS.md",
-    "ux-patterns/UX_PATTERNS.md",
-    "ENGINEERING_PLAN.md",
-    "PRODUCTION_READINESS.md",
+    "product/experience/ux-patterns/UX_PATTERNS.md",
+    "engineering/ENGINEERING_PLAN.md",
+    "engineering/PRODUCTION_READINESS.md",
     "SCREENSHOTS.md",
-    "STORE_CONSOLE.md",
+    "store/STORE_CONSOLE.md",
     "APP_STORE_LISTING.md",
-    "FASTLANE_OPS.md",
+    "growth/FASTLANE_OPS.md",
     "ASO.md",
   ]) {
     const text = readText(args.root, candidate);
@@ -125,10 +125,10 @@ if (toolDecisions) {
   ];
 
   for (const tool of tools) {
-    // Does any lane doc (other than TOOL_DECISIONS.md) mention a fallback for this tool?
-    const fallbackInLanes = laneDocs.some((doc) => doc.path !== "TOOL_DECISIONS.md" && tool.fallbackSignals.test(doc.text));
+    // Does any lane doc (other than strategy/TOOL_DECISIONS.md) mention a fallback for this tool?
+    const fallbackInLanes = laneDocs.some((doc) => doc.path !== "strategy/TOOL_DECISIONS.md" && tool.fallbackSignals.test(doc.text));
 
-    // Does TOOL_DECISIONS.md mention this tool at all?
+    // Does strategy/TOOL_DECISIONS.md mention this tool at all?
     const entryInDecisions = tool.entrySignals.test(toolDecisions);
 
     if (fallbackInLanes && !entryInDecisions) {
@@ -136,13 +136,13 @@ if (toolDecisions) {
         issue(
           "error",
           `paid_tool_decisions.${tool.code}.entry_missing`,
-          `A ${tool.name} fallback was used in a lane doc but TOOL_DECISIONS.md has no entry for ${tool.name}. Record tool, lane, access status, founder confirmation, selected route, and fallback limitation.`,
-          "TOOL_DECISIONS.md",
+          `A ${tool.name} fallback was used in a lane doc but strategy/TOOL_DECISIONS.md has no entry for ${tool.name}. Record tool, lane, access status, founder confirmation, selected route, and fallback limitation.`,
+          "strategy/TOOL_DECISIONS.md",
         ),
       );
     }
 
-    // If TOOL_DECISIONS.md mentions this tool but has no approval language, flag it.
+    // If strategy/TOOL_DECISIONS.md mentions this tool but has no approval language, flag it.
     if (entryInDecisions) {
       // Find the paragraph(s) that mention this tool and check for approval.
       const paragraphs = toolDecisions.split(/\n{2,}/);
@@ -155,8 +155,8 @@ if (toolDecisions) {
           issue(
             "warning",
             `paid_tool_decisions.${tool.code}.approval_unclear`,
-            `TOOL_DECISIONS.md mentions ${tool.name} but the entry does not clearly record founder approval, confirmed access, or explicit fallback approval. Add a founder_confirmation field.`,
-            "TOOL_DECISIONS.md",
+            `strategy/TOOL_DECISIONS.md mentions ${tool.name} but the entry does not clearly record founder approval, confirmed access, or explicit fallback approval. Add a founder_confirmation field.`,
+            "strategy/TOOL_DECISIONS.md",
           ),
         );
       }
@@ -174,8 +174,8 @@ if (toolDecisions) {
         issue(
           "warning",
           `paid_tool_decisions.structure.${section.replaceAll(" ", "_")}.missing`,
-          `TOOL_DECISIONS.md should include a "${section}" field for each entry per the artifact contract in paid-tool-routing.md.`,
-          "TOOL_DECISIONS.md",
+          `strategy/TOOL_DECISIONS.md should include a "${section}" field for each entry per the artifact contract in paid-tool-routing.md.`,
+          "strategy/TOOL_DECISIONS.md",
         ),
       );
     }
@@ -193,8 +193,8 @@ if (toolDecisions) {
       issue(
         "error",
         "paid_tool_decisions.fallback_limitation_unlabeled",
-        "TOOL_DECISIONS.md records a fallback route but does not include a fallback_limitation or confidence note. Fallback outputs must be labeled with what the paid tool would have improved.",
-        "TOOL_DECISIONS.md",
+        "strategy/TOOL_DECISIONS.md records a fallback route but does not include a fallback_limitation or confidence note. Fallback outputs must be labeled with what the paid tool would have improved.",
+        "strategy/TOOL_DECISIONS.md",
       ),
     );
   }

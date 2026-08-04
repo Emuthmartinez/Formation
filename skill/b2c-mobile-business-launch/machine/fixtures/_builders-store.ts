@@ -12,7 +12,7 @@ export function writeCompleteAttribution(root: string): void {
   contract["verified"] = true;
   writeState(root, state);
   writeFileSync(
-    path.join(root, "ANALYTICS.md"),
+    path.join(root, "analytics/ANALYTICS.md"),
     [
       "# Analytics",
       "Event: attribution_source_selected",
@@ -25,7 +25,7 @@ export function writeCompleteAttribution(root: string): void {
 
 export function writeCompleteAppleSigning(root: string): void {
   writeFileSync(
-    path.join(root, "APPLE_SIGNING.md"),
+    path.join(root, "store/APPLE_SIGNING.md"),
     [
       "# Apple Signing",
       "Apple Developer account and Team ID are confirmed.",
@@ -67,7 +67,7 @@ export function writeCompleteAppleRequirements(root: string): void {
     "utf8",
   );
   writeFileSync(
-    path.join(root, "APPLE_APP_STORE_REQUIREMENTS.md"),
+    path.join(root, "store/APPLE_APP_STORE_REQUIREMENTS.md"),
     [
       "# Apple App Store Requirements",
       "Status: ready for founder approval.",
@@ -75,10 +75,10 @@ export function writeCompleteAppleRequirements(root: string): void {
       "Privacy Manifest: PrivacyInfo.xcprivacy exists at ios/App/PrivacyInfo.xcprivacy and is included in app target resources.",
       "Manifest keys: NSPrivacyCollectedDataTypes is empty for this fixture, NSPrivacyAccessedAPITypes is empty for this fixture, NSPrivacyAccessedAPITypeReasons is not used because no required reason API category is present, NSPrivacyTracking is false, and NSPrivacyTrackingDomains is empty.",
       "Third-party SDK Inventory: third-party SDK entries are checked against Apple's listed SDKs; SDK signatures and bundled manifests are verified or the SDK is excluded from the build.",
-      "Xcode privacy report: generated from archive and reconciled with App Privacy, Privacy Nutrition Labels, PRIVACY.md, SECURITY.md, APP_STORE_LISTING.md, STORE_CONSOLE.md, and review notes.",
+      "Xcode privacy report: generated from archive and reconciled with App Privacy, Privacy Nutrition Labels, trust/PRIVACY.md, trust/SECURITY.md, APP_STORE_LISTING.md, store/STORE_CONSOLE.md, and review notes.",
       "App Privacy: Privacy Policy URL and Privacy Choices URL are verified, account deletion is present, and data collection answers match vendors and app behavior.",
       "Protected resources: Info.plist UsageDescription purpose strings are audited for protected resources. NSUserTrackingUsageDescription and App Tracking Transparency are recorded when tracking or advertising identifiers are in scope.",
-      "Archive and upload: APPLE_SIGNING.md records archive, export, upload, App Store Connect delivery warnings, processing status, and founder approval before submission.",
+      "Archive and upload: store/APPLE_SIGNING.md records archive, export, upload, App Store Connect delivery warnings, processing status, and founder approval before submission.",
     ].join("\n"),
     "utf8",
   );
@@ -86,7 +86,7 @@ export function writeCompleteAppleRequirements(root: string): void {
 
 export function writeCompleteStoreConsole(root: string): void {
   writeFileSync(
-    path.join(root, "STORE_CONSOLE.md"),
+    path.join(root, "store/STORE_CONSOLE.md"),
     [
       "# Store Console",
       "App Store Connect click path and ASC CLI routes cover app creation, asc-id-resolver ID resolution, app info, SKU, primary locale, bundle ID, App Privacy, pricing, RevenueCat, asc-revenuecat-catalog-sync, subscription setup, localization, custom product page strategy, In-App Event planning, Higgsfield-backed marketing assets, screenshots, TestFlight, review status, review notes, and account deletion.",
@@ -96,7 +96,7 @@ export function writeCompleteStoreConsole(root: string): void {
     ].join("\n"),
     "utf8",
   );
-  writeFileSync(path.join(root, "store-console.html"), "<!doctype html><html><body>Store console packet</body></html>", "utf8");
+  writeFileSync(path.join(root, "store/store-console.html"), "<!doctype html><html><body>Store console packet</body></html>", "utf8");
   writeFileSync(
     path.join(root, "APP_STORE_LISTING.md"),
     [
@@ -118,11 +118,11 @@ export function writeCompleteStoreScreenshots(root: string): void {
     [
       "# Store Screenshots",
       "Status: partial until founder approval for upload.",
-      "Source Ledger: DESIGN.md, design.md, 11_STAR_EXPERIENCE.md, APP_STORE_LISTING.md, CONTENT_ASSETS.md, MobAI raw captures, Codex Desktop native iOS/XcodeBuildMCP captures, serve-sim streams, SnapshotPreviews preview-only proof, Higgsfield supporting visuals, Remotion rendered frames, ParthJadhav/app-store-screenshots export board, app-store-screenshots.json state, and asc-screenshot-resize validation.",
+      "Source Ledger: design/DESIGN.md, design.md, 11_STAR_EXPERIENCE.md, APP_STORE_LISTING.md, CONTENT_ASSETS.md, MobAI raw captures, Codex Desktop native iOS/XcodeBuildMCP captures, serve-sim streams, SnapshotPreviews preview-only proof, Higgsfield supporting visuals, Remotion rendered frames, ParthJadhav/app-store-screenshots export board, app-store-screenshots.json state, and asc-screenshot-resize validation.",
       "Narrative: Slot 1 sells the core outcome; slots 2-3 prove the V1 scalable slice; later slots show one benefit per frame.",
       "App Icon: 1024x1024 PNG, no alpha, no rounded corners, tested at App Store search thumbnail size, with Higgsfield route recorded when generated.",
       "App Preview Video (Autoplay Hook): app previews autoplay muted and always precede screenshots; the first preview's first 3-5 seconds are the muted hook showing the magical moment first, produced via aso-skills:app-preview-video, with a poster frame, real in-app footage, and founder approval before upload.",
-      "Asset Knowledge Brief: every asset draws on RESEARCH.md (target user/problem), 11_STAR_EXPERIENCE.md (magical moment), and EMOTIONAL_DESIGN.md (Emotional North Star and Experience Card) so screenshots and the app preview are knowledge-leveraged, not generic.",
+      "Asset Knowledge Brief: every asset draws on strategy/RESEARCH.md (target user/problem), 11_STAR_EXPERIENCE.md (magical moment), and EMOTIONAL_DESIGN.md (Emotional North Star and Experience Card) so screenshots and the app preview are knowledge-leveraged, not generic.",
       "Composition And Export Route: ParthJadhav/app-store-screenshots writes app-store-screenshots.json and a reusable screenshots/index.html board from real UI, app icon, design tokens, localized copy, and optional Higgsfield support assets.",
       "Definition of Good (Present / Proven / Optimized): PRESENT — matrices filled; PROVEN — real raw captures and final PNGs exist, app-store-screenshots.json references them, the ParthJadhav theme is derived from theme.tokens.json, and captions reinforce APP_STORE_LISTING.md keywords; OPTIMIZED — screenshot-rubric-scores.json records a passing grade per SCREENSHOT_RUBRIC.md or a logged founder override.",
       "Raw Capture Matrix",
@@ -134,8 +134,8 @@ export function writeCompleteStoreScreenshots(root: string): void {
       "Production Composition Matrix",
       "| Slot | Headline | Copy overlay | Layout | Supporting asset | Route | Final upload path | Dimensions | Alpha/color space | Visual QA |",
       "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
-      "| 1 | See the win fast | yes | framed iPhone app store screenshot | Higgsfield background tied to DESIGN.md | ParthJadhav/app-store-screenshots composition from real UI | screenshots/final/iphone-69-slot-1.png | 1320x2868 | alpha removed, sRGB color space | thumbnail and mobile proof passed |",
-      "| 2 | Built for big screens | yes | framed iPad app store screenshot | DESIGN.md gradient panel | ParthJadhav/app-store-screenshots composition from real UI | screenshots/final/ipad-13-slot-2.png | 2064x2752 | alpha removed, sRGB color space | iPad well proof passed |",
+      "| 1 | See the win fast | yes | framed iPhone app store screenshot | Higgsfield background tied to design/DESIGN.md | ParthJadhav/app-store-screenshots composition from real UI | screenshots/final/iphone-69-slot-1.png | 1320x2868 | alpha removed, sRGB color space | thumbnail and mobile proof passed |",
+      "| 2 | Built for big screens | yes | framed iPad app store screenshot | design/DESIGN.md gradient panel | ParthJadhav/app-store-screenshots composition from real UI | screenshots/final/ipad-13-slot-2.png | 2064x2752 | alpha removed, sRGB color space | iPad well proof passed |",
       "Device Wells",
       "| Platform | Well | Required/scaled decision | ASC device_type | Screenshot count | Dimensions | Target file | Validation proof | Status |",
       "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -177,18 +177,18 @@ export function writeCompleteElevenStar(root: string): void {
       "Surface Matrix",
       "| Surface | 11-star question | Product-specific answer | Artifact owner | Proof |",
       "| --- | --- | --- | --- | --- |",
-      "| Product | What result would the user retell? | Context-aware next step. | SPEC.md, LAUNCH_TRACE.md | EXP-001 |",
-      "| Onboarding | What makes the user feel understood early? | Reflect answers before paywall. | ONBOARDING.md | EXP-001 |",
-      "| Paywall | What unlocks momentum? | Show the next unlocked action. | REVENUE_OPS.md | EXP-001 |",
+      "| Product | What result would the user retell? | Context-aware next step. | product/SPEC.md, state/LAUNCH_TRACE.md | EXP-001 |",
+      "| Onboarding | What makes the user feel understood early? | Reflect answers before paywall. | product/ONBOARDING.md | EXP-001 |",
+      "| Paywall | What unlocks momentum? | Show the next unlocked action. | revenue/REVENUE_OPS.md | EXP-001 |",
       "| Ad | What tiny experience can the ad deliver? | Show the before/after moment. | CONTENT_ASSETS.md | EXP-001 |",
       "| App Store | What three frames prove the magic? | Problem, personalized result, next step. | APP_STORE_LISTING.md | EXP-001 |",
-      "| Engineering | What must be real? | State, API, analytics, and fixture proof. | TECH_SPEC.md | EXP-001 |",
+      "| Engineering | What must be real? | State, API, analytics, and fixture proof. | engineering/TECH_SPEC.md | EXP-001 |",
       "Visual Storyboard: 11-star-experience.html renders the ladder.",
       "Traceability",
       "| Trace ID | Experience decision | Source evidence | Product impact | Design impact | Build contract | Verification |",
       "| --- | --- | --- | --- | --- | --- | --- |",
-      "| EXP-001 | Context-aware result is the magical moment. | RESEARCH.md | SPEC.md | DESIGN.md | TECH_SPEC.md | PRODUCTION_READINESS.md |",
-      "Engineering Contract: TECH_SPEC.md owns the state machine, data model, API/RPC/webhook contracts, permissions, offline/error states, analytics events, test fixture, and E2E proof path.",
+      "| EXP-001 | Context-aware result is the magical moment. | strategy/RESEARCH.md | product/SPEC.md | design/DESIGN.md | engineering/TECH_SPEC.md | engineering/PRODUCTION_READINESS.md |",
+      "Engineering Contract: engineering/TECH_SPEC.md owns the state machine, data model, API/RPC/webhook contracts, permissions, offline/error states, analytics events, test fixture, and E2E proof path.",
     ].join("\n"),
     "utf8",
   );
@@ -198,10 +198,10 @@ export function writeCompleteElevenStar(root: string): void {
     "utf8",
   );
   for (const [file, text] of [
-    ["SPEC.md", "# Spec\n\n## 11-Star Experience\n\nSource: 11_STAR_EXPERIENCE.md. Trace: EXP-001.\n"],
-    ["DESIGN.md", "# Design\n\nThis design expresses the 11-star V1 slice from 11_STAR_EXPERIENCE.md. Trace: EXP-001.\n"],
+    ["product/SPEC.md", "# Spec\n\n## 11-Star Experience\n\nSource: 11_STAR_EXPERIENCE.md. Trace: EXP-001.\n"],
+    ["design/DESIGN.md", "# Design\n\nThis design expresses the 11-star V1 slice from 11_STAR_EXPERIENCE.md. Trace: EXP-001.\n"],
     [
-      "ONBOARDING.md",
+      "product/ONBOARDING.md",
       [
         "# Onboarding",
         "",
@@ -215,8 +215,11 @@ export function writeCompleteElevenStar(root: string): void {
         "Fallback: the platform may not show the review sheet; continue onboarding to paywall or activation without blocking the user.",
       ].join("\n"),
     ],
-    ["TECH_SPEC.md", "# Tech Spec\n\nThe state, API, analytics, and fixture contracts implement EXP-001 from 11_STAR_EXPERIENCE.md.\n"],
-    ["LAUNCH_TRACE.md", "# Launch Trace\n\nEXP-001 maps research to 11_STAR_EXPERIENCE.md, SPEC.md, DESIGN.md, ONBOARDING.md, TECH_SPEC.md, and proof.\n"],
+    ["engineering/TECH_SPEC.md", "# Tech Spec\n\nThe state, API, analytics, and fixture contracts implement EXP-001 from 11_STAR_EXPERIENCE.md.\n"],
+    [
+      "state/LAUNCH_TRACE.md",
+      "# Launch Trace\n\nEXP-001 maps research to 11_STAR_EXPERIENCE.md, product/SPEC.md, design/DESIGN.md, product/ONBOARDING.md, engineering/TECH_SPEC.md, and proof.\n",
+    ],
   ] as const) {
     writeFileSync(path.join(root, file), text, "utf8");
   }
@@ -224,7 +227,7 @@ export function writeCompleteElevenStar(root: string): void {
 
 export function writeCompleteSecurity(root: string): void {
   writeFileSync(
-    path.join(root, "SECURITY.md"),
+    path.join(root, "trust/SECURITY.md"),
     [
       "# Security Release Plan",
       "Source Basis: OWASP MASVS, OWASP ASVS, Apple Platform Security, Android security best practices, Claude Security, Codex Security, MobSF, Doppler, Sentry, and local security skills.",
@@ -233,7 +236,7 @@ export function writeCompleteSecurity(root: string): void {
       "Free fallback: security-threat-model, security-best-practices, MobSF local, gitleaks, trufflehog, npm audit, osv-scanner, and semgrep community rules.",
       "Threat Model: Assets, Trust Boundaries, Attacker Capabilities, and abuse paths cover account, attribution, API, revenue, support, and store release flows.",
       "Data Classification separates public copy, user personal data, purchase data, Secrets, signing material, and CI credentials.",
-      "Mobile Hardening: iOS uses Keychain, App Transport Security, App Attest, DeviceCheck, entitlements, and APPLE_SIGNING.md release proof. Android uses Android Keystore, Network Security Config, and Play Integrity.",
+      "Mobile Hardening: iOS uses Keychain, App Transport Security, App Attest, DeviceCheck, entitlements, and store/APPLE_SIGNING.md release proof. Android uses Android Keystore, Network Security Config, and Play Integrity.",
       "Authentication and Authorization are backend-owned; client checks are not access control.",
       "Backend and API controls include validation, rate limits, idempotency, webhook signature verification, RLS, audit logging, and admin least privilege.",
       "Revenue, Entitlements, RevenueCat, Stripe, restore, webhook, and idempotency controls prevent entitlement spoofing and replay.",
@@ -241,11 +244,11 @@ export function writeCompleteSecurity(root: string): void {
       "Email and Domain Security cover SPF, DKIM, DMARC, unsubscribe, Resend, support, privacy, security aliases, security.txt, and security headers.",
       "Supply Chain covers SDK inventory, dependency review, lockfiles, secret scan, build scripts, signing material, and no raw secrets.",
       "Monitoring and Incident Response cover Sentry, release health, alerts, support escalation, rollback, and vulnerability disclosure.",
-      "Release Checks require check:security, check:secrets, mobile evidence, webhook evidence, scanner or blocked-route evidence, and security-review.html.",
+      "Release Checks require check:security, check:secrets, mobile evidence, webhook evidence, scanner or blocked-route evidence, and trust/security-review.html.",
       "Accepted Risks list owner, reason, expiry, compensating control, evidence, and founder approval.",
       "Founder Approval gates paid scanners, hosted security tools, repo connections, public disclosure routes, and blocking App Attest, DeviceCheck, or Play Integrity enforcement.",
     ].join("\n"),
     "utf8",
   );
-  writeFileSync(path.join(root, "security-review.html"), "<!doctype html><html><body>Security review board</body></html>", "utf8");
+  writeFileSync(path.join(root, "trust/security-review.html"), "<!doctype html><html><body>Security review board</body></html>", "utf8");
 }

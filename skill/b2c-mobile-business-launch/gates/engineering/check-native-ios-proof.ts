@@ -18,8 +18,8 @@ const state = loaded.state;
  */
 const IN_APP_SIMULATOR_TERMS = ["iOS Simulator pane", "simulator pane", "in-app simulator", "in-app iOS Simulator", "build-ios-apps", "computer-use"];
 
-const readiness = firstExistingText(["PRODUCTION_READINESS.md", "engineering/PRODUCTION_READINESS.md"]);
-const screenshots = firstExistingText(["SCREENSHOTS.md", "screenshots/SCREENSHOTS.md", "app-store-listing/SCREENSHOTS.md"]);
+const readiness = firstExistingText(["engineering/PRODUCTION_READINESS.md", "engineering/engineering/PRODUCTION_READINESS.md"]);
+const screenshots = firstExistingText(["SCREENSHOTS.md", "screenshots/SCREENSHOTS.md", "store/app-store-listing/SCREENSHOTS.md"]);
 
 const platforms = state
   ? asArray(getPath(state, "project.platforms"))
@@ -35,8 +35,8 @@ if (hasIos && engineeringStatus === "done" && !readiness) {
     issue(
       "error",
       "native_ios_proof.readiness_missing",
-      "Done iOS engineering requires PRODUCTION_READINESS.md with native iOS proof.",
-      "PRODUCTION_READINESS.md",
+      "Done iOS engineering requires engineering/PRODUCTION_READINESS.md with native iOS proof.",
+      "engineering/PRODUCTION_READINESS.md",
     ),
   );
 }
@@ -60,7 +60,7 @@ function validateReadiness(text: string, file: string): void {
     text,
     ["Native iOS Proof", "native iOS proof", "iOS proof", "Apple simulator/device proof"],
     "native_ios_proof.section_missing",
-    "PRODUCTION_READINESS.md must include a native iOS proof section before iOS readiness claims.",
+    "engineering/PRODUCTION_READINESS.md must include a native iOS proof section before iOS readiness claims.",
     file,
   );
   requireAny(
@@ -128,14 +128,14 @@ function validateReadiness(text: string, file: string): void {
   );
   requireAny(
     text,
-    ["PROVIDER_PROOF.md", "backend/provider proof", "RevenueCat", "PostHog", "Stripe", "Resend", "Sentry"],
+    ["operations/PROVIDER_PROOF.md", "backend/provider proof", "RevenueCat", "PostHog", "Stripe", "Resend", "Sentry"],
     "native_ios_proof.provider_pairing_missing",
     "Native iOS app proof must be paired with backend/provider proof when provider-backed behavior is in scope.",
     file,
   );
   requireAny(
     text,
-    ["simulator build alone is not distribution readiness", "does not prove App Store signing", "not distribution readiness", "APPLE_SIGNING.md"],
+    ["simulator build alone is not distribution readiness", "does not prove App Store signing", "not distribution readiness", "store/APPLE_SIGNING.md"],
     "native_ios_proof.distribution_limit_missing",
     "Native iOS proof must state that simulator/preview proof does not replace Apple signing, archive, upload, or distribution readiness.",
     file,

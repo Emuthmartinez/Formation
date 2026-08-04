@@ -30,9 +30,9 @@ All grants/spends/refunds flow through the append-only ledger; entitlement
 reads come from a cached status, not a live billing-provider call per request.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -40,8 +40,8 @@ shipping strings.
 
 - **Reconcile with `revenue-monetization.md` §10 before picking the model — as defaults to TEST, not dogma:** hard paywalls convert ~5x freemium (median ~10.7% vs ~2.1% D35 download-to-paid), yearly-dominant apps show the highest realized LTV, price reads as a quality signal (high-priced apps show ~5.4x monthly LTV *with higher* conversion), and paid intro offers are worth testing over reflexive free trials. The anti-pattern is reaching for the cozy default (generous freemium, monthly-only, $2.99) by reflex and never surfacing the trade-off. Per the report's AI pattern: AI apps earn more per payer but churn faster — protect margin (annual-led, less-generous freemium) and judge on renewals, not install-day conversion.
 - **Per-generation COGS is the difference from ordinary subscription apps:** a free user is not "free" — every generation has a provider invoice behind it. Price packs and allowances from the measured cost per generation (prompt 04), and never grant unmetered "unlimited" generations without a fair-use cap.
-- Pricing, plan mix, pack sizes, and the free grant are **founder-gated** (`revenue-monetization.md` §9): surface the benchmark trade-offs, then the founder decides. Record in `REVENUE_OPS.md`.
+- Pricing, plan mix, pack sizes, and the free grant are **founder-gated** (`revenue-monetization.md` §9): surface the benchmark trade-offs, then the founder decides. Record in `revenue/REVENUE_OPS.md`.
 - Billing path follows the surface: Stripe for web; native digital purchases go through IAP via RevenueCat — do not ship the web Stripe paywall inside a native binary without resolving store policy first.
-- Webhook signing secrets route through `SECRETS.md`; webhooks are an abuse surface (`SECURITY.md`) and ledger writes must be idempotent. Handle involuntary billing-failure churn (grace period, dunning) per `revenue-monetization.md` §8a.
+- Webhook signing secrets route through `SECRETS.md`; webhooks are an abuse surface (`trust/SECURITY.md`) and ledger writes must be idempotent. Handle involuntary billing-failure churn (grace period, dunning) per `revenue-monetization.md` §8a.
 - The out-of-credits upgrade moment is paywall timing (`onboarding-conversion.md`) and sits next to the Variable Reward loop — an honest price at a real value moment, never a spend-compulsion nudge (`ethics-guardrail.md`).
-- Add `checkout_started`, `credits_purchased`, `subscription_activated`, `out_of_credits_shown`, `payment_failed` to `ANALYTICS.md`; pair with per-generation cost for margin dashboards.
+- Add `checkout_started`, `credits_purchased`, `subscription_activated`, `out_of_credits_shown`, `payment_failed` to `analytics/ANALYTICS.md`; pair with per-generation cost for margin dashboards.

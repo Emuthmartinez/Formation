@@ -39,7 +39,7 @@
       "readiness": [
         {
           "status": "green",
-          "label": "PROJECT_STATE.yaml is current",
+          "label": "state/PROJECT_STATE.yaml is current",
           "tag": "Fresh"
         },
         {
@@ -93,14 +93,14 @@
         {
           "title": "Design Room",
           "summary": "Review product, market, audience, promise, screenshots, and visual direction from state files.",
-          "path": "design-room.html",
+          "path": "design/design-room.html",
           "status": "Ready",
           "id": "panel.design-room"
         },
         {
           "title": "Launch Cockpit",
           "summary": "See launch stage, blockers, milestones, provider proof, and next agent actions.",
-          "path": "launch-cockpit.html",
+          "path": "state/launch-cockpit.html",
           "status": "Ready",
           "id": "view.launch-cockpit"
         },

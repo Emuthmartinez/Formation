@@ -80,8 +80,8 @@ repositioning). Prerequisites:
 - **Lead time of ~4–6 weeks** end to end. Do not expect a tentpole on a 3-day turnaround.
 - **A credible human principal**, not the faceless brand handle. Koji = Sue Khim; Moda = Anvisha.
   The principal's face/voice is the trust anchor.
-- **A hero asset** (video/clip) from [`content-assets/CONTENT_ASSETS.md`](../../business/content-assets/CONTENT_ASSETS.md)
-  / `DEMO_VIDEO.md`.
+- **A hero asset** (video/clip) from [`growth/content-assets/CONTENT_ASSETS.md`](../../business/growth/content-assets/CONTENT_ASSETS.md)
+  / `growth/DEMO_VIDEO.md`.
 
 ### Feature Launch Cadence (the heartbeat)
 
@@ -294,7 +294,7 @@ everything. The launch never ends.
 
 - Tie attention to product behavior via [`analytics-attribution.md`](../data/analytics-attribution.md): post
   impressions → reply-link clicks (UTM'd) → install → activation event. Record the self-reported
-  attribution source key per the `ANALYTICS.md` attribution contract.
+  attribution source key per the `analytics/ANALYTICS.md` attribution contract.
 - Watch a standing-audience metric weekly (followers gained, profile-served impressions, returning
   viewers), not just per-post views.
 - Use exact, attributable numbers when you cite anyone (Koji ~4.71M, Moda funding ~4.50M, ChatGPT
@@ -320,7 +320,7 @@ calendar and paid amplification:
 - Hero video and post assets: [`remotion-content-assets.md`](../design/remotion-content-assets.md) → `CONTENT_ASSETS.md`.
 - In-product loop the launch rides: [`viral-growth-loops.md`](viral-growth-loops.md) → `VIRAL_GROWTH.md`.
 - Store launch calendar/listing alignment: [`aso-store-ops.md`](../store/aso-store-ops.md) → `APP_STORE_LISTING.md`.
-- Cross-surface launch decisions: `LAUNCH_TRACE.md`.
+- Cross-surface launch decisions: `state/LAUNCH_TRACE.md`.
 
 ## Acceptance Checklist
 

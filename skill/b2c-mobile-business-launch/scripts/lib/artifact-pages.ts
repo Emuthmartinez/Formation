@@ -40,28 +40,44 @@ export type PageProvenance =
  * branch no fixture could ever reach.
  */
 export const artifactPages: Readonly<Record<string, PageProvenance>> = {
-  "design-room.html": {
+  "design/design-room.html": {
     kind: "rendered-by",
     script: "scripts/render-design-room.ts",
     why: "built from state/business.json and the design tokens, with its own design-state hash.",
   },
-  "launch-cockpit.html": {
+  "state/launch-cockpit.html": {
     kind: "rendered-by",
     script: "scripts/render-launch-cockpit.ts",
-    why: "built from PROJECT_STATE.yaml through the founder-copy translation layer.",
+    why: "built from state/PROJECT_STATE.yaml through the founder-copy translation layer.",
   },
-  "design.html": {
+  "design/design.html": {
     kind: "starter-stub",
     why: "a starter placeholder. The real page is the rendered Design Room, which only exists once design state has been produced. There is no Markdown twin to render, and generating one from a plan document would invent visual proof that does not exist yet.",
   },
-  "analytics-plan.html": {
+  "analytics/analytics-plan.html": {
     kind: "starter-stub",
-    why: "a starter placeholder. The real page is rendered once the live services report real data. Rendering ANALYTICS.md here would present a plan as a measurement result.",
+    why: "a starter placeholder. The real page is rendered once the live services report real data. Rendering analytics/ANALYTICS.md here would present a plan as a measurement result.",
   },
-  "onboarding.html": { kind: "authored-from", markdown: "ONBOARDING.md", why: "the screen sequence, data matrix and review-popup rules are the page." },
-  "orchestration.html": { kind: "authored-from", markdown: "ORCHESTRATION.md", why: "the preflight, unit table and ownership rules are the page." },
-  "store-console.html": { kind: "authored-from", markdown: "STORE_CONSOLE.md", why: "the console routes and the App Review checklist are the page." },
-  "security-review.html": { kind: "authored-from", markdown: "SECURITY.md", why: "the threat model, hardening checklist and accepted risks are the page." },
+  "product/onboarding.html": {
+    kind: "authored-from",
+    markdown: "product/ONBOARDING.md",
+    why: "the screen sequence, data matrix and review-popup rules are the page.",
+  },
+  "operations/orchestration.html": {
+    kind: "authored-from",
+    markdown: "operations/ORCHESTRATION.md",
+    why: "the preflight, unit table and ownership rules are the page.",
+  },
+  "store/store-console.html": {
+    kind: "authored-from",
+    markdown: "store/STORE_CONSOLE.md",
+    why: "the console routes and the App Review checklist are the page.",
+  },
+  "trust/security-review.html": {
+    kind: "authored-from",
+    markdown: "trust/SECURITY.md",
+    why: "the threat model, hardening checklist and accepted risks are the page.",
+  },
 };
 
 /** Manifest entries in a fixed order, so two runs report findings identically. */

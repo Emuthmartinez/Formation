@@ -52,7 +52,7 @@ function parseOptions(argv: string[]): Options {
   const defaults: Options = {
     skillRoot: path.resolve(scriptDir, ".."),
     projectRoot: process.cwd(),
-    statePath: "PROJECT_STATE.yaml",
+    statePath: "state/PROJECT_STATE.yaml",
     out: "graph-run/execution-plan.json",
     runtime: "inline",
     check: false,

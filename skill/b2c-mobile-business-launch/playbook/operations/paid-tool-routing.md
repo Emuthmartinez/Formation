@@ -28,7 +28,7 @@ The rule is simple: tool access missing from the current runtime does not mean t
 4. If the tool is genuinely unavailable, expired, unauthenticated, or blocked after the MCP check, stop before running the free fallback.
 5. Ask the founder whether to use/provision the paid tool, provide access or exports, or continue with the fallback.
 6. Continue only after the user confirms the paid path or the free fallback.
-7. Record the decision in `TOOL_DECISIONS.md` or in the relevant ops doc when the launch is small.
+7. Record the decision in `strategy/TOOL_DECISIONS.md` or in the relevant ops doc when the launch is small.
 
 Do not present a fallback artifact as equivalent to the paid-tool artifact. Label fallback outputs with confidence, limitations, and what the paid tool would have improved.
 
@@ -55,7 +55,7 @@ If credits, a trial, subscription, or other spend is involved, separate that int
 | XPOZ | Reddit, TikTok, X/Twitter, Instagram social-language and creator research | public web search, platform-native search in browser, Reddit search, YouTube comments, App Store/Play reviews, founder-provided screenshots/exports |
 | Firecrawl | competitor site crawling, pricing/policy/funnel extraction, SEO/GEO page discovery | browser inspection, web search, `curl`, `sitemap.xml`, `robots.txt`, Playwright/browser snapshots, manual page notes |
 | Higgsfield | generated visuals, app icons, mascots, mockups, animations, ad creative, demo clips; also `brand-kits fetch`, `reframe` (aspect-ratio variants), and `personal_clipper` (long recording → short clips) — all three are paid/credit-consuming MCP operations and require the same spend confirmation as any generate run | Remotion code-rendered videos/stills after license check, real app screenshots, founder-owned assets, hand-authored HTML/CSS/SVG/canvas, local screen recordings, free/public-domain assets with license notes |
-| MobAI | Free tier: one device, limited daily AI usage, Testing Mode, and limited AI test generation/fixing. Plus/Pro: unlimited daily use; Pro adds unlimited devices, parallel suites, multi-device runs, and offline mode. | Use the MobAI free tier without a spend gate when it satisfies the lane. Ask before upgrade/trial/spend. The in-app iOS Simulator (rung 0) is free, built in, and never needs a spend gate — but it is a *coverage* decision, not a convenience: a one-off iOS look/flow/bug-repro check on a local Mac is the intended route and needs only a recorded rung in `TOOL_DECISIONS.md`, while using it in place of MobAI on a lane that needs Android, a repeatable `.mob` suite, CI, performance gates, multi-device runs, physical hardware, or polished demo recording drops coverage and requires the same recorded decision as the XcodeBuildMCP fallback. XcodeBuildMCP remains the scripted/CI Apple route; `xcodebuild`/`simctl` only if that route is approved and XcodeBuildMCP is unavailable. Use Android emulator/ADB or record a blocker for missing Android coverage. |
+| MobAI | Free tier: one device, limited daily AI usage, Testing Mode, and limited AI test generation/fixing. Plus/Pro: unlimited daily use; Pro adds unlimited devices, parallel suites, multi-device runs, and offline mode. | Use the MobAI free tier without a spend gate when it satisfies the lane. Ask before upgrade/trial/spend. The in-app iOS Simulator (rung 0) is free, built in, and never needs a spend gate — but it is a *coverage* decision, not a convenience: a one-off iOS look/flow/bug-repro check on a local Mac is the intended route and needs only a recorded rung in `strategy/TOOL_DECISIONS.md`, while using it in place of MobAI on a lane that needs Android, a repeatable `.mob` suite, CI, performance gates, multi-device runs, physical hardware, or polished demo recording drops coverage and requires the same recorded decision as the XcodeBuildMCP fallback. XcodeBuildMCP remains the scripted/CI Apple route; `xcodebuild`/`simctl` only if that route is approved and XcodeBuildMCP is unavailable. Use Android emulator/ADB or record a blocker for missing Android coverage. |
 | Retention Mechanics MCP (first-party) | live Experience Card deck: mechanic search with funnel-stage and ethics-risk-ceiling filters, versioned card content, tier-appropriate ethics attestation scaffolds; account-gated once launched, local during development | bundled frozen stubs in `playbook/experience/experience-cards/` (routing, risk tiers, bright/dark lines, pinned motion canon) plus `playbook/experience/ethics-guardrail.md` — the offline route with no spend gate; validators always read the bundled files, and without the server the deck contract and ethics contract still gate shipping, at stub depth |
 | Fastlane AI | post-launch organic content engine, Blitz generation, scheduling, analytics | manual content calendar, spreadsheet/JSON schedule, local prompts, platform-native drafts, no automated posting unless founder approves |
 | Paid ASO/MMP/ad tools | keyword ranks, paid attribution, SKAdNetwork/ad-network reporting, competitor tracking | AppKittie if available, public store search, store-console analytics, manual keyword sheet, Apple Search Ads/Google Ads native reports when accounts exist |
@@ -67,7 +67,7 @@ If credits, a trial, subscription, or other spend is involved, separate that int
 
 ## Artifact Requirements
 
-Create `TOOL_DECISIONS.md` when more than one paid or account-gated tool affects the launch.
+Create `strategy/TOOL_DECISIONS.md` when more than one paid or account-gated tool affects the launch.
 
 Include:
 - tool
@@ -81,7 +81,7 @@ Include:
 - downstream artifacts affected
 - date checked
 
-Small launches can add a "Tool decisions" section to `RESEARCH.md`, `ENGINEERING_PLAN.md`, `STORE_CONSOLE.md`, `SCREENSHOTS.md`, `FASTLANE_OPS.md`, or `PRODUCTION_READINESS.md`.
+Small launches can add a "Tool decisions" section to `strategy/RESEARCH.md`, `engineering/ENGINEERING_PLAN.md`, `store/STORE_CONSOLE.md`, `SCREENSHOTS.md`, `growth/FASTLANE_OPS.md`, or `engineering/PRODUCTION_READINESS.md`.
 
 ## Founder Gates
 
@@ -117,7 +117,7 @@ Higgsfield credit use is a separate protected spend gate. Call `mcp__claude_ai_H
 - XPOZ tools visible in `system-reminder` (e.g. `mcp__claude_ai_XPOZ__getRedditUser`) but agent claims "XPOZ not found" without calling ToolSearch to confirm.
 - Higgsfield authenticated and MCP tools present, but agent does not invoke them because the work "only needed optimization" — use the tool or confirm with the founder that the lane is deferred.
 - AppKittie `mcp__appkittie__batch_keyword_difficulty` available in the session but agent produces ASO keyword packets without calling it.
-- Refero "not found" silently dropped — no TOOL_DECISIONS.md entry, no founder prompt, no fallback loaded.
+- Refero "not found" silently dropped — no strategy/TOOL_DECISIONS.md entry, no founder prompt, no fallback loaded.
 - Running hours of manual free research when the founder would have provided an export or paid access.
 - Replacing MobAI with XcodeBuildMCP or the in-app iOS Simulator without saying that Android coverage, repeatable suites, CI, performance gates, and physical-device automation are no longer covered.
 - Installing MobAI or XcodeBuildMCP, or asking the founder for tool access, just to look at one screen or walk one flow on a local Mac — that is rung 0 work and needs no install and no gate.
@@ -125,4 +125,4 @@ Higgsfield credit use is a separate protected spend gate. Call `mcp__claude_ai_H
 - Generating visual assets with free local methods or Remotion after Higgsfield was intended, without asking whether the founder wants to use Higgsfield or approve the fallback.
 - Treating Remotion as universally free for commercial work without checking the current Remotion license and recording eligibility or founder approval.
 - Creating a store-console or ASO packet from public pages alone when App Store Connect or Google Play Console access was available but not requested.
-- Presenting fallback outputs without a confidence label, limitation note, and TOOL_DECISIONS.md entry — every fallback decision must be recorded even when small.
+- Presenting fallback outputs without a confidence label, limitation note, and strategy/TOOL_DECISIONS.md entry — every fallback decision must be recorded even when small.

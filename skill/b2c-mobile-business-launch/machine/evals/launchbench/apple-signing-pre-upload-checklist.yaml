@@ -21,13 +21,13 @@ expected_guardrail: >
   is non-empty when usage is found; (4) include -authenticationKeyPath/-authenticationKeyID/
   -authenticationKeyIssuerID on every exportArchive invocation; (5) verify raw screenshot
   capture dimensions via sips and block upload if width is below the device well minimum.
-  Record all five sign-off lines in APPLE_SIGNING.md before proceeding.
+  Record all five sign-off lines in store/APPLE_SIGNING.md before proceeding.
 validators:
   - check-apple-signing-packet
   - check-apple-app-store-requirements
   - check-store-screenshots
 must_catch:
-  - Archive/export/upload claimed ready without pre-archive preflight sign-off in APPLE_SIGNING.md.
+  - Archive/export/upload claimed ready without pre-archive preflight sign-off in store/APPLE_SIGNING.md.
   - SDK runtime keys (REVENUECAT_API_KEY, SUPABASE_URL, POSTHOG_KEY, etc.) not verified in archived Info.plist before upload.
   - PrivacyInfo.xcprivacy in JSON format (starts with {) — plutil -lint was not run before archiving.
   - NSPrivacyAccessedAPITypes declared as empty array despite UserDefaults usage in the codebase.
@@ -40,5 +40,5 @@ should_say:
   - "If NSPrivacyAccessedAPITypes is empty, scan for UserDefaults usage and populate the correct reason codes."
   - "Always pass -authenticationKeyPath, -authenticationKeyID, and -authenticationKeyIssuerID to exportArchive."
   - "Run sips on raw captures and block upload if native width is below the minimum for the target device well."
-  - "Record all five preflight sign-off lines in APPLE_SIGNING.md before starting xcodebuild archive."
-  - "Add or activate the apple-pre-upload-preflight-skipped failure card in PROJECT_STATE.yaml when any preflight item is blocked."
+  - "Record all five preflight sign-off lines in store/APPLE_SIGNING.md before starting xcodebuild archive."
+  - "Add or activate the apple-pre-upload-preflight-skipped failure card in state/PROJECT_STATE.yaml when any preflight item is blocked."

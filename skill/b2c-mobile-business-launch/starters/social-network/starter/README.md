@@ -25,7 +25,7 @@ Each prompt customizes a specific area. Run them in pack order (see [`../README.
 
 | Prompt | Customizes |
 |---|---|
-| `00-niche-strategy.md` | No code — positioning feeds `RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md`. |
+| `00-niche-strategy.md` | No code — positioning feeds `strategy/RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md`. |
 | `01-database-schema.md` | `supabase/migrations/0001_init.sql` (extend schema/indexes) + `supabase/tests/0001_rls.test.sql` (every new table gets tested policies). |
 | `02-auth-system.md` | `app/login/`, `app/auth/confirm/route.ts`, `lib/supabase/*`, `proxy.ts` (OAuth providers, profile setup, username claims). |
 | `03-feed-and-posts.md` | `app/feed/page.tsx` (composer, optimistic likes/reposts, realtime) + `lib/analytics/events.ts` core-loop events. |
@@ -41,6 +41,6 @@ Each prompt customizes a specific area. Run them in pack order (see [`../README.
 
 - **Auth**: Supabase magic-link sign-in, session refresh in `proxy.ts` (Next.js 16), server/browser clients per current `@supabase/ssr` docs.
 - **Schema + RLS**: five-core-systems schema with per-table policies, tested via pgTAP (`npm run test:rls`).
-- **Analytics**: PostHog with a typed snake_case event catalog (`lib/analytics/events.ts`) following the analytics lane conventions — add events there first, then mirror into `ANALYTICS.md`.
+- **Analytics**: PostHog with a typed snake_case event catalog (`lib/analytics/events.ts`) following the analytics lane conventions — add events there first, then mirror into `analytics/ANALYTICS.md`.
 - **Billing stubs**: Stripe checkout/webhook (web) and RevenueCat webhook → entitlement projection (native) — inert until keys are routed; provider proof required before the revenue lane is done.
 - **CI**: typecheck + build with placeholder public env only.

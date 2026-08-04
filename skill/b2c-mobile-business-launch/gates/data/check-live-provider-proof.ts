@@ -6,7 +6,7 @@ import { asString, getPath, isRecord, issue, loadProjectState, parseCliArgs, rep
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues: Issue[] = [...loaded.issues];
-const proofPath = path.join(args.root, "PROVIDER_PROOF.md");
+const proofPath = path.join(args.root, "operations/PROVIDER_PROOF.md");
 const proofText = existsSync(proofPath) ? readFileSync(proofPath, "utf8") : "";
 
 const proofRequiredLanes = ["analytics_attribution", "revenue", "email", "store_console", "apple_signing", "security", "engineering"];
@@ -60,7 +60,7 @@ function pathTokens(text: string): string[] {
 }
 
 // A done proof-required lane is the hard trigger. Readiness prose in
-// PRODUCTION_READINESS.md is only a soft signal: the shipped template's own
+// engineering/PRODUCTION_READINESS.md is only a soft signal: the shipped template's own
 // cautionary boilerplate ("Do not mark this app launch-ready until ...")
 // matches any naive readiness regex, so text alone must not hard-fail a repo
 // where nothing is done yet.
@@ -72,7 +72,7 @@ if (loaded.state && isRecord(loaded.state)) {
     }
   }
 }
-const readinessText = readOptional("PRODUCTION_READINESS.md");
+const readinessText = readOptional("engineering/PRODUCTION_READINESS.md");
 const readinessProse = Boolean(readinessText && /\b(ready|done|verified|launch[- ]ready|production[- ]ready)\b/i.test(readinessText));
 
 if (!proofText.trim()) {
@@ -81,8 +81,8 @@ if (!proofText.trim()) {
       issue(
         "error",
         "provider_proof.file_missing",
-        "Provider-backed readiness requires PROVIDER_PROOF.md with live evidence or explicit founder-only blockers.",
-        "PROVIDER_PROOF.md",
+        "Provider-backed readiness requires operations/PROVIDER_PROOF.md with live evidence or explicit founder-only blockers.",
+        "operations/PROVIDER_PROOF.md",
       ),
     );
   } else if (readinessProse) {
@@ -90,8 +90,8 @@ if (!proofText.trim()) {
       issue(
         "warning",
         "provider_proof.file_missing",
-        "PRODUCTION_READINESS.md carries readiness language but PROVIDER_PROOF.md does not exist yet. Seed it from business/PROVIDER_PROOF.md before any provider-backed lane is marked done.",
-        "PROVIDER_PROOF.md",
+        "engineering/PRODUCTION_READINESS.md carries readiness language but operations/PROVIDER_PROOF.md does not exist yet. Seed it from business/operations/PROVIDER_PROOF.md before any provider-backed lane is marked done.",
+        "operations/PROVIDER_PROOF.md",
       ),
     );
   }
@@ -110,7 +110,9 @@ if (!proofText.trim()) {
     "founder-only",
   ]) {
     if (!proofText.toLowerCase().includes(keyword.toLowerCase())) {
-      issues.push(issue("error", `provider_proof.${slug(keyword)}.missing`, `PROVIDER_PROOF.md must include ${keyword}.`, "PROVIDER_PROOF.md"));
+      issues.push(
+        issue("error", `provider_proof.${slug(keyword)}.missing`, `operations/PROVIDER_PROOF.md must include ${keyword}.`, "operations/PROVIDER_PROOF.md"),
+      );
     }
   }
 
@@ -122,7 +124,7 @@ if (!proofText.trim()) {
         "error",
         "provider_proof.ready_claim_with_blocker",
         "Do not claim provider proof is ready while unresolved placeholders, pending items, or founder-only blockers remain.",
-        "PROVIDER_PROOF.md",
+        "operations/PROVIDER_PROOF.md",
       ),
     );
   }
@@ -142,8 +144,8 @@ if (!proofText.trim()) {
         issue(
           "error",
           `provider_proof.${slug(mapping.provider)}.row_missing`,
-          `lanes.${doneLanes[0]} is done but PROVIDER_PROOF.md has no ledger row for ${mapping.provider}.`,
-          "PROVIDER_PROOF.md",
+          `lanes.${doneLanes[0]} is done but operations/PROVIDER_PROOF.md has no ledger row for ${mapping.provider}.`,
+          "operations/PROVIDER_PROOF.md",
         ),
       );
       continue;
@@ -155,7 +157,7 @@ if (!proofText.trim()) {
           "error",
           `provider_proof.${slug(mapping.provider)}.status_unproven`,
           `lanes.${doneLanes[0]} is done but the ${mapping.provider} ledger status still reads as planned work ("${statusCell.trim()}"). Capture the live evidence or keep the lane partial/blocked.`,
-          "PROVIDER_PROOF.md",
+          "operations/PROVIDER_PROOF.md",
         ),
       );
     }
@@ -169,7 +171,7 @@ if (!proofText.trim()) {
           "error",
           `provider_proof.${slug(mapping.provider)}.evidence_path_unrecorded`,
           `lanes.${doneLanes[0]} is done but the ${mapping.provider} ledger row names no file path. Record the captured artifact's path (backtick-quote paths that contain spaces).`,
-          "PROVIDER_PROOF.md",
+          "operations/PROVIDER_PROOF.md",
         ),
       );
     } else if (!evidencePaths.some((relative) => existsSync(path.join(args.root, relative)))) {

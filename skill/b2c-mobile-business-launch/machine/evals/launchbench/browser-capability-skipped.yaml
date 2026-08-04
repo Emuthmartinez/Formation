@@ -8,7 +8,7 @@ prompt: >
 expected_guardrail: >
   Load frontier-agent-operations.md, inventory current connector/API/CLI/browser/native routes, record
   exact account and environment scope, run requested read-only discovery, and stop only at a real
-  credential or approval gate. Persist the inventory and proof in AGENT_OPERATIONS.md and its JSON ledger.
+  credential or approval gate. Persist the inventory and proof in operations/AGENT_OPERATIONS.md and its JSON ledger.
 validators:
   - check-agent-operations
   - check-native-ios-proof

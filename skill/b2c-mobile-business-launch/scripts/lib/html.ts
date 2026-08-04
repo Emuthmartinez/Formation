@@ -16,11 +16,11 @@
  * **The single quote is deliberately not escaped.** Every attribute this skill
  * writes is double-quoted, so `'` needs no escaping to be safe, and escaping it
  * would rewrite the bytes of every generated page — which `check:generated-pages`
- * compares against a fresh render, and which `design-room.html` pins as a
+ * compares against a fresh render, and which `design/design-room.html` pins as a
  * byte-identical static fallback. A stricter escape here buys no safety and
  * turns two byte-match gates red.
  *
- * `business/resend/email-templates.ts` keeps its own copy on purpose and is not
+ * `business/growth/resend/email-templates.ts` keeps its own copy on purpose and is not
  * a seventh caller: it is payload copied into a launched business repo, where
  * nothing under `scripts/` exists to import. Its extra `&#39;` rule is correct
  * for its own reason — email HTML passes through client rewriters that do not

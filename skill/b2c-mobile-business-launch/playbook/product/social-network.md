@@ -30,7 +30,7 @@ Ask, in one batched call:
 3. **Which optional systems are in V1?** (multi-select) — direct messages, monetization (subscriptions + creator support), invite-only onboarding, search/discovery. These map to the optional prompts in the pack.
 4. **Niche** — who is this community for? (Free text. Feeds Step 2 positioning. A focused niche is the whole strategy: a smaller, highly engaged community beats a general-purpose clone.)
 
-Record the answers in `PROJECT_STATE.yaml` (under the product lane, e.g. `lanes.product.archetype: social-network`, `content_format`, `primary_surface`, `optional_systems`) so later sessions do not re-litigate the shape.
+Record the answers in `state/PROJECT_STATE.yaml` (under the product lane, e.g. `lanes.product.archetype: social-network`, `content_format`, `primary_surface`, `optional_systems`) so later sessions do not re-litigate the shape.
 
 Honesty note on the stack: the bundled prompts target **web (Next.js + Supabase + Vercel)** because that is the fastest path to a working multi-user social product. If the founder picks native mobile, say so plainly — the schema, RLS, real-time, and storage prompts carry over unchanged, but the auth/feed/profile/DM client prompts are web prompts and must be adapted, and the full iOS signing/ASC/store lanes become required rather than optional.
 
@@ -54,14 +54,14 @@ Build **one system at a time, test it, then move on**. A solid identity + feed b
 
 | # | Prompt | Core system | Threads into |
 |---|---|---|---|
-| 00 | `00-niche-strategy` (Claude.ai, not Claude Code) | positioning | `RESEARCH.md`, naming, `VIRAL_GROWTH.md`, `growth/LAUNCH_NARRATIVE.md` |
-| 01 | `01-database-schema` | content + graph + engagement | `TECH_SPEC.md`, engineering lane, security (RLS) |
-| 02 | `02-auth-system` | identity | engineering, `SECURITY.md`, `SECRETS.md` (OAuth keys) |
-| 03 | `03-feed-and-posts` | content + feed + engagement | `11_STAR_EXPERIENCE.md` core loop, `ANALYTICS.md` events |
-| 04 | `04-profiles-and-follow` | identity + graph + notifications | engineering, real-time, `ANALYTICS.md` |
+| 00 | `00-niche-strategy` (Claude.ai, not Claude Code) | positioning | `strategy/RESEARCH.md`, naming, `VIRAL_GROWTH.md`, `growth/LAUNCH_NARRATIVE.md` |
+| 01 | `01-database-schema` | content + graph + engagement | `engineering/TECH_SPEC.md`, engineering lane, security (RLS) |
+| 02 | `02-auth-system` | identity | engineering, `trust/SECURITY.md`, `SECRETS.md` (OAuth keys) |
+| 03 | `03-feed-and-posts` | content + feed + engagement | `11_STAR_EXPERIENCE.md` core loop, `analytics/ANALYTICS.md` events |
+| 04 | `04-profiles-and-follow` | identity + graph + notifications | engineering, real-time, `analytics/ANALYTICS.md` |
 | 05 | `05-search-and-discovery` (optional) | discovery | engineering, growth |
 | 06 | `06-direct-messages` (optional) | engagement | engineering, real-time, abuse controls |
-| 07 | `07-stripe-monetization` (optional) | revenue | `revenue-monetization.md`, `REVENUE_OPS.md` |
+| 07 | `07-stripe-monetization` (optional) | revenue | `revenue-monetization.md`, `revenue/REVENUE_OPS.md` |
 | 08 | `08-invite-system` (optional) | growth | `viral-growth-loops.md`, `VIRAL_GROWTH.md` |
 
 Variants (apply after the text-first base, or fold into prompt 01/03 if chosen upfront): [`variants/image-first-instagram`](../../starters/social-network/prompts/variants/image-first-instagram.md) and [`variants/video-first-tiktok`](../../starters/social-network/prompts/variants/video-first-tiktok.md).
@@ -72,18 +72,18 @@ Step 0 (niche strategy) is strategic work for the **web interface / Claude.ai**,
 
 The prompt pack is the engineering spine, not the whole launch. Keep these connections live:
 
-- **Database schema first.** Prompt 01 produces the schema every other system builds on; getting it wrong means expensive rewrites. Reconcile it with `TECH_SPEC.md` (data model, API contracts, RLS policies) before building clients.
+- **Database schema first.** Prompt 01 produces the schema every other system builds on; getting it wrong means expensive rewrites. Reconcile it with `engineering/TECH_SPEC.md` (data model, API contracts, RLS policies) before building clients.
 - **Row Level Security is the security lane, not a checkbox.** The schema prompt emits Supabase RLS so users can only edit their own data. Treat RLS policies as part of `security-release-hardening.md`: every table that holds user data needs a policy and a test, and entitlement/visibility rules (private accounts, blocks) belong in the threat model.
 - **The feed is the 11-star core loop.** Prompt 03 is where the magical V1 moment lives. Run `eleven-star-experience.md` over it, and name the optimistic-UI like/repost reveal and the real-time arrival of new posts as engineered moments with PostHog events and reduced-motion fallbacks (`consumer-product-design-agency.md`, `emotional-design-system.md`).
 - **Monetization reconciles with the revenue lane.** Prompt 07 uses **Stripe** (Checkout + Customer Portal + Connect for creator payouts) because the default surface is web. If the founder ships native iOS, digital subscriptions generally must go through StoreKit/IAP (route via `revenue-monetization.md` and RevenueCat); Stripe Connect creator payouts and physical/real-world value can stay on Stripe. Do not ship the web Stripe paywall inside an iOS binary without resolving App Store policy first.
 - **Invites are a growth loop, not just a gate.** Prompt 08 feeds `viral-growth-loops.md`: invite acceptance rate, inviter attribution, and the invitation tree are the loop's analytics. Pre-loading value before opening the doors (build-in-public → invite-only beta → referral codes) is the standard cold-start sequence.
-- **Positioning feeds research and launch.** Prompt 00's outputs (what the community hates about incumbents, the one tell-a-friend feature, name directions, first-100-users plan) flow into `RESEARCH.md`, naming, and `growth/LAUNCH_NARRATIVE.md`.
-- **Analytics before surfaces lock.** Every engagement and notification path named in prompts 03/04/06 needs an event in `ANALYTICS.md` before build (`analytics-attribution.md`).
+- **Positioning feeds research and launch.** Prompt 00's outputs (what the community hates about incumbents, the one tell-a-friend feature, name directions, first-100-users plan) flow into `strategy/RESEARCH.md`, naming, and `growth/LAUNCH_NARRATIVE.md`.
+- **Analytics before surfaces lock.** Every engagement and notification path named in prompts 03/04/06 needs an event in `analytics/ANALYTICS.md` before build (`analytics-attribution.md`).
 - **Don't optimize for scale before users.** Build the monolith, ship it, get users, then optimize the queries that actually become bottlenecks. A feed query that is inefficient at 100 users is fine until ~10,000.
 
 ## Infrastructure Defaults (record decisions, do not hardcode)
 
-These are the pack's default choices; confirm and record them in `TOOL_DECISIONS.md` / `SECRETS.md` rather than assuming:
+These are the pack's default choices; confirm and record them in `strategy/TOOL_DECISIONS.md` / `SECRETS.md` rather than assuming:
 
 - **Backend:** Supabase (Postgres + Auth + Realtime + Storage). Object storage for all media — never serve media from the app server. At significant media volume, migrate to Cloudflare R2 (zero egress).
 - **Hosting:** Vercel (preview URL per PR, global CDN) for the web surface.
@@ -104,13 +104,13 @@ This is the first archetype pack. To add another (e.g. marketplace, dating, jour
 
 Before calling a social-platform build ready:
 
-- [ ] Archetype + content format + primary surface + optional systems confirmed via AskUserQuestion and recorded in `PROJECT_STATE.yaml`.
-- [ ] Schema (prompt 01) reconciled with `TECH_SPEC.md`; every user-data table has a tested RLS policy referenced from `SECURITY.md`.
+- [ ] Archetype + content format + primary surface + optional systems confirmed via AskUserQuestion and recorded in `state/PROJECT_STATE.yaml`.
+- [ ] Schema (prompt 01) reconciled with `engineering/TECH_SPEC.md`; every user-data table has a tested RLS policy referenced from `trust/SECURITY.md`.
 - [ ] The five core systems are each complete and tested before dependent features start.
-- [ ] The feed core loop is run through `11_STAR_EXPERIENCE.md` with named engineered moments and PostHog events in `ANALYTICS.md`.
+- [ ] The feed core loop is run through `11_STAR_EXPERIENCE.md` with named engineered moments and PostHog events in `analytics/ANALYTICS.md`.
 - [ ] Monetization (if in scope) is reconciled with `revenue-monetization.md` and the correct billing path for the chosen surface (Stripe for web; IAP/StoreKit for native digital subscriptions).
 - [ ] Invite/referral mechanics (if in scope) are tied to `viral-growth-loops.md` with acceptance-rate and attribution analytics and self-referral/abuse controls.
 - [ ] Moderation baseline (rate limits, word filter, image + text classification) is specified before any public launch.
-- [ ] Positioning outputs from prompt 00 flow into `RESEARCH.md`, naming, and `growth/LAUNCH_NARRATIVE.md`.
+- [ ] Positioning outputs from prompt 00 flow into `strategy/RESEARCH.md`, naming, and `growth/LAUNCH_NARRATIVE.md`.
 </content>
 </invoke>

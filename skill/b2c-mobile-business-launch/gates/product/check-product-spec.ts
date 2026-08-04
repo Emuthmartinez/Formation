@@ -2,8 +2,8 @@
 /**
  * check-product-spec.ts — content floor for the product lane.
  *
- * SPEC.md is where research becomes a product decision; the lane previously
- * had no dedicated validator. Structure follows the SPEC.md contract in
+ * product/SPEC.md is where research becomes a product decision; the lane previously
+ * had no dedicated validator. Structure follows the product/SPEC.md contract in
  * playbook/process/artifact-contracts.md: the spec must explain why the app can
  * win, name the magical V1 moment, and bound V1 before engineering planning.
  *
@@ -20,15 +20,15 @@ const state = loaded.state;
 const laneStatus = state ? asString(getPath(state, "lanes.product.status"))?.toLowerCase() : undefined;
 const skip = laneStatus === "not_needed" || laneStatus === "deferred";
 const done = laneStatus === "done";
-const text = readText(args.root, "SPEC.md");
+const text = readText(args.root, "product/SPEC.md");
 
 if (!skip && !text) {
   issues.push(
     issue(
       "error",
       "product_spec.markdown_missing",
-      "SPEC.md is required before design, store, or engineering work hardens. Seed it from business/SPEC.md.",
-      "SPEC.md",
+      "product/SPEC.md is required before design, store, or engineering work hardens. Seed it from business/product/SPEC.md.",
+      "product/SPEC.md",
     ),
   );
 }
@@ -52,21 +52,21 @@ if (text) {
         issue(
           done ? "error" : "warning",
           `product_spec.${phrase.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.missing`,
-          `SPEC.md should include a ${phrase} section (see the SPEC.md contract in artifact-contracts.md).`,
-          "SPEC.md",
+          `product/SPEC.md should include a ${phrase} section (see the product/SPEC.md contract in artifact-contracts.md).`,
+          "product/SPEC.md",
         ),
       );
     }
   }
 
-  for (const ref of ["11_STAR_EXPERIENCE.md", "RESEARCH.md"]) {
+  for (const ref of ["11_STAR_EXPERIENCE.md", "strategy/RESEARCH.md"]) {
     if (!text.includes(ref)) {
       issues.push(
         issue(
           done ? "error" : "warning",
           `product_spec.ref_${ref.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.missing`,
-          `SPEC.md should reference ${ref} so the spec stays traced to experience and evidence.`,
-          "SPEC.md",
+          `product/SPEC.md should reference ${ref} so the spec stays traced to experience and evidence.`,
+          "product/SPEC.md",
         ),
       );
     }
@@ -77,8 +77,8 @@ if (text) {
       issue(
         "error",
         "product_spec.placeholder_complete",
-        "The product lane cannot be done while template placeholders ('replace with', TODO/TBD) remain in SPEC.md.",
-        "SPEC.md",
+        "The product lane cannot be done while template placeholders ('replace with', TODO/TBD) remain in product/SPEC.md.",
+        "product/SPEC.md",
       ),
     );
   }
@@ -149,9 +149,9 @@ if (text) {
       // Distinct incumbents only: the same row twice is still a category of
       // one.
       // The incumbents are grounded in research: an invented competitor with
-      // filled cells benchmarks nothing. When RESEARCH.md is readable, each
+      // filled cells benchmarks nothing. When strategy/RESEARCH.md is readable, each
       // counted name must appear in it.
-      const researchText = readText(args.root, "RESEARCH.md") ?? readText(args.root, "research/RESEARCH.md");
+      const researchText = readText(args.root, "strategy/RESEARCH.md") ?? readText(args.root, "research/strategy/RESEARCH.md");
       const normalizeName = (value: string): string => value.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
       const normalizedResearch = researchText ? normalizeName(researchText) : undefined;
       const realRowCount = new Set(
@@ -175,8 +175,8 @@ if (text) {
             "error",
             "product_spec.incumbent_row_missing",
             "Differentiation And Moat has fewer than two real incumbent rows (top 2-3 competitors by revenue, what each does well, the beat moment, what stops " +
-              "a week-one copy — every cell filled, each incumbent named in RESEARCH.md). Benchmarking against nobody is how a commodity idea ships with excellent process compliance.",
-            "SPEC.md",
+              "a week-one copy — every cell filled, each incumbent named in strategy/RESEARCH.md). Benchmarking against nobody is how a commodity idea ships with excellent process compliance.",
+            "product/SPEC.md",
           ),
         );
       }
@@ -261,7 +261,7 @@ if (text) {
             "product_spec.moat_class_missing",
             "Differentiation And Moat names no moat class. Pick one honestly from product-moat.md §2 (data / workflow / community / taste / " +
               'model / distribution) with its build plan — "our execution will be better" is not a moat class.',
-            "SPEC.md",
+            "product/SPEC.md",
           ),
         );
       }
@@ -285,7 +285,7 @@ if (text) {
             "product_spec.copy_test_missing",
             "Differentiation And Moat records no one-week-copy test answer. Write down what structurally stops the incumbent from shipping " +
               "this wedge in a sprint (product-moat.md §1) — an unanswered copy test is a wedge on borrowed time.",
-            "SPEC.md",
+            "product/SPEC.md",
           ),
         );
       }

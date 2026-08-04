@@ -4,11 +4,11 @@
  * left undeclared.
  *
  * The four pages this gate was written for had all drifted from their Markdown
- * sources while the audit stayed green: security-review.html was missing about ten
- * of the fifteen sections its own opening line claimed to cover, store-console.html
+ * sources while the audit stayed green: trust/security-review.html was missing about ten
+ * of the fifteen sections its own opening line claimed to cover, store/store-console.html
  * had lost the entire App Review checklist that prevents a Guideline 2.1 rejection,
- * onboarding.html carried one screen's content under another screen's heading, and
- * orchestration.html contained a table row that had never been real. Nothing could
+ * product/onboarding.html carried one screen's content under another screen's heading, and
+ * operations/orchestration.html contained a table row that had never been real. Nothing could
  * catch any of it, because nothing knew the pages had sources.
  *
  * Three assertions, and all three are needed. Any one alone passes vacuously:

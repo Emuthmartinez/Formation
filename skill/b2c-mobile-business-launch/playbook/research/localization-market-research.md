@@ -4,7 +4,7 @@ Use this **before** localizing any surface — App Store/Google Play metadata, k
 
 This is the research-first inversion of the common indie pattern (translate into N languages, then hope for downloads). The skill's posture is the opposite: **research demand, prioritize markets, then localize only what clears the bar, then measure**. Produce `LOCALIZATION_MARKET_RESEARCH.md` (and `localization-market-research.html`) in the research phase so the priority tiers exist before metadata, screenshots, or paywall copy lock.
 
-Load `aso-store-ops.md` and `app-store-listing-prep.md` for how the chosen markets become metadata, keyword fields, screenshots, custom product pages, and In-App Events. Load `paid-user-acquisition.md` before choosing Apple Search Ads / paid storefronts (campaign storefronts are selected *from* this matrix). Load `geo-seo.md` before localizing landing/web surfaces (`hreflang`, localized `llms.txt`/schema). Load `change-cascade.md` to propagate a market's tier across every surface. Load `revenue-monetization.md` for paywall/offer adaptation per market. Whether the app *can* ship a Tier 1 market cheaply is decided long before this research: [`conversion-copy.md`](../words/conversion-copy.md) §Localization Readiness makes string externalization, ICU plurals, and locale-aware formatting a day-one engineering property, with `COPY_DECK.md` keys as the translation keys and each deck row carrying this matrix's tier.
+Load `aso-store-ops.md` and `app-store-listing-prep.md` for how the chosen markets become metadata, keyword fields, screenshots, custom product pages, and In-App Events. Load `paid-user-acquisition.md` before choosing Apple Search Ads / paid storefronts (campaign storefronts are selected *from* this matrix). Load `geo-seo.md` before localizing landing/web surfaces (`hreflang`, localized `llms.txt`/schema). Load `change-cascade.md` to propagate a market's tier across every surface. Load `revenue-monetization.md` for paywall/offer adaptation per market. Whether the app *can* ship a Tier 1 market cheaply is decided long before this research: [`conversion-copy.md`](../words/conversion-copy.md) §Localization Readiness makes string externalization, ICU plurals, and locale-aware formatting a day-one engineering property, with `product/copy/COPY_DECK.md` keys as the translation keys and each deck row carrying this matrix's tier.
 
 Load `paid-tool-routing.md` before replacing AppKittie, XPOZ, paid ASO/MMP tooling, or App Store Connect / Google Play account data with a free or manual fallback. Missing runtime access to a paid intelligence tool is a founder decision, not a reason to guess the language list.
 
@@ -90,7 +90,7 @@ A market's tier cascades to every surface via `change-cascade.md`, so localizati
 
 - **Phase 1 (research-backed spec):** produce `LOCALIZATION_MARKET_RESEARCH.md` alongside category economics, before any metadata/screenshot/paywall lock.
 - **Phase 3 (store ops):** ASO consumes the tiers instead of defaulting to English-only or translate-everything.
-- Trace each Tier 1/2 decision into `LAUNCH_TRACE.md` so a future agent can see why a market was localized and which evidence backed it.
+- Trace each Tier 1/2 decision into `state/LAUNCH_TRACE.md` so a future agent can see why a market was localized and which evidence backed it.
 
 ## 7. Post-Launch Refresh
 
@@ -100,7 +100,7 @@ The post-launch ASO loop (`aso-store-ops.md` §10) refreshes this same matrix fr
 
 - `LOCALIZATION_MARKET_RESEARCH.md`: the market opportunity matrix, priority tiers, per-cell tool sourcing, surface rollout plan, rejected markets with reasons, and refresh cadence.
 - `localization-market-research.html`: founder-visible board of the ranked markets and tiers.
-- Updated `APP_STORE_LISTING.md` localization matrix, `LAUNCH_TRACE.md` traces, and (when in scope) `PAID_UA.md` storefront choices that draw from the tiers.
+- Updated `APP_STORE_LISTING.md` localization matrix, `state/LAUNCH_TRACE.md` traces, and (when in scope) `PAID_UA.md` storefront choices that draw from the tiers.
 - `npm run check:localization-research -- --root .` passes (or records why localization is `not_needed`/`deferred`).
 
 ## 9. Common Failure Modes

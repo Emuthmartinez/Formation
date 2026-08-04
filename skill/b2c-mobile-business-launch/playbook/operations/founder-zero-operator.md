@@ -46,7 +46,7 @@ The protocol above covers moments that need a decision. Routine progress needs t
 
 ## Business Bootstrap Sequence
 
-Create `BUSINESS_ACCESS.md` and `operations/business-access.json` during orient, before provider setup sprawls. Keep `currentPhase` visible and at most one structured `activeFounderGate` with phase, origin, class, definitions, choices, bypass/defer policy, lifecycle, next actions, and proof. Set the active gate to `null` while no founder decision is needed; the agent keeps working from `nextAgentAction`. Also record the next business operation so access setup cannot become a dead end. Run the sequence continuously:
+Create `operations/BUSINESS_ACCESS.md` and `operations/business-access.json` during orient, before provider setup sprawls. Keep `currentPhase` visible and at most one structured `activeFounderGate` with phase, origin, class, definitions, choices, bypass/defer policy, lifecycle, next actions, and proof. Set the active gate to `null` while no founder decision is needed; the agent keeps working from `nextAgentAction`. Also record the next business operation so access setup cannot become a dead end. Run the sequence continuously:
 
 1. **Business identity:** confirm the working business/app name, founder-owned contact email, region, and whether a legal entity already exists. Do not force incorporation before it is needed.
 2. **Ownership spine:** establish a founder-controlled business email, recovery email/phone, password-manager or passkey posture, and 2FA ownership. The founder remains the owner of record.
@@ -125,7 +125,7 @@ For every social account, verify:
 - who delegated access and the exact revocation path
 - recovery and 2FA owner
 - connected OAuth/API secret names, never values
-- a secret-scannable read-back log and the next operating action; route screenshots/video through `AGENT_OPERATIONS.md` with its redaction attestation instead of treating a filename as proof of sanitization
+- a secret-scannable read-back log and the next operating action; route screenshots/video through `operations/AGENT_OPERATIONS.md` with its redaction attestation instead of treating a filename as proof of sanitization
 
 Do not stop after saying "create an account." Offer handle options from the approved brand, check availability when authorized, open the correct signup/business screen, guide the founder through the single ownership step, complete profile setup, secure access, and move directly into the first content/research/support task.
 
@@ -143,13 +143,13 @@ Account access authorizes capability discovery and approved operating work, not 
 
 The durable source set is:
 
-- `BUSINESS_ACCESS.md`
+- `operations/BUSINESS_ACCESS.md`
 - `operations/business-access.json`
-- `AGENT_OPERATIONS.md`
+- `operations/AGENT_OPERATIONS.md`
 - `operations/agent-operations.json`
 - `SECRETS.md`
-- `PROJECT_STATE.yaml`
-- `launch-cockpit.html`
+- `state/PROJECT_STATE.yaml`
+- `state/launch-cockpit.html`
 
 After every setup action, update the exact account status and business asset, named operator identity, granted scopes, delegation and revocation path, next founder action, next agent action, next business operation, proof path, and blocker. `not_needed` requires a reason. At resume, continue from those next actions without asking the founder to reconstruct prior setup.
 

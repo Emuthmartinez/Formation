@@ -108,9 +108,9 @@ function maybeRequireDoneOutputs(asset: Record<string, unknown>, index: number, 
 
 const contentStatus = state ? asString(getPath(state, "lanes.content_assets.status"))?.toLowerCase() : undefined;
 const skip = contentStatus === "not_needed" || contentStatus === "deferred";
-const markdown = firstExistingText(["CONTENT_ASSETS.md", "content-assets/CONTENT_ASSETS.md"]);
-const htmlPath = existsAny(["content-assets.html", "content-assets/content-assets.html"]);
-const manifestText = firstExistingText(["content-assets/manifest.json", "manifest.json"]);
+const markdown = firstExistingText(["CONTENT_ASSETS.md", "growth/content-assets/CONTENT_ASSETS.md"]);
+const htmlPath = existsAny(["content-assets.html", "growth/content-assets/content-assets.html"]);
+const manifestText = firstExistingText(["growth/content-assets/manifest.json", "manifest.json"]);
 
 if (!skip && !markdown) {
   issues.push(
@@ -192,8 +192,8 @@ if (!skip && !manifestText) {
     issue(
       "error",
       "content_assets.manifest_missing",
-      "content-assets/manifest.json is required to make rendered/generated asset outputs machine-readable.",
-      "content-assets/manifest.json",
+      "growth/content-assets/manifest.json is required to make rendered/generated asset outputs machine-readable.",
+      "growth/content-assets/manifest.json",
     ),
   );
 }
@@ -258,7 +258,7 @@ if (manifestText) {
           issue(
             "error",
             `content_assets.manifest.assets.${index}.prompt_brief.missing`,
-            `Manifest asset ${index} uses a Higgsfield/Marketing Studio route but records no prompt_brief carrying the DESIGN.md tokens used for generation. Generating without the DESIGN.md brief is a named failure mode.`,
+            `Manifest asset ${index} uses a Higgsfield/Marketing Studio route but records no prompt_brief carrying the design/DESIGN.md tokens used for generation. Generating without the design/DESIGN.md brief is a named failure mode.`,
             manifestText.relativePath,
           ),
         );
@@ -267,7 +267,7 @@ if (manifestText) {
           issue(
             "warning",
             `content_assets.manifest.assets.${index}.prompt_brief.no_design_reference`,
-            `Manifest asset ${index} prompt_brief should reference the DESIGN.md tokens (palette, typography, banned aesthetics) carried into the generation prompt.`,
+            `Manifest asset ${index} prompt_brief should reference the design/DESIGN.md tokens (palette, typography, banned aesthetics) carried into the generation prompt.`,
             manifestText.relativePath,
           ),
         );

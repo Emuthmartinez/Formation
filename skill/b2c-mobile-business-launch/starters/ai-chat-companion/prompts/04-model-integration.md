@@ -24,17 +24,17 @@ Tell me the exact current Claude model ID and parameters to use (confirm against
 current Anthropic docs), and keep the model name in one config constant.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
 - **Follow the `claude-api` skill** for current model IDs, Messages API shape, streaming, tool use, and prompt caching. Keep the model ID in one config constant so model upgrades are a one-line change (and a `change-cascade.md` event).
-- The Claude API key routes through `SECRETS.md`. The inference endpoint is the top abuse/cost surface — add per-user rate limits and quotas (coordinate with prompt 06) and prompt-injection handling to `SECURITY.md`.
-- The **system prompt is a product asset**: version it, review it against `BRAND.md §Voice`, and trace persona/boundary changes through `change-cascade.md`.
-- Context summarization is a real backend step — document it in `TECH_SPEC.md` (it also justifies an honest "thinking/summarizing" perceived-effort moment, not a fake loader; see `consumer-product-design-agency.md`).
-- Add `model_response_succeeded`, `model_response_errored`, `context_summarized` (with token counts) to `ANALYTICS.md`.
+- The Claude API key routes through `SECRETS.md`. The inference endpoint is the top abuse/cost surface — add per-user rate limits and quotas (coordinate with prompt 06) and prompt-injection handling to `trust/SECURITY.md`.
+- The **system prompt is a product asset**: version it, review it against `strategy/BRAND.md §Voice`, and trace persona/boundary changes through `change-cascade.md`.
+- Context summarization is a real backend step — document it in `engineering/TECH_SPEC.md` (it also justifies an honest "thinking/summarizing" perceived-effort moment, not a fake loader; see `consumer-product-design-agency.md`).
+- Add `model_response_succeeded`, `model_response_errored`, `context_summarized` (with token counts) to `analytics/ANALYTICS.md`.
 </content>

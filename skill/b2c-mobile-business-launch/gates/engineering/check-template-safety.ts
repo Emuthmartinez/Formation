@@ -9,7 +9,7 @@
  * templates copied into business repos. Markdown/HTML docs are excluded so that
  * documentation examples remain allowed.
  *
- * Deliberate exception: business/landing/ is the landing-page section library
+ * Deliberate exception: business/growth/landing/ is the landing-page section library
  * — a web-only surface where `motion/react` is the mandated animation library
  * (playbook/design/landing-motion-craft.md). Those files are copied into a web
  * project, never into the mobile binary, so the import is correct there.
@@ -53,7 +53,8 @@ for (const file of collectAllFiles(root)) {
   // motion/react is the mandated animation library there and never ships into
   // the binary. Anchored to the first segment so unrelated nested directories
   // that happen to be named "landing" stay covered by the gate.
-  if (path.relative(root, file).split(path.sep)[0] === "landing") {
+  const relativeSegments = path.relative(root, file).split(path.sep);
+  if (relativeSegments[0] === "growth" && relativeSegments[1] === "landing") {
     continue;
   }
   if (!codeExtensions.has(path.extname(file))) {

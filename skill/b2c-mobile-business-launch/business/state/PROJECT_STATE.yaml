@@ -1,0 +1,586 @@
+schema_version: "1"
+definition_graph_version: "1.0.0"
+updated_at: "2026-07-12"
+# The narrated update the founder reads first, above any table, on state/launch-cockpit.html.
+# Write these in plain language, in the second person, with no lane ids, phase codes, or
+# status values. Refresh them whenever state changes; check:founder-copy fails on empty
+# or placeholder text once the project is past the orient phase.
+narrative:
+  # What changed since the founder last looked. Name the concrete thing that got done.
+  since_last_time: ""
+  # What the agent is working on right now, in one sentence.
+  right_now: ""
+  # The single thing the founder needs to decide or provide, or that nothing is needed.
+  your_call: ""
+  # The progress beat already spoken, so a milestone is never celebrated twice.
+  last_celebrated_phase: ""
+project:
+  name: "App Name"
+  slug: "app-name"
+  owner: "Founder or team"
+  phase: "phase_0_orient"
+  # Launch scope sizes the work to the product: "essentials" (the recommended default
+  # for a first launch) runs the core spine and defers the named breadth areas with
+  # dated reasons; "full" runs every area and is a deliberate flagship choice (see
+  # launch-phases.md "Launch Scopes"). Confirm the scope with the founder at orient;
+  # record changes here. Named "scope" rather than "tier" because "tier" collides with
+  # the founder's own app pricing tiers. The legacy project.launch_tier key and its
+  # "lite" value are still read, so older state files work.
+  launch_scope: "essentials"
+  # ISO date orient completed — the pre-build clock. validate:launch-state warns
+  # when the project is still in phases 0-2 more than 45 days after kickoff
+  # (project.pre_build_stall): cut scope, re-run Go/Pivot/Kill, or record the
+  # deliberate founder choice to continue. Most dead launches die in planning.
+  kickoff_date: ""
+  platforms:
+    - ios
+  bundle_ids:
+    ios: "com.example.app"
+    android: ""
+  public_urls:
+    landing: ""
+    privacy: ""
+    terms: ""
+  source_truth:
+    transcript: ""
+    repo: ""
+    current_docs:
+      - "product/SPEC.md"
+autonomy:
+  mode: "prepare"
+  last_founder_approval: ""
+  founder_only_gates:
+    - "paid tool signups or spend"
+    - "credentials, secrets, and account access"
+    - "legal, privacy, or pricing approval"
+    - "destructive or irreversible actions"
+    - "App Store or Google Play submission"
+    - "public posting or scheduling"
+business_operator:
+  status: "not_started"
+  founder_experience: "beginner_assumed"
+  agent_role: "business_operator"
+  human_log: "operations/BUSINESS_ACCESS.md"
+  structured_ledger: "operations/business-access.json"
+  doppler_status: "not_started"
+  social_access_status: "not_started"
+  access_ready_count: 0
+  current_phase: "phase_0_orient"
+  current_phase_label: "Set the foundation"
+  current_phase_outcome: "A clear working identity and the next safe setup step."
+  active_gate_id: "confirm-working-name"
+  active_gate_class: "scope"
+  active_gate_origin: "skill_requirement"
+  active_gate_status: "pending"
+  active_gate_bypass_mode: "fallback_allowed"
+  question_mode: "ask_user_question_when_available"
+  next_founder_action: "Tell me the working business or app name you want to use; I will explain and handle the rest one step at a time."
+  next_agent_action: "Inspect current repo and public identity state, then guide the first secure business account step."
+  next_business_operation: "Once we have a working name, I move on to secure account setup, market research, your social profiles, content, support, analytics, store work, and launch, in that order."
+  state_reconciled: true
+agent_operations:
+  status: "not_started"
+  human_log: "operations/AGENT_OPERATIONS.md"
+  structured_ledger: "operations/agent-operations.json"
+  capability_checked_at: ""
+  active_approval_ids: []
+  last_action_id: ""
+  state_reconciled: false
+continuity:
+  last_state_review: "not_reviewed"
+  source_files:
+    - "AGENTS.md"
+    - "state/PROJECT_STATE.yaml"
+    - "state/launch-cockpit.html"
+    - "operations/BUSINESS_ACCESS.md"
+    - "operations/business-access.json"
+    - "operations/AGENT_OPERATIONS.md"
+    - "operations/agent-operations.json"
+    - "operations/ORCHESTRATION.md"
+    - "engineering/PRODUCTION_READINESS.md"
+    - "operations/FAILURE_CARDS.md"
+  git_status_reviewed: false
+  next_action: "Reconstruct state from the continuity source files before choosing work."
+  drift_risks: []
+orchestration:
+  preflight_done: false
+  strategy: "not_evaluated"
+  rationale: "No orchestration preflight has been evaluated yet."
+  integration_owner: "orchestrator"
+  manager_pattern: true
+  file_overlap_checked: false
+  actual_file_collision_check: false
+  agent_outputs_reviewed: false
+  state_reconciled: false
+  candidate_units: []
+  parallel_safe_units: []
+  serialized_units:
+    - "state/PROJECT_STATE.yaml updates"
+    - "state/launch-cockpit.html rendering"
+    - "founder gates, business ownership, account creation, delegation, recovery, and 2FA"
+    - "git staging, commits, merges, pushes, and releases"
+    - "provider/account mutations"
+    - "authenticated browser profiles, public responses, and externally visible actions"
+    - "MobAI, Codex Desktop native iOS, XcodeBuildMCP, serve-sim, or simulator/device control"
+  spawned_agents: []
+  focused_validators_run: []
+  full_suites_run: []
+compound_engineering:
+  availability: "unknown"
+  route: "not_evaluated"
+  latest_check:
+    status: "not_checked"
+    checked_at: ""
+    installed_version: ""
+    latest_version: ""
+    source: ""
+  skills_considered: []
+  brainstorm_status: "not_evaluated"
+  plan_status: "not_evaluated"
+  work_status: "not_evaluated"
+  worktree_status: "not_evaluated"
+  review_status: "not_evaluated"
+  test_status: "not_evaluated"
+  proof_status: "not_evaluated"
+  fallback_reason: ""
+lanes:
+  # Lane status: not_started (honest default) -> partial -> blocked/not_needed/deferred -> done.
+  # "done" requires evidence paths; do not leave lanes at not_started past phase_0c (see check-lane-coverage).
+  #
+  # Lanes also have dependency edges ("Lock phase outputs before depending on them"):
+  # a lane cannot be "done" while an upstream lane is not_started/partial/blocked.
+  # done/not_needed/deferred upstream all satisfy the edge. The edge set ships with
+  # the skill (scripts/lib/launch-state.ts, laneDependencies) and is not editable
+  # from here. To finish a lane over an open upstream, add a dated
+  #   dependency_override: "YYYY-MM-DD why this lane is genuinely independent of it"
+  # which downgrades the error to a standing warning. See playbook/orchestration/project-state.md.
+  paid_tool_routing:
+    status: "not_started"
+    evidence:
+      - "strategy/TOOL_DECISIONS.md"
+    blockers: []
+  secrets:
+    status: "not_started"
+    evidence:
+      - "trust/secrets/SECRETS.md"
+    blockers: []
+  security:
+    status: "not_started"
+    evidence:
+      - "trust/SECURITY.md"
+      - "trust/security-review.html"
+    blockers: []
+  research:
+    status: "not_started"
+    evidence:
+      - "strategy/RESEARCH.md"
+      - "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
+      - "strategy/localization-market-research/localization-market-research.html"
+    blockers: []
+    # Pre-build verdict from the Go, Pivot, Or Kill checkpoint (strategy/RESEARCH.md,
+    # launch-phases.md Phase 1): founder-decided over category-revenue, wedge,
+    # and demand evidence, before design/build work is spent on the idea.
+    # Values: go | pivot | kill. Date is the ISO day the founder decided.
+    go_pivot_kill_decision: ""
+    go_pivot_kill_decided_at: ""
+  traceability:
+    status: "not_started"
+    evidence:
+      - "state/LAUNCH_TRACE.md"
+    blockers: []
+  experience:
+    status: "not_started"
+    evidence:
+      - "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
+      - "product/experience/11-star-experience/11-star-experience.html"
+    blockers: []
+  emotional_design:
+    status: "not_started"
+    evidence:
+      - "product/experience/emotional-design/EMOTIONAL_DESIGN.md"
+      - "product/experience/emotional-design/emotional-design.html"
+    blockers: []
+    audit_requested: false
+    deferred_cards: []
+  product:
+    status: "not_started"
+    evidence:
+      - "product/SPEC.md"
+    blockers: []
+  design:
+    status: "not_started"
+    evidence:
+      - "strategy/BRAND.md"
+      - "design/DESIGN.md"
+      - "product/copy/COPY_BRIEF.md"
+      - "product/copy/COPY_DECK.md"
+      - "design/screen-design/design.md"
+      - "product/experience/ux-patterns/UX_PATTERNS.md"
+      - "design/design.html"
+      - "product/experience/ux-patterns/ux-patterns.html"
+    blockers: []
+  content_assets:
+    status: "not_started"
+    evidence:
+      - "growth/content-assets/CONTENT_ASSETS.md"
+      - "growth/content-assets/content-assets.html"
+      - "growth/content-assets/manifest.json"
+      - "growth/DEMO_VIDEO.md"
+    blockers: []
+  analytics_attribution:
+    status: "not_started"
+    evidence:
+      - "analytics/ANALYTICS.md"
+      - "analytics/analytics-plan.html"
+    blockers: []
+    attribution_contract:
+      screen_early: false
+      stable_source_keys:
+        - "friend"
+        - "x_twitter"
+        - "tiktok"
+        - "instagram"
+        - "youtube"
+        - "app_store_search"
+        - "google_play_search"
+        - "creator"
+        - "ai_search"
+        - "other"
+      other_free_text: false
+      event_name: "attribution_source_selected"
+      person_properties:
+        - "self_reported_source"
+        - "self_reported_source_label"
+      backend_persistence: false
+      anonymous_reconciliation: false
+      verified: false
+  paid_user_acquisition:
+    status: "not_started"
+    evidence:
+      - "growth/PAID_UA.md"
+      - "growth/paid-ua-report.csv"
+    blockers:
+      - "Founder approval is required before ad account connection, paid spend, budget changes, or live campaign launch."
+  onboarding:
+    status: "not_started"
+    evidence:
+      - "product/ONBOARDING.md"
+      - "product/onboarding.html"
+    blockers: []
+  revenue:
+    status: "not_started"
+    evidence:
+      - "revenue/REVENUE_OPS.md"
+    blockers: []
+  store_console:
+    status: "not_started"
+    evidence:
+      - "store/STORE_CONSOLE.md"
+      - "store/store-console.html"
+      - "store/app-store-listing/APP_STORE_LISTING.md"
+      - "store/app-store-listing/app-store-listing.html"
+      - "store/app-store-listing/app-privacy-questionnaire.html"
+      - "store/APPLE_APP_STORE_REQUIREMENTS.md"
+      - "store/app-store-listing/SCREENSHOTS.md"
+    blockers: []
+  apple_signing:
+    status: "not_started"
+    evidence:
+      - "store/APPLE_SIGNING.md"
+      - "store/APPLE_APP_STORE_REQUIREMENTS.md"
+    blockers: []
+  privacy_legal:
+    status: "not_started"
+    evidence:
+      - "trust/PRIVACY.md"
+      - "trust/TERMS.md"
+      - "store/APPLE_APP_STORE_REQUIREMENTS.md"
+    blockers: []
+  email:
+    status: "not_started"
+    evidence:
+      - "growth/EMAIL_OPS.md"
+    blockers: []
+  orchestration:
+    status: "not_started"
+    evidence:
+      - "operations/ORCHESTRATION.md"
+      - "operations/orchestration.html"
+    blockers: []
+  engineering:
+    status: "not_started"
+    evidence:
+      - "engineering/TECH_SPEC.md"
+      - "engineering/ENGINEERING_PLAN.md"
+      - "engineering/PRODUCTION_READINESS.md"
+    blockers: []
+  growth:
+    status: "not_started"
+    evidence:
+      - "growth/VIRAL_GROWTH.md"
+      - "growth/LAUNCH_NARRATIVE.md"
+      - "growth/format-lab.csv"
+      - "growth/UGC_PLAYBOOK.md"
+      - "growth/FASTLANE_OPS.md"
+    blockers: []
+  post_launch_ops:
+    status: "not_started"
+    evidence:
+      - "operations/POST_LAUNCH_OPS.md"
+      - "operations/LAUNCH_RETRO.md"
+    blockers: []
+    # ISO date the app first went approved-for-sale on either store. Recorded once,
+    # never changed. This is the clock every post-launch gate hangs off: day-30/day-90
+    # retro due dates and the weekly-log freshness bar in check:post-launch.
+    live_since: ""
+    # Whole-app verdict from the Kill-Or-Scale Review (post-launch-operations.md §9),
+    # recorded at the day-30/day-90 retro checkpoints. Founder-decided, never automatic.
+    # Values: scale | hold | fix | kill. Date is the ISO day the founder decided.
+    kill_or_scale_decision: ""
+    kill_or_scale_decided_at: ""
+tools:
+  doppler:
+    route: "intended_paid_or_account_tool"
+    docs_checked_at: ""
+    cli_version: ""
+    required_secrets:
+      - "DOPPLER_TOKEN"
+    preflight: "Confirm project/config naming before creating service tokens."
+    validation: "doppler run -- printenv APP_ENV"
+    fallback: "Apple Keychain, platform secrets, or names-only .env after founder approval."
+  posthog:
+    route: "intended_account_tool"
+    docs_checked_at: ""
+    required_secrets:
+      - "POSTHOG_PROJECT_API_KEY"
+      - "POSTHOG_PERSONAL_API_KEY"
+    preflight: "Confirm product analytics region, replay/survey posture, and privacy disclosures."
+    validation: "Verify event plus person property in PostHog."
+    fallback: "Local event log or open-source analytics only after founder approval."
+  refero:
+    route: "optional_paid_or_account_tool"
+    docs_checked_at: ""
+    required_secrets:
+      - "REFERO_API_TOKEN"
+    preflight: "Confirm Refero Pro access, OAuth or bearer-token route, query budget, and whether fallback UX pattern pack is founder-approved."
+    validation: "UX_PATTERNS.md records selected styles/screens/flows or approved fallback; ux-patterns.html renders pattern inventory and state matrix."
+    fallback: "Bundled business/product/experience/ux-patterns pattern pack, founder-provided references, or public UX libraries only after founder approval."
+  revenuecat:
+    route: "intended_account_tool"
+    docs_checked_at: ""
+    required_secrets:
+      - "REVENUECAT_PUBLIC_IOS_KEY"
+      - "REVENUECAT_SECRET_API_KEY"
+      - "REVENUECAT_WEBHOOK_SECRET"
+    preflight: "Confirm entitlement, offering, store products, and sandbox account."
+    validation: "Sandbox purchase grants entitlement in app and backend/profile."
+    fallback: "StoreKit/TestFlight sandbox notes only after founder approval."
+  paid_ad_channels:
+    route: "optional_paid_or_account_tool"
+    docs_checked_at: ""
+    required_secrets: []
+    preflight: "Use paid-user-acquisition.md before spend. Confirm one-channel choice, target event, baseline, creative cadence, tracking stack, RevenueCat LTV/CPA source, store destination, privacy/ATT implications, and founder-approved budget."
+    validation: "PAID_UA.md, growth/paid-ua-report.csv, analytics/ANALYTICS.md, revenue/REVENUE_OPS.md, CONTENT_ASSETS.md, and state/LAUNCH_TRACE.md show channel decision, blended report, RevenueCat economics, creative proof, and stop/scale rules."
+    fallback: "Use organic, ASO, waitlist, or manual spreadsheet planning only after paid spend or ad-account access is blocked, deferred, or not needed."
+  stripe:
+    route: "optional_account_tool"
+    docs_checked_at: ""
+    required_secrets:
+      - "STRIPE_SECRET_KEY"
+      - "STRIPE_WEBHOOK_SECRET"
+    preflight: "Confirm whether web checkout or web funnels are in scope."
+    validation: "Checkout or webhook event projects entitlement correctly."
+    fallback: "Defer web checkout and use app-store purchase only after founder approval."
+  resend:
+    route: "intended_account_tool"
+    docs_checked_at: ""
+    required_secrets:
+      - "RESEND_API_KEY"
+      - "RESEND_WEBHOOK_SECRET"
+    preflight: "Confirm sender domain, reply-to, unsubscribe, and support aliases."
+    validation: "Send test email and verify webhook or provider log."
+    fallback: "Cloudflare routing plus manual Gmail responses after founder approval."
+  sentry:
+    route: "optional_account_tool"
+    docs_checked_at: ""
+    required_secrets:
+      - "SENTRY_DSN"
+      - "SENTRY_AUTH_TOKEN"
+    preflight: "Confirm crash/performance scope and PII scrubbing."
+    validation: "Known non-production test event reaches Sentry."
+    fallback: "Store crash reports and local logs after founder approval."
+  security_review:
+    route: "optional_paid_or_account_tool"
+    docs_checked_at: ""
+    required_secrets: []
+    preflight: "Confirm whether Claude Security, Codex Security, GitHub Advanced Security, Snyk/Semgrep/Socket, MobSF Cloud, or a free local route is approved before running scans."
+    validation: "trust/SECURITY.md, trust/security-review.html, LaunchBench, and security validator evidence show threat model, platform hardening, supply-chain checks, and release checks."
+    fallback: "Use local security skills, OWASP MASVS/ASVS, MobSF local, gitleaks/trufflehog, npm audit/osv-scanner, semgrep community rules, Xcode/Android static checks only after founder approval when replacing paid tools."
+  app_store_connect:
+    route: "intended_account_tool"
+    docs_checked_at: ""
+    required_secrets:
+      - "ASC_KEY_ID"
+      - "ASC_ISSUER_ID"
+      - "ASC_PRIVATE_KEY_PATH"
+    preflight: "Use app-store-connect-cli.md first (ASC Auth Setup And Recovery). Check for an existing keychain profile (asc --profile <Name>) before claiming no ASC access; one account-level API key reaches every app on the team. Confirm Apple Developer membership, Team ID, bundle ID, app name, SKU, locale, ASC CLI/skill-pack auth, and founder approval before app-record mutation."
+    validation: "ASC CLI/skill route records app creation/app record state, IDs, metadata, screenshots, TestFlight, review status, RevenueCat catalog reconciliation, and archive/export/upload path."
+    fallback: "Manual ASC click-path packet only after CLI/auth/account/skill-route blocker or founder-approved non-CLI route is recorded."
+  aso_skills:
+    route: "optional_local_skill_pack"
+    docs_checked_at: ""
+    required_secrets: []
+    preflight: "Refresh the Eronred ASO skill pack or installed local equivalents before ASO, icon, screenshot, CPP, event, paid UA, or post-launch metric guidance."
+    validation: "APP_STORE_LISTING.md, SCREENSHOTS.md, and store/STORE_CONSOLE.md record which ASO specialist lanes were used or intentionally not needed."
+    fallback: "Apply equivalent frameworks manually only after paid/account-gated ASO routes and missing runtime access are recorded."
+  app_store_screenshots:
+    route: "optional_local_skill_pack"
+    docs_checked_at: ""
+    required_secrets: []
+    # One value, not a pipe-delimited triple. The old form rendered a GitHub username and
+    # two alternatives into a single founder-visible cell.
+    selected_route: "blocked"
+    route_options:
+      - "ParthJadhav/app-store-screenshots"
+      - "equivalent local export board"
+    preflight: "Refresh ParthJadhav/app-store-screenshots, confirm real UI captures, app icon, design tokens, 11-star slice, locales/themes, iPhone/iPad support, and whether Higgsfield/Remotion supporting assets need approval."
+    board_path: "screenshots/index.html or generated app-store-screenshots workspace"
+    state_path: "app-store-screenshots.json"
+    source_inputs:
+      - "screenshots/raw/"
+      - "app-icon/app-icon-1024.png"
+      - "design/DESIGN.md"
+      - "design.md"
+      - "11_STAR_EXPERIENCE.md"
+      - "APP_STORE_LISTING.md"
+      - "CONTENT_ASSETS.md when Higgsfield/Remotion/supporting art is used"
+    output_dirs:
+      - "screenshots/final/en-US/iphone-69/"
+      - "screenshots/final/en-US/ipad-13/"
+    validation: "SCREENSHOTS.md records exact iPhone/iPad wells, required/scaled decisions, screenshot count, dimensions, alpha/sRGB proof, asc-shots-pipeline dry-run, and upload status."
+    upload_status: "not_started | dry_run_ready | uploaded | blocked"
+    fallback: "Use Remotion, HTML/CSS composition, or designer-owned files only after the app-store-screenshots route is unavailable or not fit and the limitation is recorded."
+  higgsfield:
+    route: "optional_paid_or_account_tool"
+    docs_checked_at: ""
+    required_secrets: []
+    preflight: "Confirm design/DESIGN.md tokens, asset family, prompt brief, source rights, and whether the output is screenshot support, App Icon, CPP/event art, preview thumbnail, or UGC/ad creative."
+    validation: "CONTENT_ASSETS.md and SCREENSHOTS.md record route, prompt summary, source inputs, output paths, visual QA, and founder approval gates."
+    fallback: "Remotion, HTML/CSS composition, founder-owned media, public-domain assets, or raw screenshots only after founder approval and limitation notes."
+    identity:
+      # Trained-once Soul/presenter identity, reused across ads, UGC, and presenter video.
+      # Run show_characters before training to avoid duplicate runs. See tool-recipes/visual-and-motion-production.md "Soul-Once Founder-Face Ads".
+      soul_reference_id: ""
+      soul_variant: ""
+      avatar_id: ""
+      training_date: ""
+      photos_source: ""
+      training_manifest_path: ""
+  in_app_ios_simulator:
+    route: "built_in_agent_simulator_when_local_mac"
+    docs_checked_at: ""
+    runtime: "claude_code_desktop_pane | claude_code_cli_computer_use | codex_build_ios_apps | blocked | not_needed"
+    runtime_version: ""
+    session_type: "local | cloud_or_ssh_blocked"
+    required_secrets: []
+    preflight: "Confirm this is a local macOS session (the pane and computer-use cannot reach a Mac's simulators from cloud, SSH, or container sessions), the runtime version and plan gate, that org policy has not disabled simulator tools, and that Xcode plus an iOS simulator runtime are installed. Confirm a fixture or sandbox account before any sign-in on the device."
+    validation: "engineering/PRODUCTION_READINESS.md records the runtime and version, the local session, the simulated device and OS, the fixture-account decision, the exported screenshot/recording paths under proof/ios-simulator/, and the coverage this route does not provide: no Android, no physical device, no repeatable suite/CI, no distribution readiness."
+    fallback: "Escalate to XcodeBuildMCP for scripted/CI or physical-device Apple work, serve-sim for browser-visible simulators, or MobAI for Android and repeatable suites; record the rung change in strategy/TOOL_DECISIONS.md. When no local Mac is reachable, mark device proof blocked rather than narrating a simulator run that did not happen."
+  mobai:
+    route: "intended_free_or_paid_account_tool"
+    docs_checked_at: ""
+    selected_tier: "free | plus | pro | blocked | not_needed"
+    desktop_version: ""
+    mcp_version: ""
+    cli_version: ""
+    required_secrets: []
+    preflight: "Refresh the desktop release, active MCP resources, npm CLI version/help, and MobAI CI docs independently; confirm tier, device/app access, bundle/package ID, locale, seeded demo state, and critical .mob flows before mutation."
+    validation: "engineering/PRODUCTION_READINESS.md records separate desktop/MCP/CLI versions, selected tier, iOS/Android device-flow evidence, AI-heal diff review plus rerun, bounded repeat parameters, host-script allowlist/secret/cleanup proof, provider correlation, and limitations. SCREENSHOTS.md links raw captures to final composition."
+    fallback: "Use MobAI Free without a spend gate when it fits. Ask before Plus/Pro spend or an XcodeBuildMCP Apple-only substitution; record missing Android/cross-platform proof and use Android emulator/ADB or a dated blocker."
+  codex_native_ios:
+    route: "codex_desktop_native_tooling_when_exposed"
+    docs_checked_at: ""
+    required_secrets: []
+    preflight: "When Codex Desktop exposes native Apple/XcodeBuildMCP tools, load xcodebuildmcp-testing.md, call session_show_defaults before the first build/run/test, and confirm project/workspace, scheme, simulator/device, OS/runtime, and configuration."
+    validation: "engineering/PRODUCTION_READINESS.md records exposed MCP tool names such as build_run_sim/test_sim/screenshot/log capture, output paths, simulator/device details, provider-proof pairing, and the distribution-readiness limitation."
+    fallback: "Use XcodeBuildMCP CLI, serve-sim, SnapshotPreviews preview proof, MobAI, or mark proof blocked according to the lane and paid-tool approval state."
+  snapshot_previews:
+    route: "optional_open_source_cli_preview_proof"
+    docs_checked_at: ""
+    required_secrets: []
+    preflight: "Refresh getsentry/SnapshotPreviews, confirm SwiftUI/UIKit/AppKit previews exist, link SnapshottingTests, and decide SnapshotTest vs PreviewLayoutTest."
+    validation: "engineering/PRODUCTION_READINESS.md records package URL/version/commit, TEST_RUNNER_SNAPSHOTS_EXPORT_DIR, exported PNG/JSON paths, deterministic fixtures, and preview-only limitation."
+    fallback: "Use XcodeBuildMCP/Codex Desktop screenshots, serve-sim, MobAI, or manual preview review; do not call preview proof runtime E2E."
+  serve_sim:
+    route: "optional_open_source_cli_simulator_stream"
+    docs_checked_at: ""
+    required_secrets: []
+    preflight: "Refresh EvanBacon/serve-sim, confirm macOS + Xcode command line tools + Node 18+, boot the intended iOS Simulator, and choose URL/port."
+    validation: "engineering/PRODUCTION_READINESS.md or SCREENSHOTS.md records npx serve-sim resolution, booted simulator/device, localhost preview URL/port, actions, logs, stream proof, and provider/signing limitations."
+    fallback: "Use Codex Desktop native iOS/XcodeBuildMCP tools, MobAI, founder-provided captures, or mark simulator proof blocked."
+  google_play:
+    route: "intended_account_tool"
+    docs_checked_at: ""
+    required_secrets:
+      - "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
+    preflight: "Confirm developer account, package name, app content declarations, data safety, and tester track."
+    validation: "Internal testing release or blocked reason recorded."
+    fallback: "Manual Play Console packet after founder approval."
+  cloudflare:
+    route: "optional_account_tool"
+    docs_checked_at: ""
+    required_secrets:
+      - "CLOUDFLARE_API_TOKEN"
+    preflight: "Confirm domain, DNS, email routing, Pages/Workers, and secrets."
+    validation: "HTTPS, DNS, headers, routes, and email aliases verified."
+    fallback: "Existing registrar/host after founder approval."
+  remotion:
+    route: "optional_local_render_tool"
+    docs_checked_at: ""
+    required_secrets: []
+    license_status: "Check current Remotion license before commercial use; record eligibility or founder approval."
+    preflight: "Confirm Higgsfield fallback approval if applicable, source asset rights, real app UI inputs, target surfaces, and whether a launch-local content-assets/remotion project is needed."
+    validation: "CONTENT_ASSETS.md, content-assets.html, manifest.json, render command proof, source inputs, and output paths are recorded; representative still or render is checked before public use."
+    fallback: "Use Higgsfield, raw screenshots, founder-owned media, local recordings, HTML/CSS/SVG/canvas, or public-domain assets only after the route is approved and limitations are recorded."
+proof:
+  launch_cockpit: "state/launch-cockpit.html"
+  launchbench:
+    last_run: ""
+    scenarios_passed: []
+    scenarios_failed: []
+  # Empty list, not one blank entry. A single all-empty entry defeated the cockpit's own
+  # "not checked yet" fallback and rendered an unlabeled empty box to the founder.
+  commands: []
+open_questions:
+  - owner: "founder"
+    question: "What decisions still require founder approval?"
+    blocks:
+      - "store submission"
+# Recorded change cascades for a launched (or near-launch) app. Empty until the
+# first post-launch change ships; check:change-cascade grades each entry against
+# playbook/process/cascade-edges.yaml (the data form of the Change Cascade Map, which
+# ships with the skill and is not editable from here).
+#
+# Every surface the map says a change type touches must be accounted for:
+#   status: updated    -> needs `evidence`
+#   status: unaffected -> needs `reason` (one line of why it is untouched)
+#   status: blocked    -> needs `blocker`
+# A surface left out by omission is the change-cascade-incomplete failure card.
+#
+# change_cascade:
+#   - id: "rename-streaks-to-runs"
+#     type: "lexicon_change"        # see cascade-edges.yaml change_types
+#     recorded_at: "2026-07-25"
+#     surfaces:
+#       app_in_app: { status: "updated", evidence: "product/ONBOARDING.md" }
+#       asc_listing: { status: "updated", evidence: "APP_STORE_LISTING.md" }
+#       content_ugc_ads: { status: "unaffected", reason: "no ad creative names the term yet" }
+change_cascade: []
+failure_cards:
+  active:
+    - id: "doppler-docs-stale"
+      severity: "medium"
+      owner: "orchestrator"
+      status: "open"
+      next_action: "Refresh official docs and local CLI help before writing setup commands."
+  resolved: []

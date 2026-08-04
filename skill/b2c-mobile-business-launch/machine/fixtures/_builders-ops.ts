@@ -14,7 +14,7 @@ export function writeCompleteContentAssets(root: string): void {
       "Remotion is approved for local rendered product-demo assets from real app UI.",
       "Founder approval is required before public posting, store upload, paid generation, paid render infrastructure, or scheduling.",
       "License status: Remotion license eligibility for commercial use is checked or founder-approved before production output.",
-      "Source Inputs: screenshots/raw/onboarding.png, 11_STAR_EXPERIENCE.md, DESIGN.md, content-assets/copy/hooks.json, owned or licensed media.",
+      "Source Inputs: screenshots/raw/onboarding.png, 11_STAR_EXPERIENCE.md, design/DESIGN.md, content-assets/copy/hooks.json, owned or licensed media.",
       "Composition Manifest: content-assets/manifest.json records asset IDs, composition IDs, dimensions, inputs, outputs, truth constraints, approvals, render proof, and license status.",
       "Render Commands: cd content-assets/remotion && npx remotion render VerticalHookDemo --output ../out/vertical-hook-demo.mp4.",
       "Claim Review: real app UI remains visible, no unsupported pricing, endorsement, medical, financial, urgency, scarcity, or unavailable UI claims.",
@@ -42,8 +42,8 @@ export function writeCompleteContentAssets(root: string): void {
             composition_id: "VerticalHookDemo",
             dimensions: "1080x1920",
             duration_seconds: 12,
-            inputs: ["screenshots/raw/onboarding.png", "11_STAR_EXPERIENCE.md", "DESIGN.md", "content-assets/copy/hooks.json"],
-            outputs: ["content-assets/out/vertical-hook-demo.mp4"],
+            inputs: ["screenshots/raw/onboarding.png", "11_STAR_EXPERIENCE.md", "design/DESIGN.md", "growth/content-assets/copy/hooks.json"],
+            outputs: ["growth/content-assets/out/vertical-hook-demo.mp4"],
             truth_constraints: ["real app UI remains visible", "V1 scalable slice from 11_STAR_EXPERIENCE.md remains truthful", "no unsupported claims"],
             approvals: ["founder approval before public posting", "fallback approval before replacing Higgsfield"],
             render_proof: "cd content-assets/remotion && npx remotion render VerticalHookDemo --output ../out/vertical-hook-demo.mp4",
@@ -63,7 +63,7 @@ export function writeCompleteViralGrowth(root: string): void {
   const state = readState(root);
   const growthLane = getLane(state, "growth");
   growthLane["status"] = "done";
-  growthLane["evidence"] = ["growth/VIRAL_GROWTH.md", "growth/format-lab.csv", "UGC_PLAYBOOK.md", "FASTLANE_OPS.md"];
+  growthLane["evidence"] = ["growth/VIRAL_GROWTH.md", "growth/format-lab.csv", "growth/UGC_PLAYBOOK.md", "growth/FASTLANE_OPS.md"];
   growthLane["blockers"] = [];
   writeState(root, state);
   writeFileSync(
@@ -75,12 +75,12 @@ export function writeCompleteViralGrowth(root: string): void {
       "Product Loop: users can share or invite from the result preview after onboarding. Referral Or Share Mechanic: stable referral code, recipient value, backend entitlement validation, duplicate handling, self-referral prevention, rate limits, support recovery, and abuse controls.",
       "Content Loop: TikTok/Reels/Shorts formats show real app UI, product visibility, a clear CTA, creator_code mapping, and claim constraints.",
       "Format Lab: growth/format-lab.csv records format ID, hook, first frame, product insertion, CTA, variables, signal windows, and status.",
-      "Monetization Timing: ONBOARDING.md previews value before paywall, REVENUE_OPS.md owns RevenueCat and Stripe package rules, paywall timing, purchase proof, restore purchases, and transparent terms.",
-      "Measurement Plan: ANALYTICS.md and analytics-plan.html define PostHog events, dashboard proof, referral_invite_started, referral_invite_completed, referral_unlock_earned, share_started, share_completed, creator_code_applied, viral_format_signal_detected, paywall_viewed, purchase_completed, entitlement_active, and retention checks.",
+      "Monetization Timing: product/ONBOARDING.md previews value before paywall, revenue/REVENUE_OPS.md owns RevenueCat and Stripe package rules, paywall timing, purchase proof, restore purchases, and transparent terms.",
+      "Measurement Plan: analytics/ANALYTICS.md and analytics/analytics-plan.html define PostHog events, dashboard proof, referral_invite_started, referral_invite_completed, referral_unlock_earned, share_started, share_completed, creator_code_applied, viral_format_signal_detected, paywall_viewed, purchase_completed, entitlement_active, and retention checks.",
       "Loop Economics: k = invites per active user times recipient conversion, computed weekly; k at 0.06 in week one with a 6-day cycle time, trend flat — the loop is not yet a growth engine and the share moment is the next test.",
       "Stop And Scale Rules: one viral post is not a format; scale after 2-3 repeatable hits plus downstream app opens, paywall reach, purchases, and retention evidence, keyed on k and its trend rather than gross share counts.",
       "Founder-Only Gates: creator payments, paid tools, public posting, social account connections, pricing changes, legal approval, and platform-policy approval.",
-      "Traceability: LAUNCH_TRACE.md maps GROW-001 from research to SPEC.md, 11_STAR_EXPERIENCE.md, ONBOARDING.md, UGC_PLAYBOOK.md, CONTENT_ASSETS.md, FASTLANE_OPS.md, REVENUE_OPS.md, ANALYTICS.md, PRIVACY.md, TERMS.md, and PRODUCTION_READINESS.md.",
+      "Traceability: state/LAUNCH_TRACE.md maps GROW-001 from research to product/SPEC.md, 11_STAR_EXPERIENCE.md, product/ONBOARDING.md, growth/UGC_PLAYBOOK.md, CONTENT_ASSETS.md, growth/FASTLANE_OPS.md, revenue/REVENUE_OPS.md, analytics/ANALYTICS.md, trust/PRIVACY.md, trust/TERMS.md, and engineering/PRODUCTION_READINESS.md.",
     ].join("\n"),
     "utf8",
   );
@@ -90,11 +90,11 @@ export function writeCompleteViralGrowth(root: string): void {
     "utf8",
   );
   writeFileSync(
-    path.join(root, "UGC_PLAYBOOK.md"),
+    path.join(root, "growth/UGC_PLAYBOOK.md"),
     "# UGC Playbook\n\nCreator scripts use GROW-001 and the format lab.\n\nPost-Breakout Scale Model: roster grows in bands (3-5 discovery, ~10 proven, ~30 scale, 75+ volume), each band a founder-gated budget step with install-per-video fatigue measured weekly. Current band: Discovery, entered 2026-07-01, budget $300/week founder-approved with the prior band's install-per-video and payback numbers in front of the decision.\n",
     "utf8",
   );
-  writeFileSync(path.join(root, "FASTLANE_OPS.md"), "# Fastlane Ops\n\nFastlane reuses approved format IDs after launch approval.\n", "utf8");
+  writeFileSync(path.join(root, "growth/FASTLANE_OPS.md"), "# Fastlane Ops\n\nFastlane reuses approved format IDs after launch approval.\n", "utf8");
 }
 
 export function writeCompletePaidUserAcquisition(root: string): void {
@@ -113,14 +113,14 @@ export function writeCompletePaidUserAcquisition(root: string): void {
       "Channel Choice: one-channel rule selects Meta Ads for the first test while TikTok, Google web-to-app, Apple Ads, and Apple Search Ads are rejected until one channel works.",
       "Creative Production: CONTENT_ASSETS.md owns 3-5 weekly creative assets, angle IDs, real app UI, product visibility, claim constraints, and the 11_STAR_EXPERIENCE.md V1 slice.",
       "Creative Scoring Gate: score each video creative with the Virality Predictor (brain_activity) before paid distribution; record virality_score and hook_dmn_risk per creative.",
-      "Tracking Baseline: ANALYTICS.md records PostHog events, ad-network SDK or native report route, App Store Connect or Google Play store metrics, self-reported attribution, and baseline uplift rules.",
-      "RevenueCat Economics: REVENUE_OPS.md uses RevenueCat LTV, cohorts, trial starts, purchases, and entitlement data to compare CPA, CPI, ROAS, and payback window.",
+      "Tracking Baseline: analytics/ANALYTICS.md records PostHog events, ad-network SDK or native report route, App Store Connect or Google Play store metrics, self-reported attribution, and baseline uplift rules.",
+      "RevenueCat Economics: revenue/REVENUE_OPS.md uses RevenueCat LTV, cohorts, trial starts, purchases, and entitlement data to compare CPA, CPI, ROAS, and payback window.",
       "Blended Report: growth/paid-ua-report.csv records spend, impressions, clicks, installs or app opens, paywall views, trials, purchases, entitlement active count, revenue, CPA, LTV window, winning angle, and next action.",
       "Weekly Schedule: Monday report review, Tuesday 3-5 asset production, Wednesday delivery check, Thursday anomaly check, Friday scale/hold/reduce/pause decision, and daily 15-minute pacing checks.",
       "Stop And Scale Rules: stop when baseline is missing, CPA cannot fit LTV, paywall or retention quality drops, or only clicks/installs improve; scale after one channel and repeatable creative angles show downstream revenue evidence.",
       "Decision Thresholds: Attribution tolerance ±20% across RevenueCat, store console, PostHog, and self-reported; Payback window 90 days against realized LTV; Creative signal floor 2x target CPA or 7 days per creative; Scale trigger 14 consecutive days at or under target CPA at approved spend.",
       "Founder-Only Gates: founder approval is required for ad account connection, budget, spend, automated rules, paid MMP/ad tooling, ad-network SDK privacy changes, custom product pages, public creative, pricing, trials, offers, and legal copy.",
-      "Traceability: LAUNCH_TRACE.md maps PUA-001 from RESEARCH.md to CONTENT_ASSETS.md, REVENUE_OPS.md, ANALYTICS.md, APP_STORE_LISTING.md, PRIVACY.md, TERMS.md, and PRODUCTION_READINESS.md.",
+      "Traceability: state/LAUNCH_TRACE.md maps PUA-001 from strategy/RESEARCH.md to CONTENT_ASSETS.md, revenue/REVENUE_OPS.md, analytics/ANALYTICS.md, APP_STORE_LISTING.md, trust/PRIVACY.md, trust/TERMS.md, and engineering/PRODUCTION_READINESS.md.",
     ].join("\n"),
     "utf8",
   );
@@ -150,7 +150,7 @@ export function writeCompleteOrchestration(root: string): void {
         role: "product leader",
         objective: "Audit scope, onboarding, activation, and traceability.",
         mode: "read_only",
-        files: ["SPEC.md", "11_STAR_EXPERIENCE.md", "ONBOARDING.md", "LAUNCH_TRACE.md"],
+        files: ["product/SPEC.md", "11_STAR_EXPERIENCE.md", "product/ONBOARDING.md", "state/LAUNCH_TRACE.md"],
         shared_resources: [],
         parallel_safe: true,
         output: "findings",
@@ -161,7 +161,7 @@ export function writeCompleteOrchestration(root: string): void {
         role: "security architect",
         objective: "Audit threat model, app integrity, entitlement abuse, and incident response.",
         mode: "read_only",
-        files: ["SECURITY.md", "security-review.html"],
+        files: ["trust/SECURITY.md", "trust/security-review.html"],
         shared_resources: [],
         parallel_safe: true,
         output: "findings",
@@ -172,7 +172,7 @@ export function writeCompleteOrchestration(root: string): void {
         role: "orchestrator",
         objective: "Update state, failure cards, launch cockpit, git, and final proof.",
         mode: "serialized",
-        files: ["PROJECT_STATE.yaml", "launch-cockpit.html", "PRODUCTION_READINESS.md"],
+        files: ["state/PROJECT_STATE.yaml", "state/launch-cockpit.html", "engineering/PRODUCTION_READINESS.md"],
         shared_resources: ["git index"],
         parallel_safe: false,
         output: "integrated proof",
@@ -181,8 +181,8 @@ export function writeCompleteOrchestration(root: string): void {
     ],
     parallel_safe_units: ["product-audit", "security-audit"],
     serialized_units: [
-      "PROJECT_STATE.yaml updates",
-      "launch-cockpit.html rendering",
+      "state/PROJECT_STATE.yaml updates",
+      "state/launch-cockpit.html rendering",
       "git staging, commits, merges, pushes, and releases",
       "provider/account mutations",
       "MobAI or simulator/device control",
@@ -225,38 +225,38 @@ export function writeCompleteOrchestration(root: string): void {
   };
   const orchestrationLane = getLane(state, "orchestration");
   orchestrationLane["status"] = "done";
-  orchestrationLane["evidence"] = ["ORCHESTRATION.md", "orchestration.html", "orchestration/security-audit.md"];
+  orchestrationLane["evidence"] = ["operations/ORCHESTRATION.md", "operations/orchestration.html", "orchestration/security-audit.md"];
   orchestrationLane["blockers"] = [];
   writeState(root, state);
   writeFileSync(
-    path.join(root, "ORCHESTRATION.md"),
+    path.join(root, "operations/ORCHESTRATION.md"),
     [
       "# Orchestration",
       "Orchestration Preflight: the orchestrator keeps state integration local while product and security audits run in parallel.",
       "Strategy: hybrid manager pattern with one orchestrator.",
       "## Session Continuity",
       "Last state review: 2026-05-31.",
-      "Continuity source set: AGENTS.md, PROJECT_STATE.yaml, launch-cockpit.html, ORCHESTRATION.md, BUSINESS_ACCESS.md, operations/business-access.json, PRODUCTION_READINESS.md, FAILURE_CARDS.md.",
+      "Continuity source set: AGENTS.md, state/PROJECT_STATE.yaml, state/launch-cockpit.html, operations/ORCHESTRATION.md, operations/BUSINESS_ACCESS.md, operations/business-access.json, engineering/PRODUCTION_READINESS.md, operations/FAILURE_CARDS.md.",
       "Memory policy: Do not rely on chat memory or prior transcripts as source truth; repo state wins.",
       "Git status reviewed: yes.",
       "Drift risks or stale assumptions: none for this fixture.",
       "Next action: continue with integrated validation.",
       "State or cockpit rerender needed: no.",
-      "Compound Engineering Routing: ce-update freshness checked v3.9.3 against latest release v3.9.3; ce-brainstorm skipped because product direction already decisive; ce-plan created ENGINEERING_PLAN.md; ce-work executed bounded units; ce-worktree was not needed; ce-code-review passed; ce-test-browser covered web proof; ce-proof produced proof artifact.",
-      "Candidate Units: product-audit includes SPEC.md, 11_STAR_EXPERIENCE.md, ONBOARDING.md, and LAUNCH_TRACE.md; security-audit is read-only; state-integration is serialized.",
+      "Compound Engineering Routing: ce-update freshness checked v3.9.3 against latest release v3.9.3; ce-brainstorm skipped because product direction already decisive; ce-plan created engineering/ENGINEERING_PLAN.md; ce-work executed bounded units; ce-worktree was not needed; ce-code-review passed; ce-test-browser covered web proof; ce-proof produced proof artifact.",
+      "Candidate Units: product-audit includes product/SPEC.md, 11_STAR_EXPERIENCE.md, product/ONBOARDING.md, and state/LAUNCH_TRACE.md; security-audit is read-only; state-integration is serialized.",
       "Parallel Safety Check: file-overlap check passed; actual modified files were compared after agent outputs returned.",
-      "File Ownership: the orchestrator owns PROJECT_STATE.yaml, launch-cockpit.html, PRODUCTION_READINESS.md, git, and releases.",
+      "File Ownership: the orchestrator owns state/PROJECT_STATE.yaml, state/launch-cockpit.html, engineering/PRODUCTION_READINESS.md, git, and releases.",
       "Serialized Work: provider/account mutations, credentials, device control, git, commits, pushes, public posting, and release decisions stay serialized.",
       "Subagent Instructions: do not stage files, do not commit, do not push, do not mutate providers, do not control devices, and do not make founder-only decisions.",
       "Integration Plan: the orchestrator reviews outputs, accepts or rejects findings, updates failure cards and state, then runs focused validators and the full suite.",
       "Verification: npm run check:orchestration -- --root . and npm run audit passed.",
       "Founder-Only Gates: pricing, legal, credentials, spending, public posting, app-store submission, and destructive repo actions.",
-      "State Updates: PROJECT_STATE.yaml and launch-cockpit.html were reconciled after integration.",
+      "State Updates: state/PROJECT_STATE.yaml and state/launch-cockpit.html were reconciled after integration.",
       "Failure Cards: no active orchestration failure cards remain.",
     ].join("\n"),
     "utf8",
   );
-  writeFileSync(path.join(root, "orchestration.html"), "<!doctype html><html><body>Orchestration board</body></html>", "utf8");
+  writeFileSync(path.join(root, "operations/orchestration.html"), "<!doctype html><html><body>Orchestration board</body></html>", "utf8");
   writeFileSync(path.join(root, "orchestration", "security-audit.md"), "# Security Audit\n\nNo orchestration blocker remains.\n", "utf8");
 }
 
@@ -265,12 +265,12 @@ export function writeCompleteCompoundEngineering(root: string): void {
   const state = readState(root);
   const engineeringLane = getLane(state, "engineering");
   engineeringLane["status"] = "done";
-  engineeringLane["evidence"] = ["TECH_SPEC.md", "ENGINEERING_PLAN.md", "PRODUCTION_READINESS.md"];
+  engineeringLane["evidence"] = ["engineering/TECH_SPEC.md", "engineering/ENGINEERING_PLAN.md", "engineering/PRODUCTION_READINESS.md"];
   engineeringLane["blockers"] = [];
   writeState(root, state);
-  writeFileSync(path.join(root, "TECH_SPEC.md"), "# Tech Spec\n\nImplementation contracts are traced from LAUNCH_TRACE.md.\n", "utf8");
+  writeFileSync(path.join(root, "engineering/TECH_SPEC.md"), "# Tech Spec\n\nImplementation contracts are traced from state/LAUNCH_TRACE.md.\n", "utf8");
   writeFileSync(
-    path.join(root, "ENGINEERING_PLAN.md"),
+    path.join(root, "engineering/ENGINEERING_PLAN.md"),
     [
       "# Engineering Plan",
       "Compound Engineering: ce-plan produced this plan after product direction already decisive; ce-brainstorm was skipped with rationale.",
@@ -280,7 +280,7 @@ export function writeCompleteCompoundEngineering(root: string): void {
     "utf8",
   );
   writeFileSync(
-    path.join(root, "PRODUCTION_READINESS.md"),
+    path.join(root, "engineering/PRODUCTION_READINESS.md"),
     [
       "# Production Readiness",
       "Implementation proof: ce-work completed the planned units.",
@@ -295,7 +295,7 @@ export function writeCompleteCompoundEngineering(root: string): void {
 
 export function writeCompleteProviderProof(root: string): void {
   writeFileSync(
-    path.join(root, "PROVIDER_PROOF.md"),
+    path.join(root, "operations/PROVIDER_PROOF.md"),
     [
       "# Provider Proof",
       "Status: evidence captured for this fixture.",
@@ -317,7 +317,7 @@ export function writeCompleteProviderProof(root: string): void {
 
 export function writeCompletePaidToolDecisions(root: string): void {
   writeFileSync(
-    path.join(root, "TOOL_DECISIONS.md"),
+    path.join(root, "strategy/TOOL_DECISIONS.md"),
     [
       "# Tool Decisions",
       "| Tool | Lane | Access status | Founder confirmation | Selected route | Fallback limitation |",

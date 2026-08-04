@@ -1,6 +1,6 @@
 # 04 — AI Generation Pipeline
 
-This is where product quality and product cost live. The pipeline is **provider-agnostic by design**: which image model/provider to use is a paid, founder-gated decision — route it through `paid-tool-routing.md` and record it in `TOOL_DECISIONS.md` before filling in the provider adapter. The provider API key is server-side only, via `SECRETS.md`.
+This is where product quality and product cost live. The pipeline is **provider-agnostic by design**: which image model/provider to use is a paid, founder-gated decision — route it through `paid-tool-routing.md` and record it in `strategy/TOOL_DECISIONS.md` before filling in the provider adapter. The provider API key is server-side only, via `SECRETS.md`.
 
 ```
 Build the AI generation pipeline as a server-side job system. The generation
@@ -30,17 +30,17 @@ Requirements:
 - Never leak raw provider errors or provider identity strings to the client
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- **Provider selection is founder-gated.** Follow `paid-tool-routing.md`: identify the candidate providers, confirm with the founder, record the decision and cost assumptions in `TOOL_DECISIONS.md`, and route the key through `SECRETS.md`. Do not hardcode a provider because it is familiar — the adapter interface exists so the decision stays swappable.
-- The generation route is the top abuse/cost surface: ownership checks, credit checks, rate limits, and the concurrency cap are `SECURITY.md` items, enforced server-side (a client check is not a control).
+- **Provider selection is founder-gated.** Follow `paid-tool-routing.md`: identify the candidate providers, confirm with the founder, record the decision and cost assumptions in `strategy/TOOL_DECISIONS.md`, and route the key through `SECRETS.md`. Do not hardcode a provider because it is familiar — the adapter interface exists so the decision stays swappable.
+- The generation route is the top abuse/cost surface: ownership checks, credit checks, rate limits, and the concurrency cap are `trust/SECURITY.md` items, enforced server-side (a client check is not a control).
 - **The reveal maps to the Variable Reward card — HIGH risk per `ethics-guardrail.md`.** Output quality genuinely varies, which is exactly the variable-ratio mechanism; the card requires `ethics_attestation`, a `user_control_escape_hatch` (the user can always stop; no "one more spin" pressure at the credit floor), a `counter_metric` (e.g. regeneration spirals per session), and `reward_variation_proof` (the variation is the model's real output variance, not engineered near-misses). The waiting state is a Perceived Effort Delay moment: progress must reflect the real job status (`computation_type: real_api_call`) — no fake work, no padded timers (`consumer-product-design-agency.md`).
 - Cost tracking per generation is the unit-economics substrate for prompt 06 — without it, pricing is guesswork. Reconcile the cost model with `revenue-monetization.md`.
-- Add `media_uploaded`, `generation_started`, `generation_completed`, `media_shared` to `ANALYTICS.md` (the lane's four required events; `generation_completed` carries status, duration, and credit cost as properties — counts and metadata, not image content).
-- Document the queue/polling design and retry/backoff policy in `TECH_SPEC.md`; provider output retention (does the provider keep copies?) goes in `privacy-terms.md` and feeds prompt 08.
+- Add `media_uploaded`, `generation_started`, `generation_completed`, `media_shared` to `analytics/ANALYTICS.md` (the lane's four required events; `generation_completed` carries status, duration, and credit cost as properties — counts and metadata, not image content).
+- Document the queue/polling design and retry/backoff policy in `engineering/TECH_SPEC.md`; provider output retention (does the provider keep copies?) goes in `privacy-terms.md` and feeds prompt 08.

@@ -18,8 +18,8 @@ const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
 const state = loaded.state;
-const markdownPath = "SECURITY.md";
-const htmlPath = "security-review.html";
+const markdownPath = "trust/SECURITY.md";
+const htmlPath = "trust/security-review.html";
 const markdown = readText(args.root, markdownPath);
 const htmlExists = existsSync(path.join(args.root, htmlPath));
 
@@ -109,13 +109,15 @@ if (securityNotNeeded && mobileInScope) {
       "error",
       "security.not_needed_invalid",
       "Mobile launches require a security lane; use deferred or blocked with a reason if proof cannot be completed yet.",
-      "PROJECT_STATE.yaml",
+      "state/PROJECT_STATE.yaml",
     ),
   );
 }
 
 if (!markdown && !securityNotNeeded) {
-  issues.push(issue("error", "security.markdown_missing", "SECURITY.md is required for mobile launch security hardening and release proof.", markdownPath));
+  issues.push(
+    issue("error", "security.markdown_missing", "trust/SECURITY.md is required for mobile launch security hardening and release proof.", markdownPath),
+  );
 }
 
 if (markdown) {
@@ -143,7 +145,7 @@ if (markdown) {
     "Supply Chain",
     "Monitoring",
     "Incident Response",
-    // Renamed from "Release Proof" when security-review.html became a render of
+    // Renamed from "Release Proof" when trust/security-review.html became a render of
     // this document: "proof" is banned in founder-visible copy by
     // check:founder-copy, and the hand-authored page had already been silently
     // translating the heading to "Release Checks" for the founder.
@@ -153,7 +155,7 @@ if (markdown) {
   ];
 
   if (hasIos) {
-    requiredPhrases.push("iOS", "Keychain", "App Transport Security", "App Attest", "DeviceCheck", "entitlements", "APPLE_SIGNING.md");
+    requiredPhrases.push("iOS", "Keychain", "App Transport Security", "App Attest", "DeviceCheck", "entitlements", "store/APPLE_SIGNING.md");
   }
   if (hasAndroid) {
     requiredPhrases.push("Android", "Android Keystore", "Network Security Config", "Play Integrity");
@@ -182,7 +184,7 @@ if (markdown) {
       issue(
         "error",
         "security.complete_with_placeholder",
-        "SECURITY.md cannot claim done/launch-ready while unresolved placeholder language remains.",
+        "trust/SECURITY.md cannot claim done/launch-ready while unresolved placeholder language remains.",
         markdownPath,
       ),
     );
@@ -191,7 +193,7 @@ if (markdown) {
 
 if (!htmlExists && !securityNotNeeded) {
   const severity = securityStatus === "done" ? "error" : "warning";
-  issues.push(issue(severity, "security.html_missing", "security-review.html should render the security release board for founder review.", htmlPath));
+  issues.push(issue(severity, "security.html_missing", "trust/security-review.html should render the security release board for founder review.", htmlPath));
 }
 
 reportAndExit("Security release check", issues);

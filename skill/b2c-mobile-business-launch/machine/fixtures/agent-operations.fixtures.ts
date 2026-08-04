@@ -237,8 +237,8 @@ export function register(h: Harness): void {
 
   const secretHuman = makeFixture("agent-operations-secret-human-log");
   writeFileSync(
-    path.join(secretHuman, "AGENT_OPERATIONS.md"),
-    `${readFileSync(path.join(secretHuman, "AGENT_OPERATIONS.md"), "utf8")}\npassword: \"do-not-store-me\"\n`,
+    path.join(secretHuman, "operations/AGENT_OPERATIONS.md"),
+    `${readFileSync(path.join(secretHuman, "operations/AGENT_OPERATIONS.md"), "utf8")}\npassword: \"do-not-store-me\"\n`,
     "utf8",
   );
   runFixture("raw secret in human operations log fails", secretHuman, "check-agent-operations.ts", 1, "raw_secret_detected");
@@ -376,7 +376,7 @@ function completeLedger(root: string, now = new Date().toISOString(), expiresAt 
       redactionAttested: true,
       reconciliation: {
         projectStateUpdated: true,
-        canonicalDocs: ["STORE_CONSOLE.md", "AGENT_OPERATIONS.md"],
+        canonicalDocs: ["store/STORE_CONSOLE.md", "operations/AGENT_OPERATIONS.md"],
         providerProofUpdated: true,
         cockpitRendered: true,
         at: now,
@@ -401,13 +401,13 @@ function reconcileFixture(root: string, ledger: Record<string, unknown>): void {
   operations.state_reconciled = reconciled;
   writeState(root, state);
 
-  const humanPath = path.join(root, "AGENT_OPERATIONS.md");
+  const humanPath = path.join(root, "operations/AGENT_OPERATIONS.md");
   writeFileSync(
     humanPath,
     `${readFileSync(humanPath, "utf8").replace(/^Status:.*$/m, `Status: ${String(ledger.status)}`)}\n| ${latestId} | mutate | exact fixture target | browser | APR-asc-draft | sanitized before/after | ${String(result.status)} | yes |\n`,
     "utf8",
   );
-  const cockpitPath = path.join(root, "launch-cockpit.html");
+  const cockpitPath = path.join(root, "state/launch-cockpit.html");
   const cockpitSource = readFileSync(cockpitPath, "utf8");
   const marker = "<h2>Behind The Scenes</h2>";
   const markerIndex = cockpitSource.indexOf(marker);
@@ -419,7 +419,7 @@ function reconcileFixture(root: string, ledger: Record<string, unknown>): void {
     .replace("Last action: </p>", `Last action: ${latestId}</p>`)
     .replace("State reconciled: false", `State reconciled: ${String(reconciled)}`);
   writeFileSync(cockpitPath, `${cockpitHead}${cockpitTail}`, "utf8");
-  for (const relative of ["STORE_CONSOLE.md", "PROVIDER_PROOF.md"]) {
+  for (const relative of ["store/STORE_CONSOLE.md", "operations/PROVIDER_PROOF.md"]) {
     const fullPath = path.join(root, relative);
     const existing = readFileSync(fullPath, "utf8");
     writeFileSync(fullPath, `${existing}\nAgent operation proof: ${latestId}.\n`, "utf8");

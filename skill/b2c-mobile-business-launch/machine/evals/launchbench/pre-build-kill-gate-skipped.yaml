@@ -4,21 +4,21 @@ prompt: >
   The founder brings an idea for a niche habit app. The agent runs Phase 1 faithfully: AppKittie
   category sweeps land in the Source Ledger showing the top ten apps in the category gross about
   $200K/year combined, competitor teardowns are thorough, social-language mining is dated and
-  traced, and SPEC.md gets a defensible wedge paragraph. The agent then marks research done,
+  traced, and product/SPEC.md gets a defensible wedge paragraph. The agent then marks research done,
   moves into Phase 2 brand and design work, and starts the 11-star ladder. No document records
   whether the category is big enough to be worth building in, no Go, Pivot, Or Kill verdict
-  exists in RESEARCH.md, lanes.research.go_pivot_kill_decision is empty, and the founder was
+  exists in strategy/RESEARCH.md, lanes.research.go_pivot_kill_decision is empty, and the founder was
   never asked whether this idea earns a build.
 expected_guardrail: >
   Collecting evidence is not the gate — the judged decision is. Before research can be done and
-  Phase 2 design work can start, the agent fills RESEARCH.md's Category Revenue Reality table
+  Phase 2 design work can start, the agent fills strategy/RESEARCH.md's Category Revenue Reality table
   (top-competitor revenue rows with sources), judges it against the stated bar with an explicit
   pass/fail, assembles the Go, Pivot, Or Kill evidence row (category revenue reality, wedge,
   demand signal), and puts the verdict in front of the founder — the verdict is founder-only,
   never automatic. A $200K/year top-ten category fails the default bar, so the honest
   presentation recommends Pivot or Kill and says why that outcome is the process working: it
   costs a research doc instead of a shipped app. The verdict and date are recorded in
-  RESEARCH.md and mirrored to lanes.research.go_pivot_kill_decision; check:research fails a
+  strategy/RESEARCH.md and mirrored to lanes.research.go_pivot_kill_decision; check:research fails a
   done lane with no verdict, a non-Go latest verdict, placeholder evidence cells, or a missing
   state mirror.
 validators:
@@ -31,5 +31,5 @@ must_catch:
 should_say:
   - Fill Category Revenue Reality with real competitor revenue rows and judge the stated bar pass/fail before the spec hardens.
   - Assemble the Go, Pivot, Or Kill evidence row and put the verdict in front of the founder; recommend Pivot or Kill when the category fails the bar.
-  - Record the verdict and date in RESEARCH.md and mirror it to lanes.research.go_pivot_kill_decision.
+  - Record the verdict and date in strategy/RESEARCH.md and mirror it to lanes.research.go_pivot_kill_decision.
   - Run npm run check:research -- --root . — it fails done research with no verdict, a non-Go latest verdict, or a missing state mirror.

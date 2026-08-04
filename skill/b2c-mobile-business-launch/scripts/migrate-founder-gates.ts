@@ -10,7 +10,7 @@ const args = parseCliArgs(process.argv.slice(2));
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const ledgerPath = path.join(args.root, "operations/business-access.json");
 const schemaPath = path.join(args.root, "operations/business-access.schema.json");
-const humanPath = path.join(args.root, "BUSINESS_ACCESS.md");
+const humanPath = path.join(args.root, "operations/BUSINESS_ACCESS.md");
 
 if (!existsSync(ledgerPath)) {
   throw new Error(`Missing founder ledger: ${ledgerPath}`);

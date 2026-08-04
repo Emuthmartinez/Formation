@@ -21,7 +21,7 @@ observable at that point.
 
 **Method note:** these are simulated runs (no live providers/repos in this
 session), traced step-by-step against the skill's named validators, artifact
-templates, and `PROJECT_STATE.yaml` lanes. Where a run exposed a failure mode I
+templates, and `state/PROJECT_STATE.yaml` lanes. Where a run exposed a failure mode I
 tightened the loop in `skill/b2c-mobile-business-launch/graph/generated/skill-graph.md` and re-ran; both the first
 outcome and the re-run are recorded.
 
@@ -58,8 +58,8 @@ Re-run: validator green, render exits 0, tier confirmed → **fires once.** ✅ 
 
 ### L04 — Paid-tool routing
 Task: AppKittie + Higgsfield + RevenueCat in play.
-Trigger ✓. Action: classify lanes into `TOOL_DECISIONS.md`. Proof: `check:paid-tool-decisions` passes; every lane row carries one of the three states.
-Stop: validator green + grep finds no unmarked row → fires once. Not vacuous: the validator fails-closed when `TOOL_DECISIONS.md` is absent, so the grep clause never stands alone. ✅ **TERMINATES.**
+Trigger ✓. Action: classify lanes into `strategy/TOOL_DECISIONS.md`. Proof: `check:paid-tool-decisions` passes; every lane row carries one of the three states.
+Stop: validator green + grep finds no unmarked row → fires once. Not vacuous: the validator fails-closed when `strategy/TOOL_DECISIONS.md` is absent, so the grep clause never stands alone. ✅ **TERMINATES.**
 
 ### L05 — Secrets baseline
 Task: add Doppler + RevenueCat key.
@@ -73,14 +73,14 @@ Stop: both green + field set → fires once. Both validators fail at entry (no a
 
 ### L07 — Provider-proof verification
 Task: mark analytics lane done.
-Trigger ✓. Action: gather `probe:posthog` output into `PROVIDER_PROOF.md`. Proof: `check:provider-proof` passes.
+Trigger ✓. Action: gather `probe:posthog` output into `operations/PROVIDER_PROOF.md`. Proof: `check:provider-proof` passes.
 Stop: validator green (probe artifact OR named gate present) → fires once. Escape branch (founder gate) guarantees a reachable terminator → not infinite. ✅ **TERMINATES.**
 
 ### L08 — Change cascade  ⚠️→✅
 Task: rename the core feature "Streaks" → "Momentum" on a live app.
 First run: stop = "every surface row marked `updated|unaffected` (grep finds none unmarked)…". On a run where the agent **never built the cascade table**, grep over zero rows finds nothing unmarked → **⊘ fires immediately**, masking the skipped work. (The `recorded in LAUNCH_TRACE` clause partially guarded it, but the grep clause itself was vacuous.)
 **Fix:** stop now first requires "the cascade table enumerates every surface from the matching Change Cascade Map rows (non-empty)" before the marked/lexicon/recorded clauses.
-Re-run: table enumerates 11 surfaces for a lexicon change, each marked, Lexicon Lock grep = 0 mismatches, recorded in `LAUNCH_TRACE.md` → **fires once.** ✅ **TERMINATES.**
+Re-run: table enumerates 11 surfaces for a lexicon change, each marked, Lexicon Lock grep = 0 mismatches, recorded in `state/LAUNCH_TRACE.md` → **fires once.** ✅ **TERMINATES.**
 
 ### L09 — Research-backed spec  ⚠️→✅
 Task: spec a sleep-tracking app.
@@ -130,23 +130,23 @@ Stop: validator green + lane locked → fires once (validator fails on guardrail
 
 ### L18 — Launch trace & build contracts  ⚠️→✅
 Task: cross from research into build for the sleep app.
-First run: "every row in the decision table has a non-empty evidence cell (grep)" → **⊘ immediate** on an empty `LAUNCH_TRACE.md`.
-**Fix:** require "decision table is non-empty and every row has a non-empty evidence cell" + Lexicon Lock grep = 0 + `TECH_SPEC.md` exists when implementation is in scope.
-Re-run: 9 decision rows each with evidence, lexicon clean, `TECH_SPEC.md` present → **fires once.** ✅ **TERMINATES.**
+First run: "every row in the decision table has a non-empty evidence cell (grep)" → **⊘ immediate** on an empty `state/LAUNCH_TRACE.md`.
+**Fix:** require "decision table is non-empty and every row has a non-empty evidence cell" + Lexicon Lock grep = 0 + `engineering/TECH_SPEC.md` exists when implementation is in scope.
+Re-run: 9 decision rows each with evidence, lexicon clean, `engineering/TECH_SPEC.md` present → **fires once.** ✅ **TERMINATES.**
 
 ### L19 — Security architecture & release gate
 Task: threat-model before build.
-Trigger ✓. Proof: `check:security` passes; `security-review.html` rendered; each residual risk `resolved|accepted` or gated.
+Trigger ✓. Proof: `check:security` passes; `trust/security-review.html` rendered; each residual risk `resolved|accepted` or gated.
 Stop: validator green + every risk dispositioned → fires once. Each risk has a discrete disposition → finite, checkable. ✅ **TERMINATES.**
 
 ### L20 — Design Room
 Task: change the paywall layout.
-Trigger ✓. Action: STATE→MUTATE→VERSION→RENDER. Proof: `check:design-room` + `validate:design-state` pass; `git tag baseline/<name>` exists; `design-room.html` re-rendered.
+Trigger ✓. Action: STATE→MUTATE→VERSION→RENDER. Proof: `check:design-room` + `validate:design-state` pass; `git tag baseline/<name>` exists; `design/design-room.html` re-rendered.
 Stop: both green + baseline tag present → fires once. Tag existence is a discrete git check → checkable. ✅ **TERMINATES.**
 
 ### L21 — Token promotion
 Task: promote a new accent palette.
-Trigger ✓. Proof: `check:token-promotion` passes; `design-system/` diff-matches `theme.tokens.json`.
+Trigger ✓. Proof: `check:token-promotion` passes; `design/system/` diff-matches `theme.tokens.json`.
 Stop: validator green → fires once (fails until promotion runs). ✅ **TERMINATES.**
 
 ### L22 — UX patterns
@@ -183,7 +183,7 @@ Stop: validator green → fires once (fails on over-length/keyword-rule break). 
 Task: assemble the listing packet.
 First run: "no `TODO`/empty token (grep)" → on a **non-existent `APP_STORE_LISTING.md`**, grep finds no TODO → **⊘ immediate** (and grep on a missing file errors → uncheckable).
 **Fix:** require "exists with every required-field section present and carries no `TODO`/empty token" + App Privacy diff-match + founder gate row.
-Re-run: packet present, all sections filled, privacy answers diff-match `PRIVACY.md`, gate row present → **fires once.** ✅ **TERMINATES.**
+Re-run: packet present, all sections filled, privacy answers diff-match `trust/PRIVACY.md`, gate row present → **fires once.** ✅ **TERMINATES.**
 
 ### L29 — Apple signing
 Task: record signing/distribution state.
@@ -217,7 +217,7 @@ Stop: validator green OR blockers recorded → fires once. ✅ **TERMINATES.**
 
 ### L35 — Engineering orchestration
 Task: build the core loop.
-Trigger ✓. Proof: `check:compound-engineering` + `check:orchestration` pass; `PRODUCTION_READINESS.md` has evidence for all five stages.
+Trigger ✓. Proof: `check:compound-engineering` + `check:orchestration` pass; `engineering/PRODUCTION_READINESS.md` has evidence for all five stages.
 Stop: both green + five-stage evidence → fires once. The five stages are an explicit finite set → bounded; `engineering` lane stays `partial` until all five present → not vacuous. ✅ **TERMINATES.**
 
 ### L36 — Backend data contract
@@ -249,7 +249,7 @@ Stop: both green → fires once; production gate correctly excluded from the ter
 ### L41 — Privacy & terms  ⚠️→✅
 Task: draft privacy policy + terms.
 First run: "have no placeholder token (grep)" → on **absent files**, grep finds no placeholder → **⊘ immediate / uncheckable** (grep on a missing path errors).
-**Fix:** require "`PRIVACY.md` and `TERMS.md` exist, are non-empty, and carry no placeholder token" + Data Safety diff-match.
+**Fix:** require "`trust/PRIVACY.md` and `trust/TERMS.md` exist, are non-empty, and carry no placeholder token" + Data Safety diff-match.
 Re-run: both files present and filled, answers diff-match the apple/play packets → **fires once.** ✅ **TERMINATES.**
 
 ### L42 — Resend email ops
@@ -270,18 +270,18 @@ Stop: validator green + live checks → fires once; public deploy is a founder g
 ### L45 — UGC creator engine  ⚠️→✅
 Task: plan a 90-day creator program.
 First run: "non-empty rows for fit/plan/budget/disclosure/stop-scale (grep finds none empty)" → with **no rows**, vacuously true → **⊘ immediate.**
-**Fix:** require "`UGC_PLAYBOOK.md` contains all five named rows, each present and non-empty."
+**Fix:** require "`growth/UGC_PLAYBOOK.md` contains all five named rows, each present and non-empty."
 Re-run: five rows present and filled → **fires once.** ✅ **TERMINATES.**
 
 ### L46 — Fastlane growth ops  ⚠️→✅
 Task: set up the post-launch content workspace.
-First run: "records workspace + connections + angles + weekly loop with a QA pass logged" — soft prose; on a stub `FASTLANE_OPS.md` with empty headers it could read as satisfied → **⊘ risk.**
-**Fix:** require "`FASTLANE_OPS.md` exists with the four named sections present and a QA-pass log line recorded."
+First run: "records workspace + connections + angles + weekly loop with a QA pass logged" — soft prose; on a stub `growth/FASTLANE_OPS.md` with empty headers it could read as satisfied → **⊘ risk.**
+**Fix:** require "`growth/FASTLANE_OPS.md` exists with the four named sections present and a QA-pass log line recorded."
 Re-run: four sections present + QA log line → **fires once**; posting/connection stay founder gates. ✅ **TERMINATES.**
 
 ### L47 — Post-launch operations
 Task: stand up the weekly ops rhythm.
-Trigger ✓. Proof: `check:post-launch` passes; `LAUNCH_RETRO.md` at +7/30/90.
+Trigger ✓. Proof: `check:post-launch` passes; `operations/LAUNCH_RETRO.md` at +7/30/90.
 Stop: validator green → fires once (fails without the rhythm + SLA + cohort source). ✅ **TERMINATES.**
 
 ### L48 — Source-freshness maintenance
@@ -301,12 +301,12 @@ Stop: validators green + (diff empty OR skip recorded) → fires once. In a clou
 
 ### L51 — Founder-zero operator bootstrap
 Task: founder says "launch this" with no accounts set up yet.
-Trigger ✓ (broad launch start). Action: load `founder-zero-operator.md`, seed access state, record identity and the one-decision-at-a-time gates. Proof: `check:founder-operator` passes; the rendered cockpit phase label equals `PROJECT_STATE.yaml` `phase`.
-Stop: validator green + phase labels equal → fires once. At entry the validator fails closed on an absent `BUSINESS_ACCESS.md`, so not vacuous; the required-section set is finite, so not infinite. ✅ **TERMINATES.**
+Trigger ✓ (broad launch start). Action: load `founder-zero-operator.md`, seed access state, record identity and the one-decision-at-a-time gates. Proof: `check:founder-operator` passes; the rendered cockpit phase label equals `state/PROJECT_STATE.yaml` `phase`.
+Stop: validator green + phase labels equal → fires once. At entry the validator fails closed on an absent `operations/BUSINESS_ACCESS.md`, so not vacuous; the required-section set is finite, so not infinite. ✅ **TERMINATES.**
 
 ### L52 — Agent operations ledger
 Task: agent signs into RevenueCat to read the entitlement config.
-Trigger ✓ (authenticated provider action). Action: load `frontier-agent-operations.md`; record the action, its authorization basis, and its outcome. Proof: `check:agent-operations` passes; provider claims resolve to `PROVIDER_PROOF.md`.
+Trigger ✓ (authenticated provider action). Action: load `frontier-agent-operations.md`; record the action, its authorization basis, and its outcome. Proof: `check:agent-operations` passes; provider claims resolve to `operations/PROVIDER_PROOF.md`.
 Stop: validator green → fires once. Fails closed on an absent ledger, so the stop cannot fire before the first entry exists; one action produces one row, so the write is bounded. ✅ **TERMINATES.**
 
 ### L53 — Writing-quality gate (no-slop)  ⚠️→✅
@@ -358,7 +358,7 @@ classes mechanically:
 - **No uncheckable stops:** the one nondeterministic terminator (L03
   byte-identical render) was removed; every remaining stop is a command exit, a
   grep/`diff`/`curl`/HTTP observation, a git-tag existence check, or a discrete
-  `PROJECT_STATE.yaml` state.
+  `state/PROJECT_STATE.yaml` state.
 
 **Verify/stop met:** every loop terminates correctly on its sample task; the log
 shows each loop reaching its stop exactly once — not zero (infinite), not

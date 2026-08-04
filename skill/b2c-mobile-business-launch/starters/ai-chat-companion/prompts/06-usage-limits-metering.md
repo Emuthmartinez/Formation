@@ -21,16 +21,16 @@ Make the cap, rate limit, and model-per-tier values config constants so they are
 easy to tune.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Caps and rate limits must be enforced **server-side** at the inference route (prompt 04) — a client check is not a control. This is both cost control and a `SECURITY.md` abuse control.
+- Caps and rate limits must be enforced **server-side** at the inference route (prompt 04) — a client check is not a control. This is both cost control and a `trust/SECURITY.md` abuse control.
 - The cap values, model-per-tier, and price are a monetization decision — reconcile with `revenue-monetization.md` (test caps; don't reflexively pick a number) before prompt 07. Pricing changes are founder-gated.
 - The "limit reached → upgrade" state is a paywall-timing moment (`onboarding-conversion.md`): it should arrive at a real value moment (the user wanted to keep going), not on first open.
-- Add `usage_incremented`, `free_limit_reached`, `upgrade_prompt_shown`, `rate_limited` to `ANALYTICS.md`. These feed the conversion funnel and the cost model.
+- Add `usage_incremented`, `free_limit_reached`, `upgrade_prompt_shown`, `rate_limited` to `analytics/ANALYTICS.md`. These feed the conversion funnel and the cost model.
 </content>

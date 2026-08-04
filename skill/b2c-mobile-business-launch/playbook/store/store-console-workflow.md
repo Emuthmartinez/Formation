@@ -80,20 +80,20 @@ Google Play:
 
 Create these when a store submission is in scope:
 
-- `PROJECT_STATE.yaml`: `store_console`, `apple_signing`, privacy/legal, revenue, screenshot, and provider/tool state with active failure cards.
-- `STORE_CONSOLE.md`: agent-readable source of truth for App Store Connect and Google Play Console fields, click paths, blockers, and evidence.
+- `state/PROJECT_STATE.yaml`: `store_console`, `apple_signing`, privacy/legal, revenue, screenshot, and provider/tool state with active failure cards.
+- `store/STORE_CONSOLE.md`: agent-readable source of truth for App Store Connect and Google Play Console fields, click paths, blockers, and evidence.
 - `APP_STORE_LISTING.md`: Apple listing preparation packet covering default listing fields, App Privacy, pricing/subscriptions, RevenueCat/Stripe/web funnels, custom product pages, In-App Events, localization, screenshots/previews, and marketing strategy.
-- `APPLE_APP_STORE_REQUIREMENTS.md`: Apple pre-ASC requirements packet covering privacy manifests, required reason API declarations, third-party SDK privacy manifests/signatures, Xcode privacy report, App Privacy labels, `Info.plist` purpose strings, ATT, account deletion, review notes, and archive/upload warnings.
+- `store/APPLE_APP_STORE_REQUIREMENTS.md`: Apple pre-ASC requirements packet covering privacy manifests, required reason API declarations, third-party SDK privacy manifests/signatures, Xcode privacy report, App Privacy labels, `Info.plist` purpose strings, ATT, account deletion, review notes, and archive/upload warnings.
 - `app-store-listing.html`: founder-facing App Store listing view with copyable values, character counts, pricing/product matrix, privacy status, CPP/event plan, and approval gates.
 - `app-privacy-questionnaire.html`: interactive local worksheet for Apple App Privacy answers when privacy disclosures are not already verified.
-- `APPLE_SIGNING.md`: required for Apple distribution, TestFlight, physical-device signing, or first upload readiness; include account/team, bundle ID/App ID, app record, signing, capabilities, certificates/profiles, archive/export/upload state, and founder gates.
-- `store-console.html`: founder-facing mock console with copy buttons or clearly copyable fields grouped by exact ASC/Play Console page.
+- `store/APPLE_SIGNING.md`: required for Apple distribution, TestFlight, physical-device signing, or first upload readiness; include account/team, bundle ID/App ID, app record, signing, capabilities, certificates/profiles, archive/export/upload state, and founder gates.
+- `store/store-console.html`: founder-facing mock console with copy buttons or clearly copyable fields grouped by exact ASC/Play Console page.
 - `SCREENSHOTS.md`: screenshot capture, ParthJadhav/app-store-screenshots composition route when used, dimensions, device targets, locale, proof constraints, upload status, and source image paths.
 - `screenshots/`: final upload assets plus raw MobAI/native iOS/device captures and intermediate compositions.
-- `TOOL_DECISIONS.md` or an embedded tool-decision section when ASC CLI, paid ASO tools, MobAI, Codex Desktop native iOS/XcodeBuildMCP, SnapshotPreviews, serve-sim, Higgsfield, or paid screenshot/creator tooling affects the packet.
-- `launch-cockpit.html`: rendered state so the founder can see which console pages are ready, blocked, or founder-approval gated.
+- `strategy/TOOL_DECISIONS.md` or an embedded tool-decision section when ASC CLI, paid ASO tools, MobAI, Codex Desktop native iOS/XcodeBuildMCP, SnapshotPreviews, serve-sim, Higgsfield, or paid screenshot/creator tooling affects the packet.
+- `state/launch-cockpit.html`: rendered state so the founder can see which console pages are ready, blocked, or founder-approval gated.
 
-Small launches can merge `SCREENSHOTS.md` into `STORE_CONSOLE.md`, but keep `store-console.html` as the human-facing copy-paste surface.
+Small launches can merge `SCREENSHOTS.md` into `store/STORE_CONSOLE.md`, but keep `store/store-console.html` as the human-facing copy-paste surface.
 
 Each output must state the documentation refresh date. If current docs cannot be reached, mark the packet `blocked: docs refresh needed` instead of relying on old console memory.
 
@@ -115,7 +115,7 @@ Status: ready | blocked | founder approval needed | verified in console
 Notes: any policy/risk caveat
 ```
 
-For `store-console.html`, group fields by console page and make the user path visually obvious:
+For `store/store-console.html`, group fields by console page and make the user path visually obvious:
 - page title matching the console page
 - click path breadcrumb
 - field label
@@ -169,7 +169,7 @@ Before creating the record, load `apple-signing-release.md` and confirm:
 - distribution signing strategy is known or explicitly blocked.
 - the name-collision plan is explicit; do not silently accept CLI fallback names like `<Name> - app`.
 - the founder understands whether they are using Full Access or Limited Access and why.
-- `PROJECT_STATE.yaml` and `launch-cockpit.html` reflect app-record readiness, blockers, and founder-only gates.
+- `state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` reflect app-record readiness, blockers, and founder-only gates.
 
 ### App Information
 
@@ -193,7 +193,7 @@ Packet should include:
 - whether value is editable after submission or version-gated
 - source evidence or policy source
 
-Also create `APP_STORE_LISTING.md` rows for any field that affects marketing, privacy, pricing, or discoverability. The App Information section should agree with `DESIGN.md`, `app-marketing-context.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `TERMS.md`, `SCREENSHOTS.md`, and public support/privacy URLs.
+Also create `APP_STORE_LISTING.md` rows for any field that affects marketing, privacy, pricing, or discoverability. The App Information section should agree with `design/DESIGN.md`, `app-marketing-context.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, `SCREENSHOTS.md`, and public support/privacy URLs.
 
 ### App Privacy
 
@@ -205,9 +205,9 @@ Process:
 2. Start or edit app privacy responses.
 3. Select every data type collected by the app or third-party partners.
 4. For each data type, answer whether it is linked to the user, used for tracking, and the purposes for collection.
-5. Compare the final answers against `PRIVACY.md`, `ANALYTICS.md`, `EMAIL_OPS.md`, `REVENUE_OPS.md`, SDK list, backend schema, and vendor docs.
+5. Compare the final answers against `trust/PRIVACY.md`, `analytics/ANALYTICS.md`, `growth/EMAIL_OPS.md`, `revenue/REVENUE_OPS.md`, SDK list, backend schema, and vendor docs.
 6. Preview the product-page privacy label and record any mismatch before publishing responses.
-7. Reconcile the answers with `APPLE_APP_STORE_REQUIREMENTS.md`, the bundled `PrivacyInfo.xcprivacy`, required reason API reasons, third-party SDK manifest/signature status, Xcode privacy report, `Info.plist` purpose strings, `NSUserTrackingUsageDescription`, and archive/upload warnings before upload readiness.
+7. Reconcile the answers with `store/APPLE_APP_STORE_REQUIREMENTS.md`, the bundled `PrivacyInfo.xcprivacy`, required reason API reasons, third-party SDK manifest/signature status, Xcode privacy report, `Info.plist` purpose strings, `NSUserTrackingUsageDescription`, and archive/upload warnings before upload readiness.
 
 Packet sections:
 - data type table: Apple data type, source, collected yes/no, linked yes/no, tracking yes/no, purposes, notes
@@ -220,7 +220,7 @@ Packet sections:
 Never answer App Privacy from generic policy text alone. Use the real data inventory and SDK/vendor behavior.
 
 Interactive worksheet:
-- Use `business/app-store-listing/app-privacy-questionnaire.html` or a project-specific equivalent when the founder needs to review answers manually.
+- Use `business/store/app-store-listing/app-privacy-questionnaire.html` or a project-specific equivalent when the founder needs to review answers manually.
 - The worksheet should let the founder inspect selected data types, linked/tracking/purpose answers, vendors, proof paths, and unanswered items before publishing in App Store Connect.
 - Treat payment information entered through Apple, Stripe, or RevenueCat-hosted flows as collected only if the developer/app actually receives or stores it; otherwise document the payment provider and disclosure rationale.
 
@@ -259,7 +259,7 @@ Click paths vary by app setup. The packet must show:
 - app price/free status and territory availability
 - subscription group, products, localizations, prices, intro/trial offers, review notes, and family sharing status where applicable
 - App Store Server Notification URL, shared secret/API keys where needed by RevenueCat, and sandbox tester status
-- product mapping to `REVENUE_OPS.md` and RevenueCat offering/package IDs
+- product mapping to `revenue/REVENUE_OPS.md` and RevenueCat offering/package IDs
 
 Founder gates:
 - price, trial, discount, intro offer, tax/compliance, territory, final submission
@@ -331,7 +331,7 @@ Packet should include:
 - common-task matrix: first launch, login, purchase, primary app task, settings, restore purchase, account deletion, and any app-specific critical task
 - feature support decision by device: VoiceOver, Voice Control, Larger Text, Dark Interface, Differentiate without Color Alone, Sufficient Contrast, Reduced Motion, Captions, Audio Descriptions, or current App Store Connect feature set
 - accessibility URL value when the app has public accessibility notes
-- evidence path: `DESIGN.md`, `design.html`, MobAI/manual device test notes, screenshots/video proof, and `PRODUCTION_READINESS.md`
+- evidence path: `design/DESIGN.md`, `design/design.html`, MobAI/manual device test notes, screenshots/video proof, and `engineering/PRODUCTION_READINESS.md`
 - exact publish status and founder approval
 
 Rules:
@@ -380,7 +380,7 @@ Founder approval required:
 - TestFlight external distribution
 - final submit, release, cancel, phased release, managed publishing, or any public Wall of Apps submission
 
-`STORE_CONSOLE.md` must record:
+`store/STORE_CONSOLE.md` must record:
 - CLI version/source checked
 - official Apple docs refresh date
 - auth status without secrets
@@ -396,7 +396,7 @@ Use `paid-tool-routing.md` if the CLI or skill pack is unavailable. The founder 
 
 Use `apple-signing-release.md` when the app needs TestFlight, App Store upload, physical-device signing, or first-time Apple setup.
 
-`STORE_CONSOLE.md` must distinguish these states:
+`store/STORE_CONSOLE.md` must distinguish these states:
 - `simulator-build-ok`: local simulator build can compile/run, but distribution signing may still be missing.
 - `apple-account-ready`: Apple Developer Program membership, role, Team ID, seller/developer name, and agreements are confirmed.
 - `bundle-id-ready`: explicit App ID/bundle identifier exists and matches the Xcode target.
@@ -489,7 +489,7 @@ Process:
 2. For each data type, answer collection, sharing, purpose, optional/required, processing, encryption, deletion, and user control.
 3. Align answers with privacy policy, SDK list, backend schema, analytics, ads, AI, payments, email, crash, and support vendors.
 4. Preview the Play Store disclosure before submitting.
-5. Use Play Console CSV export/import only when it reduces manual errors, and keep the exported/imported CSV path in `STORE_CONSOLE.md`.
+5. Use Play Console CSV export/import only when it reduces manual errors, and keep the exported/imported CSV path in `store/STORE_CONSOLE.md`.
 
 Packet table:
 - Google data type
@@ -534,8 +534,8 @@ Screenshots should start from real app UI captured locally, then be composed wit
 Raw captures are never the final App Store or Google Play artwork by themselves. They are the proof layer that feeds production screenshot compositions, App Icon checks, App Preview/poster frames, device-well exports, and upload validation.
 
 Use:
-- `DESIGN.md` for visual rules
-- `design.html` or screenshot HTML for framed concepts
+- `design/DESIGN.md` for visual rules
+- `design/design.html` or screenshot HTML for framed concepts
 - ParthJadhav/app-store-screenshots for a reusable local screenshot editor/export board that can combine real app captures, app icon, design-system style, headline/copy overlays, locale variants, iPhone/iPad decks, and bulk PNG export
 - MobAI for real app screenshots from simulator/device
 - MobAI `mobile-recorder-skill` for polished iOS/Android app-preview or launch demo videos when video assets are in scope
@@ -543,7 +543,7 @@ Use:
 - Higgsfield for supporting visual assets only after the real UI is clear
 - `SCREENSHOTS.md` for final slot table
 - `screenshots/index.html` or equivalent screenshot HTML for local composition/export proof when final stills are being assembled
-- `DEMO_VIDEO.md` for app-preview/demo-video choreography, raw capture, edited export, captions, and upload copy
+- `growth/DEMO_VIDEO.md` for app-preview/demo-video choreography, raw capture, edited export, captions, and upload copy
 
 ### MobAI Capture
 
@@ -570,7 +570,7 @@ MobAI recorder route:
 - Refresh `https://github.com/MobAI-App/mobile-recorder-skill` before install or command syntax.
 - Follow upstream flow: explore -> `.mob` choreography -> dry-run -> native record -> edit/export.
 - Save `.mob`, raw video, final video, captions, upload copy, target device, fixture, duration, dimensions, and rerender instructions.
-- Use `DESIGN.md` for phone bezel/background, captions, thumbnail/frame treatment, and upload copy voice.
+- Use `design/DESIGN.md` for phone bezel/background, captions, thumbnail/frame treatment, and upload copy voice.
 
 ### XcodeBuildMCP Fallback
 
@@ -653,7 +653,7 @@ Packet should cover:
 
 ## HTML Mock Requirements
 
-`store-console.html` should be a working, local file with:
+`store/store-console.html` should be a working, local file with:
 - tabs or sections for App Store Connect and Google Play
 - ASC page cards in click-path order
 - Play Console page cards in click-path order
@@ -669,7 +669,7 @@ Do not make this a marketing page. It should feel like an operator console: dens
 ## Common Failure Modes
 
 - Metadata exists in `LAUNCH.md` but no click path tells the founder where to paste it.
-- ASC CLI exists but `store-console.html` and manual click paths were skipped.
+- ASC CLI exists but `store/store-console.html` and manual click paths were skipped.
 - ASC CLI/skill pack could create the app, but the agent gave a manual-only "I cannot create the app" answer without checking auth, role, agreements, local `asc --help`, or `asc-app-create-ui`.
 - A missing ASC CLI/MobAI/paid ASO runtime was treated as permission to use a free fallback without asking.
 - Privacy answers are copied from a policy generator instead of data inventory and SDK behavior.

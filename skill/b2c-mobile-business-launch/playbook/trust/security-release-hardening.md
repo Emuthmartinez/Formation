@@ -2,15 +2,15 @@
 
 Use this before app architecture is frozen, before beta/TestFlight/store submission, before provider webhooks mutate state, or when the user asks about security hardening, Claude Security, Codex Security, OWASP MASVS, MobSF, Sentry, app integrity, threat modeling, or release readiness.
 
-Security is a launch lane, not a cleanup pass. Create or refresh `SECURITY.md` early enough to influence `TECH_SPEC.md`, `ENGINEERING_PLAN.md`, `PRIVACY.md`, `ANALYTICS.md`, `REVENUE_OPS.md`, `APPLE_SIGNING.md`, `STORE_CONSOLE.md`, and `PRODUCTION_READINESS.md`.
+Security is a launch lane, not a cleanup pass. Create or refresh `trust/SECURITY.md` early enough to influence `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `trust/PRIVACY.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `store/APPLE_SIGNING.md`, `store/STORE_CONSOLE.md`, and `engineering/PRODUCTION_READINESS.md`.
 
 ## Default Output
 
-- `SECURITY.md`: canonical threat model, controls, tool routing, accepted risks, and release proof.
-- `security-review.html`: founder-visible rendered board showing risk, proof, and gates.
-- `PROJECT_STATE.yaml`: `lanes.security`, `tools.security_review`, evidence, blockers, and failure cards.
+- `trust/SECURITY.md`: canonical threat model, controls, tool routing, accepted risks, and release proof.
+- `trust/security-review.html`: founder-visible rendered board showing risk, proof, and gates.
+- `state/PROJECT_STATE.yaml`: `lanes.security`, `tools.security_review`, evidence, blockers, and failure cards.
 - Optional `.well-known/security.txt` or equivalent public vulnerability route when the web/app handles accounts, payments, user content, or sensitive data.
-- Optional security findings in `FAILURE_CARDS.md` when risks are open.
+- Optional security findings in `operations/FAILURE_CARDS.md` when risks are open.
 
 ## Source Basis
 
@@ -25,7 +25,7 @@ Refresh current docs at runtime before writing commands, claims, or setup paths:
 - MobSF docs and release notes when using local or hosted mobile scanning.
 - Sentry docs for mobile/web crash, performance, replay, PII scrubbing, release health, and alerts.
 
-Record source URLs and checked dates in `SECURITY.md` and `PROJECT_STATE.yaml.tools.security_review.docs_checked_at` when the route changes.
+Record source URLs and checked dates in `trust/SECURITY.md` and `state/PROJECT_STATE.yaml.tools.security_review.docs_checked_at` when the route changes.
 
 ## Skill And Tool Routing
 
@@ -51,11 +51,11 @@ Paid or account-gated security routes require founder confirmation before fallba
 | MobSF Cloud or commercial mobile pentest | APK/IPA/source static and dynamic mobile analysis | local Docker MobSF, platform static analyzer, manual MASTG checks |
 | Approov / Guardsquare / commercial app integrity | anti-tamper, attestation, runtime protection | App Attest, DeviceCheck, Play Integrity, rate limits, backend risk scoring |
 
-Missing runtime access is not approval to use the fallback. Ask or record the blocked route in `TOOL_DECISIONS.md` and `PROJECT_STATE.yaml`.
+Missing runtime access is not approval to use the fallback. Ask or record the blocked route in `strategy/TOOL_DECISIONS.md` and `state/PROJECT_STATE.yaml`.
 
-## SECURITY.md Contract
+## trust/SECURITY.md Contract
 
-`SECURITY.md` must include these sections:
+`trust/SECURITY.md` must include these sections:
 
 - Source Basis with current docs and checked dates.
 - Security Review Tool Routing with paid/account route, founder gate, selected fallback, and limitations.
@@ -72,7 +72,7 @@ Missing runtime access is not approval to use the fallback. Ask or record the bl
 - Release Checks: command results, scanner evidence or blocked route, mobile/backend/provider evidence, and accepted risks.
 - Founder Approval Gates.
 
-Do not mark security done from prose. Security is done only when `SECURITY.md`, `security-review.html`, relevant scanner/review evidence, secret routing, production-readiness proof, and remaining accepted risks are all current.
+Do not mark security done from prose. Security is done only when `trust/SECURITY.md`, `trust/security-review.html`, relevant scanner/review evidence, secret routing, production-readiness proof, and remaining accepted risks are all current.
 
 ## Mobile Hardening Checklist
 
@@ -83,7 +83,7 @@ For iOS:
 - App Attest or DeviceCheck considered for high-value backend actions, entitlement/reward abuse, or fraud-heavy flows.
 - Entitlements reviewed: associated domains, URL schemes, app groups, keychain access groups, push, iCloud, HealthKit, camera, location, photos, Bluetooth, contacts, notifications.
 - Deep links and universal links validate input and route only to allowed states.
-- `APPLE_SIGNING.md` proves Team ID, bundle ID/App ID, app record, signing, archive/export/upload/TestFlight when distribution is in scope.
+- `store/APPLE_SIGNING.md` proves Team ID, bundle ID/App ID, app record, signing, archive/export/upload/TestFlight when distribution is in scope.
 
 For Android:
 
@@ -98,7 +98,7 @@ For Android:
 
 Any monetized app must prove:
 
-- RevenueCat offering/product/entitlement IDs match app-store products and `REVENUE_OPS.md`.
+- RevenueCat offering/product/entitlement IDs match app-store products and `revenue/REVENUE_OPS.md`.
 - App access is granted from backend/provider truth, not client-only events.
 - Stripe web checkout maps to the same entitlement as app-store purchases.
 - Webhooks verify signatures and use idempotency/replay protection before mutating entitlements.
@@ -110,7 +110,7 @@ Any monetized app must prove:
 
 Security and privacy docs must agree:
 
-- `SECURITY.md`, `PRIVACY.md`, `ANALYTICS.md`, App Privacy answers, Google Play Data safety, and `STORE_CONSOLE.md` use the same SDK/data inventory.
+- `trust/SECURITY.md`, `trust/PRIVACY.md`, `analytics/ANALYTICS.md`, App Privacy answers, Google Play Data safety, and `store/STORE_CONSOLE.md` use the same SDK/data inventory.
 - Session replay and surveys include masking, sampling, consent/opt-out posture, and disclosure notes.
 - Self-reported attribution is persisted with stable keys and does not store raw sensitive data beyond the approved free-text field.
 - Sentry and analytics scrub PII where supported and do not capture raw secrets, receipts, passwords, private messages, or unsupported health/child data.
@@ -132,28 +132,28 @@ Run:
 npm run check:security -- --root /path/to/app
 ```
 
-The validator checks that `SECURITY.md` includes the minimum security contract, platform-specific hardening, tool-routing fallback language, revenue/webhook controls, privacy/analytics controls, email/domain security, supply-chain controls, monitoring/incident response, and founder gates. It is not a vulnerability scanner. Use it to prevent launch-package gaps, then use scanners and reviews for actual code findings.
+The validator checks that `trust/SECURITY.md` includes the minimum security contract, platform-specific hardening, tool-routing fallback language, revenue/webhook controls, privacy/analytics controls, email/domain security, supply-chain controls, monitoring/incident response, and founder gates. It is not a vulnerability scanner. Use it to prevent launch-package gaps, then use scanners and reviews for actual code findings.
 
 ## LaunchBench Failure Mode
 
-When an agent claims an app is launch-ready without `SECURITY.md`, scanner/review route, app-integrity decision, entitlement abuse controls, or incident response, add or activate a failure card:
+When an agent claims an app is launch-ready without `trust/SECURITY.md`, scanner/review route, app-integrity decision, entitlement abuse controls, or incident response, add or activate a failure card:
 
 ```yaml
 id: "security-release-lane-missing"
 severity: "high"
 owner: "security-architect"
 status: "open"
-next_action: "Create SECURITY.md, render security-review.html, run check:security, and attach scanner/review proof or founder-approved blocked route."
+next_action: "Create trust/SECURITY.md, render trust/security-review.html, run check:security, and attach scanner/review proof or founder-approved blocked route."
 validator: "npm run check:security -- --root ."
 ```
 
 ## Acceptance
 
-- Security lane exists in `PROJECT_STATE.yaml`.
-- `SECURITY.md` is specific to the app, not generic boilerplate.
-- `security-review.html` renders the security plan for founder review.
+- Security lane exists in `state/PROJECT_STATE.yaml`.
+- `trust/SECURITY.md` is specific to the app, not generic boilerplate.
+- `trust/security-review.html` renders the security plan for founder review.
 - Paid security tools are used, blocked, or founder-approved for fallback.
 - Platform controls are considered for the actual platforms.
 - Monetization, backend, email, analytics, and store disclosures are covered.
 - Remaining risks have owner, reason, expiry/revisit date, and compensating control.
-- Security validator and relevant scans/reviews are recorded in `PRODUCTION_READINESS.md`.
+- Security validator and relevant scans/reviews are recorded in `engineering/PRODUCTION_READINESS.md`.

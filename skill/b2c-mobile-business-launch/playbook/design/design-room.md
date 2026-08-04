@@ -8,8 +8,8 @@ Use this reference before designing, changing, comparing, baselining, restoring,
 
 1. **STATE**: read `state/business.json` and `state/theme.tokens.json` in the app repo. If missing, copy the skill's `state/` seed or `business/state/` into the app repo.
 2. **MUTATE**: make one coherent change to the JSON state. Keep the mutation small enough to review: one audience, one surface cluster, one token pass, one store experiment, or one wipe.
-3. **VERSION**: validate, render, and commit the state change. A design version is a git commit over `state/` and `design-room.html`, not a Markdown label.
-4. **RENDER**: run the renderer and show the user `design-room.html` or `dist/design-room/index.html`. Do not freehand a one-off `DESIGN_PROPOSAL.md`, mood board, or ad-hoc HTML proof.
+3. **VERSION**: validate, render, and commit the state change. A design version is a git commit over `state/` and `design/design-room.html`, not a Markdown label.
+4. **RENDER**: run the renderer and show the user `design/design-room.html` or `dist/design-room/index.html`. Do not freehand a one-off `DESIGN_PROPOSAL.md`, mood board, or ad-hoc HTML proof.
 
 The user looks at the rendered Design Room. The agent edits only the state.
 
@@ -20,7 +20,7 @@ In the business repo:
 ```text
 state/business.json       # identity, positioning, surfaces, Design Room version log, Control Plane panels
 state/theme.tokens.json   # semantic tokens (color/font/space/radius/motion) used by every rendered surface; motion.* promotes to web (--motion-* / framer-motion) and DesignTokens.Motion (SwiftUI)
-design-room.html          # static fallback render with design-state-hash
+design/design-room.html          # static fallback render with design-state-hash
 dist/design-room/         # React/Vite build, when available
 ```
 
@@ -37,7 +37,7 @@ gates/design/check-token-promotion.ts
 render/
 ```
 
-`PROJECT_STATE.yaml` and `launch-cockpit.html` remain the launch-status cockpit. `state/business.json` and `design-room.html` are the design/control-plane cockpit. Keep both current when design changes affect launch lanes.
+`state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` remain the launch-status cockpit. `state/business.json` and `design/design-room.html` are the design/control-plane cockpit. Keep both current when design changes affect launch lanes.
 
 ## Commands
 
@@ -70,7 +70,7 @@ npm run design:version -- wipe --root /path/to/app --yes --message "design: wipe
 Before editing state, choose the mutation boundary:
 
 - **Theme mutation**: changes semantic tokens in `state/theme.tokens.json`; rerender all panels.
-- **Brief mutation**: sets or updates the optional `designBrief` in `state/business.json` (recommended style, palette/typography mood, key effects, anti-patterns, motion notes). Seed it from ui-ux-pro-max guidance with `npm run seed:design-brief` (reference-only; adapt, do not paste its data). It renders in `design-room.html`.
+- **Brief mutation**: sets or updates the optional `designBrief` in `state/business.json` (recommended style, palette/typography mood, key effects, anti-patterns, motion notes). Seed it from ui-ux-pro-max guidance with `npm run seed:design-brief` (reference-only; adapt, do not paste its data). It renders in `design/design-room.html`.
 - **Surface mutation**: adds or changes a web funnel, landing page, marketing asset, mobile app screen/flow, App Store page, PPO test, or In-App Event in `state/business.json`.
 - **Positioning mutation**: changes business promise, audience, or surface claims; cascade to affected surfaces instead of changing only one page.
 - **Baseline mutation**: tags the current commit as `baseline/<name>` after validation and render pass.
@@ -78,7 +78,7 @@ Before editing state, choose the mutation boundary:
 
 Each mutation should update `designRoom.versionLog` with a short summary, `statePaths`, and `renderedArtifacts`.
 
-Theme mutations that are accepted for implementation must also promote tokens into `design-system/tokens.json`, `design-system/tokens.css`, and `design-system/DesignTokens.swift`. Treat those files as generated handoff artifacts from the Design Room, not as a second source of truth.
+Theme mutations that are accepted for implementation must also promote tokens into `design/system/tokens.json`, `design/system/tokens.css`, and `design/system/DesignTokens.swift`. Treat those files as generated handoff artifacts from the Design Room, not as a second source of truth.
 
 ## App Store Surfaces
 
@@ -96,7 +96,7 @@ Do not plan custom product pages without an audience, traffic source, measuremen
 
 The primary medium is the React/Vite app in `render/`. It reads `state/business.json` and `state/theme.tokens.json`, turns tokens into CSS variables, and renders panels for the modeled surfaces.
 
-The fallback is `design-room.html`, a self-contained render with a `design-state-hash` meta tag. The contract validator compares this hash to the current state so stale renders cannot pass.
+The fallback is `design/design-room.html`, a self-contained render with a `design-state-hash` meta tag. The contract validator compares this hash to the current state so stale renders cannot pass.
 
 Never inline brand colors, type choices, radius, or spacing in one-off artifacts. Add or mutate semantic tokens, then render.
 
@@ -106,8 +106,8 @@ Design work is ready for review only when:
 
 - `state/business.json` and `state/theme.tokens.json` validate.
 - `designRoom.versionLog` names the mutation and rendered artifacts.
-- `design-room.html` hash matches the current state.
+- `design/design-room.html` hash matches the current state.
 - React/Vite build exists when dependencies are installed, or the static fallback is explicitly recorded.
 - `check-design-room-contract` passes.
 - `check-token-promotion` passes when theme tokens changed or implementation is about to consume the design system.
-- If the design affects launch status, `PROJECT_STATE.yaml` and `launch-cockpit.html` are updated too.
+- If the design affects launch status, `state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` are updated too.

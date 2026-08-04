@@ -13,36 +13,36 @@ Use LaunchBench for failure modes that have happened before or would be expensiv
 - MobAI is unavailable and the agent silently switches to XcodeBuildMCP or the in-app iOS Simulator without recording the lost Android/repeatable-suite/CI/physical-device coverage; neither MobAI Free nor the built-in in-app simulator needs spend approval
 - MobAI desktop, MCP, and CLI versions are collapsed into one number, 2.5-era repeat/host-script safety is omitted, or AI-healed flows are accepted without diff review and a passing rerun
 - RevenueCat products exist but entitlement grant, restore, webhook, or backend projection is unproven
-- Resend templates ignore `DESIGN.md`, unsubscribe rules, sender-domain proof, or support reply paths
+- Resend templates ignore `design/DESIGN.md`, unsubscribe rules, sender-domain proof, or support reply paths
 - a new API key/env var appears but `SECRETS.md`, Doppler, CI injection, or public/server-only classification is not updated
 - a new third-party docs/tooling URL appears but is not added to `source-registry.yaml`
 - upstream App Store Connect CLI skills or provider docs change but stale command snippets remain in references/templates
-- iOS ASC upload readiness is claimed from metadata/privacy prose while `APPLE_APP_STORE_REQUIREMENTS.md`, `PrivacyInfo.xcprivacy`, required reason APIs, SDK manifests/signatures, Xcode privacy report, protected-resource purpose strings, ATT, account deletion, review notes, or upload-warning proof is missing
+- iOS ASC upload readiness is claimed from metadata/privacy prose while `store/APPLE_APP_STORE_REQUIREMENTS.md`, `PrivacyInfo.xcprivacy`, required reason APIs, SDK manifests/signatures, Xcode privacy report, protected-resource purpose strings, ATT, account deletion, review notes, or upload-warning proof is missing
 - store screenshot work treats raw device captures as final App Store upload artwork without composed iPhone/iPad assets, copy overlays, device-well validation, icon/preview routing, and visual QA
 - weekly source refresh treats auto-discovered links as accepted launch policy without review
 - product/design/build handoff starts without `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, a line of feasibility, and a V1 scalable slice
 - product, onboarding, core-loop, or paywall work proceeds without `EMOTIONAL_DESIGN.md` when the 11-star target is 6-star or higher; or a HIGH-risk card (variable reward, streak, scarcity, urgency, social proof) ships without an Ethics Attestation, a `user_control_escape_hatch`, a `counter_metric`, and a truthfulness proof; or an emotional/UX audit returns prose with no per-journey card mapping or pathway to a better state
 - onboarding reaches first value, a personalized plan, or a value-reveal screen but omits the native App Review popup immediately after that first-value moment
-- design work produces a freeform `design-proposal.html`, mood board, or Markdown version label instead of mutating `state/business.json`/`state/theme.tokens.json`, rendering `design-room.html`, and versioning state with git
+- design work produces a freeform `design-proposal.html`, mood board, or Markdown version label instead of mutating `state/business.json`/`state/theme.tokens.json`, rendering `design/design-room.html`, and versioning state with git
 - monetization defaults are locked by reflex — soft paywall, ≤4-day trial, monthly-only, low price, English-only, ads before the paywall is proven, day-30 win-back as the retention plan — without surfacing the RevenueCat 2026 anti-pattern trade-offs (`revenue-monetization.md` §10 digest, `onboarding-conversion.md` Conversion Anti-Patterns, `paid-user-acquisition.md` Anti-Patterns) as founder-gated decisions to test
 - paid growth is marked ready from ad-channel ideas without `PAID_UA.md`, one-channel focus, creative cadence, tracking baseline, blended report, RevenueCat LTV/CPA review, stop/scale rules, and founder spend approval
 - social growth is marked ready from UGC ideas, views, or TikTok hooks without `VIRAL_GROWTH.md`, product-loop contract, abuse controls, monetization timing, analytics proof, and stop/scale rules
-- a primary paid tool or tier (AppKittie, XPOZ, Higgsfield, Refero, MobAI Plus/Pro) is bypassed without first using ToolSearch to confirm the MCP path is absent, asking the founder when spend/coverage changes, and recording tool, tier, lane, access, confirmation, route, and fallback limitation in TOOL_DECISIONS.md
+- a primary paid tool or tier (AppKittie, XPOZ, Higgsfield, Refero, MobAI Plus/Pro) is bypassed without first using ToolSearch to confirm the MCP path is absent, asking the founder when spend/coverage changes, and recording tool, tier, lane, access, confirmation, route, and fallback limitation in strategy/TOOL_DECISIONS.md
 - a simple reversible founder request becomes a jargon-heavy multi-field blocker with no phase/outcome, selectable question, consequences, safe skip/defer route, or stale-gate supersession
 - XPOZ MCP tools are listed in the system-reminder but the agent declares XPOZ unavailable and runs curl or web search without a ToolSearch verification step
 - AppKittie MCP tools are available in the session but ASO keyword difficulty or competitor data is produced without calling them
 - Higgsfield is authenticated and MCP tools are present but the agent does not invoke them and does not ask the founder to confirm the lane is deferred
-- Refero "not found" is silently dropped with no TOOL_DECISIONS.md entry and no founder prompt
-- fallback output is presented as equivalent to paid-tool quality without a confidence label, limitation note, and TOOL_DECISIONS.md entry
+- Refero "not found" is silently dropped with no strategy/TOOL_DECISIONS.md entry and no founder prompt
+- fallback output is presented as equivalent to paid-tool quality without a confidence label, limitation note, and strategy/TOOL_DECISIONS.md entry
 - Higgsfield is unavailable and the agent silently uses Remotion or local media without founder-approved fallback routing
 - Remotion content assets are marked ready without license status, source inputs, manifest entries, render proof, or claim review
 - paid video creatives move to distribution without a Virality Predictor (`brain_activity`) score and a recorded `virality_score`/`hook_dmn_risk` in `PAID_UA.md`
-- a Higgsfield/Marketing Studio manifest asset is generated without a `prompt_brief` carrying the `DESIGN.md` tokens, or the Click-to-Ad `--url` shortcut is used without injecting the brief into `--prompt`
-- a Soul identity is retrained from scratch while `PROJECT_STATE.yaml` `tools.higgsfield.identity` already holds a usable `soul_reference_id`/`avatar_id`, without checking `show_characters` first
-- broad launch work starts without an orchestration preflight, critical-path/sidecar split, or `ORCHESTRATION.md`
+- a Higgsfield/Marketing Studio manifest asset is generated without a `prompt_brief` carrying the `design/DESIGN.md` tokens, or the Click-to-Ad `--url` shortcut is used without injecting the brief into `--prompt`
+- a Soul identity is retrained from scratch while `state/PROJECT_STATE.yaml` `tools.higgsfield.identity` already holds a usable `soul_reference_id`/`avatar_id`, without checking `show_characters` first
+- broad launch work starts without an orchestration preflight, critical-path/sidecar split, or `operations/ORCHESTRATION.md`
 - parallel agents are marked safe while sharing files, provider accounts, devices, migrations, git actions, or final readiness decisions
 - spawned agents are allowed to stage, commit, push, mutate providers, control devices, run project-wide suites, or make founder-only decisions
-- subagent findings are not reviewed, reconciled into `PROJECT_STATE.yaml`, converted into failure cards, or verified by focused and full-suite validators
+- subagent findings are not reviewed, reconciled into `state/PROJECT_STATE.yaml`, converted into failure cards, or verified by focused and full-suite validators
 - core engineering starts without a Compound Engineering freshness check, `ce-plan`, `ce-work`, review, test, and proof routing or an unavailable-with-reason fallback
 - landing page is declared ready after a curl/API test while the live URL was never opened in a browser, a form field was never filled and submitted, and the success state was never visually confirmed
 - wrangler deploy runs with an uncommitted working tree, an outdated major version, or a token whose scope was never verified with `wrangler whoami`
@@ -93,9 +93,9 @@ Most artifact validators are deterministic phrase/regex gates over Markdown and 
 
 Frequently-tripped literal tokens worth knowing before authoring artifacts by hand:
 
-- `ONBOARDING.md` (`check:onboarding`): must contain the literal analytics event names `review_prompt_eligible` and `review_prompt_requested`, a named native review API (`SKStoreReviewController`, `requestReview`, StoreKit, or Google Play In-App Review), a cooldown/frequency cap, and a suppressed-prompt fallback — see `gates/experience/check-onboarding-conversion.ts` for the full accepted lists.
+- `product/ONBOARDING.md` (`check:onboarding`): must contain the literal analytics event names `review_prompt_eligible` and `review_prompt_requested`, a named native review API (`SKStoreReviewController`, `requestReview`, StoreKit, or Google Play In-App Review), a cooldown/frequency cap, and a suppressed-prompt fallback — see `gates/experience/check-onboarding-conversion.ts` for the full accepted lists.
 - `growth/LAUNCH_NARRATIVE.md` (`check:launch-narrative`): fenced post copy is scanned against the 2026 guardrails (no hashtags, no emojis, no link in the main post) — see `gates/growth/check-launch-narrative.ts`.
-- `ANALYTICS.md` (`check:attribution`): expects the stable event/person-property names (e.g. `attribution_source_selected`, `self_reported_source`) plus backend persistence and reconciliation language — see `gates/data/check-attribution-contract.ts`.
+- `analytics/ANALYTICS.md` (`check:attribution`): expects the stable event/person-property names (e.g. `attribution_source_selected`, `self_reported_source`) plus backend persistence and reconciliation language — see `gates/data/check-attribution-contract.ts`.
 - `SCREENSHOTS.md` (`check:store-screenshots`): expects raw-vs-final separation, device wells, and composition routing phrases — see `gates/store/check-store-screenshots.ts`.
 
 When a new validator gains a phrase vocabulary, add the high-traffic literals here and to the shipped template so authors discover the contract before the red X.
@@ -109,7 +109,7 @@ After major skill edits or before declaring a launch complete:
 - run source freshness checks when the skill itself or third-party references changed
 - use parallel audit agents only for independent review, not for final integration
 - pass each audit agent the minimum scenario and artifact paths, not the intended answer
-- write failures into `PROJECT_STATE.yaml` as active failure cards
+- write failures into `state/PROJECT_STATE.yaml` as active failure cards
 
 ## Acceptance
 

@@ -32,7 +32,7 @@ Defer or reject viral loops when:
 - the product cannot monetize or retain the traffic spike it might create
 - the acquisition platform does not match the likely paying buyer or device mix
 
-Record the fit decision in `VIRAL_GROWTH.md`, update `PROJECT_STATE.yaml` `lanes.growth`, and trace the decision into `LAUNCH_TRACE.md`.
+Record the fit decision in `VIRAL_GROWTH.md`, update `state/PROJECT_STATE.yaml` `lanes.growth`, and trace the decision into `state/LAUNCH_TRACE.md`.
 
 ## Growth System Thesis
 
@@ -94,12 +94,12 @@ Use `ugc-creator-engine.md` when creators, payments, contracts, or UGC operation
 
 Personalized share cards (score result, milestone badge, referral-unlock reveal) are social artifacts — they are not store screenshots and do not trigger the real-screenshots-only store-truthfulness guardrail. Produce them via `higgsfield-generate` with the `gpt_image_2` model:
 
-- Embed on-image user data (score, badge label, referral unlock text) in the `--prompt` alongside the full `DESIGN.md` brief (palette, type mood, shapes, texture, banned aesthetics).
+- Embed on-image user data (score, badge label, referral unlock text) in the `--prompt` alongside the full `design/DESIGN.md` brief (palette, type mood, shapes, texture, banned aesthetics).
 - Generate 9:16 first (Stories/Reels primary surface); produce the 1:1 feed variant via the `mcp__claude_ai_Higgsfield__reframe` MCP tool — do not re-generate a separate 1:1 from scratch. Confirm exact reframe invocation via the `higgsfield-generate` skill or MCP tool help before running; see the **Master → All Platforms (reframe + personal_clipper)** recipe in `tool-recipes/visual-and-motion-production.md`.
 - For referral-reveal carousels, use `higgsfield product-photoshoot` with `--mode social_carousel`; see the `higgsfield-product-photoshoot` skill.
 
 Guardrails:
-- `DESIGN.md` brief is required on every generation; generating without it is a named failure mode.
+- `design/DESIGN.md` brief is required on every generation; generating without it is a named failure mode.
 - Confirm spend with the founder before every paid generation run (reframe included) per `paid-tool-routing.md`; surface current credit balance first.
 - Record every generated share card in `CONTENT_ASSETS.md` with route, `prompt_brief`, output paths, and QA/approval status.
 - Public posting stays founder-gated; generating share cards for in-app display does not constitute posting.
@@ -122,7 +122,7 @@ The transferable lesson from the PDF is timing and framing, not copying manipula
 
 ## Measurement Plan
 
-Use `analytics-attribution.md` before implementation. `ANALYTICS.md` should include:
+Use `analytics-attribution.md` before implementation. `analytics/ANALYTICS.md` should include:
 - technical attribution: UTMs, referrer, deep link, creator/referral code, vanity URL, store context
 - self-reported attribution with stable source keys and `other` free text
 - product-loop events such as `referral_invite_started`, `referral_invite_completed`, `referral_unlock_earned`, `share_started`, `share_completed`, `creator_code_applied`, and `viral_format_signal_detected` when relevant
@@ -147,10 +147,10 @@ Create or update:
 - `VIRAL_GROWTH.md`: fit gate, growth thesis, product loop, content loop, monetization timing, measurement plan, stop/scale rules, founder-only gates, and traceability
 - `growth/format-lab.csv` or `ugc/script-bank.md`: format IDs, hooks, variables, results, and next tests
 - `growth/referral-loop-map.md` when referral or unlock mechanics are non-trivial
-- `ANALYTICS.md` and `analytics-plan.html` with growth-loop events and dashboards
-- `ONBOARDING.md` and `REVENUE_OPS.md` when the loop changes onboarding, paywall, intro offer, or closing offer behavior
-- `UGC_PLAYBOOK.md`, `CONTENT_ASSETS.md`, and `FASTLANE_OPS.md` when creator or generated content is in scope
-- `LAUNCH_TRACE.md` rows connecting research, 11-star slice, product loop, content format, monetization, analytics, privacy/legal, and proof
+- `analytics/ANALYTICS.md` and `analytics/analytics-plan.html` with growth-loop events and dashboards
+- `product/ONBOARDING.md` and `revenue/REVENUE_OPS.md` when the loop changes onboarding, paywall, intro offer, or closing offer behavior
+- `growth/UGC_PLAYBOOK.md`, `CONTENT_ASSETS.md`, and `growth/FASTLANE_OPS.md` when creator or generated content is in scope
+- `state/LAUNCH_TRACE.md` rows connecting research, 11-star slice, product loop, content format, monetization, analytics, privacy/legal, and proof
 
 Run:
 
@@ -168,4 +168,4 @@ npm run check:viral-growth -- --root .
 - Scaling creators from one lucky post before a repeatable format exists.
 - Letting content promise a result the product cannot truthfully produce.
 - Moving a viral unlock into build work without backend entitlement/referral proof.
-- Calling growth "done" while `VIRAL_GROWTH.md`, `ANALYTICS.md`, `ONBOARDING.md`, `REVENUE_OPS.md`, `UGC_PLAYBOOK.md`, or `LAUNCH_TRACE.md` disagree.
+- Calling growth "done" while `VIRAL_GROWTH.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `growth/UGC_PLAYBOOK.md`, or `state/LAUNCH_TRACE.md` disagree.

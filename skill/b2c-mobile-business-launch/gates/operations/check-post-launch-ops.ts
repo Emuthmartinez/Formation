@@ -6,13 +6,13 @@
  * business, and "launched" is not the end state of the launch package. When
  * the post_launch_ops lane is claimed (partial/done) or the project reaches
  * the post-launch phases (phase_6/phase_6b), this validator requires:
- *   1. POST_LAUNCH_OPS.md to exist (the operating runbook).
+ *   1. operations/POST_LAUNCH_OPS.md to exist (the operating runbook).
  *   2. The runbook to carry the operating sections: Weekly Operating Rhythm,
  *      Crash Triage, Review Responses, Release And Hotfix Cadence,
  *      Retention Review, Support Operations, Launch Retro.
  *   3. done additionally requires: a named crash route (Sentry or store crash
  *      reports), a stated review-response SLA, a retention cohort source, and
- *      LAUNCH_RETRO.md on disk so the retro loop feeds failure cards.
+ *      operations/LAUNCH_RETRO.md on disk so the retro loop feeds failure cards.
  *   4. The numbers loop: lanes.post_launch_ops.live_since anchors the clock;
  *      day-30/day-90 retro checkpoints cannot sit uncompleted past their due
  *      date, evidence cells cannot hold placeholder text ("unverified — confirm
@@ -61,7 +61,7 @@ if (!laneClaimed && !postLaunchPhase) {
 
 // ── Check 0: runbook exists ─────────────────────────────────────────────────
 
-const runbookCandidates = ["POST_LAUNCH_OPS.md", "post-launch/POST_LAUNCH_OPS.md"];
+const runbookCandidates = ["operations/POST_LAUNCH_OPS.md", "post-launch/operations/POST_LAUNCH_OPS.md"];
 const runbookPath = runbookCandidates.find((candidate) => Boolean(readText(args.root, candidate)));
 const runbook = runbookPath ? readText(args.root, runbookPath) : undefined;
 
@@ -70,10 +70,10 @@ if (!runbook || !runbookPath) {
     issue(
       "error",
       "post_launch_ops.runbook_missing",
-      "POST_LAUNCH_OPS.md is required once the project is post-launch (phase_6/phase_6b) or the post_launch_ops lane is claimed. " +
+      "operations/POST_LAUNCH_OPS.md is required once the project is post-launch (phase_6/phase_6b) or the post_launch_ops lane is claimed. " +
         "A launched app with no operating runbook is the launch-and-vanish anti-pattern. " +
         "See playbook/operations/post-launch-operations.md.",
-      "POST_LAUNCH_OPS.md",
+      "operations/POST_LAUNCH_OPS.md",
     ),
   );
   reportAndExit("Post-launch operations check", issues);
@@ -184,12 +184,12 @@ if (!liveSince) {
         (liveSinceRaw ? `(current value: "${liveSinceRaw}"). ` : ". ") +
         "Without a real calendar date nothing can ever be overdue — no retro checkpoint has a due date and the weekly log has no " +
         "freshness bar. Record the first approved-for-sale date once; it never changes.",
-      "PROJECT_STATE.yaml",
+      "state/PROJECT_STATE.yaml",
     ),
   );
 }
 
-const retroFile = ["LAUNCH_RETRO.md", "post-launch/LAUNCH_RETRO.md"].find((candidate) => existsSync(path.join(args.root, candidate)));
+const retroFile = ["operations/LAUNCH_RETRO.md", "post-launch/operations/LAUNCH_RETRO.md"].find((candidate) => existsSync(path.join(args.root, candidate)));
 const retroText = retroFile ? (readText(args.root, retroFile) ?? "") : "";
 
 // The wind-down exemption must be earned, not typed: a one-string state edit
@@ -246,10 +246,10 @@ if (liveSince && !killDecided) {
         issue(
           checkpoint.severity,
           `post_launch_ops.checkpoint_overdue.${checkpoint.code}`,
-          `The app has been live ${daysLive} days and the ${checkpoint.label.replaceAll("\\", "")} retro checkpoint in ${retroFile ?? "LAUNCH_RETRO.md"} ` +
+          `The app has been live ${daysLive} days and the ${checkpoint.label.replaceAll("\\", "")} retro checkpoint in ${retroFile ?? "operations/LAUNCH_RETRO.md"} ` +
             `is still not completed (due at day ${checkpoint.dueDays}, grace ${CHECKPOINT_GRACE_DAYS} days). An uncompleted checkpoint is how the ` +
             `kill-or-scale question gets dodged indefinitely — run the checkpoint now and record its date in the Retro Window.`,
-          retroFile ?? "LAUNCH_RETRO.md",
+          retroFile ?? "operations/LAUNCH_RETRO.md",
         ),
       );
     }
@@ -392,15 +392,15 @@ if (laneDone) {
 // only with the lane status.
 
 if (laneDone || postLaunchPhase) {
-  const retroPath = ["LAUNCH_RETRO.md", "post-launch/LAUNCH_RETRO.md"].find((candidate) => existsSync(path.join(args.root, candidate)));
+  const retroPath = ["operations/LAUNCH_RETRO.md", "post-launch/operations/LAUNCH_RETRO.md"].find((candidate) => existsSync(path.join(args.root, candidate)));
   if (!retroPath) {
     issues.push(
       issue(
         "error",
         "post_launch_ops.launch_retro_missing",
-        "LAUNCH_RETRO.md is required once the app is live or post_launch_ops is done. The retro is how this launch's misses become failure cards " +
+        "operations/LAUNCH_RETRO.md is required once the app is live or post_launch_ops is done. The retro is how this launch's misses become failure cards " +
           "and LaunchBench scenarios instead of oral lore.",
-        "LAUNCH_RETRO.md",
+        "operations/LAUNCH_RETRO.md",
       ),
     );
   } else {
@@ -427,7 +427,7 @@ if (laneDone || postLaunchPhase) {
       // The heading alone is not the contract — the verdict is. Once the Retro
       // Window table records a completion date for Day 30 or Day 90, that
       // checkpoint's row in the Kill, Hold, Or Scale table must carry an actual
-      // verdict, and the decision must be mirrored into PROJECT_STATE.yaml.
+      // verdict, and the decision must be mirrored into state/PROJECT_STATE.yaml.
       // Before the first checkpoint completes, the section's presence is enough
       // (done at launch +7 days is legitimate).
       const windowSection = markdownSection(retroRaw, "Retro Window");
@@ -500,7 +500,7 @@ if (laneDone || postLaunchPhase) {
               "post_launch_ops.kill_or_scale_state_missing",
               `A day-30/day-90 retro checkpoint is complete but lanes.post_launch_ops.kill_or_scale_decision/kill_or_scale_decided_at ` +
                 `do not record a valid verdict (scale|hold|fix|kill) with an ISO date. The state mirror is what future sessions and the portfolio registry read.`,
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
         } else {
@@ -520,7 +520,7 @@ if (laneDone || postLaunchPhase) {
                 "post_launch_ops.kill_or_scale_state_mismatch",
                 `lanes.post_launch_ops.kill_or_scale_decision ("${decision}") disagrees with the latest completed checkpoint's verdict in ${retroPath} ("${latestVerdict}"). ` +
                   `Update the state mirror when the verdict changes — it is what future sessions and the portfolio registry act on.`,
-                "PROJECT_STATE.yaml",
+                "state/PROJECT_STATE.yaml",
               ),
             );
           }

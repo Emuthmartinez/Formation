@@ -31,7 +31,7 @@ Purpose: get the revenue numbers out of the dashboard and into decisions on a fi
 
 1. Refresh the current RevenueCat charts/metrics docs from the §1 sources in `revenue-monetization.md` before relying on chart names or API shapes — dashboards and endpoints move; record the docs basis and checked date with the numbers.
 2. Pull four numbers for the trailing window: MRR, realized LTV per paying customer, download-to-paid (initial) conversion, and churn split voluntary vs. involuntary by platform (the §8a events make the split readable in PostHog when RevenueCat's own view is too coarse).
-3. Land them in the `REVENUE_OPS.md` Economics Snapshot row for the date, with the source named per row.
+3. Land them in the `revenue/REVENUE_OPS.md` Economics Snapshot row for the date, with the source named per row.
 4. Route the consequences, not just the numbers: LTV and payback feed the `growth/PAID_UA.md` blended report and its Decision Thresholds; the cancellation-reason mix feeds the Pricing Decision revisit (§7a step 5); the whole row feeds the kill-or-scale evidence pack.
 5. Numbers that would change a founder-gated decision (price, spend, kill/scale) get surfaced in the reply per the narration contract — never only written to the file.
 
@@ -73,7 +73,7 @@ Use `analytics-attribution.md` before:
 
 Delegate:
 - `setup-posthog` only after the product repo exists and can receive an event scaffold.
-- `setup-posthog` handles initial project/setup validation; this launch skill owns the upfront `ANALYTICS.md` and `analytics-plan.html`.
+- `setup-posthog` handles initial project/setup validation; this launch skill owns the upfront `analytics/ANALYTICS.md` and `analytics/analytics-plan.html`.
 - Use current PostHog docs or Context7/web docs for stack-specific SDK details because PostHog SDK options, defaults, and product docs change.
 
 Default stack:
@@ -84,7 +84,7 @@ Default stack:
 - Sentry for errors/crashes, not product analytics.
 
 Rules:
-- Create `ANALYTICS.md` and a founder-visible `analytics-plan.html` before implementation.
+- Create `analytics/ANALYTICS.md` and a founder-visible `analytics/analytics-plan.html` before implementation.
 - Track waitlist, referral, pricing-section, app-store CTA, onboarding steps, attribution answer, demo video, personalized plan, review prompt eligibility/request, paywall view/dismissal, closing offer, activation, subscription lifecycle, restore, refund, email lifecycle, and Fastlane campaign events when relevant.
 - Combine technical attribution with self-reported attribution; UTMs alone miss word-of-mouth, creator, AI-search, and social discovery.
 - Use one analytics wrapper per surface; do not scatter vendor SDK calls throughout app code.

@@ -68,11 +68,11 @@ function resolveEvidence(evidencePath: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// PROVIDER_PROOF.md cross-lane check
+// operations/PROVIDER_PROOF.md cross-lane check
 // ---------------------------------------------------------------------------
 
 function checkProviderProofForPostHog(laneStatus: string): void {
-  const proofCandidates = ["PROVIDER_PROOF.md", "provider-proof.md", "evidence/PROVIDER_PROOF.md"];
+  const proofCandidates = ["operations/PROVIDER_PROOF.md", "provider-proof.md", "evidence/operations/PROVIDER_PROOF.md"];
   let proofText: string | undefined;
   let proofFile: string | undefined;
 
@@ -85,14 +85,14 @@ function checkProviderProofForPostHog(laneStatus: string): void {
     }
   }
 
-  // When the lane is done, PROVIDER_PROOF.md must exist.
+  // When the lane is done, operations/PROVIDER_PROOF.md must exist.
   if (laneStatus === "done" && !proofText) {
     issues.push(
       issue(
         "error",
         "attribution.provider_proof.file_missing",
-        "analytics_attribution lane is 'done' but PROVIDER_PROOF.md is missing. Record PostHog live-event and person-property evidence before marking done.",
-        "PROVIDER_PROOF.md",
+        "analytics_attribution lane is 'done' but operations/PROVIDER_PROOF.md is missing. Record PostHog live-event and person-property evidence before marking done.",
+        "operations/PROVIDER_PROOF.md",
       ),
     );
     return;
@@ -104,8 +104,8 @@ function checkProviderProofForPostHog(laneStatus: string): void {
         issue(
           "warning",
           "attribution.provider_proof.file_missing",
-          "PROVIDER_PROOF.md not found. Add it with a PostHog row including a non-placeholder evidence path before moving analytics_attribution to 'done'.",
-          "PROVIDER_PROOF.md",
+          "operations/PROVIDER_PROOF.md not found. Add it with a PostHog row including a non-placeholder evidence path before moving analytics_attribution to 'done'.",
+          "operations/PROVIDER_PROOF.md",
         ),
       );
     }
@@ -130,7 +130,7 @@ function checkProviderProofForPostHog(laneStatus: string): void {
         issue(
           laneStatus === "done" ? "error" : "warning",
           "attribution.provider_proof_placeholder",
-          `PostHog row in PROVIDER_PROOF.md has a placeholder evidence path ("${evidencePathCell}"). Replace with the real path to your PostHog event export, capture log, or screenshot before moving analytics_attribution to 'done'.`,
+          `PostHog row in operations/PROVIDER_PROOF.md has a placeholder evidence path ("${evidencePathCell}"). Replace with the real path to your PostHog event export, capture log, or screenshot before moving analytics_attribution to 'done'.`,
           proofFile,
         ),
       );
@@ -144,7 +144,7 @@ function checkProviderProofForPostHog(laneStatus: string): void {
             issue(
               "warning",
               "attribution.provider_proof_evidence_url_unverifiable",
-              `PostHog evidence path "${evidencePathCell}" in PROVIDER_PROOF.md is a remote URL — the static validator cannot fetch it. Founder must attest (add a comment "founder-attested: YYYY-MM-DD") or run the probe to generate analytics/posthog-proof.json: doppler run -- npx tsx scripts/probe-posthog.ts --root .`,
+              `PostHog evidence path "${evidencePathCell}" in operations/PROVIDER_PROOF.md is a remote URL — the static validator cannot fetch it. Founder must attest (add a comment "founder-attested: YYYY-MM-DD") or run the probe to generate analytics/posthog-proof.json: doppler run -- npx tsx scripts/probe-posthog.ts --root .`,
               proofFile,
             ),
           );
@@ -156,7 +156,7 @@ function checkProviderProofForPostHog(laneStatus: string): void {
               issue(
                 "error",
                 "attribution.provider_proof_evidence_path_missing",
-                `PostHog evidence path "${evidencePathCell}" recorded in PROVIDER_PROOF.md does not exist on disk. Create the file or update the path.`,
+                `PostHog evidence path "${evidencePathCell}" recorded in operations/PROVIDER_PROOF.md does not exist on disk. Create the file or update the path.`,
                 proofFile,
               ),
             );
@@ -183,7 +183,7 @@ function checkProviderProofForPostHog(laneStatus: string): void {
       issue(
         "error",
         "attribution.provider_proof.posthog_row_missing",
-        "PROVIDER_PROOF.md must include a PostHog row with current status, proof command, and evidence path when analytics_attribution is 'done'.",
+        "operations/PROVIDER_PROOF.md must include a PostHog row with current status, proof command, and evidence path when analytics_attribution is 'done'.",
         proofFile,
       ),
     );
@@ -194,7 +194,7 @@ function checkProviderProofForPostHog(laneStatus: string): void {
       issue(
         "warning",
         "attribution.provider_proof.posthog_row_missing",
-        "Add a PostHog row to PROVIDER_PROOF.md before marking analytics_attribution done.",
+        "Add a PostHog row to operations/PROVIDER_PROOF.md before marking analytics_attribution done.",
         proofFile,
       ),
     );
@@ -208,13 +208,13 @@ function checkProviderProofForPostHog(laneStatus: string): void {
 /**
  * When analytics_attribution is "done" and attribution_contract.verified is true,
  * there must be at least one evidence artifact that:
- *   (a) is listed under lanes.analytics_attribution.evidence in PROJECT_STATE.yaml, AND
+ *   (a) is listed under lanes.analytics_attribution.evidence in state/PROJECT_STATE.yaml, AND
  *   (b) actually exists on disk (not a placeholder filename), AND
- *   (c) is not one of the planning-only docs (ANALYTICS.md, analytics-plan.html)
+ *   (c) is not one of the planning-only docs (analytics/ANALYTICS.md, analytics/analytics-plan.html)
  *       — the lane needs at least one proof artifact beyond the plan.
  */
 function checkVerifiedEvidencePaths(laneStatus: string): void {
-  const planningOnlyDocs = new Set(["ANALYTICS.md", "analytics-plan.html"]);
+  const planningOnlyDocs = new Set(["analytics/ANALYTICS.md", "analytics/analytics-plan.html"]);
   const evidenceList = asArray(getPath(state, "lanes.analytics_attribution.evidence"))
     .map((item) => asString(item))
     .filter((item): item is string => Boolean(item?.trim()));
@@ -227,8 +227,8 @@ function checkVerifiedEvidencePaths(laneStatus: string): void {
         issue(
           "error",
           "attribution.verified_without_evidence_path",
-          "analytics_attribution is 'done' but no proof artifact is listed under lanes.analytics_attribution.evidence beyond planning docs (ANALYTICS.md, analytics-plan.html). Add a path to a PostHog event export, on-device capture log, or equivalent live evidence.",
-          "PROJECT_STATE.yaml",
+          "analytics_attribution is 'done' but no proof artifact is listed under lanes.analytics_attribution.evidence beyond planning docs (analytics/ANALYTICS.md, analytics/analytics-plan.html). Add a path to a PostHog event export, on-device capture log, or equivalent live evidence.",
+          "state/PROJECT_STATE.yaml",
         ),
       );
     } else {
@@ -239,7 +239,7 @@ function checkVerifiedEvidencePaths(laneStatus: string): void {
               "error",
               "attribution.verified_without_evidence_path",
               `Evidence path "${evidencePath}" in lanes.analytics_attribution.evidence looks like a placeholder. Replace with the real path to live proof.`,
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
           continue;
@@ -254,7 +254,7 @@ function checkVerifiedEvidencePaths(laneStatus: string): void {
               "warning",
               "attribution.evidence_path_bare_word",
               `Evidence path "${evidencePath}" in lanes.analytics_attribution.evidence contains no slash or extension — this looks like a bare-word placeholder rather than a real file path. Provide a relative path such as "analytics/posthog-proof.json".`,
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
         }
@@ -266,7 +266,7 @@ function checkVerifiedEvidencePaths(laneStatus: string): void {
               "error",
               "attribution.verified_without_evidence_path",
               `Evidence path "${evidencePath}" listed in lanes.analytics_attribution.evidence does not exist on disk. Create the file or correct the path before marking the lane done.`,
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
         }
@@ -281,7 +281,7 @@ function checkVerifiedEvidencePaths(laneStatus: string): void {
             "warning",
             "attribution.verified_without_evidence_path",
             `Evidence path "${evidencePath}" in lanes.analytics_attribution.evidence looks like a placeholder. Fill it in before moving to 'done'.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -292,7 +292,7 @@ function checkVerifiedEvidencePaths(laneStatus: string): void {
             "warning",
             "attribution.evidence_path_bare_word",
             `Evidence path "${evidencePath}" contains no slash or extension — provide a relative path such as "analytics/posthog-proof.json".`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -333,7 +333,7 @@ const PROOF_MAX_AGE_HOURS = 72;
  *   5. event_count must be a number > 0 (not 0, not "unknown", not "at_least_1").
  *   6. recorded_at must parse as a date no older than PROOF_MAX_AGE_HOURS.
  *
- * When the PROVIDER_PROOF.md PostHog row's evidence cell is a bare https:// URL
+ * When the operations/PROVIDER_PROOF.md PostHog row's evidence cell is a bare https:// URL
  * (not a local path), the validator cannot fetch it — downgrade to a WARNING
  * and require the founder to attest or run the probe.
  */
@@ -496,7 +496,7 @@ function checkPostHogProofArtifact(laneStatus: string): void {
 
 function findImplementationText(root: string, needles: string[]): Map<string, string[]> {
   const found = new Map<string, string[]>();
-  const ignoredFiles = new Set(["PROJECT_STATE.yaml", "PROJECT_STATE.yml", "launch-cockpit.html"]);
+  const ignoredFiles = new Set(["state/PROJECT_STATE.yaml", "PROJECT_STATE.yml", "state/launch-cockpit.html"]);
   const extensions = new Set([".md", ".ts", ".tsx", ".js", ".jsx", ".swift", ".kt", ".java", ".dart", ".yaml", ".yml", ".html"]);
 
   for (const file of collectFiles(root, extensions)) {
@@ -504,9 +504,9 @@ function findImplementationText(root: string, needles: string[]): Map<string, st
     if (
       ignoredFiles.has(relative) ||
       relative.startsWith("business/") ||
-      relative.startsWith("repo-agent-entrypoints/") ||
+      relative.startsWith("engineering/repo-agent-entrypoints/") ||
       relative.startsWith("agents/") ||
-      relative.startsWith("app-agent-roster/") ||
+      relative.startsWith("engineering/app-agent-roster/") ||
       ["APP_AGENTS.md", "AGENTS.md", "CLAUDE.md"].includes(relative)
     ) {
       continue;
@@ -544,7 +544,12 @@ if (state) {
     for (const field of requiredBooleans) {
       if (asBoolean(getPath(state, `${base}.${field}`)) !== true) {
         issues.push(
-          issue(booleanSeverity, `attribution.${field}.incomplete`, `${base}.${field} must be true before attribution is launch-ready.`, "PROJECT_STATE.yaml"),
+          issue(
+            booleanSeverity,
+            `attribution.${field}.incomplete`,
+            `${base}.${field} must be true before attribution is launch-ready.`,
+            "state/PROJECT_STATE.yaml",
+          ),
         );
       }
     }
@@ -572,7 +577,7 @@ if (state) {
             "error",
             "attribution.event_name.invalid",
             "Use attribution_source_selected as the canonical event name unless the docs record a deliberate alias.",
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       } else {
@@ -581,7 +586,7 @@ if (state) {
             "warning",
             "attribution.event_name.alias",
             `Using documented attribution event alias ${eventName}; keep dashboards mapped to ${canonicalEventName}.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -595,7 +600,9 @@ if (state) {
       .filter((item): item is string => Boolean(item));
     for (const requiredKey of ["friend", "app_store_search", "creator", "ai_search", "other"]) {
       if (!stableKeys.includes(requiredKey)) {
-        issues.push(issue("error", `attribution.stable_key.${requiredKey}.missing`, `Stable attribution key ${requiredKey} is missing.`, "PROJECT_STATE.yaml"));
+        issues.push(
+          issue("error", `attribution.stable_key.${requiredKey}.missing`, `Stable attribution key ${requiredKey} is missing.`, "state/PROJECT_STATE.yaml"),
+        );
       }
     }
 
@@ -606,7 +613,9 @@ if (state) {
       .map((item) => asString(item))
       .filter((item): item is string => Boolean(item));
     if (!personProperties.includes("self_reported_source")) {
-      issues.push(issue("error", "attribution.person_property.missing", "PostHog person properties must include self_reported_source.", "PROJECT_STATE.yaml"));
+      issues.push(
+        issue("error", "attribution.person_property.missing", "PostHog person properties must include self_reported_source.", "state/PROJECT_STATE.yaml"),
+      );
     }
 
     // ------------------------------------------------------------------
@@ -619,7 +628,7 @@ if (state) {
           issue(
             requiresImplementationProof ? "error" : "warning",
             `attribution.text.${needle}.not_found`,
-            `${needle} was not found in implementation docs or code outside PROJECT_STATE.yaml. If this is generated later, keep the lane partial.`,
+            `${needle} was not found in implementation docs or code outside state/PROJECT_STATE.yaml. If this is generated later, keep the lane partial.`,
             args.root,
           ),
         );
@@ -627,7 +636,7 @@ if (state) {
     }
 
     // ------------------------------------------------------------------
-    // PROVEN layer: evidence paths and PROVIDER_PROOF.md cross-check
+    // PROVEN layer: evidence paths and operations/PROVIDER_PROOF.md cross-check
     // ------------------------------------------------------------------
     const verifiedClaimed = asBoolean(getPath(state, `${base}.verified`)) === true;
 

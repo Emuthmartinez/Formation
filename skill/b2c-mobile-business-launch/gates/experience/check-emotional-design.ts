@@ -225,7 +225,7 @@ function checkCardBlock(block: CardBlock): void {
       issue(
         "error",
         "emotional_design.card_missing_posthog_event",
-        `${label} in ${where} is missing "posthog_event". Every emotional moment must emit a named PostHog event from ANALYTICS.md.`,
+        `${label} in ${where} is missing "posthog_event". Every emotional moment must emit a named PostHog event from analytics/ANALYTICS.md.`,
         where,
       ),
     );
@@ -548,9 +548,9 @@ const laneStatus = state ? asString(getPath(state, "lanes.emotional_design.statu
 const laneAbsent = state ? getPath(state, "lanes.emotional_design") === undefined : true;
 const skip = laneStatus === "not_needed" || laneStatus === "deferred";
 
-const design = firstExistingText(["EMOTIONAL_DESIGN.md", "emotional-design/EMOTIONAL_DESIGN.md"]);
-const designHtml = existsAny(["emotional-design.html", "emotional-design/emotional-design.html"]);
-const audit = firstExistingText(["EMOTIONAL_AUDIT.md", "emotional-design/EMOTIONAL_AUDIT.md"]);
+const design = firstExistingText(["EMOTIONAL_DESIGN.md", "product/experience/emotional-design/EMOTIONAL_DESIGN.md"]);
+const designHtml = existsAny(["emotional-design.html", "product/experience/emotional-design/emotional-design.html"]);
+const audit = firstExistingText(["EMOTIONAL_AUDIT.md", "product/experience/emotional-design/EMOTIONAL_AUDIT.md"]);
 
 const designBlocks = design ? extractCardBlocks(design.relativePath, design.text) : [];
 const auditCardBlocks = audit ? extractCardBlocks(audit.relativePath, audit.text) : [];
@@ -560,8 +560,8 @@ if (!skip && laneAbsent) {
     issue(
       "error",
       "emotional_design.lane_missing",
-      "PROJECT_STATE.yaml must include lanes.emotional_design unless the emotional design lane is explicitly not_needed or deferred with founder-approved rationale.",
-      "PROJECT_STATE.yaml",
+      "state/PROJECT_STATE.yaml must include lanes.emotional_design unless the emotional design lane is explicitly not_needed or deferred with founder-approved rationale.",
+      "state/PROJECT_STATE.yaml",
     ),
   );
 }
@@ -600,7 +600,7 @@ if (design) {
     }
   }
 
-  for (const ref of ["11_STAR_EXPERIENCE.md", "ANALYTICS.md", "DESIGN.md", "ONBOARDING.md"]) {
+  for (const ref of ["11_STAR_EXPERIENCE.md", "analytics/ANALYTICS.md", "design/DESIGN.md", "product/ONBOARDING.md"]) {
     if (!design.text.includes(ref)) {
       issues.push(
         issue(
@@ -659,8 +659,8 @@ if (!skip && !designHtml) {
   issues.push(
     issue(
       "error",
-      "emotional_design.html_missing",
-      "emotional-design.html should render the emotional curve and card application map for founder review. A generic design.html proof does not satisfy the emotional design board.",
+      "emotional_design/design.html_missing",
+      "emotional-design.html should render the emotional curve and card application map for founder review. A generic design/design.html proof does not satisfy the emotional design board.",
       "emotional-design.html",
     ),
   );
@@ -670,7 +670,9 @@ if (designHtml) {
   const htmlText = readText(args.root, designHtml) ?? "";
   for (const phrase of ["Emotional Curve", "Card Application"]) {
     if (!includesPhrase(htmlText, phrase)) {
-      issues.push(issue("warning", `emotional_design.html_${codeFor(phrase)}_missing`, `The emotional-design board should render ${phrase}.`, designHtml));
+      issues.push(
+        issue("warning", `emotional_design/design.html_${codeFor(phrase)}_missing`, `The emotional-design board should render ${phrase}.`, designHtml),
+      );
     }
   }
 }
@@ -714,7 +716,7 @@ if (audit) {
 // for. Deliberately NOT gated on the lane skip: deferring the emotional-design lane skips its
 // deliverables, never the non-negotiable ethics veto over copy that already exists.
 {
-  for (const doc of ["ONBOARDING.md", "SPEC.md", "APP_STORE_LISTING.md", "app-store-listing/APP_STORE_LISTING.md", "PAYWALL.md"]) {
+  for (const doc of ["product/ONBOARDING.md", "product/SPEC.md", "APP_STORE_LISTING.md", "store/app-store-listing/APP_STORE_LISTING.md", "PAYWALL.md"]) {
     const liveText = readText(args.root, doc);
     if (liveText) {
       scanLiveCopy(doc, liveText, true);
@@ -726,8 +728,8 @@ if (audit) {
 const ageRange = state ? (asString(getPath(state, "business.audience.age_range")) ?? asString(getPath(state, "audience.age_range"))) : undefined;
 const scopeText = [
   ageRange ?? "",
-  readText(args.root, "SPEC.md"),
-  readText(args.root, "ONBOARDING.md"),
+  readText(args.root, "product/SPEC.md"),
+  readText(args.root, "product/ONBOARDING.md"),
   readText(args.root, "APP_STORE_LISTING.md"),
   design?.text,
 ]
@@ -742,7 +744,7 @@ const targetsMinors =
   );
 if (!skip && design && targetsMinors) {
   const privacy =
-    (readText(args.root, "ETHICS.md") ?? "") + (readText(args.root, "PRIVACY.md") ?? "") + (readText(args.root, "PRIVACY_POLICY.md") ?? "") + design.text;
+    (readText(args.root, "ETHICS.md") ?? "") + (readText(args.root, "trust/PRIVACY.md") ?? "") + (readText(args.root, "PRIVACY_POLICY.md") ?? "") + design.text;
   const reviewed = /COPPA|Children'?s Code|Age-Appropriate Design|AADC|under 13|under-13/i.test(privacy);
   if (!reviewed) {
     const severity: Severity = under13 ? "error" : "warning";

@@ -21,7 +21,7 @@ Load [`conversion-copy.md`](../words/conversion-copy.md) for the words on the pa
 
 - Corey Haines marketingskills `cro` skill (MIT): `https://github.com/coreyhaines31/marketingskills`
 - Current Core Web Vitals thresholds (LCP/INP/CLS) — slow pages cap conversion: `https://web.dev/articles/vitals`
-- The project's `RESEARCH.md` competitor landing teardown and `11_STAR_EXPERIENCE.md` for the one promise the page must carry
+- The project's `strategy/RESEARCH.md` competitor landing teardown and `11_STAR_EXPERIENCE.md` for the one promise the page must carry
 - Refero shipped-flow research for current landing/waitlist patterns when access is available (see [`refero-ux-patterns.md`](../design/refero-ux-patterns.md))
 
 ## Required Artifacts
@@ -66,7 +66,7 @@ Conversion rises faster from removing friction than from adding persuasion. For 
 
 ## Analytics Events
 
-Declare in `ANALYTICS.md` first; implement the approved catalog:
+Declare in `analytics/ANALYTICS.md` first; implement the approved catalog:
 - `landing_viewed` (variant_id, traffic_source)
 - `landing_cta_clicked` (variant_id, cta_position)
 - `waitlist_submitted` / `app_store_redirect` / `purchase_started` (the page's primary conversion)
@@ -77,7 +77,7 @@ Tie every CRO test to the experiment discipline in [`analytics-attribution.md`](
 - `CRO_AUDIT.md` exists for any public conversion page
 - the page has one primary conversion goal and an above-the-fold promise + CTA + proof
 - [`geo-seo.md`](geo-seo.md) was loaded before the first file edit; AI-crawler/metadata/schema checks pass
-- the [`check-landing-funnel.ts`](../../gates/growth/check-landing-funnel.ts) gates (live deploy, form smoke test) pass and are recorded in `PRODUCTION_READINESS.md`
+- the [`check-landing-funnel.ts`](../../gates/growth/check-landing-funnel.ts) gates (live deploy, form smoke test) pass and are recorded in `engineering/PRODUCTION_READINESS.md`
 - mobile viewport and Core Web Vitals verified with visual QA proof
 - the top CRO hypothesis is registered as an experiment with a stop rule
-- copy on the page traces to `COPY_BRIEF.md`; the hero matches the driving ad
+- copy on the page traces to `product/copy/COPY_BRIEF.md`; the hero matches the driving ad

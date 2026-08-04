@@ -23,13 +23,13 @@ function resolveTsxBin(): string {
 }
 
 export function writeBusinessEntrypoints(root: string): void {
-  cpSync(path.join(skillRoot, "business", "repo-agent-entrypoints", "AGENTS.md"), path.join(root, "AGENTS.md"));
-  cpSync(path.join(skillRoot, "business", "repo-agent-entrypoints", "CLAUDE.md"), path.join(root, "CLAUDE.md"));
-  cpSync(path.join(skillRoot, "business", "app-agent-roster", "APP_AGENTS.md"), path.join(root, "APP_AGENTS.md"));
-  cpSync(path.join(skillRoot, "business", "app-agent-roster", "agents"), path.join(root, "agents"), { recursive: true });
-  cpSync(path.join(skillRoot, "business", "ORCHESTRATION.md"), path.join(root, "ORCHESTRATION.md"));
-  cpSync(path.join(skillRoot, "business", "orchestration.html"), path.join(root, "orchestration.html"));
-  writeFileSync(path.join(root, "launch-cockpit.html"), "<!doctype html><html><body>Launch cockpit fixture</body></html>", "utf8");
+  cpSync(path.join(skillRoot, "business", "engineering/repo-agent-entrypoints", "AGENTS.md"), path.join(root, "AGENTS.md"));
+  cpSync(path.join(skillRoot, "business", "engineering/repo-agent-entrypoints", "CLAUDE.md"), path.join(root, "CLAUDE.md"));
+  cpSync(path.join(skillRoot, "business", "engineering/app-agent-roster", "APP_AGENTS.md"), path.join(root, "APP_AGENTS.md"));
+  cpSync(path.join(skillRoot, "business", "engineering/app-agent-roster", "agents"), path.join(root, "agents"), { recursive: true });
+  cpSync(path.join(skillRoot, "business", "operations/ORCHESTRATION.md"), path.join(root, "operations/ORCHESTRATION.md"));
+  cpSync(path.join(skillRoot, "business", "operations/orchestration.html"), path.join(root, "operations/orchestration.html"));
+  writeFileSync(path.join(root, "state/launch-cockpit.html"), "<!doctype html><html><body>Launch cockpit fixture</body></html>", "utf8");
 }
 
 export interface Harness {
@@ -65,7 +65,7 @@ export function createHarness(): Harness {
     // template), so the fixture root has to pull it in explicitly — several
     // validators scan a business root for starter prompts and shipped copy.
     cpSync(path.join(skillRoot, "starters"), path.join(fixtureRoot, "starters"), { recursive: true });
-    cpSync(path.join(skillRoot, "business", "secrets", "SECRETS.md"), path.join(fixtureRoot, "SECRETS.md"));
+    cpSync(path.join(skillRoot, "business", "trust", "secrets", "SECRETS.md"), path.join(fixtureRoot, "SECRETS.md"));
     return fixtureRoot;
   };
 
@@ -76,19 +76,7 @@ export function createHarness(): Harness {
     // containing business/. Seed both shapes so tests can write one targeted
     // artifact without duplicating directory setup. Presence still comes from
     // files, never from these empty directory roots.
-    for (const capability of [
-      "state",
-      "strategy",
-      "product",
-      "design",
-      "engineering",
-      "analytics",
-      "growth",
-      "revenue",
-      "store",
-      "trust",
-      "operations",
-    ]) {
+    for (const capability of ["state", "strategy", "product", "design", "engineering", "analytics", "growth", "revenue", "store", "trust", "operations"]) {
       mkdirSync(path.join(fixtureRoot, capability), { recursive: true });
       mkdirSync(path.join(fixtureRoot, "business", capability), { recursive: true });
     }

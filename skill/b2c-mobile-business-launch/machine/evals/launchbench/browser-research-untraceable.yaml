@@ -16,4 +16,4 @@ must_catch:
   - Video transcript and visual evidence are not distinguished.
   - Observation, inference, confidence, and sample limits are absent.
 should_say:
-  - Refresh RESEARCH.md and the structured agent operations ledger before using these claims.
+  - Refresh strategy/RESEARCH.md and the structured agent operations ledger before using these claims.

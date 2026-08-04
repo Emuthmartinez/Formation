@@ -20,25 +20,25 @@ Also define:
 - The platform's name direction (3 options with rationale)
 - The tagline (under 8 words)
 - The first 100 users — where do I find them and what do I say?
-- The moat contract for `SPEC.md`'s Differentiation And Moat section: the top 2-3
+- The moat contract for `product/SPEC.md`'s Differentiation And Moat section: the top 2-3
   incumbents by revenue (what each does well, the moment we beat them, what stops
   each shipping a copy in a week), the moat class being built (data / workflow /
   community / taste / model / distribution) with its concrete build plan, and the
   one-week-copy test answer
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- The five answers and the "tell a friend" feature feed `RESEARCH.md` and the 11-star magical moment in `11_STAR_EXPERIENCE.md`.
+- The five answers and the "tell a friend" feature feed `strategy/RESEARCH.md` and the 11-star magical moment in `11_STAR_EXPERIENCE.md`.
 - "What it should NOT have" is the V2/banned-scope list — record it so the build does not drift into a general-purpose clone.
 - The name directions feed naming + collision checks; the tagline feeds `APP_STORE_LISTING.md` / landing copy (run `geo-seo.md` before editing landing copy).
 - The "first 100 users" plan feeds `growth/LAUNCH_NARRATIVE.md` and `viral-growth-loops.md` (build-in-public → invite-only beta → referral codes).
 - The monetization-fit answer constrains prompt 07: pick the model that matches the community's values, do not bolt on a generic paywall.
 </content>
-- **Transcribe the wedge into the spec:** the answers above land verbatim in `SPEC.md`'s Differentiation And Moat section and are held to `product-moat.md`'s tests (one-week-copy, moat class, incumbent beat moment). `check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a wedge that lives only in this chat is invisible to every gate.
+- **Transcribe the wedge into the spec:** the answers above land verbatim in `product/SPEC.md`'s Differentiation And Moat section and are held to `product-moat.md`'s tests (one-week-copy, moat class, incumbent beat moment). `check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a wedge that lives only in this chat is invisible to every gate.

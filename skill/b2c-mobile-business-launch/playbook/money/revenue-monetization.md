@@ -45,7 +45,7 @@ Refresh current docs before acting because payment, tax, and app-store rules cha
 - Google Play payments policy: https://support.google.com/googleplay/android-developer/answer/9858738?hl=en
 - Google Play subscription lifecycle and RTDNs: https://developer.android.com/google/play/billing/lifecycle/subscriptions
 
-Record checked dates, links, and resulting decisions in `REVENUE_OPS.md` or `LEGAL_REVIEW.md`.
+Record checked dates, links, and resulting decisions in `revenue/REVENUE_OPS.md` or `LEGAL_REVIEW.md`.
 
 ## 2. Monetization Decision Matrix
 
@@ -89,7 +89,7 @@ Validation:
 ## 4. App Store And Play Product Gates
 
 **CRITICAL — App container price vs IAP distinction (surface this before any store pricing work begins):**
-Subscription and IAP-based apps must remain **Free** at the App Store container level (Pricing and Availability > Price: Free). The container price is the upfront download fee — setting it to $79.99 means every user pays $79.99 just to install the app before seeing the paywall. A Lifetime access offer is a **NON_CONSUMABLE** in-app purchase product created in App Store Connect > In-App Purchases, attached to the app version and mapped to a RevenueCat entitlement/offering. Never set the app container price to the lifetime price. Surface this distinction proactively at the start of any store pricing work; do not wait for the founder to make the error. If `STORE_CONSOLE.md` or `REVENUE_OPS.md` includes a Lifetime offer, verify a NON_CONSUMABLE IAP SKU exists before marking pricing ready.
+Subscription and IAP-based apps must remain **Free** at the App Store container level (Pricing and Availability > Price: Free). The container price is the upfront download fee — setting it to $79.99 means every user pays $79.99 just to install the app before seeing the paywall. A Lifetime access offer is a **NON_CONSUMABLE** in-app purchase product created in App Store Connect > In-App Purchases, attached to the app version and mapped to a RevenueCat entitlement/offering. Never set the app container price to the lifetime price. Surface this distinction proactively at the start of any store pricing work; do not wait for the founder to make the error. If `store/STORE_CONSOLE.md` or `revenue/REVENUE_OPS.md` includes a Lifetime offer, verify a NON_CONSUMABLE IAP SKU exists before marking pricing ready.
 
 iOS:
 - set app container price to **Free** for any app that monetizes via subscriptions, IAP, or in-app paywalls
@@ -110,7 +110,7 @@ Android:
 
 Gate:
 - store products must match paywall copy, screenshots, app metadata, privacy/terms, RevenueCat products, and analytics event names.
-- App Store listing work must produce an `APP_STORE_LISTING.md` or `STORE_CONSOLE.md` pricing section that ties each App Store product/subscription to RevenueCat entitlement/offering/package, web funnel/Stripe route when used, review status, sandbox proof, and founder approval.
+- App Store listing work must produce an `APP_STORE_LISTING.md` or `store/STORE_CONSOLE.md` pricing section that ties each App Store product/subscription to RevenueCat entitlement/offering/package, web funnel/Stripe route when used, review status, sandbox proof, and founder approval.
 
 ## 4a. Subscription MISSING_METADATA, RevenueCat Product-Type, And Paywall Smoke Proof
 
@@ -127,12 +127,12 @@ These three gaps repeatedly shipped a broken paywall ("Purchases unavailable" / 
 Apple requires a **unique 1024x1024 promotional image** for each promoted IAP and subscription product. These are store-facing assets (App Store promoted IAP slots), not app UI screenshots, so Higgsfield output is eligible.
 
 Production route:
-- Write a DESIGN.md brief for each product's promotional image (palette, mood, banned aesthetics, intended surface: App Store promoted IAP).
-- Generate via `higgsfield generate create gpt_image_2 --prompt "<DESIGN.md brief>" --aspect_ratio 1:1 --wait`. See the **Cheap-First Direction (z_image → production model)** recipe in `tool-recipes/visual-and-motion-production.md` if spend-reduction drafts are needed first; cheap-first must be offered as an explicit spend option, never applied silently — confirm spend per `paid-tool-routing.md`.
+- Write a design/DESIGN.md brief for each product's promotional image (palette, mood, banned aesthetics, intended surface: App Store promoted IAP).
+- Generate via `higgsfield generate create gpt_image_2 --prompt "<design/DESIGN.md brief>" --aspect_ratio 1:1 --wait`. See the **Cheap-First Direction (z_image → production model)** recipe in `tool-recipes/visual-and-motion-production.md` if spend-reduction drafts are needed first; cheap-first must be offered as an explicit spend option, never applied silently — confirm spend per `paid-tool-routing.md`.
 - Record every generated asset in `CONTENT_ASSETS.md` with `prompt_brief`, `source_job_id`, QA status, and approval gate. Cross-reference `app-store-listing-prep.md` for upload and metadata sequencing.
 - Gate: founder must approve each promotional image before upload. Do not upload while the product is still in `MISSING_METADATA` (see section 4a).
 
-**Paywall hero art:** Route paywall background/hero images through `higgsfield generate create soul_location` (the environment model; prompt-only) with a DESIGN.md brief, or `gpt_image_2` when on-image text is required. This produces environment/background art consistent with the visual system defined in `design-visual-system.md`. Record outputs in `CONTENT_ASSETS.md`; apply the same spend-confirmation and founder-approval gates. Higgsfield output must never substitute for truthful real app UI in store screenshots.
+**Paywall hero art:** Route paywall background/hero images through `higgsfield generate create soul_location` (the environment model; prompt-only) with a design/DESIGN.md brief, or `gpt_image_2` when on-image text is required. This produces environment/background art consistent with the visual system defined in `design-visual-system.md`. Record outputs in `CONTENT_ASSETS.md`; apply the same spend-confirmation and founder-approval gates. Higgsfield output must never substitute for truthful real app UI in store screenshots.
 
 ## 4c. Paywall Timing, Plans, Trials, And Offers
 
@@ -222,19 +222,19 @@ Before publishing pricing:
 
 ## 7a. Price-Point Decision Procedure
 
-§7 governs how an approved price is disclosed; this section is how the price gets chosen. "Do pricing research" is not a procedure — this is, and its output lands in `REVENUE_OPS.md` under a "Pricing Decision" heading that `check:revenue` requires before the lane is done.
+§7 governs how an approved price is disclosed; this section is how the price gets chosen. "Do pricing research" is not a procedure — this is, and its output lands in `revenue/REVENUE_OPS.md` under a "Pricing Decision" heading that `check:revenue` requires before the lane is done.
 
-1. **Anchor against the category.** Pull the subscription prices of 5–10 direct competitors from `RESEARCH.md`'s competitor set — AppKittie app details (IAP lists) plus the live store listings are the sources. Record each competitor's monthly and annual price with the date checked, and compute the category range and median. An anchor table with fewer than five real rows means the research lane is not done enough to price against.
+1. **Anchor against the category.** Pull the subscription prices of 5–10 direct competitors from `strategy/RESEARCH.md`'s competitor set — AppKittie app details (IAP lists) plus the live store listings are the sources. Record each competitor's monthly and annual price with the date checked, and compute the category range and median. An anchor table with fewer than five real rows means the research lane is not done enough to price against.
 2. **Choose two or three candidate points, biased high.** The benchmarks already in §10 are the prior: higher-priced apps show ~5.4x monthly realized LTV and *higher* download-to-paid conversion, because price reads as a quality signal. Default candidates: the category median, and one point meaningfully above it justified by the 11-star slice. Only go below median with a written reason (deliberate land-grab, network-effect freemium per §4c). Anchor annual as the highlighted plan per §4c and anti-pattern #5.
 3. **Design the trial against the value moment, not the calendar.** Trial length and paywall placement route through `onboarding-conversion.md` (Plan And Trial Mix, Paywall Timing) — the trial must be long enough to reach the magical moment from `11_STAR_EXPERIENCE.md` at a realistic usage cadence, and trial length is an experiment, not a constant.
-4. **Record the decision.** The chosen points, the anchor table, the rationale, and the founder's approval date go in `REVENUE_OPS.md` ("Pricing Decision"). Pricing is founder-only (§9); the procedure prepares the decision, it never makes it.
-5. **Revisit on evidence, not anniversaries.** Post-launch price changes are driven by the cancellation-reason mix (§8b), realized LTV vs. the anchor assumptions (Economics Snapshot in `REVENUE_OPS.md`), and the kill-or-scale evidence pack — and every change routes through `change-cascade.md` so store products, RevenueCat offerings, screenshots, landing, and legal move together.
+4. **Record the decision.** The chosen points, the anchor table, the rationale, and the founder's approval date go in `revenue/REVENUE_OPS.md` ("Pricing Decision"). Pricing is founder-only (§9); the procedure prepares the decision, it never makes it.
+5. **Revisit on evidence, not anniversaries.** Post-launch price changes are driven by the cancellation-reason mix (§8b), realized LTV vs. the anchor assumptions (Economics Snapshot in `revenue/REVENUE_OPS.md`), and the kill-or-scale evidence pack — and every change routes through `change-cascade.md` so store products, RevenueCat offerings, screenshots, landing, and legal move together.
 
 ## 7b. Paywall Experiment Cadence
 
 The first paywall is a hypothesis, not a decision. The apps that clear the $1K-to-$10K climb run continuous paywall/pricing experiments — timing, packaging, trial shape, offer — while the ~75% that never clear it typically shipped one reasonable paywall and stopped (anti-pattern #10 in `onboarding-conversion.md` names this; this section is its procedure). The cadence is a standing program, not a launch task:
 
-- **The backlog is a living artifact.** `REVENUE_OPS.md`'s Paywall Experiment Backlog carries planned/active/completed rows: hypothesis, variant, primary metric, start date, result, decision. `check:revenue` requires current activity once the app has been live four weeks with the revenue lane done — an active row, a completed row started within eight weeks, or a dated next experiment; a backlog of empty headers or one fossilized test is the one-and-done plateau wearing a green check.
+- **The backlog is a living artifact.** `revenue/REVENUE_OPS.md`'s Paywall Experiment Backlog carries planned/active/completed rows: hypothesis, variant, primary metric, start date, result, decision. `check:revenue` requires current activity once the app has been live four weeks with the revenue lane done — an active row, a completed row started within eight weeks, or a dated next experiment; a backlog of empty headers or one fossilized test is the one-and-done plateau wearing a green check.
 - **One experiment at a time per surface,** measured on cohort economics (trial-start rate × trial-to-paid × early churn — §10's guidance), never on day-one conversion alone. Minimum one full renewal-decision window before judging.
 - **The test menu, in rough order of historical lift:** paywall timing/placement in onboarding, packaging mix (annual anchor, lifetime presence), trial length and type (opt-in vs opt-out, reverse trial), price point per §7a's revisit procedure, closing offer, and paywall design/copy last.
 - **Route by tooling:** RevenueCat Experiments when available (it randomizes and reads revenue truth); otherwise a dated before/after with cohort comparison, honestly labeled as weaker evidence.
@@ -242,7 +242,7 @@ The first paywall is a hypothesis, not a decision. The apps that clear the $1K-t
 
 ## 8. Backend And Analytics Contract
 
-Create or update `ANALYTICS.md` and backend docs with:
+Create or update `analytics/ANALYTICS.md` and backend docs with:
 - stable user ID strategy across app, web, RevenueCat, Stripe, Supabase/Firebase, analytics, and support
 - anonymous web purchase and redemption behavior
 - purchase events: paywall viewed, product selected, checkout started, purchase completed, entitlement active, restore started/succeeded/failed, cancellation, refund, renewal, billing issue
@@ -277,7 +277,7 @@ Design implications:
 - **Offer pause instead of cancel, and keep return one tap.** Let users pause a subscription rather than fully cancel, and don't force them to re-enter payment details to come back. Surface this in the cancellation flow alongside the transparent downsell/closing offer (`onboarding-conversion.md`), without dark patterns.
 - **Capture the cancellation reason at the moment of cancellation.** One screen in the in-app cancellation/pause flow — before the store-managed cancel handoff — with a fixed reason-code taxonomy: `too_expensive`, `missing_feature`, `found_alternative`, `not_needed`, `technical_issue`, `other` (free text optional, never required). Emit `cancellation_reason_selected` with `reason_code` and `plan_duration`. A delayed exit-survey email measures who answers email, not why people cancel — same Day-0 logic as the rest of this file. The aggregated mix feeds the Pricing Decision revisit (§7a step 5: a `too_expensive` majority is pricing evidence), win-back targeting here in §8b (`missing_feature` churners are the reachable cohort when the feature ships), and the kill-or-scale evidence pack. Never gate the actual cancellation on answering — the screen is skippable in one tap, per the ethics guardrail.
 
-Analytics: track `subscription_paused`, `reactivation_offer_shown`, `reactivated`, and `cancellation_reason_selected` with `prior_plan_duration`, `days_since_churn`, `price_tier`, and `reason_code` so reactivation is measured by plan duration (where the real gains are) rather than as a single blended rate. All §8a/§8b event names live in the `ANALYTICS.md` Event Contract first — `check:analytics-catalog` reconciles `REVENUE_OPS.md` against the catalog the same way it does onboarding and growth docs.
+Analytics: track `subscription_paused`, `reactivation_offer_shown`, `reactivated`, and `cancellation_reason_selected` with `prior_plan_duration`, `days_since_churn`, `price_tier`, and `reason_code` so reactivation is measured by plan duration (where the real gains are) rather than as a single blended rate. All §8a/§8b event names live in the `analytics/ANALYTICS.md` Event Contract first — `check:analytics-catalog` reconciles `revenue/REVENUE_OPS.md` against the catalog the same way it does onboarding and growth docs.
 
 ## 9. Founder-Only Gates
 

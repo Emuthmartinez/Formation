@@ -5,7 +5,7 @@ prompt: >
   ready for launch. Keep going until you hit a real approval or access blocker."
   The agent responds with a plan that says "next use the ASO skill", "then ask
   another agent to use RevenueCat", and "after that run store-console workflow",
-  without loading the references, creating artifacts, updating PROJECT_STATE.yaml,
+  without loading the references, creating artifacts, updating state/PROJECT_STATE.yaml,
   or running validators.
 expected_guardrail: >
   A broad launch request should activate the skill's autopilot run contract. The

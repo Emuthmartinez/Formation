@@ -96,7 +96,7 @@ function checkLaneDependencies(state: unknown, lane: string, issues: Issue[]): {
         `lane_coverage.${lane}.dependency_overridden`,
         `lanes.${lane} is done while upstream ${detail} is unlocked, permitted by dependency_override. ` +
           `Confirm the override still holds; an upstream lane that never locks means this lane's evidence rests on a moving input.`,
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
     issues.push(...overrideIssues);
@@ -113,7 +113,7 @@ function checkLaneDependencies(state: unknown, lane: string, issues: Issue[]): {
         (override?.trim()
           ? `The recorded dependency_override is undated or too thin to count — rewrite it with an ISO date and the concrete independence rationale.`
           : `Advance the upstream lane to done/not_needed/deferred, or record a dated lanes.${lane}.dependency_override explaining why this lane is genuinely independent of it.`),
-      "PROJECT_STATE.yaml",
+      "state/PROJECT_STATE.yaml",
     ),
   );
   return { errors: 1, warnings: overrideIssues.filter((i) => i.severity === "warning").length };
@@ -149,8 +149,8 @@ if (state) {
         issue(
           "error",
           `lane_coverage.${lane}.missing`,
-          `${lanePath} is missing entirely. All ${requiredLanes.length} required lanes must be present in PROJECT_STATE.yaml.`,
-          "PROJECT_STATE.yaml",
+          `${lanePath} is missing entirely. All ${requiredLanes.length} required lanes must be present in state/PROJECT_STATE.yaml.`,
+          "state/PROJECT_STATE.yaml",
         ),
       );
       continue;
@@ -211,7 +211,7 @@ if (state) {
               `lanes.${lane} carries a founder-gated blocker with no valid past ISO date ("${blocker.slice(0, 80)}"). ` +
                 `Record the real date the gate was last presented so the re-engagement window is checkable — an undated, typo'd, or ` +
                 `forward-dated founder gate is one nobody can ever call stale, and on a live app that is an error, not a nit.`,
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
           continue;
@@ -227,7 +227,7 @@ if (state) {
               `lanes.${lane}'s founder gate was last presented ${ageDays} days ago (${presentedAt}) with no recorded refresh. ` +
                 `Re-present it to the founder with what changed since, and re-date the blocker with their response — approve, defer again, or drop the lane. ` +
                 `A founder gate is a pause, not a termination; silence is not a decision.`,
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
         }
@@ -245,7 +245,7 @@ if (state) {
             `lane_coverage.${lane}.not_started_past_orient`,
             `lanes.${lane} is not_started but the project is past the orient phase (${currentPhase || "unknown"}). ` +
               `Start the lane, block it with a reason, or explicitly mark it not_needed or deferred.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       } else {
@@ -267,7 +267,7 @@ if (state) {
             `lane_coverage.${lane}.partial_stall_past_orient`,
             `lanes.${lane} is partial with no evidence, no blockers, and no reason — and the project is past the orient phase (${currentPhase || "unknown"}). ` +
               `Add an evidence path, a blocker, or a reason field to show intentional progress, or advance the lane status.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       } else if (silentStall) {
@@ -279,7 +279,7 @@ if (state) {
             `lane_coverage.${lane}.partial_no_evidence_no_blocker`,
             `lanes.${lane} is partial but has no evidence paths, no blockers, and no reason. ` +
               `Add an evidence path, a blocker, or a reason field to show intentional progress.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       } else {
@@ -303,7 +303,7 @@ if (state) {
             "error",
             `lane_coverage.${lane}.done_without_evidence`,
             `lanes.${lane} is done but has no evidence paths. Done status requires at least one concrete artifact path or live-proof reference.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       } else {
@@ -328,7 +328,7 @@ if (state) {
             "error",
             `lane_coverage.${lane}.blocked_without_blocker`,
             `lanes.${lane} is blocked but has no blocker entry. Add at least one non-empty string to the blockers array.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       } else {
@@ -348,7 +348,7 @@ if (state) {
             `lane_coverage.${lane}.${status}_without_reason`,
             `lanes.${lane} is ${status} but has no evidence, blockers, or reason explaining why. ` +
               `Record the rationale so a future agent can verify the skip is intentional.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       } else {

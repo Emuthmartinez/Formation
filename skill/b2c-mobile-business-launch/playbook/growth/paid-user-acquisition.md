@@ -40,7 +40,7 @@ Defer or reject paid UA when:
 - the only plan is "try ads" without a channel, creative cadence, target event, dashboard, and stop rule
 - paid spend or ad-account access is unapproved
 
-Record the fit decision in `PAID_UA.md`, update `PROJECT_STATE.yaml` `lanes.paid_user_acquisition`, and trace the decision into `LAUNCH_TRACE.md`.
+Record the fit decision in `PAID_UA.md`, update `state/PROJECT_STATE.yaml` `lanes.paid_user_acquisition`, and trace the decision into `state/LAUNCH_TRACE.md`.
 
 ## One-Channel Choice
 
@@ -69,8 +69,8 @@ Before spend, define the first creative batch:
 - one ad group or equivalent simple structure for the first test
 - angle map: pain, aspiration, identity, objection, comparison, proof, result, or use case
 - product visibility: real app UI, store screenshot, app-flow recording, Remotion render, or approved generated/supporting asset
-- copy and claim constraints from `APP_STORE_LISTING.md`, `PRIVACY.md`, `TERMS.md`, `REVENUE_OPS.md`, and `SECURITY.md`
-- each creative tied to `11_STAR_EXPERIENCE.md`, `CONTENT_ASSETS.md`, and `LAUNCH_TRACE.md`
+- copy and claim constraints from `APP_STORE_LISTING.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, `revenue/REVENUE_OPS.md`, and `trust/SECURITY.md`
+- each creative tied to `11_STAR_EXPERIENCE.md`, `CONTENT_ASSETS.md`, and `state/LAUNCH_TRACE.md`
 
 Use `remotion-content-assets.md` when repeatable ad variants, motion screenshots, captions, cutdowns, or local render proof are needed. Use Higgsfield only after design-system constraints and paid-tool routing are recorded. Use real app UI wherever a user must inspect the actual product.
 
@@ -78,7 +78,7 @@ Use `remotion-content-assets.md` when repeatable ad variants, motion screenshots
 
 ### Higgsfield Creative Production
 
-Before generating any Higgsfield asset: confirm spend with the founder per `paid-tool-routing.md`, carry `DESIGN.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface) in every prompt, and record every output in `CONTENT_ASSETS.md`.
+Before generating any Higgsfield asset: confirm spend with the founder per `paid-tool-routing.md`, carry `design/DESIGN.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface) in every prompt, and record every output in `CONTENT_ASSETS.md`.
 
 **Routed recipes** (bodies in `tool-recipes/visual-and-motion-production.md` — do not re-copy here):
 - **App Store URL → UGC Ad Batch (Click-to-Ad)** — webproducts fetch → avatar pick → parallel mode batch → score → save winners → founder approval.
@@ -93,7 +93,7 @@ higgsfield marketing-studio dtc-ads generate --format-id <id> [--brand-kit-id <i
 
 **Hook A/B protocol.** Before committing to a production run, test breadth before depth: run 4 hooks × 1 mode first to find the winning hook, then 1 hook × 4 modes to find the winning mode. Score each variant with `brain_activity` before expanding.
 
-**Click-to-Ad `--url` note.** The `--url <app-store-url>` shortcut bypasses brief injection — `DESIGN.md` tokens are NOT carried automatically. Always inject them explicitly into `--prompt`.
+**Click-to-Ad `--url` note.** The `--url <app-store-url>` shortcut bypasses brief injection — `design/DESIGN.md` tokens are NOT carried automatically. Always inject them explicitly into `--prompt`.
 
 **Win-back / re-engagement creatives.** For lapsed-user campaigns, generate `marketing_studio_video --mode product_review` ads with "do you miss X" hooks, plus `product-photoshoot --mode lifestyle_scene` static re-engagement visuals; score the video with `brain_activity` before allocating any spend. Record `virality_score` and `hook_dmn_risk` in `CONTENT_ASSETS.md` before distributing.
 
@@ -160,7 +160,7 @@ Automated ad-platform rules may be planned when supported, but live setup or bud
 Every rule below evaluates against a number recorded in `growth/PAID_UA.md` under **Decision Thresholds** — an agent (or the founder at 11pm) must be able to read the week's report and know which side of each line it landed on. The defaults are starting points to adjust per category evidence, the same way the crash-free threshold works in `post-launch-operations.md`; changing a threshold is a recorded edit with a reason, never a silent re-read:
 
 - **Attribution tolerance** — default ±20%. The maximum disagreement between RevenueCat, ASC/Play console, PostHog, and self-reported attribution before the numbers stop being readable.
-- **Payback window** — default 90 days. Blended CPA must be recoverable from realized LTV (Economics Snapshot in `REVENUE_OPS.md`) inside this window.
+- **Payback window** — default 90 days. Blended CPA must be recoverable from realized LTV (Economics Snapshot in `revenue/REVENUE_OPS.md`) inside this window.
 - **Creative signal floor** — default 2x target CPA in spend, or 7 days, per creative — whichever comes first — before a creative may be judged or killed.
 - **Scale trigger** — default 14 consecutive days at or under target CPA at the founder-approved spend level before any budget increase is proposed.
 
@@ -202,11 +202,11 @@ Always ask before:
 Create or update:
 - `PAID_UA.md`: fit gate, channel choice, creative system, tracking baseline, blended report, schedule, stop/scale rules, founder-only gates, and traceability
 - `growth/paid-ua-report.csv` when spend is planned or active
-- `ANALYTICS.md` and `analytics-plan.html` with campaign, ad-network, baseline, and RevenueCat/ASC/PostHog dashboard definitions
-- `REVENUE_OPS.md` with LTV/CPA/payback assumptions and RevenueCat cohort source
+- `analytics/ANALYTICS.md` and `analytics/analytics-plan.html` with campaign, ad-network, baseline, and RevenueCat/ASC/PostHog dashboard definitions
+- `revenue/REVENUE_OPS.md` with LTV/CPA/payback assumptions and RevenueCat cohort source
 - `CONTENT_ASSETS.md` and optional Remotion/Higgsfield artifacts for repeatable creative production
-- `APP_STORE_LISTING.md`, `STORE_CONSOLE.md`, or custom product page notes when the campaign destination is a store surface
-- `LAUNCH_TRACE.md` rows connecting research, 11-star slice, channel, creative angles, paywall/revenue, analytics, privacy/legal, and proof
+- `APP_STORE_LISTING.md`, `store/STORE_CONSOLE.md`, or custom product page notes when the campaign destination is a store surface
+- `state/LAUNCH_TRACE.md` rows connecting research, 11-star slice, channel, creative angles, paywall/revenue, analytics, privacy/legal, and proof
 
 Run:
 
@@ -234,4 +234,4 @@ The paid-acquisition entries in the monetization-and-growth digest in [`revenue-
 **9. Optimize ad creative first.** The fun part — hooks, fonts, trending audio — is not the constraint. The order that works is **paywall → onboarding → ads**: paywall (and trial/price) LTV is the bottleneck, onboarding is the conversion ramp into it, and ads only multiply whatever those two already do. Pouring traffic into a leaky paywall is filling a bucket with no bottom and calling it marketing. The Fit Gate already requires `revenue-monetization.md` and `onboarding-conversion.md` to be in good shape before spend; do not invert the order by polishing creatives while the paywall is unproven.
 
 **11. Chase views / vanity reach.** A 500K-view screenshot for the group chat is a hug, not a business — views without buying intent do not convert (one founder turned broad emotional reach into $400). Optimize for installs → paywall reach → purchase → retention, not impressions. The Stop And Scale Rules already flag "the only positive metric is impressions, clicks, or installs"; the same trap on the organic side is covered in [`viral-growth-loops.md`](viral-growth-loops.md) Common Failure Modes (optimizing for views instead of installs/paywall/purchases).
-- Calling paid UA "done" while `PAID_UA.md`, `ANALYTICS.md`, `REVENUE_OPS.md`, `CONTENT_ASSETS.md`, `APP_STORE_LISTING.md`, or `LAUNCH_TRACE.md` disagree.
+- Calling paid UA "done" while `PAID_UA.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `CONTENT_ASSETS.md`, `APP_STORE_LISTING.md`, or `state/LAUNCH_TRACE.md` disagree.

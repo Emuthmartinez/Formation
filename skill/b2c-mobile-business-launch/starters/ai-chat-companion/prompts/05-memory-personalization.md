@@ -20,15 +20,15 @@ Requirements:
 Do not invent facts the user never provided. Memory is recalled, not guessed.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Memory recall is an **Intent Mirroring** moment (`consumer-product-design-agency.md`): it must use the user's actual stored words, be dismissable/editable, and follow the Human-Centered AI honesty rule — attribute to user context, never fabricate. Add `memory_recalled` and `memory_edited` to `ANALYTICS.md`.
+- Memory recall is an **Intent Mirroring** moment (`consumer-product-design-agency.md`): it must use the user's actual stored words, be dismissable/editable, and follow the Human-Centered AI honesty rule — attribute to user context, never fabricate. Add `memory_recalled` and `memory_edited` to `analytics/ANALYTICS.md`.
 - The memory store and any embeddings are sensitive PII: document retention, export, and deletion in `privacy-terms.md`, and ensure "delete my data" actually clears memory.
 - The user-editable memory screen is a trust/agency surface — a ≤2-tap path to edit/delete satisfies the agency requirement and is a strong differentiator.
 - Including memory in the system prompt pairs well with prompt caching (prompt 04) to control cost.

@@ -19,16 +19,16 @@ Keep the same backend schema but add:
 - Story table with created_at and 24h expiry logic
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Schema deltas (required image, stored aspect ratio, `stories` table with expiry) belong in prompt 01 / `TECH_SPEC.md`. Implement 24h expiry as a query filter on `created_at` plus a cleanup job — not by trusting the client.
+- Schema deltas (required image, stored aspect ratio, `stories` table with expiry) belong in prompt 01 / `engineering/TECH_SPEC.md`. Implement 24h expiry as a query filter on `created_at` plus a cleanup job — not by trusting the client.
 - The grid feed and profile thumbnails change the layout but reuse the same feed query; the Explore mosaic overlaps with prompt 05 (discovery) — build them together.
-- Stories are a high-engagement, time-boxed surface — a strong 11-star moment. Run `eleven-star-experience.md` and add `story_created`, `story_viewed`, `story_expired` to `ANALYTICS.md`.
+- Stories are a high-engagement, time-boxed surface — a strong 11-star moment. Run `eleven-star-experience.md` and add `story_created`, `story_viewed`, `story_expired` to `analytics/ANALYTICS.md`.
 - Image moderation is non-negotiable before public launch (see the reference's moderation note).
 </content>

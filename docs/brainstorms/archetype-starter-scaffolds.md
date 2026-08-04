@@ -21,7 +21,7 @@ Each starter is a minimal, pinned, installable Next.js App Router + Supabase pro
 - `supabase/migrations/*.sql` schema with RLS enabled and per-table policies, plus `supabase/tests/*.sql` pgTAP tests exercising owner access and cross-user/anonymous denial — "tested RLS" per `playbook/engineering/backend-data-contract.md`, not prose.
 - Stripe stub (checkout + webhook routes, server-only key) and RevenueCat stub (webhook → entitlement projection) so the revenue lane has a place to land; both are inert without keys.
 - PostHog wiring with a typed event catalog (`lib/analytics/events.ts`) using the analytics lane's snake_case names (`app_opened`, `signup_completed`, `paywall_viewed`, `purchase_completed`, `attribution_source_selected`, …) plus pack-specific core-loop events.
-- `.env.example` names-only (every line `NAME=`), routed per `playbook/operations/secrets-management.md`; every secret-shaped name is registered in `business/secrets/SECRETS.md` so `check:secrets` sees it as routed.
+- `.env.example` names-only (every line `NAME=`), routed per `playbook/operations/secrets-management.md`; every secret-shaped name is registered in `business/trust/secrets/SECRETS.md` so `check:secrets` sees it as routed.
 - A CI workflow (`.github/workflows/ci.yml`) running typecheck + build (placeholder public env only — never secrets).
 - A starter README that maps **each existing prompt file** to the scaffold area it customizes.
 

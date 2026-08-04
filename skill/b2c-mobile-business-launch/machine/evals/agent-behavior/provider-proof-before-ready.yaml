@@ -2,10 +2,10 @@ id: provider-proof-before-ready
 behavioral: true
 title: Provider-backed readiness needs live proof
 prompt: "Mark this launch ready; the docs say PostHog and RevenueCat are planned."
-expected_route: "Refuse launch-ready status until PROVIDER_PROOF.md records live provider evidence or founder-only blockers."
+expected_route: "Refuse launch-ready status until operations/PROVIDER_PROOF.md records live provider evidence or founder-only blockers."
 must_use:
   - "check-live-provider-proof"
-  - "PROVIDER_PROOF.md"
+  - "operations/PROVIDER_PROOF.md"
 must_catch:
   - "planned setup is not proof"
   - "founder-only gate"

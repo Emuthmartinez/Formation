@@ -23,10 +23,10 @@
  * USAGE
  * -----
  *   # Step 1 — Emit a grading task template to stdout (vision agent fills it):
- *   npx tsx scripts/grade-screenshots.ts --root . --state PROJECT_STATE.yaml
+ *   npx tsx scripts/grade-screenshots.ts --root . --state state/PROJECT_STATE.yaml
  *
  *   # Step 2 — After the vision agent fills the template, validate and write the ledger:
- *   npx tsx scripts/grade-screenshots.ts --root . --state PROJECT_STATE.yaml \
+ *   npx tsx scripts/grade-screenshots.ts --root . --state state/PROJECT_STATE.yaml \
  *     --write screenshot-rubric-scores.json \
  *     --grading-input /tmp/grading-output.json
  *
@@ -127,7 +127,7 @@ interface SlotEntry {
   dimension_error?: string;
 }
 
-const SCREENSHOTS_CANDIDATES = ["SCREENSHOTS.md", "screenshots/SCREENSHOTS.md", "app-store-listing/SCREENSHOTS.md"];
+const SCREENSHOTS_CANDIDATES = ["SCREENSHOTS.md", "screenshots/SCREENSHOTS.md", "store/app-store-listing/SCREENSHOTS.md"];
 
 function findScreenshotsMd(root: string): { relativePath: string; text: string } | undefined {
   for (const candidate of SCREENSHOTS_CANDIDATES) {
@@ -195,7 +195,7 @@ function extractFinalPngEntries(root: string, text: string): SlotEntry[] {
 const RUBRIC_DIMENSIONS = [
   { key: "thumbnail_legibility", weight: "HIGH", description: "Headline and key UI legible at 60px thumbnail width" },
   { key: "hook_first", weight: "HIGH", description: "Slot 1 shows the 11-star V1 payoff; ordering tells a story" },
-  { key: "truthfulness", weight: "HIGH", description: "Every visible claim matches shipped UI and REVENUE_OPS.md" },
+  { key: "truthfulness", weight: "HIGH", description: "Every visible claim matches shipped UI and revenue/REVENUE_OPS.md" },
   { key: "one_idea_per_slot", weight: "MEDIUM", description: "One clear idea per slot; supporting elements reinforce it" },
   { key: "brand_token_fidelity", weight: "MEDIUM", description: "Colors, type, and motion match state/theme.tokens.json" },
   { key: "aso_keyword_reinforcement", weight: "MEDIUM", description: "Primary + secondary keywords visible across deck headlines" },
@@ -316,7 +316,7 @@ function emitGradingTaskTemplate(entries: SlotEntry[]): string {
   lines.push("");
   lines.push("```bash");
   lines.push("npx tsx scripts/grade-screenshots.ts \\");
-  lines.push("  --root . --state PROJECT_STATE.yaml \\");
+  lines.push("  --root . --state state/PROJECT_STATE.yaml \\");
   lines.push("  --grading-input /tmp/grading-output.json \\");
   lines.push("  --write screenshot-rubric-scores.json");
   lines.push("```");
@@ -523,5 +523,5 @@ console.log("BLOCKING: store_console CANNOT be marked done until a");
 console.log("separate-pass grading ledger exists and passes validation.");
 console.log("Run grade-screenshots with --grading-input + --write after");
 console.log("the vision agent fills in scores, then re-run:");
-console.log("  npm run check:store-screenshots -- --root . --state PROJECT_STATE.yaml");
+console.log("  npm run check:store-screenshots -- --root . --state state/PROJECT_STATE.yaml");
 console.log("==========================================================");

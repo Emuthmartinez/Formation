@@ -3,11 +3,11 @@
  * check-google-play-readiness
  *
  * Enforces Google Play distribution parity when Android is in scope. iOS has
- * deep packet coverage (APPLE_SIGNING.md, APPLE_APP_STORE_REQUIREMENTS.md);
+ * deep packet coverage (store/APPLE_SIGNING.md, store/APPLE_APP_STORE_REQUIREMENTS.md);
  * this validator stops the Play side from shipping as an afterthought clone
  * of the ASC packet. When the project targets Android (platforms include
  * android or an android bundle id exists) and the store lane is active:
- *   1. GOOGLE_PLAY_RELEASE.md must exist.
+ *   1. store/GOOGLE_PLAY_RELEASE.md must exist.
  *   2. It must carry the Play-specific sections: Developer Account,
  *      Data Safety, Content Rating, Play App Signing, Target API Level,
  *      Release Tracks, Closed Testing, Pre-Launch Report.
@@ -58,7 +58,7 @@ if (!androidInScope || storeSkipped) {
 
 // ── Check 0: packet exists ──────────────────────────────────────────────────
 
-const packetCandidates = ["GOOGLE_PLAY_RELEASE.md", "google-play/GOOGLE_PLAY_RELEASE.md"];
+const packetCandidates = ["store/GOOGLE_PLAY_RELEASE.md", "google-play/store/GOOGLE_PLAY_RELEASE.md"];
 const packetPath = packetCandidates.find((candidate) => Boolean(readText(args.root, candidate)));
 const packet = packetPath ? readText(args.root, packetPath) : undefined;
 
@@ -67,10 +67,10 @@ if (!packet || !packetPath) {
     issue(
       storeDone ? "error" : "warning",
       "google_play.packet_missing",
-      "Android is in scope (platforms/bundle id) but GOOGLE_PLAY_RELEASE.md does not exist. " +
+      "Android is in scope (platforms/bundle id) but store/GOOGLE_PLAY_RELEASE.md does not exist. " +
         "Plan the Play side early — the personal-account closed-testing gate (12 testers for 14 continuous days) " +
         "can slip a launch date by weeks when discovered late. See playbook/store/google-play-release.md.",
-      "GOOGLE_PLAY_RELEASE.md",
+      "store/GOOGLE_PLAY_RELEASE.md",
     ),
   );
   reportAndExit("Google Play readiness check", issues);

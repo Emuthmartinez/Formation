@@ -32,7 +32,7 @@ Every B2C mobile launch produced by this skill must implement four named cards. 
 
 **Deterministic guardrail.** The goal must be user-authored (free input or a real choice from ≤5 options). The app must allow the user to change or delete the goal at any time from settings. If the goal is used in a retention notification it must include the user's own words, not generic urgency copy.
 
-**Artifact.** Record the specific commitment interaction in `ONBOARDING.md` (commitment step, question copy, stored key, PostHog person property, notification use). Map it to the 6-star or 7-star level in `11_STAR_EXPERIENCE.md`.
+**Artifact.** Record the specific commitment interaction in `product/ONBOARDING.md` (commitment step, question copy, stored key, PostHog person property, notification use). Map it to the 6-star or 7-star level in `11_STAR_EXPERIENCE.md`.
 
 ---
 
@@ -46,9 +46,9 @@ Every B2C mobile launch produced by this skill must implement four named cards. 
 
 **Dark line.** Rewards are withheld artificially to drive re-opens; slots-style mechanics behind a paywall or ad gate; rewards that require social sharing or a purchase to reveal. This is a compliance veto.
 
-**Deterministic guardrail.** Every variable reward path must have a non-empty fallback (a non-variable version of the same outcome). The reward reveal animation must respect `prefers-reduced-motion` / OS reduce-motion (per `design-visual-system.md`). The PostHog event for the reward reveal must be in `ANALYTICS.md` before build.
+**Deterministic guardrail.** Every variable reward path must have a non-empty fallback (a non-variable version of the same outcome). The reward reveal animation must respect `prefers-reduced-motion` / OS reduce-motion (per `design-visual-system.md`). The PostHog event for the reward reveal must be in `analytics/ANALYTICS.md` before build.
 
-**Artifact.** Name every variable-reward moment in `SPEC.md` with the trigger action, the reward type (tribe/hunt/self), the fallback, and the PostHog event. Map each to a star level in `11_STAR_EXPERIENCE.md`. Motion spec goes in `DESIGN.md`.
+**Artifact.** Name every variable-reward moment in `product/SPEC.md` with the trigger action, the reward type (tribe/hunt/self), the fallback, and the PostHog event. Map each to a star level in `11_STAR_EXPERIENCE.md`. Motion spec goes in `design/DESIGN.md`.
 
 ---
 
@@ -62,9 +62,9 @@ Every B2C mobile launch produced by this skill must implement four named cards. 
 
 **Dark line.** The delay is purely artificial with fabricated stage labels. The effort display implies AI sophistication that does not exist. A fake progress bar resets near 100% to extend time. This is a compliance veto.
 
-**Deterministic guardrail.** Each stage label in the progress experience must map to an actual backend or on-device computation step documented in `TECH_SPEC.md`. If the computation is truly instant (cached), the delay must be omitted or kept to ≤800ms with a single honest label. No stage may claim a specific data source the app does not actually access.
+**Deterministic guardrail.** Each stage label in the progress experience must map to an actual backend or on-device computation step documented in `engineering/TECH_SPEC.md`. If the computation is truly instant (cached), the delay must be omitted or kept to ≤800ms with a single honest label. No stage may claim a specific data source the app does not actually access.
 
-**Artifact.** Define the perceived effort sequence in `ONBOARDING.md` and in the relevant feature section of `SPEC.md`. Include stage count, label copy, duration per stage, motion spec (tokens), and true computation mapping. Add `onboarding_effort_reveal_complete` (or the feature-specific equivalent) to `ANALYTICS.md`.
+**Artifact.** Define the perceived effort sequence in `product/ONBOARDING.md` and in the relevant feature section of `product/SPEC.md`. Include stage count, label copy, duration per stage, motion spec (tokens), and true computation mapping. Add `onboarding_effort_reveal_complete` (or the feature-specific equivalent) to `analytics/ANALYTICS.md`.
 
 ---
 
@@ -78,9 +78,9 @@ Every B2C mobile launch produced by this skill must implement four named cards. 
 
 **Dark line.** The mirror is deployed to create guilt ("You said you'd practice every day…"), to manufacture urgency before a paywall, or to delay a user who wants to leave. This is a compliance veto.
 
-**Deterministic guardrail.** The mirror moment must not be the gate to the next screen (it cannot block progress). It must be dismissable in ≤1 tap. It must not appear more than once per session. Copy must include at least one user-authored phrase from their committed goal or last session data, not generic filler. Review copy against `BRAND.md §Voice` (brand-voice attestation required before build).
+**Deterministic guardrail.** The mirror moment must not be the gate to the next screen (it cannot block progress). It must be dismissable in ≤1 tap. It must not appear more than once per session. Copy must include at least one user-authored phrase from their committed goal or last session data, not generic filler. Review copy against `strategy/BRAND.md §Voice` (brand-voice attestation required before build).
 
-**Artifact.** Define the mirror moment in `ONBOARDING.md` (where it appears) and `SPEC.md` (what triggers it post-onboarding). Include the data source for the user-authored phrase (PostHog person property or local state key). Add `intent_mirror_shown` to `ANALYTICS.md`. Map to 6-star or 7-star level in `11_STAR_EXPERIENCE.md`.
+**Artifact.** Define the mirror moment in `product/ONBOARDING.md` (where it appears) and `product/SPEC.md` (what triggers it post-onboarding). Include the data source for the user-authored phrase (PostHog person property or local state key). Add `intent_mirror_shown` to `analytics/ANALYTICS.md`. Map to 6-star or 7-star level in `11_STAR_EXPERIENCE.md`.
 
 ---
 
@@ -94,12 +94,12 @@ Every B2C mobile launch produced by this skill must implement four named cards. 
 
 **2. Cognitive load caps conversion.** Miller's 7±2 working-memory limit (attribution-uncertain: Miller 1956 is real, but the 7±2 framing is approximate) and Hick's Law (reaction time rises with number of choices) are the HCI-side explanation for why onboarding flows with >5 choices per screen or >7 screens to paywall perform poorly. The decision that changes: every onboarding question must have a single, narrow purpose; options per screen ≤4; required decisions before first value ≤3.
 
-**3. Accessibility is a launch gate, not a cleanup task.** WCAG 2.2 AA contrast minimums, Dynamic Type support (iOS) / Accessibility Settings (Android), and VoiceOver/TalkBack labels are correctness requirements for App Store Review, not polish. The decision that changes: token system must encode contrast-safe palettes from the start (`DESIGN.md`); motion must have OS reduce-motion fallbacks (`design-visual-system.md`); build gates must include accessibility smoke tests via `xcodebuildmcp-testing.md` or `mobai-toolbelt.md`.
+**3. Accessibility is a launch gate, not a cleanup task.** WCAG 2.2 AA contrast minimums, Dynamic Type support (iOS) / Accessibility Settings (Android), and VoiceOver/TalkBack labels are correctness requirements for App Store Review, not polish. The decision that changes: token system must encode contrast-safe palettes from the start (`design/DESIGN.md`); motion must have OS reduce-motion fallbacks (`design-visual-system.md`); build gates must include accessibility smoke tests via `xcodebuildmcp-testing.md` or `mobai-toolbelt.md`.
 
 ### Artifact This Tier Produces
 
-- In `ONBOARDING.md`: a "cognitive load audit" row for each onboarding screen listing: choices count, text density rating (low/medium/high), and the single decision the screen owns.
-- In `DESIGN.md`: contrast token validation note (WCAG AA confirmed or blocked-with-evidence).
+- In `product/ONBOARDING.md`: a "cognitive load audit" row for each onboarding screen listing: choices count, text density rating (low/medium/high), and the single decision the screen owns.
+- In `design/DESIGN.md`: contrast token validation note (WCAG AA confirmed or blocked-with-evidence).
 - Blocker card `hcd-formative-research-skipped` (see Failure Cards shape) if no user test or data-informed finding exists before onboarding is locked.
 
 ### Failure Mode If Tier Is Ignored
@@ -114,16 +114,16 @@ The app ships with onboarding that felt obvious to the team and confuses real us
 
 ### Ideas That Change A Launch Decision
 
-**1. Three design levels operate simultaneously.** Norman's visceral (appearance/feel), behavioral (usability/function), and reflective (meaning/identity) levels are not sequential — all three fire from the first frame the user sees. A B2C mobile app that nails behavioral (works) but misses visceral (looks cheap) or reflective (feels generic) fails at the 5-star level and cannot reach 6 or 7 without a visual and copy redesign. The decision that changes: `DESIGN.md` must contain a deliberate choice for each level (palette/motion = visceral, interaction pattern = behavioral, brand voice/identity = reflective) before any screen is built. The `quality-lens.md` anti-generic check enforces the reflective level.
+**1. Three design levels operate simultaneously.** Norman's visceral (appearance/feel), behavioral (usability/function), and reflective (meaning/identity) levels are not sequential — all three fire from the first frame the user sees. A B2C mobile app that nails behavioral (works) but misses visceral (looks cheap) or reflective (feels generic) fails at the 5-star level and cannot reach 6 or 7 without a visual and copy redesign. The decision that changes: `design/DESIGN.md` must contain a deliberate choice for each level (palette/motion = visceral, interaction pattern = behavioral, brand voice/identity = reflective) before any screen is built. The `quality-lens.md` anti-generic check enforces the reflective level.
 
-**2. Affordances and signifiers shape whether users discover features.** Norman distinguishes affordance (the action a thing can perform) from signifier (what signals that action to the user). An icon with no label affords a tap but signals nothing. Copy that says "Start" signals differently from "Build my plan." The decision that changes: every primary CTA in onboarding and the core loop must use the user's goal verb, not a generic action verb. Signifier audit belongs in the `ONBOARDING.md` copy column.
+**2. Affordances and signifiers shape whether users discover features.** Norman distinguishes affordance (the action a thing can perform) from signifier (what signals that action to the user). An icon with no label affords a tap but signals nothing. Copy that says "Start" signals differently from "Build my plan." The decision that changes: every primary CTA in onboarding and the core loop must use the user's goal verb, not a generic action verb. Signifier audit belongs in the `product/ONBOARDING.md` copy column.
 
 **3. Reflective design is where word-of-mouth originates.** Norman's reflective level is the "made for me" feeling — the emotional resonance that makes a user tell someone about an app. Picard's affective computing research grounds this in the finding that systems that acknowledge a user's emotional state are rated higher in trustworthiness and satisfaction. The decision that changes: the Intent Mirroring Card (above) is the primary engineering surface for reflective-level design; it is not optional.
 
 ### Artifact This Tier Produces
 
-- In `DESIGN.md`: a three-level emotional tone block (visceral target, behavioral target, reflective target) — brief, one sentence each, before the token table.
-- In `ONBOARDING.md`: a signifier audit column for each primary CTA confirming the button label uses the user's goal domain, not a generic verb.
+- In `design/DESIGN.md`: a three-level emotional tone block (visceral target, behavioral target, reflective target) — brief, one sentence each, before the token table.
+- In `product/ONBOARDING.md`: a signifier audit column for each primary CTA confirming the button label uses the user's goal domain, not a generic verb.
 - In `11_STAR_EXPERIENCE.md`: the 6-star and 7-star levels must map to at least one of the three Norman levels explicitly.
 
 ### Failure Mode If Tier Is Ignored
@@ -142,15 +142,15 @@ The app is functionally correct but emotionally neutral. It sits at 5-star (expe
 
 **2. Peak-end rule determines what the user remembers.** Kahneman and Fredrickson showed that memory of an experience is the average of its emotional peak and its final moment — not the duration or average quality. The decision that changes: (a) design one clear emotional peak in the core loop (the Variable Reward Card reveal is the primary engineering surface for this); (b) design the session-end moment deliberately (the Intent Mirroring Card is the session-end surface); (c) do not let the user's last interaction each session be a paywall they declined.
 
-**3. Fresh-start effect lowers the psychological cost of starting.** Hengchen Dai's research shows that temporal landmarks (new week, new month, post-milestone) increase goal initiation. The decision that changes: lifecycle notifications and in-app re-engagement prompts sent at natural temporal landmarks ("New week, same goal") outperform generic re-engagement copy. This is a `ANALYTICS.md` segmentation and `EMAIL_OPS.md` send-time decision.
+**3. Fresh-start effect lowers the psychological cost of starting.** Hengchen Dai's research shows that temporal landmarks (new week, new month, post-milestone) increase goal initiation. The decision that changes: lifecycle notifications and in-app re-engagement prompts sent at natural temporal landmarks ("New week, same goal") outperform generic re-engagement copy. This is a `analytics/ANALYTICS.md` segmentation and `growth/EMAIL_OPS.md` send-time decision.
 
 ### Artifact This Tier Produces
 
 The Four Required Experience Cards above (Commitment Card, Variable Reward Card, Perceived Effort Delay Card, Intent Mirroring Card) are the primary artifacts for Tier 3. Additionally:
 
-- In `ONBOARDING.md`: a B=MAP audit row for the onboarding sequence: Motivation score (high/medium/low and why), Ability score, Prompt placement.
-- In `ANALYTICS.md`: a peak-end event pair — one event for the emotional peak (variable reward reveal) and one for session close (intent mirror or last core action). These two events feed the north-star retention dashboard.
-- In `EMAIL_OPS.md` or `ANALYTICS.md`: fresh-start segment definition and send-time rule.
+- In `product/ONBOARDING.md`: a B=MAP audit row for the onboarding sequence: Motivation score (high/medium/low and why), Ability score, Prompt placement.
+- In `analytics/ANALYTICS.md`: a peak-end event pair — one event for the emotional peak (variable reward reveal) and one for session close (intent mirror or last core action). These two events feed the north-star retention dashboard.
+- In `growth/EMAIL_OPS.md` or `analytics/ANALYTICS.md`: fresh-start segment definition and send-time rule.
 
 ### Failure Mode If Tier Is Ignored
 
@@ -164,7 +164,7 @@ The app works but does not stick. Day-7 retention is low not because the core lo
 
 ### Ideas That Change A Launch Decision
 
-**1. Frontstage and backstage failures look identical to the user.** A user who cannot load their personalized plan does not know whether the failure is a UI bug (frontstage) or a missing API call / RevenueCat entitlement gap (backstage). Service blueprinting forces the team to map both layers simultaneously. The decision that changes: `TECH_SPEC.md` must trace every onboarding screen and core loop screen to its backstage dependency (API, entitlement state, analytics event, permission). A missing trace is a known launch risk. The `failure-cards.md` provider cards (RevenueCat, PostHog, Sentry) are the service-blueprint backstage failure mitigations.
+**1. Frontstage and backstage failures look identical to the user.** A user who cannot load their personalized plan does not know whether the failure is a UI bug (frontstage) or a missing API call / RevenueCat entitlement gap (backstage). Service blueprinting forces the team to map both layers simultaneously. The decision that changes: `engineering/TECH_SPEC.md` must trace every onboarding screen and core loop screen to its backstage dependency (API, entitlement state, analytics event, permission). A missing trace is a known launch risk. The `failure-cards.md` provider cards (RevenueCat, PostHog, Sentry) are the service-blueprint backstage failure mitigations.
 
 **2. Journey mapping reveals the moments before and after the app.** The user's emotional job did not start when they opened the App Store. It started when something in their life created a need. Service design maps the full arc: trigger → discovery (ad/word-of-mouth/App Store) → install → onboarding → first value → retention → lapse → re-engagement → word-of-mouth. The decision that changes: the paid UA creative (`PAID_UA.md`) and UGC playbook (`ugc-creator-engine.md`) must address the trigger moment (why the user's life produced this need *today*), not just feature benefits. The viral growth loop (`viral-growth-loops.md`) must map the word-of-mouth moment and the recipient's entry point.
 
@@ -172,8 +172,8 @@ The app works but does not stick. Day-7 retention is low not because the core lo
 
 ### Artifact This Tier Produces
 
-- In `TECH_SPEC.md`: a frontstage/backstage dependency table for each onboarding screen and core loop screen (frontstage element → backstage service/API/entitlement → failure mode → fallback behavior).
-- In `LAUNCH_TRACE.md`: a journey-map row for the trigger-to-word-of-mouth arc, linking each moment to the surface that handles it.
+- In `engineering/TECH_SPEC.md`: a frontstage/backstage dependency table for each onboarding screen and core loop screen (frontstage element → backstage service/API/entitlement → failure mode → fallback behavior).
+- In `state/LAUNCH_TRACE.md`: a journey-map row for the trigger-to-word-of-mouth arc, linking each moment to the surface that handles it.
 - In `PAID_UA.md`: the Day-7 retention unlock threshold as a hard stop/scale rule.
 
 ### Failure Mode If Tier Is Ignored
@@ -190,7 +190,7 @@ The product launches with a polished frontstage (beautiful onboarding, smooth an
 
 ### Ideas That Change A Launch Decision
 
-**1. Trust calibration is set by the first AI result.** If the first AI output is wrong, generic, or clearly uncalibrated to the user's actual context, trust resets to zero and rarely recovers in the same session (attribution-uncertain: consistent finding across HCI/HAI research on AI assistant trust, no single canonical citation). The decision that changes: the Perceived Effort Delay Card (above) is the primary trust-calibration engineering surface — showing the user what the AI considered signals competence before the result appears. The result itself must be qualified where appropriate ("Based on what you told me…") to signal the system's knowledge boundary. This is a copy rule, not a UI component. Add it to `BRAND.md §Voice` as a hard copy constraint.
+**1. Trust calibration is set by the first AI result.** If the first AI output is wrong, generic, or clearly uncalibrated to the user's actual context, trust resets to zero and rarely recovers in the same session (attribution-uncertain: consistent finding across HCI/HAI research on AI assistant trust, no single canonical citation). The decision that changes: the Perceived Effort Delay Card (above) is the primary trust-calibration engineering surface — showing the user what the AI considered signals competence before the result appears. The result itself must be qualified where appropriate ("Based on what you told me…") to signal the system's knowledge boundary. This is a copy rule, not a UI component. Add it to `strategy/BRAND.md §Voice` as a hard copy constraint.
 
 **2. User agency must be preserved at every AI-generated step.** An AI feature that removes user choice — even when its recommendation is correct — is experienced as loss of control. Kahneman and Thaler's endowment effect implies users will resist being "corrected" by a system more than they resist correcting themselves. The decision that changes: every AI-generated recommendation, plan, or result must include a visible "change this" path within ≤2 taps. The Commitment Card feeds this: the user's own committed goal is the override authority for any AI output. If the AI suggests a different goal, it must ask, not replace.
 
@@ -198,9 +198,9 @@ The product launches with a polished frontstage (beautiful onboarding, smooth an
 
 ### Artifact This Tier Produces
 
-- In `BRAND.md §Voice` (or `DESIGN.md §Copy Rules`): a hard copy rule: every AI-generated result in the UI must include one sentence attributing the result to user-provided context. No AI output may claim certainty it cannot verify.
-- In `SPEC.md`: for every AI feature, a "user agency path" specification: the specific tap path that lets the user override, redo, or dismiss the AI result within ≤2 taps.
-- In `ONBOARDING.md`: a "trust ramp" note on the first AI reveal screen — what the system shows to signal that it has processed the user's specific input, not a generic output.
+- In `strategy/BRAND.md §Voice` (or `design/DESIGN.md §Copy Rules`): a hard copy rule: every AI-generated result in the UI must include one sentence attributing the result to user-provided context. No AI output may claim certainty it cannot verify.
+- In `product/SPEC.md`: for every AI feature, a "user agency path" specification: the specific tap path that lets the user override, redo, or dismiss the AI result within ≤2 taps.
+- In `product/ONBOARDING.md`: a "trust ramp" note on the first AI reveal screen — what the system shows to signal that it has processed the user's specific input, not a generic output.
 
 ### Failure Mode If Tier Is Ignored
 
@@ -216,17 +216,17 @@ These apply to all five tiers and all four cards. Any implementation that crosse
 |---|---|---|---|
 | Commitment | User-authored goal, revisable, used to personalize | Guilt-trigger on churn, fake defaults that require opt-out | Can user delete goal from settings in ≤2 taps? |
 | Variable Reward | Reward is a real product outcome, variability in quality/surprise | Artificial withholding, slots-style monetization, requires payment/share to reveal | Does a non-variable fallback exist? |
-| Perceived Effort Delay | Each stage label maps to a real computation step | Fabricated stages, reset-near-100% fake progress bar, implies AI capability that does not exist | Is each label in TECH_SPEC.md? |
+| Perceived Effort Delay | Each stage label maps to a real computation step | Fabricated stages, reset-near-100% fake progress bar, implies AI capability that does not exist | Is each label in engineering/TECH_SPEC.md? |
 | Intent Mirror | Uses user's own words, dismissable in ≤1 tap, ≤once per session | Guilt before paywall, blocks navigation, generic urgency copy | Does it use user-authored phrase from committed goal? |
-| Variable Reward motion | `DesignTokens.Motion` compliant, reduce-motion fallback | Motion plays on OS reduce-motion enabled | Is fallback in DESIGN.md? |
-| AI results | Attributes result to user context, ≤2-tap override | Claims certainty it cannot verify, removes user choice silently | Is attribution copy in BRAND.md §Voice? |
+| Variable Reward motion | `DesignTokens.Motion` compliant, reduce-motion fallback | Motion plays on OS reduce-motion enabled | Is fallback in design/DESIGN.md? |
+| AI results | Attributes result to user context, ≤2-tap override | Claims certainty it cannot verify, removes user choice silently | Is attribution copy in strategy/BRAND.md §Voice? |
 | Fresh-start | Temporal landmarks user can recognize | Fake scarcity timers that reset | Is countdown enforced server-side? |
 
 ---
 
 ## Analytics Contract
 
-Every emotional moment must be measurable. These events are required in `ANALYTICS.md` before any Experience Card is shipped.
+Every emotional moment must be measurable. These events are required in `analytics/ANALYTICS.md` before any Experience Card is shipped.
 
 | Event Name | Fires When | Required Properties |
 |---|---|---|
@@ -238,7 +238,7 @@ Every emotional moment must be measurable. These events are required in `ANALYTI
 | `ai_result_trust_signal_shown` | AI attribution copy renders on result screen | `feature_context` |
 | `ai_result_overridden` | User taps "change this" path on AI result | `feature_context`, `steps_to_override` |
 
-All events must follow the naming rules in `ANALYTICS.md`. Add these to the event catalog in `ANALYTICS.md` before build, not after.
+All events must follow the naming rules in `analytics/ANALYTICS.md`. Add these to the event catalog in `analytics/ANALYTICS.md` before build, not after.
 
 ---
 
@@ -246,18 +246,18 @@ All events must follow the naming rules in `ANALYTICS.md`. Add these to the even
 
 Before calling the emotional/behavioral layer build-ready:
 
-- [ ] All four Experience Cards are specified in `ONBOARDING.md` and `SPEC.md` with copy, data source, PostHog event, and star-level mapping.
+- [ ] All four Experience Cards are specified in `product/ONBOARDING.md` and `product/SPEC.md` with copy, data source, PostHog event, and star-level mapping.
 - [ ] Each card's bright-line guardrail is met (see table above).
 - [ ] Dark-line tests pass: no guilt-trigger on churn, no artificial withholding, no fabricated AI stages, no intent mirror that blocks navigation.
-- [ ] Perceived Effort Delay stage labels all trace to a step in `TECH_SPEC.md`.
-- [ ] Variable Reward motion has a `prefers-reduced-motion` fallback in `DESIGN.md`.
+- [ ] Perceived Effort Delay stage labels all trace to a step in `engineering/TECH_SPEC.md`.
+- [ ] Variable Reward motion has a `prefers-reduced-motion` fallback in `design/DESIGN.md`.
 - [ ] Intent Mirror copy includes a user-authored phrase (Commitment Card stored key or last session action) — brand-voice attestation attached.
-- [ ] AI result screens have attribution copy and ≤2-tap override path specified in `SPEC.md`.
-- [ ] All seven analytics events from the Analytics Contract are in `ANALYTICS.md`.
-- [ ] Three-level emotional tone block (visceral/behavioral/reflective) is in `DESIGN.md`.
-- [ ] Frontstage/backstage dependency table is in `TECH_SPEC.md` for each Experience Card screen.
-- [ ] Peak-end event pair (reward reveal + session close) is in `ANALYTICS.md`.
-- [ ] B=MAP audit row is in `ONBOARDING.md`.
-- [ ] Journey-map row in `LAUNCH_TRACE.md` covers trigger → word-of-mouth arc.
+- [ ] AI result screens have attribution copy and ≤2-tap override path specified in `product/SPEC.md`.
+- [ ] All seven analytics events from the Analytics Contract are in `analytics/ANALYTICS.md`.
+- [ ] Three-level emotional tone block (visceral/behavioral/reflective) is in `design/DESIGN.md`.
+- [ ] Frontstage/backstage dependency table is in `engineering/TECH_SPEC.md` for each Experience Card screen.
+- [ ] Peak-end event pair (reward reveal + session close) is in `analytics/ANALYTICS.md`.
+- [ ] B=MAP audit row is in `product/ONBOARDING.md`.
+- [ ] Journey-map row in `state/LAUNCH_TRACE.md` covers trigger → word-of-mouth arc.
 - [ ] Day-7 retention unlock threshold recorded as hard stop/scale rule in `PAID_UA.md`.
 - [ ] `npm run check:11-star -- --root .` passes with all four cards mapped to a star level.

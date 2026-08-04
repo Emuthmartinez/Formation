@@ -2,20 +2,20 @@
 /**
  * check-analytics-catalog.ts — cross-doc event-catalog completeness.
  *
- * ANALYTICS.md is the single event catalog (analytics-attribution.md): any
+ * analytics/ANALYTICS.md is the single event catalog (analytics-attribution.md): any
  * event a surface doc names must exist there before the surface locks.
- * This validator reconciles the event names declared in ONBOARDING.md,
- * EMOTIONAL_DESIGN.md, VIRAL_GROWTH.md, and REVENUE_OPS.md against ANALYTICS.md.
+ * This validator reconciles the event names declared in product/ONBOARDING.md,
+ * EMOTIONAL_DESIGN.md, VIRAL_GROWTH.md, and revenue/REVENUE_OPS.md against analytics/ANALYTICS.md.
  *
  * Extraction is deliberately narrow so property names never count as events:
  *   - markdown table cells under a header containing "event" or "analytics"
- *     (e.g. ONBOARDING.md "Analytics" column, EMOTIONAL_DESIGN.md
+ *     (e.g. product/ONBOARDING.md "Analytics" column, EMOTIONAL_DESIGN.md
  *     "Measurement Event" column), backticked snake_case tokens only
  *   - bare bullet lines of the form "- `event_name`" (VIRAL_GROWTH.md list)
  *
  * Severity: warning while the analytics lane is partial, error when
  * lanes.analytics_attribution is done (or the doc names events while
- * ANALYTICS.md is missing). Skipped when the lane is not_needed/deferred.
+ * analytics/ANALYTICS.md is missing). Skipped when the lane is not_needed/deferred.
  *
  * npm script: check:analytics-catalog
  */
@@ -38,28 +38,28 @@ if (laneSkipped) {
 
 const severity: "error" | "warning" = laneDone ? "error" : "warning";
 
-// REVENUE_OPS.md drift hardens with the REVENUE lane too: a done revenue lane
+// revenue/REVENUE_OPS.md drift hardens with the REVENUE lane too: a done revenue lane
 // naming an uncataloged event is an error even while analytics is still
 // partial — the revenue claim is what makes the event name load-bearing.
 const revenueDone = state ? asString(getPath(state, "lanes.revenue.status"))?.toLowerCase() === "done" : false;
 function severityFor(docLabel: string): "error" | "warning" {
-  if (docLabel === "REVENUE_OPS.md" && revenueDone) return "error";
+  if (docLabel === "revenue/REVENUE_OPS.md" && revenueDone) return "error";
   return severity;
 }
 
 // Surface docs that name events (first existing path wins per doc).
-// REVENUE_OPS.md joined the list when the billing-lifecycle events prescribed
+// revenue/REVENUE_OPS.md joined the list when the billing-lifecycle events prescribed
 // in revenue-monetization.md §8a/§8b turned out to live only in reference
 // prose — a revenue doc naming an event the catalog does not carry is the
 // same invented-inline miss as an onboarding doc doing it.
 const SOURCE_DOCS: Array<{ label: string; paths: string[] }> = [
-  { label: "ONBOARDING.md", paths: ["ONBOARDING.md"] },
-  { label: "EMOTIONAL_DESIGN.md", paths: ["EMOTIONAL_DESIGN.md", "emotional-design/EMOTIONAL_DESIGN.md"] },
+  { label: "product/ONBOARDING.md", paths: ["product/ONBOARDING.md"] },
+  { label: "EMOTIONAL_DESIGN.md", paths: ["EMOTIONAL_DESIGN.md", "product/experience/emotional-design/EMOTIONAL_DESIGN.md"] },
   { label: "VIRAL_GROWTH.md", paths: ["VIRAL_GROWTH.md", "growth/VIRAL_GROWTH.md"] },
-  { label: "REVENUE_OPS.md", paths: ["REVENUE_OPS.md"] },
+  { label: "revenue/REVENUE_OPS.md", paths: ["revenue/REVENUE_OPS.md"] },
 ];
 
-const analyticsText = readText(args.root, "ANALYTICS.md") ?? readText(args.root, "analytics/ANALYTICS.md");
+const analyticsText = readText(args.root, "analytics/ANALYTICS.md") ?? readText(args.root, "analytics/analytics/ANALYTICS.md");
 
 const eventToken = /`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`/g;
 
@@ -85,8 +85,8 @@ for (const doc of SOURCE_DOCS) {
       issue(
         severityFor(doc.label),
         "analytics_catalog.analytics_doc_missing",
-        `${doc.label} names ${events.size} analytics event(s) but ANALYTICS.md does not exist. Create the event catalog before surfaces lock (analytics-attribution.md).`,
-        "ANALYTICS.md",
+        `${doc.label} names ${events.size} analytics event(s) but analytics/ANALYTICS.md does not exist. Create the event catalog before surfaces lock (analytics-attribution.md).`,
+        "analytics/ANALYTICS.md",
       ),
     );
     break;
@@ -98,7 +98,7 @@ for (const doc of SOURCE_DOCS) {
         issue(
           severityFor(doc.label),
           `analytics_catalog.${eventName}.uncataloged`,
-          `${doc.label} names the event ${eventName} but ANALYTICS.md's catalog does not contain it. Add it to the Event Contract (or Emotion Card Events) table before the surface locks — events are named in the catalog first, never invented inline.`,
+          `${doc.label} names the event ${eventName} but analytics/ANALYTICS.md's catalog does not contain it. Add it to the Event Contract (or Emotion Card Events) table before the surface locks — events are named in the catalog first, never invented inline.`,
           doc.label,
         ),
       );

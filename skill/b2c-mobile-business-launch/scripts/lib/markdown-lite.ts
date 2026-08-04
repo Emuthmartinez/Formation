@@ -259,7 +259,7 @@ function parseParagraph(lines: string[], start: number): { block: Block; next: n
   while (index < lines.length) {
     const raw = lines[index] ?? "";
     if (raw.trim() === "") break;
-    // A list may interrupt a paragraph without a blank line, and STORE_CONSOLE.md
+    // A list may interrupt a paragraph without a blank line, and store/STORE_CONSOLE.md
     // does exactly that. Headings, tables and fences end a paragraph too.
     if (index > start && (UNORDERED_ITEM.test(raw) || ORDERED_ITEM.test(raw) || HEADING.test(raw) || FENCE.test(raw) || raw.startsWith("|"))) {
       break;

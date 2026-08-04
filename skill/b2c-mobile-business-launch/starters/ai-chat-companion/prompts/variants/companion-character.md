@@ -25,16 +25,16 @@ Hard rules (do not remove):
 - Crisis and self-harm handling from prompt 08 always overrides the persona
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
 - The "hard rules" are an `ethics-guardrail.md` compliance veto, not optional copy. Companion mechanics that exploit loneliness or manufacture dependency to drive retention/spend are dark patterns. Any affinity/streak indicator is a HIGH-risk card requiring an escape hatch, a counter-metric, and a truthfulness proof (`consumer-product-design-agency.md`).
-- Persona/backstory is part of the system prompt — version it and review against `BRAND.md §Voice`; persona changes are `change-cascade.md` events.
+- Persona/backstory is part of the system prompt — version it and review against `strategy/BRAND.md §Voice`; persona changes are `change-cascade.md` events.
 - Age gating and minor-safety disclosures (prompt 08) are required; confirm legal requirements with the founder and reflect them in `privacy-terms.md`.
 - Relationship memory deepens prompt 05's privacy/deletion obligations — "delete my data" must clear it.
 </content>

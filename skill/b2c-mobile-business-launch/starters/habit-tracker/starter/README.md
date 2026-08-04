@@ -27,7 +27,7 @@ Each prompt customizes a specific area. Run them in pack order (see [`../README.
 
 | Prompt | Customizes |
 |---|---|
-| `00-positioning-strategy.md` | No code — positioning feeds `RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md`. |
+| `00-positioning-strategy.md` | No code — positioning feeds `strategy/RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md`. |
 | `01-database-schema.md` | `supabase/migrations/0001_init.sql` (extend habits/check-ins/reminders schema) + `supabase/tests/0001_rls.test.sql` (every new table gets tested owner-only policies). |
 | `02-auth-system.md` | `app/login/`, `app/auth/confirm/route.ts`, `lib/supabase/*`, `proxy.ts` — plus timezone capture into `profiles.timezone` (streaks depend on the user's local midnight). |
 | `03-habit-core-loop.md` | `app/today/page.tsx` (one-tap optimistic check-in, streak display) + `lib/analytics/events.ts` core-loop events. |

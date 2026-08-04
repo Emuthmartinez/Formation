@@ -24,17 +24,17 @@ Algorithm for feed:
 - Videos watched past 80% get heavily weighted in recommendations
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Video transcoding (**Mux or Cloudflare Stream**) is a paid/account-gated provider and an external dependency — record the choice in `TOOL_DECISIONS.md` and route its keys through `SECRETS.md`. Confirm cost/egress assumptions; video is the most expensive media to serve.
-- Schema deltas: `videos` table with duration, thumbnail URL, and a watch-events table (for completion-rate tracking) — add to prompt 01 / `TECH_SPEC.md`.
-- Watch completion is the primary engagement signal and the ranking input. Add `video_view_started`, `video_watch_progress`, `video_completed` (with completion %) to `ANALYTICS.md` — these are required before the recommendation mix can be tuned.
+- Video transcoding (**Mux or Cloudflare Stream**) is a paid/account-gated provider and an external dependency — record the choice in `strategy/TOOL_DECISIONS.md` and route its keys through `SECRETS.md`. Confirm cost/egress assumptions; video is the most expensive media to serve.
+- Schema deltas: `videos` table with duration, thumbnail URL, and a watch-events table (for completion-rate tracking) — add to prompt 01 / `engineering/TECH_SPEC.md`.
+- Watch completion is the primary engagement signal and the ranking input. Add `video_view_started`, `video_watch_progress`, `video_completed` (with completion %) to `analytics/ANALYTICS.md` — these are required before the recommendation mix can be tuned.
 - The 40/60 follow-vs-recommend mix is a starting heuristic, not a law — make it a tunable config and revisit with real watch data.
 - Auto-play with sound off and tap-to-unmute must honor reduced-motion / data-saver preferences; specify fallbacks (`design-visual-system.md`).
 </content>

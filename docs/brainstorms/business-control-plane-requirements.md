@@ -18,7 +18,7 @@ Markdown should remain useful as artifact content, but not as the primary state 
 
 ## Existing Repo Anchors
 
-- `skill/b2c-mobile-business-launch/business/PROJECT_STATE.yaml` already models launch state, continuity, orchestration, lanes, tools, and founder-only gates.
+- `skill/b2c-mobile-business-launch/business/state/PROJECT_STATE.yaml` already models launch state, continuity, orchestration, lanes, tools, and founder-only gates.
 - `skill/b2c-mobile-business-launch/state/business.json` already models business identity, design state, surfaces, App Store state, and control-plane panels.
 - `skill/b2c-mobile-business-launch/state/schema/business.schema.json` already validates Design Room state with JSON Schema and AJV.
 - `skill/b2c-mobile-business-launch/playbook/process/control-plane.md` already says Design Room is the first panel in a larger Business Control Plane.
@@ -39,7 +39,7 @@ Markdown should remain useful as artifact content, but not as the primary state 
 
 1. **Workspace index**: A portfolio file that lists local businesses, templates, paths, tags, and current status. This is the home-screen source.
 2. **Business state**: A normalized per-business model for identity, stage, positioning, surfaces, panels, artifacts, proof, and agent lanes.
-3. **Launch state adapter**: A parser that imports `PROJECT_STATE.yaml` or another launch-state file into the normalized business model.
+3. **Launch state adapter**: A parser that imports `state/PROJECT_STATE.yaml` or another launch-state file into the normalized business model.
 4. **Artifact registry**: A typed list of docs, HTML renders, screenshots, evals, validators, app builds, deploys, and provider proof.
 5. **Template registry**: A list of scaffoldable business templates, their included files, required state, and optional adapters.
 
@@ -76,7 +76,7 @@ After that, the next experiment should replace the fixture with an adapter that 
 
 - `skill/b2c-mobile-business-launch/state/business.json`
 - `skill/b2c-mobile-business-launch/state/theme.tokens.json`
-- `skill/b2c-mobile-business-launch/business/PROJECT_STATE.yaml`
+- `skill/b2c-mobile-business-launch/business/state/PROJECT_STATE.yaml`
 
 That adapter now exists as `skill/b2c-mobile-business-launch/scripts/render-business-control-plane-workspace.ts`; `check:business-control-plane-workspace` keeps the generated workspace read model fresh.
 

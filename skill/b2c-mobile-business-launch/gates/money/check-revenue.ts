@@ -14,14 +14,14 @@
  *     file (Tier-1 anti-gaming floor).
  *   - Revenue lane is "done" but proof JSON is below the minimum byte
  *     threshold (Tier-1 anti-gaming floor).
- *   - Revenue lane is "done" but REVENUE_OPS.md contains any product in
+ *   - Revenue lane is "done" but revenue/REVENUE_OPS.md contains any product in
  *     MISSING_METADATA state.
- *   - Revenue lane is "done" but REVENUE_OPS.md contains a product mapped as
+ *   - Revenue lane is "done" but revenue/REVENUE_OPS.md contains a product mapped as
  *     non_renewing_subscription (lifetime must be non_consumable).
- *   - Revenue lane is "done" but REVENUE_OPS.md contains no product table rows.
- *   - Revenue lane is "done" but REVENUE_OPS.md contains no currentOffering ID.
+ *   - Revenue lane is "done" but revenue/REVENUE_OPS.md contains no product table rows.
+ *   - Revenue lane is "done" but revenue/REVENUE_OPS.md contains no currentOffering ID.
  *   - Revenue lane is "done" but restore-purchase test is not confirmed in
- *     revenue/revenuecat-proof.md or PRODUCTION_READINESS.md.
+ *     revenue/revenuecat-proof.md or engineering/PRODUCTION_READINESS.md.
  *
  * Warnings:
  *   - Proof JSON timestamp is older than 30 days (stale probe).
@@ -32,8 +32,8 @@
  *   - Annual plan is not offered or not highlighted as the recommended option.
  *   - Freemium model chosen without a documented network-effect rationale.
  *   - Involuntary-churn recovery not addressed when lane is done.
- *   - Orphan state: revenue lane is "partial" but REVENUE_OPS.md is missing.
- *   - Proof artifact path declared in REVENUE_OPS.md references a bare word
+ *   - Orphan state: revenue lane is "partial" but revenue/REVENUE_OPS.md is missing.
+ *   - Proof artifact path declared in revenue/REVENUE_OPS.md references a bare word
  *     (no slash/dot) that is not a recognizable file path.
  *   - Prose fallback: revenuecat-proof.md present but lacks entitlement/release
  *     confirmation (warning only; JSON is the authoritative proof).
@@ -49,9 +49,9 @@ const loaded = loadProjectState(args);
 const issues: Issue[] = [...loaded.issues];
 const state = loaded.state;
 
-const revenueOpsPath = "REVENUE_OPS.md";
-const providerProofPath = "PROVIDER_PROOF.md";
-const productionReadinessPath = "PRODUCTION_READINESS.md";
+const revenueOpsPath = "revenue/REVENUE_OPS.md";
+const providerProofPath = "operations/PROVIDER_PROOF.md";
+const productionReadinessPath = "engineering/PRODUCTION_READINESS.md";
 const proofJsonRelPath = "revenue/revenuecat-proof.json";
 const proofMdRelPath = "revenue/revenuecat-proof.md";
 // The example file ships with the skill; used for the byte-identity Tier-1 floor.
@@ -111,7 +111,7 @@ function looksLikeBareWord(value: string): boolean {
 }
 
 /**
- * Extract the evidence path from a PROVIDER_PROOF.md RevenueCat row.
+ * Extract the evidence path from a operations/PROVIDER_PROOF.md RevenueCat row.
  * The template row pattern is:
  *   | RevenueCat | ... | ... | revenue/revenuecat-proof.json | ... |
  */
@@ -394,7 +394,7 @@ if (!revenueSkipped) {
       issue(
         revenueDone ? "error" : "warning",
         "revenue.ops_doc.missing",
-        "REVENUE_OPS.md is required for the revenue lane. Copy business/REVENUE_OPS.md and fill in products, offering, and paywall model.",
+        "revenue/REVENUE_OPS.md is required for the revenue lane. Copy business/revenue/REVENUE_OPS.md and fill in products, offering, and paywall model.",
         revenueOpsPath,
       ),
     );
@@ -416,7 +416,7 @@ if (revenueDone && revenueOpsText) {
       issue(
         "error",
         "revenue.offering_id.missing",
-        "REVENUE_OPS.md must identify the currentOffering ID (e.g. 'default') before the revenue lane is marked done.",
+        "revenue/REVENUE_OPS.md must identify the currentOffering ID (e.g. 'default') before the revenue lane is marked done.",
         revenueOpsPath,
       ),
     );
@@ -445,7 +445,7 @@ if (revenueDone && revenueOpsText) {
       issue(
         "error",
         "revenue.product_table.empty",
-        "REVENUE_OPS.md must contain at least one product table row with real product IDs (in the Store Product ID table) before the revenue lane is marked done.",
+        "revenue/REVENUE_OPS.md must contain at least one product table row with real product IDs (in the Store Product ID table) before the revenue lane is marked done.",
         revenueOpsPath,
       ),
     );
@@ -464,7 +464,7 @@ if (revenueDone && revenueOpsText) {
       issue(
         "error",
         "revenue.pricing_decision.missing",
-        'REVENUE_OPS.md has no "Pricing Decision" section. Run the price-point decision procedure (revenue-monetization.md §7a) and record the anchor table, candidates, and founder approval before the revenue lane is marked done.',
+        'revenue/REVENUE_OPS.md has no "Pricing Decision" section. Run the price-point decision procedure (revenue-monetization.md §7a) and record the anchor table, candidates, and founder approval before the revenue lane is marked done.',
         revenueOpsPath,
       ),
     );
@@ -534,7 +534,7 @@ if (revenueDone && revenueOpsText) {
         issue(
           "error",
           "revenue.experiment_backlog.missing",
-          'REVENUE_OPS.md has no "Paywall Experiment Backlog" section and the app has been live four-plus weeks. The first paywall is a ' +
+          'revenue/REVENUE_OPS.md has no "Paywall Experiment Backlog" section and the app has been live four-plus weeks. The first paywall is a ' +
             "hypothesis, not a decision — stand up the experiment program (revenue-monetization.md §7b) before the plateau sets in.",
           revenueOpsPath,
         ),
@@ -696,7 +696,7 @@ if (revenueDone && revenueOpsText) {
       issue(
         "error",
         "revenue.missing_metadata.unresolved",
-        'REVENUE_OPS.md contains a product in MISSING_METADATA state (a row recording the state, or a product table row whose "MISSING_METADATA cleared?" column is negative or unanswered). All App Store subscription products must clear MISSING_METADATA (subscription-group localizations created) before the revenue lane is marked done.',
+        'revenue/REVENUE_OPS.md contains a product in MISSING_METADATA state (a row recording the state, or a product table row whose "MISSING_METADATA cleared?" column is negative or unanswered). All App Store subscription products must clear MISSING_METADATA (subscription-group localizations created) before the revenue lane is marked done.',
         revenueOpsPath,
       ),
     );
@@ -708,14 +708,14 @@ if (revenueDone && revenueOpsText) {
       issue(
         "error",
         "revenue.product_type.non_renewing_subscription",
-        "REVENUE_OPS.md lists a product typed as non_renewing_subscription. Lifetime/one-time unlock products must be non_consumable; non_renewing_subscription silently expires and is the wrong type for a permanent unlock.",
+        "revenue/REVENUE_OPS.md lists a product typed as non_renewing_subscription. Lifetime/one-time unlock products must be non_consumable; non_renewing_subscription silently expires and is the wrong type for a permanent unlock.",
         revenueOpsPath,
       ),
     );
   }
 
   // 5. RevenueCat proof JSON artifact (Tier-3 live probe artifact verification).
-  //    This replaces the previous prose/keyword scan on PROVIDER_PROOF.md.
+  //    This replaces the previous prose/keyword scan on operations/PROVIDER_PROOF.md.
   const proofJsonContent = rawContent(proofJsonRelPath);
   if (!proofJsonContent) {
     issues.push(
@@ -738,7 +738,7 @@ if (revenueDone && revenueOpsText) {
     }
   }
 
-  // 5b. Proof JSON path declared in REVENUE_OPS.md — warn if it is a bare word.
+  // 5b. Proof JSON path declared in revenue/REVENUE_OPS.md — warn if it is a bare word.
   const proofPathFromOps = (() => {
     const match = revenueOpsText.match(/RevenueCat proof artifact path\s*:\s*`?([^\s`\n]+)`?/i);
     if (match && match[1] && !isPlaceholderPath(match[1])) {
@@ -752,7 +752,7 @@ if (revenueDone && revenueOpsText) {
       issue(
         "error",
         "revenue.proof_artifact.path_undeclared",
-        "REVENUE_OPS.md must declare a 'RevenueCat proof artifact path' pointing to the on-disk proof file (e.g. revenue/revenuecat-proof.json).",
+        "revenue/REVENUE_OPS.md must declare a 'RevenueCat proof artifact path' pointing to the on-disk proof file (e.g. revenue/revenuecat-proof.json).",
         revenueOpsPath,
       ),
     );
@@ -763,7 +763,7 @@ if (revenueDone && revenueOpsText) {
       issue(
         "warning",
         "revenue.proof_artifact.path_bare_word",
-        `The RevenueCat proof artifact path in REVENUE_OPS.md ("${proofPathFromOps}") looks like a bare word rather than a relative file path (no slash or dot). Expected a path like revenue/revenuecat-proof.json.`,
+        `The RevenueCat proof artifact path in revenue/REVENUE_OPS.md ("${proofPathFromOps}") looks like a bare word rather than a relative file path (no slash or dot). Expected a path like revenue/revenuecat-proof.json.`,
         revenueOpsPath,
       ),
     );
@@ -802,7 +802,7 @@ if (revenueDone && revenueOpsText) {
     }
   }
 
-  // 6. Restore tested — check proof.md companion or PRODUCTION_READINESS.md.
+  // 6. Restore tested — check proof.md companion or engineering/PRODUCTION_READINESS.md.
   const restoreInProofMd = proofMdText
     ? textHasPattern(proofMdText, /restore.*purchase|purchase.*restore|restore.*tested|restore.*verified|restore result.*succeeded/i)
     : false;
@@ -812,20 +812,20 @@ if (revenueDone && revenueOpsText) {
       issue(
         "error",
         "revenue.restore.unconfirmed",
-        "Restore-purchases path must be confirmed tested in revenue/revenuecat-proof.md or PRODUCTION_READINESS.md before the revenue lane is marked done.",
+        "Restore-purchases path must be confirmed tested in revenue/revenuecat-proof.md or engineering/PRODUCTION_READINESS.md before the revenue lane is marked done.",
         proofMdRelPath,
       ),
     );
   }
 
-  // 7. PROVIDER_PROOF.md must reference RevenueCat (still required for cross-file
+  // 7. operations/PROVIDER_PROOF.md must reference RevenueCat (still required for cross-file
   //    consistency; the primary proof is now the JSON artifact).
   if (!providerProofText) {
     issues.push(
       issue(
         "error",
         "revenue.provider_proof.missing",
-        "PROVIDER_PROOF.md is required when the revenue lane is done. It must include a RevenueCat row with a real evidence path.",
+        "operations/PROVIDER_PROOF.md is required when the revenue lane is done. It must include a RevenueCat row with a real evidence path.",
         providerProofPath,
       ),
     );
@@ -835,7 +835,7 @@ if (revenueDone && revenueOpsText) {
         issue(
           "error",
           "revenue.provider_proof.revenuecat_row.missing",
-          "PROVIDER_PROOF.md must contain a RevenueCat row with current status, proof command, and evidence path.",
+          "operations/PROVIDER_PROOF.md must contain a RevenueCat row with current status, proof command, and evidence path.",
           providerProofPath,
         ),
       );
@@ -846,7 +846,7 @@ if (revenueDone && revenueOpsText) {
           issue(
             "error",
             "revenue.provider_proof.evidence_path.missing",
-            "The RevenueCat row in PROVIDER_PROOF.md must contain a real evidence path (not a placeholder) pointing to the on-disk proof artifact.",
+            "The RevenueCat row in operations/PROVIDER_PROOF.md must contain a real evidence path (not a placeholder) pointing to the on-disk proof artifact.",
             providerProofPath,
           ),
         );
@@ -857,7 +857,7 @@ if (revenueDone && revenueOpsText) {
             issue(
               "warning",
               "revenue.provider_proof.evidence_path_bare_word",
-              `The RevenueCat evidence path in PROVIDER_PROOF.md ("${evidencePath}") looks like a bare word rather than a relative file path. Expected a path like revenue/revenuecat-proof.json.`,
+              `The RevenueCat evidence path in operations/PROVIDER_PROOF.md ("${evidencePath}") looks like a bare word rather than a relative file path. Expected a path like revenue/revenuecat-proof.json.`,
               providerProofPath,
             ),
           );
@@ -868,7 +868,7 @@ if (revenueDone && revenueOpsText) {
               issue(
                 "error",
                 "revenue.provider_proof.evidence_file.missing",
-                `The RevenueCat evidence path in PROVIDER_PROOF.md (${evidencePath}) does not exist on disk. Run the live probe and ensure the artifact exists before marking the revenue lane done.`,
+                `The RevenueCat evidence path in operations/PROVIDER_PROOF.md (${evidencePath}) does not exist on disk. Run the live probe and ensure the artifact exists before marking the revenue lane done.`,
                 evidencePath,
               ),
             );
@@ -878,7 +878,7 @@ if (revenueDone && revenueOpsText) {
     }
   }
 
-  // 8. Check for unresolved placeholder text in REVENUE_OPS.md.
+  // 8. Check for unresolved placeholder text in revenue/REVENUE_OPS.md.
   const placeholderPatterns = [/<!--\s*fill in/i, /example:\s*com\.app\./i, /_example_/i, /\bTODO\b/, /\bTBD\b/, /\bpending\b.*model/i];
   for (const pattern of placeholderPatterns) {
     if (textHasPattern(revenueOpsText, pattern)) {
@@ -886,7 +886,7 @@ if (revenueDone && revenueOpsText) {
         issue(
           "error",
           "revenue.ops_doc.placeholder_unresolved",
-          `REVENUE_OPS.md contains unfilled template placeholder text (matched: ${pattern.source}). Fill in product IDs, paywall model, offering ID, and proof path before marking the revenue lane done.`,
+          `revenue/REVENUE_OPS.md contains unfilled template placeholder text (matched: ${pattern.source}). Fill in product IDs, paywall model, offering ID, and proof path before marking the revenue lane done.`,
           revenueOpsPath,
         ),
       );
@@ -907,7 +907,7 @@ if (!revenueSkipped && revenueOpsText) {
       issue(
         "warning",
         "revenue.paywall_model.undocumented",
-        "REVENUE_OPS.md does not record an explicit paywall model decision (hard_paywall | freemium | reverse_trial | web_funnel). Document the choice and rationale citing benchmarks.",
+        "revenue/REVENUE_OPS.md does not record an explicit paywall model decision (hard_paywall | freemium | reverse_trial | web_funnel). Document the choice and rationale citing benchmarks.",
         revenueOpsPath,
       ),
     );
@@ -919,7 +919,7 @@ if (!revenueSkipped && revenueOpsText) {
       issue(
         "warning",
         "revenue.pricing_decision.undocumented",
-        "REVENUE_OPS.md does not record trial duration and price as explicit decisions. Document the plan mix, trial, and pricing with a benchmark citation (e.g. RevenueCat State of Subscription Apps 2026).",
+        "revenue/REVENUE_OPS.md does not record trial duration and price as explicit decisions. Document the plan mix, trial, and pricing with a benchmark citation (e.g. RevenueCat State of Subscription Apps 2026).",
         revenueOpsPath,
       ),
     );
@@ -961,7 +961,7 @@ if (!revenueSkipped && revenueOpsText) {
         issue(
           "warning",
           "revenue.involuntary_churn_recovery.unaddressed",
-          "Revenue lane is done but involuntary-churn recovery (grace period, billing-issue webhook, dunning) is not addressed in REVENUE_OPS.md or PRODUCTION_READINESS.md. On Google Play ~31% of cancellations are involuntary billing failures (see revenue-monetization.md §8a).",
+          "Revenue lane is done but involuntary-churn recovery (grace period, billing-issue webhook, dunning) is not addressed in revenue/REVENUE_OPS.md or engineering/PRODUCTION_READINESS.md. On Google Play ~31% of cancellations are involuntary billing failures (see revenue-monetization.md §8a).",
           revenueOpsPath,
         ),
       );

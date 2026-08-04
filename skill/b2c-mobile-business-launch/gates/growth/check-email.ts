@@ -3,7 +3,7 @@
  * check-email.ts — Email lane Present/Proven/Optimized validator.
  *
  * PRESENT  (warning when partial, error when done):
- *   - EMAIL_OPS.md exists
+ *   - growth/EMAIL_OPS.md exists
  *   - sender map has at least one populated row (non-placeholder from address)
  *   - a sending domain is recorded (not resend.dev)
  *   - template inventory has at least one row
@@ -15,10 +15,10 @@
  *   - SECRETS.md lists RESEND_API_KEY and references Doppler (keys not in raw .env)
  *
  * PRESENT+ (warning when partial, error when done — beyond template presence):
- *   - EMAIL_OPS.md references the sender-domain DNS records (SPF and DKIM)
+ *   - growth/EMAIL_OPS.md references the sender-domain DNS records (SPF and DKIM)
  *     that the proof artifacts attest to
- *   - EMAIL_OPS.md documents unsubscribe handling
- *   - EMAIL_OPS.md maps brand tokens from DESIGN.md (the resend
+ *   - growth/EMAIL_OPS.md documents unsubscribe handling
+ *   - growth/EMAIL_OPS.md maps brand tokens from design/DESIGN.md (the resend
  *     email-templates.ts LaunchEmailDesignSystem contract)
  *
  * OPTIMIZED (warning always, regardless of lane status):
@@ -56,7 +56,7 @@ function presentSeverity(): "error" | "warning" {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-const emailOpsPath = "EMAIL_OPS.md";
+const emailOpsPath = "growth/EMAIL_OPS.md";
 const emailOpsText = readText(args.root, emailOpsPath);
 
 function readOptional(relativePath: string): string | undefined {
@@ -98,7 +98,7 @@ if (!emailOpsText) {
     issue(
       presentSeverity(),
       "email.doc_missing",
-      "EMAIL_OPS.md is required for the email lane. Copy business/EMAIL_OPS.md and fill in the sender map, domain, and template inventory.",
+      "growth/EMAIL_OPS.md is required for the email lane. Copy business/growth/EMAIL_OPS.md and fill in the sender map, domain, and template inventory.",
       emailOpsPath,
     ),
   );
@@ -114,7 +114,7 @@ if (!emailOpsText) {
       issue(
         presentSeverity(),
         "email.sender_map_unpopulated",
-        "EMAIL_OPS.md sender map has no populated from-address row. Add at least one real sender address to the sender map table.",
+        "growth/EMAIL_OPS.md sender map has no populated from-address row. Add at least one real sender address to the sender map table.",
         emailOpsPath,
       ),
     );
@@ -138,7 +138,7 @@ if (!emailOpsText) {
       issue(
         "error",
         "email.resend_dev_domain",
-        "EMAIL_OPS.md references resend.dev as a sending domain. Production sends require a verified custom domain or subdomain, not resend.dev.",
+        "growth/EMAIL_OPS.md references resend.dev as a sending domain. Production sends require a verified custom domain or subdomain, not resend.dev.",
         emailOpsPath,
       ),
     );
@@ -148,7 +148,7 @@ if (!emailOpsText) {
       issue(
         presentSeverity(),
         "email.sending_domain_missing",
-        "EMAIL_OPS.md does not record a sending subdomain (e.g. mail.example.com). Fill in the Domain/DNS Status table before marking this lane done.",
+        "growth/EMAIL_OPS.md does not record a sending subdomain (e.g. mail.example.com). Fill in the Domain/DNS Status table before marking this lane done.",
         emailOpsPath,
       ),
     );
@@ -161,7 +161,7 @@ if (!emailOpsText) {
       issue(
         presentSeverity(),
         "email.dns_proof_reference_missing",
-        "EMAIL_OPS.md does not reference the sender-domain DNS records (SPF and DKIM). Fill the Domain/DNS Status table so the proof artifacts have a documented basis.",
+        "growth/EMAIL_OPS.md does not reference the sender-domain DNS records (SPF and DKIM). Fill the Domain/DNS Status table so the proof artifacts have a documented basis.",
         emailOpsPath,
       ),
     );
@@ -173,20 +173,20 @@ if (!emailOpsText) {
       issue(
         presentSeverity(),
         "email.unsubscribe_handling_missing",
-        "EMAIL_OPS.md does not document unsubscribe handling. Classify every sender-map row (transactional vs lifecycle/marketing) and record how lifecycle unsubscribes are honored.",
+        "growth/EMAIL_OPS.md does not document unsubscribe handling. Classify every sender-map row (transactional vs lifecycle/marketing) and record how lifecycle unsubscribes are honored.",
         emailOpsPath,
       ),
     );
   }
 
-  // Brand tokens: production templates pull their design system from DESIGN.md
-  // (business/resend/email-templates.ts LaunchEmailDesignSystem contract).
-  if (!emailOpsText.includes("DESIGN.md")) {
+  // Brand tokens: production templates pull their design system from design/DESIGN.md
+  // (business/growth/resend/email-templates.ts LaunchEmailDesignSystem contract).
+  if (!emailOpsText.includes("design/DESIGN.md")) {
     issues.push(
       issue(
         presentSeverity(),
         "email.brand_tokens_missing",
-        "EMAIL_OPS.md does not record the DESIGN.md brand-token mapping. Email templates must pull colors/typography/radius/spacing from DESIGN.md (the email-templates.ts LaunchEmailDesignSystem contract) before production sends.",
+        "growth/EMAIL_OPS.md does not record the design/DESIGN.md brand-token mapping. Email templates must pull colors/typography/radius/spacing from design/DESIGN.md (the email-templates.ts LaunchEmailDesignSystem contract) before production sends.",
         emailOpsPath,
       ),
     );
@@ -202,7 +202,7 @@ if (!emailOpsText) {
       issue(
         presentSeverity(),
         "email.template_inventory_missing",
-        "EMAIL_OPS.md does not list any email templates. Add at least one template reference to the sender map table.",
+        "growth/EMAIL_OPS.md does not list any email templates. Add at least one template reference to the sender map table.",
         emailOpsPath,
       ),
     );
@@ -250,7 +250,7 @@ if (emailDone) {
   }
 
   // API keys via Doppler, not raw .env.
-  const secretsText = readOptional("SECRETS.md") ?? readOptional("secrets/SECRETS.md");
+  const secretsText = readOptional("SECRETS.md") ?? readOptional("trust/secrets/SECRETS.md");
   if (!secretsText) {
     issues.push(
       issue(
@@ -322,7 +322,7 @@ if (emailOpsText) {
     ];
 
     for (const automation of criticalAutomations) {
-      // Find the line(s) in EMAIL_OPS.md that reference this automation.
+      // Find the line(s) in growth/EMAIL_OPS.md that reference this automation.
       const matchingLines = emailOpsText.split(/\r?\n/).filter((line) => automation.detectRegex.test(line));
 
       if (matchingLines.length === 0) {
@@ -331,7 +331,7 @@ if (emailOpsText) {
           issue(
             "warning",
             `email.automation.${automation.label.replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/, "")}`.replace(/ /g, "_"),
-            `EMAIL_OPS.md does not document the ${automation.label} lifecycle automation. Add a row to the automations table (done/skipped) or add <!-- email-automation-override: <reason> --> to suppress this warning.`,
+            `growth/EMAIL_OPS.md does not document the ${automation.label} lifecycle automation. Add a row to the automations table (done/skipped) or add <!-- email-automation-override: <reason> --> to suppress this warning.`,
             emailOpsPath,
           ),
         );
@@ -343,7 +343,7 @@ if (emailOpsText) {
             issue(
               "warning",
               `email.automation.${automation.label.replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/, "")}_todo`,
-              `EMAIL_OPS.md ${automation.label} automation row still reads TODO. Update the status to done or skipped, or add <!-- email-automation-override: <reason> --> to suppress this warning.`,
+              `growth/EMAIL_OPS.md ${automation.label} automation row still reads TODO. Update the status to done or skipped, or add <!-- email-automation-override: <reason> --> to suppress this warning.`,
               emailOpsPath,
             ),
           );

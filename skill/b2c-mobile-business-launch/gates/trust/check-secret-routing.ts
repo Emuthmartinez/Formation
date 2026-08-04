@@ -17,7 +17,7 @@ const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
 const state = loaded.state;
-const secretsPath = readText(args.root, "SECRETS.md") ? "SECRETS.md" : "secrets/SECRETS.md";
+const secretsPath = readText(args.root, "SECRETS.md") ? "SECRETS.md" : "trust/secrets/SECRETS.md";
 const secretsText = readText(args.root, secretsPath);
 
 if (!secretsText) {
@@ -50,7 +50,12 @@ if (state) {
       for (const secretName of requiredSecrets) {
         if (/key|token|secret|password|private/i.test(secretName) && !/^[A-Z0-9_]+$/.test(secretName)) {
           issues.push(
-            issue("error", `secrets.${toolName}.name_format`, `${secretName} should be a names-only env var, not a value or prose.`, "PROJECT_STATE.yaml"),
+            issue(
+              "error",
+              `secrets.${toolName}.name_format`,
+              `${secretName} should be a names-only env var, not a value or prose.`,
+              "state/PROJECT_STATE.yaml",
+            ),
           );
         }
       }
@@ -137,7 +142,7 @@ for (const file of collectFiles(args.root, textFileExtensions, 5000)) {
   if (text && secretLike.test(text)) {
     issues.push(issue("error", "secrets.raw_secret_pattern", `Potential raw secret pattern found in ${relative}.`, relative));
   }
-  if (text && relative !== "PROJECT_STATE.yaml" && relative !== secretsPath) {
+  if (text && relative !== "state/PROJECT_STATE.yaml" && relative !== secretsPath) {
     const seenInFile = new Set(text.match(envReference) ?? []);
     for (const secretName of seenInFile) {
       if (!requiredSecretNames.has(secretName)) {
@@ -145,7 +150,7 @@ for (const file of collectFiles(args.root, textFileExtensions, 5000)) {
           issue(
             "error",
             `secrets.${secretName}.unrouted`,
-            `${secretName} appears in ${relative} but is not listed in PROJECT_STATE.yaml tools.required_secrets or ${secretsPath}.`,
+            `${secretName} appears in ${relative} but is not listed in state/PROJECT_STATE.yaml tools.required_secrets or ${secretsPath}.`,
             relative,
           ),
         );

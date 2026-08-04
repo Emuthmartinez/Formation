@@ -20,18 +20,18 @@ This reference adapts the rules from [`petergyang/no-ai-slop`](https://github.co
 These rules remove slop. They do not remove character. Before cutting a single word, know the voice you are protecting:
 
 - For founder-facing copy, the voice is this skill's own: direct, concrete, no filler, no false cheer about a gate the founder still has to clear.
-- For marketing copy generated for a launched business, the voice comes from that business's `BRAND.md` and the tone set in `11_STAR_EXPERIENCE.md` — not from this file, and not from generic "clean marketing English." A playful app's onboarding copy should still sound playful after editing. A clinical, no-nonsense utility's paywall copy should still sound clinical. If `BRAND.md` calls for short punchy fragments, an occasional rhetorical question, or a specific slang register, that voice wins over the general preference for complete sentences below.
+- For marketing copy generated for a launched business, the voice comes from that business's `strategy/BRAND.md` and the tone set in `11_STAR_EXPERIENCE.md` — not from this file, and not from generic "clean marketing English." A playful app's onboarding copy should still sound playful after editing. A clinical, no-nonsense utility's paywall copy should still sound clinical. If `strategy/BRAND.md` calls for short punchy fragments, an occasional rhetorical question, or a specific slang register, that voice wins over the general preference for complete sentences below.
 
 Brand voice sets the target. This file's job is removing what an AI defaults to when nobody set a target: filler, hedging, importance-inflation, and formatting tics. Make the minimum effective edit — fix the slop, keep everything that sounds like the brand actually talking. A rewrite that reads as generically "clean" or "professional" instead of like the brand has over-corrected and needs to be walked back.
 
 ## 2. Two Audiences, One Standard
 
-1. **The skill's own founder-facing copy.** `launch-cockpit.html`, gate prompts under `founder-zero-operator.md`, and any doc a founder reads to make a decision. A founder-zero user is often reading this at 11pm, tired, deciding whether to approve something. Every filler word costs them attention they do not have.
+1. **The skill's own founder-facing copy.** `state/launch-cockpit.html`, gate prompts under `founder-zero-operator.md`, and any doc a founder reads to make a decision. A founder-zero user is often reading this at 11pm, tired, deciding whether to approve something. Every filler word costs them attention they do not have.
 2. **All marketing copy generated for a launched business.** Store metadata, screenshots, landing/funnel copy, paywall/onboarding copy, lifecycle email, launch posts, ad creative, UGC scripts, GEO/SEO metadata. This copy also has to survive App Review, ASO keyword pressure, and character budgets — see section 7.
 
-Run the same rules against both. The difference is whose voice you are protecting (this skill's own vs. the launched business's `BRAND.md`) and which channel limits apply.
+Run the same rules against both. The difference is whose voice you are protecting (this skill's own vs. the launched business's `strategy/BRAND.md`) and which channel limits apply.
 
-There is a third surface the gate also covers: this repo's own public docs (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` at error, `AGENTS.md` and `CLAUDE.md` at warning). A skill that ships a writing standard and exempts its own front door from it is enforcing words rather than work. Same rules, same voice as founder-facing copy: direct, concrete, no filler.
+There is a third surface the gate also covers: this repo's own public docs (`README.md`, `CONTRIBUTING.md`, `trust/SECURITY.md`, `CODE_OF_CONDUCT.md` at error, `AGENTS.md` and `CLAUDE.md` at warning). A skill that ships a writing standard and exempts its own front door from it is enforcing words rather than work. Same rules, same voice as founder-facing copy: direct, concrete, no filler.
 
 ## 3. Editing Principles — Adapted
 
@@ -89,7 +89,7 @@ Run this before marking any founder-facing doc or generated marketing copy ready
 
 **Voice and meaning**
 1. Does the copy preserve the founder's or brand's actual point, without adding claims, stats, or opinions nobody supplied?
-2. Does it preserve the brand's distinctive vocabulary, cadence, and level of polish from `BRAND.md`/`11_STAR_EXPERIENCE.md` (or, for founder-facing copy, this skill's own direct tone) — not a flattened, generic-professional voice?
+2. Does it preserve the brand's distinctive vocabulary, cadence, and level of polish from `strategy/BRAND.md`/`11_STAR_EXPERIENCE.md` (or, for founder-facing copy, this skill's own direct tone) — not a flattened, generic-professional voice?
 3. Does it leave strong lines alone instead of rewriting them for consistency?
 4. Is the amount of cutting proportional to the actual slop found, with no over-compression that strips out character?
 5. Does it use active voice with real subjects where possible?
@@ -104,7 +104,7 @@ Run this before marking any founder-facing doc or generated marketing copy ready
 10. For store metadata, ad headlines, and subject lines specifically: is every word pulling weight, with importance-puffery patterns caught before the character limit forces an even worse cut later?
 
 **Final read**
-11. Would the founder, or the brand's own voice as defined in `BRAND.md`, recognize this as itself?
+11. Would the founder, or the brand's own voice as defined in `strategy/BRAND.md`, recognize this as itself?
 12. Would it sound natural read aloud to a sharp colleague — not like a press release?
 13. Does the output include a short **What changed** note when this was an edit pass on existing copy, so the founder can see what moved?
 
@@ -116,7 +116,7 @@ The source skill edits essay-length drafts. This skill also ships copy into hard
 
 **Ad headlines and primary text.** Platform limits move — verify current specs in the `ad-creative` skill or the platform's own ad-manager docs before locking, rather than trusting a remembered character count. Regardless of the exact limit: lead with the concrete benefit or the hook, not a throat-clearing opener burning the first visible characters before a "see more" truncation. Weasel attribution ("proven results") and importance puffery are the most common ad-copy failures because they read as ad-speak the platform's own reviewers and users have learned to skip.
 
-**Push notifications and lifecycle email subject lines.** These are read in a notification tray or inbox list, competing with everything else on the screen. Cut summary-recap framing and fake-profound kickers entirely — there is no room for a closing line, only the hook. Favor one concrete detail (a name, a number, a specific unlock) over a vague benefit claim. Match the send to `EMAIL_OPS.md`'s brand-token mapping and the tone set in `11_STAR_EXPERIENCE.md` so a lifecycle email does not suddenly sound like a different brand than the app.
+**Push notifications and lifecycle email subject lines.** These are read in a notification tray or inbox list, competing with everything else on the screen. Cut summary-recap framing and fake-profound kickers entirely — there is no room for a closing line, only the hook. Favor one concrete detail (a name, a number, a specific unlock) over a vague benefit claim. Match the send to `growth/EMAIL_OPS.md`'s brand-token mapping and the tone set in `11_STAR_EXPERIENCE.md` so a lifecycle email does not suddenly sound like a different brand than the app.
 
 **Social launch posts.** This skill's own launch-narrative guardrails already forbid hashtags and emoji in launch and feature-launch post copy (`launch-narrative-cadence.md` — "No hashtags... No emojis carrying the message," §"the 2026 guardrails"). That is a stronger, platform-specific rule than the source skill's general formatting-slop pattern, and it stands: do not soften it back to "use emoji sparingly" for launch posts. The same file's feeling-first thesis (indictment → hopeful reframe → product, no link in the main post) already does the throat-clearing and colon-reveal work this file would otherwise flag — load `launch-narrative-cadence.md` for post structure, and use this file to catch banned words, empty phrases, and importance puffery inside that structure.
 

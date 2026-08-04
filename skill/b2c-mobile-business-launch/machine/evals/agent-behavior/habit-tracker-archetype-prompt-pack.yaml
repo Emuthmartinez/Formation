@@ -1,12 +1,12 @@
 id: habit-tracker-archetype-prompt-pack
 title: Habit-tracker request detects the archetype and routes the prompt pack
 prompt: "I want to build a habit tracker for runners — daily training habits, streaks, and reminders that get people out the door."
-expected_route: "Detect the habit-tracker archetype, load habit-tracker.md, confirm habit model / primary surface / optional systems / niche via one batched AskUserQuestion, record the archetype in PROJECT_STATE.yaml, copy the runnable starter as the floor, then route the bundled prompt pack in order (schema, auth + timezone, check-in core loop, reminders + streaks) with the streak ethics contract treated as a ship gate — instead of improvising the schema and a client-side streak counter."
+expected_route: "Detect the habit-tracker archetype, load habit-tracker.md, confirm habit model / primary surface / optional systems / niche via one batched AskUserQuestion, record the archetype in state/PROJECT_STATE.yaml, copy the runnable starter as the floor, then route the bundled prompt pack in order (schema, auth + timezone, check-in core loop, reminders + streaks) with the streak ethics contract treated as a ship gate — instead of improvising the schema and a client-side streak counter."
 must_use:
   - "habit-tracker.md"
   - "starters/habit-tracker"
   - "AskUserQuestion"
-  - "PROJECT_STATE.yaml"
+  - "state/PROJECT_STATE.yaml"
 must_catch:
   - "the request is a habit-tracker archetype with a known build sequence and a runnable starter as the floor"
   - "the streak is a HIGH-risk Streak/Loss-Aversion card requiring an ethics attestation, a free escape hatch (streak freeze/repair), a counter-metric, and no guilt/confirmshaming notification copy"

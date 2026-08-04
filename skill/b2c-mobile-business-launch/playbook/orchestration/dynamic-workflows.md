@@ -10,10 +10,10 @@ This is a **default bias and a recommendation, not a hard rule**. Either runtime
 
 The recommended division of labor:
 
-- **Claude is the better fit for everything up to and including the spec/handoff.** Evidence gathering, category economics, social-language mining, 11-star and emotional design, analytics/attribution blueprints, paid UA and viral-growth plans, the launch narrative, localization market research, design exploration, and the build contracts (`SPEC.md`, `TECH_SPEC.md`, `LAUNCH_TRACE.md`, `ENGINEERING_PLAN.md`). These are research-heavy, taste-heavy, and adversarial-verification-shaped — exactly where Dynamic Workflows earn their cost. One capability now reaches past the spec on the Claude side: on a local Mac, Claude Code Desktop's in-app iOS Simulator pane is a build-time route for "run the app and show me this screen/flow", so visual checks, flow walks, and bug repro can stay on Claude even when the bulk implementation is on Codex.
-- **Codex is the better fit for the core engineering build** once the spec is ready. Codex has its own in-app iOS Simulator loop (XcodeBuildMCP plus the `build-ios-apps` plugin), so the build side does not lose the see-the-app loop by staying in Codex; rung 0 exists in both runtimes and is never a reason to move a lane. The handoff bundle (`AGENTS.md`, `CLAUDE.md`, `APP_AGENTS.md`, `agents/`, `TECH_SPEC.md`, `ENGINEERING_PLAN.md`, `ORCHESTRATION.md`) is what Codex (or Compound Engineering on Codex) consumes to write the app.
+- **Claude is the better fit for everything up to and including the spec/handoff.** Evidence gathering, category economics, social-language mining, 11-star and emotional design, analytics/attribution blueprints, paid UA and viral-growth plans, the launch narrative, localization market research, design exploration, and the build contracts (`product/SPEC.md`, `engineering/TECH_SPEC.md`, `state/LAUNCH_TRACE.md`, `engineering/ENGINEERING_PLAN.md`). These are research-heavy, taste-heavy, and adversarial-verification-shaped — exactly where Dynamic Workflows earn their cost. One capability now reaches past the spec on the Claude side: on a local Mac, Claude Code Desktop's in-app iOS Simulator pane is a build-time route for "run the app and show me this screen/flow", so visual checks, flow walks, and bug repro can stay on Claude even when the bulk implementation is on Codex.
+- **Codex is the better fit for the core engineering build** once the spec is ready. Codex has its own in-app iOS Simulator loop (XcodeBuildMCP plus the `build-ios-apps` plugin), so the build side does not lose the see-the-app loop by staying in Codex; rung 0 exists in both runtimes and is never a reason to move a lane. The handoff bundle (`AGENTS.md`, `CLAUDE.md`, `APP_AGENTS.md`, `agents/`, `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `operations/ORCHESTRATION.md`) is what Codex (or Compound Engineering on Codex) consumes to write the app.
 
-When the founder leans this way, structure the run so Claude takes each pre-build stage to a locked, evidence-backed artifact, then hands a complete spec to Codex. Record which runtime is handling which lane in `ORCHESTRATION.md` and `PROJECT_STATE.yaml` so a later session does not re-litigate it. But none of this is a gate: Claude can do small code edits, a founder can run the whole build under Claude, and a founder can run the whole pre-build under Codex if they choose — the skill recommends, then proceeds.
+When the founder leans this way, structure the run so Claude takes each pre-build stage to a locked, evidence-backed artifact, then hands a complete spec to Codex. Record which runtime is handling which lane in `operations/ORCHESTRATION.md` and `state/PROJECT_STATE.yaml` so a later session does not re-litigate it. But none of this is a gate: Claude can do small code edits, a founder can run the whole build under Claude, and a founder can run the whole pre-build under Codex if they choose — the skill recommends, then proceeds.
 
 As a cost note rather than a rule: a Claude Dynamic Workflow is usually wasted on the core engineering build (500-file migrations, codebase-wide refactors, the app implementation itself) — that work belongs to the Codex/CE route, so workflows on the Claude side typically stop at the spec. The Claude-side capability that extends past the spec is the simulator pane, not a workflow: a one-turn "run it and show me" is the cheapest thing in the whole ladder and should never be wrapped in a workflow.
 
@@ -32,7 +32,7 @@ The highest-value moment for this recommendation is when someone is **running Co
 1. Surface the recommendation **once**, plainly — not via AskUserQuestion, not as a founder-only gate. Say what and why: this pre-build stage tends to go better on Claude Code with Dynamic Workflows (per-agent isolation, adversarial verification, fan-out research), and Codex remains the stronger pick for the core build that follows.
 2. Give the concrete option: run this stage in Claude Code with `ultracode` (or `/deep-research`), or continue here in Codex — their call.
 3. **Continue the work in the current runtime regardless of the answer.** Do not pause, do not require approval, do not refuse. If they stay in Codex, run the same quality shapes (fan-out, adversarial verification, quarantine) as serial/parallel subagents or inline.
-4. Record that the recommendation was made in `PROJECT_STATE.yaml` so it is not repeated every turn. Make it once per pre-build phase or session, not on every message — no nagging.
+4. Record that the recommendation was made in `state/PROJECT_STATE.yaml` so it is not repeated every turn. Make it once per pre-build phase or session, not on every message — no nagging.
 
 ## What A Dynamic Workflow Is
 
@@ -91,7 +91,7 @@ Pick `parallel` vs `pipeline` by one question: *do I need all results before I c
 
 1. **Classify-and-act** — a cheap classifier routes work before doing it. *Use for:* deciding research depth per competitor, routing each surface to the right design treatment, triaging which localization markets deserve a full pass.
 2. **Fan-out-and-synthesize** — many independent slices in `parallel`, one Opus synthesis at the barrier. *Use for:* one agent per competitor/review-cluster/keyword/endpoint, then a merged evidence ledger; per-surface 11-star or emotional-design audits merged into one map.
-3. **Adversarial verification** — pair each producing agent with a separate verifier that never saw who produced the work, checking it against a rubric or source. *Use for:* every factual claim in `RESEARCH.md` verified against its source; a "why NOT to build this wedge" pass against the emerging spec; an ethics-guardrail skeptic against each emotional-design card; a copy-guardrail check against launch-narrative posts.
+3. **Adversarial verification** — pair each producing agent with a separate verifier that never saw who produced the work, checking it against a rubric or source. *Use for:* every factual claim in `strategy/RESEARCH.md` verified against its source; a "why NOT to build this wedge" pass against the emerging spec; an ethics-guardrail skeptic against each emotional-design card; a copy-guardrail check against launch-narrative posts.
 4. **Generate-and-filter** — generate many options, then a verifier kills the weak ones; you see only the survivors. *Use for:* names, taglines, paywall framings, onboarding hooks, ad angles, design directions — commit late, after every option is challenged.
 5. **Tournament** — pairwise comparison instead of absolute scoring (more reliable for taste). *Use for:* ranking design directions, screenshot concepts, value props, market priority — anything taste-based or too large to sort in one prompt.
 6. **Loop-until-done** — keep spawning agents until a stop condition holds, for unknown-size work. *Use for:* mining social language until no new themes appear; hunting spec gaps until a full pass returns zero; pair with `/goal` to force a hard completion ("don't stop until the evidence ledger has a source for every claim").
@@ -131,7 +131,7 @@ Apply the **quarantine pattern**: the agents that *read* untrusted content are r
 
 ## State Contract
 
-When a stage runs as a workflow, record it in `ORCHESTRATION.md` and the top-level `orchestration` block of `PROJECT_STATE.yaml` alongside the subagent fields:
+When a stage runs as a workflow, record it in `operations/ORCHESTRATION.md` and the top-level `orchestration` block of `state/PROJECT_STATE.yaml` alongside the subagent fields:
 
 ```yaml
 orchestration:
@@ -149,9 +149,9 @@ orchestration:
       trigger: "ultracode"        # ultracode | /effort ultracode | /deep-research | natural-language
       patterns: ["fan-out", "adversarial-verification"]
       token_budget: "10k"
-      goal: "Every claim in RESEARCH.md has a verified source."
+      goal: "Every claim in strategy/RESEARCH.md has a verified source."
       saved_as: ""                # /command name if saved, else ""
-      result_artifact: "RESEARCH.md"
+      result_artifact: "strategy/RESEARCH.md"
 ```
 
 If Dynamic Workflows are unavailable (runtime is not Claude Code, version below v2.1.154, disabled, or the founder declined), do **not** silently skip the quality pattern. Degrade to subagents (`parallel-agent-orchestration.md`) or an inline pass, and record `used: false` with the reason. The adversarial-verification and tournament *shapes* still apply even when run as serial subagents — only the runtime changes.
@@ -168,11 +168,11 @@ Refresh these before changing any trigger, API name, flag, or limit above — th
 
 A pre-build stage run through Dynamic Workflows is done only when:
 
-- the runtime in use, the recommended split, and who actually handled pre-build vs build are recorded in `ORCHESTRATION.md` and `PROJECT_STATE.yaml`;
+- the runtime in use, the recommended split, and who actually handled pre-build vs build are recorded in `operations/ORCHESTRATION.md` and `state/PROJECT_STATE.yaml`;
 - if the runtime is Codex (or another non-Claude-Code runtime) on a pre-build stage, the Claude-for-pre-build recommendation was surfaced once (plainly, not as a gate), recorded, and the work continued without blocking;
 - the workflow used a token budget, and any loop pattern was paired with `/goal`;
 - any agent that read untrusted public content was quarantined (read-only, no high-privilege actions);
 - producing agents and verifying agents were separate (no self-judging) where a quality gate was claimed;
-- the run's output landed in the stage's canonical artifact (e.g. `RESEARCH.md`, `11_STAR_EXPERIENCE.md`, `ANALYTICS.md`), not only in chat;
+- the run's output landed in the stage's canonical artifact (e.g. `strategy/RESEARCH.md`, `11_STAR_EXPERIENCE.md`, `analytics/ANALYTICS.md`), not only in chat;
 - if workflows were unavailable, the fallback route and reason are recorded and the equivalent shape was run as subagents or inline;
 - the stage artifact is locked before the next stage or the Codex build depends on it.

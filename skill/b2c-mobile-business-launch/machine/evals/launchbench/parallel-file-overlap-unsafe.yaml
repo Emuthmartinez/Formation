@@ -2,8 +2,8 @@ id: parallel-file-overlap-unsafe
 title: Parallel workers edit the same launch source of truth
 prompt: >
   Two parallel agents are assigned implementation planning. One updates analytics
-  requirements in ENGINEERING_PLAN.md while another updates revenue requirements
-  in the same ENGINEERING_PLAN.md. The orchestrator records both as parallel-safe
+  requirements in engineering/ENGINEERING_PLAN.md while another updates revenue requirements
+  in the same engineering/ENGINEERING_PLAN.md. The orchestrator records both as parallel-safe
   and does not isolate them in worktrees.
 expected_guardrail: >
   Parallel units that share a file are not parallel-safe in the same working tree.
@@ -12,7 +12,7 @@ expected_guardrail: >
 validators:
   - check-parallel-orchestration
 must_catch:
-  - ENGINEERING_PLAN.md has overlapping write ownership.
+  - engineering/ENGINEERING_PLAN.md has overlapping write ownership.
   - Shared source-of-truth docs should be serialized or worktree-isolated.
   - Actual modified files must be compared before integration.
 should_say:

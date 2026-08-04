@@ -24,7 +24,7 @@ Path bindings remain catalog metadata rather than execution identity. The runtim
 
 ## Single-writer rule
 
-Parallel workers return immutable outputs, evidence, and a proposed state patch. The orchestrator-owned reducer applies accepted changes. Workers do not directly write `PROJECT_STATE.yaml`, render the cockpit, integrate git, or mutate shared provider accounts.
+Parallel workers return immutable outputs, evidence, and a proposed state patch. The orchestrator-owned reducer applies accepted changes. Workers do not directly write `state/PROJECT_STATE.yaml`, render the cockpit, integrate git, or mutate shared provider accounts.
 
 ## Runtime adapters
 

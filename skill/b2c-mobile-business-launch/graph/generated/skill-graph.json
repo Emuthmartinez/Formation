@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "skillVersion": "0.66.1",
+  "skillVersion": "0.67.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -253,7 +253,7 @@
       "key": "phase_0_orient",
       "label": "0",
       "focus": "Founder-zero orient and scaffold",
-      "primaryOutput": "BUSINESS_ACCESS.md + ledger, PROJECT_STATE.yaml, autonomy/scope, first cockpit",
+      "primaryOutput": "operations/BUSINESS_ACCESS.md + ledger, state/PROJECT_STATE.yaml, autonomy/scope, first cockpit",
       "order": 0,
       "orientWindow": true
     },
@@ -271,7 +271,7 @@
       "key": "phase_0b",
       "label": "0b",
       "focus": "Paid-tool access and fallback routing",
-      "primaryOutput": "TOOL_DECISIONS.md",
+      "primaryOutput": "strategy/TOOL_DECISIONS.md",
       "order": 2,
       "orientWindow": true
     },
@@ -289,7 +289,7 @@
       "key": "phase_1",
       "label": "1",
       "focus": "Research-backed spec",
-      "primaryOutput": "RESEARCH.md, LOCALIZATION_MARKET_RESEARCH.md, revised SPEC.md",
+      "primaryOutput": "strategy/RESEARCH.md, LOCALIZATION_MARKET_RESEARCH.md, revised product/SPEC.md",
       "order": 4
     },
     {
@@ -297,7 +297,7 @@
       "key": "phase_1b",
       "label": "1b",
       "focus": "Analytics and attribution blueprint",
-      "primaryOutput": "ANALYTICS.md, analytics-plan.html",
+      "primaryOutput": "analytics/ANALYTICS.md, analytics/analytics-plan.html",
       "order": 5
     },
     {
@@ -329,7 +329,7 @@
       "key": "phase_1f",
       "label": "1f",
       "focus": "Launch trace and build contracts",
-      "primaryOutput": "LAUNCH_TRACE.md, TECH_SPEC.md",
+      "primaryOutput": "state/LAUNCH_TRACE.md, engineering/TECH_SPEC.md",
       "order": 9
     },
     {
@@ -337,7 +337,7 @@
       "key": "phase_1g",
       "label": "1g",
       "focus": "Security architecture",
-      "primaryOutput": "SECURITY.md, security-review.html",
+      "primaryOutput": "trust/SECURITY.md, trust/security-review.html",
       "order": 10
     },
     {
@@ -345,7 +345,7 @@
       "key": "phase_2",
       "label": "2",
       "focus": "Brand and design",
-      "primaryOutput": "BRAND.md, DESIGN.md, design.md, rendered proofs, key assets",
+      "primaryOutput": "strategy/BRAND.md, design/DESIGN.md, design.md, rendered proofs, key assets",
       "order": 11
     },
     {
@@ -361,7 +361,7 @@
       "key": "phase_3b",
       "label": "3b",
       "focus": "Revenue and monetization operations",
-      "primaryOutput": "REVENUE_OPS.md and sandbox/production purchase validation",
+      "primaryOutput": "revenue/REVENUE_OPS.md and sandbox/production purchase validation",
       "order": 13
     },
     {
@@ -385,7 +385,7 @@
       "key": "phase_5b",
       "label": "5b",
       "focus": "Engineering orchestration and production readiness",
-      "primaryOutput": "ENGINEERING_PLAN.md, ORCHESTRATION.md, PRODUCTION_READINESS.md, device proof",
+      "primaryOutput": "engineering/ENGINEERING_PLAN.md, operations/ORCHESTRATION.md, engineering/PRODUCTION_READINESS.md, device proof",
       "order": 16
     },
     {
@@ -393,7 +393,7 @@
       "key": "phase_5c",
       "label": "5c",
       "focus": "Security release gate",
-      "primaryOutput": "Scan and review proof attached to PRODUCTION_READINESS.md",
+      "primaryOutput": "Scan and review proof attached to engineering/PRODUCTION_READINESS.md",
       "order": 17
     },
     {
@@ -401,7 +401,7 @@
       "key": "phase_6",
       "label": "6",
       "focus": "Post-launch UGC and Fastlane growth engine",
-      "primaryOutput": "UGC_PLAYBOOK.md, FASTLANE_OPS.md, 90-day format-discovery plan",
+      "primaryOutput": "growth/UGC_PLAYBOOK.md, growth/FASTLANE_OPS.md, 90-day format-discovery plan",
       "order": 18
     },
     {
@@ -409,7 +409,7 @@
       "key": "phase_6b",
       "label": "6b",
       "focus": "Post-launch operations",
-      "primaryOutput": "POST_LAUNCH_OPS.md, LAUNCH_RETRO.md, day-30 scope revisit",
+      "primaryOutput": "operations/POST_LAUNCH_OPS.md, operations/LAUNCH_RETRO.md, day-30 scope revisit",
       "order": 19
     }
   ],
@@ -612,7 +612,7 @@
       "domainId": "domain.machine",
       "title": "LaunchBench Evals",
       "loadWhen": "Writing or auditing a LaunchBench scenario, adding a failure mode to the regression suite, or deciding whether a miss deserves a new gate",
-      "bytes": 14290,
+      "bytes": 14391,
       "index": false
     },
     {
@@ -648,7 +648,7 @@
       "domainId": "domain.machine",
       "title": "Source Registry",
       "loadWhen": "Registering a new external source the skill depends on",
-      "bytes": 114321,
+      "bytes": 114552,
       "index": false
     },
     {
@@ -657,7 +657,7 @@
       "domainId": "domain.data",
       "title": "Analytics And Attribution Planning",
       "loadWhen": "before onboarding, paywalls, funnels, store CTAs, referrals, lifecycle email, UGC/Fastlane campaigns, paid UA, or any builder prompt that names events; before PostHog setup, dashboards, deep links, feature flags, experiments, session replay, or surveys",
-      "bytes": 23167,
+      "bytes": 23287,
       "index": false
     },
     {
@@ -666,7 +666,7 @@
       "domainId": "domain.data",
       "title": "Analytics And Tracking",
       "loadWhen": "route into Analytics And Tracking",
-      "bytes": 811,
+      "bytes": 839,
       "index": true
     },
     {
@@ -675,7 +675,7 @@
       "domainId": "domain.design",
       "title": "Design Room Protocol",
       "loadWhen": "designing, versioning, baselining, restoring, wiping, or rendering B2C design state; custom product page, PPO, In-App Event, landing, onboarding, paywall, or marketing-surface proposals; whenever a design output would otherwise be freeform",
-      "bytes": 6268,
+      "bytes": 6341,
       "index": false
     },
     {
@@ -683,8 +683,8 @@
       "path": "playbook/design/design-visual-system.md",
       "domainId": "domain.design",
       "title": "Design System And HTML Visual Proofs",
-      "loadWhen": "creating or changing `DESIGN.md`, lowercase `design.md`, visual systems, UI mockups, generated visual concepts, Higgsfield-backed visuals/motion/icons/mascots, mobile screen specs, App Store creative, screenshot frames, design audits, or HTML visual artifacts",
-      "bytes": 23492,
+      "loadWhen": "creating or changing `design/DESIGN.md`, lowercase `design.md`, visual systems, UI mockups, generated visual concepts, Higgsfield-backed visuals/motion/icons/mascots, mobile screen specs, App Store creative, screenshot frames, design audits, or HTML visual artifacts",
+      "bytes": 23774,
       "index": false
     },
     {
@@ -693,7 +693,7 @@
       "domainId": "domain.design",
       "title": "Landing Motion Craft",
       "loadWhen": "before building or animating any landing page, funnel page, or web marketing surface",
-      "bytes": 6086,
+      "bytes": 6127,
       "index": false
     },
     {
@@ -702,7 +702,7 @@
       "domainId": "domain.design",
       "title": "Motion Craft Benchmarks: The In-App Swipe-File",
       "loadWhen": "working on motion craft benchmarks",
-      "bytes": 22946,
+      "bytes": 22960,
       "index": false
     },
     {
@@ -711,7 +711,7 @@
       "domainId": "domain.design",
       "title": "Premium Mobile Craft: The Invisible Details",
       "loadWhen": "building or polishing in-app UI; wiring press states, animation, haptics, keyboard, loading/empty states; any \"premium feel\" request",
-      "bytes": 16024,
+      "bytes": 16062,
       "index": false
     },
     {
@@ -729,7 +729,7 @@
       "domainId": "domain.design",
       "title": "Look And Feel",
       "loadWhen": "route into Look And Feel",
-      "bytes": 3166,
+      "bytes": 3196,
       "index": true
     },
     {
@@ -738,7 +738,7 @@
       "domainId": "domain.design",
       "title": "Refero UX Pattern Research And Baseline Flows",
       "loadWhen": "before using Refero, replacing Refero with a free pattern route, creating `UX_PATTERNS.md`, drawing web/mobile flow maps, or auditing pattern coverage",
-      "bytes": 7609,
+      "bytes": 7737,
       "index": false
     },
     {
@@ -747,7 +747,7 @@
       "domainId": "domain.design",
       "title": "Remotion Content Assets",
       "loadWhen": "replacing Higgsfield with Remotion; scaffolding a Remotion project; code-rendered videos/stills; app-preview clips; social/ad/content variants; any \"local rendered assets are ready\" claim",
-      "bytes": 11554,
+      "bytes": 11664,
       "index": false
     },
     {
@@ -765,7 +765,7 @@
       "domainId": "domain.engineering",
       "title": "App-Local Agent Roster",
       "loadWhen": "before app handoffs, builder-ready bundles, business-repo `AGENTS.md`/`CLAUDE.md`, or post-launch operating docs",
-      "bytes": 7219,
+      "bytes": 7618,
       "index": false
     },
     {
@@ -773,8 +773,8 @@
       "path": "playbook/engineering/backend-data-contract.md",
       "domainId": "domain.engineering",
       "title": "Backend Data Contract",
-      "loadWhen": "before `TECH_SPEC.md` data/API sections harden; before archetype schema/auth prompts run; when the founder wants Firebase or a custom backend instead of the Supabase default; auditing an existing data layer",
-      "bytes": 17084,
+      "loadWhen": "before `engineering/TECH_SPEC.md` data/API sections harden; before archetype schema/auth prompts run; when the founder wants Firebase or a custom backend instead of the Supabase default; auditing an existing data layer",
+      "bytes": 17212,
       "index": false
     },
     {
@@ -782,8 +782,8 @@
       "path": "playbook/engineering/engineering-orchestration.md",
       "domainId": "domain.engineering",
       "title": "Engineering Orchestration And Production Readiness",
-      "loadWhen": "before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees, `ENGINEERING_PLAN.md`, `PRODUCTION_READINESS.md`, or production-readiness claims",
-      "bytes": 26229,
+      "loadWhen": "before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees, `engineering/ENGINEERING_PLAN.md`, `engineering/PRODUCTION_READINESS.md`, or production-readiness claims",
+      "bytes": 26912,
       "index": false
     },
     {
@@ -792,7 +792,7 @@
       "domainId": "domain.engineering",
       "title": "MobAI Toolbelt",
       "loadWhen": "before MobAI device automation, `.mob` generation/healing, repeat or host-script actions, Sync Mode/multi-device work, performance gates, screenshots, polished demo videos, app previews, bug repro recordings, MobAI CI, or recorder-skill setup",
-      "bytes": 23804,
+      "bytes": 23922,
       "index": false
     },
     {
@@ -801,7 +801,7 @@
       "domainId": "domain.engineering",
       "title": "Building The App",
       "loadWhen": "route into Building The App",
-      "bytes": 3131,
+      "bytes": 3174,
       "index": true
     },
     {
@@ -810,7 +810,7 @@
       "domainId": "domain.engineering",
       "title": "Native iOS Proof: In-App Simulators, XcodeBuildMCP, SnapshotPreviews, And serve-sim",
       "loadWhen": "**first** for any \"run the app\", \"check this screen\", \"walk this flow\", or \"reproduce this bug\" request on a local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator (Claude Code Desktop pane, CLI `computer-use`, Codex `build-ios-apps`) before XcodeBuildMCP CLI/MCP. Also for Codex Desktop native iOS tools, SnapshotPreviews exports, serve-sim streaming, or simulator/device screenshots",
-      "bytes": 34697,
+      "bytes": 34848,
       "index": false
     },
     {
@@ -819,7 +819,7 @@
       "domainId": "domain.experience",
       "title": "Consumer Product Design Agency",
       "loadWhen": "grounding the emotional/behavioral layer in its research tiers, or auditing whether the four Experience Cards are implemented",
-      "bytes": 30191,
+      "bytes": 30626,
       "index": false
     },
     {
@@ -827,8 +827,8 @@
       "path": "playbook/experience/eleven-star-experience.md",
       "domainId": "domain.experience",
       "title": "11-Star Experience",
-      "loadWhen": "before `SPEC.md`, `DESIGN.md`, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready. **Also on \"11-star run\"/\"11-star pass\" or equivalent — follow the reference's \"11-Star Run Protocol\" before any other output.**",
-      "bytes": 12691,
+      "loadWhen": "before `product/SPEC.md`, `design/DESIGN.md`, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready. **Also on \"11-star run\"/\"11-star pass\" or equivalent — follow the reference's \"11-Star Run Protocol\" before any other output.**",
+      "bytes": 13077,
       "index": false
     },
     {
@@ -837,7 +837,7 @@
       "domainId": "domain.experience",
       "title": "Emotional Experience System",
       "loadWhen": "any product, onboarding, core-loop, paywall, or return-session work targeting 6-star (\"better than expected\") or higher; and on \"charge this feature with emotion\", \"make users stick / build a habit\", \"apply the \\<name\\> card\", \"emotional UX audit\"",
-      "bytes": 32205,
+      "bytes": 32524,
       "index": false
     },
     {
@@ -846,7 +846,7 @@
       "domainId": "domain.experience",
       "title": "Emotional Experience Design",
       "loadWhen": "working on emotional experience design",
-      "bytes": 26386,
+      "bytes": 26579,
       "index": false
     },
     {
@@ -855,7 +855,7 @@
       "domainId": "domain.experience",
       "title": "Emotional Experience Measurement",
       "loadWhen": "working on emotional experience measurement",
-      "bytes": 32018,
+      "bytes": 32073,
       "index": false
     },
     {
@@ -864,7 +864,7 @@
       "domainId": "domain.experience",
       "title": "Ethics And Dark-Pattern Guardrail",
       "loadWhen": "working on ethics guardrail",
-      "bytes": 30430,
+      "bytes": 30559,
       "index": false
     },
     {
@@ -873,7 +873,7 @@
       "domainId": "domain.experience",
       "title": "Experience Cards",
       "loadWhen": "working on experience cards",
-      "bytes": 11927,
+      "bytes": 11943,
       "index": false
     },
     {
@@ -927,7 +927,7 @@
       "domainId": "domain.experience",
       "title": "Mastery and Status Card",
       "loadWhen": "when mastery and status card governs the current work",
-      "bytes": 2695,
+      "bytes": 2717,
       "index": false
     },
     {
@@ -990,7 +990,7 @@
       "domainId": "domain.experience",
       "title": "Onboarding Conversion And Paywall Flow",
       "loadWhen": "before onboarding quizzes, personalization, attribution questions, demo videos, App Review popups, paywall timing, closing offers, trials, or first-session activation",
-      "bytes": 27622,
+      "bytes": 27894,
       "index": false
     },
     {
@@ -999,7 +999,7 @@
       "domainId": "domain.experience",
       "title": "Push Notification Lifecycle",
       "loadWhen": "before push permission priming or notification lifecycle work; before Resend, API keys, transactional email, lifecycle automations, broadcasts, contacts/topics, webhooks, inbound email, unsubscribe, deliverability, or templates",
-      "bytes": 7387,
+      "bytes": 7429,
       "index": false
     },
     {
@@ -1008,7 +1008,7 @@
       "domainId": "domain.experience",
       "title": "How The App Feels",
       "loadWhen": "route into How The App Feels",
-      "bytes": 3113,
+      "bytes": 3199,
       "index": true
     },
     {
@@ -1017,7 +1017,7 @@
       "domainId": "domain.growth",
       "title": "Landing Page CRO (Public Funnel Structure)",
       "loadWhen": "before building or auditing a public conversion surface: landing/waitlist, web-to-app, or launch page",
-      "bytes": 6744,
+      "bytes": 6788,
       "index": false
     },
     {
@@ -1026,7 +1026,7 @@
       "domainId": "domain.growth",
       "title": "Fastlane Growth Operations",
       "loadWhen": "after launch approval or public beta; on any usefastlane.ai request — workspace setup, social connections, Blitz campaigns, generated organic content, scheduling, canceling posts, short-form analytics",
-      "bytes": 17602,
+      "bytes": 17836,
       "index": false
     },
     {
@@ -1035,7 +1035,7 @@
       "domainId": "domain.growth",
       "title": "GEO And SEO Launch Visibility",
       "loadWhen": "**before the first file edit**, not the deploy — any landing page file, component copy, screenshot metadata, policy page, `robots.txt`, `llms.txt`, `sitemap.xml`, schema, or metadata; also before publishing, AI-crawler access, or brand/entity signals",
-      "bytes": 10580,
+      "bytes": 10610,
       "index": false
     },
     {
@@ -1044,7 +1044,7 @@
       "domainId": "domain.growth",
       "title": "Influencer Sponsorship Engine",
       "loadWhen": "before founder-led organic social, TikTok/Reels/Shorts UGC, creator sourcing/contracts/payments, creator-marketplace use, format-discovery tests, paid influencer sponsorships, CPM/view-guarantee deals, or meme-page amplification",
-      "bytes": 17789,
+      "bytes": 17841,
       "index": false
     },
     {
@@ -1053,7 +1053,7 @@
       "domainId": "domain.growth",
       "title": "Launch Narrative & Cadence",
       "loadWhen": "before drafting the announcement, the launch-day sequence, the tentpole-vs-weekly-cadence plan, or launch post copy",
-      "bytes": 23349,
+      "bytes": 23386,
       "index": false
     },
     {
@@ -1062,7 +1062,7 @@
       "domainId": "domain.growth",
       "title": "Paid User Acquisition",
       "loadWhen": "before paid ads, Apple Search Ads, Meta/TikTok/Google campaigns, custom product page campaign routing, MMP/ad-network SDK choices, paid creative tests, or spend-readiness claims",
-      "bytes": 19426,
+      "bytes": 19556,
       "index": false
     },
     {
@@ -1071,7 +1071,7 @@
       "domainId": "domain.growth",
       "title": "Marketing And Growth",
       "loadWhen": "route into Marketing And Growth",
-      "bytes": 3549,
+      "bytes": 3633,
       "index": true
     },
     {
@@ -1080,7 +1080,7 @@
       "domainId": "domain.growth",
       "title": "UGC Creator Engine",
       "loadWhen": "before founder-led organic social, TikTok/Reels/Shorts UGC, creator sourcing/contracts/payments, creator-marketplace use, format-discovery tests, paid influencer sponsorships, CPM/view-guarantee deals, or meme-page amplification",
-      "bytes": 16167,
+      "bytes": 16231,
       "index": false
     },
     {
@@ -1089,7 +1089,7 @@
       "domainId": "domain.growth",
       "title": "Viral Growth Loops",
       "loadWhen": "before referral unlocks, share-to-unlock, invite systems, social/comment loops, viral onboarding or paywall flows, creator CTAs, content format labs, or features meant to spread on TikTok/Reels/Shorts",
-      "bytes": 12452,
+      "bytes": 12583,
       "index": false
     },
     {
@@ -1098,7 +1098,7 @@
       "domainId": "domain.money",
       "title": "Pricing And Getting Paid",
       "loadWhen": "route into Pricing And Getting Paid",
-      "bytes": 586,
+      "bytes": 594,
       "index": true
     },
     {
@@ -1107,7 +1107,7 @@
       "domainId": "domain.money",
       "title": "Revenue, Monetization, And Purchase Funnels",
       "loadWhen": "before RevenueCat, Stripe, app-store products, web billing, web purchase links, funnels, paywalls, subscriptions, webhooks, taxes, pricing, restore purchases, or entitlements",
-      "bytes": 40061,
+      "bytes": 40179,
       "index": false
     },
     {
@@ -1116,7 +1116,7 @@
       "domainId": "domain.operations",
       "title": "Founder-Zero Business Operator",
       "loadWhen": "every broad launch start; before account/social/Doppler bootstrap; when the founder is unsure; whenever an agent is about to hand back a checklist instead of operating the business",
-      "bytes": 15620,
+      "bytes": 15676,
       "index": false
     },
     {
@@ -1125,7 +1125,7 @@
       "domainId": "domain.operations",
       "title": "Frontier Agent Operations",
       "loadWhen": "before authenticated browser/API/CLI/native action on any provider, social, or store account",
-      "bytes": 14733,
+      "bytes": 14801,
       "index": false
     },
     {
@@ -1134,7 +1134,7 @@
       "domainId": "domain.operations",
       "title": "Paid Tool Routing And Free Fallbacks",
       "loadWhen": "before using or replacing any paid/account-gated tool, before running a free fallback, or when a service is missing from the runtime",
-      "bytes": 13316,
+      "bytes": 13407,
       "index": false
     },
     {
@@ -1143,7 +1143,7 @@
       "domainId": "domain.operations",
       "title": "Post-Launch Operations",
       "loadWhen": "once the app is live (phase_6/phase_6b); after first store approval; on \"what now\"; for weekly ops, incidents, review responses, retention and kill-or-scale reviews, or resuming a live app; when a second business exists (portfolio registry)",
-      "bytes": 26817,
+      "bytes": 27108,
       "index": false
     },
     {
@@ -1152,7 +1152,7 @@
       "domainId": "domain.operations",
       "title": "Provider State Recipes",
       "loadWhen": "working on provider state recipes",
-      "bytes": 4162,
+      "bytes": 4206,
       "index": false
     },
     {
@@ -1161,7 +1161,7 @@
       "domainId": "domain.operations",
       "title": "Running The Business",
       "loadWhen": "route into Running The Business",
-      "bytes": 2622,
+      "bytes": 2739,
       "index": true
     },
     {
@@ -1170,7 +1170,7 @@
       "domainId": "domain.operations",
       "title": "Resend Email Operations",
       "loadWhen": "before push permission priming or notification lifecycle work; before Resend, API keys, transactional email, lifecycle automations, broadcasts, contacts/topics, webhooks, inbound email, unsubscribe, deliverability, or templates",
-      "bytes": 19514,
+      "bytes": 19658,
       "index": false
     },
     {
@@ -1179,7 +1179,7 @@
       "domainId": "domain.operations",
       "title": "Secrets Management",
       "loadWhen": "working on secrets management",
-      "bytes": 16266,
+      "bytes": 16374,
       "index": false
     },
     {
@@ -1188,7 +1188,7 @@
       "domainId": "domain.orchestration",
       "title": "Autonomy Modes",
       "loadWhen": "start of multi-lane work; resuming a prior session; before provider/store mutations, handoff, or subagent dispatch; when rendering the cockpit",
-      "bytes": 3378,
+      "bytes": 3390,
       "index": false
     },
     {
@@ -1196,8 +1196,8 @@
       "path": "playbook/orchestration/compound-engineering-routing.md",
       "domainId": "domain.orchestration",
       "title": "Compound Engineering Routing",
-      "loadWhen": "before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees, `ENGINEERING_PLAN.md`, `PRODUCTION_READINESS.md`, or production-readiness claims",
-      "bytes": 4902,
+      "loadWhen": "before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees, `engineering/ENGINEERING_PLAN.md`, `engineering/PRODUCTION_READINESS.md`, or production-readiness claims",
+      "bytes": 4996,
       "index": false
     },
     {
@@ -1206,7 +1206,7 @@
       "domainId": "domain.orchestration",
       "title": "Claude Dynamic Workflows For The Pre-Build Stages",
       "loadWhen": "a stage needs dozens-to-hundreds of agents, a codified quality pattern (adversarial verification, tournament, loop-until-done), or a run you want to read and rerun",
-      "bytes": 20046,
+      "bytes": 20222,
       "index": false
     },
     {
@@ -1215,7 +1215,7 @@
       "domainId": "domain.orchestration",
       "title": "Parallel Agent Orchestration",
       "loadWhen": "start of multi-lane work; resuming a prior session; before provider/store mutations, handoff, or subagent dispatch; when rendering the cockpit",
-      "bytes": 14420,
+      "bytes": 14696,
       "index": false
     },
     {
@@ -1224,7 +1224,7 @@
       "domainId": "domain.orchestration",
       "title": "Project State And Launch Cockpit",
       "loadWhen": "start of multi-lane work; resuming a prior session; before provider/store mutations, handoff, or subagent dispatch; when rendering the cockpit",
-      "bytes": 14732,
+      "bytes": 14876,
       "index": false
     },
     {
@@ -1233,7 +1233,7 @@
       "domainId": "domain.orchestration",
       "title": "Driving The Work",
       "loadWhen": "route into Driving The Work",
-      "bytes": 2664,
+      "bytes": 2763,
       "index": true
     },
     {
@@ -1242,7 +1242,7 @@
       "domainId": "domain.process",
       "title": "Artifact Contracts",
       "loadWhen": "writing docs, handoff bundles, or acceptance criteria",
-      "bytes": 83307,
+      "bytes": 85153,
       "index": false
     },
     {
@@ -1251,7 +1251,7 @@
       "domainId": "domain.process",
       "title": "cascade-edges.yaml — the Change Cascade Map as data.",
       "loadWhen": "working on cascade edges",
-      "bytes": 6747,
+      "bytes": 6753,
       "index": false
     },
     {
@@ -1260,7 +1260,7 @@
       "domainId": "domain.process",
       "title": "Change Cascade",
       "loadWhen": "after **any** change to a launched or near-launch app's features, copy, brand vocabulary, pricing, products, design, or data behavior",
-      "bytes": 11112,
+      "bytes": 11186,
       "index": false
     },
     {
@@ -1269,7 +1269,7 @@
       "domainId": "domain.process",
       "title": "Business Control Plane",
       "loadWhen": "extending the Design Room, or planning future analytics, monetization, store-ops, or growth panels over the same state store and theme tokens",
-      "bytes": 5739,
+      "bytes": 5833,
       "index": false
     },
     {
@@ -1278,7 +1278,7 @@
       "domainId": "domain.process",
       "title": "Failure Cards",
       "loadWhen": "before readiness claims; after a repeated agent miss; when adding a validator or scenario",
-      "bytes": 34860,
+      "bytes": 35303,
       "index": false
     },
     {
@@ -1286,8 +1286,8 @@
       "path": "playbook/process/flow-traceability.md",
       "domainId": "domain.process",
       "title": "Launch Flow Traceability And Build Contracts",
-      "loadWhen": "crossing a phase boundary; deciding whether `TECH_SPEC.md` is needed; auditing whether research reached experience, design, and specs",
-      "bytes": 12177,
+      "loadWhen": "crossing a phase boundary; deciding whether `engineering/TECH_SPEC.md` is needed; auditing whether research reached experience, design, and specs",
+      "bytes": 12604,
       "index": false
     },
     {
@@ -1296,7 +1296,7 @@
       "domainId": "domain.process",
       "title": "B2C Launch Coverage Audit",
       "loadWhen": "\"what else is missing\", \"launch readiness\"; moving from planning to build or submission",
-      "bytes": 42671,
+      "bytes": 43420,
       "index": false
     },
     {
@@ -1305,7 +1305,7 @@
       "domainId": "domain.process",
       "title": "Launch Phases",
       "loadWhen": "any multi-phase launch or continuation; deciding where work starts",
-      "bytes": 65529,
+      "bytes": 67125,
       "index": false
     },
     {
@@ -1314,7 +1314,7 @@
       "domainId": "domain.process",
       "title": "Provider Proof",
       "loadWhen": "working on provider proof",
-      "bytes": 2003,
+      "bytes": 2025,
       "index": false
     },
     {
@@ -1323,7 +1323,7 @@
       "domainId": "domain.process",
       "title": "Running The Launch",
       "loadWhen": "route into Running The Launch",
-      "bytes": 2703,
+      "bytes": 2745,
       "index": true
     },
     {
@@ -1332,7 +1332,7 @@
       "domainId": "domain.process",
       "title": "Tool Recipes",
       "loadWhen": "running research, setting up the funnel, configuring domain/email routing, checking analytics, choosing stack, or verifying deployment",
-      "bytes": 5685,
+      "bytes": 5694,
       "index": false
     },
     {
@@ -1341,7 +1341,7 @@
       "domainId": "domain.process",
       "title": "Device Capture And App Proof",
       "loadWhen": "when device capture and app proof governs the current work",
-      "bytes": 8806,
+      "bytes": 8825,
       "index": false
     },
     {
@@ -1350,7 +1350,7 @@
       "domainId": "domain.process",
       "title": "Engineering And Agent Orchestration",
       "loadWhen": "when engineering and agent orchestration governs the current work",
-      "bytes": 6063,
+      "bytes": 6294,
       "index": false
     },
     {
@@ -1368,7 +1368,7 @@
       "domainId": "domain.process",
       "title": "Growth And Store Routing",
       "loadWhen": "when growth and store routing governs the current work",
-      "bytes": 11124,
+      "bytes": 11431,
       "index": false
     },
     {
@@ -1377,7 +1377,7 @@
       "domainId": "domain.process",
       "title": "Research And Market Intelligence",
       "loadWhen": "when research and market intelligence governs the current work",
-      "bytes": 10270,
+      "bytes": 10286,
       "index": false
     },
     {
@@ -1386,7 +1386,7 @@
       "domainId": "domain.process",
       "title": "Revenue, Email, And Analytics Routing",
       "loadWhen": "when revenue, email, and analytics routing governs the current work",
-      "bytes": 7371,
+      "bytes": 7419,
       "index": false
     },
     {
@@ -1404,7 +1404,7 @@
       "domainId": "domain.process",
       "title": "Visual And Motion Production",
       "loadWhen": "when visual and motion production governs the current work",
-      "bytes": 19816,
+      "bytes": 19997,
       "index": false
     },
     {
@@ -1413,7 +1413,7 @@
       "domainId": "domain.product",
       "title": "AI Chat / Companion Build Lane",
       "loadWhen": "\"an AI assistant\", \"a chatbot for \\<domain\\>\", \"an AI companion/character\", a coach/tutor chat app; before specing conversation schema, model integration, memory, usage metering, or the safety layer",
-      "bytes": 11618,
+      "bytes": 11757,
       "index": false
     },
     {
@@ -1422,7 +1422,7 @@
       "domainId": "domain.product",
       "title": "Habit Tracker / Daily Utility Build Lane",
       "loadWhen": "\"a habit tracker\", \"a streak app\", a daily routine or wellness/productivity utility; before specing habits, check-ins, streaks, reminders, or insights",
-      "bytes": 12416,
+      "bytes": 12559,
       "index": false
     },
     {
@@ -1431,7 +1431,7 @@
       "domainId": "domain.product",
       "title": "Photo / AI Media Build Lane",
       "loadWhen": "AI headshots/avatars, photo enhancer/restorer, AI art studio, \"an app that turns photos into \\<X\\>\"; before specing media storage, the generation pipeline, credits/metering, sharing, or safety",
-      "bytes": 13901,
+      "bytes": 14060,
       "index": false
     },
     {
@@ -1439,8 +1439,8 @@
       "path": "playbook/product/product-moat.md",
       "domainId": "domain.product",
       "title": "Product Moat And Core-Loop Innovation",
-      "loadWhen": "before `SPEC.md`, `DESIGN.md`, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready. **Also on \"11-star run\"/\"11-star pass\" or equivalent — follow the reference's \"11-Star Run Protocol\" before any other output.**",
-      "bytes": 6400,
+      "loadWhen": "before `product/SPEC.md`, `design/DESIGN.md`, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready. **Also on \"11-star run\"/\"11-star pass\" or equivalent — follow the reference's \"11-Star Run Protocol\" before any other output.**",
+      "bytes": 6423,
       "index": false
     },
     {
@@ -1449,7 +1449,7 @@
       "domainId": "domain.product",
       "title": "What You're Building",
       "loadWhen": "route into What You're Building",
-      "bytes": 2279,
+      "bytes": 2294,
       "index": true
     },
     {
@@ -1458,7 +1458,7 @@
       "domainId": "domain.product",
       "title": "Social / Community Platform Build Lane",
       "loadWhen": "\"build a social network\", an X/Instagram/TikTok clone, \"a community app for \\<niche\\>\"; before specing schema, auth, feed, profiles, search, DMs, monetization, or invites",
-      "bytes": 13486,
+      "bytes": 13630,
       "index": false
     },
     {
@@ -1467,7 +1467,7 @@
       "domainId": "domain.research",
       "title": "Localization Market Research First",
       "loadWhen": "before localizing **any** surface (store metadata/keywords/screenshots, paywall/offers, landing/web, lifecycle email, paid storefronts) or choosing which locales to ship",
-      "bytes": 10544,
+      "bytes": 10569,
       "index": false
     },
     {
@@ -1485,7 +1485,7 @@
       "domainId": "domain.store",
       "title": "App Store Connect CLI Routing",
       "loadWhen": "before automating App Store Connect with the Rork `asc` CLI or CLI skill pack — app creation, metadata, screenshots, TestFlight, review status, RevenueCat catalog sync",
-      "bytes": 24234,
+      "bytes": 24372,
       "index": false
     },
     {
@@ -1494,7 +1494,7 @@
       "domainId": "domain.store",
       "title": "App Store Listing Preparation",
       "loadWhen": "before listing packets, privacy questionnaires, pricing/subscription field maps, custom product pages, in-app events, promotion pages, localization matrices, App Icon/App Preview work, or App Store marketing material",
-      "bytes": 30326,
+      "bytes": 30529,
       "index": false
     },
     {
@@ -1503,7 +1503,7 @@
       "domainId": "domain.store",
       "title": "Apple Signing And First Upload",
       "loadWhen": "before ASC upload readiness on any iOS submission path",
-      "bytes": 27128,
+      "bytes": 27311,
       "index": false
     },
     {
@@ -1512,7 +1512,7 @@
       "domainId": "domain.store",
       "title": "ASO And Store Operations",
       "loadWhen": "before App Store/Play metadata, screenshot planning, ASO audits, keyword research, Apple Search Ads, release/rejection handling, ratings/reviews, or post-launch monitoring",
-      "bytes": 19633,
+      "bytes": 19750,
       "index": false
     },
     {
@@ -1521,7 +1521,7 @@
       "domainId": "domain.store",
       "title": "Google Play Release",
       "loadWhen": "Android is in scope (platforms include android, or an android bundle id exists); before Play Console setup, Data Safety answers, content rating, Play App Signing, release tracks, closed testing, or pre-launch report triage",
-      "bytes": 17573,
+      "bytes": 17705,
       "index": false
     },
     {
@@ -1530,7 +1530,7 @@
       "domainId": "domain.store",
       "title": "App Store And Google Play",
       "loadWhen": "route into App Store And Google Play",
-      "bytes": 2693,
+      "bytes": 2717,
       "index": true
     },
     {
@@ -1539,7 +1539,7 @@
       "domainId": "domain.store",
       "title": "Store Console Workflow And User Handoff",
       "loadWhen": "before App Store Connect or Play Console setup, privacy labels/Data safety, screenshot capture/upload, reviewer notes, account-deletion console work, or any \"where do I click and what do I paste\" handoff",
-      "bytes": 38691,
+      "bytes": 38928,
       "index": false
     },
     {
@@ -1548,7 +1548,7 @@
       "domainId": "domain.trust",
       "title": "Privacy And Terms Pages",
       "loadWhen": "before drafting or publishing privacy policy, terms, EULA, subscription terms, account/data deletion flows, or app-store privacy/Data safety disclosures",
-      "bytes": 9884,
+      "bytes": 9896,
       "index": false
     },
     {
@@ -1557,7 +1557,7 @@
       "domainId": "domain.trust",
       "title": "Privacy, Security, And Legal",
       "loadWhen": "route into Privacy, Security, And Legal",
-      "bytes": 690,
+      "bytes": 702,
       "index": true
     },
     {
@@ -1566,7 +1566,7 @@
       "domainId": "domain.trust",
       "title": "Security Release Hardening",
       "loadWhen": "working on security release hardening",
-      "bytes": 10522,
+      "bytes": 10776,
       "index": false
     },
     {
@@ -1575,7 +1575,7 @@
       "domainId": "domain.words",
       "title": "Conversion Copywriting, App Copy, And Localization Readiness",
       "loadWhen": "before writing any words a user reads: conversion copy (hero/CTA, store, paywall) and every in-app string (buttons, empty states, errors, settings); and l10n readiness",
-      "bytes": 21149,
+      "bytes": 21505,
       "index": false
     },
     {
@@ -1584,7 +1584,7 @@
       "domainId": "domain.words",
       "title": "No-Slop Writing And Marketing Copy",
       "loadWhen": "before writing or reviewing any founder-facing copy, or any marketing copy this skill generates — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO",
-      "bytes": 16096,
+      "bytes": 16160,
       "index": false
     },
     {
@@ -1593,7 +1593,7 @@
       "domainId": "domain.words",
       "title": "Every Word A User Reads",
       "loadWhen": "route into Every Word A User Reads",
-      "bytes": 1034,
+      "bytes": 1069,
       "index": true
     }
   ],
@@ -1929,8 +1929,8 @@
       ],
       "dependencies": [],
       "outputPaths": [
-        "PROJECT_STATE.yaml",
-        "launch-cockpit.html"
+        "state/PROJECT_STATE.yaml",
+        "state/launch-cockpit.html"
       ],
       "gateCommands": [
         "check:continuity-contract"
@@ -1967,9 +1967,9 @@
       ],
       "dependencies": [],
       "outputPaths": [
-        "PROJECT_STATE.yaml",
-        "launch-cockpit.html",
-        "BUSINESS_ACCESS.md"
+        "state/PROJECT_STATE.yaml",
+        "state/launch-cockpit.html",
+        "operations/BUSINESS_ACCESS.md"
       ],
       "gateCommands": [
         "validate:launch-state",
@@ -2002,7 +2002,7 @@
       "laneIds": [],
       "dependencies": [],
       "outputPaths": [
-        "PROVIDER_PROOF.md"
+        "operations/PROVIDER_PROOF.md"
       ],
       "gateCommands": [
         "check:provider-proof"
@@ -2040,8 +2040,8 @@
       "laneIds": [],
       "dependencies": [],
       "outputPaths": [
-        "PROJECT_STATE.yaml",
-        "LAUNCH_TRACE.md"
+        "state/PROJECT_STATE.yaml",
+        "state/LAUNCH_TRACE.md"
       ],
       "gateCommands": [
         "check:change-cascade"
@@ -2061,7 +2061,7 @@
       "areaIds": [
         "area.operating-system"
       ],
-      "trigger": "Crossing research → product/design/build; deciding if TECH_SPEC.md is needed",
+      "trigger": "Crossing research → product/design/build; deciding if engineering/TECH_SPEC.md is needed",
       "negativeTriggers": [],
       "contextPackIds": [
         "context.process"
@@ -2081,8 +2081,8 @@
         "workflow.experience.11-star-experience"
       ],
       "outputPaths": [
-        "LAUNCH_TRACE.md",
-        "TECH_SPEC.md"
+        "state/LAUNCH_TRACE.md",
+        "engineering/TECH_SPEC.md"
       ],
       "gateCommands": [
         "check:launch-trace"
@@ -2151,7 +2151,7 @@
         "workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep"
       ],
       "outputPaths": [
-        "FAILURE_CARDS.md",
+        "operations/FAILURE_CARDS.md",
         "LAUNCHBENCH.md"
       ],
       "gateCommands": [
@@ -2190,7 +2190,7 @@
       ],
       "dependencies": [],
       "outputPaths": [
-        "TOOL_DECISIONS.md"
+        "strategy/TOOL_DECISIONS.md"
       ],
       "gateCommands": [
         "check:paid-tool-decisions"
@@ -2231,7 +2231,7 @@
       ],
       "dependencies": [],
       "outputPaths": [
-        "secrets/SECRETS.md"
+        "trust/secrets/SECRETS.md"
       ],
       "gateCommands": [
         "check:secrets"
@@ -2273,8 +2273,8 @@
       ],
       "dependencies": [],
       "outputPaths": [
-        "SECURITY.md",
-        "security-review.html"
+        "trust/SECURITY.md",
+        "trust/security-review.html"
       ],
       "gateCommands": [
         "check:security"
@@ -2317,8 +2317,8 @@
         "workflow.process.launch-trace-and-build-contracts"
       ],
       "outputPaths": [
-        "PRIVACY.md",
-        "TERMS.md",
+        "trust/PRIVACY.md",
+        "trust/TERMS.md",
         "LEGAL_REVIEW.md"
       ],
       "gateCommands": [
@@ -2361,7 +2361,7 @@
         "workflow.data.analytics-and-attribution-blueprint"
       ],
       "outputPaths": [
-        "EMAIL_OPS.md"
+        "growth/EMAIL_OPS.md"
       ],
       "gateCommands": [
         "check:email"
@@ -2402,8 +2402,8 @@
         "workflow.engineering.engineering-orchestration-ce-production-readiness"
       ],
       "outputPaths": [
-        "POST_LAUNCH_OPS.md",
-        "LAUNCH_RETRO.md"
+        "operations/POST_LAUNCH_OPS.md",
+        "operations/LAUNCH_RETRO.md"
       ],
       "gateCommands": [
         "check:post-launch"
@@ -2438,7 +2438,7 @@
       "laneIds": [],
       "dependencies": [],
       "outputPaths": [
-        "BUSINESS_ACCESS.md",
+        "operations/BUSINESS_ACCESS.md",
         "operations/business-access.json"
       ],
       "gateCommands": [
@@ -2474,7 +2474,7 @@
       "laneIds": [],
       "dependencies": [],
       "outputPaths": [
-        "AGENT_OPERATIONS.md",
+        "operations/AGENT_OPERATIONS.md",
         "operations/agent-operations.json"
       ],
       "gateCommands": [
@@ -2520,7 +2520,7 @@
       ],
       "dependencies": [],
       "outputPaths": [
-        "SPEC.md"
+        "product/SPEC.md"
       ],
       "gateCommands": [
         "check:app-archetype",
@@ -2557,8 +2557,8 @@
       ],
       "dependencies": [],
       "outputPaths": [
-        "RESEARCH.md",
-        "SPEC.md"
+        "strategy/RESEARCH.md",
+        "product/SPEC.md"
       ],
       "gateCommands": [
         "check:research",
@@ -2596,7 +2596,7 @@
       ],
       "dependencies": [],
       "outputPaths": [
-        "localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
+        "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
       ],
       "gateCommands": [
         "check:localization-research"
@@ -2636,8 +2636,8 @@
         "workflow.research.research-backed-spec"
       ],
       "outputPaths": [
-        "11-star-experience/11_STAR_EXPERIENCE.md",
-        "11-star-experience/11-star-experience.html"
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "product/experience/11-star-experience/11-star-experience.html"
       ],
       "gateCommands": [
         "check:11-star"
@@ -2677,7 +2677,7 @@
         "workflow.data.analytics-and-attribution-blueprint"
       ],
       "outputPaths": [
-        "emotional-design/EMOTIONAL_DESIGN.md"
+        "product/experience/emotional-design/EMOTIONAL_DESIGN.md"
       ],
       "gateCommands": [
         "check:emotional-design"
@@ -2716,7 +2716,7 @@
         "workflow.experience.emotional-experience-design-producer"
       ],
       "outputPaths": [
-        "emotional-design/EMOTIONAL_AUDIT.md"
+        "product/experience/emotional-design/EMOTIONAL_AUDIT.md"
       ],
       "gateCommands": [
         "check:emotional-design"
@@ -2757,7 +2757,7 @@
       "outputPaths": [
         "state/business.json",
         "state/theme.tokens.json",
-        "design-room.html"
+        "design/design-room.html"
       ],
       "gateCommands": [
         "validate:design-state",
@@ -2799,9 +2799,9 @@
         "workflow.design.design-room-state-mutate-version-render"
       ],
       "outputPaths": [
-        "design-system/tokens.json",
-        "design-system/tokens.css",
-        "design-system/DesignTokens.swift"
+        "design/system/tokens.json",
+        "design/system/tokens.css",
+        "design/system/DesignTokens.swift"
       ],
       "gateCommands": [
         "check:token-promotion"
@@ -2839,7 +2839,7 @@
         "workflow.design.design-room-state-mutate-version-render"
       ],
       "outputPaths": [
-        "ux-patterns/UX_PATTERNS.md"
+        "product/experience/ux-patterns/UX_PATTERNS.md"
       ],
       "gateCommands": [
         "check:ux-patterns"
@@ -2881,8 +2881,8 @@
         "workflow.experience.11-star-experience"
       ],
       "outputPaths": [
-        "ONBOARDING.md",
-        "onboarding.html"
+        "product/ONBOARDING.md",
+        "product/onboarding.html"
       ],
       "gateCommands": [
         "check:onboarding"
@@ -2917,8 +2917,8 @@
       ],
       "dependencies": [],
       "outputPaths": [
-        "DESIGN.md",
-        "ux-patterns/UX_PATTERNS.md"
+        "design/DESIGN.md",
+        "product/experience/ux-patterns/UX_PATTERNS.md"
       ],
       "gateCommands": [
         "check:ux-patterns",
@@ -2958,8 +2958,8 @@
         "workflow.design.design-room-state-mutate-version-render"
       ],
       "outputPaths": [
-        "content-assets/CONTENT_ASSETS.md",
-        "content-assets/content-assets.html"
+        "growth/content-assets/CONTENT_ASSETS.md",
+        "growth/content-assets/content-assets.html"
       ],
       "gateCommands": [
         "check:content-assets"
@@ -2993,8 +2993,8 @@
       "laneIds": [],
       "dependencies": [],
       "outputPaths": [
-        "COPY_BRIEF.md",
-        "COPY_DECK.md"
+        "product/copy/COPY_BRIEF.md",
+        "product/copy/COPY_DECK.md"
       ],
       "gateCommands": [
         "check:no-slop",
@@ -3073,7 +3073,7 @@
         "workflow.store.aso-and-store-ops"
       ],
       "outputPaths": [
-        "app-store-listing/APP_STORE_LISTING.md"
+        "store/app-store-listing/APP_STORE_LISTING.md"
       ],
       "gateCommands": [
         "check:store-console"
@@ -3112,7 +3112,7 @@
         "workflow.store.app-store-listing-prep-packet"
       ],
       "outputPaths": [
-        "APPLE_SIGNING.md"
+        "store/APPLE_SIGNING.md"
       ],
       "gateCommands": [
         "check:apple-signing"
@@ -3157,7 +3157,7 @@
         "workflow.trust.privacy-and-terms"
       ],
       "outputPaths": [
-        "APPLE_APP_STORE_REQUIREMENTS.md"
+        "store/APPLE_APP_STORE_REQUIREMENTS.md"
       ],
       "gateCommands": [
         "check:apple-requirements"
@@ -3201,8 +3201,8 @@
         "workflow.store.apple-signing-and-release-readiness"
       ],
       "outputPaths": [
-        "STORE_CONSOLE.md",
-        "store-console.html"
+        "store/STORE_CONSOLE.md",
+        "store/store-console.html"
       ],
       "gateCommands": [
         "check:store-console"
@@ -3246,7 +3246,7 @@
         "workflow.store.store-console-workflow"
       ],
       "outputPaths": [
-        "STORE_CONSOLE.md"
+        "store/STORE_CONSOLE.md"
       ],
       "gateCommands": [
         "check:asc-command-contract"
@@ -3291,7 +3291,7 @@
         "workflow.store.app-store-listing-prep-packet"
       ],
       "outputPaths": [
-        "app-store-listing/SCREENSHOTS.md"
+        "store/app-store-listing/SCREENSHOTS.md"
       ],
       "gateCommands": [
         "check:store-screenshots"
@@ -3332,7 +3332,7 @@
         "workflow.store.app-store-listing-prep-packet"
       ],
       "outputPaths": [
-        "GOOGLE_PLAY_RELEASE.md"
+        "store/GOOGLE_PLAY_RELEASE.md"
       ],
       "gateCommands": [
         "check:google-play"
@@ -3377,9 +3377,9 @@
         "workflow.design.design-room-state-mutate-version-render"
       ],
       "outputPaths": [
-        "ENGINEERING_PLAN.md",
-        "ORCHESTRATION.md",
-        "PRODUCTION_READINESS.md"
+        "engineering/ENGINEERING_PLAN.md",
+        "operations/ORCHESTRATION.md",
+        "engineering/PRODUCTION_READINESS.md"
       ],
       "gateCommands": [
         "check:compound-engineering",
@@ -3400,7 +3400,7 @@
       "areaIds": [
         "area.build-release"
       ],
-      "trigger": "Before schema/auth prompts or TECH_SPEC.md data/API sections harden",
+      "trigger": "Before schema/auth prompts or engineering/TECH_SPEC.md data/API sections harden",
       "negativeTriggers": [],
       "contextPackIds": [
         "context.engineering"
@@ -3420,7 +3420,7 @@
         "workflow.process.launch-trace-and-build-contracts"
       ],
       "outputPaths": [
-        "TECH_SPEC.md"
+        "engineering/TECH_SPEC.md"
       ],
       "gateCommands": [
         "check:backend-contract"
@@ -3501,8 +3501,8 @@
         "workflow.engineering.engineering-orchestration-ce-production-readiness"
       ],
       "outputPaths": [
-        "DEMO_VIDEO.md",
-        "PRODUCTION_READINESS.md"
+        "growth/DEMO_VIDEO.md",
+        "engineering/PRODUCTION_READINESS.md"
       ],
       "gateCommands": [
         "check:mobai-proof"
@@ -3543,7 +3543,7 @@
         "workflow.engineering.engineering-orchestration-ce-production-readiness"
       ],
       "outputPaths": [
-        "PRODUCTION_READINESS.md"
+        "engineering/PRODUCTION_READINESS.md"
       ],
       "gateCommands": [
         "check:native-ios"
@@ -3586,8 +3586,8 @@
         "workflow.research.research-backed-spec"
       ],
       "outputPaths": [
-        "ANALYTICS.md",
-        "analytics-plan.html"
+        "analytics/ANALYTICS.md",
+        "analytics/analytics-plan.html"
       ],
       "gateCommands": [
         "check:analytics-catalog",
@@ -3753,7 +3753,7 @@
         "workflow.process.launch-trace-and-build-contracts"
       ],
       "outputPaths": [
-        "REVENUE_OPS.md"
+        "revenue/REVENUE_OPS.md"
       ],
       "gateCommands": [
         "check:revenue"
@@ -3835,7 +3835,7 @@
         "workflow.growth.geo-seo-public-visibility"
       ],
       "outputPaths": [
-        "landing/"
+        "growth/landing/"
       ],
       "gateCommands": [
         "check:landing-funnel"
@@ -3874,7 +3874,7 @@
         "workflow.growth.launch-narrative-and-cadence"
       ],
       "outputPaths": [
-        "UGC_PLAYBOOK.md"
+        "growth/UGC_PLAYBOOK.md"
       ],
       "gateCommands": [
         "check:viral-growth"
@@ -3913,7 +3913,7 @@
         "workflow.growth.launch-narrative-and-cadence"
       ],
       "outputPaths": [
-        "FASTLANE_OPS.md"
+        "growth/FASTLANE_OPS.md"
       ],
       "gateCommands": [
         "check:post-launch"
@@ -4174,31 +4174,6 @@
   ],
   "artifacts": [
     {
-      "id": "artifact.11-star-experience-11-star-experience-md",
-      "path": "11-star-experience/11_STAR_EXPERIENCE.md",
-      "ownerDomainId": "domain.experience",
-      "laneIds": [
-        "lane.experience"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.11-star-experience-11-star-experience-html",
-      "path": "11-star-experience/11-star-experience.html",
-      "ownerDomainId": "domain.experience",
-      "laneIds": [
-        "lane.experience"
-      ],
-      "generated": true
-    },
-    {
-      "id": "artifact.agent-operations-md",
-      "path": "AGENT_OPERATIONS.md",
-      "ownerDomainId": "domain.operations",
-      "laneIds": [],
-      "generated": false
-    },
-    {
       "id": "artifact.agents-md",
       "path": "AGENTS.md",
       "ownerDomainId": "domain.engineering",
@@ -4208,8 +4183,8 @@
       "generated": false
     },
     {
-      "id": "artifact.analytics-plan-html",
-      "path": "analytics-plan.html",
+      "id": "artifact.analytics-analytics-plan-html",
+      "path": "analytics/analytics-plan.html",
       "ownerDomainId": "domain.data",
       "laneIds": [
         "lane.analytics-attribution"
@@ -4217,8 +4192,8 @@
       "generated": true
     },
     {
-      "id": "artifact.analytics-md",
-      "path": "ANALYTICS.md",
+      "id": "artifact.analytics-analytics-md",
+      "path": "analytics/ANALYTICS.md",
       "ownerDomainId": "domain.data",
       "laneIds": [
         "lane.analytics-attribution"
@@ -4235,78 +4210,6 @@
       "generated": false
     },
     {
-      "id": "artifact.app-store-listing-app-store-listing-md",
-      "path": "app-store-listing/APP_STORE_LISTING.md",
-      "ownerDomainId": "domain.store",
-      "laneIds": [
-        "lane.store-console"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.app-store-listing-app-privacy-questionnaire-html",
-      "path": "app-store-listing/app-privacy-questionnaire.html",
-      "ownerDomainId": "domain.store",
-      "laneIds": [
-        "lane.store-console"
-      ],
-      "generated": true
-    },
-    {
-      "id": "artifact.app-store-listing-app-store-listing-html",
-      "path": "app-store-listing/app-store-listing.html",
-      "ownerDomainId": "domain.store",
-      "laneIds": [
-        "lane.store-console"
-      ],
-      "generated": true
-    },
-    {
-      "id": "artifact.app-store-listing-screenshots-md",
-      "path": "app-store-listing/SCREENSHOTS.md",
-      "ownerDomainId": "domain.store",
-      "laneIds": [
-        "lane.store-console"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.apple-app-store-requirements-md",
-      "path": "APPLE_APP_STORE_REQUIREMENTS.md",
-      "ownerDomainId": "domain.store",
-      "laneIds": [
-        "lane.store-console",
-        "lane.apple-signing",
-        "lane.privacy-legal"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.apple-signing-md",
-      "path": "APPLE_SIGNING.md",
-      "ownerDomainId": "domain.store",
-      "laneIds": [
-        "lane.apple-signing"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.brand-md",
-      "path": "BRAND.md",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.design"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.business-access-md",
-      "path": "BUSINESS_ACCESS.md",
-      "ownerDomainId": "domain.operations",
-      "laneIds": [],
-      "generated": false
-    },
-    {
       "id": "artifact.claude-md",
       "path": "CLAUDE.md",
       "ownerDomainId": "domain.engineering",
@@ -4316,69 +4219,42 @@
       "generated": false
     },
     {
-      "id": "artifact.content-assets-content-assets-md",
-      "path": "content-assets/CONTENT_ASSETS.md",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.content-assets"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.content-assets-content-assets-html",
-      "path": "content-assets/content-assets.html",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.content-assets"
-      ],
-      "generated": true
-    },
-    {
-      "id": "artifact.content-assets-manifest-json",
-      "path": "content-assets/manifest.json",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.content-assets"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.copy-brief-md",
-      "path": "COPY_BRIEF.md",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.design"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.copy-deck-md",
-      "path": "COPY_DECK.md",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.design"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.demo-video-md",
-      "path": "DEMO_VIDEO.md",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.content-assets"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.design-room-html",
-      "path": "design-room.html",
+      "id": "artifact.design-design-room-html",
+      "path": "design/design-room.html",
       "ownerDomainId": "domain.design",
       "laneIds": [],
       "generated": true
     },
     {
+      "id": "artifact.design-design-html",
+      "path": "design/design.html",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.design"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.design-design-md",
+      "path": "design/DESIGN.md",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.design"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.design-screen-design-design-md",
+      "path": "design/screen-design/design.md",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.design"
+      ],
+      "generated": false
+    },
+    {
       "id": "artifact.design-system-designtokens-swift",
-      "path": "design-system/DesignTokens.swift",
+      "path": "design/system/DesignTokens.swift",
       "ownerDomainId": "domain.design",
       "laneIds": [
         "lane.design"
@@ -4387,7 +4263,7 @@
     },
     {
       "id": "artifact.design-system-tokens-css",
-      "path": "design-system/tokens.css",
+      "path": "design/system/tokens.css",
       "ownerDomainId": "domain.design",
       "laneIds": [
         "lane.design"
@@ -4396,7 +4272,7 @@
     },
     {
       "id": "artifact.design-system-tokens-json",
-      "path": "design-system/tokens.json",
+      "path": "design/system/tokens.json",
       "ownerDomainId": "domain.design",
       "laneIds": [
         "lane.design"
@@ -4404,62 +4280,8 @@
       "generated": false
     },
     {
-      "id": "artifact.design-html",
-      "path": "design.html",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.design"
-      ],
-      "generated": true
-    },
-    {
-      "id": "artifact.design-md",
-      "path": "DESIGN.md",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.design"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.email-ops-md",
-      "path": "EMAIL_OPS.md",
-      "ownerDomainId": "domain.operations",
-      "laneIds": [
-        "lane.email"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.emotional-design-emotional-audit-md",
-      "path": "emotional-design/EMOTIONAL_AUDIT.md",
-      "ownerDomainId": "domain.experience",
-      "laneIds": [
-        "lane.emotional-design"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.emotional-design-emotional-design-md",
-      "path": "emotional-design/EMOTIONAL_DESIGN.md",
-      "ownerDomainId": "domain.experience",
-      "laneIds": [
-        "lane.emotional-design"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.emotional-design-emotional-design-html",
-      "path": "emotional-design/emotional-design.html",
-      "ownerDomainId": "domain.experience",
-      "laneIds": [
-        "lane.emotional-design"
-      ],
-      "generated": true
-    },
-    {
-      "id": "artifact.engineering-plan-md",
-      "path": "ENGINEERING_PLAN.md",
+      "id": "artifact.engineering-engineering-plan-md",
+      "path": "engineering/ENGINEERING_PLAN.md",
       "ownerDomainId": "domain.engineering",
       "laneIds": [
         "lane.engineering"
@@ -4467,18 +4289,20 @@
       "generated": false
     },
     {
-      "id": "artifact.failure-cards-md",
-      "path": "FAILURE_CARDS.md",
-      "ownerDomainId": "domain.orchestration",
-      "laneIds": [],
+      "id": "artifact.engineering-production-readiness-md",
+      "path": "engineering/PRODUCTION_READINESS.md",
+      "ownerDomainId": "domain.engineering",
+      "laneIds": [
+        "lane.engineering"
+      ],
       "generated": false
     },
     {
-      "id": "artifact.fastlane-ops-md",
-      "path": "FASTLANE_OPS.md",
-      "ownerDomainId": "domain.growth",
+      "id": "artifact.engineering-tech-spec-md",
+      "path": "engineering/TECH_SPEC.md",
+      "ownerDomainId": "domain.engineering",
       "laneIds": [
-        "lane.growth"
+        "lane.engineering"
       ],
       "generated": false
     },
@@ -4488,15 +4312,6 @@
       "ownerDomainId": "domain.growth",
       "laneIds": [
         "lane.growth"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.google-play-release-md",
-      "path": "GOOGLE_PLAY_RELEASE.md",
-      "ownerDomainId": "domain.store",
-      "laneIds": [
-        "lane.store-console"
       ],
       "generated": false
     },
@@ -4522,8 +4337,71 @@
       "generated": true
     },
     {
+      "id": "artifact.growth-content-assets-content-assets-md",
+      "path": "growth/content-assets/CONTENT_ASSETS.md",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.content-assets"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.growth-content-assets-content-assets-html",
+      "path": "growth/content-assets/content-assets.html",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.content-assets"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.growth-content-assets-manifest-json",
+      "path": "growth/content-assets/manifest.json",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.content-assets"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.growth-demo-video-md",
+      "path": "growth/DEMO_VIDEO.md",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.content-assets"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.growth-email-ops-md",
+      "path": "growth/EMAIL_OPS.md",
+      "ownerDomainId": "domain.operations",
+      "laneIds": [
+        "lane.email"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.growth-fastlane-ops-md",
+      "path": "growth/FASTLANE_OPS.md",
+      "ownerDomainId": "domain.growth",
+      "laneIds": [
+        "lane.growth"
+      ],
+      "generated": false
+    },
+    {
       "id": "artifact.growth-format-lab-csv",
       "path": "growth/format-lab.csv",
+      "ownerDomainId": "domain.growth",
+      "laneIds": [
+        "lane.growth"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.growth-landing",
+      "path": "growth/landing/",
       "ownerDomainId": "domain.growth",
       "laneIds": [
         "lane.growth"
@@ -4558,6 +4436,15 @@
       "generated": false
     },
     {
+      "id": "artifact.growth-ugc-playbook-md",
+      "path": "growth/UGC_PLAYBOOK.md",
+      "ownerDomainId": "domain.growth",
+      "laneIds": [
+        "lane.growth"
+      ],
+      "generated": false
+    },
+    {
       "id": "artifact.growth-viral-growth-md",
       "path": "growth/VIRAL_GROWTH.md",
       "ownerDomainId": "domain.growth",
@@ -4565,40 +4452,6 @@
         "lane.growth"
       ],
       "generated": false
-    },
-    {
-      "id": "artifact.landing",
-      "path": "landing/",
-      "ownerDomainId": "domain.growth",
-      "laneIds": [
-        "lane.growth"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.launch-retro-md",
-      "path": "LAUNCH_RETRO.md",
-      "ownerDomainId": "domain.operations",
-      "laneIds": [
-        "lane.post-launch-ops"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.launch-trace-md",
-      "path": "LAUNCH_TRACE.md",
-      "ownerDomainId": "domain.process",
-      "laneIds": [
-        "lane.traceability"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.launch-cockpit-html",
-      "path": "launch-cockpit.html",
-      "ownerDomainId": "domain.orchestration",
-      "laneIds": [],
-      "generated": true
     },
     {
       "id": "artifact.launchbench-md",
@@ -4617,24 +4470,6 @@
       "generated": false
     },
     {
-      "id": "artifact.localization-market-research-localization-market-research-md",
-      "path": "localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
-      "ownerDomainId": "domain.research",
-      "laneIds": [
-        "lane.research"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.localization-market-research-localization-market-research-html",
-      "path": "localization-market-research/localization-market-research.html",
-      "ownerDomainId": "domain.research",
-      "laneIds": [
-        "lane.research"
-      ],
-      "generated": true
-    },
-    {
       "id": "artifact.machine-source-registry-yaml",
       "path": "machine/source-registry.yaml",
       "ownerDomainId": "domain.machine",
@@ -4642,26 +4477,22 @@
       "generated": false
     },
     {
-      "id": "artifact.onboarding-html",
-      "path": "onboarding.html",
-      "ownerDomainId": "domain.experience",
-      "laneIds": [
-        "lane.onboarding"
-      ],
-      "generated": true
-    },
-    {
-      "id": "artifact.onboarding-md",
-      "path": "ONBOARDING.md",
-      "ownerDomainId": "domain.experience",
-      "laneIds": [
-        "lane.onboarding"
-      ],
+      "id": "artifact.operations-agent-operations-md",
+      "path": "operations/AGENT_OPERATIONS.md",
+      "ownerDomainId": "domain.operations",
+      "laneIds": [],
       "generated": false
     },
     {
       "id": "artifact.operations-agent-operations-json",
       "path": "operations/agent-operations.json",
+      "ownerDomainId": "domain.operations",
+      "laneIds": [],
+      "generated": false
+    },
+    {
+      "id": "artifact.operations-business-access-md",
+      "path": "operations/BUSINESS_ACCESS.md",
       "ownerDomainId": "domain.operations",
       "laneIds": [],
       "generated": false
@@ -4674,8 +4505,24 @@
       "generated": false
     },
     {
-      "id": "artifact.orchestration-html",
-      "path": "orchestration.html",
+      "id": "artifact.operations-failure-cards-md",
+      "path": "operations/FAILURE_CARDS.md",
+      "ownerDomainId": "domain.orchestration",
+      "laneIds": [],
+      "generated": false
+    },
+    {
+      "id": "artifact.operations-launch-retro-md",
+      "path": "operations/LAUNCH_RETRO.md",
+      "ownerDomainId": "domain.operations",
+      "laneIds": [
+        "lane.post-launch-ops"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.operations-orchestration-html",
+      "path": "operations/orchestration.html",
       "ownerDomainId": "domain.orchestration",
       "laneIds": [
         "lane.orchestration"
@@ -4683,12 +4530,28 @@
       "generated": true
     },
     {
-      "id": "artifact.orchestration-md",
-      "path": "ORCHESTRATION.md",
+      "id": "artifact.operations-orchestration-md",
+      "path": "operations/ORCHESTRATION.md",
       "ownerDomainId": "domain.orchestration",
       "laneIds": [
         "lane.orchestration"
       ],
+      "generated": false
+    },
+    {
+      "id": "artifact.operations-post-launch-ops-md",
+      "path": "operations/POST_LAUNCH_OPS.md",
+      "ownerDomainId": "domain.operations",
+      "laneIds": [
+        "lane.post-launch-ops"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.operations-provider-proof-md",
+      "path": "operations/PROVIDER_PROOF.md",
+      "ownerDomainId": "domain.process",
+      "laneIds": [],
       "generated": false
     },
     {
@@ -4701,70 +4564,119 @@
       "generated": false
     },
     {
-      "id": "artifact.post-launch-ops-md",
-      "path": "POST_LAUNCH_OPS.md",
-      "ownerDomainId": "domain.operations",
-      "laneIds": [
-        "lane.post-launch-ops"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.privacy-md",
-      "path": "PRIVACY.md",
-      "ownerDomainId": "domain.trust",
-      "laneIds": [
-        "lane.privacy-legal"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.production-readiness-md",
-      "path": "PRODUCTION_READINESS.md",
-      "ownerDomainId": "domain.engineering",
-      "laneIds": [
-        "lane.engineering"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.project-state-yaml",
-      "path": "PROJECT_STATE.yaml",
-      "ownerDomainId": "domain.orchestration",
-      "laneIds": [],
-      "generated": false
-    },
-    {
-      "id": "artifact.provider-proof-md",
-      "path": "PROVIDER_PROOF.md",
-      "ownerDomainId": "domain.process",
-      "laneIds": [],
-      "generated": false
-    },
-    {
-      "id": "artifact.research-md",
-      "path": "RESEARCH.md",
-      "ownerDomainId": "domain.research",
-      "laneIds": [
-        "lane.research"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.revenue-ops-md",
-      "path": "REVENUE_OPS.md",
-      "ownerDomainId": "domain.money",
-      "laneIds": [
-        "lane.revenue"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.screen-design-design-md",
-      "path": "screen-design/design.md",
+      "id": "artifact.product-copy-copy-brief-md",
+      "path": "product/copy/COPY_BRIEF.md",
       "ownerDomainId": "domain.design",
       "laneIds": [
         "lane.design"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-copy-copy-deck-md",
+      "path": "product/copy/COPY_DECK.md",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.design"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-experience-11-star-experience-11-star-experience-md",
+      "path": "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "lane.experience"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-experience-11-star-experience-11-star-experience-html",
+      "path": "product/experience/11-star-experience/11-star-experience.html",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "lane.experience"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.product-experience-emotional-design-emotional-audit-md",
+      "path": "product/experience/emotional-design/EMOTIONAL_AUDIT.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "lane.emotional-design"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-experience-emotional-design-emotional-design-md",
+      "path": "product/experience/emotional-design/EMOTIONAL_DESIGN.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "lane.emotional-design"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-experience-emotional-design-emotional-design-html",
+      "path": "product/experience/emotional-design/emotional-design.html",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "lane.emotional-design"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.product-experience-ux-patterns-ux-patterns-md",
+      "path": "product/experience/ux-patterns/UX_PATTERNS.md",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.design"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-experience-ux-patterns-ux-patterns-html",
+      "path": "product/experience/ux-patterns/ux-patterns.html",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.design"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.product-onboarding-html",
+      "path": "product/onboarding.html",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "lane.onboarding"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.product-onboarding-md",
+      "path": "product/ONBOARDING.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "lane.onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-spec-md",
+      "path": "product/SPEC.md",
+      "ownerDomainId": "domain.product",
+      "laneIds": [
+        "lane.product"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.revenue-revenue-ops-md",
+      "path": "revenue/REVENUE_OPS.md",
+      "ownerDomainId": "domain.money",
+      "laneIds": [
+        "lane.revenue"
       ],
       "generated": false
     },
@@ -4773,33 +4685,6 @@
       "path": "scripts/lib/founder-copy.ts",
       "ownerDomainId": "domain.machine",
       "laneIds": [],
-      "generated": false
-    },
-    {
-      "id": "artifact.secrets-secrets-md",
-      "path": "secrets/SECRETS.md",
-      "ownerDomainId": "domain.operations",
-      "laneIds": [
-        "lane.secrets"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.security-review-html",
-      "path": "security-review.html",
-      "ownerDomainId": "domain.trust",
-      "laneIds": [
-        "lane.security"
-      ],
-      "generated": true
-    },
-    {
-      "id": "artifact.security-md",
-      "path": "SECURITY.md",
-      "ownerDomainId": "domain.trust",
-      "laneIds": [
-        "lane.security"
-      ],
       "generated": false
     },
     {
@@ -4817,18 +4702,32 @@
       "generated": false
     },
     {
-      "id": "artifact.spec-md",
-      "path": "SPEC.md",
-      "ownerDomainId": "domain.product",
+      "id": "artifact.state-business-json",
+      "path": "state/business.json",
+      "ownerDomainId": "domain.process",
+      "laneIds": [],
+      "generated": false
+    },
+    {
+      "id": "artifact.state-launch-trace-md",
+      "path": "state/LAUNCH_TRACE.md",
+      "ownerDomainId": "domain.process",
       "laneIds": [
-        "lane.product"
+        "lane.traceability"
       ],
       "generated": false
     },
     {
-      "id": "artifact.state-business-json",
-      "path": "state/business.json",
-      "ownerDomainId": "domain.process",
+      "id": "artifact.state-launch-cockpit-html",
+      "path": "state/launch-cockpit.html",
+      "ownerDomainId": "domain.orchestration",
+      "laneIds": [],
+      "generated": true
+    },
+    {
+      "id": "artifact.state-project-state-yaml",
+      "path": "state/PROJECT_STATE.yaml",
+      "ownerDomainId": "domain.orchestration",
       "laneIds": [],
       "generated": false
     },
@@ -4847,15 +4746,6 @@
       "generated": true
     },
     {
-      "id": "artifact.store-console-md",
-      "path": "STORE_CONSOLE.md",
-      "ownerDomainId": "domain.store",
-      "laneIds": [
-        "lane.store-console"
-      ],
-      "generated": false
-    },
-    {
       "id": "artifact.store-ops-md",
       "path": "STORE_OPS.md",
       "ownerDomainId": "domain.store",
@@ -4865,8 +4755,17 @@
       "generated": false
     },
     {
-      "id": "artifact.store-console-html",
-      "path": "store-console.html",
+      "id": "artifact.store-app-store-listing-app-store-listing-md",
+      "path": "store/app-store-listing/APP_STORE_LISTING.md",
+      "ownerDomainId": "domain.store",
+      "laneIds": [
+        "lane.store-console"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.store-app-store-listing-app-privacy-questionnaire-html",
+      "path": "store/app-store-listing/app-privacy-questionnaire.html",
       "ownerDomainId": "domain.store",
       "laneIds": [
         "lane.store-console"
@@ -4874,26 +4773,109 @@
       "generated": true
     },
     {
-      "id": "artifact.tech-spec-md",
-      "path": "TECH_SPEC.md",
-      "ownerDomainId": "domain.engineering",
+      "id": "artifact.store-app-store-listing-app-store-listing-html",
+      "path": "store/app-store-listing/app-store-listing.html",
+      "ownerDomainId": "domain.store",
       "laneIds": [
-        "lane.engineering"
+        "lane.store-console"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.store-app-store-listing-screenshots-md",
+      "path": "store/app-store-listing/SCREENSHOTS.md",
+      "ownerDomainId": "domain.store",
+      "laneIds": [
+        "lane.store-console"
       ],
       "generated": false
     },
     {
-      "id": "artifact.terms-md",
-      "path": "TERMS.md",
-      "ownerDomainId": "domain.trust",
+      "id": "artifact.store-apple-app-store-requirements-md",
+      "path": "store/APPLE_APP_STORE_REQUIREMENTS.md",
+      "ownerDomainId": "domain.store",
       "laneIds": [
+        "lane.store-console",
+        "lane.apple-signing",
         "lane.privacy-legal"
       ],
       "generated": false
     },
     {
-      "id": "artifact.tool-decisions-md",
-      "path": "TOOL_DECISIONS.md",
+      "id": "artifact.store-apple-signing-md",
+      "path": "store/APPLE_SIGNING.md",
+      "ownerDomainId": "domain.store",
+      "laneIds": [
+        "lane.apple-signing"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.store-google-play-release-md",
+      "path": "store/GOOGLE_PLAY_RELEASE.md",
+      "ownerDomainId": "domain.store",
+      "laneIds": [
+        "lane.store-console"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.store-store-console-md",
+      "path": "store/STORE_CONSOLE.md",
+      "ownerDomainId": "domain.store",
+      "laneIds": [
+        "lane.store-console"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.store-store-console-html",
+      "path": "store/store-console.html",
+      "ownerDomainId": "domain.store",
+      "laneIds": [
+        "lane.store-console"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.strategy-brand-md",
+      "path": "strategy/BRAND.md",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.design"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.strategy-localization-market-research-localization-market-research-md",
+      "path": "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+      "ownerDomainId": "domain.research",
+      "laneIds": [
+        "lane.research"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.strategy-localization-market-research-localization-market-research-html",
+      "path": "strategy/localization-market-research/localization-market-research.html",
+      "ownerDomainId": "domain.research",
+      "laneIds": [
+        "lane.research"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.strategy-research-md",
+      "path": "strategy/RESEARCH.md",
+      "ownerDomainId": "domain.research",
+      "laneIds": [
+        "lane.research"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.strategy-tool-decisions-md",
+      "path": "strategy/TOOL_DECISIONS.md",
       "ownerDomainId": "domain.operations",
       "laneIds": [
         "lane.paid-tool-routing"
@@ -4901,31 +4883,49 @@
       "generated": false
     },
     {
-      "id": "artifact.ugc-playbook-md",
-      "path": "UGC_PLAYBOOK.md",
-      "ownerDomainId": "domain.growth",
+      "id": "artifact.trust-privacy-md",
+      "path": "trust/PRIVACY.md",
+      "ownerDomainId": "domain.trust",
       "laneIds": [
-        "lane.growth"
+        "lane.privacy-legal"
       ],
       "generated": false
     },
     {
-      "id": "artifact.ux-patterns-ux-patterns-md",
-      "path": "ux-patterns/UX_PATTERNS.md",
-      "ownerDomainId": "domain.design",
+      "id": "artifact.trust-secrets-secrets-md",
+      "path": "trust/secrets/SECRETS.md",
+      "ownerDomainId": "domain.operations",
       "laneIds": [
-        "lane.design"
+        "lane.secrets"
       ],
       "generated": false
     },
     {
-      "id": "artifact.ux-patterns-ux-patterns-html",
-      "path": "ux-patterns/ux-patterns.html",
-      "ownerDomainId": "domain.design",
+      "id": "artifact.trust-security-review-html",
+      "path": "trust/security-review.html",
+      "ownerDomainId": "domain.trust",
       "laneIds": [
-        "lane.design"
+        "lane.security"
       ],
       "generated": true
+    },
+    {
+      "id": "artifact.trust-security-md",
+      "path": "trust/SECURITY.md",
+      "ownerDomainId": "domain.trust",
+      "laneIds": [
+        "lane.security"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.trust-terms-md",
+      "path": "trust/TERMS.md",
+      "ownerDomainId": "domain.trust",
+      "laneIds": [
+        "lane.privacy-legal"
+      ],
+      "generated": false
     }
   ],
   "gates": [
@@ -5576,8 +5576,8 @@
         "treat silence as approval"
       ],
       "artifactPaths": [
-        "BUSINESS_ACCESS.md",
-        "PROJECT_STATE.yaml"
+        "operations/BUSINESS_ACCESS.md",
+        "state/PROJECT_STATE.yaml"
       ]
     },
     {
@@ -5616,12 +5616,12 @@
         "claim readiness without deterministic proof"
       ],
       "artifactPaths": [
-        "PROJECT_STATE.yaml",
-        "launch-cockpit.html",
-        "ORCHESTRATION.md",
-        "PRODUCTION_READINESS.md"
+        "state/PROJECT_STATE.yaml",
+        "state/launch-cockpit.html",
+        "operations/ORCHESTRATION.md",
+        "engineering/PRODUCTION_READINESS.md"
       ],
-      "promptPath": "business/app-agent-roster/agents/orchestrator.md"
+      "promptPath": "business/engineering/app-agent-roster/agents/orchestrator.md"
     },
     {
       "id": "operator.marketing-guru",
@@ -5658,11 +5658,11 @@
       ],
       "artifactPaths": [
         "PAID_UA.md",
-        "UGC_PLAYBOOK.md",
-        "FASTLANE_OPS.md",
+        "growth/UGC_PLAYBOOK.md",
+        "growth/FASTLANE_OPS.md",
         "growth/LAUNCH_NARRATIVE.md"
       ],
-      "promptPath": "business/app-agent-roster/agents/marketing-guru.md"
+      "promptPath": "business/engineering/app-agent-roster/agents/marketing-guru.md"
     },
     {
       "id": "operator.engineering-leader",
@@ -5697,11 +5697,11 @@
         "claim readiness without deterministic proof"
       ],
       "artifactPaths": [
-        "TECH_SPEC.md",
-        "ENGINEERING_PLAN.md",
-        "PRODUCTION_READINESS.md"
+        "engineering/TECH_SPEC.md",
+        "engineering/ENGINEERING_PLAN.md",
+        "engineering/PRODUCTION_READINESS.md"
       ],
-      "promptPath": "business/app-agent-roster/agents/engineering-leader.md"
+      "promptPath": "business/engineering/app-agent-roster/agents/engineering-leader.md"
     },
     {
       "id": "operator.security-architect",
@@ -5734,11 +5734,11 @@
         "claim readiness without deterministic proof"
       ],
       "artifactPaths": [
-        "SECURITY.md",
-        "security-review.html",
-        "PRODUCTION_READINESS.md"
+        "trust/SECURITY.md",
+        "trust/security-review.html",
+        "engineering/PRODUCTION_READINESS.md"
       ],
-      "promptPath": "business/app-agent-roster/agents/security-architect.md"
+      "promptPath": "business/engineering/app-agent-roster/agents/security-architect.md"
     },
     {
       "id": "operator.product-leader",
@@ -5770,12 +5770,12 @@
         "claim readiness without deterministic proof"
       ],
       "artifactPaths": [
-        "RESEARCH.md",
-        "SPEC.md",
-        "11-star-experience/11_STAR_EXPERIENCE.md",
-        "LAUNCH_TRACE.md"
+        "strategy/RESEARCH.md",
+        "product/SPEC.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "state/LAUNCH_TRACE.md"
       ],
-      "promptPath": "business/app-agent-roster/agents/product-leader.md"
+      "promptPath": "business/engineering/app-agent-roster/agents/product-leader.md"
     },
     {
       "id": "operator.design-guru",
@@ -5808,12 +5808,12 @@
         "claim readiness without deterministic proof"
       ],
       "artifactPaths": [
-        "BRAND.md",
-        "DESIGN.md",
-        "design.html",
-        "content-assets/CONTENT_ASSETS.md"
+        "strategy/BRAND.md",
+        "design/DESIGN.md",
+        "design/design.html",
+        "growth/content-assets/CONTENT_ASSETS.md"
       ],
-      "promptPath": "business/app-agent-roster/agents/design-guru.md"
+      "promptPath": "business/engineering/app-agent-roster/agents/design-guru.md"
     },
     {
       "id": "operator.customer-success",
@@ -5846,12 +5846,12 @@
         "claim readiness without deterministic proof"
       ],
       "artifactPaths": [
-        "EMAIL_OPS.md",
-        "POST_LAUNCH_OPS.md",
-        "PRIVACY.md",
-        "TERMS.md"
+        "growth/EMAIL_OPS.md",
+        "operations/POST_LAUNCH_OPS.md",
+        "trust/PRIVACY.md",
+        "trust/TERMS.md"
       ],
-      "promptPath": "business/app-agent-roster/agents/customer-success.md"
+      "promptPath": "business/engineering/app-agent-roster/agents/customer-success.md"
     },
     {
       "id": "operator.maintainer",
@@ -5903,7 +5903,7 @@
         "silently waive findings"
       ],
       "artifactPaths": [
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
         "LAUNCHBENCH.md"
       ]
     },
@@ -5932,8 +5932,8 @@
         "write timestamps into deterministic projections"
       ],
       "artifactPaths": [
-        "launch-cockpit.html",
-        "design-room.html",
+        "state/launch-cockpit.html",
+        "design/design-room.html",
         "graph/generated/skill-graph.json"
       ]
     }
@@ -5977,7 +5977,7 @@
       ],
       "preflight": "Confirm Refero Pro access, OAuth or bearer-token route, query budget, and whether fallback UX pattern pack is founder-approved.",
       "validation": "UX_PATTERNS.md records selected styles/screens/flows or approved fallback; ux-patterns.html renders pattern inventory and state matrix.",
-      "fallback": "Bundled business/ux-patterns pattern pack, founder-provided references, or public UX libraries only after founder approval."
+      "fallback": "Bundled business/product/experience/ux-patterns pattern pack, founder-provided references, or public UX libraries only after founder approval."
     },
     {
       "id": "provider.revenuecat",
@@ -6002,7 +6002,7 @@
       "route": "optional_paid_or_account_tool",
       "requiredSecrets": [],
       "preflight": "Use paid-user-acquisition.md before spend. Confirm one-channel choice, target event, baseline, creative cadence, tracking stack, RevenueCat LTV/CPA source, store destination, privacy/ATT implications, and founder-approved budget.",
-      "validation": "PAID_UA.md, growth/paid-ua-report.csv, ANALYTICS.md, REVENUE_OPS.md, CONTENT_ASSETS.md, and LAUNCH_TRACE.md show channel decision, blended report, RevenueCat economics, creative proof, and stop/scale rules.",
+      "validation": "PAID_UA.md, growth/paid-ua-report.csv, analytics/ANALYTICS.md, revenue/REVENUE_OPS.md, CONTENT_ASSETS.md, and state/LAUNCH_TRACE.md show channel decision, blended report, RevenueCat economics, creative proof, and stop/scale rules.",
       "fallback": "Use organic, ASO, waitlist, or manual spreadsheet planning only after paid spend or ad-account access is blocked, deferred, or not needed."
     },
     {
@@ -6055,7 +6055,7 @@
       "route": "optional_paid_or_account_tool",
       "requiredSecrets": [],
       "preflight": "Confirm whether Claude Security, Codex Security, GitHub Advanced Security, Snyk/Semgrep/Socket, MobSF Cloud, or a free local route is approved before running scans.",
-      "validation": "SECURITY.md, security-review.html, LaunchBench, and security validator evidence show threat model, platform hardening, supply-chain checks, and release checks.",
+      "validation": "trust/SECURITY.md, trust/security-review.html, LaunchBench, and security validator evidence show threat model, platform hardening, supply-chain checks, and release checks.",
       "fallback": "Use local security skills, OWASP MASVS/ASVS, MobSF local, gitleaks/trufflehog, npm audit/osv-scanner, semgrep community rules, Xcode/Android static checks only after founder approval when replacing paid tools."
     },
     {
@@ -6081,7 +6081,7 @@
       "route": "optional_local_skill_pack",
       "requiredSecrets": [],
       "preflight": "Refresh the Eronred ASO skill pack or installed local equivalents before ASO, icon, screenshot, CPP, event, paid UA, or post-launch metric guidance.",
-      "validation": "APP_STORE_LISTING.md, SCREENSHOTS.md, and STORE_CONSOLE.md record which ASO specialist lanes were used or intentionally not needed.",
+      "validation": "APP_STORE_LISTING.md, SCREENSHOTS.md, and store/STORE_CONSOLE.md record which ASO specialist lanes were used or intentionally not needed.",
       "fallback": "Apply equivalent frameworks manually only after paid/account-gated ASO routes and missing runtime access are recorded."
     },
     {
@@ -6102,7 +6102,7 @@
       "ownerDomainId": "domain.design",
       "route": "optional_paid_or_account_tool",
       "requiredSecrets": [],
-      "preflight": "Confirm DESIGN.md tokens, asset family, prompt brief, source rights, and whether the output is screenshot support, App Icon, CPP/event art, preview thumbnail, or UGC/ad creative.",
+      "preflight": "Confirm design/DESIGN.md tokens, asset family, prompt brief, source rights, and whether the output is screenshot support, App Icon, CPP/event art, preview thumbnail, or UGC/ad creative.",
       "validation": "CONTENT_ASSETS.md and SCREENSHOTS.md record route, prompt summary, source inputs, output paths, visual QA, and founder approval gates.",
       "fallback": "Remotion, HTML/CSS composition, founder-owned media, public-domain assets, or raw screenshots only after founder approval and limitation notes."
     },
@@ -6114,8 +6114,8 @@
       "route": "built_in_agent_simulator_when_local_mac",
       "requiredSecrets": [],
       "preflight": "Confirm this is a local macOS session (the pane and computer-use cannot reach a Mac's simulators from cloud, SSH, or container sessions), the runtime version and plan gate, that org policy has not disabled simulator tools, and that Xcode plus an iOS simulator runtime are installed. Confirm a fixture or sandbox account before any sign-in on the device.",
-      "validation": "PRODUCTION_READINESS.md records the runtime and version, the local session, the simulated device and OS, the fixture-account decision, the exported screenshot/recording paths under proof/ios-simulator/, and the coverage this route does not provide: no Android, no physical device, no repeatable suite/CI, no distribution readiness.",
-      "fallback": "Escalate to XcodeBuildMCP for scripted/CI or physical-device Apple work, serve-sim for browser-visible simulators, or MobAI for Android and repeatable suites; record the rung change in TOOL_DECISIONS.md. When no local Mac is reachable, mark device proof blocked rather than narrating a simulator run that did not happen."
+      "validation": "engineering/PRODUCTION_READINESS.md records the runtime and version, the local session, the simulated device and OS, the fixture-account decision, the exported screenshot/recording paths under proof/ios-simulator/, and the coverage this route does not provide: no Android, no physical device, no repeatable suite/CI, no distribution readiness.",
+      "fallback": "Escalate to XcodeBuildMCP for scripted/CI or physical-device Apple work, serve-sim for browser-visible simulators, or MobAI for Android and repeatable suites; record the rung change in strategy/TOOL_DECISIONS.md. When no local Mac is reachable, mark device proof blocked rather than narrating a simulator run that did not happen."
     },
     {
       "id": "provider.mobai",
@@ -6125,7 +6125,7 @@
       "route": "intended_free_or_paid_account_tool",
       "requiredSecrets": [],
       "preflight": "Refresh the desktop release, active MCP resources, npm CLI version/help, and MobAI CI docs independently; confirm tier, device/app access, bundle/package ID, locale, seeded demo state, and critical .mob flows before mutation.",
-      "validation": "PRODUCTION_READINESS.md records separate desktop/MCP/CLI versions, selected tier, iOS/Android device-flow evidence, AI-heal diff review plus rerun, bounded repeat parameters, host-script allowlist/secret/cleanup proof, provider correlation, and limitations. SCREENSHOTS.md links raw captures to final composition.",
+      "validation": "engineering/PRODUCTION_READINESS.md records separate desktop/MCP/CLI versions, selected tier, iOS/Android device-flow evidence, AI-heal diff review plus rerun, bounded repeat parameters, host-script allowlist/secret/cleanup proof, provider correlation, and limitations. SCREENSHOTS.md links raw captures to final composition.",
       "fallback": "Use MobAI Free without a spend gate when it fits. Ask before Plus/Pro spend or an XcodeBuildMCP Apple-only substitution; record missing Android/cross-platform proof and use Android emulator/ADB or a dated blocker."
     },
     {
@@ -6136,7 +6136,7 @@
       "route": "codex_desktop_native_tooling_when_exposed",
       "requiredSecrets": [],
       "preflight": "When Codex Desktop exposes native Apple/XcodeBuildMCP tools, load xcodebuildmcp-testing.md, call session_show_defaults before the first build/run/test, and confirm project/workspace, scheme, simulator/device, OS/runtime, and configuration.",
-      "validation": "PRODUCTION_READINESS.md records exposed MCP tool names such as build_run_sim/test_sim/screenshot/log capture, output paths, simulator/device details, provider-proof pairing, and the distribution-readiness limitation.",
+      "validation": "engineering/PRODUCTION_READINESS.md records exposed MCP tool names such as build_run_sim/test_sim/screenshot/log capture, output paths, simulator/device details, provider-proof pairing, and the distribution-readiness limitation.",
       "fallback": "Use XcodeBuildMCP CLI, serve-sim, SnapshotPreviews preview proof, MobAI, or mark proof blocked according to the lane and paid-tool approval state."
     },
     {
@@ -6147,7 +6147,7 @@
       "route": "optional_open_source_cli_preview_proof",
       "requiredSecrets": [],
       "preflight": "Refresh getsentry/SnapshotPreviews, confirm SwiftUI/UIKit/AppKit previews exist, link SnapshottingTests, and decide SnapshotTest vs PreviewLayoutTest.",
-      "validation": "PRODUCTION_READINESS.md records package URL/version/commit, TEST_RUNNER_SNAPSHOTS_EXPORT_DIR, exported PNG/JSON paths, deterministic fixtures, and preview-only limitation.",
+      "validation": "engineering/PRODUCTION_READINESS.md records package URL/version/commit, TEST_RUNNER_SNAPSHOTS_EXPORT_DIR, exported PNG/JSON paths, deterministic fixtures, and preview-only limitation.",
       "fallback": "Use XcodeBuildMCP/Codex Desktop screenshots, serve-sim, MobAI, or manual preview review; do not call preview proof runtime E2E."
     },
     {
@@ -6158,7 +6158,7 @@
       "route": "optional_open_source_cli_simulator_stream",
       "requiredSecrets": [],
       "preflight": "Refresh EvanBacon/serve-sim, confirm macOS + Xcode command line tools + Node 18+, boot the intended iOS Simulator, and choose URL/port.",
-      "validation": "PRODUCTION_READINESS.md or SCREENSHOTS.md records npx serve-sim resolution, booted simulator/device, localhost preview URL/port, actions, logs, stream proof, and provider/signing limitations.",
+      "validation": "engineering/PRODUCTION_READINESS.md or SCREENSHOTS.md records npx serve-sim resolution, booted simulator/device, localhost preview URL/port, actions, logs, stream proof, and provider/signing limitations.",
       "fallback": "Use Codex Desktop native iOS/XcodeBuildMCP tools, MobAI, founder-provided captures, or mark simulator proof blocked."
     },
     {

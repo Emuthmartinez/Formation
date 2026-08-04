@@ -16,7 +16,7 @@ what is true and attributable.
 
 ## Fit Gate
 
-- Lane status (`lanes.growth.status` in `PROJECT_STATE.yaml`): `<partial | done | not_needed | deferred>`
+- Lane status (`lanes.growth.status` in `state/PROJECT_STATE.yaml`): `<partial | done | not_needed | deferred>`
 - Is there a product moment heavy enough to back a tentpole? `<yes/no — what it is>`
 - If no tentpole yet: ship the weekly Feature Launch Cadence only, and record the tentpole as a future gate.
 
@@ -25,7 +25,7 @@ what is true and attributable.
 Shape the launch around a feeling first, the feature second. If a reader can only react with
 "okay" and keep scrolling, the algorithm reads no reaction as no value.
 
-- Emotional North Star (from [`EMOTIONAL_DESIGN.md`](../emotional-design/EMOTIONAL_DESIGN.md)): `<one line>`
+- Emotional North Star (from [`EMOTIONAL_DESIGN.md`](../product/experience/emotional-design/EMOTIONAL_DESIGN.md)): `<one line>`
 - The feeling this launch must create before the feature is explained: `<one line>`
 - Why this is in the zeitgeist this week: `<the trend/news/mood we are attaching to>`
 
@@ -87,7 +87,7 @@ and adapting proven formats.
 - Every influencer post is written by us, word for word, with custom visuals — never a brief.
 - Format matched per creator (e.g. Ways I Use It / Comparison / Founder Story): `<mapping>`
 - Launch video built to the rules (bold claim in first 5s, present tense, sub-fifth-grade language,
-  audio/visual 1:1, viewer's outcome) — see [`CONTENT_ASSETS.md`](../content-assets/CONTENT_ASSETS.md): `<asset>`
+  audio/visual 1:1, viewer's outcome) — see [`CONTENT_ASSETS.md`](content-assets/CONTENT_ASSETS.md): `<asset>`
 - One defensible rage-bait line (true, on-claim, subtle enough that most scroll past): `<line>`
   - Ethics check: reviewed against the truthfulness/claims rule; this is a HIGH-sensitivity tactic. `<attestation>`
 
@@ -209,11 +209,11 @@ The platform's two signals (the agency's working model, not official docs), used
 
 ## Measurement Plan
 
-Tie attention to product behavior — see [`ANALYTICS.md`](../ANALYTICS.md) and
-[`analytics-plan.html`](../analytics-plan.html).
+Tie attention to product behavior — see [`analytics/ANALYTICS.md`](../analytics/ANALYTICS.md) and
+[`analytics/analytics-plan.html`](../analytics/analytics-plan.html).
 
 - Funnel watched: post impressions → reply-link clicks (UTM'd) → install → activation event `<name>`
-- Self-reported attribution source key for this channel (per `ANALYTICS.md` attribution contract): `<x_twitter | creator | ...>`
+- Self-reported attribution source key for this channel (per `analytics/ANALYTICS.md` attribution contract): `<x_twitter | creator | ...>`
 - Standing-audience metric reviewed weekly: `<metric>`
 - Target bands (agency-stated, aim-at not promised): ~2–10M views, 500–2,000+ comments (all replied to), 1,000–5,000+ retweets.
 
@@ -232,10 +232,10 @@ Tie attention to product behavior — see [`ANALYTICS.md`](../ANALYTICS.md) and
 
 ## Traceability
 
-- Emotional North Star and feeling: [`EMOTIONAL_DESIGN.md`](../emotional-design/EMOTIONAL_DESIGN.md)
-- Magical V1 moment the launch sells: [`11_STAR_EXPERIENCE.md`](../11-star-experience/11_STAR_EXPERIENCE.md)
-- Hero video and post assets: [`CONTENT_ASSETS.md`](../content-assets/CONTENT_ASSETS.md)
+- Emotional North Star and feeling: [`EMOTIONAL_DESIGN.md`](../product/experience/emotional-design/EMOTIONAL_DESIGN.md)
+- Magical V1 moment the launch sells: [`11_STAR_EXPERIENCE.md`](../product/experience/11-star-experience/11_STAR_EXPERIENCE.md)
+- Hero video and post assets: [`CONTENT_ASSETS.md`](content-assets/CONTENT_ASSETS.md)
 - Product-led sharing/referral loop this rides: [`VIRAL_GROWTH.md`](VIRAL_GROWTH.md)
-- Store launch calendar and listing alignment: [`APP_STORE_LISTING.md`](../app-store-listing/APP_STORE_LISTING.md)
-- Events, attribution, dashboards: [`ANALYTICS.md`](../ANALYTICS.md)
-- Cross-surface launch decisions: [`LAUNCH_TRACE.md`](../LAUNCH_TRACE.md)
+- Store launch calendar and listing alignment: [`APP_STORE_LISTING.md`](../store/app-store-listing/APP_STORE_LISTING.md)
+- Events, attribution, dashboards: [`analytics/ANALYTICS.md`](../analytics/ANALYTICS.md)
+- Cross-surface launch decisions: [`state/LAUNCH_TRACE.md`](../state/LAUNCH_TRACE.md)

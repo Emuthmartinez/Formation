@@ -2,7 +2,7 @@
 
 Use this before setting up or auditing third-party services. The skill should produce a provider state plan before provider work starts, then update it as real setup happens.
 
-Each provider entry in `PROJECT_STATE.yaml` should include:
+Each provider entry in `state/PROJECT_STATE.yaml` should include:
 
 - route: intended paid/account tool, optional account tool, free fallback, blocked, or not needed
 - docs checked date and URL basis when docs/CLIs are fast-moving
@@ -49,7 +49,7 @@ Each provider entry in `PROJECT_STATE.yaml` should include:
 ### Resend
 
 - record sending domain, SPF/DKIM/DMARC, sender identities, reply-to, inbound route, contacts/topics, unsubscribe headers, webhooks, idempotency keys, and lifecycle automations
-- adapt `business/resend/email-templates.ts` from `DESIGN.md`
+- adapt `business/growth/resend/email-templates.ts` from `design/DESIGN.md`
 - verify a real test send and provider log/webhook where in scope
 
 ### Sentry
@@ -77,4 +77,4 @@ Each provider entry in `PROJECT_STATE.yaml` should include:
 
 - Every provider setup has a current-doc basis, secret route, preflight, validation, and fallback limitation.
 - Missing runtime access becomes a founder decision, not an automatic free fallback.
-- Provider state flows into `PROJECT_STATE.yaml`, `SECRETS.md`, `LAUNCH_TRACE.md`, and `PRODUCTION_READINESS.md`.
+- Provider state flows into `state/PROJECT_STATE.yaml`, `SECRETS.md`, `state/LAUNCH_TRACE.md`, and `engineering/PRODUCTION_READINESS.md`.

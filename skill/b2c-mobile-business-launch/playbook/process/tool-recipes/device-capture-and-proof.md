@@ -51,7 +51,7 @@ Recorder-skill route:
 - Mobile recorder produces a reproducible `.mob` choreography, native device recording, tap ripples, finger overlay, phone bezel/background, zoom, variable speed, captions, final mp4, and upload copy.
 - Desktop recorder produces a reproducible `screenplay.json`, native recording, click ripples, cursor sprite, captions, zoom, variable speed, final mp4, and upload copy.
 - Follow the upstream golden rule: explore -> script/screenplay -> dry-run -> record -> edit/export. Never improvise during the final recording.
-- Create `DEMO_VIDEO.md` for launch demo videos and link `.mob` or `screenplay.json`, raw captures, final exports, captions, and upload copy.
+- Create `growth/DEMO_VIDEO.md` for launch demo videos and link `.mob` or `screenplay.json`, raw captures, final exports, captions, and upload copy.
 
 Confirmed free fallback:
 - MobAI is freemium: use its free tier without a spend gate when one device/current quotas fit, but ask before Plus/Pro spend. If MobAI is unavailable and the lane is iOS-only, the in-app iOS Simulator (rung 0) is the first fallback — free, zero-setup, no spend gate — and only the lost Android/suite/CI/physical-device coverage needs recording per `paid-tool-routing.md`. Escalate to XcodeBuildMCP when the lane needs scripted builds, CI, or physical hardware, and record the Apple-only limitation either way.
@@ -62,7 +62,7 @@ Confirmed free fallback:
 In-app native iOS route (rung 0, both runtimes):
 - In Claude Code Desktop on a Mac (local sessions only — never cloud or SSH), state the goal plainly ("run the app in the iOS Simulator and tap through the signup flow"); the simulator pane opens itself when the app runs. Consent is per device, and screenshots of the device leave the machine — use fixture/sandbox accounts only, never a real account.
 - In Codex with the `build-ios-apps` plugin, call `session_show_defaults` before the first build/run/test, use `build_run_sim` when defaults are set, read the accessibility hierarchy before interacting, and prefer stable labels over raw coordinates.
-- Record the runtime and app version, the plan/policy gate cleared, that the session was local, the simulated device and OS, the fixture account, output paths, and the simulator-only/no-Android/no-distribution limitation in `PRODUCTION_READINESS.md`.
+- Record the runtime and app version, the plan/policy gate cleared, that the session was local, the simulated device and OS, the fixture account, output paths, and the simulator-only/no-Android/no-distribution limitation in `engineering/PRODUCTION_READINESS.md`.
 
 CLI proof tools:
 - SnapshotPreviews (`https://github.com/getsentry/SnapshotPreviews`) exports preview PNG/JSON proof from XCTest. Link `SnapshottingTests`, use `SnapshotTest` or `PreviewLayoutTest`, set `TEST_RUNNER_SNAPSHOTS_EXPORT_DIR`, and record that this is preview-only coverage.

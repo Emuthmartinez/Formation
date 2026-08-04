@@ -3,7 +3,7 @@ import { AnalyticsProvider } from "@/components/analytics-provider";
 import { strings } from "@/lib/strings";
 
 // Metadata reads from lib/strings.ts; the copy pass replaces the fictional
-// example brand from COPY_DECK.md before anything ships.
+// example brand from product/copy/COPY_DECK.md before anything ships.
 export const metadata: Metadata = {
   title: strings.meta.title,
   description: strings.meta.description,

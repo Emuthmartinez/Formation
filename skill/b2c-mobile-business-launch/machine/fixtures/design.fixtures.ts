@@ -25,7 +25,7 @@ export function register(h: Harness): void {
 
   const onboardingNoReview = makeFixture("onboarding-no-review");
   writeFileSync(
-    path.join(onboardingNoReview, "ONBOARDING.md"),
+    path.join(onboardingNoReview, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan before the paywall.",
@@ -44,7 +44,7 @@ export function register(h: Harness): void {
 
   const onboardingReviewBeforeValue = makeFixture("onboarding-review-before-value");
   writeFileSync(
-    path.join(onboardingReviewBeforeValue, "ONBOARDING.md"),
+    path.join(onboardingReviewBeforeValue, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "App Review popup: immediately request SKStoreReviewController.requestReview(in:) on app open.",
@@ -73,7 +73,7 @@ export function register(h: Harness): void {
     writeState(onboardingColdPush, state);
   }
   writeFileSync(
-    path.join(onboardingColdPush, "ONBOARDING.md"),
+    path.join(onboardingColdPush, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -101,7 +101,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushBeforeValue, state);
   }
   writeFileSync(
-    path.join(onboardingPushBeforeValue, "ONBOARDING.md"),
+    path.join(onboardingPushBeforeValue, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -129,7 +129,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNegated, state);
   }
   writeFileSync(
-    path.join(onboardingPushNegated, "ONBOARDING.md"),
+    path.join(onboardingPushNegated, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -151,7 +151,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNegatedInverse, state);
   }
   writeFileSync(
-    path.join(onboardingPushNegatedInverse, "ONBOARDING.md"),
+    path.join(onboardingPushNegatedInverse, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -180,7 +180,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushSameStep, state);
   }
   writeFileSync(
-    path.join(onboardingPushSameStep, "ONBOARDING.md"),
+    path.join(onboardingPushSameStep, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -208,7 +208,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNaBare, state);
   }
   writeFileSync(
-    path.join(onboardingPushNaBare, "ONBOARDING.md"),
+    path.join(onboardingPushNaBare, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -236,7 +236,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNaReasoned, state);
   }
   writeFileSync(
-    path.join(onboardingPushNaReasoned, "ONBOARDING.md"),
+    path.join(onboardingPushNaReasoned, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -259,7 +259,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushStepTable, state);
   }
   writeFileSync(
-    path.join(onboardingPushStepTable, "ONBOARDING.md"),
+    path.join(onboardingPushStepTable, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -292,7 +292,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushStepAlias, state);
   }
   writeFileSync(
-    path.join(onboardingPushStepAlias, "ONBOARDING.md"),
+    path.join(onboardingPushStepAlias, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -325,7 +325,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNamedStep, state);
   }
   writeFileSync(
-    path.join(onboardingPushNamedStep, "ONBOARDING.md"),
+    path.join(onboardingPushNamedStep, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -358,7 +358,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushCombinedRow, state);
   }
   writeFileSync(
-    path.join(onboardingPushCombinedRow, "ONBOARDING.md"),
+    path.join(onboardingPushCombinedRow, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -390,7 +390,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNaContradicted, state);
   }
   writeFileSync(
-    path.join(onboardingPushNaContradicted, "ONBOARDING.md"),
+    path.join(onboardingPushNaContradicted, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -419,7 +419,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushDialogNoPrime, state);
   }
   writeFileSync(
-    path.join(onboardingPushDialogNoPrime, "ONBOARDING.md"),
+    path.join(onboardingPushDialogNoPrime, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -447,7 +447,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushAutoDialog, state);
   }
   writeFileSync(
-    path.join(onboardingPushAutoDialog, "ONBOARDING.md"),
+    path.join(onboardingPushAutoDialog, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -475,7 +475,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNaInlineAsk, state);
   }
   writeFileSync(
-    path.join(onboardingPushNaInlineAsk, "ONBOARDING.md"),
+    path.join(onboardingPushNaInlineAsk, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -503,7 +503,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNotificationPriming, state);
   }
   writeFileSync(
-    path.join(onboardingPushNotificationPriming, "ONBOARDING.md"),
+    path.join(onboardingPushNotificationPriming, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -525,7 +525,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushCapabilityNa, state);
   }
   writeFileSync(
-    path.join(onboardingPushCapabilityNa, "ONBOARDING.md"),
+    path.join(onboardingPushCapabilityNa, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -547,7 +547,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushDeclineTap, state);
   }
   writeFileSync(
-    path.join(onboardingPushDeclineTap, "ONBOARDING.md"),
+    path.join(onboardingPushDeclineTap, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -575,7 +575,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNaDeclarative, state);
   }
   writeFileSync(
-    path.join(onboardingPushNaDeclarative, "ONBOARDING.md"),
+    path.join(onboardingPushNaDeclarative, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -604,7 +604,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushNaInlineDeclarative, state);
   }
   writeFileSync(
-    path.join(onboardingPushNaInlineDeclarative, "ONBOARDING.md"),
+    path.join(onboardingPushNaInlineDeclarative, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -632,7 +632,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushDialogBeforeTap, state);
   }
   writeFileSync(
-    path.join(onboardingPushDialogBeforeTap, "ONBOARDING.md"),
+    path.join(onboardingPushDialogBeforeTap, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -661,7 +661,7 @@ export function register(h: Harness): void {
     writeState(onboardingPushPermissionNa, state);
   }
   writeFileSync(
-    path.join(onboardingPushPermissionNa, "ONBOARDING.md"),
+    path.join(onboardingPushPermissionNa, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "First value / value-reveal step: the user sees a personalized plan.",
@@ -676,35 +676,35 @@ export function register(h: Harness): void {
   runFixture("a reasoned push-permission not-applicable decision passes", onboardingPushPermissionNa, "check-onboarding-conversion.ts", 0);
 
   const elevenStarMissing = makeFixture("eleven-star-missing");
-  rmSync(path.join(elevenStarMissing, "11-star-experience"), { recursive: true, force: true });
+  rmSync(path.join(elevenStarMissing, "product", "experience", "11-star-experience"), { recursive: true, force: true });
   runFixture("missing 11-star experience packet fails", elevenStarMissing, "check-eleven-star-experience.ts", 1, "eleven_star.markdown_missing");
 
   const emotionalDesignMissing = makeFixture("emotional-design-missing");
-  rmSync(path.join(emotionalDesignMissing, "emotional-design"), { recursive: true, force: true });
+  rmSync(path.join(emotionalDesignMissing, "product", "experience", "emotional-design"), { recursive: true, force: true });
   runFixture("missing emotional design contract fails", emotionalDesignMissing, "check-emotional-design.ts", 1, "emotional_design.contract_missing");
 
   const emotionalDesignLaneAbsent = makeFixture("emotional-design-lane-absent");
   {
     const state = readState(emotionalDesignLaneAbsent);
-    const lanes = expectRecord(state.lanes, "PROJECT_STATE.yaml lanes");
+    const lanes = expectRecord(state.lanes, "state/PROJECT_STATE.yaml lanes");
     delete lanes.emotional_design;
     writeState(emotionalDesignLaneAbsent, state);
   }
   runFixture("missing emotional design lane fails", emotionalDesignLaneAbsent, "check-emotional-design.ts", 1, "emotional_design.lane_missing");
 
   const emotionalDesignGenericHtml = makeFixture("emotional-design-generic-html");
-  rmSync(path.join(emotionalDesignGenericHtml, "emotional-design", "emotional-design.html"), { force: true });
+  rmSync(path.join(emotionalDesignGenericHtml, "product", "experience", "emotional-design", "emotional-design.html"), { force: true });
   runFixture(
-    "generic design.html does not satisfy emotional board",
+    "generic design/design.html does not satisfy emotional board",
     emotionalDesignGenericHtml,
     "check-emotional-design.ts",
     1,
-    "emotional_design.html_missing",
+    "emotional_design/design.html_missing",
   );
 
   const emotionalSocialProofUnproven = makeFixture("emotional-social-proof-unproven");
   {
-    const cardPath = path.join(emotionalSocialProofUnproven, "emotional-design", "EMOTIONAL_DESIGN.md");
+    const cardPath = path.join(emotionalSocialProofUnproven, "product", "experience", "emotional-design", "EMOTIONAL_DESIGN.md");
     const text = readFileSync(cardPath, "utf8");
     writeFileSync(
       cardPath,
@@ -725,7 +725,7 @@ experience_card:
       "utf8",
     );
     writeFileSync(
-      path.join(emotionalSocialProofUnproven, "ONBOARDING.md"),
+      path.join(emotionalSocialProofUnproven, "product/ONBOARDING.md"),
       [
         "# Onboarding",
         "First value / value-reveal step: the user sees a personalized plan before the paywall.",
@@ -746,7 +746,7 @@ experience_card:
 
   const emotionalDesignUnguardedReward = makeFixture("emotional-design-unguarded-reward");
   {
-    const cardPath = path.join(emotionalDesignUnguardedReward, "emotional-design", "EMOTIONAL_DESIGN.md");
+    const cardPath = path.join(emotionalDesignUnguardedReward, "product", "experience", "emotional-design", "EMOTIONAL_DESIGN.md");
     const text = readFileSync(cardPath, "utf8");
     // Rename the variable_reward escape-hatch + counter-metric keys so the HIGH-tier gate fires.
     const stripped = text.replace("  user_control_escape_hatch: >", "  removed_escape_hatch: >").replace("  counter_metric: >", "  removed_counter_metric: >");
@@ -762,7 +762,7 @@ experience_card:
 
   const emotionalSpendNearReward = makeFixture("emotional-spend-near-reward");
   writeFileSync(
-    path.join(emotionalSpendNearReward, "ONBOARDING.md"),
+    path.join(emotionalSpendNearReward, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "Streak reveal: day 7 celebration with the weekly progress recap.",
@@ -781,7 +781,7 @@ experience_card:
 
   const emotionalSpendSeparated = makeFixture("emotional-spend-separated");
   writeFileSync(
-    path.join(emotionalSpendSeparated, "ONBOARDING.md"),
+    path.join(emotionalSpendSeparated, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "Streak reveal: day 7 celebration with the weekly progress recap.",
@@ -803,7 +803,7 @@ experience_card:
 
   const emotionalSpendProhibited = makeFixture("emotional-spend-prohibited");
   writeFileSync(
-    path.join(emotionalSpendProhibited, "ONBOARDING.md"),
+    path.join(emotionalSpendProhibited, "product/ONBOARDING.md"),
     ["# Onboarding", "Never show the paywall inside a streak-break grief screen.", "Analytics: streak_celebrated, paywall_viewed."].join("\n"),
     "utf8",
   );
@@ -821,7 +821,7 @@ experience_card:
   // IAP is the guardrail's own spend terminology — it must trip the veto vocabulary.
   const emotionalSpendIap = makeFixture("emotional-spend-iap");
   writeFileSync(
-    path.join(emotionalSpendIap, "ONBOARDING.md"),
+    path.join(emotionalSpendIap, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "Streak reveal: day 7 celebration with the weekly progress recap.",
@@ -841,7 +841,7 @@ experience_card:
   // Markdown wrapping must not turn a compliant prohibition into a false veto.
   const emotionalSpendWrappedProhibition = makeFixture("emotional-spend-wrapped-prohibition");
   writeFileSync(
-    path.join(emotionalSpendWrappedProhibition, "ONBOARDING.md"),
+    path.join(emotionalSpendWrappedProhibition, "product/ONBOARDING.md"),
     ["# Onboarding", "Never show the", "paywall inside a streak-break grief screen.", "Analytics: streak_celebrated, paywall_viewed."].join("\n"),
     "utf8",
   );
@@ -859,7 +859,7 @@ experience_card:
   // A separation note for one compliant flow must not bless a different dark flow beside it.
   const emotionalSpendBorrowedProof = makeFixture("emotional-spend-borrowed-proof");
   writeFileSync(
-    path.join(emotionalSpendBorrowedProof, "ONBOARDING.md"),
+    path.join(emotionalSpendBorrowedProof, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "Streak recap flow: the weekly recap celebrates the run so far.",
@@ -881,7 +881,7 @@ experience_card:
   // sentence must not ride past the veto.
   const emotionalSpendUnrelatedNegation = makeFixture("emotional-spend-unrelated-negation");
   writeFileSync(
-    path.join(emotionalSpendUnrelatedNegation, "ONBOARDING.md"),
+    path.join(emotionalSpendUnrelatedNegation, "product/ONBOARDING.md"),
     ["# Onboarding", "Do not animate the streak; show the paywall on the same screen.", "Analytics: streak_celebrated, paywall_viewed."].join("\n"),
     "utf8",
   );
@@ -896,7 +896,7 @@ experience_card:
   // "there is no separate screen" is an admission, not separation proof.
   const emotionalSpendNegatedProof = makeFixture("emotional-spend-negated-proof");
   writeFileSync(
-    path.join(emotionalSpendNegatedProof, "ONBOARDING.md"),
+    path.join(emotionalSpendNegatedProof, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "Streak-break grief screen and paywall share one view; there is no separate screen.",
@@ -915,7 +915,7 @@ experience_card:
   // The prohibitive clause must be the one holding the spend/reward keywords.
   const emotionalSpendOtherClause = makeFixture("emotional-spend-other-clause");
   writeFileSync(
-    path.join(emotionalSpendOtherClause, "ONBOARDING.md"),
+    path.join(emotionalSpendOtherClause, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "Show the paywall on the streak screen, but do not display an upgrade after dismissal.",
@@ -934,7 +934,7 @@ experience_card:
   // A prohibited clause about a different spend surface must not bless the violating clause.
   const emotionalSpendSecondClause = makeFixture("emotional-spend-second-clause");
   writeFileSync(
-    path.join(emotionalSpendSecondClause, "ONBOARDING.md"),
+    path.join(emotionalSpendSecondClause, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "Show the paywall on the streak screen, but do not show a purchase offer after dismissal.",
@@ -953,7 +953,7 @@ experience_card:
   // Checkout screens are spend surfaces — the guardrail's own vocabulary.
   const emotionalSpendCheckout = makeFixture("emotional-spend-checkout");
   writeFileSync(
-    path.join(emotionalSpendCheckout, "ONBOARDING.md"),
+    path.join(emotionalSpendCheckout, "product/ONBOARDING.md"),
     ["# Onboarding", "Streak-break grief screen opens Stripe Checkout here.", "Analytics: streak_celebrated."].join("\n"),
     "utf8",
   );
@@ -973,7 +973,7 @@ experience_card:
     writeState(emotionalSpendDeferredLane, state);
   }
   writeFileSync(
-    path.join(emotionalSpendDeferredLane, "ONBOARDING.md"),
+    path.join(emotionalSpendDeferredLane, "product/ONBOARDING.md"),
     [
       "# Onboarding",
       "Streak reveal: day 7 celebration with the weekly progress recap.",
@@ -1569,7 +1569,7 @@ experience_card:
 
   const elevenStarThin = makeFixture("eleven-star-thin");
   writeFileSync(
-    path.join(elevenStarThin, "11-star-experience", "11_STAR_EXPERIENCE.md"),
+    path.join(elevenStarThin, "product", "experience", "11-star-experience", "11_STAR_EXPERIENCE.md"),
     [
       "# 11-Star Experience",
       "Experience Thesis: Make it feel magical.",
@@ -1586,7 +1586,10 @@ experience_card:
   const elevenStarDonePlaceholderState = readState(elevenStarDonePlaceholder);
   const doneExperienceLane = getLane(elevenStarDonePlaceholderState, "experience");
   doneExperienceLane["status"] = "done";
-  doneExperienceLane["evidence"] = ["11-star-experience/11_STAR_EXPERIENCE.md", "11-star-experience/11-star-experience.html"];
+  doneExperienceLane["evidence"] = [
+    "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+    "product/experience/11-star-experience/11-star-experience.html",
+  ];
   writeState(elevenStarDonePlaceholder, elevenStarDonePlaceholderState);
   runFixture(
     "done 11-star experience with placeholders fails",

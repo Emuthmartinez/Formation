@@ -29,7 +29,7 @@ For Apple distribution, TestFlight, physical-device signing, archives, exports, 
 
 ## Route Ladder: Start With The In-App Simulator
 
-Pick the lightest rung that can actually produce the evidence the lane needs, then record the rung and the reason in `TOOL_DECISIONS.md`. Escalating is normal; skipping straight to rung 3 for a "let me see the app" request is wasted founder time, and staying on rung 0 when the lane needs Android, a repeatable suite, CI, or distribution proof is a silent coverage downgrade under `paid-tool-routing.md`.
+Pick the lightest rung that can actually produce the evidence the lane needs, then record the rung and the reason in `strategy/TOOL_DECISIONS.md`. Escalating is normal; skipping straight to rung 3 for a "let me see the app" request is wasted founder time, and staying on rung 0 when the lane needs Android, a repeatable suite, CI, or distribution proof is a silent coverage downgrade under `paid-tool-routing.md`.
 
 | Rung | Route | Setup cost | Covers | Cannot cover |
 | --- | --- | --- | --- | --- |
@@ -80,7 +80,7 @@ Refresh these before implementation because in-app simulator gates, XcodeBuildMC
 
 Before installation, setup, client configuration, CLI commands, tool names, privacy settings, skills, or screenshot/test proof, refresh the official docs above and the local CLI help when available. Do not treat this reference, the local `xcodebuildmcp-cli` skill, old transcripts, or project memory as version authority.
 
-Record in `PRODUCTION_READINESS.md` or `SCREENSHOTS.md`:
+Record in `engineering/PRODUCTION_READINESS.md` or `SCREENSHOTS.md`:
 - docs checked date
 - docs URLs used
 - official docs version/tag when shown
@@ -162,7 +162,7 @@ Operating notes:
 
 Consent and privacy, which the launch package must respect:
 - The first use of a device asks for consent, once per device, covering control and screenshots.
-- **Screenshots of the device are sent to Anthropic and retained under normal conversation retention.** Use fixture or sandbox accounts only. Never sign a device the agent drives into a real founder, customer, store, bank, or provider account, and keep production credentials off it. Record the fixture-account decision in `PRODUCTION_READINESS.md`.
+- **Screenshots of the device are sent to Anthropic and retained under normal conversation retention.** Use fixture or sandbox accounts only. Never sign a device the agent drives into a real founder, customer, store, bank, or provider account, and keep production credentials off it. Record the fixture-account decision in `engineering/PRODUCTION_READINESS.md`.
 - Two actions follow the session permission mode instead of the one-time consent: opening a URL on the device (a deep-link or Safari test can carry data off the device) and building the app (`xcodebuild` runs the project's build scripts on the Mac). Treat a deep-link test as a scoped action worth naming, not a silent step.
 - Claude drives simulated devices only. It cannot control a physical iPhone or iPad; physical-device runs stay a founder action from Xcode, with results described or screenshotted into the conversation.
 
@@ -200,7 +200,7 @@ Required sequence:
 4. Do not manually boot/open Simulator as a prerequisite for `build_run_sim`; the tool handles that where supported.
 5. Read the accessibility hierarchy before interacting, and prefer stable labels over raw coordinates.
 6. Keep one concrete bug per debugging session with clear repro steps and expected behavior, let the loop own the full reproduce-patch-verify cycle rather than hand-driving intermediate steps, and ask for the screenshot, log, or stack trace alongside the fix. Critical patches still get human review.
-7. Record the exposed tool names, project/workspace, scheme, simulator/device, OS/runtime, build configuration, screenshots/log paths, and any fallback in `PRODUCTION_READINESS.md`.
+7. Record the exposed tool names, project/workspace, scheme, simulator/device, OS/runtime, build configuration, screenshots/log paths, and any fallback in `engineering/PRODUCTION_READINESS.md`.
 
 In-app native iOS proof — Claude pane or Codex plugin — can satisfy Apple simulator implementation proof when paired with the relevant backend/provider proof. It does not replace MobAI for Android coverage, App Store signing readiness, archive/export/upload proof, TestFlight proof, or founder approval gates.
 
@@ -309,7 +309,7 @@ xcodebuild test \
   -destination 'platform=iOS Simulator,name=iPhone 15 Pro'
 ```
 
-Record in `PRODUCTION_READINESS.md`:
+Record in `engineering/PRODUCTION_READINESS.md`:
 - package URL/version/commit
 - target and test class: `SnapshotTest` or `PreviewLayoutTest`
 - preview module filter, excluded previews, fixtures, and deterministic-data controls
@@ -342,7 +342,7 @@ npx serve-sim type "Hello, world!"
 npx serve-sim button home
 ```
 
-Record in `PRODUCTION_READINESS.md` or `SCREENSHOTS.md`:
+Record in `engineering/PRODUCTION_READINESS.md` or `SCREENSHOTS.md`:
 - package/version or `npx serve-sim` resolution
 - simulator/device name or UDID and proof it was booted
 - preview URL/port such as `http://localhost:3200`
@@ -362,12 +362,12 @@ For production-readiness proof:
 4. Run unit and UI tests where available.
 5. Use UI automation snapshots before gestures.
 
-Before calling native engineering done, complete the launch-critical matrix in `PRODUCTION_READINESS.md`: a named prerelease `.xctestplan`; unit/integration/UI/performance targets; device/OS/locale and light/dark/Dynamic Type variants; accessibility audit; permission allowed/denied; offline/error/retry; deep-link/notification/background/foreground/interruption paths; StoreKit local plus sandbox/TestFlight entitlement/restore/refund state; performance budgets; and Release-configuration physical-device coverage or a named blocker. Record existing `.xcresult`, screenshot/video, log, metrics JSON, and provider-correlation paths. A tool invocation or simulator compile is not journey proof.
+Before calling native engineering done, complete the launch-critical matrix in `engineering/PRODUCTION_READINESS.md`: a named prerelease `.xctestplan`; unit/integration/UI/performance targets; device/OS/locale and light/dark/Dynamic Type variants; accessibility audit; permission allowed/denied; offline/error/retry; deep-link/notification/background/foreground/interruption paths; StoreKit local plus sandbox/TestFlight entitlement/restore/refund state; performance budgets; and Release-configuration physical-device coverage or a named blocker. Record existing `.xcresult`, screenshot/video, log, metrics JSON, and provider-correlation paths. A tool invocation or simulator compile is not journey proof.
 6. Capture screenshots/video only after the target state is reached.
 7. Use SnapshotPreviews for preview coverage when previews exist, and record that it is preview-only coverage.
 8. Use serve-sim when a browser-visible simulator/control surface is useful for CLI agents or remote Mac workflows.
 9. Pair device proof with backend/provider proof: database, RevenueCat, Stripe, PostHog, Resend, Sentry, or store-console evidence when in scope.
-10. Record command/tool output paths, simulator/device, OS, scheme, build config, account fixture, and result in `PRODUCTION_READINESS.md` and `SCREENSHOTS.md`.
+10. Record command/tool output paths, simulator/device, OS, scheme, build config, account fixture, and result in `engineering/PRODUCTION_READINESS.md` and `SCREENSHOTS.md`.
 
 ### Test Triage Protocol
 
@@ -378,14 +378,14 @@ When UI tests crash with signal kill, time out, or flake, escalate in order — 
 3. **Full suite last**, once — only after units + isolated UI pass.
 4. **A green suite is not contract proof.** If the suite passes while RevenueCat returns zero packages, the paywall shows "Purchases unavailable", or PostHog person properties lack `self_reported_source`, open a `test-suite-green-contracts-unproven` failure card and require backend/provider proof before any paywall/attribution-ready claim.
 
-**120s MCP tool timeout — manual fallback.** XcodeBuildMCP MCP tools time out at ~120s; post-clean-cache builds exceed it. When `test_sim`/`build_run_sim` times out: `build_sim` (build only) → `install_app_sim` (built `.app`) → `launch_app_sim` → `get_simulator_logs`/`tail_logs`. Record the fallback route in `PRODUCTION_READINESS.md`.
+**120s MCP tool timeout — manual fallback.** XcodeBuildMCP MCP tools time out at ~120s; post-clean-cache builds exceed it. When `test_sim`/`build_run_sim` times out: `build_sim` (build only) → `install_app_sim` (built `.app`) → `launch_app_sim` → `get_simulator_logs`/`tail_logs`. Record the fallback route in `engineering/PRODUCTION_READINESS.md`.
 
 **xcresulttool syntax (Xcode 16 / 26).** `xcresulttool get --path <bundle> --format json` was deprecated in Xcode 16 and needs `--legacy` in Xcode 26. Prefer `xcresulttool get test-results summary --path <bundle.xcresult>`; refresh `xcresulttool --help` before scripting result parsing.
 
 For App Store screenshot work:
 - in-app simulator captures (pane **Cmd+S**/**Cmd+R**, or the Codex screenshot tool) are valid raw real-app UI; copy them off the Desktop into the repo's raw capture directory and record the device, OS, locale, and fixture account
 - use real app UI from XcodeBuildMCP captures when MobAI is not approved/available
-- compose final screenshots through `DESIGN.md` tokens and screenshot HTML
+- compose final screenshots through `design/DESIGN.md` tokens and screenshot HTML
 - keep raw captures separate from final upload assets
 - map each final image to Apple display wells and Google device classes
 - a simulator capture is a simulated device: confirm the display well's pixel dimensions before upload rather than assuming the pane's stream resolution matches Apple's required size
@@ -408,7 +408,7 @@ sentryDisabled: true
 
 to `.xcodebuildmcp/config.yaml`.
 
-Record the telemetry decision in `TOOL_DECISIONS.md` or `PRODUCTION_READINESS.md`.
+Record the telemetry decision in `strategy/TOOL_DECISIONS.md` or `engineering/PRODUCTION_READINESS.md`.
 
 ## Troubleshooting
 
@@ -433,7 +433,7 @@ Do not flatten these into "Xcode is broken". Record the exact doctor finding and
 
 ## Evidence Requirements
 
-`PRODUCTION_READINESS.md` should include:
+`engineering/PRODUCTION_READINESS.md` should include:
 - in-app simulator route when used: the agent surface and app version, the plan/policy gate cleared, that it was a local session (not cloud or SSH), the simulated device and OS, the fixture/sandbox account used instead of a real account, the exported screenshot/recording paths now committed in the repo, and the coverage this route does not provide (no Android, no physical device, no distribution readiness)
 - Codex in-app native iOS route when used: `session_show_defaults`, exposed MCP tool names, project/workspace, scheme, simulator/device, and screenshot/log/test paths
 - XcodeBuildMCP version or install route
@@ -449,7 +449,7 @@ Do not flatten these into "Xcode is broken". Record the exact doctor finding and
 - SnapshotPreviews package URL/version/commit, `SnapshotTest` or `PreviewLayoutTest` target, `TEST_RUNNER_SNAPSHOTS_EXPORT_DIR`, exported PNG/JSON paths, and preview-only limitation when used
 - serve-sim package/version, booted simulator/device, preview URL/port, gesture/type/button commands, stream/log evidence paths, and limitation when used
 - backend/provider proof paired to app actions
-- Apple signing proof when distribution is in scope: Team ID, `DEVELOPMENT_TEAM`, bundle ID/App ID, app record, signing style, local signing identity class, provisioning strategy, archive/export/upload/TestFlight status, and any `APPLE_SIGNING.md` blocker
+- Apple signing proof when distribution is in scope: Team ID, `DEVELOPMENT_TEAM`, bundle ID/App ID, app record, signing style, local signing identity class, provisioning strategy, archive/export/upload/TestFlight status, and any `store/APPLE_SIGNING.md` blocker
 - telemetry decision
 - remaining blocked flows
 

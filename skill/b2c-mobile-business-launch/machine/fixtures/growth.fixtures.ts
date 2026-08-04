@@ -6,9 +6,9 @@ export function register(h: Harness): void {
   const { makeFixture, runFixture } = h;
 
   const contentFallbackUnapproved = makeFixture("content-fallback-unapproved");
-  mkdirSync(path.join(contentFallbackUnapproved, "content-assets"), { recursive: true });
+  mkdirSync(path.join(contentFallbackUnapproved, "growth", "content-assets"), { recursive: true });
   writeFileSync(
-    path.join(contentFallbackUnapproved, "content-assets", "CONTENT_ASSETS.md"),
+    path.join(contentFallbackUnapproved, "growth", "content-assets", "CONTENT_ASSETS.md"),
     [
       "# Content Assets",
       "Route Matrix",
@@ -33,9 +33,9 @@ export function register(h: Harness): void {
   );
 
   const remotionLicenseUnchecked = makeFixture("remotion-license-unchecked");
-  mkdirSync(path.join(remotionLicenseUnchecked, "content-assets"), { recursive: true });
+  mkdirSync(path.join(remotionLicenseUnchecked, "growth", "content-assets"), { recursive: true });
   writeFileSync(
-    path.join(remotionLicenseUnchecked, "content-assets", "CONTENT_ASSETS.md"),
+    path.join(remotionLicenseUnchecked, "growth", "content-assets", "CONTENT_ASSETS.md"),
     [
       "# Content Assets",
       "Route Matrix",
@@ -53,7 +53,7 @@ export function register(h: Harness): void {
     "utf8",
   );
   writeFileSync(
-    path.join(remotionLicenseUnchecked, "content-assets", "manifest.json"),
+    path.join(remotionLicenseUnchecked, "growth", "content-assets", "manifest.json"),
     JSON.stringify(
       {
         assets: [
@@ -64,8 +64,8 @@ export function register(h: Harness): void {
             status: "draft",
             composition_id: "Ad",
             dimensions: "1080x1080",
-            inputs: ["DESIGN.md"],
-            outputs: ["content-assets/out/ad.mp4"],
+            inputs: ["design/DESIGN.md"],
+            outputs: ["growth/content-assets/out/ad.mp4"],
             truth_constraints: ["real app UI visible"],
             approvals: ["founder approval before public use"],
             render_proof: "npx remotion render Ad --output ../out/ad.mp4",
@@ -87,9 +87,9 @@ export function register(h: Harness): void {
   );
 
   const thinContentManifest = makeFixture("content-manifest-thin");
-  mkdirSync(path.join(thinContentManifest, "content-assets"), { recursive: true });
+  mkdirSync(path.join(thinContentManifest, "growth", "content-assets"), { recursive: true });
   writeFileSync(
-    path.join(thinContentManifest, "content-assets", "CONTENT_ASSETS.md"),
+    path.join(thinContentManifest, "growth", "content-assets", "CONTENT_ASSETS.md"),
     [
       "# Content Assets",
       "Route Matrix",
@@ -107,16 +107,16 @@ export function register(h: Harness): void {
     "utf8",
   );
   writeFileSync(
-    path.join(thinContentManifest, "content-assets", "manifest.json"),
+    path.join(thinContentManifest, "growth", "content-assets", "manifest.json"),
     JSON.stringify({ assets: [{ asset_id: "thin", route: "remotion", status: "draft" }] }, null, 2),
     "utf8",
   );
   runFixture("thin Remotion content manifest fails", thinContentManifest, "check-content-assets.ts", 1, "content_assets.manifest.assets.0.surface.missing");
 
   const higgsfieldNoBrief = makeFixture("content-higgsfield-no-brief");
-  mkdirSync(path.join(higgsfieldNoBrief, "content-assets"), { recursive: true });
+  mkdirSync(path.join(higgsfieldNoBrief, "growth", "content-assets"), { recursive: true });
   writeFileSync(
-    path.join(higgsfieldNoBrief, "content-assets", "CONTENT_ASSETS.md"),
+    path.join(higgsfieldNoBrief, "growth", "content-assets", "CONTENT_ASSETS.md"),
     [
       "# Content Assets",
       "Route Matrix",
@@ -134,7 +134,7 @@ export function register(h: Harness): void {
     "utf8",
   );
   writeFileSync(
-    path.join(higgsfieldNoBrief, "content-assets", "manifest.json"),
+    path.join(higgsfieldNoBrief, "growth", "content-assets", "manifest.json"),
     JSON.stringify(
       {
         assets: [
@@ -144,8 +144,8 @@ export function register(h: Harness): void {
             route: "higgsfield_marketing_studio",
             status: "draft",
             dimensions: "1080x1920",
-            inputs: ["DESIGN.md"],
-            outputs: ["content-assets/out/founder-ad.mp4"],
+            inputs: ["design/DESIGN.md"],
+            outputs: ["growth/content-assets/out/founder-ad.mp4"],
             truth_constraints: ["real app UI remains truthful"],
             approvals: ["founder approval before public posting"],
             license_status: "Higgsfield account/credit route",
@@ -226,7 +226,7 @@ export function register(h: Harness): void {
   // A playbook that stops at the Day-0 roster leaves the scaled state undefined.
   const viralGrowthNoUgcScale = makeFixture("viral-growth-no-ugc-scale");
   writeCompleteViralGrowth(viralGrowthNoUgcScale);
-  writeFileSync(path.join(viralGrowthNoUgcScale, "UGC_PLAYBOOK.md"), "# UGC Playbook\n\nCreator scripts use GROW-001 and the format lab.\n", "utf8");
+  writeFileSync(path.join(viralGrowthNoUgcScale, "growth/UGC_PLAYBOOK.md"), "# UGC Playbook\n\nCreator scripts use GROW-001 and the format lab.\n", "utf8");
   runFixture(
     "UGC playbook without the post-breakout scale model fails",
     viralGrowthNoUgcScale,
@@ -239,7 +239,7 @@ export function register(h: Harness): void {
   // actually be defined.
   const viralGrowthUgcScaleThin = makeFixture("viral-growth-ugc-scale-thin");
   writeCompleteViralGrowth(viralGrowthUgcScaleThin);
-  writeFileSync(path.join(viralGrowthUgcScaleThin, "UGC_PLAYBOOK.md"), "# UGC Playbook\n\nPost-breakout band founder.\n", "utf8");
+  writeFileSync(path.join(viralGrowthUgcScaleThin, "growth/UGC_PLAYBOOK.md"), "# UGC Playbook\n\nPost-breakout band founder.\n", "utf8");
   runFixture(
     "keyword-only scale model without bands and fatigue fails",
     viralGrowthUgcScaleThin,
@@ -251,8 +251,14 @@ export function register(h: Harness): void {
   // A deleted playbook is the Day-0 ceiling with the evidence removed.
   const viralGrowthNoPlaybook = makeFixture("viral-growth-no-ugc-playbook");
   writeCompleteViralGrowth(viralGrowthNoPlaybook);
-  rmSync(path.join(viralGrowthNoPlaybook, "UGC_PLAYBOOK.md"), { force: true });
-  runFixture("done growth lane without UGC_PLAYBOOK.md fails", viralGrowthNoPlaybook, "check-viral-growth-loop.ts", 1, "viral_growth.ugc_playbook_missing");
+  rmSync(path.join(viralGrowthNoPlaybook, "growth/UGC_PLAYBOOK.md"), { force: true });
+  runFixture(
+    "done growth lane without growth/UGC_PLAYBOOK.md fails",
+    viralGrowthNoPlaybook,
+    "check-viral-growth-loop.ts",
+    1,
+    "viral_growth.ugc_playbook_missing",
+  );
 
   // A dated numeric row in a LATER section must not read as a loop measurement.
   const viralGrowthLoopCrossSection = makeFixture("viral-growth-loop-cross-section");
@@ -320,7 +326,7 @@ export function register(h: Harness): void {
   const viralGrowthLabelsOnly = makeFixture("viral-growth-band-labels-only");
   writeCompleteViralGrowth(viralGrowthLabelsOnly);
   writeFileSync(
-    path.join(viralGrowthLabelsOnly, "UGC_PLAYBOOK.md"),
+    path.join(viralGrowthLabelsOnly, "growth/UGC_PLAYBOOK.md"),
     "# UGC Playbook\n\nPost-Breakout Scale Model: discovery, proven, scale; founder reviews; track fatigue.\n",
     "utf8",
   );
@@ -374,9 +380,9 @@ export function register(h: Harness): void {
   // The shipped template's band table has structure but no state: empty
   // Budget and Entered/evidence cells must not satisfy the scale model.
   const viralGrowthTemplateUntouched = makeFixture("viral-growth-template-untouched");
-  const shippedUgcPlaybook = readFileSync(path.join(viralGrowthTemplateUntouched, "UGC_PLAYBOOK.md"), "utf8");
+  const shippedUgcPlaybook = readFileSync(path.join(viralGrowthTemplateUntouched, "growth/UGC_PLAYBOOK.md"), "utf8");
   writeCompleteViralGrowth(viralGrowthTemplateUntouched);
-  writeFileSync(path.join(viralGrowthTemplateUntouched, "UGC_PLAYBOOK.md"), shippedUgcPlaybook, "utf8");
+  writeFileSync(path.join(viralGrowthTemplateUntouched, "growth/UGC_PLAYBOOK.md"), shippedUgcPlaybook, "utf8");
   runFixture(
     "the untouched UGC template's empty band cells fail the scale model",
     viralGrowthTemplateUntouched,
@@ -389,7 +395,7 @@ export function register(h: Harness): void {
   const viralGrowthBandPopulated = makeFixture("viral-growth-band-table-populated");
   writeCompleteViralGrowth(viralGrowthBandPopulated);
   writeFileSync(
-    path.join(viralGrowthBandPopulated, "UGC_PLAYBOOK.md"),
+    path.join(viralGrowthBandPopulated, "growth/UGC_PLAYBOOK.md"),
     [
       "# UGC Playbook",
       "",
@@ -446,7 +452,7 @@ export function register(h: Harness): void {
   const viralGrowthDashCells = makeFixture("viral-growth-band-dash-cells");
   writeCompleteViralGrowth(viralGrowthDashCells);
   writeFileSync(
-    path.join(viralGrowthDashCells, "UGC_PLAYBOOK.md"),
+    path.join(viralGrowthDashCells, "growth/UGC_PLAYBOOK.md"),
     [
       "# UGC Playbook",
       "",
@@ -477,7 +483,7 @@ export function register(h: Harness): void {
   const viralGrowthNegativeEvidence = makeFixture("viral-growth-band-negative-evidence");
   writeCompleteViralGrowth(viralGrowthNegativeEvidence);
   writeFileSync(
-    path.join(viralGrowthNegativeEvidence, "UGC_PLAYBOOK.md"),
+    path.join(viralGrowthNegativeEvidence, "growth/UGC_PLAYBOOK.md"),
     [
       "# UGC Playbook",
       "",
@@ -521,7 +527,7 @@ export function register(h: Harness): void {
   const viralGrowthNotesRow = makeFixture("viral-growth-band-notes-row");
   writeCompleteViralGrowth(viralGrowthNotesRow);
   writeFileSync(
-    path.join(viralGrowthNotesRow, "UGC_PLAYBOOK.md"),
+    path.join(viralGrowthNotesRow, "growth/UGC_PLAYBOOK.md"),
     [
       "# UGC Playbook",
       "",
@@ -616,9 +622,9 @@ export function register(h: Harness): void {
 
   // The recorded exemption stands even when the shipped template remains.
   const viralGrowthUgcExempt = makeFixture("viral-growth-ugc-exempt-template");
-  const shippedUgcPlaybookExempt = readFileSync(path.join(viralGrowthUgcExempt, "UGC_PLAYBOOK.md"), "utf8");
+  const shippedUgcPlaybookExempt = readFileSync(path.join(viralGrowthUgcExempt, "growth/UGC_PLAYBOOK.md"), "utf8");
   writeCompleteViralGrowth(viralGrowthUgcExempt);
-  writeFileSync(path.join(viralGrowthUgcExempt, "UGC_PLAYBOOK.md"), shippedUgcPlaybookExempt, "utf8");
+  writeFileSync(path.join(viralGrowthUgcExempt, "growth/UGC_PLAYBOOK.md"), shippedUgcPlaybookExempt, "utf8");
   writeFileSync(
     path.join(viralGrowthUgcExempt, "growth", "VIRAL_GROWTH.md"),
     readFileSync(path.join(viralGrowthUgcExempt, "growth", "VIRAL_GROWTH.md"), "utf8") +
@@ -753,7 +759,7 @@ export function register(h: Harness): void {
   const viralGrowthBudgetNoGate = makeFixture("viral-growth-budget-no-gate");
   writeCompleteViralGrowth(viralGrowthBudgetNoGate);
   writeFileSync(
-    path.join(viralGrowthBudgetNoGate, "UGC_PLAYBOOK.md"),
+    path.join(viralGrowthBudgetNoGate, "growth/UGC_PLAYBOOK.md"),
     [
       "# UGC Playbook",
       "",
@@ -890,7 +896,7 @@ export function register(h: Harness): void {
   const viralGrowthBudgetDigitBands = makeFixture("viral-growth-budget-digit-bands");
   writeCompleteViralGrowth(viralGrowthBudgetDigitBands);
   writeFileSync(
-    path.join(viralGrowthBudgetDigitBands, "UGC_PLAYBOOK.md"),
+    path.join(viralGrowthBudgetDigitBands, "growth/UGC_PLAYBOOK.md"),
     [
       "# UGC Playbook",
       "",

@@ -23,4 +23,4 @@ must_catch:
 should_say:
   - Run "asc metadata pull" (or asc-metadata-sync read route) to fetch the current live listing before auditing.
   - Build logs are snapshots of a past CLI run and must not substitute for a live pull.
-  - Record the metadata output path and diff timestamp in APP_STORE_LISTING.md or STORE_CONSOLE.md.
+  - Record the metadata output path and diff timestamp in APP_STORE_LISTING.md or store/STORE_CONSOLE.md.

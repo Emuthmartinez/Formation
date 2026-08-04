@@ -24,16 +24,16 @@ Changes from the base:
   feed — library, restore, account
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- This is the variant to suggest when the founder's request and budget point at `launch_scope: lite`: fewest systems (prompts 00–04 + 08, with 06 in its simplest pack form), fastest path to the wow moment, and the easiest store-review story. Record the tier in `PROJECT_STATE.yaml`.
+- This is the variant to suggest when the founder's request and budget point at `launch_scope: lite`: fewest systems (prompts 00–04 + 08, with 06 in its simplest pack form), fastest path to the wow moment, and the easiest store-review story. Record the tier in `state/PROJECT_STATE.yaml`.
 - The fixed-parameter, no-re-roll design *lowers* the Variable Reward exposure — say so in the ethics artifact rather than skipping the card: the reveal is still emotionally engineered (family photos cut deep) and still needs its attestation, escape hatch, and honest progress per `ethics-guardrail.md`.
 - Old family photos are often of deceased or non-consenting relatives; keep the rights attestation from prompt 08 in its simplified form and the takedown path intact (`privacy-terms.md`).
 - Sharing restored family photos is a strong organic loop — the prompt 07 before/after share formats apply unchanged if the founder selects sharing.
-- Keep the four lane events (`media_uploaded`, `generation_started`, `generation_completed`, `media_shared`) plus `restore_mode_selected` in `ANALYTICS.md`.
+- Keep the four lane events (`media_uploaded`, `generation_started`, `generation_completed`, `media_shared`) plus `restore_mode_selected` in `analytics/ANALYTICS.md`.

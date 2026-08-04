@@ -8,7 +8,7 @@ Compound Engineering is the default engineering operating system for this skill.
 
 1. **Freshness**: run `ce-update` in Claude Code when available, or record the local CE skill inventory and latest-release check. The current upstream release source is `https://github.com/EveryInc/compound-engineering-plugin/releases`.
 2. **Product/requirements**: run `ce-brainstorm` when product shape, scope, user behavior, onboarding, paywall, or activation still has multiple defensible directions. If skipped, record why the source docs are already decisive.
-3. **Plan**: run `ce-plan` before non-trivial implementation. `ENGINEERING_PLAN.md` should identify `ce-plan` or an equivalent CE planning route as its source.
+3. **Plan**: run `ce-plan` before non-trivial implementation. `engineering/ENGINEERING_PLAN.md` should identify `ce-plan` or an equivalent CE planning route as its source.
 4. **Work**: run `ce-work` for bounded implementation. Use `ce-worktree` when lanes need isolation, the main checkout is dirty, or parallel implementation would collide.
 5. **Review**: run `ce-code-review` before treating non-trivial code changes as ready.
 6. **Test**: run `ce-test-browser` for web surfaces and `ce-test-xcode` for iOS/macOS surfaces when applicable. Use MobAI for serialized mobile-device E2E when available.
@@ -18,7 +18,7 @@ Tiny doc edits, typo fixes, one-file copy changes, and repo-maintenance-only val
 
 ## State Contract
 
-Record the route in `PROJECT_STATE.yaml`:
+Record the route in `state/PROJECT_STATE.yaml`:
 
 ```yaml
 compound_engineering:
@@ -44,11 +44,11 @@ compound_engineering:
 For production-readiness claims, the route must show either:
 
 - CE is available and planning, work, review, testing, and proof are used or intentionally not needed with a reason.
-- CE is unavailable and the Standalone Engineering Loop (`engineering-orchestration.md` §1b) is recorded in `ORCHESTRATION.md`, `PROJECT_STATE.yaml`, and `ENGINEERING_PLAN.md` — plan, bounded slices, adversarial review, test, and proof with the same evidence bar. `check:compound-engineering` errors when CE is unavailable and `ENGINEERING_PLAN.md` does not record the loop.
+- CE is unavailable and the Standalone Engineering Loop (`engineering-orchestration.md` §1b) is recorded in `operations/ORCHESTRATION.md`, `state/PROJECT_STATE.yaml`, and `engineering/ENGINEERING_PLAN.md` — plan, bounded slices, adversarial review, test, and proof with the same evidence bar. `check:compound-engineering` errors when CE is unavailable and `engineering/ENGINEERING_PLAN.md` does not record the loop.
 
 ## Artifact Requirements
 
-`ORCHESTRATION.md` must include:
+`operations/ORCHESTRATION.md` must include:
 
 - Compound Engineering Routing
 - CE freshness check
@@ -61,14 +61,14 @@ For production-readiness claims, the route must show either:
 - ce-proof or ce-demo-reel route
 - fallback reason if unavailable
 
-`ENGINEERING_PLAN.md` must include:
+`engineering/ENGINEERING_PLAN.md` must include:
 
 - source docs and whether `ce-brainstorm` was used or intentionally skipped
 - `ce-plan` or equivalent planning source
 - `ce-work` execution route and `ce-worktree` decision
 - review, test, and proof gates before readiness
 
-`PRODUCTION_READINESS.md` must include:
+`engineering/PRODUCTION_READINESS.md` must include:
 
 - implementation command/proof
 - CE review result or equivalent fallback

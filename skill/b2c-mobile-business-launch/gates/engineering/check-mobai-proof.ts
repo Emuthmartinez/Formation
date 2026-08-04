@@ -87,11 +87,13 @@ function validateStoredContract(): void {
 }
 
 function validateProjectProof(state: unknown): void {
-  const readiness = existingText(["PRODUCTION_READINESS.md", "engineering/PRODUCTION_READINESS.md"]);
+  const readiness = existingText(["engineering/PRODUCTION_READINESS.md", "engineering/engineering/PRODUCTION_READINESS.md"]);
   const engineeringStatus = asString(getPath(state, "lanes.engineering.status"))?.toLowerCase();
   if (engineeringStatus !== "done") return;
   if (!readiness) {
-    issues.push(issue("error", "mobai.proof.readiness_missing", "Done engineering needs PRODUCTION_READINESS.md.", "PRODUCTION_READINESS.md"));
+    issues.push(
+      issue("error", "mobai.proof.readiness_missing", "Done engineering needs engineering/PRODUCTION_READINESS.md.", "engineering/PRODUCTION_READINESS.md"),
+    );
     return;
   }
 
@@ -123,7 +125,7 @@ function validateProjectProof(state: unknown): void {
         issue(
           "error",
           "mobai.proof.cross_platform_section_missing",
-          "Android is in scope and engineering is done, but PRODUCTION_READINESS.md has no MobAI Cross-Platform Proof section. An iOS-only route cannot prove Android: record the Android evidence, or a dated blocked/not-needed tier with the replacement coverage.",
+          "Android is in scope and engineering is done, but engineering/PRODUCTION_READINESS.md has no MobAI Cross-Platform Proof section. An iOS-only route cannot prove Android: record the Android evidence, or a dated blocked/not-needed tier with the replacement coverage.",
           readiness.relativePath,
         ),
       );
@@ -280,14 +282,14 @@ function validatePlatformMatrix(section: string, state: unknown, file: string): 
 }
 
 function validateProviderProof(): void {
-  const proof = existingText(["PROVIDER_PROOF.md", "operations/PROVIDER_PROOF.md"]);
+  const proof = existingText(["operations/PROVIDER_PROOF.md", "operations/operations/PROVIDER_PROOF.md"]);
   if (!proof) {
-    issues.push(issue("error", "mobai.proof.provider_ledger_missing", "MobAI readiness needs PROVIDER_PROOF.md.", "PROVIDER_PROOF.md"));
+    issues.push(issue("error", "mobai.proof.provider_ledger_missing", "MobAI readiness needs operations/PROVIDER_PROOF.md.", "operations/PROVIDER_PROOF.md"));
     return;
   }
   const row = proof.text.split(/\r?\n/).find((line) => /^\|\s*MobAI\s*\|/i.test(line));
   if (!row) {
-    issues.push(issue("error", "mobai.proof.provider_row_missing", "PROVIDER_PROOF.md needs a MobAI row.", proof.relativePath));
+    issues.push(issue("error", "mobai.proof.provider_row_missing", "operations/PROVIDER_PROOF.md needs a MobAI row.", proof.relativePath));
     return;
   }
   const cells = splitRow(row);
@@ -306,15 +308,15 @@ function validateProviderProof(): void {
 
 function validateTierApproval(selectedTier?: string): void {
   if (!selectedTier || !/^\s*(?:plus|pro)\b/i.test(selectedTier)) return;
-  const decisions = existingText(["TOOL_DECISIONS.md", "operations/TOOL_DECISIONS.md"]);
+  const decisions = existingText(["strategy/TOOL_DECISIONS.md", "operations/strategy/TOOL_DECISIONS.md"]);
   const row = decisions?.text.split(/\r?\n/).find((line) => /^\|\s*MobAI\s*\|/i.test(line));
   if (!row || !/founder\s+(?:approved|confirmed)|approved paid|spend approved/i.test(row)) {
     issues.push(
       issue(
         "error",
         "mobai.proof.paid_tier_approval_missing",
-        "MobAI Plus/Pro proof needs founder spend confirmation in TOOL_DECISIONS.md; Free does not.",
-        decisions?.relativePath ?? "TOOL_DECISIONS.md",
+        "MobAI Plus/Pro proof needs founder spend confirmation in strategy/TOOL_DECISIONS.md; Free does not.",
+        decisions?.relativePath ?? "strategy/TOOL_DECISIONS.md",
       ),
     );
   }

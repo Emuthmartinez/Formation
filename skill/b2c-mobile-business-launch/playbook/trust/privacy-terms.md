@@ -4,7 +4,7 @@ Use this before drafting or publishing privacy policy, terms of service, EULA, s
 
 This is a workflow, not legal advice. Agents may research, draft, implement pages, and prepare review packets. Founder/legal approval is required before publishing final legal terms or making material privacy promises.
 
-When store submission is in scope, also load `store-console-workflow.md`. For Apple App Store listings, also load `app-store-listing-prep.md` and use `business/app-store-listing/app-privacy-questionnaire.html` or an equivalent interactive worksheet when the founder needs to review privacy answers. Privacy/terms work must produce the public pages and the console answers: Apple App Privacy data types, Google Play Data safety answers, account deletion URLs, reviewer access notes, and source evidence.
+When store submission is in scope, also load `store-console-workflow.md`. For Apple App Store listings, also load `app-store-listing-prep.md` and use `business/store/app-store-listing/app-privacy-questionnaire.html` or an equivalent interactive worksheet when the founder needs to review privacy answers. Privacy/terms work must produce the public pages and the console answers: Apple App Privacy data types, Google Play Data safety answers, account deletion URLs, reviewer access notes, and source evidence.
 
 ## Contents
 
@@ -28,7 +28,7 @@ Baseline sources to check:
 - EU/EEA GDPR transparency guidance if the app is offered to EU/EEA users.
 - Vendor docs for analytics, attribution, ads, AI providers, payment/subscription tooling, backend, email, crash reporting, and push notifications. For PostHog, refresh product analytics, web analytics, mobile SDK, anonymous vs identified events, persons/properties, feature flags/experiments, session replay privacy, surveys, and data pipeline docs when those features are used.
 
-Record checked sources, dates, and URLs in `LEGAL_REVIEW.md`. Mirror store-specific sources and final console answers in `STORE_CONSOLE.md` when App Store Connect or Google Play Console submission is in scope.
+Record checked sources, dates, and URLs in `LEGAL_REVIEW.md`. Mirror store-specific sources and final console answers in `store/STORE_CONSOLE.md` when App Store Connect or Google Play Console submission is in scope.
 
 ## 2. Build The Data Inventory First
 

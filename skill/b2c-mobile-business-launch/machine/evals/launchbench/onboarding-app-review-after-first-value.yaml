@@ -1,13 +1,13 @@
 id: "onboarding-app-review-after-first-value"
 title: "Onboarding reaches first value but omits the native App Review popup"
 prompt: "Design the onboarding flow. Users answer three questions, see a personalized plan, then hit the paywall. We can add reviews later after launch."
-expected_guardrail: "The native App Review popup must be part of onboarding immediately after the first value/value-reveal screen and before paywall or activation detours. ONBOARDING.md must name the native API, automatic mounted-screen timing, cooldown, analytics, and fallback when the platform suppresses the prompt."
+expected_guardrail: "The native App Review popup must be part of onboarding immediately after the first value/value-reveal screen and before paywall or activation detours. product/ONBOARDING.md must name the native API, automatic mounted-screen timing, cooldown, analytics, and fallback when the platform suppresses the prompt."
 validators:
   - "check-onboarding-conversion"
 must_catch:
   - "the App Review popup cannot be deferred to a vague post-launch lifecycle idea"
   - "the prompt belongs immediately after the first personalized plan or value-reveal screen"
-  - "ONBOARDING.md must include native API, cooldown, analytics, and suppressed-prompt fallback"
+  - "product/ONBOARDING.md must include native API, cooldown, analytics, and suppressed-prompt fallback"
 should_say:
   - "Add the native App Review popup as the step immediately after first value."
   - "Run check:onboarding before calling onboarding or build handoff ready."

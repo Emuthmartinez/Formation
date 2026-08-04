@@ -42,7 +42,7 @@ Refresh current sources before install, setup, command syntax, recording workflo
 
 When a recorder skill is needed, read the repo `README.md`, `install.md`, and installable `SKILL.md` from the current default branch. Do not rely on copied command names from this reference when the upstream skill changed.
 
-Record in `TOOL_DECISIONS.md`, `SCREENSHOTS.md`, `FASTLANE_OPS.md`, `PRODUCTION_READINESS.md`, or `DEMO_VIDEO.md`:
+Record in `strategy/TOOL_DECISIONS.md`, `SCREENSHOTS.md`, `growth/FASTLANE_OPS.md`, `engineering/PRODUCTION_READINESS.md`, or `growth/DEMO_VIDEO.md`:
 - docs/repos checked date
 - repo URLs and commit or default-branch date
 - selected MobAI tool or skill
@@ -182,7 +182,7 @@ After any build event that restarts or relaunches the simulator — such as `bui
 2. If start_bridge does not surface the device within ~5 s:
    a. Confirm the simulator is actually running (xcrun simctl list | grep Booted).
    b. Restart the bridge once more.
-   c. If still absent, surface the block in PROJECT_STATE.yaml and stop.
+   c. If still absent, surface the block in state/PROJECT_STATE.yaml and stop.
 ```
 
 Do not silently retry a stale UUID. The device-not-found error is deterministic; retrying the same UUID wastes tool calls.
@@ -273,7 +273,7 @@ Default launch prompt shape:
 
 ```text
 Record a 30s vertical demo of the onboarding flow on iPhone 16 Pro.
-Use the app's DESIGN.md for background, captions, bezel treatment, and export copy.
+Use the app's design/DESIGN.md for background, captions, bezel treatment, and export copy.
 Save the .mob choreography, raw recording, final mp4, captions, and upload copy.
 ```
 
@@ -307,7 +307,7 @@ Default launch prompt shape:
 
 ```text
 Record a polished 30s product demo of the web onboarding flow.
-Use the app's DESIGN.md for background, captions, cursor/ripple styling, and export copy.
+Use the app's design/DESIGN.md for background, captions, cursor/ripple styling, and export copy.
 Save screenplay.json, raw recording, final mp4, captions, and upload copy.
 ```
 
@@ -330,12 +330,12 @@ Common final artifacts:
 
 ## Launch Outputs
 
-Create `DEMO_VIDEO.md` when demo videos are part of the launch package.
+Create `growth/DEMO_VIDEO.md` when demo videos are part of the launch package.
 
-`DEMO_VIDEO.md` should include:
+`growth/DEMO_VIDEO.md` should include:
 - selected recorder skill and repo commit/date checked
 - app flow, target platform/device/window, fixture account, locale/theme, and build
-- design-system source: `DESIGN.md`, `design.html`, or screenshot frame spec
+- design-system source: `design/DESIGN.md`, `design/design.html`, or screenshot frame spec
 - choreography path: `.mob` or `screenplay.json`
 - dry-run outcome
 - raw recording path
@@ -362,5 +362,5 @@ Before calling a demo video launch-ready:
 - final recording has no private data, secrets, accidental notifications, or unapproved screens
 - output dimensions and duration match target channel: store preview, website, social, support bug repro, or internal walkthrough
 - backend/provider proof exists separately when the demo shows a state-changing flow
-- `TOOL_DECISIONS.md` records MobAI access or fallback route
-- `DEMO_VIDEO.md`, `SCREENSHOTS.md`, `FASTLANE_OPS.md`, or `PRODUCTION_READINESS.md` links final artifacts
+- `strategy/TOOL_DECISIONS.md` records MobAI access or fallback route
+- `growth/DEMO_VIDEO.md`, `SCREENSHOTS.md`, `growth/FASTLANE_OPS.md`, or `engineering/PRODUCTION_READINESS.md` links final artifacts

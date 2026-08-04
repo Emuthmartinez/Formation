@@ -26,7 +26,7 @@ Use `aso-store-ops.md` as the router. Load `app-store-listing-prep.md` for Apple
 Fallback:
 - If the ASO skills are installed but not discoverable in the current runtime, search local skill/plugin directories for the skill name and read its `SKILL.md`.
 - If the Eronred ASO skill set is relevant, refresh `https://github.com/Eronred/aso-skills` and prefer installed or vendored skill docs over memory.
-- If no ASO skill pack is installed, use `paid-tool-routing.md` before replacing paid ASO tooling with AppKittie, public App Store/Play Console research, manual keyword sheets, and the same outputs: context, keyword map, metadata variants, `APP_STORE_LISTING.md`, `STORE_CONSOLE.md`, `app-store-listing.html`, `store-console.html`, `SCREENSHOTS.md`, launch calendar, and post-launch monitoring loop.
+- If no ASO skill pack is installed, use `paid-tool-routing.md` before replacing paid ASO tooling with AppKittie, public App Store/Play Console research, manual keyword sheets, and the same outputs: context, keyword map, metadata variants, `APP_STORE_LISTING.md`, `store/STORE_CONSOLE.md`, `app-store-listing.html`, `store/store-console.html`, `SCREENSHOTS.md`, launch calendar, and post-launch monitoring loop.
 
 ## Paid User Acquisition Routing
 
@@ -39,7 +39,7 @@ Use `paid-user-acquisition.md` before:
 - using RevenueCat LTV/cohort data to judge CPA, trial conversion, payback, or ROAS
 
 Inputs:
-- `SPEC.md`, `11_STAR_EXPERIENCE.md`, `CONTENT_ASSETS.md`, `ANALYTICS.md`, `REVENUE_OPS.md`, `APP_STORE_LISTING.md`, `LAUNCH_TRACE.md`, `PRIVACY.md`, `TERMS.md`
+- `product/SPEC.md`, `11_STAR_EXPERIENCE.md`, `CONTENT_ASSETS.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `APP_STORE_LISTING.md`, `state/LAUNCH_TRACE.md`, `trust/PRIVACY.md`, `trust/TERMS.md`
 - RevenueCat LTV/cohort/trial/purchase/entitlement data when available
 - App Store Connect or Play Console baseline metrics
 - ad-channel access and budget approval state
@@ -47,7 +47,7 @@ Inputs:
 Outputs:
 - `PAID_UA.md`
 - `growth/paid-ua-report.csv` when spend is planned or active
-- updated `ANALYTICS.md`, `REVENUE_OPS.md`, `CONTENT_ASSETS.md`, `APP_STORE_LISTING.md`, and `LAUNCH_TRACE.md`
+- updated `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `CONTENT_ASSETS.md`, `APP_STORE_LISTING.md`, and `state/LAUNCH_TRACE.md`
 
 Rules:
 - Start with one channel or document the exception.
@@ -66,7 +66,7 @@ Use `viral-growth-loops.md` before:
 - calling a social channel ready from views, likes, or UGC ideas alone
 
 Inputs:
-- `SPEC.md`, `11_STAR_EXPERIENCE.md`, `ONBOARDING.md`, `REVENUE_OPS.md`, `ANALYTICS.md`, `LAUNCH_TRACE.md`, `PRIVACY.md`, `TERMS.md`
+- `product/SPEC.md`, `11_STAR_EXPERIENCE.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `analytics/ANALYTICS.md`, `state/LAUNCH_TRACE.md`, `trust/PRIVACY.md`, `trust/TERMS.md`
 - AppKittie/XPOZ/review/social evidence for category, platform, creator language, device mix, and content formats
 - real product screens or truthful prototypes that show the shareable result
 
@@ -74,7 +74,7 @@ Outputs:
 - `VIRAL_GROWTH.md`
 - `growth/format-lab.csv` or `ugc/script-bank.md`
 - `growth/referral-loop-map.md` when referral/unlock mechanics are non-trivial
-- updated `UGC_PLAYBOOK.md`, `FASTLANE_OPS.md`, `CONTENT_ASSETS.md`, and `ANALYTICS.md` when content or automation is in scope
+- updated `growth/UGC_PLAYBOOK.md`, `growth/FASTLANE_OPS.md`, `CONTENT_ASSETS.md`, and `analytics/ANALYTICS.md` when content or automation is in scope
 
 Rules:
 - Treat UGC as supply and viral growth as the system that converts attention into product actions.
@@ -94,13 +94,13 @@ Use `ugc-creator-engine.md` before:
 - adapting creator videos into ads or Fastlane campaigns
 
 Inputs:
-- `SPEC.md`, `BRAND.md`, `DESIGN.md`, `ONBOARDING.md`, `LAUNCH.md`, `ANALYTICS.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `TERMS.md`
+- `product/SPEC.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `product/ONBOARDING.md`, `LAUNCH.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`
 - AppKittie/XPOZ/review evidence for audience language and competitor creator patterns
 - real app screenshots/recordings from MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, or approved fallback
-- Higgsfield visuals only as supporting assets constrained by `DESIGN.md`
+- Higgsfield visuals only as supporting assets constrained by `design/DESIGN.md`
 
 Outputs:
-- `UGC_PLAYBOOK.md`
+- `growth/UGC_PLAYBOOK.md`
 - `ugc/creator-list.csv`
 - `ugc/creator-brief.md`
 - `ugc/script-bank.md`
@@ -127,14 +127,14 @@ Delegate:
 - compare a user-provided Fastlane `SKILL.md` against the installed skill when the user supplies one
 - use current app/docs/API state as source truth because `developers.usefastlane.ai` can be a JavaScript shell
 - use safe reads first: preferences, angles, connections, content, posts, analytics when post IDs exist
-- build `FASTLANE_OPS.md` and `fastlane/` artifacts before generating or scheduling content
+- build `growth/FASTLANE_OPS.md` and `fastlane/` artifacts before generating or scheduling content
 
 Inputs:
-- `SPEC.md`, `BRAND.md`, `DESIGN.md`, `LAUNCH.md`, `ONBOARDING.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `TERMS.md`, and `RESEARCH.md`
+- `product/SPEC.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `LAUNCH.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, and `strategy/RESEARCH.md`
 - MobAI screenshots/recordings for real app proof
 - Codex Desktop native iOS/XcodeBuildMCP or serve-sim screenshots/recordings when Apple-platform media proof is available or approved as a fallback
 - Higgsfield assets for design-system constrained hooks, mascots, backgrounds, and motion
-- `UGC_PLAYBOOK.md`, `ugc/script-bank.md`, and creator/post results when a creator-led engine exists
+- `growth/UGC_PLAYBOOK.md`, `ugc/script-bank.md`, and creator/post results when a creator-led engine exists
 
 Rules:
 - never store or print `FASTLANE_API_KEY`

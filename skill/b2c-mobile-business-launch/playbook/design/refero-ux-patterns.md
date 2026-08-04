@@ -36,8 +36,8 @@ Refero is paid/account-gated. Missing runtime access is not permission to switch
 Before using any fallback:
 1. Load `paid-tool-routing.md`.
 2. Ask the founder whether they have Refero, will provide an export/screenshots, want to sign up, or approve the free baseline route.
-3. Record the answer in `TOOL_DECISIONS.md` and `PROJECT_STATE.yaml.tools.refero`.
-4. If approved fallback is used, copy or adapt `business/ux-patterns/UX_PATTERNS.md` and `business/ux-patterns/ux-patterns.html`.
+3. Record the answer in `strategy/TOOL_DECISIONS.md` and `state/PROJECT_STATE.yaml.tools.refero`.
+4. If approved fallback is used, copy or adapt `business/product/experience/ux-patterns/UX_PATTERNS.md` and `business/product/experience/ux-patterns/ux-patterns.html`.
 
 ## Refero Research Workflow
 
@@ -77,9 +77,9 @@ Run or adapt these by product category:
 ## Baseline Pattern Pack
 
 If Refero is unavailable and fallback is founder-approved, still produce a useful UX pattern packet:
-- Copy `business/ux-patterns/UX_PATTERNS.md` to the app root.
-- Copy `business/ux-patterns/ux-patterns.html` or render the same pattern board inside `design.html`.
-- Keep `ONBOARDING.md` based on `onboarding-conversion.md`, not generic inspiration.
+- Copy `business/product/experience/ux-patterns/UX_PATTERNS.md` to the app root.
+- Copy `business/product/experience/ux-patterns/ux-patterns.html` or render the same pattern board inside `design/design.html`.
+- Keep `product/ONBOARDING.md` based on `onboarding-conversion.md`, not generic inspiration.
 - Use public or first-party references only as evidence summaries; do not paste copyrighted screenshots unless permitted.
 
 Baseline patterns are not a substitute for category-specific research. They are a safety net that prevents common bugs and broken UX flows.
@@ -113,7 +113,7 @@ Before build handoff:
 - Loading, error, offline, permission denied, and empty states are not left to implementation guesswork.
 - Paywalls show restore purchases and clear price/trial/renewal language.
 - Account deletion and cancellation flows avoid dark patterns and preserve confirmation/recovery steps.
-- UX patterns are tied to `ANALYTICS.md` events and `PRODUCTION_READINESS.md` tests.
+- UX patterns are tied to `analytics/ANALYTICS.md` events and `engineering/PRODUCTION_READINESS.md` tests.
 
 ## Common Failures
 

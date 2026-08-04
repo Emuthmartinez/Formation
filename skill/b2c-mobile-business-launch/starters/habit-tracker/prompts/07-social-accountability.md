@@ -33,9 +33,9 @@ Notification copy follows the prompt 04 rules: encouragement, never shame.
 Never notify a circle that a member missed a day.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -43,7 +43,7 @@ shipping strings.
 
 - **This feeds `viral-growth-loops.md`**: the buddy/circle invite is the growth loop — instrument invite sent → accepted → activated (first shared check-in) with attribution, and add self-invite/abuse controls. Record acceptance rate in `VIRAL_GROWTH.md`.
 - Social pressure is a dual-use mechanism (`ethics-guardrail.md` Social Proof / social-norm pressure): showing a circle who showed up is bright-line; broadcasting who *failed*, rankings by default, or shame nudges are dark-line. The "never notify a miss" rule is the boundary — keep it.
-- Visibility rules are RLS policies, not client filtering: a buddy's read access is scoped to the shared habit's daily status. Extend the prompt 01 policies, test them (pgTAP per `backend-data-contract.md`), and add the sharing model to the threat model in `SECURITY.md`.
+- Visibility rules are RLS policies, not client filtering: a buddy's read access is scoped to the shared habit's daily status. Extend the prompt 01 policies, test them (pgTAP per `backend-data-contract.md`), and add the sharing model to the threat model in `trust/SECURITY.md`.
 - Block/report, data removal on leave, and the invite-only posture are launch gates for any social surface (`security-release-hardening.md`); reflect shared-data handling in `privacy-terms.md`.
 - Free circles are the classic deliberate-freemium argument in prompt 06 — if circles drive word of mouth, that is a reason to choose freemium *on purpose*.
-- Add `buddy_invite_sent`, `buddy_invite_accepted`, `circle_created`, `circle_joined`, `nudge_sent`, `member_blocked` to `ANALYTICS.md`.
+- Add `buddy_invite_sent`, `buddy_invite_accepted`, `circle_created`, `circle_joined`, `nudge_sent`, `member_blocked` to `analytics/ANALYTICS.md`.

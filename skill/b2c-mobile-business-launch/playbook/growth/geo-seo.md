@@ -53,7 +53,7 @@ Write content for both humans and AI answer engines:
 
 ## 3a. Landing Craft: Motion And UI Generation
 
-Landing pages and funnels are web surfaces, so framer-motion / the `motion` library and the `ui-ux-pro-max` skill apply directly here (unlike the shipped mobile binary). **Load [`landing-motion-craft.md`](../design/landing-motion-craft.md) before building or animating any landing section** — it carries the two-lane (Remotion-baked vs motion/react-live) model, the `business/landing/` section library, the landing motion-token scale (`--motion-duration-reveal`/`--motion-duration-cinematic`/`--motion-easing-emphasis`/`--motion-easing-spring`/`--motion-stagger`), and the progressive-enhancement contract that `check:landing-funnel` enforces. Use them to lift conversion without hurting GEO or performance:
+Landing pages and funnels are web surfaces, so framer-motion / the `motion` library and the `ui-ux-pro-max` skill apply directly here (unlike the shipped mobile binary). **Load [`landing-motion-craft.md`](../design/landing-motion-craft.md) before building or animating any landing section** — it carries the two-lane (Remotion-baked vs motion/react-live) model, the `business/growth/landing/` section library, the landing motion-token scale (`--motion-duration-reveal`/`--motion-duration-cinematic`/`--motion-easing-emphasis`/`--motion-easing-spring`/`--motion-stagger`), and the progressive-enhancement contract that `check:landing-funnel` enforces. Use them to lift conversion without hurting GEO or performance:
 
 - Generate senior-grade landing and section layouts with the `ui-ux-pro-max` skill when available (reference-only; adapt, do not copy its data). Keep section copy answer-style and self-contained per section 3.
 - Animate hero, feature reveals, and CTAs with framer-motion reading the tokenized `--motion-*` scale (micro-interactions 150-300ms; in-view reveals and cinematic beats use the landing scale above). Reuse the same `motion.*` tokens as the app so brand motion is consistent across surfaces.
@@ -68,12 +68,12 @@ Run this scan before writing or accepting any landing copy, not only before depl
 - Superlatives tied to a ranked cohort: "Top N unlock", "Top 100 referrers get", "first N users receive". Remove unless the waitlist system actively enforces the cutoff and the size is not invented.
 - Unshipped-feature promises: device integrations ("WHOOP V2 V3 when they ship"), integrations not yet in code, or features scoped to V2/V3. Remove or move to a clearly labeled roadmap section.
 - Implied authority or credential claims: "tested by applied performance researchers", "clinically validated", "neuroscience-backed". Remove unless the founder supplies verifiable citations.
-- Lifetime or free-tier promises not reflected in `REVENUE_OPS.md`: "free first year of Pro at launch", "lifetime access". Cross-check against current pricing and RevenueCat entitlement design before writing.
+- Lifetime or free-tier promises not reflected in `revenue/REVENUE_OPS.md`: "free first year of Pro at launch", "lifetime access". Cross-check against current pricing and RevenueCat entitlement design before writing.
 - Scarcity/urgency claims without a live enforcement mechanism: "spots are almost gone", "limited availability".
 
 **JSON-LD schema check:**
 - After writing or modifying any page that includes `application/ld+json`, verify the JSON parses (`JSON.parse(...)` locally or via `jq .` on the raw tag value). Invalid JSON-LD is silent in browsers but blocks structured-data rich results.
-- If schema sections reference product names, prices, or dates, cross-check them against `DESIGN.md`, `REVENUE_OPS.md`, and current copy before deploy.
+- If schema sections reference product names, prices, or dates, cross-check them against `design/DESIGN.md`, `revenue/REVENUE_OPS.md`, and current copy before deploy.
 
 **Waitlist idempotency contract:**
 - Any landing page that collects email for a waitlist must guarantee: duplicate email submissions return HTTP 200 (not 4xx), with a de-duplicated response message. Test with a repeated submit before marking the funnel live.

@@ -18,7 +18,7 @@ const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
 const state = loaded.state;
-const relative = "APPLE_APP_STORE_REQUIREMENTS.md";
+const relative = "store/APPLE_APP_STORE_REQUIREMENTS.md";
 const text = readText(args.root, relative);
 
 function statusForLane(name: string): string | undefined {
@@ -142,7 +142,12 @@ if (appleRequirementsSkipped) {
   // Android-only or explicitly out-of-scope Apple distribution paths do not require this packet.
 } else if (!text) {
   issues.push(
-    issue("error", "apple_requirements.missing", "APPLE_APP_STORE_REQUIREMENTS.md is required before an iOS app is pushed to App Store Connect.", relative),
+    issue(
+      "error",
+      "apple_requirements.missing",
+      "store/APPLE_APP_STORE_REQUIREMENTS.md is required before an iOS app is pushed to App Store Connect.",
+      relative,
+    ),
   );
 } else {
   const requiredPhrases = [
@@ -174,17 +179,17 @@ if (appleRequirementsSkipped) {
     "upload",
     "delivery warnings",
     "App Store Connect",
-    "APPLE_SIGNING.md",
+    "store/APPLE_SIGNING.md",
     "APP_STORE_LISTING.md",
-    "STORE_CONSOLE.md",
-    "PRIVACY.md",
-    "SECURITY.md",
+    "store/STORE_CONSOLE.md",
+    "trust/PRIVACY.md",
+    "trust/SECURITY.md",
     "founder approval",
   ];
 
   for (const phrase of requiredPhrases) {
     if (!normalizedIncludes(text, phrase)) {
-      issues.push(issue("error", missingPhraseCode("apple_requirements", phrase), `APPLE_APP_STORE_REQUIREMENTS.md should include ${phrase}.`, relative));
+      issues.push(issue("error", missingPhraseCode("apple_requirements", phrase), `store/APPLE_APP_STORE_REQUIREMENTS.md should include ${phrase}.`, relative));
     }
   }
 

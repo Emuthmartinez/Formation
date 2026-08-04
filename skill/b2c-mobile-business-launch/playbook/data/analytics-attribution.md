@@ -58,16 +58,16 @@ Also refresh:
 
 ## 2. Required Artifacts
 
-Create `ANALYTICS.md` before implementation or builder handoff.
+Create `analytics/ANALYTICS.md` before implementation or builder handoff.
 
-Update `PROJECT_STATE.yaml` before calling analytics ready:
+Update `state/PROJECT_STATE.yaml` before calling analytics ready:
 - lane status and evidence paths for `analytics_attribution`
 - provider state for PostHog, RevenueCat, Stripe, Resend, Sentry, or ad/MMP tools when relevant
 - current-doc basis for fast-moving analytics/provider setup
 - attribution contract booleans, stable keys, event name, person properties, backend persistence, anonymous reconciliation, and verification status
 - active failure cards for missing analytics, attribution, privacy, replay/survey, or dashboard proof
 
-`ANALYTICS.md` must include:
+`analytics/ANALYTICS.md` must include:
 - measurement goals and north-star metric
 - vendor stack: PostHog primary, GA4 or ad-network tools if useful, RevenueCat subscription truth, Stripe/web checkout truth, Sentry for errors
 - PostHog project/host/region decision and whether one project spans website, mobile app, web app, and backend
@@ -83,16 +83,16 @@ Update `PROJECT_STATE.yaml` before calling analytics ready:
 - data governance: PII rules, retention, opt-out/consent, privacy-policy/store-disclosure mapping
 - QA plan with smoke events, dashboard checks, activity-tab checks, and launch-blocking failures
 
-Create `analytics-plan.html` or an analytics section in `design.html` early:
+Create `analytics/analytics-plan.html` or an analytics section in `design/design.html` early:
 - show the acquisition-to-revenue journey as a visual map
 - include copyable event tables grouped by surface
 - render funnel cards for acquisition, onboarding, paywall, activation, retention, referral, email, and post-launch social
 - show an attribution matrix with UTM/source/deep-link/self-report examples
 - show dashboard wireframes or screenshot placeholders
 - mark founder-only decisions and blocked credentials
-- use `DESIGN.md` tokens when available; otherwise label it as provisional
+- use `design/DESIGN.md` tokens when available; otherwise label it as provisional
 
-Render or refresh `launch-cockpit.html` after analytics status changes so the founder can see what is planned, what is wired, and what is still unverified.
+Render or refresh `state/launch-cockpit.html` after analytics status changes so the founder can see what is planned, what is wired, and what is still unverified.
 
 ## 3. Upfront Planning Workflow
 
@@ -103,7 +103,7 @@ Render or refresh `launch-cockpit.html` after analytics status changes so the fo
 5. Write the identity and attribution model before event names. Do not let each surface invent its own user ID or source fields.
 6. Draft the event catalog and dashboards, then map each event to the exact screen, server endpoint, webhook, provider callback, or email lifecycle hook that emits it.
 7. Add privacy and store-disclosure notes while planning, not after implementation.
-8. Render `analytics-plan.html` so the founder can inspect the tracking plan and understand launch learning before the build starts.
+8. Render `analytics/analytics-plan.html` so the founder can inspect the tracking plan and understand launch learning before the build starts.
 
 ## 4. Identity Model
 
@@ -156,7 +156,7 @@ Self-reported attribution data contract:
 - PostHog person properties: set `self_reported_source`, `self_reported_source_label`, `self_reported_source_other_text_present`, and `self_reported_source_captured_at`. Store raw `self_reported_source_other` only when privacy docs allow it.
 - Backend/profile fields: persist `self_reported_source`, `self_reported_source_label`, `self_reported_source_other`, `self_reported_source_captured_at`, and `self_reported_source_context` or the product's named equivalents.
 - Verification: prove event delivery, person-property update, backend/profile write, and anonymous-to-identified stitching. Do not call attribution wired if it only updates local state or emits a one-off event.
-- State: set `PROJECT_STATE.yaml` attribution contract fields to true only after each corresponding implementation/proof exists.
+- State: set `state/PROJECT_STATE.yaml` attribution contract fields to true only after each corresponding implementation/proof exists.
 
 Campaign convention:
 - `utm_source`: platform or partner, e.g. `tiktok`, `instagram`, `youtube`, `reddit`, `apple_search_ads`, `creator_<handle>`
@@ -245,7 +245,7 @@ Surveys:
 
 ## 9. Privacy And Governance
 
-Analytics planning must update `PRIVACY.md`, `LEGAL_REVIEW.md`, and store console answers.
+Analytics planning must update `trust/PRIVACY.md`, `LEGAL_REVIEW.md`, and store console answers.
 
 Document:
 - analytics vendor, host/region, SDKs, and whether data is linked to identity
@@ -289,14 +289,14 @@ QA checklist:
 - Session replay and surveys respect masking, sampling, and consent settings.
 - Privacy/terms/store data disclosures match the actual SDK/event behavior.
 - `npm run check:attribution -- --root .` or the installed-skill equivalent passes when onboarding/signup/waitlist attribution exists.
-- `PROJECT_STATE.yaml` and `launch-cockpit.html` reflect analytics provider state, proof, and blockers.
+- `state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` reflect analytics provider state, proof, and blockers.
 
 ## 11. Runtime Research Prompt
 
-Before writing `ANALYTICS.md`, run a current-doc pass like:
+Before writing `analytics/ANALYTICS.md`, run a current-doc pass like:
 
 ```text
-Research current PostHog docs for this app's stack and produce an analytics/attribution plan before launch. Cover product analytics installation, event capture, web analytics, mobile SDK setup, anonymous vs identified events, persons/properties, UTM/referrer/click ID attribution, feature flags, experiments, session replay privacy, surveys, and data pipelines. Map each doc finding to this app's landing, onboarding, paywall, subscription, email, referral, store CTA, and Fastlane/social campaigns. Output ANALYTICS.md plus analytics-plan.html with funnels, event catalog, identity model, attribution model, dashboards, privacy notes, and QA gates.
+Research current PostHog docs for this app's stack and produce an analytics/attribution plan before launch. Cover product analytics installation, event capture, web analytics, mobile SDK setup, anonymous vs identified events, persons/properties, UTM/referrer/click ID attribution, feature flags, experiments, session replay privacy, surveys, and data pipelines. Map each doc finding to this app's landing, onboarding, paywall, subscription, email, referral, store CTA, and Fastlane/social campaigns. Output analytics/ANALYTICS.md plus analytics/analytics-plan.html with funnels, event catalog, identity model, attribution model, dashboards, privacy notes, and QA gates.
 ```
 
 If the product repo already exists and is ready, use the installed `setup-posthog` skill for initial project setup and first-event validation after the plan is approved. If the repo does not exist, stop at the plan, event catalog, and builder prompts.

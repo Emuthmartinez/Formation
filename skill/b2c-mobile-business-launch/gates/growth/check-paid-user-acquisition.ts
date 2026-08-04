@@ -71,7 +71,14 @@ if (markdown) {
     }
   }
 
-  const requiredRefs = ["ANALYTICS.md", "REVENUE_OPS.md", "CONTENT_ASSETS.md", "APP_STORE_LISTING.md", "LAUNCH_TRACE.md", "11_STAR_EXPERIENCE.md"];
+  const requiredRefs = [
+    "analytics/ANALYTICS.md",
+    "revenue/REVENUE_OPS.md",
+    "CONTENT_ASSETS.md",
+    "APP_STORE_LISTING.md",
+    "state/LAUNCH_TRACE.md",
+    "11_STAR_EXPERIENCE.md",
+  ];
   for (const ref of requiredRefs) {
     if (!markdown.text.includes(ref)) {
       issues.push(issue("error", `paid_ua.ref_${codeFor(ref)}.missing`, `PAID_UA.md should reference ${ref}.`, markdown.relativePath));

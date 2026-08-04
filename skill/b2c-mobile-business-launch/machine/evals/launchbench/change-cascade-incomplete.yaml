@@ -14,4 +14,4 @@ must_catch:
 should_say:
   - Load change-cascade.md and classify the change against the Change Cascade Map.
   - Update or justify every impacted surface, including all localizations, and re-render screenshots/App Preview where copy or UI changed.
-  - Reconcile the lexicon across in-app, store, landing, schema, RevenueCat, and email; record the cascade in LAUNCH_TRACE.md/PROJECT_STATE.yaml.
+  - Reconcile the lexicon across in-app, store, landing, schema, RevenueCat, and email; record the cascade in state/LAUNCH_TRACE.md/state/PROJECT_STATE.yaml.

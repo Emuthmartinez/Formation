@@ -141,14 +141,14 @@ Research packet:
 - 5-10 screens for each critical surface family: onboarding, paywall, pricing, restore, settings/account, support/privacy, empty/error/offline, referral/share, search/filter.
 - 2-4 flows for each critical journey: onboarding, purchase/upgrade, cancellation/retention, restore purchases, account deletion, password reset or login recovery, and permission requests when applicable.
 - A `UX_PATTERNS.md` source ledger with query, platform, selected records, observed pattern, adopted decision, rejected decisions, and caveats.
-- A `ux-patterns.html` or `design.html` section rendering pattern inventory, flow maps, state matrix, and bug traps.
+- A `ux-patterns.html` or `design/design.html` section rendering pattern inventory, flow maps, state matrix, and bug traps.
 
 Rules:
 - Use Refero as research ingredients, not a template library to copy.
 - Preserve the onboarding conversion playbook unless the user explicitly approves a named experiment.
 - Do not commit paid Refero screenshots unless licensing/permission is clear; summarize metadata and link source records instead.
 - Pair Refero findings with product trace rows, analytics events, accessibility checks, and implementation state matrices.
-- Record free fallback approval and limitations in `TOOL_DECISIONS.md` when Refero is unavailable.
+- Record free fallback approval and limitations in `strategy/TOOL_DECISIONS.md` when Refero is unavailable.
 
 ## Name And Keyword Collision
 

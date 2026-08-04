@@ -5,13 +5,13 @@ prompt: >
   I know nothing about setting up or running a mobile app business. Get the business accounts, Doppler,
   socials, and your secure access organized, then run the launch with me only stepping in where needed.
 expected_route: >
-  Load founder-zero-operator.md, seed BUSINESS_ACCESS.md and its ledger, establish the founder-owned
+  Load founder-zero-operator.md, seed operations/BUSINESS_ACCESS.md and its ledger, establish the founder-owned
   identity spine, configure Doppler for automation secrets, prefer named and revocable delegated/OAuth
   social access with explicit scopes, and present one structured plain-language founder gate while the
   agent records and executes the next business operation.
 must_use:
   - founder-zero-operator.md
-  - BUSINESS_ACCESS.md
+  - operations/BUSINESS_ACCESS.md
   - operations/business-access.json
   - check-founder-operator
 must_catch:

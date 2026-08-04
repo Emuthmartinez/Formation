@@ -25,16 +25,16 @@ Requirements:
 Keep preset definitions data-driven so adding a style is a row, not a deploy.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Re-runs go through the same pipeline as first runs: credit-checked, rate-limited, idempotent. A "tweak" that bypasses metering is a cost leak and an abuse vector (`SECURITY.md`).
+- Re-runs go through the same pipeline as first runs: credit-checked, rate-limited, idempotent. A "tweak" that bypasses metering is a cost leak and an abuse vector (`trust/SECURITY.md`).
 - "Try another style" multiplies the Variable Reward exposure from prompt 04 — the same HIGH-risk `ethics-guardrail.md` contract applies. Watch the `counter_metric` (regeneration spirals, credit-balance crashes in one session) and keep the escape hatch honest: never time a "one more try" nudge to the moment the balance hits zero.
 - Watermark-free as a premium lever is a `revenue-monetization.md` decision (it shapes the free tier's shareability — the watermark is also organic attribution for prompt 07). Surface the tradeoff; the founder picks.
 - Premium presets shown-but-labeled is paywall surface design (`onboarding-conversion.md`): the upgrade moment should land when the user wants a specific style, a real value moment.
-- Add `preset_selected`, `generation_rerun`, `variation_compared`, `watermark_removed_export` to `ANALYTICS.md`.
+- Add `preset_selected`, `generation_rerun`, `variation_compared`, `watermark_removed_export` to `analytics/ANALYTICS.md`.

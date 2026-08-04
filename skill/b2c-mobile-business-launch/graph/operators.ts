@@ -21,7 +21,7 @@ export const operators = defineOperators([
     allowedActions: founderGates,
     founderGatedActions: [],
     forbiddenActions: ["treat silence as approval"],
-    artifactPaths: ["BUSINESS_ACCESS.md", "PROJECT_STATE.yaml"],
+    artifactPaths: ["operations/BUSINESS_ACCESS.md", "state/PROJECT_STATE.yaml"],
   },
   {
     id: "operator.orchestrator",
@@ -33,8 +33,8 @@ export const operators = defineOperators([
     allowedActions: ["assign bounded work", "update durable state", "integrate outputs", "run validators", "prepare founder decisions"],
     founderGatedActions: founderGates,
     forbiddenActions: agentForbidden,
-    artifactPaths: ["PROJECT_STATE.yaml", "launch-cockpit.html", "ORCHESTRATION.md", "PRODUCTION_READINESS.md"],
-    promptPath: "business/app-agent-roster/agents/orchestrator.md",
+    artifactPaths: ["state/PROJECT_STATE.yaml", "state/launch-cockpit.html", "operations/ORCHESTRATION.md", "engineering/PRODUCTION_READINESS.md"],
+    promptPath: "business/engineering/app-agent-roster/agents/orchestrator.md",
   },
   {
     id: "operator.marketing-guru",
@@ -46,8 +46,8 @@ export const operators = defineOperators([
     allowedActions: ["research channels", "prepare campaigns", "draft public copy", "audit attribution"],
     founderGatedActions: ["spend", "public posting", "account connections"],
     forbiddenActions: agentForbidden,
-    artifactPaths: ["PAID_UA.md", "UGC_PLAYBOOK.md", "FASTLANE_OPS.md", "growth/LAUNCH_NARRATIVE.md"],
-    promptPath: "business/app-agent-roster/agents/marketing-guru.md",
+    artifactPaths: ["PAID_UA.md", "growth/UGC_PLAYBOOK.md", "growth/FASTLANE_OPS.md", "growth/LAUNCH_NARRATIVE.md"],
+    promptPath: "business/engineering/app-agent-roster/agents/marketing-guru.md",
   },
   {
     id: "operator.engineering-leader",
@@ -59,8 +59,8 @@ export const operators = defineOperators([
     allowedActions: ["implement bounded changes", "run builds and tests", "prepare release evidence"],
     founderGatedActions: ["production mutations", "store submission", "destructive actions"],
     forbiddenActions: agentForbidden,
-    artifactPaths: ["TECH_SPEC.md", "ENGINEERING_PLAN.md", "PRODUCTION_READINESS.md"],
-    promptPath: "business/app-agent-roster/agents/engineering-leader.md",
+    artifactPaths: ["engineering/TECH_SPEC.md", "engineering/ENGINEERING_PLAN.md", "engineering/PRODUCTION_READINESS.md"],
+    promptPath: "business/engineering/app-agent-roster/agents/engineering-leader.md",
   },
   {
     id: "operator.security-architect",
@@ -72,8 +72,8 @@ export const operators = defineOperators([
     allowedActions: ["audit controls", "run approved scanners", "prepare accepted-risk decisions"],
     founderGatedActions: ["security spend", "production credential changes", "risk acceptance"],
     forbiddenActions: agentForbidden,
-    artifactPaths: ["SECURITY.md", "security-review.html", "PRODUCTION_READINESS.md"],
-    promptPath: "business/app-agent-roster/agents/security-architect.md",
+    artifactPaths: ["trust/SECURITY.md", "trust/security-review.html", "engineering/PRODUCTION_READINESS.md"],
+    promptPath: "business/engineering/app-agent-roster/agents/security-architect.md",
   },
   {
     id: "operator.product-leader",
@@ -85,8 +85,8 @@ export const operators = defineOperators([
     allowedActions: ["research", "propose scope", "audit product contracts"],
     founderGatedActions: ["go-pivot-kill decision", "material scope change"],
     forbiddenActions: agentForbidden,
-    artifactPaths: ["RESEARCH.md", "SPEC.md", "11-star-experience/11_STAR_EXPERIENCE.md", "LAUNCH_TRACE.md"],
-    promptPath: "business/app-agent-roster/agents/product-leader.md",
+    artifactPaths: ["strategy/RESEARCH.md", "product/SPEC.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md", "state/LAUNCH_TRACE.md"],
+    promptPath: "business/engineering/app-agent-roster/agents/product-leader.md",
   },
   {
     id: "operator.design-guru",
@@ -98,8 +98,8 @@ export const operators = defineOperators([
     allowedActions: ["mutate design state", "render visual proof", "audit accessibility"],
     founderGatedActions: ["approve final brand", "purchase visual tools", "publish assets"],
     forbiddenActions: agentForbidden,
-    artifactPaths: ["BRAND.md", "DESIGN.md", "design.html", "content-assets/CONTENT_ASSETS.md"],
-    promptPath: "business/app-agent-roster/agents/design-guru.md",
+    artifactPaths: ["strategy/BRAND.md", "design/DESIGN.md", "design/design.html", "growth/content-assets/CONTENT_ASSETS.md"],
+    promptPath: "business/engineering/app-agent-roster/agents/design-guru.md",
   },
   {
     id: "operator.customer-success",
@@ -111,8 +111,8 @@ export const operators = defineOperators([
     allowedActions: ["prepare support operations", "draft lifecycle copy", "triage feedback"],
     founderGatedActions: ["public responses", "refund policy changes", "legal commitments"],
     forbiddenActions: agentForbidden,
-    artifactPaths: ["EMAIL_OPS.md", "POST_LAUNCH_OPS.md", "PRIVACY.md", "TERMS.md"],
-    promptPath: "business/app-agent-roster/agents/customer-success.md",
+    artifactPaths: ["growth/EMAIL_OPS.md", "operations/POST_LAUNCH_OPS.md", "trust/PRIVACY.md", "trust/TERMS.md"],
+    promptPath: "business/engineering/app-agent-roster/agents/customer-success.md",
   },
   {
     id: "operator.maintainer",
@@ -136,7 +136,7 @@ export const operators = defineOperators([
     allowedActions: ["read files", "emit findings", "fail the audit"],
     founderGatedActions: [],
     forbiddenActions: ["mutate business state", "silently waive findings"],
-    artifactPaths: ["PROJECT_STATE.yaml", "LAUNCHBENCH.md"],
+    artifactPaths: ["state/PROJECT_STATE.yaml", "LAUNCHBENCH.md"],
   },
   {
     id: "operator.renderer",
@@ -148,6 +148,6 @@ export const operators = defineOperators([
     allowedActions: ["read canonical state", "write generated projections"],
     founderGatedActions: [],
     forbiddenActions: ["invent business truth", "write timestamps into deterministic projections"],
-    artifactPaths: ["launch-cockpit.html", "design-room.html", "graph/generated/skill-graph.json"],
+    artifactPaths: ["state/launch-cockpit.html", "design/design-room.html", "graph/generated/skill-graph.json"],
   },
 ] as const);

@@ -17,8 +17,8 @@ const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
 const state = loaded.state;
-const markdownPath = "STORE_CONSOLE.md";
-const htmlPath = "store-console.html";
+const markdownPath = "store/STORE_CONSOLE.md";
+const htmlPath = "store/store-console.html";
 const appListingPath = "APP_STORE_LISTING.md";
 const appListingHtmlPath = "app-store-listing.html";
 const appPrivacyQuestionnairePath = "app-privacy-questionnaire.html";
@@ -39,9 +39,9 @@ function existsAny(candidates: string[]): string | undefined {
   return candidates.find((candidate) => existsSync(path.join(args.root, candidate)));
 }
 
-const appListingMarkdown = firstExistingText([appListingPath, `app-store-listing/${appListingPath}`]);
-const appListingHtml = existsAny([appListingHtmlPath, `app-store-listing/${appListingHtmlPath}`]);
-const appPrivacyQuestionnaire = existsAny([appPrivacyQuestionnairePath, `app-store-listing/${appPrivacyQuestionnairePath}`]);
+const appListingMarkdown = firstExistingText([appListingPath, `store/app-store-listing/${appListingPath}`]);
+const appListingHtml = existsAny([appListingHtmlPath, `store/app-store-listing/${appListingHtmlPath}`]);
+const appPrivacyQuestionnaire = existsAny([appPrivacyQuestionnairePath, `store/app-store-listing/${appPrivacyQuestionnairePath}`]);
 
 function collisionFallbackLines(markdownText: string): string[] {
   return markdownText
@@ -126,7 +126,7 @@ if (!markdown) {
       issue(
         severity,
         "store_console.markdown_missing",
-        "STORE_CONSOLE.md is required for copy-paste App Store Connect and Google Play guidance.",
+        "store/STORE_CONSOLE.md is required for copy-paste App Store Connect and Google Play guidance.",
         markdownPath,
       ),
     );
@@ -204,7 +204,7 @@ if (!markdown) {
         issue(
           "error",
           "store_console.lifetime_iap_type_missing",
-          "STORE_CONSOLE.md mentions a Lifetime offer but does not confirm a NON_CONSUMABLE IAP product type. A Lifetime paywall row must be backed by a NON_CONSUMABLE in-app purchase, not the app container price.",
+          "store/STORE_CONSOLE.md mentions a Lifetime offer but does not confirm a NON_CONSUMABLE IAP product type. A Lifetime paywall row must be backed by a NON_CONSUMABLE in-app purchase, not the app container price.",
           markdownPath,
         ),
       );
@@ -219,7 +219,7 @@ if (!markdown) {
         issue(
           "warning",
           "store_console.app_container_price_possibly_non_free",
-          "STORE_CONSOLE.md may set a non-zero app container price while a Lifetime IAP offer is present. Subscription/IAP apps must remain Free at the container level; the Lifetime price belongs on the NON_CONSUMABLE IAP product only.",
+          "store/STORE_CONSOLE.md may set a non-zero app container price while a Lifetime IAP offer is present. Subscription/IAP apps must remain Free at the container level; the Lifetime price belongs on the NON_CONSUMABLE IAP product only.",
           markdownPath,
         ),
       );
@@ -253,7 +253,9 @@ if (!markdown) {
 }
 
 if (!htmlExists) {
-  issues.push(issue("warning", "store_console.html_missing", "store-console.html should render the copy-paste console packet for the founder.", htmlPath));
+  issues.push(
+    issue("warning", "store_console.html_missing", "store/store-console.html should render the copy-paste console packet for the founder.", htmlPath),
+  );
 }
 
 if (hasIos) {

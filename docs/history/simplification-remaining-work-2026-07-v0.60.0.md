@@ -71,15 +71,15 @@ Codex has been right every time this session, including two P1-worthy catches.
 **This is not a tidiness refactor.** Reading the four hand-authored pages against their
 own Markdown sources found real defects in shipped founder artifacts:
 
-- **`security-review.html`** — ~10 of ~15 sections absent (Auth/Authz, Backend/API
+- **`trust/security-review.html`** — ~10 of ~15 sections absent (Auth/Authz, Backend/API
   controls, revenue abuse, Accepted Risks). **Its own lede claims to cover them.**
-- **`store-console.html`** — missing the actual click-path table, the Apple pre-ASC
+- **`store/store-console.html`** — missing the actual click-path table, the Apple pre-ASC
   compliance row (PrivacyInfo.xcprivacy, ATT, account deletion), and the entire 7-item
   App Review checklist. That is **Guideline 2.1 rejection-risk content missing from a
   launch artifact.**
-- **`onboarding.html`** — Push Permission Prime entirely absent; the Personalization
+- **`product/onboarding.html`** — Push Permission Prime entirely absent; the Personalization
   step's content is **silently overwritten by Attribution content**.
-- **`orchestration.html`** — missing Session Continuity, CE routing, Subagent
+- **`operations/orchestration.html`** — missing Session Continuity, CE routing, Subagent
   Instructions, Verification, Failure Cards; and contains a **fabricated
   `state-integration` table row** that was never real data.
 
@@ -90,14 +90,14 @@ point; the dedup is the mechanism.
 
 | File | Kind | Action |
 | --- | --- | --- |
-| `design-room.html` | rendered by `scripts/render-design-room.ts` | leave |
-| `launch-cockpit.html` | rendered by `scripts/render-launch-cockpit.ts` | leave |
-| `design.html` (332 B) | **starter stub** — "Render the canonical Design Room from state before replacing this starter" | declare, do not generate |
-| `analytics-plan.html` (387 B) | **starter stub** — "Replace with rendered … once the live services are reporting real data" | declare, do not generate |
-| `onboarding.html` | authored ← `business/ONBOARDING.md` | generate |
-| `orchestration.html` | authored ← `business/ORCHESTRATION.md` | generate |
-| `store-console.html` | authored ← `business/STORE_CONSOLE.md` | generate |
-| `security-review.html` | authored ← `business/SECURITY.md` | generate |
+| `design/design-room.html` | rendered by `scripts/render-design-room.ts` | leave |
+| `state/launch-cockpit.html` | rendered by `scripts/render-launch-cockpit.ts` | leave |
+| `design/design.html` (332 B) | **starter stub** — "Render the canonical Design Room from state before replacing this starter" | declare, do not generate |
+| `analytics/analytics-plan.html` (387 B) | **starter stub** — "Replace with rendered … once the live services are reporting real data" | declare, do not generate |
+| `product/onboarding.html` | authored ← `business/product/ONBOARDING.md` | generate |
+| `operations/orchestration.html` | authored ← `business/operations/ORCHESTRATION.md` | generate |
+| `store/store-console.html` | authored ← `business/store/STORE_CONSOLE.md` | generate |
+| `trust/security-review.html` | authored ← `business/trust/SECURITY.md` | generate |
 
 The two stubs are **deliberate pre-launch placeholders** whose real content only exists
 after a launch produces it. Generating them from a plan document would be wrong. Do not
@@ -109,10 +109,10 @@ be talked into "generate all eight" by the filename symmetry.
 proven pattern. Build and prove it **in isolation** before writing the renderer, manifest,
 gate or any wiring. Feed it literal excerpts from the four real documents:
 
-- `business/ONBOARDING.md` Screen Sequence table
-- `business/ORCHESTRATION.md` fenced code block + Candidate Units table
-- `business/STORE_CONSOLE.md` ordered App Review checklist
-- `business/SECURITY.md` Data Classification table
+- `business/product/ONBOARDING.md` Screen Sequence table
+- `business/operations/ORCHESTRATION.md` fenced code block + Candidate Units table
+- `business/store/STORE_CONSOLE.md` ordered App Review checklist
+- `business/trust/SECURITY.md` Data Classification table
 
 Only once it round-trips all four does the rest become mechanical assembly.
 
@@ -153,7 +153,7 @@ npm script `check:generated-pages` in **both** `package.json` files · a step in
 
 ### One accepted downgrade, already decided
 
-`orchestration.html` loses its 3-chip "traffic light" status dashboard. Synthesizing those
+`operations/orchestration.html` loses its 3-chip "traffic light" status dashboard. Synthesizing those
 labels needs bespoke per-page logic bolted onto a generic renderer, which fights
 "simplified". Trade: slightly less glanceable, in exchange for 7 restored sections and the
 removal of fabricated content. Say this in the PR body rather than hiding it.
@@ -167,13 +167,13 @@ removal of fabricated content. Say this in the PR body rather than hiding it.
 - Do not refactor the three duplicated `escapeHtml` copies
   (`render-launch-cockpit.ts:24`, `render-design-room.ts:266`,
   `lib/founder-gate-presentation.ts:69`) in this PR. Real cleanup, separate review.
-- Do not add a freshness gate for `launch-cockpit.html` here — it genuinely lacks one, but
+- Do not add a freshness gate for `state/launch-cockpit.html` here — it genuinely lacks one, but
   it is not a Markdown-paired page and bolting it on inflates review surface.
 - Do not fabricate mockup content (fake mascot art, video embeds) to satisfy
-  `onboarding.html`'s `artifact-contracts.md` must-include list. Render an honest
+  `product/onboarding.html`'s `artifact-contracts.md` must-include list. Render an honest
   "not yet designed" placeholder from state instead.
 - Do not change any of the eight filenames. Four are evidence paths in
-  `business/PROJECT_STATE.yaml` and the set carries **194 references repo-wide**.
+  `business/state/PROJECT_STATE.yaml` and the set carries **194 references repo-wide**.
 
 ---
 

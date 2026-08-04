@@ -189,14 +189,14 @@ Four have a Markdown twin:
 
 | HTML | Markdown twin |
 | --- | --- |
-| `business/design-room.html` | `playbook/design/design-room.md` |
-| `business/design.html` | `business/DESIGN.md` |
-| `business/onboarding.html` | `business/ONBOARDING.md` |
-| `business/orchestration.html` | `business/ORCHESTRATION.md` |
-| `business/analytics-plan.html` | none |
-| `business/launch-cockpit.html` | none (rendered by `render-launch-cockpit.ts`) |
-| `business/security-review.html` | none |
-| `business/store-console.html` | none |
+| `business/design/design-room.html` | `playbook/design/design-room.md` |
+| `business/design/design.html` | `business/design/DESIGN.md` |
+| `business/product/onboarding.html` | `business/product/ONBOARDING.md` |
+| `business/operations/orchestration.html` | `business/operations/ORCHESTRATION.md` |
+| `business/analytics/analytics-plan.html` | none |
+| `business/state/launch-cockpit.html` | none (rendered by `render-launch-cockpit.ts`) |
+| `business/trust/security-review.html` | none |
+| `business/store/store-console.html` | none |
 
 The work: for each, establish whether it is rendered or hand-authored. Where
 rendered, add a generated-by header and a gate that fails if it drifts from its
@@ -223,7 +223,7 @@ The move happened; the merge did not. Two clusters remain.
 playbook/experience/emotional-design-system.md          42,051 B
 playbook/experience/emotional-experience-measurement.md 37,557 B
 playbook/experience/emotional-experience-design.md      29,617 B
-business/emotional-design/EMOTIONAL_DESIGN.md           28,813 B
+business/product/experience/emotional-design/EMOTIONAL_DESIGN.md           28,813 B
 ```
 
 docs/architecture.md says these restate the same citations. Read all four before

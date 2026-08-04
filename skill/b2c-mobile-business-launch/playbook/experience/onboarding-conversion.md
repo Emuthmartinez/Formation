@@ -32,11 +32,11 @@ Load `eleven-star-experience.md` before locking onboarding. The onboarding seque
 
 Load `viral-growth-loops.md` before using referral unlocks, share-to-unlock mechanics, creator-code CTAs, social-comment loops, or viral paywall/onboarding sequences. Onboarding can create growth momentum, but the loop needs a fair fallback, abuse controls, analytics proof, and traceability before build handoff.
 
-Create or update `ONBOARDING.md` when an app has more than one setup screen, asks personalization questions, uses a mascot/demo, has a paywall, or relies on first-session conversion.
+Create or update `product/ONBOARDING.md` when an app has more than one setup screen, asks personalization questions, uses a mascot/demo, has a paywall, or relies on first-session conversion.
 
 Use Refero as evidence, not as replacement doctrine. The onboarding playbook in this file remains the default conversion contract. Refero should help find concrete examples for sequencing, copy density, state handling, and recovery paths; it should not remove early self-reported attribution, the native App Review popup immediately after first value, paywall proof, restore purchases, privacy/terms links, or backend attribution persistence unless a deliberate experiment is documented.
 
-Before drafting any onboarding question copy, mascot line, demo-video caption, paywall headline, or closing-offer copy, load [`conversion-copy.md`](../words/conversion-copy.md) and `playbook/words/no-slop-writing.md`; keep the tone `11_STAR_EXPERIENCE.md` and `BRAND.md` set for this product, not generic onboarding copy. The final words for every onboarding screen — headlines, questions, buttons, primes, loading lines — are authored in `COPY_DECK.md` before the build consumes them; the screen-sequence table in `ONBOARDING.md` names the deck keys, and `check:app-copy` fails a flow whose deck rows are missing or still placeholder-shaped.
+Before drafting any onboarding question copy, mascot line, demo-video caption, paywall headline, or closing-offer copy, load [`conversion-copy.md`](../words/conversion-copy.md) and `playbook/words/no-slop-writing.md`; keep the tone `11_STAR_EXPERIENCE.md` and `strategy/BRAND.md` set for this product, not generic onboarding copy. The final words for every onboarding screen — headlines, questions, buttons, primes, loading lines — are authored in `product/copy/COPY_DECK.md` before the build consumes them; the screen-sequence table in `product/ONBOARDING.md` names the deck keys, and `check:app-copy` fails a flow whose deck rows are missing or still placeholder-shaped.
 
 Onboarding is where most of the Experience Cards fire. When the 11-star target is 6-star or higher, load [`emotional-design-system.md`](emotional-design-system.md) for the card-timing contract and reflect it here: the Commitment Card fires at the first personalization/goal question; the Perceived Effort Delay Card fires at plan/result generation; the Intent Mirroring Card fires after first value and immediately before the paywall (never on the paywall screen itself or any cancel flow); the native App Review popup fires at or just after the emotional peak. These moments belong in `EMOTIONAL_DESIGN.md`'s Card Application Map with a PostHog event each, and the onboarding curve must cross positive before the paywall.
 
@@ -45,7 +45,7 @@ Recommended Refero searches when access is available:
 - `refero_search_screens`: `ios onboarding progress question`, `ios paywall annual weekly lifetime`, `ios restore purchases settings`, `web pricing annual monthly toggle`
 - `refero_get_flow` for 2-4 strongest flows, then summarize step count, friction, recovery, and system response in `UX_PATTERNS.md`
 
-`ONBOARDING.md` must include:
+`product/ONBOARDING.md` must include:
 - target user state before onboarding and desired state after onboarding
 - 11-star experience mapping: which step delivers or previews the magical moment from `11_STAR_EXPERIENCE.md`
 - screen-by-screen sequence with purpose, question/copy, state, visual asset, animation, analytics event, and skip/back rules
@@ -53,7 +53,7 @@ Recommended Refero searches when access is available:
 - demo-video plan: clip length, aha moment, source UI, visual treatment, no-audio fallback, Higgsfield or Remotion route, and where it appears
 - data collection matrix: question, answer options, personalization use, attribution use, lifecycle-message use, privacy/legal note, and whether it is required
 - attribution question: "How did you hear about us?" options, UTM/referrer capture, and free-text/other handling
-- attribution source mapping to `ANALYTICS.md`: stored key, display label, PostHog person property, event property, lifecycle-message use, and privacy note
+- attribution source mapping to `analytics/ANALYTICS.md`: stored key, display label, PostHog person property, event property, lifecycle-message use, and privacy note
 - App Review popup gate: first-value/value-reveal trigger, native platform API, automatic mounted-screen timing, cooldown, analytics, and fallback if the platform does not show the prompt
 - push permission priming: the soft-prime screen and system-dialog placement per `push-notification-lifecycle.md` — after a first value moment, never cold on launch, and never in the same step as the review popup (value moment → one of the two; the other waits for the next earned moment)
 - paywall placement and access model: hard paywall, soft paywall, reverse trial, freemium limit, or no paywall yet
@@ -63,15 +63,15 @@ Recommended Refero searches when access is available:
 - viral growth loop mapping when relevant: referral/share trigger, reward, recipient value, fallback, abuse controls, backend/provider proof, and related `VIRAL_GROWTH.md` trace IDs
 - privacy/terms/support links shown before data collection or purchase
 
-Create `onboarding.html` or include an onboarding section in `design.html`:
+Create `product/onboarding.html` or include an onboarding section in `design/design.html`:
 - render every onboarding screen at mobile dimensions
 - include mascot states, data question UI, demo-video placeholder or clip, Remotion-rendered asset placeholder when selected, plan summary, paywall, closing offer, review prompt placeholder, loading/error/offline states, and post-paywall activation
-- use CSS variables from `DESIGN.md`
+- use CSS variables from `design/DESIGN.md`
 - include reduced-motion behavior and no-video fallback
 
 ## Out-Of-Box Attribution Data Contract
 
-Self-reported attribution is a data contract, not a screen. Every B2C app with onboarding, signup, waitlist, account creation, or a launch funnel must include self-reported attribution unless `ONBOARDING.md` and `ANALYTICS.md` explicitly mark it not applicable with a reason.
+Self-reported attribution is a data contract, not a screen. Every B2C app with onboarding, signup, waitlist, account creation, or a launch funnel must include self-reported attribution unless `product/ONBOARDING.md` and `analytics/ANALYTICS.md` explicitly mark it not applicable with a reason.
 
 Placement:
 - Show a visible, required "How did you hear about us?" screen after the value promise/demo is clear but within the first third of onboarding or signup.
@@ -103,7 +103,7 @@ Implementation definition of done:
 - The selected source is set as PostHog person properties: `self_reported_source`, `self_reported_source_label`, `self_reported_source_other_text_present`, and `self_reported_source_captured_at`. Store raw `self_reported_source_other` only when the privacy plan allows it.
 - The selected source is persisted to the backend profile, waitlist, account, or Supabase profile record when identity exists. Use fields such as `self_reported_source`, `self_reported_source_label`, `self_reported_source_other`, `self_reported_source_captured_at`, and `self_reported_source_context`.
 - Anonymous attribution is reconciled into the identified user after signup/login instead of being stranded on an anonymous event stream.
-- If there is no backend/profile persistence path yet, mark attribution as blocked in `PRODUCTION_READINESS.md` with the exact missing backend contract; do not call it complete.
+- If there is no backend/profile persistence path yet, mark attribution as blocked in `engineering/PRODUCTION_READINESS.md` with the exact missing backend contract; do not call it complete.
 - Unit, UI, or live smoke tests prove selection, event delivery, PostHog person-property update, and backend/profile persistence where those surfaces exist.
 
 Do not describe attribution as "wired", "complete", or "launch-ready" if it only updates local state or emits a one-off event. It is wired only when the source is represented by a stable key, forwarded to analytics, attached to the person/profile identity, and persisted to the app backend once identity exists.
@@ -116,7 +116,7 @@ Use a mascot when the product benefits from warmth, reassurance, habit formation
 - react to answers and progress
 - soften friction without hiding cost, privacy, or limitations
 - have 4-8 reusable emotion states before implementation
-- be generated or refined with Higgsfield against `DESIGN.md`
+- be generated or refined with Higgsfield against `design/DESIGN.md`
 - appear in HTML proofs before app implementation
 
 Do not use a mascot when it makes a serious, regulated, or high-stakes product feel unserious.
@@ -156,7 +156,7 @@ Attribution answers should be treated as first-class launch learning:
 
 For apps with onboarding, the native App Review popup is part of onboarding by default. It belongs immediately after the first value moment: the first personalized plan, analysis, demo result, aha moment, or other value-reveal screen the user can actually judge.
 
-Do not leave the review prompt as a vague later lifecycle idea. `ONBOARDING.md` must show the sequence: value promise/demo -> useful questions -> first value/value reveal -> App Review popup eligibility/request -> paywall or activation. If a product truly has no first-value moment in onboarding, record that as an experiment or blocker instead of silently dropping the prompt.
+Do not leave the review prompt as a vague later lifecycle idea. `product/ONBOARDING.md` must show the sequence: value promise/demo -> useful questions -> first value/value reveal -> App Review popup eligibility/request -> paywall or activation. If a product truly has no first-value moment in onboarding, record that as an experiment or blocker instead of silently dropping the prompt.
 
 **Canonical placement — value-reveal screen, automatic trigger:**
 - Fire the native review request automatically after the value-reveal screen is fully displayed (plan, analysis, demo result, or aha moment is visible on screen), with a 1-2 second async delay so the screen remains mounted and visible.
@@ -192,7 +192,7 @@ Rules that keep it honest:
 - offer a visible skip path for users who want to defer the demo input
 - the held result must be delivered in full immediately on purchase or trial start
 - this is the Perceived Effort Delay Card operating at the paywall boundary — when the 6-star+ card contract applies, map it in `EMOTIONAL_DESIGN.md`
-- instrument with the approved catalog: `personalized_plan_viewed` (or the value-reveal equivalent), `paywall_viewed`, and the paywall variant dimension; add any new event name to `ANALYTICS.md` first
+- instrument with the approved catalog: `personalized_plan_viewed` (or the value-reveal equivalent), `paywall_viewed`, and the paywall variant dimension; add any new event name to `analytics/ANALYTICS.md` first
 
 ### Closing Offer Or Reverse Trial
 
@@ -209,13 +209,13 @@ RevenueCat's 2026 report calls the moment after paywall dismissal a high-leverag
 Route generated art by surface:
 
 - **Paywall hero / background art** — use `soul_location` (environment/scene, prompt-only) or `gpt_image_2` via the `higgsfield-generate` skill. These are decorative backgrounds embedded in HTML proofs; they are never substitutes for real app UI.
-- **Onboarding illustrations, empty-state art, and celebration frames** — use the `higgsfield-generate` skill. Every prompt must carry `DESIGN.md` tokens (palette, type mood, shapes, texture, banned aesthetics, intended surface); generating without the brief is a named failure mode.
+- **Onboarding illustrations, empty-state art, and celebration frames** — use the `higgsfield-generate` skill. Every prompt must carry `design/DESIGN.md` tokens (palette, type mood, shapes, texture, banned aesthetics, intended surface); generating without the brief is a named failure mode.
 - **Direction iteration before committing production-model credits** — route through the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md`. Per that recipe's Rule-5 reconciliation, cheap-first is offered as a spend-reduction option at the `paid-tool-routing.md` spend-confirmation prompt — never applied silently.
 
 Guardrails:
 - Generated art is decoration embedded in HTML proofs; it is **never** a substitute for truthful real app UI in store screenshots or product claims.
 - Spend-confirmation applies before every generation run; confirm with the founder per `paid-tool-routing.md` and surface current balance when possible.
-- Record every generated asset in `CONTENT_ASSETS.md` with route, prompt brief (`DESIGN.md` tokens used), output paths, QA, and approval gate.
+- Record every generated asset in `CONTENT_ASSETS.md` with route, prompt brief (`design/DESIGN.md` tokens used), output paths, QA, and approval gate.
 
 ### Plan And Trial Mix
 
@@ -243,7 +243,7 @@ Name the cozy defaults that feel safe and quietly lose. These are the onboarding
 
 ## Analytics Events
 
-Add these to `ANALYTICS.md` before implementation:
+Add these to `analytics/ANALYTICS.md` before implementation:
 - `onboarding_started`
 - `onboarding_step_viewed`
 - `onboarding_answer_selected`
@@ -266,21 +266,21 @@ Add these to `ANALYTICS.md` before implementation:
 
 Include dimensions: step_id, answer_key, attribution_source, source_key, source_label, other_text_present, demo_id, mascot_state, paywall_variant, offering_id, package_id, trial_state, platform, campaign/source/medium, and error_state.
 
-**Event naming rule — cross-check before proposing:** Any onboarding event name not in the approved catalog above must be verified against `ANALYTICS.md` before being proposed or implemented. Do not invent new event names (e.g. first-use coach events, tutorial events) without first checking whether `ANALYTICS.md` already defines an equivalent. If no equivalent exists, add the candidate name to `ANALYTICS.md` explicitly before referencing it in implementation docs or code. Invented event names that bypass this step create permanent dashboard schema drift.
+**Event naming rule — cross-check before proposing:** Any onboarding event name not in the approved catalog above must be verified against `analytics/ANALYTICS.md` before being proposed or implemented. Do not invent new event names (e.g. first-use coach events, tutorial events) without first checking whether `analytics/ANALYTICS.md` already defines an equivalent. If no equivalent exists, add the candidate name to `analytics/ANALYTICS.md` explicitly before referencing it in implementation docs or code. Invented event names that bypass this step create permanent dashboard schema drift.
 
 ## Gates Before Build Handoff
 
-- `ONBOARDING.md` exists and maps every question to a real use.
-- `ONBOARDING.md` references `11_STAR_EXPERIENCE.md` and shows where the V1 scalable slice appears.
-- `onboarding.html` or `design.html` renders the full onboarding/paywall/review/closing-offer path.
+- `product/ONBOARDING.md` exists and maps every question to a real use.
+- `product/ONBOARDING.md` references `11_STAR_EXPERIENCE.md` and shows where the V1 scalable slice appears.
+- `product/onboarding.html` or `design/design.html` renders the full onboarding/paywall/review/closing-offer path.
 - Higgsfield asset plan exists for mascot, icons, demo video, screenshot frames, and animations when visuals are not already final.
 - If Higgsfield is unavailable, the founder confirmed the free/local visual fallback and limitations are recorded.
-- `EMAIL_OPS.md` covers any onboarding resume, welcome, trial, payment recovery, or win-back emails triggered by the flow.
+- `growth/EMAIL_OPS.md` covers any onboarding resume, welcome, trial, payment recovery, or win-back emails triggered by the flow.
 - App Review popup is inside onboarding immediately after first value/value reveal, uses the native platform API, is not incentivized, auto-triggers after the value-reveal screen mounts with a 1-2s delay, and is not bound to an acceptance tap or to any navigation action that dismisses the screen.
 - `npm run check:onboarding -- --root <app>` passes before onboarding or build handoff is called ready.
-- Paywall placement, product IDs, offerings, prices, trial, and closing offer match `REVENUE_OPS.md`.
+- Paywall placement, product IDs, offerings, prices, trial, and closing offer match `revenue/REVENUE_OPS.md`.
 - Privacy/terms links and data-use explanations match the data collection matrix.
-- Analytics events are named before implementation, and every proposed event name is present in `ANALYTICS.md`; no event name is invented during implementation without a prior `ANALYTICS.md` entry.
-- `analytics-plan.html` shows the onboarding and paywall funnel before build handoff.
+- Analytics events are named before implementation, and every proposed event name is present in `analytics/ANALYTICS.md`; no event name is invented during implementation without a prior `analytics/ANALYTICS.md` entry.
+- `analytics/analytics-plan.html` shows the onboarding and paywall funnel before build handoff.
 - Self-reported attribution passes the data contract: early visible screen, stable source keys, `other` free text, analytics event, PostHog person property, backend/profile persistence, anonymous-to-identified reconciliation, and verification evidence.
-- Onboarding, paywall, and closing-offer copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` in the product's `BRAND.md`/`11_STAR_EXPERIENCE.md` voice.
+- Onboarding, paywall, and closing-offer copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` in the product's `strategy/BRAND.md`/`11_STAR_EXPERIENCE.md` voice.
