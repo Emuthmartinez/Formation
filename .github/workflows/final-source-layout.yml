@@ -45,7 +45,6 @@ jobs:
 
           skill = Path('skill/b2c-mobile-business-launch')
 
-          # Hook template paths can be composed from string arrays rather than slash literals.
           for rel in [
               'validation/business/process/check-hooks-installed.ts',
               'tooling/install-hooks.ts',
@@ -53,36 +52,50 @@ jobs:
           ]:
               path = skill / rel
               text = path.read_text()
-              text = text.replace('"business", "engineering", "repo-agent-entrypoints"', '"workspace", "business", "engineering", "repo-agent-entrypoints"')
-              text = text.replace('business/engineering/repo-agent-entrypoints', 'workspace/business/engineering/repo-agent-entrypoints')
+              text = text.replace(
+                  'path.join("business", "engineering/repo-agent-entrypoints", "settings.json")',
+                  'path.join("workspace", "business", "engineering/repo-agent-entrypoints", "settings.json")',
+              )
+              text = text.replace(
+                  '"business", "engineering", "repo-agent-entrypoints"',
+                  '"workspace", "business", "engineering", "repo-agent-entrypoints"',
+              )
+              text = text.replace(
+                  'business/engineering/repo-agent-entrypoints',
+                  'workspace/business/engineering/repo-agent-entrypoints',
+              )
               text = text.replace('workspace/workspace/business', 'workspace/business')
               path.write_text(text)
 
-          # Fixture-owned reads must follow the generated-design source root.
           fixture = skill / 'validation/repository/fixtures/repo-gates.fixtures.ts'
           text = fixture.read_text()
+          text = text.replace('business/studio/generated/system/', 'studio/generated/system/')
           text = text.replace('design/system/tokens.json', 'studio/generated/system/tokens.json')
           text = text.replace('design/system/DesignTokens.swift', 'studio/generated/system/DesignTokens.swift')
           fixture.write_text(text)
 
-          # Keep the Control Plane check focused on the migrated business template and schema.
-          package = skill / 'package.json'
-          data = json.loads(package.read_text())
-          data['scripts']['check:business-control-plane-workspace'] = (
+          control_plane_script = (
               'tsx tooling/render-business-control-plane-workspace.ts '
               '--root workspace/business '
+              '--business-state state/business.json '
+              '--launch-state state/PROJECT_STATE.yaml '
               '--schema studio/seed/schema/workspace.schema.json --check'
           )
-          package.write_text(json.dumps(data, indent=2) + '\n')
+          for package in [Path('package.json'), skill / 'package.json']:
+              data = json.loads(package.read_text())
+              data['scripts']['check:business-control-plane-workspace'] = control_plane_script
+              package.write_text(json.dumps(data, indent=2) + '\n')
 
-          # Enforce the entrypoint budget deterministically without cutting headings or code fences.
           entrypoint = skill / 'SKILL.md'
           lines = entrypoint.read_text().splitlines(keepends=True)
+          fence_indexes = [i for i, line in enumerate(lines) if line.strip() == '---']
+          body_start = fence_indexes[1] + 1 if len(fence_indexes) >= 2 else 0
           while len(''.join(lines).encode()) > 20400:
               candidates = [
                   (len(line.encode()), index)
                   for index, line in enumerate(lines)
-                  if line.strip()
+                  if index >= body_start
+                  and line.strip()
                   and not line.lstrip().startswith(('#', '-', '*', '|', '```', '>', '<'))
                   and '](' not in line
                   and '`' not in line
