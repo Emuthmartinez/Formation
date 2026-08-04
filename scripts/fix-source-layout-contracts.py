@@ -13,11 +13,20 @@ replacements = {
     'graph/**/*.json': 'runtime/graph/**/*.json',
     'playbook/**/*.md': 'knowledge/**/*.md',
     'business/**/*.md': 'workspace/business/**/*.md',
-    'skillRoot, "business"': 'skillRoot, "workspace", "business"',
-    "skillRoot, 'business'": "skillRoot, 'workspace', 'business'",
-    'SKILL_ROOT, "business"': 'SKILL_ROOT, "workspace", "business"',
-    "SKILL_ROOT, 'business'": "SKILL_ROOT, 'workspace', 'business'",
 }
+
+SKILL_ROOT_MOVES = {
+    'graph': ('runtime', 'graph'),
+    'playbook': ('knowledge',),
+    'business': ('workspace', 'business'),
+    'gates': ('validation', 'business'),
+    'machine': ('validation', 'repository'),
+    'scripts': ('tooling',),
+    'state': ('studio', 'seed'),
+    'render': ('studio', 'app'),
+    'design': ('studio', 'generated'),
+}
+
 TARGET_ROOTS = {
     'graph': ('runtime', 'graph'),
     'runtime/graph': ('runtime', 'graph'),
@@ -35,6 +44,8 @@ TARGET_ROOTS = {
     'studio/app': ('studio', 'app'),
     'state': ('studio', 'seed'),
     'studio/seed': ('studio', 'seed'),
+    'design': ('studio', 'generated'),
+    'studio/generated': ('studio', 'generated'),
 }
 
 for path in ROOT.rglob('*'):
@@ -49,6 +60,13 @@ for path in ROOT.rglob('*'):
     new = text
     for old, replacement in replacements.items():
         new = new.replace(old, replacement)
+
+    for variable in ('skillRoot', 'SKILL_ROOT'):
+        for old_root, new_parts in SKILL_ROOT_MOVES.items():
+            for quote in ('"', "'"):
+                old = f'{variable}, {quote}{old_root}{quote}'
+                parts = ', '.join(f'{quote}{part}{quote}' for part in new_parts)
+                new = new.replace(old, f'{variable}, {parts}')
 
     if path.suffix.lower() in {'.ts', '.tsx'} and SKILL in path.parents:
         import_pattern = re.compile(r'(?P<quote>["\'])(?P<spec>(?:\.{1,2}/)+[^"\']+)(?P=quote)')
