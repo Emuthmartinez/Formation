@@ -1,173 +1,125 @@
 # B2C Mobile Business Launch Skill
 
-An agent skill that takes a consumer mobile app from idea, transcript, or half-built repo to a launched business, with deterministic validators standing between every claim and "done".
+An agent skill that takes a consumer mobile app from idea, transcript, specification, or half-built repository to a launched and operated business. It combines a graph-native orchestration model with durable business state, bounded specialist agents, founder approval interrupts, deterministic validators, and evidence-backed readiness claims.
 
 [![audit:ci](https://img.shields.io/github/actions/workflow/status/Emuthmartinez/b2c-mobile-business-launch-skill/source-freshness.yml?branch=main&label=audit%3Aci)](https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/actions/workflows/source-freshness.yml)
 [![skill version](https://img.shields.io/github/package-json/v/Emuthmartinez/b2c-mobile-business-launch-skill?label=skill)](skill/b2c-mobile-business-launch/skill-version.json)
 [![node 22](https://img.shields.io/badge/node-22-informational)](CONTRIBUTING.md)
 [![license MIT](https://img.shields.io/github/license/Emuthmartinez/b2c-mobile-business-launch-skill)](LICENSE)
 
-You install this into [Claude Code](https://claude.com/claude-code) or Codex and then talk to your agent normally. It is a set of markdown playbooks plus 60+ TypeScript validators that the agent reads and runs, so there is no app here to start and no server to boot.
+There is no application server to start. Install the skill into Claude Code, Codex, or another compatible agent runtime, open the app repository you want to launch, and ask for the outcome you want.
 
 ## What it does
 
-Give the agent one broad request and it works through the launch instead of handing you a checklist:
+The skill can:
 
-> "Take this transcript and turn it into a business I can launch."
+- recover a launch from an existing repository and durable state
+- research the category, buyers, competitors, pricing, and market language
+- define the product, experience, design system, copy, analytics, revenue, privacy, security, and store plan
+- coordinate implementation through bounded task and subgraph nodes
+- run independent verification in fresh contexts
+- pause only for protected founder decisions such as credentials, spend, pricing, legal approval, public actions, destructive actions, and release
+- leave behind machine-readable state, evidence, run history, and founder-readable status
 
-> "I have a half-built B2C app. Get it launch-ready and stop only for real approval or access blockers."
+Typical requests:
 
-> "Get this iOS app ready for TestFlight, App Store Connect, RevenueCat, PostHog, Resend, and launch."
+> “Turn this transcript into a business I can launch.”
 
-Two layers make that repeatable. The playbooks under [`playbook/`](skill/b2c-mobile-business-launch/playbook/), grouped by area of the business, hold the launch process a human can read. `PROJECT_STATE.yaml` holds the same process as machine-checkable state, which the validators grade and `launch-cockpit.html` renders as a dashboard written in founder language rather than internal status codes. Future agents inspect state and run checks rather than remembering what happened.
+> “Take this half-built consumer app to TestFlight and App Store submission.”
 
-A typed definition graph under [`graph/`](skill/b2c-mobile-business-launch/graph/) gives those layers stable identities and explicit relationships. It owns the domain routing, 57 workflow contracts, context packs, phase and lane topology, artifacts, gates, operators, and providers. `PROJECT_STATE.yaml` remains the mutable state for one business rather than copying the skill-owned topology.
+> “Resume this launch, determine what is stale or blocked, and keep going.”
 
-The skill pauses for founder-only decisions: credentials, spend, legal and pricing approval, public posting, destructive actions, and final submission.
+## The execution model
 
-## Who it's for
+The typed graph under [`skill/b2c-mobile-business-launch/graph/`](skill/b2c-mobile-business-launch/graph/) is the only normal dispatch source. It is executable architecture, not a diagram layered beside a separate workflow.
 
-Built for **subscription and freemium consumer apps**. It does not cover one-time purchases, and it does not yet cover ad-based monetization. The opinions are deliberate, so a mismatched product will feel the friction early.
+It is layered:
 
-You need:
+1. **Definition graph**: stable skill-owned identities and contracts for business areas, domains, workflows, context packs, phases, lanes, artifacts, gates, operators, and providers.
+2. **Business instance graph**: the launch-specific subset selected from scope, archetype, state, approvals, and available providers.
+3. **Durable run graph**: runnable nodes, attempts, dependencies, resource claims, retries, joins, approval interrupts, verification, and stale propagation.
+4. **Trace and evidence graph**: accepted artifact versions, producing attempts, proof, and lineage.
 
-- **An agent that supports skills.** Claude Code or Codex.
-- **Node.js 22** for the validators, matching CI.
-- *(Optional)* accounts for the providers the playbooks reference, such as RevenueCat, Doppler, PostHog, Stripe, Resend, App Store Connect, and Google Play. Most have free tiers. None are required to read the playbooks or run the validators, and the skill routes an explicit fallback whenever a paid tool is unavailable.
+The orchestrator compiles and executes this model. Agents perform judgment inside bounded nodes. Runtime adapters may serialize work when necessary, but they may not change prerequisites, proof requirements, founder gates, or completion semantics.
 
-Maintaining or contributing instead of using? Start with [`CONTRIBUTING.md`](CONTRIBUTING.md), then [`AGENTS.md`](AGENTS.md).
+`PROJECT_STATE.yaml` remains the canonical mutable state for one business. Parallel workers do not edit it directly. They return outputs, evidence, and proposed state changes to an orchestrator-owned reducer, which is the single writer to canonical state, the launch cockpit, shared provider mutations, and integration state.
 
 ## Quickstart
-
-Install the skill into your agent's skills directory:
 
 ```bash
 git clone https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill
 cd b2c-mobile-business-launch-skill
 
-mkdir -p ~/.claude/skills
+mkdir -p ~/.codex/skills
 rsync -a --delete --exclude node_modules \
   skill/b2c-mobile-business-launch/ \
-  ~/.claude/skills/b2c-mobile-business-launch/
+  ~/.codex/skills/b2c-mobile-business-launch/
 
-npm install --prefix ~/.claude/skills/b2c-mobile-business-launch
+npm install --prefix ~/.codex/skills/b2c-mobile-business-launch
 ```
 
-Then open your agent in the app repo you want to launch and ask for what you want:
+Then open your app repository and ask naturally:
 
 ```text
-Read my transcript at notes/idea.md and turn it into a business I can launch.
+Read notes/idea.md, inspect this repo, and take the business to launch readiness.
 ```
 
-Running both Claude Code and Codex? Install once into `~/.codex/skills/` and symlink `~/.claude/skills/` and `~/.agents/skills/` at it, so the freshness check compares source against a real runtime copy instead of against a symlink to itself:
+For multiple runtimes, install one canonical copy and symlink the others to it:
 
 ```bash
-rsync -a --delete --exclude node_modules \
-  skill/b2c-mobile-business-launch/ ~/.codex/skills/b2c-mobile-business-launch/
-npm install --prefix ~/.codex/skills/b2c-mobile-business-launch
-
 ln -sfn ~/.codex/skills/b2c-mobile-business-launch ~/.claude/skills/b2c-mobile-business-launch
 ln -sfn ~/.codex/skills/b2c-mobile-business-launch ~/.agents/skills/b2c-mobile-business-launch
 ```
 
-## What you get
+## What lands in the app repository
 
-Artifacts land in your app repo, not in this one.
-
-| Area | What lands in your repo |
+| Area | Durable output |
 | --- | --- |
-| **State and cockpit** | `PROJECT_STATE.yaml` plus `launch-cockpit.html`, the founder-readable dashboard over it |
-| **Founder-zero operator** | `BUSINESS_ACCESS.md`, business identity, Doppler access, one plain-language decision at a time |
-| **Research and positioning** | Competitor, review-mining, ASO and GEO/SEO evidence, traced through `LAUNCH_TRACE.md` |
-| **Product and experience** | `SPEC.md`, `TECH_SPEC.md`, `11_STAR_EXPERIENCE.md`, scope locks and acceptance criteria |
-| **Design** | `DESIGN.md`, tokenized theme, Design Room versions, baselines, and rendered HTML proofs |
-| **Security and legal** | `SECURITY.md`, threat model, scanner proof, `PRIVACY.md`, `TERMS.md`, accepted risks |
-| **Revenue and growth** | RevenueCat and Stripe wiring, `PAID_UA.md`, `VIRAL_GROWTH.md`, lifecycle email through Resend |
-| **Store operations** | App Store Connect and Play packets, Apple signing, screenshots, ASO metadata, review notes |
-| **Analytics and copy** | PostHog event catalog, attribution contract, and a writing gate over every word shipped |
-| **Engineering and proof** | Business-repo `AGENTS.md`, device tests, orchestration plan, `PRODUCTION_READINESS.md` |
+| State and status | `PROJECT_STATE.yaml`, run state, evidence, and `launch-cockpit.html` |
+| Founder operations | `BUSINESS_ACCESS.md`, structured approvals, access proof, and one action at a time |
+| Research and positioning | market evidence, competitor and review mining, research verdicts, and `LAUNCH_TRACE.md` |
+| Product and experience | `SPEC.md`, `TECH_SPEC.md`, acceptance criteria, experience contracts, and scope locks |
+| Design | `DESIGN.md`, state-driven Design Room versions, tokens, baselines, and rendered proof |
+| Engineering | implementation plans, task ownership, device proof, backend contracts, and production readiness |
+| Revenue and growth | pricing, RevenueCat and Stripe contracts, paid acquisition, viral loops, lifecycle email, and funnel assets |
+| Store operations | signing, screenshots, metadata, privacy answers, submission packets, and rejection handling |
+| Trust | threat model, security proof, privacy, terms, deletion, monitoring, and accepted risk |
+| Analytics and copy | event catalog, attribution, experiments, dashboards, and validated user-facing copy |
 
-Each area routes through its own reference and its own validator. [`docs/validators.md`](docs/validators.md) maps every gate to what it checks.
+## Documentation map
 
-## How it stays honest
+- [`skill/b2c-mobile-business-launch/SKILL.md`](skill/b2c-mobile-business-launch/SKILL.md): runtime entrypoint and always-on contracts
+- [`skill/b2c-mobile-business-launch/spine.md`](skill/b2c-mobile-business-launch/spine.md): phase-oriented launch walk
+- [`skill/b2c-mobile-business-launch/graph/README.md`](skill/b2c-mobile-business-launch/graph/README.md): graph semantics, compiler, scheduler, and run-state contract
+- [`docs/architecture.md`](docs/architecture.md): current repository and execution architecture
+- [`docs/implementation/graph-execution-v2.md`](docs/implementation/graph-execution-v2.md): implementation details and extension rules
+- [`docs/validators.md`](docs/validators.md): validator and audit reference
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): development, release, and review workflow
+- [`AGENTS.md`](AGENTS.md): maintainer rules and repository map
 
-The full contracts live in [`SKILL.md`](skill/b2c-mobile-business-launch/SKILL.md). The six that shape everything else:
+Every domain under [`playbook/`](skill/b2c-mobile-business-launch/playbook/) has its own `README.md` index with load conditions and bounded references. Those indexes describe knowledge routing. They do not define execution order. Execution order comes from the compiled graph and durable run state.
 
-- **State is the contract.** `PROJECT_STATE.yaml` carries phase, autonomy, lane status, provider setup, proof, blockers, and failure cards. Prose alone never marks a lane done.
-- **Research has to reach the product.** Findings must flow into spec, brand, design, store copy, revenue, privacy, and verification through `LAUNCH_TRACE.md`.
-- **Founder gates are never inferred.** Credentials, spend, pricing, legal, public posting, and release stay with the founder, and account access is never blanket authorization.
-- **Secrets route through Doppler.** `SECRETS.md`, `doppler run --`, names-only `.env.example`, and a production service-token gate. No secret values in state, templates, or cockpits.
-- **Security is a release lane.** Threat model, tool routing, mobile and backend hardening, scanner proof, incident response, and accepted risks, all before release.
-- **Readiness claims run the validators.** A launch-ready lane that cannot produce evidence fails its gate, and LaunchBench covers the failure modes that have already bitten once.
-
-Writing quality is gated too. [`playbook/words/no-slop-writing.md`](skill/b2c-mobile-business-launch/playbook/words/no-slop-writing.md) governs the copy this skill writes and the copy it generates for your business: store listings, paywall and onboarding copy, lifecycle email, launch posts, ad headlines, and UGC scripts. `check:no-slop` parses its rule table straight out of that reference, so the doc an agent reads and the gate that fails the build cannot drift apart. Rules adapted from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT). Your brand voice from `BRAND.md` sets the target; the rules only remove what an AI defaults to when nobody set one.
-
-## Validators
-
-Every gate runs through one orchestrator: typecheck first, then each check, with independent steps sharing a small concurrency pool.
+## Validation
 
 ```bash
 npm install
-npm run audit                  # full local pipeline
-npm run audit:ci               # exactly what CI runs
-npm run audit -- --list        # print the resolved plan
-npm run audit -- --only check:secrets
-npm run check:skill-graph       # graph identities, edges, workflows, context, projections
-
-npm run validate:launch-state -- --root /path/to/app
-npm run launchbench            # known failure-mode scenarios
+npm run audit
+npm run audit:ci
+npm run audit -- --list
+npm run check:skill-graph
+npm run render:skill-graph -- --check
+npm run launchbench
+npm pack --dry-run --json
 ```
 
-`check:package-parity` fails when a `check:*` or `validate:*` script is neither an audit step nor explicitly excluded with a reason, so gates cannot be quietly dropped from the pipeline. The full command and script reference is in [`docs/validators.md`](docs/validators.md).
+The audit starts with TypeScript and formatting, validates the graph and generated projections, runs deterministic business gates, executes 700+ validator fixtures through LaunchBench, and checks package and version discipline.
 
-Before broad launch or design work, compare the installed runtime against source:
+The house rule is simple: when a failure can recur, strengthen the graph contract, validator, fixture, or LaunchBench scenario instead of adding another paragraph that nobody can reliably execute.
 
-```bash
-npm run check:skill-version -- \
-  --source skill/b2c-mobile-business-launch \
-  --installed ~/.codex/skills/b2c-mobile-business-launch
-```
+## Scope
 
-## Archetypes and LaunchBench
+The skill is opinionated for subscription and freemium consumer mobile apps. One-time purchase and advertising-led businesses are not yet first-class paths. Provider integrations are optional until their lane is in scope, but the skill never silently replaces a required capability with a weaker fallback.
 
-Four **app archetype packs** cover the B2C product shapes this skill sees most: [social and community](skill/b2c-mobile-business-launch/playbook/product/social-network.md), [AI chat and companion](skill/b2c-mobile-business-launch/playbook/product/ai-chat-companion.md), [habit tracker and utility](skill/b2c-mobile-business-launch/playbook/product/habit-tracker.md), and [photo and AI media](skill/b2c-mobile-business-launch/playbook/product/photo-ai-media.md). Each ships a runnable starter scaffold, not just prompts: Next.js and Supabase with tested RLS policies, Stripe and RevenueCat stubs, a PostHog event catalog, names-only env, and CI. `check:archetype-starter` verifies the scaffold still builds the shape it advertises.
+## Security and license
 
-**LaunchBench** holds the regression scenarios under [`evals/launchbench/`](skill/b2c-mobile-business-launch/machine/evals/launchbench/), one per launch failure mode worth never repeating. `npm run launchbench` lints the definitions and runs the deterministic validator fixtures. A separate opt-in layer, `npm run evals:behavioral`, grades flagged scenarios against a live agent and stays outside the PR gate on purpose, because live runs cost money and carry model variance.
-
-## Repo layout
-
-```text
-skill/b2c-mobile-business-launch/
-  SKILL.md              # entrypoint and lane routing
-  spine.md              # the always-on contracts SKILL.md routes from
-  skill-version.json    # runtime freshness manifest
-  graph/                # typed semantic graph and deterministic projections
-  playbook/             # launch playbooks, grouped by area of the business
-  business/             # artifacts copied into your app repo
-  starters/             # runnable app scaffolds for the four archetypes
-  gates/                # validators that grade a business launch
-  machine/              # the skill's own upkeep: versioning, evals, sources
-  scripts/              # renderers, the audit runner, shared lib
-  state/                # Design Room seed state and schema
-  design-system/        # shipped design tokens
-  render/               # React/Vite Design Room renderer
-  agents/               # OpenAI connector manifest
-docs/
-  architecture.md       # the target layout every refactor moves toward
-  validators.md         # full validator reference
-  method/               # how the skill's own workflow loops were designed
-  prototypes/           # standalone HTML proofs and their fixtures
-  brainstorms/          # ideas still being weighed
-  history/              # dated, point-in-time records
-AGENTS.md               # maintainer guide and repo map
-```
-
-## Contributing
-
-Contributions from humans and agents are welcome, held to the same gates. [`CONTRIBUTING.md`](CONTRIBUTING.md) covers setup, the `npm run audit:ci` gate, versioning and source-freshness rules, and what a reviewable PR looks like. [`AGENTS.md`](AGENTS.md) is the deeper maintainer map behind it.
-
-The house rule: when a mistake can recur, tighten a validator or add a LaunchBench eval rather than writing a longer paragraph of instructions.
-
-## Security, conduct, and license
-
-Report a vulnerability in this repo's validators, CI, or supply chain through [`.github/SECURITY.md`](.github/SECURITY.md). Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Licensed under [MIT](LICENSE).
+Report vulnerabilities through [`.github/SECURITY.md`](.github/SECURITY.md). Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Licensed under [MIT](LICENSE).

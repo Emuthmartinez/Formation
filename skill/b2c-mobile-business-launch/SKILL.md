@@ -24,7 +24,7 @@ Never speak this file's internal vocabulary to a founder: no lane ids, no phase 
 
 ### Autopilot Run Contract
 
-When this skill activates for broad launch/business work, keep running the launch workflow without asking the user to re-invoke this skill. Load the next needed reference yourself, update `PROJECT_STATE.yaml`, render `launch-cockpit.html`, and run the relevant validators before readiness claims. Do not stop with instructions. When the cockpit changes or the session ends, say the narrative in your reply — what happened, what is next, what needs the founder; a rendered file nobody opens is not a status update.
+When this skill activates for broad launch/business work, keep running the launch workflow without asking the user to re-invoke this skill. Compile the applicable definition graph into the launch-specific run graph and execute its readiness frontier. Load the next needed reference yourself. Workers return outputs, evidence, and proposed state patches; the orchestrator-owned reducer is the only writer to update `PROJECT_STATE.yaml`, render `launch-cockpit.html`, mutate shared provider state, and reconcile integration state. Run the relevant validators before readiness claims. Do not stop with instructions. When the cockpit changes or the session ends, narrate what happened, what is next, and what needs the founder.
 
 Assume a beginner founder. Load [`playbook/operations/founder-zero-operator.md`](playbook/operations/founder-zero-operator.md), seed access state, present one plain-language action, do the rest, and continue when access clears.
 

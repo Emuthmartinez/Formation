@@ -129,3 +129,7 @@ This skill is opinionated and targets subscription and freemium consumer mobile 
 Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Report security issues through [`.github/SECURITY.md`](.github/SECURITY.md) rather than a public issue.
 
 By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE) that covers this repository.
+
+## Documentation synchronization
+
+A behavior or schema change is incomplete until the repository README, `SKILL.md`, graph README, architecture guide, implementation guide, validator reference, affected domain README indexes, generated projections, and `skill-version.json` agree. Review every README even when only canonical surfaces need edits. Generated blocks are changed through definitions and renderers, never by hand.
