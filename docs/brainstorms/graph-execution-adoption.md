@@ -1,210 +1,798 @@
 # Adopting the graph as the execution model
 
-Status: proposal, not policy. Nothing here describes what the repo does today except the
-measurements in "What is in the tree", which were taken against v0.65.1.
+Status: proposal, not policy. The measurements in "What is in the tree" describe v0.65.1.
+Everything after that section is a target architecture and migration plan.
 
-## Verdict
+## Executive decision
 
-Go all the way, with one boundary.
+Adopt the graph fully at the orchestration boundary, but do not implement it as a single
+artifact-path DAG.
 
-The graph should own **dispatch** — which unit of work is runnable, what it reads, what it
-writes, who may run it, and what proves it. It should not own **knowledge** — the 1.7MB of
-`playbook/` prose stays prose, because a node's inside is not a graph. That line is the whole
-design. Turning 110 references into nodes is the version of "full adoption" that costs the most
-and buys the least.
+The clean target is a **compiled, layered execution graph**:
 
-"The orchestrator layer executes graphs" is the right target. Today it cannot, and the reasons
-are structural rather than unfinished.
+```text
+skill definition graph
+        ↓ compile for one launch
+business instance graph
+        ↓ expand for one run
+durable run graph
+        ↓ execute and record
+trace + evidence graph
+```
+
+The definition graph says what work can exist. The instance graph selects what this launch
+needs. The run graph owns readiness, dispatch, retries, joins, approvals, resource locks, and
+verification. The trace graph records what actually happened and what evidence proves it.
+
+The orchestrator should execute that graph. It should not hand-build a task list from prose,
+invent dependencies turn by turn, or maintain a second file-collision map beside the graph.
+
+One boundary remains correct: the graph owns **work, state transitions, and proof**, not the
+knowledge inside a node. `playbook/` stays prose. A workflow node loads bounded knowledge,
+performs one contracted job, and returns typed output. Turning every reference or paragraph into
+a node would confuse content with control flow.
+
+This is full adoption without graph theater:
+
+- every dispatched unit has a stable graph identity and a run identity
+- every prerequisite has typed semantics
+- every mutable shared resource is declared before dispatch
+- every run transition is durable and resumable
+- every output is versioned and tied to evidence
+- every runtime executes the same runtime-neutral plan
+- the old hand-authored dispatch maps are deleted after parity
+
+Full adoption does **not** mean every task uses multiple agents. A small or genuinely sequential
+node can run inline. The graph still decides that it is ready, records its attempt, and verifies
+its result.
+
+## What the current proposal got right
+
+The proposal identified the central problem correctly: the typed graph is a strong catalogue,
+but it does not yet drive execution.
+
+It also correctly identified several concrete defects:
+
+- all 57 workflow bodies inherit generic `action`, `proof`, `memory`, and
+  `stoppingCondition` text from one helper
+- the validator grades text that the same helper generated to satisfy it
+- workflow dependencies are declared rather than mechanically tested
+- context packs are domain-wide instead of node-bounded
+- no code computes a ready frontier from `PROJECT_STATE.yaml`
+- the existing gates are the anchors that can keep an agent graph grounded
+- fresh-context verification is required for judgment work
+- the skill should emit plans for runtimes rather than grow a long-running service
+- graph cost and parallelism need explicit caps
+
+Keep those findings. They are the reason to proceed.
 
 ## What is in the tree (measured at v0.65.1)
 
 The typed definition graph shipped in v0.65.0 and it is real: 6 areas, 15 domains, 20 phases,
 22 lanes, 110 references, 15 context packs, **57 workflows**, 88 artifacts, 78 gates, 11
-operators, 21 providers. `check:skill-graph` rejects duplicate and unknown IDs, lane and
+operators, and 21 providers. `check:skill-graph` rejects duplicate and unknown IDs, lane and
 workflow cycles, unrouted references, unregistered gates, operator-prompt drift, and stale
-projections. That is more than most repos ever build.
+projections.
 
-It is a catalogue, not an execution model. Four measurements:
+It is a catalogue, not an execution model. Four measurements show the gap.
 
-**1. Every node's body comes from one template.** All 57 workflows are built by
-`graph/workflows/helpers.ts`, and not one overrides `action`, `proof`, `memory`, or
-`stoppingCondition`. Each node's action is the same three sentences with its own title
-substituted. Each node's proof is `<gate> exits 0`. Each stopping condition is that proof
-string-joined.
+### 1. Every node body comes from one template
 
-The consequence is worth stating plainly: `validate.ts`'s checks for missing proof, missing
-memory, and an unobservable stopping condition **cannot fail**.
-`skill_graph.workflow.stop_unobservable` runs its regex against a string the generator wrote to
-match it. Every one of the 57 has a gate, so every one takes the generated branch. Those checks
-are green because they are circular, not because 57 workflows were designed.
+All 57 workflows are built by `graph/workflows/helpers.ts`, and none overrides `action`, `proof`,
+`memory`, or `stoppingCondition`. Each action is the same three sentences with its title
+substituted. Proof is `<gate> exits 0`. The stopping condition is generated from the same gate
+strings.
 
-**2. The edges are declared, never derived.** `upstreamWorkflowIds` is hand-written per
-workflow: 19 roots, 10 nodes with more than one upstream, longest declared chain 9 deep.
-Nothing tests whether an edge carries data. `WorkflowDefinition` has `artifactPaths` — what a
-node writes — and no field at all for what a node reads. The fake-edge test cannot be run
-mechanically against the current type, and never has been run by hand.
+`validate.ts` therefore checks text written by the helper to pass the check. The proof, memory,
+and stopping-condition validations can be green without 57 independently designed node
+contracts.
 
-**3. Context is domain-granular, so nodes do not reduce context.** `buildContextPacks` makes
-exactly one pack per domain, and `composeSkillGraph` sets every workflow's `referenceIds` to its
-domain pack's entry set. All 13 workflows in `build-release.ts` resolve to the same entry
-references. Across all 57 nodes, `contextPackIds.length > 1` is zero. The per-node context
-contract — the thing that makes a node dispatchable to a fresh window — does not exist yet.
+### 2. Workflow edges are declared, not explained
 
-**4. Nothing computes a frontier.** `laneDependencies` is enforced negatively: `check:lane-coverage`
-refuses to let a lane reach `done` over an open upstream, with a dated `dependency_override`
-escape. That is the one edge in the tree with teeth, and it is worth keeping. But no code
-answers "given this `PROJECT_STATE.yaml`, which workflows are runnable now, and which of those
-are independent of each other?" The cockpit's `next_action` is a hand-typed string. The launch
-is dispatched by an agent reading a routing table and using judgment — a line, drawn one turn at
-a time.
+`upstreamWorkflowIds` is hand-written: 19 roots, 10 nodes with more than one upstream, and a
+longest declared chain nine edges deep. The type has outputs through `artifactPaths`, but no
+input contract. The graph cannot determine whether a declared data dependency carries anything.
 
-One thing that already is parallel and should be left alone: `run-audit.ts` runs the ~65-step
-audit through a concurrency pool behind a single typecheck barrier, with `serial: true` for
-launchbench. The easy fan-out there is already claimed. A real DAG would buy failure isolation
-and ordering, not speed. Rank it last.
+### 3. Context is domain-granular
 
-## What to build
+`buildContextPacks` creates one pack per domain, and `composeSkillGraph` gives a workflow the entry
+references from that domain pack. A run node cannot yet declare the exact references, state
+slice, artifact versions, trust boundary, or tool permissions it needs in a fresh context.
 
-Three layers, and the discipline is not to collapse them.
+### 4. Nothing computes a durable frontier
 
-- **Plan — the skill's job.** The graph computes a run plan from `PROJECT_STATE.yaml`, launch
-  scope, and archetype: ready frontier, independent batches, critical path, and the founder
-  gates that will block it.
-- **Execution — the runtime's job.** Claude Code runs the plan as a Dynamic Workflow. Codex runs
-  the same plan as serial or parallel subagents. This preserves the recommend-don't-gate runtime
-  policy exactly as written. The skill ships no daemon and must not grow one; it is loaded into
-  someone else's agent.
-- **Anchors — the gates already here.** 78 gates, 71 in the audit plan, 73 with a LaunchBench
-  validator. This is the repo's real asset and the reason a graph here can stay honest instead of
-  becoming an expensive toy. Most systems adopting this pattern have no anchors at all.
+Lane dependencies prevent a lane from being marked done over an open upstream lane, with a dated
+override. That edge has real enforcement and should remain.
 
-### The one change that does the most work: derive edges from data
+No code answers: given this definition version, launch state, scope, decisions, artifact
+versions, and active attempts, which nodes are runnable now? `continuity.next_action` is still
+hand-authored, and the parallel-orchestration preflight builds candidate units and collisions by
+hand.
 
-Add one field to `WorkflowDefinition`:
+One execution surface is already parallel: `run-audit.ts` places independent checks in a
+concurrency pool behind a typecheck barrier and serializes LaunchBench. A graph will add more
+failure isolation and semantics than raw speed there.
+
+## What must change before implementation
+
+The original proposal is incomplete in seven important ways.
+
+### 1. Artifact paths cannot be graph identities
+
+The repo's own architecture says paths are attributes and stable graph IDs are identities.
+`consumes: string[]` would reverse that rule and make a file move look like a new dependency.
+
+The current artifact catalogue also derives many artifact IDs from their paths. That is useful
+for discovery, but it is not a stable identity contract. Before artifacts become executable
+edges, each executable artifact needs an authored stable `ArtifactId`, with one or more current
+path bindings.
+
+Replace path-shaped workflow contracts:
 
 ```ts
-consumes: string[];      // artifact paths this workflow reads
-// artifactPaths already exists: what it writes
+consumes: string[];
+artifactPaths: string[];
 ```
 
-Then make `upstreamWorkflowIds` **generated**: B is downstream of A when
-`B.consumes ∩ A.artifactPaths ≠ ∅`. Keep the hand-written list for one release as
-`declaredUpstreamWorkflowIds`, and have `check:skill-graph` fail on any declared edge whose
-intersection is empty.
+with identity-shaped contracts:
 
-That single change:
+```ts
+inputs: ArtifactRead[];
+outputs: ArtifactWrite[];
+```
 
-- runs the fake-edge test mechanically across all 57 nodes, once and then forever
-- makes the frontier computable — a node is ready when every artifact it consumes exists and its
-  lane's upstream lanes are satisfied
-- gives artifacts a second job: they stop being an evidence list and become the edges
-- surfaces the shared-write hazard that is already in the data and currently unexamined: **10
-  artifacts are written by more than one workflow.** Those are hidden edges, exactly the false
-  independence that breaks fan-out, and they are one query away from being visible.
+Paths remain on `ArtifactDefinition`. A compiler binds an `ArtifactId` to the current launch
+path. Renaming `RESEARCH.md` must not silently change the identity of the research evidence.
 
-Expect it to cut edges. The store chain — `aso-and-store-ops` → `listing-prep-packet` →
-`apple-signing` → `store-console` → `asc-cli` — is a straight five-node line today in a domain
-whose real precondition is "the name is locked and the design is rendered."
+### 2. Data flow is only one edge kind
 
-The prize is bounded and worth naming honestly. 57 nodes at declared depth 9 means the launch is
-already at most ten layers deep, not 57 steps long — the sequencing win is mostly already
-implied by the data, it is just never computed. What derivation adds is that the layers become
-*true* instead of asserted.
+The fake-edge test is valuable for data edges. It is not a universal definition of an edge.
 
-### Make the node contract real
+A workflow can be blocked because:
 
-`helpers.ts` stays — a default is right across 57 nodes — but it must stop satisfying the
-validator on a node's behalf.
+- it needs a verified artifact
+- a state predicate is false
+- a founder decision is pending
+- another workflow must finish for a non-artifact invariant
+- a provider, account, device, git tree, or file prefix is exclusively in use
+- a verifier or reducer has not accepted an output
+- a conditional branch did not select it
 
-- `consumes` is required and hand-authored. No default.
-- `stoppingCondition` keeps its generated form only when the node's gate is `audit: required`
-  **and** carries a `launchbenchValidator`. Otherwise the node authors its own, so the
-  observability check is testing something the generator did not write.
-- `proof` needs a second kind. A gate proves the artifact is well-formed; it does not prove the
-  node did its job when the job is judgment — research claims, copy, design direction, pricing.
-  Those nodes get `verification: { lens, freshContext: true }` and a separate verifier. Right
-  now producer and verifier are the same agent on every judgment node in the tree.
-- `contextPackIds` allows per-workflow packs, not only `context.<domain>`. The pack is the node's
-  IN; `artifactPaths` is its OUT. That is the node contract, and it is what lets a node be
-  handed to a fresh window without handing over a transcript.
+Only the first is an artifact intersection. Forcing every relationship through a file would
+create fake artifacts merely to preserve sequencing.
 
-### The run plan is generated, never authored
+Use typed edge semantics. Every data edge must carry an artifact version. Every non-data
+prerequisite must carry a machine-checkable predicate or decision identity. A shared resource is
+not a permanent causal edge at all; it is a scheduling constraint that may impose temporary
+ordering for one run.
 
-`render:run-plan` emits `graph/generated/run-plan.json` for the template state, and the same
-computation against a real launch repo's `PROJECT_STATE.yaml`. It carries the frontier, the
-independent batches, the critical path, the founder-gated set, and per node: operator, context
-pack, consumes, produces, gate, verifier lens, token budget.
+### 3. The 57 workflows are capabilities, not necessarily atomic run nodes
 
-Two constraints from rules this repo already holds:
+Several current workflows produce multiple artifacts, span multiple phases, or describe an
+entire producer-review-render cycle. They are useful stable capabilities, but some are too broad
+to dispatch as one indivisible attempt.
 
-- **`SKILL.md` does not grow.** `ENTRYPOINT_BUDGET_BYTES` is a ratchet, not a target. The run
-  plan earns at most a generated block that replaces existing text, and more likely nothing in
-  the entrypoint at all — an agent asks for the plan when it needs one.
-- **None of this vocabulary reaches a founder.** Frontier, batch, node, run plan, DAG are
-  internal. `check:founder-copy` fails the build when one leaks, and any new status or mode needs
-  its `founder-copy.ts` label in the same commit.
+Keep them as task nodes when they are truly bounded. Otherwise make them subgraph definitions
+that expand into run nodes such as:
 
-### Emit the workflow script; do not become a workflow runtime
+```text
+plan → fan out → reduce → verify → reconcile state
+```
 
-Generate the Dynamic Workflow script from the run plan instead of describing one in prose.
-`dynamic-workflows.md` is 20KB that teaches six patterns and a stage → pattern mapping. That
-mapping is a field on a node (`executionPattern`) plus a generator, not a table an agent reads
-and reproduces by hand each run.
+The definition graph can stay readable while the compiler creates the smaller units needed for
+retries, isolation, and partial recovery.
 
-On Codex the same plan is read as batches for subagents. This is the second-largest win:
-`parallel-agent-orchestration.md` asks the orchestrator to hand-build a candidate-unit list, a
-file-to-unit map, and a serialized set before every dispatch. The graph knows which nodes write
-which artifacts, so that whole preflight is derivable — including the 10 shared-write artifacts
-that a hand-built map is most likely to miss.
+### 4. Artifact existence is not readiness
 
-## Sequence
+A file can exist and still be stale, unverified, generated from older inputs, or left over from a
+failed attempt. "Every consumed file exists" is not a sufficient frontier rule.
 
-One version per step, each keeping `npm run audit:ci` green and landing as its own PR. This repo
-pays 8–18 review rounds per PR, so deciding something twice is the expensive mistake.
+A ready node needs input bindings to accepted artifact versions. Each binding should carry at
+least:
 
-| Version | Step | What it proves |
+- artifact identity
+- content or semantic fingerprint
+- producing run node and attempt
+- verification status
+- freshness policy
+- evidence references
+
+When an upstream fingerprint changes, downstream results that depended on the old version become
+`stale`. The existing change-cascade behavior should feed this invalidation model rather than
+remain a separate warning system.
+
+### 5. Shared state will erase the proposed parallelism unless it gets one owner
+
+The generic workflow action currently tells every node to update `PROJECT_STATE.yaml`. That makes
+all 57 workflows writers to the same mutable resource. A scheduler that models this honestly
+would serialize almost everything.
+
+Workers should return immutable results, evidence, and a proposed state patch. A dedicated
+state-reconcile reducer, owned by the orchestrator, applies accepted patches transactionally.
+The same single-owner rule applies to:
+
+- `PROJECT_STATE.yaml`
+- `launch-cockpit.html`
+- git staging, integration, commits, merges, and releases
+- provider and account mutations
+- shared simulator or device sessions
+
+This preserves the manager pattern already documented in the repo and creates real parallel
+read-only or isolated work.
+
+### 6. Runtime features are adapters, not architecture
+
+Claude Dynamic Workflows, Codex subagents, inline execution, worktrees, and any future runtime
+have different limits and APIs. None should define the canonical graph.
+
+The graph compiler must emit a runtime-neutral plan. Adapters translate that plan into:
+
+- inline execution for small or tightly coupled work
+- serial or parallel subagents
+- isolated worktrees
+- a Claude workflow script when available and worthwhile
+
+An adapter may reduce parallelism when capabilities are missing. It may not reinterpret
+dependencies, skip proof, weaken a human gate, or invent a different completion state.
+
+### 7. The audit pipeline should be the first execution customer, not the last
+
+`run-audit.ts` already has a typecheck barrier, a concurrency pool, serial steps, deterministic
+output order, and explicit failure reporting. It offers less speedup than launch work, but it is
+the best conformance fixture because its nodes and anchors are deterministic.
+
+Move the audit plan onto the same compiler and scheduler before dispatching open-ended launch
+work. If the graph cannot faithfully reproduce the audit barrier, concurrency, serial
+LaunchBench step, failure propagation, and ordered reporting, it is not ready to run a business
+launch.
+
+## August 2026 engineering synthesis
+
+Current agent-orchestration practice converges on a hybrid rather than an all-agent or all-DAG
+design:
+
+- explicit workflows own process rules, durable state, routing, and human interrupts
+- agents operate inside bounded nodes where judgment or exploration is useful
+- one manager owns the user thread, integration, guardrails, and final answer
+- execution state must be checkpointed so a run can resume after process or model failure
+- side effects must be isolated and idempotent because retries and resumes can replay work
+- parallel execution needs explicit resource ownership, not only data-dependency analysis
+- the execution graph and the context/message graph are related but separate concerns
+- simple work should use the smallest execution mode that fits
+- deterministic tests and real external outcomes are stronger anchors than model consensus
+
+The useful ideas in the Graph Engineering article fit this model: remove fake data edges, fan out
+independent work, reduce before synthesis, use fresh verifiers, layer fan-in, count expected
+results, isolate writers, and keep hard anchors. The article becomes unsafe only when those
+heuristics are treated as the complete execution semantics.
+
+## Target layered model
+
+### Layer 1: definition graph
+
+Owned by the skill and versioned under `graph/`.
+
+It defines:
+
+- stable capability and subgraph identities
+- stable artifact, decision, resource, gate, operator, and provider identities
+- typed inputs and outputs
+- explicit non-data prerequisites
+- context contracts
+- execution and retry policies
+- verification policy
+- optionality and selection rules
+- default budgets and risk class
+
+It does not contain business-instance status or run attempts.
+
+### Layer 2: business instance graph
+
+Compiled for one launch from:
+
+- the definition graph version
+- `PROJECT_STATE.yaml`
+- launch scope
+- app archetype
+- selected platforms
+- selected providers
+- founder decisions
+- explicit deferrals and overrides
+
+This layer selects the workflows that apply, binds stable artifacts to launch paths, resolves
+conditions, and records why optional nodes were included or omitted. It is a frozen plan revision,
+not a live transcript.
+
+A change to scope, platform, provider, or a material upstream artifact produces a new plan
+revision. It does not mutate history.
+
+### Layer 3: durable run graph
+
+Expanded from one instance-plan revision.
+
+It contains the actual executable units:
+
+- task nodes
+- subgraph expansions
+- fan-out shards
+- reduce and integration nodes
+- verifier nodes
+- state-reconcile nodes
+- founder approval interrupts
+- conditional branches
+- bounded loops
+- joins
+
+Each run node has durable status:
+
+```text
+pending
+ready
+running
+waiting_human
+blocked
+succeeded
+failed
+skipped
+cancelled
+stale
+```
+
+Each attempt records its owner or lease, start and finish state, input fingerprint, output
+references, evidence, error, retry decision, and resource claims.
+
+### Layer 4: trace and evidence graph
+
+Append-only proof of what happened.
+
+It links:
+
+```text
+plan revision
+  → run node
+    → attempt
+      → exact input versions
+      → output versions
+      → gate results
+      → verifier verdicts
+      → state patch
+      → integration result
+```
+
+This layer makes silent failure and self-grading visible. It also supports cost, latency, retry,
+and reliability analysis without treating generated reports as truth.
+
+### Orthogonal layer: context and permissions
+
+Execution topology does not automatically define what an agent sees.
+
+Every task contract must separately declare:
+
+- exact reference IDs
+- exact state selectors
+- exact artifact versions
+- trust class of each input
+- tool and provider permissions
+- read-only or write scope
+- maximum context or token budget
+- whether context must be fresh
+- whether untrusted content must be quarantined
+
+A verifier receives the finding and its source evidence, never the producer transcript. A
+privileged actor receives a validated structured result, never raw untrusted content unless its
+job requires it.
+
+## Canonical contract
+
+A v2 workflow contract should look conceptually like this:
+
+```ts
+interface WorkflowDefinitionV2 {
+  id: WorkflowId;
+  kind: "task" | "subgraph";
+  title: string;
+  domainId: DomainId;
+  areaIds: AreaId[];
+
+  triggers: TriggerDefinition[];
+  inputs: ArtifactRead[];
+  outputs: ArtifactWrite[];
+  prerequisites: Prerequisite[];
+  resources: ResourceClaim[];
+
+  context: ContextContract;
+  execution: ExecutionPolicy;
+  verification: VerificationPolicy;
+
+  laneIds: LaneId[];
+  phaseIds: PhaseId[];
+  providerIds: ProviderId[];
+  operatorIds: OperatorId[];
+  founderOnlyActionIds: DecisionId[];
+}
+```
+
+The supporting contracts need explicit semantics:
+
+```ts
+interface ArtifactRead {
+  artifactId: ArtifactId;
+  requirement: "required" | "optional";
+  accepts: "latest_verified" | "latest_succeeded" | "specific";
+  freshness?: FreshnessPolicyId;
+}
+
+interface ArtifactWrite {
+  artifactId: ArtifactId;
+  mode: "create" | "replace" | "patch" | "append";
+  ownership: "exclusive" | "reducer_owned";
+}
+
+type Prerequisite =
+  | { kind: "state"; predicateId: StatePredicateId }
+  | { kind: "workflow"; workflowId: WorkflowId; requires: "succeeded" | "verified"; reason: string }
+  | { kind: "approval"; decisionId: DecisionId }
+  | { kind: "condition"; conditionId: ConditionId };
+
+interface ResourceClaim {
+  resourceId: ResourceId;
+  mode: "shared" | "exclusive";
+}
+
+interface ExecutionPolicy {
+  preferredMode: "inline" | "subagent" | "worktree" | "workflow";
+  join: "all" | "any" | "quorum";
+  maxAttempts: number;
+  timeoutSeconds?: number;
+  idempotency: "pure" | "keyed" | "manual_recovery";
+  budgetId: BudgetId;
+}
+
+type VerificationPolicy =
+  | { kind: "deterministic"; gateIds: GateId[] }
+  | { kind: "adversarial"; lensIds: VerificationLensId[]; freshContext: true }
+  | { kind: "quorum"; lensIds: VerificationLensId[]; threshold: number; freshContext: true }
+  | { kind: "human"; decisionId: DecisionId };
+```
+
+Names can change during implementation. The semantics cannot.
+
+Two migration rules are non-negotiable:
+
+1. `ArtifactDefinition.id` must be authored and stable before executable edges depend on it.
+2. A free-text `reason` is explanatory only. Readiness must evaluate a typed predicate, decision,
+   gate, or accepted artifact version.
+
+## Edge semantics
+
+| Relationship | How it is represented | Readiness rule |
 | --- | --- | --- |
-| 0.66 | `consumes`, derived edges, fake-edge gate, shared-write report | the DAG is real; publishes which declared edges carried no data |
-| 0.67 | node contract: authored stopping conditions, per-node context packs, `verification` | the validator stops grading its own generator |
-| 0.68 | `render:run-plan`, frontier computation, `check:run-plan` | a computed frontier matches the hand-written `next_action`, or the gap is explained |
-| 0.69 | collision map and batch derivation; the parallel preflight becomes generated | file-overlap checking is mechanical |
-| 0.70 | workflow-script generation from the plan; `dynamic-workflows.md` compresses to policy plus generator | the stage → pattern table stops being prose |
-| 0.71 | verifier nodes on judgment outputs, fresh context, majority rule, LaunchBench scenario each | producer ≠ verifier, provably |
-| later | audit DAG | failure isolation, not speed |
+| Data dependency | Derived from an output `ArtifactId` to an input `ArtifactId` | Required accepted version exists |
+| State dependency | Explicit state predicate | Predicate evaluates true against the plan's state revision |
+| Workflow invariant | Explicit workflow prerequisite with reason | Required upstream state is succeeded or verified |
+| Founder approval | Decision node / interrupt | Recorded approval matches the pending decision and plan revision |
+| Conditional route | Typed condition and selected branch | Branch is selected; non-selected nodes become skipped |
+| Verification | Compiler-inserted verifier or deterministic gate node | Policy threshold passes against the exact output version |
+| Resource collision | Shared/exclusive resource claims | Scheduler can acquire every claim for the attempt |
 
-Steps 0.66–0.68 are worth landing even if the work stops there: they make the graph that already
-exists honest. 0.69–0.71 are what make the orchestrator execute it.
+A shared writer is not automatically an upstream workflow. It is either:
 
-## What this does not buy
+- an invalid collision
+- an explicitly reducer-owned output
+- a versioned append
+- a patch that a single integration node applies
 
-- **Breadth, not judgment.** A launch has genuinely sequential stretches, and the Ground Rule
-  that produces them is correct — no design from an unlocked spec, no ASO from an unlocked name.
-  The frontier will often be narrow. The gain is that it will be measured narrow instead of
-  assumed narrow.
-- **Not a cost saving.** Fan-out plus fresh-context verification is the expensive shape. Cap it:
-  verifiers only where a gate cannot decide the question, and carry the token budget on the node
-  so it is enforced rather than advised.
-- **No self-grading.** Anchors stay what they are — a gate that exits 0, a purchase that cleared
-  sandbox, a build that uploaded, a founder who signed. Nothing the run plan produces may become
-  evidence for itself.
+The compiler must reject ambiguous shared writes rather than invent an ordering.
+
+## Resource model
+
+File equality is too weak for safety. These all conflict even when their strings differ:
+
+- a file and its parent directory
+- two paths under the same generated bundle
+- two migrations against one database
+- two agents using one provider account
+- two App Store Connect mutations
+- two sessions controlling one simulator
+- any worker and the orchestrator both mutating git state
+- any worker and the state reducer both writing `PROJECT_STATE.yaml`
+
+Define stable resources such as:
+
+```text
+resource.state.project
+resource.git.integration
+resource.path.design-system
+resource.provider.app-store-connect
+resource.provider.revenuecat
+resource.device.ios-simulator
+resource.account.social-publishing
+```
+
+A resource can have capacity greater than one for safe rate-limited reads. Mutations are exclusive
+unless a provider-specific policy proves otherwise.
+
+The generated parallel batch is the set of ready nodes whose resource claims are compatible,
+not merely the set with no data edge between them.
+
+## Compiler
+
+The graph compiler is deterministic TypeScript, not an LLM.
+
+For one launch and one plan revision it should:
+
+1. validate stable identities and schemas
+2. select applicable workflows by scope, archetype, platform, provider, and state
+3. expand subgraphs and bounded fan-out shards
+4. bind artifact identities to exact accepted versions and launch paths
+5. derive data edges from typed input/output bindings
+6. add explicit state, decision, condition, and workflow prerequisites
+7. insert reducers, verifiers, and founder interrupts
+8. validate join, loop, retry, and idempotency policies
+9. validate resource ownership and reject ambiguous writes
+10. compute the critical path, ready frontier, compatible batches, and budget envelope
+11. emit a runtime-neutral Graph IR plus a human-readable explanation
+12. emit a migration report for any legacy declaration that disagrees
+
+The compiler's output is not evidence that the work passed. It is only a plan.
+
+`graph/generated/` remains the projection of the skill-owned definition graph. A real launch's
+instance plan, run state, and trace belong in the launch repo, not under the skill definition
+directory. The exact launch-repo location should be chosen as a versioned artifact-contract
+decision in the durable-state step, not smuggled into an earlier renderer.
+
+## Scheduler and durable execution
+
+The scheduler should be a callable library and CLI used by the orchestrator, not a daemon.
+
+It must support:
+
+- deterministic frontier computation
+- atomic status transitions
+- leases or attempt ownership
+- shared and exclusive resource acquisition
+- configurable concurrency and token budgets
+- `all`, `any`, and quorum joins
+- bounded retry with backoff
+- timeout and cancellation
+- explicit skip, defer, and override reasons
+- founder pause and resume
+- checkpoint and resume after process failure
+- expected-input counts at every fan-in
+- stale propagation when accepted inputs change
+- fail-closed handling of missing node results
+- a dry-run explanation of why each node is ready or blocked
+
+A node that performs side effects must be pure, keyed-idempotent, or marked for manual recovery.
+Retrying an unclassified side effect is a compile error for autonomous modes.
+
+Loops are allowed only with a typed stop predicate and a hard attempt or budget cap. The
+definition graph may contain bounded cycles; each materialized run segment must remain
+checkpointable and explainable.
+
+## State reduction
+
+The state reducer is the only system component that writes canonical launch state during
+parallel execution.
+
+A worker result should resemble:
+
+```ts
+interface NodeResult {
+  runNodeId: RunNodeId;
+  attemptId: AttemptId;
+  inputFingerprint: string;
+  outputs: ProducedArtifactVersion[];
+  evidence: EvidenceRef[];
+  proposedStatePatch: JsonPatchOperation[];
+  findings: StructuredFinding[];
+}
+```
+
+The reducer:
+
+1. confirms the attempt still owns its lease
+2. confirms inputs have not changed
+3. checks deterministic gates and required verification
+4. rejects stale or conflicting patches
+5. applies accepted state changes
+6. triggers deterministic renderers
+7. recomputes staleness and the frontier
+8. appends trace events
+
+This replaces every worker independently editing canonical state and then hoping merge order
+preserves truth.
+
+## Runtime adapters
+
+One plan, several adapters.
+
+### Inline adapter
+
+Use for small, sequential, high-coupling, or exploratory nodes. It still records attempts,
+inputs, outputs, evidence, and state patches.
+
+### Codex adapter
+
+Translate compatible batches into bounded subagent or worktree assignments. Preserve the
+manager pattern: workers do not stage, commit, mutate providers, control shared devices, or write
+canonical state.
+
+### Claude adapter
+
+Translate a compatible batch or subgraph into a Dynamic Workflow when the feature is available
+and the expected breadth justifies the cost. Workflow-specific script syntax belongs in the
+adapter. It does not belong in `WorkflowDefinition`.
+
+### Capability fallback
+
+Each adapter reports capabilities. The scheduler may serialize work, choose inline execution, or
+split a run into smaller segments when a feature is unavailable. Quality gates and human gates
+do not degrade.
+
+Adapter parity tests must prove that the same fixture reaches the same terminal node states and
+evidence requirements under inline, Codex-style, and Claude-style execution.
+
+## Verification and anchors
+
+Use the strongest available verifier in this order:
+
+1. deterministic test, schema, query, build, or external receipt
+2. independent source check against the exact claim
+3. fresh-context adversarial judgment
+4. explicit human decision
+
+Do not add three model voters to every node. Majority agreement among agents reading the same
+bad source is still one bad source with a committee.
+
+Judgment verification should declare distinct lenses only when they answer different questions,
+for example correctness, freshness, and source fidelity. The result is structured, tied to the
+output fingerprint, and unable to mutate the producer's work.
+
+High-risk nodes fail closed. Lower-risk nodes may return `needs_review` with a visible blocker.
+No verifier report and no synthesized plan may become evidence for itself.
+
+Untrusted public content remains quarantined. Read-only evidence workers can inspect it. Actors
+with provider, git, credential, or publication permissions receive only validated structured
+outputs.
+
+## When the graph should still run inline
+
+Full graph adoption governs dispatch and state. It does not require fan-out.
+
+Choose inline execution when:
+
+- the task is small
+- there is one real critical path
+- the next action depends on exploratory feedback
+- coordination would cost more than the work
+- one shared device, provider, or source of truth forces serialization
+- no two ready nodes have compatible resources
+
+Exploratory work can live inside an `agentic` task or subgraph with a bounded budget and output
+contract. The graph defines when exploration is allowed, what it may access, what it must return,
+and what proves completion. It should not pretend to know the model's internal reasoning steps.
+
+## Migration sequence
+
+Each step lands as its own versioned PR, keeps `npm run audit:ci` green, updates the relevant
+architecture and public surfaces, and adds deterministic fixtures before the next step starts.
+
+| Version | Step | Exit proof |
+| --- | --- | --- |
+| 0.66 | **Graph semantics v2.** Author stable artifact IDs; add typed inputs, outputs, non-data prerequisites, decisions, resources, execution policy, context contract, and verification policy. Keep legacy fields only through an explicit compatibility reader. | Migration report covers all 57 workflows; every legacy edge is classified; ambiguous shared writers fail |
+| 0.67 | **Compiler and instance graph.** Select workflows for template launch states, bind artifact IDs, expand subgraphs, derive data edges, and emit runtime-neutral Graph IR in dry-run mode. | Same input state produces byte-stable plan; every inclusion, omission, edge, and block has an explanation |
+| 0.68 | **Durable run state.** Add run-node statuses, attempts, checkpoints, input fingerprints, evidence lineage, founder interrupts, stale propagation, and plan revisions. Choose and version the launch-repo run-state location here. | Crash/resume, approval pause/resume, upstream-change invalidation, and missing-result fixtures pass |
+| 0.69 | **Dogfood the audit graph.** Express typecheck barrier, parallel checks, serial LaunchBench, failure handling, and ordered reporting through the compiler and scheduler. | Graph-driven audit is behaviorally equivalent to the existing audit on green and failing fixtures |
+| 0.70 | **Resource scheduler and state reducer.** Add path-prefix, provider, account, device, git, and canonical-state claims; generate compatible batches and orchestration preflight. | No batch contains an undeclared collision; parallel workers never write canonical state directly |
+| 0.71 | **Runtime adapters.** Ship inline, Codex, and Claude adapters with capability negotiation, budgets, and fallback. | Adapter parity fixtures reach identical terminal semantics and evidence requirements |
+| 0.72 | **Verifier subgraphs.** Insert deterministic or fresh-context verification by policy, plus quarantine boundaries and risk-based fail behavior. | Producer and verifier contexts are isolated; verdicts bind to exact output fingerprints |
+| 0.73 | **Cutover.** Make compiled plans the only dispatch source, update `SKILL.md`, root `README.md`, `graph/README.md`, and `docs/architecture.md`, then delete legacy mirrors and compatibility fields. | A cutover gate fails on any manually maintained dependency, candidate-unit map, or alternate next-action source |
+
+### Why the audit graph moves earlier
+
+The audit migration proves scheduler semantics before the scheduler can mutate a launch. It also
+forces the implementation to support barriers, serial resources, deterministic log order,
+partial failure, and complete input counts without relying on model judgment.
+
+Its limited speedup is irrelevant. It is a conformance harness.
+
+## Cutover means deletion
+
+The migration is not complete while two sources can disagree.
+
+After parity, remove or replace:
+
+- hand-authored `upstreamWorkflowIds`
+- path-shaped `artifactPaths` as workflow identity bindings
+- generic helper text that satisfies proof and stopping-condition validators
+- manually assembled `candidate_units`
+- manually assembled file-to-unit and serialized-unit maps
+- the prose stage-to-runtime-pattern table as an execution source
+- hand-typed `continuity.next_action` as source truth
+- direct worker writes to `PROJECT_STATE.yaml`
+- the ordered audit plan as a second scheduler definition
+- any runtime-specific script treated as canonical topology
+
+Founder-readable narrative remains authored or rendered through `founder-copy.ts`. A computed
+frontier can propose the next safe work; it does not expose graph vocabulary to the founder.
+
+Allow one explicit escape hatch for an unmodeled emergency task:
+
+```text
+manual override
+  + owner
+  + dated reason
+  + declared resources
+  + proof requirement
+  + follow-up graph issue
+```
+
+An escape hatch is not a second normal workflow.
+
+## Acceptance criteria for full adoption
+
+The graph is fully adopted only when all of these are true:
+
+1. Every dispatched unit has a stable workflow ID, run-node ID, and attempt ID.
+2. Every data edge carries a stable artifact identity and accepted version.
+3. Every non-data prerequisite evaluates a typed predicate or decision.
+4. Every parallel batch is proven compatible across files, directories, providers, accounts,
+   devices, git, and canonical state.
+5. Every fan-in reports expected, completed, failed, skipped, and missing inputs.
+6. Every side-effecting node declares idempotency or manual recovery.
+7. Every founder-only action pauses durably and resumes against the same plan revision.
+8. Every accepted output is tied to deterministic proof or an explicit verification policy.
+9. Every upstream change invalidates affected downstream results before they can be reused.
+10. Every run can resume after interruption without repeating unsafe side effects.
+11. Every runtime adapter preserves the same node states, gates, and evidence contract.
+12. Every worker context is bounded, permissioned, and independent where verification requires it.
+13. The orchestrator is the sole integration and canonical-state owner.
+14. `PROJECT_STATE.yaml`, the cockpit, the run trace, and the computed frontier reconcile.
+15. No hand-authored dependency map or task list competes with the compiled plan.
+16. LaunchBench contains fixtures for edges, joins, retries, loops, collisions, interrupts,
+    staleness, verifier isolation, adapter parity, and silent node failure.
+17. The root README and `SKILL.md` describe the behavior that actually ships, not the target one
+    release early.
 
 ## What not to do
 
-- **Do not turn `playbook/` into nodes.** 110 references, 1.7MB. Prose is a node's payload.
-  `docs/architecture.md` already settled that stage is a document and domain is a folder;
-  nodes-as-files reopens a closed decision for nothing.
-- **Do not build a graph runtime, scheduler, or database.** `graph/README.md` says this in one
-  line and it is right. Anything needing a process the skill owns is out of scope.
-- **Do not reshape `business/`.** It is a launch repo's root and its layout is the artifact
-  contract — attempted and reverted in v0.64.0.
-- **Do not let the plan become a gate on the runtime split.** It has to degrade to subagents with
-  no loss of shape, or it breaks the policy that the skill recommends and never blocks.
+- Do not turn `playbook/` files into execution nodes.
+- Do not use file paths as stable dependency identities.
+- Do not model every constraint as an artifact edge.
+- Do not convert resource collisions into permanent topology.
+- Do not let every worker mutate `PROJECT_STATE.yaml`.
+- Do not equate file existence with accepted completion.
+- Do not make a model-generated plan its own proof.
+- Do not hard-code one vendor's workflow API into the definition graph.
+- Do not add a graph database or long-running service unless measured scale later proves the
+  deterministic TypeScript model insufficient.
+- Do not fan out work that is small, coupled, exploratory, or forced through one exclusive
+  resource.
+- Do not migrate all launch workflows before the scheduler passes the deterministic audit
+  conformance suite.
+- Do not leave compatibility fields after the cutover gate can replace them.
 
-## Two founder calls
+## Decisions this proposal asks the maintainer to make
 
-1. **Does a computed frontier ever dispatch without asking?** Autonomy modes exist, and a
-   frontier makes "run the next three independent nodes" a single move. That is a spend and
-   blast-radius decision, not an agent's.
-2. **Per-node token budgets.** A verifier on every judgment node is the line item that decides
-   whether a launch run costs the same as today or several times more. The number belongs to
-   whoever pays it.
+1. Approve the layered model: definition, instance, run, and trace, with context and permissions
+   modeled separately.
+2. Approve stable artifact IDs and typed edge semantics instead of `consumes: string[]`.
+3. Approve the audit pipeline as the first graph-execution customer.
+4. Approve the single-writer state reducer and manager-owned integration model.
+5. Approve runtime-neutral Graph IR with vendor adapters.
+6. Approve a real cutover that deletes manual dispatch sources.
+
+Autonomy, concurrency, and token spend should be runtime policy with conservative defaults and
+founder-controlled ceilings. They should not be embedded as irreversible topology decisions.
+
+## Final verdict
+
+Proceed, but replace the artifact-only DAG plan with the layered compiler, scheduler, state, and
+adapter model above.
+
+The right end state is not "the repo contains a graph." It already does.
+
+The right end state is: **the orchestrator cannot dispatch, resume, verify, or reconcile launch
+work except through a typed, durable graph plan, while agents remain free to use judgment inside
+the bounded nodes where judgment belongs.**
