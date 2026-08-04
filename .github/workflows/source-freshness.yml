@@ -21,11 +21,26 @@ jobs:
         with:
           ref: agent/repository-information-architecture
           fetch-depth: 0
-      - run: python3 scripts/inventory-repository-ia.py
-      - name: Commit inventory
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix skill/b2c-mobile-business-launch
+      - run: python3 scripts/finalize-repository-ia.py
+      - run: npm run format --prefix skill/b2c-mobile-business-launch
+      - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
+      - name: Remove temporary machinery and restore normal CI
+        run: |
+          rm scripts/finalize-repository-ia.py
+          rm -f scripts/inventory-repository-ia.py docs/repository-ia-inventory.md
+          git show origin/main:.github/workflows/source-freshness.yml > .github/workflows/source-freshness.yml
+      - run: npm run audit:ci
+      - run: npm pack --dry-run --json
+      - name: Commit final repository architecture
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add docs/repository-ia-inventory.md
-          git commit -m "docs: inventory repository information architecture" || exit 0
+          git add -A
+          git commit -m "refactor: organize business artifacts by capability"
           git push origin HEAD:agent/repository-information-architecture
