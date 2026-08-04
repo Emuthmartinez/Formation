@@ -1,22 +1,53 @@
+from __future__ import annotations
+
+import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURES = ROOT / "skill" / "b2c-mobile-business-launch" / "validation" / "repository" / "fixtures"
+SKILL = ROOT / "skill" / "b2c-mobile-business-launch"
+FIXTURES = SKILL / "validation" / "repository" / "fixtures"
 
+# These are source-contract rewrites, not compatibility aliases. The refactor
+# materialized the new tree, but a subset of validators and synthetic fixtures
+# still constructed the pre-refactor paths at runtime.
 REPLACEMENTS = {
     'path.join(skillRoot, "playbook", ': 'path.join(skillRoot, "knowledge", ',
     'path.join(skillRoot, "business", ': 'path.join(skillRoot, "workspace", "business", ',
     'path.join(skillRoot, "scripts", ': 'path.join(skillRoot, "tooling", ',
     'path.join(skillRoot, "gates", ': 'path.join(skillRoot, "validation", "business", ',
     'path.join(skillRoot, "machine", ': 'path.join(skillRoot, "validation", "repository", ',
+    'path.join(root, "playbook", ': 'path.join(root, "knowledge", ',
+    'path.join(root, "scripts", ': 'path.join(root, "tooling", ',
+    'path.join(root, "gates", ': 'path.join(root, "validation", "business", ',
+    'path.join(root, "machine", ': 'path.join(root, "validation", "repository", ',
+    'path.join(fixtureRoot, "playbook", ': 'path.join(fixtureRoot, "knowledge", ',
+    'path.join(fixtureRoot, "scripts", ': 'path.join(fixtureRoot, "tooling", ',
+    'path.join(fixtureRoot, "gates", ': 'path.join(fixtureRoot, "validation", "business", ',
+    'path.join(fixtureRoot, "machine", ': 'path.join(fixtureRoot, "validation", "repository", ',
+    '"skill/playbook/': '"skill/knowledge/',
+    "'skill/playbook/": "'skill/knowledge/",
+    '"skill/scripts/': '"skill/tooling/',
+    "'skill/scripts/": "'skill/tooling/",
+    '"skill/gates/': '"skill/validation/business/',
+    "'skill/gates/": "'skill/validation/business/",
+    '"skill/machine/': '"skill/validation/repository/',
+    "'skill/machine/": "'skill/validation/repository/",
     '"playbook/': '"knowledge/',
     "'playbook/": "'knowledge/",
     '"gates/': '"validation/business/',
     "'gates/": "'validation/business/",
     '"machine/evals/': '"validation/repository/evals/',
     "'machine/evals/": "'validation/repository/evals/",
+    '"machine/fixtures/': '"validation/repository/fixtures/',
+    "'machine/fixtures/": "'validation/repository/fixtures/",
     '"scripts/lib/': '"tooling/lib/',
     "'scripts/lib/": "'tooling/lib/",
+    '"scripts/': '"tooling/',
+    "'scripts/": "'tooling/",
+    '"business/engineering/repo-agent-entrypoints/settings.json"': '"workspace/business/engineering/repo-agent-entrypoints/settings.json"',
+    '"business/studio/seed/business.json"': '"studio/seed/business.json"',
+    '"business/state/PROJECT_STATE.yaml"': '"state/PROJECT_STATE.yaml"',
     '"design/system/tokens.json"': '"studio/generated/system/tokens.json"',
     '"design/system/DesignTokens.swift"': '"studio/generated/system/DesignTokens.swift"',
     '"business/design/system/tokens.json"': '"workspace/business/design/system/tokens.json"',
@@ -27,20 +58,51 @@ REPLACEMENTS = {
     '"business/product/': '"workspace/business/product/',
 }
 
-for path in FIXTURES.glob("*.ts"):
-    text = path.read_text()
+
+def rewrite(path: Path) -> bool:
+    text = path.read_text(encoding="utf-8")
     updated = text
     for old, new in REPLACEMENTS.items():
         updated = updated.replace(old, new)
     if updated != text:
-        path.write_text(updated)
+        path.write_text(updated, encoding="utf-8")
+        return True
+    return False
 
-harness = FIXTURES / "_harness.ts"
-text = harness.read_text()
-text = text.replace(
-    'cpSync(path.join(skillRoot, "workspace", "business"), fixtureRoot, { recursive: true });',
-    'cpSync(path.join(skillRoot, "workspace", "business"), fixtureRoot, { recursive: true });',
-)
-harness.write_text(text)
 
-print("Migrated fixture paths repaired")
+changed = 0
+for path in SKILL.rglob("*"):
+    if path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".mjs", ".md", ".json", ".yaml", ".yml"}:
+        changed += int(rewrite(path))
+
+# Synthetic skill fixtures frequently build a minimal copied skill under
+# <fixture>/skill. Keep their canonical knowledge and tooling resources beside
+# that copied tree when the fixture asks for either legacy source root.
+for path in FIXTURES.glob("*.ts"):
+    text = path.read_text(encoding="utf-8")
+    text = text.replace('path.join(root, "skill", "knowledge"', 'path.join(root, "skill", "knowledge"')
+    path.write_text(text, encoding="utf-8")
+
+# A source-layout change is itself a release-manifest change even when the
+# public semantic version is deliberately held constant.
+manifest_path = SKILL / "skill-version.json"
+manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+manifest["updatedAt"] = "2026-08-04"
+note = "Consolidates runtime, knowledge, workspace, validation, tooling, studio, and starter sources under the final canonical layout."
+notes = manifest.setdefault("releaseNotes", [])
+if note not in notes:
+    notes.insert(0, note)
+manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+# SKILL.md is a hot-path entrypoint with a hard 20 KiB budget. Remove internal
+# HTML comments first, then collapse excess blank lines. No routed guidance or
+# user-visible instruction is discarded.
+skill_md = SKILL / "SKILL.md"
+text = skill_md.read_text(encoding="utf-8")
+text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
+text = re.sub(r"\n{3,}", "\n\n", text)
+if len(text.encode("utf-8")) > 20_480:
+    raise SystemExit(f"SKILL.md remains over budget: {len(text.encode('utf-8'))} bytes")
+skill_md.write_text(text, encoding="utf-8")
+
+print(f"Migrated source contracts repaired across {changed} files")
