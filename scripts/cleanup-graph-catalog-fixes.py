@@ -10,5 +10,7 @@ operator_block = text[operator_start:provider_start].replace("outputPaths: strin
 types.write_text(text[:operator_start] + operator_block + text[provider_start:])
 
 renderer = root / "scripts/render-execution-plan.ts"
-text = renderer.read_text().replace("plan.compatibility", "plan.catalog")
+text = renderer.read_text()
+text = text.replace("plan.compatibility", "plan.catalog")
+text = text.replace("legacyWorkflowEdges", "dependencyEdges")
 renderer.write_text(text)
