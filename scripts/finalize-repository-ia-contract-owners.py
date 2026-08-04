@@ -60,18 +60,21 @@ for rel in [
         },
     )
 
-# Fixture state files now live under state/. Create the parent after the fixture
-# declaration regardless of how Prettier wraps the following writeFileSync call.
+# Fixture state files now live under state/. Create the parent after every
+# landing-funnel fixture declaration, independent of variable name or wrapping.
 fixture_state = SKILL / "machine/fixtures/state-and-meta.fixtures.ts"
 fixture_text = fixture_state.read_text()
-for variable in ["landingInScopePass", "landingInScopeFail"]:
-    declaration = rf'(const {variable} = makeEmptyFixture\([^\n]+\);\n)(?!\s*mkdirSync\(path\.join\({variable}, "state"\))'
-    fixture_text = re.sub(
-        declaration,
-        rf'\1  mkdirSync(path.join({variable}, "state"), {{ recursive: true }});\n',
-        fixture_text,
-        count=1,
-    )
+fixture_pattern = re.compile(
+    r'(const (?P<variable>\w+) = makeEmptyFixture\("landing-funnel-[^"]+"\);\n)'
+    r'(?!\s*mkdirSync\(path\.join\((?P=variable), "state"\))'
+)
+fixture_text = fixture_pattern.sub(
+    lambda match: (
+        f'{match.group(1)}'
+        f'  mkdirSync(path.join({match.group("variable")}, "state"), {{ recursive: true }});\n'
+    ),
+    fixture_text,
+)
 fixture_state.write_text(fixture_text)
 
 for rel in [
