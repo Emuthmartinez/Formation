@@ -13,6 +13,8 @@ replacements = {
     'graph/**/*.json': 'runtime/graph/**/*.json',
     'playbook/**/*.md': 'knowledge/**/*.md',
     'business/**/*.md': 'workspace/business/**/*.md',
+    'promptPath: "business/': 'promptPath: "workspace/business/',
+    "promptPath: 'business/": "promptPath: 'workspace/business/",
 }
 
 SKILL_ROOT_MOVES = {
