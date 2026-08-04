@@ -164,9 +164,9 @@ export function register(h: Harness): void {
 
   const externalScriptSecret = makeFixture("mobai-proof-external-script-secret");
   writeCompleteMobaiProof(externalScriptSecret);
-  mkdirSync(path.join(externalScriptSecret, "tooling"), { recursive: true });
+  mkdirSync(path.join(externalScriptSecret, "flows", "tooling"), { recursive: true });
   writeFileSync(path.join(externalScriptSecret, "flows", "smoke.mob"), 'appId: com.example.app\nscript "tooling/seed.js"\n', "utf8");
-  writeFileSync(path.join(externalScriptSecret, "tooling", "seed.js"), 'const token = "fixture-secret-value";\n', "utf8");
+  writeFileSync(path.join(externalScriptSecret, "flows", "tooling", "seed.js"), 'const token = "fixture-secret-value";\n', "utf8");
   replaceInFile(
     externalScriptSecret,
     "engineering/PRODUCTION_READINESS.md",
