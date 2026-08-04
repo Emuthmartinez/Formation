@@ -30,6 +30,27 @@ jobs:
       - run: npm ci
       - run: npm ci --prefix skill/b2c-mobile-business-launch
       - run: python3 scripts/finalize-doc-refresh.py
+      - name: Tighten SKILL runtime contract
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("skill/b2c-mobile-business-launch/SKILL.md")
+          text = path.read_text()
+          start = text.index("When this skill activates for broad launch or business work")
+          end = text.index("\n\nAssume a beginner founder.", start)
+          replacement = "When this skill activates for broad launch/business work, keep running the launch workflow without asking the user to re-invoke this skill. Compile the applicable definition graph into the launch-specific run graph and execute its readiness frontier. Load the next needed reference yourself. Workers return outputs, evidence, and proposed state patches; the orchestrator-owned reducer is the only writer to update `PROJECT_STATE.yaml`, render `launch-cockpit.html`, mutate shared provider state, and reconcile integration state. Run the relevant validators before readiness claims. Do not stop with instructions. When the cockpit changes or the session ends, narrate what happened, what is next, and what needs the founder."
+          text = text[:start] + replacement + text[end:]
+
+          graph_heading = "### Graph Dispatch Contract\n"
+          runtime_heading = "### Runtime Routing And Dynamic Workflows\n"
+          if graph_heading in text:
+              graph_start = text.index(graph_heading)
+              runtime_start = text.index(runtime_heading, graph_start)
+              text = text[:graph_start] + text[runtime_start:]
+
+          path.write_text(text)
+          PY
       - run: npm run format --prefix skill/b2c-mobile-business-launch
       - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
       - name: Remove temporary finalizer and restore CI
