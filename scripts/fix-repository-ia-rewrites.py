@@ -25,18 +25,17 @@ for path in ROOT.rglob("*"):
         continue
     if ".git" in path.parts or "node_modules" in path.parts:
         continue
+    if path.parent == ROOT / "scripts" and ("repository-ia" in path.name or path.name == "fix-numeric-capability-paths.py"):
+        continue
     try:
         original = path.read_text()
     except UnicodeDecodeError:
         continue
     updated = original
 
-    # Undo broad relative directory substitutions. A word followed by `/` may be
-    # a regex literal or prose, not a filesystem binding.
     for old, new in sorted(DIRECTORY_MOVES.items(), key=lambda item: len(item[1]), reverse=True):
         updated = updated.replace(f"{new}/", f"{old}/")
 
-    # Re-apply only explicit business-root bindings.
     for old, new in sorted(DIRECTORY_MOVES.items(), key=lambda item: len(item[0]), reverse=True):
         updated = updated.replace(f"business/{old}/", f"business/{new}/")
         updated = updated.replace(f"business\\{old}\\", f"business\\{new.replace('/', chr(92))}\\")
