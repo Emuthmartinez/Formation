@@ -31,7 +31,7 @@ Typical requests:
 
 ## The execution model
 
-The typed graph under [`skill/b2c-mobile-business-launch/graph/`](skill/b2c-mobile-business-launch/graph/) is the only normal dispatch source.
+The typed graph under [`skill/b2c-mobile-business-launch/graph/`](skill/b2c-mobile-business-launch/graph/) is the only normal dispatch source. It is executable architecture, not a diagram layered beside a separate workflow.
 
 It is layered:
 
