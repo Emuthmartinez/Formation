@@ -50,7 +50,8 @@ landing_text = re.sub(
 landing_text = landing_text.replace('growth/growth/landing/', 'growth/landing/')
 landing_gate.write_text(landing_text)
 
-# Every landing fixture writes into the final capability path scanned above.
+# Every migrated fixture must mutate the same capability-owned paths that the
+# validators inspect. Cover both segmented joins and one-segment relative paths.
 state_fixture = SKILL / "machine" / "fixtures" / "state-and-meta.fixtures.ts"
 state_text = state_fixture.read_text()
 state_text = re.sub(
@@ -59,6 +60,15 @@ state_text = re.sub(
     state_text,
 )
 state_text = state_text.replace('"growth", "growth", "landing"', '"growth", "landing"')
+state_text = state_text.replace('"landing/', '"growth/landing/')
+state_text = state_text.replace(
+    'path.join(localizationTranslateFirst, "localization-market-research")',
+    'path.join(localizationTranslateFirst, "strategy", "localization-market-research")',
+)
+state_text = state_text.replace(
+    'path.join(localizationTranslateFirst, "APP_STORE_LISTING.md")',
+    'path.join(localizationTranslateFirst, "store", "APP_STORE_LISTING.md")',
+)
 state_fixture.write_text(state_text)
 
 # Localization can be validated against either a copied business root or the
@@ -128,4 +138,8 @@ store_text = re.sub(
     store_text,
 )
 store_text = store_text.replace('"store", "store",', '"store",')
+store_text = store_text.replace(
+    'store_console.store_app_store_listing.markdown_missing',
+    'store_console.app_store_listing.markdown_missing',
+)
 store_fixture.write_text(store_text)
