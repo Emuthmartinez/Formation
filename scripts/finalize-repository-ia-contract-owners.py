@@ -59,6 +59,16 @@ for rel in [
         },
     )
 
+# Fixture state files now live under state/. Create the parent before direct writes.
+fixture_state = SKILL / "machine/fixtures/state-and-meta.fixtures.ts"
+replace(
+    fixture_state,
+    {
+        'const landingInScopePass = makeEmptyFixture("landing-funnel-in-scope-pass");\n  writeFileSync(path.join(landingInScopePass, "state", "PROJECT_STATE.yaml")': 'const landingInScopePass = makeEmptyFixture("landing-funnel-in-scope-pass");\n  mkdirSync(path.join(landingInScopePass, "state"), { recursive: true });\n  writeFileSync(path.join(landingInScopePass, "state", "PROJECT_STATE.yaml")',
+        'const landingInScopeFail = makeEmptyFixture("landing-funnel-in-scope-missing-gates");\n  writeFileSync(path.join(landingInScopeFail, "state", "PROJECT_STATE.yaml")': 'const landingInScopeFail = makeEmptyFixture("landing-funnel-in-scope-missing-gates");\n  mkdirSync(path.join(landingInScopeFail, "state"), { recursive: true });\n  writeFileSync(path.join(landingInScopeFail, "state", "PROJECT_STATE.yaml")',
+    },
+)
+
 for rel in [
     "scripts/promote-design-tokens.ts",
     "gates/design/check-token-promotion.ts",
