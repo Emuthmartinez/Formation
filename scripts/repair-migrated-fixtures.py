@@ -98,6 +98,10 @@ repo_gates = repo_gates.replace('path.join(root, "business", ', 'path.join(root,
 repo_gates = repo_gates.replace('path.join(linksDuplicate, "business", ', 'path.join(linksDuplicate, "workspace", "business", ')
 repo_gates = repo_gates.replace("../business/", "../workspace/business/")
 repo_gates = repo_gates.replace(
+    'mkdirSync(fixtureTemplates, { recursive: true });\n  writeFileSync(path.join(fixtureTemplates, "strategy/BRAND.md")',
+    'mkdirSync(path.join(fixtureTemplates, "strategy"), { recursive: true });\n  writeFileSync(path.join(fixtureTemplates, "strategy/BRAND.md")',
+)
+repo_gates = repo_gates.replace(
     '["--root", path.join(skillRoot, "workspace", "business"), "--out", path.join(skillRoot, "studio", "seed", "workspace.generated.json"), "--check"]',
     '["--root", path.join(skillRoot, "workspace", "business"), "--business-state", "../../studio/seed/business.json", "--out", path.join(skillRoot, "studio", "seed", "workspace.generated.json"), "--check"]',
 )
