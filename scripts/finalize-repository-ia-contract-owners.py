@@ -91,6 +91,10 @@ providers_text = providers_text.replace(
     'const rawEnvExample = makeFixture("raw-env-example");\n',
     'const rawEnvExample = makeFixture("raw-env-example");\n  mkdirSync(path.join(rawEnvExample, "trust", "secrets"), { recursive: true });\n',
 )
+providers_text = providers_text.replace(
+    'path.join(rawEnvExample, "secrets", ".env.example")',
+    'path.join(rawEnvExample, "trust", "secrets", ".env.example")',
+)
 providers_fixture.write_text(providers_text)
 
 for rel in [
