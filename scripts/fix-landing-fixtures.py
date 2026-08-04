@@ -39,7 +39,7 @@ candidate_block = f'''const candidateDocs = [
 ];'''
 validator_text = re.sub(
     r'const candidateDocs = \[[^;]*\];',
-    candidate_block,
+    lambda _: candidate_block,
     validator_text,
     count=1,
     flags=re.DOTALL,
@@ -48,7 +48,7 @@ primary_block = f'''const primaryDoc =
   docTexts.find((d) => d.path === "README.md" || d.path === "{capability_landing}/README.md")?.path ?? candidateDocs[0];'''
 validator_text = re.sub(
     r'const primaryDoc = docTexts\.find\([^;]*\)\?\.path \?\? candidateDocs\[0\];',
-    primary_block,
+    lambda _: primary_block,
     validator_text,
     count=1,
     flags=re.DOTALL,
@@ -71,7 +71,7 @@ motion_block = f'''const motionTexts = allMotionTexts.filter(({{ relativePath }}
 );'''
 validator_text = re.sub(
     r'const motionTexts = allMotionTexts\.filter\(\(\{ relativePath \}\) =>[^;]*;',
-    motion_block,
+    lambda _: motion_block,
     validator_text,
     count=1,
     flags=re.DOTALL,
