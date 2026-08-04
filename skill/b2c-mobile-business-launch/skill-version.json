@@ -4,6 +4,7 @@
   "updatedAt": "2026-08-04",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
+    "Certifies the final canonical source layout with the complete audit, all LaunchBench fixtures, and package dry run.",
     "Consolidates runtime, knowledge, workspace, validation, tooling, studio, and starter sources under the final canonical layout.",
     "Reorganizes the reusable business workspace into capability-owned state, strategy, product, design, engineering, analytics, growth, revenue, store, trust, and operations directories.",
     "Rewrites CLAUDE.md as Claude-specific graph runtime guidance and AGENTS.md as the repository layer-ownership and dependency contract.",
