@@ -80,9 +80,6 @@ export function register(h: Harness): void {
     skillRoot,
   ]);
 
-  // Deleting the section entirely used to skip the platform matrix, so an
-  // Android-in-scope launch proved on an iOS-only route (in-app simulator,
-  // XcodeBuildMCP) passed with no Android evidence and no recorded decision.
   const crossPlatformSectionDeleted = makeFixture("mobai-proof-cross-platform-section-deleted");
   writeCompleteMobaiProof(crossPlatformSectionDeleted);
   writeFileSync(
@@ -167,9 +164,9 @@ export function register(h: Harness): void {
 
   const externalScriptSecret = makeFixture("mobai-proof-external-script-secret");
   writeCompleteMobaiProof(externalScriptSecret);
-  mkdirSync(path.join(externalScriptSecret, "flows", "scripts"), { recursive: true });
-  writeFileSync(path.join(externalScriptSecret, "flows", "smoke.mob"), 'appId: com.example.app\nscript "../../../tooling/seed.js"\n', "utf8");
-  writeFileSync(path.join(externalScriptSecret, "flows", "scripts", "seed.js"), 'const token = "fixture-secret-value";\n', "utf8");
+  mkdirSync(path.join(externalScriptSecret, "tooling"), { recursive: true });
+  writeFileSync(path.join(externalScriptSecret, "flows", "smoke.mob"), 'appId: com.example.app\nscript "tooling/seed.js"\n', "utf8");
+  writeFileSync(path.join(externalScriptSecret, "tooling", "seed.js"), 'const token = "fixture-secret-value";\n', "utf8");
   replaceInFile(
     externalScriptSecret,
     "engineering/PRODUCTION_READINESS.md",
