@@ -70,16 +70,32 @@ jobs:
 
           fixture = skill / 'validation/repository/fixtures/repo-gates.fixtures.ts'
           text = fixture.read_text()
-          replacement = (
-              'const sourceRel = rel.startsWith("business/studio/generated/") '
-              '? rel.slice("business/".length) : rel;\n'
-              '      const text = readFileSync(path.join(skillRoot, sourceRel), "utf8");'
+          text = text.replace(
+              'import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";',
+              'import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";',
           )
+          replacement = '''const sourceCandidates = [
+        rel,
+        rel.startsWith("business/design/system/") ? rel.replace("business/design/system/", "studio/generated/system/") : rel,
+        rel.startsWith("design/system/") ? rel.replace("design/system/", "studio/generated/system/") : rel,
+        rel.startsWith("business/") ? `workspace/${rel}` : rel,
+        rel.startsWith("playbook/") ? `workspace/${rel}` : rel,
+      ];
+      const sourceRel = sourceCandidates.find((candidate) => existsSync(path.join(skillRoot, candidate))) ?? rel;
+      const text = readFileSync(path.join(skillRoot, sourceRel), "utf8");'''
           text, count = re.subn(
-              r'const text = readFileSync\(path\.join\(skillRoot,\s*rel\),\s*["\']utf8["\']\);',
+              r'const sourceRel = rel\.startsWith\("business/studio/generated/"\)[\s\S]*?const text = readFileSync\(path\.join\(skillRoot, sourceRel\), "utf8"\);',
               replacement,
               text,
+              count=1,
           )
+          if count == 0:
+              text, count = re.subn(
+                  r'const text = readFileSync\(path\.join\(skillRoot,\s*rel\),\s*["\']utf8["\']\);',
+                  replacement,
+                  text,
+                  count=1,
+              )
           if count == 0:
               raise SystemExit('fixture helper source read was not found for normalization')
           fixture.write_text(text)
