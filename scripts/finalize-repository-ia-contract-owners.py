@@ -12,6 +12,7 @@ def replace(path: Path, changes: dict[str, str]) -> None:
         text = text.replace(old, new)
     path.write_text(text)
 
+
 state = SKILL / "business" / "state" / "PROJECT_STATE.yaml"
 replace(state, {"product/experience/product/experience/": "product/experience/"})
 
@@ -33,8 +34,14 @@ for rel in [
             '"app-agent-roster"': '"engineering/app-agent-roster"',
             'business/repo-agent-entrypoints/': 'business/engineering/repo-agent-entrypoints/',
             'business/app-agent-roster/': 'business/engineering/app-agent-roster/',
-            '"business", "repo-agent-entrypoints"': '"business", "engineering/repo-agent-entrypoints"',
-            '"business", "app-agent-roster"': '"business", "engineering/app-agent-roster"',
+            '"business", "repo-agent-entrypoints"': '"business", "engineering", "repo-agent-entrypoints"',
+            '"business", "app-agent-roster"': '"business", "engineering", "app-agent-roster"',
+            'path.join("business", "repo-agent-entrypoints", "settings.json")': 'path.join("business", "engineering", "repo-agent-entrypoints", "settings.json")',
+            'path.join("business", "repo-agent-entrypoints", "AGENTS.md")': 'path.join("business", "engineering", "repo-agent-entrypoints", "AGENTS.md")',
+            'path.join("business", "repo-agent-entrypoints", "CLAUDE.md")': 'path.join("business", "engineering", "repo-agent-entrypoints", "CLAUDE.md")',
+            'path.join(skillRoot, "business", "repo-agent-entrypoints", "AGENTS.md")': 'path.join(skillRoot, "business", "engineering", "repo-agent-entrypoints", "AGENTS.md")',
+            'path.join(skillRoot, "business", "repo-agent-entrypoints", "CLAUDE.md")': 'path.join(skillRoot, "business", "engineering", "repo-agent-entrypoints", "CLAUDE.md")',
+            'path.join(skillRoot, "business", "repo-agent-entrypoints", "settings.json")': 'path.join(skillRoot, "business", "engineering", "repo-agent-entrypoints", "settings.json")',
         },
     )
 
@@ -47,7 +54,7 @@ for rel in [
         SKILL / rel,
         {
             'business/secrets/': 'business/trust/secrets/',
-            '"business", "secrets"': '"business", "trust/secrets"',
+            '"business", "secrets"': '"business", "trust", "secrets"',
             '"secrets/SECRETS.md"': '"trust/secrets/SECRETS.md"',
         },
     )
@@ -79,6 +86,7 @@ replace(
     SKILL / "gates/engineering/check-template-safety.ts",
     {
         'if (path.relative(root, file).split(path.sep)[0] === "landing") {': 'const relativeSegments = path.relative(root, file).split(path.sep);\n  if (relativeSegments[0] === "growth" && relativeSegments[1] === "landing") {',
+        'if (path.relative(root, file).split(path.sep)[0] === "growth/landing") {': 'const relativeSegments = path.relative(root, file).split(path.sep);\n  if (relativeSegments[0] === "growth" && relativeSegments[1] === "landing") {',
     },
 )
 
