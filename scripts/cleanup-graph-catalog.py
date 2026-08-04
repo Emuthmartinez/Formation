@@ -1,0 +1,117 @@
+from pathlib import Path
+import re
+
+root = Path("skill/b2c-mobile-business-launch")
+workflow_dir = root / "graph/workflows"
+
+for file in workflow_dir.glob("*.ts"):
+    if file.name == "helpers.ts":
+        continue
+    text = file.read_text()
+    text = re.sub(r'\n\s*legacyId: "L\d+",', "", text)
+    text = text.replace("upstreamWorkflowIds:", "dependencies:")
+    text = text.replace("artifacts:", "outputPaths:")
+    file.write_text(text)
+
+types = root / "graph/types.ts"
+text = types.read_text()
+text = re.sub(r'\n\s*legacyId\?: `L\$\{string\}`;', "", text)
+for field in ("action: string[];", "proof: string[];", "memory: string[];", "stoppingCondition: string;"):
+    text = text.replace("\n  " + field, "")
+text = text.replace("upstreamWorkflowIds: WorkflowId[];", "dependencies: WorkflowId[];")
+text = text.replace("artifactPaths: string[];", "outputPaths: string[];")
+types.write_text(text)
+
+helpers = root / "graph/workflows/helpers.ts"
+helpers.write_text('''import type { AreaId, DomainId, LaneId, OperatorId, PhaseId, ProviderId, WorkflowDefinition, WorkflowId } from "../types.js";
+
+export interface WorkflowSeed {
+  id: WorkflowId;
+  title: string;
+  domainId: DomainId;
+  areaIds: AreaId[];
+  trigger: string;
+  laneIds?: LaneId[];
+  phaseIds?: PhaseId[];
+  dependencies?: WorkflowId[];
+  outputPaths?: string[];
+  gates?: string[];
+  providers?: ProviderId[];
+  operators?: OperatorId[];
+  founderOnlyActions?: string[];
+}
+
+export function workflow(seed: WorkflowSeed): WorkflowDefinition {
+  return {
+    id: seed.id,
+    title: seed.title,
+    domainId: seed.domainId,
+    areaIds: seed.areaIds,
+    trigger: seed.trigger,
+    negativeTriggers: [],
+    contextPackIds: [`context.${seed.domainId.slice("domain.".length)}`],
+    referenceIds: [],
+    phaseIds: seed.phaseIds ?? [],
+    laneIds: seed.laneIds ?? [],
+    dependencies: seed.dependencies ?? [],
+    outputPaths: seed.outputPaths ?? [],
+    gateCommands: seed.gates ?? [],
+    providerIds: seed.providers ?? [],
+    operatorIds: seed.operators ?? ["operator.orchestrator"],
+    founderOnlyActions: seed.founderOnlyActions ?? [],
+    sourcePath: "graph/workflows",
+  };
+}
+''')
+
+for relative in ("graph/execution.ts", "graph/render.ts"):
+    file = root / relative
+    text = file.read_text()
+    text = text.replace(".artifactPaths", ".outputPaths")
+    text = text.replace(".upstreamWorkflowIds", ".dependencies")
+    text = text.replace("legacyWorkflowEdges", "dependencyEdges")
+    text = text.replace("inferredArtifactInputs", "artifactInputs")
+    if relative.endswith("execution.ts"):
+        text = text.replace("compatibility:", "catalog:")
+    else:
+        text = text.replace("workflow.legacyId ?? workflow.id", "workflow.id")
+    file.write_text(text)
+
+validate = root / "graph/validate.ts"
+text = validate.read_text()
+text = text.replace(
+    "const artifactPaths = new Set(graph.artifacts.map((item) => item.path));",
+    "const artifactsByPath = new Map(graph.artifacts.map((item) => [item.path, item.id]));",
+)
+text = re.sub(r'\n\s*uniqueBy\(graph\.workflows, \(item\) => item\.legacyId \?\? item\.id,.*?;', "", text)
+text = text.replace("workflow.upstreamWorkflowIds", "workflow.dependencies")
+text = text.replace("workflow.artifactPaths", "workflow.outputPaths")
+text = text.replace("upstreamId", "dependencyId")
+text = text.replace("unknown_upstream", "unknown_dependency")
+text = text.replace("artifactPath", "outputPath")
+text = text.replace("artifactPaths.has(outputPath)", "artifactsByPath.has(outputPath)")
+text = text.replace("unknown_artifact", "unknown_output")
+text = re.sub(r'\n  for \(let number = 1; number <= 57; number \+= 1\) \{.*?\n  \}', "", text, flags=re.S)
+text = re.sub(
+    r'function validateWorkflow\(workflow: WorkflowDefinition, issues: GraphIssue\[\]\): void \{.*?\n\}',
+    '''function validateWorkflow(workflow: WorkflowDefinition, issues: GraphIssue[]): void {
+  if (!workflow.trigger.trim()) issues.push(error("skill_graph.workflow.trigger_missing", `${workflow.id} has no trigger.`));
+  if (workflow.contextPackIds.length === 0) issues.push(error("skill_graph.workflow.context_missing", `${workflow.id} has no context pack.`));
+  if (workflow.operatorIds.length === 0) issues.push(error("skill_graph.workflow.operator_missing", `${workflow.id} has no eligible operator.`));
+  if (workflow.outputPaths.length === 0 && workflow.gateCommands.length === 0) issues.push(error("skill_graph.workflow.contract_empty", `${workflow.id} has neither outputs nor verification gates.`));
+}''',
+    text,
+    flags=re.S,
+)
+validate.write_text(text)
+
+fixtures = root / "machine/fixtures/graph.fixtures.ts"
+if fixtures.exists():
+    text = fixtures.read_text()
+    text = re.sub(r'\n\s*legacyId: "L\d+",', "", text)
+    text = text.replace("upstreamWorkflowIds:", "dependencies:")
+    text = text.replace("artifactPaths:", "outputPaths:")
+    for field in ("action", "proof", "memory"):
+        text = re.sub(rf'\n\s*{field}: \[[^\n]*\],', "", text)
+    text = re.sub(r'\n\s*stoppingCondition: [^\n]*,', "", text)
+    fixtures.write_text(text)
