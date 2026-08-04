@@ -14,6 +14,24 @@ replacements = {
     'playbook/**/*.md': 'knowledge/**/*.md',
     'business/**/*.md': 'workspace/business/**/*.md',
 }
+TARGET_ROOTS = {
+    'graph': ('runtime', 'graph'),
+    'runtime/graph': ('runtime', 'graph'),
+    'scripts': ('tooling',),
+    'tooling': ('tooling',),
+    'gates': ('validation', 'business'),
+    'validation/business': ('validation', 'business'),
+    'machine': ('validation', 'repository'),
+    'validation/repository': ('validation', 'repository'),
+    'playbook': ('knowledge',),
+    'knowledge': ('knowledge',),
+    'business': ('workspace', 'business'),
+    'workspace/business': ('workspace', 'business'),
+    'render': ('studio', 'app'),
+    'studio/app': ('studio', 'app'),
+    'state': ('studio', 'seed'),
+    'studio/seed': ('studio', 'seed'),
+}
 
 for path in ROOT.rglob('*'):
     if not path.is_file() or '.git' in path.parts or 'node_modules' in path.parts:
@@ -29,19 +47,29 @@ for path in ROOT.rglob('*'):
         new = new.replace(old, replacement)
 
     if path.suffix.lower() in {'.ts', '.tsx'} and SKILL in path.parents:
-        def fix_graph_import(match: re.Match[str]) -> str:
-            rest = match.group('rest')
-            target = SKILL / 'runtime' / 'graph' / rest
+        import_pattern = re.compile(r'(?P<quote>["\'])(?P<spec>(?:\.{1,2}/)+[^"\']+)(?P=quote)')
+
+        def fix_import(match: re.Match[str]) -> str:
+            spec = match.group('spec')
+            normalized = spec.replace('\\', '/')
+            chosen = None
+            rest = ''
+            for marker, target_parts in sorted(TARGET_ROOTS.items(), key=lambda item: len(item[0]), reverse=True):
+                token = marker + '/'
+                idx = normalized.find(token)
+                if idx >= 0:
+                    chosen = target_parts
+                    rest = normalized[idx + len(token):]
+                    break
+            if chosen is None:
+                return match.group(0)
+            target = SKILL.joinpath(*chosen, rest)
             rel = os.path.relpath(target, path.parent).replace(os.sep, '/')
             if not rel.startswith('.'):
                 rel = './' + rel
             return match.group('quote') + rel + match.group('quote')
 
-        new = re.sub(
-            r'(?P<quote>["\'])(?:\.{1,2}/)+graph/(?P<rest>[^"\']+)(?P=quote)',
-            fix_graph_import,
-            new,
-        )
+        new = import_pattern.sub(fix_import, new)
 
     if new != text:
         path.write_text(new)
