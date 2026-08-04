@@ -10,8 +10,8 @@ must_catch:
   - workflow without a stable graph id or proof contract
   - lane dependency or workflow edge pointing to an unknown node
   - generated SKILL.md, spine, graph, or context report drift
-  - static definitions copied into mutable PROJECT_STATE.yaml
+  - static definitions copied into mutable state/PROJECT_STATE.yaml
 should_say:
   - The typed graph is authoritative and generated projections are not edited independently.
-  - PROJECT_STATE.yaml keeps mutable instance state while topology remains skill-owned.
+  - state/PROJECT_STATE.yaml keeps mutable instance state while topology remains skill-owned.
 behavioral: false

@@ -50,10 +50,10 @@ const engineeringPath = path.join(skillRoot, "playbook", "engineering", "enginee
 // tool-recipes surface; the index only routes to it.
 const toolRecipesPath = path.join(skillRoot, "playbook", "process", "tool-recipes", "engineering-and-agent-orchestration.md");
 const compoundEngineeringPath = path.join(skillRoot, "playbook", "orchestration", "compound-engineering-routing.md");
-const templateAgentsPath = path.join(skillRoot, "business", "repo-agent-entrypoints", "AGENTS.md");
-const templateClaudePath = path.join(skillRoot, "business", "repo-agent-entrypoints", "CLAUDE.md");
-const orchestrationTemplatePath = path.join(skillRoot, "business", "ORCHESTRATION.md");
-const projectStateTemplatePath = path.join(skillRoot, "business", "PROJECT_STATE.yaml");
+const templateAgentsPath = path.join(skillRoot, "business", "engineering/repo-agent-entrypoints", "AGENTS.md");
+const templateClaudePath = path.join(skillRoot, "business", "engineering/repo-agent-entrypoints", "CLAUDE.md");
+const orchestrationTemplatePath = path.join(skillRoot, "business", "operations/ORCHESTRATION.md");
+const projectStateTemplatePath = path.join(skillRoot, "business", "state/PROJECT_STATE.yaml");
 const launchbenchDir = path.join(skillRoot, "machine", "evals", "launchbench");
 
 const parallel = readRequired(parallelPath, "parallel_agent_reference", issues);
@@ -134,8 +134,8 @@ requireTerms(
     "mechanical enforcement",
     "validators, LaunchBench, and failure cards",
     "record why subagents are unavailable or unsafe",
-    "record the fallback reason in `ORCHESTRATION.md`",
-    "PROJECT_STATE.yaml` `compound_engineering`",
+    "record the fallback reason in `operations/ORCHESTRATION.md`",
+    "state/PROJECT_STATE.yaml` `compound_engineering`",
     "Session Continuity",
     "AGENTS.md",
     "Do not rely on chat memory",
@@ -219,11 +219,11 @@ for (const scenario of [
     if (scenario === "continuity-drift-between-sessions.yaml") {
       requiredTerms.push(
         "check-continuity-contract",
-        "PROJECT_STATE.yaml",
-        "launch-cockpit.html",
-        "ORCHESTRATION.md",
-        "PRODUCTION_READINESS.md",
-        "FAILURE_CARDS.md",
+        "state/PROJECT_STATE.yaml",
+        "state/launch-cockpit.html",
+        "operations/ORCHESTRATION.md",
+        "engineering/PRODUCTION_READINESS.md",
+        "operations/FAILURE_CARDS.md",
         "git status",
         "APP_AGENTS.md",
       );

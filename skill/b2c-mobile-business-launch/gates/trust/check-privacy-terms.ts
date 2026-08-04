@@ -2,9 +2,9 @@
 /**
  * check-privacy-terms.ts — content floor for the privacy_legal lane.
  *
- * PRIVACY.md and TERMS.md are the source drafts for the public policy pages
+ * trust/PRIVACY.md and trust/TERMS.md are the source drafts for the public policy pages
  * and store disclosures; the lane previously had no dedicated validator.
- * Structure follows the PRIVACY.md / TERMS.md contracts in
+ * Structure follows the trust/PRIVACY.md / trust/TERMS.md contracts in
  * playbook/process/artifact-contracts.md. Founder/legal approval remains the final
  * gate — this validator enforces the structural floor, not legal adequacy.
  *
@@ -24,11 +24,11 @@ const done = laneStatus === "done";
 
 const documents: Array<{ name: string; requiredPhrases: string[] }> = [
   {
-    name: "PRIVACY.md",
+    name: "trust/PRIVACY.md",
     requiredPhrases: ["Effective date", "Privacy contact", "Data Inventory", "Retention And Deletion", "App Store Disclosure Mapping", "Deletion route"],
   },
   {
-    name: "TERMS.md",
+    name: "trust/TERMS.md",
     requiredPhrases: ["Effective date", "not legal advice", "Subscriptions And Refunds", "Disclaimers And Liability", "Platform Terms", "governing law"],
   },
 ];

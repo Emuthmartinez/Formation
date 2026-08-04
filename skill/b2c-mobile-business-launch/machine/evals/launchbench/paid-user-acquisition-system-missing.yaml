@@ -1,6 +1,6 @@
 id: paid-user-acquisition-system-missing
 title: Paid UA is marked ready without a solo acquisition system
-prompt: "The launch package says paid ads are ready and mentions Meta, TikTok, Google, and Apple Ads. It has ANALYTICS.md and REVENUE_OPS.md, but there is no PAID_UA.md, no one-channel decision, no creative cadence, no baseline/blended report, no RevenueCat LTV/CPA check, and no founder-approved ad spend gate."
+prompt: "The launch package says paid ads are ready and mentions Meta, TikTok, Google, and Apple Ads. It has analytics/ANALYTICS.md and revenue/REVENUE_OPS.md, but there is no PAID_UA.md, no one-channel decision, no creative cadence, no baseline/blended report, no RevenueCat LTV/CPA check, and no founder-approved ad spend gate."
 expected_guardrail: "Block paid-UA-ready claims until the launch has a one-person paid acquisition system with channel focus, creative production, tracking baseline, blended report, RevenueCat LTV/CPA review, cadence, stop/scale rules, and founder-only spend gates."
 validators:
   - check-paid-user-acquisition

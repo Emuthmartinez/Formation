@@ -39,17 +39,17 @@ Create:
 Output as SQL I can run directly in Supabase's SQL editor.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Reconcile with `TECH_SPEC.md` (data model, API contracts, RLS, Storage layout) before building clients. Every user-data table needs a **tested** owner-only policy (pgTAP, per `backend-data-contract.md`) referenced from `SECURITY.md`.
+- Reconcile with `engineering/TECH_SPEC.md` (data model, API contracts, RLS, Storage layout) before building clients. Every user-data table needs a **tested** owner-only policy (pgTAP, per `backend-data-contract.md`) referenced from `trust/SECURITY.md`.
 - **Media is never served from the app server.** Files live in Supabase Storage; clients get short-lived signed URLs (prompt 03). Storage paths are owner-scoped (`<user_id>/...`) so the Storage policies can enforce ownership by prefix.
 - The credit ledger is the metering substrate for prompt 06 — append-only, signed amounts, balance-by-sum. Cost per generation (credits and estimated provider cost) is what makes COGS visible; don't store text-only "success" rows.
-- `generations.provider` / `model` are recorded values, not hardcoded choices — the provider decision is founder-gated (`paid-tool-routing.md`, `TOOL_DECISIONS.md`); the schema must survive a provider swap.
+- `generations.provider` / `model` are recorded values, not hardcoded choices — the provider decision is founder-gated (`paid-tool-routing.md`, `strategy/TOOL_DECISIONS.md`); the schema must survive a provider swap.
 - Uploaded faces are biometric-adjacent personal data — note retention and deletion (asset rows AND storage objects AND any provider-side copies) in `privacy-terms.md`.
 - Seed data is development-only.

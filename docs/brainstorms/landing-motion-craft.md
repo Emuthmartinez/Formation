@@ -1,7 +1,7 @@
 # Brainstorm: motionsites-grade landing motion as a skill lane
 
 Date: 2026-06-13
-Status: **implemented** (founder greenlit the full change-set 2026-07-07; shipped as v0.15.0 — `playbook/design/landing-motion-craft.md`, `business/landing/`, the landing motion-token promotion, the `check:landing-funnel` motion-craft gates, and the `landing-motion-progressive-enhancement-missing` LaunchBench scenario)
+Status: **implemented** (founder greenlit the full change-set 2026-07-07; shipped as v0.15.0 — `playbook/design/landing-motion-craft.md`, `business/growth/landing/`, the landing motion-token promotion, the `check:landing-funnel` motion-craft gates, and the `landing-motion-progressive-enhancement-missing` LaunchBench scenario)
 Compound Engineering note: CE tooling (`ce-brainstorm`/`ce-plan`/`ce-work`) is unavailable in this cloud session; per `playbook/engineering/engineering-orchestration.md` §1b this design pass is the Standalone Engineering Loop equivalent (plan → bounded slice → adversarial review via the existing validators → proof via `npm run audit:ci`). The proof artifact is committed; the validator/eval/template work below is scoped but deliberately not yet written, because the founder asked to "practice making some here and **see if we can match the level of quality** to abstract it into a skill" — i.e. evaluate first, then abstract.
 
 ## The ask
@@ -52,13 +52,13 @@ The "wow" of motionsites is ~85% the **live** lane and ~15% the **baked** lane. 
 ## Gap analysis — where the skill currently undershoots
 
 1. **No section library.** `business/` has design/onboarding/store HTML proofs but **no landing-page section catalog**. Landing pages are improvised per launch; `check-landing-funnel.ts` even fingerprints an **Alpine.js + static HTML** funnel (CSP gate), i.e. the current floor is a simple form page, not a motionsites-grade site.
-2. **Motion doctrine is tuned for in-app micro-motion, not cinematic web.** `design-system/tokens.css` tops out at `--motion-duration-slow: 360ms` with one easing. Correct for the shipped binary; too short/flat for hero word-reveals and scroll choreography. There is no expo-out / spring easing and no stagger token for web.
+2. **Motion doctrine is tuned for in-app micro-motion, not cinematic web.** `design/system/tokens.css` tops out at `--motion-duration-slow: 360ms` with one easing. Correct for the shipped binary; too short/flat for hero word-reveals and scroll choreography. There is no expo-out / spring easing and no stagger token for web.
 3. **Landing validator checks plumbing, not craft.** `check-landing-funnel.ts` enforces deploy gates, GEO/SEO files, copy compliance, waitlist idempotency — **zero** checks on motion quality, reduced-motion fallback, or that animation didn't gate LCP/hide text from crawlers.
 4. **The cinematic-vs-GEO tension is unresolved in guidance.** §3a says "motion is progressive enhancement, don't delay LCP" — right, but it reads as a brake. Nothing shows a team _how_ to be cinematic **and** crawlable/fast at once.
 
 ## The practice proof: `docs/prototypes/landing-motion-lab.html`
 
-A single, **fully self-contained** file (zero external fonts/scripts/CDNs — required so it passes `check:source-registry`, and so it opens offline anywhere). It is built **entirely on the skill's real brand tokens** (the cream/green/coral + Fraunces/Source Sans system from `design-system/tokens.css`) to prove the section library is token-driven, not a generic dark SaaS skin. Open it in a browser and toggle "Pattern labels" to read each section's technique.
+A single, **fully self-contained** file (zero external fonts/scripts/CDNs — required so it passes `check:source-registry`, and so it opens offline anywhere). It is built **entirely on the skill's real brand tokens** (the cream/green/coral + Fraunces/Source Sans system from `design/system/tokens.css`) to prove the section library is token-driven, not a generic dark SaaS skin. Open it in a browser and toggle "Pattern labels" to read each section's technique.
 
 Coverage vs the motionsites catalog:
 
@@ -90,8 +90,8 @@ Coverage vs the motionsites catalog:
 If we greenlight, the change-set (each piece earns its place per AGENTS.md "add a validator/eval, not prose"):
 
 1. **`playbook/design/landing-motion-craft.md`** — the two-lane model, the section catalog with technique + the "progressive-enhancement contract" (SSR text, `js`-gated reveals, reduced-motion collapse, no LCP gate), and the Remotion↔motion handoff. Routed from `geo-seo.md` §3a and `design-visual-system.md`.
-2. **`business/landing/`** — a runnable **section library** (Next or Astro + `motion/react`) mirroring the proof's sections, each a typed, token-driven component reading `--motion-*`. Ships `robots.txt`/`llms.txt`/`sitemap.xml` (already required) and a baked-video slot wired to the Remotion content-assets lane.
-3. **Motion-token promotion** — add `--motion-duration-reveal`, `--motion-duration-cinematic`, `--motion-easing-emphasis` (expo-out), `--motion-easing-spring`, `--motion-stagger` to `design-system/tokens.css` + `tokens.json` (the proof prototypes them in `:root`), so Remotion ads and the landing page share one timing system. Bumps the design-token hash → run `promote-design-tokens`.
+2. **`business/growth/landing/`** — a runnable **section library** (Next or Astro + `motion/react`) mirroring the proof's sections, each a typed, token-driven component reading `--motion-*`. Ships `robots.txt`/`llms.txt`/`sitemap.xml` (already required) and a baked-video slot wired to the Remotion content-assets lane.
+3. **Motion-token promotion** — add `--motion-duration-reveal`, `--motion-duration-cinematic`, `--motion-easing-emphasis` (expo-out), `--motion-easing-spring`, `--motion-stagger` to `design/system/tokens.css` + `tokens.json` (the proof prototypes them in `:root`), so Remotion ads and the landing page share one timing system. Bumps the design-token hash → run `promote-design-tokens`.
 4. **Extend `check-landing-funnel.ts`** — when a landing site is in scope, additionally assert: `prefers-reduced-motion` block present; no animation library imported into the shipped mobile binary; above-the-fold text exists in static HTML (anti-LCP-gate / anti-crawler-hiding heuristic); motion reads tokenized `--motion-*` rather than magic numbers.
 5. **LaunchBench eval** — `landing-motion-progressive-enhancement-missing.yaml`: a landing site that hides hero copy until JS / ignores reduced-motion must fail.
 6. **Source registry** — add `motion.dev` scroll/in-view doc pages actually used; record `motionsites.ai` as an _inspiration benchmark_ (visual reference, not a command-syntax source). Lenis only if adopted.

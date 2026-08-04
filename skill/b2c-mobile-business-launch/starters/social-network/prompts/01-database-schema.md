@@ -21,16 +21,16 @@ Create:
 Output as SQL I can run directly in Supabase's SQL editor.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Reconcile the output with `TECH_SPEC.md` (data model, API contracts, app states). The schema is the source of truth; keep them aligned.
-- **RLS is the security lane.** Every table holding user data needs a policy and a test. Pull these into `SECURITY.md` (`security-release-hardening.md`) and add visibility rules you'll need later: private accounts, blocks, and who can read DMs.
+- Reconcile the output with `engineering/TECH_SPEC.md` (data model, API contracts, app states). The schema is the source of truth; keep them aligned.
+- **RLS is the security lane.** Every table holding user data needs a policy and a test. Pull these into `trust/SECURITY.md` (`security-release-hardening.md`) and add visibility rules you'll need later: private accounts, blocks, and who can read DMs.
 - Verify the feed query plan: a follows-join feed is the hot path. Confirm the indexes cover (follower → followed → posts ordered by created_at). It's fine to be naive at 100 users; record the bottleneck to revisit near ~10k.
 - Keep the schema stable across variants — the image-first and video-first variants add columns/tables (media, aspect ratio, stories, video duration) rather than reshaping the core.
 - Seed data is for development only; never seed production with test users.

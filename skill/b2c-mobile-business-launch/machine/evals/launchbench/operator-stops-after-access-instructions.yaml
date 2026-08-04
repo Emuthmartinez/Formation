@@ -5,7 +5,7 @@ prompt: >
   the founder to come back after they finish all of it manually.
 expected_guardrail: >
   Use current browser/account tools to guide or execute setup, pause only for the single ownership/login
-  action, verify access, update BUSINESS_ACCESS.md and state, then continue directly into profile setup,
+  action, verify access, update operations/BUSINESS_ACCESS.md and state, then continue directly into profile setup,
   research, content drafting, support, analytics, or the next launch operation.
 validators:
   - check-founder-operator-bootstrap

@@ -6,5 +6,5 @@ Load the row whose trigger matches the work in front of you. Do not preload the 
 
 | Load when | Reference | Produces / gate |
 | --- | --- | --- |
-| before drafting or publishing privacy policy, terms, EULA, subscription terms, account/data deletion flows, or app-store privacy/Data safety disclosures | [`privacy-terms.md`](privacy-terms.md) | `PRIVACY.md`, `TERMS.md`, `LEGAL_REVIEW.md` · `check:privacy-terms` |
+| before drafting or publishing privacy policy, terms, EULA, subscription terms, account/data deletion flows, or app-store privacy/Data safety disclosures | [`privacy-terms.md`](privacy-terms.md) | `trust/PRIVACY.md`, `trust/TERMS.md`, `LEGAL_REVIEW.md` · `check:privacy-terms` |
 | working on security release hardening | [`security-release-hardening.md`](security-release-hardening.md) | — |

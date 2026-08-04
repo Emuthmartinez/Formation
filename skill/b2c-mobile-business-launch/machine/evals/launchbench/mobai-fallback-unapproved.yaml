@@ -10,4 +10,4 @@ must_catch:
   - "XcodeBuildMCP only covers Apple-platform scope"
   - "device testing cannot be marked complete for Android or MobAI-specific flows"
 should_say:
-  - "Record the decision in TOOL_DECISIONS.md and PROJECT_STATE.yaml."
+  - "Record the decision in strategy/TOOL_DECISIONS.md and state/PROJECT_STATE.yaml."

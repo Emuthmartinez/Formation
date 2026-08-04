@@ -14,7 +14,7 @@
   },
   "designRoom": {
     "status": "not_started",
-    "renderPath": "design-room.html",
+    "renderPath": "design/design-room.html",
     "versionLog": [
       {
         "id": "initial-state",
@@ -25,7 +25,7 @@
           "state/theme.tokens.json"
         ],
         "renderedArtifacts": [
-          "design-room.html"
+          "design/design-room.html"
         ]
       }
     ],
@@ -67,7 +67,7 @@
           "state/theme.tokens.json"
         ],
         "renderedArtifacts": [
-          "design-room.html"
+          "design/design-room.html"
         ]
       },
       {
@@ -75,12 +75,12 @@
         "name": "Analytics",
         "status": "planned",
         "stateRefs": [
-          "PROJECT_STATE.yaml",
-          "ANALYTICS.md",
-          "analytics-plan.html"
+          "state/PROJECT_STATE.yaml",
+          "analytics/ANALYTICS.md",
+          "analytics/analytics-plan.html"
         ],
         "renderedArtifacts": [
-          "analytics-plan.html"
+          "analytics/analytics-plan.html"
         ]
       },
       {
@@ -88,8 +88,8 @@
         "name": "Monetization",
         "status": "planned",
         "stateRefs": [
-          "PROJECT_STATE.yaml",
-          "REVENUE_OPS.md"
+          "state/PROJECT_STATE.yaml",
+          "revenue/REVENUE_OPS.md"
         ],
         "renderedArtifacts": [
           "revenue-plan.html"
@@ -100,14 +100,14 @@
         "name": "Store Ops",
         "status": "planned",
         "stateRefs": [
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
           "APP_STORE_LISTING.md",
-          "STORE_CONSOLE.md",
+          "store/STORE_CONSOLE.md",
           "SCREENSHOTS.md"
         ],
         "renderedArtifacts": [
           "app-store-listing.html",
-          "store-console.html"
+          "store/store-console.html"
         ]
       },
       {
@@ -115,7 +115,7 @@
         "name": "Growth",
         "status": "planned",
         "stateRefs": [
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
           "growth/PAID_UA.md",
           "growth/VIRAL_GROWTH.md"
         ],

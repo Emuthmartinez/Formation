@@ -24,8 +24,8 @@ function existsAny(candidates: string[]): string | undefined {
 
 const designStatus = state ? asString(getPath(state, "lanes.design.status")) : undefined;
 const skip = designStatus === "not_needed" || designStatus === "deferred";
-const markdown = firstExistingText(["UX_PATTERNS.md", "ux-patterns/UX_PATTERNS.md"]);
-const htmlPath = existsAny(["ux-patterns.html", "ux-patterns/ux-patterns.html", "design.html"]);
+const markdown = firstExistingText(["UX_PATTERNS.md", "product/experience/ux-patterns/UX_PATTERNS.md"]);
+const htmlPath = existsAny(["ux-patterns.html", "product/experience/ux-patterns/ux-patterns.html", "design/design.html"]);
 
 if (!skip && !markdown) {
   issues.push(
@@ -83,7 +83,7 @@ if (!skip && !htmlPath) {
     issue(
       "warning",
       "ux_patterns.html_missing",
-      "ux-patterns.html or design.html should render the pattern inventory, flow maps, and state matrix.",
+      "ux-patterns.html or design/design.html should render the pattern inventory, flow maps, and state matrix.",
       "ux-patterns.html",
     ),
   );

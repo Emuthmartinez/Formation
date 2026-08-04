@@ -358,13 +358,13 @@ Dashboard description should state: "This dashboard is the audit surface. If any
 
 ## 9. Dark-Pattern Detection Protocol
 
-Run this protocol weekly while any emotional card experiment is active. Record results in `PROJECT_STATE.yaml` under `lanes.emotional_design.dark_pattern_watch`.
+Run this protocol weekly while any emotional card experiment is active. Record results in `state/PROJECT_STATE.yaml` under `lanes.emotional_design.dark_pattern_watch`.
 
 1. Pull the "Dark-Pattern Watch" dashboard for the past 7 days.
 2. For each card, check all counter-metrics against their thresholds (Sections 4c, 5c, 6c, 7c).
 3. Run an App Store review text scan for cluster terms: "addictive," "manipulative," "gambling," "guilt," "shame," "fake," "slot machine," "can't cancel," "won't let me," "trapped."
 4. If any threshold is breached OR any text cluster appears with ≥ 3 reviews: open the `experience-card-dark-pattern` failure card (Section 12), pause the triggering experiment variant, notify the founder.
-5. If all clear: record date and sign-off in `PROJECT_STATE.yaml`. Close any open watch cards.
+5. If all clear: record date and sign-off in `state/PROJECT_STATE.yaml`. Close any open watch cards.
 6. If a card has been paused for ≥ 14 days with no resolution, escalate to a design review. Do not silently re-enable paused variants.
 
 ## 10. Ethics Guardrails And Compliance Veto
@@ -386,7 +386,7 @@ Add these checks to the standard analytics QA from `analytics-attribution.md`.
 - Each card's computation_type is documented and verified: Perceived Effort Delay steps reference only real computation or real UI composition, not arbitrary sleep timers.
 - The "Dark-Pattern Watch" dashboard exists in PostHog before any card experiment goes live.
 - A/B experiment flags are gated: control variant is always the safe baseline; no experiment ships without a counter-metric alert configured in PostHog.
-- `PROJECT_STATE.yaml` `lanes.emotional_design` includes `status`, `evidence`, `active_experiments`, and `dark_pattern_watch.last_reviewed_at` fields.
+- `state/PROJECT_STATE.yaml` `lanes.emotional_design` includes `status`, `evidence`, `active_experiments`, and `dark_pattern_watch.last_reviewed_at` fields.
 
 Run:
 
@@ -394,11 +394,11 @@ Run:
 npm run check:analytics -- --root .
 ```
 
-Verify `emotion_card_fired` and at least one card-specific event appear in the event catalog section of `ANALYTICS.md`.
+Verify `emotion_card_fired` and at least one card-specific event appear in the event catalog section of `analytics/ANALYTICS.md`.
 
 ## 12. Failure Card Shape
 
-Use this shape when a dark-pattern signal is detected. Store in `PROJECT_STATE.yaml` and mirror in `FAILURE_CARDS.md` when the launch is large.
+Use this shape when a dark-pattern signal is detected. Store in `state/PROJECT_STATE.yaml` and mirror in `operations/FAILURE_CARDS.md` when the launch is large.
 
 ```yaml
 id: "experience-card-dark-pattern"
@@ -427,5 +427,5 @@ evidence:
   - "emotion_card_fired event absent from PostHog activity"
 impact: "Emotional card is live without instrumentation. Dark-pattern signals cannot be detected. Analytics audit produces no evidence."
 next_action: "Implement all four system events (emotion_card_fired, emotion_card_completed, emotion_card_abandoned, emotion_card_opt_out) and at least the primary event for each active card before any experiment flag is enabled."
-validator: "npm run check:analytics -- --root . shows emotion_card_fired in ANALYTICS.md event catalog"
+validator: "npm run check:analytics -- --root . shows emotion_card_fired in analytics/ANALYTICS.md event catalog"
 ```

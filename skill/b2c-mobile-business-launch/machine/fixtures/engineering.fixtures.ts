@@ -21,7 +21,7 @@ export function register(h: Harness): void {
   const orchestrationNoPreflightState = readState(orchestrationNoPreflight);
   const noPreflightLane = getLane(orchestrationNoPreflightState, "orchestration");
   noPreflightLane["status"] = "done";
-  noPreflightLane["evidence"] = ["orchestration/ORCHESTRATION.md", "orchestration/orchestration.html"];
+  noPreflightLane["evidence"] = ["orchestration/operations/ORCHESTRATION.md", "orchestration/operations/orchestration.html"];
   writeState(orchestrationNoPreflight, orchestrationNoPreflightState);
   runFixture(
     "orchestration done without preflight fails",
@@ -49,7 +49,7 @@ export function register(h: Harness): void {
         role: "engineering leader",
         objective: "Update analytics plan.",
         mode: "edit",
-        files: ["ENGINEERING_PLAN.md"],
+        files: ["engineering/ENGINEERING_PLAN.md"],
         shared_resources: [],
         parallel_safe: true,
         status: "pending",
@@ -59,14 +59,14 @@ export function register(h: Harness): void {
         role: "engineering leader",
         objective: "Update revenue plan.",
         mode: "edit",
-        files: ["ENGINEERING_PLAN.md"],
+        files: ["engineering/ENGINEERING_PLAN.md"],
         shared_resources: [],
         parallel_safe: true,
         status: "pending",
       },
     ],
     parallel_safe_units: ["analytics-doc", "revenue-doc"],
-    serialized_units: ["PROJECT_STATE.yaml updates", "git staging, commits, merges, pushes, and releases"],
+    serialized_units: ["state/PROJECT_STATE.yaml updates", "git staging, commits, merges, pushes, and releases"],
     spawned_agents: [],
     focused_validators_run: [],
     full_suites_run: [],
@@ -105,7 +105,7 @@ export function register(h: Harness): void {
       },
     ],
     parallel_safe_units: ["worker-doc"],
-    serialized_units: ["PROJECT_STATE.yaml updates", "git staging, commits, merges, pushes, and releases"],
+    serialized_units: ["state/PROJECT_STATE.yaml updates", "git staging, commits, merges, pushes, and releases"],
     spawned_agents: [
       {
         id: "agent-worker",
@@ -144,7 +144,7 @@ export function register(h: Harness): void {
 
   const orchestrationPermissivePrompt = makeFixture("orchestration-permissive-prompt");
   writeFileSync(
-    path.join(orchestrationPermissivePrompt, "ORCHESTRATION.md"),
+    path.join(orchestrationPermissivePrompt, "operations/ORCHESTRATION.md"),
     [
       "# Orchestration",
       "Orchestration Preflight",
@@ -180,7 +180,7 @@ export function register(h: Harness): void {
     getLane(state, "engineering")["status"] = "done";
     writeState(compoundSkipped, state);
   }
-  writeFileSync(path.join(compoundSkipped, "ENGINEERING_PLAN.md"), "# Engineering Plan\n\nGeneric implementation checklist.\n", "utf8");
+  writeFileSync(path.join(compoundSkipped, "engineering/ENGINEERING_PLAN.md"), "# Engineering Plan\n\nGeneric implementation checklist.\n", "utf8");
   runFixture(
     "core engineering without Compound Engineering route fails",
     compoundSkipped,
@@ -211,7 +211,7 @@ export function register(h: Harness): void {
   runFixture("unregistered external source fails source freshness", sourceRegistryMissing, "check-source-freshness.ts", 1, "source_freshness.url_unregistered");
 
   const designRoomMissingRender = makeFixture("design-room-missing-render");
-  rmSync(path.join(designRoomMissingRender, "design-room.html"), { force: true });
+  rmSync(path.join(designRoomMissingRender, "design/design-room.html"), { force: true });
   runFixture("Design Room state without render fails", designRoomMissingRender, "check-design-room-contract.ts", 1, "design_room.render_missing");
 
   const designRoomFreeform = makeFixture("design-room-freeform-proposal");
@@ -239,15 +239,15 @@ export function register(h: Harness): void {
     const state = readState(providerProofMissing);
     const revenue = getLane(state, "revenue");
     revenue["status"] = "done";
-    revenue["evidence"] = ["REVENUE_OPS.md"];
+    revenue["evidence"] = ["revenue/REVENUE_OPS.md"];
     writeState(providerProofMissing, state);
-    rmSync(path.join(providerProofMissing, "PROVIDER_PROOF.md"), { force: true });
+    rmSync(path.join(providerProofMissing, "operations/PROVIDER_PROOF.md"), { force: true });
   }
   runFixture("provider-backed done lane without proof fails", providerProofMissing, "check-live-provider-proof.ts", 1, "provider_proof.file_missing");
 
   const providerProofContradiction = makeFixture("provider-proof-contradiction");
   writeFileSync(
-    path.join(providerProofContradiction, "PROVIDER_PROOF.md"),
+    path.join(providerProofContradiction, "operations/PROVIDER_PROOF.md"),
     [
       "# Provider Proof",
       "Status: verified but pending founder-only blocker.",
@@ -270,7 +270,7 @@ export function register(h: Harness): void {
     const state = readState(providerProofGrounded);
     const analytics = getLane(state, "analytics_attribution");
     analytics["status"] = "done";
-    analytics["evidence"] = ["ANALYTICS.md", "analytics/posthog-proof.md"];
+    analytics["evidence"] = ["analytics/ANALYTICS.md", "analytics/posthog-proof.md"];
     writeState(providerProofGrounded, state);
     writeCompleteProviderProof(providerProofGrounded);
     mkdirSync(path.join(providerProofGrounded, "analytics"), { recursive: true });
@@ -283,7 +283,7 @@ export function register(h: Harness): void {
     const state = readState(providerProofUngrounded);
     const analytics = getLane(state, "analytics_attribution");
     analytics["status"] = "done";
-    analytics["evidence"] = ["ANALYTICS.md"];
+    analytics["evidence"] = ["analytics/ANALYTICS.md"];
     writeState(providerProofUngrounded, state);
     writeCompleteProviderProof(providerProofUngrounded);
   }
@@ -302,10 +302,10 @@ export function register(h: Harness): void {
     const state = readState(providerProofPipedCommand);
     const analytics = getLane(state, "analytics_attribution");
     analytics["status"] = "done";
-    analytics["evidence"] = ["ANALYTICS.md", "analytics/posthog-proof.md"];
+    analytics["evidence"] = ["analytics/ANALYTICS.md", "analytics/posthog-proof.md"];
     writeState(providerProofPipedCommand, state);
     writeCompleteProviderProof(providerProofPipedCommand);
-    const proofPath = path.join(providerProofPipedCommand, "PROVIDER_PROOF.md");
+    const proofPath = path.join(providerProofPipedCommand, "operations/PROVIDER_PROOF.md");
     const withPipedCommand = readFileSync(proofPath, "utf8").replace(
       "| PostHog | event and person property captured | inspect dashboard/API | analytics/posthog-proof.md |",
       "| PostHog | event and person property captured | curl api.posthog.com \\| jq .results | analytics/posthog-proof.md |",
@@ -316,11 +316,11 @@ export function register(h: Harness): void {
   }
   runFixture("provider proof row with a piped proof command still grounds", providerProofPipedCommand, "check-live-provider-proof.ts", 0);
 
-  // Regression (verification pass): the shipped PRODUCTION_READINESS.md
+  // Regression (verification pass): the shipped engineering/PRODUCTION_READINESS.md
   // template's cautionary boilerplate ("Do not mark this app launch-ready
   // until ...") must not hard-fail a repo where no lane is done yet.
   const providerProofEarlyRepo = makeFixture("provider-proof-early-repo");
-  rmSync(path.join(providerProofEarlyRepo, "PROVIDER_PROOF.md"), { force: true });
+  rmSync(path.join(providerProofEarlyRepo, "operations/PROVIDER_PROOF.md"), { force: true });
   runFixture("readiness boilerplate without done lanes does not hard-fail provider proof", providerProofEarlyRepo, "check-live-provider-proof.ts", 0);
 
   const providerProofStaleStatus = makeFixture("provider-proof-stale-status");
@@ -328,7 +328,7 @@ export function register(h: Harness): void {
     const state = readState(providerProofStaleStatus);
     const analytics = getLane(state, "analytics_attribution");
     analytics["status"] = "done";
-    analytics["evidence"] = ["ANALYTICS.md"];
+    analytics["evidence"] = ["analytics/ANALYTICS.md"];
     writeState(providerProofStaleStatus, state);
     // Keep the shipped template ledger: its PostHog status still reads "needs
     // live event and person-property evidence", which cannot back a done lane.

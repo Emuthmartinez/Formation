@@ -2,7 +2,7 @@
 
 Use this reference before marking analytics, revenue, email, store, security, or engineering lanes done.
 
-`PROVIDER_PROOF.md` is the live-evidence ledger. It separates planned provider setup from proof that the provider actually worked.
+`operations/PROVIDER_PROOF.md` is the live-evidence ledger. It separates planned provider setup from proof that the provider actually worked.
 
 ## Required Providers
 
@@ -26,7 +26,7 @@ For most B2C mobile launches, the proof ledger should cover:
 
 ## Minimum Ledger Shape
 
-Use `business/PROVIDER_PROOF.md` as the starter. Each row needs:
+Use `business/operations/PROVIDER_PROOF.md` as the starter. Each row needs:
 
 - provider name
 - current status

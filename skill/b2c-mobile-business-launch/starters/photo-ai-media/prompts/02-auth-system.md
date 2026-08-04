@@ -24,9 +24,9 @@ Design: clean, modern, media-forward (the user's photos are the hero). Form
 validation with clear error messages.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -36,4 +36,4 @@ shipping strings.
 - **Anonymous try-before-signup is a common pattern in this category** (upload a photo, see a preview, sign up to keep it). It converts well because the wow moment precedes the ask — but it is also an abuse and cost surface: anonymous generations burn real provider money and dodge per-user quotas. If the founder wants it, gate it deliberately: device-scoped quota of 1 cheap/low-res preview, server-side rate limiting, full safety screening (prompt 08) still applies, and the asset migrates to the account on signup. Surface the tradeoff to the founder; do not silently add or silently skip it.
 - The first-run "what do you want to make" answer is an onboarding surface (`onboarding-conversion.md`) and seeds preset selection (prompt 05) — an Intent Mirroring input, not throwaway copy.
 - Reconcile the look with Design Room tokens (`design-room.md`); don't invent a one-off style.
-- Add `sign_up_completed`, `oauth_used`, `first_run_completed` (and `anonymous_preview_used` if the try-first path ships) to `ANALYTICS.md`.
+- Add `sign_up_completed`, `oauth_used`, `first_run_completed` (and `anonymous_preview_used` if the try-first path ships) to `analytics/ANALYTICS.md`.

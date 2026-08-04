@@ -21,16 +21,16 @@ const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues: Issue[] = [...loaded.issues];
 const stateOperator = loaded.state ? getPath(loaded.state, "business_operator") : undefined;
-const humanPath = "BUSINESS_ACCESS.md";
+const humanPath = "operations/BUSINESS_ACCESS.md";
 const ledgerRelative = "operations/business-access.json";
 const schemaRelative = "operations/business-access.schema.json";
 const ledgerPath = path.join(args.root, ledgerRelative);
 const schemaPath = path.join(args.root, schemaRelative);
 const human = readText(args.root, humanPath);
-const cockpit = readText(args.root, "launch-cockpit.html");
+const cockpit = readText(args.root, "state/launch-cockpit.html");
 
 if (!isRecord(stateOperator)) {
-  issues.push(issue("error", "founder_operator.state_missing", "PROJECT_STATE.yaml must include business_operator state.", "PROJECT_STATE.yaml"));
+  issues.push(issue("error", "founder_operator.state_missing", "state/PROJECT_STATE.yaml must include business_operator state.", "state/PROJECT_STATE.yaml"));
 } else {
   requireStateValue("founder_experience", "beginner_assumed");
   requireStateValue("agent_role", "business_operator");
@@ -39,7 +39,7 @@ if (!isRecord(stateOperator)) {
 }
 
 if (!human) {
-  issues.push(issue("error", "founder_operator.human_log_missing", "Seed BUSINESS_ACCESS.md before broad business setup.", humanPath));
+  issues.push(issue("error", "founder_operator.human_log_missing", "Seed operations/BUSINESS_ACCESS.md before broad business setup.", humanPath));
 } else {
   for (const phrase of [
     "Founder-Zero Promise",
@@ -54,12 +54,12 @@ if (!human) {
     "Operator Handoff",
   ]) {
     if (!human.toLowerCase().includes(phrase.toLowerCase())) {
-      issues.push(issue("error", `founder_operator.human_${code(phrase)}_missing`, `BUSINESS_ACCESS.md must include ${phrase}.`, humanPath));
+      issues.push(issue("error", `founder_operator.human_${code(phrase)}_missing`, `operations/BUSINESS_ACCESS.md must include ${phrase}.`, humanPath));
     }
   }
   for (const phrase of ["agent runs setup", "one plain-language step at a time", "Doppler stores automation secrets", "Browser passwords/passkeys"]) {
     if (!human.toLowerCase().includes(phrase.toLowerCase())) {
-      issues.push(issue("error", `founder_operator.promise_${code(phrase)}_missing`, `BUSINESS_ACCESS.md must state: ${phrase}.`, humanPath));
+      issues.push(issue("error", `founder_operator.promise_${code(phrase)}_missing`, `operations/BUSINESS_ACCESS.md must state: ${phrase}.`, humanPath));
     }
   }
   scanForSecrets(human, humanPath);
@@ -93,7 +93,7 @@ reportAndExit("Founder-zero business operator check", issues);
 
 function requireStateValue(key: string, expected: string): void {
   if (isRecord(stateOperator) && asString(stateOperator[key]) !== expected) {
-    issues.push(issue("error", `founder_operator.state_${key}_invalid`, `business_operator.${key} must be ${expected}.`, "PROJECT_STATE.yaml"));
+    issues.push(issue("error", `founder_operator.state_${key}_invalid`, `business_operator.${key} must be ${expected}.`, "state/PROJECT_STATE.yaml"));
   }
 }
 
@@ -644,7 +644,7 @@ function validateState(
           "error",
           `founder_operator.state_${key}_mismatch`,
           `PROJECT_STATE business_operator.${key} must match the structured ledger.`,
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
         ),
       );
     }
@@ -681,7 +681,12 @@ function validateState(
   }
   if (!human || humanGateValues.some((value) => !value || !human.includes(value))) {
     issues.push(
-      issue("error", "founder_operator.human_next_action_stale", "BUSINESS_ACCESS.md must mirror the current founder and agent next actions.", humanPath),
+      issue(
+        "error",
+        "founder_operator.human_next_action_stale",
+        "operations/BUSINESS_ACCESS.md must mirror the current founder and agent next actions.",
+        humanPath,
+      ),
     );
   }
   const humanOneNextAction = human?.split("## One Next Action")[1]?.split("\n## ")[0] ?? "";
@@ -694,7 +699,7 @@ function validateState(
       issue(
         "error",
         "founder_operator.human_stale_gate_visible",
-        "BUSINESS_ACCESS.md must remove stale choices when no founder decision is pending.",
+        "operations/BUSINESS_ACCESS.md must remove stale choices when no founder decision is pending.",
         humanPath,
       ),
     );
@@ -731,7 +736,12 @@ function validateState(
       ].some((entry) => !entry || !cockpitSection.includes(escapeHtml(entry))))
   ) {
     issues.push(
-      issue("error", "founder_operator.cockpit_stale", "launch-cockpit.html must mirror founder-zero bootstrap state and next actions.", "launch-cockpit.html"),
+      issue(
+        "error",
+        "founder_operator.cockpit_stale",
+        "state/launch-cockpit.html must mirror founder-zero bootstrap state and next actions.",
+        "state/launch-cockpit.html",
+      ),
     );
   }
   if (
@@ -747,14 +757,14 @@ function validateState(
         "error",
         "founder_operator.cockpit_stale_gate_visible",
         "The cockpit must remove stale choices when no founder decision is pending.",
-        "launch-cockpit.html",
+        "state/launch-cockpit.html",
       ),
     );
   }
 
   if (stateOperator.state_reconciled !== true) {
     issues.push(
-      issue("error", "founder_operator.state_not_reconciled", "PROJECT_STATE business_operator.state_reconciled must be true.", "PROJECT_STATE.yaml"),
+      issue("error", "founder_operator.state_not_reconciled", "PROJECT_STATE business_operator.state_reconciled must be true.", "state/PROJECT_STATE.yaml"),
     );
   }
 

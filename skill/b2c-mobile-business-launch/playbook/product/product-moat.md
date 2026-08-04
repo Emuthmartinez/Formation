@@ -32,7 +32,7 @@ Name the moat class the app is building toward — one primary, honestly:
 
 Before the spec hardens, run the app's core job against the named incumbents as a user would experience it:
 
-- Pick the top 2–3 incumbents from `RESEARCH.md`'s competitor evidence — by revenue, not by similarity comfort.
+- Pick the top 2–3 incumbents from `strategy/RESEARCH.md`'s competitor evidence — by revenue, not by similarity comfort.
 - For the single core job, record: steps to first value, quality of the result, and the one moment the incumbent is weak (onboarding friction, generic output, price wall, dated design — with evidence from reviews/social mining, not taste).
 - The new app must name the **beat moment**: the specific moment in the core loop where a user who knows the incumbent would say "this is better," and why that gap survives the one-week-copy test.
 - If no beat moment survives scrutiny, that finding goes into the Go/Pivot/Kill evidence — it is exactly what the checkpoint exists to hear.
@@ -47,13 +47,13 @@ A weak wedge is a routing signal, not a verdict. Before it reaches the founder a
 
 ## 5. The Differentiation Artifact
 
-The wedge lives in `SPEC.md`'s **Differentiation And Moat** section, not in a chat transcript. The archetype positioning prompts (each pack's `00-*.md`) produce the raw answers; they are transcribed here verbatim and then held to this reference's tests. The section carries:
+The wedge lives in `product/SPEC.md`'s **Differentiation And Moat** section, not in a chat transcript. The archetype positioning prompts (each pack's `00-*.md`) produce the raw answers; they are transcribed here verbatim and then held to this reference's tests. The section carries:
 
 - the incumbent table: top 2–3 by revenue, each with what it does well, the beat moment, and what stops a week-one copy
 - the named moat class (§2) and the concrete build plan for it
 - the one-week-copy test answer in writing
 
-`check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a positioning chat that never lands in the spec is the artifact-less wedge the 2026-07-26 audit found on real launches. The section feeds `LAUNCH_TRACE.md`, the 11-star ladder's magical-moment choice, and the Go/Pivot/Kill evidence row.
+`check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a positioning chat that never lands in the spec is the artifact-less wedge the 2026-07-26 audit found on real launches. The section feeds `state/LAUNCH_TRACE.md`, the 11-star ladder's magical-moment choice, and the Go/Pivot/Kill evidence row.
 
 ## 6. Anti-Patterns
 

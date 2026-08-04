@@ -1,11 +1,11 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.66.1",
+  "version": "0.67.0",
   "updatedAt": "2026-08-03",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Aligns the repository README, SKILL runtime contract, architecture, graph guide, implementation guide, validator reference, contributor guide, and maintainer guide with the graph-native execution model.",
-    "Documents compiled readiness, single-writer state reduction, resource-aware scheduling, fresh-context verification, stale propagation, fail-closed fan-in, schema-version discipline, and the separation between knowledge routing and execution topology.",
-    "Reviews every README and Markdown surface for removed compatibility-era guidance and regenerates graph-owned projections."
+    "Reorganizes the reusable business workspace into capability-owned state, strategy, product, design, engineering, analytics, growth, revenue, store, trust, and operations directories.",
+    "Rewrites CLAUDE.md as Claude-specific graph runtime guidance and AGENTS.md as the repository layer-ownership and dependency contract.",
+    "Updates graph bindings, validators, fixtures, renderers, links, generated projections, and architecture documentation for the new business artifact paths."
   ]
 }

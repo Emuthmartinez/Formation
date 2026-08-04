@@ -6,7 +6,7 @@ These are **starting prompts**, not final code. Each file has a copy-paste block
 
 ## How to use
 
-1. Confirm the product shape via **AskUserQuestion** (chat type, primary surface, modality, memory depth, safety scope) — see the reference. Record it in `PROJECT_STATE.yaml`.
+1. Confirm the product shape via **AskUserQuestion** (chat type, primary surface, modality, memory depth, safety scope) — see the reference. Record it in `state/PROJECT_STATE.yaml`.
 2. **Copy the runnable starter** ([`starter/`](starter/README.md)) into the business repo and install it — it is the pre-wired floor (auth, tested owner-only RLS migrations, a server-side streaming Claude route, PostHog event catalog, Stripe/RevenueCat stubs, names-only `.env.example`, CI). Do not regenerate this wiring from scratch; `check:archetype-starter` enforces its contract.
 3. Run prompt **00** strategy work on the web interface / Claude.ai.
 4. Run prompts **01 → 04** in order as Claude Code build prompts against the starter (the starter README maps each prompt to the scaffold area it customizes). Build one system, test it, then move on.

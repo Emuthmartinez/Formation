@@ -164,7 +164,7 @@ export function compileExecutionPlan(graph: SkillGraph, now = "1970-01-01T00:00:
       ...workflow.outputPaths.map((path) => ({ id: `resource.path.${normalizeResource(path)}`, mode: "exclusive" as const })),
       ...workflow.providerIds.map((id) => ({ id: `resource.${id}`, mode: "exclusive" as const })),
     ];
-    if (workflow.outputPaths.includes("PROJECT_STATE.yaml")) resources.push({ id: canonicalResources[0]!, mode: "exclusive" });
+    if (workflow.outputPaths.includes("state/PROJECT_STATE.yaml")) resources.push({ id: canonicalResources[0]!, mode: "exclusive" });
     if (workflow.founderOnlyActions.length > 0) resources.push({ id: "resource.founder.attention", mode: "exclusive" });
 
     return {

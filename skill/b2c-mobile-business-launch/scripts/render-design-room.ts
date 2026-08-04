@@ -15,7 +15,7 @@ if (!loaded.state || !loaded.tokens || !loaded.stateHash) {
   process.exit();
 }
 
-const outputPath = args.outputPath ?? path.join(args.root, "design-room.html");
+const outputPath = args.outputPath ?? path.join(args.root, "design/design-room.html");
 mkdirSync(path.dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, renderStaticHtml(loaded.state, loaded.tokens, loaded.stateHash), "utf8");
 console.log(`Design Room static HTML written to ${rel(args.root, outputPath)}`);

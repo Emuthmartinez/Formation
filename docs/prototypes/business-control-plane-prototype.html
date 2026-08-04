@@ -1044,7 +1044,7 @@
           ["Next lane", "ASC", "store proof"]
         ],
         readiness: [
-          ["green", "PROJECT_STATE.yaml is current", "Fresh"],
+          ["green", "state/PROJECT_STATE.yaml is current", "Fresh"],
           ["green", "Design Room render exists", "Ready"],
           ["amber", "PostHog attribution proof", "Founder"],
           ["amber", "Continuity drift eval", "Needed"],
@@ -1057,8 +1057,8 @@
           ["Revenue analyst", "Reviews pricing, RevenueCat state, provider proof, and paywall claims."]
         ],
         lanes: [
-          ["Design Room", "Review product, market, audience, promise, screenshots, and visual direction from state files.", "design-room.html", "Ready"],
-          ["Launch Cockpit", "See launch stage, blockers, milestones, provider proof, and next agent actions.", "launch-cockpit.html", "Ready"],
+          ["Design Room", "Review product, market, audience, promise, screenshots, and visual direction from state files.", "design/design-room.html", "Ready"],
+          ["Launch Cockpit", "See launch stage, blockers, milestones, provider proof, and next agent actions.", "state/launch-cockpit.html", "Ready"],
           ["Store Ops", "Inspect ASC metadata, screenshots, TestFlight notes, and release-readiness proof.", "business/store/", "Watch"],
           ["Growth", "Review viral loops, referral assets, paid UA notes, and source freshness.", "references/PAID_UA.md", "Draft"],
           ["Analytics", "Check PostHog event contract, attribution status, retention events, and red/yellow gates.", "scripts/check-provider-proof.ts", "Gate"],
@@ -1184,7 +1184,7 @@
     const operatorPanelCopy = {
       overview: "The overview keeps executive signal visible first: stage, risk, next lane, artifacts, and the most important review surfaces.",
       design: "The Design Room panel renders from state/business.json and theme.tokens.json, then shows product promise, audience, positioning, visual direction, and screenshots.",
-      launch: "The Launch panel renders from PROJECT_STATE.yaml and shows milestones, blockers, launch lane ownership, source freshness, and proof gates.",
+      launch: "The Launch panel renders from state/PROJECT_STATE.yaml and shows milestones, blockers, launch lane ownership, source freshness, and proof gates.",
       store: "Store Ops gathers App Store Connect, Google Play, screenshots, What to Test, compliance notes, and release evidence.",
       revenue: "Revenue gathers RevenueCat, Stripe, pricing, paywall, attribution, and provider-proof gates without faking founder-owned setup.",
       agents: "Agents shows the exact subagents and continuity checks required before work starts, so the workflow is enforced mechanically."
@@ -1428,7 +1428,7 @@
       }
 
       return label
-        .replace("PROJECT_STATE.yaml is current", "Business state is current")
+        .replace("state/PROJECT_STATE.yaml is current", "Business state is current")
         .replace("Design Room render exists", "Design review is ready")
         .replace("PostHog attribution proof", "Analytics proof")
         .replace("Continuity drift eval", "Resume flow test")

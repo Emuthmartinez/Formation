@@ -29,7 +29,7 @@ At each founder decision, translate the internal phase into a plain-language lab
 
 ## Launch Scopes
 
-The full phase flow below produces thirty-plus artifacts. That is right for a flagship subscription launch and overproduction for a utility shipped to learn — and overproduction is how launches die: most stall in planning, in artifact work nobody decided to stop. Scope the artifact burden with the founder at orient (AskUserQuestion when available) and record `project.launch_scope` in `PROJECT_STATE.yaml`:
+The full phase flow below produces thirty-plus artifacts. That is right for a flagship subscription launch and overproduction for a utility shipped to learn — and overproduction is how launches die: most stall in planning, in artifact work nobody decided to stop. Scope the artifact burden with the founder at orient (AskUserQuestion when available) and record `project.launch_scope` in `state/PROJECT_STATE.yaml`:
 
 - **essentials** (recommended for a first launch): the core spine runs — state/cockpit, paid-tool routing, secrets, security baseline, research-backed spec with its Go/Pivot/Kill verdict, 11-star slice, design, onboarding, store readiness (signing and privacy packet included), revenue, privacy/terms, engineering with proof, and post-launch ops. Breadth lanes defer *through the normal deferral mechanics* — `deferred` with a dated reason — typically: paid UA, viral growth loop, launch narrative, localization beyond the home storefront, UGC/Fastlane engine, lifecycle email beyond transactional, and GEO/SEO beyond the basic landing metadata. Market contact beats artifact completeness.
 - **full**: every lane runs; the Deliverable Standard in `SKILL.md` applies in full. A deliberate choice — flagship bet, proven re-entry, scaling a winner — never a default. (Legacy name for essentials: `lite`; still validates.)
@@ -38,7 +38,7 @@ Rules:
 
 - The scope never silently disables a validator. Essentials deferrals carry dated reasons `check:lane-coverage` and `validate:launch-state` can see; deferred lanes revisit at the Phase 6b day-30 retro.
 - A typo'd scope is an error (`validate:launch-state` accepts `full` or `essentials`; legacy `lite` still resolves).
-- Moving essentials → full (or back) is a dated founder decision in `PROJECT_STATE.yaml`.
+- Moving essentials → full (or back) is a dated founder decision in `state/PROJECT_STATE.yaml`.
 - Revenue, privacy/legal, security, signing, and store-console lanes are never deferred by scope — an essentials launch still charges money, handles data, and passes review.
 
 Two companion contracts bound pre-build weight:
@@ -55,17 +55,17 @@ Do:
 - Inspect the provided transcript/spec/repo and list existing artifacts.
 - Identify current phase, business name, target platform, monetization model, data/backend assumptions, and launch surface.
 - Load `project-state.md` and `autonomy-modes.md`.
-- Create or refresh `PROJECT_STATE.yaml` from `business/PROJECT_STATE.yaml`, set the current autonomy mode, and record lane status honestly.
+- Create or refresh `state/PROJECT_STATE.yaml` from `business/state/PROJECT_STATE.yaml`, set the current autonomy mode, and record lane status honestly.
 - Confirm the launch scope (see Launch Scopes above; recommend essentials for a first launch), record `project.launch_scope` and `project.kickoff_date` — the pre-build clock starts now — and defer essentials breadth lanes with dated reasons.
-- Render `launch-cockpit.html` once the first state pass exists.
-- Create `BUSINESS_ACCESS.md` and `operations/business-access.json`; present one phase-labeled founder question with selectable choices, consequences, a safe defer route, and the agent action that follows it.
+- Render `state/launch-cockpit.html` once the first state pass exists.
+- Create `operations/BUSINESS_ACCESS.md` and `operations/business-access.json`; present one phase-labeled founder question with selectable choices, consequences, a safe defer route, and the agent action that follows it.
 - Create tasks/checkpoints for the engagement; block later phases on the right prior outputs.
 - Decide whether to create one canonical repo bundle, a separate landing repo, or a product-build handoff bundle.
 
 Outputs:
-- `PROJECT_STATE.yaml`
-- `launch-cockpit.html`
-- `BUSINESS_ACCESS.md`
+- `state/PROJECT_STATE.yaml`
+- `state/launch-cockpit.html`
+- `operations/BUSINESS_ACCESS.md`
 - `operations/business-access.json`
 - concise phase plan
 - source-of-truth file map
@@ -82,21 +82,21 @@ Acceptance:
 Goal: make the launch inspectable and bounded before the agent starts executing.
 
 Do:
-- Use `BUSINESS_ACCESS.md` as the ownership/account spine and keep Doppler, social, store, email, domain, recovery, and 2FA state current.
+- Use `operations/BUSINESS_ACCESS.md` as the ownership/account spine and keep Doppler, social, store, email, domain, recovery, and 2FA state current.
 - Load `project-state.md`, `autonomy-modes.md`, `provider-state-recipes.md`, `launchbench-evals.md`, and `failure-cards.md` only as needed.
 - Set `autonomy.mode` to the least-powerful useful mode: usually `scout`, `draft`, `prepare`, or `apply`.
-- Copy `business/PROJECT_STATE.yaml` if no state file exists.
+- Copy `business/state/PROJECT_STATE.yaml` if no state file exists.
 - Fill phase, platform, bundle/package IDs when known, source-truth files, lane statuses, tool/provider routes, required secret names, founder-only gates, proof commands, and active failure cards.
-- Render `launch-cockpit.html` after the first meaningful state pass.
+- Render `state/launch-cockpit.html` after the first meaningful state pass.
 
 Outputs:
-- `PROJECT_STATE.yaml`
-- `launch-cockpit.html`
-- active failure cards in state, and `FAILURE_CARDS.md` only when a larger card log is useful
+- `state/PROJECT_STATE.yaml`
+- `state/launch-cockpit.html`
+- active failure cards in state, and `operations/FAILURE_CARDS.md` only when a larger card log is useful
 
 Acceptance:
 - State never contains raw secret values.
-- `launch-cockpit.html` can be opened by the founder to see blockers, proof, and approval gates.
+- `state/launch-cockpit.html` can be opened by the founder to see blockers, proof, and approval gates.
 - Provider/store/social mutations remain blocked unless autonomy mode and founder approval allow them.
 - `business_operator` state mirrors the access ledger and one-next-action handoff.
 
@@ -109,11 +109,11 @@ Do:
 - List paid/account-gated lanes that affect the launch: AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI Plus/Pro capabilities, Fastlane AI, ASO/MMP/ad tools, Sideshift/creator marketplaces, RevenueCat, Stripe, PostHog, Resend, and App Store/Play accounts. Record when MobAI Free covers the lane and when a fallback narrows cross-platform proof.
 - Check current runtime access, local installs, user-provided exports, screenshots, PDFs, CSVs, API keys, and account sessions.
 - Ask before replacing any paid/account-gated tool with a free fallback.
-- Record selected routes, limitations, and blocked access in `TOOL_DECISIONS.md` or the relevant ops doc.
-- Update `PROJECT_STATE.yaml` provider/tool routes and rerender `launch-cockpit.html` after material tool decisions.
+- Record selected routes, limitations, and blocked access in `strategy/TOOL_DECISIONS.md` or the relevant ops doc.
+- Update `state/PROJECT_STATE.yaml` provider/tool routes and rerender `state/launch-cockpit.html` after material tool decisions.
 
 Outputs:
-- `TOOL_DECISIONS.md` when more than one tool decision affects the launch
+- `strategy/TOOL_DECISIONS.md` when more than one tool decision affects the launch
 - founder-only access and spend decisions
 - approved free-fallback list with limitations
 - blocked paid-tool list
@@ -137,7 +137,7 @@ Do:
 - Add `.env.example` names only when the repo needs a local schema.
 - Add or verify `.gitignore` blocks local env files, service-account JSON, app-store private keys, signing material, and downloaded credentials.
 - Record founder-only secret/account actions and blocked values.
-- Update `PROJECT_STATE.yaml` provider entries with docs checked date, required secret names, preflight, validation, fallback, and blocked secret state.
+- Update `state/PROJECT_STATE.yaml` provider entries with docs checked date, required secret names, preflight, validation, fallback, and blocked secret state.
 
 Outputs:
 - `SECRETS.md`
@@ -151,7 +151,7 @@ Acceptance:
 - Secret-bearing commands have a `doppler run --` or approved provider wrapper.
 - A future agent can tell which secrets are public client config, server-only, webhook signing secrets, store credentials, CI/deploy secrets, or local operator credentials.
 - No raw values are written into docs, commits, screenshots, logs, or proof artifacts.
-- `PROJECT_STATE.yaml` and `launch-cockpit.html` expose names-only secret requirements and provider status without values.
+- `state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` expose names-only secret requirements and provider status without values.
 
 ## Phase 1: Research-Backed Spec
 
@@ -165,16 +165,16 @@ Do:
 - Use Firecrawl or an equivalent crawler/scraper to inspect competitor landing pages, pricing pages, help centers, policy pages, SEO pages, and funnel claims.
 - Mine social language with XPOZ from Reddit, TikTok, X/Twitter, Instagram, and creator content for the pain users already name.
 - Run keyword and name collision checks before locking a name, subtitle, or ASO angle.
-- Judge the category against a stated revenue bar: top-competitor revenue estimates into RESEARCH.md's Category Revenue Reality table with an explicit pass/fail — data collection without a judgment is not evidence.
+- Judge the category against a stated revenue bar: top-competitor revenue estimates into strategy/RESEARCH.md's Category Revenue Reality table with an explicit pass/fail — data collection without a judgment is not evidence.
 - Convert findings into a revised product spec, with evidence cited inline or in an appendix.
 - Separate identity from storefront when needed: e.g. list where users search, position against the category if that is the wedge.
-- Update `PROJECT_STATE.yaml` research/product/traceability lane statuses and active failure cards when evidence gaps remain.
+- Update `state/PROJECT_STATE.yaml` research/product/traceability lane statuses and active failure cards when evidence gaps remain.
 
 Outputs:
-- `SPEC.md` with positioning, category strategy, competitor threat model, core loop, onboarding, monetization, roadmap, metrics, risks, and decisions
+- `product/SPEC.md` with positioning, category strategy, competitor threat model, core loop, onboarding, monetization, roadmap, metrics, risks, and decisions
 - evidence ledger with AppKittie tables, review summaries, XPOZ/social-language evidence, Firecrawl/web evidence, and keyword scan
-- initial `LAUNCH_TRACE.md` rows or equivalent trace section tying evidence to product decisions, claims, scope, and rejected alternatives
-- the Go, Pivot, Or Kill verdict: agent-assembled evidence, founder-decided, in `RESEARCH.md`, mirrored to `lanes.research.go_pivot_kill_decision`
+- initial `state/LAUNCH_TRACE.md` rows or equivalent trace section tying evidence to product decisions, claims, scope, and rejected alternatives
+- the Go, Pivot, Or Kill verdict: agent-assembled evidence, founder-decided, in `strategy/RESEARCH.md`, mirrored to `lanes.research.go_pivot_kill_decision`
 - short decision checkpoint for founder-only calls
 
 Acceptance:
@@ -201,13 +201,13 @@ Do:
 - Render the plan in HTML so the founder sees what will be learned at launch.
 
 Outputs:
-- `ANALYTICS.md`
-- `analytics-plan.html`
-- updated analytics hooks in `SPEC.md`, `ONBOARDING.md`, `REVENUE_OPS.md`, `EMAIL_OPS.md`, `STORE_CONSOLE.md`, and `FASTLANE_OPS.md` when those docs exist
+- `analytics/ANALYTICS.md`
+- `analytics/analytics-plan.html`
+- updated analytics hooks in `product/SPEC.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `growth/EMAIL_OPS.md`, `store/STORE_CONSOLE.md`, and `growth/FASTLANE_OPS.md` when those docs exist
 - founder-only analytics decisions: PostHog region, paid attribution/MMP spend, replay/survey posture, privacy/consent wording, and final dashboard access
 
 Acceptance:
-- The founder can inspect acquisition-to-revenue tracking in `analytics-plan.html` before implementation.
+- The founder can inspect acquisition-to-revenue tracking in `analytics/analytics-plan.html` before implementation.
 - A builder can implement analytics without inventing event names, user IDs, attribution properties, or dashboard definitions.
 - Self-reported attribution and technical attribution are both planned.
 - Privacy/legal/store-disclosure implications are documented before SDKs or replay/surveys are enabled.
@@ -227,13 +227,13 @@ Do:
 - Use Compound Engineering `ce-brainstorm` when research leaves multiple viable wedges, onboarding shapes, monetization postures, core loops, or user success definitions.
 - Use the brainstorm to produce a requirements source, not implementation code.
 - Preserve scope boundaries, actors, key flows, acceptance examples, risks, and non-goals.
-- Skip the brainstorm only when `SPEC.md`, `11_STAR_EXPERIENCE.md`, `ONBOARDING.md`, `ANALYTICS.md`, and monetization assumptions already define product behavior tightly enough for planning. Do not skip the 11-star artifact for a real build handoff unless the experience lane is explicitly deferred or not needed with a reason.
+- Skip the brainstorm only when `product/SPEC.md`, `11_STAR_EXPERIENCE.md`, `product/ONBOARDING.md`, `analytics/ANALYTICS.md`, and monetization assumptions already define product behavior tightly enough for planning. Do not skip the 11-star artifact for a real build handoff unless the experience lane is explicitly deferred or not needed with a reason.
 
 Outputs:
 - `11_STAR_EXPERIENCE.md`
 - `11-star-experience.html`
 - requirements/brainstorm document when product shape is ambiguous
-- updated `SPEC.md`, `ONBOARDING.md`, `ANALYTICS.md`, `REVENUE_OPS.md`, `DESIGN.md`, and `TECH_SPEC.md` decisions when the experience or brainstorm changes product behavior
+- updated `product/SPEC.md`, `product/ONBOARDING.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `design/DESIGN.md`, and `engineering/TECH_SPEC.md` decisions when the experience or brainstorm changes product behavior
 - decision log explaining whether the brainstorm was used or intentionally skipped
 
 Acceptance:
@@ -253,15 +253,15 @@ Do:
 - Decide fit: store/beta/web destination, onboarding/paywall readiness, RevenueCat LTV/cohort visibility, analytics baseline, creative angles, privacy/store implications, and founder-approved budget.
 - Select one starting channel or document why paid UA is blocked/deferred/not needed.
 - Create `PAID_UA.md` with channel choice, creative production system, tracking baseline, blended report, weekly schedule, stop/scale rules, founder-only gates, and trace rows.
-- Add paid-UA events, dashboards, baseline windows, and ad-network/MMP decisions to `ANALYTICS.md` and `analytics-plan.html`.
-- Update `REVENUE_OPS.md` with RevenueCat LTV/CPA/payback assumptions and `CONTENT_ASSETS.md` with paid creative source assets.
-- Update `APP_STORE_LISTING.md`, `STORE_CONSOLE.md`, custom product page notes, or web-funnel docs when paid traffic lands on a store or web purchase surface.
+- Add paid-UA events, dashboards, baseline windows, and ad-network/MMP decisions to `analytics/ANALYTICS.md` and `analytics/analytics-plan.html`.
+- Update `revenue/REVENUE_OPS.md` with RevenueCat LTV/CPA/payback assumptions and `CONTENT_ASSETS.md` with paid creative source assets.
+- Update `APP_STORE_LISTING.md`, `store/STORE_CONSOLE.md`, custom product page notes, or web-funnel docs when paid traffic lands on a store or web purchase surface.
 - Run `npm run check:paid-ua -- --root .` before claiming paid acquisition readiness.
 
 Outputs:
 - `PAID_UA.md`
 - `growth/paid-ua-report.csv` when spend is planned or active
-- updated `PROJECT_STATE.yaml`, `LAUNCH_TRACE.md`, `ANALYTICS.md`, `REVENUE_OPS.md`, `CONTENT_ASSETS.md`, and store/funnel docs
+- updated `state/PROJECT_STATE.yaml`, `state/LAUNCH_TRACE.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `CONTENT_ASSETS.md`, and store/funnel docs
 
 Acceptance:
 - Paid UA is not reduced to "try ads."
@@ -278,15 +278,15 @@ Do:
 - Decide fit: visible product moment, emotional hook, platform-native audience behavior, privacy/policy risk, traffic quality, and monetization readiness.
 - Create `VIRAL_GROWTH.md` with the growth thesis, product loop, referral/share mechanic, content loop, format lab, monetization timing, measurement plan, stop/scale rules, founder-only gates, and trace rows.
 - Define backend/provider proof for referral unlocks, share rewards, creator codes, entitlements, duplicate handling, self-referral prevention, and abuse controls before implementation.
-- Add growth-loop events and dashboards to `ANALYTICS.md` and `analytics-plan.html`.
-- Update `ONBOARDING.md`, `REVENUE_OPS.md`, `UGC_PLAYBOOK.md`, `CONTENT_ASSETS.md`, `FASTLANE_OPS.md`, and `LAUNCH_TRACE.md` when the loop affects those surfaces.
+- Add growth-loop events and dashboards to `analytics/ANALYTICS.md` and `analytics/analytics-plan.html`.
+- Update `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `growth/UGC_PLAYBOOK.md`, `CONTENT_ASSETS.md`, `growth/FASTLANE_OPS.md`, and `state/LAUNCH_TRACE.md` when the loop affects those surfaces.
 - Run `npm run check:viral-growth -- --root .` before claiming the growth lane is ready.
 
 Outputs:
 - `VIRAL_GROWTH.md`
 - `growth/format-lab.csv` or `ugc/script-bank.md` when content tests are in scope
 - optional `growth/referral-loop-map.md` for non-trivial referral/unlock mechanics
-- updated `PROJECT_STATE.yaml`, `LAUNCH_TRACE.md`, `ANALYTICS.md`, `ONBOARDING.md`, and `REVENUE_OPS.md`
+- updated `state/PROJECT_STATE.yaml`, `state/LAUNCH_TRACE.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, and `revenue/REVENUE_OPS.md`
 
 Acceptance:
 - The launch explains how attention becomes product action, not just which videos to post.
@@ -300,19 +300,19 @@ Goal: make the handoff from research to brand/design to implementation explicit 
 
 Do:
 - Load `flow-traceability.md`.
-- Refresh `PROJECT_STATE.yaml` before creating trace rows so status reflects the current phase and blockers.
-- Create or update `LAUNCH_TRACE.md` unless the launch is tiny enough for a clearly labeled trace section in `RESEARCH.md`.
+- Refresh `state/PROJECT_STATE.yaml` before creating trace rows so status reflects the current phase and blockers.
+- Create or update `state/LAUNCH_TRACE.md` unless the launch is tiny enough for a clearly labeled trace section in `strategy/RESEARCH.md`.
 - Assign stable trace IDs for major research findings, 11-star experience decisions, product decisions, claims, onboarding questions, paywall choices, data collection, store-console answers, and build-critical flows.
-- Map each trace row to affected docs: `SPEC.md`, `11_STAR_EXPERIENCE.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `BRAND.md`, `DESIGN.md`, `design.md`, `ANALYTICS.md`, `ONBOARDING.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `STORE_CONSOLE.md`, `ENGINEERING_PLAN.md`, and `PRODUCTION_READINESS.md` where applicable.
-- Decide whether `TECH_SPEC.md` is needed. Create it when app/backend/web implementation needs data model, API/RPC/webhook contracts, state machines, permissions, integrations, app integrity, feature flags, or test fixtures.
+- Map each trace row to affected docs: `product/SPEC.md`, `11_STAR_EXPERIENCE.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `design.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `store/STORE_CONSOLE.md`, `engineering/ENGINEERING_PLAN.md`, and `engineering/PRODUCTION_READINESS.md` where applicable.
+- Decide whether `engineering/TECH_SPEC.md` is needed. Create it when app/backend/web implementation needs data model, API/RPC/webhook contracts, state machines, permissions, integrations, app integrity, feature flags, or test fixtures.
 - Record rejected decisions so future agents do not reintroduce weak claims, unproven features, generic styling, or unsupported monetization behavior.
 
 Outputs:
-- `LAUNCH_TRACE.md` or equivalent trace section
-- `TECH_SPEC.md` when implementation complexity justifies it
+- `state/LAUNCH_TRACE.md` or equivalent trace section
+- `engineering/TECH_SPEC.md` when implementation complexity justifies it
 - updated source docs with trace IDs or source pointers
 - build-ready/deferred decision and blocker list
-- updated `PROJECT_STATE.yaml` and `launch-cockpit.html` when trace/build-contract status changes
+- updated `state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` when trace/build-contract status changes
 
 Acceptance:
 - Every major experience, viral growth, brand, design, onboarding, revenue, privacy, store, and build decision can be traced to evidence or a founder-only decision.
@@ -327,19 +327,19 @@ Do:
 - Load `security-release-hardening.md`.
 - Refresh current OWASP MASVS/MASTG, OWASP ASVS, Apple, Android, Sentry, Claude Security, Codex Security, and MobSF docs as relevant.
 - Decide whether Claude Security, Codex Security, GitHub Advanced Security, Snyk, Semgrep, Socket, MobSF Cloud, commercial app-integrity tools, or local/free fallbacks are intended. Record founder approval, blocked state, or fallback approval before running a replacement route.
-- Create `SECURITY.md` from the app's real surfaces: mobile platforms, backend/API, revenue, attribution, email, public funnel, app signing, store operations, support, privacy, and analytics.
+- Create `trust/SECURITY.md` from the app's real surfaces: mobile platforms, backend/API, revenue, attribution, email, public funnel, app signing, store operations, support, privacy, and analytics.
 - Define assets, trust boundaries, attacker capabilities, abuse paths, mitigations, accepted risks, and non-capabilities.
 - Decide mobile hardening: iOS Keychain, ATS, DeviceCheck/App Attest, entitlements/deep links; Android Keystore, Network Security Config, Play Integrity, exported components/deep links.
 - Map abuse controls for RevenueCat, Stripe, restore purchases, promo grants, webhooks, idempotency, rate limits, RLS/authz, support entitlement grants, and account deletion.
-- Render `security-review.html` so the founder sees the security lane, open risks, tool routing, and approval gates.
-- Update `PROJECT_STATE.yaml` `lanes.security`, `tools.security_review`, active failure cards, and `launch-cockpit.html`.
+- Render `trust/security-review.html` so the founder sees the security lane, open risks, tool routing, and approval gates.
+- Update `state/PROJECT_STATE.yaml` `lanes.security`, `tools.security_review`, active failure cards, and `state/launch-cockpit.html`.
 
 Outputs:
-- `SECURITY.md`
-- `security-review.html`
-- updated `PROJECT_STATE.yaml`
+- `trust/SECURITY.md`
+- `trust/security-review.html`
+- updated `state/PROJECT_STATE.yaml`
 - optional public `.well-known/security.txt` or equivalent security contact route when public users, accounts, payments, user content, or sensitive data are in scope
-- updated `TECH_SPEC.md`, `SECRETS.md`, `ANALYTICS.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `STORE_CONSOLE.md`, and `PRODUCTION_READINESS.md` pointers where security decisions affect implementation or disclosures
+- updated `engineering/TECH_SPEC.md`, `SECRETS.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `store/STORE_CONSOLE.md`, and `engineering/PRODUCTION_READINESS.md` pointers where security decisions affect implementation or disclosures
 
 Acceptance:
 - A builder knows which security controls are required, deferred, blocked, or not applicable.
@@ -352,7 +352,7 @@ Acceptance:
 Goal: lock the brand enough for builders, designers, screenshots, and landing pages to stay consistent.
 
 Do:
-- Load `flow-traceability.md` and update `LAUNCH_TRACE.md` as brand and visual decisions are made.
+- Load `flow-traceability.md` and update `state/LAUNCH_TRACE.md` as brand and visual decisions are made.
 - Load `eleven-star-experience.md` and make the visual language express the V1 scalable slice, not a generic category aesthetic.
 - Load `parallel-agent-orchestration.md` and `engineering-orchestration.md` when screen specs will become builder prompts or implementation work.
 - Load `analytics-attribution.md` before locking screen analytics hooks, attribution questions, demo video metrics, paywall variants, or builder-facing event names.
@@ -360,23 +360,23 @@ Do:
 - Load `onboarding-conversion.md` before locking onboarding, demo videos, personalization questions, review prompts, paywall timing, or first-session activation.
 - Build a compact brand strategy: name, tagline, archetype, voice, banned words, owned words, proof constraints.
 - Use the Layers product-design workflow when the user need, conceptual model, or interaction flow is under-specified before choosing surface style.
-- Create a canonical `DESIGN.md` using the Google Labs `design.md` token/prose format: colors, type, spacing, radius, component tokens, rationale, do/don't rules, and implementation notes.
+- Create a canonical `design/DESIGN.md` using the Google Labs `design.md` token/prose format: colors, type, spacing, radius, component tokens, rationale, do/don't rules, and implementation notes.
 - Use Taste and Impeccable guidance when available to set visual direction, avoid generic defaults, audit hierarchy/contrast/responsiveness, and polish final surfaces.
-- Use Higgsfield for generated visuals, mockups, icons, mascots, screenshot art, demo videos, onboarding animation clips, and ad creative, using `DESIGN.md` as the source constraints.
+- Use Higgsfield for generated visuals, mockups, icons, mascots, screenshot art, demo videos, onboarding animation clips, and ad creative, using `design/DESIGN.md` as the source constraints.
 - Produce lowercase `design.md` in an agent-friendly format: screen inventory, flows, states, copy calibration, animation specs, component contracts, implementation constraints, and analytics hooks.
-- Produce `ONBOARDING.md` when onboarding, personalization, review prompts, paywalls, or first-session activation are in scope.
+- Produce `product/ONBOARDING.md` when onboarding, personalization, review prompts, paywalls, or first-session activation are in scope.
 - Render the design system and key visuals in HTML. Include component gallery, onboarding/paywall flow, mobile screen frames, responsive landing/funnel views, screenshot concepts, and any generated imagery embedded with direction/production labels.
 - Generate or source only high-leverage visual assets: app icon direction, mascot/character sheet if relevant, hero/aha moment, onboarding reveal, share artifact, screenshot frames. Any asset board must also appear inside an HTML proof.
 - Draft partnership or endorsement outreach if the concept depends on a named framework, creator, or expert.
 
 Outputs:
-- `BRAND.md`
-- updated `ANALYTICS.md` screen/event hooks and `analytics-plan.html` if screens changed the measurement plan
-- `DESIGN.md`
+- `strategy/BRAND.md`
+- updated `analytics/ANALYTICS.md` screen/event hooks and `analytics/analytics-plan.html` if screens changed the measurement plan
+- `design/DESIGN.md`
 - `DESIGN_SYSTEM.md` only when useful as an expanded appendix or required by repo convention
 - `design.md`
-- `design.html` or equivalent rendered visual-system proof
-- `ONBOARDING.md` and `onboarding.html` or equivalent rendered section when onboarding is in scope
+- `design/design.html` or equivalent rendered visual-system proof
+- `product/ONBOARDING.md` and `product/onboarding.html` or equivalent rendered section when onboarding is in scope
 - `brand.html` or equivalent rendered brand book when useful
 - visual-reference assets with clear "direction vs production" labels
 - `OUTREACH.md` if partnership/endorsement is material
@@ -386,8 +386,8 @@ Acceptance:
 - A copywriter can reject off-brand copy using the voice rules.
 - Brand voice, screen choices, and generated visual directions cite the research/product trace rows they express.
 - AI-generated visuals are labeled as references unless final production-ready.
-- `DESIGN.md` is linted with `npx @google/design.md lint DESIGN.md` when available, or the validation blocker is recorded.
-- Visual artifacts are inspectable in HTML and use the same tokens/components as `DESIGN.md`.
+- `design/DESIGN.md` is linted with `npx @google/design.md lint design/DESIGN.md` when available, or the validation blocker is recorded.
+- Visual artifacts are inspectable in HTML and use the same tokens/components as `design/DESIGN.md`.
 - Mobile and desktop HTML proofs are checked for text fit, overlap, contrast, and responsive framing.
 - Onboarding questions, mascot states, review prompt, paywall, closing offer, trial, and activation task are specified before builder handoff.
 
@@ -405,7 +405,7 @@ Do:
 - Use specialist ASO skills when available: app marketing context, keyword research, metadata optimization, screenshot optimization, custom product pages, In-App Events, ASO audit, launch planning, Apple Search Ads, localization, reviews/ratings, subscriptions, analytics, and competitor tracking.
 - Write App Store metadata: name, subtitle, promotional text, keyword field, description, what's-new copy, categories, localization posture.
 - Prepare App Store listing packet: App Privacy answers, pricing/RevenueCat/Stripe/web-funnel matrix, custom product pages, In-App Events, localization, screenshot/app-preview upload wells, and Higgsfield/design-system marketing asset route.
-- Prepare Apple pre-ASC requirements: `APPLE_APP_STORE_REQUIREMENTS.md` with `PrivacyInfo.xcprivacy`, required reason API declarations, third-party SDK manifests/signatures, Xcode privacy report, App Privacy labels, protected-resource purpose strings, ATT, account deletion, review notes, archive/upload warnings, and founder approval before upload/submission.
+- Prepare Apple pre-ASC requirements: `store/APPLE_APP_STORE_REQUIREMENTS.md` with `PrivacyInfo.xcprivacy`, required reason API declarations, third-party SDK manifests/signatures, Xcode privacy report, App Privacy labels, protected-resource purpose strings, ATT, account deletion, review notes, archive/upload warnings, and founder approval before upload/submission.
 - Define screenshots by frame: hero copy, device screen content, supporting line, source asset, raw MobAI/native iOS/device capture, production-text overlay notes, final upload dimensions, and upload well.
 - Build an ad-copy library by angle clusters; tie angles to research, not vibes.
 - Create Apple Search Ads or paid-channel campaign groups only inside `PAID_UA.md` or a linked campaign packet: exact/phrase/broad, defensive keywords, category keywords, competitor keywords, daily budget, success metrics, and founder approval.
@@ -420,17 +420,17 @@ Do:
 
 Outputs:
 - `LAUNCH.md`
-- updated `ANALYTICS.md` attribution and store-source events
+- updated `analytics/ANALYTICS.md` attribution and store-source events
 - `APP_STORE_LISTING.md`
-- `APPLE_APP_STORE_REQUIREMENTS.md`
+- `store/APPLE_APP_STORE_REQUIREMENTS.md`
 - `app-store-listing.html`
 - `app-privacy-questionnaire.html` when Apple App Privacy answers are in scope
-- `STORE_CONSOLE.md`
-- `APPLE_SIGNING.md` when Apple distribution, TestFlight, physical-device signing, or first upload readiness is in scope
-- `store-console.html`
+- `store/STORE_CONSOLE.md`
+- `store/APPLE_SIGNING.md` when Apple distribution, TestFlight, physical-device signing, or first upload readiness is in scope
+- `store/store-console.html`
 - `SCREENSHOTS.md`
 - `PAID_UA.md` when paid acquisition, Apple Search Ads, custom product pages, or ad creative are in scope
-- `PRIVACY.md`, `TERMS.md`, and `LEGAL_REVIEW.md` when public collection, accounts, subscriptions, app-store submission, or sensitive data are in scope
+- `trust/PRIVACY.md`, `trust/TERMS.md`, and `LEGAL_REVIEW.md` when public collection, accounts, subscriptions, app-store submission, or sensitive data are in scope
 - `app-marketing-context.md` or equivalent ASO context section
 - screenshot mockups/assets, including raw captures and composed iPhone/iPad/Play final upload candidates
 - ad and ASA plan
@@ -440,9 +440,9 @@ Outputs:
 
 Acceptance:
 - App Store Connect can be filled from the doc without new copywriting.
-- Apple upload readiness is not inferred from simulator success; `APPLE_SIGNING.md` proves distribution prerequisites or names the exact blocker.
-- Apple upload readiness is not inferred from App Privacy copy; `APPLE_APP_STORE_REQUIREMENTS.md` proves privacy manifest, required-reason API, SDK, purpose-string, ATT, review-note, account-deletion, and upload-warning prerequisites or names the exact blocker.
-- The founder can follow exact App Store Connect/Google Play click paths and copy values from `store-console.html`.
+- Apple upload readiness is not inferred from simulator success; `store/APPLE_SIGNING.md` proves distribution prerequisites or names the exact blocker.
+- Apple upload readiness is not inferred from App Privacy copy; `store/APPLE_APP_STORE_REQUIREMENTS.md` proves privacy manifest, required-reason API, SDK, purpose-string, ATT, review-note, account-deletion, and upload-warning prerequisites or names the exact blocker.
+- The founder can follow exact App Store Connect/Google Play click paths and copy values from `store/store-console.html`.
 - Screenshot files are mapped from raw MobAI/native iOS/device capture to final upload asset by platform, device well, locale, slot, and dimensions.
 - Store-console blockers are known before submission, not discovered during review.
 - The launch plan states what to do when metrics miss thresholds.
@@ -468,11 +468,11 @@ Do:
 - Keep all live pricing, live checkout, tax, and store submission actions behind founder approval.
 
 Outputs:
-- `REVENUE_OPS.md`
+- `revenue/REVENUE_OPS.md`
 - updated `SECRETS.md` for RevenueCat, Stripe, store credentials, webhook signing secrets, SDK keys, and deploy/runtime injection
 - monetization section in `LAUNCH.md`
-- updated `ANALYTICS.md` subscription and purchase events
-- updated `PRIVACY.md`, `TERMS.md`, and `LEGAL_REVIEW.md` when payments, subscriptions, taxes, or web checkout exist
+- updated `analytics/ANALYTICS.md` subscription and purchase events
+- updated `trust/PRIVACY.md`, `trust/TERMS.md`, and `LEGAL_REVIEW.md` when payments, subscriptions, taxes, or web checkout exist
 - sandbox/test purchase verification notes
 
 Acceptance:
@@ -498,7 +498,7 @@ Default stack from the model session:
 Do:
 - Load `analytics-attribution.md` before building the funnel, waitlist/referral loop, PostHog setup, GA4 setup, web checkout, or campaign links.
 - Load `secrets-management.md` before adding backend, email, analytics, deploy, database, or CI environment variables.
-- Build the landing page around the locked brand, not a generic marketing template; hero, lifestyle, and feature-illustration art route through Higgsfield (`hero_banner` / `lifestyle_scene` modes) using a `DESIGN.md` brief, after confirming spend per `paid-tool-routing.md`, with every generated asset recorded in `CONTENT_ASSETS.md` (see the App Store URL → UGC Ad Batch recipe and the Cheap-First Direction recipe in `tool-recipes/visual-and-motion-production.md`).
+- Build the landing page around the locked brand, not a generic marketing template; hero, lifestyle, and feature-illustration art route through Higgsfield (`hero_banner` / `lifestyle_scene` modes) using a `design/DESIGN.md` brief, after confirming spend per `paid-tool-routing.md`, with every generated asset recorded in `CONTENT_ASSETS.md` (see the App Store URL → UGC Ad Batch recipe and the Cheap-First Direction recipe in `tool-recipes/visual-and-motion-production.md`).
 - Add email waitlist and optional referral loop; avoid fake scarcity.
 - Load `resend-email-ops.md` before configuring Resend, transactional sends, waitlist confirmations, lifecycle automations, broadcasts, inbound email, unsubscribe handling, or email webhooks.
 - If monetization is active, wire only the approved checkout path (RevenueCat Web Purchase Link / Web Funnel / Web SDK, Stripe Checkout/Payment Link, or none); do not mix billing engines casually.
@@ -522,12 +522,12 @@ Do:
 - Smoke test signup, referral redirect, leaderboard/share state, analytics events, and mobile layout. **For any page containing an email capture or form, the smoke test must be browser-rendered, not curl or API-only.** Open the live URL in a real browser (or use MobAI/Playwright if available), fill in the form fields, click submit, and assert the success state is visible on screen. An API-level curl that returns 200 does not prove the browser form works; Alpine rendering bugs, CSP violations, and JS event-binding errors are invisible to curl. Do not declare the funnel ready until a browser-rendered form submission has succeeded end to end.
 
 Outputs:
-- landing repo or `landing/` directory
-- `ANALYTICS.md` and `analytics-plan.html` updated with web, referral, checkout, email, and campaign events
+- landing repo or `growth/landing/` directory
+- `analytics/ANALYTICS.md` and `analytics/analytics-plan.html` updated with web, referral, checkout, email, and campaign events
 - `README.md` explaining stack, local dev, deploy, data flow, and pre-launch hygiene
 - public `/privacy`, `/terms`, and deletion/privacy-choice URLs where required
 - tested support/privacy contact aliases and DNS/email-routing notes
-- `EMAIL_OPS.md` when Resend or another email provider is used
+- `growth/EMAIL_OPS.md` when Resend or another email provider is used
 - `GEO_SEO.md` or equivalent GEO/SEO verification notes when the site is public
 - live URL and verification notes
 - optional web funnel or checkout URL, sandbox/production status, and purchase-to-entitlement verification when monetization is active
@@ -553,52 +553,52 @@ Goal: package the business so another agent or builder can ship the app without 
 
 Do:
 - Load `flow-traceability.md` before writing builder prompts, `AGENTS.md`, or implementation specs.
-- Load `parallel-agent-orchestration.md` and `engineering-orchestration.md` before writing `ORCHESTRATION.md`, `AGENTS.md`, `CLAUDE.md`, `PROMPTS.md`, or any implementation prompt.
+- Load `parallel-agent-orchestration.md` and `engineering-orchestration.md` before writing `operations/ORCHESTRATION.md`, `AGENTS.md`, `CLAUDE.md`, `PROMPTS.md`, or any implementation prompt.
 - Load `project-state.md`, `autonomy-modes.md`, `launchbench-evals.md`, and `failure-cards.md` before the handoff is considered complete.
 - Load `app-agent-roster.md` before writing repo-root `AGENTS.md`/`CLAUDE.md`, `APP_AGENTS.md`, app-local `agents/`, or specialist audit prompts.
 - Use `launch-coverage.md` before moving from docs to implementation or submission.
-- Create a business-specific `AGENTS.md` from `business/repo-agent-entrypoints/AGENTS.md` as canonical source of truth: brief, stack, business model, brand rules, doc map, V1/V2/V3 scope, implementation conventions, analytics rules, continued `b2c-mobile-business-launch` routing, Compound Engineering routing, `ORCHESTRATION.md`, parallel-agent/worktree rules, MobAI/native iOS/device testing, and production-readiness gates.
-- Include `PROJECT_STATE.yaml`, `launch-cockpit.html`, active failure cards, and LaunchBench/validator instructions in the first-read docs.
+- Create a business-specific `AGENTS.md` from `business/engineering/repo-agent-entrypoints/AGENTS.md` as canonical source of truth: brief, stack, business model, brand rules, doc map, V1/V2/V3 scope, implementation conventions, analytics rules, continued `b2c-mobile-business-launch` routing, Compound Engineering routing, `operations/ORCHESTRATION.md`, parallel-agent/worktree rules, MobAI/native iOS/device testing, and production-readiness gates.
+- Include `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, active failure cards, and LaunchBench/validator instructions in the first-read docs.
 - Create `APP_AGENTS.md` and the seven-file `agents/` roster so future app work has an orchestrator plus marketing, engineering, security, product, design, and customer-success specialist entrypoints.
-- Include paid-tool routing, approved fallbacks, and `TOOL_DECISIONS.md` so future agents do not silently downgrade AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI, Fastlane, ASO, RevenueCat, Stripe, PostHog, Resend, or ASC/Play work.
-- Add a tool-specific `CLAUDE.md`, `CURSOR.md`, or equivalent only as a pointer/addendum; start `CLAUDE.md` from `business/repo-agent-entrypoints/CLAUDE.md` when Claude/Rork compatibility is needed.
-- Include `LAUNCH_TRACE.md` and `11_STAR_EXPERIENCE.md` so builders can follow evidence-to-product-experience-to-design-to-build decisions.
-- Include `TECH_SPEC.md` when data, API, state, permissions, platform capabilities, app integrity, feature flags, or integration behavior is in scope.
-- Write an `ANALYTICS.md` event catalog and `analytics-plan.html` before build prompts. Do not let builders invent event names screen by screen.
+- Include paid-tool routing, approved fallbacks, and `strategy/TOOL_DECISIONS.md` so future agents do not silently downgrade AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI, Fastlane, ASO, RevenueCat, Stripe, PostHog, Resend, or ASC/Play work.
+- Add a tool-specific `CLAUDE.md`, `CURSOR.md`, or equivalent only as a pointer/addendum; start `CLAUDE.md` from `business/engineering/repo-agent-entrypoints/CLAUDE.md` when Claude/Rork compatibility is needed.
+- Include `state/LAUNCH_TRACE.md` and `11_STAR_EXPERIENCE.md` so builders can follow evidence-to-product-experience-to-design-to-build decisions.
+- Include `engineering/TECH_SPEC.md` when data, API, state, permissions, platform capabilities, app integrity, feature flags, or integration behavior is in scope.
+- Write an `analytics/ANALYTICS.md` event catalog and `analytics/analytics-plan.html` before build prompts. Do not let builders invent event names screen by screen.
 - Include `PAID_UA.md` when paid acquisition, Apple Search Ads, custom product pages, paid creative tests, or spend-readiness claims are part of the business.
-- Include `ENGINEERING_PLAN.md` when the app build is ready for `ce-plan`/`ce-work` or a generated builder.
-- Include `PRODUCTION_READINESS.md` template or checklist before actual build execution begins.
-- Include `ONBOARDING.md` and `onboarding.html` when the build includes onboarding, personalization, review prompts, or a paywall.
+- Include `engineering/ENGINEERING_PLAN.md` when the app build is ready for `ce-plan`/`ce-work` or a generated builder.
+- Include `engineering/PRODUCTION_READINESS.md` template or checklist before actual build execution begins.
+- Include `product/ONBOARDING.md` and `product/onboarding.html` when the build includes onboarding, personalization, review prompts, or a paywall.
 - Include `VIRAL_GROWTH.md` when social, referral, invite, creator-code, or share-loop mechanics are part of the business.
-- Include `UGC_PLAYBOOK.md` and `ugc/` artifacts when social/creator distribution is part of the business.
+- Include `growth/UGC_PLAYBOOK.md` and `ugc/` artifacts when social/creator distribution is part of the business.
 - Write sequenced build prompts for Rork or another builder. Each prompt should name required docs, deliverables, analytics events, definition of done, and scope exclusions.
 - Bundle docs and visual references into a `rork-ready/` or `builder-ready/` directory when handoff to another repo is expected.
 - Include push pattern, repo destination, commit guidance, and what assets are direction vs production.
 
 Outputs:
 - launch coverage table or explicit deferred-lane list
-- `PROJECT_STATE.yaml`
-- `launch-cockpit.html`
+- `state/PROJECT_STATE.yaml`
+- `state/launch-cockpit.html`
 - `AGENTS.md`
 - `CLAUDE.md` when Claude/Rork/builder compatibility requires it
 - `APP_AGENTS.md`
 - `agents/` with orchestrator, marketing, engineering, product, design, and customer-success role prompts
-- `LAUNCH_TRACE.md`
+- `state/LAUNCH_TRACE.md`
 - `11_STAR_EXPERIENCE.md`
 - `11-star-experience.html`
-- `TECH_SPEC.md` when implementation contracts are in scope
-- `ANALYTICS.md`
-- `analytics-plan.html`
-- `TOOL_DECISIONS.md` when paid/account-gated tools or fallbacks affect the launch
-- `ENGINEERING_PLAN.md` when implementation is in scope
-- `PRODUCTION_READINESS.md` checklist/template when implementation is in scope
+- `engineering/TECH_SPEC.md` when implementation contracts are in scope
+- `analytics/ANALYTICS.md`
+- `analytics/analytics-plan.html`
+- `strategy/TOOL_DECISIONS.md` when paid/account-gated tools or fallbacks affect the launch
+- `engineering/ENGINEERING_PLAN.md` when implementation is in scope
+- `engineering/PRODUCTION_READINESS.md` checklist/template when implementation is in scope
 - `LAUNCHBENCH.md` or recorded validator/LaunchBench state when checks have run
-- `FAILURE_CARDS.md` when active risks need more detail than `PROJECT_STATE.yaml`
+- `operations/FAILURE_CARDS.md` when active risks need more detail than `state/PROJECT_STATE.yaml`
 - `PROMPTS.md`
-- `ONBOARDING.md` and `onboarding.html` when in scope
+- `product/ONBOARDING.md` and `product/onboarding.html` when in scope
 - `PAID_UA.md` when in scope
 - `VIRAL_GROWTH.md` when in scope
-- `UGC_PLAYBOOK.md` and `ugc/` artifacts when in scope
+- `growth/UGC_PLAYBOOK.md` and `ugc/` artifacts when in scope
 - `README.md`
 - `docs/` bundle
 - `assets/` bundle
@@ -618,17 +618,17 @@ Acceptance:
 Goal: implement the actual app with orchestration, review, and end-to-end proof.
 
 Do:
-- Load `flow-traceability.md` and require `ENGINEERING_PLAN.md` to reference trace IDs for build-critical work.
+- Load `flow-traceability.md` and require `engineering/ENGINEERING_PLAN.md` to reference trace IDs for build-critical work.
 - Load `eleven-star-experience.md` and require the engineering plan to name the V1 scalable slice and proof path.
 - Load `parallel-agent-orchestration.md` and `engineering-orchestration.md`.
 - Load `secrets-management.md` before writing code, tests, or deploy configs that introduce environment variables or credentials.
 - Load `project-state.md`, `launchbench-evals.md`, and `failure-cards.md` before declaring any lane done.
 - Use `ce-brainstorm` first if product behavior is still ambiguous after research.
 - Use `ce-plan` or an equivalent plan to create implementation units with repo-relative paths, dependencies, test scenarios, and verification.
-- Use `TECH_SPEC.md` as the source for data models, API contracts, state machines, permission behavior, provider integrations, app integrity, remote config, and fixtures when it exists.
+- Use `engineering/TECH_SPEC.md` as the source for data models, API contracts, state machines, permission behavior, provider integrations, app integrity, remote config, and fixtures when it exists.
 - Use `ce-work` or the builder's equivalent executor for engineering-heavy implementation.
 - Use `ce-worktree` when parallel feature lanes need isolation or the current checkout must remain clean.
-- Create or update `ORCHESTRATION.md` and use parallel agents only for independent units that pass file-overlap, shared-resource, and dependency checks.
+- Create or update `operations/ORCHESTRATION.md` and use parallel agents only for independent units that pass file-overlap, shared-resource, and dependency checks.
 - Keep the orchestrator responsible for git state, staging, commits, full-suite tests, migrations, releases, and final readiness calls.
 - Serialize MobAI/native iOS/device automation; other agents may prepare fixtures, inspect code, or analyze logs while the device owner runs the flow.
 - Run backend and frontend E2E checks for in-scope user journeys: onboarding, attribution, paywall, entitlement, restore, referral, web checkout, lifecycle email, privacy/delete, analytics, and support.
@@ -636,12 +636,12 @@ Do:
 - Verify real test data lands where expected: database/Firestore/Supabase/Postgres, RevenueCat, Stripe, Resend, PostHog, Sentry, store console, or provider logs.
 - Use `ce-code-review`, `ce-test-browser`, `ce-test-xcode`, `ce-proof`, or `ce-demo-reel` when available and appropriate.
 - Use `xcodebuildmcp-testing.md` for all Apple simulator/device proof and start at its Route Ladder rung 0: the in-app iOS Simulator (Claude Code Desktop pane or Codex `build-ios-apps`) for running the app, checking screens, walking flows, and reproducing bugs on a local Mac. Escalate to XcodeBuildMCP, SnapshotPreviews, or serve-sim when the lane needs scripted/CI builds, preview coverage, or a browser-visible stream. Replacing MobAI with any Apple-only rung requires a recorded coverage decision per `paid-tool-routing.md`.
-- Record all verification and blockers in `PRODUCTION_READINESS.md`.
-- Run deterministic validators or LaunchBench checks where available, update failure cards, update `PROJECT_STATE.yaml`, and rerender `launch-cockpit.html`.
+- Record all verification and blockers in `engineering/PRODUCTION_READINESS.md`.
+- Run deterministic validators or LaunchBench checks where available, update failure cards, update `state/PROJECT_STATE.yaml`, and rerender `state/launch-cockpit.html`.
 
 Outputs:
 - implemented app/backend/web changes
-- updated `AGENTS.md`, `CLAUDE.md`, `ENGINEERING_PLAN.md`, and `PRODUCTION_READINESS.md`
+- updated `AGENTS.md`, `CLAUDE.md`, `engineering/ENGINEERING_PLAN.md`, and `engineering/PRODUCTION_READINESS.md`
 - test artifacts, MobAI screenshots/recordings, provider/dashboard proof, and PR/release notes where applicable
 - validator/LaunchBench output summary and active/resolved failure cards
 
@@ -651,7 +651,7 @@ Acceptance:
 - Frontend actions are proven against backend/provider state when a backend/provider is in scope.
 - Device proof exists for critical mobile flows from the rung actually used — in-app iOS Simulator (rung 0), MobAI, XcodeBuildMCP, serve-sim, or SnapshotPreviews — with the rung, evidence paths, and coverage limitations recorded, or the blocker is explicit (including "no local Mac in this session" for cloud/SSH runs).
 - Remaining gaps are founder-only gates, external access waits, or platform review waits.
-- `PROJECT_STATE.yaml` and `launch-cockpit.html` match the proof and blockers in `PRODUCTION_READINESS.md`.
+- `state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` match the proof and blockers in `engineering/PRODUCTION_READINESS.md`.
 
 ## Phase 5c: Security Release Gate
 
@@ -665,20 +665,20 @@ Do:
 - If fallback was founder-approved, run local alternatives such as MobSF Docker, gitleaks/trufflehog, Semgrep community rules, `npm audit`, `osv-scanner`, Xcode static analyzer, Android lint, or manual OWASP MASVS/ASVS checks.
 - Verify release-specific controls: app signing, no server-only secrets in public/mobile bundles, webhook signatures, idempotency, rate limits, RLS/authz, entitlement restore, account deletion, support-grant audit log, PII scrubbing, Sentry release health, and security contact route.
 - Resolve findings or record accepted risks with owner, reason, expiry/revisit date, compensating control, and founder approval.
-- Update `SECURITY.md`, `security-review.html`, `PRODUCTION_READINESS.md`, `PROJECT_STATE.yaml`, and active failure cards.
+- Update `trust/SECURITY.md`, `trust/security-review.html`, `engineering/PRODUCTION_READINESS.md`, `state/PROJECT_STATE.yaml`, and active failure cards.
 
 Outputs:
 - security validator output summary
 - scan/review result paths or blocked-route proof
-- updated `SECURITY.md`
-- updated `security-review.html`
-- updated `PRODUCTION_READINESS.md`
+- updated `trust/SECURITY.md`
+- updated `trust/security-review.html`
+- updated `engineering/PRODUCTION_READINESS.md`
 - active/resolved failure cards
 
 Acceptance:
 - Security readiness is tied to artifacts and command/tool evidence, not a verbal assurance.
 - Paid security tooling is used, blocked, or founder-approved for fallback.
-- Release blockers are visible in `PROJECT_STATE.yaml` and `launch-cockpit.html`.
+- Release blockers are visible in `state/PROJECT_STATE.yaml` and `state/launch-cockpit.html`.
 - Accepted risks are explicit and do not hide known gaps.
 
 ## Phase 6: Post-Launch UGC/Fastlane Growth Engine
@@ -692,15 +692,15 @@ Do:
 - Load `fastlane-growth-ops.md` when the app is approved, in public beta, or ready to start marketing through Fastlane AI.
 - Refresh the viral growth fit decision: visible product moment, emotional hook, platform-native behavior, referral/share mechanics, monetization readiness, analytics proof, and compliant claim surface.
 - Decide whether UGC is a fit: visible product moment, emotional hook, large consumer/prosumer audience, comment/share potential, and compliant claim surface.
-- If UGC is a fit, create `UGC_PLAYBOOK.md` with 90-day Day 0 plan, budget, 3-5 creator roster target, sourcing workflow, contract checklist, payment structure, script ownership, tracking sheet, and stop/scale thresholds.
+- If UGC is a fit, create `growth/UGC_PLAYBOOK.md` with 90-day Day 0 plan, budget, 3-5 creator roster target, sourcing workflow, contract checklist, payment structure, script ownership, tracking sheet, and stop/scale thresholds.
 - Use the installed `usefastlane-ai` skill and current Fastlane app/docs/API as the live source for endpoint behavior, workspace state, limits, and connected accounts.
 - Confirm launch readiness before posting: store/beta links, landing page, privacy/terms/support links, approved claims, screenshots, pricing, and product analytics.
 - Set up or inspect the Fastlane workspace at `https://app.usefastlane.ai/home` and follow the current in-app guide at `/guide` when accessible.
 - Connect social accounts only with founder approval, then verify with safe API reads or current UI state.
-- Create `FASTLANE_OPS.md` and the `fastlane/` campaign directory.
+- Create `growth/FASTLANE_OPS.md` and the `fastlane/` campaign directory.
 - Build campaign brief, prompts, angles, Blitz preferences, UTM convention, and 30-day cadence from the launch docs.
 - Use MobAI full-quality screenshots and screen recordings plus Higgsfield design-system visuals as approved media inputs.
-- For polished app-flow demo videos, load `mobai-toolbelt.md` and route to MobAI `mobile-recorder-skill` for iOS/Android or `desktop-recorder-skill` for macOS/web. Save `.mob` or `screenplay.json`, raw capture, final export, captions, and upload copy in `DEMO_VIDEO.md`.
+- For polished app-flow demo videos, load `mobai-toolbelt.md` and route to MobAI `mobile-recorder-skill` for iOS/Android or `desktop-recorder-skill` for macOS/web. Save `.mob` or `screenplay.json`, raw capture, final export, captions, and upload copy in `growth/DEMO_VIDEO.md`.
 - Use in-app iOS Simulator screenshots/recordings (rung 0, either runtime), or XcodeBuildMCP/serve-sim captures, when Apple-platform media is needed; copy captures off the Desktop into the repo's raw capture directory, verify native resolution against the target well, and record limitations.
 - Generate content, QA it against brand/legal/store claims, and prepare a schedule.
 - Schedule or post only after explicit approval.
@@ -709,13 +709,13 @@ Do:
 Outputs:
 - `VIRAL_GROWTH.md`
 - `growth/format-lab.csv` when format tests are in scope
-- `UGC_PLAYBOOK.md`
+- `growth/UGC_PLAYBOOK.md`
 - `ugc/creator-list.csv`
 - `ugc/creator-brief.md`
 - `ugc/script-bank.md`
 - `ugc/tracker.csv` or sheet link
 - `ugc/weekly-review.md`
-- `FASTLANE_OPS.md`
+- `growth/FASTLANE_OPS.md`
 - `fastlane/campaign-brief.md`
 - `fastlane/prompts.md`
 - `fastlane/angles.json`
@@ -724,7 +724,7 @@ Outputs:
 - `fastlane/api-log.jsonl`
 - `fastlane/metrics-snapshot.json`
 - `fastlane/runs/<timestamp>/`
-- updated `ANALYTICS.md`, `LAUNCH.md`, or `RESEARCH.md` notes when social learnings change positioning, keywords, or funnel assumptions
+- updated `analytics/ANALYTICS.md`, `LAUNCH.md`, or `strategy/RESEARCH.md` notes when social learnings change positioning, keywords, or funnel assumptions
 
 Acceptance:
 - UGC starts only after fit, budget, rights, disclosure, and founder approval gates are clear.
@@ -740,27 +740,27 @@ Acceptance:
 Goal: run the live business on a fixed weekly rhythm — crash health, reviews, retention economics, support, and the launch retro — so "launched" becomes an operating state, not an end state.
 
 Do:
-- Load `post-launch-operations.md`; create `POST_LAUNCH_OPS.md` from the template and set `lanes.post_launch_ops` honestly.
+- Load `post-launch-operations.md`; create `operations/POST_LAUNCH_OPS.md` from the template and set `lanes.post_launch_ops` honestly.
 - Stand up the crash route (Sentry or store crash reports) with alert routing and a crash-free release gate.
 - Start the review-response loop with a stated SLA; mine reviews for failure cards, ASO language, and feature demand.
 - Fix the release train (weekly/biweekly), staged rollout posture, hotfix criteria, and rollback path.
 - Run the retention review: D0/D7/D30 cohorts, first-renewal inflection, voluntary-vs-involuntary churn split, reactivation posture.
 - Verify support routing end to end (support@ alias, refund path, FAQ, escalation, data-deletion requests).
 - Hand growth tactics to the existing lanes: `paid-user-acquisition.md` stop/scale rules, `fastlane-growth-ops.md` weekly loop, `aso-store-ops.md` monitoring.
-- Fill `LAUNCH_RETRO.md` at launch +7 days; refresh at day 30 and day 90; revisit essentials-scope deferred lanes at the day-30 retro.
-- Run `npm run check:post-launch -- --root . --state PROJECT_STATE.yaml` before calling the lane done.
+- Fill `operations/LAUNCH_RETRO.md` at launch +7 days; refresh at day 30 and day 90; revisit essentials-scope deferred lanes at the day-30 retro.
+- Run `npm run check:post-launch -- --root . --state state/PROJECT_STATE.yaml` before calling the lane done.
 
 Outputs:
-- `POST_LAUNCH_OPS.md`
-- `LAUNCH_RETRO.md`
-- updated `PROJECT_STATE.yaml` (`lanes.post_launch_ops`, failure cards from retro findings)
-- weekly log entries in `POST_LAUNCH_OPS.md`
+- `operations/POST_LAUNCH_OPS.md`
+- `operations/LAUNCH_RETRO.md`
+- updated `state/PROJECT_STATE.yaml` (`lanes.post_launch_ops`, failure cards from retro findings)
+- weekly log entries in `operations/POST_LAUNCH_OPS.md`
 
 Acceptance:
 - The weekly rhythm has run at least once on the live app with evidence in the weekly log.
 - Crash, review, retention, and support routes are proven, not planned.
 - The retro exists and its misses are filed as failure cards or LaunchBench candidates, not oral lore.
-- Each retro checkpoint that has completed (day-30, then day-90) carries a founder-decided Kill, Hold, Or Scale verdict (`post-launch-operations.md` §9); before day 30 the section's presence in `LAUNCH_RETRO.md` is enough.
+- Each retro checkpoint that has completed (day-30, then day-90) carries a founder-decided Kill, Hold, Or Scale verdict (`post-launch-operations.md` §9); before day 30 the section's presence in `operations/LAUNCH_RETRO.md` is enough.
 - `check:post-launch` passes with the lane status the state claims.
 
-Once a second business exists, open the portfolio layer in `control-plane.md`: `PORTFOLIO_REGISTRY.md` is where per-app verdicts become a cross-app allocation decision, and where each launch's retro compounds into the next one.
+Once a second business exists, open the portfolio layer in `control-plane.md`: `strategy/PORTFOLIO_REGISTRY.md` is where per-app verdicts become a cross-app allocation decision, and where each launch's retro compounds into the next one.

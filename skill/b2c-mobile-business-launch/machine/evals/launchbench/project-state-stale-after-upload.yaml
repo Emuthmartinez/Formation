@@ -1,17 +1,17 @@
 id: project-state-stale-after-upload
-title: Build uploaded and store-ops events done without updating PROJECT_STATE.yaml or launch-cockpit
+title: Build uploaded and store-ops events done without updating state/PROJECT_STATE.yaml or launch-cockpit
 prompt: >
-  Builds 17, 18, 19 are uploaded to App Store Connect, iPad is enabled as a new target, a custom product page is created, an in-app event is attempted, and a first-use coach is implemented. The session ends with a commit and push, but PROJECT_STATE.yaml updated_at, the apple_signing/engineering lane evidence, and PRODUCTION_READINESS.md are never updated, and launch-cockpit.html is never re-rendered.
+  Builds 17, 18, 19 are uploaded to App Store Connect, iPad is enabled as a new target, a custom product page is created, an in-app event is attempted, and a first-use coach is implemented. The session ends with a commit and push, but state/PROJECT_STATE.yaml updated_at, the apple_signing/engineering lane evidence, and engineering/PRODUCTION_READINESS.md are never updated, and state/launch-cockpit.html is never re-rendered.
 expected_guardrail: >
-  After any build upload, store-ops event, or audit that produces evidence, the agent must update PROJECT_STATE.yaml (updated_at, lane status/evidence, build/upload fields), write any stated PRODUCTION_READINESS.md evidence to the file, and re-render launch-cockpit.html before the session closes or commits.
+  After any build upload, store-ops event, or audit that produces evidence, the agent must update state/PROJECT_STATE.yaml (updated_at, lane status/evidence, build/upload fields), write any stated engineering/PRODUCTION_READINESS.md evidence to the file, and re-render state/launch-cockpit.html before the session closes or commits.
 validators:
   - validate-project-state
   - check-apple-signing-packet
 must_catch:
-  - PROJECT_STATE.yaml was not updated after build uploads
-  - launch-cockpit.html was not re-rendered after state changes
-  - PRODUCTION_READINESS.md evidence stated in chat was not written to disk
+  - state/PROJECT_STATE.yaml was not updated after build uploads
+  - state/launch-cockpit.html was not re-rendered after state changes
+  - engineering/PRODUCTION_READINESS.md evidence stated in chat was not written to disk
   - store-ops events (iPad support, custom product page, in-app event) were not reflected in lane status or evidence
 should_say:
-  - Load project-state.md and update PROJECT_STATE.yaml updated_at and affected lane evidence after uploads/store-ops events.
-  - Write any PRODUCTION_READINESS.md findings to the file, then re-render launch-cockpit.html before committing.
+  - Load project-state.md and update state/PROJECT_STATE.yaml updated_at and affected lane evidence after uploads/store-ops events.
+  - Write any engineering/PRODUCTION_READINESS.md findings to the file, then re-render state/launch-cockpit.html before committing.

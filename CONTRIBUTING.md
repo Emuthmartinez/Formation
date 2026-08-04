@@ -126,7 +126,7 @@ This skill is opinionated and targets subscription and freemium consumer mobile 
 
 ## Code of conduct and licensing
 
-Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Report security issues through [`.github/SECURITY.md`](.github/SECURITY.md) rather than a public issue.
+Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Report security issues through [`.github/trust/SECURITY.md`](.github/trust/SECURITY.md) rather than a public issue.
 
 By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE) that covers this repository.
 

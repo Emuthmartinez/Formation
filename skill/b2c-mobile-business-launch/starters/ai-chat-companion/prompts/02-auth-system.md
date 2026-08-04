@@ -23,9 +23,9 @@ Create:
 Design: clean, modern, dark theme. Form validation with clear error messages.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -34,5 +34,5 @@ shipping strings.
 - OAuth client secrets and the Supabase service role key are secrets → route via `SECRETS.md` (`secrets-management.md`). Verification/reset emails go through `resend-email-ops.md`.
 - The first-run step is an onboarding surface (`onboarding-conversion.md`) and a chance to capture one personalization fact (a Commitment moment, `consumer-product-design-agency.md`) that seeds memory (prompt 05).
 - Reconcile the dark-theme look with Design Room tokens (`design-room.md`), don't invent a one-off style.
-- Add `sign_up_completed`, `oauth_used`, `first_run_completed` to `ANALYTICS.md`.
+- Add `sign_up_completed`, `oauth_used`, `first_run_completed` to `analytics/ANALYTICS.md`.
 </content>

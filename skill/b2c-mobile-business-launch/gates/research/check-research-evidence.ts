@@ -2,9 +2,9 @@
 /**
  * check-research-evidence.ts — content floor for the research lane.
  *
- * RESEARCH.md is the evidence root every downstream lane traces back to, yet
+ * strategy/RESEARCH.md is the evidence root every downstream lane traces back to, yet
  * the lane previously had no dedicated validator: only the generic
- * lane-coverage status floor saw it. Structure follows the RESEARCH.md
+ * lane-coverage status floor saw it. Structure follows the strategy/RESEARCH.md
  * contract in playbook/process/artifact-contracts.md.
  *
  * npm script: check:research
@@ -35,7 +35,7 @@ const downstreamActive = DOWNSTREAM_OF_VERDICT.some((lane) => {
   return status === "partial" || status === "done";
 });
 const verdictRequired = done || buildPhase || downstreamActive;
-const text = readText(args.root, "RESEARCH.md");
+const text = readText(args.root, "strategy/RESEARCH.md");
 
 // A deferred/not_needed research lane suppresses the missing-file error only
 // before the build phases: from phase_2 onward the verdict is mandatory, so
@@ -46,10 +46,10 @@ if ((!skip || buildPhase || downstreamActive) && !text) {
     issue(
       "error",
       "research.markdown_missing",
-      "RESEARCH.md is required: it is the evidence root that SPEC.md, brand, ASO, pricing, and funnel decisions trace back to" +
+      "strategy/RESEARCH.md is required: it is the evidence root that product/SPEC.md, brand, ASO, pricing, and funnel decisions trace back to" +
         (buildPhase && skip ? ", and from phase_2 onward the Go/Pivot/Kill verdict it carries is mandatory even for a deferred research lane" : "") +
-        ". Seed it from business/RESEARCH.md.",
-      "RESEARCH.md",
+        ". Seed it from business/strategy/RESEARCH.md.",
+      "strategy/RESEARCH.md",
     ),
   );
 }
@@ -70,8 +70,8 @@ if (text) {
         issue(
           done ? "error" : "warning",
           `research.${phrase.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.missing`,
-          `RESEARCH.md should include a ${phrase} section (see the RESEARCH.md contract in artifact-contracts.md).`,
-          "RESEARCH.md",
+          `strategy/RESEARCH.md should include a ${phrase} section (see the strategy/RESEARCH.md contract in artifact-contracts.md).`,
+          "strategy/RESEARCH.md",
         ),
       );
     }
@@ -82,8 +82,8 @@ if (text) {
       issue(
         done ? "error" : "warning",
         "research.trace_pointer.missing",
-        "RESEARCH.md should give major decisions trace IDs or LAUNCH_TRACE.md pointers so evidence stays connected to build decisions.",
-        "RESEARCH.md",
+        "strategy/RESEARCH.md should give major decisions trace IDs or state/LAUNCH_TRACE.md pointers so evidence stays connected to build decisions.",
+        "strategy/RESEARCH.md",
       ),
     );
   }
@@ -96,7 +96,7 @@ if (text) {
             "error",
             `research.source_ledger_${column.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.missing`,
             `Done research needs the ${column} provenance column so browser/social/video evidence is reproducible.`,
-            "RESEARCH.md",
+            "strategy/RESEARCH.md",
           ),
         );
       }
@@ -106,8 +106,8 @@ if (text) {
         issue(
           "error",
           "research.placeholder_complete",
-          "Research cannot be done while template placeholders (YYYY-MM-DD, 'replace with', TODO/TBD) remain in RESEARCH.md.",
-          "RESEARCH.md",
+          "Research cannot be done while template placeholders (YYYY-MM-DD, 'replace with', TODO/TBD) remain in strategy/RESEARCH.md.",
+          "strategy/RESEARCH.md",
         ),
       );
     }
@@ -117,7 +117,7 @@ if (text) {
           "error",
           "research.no_dated_evidence",
           "A done research lane needs at least one dated evidence row (a real YYYY-MM-DD date) so freshness is checkable.",
-          "RESEARCH.md",
+          "strategy/RESEARCH.md",
         ),
       );
     }
@@ -141,8 +141,8 @@ if (text) {
         issue(
           "error",
           "research.category_revenue_reality.section_missing",
-          'RESEARCH.md mentions Category Revenue Reality but has no "## Category Revenue Reality" section. The gate reads the section, not the phrase.',
-          "RESEARCH.md",
+          'strategy/RESEARCH.md mentions Category Revenue Reality but has no "## Category Revenue Reality" section. The gate reads the section, not the phrase.',
+          "strategy/RESEARCH.md",
         ),
       );
     } else {
@@ -170,7 +170,7 @@ if (text) {
             "Done research needs at least one real competitor revenue row in Category Revenue Reality: a dollar estimate in the revenue " +
               "column AND a dated, non-placeholder source in the source column. Collecting AppKittie data is not the gate — the judged, " +
               "sourced number is: a category whose top apps gross too little cannot become a real business however well the launch executes.",
-            "RESEARCH.md",
+            "strategy/RESEARCH.md",
           ),
         );
       }
@@ -184,7 +184,7 @@ if (text) {
             "research.category_revenue_bar_unjudged",
             "Category Revenue Reality needs a substantive stated bar (a number, not a blank or placeholder) AND an explicit pass/fail judgment " +
               "against it. A pass verdict over no stated threshold, or a table without the judgment line, is data collection wearing a gate's clothes.",
-            "RESEARCH.md",
+            "strategy/RESEARCH.md",
           ),
         );
       }
@@ -196,8 +196,8 @@ if (text) {
         issue(
           "error",
           "research.go_pivot_or_kill.section_missing",
-          'RESEARCH.md mentions Go, Pivot, Or Kill but has no "## Go, Pivot, Or Kill" section. The gate reads the section, not the phrase.',
-          "RESEARCH.md",
+          'strategy/RESEARCH.md mentions Go, Pivot, Or Kill but has no "## Go, Pivot, Or Kill" section. The gate reads the section, not the phrase.',
+          "strategy/RESEARCH.md",
         ),
       );
     } else {
@@ -217,7 +217,7 @@ if (text) {
             "research.go_pivot_kill_evidence_columns_missing",
             "The Go, Pivot, Or Kill table is missing its named evidence columns. Category revenue reality, wedge, and demand signal must " +
               "each have a column between Date and Verdict — a verdict table with the reasons renamed or removed is a decision without its inputs.",
-            "RESEARCH.md",
+            "strategy/RESEARCH.md",
           ),
         );
       }
@@ -244,7 +244,7 @@ if (text) {
             "research.go_pivot_kill_row_malformed",
             `The Go, Pivot, Or Kill table has ${malformedRows.length} row(s) with a mistyped date (ISO YYYY-MM-DD required) or verdict ` +
               `(Go/Pivot/Kill required). Fix the row — a malformed later decision must never silently lose to an older one.`,
-            "RESEARCH.md",
+            "strategy/RESEARCH.md",
           ),
         );
       }
@@ -255,7 +255,7 @@ if (text) {
             "research.go_pivot_kill_row_missing",
             "Done research needs a completed Go, Pivot, Or Kill row: an ISO date, the evidence cells, and the founder's verdict. " +
               "The heading without a decided row is the pre-build kill gate left unwired.",
-            "RESEARCH.md",
+            "strategy/RESEARCH.md",
           ),
         );
       } else {
@@ -281,7 +281,7 @@ if (text) {
               "research.go_pivot_kill_decider_missing",
               'The latest Go, Pivot, Or Kill row does not name the founder in "Decided by" (empty, placeholder, or an automation identity). ' +
                 "The verdict is founder-only, never automatic — record the founder by name or role. An agent recording Go for itself is the exact bypass this gate exists to stop.",
-              "RESEARCH.md",
+              "strategy/RESEARCH.md",
             ),
           );
         }
@@ -293,7 +293,7 @@ if (text) {
               "research.go_pivot_kill_evidence_thin",
               "The latest Go, Pivot, Or Kill row carries empty or placeholder evidence cells. A verdict decided over " +
                 '"unverified" is a mood, not a decision — fill category revenue, wedge, and demand from the ledger above before recording it.',
-              "RESEARCH.md",
+              "strategy/RESEARCH.md",
             ),
           );
         }
@@ -305,7 +305,7 @@ if (text) {
               `The latest Go, Pivot, Or Kill verdict is "${latest.verdict}", but the research lane is marked done. ` +
                 `A Kill winds the idea down pre-build; a Pivot re-enters Phase 1 with the wedge changed. Either way the lane is not done — ` +
                 `record the follow-up verdict once the founder decides to build.`,
-              "RESEARCH.md",
+              "strategy/RESEARCH.md",
             ),
           );
         }
@@ -316,9 +316,9 @@ if (text) {
             issue(
               "error",
               "research.go_pivot_kill_state_missing",
-              "RESEARCH.md records a Go, Pivot, Or Kill verdict but lanes.research.go_pivot_kill_decision/go_pivot_kill_decided_at " +
+              "strategy/RESEARCH.md records a Go, Pivot, Or Kill verdict but lanes.research.go_pivot_kill_decision/go_pivot_kill_decided_at " +
                 "do not hold a valid verdict (go|pivot|kill) with an ISO date. The state mirror is what downstream lanes and the portfolio pipeline read.",
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
         } else if (decision !== latest.verdict || decidedAt !== latest.date) {
@@ -326,10 +326,10 @@ if (text) {
             issue(
               "error",
               "research.go_pivot_kill_state_mismatch",
-              `lanes.research.go_pivot_kill_decision/decided_at ("${decision}" on ${decidedAt}) disagree with the latest verdict row in RESEARCH.md ` +
+              `lanes.research.go_pivot_kill_decision/decided_at ("${decision}" on ${decidedAt}) disagree with the latest verdict row in strategy/RESEARCH.md ` +
                 `("${latest.verdict}" on ${latest.date}). Both the verdict and its date must match — a stale or forward-dated mirror is what downstream ` +
                 `lanes and the portfolio pipeline would act on.`,
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
         }
@@ -361,7 +361,7 @@ if (text) {
           "error",
           "research.source_ledger_row_missing",
           "Done research needs at least one complete Source Ledger evidence row; headers and an unrelated date are not proof.",
-          "RESEARCH.md",
+          "strategy/RESEARCH.md",
         ),
       );
     }

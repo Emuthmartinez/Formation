@@ -23,7 +23,7 @@ Before building, confirm the product shape with the founder via **AskUserQuestio
 4. **Memory depth** — session-only, or **long-term per-user memory** the model recalls across conversations? Long-term memory is the "feels like it knows me" moment and a privacy/security item.
 5. **Audience & safety scope** — general adult, or could **minors** use it? Companion/character and any minor exposure raise the safety bar (crisis protocols, age gating) from optional to required.
 
-Record the answers in `PROJECT_STATE.yaml` (e.g. `lanes.product.archetype: ai-chat-companion`, `chat_type`, `primary_surface`, `modality`, `memory_depth`, `safety_scope`).
+Record the answers in `state/PROJECT_STATE.yaml` (e.g. `lanes.product.archetype: ai-chat-companion`, `chat_type`, `primary_surface`, `modality`, `memory_depth`, `safety_scope`).
 
 Honesty note: the bundled prompts target **web (Next.js + Supabase + Claude API)**. The Claude API key and all inference calls must be **server-side only** — never ship the key to the client. For native mobile, the inference proxy/backend carries over unchanged; the chat client is re-expressed for the native stack and IAP applies.
 
@@ -48,14 +48,14 @@ Build one system at a time and test it. Prompts live in [`../starters/ai-chat-co
 
 | # | Prompt | Core system | Threads into |
 |---|---|---|---|
-| 00 | `00-positioning-strategy` (Claude.ai, not Claude Code) | positioning | `RESEARCH.md`, naming, `VIRAL_GROWTH.md` |
-| 01 | `01-database-schema` | conversations + usage + memory | `TECH_SPEC.md`, engineering, security (RLS) |
-| 02 | `02-auth-system` | identity | engineering, `SECURITY.md`, `SECRETS.md` |
-| 03 | `03-chat-core-loop` | conversations + streaming UI | `11_STAR_EXPERIENCE.md`, `ANALYTICS.md` |
-| 04 | `04-model-integration` | inference + context | `TECH_SPEC.md`, `SECRETS.md`, security |
+| 00 | `00-positioning-strategy` (Claude.ai, not Claude Code) | positioning | `strategy/RESEARCH.md`, naming, `VIRAL_GROWTH.md` |
+| 01 | `01-database-schema` | conversations + usage + memory | `engineering/TECH_SPEC.md`, engineering, security (RLS) |
+| 02 | `02-auth-system` | identity | engineering, `trust/SECURITY.md`, `SECRETS.md` |
+| 03 | `03-chat-core-loop` | conversations + streaming UI | `11_STAR_EXPERIENCE.md`, `analytics/ANALYTICS.md` |
+| 04 | `04-model-integration` | inference + context | `engineering/TECH_SPEC.md`, `SECRETS.md`, security |
 | 05 | `05-memory-personalization` (optional) | memory | `consumer-product-design-agency.md`, privacy |
-| 06 | `06-usage-limits-metering` | usage | `revenue-monetization.md`, `ANALYTICS.md` |
-| 07 | `07-stripe-monetization` (optional) | revenue | `revenue-monetization.md`, `REVENUE_OPS.md` |
+| 06 | `06-usage-limits-metering` | usage | `revenue-monetization.md`, `analytics/ANALYTICS.md` |
+| 07 | `07-stripe-monetization` (optional) | revenue | `revenue-monetization.md`, `revenue/REVENUE_OPS.md` |
 | 08 | `08-safety-and-moderation` | safety | `security-release-hardening.md`, `ethics-guardrail.md`, `privacy-terms.md` |
 
 Variants (apply after the text base): [`variants/companion-character`](../../starters/ai-chat-companion/prompts/variants/companion-character.md) and [`variants/voice-first`](../../starters/ai-chat-companion/prompts/variants/voice-first.md).
@@ -64,12 +64,12 @@ Step 0 (positioning) is strategic work for the **web interface / Claude.ai**. Th
 
 ## How This Lane Threads Into The Launch Workflow
 
-- **The system prompt is a product asset, not a code detail.** It encodes the persona, the domain guardrails, the refusal style, and the safety rules. Version it, review it against `BRAND.md §Voice`, and treat changes as `change-cascade.md` events. When building AI features in this skill, follow the Claude API guidance (the `claude-api` skill) for current model IDs, streaming, tool use, and prompt-caching — do not hardcode model names or pricing from memory.
-- **Inference keys are server-side secrets.** The Claude API key never reaches the client; all calls go through a server route or edge function. Route the key through `SECRETS.md` (`secrets-management.md`) and treat the inference endpoint as an abuse/cost surface in `SECURITY.md` (rate limits, per-user quotas, prompt-injection handling).
+- **The system prompt is a product asset, not a code detail.** It encodes the persona, the domain guardrails, the refusal style, and the safety rules. Version it, review it against `strategy/BRAND.md §Voice`, and treat changes as `change-cascade.md` events. When building AI features in this skill, follow the Claude API guidance (the `claude-api` skill) for current model IDs, streaming, tool use, and prompt-caching — do not hardcode model names or pricing from memory.
+- **Inference keys are server-side secrets.** The Claude API key never reaches the client; all calls go through a server route or edge function. Route the key through `SECRETS.md` (`secrets-management.md`) and treat the inference endpoint as an abuse/cost surface in `trust/SECURITY.md` (rate limits, per-user quotas, prompt-injection handling).
 - **The first response is the 11-star moment.** Run `eleven-star-experience.md` over prompt 03/04: streaming that feels alive, and (with memory) a reply that reflects the user's own context, is the magical V1 slice. The memory recall is an Intent Mirroring moment (`consumer-product-design-agency.md`); give it a PostHog event and an honest "based on what you told me" attribution per the Human-Centered AI tier.
 - **Usage metering is the monetization spine.** Prompt 06 meters messages/tokens and enforces free-tier caps before prompt 07 sells the upgrade. Reconcile caps, model tiers, and price with `revenue-monetization.md` (Stripe for web; IAP/StoreKit for native digital subscriptions). The upgrade prompt at the cap is an onboarding/paywall-timing decision (`onboarding-conversion.md`).
 - **Safety is a launch gate, scaled to audience.** Prompt 08 is required before public launch: input/output moderation (Claude API or a classifier), jailbreak resistance, and — for companion/character apps or any product minors can reach — crisis/self-harm escalation copy and age gating. This is both a `security-release-hardening.md` item and an `ethics-guardrail.md` item: a companion that encourages dependency or misrepresents itself as human/licensed is a dark pattern and a compliance veto. Reflect data retention and AI-use disclosures in `privacy-terms.md`.
-- **AI-result honesty is a copy rule.** Per the Human-Centered AI tier in `consumer-product-design-agency.md`: every AI result attributes itself to user context where relevant, never claims certainty it cannot verify, and keeps a visible user-override/edit path. Add the rule to `BRAND.md §Voice`.
+- **AI-result honesty is a copy rule.** Per the Human-Centered AI tier in `consumer-product-design-agency.md`: every AI result attributes itself to user context where relevant, never claims certainty it cannot verify, and keeps a visible user-override/edit path. Add the rule to `strategy/BRAND.md §Voice`.
 
 ## Infrastructure Defaults (record decisions, do not hardcode)
 
@@ -85,11 +85,11 @@ This pack follows the archetype contract enforced by `check-app-archetype.ts` (R
 
 Before calling an AI-chat build ready:
 
-- [ ] Chat type, surface, modality, memory depth, and safety scope confirmed via AskUserQuestion and recorded in `PROJECT_STATE.yaml`.
-- [ ] Claude API key is server-side only; inference endpoint has per-user rate limits/quotas and prompt-injection handling in `SECURITY.md`.
-- [ ] System prompt is versioned and reviewed against `BRAND.md §Voice`.
-- [ ] Streaming + context-window management + summarization are specified in `TECH_SPEC.md`; current model IDs/params sourced via the `claude-api` skill, not memory.
+- [ ] Chat type, surface, modality, memory depth, and safety scope confirmed via AskUserQuestion and recorded in `state/PROJECT_STATE.yaml`.
+- [ ] Claude API key is server-side only; inference endpoint has per-user rate limits/quotas and prompt-injection handling in `trust/SECURITY.md`.
+- [ ] System prompt is versioned and reviewed against `strategy/BRAND.md §Voice`.
+- [ ] Streaming + context-window management + summarization are specified in `engineering/TECH_SPEC.md`; current model IDs/params sourced via the `claude-api` skill, not memory.
 - [ ] Usage metering + free-tier caps reconciled with `revenue-monetization.md`; correct billing path for the surface (Stripe web / IAP native).
 - [ ] Safety pass (moderation, jailbreak resistance, crisis protocol + age gating where the audience requires) complete; ethics-guardrail and privacy/AI-use disclosures reconciled.
-- [ ] AI-result honesty copy rule in `BRAND.md §Voice`; memory recall has a PostHog event and a user-editable/override path.
+- [ ] AI-result honesty copy rule in `strategy/BRAND.md §Voice`; memory recall has a PostHog event and a user-editable/override path.
 </content>

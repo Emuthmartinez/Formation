@@ -25,9 +25,9 @@ Notifications:
 - Real-time updates via Supabase subscriptions
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -35,7 +35,7 @@ shipping strings.
 
 - Notifications must be **async and not block the main request cycle** — generate them off the engagement write path (DB trigger or background job), not inline.
 - The follow write is performance-sensitive (it changes every follower's feed). Confirm it scales with the prompt 01 indexes; keep it a simple insert/delete on the edge table, not a feed fan-out write at MVP scale.
-- Add `user_followed`, `user_unfollowed`, `notification_received`, `notifications_marked_read` to `ANALYTICS.md`.
+- Add `user_followed`, `user_unfollowed`, `notification_received`, `notifications_marked_read` to `analytics/ANALYTICS.md`.
 - Follow / new-follower is the first viral surface — connect it to `viral-growth-loops.md` (a new follower can trigger a welcome/notification email via `resend-email-ops.md`).
 - Profile header design pulls from the Design Room tokens, not a one-off look.
 </content>

@@ -3,7 +3,7 @@
  * check-founder-copy.ts — no raw machine value reaches a founder.
  *
  * This gate exists because the founder-facing dashboard used to print
- * PROJECT_STATE.yaml keys straight into HTML, so a founder read rows like
+ * state/PROJECT_STATE.yaml keys straight into HTML, so a founder read rows like
  * "paid_tool_routing | not_started" on their own business dashboard. The fix was a
  * translation layer (scripts/lib/founder-copy.ts). This gate is what stops the fix from
  * rotting the next time someone adds a lane, a status, a phase, or a provider route.
@@ -56,13 +56,13 @@ const issues: Issue[] = [];
  * the strictest copy rules in the repo.
  */
 const founderSurfaces: { relative: string; kind: "html" | "markdown" }[] = [
-  { relative: "launch-cockpit.html", kind: "html" },
-  { relative: "BUSINESS_ACCESS.md", kind: "markdown" },
-  { relative: "design-room.html", kind: "html" },
-  { relative: "onboarding.html", kind: "html" },
-  { relative: "analytics-plan.html", kind: "html" },
-  { relative: "security-review.html", kind: "html" },
-  { relative: "store-console.html", kind: "html" },
+  { relative: "state/launch-cockpit.html", kind: "html" },
+  { relative: "operations/BUSINESS_ACCESS.md", kind: "markdown" },
+  { relative: "design/design-room.html", kind: "html" },
+  { relative: "product/onboarding.html", kind: "html" },
+  { relative: "analytics/analytics-plan.html", kind: "html" },
+  { relative: "trust/security-review.html", kind: "html" },
+  { relative: "store/store-console.html", kind: "html" },
 ];
 
 /**
@@ -76,7 +76,7 @@ const allowedTokens = new Map<string, string>([
   ["security.txt", "a published file at a public URL"],
   ["app-ads.txt", "a published file at a public URL"],
   ["BUSINESS_ACCESS.md", "the founder's own access document, named in its own heading"],
-  ["PROJECT_STATE.yaml", "named in continuity prose that a founder may hand to another agent"],
+  ["state/PROJECT_STATE.yaml", "named in continuity prose that a founder may hand to another agent"],
   ["package.json", "a real filename in setup instructions"],
   ["Info.plist", "a real Apple filename in submission instructions"],
   ["2FA", "a term founders already know"],
@@ -152,12 +152,12 @@ if (!rendererSource.includes("celebrationFor") && !rendererSource.includes("cele
   );
 }
 
-// Narrative freshness: the PROJECT_STATE.yaml template has promised this
+// Narrative freshness: the state/PROJECT_STATE.yaml template has promised this
 // enforcement in its own comment since v0.25.0 ("check:founder-copy fails on
 // empty or placeholder text once the project is past the orient phase") —
 // this makes the promise true. The shipped template stays in orient, so it is
 // exempt by its own phase.
-const statePath = path.join(root, "PROJECT_STATE.yaml");
+const statePath = path.join(root, "state/PROJECT_STATE.yaml");
 if (existsSync(statePath)) {
   try {
     const state: unknown = parseYaml(readFileSync(statePath, "utf8"));
@@ -172,7 +172,7 @@ if (existsSync(statePath)) {
               `founder_copy.narrative_stale.${field}`,
               `narrative.${field} is empty or placeholder text while the project is past orient (${phase}). ` +
                 `The narrated update is the founder's first read on the cockpit — write what actually happened, in plain language.`,
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
         }
@@ -378,7 +378,7 @@ function rawIdentifiers(text: string): string[] {
 function isAllowed(token: string): boolean {
   if (allowedTokens.has(token)) return true;
   // Allowlisted filenames are matched without their extension too, because the token
-  // regex stops at the dot ("BUSINESS_ACCESS.md" is scanned as "BUSINESS_ACCESS").
+  // regex stops at the dot ("operations/BUSINESS_ACCESS.md" is scanned as "BUSINESS_ACCESS").
   return [...allowedTokens.keys()].some((allowed) => allowed.replace(/\.[A-Za-z0-9]+$/, "") === token);
 }
 

@@ -52,18 +52,18 @@ function rejectTerms(text: string, terms: string[], label: string, filePath: str
 const { skillRoot, repoRoot } = parseArgs(process.argv.slice(2));
 const issues: Issue[] = [];
 
-const templateRoot = path.join(skillRoot, "business", "repo-agent-entrypoints");
+const templateRoot = path.join(skillRoot, "business", "engineering/repo-agent-entrypoints");
 const templateAgentsPath = path.join(templateRoot, "AGENTS.md");
 const templateClaudePath = path.join(templateRoot, "CLAUDE.md");
 const templateAgents = requireFile(templateAgentsPath, "template_agents", issues);
 const templateClaude = requireFile(templateClaudePath, "template_claude", issues);
-const appAgentsPath = path.join(skillRoot, "business", "app-agent-roster", "APP_AGENTS.md");
-const designGuruPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "design-guru.md");
-const productLeaderPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "product-leader.md");
-const marketingGuruPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "marketing-guru.md");
-const customerSuccessPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "customer-success.md");
-const engineeringLeaderPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "engineering-leader.md");
-const securityArchitectPath = path.join(skillRoot, "business", "app-agent-roster", "agents", "security-architect.md");
+const appAgentsPath = path.join(skillRoot, "business", "engineering/app-agent-roster", "APP_AGENTS.md");
+const designGuruPath = path.join(skillRoot, "business", "engineering/app-agent-roster", "agents", "design-guru.md");
+const productLeaderPath = path.join(skillRoot, "business", "engineering/app-agent-roster", "agents", "product-leader.md");
+const marketingGuruPath = path.join(skillRoot, "business", "engineering/app-agent-roster", "agents", "marketing-guru.md");
+const customerSuccessPath = path.join(skillRoot, "business", "engineering/app-agent-roster", "agents", "customer-success.md");
+const engineeringLeaderPath = path.join(skillRoot, "business", "engineering/app-agent-roster", "agents", "engineering-leader.md");
+const securityArchitectPath = path.join(skillRoot, "business", "engineering/app-agent-roster", "agents", "security-architect.md");
 const appAgents = requireFile(appAgentsPath, "app_agents", issues);
 const designGuru = requireFile(designGuruPath, "design_guru", issues);
 const productLeader = requireFile(productLeaderPath, "product_leader", issues);
@@ -82,22 +82,22 @@ if (templateAgents) {
       "{{STACK_SUMMARY}}",
       "b2c-mobile-business-launch",
       "do not ask the founder to re-invoke it",
-      "PROJECT_STATE.yaml",
-      "launch-cockpit.html",
-      "BUSINESS_ACCESS.md",
+      "state/PROJECT_STATE.yaml",
+      "state/launch-cockpit.html",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
-      "AGENT_OPERATIONS.md",
+      "operations/AGENT_OPERATIONS.md",
       "operations/agent-operations.json",
       "APP_AGENTS.md",
-      "ORCHESTRATION.md",
-      "PRODUCTION_READINESS.md",
-      "FAILURE_CARDS.md",
+      "operations/ORCHESTRATION.md",
+      "engineering/PRODUCTION_READINESS.md",
+      "operations/FAILURE_CARDS.md",
       "Session Continuity",
       "Do not rely on chat memory",
       "git status --short",
       "role prompts",
       "SECRETS.md",
-      "SECURITY.md",
+      "trust/SECURITY.md",
       "LaunchBench",
       "founder-only",
       "Doppler",
@@ -111,14 +111,14 @@ if (templateAgents) {
       "EMOTIONAL_DESIGN.md",
       "EMOTIONAL_AUDIT.md",
       "check:emotional-design",
-      "BRAND.md",
+      "strategy/BRAND.md",
       // The copy route: builders type deck rows, never spec vocabulary. Held
       // here so a later edit cannot drop the deck from the read-first list.
-      "COPY_BRIEF.md",
-      "COPY_DECK.md",
+      "product/copy/COPY_BRIEF.md",
+      "product/copy/COPY_DECK.md",
       // Held as the runnable verification command, not just a prose mention.
       "npm run check:app-copy -- --root",
-      "DEMO_VIDEO.md",
+      "growth/DEMO_VIDEO.md",
       "app-store-connect-cli.md",
       "ASC CLI/skill routes can cover app creation",
       "ParthJadhav/app-store-screenshots",
@@ -151,11 +151,11 @@ if (templateClaude) {
       "Session Continuity",
       "Do not rely on prior chat context",
       "APP_AGENTS.md",
-      "ORCHESTRATION.md",
-      "BUSINESS_ACCESS.md",
+      "operations/ORCHESTRATION.md",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
       "ASC CLI/skills",
-      "AGENT_OPERATIONS.md",
+      "operations/AGENT_OPERATIONS.md",
       "frontier-agent-operations.md",
       "beginner founder knowledge",
     ],
@@ -183,9 +183,9 @@ if (appAgents) {
       "EMOTIONAL_AUDIT.md",
       "Experience Cards",
       "check:emotional-design",
-      "BRAND.md",
-      "DEMO_VIDEO.md",
-      "BUSINESS_ACCESS.md",
+      "strategy/BRAND.md",
+      "growth/DEMO_VIDEO.md",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
       "check:founder-operator",
     ],
@@ -205,8 +205,8 @@ if (designGuru) {
       "EMOTIONAL_AUDIT.md",
       "Experience Card",
       "check:emotional-design",
-      "BRAND.md",
-      "DEMO_VIDEO.md",
+      "strategy/BRAND.md",
+      "growth/DEMO_VIDEO.md",
     ],
     "design_guru",
     designGuruPath,
@@ -232,11 +232,11 @@ if (marketingGuru) {
       "Do not rely on chat memory",
       "EMOTIONAL_DESIGN.md",
       "Experience Cards",
-      "BRAND.md",
-      "DEMO_VIDEO.md",
-      "BUSINESS_ACCESS.md",
+      "strategy/BRAND.md",
+      "growth/DEMO_VIDEO.md",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
-      "AGENT_OPERATIONS.md",
+      "operations/AGENT_OPERATIONS.md",
       "approval envelope",
       "revocation path",
     ],
@@ -252,9 +252,9 @@ if (customerSuccess) {
     [
       "Session Continuity",
       "Do not rely on chat memory",
-      "BUSINESS_ACCESS.md",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
-      "AGENT_OPERATIONS.md",
+      "operations/AGENT_OPERATIONS.md",
       "approval envelope",
       "revocation path",
     ],
@@ -265,9 +265,15 @@ if (customerSuccess) {
 }
 
 if (engineeringLeader) {
-  // COPY_DECK.md is in the read-first list because engineering types the
+  // product/copy/COPY_DECK.md is in the read-first list because engineering types the
   // strings; the gate holds it so a roster edit cannot silently drop it.
-  requireTerms(engineeringLeader, ["Session Continuity", "Do not rely on chat memory", "COPY_DECK.md"], "engineering_leader", engineeringLeaderPath, issues);
+  requireTerms(
+    engineeringLeader,
+    ["Session Continuity", "Do not rely on chat memory", "product/copy/COPY_DECK.md"],
+    "engineering_leader",
+    engineeringLeaderPath,
+    issues,
+  );
 }
 
 if (securityArchitect) {
@@ -286,7 +292,7 @@ if (repoRoot) {
       [
         "This file is for maintaining this skill repo itself",
         "Do not copy these instructions into a launched business or generated app repo",
-        "business/repo-agent-entrypoints",
+        "business/engineering/repo-agent-entrypoints",
         "Runtime Sync",
         "Source Freshness",
       ],
@@ -299,7 +305,7 @@ if (repoRoot) {
   if (repoClaude) {
     requireTerms(
       repoClaude,
-      ["maintainer-only", "Do not copy it into businesses created by the skill", "business/repo-agent-entrypoints/CLAUDE.md"],
+      ["maintainer-only", "Do not copy it into businesses created by the skill", "business/engineering/repo-agent-entrypoints/CLAUDE.md"],
       "repo_claude",
       repoClaudePath,
       issues,

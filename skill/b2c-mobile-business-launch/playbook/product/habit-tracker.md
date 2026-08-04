@@ -22,7 +22,7 @@ Before building, confirm the product shape with the founder via **AskUserQuestio
 3. **Which optional systems are in V1?** (multi-select) — stats/insights (prompt 05), monetization (prompt 06), social accountability (prompt 07).
 4. **Niche** — who is this for, and which habit or routine? (Free text. Feeds prompt 00 positioning. A specific niche is the whole strategy; "track anything" loses to free incumbents and the phone's built-in reminders.)
 
-Record the answers in `PROJECT_STATE.yaml` (e.g. `lanes.product.archetype: habit-tracker`, `habit_model`, `primary_surface`, `optional_systems`, plus `project.launch_scope: lite` if the counter-utility variant is chosen) so later sessions do not re-litigate the shape.
+Record the answers in `state/PROJECT_STATE.yaml` (e.g. `lanes.product.archetype: habit-tracker`, `habit_model`, `primary_surface`, `optional_systems`, plus `project.launch_scope: lite` if the counter-utility variant is chosen) so later sessions do not re-litigate the shape.
 
 ## Runnable Starter
 
@@ -44,13 +44,13 @@ Build one system at a time and test it. Prompts live in [`../starters/habit-trac
 
 | # | Prompt | Core system | Threads into |
 |---|---|---|---|
-| 00 | `00-positioning-strategy` (Claude.ai, not Claude Code) | positioning | `RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md` |
-| 01 | `01-database-schema` | habit definition + check-ins + reminders | `TECH_SPEC.md`, engineering, security (RLS) |
-| 02 | `02-auth-system` | identity + timezone | engineering, `SECURITY.md`, `SECRETS.md`, `onboarding-conversion.md` |
-| 03 | `03-habit-core-loop` | check-in loop | `11_STAR_EXPERIENCE.md`, `emotional-design-system.md`, `ANALYTICS.md` |
-| 04 | `04-reminders-and-streaks` | streak/reminder engine | `ethics-guardrail.md`, `SECRETS.md`, `TECH_SPEC.md` tests |
+| 00 | `00-positioning-strategy` (Claude.ai, not Claude Code) | positioning | `strategy/RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md` |
+| 01 | `01-database-schema` | habit definition + check-ins + reminders | `engineering/TECH_SPEC.md`, engineering, security (RLS) |
+| 02 | `02-auth-system` | identity + timezone | engineering, `trust/SECURITY.md`, `SECRETS.md`, `onboarding-conversion.md` |
+| 03 | `03-habit-core-loop` | check-in loop | `11_STAR_EXPERIENCE.md`, `emotional-design-system.md`, `analytics/ANALYTICS.md` |
+| 04 | `04-reminders-and-streaks` | streak/reminder engine | `ethics-guardrail.md`, `SECRETS.md`, `engineering/TECH_SPEC.md` tests |
 | 05 | `05-stats-and-insights` (optional) | insight surface | `emotional-experience-measurement.md`, retention |
-| 06 | `06-paywall-and-monetization` (optional) | revenue | `revenue-monetization.md` §10, `REVENUE_OPS.md` |
+| 06 | `06-paywall-and-monetization` (optional) | revenue | `revenue-monetization.md` §10, `revenue/REVENUE_OPS.md` |
 | 07 | `07-social-accountability` (optional) | accountability + growth | `viral-growth-loops.md`, abuse controls |
 
 Variants: [`variants/wellness-coach`](../../starters/habit-tracker/prompts/variants/wellness-coach.md) (guided programs, content as product) and [`variants/simple-counter-utility`](../../starters/habit-tracker/prompts/variants/simple-counter-utility.md) (strip to a essentials-scope single-purpose utility).
@@ -61,11 +61,11 @@ Step 0 (positioning) is strategic work for the **web interface / Claude.ai**. Th
 
 - **The check-in is the 11-star magical moment.** Run `eleven-star-experience.md` over prompt 03: the tap → instant flip → streak tick is the engineered moment, with a PostHog event and a reduced-motion fallback (`consumer-product-design-agency.md`). The all-done state is the session close — a completion signal under the peak-end rule, never an engagement hook.
 - **The streak is a HIGH-risk Experience Card and carries a contract.** The check-in maps to the **Commitment** card; the streak maps to the **Streak / Loss Aversion** card, HIGH-risk per `ethics-guardrail.md`. Before ship it requires an `ethics_attestation`, a **user-control escape hatch** (free streak freeze/repair — paid-only forgiveness is the named dark line), a **counter-metric** (streak-anxiety signals), and a **truthfulness proof** (streaks derived from real check-ins, never a mutable counter). Guilt/shame/confirmshaming notification copy, or pairing a streak-break with a spend prompt, is a dark-pattern veto (`failure-cards.md`). `check:emotional-design` enforces the attestation fields.
-- **Timezone-correct streaks are the classic correctness trap.** Local dates derive from the profile timezone server-side; DST transitions, timezone changes, and the 11:58pm check-in are required test cases in `TECH_SPEC.md`. A streak engine that lies after a DST shift fails the truthfulness proof, not just QA.
-- **Analytics before surfaces lock.** `habit_created`, `habit_checked_in`, `streak_extended`, `streak_recovered` (plus the reminder and paywall events in their prompts) must exist in `ANALYTICS.md` before prompts 03/04 surfaces lock (`analytics-attribution.md`).
+- **Timezone-correct streaks are the classic correctness trap.** Local dates derive from the profile timezone server-side; DST transitions, timezone changes, and the 11:58pm check-in are required test cases in `engineering/TECH_SPEC.md`. A streak engine that lies after a DST shift fails the truthfulness proof, not just QA.
+- **Analytics before surfaces lock.** `habit_created`, `habit_checked_in`, `streak_extended`, `streak_recovered` (plus the reminder and paywall events in their prompts) must exist in `analytics/ANALYTICS.md` before prompts 03/04 surfaces lock (`analytics-attribution.md`).
 - **Revenue reconciles with the SOSA-grounded defaults — as tests, founder-gated.** Prompt 06 surfaces the `revenue-monetization.md` §10 benchmarks (hard paywall ~5x freemium conversion, yearly-dominant plans realize the highest LTV, ≤4-day trials underperform 17–32-day, low prices anchor worthlessness) as strong defaults to test, not dogma; freemium remains a deliberate choice when free users drive accountability-circle network effects. Pricing, plan mix, and trial length are founder-approved. Billing follows the surface: Stripe web, RevenueCat + IAP native.
-- **Security is owner-only RLS, tested.** Habit data is private, health-adjacent data: every table carries a tested owner-only policy (pgTAP per `backend-data-contract.md`) referenced from `SECURITY.md`; prompt 07's sharing model extends RLS, never client filtering. Reminder push credentials (VAPID/APNs/FCM), cron secrets, and billing webhooks route via `SECRETS.md` and count as abuse surfaces.
-- **Positioning feeds research and launch.** Prompt 00's outputs (the niche's failure mode with generic trackers, the one habit loop, name directions, first-100-users plan) flow into `RESEARCH.md`, naming, and `growth/LAUNCH_NARRATIVE.md`.
+- **Security is owner-only RLS, tested.** Habit data is private, health-adjacent data: every table carries a tested owner-only policy (pgTAP per `backend-data-contract.md`) referenced from `trust/SECURITY.md`; prompt 07's sharing model extends RLS, never client filtering. Reminder push credentials (VAPID/APNs/FCM), cron secrets, and billing webhooks route via `SECRETS.md` and count as abuse surfaces.
+- **Positioning feeds research and launch.** Prompt 00's outputs (the niche's failure mode with generic trackers, the one habit loop, name directions, first-100-users plan) flow into `strategy/RESEARCH.md`, naming, and `growth/LAUNCH_NARRATIVE.md`.
 
 ## Infrastructure Defaults (record decisions, do not hardcode)
 
@@ -79,11 +79,11 @@ Step 0 (positioning) is strategic work for the **web interface / Claude.ai**. Th
 
 Before calling a habit-tracker build ready:
 
-- [ ] Habit model, primary surface, optional systems, and niche confirmed via AskUserQuestion and recorded in `PROJECT_STATE.yaml` (with `launch_scope: lite` if the counter variant applies).
-- [ ] Schema (prompt 01) reconciled with `TECH_SPEC.md`; every user-data table has a tested owner-only RLS policy referenced from `SECURITY.md`; one-check-in-per-day uniqueness enforced in the database.
+- [ ] Habit model, primary surface, optional systems, and niche confirmed via AskUserQuestion and recorded in `state/PROJECT_STATE.yaml` (with `launch_scope: lite` if the counter variant applies).
+- [ ] Schema (prompt 01) reconciled with `engineering/TECH_SPEC.md`; every user-data table has a tested owner-only RLS policy referenced from `trust/SECURITY.md`; one-check-in-per-day uniqueness enforced in the database.
 - [ ] Timezone captured at signup; streaks computed server-side from local dates; DST/timezone-change/late-night test cases pass in CI.
 - [ ] The check-in loop is run through `11_STAR_EXPERIENCE.md`; Commitment and Streak/Loss-Aversion cards have complete attestation blocks (escape hatch, counter-metric, truthfulness proof, recovery mechanism) passing `check:emotional-design`.
-- [ ] Streak recovery/freeze exists, is free, and is never paired with a spend prompt; notification copy reviewed against the no-guilt rules and `BRAND.md §Voice`.
-- [ ] `habit_created`, `habit_checked_in`, `streak_extended`, `streak_recovered` (and selected optional-system events) exist in `ANALYTICS.md`.
+- [ ] Streak recovery/freeze exists, is free, and is never paired with a spend prompt; notification copy reviewed against the no-guilt rules and `strategy/BRAND.md §Voice`.
+- [ ] `habit_created`, `habit_checked_in`, `streak_extended`, `streak_recovered` (and selected optional-system events) exist in `analytics/ANALYTICS.md`.
 - [ ] Monetization (if in scope) surfaced the §10 trade-offs to the founder, uses the correct billing path for the surface, and never paywalls the escape hatch.
 - [ ] Social accountability (if in scope) is opt-in per habit, RLS-scoped, has block/report and invite abuse controls, and never broadcasts misses.

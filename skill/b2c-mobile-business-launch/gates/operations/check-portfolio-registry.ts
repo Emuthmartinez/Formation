@@ -2,7 +2,7 @@
 /**
  * check-portfolio-registry.ts — structure floor for the multi-app portfolio surface.
  *
- * PORTFOLIO_REGISTRY.md is the one page a repeat founder reads across every
+ * strategy/PORTFOLIO_REGISTRY.md is the one page a repeat founder reads across every
  * business they run: per-app stage/MRR/verdict rows, an allocation paragraph,
  * cross-app learnings, and the next-launch pipeline. Most launches stay
  * single-business, so the file is optional — this check is a no-op when it is
@@ -24,7 +24,7 @@ import { issue, parseCliArgs, readText, reportAndExit, type Issue } from "../../
 const args = parseCliArgs(process.argv.slice(2));
 const issues: Issue[] = [];
 
-const registryRelative = "PORTFOLIO_REGISTRY.md";
+const registryRelative = "strategy/PORTFOLIO_REGISTRY.md";
 const registryPath = path.join(args.root, registryRelative);
 
 if (existsSync(registryPath)) {

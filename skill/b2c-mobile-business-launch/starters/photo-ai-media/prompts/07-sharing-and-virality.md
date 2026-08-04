@@ -24,9 +24,9 @@ Requirements:
   library is public by default
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -36,4 +36,4 @@ shipping strings.
 - The branded frame doubles as the free-tier watermark decision from prompt 05; reconcile the two so premium "watermark-free" and "frame-free sharing" are one coherent entitlement (`revenue-monetization.md`, founder-gated).
 - Privacy boundary: the library is private (signed URLs, prompt 03); a share mints a deliberate public copy. Never let referral mechanics leak private assets, and let users revoke a shared copy (takedown path threads into prompt 08). Likeness consent matters doubly here — sharing someone else's face is the user's action, but the example images *you* show on the landing page need explicit consent (`privacy-terms.md`).
 - Shared content must already have passed output safety screening (prompt 08) — the share surface is where unsafe output becomes a public incident.
-- Add `media_shared` (the lane's required event; with format + frame properties), `share_link_clicked`, `referral_signup_attributed`, `shared_copy_revoked` to `ANALYTICS.md`. Self-referral and incentive-abuse controls per `viral-growth-loops.md`.
+- Add `media_shared` (the lane's required event; with format + frame properties), `share_link_clicked`, `referral_signup_attributed`, `shared_copy_revoked` to `analytics/ANALYTICS.md`. Self-referral and incentive-abuse controls per `viral-growth-loops.md`.

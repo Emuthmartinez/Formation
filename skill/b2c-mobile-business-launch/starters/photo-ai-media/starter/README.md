@@ -17,7 +17,7 @@ supabase test db                          # RLS + storage policy tests (requires
 
 Secrets: `.env.example` is names-only. Route every value per `secrets-management.md` (Doppler default, `doppler run --`), and record each name in `SECRETS.md`.
 
-Provider: the AI generation provider is **deliberately not hardcoded**. Selecting one is a founder-gated paid-tool decision (`paid-tool-routing.md`, recorded in `TOOL_DECISIONS.md`); its key lives server-side as `MEDIA_GENERATION_API_KEY`. The generation route ships as a provider-agnostic job stub until that decision is made.
+Provider: the AI generation provider is **deliberately not hardcoded**. Selecting one is a founder-gated paid-tool decision (`paid-tool-routing.md`, recorded in `strategy/TOOL_DECISIONS.md`); its key lives server-side as `MEDIA_GENERATION_API_KEY`. The generation route ships as a provider-agnostic job stub until that decision is made.
 
 Backend: this starter is the **supabase-route artifact** of `backend-data-contract.md`. If the founder selects Firebase or a custom backend, replace `supabase/`, `lib/supabase/`, and `proxy.ts` through the data-contract lane (Backend Selection + reason, Data Model, tested Authorization Model, Migrations And Environments) and adapt the prompts — do not run the Supabase prompts verbatim against another backend.
 
@@ -27,7 +27,7 @@ Each prompt customizes a specific area. Run them in pack order (see [`../README.
 
 | Prompt | Customizes |
 |---|---|
-| `00-positioning-strategy.md` | No code — positioning feeds `RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md`. |
+| `00-positioning-strategy.md` | No code — positioning feeds `strategy/RESEARCH.md`, naming, `growth/LAUNCH_NARRATIVE.md`. |
 | `01-database-schema.md` | `supabase/migrations/0001_init.sql` (media_assets/generations/usage_events + owner-scoped storage policies) + `supabase/tests/0001_rls.test.sql`. |
 | `02-auth-system.md` | `app/login/`, `app/auth/confirm/route.ts`, `lib/supabase/*`, `proxy.ts` (OAuth providers, anonymous-try tradeoffs). |
 | `03-capture-and-library.md` | `app/library/page.tsx` (upload to the `media` bucket, signed-URL thumbnails, before/after reveal) + `media_uploaded` wiring. |

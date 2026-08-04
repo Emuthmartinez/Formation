@@ -6,7 +6,7 @@
  * words and fill it from the spec, so users read "Product-specific value promise"
  * and "Habit Tracker Starter" instead of the product. check:founder-copy closed
  * this class for founder-facing surfaces; this gate closes it for the app's own
- * strings by holding the artifact that carries them: COPY_DECK.md.
+ * strings by holding the artifact that carries them: product/copy/COPY_DECK.md.
  *
  * Rule lists are parsed from playbook/words/conversion-copy.md §Banned In App Copy
  * (see lib/app-copy-rules.ts), so the doc an agent reads and the gate that fails
@@ -14,7 +14,7 @@
  * check:founder-copy. The judgment rules — tone, warmth, case taste — stay
  * advisory; this gate catches shapes, not voice.
  *
- * Scope, deliberately: the deck, the ONBOARDING.md Copy column, TECH_SPEC.md's
+ * Scope, deliberately: the deck, the product/ONBOARDING.md Copy column, engineering/TECH_SPEC.md's
  * externalization contract, and (in the skill repo) the shipped templates and
  * archetype starters. It does not walk arbitrary app source — code TODOs are not
  * copy, and AST-scanning every stack is a different tool. The deck is the source
@@ -25,7 +25,7 @@
  * a tracked backfill, not a broken build. New launches get errors.
  *
  * npm script: check:app-copy
- * Usage: tsx gates/words/check-app-copy.ts --skill-root <skill> [--root <templates-or-app>] [--state <PROJECT_STATE.yaml>]
+ * Usage: tsx gates/words/check-app-copy.ts --skill-root <skill> [--root <templates-or-app>] [--state <state/PROJECT_STATE.yaml>]
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
@@ -71,7 +71,7 @@ const skillRoot = path.resolve(flagString(flags, "skillRoot") ?? defaultSkillRoo
 const hasRootFlag = process.argv.includes("--root");
 const cli = parseCliArgs(process.argv.slice(2));
 const root = hasRootFlag ? cli.root : path.join(skillRoot, "business");
-const statePath = hasRootFlag ? cli.statePath : path.join(root, "PROJECT_STATE.yaml");
+const statePath = hasRootFlag ? cli.statePath : path.join(root, "state/PROJECT_STATE.yaml");
 
 const issues: Issue[] = [];
 
@@ -115,7 +115,7 @@ const deckRequired = laneStatus("design") === "done" || laneStatus("onboarding")
 
 // Status detection reads the rendered document: a status line hidden in a
 // Markdown comment declares nothing.
-const rawDeckText = readText(root, "COPY_DECK.md");
+const rawDeckText = readText(root, "product/copy/COPY_DECK.md");
 const deckText = rawDeckText === undefined ? undefined : stripMarkdownComments(rawDeckText);
 const deckIsTemplate = Boolean(deckText && /^Status:\s*template\b/im.test(deckText));
 
@@ -124,9 +124,9 @@ if (!deckText && deckRequired) {
     issue(
       sev("error"),
       "app_copy.deck_missing",
-      "COPY_DECK.md is missing while the design/onboarding lane claims done. Every user-facing string is authored in the deck before the build " +
+      "product/copy/COPY_DECK.md is missing while the design/onboarding lane claims done. Every user-facing string is authored in the deck before the build " +
         "types it (playbook/words/conversion-copy.md §The Copy Deck); a build with no deck improvises labels from the spec.",
-      "COPY_DECK.md",
+      "product/copy/COPY_DECK.md",
     ),
   );
 }
@@ -136,9 +136,9 @@ if (deckText && deckIsTemplate && deckRequired) {
     issue(
       sev("error"),
       "app_copy.deck_still_template",
-      "COPY_DECK.md still declares 'Status: template' while the design/onboarding lane claims done — the example cells were never replaced " +
+      "product/copy/COPY_DECK.md still declares 'Status: template' while the design/onboarding lane claims done — the example cells were never replaced " +
         "with this product's words. Author every cell, then set the status to authored with the date.",
-      "COPY_DECK.md",
+      "product/copy/COPY_DECK.md",
     ),
   );
 }
@@ -152,22 +152,22 @@ if (deckText && !deckIsTemplate && !deckIsAuthored && deckRequired) {
     issue(
       sev("error"),
       "app_copy.deck_status_unauthored",
-      "COPY_DECK.md does not declare 'Status: authored <date>' while the design/onboarding lane claims done — a draft or unlabeled deck is " +
+      "product/copy/COPY_DECK.md does not declare 'Status: authored <date>' while the design/onboarding lane claims done — a draft or unlabeled deck is " +
         "unfinished by its own account. Finish the cells, then set the status.",
-      "COPY_DECK.md",
+      "product/copy/COPY_DECK.md",
     ),
   );
 }
 
 // The deck inherits its voice from the brief; a done design/onboarding lane
-// whose COPY_BRIEF.md is missing, template-status, or unlabeled shipped its
+// whose product/copy/COPY_BRIEF.md is missing, template-status, or unlabeled shipped its
 // strings without the voice source they are supposed to speak. Conversion
 // surfaces (store listing, paywall, lifecycle email) require the brief on
 // their own — conversion-copy.md ties it to those surfaces, not to the deck.
 const briefRequired = deckRequired || ["store_console", "revenue", "email"].some((lane) => laneStatus(lane) === "done");
 if (briefRequired) {
   // Commented-out sections render nothing and count for nothing.
-  const rawBrief = readText(root, "COPY_BRIEF.md");
+  const rawBrief = readText(root, "product/copy/COPY_BRIEF.md");
   const brief = rawBrief === undefined ? undefined : stripMarkdownComments(rawBrief);
   // A hollow status stub is not a brief: the sections the deck inherits from
   // must exist and carry content, not just headings.
@@ -186,8 +186,8 @@ if (briefRequired) {
       issue(
         sev("error"),
         "app_copy.brief_hollow",
-        "COPY_BRIEF.md declares itself authored but still carries the template's replace-this-line instruction — the sections were never filled with this product's content.",
-        "COPY_BRIEF.md",
+        "product/copy/COPY_BRIEF.md declares itself authored but still carries the template's replace-this-line instruction — the sections were never filled with this product's content.",
+        "product/copy/COPY_BRIEF.md",
       ),
     );
   }
@@ -200,8 +200,8 @@ if (briefRequired) {
       issue(
         sev("error"),
         "app_copy.brief_hollow",
-        `COPY_BRIEF.md declares itself authored but these sections are missing or empty: ${hollowSections.join(", ")}. The deck inherits its voice from the brief — a status line with no source material grants nothing.`,
-        "COPY_BRIEF.md",
+        `product/copy/COPY_BRIEF.md declares itself authored but these sections are missing or empty: ${hollowSections.join(", ")}. The deck inherits its voice from the brief — a status line with no source material grants nothing.`,
+        "product/copy/COPY_BRIEF.md",
       ),
     );
   }
@@ -210,7 +210,7 @@ if (briefRequired) {
   // verbatim in an authored brief mean the sections still carry the
   // template's prose instead of this product's. The sentinel lines are
   // parsed from the shipped template so they can never drift from it.
-  const briefTemplatePath = path.join(skillRoot, "business", "COPY_BRIEF.md");
+  const briefTemplatePath = path.join(skillRoot, "business", "product/copy/COPY_BRIEF.md");
   if (brief && /^Status:\s*authored\s+\d{4}-\d{2}-\d{2}\b/im.test(brief) && existsSync(briefTemplatePath)) {
     const normalizedBrief = normalizeProse(brief);
     const surviving = briefTemplateInstructionLines(readFileSync(briefTemplatePath, "utf8"), REQUIRED_BRIEF_SECTIONS).filter((line) =>
@@ -221,8 +221,8 @@ if (briefRequired) {
         issue(
           sev("error"),
           "app_copy.brief_hollow",
-          `COPY_BRIEF.md declares itself authored but still carries ${surviving.length} of the template's instruction lines verbatim (e.g. "${(surviving[0] ?? "").slice(0, 70)}"). Deleting the replace-this-line markers is not authorship — write this product's promise, proof, and voice in their place.`,
-          "COPY_BRIEF.md",
+          `product/copy/COPY_BRIEF.md declares itself authored but still carries ${surviving.length} of the template's instruction lines verbatim (e.g. "${(surviving[0] ?? "").slice(0, 70)}"). Deleting the replace-this-line markers is not authorship — write this product's promise, proof, and voice in their place.`,
+          "product/copy/COPY_BRIEF.md",
         ),
       );
     }
@@ -232,9 +232,9 @@ if (briefRequired) {
       issue(
         sev("error"),
         "app_copy.brief_unauthored",
-        "COPY_BRIEF.md is missing or not authored ('Status: authored <date>') while the design/onboarding lane claims done. The deck's voice " +
+        "product/copy/COPY_BRIEF.md is missing or not authored ('Status: authored <date>') while the design/onboarding lane claims done. The deck's voice " +
           "comes from the brief — author the promise, voice rules, and claims ledger before the lane is done (playbook/words/conversion-copy.md).",
-        "COPY_BRIEF.md",
+        "product/copy/COPY_BRIEF.md",
       ),
     );
   }
@@ -252,8 +252,8 @@ if (deckText && !deckIsTemplate) {
       issue(
         sev("error"),
         "app_copy.deck_row_malformed",
-        `COPY_DECK.md line ${bad.line} is a table row with ${bad.cells} cells instead of 5 — a dropped row is a string nobody validates. Fix the row (escape literal pipes as \\|).`,
-        `COPY_DECK.md:${bad.line}`,
+        `product/copy/COPY_DECK.md line ${bad.line} is a table row with ${bad.cells} cells instead of 5 — a dropped row is a string nobody validates. Fix the row (escape literal pipes as \\|).`,
+        `product/copy/COPY_DECK.md:${bad.line}`,
       ),
     );
   }
@@ -262,8 +262,8 @@ if (deckText && !deckIsTemplate) {
       issue(
         sev("error"),
         "app_copy.deck_empty",
-        "COPY_DECK.md has no string rows. The deck carries one row per user-facing string — an empty deck is a missing deck with a title.",
-        "COPY_DECK.md",
+        "product/copy/COPY_DECK.md has no string rows. The deck carries one row per user-facing string — an empty deck is a missing deck with a title.",
+        "product/copy/COPY_DECK.md",
       ),
     );
   }
@@ -279,7 +279,7 @@ if (deckText && !deckIsTemplate) {
           sev("error"),
           "app_copy.allowlist_reason_missing",
           `Allowed term "${declared.term}" has no substantive reason. The exemption is earned by one line on why this product owns the word — a bare bullet grants nothing.`,
-          "COPY_DECK.md",
+          "product/copy/COPY_DECK.md",
         ),
       );
     }
@@ -299,7 +299,7 @@ if (deckText && !deckIsTemplate) {
     return out;
   };
   for (const row of rows) {
-    const where = `COPY_DECK.md:${row.line}`;
+    const where = `product/copy/COPY_DECK.md:${row.line}`;
     // Deck keys ship unchanged into the string resources, where a duplicate
     // key silently overwrites another row's copy.
     // Two canonical keys that collapse to the same dots-to-underscores form
@@ -405,8 +405,8 @@ if (deckText && !deckIsTemplate) {
       issue(
         "warning",
         "app_copy.case_mixed",
-        "Control labels mix title case and sentence case. Pick one case system in COPY_BRIEF.md and hold it — either reads fine, mixing reads sloppy.",
-        "COPY_DECK.md",
+        "Control labels mix title case and sentence case. Pick one case system in product/copy/COPY_BRIEF.md and hold it — either reads fine, mixing reads sloppy.",
+        "product/copy/COPY_DECK.md",
       ),
     );
   }
@@ -454,8 +454,8 @@ if (deckText && !deckIsTemplate) {
           issue(
             sev("error"),
             "app_copy.deck_surface_missing",
-            `COPY_DECK.md has no "${surface.name}" strings — the surface set is the contract (onboarding, paywall, core loop, empty states, errors, settings and dialogs). Author the rows, or keep the heading with a "Not applicable — <reason>" line when this product genuinely lacks the surface.`,
-            "COPY_DECK.md",
+            `product/copy/COPY_DECK.md has no "${surface.name}" strings — the surface set is the contract (onboarding, paywall, core loop, empty states, errors, settings and dialogs). Author the rows, or keep the heading with a "Not applicable — <reason>" line when this product genuinely lacks the surface.`,
+            "product/copy/COPY_DECK.md",
           ),
         );
       }
@@ -463,10 +463,10 @@ if (deckText && !deckIsTemplate) {
   }
 }
 
-// ONBOARDING.md Copy column: the cell that used to say "Product-specific value
+// product/ONBOARDING.md Copy column: the cell that used to say "Product-specific value
 // promise". Deck keys, quoted final strings, and guidance are all fine; filler,
 // banned vocabulary, and raw identifiers are the leak this gate exists for.
-const onboarding = readText(root, "ONBOARDING.md") ?? readText(root, "onboarding/ONBOARDING.md");
+const onboarding = readText(root, "product/ONBOARDING.md") ?? readText(root, "onboarding/product/ONBOARDING.md");
 if (onboarding) {
   // Same earned-exemption rule as the deck: reasonless bullets grant nothing.
   const onboardingAllowedTerms = (deckText ? deckAllowedTerms(deckText) : [])
@@ -490,8 +490,8 @@ if (onboarding) {
       issue(
         sev("error"),
         "app_copy.onboarding_copy_table_missing",
-        "ONBOARDING.md has no screen table with a Copy column while the onboarding lane claims done. The screen sequence names its COPY_DECK.md keys in that column (playbook/words/conversion-copy.md) — without it, no string is reconciled.",
-        "ONBOARDING.md",
+        "product/ONBOARDING.md has no screen table with a Copy column while the onboarding lane claims done. The screen sequence names its product/copy/COPY_DECK.md keys in that column (playbook/words/conversion-copy.md) — without it, no string is reconciled.",
+        "product/ONBOARDING.md",
       ),
     );
   }
@@ -502,8 +502,8 @@ if (onboarding) {
       issue(
         sev("error"),
         "app_copy.onboarding_row_malformed",
-        `ONBOARDING.md line ${bad.line} is a screen-table row with ${bad.cells} cells where the header has ${bad.expected} — a shifted or missing cell hides copy from this scan. Fix the row (escape literal pipes as \\|).`,
-        `ONBOARDING.md:${bad.line}`,
+        `product/ONBOARDING.md line ${bad.line} is a screen-table row with ${bad.cells} cells where the header has ${bad.expected} — a shifted or missing cell hides copy from this scan. Fix the row (escape literal pipes as \\|).`,
+        `product/ONBOARDING.md:${bad.line}`,
       ),
     );
   }
@@ -514,13 +514,13 @@ if (onboarding) {
       issue(
         sev("error"),
         "app_copy.onboarding_key_reference_malformed",
-        `ONBOARDING.md's Copy column references \`${badRef}\`, which is not a localization key shape (lowercase dot-namespaced, optional trailing .*). Fix the reference so coverage can reconcile it against COPY_DECK.md.`,
-        "ONBOARDING.md",
+        `product/ONBOARDING.md's Copy column references \`${badRef}\`, which is not a localization key shape (lowercase dot-namespaced, optional trailing .*). Fix the reference so coverage can reconcile it against product/copy/COPY_DECK.md.`,
+        "product/ONBOARDING.md",
       ),
     );
   }
   for (const cell of copyColumn.cells) {
-    const where = `ONBOARDING.md:${cell.line}`;
+    const where = `product/ONBOARDING.md:${cell.line}`;
     // An empty Copy cell is a screen with no words and nothing to reconcile —
     // and a cell rendering only markup (&nbsp;, <br>) is the same emptiness.
     if (!/\S/.test(renderedCellText(cell.text))) {
@@ -528,7 +528,7 @@ if (onboarding) {
         issue(
           sev("error"),
           "app_copy.onboarding_copy_cell_empty",
-          "ONBOARDING.md has a screen row with an empty Copy cell — name the COPY_DECK.md keys that hold the screen's words, or the final words themselves.",
+          "product/ONBOARDING.md has a screen row with an empty Copy cell — name the product/copy/COPY_DECK.md keys that hold the screen's words, or the final words themselves.",
           where,
         ),
       );
@@ -545,7 +545,7 @@ if (onboarding) {
           issue(
             sev("error"),
             "app_copy.onboarding_placeholder",
-            `ONBOARDING.md's Copy column still says "${shape}" — the screen has no authored words. Name the COPY_DECK.md keys that hold them (playbook/words/conversion-copy.md).`,
+            `product/ONBOARDING.md's Copy column still says "${shape}" — the screen has no authored words. Name the product/copy/COPY_DECK.md keys that hold them (playbook/words/conversion-copy.md).`,
             where,
           ),
         );
@@ -560,7 +560,7 @@ if (onboarding) {
           issue(
             sev("error"),
             "app_copy.onboarding_internal_vocabulary",
-            `ONBOARDING.md's Copy column says "${term}" — internal vocabulary where a screen's words belong. Copy cells carry deck keys or final human words.`,
+            `product/ONBOARDING.md's Copy column says "${term}" — internal vocabulary where a screen's words belong. Copy cells carry deck keys or final human words.`,
             where,
           ),
         );
@@ -571,7 +571,7 @@ if (onboarding) {
         issue(
           sev("error"),
           "app_copy.onboarding_raw_identifier",
-          `ONBOARDING.md's Copy column shows the raw identifier "${token}". Copy cells carry deck keys or final words, not machine state.`,
+          `product/ONBOARDING.md's Copy column shows the raw identifier "${token}". Copy cells carry deck keys or final words, not machine state.`,
           where,
         ),
       );
@@ -593,9 +593,9 @@ if (onboarding) {
             sev("error"),
             "app_copy.deck_coverage_missing",
             reference.wildcard
-              ? `ONBOARDING.md names "${reference.key}" strings but COPY_DECK.md has no key under that prefix. Author the rows before the build reaches that screen.`
-              : `ONBOARDING.md references the exact key "${reference.key}" but COPY_DECK.md has no such row — the localization lookup at build time is exact. Author the row before the build reaches that screen.`,
-            "COPY_DECK.md",
+              ? `product/ONBOARDING.md names "${reference.key}" strings but product/copy/COPY_DECK.md has no key under that prefix. Author the rows before the build reaches that screen.`
+              : `product/ONBOARDING.md references the exact key "${reference.key}" but product/copy/COPY_DECK.md has no such row — the localization lookup at build time is exact. Author the row before the build reaches that screen.`,
+            "product/copy/COPY_DECK.md",
           ),
         );
       }
@@ -628,7 +628,7 @@ if (root !== path.join(skillRoot, "business")) {
               issue(
                 sev("error"),
                 "app_copy.fictional_brand_shipped",
-                `${relative} still shows the starter's fictional example brand "${brand}" in user-visible text ("${visible.slice(0, 60)}"). The copy pass replaces starter example copy from COPY_DECK.md before anything ships.`,
+                `${relative} still shows the starter's fictional example brand "${brand}" in user-visible text ("${visible.slice(0, 60)}"). The copy pass replaces starter example copy from product/copy/COPY_DECK.md before anything ships.`,
                 relative,
               ),
             );
@@ -639,11 +639,11 @@ if (root !== path.join(skillRoot, "business")) {
   }
 }
 
-// ENGINEERING_PLAN.md is what a builder follows in isolation — a customized
+// engineering/ENGINEERING_PLAN.md is what a builder follows in isolation — a customized
 // plan that drops the deck route reopens the improvisation path every other
 // gate here closes, so the route is held in the plan itself.
 if (deckRequired) {
-  const plan = readText(root, "ENGINEERING_PLAN.md");
+  const plan = readText(root, "engineering/ENGINEERING_PLAN.md");
   // With engineering underway, a missing plan is the same failure as a plan
   // without the route: the builder has nothing directing strings to the deck.
   if (engineeringActive && !plan) {
@@ -651,35 +651,35 @@ if (deckRequired) {
       issue(
         sev("error"),
         "app_copy.plan_deck_route_missing",
-        "ENGINEERING_PLAN.md is missing while engineering is underway — there is no plan directing builders to type strings from COPY_DECK.md.",
-        "ENGINEERING_PLAN.md",
+        "engineering/ENGINEERING_PLAN.md is missing while engineering is underway — there is no plan directing builders to type strings from product/copy/COPY_DECK.md.",
+        "engineering/ENGINEERING_PLAN.md",
       ),
     );
   }
-  // The route must be affirmative: "Do not use COPY_DECK.md" contains the
+  // The route must be affirmative: "Do not use product/copy/COPY_DECK.md" contains the
   // filename while reopening the improvisation path. NEGATION is the shared
   // lexicon (lib/app-copy-rules.ts), so the plan, the prompt fences, and the
   // mechanism clause all reject the same forms.
   const planRoutesToDeck = stripMarkdownComments(plan ?? "")
     .split(/\r?\n/)
-    .some((line) => line.includes("COPY_DECK.md") && !NEGATION.test(line));
+    .some((line) => line.includes("product/copy/COPY_DECK.md") && !NEGATION.test(line));
   if (plan && !planRoutesToDeck) {
     issues.push(
       issue(
         sev("error"),
         "app_copy.plan_deck_route_missing",
-        "ENGINEERING_PLAN.md does not route strings through COPY_DECK.md. Builders follow the plan in isolation — restore the rule that work " +
+        "engineering/ENGINEERING_PLAN.md does not route strings through product/copy/COPY_DECK.md. Builders follow the plan in isolation — restore the rule that work " +
           "units type deck rows (and stop to author missing ones) so screens are never implemented from spec vocabulary.",
-        "ENGINEERING_PLAN.md",
+        "engineering/ENGINEERING_PLAN.md",
       ),
     );
   }
 }
 
-// TECH_SPEC.md: localization readiness is a day-one engineering property. When
+// engineering/TECH_SPEC.md: localization readiness is a day-one engineering property. When
 // the engineering lane claims done, the spec names the externalization mechanism.
 if (engineeringActive) {
-  const rawTechSpec = readText(root, "TECH_SPEC.md");
+  const rawTechSpec = readText(root, "engineering/TECH_SPEC.md");
   // A readiness section hidden in a comment renders nothing and counts for nothing.
   const techSpec = rawTechSpec === undefined ? undefined : stripMarkdownComments(rawTechSpec);
   const hasSection = Boolean(techSpec) && /##\s+Strings And Localization Readiness/i.test(techSpec ?? "");
@@ -729,18 +729,18 @@ if (engineeringActive) {
   });
   // The shipped template lists every mechanism as an option menu ending in
   // "Record the choice here." — that sentinel surviving means nobody chose.
-  // A missing TECH_SPEC.md is the same failure: no committed mechanism.
+  // A missing engineering/TECH_SPEC.md is the same failure: no committed mechanism.
   const choiceStillOpen = /record the choice here/i.test(techSpec ?? "");
   if (!hasSection || !namesMechanism || choiceStillOpen) {
     issues.push(
       issue(
         sev("error"),
         "app_copy.externalization_missing",
-        "TECH_SPEC.md does not commit to a string-externalization mechanism: the Strings And Localization Readiness section must exist and name " +
+        "engineering/TECH_SPEC.md does not commit to a string-externalization mechanism: the Strings And Localization Readiness section must exist and name " +
           "ONE concrete choice for this stack (String Catalogs, i18next + expo-localization, ARB + gen-l10n, or next-intl) — a missing spec or " +
           "the template's untouched option menu does not count. Externalized strings are decided on day one, not retrofitted — " +
           "playbook/words/conversion-copy.md §Localization Readiness.",
-        "TECH_SPEC.md",
+        "engineering/TECH_SPEC.md",
       ),
     );
   }
@@ -758,8 +758,8 @@ if (root === path.join(skillRoot, "business")) {
       issue(
         "error",
         "app_copy.deck_template_missing",
-        "business/COPY_DECK.md is missing — the deck contract has no starting artifact.",
-        "business/COPY_DECK.md",
+        "business/product/copy/COPY_DECK.md is missing — the deck contract has no starting artifact.",
+        "business/product/copy/COPY_DECK.md",
       ),
     );
   } else {
@@ -768,8 +768,8 @@ if (root === path.join(skillRoot, "business")) {
         issue(
           "error",
           "app_copy.deck_template_status",
-          "business/COPY_DECK.md must declare 'Status: template' — the shipped deck is example voice, and the status line is what exempts it from cell rules.",
-          "business/COPY_DECK.md",
+          "business/product/copy/COPY_DECK.md must declare 'Status: template' — the shipped deck is example voice, and the status line is what exempts it from cell rules.",
+          "business/product/copy/COPY_DECK.md",
         ),
       );
     }
@@ -779,8 +779,8 @@ if (root === path.join(skillRoot, "business")) {
         issue(
           "error",
           "app_copy.deck_template_row_malformed",
-          `business/COPY_DECK.md line ${bad.line} splits into ${bad.cells} cells instead of 5 — the template must demonstrate well-formed rows.`,
-          `business/COPY_DECK.md:${bad.line}`,
+          `business/product/copy/COPY_DECK.md line ${bad.line} splits into ${bad.cells} cells instead of 5 — the template must demonstrate well-formed rows.`,
+          `business/product/copy/COPY_DECK.md:${bad.line}`,
         ),
       );
     }
@@ -789,8 +789,8 @@ if (root === path.join(skillRoot, "business")) {
         issue(
           "error",
           "app_copy.deck_template_thin",
-          `business/COPY_DECK.md has ${rows.length} example rows; the template demonstrates the full surface set (expected at least 20 across onboarding, paywall, core loop, empty states, errors, settings).`,
-          "business/COPY_DECK.md",
+          `business/product/copy/COPY_DECK.md has ${rows.length} example rows; the template demonstrates the full surface set (expected at least 20 across onboarding, paywall, core loop, empty states, errors, settings).`,
+          "business/product/copy/COPY_DECK.md",
         ),
       );
     }
@@ -800,20 +800,20 @@ if (root === path.join(skillRoot, "business")) {
           issue(
             "error",
             "app_copy.deck_template_key_shape",
-            `business/COPY_DECK.md example key "${row.key}" breaks the localization-key shape it exists to demonstrate.`,
-            `business/COPY_DECK.md:${row.line}`,
+            `business/product/copy/COPY_DECK.md example key "${row.key}" breaks the localization-key shape it exists to demonstrate.`,
+            `business/product/copy/COPY_DECK.md:${row.line}`,
           ),
         );
       }
     }
   }
-  if (!readText(root, "COPY_BRIEF.md")) {
+  if (!readText(root, "product/copy/COPY_BRIEF.md")) {
     issues.push(
       issue(
         "error",
         "app_copy.brief_template_missing",
-        "business/COPY_BRIEF.md is missing — conversion-copy.md requires the brief and the skill ships its starting artifact.",
-        "business/COPY_BRIEF.md",
+        "business/product/copy/COPY_BRIEF.md is missing — conversion-copy.md requires the brief and the skill ships its starting artifact.",
+        "business/product/copy/COPY_BRIEF.md",
       ),
     );
   }
@@ -833,17 +833,17 @@ if (root === path.join(skillRoot, "business")) {
         // rule parked in a later example fence never reaches the build.
         const firstFence = readFileSync(file, "utf8").match(/```[\s\S]*?```/)?.[0] ?? "";
         // The route must be affirmative inside the fence too: "Do not use
-        // COPY_DECK.md; hardcode the strings" carries the filename while
+        // product/copy/COPY_DECK.md; hardcode the strings" carries the filename while
         // certifying the exact improvisation path this block closes — the
         // same shared negation lexicon the plan-route check reads.
-        const fenceRoutesToDeck = firstFence.split(/\r?\n/).some((line) => line.includes("COPY_DECK.md") && !NEGATION.test(line));
+        const fenceRoutesToDeck = firstFence.split(/\r?\n/).some((line) => line.includes("product/copy/COPY_DECK.md") && !NEGATION.test(line));
         if (!fenceRoutesToDeck) {
           const relative = path.relative(skillRoot, file);
           issues.push(
             issue(
               "error",
               "app_copy.prompt_deck_route_missing",
-              `${relative} does not route strings through COPY_DECK.md. Every archetype build prompt carries the deck rule so a builder following it in isolation cannot invent copy inline.`,
+              `${relative} does not route strings through product/copy/COPY_DECK.md. Every archetype build prompt carries the deck rule so a builder following it in isolation cannot invent copy inline.`,
               relative,
             ),
           );

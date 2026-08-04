@@ -45,7 +45,7 @@ Use the CLI route when:
 - Apple Developer account, bundle ID/App ID, app record, signing, certificate/profile, or first upload state needs deterministic inspection
 - RevenueCat catalog/subscription mapping needs reconciliation against ASC products
 
-Still create `STORE_CONSOLE.md` and `store-console.html`. The CLI can automate or verify pieces, but the founder-facing copy-paste packet remains the durable handoff.
+Still create `store/STORE_CONSOLE.md` and `store/store-console.html`. The CLI can automate or verify pieces, but the founder-facing copy-paste packet remains the durable handoff.
 
 ## Skill Pack Routing
 
@@ -73,7 +73,7 @@ When installed, route to these skill areas:
 - `asc-notarization`: macOS Developer ID archive/export/notarization when a macOS launch is in scope
 - `asc-wall-submit`: optional Wall of Apps public submission, always founder-approved
 
-For App Store listing work, also load `app-store-listing-prep.md`. CLI automation can apply or verify pieces of the listing, but the durable deliverable still needs `APP_STORE_LISTING.md`, `app-store-listing.html`, `STORE_CONSOLE.md`, and founder-visible approval gates.
+For App Store listing work, also load `app-store-listing-prep.md`. CLI automation can apply or verify pieces of the listing, but the durable deliverable still needs `APP_STORE_LISTING.md`, `app-store-listing.html`, `store/STORE_CONSOLE.md`, and founder-visible approval gates.
 
 Treat `asc-app-create-ui` as the expected app-record creation route when the API route is missing or the upstream skill pack says browser automation is required. That still counts as ASC CLI skill-pack routing; it is not a reason to declare the task impossible.
 
@@ -121,7 +121,7 @@ asc workflow validate
 asc workflow run --dry-run testflight_beta VERSION:1.2.3
 ```
 
-Before any first-time app creation claim, refresh and record the exact creation path from `asc apps --help`, `asc bundle-ids --help`, and the ASC skill pack. If the current route is `asc-app-create-ui` rather than a direct API command, record the browser automation preflight and founder gate in `STORE_CONSOLE.md`.
+Before any first-time app creation claim, refresh and record the exact creation path from `asc apps --help`, `asc bundle-ids --help`, and the ASC skill pack. If the current route is `asc-app-create-ui` rather than a direct API command, record the browser automation preflight and founder gate in `store/STORE_CONSOLE.md`.
 
 Use `--dry-run` and read commands first. Do not use `--confirm`, `--submit`, pricing changes, screenshot replacement, metadata apply, TestFlight external distribution, or release actions without explicit founder approval.
 
@@ -143,15 +143,15 @@ These notes exist because agents repeatedly burned live-store cycles guessing fl
 - **Pre-use `--help` rule.** Before the first use of any `asc` subcommand not shown in this file, run `asc <subcommand> --help` and record the confirmed flags. If a command errors on a flag, run `asc <cmd> --help` before retrying — never retry a mutating command with a guessed alternate flag. (Failure card: `asc-flag-drift`.)
 - **`--confirm` is a CLI-required gate, not just a founder gate.** Destructive/mutating commands (`asc review cancel`, `asc review submit`, `asc subscriptions review submit`, release actions) error and do nothing unless `--confirm` is passed. So they need *both* the CLI `--confirm` flag *and* explicit founder approval before you run them. Omitting `--confirm` does not "safely no-op into a dry run" — it just errors; check `--help` for the required flags before the first live call.
 - **`validate` form.** In `asc 0.38.1`, validation accepts either `--version <VERSION_STRING>` or `--version-id <VERSION_ID>` with `--app`; there is no `asc validate app-store-version` subcommand. Always confirm current local help before use.
-- **Auth env vars.** The `asc` CLI reads `ASC_KEY_ID`, `ASC_ISSUER_ID`, and `ASC_PRIVATE_KEY_PATH` (the **path** to the `.p8`, confirmed from the CLI's own auth hint — not the key contents). Keep these names consistent with `PROJECT_STATE.yaml`. See "ASC Auth Setup And Recovery" above for the full auth ladder (keychain profiles, account-level keys, `asc auth init/login`). Do not `source` a `.env`/`clueless.env` that contains comments or unquoted values — that throws `command not found` on every invocation; extract single values with the awk pattern in [`secrets-management.md`](../operations/secrets-management.md) ("Env file extraction — never `source`").
+- **Auth env vars.** The `asc` CLI reads `ASC_KEY_ID`, `ASC_ISSUER_ID`, and `ASC_PRIVATE_KEY_PATH` (the **path** to the `.p8`, confirmed from the CLI's own auth hint — not the key contents). Keep these names consistent with `state/PROJECT_STATE.yaml`. See "ASC Auth Setup And Recovery" above for the full auth ladder (keychain profiles, account-level keys, `asc auth init/login`). Do not `source` a `.env`/`clueless.env` that contains comments or unquoted values — that throws `command not found` on every invocation; extract single values with the awk pattern in [`secrets-management.md`](../operations/secrets-management.md) ("Env file extraction — never `source`").
 - **Internal TestFlight groups auto-distribute.** Internal groups deliver to all internal testers automatically; do not pass a skip flag unless you intend to block internal delivery. External distribution always needs founder approval.
 - **Test notes are idempotent updates.** Updating a build's test notes is an update, not a create — do not create a second build record when one already exists.
 
 ## Promoted In-App Purchase Images
 
-If any in-app purchase or subscription is **promoted** on the App Store (or has a promotional image attached), each promoted product needs its own **unique 1024×1024 promotional image that depicts that specific product**. Reusing the app icon, or the same image across weekly/yearly/lifetime products, triggers a Guideline 2.3.2 "Accurate Metadata" rejection. Generate distinct on-brand images (Higgsfield tied to `DESIGN.md`), set each via the ASC IAP/subscription image route (confirm the exact verb with `--help`), or remove the promotional image for products you will not promote. (Failure card: `asc-promoted-iap-image-duplicate`.)
+If any in-app purchase or subscription is **promoted** on the App Store (or has a promotional image attached), each promoted product needs its own **unique 1024×1024 promotional image that depicts that specific product**. Reusing the app icon, or the same image across weekly/yearly/lifetime products, triggers a Guideline 2.3.2 "Accurate Metadata" rejection. Generate distinct on-brand images (Higgsfield tied to `design/DESIGN.md`), set each via the ASC IAP/subscription image route (confirm the exact verb with `--help`), or remove the promotional image for products you will not promote. (Failure card: `asc-promoted-iap-image-duplicate`.)
 
-Each unique promotional image should be generated with `higgsfield generate create gpt_image_2` using a DESIGN.md brief that names the specific product and its price point. Record every generated asset (prompt brief, output path, approval status) in `CONTENT_ASSETS.md`. See `app-store-listing-prep.md` for the full IAP asset workflow.
+Each unique promotional image should be generated with `higgsfield generate create gpt_image_2` using a design/DESIGN.md brief that names the specific product and its price point. Record every generated asset (prompt brief, output path, approval status) in `CONTENT_ASSETS.md`. See `app-store-listing-prep.md` for the full IAP asset workflow.
 
 ## App Store URL → Ad Creative Seeding
 
@@ -161,11 +161,11 @@ A live App Store URL can seed a Higgsfield Marketing Studio webproduct entity, w
 higgsfield marketing-studio webproducts fetch --url <app store url> --wait
 ```
 
-The `--url` Click-to-Ad shortcut bypasses DESIGN.md brief injection by default — always pass `--prompt` with explicit DESIGN.md tokens, and confirm spend per `paid-tool-routing.md` before generation. See the **App Store URL → UGC Ad Batch (Click-to-Ad)** recipe in `tool-recipes/visual-and-motion-production.md` for the full sequence (webproduct fetch → avatar pick → spend confirm → parallel `marketing_studio_video` modes → virality scoring → CONTENT_ASSETS.md → founder approval). For paid campaign context, see `paid-user-acquisition.md`.
+The `--url` Click-to-Ad shortcut bypasses design/DESIGN.md brief injection by default — always pass `--prompt` with explicit design/DESIGN.md tokens, and confirm spend per `paid-tool-routing.md` before generation. See the **App Store URL → UGC Ad Batch (Click-to-Ad)** recipe in `tool-recipes/visual-and-motion-production.md` for the full sequence (webproduct fetch → avatar pick → spend confirm → parallel `marketing_studio_video` modes → virality scoring → CONTENT_ASSETS.md → founder approval). For paid campaign context, see `paid-user-acquisition.md`.
 
 ## Post-Action State Update
 
-After any ASC action that changes build, metadata, screenshot, TestFlight, custom product page, in-app event, subscription, or platform state, update `PROJECT_STATE.yaml` (`updated_at`, the relevant lane status/evidence, build number, and upload status) and re-render `launch-cockpit.html` before the session ends — write any new `PRODUCTION_READINESS.md` evidence to the file rather than leaving it in chat. Skipping this is the `project-state-stale-after-upload` failure card.
+After any ASC action that changes build, metadata, screenshot, TestFlight, custom product page, in-app event, subscription, or platform state, update `state/PROJECT_STATE.yaml` (`updated_at`, the relevant lane status/evidence, build number, and upload status) and re-render `state/launch-cockpit.html` before the session ends — write any new `engineering/PRODUCTION_READINESS.md` evidence to the file rather than leaving it in chat. Skipping this is the `project-state-stale-after-upload` failure card.
 
 ## First-Time Signing And App Record Triage
 
@@ -201,7 +201,7 @@ Interpretation rules:
 - Only `Apple Development` identities means local development can work, but App Store/TestFlight distribution still needs Xcode automatic signing/cloud-managed distribution signing or an Apple Distribution certificate/profile.
 - `Bundle ID` and `SKU` should be treated as sticky identity. Do not create production records against placeholder naming.
 
-Record all findings in `APPLE_SIGNING.md` and mirror app-record blockers in `STORE_CONSOLE.md`.
+Record all findings in `store/APPLE_SIGNING.md` and mirror app-record blockers in `store/STORE_CONSOLE.md`.
 
 ## Safe Automation Boundaries
 
@@ -236,11 +236,11 @@ If ASC CLI is missing, use `paid-tool-routing.md` before falling back to manual 
 
 ## Store Packet Integration
 
-`STORE_CONSOLE.md` should show both routes when ASC CLI is in scope:
+`store/STORE_CONSOLE.md` should show both routes when ASC CLI is in scope:
 - CLI route: command, dry-run/apply status, JSON artifact path, blocker
 - Console route: click path, field, paste value, source, founder gate
 
-`store-console.html` should still show the founder where values live in App Store Connect. When a CLI command can update a value, show a "CLI available" note and the exact dry-run/apply distinction.
+`store/store-console.html` should still show the founder where values live in App Store Connect. When a CLI command can update a value, show a "CLI available" note and the exact dry-run/apply distinction.
 
 For screenshot upload:
 - plan screenshots with `SCREENSHOTS.md`
@@ -251,7 +251,7 @@ For screenshot upload:
 
 For RevenueCat:
 - use `asc-revenuecat-catalog-sync` or equivalent audit before creating products or mappings
-- do not create products, change prices, or map entitlements without founder approval and `REVENUE_OPS.md`
+- do not create products, change prices, or map entitlements without founder approval and `revenue/REVENUE_OPS.md`
 
 For localization:
 - use `asc-metadata-sync` to pull canonical metadata before edits
@@ -274,7 +274,7 @@ For App Store marketing surfaces:
 
 ## Evidence Requirements
 
-Record in `STORE_CONSOLE.md`:
+Record in `store/STORE_CONSOLE.md`:
 - CLI version/source checked
 - auth status without secrets
 - app ID, version ID, localization IDs, build IDs, and TestFlight group IDs resolved
@@ -285,7 +285,7 @@ Record in `STORE_CONSOLE.md`:
 - remaining manual console steps
 - official Apple doc refresh date
 
-Record in `PRODUCTION_READINESS.md` when release work is in scope:
+Record in `engineering/PRODUCTION_READINESS.md` when release work is in scope:
 - build upload or processing status
 - validation, release `status`, and review-submission result
 - TestFlight status
@@ -301,4 +301,4 @@ Record in `PRODUCTION_READINESS.md` when release work is in scope:
 - Losing track of localization IDs and uploading screenshots to the wrong locale.
 - Storing App Store Connect credentials in committed files.
 - Using unofficial skill-pack guidance without refreshing official Apple docs for the current required fields.
-- Skipping `store-console.html` because CLI automation exists.
+- Skipping `store/store-console.html` because CLI automation exists.

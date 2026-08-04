@@ -10,7 +10,7 @@ Part of the [Tool Recipes](../tool-recipes.md) index. Before using any paid or a
 
 Purpose: produce launch visuals, mockups, icons, mascots, animations, demo videos, screenshot art, and ad creative from the locked design system.
 
-Use after `DESIGN.md` exists or after a provisional design direction is explicitly labeled `draft`.
+Use after `design/DESIGN.md` exists or after a provisional design direction is explicitly labeled `draft`.
 
 Access:
 - Higgsfield is a paid/account-gated visual production path. If unavailable, ask before using Remotion, local HTML/CSS/SVG/canvas, founder-owned assets, public-domain assets, or real app screenshots as the free fallback.
@@ -42,8 +42,8 @@ Ad-reference caution: ad references (`--ad-reference-id`) are MUTUALLY EXCLUSIVE
 Cost-Tier Discipline: by default, use the quality-first model for each task (matching the upstream `higgsfield-generate` skill default). The cheap-first z_image → production-model path (Recipe 6 below) is a spend-reduction option offered ONLY at the `paid-tool-routing.md` spend-confirmation prompt, never applied silently. This intentionally overrides the upstream quality-first default because this skill is spend-sensitive and founder-gated.
 
 Rules:
-- Put `DESIGN.md` constraints into the generation brief: palette, typography mood, shapes, texture, motion energy, banned aesthetics, and intended surface.
-- All generated assets must be embedded or referenced in HTML proofs: `design.html`, `onboarding.html`, screenshot HTML, landing HTML, or ad-preview HTML.
+- Put `design/DESIGN.md` constraints into the generation brief: palette, typography mood, shapes, texture, motion energy, banned aesthetics, and intended surface.
+- All generated assets must be embedded or referenced in HTML proofs: `design/design.html`, `product/onboarding.html`, screenshot HTML, landing HTML, or ad-preview HTML.
 - Label assets as `direction`, `draft`, or `production`.
 - Do not present generated screenshots as real app functionality. Store screenshots must show truthful app UI and avoid unsupported claims, prices, or features.
 - For animations, write the storyboard and reduced-motion fallback before generation, then verify the clip in layout.
@@ -56,7 +56,7 @@ These are the canonical recipe bodies. Other files route to a recipe by name and
 
 Purpose: create a reusable founder/presenter Soul identity once, then produce weekly Marketing Studio video ads from it.
 
-1. **Check for existing Soul.** Call `mcp__claude_ai_Higgsfield__show_characters` and check `PROJECT_STATE.yaml` `tools.higgsfield.identity.soul_reference_id`. If a trained Soul exists, jump to step 6.
+1. **Check for existing Soul.** Call `mcp__claude_ai_Higgsfield__show_characters` and check `state/PROJECT_STATE.yaml` `tools.higgsfield.identity.soul_reference_id`. If a trained Soul exists, jump to step 6.
 2. **Media preflight.** For each founder photo, call `mcp__claude_ai_Higgsfield__media_upload` then `mcp__claude_ai_Higgsfield__media_confirm`. Record each `upload_id`.
 3. **Spend confirm.** Surface current balance via `mcp__claude_ai_Higgsfield__balance`. Confirm Soul training spend with the founder per `paid-tool-routing.md`.
 4. **Train Soul.** Use `--soul-2` for still/image-driven campaigns; use `--soul-cinematic` when the launch needs talking-head or presenter VIDEO:
@@ -64,22 +64,22 @@ Purpose: create a reusable founder/presenter Soul identity once, then produce we
    higgsfield soul-id create --name "founder" --soul-2 \
      --image a.png --image b.png --output-dir ./identity
    ```
-   Save the returned `reference_id` to `PROJECT_STATE.yaml` `tools.higgsfield.identity.soul_reference_id` and `./identity/training-manifest.json`.
+   Save the returned `reference_id` to `state/PROJECT_STATE.yaml` `tools.higgsfield.identity.soul_reference_id` and `./identity/training-manifest.json`.
 5. **Create avatar.** Use the upload ID from the preflight:
    ```bash
    higgsfield marketing-studio avatars create --name "Founder" --image <upload_id>
    ```
-   Save `avatar_id` to `PROJECT_STATE.yaml` `tools.higgsfield.identity.avatar_id`. Write `avatars.json` as `[{"id":"<avatar_id>","type":"custom"}]`.
+   Save `avatar_id` to `state/PROJECT_STATE.yaml` `tools.higgsfield.identity.avatar_id`. Write `avatars.json` as `[{"id":"<avatar_id>","type":"custom"}]`.
 6. **Import app product.** If not already done:
    ```bash
    higgsfield marketing-studio webproducts fetch \
      --url <app-store-url> --wait
    ```
 7. **Spend confirm for ad batch.** Surface current balance via `mcp__claude_ai_Higgsfield__balance`. Confirm weekly generation spend with the founder per `paid-tool-routing.md`.
-8. **Generate ads (weekly).** Inject DESIGN.md tokens into every `--prompt`:
+8. **Generate ads (weekly).** Inject design/DESIGN.md tokens into every `--prompt`:
    ```bash
    higgsfield generate create marketing_studio_video \
-     --prompt "<hook + DESIGN.md brief>" \
+     --prompt "<hook + design/DESIGN.md brief>" \
      --avatars @avatars.json \
      --product_ids @products.json \
      --mode ugc \
@@ -107,31 +107,31 @@ Purpose: turn the live App Store listing into a multi-format UGC ad batch withou
    higgsfield marketing-studio webproducts fetch \
      --url <app-store-url> --wait
    ```
-2. **Pick avatar.** Use a preset avatar or a custom Soul avatar. For custom Soul, confirm `avatar_id` exists in `PROJECT_STATE.yaml`; if not, run Recipe 1 steps 2–5 first.
+2. **Pick avatar.** Use a preset avatar or a custom Soul avatar. For custom Soul, confirm `avatar_id` exists in `state/PROJECT_STATE.yaml`; if not, run Recipe 1 steps 2–5 first.
 3. **Spend confirm.** Surface balance via `mcp__claude_ai_Higgsfield__balance`. Confirm spend for the planned mode batch with the founder per `paid-tool-routing.md`.
-4. **Generate parallel mode batch.** Inject DESIGN.md tokens into every `--prompt`. The `--url` shortcut reuses the backend entity but does NOT inject brief — always add `--prompt` explicitly:
+4. **Generate parallel mode batch.** Inject design/DESIGN.md tokens into every `--prompt`. The `--url` shortcut reuses the backend entity but does NOT inject brief — always add `--prompt` explicitly:
    ```bash
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \
-     --prompt "<hook + DESIGN.md brief>" \
+     --prompt "<hook + design/DESIGN.md brief>" \
      --mode ugc --duration 15 --aspect_ratio 9:16 \
      --output-dir ./ads/ugc --wait
 
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \
-     --prompt "<hook + DESIGN.md brief>" \
+     --prompt "<hook + design/DESIGN.md brief>" \
      --mode ugc_unboxing --duration 15 --aspect_ratio 9:16 \
      --output-dir ./ads/ugc_unboxing --wait
 
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \
-     --prompt "<hook + DESIGN.md brief>" \
+     --prompt "<hook + design/DESIGN.md brief>" \
      --mode product_review --duration 15 --aspect_ratio 9:16 \
      --output-dir ./ads/product_review --wait
 
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \
-     --prompt "<hook + DESIGN.md brief>" \
+     --prompt "<hook + design/DESIGN.md brief>" \
      --mode tv_spot --duration 15 --aspect_ratio 9:16 \
      --output-dir ./ads/tv_spot --wait
    ```
@@ -192,13 +192,13 @@ Purpose: refresh CPP backgrounds, event art, and supporting screenshot art for s
    ```bash
    higgsfield product-photoshoot create \
      --mode restyle \
-     --prompt "<seasonal context + DESIGN.md palette: colors, texture, mood, banned aesthetics>" \
+     --prompt "<seasonal context + design/DESIGN.md palette: colors, texture, mood, banned aesthetics>" \
      --image ./supporting-art/background.jpg \
      --count 3 \
      --output-dir ./seasonal/<season>
    ```
    Generate 2–3 variants. Label all outputs `status:draft`.
-5. **CONTENT_ASSETS.md.** Record prompt_brief (with DESIGN.md tokens and seasonal context), source asset, output paths, variant labels (status:draft), and approval gate.
+5. **CONTENT_ASSETS.md.** Record prompt_brief (with design/DESIGN.md tokens and seasonal context), source asset, output paths, variant labels (status:draft), and approval gate.
 6. **Founder gate.** Founder must approve before CPP upload, App Store event submission, or IAP promotional art upload. Do not upload any seasonal restyle without explicit founder approval.
 7. **Upload.** On approval, use `app-store-connect-cli.md` upload procedures for CPP/event/IAP art.
 
@@ -211,29 +211,29 @@ Purpose: minimize credit spend on direction-finding before committing production
 **Rule-5 reconciliation:** the upstream `higgsfield-generate` skill defaults to quality-first and says do NOT pre-optimize for cheaper models unless asked. In this spend-sensitive, founder-gated skill, cheap-first is offered ONLY as a spend-reduction option at the `paid-tool-routing.md` spend-confirmation prompt — never applied silently. Present it as an option, let the founder choose, then proceed.
 
 1. **At spend-confirmation prompt.** Offer the cheap-first path as an option: "Run z_image drafts first (cheaper) to lock direction, then production model on the winner. Saves approximately X credits vs. running production model on all variants. Proceed with cheap-first or production-only?"
-2. **Translate DESIGN.md brief.** Extract palette, typography mood, shapes, texture, banned aesthetics, and intended surface into a tight prompt.
-3. **Check icon_style token.** If `DESIGN.md` `icon_style` is `character`, `cartoon`, or `mascot`, use `nano_banana_2` or `nano_banana_pro` for drafts, not `z_image`. Otherwise, use `z_image` for cheap drafts.
+2. **Translate design/DESIGN.md brief.** Extract palette, typography mood, shapes, texture, banned aesthetics, and intended surface into a tight prompt.
+3. **Check icon_style token.** If `design/DESIGN.md` `icon_style` is `character`, `cartoon`, or `mascot`, use `nano_banana_2` or `nano_banana_pro` for drafts, not `z_image`. Otherwise, use `z_image` for cheap drafts.
 4. **Draft run (z_image, 5–8 variants):**
    ```bash
    higgsfield generate create z_image \
-     --prompt "<DESIGN.md brief>" \
+     --prompt "<design/DESIGN.md brief>" \
      --aspect_ratio 1:1 \
      --wait
    ```
-   Label all outputs `status:direction`. Render in `design.html` for founder side-by-side review.
+   Label all outputs `status:direction`. Render in `design/design.html` for founder side-by-side review.
 5. **Pick 2–3 directions.** Founder (or, if the founder delegates to the agent, the agent using the council) selects directions to promote.
 6. **Production-model run on confirmed directions:**
    ```bash
    higgsfield generate create gpt_image_2 \
-     --prompt "<DESIGN.md brief, on-image text if needed>" \
+     --prompt "<design/DESIGN.md brief, on-image text if needed>" \
      --aspect_ratio 1:1 \
      --wait
    ```
    (Use `nano_banana_2`/`nano_banana_pro` for character/mascot; `seedream_v4_5` for vector/flat illustration.)
    Label promoted outputs `status:draft`.
-7. **Design proof.** Update `design.html` with `status:draft` variants in a side-by-side layout.
+7. **Design proof.** Update `design/design.html` with `status:draft` variants in a side-by-side layout.
 8. **Founder selects.** Founder picks final production asset. Label selected output `status:production`.
-9. **CONTENT_ASSETS.md.** Record prompt_brief (DESIGN.md tokens), model used at each stage, direction outputs (status:direction), draft outputs (status:draft), final output (status:production), output paths, QA, and approval state.
+9. **CONTENT_ASSETS.md.** Record prompt_brief (design/DESIGN.md tokens), model used at each stage, direction outputs (status:direction), draft outputs (status:draft), final output (status:production), output paths, QA, and approval state.
 
 ## Remotion Content Asset Production
 
@@ -249,7 +249,7 @@ Access and license:
 - Load `paid-tool-routing.md` before replacing Higgsfield with Remotion.
 - Load `remotion-content-assets.md` before scaffolding a Remotion project or claiming rendered assets are ready.
 - Refresh current Remotion docs and license before setup, CLI flags, commercial-use guidance, or renderer API examples.
-- Record license eligibility or founder approval in `CONTENT_ASSETS.md` or `TOOL_DECISIONS.md`.
+- Record license eligibility or founder approval in `CONTENT_ASSETS.md` or `strategy/TOOL_DECISIONS.md`.
 
 Recommended setup in the launch repo, not inside this skill package:
 
@@ -276,5 +276,5 @@ Rules:
 - Put local images, video, audio, and captions in the Remotion `public/` folder and reference them with `staticFile()`.
 - Use frame-based animation APIs such as `useCurrentFrame()`, `interpolate()`, `spring()`, and `Sequence`; do not rely on CSS animations for render-critical motion.
 - Keep real app UI visible when the asset claims to show the app.
-- Record source inputs, render commands, output paths, dimensions, duration, route decision, license status, and claim checks in `CONTENT_ASSETS.md` and `content-assets/manifest.json`.
+- Record source inputs, render commands, output paths, dimensions, duration, route decision, license status, and claim checks in `CONTENT_ASSETS.md` and `growth/content-assets/manifest.json`.
 - Do not publish, schedule, upload store assets, run paid campaigns, or pay for rendering infrastructure without founder approval.

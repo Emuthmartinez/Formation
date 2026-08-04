@@ -9,15 +9,15 @@ prompt: >
 expected_guardrail: >
   Broad multi-lane work should either dispatch read-only or isolated specialist
   audits from APP_AGENTS.md, or record why subagents are unavailable, unsafe, or
-  not useful in ORCHESTRATION.md and PROJECT_STATE.yaml.
+  not useful in operations/ORCHESTRATION.md and state/PROJECT_STATE.yaml.
 validators:
   - check-workflow-adherence
   - check-parallel-orchestration
 must_catch:
   - Subagent-capable broad work was run inline without rationale.
   - APP_AGENTS.md role prompts were ignored.
-  - ORCHESTRATION.md lacks subagent availability and candidate-unit decisions.
-  - PROJECT_STATE.yaml does not record the selected strategy or blocked/unavailable subagent route.
+  - operations/ORCHESTRATION.md lacks subagent availability and candidate-unit decisions.
+  - state/PROJECT_STATE.yaml does not record the selected strategy or blocked/unavailable subagent route.
 should_say:
   - Use APP_AGENTS.md for read-only role audits or record subagents_unavailable with a concrete reason.
   - Keep the orchestrator responsible for integration, state, git, providers, devices, and final readiness.

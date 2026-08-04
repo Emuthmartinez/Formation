@@ -70,10 +70,22 @@ if (storeSkipped || !hasStorePlatform) {
 
 // ── File discovery ──────────────────────────────────────────────────────────
 
-const research = firstExistingText(["LOCALIZATION_MARKET_RESEARCH.md", "localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"]);
+const research = firstExistingText([
+  "strategy/strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+  "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+  "business/strategy/strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+  "business/strategy/strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+]);
 
-const listing = firstExistingText(["APP_STORE_LISTING.md", "app-store-listing/APP_STORE_LISTING.md"]);
-const storeConsole = firstExistingText(["STORE_CONSOLE.md"]);
+const listing = firstExistingText([
+  "store/APP_STORE_LISTING.md",
+  "store/store/app-store-listing/APP_STORE_LISTING.md",
+  "APP_STORE_LISTING.md",
+  "store/app-store-listing/APP_STORE_LISTING.md",
+  "business/store/APP_STORE_LISTING.md",
+  "business/store/store/app-store-listing/APP_STORE_LISTING.md",
+]);
+const storeConsole = firstExistingText(["store/store/STORE_CONSOLE.md", "store/STORE_CONSOLE.md", "business/store/store/STORE_CONSOLE.md"]);
 
 // ── Check 0: translate-first guard ──────────────────────────────────────────
 //

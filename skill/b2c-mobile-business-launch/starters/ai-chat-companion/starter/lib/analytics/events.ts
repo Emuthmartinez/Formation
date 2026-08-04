@@ -2,7 +2,7 @@
  * Analytics event catalog — the single source of event names for this app.
  *
  * Conventions (analytics-attribution.md): snake_case names, defined here and
- * mirrored into ANALYTICS.md's event catalog before any surface emits them.
+ * mirrored into analytics/ANALYTICS.md's event catalog before any surface emits them.
  * Never invent an event name inline in a component; add it here first so the
  * catalog, dashboards, and validators stay reconciled.
  */

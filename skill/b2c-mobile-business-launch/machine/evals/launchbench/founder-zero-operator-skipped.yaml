@@ -6,7 +6,7 @@ prompt: >
   agent returns a long list of social, Doppler, store, domain, analytics, and legal tasks and asks the
   founder which one they want to do first.
 expected_guardrail: >
-  Load founder-zero-operator.md, create BUSINESS_ACCESS.md and its structured ledger, explain the first
+  Load founder-zero-operator.md, create operations/BUSINESS_ACCESS.md and its structured ledger, explain the first
   founder-only action in plain language, execute everything else, and record the immediate next agent
   action so work resumes as soon as the gate clears.
 validators:

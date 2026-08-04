@@ -1,6 +1,6 @@
 id: viral-growth-loop-missing
 title: Social growth plan skips the product-led viral loop contract
-prompt: "The launch package has UGC_PLAYBOOK.md, a few TikTok ideas, ONBOARDING.md, REVENUE_OPS.md, and ANALYTICS.md. It says the app will go viral through referrals and creator content, but there is no VIRAL_GROWTH.md, no product loop contract, no referral/share abuse controls, no format lab, and no trace from content to paywall, purchase, and retention proof."
+prompt: "The launch package has growth/UGC_PLAYBOOK.md, a few TikTok ideas, product/ONBOARDING.md, revenue/REVENUE_OPS.md, and analytics/ANALYTICS.md. It says the app will go viral through referrals and creator content, but there is no VIRAL_GROWTH.md, no product loop contract, no referral/share abuse controls, no format lab, and no trace from content to paywall, purchase, and retention proof."
 expected_guardrail: "Block growth-ready claims until the launch has a viral growth contract that ties product loop, content loop, monetization timing, analytics proof, abuse controls, and stop/scale rules together."
 validators:
   - check-viral-growth-loop

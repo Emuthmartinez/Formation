@@ -128,7 +128,7 @@ export function register(h: Harness): void {
   staleHumanFounder.nextAgentAction = "Continue product and evidence review while no founder decision is required.";
   writeLedger(staleHumanGate, staleHumanValue);
   reconcileFixture(staleHumanGate, staleHumanValue);
-  const staleHumanPath = path.join(staleHumanGate, "BUSINESS_ACCESS.md");
+  const staleHumanPath = path.join(staleHumanGate, "operations/BUSINESS_ACCESS.md");
   writeFileSync(
     staleHumanPath,
     readFileSync(staleHumanPath, "utf8").replace("- Agent action next:", "- Recommended choice: Approve the stale decision.\n- Agent action next:"),
@@ -150,7 +150,7 @@ export function register(h: Harness): void {
   staleCockpitFounder.nextAgentAction = "Continue product and evidence review while no founder decision is required.";
   writeLedger(staleCockpitGate, staleCockpitValue);
   reconcileFixture(staleCockpitGate, staleCockpitValue);
-  const staleCockpitPath = path.join(staleCockpitGate, "launch-cockpit.html");
+  const staleCockpitPath = path.join(staleCockpitGate, "state/launch-cockpit.html");
   writeFileSync(
     staleCockpitPath,
     readFileSync(staleCockpitPath, "utf8").replace("No founder decision is pending.", "No founder decision is pending. (Recommended)"),
@@ -197,12 +197,12 @@ export function register(h: Harness): void {
   );
 
   const rawPassword = makeFixture("founder-operator-raw-password");
-  const humanPath = path.join(rawPassword, "BUSINESS_ACCESS.md");
+  const humanPath = path.join(rawPassword, "operations/BUSINESS_ACCESS.md");
   writeFileSync(humanPath, `${readFileSync(humanPath, "utf8")}\npassword: \"do-not-store-this\"\n`, "utf8");
   runFixture("business access artifact with raw password fails", rawPassword, "check-founder-operator-bootstrap.ts", 1, "founder_operator.raw_secret_detected");
 
   const rawUnquotedToken = makeFixture("founder-operator-raw-unquoted-token");
-  const rawUnquotedTokenPath = path.join(rawUnquotedToken, "BUSINESS_ACCESS.md");
+  const rawUnquotedTokenPath = path.join(rawUnquotedToken, "operations/BUSINESS_ACCESS.md");
   writeFileSync(rawUnquotedTokenPath, `${readFileSync(rawUnquotedTokenPath, "utf8")}\naccess_token=secretvalue123456\n`, "utf8");
   runFixture(
     "business access artifact with an unquoted token fails",
@@ -213,7 +213,7 @@ export function register(h: Harness): void {
   );
 
   const shortMfa = makeFixture("founder-operator-short-mfa");
-  const shortMfaPath = path.join(shortMfa, "BUSINESS_ACCESS.md");
+  const shortMfaPath = path.join(shortMfa, "operations/BUSINESS_ACCESS.md");
   writeFileSync(shortMfaPath, `${readFileSync(shortMfaPath, "utf8")}\nmfa_code=123456\n`, "utf8");
   runFixture("six-digit MFA values fail secret scanning", shortMfa, "check-founder-operator-bootstrap.ts", 1, "founder_operator.raw_secret_detected");
 
@@ -624,7 +624,7 @@ export function register(h: Harness): void {
   const value = completeValue(complete);
   writeLedger(complete, value);
   reconcileFixture(complete, value);
-  const completeCockpit = readFileSync(path.join(complete, "launch-cockpit.html"), "utf8");
+  const completeCockpit = readFileSync(path.join(complete, "state/launch-cockpit.html"), "utf8");
   if (!completeCockpit.includes("Setup so far: Active") || !completeCockpit.includes("Secure key storage: Ready")) {
     throw new Error("The founder cockpit must render active setup and ready key storage literally; shared fallback labels cannot certify themselves.");
   }
@@ -634,7 +634,7 @@ export function register(h: Harness): void {
   const readyLedger = readyValue(ready);
   writeLedger(ready, readyLedger);
   reconcileFixture(ready, readyLedger);
-  if (!readFileSync(path.join(ready, "launch-cockpit.html"), "utf8").includes("Setup so far: Ready")) {
+  if (!readFileSync(path.join(ready, "state/launch-cockpit.html"), "utf8").includes("Setup so far: Ready")) {
     throw new Error('The founder cockpit must render a ready operator as "Ready".');
   }
   runFixture("resolved founder-owned operator bootstrap passes ready state", ready, "check-founder-operator-bootstrap.ts", 0);
@@ -912,7 +912,7 @@ function reconcileFixture(root: string, value: Record<string, unknown>): void {
   operator.next_business_operation = founder.nextBusinessOperation;
   writeState(root, state);
 
-  const humanPath = path.join(root, "BUSINESS_ACCESS.md");
+  const humanPath = path.join(root, "operations/BUSINESS_ACCESS.md");
   const currentHuman = readFileSync(humanPath, "utf8");
   const definitionText = definitions.map((entry) => `${String(entry.term)}: ${String(entry.meaning)}`).join("; ") || "None needed for this decision.";
   const optionLines = options
@@ -945,7 +945,7 @@ ${gateLines}
   writeFileSync(humanPath, currentHuman.replace(/## One Next Action[\s\S]*?(?=\n## )/, section), "utf8");
 
   const cockpit = `<!doctype html><html><body><section><h2>What I Need From You</h2>${renderFounderGateMarkup(founder, operator)}</section></body></html>\n`;
-  writeFileSync(path.join(root, "launch-cockpit.html"), cockpit, "utf8");
+  writeFileSync(path.join(root, "state/launch-cockpit.html"), cockpit, "utf8");
 }
 
 function deriveSocialStatus(accounts: Array<Record<string, unknown>>): string {

@@ -21,7 +21,7 @@ if (loaded.tokens && !/^\d+(?:\.\d+)?ms$/i.test(celebrateRaw)) {
       'state/theme.tokens.json must define motion.durationCelebrate (e.g. "500ms"; added in v0.43.0) before promotion — a missing value would silently disable celebration motion.',
   });
 } else if (loaded.tokens) {
-  const outputDir = path.join(args.root, "design-system");
+  const outputDir = path.join(args.root, "design/system");
   const tokenHash = hashTokens(loaded.tokens);
   mkdirSync(outputDir, { recursive: true });
   writeFileSync(

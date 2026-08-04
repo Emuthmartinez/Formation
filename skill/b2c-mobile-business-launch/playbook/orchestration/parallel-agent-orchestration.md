@@ -33,7 +33,7 @@ This reference covers Claude's turn-by-turn subagents and worktrees, where the o
 
 ## Required Preflight
 
-Before substantial launch work starts, write or update `ORCHESTRATION.md` and the `orchestration` block in `PROJECT_STATE.yaml`. At the start of a new session, resume, status check, or handoff, also update the Session Continuity block from `AGENTS.md`, `PROJECT_STATE.yaml`, `launch-cockpit.html`, `ORCHESTRATION.md`, `PRODUCTION_READINESS.md`, `FAILURE_CARDS.md`, and `git status --short`; chat memory is not source truth.
+Before substantial launch work starts, write or update `operations/ORCHESTRATION.md` and the `orchestration` block in `state/PROJECT_STATE.yaml`. At the start of a new session, resume, status check, or handoff, also update the Session Continuity block from `AGENTS.md`, `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/ORCHESTRATION.md`, `engineering/PRODUCTION_READINESS.md`, `operations/FAILURE_CARDS.md`, and `git status --short`; chat memory is not source truth.
 
 The orchestrator must answer:
 
@@ -46,7 +46,7 @@ The orchestrator must answer:
 
 If the answer is "no useful parallelism," record `strategy: inline` with a short reason. If the runtime lacks a callable subagent facility, record `strategy: blocked` or `inline` with `subagents_unavailable` in the rationale and run the role audits serially or inline from `APP_AGENTS.md`. The preflight still matters because it proves the agent considered parallelism deliberately.
 
-**MCP catalog overflow (a common silent subagent failure).** When many MCP servers are connected, the combined tool catalog can overflow a subagent's context before it starts — the subagent returns empty with ~0 tokens in a few seconds, or fails with "Prompt is too long." If a dispatched subagent exits in under ~5 seconds with no output, treat it as a context-overflow signal, not a task result. Mitigation: prefer `strategy: inline` for MCP-tool-heavy research (run it in the parent session); if background dispatch is required, enable on-demand tool loading (e.g. `ENABLE_TOOL_SEARCH=true`, which typically needs a client restart) and confirm it is active before dispatch. Record the overflow and the chosen mitigation in `ORCHESTRATION.md`; do not silently retry the same dispatch.
+**MCP catalog overflow (a common silent subagent failure).** When many MCP servers are connected, the combined tool catalog can overflow a subagent's context before it starts — the subagent returns empty with ~0 tokens in a few seconds, or fails with "Prompt is too long." If a dispatched subagent exits in under ~5 seconds with no output, treat it as a context-overflow signal, not a task result. Mitigation: prefer `strategy: inline` for MCP-tool-heavy research (run it in the parent session); if background dispatch is required, enable on-demand tool loading (e.g. `ENABLE_TOOL_SEARCH=true`, which typically needs a client restart) and confirm it is active before dispatch. Record the overflow and the chosen mitigation in `operations/ORCHESTRATION.md`; do not silently retry the same dispatch.
 
 ## Strategy Choices
 
@@ -79,7 +79,7 @@ Parallel agents are useful when each unit has a clear output and does not need a
 
 Do not parallelize these unless they are isolated in separate worktrees and the orchestrator owns final integration:
 
-- edits to `PROJECT_STATE.yaml`, `launch-cockpit.html`, `AGENTS.md`, `ENGINEERING_PLAN.md`, `PRODUCTION_READINESS.md`, or release notes
+- edits to `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `AGENTS.md`, `engineering/ENGINEERING_PLAN.md`, `engineering/PRODUCTION_READINESS.md`, or release notes
 - migrations plus code depending on the migration state
 - MobAI, in-app iOS Simulator panes, XcodeBuildMCP, serve-sim, or simulator/device automation on the same target device — and note that an in-app simulator device belongs to the session that launched it (max 4 panes per session), so a subagent cannot inherit the orchestrator's simulator; the orchestrator runs the device flow itself
 - App Store Connect, Google Play, RevenueCat, Stripe, Resend, PostHog, DNS, domain, Fastlane, or social-account mutations
@@ -97,7 +97,7 @@ Before dispatching parallel agents:
 5. Confirm every parallel code-edit unit has a disjoint write set or a separate worktree.
 6. Confirm every parallel audit unit is read-only unless assigned an isolated patch.
 7. Add the exact forbidden actions to each prompt.
-8. Record the preflight in `ORCHESTRATION.md` and `PROJECT_STATE.yaml`.
+8. Record the preflight in `operations/ORCHESTRATION.md` and `state/PROJECT_STATE.yaml`.
 
 After agents return:
 
@@ -106,7 +106,7 @@ After agents return:
 3. Review each output against its requested format and source docs.
 4. Apply or reject findings deliberately.
 5. Run focused validators first, then full launch validators.
-6. Update `PROJECT_STATE.yaml`, failure cards, and `PRODUCTION_READINESS.md`.
+6. Update `state/PROJECT_STATE.yaml`, failure cards, and `engineering/PRODUCTION_READINESS.md`.
 
 ## Standard Subagent Instructions
 
@@ -148,18 +148,18 @@ Specialists review and propose by default. They implement only with an explicit 
 
 ## State Contract
 
-Add this top-level block to `PROJECT_STATE.yaml`:
+Add this top-level block to `state/PROJECT_STATE.yaml`:
 
 ```yaml
 continuity:
   last_state_review: "not_reviewed"
   source_files:
     - "AGENTS.md"
-    - "PROJECT_STATE.yaml"
-    - "launch-cockpit.html"
-    - "ORCHESTRATION.md"
-    - "PRODUCTION_READINESS.md"
-    - "FAILURE_CARDS.md"
+    - "state/PROJECT_STATE.yaml"
+    - "state/launch-cockpit.html"
+    - "operations/ORCHESTRATION.md"
+    - "engineering/PRODUCTION_READINESS.md"
+    - "operations/FAILURE_CARDS.md"
   git_status_reviewed: false
   next_action: "Reconstruct state from durable repo artifacts before choosing work."
   drift_risks: []
@@ -176,7 +176,7 @@ orchestration:
   candidate_units: []
   parallel_safe_units: []
   serialized_units:
-    - "PROJECT_STATE.yaml updates"
+    - "state/PROJECT_STATE.yaml updates"
     - "git staging, commits, merges, pushes, and releases"
     - "provider/account mutations"
     - "MobAI, in-app iOS Simulator panes, XcodeBuildMCP, serve-sim, or simulator/device control"
@@ -193,8 +193,8 @@ orchestration:
   objective: "Audit attribution contract and event proof."
   mode: "read_only"
   files:
-    - "ANALYTICS.md"
-    - "PROJECT_STATE.yaml"
+    - "analytics/ANALYTICS.md"
+    - "state/PROJECT_STATE.yaml"
   parallel_safe: true
   shared_resources: []
   output: "findings"
@@ -219,7 +219,7 @@ orchestration:
 
 ## Required Artifacts
 
-`ORCHESTRATION.md` must include:
+`operations/ORCHESTRATION.md` must include:
 
 - Orchestration Preflight
 - Strategy
@@ -234,7 +234,7 @@ orchestration:
 - State Updates
 - Failure Cards
 
-`orchestration.html` is optional but recommended when the founder needs a visual board of lanes, blockers, assigned agents, and proof.
+`operations/orchestration.html` is optional but recommended when the founder needs a visual board of lanes, blockers, assigned agents, and proof.
 
 ## Done Rules
 
@@ -246,6 +246,6 @@ Parallel orchestration is done only when:
 - actual returned file changes were compared before integration
 - subagent findings are accepted, rejected, or converted into failure cards
 - focused validators and the full relevant suite are recorded
-- `PROJECT_STATE.yaml`, `launch-cockpit.html`, `ORCHESTRATION.md`, and `PRODUCTION_READINESS.md` agree on current state
+- `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/ORCHESTRATION.md`, and `engineering/PRODUCTION_READINESS.md` agree on current state
 
 If any of these are missing, keep the orchestration state `partial` or `blocked`. Do not call the app launch-ready from parallel activity alone.

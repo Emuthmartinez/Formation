@@ -10,14 +10,14 @@
  *
  * This validator reads the same map as data (playbook/process/cascade-edges.yaml)
  * and grades the `change_cascade` block a launch run records in its own
- * PROJECT_STATE.yaml:
+ * state/PROJECT_STATE.yaml:
  *
  *   change_cascade:
  *     - id: "rename-streaks-to-runs"
  *       type: "lexicon_change"
  *       recorded_at: "2026-07-25"
  *       surfaces:
- *         app_in_app: { status: "updated", evidence: "ONBOARDING.md" }
+ *         app_in_app: { status: "updated", evidence: "product/ONBOARDING.md" }
  *         asc_listing: { status: "updated", evidence: "APP_STORE_LISTING.md" }
  *         seo_geo:     { status: "unaffected", reason: "term never appears in target keywords" }
  *
@@ -134,7 +134,12 @@ if (map && loaded.state) {
   const entries = Array.isArray(recorded) ? recorded : [];
   if (recorded !== undefined && !Array.isArray(recorded)) {
     issues.push(
-      issue("error", "change_cascade.block_malformed", "PROJECT_STATE.yaml change_cascade must be a list of recorded changes.", "PROJECT_STATE.yaml"),
+      issue(
+        "error",
+        "change_cascade.block_malformed",
+        "state/PROJECT_STATE.yaml change_cascade must be a list of recorded changes.",
+        "state/PROJECT_STATE.yaml",
+      ),
     );
   }
 
@@ -143,7 +148,12 @@ if (map && loaded.state) {
   entries.forEach((entry, index) => {
     if (!isRecord(entry)) {
       issues.push(
-        issue("error", `change_cascade[${index}].malformed`, `change_cascade[${index}] must be a mapping with id, type, and surfaces.`, "PROJECT_STATE.yaml"),
+        issue(
+          "error",
+          `change_cascade[${index}].malformed`,
+          `change_cascade[${index}] must be a mapping with id, type, and surfaces.`,
+          "state/PROJECT_STATE.yaml",
+        ),
       );
       return;
     }
@@ -157,7 +167,7 @@ if (map && loaded.state) {
           "error",
           `change_cascade.${id}.type_missing`,
           `change_cascade entry "${id}" has no type. Classify it against the Change Cascade Map before calling the change done.`,
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
         ),
       );
       return;
@@ -171,7 +181,7 @@ if (map && loaded.state) {
           "error",
           `change_cascade.${id}.unknown_type`,
           `change_cascade entry "${id}" has type "${type}", which is not in cascade-edges.yaml. Known types: ${known}.`,
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
         ),
       );
       return;
@@ -192,7 +202,7 @@ if (map && loaded.state) {
             `change_cascade.${id}.${surface}.unaccounted`,
             `change_cascade entry "${id}" (${definition.label ?? type}) does not account for the ${label} surface. ` +
               `Record it as updated with evidence, unaffected with a reason, or blocked — a surface left out by omission is the change-cascade-incomplete failure card.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
         continue;
@@ -205,7 +215,7 @@ if (map && loaded.state) {
             "error",
             `change_cascade.${id}.${surface}.status_invalid`,
             `change_cascade entry "${id}" surface ${surface} has status "${status ?? "(missing)"}". Use one of: ${[...SURFACE_STATUSES].join(", ")}.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
         continue;
@@ -217,7 +227,7 @@ if (map && loaded.state) {
             "error",
             `change_cascade.${id}.${surface}.evidence_missing`,
             `change_cascade entry "${id}" marks ${label} updated but records no evidence. Point at the artifact, re-rendered asset, or console change that proves it.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -228,7 +238,7 @@ if (map && loaded.state) {
             "error",
             `change_cascade.${id}.${surface}.reason_missing`,
             `change_cascade entry "${id}" marks ${label} unaffected but records no reason. One line of why it is untouched is the difference between a decision and an omission.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -239,7 +249,7 @@ if (map && loaded.state) {
             "error",
             `change_cascade.${id}.${surface}.blocker_missing`,
             `change_cascade entry "${id}" marks ${label} blocked but records no blocker.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -254,7 +264,7 @@ if (map && loaded.state) {
             "error",
             `change_cascade.${id}.${surface}.unknown_surface`,
             `change_cascade entry "${id}" records surface "${surface}", which is not in the cascade-edges.yaml inventory. Fix the id so it is actually graded.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       }

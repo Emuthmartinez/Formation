@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.66.1",
+  "version": "0.67.0",
   "private": true,
   "type": "module",
   "scripts": {

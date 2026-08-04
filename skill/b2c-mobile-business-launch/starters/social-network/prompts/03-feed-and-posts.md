@@ -27,9 +27,9 @@ Use Supabase real-time subscriptions so new posts from followed users appear
 without refresh.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -37,7 +37,7 @@ shipping strings.
 
 - **Run `eleven-star-experience.md` over this prompt** — the feed is the V1 scalable slice. The optimistic like/repost reveal and the real-time arrival of new posts are engineered emotional moments: give each a PostHog event and a `prefers-reduced-motion` fallback (`consumer-product-design-agency.md`, `emotional-design-system.md`).
 - Media goes in **Supabase Storage**, never served from the app server. Validate file size/format on upload; flag image moderation as a launch gate (see the reference's moderation note).
-- Add core-loop events to `ANALYTICS.md` before build: `post_created`, `post_liked`, `post_reposted`, `reply_created`, `feed_loaded`, `feed_paginated`.
+- Add core-loop events to `analytics/ANALYTICS.md` before build: `post_created`, `post_liked`, `post_reposted`, `reply_created`, `feed_loaded`, `feed_paginated`.
 - The follows-join feed query is the hot path — confirm it uses the indexes from prompt 01. Naive is fine early; record the scale threshold to revisit.
-- Optimistic UI needs a rollback path on server failure — specify the error/retry state in `TECH_SPEC.md`.
+- Optimistic UI needs a rollback path on server failure — specify the error/retry state in `engineering/TECH_SPEC.md`.
 </content>

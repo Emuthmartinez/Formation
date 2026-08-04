@@ -90,10 +90,10 @@ if (markdown) {
 
   const requiredRefs = [
     "CONTENT_ASSETS.md",
-    "ANALYTICS.md",
+    "analytics/ANALYTICS.md",
     "APP_STORE_LISTING.md",
     "VIRAL_GROWTH.md",
-    "LAUNCH_TRACE.md",
+    "state/LAUNCH_TRACE.md",
     "11_STAR_EXPERIENCE.md",
     "EMOTIONAL_DESIGN.md",
   ];

@@ -68,7 +68,7 @@
           "id": "operator.orchestrator",
           "name": "Orchestrator",
           "kind": "agent",
-          "summary": "Owns integration through orchestrator and reconstructs state from AGENTS.md, PROJECT_STATE.yaml, launch-cockpit.html, BUSINESS_ACCESS.md."
+          "summary": "Owns integration through orchestrator and reconstructs state from AGENTS.md, state/PROJECT_STATE.yaml, state/launch-cockpit.html, operations/BUSINESS_ACCESS.md."
         },
         {
           "id": "operator.product-leader",
@@ -94,48 +94,48 @@
           "id": "panel.design-room",
           "title": "Design Room",
           "summary": "Design Room is Active and reads state/business.json, state/theme.tokens.json.",
-          "path": "design-room.html",
+          "path": "design/design-room.html",
           "status": "Ready"
         },
         {
           "id": "panel.agent-ops",
           "title": "Agent Operations",
-          "summary": "Agent Operations is Planned and reads PROJECT_STATE.yaml, AGENT_OPERATIONS.md, operations/agent-operations.json.",
-          "path": "launch-cockpit.html",
+          "summary": "Agent Operations is Planned and reads state/PROJECT_STATE.yaml, operations/AGENT_OPERATIONS.md, operations/agent-operations.json.",
+          "path": "state/launch-cockpit.html",
           "status": "Draft"
         },
         {
           "id": "panel.operator-bootstrap",
           "title": "Founder-Zero Operator Bootstrap",
-          "summary": "Founder-Zero Operator Bootstrap is Planned and reads PROJECT_STATE.yaml, BUSINESS_ACCESS.md, operations/business-access.json, SECRETS.md.",
-          "path": "launch-cockpit.html",
+          "summary": "Founder-Zero Operator Bootstrap is Planned and reads state/PROJECT_STATE.yaml, operations/BUSINESS_ACCESS.md, operations/business-access.json, SECRETS.md.",
+          "path": "state/launch-cockpit.html",
           "status": "Draft"
         },
         {
           "id": "panel.analytics",
           "title": "Analytics",
-          "summary": "Analytics is Planned and reads PROJECT_STATE.yaml, ANALYTICS.md, analytics-plan.html.",
-          "path": "analytics-plan.html",
+          "summary": "Analytics is Planned and reads state/PROJECT_STATE.yaml, analytics/ANALYTICS.md, analytics/analytics-plan.html.",
+          "path": "analytics/analytics-plan.html",
           "status": "Draft"
         },
         {
           "id": "panel.monetization",
           "title": "Monetization",
-          "summary": "Monetization is Planned and reads PROJECT_STATE.yaml, REVENUE_OPS.md.",
+          "summary": "Monetization is Planned and reads state/PROJECT_STATE.yaml, revenue/REVENUE_OPS.md.",
           "path": "revenue-plan.html",
           "status": "Draft"
         },
         {
           "id": "panel.store-ops",
           "title": "Store Ops",
-          "summary": "Store Ops is Planned and reads PROJECT_STATE.yaml, APP_STORE_LISTING.md, STORE_CONSOLE.md, SCREENSHOTS.md.",
+          "summary": "Store Ops is Planned and reads state/PROJECT_STATE.yaml, APP_STORE_LISTING.md, store/STORE_CONSOLE.md, SCREENSHOTS.md.",
           "path": "app-store-listing.html",
           "status": "Draft"
         },
         {
           "id": "panel.growth",
           "title": "Growth",
-          "summary": "Growth is Planned and reads PROJECT_STATE.yaml, growth/PAID_UA.md, growth/VIRAL_GROWTH.md.",
+          "summary": "Growth is Planned and reads state/PROJECT_STATE.yaml, growth/PAID_UA.md, growth/VIRAL_GROWTH.md.",
           "path": "growth-plan.html",
           "status": "Draft"
         },
@@ -143,21 +143,21 @@
           "id": "view.launch-cockpit",
           "title": "Launch Cockpit",
           "summary": "0 launch lane(s) done, 0 blocked, 22 tracked.",
-          "path": "launch-cockpit.html",
+          "path": "state/launch-cockpit.html",
           "status": "Watch"
         },
         {
           "id": "view.continuity",
           "title": "Continuity",
           "summary": "Reconstruct state from the continuity source files before choosing work.",
-          "path": "PROJECT_STATE.yaml",
+          "path": "state/PROJECT_STATE.yaml",
           "status": "Gate"
         },
         {
           "id": "view.failure-cards",
           "title": "Failure Cards",
           "summary": "1 active failure card(s) tracked for future agents.",
-          "path": "FAILURE_CARDS.md",
+          "path": "operations/FAILURE_CARDS.md",
           "status": "Active"
         }
       ]

@@ -5,12 +5,12 @@ These are the reusable document shapes from the model launch session. Keep docs 
 ## Contents
 
 - Canonical File Map
-- Core docs: `PROJECT_STATE.yaml`, `launch-cockpit.html`, `BUSINESS_ACCESS.md`, `operations/business-access.json`, `AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `state/business.json`, `state/theme.tokens.json`, `design-room.html`, `AGENTS.md`, `APP_AGENTS.md`, `TOOL_DECISIONS.md`, `SECRETS.md`, `SECURITY.md`, `security-review.html`, `ANALYTICS.md`, `analytics-plan.html`, `LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, `SPEC.md`, `RESEARCH.md`, `BRAND.md`
-- Design docs: `DESIGN.md`, `DESIGN_SYSTEM.md`, `design.md`, `design.html`
-- Conversion docs: `ONBOARDING.md`, `onboarding.html`
-- Launch ops: `LAUNCH.md`, `APPLE_SIGNING.md`, `APPLE_APP_STORE_REQUIREMENTS.md`, `APP_STORE_LISTING.md`, `app-store-listing.html`, `app-privacy-questionnaire.html`, `STORE_CONSOLE.md`, `store-console.html`, `SCREENSHOTS.md`, `CONTENT_ASSETS.md`, `content-assets.html`, `STORE_OPS.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `UGC_PLAYBOOK.md`, `FASTLANE_OPS.md`
-- Business ops: `EMAIL_OPS.md`, `REVENUE_OPS.md`, `GEO_SEO.md`, `PRIVACY.md`, `TERMS.md`, `LEGAL_REVIEW.md`
-- Engineering docs: `TECH_SPEC.md`, `ORCHESTRATION.md`, `ENGINEERING_PLAN.md`, `PRODUCTION_READINESS.md`, `LAUNCHBENCH.md`, `FAILURE_CARDS.md`
+- Core docs: `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `state/business.json`, `state/theme.tokens.json`, `design/design-room.html`, `AGENTS.md`, `APP_AGENTS.md`, `strategy/TOOL_DECISIONS.md`, `SECRETS.md`, `trust/SECURITY.md`, `trust/security-review.html`, `analytics/ANALYTICS.md`, `analytics/analytics-plan.html`, `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, `product/SPEC.md`, `strategy/RESEARCH.md`, `strategy/BRAND.md`
+- Design docs: `design/DESIGN.md`, `DESIGN_SYSTEM.md`, `design.md`, `design/design.html`
+- Conversion docs: `product/ONBOARDING.md`, `product/onboarding.html`
+- Launch ops: `LAUNCH.md`, `store/APPLE_SIGNING.md`, `store/APPLE_APP_STORE_REQUIREMENTS.md`, `APP_STORE_LISTING.md`, `app-store-listing.html`, `app-privacy-questionnaire.html`, `store/STORE_CONSOLE.md`, `store/store-console.html`, `SCREENSHOTS.md`, `CONTENT_ASSETS.md`, `content-assets.html`, `STORE_OPS.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `growth/UGC_PLAYBOOK.md`, `growth/FASTLANE_OPS.md`
+- Business ops: `growth/EMAIL_OPS.md`, `revenue/REVENUE_OPS.md`, `GEO_SEO.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, `LEGAL_REVIEW.md`
+- Engineering docs: `engineering/TECH_SPEC.md`, `operations/ORCHESTRATION.md`, `engineering/ENGINEERING_PLAN.md`, `engineering/PRODUCTION_READINESS.md`, `LAUNCHBENCH.md`, `operations/FAILURE_CARDS.md`
 - Handoff docs: `PROMPTS.md`, `AUDIT_PROMPT.md`, `agents/`
 
 ## Canonical File Map
@@ -21,68 +21,68 @@ Use this structure when the business is still pre-build or being handed to a bui
 AGENTS.md                 # agent entrypoint and canonical operating instructions
 CLAUDE.md                 # optional tool-specific addendum that points back to AGENTS.md
 APP_AGENTS.md             # lightweight app-local role roster for ongoing build, growth, product, design, and support work
-PROJECT_STATE.yaml        # compact machine-readable phase, autonomy, lane, provider, proof, blocker, and failure-card state
-launch-cockpit.html       # rendered founder-visible dashboard over PROJECT_STATE.yaml
-BUSINESS_ACCESS.md        # founder-zero business identity, Doppler, account/social access, and one-next-action handoff
+state/PROJECT_STATE.yaml        # compact machine-readable phase, autonomy, lane, provider, proof, blocker, and failure-card state
+state/launch-cockpit.html       # rendered founder-visible dashboard over state/PROJECT_STATE.yaml
+operations/BUSINESS_ACCESS.md        # founder-zero business identity, Doppler, account/social access, and one-next-action handoff
 operations/business-access.json # structured operator bootstrap and exact account access state
 operations/business-access.schema.json # portable machine contract for business access state
-AGENT_OPERATIONS.md       # human-readable capability, approval, authenticated-action, and research/media operations log
+operations/AGENT_OPERATIONS.md       # human-readable capability, approval, authenticated-action, and research/media operations log
 operations/agent-operations.json # structured capability inventory, approval envelopes, action proof, and reconciliation state
 operations/agent-operations.schema.json # portable machine contract for the structured operations ledger
 state/business.json       # Design Room source of truth for business identity, surfaces, version log, and control-plane panels
 state/theme.tokens.json   # semantic design tokens consumed by Design Room render and downstream surfaces
-design-room.html          # static rendered Design Room with design-state-hash
+design/design-room.html          # static rendered Design Room with design-state-hash
 dist/design-room/         # React/Vite Design Room build when available
-TOOL_DECISIONS.md         # paid/account-gated tool access, confirmed fallbacks, limitations, and blocked routes
+strategy/TOOL_DECISIONS.md         # paid/account-gated tool access, confirmed fallbacks, limitations, and blocked routes
 SECRETS.md                # Doppler or approved secret-provider inventory, command map, CI/deploy routing, and proof notes
-SECURITY.md               # threat model, security tool routing, mobile/backend/revenue/email hardening, monitoring, accepted risks, release proof
-security-review.html      # rendered founder-facing security release board
+trust/SECURITY.md               # threat model, security tool routing, mobile/backend/revenue/email hardening, monitoring, accepted risks, release proof
+trust/security-review.html      # rendered founder-facing security release board
 doppler.yaml              # optional non-secret Doppler project/config hints
 .env.example              # optional names-only local environment schema
-ANALYTICS.md              # upfront measurement, attribution, event catalog, funnels, dashboards, and QA gates
-analytics-plan.html       # founder-visible rendered analytics/attribution plan and dashboard wireframes
-LAUNCH_TRACE.md           # evidence-to-product-to-brand/design-to-build-to-proof traceability matrix
+analytics/ANALYTICS.md              # upfront measurement, attribution, event catalog, funnels, dashboards, and QA gates
+analytics/analytics-plan.html       # founder-visible rendered analytics/attribution plan and dashboard wireframes
+state/LAUNCH_TRACE.md           # evidence-to-product-to-brand/design-to-build-to-proof traceability matrix
 11_STAR_EXPERIENCE.md     # 1/2/5/6/7/10/11-star product experience ladder and V1 scalable slice
 11-star-experience.html   # visual ladder, line of feasibility, and surface translation board
-TECH_SPEC.md              # data/API/state/permission/integration contracts when actual implementation is in scope
-ORCHESTRATION.md          # parallel-agent/worktree preflight, candidate units, file ownership, serialized resources, integration, and verification
-orchestration.html        # optional founder-facing orchestration board
-ENGINEERING_PLAN.md       # Compound Engineering plan or implementation plan when actual app build is in scope
-PRODUCTION_READINESS.md   # end-to-end proof across frontend, backend, mobile device, providers, and release gates
+engineering/TECH_SPEC.md              # data/API/state/permission/integration contracts when actual implementation is in scope
+operations/ORCHESTRATION.md          # parallel-agent/worktree preflight, candidate units, file ownership, serialized resources, integration, and verification
+operations/orchestration.html        # optional founder-facing orchestration board
+engineering/ENGINEERING_PLAN.md       # Compound Engineering plan or implementation plan when actual app build is in scope
+engineering/PRODUCTION_READINESS.md   # end-to-end proof across frontend, backend, mobile device, providers, and release gates
 LAUNCHBENCH.md            # optional eval/check history for known launch-grade failure modes
-FAILURE_CARDS.md          # recurring or unresolved launch risks that must survive session handoff
+operations/FAILURE_CARDS.md          # recurring or unresolved launch risks that must survive session handoff
 PROMPTS.md                # sequenced builder/Rork prompts
-RESEARCH.md               # AppKittie, XPOZ, Firecrawl, review, keyword, and competitor evidence
-SPEC.md                   # research-grounded product spec
-BRAND.md                  # name, voice, brand rules, copy calibration
-DESIGN.md                 # google design.md token/prose design system source of truth
+strategy/RESEARCH.md               # AppKittie, XPOZ, Firecrawl, review, keyword, and competitor evidence
+product/SPEC.md                   # research-grounded product spec
+strategy/BRAND.md                  # name, voice, brand rules, copy calibration
+design/DESIGN.md                 # google design.md token/prose design system source of truth
 DESIGN_SYSTEM.md          # optional expanded app-specific design appendix
 design.md                 # screen-by-screen implementation design spec
-design.html               # rendered visual system, components, and screen proofs
-ONBOARDING.md             # onboarding, personalization, review prompt, paywall timing, and activation contract
-onboarding.html           # rendered onboarding/paywall/review/offer flow proof
+design/design.html               # rendered visual system, components, and screen proofs
+product/ONBOARDING.md             # onboarding, personalization, review prompt, paywall timing, and activation contract
+product/onboarding.html           # rendered onboarding/paywall/review/offer flow proof
 LAUNCH.md                 # ASO, screenshots, ads, launch sequence, metrics
-APPLE_SIGNING.md          # Apple Developer account, Team ID, bundle ID/App ID, signing, archive/export/upload, and TestFlight gates
-APPLE_APP_STORE_REQUIREMENTS.md # Apple pre-ASC requirements: privacy manifest, required reason APIs, SDK manifests/signatures, App Privacy labels, purpose strings, ATT, review notes, upload warnings
+store/APPLE_SIGNING.md          # Apple Developer account, Team ID, bundle ID/App ID, signing, archive/export/upload, and TestFlight gates
+store/APPLE_APP_STORE_REQUIREMENTS.md # Apple pre-ASC requirements: privacy manifest, required reason APIs, SDK manifests/signatures, App Privacy labels, purpose strings, ATT, review notes, upload warnings
 APP_STORE_LISTING.md      # Apple listing, privacy, pricing, CPP/In-App Event, localization, and marketing packet
 app-store-listing.html    # rendered founder-facing Apple listing copy/paste board
 app-privacy-questionnaire.html # interactive Apple App Privacy worksheet
-EMAIL_OPS.md              # Resend/domain/lifecycle/broadcast/webhook/inbound email operations
-REVENUE_OPS.md            # RevenueCat, Stripe, store products, web funnels, entitlements, and purchase validation
+growth/EMAIL_OPS.md              # Resend/domain/lifecycle/broadcast/webhook/inbound email operations
+revenue/REVENUE_OPS.md            # RevenueCat, Stripe, store products, web funnels, entitlements, and purchase validation
 GEO_SEO.md                # public-site GEO/SEO, AI crawler, schema, llms.txt, and citability state
-PRIVACY.md                # privacy policy source draft and data-practices matrix
-TERMS.md                  # terms of service / EULA source draft
+trust/PRIVACY.md                # privacy policy source draft and data-practices matrix
+trust/TERMS.md                  # terms of service / EULA source draft
 LEGAL_REVIEW.md           # founder/legal decisions, risk flags, source URLs, review status
-STORE_CONSOLE.md          # copy-paste App Store Connect and Google Play Console packet with click paths and blockers
-store-console.html        # rendered founder-facing mock console grouped by ASC/Play page
+store/STORE_CONSOLE.md          # copy-paste App Store Connect and Google Play Console packet with click paths and blockers
+store/store-console.html        # rendered founder-facing mock console grouped by ASC/Play page
 SCREENSHOTS.md            # device capture, composition, dimensions, locale, and upload matrix
 CONTENT_ASSETS.md         # Higgsfield/Remotion/source-media route, source inputs, manifest, render proof, license status, and content QA
 content-assets.html       # founder-facing media route and output proof board
 STORE_OPS.md              # optional review, email-routing, console status, and post-launch growth state when submission is active
 PAID_UA.md                # one-channel paid acquisition fit, creative cadence, tracking baseline, blended report, RevenueCat economics, stop/scale rules
 VIRAL_GROWTH.md           # product-led viral loop fit, referral/share mechanics, content format lab, monetization timing, analytics proof, abuse controls, and stop/scale rules
-UGC_PLAYBOOK.md           # creator-led organic growth fit, 90-day Day 0 plan, budget, creator ops, scripts, tracking, stop/scale rules
-FASTLANE_OPS.md           # Fastlane workspace, connections, content engine, schedule, and analytics loop
+growth/UGC_PLAYBOOK.md           # creator-led organic growth fit, 90-day Day 0 plan, budget, creator ops, scripts, tracking, stop/scale rules
+growth/FASTLANE_OPS.md           # Fastlane workspace, connections, content engine, schedule, and analytics loop
 OUTREACH.md               # endorsement/partner drafts when relevant
 brand.html                # optional rendered brand book
 landing/                  # optional pre-launch funnel
@@ -95,9 +95,9 @@ AUDIT_PROMPT.md           # independent audit brief for public funnel or app
 agents/                   # simple role prompts/configs: orchestrator, marketing, engineering, security, product, design, customer success
 ```
 
-`AGENT_OPERATIONS.md` and its JSON ledger are required before browser, account/provider, social, or native-device operations are claimed ready. Use `frontier-agent-operations.md`; access is not authorization, and completed external mutations need exact-target preflight, a scoped approval envelope, sanitized before/after read-back proof, rollback/recovery, and canonical state reconciliation. Gate with `check:agent-operations`.
+`operations/AGENT_OPERATIONS.md` and its JSON ledger are required before browser, account/provider, social, or native-device operations are claimed ready. Use `frontier-agent-operations.md`; access is not authorization, and completed external mutations need exact-target preflight, a scoped approval envelope, sanitized before/after read-back proof, rollback/recovery, and canonical state reconciliation. Gate with `check:agent-operations`.
 
-`BUSINESS_ACCESS.md` and `operations/business-access.json` are required at broad-launch orient. Use `founder-zero-operator.md`: assume beginner founder knowledge, let the agent drive setup, keep the current phase visible, and use at most one versioned active gate with plain-language definitions, two or three AskUserQuestion-compatible choices, consequences, safe fallback/defer behavior, lifecycle, and next actions. Use `null` while the agent can continue without a founder decision; never invent a gate to fill the slot. Route accounts through founder-owned, scoped, revocable access with sanitized proof. Legacy 1.x ledgers remain readable with a migration warning; run `npm run migrate:founder-gates -- --root .` before changing them. Gate with `check:founder-operator`.
+`operations/BUSINESS_ACCESS.md` and `operations/business-access.json` are required at broad-launch orient. Use `founder-zero-operator.md`: assume beginner founder knowledge, let the agent drive setup, keep the current phase visible, and use at most one versioned active gate with plain-language definitions, two or three AskUserQuestion-compatible choices, consequences, safe fallback/defer behavior, lifecycle, and next actions. Use `null` while the agent can continue without a founder decision; never invent a gate to fill the slot. Route accounts through founder-owned, scoped, revocable access with sanitized proof. Legacy 1.x ledgers remain readable with a migration warning; run `npm run migrate:founder-gates -- --root .` before changing them. Gate with `check:founder-operator`.
 
 When handing to Rork or another generated-app builder, duplicate the needed subset into:
 
@@ -107,44 +107,44 @@ rork-ready/
   AGENTS.md
   CLAUDE.md
   APP_AGENTS.md
-  PROJECT_STATE.yaml
-  launch-cockpit.html
-  TOOL_DECISIONS.md
+  state/PROJECT_STATE.yaml
+  state/launch-cockpit.html
+  strategy/TOOL_DECISIONS.md
   SECRETS.md
-  SECURITY.md
-  security-review.html
-  ANALYTICS.md
-  analytics-plan.html
-  LAUNCH_TRACE.md
+  trust/SECURITY.md
+  trust/security-review.html
+  analytics/ANALYTICS.md
+  analytics/analytics-plan.html
+  state/LAUNCH_TRACE.md
   11_STAR_EXPERIENCE.md
   11-star-experience.html
-  TECH_SPEC.md
-  ORCHESTRATION.md
-  orchestration.html
-  ENGINEERING_PLAN.md
-  PRODUCTION_READINESS.md
+  engineering/TECH_SPEC.md
+  operations/ORCHESTRATION.md
+  operations/orchestration.html
+  engineering/ENGINEERING_PLAN.md
+  engineering/PRODUCTION_READINESS.md
   LAUNCHBENCH.md
-  FAILURE_CARDS.md
+  operations/FAILURE_CARDS.md
   PROMPTS.md
-  DESIGN.md
+  design/DESIGN.md
   design.md
-  design.html
-  ONBOARDING.md
-  onboarding.html
-  STORE_CONSOLE.md
+  design/design.html
+  product/ONBOARDING.md
+  product/onboarding.html
+  store/STORE_CONSOLE.md
   APP_STORE_LISTING.md
-  APPLE_SIGNING.md
-  APPLE_APP_STORE_REQUIREMENTS.md
+  store/APPLE_SIGNING.md
+  store/APPLE_APP_STORE_REQUIREMENTS.md
   CONTENT_ASSETS.md
   app-store-listing.html
   app-privacy-questionnaire.html
   content-assets.html
-  store-console.html
+  store/store-console.html
   SCREENSHOTS.md
   PAID_UA.md
   VIRAL_GROWTH.md
-  UGC_PLAYBOOK.md
-  FASTLANE_OPS.md
+  growth/UGC_PLAYBOOK.md
+  growth/FASTLANE_OPS.md
   docs/
   orchestration/
   content-assets/
@@ -155,9 +155,9 @@ rork-ready/
   assets/
 ```
 
-## `PROJECT_STATE.yaml` And `launch-cockpit.html`
+## `state/PROJECT_STATE.yaml` And `state/launch-cockpit.html`
 
-Use `PROJECT_STATE.yaml` for every multi-lane launch, continuation, builder handoff, or launch-readiness audit. It is the compact state contract for agents and validators; `launch-cockpit.html` is the founder-facing rendering of the same information.
+Use `state/PROJECT_STATE.yaml` for every multi-lane launch, continuation, builder handoff, or launch-readiness audit. It is the compact state contract for agents and validators; `state/launch-cockpit.html` is the founder-facing rendering of the same information.
 
 Must include:
 - project name, slug, owner, phase, platforms, bundle/package IDs, public URLs, and source-truth pointers
@@ -174,29 +174,29 @@ Must include:
 
 Acceptance:
 - A future agent can tell which lane is blocked, partial, done, deferred, or not needed without rereading every artifact.
-- The founder can open `launch-cockpit.html` and see what is proven, what is blocked, and what needs approval.
+- The founder can open `state/launch-cockpit.html` and see what is proven, what is blocked, and what needs approval.
 - No raw secrets, passwords, private keys, credential file contents, or real-looking placeholder values appear in the state or cockpit.
 - State changes when provider setup, signing, analytics, revenue, email, store, or proof changes.
 
 ## `AGENTS.md`
 
-Use the shipped `business/repo-agent-entrypoints/AGENTS.md` as the starting point for generated business repos. Do not copy the skill repo's root maintainer `AGENTS.md` into a launch repo.
+Use the shipped `business/engineering/repo-agent-entrypoints/AGENTS.md` as the starting point for generated business repos. Do not copy the skill repo's root maintainer `AGENTS.md` into a launch repo.
 
 Must include:
 - 60-second project brief
 - an explicit instruction to continue using the `b2c-mobile-business-launch` skill for broad launch/business work without asking the founder to re-invoke it
 - source-of-truth file map
-- `PROJECT_STATE.yaml`, `launch-cockpit.html`, LaunchBench/failure-card rules, and the current autonomy mode contract
-- `LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, and `TECH_SPEC.md` when they exist
+- `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, LaunchBench/failure-card rules, and the current autonomy mode contract
+- `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, and `engineering/TECH_SPEC.md` when they exist
 - brand voice rules and banned/owned words
-- `DESIGN.md` and HTML visual-proof enforcement rules
+- `design/DESIGN.md` and HTML visual-proof enforcement rules
 - onboarding, review prompt, paywall, closing offer, and activation rules when in scope
 - architecture conventions
 - V1 scope, V2/V3 scope, and banned scope
 - analytics rules
 - secret-management rules: `SECRETS.md`, Doppler or approved provider, `.env.example` names only, no raw secret values in docs/logs/proofs, and `doppler run --` or approved wrapper for secret-bearing commands
-- security rules: `SECURITY.md`, `security-review.html`, threat model, security tool routing, OWASP MASVS/ASVS basis, mobile platform hardening, app-integrity decision, entitlement/webhook abuse controls, supply-chain checks, monitoring/incident response, accepted risks, and `check:security`
-- Compound Engineering routing, `ORCHESTRATION.md`, safe parallel-agent/worktree rules, and when to use `ce-brainstorm`, `ce-plan`, `ce-work`, review, and proof skills
+- security rules: `trust/SECURITY.md`, `trust/security-review.html`, threat model, security tool routing, OWASP MASVS/ASVS basis, mobile platform hardening, app-integrity decision, entitlement/webhook abuse controls, supply-chain checks, monitoring/incident response, accepted risks, and `check:security`
+- Compound Engineering routing, `operations/ORCHESTRATION.md`, safe parallel-agent/worktree rules, and when to use `ce-brainstorm`, `ce-plan`, `ce-work`, review, and proof skills
 - app-local agent roster pointer to `APP_AGENTS.md` and `agents/`, including orchestrator ownership and specialist audit roles
 - MobAI/native iOS/device testing rules and serialized device ownership
 - paid-tool routing and approved MobAI/XcodeBuildMCP fallback rules plus SnapshotPreviews/serve-sim limitations
@@ -208,25 +208,25 @@ Must include:
 Acceptance:
 - An agent can answer "what should I read first?"
 - The file is business-specific: product, stack, repo paths, scope, provider state, and launch phase are filled for the current app.
-- A future agent knows to load the next needed skill reference, update `PROJECT_STATE.yaml`, rerender `launch-cockpit.html`, and run validators before pausing for anything other than a founder-only gate.
+- A future agent knows to load the next needed skill reference, update `state/PROJECT_STATE.yaml`, rerender `state/launch-cockpit.html`, and run validators before pausing for anything other than a founder-only gate.
 - Banned scope is explicit enough to stop feature creep.
 - Implementation rules are specific to the stack.
 - A future engineering agent knows when to use parallel agents and when to serialize MobAI, git, migrations, releases, or shared-file edits.
 - A future app-management agent knows which local role prompt owns product, marketing, engineering, design, or customer-success follow-up.
-- A future agent updates `PROJECT_STATE.yaml` before claiming completion or crossing a launch phase.
+- A future agent updates `state/PROJECT_STATE.yaml` before claiming completion or crossing a launch phase.
 
 ## `APP_AGENTS.md` And `agents/`
 
 Use for real app builds, generated-app handoffs, or post-launch management packages. Keep these lightweight; they are role entrypoints, not a second product spec.
 
 Must include:
-- one orchestrator role that owns source-of-truth docs, `PROJECT_STATE.yaml`, `launch-cockpit.html`, failure cards, sequencing, worktree/subagent safety, integration, git/release coordination, and `PRODUCTION_READINESS.md`
+- one orchestrator role that owns source-of-truth docs, `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, failure cards, sequencing, worktree/subagent safety, integration, git/release coordination, and `engineering/PRODUCTION_READINESS.md`
 - one marketing guru role for ASO, GEO/SEO, Fastlane, UGC, attribution learning, reviews, launch calendar, claims, and channel experiments
-- one engineering leader role for `TECH_SPEC.md`, `ENGINEERING_PLAN.md`, frontend/backend/provider integration, test strategy, observability, and production-readiness evidence
+- one engineering leader role for `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, frontend/backend/provider integration, test strategy, observability, and production-readiness evidence
 - one product leader role for ICP, problem framing, V1/V2/V3 scope, onboarding, activation, retention loops, and evidence-to-product traceability
-- one design guru role for `DESIGN.md`, `design.md`, `design.html`, `CONTENT_ASSETS.md`, visual QA, accessibility, screenshots, icons, motion, Higgsfield asset use, and Remotion rendered content
+- one design guru role for `design/DESIGN.md`, `design.md`, `design/design.html`, `CONTENT_ASSETS.md`, visual QA, accessibility, screenshots, icons, motion, Higgsfield asset use, and Remotion rendered content
 - one customer success role for support email, help/FAQ, privacy/delete/refund/restore paths, review responses, lifecycle copy, and feedback triage
-- one security architect role for `SECURITY.md`, security tool routing, threat model, platform hardening, app integrity, abuse controls, scanner/review evidence, accepted risks, and incident response
+- one security architect role for `trust/SECURITY.md`, security tool routing, threat model, platform hardening, app integrity, abuse controls, scanner/review evidence, accepted risks, and incident response
 - each role's inputs, outputs, forbidden actions, and when to ask the founder
 - a note that role agents review and propose by default; implementation requires orchestrator assignment, file-overlap check, and integration proof
 
@@ -244,7 +244,7 @@ Acceptance:
 - The orchestrator can launch parallel audits against the skill definition without letting specialists stage, commit, release, or edit overlapping files independently.
 - Product, design, marketing, engineering, security, and support follow-up work has a named owner after bootstrap.
 
-## `ORCHESTRATION.md` And `orchestration.html`
+## `operations/ORCHESTRATION.md` And `operations/orchestration.html`
 
 Use before broad multi-lane launch work, subagent dispatch, worktree routing, production-readiness sweeps, or app handoff prompts that imply parallel agents.
 
@@ -260,13 +260,13 @@ Must include:
 - founder-only gates and active failure cards
 
 Acceptance:
-- `PROJECT_STATE.yaml` has a matching top-level `orchestration` block.
+- `state/PROJECT_STATE.yaml` has a matching top-level `orchestration` block.
 - Parallel-safe units do not share write files or mutable resources unless isolated in worktrees and integrated serially.
 - Subagent outputs are reviewed before any done/readiness claim.
-- The orchestrator owns `PROJECT_STATE.yaml`, `launch-cockpit.html`, `ORCHESTRATION.md`, `PRODUCTION_READINESS.md`, git, provider/device mutations, and final launch judgment.
+- The orchestrator owns `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/ORCHESTRATION.md`, `engineering/PRODUCTION_READINESS.md`, git, provider/device mutations, and final launch judgment.
 - `npm run check:orchestration -- --root .` passes or leaves named blockers/failure cards.
 
-## `TOOL_DECISIONS.md`
+## `strategy/TOOL_DECISIONS.md`
 
 Use when paid or account-gated tools affect research, visuals, testing, store ops, revenue, email, analytics, UGC, or post-launch growth.
 
@@ -298,7 +298,7 @@ Must include:
 - new-secret routing log for secrets discovered during implementation
 - founder-only actions and blocked secrets
 - proof notes that record location and command evidence, never raw values
-- matching `PROJECT_STATE.yaml` provider entries with required secret names, docs checked date, preflight, validation, and fallback limitations
+- matching `state/PROJECT_STATE.yaml` provider entries with required secret names, docs checked date, preflight, validation, and fallback limitations
 
 Rules:
 - Commit `SECRETS.md`, optional `doppler.yaml`, and optional `.env.example` with names only.
@@ -312,9 +312,9 @@ Acceptance:
 - No raw secret values appear in docs, commits, screenshots, logs, or readiness proof.
 - Public client config is separated from server-only secrets.
 - Production secret injection is different from local personal login.
-- `PROJECT_STATE.yaml` and `launch-cockpit.html` show names-only secret requirements and provider status without exposing values.
+- `state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` show names-only secret requirements and provider status without exposing values.
 
-## `SECURITY.md` And `security-review.html`
+## `trust/SECURITY.md` And `trust/security-review.html`
 
 Use when a launch includes mobile code, backend state, public web surfaces, accounts, payments, email, analytics, store submission, or any provider that mutates user state.
 
@@ -338,17 +338,17 @@ Rules:
 - Do not call security done from prose alone.
 - Do not silently replace Claude Security, Codex Security, GitHub Advanced Security, Snyk/Semgrep/Socket, MobSF Cloud, or commercial app-integrity tools with free fallbacks.
 - Do not enforce App Attest, DeviceCheck, or Play Integrity in a blocking way until telemetry and founder approval support the rollout.
-- `security-review.html` should render the plan and open risks for founder review, using the app's design system when available.
+- `trust/security-review.html` should render the plan and open risks for founder review, using the app's design system when available.
 
 Acceptance:
 - A future agent can identify security-critical flows and tests without re-threat-modeling the whole app.
-- Store privacy answers, `PRIVACY.md`, `ANALYTICS.md`, `TECH_SPEC.md`, `REVENUE_OPS.md`, and `PRODUCTION_READINESS.md` agree with `SECURITY.md`.
+- Store privacy answers, `trust/PRIVACY.md`, `analytics/ANALYTICS.md`, `engineering/TECH_SPEC.md`, `revenue/REVENUE_OPS.md`, and `engineering/PRODUCTION_READINESS.md` agree with `trust/SECURITY.md`.
 - `npm run check:security -- --root .` passes or produces named blockers/failure cards.
 - Remaining risks are explicit instead of hidden inside launch-readiness language.
 
-## `LAUNCH_TRACE.md`
+## `state/LAUNCH_TRACE.md`
 
-Validator: `npm run check:launch-trace -- --root . --state PROJECT_STATE.yaml` enforces the structural floor (Decision Trace with TRACE-<n> IDs, Rejected Decisions, Founder-Only Decisions, Blockers, Verification, RESEARCH.md/SPEC.md links; no placeholders when the traceability lane is done).
+Validator: `npm run check:launch-trace -- --root . --state state/PROJECT_STATE.yaml` enforces the structural floor (Decision Trace with TRACE-<n> IDs, Rejected Decisions, Founder-Only Decisions, Blockers, Verification, strategy/RESEARCH.md/product/SPEC.md links; no placeholders when the traceability lane is done).
 
 Use for any multi-artifact launch so the chain from research to implementation does not drift.
 
@@ -364,11 +364,11 @@ Acceptance:
 - A future agent can explain why each major screen, claim, onboarding question, paywall behavior, event, data collection, and store-console answer exists.
 - The 11-star ladder and V1 scalable slice have trace rows before design and engineering harden.
 - Brand/design work cites research/product trace rows.
-- `ENGINEERING_PLAN.md`, builder prompts, and production-readiness checks can reference trace IDs instead of restating context.
+- `engineering/ENGINEERING_PLAN.md`, builder prompts, and production-readiness checks can reference trace IDs instead of restating context.
 
 ## `11_STAR_EXPERIENCE.md` And `11-star-experience.html`
 
-Use before `SPEC.md`, design, onboarding, ad/store concepts, content assets, or engineering plans are treated as ready. This is the product's experience north star, not a mood board.
+Use before `product/SPEC.md`, design, onboarding, ad/store concepts, content assets, or engineering plans are treated as ready. This is the product's experience north star, not a mood board.
 
 `11_STAR_EXPERIENCE.md` must include:
 - experience thesis: target user, ordinary world, desired transformation, magical moment, and why the user would retell it
@@ -376,7 +376,7 @@ Use before `SPEC.md`, design, onboarding, ad/store concepts, content assets, or 
 - visible line of feasibility separating V1, light manual/concierge support, deferred inspiration, and explicitly not-in-scope ideas
 - V1 scalable slice with product behavior, data/state/API needs, design/motion needs, analytics proof, and production-readiness proof
 - surface matrix for product, onboarding, paywall, ad/creator hook, App Store screenshots, landing, lifecycle email, support, and engineering
-- traceability rows that connect experience decisions to `RESEARCH.md`, `SPEC.md`, `DESIGN.md`, `ONBOARDING.md`, `TECH_SPEC.md`, `LAUNCH_TRACE.md`, and `PRODUCTION_READINESS.md`
+- traceability rows that connect experience decisions to `strategy/RESEARCH.md`, `product/SPEC.md`, `design/DESIGN.md`, `product/ONBOARDING.md`, `engineering/TECH_SPEC.md`, `state/LAUNCH_TRACE.md`, and `engineering/PRODUCTION_READINESS.md`
 
 `11-star-experience.html` must include:
 - visual vertical or staged ladder similar in structure to the 1/2/5/6/7/10/11-star framework, but with product-specific labels
@@ -391,7 +391,7 @@ Acceptance:
 - The V1 slice is narrow enough to build but strong enough to shape design, ad creative, screenshots, onboarding, and technical contracts.
 - `npm run check:11-star -- --root .` passes or leaves an active failure card.
 
-## `TECH_SPEC.md`
+## `engineering/TECH_SPEC.md`
 
 Use when app, backend, or web-funnel implementation needs precise contracts beyond visual screen specs.
 
@@ -411,14 +411,14 @@ Must include:
 
 Acceptance:
 - A builder does not invent schema, endpoint, state, permission, provider, or fixture behavior.
-- `PRODUCTION_READINESS.md` can test frontend/device actions against backend/provider truth.
+- `engineering/PRODUCTION_READINESS.md` can test frontend/device actions against backend/provider truth.
 - Privacy, store, analytics, and revenue disclosures trace to actual implementation behavior.
 
 ## `CLAUDE.md`
 
 Use when Claude Code, Rork, or another builder expects Claude-specific guidance.
 
-Use the shipped `business/repo-agent-entrypoints/CLAUDE.md` as the starting point for generated business repos. Do not copy this skill repo's root maintainer `CLAUDE.md`.
+Use the shipped `business/engineering/repo-agent-entrypoints/CLAUDE.md` as the starting point for generated business repos. Do not copy this skill repo's root maintainer `CLAUDE.md`.
 
 Must include:
 - one-line pointer that `AGENTS.md` is canonical
@@ -430,7 +430,7 @@ Acceptance:
 - Claude can find the same canonical docs without creating a second source of truth.
 - Product, design, analytics, and engineering rules remain in `AGENTS.md` unless truly Claude-specific.
 
-## `ANALYTICS.md`
+## `analytics/ANALYTICS.md`
 
 Must include:
 - vendor and identity model
@@ -456,20 +456,20 @@ Rules:
 - Mirror events across surfaces when the concept is the same.
 - Do not invent event names in build prompts; update the catalog first.
 - Public analytics tokens may live in public bundles only when the vendor documents them as publishable/write-only. Service keys never go into git.
-- Render `analytics-plan.html` before builder handoff or launch so the founder can inspect the measurement plan, attribution map, funnel cards, and blocked credentials visually.
+- Render `analytics/analytics-plan.html` before builder handoff or launch so the founder can inspect the measurement plan, attribution map, funnel cards, and blocked credentials visually.
 - Do not call attribution wired if it only emits an event or updates local state; `self_reported_source` must reach PostHog person properties and backend/profile storage where identity exists.
 
-## `ENGINEERING_PLAN.md`
+## `engineering/ENGINEERING_PLAN.md`
 
 Use when the actual app, backend, or web funnel will be implemented by Codex, Claude, Rork, or another builder.
 
 Must include:
-- origin docs, `LAUNCH_TRACE.md` IDs, and requirements trace
+- origin docs, `state/LAUNCH_TRACE.md` IDs, and requirements trace
 - product brainstorm source when `ce-brainstorm` was used
-- `TECH_SPEC.md` pointer or an inline technical contract section when implementation contracts are in scope
+- `engineering/TECH_SPEC.md` pointer or an inline technical contract section when implementation contracts are in scope
 - architecture and repo boundaries
 - implementation units with repo-relative paths
-- orchestration source: `ORCHESTRATION.md`, `PROJECT_STATE.yaml` strategy, candidate units, safe parallel lanes, serial dependencies, shared files/resources, actual collision check, and worktree needs
+- orchestration source: `operations/ORCHESTRATION.md`, `state/PROJECT_STATE.yaml` strategy, candidate units, safe parallel lanes, serial dependencies, shared files/resources, actual collision check, and worktree needs
 - frontend, backend, database, analytics, revenue, email, privacy, and store-console impacts
 - secret impacts: new/changed env vars, Doppler/provider routing, `.env.example` updates, CI/deploy injection, and bundle-safety checks
 - test scenarios for each unit
@@ -482,7 +482,7 @@ Acceptance:
 - It explains where parallel agents are safe and where orchestration must stay serial.
 - It keeps implementation units tied back to launch docs rather than standalone tasks.
 
-## `PRODUCTION_READINESS.md`
+## `engineering/PRODUCTION_READINESS.md`
 
 Use before declaring an app build ready for beta, store submission, or production launch.
 
@@ -499,7 +499,7 @@ Must include:
 - self-reported attribution proof when onboarding/signup/waitlist exists: early screen, stable stored key, `other` free text, PostHog person property, backend/profile write, and anonymous-to-identified stitching
 - Resend/email/webhook proof when lifecycle or transactional email is in scope
 - Sentry/crash/release-health status or a documented no-Sentry reason
-- security release proof: `SECURITY.md`, `security-review.html`, `check:security` output, scanner/security-review evidence or founder-approved blocked route, app-integrity decision, accepted risks, and incident-response route
+- security release proof: `trust/SECURITY.md`, `trust/security-review.html`, `check:security` output, scanner/security-review evidence or founder-approved blocked route, app-integrity decision, accepted risks, and incident-response route
 - release-build or staging-build proof that mocks are disabled and secrets are not bundled
 - `check:native-ios` result when iOS engineering, screenshots, app-preview, or production-readiness lanes are in scope
 - `check:mobai-proof` result when MobAI is used or claimed as mobile engineering proof
@@ -511,9 +511,9 @@ Acceptance:
 - A reviewer can trace a user action from frontend/device to backend/provider state.
 - Blocked E2E flows are explicit and do not get flattened into "done."
 
-## `SPEC.md`
+## `product/SPEC.md`
 
-Validator: `npm run check:product-spec -- --root . --state PROJECT_STATE.yaml` enforces the structural floor (Promise, 11-Star Experience, Category And Competitors, Differentiation And Moat, Core Product Loop, V1 Scalable Slice, Monetization Posture, Metrics, Acceptance Contract, Risks And Open Questions; at done, no placeholders plus a real incumbent row, a named moat class, and the one-week-copy test answer).
+Validator: `npm run check:product-spec -- --root . --state state/PROJECT_STATE.yaml` enforces the structural floor (Promise, 11-Star Experience, Category And Competitors, Differentiation And Moat, Core Product Loop, V1 Scalable Slice, Monetization Posture, Metrics, Acceptance Contract, Risks And Open Questions; at done, no placeholders plus a real incumbent row, a named moat class, and the one-week-copy test answer).
 
 Must include:
 - one-line promise
@@ -540,9 +540,9 @@ Acceptance:
 - The category strategy uses store data, not internal language.
 - The moat is stated as a bundle of advantages, not one vague differentiator.
 
-## `RESEARCH.md`
+## `strategy/RESEARCH.md`
 
-Validator: `npm run check:research -- --root . --state PROJECT_STATE.yaml` enforces the structural floor (Source Ledger, Decision Inputs, Decision Log, Rejected Claims, Category Revenue Reality, Go, Pivot, Or Kill, trace pointers; dated evidence, a judged revenue bar, a founder-decided verdict mirrored to state, and no placeholders when the research lane is done).
+Validator: `npm run check:research -- --root . --state state/PROJECT_STATE.yaml` enforces the structural floor (Source Ledger, Decision Inputs, Decision Log, Rejected Claims, Category Revenue Reality, Go, Pivot, Or Kill, trace pointers; dated evidence, a judged revenue bar, a founder-decided verdict mirrored to state, and no placeholders when the research lane is done).
 
 Use when research spans app stores, social platforms, competitor websites, reviews, creators, keywords, pricing, or paid acquisition signals.
 
@@ -554,7 +554,7 @@ Must include:
 - XPOZ findings: platform, query, creator/subreddit/handle, post/comment evidence, user language, emotional register, objections, and ad/organic content formats
 - Firecrawl/web findings: competitor pages crawled, pricing, plans, claims, CTAs, FAQ/help/policy pages, SEO/GEO patterns, and source URLs
 - decision log: what each evidence cluster changed in the spec, brand, ASO, pricing, funnel, or roadmap
-- trace IDs or `LAUNCH_TRACE.md` pointers for every major decision that moves forward
+- trace IDs or `state/LAUNCH_TRACE.md` pointers for every major decision that moves forward
 - rejected claims and why they are unsupported or risky
 
 Acceptance:
@@ -562,7 +562,7 @@ Acceptance:
 - App-store estimates, social evidence, and web claims are labeled by source type.
 - No claim moves into public copy unless it has supporting evidence or is marked as founder opinion.
 
-## `BRAND.md`
+## `strategy/BRAND.md`
 
 Must include:
 - name and meaning
@@ -580,7 +580,7 @@ Acceptance:
 - Brand choices map back to research/product evidence instead of generic taste.
 - Any use of a creator/expert/framework name is constrained by permission status.
 
-## `DESIGN.md`
+## `design/DESIGN.md`
 
 Use this as the canonical design-system source of truth, following the Google Labs `design.md` format: YAML front matter for machine-readable tokens plus Markdown prose for rationale and application rules.
 
@@ -593,13 +593,13 @@ Must include:
 - export or implementation notes for the target app stack: CSS variables, Tailwind theme, SwiftUI tokens, React Native theme, Flutter theme, or Rork/builder prompt rules
 
 Acceptance:
-- `npx @google/design.md lint DESIGN.md` passes when the CLI is available, or validation is marked blocked with the exact error.
+- `npx @google/design.md lint design/DESIGN.md` passes when the CLI is available, or validation is marked blocked with the exact error.
 - Tokens are specific enough for a builder to implement without inventing fonts, colors, spacing, or components.
-- Any existing `DESIGN_SYSTEM.md` defers to `DESIGN.md` for token truth.
+- Any existing `DESIGN_SYSTEM.md` defers to `design/DESIGN.md` for token truth.
 
 ## `DESIGN_SYSTEM.md`
 
-Use only when the project needs a larger appendix than `DESIGN.md` can comfortably hold, or when the target repo already has this convention. It must not conflict with `DESIGN.md`.
+Use only when the project needs a larger appendix than `design/DESIGN.md` can comfortably hold, or when the target repo already has this convention. It must not conflict with `design/DESIGN.md`.
 
 Must include:
 - color tokens
@@ -617,13 +617,13 @@ Acceptance:
 
 ## `design.md`
 
-Use this as the builder-facing screen implementation spec. It should reference `DESIGN.md` for tokens and visual rules rather than redefining them.
+Use this as the builder-facing screen implementation spec. It should reference `design/DESIGN.md` for tokens and visual rules rather than redefining them.
 
 Must include:
 - product surfaces
 - 11-star experience slice and trace IDs for the magical moment
 - screen-by-screen flows
-- trace IDs from `LAUNCH_TRACE.md` for key screens, copy claims, onboarding questions, paywall decisions, data collection, and screenshot concepts
+- trace IDs from `state/LAUNCH_TRACE.md` for key screens, copy claims, onboarding questions, paywall decisions, data collection, and screenshot concepts
 - component contracts
 - important animations
 - states and empty/error/loading behavior
@@ -635,15 +635,15 @@ Must include:
 Acceptance:
 - The builder can implement the screen without asking what it looks like.
 - The builder can tell why each screen exists and which product/research decision it implements.
-- The design spec references `ANALYTICS.md` for event names.
-- The design spec references `DESIGN.md` for token names and component rules.
+- The design spec references `analytics/ANALYTICS.md` for event names.
+- The design spec references `design/DESIGN.md` for token names and component rules.
 
-## `design.html`
+## `design/design.html`
 
 Use this as the human-visible proof that the design system works in real layout. Every visual artifact created by this skill should be represented in HTML, even if it also uses generated images or exported screenshots.
 
 Must include:
-- CSS variables or theme definitions derived from `DESIGN.md`
+- CSS variables or theme definitions derived from `design/DESIGN.md`
 - token swatches, typography specimens, spacing/radius/motion examples, and component states
 - mobile-first screen frames for onboarding, aha moment, core loop, paywall/revenue surface when relevant, settings/account, empty/loading/error states, and share/referral surfaces when relevant
 - desktop or responsive variants for public landing, legal, support, and checkout/funnel pages when relevant
@@ -656,7 +656,7 @@ Acceptance:
 - Mobile and desktop layouts do not overlap, clip critical text, or rely on invisible/remote-only assets.
 - Visual concepts, generated images, brand books, screenshot frames, and UI explorations are not left as prose-only artifacts.
 
-## `ONBOARDING.md`
+## `product/ONBOARDING.md`
 
 Use when the app has onboarding, personalization questions, a mascot/guide, demo video, attribution capture, review prompt, paywall, closing offer, or first-session activation.
 
@@ -676,16 +676,16 @@ Acceptance:
 - Every onboarding question has a reason beyond "engagement".
 - Self-reported attribution is visible early in the rendered flow and passes the analytics/backend data contract; it is not just a local UI choice.
 - App Review popup behavior is native-platform compliant, not incentivized, and placed immediately after first value before paywall or activation detours.
-- Paywall, pricing, trial, and closing offer match `REVENUE_OPS.md`, `TERMS.md`, store products, and analytics events.
+- Paywall, pricing, trial, and closing offer match `revenue/REVENUE_OPS.md`, `trust/TERMS.md`, store products, and analytics events.
 
-## `onboarding.html`
+## `product/onboarding.html`
 
-Use this as the visual proof for onboarding and paywall flow. It can be a standalone file or a section inside `design.html` for small launches.
+Use this as the visual proof for onboarding and paywall flow. It can be a standalone file or a section inside `design/design.html` for small launches.
 
 Must include:
 - all onboarding screens at mobile dimensions
 - mascot states, question UI, personalized plan or first-value reveal, demo video placeholder/clip, App Review popup placeholder immediately after first value, paywall, closing offer, loading/error/offline states, and post-paywall activation
-- CSS variables from `DESIGN.md`
+- CSS variables from `design/DESIGN.md`
 - embedded Higgsfield assets, Remotion outputs, or local references with `direction`, `draft`, or `production` labels
 - reduced-motion and no-video fallback notes
 
@@ -706,11 +706,11 @@ Must include:
 - Apple Search Ads or equivalent paid-search plan
 - launch calendar
 - monetization tracking thresholds
-- monetization architecture or pointer to `REVENUE_OPS.md`
+- monetization architecture or pointer to `revenue/REVENUE_OPS.md`
 - rating/review prompt strategy
-- store-console readiness checklist or pointer to `STORE_CONSOLE.md` and `store-console.html`
+- store-console readiness checklist or pointer to `store/STORE_CONSOLE.md` and `store/store-console.html`
 - support/privacy email alias status
-- Resend or transactional/lifecycle email readiness, or pointer to `EMAIL_OPS.md`
+- Resend or transactional/lifecycle email readiness, or pointer to `growth/EMAIL_OPS.md`
 - open founder decisions
 
 Acceptance:
@@ -761,20 +761,20 @@ Must include:
 - linked/tracking/purpose/vendor/proof fields per selected data type
 - third-party partner inventory
 - optional-disclosure rationale area
-- export/copy summary for `APP_STORE_LISTING.md` and `STORE_CONSOLE.md`
+- export/copy summary for `APP_STORE_LISTING.md` and `store/STORE_CONSOLE.md`
 
-## `STORE_CONSOLE.md`
+## `store/STORE_CONSOLE.md`
 
 Use when a founder or agent must create, fill, submit, or audit App Store Connect or Google Play Console.
 
 Must include:
 - official docs checked with URLs and dates
 - App Store Connect field table grouped by exact console page and click path
-- Apple app-record and signing status or pointer to `APPLE_SIGNING.md`: Developer Program membership, Team ID, bundle ID/App ID, app record, `DEVELOPMENT_TEAM`, signing strategy, archive/export/upload/TestFlight blocker
+- Apple app-record and signing status or pointer to `store/APPLE_SIGNING.md`: Developer Program membership, Team ID, bundle ID/App ID, app record, `DEVELOPMENT_TEAM`, signing strategy, archive/export/upload/TestFlight blocker
 - ASC CLI route when used: commands, dry-run/applied status, JSON output paths, resolved IDs, and founder-gated mutations
 - Google Play Console field table grouped by exact console page and click path
 - field limits, character/byte counts, paste-ready values, source artifact, evidence, and status
-- Apple App Privacy data-type matrix mapped to `PRIVACY.md`, `ANALYTICS.md`, `EMAIL_OPS.md`, `REVENUE_OPS.md`, SDKs, backend schema, and vendors
+- Apple App Privacy data-type matrix mapped to `trust/PRIVACY.md`, `analytics/ANALYTICS.md`, `growth/EMAIL_OPS.md`, `revenue/REVENUE_OPS.md`, SDKs, backend schema, and vendors
 - Google Play Data safety matrix mapped to the same data inventory
 - account deletion, privacy choices, support/privacy URLs, reviewer credentials, review notes, age/content rating, export compliance, and app access instructions
 - screenshot upload matrix or pointer to `SCREENSHOTS.md`
@@ -782,11 +782,11 @@ Must include:
 
 Acceptance:
 - A founder can open ASC or Play Console and fill every known field without asking where it goes.
-- Simulator build success is not presented as upload readiness unless `APPLE_SIGNING.md` proves distribution signing and app-record prerequisites.
+- Simulator build success is not presented as upload readiness unless `store/APPLE_SIGNING.md` proves distribution signing and app-record prerequisites.
 - Apple App Privacy and Google Data safety answers trace to actual data flows, not generic legal copy.
 - Any unknown console item is marked `blocked` with the exact data/access needed.
 
-## `APPLE_SIGNING.md`
+## `store/APPLE_SIGNING.md`
 
 Use when Apple distribution, TestFlight, physical-device signing, archive/export/upload, or first-time App Store setup is in scope.
 
@@ -806,7 +806,7 @@ Acceptance:
 - `Bundle ID` and `SKU` are treated as sticky identity, not temporary labels.
 - App Store distribution readiness is never inferred from simulator build success alone.
 
-## `APPLE_APP_STORE_REQUIREMENTS.md`
+## `store/APPLE_APP_STORE_REQUIREMENTS.md`
 
 Use before any iOS, iPadOS, visionOS, tvOS, watchOS, or macOS build is described as ready to upload to App Store Connect.
 
@@ -819,7 +819,7 @@ Must include:
 - Privacy Policy URL, Privacy Choices URL, account deletion route, in-app privacy route, and public policy/legal source
 - protected-resource and `Info.plist` matrix: every touched camera, photos, microphone, location, contacts, tracking, or similar permission has a clear `UsageDescription` string and denied-permission fallback
 - `NSUserTrackingUsageDescription` and App Tracking Transparency route when tracking, advertising identifiers, retargeting, data broker sharing, or third-party ad attribution is in scope
-- archive/upload proof from `APPLE_SIGNING.md`, including any App Store Connect delivery warnings or processing blockers
+- archive/upload proof from `store/APPLE_SIGNING.md`, including any App Store Connect delivery warnings or processing blockers
 - founder-only gates for App Store Connect upload, App Review submission, public release, privacy/legal approval, and paid account mutations
 
 Acceptance:
@@ -828,7 +828,7 @@ Acceptance:
 - App Privacy answers are not copied from policy prose alone; they reconcile app code, SDKs, vendors, analytics, revenue, privacy policy, Xcode privacy report, and App Store Connect labels.
 - Upload readiness is blocked by unresolved privacy manifest, required reason API, third-party SDK, purpose string, ATT, review-note, account-deletion, or ASC delivery-warning gaps.
 
-## `store-console.html`
+## `store/store-console.html`
 
 Use this as the human-facing copy surface for console work. It should be local, static, and dense enough to act like a mock ASC/Play Console.
 
@@ -843,7 +843,7 @@ Must include:
 
 Acceptance:
 - The user can copy values from the HTML without scanning a long Markdown file.
-- It uses the project `DESIGN.md` tokens when available, but reads as an operator console rather than a marketing page.
+- It uses the project `design/DESIGN.md` tokens when available, but reads as an operator console rather than a marketing page.
 - It can be opened locally and is usable on desktop and mobile.
 
 ## `SCREENSHOTS.md`
@@ -865,7 +865,7 @@ Acceptance:
 - Final dimensions match current Apple or Google requirements.
 - Raw captures are preserved separately from composed upload assets and are never described as final store artwork by themselves.
 
-## `CONTENT_ASSETS.md`, `content-assets.html`, And `content-assets/manifest.json`
+## `CONTENT_ASSETS.md`, `content-assets.html`, And `growth/content-assets/manifest.json`
 
 Use when Higgsfield, Remotion, local recordings, edited media, app previews, social clips, store screenshot frames, UGC overlays, ad variants, or campaign assets are in scope.
 
@@ -873,10 +873,10 @@ Must include:
 - route matrix: Higgsfield, Remotion, raw screenshots, founder-owned media, public-domain assets, blocked, deferred, or not needed
 - paid-tool and fallback approvals, especially when Remotion replaces an intended Higgsfield path
 - Remotion license status or founder approval before commercial output
-- source input inventory: screenshots, recordings, `DESIGN.md`, copy files, audio, captions, logos, and rights notes
+- source input inventory: screenshots, recordings, `design/DESIGN.md`, copy files, audio, captions, logos, and rights notes
 - composition manifest with asset ID, surface, route, status, composition ID, dimensions, duration, inputs, outputs, truth constraints, approvals, render proof, and license status
 - render commands for Remotion previews, stills, and videos when Remotion is selected
-- claim review against `APP_STORE_LISTING.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `TERMS.md`, onboarding/paywall copy, and store policy constraints
+- claim review against `APP_STORE_LISTING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, onboarding/paywall copy, and store policy constraints
 - output registry with target surface, local path, QA state, and next gate
 - public use gates for posting, scheduling, paid campaigns, creator distribution, paid generation, paid rendering, store upload, and final launch use
 
@@ -902,7 +902,7 @@ Must include:
 - weekly operating cadence and anomaly check
 - stop/scale/outsource rules
 - founder-only gates for spend, account connection, SDK/privacy changes, public creative, pricing, legal, and campaign launch
-- traceability rows to `LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `CONTENT_ASSETS.md`, `ANALYTICS.md`, `REVENUE_OPS.md`, `APP_STORE_LISTING.md`, `PRIVACY.md`, and proof artifacts
+- traceability rows to `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `CONTENT_ASSETS.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `APP_STORE_LISTING.md`, `trust/PRIVACY.md`, and proof artifacts
 
 Acceptance:
 - Paid growth is not reduced to "try ads."
@@ -924,7 +924,7 @@ Must include:
 - measurement plan: PostHog or equivalent events, attribution, dashboards, traffic quality, referral/share proof, paywall reach, purchase, entitlement, activation, retention, and platform/device mix
 - stop/scale rules: reps before judgment, repeatable-hit threshold, downstream evidence threshold, and shut-down/reposition rules
 - founder-only gates: creator payments, paid tools, public posting, social account connections, pricing changes, and legal/policy approval
-- traceability rows to `LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `ONBOARDING.md`, `REVENUE_OPS.md`, `ANALYTICS.md`, `UGC_PLAYBOOK.md`, and proof artifacts
+- traceability rows to `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `analytics/ANALYTICS.md`, `growth/UGC_PLAYBOOK.md`, and proof artifacts
 
 Acceptance:
 - Growth is represented as a product/content/revenue/analytics system, not a list of social posts.
@@ -932,7 +932,7 @@ Acceptance:
 - A future agent can tell when to scale, repeat, stop, or defer a format.
 - Views are not treated as proof unless tied to launch goals such as opens, referrals, paywall reach, purchases, retention, or awareness-only objectives.
 
-## `UGC_PLAYBOOK.md`
+## `growth/UGC_PLAYBOOK.md`
 
 Use when founder-led or creator-led organic TikTok/Reels/Shorts, Sideshift/creator marketplaces, creator payments, UGC scripts, paid influencer sponsorships, or post-launch content engines are in scope.
 
@@ -957,7 +957,7 @@ Acceptance:
 - The program can run without inventing contracts, payment rules, scripts, or tracking from scratch.
 - Fastlane or paid ads consume only approved and rights-cleared UGC inputs.
 
-## `EMAIL_OPS.md`
+## `growth/EMAIL_OPS.md`
 
 Use when the launch uses Resend or another email provider for transactional, lifecycle, broadcast, inbound, or support email.
 
@@ -978,7 +978,7 @@ Acceptance:
 - Marketing/lifecycle email has unsubscribe/preference handling.
 - Resend behavior is reflected in privacy/legal docs and analytics events.
 
-## `REVENUE_OPS.md`
+## `revenue/REVENUE_OPS.md`
 
 Use when the app has subscriptions, paid access, RevenueCat, Stripe, web checkout, web funnels, or app-store products.
 
@@ -1026,7 +1026,7 @@ Use when the app is near submission, already in review, rejected, or actively mo
 
 Must include:
 - platform, app ID/bundle ID/package name, version/build, target countries, category, and current console status
-- pointer to `STORE_CONSOLE.md`, `store-console.html`, and `SCREENSHOTS.md` when those are separate files
+- pointer to `store/STORE_CONSOLE.md`, `store/store-console.html`, and `SCREENSHOTS.md` when those are separate files
 - store-console checklist status: metadata, screenshots, privacy labels/Data safety, privacy manifest, age/content rating, export compliance, IAP/subscriptions, review notes, demo credentials, account deletion, release track, and build status
 - support/privacy/security email alias table with destination, routing/DNS status, external test result, and published locations
 - screenshot upload set by device/locale/slot with dimensions and source files
@@ -1038,7 +1038,7 @@ Acceptance:
 - Email addresses published in stores/legal pages actually receive mail.
 - Final submission/resubmission remains founder-approved.
 
-## `FASTLANE_OPS.md`
+## `growth/FASTLANE_OPS.md`
 
 Use after the app is approved, in public beta, or ready for organic social marketing through Fastlane AI at `usefastlane.ai`.
 
@@ -1050,7 +1050,7 @@ Must include:
 - API setup state: `FASTLANE_API_KEY` storage location only, base URL, safe-read discovery results, rate limits, active angles, preferences, content/post counts
 - campaign plan: content pillars, target platforms, hooks, CTAs, UTM convention, 30-day cadence, and claims to avoid
 - media input plan: MobAI screenshots/recordings, app previews, store screenshots, Higgsfield assets, founder/UGC clips, and source paths
-- UGC input plan or pointer to `UGC_PLAYBOOK.md` when creator-tested hooks, scripts, or clips shape Fastlane campaigns
+- UGC input plan or pointer to `growth/UGC_PLAYBOOK.md` when creator-tested hooks, scripts, or clips shape Fastlane campaigns
 - live automation state or pointer to `fastlane/`: angles, preferences, generated content, QA results, schedule, sanitized API logs, and metrics snapshots
 - founder-only gates for account connections, API keys, public posts, scheduled posts, deletes/cancels, spend, and profile changes
 - weekly iteration loop tying Fastlane metrics to installs, trials, purchases, attribution answers, and product analytics
@@ -1061,9 +1061,9 @@ Acceptance:
 - Generated posts trace back to launch docs, real product media, and approved claims.
 - Fastlane performance is connected to product metrics, not treated as vanity-only social analytics.
 
-## `PRIVACY.md`
+## `trust/PRIVACY.md`
 
-Validator: `npm run check:privacy-terms -- --root . --state PROJECT_STATE.yaml` enforces the structural floor for PRIVACY.md and TERMS.md (effective dates, contacts, Data Inventory, Retention And Deletion, App Store Disclosure Mapping, subscriptions/refunds, disclaimers, governing law; no placeholders when privacy_legal is done). Founder/legal approval remains the final gate.
+Validator: `npm run check:privacy-terms -- --root . --state state/PROJECT_STATE.yaml` enforces the structural floor for trust/PRIVACY.md and trust/TERMS.md (effective dates, contacts, Data Inventory, Retention And Deletion, App Store Disclosure Mapping, subscriptions/refunds, disclaimers, governing law; no placeholders when privacy_legal is done). Founder/legal approval remains the final gate.
 
 Use as the source draft for privacy policy, privacy choices, account deletion, and app-store privacy disclosures. Also generate publishable pages from it when the launch has a public site.
 
@@ -1089,7 +1089,7 @@ Acceptance:
 - The page is public, non-geofenced, not a PDF, and linked from app/site/store metadata where required.
 - Any uncertainty is in `LEGAL_REVIEW.md`, not silently papered over.
 
-## `TERMS.md`
+## `trust/TERMS.md`
 
 Use as the source draft for terms of service and, if needed, a custom EULA.
 
@@ -1124,7 +1124,7 @@ Must include:
 - publish blockers
 - approval status and approver
 
-## `LAUNCHBENCH.md` And `FAILURE_CARDS.md`
+## `LAUNCHBENCH.md` And `operations/FAILURE_CARDS.md`
 
 Use when the launch is complex, the skill has been updated, or a repeated miss needs to become a reusable guardrail.
 
@@ -1135,7 +1135,7 @@ Use when the launch is complex, the skill has been updated, or a repeated miss n
 - expected failures caught and unexpected misses
 - resulting failure cards or skill updates
 
-`FAILURE_CARDS.md` must include, when not fully captured in `PROJECT_STATE.yaml`:
+`operations/FAILURE_CARDS.md` must include, when not fully captured in `state/PROJECT_STATE.yaml`:
 - card ID, severity, owner, status, detected date, affected lane, evidence, impact, next action, validator, and resolution proof
 - founder-only decisions related to the card
 - downstream docs that must update before the card closes

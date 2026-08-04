@@ -40,7 +40,7 @@ function mentionsAny(text: string, terms: string[]): boolean {
 const growthStatus = state ? asString(getPath(state, "lanes.growth.status"))?.toLowerCase() : undefined;
 const skip = growthStatus === "not_needed" || growthStatus === "deferred";
 const markdown = firstExistingText(["VIRAL_GROWTH.md", "growth/VIRAL_GROWTH.md"]);
-const formatLabPath = existsAny(["growth/format-lab.csv", "ugc/script-bank.md", "FASTLANE_OPS.md"]);
+const formatLabPath = existsAny(["growth/format-lab.csv", "ugc/script-bank.md", "growth/FASTLANE_OPS.md"]);
 
 if (!skip && !markdown) {
   issues.push(
@@ -74,7 +74,14 @@ if (markdown) {
     }
   }
 
-  const requiredRefs = ["ANALYTICS.md", "ONBOARDING.md", "REVENUE_OPS.md", "UGC_PLAYBOOK.md", "LAUNCH_TRACE.md", "11_STAR_EXPERIENCE.md"];
+  const requiredRefs = [
+    "analytics/ANALYTICS.md",
+    "product/ONBOARDING.md",
+    "revenue/REVENUE_OPS.md",
+    "growth/UGC_PLAYBOOK.md",
+    "state/LAUNCH_TRACE.md",
+    "11_STAR_EXPERIENCE.md",
+  ];
   for (const ref of requiredRefs) {
     if (!markdown.text.includes(ref)) {
       issues.push(issue("error", `viral_growth.ref_${codeFor(ref)}.missing`, `VIRAL_GROWTH.md should reference ${ref}.`, markdown.relativePath));
@@ -114,7 +121,7 @@ if (markdown) {
     );
   }
 
-  if (!mentionsAny(markdown.text, ["PostHog", "event", "dashboard", "analytics-plan.html"])) {
+  if (!mentionsAny(markdown.text, ["PostHog", "event", "dashboard", "analytics/analytics-plan.html"])) {
     issues.push(
       issue("error", "viral_growth.analytics_link.missing", "Viral growth should define event/dashboard proof, not only content ideas.", markdown.relativePath),
     );
@@ -312,16 +319,16 @@ if (growthStatus === "done" && markdown) {
   // Post-breakout scale contract: a UGC playbook that stops at the Day-0
   // roster is the known miss. When the playbook exists, it must carry the
   // scale-band model with founder-gated budget steps.
-  const ugcPlaybook = firstExistingText(["UGC_PLAYBOOK.md", "ugc/UGC_PLAYBOOK.md"]);
+  const ugcPlaybook = firstExistingText(["growth/UGC_PLAYBOOK.md", "ugc/growth/UGC_PLAYBOOK.md"]);
   const ugcNotApplicable = /creator (content|loop)[^\n]*\b(not in scope|not applicable|rejected)\b/i.test(markdown.text);
   if (!ugcPlaybook && !ugcNotApplicable) {
     issues.push(
       issue(
         "error",
         "viral_growth.ugc_playbook_missing",
-        "The growth lane is done but UGC_PLAYBOOK.md is absent. Create it (with its Post-Breakout Scale Model), or record creator " +
+        "The growth lane is done but growth/UGC_PLAYBOOK.md is absent. Create it (with its Post-Breakout Scale Model), or record creator " +
           "content as not in scope in VIRAL_GROWTH.md — a missing playbook is the Day-0 ceiling with the evidence deleted.",
-        "UGC_PLAYBOOK.md",
+        "growth/UGC_PLAYBOOK.md",
       ),
     );
   }
@@ -409,7 +416,7 @@ if (growthStatus === "done" && !formatLabPath) {
     issue(
       "error",
       "viral_growth.format_lab_missing_done",
-      "A done growth lane should include growth/format-lab.csv, ugc/script-bank.md, or FASTLANE_OPS.md as repeatable format evidence.",
+      "A done growth lane should include growth/format-lab.csv, ugc/script-bank.md, or growth/FASTLANE_OPS.md as repeatable format evidence.",
       "growth/format-lab.csv",
     ),
   );

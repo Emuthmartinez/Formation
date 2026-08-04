@@ -36,7 +36,7 @@ Refresh these docs before implementation because email deliverability, bulk-send
 
 ## Required Artifact
 
-Create `EMAIL_OPS.md` when email is more than a plain waitlist notification, or when Resend is part of the stack.
+Create `growth/EMAIL_OPS.md` when email is more than a plain waitlist notification, or when Resend is part of the stack.
 
 Must include:
 - email purpose map: auth, waitlist confirmation, welcome, onboarding nudges, trial reminders, payment recovery, receipts, product updates, marketing broadcasts, support replies, admin alerts
@@ -55,7 +55,7 @@ Acceptance:
 - API keys are server-only and scoped to the smallest useful permission.
 - Bounces, complaints/unsubscribes, and webhooks are observable before public traffic.
 - Marketing/lifecycle messages have unsubscribe handling; transactional-only messages are classified intentionally.
-- Email behavior matches `PRIVACY.md`, `TERMS.md`, `ANALYTICS.md`, `ONBOARDING.md`, and `REVENUE_OPS.md`.
+- Email behavior matches `trust/PRIVACY.md`, `trust/TERMS.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, and `revenue/REVENUE_OPS.md`.
 
 ## Setup Process
 
@@ -146,12 +146,12 @@ Choose one template strategy:
 - React Email/TSX templates in the product repo.
 - Resend hosted Templates for Automations and non-developer editing.
 - Simple inline HTML/text only for tiny early-stage transactional messages.
-- Starter TypeScript templates from `business/resend/email-templates.ts` when the app needs common support, lifecycle, billing, entitlement, waitlist, or privacy messages quickly.
+- Starter TypeScript templates from `business/growth/resend/email-templates.ts` when the app needs common support, lifecycle, billing, entitlement, waitlist, or privacy messages quickly.
 
 Every template needs:
-- before drafting subject, preview text, or body copy: load `playbook/words/no-slop-writing.md` — its §7 covers push/lifecycle email subject-line limits specifically; keep the tone `11_STAR_EXPERIENCE.md`/`BRAND.md` set for this product, not generic transactional-email English
+- before drafting subject, preview text, or body copy: load `playbook/words/no-slop-writing.md` — its §7 covers push/lifecycle email subject-line limits specifically; keep the tone `11_STAR_EXPERIENCE.md`/`strategy/BRAND.md` set for this product, not generic transactional-email English
 - subject, preview text where supported, HTML, plain text, sender, reply-to, purpose, owner
-- brand fields and required email-safe design tokens derived from `DESIGN.md`: logo, app name, accent color, text colors, surface/border colors, typography, radius, spacing, max width, logo height, and footer rules
+- brand fields and required email-safe design tokens derived from `design/DESIGN.md`: logo, app name, accent color, text colors, surface/border colors, typography, radius, spacing, max width, logo height, and footer rules
 - experience tone derived from `11_STAR_EXPERIENCE.md`, especially lifecycle copy that should feel like the product remembered the user's goal
 - mobile-safe layout and accessible links/buttons
 - unsubscribe/preference link for non-transactional messages
@@ -182,7 +182,7 @@ Good launch automations:
 - `subscription.cancelled` -> cancellation confirmation and optional win-back
 
 Rules:
-- Trigger Automations from product events that already exist in `ANALYTICS.md`.
+- Trigger Automations from product events that already exist in `analytics/ANALYTICS.md`.
 - Include `{{{RESEND_UNSUBSCRIBE_URL}}}` for non-transactional product and marketing messaging.
 - Monitor Automation runs for `running`, `completed`, `failed`, `cancelled`, and `skipped`.
 - Record where Resend automation state overlaps with PostHog, RevenueCat, Stripe, or your backend so users do not receive duplicate lifecycle emails.
@@ -197,7 +197,7 @@ Win-back, trial-reminder, and billing-recovery emails can carry Higgsfield-gener
 Generate both via the `higgsfield-product-photoshoot` skill. See the **Seasonal restyle Refresh** and **Cheap-First Direction** recipes in `tool-recipes/visual-and-motion-production.md` for the generation workflow; use `--mode hero_banner` or `--mode lifestyle_scene` in the `higgsfield product-photoshoot create` call.
 
 Rules:
-- Every prompt must carry DESIGN.md brand tokens (palette, type mood, shapes, texture, banned aesthetics). DESIGN.md tokens are already pulled for email `LaunchEmailBrand.designSystem`; reuse the same token set.
+- Every prompt must carry design/DESIGN.md brand tokens (palette, type mood, shapes, texture, banned aesthetics). design/DESIGN.md tokens are already pulled for email `LaunchEmailBrand.designSystem`; reuse the same token set.
 - Generated images are supporting art only. They must not substitute for truthful real UI or make product claims.
 - Confirm spend with the founder before each photoshoot run per `paid-tool-routing.md`; surface current credit balance.
 - Record every generated asset in `CONTENT_ASSETS.md` with `prompt_brief`, output path, intended email surface (`hero_banner` / `lifestyle_scene`), and approval gate.
@@ -266,8 +266,8 @@ If the goal is ordinary support inbox forwarding, Cloudflare Email Routing, Gmai
 ### 10. Compliance, Privacy, And Deliverability
 
 Before public traffic:
-- Update `PRIVACY.md` with Resend as email processor, email categories, tracking if enabled, and unsubscribe/preference behavior.
-- Update `TERMS.md` or support docs for account/billing/support email expectations where needed.
+- Update `trust/PRIVACY.md` with Resend as email processor, email categories, tracking if enabled, and unsubscribe/preference behavior.
+- Update `trust/TERMS.md` or support docs for account/billing/support email expectations where needed.
 - Add unsubscribe links to marketing/lifecycle messages and one-click unsubscribe headers where bulk-sender rules apply.
 - Suppress or stop sending to bounced, complained, deleted, or unsubscribed contacts.
 - Check headers on test emails for SPF, DKIM, and DMARC pass.
@@ -275,7 +275,7 @@ Before public traffic:
 
 ## Starter Template Pack
 
-Use `business/resend/email-templates.ts` as the out-of-the-box pack for B2C app launches. Copy it into the product repo when Resend is selected, then adapt brand copy, links, legal footer, support SLAs, `LaunchEmailBrand.designSystem` from the project's canonical `DESIGN.md`, and lifecycle tone from `11_STAR_EXPERIENCE.md`.
+Use `business/growth/resend/email-templates.ts` as the out-of-the-box pack for B2C app launches. Copy it into the product repo when Resend is selected, then adapt brand copy, links, legal footer, support SLAs, `LaunchEmailBrand.designSystem` from the project's canonical `design/DESIGN.md`, and lifecycle tone from `11_STAR_EXPERIENCE.md`.
 
 Included templates:
 - `waitlistConfirmationEmail` - confirms waitlist signup and optional referral link.
@@ -288,9 +288,9 @@ Included templates:
 - `accountDeletionConfirmedEmail` - confirms privacy/account deletion completion.
 
 Rules:
-- Do not ship generic-looking email. `LaunchEmailBrand.designSystem` is required and must be populated from the business design system before production sends. Set `designSystem.source` to `DESIGN.md` or the project-specific design artifact used, and fill every required token group: `colors`, `typography`, `radius`, `spacing`, and `email`.
+- Do not ship generic-looking email. `LaunchEmailBrand.designSystem` is required and must be populated from the business design system before production sends. Set `designSystem.source` to `design/DESIGN.md` or the project-specific design artifact used, and fill every required token group: `colors`, `typography`, `radius`, `spacing`, and `email`.
 - Use email-safe interpretations of design tokens: hex colors, web-safe or hosted font stacks, conservative radii, fixed max width, accessible contrast, and inline styles.
-- Treat the pack as starter implementation, not legal copy. Match `PRIVACY.md`, `TERMS.md`, subscription disclosures, and app-store billing rules before production.
+- Treat the pack as starter implementation, not legal copy. Match `trust/PRIVACY.md`, `trust/TERMS.md`, subscription disclosures, and app-store billing rules before production.
 - For `entitlementGrantedEmail`, verify the RevenueCat grant in dashboard/API proof first. Do not imply that a granted entitlement changes billing, cancels a subscription, creates a paid subscription, or issues a refund.
 - For lifecycle or marketing-like messages, include preference/unsubscribe links and one-click unsubscribe headers when bulk-sender rules apply.
 - For support and account-access messages, keep replies transactional unless marketing or upsell copy is added.
@@ -299,7 +299,7 @@ Rules:
 
 ## Verification Checklist
 
-Record each result in `EMAIL_OPS.md`:
+Record each result in `growth/EMAIL_OPS.md`:
 - domain/subdomain verified in Resend
 - SPF and DKIM pass
 - DMARC record exists and current policy is justified

@@ -39,11 +39,11 @@ If an ASO skill pack is installed, delegate narrow work instead of re-creating i
 - Activation and retention: `onboarding-optimization`, `retention-optimization`, `referral-program`.
 - Ratings, reviews, and quality: `review-management`, `rating-prompt-strategy`, `crash-analytics`, `app-rejection-recovery`.
 - Analytics and first-party performance: `app-analytics`, `asc-metrics`.
-- Launch and publicity: `app-launch`, `creator-ugc-marketing`, `press-and-pr` (for press kit imagery: use `product-photoshoot --mode conceptual_product` for premium product art and `soul-id create --soul-cinematic` → marketing-studio avatar for founder editorial headshots; full brief required from DESIGN.md; gate behind spend confirmation per `playbook/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md` with license and approval gate before distribution).
+- Launch and publicity: `app-launch`, `creator-ugc-marketing`, `press-and-pr` (for press kit imagery: use `product-photoshoot --mode conceptual_product` for premium product art and `soul-id create --soul-cinematic` → marketing-studio avatar for founder editorial headshots; full brief required from design/DESIGN.md; gate behind spend confirmation per `playbook/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md` with license and approval gate before distribution).
 
 If these skills are not directly discoverable in the current runtime, search installed skill/plugin paths for the names above, read the matching `SKILL.md`, and proceed with the same output contract manually. Do not assume Claude and Codex expose the same installed plugin surface.
 
-Before handing work back to the founder, produce or update `STORE_CONSOLE.md`, `store-console.html`, `APP_STORE_LISTING.md`, `APPLE_APP_STORE_REQUIREMENTS.md`, `SCREENSHOTS.md`, and the screenshot/export proof board when a store submission is in scope.
+Before handing work back to the founder, produce or update `store/STORE_CONSOLE.md`, `store/store-console.html`, `APP_STORE_LISTING.md`, `store/APPLE_APP_STORE_REQUIREMENTS.md`, `SCREENSHOTS.md`, and the screenshot/export proof board when a store submission is in scope.
 
 ## 2. Required ASO Context
 
@@ -84,7 +84,7 @@ Output:
 Screenshots must sell the product and satisfy platform rules.
 
 Checklist:
-- load `playbook/words/no-slop-writing.md` before writing screenshot headline/copy-overlay text — a thumbnail-size overlay has no room for puffery or synonym cycling; keep the app's `BRAND.md` voice, not generic ad copy
+- load `playbook/words/no-slop-writing.md` before writing screenshot headline/copy-overlay text — a thumbnail-size overlay has no room for puffery or synonym cycling; keep the app's `strategy/BRAND.md` voice, not generic ad copy
 - define the first 3 screenshots as the search/product-page conversion set
 - treat raw app screenshots as proof inputs, not final store creative
 - produce composed final assets with headline, copy overlay, device frame or intentional frameless layout, background/supporting visuals, export dimensions, and visual QA
@@ -121,16 +121,16 @@ Required Apple marketing surfaces:
 - custom product page strategy by audience/channel/keyword set, including deep links and measurement plan
 - In-App Event strategy only when the app has real event content, schedule, media, deep link, localization, and App Review readiness
 - localization matrix for metadata, keyword fields, screenshots, privacy/support URLs, and cultural review
-- visual asset route: real app UI captures first, Higgsfield for high-quality supporting art/icons/backgrounds/CPP/event imagery when needed, always tied to `11_STAR_EXPERIENCE.md` and `DESIGN.md`
+- visual asset route: real app UI captures first, Higgsfield for high-quality supporting art/icons/backgrounds/CPP/event imagery when needed, always tied to `11_STAR_EXPERIENCE.md` and `design/DESIGN.md`
 
 Use the ASO skill set when available: `app-marketing-context`, `keyword-research`, `metadata-optimization`, `screenshot-optimization`, `custom-product-pages`, `in-app-events`, `localization`, `apple-search-ads`, `review-management`, `monetization-strategy`, and `subscription-lifecycle`.
 
 Output:
 - `APP_STORE_LISTING.md`
-- `APPLE_APP_STORE_REQUIREMENTS.md`
+- `store/APPLE_APP_STORE_REQUIREMENTS.md`
 - `app-store-listing.html`
 - `app-privacy-questionnaire.html` when privacy answers are not already proven
-- updated `STORE_CONSOLE.md`, `SCREENSHOTS.md`, `REVENUE_OPS.md`, and `LAUNCH_TRACE.md`
+- updated `store/STORE_CONSOLE.md`, `SCREENSHOTS.md`, `revenue/REVENUE_OPS.md`, and `state/LAUNCH_TRACE.md`
 
 ## 6. Store Console Readiness
 
@@ -142,7 +142,7 @@ Apple checklist:
 - bundle ID, SKU, category, age rating, availability, pricing, IAP/subscriptions, review notes, demo credentials, export compliance, and build status are known
 - privacy policy URL and optional privacy choices/account deletion URL are live
 - App Privacy responses match the actual data inventory and third-party SDKs
-- `APPLE_APP_STORE_REQUIREMENTS.md` proves privacy manifest and required-reason API declarations, third-party SDK manifests/signatures, Xcode privacy report, purpose strings, ATT, account deletion, review notes, and upload warnings for the app and bundled SDKs
+- `store/APPLE_APP_STORE_REQUIREMENTS.md` proves privacy manifest and required-reason API declarations, third-party SDK manifests/signatures, Xcode privacy report, purpose strings, ATT, account deletion, review notes, and upload warnings for the app and bundled SDKs
 - Accessibility Nutrition Labels are answered or intentionally deferred, and any claimed support is backed by common-task testing on each supported device
 - account deletion is available in-app when accounts can be created
 - Sign in with Apple token revocation is handled when Sign in with Apple is used
@@ -155,15 +155,15 @@ Google Play checklist:
 - privacy policy URL is active, public, non-geofenced, non-editable, and not a PDF
 - Data safety answers match actual collection, sharing, retention, deletion, security, and vendor behavior
 - account deletion web resource exists when accounts can be created
-- feature graphic (1024x500), screenshots, short description, long description, and store listing experiments are prepared; produce the feature graphic via `product-photoshoot --mode hero_banner` with full DESIGN.md tokens — gate behind spend confirmation per `playbook/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md`; founder approval before upload
+- feature graphic (1024x500), screenshots, short description, long description, and store listing experiments are prepared; produce the feature graphic via `product-photoshoot --mode hero_banner` with full design/DESIGN.md tokens — gate behind spend confirmation per `playbook/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md`; founder approval before upload
 - App content declarations, app access instructions, sensitive-permission declarations, and pre-launch report status are tracked before production release
 - staged rollout/managed publishing choice is explicit
 
 Output:
-- `STORE_CONSOLE.md` with click paths, field limits, paste-ready values, evidence, statuses, and blockers
-- `store-console.html` with copyable fields grouped by ASC/Play Console page
+- `store/STORE_CONSOLE.md` with click paths, field limits, paste-ready values, evidence, statuses, and blockers
+- `store/store-console.html` with copyable fields grouped by ASC/Play Console page
 - `APP_STORE_LISTING.md` and `app-store-listing.html` when an iOS App Store listing is in scope
-- `APPLE_APP_STORE_REQUIREMENTS.md` when an iOS App Store Connect upload path is in scope
+- `store/APPLE_APP_STORE_REQUIREMENTS.md` when an iOS App Store Connect upload path is in scope
 - `SCREENSHOTS.md` with device capture, dimension, locale, proof, and upload state
 - required links and which console fields use them
 - final founder-only approval list
@@ -194,7 +194,7 @@ Valid with founder approval:
 
 Do not tell the founder an agent cannot create the app unless current `asc` help/skill-pack guidance, auth/account checks, or Apple agreements prove a concrete blocker. Record the blocker and the exact next action instead.
 
-Even when `asc` is used, produce `STORE_CONSOLE.md` and `store-console.html` with manual click paths, paste values, and founder-only approvals.
+Even when `asc` is used, produce `store/STORE_CONSOLE.md` and `store/store-console.html` with manual click paths, paste values, and founder-only approvals.
 
 ## 8. Support, Privacy, And Email Routing
 
@@ -246,7 +246,7 @@ Run a weekly loop for the first 6-8 weeks after launch:
 - competitor metadata, screenshot, ranking, ad, pricing, and review changes
 - localization opportunities by country revenue/downloads: refresh `LOCALIZATION_MARKET_RESEARCH.md` from first-party App Analytics/Play statistics — promote Tier 2/3 markets that are downloading or converting, prune localized markets that under-deliver (see `localization-market-research.md` §7)
 
-When keyword or CVR analysis flags a priority angle, produce a 3-5 slide social carousel via `product-photoshoot --mode social_carousel` (DESIGN.md brief required; gate behind spend confirmation per `playbook/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md`; founder approval required before distribution); add the produced carousel to the prioritized-experiments output below.
+When keyword or CVR analysis flags a priority angle, produce a 3-5 slide social carousel via `product-photoshoot --mode social_carousel` (design/DESIGN.md brief required; gate behind spend confirmation per `playbook/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md`; founder approval required before distribution); add the produced carousel to the prioritized-experiments output below.
 
 Output:
 - weekly change log

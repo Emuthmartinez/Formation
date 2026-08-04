@@ -196,7 +196,7 @@ if (!loaded.state) {
 
   const agentOperationsMarkup = `<div class="grid">
     <article class="card"><h3>Status</h3><p><span class="status ${escapeHtml(agentOperations.status ?? "not_started")}">${escapeHtml(agentOperations.status ?? "not_started")}</span></p><p class="muted">Capability checked: ${escapeHtml(agentOperations.capability_checked_at ?? "not recorded")}</p></article>
-    <article class="card"><h3>Artifacts</h3><p>${escapeHtml(agentOperations.human_log ?? "AGENT_OPERATIONS.md")}</p><p>${escapeHtml(agentOperations.structured_ledger ?? "operations/agent-operations.json")}</p></article>
+    <article class="card"><h3>Artifacts</h3><p>${escapeHtml(agentOperations.human_log ?? "operations/AGENT_OPERATIONS.md")}</p><p>${escapeHtml(agentOperations.structured_ledger ?? "operations/agent-operations.json")}</p></article>
     <article class="card"><h3>Approvals</h3>${list(asArray(agentOperations.active_approval_ids))}</article>
     <article class="card"><h3>Reconciliation</h3><p>Last action: ${escapeHtml(agentOperations.last_action_id ?? "none")}</p><p>State reconciled: ${escapeHtml(agentOperations.state_reconciled ?? false)}</p></article>
   </div>`;
@@ -322,7 +322,7 @@ if (!loaded.state) {
 </html>
 `;
 
-  const output = args.outputPath ?? `${args.root}/launch-cockpit.html`;
+  const output = args.outputPath ?? `${args.root}/state/launch-cockpit.html`;
   writeText(output, html);
   console.log(`Launch cockpit written to ${output}`);
   reportAndExit("Launch cockpit render", issues);

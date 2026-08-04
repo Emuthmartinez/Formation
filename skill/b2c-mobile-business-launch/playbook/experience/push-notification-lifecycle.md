@@ -16,8 +16,8 @@ The ethics line up front: push serves the user's stated goal, never the app's ne
 
 ## 1. Provider Setup
 
-- **Native default:** APNs (iOS) and FCM (Android) direct, via the app's backend. The archetype starters' Supabase backend can schedule and send through an edge function; record the route in `TECH_SPEC.md`'s data contract.
-- **Provider route:** OneSignal or a comparable push provider is a paid/account-gated tool decision — route it through `paid-tool-routing.md` before adopting, and record the choice in `TOOL_DECISIONS.md`. A provider earns its keep at segmentation/scheduling scale; day one usually does not need one.
+- **Native default:** APNs (iOS) and FCM (Android) direct, via the app's backend. The archetype starters' Supabase backend can schedule and send through an edge function; record the route in `engineering/TECH_SPEC.md`'s data contract.
+- **Provider route:** OneSignal or a comparable push provider is a paid/account-gated tool decision — route it through `paid-tool-routing.md` before adopting, and record the choice in `strategy/TOOL_DECISIONS.md`. A provider earns its keep at segmentation/scheduling scale; day one usually does not need one.
 - Keys and certificates (APNs key, FCM service account) are server secrets: route through `secrets-management.md`, names-only in `SECRETS.md`.
 - Token lifecycle: capture the push token post-permission, refresh on app start, delete on logout and account deletion (the deletion path in `privacy-terms.md` includes push tokens).
 
@@ -47,14 +47,14 @@ Every row deep-links to the exact screen that fulfills the promise; a push that 
 
 ## 4. Frequency Caps And Quiet Hours
 
-- Default cap: **one marketing/lifecycle push per day, three per week**, transactional (billing, security) exempt. Record the chosen caps here and in `POST_LAUNCH_OPS.md`.
+- Default cap: **one marketing/lifecycle push per day, three per week**, transactional (billing, security) exempt. Record the chosen caps here and in `operations/POST_LAUNCH_OPS.md`.
 - Quiet hours by default (22:00–09:00 local) unless the user scheduled a time inside them — their explicit schedule always wins.
 - Caps are enforced server-side, not promised in prose: the send path checks the user's recent-send count before dispatch.
 - The notification-disable rate is the counter-metric (`emotional-experience-measurement.md` flags >20% as investigate): a rising disable rate is users telling you the caps are wrong.
 
 ## 5. Analytics Contract
 
-Push events live in the `ANALYTICS.md` Event Contract before any builder prompt names them (`analytics-attribution.md` rule). The standard catalog rows:
+Push events live in the `analytics/ANALYTICS.md` Event Contract before any builder prompt names them (`analytics-attribution.md` rule). The standard catalog rows:
 
 - `push_permission_primed` — the soft-prime screen was shown (properties: placement, session_number)
 - `push_permission_granted` / `push_permission_denied` — system dialog outcome

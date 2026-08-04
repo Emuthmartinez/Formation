@@ -9,12 +9,12 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "../..");
 const args = parseArgs(process.argv.slice(2));
 const issues: Issue[] = [];
-const statePath = args.statePath ?? path.join(args.templatesRoot, "PROJECT_STATE.yaml");
+const statePath = args.statePath ?? path.join(args.templatesRoot, "state/PROJECT_STATE.yaml");
 
 if (!existsSync(args.templatesRoot)) {
   issues.push(issue("error", "artifact_templates.templates_missing", `Templates directory is missing: ${args.templatesRoot}`, args.templatesRoot));
 } else if (!existsSync(statePath)) {
-  issues.push(issue("error", "artifact_templates.project_state_missing", `Template PROJECT_STATE.yaml is missing: ${statePath}`, statePath));
+  issues.push(issue("error", "artifact_templates.project_state_missing", `Template state/PROJECT_STATE.yaml is missing: ${statePath}`, statePath));
 } else {
   const state = parseYaml(readFileSync(statePath, "utf8"));
   const templateFiles = collectTemplateFiles(args.templatesRoot);
@@ -23,7 +23,7 @@ if (!existsSync(args.templatesRoot)) {
 
   if (!isRecord(state) || !isRecord(state.lanes)) {
     issues.push(
-      issue("error", "artifact_templates.lanes_missing", "Template PROJECT_STATE.yaml must include lanes.", path.relative(args.skillRoot, statePath)),
+      issue("error", "artifact_templates.lanes_missing", "Template state/PROJECT_STATE.yaml must include lanes.", path.relative(args.skillRoot, statePath)),
     );
   } else {
     for (const [laneName, laneValue] of Object.entries(state.lanes)) {
@@ -39,7 +39,7 @@ if (!existsSync(args.templatesRoot)) {
             "error",
             `artifact_templates.${laneName}.evidence_missing`,
             `${laneName} must list at least one starter evidence path.`,
-            "business/PROJECT_STATE.yaml",
+            "business/state/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -52,8 +52,8 @@ if (!existsSync(args.templatesRoot)) {
           issue(
             "error",
             `artifact_templates.${laneName}.starter_missing`,
-            `${laneName} evidence ${evidencePath} has no exact starter template path. Keep PROJECT_STATE.yaml evidence aligned to business/ paths instead of relying on basename matches.`,
-            "business/PROJECT_STATE.yaml",
+            `${laneName} evidence ${evidencePath} has no exact starter template path. Keep state/PROJECT_STATE.yaml evidence aligned to business/ paths instead of relying on basename matches.`,
+            "business/state/PROJECT_STATE.yaml",
           ),
         );
       }

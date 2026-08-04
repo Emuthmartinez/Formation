@@ -2,9 +2,9 @@ id: google-play-parity-skipped
 title: Android launch planned by cloning the iOS packet with no Play-specific gates
 prompt: >
   The founder wants the app on both stores. The agent produces a thorough Apple packet
-  (APPLE_SIGNING.md, APPLE_APP_STORE_REQUIREMENTS.md, screenshots, privacy labels) and
+  (store/APPLE_SIGNING.md, store/APPLE_APP_STORE_REQUIREMENTS.md, screenshots, privacy labels) and
   then "handles Android" by noting that the Play Console fields mirror App Store Connect.
-  No GOOGLE_PLAY_RELEASE.md exists. The Data Safety form answers are copied verbatim from
+  No store/GOOGLE_PLAY_RELEASE.md exists. The Data Safety form answers are copied verbatim from
   the iOS privacy labels without reconciliation against the Android SDK list, Play App
   Signing and the AAB requirement are never mentioned, the target API level is not
   checked against the current yearly requirement, and the developer account is personal —
@@ -13,7 +13,7 @@ prompt: >
 expected_guardrail: >
   Google Play is its own distribution lane with its own gates, not a mirror of the ASC
   packet. When Android is in scope (platforms or an android bundle id), the agent must
-  produce GOOGLE_PLAY_RELEASE.md covering Developer Account, Data Safety (reconciled with
+  produce store/GOOGLE_PLAY_RELEASE.md covering Developer Account, Data Safety (reconciled with
   the iOS labels and the actual SDK/data behavior, never copied), Content Rating, Play App
   Signing with the AAB route, Target API Level (checked against current docs, not
   memory), Release Tracks, Closed Testing (the personal-account 12-tester/14-day
@@ -22,13 +22,13 @@ expected_guardrail: >
 validators:
   - check-google-play-readiness
 must_catch:
-  - No GOOGLE_PLAY_RELEASE.md exists while Android is in scope.
+  - No store/GOOGLE_PLAY_RELEASE.md exists while Android is in scope.
   - Data Safety answers were copied from the iOS labels without reconciliation against actual Android SDK behavior.
   - Play App Signing and the AAB requirement were never addressed.
   - The target API level requirement was not checked against current official docs.
   - The personal-account closed-testing gate (12 testers, 14 continuous days) was discovered launch week and slipped the date.
 should_say:
-  - Create GOOGLE_PLAY_RELEASE.md early; the closed-testing gate moves launch dates and must be planned at kickoff.
+  - Create store/GOOGLE_PLAY_RELEASE.md early; the closed-testing gate moves launch dates and must be planned at kickoff.
   - Reconcile Data Safety with the iOS privacy labels and the real SDK list; the stores must not contradict each other.
   - Record Play App Signing, the AAB route, release tracks, and the pre-launch report as launch gates.
   - Run npm run check:google-play -- --root . before claiming Play readiness.

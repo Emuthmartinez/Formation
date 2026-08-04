@@ -109,7 +109,7 @@ const pairSources =
     ? args.businessDirs.map((dir) => ({
         root: dir,
         businessStatePath: resolveFrom(dir, "state/business.json"),
-        launchStatePath: resolveFrom(dir, "PROJECT_STATE.yaml"),
+        launchStatePath: resolveFrom(dir, "state/PROJECT_STATE.yaml"),
       }))
     : [{ root: args.root, businessStatePath: args.businessStatePath, launchStatePath: args.launchStatePath }];
 
@@ -195,13 +195,13 @@ function parseArgs(argv: string[]): Args {
   ]);
   const root = flagString(flags, "root") ?? process.cwd();
   const businessStatePath = flagString(flags, "businessState") ?? "state/business.json";
-  const launchStatePath = flagString(flags, "launchState") ?? "PROJECT_STATE.yaml";
+  const launchStatePath = flagString(flags, "launchState") ?? "state/PROJECT_STATE.yaml";
   const schemaPath = flagString(flags, "schema") ?? path.join(skillRoot, "state/schema/workspace.schema.json");
   const outputPath = flagString(flags, "output");
 
   // Aggregate mode: parseFlags keeps only the last value of a repeated flag,
   // so --business dirs are collected straight from argv. Each names one
-  // business workspace (containing state/business.json + PROJECT_STATE.yaml).
+  // business workspace (containing state/business.json + state/PROJECT_STATE.yaml).
   const businessDirs: string[] = [];
   for (let index = 0; index < argv.length; index += 1) {
     if (argv[index] === "--business") {
@@ -385,21 +385,21 @@ function workspaceLanes(
       id: "view.launch-cockpit",
       title: "Launch Cockpit",
       summary: `${doneCount} launch lane(s) done, ${blockedCount} blocked, ${launchLanes.length} tracked.`,
-      path: "launch-cockpit.html",
+      path: "state/launch-cockpit.html",
       status: blockedCount > 0 ? "Gate" : "Watch",
     },
     {
       id: "view.continuity",
       title: "Continuity",
       summary: nextAction,
-      path: "PROJECT_STATE.yaml",
+      path: "state/PROJECT_STATE.yaml",
       status: asBoolean(getPath(projectState, "continuity.git_status_reviewed")) ? "Ready" : "Gate",
     },
     {
       id: "view.failure-cards",
       title: "Failure Cards",
       summary: `${failureCards.length} active failure card(s) tracked for future agents.`,
-      path: "FAILURE_CARDS.md",
+      path: "operations/FAILURE_CARDS.md",
       status: failureCards.length > 0 ? "Active" : "Ready",
     },
   ];

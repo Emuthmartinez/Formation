@@ -38,7 +38,7 @@ export function discoverReferences(skillRoot: string, domains: readonly DomainDe
 }
 
 export function discoverArtifacts(skillRoot: string, lanes: readonly LaneDefinition[], domains: readonly DomainDefinition[]): ArtifactDefinition[] {
-  const statePath = path.join(skillRoot, "business", "PROJECT_STATE.yaml");
+  const statePath = path.join(skillRoot, "business", "state/PROJECT_STATE.yaml");
   const text = readFileSync(statePath, "utf8");
   const laneByKey = new Map(lanes.map((lane) => [lane.key, lane]));
   const found = new Map<string, Set<string>>();
@@ -79,14 +79,14 @@ export function discoverArtifacts(skillRoot: string, lanes: readonly LaneDefinit
   }
 
   for (const core of [
-    "PROJECT_STATE.yaml",
-    "launch-cockpit.html",
+    "state/PROJECT_STATE.yaml",
+    "state/launch-cockpit.html",
     "state/business.json",
     "state/theme.tokens.json",
-    "design-room.html",
-    "BUSINESS_ACCESS.md",
-    "AGENT_OPERATIONS.md",
-    "FAILURE_CARDS.md",
+    "design/design-room.html",
+    "operations/BUSINESS_ACCESS.md",
+    "operations/AGENT_OPERATIONS.md",
+    "operations/FAILURE_CARDS.md",
   ]) {
     if (!found.has(core)) found.set(core, new Set());
   }
@@ -107,7 +107,7 @@ export function discoverArtifacts(skillRoot: string, lanes: readonly LaneDefinit
 }
 
 export function discoverProviders(skillRoot: string, domains: readonly DomainDefinition[]): ProviderDefinition[] {
-  const text = readFileSync(path.join(skillRoot, "business", "PROJECT_STATE.yaml"), "utf8");
+  const text = readFileSync(path.join(skillRoot, "business", "state/PROJECT_STATE.yaml"), "utf8");
   const providers: ProviderDefinition[] = [];
   let inTools = false;
   let current: ProviderDefinition | undefined;

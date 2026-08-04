@@ -327,7 +327,7 @@ function isRubricLedger(value: unknown): value is RubricLedger {
  * override declared in SCREENSHOTS.md as `screenshot-rubric-scores.<name>.json`.
  */
 function findRubricLedgerPath(): string | undefined {
-  const candidates = ["screenshot-rubric-scores.json", "screenshots/screenshot-rubric-scores.json", "app-store-listing/screenshot-rubric-scores.json"];
+  const candidates = ["screenshot-rubric-scores.json", "screenshots/screenshot-rubric-scores.json", "store/app-store-listing/screenshot-rubric-scores.json"];
   return candidates.find((candidate) => existsSync(path.join(args.root, candidate)));
 }
 
@@ -522,7 +522,7 @@ function checkPngDimensions(slot: RubricSlot, storeStatus: string | undefined): 
  * or agent pastes screenshot-rubric-scores.example.json as their proof.
  * Returns true if the file should be rejected (issues already pushed).
  */
-const RUBRIC_EXAMPLE_REL_PATH = "business/app-store-listing/screenshot-rubric-scores.example.json";
+const RUBRIC_EXAMPLE_REL_PATH = "business/store/app-store-listing/screenshot-rubric-scores.example.json";
 const RUBRIC_MIN_BYTES = 200;
 
 function checkRubricLedgerNotExampleCopy(ledgerRelPath: string, ledgerRaw: string): boolean {
@@ -546,7 +546,7 @@ function checkRubricLedgerNotExampleCopy(ledgerRelPath: string, ledgerRaw: strin
   const exampleCandidates = [
     path.join(args.root, RUBRIC_EXAMPLE_REL_PATH),
     path.join(args.root, "screenshot-rubric-scores.example.json"),
-    path.join(args.root, "app-store-listing/screenshot-rubric-scores.example.json"),
+    path.join(args.root, "store/app-store-listing/screenshot-rubric-scores.example.json"),
   ];
   for (const examplePath of exampleCandidates) {
     if (!existsSync(examplePath)) {
@@ -912,14 +912,14 @@ const storeStatus = state ? asString(getPath(state, "lanes.store_console.status"
 const storeSkipped = ["not_needed", "deferred"].includes(storeStatus ?? "");
 const shouldCheck = !storeSkipped && (hasIos || hasAndroid || !state);
 
-const screenshotPacket = firstExistingText(["SCREENSHOTS.md", "screenshots/SCREENSHOTS.md", "app-store-listing/SCREENSHOTS.md"]);
-const appListing = firstExistingText(["APP_STORE_LISTING.md", "app-store-listing/APP_STORE_LISTING.md"]);
-const contentAssets = firstExistingText(["CONTENT_ASSETS.md", "content-assets/CONTENT_ASSETS.md"]);
-const screenshotHtml = existsAny(["screenshots/index.html", "screenshots/screenshots.html", "app-store-listing/screenshots.html"]);
+const screenshotPacket = firstExistingText(["SCREENSHOTS.md", "screenshots/SCREENSHOTS.md", "store/app-store-listing/SCREENSHOTS.md"]);
+const appListing = firstExistingText(["APP_STORE_LISTING.md", "store/app-store-listing/APP_STORE_LISTING.md"]);
+const contentAssets = firstExistingText(["CONTENT_ASSETS.md", "growth/content-assets/CONTENT_ASSETS.md"]);
+const screenshotHtml = existsAny(["screenshots/index.html", "screenshots/screenshots.html", "store/app-store-listing/screenshots.html"]);
 const appStoreScreenshotsStateRelPath = existsAny([
   "app-store-screenshots.json",
   "screenshots/app-store-screenshots.json",
-  "app-store-listing/app-store-screenshots.json",
+  "store/app-store-listing/app-store-screenshots.json",
 ]);
 
 if (shouldCheck && !screenshotPacket) {
@@ -943,7 +943,7 @@ if (screenshotPacket) {
     "Device Wells",
     "headline",
     "copy overlay",
-    "DESIGN.md",
+    "design/DESIGN.md",
     "11_STAR_EXPERIENCE.md",
     "MobAI",
     "Higgsfield",
@@ -961,7 +961,7 @@ if (screenshotPacket) {
     // store_screenshots.app_preview_video.missing — the only colliding pair in this list.
     // The issue message names the phrase, so a failure still says which one is absent.
     "app-preview-video",
-    "RESEARCH.md",
+    "strategy/RESEARCH.md",
     "EMOTIONAL_DESIGN.md",
     "asc-screenshot-resize",
     "asc-shots-pipeline",

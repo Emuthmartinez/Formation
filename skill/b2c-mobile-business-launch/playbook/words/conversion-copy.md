@@ -5,7 +5,7 @@ Use this before writing or editing any words a user reads. That is two jobs with
 1. **Conversion-critical words** — landing hero/subhead/CTA, App Store title/subtitle/keywords/description/promo text, paywall headline and plan copy, onboarding question and value-reveal strings, push/email subject and body, screenshot captions, and ad hooks.
 2. **Every other user-facing string in the app** — buttons, tab labels, empty states, errors, permission primes, confirmation dialogs, loading and success moments, settings, tooltips. These are where internal vocabulary leaks: a builder with no authored copy fills the screen from the spec, and the user reads the plan instead of the product.
 
-Copy is the one input shared by almost every B2C surface, so it gets a craft contract instead of being improvised per screen. The words are authored in `COPY_DECK.md` before they are typed into code; builders consume the deck, they do not invent strings.
+Copy is the one input shared by almost every B2C surface, so it gets a craft contract instead of being improvised per screen. The words are authored in `product/copy/COPY_DECK.md` before they are typed into code; builders consume the deck, they do not invent strings.
 
 This reference governs the *words*. Load [`cro-landing.md`](../growth/cro-landing.md) for landing-page *structure* (above-the-fold layout, CTA hierarchy, trust blocks, friction audit). Load [`onboarding-conversion.md`](../experience/onboarding-conversion.md) for in-app flow sequencing and paywall timing, [`aso-store-ops.md`](../store/aso-store-ops.md) and [`app-store-listing-prep.md`](../store/app-store-listing-prep.md) for store-field character limits and metadata rules, [`resend-email-ops.md`](../operations/resend-email-ops.md) for lifecycle email mechanics, [`geo-seo.md`](../growth/geo-seo.md) before editing any public page copy, and [`emotional-design-system.md`](../experience/emotional-design-system.md) when copy carries an Experience Card moment. Do not duplicate those contracts here; this file decides whether the sentence converts.
 
@@ -38,19 +38,19 @@ Refresh current craft and platform-constraint sources before locking copy:
 - Xcode String Catalogs (`.xcstrings`) for iOS string externalization: `https://developer.apple.com/documentation/xcode/localizing-and-varying-text-with-a-string-catalog`
 - Expo localization guidance (RN string externalization with `expo-localization` + i18next): `https://docs.expo.dev/guides/localization/`
 - Flutter i18n (ARB + `gen-l10n`): `https://docs.flutter.dev/ui/internationalization`
-- The project's own `RESEARCH.md` review-mining and `11_STAR_EXPERIENCE.md` north-star language as the primary voice-of-customer source (prefer real user words over invented ones)
+- The project's own `strategy/RESEARCH.md` review-mining and `11_STAR_EXPERIENCE.md` north-star language as the primary voice-of-customer source (prefer real user words over invented ones)
 - 60fps.design shot library for how premium consumer apps actually phrase these moments (see the pattern citations in App Surface Recipes)
 
 ## Required Artifacts
 
 Two artifacts, two layers:
 
-- **`COPY_BRIEF.md`** — the promise and the voice. Create or update it when a launch ships any landing page, App Store listing, paywall, lifecycle email, or onboarding copy that conversion depends on. It is the single source of truth for the product's message, so the same promise appears on every surface. Start from [`business/COPY_BRIEF.md`](../../business/COPY_BRIEF.md).
-- **`COPY_DECK.md`** — every user-facing string, authored screen by screen before the build consumes it. The deck is the bridge between the brief and the code: keys in the deck become the app's localization keys. Start from [`business/COPY_DECK.md`](../../business/COPY_DECK.md); the contract lives in The Copy Deck section below. `check:app-copy` gates it.
+- **`product/copy/COPY_BRIEF.md`** — the promise and the voice. Create or update it when a launch ships any landing page, App Store listing, paywall, lifecycle email, or onboarding copy that conversion depends on. It is the single source of truth for the product's message, so the same promise appears on every surface. Start from [`business/product/copy/COPY_BRIEF.md`](../../business/product/copy/COPY_BRIEF.md).
+- **`product/copy/COPY_DECK.md`** — every user-facing string, authored screen by screen before the build consumes it. The deck is the bridge between the brief and the code: keys in the deck become the app's localization keys. Start from [`business/product/copy/COPY_DECK.md`](../../business/product/copy/COPY_DECK.md); the contract lives in The Copy Deck section below. `check:app-copy` gates it.
 
-Load [`flow-traceability.md`](../process/flow-traceability.md) before locking copy: every headline claim must trace to evidence in `RESEARCH.md` or `11_STAR_EXPERIENCE.md`, not to taste. Load [`analytics-attribution.md`](../data/analytics-attribution.md) before naming copy-test events so variants implement the approved catalog. Load [`change-cascade.md`](../process/change-cascade.md) whenever a core promise, name, or price changes — copy lives on many surfaces and must be reconciled, not patched on one screen.
+Load [`flow-traceability.md`](../process/flow-traceability.md) before locking copy: every headline claim must trace to evidence in `strategy/RESEARCH.md` or `11_STAR_EXPERIENCE.md`, not to taste. Load [`analytics-attribution.md`](../data/analytics-attribution.md) before naming copy-test events so variants implement the approved catalog. Load [`change-cascade.md`](../process/change-cascade.md) whenever a core promise, name, or price changes — copy lives on many surfaces and must be reconciled, not patched on one screen.
 
-`COPY_BRIEF.md` must include:
+`product/copy/COPY_BRIEF.md` must include:
 - the one-sentence value proposition (the promise the whole product makes) traced to evidence
 - the message hierarchy: primary promise, 2-3 supporting benefits, the proof for each
 - voice and tone rules (3-5 lines): reading level, person/POV, words to use, words banned
@@ -62,7 +62,7 @@ Load [`flow-traceability.md`](../process/flow-traceability.md) before locking co
 
 The strongest conversion copy is not written — it is found. Mine the words real users already use:
 - pull verbatim phrases from App Store/Play reviews of the product and 2-3 competitors (their words for the problem, the relief, the objection)
-- pull from any interview notes, support threads, or social-language research already in `RESEARCH.md`
+- pull from any interview notes, support threads, or social-language research already in `strategy/RESEARCH.md`
 - cluster phrases into: the problem in their words, the desired outcome in their words, the objection/risk in their words
 - write headlines and CTAs from that bank. Mirroring the user's own language outperforms clever copy because it resolves the "this is for me" question instantly.
 
@@ -86,14 +86,14 @@ The strongest conversion copy is not written — it is found. Mine the words rea
 
 ## The Copy Deck (All User-Facing Strings)
 
-`COPY_DECK.md` carries the final words for every screen and moment, keyed so the same entry drives the code and the translations. Builders read the deck and type its strings; a builder who reaches a screen with no deck row stops and authors the row first (voice from `COPY_BRIEF.md` and `BRAND.md`), rather than improvising a label from the spec.
+`product/copy/COPY_DECK.md` carries the final words for every screen and moment, keyed so the same entry drives the code and the translations. Builders read the deck and type its strings; a builder who reaches a screen with no deck row stops and authors the row first (voice from `product/copy/COPY_BRIEF.md` and `strategy/BRAND.md`), rather than improvising a label from the spec.
 
 Deck rules:
 
 - **One row per string.** `| key | screen / moment | copy (source language) | voice notes | locale tier |`. The copy cell holds the exact words that ship. A literal pipe in copy is escaped (`\|`); a row that does not parse into five cells is an error, never a silent skip.
-- **Keys are localization keys.** Lowercase dot-namespaced (`onboarding.promise.headline`, `paywall.cta`, `errors.network.body`), and unique — string resources keep one value per key, so a duplicate silently overwrites another row's copy. The key in the deck is the key in the string resource — one name from author to translator. Where the format rejects dots in identifiers (ARB names must be Dart members for `gen-l10n`; Android `strings.xml` names), apply one mechanical, reversible transform — dots become underscores (`onboarding.promise.headline` → `onboarding_promise_headline`) — and record it in `TECH_SPEC.md`; the deck key stays canonical.
-- **Coverage is reconciled, not assumed.** Every deck-key prefix the `ONBOARDING.md` screen table names (`onboarding.promise.*`, `paywall.*`, …) must resolve to authored rows — a one-row deck wearing an authored status fails `check:app-copy`. References follow the same lowercase key shape; a mistyped reference and a screen-table row whose cells shifted are errors, not silent skips.
-- **Sections follow surfaces**, at minimum: onboarding (every screen in the `ONBOARDING.md` sequence, permission primes included), paywall, core loop, empty states, errors, settings and dialogs. Keep those canonical section headings so `check:app-copy` can hold the set; a surface this product genuinely lacks keeps its heading with one line — `Not applicable — <reason>` — instead of rows. Push and email copy live in their own artifacts (`POST_LAUNCH_OPS.md`, `EMAIL_OPS.md`) — the deck may point there, not duplicate.
+- **Keys are localization keys.** Lowercase dot-namespaced (`onboarding.promise.headline`, `paywall.cta`, `errors.network.body`), and unique — string resources keep one value per key, so a duplicate silently overwrites another row's copy. The key in the deck is the key in the string resource — one name from author to translator. Where the format rejects dots in identifiers (ARB names must be Dart members for `gen-l10n`; Android `strings.xml` names), apply one mechanical, reversible transform — dots become underscores (`onboarding.promise.headline` → `onboarding_promise_headline`) — and record it in `engineering/TECH_SPEC.md`; the deck key stays canonical.
+- **Coverage is reconciled, not assumed.** Every deck-key prefix the `product/ONBOARDING.md` screen table names (`onboarding.promise.*`, `paywall.*`, …) must resolve to authored rows — a one-row deck wearing an authored status fails `check:app-copy`. References follow the same lowercase key shape; a mistyped reference and a screen-table row whose cells shifted are errors, not silent skips.
+- **Sections follow surfaces**, at minimum: onboarding (every screen in the `product/ONBOARDING.md` sequence, permission primes included), paywall, core loop, empty states, errors, settings and dialogs. Keep those canonical section headings so `check:app-copy` can hold the set; a surface this product genuinely lacks keeps its heading with one line — `Not applicable — <reason>` — instead of rows. Push and email copy live in their own artifacts (`operations/POST_LAUNCH_OPS.md`, `growth/EMAIL_OPS.md`) — the deck may point there, not duplicate.
 - **Locale tier per row** from `LOCALIZATION_MARKET_RESEARCH.md`: `1` ships translated at launch, `2` ships source-language, `3` deferred. Tier decisions belong to that reference; the deck records them.
 - **Brand terms are declared, not smuggled.** Words the product owns that could look like violations (a coined feature name, a stylized lowercase brand) go under the deck's `**Allowed terms**` list so `check:app-copy` can tell voice from leakage.
 - **The deck is spec-blind.** Spec vocabulary, schema identifiers, lane/gate/phase words, and placeholder filler never appear in a copy cell — see Banned In App Copy. A deck cell that says "Product-specific value promise" is an unfilled deck, and `check:app-copy` fails it.
@@ -101,7 +101,7 @@ Deck rules:
 
 ## App Surface Recipes
 
-How premium consumer apps phrase these moments, mined from the 60fps.design shot library (shot slugs cited so the source stays checkable). Write to the formula, then re-voice per `COPY_BRIEF.md`.
+How premium consumer apps phrase these moments, mined from the 60fps.design shot library (shot slugs cited so the source stays checkable). Write to the formula, then re-voice per `product/copy/COPY_BRIEF.md`.
 
 - **CTA = verb + what the user gets.** "Allow Location", "Try three days for free", "Get my plan" — never "Submit", "Continue" alone when the tap has a consequence worth naming (`sesame-allow-location-permission-pulse-animation`, `whistle-value-prop-animation`).
 - **Onboarding headline claims agency for the user.** Verb + possessive: "Experiment your way" — the app adapts to them, not the reverse (`easlo-experiments-onboarding`).
@@ -112,7 +112,7 @@ How premium consumer apps phrase these moments, mined from the 60fps.design shot
 - **Destructive dialogs name the consequence on the button.** "Delete 3 entries", not "OK". The neutral option stays neutral: "Cancel", "Not now" — no shame copy, per [`ethics-guardrail.md`](../experience/ethics-guardrail.md) (`carrot-pricing`).
 - **Plan names are identities, not commodity tiers.** "Peak" / "Plus" / "The everyday package" — the user self-selects by identity, not by feature count (`alltrails-plan-selection-interaction`, `amie-pricing`).
 - **Milestones celebrate briefly, then point forward.** Big number as the hero, one forward CTA — momentum over dwelling (`duolingo-14-day-streak-goal-checkpoint-reveal-animation`).
-- **Capitalization is a consistency contract, not a universal rule.** Apple says pick title case or sentence case and hold it; Material mandates sentence case. Choose per platform convention, record the choice in `COPY_BRIEF.md`, and never mix within a surface. `check:app-copy` warns on mixing; it never hard-fails case, because the platforms genuinely disagree.
+- **Capitalization is a consistency contract, not a universal rule.** Apple says pick title case or sentence case and hold it; Material mandates sentence case. Choose per platform convention, record the choice in `product/copy/COPY_BRIEF.md`, and never mix within a surface. `check:app-copy` warns on mixing; it never hard-fails case, because the platforms genuinely disagree.
 - **Second person, present tense, one reading level.** The app talks to "you" like a person who respects your time. If a string sounds like a system explaining itself, rewrite it as a person helping.
 
 ## Banned In App Copy (Machine-Parsed)
@@ -125,13 +125,13 @@ lane, gate, phase, artifact, archetype, scaffold, prompt pack, value reveal, val
 **Placeholder shapes** (filler that means the deck row was never authored; substring, case-insensitive; `fernpath`, `wrenfeed`, `loomroom`, and `glimmerjar` are the fictional example brands in the deck template and archetype starters, so their survival means example copy shipped verbatim)
 product-specific, tbd, todo, to be filled, lorem ipsum, placeholder, insert copy, your headline here, app name here, archetype scaffold, runnable starter, customize it with the prompt, fernpath, wrenfeed, loomroom, glimmerjar
 
-Say instead: the human sentence the moment needs, authored in the deck. If a banned term is genuinely part of the product's own voice (an app about racing "lanes", say), declare it under `**Allowed terms**` in `COPY_DECK.md` with a one-line reason — the gate honors deck-local allowlists, mirroring `check:founder-copy`.
+Say instead: the human sentence the moment needs, authored in the deck. If a banned term is genuinely part of the product's own voice (an app about racing "lanes", say), declare it under `**Allowed terms**` in `product/copy/COPY_DECK.md` with a one-line reason — the gate honors deck-local allowlists, mirroring `check:founder-copy`.
 
 ## Localization Readiness
 
 Localize-ready is an engineering property decided on day one, not a retrofit. Which locales ship is [`localization-market-research.md`](../research/localization-market-research.md)'s call; this section makes the app able to ship them.
 
-- **Every user-facing string is externalized from the first commit.** iOS: String Catalogs (`.xcstrings`). Native Android: `res/values/strings.xml` with per-locale `values-*` folders. React Native/Expo: `expo-localization` + i18next resources. Flutter: ARB + `gen-l10n`. Next.js landing/web: a typed strings module or `next-intl` messages. Deck keys are the resource keys. `TECH_SPEC.md` records ONE concrete choice for the stack — leaving the template's option menu untouched fails `check:app-copy`.
+- **Every user-facing string is externalized from the first commit.** iOS: String Catalogs (`.xcstrings`). Native Android: `res/values/strings.xml` with per-locale `values-*` folders. React Native/Expo: `expo-localization` + i18next resources. Flutter: ARB + `gen-l10n`. Next.js landing/web: a typed strings module or `next-intl` messages. Deck keys are the resource keys. `engineering/TECH_SPEC.md` records ONE concrete choice for the stack — leaving the template's option menu untouched fails `check:app-copy`.
 - **No sentence assembly by concatenation.** A translated language will reorder the sentence; use full-sentence templates with named interpolations (`"You've logged {count} days"`), never `"You've logged " + count`.
 - **Plurals and gender go through ICU MessageFormat** (or the platform's plural rules: `.xcstrings` variants, ARB plurals, i18next plural keys) — English's two forms are the exception, not the rule.
 - **Dates, numbers, and prices format through locale APIs**, never hand-built strings. Paywall prices come from StoreKit/RevenueCat locale-formatted values.
@@ -142,7 +142,7 @@ Localize-ready is an engineering property decided on day one, not a retrofit. Wh
 
 ## Analytics Events
 
-When copy is under test, declare events in `ANALYTICS.md` first (do not invent here):
+When copy is under test, declare events in `analytics/ANALYTICS.md` first (do not invent here):
 - `copy_variant_viewed` (surface, variant_id)
 - `copy_cta_clicked` (surface, variant_id)
 - downstream conversion event already owned by the surface's funnel (install, trial_start, purchase)
@@ -156,20 +156,20 @@ Before copy is called ready:
 - every claim is in the claims ledger with substantiation or removed
 - headlines use voice-of-customer language, not invented jargon
 - each CTA is a single value-named verb
-- reading level and tone match the `COPY_BRIEF.md` rules
-- every screen in the build has its strings in `COPY_DECK.md` — no string invented at the keyboard
+- reading level and tone match the `product/copy/COPY_BRIEF.md` rules
+- every screen in the build has its strings in `product/copy/COPY_DECK.md` — no string invented at the keyboard
 - deck copy cells carry no banned internal vocabulary, placeholder shapes, or raw identifiers (`check:app-copy`)
 - read the deck aloud surface by surface: anything that sounds like a system explaining itself gets rewritten as a person helping
-- capitalization follows the one case system recorded in `COPY_BRIEF.md`
+- capitalization follows the one case system recorded in `product/copy/COPY_BRIEF.md`
 - store fields respect platform character limits and policy
 - public-page copy was routed through [`geo-seo.md`](../growth/geo-seo.md) before the edit
 
 ## Gates Before Handoff
 
-- `COPY_BRIEF.md` exists for any launch with a landing page, store listing, paywall, or lifecycle email — and is authored (its own status set, not the shipped template) before the design/onboarding lane is done, because the deck inherits its voice from the brief
-- `COPY_DECK.md` exists and covers every screen before the build starts; `npm run check:app-copy` passes (deck coverage, banned vocabulary, placeholder shapes, identifier shapes; live apps launched before the deck contract get warnings while their backfill is tracked)
-- the build plan names the string-externalization mechanism (Localization Readiness above) and `TECH_SPEC.md` carries it
+- `product/copy/COPY_BRIEF.md` exists for any launch with a landing page, store listing, paywall, or lifecycle email — and is authored (its own status set, not the shipped template) before the design/onboarding lane is done, because the deck inherits its voice from the brief
+- `product/copy/COPY_DECK.md` exists and covers every screen before the build starts; `npm run check:app-copy` passes (deck coverage, banned vocabulary, placeholder shapes, identifier shapes; live apps launched before the deck contract get warnings while their backfill is tracked)
+- the build plan names the string-externalization mechanism (Localization Readiness above) and `engineering/TECH_SPEC.md` carries it
 - claims ledger has no unsubstantiated quantified/comparative/health/earnings claim
 - the primary promise is reconciled across surfaces via [`change-cascade.md`](../process/change-cascade.md)
 - any copy test is registered as an experiment with a hypothesis and stop rule
-- `LAUNCH_TRACE.md` links the copy promise back to its evidence
+- `state/LAUNCH_TRACE.md` links the copy promise back to its evidence

@@ -42,17 +42,17 @@ Notification copy rules (hard rules, do not remove):
   guilt-trip follow-up, only the calm repair offer
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
 - **This prompt is the Streak / Loss Aversion card's compliance surface.** Per `ethics-guardrail.md`, the streak card is HIGH-risk and the free recovery mechanism is the required `user_control_escape_hatch` / `streak_recovery_mechanism` attestation field. Paid-only forgiveness is the named dark line for this card. Combining a streak-break notification with a spend prompt is the highest-risk pattern — never pair them.
-- **Confirmshaming and commitment-guilt copy is a dark-pattern veto.** The copy rules in the prompt are enforced by the emotional-design audit (`emotional-design-system.md`, `failure-cards.md`); review final notification strings against `BRAND.md §Voice` and the bright-line test (goal alignment, truthfulness, informed exit).
-- Timezone/DST tests are the acceptance bar — put them in `TECH_SPEC.md` and CI. A streak engine that lies after a DST shift fails the truthfulness proof.
-- Push credentials (VAPID keys / APNs / FCM) and cron secrets route via `SECRETS.md` (`secrets-management.md`); reminder email goes through `resend-email-ops.md`. Treat the reminder job as an abuse/cost surface in `SECURITY.md` (rate limits, idempotent delivery).
+- **Confirmshaming and commitment-guilt copy is a dark-pattern veto.** The copy rules in the prompt are enforced by the emotional-design audit (`emotional-design-system.md`, `failure-cards.md`); review final notification strings against `strategy/BRAND.md §Voice` and the bright-line test (goal alignment, truthfulness, informed exit).
+- Timezone/DST tests are the acceptance bar — put them in `engineering/TECH_SPEC.md` and CI. A streak engine that lies after a DST shift fails the truthfulness proof.
+- Push credentials (VAPID keys / APNs / FCM) and cron secrets route via `SECRETS.md` (`secrets-management.md`); reminder email goes through `resend-email-ops.md`. Treat the reminder job as an abuse/cost surface in `trust/SECURITY.md` (rate limits, idempotent delivery).
 - On native surfaces, local notifications replace web push and are a major reason the founder may choose native (see the lane reference); the server-side streak engine carries over unchanged.
-- Add `reminder_scheduled`, `reminder_sent`, `reminder_muted`, `streak_recovered`, `streak_freeze_applied` to `ANALYTICS.md`; pair `streak_extended` vs `streak_recovered` with the counter-metric from prompt 03's attestation.
+- Add `reminder_scheduled`, `reminder_sent`, `reminder_muted`, `streak_recovered`, `streak_freeze_applied` to `analytics/ANALYTICS.md`; pair `streak_extended` vs `streak_recovered` with the counter-metric from prompt 03's attestation.

@@ -14,14 +14,14 @@ expected_guardrail: |
     RevenueCat entitlement/offering.
   - Instruct the founder to revert the container price to Free.
   - Block store pricing readiness until a NON_CONSUMABLE IAP SKU is confirmed.
-  - Create or update the app-price-vs-iap-confusion failure card in PROJECT_STATE.yaml.
+  - Create or update the app-price-vs-iap-confusion failure card in state/PROJECT_STATE.yaml.
 validators:
   - check-store-console-packet
   - validate-project-state
 must_catch:
   - Agent must not accept the container price as proof of Lifetime paywall setup.
   - Agent must not proceed with store pricing work without confirming the container price is Free.
-  - STORE_CONSOLE.md or REVENUE_OPS.md must reference NON_CONSUMABLE when a Lifetime offer is present.
+  - store/STORE_CONSOLE.md or revenue/REVENUE_OPS.md must reference NON_CONSUMABLE when a Lifetime offer is present.
 should_say:
   - "The app container price must remain Free for subscription or IAP-based apps."
   - "A Lifetime offer requires a NON_CONSUMABLE in-app purchase product, not a paid download price."

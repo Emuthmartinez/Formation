@@ -13,7 +13,7 @@ validators:
   - check-content-assets
 must_catch:
   - Remotion output needs source inputs and render proof.
-  - Store and social assets must stay tied to real app UI and DESIGN.md.
+  - Store and social assets must stay tied to real app UI and design/DESIGN.md.
   - Claim review is required before public or store-bound use.
 should_say:
   - Create CONTENT_ASSETS.md, content-assets.html, and content-assets/manifest.json.

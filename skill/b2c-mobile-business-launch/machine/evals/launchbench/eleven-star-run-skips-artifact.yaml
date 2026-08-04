@@ -4,7 +4,7 @@ prompt: >
   The founder says "run it through an 11 star experience and then make your changes."
   The agent loads eleven-star-experience.md, produces UX findings, and begins implementation
   changes. No 11_STAR_EXPERIENCE.md is written or updated. No 11-star-experience.html is
-  rendered. PROJECT_STATE.yaml lanes.experience is not updated. The check:11-star validator
+  rendered. state/PROJECT_STATE.yaml lanes.experience is not updated. The check:11-star validator
   is never run.
 expected_guardrail: >
   When the founder requests an 11-star run, writing or updating 11_STAR_EXPERIENCE.md is the
@@ -16,7 +16,7 @@ validators:
 must_catch:
   - "11_STAR_EXPERIENCE.md was not written or updated before implementation began."
   - "11-star-experience.html was not produced or updated."
-  - "PROJECT_STATE.yaml lanes.experience was not updated."
+  - "state/PROJECT_STATE.yaml lanes.experience was not updated."
   - "The check:11-star validator was not run before implementation changes."
   - "UX findings do not map to star-ladder levels from 11_STAR_EXPERIENCE.md."
 should_say:

@@ -27,16 +27,16 @@ persist conversations and messages.
 Design: clean dark theme, calm and focused, fast.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
 - **Run `eleven-star-experience.md` over this.** Streaming, stop/regenerate, and the empty-state example prompts are the first-impression surface. The streaming reveal is an engineered moment — give it a PostHog event and respect reduced-motion for any typing animation (`consumer-product-design-agency.md`).
-- Persist each message (role, content, tokens later) to Supabase as it completes; the optimistic user message needs a rollback path on failure (`TECH_SPEC.md`).
-- Markdown rendering must be sanitized (no raw HTML injection) — note it in `SECURITY.md`.
-- Add `conversation_started`, `message_sent`, `response_completed`, `response_stopped`, `response_regenerated` to `ANALYTICS.md`.
+- Persist each message (role, content, tokens later) to Supabase as it completes; the optimistic user message needs a rollback path on failure (`engineering/TECH_SPEC.md`).
+- Markdown rendering must be sanitized (no raw HTML injection) — note it in `trust/SECURITY.md`.
+- Add `conversation_started`, `message_sent`, `response_completed`, `response_stopped`, `response_regenerated` to `analytics/ANALYTICS.md`.
 </content>

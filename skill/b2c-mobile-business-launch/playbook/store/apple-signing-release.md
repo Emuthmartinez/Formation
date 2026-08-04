@@ -47,15 +47,15 @@ Also refresh:
 - App Store Connect CLI docs and `asc --help` when using the Rork CLI route
 - XcodeBuildMCP docs and local CLI/tool help when using XcodeBuildMCP
 
-Record the docs checked date and command basis in `APPLE_SIGNING.md`, `APPLE_APP_STORE_REQUIREMENTS.md`, `STORE_CONSOLE.md`, or `PRODUCTION_READINESS.md`.
+Record the docs checked date and command basis in `store/APPLE_SIGNING.md`, `store/APPLE_APP_STORE_REQUIREMENTS.md`, `store/STORE_CONSOLE.md`, or `engineering/PRODUCTION_READINESS.md`.
 
-Also update `PROJECT_STATE.yaml` with Apple provider state: docs checked date, Apple Developer membership, Team ID, bundle ID/App ID, app record, signing strategy, certificate/profile status, privacy manifest/required-reason API status, archive/export/upload/TestFlight status, founder-only gates, and active failure cards such as `apple-signing-simulator-only`, `apple-privacy-manifest-unproven`, or `asc-name-fallback-unapproved`.
+Also update `state/PROJECT_STATE.yaml` with Apple provider state: docs checked date, Apple Developer membership, Team ID, bundle ID/App ID, app record, signing strategy, certificate/profile status, privacy manifest/required-reason API status, archive/export/upload/TestFlight status, founder-only gates, and active failure cards such as `apple-signing-simulator-only`, `apple-privacy-manifest-unproven`, or `asc-name-fallback-unapproved`.
 
 ## Naming And Identifier Contract
 
 Separate flexible names from platform identity:
 
-- `DESIGN.md` and lowercase `design.md` are repo-local conventions. Renaming them will not break the mobile binary unless code or tooling references the files, but it will break this skill's routing, app-local agents, validation prompts, and handoff expectations unless every reference is updated.
+- `design/DESIGN.md` and lowercase `design.md` are repo-local conventions. Renaming them will not break the mobile binary unless code or tooling references the files, but it will break this skill's routing, app-local agents, validation prompts, and handoff expectations unless every reference is updated.
 - App display name is more flexible. Apple allows editing before review and later with a new version or when the app version status permits it.
 - `Bundle ID` is platform identity. It must match the Xcode target bundle identifier and cannot be changed in App Store Connect after a build is uploaded.
 - `SKU` is internal App Store Connect tracking identity and cannot be changed after the app is added to the account.
@@ -139,10 +139,10 @@ Name-collision handling:
 - If App Store Connect reports the app name already in use, do not let the CLI invent and apply a public fallback name without approval.
 - First check whether the name is already used by another app in the same account/localization. If so, the founder can rename the existing app version or remove the old app record if appropriate.
 - If another developer is using the name and the founder has trademark rights, record the Apple support/trademark claim route instead of choosing a weaker name in the moment.
-- If the founder approves a fallback, update `BRAND.md`, `LAUNCH.md`, `STORE_CONSOLE.md`, screenshots, website metadata, RevenueCat/store-product notes, and ASO keywords so the public name does not drift.
-- Add or resolve the `asc-name-fallback-unapproved` failure card in `PROJECT_STATE.yaml` before continuing.
+- If the founder approves a fallback, update `strategy/BRAND.md`, `LAUNCH.md`, `store/STORE_CONSOLE.md`, screenshots, website metadata, RevenueCat/store-product notes, and ASO keywords so the public name does not drift.
+- Add or resolve the `asc-name-fallback-unapproved` failure card in `state/PROJECT_STATE.yaml` before continuing.
 
-`STORE_CONSOLE.md` should include a filled app-record table before creation:
+`store/STORE_CONSOLE.md` should include a filled app-record table before creation:
 
 ```text
 Field: Platforms
@@ -153,7 +153,7 @@ Founder approval: required if adding non-iOS platforms
 
 Field: Name
 Recommended value: <exact app name>
-Why: Matches BRAND.md and ASO plan.
+Why: Matches strategy/BRAND.md and ASO plan.
 Editable/sticky: editable before review and in later version windows, but public/ASO-sensitive.
 Fallback if unavailable: <approved alternatives or blocked>
 
@@ -242,7 +242,7 @@ Creation order for a new iOS app is usually:
 6. Archive, sign/export or upload.
 7. Wait for build processing, then attach build to version/TestFlight.
 
-Before step 6 is treated as ready, `APPLE_APP_STORE_REQUIREMENTS.md` should pass the installed `check:apple-requirements` validator or record the exact blocker. App Store Connect upload warnings about invalid privacy manifests or SDK requirements are release blockers, not post-submit cleanup.
+Before step 6 is treated as ready, `store/APPLE_APP_STORE_REQUIREMENTS.md` should pass the installed `check:apple-requirements` validator or record the exact blocker. App Store Connect upload warnings about invalid privacy manifests or SDK requirements are release blockers, not post-submit cleanup.
 
 Do not mutate steps 2-4 without founder approval.
 
@@ -278,7 +278,7 @@ Use when local Mac does not have distribution signing or the team prefers CI.
 
 ## Pre-Archive/Export/Upload Preflight Checklist
 
-Run every item below and record pass/fail in `APPLE_SIGNING.md` before archiving, exporting, or uploading. A single unresolved failure blocks upload. Do not skip this checklist on re-archive cycles.
+Run every item below and record pass/fail in `store/APPLE_SIGNING.md` before archiving, exporting, or uploading. A single unresolved failure blocks upload. Do not skip this checklist on re-archive cycles.
 
 ### 1. SDK Keys Injected Into Info.plist
 
@@ -381,7 +381,7 @@ Screenshot dimension preflight: pass (<device> native: <WxH>) | BLOCKED — <dev
 
 ### 5. Preflight Sign-Off
 
-Record all four checks in `APPLE_SIGNING.md` before archiving:
+Record all four checks in `store/APPLE_SIGNING.md` before archiving:
 
 ```text
 Pre-archive/export/upload preflight (YYYY-MM-DD):
@@ -398,12 +398,12 @@ Do not begin `xcodebuild archive` until all items are `pass` or `ready`. A block
 
 Before upload:
 
-- Pre-archive/export/upload preflight checklist above is fully signed off in `APPLE_SIGNING.md`.
+- Pre-archive/export/upload preflight checklist above is fully signed off in `store/APPLE_SIGNING.md`.
 - Release build settings show correct `PRODUCT_BUNDLE_IDENTIFIER`, `DEVELOPMENT_TEAM`, `MARKETING_VERSION`, and `CURRENT_PROJECT_VERSION`.
 - App icons, launch screen, supported destinations, category, privacy manifest, Info.plist, URL schemes, entitlements, associated domains, push, and IAP capabilities are accounted for.
 - App record and explicit App ID exist in the same Apple team.
 - Distribution signing path is chosen and proven or explicitly blocked.
-- Privacy, terms, support URL, account deletion, export compliance, age rating, and review notes are drafted in `STORE_CONSOLE.md`.
+- Privacy, terms, support URL, account deletion, export compliance, age rating, and review notes are drafted in `store/STORE_CONSOLE.md`.
 
 Archive/upload evidence can include:
 
@@ -440,11 +440,11 @@ Safe without new approval when credentials are already configured and the user a
 - local build setting inventory
 - local signing identity inventory without exporting keys
 - validation, doctor, and dry-run commands
-- draft `APPLE_SIGNING.md`, `STORE_CONSOLE.md`, `store-console.html`, and blocker lists
+- draft `store/APPLE_SIGNING.md`, `store/STORE_CONSOLE.md`, `store/store-console.html`, and blocker lists
 
 ## Required Artifacts
 
-Create `APPLE_SIGNING.md` whenever Apple distribution is in scope. It should include:
+Create `store/APPLE_SIGNING.md` whenever Apple distribution is in scope. It should include:
 
 - official Apple docs checked with dates and URLs
 - account membership, role, Team ID, seller/developer name, and agreement status
@@ -457,21 +457,21 @@ Create `APPLE_SIGNING.md` whenever Apple distribution is in scope. It should inc
 - exact founder-only gates
 - command/tool evidence and output paths
 - secret-management route for signing/API material
-- matching `PROJECT_STATE.yaml` `apple_signing` lane status, provider state, and active/resolved failure cards
+- matching `state/PROJECT_STATE.yaml` `apple_signing` lane status, provider state, and active/resolved failure cards
 
 Update:
 
-- `STORE_CONSOLE.md` with app record, build, privacy, review, and upload blockers
-- `PRODUCTION_READINESS.md` with archive/export/upload proof or blocker
+- `store/STORE_CONSOLE.md` with app record, build, privacy, review, and upload blockers
+- `engineering/PRODUCTION_READINESS.md` with archive/export/upload proof or blocker
 - `SECRETS.md` for ASC API keys, Transporter/API issuer IDs, `.p8`, `.p12`, provisioning profiles, CI signing secrets, webhooks, and store credentials
-- `REVENUE_OPS.md` when App Store products or RevenueCat mappings depend on the app record/bundle ID
-- `launch-cockpit.html` after signing or app-record state changes
+- `revenue/REVENUE_OPS.md` when App Store products or RevenueCat mappings depend on the app record/bundle ID
+- `state/launch-cockpit.html` after signing or app-record state changes
 
 Run `npm run check:apple-signing -- --root .` or the installed-skill equivalent when the artifact exists and the repo uses the bundled validators.
 
 ## Common Failure Modes
 
-- Skipping the pre-archive/export/upload preflight checklist and discovering broken configuration only after upload — causes extra full archive/export/upload cycles. Add or activate the `apple-pre-upload-preflight-skipped` failure card in `PROJECT_STATE.yaml` and run `npm run check:apple-signing -- --root .` before each upload attempt.
+- Skipping the pre-archive/export/upload preflight checklist and discovering broken configuration only after upload — causes extra full archive/export/upload cycles. Add or activate the `apple-pre-upload-preflight-skipped` failure card in `state/PROJECT_STATE.yaml` and run `npm run check:apple-signing -- --root .` before each upload attempt.
 - Treating `xcodebuild` simulator success, or an in-app simulator run, as proof the app can be uploaded. The easier the simulator run is to reach, the easier this mistake is to make.
 - `DEVELOPMENT_TEAM` is blank but the agent claims signing is configured.
 - Only an `Apple Development` identity exists locally, but the agent claims App Store distribution is ready.
@@ -483,4 +483,4 @@ Run `npm run check:apple-signing -- --root .` or the installed-skill equivalent 
 - Committing `.p8`, `.p12`, provisioning profiles, export passwords, or App Store Connect API credentials.
 - Renaming the bundle ID after RevenueCat, push, OAuth redirects, associated domains, app groups, or App Store products already depend on it.
 - App privacy, export compliance, age rating, screenshots, review notes, accessibility labels, or subscription products are incomplete even though the binary uploaded.
-- `PROJECT_STATE.yaml` says Apple signing is done while archive/export/upload/TestFlight proof is still missing or blocked.
+- `state/PROJECT_STATE.yaml` says Apple signing is done while archive/export/upload/TestFlight proof is still missing or blocked.

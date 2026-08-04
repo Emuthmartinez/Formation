@@ -28,7 +28,7 @@ export function register(h: Harness): void {
   };
 
   const appendWeeklyLogRow = (root: string, options: { daysAgo: number; crashFree?: string; d7?: string; notes?: string }): void => {
-    const runbookPath = path.join(root, "POST_LAUNCH_OPS.md");
+    const runbookPath = path.join(root, "operations/POST_LAUNCH_OPS.md");
     const header = "| Date | Crash-free % | New reviews (avg rating) | D7 retention | Decision shipped | Notes |\n| --- | --- | --- | --- | --- | --- |";
     const row = `| ${isoDaysAgo(options.daysAgo)} | ${options.crashFree ?? "99.7%"} | 4.8 (3 new) | ${options.d7 ?? "31%"} | shipped paywall copy fix | ${options.notes ?? "MRR $412 (+3%)"} |`;
     writeFileSync(path.join(runbookPath), readFileSync(runbookPath, "utf8").replace(header, `${header}\n${row}`), "utf8");
@@ -39,7 +39,7 @@ export function register(h: Harness): void {
     checkpoint: "Day 30" | "Day 90",
     options: { daysAgo: number; verdict: string; evidence?: [string, string, string, string] },
   ): void => {
-    const retroPath = path.join(root, "LAUNCH_RETRO.md");
+    const retroPath = path.join(root, "operations/LAUNCH_RETRO.md");
     const ev = options.evidence ?? ["$412 MRR, flat 4 wks", "D7 31% → 29% → 31%", "n/a — organic only", "6"];
     const retro = readFileSync(retroPath, "utf8")
       .replace(`| ${checkpoint} | | |`, `| ${checkpoint} | ${isoDaysAgo(options.daysAgo)} | founder |`)
@@ -53,7 +53,7 @@ export function register(h: Harness): void {
     expectRecord(state.project, "project")["phase"] = "phase_6b";
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchComplete, state);
     setPostLaunchLive(postLaunchComplete, 10);
   }
@@ -66,7 +66,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchNoLiveDate);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchNoLiveDate, state);
   }
   runFixture("post-launch done without a live_since date fails", postLaunchNoLiveDate, "check-post-launch-ops.ts", 1, "post_launch_ops.live_since_missing");
@@ -78,7 +78,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchBadLiveDate);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["live_since"] = "2026-99-99";
     writeState(postLaunchBadLiveDate, state);
   }
@@ -90,7 +90,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchFutureLiveDate);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["live_since"] = isoDaysAgo(-30);
     writeState(postLaunchFutureLiveDate, state);
   }
@@ -120,7 +120,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchNoRunbook);
     expectRecord(state.project, "project")["phase"] = "phase_6";
     writeState(postLaunchNoRunbook, state);
-    rmSync(path.join(postLaunchNoRunbook, "POST_LAUNCH_OPS.md"));
+    rmSync(path.join(postLaunchNoRunbook, "operations/POST_LAUNCH_OPS.md"));
   }
   runFixture("post-launch phase without runbook fails", postLaunchNoRunbook, "check-post-launch-ops.ts", 1, "post_launch_ops.runbook_missing");
 
@@ -129,10 +129,10 @@ export function register(h: Harness): void {
     const state = readState(postLaunchNoRetro);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md"];
     writeState(postLaunchNoRetro, state);
     setPostLaunchLive(postLaunchNoRetro, 10);
-    rmSync(path.join(postLaunchNoRetro, "LAUNCH_RETRO.md"));
+    rmSync(path.join(postLaunchNoRetro, "operations/LAUNCH_RETRO.md"));
   }
   runFixture("post-launch done without launch retro fails", postLaunchNoRetro, "check-post-launch-ops.ts", 1, "post_launch_ops.launch_retro_missing");
 
@@ -143,11 +143,11 @@ export function register(h: Harness): void {
     const state = readState(postLaunchNoVerdict);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchNoVerdict, state);
     setPostLaunchLive(postLaunchNoVerdict, 10);
     writeFileSync(
-      path.join(postLaunchNoVerdict, "LAUNCH_RETRO.md"),
+      path.join(postLaunchNoVerdict, "operations/LAUNCH_RETRO.md"),
       ["# Launch Retro", "", "## Lane Usage", "", "## Stalls And Blockers", "", "## Surprises", "", "## Failure Card Candidates"].join("\n"),
       "utf8",
     );
@@ -167,11 +167,11 @@ export function register(h: Harness): void {
     const state = readState(postLaunchProsePhrase);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchProsePhrase, state);
     setPostLaunchLive(postLaunchProsePhrase, 10);
     writeFileSync(
-      path.join(postLaunchProsePhrase, "LAUNCH_RETRO.md"),
+      path.join(postLaunchProsePhrase, "operations/LAUNCH_RETRO.md"),
       ["# Launch Retro", "", "## Surprises", "", "We should think about kill, hold, or scale at some point.", "", "## Failure Card Candidates"].join("\n"),
       "utf8",
     );
@@ -192,7 +192,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchVerdictEmpty);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchVerdictEmpty, state);
     setPostLaunchLive(postLaunchVerdictEmpty, 40);
     appendWeeklyLogRow(postLaunchVerdictEmpty, { daysAgo: 3 });
@@ -211,7 +211,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchVerdictNoState);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchVerdictNoState, state);
     setPostLaunchLive(postLaunchVerdictNoState, 40);
     appendWeeklyLogRow(postLaunchVerdictNoState, { daysAgo: 3 });
@@ -230,7 +230,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchVerdictComplete);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "hold";
     lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
     writeState(postLaunchVerdictComplete, state);
@@ -250,16 +250,16 @@ export function register(h: Harness): void {
     const state = readState(postLaunchVerdictNoEvidence);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "hold";
     lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
     writeState(postLaunchVerdictNoEvidence, state);
     setPostLaunchLive(postLaunchVerdictNoEvidence, 40);
     appendWeeklyLogRow(postLaunchVerdictNoEvidence, { daysAgo: 3 });
-    const retro = readFileSync(path.join(postLaunchVerdictNoEvidence, "LAUNCH_RETRO.md"), "utf8")
+    const retro = readFileSync(path.join(postLaunchVerdictNoEvidence, "operations/LAUNCH_RETRO.md"), "utf8")
       .replace("| Day 30 | | |", `| Day 30 | ${isoDaysAgo(8)} | founder |`)
       .replace("| Day 30 | | | | | | |", "| Day 30 | | | | | Hold | |");
-    writeFileSync(path.join(postLaunchVerdictNoEvidence, "LAUNCH_RETRO.md"), retro, "utf8");
+    writeFileSync(path.join(postLaunchVerdictNoEvidence, "operations/LAUNCH_RETRO.md"), retro, "utf8");
   }
   runFixture(
     "verdict recorded without the evidence pack fails",
@@ -276,7 +276,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchEvidencePlaceholder);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "hold";
     lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
     writeState(postLaunchEvidencePlaceholder, state);
@@ -302,7 +302,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchVerdictMismatch);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "scale";
     lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
     writeState(postLaunchVerdictMismatch, state);
@@ -326,7 +326,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchDay30Overdue);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchDay30Overdue, state);
     setPostLaunchLive(postLaunchDay30Overdue, 45);
     appendWeeklyLogRow(postLaunchDay30Overdue, { daysAgo: 3 });
@@ -345,7 +345,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchWeeklyMissing);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchWeeklyMissing, state);
     setPostLaunchLive(postLaunchWeeklyMissing, 20);
   }
@@ -362,7 +362,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchWeeklyStale);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "hold";
     lane["kill_or_scale_decided_at"] = isoDaysAgo(10);
     writeState(postLaunchWeeklyStale, state);
@@ -383,7 +383,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchWeeklyPlaceholder);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchWeeklyPlaceholder, state);
     setPostLaunchLive(postLaunchWeeklyPlaceholder, 20);
     appendWeeklyLogRow(postLaunchWeeklyPlaceholder, { daysAgo: 2, crashFree: "unverified", d7: "looks fine" });
@@ -397,11 +397,11 @@ export function register(h: Harness): void {
     const state = readState(postLaunchPrelaunchDate);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchPrelaunchDate, state);
     setPostLaunchLive(postLaunchPrelaunchDate, 45);
     appendWeeklyLogRow(postLaunchPrelaunchDate, { daysAgo: 3 });
-    const retroPath = path.join(postLaunchPrelaunchDate, "LAUNCH_RETRO.md");
+    const retroPath = path.join(postLaunchPrelaunchDate, "operations/LAUNCH_RETRO.md");
     writeFileSync(retroPath, readFileSync(retroPath, "utf8").replace("| Day 30 | | |", `| Day 30 | ${isoDaysAgo(60)} | founder |`), "utf8");
   }
   runFixture(
@@ -418,7 +418,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchKillHoursAdjective);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "kill";
     lane["kill_or_scale_decided_at"] = isoDaysAgo(25);
     writeState(postLaunchKillHoursAdjective, state);
@@ -444,7 +444,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchBogusBlocker);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchBogusBlocker, state);
     setPostLaunchLive(postLaunchBogusBlocker, 20);
     appendWeeklyLogRow(postLaunchBogusBlocker, { daysAgo: 2, crashFree: "blocked: Sentry auth 2026-99-99" });
@@ -465,7 +465,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchKillAdjectives);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "kill";
     lane["kill_or_scale_decided_at"] = isoDaysAgo(25);
     writeState(postLaunchKillAdjectives, state);
@@ -491,7 +491,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchWrongMoney);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchWrongMoney, state);
     setPostLaunchLive(postLaunchWrongMoney, 20);
     appendWeeklyLogRow(postLaunchWrongMoney, { daysAgo: 2, notes: "ad spend $500 this week" });
@@ -506,7 +506,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchKillStringOnly);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "kill";
     writeState(postLaunchKillStringOnly, state);
     setPostLaunchLive(postLaunchKillStringOnly, 20);
@@ -532,7 +532,7 @@ export function register(h: Harness): void {
     lane["kill_or_scale_decided_at"] = isoDaysAgo(10);
     writeState(postLaunchKillNoCheckpoint, state);
     setPostLaunchLive(postLaunchKillNoCheckpoint, 120);
-    const retroPath = path.join(postLaunchKillNoCheckpoint, "LAUNCH_RETRO.md");
+    const retroPath = path.join(postLaunchKillNoCheckpoint, "operations/LAUNCH_RETRO.md");
     const retro = readFileSync(retroPath, "utf8").replace(
       "| Day 90 | | | | | | |",
       "| Day 90 | $60 MRR declining | D30 under 5% | n/a — organic only | 8 | Kill | |",
@@ -557,7 +557,7 @@ export function register(h: Harness): void {
     writeState(postLaunchCheckpointTbd, state);
     setPostLaunchLive(postLaunchCheckpointTbd, 45);
     appendWeeklyLogRow(postLaunchCheckpointTbd, { daysAgo: 3 });
-    const retroPath = path.join(postLaunchCheckpointTbd, "LAUNCH_RETRO.md");
+    const retroPath = path.join(postLaunchCheckpointTbd, "operations/LAUNCH_RETRO.md");
     writeFileSync(retroPath, readFileSync(retroPath, "utf8").replace("| Day 30 | | |", "| Day 30 | TBD | founder |"), "utf8");
   }
   runFixture(
@@ -574,7 +574,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchWeeklyFutureRow);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "hold";
     lane["kill_or_scale_decided_at"] = isoDaysAgo(8);
     writeState(postLaunchWeeklyFutureRow, state);
@@ -605,7 +605,7 @@ export function register(h: Harness): void {
     writeState(postLaunchPhaseEmptyVerdict, state);
     setPostLaunchLive(postLaunchPhaseEmptyVerdict, 45);
     appendWeeklyLogRow(postLaunchPhaseEmptyVerdict, { daysAgo: 3 });
-    const retroPath = path.join(postLaunchPhaseEmptyVerdict, "LAUNCH_RETRO.md");
+    const retroPath = path.join(postLaunchPhaseEmptyVerdict, "operations/LAUNCH_RETRO.md");
     writeFileSync(retroPath, readFileSync(retroPath, "utf8").replace("| Day 30 | | |", `| Day 30 | ${isoDaysAgo(10)} | founder |`), "utf8");
   }
   runFixture(
@@ -622,7 +622,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchWeeklyNoRevenue);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchWeeklyNoRevenue, state);
     setPostLaunchLive(postLaunchWeeklyNoRevenue, 20);
     appendWeeklyLogRow(postLaunchWeeklyNoRevenue, { daysAgo: 2, notes: "quiet week" });
@@ -641,7 +641,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchWeeklyAdjective);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchWeeklyAdjective, state);
     setPostLaunchLive(postLaunchWeeklyAdjective, 20);
     appendWeeklyLogRow(postLaunchWeeklyAdjective, { daysAgo: 2, crashFree: "iOS 17 looks fine", d7: "D7 looks fine 4 sure" });
@@ -661,7 +661,7 @@ export function register(h: Harness): void {
     const state = readState(postLaunchKilledQuiet);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     lane["kill_or_scale_decision"] = "kill";
     lane["kill_or_scale_decided_at"] = isoDaysAgo(25);
     writeState(postLaunchKilledQuiet, state);
@@ -688,7 +688,7 @@ export function register(h: Harness): void {
   // Once the registry exists it must carry the whole board, not just app rows.
   const portfolioThin = makeEmptyFixture("portfolio-registry-thin");
   writeFileSync(
-    path.join(portfolioThin, "PORTFOLIO_REGISTRY.md"),
+    path.join(portfolioThin, "strategy/PORTFOLIO_REGISTRY.md"),
     ["# Portfolio Registry", "", "## Businesses", "", "| Business | Repo | Stage |", "| --- | --- | --- |", "| Ocho | ~/code/rork-ocho | live |"].join("\n"),
     "utf8",
   );
@@ -705,7 +705,7 @@ export function register(h: Harness): void {
   // stays inert through its _example:_ row, exercised by the audit-plan step.
   const portfolioBlank = makeEmptyFixture("portfolio-registry-blank-board");
   writeFileSync(
-    path.join(portfolioBlank, "PORTFOLIO_REGISTRY.md"),
+    path.join(portfolioBlank, "strategy/PORTFOLIO_REGISTRY.md"),
     [
       "# Portfolio Registry",
       "",
@@ -739,9 +739,9 @@ export function register(h: Harness): void {
   );
 
   const portfolioFilled = makeEmptyFixture("portfolio-registry-filled");
-  const shippedPortfolio = readFileSync(path.join(skillRoot, "business", "PORTFOLIO_REGISTRY.md"), "utf8");
+  const shippedPortfolio = readFileSync(path.join(skillRoot, "business", "strategy/PORTFOLIO_REGISTRY.md"), "utf8");
   writeFileSync(
-    path.join(portfolioFilled, "PORTFOLIO_REGISTRY.md"),
+    path.join(portfolioFilled, "strategy/PORTFOLIO_REGISTRY.md"),
     shippedPortfolio.replace(
       /\| _example: Ocho_[^\n]*\n/,
       "| Ocho | ~/code/rork-ocho | 2026-05-29 | live | $180 flat | hold (2026-06-28) | 8 | day-90 retro |\n",
@@ -755,11 +755,11 @@ export function register(h: Harness): void {
     const state = readState(postLaunchThin);
     const lane = getLane(state, "post_launch_ops");
     lane["status"] = "done";
-    lane["evidence"] = ["POST_LAUNCH_OPS.md", "LAUNCH_RETRO.md"];
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchThin, state);
     setPostLaunchLive(postLaunchThin, 10);
     writeFileSync(
-      path.join(postLaunchThin, "POST_LAUNCH_OPS.md"),
+      path.join(postLaunchThin, "operations/POST_LAUNCH_OPS.md"),
       ["# Post-Launch Operations", "We will check Sentry sometimes and reply to reviews when there is time."].join("\n"),
       "utf8",
     );
@@ -775,7 +775,7 @@ export function register(h: Harness): void {
     expectRecord(project["bundle_ids"], "bundle_ids")["android"] = "com.example.app";
     const lane = getLane(state, "store_console");
     lane["status"] = storeStatus;
-    lane["evidence"] = ["STORE_CONSOLE.md", "GOOGLE_PLAY_RELEASE.md"];
+    lane["evidence"] = ["store/STORE_CONSOLE.md", "store/GOOGLE_PLAY_RELEASE.md"];
     writeState(root, state);
   }
 
@@ -785,17 +785,17 @@ export function register(h: Harness): void {
 
   const playMissing = makeFixture("google-play-missing");
   setAndroidStore(playMissing, "done");
-  rmSync(path.join(playMissing, "GOOGLE_PLAY_RELEASE.md"));
+  rmSync(path.join(playMissing, "store/GOOGLE_PLAY_RELEASE.md"));
   runFixture("android store done without play packet fails", playMissing, "check-google-play-readiness.ts", 1, "google_play.packet_missing");
 
   const playIosOnly = makeFixture("google-play-ios-only");
-  rmSync(path.join(playIosOnly, "GOOGLE_PLAY_RELEASE.md"));
+  rmSync(path.join(playIosOnly, "store/GOOGLE_PLAY_RELEASE.md"));
   runFixture("ios-only project skips google play check", playIosOnly, "check-google-play-readiness.ts", 0);
 
   const playUnreconciled = makeFixture("google-play-unreconciled");
   setAndroidStore(playUnreconciled, "done");
   writeFileSync(
-    path.join(playUnreconciled, "GOOGLE_PLAY_RELEASE.md"),
+    path.join(playUnreconciled, "store/GOOGLE_PLAY_RELEASE.md"),
     [
       "# Google Play Release",
       "## Developer Account",
@@ -831,7 +831,7 @@ export function register(h: Harness): void {
     const state = readState(root);
     const lane = getLane(state, "engineering");
     lane["status"] = "done";
-    lane["evidence"] = ["TECH_SPEC.md", "ENGINEERING_PLAN.md", "PRODUCTION_READINESS.md"];
+    lane["evidence"] = ["engineering/TECH_SPEC.md", "engineering/ENGINEERING_PLAN.md", "engineering/PRODUCTION_READINESS.md"];
     writeState(root, state);
   }
 
@@ -842,22 +842,22 @@ export function register(h: Harness): void {
   const backendNoSection = makeFixture("backend-contract-no-section");
   setEngineeringDone(backendNoSection);
   writeFileSync(
-    path.join(backendNoSection, "TECH_SPEC.md"),
-    ["# Tech Spec", "Implementation contracts are traced from LAUNCH_TRACE.md; schema lives wherever the builder put it."].join("\n"),
+    path.join(backendNoSection, "engineering/TECH_SPEC.md"),
+    ["# Tech Spec", "Implementation contracts are traced from state/LAUNCH_TRACE.md; schema lives wherever the builder put it."].join("\n"),
     "utf8",
   );
   runFixture("engineering done without data contract section fails", backendNoSection, "check-backend-data-contract.ts", 1, "backend_contract.section_missing");
 
   const backendNoSpec = makeFixture("backend-contract-no-spec");
   setEngineeringDone(backendNoSpec);
-  rmSync(path.join(backendNoSpec, "TECH_SPEC.md"));
+  rmSync(path.join(backendNoSpec, "engineering/TECH_SPEC.md"));
   runFixture("engineering done without tech spec fails", backendNoSpec, "check-backend-data-contract.ts", 1, "backend_contract.tech_spec_missing");
 
   // Words-vs-work grounding: naming RLS in prose is not tested authorization.
   const backendUntestedAuth = makeFixture("backend-contract-untested-auth");
   setEngineeringDone(backendUntestedAuth);
   writeFileSync(
-    path.join(backendUntestedAuth, "TECH_SPEC.md"),
+    path.join(backendUntestedAuth, "engineering/TECH_SPEC.md"),
     [
       "# Tech Spec",
       "## Data Contract",
@@ -883,7 +883,7 @@ export function register(h: Harness): void {
   const backendUngroundedAuth = makeFixture("backend-contract-ungrounded-auth");
   setEngineeringDone(backendUngroundedAuth);
   writeFileSync(
-    path.join(backendUngroundedAuth, "TECH_SPEC.md"),
+    path.join(backendUngroundedAuth, "engineering/TECH_SPEC.md"),
     [
       "# Tech Spec",
       "## Data Contract",
@@ -911,7 +911,7 @@ export function register(h: Harness): void {
   const backendNumberedHeading = makeFixture("backend-contract-numbered-heading");
   setEngineeringDone(backendNumberedHeading);
   writeFileSync(
-    path.join(backendNumberedHeading, "TECH_SPEC.md"),
+    path.join(backendNumberedHeading, "engineering/TECH_SPEC.md"),
     [
       "# Tech Spec",
       "## Data Contract",
@@ -962,7 +962,7 @@ export function register(h: Harness): void {
   writeCompleteCompoundEngineering(ceFallbackWithLoop);
   setCeUnavailable(ceFallbackWithLoop);
   writeFileSync(
-    path.join(ceFallbackWithLoop, "ENGINEERING_PLAN.md"),
+    path.join(ceFallbackWithLoop, "engineering/ENGINEERING_PLAN.md"),
     [
       "# Engineering Plan",
       "Compound Engineering: unavailable in this runtime; ce-plan and ce-work are replaced by the Standalone Engineering Loop with the same evidence bar.",
@@ -979,7 +979,7 @@ export function register(h: Harness): void {
     const state = readState(root);
     const lane = getLane(state, "email");
     lane["status"] = "done";
-    lane["evidence"] = ["EMAIL_OPS.md"];
+    lane["evidence"] = ["growth/EMAIL_OPS.md"];
     writeState(root, state);
     mkdirSync(path.join(root, "proof"), { recursive: true });
     for (const proof of ["email-domain-verified.txt", "email-spf-dkim-pass.txt", "email-test-send-log.txt"]) {
@@ -991,7 +991,7 @@ export function register(h: Harness): void {
       "utf8",
     );
     // Populate the sender map / domain rows the template ships as placeholders.
-    const emailOpsPath = path.join(root, "EMAIL_OPS.md");
+    const emailOpsPath = path.join(root, "growth/EMAIL_OPS.md");
     const emailOps = readFileSync(emailOpsPath, "utf8")
       .replaceAll("<!-- e.g. hello@mail.example.com -->", "hello@mail.example.com")
       .replaceAll("<!-- e.g. support@example.com -->", "support@example.com")
@@ -1006,22 +1006,22 @@ export function register(h: Harness): void {
   const emailDoneUnbranded = makeFixture("email-done-unbranded");
   setEmailDone(emailDoneUnbranded);
   {
-    const emailOpsPath = path.join(emailDoneUnbranded, "EMAIL_OPS.md");
-    writeFileSync(emailOpsPath, readFileSync(emailOpsPath, "utf8").replaceAll("DESIGN.md", "the design doc"), "utf8");
+    const emailOpsPath = path.join(emailDoneUnbranded, "growth/EMAIL_OPS.md");
+    writeFileSync(emailOpsPath, readFileSync(emailOpsPath, "utf8").replaceAll("design/DESIGN.md", "the design doc"), "utf8");
   }
-  runFixture("email lane done without DESIGN.md brand tokens fails", emailDoneUnbranded, "check-email.ts", 1, "email.brand_tokens_missing");
+  runFixture("email lane done without design/DESIGN.md brand tokens fails", emailDoneUnbranded, "check-email.ts", 1, "email.brand_tokens_missing");
 
   const emailDoneNoDns = makeFixture("email-done-no-dns");
   setEmailDone(emailDoneNoDns);
   writeFileSync(
-    path.join(emailDoneNoDns, "EMAIL_OPS.md"),
+    path.join(emailDoneNoDns, "growth/EMAIL_OPS.md"),
     [
       "# Email Ops",
       "Sender map:",
       "| Email | From address | Template | Unsubscribe required |",
       "| --- | --- | --- | --- |",
       "| welcome | hello@mail.example.com | resend/email-templates.ts `welcomeEmail` | no (transactional) |",
-      "Brand tokens pulled from DESIGN.md per email-templates.ts.",
+      "Brand tokens pulled from design/DESIGN.md per email-templates.ts.",
     ].join("\n"),
     "utf8",
   );
@@ -1051,11 +1051,11 @@ export function register(h: Harness): void {
     "analytics_catalog.invented_share_event.uncataloged",
   );
 
-  // REVENUE_OPS.md is a surface doc too: a billing/cancellation event named
+  // revenue/REVENUE_OPS.md is a surface doc too: a billing/cancellation event named
   // there without a catalog row is the same invented-inline miss.
   const catalogRevenueDrift = makeFixture("analytics-catalog-revenue-drift");
   setAnalyticsDone(catalogRevenueDrift);
-  appendFileSync(path.join(catalogRevenueDrift, "REVENUE_OPS.md"), "\n- `invented_billing_event`\n", "utf8");
+  appendFileSync(path.join(catalogRevenueDrift, "revenue/REVENUE_OPS.md"), "\n- `invented_billing_event`\n", "utf8");
   runFixture(
     "analytics done with an uncataloged revenue-doc event fails",
     catalogRevenueDrift,
@@ -1073,7 +1073,7 @@ export function register(h: Harness): void {
     getLane(state, "revenue")["status"] = "done";
     writeState(catalogRevenueDoneDrift, state);
   }
-  appendFileSync(path.join(catalogRevenueDoneDrift, "REVENUE_OPS.md"), "\n- `invented_billing_event`\n", "utf8");
+  appendFileSync(path.join(catalogRevenueDoneDrift, "revenue/REVENUE_OPS.md"), "\n- `invented_billing_event`\n", "utf8");
   runFixture(
     "done revenue lane with an uncataloged revenue-doc event fails even while analytics is partial",
     catalogRevenueDoneDrift,

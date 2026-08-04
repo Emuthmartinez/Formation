@@ -1,6 +1,6 @@
 /**
  * app-copy-rules.ts — the machine-readable form of playbook/words/conversion-copy.md
- * §Banned In App Copy, plus the COPY_DECK.md table reader.
+ * §Banned In App Copy, plus the product/copy/COPY_DECK.md table reader.
  *
  * The rule lists are PARSED OUT OF THE REFERENCE rather than duplicated here, the
  * same contract check-no-slop holds with no-slop-writing.md: the reference is the
@@ -99,7 +99,7 @@ function splitRow(line: string): string[] {
 }
 
 /**
- * Reads every string-table row out of a COPY_DECK.md. Header rows (first cell
+ * Reads every string-table row out of a product/copy/COPY_DECK.md. Header rows (first cell
  * "Key") and separator rows are skipped; a well-formed row has exactly 5 cells,
  * and every deck table is a string table, so anything else pipe-shaped is
  * reported as malformed rather than silently ignored.
@@ -154,7 +154,7 @@ export function parseDeck(rawDeckText: string): ParsedDeck {
 
 /**
  * Backticked deck-key references in guidance cells, e.g. `onboarding.promise.*`
- * or `paywall.cta` — the ONBOARDING.md screen table names its strings this way.
+ * or `paywall.cta` — the product/ONBOARDING.md screen table names its strings this way.
  * Returned as prefixes (the trailing .* stripped) so coverage can be reconciled
  * against the authored deck's actual keys.
  */
@@ -266,7 +266,7 @@ export interface CopyColumn {
 
 /**
  * Extracts the Copy-column cells from any markdown table whose third column
- * header starts with "Copy" — the ONBOARDING.md screen-sequence shape. Returns
+ * header starts with "Copy" — the product/ONBOARDING.md screen-sequence shape. Returns
  * each cell with its 1-indexed line, plus every body row whose cell count
  * breaks the header's column count (an unescaped pipe or missing cell moves
  * text out of the scanned column).
@@ -345,10 +345,10 @@ export function identifierShapes(text: string, options: { stripInlineCode?: bool
  * One negation lexicon for every affirmative-route check: the engineering
  * plan's deck route, the runnable prompt fence's deck route, and the
  * TECH_SPEC mechanism clause all reject a line that negates its own subject
- * ("Do not use COPY_DECK.md", "Mechanism: don't use i18next"). One shared
+ * ("Do not use product/copy/COPY_DECK.md", "Mechanism: don't use i18next"). One shared
  * list, so a form added for one check can never lag the others. Bare
  * "no"/"not"/"none" stay out — they appear inside legitimate affirmative
- * lines ("typed from COPY_DECK.md, not the spec"); the mechanism check adds
+ * lines ("typed from product/copy/COPY_DECK.md, not the spec"); the mechanism check adds
  * them separately because its scope is a single clause, not a whole line.
  */
 const NEGATION_FORMS = [

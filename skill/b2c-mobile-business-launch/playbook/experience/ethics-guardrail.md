@@ -264,7 +264,7 @@ any mechanism in the risk table must satisfy all fields in this contract.
 ### Required Card Attestation Block
 
 Every applied card must include an attestation block in the artifact doc
-(`ONBOARDING.md`, `11_STAR_EXPERIENCE.md`, `SPEC.md`, or a dedicated `ETHICS.md`).
+(`product/ONBOARDING.md`, `11_STAR_EXPERIENCE.md`, `product/SPEC.md`, or a dedicated `ETHICS.md`).
 The validator checks for these stable phrase keys.
 
 ```yaml
@@ -274,7 +274,7 @@ experience_card:
   mechanism: "variable_reward"                  # must match mechanism column in risk table
   applied_to: "post-session result reveal"      # screen/moment where the card fires
   star_level: "7"                               # 11-star ladder level this elevates
-  posthog_event: "variable_reward_triggered"    # named PostHog event (from ANALYTICS.md)
+  posthog_event: "variable_reward_triggered"    # named PostHog event (from analytics/ANALYTICS.md)
   bright_line: >
     The result reveal varies in quality and surprise to keep the user curious about
     their own progress. The user always knows what metric they are working toward.
@@ -319,12 +319,12 @@ All codes are emitted by `gates/experience/check-emotional-design.ts` with the p
 | `intent_mirror_free_text_unsanitized` | warning | An intent mirror reflects free-text user input with no `free_text_sanitization` approach. |
 | `endowed_progress_unsourced` | warning | An endowed-progress card lacks `progress_sourcing_attestation`. |
 | `rating_prompt_missing_platform_api_used` | error | A rating-prompt card does not name the native StoreKit / Play In-App Review API. |
-| `fake_scarcity_phrase` / `fake_social_proof_phrase` | error | Live copy (EMOTIONAL_DESIGN.md, EMOTIONAL_AUDIT.md, ONBOARDING.md, SPEC.md, APP_STORE_LISTING.md) contains scarcity/social-proof copy with no attested scarcity/social-proof card block in EMOTIONAL_DESIGN.md. |
+| `fake_scarcity_phrase` / `fake_social_proof_phrase` | error | Live copy (EMOTIONAL_DESIGN.md, EMOTIONAL_AUDIT.md, product/ONBOARDING.md, product/SPEC.md, APP_STORE_LISTING.md) contains scarcity/social-proof copy with no attested scarcity/social-proof card block in EMOTIONAL_DESIGN.md. |
 | `confirmshaming_phrase` / `commitment_guilt_phrase` | error | Live copy contains a confirmshaming opt-out label or commitment-guilt copy (e.g. "are you sure you want to cancel", "remember why you started"). |
 | `spend_prompt_after_reward` | error | Live copy co-locates a spend prompt with a streak/reward moment and no adjacent separation statement (separate screen / one interaction between). Prohibition 4 below is non-negotiable, so the gate blocks instead of advising. |
 | `risk_tier_conflict` / `risk_tier_duplicate_row` / `risk_tier_mismatch` / `risk_tier_unrecognized` / `risk_tier_unmapped_card` / `risk_tier_index_missing_card` / `risk_table_unparsed` / `card_index_unparsed` / `risk_table_malformed_row` | error | The §3 risk table or the routing index carries two rows for one mechanism (disagreeing tiers, agreeing duplicates, or a bucket/explicit contradiction — one tier per mechanism, one routing row per card), the `experience-cards.md` index Risk column disagrees with the §3 tier for a card, an index card resolves to no §3 row at all (deliberately unmapped cards excepted), a canonical §3 deck mechanism has no index routing row (table-only mechanisms excepted), a tier cell is not LOW/MEDIUM/HIGH or an ascending range (ranges span their intermediate tiers), a table-shaped line fails to parse as a row, or either table stops parsing. |
-| `children_unreviewed` | error (under-13, the COPPA boundary) / warning (13–17) | The audience includes minors and no COPPA / UK AADC review is documented in `ETHICS.md`, `PRIVACY.md`, or `PRIVACY_POLICY.md`. |
-| `contract_missing` / `section_<name>_missing` / `ref_<file>_missing` / `no_card_blocks` / `html_missing` / `placeholder_complete` | error | EMOTIONAL_DESIGN.md is missing, lacks a required section, omits a required cross-reference (11_STAR_EXPERIENCE.md / ANALYTICS.md / DESIGN.md / ONBOARDING.md), has no card blocks, has no rendered board, or still has placeholder language while the lane is `done`. The required **Ethics Attestation** section is what satisfies the centralized-attestation rule — no separate `ETHICS.md` is required. |
+| `children_unreviewed` | error (under-13, the COPPA boundary) / warning (13–17) | The audience includes minors and no COPPA / UK AADC review is documented in `ETHICS.md`, `trust/PRIVACY.md`, or `PRIVACY_POLICY.md`. |
+| `contract_missing` / `section_<name>_missing` / `ref_<file>_missing` / `no_card_blocks` / `html_missing` / `placeholder_complete` | error | EMOTIONAL_DESIGN.md is missing, lacks a required section, omits a required cross-reference (11_STAR_EXPERIENCE.md / analytics/ANALYTICS.md / design/DESIGN.md / product/ONBOARDING.md), has no card blocks, has no rendered board, or still has placeholder language while the lane is `done`. The required **Ethics Attestation** section is what satisfies the centralized-attestation rule — no separate `ETHICS.md` is required. |
 
 ### Non-Negotiable Prohibitions (Automatic Compliance Veto)
 
@@ -362,7 +362,7 @@ severity: "critical"
 owner: "product-lead"
 status: "open"
 evidence:
-  - "ONBOARDING.md or SPEC.md — section containing the claim"
+  - "product/ONBOARDING.md or product/SPEC.md — section containing the claim"
 impact: >
   Fake scarcity claims violate FTC Click-to-Cancel/deceptive-design enforcement,
   EU Omnibus Directive unfair commercial practices, and Apple §2.3 Accurate Metadata.
@@ -380,7 +380,7 @@ severity: "high"
 owner: "product-lead"
 status: "open"
 evidence:
-  - "ONBOARDING.md — opt-out copy"
+  - "product/ONBOARDING.md — opt-out copy"
 impact: >
   Confirmshaming is a named dark pattern under EU DSA Art. 25 and FTC deceptive-design
   enforcement. Apple §4.0 (manipulative patterns) is grounds for rejection.
@@ -396,7 +396,7 @@ severity: "critical"
 owner: "engineering-lead"
 status: "open"
 evidence:
-  - "ONBOARDING.md or SPEC.md — streak-break screen spec"
+  - "product/ONBOARDING.md or product/SPEC.md — streak-break screen spec"
 impact: >
   Combining loss-aversion grief with a spend prompt is the highest-risk dark pattern in
   habit/fitness apps. Violates Apple §4.0 (exploit emotions). FTC enforcement target.
@@ -447,9 +447,9 @@ Before any emotionally persuasive mechanism ships:
 - [ ] No confirmshaming copy in any opt-out label.
 - [ ] No fake scarcity phrases without backend enforcement.
 - [ ] No spend prompt on the same screen as a streak-loss or variable-reward reveal.
-- [ ] Every emotional moment emits a named PostHog event from `ANALYTICS.md`.
+- [ ] Every emotional moment emits a named PostHog event from `analytics/ANALYTICS.md`.
 - [ ] Every motion-bearing delight moment has a prefers-reduced-motion / OS reduce-motion
       fallback declared.
 - [ ] App targets under-18 audience: COPPA and UK Children's Code review noted in `ETHICS.md`
-      or `PRIVACY.md`.
+      or `trust/PRIVACY.md`.
 - [ ] `npm run check:emotional-design -- --root .` passes with zero errors.

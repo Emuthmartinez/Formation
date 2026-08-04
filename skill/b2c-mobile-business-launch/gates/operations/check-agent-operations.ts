@@ -20,29 +20,43 @@ const loaded = loadProjectState(args);
 const issues: Issue[] = [...loaded.issues];
 const state = loaded.state;
 const stateOps = state ? getPath(state, "agent_operations") : undefined;
-const human = readText(args.root, "AGENT_OPERATIONS.md");
-const cockpit = readText(args.root, "launch-cockpit.html");
+const human = readText(args.root, "operations/AGENT_OPERATIONS.md");
+const cockpit = readText(args.root, "state/launch-cockpit.html");
 const ledgerPath = path.join(args.root, "operations", "agent-operations.json");
 const schemaPath = path.join(args.root, "operations", "agent-operations.schema.json");
 
 if (!isRecord(stateOps)) {
   issues.push(
-    issue("error", "agent_operations.state_missing", "PROJECT_STATE.yaml must include the cross-cutting agent_operations state block.", "PROJECT_STATE.yaml"),
+    issue(
+      "error",
+      "agent_operations.state_missing",
+      "state/PROJECT_STATE.yaml must include the cross-cutting agent_operations state block.",
+      "state/PROJECT_STATE.yaml",
+    ),
   );
 } else {
-  requireStatePath(stateOps, "human_log", "AGENT_OPERATIONS.md");
+  requireStatePath(stateOps, "human_log", "operations/AGENT_OPERATIONS.md");
   requireStatePath(stateOps, "structured_ledger", "operations/agent-operations.json");
 }
 
 if (!human) {
-  issues.push(issue("error", "agent_operations.human_log_missing", "Seed AGENT_OPERATIONS.md from the skill template.", "AGENT_OPERATIONS.md"));
+  issues.push(
+    issue("error", "agent_operations.human_log_missing", "Seed operations/AGENT_OPERATIONS.md from the skill template.", "operations/AGENT_OPERATIONS.md"),
+  );
 } else {
   for (const phrase of ["Capability Summary", "Approval Envelopes", "Action Ledger", "Research And Media Provenance", "Safety Invariants"]) {
     if (!human.toLowerCase().includes(phrase.toLowerCase())) {
-      issues.push(issue("error", `agent_operations.human_log.${code(phrase)}_missing`, `AGENT_OPERATIONS.md must include ${phrase}.`, "AGENT_OPERATIONS.md"));
+      issues.push(
+        issue(
+          "error",
+          `agent_operations.human_log.${code(phrase)}_missing`,
+          `operations/AGENT_OPERATIONS.md must include ${phrase}.`,
+          "operations/AGENT_OPERATIONS.md",
+        ),
+      );
     }
   }
-  scanForSecrets(human, "AGENT_OPERATIONS.md");
+  scanForSecrets(human, "operations/AGENT_OPERATIONS.md");
 }
 
 if (!existsSync(ledgerPath)) {
@@ -98,7 +112,7 @@ reportAndExit("Agent operations check", issues);
 function requireStatePath(record: Record<string, unknown>, key: string, expected: string): void {
   const value = asString(record[key]);
   if (value !== expected) {
-    issues.push(issue("error", `agent_operations.state_${key}_invalid`, `agent_operations.${key} must be ${expected}.`, "PROJECT_STATE.yaml"));
+    issues.push(issue("error", `agent_operations.state_${key}_invalid`, `agent_operations.${key} must be ${expected}.`, "state/PROJECT_STATE.yaml"));
   }
 }
 
@@ -284,7 +298,7 @@ function validateAction(
         issue(
           "error",
           `${prefix}.reconciliation_missing`,
-          "Succeeded external mutation must reconcile PROJECT_STATE.yaml, canonical docs, PROVIDER_PROOF.md, and launch-cockpit.html with a timestamp.",
+          "Succeeded external mutation must reconcile state/PROJECT_STATE.yaml, canonical docs, operations/PROVIDER_PROOF.md, and state/launch-cockpit.html with a timestamp.",
           file,
         ),
       );
@@ -518,7 +532,7 @@ function validateApprovalUsage(approvals: Record<string, unknown>[], usage: Map<
 
 function validateCrossArtifactState(value: Record<string, unknown>, actions: Record<string, unknown>[], approvals: Record<string, unknown>[]): void {
   if (!isRecord(stateOps)) return;
-  const file = "PROJECT_STATE.yaml";
+  const file = "state/PROJECT_STATE.yaml";
   const activeApprovalIds = approvals
     .filter((entry) => entry.status === "active")
     .map((entry) => asString(entry.id))
@@ -552,10 +566,24 @@ function validateCrossArtifactState(value: Record<string, unknown>, actions: Rec
     );
   }
   if (!human?.includes(actionId) || !human.toLowerCase().includes(asString(result.status)?.toLowerCase() ?? "")) {
-    issues.push(issue("error", "agent_operations.human_log_stale", "AGENT_OPERATIONS.md must record the latest action ID and result.", "AGENT_OPERATIONS.md"));
+    issues.push(
+      issue(
+        "error",
+        "agent_operations.human_log_stale",
+        "operations/AGENT_OPERATIONS.md must record the latest action ID and result.",
+        "operations/AGENT_OPERATIONS.md",
+      ),
+    );
   }
   if (!new RegExp(`Status:\\s*${escapeRegex(asString(value.status) ?? "")}`, "i").test(human ?? "")) {
-    issues.push(issue("error", "agent_operations.human_status_stale", "AGENT_OPERATIONS.md status must match the structured ledger.", "AGENT_OPERATIONS.md"));
+    issues.push(
+      issue(
+        "error",
+        "agent_operations.human_status_stale",
+        "operations/AGENT_OPERATIONS.md status must match the structured ledger.",
+        "operations/AGENT_OPERATIONS.md",
+      ),
+    );
   }
   // Agent bookkeeping now lives behind the cockpit's collapsed technical-details block
   // under a plainer heading. Renaming it here and in render-launch-cockpit.ts must stay
@@ -568,7 +596,12 @@ function validateCrossArtifactState(value: Record<string, unknown>, actions: Rec
     !cockpitOps.includes(`State reconciled: ${String(succeededRisky)}`)
   ) {
     issues.push(
-      issue("error", "agent_operations.cockpit_stale", "launch-cockpit.html must mirror the latest action and reconciliation truth.", "launch-cockpit.html"),
+      issue(
+        "error",
+        "agent_operations.cockpit_stale",
+        "state/launch-cockpit.html must mirror the latest action and reconciliation truth.",
+        "state/launch-cockpit.html",
+      ),
     );
   }
   if (succeededRisky) {
@@ -577,7 +610,7 @@ function validateCrossArtifactState(value: Record<string, unknown>, actions: Rec
       ...asArray(reconciliation.canonicalDocs)
         .map(asString)
         .filter((value): value is string => Boolean(value)),
-      "PROVIDER_PROOF.md",
+      "operations/PROVIDER_PROOF.md",
     ]) {
       const content = readText(args.root, doc);
       if (!content?.includes(actionId)) {

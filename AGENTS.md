@@ -1,186 +1,82 @@
-# AGENTS.md
+# Repository Agent Guide
 
-This repo maintains the `b2c-mobile-business-launch` skill: source skill files, references, templates, validators, LaunchBench evals, package metadata, and installed runtime sync.
+This repository maintains the `b2c-mobile-business-launch` skill. These instructions govern the skill source repository, not app repositories created by the skill. Generated businesses receive their own app-specific entrypoints from `business/engineering/repo-agent-entrypoints/`.
 
-This file is for maintaining this skill repo itself. Do not copy these instructions into a launched business or generated app repo. Business repos created through the skill must get their own product-specific `AGENTS.md` and `CLAUDE.md` from the shipped templates, filled with the current app, stack, launch state, and source-of-truth docs.
+## Read order
 
-New contributor (human or agent)? Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the CI gate, and PR expectations; this file is the deeper maintainer reference behind it.
+1. `README.md` for product scope
+2. `docs/architecture.md` for system boundaries
+3. `skill/b2c-mobile-business-launch/SKILL.md` for runtime contracts
+4. the owning layer README and directly relevant files
 
-Structural work follows [`docs/architecture.md`](docs/architecture.md), the target layout every reorganization moves toward. Where the current directory shape and that document disagree, the document wins and the layout is what changes — do not shape a refactor around what today's structure or a validator currently expects.
+## Layer ownership
 
-## Repo Map
+| Layer | Owns | May depend on | Must not own |
+| --- | --- | --- | --- |
+| `graph/` | stable identities, contracts, dependencies, resources, gates, context packs, and compilation semantics | typed definitions | mutable business state or policy prose |
+| `playbook/` | bounded business and implementation knowledge | official sources and graph IDs | scheduling or generated business artifacts |
+| `business/` | reusable business-instance artifacts copied into app repositories | graph-bound paths and templates | skill policy or execution topology |
+| `gates/` | deterministic business-artifact acceptance | business contracts and shared libraries | orchestration policy |
+| `machine/` | skill integrity, package parity, source freshness, version discipline, and context budgets | repository source | business-instance decisions |
+| `scripts/` | renderers, runners, probes, migrations, and shared executable utilities | graph, gates, machine, and source artifacts | durable policy that cannot be tested |
+| `state/` and `render/` | skill-owned Design Room seed state and rendering implementation | design contracts | launch-instance canonical state |
+| `starters/` | product-archetype overlays and runnable scaffolds | stable graph and business contracts | alternate orchestration systems |
+| `docs/` | current architecture, implementation, validation, contribution, and dated history | source truth above | competing contracts |
 
-- `README.md`: public overview. Keep it short and route depth elsewhere; the full command and gate reference lives in `docs/validators.md`.
-- `docs/architecture.md`: the target layout. `docs/validators.md`: every validator, renderer, and eval command with what it checks — add a row here when you add a gate.
-- `docs/method/`: how the skill's own workflow loops were designed and dry-run. `docs/prototypes/`: standalone HTML proofs and the fixtures they read, kept out of the shipped skill because nothing loads them at launch time.
-- `docs/history/`: point-in-time records — dated audits and finished work prompts. Nothing here is current, and nothing links to it from `README.md`, because a dated document reachable from the front door reads as live. Name the file `<topic>-<YYYY-MM>-v<version-it-describes>.md` and open it with a blockquote banner saying what it described, when, and what has since shipped. **Move a work prompt here the moment its work merges.** A finished prompt left in `docs/brainstorms/` is worse than a deleted one: the next session greps for open work, finds a confident step list, and re-does it. `docs/brainstorms/` is for ideas still being weighed; nothing in it should assert repo state.
-- `CONTRIBUTING.md`, `.github/CODE_OF_CONDUCT.md`, `.github/SECURITY.md`, `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`: contributor-facing surfaces. `.github/SECURITY.md` covers this repo's validators, workflows, and dependency chain, and is a different document from the shipped `business/SECURITY.md` security release plan.
-- `skill/b2c-mobile-business-launch/SKILL.md`: skill entrypoint and progressive-disclosure routing.
-- `skill/b2c-mobile-business-launch/skill-version.json`: installed-runtime freshness manifest.
-- `skill/b2c-mobile-business-launch/graph/`: canonical typed definitions for business areas, domains, workflows, context packs, phases, lanes, artifacts, gates, operators, and providers. Generated projections live under `graph/generated/`; edit definitions and run `render:skill-graph`, never edit projections directly.
-- `skill/b2c-mobile-business-launch/playbook/`: agent knowledge grouped by area of the business, one folder per domain with its own `README.md` index. `process/` is sequencing and proving a launch; `orchestration/` is driving the work (state, autonomy, subagents, workflows, engineering routing).
-- `skill/b2c-mobile-business-launch/state/`: Design Room seed state, theme tokens, and JSON schema.
-- `skill/b2c-mobile-business-launch/render/`: React/Vite Design Room renderer; `scripts/render-design-room.ts` also writes the static fallback.
-- `skill/b2c-mobile-business-launch/business/`: reusable launch artifacts copied into app repos.
-- `skill/b2c-mobile-business-launch/starters/`: per-product-shape packs (`social-network`, `ai-chat-companion`, `habit-tracker`, `photo-ai-media`) — each a lane-routed prompt pack plus a runnable `starter/` scaffold, enforced by `check-app-archetype` and `check-archetype-starter`.
-- `skill/b2c-mobile-business-launch/business/repo-agent-entrypoints/`: business-repo `AGENTS.md` and `CLAUDE.md` templates that keep future agents on the launch skill workflow.
-- `skill/b2c-mobile-business-launch/gates/`: the deterministic validators that grade a business launch, mirroring the `playbook/` domains (`gates/store/`, `gates/money/`, …). Cross-cutting launch-method gates live in `gates/process/`.
-- `skill/b2c-mobile-business-launch/machine/`: what grades the skill itself — package parity, skill versioning, version discipline, the source registry, reference byte budgets, and the `SKILL.md` autopilot contract.
-- `skill/b2c-mobile-business-launch/scripts/`: everything executable that is not a gate — renderers, runners, probes, seeds, the LaunchBench harness, and the shared `lib/`.
-- `skill/b2c-mobile-business-launch/evals/launchbench/`: known failure-mode scenarios.
-- `skill/b2c-mobile-business-launch/agents/openai.yaml`: UI metadata.
-- `scripts/sync-skill-runtime.sh`: maintainer-only installed-runtime sync (`npm run sync:runtime`); see [Runtime Sync](#runtime-sync).
+Dependencies point downward from runtime orchestration into bounded knowledge and artifacts, then into deterministic proof. Filesystem proximity never creates an execution edge.
 
-## First Reads
+## Business workspace
 
-1. `README.md`
-2. `skill/b2c-mobile-business-launch/SKILL.md`
-3. Any directly relevant reference under `skill/b2c-mobile-business-launch/playbook/`
-4. The script/template/eval files you will change
+`skill/b2c-mobile-business-launch/business/` is organized by capability: `state`, `strategy`, `product`, `design`, `engineering`, `analytics`, `growth`, `revenue`, `store`, `trust`, and `operations`. Add artifacts to the capability that owns the business decision and evidence. Update graph bindings, validators, fixtures, renderers, and documentation in the same change.
 
-Use the skill-creator guidance when changing skill structure, trigger text, references, bundled scripts, or validation behavior.
+`business/state/PROJECT_STATE.yaml` is mutable business-instance state. It does not duplicate the definition graph. Parallel workers never write it directly; they return proposed patches to the orchestrator-owned reducer.
 
-Use Compound Engineering for non-trivial repo maintenance: check CE freshness (`ce-update` or latest-release fallback), use `ce-plan` or `ce-brainstorm` when scope or product/engineering direction is ambiguous, execute bounded work with `ce-work`, route isolated lanes through `ce-worktree` when useful, and finish behavior changes with CE review/test/proof skills where applicable. If CE is unavailable, record the fallback reason in the work summary and keep validator/eval coverage as the readiness gate.
+## Authored and generated boundaries
 
-When changing generated business-repo guidance, edit the shipped templates and validators under `skill/b2c-mobile-business-launch/` first; only update this root file for repo-maintenance practices.
+- Edit graph definitions, not `graph/generated/`.
+- Edit source Markdown or JSON, not rendered HTML, unless the HTML is explicitly authored.
+- Every generated file must declare or have an obvious owning renderer and a freshness check.
+- Stable graph IDs survive path moves. Paths are bindings, not identity.
 
-## Agent Legibility
+## Change contract
 
-Keep this file as a concise map, not a duplicate manual. Put durable semantic relationships in `graph/`, detailed launch policy in `playbook/`, reusable generated output in `business/`, and deterministic enforcement in `gates/` (or `machine/`, when the thing being graded is the skill itself) plus LaunchBench. When an agent miss repeats, add or tighten a validator/eval instead of relying on a longer reminder.
+A structural or behavioral change is incomplete until it updates all affected layers: source definition, business artifact, validator, fixture or LaunchBench scenario, generated projection, version manifest, and current documentation. Archive completed plans under `docs/history/`; do not leave shipped work in `docs/brainstorms/`.
 
-`graph/` is the semantic source of truth; the filesystem and generated routing blocks are projections. Paths may change, but stable graph IDs must not. `PROJECT_STATE.yaml` holds mutable business-instance state and must not become a second copy of the definition graph.
-
-`SKILL.md` is a **router, not a manual** — it loads on every trigger, so its job is the always-on contracts plus one Lane Routing index (route here when / load / produce / gate). Detail belongs in the reference the row points at. `check:reference-size` holds a 45KB entrypoint budget on freeze-and-subtract terms: a new lane row is paid for by compressing or relocating existing entrypoint text, never by raising the ceiling. Do not reintroduce a second enumeration of the same routing (the old "Start Here" narrative and "When To Load References" list said the same thing twice and drifted).
-
-## Founder-Facing Copy
-
-Internal vocabulary is for agents and validators, never for founders. `scripts/lib/founder-copy.ts` is the only sanctioned path from machine state to founder-visible text; every founder-facing renderer imports from it. Adding a lane, status, phase, autonomy mode, or provider route means adding its label there **in the same commit** — `check:founder-copy` proves coverage and fails the build when a raw identifier, phase code, status enum, or banned internal word reaches a founder-visible surface. When a founder-visible heading is renamed, grep the whole skill tree for the literal heading rather than one directory: `gates/operations/check-founder-operator-bootstrap.ts` and `gates/operations/check-agent-operations.ts` both split the rendered cockpit on a literal `<h2>` string, so the rename and the validator update are one commit or the audit breaks. Scoping that grep to a single directory is how the rename silently misses a gate — these two have already moved once.
-
-Writing quality is enforced, not advised. `playbook/words/no-slop-writing.md` holds the banned words, named slop patterns, and per-channel limits for everything this skill writes and everything it generates for a launched business; the rules are adapted from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) (MIT). `check:no-slop` **parses its rule table out of that reference** rather than duplicating it, so edit the reference and the gate follows. It errors on shipped copy surfaces, errors on this repo's own public docs (`README.md`, `CONTRIBUTING.md`, `.github/SECURITY.md`, `.github/CODE_OF_CONDUCT.md`, scanned via `--repo-root`), warns on guidance prose and on `AGENTS.md`/`CLAUDE.md`, and it deliberately does not enforce the judgment-dependent rules — turning "cut the adverb when it adds nothing" into a regex would flatten brand voice, which is the failure the source skill warns about.
+When a failure can recur, strengthen a type, validator, fixture, or eval instead of adding another reminder.
 
 ## Commands
 
-From repo root:
+From repository root:
 
 ```bash
 npm install
 npm run audit
+npm run audit:ci
 npm run launchbench
-npm run test:validators
-npm run check:source-registry
 npm run check:skill-graph
 npm run render:skill-graph -- --check
-npm run check:agent-entrypoints
-npm run check:founder-operator -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:workflow-adherence
-npm run check:skill-version -- --source skill/b2c-mobile-business-launch --installed skill/b2c-mobile-business-launch
 npm run check:version-discipline -- --repo-root . --skill-root skill/b2c-mobile-business-launch
-npm run check:artifact-templates -- --skill-root skill/b2c-mobile-business-launch
-npm run check:agent-evals
-npm run check:compound-engineering -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:control-plane -- --root skill/b2c-mobile-business-launch/business
-npm run check:business-control-plane-workspace
-npm run check:provider-proof -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:agent-operations -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:asc-command-contract -- --skill-root skill/b2c-mobile-business-launch
-npm run check:mobai-proof -- --skill-root skill/b2c-mobile-business-launch --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:token-promotion -- --root skill/b2c-mobile-business-launch/business
-npm run check:template-safety
-npm run check:founder-copy -- --root skill/b2c-mobile-business-launch/business --skill-root skill/b2c-mobile-business-launch
-npm run check:no-slop -- --root skill/b2c-mobile-business-launch/business --skill-root skill/b2c-mobile-business-launch
-npm run check:app-copy -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml --skill-root skill/b2c-mobile-business-launch
-npm run check:onboarding -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:post-launch -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:google-play -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:backend-contract -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:analytics-catalog -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml
-npm run check:change-cascade -- --root skill/b2c-mobile-business-launch/business --state PROJECT_STATE.yaml --skill-root skill/b2c-mobile-business-launch
-npm run check:app-archetype -- --skill-root skill/b2c-mobile-business-launch
-npm run check:archetype-starter -- --skill-root skill/b2c-mobile-business-launch
-npm run check:reference-size -- --skill-root skill/b2c-mobile-business-launch
-npm run evals:behavioral -- --list
 npm pack --dry-run --json
 ```
 
-Runtime copy:
+Use `npm run audit -- --list` and `docs/validators.md` for the full gate inventory.
 
-```bash
-repo_root="$PWD"
+## Runtime sync
 
-rsync -a --delete --exclude node_modules \
-  "$repo_root/skill/b2c-mobile-business-launch/" \
-  ~/.codex/skills/b2c-mobile-business-launch/
+Edit repository source first. On the maintainer machine only, `npm run sync:runtime` mirrors the source skill into `~/.codex/skills/b2c-mobile-business-launch`, audits it, verifies parity, and checks Claude, Agents, and Cursor symlinks. In CI, cloud sessions, or clones without that installed runtime, skip sync and use `npm run audit:ci`.
 
-(
-  cd ~/.codex/skills/b2c-mobile-business-launch
-  npm install
-  npm run audit
-  npm pack --dry-run --json
-)
+## Safety and authority
 
-diff -qr --exclude node_modules \
-  "$repo_root/skill/b2c-mobile-business-launch" \
-  ~/.codex/skills/b2c-mobile-business-launch
+Subagents may inspect and mutate bounded disjoint scopes. The orchestrator owns integration, git, canonical state, shared provider changes, public actions, spend, destructive actions, and release. Never commit secrets or credentials. Refresh official documentation or local CLI help before changing fast-moving provider commands.
 
-ls -ld ~/.codex/skills/b2c-mobile-business-launch \
-  ~/.claude/skills/b2c-mobile-business-launch \
-  ~/.agents/skills/b2c-mobile-business-launch \
-  ~/.cursor/skills/b2c-mobile-business-launch
-```
+## Maintainer compatibility contract
+
+This file is for maintaining this skill repo itself. Do not copy these instructions into a launched business or generated app repo. Keep it a concise map; mechanical behavior belongs in a validator/eval.
 
 ## Runtime Sync
 
-Edit the repo source first. Runtime sync applies only on the maintainer machine, where `~/.codex/skills/b2c-mobile-business-launch` exists: before claiming the skill is installed there, mirror the current checkout's `skill/b2c-mobile-business-launch/` into `~/.codex/skills/b2c-mobile-business-launch/`, run the runtime audit there, and verify the consumer symlinks (`~/.claude/skills/b2c-mobile-business-launch`, `~/.agents/skills/b2c-mobile-business-launch`, and `~/.cursor/skills/b2c-mobile-business-launch` all point to the Codex runtime copy). Cursor's own built-in skills live in `~/.cursor/skills-cursor`, which is vendor-owned and must never be synced into. In clones, CI, or cloud sessions without that installed copy, do not attempt runtime sync; `npm run audit:ci` is the readiness gate.
-
-`scripts/sync-skill-runtime.sh` performs that whole sequence and is the preferred way to run it:
-
-```bash
-npm run sync:runtime                # pull main, audit source, mirror, audit runtime, prove parity + symlinks
-npm run sync:runtime -- --dry-run   # preview the mirror without mutating anything
-npm run sync:runtime -- --bootstrap  # create the runtime when this machine has none yet
-```
-
-It exits 0 with an explanatory message on machines with no installed runtime, refuses to sync from a non-`main` branch or a dirty tree without an explicit choice, fails on post-sync drift, and fails if a consumer path is a real directory instead of a symlink (that copy would silently keep serving stale content).
-
-**When the runtime goes missing.** Deleting `~/.codex/skills/<skill>` leaves `~/.claude/skills/<skill>`, `~/.agents/skills/<skill>`, and `~/.cursor/skills/<skill>` as *dangling* symlinks: every one of those tools keeps listing the skill while every read of it resolves to nothing. Plain `sync:runtime` cannot fix that — skipping is correct for clones, CI, and cloud sessions, which legitimately have no install. The no-runtime message now names any dangling links it finds so the state is visible instead of silent, and `--bootstrap` creates the runtime and repairs them in one step. Note that `[ -e ]` follows symlinks, so it reports a dangling link as *absent*; use `[ -L ]` (or `ls -ld`) when checking whether a consumer link exists.
-
-Broad launch/design/store/revenue/build work should first run `npm run check:skill-version -- --source skill/b2c-mobile-business-launch --installed ~/.codex/skills/b2c-mobile-business-launch` from the source repo, or the equivalent command from the installed runtime. If the installed copy is stale, use AskUserQuestion or a plain founder choice before continuing the original request.
+Use the runtime-sync process described above only on the maintainer machine.
 
 ## Source Freshness
 
-New external URLs must be tracked in `skill/b2c-mobile-business-launch/machine/source-registry.yaml`.
-
-Use:
-
-```bash
-npm run check:source-registry
-npm run refresh:source-freshness
-```
-
-For Doppler, PostHog, RevenueCat, Stripe, Resend, Apple/App Store Connect, Google Play, the in-app iOS Simulator surfaces (the Claude Code Desktop pane is in public beta and CLI computer use is a research preview, so their version, plan, and policy gates move fastest of all), XcodeBuildMCP, MobAI, Refero, Higgsfield, Fastlane, Remotion, and similar fast-moving tools, do not trust memory or old transcripts for command syntax. Refresh official docs or local CLI `--help`/version output before changing setup guidance.
-
-The weekly freshness workflow may auto-add candidate URLs, but candidates are not accepted launch policy until reviewed and backed by reference/template/validator/eval updates when relevant.
-
-## Subagents
-
-Use subagents for independent bounded audits and disjoint implementation slices. The orchestrator owns integration, final edits, git, runtime sync, and final verification. Do not let subagent findings alone mark the skill ready.
-
-Useful subagent lanes:
-
-- source freshness scout
-- ASC capability auditor
-- validator/eval auditor
-- template consistency auditor
-- runtime install auditor
-
-## Guardrails
-
-- Do not commit secrets, provider keys, screenshots of credentials, `.p8`, `.p12`, `.mobileprovision`, or local `.env` values.
-- Do not silently downgrade paid/account-gated tooling to free fallbacks.
-- Do not update third-party command examples from memory.
-- Do not add a new known miss as prose only; add a validator or LaunchBench scenario when deterministic coverage is possible.
-- Do not call repo work complete until source audit, LaunchBench, validator fixtures, runtime sync, and git status are clean or blockers are explicit.
-
-## Documentation synchronization
-
-A behavior or schema change is incomplete until the repository README, `SKILL.md`, graph README, architecture guide, implementation guide, validator reference, affected domain README indexes, generated projections, and `skill-version.json` agree. Review every README even when only canonical surfaces need edits. Generated blocks are changed through definitions and renderers, never by hand.
+Track and verify fast-moving external sources before changing provider guidance.

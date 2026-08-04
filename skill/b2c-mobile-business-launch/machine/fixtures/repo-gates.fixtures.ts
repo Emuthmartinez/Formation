@@ -65,7 +65,7 @@ function writeParityPair(root: string, options: { rootVersion: string; skillVers
 /**
  * Synthetic skill-root + templates-root pair for check-no-slop. The real banned-word list is
  * copied in rather than invented, so these fixtures fail if the reference and the matcher
- * ever stop agreeing. BRAND.md is a shipped surface, which makes every finding an error.
+ * ever stop agreeing. strategy/BRAND.md is a shipped surface, which makes every finding an error.
  */
 function writeNoSlopRoots(root: string, brandCopy: string): { fixtureSkillRoot: string; fixtureTemplates: string } {
   const fixtureSkillRoot = path.join(root, "skill");
@@ -73,7 +73,7 @@ function writeNoSlopRoots(root: string, brandCopy: string): { fixtureSkillRoot: 
   cpSync(path.join(skillRoot, "playbook", "words", "no-slop-writing.md"), path.join(fixtureSkillRoot, "playbook", "words", "no-slop-writing.md"));
   const fixtureTemplates = path.join(root, "business");
   mkdirSync(fixtureTemplates, { recursive: true });
-  writeFileSync(path.join(fixtureTemplates, "BRAND.md"), `# Brand\n\n${brandCopy}\n`, "utf8");
+  writeFileSync(path.join(fixtureTemplates, "strategy/BRAND.md"), `# Brand\n\n${brandCopy}\n`, "utf8");
   return { fixtureSkillRoot, fixtureTemplates };
 }
 
@@ -224,7 +224,7 @@ export function register(h: Harness): void {
   );
 
   const pagesDeleted = pagesRoot("generated-pages-deleted", (root) => {
-    rmSync(path.join(root, "store-console.html"));
+    rmSync(path.join(root, "store/store-console.html"));
   });
   runScriptArgs(
     "generated pages fail when a declared page is deleted",
@@ -235,7 +235,7 @@ export function register(h: Harness): void {
   );
 
   const pagesSourceGone = pagesRoot("generated-pages-source-missing", (root) => {
-    rmSync(path.join(root, "SECURITY.md"));
+    rmSync(path.join(root, "trust/SECURITY.md"));
   });
   runScriptArgs(
     "generated pages fail when the document a page is written from is deleted",
@@ -248,7 +248,7 @@ export function register(h: Harness): void {
   // The drift case is the one the four broken pages would have been caught by:
   // the file exists, is declared, and no longer says what its source says.
   const pagesDrift = pagesRoot("generated-pages-drift", (root) => {
-    const page = path.join(root, "onboarding.html");
+    const page = path.join(root, "product/onboarding.html");
     writeFileSync(page, readFileSync(page, "utf8").replace("Push permission prime", "Push permission (removed by hand)"), "utf8");
   });
   runScriptArgs(
@@ -263,7 +263,7 @@ export function register(h: Harness): void {
   // them as something else. A silent downgrade to a paragraph is exactly how a
   // section turns to mush behind a green gate.
   const pagesUnsupported = pagesRoot("generated-pages-unsupported-markdown", (root) => {
-    const source = path.join(root, "ORCHESTRATION.md");
+    const source = path.join(root, "operations/ORCHESTRATION.md");
     writeFileSync(source, `${readFileSync(source, "utf8")}\n#### Too deep for this renderer\n`, "utf8");
   });
   runScriptArgs(
@@ -441,9 +441,9 @@ export function register(h: Harness): void {
   // mandated (playbook/design/landing-motion-craft.md); the same import outside
   // landing/ still fails above.
   const templateSafetyLanding = makeEmptyFixture("template-safety-landing-pack");
-  mkdirSync(path.join(templateSafetyLanding, "landing", "sections"), { recursive: true });
+  mkdirSync(path.join(templateSafetyLanding, "growth", "landing", "sections"), { recursive: true });
   writeFileSync(
-    path.join(templateSafetyLanding, "landing", "sections", "Hero.tsx"),
+    path.join(templateSafetyLanding, "growth", "landing", "sections", "Hero.tsx"),
     'import { motion } from "motion/react";\nexport const Hero = motion.section;\n',
     "utf8",
   );
@@ -578,7 +578,7 @@ export function register(h: Harness): void {
 
   const founderCopyRawId = makeEmptyFixture("founder-copy-raw-identifier");
   writeFileSync(
-    path.join(founderCopyRawId, "launch-cockpit.html"),
+    path.join(founderCopyRawId, "state/launch-cockpit.html"),
     "<html><body><h2>Progress</h2><p>paid_tool_routing | not_started</p></body></html>\n",
     "utf8",
   );
@@ -594,7 +594,7 @@ export function register(h: Harness): void {
   // promised since v0.25.0: empty narrative past orient is an error.
   const founderCopyStaleNarrative = makeEmptyFixture("founder-copy-stale-narrative");
   writeFileSync(
-    path.join(founderCopyStaleNarrative, "PROJECT_STATE.yaml"),
+    path.join(founderCopyStaleNarrative, "state/PROJECT_STATE.yaml"),
     ["narrative:", '  since_last_time: ""', '  right_now: ""', '  your_call: ""', "project:", '  phase: "phase_1"'].join("\n"),
     "utf8",
   );
@@ -726,7 +726,7 @@ export function register(h: Harness): void {
    */
   const noSlopHtmlBackticks = writeNoSlopRoots(makeEmptyFixture("no-slop-html-backtick-banned-word"), "Plain brand copy with nothing banned.");
   writeFileSync(
-    path.join(noSlopHtmlBackticks.fixtureTemplates, "onboarding.html"),
+    path.join(noSlopHtmlBackticks.fixtureTemplates, "product/onboarding.html"),
     "<html><body><p>We `leverage` your first session to unlock the plan.</p></body></html>\n",
     "utf8",
   );
@@ -757,18 +757,18 @@ export function register(h: Harness): void {
   const motionContractFiles = [
     "playbook/design/motion-craft-benchmarks.md",
     "playbook/design/premium-mobile-craft.md",
-    "design-system/tokens.json",
-    "design-system/DesignTokens.swift",
-    "business/design-system/tokens.json",
-    "business/design-system/DesignTokens.swift",
-    "business/design-system/PremiumCraft.swift",
+    "design/system/tokens.json",
+    "design/system/DesignTokens.swift",
+    "business/design/system/tokens.json",
+    "business/design/system/DesignTokens.swift",
+    "business/design/system/PremiumCraft.swift",
     "playbook/experience/experience-cards/peak-end-card.md",
     "playbook/experience/experience-cards/mastery-and-status-card.md",
     "playbook/experience/experience-cards/variable-reward-card.md",
-    "business/DESIGN.md",
-    "business/emotional-design/EMOTIONAL_DESIGN.md",
-    "business/motion-catalog/TokenSpring.swift",
-    "business/motion-catalog/motion-tokens.ts",
+    "business/design/DESIGN.md",
+    "business/product/experience/emotional-design/EMOTIONAL_DESIGN.md",
+    "business/design/motion-catalog/TokenSpring.swift",
+    "business/design/motion-catalog/motion-tokens.ts",
   ];
   const writeMotionContractRoot = (name: string, mutate?: (rel: string, text: string) => string): string => {
     const root = makeEmptyFixture(name);
@@ -1026,7 +1026,7 @@ export function register(h: Harness): void {
   );
 
   const motionCardMomentDrift = writeMotionContractRoot("motion-contract-card-moment-drift", (rel, text) =>
-    rel.endsWith("business/DESIGN.md")
+    rel.endsWith("business/design/DESIGN.md")
       ? text.replace("| Intent Mirror entrance | `motion.durationReveal` |", "| Intent Mirror entrance | `motion.durationSlow` |")
       : text,
   );
@@ -1090,7 +1090,7 @@ export function register(h: Harness): void {
   );
 
   const motionTemplateDrift = writeMotionContractRoot("motion-contract-template-token-drift", (rel, text) =>
-    rel === "business/design-system/tokens.json" ? text.replace('"durationBase": "220ms"', '"durationBase": "240ms"') : text,
+    rel === "business/design/system/tokens.json" ? text.replace('"durationBase": "220ms"', '"durationBase": "240ms"') : text,
   );
   runScriptArgs(
     "motion contract fails when the template token copy drifts from the top-level artifact",

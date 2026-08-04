@@ -50,22 +50,22 @@ Also inspect the ASO skill set when available:
 - Local vendored copy, when present: `skills/vendor/aso-skills/skills/*`
 - Installed local skills such as `ios-screenshots`, `finding-app-niches`, `analyzing-competitors`, and `researching-paywalls`
 
-Record source URLs and checked dates in `APP_STORE_LISTING.md`, `STORE_CONSOLE.md`, and `PROJECT_STATE.yaml.tools.app_store_connect.docs_checked_at`.
-Record Apple privacy/build source URLs and checked dates in `APPLE_APP_STORE_REQUIREMENTS.md` before any App Store Connect upload-readiness claim.
+Record source URLs and checked dates in `APP_STORE_LISTING.md`, `store/STORE_CONSOLE.md`, and `state/PROJECT_STATE.yaml.tools.app_store_connect.docs_checked_at`.
+Record Apple privacy/build source URLs and checked dates in `store/APPLE_APP_STORE_REQUIREMENTS.md` before any App Store Connect upload-readiness claim.
 
 ## Required Outputs
 
 For iOS store submission or marketing prep, produce:
 - `APP_STORE_LISTING.md`: canonical Apple listing, privacy, pricing, localization, custom product page, In-App Event, screenshot, and approval packet.
-- `APPLE_APP_STORE_REQUIREMENTS.md`: pre-ASC upload gate covering privacy manifest files, required reason APIs, third-party SDK manifests/signatures, Xcode privacy report, App Privacy labels, purpose strings, ATT, account deletion, review notes, and archive/upload warnings.
+- `store/APPLE_APP_STORE_REQUIREMENTS.md`: pre-ASC upload gate covering privacy manifest files, required reason APIs, third-party SDK manifests/signatures, Xcode privacy report, App Privacy labels, purpose strings, ATT, account deletion, review notes, and archive/upload warnings.
 - `app-store-listing.html`: founder-facing copy-paste view with ASC click paths, field limits, character counts, and status badges.
 - `app-privacy-questionnaire.html`: interactive local worksheet for Apple App Privacy data types, linked/tracking/purpose answers, vendors, and proof.
-- `STORE_CONSOLE.md` and `store-console.html`: manual console packet across App Store Connect and Play Console when relevant.
-- `REVENUE_OPS.md`: product, entitlement, offering, price, trial, intro offer, RevenueCat/Stripe/web funnel mapping, and sandbox proof.
+- `store/STORE_CONSOLE.md` and `store/store-console.html`: manual console packet across App Store Connect and Play Console when relevant.
+- `revenue/REVENUE_OPS.md`: product, entitlement, offering, price, trial, intro offer, RevenueCat/Stripe/web funnel mapping, and sandbox proof.
 - `SCREENSHOTS.md`: slot-by-slot screenshot/app-preview plan, ParthJadhav/app-store-screenshots export route when used, iPhone/iPad device-well matrix, and ASC CLI upload proof.
-- `SCREENSHOT_RUBRIC.md`: the grading rubric and separate-pass grader protocol behind `grade-screenshots.ts` and `check:store-screenshots`. Seed it from [`business/app-store-listing/SCREENSHOT_RUBRIC.md`](../../business/app-store-listing/SCREENSHOT_RUBRIC.md) next to `SCREENSHOTS.md` so the grader agent scores against the same dimensions the validator enforces.
+- `SCREENSHOT_RUBRIC.md`: the grading rubric and separate-pass grader protocol behind `grade-screenshots.ts` and `check:store-screenshots`. Seed it from [`business/store/app-store-listing/SCREENSHOT_RUBRIC.md`](../../business/store/app-store-listing/SCREENSHOT_RUBRIC.md) next to `SCREENSHOTS.md` so the grader agent scores against the same dimensions the validator enforces.
 
-Small projects may merge the listing packet into `STORE_CONSOLE.md`, but keep the App Privacy questionnaire and HTML copy-paste surface when privacy, subscriptions, localization, screenshots, or custom product pages are in scope.
+Small projects may merge the listing packet into `store/STORE_CONSOLE.md`, but keep the App Privacy questionnaire and HTML copy-paste surface when privacy, subscriptions, localization, screenshots, or custom product pages are in scope.
 
 ## Listing Packet Shape
 
@@ -82,7 +82,7 @@ Automation: asc metadata dry-run path or manual only
 Status: ready | blocked | founder approval needed | verified in console
 ```
 
-Before filling in any pasted field above — promotional text, description, keyword terms, or What's New copy — load `playbook/words/no-slop-writing.md`; its §7 covers the App Store title/subtitle/keyword character and byte limits specifically, and the description body should read in the business's `BRAND.md` voice, not generic ASO copy.
+Before filling in any pasted field above — promotional text, description, keyword terms, or What's New copy — load `playbook/words/no-slop-writing.md`; its §7 covers the App Store title/subtitle/keyword character and byte limits specifically, and the description body should read in the business's `strategy/BRAND.md` voice, not generic ASO copy.
 
 Cover at minimum:
 - app information: name, subtitle, category, age rating, privacy policy URL, privacy choices URL, license/EULA, content rights, support URL, marketing URL
@@ -97,8 +97,8 @@ Cover at minimum:
 
 Do not answer App Privacy from policy prose alone. Use actual data flows:
 - code and SDK inventory
-- `ANALYTICS.md`, PostHog/event catalog, session replay/survey posture, and attribution plan
-- `REVENUE_OPS.md`, RevenueCat, Stripe/web billing, Apple/Google purchase identifiers
+- `analytics/ANALYTICS.md`, PostHog/event catalog, session replay/survey posture, and attribution plan
+- `revenue/REVENUE_OPS.md`, RevenueCat, Stripe/web billing, Apple/Google purchase identifiers
 - backend schema, storage buckets, logs, AI providers, email/support tools, push notifications, ads/MMPs
 - public privacy/terms/account deletion pages
 
@@ -108,9 +108,9 @@ The worksheet should ask:
 - For each selected data type: source/vendor, purpose, linked to user, used for tracking, required/optional, retention, deletion path, privacy-policy section, and proof.
 - Does any data meet Apple's optional-disclosure criteria? If yes, record every criterion and why it applies.
 - Are any SDK privacy manifests, required reason APIs, or third-party SDK signatures relevant?
-- Does `APPLE_APP_STORE_REQUIREMENTS.md` reconcile the Xcode privacy report, public App Privacy answers, privacy policy/choices URLs, SDK inventory, and actual bundled `PrivacyInfo.xcprivacy` before ASC upload?
+- Does `store/APPLE_APP_STORE_REQUIREMENTS.md` reconcile the Xcode privacy report, public App Privacy answers, privacy policy/choices URLs, SDK inventory, and actual bundled `PrivacyInfo.xcprivacy` before ASC upload?
 
-Use `business/app-store-listing/app-privacy-questionnaire.html` as the local interactive worksheet or render an equivalent project-specific HTML page.
+Use `business/store/app-store-listing/app-privacy-questionnaire.html` as the local interactive worksheet or render an equivalent project-specific HTML page.
 
 ## Pricing, RevenueCat, And Web Funnel Alignment
 
@@ -190,13 +190,13 @@ For localization:
 
 ## Visual And Asset Rules
 
-**The app preview video is the most underused growth lever on the App Store — treat it as a first-class, required iOS asset, not an afterthought.** (This is anti-pattern 12 in the monetization-and-growth digest in [`revenue-monetization.md`](../money/revenue-monetization.md) §10: skipping the preview because recording, captioning, and exporting "feels like a real project." The autoplay-muted hook before the screenshots is a free 5-second pitch handed to you by Apple and a meaningful install-rate lift; skipping it because it takes effort is exactly the trap.) Verified Apple behavior (refresh against `source-registry.yaml` before upload): you can upload **up to 3 app previews** per device size and language, **app previews always precede screenshots** at the top of the product page, and on the product page **app previews autoplay with muted audio** ("make sure the first few seconds of your video are visually compelling"). So the first preview is a silent ~3–5 second hook the user watches whether they meant to or not, with a **poster frame** that must sell on its own when autoplay is blocked. The hook must show the magical V1 moment first (no logo/splash), communicate value with on-screen text (no audio dependency), land the Emotional North Star feeling, and be truthful (real app footage, no bait-and-switch). Both screenshots and the preview are produced through the screenshot ASO skill and the `app-preview-video` skill, and every asset is engineered from the **Asset Knowledge Brief** in `SCREENSHOTS.md` (`RESEARCH.md` user/problem, `11_STAR_EXPERIENCE.md` magical moment, `EMOTIONAL_DESIGN.md` + `experience-cards.md` emotion/card, `DESIGN.md`/`BRAND.md` tokens/voice) — never generic. This is auditable: `check-store-screenshots` and the `SCREENSHOTS.md` packet flag a missing or generic, knowledge-free hook for both new and existing apps.
+**The app preview video is the most underused growth lever on the App Store — treat it as a first-class, required iOS asset, not an afterthought.** (This is anti-pattern 12 in the monetization-and-growth digest in [`revenue-monetization.md`](../money/revenue-monetization.md) §10: skipping the preview because recording, captioning, and exporting "feels like a real project." The autoplay-muted hook before the screenshots is a free 5-second pitch handed to you by Apple and a meaningful install-rate lift; skipping it because it takes effort is exactly the trap.) Verified Apple behavior (refresh against `source-registry.yaml` before upload): you can upload **up to 3 app previews** per device size and language, **app previews always precede screenshots** at the top of the product page, and on the product page **app previews autoplay with muted audio** ("make sure the first few seconds of your video are visually compelling"). So the first preview is a silent ~3–5 second hook the user watches whether they meant to or not, with a **poster frame** that must sell on its own when autoplay is blocked. The hook must show the magical V1 moment first (no logo/splash), communicate value with on-screen text (no audio dependency), land the Emotional North Star feeling, and be truthful (real app footage, no bait-and-switch). Both screenshots and the preview are produced through the screenshot ASO skill and the `app-preview-video` skill, and every asset is engineered from the **Asset Knowledge Brief** in `SCREENSHOTS.md` (`strategy/RESEARCH.md` user/problem, `11_STAR_EXPERIENCE.md` magical moment, `EMOTIONAL_DESIGN.md` + `experience-cards.md` emotion/card, `design/DESIGN.md`/`strategy/BRAND.md` tokens/voice) — never generic. This is auditable: `check-store-screenshots` and the `SCREENSHOTS.md` packet flag a missing or generic, knowledge-free hook for both new and existing apps.
 
 Screenshots and previews should start from real app UI. When marketing compositions need more than raw screenshots:
-- use `DESIGN.md` and `design.md` for tokens, typography, voice, screen specs, and asset constraints
+- use `design/DESIGN.md` and `design.md` for tokens, typography, voice, screen specs, and asset constraints
 - use `11_STAR_EXPERIENCE.md` for the magical moment and line of feasibility so screenshots and ads do not overpromise
 - use the in-app iOS Simulator (rung 0, Claude Code Desktop pane or Codex `build-ios-apps`) for real iOS captures on a local Mac; record device, OS, locale, fixture account, and native capture dimensions, and copy files off the Desktop into `screenshots/raw/`
-- use MobAI for real iOS/Android captures when Android or a repeatable capture matrix is in scope; use XcodeBuildMCP for scripted/CI capture and record project/scheme/simulator/device/output paths in `PRODUCTION_READINESS.md`
+- use MobAI for real iOS/Android captures when Android or a repeatable capture matrix is in scope; use XcodeBuildMCP for scripted/CI capture and record project/scheme/simulator/device/output paths in `engineering/PRODUCTION_READINESS.md`
 - use serve-sim for browser-visible booted-simulator capture/control when CLI users need a URL; record URL/port, actions, logs, and limitations
 - use SnapshotPreviews for preview/component PNG/JSON evidence via `TEST_RUNNER_SNAPSHOTS_EXPORT_DIR`; keep it labeled preview-only, not runtime App Preview footage
 - use ParthJadhav/app-store-screenshots as the preferred local composition/export editor when App Store or Play Store screenshot decks need production layouts, locale/device/theme variants, or bulk PNG export from real app captures plus design-system copy
@@ -207,8 +207,8 @@ Screenshots and previews should start from real app UI. When marketing compositi
 - route App Preview or Play promo video through `app-preview-video`, MobAI/native iOS recording proof, and Remotion/Higgsfield/owned-media production rules when video is in scope
   - **App Preview / Play promo video resolutions:** use the `mcp__claude_ai_Higgsfield__reframe` MCP tool (see the **Master → All Platforms (reframe + personal_clipper)** recipe in `tool-recipes/visual-and-motion-production.md`) to produce all required Apple and Play resolution variants (9:16, 1:1, 16:9) from a single master. Source footage MUST be real app screen recordings — reframe is for aspect-ratio reformatting only, never for generating substitute UI. Confirm exact invocation via the `higgsfield-generate` skill or MCP tool help before running. Spend-confirm before invoking reframe; record all output URLs and source job IDs in `CONTENT_ASSETS.md`.
   - **Preview-video B-roll:** supporting motion around real app footage may use Seedance (via `higgsfield generate create seedance_2_0`), or Cinema Studio Video 3.0 — confirm its model id via the `higgsfield-generate` skill; B-roll must never replace or obscure the real UI layer. See `tool-recipes/visual-and-motion-production.md` for syntax; confirm model availability via `higgsfield-generate` skill before use.
-- **Google Play feature graphic:** route via `higgsfield product-photoshoot --mode hero_banner` (DESIGN.md brief required; real app UI or product imagery as input) for the 1024×500 Play Console feature graphic slot. Record in `CONTENT_ASSETS.md`; founder approval before upload.
-- **CPP background art / seasonal refresh:** for Custom Product Page supporting background art, use the `higgsfield product-photoshoot --mode restyle` path. See the **Seasonal restyle Refresh** recipe in `tool-recipes/visual-and-motion-production.md` for the full flow (load locked CPP background, spend confirm, restyle with seasonal context + DESIGN.md palette, 2–3 variants status:draft, CONTENT_ASSETS.md, founder approval before CPP upload). The real-UI screenshot layer is never passed to restyle.
+- **Google Play feature graphic:** route via `higgsfield product-photoshoot --mode hero_banner` (design/DESIGN.md brief required; real app UI or product imagery as input) for the 1024×500 Play Console feature graphic slot. Record in `CONTENT_ASSETS.md`; founder approval before upload.
+- **CPP background art / seasonal refresh:** for Custom Product Page supporting background art, use the `higgsfield product-photoshoot --mode restyle` path. See the **Seasonal restyle Refresh** recipe in `tool-recipes/visual-and-motion-production.md` for the full flow (load locked CPP background, spend confirm, restyle with seasonal context + design/DESIGN.md palette, 2–3 variants status:draft, CONTENT_ASSETS.md, founder approval before CPP upload). The real-UI screenshot layer is never passed to restyle.
 - use Higgsfield for high-quality supporting visuals, mascots, backgrounds, icons, thumbnails, CPP/event artwork, and campaign imagery when the asset is not just a screenshot
 - use Remotion after `remotion-content-assets.md` when screenshots, previews, CPP/event media, or social/store variants should be code-rendered from real app UI, brand tokens, copy, captions, and local media
 - keep generated assets consistent with the design system and label reference art separately from production upload files
@@ -229,16 +229,16 @@ Founder approval required:
 
 Do not call the App Store listing ready unless:
 - current Apple docs were refreshed and cited in the packet
-- `APPLE_APP_STORE_REQUIREMENTS.md` exists and passes `npm run check:apple-requirements -- --root .`
+- `store/APPLE_APP_STORE_REQUIREMENTS.md` exists and passes `npm run check:apple-requirements -- --root .`
 - `APP_STORE_LISTING.md` exists as a file artifact (not just inline chat copy) and `npm run check:aso-metadata -- --root .` passes
-- keyword field is backed by AppKittie `batch_keyword_difficulty` or `get_keyword_difficulty` evidence with difficulty scores, volumes, and selection rationale recorded; if AppKittie is unavailable the paid-tool-routing decision and fallback are recorded in `TOOL_DECISIONS.md` before proceeding
+- keyword field is backed by AppKittie `batch_keyword_difficulty` or `get_keyword_difficulty` evidence with difficulty scores, volumes, and selection rationale recorded; if AppKittie is unavailable the paid-tool-routing decision and fallback are recorded in `strategy/TOOL_DECISIONS.md` before proceeding
 - description field is ≥ 2500 characters of keyword-rich body copy, secondary benefit paragraphs, and social proof, or a founder-approved brevity rationale is recorded; descriptions < 2500 chars without a rationale are a conversion gap and must not be called ready
 - live ASC metadata was read via `asc metadata pull` (or the asc-metadata-sync read route) before any metadata audit or diff; build log files must not be used as the authoritative current App Store Connect state
 - `PrivacyInfo.xcprivacy` is present in the app target resources before a ready/upload claim
 - required reason API declarations, third-party SDK privacy manifests/signatures, Xcode privacy report, protected-resource purpose strings, ATT, App Privacy labels, account deletion, review notes, and archive/upload warnings are reconciled before App Store Connect upload
 - the App Review Information Notes packet is written (purpose+audience, setup/access instructions, demo credentials OR an explicit no-login "no account, no demo needed" confirmation with the demo-account-required flag cleared, test devices+OS, external services, regional differences, regulated-material proof) — empty notes or a missing no-login confirmation cause a Guideline 2.1 "Information Needed" rejection (failure card: `asc-review-information-missing`)
-- every **promoted** in-app purchase/subscription has a unique 1024×1024 promotional image that depicts that specific product — never the app icon and never a duplicate across products — or the promotional image is removed for products that will not be promoted (failure card: `asc-promoted-iap-image-duplicate`; Guideline 2.3.2). Produce each image via `higgsfield generate create gpt_image_2 --aspect_ratio 1:1` with a per-product DESIGN.md brief (palette, product name, key benefit, banned aesthetics, intended surface: promoted-IAP). Spend-confirm before generating; record each output in `CONTENT_ASSETS.md` with `prompt_brief` and approval gate. Cross-ref `app-store-connect-cli.md` for the ASC upload route and `revenue-monetization.md` for product/entitlement source of truth. See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md` as a spend-reduction option at the spend-confirmation prompt.
-- listing copy (promotional text, description, keywords, What's New notes) passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` in the business's `BRAND.md` voice before the packet is called ready
+- every **promoted** in-app purchase/subscription has a unique 1024×1024 promotional image that depicts that specific product — never the app icon and never a duplicate across products — or the promotional image is removed for products that will not be promoted (failure card: `asc-promoted-iap-image-duplicate`; Guideline 2.3.2). Produce each image via `higgsfield generate create gpt_image_2 --aspect_ratio 1:1` with a per-product design/DESIGN.md brief (palette, product name, key benefit, banned aesthetics, intended surface: promoted-IAP). Spend-confirm before generating; record each output in `CONTENT_ASSETS.md` with `prompt_brief` and approval gate. Cross-ref `app-store-connect-cli.md` for the ASC upload route and `revenue-monetization.md` for product/entitlement source of truth. See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md` as a spend-reduction option at the spend-confirmation prompt.
+- listing copy (promotional text, description, keywords, What's New notes) passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` in the business's `strategy/BRAND.md` voice before the packet is called ready
 - default listing fields are paste-ready with character/byte counts
 - App Privacy answers are derived from real data inventory and third-party partners
 - pricing/subscriptions/products match RevenueCat/Stripe/web funnel/paywall/legal copy
@@ -246,6 +246,6 @@ Do not call the App Store listing ready unless:
 - `SCREENSHOTS.md` proves raw captures, composed production assets, iPhone/iPad device wells, App Icon/App Preview route, visual QA, and `check-store-screenshots` status
 - custom product pages, In-App Events, and ASA/marketing routing are either planned with proof or explicitly not needed
 - localization strategy is documented with target markets and proof status
-- Higgsfield, Remotion, or generated assets are tied to `DESIGN.md`, recorded in `CONTENT_ASSETS.md` when used, and separated from raw UI proof
+- Higgsfield, Remotion, or generated assets are tied to `design/DESIGN.md`, recorded in `CONTENT_ASSETS.md` when used, and separated from raw UI proof
 - store screenshots, previews, CPPs, and ads express the V1 scalable slice from `11_STAR_EXPERIENCE.md` without crossing the line of feasibility
-- `STORE_CONSOLE.md` and HTML packet show what the founder must click, paste, approve, or leave blocked
+- `store/STORE_CONSOLE.md` and HTML packet show what the founder must click, paste, approve, or leave blocked

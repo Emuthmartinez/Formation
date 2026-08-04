@@ -6,7 +6,7 @@
 #
 # Trust boundary, same as laneDependencies in scripts/lib/launch-state.ts:
 # this file ships WITH THE SKILL and is never copied into a business repo. A
-# launch run records which surfaces it touched in its own PROJECT_STATE.yaml
+# launch run records which surfaces it touched in its own state/PROJECT_STATE.yaml
 # `change_cascade` block; it cannot edit the edge set that grades it.
 #
 # When change-cascade.md's table changes, change this file in the same edit.

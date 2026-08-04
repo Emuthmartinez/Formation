@@ -2,7 +2,7 @@
 
 Use this when a launch needs reusable videos, stills, store-art compositions, app-preview clips, demo loops, social posts, ad variants, UGC overlays, or campaign assets and Higgsfield is unavailable, not approved, too expensive for the lane, or less appropriate than code-rendered product truth.
 
-Remotion is not a drop-in replacement for Higgsfield. Higgsfield is the premium generative route for net-new imagery, mascots, presenter ads, image-to-video, photoreal scenes, Marketing Studio, and Virality Predictor. Remotion is the deterministic route for assets built from real app UI, founder-owned media, licensed/public-domain inputs, `DESIGN.md` tokens, copy variants, data, captions, and repeatable React compositions.
+Remotion is not a drop-in replacement for Higgsfield. Higgsfield is the premium generative route for net-new imagery, mascots, presenter ads, image-to-video, photoreal scenes, Marketing Studio, and Virality Predictor. Remotion is the deterministic route for assets built from real app UI, founder-owned media, licensed/public-domain inputs, `design/DESIGN.md` tokens, copy variants, data, captions, and repeatable React compositions.
 
 ## Contents
 
@@ -41,7 +41,7 @@ Do not create the asset yet when:
 
 Load `paid-tool-routing.md` before replacing Higgsfield with Remotion. Missing Higgsfield runtime access is not approval to use Remotion or another fallback.
 
-Record the decision in `TOOL_DECISIONS.md`, `CONTENT_ASSETS.md`, or the relevant ops doc:
+Record the decision in `strategy/TOOL_DECISIONS.md`, `CONTENT_ASSETS.md`, or the relevant ops doc:
 - intended route: Higgsfield, Remotion, founder-owned media, raw screenshots, or blocked
 - why Remotion is appropriate for this asset
 - founder approval for fallback if Higgsfield was intended
@@ -56,8 +56,8 @@ Remotion can be lower-cost, but it is not universally free for every commercial 
 Use truthful inputs before rendered embellishment:
 - real app screenshots or recordings from MobAI, XcodeBuildMCP, simulator/device capture, Android emulator/ADB, or founder-owned captures
 - `11_STAR_EXPERIENCE.md` for the magical moment, line of feasibility, and V1 scalable slice the asset should express
-- `DESIGN.md` tokens, typography, voice, shape, spacing, and banned aesthetics
-- `design.md`, `ONBOARDING.md`, `APP_STORE_LISTING.md`, `REVENUE_OPS.md`, `ANALYTICS.md`, and legal docs for claim and pricing truth
+- `design/DESIGN.md` tokens, typography, voice, shape, spacing, and banned aesthetics
+- `design.md`, `product/ONBOARDING.md`, `APP_STORE_LISTING.md`, `revenue/REVENUE_OPS.md`, `analytics/ANALYTICS.md`, and legal docs for claim and pricing truth
 - founder-owned logos, icons, photos, audio, and product media
 - licensed or public-domain assets with source/license notes
 - copy datasets for hooks, CTAs, captions, subtitles, localizations, or store page variants
@@ -92,7 +92,7 @@ cd content-assets
 npx create-video@latest --yes --blank --no-tailwind remotion
 ```
 
-Use app-specific package scripts in `content-assets/remotion/package.json`, for example:
+Use app-specific package scripts in `growth/content-assets/remotion/package.json`, for example:
 
 ```json
 {
@@ -105,7 +105,7 @@ Use app-specific package scripts in `content-assets/remotion/package.json`, for 
 }
 ```
 
-Keep raw captures under `content-assets/inputs/` or `screenshots/raw/`, generated outputs under `content-assets/out/`, and final store upload assets under the store screenshot path only after QA.
+Keep raw captures under `growth/content-assets/inputs/` or `screenshots/raw/`, generated outputs under `growth/content-assets/out/`, and final store upload assets under the store screenshot path only after QA.
 
 ## Remotion Skill Routing
 
@@ -123,7 +123,7 @@ Relevant Remotion skill rules:
 
 Remotion animation must be frame-driven with `useCurrentFrame()`, `interpolate()`, `spring()`, `Sequence`, or related Remotion APIs. Do not rely on CSS transitions or CSS animations for render-critical motion.
 
-Keep render lanes distinct but visually consistent: Remotion (video/still render) stays frame-driven, while live web surfaces (landing pages, funnels, web paywall) use framer-motion / the `motion` library. Both should draw timing/easing from the same `motion.*` tokens (`design-system/tokens.css` `--motion-*`) so a Remotion ad and the landing page it drives to feel like one brand. Do not import framer-motion into Remotion compositions or into the shipped mobile binary.
+Keep render lanes distinct but visually consistent: Remotion (video/still render) stays frame-driven, while live web surfaces (landing pages, funnels, web paywall) use framer-motion / the `motion` library. Both should draw timing/easing from the same `motion.*` tokens (`design/system/tokens.css` `--motion-*`) so a Remotion ad and the landing page it drives to feel like one brand. Do not import framer-motion into Remotion compositions or into the shipped mobile binary.
 
 ## Composition Standards
 
@@ -188,7 +188,7 @@ Before marking a content asset done:
 - real app UI is visible where the asset claims to show the app
 - source screenshots/recordings, design tokens, copy, and legal/pricing claims are traceable
 - Remotion license status and Higgsfield fallback approval are recorded
-- public claims match `APP_STORE_LISTING.md`, `REVENUE_OPS.md`, `PRIVACY.md`, `TERMS.md`, and onboarding/paywall copy
+- public claims match `APP_STORE_LISTING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, and onboarding/paywall copy
 - no generated or mock UI is presented as real production functionality
 - captions, silent playback, text fit, safe areas, and mobile readability are checked
 - output dimensions, duration, codec/container, and target surface are recorded
@@ -213,7 +213,7 @@ Include:
 - output registry
 - blocked assets and founder-only gates
 
-Create `content-assets/manifest.json` for machine-readable assets. Each asset should include:
+Create `growth/content-assets/manifest.json` for machine-readable assets. Each asset should include:
 - `asset_id`
 - `surface`
 - `route`
@@ -230,7 +230,7 @@ Create `content-assets/manifest.json` for machine-readable assets. Each asset sh
 
 Create or update `content-assets.html` as the founder-facing proof board. It should show route decisions, asset thumbnails/placeholders, target surfaces, source inputs, output paths, QA status, and blocked approvals.
 
-Update `PROJECT_STATE.yaml`:
+Update `state/PROJECT_STATE.yaml`:
 - `lanes.content_assets.status`
 - `lanes.content_assets.evidence`
 - `tools.remotion.route`
@@ -245,7 +245,7 @@ Update `PROJECT_STATE.yaml`:
 - Treating Higgsfield unavailability as automatic permission to use Remotion.
 - Calling Remotion a free fallback without checking license eligibility.
 - Rendering polished mock UI and letting it drift into store screenshots or product claims.
-- Creating videos without `DESIGN.md`, source screenshots, captions, text-fit checks, or claim review.
+- Creating videos without `design/DESIGN.md`, source screenshots, captions, text-fit checks, or claim review.
 - Making one-off assets with no manifest, render command, or rerender path.
 - Forgetting that public posting, scheduling, store uploads, paid campaigns, and creator spend require founder approval.
 - Bundling a heavy Remotion project inside this skill instead of creating it in the launch repo that owns the media.

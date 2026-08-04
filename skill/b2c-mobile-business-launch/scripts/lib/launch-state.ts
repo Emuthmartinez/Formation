@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import {
@@ -105,7 +105,7 @@ export const requiredLanes: string[] = [...graphRequiredLanes];
  * relist research). Every edge here already existed as prose in a reference or
  * a lane row — this map mechanizes them, it does not invent new sequencing.
  *
- * This map ships with the skill rather than living in PROJECT_STATE.yaml on
+ * This map ships with the skill rather than living in state/PROJECT_STATE.yaml on
  * purpose: an edge set a launch run can edit is an edge set a launch run can
  * delete. The auditable escape hatch is the per-lane `dependency_override`
  * dated reason, not silent removal.
@@ -199,7 +199,7 @@ const ignoredDirs = new Set([".git", "node_modules", ".next", "dist", "build", "
 
 export function parseCliArgs(argv: string[]): CliArgs {
   let root = process.cwd();
-  let statePath = "PROJECT_STATE.yaml";
+  let statePath = "state/PROJECT_STATE.yaml";
   let outputPath: string | undefined;
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -378,7 +378,7 @@ export function loadProjectState(args: CliArgs): { state?: unknown; raw?: string
         issue(
           "error",
           "project_state.missing",
-          "PROJECT_STATE.yaml is missing. Copy business/PROJECT_STATE.yaml and update it before claiming launch readiness.",
+          "state/PROJECT_STATE.yaml is missing. Copy business/state/PROJECT_STATE.yaml and update it before claiming launch readiness.",
           path.relative(args.root, args.statePath),
         ),
       ],
@@ -392,7 +392,9 @@ export function loadProjectState(args: CliArgs): { state?: unknown; raw?: string
     const message = error instanceof Error ? error.message : String(error);
     return {
       raw,
-      issues: [issue("error", "project_state.invalid_yaml", `PROJECT_STATE.yaml is not valid YAML: ${message}`, path.relative(args.root, args.statePath))],
+      issues: [
+        issue("error", "project_state.invalid_yaml", `state/PROJECT_STATE.yaml is not valid YAML: ${message}`, path.relative(args.root, args.statePath)),
+      ],
     };
   }
 }
@@ -400,20 +402,22 @@ export function loadProjectState(args: CliArgs): { state?: unknown; raw?: string
 export function requireString(state: unknown, dottedPath: string, issues: Issue[]): void {
   const value = getPath(state, dottedPath);
   if (!asString(value)?.trim()) {
-    issues.push(issue("error", `${dottedPath}.missing`, `${dottedPath} must be a non-empty string.`, "PROJECT_STATE.yaml"));
+    issues.push(issue("error", `${dottedPath}.missing`, `${dottedPath} must be a non-empty string.`, "state/PROJECT_STATE.yaml"));
   }
 }
 
 export function requireStatus(state: unknown, dottedPath: string, issues: Issue[]): void {
   const value = asString(getPath(state, dottedPath));
   if (!value || !statusValues.has(value)) {
-    issues.push(issue("error", `${dottedPath}.invalid_status`, `${dottedPath} must be one of ${Array.from(statusValues).join(", ")}.`, "PROJECT_STATE.yaml"));
+    issues.push(
+      issue("error", `${dottedPath}.invalid_status`, `${dottedPath} must be one of ${Array.from(statusValues).join(", ")}.`, "state/PROJECT_STATE.yaml"),
+    );
   }
 }
 
 export function requireBoolean(state: unknown, dottedPath: string, issues: Issue[]): void {
   if (asBoolean(getPath(state, dottedPath)) === undefined) {
-    issues.push(issue("error", `${dottedPath}.missing_boolean`, `${dottedPath} must be true or false.`, "PROJECT_STATE.yaml"));
+    issues.push(issue("error", `${dottedPath}.missing_boolean`, `${dottedPath} must be true or false.`, "state/PROJECT_STATE.yaml"));
   }
 }
 
@@ -509,6 +513,7 @@ export function reportAndExit(title: string, issues: Issue[]): void {
 }
 
 export function writeText(filePath: string, contents: string): void {
+  mkdirSync(path.dirname(filePath), { recursive: true });
   writeFileSync(filePath, contents, "utf8");
 }
 
@@ -597,7 +602,7 @@ export function validateReason(reason: string | undefined, lanePath: string, con
         `${lanePath}.reason_undated_or_trivial`,
         `${lanePath} ${context} reason is missing, too short (< ${REASON_MIN_LENGTH} chars), or lacks an ISO date (YYYY-MM-DD). ` +
           `Record a dated rationale so future passes can verify the stall is intentional and not stale.`,
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
     return;
@@ -609,7 +614,7 @@ export function validateReason(reason: string | undefined, lanePath: string, con
         `${lanePath}.reason_undated_or_trivial`,
         `${lanePath} ${context} reason does not contain an ISO date (YYYY-MM-DD). ` +
           `Add the date the stall/skip was recorded so a future pass can detect if it has gone stale.`,
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
     return;
@@ -620,7 +625,7 @@ export function validateReason(reason: string | undefined, lanePath: string, con
         "warning",
         `${lanePath}.stall_reason_stale`,
         `${lanePath} ${context} reason is dated more than ${STALL_STALE_DAYS} days ago. ` + `Revisit and update the rationale or advance the lane status.`,
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
   }

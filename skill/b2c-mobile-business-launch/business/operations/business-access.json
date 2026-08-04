@@ -66,7 +66,7 @@
       },
       "safeWorkWhileWaiting": "Continue read-only repo and product-state inspection; do not infer consent or create public identity assets.",
       "agentActionNext": "Inspect current repo and public identity state, then guide the first secure business account step.",
-      "successProof": "Business identity and the next account are recorded in BUSINESS_ACCESS.md and this ledger.",
+      "successProof": "Business identity and the next account are recorded in operations/BUSINESS_ACCESS.md and this ledger.",
       "lifecycle": {
         "status": "pending",
         "presentedAt": "",

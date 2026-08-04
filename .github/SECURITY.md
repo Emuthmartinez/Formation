@@ -2,7 +2,7 @@
 
 This policy covers **this repository**: the TypeScript validators under `skill/b2c-mobile-business-launch/scripts/`, the templates and references it ships, the GitHub Actions workflows, and the npm dependency chain behind them.
 
-It does not cover apps launched with this skill. Those get their own security plan from `business/SECURITY.md`, which is a different document for a different audience: the threat model, hardening, and release gates of a shipped consumer app.
+It does not cover apps launched with this skill. Those get their own security plan from `business/trust/SECURITY.md`, which is a different document for a different audience: the threat model, hardening, and release gates of a shipped consumer app.
 
 ## How to report
 

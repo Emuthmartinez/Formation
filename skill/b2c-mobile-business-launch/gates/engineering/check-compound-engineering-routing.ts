@@ -25,18 +25,21 @@ const routeValues = new Set(["ce_full_pipeline", "ce_plan_work", "ce_fallback", 
 const freshnessValues = new Set(["checked", "ce_update_run", "source_registry_refresh_run", "unavailable_with_reason", "not_needed", "not_checked"]);
 
 const engineeringLaneStatus = state ? asString(getPath(state, "lanes.engineering.status"))?.toLowerCase() : undefined;
-const readinessArtifacts = ["ENGINEERING_PLAN.md", "engineering/ENGINEERING_PLAN.md", "PRODUCTION_READINESS.md", "engineering/PRODUCTION_READINESS.md"].filter(
-  (candidate) => existsSync(path.join(args.root, candidate)),
-);
+const readinessArtifacts = [
+  "engineering/ENGINEERING_PLAN.md",
+  "engineering/engineering/ENGINEERING_PLAN.md",
+  "engineering/PRODUCTION_READINESS.md",
+  "engineering/engineering/PRODUCTION_READINESS.md",
+].filter((candidate) => existsSync(path.join(args.root, candidate)));
 const compoundRoute = state ? asString(getPath(state, "compound_engineering.route")) : undefined;
 const engineeringInScope =
   engineeringLaneStatus === "done" ||
   (compoundRoute !== undefined && compoundRoute !== "not_evaluated" && compoundRoute !== "not_needed") ||
   readinessArtifacts.some((artifact) => hasReadinessClaim(readText(args.root, artifact) ?? ""));
 
-const orchestration = firstText(["ORCHESTRATION.md", "orchestration/ORCHESTRATION.md"]);
-const engineeringPlan = firstText(["ENGINEERING_PLAN.md", "engineering/ENGINEERING_PLAN.md"]);
-const productionReadiness = firstText(["PRODUCTION_READINESS.md", "engineering/PRODUCTION_READINESS.md"]);
+const orchestration = firstText(["operations/ORCHESTRATION.md", "orchestration/operations/ORCHESTRATION.md"]);
+const engineeringPlan = firstText(["engineering/ENGINEERING_PLAN.md", "engineering/engineering/ENGINEERING_PLAN.md"]);
+const productionReadiness = firstText(["engineering/PRODUCTION_READINESS.md", "engineering/engineering/PRODUCTION_READINESS.md"]);
 
 if (state && engineeringInScope) {
   const compound = getPath(state, "compound_engineering");
@@ -45,8 +48,8 @@ if (state && engineeringInScope) {
       issue(
         "error",
         "compound_engineering.state_missing",
-        "PROJECT_STATE.yaml must include compound_engineering before core engineering readiness.",
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml must include compound_engineering before core engineering readiness.",
+        "state/PROJECT_STATE.yaml",
       ),
     );
   } else {
@@ -56,7 +59,14 @@ if (state && engineeringInScope) {
 
 if (engineeringInScope) {
   if (!orchestration) {
-    issues.push(issue("error", "compound_engineering.orchestration_missing", "ORCHESTRATION.md must record Compound Engineering routing.", "ORCHESTRATION.md"));
+    issues.push(
+      issue(
+        "error",
+        "compound_engineering.orchestration_missing",
+        "operations/ORCHESTRATION.md must record Compound Engineering routing.",
+        "operations/ORCHESTRATION.md",
+      ),
+    );
   } else {
     requireTerms(orchestration.text, ["Compound Engineering Routing", "ce-plan", "ce-work", "ce-code-review"], orchestration.relativePath);
     if (!includesAny(orchestration.text, ["ce-update", "CE freshness check", "latest-release check"])) {
@@ -64,7 +74,7 @@ if (engineeringInScope) {
         issue(
           "error",
           "compound_engineering.freshness_missing",
-          "ORCHESTRATION.md must record CE freshness check or latest-release fallback.",
+          "operations/ORCHESTRATION.md must record CE freshness check or latest-release fallback.",
           orchestration.relativePath,
         ),
       );
@@ -74,7 +84,7 @@ if (engineeringInScope) {
         issue(
           "error",
           "compound_engineering.proof_route_missing",
-          "ORCHESTRATION.md must record CE proof or an equivalent proof route.",
+          "operations/ORCHESTRATION.md must record CE proof or an equivalent proof route.",
           orchestration.relativePath,
         ),
       );
@@ -89,7 +99,7 @@ if (engineeringPlan) {
       issue(
         "error",
         "compound_engineering.brainstorm_decision_missing",
-        "ENGINEERING_PLAN.md must record ce-brainstorm use or skip rationale.",
+        "engineering/ENGINEERING_PLAN.md must record ce-brainstorm use or skip rationale.",
         engineeringPlan.relativePath,
       ),
     );
@@ -106,7 +116,7 @@ if ((ceAvailability === "unavailable" || ceRoute === "ce_fallback") && engineeri
     issue(
       "error",
       "compound_engineering.standalone_loop_missing",
-      "Compound Engineering is unavailable (or routed to ce_fallback) but ENGINEERING_PLAN.md does not record the Standalone Engineering Loop. " +
+      "Compound Engineering is unavailable (or routed to ce_fallback) but engineering/ENGINEERING_PLAN.md does not record the Standalone Engineering Loop. " +
         "A fallback reason alone is documentation, not a path — record the plan/bounded-slices/adversarial-review/test/proof loop from " +
         "playbook/engineering/engineering-orchestration.md so the readiness bar does not silently drop with CE missing.",
       engineeringPlan.relativePath,
@@ -121,7 +131,7 @@ if (productionReadiness) {
       issue(
         "error",
         "compound_engineering.test_route_missing",
-        "PRODUCTION_READINESS.md must record CE test route, MobAI, or equivalent E2E proof.",
+        "engineering/PRODUCTION_READINESS.md must record CE test route, MobAI, or equivalent E2E proof.",
         productionReadiness.relativePath,
       ),
     );
@@ -131,7 +141,7 @@ if (productionReadiness) {
       issue(
         "error",
         "compound_engineering.readiness_proof_missing",
-        "PRODUCTION_READINESS.md must record CE proof/demo or an equivalent proof artifact.",
+        "engineering/PRODUCTION_READINESS.md must record CE proof/demo or an equivalent proof artifact.",
         productionReadiness.relativePath,
       ),
     );
@@ -149,7 +159,7 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
         "error",
         "compound_engineering.availability.invalid",
         `compound_engineering.availability must be one of ${Array.from(availabilityValues).join(", ")}.`,
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
   }
@@ -159,7 +169,7 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
         "error",
         "compound_engineering.route.invalid",
         `compound_engineering.route must be one of ${Array.from(routeValues).join(", ")}.`,
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
   }
@@ -169,7 +179,7 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
         "error",
         "compound_engineering.not_evaluated",
         "Core engineering work cannot proceed to plan/readiness with Compound Engineering still not_evaluated.",
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
   }
@@ -177,7 +187,12 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
   const latestCheck = compound.latest_check;
   if (!isRecord(latestCheck)) {
     issues.push(
-      issue("error", "compound_engineering.latest_check.missing", "compound_engineering.latest_check must record CE freshness status.", "PROJECT_STATE.yaml"),
+      issue(
+        "error",
+        "compound_engineering.latest_check.missing",
+        "compound_engineering.latest_check must record CE freshness status.",
+        "state/PROJECT_STATE.yaml",
+      ),
     );
   } else {
     const freshnessStatus = asString(latestCheck.status)?.trim() ?? "";
@@ -187,7 +202,7 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
           "error",
           "compound_engineering.latest_check.status.invalid",
           `latest_check.status must be one of ${Array.from(freshnessValues).join(", ")}.`,
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
         ),
       );
     }
@@ -197,7 +212,7 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
           "error",
           "compound_engineering.latest_check.not_checked",
           "Check ce-update or record why CE latest-version verification is unavailable before core engineering.",
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
         ),
       );
     }
@@ -212,21 +227,28 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
             "error",
             `compound_engineering.skills.${required}.missing`,
             `skills_considered must include ${required} when CE is available.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       }
     }
     if (!skills.some((skill) => ["ce-test-browser", "ce-test-xcode", "ce-proof", "ce-demo-reel"].includes(skill))) {
       issues.push(
-        issue("error", "compound_engineering.skills.proof_or_test_missing", "skills_considered must include a CE test or proof route.", "PROJECT_STATE.yaml"),
+        issue(
+          "error",
+          "compound_engineering.skills.proof_or_test_missing",
+          "skills_considered must include a CE test or proof route.",
+          "state/PROJECT_STATE.yaml",
+        ),
       );
     }
   }
 
   if (availability === "unavailable" || route === "ce_fallback") {
     if (!asString(compound.fallback_reason)?.trim()) {
-      issues.push(issue("error", "compound_engineering.fallback_reason.missing", "Unavailable CE routing requires fallback_reason.", "PROJECT_STATE.yaml"));
+      issues.push(
+        issue("error", "compound_engineering.fallback_reason.missing", "Unavailable CE routing requires fallback_reason.", "state/PROJECT_STATE.yaml"),
+      );
     }
   }
 
@@ -239,7 +261,7 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
           "error",
           `compound_engineering.${field}.invalid`,
           `${field} must be one of ${Array.from(ceRoutingStatusValues).join(", ")}.`,
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
         ),
       );
     }
@@ -249,7 +271,12 @@ function validateCompoundState(compound: Record<string, unknown>, engineeringDon
     for (const field of ["plan_status", "work_status", "review_status", "test_status", "proof_status"]) {
       if (asString(compound[field]) !== "used") {
         issues.push(
-          issue("error", `compound_engineering.${field}.not_used`, `Done engineering requires ${field}: used when CE is available.`, "PROJECT_STATE.yaml"),
+          issue(
+            "error",
+            `compound_engineering.${field}.not_used`,
+            `Done engineering requires ${field}: used when CE is available.`,
+            "state/PROJECT_STATE.yaml",
+          ),
         );
       }
     }

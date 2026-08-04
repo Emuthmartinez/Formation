@@ -4,24 +4,24 @@ Motionsites-grade landing motion on the project's own brand tokens — cinematic
 
 ## The two-lane content model
 
-One brand timing system, two delivery lanes. Both read the same promoted `--motion-*` tokens (`design-system/tokens.css`, generated from `state/theme.tokens.json` by `npm run promote:design-tokens`):
+One brand timing system, two delivery lanes. Both read the same promoted `--motion-*` tokens (`design/system/tokens.css`, generated from `state/theme.tokens.json` by `npm run promote:design-tokens`):
 
 | Lane | Tool | Owns | Never does |
 | --- | --- | --- | --- |
 | **Baked** | Remotion (`remotion-content-assets.md`) | hero loop `.webm`/`.mp4` + poster, section media tiles, ad/store art — render once, embed | live scroll/hover/cursor behavior |
 | **Live** | `motion/react` (`https://motion.dev/docs/react`) | in-view stagger reveals, scroll-linked parallax, sticky scrollytelling, count-up, cursor spotlight, 3D tilt, marquee | frame-exact video output |
 
-Remotion is the wrong *primary* tool for landing motion: it renders frames, not live DOM behavior. The "wow" of a motionsites-grade page is ~85% the live lane. Do not re-litigate this split per launch; record the baked-video opt-in (license-gated per `paid-tool-routing.md`) in `TOOL_DECISIONS.md`.
+Remotion is the wrong *primary* tool for landing motion: it renders frames, not live DOM behavior. The "wow" of a motionsites-grade page is ~85% the live lane. Do not re-litigate this split per launch; record the baked-video opt-in (license-gated per `paid-tool-routing.md`) in `strategy/TOOL_DECISIONS.md`.
 
 ## The section library
 
-`business/landing/` ships the reusable sections — Hero (mesh/video, parallax, word stagger, tilt), Marquee, Bento, Scrollytelling, Stats count-up, Testimonials spotlight, Pricing glass + billing toggle, CTA gradient morph — plus `lib/motion-tokens.ts` (SSR-safe token reader) and `motion.css` (js-gated reveal utilities, reduced-motion collapse). Start from the library and customize copy/layout; do not improvise section choreography from scratch. The pack is aesthetic-neutral: warm-editorial and dark-glass brands come out of the same components purely via tokens.
+`business/growth/landing/` ships the reusable sections — Hero (mesh/video, parallax, word stagger, tilt), Marquee, Bento, Scrollytelling, Stats count-up, Testimonials spotlight, Pricing glass + billing toggle, CTA gradient morph — plus `lib/motion-tokens.ts` (SSR-safe token reader) and `motion.css` (js-gated reveal utilities, reduced-motion collapse). Start from the library and customize copy/layout; do not improvise section choreography from scratch. The pack is aesthetic-neutral: warm-editorial and dark-glass brands come out of the same components purely via tokens.
 
 Two web-lane recipes live in the in-app benchmark file [`motion-craft-benchmarks.md`](motion-craft-benchmarks.md): R9, the contained edge-warp scroll transition (margin, channel-split, and edge-proximity rules), and R1, asynchronous-grid hero liveness. Load it when a landing hero or scroll moment calls for either.
 
-Before drafting copy for any section slot — hero headline/subhead, testimonial spotlight quotes, stats captions, or CTA button/microcopy — load `playbook/words/no-slop-writing.md`; keep the brand's voice from `BRAND.md`/`11_STAR_EXPERIENCE.md`, not a flattened landing-page register.
+Before drafting copy for any section slot — hero headline/subhead, testimonial spotlight quotes, stats captions, or CTA button/microcopy — load `playbook/words/no-slop-writing.md`; keep the brand's voice from `strategy/BRAND.md`/`11_STAR_EXPERIENCE.md`, not a flattened landing-page register.
 
-Host: a Next.js App Router project (the archetype starters are the expected hosts) or any React SSR site; Astro via client islands. `motion/react` is mandated for the web surface and **must never be imported by the mobile binary** — `check:template-safety` enforces the boundary (the `business/landing/` exception is deliberate and web-only).
+Host: a Next.js App Router project (the archetype starters are the expected hosts) or any React SSR site; Astro via client islands. `motion/react` is mandated for the web surface and **must never be imported by the mobile binary** — `check:template-safety` enforces the boundary (the `business/growth/landing/` exception is deliberate and web-only).
 
 ## The progressive-enhancement contract (enforceable)
 
@@ -44,12 +44,12 @@ The in-app micro-motion band (120–360ms) is deliberately too short for cinemat
 | `--motion-easing-spring` | springy overshoot | playful accents (toggle re-price, badges) |
 | `--motion-stagger` | 60ms | per-item stagger step |
 
-These live in `state/theme.tokens.json` → promoted into `design-system/tokens.css`, `tokens.json`, and `DesignTokens.swift` (`check:token-promotion` gates the hash). Remotion compositions read the same values so baked and live motion share one feel.
+These live in `state/theme.tokens.json` → promoted into `design/system/tokens.css`, `tokens.json`, and `DesignTokens.swift` (`check:token-promotion` gates the hash). Remotion compositions read the same values so baked and live motion share one feel.
 
 ## Production floor (beyond the proof)
 
 - **Type:** self-host the real display webfont (subset, `font-display: swap`, preload). The token fallback stack is for dependency-free proofs only.
 - **Baked hero video:** opt-in per launch through the Remotion lane; always ship a poster and keep the mesh fallback.
 - **Smooth scroll (Lenis):** optional; if adopted it must degrade cleanly, respect reduced motion, and be registered in `source-registry.yaml` before use.
-- **Copy:** section copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` before `check:landing-funnel` runs — brand voice from `BRAND.md` wins over generic landing-page register.
+- **Copy:** section copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` before `check:landing-funnel` runs — brand voice from `strategy/BRAND.md` wins over generic landing-page register.
 - **Verification:** run `check:landing-funnel` (deploy gates + GEO/SEO files + copy guardrails + motion craft) before calling the landing lane ready; the LaunchBench scenario `landing-motion-progressive-enhancement-missing` locks the failure mode.

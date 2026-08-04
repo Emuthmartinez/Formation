@@ -39,16 +39,16 @@ Create:
 Output as SQL I can run directly in Supabase's SQL editor.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Reconcile with `TECH_SPEC.md` (data model, API contracts, RLS) before building clients. **RLS is the security lane, not a checkbox**: habit data reveals routines, health, and location-adjacent patterns — every table needs a tested owner-only policy referenced from `SECURITY.md` (pgTAP tests per `backend-data-contract.md`; the starter ships them).
-- **Timezone/DST correctness is the trap.** A check-in at 11:58pm local must count for that local day; a user flying across timezones or hitting a DST shift must not lose a streak to UTC math. Storing the local date explicitly (derived from the profile timezone, prompt 02) and computing streaks server-side from that column (prompt 04) is the defense. Add the edge cases to `TECH_SPEC.md` test plans.
+- Reconcile with `engineering/TECH_SPEC.md` (data model, API contracts, RLS) before building clients. **RLS is the security lane, not a checkbox**: habit data reveals routines, health, and location-adjacent patterns — every table needs a tested owner-only policy referenced from `trust/SECURITY.md` (pgTAP tests per `backend-data-contract.md`; the starter ships them).
+- **Timezone/DST correctness is the trap.** A check-in at 11:58pm local must count for that local day; a user flying across timezones or hitting a DST shift must not lose a streak to UTC math. Storing the local date explicitly (derived from the profile timezone, prompt 02) and computing streaks server-side from that column (prompt 04) is the defense. Add the edge cases to `engineering/TECH_SPEC.md` test plans.
 - Streaks are **derived, never stored as a mutable counter** — a stored counter drifts and then the product lies, which fails the truthfulness test in `ethics-guardrail.md`.
 - Cadence-aware streaks matter: punishing a "Mon/Wed/Fri" habit for Tuesday is a correctness bug that users read as cruelty.
 - Seed data is development-only.

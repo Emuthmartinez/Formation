@@ -21,9 +21,9 @@ Track:
 - Network visualization of invitation chains
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -33,5 +33,5 @@ shipping strings.
 - Code redemption gates registration — coordinate with prompt 02 (auth): the register page must validate the code before account creation.
 - "Inviter gets notified" routes through the notification system (prompt 04) and optionally an email via `resend-email-ops.md`.
 - The "invites become optional after public launch" toggle is a config/feature flag — record it so it is a deliberate switch, not a code change.
-- Add `invite_code_generated`, `invite_code_redeemed`, `invite_accepted` to `ANALYTICS.md`. The invitation tree feeds the launch cohort story in `growth/LAUNCH_NARRATIVE.md`.
+- Add `invite_code_generated`, `invite_code_redeemed`, `invite_accepted` to `analytics/ANALYTICS.md`. The invitation tree feeds the launch cohort story in `growth/LAUNCH_NARRATIVE.md`.
 </content>

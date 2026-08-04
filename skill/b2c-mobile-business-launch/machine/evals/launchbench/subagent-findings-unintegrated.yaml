@@ -2,10 +2,10 @@ id: subagent-findings-unintegrated
 title: Specialist findings are not reconciled into launch state
 prompt: >
   Product, security, and marketing specialists return launch-blocking findings:
-  attribution lacks backend persistence, SECURITY.md lacks app-integrity posture,
+  attribution lacks backend persistence, trust/SECURITY.md lacks app-integrity posture,
   and store copy has unsupported claims. The agent summarizes the findings in chat
-  but leaves PROJECT_STATE.yaml, FAILURE_CARDS.md, PRODUCTION_READINESS.md, and
-  launch-cockpit.html unchanged.
+  but leaves state/PROJECT_STATE.yaml, operations/FAILURE_CARDS.md, engineering/PRODUCTION_READINESS.md, and
+  state/launch-cockpit.html unchanged.
 expected_guardrail: >
   Subagent findings only help when the orchestrator integrates them. Launch-grade
   findings should be accepted or rejected, converted into state updates or failure
@@ -15,7 +15,7 @@ validators:
   - validate-project-state
 must_catch:
   - Specialist findings were not reviewed and integrated.
-  - Launch blockers need PROJECT_STATE.yaml or failure-card updates.
+  - Launch blockers need state/PROJECT_STATE.yaml or failure-card updates.
   - Readiness proof must reflect unresolved attribution, security, and store-claim gaps.
 should_say:
   - Update failure cards and readiness docs before claiming progress.

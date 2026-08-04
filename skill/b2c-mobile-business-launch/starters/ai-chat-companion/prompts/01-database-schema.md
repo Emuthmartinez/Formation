@@ -28,15 +28,15 @@ Output as SQL I can run directly in Supabase's SQL editor. If you include an
 embedding column, use pgvector and note the extension to enable.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- Reconcile with `TECH_SPEC.md` (data model, API contracts, RLS). RLS here is critical: conversations are private user data — every table (conversations, messages, usage, memory) needs a tested owner-only policy referenced from `SECURITY.md`.
+- Reconcile with `engineering/TECH_SPEC.md` (data model, API contracts, RLS). RLS here is critical: conversations are private user data — every table (conversations, messages, usage, memory) needs a tested owner-only policy referenced from `trust/SECURITY.md`.
 - Token counts per message are the metering substrate for prompt 06 and for cost analytics — store input/output tokens and the model, not just text.
 - The memory table (and any `pgvector` embeddings) is sensitive personal data — note retention and deletion in `privacy-terms.md`.
 - Keep the schema stable across variants; companion/character and voice-first add columns (persona, audio URL) rather than reshaping the core.

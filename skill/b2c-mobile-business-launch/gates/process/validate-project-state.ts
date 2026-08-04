@@ -31,7 +31,7 @@ if (state) {
   requireString(state, "updated_at", issues);
   const updatedAt = asString(getPath(state, "updated_at"));
   if (updatedAt && !/^\d{4}-\d{2}-\d{2}(?:T[\d:.+-]+Z?)?$/.test(updatedAt)) {
-    issues.push(issue("error", "updated_at.placeholder", "updated_at must be a concrete ISO date, not a placeholder.", "PROJECT_STATE.yaml"));
+    issues.push(issue("error", "updated_at.placeholder", "updated_at must be a concrete ISO date, not a placeholder.", "state/PROJECT_STATE.yaml"));
   }
   requireString(state, "project.name", issues);
   requireString(state, "project.slug", issues);
@@ -39,7 +39,7 @@ if (state) {
 
   const mode = asString(getPath(state, "autonomy.mode"));
   if (!mode || !autonomyModes.has(mode)) {
-    issues.push(issue("error", "autonomy.mode.invalid", `autonomy.mode must be one of ${Array.from(autonomyModes).join(", ")}.`, "PROJECT_STATE.yaml"));
+    issues.push(issue("error", "autonomy.mode.invalid", `autonomy.mode must be one of ${Array.from(autonomyModes).join(", ")}.`, "state/PROJECT_STATE.yaml"));
   }
 
   // Launch scope is optional (defaults to full) but must be a known value when present,
@@ -54,7 +54,7 @@ if (state) {
         "error",
         "project.launch_scope.invalid",
         `project.launch_scope must be one of ${acceptedLaunchScopeValues.join(", ")} when present.`,
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
   }
@@ -76,7 +76,7 @@ if (state) {
         "project.kickoff_date.missing",
         "project.kickoff_date is blank but the project is past orientation. Record the ISO date orient completed — without it the " +
           'pre-build clock can never surface a stall (launch-phases.md "The Pre-Build Clock").',
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
   }
@@ -92,7 +92,7 @@ if (state) {
           "error",
           "project.kickoff_date.invalid",
           `project.kickoff_date ("${kickoffRaw}") must be a real past ISO date (YYYY-MM-DD). An invalid or future date disarms the pre-build clock.`,
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
         ),
       );
     } else if (/^phase_[0-2]/.test((asString(getPath(state, "project.phase")) ?? "").toLowerCase())) {
@@ -105,7 +105,7 @@ if (state) {
             `This launch has been in pre-build phases for ${kickoffAgeDays} days (kickoff ${kickoffRaw}). Pre-build work is a means, not a residence — ` +
               `cut scope to essentials, re-run the Go/Pivot/Kill checkpoint, or record the deliberate founder choice to continue with a dated reason ` +
               `(see launch-phases.md "The Pre-Build Clock").`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       }
@@ -119,7 +119,7 @@ if (state) {
   for (const lane of requiredLanes) {
     const lanePath = `lanes.${lane}`;
     if (!isRecord(getPath(state, lanePath))) {
-      issues.push(issue("error", `${lanePath}.missing`, `${lanePath} is required.`, "PROJECT_STATE.yaml"));
+      issues.push(issue("error", `${lanePath}.missing`, `${lanePath} is required.`, "state/PROJECT_STATE.yaml"));
       continue;
     }
     requireStatus(state, `${lanePath}.status`, issues);
@@ -127,22 +127,22 @@ if (state) {
     const nonEmptyEvidence = evidence.filter((item) => (typeof item === "string" ? item.trim().length > 0 : Boolean(item)));
     for (const [index, evidenceItem] of evidence.entries()) {
       if (typeof evidenceItem === "string" && evidenceItem.trim().length === 0) {
-        issues.push(issue("error", `${lanePath}.evidence.${index}.blank`, `${lanePath}.evidence entries must not be blank.`, "PROJECT_STATE.yaml"));
+        issues.push(issue("error", `${lanePath}.evidence.${index}.blank`, `${lanePath}.evidence entries must not be blank.`, "state/PROJECT_STATE.yaml"));
       }
     }
     const status = asString(getPath(state, `${lanePath}.status`));
     if (status === "done" && nonEmptyEvidence.length === 0) {
-      issues.push(issue("error", `${lanePath}.done_without_evidence`, `${lanePath} cannot be done without evidence paths.`, "PROJECT_STATE.yaml"));
+      issues.push(issue("error", `${lanePath}.done_without_evidence`, `${lanePath} cannot be done without evidence paths.`, "state/PROJECT_STATE.yaml"));
     }
     const blockers = asArray(getPath(state, `${lanePath}.blockers`));
     const nonEmptyBlockers = blockers.filter((item) => (typeof item === "string" ? item.trim().length > 0 : Boolean(item)));
     for (const [index, blocker] of blockers.entries()) {
       if (typeof blocker === "string" && blocker.trim().length === 0) {
-        issues.push(issue("error", `${lanePath}.blockers.${index}.blank`, `${lanePath}.blockers entries must not be blank.`, "PROJECT_STATE.yaml"));
+        issues.push(issue("error", `${lanePath}.blockers.${index}.blank`, `${lanePath}.blockers entries must not be blank.`, "state/PROJECT_STATE.yaml"));
       }
     }
     if (status === "blocked" && nonEmptyBlockers.length === 0) {
-      issues.push(issue("error", `${lanePath}.blocked_without_blocker`, `${lanePath} is blocked but has no blocker.`, "PROJECT_STATE.yaml"));
+      issues.push(issue("error", `${lanePath}.blocked_without_blocker`, `${lanePath} is blocked but has no blocker.`, "state/PROJECT_STATE.yaml"));
     }
     if ((status === "deferred" || status === "not_needed") && nonEmptyBlockers.length === 0 && nonEmptyEvidence.length === 0) {
       issues.push(
@@ -150,7 +150,7 @@ if (state) {
           "error",
           `${lanePath}.${status}_without_reason`,
           `${lanePath} is ${status} but has no evidence or blocker/reason explaining why.`,
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
         ),
       );
     }
@@ -165,7 +165,7 @@ if (state) {
           "error",
           `${lanePath}.not_started_past_orient`,
           `${lanePath} is not_started but the project is past the orient phase (${currentPhase}). Start the lane, block it with a reason, or explicitly mark it not_needed or deferred.`,
-          "PROJECT_STATE.yaml",
+          "state/PROJECT_STATE.yaml",
         ),
       );
     }
@@ -181,7 +181,7 @@ if (state) {
             "warning",
             `${lanePath}.partial_no_evidence_no_blocker`,
             `${lanePath} is partial but has no evidence paths, no blockers, and no reason. Add an evidence path, a blocker, or a reason field to show intentional progress.`,
-            "PROJECT_STATE.yaml",
+            "state/PROJECT_STATE.yaml",
           ),
         );
       } else {
@@ -223,7 +223,7 @@ if (state) {
                 "error",
                 `${lanePath}.done_evidence_missing`,
                 `${lanePath} is done but local evidence path does not exist: ${evidencePath}.`,
-                "PROJECT_STATE.yaml",
+                "state/PROJECT_STATE.yaml",
               ),
             );
           }
@@ -240,7 +240,7 @@ if (state) {
               `${lanePath} evidence entry "${evidencePath}" is not a resolvable local path and not a URL/anchor reference. ` +
                 `If this is a human note, prefix it with "#" so its intent is explicit. ` +
                 `If it is a file path, ensure it contains a "/" or "." so existence can be verified.`,
-              "PROJECT_STATE.yaml",
+              "state/PROJECT_STATE.yaml",
             ),
           );
         }
@@ -255,25 +255,30 @@ if (state) {
         "error",
         "tools.missing",
         "tools must map provider names to route, docs, secrets, preflight, validation, and fallback state.",
-        "PROJECT_STATE.yaml",
+        "state/PROJECT_STATE.yaml",
       ),
     );
   } else {
     for (const [toolName, value] of Object.entries(tools)) {
       if (!isRecord(value)) {
-        issues.push(issue("error", `tools.${toolName}.invalid`, `tools.${toolName} must be an object.`, "PROJECT_STATE.yaml"));
+        issues.push(issue("error", `tools.${toolName}.invalid`, `tools.${toolName} must be an object.`, "state/PROJECT_STATE.yaml"));
         continue;
       }
       for (const field of ["route", "preflight", "validation", "fallback"]) {
         if (!asString(value[field])?.trim()) {
-          issues.push(issue("warning", `tools.${toolName}.${field}.missing`, `tools.${toolName}.${field} should be recorded.`, "PROJECT_STATE.yaml"));
+          issues.push(issue("warning", `tools.${toolName}.${field}.missing`, `tools.${toolName}.${field} should be recorded.`, "state/PROJECT_STATE.yaml"));
         }
       }
       const requiredSecrets = asArray(value.required_secrets);
       for (const secretName of requiredSecrets) {
         if (!asString(secretName)?.trim()) {
           issues.push(
-            issue("error", `tools.${toolName}.required_secrets.invalid`, `tools.${toolName}.required_secrets must contain names only.`, "PROJECT_STATE.yaml"),
+            issue(
+              "error",
+              `tools.${toolName}.required_secrets.invalid`,
+              `tools.${toolName}.required_secrets must contain names only.`,
+              "state/PROJECT_STATE.yaml",
+            ),
           );
         }
       }
@@ -283,13 +288,13 @@ if (state) {
   const activeCards = asArray(getPath(state, "failure_cards.active"));
   for (const [index, card] of activeCards.entries()) {
     if (!isRecord(card)) {
-      issues.push(issue("error", `failure_cards.active.${index}.invalid`, "Each active failure card must be an object.", "PROJECT_STATE.yaml"));
+      issues.push(issue("error", `failure_cards.active.${index}.invalid`, "Each active failure card must be an object.", "state/PROJECT_STATE.yaml"));
       continue;
     }
     for (const field of ["id", "severity", "owner", "status", "next_action"]) {
       if (!asString(card[field])?.trim()) {
         issues.push(
-          issue("error", `failure_cards.active.${index}.${field}.missing`, `Active failure card ${index} is missing ${field}.`, "PROJECT_STATE.yaml"),
+          issue("error", `failure_cards.active.${index}.${field}.missing`, `Active failure card ${index} is missing ${field}.`, "state/PROJECT_STATE.yaml"),
         );
       }
     }

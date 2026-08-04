@@ -60,7 +60,7 @@ It also correctly identified several concrete defects:
 - the validator grades text that the same helper generated to satisfy it
 - workflow dependencies are declared rather than mechanically tested
 - context packs are domain-wide instead of node-bounded
-- no code computes a ready frontier from `PROJECT_STATE.yaml`
+- no code computes a ready frontier from `state/PROJECT_STATE.yaml`
 - the existing gates are the anchors that can keep an agent graph grounded
 - fresh-context verification is required for judgment work
 - the skill should emit plans for runtimes rather than grow a long-running service
@@ -144,7 +144,7 @@ outputs: ArtifactWrite[];
 ```
 
 Paths remain on `ArtifactDefinition`. A compiler binds an `ArtifactId` to the current launch
-path. Renaming `RESEARCH.md` must not silently change the identity of the research evidence.
+path. Renaming `strategy/RESEARCH.md` must not silently change the identity of the research evidence.
 
 ### 2. Data flow is only one edge kind
 
@@ -205,7 +205,7 @@ remain a separate warning system.
 
 ### 5. Shared state will erase the proposed parallelism unless it gets one owner
 
-The generic workflow action currently tells every node to update `PROJECT_STATE.yaml`. That makes
+The generic workflow action currently tells every node to update `state/PROJECT_STATE.yaml`. That makes
 all 57 workflows writers to the same mutable resource. A scheduler that models this honestly
 would serialize almost everything.
 
@@ -213,8 +213,8 @@ Workers should return immutable results, evidence, and a proposed state patch. A
 state-reconcile reducer, owned by the orchestrator, applies accepted patches transactionally.
 The same single-owner rule applies to:
 
-- `PROJECT_STATE.yaml`
-- `launch-cockpit.html`
+- `state/PROJECT_STATE.yaml`
+- `state/launch-cockpit.html`
 - git staging, integration, commits, merges, and releases
 - provider and account mutations
 - shared simulator or device sessions
@@ -293,7 +293,7 @@ It does not contain business-instance status or run attempts.
 Compiled for one launch from:
 
 - the definition graph version
-- `PROJECT_STATE.yaml`
+- `state/PROJECT_STATE.yaml`
 - launch scope
 - app archetype
 - selected platforms
@@ -497,7 +497,7 @@ File equality is too weak for safety. These all conflict even when their strings
 - two App Store Connect mutations
 - two sessions controlling one simulator
 - any worker and the orchestrator both mutating git state
-- any worker and the state reducer both writing `PROJECT_STATE.yaml`
+- any worker and the state reducer both writing `state/PROJECT_STATE.yaml`
 
 Define stable resources such as:
 
@@ -712,7 +712,7 @@ After parity, remove or replace:
 - manually assembled file-to-unit and serialized-unit maps
 - the prose stage-to-runtime-pattern table as an execution source
 - hand-typed `continuity.next_action` as source truth
-- direct worker writes to `PROJECT_STATE.yaml`
+- direct worker writes to `state/PROJECT_STATE.yaml`
 - the ordered audit plan as a second scheduler definition
 - any runtime-specific script treated as canonical topology
 
@@ -750,7 +750,7 @@ The graph is fully adopted only when all of these are true:
 11. Every runtime adapter preserves the same node states, gates, and evidence contract.
 12. Every worker context is bounded, permissioned, and independent where verification requires it.
 13. The orchestrator is the sole integration and canonical-state owner.
-14. `PROJECT_STATE.yaml`, the cockpit, the run trace, and the computed frontier reconcile.
+14. `state/PROJECT_STATE.yaml`, the cockpit, the run trace, and the computed frontier reconcile.
 15. No hand-authored dependency map or task list competes with the compiled plan.
 16. LaunchBench contains fixtures for edges, joins, retries, loops, collisions, interrupts,
     staleness, verifier isolation, adapter parity, and silent node failure.
@@ -763,7 +763,7 @@ The graph is fully adopted only when all of these are true:
 - Do not use file paths as stable dependency identities.
 - Do not model every constraint as an artifact edge.
 - Do not convert resource collisions into permanent topology.
-- Do not let every worker mutate `PROJECT_STATE.yaml`.
+- Do not let every worker mutate `state/PROJECT_STATE.yaml`.
 - Do not equate file existence with accepted completion.
 - Do not make a model-generated plan its own proof.
 - Do not hard-code one vendor's workflow API into the definition graph.

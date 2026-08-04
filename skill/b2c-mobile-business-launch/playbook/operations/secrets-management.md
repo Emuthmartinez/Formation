@@ -37,7 +37,7 @@ Record in `SECRETS.md`:
 - command differences between live docs, local CLI help, this skill, or old project docs
 - live-environment auth model: service token, provider integration, OIDC, or platform-native secret store
 
-Also record the matching provider state in `PROJECT_STATE.yaml`: docs checked date, required secret names, preflight, validation command/proof, fallback limitation, and blocked founder actions.
+Also record the matching provider state in `state/PROJECT_STATE.yaml`: docs checked date, required secret names, preflight, validation command/proof, fallback limitation, and blocked founder actions.
 
 If current official docs or CLI help cannot be reached, mark setup as `blocked: docs refresh needed` or `provisional: docs unavailable`. Do not invent install, login, service-token, or deploy commands from memory.
 
@@ -55,7 +55,7 @@ Create or update `SECRETS.md` whenever any service in the launch needs a secret 
 - new-secret routing log: what introduced the secret, where it was stored, which docs/tests were updated, and who owns it
 - blocked founder actions: secrets or account steps the agent cannot complete
 - proof notes: secret-manager location and command evidence, never raw values
-- corresponding `PROJECT_STATE.yaml` provider status for every material provider
+- corresponding `state/PROJECT_STATE.yaml` provider status for every material provider
 
 Recommended repo files:
 - `SECRETS.md`: committed, names and locations only
@@ -63,7 +63,7 @@ Recommended repo files:
 - `.env.example`: committed names only, no values
 - `.env`, `.env.local`, `.env.*.local`, service-account JSON, `.p8`, `.p12`, `.mobileprovision`, raw keys, tokens, and downloaded credential files: ignored or stored outside git
 
-Use `business/secrets/` as a starting point when available.
+Use `business/trust/secrets/` as a starting point when available.
 
 ## Secret Discovery Loop
 
@@ -72,8 +72,8 @@ When a new secret appears during research, setup, or implementation:
 2. Add the name to `SECRETS.md` with service, class, environment, runtime surface, owner, and status.
 3. Route it to Doppler or the founder-approved provider before running commands that require it.
 4. Update `.env.example` with the name only when the repo needs a local schema.
-5. Update `AGENTS.md`, `TECH_SPEC.md`, `ENGINEERING_PLAN.md`, provider ops docs, and `PRODUCTION_READINESS.md` if behavior or verification changes.
-6. Update `PROJECT_STATE.yaml` and rerender `launch-cockpit.html`.
+5. Update `AGENTS.md`, `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, provider ops docs, and `engineering/PRODUCTION_READINESS.md` if behavior or verification changes.
+6. Update `state/PROJECT_STATE.yaml` and rerender `state/launch-cockpit.html`.
 7. Run or record a secret scan before handoff.
 
 Do not leave new secrets as ad hoc shell exports, pasted chat values, committed `.env` values, screenshots, raw logs, or untracked setup steps.
@@ -96,7 +96,7 @@ Public does not mean harmless. If a token can write, mutate, impersonate, bill, 
 
 **Config name preflight (never guess):** Before constructing any `doppler run --project <name> --config <config>` command, resolve the actual config name. Config names are project-specific and do not follow a universal convention — "prod" and "prd" are both common and the wrong one causes a hard error. Resolve in this priority order:
 1. Read the project's `SECRETS.md` config map — it is the canonical record.
-2. Read `STORE_CONSOLE.md` if it contains Doppler snippets; those snippets are written from a working session.
+2. Read `store/STORE_CONSOLE.md` if it contains Doppler snippets; those snippets are written from a working session.
 3. Run `doppler configs --project <name>` to list all real config names in the project.
 Never construct a `doppler run` command with a config name sourced from memory, a different project's docs, or a prior session transcript. Record the resolved config name in `SECRETS.md` if it is missing.
 
@@ -106,7 +106,7 @@ Never construct a `doppler run` command with a config name sourced from memory, 
 ```bash
 VAR=$(awk -F= '/^KEY_NAME=/{print $2}' /path/to/file.env)
 ```
-For multiline values such as a `.p8` private key, never extract the raw value into a shell variable or print it. Read the file path directly or route through Doppler. Document the extraction command in `SECRETS.md`; do not commit awk/grep extraction snippets that print raw credential values in `STORE_CONSOLE.md` or any committed markdown.
+For multiline values such as a `.p8` private key, never extract the raw value into a shell variable or print it. Read the file path directly or route through Doppler. Document the extraction command in `SECRETS.md`; do not commit awk/grep extraction snippets that print raw credential values in `store/STORE_CONSOLE.md` or any committed markdown.
 
 **JS template literals inside `doppler run -- bash -lc`:** When a command passed to `doppler run -- bash -lc '...'` contains JavaScript template literals (`${...}`, `` `...` ``), the outer bash shell expands the `${...}` before Doppler injects secrets, causing "bad substitution" or silent empty-string substitution. Use one of these patterns instead:
 - Use a single-quoted heredoc to pass a Node script (`doppler run -- node --input-type=module <<'NODE' ... NODE`). Single-quoting the heredoc delimiter prevents bash expansion; Doppler injects environment variables and Node sees them as `process.env.*`.
@@ -123,7 +123,7 @@ Local development:
 - Authenticate locally with `doppler login`; this is a founder/operator action when browser login or account access is required.
 - Run `doppler me` to confirm the active account before secrets work.
 - Run `doppler setup` at the repo root or configured app folder. Use `doppler.yaml` only for non-secret project/config/path hints.
-- Before constructing `doppler run --project X --config Y`, verify the config name from `SECRETS.md`, `STORE_CONSOLE.md`, or `doppler configs --project X`. Never guess the config name.
+- Before constructing `doppler run --project X --config Y`, verify the config name from `SECRETS.md`, `store/STORE_CONSOLE.md`, or `doppler configs --project X`. Never guess the config name.
 - Run commands as `doppler run -- <command>`, for example `doppler run -- pnpm dev`, `doppler run -- npm test`, or `doppler run -- wrangler deploy`.
 - Use `doppler run --watch -- <command>` only when the plan supports it and the current Doppler plan/docs allow it.
 - For one-off command strings that reference variables, escape variables or use single quotes so the shell does not expand before Doppler injects values.
@@ -172,7 +172,7 @@ Before beta, store submission, or production launch:
 - Frontend bundles expose only documented public client config.
 - Release/staging builds prove mocks are disabled and secrets are not bundled.
 - Rotation/revocation notes exist for live keys, webhook secrets, social/Fastlane keys, store credentials, and deploy tokens.
-- `PROJECT_STATE.yaml` and `launch-cockpit.html` show provider status and required secret names without exposing values.
+- `state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` show provider status and required secret names without exposing values.
 
 ## Common Failure Modes
 
@@ -184,8 +184,8 @@ Flag these aggressively:
 - a public `NEXT_PUBLIC_`, `PUBLIC_`, `EXPO_PUBLIC_`, or mobile plist value contains a server secret
 - service-account JSON, `.p8`, `.p12`, provisioning files, SSH keys, or OAuth refresh tokens are committed
 - CI/deploy works only from a developer shell because the agent forgot launch-time environment differs from interactive shell
-- `PROJECT_STATE.yaml` says provider setup is done even though `SECRETS.md`, CI injection, or command wrappers are missing
+- `state/PROJECT_STATE.yaml` says provider setup is done even though `SECRETS.md`, CI injection, or command wrappers are missing
 - `doppler run --config` uses a guessed config name (such as "prod" instead of "prd") without reading `SECRETS.md` or running `doppler configs` first
 - `source` or `.` is used on a `.env` or credential file containing prose, multiline values, or non-POSIX assignment syntax
-- a committed markdown file (`STORE_CONSOLE.md` or similar) contains an awk/grep/shell snippet that extracts and prints a raw credential value from a `.env` or `.p8` file
+- a committed markdown file (`store/STORE_CONSOLE.md` or similar) contains an awk/grep/shell snippet that extracts and prints a raw credential value from a `.env` or `.p8` file
 - JavaScript template literals are nested inside a double-quoted bash heredoc passed to `doppler run -- bash -lc`, causing silent bash expansion before Doppler injection

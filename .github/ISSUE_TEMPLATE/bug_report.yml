@@ -13,7 +13,7 @@ body:
       label: What happened
       description: What the skill or a validator did, and what you expected instead.
       placeholder: |
-        `check:revenue` failed on a repo where REVENUE_OPS.md has every required section.
+        `check:revenue` failed on a repo where revenue/REVENUE_OPS.md has every required section.
     validations:
       required: true
 

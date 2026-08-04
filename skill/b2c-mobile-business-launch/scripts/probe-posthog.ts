@@ -21,7 +21,7 @@
  *   so the validator can distinguish a real probe output from hand-typed JSON.
  *   Acknowledging the limitation: "probe":"posthog@1" is a raised bar, not an
  *   unforgeable proof — a founder could hand-write the JSON. Founder approval
- *   (PROVIDER_PROOF.md sign-off) is the ultimate backstop.
+ *   (operations/PROVIDER_PROOF.md sign-off) is the ultimate backstop.
  *
  * USAGE (run via Doppler so the API key is injected from the vault)
  * -------

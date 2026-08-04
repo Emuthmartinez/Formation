@@ -6,7 +6,7 @@ These are **starting prompts**, not final code. Improve them per project. Each p
 
 ## How to use
 
-1. Confirm the product shape with the founder via **AskUserQuestion** (content format, primary surface, optional systems, niche) — see the reference. Record it in `PROJECT_STATE.yaml`.
+1. Confirm the product shape with the founder via **AskUserQuestion** (content format, primary surface, optional systems, niche) — see the reference. Record it in `state/PROJECT_STATE.yaml`.
 2. **Copy the runnable starter** ([`starter/`](starter/README.md)) into the business repo and install it — it is the pre-wired floor (auth, tested RLS migrations, PostHog event catalog, Stripe/RevenueCat stubs, names-only `.env.example`, CI). Do not regenerate this wiring from scratch; `check:archetype-starter` enforces its contract.
 3. Run prompt **00** strategy work on the web interface / Claude.ai (it is about people, not systems).
 4. Run prompts **01 → 04** in order as Claude Code build prompts against the starter (the starter README maps each prompt to the scaffold area it customizes). Build one system, test it, then move on.
@@ -15,7 +15,7 @@ These are **starting prompts**, not final code. Improve them per project. Each p
 
 ## Default stack
 
-Next.js App Router + Supabase (Postgres, Auth, Realtime, Storage) + Vercel, with Stripe for web monetization and Mux/Cloudflare Stream for video. Confirm and record these in `TOOL_DECISIONS.md` / `SECRETS.md`; do not assume. For a native-mobile primary surface, the schema/RLS/realtime/storage prompts carry over but the client prompts must be adapted and the Apple/Play store lanes apply.
+Next.js App Router + Supabase (Postgres, Auth, Realtime, Storage) + Vercel, with Stripe for web monetization and Mux/Cloudflare Stream for video. Confirm and record these in `strategy/TOOL_DECISIONS.md` / `SECRETS.md`; do not assume. For a native-mobile primary surface, the schema/RLS/realtime/storage prompts carry over but the client prompts must be adapted and the Apple/Play store lanes apply.
 
 ## Build order
 

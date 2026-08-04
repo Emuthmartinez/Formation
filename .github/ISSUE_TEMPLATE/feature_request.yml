@@ -53,7 +53,7 @@ body:
       description: |
         The house rule is enforcement over reminders. If this can only be a longer instruction and never a check, say so and explain why.
       placeholder: |
-        A new check in check-revenue.ts comparing REVENUE_OPS.md trial length against the product mapping in STORE_CONSOLE.md, with positive and negative fixtures.
+        A new check in check-revenue.ts comparing revenue/REVENUE_OPS.md trial length against the product mapping in store/STORE_CONSOLE.md, with positive and negative fixtures.
     validations:
       required: true
 

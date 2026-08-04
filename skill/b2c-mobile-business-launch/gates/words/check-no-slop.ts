@@ -70,24 +70,24 @@ const rules = loadNoSlopRules(referencePath);
  * because a store subtitle or an ad headline has no room for one.
  */
 const shippedSurfaces: { relative: string; shortCopy: boolean }[] = [
-  { relative: "launch-cockpit.html", shortCopy: true },
-  { relative: "BUSINESS_ACCESS.md", shortCopy: false },
-  { relative: "onboarding.html", shortCopy: true },
-  { relative: "design-room.html", shortCopy: true },
-  { relative: "BRAND.md", shortCopy: false },
-  { relative: "DESIGN.md", shortCopy: false },
-  { relative: "COPY_BRIEF.md", shortCopy: false },
-  { relative: "COPY_DECK.md", shortCopy: false },
-  { relative: "ONBOARDING.md", shortCopy: false },
-  { relative: "REVENUE_OPS.md", shortCopy: false },
-  { relative: "EMAIL_OPS.md", shortCopy: false },
+  { relative: "state/launch-cockpit.html", shortCopy: true },
+  { relative: "operations/BUSINESS_ACCESS.md", shortCopy: false },
+  { relative: "product/onboarding.html", shortCopy: true },
+  { relative: "design/design-room.html", shortCopy: true },
+  { relative: "strategy/BRAND.md", shortCopy: false },
+  { relative: "design/DESIGN.md", shortCopy: false },
+  { relative: "product/copy/COPY_BRIEF.md", shortCopy: false },
+  { relative: "product/copy/COPY_DECK.md", shortCopy: false },
+  { relative: "product/ONBOARDING.md", shortCopy: false },
+  { relative: "revenue/REVENUE_OPS.md", shortCopy: false },
+  { relative: "growth/EMAIL_OPS.md", shortCopy: false },
   { relative: "growth/LAUNCH_NARRATIVE.md", shortCopy: false },
   { relative: "growth/VIRAL_GROWTH.md", shortCopy: false },
   { relative: "growth/PAID_UA.md", shortCopy: false },
-  { relative: "UGC_PLAYBOOK.md", shortCopy: false },
-  { relative: "app-store-listing/APP_STORE_LISTING.md", shortCopy: true },
-  { relative: "11-star-experience/11_STAR_EXPERIENCE.md", shortCopy: false },
-  { relative: "emotional-design/EMOTIONAL_DESIGN.md", shortCopy: false },
+  { relative: "growth/UGC_PLAYBOOK.md", shortCopy: false },
+  { relative: "store/app-store-listing/APP_STORE_LISTING.md", shortCopy: true },
+  { relative: "product/experience/11-star-experience/11_STAR_EXPERIENCE.md", shortCopy: false },
+  { relative: "product/experience/emotional-design/EMOTIONAL_DESIGN.md", shortCopy: false },
 ];
 
 for (const surface of shippedSurfaces) {
@@ -112,7 +112,7 @@ for (const surface of shippedSurfaces) {
 const repoDocs: { relative: string; severity: "error" | "warning" }[] = [
   { relative: "README.md", severity: "error" },
   { relative: "CONTRIBUTING.md", severity: "error" },
-  { relative: ".github/SECURITY.md", severity: "error" },
+  { relative: ".github/trust/SECURITY.md", severity: "error" },
   { relative: ".github/CODE_OF_CONDUCT.md", severity: "error" },
   { relative: "AGENTS.md", severity: "warning" },
   { relative: "CLAUDE.md", severity: "warning" },

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 // Generation pipeline entrypoint (prompt 04). Deliberately provider-agnostic:
 // the AI media provider is a founder-gated decision (paid-tool-routing.md,
-// recorded in TOOL_DECISIONS.md) and its key stays server-side as
+// recorded in strategy/TOOL_DECISIONS.md) and its key stays server-side as
 // MEDIA_GENERATION_API_KEY, routed per secrets-management.md. This route
 // records the generation row + usage event; the actual inference call is
 // wired in by prompt 04 once the provider is approved.

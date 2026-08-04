@@ -24,18 +24,18 @@ Also add:
 - Monthly payout to creators via Stripe Connect
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
 - **Reconcile with `revenue-monetization.md` before building.** Confirm the price points, plan mix, and paywall model against that lane's anti-pattern digest (do not soft-paywall by reflex; test annual vs monthly) — pricing/plan changes are founder-gated.
-- The webhook **signing secret** and Stripe API keys are secrets — route through `SECRETS.md`. Verify webhook signatures; treat the webhook as an abuse surface in `SECURITY.md`.
+- The webhook **signing secret** and Stripe API keys are secrets — route through `SECRETS.md`. Verify webhook signatures; treat the webhook as an abuse surface in `trust/SECURITY.md`.
 - "Subscription status checked on each request" should read a cached entitlement, not call Stripe per request. Reconcile entitlement identity with `revenue-monetization.md`.
 - The free→paid upgrade prompt is an onboarding/paywall-timing decision — run `onboarding-conversion.md`; show it at a real value moment, not on first open.
-- Creator payouts via **Stripe Connect** require connected-account onboarding and KYC — flag the founder-only gates (platform terms, tax, payout schedule) and record them in `REVENUE_OPS.md`.
-- Add `paywall_viewed`, `checkout_started`, `subscription_activated`, `subscription_cancelled`, `creator_support_sent` to `ANALYTICS.md`.
+- Creator payouts via **Stripe Connect** require connected-account onboarding and KYC — flag the founder-only gates (platform terms, tax, payout schedule) and record them in `revenue/REVENUE_OPS.md`.
+- Add `paywall_viewed`, `checkout_started`, `subscription_activated`, `subscription_cancelled`, `creator_support_sent` to `analytics/ANALYTICS.md`.
 </content>

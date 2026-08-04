@@ -21,7 +21,7 @@ Load `eleven-star-experience.md` first. The star ladder defines the target emoti
 
 Every B2C mobile app built with this skill must implement all four Experience Cards. They are not optional polish — they are the mechanics that separate a 6-star ("better than expected") product from a 5-star commodity.
 
-For each card: implement the pattern, emit the named PostHog event, verify the bright line, and record evidence in `PRODUCTION_READINESS.md`.
+For each card: implement the pattern, emit the named PostHog event, verify the bright line, and record evidence in `engineering/PRODUCTION_READINESS.md`.
 
 ---
 
@@ -57,7 +57,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 - Bright side: the variation reflects real personalization, discovery, or learning — the user genuinely does not know which insight or result they will see, and every possible result serves their goal.
 - Dark side: simulated variation (randomized label on identical outcomes), artificial delay on a pre-computed result with no real variance, or loot-box mechanics where paid money buys uncertain outcomes. Gambling-adjacent mechanics in apps rated 4+ are a platform policy violation and a skill-level compliance veto.
 
-**Guardrail (deterministic).** The result must be genuinely variable in content, not only in cosmetic framing. If the same user action always produces an identical backend result, the animation is deceptive. Implementation must pass a test where two consecutive completions of the same action produce observably different content outputs at least 30% of the time, OR the product can demonstrate that variation is real but unlikely to occur on consecutive attempts due to personalization convergence. Record the proof method in `PRODUCTION_READINESS.md`.
+**Guardrail (deterministic).** The result must be genuinely variable in content, not only in cosmetic framing. If the same user action always produces an identical backend result, the animation is deceptive. Implementation must pass a test where two consecutive completions of the same action produce observably different content outputs at least 30% of the time, OR the product can demonstrate that variation is real but unlikely to occur on consecutive attempts due to personalization convergence. Record the proof method in `engineering/PRODUCTION_READINESS.md`.
 
 **PostHog events.** `variable_reward_anticipation_started` with `surface`, `reward_type`, `flow_id`; `variable_reward_revealed` with `surface`, `reward_type`, `reward_variant`, `anticipation_duration_ms`.
 
@@ -77,7 +77,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 - Bright side: the displayed steps correspond to real computational steps (even if re-paced), and the final output is genuinely assembled from the user's inputs. The delay creates appreciation.
 - Dark side: a purely cosmetic spinner on a pre-rendered result with zero relationship between the displayed steps and the actual computation. If the product team can ship a result in 50ms but adds a 4s spinner with fake steps, that is a deceptive dark pattern even if the result is accurate.
 
-**Guardrail (deterministic).** At least 50% of the displayed processing steps must correspond to a real computational operation (data fetch, model inference, sorting, filtering, formatting, or rendering). The product spec must document the step-to-operation map in `TECH_SPEC.md`. If this cannot be verified, use a simpler loading state instead.
+**Guardrail (deterministic).** At least 50% of the displayed processing steps must correspond to a real computational operation (data fetch, model inference, sorting, filtering, formatting, or rendering). The product spec must document the step-to-operation map in `engineering/TECH_SPEC.md`. If this cannot be verified, use a simpler loading state instead.
 
 **PostHog events.** `perceived_effort_started` with `surface`, `effort_type`, `step_count`; `perceived_effort_completed` with `surface`, `effort_type`, `step_count`, `total_duration_ms`, `real_step_ratio`.
 
@@ -97,7 +97,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 - Bright side: the mirror reflects the user's actual stated words or selections, back to them, in a way that serves their goal. It creates recognition and trust.
 - Dark side: manufactured emotional urgency ("You said you were failing — don't give up now"), manipulative guilt ("Remember why you started?"), or mirror language that escalates anxiety to drive a purchase. These are dark patterns and a compliance veto.
 
-**Guardrail (deterministic).** The mirrored content must use only fields the user explicitly provided (answer selections, free text, goal statements, commitment values). It must never infer or manufacture emotional states the user did not express. The implementation must be reviewed against `BRAND.md §Voice` to ensure the tone is warm, not coercive. The mirror must not be followed by a paywall or hard CTA in the same screen. Record the trigger source and content source in `PRODUCTION_READINESS.md`.
+**Guardrail (deterministic).** The mirrored content must use only fields the user explicitly provided (answer selections, free text, goal statements, commitment values). It must never infer or manufacture emotional states the user did not express. The implementation must be reviewed against `strategy/BRAND.md §Voice` to ensure the tone is warm, not coercive. The mirror must not be followed by a paywall or hard CTA in the same screen. Record the trigger source and content source in `engineering/PRODUCTION_READINESS.md`.
 
 **PostHog events.** `intent_mirror_shown` with `surface`, `mirror_type`, `source_field`, `trigger_context`; `intent_mirror_continued` with `surface`, `next_action`.
 
@@ -229,7 +229,7 @@ with itself across two files is worse than one that lives in a single place.
 
 ## Analytics Events For Emotional Moments
 
-Add these to `ANALYTICS.md` before implementation. Do not invent event names outside this catalog without first adding the candidate to `ANALYTICS.md`.
+Add these to `analytics/ANALYTICS.md` before implementation. Do not invent event names outside this catalog without first adding the candidate to `analytics/ANALYTICS.md`.
 
 ```
 commitment_made            surface, commitment_type, commitment_value, flow_id, step_id
@@ -255,7 +255,7 @@ Every emotional moment must be expressed in motion. Motion is a delight lever pe
 
 **Mobile binary.** Use native animation from `DesignTokens.Motion` on SwiftUI/Flutter/React Native Reanimated. Do not hardcode durations or easing values — reference the token.
 
-**Reduced-motion requirement.** Every delight moment that uses animation must implement a `prefers-reduced-motion` / OS reduce-motion check. The fallback must be a functional, non-animated version of the same interaction. Record fallback implementation for each card in `TECH_SPEC.md`.
+**Reduced-motion requirement.** Every delight moment that uses animation must implement a `prefers-reduced-motion` / OS reduce-motion check. The fallback must be a functional, non-animated version of the same interaction. Record fallback implementation for each card in `engineering/TECH_SPEC.md`.
 
 **Timing guidance for each card:**
 - Commitment Card echo: use a soft fade or gentle highlight (duration: `motion.durationFast`, 120ms) when the commitment value is reflected back.
@@ -282,10 +282,10 @@ severity: "high"
 owner: "product-leader"
 status: "open"
 evidence:
-  - "TECH_SPEC.md"
-  - "PRODUCTION_READINESS.md"
+  - "engineering/TECH_SPEC.md"
+  - "engineering/PRODUCTION_READINESS.md"
 impact: "App is missing one or more required Experience Cards. Emotional engagement below 6-star threshold."
-next_action: "Implement all four Experience Cards (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring). Emit named PostHog events for each. Record bright-line compliance in PRODUCTION_READINESS.md."
+next_action: "Implement all four Experience Cards (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring). Emit named PostHog events for each. Record bright-line compliance in engineering/PRODUCTION_READINESS.md."
 validator: "npm run check:emotional-design -- --root ."
 ```
 
@@ -295,9 +295,9 @@ severity: "critical"
 owner: "product-leader"
 status: "open"
 evidence:
-  - "PRODUCTION_READINESS.md"
+  - "engineering/PRODUCTION_READINESS.md"
 impact: "One or more Experience Cards cross the bright line into manipulation. Platform policy violation risk and skill-level compliance veto."
-next_action: "Identify which card crosses the bright line using the checklist in emotional-experience-design.md §Bright Line. Fix or remove the mechanic. Record resolution in PRODUCTION_READINESS.md."
+next_action: "Identify which card crosses the bright line using the checklist in emotional-experience-design.md §Bright Line. Fix or remove the mechanic. Record resolution in engineering/PRODUCTION_READINESS.md."
 validator: "npm run check:emotional-design -- --root ."
 ```
 
@@ -319,9 +319,9 @@ severity: "medium"
 owner: "engineering-leader"
 status: "open"
 evidence:
-  - "ANALYTICS.md"
+  - "analytics/ANALYTICS.md"
 impact: "Experience Card is implemented but emits no PostHog event. Emotional moments are unmeasurable."
-next_action: "Add missing events to ANALYTICS.md. Implement event emission for each Experience Card trigger and reveal. Verify events appear in PostHog activity view."
+next_action: "Add missing events to analytics/ANALYTICS.md. Implement event emission for each Experience Card trigger and reveal. Verify events appear in PostHog activity view."
 validator: "npm run check:attribution -- --root ."
 ```
 
@@ -331,9 +331,9 @@ severity: "medium"
 owner: "engineering-leader"
 status: "open"
 evidence:
-  - "TECH_SPEC.md"
+  - "engineering/TECH_SPEC.md"
 impact: "Experience Card animation has no prefers-reduced-motion fallback. Accessibility non-compliance."
-next_action: "Implement prefers-reduced-motion / OS reduce-motion check for each animated Experience Card moment. Record fallback behavior in TECH_SPEC.md."
+next_action: "Implement prefers-reduced-motion / OS reduce-motion check for each animated Experience Card moment. Record fallback behavior in engineering/TECH_SPEC.md."
 validator: "npm run check:design-room -- --root ."
 ```
 

@@ -1,4 +1,4 @@
-// Every user-facing string in the starter lives here, keyed the way COPY_DECK.md
+// Every user-facing string in the starter lives here, keyed the way product/copy/COPY_DECK.md
 // keys the product's words — the key here becomes the localization key later.
 // The copy pass replaces these values from the deck; when localizing, lift this
 // module into the stack's resource format (next-intl messages, i18next resources).

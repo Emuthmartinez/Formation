@@ -34,16 +34,16 @@ Make thresholds and policy config-driven; log moderation decisions as counts
 and categories, never retaining blocked content beyond legal requirements.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
-- **This prompt is a release gate in `PRODUCTION_READINESS.md`:** do not call the app launch-ready from a working pipeline alone, and do not run a public launch — or even an open beta — before it ships. App Review rejects AI-generation apps without a moderation story; have the filtering, reporting, and age-rating answers written down before submission (`app-store-listing-prep.md`, `security-release-hardening.md`).
-- CSAM detection and reporting is a legal obligation, not a product choice. The screening provider is a paid-tool decision (`paid-tool-routing.md` → `TOOL_DECISIONS.md`); its keys route through `SECRETS.md`.
+- **This prompt is a release gate in `engineering/PRODUCTION_READINESS.md`:** do not call the app launch-ready from a working pipeline alone, and do not run a public launch — or even an open beta — before it ships. App Review rejects AI-generation apps without a moderation story; have the filtering, reporting, and age-rating answers written down before submission (`app-store-listing-prep.md`, `security-release-hardening.md`).
+- CSAM detection and reporting is a legal obligation, not a product choice. The screening provider is a paid-tool decision (`paid-tool-routing.md` → `strategy/TOOL_DECISIONS.md`); its keys route through `SECRETS.md`.
 - The rights posture and likeness-consent policy live in `privacy-terms.md`: training-data answers, output ownership, the no-training-on-uploads default, retention/deletion of faces (biometric-adjacent data), and provider-side copy handling from prompt 04.
 - Deceptive intimate imagery and impersonation are `ethics-guardrail.md` compliance vetoes — a product that knowingly enables them does not ship, regardless of revenue. The takedown path is the user-facing escape hatch and threads back to shared-copy revocation in prompt 07.
-- Add `upload_blocked`, `output_blocked`, `prompt_blocked`, `report_submitted`, `takedown_completed` to `ANALYTICS.md` (counts and categories, never content).
+- Add `upload_blocked`, `output_blocked`, `prompt_blocked`, `report_submitted`, `takedown_completed` to `analytics/ANALYTICS.md` (counts and categories, never content).

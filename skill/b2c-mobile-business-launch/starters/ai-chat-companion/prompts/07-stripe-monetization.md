@@ -19,16 +19,16 @@ Implement:
 5. The upgrade prompt shown when a free user hits the limit links to Checkout
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
 ## Skill-integration notes
 
 - **Reconcile with `revenue-monetization.md` first**: tier, price, what the paywall gates, and free-vs-paid caps. Confirm against the lane's anti-pattern digest (don't soft-paywall by reflex; consider annual). Pricing/plan changes are founder-gated.
-- Webhook **signing secret** and Stripe keys route through `SECRETS.md`; verify webhook signatures and treat the webhook as an abuse surface in `SECURITY.md`. Make subscription updates idempotent.
+- Webhook **signing secret** and Stripe keys route through `SECRETS.md`; verify webhook signatures and treat the webhook as an abuse surface in `trust/SECURITY.md`. Make subscription updates idempotent.
 - Entitlement identity (which user a Stripe customer maps to) must be reconciled with `revenue-monetization.md`; the metering check reads a cached entitlement, not Stripe live.
-- Add `checkout_started`, `subscription_activated`, `subscription_cancelled`, `payment_failed` to `ANALYTICS.md`; pair with the usage funnel for LTV/CPA.
+- Add `checkout_started`, `subscription_activated`, `subscription_cancelled`, `payment_failed` to `analytics/ANALYTICS.md`; pair with the usage funnel for LTV/CPA.
 </content>

@@ -35,9 +35,9 @@ Design: calm and focused. The check-in animation must respect
 prefers-reduced-motion with a non-animated completed state.
 
 Strings: every user-facing label, headline, button, empty state, and error
-comes from COPY_DECK.md (author missing rows first — voice from COPY_BRIEF.md,
+comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
 craft from playbook/words/conversion-copy.md), typed via the externalized resource
-named in TECH_SPEC.md. Example copy in this prompt is voice guidance, not
+named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
 
@@ -46,5 +46,5 @@ shipping strings.
 - **This is the 11-star magical moment.** Run `eleven-star-experience.md` over it: the tap → instant flip → streak tick is the engineered moment that decides whether the app feels alive. Name it in `11_STAR_EXPERIENCE.md` with its PostHog event and the reduced-motion fallback (`consumer-product-design-agency.md`, `emotional-design-system.md`).
 - **Two Experience Cards apply, and one is HIGH-risk.** The check-in maps to the **Commitment** card (the user acts on their own stated goal). The streak display maps to the **Streak / Loss Aversion** card, which is HIGH-risk per `ethics-guardrail.md` and requires, before ship: an `ethics_attestation`, a `user_control_escape_hatch` (the streak freeze/repair built in prompt 04), a `counter_metric` (e.g. streak-anxiety signals: undo-then-redo churn, late-night panic check-ins), and a truthfulness proof (streaks derived from real check-ins, never inflated). The attestation block lives in the emotional-design artifact; `check:emotional-design` enforces the fields.
 - The all-done state is the session close (peak-end rule) — a completion signal, not an engagement hook. Do not add "one more thing" mechanics there.
-- The optimistic write needs a rollback path and an honest failure state (`TECH_SPEC.md`); a check-in that silently fails and breaks a streak is the worst bug this product can have.
-- Add `habit_created`, `habit_checked_in`, `streak_extended`, `streak_recovered` to `ANALYTICS.md` before this surface locks (`analytics-attribution.md`); `streak_recovered` is emitted by prompt 04's recovery flow.
+- The optimistic write needs a rollback path and an honest failure state (`engineering/TECH_SPEC.md`); a check-in that silently fails and breaks a streak is the worst bug this product can have.
+- Add `habit_created`, `habit_checked_in`, `streak_extended`, `streak_recovered` to `analytics/ANALYTICS.md` before this surface locks (`analytics-attribution.md`); `streak_recovered` is emitted by prompt 04's recovery flow.

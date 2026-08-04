@@ -7,7 +7,7 @@ const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
 const state = loaded.state;
-const relative = "APPLE_SIGNING.md";
+const relative = "store/APPLE_SIGNING.md";
 const filePath = path.join(args.root, relative);
 const text = readText(args.root, relative);
 
@@ -24,7 +24,7 @@ const skipAppleSigning = !hasIos || appleSigningStatus === "not_needed";
 if (skipAppleSigning) {
   // Android-only or explicitly not-needed projects do not require Apple signing proof.
 } else if (!existsSync(filePath) || !text) {
-  issues.push(issue("error", "apple_signing.missing", "APPLE_SIGNING.md is required before TestFlight/App Store readiness is claimed.", relative));
+  issues.push(issue("error", "apple_signing.missing", "store/APPLE_SIGNING.md is required before TestFlight/App Store readiness is claimed.", relative));
 } else {
   const requiredPhrases = [
     "Apple Developer",
@@ -54,7 +54,9 @@ if (skipAppleSigning) {
 
   for (const phrase of requiredPhrases) {
     if (!text.toLowerCase().includes(phrase.toLowerCase())) {
-      issues.push(issue("error", `apple_signing.${phrase.replaceAll(" ", "_").toLowerCase()}.missing`, `APPLE_SIGNING.md should cover ${phrase}.`, relative));
+      issues.push(
+        issue("error", `apple_signing.${phrase.replaceAll(" ", "_").toLowerCase()}.missing`, `store/APPLE_SIGNING.md should cover ${phrase}.`, relative),
+      );
     }
   }
 
@@ -120,7 +122,7 @@ if (skipAppleSigning) {
       issue(
         "error",
         "apple_signing.preflight_signoff_missing",
-        "APPLE_SIGNING.md claims archive/export/upload readiness but has no pre-archive/export/upload preflight sign-off covering SDK key injection, plutil -lint, exportArchive auth flags, and screenshot dimensions.",
+        "store/APPLE_SIGNING.md claims archive/export/upload readiness but has no pre-archive/export/upload preflight sign-off covering SDK key injection, plutil -lint, exportArchive auth flags, and screenshot dimensions.",
         relative,
       ),
     );

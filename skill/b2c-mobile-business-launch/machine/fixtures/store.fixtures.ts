@@ -16,7 +16,7 @@ export function register(h: Harness): void {
 
   const simulatorOnly = makeFixture("simulator-only");
   writeFileSync(
-    path.join(simulatorOnly, "APPLE_SIGNING.md"),
+    path.join(simulatorOnly, "store/APPLE_SIGNING.md"),
     [
       "# Apple Signing",
       "Apple Developer Team ID DEVELOPMENT_TEAM Bundle ID App ID App Store Connect ASC CLI auth status app creation route App Record Creation Preflight certificate provisioning archive export upload TestFlight founder approval.",
@@ -30,7 +30,7 @@ export function register(h: Harness): void {
   // "simulator build passed" line; the guard has to catch that phrasing too.
   const paneRunOnly = makeFixture("apple-signing-pane-run-only");
   writeFileSync(
-    path.join(paneRunOnly, "APPLE_SIGNING.md"),
+    path.join(paneRunOnly, "store/APPLE_SIGNING.md"),
     [
       "# Apple Signing",
       "Apple Developer Team ID DEVELOPMENT_TEAM Bundle ID App ID App Store Connect ASC CLI auth status app creation route App Record Creation Preflight certificate provisioning archive export upload TestFlight founder approval.",
@@ -42,7 +42,7 @@ export function register(h: Harness): void {
 
   const nativeIosProofThin = makeFixture("native-ios-proof-thin");
   writeFileSync(
-    path.join(nativeIosProofThin, "PRODUCTION_READINESS.md"),
+    path.join(nativeIosProofThin, "engineering/PRODUCTION_READINESS.md"),
     [
       "# Production Readiness",
       "Status: ready.",
@@ -66,7 +66,7 @@ export function register(h: Harness): void {
   // account (device screenshots leave the machine), and the coverage it drops.
   const inAppSimulatorUngated = makeFixture("native-ios-in-app-simulator-ungated");
   writeFileSync(
-    path.join(inAppSimulatorUngated, "PRODUCTION_READINESS.md"),
+    path.join(inAppSimulatorUngated, "engineering/PRODUCTION_READINESS.md"),
     [
       "# Production Readiness",
       "Status: ready.",
@@ -74,7 +74,7 @@ export function register(h: Harness): void {
       "Launch-Critical Test Matrix covers the prerelease .xctestplan with unit, integration, UI, and performance targets across device, OS, locale, Dynamic Type, light and dark.",
       "Coverage includes permission denied, offline retry, background, foreground, deep link, notification, and interruption paths, an accessibility audit, and StoreKit entitlement, restore, and refund states.",
       "Release configuration on a physical device is deferred.",
-      "Screenshots at screenshots/raw/home.png. Paired with PROVIDER_PROOF.md. A simulator build alone is not distribution readiness; see APPLE_SIGNING.md.",
+      "Screenshots at screenshots/raw/home.png. Paired with operations/PROVIDER_PROOF.md. A simulator build alone is not distribution readiness; see store/APPLE_SIGNING.md.",
     ].join("\n"),
     "utf8",
   );
@@ -112,7 +112,7 @@ export function register(h: Harness): void {
   // cannot silently start rejecting real-world readiness docs.
   const inAppSimulatorGated = makeFixture("native-ios-in-app-simulator-gated");
   writeFileSync(
-    path.join(inAppSimulatorGated, "PRODUCTION_READINESS.md"),
+    path.join(inAppSimulatorGated, "engineering/PRODUCTION_READINESS.md"),
     [
       "# Production Readiness",
       "Status: ready.",
@@ -121,7 +121,7 @@ export function register(h: Harness): void {
       "Launch-Critical Test Matrix covers the prerelease .xctestplan with unit, integration, UI, and performance targets across device, OS, locale, Dynamic Type, light and dark.",
       "Coverage includes permission denied, offline retry, background, foreground, deep link, notification, and interruption paths, an accessibility audit, and StoreKit entitlement, restore, and refund states.",
       "Release configuration on a physical device is deferred.",
-      "Screenshots at screenshots/raw/home.png. Paired with PROVIDER_PROOF.md. A simulator build alone is not distribution readiness; see APPLE_SIGNING.md.",
+      "Screenshots at screenshots/raw/home.png. Paired with operations/PROVIDER_PROOF.md. A simulator build alone is not distribution readiness; see store/APPLE_SIGNING.md.",
     ].join("\n"),
     "utf8",
   );
@@ -175,7 +175,7 @@ export function register(h: Harness): void {
   const nativeIosGroundedState = readState(nativeIosGrounded);
   getLane(nativeIosGroundedState, "engineering")["status"] = "done";
   writeState(nativeIosGrounded, nativeIosGroundedState);
-  const groundedReadinessPath = path.join(nativeIosGrounded, "PRODUCTION_READINESS.md");
+  const groundedReadinessPath = path.join(nativeIosGrounded, "engineering/PRODUCTION_READINESS.md");
   mkdirSync(path.join(nativeIosGrounded, "mobile", "proof"), { recursive: true });
   const matrixProofs: Array<[string, string]> = [
     ["cold launch and core value journey", "cold-launch.log"],
@@ -262,7 +262,7 @@ export function register(h: Harness): void {
   appleMissingLane["status"] = "done";
   writeState(appleMissingState, appleMissingStateValue);
   writeFileSync(
-    path.join(appleMissingState, "APPLE_SIGNING.md"),
+    path.join(appleMissingState, "store/APPLE_SIGNING.md"),
     [
       "# Apple Signing",
       "Apple Developer membership missing.",
@@ -285,7 +285,7 @@ export function register(h: Harness): void {
   );
 
   const missingAppleRequirements = makeFixture("apple-requirements-missing");
-  rmSync(path.join(missingAppleRequirements, "APPLE_APP_STORE_REQUIREMENTS.md"), { force: true });
+  rmSync(path.join(missingAppleRequirements, "store/APPLE_APP_STORE_REQUIREMENTS.md"), { force: true });
   runFixture(
     "missing Apple App Store requirements packet fails",
     missingAppleRequirements,
@@ -296,7 +296,7 @@ export function register(h: Harness): void {
 
   const thinAppleRequirements = makeFixture("apple-requirements-thin");
   writeFileSync(
-    path.join(thinAppleRequirements, "APPLE_APP_STORE_REQUIREMENTS.md"),
+    path.join(thinAppleRequirements, "store/APPLE_APP_STORE_REQUIREMENTS.md"),
     ["# Apple App Store Requirements", "Privacy is handled in the policy.", "The app can be uploaded to App Store Connect."].join("\n"),
     "utf8",
   );
@@ -325,7 +325,7 @@ export function register(h: Harness): void {
   expectRecord(expectRecord(iosOnlyStoreState.project, "project")["bundle_ids"], "project.bundle_ids")["android"] = "";
   writeState(iosOnlyStore, iosOnlyStoreState);
   writeFileSync(
-    path.join(iosOnlyStore, "STORE_CONSOLE.md"),
+    path.join(iosOnlyStore, "store/STORE_CONSOLE.md"),
     [
       "# Store Console",
       "App Store Connect click path and ASC CLI routes cover app creation, asc-id-resolver ID resolution, app info, SKU, primary locale, bundle ID, App Privacy, pricing, RevenueCat, asc-revenuecat-catalog-sync, subscription setup, localization, custom product page strategy, In-App Event planning, Higgsfield-backed marketing assets, screenshots, TestFlight, review status, review notes, and account deletion.",
@@ -334,7 +334,7 @@ export function register(h: Harness): void {
     ].join("\n"),
     "utf8",
   );
-  writeFileSync(path.join(iosOnlyStore, "store-console.html"), "<!doctype html><html><body>iOS store packet</body></html>", "utf8");
+  writeFileSync(path.join(iosOnlyStore, "store/store-console.html"), "<!doctype html><html><body>iOS store packet</body></html>", "utf8");
   writeFileSync(
     path.join(iosOnlyStore, "APP_STORE_LISTING.md"),
     [
@@ -351,9 +351,9 @@ export function register(h: Harness): void {
   runFixture("iOS-only store packet does not require Google Play fields", iosOnlyStore, "check-store-console-packet.ts", 0);
 
   const missingListingArtifacts = makeFixture("store-missing-listing-artifacts");
-  rmSync(path.join(missingListingArtifacts, "app-store-listing"), { recursive: true, force: true });
+  rmSync(path.join(missingListingArtifacts, "store", "app-store-listing"), { recursive: true, force: true });
   writeFileSync(
-    path.join(missingListingArtifacts, "STORE_CONSOLE.md"),
+    path.join(missingListingArtifacts, "store/STORE_CONSOLE.md"),
     [
       "# Store Console",
       "App Store Connect click path covers app info, SKU, primary locale, bundle ID, App Privacy, pricing, RevenueCat, subscription setup, localization, custom product page strategy, In-App Event planning, Higgsfield-backed marketing assets, screenshots, review notes, and account deletion.",
@@ -362,7 +362,7 @@ export function register(h: Harness): void {
     ].join("\n"),
     "utf8",
   );
-  writeFileSync(path.join(missingListingArtifacts, "store-console.html"), "<!doctype html><html><body>Store console only</body></html>", "utf8");
+  writeFileSync(path.join(missingListingArtifacts, "store/store-console.html"), "<!doctype html><html><body>Store console only</body></html>", "utf8");
   runFixture(
     "iOS store packet without App Store listing artifacts fails",
     missingListingArtifacts,
@@ -396,7 +396,7 @@ export function register(h: Harness): void {
 
   const thinAscMarketing = makeFixture("thin-asc-marketing");
   writeFileSync(
-    path.join(thinAscMarketing, "STORE_CONSOLE.md"),
+    path.join(thinAscMarketing, "store/STORE_CONSOLE.md"),
     [
       "# Store Console",
       "App Store Connect click path covers app info, SKU, primary locale, bundle ID, privacy, screenshots, review notes, and account deletion.",
@@ -405,7 +405,7 @@ export function register(h: Harness): void {
     ].join("\n"),
     "utf8",
   );
-  writeFileSync(path.join(thinAscMarketing, "store-console.html"), "<!doctype html><html><body>Thin store packet</body></html>", "utf8");
+  writeFileSync(path.join(thinAscMarketing, "store/store-console.html"), "<!doctype html><html><body>Thin store packet</body></html>", "utf8");
   runFixture(
     "thin ASC listing packet without App Privacy and marketing surfaces fails",
     thinAscMarketing,
@@ -417,7 +417,7 @@ export function register(h: Harness): void {
   const unsafeFallback = makeFixture("unsafe-store-fallback");
   writeCompleteStoreConsole(unsafeFallback);
   writeFileSync(
-    path.join(unsafeFallback, "STORE_CONSOLE.md"),
+    path.join(unsafeFallback, "store/STORE_CONSOLE.md"),
     [
       "# Store Console",
       "App Store Connect click path covers app info, SKU, primary locale, bundle ID, App Privacy, pricing, RevenueCat, subscription setup, localization, custom product page strategy, In-App Event planning, Higgsfield-backed marketing assets, screenshots, review notes, and account deletion.",
@@ -432,7 +432,7 @@ export function register(h: Harness): void {
   const ascAppCreationUnderclaimed = makeFixture("asc-app-creation-underclaimed");
   writeCompleteStoreConsole(ascAppCreationUnderclaimed);
   writeFileSync(
-    path.join(ascAppCreationUnderclaimed, "STORE_CONSOLE.md"),
+    path.join(ascAppCreationUnderclaimed, "store/STORE_CONSOLE.md"),
     [
       "# Store Console",
       "App Store Connect click path and ASC CLI routes cover app creation, asc-id-resolver ID resolution, app info, SKU, primary locale, bundle ID, App Privacy, pricing, RevenueCat, asc-revenuecat-catalog-sync, subscription setup, localization, custom product page strategy, In-App Event planning, Higgsfield-backed marketing assets, screenshots, TestFlight, review status, review notes, and account deletion.",
@@ -457,7 +457,7 @@ export function register(h: Harness): void {
   phraseOnlyStoreLane["status"] = "done";
   writeState(phraseOnlyStore, phraseOnlyStoreState);
   writeFileSync(
-    path.join(phraseOnlyStore, "STORE_CONSOLE.md"),
+    path.join(phraseOnlyStore, "store/STORE_CONSOLE.md"),
     [
       "# Store Console",
       "App Store Connect click path TODO.",
@@ -475,7 +475,7 @@ export function register(h: Harness): void {
     ].join("\n"),
     "utf8",
   );
-  writeFileSync(path.join(phraseOnlyStore, "store-console.html"), "<!doctype html><html><body>Store packet</body></html>", "utf8");
+  writeFileSync(path.join(phraseOnlyStore, "store/store-console.html"), "<!doctype html><html><body>Store packet</body></html>", "utf8");
   runFixture(
     "store packet with placeholders and unapproved fallback fails",
     phraseOnlyStore,
@@ -498,7 +498,7 @@ export function register(h: Harness): void {
       "Production Composition Matrix",
       "Device Wells: iPhone and iPad wells are covered.",
       "headline and copy overlay are not needed because raw screenshots are ready.",
-      "DESIGN.md, 11_STAR_EXPERIENCE.md, Higgsfield, Remotion, App Icon, App Preview, asc-screenshot-resize, alpha, color space, thumbnail, visual QA, Google Play, feature graphic, and founder approval are mentioned.",
+      "design/DESIGN.md, 11_STAR_EXPERIENCE.md, Higgsfield, Remotion, App Icon, App Preview, asc-screenshot-resize, alpha, color space, thumbnail, visual QA, Google Play, feature graphic, and founder approval are mentioned.",
     ].join("\n"),
     "utf8",
   );
@@ -514,7 +514,7 @@ export function register(h: Harness): void {
       "Raw Capture Matrix",
       "Production Composition Matrix",
       "Device Wells",
-      "headline, copy overlay, DESIGN.md, 11_STAR_EXPERIENCE.md, MobAI, Higgsfield, Remotion, ParthJadhav/app-store-screenshots, App Icon, App Preview, asc-screenshot-resize, ASC device_type, screenshot count, required, scaled, version localization ID, alpha, color space, sRGB, thumbnail, visual QA, founder approval, iPhone, iPad, Google Play, and feature graphic are mentioned.",
+      "headline, copy overlay, design/DESIGN.md, 11_STAR_EXPERIENCE.md, MobAI, Higgsfield, Remotion, ParthJadhav/app-store-screenshots, App Icon, App Preview, asc-screenshot-resize, ASC device_type, screenshot count, required, scaled, version localization ID, alpha, color space, sRGB, thumbnail, visual QA, founder approval, iPhone, iPad, Google Play, and feature graphic are mentioned.",
       "Production artwork was styled with the external screenshot skill, but no saved board state or upload orchestration proof is recorded.",
     ].join("\n"),
     "utf8",

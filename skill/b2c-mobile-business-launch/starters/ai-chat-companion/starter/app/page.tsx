@@ -3,7 +3,7 @@ import { strings } from "@/lib/strings";
 
 // Landing stub. The real landing page is owned by the launch funnel lane
 // (geo-seo.md + landing checks); this exists so the app boots end to end.
-// Words come from lib/strings.ts, which the copy pass fills from COPY_DECK.md.
+// Words come from lib/strings.ts, which the copy pass fills from product/copy/COPY_DECK.md.
 export default function Home() {
   return (
     <main>

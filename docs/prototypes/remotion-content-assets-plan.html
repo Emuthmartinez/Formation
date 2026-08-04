@@ -384,7 +384,7 @@
             <li>App preview clips, screen-recording edits, and product demo loops.</li>
             <li>Store screenshots, social posts, ad variants, and carousels from real UI.</li>
             <li>Founder-led TikTok/Reels/Shorts overlays, captions, and hook variants.</li>
-            <li>Batch-rendered assets tied to <code>DESIGN.md</code> tokens and copy data.</li>
+            <li>Batch-rendered assets tied to <code>design/DESIGN.md</code> tokens and copy data.</li>
           </ul>
         </div>
 
@@ -466,8 +466,8 @@
   "composition_id": "VerticalHookDemo",
   "dimensions": "1080x1920",
   "duration_seconds": 12,
-  "inputs": ["screenshots/raw/onboarding.png", "DESIGN.md", "copy/hooks.json"],
-  "outputs": ["content-assets/out/tiktok-hook-01.mp4"],
+  "inputs": ["screenshots/raw/onboarding.png", "design/DESIGN.md", "copy/hooks.json"],
+  "outputs": ["growth/content-assets/out/tiktok-hook-01.mp4"],
   "truth_constraints": ["real app UI visible", "no unsupported claims"],
   "render_proof": "npm run render:content -- --id tiktok-hook-01",
   "status": "draft"
@@ -611,7 +611,7 @@ npm pack --dry-run --json</code></pre>
               </td>
             </tr>
             <tr>
-              <td><code>business/PROJECT_STATE.yaml</code></td>
+              <td><code>business/state/PROJECT_STATE.yaml</code></td>
               <td>
                 Add <code>lanes.content_assets</code> and
                 <code>tools.remotion</code> with route, docs checked date,
@@ -619,7 +619,7 @@ npm pack --dry-run --json</code></pre>
               </td>
             </tr>
             <tr>
-              <td><code>business/content-assets/</code></td>
+              <td><code>business/growth/content-assets/</code></td>
               <td>
                 Add starting templates for <code>CONTENT_ASSETS.md</code>,
                 <code>content-assets.html</code>, <code>manifest.json</code>,
@@ -685,7 +685,7 @@ npm pack --dry-run --json</code></pre>
           <li>Agent treats "Higgsfield unavailable" as automatic permission to use Remotion.</li>
           <li>Remotion output is presented as equivalent to AI-generated campaign creative.</li>
           <li>Store screenshot or app-preview asset shows mock UI as if it were production.</li>
-          <li>Video/post claims drift from <code>APP_STORE_LISTING.md</code>, <code>REVENUE_OPS.md</code>, or legal docs.</li>
+          <li>Video/post claims drift from <code>APP_STORE_LISTING.md</code>, <code>revenue/REVENUE_OPS.md</code>, or legal docs.</li>
           <li>Rendered assets lack reproducible source inputs, command proof, or output paths.</li>
         </ul>
       </section>
@@ -704,7 +704,7 @@ npm pack --dry-run --json</code></pre>
               each image or video was produced.
             </li>
             <li>
-              Remotion outputs are tied to <code>DESIGN.md</code>,
+              Remotion outputs are tied to <code>design/DESIGN.md</code>,
               truthful app UI, owned or licensed assets, and public-claim checks.
             </li>
             <li>

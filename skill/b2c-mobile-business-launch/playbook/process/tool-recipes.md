@@ -31,7 +31,7 @@ Before using a free fallback for any paid or account-gated tool, load `paid-tool
 
 Paid/account-gated lanes in this skill include AppKittie, XPOZ, Firecrawl, Refero, Higgsfield, MobAI Plus/Pro capabilities, Fastlane AI, paid ASO/MMP/ad tools, Sideshift or creator marketplaces, and paid/account features of RevenueCat, Stripe, PostHog, and Resend. MobAI's free tier does not require spend approval; replacing its cross-platform route still requires a recorded coverage decision.
 
-Record the selected route in `TOOL_DECISIONS.md` or the relevant ops doc:
+Record the selected route in `strategy/TOOL_DECISIONS.md` or the relevant ops doc:
 - paid tool used
 - user-provided export used
 - free fallback approved

@@ -55,16 +55,16 @@ function parseArgs(argv: string[]): Args {
 function contractPaths(args: Args): ContractPaths {
   if (args.mode === "skill") {
     return {
-      agents: path.join(args.skillRoot, "business/repo-agent-entrypoints/AGENTS.md"),
-      claude: path.join(args.skillRoot, "business/repo-agent-entrypoints/CLAUDE.md"),
-      appAgents: path.join(args.skillRoot, "business/app-agent-roster/APP_AGENTS.md"),
+      agents: path.join(args.skillRoot, "business/engineering/repo-agent-entrypoints/AGENTS.md"),
+      claude: path.join(args.skillRoot, "business/engineering/repo-agent-entrypoints/CLAUDE.md"),
+      appAgents: path.join(args.skillRoot, "business/engineering/app-agent-roster/APP_AGENTS.md"),
       specialistPrompts: specialistPromptNames().map((fileName) => ({
         label: fileName,
-        filePath: path.join(args.skillRoot, "business/app-agent-roster/agents", fileName),
+        filePath: path.join(args.skillRoot, "business/engineering/app-agent-roster/agents", fileName),
       })),
-      orchestrator: path.join(args.skillRoot, "business/app-agent-roster/agents/orchestrator.md"),
-      orchestration: path.join(args.skillRoot, "business/ORCHESTRATION.md"),
-      projectState: path.join(args.skillRoot, "business/PROJECT_STATE.yaml"),
+      orchestrator: path.join(args.skillRoot, "business/engineering/app-agent-roster/agents/orchestrator.md"),
+      orchestration: path.join(args.skillRoot, "business/operations/ORCHESTRATION.md"),
+      projectState: path.join(args.skillRoot, "business/state/PROJECT_STATE.yaml"),
     };
   }
 
@@ -78,8 +78,8 @@ function contractPaths(args: Args): ContractPaths {
       filePath: path.join(root, "agents", fileName),
     })),
     orchestrator: path.join(root, "agents/orchestrator.md"),
-    orchestration: path.join(root, "ORCHESTRATION.md"),
-    projectState: path.join(root, "PROJECT_STATE.yaml"),
+    orchestration: path.join(root, "operations/ORCHESTRATION.md"),
+    projectState: path.join(root, "state/PROJECT_STATE.yaml"),
   };
 }
 
@@ -134,7 +134,7 @@ function validateProjectState(text: string | undefined, issues: Issue[]): Record
   } catch (error) {
     issues.push({
       code: "continuity.project_state_yaml",
-      message: `PROJECT_STATE.yaml could not be parsed: ${(error as Error).message}`,
+      message: `state/PROJECT_STATE.yaml could not be parsed: ${(error as Error).message}`,
     });
     return undefined;
   }
@@ -142,7 +142,7 @@ function validateProjectState(text: string | undefined, issues: Issue[]): Record
   if (!isRecord(parsed)) {
     issues.push({
       code: "continuity.project_state_shape",
-      message: "PROJECT_STATE.yaml must be a YAML mapping",
+      message: "state/PROJECT_STATE.yaml must be a YAML mapping",
     });
     return undefined;
   }
@@ -151,7 +151,7 @@ function validateProjectState(text: string | undefined, issues: Issue[]): Record
   if (!isRecord(continuity)) {
     issues.push({
       code: "continuity.project_state_missing",
-      message: "PROJECT_STATE.yaml must include a top-level continuity block",
+      message: "state/PROJECT_STATE.yaml must include a top-level continuity block",
     });
     return undefined;
   }
@@ -203,15 +203,15 @@ function validateProjectState(text: string | undefined, issues: Issue[]): Record
   const sourceFileSet = new Set(sourceFiles.filter((value): value is string => typeof value === "string"));
   for (const required of [
     "AGENTS.md",
-    "PROJECT_STATE.yaml",
-    "launch-cockpit.html",
-    "BUSINESS_ACCESS.md",
+    "state/PROJECT_STATE.yaml",
+    "state/launch-cockpit.html",
+    "operations/BUSINESS_ACCESS.md",
     "operations/business-access.json",
-    "AGENT_OPERATIONS.md",
+    "operations/AGENT_OPERATIONS.md",
     "operations/agent-operations.json",
-    "ORCHESTRATION.md",
-    "PRODUCTION_READINESS.md",
-    "FAILURE_CARDS.md",
+    "operations/ORCHESTRATION.md",
+    "engineering/PRODUCTION_READINESS.md",
+    "operations/FAILURE_CARDS.md",
   ]) {
     if (!sourceFileSet.has(required)) {
       issues.push({
@@ -234,13 +234,13 @@ function validateBusinessRoot(root: string | undefined, continuity: Record<strin
     ? sourceFiles.filter((value): value is string => typeof value === "string")
     : [
         "AGENTS.md",
-        "PROJECT_STATE.yaml",
-        "launch-cockpit.html",
-        "AGENT_OPERATIONS.md",
+        "state/PROJECT_STATE.yaml",
+        "state/launch-cockpit.html",
+        "operations/AGENT_OPERATIONS.md",
         "operations/agent-operations.json",
-        "ORCHESTRATION.md",
-        "PRODUCTION_READINESS.md",
-        "FAILURE_CARDS.md",
+        "operations/ORCHESTRATION.md",
+        "engineering/PRODUCTION_READINESS.md",
+        "operations/FAILURE_CARDS.md",
       ];
 
   for (const relativePath of required) {
@@ -276,8 +276,8 @@ function main(): void {
     label,
     text: readRequired(filePath, label, issues),
   }));
-  const orchestration = readRequired(paths.orchestration, "ORCHESTRATION.md", issues);
-  const projectState = readRequired(paths.projectState, "PROJECT_STATE.yaml", issues);
+  const orchestration = readRequired(paths.orchestration, "operations/ORCHESTRATION.md", issues);
+  const projectState = readRequired(paths.projectState, "state/PROJECT_STATE.yaml", issues);
 
   requireTerms(
     "AGENTS.md",
@@ -286,15 +286,15 @@ function main(): void {
       "Session Continuity",
       "Do not rely on chat memory",
       "AGENTS.md",
-      "PROJECT_STATE.yaml",
-      "launch-cockpit.html",
-      "BUSINESS_ACCESS.md",
+      "state/PROJECT_STATE.yaml",
+      "state/launch-cockpit.html",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
-      "AGENT_OPERATIONS.md",
+      "operations/AGENT_OPERATIONS.md",
       "operations/agent-operations.json",
-      "ORCHESTRATION.md",
-      "PRODUCTION_READINESS.md",
-      "FAILURE_CARDS.md",
+      "operations/ORCHESTRATION.md",
+      "engineering/PRODUCTION_READINESS.md",
+      "operations/FAILURE_CARDS.md",
       "git status --short",
       "APP_AGENTS.md",
       "role prompts",
@@ -305,7 +305,7 @@ function main(): void {
   requireTerms(
     "AGENTS.md Session Continuity section",
     markdownSection(agents, "Session Continuity"),
-    ["BUSINESS_ACCESS.md", "operations/business-access.json", "AGENT_OPERATIONS.md", "operations/agent-operations.json"],
+    ["operations/BUSINESS_ACCESS.md", "operations/business-access.json", "operations/AGENT_OPERATIONS.md", "operations/agent-operations.json"],
     issues,
   );
 
@@ -315,13 +315,13 @@ function main(): void {
     [
       "Session Continuity",
       "Do not rely on prior chat context",
-      "PROJECT_STATE.yaml",
-      "launch-cockpit.html",
-      "BUSINESS_ACCESS.md",
+      "state/PROJECT_STATE.yaml",
+      "state/launch-cockpit.html",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
-      "AGENT_OPERATIONS.md",
+      "operations/AGENT_OPERATIONS.md",
       "operations/agent-operations.json",
-      "ORCHESTRATION.md",
+      "operations/ORCHESTRATION.md",
     ],
     issues,
   );
@@ -333,12 +333,12 @@ function main(): void {
       "Session Continuity",
       "Do not rely on chat memory",
       "role prompts",
-      "PROJECT_STATE.yaml",
-      "BUSINESS_ACCESS.md",
+      "state/PROJECT_STATE.yaml",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
-      "AGENT_OPERATIONS.md",
+      "operations/AGENT_OPERATIONS.md",
       "operations/agent-operations.json",
-      "ORCHESTRATION.md",
+      "operations/ORCHESTRATION.md",
     ],
     issues,
   );
@@ -351,9 +351,9 @@ function main(): void {
       "git status --short",
       "Do not rely on chat memory",
       "state updates",
-      "BUSINESS_ACCESS.md",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
-      "AGENT_OPERATIONS.md",
+      "operations/AGENT_OPERATIONS.md",
       "operations/agent-operations.json",
     ],
     issues,
@@ -364,13 +364,13 @@ function main(): void {
   }
 
   requireTerms(
-    "ORCHESTRATION.md",
+    "operations/ORCHESTRATION.md",
     orchestration,
     [
       "## Session Continuity",
       "Last state review",
       "Continuity source set",
-      "BUSINESS_ACCESS.md",
+      "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
       "Memory policy",
       "Do not rely on chat memory",

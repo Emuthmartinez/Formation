@@ -4,7 +4,7 @@ Use this when growth depends on paying established creators to integrate the app
 
 This reference factors in a user-provided consumer-app monetization playbook ("How to Scale Your App to $10K/Month", George Lampropoulos, 2026 — the operator behind Wrestle AI). Treat it as a practitioner case study, not universal law: borrow the deal mechanics and qualification filters, verify every rate against the current niche, and reject the tactics the Rejected Tactics section names.
 
-Scope split: `ugc-creator-engine.md` owns founder-run creator operations — hired micro-creators posting on new niche accounts the program controls, where the algorithm is the distribution engine. This file owns sponsoring creators who already have an audience, where the creator's existing reach and trust are the distribution engine. Both record into `UGC_PLAYBOOK.md`. Load `viral-growth-loops.md` when sponsored content is expected to feed a product-led loop, and `paid-user-acquisition.md` when spend moves to ad platforms.
+Scope split: `ugc-creator-engine.md` owns founder-run creator operations — hired micro-creators posting on new niche accounts the program controls, where the algorithm is the distribution engine. This file owns sponsoring creators who already have an audience, where the creator's existing reach and trust are the distribution engine. Both record into `growth/UGC_PLAYBOOK.md`. Load `viral-growth-loops.md` when sponsored content is expected to feed a product-led loop, and `paid-user-acquisition.md` when spend moves to ad platforms.
 
 ## Contents
 
@@ -33,7 +33,7 @@ Sponsorships are a strong candidate when:
 - onboarding, paywall, and attribution can convert and measure a traffic spike (`onboarding-conversion.md`, `analytics-attribution.md`)
 - the founder has approved a sponsorship budget; every creator payment, contract, and public post is founder-gated
 
-Deprioritize sponsorships when there is no visible product moment, the audience is committee-led or high-ticket enterprise, or the category is regulated and claims cannot be reviewed — the same disqualifiers as the `ugc-creator-engine.md` fit gate. Record the fit decision in `UGC_PLAYBOOK.md` and trace it into `LAUNCH_TRACE.md`.
+Deprioritize sponsorships when there is no visible product moment, the audience is committee-led or high-ticket enterprise, or the category is regulated and claims cannot be reviewed — the same disqualifiers as the `ugc-creator-engine.md` fit gate. Record the fit decision in `growth/UGC_PLAYBOOK.md` and trace it into `state/LAUNCH_TRACE.md`.
 
 ## The Five-Second Demo Moment
 
@@ -62,7 +62,7 @@ Setup checklist:
 
 The lead list comes from behaving like the ideal customer, not from search:
 
-1. Write the ideal-customer profile from `RESEARCH.md`.
+1. Write the ideal-customer profile from `strategy/RESEARCH.md`.
 2. On a dedicated research account, consume exactly what that person would: watch their videos to completion, like, save, follow.
 3. Within days the recommendation feed becomes a stream of relevant creators. Prospecting becomes scroll → qualify → outreach.
 
@@ -204,11 +204,11 @@ The playbook contains tactics this skill rejects. Name them so no agent reinvent
 
 Create or update when sponsorships are in scope:
 
-- `UGC_PLAYBOOK.md`: sponsorship track — fit decision, budget and founder gates, brand-account setup, outreach volume targets, deal-structure defaults, disclosure rules, saturation/rotation rules
+- `growth/UGC_PLAYBOOK.md`: sponsorship track — fit decision, budget and founder gates, brand-account setup, outreach volume targets, deal-structure defaults, disclosure rules, saturation/rotation rules
 - `ugc/creator-list.csv`: prospect pipeline with qualification data and outreach status
 - `ugc/sponsorship-ledger.csv`: the per-deal economics ledger above
-- `ANALYTICS.md`: creator codes, UTMs, and attribution sources for sponsored posts
-- `LAUNCH_TRACE.md`: rows connecting the demo moment, creator deals, attribution, and revenue evidence
+- `analytics/ANALYTICS.md`: creator codes, UTMs, and attribution sources for sponsored posts
+- `state/LAUNCH_TRACE.md`: rows connecting the demo moment, creator deals, attribution, and revenue evidence
 
 ## Common Failure Modes
 

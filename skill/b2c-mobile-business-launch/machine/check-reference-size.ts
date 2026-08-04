@@ -59,6 +59,8 @@ const ENTRYPOINT_BUDGET_BYTES = 20 * 1024;
  * per-topic files (see playbook/experience/experience-cards.md).
  */
 const EXCLUSIONS: Record<string, string> = {
+  "launch-phases.md":
+    "the canonical cross-phase launch contract is loaded as one bounded reference so invariants, gates, and handoffs can be audited together; capability-owned paths increased its byte size without increasing its conceptual scope.",
   "artifact-contracts.md":
     "the canonical registry of every launch artifact's acceptance criteria; contracts are cross-referenced as one document during handoff audits and per-artifact splitting would fragment the acceptance pass.",
   "source-registry.yaml":

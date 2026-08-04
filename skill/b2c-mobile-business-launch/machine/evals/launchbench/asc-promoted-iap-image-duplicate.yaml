@@ -11,6 +11,6 @@ must_catch:
   - the same promotional image reused across multiple promoted products fails Guideline 2.3.2
   - each promoted product needs a unique image that represents that product
 should_say:
-  - Generate a distinct on-brand 1024x1024 image per promoted product (e.g. via Higgsfield tied to DESIGN.md).
+  - Generate a distinct on-brand 1024x1024 image per promoted product (e.g. via Higgsfield tied to design/DESIGN.md).
   - Replace each promoted product's image via the ASC IAP/subscription image route, or delete the image if the product is not promoted.
   - Verify uniqueness and product-fit in App Store Connect before resubmitting.

@@ -1,6 +1,6 @@
 # Autonomy Modes
 
-Use this before mutating repos, provider state, store records, DNS, social schedules, paid tools, or public surfaces. The agent should declare the current mode in `PROJECT_STATE.yaml` and adjust behavior to the least-powerful mode that can complete the task.
+Use this before mutating repos, provider state, store records, DNS, social schedules, paid tools, or public surfaces. The agent should declare the current mode in `state/PROJECT_STATE.yaml` and adjust behavior to the least-powerful mode that can complete the task.
 
 ## Modes
 
@@ -39,7 +39,7 @@ Always ask before:
 
 ## Acceptance
 
-- `PROJECT_STATE.yaml` records the current mode and `agent_operations`; the structured ledger records scoped approval envelopes.
+- `state/PROJECT_STATE.yaml` records the current mode and `agent_operations`; the structured ledger records scoped approval envelopes.
 - Provider and store commands cite the approval scope before they run.
 - Agents do not turn missing runtime access into unapproved fallbacks.
 - App-record, signing, product, pricing, and public-posting decisions stop for founder approval.

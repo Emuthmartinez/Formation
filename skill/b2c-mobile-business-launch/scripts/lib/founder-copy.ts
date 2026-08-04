@@ -8,7 +8,7 @@
  * here.
  *
  * Why this file exists: before it, scripts/render-launch-cockpit.ts printed raw
- * PROJECT_STATE.yaml keys straight into HTML, so a founder read rows like
+ * state/PROJECT_STATE.yaml keys straight into HTML, so a founder read rows like
  * "paid_tool_routing | not_started" on their own business dashboard. There was no
  * presentation boundary at all.
  *
@@ -312,7 +312,7 @@ export const celebrationBeats: { phase: string; earnedBy: string; say: string }[
   },
   {
     phase: "phase_1",
-    earnedBy: "RESEARCH.md carries real competitor pricing, review quotes, and keyword demand",
+    earnedBy: "strategy/RESEARCH.md carries real competitor pricing, review quotes, and keyword demand",
     say: "We now know what this market actually pays for, in numbers rather than guesses. Everything we design from here rests on that.",
   },
   {
@@ -322,7 +322,7 @@ export const celebrationBeats: { phase: string; earnedBy: string; say: string }[
   },
   {
     phase: "phase_2",
-    earnedBy: "BRAND.md and DESIGN.md are accepted and rendered",
+    earnedBy: "strategy/BRAND.md and design/DESIGN.md are accepted and rendered",
     say: "Your app has a name, a look, and screens you can point at. It stopped being an idea today.",
   },
   {

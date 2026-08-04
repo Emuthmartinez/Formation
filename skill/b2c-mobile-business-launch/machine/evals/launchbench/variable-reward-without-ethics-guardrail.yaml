@@ -10,5 +10,5 @@ must_catch:
   - "The streak card has no streak_recovery_mechanism (freeze / grace period), maximising loss-aversion harm."
   - "No counter-metric (opt-out rate, sub-500ms dismissal, 'addictive'/'gambling' reviews) is monitored before launch."
 should_say:
-  - "Complete the HIGH-risk attestation block for each card and prove real variation/recovery in PRODUCTION_READINESS.md."
+  - "Complete the HIGH-risk attestation block for each card and prove real variation/recovery in engineering/PRODUCTION_READINESS.md."
   - "Add a Settings escape hatch and a streak freeze, wire the counter-metrics into the Dark-Pattern Watch, then run check:emotional-design until zero errors."

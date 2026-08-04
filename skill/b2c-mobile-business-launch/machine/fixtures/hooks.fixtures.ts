@@ -1,6 +1,6 @@
 /**
  * Executes the shipped Claude Code hooks from
- * business/repo-agent-entrypoints/settings.json with sample tool payloads.
+ * business/engineering/repo-agent-entrypoints/settings.json with sample tool payloads.
  * These hooks are the enforcement layer copied into generated business repos;
  * before this module nothing tested them, and their documented failure modes
  * (missing jq, missing SKILL_ROOT) used to be silent. Asserts:
@@ -19,7 +19,7 @@ interface HookSettings {
 }
 
 function loadHookCommands(): { writeEditDepth: string; bashHook: string; finalPng: string } {
-  const settingsPath = path.join(skillRoot, "business", "repo-agent-entrypoints", "settings.json");
+  const settingsPath = path.join(skillRoot, "business", "engineering/repo-agent-entrypoints", "settings.json");
   const parsed = JSON.parse(readFileSync(settingsPath, "utf8")) as HookSettings;
   const postToolUse = parsed.hooks.PostToolUse;
   const command = (index: number): string => {
@@ -92,7 +92,7 @@ export function register(harness: Harness): void {
     harness,
     "hook depth-check warns loudly when SKILL_ROOT is unset",
     commands.writeEditDepth,
-    { file_path: "docs/ANALYTICS.md" },
+    { file_path: "docs/analytics/ANALYTICS.md" },
     0,
     "SKILL_ROOT is not set",
     businessRepo,
@@ -115,7 +115,7 @@ export function register(harness: Harness): void {
     harness,
     "hook depth-check warns loudly when jq is missing",
     commands.writeEditDepth,
-    { file_path: "docs/ANALYTICS.md" },
+    { file_path: "docs/analytics/ANALYTICS.md" },
     0,
     "jq is not on PATH",
     businessRepo,

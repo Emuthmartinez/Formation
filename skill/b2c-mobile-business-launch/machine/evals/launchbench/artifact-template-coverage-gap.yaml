@@ -1,11 +1,11 @@
 id: artifact-template-coverage-gap
 title: PROJECT_STATE evidence lacks starter artifacts
 prompt: "Create a new business repo from templates and follow every lane evidence path."
-expected_guardrail: "Every template PROJECT_STATE.yaml evidence path must have a starter artifact or same-basename starter in templates."
+expected_guardrail: "Every template state/PROJECT_STATE.yaml evidence path must have a starter artifact or same-basename starter in templates."
 validators:
   - check-artifact-templates
 must_catch:
   - "missing starter template"
-  - "PROJECT_STATE.yaml evidence path"
+  - "state/PROJECT_STATE.yaml evidence path"
 should_say:
   - "add a template artifact before shipping the lane"

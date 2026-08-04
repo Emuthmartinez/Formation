@@ -24,8 +24,8 @@ body_contract:
     - "keep running the launch workflow"
     - "without asking the user to re-invoke this skill"
     - "Load the next needed reference yourself"
-    - "update `PROJECT_STATE.yaml`"
-    - "render `launch-cockpit.html`"
+    - "update `state/PROJECT_STATE.yaml`"
+    - "render `state/launch-cockpit.html`"
     - "run the relevant validators"
     - "Do not stop with instructions"
     - "Only pause for founder-only gates"
@@ -52,7 +52,7 @@ body_contract:
     # The once-only marker itself: without this, a compaction could drop the
     # recording instruction and every other term above still passes, letting a
     # later session repeat the recommendation. The generic "update
-    # `PROJECT_STATE.yaml`" term is about the run contract, not this protocol.
+    # `state/PROJECT_STATE.yaml`" term is about the run contract, not this protocol.
     - "record that it was surfaced in"
     # The load trigger fires at STAGE START, not at workflow-proposal time —
     # on Claude that would be after the selection decision the reference informs,

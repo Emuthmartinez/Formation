@@ -13,5 +13,5 @@ must_catch:
   - "a pre-paywall incentivized rating screen violates store policy; the native review prompt after first value is the compliant path"
   - "deals need a view guarantee, tracking window, and per-deal payback ledger before spend is readable"
 should_say:
-  - "Route sponsorship work through influencer-sponsorship-engine.md and record the track in UGC_PLAYBOOK.md with founder spend gates."
+  - "Route sponsorship work through influencer-sponsorship-engine.md and record the track in growth/UGC_PLAYBOOK.md with founder spend gates."
   - "Qualify creators on average views, view floor, and comment quality, not follower count."

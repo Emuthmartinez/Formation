@@ -24,7 +24,7 @@ export function register(h: Harness): void {
   runFixture("shipped research template passes before the lane is claimed", researchBaseline, "check-research-evidence.ts", 0);
 
   const researchDonePlaceholders = makeFixture("research-done-placeholders");
-  setLaneDone(researchDonePlaceholders, "research", ["RESEARCH.md"]);
+  setLaneDone(researchDonePlaceholders, "research", ["strategy/RESEARCH.md"]);
   runFixture("done research with template placeholders fails", researchDonePlaceholders, "check-research-evidence.ts", 1, "research.placeholder_complete");
 
   // Builders for the research content floor. The core sections predate the
@@ -34,7 +34,7 @@ export function register(h: Harness): void {
     "## Source Ledger",
     "| Source | Platform / type | URL / source ID | Observed at | Tool / backend / query | Transcript / visual / sample limit | Observation | Inference | Confidence | Artifact / trace |",
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
-    "| AppKittie category scan | app-store estimate | appkittie category | 2026-07-01T12:00:00Z | AppKittie / search_apps habit tracker | structured rows / top 10 | top 10 revenue apps use a first-session paywall | category supports testing paywall-first | high | RESEARCH.md / TRACE-002 |",
+    "| AppKittie category scan | app-store estimate | appkittie category | 2026-07-01T12:00:00Z | AppKittie / search_apps habit tracker | structured rows / top 10 | top 10 revenue apps use a first-session paywall | category supports testing paywall-first | high | strategy/RESEARCH.md / TRACE-002 |",
     "## Evidence Capture Protocol",
     "Use transcripts for semantic media analysis, visuals for delivery evidence, record sampling limits, and separate observation from inference.",
     "## Untrusted Content",
@@ -42,11 +42,11 @@ export function register(h: Harness): void {
     "## Decision Inputs",
     "| Signal | Source | Date checked | Impact | Follow-up |",
     "| --- | --- | --- | --- | --- |",
-    "| paywall-first monetization | AppKittie | 2026-07-01 | pricing posture | reconcile with REVENUE_OPS.md |",
+    "| paywall-first monetization | AppKittie | 2026-07-01 | pricing posture | reconcile with revenue/REVENUE_OPS.md |",
     "## Decision Log",
     "| Evidence cluster | Changed decision | Trace ID |",
     "| --- | --- | --- |",
-    "| category economics | hard paywall day one | TRACE-002 (LAUNCH_TRACE.md) |",
+    "| category economics | hard paywall day one | TRACE-002 (state/LAUNCH_TRACE.md) |",
     "## Rejected Claims",
     "| Claim | Why rejected |",
     "| --- | --- |",
@@ -71,7 +71,7 @@ export function register(h: Harness): void {
   const goRow =
     "| 2026-07-21 | pass — $14.2M top-10 | streak-insurance mechanic incumbents price-gate | 412-person waitlist from social mining | Go | founder |";
   const writeResearch = (root: string, sections: string[]): void => {
-    writeFileSync(path.join(root, "RESEARCH.md"), sections.join("\n"), "utf8");
+    writeFileSync(path.join(root, "strategy/RESEARCH.md"), sections.join("\n"), "utf8");
   };
   const setResearchVerdictState = (root: string, decision: string, decidedAt: string): void => {
     const state = readState(root);
@@ -82,7 +82,7 @@ export function register(h: Harness): void {
   };
 
   const researchDoneReal = makeFixture("research-done-real");
-  setLaneDone(researchDoneReal, "research", ["RESEARCH.md"]);
+  setLaneDone(researchDoneReal, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchDoneReal, "go", "2026-07-21");
   writeResearch(researchDoneReal, [...researchCoreSections, ...categoryRevenueSection(revenueRow), ...goPivotKillSection(goRow)]);
   runFixture("done research with dated, traced evidence and a Go verdict passes", researchDoneReal, "check-research-evidence.ts", 0);
@@ -90,7 +90,7 @@ export function register(h: Harness): void {
   // Pre-build kill gate: the sections the 2026-07-26 audit found missing —
   // research that never converts evidence into a build-or-not decision.
   const researchNoVerdictSection = makeFixture("research-done-no-verdict-section");
-  setLaneDone(researchNoVerdictSection, "research", ["RESEARCH.md"]);
+  setLaneDone(researchNoVerdictSection, "research", ["strategy/RESEARCH.md"]);
   writeResearch(researchNoVerdictSection, researchCoreSections);
   runFixture(
     "done research without the go-pivot-kill section fails",
@@ -101,7 +101,7 @@ export function register(h: Harness): void {
   );
 
   const researchVerdictRowMissing = makeFixture("research-done-verdict-row-missing");
-  setLaneDone(researchVerdictRowMissing, "research", ["RESEARCH.md"]);
+  setLaneDone(researchVerdictRowMissing, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchVerdictRowMissing, "go", "2026-07-21");
   writeResearch(researchVerdictRowMissing, [...researchCoreSections, ...categoryRevenueSection(revenueRow), ...goPivotKillSection(null)]);
   runFixture(
@@ -115,7 +115,7 @@ export function register(h: Harness): void {
   // A done research lane whose latest verdict is Kill or Pivot is a
   // contradiction: Kill winds down pre-build, Pivot re-enters the phase.
   const researchNotGo = makeFixture("research-done-not-go");
-  setLaneDone(researchNotGo, "research", ["RESEARCH.md"]);
+  setLaneDone(researchNotGo, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchNotGo, "kill", "2026-07-21");
   writeResearch(researchNotGo, [
     ...researchCoreSections,
@@ -125,7 +125,7 @@ export function register(h: Harness): void {
   runFixture("done research whose latest verdict is Kill fails", researchNotGo, "check-research-evidence.ts", 1, "research.go_pivot_kill_not_go");
 
   const researchVerdictNoMirror = makeFixture("research-done-verdict-no-mirror");
-  setLaneDone(researchVerdictNoMirror, "research", ["RESEARCH.md"]);
+  setLaneDone(researchVerdictNoMirror, "research", ["strategy/RESEARCH.md"]);
   writeResearch(researchVerdictNoMirror, [...researchCoreSections, ...categoryRevenueSection(revenueRow), ...goPivotKillSection(goRow)]);
   runFixture(
     "recorded Go verdict without the PROJECT_STATE mirror fails",
@@ -136,7 +136,7 @@ export function register(h: Harness): void {
   );
 
   const researchVerdictMismatch = makeFixture("research-done-verdict-mismatch");
-  setLaneDone(researchVerdictMismatch, "research", ["RESEARCH.md"]);
+  setLaneDone(researchVerdictMismatch, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchVerdictMismatch, "pivot", "2026-07-21");
   writeResearch(researchVerdictMismatch, [...researchCoreSections, ...categoryRevenueSection(revenueRow), ...goPivotKillSection(goRow)]);
   runFixture(
@@ -149,7 +149,7 @@ export function register(h: Harness): void {
 
   // Collecting AppKittie data is not the gate; the judged revenue row is.
   const researchRevenueRowMissing = makeFixture("research-done-revenue-row-missing");
-  setLaneDone(researchRevenueRowMissing, "research", ["RESEARCH.md"]);
+  setLaneDone(researchRevenueRowMissing, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchRevenueRowMissing, "go", "2026-07-21");
   writeResearch(researchRevenueRowMissing, [...researchCoreSections, ...categoryRevenueSection(null), ...goPivotKillSection(goRow)]);
   runFixture(
@@ -163,7 +163,7 @@ export function register(h: Harness): void {
   // A dollar amount drifting outside the revenue column, or a blank source,
   // is data-shaped text rather than a sourced estimate.
   const researchRevenueUnsourced = makeFixture("research-done-revenue-unsourced");
-  setLaneDone(researchRevenueUnsourced, "research", ["RESEARCH.md"]);
+  setLaneDone(researchRevenueUnsourced, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchRevenueUnsourced, "go", "2026-07-21");
   writeResearch(researchRevenueUnsourced, [
     ...researchCoreSections,
@@ -181,7 +181,7 @@ export function register(h: Harness): void {
   // The gate is founder-only: a Go row naming no decision-maker is the agent
   // deciding to build for itself.
   const researchNoDecider = makeFixture("research-done-no-decider");
-  setLaneDone(researchNoDecider, "research", ["RESEARCH.md"]);
+  setLaneDone(researchNoDecider, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchNoDecider, "go", "2026-07-21");
   writeResearch(researchNoDecider, [
     ...researchCoreSections,
@@ -192,7 +192,7 @@ export function register(h: Harness): void {
 
   // The mirror's date must match the verdict row, not merely be date-shaped.
   const researchDateMismatch = makeFixture("research-done-decided-at-mismatch");
-  setLaneDone(researchDateMismatch, "research", ["RESEARCH.md"]);
+  setLaneDone(researchDateMismatch, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchDateMismatch, "go", "2026-07-01");
   writeResearch(researchDateMismatch, [...researchCoreSections, ...categoryRevenueSection(revenueRow), ...goPivotKillSection(goRow)]);
   runFixture(
@@ -212,7 +212,7 @@ export function register(h: Harness): void {
     research["status"] = "partial";
     const design = getLane(state, "design");
     design["status"] = "partial";
-    design["evidence"] = ["DESIGN.md"];
+    design["evidence"] = ["design/DESIGN.md"];
     writeState(researchDesignActive, state);
   }
   runFixture(
@@ -225,7 +225,7 @@ export function register(h: Harness): void {
 
   // A malformed later decision must never silently lose to an older one.
   const researchMalformedFollowup = makeFixture("research-done-malformed-followup");
-  setLaneDone(researchMalformedFollowup, "research", ["RESEARCH.md"]);
+  setLaneDone(researchMalformedFollowup, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchMalformedFollowup, "go", "2026-07-21");
   writeResearch(researchMalformedFollowup, [
     ...researchCoreSections,
@@ -244,7 +244,7 @@ export function register(h: Harness): void {
   // The decision-maker reads from the named column: a Notes cell after Verdict
   // containing "founder" must not satisfy the gate.
   const researchNotesAfterVerdict = makeFixture("research-done-notes-after-verdict");
-  setLaneDone(researchNotesAfterVerdict, "research", ["RESEARCH.md"]);
+  setLaneDone(researchNotesAfterVerdict, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchNotesAfterVerdict, "go", "2026-07-21");
   writeResearch(researchNotesAfterVerdict, [
     ...researchCoreSections,
@@ -272,14 +272,20 @@ export function register(h: Harness): void {
     lane["status"] = "deferred";
     lane["reason"] = "2026-07-20 essentials scope defers deep research; revisit at day 30.";
     writeState(researchDeferredPhase2, state);
-    rmSync(path.join(researchDeferredPhase2, "RESEARCH.md"), { force: true });
+    rmSync(path.join(researchDeferredPhase2, "strategy/RESEARCH.md"), { force: true });
   }
-  runFixture("phase_2 with deferred research and no RESEARCH.md fails", researchDeferredPhase2, "check-research-evidence.ts", 1, "research.markdown_missing");
+  runFixture(
+    "phase_2 with deferred research and no strategy/RESEARCH.md fails",
+    researchDeferredPhase2,
+    "check-research-evidence.ts",
+    1,
+    "research.markdown_missing",
+  );
 
   // Later table rows win date ties: a same-day follow-up Kill supersedes the
   // Go recorded above it, and a mirror still saying go must fail.
   const researchSameDayReversal = makeFixture("research-same-day-reversal");
-  setLaneDone(researchSameDayReversal, "research", ["RESEARCH.md"]);
+  setLaneDone(researchSameDayReversal, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchSameDayReversal, "go", "2026-07-21");
   writeResearch(researchSameDayReversal, [
     ...researchCoreSections,
@@ -302,7 +308,7 @@ export function register(h: Harness): void {
     expectRecord(state.project, "project")["owner"] = "Daisy Rivera";
     writeState(researchNamedFounder, state);
   }
-  setLaneDone(researchNamedFounder, "research", ["RESEARCH.md"]);
+  setLaneDone(researchNamedFounder, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchNamedFounder, "go", "2026-07-21");
   writeResearch(researchNamedFounder, [
     ...researchCoreSections,
@@ -313,7 +319,7 @@ export function register(h: Harness): void {
 
   // Renamed evidence columns carry cells, not the required inputs.
   const researchRenamedColumns = makeFixture("research-done-renamed-columns");
-  setLaneDone(researchRenamedColumns, "research", ["RESEARCH.md"]);
+  setLaneDone(researchRenamedColumns, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchRenamedColumns, "go", "2026-07-21");
   writeResearch(researchRenamedColumns, [
     ...researchCoreSections,
@@ -352,7 +358,7 @@ export function register(h: Harness): void {
   // The verdict is founder-only: an automation identity in Decided by is the
   // agent approving its own build.
   const researchAgentDecider = makeFixture("research-done-agent-decider");
-  setLaneDone(researchAgentDecider, "research", ["RESEARCH.md"]);
+  setLaneDone(researchAgentDecider, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchAgentDecider, "go", "2026-07-21");
   writeResearch(researchAgentDecider, [
     ...researchCoreSections,
@@ -370,7 +376,7 @@ export function register(h: Harness): void {
   // The phrase in prose is not the section: mentioning both gates informally
   // must not skip their substance checks.
   const researchProseSections = makeFixture("research-done-prose-sections");
-  setLaneDone(researchProseSections, "research", ["RESEARCH.md"]);
+  setLaneDone(researchProseSections, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchProseSections, "go", "2026-07-21");
   writeResearch(researchProseSections, [...researchCoreSections, "We considered Category Revenue Reality and ran Go, Pivot, Or Kill informally over coffee."]);
   runFixture(
@@ -384,7 +390,7 @@ export function register(h: Harness): void {
   // A verdict table stripped of its evidence columns makes every evidence
   // check vacuously pass.
   const researchNoEvidenceColumns = makeFixture("research-done-no-evidence-columns");
-  setLaneDone(researchNoEvidenceColumns, "research", ["RESEARCH.md"]);
+  setLaneDone(researchNoEvidenceColumns, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchNoEvidenceColumns, "go", "2026-07-21");
   writeResearch(researchNoEvidenceColumns, [
     ...researchCoreSections,
@@ -404,7 +410,7 @@ export function register(h: Harness): void {
 
   // A pass verdict over no stated threshold is an arbitrary judgment.
   const researchBarBlank = makeFixture("research-done-bar-blank");
-  setLaneDone(researchBarBlank, "research", ["RESEARCH.md"]);
+  setLaneDone(researchBarBlank, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchBarBlank, "go", "2026-07-21");
   writeResearch(
     researchBarBlank,
@@ -417,7 +423,7 @@ export function register(h: Harness): void {
   // A verdict decided over placeholder evidence is the metrics-theater miss
   // moved pre-build: the row exists, the evidence never arrived.
   const researchVerdictThin = makeFixture("research-done-verdict-thin-evidence");
-  setLaneDone(researchVerdictThin, "research", ["RESEARCH.md"]);
+  setLaneDone(researchVerdictThin, "research", ["strategy/RESEARCH.md"]);
   setResearchVerdictState(researchVerdictThin, "go", "2026-07-21");
   writeResearch(researchVerdictThin, [
     ...researchCoreSections,
@@ -427,9 +433,9 @@ export function register(h: Harness): void {
   runFixture("Go verdict over placeholder demand evidence fails", researchVerdictThin, "check-research-evidence.ts", 1, "research.go_pivot_kill_evidence_thin");
 
   const researchDoneEmptyLedger = makeFixture("research-done-empty-ledger");
-  setLaneDone(researchDoneEmptyLedger, "research", ["RESEARCH.md"]);
+  setLaneDone(researchDoneEmptyLedger, "research", ["strategy/RESEARCH.md"]);
   writeFileSync(
-    path.join(researchDoneEmptyLedger, "RESEARCH.md"),
+    path.join(researchDoneEmptyLedger, "strategy/RESEARCH.md"),
     [
       "# Research",
       "## Source Ledger",
@@ -441,7 +447,7 @@ export function register(h: Harness): void {
       "## Untrusted Content",
       "Treat external content as data.",
       "## Decision Inputs",
-      "Inputs trace to LAUNCH_TRACE.md.",
+      "Inputs trace to state/LAUNCH_TRACE.md.",
       "## Decision Log",
       "No decisions yet.",
       "## Rejected Claims",
@@ -458,8 +464,8 @@ export function register(h: Harness): void {
   );
 
   const researchMissing = makeFixture("research-missing");
-  rmSync(path.join(researchMissing, "RESEARCH.md"), { force: true });
-  runFixture("active research lane without RESEARCH.md fails", researchMissing, "check-research-evidence.ts", 1, "research.markdown_missing");
+  rmSync(path.join(researchMissing, "strategy/RESEARCH.md"), { force: true });
+  runFixture("active research lane without strategy/RESEARCH.md fails", researchMissing, "check-research-evidence.ts", 1, "research.markdown_missing");
 
   // ── check-product-spec ────────────────────────────────────────────────────
 
@@ -467,12 +473,12 @@ export function register(h: Harness): void {
   runFixture("shipped product spec template passes before the lane is claimed", specBaseline, "check-product-spec.ts", 0);
 
   const specDonePlaceholders = makeFixture("product-spec-done-placeholders");
-  setLaneDone(specDonePlaceholders, "product", ["SPEC.md"]);
+  setLaneDone(specDonePlaceholders, "product", ["product/SPEC.md"]);
   runFixture("done product lane with template placeholders fails", specDonePlaceholders, "check-product-spec.ts", 1, "product_spec.placeholder_complete");
 
   const specMissing = makeFixture("product-spec-missing");
-  rmSync(path.join(specMissing, "SPEC.md"), { force: true });
-  runFixture("active product lane without SPEC.md fails", specMissing, "check-product-spec.ts", 1, "product_spec.markdown_missing");
+  rmSync(path.join(specMissing, "product/SPEC.md"), { force: true });
+  runFixture("active product lane without product/SPEC.md fails", specMissing, "check-product-spec.ts", 1, "product_spec.markdown_missing");
 
   // Differentiation substance: the wedge lives in the spec, held to
   // product-moat.md's tests — not in a positioning chat.
@@ -484,7 +490,7 @@ export function register(h: Harness): void {
       "## 11-Star Experience",
       "Ladder and magical moment per 11_STAR_EXPERIENCE.md and 11-star-experience.html.",
       "## Category And Competitors",
-      "Health & Fitness storefront per RESEARCH.md category evidence; threat model below.",
+      "Health & Fitness storefront per strategy/RESEARCH.md category evidence; threat model below.",
       "## Differentiation And Moat",
       "| Incumbent (top by revenue) | What it does well | The beat moment (where we win) | What stops a week-one copy |",
       "| --- | --- | --- | --- |",
@@ -496,22 +502,22 @@ export function register(h: Harness): void {
       "## V1 Scalable Slice",
       "Three habits, one weekly ritual; V2 holds social features; bans fake streaks.",
       "## Monetization Posture",
-      "Hard paywall after first value; pricing reconciled with REVENUE_OPS.md.",
+      "Hard paywall after first value; pricing reconciled with revenue/REVENUE_OPS.md.",
       "## Metrics",
-      "Activation and D7 defined in ANALYTICS.md.",
+      "Activation and D7 defined in analytics/ANALYTICS.md.",
       "## Acceptance Contract",
       "| Flow | User value | Data needed | Edge states | Proof |",
       "| --- | --- | --- | --- | --- |",
-      "| First value | repair plan | onboarding answers | loading, retry, empty | ONBOARDING.md |",
+      "| First value | repair plan | onboarding answers | loading, retry, empty | product/ONBOARDING.md |",
       "## Risks And Open Questions",
-      "Evidence appendix: RESEARCH.md, LAUNCH_TRACE.md.",
+      "Evidence appendix: strategy/RESEARCH.md, state/LAUNCH_TRACE.md.",
     ].join("\n");
   const realIncumbentRow =
     "| HabitKit | fast logging, wide templates | streak-insurance at the miss moment | miss-history data accrues day one; repair pricing their mix cannot follow |";
   const secondIncumbentRow =
     "| Streaks | polished native logging, wide device sync | our repair flow at the broken-streak moment | miss-history depth their local-only storage cannot mirror |";
   const twoIncumbentRows = `${realIncumbentRow}\n${secondIncumbentRow}`;
-  // Writes the spec AND grounds its incumbent names in RESEARCH.md — the
+  // Writes the spec AND grounds its incumbent names in strategy/RESEARCH.md — the
   // validator now cross-checks names against research competitor evidence.
   const groundIncumbents = (root: string, row: string | null): void => {
     const names = (row ?? "")
@@ -519,17 +525,17 @@ export function register(h: Harness): void {
       .map((line) => (line.replace(/^\|/, "").split(/(?<!\\)\|/)[0] ?? "").trim())
       .filter(Boolean);
     if (names.length === 0) return;
-    const researchPath = path.join(root, "RESEARCH.md");
+    const researchPath = path.join(root, "strategy/RESEARCH.md");
     const existing = readFileSync(researchPath, "utf8");
     writeFileSync(researchPath, `${existing}\nCompetitor evidence: ${names.join(", ")} lead the category by revenue.\n`, "utf8");
   };
   const writeMoatSpec = (root: string, moat: { row: string | null; moatClass: string; copyTest: string }): void => {
-    writeFileSync(path.join(root, "SPEC.md"), specSections(moat), "utf8");
+    writeFileSync(path.join(root, "product/SPEC.md"), specSections(moat), "utf8");
     groundIncumbents(root, moat.row);
   };
 
   const specDoneReal = makeFixture("product-spec-done-real");
-  setLaneDone(specDoneReal, "product", ["SPEC.md"]);
+  setLaneDone(specDoneReal, "product", ["product/SPEC.md"]);
   writeMoatSpec(specDoneReal, {
     row: twoIncumbentRows,
     moatClass: "data — per-user miss history compounds weekly",
@@ -538,18 +544,18 @@ export function register(h: Harness): void {
   runFixture("done product spec with a real incumbent row and moat class passes", specDoneReal, "check-product-spec.ts", 0);
 
   const specNoIncumbent = makeFixture("product-spec-done-no-incumbent-row");
-  setLaneDone(specNoIncumbent, "product", ["SPEC.md"]);
+  setLaneDone(specNoIncumbent, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specNoIncumbent, "SPEC.md"),
+    path.join(specNoIncumbent, "product/SPEC.md"),
     specSections({ row: null, moatClass: "data — per-user miss history", copyTest: "history the copy lacks" }),
     "utf8",
   );
   runFixture("done product spec without a real incumbent row fails", specNoIncumbent, "check-product-spec.ts", 1, "product_spec.incumbent_row_missing");
 
   const specNoMoatClass = makeFixture("product-spec-done-no-moat-class");
-  setLaneDone(specNoMoatClass, "product", ["SPEC.md"]);
+  setLaneDone(specNoMoatClass, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specNoMoatClass, "SPEC.md"),
+    path.join(specNoMoatClass, "product/SPEC.md"),
     specSections({ row: realIncumbentRow, moatClass: "we will out-execute them", copyTest: "history the copy lacks" }),
     "utf8",
   );
@@ -558,9 +564,9 @@ export function register(h: Harness): void {
   // A prose mention satisfies the section-name scan but carries no section —
   // the substance checks run against nothing and fail.
   const specMoatProseMention = makeFixture("product-spec-moat-prose-mention");
-  setLaneDone(specMoatProseMention, "product", ["SPEC.md"]);
+  setLaneDone(specMoatProseMention, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specMoatProseMention, "SPEC.md"),
+    path.join(specMoatProseMention, "product/SPEC.md"),
     specSections({
       row: realIncumbentRow,
       moatClass: "data — per-user miss history compounds weekly",
@@ -578,9 +584,9 @@ export function register(h: Harness): void {
 
   // "pending" is not a copy-test answer.
   const specCopyTestPending = makeFixture("product-spec-copy-test-pending");
-  setLaneDone(specCopyTestPending, "product", ["SPEC.md"]);
+  setLaneDone(specCopyTestPending, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specCopyTestPending, "SPEC.md"),
+    path.join(specCopyTestPending, "product/SPEC.md"),
     specSections({ row: realIncumbentRow, moatClass: "data — per-user miss history compounds weekly", copyTest: "pending" }),
     "utf8",
   );
@@ -588,7 +594,7 @@ export function register(h: Harness): void {
 
   // An answer that concedes the copy test is a failed test.
   const specCopyTestConceded = makeFixture("product-spec-copy-test-conceded");
-  setLaneDone(specCopyTestConceded, "product", ["SPEC.md"]);
+  setLaneDone(specCopyTestConceded, "product", ["product/SPEC.md"]);
   writeMoatSpec(specCopyTestConceded, {
     row: realIncumbentRow,
     moatClass: "data — per-user miss history compounds weekly",
@@ -598,7 +604,7 @@ export function register(h: Harness): void {
 
   // Disclaiming every class while naming them all is not a moat class.
   const specMoatClassNone = makeFixture("product-spec-moat-class-none");
-  setLaneDone(specMoatClassNone, "product", ["SPEC.md"]);
+  setLaneDone(specMoatClassNone, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatClassNone, {
     row: realIncumbentRow,
     moatClass: "none — there is no data, workflow, community, taste, model, or distribution moat",
@@ -608,7 +614,7 @@ export function register(h: Harness): void {
 
   // The doctrine's V1 exception: no moat yet, racing to build a named, dated class.
   const specMoatV1Exception = makeFixture("product-spec-moat-v1-exception");
-  setLaneDone(specMoatV1Exception, "product", ["SPEC.md"]);
+  setLaneDone(specMoatV1Exception, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatV1Exception, {
     row: twoIncumbentRows,
     moatClass: "no moat yet, racing to build data — miss-history compounding by 2026-08-25, revisited at the day-30 retro",
@@ -618,7 +624,7 @@ export function register(h: Harness): void {
 
   // N/A cells name no incumbent.
   const specIncumbentNaCells = makeFixture("product-spec-incumbent-na-cells");
-  setLaneDone(specIncumbentNaCells, "product", ["SPEC.md"]);
+  setLaneDone(specIncumbentNaCells, "product", ["product/SPEC.md"]);
   writeMoatSpec(specIncumbentNaCells, {
     row: "| N/A | none | unknown | N/A |",
     moatClass: "data — per-user miss history compounds weekly",
@@ -629,9 +635,9 @@ export function register(h: Harness): void {
   // The filled shipped template must pass: its guidance prose contains "moat
   // class" and a colon, and must never shadow the labeled answer line.
   const specTemplateFilled = makeFixture("product-spec-template-filled");
-  setLaneDone(specTemplateFilled, "product", ["SPEC.md"]);
+  setLaneDone(specTemplateFilled, "product", ["product/SPEC.md"]);
   {
-    const templateSpec = readFileSync(path.join(specTemplateFilled, "SPEC.md"), "utf8")
+    const templateSpec = readFileSync(path.join(specTemplateFilled, "product/SPEC.md"), "utf8")
       .replace(/^\| _example:.*$/m, twoIncumbentRows)
       .replace(
         "- Moat class (data / workflow / community / taste / model / distribution) and build plan:",
@@ -639,14 +645,14 @@ export function register(h: Harness): void {
       )
       .replace("- One-week-copy test answer:", "- One-week-copy test answer: the repair model needs miss-history no fresh install has.")
       .replace(/<!--[^>]*replace with[^>]*-->/gi, "");
-    writeFileSync(path.join(specTemplateFilled, "SPEC.md"), templateSpec.replace(/\breplace with\b|\b(TODO|TBD)\b/gi, "filled"), "utf8");
+    writeFileSync(path.join(specTemplateFilled, "product/SPEC.md"), templateSpec.replace(/\breplace with\b|\b(TODO|TBD)\b/gi, "filled"), "utf8");
   }
   groundIncumbents(specTemplateFilled, twoIncumbentRows);
   runFixture("the filled shipped template passes the moat gate", specTemplateFilled, "check-product-spec.ts", 0);
 
   // The doctrine's named nonanswers are copied in a sprint.
   const specCopyBetterDesigned = makeFixture("product-spec-copy-better-designed");
-  setLaneDone(specCopyBetterDesigned, "product", ["SPEC.md"]);
+  setLaneDone(specCopyBetterDesigned, "product", ["product/SPEC.md"]);
   writeMoatSpec(specCopyBetterDesigned, {
     row: realIncumbentRow,
     moatClass: "data — per-user miss history compounds weekly",
@@ -655,7 +661,7 @@ export function register(h: Harness): void {
   runFixture("the better-designed nonanswer fails", specCopyBetterDesigned, "check-product-spec.ts", 1, "product_spec.copy_test_missing");
 
   const specCopyNotThought = makeFixture("product-spec-copy-not-thought");
-  setLaneDone(specCopyNotThought, "product", ["SPEC.md"]);
+  setLaneDone(specCopyNotThought, "product", ["product/SPEC.md"]);
   writeMoatSpec(specCopyNotThought, {
     row: realIncumbentRow,
     moatClass: "data — per-user miss history compounds weekly",
@@ -665,7 +671,7 @@ export function register(h: Harness): void {
 
   // A negated structural answer is the direct, legitimate answer.
   const specCopyNegatedStructural = makeFixture("product-spec-copy-negated-structural");
-  setLaneDone(specCopyNegatedStructural, "product", ["SPEC.md"]);
+  setLaneDone(specCopyNegatedStructural, "product", ["product/SPEC.md"]);
   writeMoatSpec(specCopyNegatedStructural, {
     row: twoIncumbentRows,
     moatClass: "data — per-user miss history compounds weekly",
@@ -675,7 +681,7 @@ export function register(h: Harness): void {
 
   // The V1 exception needs its day-30 revisit, not just a name and a date.
   const specMoatV1NoRetro = makeFixture("product-spec-moat-v1-no-retro");
-  setLaneDone(specMoatV1NoRetro, "product", ["SPEC.md"]);
+  setLaneDone(specMoatV1NoRetro, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatV1NoRetro, {
     row: realIncumbentRow,
     moatClass: "no moat yet, racing to build data by 2026-08-25",
@@ -685,7 +691,7 @@ export function register(h: Harness): void {
 
   // Naming the class before the negation is the same disclaimer.
   const specMoatClassPostNegated = makeFixture("product-spec-moat-post-negated");
-  setLaneDone(specMoatClassPostNegated, "product", ["SPEC.md"]);
+  setLaneDone(specMoatClassPostNegated, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatClassPostNegated, {
     row: realIncumbentRow,
     moatClass: "data is not a moat",
@@ -695,7 +701,7 @@ export function register(h: Harness): void {
 
   // "Can ship it in a week" concedes the test without the word copy.
   const specCopyCanShip = makeFixture("product-spec-copy-can-ship");
-  setLaneDone(specCopyCanShip, "product", ["SPEC.md"]);
+  setLaneDone(specCopyCanShip, "product", ["product/SPEC.md"]);
   writeMoatSpec(specCopyCanShip, {
     row: realIncumbentRow,
     moatClass: "data — per-user miss history compounds weekly",
@@ -705,7 +711,7 @@ export function register(h: Harness): void {
 
   // The revisit must be the day-30 one.
   const specMoatV1AnnualRetro = makeFixture("product-spec-moat-v1-annual-retro");
-  setLaneDone(specMoatV1AnnualRetro, "product", ["SPEC.md"]);
+  setLaneDone(specMoatV1AnnualRetro, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatV1AnnualRetro, {
     row: realIncumbentRow,
     moatClass: "no moat yet, racing to build data by 2026-08-25; revisit at the annual retro",
@@ -715,7 +721,7 @@ export function register(h: Harness): void {
 
   // A bare taxonomy word explains nothing about how the advantage accrues.
   const specMoatClassBare = makeFixture("product-spec-moat-class-bare");
-  setLaneDone(specMoatClassBare, "product", ["SPEC.md"]);
+  setLaneDone(specMoatClassBare, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatClassBare, {
     row: realIncumbentRow,
     moatClass: "data",
@@ -725,7 +731,7 @@ export function register(h: Harness): void {
 
   // Refusing to build the class is not the exception's commitment.
   const specMoatV1NegatedBuild = makeFixture("product-spec-moat-v1-negated-build");
-  setLaneDone(specMoatV1NegatedBuild, "product", ["SPEC.md"]);
+  setLaneDone(specMoatV1NegatedBuild, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatV1NegatedBuild, {
     row: realIncumbentRow,
     moatClass: "no moat yet; we will not build data by 2026-08-25; revisit at the day-30 retro",
@@ -735,7 +741,7 @@ export function register(h: Harness): void {
 
   // A plan that refuses the moat it names is not a build plan.
   const specMoatPlanNegated = makeFixture("product-spec-moat-plan-negated");
-  setLaneDone(specMoatPlanNegated, "product", ["SPEC.md"]);
+  setLaneDone(specMoatPlanNegated, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatPlanNegated, {
     row: realIncumbentRow,
     moatClass: "data — we will never collect any user history",
@@ -745,7 +751,7 @@ export function register(h: Harness): void {
 
   // Contractions negate the commitment the same as full forms.
   const specMoatV1Contraction = makeFixture("product-spec-moat-v1-contraction");
-  setLaneDone(specMoatV1Contraction, "product", ["SPEC.md"]);
+  setLaneDone(specMoatV1Contraction, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatV1Contraction, {
     row: realIncumbentRow,
     moatClass: "no moat yet; we aren't building data by 2026-08-25; revisit at the day-30 retro",
@@ -755,7 +761,7 @@ export function register(h: Harness): void {
 
   // An unrelated negation earlier in the sentence does not erase a live concession.
   const specCopyUnrelatedNegation = makeFixture("product-spec-copy-unrelated-negation");
-  setLaneDone(specCopyUnrelatedNegation, "product", ["SPEC.md"]);
+  setLaneDone(specCopyUnrelatedNegation, "product", ["product/SPEC.md"]);
   writeMoatSpec(specCopyUnrelatedNegation, {
     row: realIncumbentRow,
     moatClass: "data — per-user miss history compounds weekly",
@@ -771,7 +777,7 @@ export function register(h: Harness): void {
 
   // One row benchmarks against a category of one.
   const specSingleIncumbentRow = makeFixture("product-spec-single-incumbent-row");
-  setLaneDone(specSingleIncumbentRow, "product", ["SPEC.md"]);
+  setLaneDone(specSingleIncumbentRow, "product", ["product/SPEC.md"]);
   writeMoatSpec(specSingleIncumbentRow, {
     row: realIncumbentRow,
     moatClass: "data — per-user miss history compounds weekly",
@@ -781,7 +787,7 @@ export function register(h: Harness): void {
 
   // A taxonomy word inside the plan cannot bless an invalid declared class.
   const specMoatClassExecution = makeFixture("product-spec-moat-class-execution");
-  setLaneDone(specMoatClassExecution, "product", ["SPEC.md"]);
+  setLaneDone(specMoatClassExecution, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatClassExecution, {
     row: twoIncumbentRows,
     moatClass: "execution — we send user data to the same model API",
@@ -791,7 +797,7 @@ export function register(h: Harness): void {
 
   // "No incumbent can reproduce…" is the structural claim, not a concession.
   const specCopyLeadingNo = makeFixture("product-spec-copy-leading-no");
-  setLaneDone(specCopyLeadingNo, "product", ["SPEC.md"]);
+  setLaneDone(specCopyLeadingNo, "product", ["product/SPEC.md"]);
   writeMoatSpec(specCopyLeadingNo, {
     row: twoIncumbentRows,
     moatClass: "data — per-user miss history compounds weekly",
@@ -801,7 +807,7 @@ export function register(h: Harness): void {
 
   // An escaped pipe is content — later columns must not shift over the gap.
   const specEscapedPipe = makeFixture("product-spec-escaped-pipe");
-  setLaneDone(specEscapedPipe, "product", ["SPEC.md"]);
+  setLaneDone(specEscapedPipe, "product", ["product/SPEC.md"]);
   writeMoatSpec(specEscapedPipe, {
     row: "| HabitKit | iOS \\| Android logging | repair moment | |\n| Streaks | iOS \\| watchOS habits | repair flow | |",
     moatClass: "data — per-user miss history compounds weekly",
@@ -811,9 +817,9 @@ export function register(h: Harness): void {
 
   // The same incumbent twice is still a category of one.
   const specDuplicateRows = makeFixture("product-spec-duplicate-rows");
-  setLaneDone(specDuplicateRows, "product", ["SPEC.md"]);
+  setLaneDone(specDuplicateRows, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specDuplicateRows, "SPEC.md"),
+    path.join(specDuplicateRows, "product/SPEC.md"),
     specSections({
       row: `${realIncumbentRow}\n${realIncumbentRow}`,
       moatClass: "data — per-user miss history compounds weekly",
@@ -825,7 +831,7 @@ export function register(h: Harness): void {
 
   // "Without requiring setup" is a plan, not a refusal.
   const specPlanFriendlyNegative = makeFixture("product-spec-plan-friendly-negative");
-  setLaneDone(specPlanFriendlyNegative, "product", ["SPEC.md"]);
+  setLaneDone(specPlanFriendlyNegative, "product", ["product/SPEC.md"]);
   writeMoatSpec(specPlanFriendlyNegative, {
     row: twoIncumbentRows,
     moatClass: "data — automatic history accrues without requiring setup",
@@ -835,9 +841,9 @@ export function register(h: Harness): void {
 
   // Markdown continuation fills the field the normal way.
   const specIndentedAnswer = makeFixture("product-spec-indented-answer");
-  setLaneDone(specIndentedAnswer, "product", ["SPEC.md"]);
+  setLaneDone(specIndentedAnswer, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specIndentedAnswer, "SPEC.md"),
+    path.join(specIndentedAnswer, "product/SPEC.md"),
     specSections({
       row: twoIncumbentRows,
       moatClass: "data — per-user miss history compounds weekly",
@@ -850,7 +856,7 @@ export function register(h: Harness): void {
 
   // A blocker cell that concedes the week-one copy is not a blocker.
   const specBlockerConceded = makeFixture("product-spec-blocker-conceded");
-  setLaneDone(specBlockerConceded, "product", ["SPEC.md"]);
+  setLaneDone(specBlockerConceded, "product", ["product/SPEC.md"]);
   writeMoatSpec(specBlockerConceded, {
     row: "| HabitKit | fast logging | streak-insurance moment | Nothing; they can ship this in a week |\n| Streaks | native polish | repair flow | No blocker; this is copied in days |",
     moatClass: "data — per-user miss history compounds weekly",
@@ -860,7 +866,7 @@ export function register(h: Harness): void {
 
   // The V1 build verb must target the named class, not any taxonomy word.
   const specMoatV1UnboundBuild = makeFixture("product-spec-moat-v1-unbound-build");
-  setLaneDone(specMoatV1UnboundBuild, "product", ["SPEC.md"]);
+  setLaneDone(specMoatV1UnboundBuild, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatV1UnboundBuild, {
     row: twoIncumbentRows,
     moatClass: "no moat yet, racing to build better execution; we send requests to the same model API by 2026-08-25; revisit at the day-30 retro",
@@ -870,9 +876,9 @@ export function register(h: Harness): void {
 
   // Guidance prose cannot shadow the labeled copy-test field.
   const specCopyLabelShadow = makeFixture("product-spec-copy-label-shadow");
-  setLaneDone(specCopyLabelShadow, "product", ["SPEC.md"]);
+  setLaneDone(specCopyLabelShadow, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specCopyLabelShadow, "SPEC.md"),
+    path.join(specCopyLabelShadow, "product/SPEC.md"),
     specSections({
       row: twoIncumbentRows,
       moatClass: "data — per-user miss history compounds weekly",
@@ -891,7 +897,7 @@ export function register(h: Harness): void {
 
   // Non-Latin incumbent names are distinct incumbents.
   const specUnicodeIncumbents = makeFixture("product-spec-unicode-incumbents");
-  setLaneDone(specUnicodeIncumbents, "product", ["SPEC.md"]);
+  setLaneDone(specUnicodeIncumbents, "product", ["product/SPEC.md"]);
   writeMoatSpec(specUnicodeIncumbents, {
     row: "| あすけん | photo food logging at scale | our miss-repair moment | per-user history their fresh install lacks |\n| カロミル | broad nutrient database | our miss-repair moment | per-user history their fresh install lacks |",
     moatClass: "data — per-user miss history compounds weekly",
@@ -901,9 +907,9 @@ export function register(h: Harness): void {
 
   // The moat-class field accepts the same continuation form as the copy test.
   const specMoatClassIndented = makeFixture("product-spec-moat-class-indented");
-  setLaneDone(specMoatClassIndented, "product", ["SPEC.md"]);
+  setLaneDone(specMoatClassIndented, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specMoatClassIndented, "SPEC.md"),
+    path.join(specMoatClassIndented, "product/SPEC.md"),
     specSections({
       row: twoIncumbentRows,
       moatClass: "",
@@ -919,9 +925,9 @@ export function register(h: Harness): void {
 
   // A later table's header is not an incumbent.
   const specSecondTableHeader = makeFixture("product-spec-second-table-header");
-  setLaneDone(specSecondTableHeader, "product", ["SPEC.md"]);
+  setLaneDone(specSecondTableHeader, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specSecondTableHeader, "SPEC.md"),
+    path.join(specSecondTableHeader, "product/SPEC.md"),
     specSections({
       row: realIncumbentRow,
       moatClass: "data — per-user miss history compounds weekly",
@@ -936,7 +942,7 @@ export function register(h: Harness): void {
 
   // A pending build plan is a placeholder, not a plan.
   const specPlanPending = makeFixture("product-spec-plan-pending");
-  setLaneDone(specPlanPending, "product", ["SPEC.md"]);
+  setLaneDone(specPlanPending, "product", ["product/SPEC.md"]);
   writeMoatSpec(specPlanPending, {
     row: twoIncumbentRows,
     moatClass: "data — build details are still pending",
@@ -946,7 +952,7 @@ export function register(h: Harness): void {
 
   // Localized specs are complete specs.
   const specJapaneseAnswers = makeFixture("product-spec-japanese-answers");
-  setLaneDone(specJapaneseAnswers, "product", ["SPEC.md"]);
+  setLaneDone(specJapaneseAnswers, "product", ["product/SPEC.md"]);
   writeMoatSpec(specJapaneseAnswers, {
     row: "| あすけん | photo food logging at scale | our miss-repair moment | per-user history their fresh install lacks |\n| カロミル | broad nutrient database | our miss-repair moment | per-user history their fresh install lacks |",
     moatClass: "data — 蓄積された利用履歴が毎週複利で強くなり、新規インストールには再現できない",
@@ -956,9 +962,9 @@ export function register(h: Harness): void {
 
   // Invented competitors with filled cells benchmark nothing.
   const specInventedIncumbents = makeFixture("product-spec-invented-incumbents");
-  setLaneDone(specInventedIncumbents, "product", ["SPEC.md"]);
+  setLaneDone(specInventedIncumbents, "product", ["product/SPEC.md"]);
   writeFileSync(
-    path.join(specInventedIncumbents, "SPEC.md"),
+    path.join(specInventedIncumbents, "product/SPEC.md"),
     specSections({
       row: "| FocusFlow | fast logging | our repair moment | history their install lacks |\n| MindBloom | broad templates | our repair moment | history their install lacks |",
       moatClass: "data — per-user miss history compounds weekly",
@@ -970,7 +976,7 @@ export function register(h: Harness): void {
 
   // Refusing the day-30 revisit voids the exception.
   const specMoatV1NegatedRevisit = makeFixture("product-spec-moat-v1-negated-revisit");
-  setLaneDone(specMoatV1NegatedRevisit, "product", ["SPEC.md"]);
+  setLaneDone(specMoatV1NegatedRevisit, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatV1NegatedRevisit, {
     row: twoIncumbentRows,
     moatClass: "no moat yet, racing to build data by 2026-08-25; we will not revisit at day 30",
@@ -980,7 +986,7 @@ export function register(h: Harness): void {
 
   // Praise of the class is not a plan.
   const specMoatHeadPraise = makeFixture("product-spec-moat-head-praise");
-  setLaneDone(specMoatHeadPraise, "product", ["SPEC.md"]);
+  setLaneDone(specMoatHeadPraise, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatHeadPraise, {
     row: twoIncumbentRows,
     moatClass: "data is unquestionably the primary moat class",
@@ -990,7 +996,7 @@ export function register(h: Harness): void {
 
   // Rows without the optional trailing pipe are the same four cells.
   const specNoTrailingPipe = makeFixture("product-spec-no-trailing-pipe");
-  setLaneDone(specNoTrailingPipe, "product", ["SPEC.md"]);
+  setLaneDone(specNoTrailingPipe, "product", ["product/SPEC.md"]);
   writeMoatSpec(specNoTrailingPipe, {
     row: "| HabitKit | fast logging, wide templates | streak-insurance at the miss moment | miss-history data accrues day one\n| Streaks | polished native logging | our repair flow | miss-history depth their storage cannot mirror",
     moatClass: "data — per-user miss history compounds weekly",
@@ -1000,7 +1006,7 @@ export function register(h: Harness): void {
 
   // Natural concrete build descriptions bind within their clause.
   const specMoatV1Natural = makeFixture("product-spec-moat-v1-natural");
-  setLaneDone(specMoatV1Natural, "product", ["SPEC.md"]);
+  setLaneDone(specMoatV1Natural, "product", ["product/SPEC.md"]);
   writeMoatSpec(specMoatV1Natural, {
     row: twoIncumbentRows,
     moatClass: "no moat yet, racing to build an accumulated per-user data corpus by 2026-08-25; revisit at the day-30 retro",
@@ -1014,12 +1020,12 @@ export function register(h: Harness): void {
   runFixture("shipped launch trace template passes before the lane is claimed", traceBaseline, "check-launch-trace.ts", 0);
 
   const traceDonePlaceholders = makeFixture("launch-trace-done-placeholders");
-  setLaneDone(traceDonePlaceholders, "traceability", ["LAUNCH_TRACE.md"]);
+  setLaneDone(traceDonePlaceholders, "traceability", ["state/LAUNCH_TRACE.md"]);
   runFixture("done traceability lane with template placeholders fails", traceDonePlaceholders, "check-launch-trace.ts", 1, "launch_trace.placeholder_complete");
 
   const traceMissing = makeFixture("launch-trace-missing");
-  rmSync(path.join(traceMissing, "LAUNCH_TRACE.md"), { force: true });
-  runFixture("active traceability lane without LAUNCH_TRACE.md fails", traceMissing, "check-launch-trace.ts", 1, "launch_trace.markdown_missing");
+  rmSync(path.join(traceMissing, "state/LAUNCH_TRACE.md"), { force: true });
+  runFixture("active traceability lane without state/LAUNCH_TRACE.md fails", traceMissing, "check-launch-trace.ts", 1, "launch_trace.markdown_missing");
 
   // ── check-privacy-terms ───────────────────────────────────────────────────
 
@@ -1027,16 +1033,16 @@ export function register(h: Harness): void {
   runFixture("shipped privacy and terms templates pass before the lane is claimed", privacyBaseline, "check-privacy-terms.ts", 0);
 
   const privacyDonePlaceholders = makeFixture("privacy-terms-done-placeholders");
-  setLaneDone(privacyDonePlaceholders, "privacy_legal", ["PRIVACY.md", "TERMS.md"]);
+  setLaneDone(privacyDonePlaceholders, "privacy_legal", ["trust/PRIVACY.md", "trust/TERMS.md"]);
   runFixture(
     "done privacy_legal lane with template placeholders fails",
     privacyDonePlaceholders,
     "check-privacy-terms.ts",
     1,
-    "privacy_terms.privacy_md.placeholder_complete",
+    "privacy_terms.trust_privacy_md.placeholder_complete",
   );
 
   const termsMissing = makeFixture("privacy-terms-missing-terms");
-  rmSync(path.join(termsMissing, "TERMS.md"), { force: true });
-  runFixture("active privacy_legal lane without TERMS.md fails", termsMissing, "check-privacy-terms.ts", 1, "privacy_terms.terms_md.missing");
+  rmSync(path.join(termsMissing, "trust/TERMS.md"), { force: true });
+  runFixture("active privacy_legal lane without trust/TERMS.md fails", termsMissing, "check-privacy-terms.ts", 1, "privacy_terms.trust_terms_md.missing");
 }

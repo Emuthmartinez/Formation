@@ -42,7 +42,7 @@ It is layered:
 
 The orchestrator compiles and executes this model. Agents perform judgment inside bounded nodes. Runtime adapters may serialize work when necessary, but they may not change prerequisites, proof requirements, founder gates, or completion semantics.
 
-`PROJECT_STATE.yaml` remains the canonical mutable state for one business. Parallel workers do not edit it directly. They return outputs, evidence, and proposed state changes to an orchestrator-owned reducer, which is the single writer to canonical state, the launch cockpit, shared provider mutations, and integration state.
+`state/PROJECT_STATE.yaml` remains the canonical mutable state for one business. Parallel workers do not edit it directly. They return outputs, evidence, and proposed state changes to an orchestrator-owned reducer, which is the single writer to canonical state, the launch cockpit, shared provider mutations, and integration state.
 
 ## Quickstart
 
@@ -71,15 +71,19 @@ ln -sfn ~/.codex/skills/b2c-mobile-business-launch ~/.claude/skills/b2c-mobile-b
 ln -sfn ~/.codex/skills/b2c-mobile-business-launch ~/.agents/skills/b2c-mobile-business-launch
 ```
 
+## Business capability tree
+
+The copied `business/` workspace is organized by capability rather than a flat artifact list. See [`business/README.md`](skill/b2c-mobile-business-launch/business/README.md) for ownership and paths. Each capability directory owns its authored artifacts and points downward to narrower contracts instead of duplicating cross-repository guidance.
+
 ## What lands in the app repository
 
 | Area | Durable output |
 | --- | --- |
-| State and status | `PROJECT_STATE.yaml`, run state, evidence, and `launch-cockpit.html` |
-| Founder operations | `BUSINESS_ACCESS.md`, structured approvals, access proof, and one action at a time |
-| Research and positioning | market evidence, competitor and review mining, research verdicts, and `LAUNCH_TRACE.md` |
-| Product and experience | `SPEC.md`, `TECH_SPEC.md`, acceptance criteria, experience contracts, and scope locks |
-| Design | `DESIGN.md`, state-driven Design Room versions, tokens, baselines, and rendered proof |
+| State and status | `state/PROJECT_STATE.yaml`, run state, evidence, and `state/launch-cockpit.html` |
+| Founder operations | `operations/BUSINESS_ACCESS.md`, structured approvals, access proof, and one action at a time |
+| Research and positioning | market evidence, competitor and review mining, research verdicts, and `state/LAUNCH_TRACE.md` |
+| Product and experience | `product/SPEC.md`, `engineering/TECH_SPEC.md`, acceptance criteria, experience contracts, and scope locks |
+| Design | `design/DESIGN.md`, state-driven Design Room versions, tokens, baselines, and rendered proof |
 | Engineering | implementation plans, task ownership, device proof, backend contracts, and production readiness |
 | Revenue and growth | pricing, RevenueCat and Stripe contracts, paid acquisition, viral loops, lifecycle email, and funnel assets |
 | Store operations | signing, screenshots, metadata, privacy answers, submission packets, and rejection handling |
@@ -122,4 +126,4 @@ The skill is opinionated for subscription and freemium consumer mobile apps. One
 
 ## Security and license
 
-Report vulnerabilities through [`.github/SECURITY.md`](.github/SECURITY.md). Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Licensed under [MIT](LICENSE).
+Report vulnerabilities through [`.github/trust/SECURITY.md`](.github/trust/SECURITY.md). Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Licensed under [MIT](LICENSE).

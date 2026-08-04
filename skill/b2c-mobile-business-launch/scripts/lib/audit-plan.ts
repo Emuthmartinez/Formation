@@ -41,7 +41,7 @@ export interface AuditStep {
  */
 export const auditExcludedScripts: Record<string, string> = {
   "check:landing-funnel":
-    "requires a generated business repo with a deployed landing funnel; the shipped templates contain no deployable funnel (business/landing/ is a section component library, deliberately not site-shaped, and the validator's scope check ignores it)",
+    "requires a generated business repo with a deployed landing funnel; the shipped templates contain no deployable funnel (business/growth/landing/ is a section component library, deliberately not site-shaped, and the validator's scope check ignores it)",
   "check:source-freshness": "alias of check:source-registry (same script and registry); running both would duplicate the step",
   "test:validators": "executed by the launchbench step, which lints scenario definitions and then runs the validator fixture suite",
 };
@@ -64,7 +64,7 @@ function skillRoot(layout: AuditLayout): string {
 export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
   const T = templatesRoot(layout);
   const S = skillRoot(layout);
-  const stateArgs = ["--root", T, "--state", "PROJECT_STATE.yaml"];
+  const stateArgs = ["--root", T, "--state", "state/PROJECT_STATE.yaml"];
   const rootArgs = ["--root", T];
 
   const steps: AuditStep[] = [
@@ -152,12 +152,12 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     {
       id: "render:launch-cockpit",
       kind: "script",
-      args: [...stateArgs, "--out", "/tmp/b2c-launch-cockpit.html"],
+      args: [...stateArgs, "--out", "/tmp/b2c-state/launch-cockpit.html"],
     },
     {
       id: "render:design-room",
       kind: "script",
-      args: [...rootArgs, "--out", "/tmp/b2c-design-room.html", "--static-only"],
+      args: [...rootArgs, "--out", "/tmp/b2c-design/design-room.html", "--static-only"],
     },
   ];
 
