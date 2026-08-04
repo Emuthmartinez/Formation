@@ -2,6 +2,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateExecutionArchitecture } from "../graph/execution.js";
 import { composeSkillGraph } from "../graph/graph.js";
 import { renderDomainRouting, renderGeneratedFiles, renderPhaseSpine, replaceGeneratedBlock } from "../graph/render.js";
 import { validateSkillGraph } from "../graph/validate.js";
@@ -11,6 +12,9 @@ const defaultSkillRoot = path.resolve(scriptDir, "..");
 const skillRoot = parseSkillRoot(process.argv.slice(2));
 const graph = composeSkillGraph(skillRoot);
 const issues = validateSkillGraph(graph, skillRoot);
+for (const message of validateExecutionArchitecture(graph)) {
+  issues.push({ severity: "error", code: "skill_graph.execution.invalid", message });
+}
 const expected = renderGeneratedFiles(graph);
 
 const skillPath = path.join(skillRoot, "SKILL.md");
@@ -33,7 +37,7 @@ for (const [relative, content] of Object.entries(expected)) {
 
 const errors = issues.filter((issue) => issue.severity === "error");
 const warnings = issues.filter((issue) => issue.severity === "warning");
-console.log("Typed skill graph integrity check");
+console.log("Typed skill graph integrity and execution check");
 for (const issue of issues) console.log(`${issue.severity.toUpperCase()} ${issue.code}: ${issue.message}${issue.path ? ` (${issue.path})` : ""}`);
 console.log(`${errors.length} error(s), ${warnings.length} warning(s), ${graph.workflows.length} workflow(s), ${graph.references.length} reference(s).`);
 if (errors.length > 0) process.exitCode = 1;
