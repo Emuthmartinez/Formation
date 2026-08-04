@@ -1,8 +1,9 @@
 name: PR99 Publisher
 
 on:
-  issue_comment:
-    types: [created]
+  pull_request_target:
+    types: [synchronize]
+    branches: [main]
 
 permissions:
   contents: write
@@ -11,9 +12,9 @@ permissions:
 jobs:
   publish:
     if: >-
-      github.event.issue.number == 99 &&
-      github.event.comment.user.id == 27366738 &&
-      github.event.comment.body == '/publish-v066-owner'
+      github.event.pull_request.number == 99 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'agent/business-unit-capabilities'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
