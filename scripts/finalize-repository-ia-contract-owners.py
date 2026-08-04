@@ -60,8 +60,6 @@ for rel in [
         },
     )
 
-# Fixture state files now live under state/. Create the parent after every
-# landing-funnel fixture declaration, independent of variable name or wrapping.
 fixture_state = SKILL / "machine/fixtures/state-and-meta.fixtures.ts"
 fixture_text = fixture_state.read_text()
 fixture_pattern = re.compile(
@@ -76,10 +74,15 @@ fixture_text = fixture_pattern.sub(
     fixture_text,
 )
 
-# Shared landing-site builders also write the migrated state file directly.
-fixture_text = fixture_text.replace(
-    'const withLandingSite = (root: string, html: string): void => {\n    writeFileSync(path.join(root, "state", "PROJECT_STATE.yaml")',
-    'const withLandingSite = (root: string, html: string): void => {\n    mkdirSync(path.join(root, "state"), { recursive: true });\n    writeFileSync(path.join(root, "state", "PROJECT_STATE.yaml")',
+helper_pattern = re.compile(
+    r'(const withLandingSite\s*=\s*\([\s\S]*?\): void => \{\n)'
+    r'(?!\s*mkdirSync\(path\.join\(root, "state"\))',
+    re.MULTILINE,
+)
+fixture_text = helper_pattern.sub(
+    r'\1    mkdirSync(path.join(root, "state"), { recursive: true });\n',
+    fixture_text,
+    count=1,
 )
 fixture_state.write_text(fixture_text)
 
@@ -89,8 +92,6 @@ for rel in [
 ]:
     replace(SKILL / rel, {'"design-system"': '"design/system"', 'design-system/': 'design/system/'})
 
-# Only the business-side copies move. The skill-owned design-system remains the
-# canonical source used to prove the business template has not drifted.
 replace(
     SKILL / "gates/design/check-motion-contract.ts",
     {
