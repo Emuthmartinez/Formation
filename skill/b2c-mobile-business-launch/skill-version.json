@@ -1,10 +1,12 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.65.1",
+  "version": "0.66.0",
   "updatedAt": "2026-08-03",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Dev-dependency maintenance only; no skill behaviour, definition, or contract changes. The dev-dependencies group moves in lockstep across both manifests: @types/node 26.1.2, @types/react 19.2.18, @types/react-dom 19.2.4, @vitejs/plugin-react 6.0.5, motion 12.43.0, and vite 8.2.0. Dependabot splits this group into one PR per manifest root, and either half alone trips check:package-parity, so the two are landed as a single change.",
-    "Cursor joins Claude and Agents as a verified consumer of the installed runtime. scripts/sync-skill-runtime.sh now carries ~/.cursor/skills/b2c-mobile-business-launch in CONSUMER_LINKS, so one sync creates, repoints, and proves that link on the same terms as the others, and a real directory there fails the run instead of silently serving stale content. Cursor's vendor-owned ~/.cursor/skills-cursor is never synced into."
+    "Completes the graph-native catalog cutover: workflow definitions now expose native dependencies and output contracts, while legacy L01-L57 identifiers and template-generated action, proof, memory, and stopping-condition prose are removed.",
+    "Updates the execution compiler, graph composition, renderers, generated projections, and validator fixtures to consume the native catalog directly; execution-plan reporting now uses catalog terminology and workflow validation tests executable outputs or gates rather than helper-authored text.",
+    "Removes the temporary migration workflow and codemod scripts, archives the completed graph-adoption proposal as a dated historical record, restores the normal source-freshness workflow, and replaces the final compatibility-era maintainer action with native catalog language.",
+    "Aligns the generated workflow table with the four-column native schema and updates the Graph Execution v2 implementation guide so maintainers no longer follow removed compatibility fields."
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "skillVersion": "0.65.1",
+  "skillVersion": "0.66.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1908,7 +1908,6 @@
   "workflows": [
     {
       "id": "workflow.orchestration.session-continuity-resume",
-      "legacyId": "L02",
       "title": "Session continuity / resume",
       "domainId": "domain.orchestration",
       "areaIds": [
@@ -1916,20 +1915,6 @@
       ],
       "trigger": "New session, resume, status check, or handoff on an existing launch",
       "negativeTriggers": [],
-      "action": [
-        "Load context.orchestration and recover current source truth before changing session continuity / resume.",
-        "Execute the bounded session continuity / resume procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:continuity-contract exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.orchestration",
-        "PROJECT_STATE.yaml",
-        "launch-cockpit.html"
-      ],
-      "stoppingCondition": "check:continuity-contract exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.orchestration"
       ],
@@ -1942,8 +1927,8 @@
       "laneIds": [
         "lane.orchestration"
       ],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "PROJECT_STATE.yaml",
         "launch-cockpit.html"
       ],
@@ -1955,11 +1940,10 @@
         "operator.orchestrator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep",
-      "legacyId": "L03",
       "title": "Orient, scaffold & state/cockpit upkeep",
       "domainId": "domain.orchestration",
       "areaIds": [
@@ -1967,22 +1951,6 @@
       ],
       "trigger": "\"Launch this app\" / broad launch request; any lane/provider/proof/blocker status change",
       "negativeTriggers": [],
-      "action": [
-        "Load context.orchestration and recover current source truth before changing orient, scaffold & state/cockpit upkeep.",
-        "Execute the bounded orient, scaffold & state/cockpit upkeep procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "validate:launch-state exits 0",
-        "render:launch-cockpit exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.orchestration",
-        "PROJECT_STATE.yaml",
-        "launch-cockpit.html",
-        "BUSINESS_ACCESS.md"
-      ],
-      "stoppingCondition": "validate:launch-state exits 0 and render:launch-cockpit exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.orchestration"
       ],
@@ -1997,8 +1965,8 @@
       "laneIds": [
         "lane.orchestration"
       ],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "PROJECT_STATE.yaml",
         "launch-cockpit.html",
         "BUSINESS_ACCESS.md"
@@ -2012,11 +1980,10 @@
         "operator.orchestrator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.process.provider-proof-verification",
-      "legacyId": "L07",
       "title": "Provider-proof verification",
       "domainId": "domain.process",
       "areaIds": [
@@ -2024,18 +1991,6 @@
       ],
       "trigger": "Before marking any provider-backed lane (analytics/revenue/email/store/security/eng) done",
       "negativeTriggers": [],
-      "action": [
-        "Load context.process and recover current source truth before changing provider-proof verification.",
-        "Execute the bounded provider-proof verification procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:provider-proof exits 0"
-      ],
-      "memory": [
-        "PROVIDER_PROOF.md"
-      ],
-      "stoppingCondition": "check:provider-proof exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.process"
       ],
@@ -2045,8 +2000,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "PROVIDER_PROOF.md"
       ],
       "gateCommands": [
@@ -2063,11 +2018,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.process.change-cascade",
-      "legacyId": "L08",
       "title": "Change cascade",
       "domainId": "domain.process",
       "areaIds": [
@@ -2075,19 +2029,6 @@
       ],
       "trigger": "Any change to a launched/near-launch app's feature, copy, brand, pricing, products, or data behavior",
       "negativeTriggers": [],
-      "action": [
-        "Load context.process and recover current source truth before changing change cascade.",
-        "Execute the bounded change cascade procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:change-cascade exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml",
-        "LAUNCH_TRACE.md"
-      ],
-      "stoppingCondition": "check:change-cascade exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.process"
       ],
@@ -2097,8 +2038,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "PROJECT_STATE.yaml",
         "LAUNCH_TRACE.md"
       ],
@@ -2111,11 +2052,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.process.launch-trace-and-build-contracts",
-      "legacyId": "L18",
       "title": "Launch trace & build contracts",
       "domainId": "domain.process",
       "areaIds": [
@@ -2123,20 +2063,6 @@
       ],
       "trigger": "Crossing research → product/design/build; deciding if TECH_SPEC.md is needed",
       "negativeTriggers": [],
-      "action": [
-        "Load context.process and recover current source truth before changing launch trace & build contracts.",
-        "Execute the bounded launch trace & build contracts procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:launch-trace exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.traceability",
-        "LAUNCH_TRACE.md",
-        "TECH_SPEC.md"
-      ],
-      "stoppingCondition": "check:launch-trace exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.process"
       ],
@@ -2150,11 +2076,11 @@
       "laneIds": [
         "lane.traceability"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.research.research-backed-spec",
         "workflow.experience.11-star-experience"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "LAUNCH_TRACE.md",
         "TECH_SPEC.md"
       ],
@@ -2167,11 +2093,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.process.business-control-plane-extension",
-      "legacyId": "L26",
       "title": "Business Control Plane extension",
       "domainId": "domain.process",
       "areaIds": [
@@ -2179,19 +2104,6 @@
       ],
       "trigger": "Extending the Design Room into new analytics/monetization/store/growth panels over the same state",
       "negativeTriggers": [],
-      "action": [
-        "Load context.process and recover current source truth before changing business control plane extension.",
-        "Execute the bounded business control plane extension procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:control-plane exits 0",
-        "check:business-control-plane-workspace exits 0"
-      ],
-      "memory": [
-        "state/workspace.generated.json"
-      ],
-      "stoppingCondition": "check:control-plane exits 0 and check:business-control-plane-workspace exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.process"
       ],
@@ -2201,8 +2113,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "state/workspace.generated.json"
       ],
       "gateCommands": [
@@ -2215,11 +2127,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.process.launchbench-failure-cards-coverage-audit",
-      "legacyId": "L49",
       "title": "LaunchBench / failure-cards / coverage audit",
       "domainId": "domain.process",
       "areaIds": [
@@ -2227,20 +2138,6 @@
       ],
       "trigger": "Before any launch-readiness claim, after a repeated miss, or adding a validator/scenario",
       "negativeTriggers": [],
-      "action": [
-        "Load context.process and recover current source truth before changing launchbench / failure-cards / coverage audit.",
-        "Execute the bounded launchbench / failure-cards / coverage audit procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "launchbench exits 0",
-        "check:lane-coverage exits 0"
-      ],
-      "memory": [
-        "FAILURE_CARDS.md",
-        "LAUNCHBENCH.md"
-      ],
-      "stoppingCondition": "launchbench exits 0 and check:lane-coverage exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.process"
       ],
@@ -2250,10 +2147,10 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "FAILURE_CARDS.md",
         "LAUNCHBENCH.md"
       ],
@@ -2267,11 +2164,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.operations.paid-tool-routing-and-fallback",
-      "legacyId": "L04",
       "title": "Paid-tool routing & fallback",
       "domainId": "domain.operations",
       "areaIds": [
@@ -2279,19 +2175,6 @@
       ],
       "trigger": "Before using or replacing any paid/account-gated tool, or before a free fallback",
       "negativeTriggers": [],
-      "action": [
-        "Load context.operations and recover current source truth before changing paid-tool routing & fallback.",
-        "Execute the bounded paid-tool routing & fallback procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:paid-tool-decisions exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.paid-tool-routing",
-        "TOOL_DECISIONS.md"
-      ],
-      "stoppingCondition": "check:paid-tool-decisions exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.operations"
       ],
@@ -2305,8 +2188,8 @@
       "laneIds": [
         "lane.paid-tool-routing"
       ],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "TOOL_DECISIONS.md"
       ],
       "gateCommands": [
@@ -2322,11 +2205,10 @@
       "founderOnlyActions": [
         "approve a paid or constrained fallback"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.operations.secrets-baseline-and-routing",
-      "legacyId": "L05",
       "title": "Secrets baseline & routing",
       "domainId": "domain.operations",
       "areaIds": [
@@ -2334,19 +2216,6 @@
       ],
       "trigger": "Before any new secret, key, token, env var, webhook secret, or .env",
       "negativeTriggers": [],
-      "action": [
-        "Load context.operations and recover current source truth before changing secrets baseline & routing.",
-        "Execute the bounded secrets baseline & routing procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:secrets exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.secrets",
-        "secrets/SECRETS.md"
-      ],
-      "stoppingCondition": "check:secrets exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.operations"
       ],
@@ -2360,8 +2229,8 @@
       "laneIds": [
         "lane.secrets"
       ],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "secrets/SECRETS.md"
       ],
       "gateCommands": [
@@ -2377,11 +2246,10 @@
       "founderOnlyActions": [
         "provide or authorize credentials"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.trust.security-architecture-and-release-gate",
-      "legacyId": "L19",
       "title": "Security architecture & release gate",
       "domainId": "domain.trust",
       "areaIds": [
@@ -2389,20 +2257,6 @@
       ],
       "trigger": "Before threat modeling, hardening, scans, or any security-readiness claim",
       "negativeTriggers": [],
-      "action": [
-        "Load context.trust and recover current source truth before changing security architecture & release gate.",
-        "Execute the bounded security architecture & release gate procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:security exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.security",
-        "SECURITY.md",
-        "security-review.html"
-      ],
-      "stoppingCondition": "check:security exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.trust"
       ],
@@ -2417,8 +2271,8 @@
       "laneIds": [
         "lane.security"
       ],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "SECURITY.md",
         "security-review.html"
       ],
@@ -2435,11 +2289,10 @@
       "founderOnlyActions": [
         "accept residual security risk"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.trust.privacy-and-terms",
-      "legacyId": "L41",
       "title": "Privacy & terms",
       "domainId": "domain.trust",
       "areaIds": [
@@ -2447,21 +2300,6 @@
       ],
       "trigger": "Before privacy policy, terms, EULA, subscription terms, account-deletion, store disclosures",
       "negativeTriggers": [],
-      "action": [
-        "Load context.trust and recover current source truth before changing privacy & terms.",
-        "Execute the bounded privacy & terms procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:privacy-terms exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.privacy-legal",
-        "PRIVACY.md",
-        "TERMS.md",
-        "LEGAL_REVIEW.md"
-      ],
-      "stoppingCondition": "check:privacy-terms exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.trust"
       ],
@@ -2475,10 +2313,10 @@
       "laneIds": [
         "lane.privacy-legal"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.process.launch-trace-and-build-contracts"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "PRIVACY.md",
         "TERMS.md",
         "LEGAL_REVIEW.md"
@@ -2493,11 +2331,10 @@
       "founderOnlyActions": [
         "approve legal text"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.operations.resend-email-ops",
-      "legacyId": "L42",
       "title": "Resend email ops",
       "domainId": "domain.operations",
       "areaIds": [
@@ -2505,19 +2342,6 @@
       ],
       "trigger": "Before Resend domains/keys, transactional/lifecycle/broadcast email, deliverability",
       "negativeTriggers": [],
-      "action": [
-        "Load context.operations and recover current source truth before changing resend email ops.",
-        "Execute the bounded resend email ops procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:email exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.email",
-        "EMAIL_OPS.md"
-      ],
-      "stoppingCondition": "check:email exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.operations"
       ],
@@ -2532,11 +2356,11 @@
       "laneIds": [
         "lane.email"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.design.design-room-state-mutate-version-render",
         "workflow.data.analytics-and-attribution-blueprint"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "EMAIL_OPS.md"
       ],
       "gateCommands": [
@@ -2550,11 +2374,10 @@
         "operator.customer-success"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.operations.post-launch-operations",
-      "legacyId": "L47",
       "title": "Post-launch operations",
       "domainId": "domain.operations",
       "areaIds": [
@@ -2562,20 +2385,6 @@
       ],
       "trigger": "App live (phase_6/6b), \"what now\", weekly ops, incident response, retention reviews",
       "negativeTriggers": [],
-      "action": [
-        "Load context.operations and recover current source truth before changing post-launch operations.",
-        "Execute the bounded post-launch operations procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:post-launch exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.post-launch-ops",
-        "POST_LAUNCH_OPS.md",
-        "LAUNCH_RETRO.md"
-      ],
-      "stoppingCondition": "check:post-launch exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.operations"
       ],
@@ -2589,10 +2398,10 @@
       "laneIds": [
         "lane.post-launch-ops"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.engineering.engineering-orchestration-ce-production-readiness"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "POST_LAUNCH_OPS.md",
         "LAUNCH_RETRO.md"
       ],
@@ -2607,11 +2416,10 @@
       "founderOnlyActions": [
         "decide Kill, Hold, Fix, or Scale"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.operations.founder-zero-operator-bootstrap",
-      "legacyId": "L51",
       "title": "Founder-zero operator bootstrap",
       "domainId": "domain.operations",
       "areaIds": [
@@ -2619,19 +2427,6 @@
       ],
       "trigger": "Every broad launch start; before account/social/Doppler bootstrap; when an agent is about to hand back a checklist",
       "negativeTriggers": [],
-      "action": [
-        "Load context.operations and recover current source truth before changing founder-zero operator bootstrap.",
-        "Execute the bounded founder-zero operator bootstrap procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:founder-operator exits 0"
-      ],
-      "memory": [
-        "BUSINESS_ACCESS.md",
-        "operations/business-access.json"
-      ],
-      "stoppingCondition": "check:founder-operator exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.operations"
       ],
@@ -2641,8 +2436,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "BUSINESS_ACCESS.md",
         "operations/business-access.json"
       ],
@@ -2657,11 +2452,10 @@
       "founderOnlyActions": [
         "provide account ownership decisions"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.operations.agent-operations-ledger",
-      "legacyId": "L52",
       "title": "Agent operations ledger",
       "domainId": "domain.operations",
       "areaIds": [
@@ -2669,19 +2463,6 @@
       ],
       "trigger": "Before any authenticated browser/API/CLI/native action on a provider, social, or store account",
       "negativeTriggers": [],
-      "action": [
-        "Load context.operations and recover current source truth before changing agent operations ledger.",
-        "Execute the bounded agent operations ledger procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:agent-operations exits 0"
-      ],
-      "memory": [
-        "AGENT_OPERATIONS.md",
-        "operations/agent-operations.json"
-      ],
-      "stoppingCondition": "check:agent-operations exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.operations"
       ],
@@ -2691,8 +2472,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "AGENT_OPERATIONS.md",
         "operations/agent-operations.json"
       ],
@@ -2712,11 +2493,10 @@
       "founderOnlyActions": [
         "approve exact authenticated actions"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.product.app-archetype-detection-and-starter",
-      "legacyId": "L06",
       "title": "App-archetype detection & starter",
       "domainId": "domain.product",
       "areaIds": [
@@ -2724,20 +2504,6 @@
       ],
       "trigger": "Request matches a known product shape (social / AI-chat / habit / photo-AI)",
       "negativeTriggers": [],
-      "action": [
-        "Load context.product and recover current source truth before changing app-archetype detection & starter.",
-        "Execute the bounded app-archetype detection & starter procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:app-archetype exits 0",
-        "check:archetype-starter exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.product",
-        "SPEC.md"
-      ],
-      "stoppingCondition": "check:app-archetype exits 0 and check:archetype-starter exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.product"
       ],
@@ -2752,8 +2518,8 @@
       "laneIds": [
         "lane.product"
       ],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "SPEC.md"
       ],
       "gateCommands": [
@@ -2765,11 +2531,10 @@
         "operator.product-leader"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.research.research-backed-spec",
-      "legacyId": "L09",
       "title": "Research-backed spec",
       "domainId": "domain.research",
       "areaIds": [
@@ -2777,22 +2542,6 @@
       ],
       "trigger": "Need category economics, competitor, review/social-language, keyword, or name-collision evidence",
       "negativeTriggers": [],
-      "action": [
-        "Load context.research and recover current source truth before changing research-backed spec.",
-        "Execute the bounded research-backed spec procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:research exits 0",
-        "check:product-spec exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.research",
-        "PROJECT_STATE.yaml lane.product",
-        "RESEARCH.md",
-        "SPEC.md"
-      ],
-      "stoppingCondition": "check:research exits 0 and check:product-spec exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.research"
       ],
@@ -2806,8 +2555,8 @@
         "lane.research",
         "lane.product"
       ],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "RESEARCH.md",
         "SPEC.md"
       ],
@@ -2822,11 +2571,10 @@
       "founderOnlyActions": [
         "decide Go, Pivot, or Kill"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.research.localization-market-research",
-      "legacyId": "L10",
       "title": "Localization market research",
       "domainId": "domain.research",
       "areaIds": [
@@ -2834,19 +2582,6 @@
       ],
       "trigger": "Before localizing any surface or choosing locales",
       "negativeTriggers": [],
-      "action": [
-        "Load context.research and recover current source truth before changing localization market research.",
-        "Execute the bounded localization market research procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:localization-research exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.research",
-        "localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
-      ],
-      "stoppingCondition": "check:localization-research exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.research"
       ],
@@ -2859,8 +2594,8 @@
       "laneIds": [
         "lane.research"
       ],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
       ],
       "gateCommands": [
@@ -2873,11 +2608,10 @@
         "operator.product-leader"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.experience.11-star-experience",
-      "legacyId": "L12",
       "title": "11-star experience",
       "domainId": "domain.experience",
       "areaIds": [
@@ -2885,20 +2619,6 @@
       ],
       "trigger": "\"11-star run\" / before SPEC, onboarding, ads, store creative, or eng plans harden",
       "negativeTriggers": [],
-      "action": [
-        "Load context.experience and recover current source truth before changing 11-star experience.",
-        "Execute the bounded 11-star experience procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:11-star exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.experience",
-        "11-star-experience/11_STAR_EXPERIENCE.md",
-        "11-star-experience/11-star-experience.html"
-      ],
-      "stoppingCondition": "check:11-star exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.experience"
       ],
@@ -2912,10 +2632,10 @@
       "laneIds": [
         "lane.experience"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.research.research-backed-spec"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "11-star-experience/11_STAR_EXPERIENCE.md",
         "11-star-experience/11-star-experience.html"
       ],
@@ -2928,11 +2648,10 @@
         "operator.design-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.experience.emotional-experience-design-producer",
-      "legacyId": "L13",
       "title": "Emotional experience design (producer)",
       "domainId": "domain.experience",
       "areaIds": [
@@ -2940,19 +2659,6 @@
       ],
       "trigger": "Feature whose 11-star target is 6★+ / \"charge this with emotion\", \"build a habit\"",
       "negativeTriggers": [],
-      "action": [
-        "Load context.experience and recover current source truth before changing emotional experience design (producer).",
-        "Execute the bounded emotional experience design (producer) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:emotional-design exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.emotional-design",
-        "emotional-design/EMOTIONAL_DESIGN.md"
-      ],
-      "stoppingCondition": "check:emotional-design exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.experience"
       ],
@@ -2966,11 +2672,11 @@
       "laneIds": [
         "lane.emotional-design"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.experience.11-star-experience",
         "workflow.data.analytics-and-attribution-blueprint"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "emotional-design/EMOTIONAL_DESIGN.md"
       ],
       "gateCommands": [
@@ -2982,11 +2688,10 @@
         "operator.design-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.experience.emotional-design-audit-auditor",
-      "legacyId": "L14",
       "title": "Emotional design audit (auditor)",
       "domainId": "domain.experience",
       "areaIds": [
@@ -2994,19 +2699,6 @@
       ],
       "trigger": "\"Audit this app's emotional design\" / \"emotional UX audit\"",
       "negativeTriggers": [],
-      "action": [
-        "Load context.experience and recover current source truth before changing emotional design audit (auditor).",
-        "Execute the bounded emotional design audit (auditor) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:emotional-design exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.emotional-design",
-        "emotional-design/EMOTIONAL_AUDIT.md"
-      ],
-      "stoppingCondition": "check:emotional-design exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.experience"
       ],
@@ -3020,10 +2712,10 @@
       "laneIds": [
         "lane.emotional-design"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.experience.emotional-experience-design-producer"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "emotional-design/EMOTIONAL_AUDIT.md"
       ],
       "gateCommands": [
@@ -3035,11 +2727,10 @@
         "operator.design-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.design.design-room-state-mutate-version-render",
-      "legacyId": "L20",
       "title": "Design Room (state→mutate→version→render)",
       "domainId": "domain.design",
       "areaIds": [
@@ -3047,23 +2738,6 @@
       ],
       "trigger": "Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work",
       "negativeTriggers": [],
-      "action": [
-        "Load context.design and recover current source truth before changing design room (state→mutate→version→render).",
-        "Execute the bounded design room (state→mutate→version→render) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "validate:design-state exits 0",
-        "check:design-room exits 0",
-        "render:design-room exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.design",
-        "state/business.json",
-        "state/theme.tokens.json",
-        "design-room.html"
-      ],
-      "stoppingCondition": "validate:design-state exits 0 and check:design-room exits 0 and render:design-room exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.design"
       ],
@@ -3077,10 +2751,10 @@
       "laneIds": [
         "lane.design"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.process.launch-trace-and-build-contracts"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "state/business.json",
         "state/theme.tokens.json",
         "design-room.html"
@@ -3097,11 +2771,10 @@
       "founderOnlyActions": [
         "approve final brand direction"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.design.token-promotion",
-      "legacyId": "L21",
       "title": "Token promotion",
       "domainId": "domain.design",
       "areaIds": [
@@ -3109,21 +2782,6 @@
       ],
       "trigger": "Theme tokens change and the design is accepted",
       "negativeTriggers": [],
-      "action": [
-        "Load context.design and recover current source truth before changing token promotion.",
-        "Execute the bounded token promotion procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:token-promotion exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.design",
-        "design-system/tokens.json",
-        "design-system/tokens.css",
-        "design-system/DesignTokens.swift"
-      ],
-      "stoppingCondition": "check:token-promotion exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.design"
       ],
@@ -3137,10 +2795,10 @@
       "laneIds": [
         "lane.design"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.design.design-room-state-mutate-version-render"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "design-system/tokens.json",
         "design-system/tokens.css",
         "design-system/DesignTokens.swift"
@@ -3153,11 +2811,10 @@
         "operator.design-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.design.ux-patterns-refero",
-      "legacyId": "L22",
       "title": "UX patterns (Refero)",
       "domainId": "domain.design",
       "areaIds": [
@@ -3165,19 +2822,6 @@
       ],
       "trigger": "Before flow maps, state matrices, UX_PATTERNS.md, or bug-trap coverage",
       "negativeTriggers": [],
-      "action": [
-        "Load context.design and recover current source truth before changing ux patterns (refero).",
-        "Execute the bounded ux patterns (refero) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:ux-patterns exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.design",
-        "ux-patterns/UX_PATTERNS.md"
-      ],
-      "stoppingCondition": "check:ux-patterns exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.design"
       ],
@@ -3191,10 +2835,10 @@
       "laneIds": [
         "lane.design"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.design.design-room-state-mutate-version-render"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "ux-patterns/UX_PATTERNS.md"
       ],
       "gateCommands": [
@@ -3207,11 +2851,10 @@
         "operator.design-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.experience.onboarding-conversion",
-      "legacyId": "L23",
       "title": "Onboarding conversion",
       "domainId": "domain.experience",
       "areaIds": [
@@ -3219,20 +2862,6 @@
       ],
       "trigger": "Before onboarding quizzes, review-prompt timing, paywall timing, or first-session activation",
       "negativeTriggers": [],
-      "action": [
-        "Load context.experience and recover current source truth before changing onboarding conversion.",
-        "Execute the bounded onboarding conversion procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:onboarding exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.onboarding",
-        "ONBOARDING.md",
-        "onboarding.html"
-      ],
-      "stoppingCondition": "check:onboarding exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.experience"
       ],
@@ -3247,11 +2876,11 @@
       "laneIds": [
         "lane.onboarding"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.data.analytics-and-attribution-blueprint",
         "workflow.experience.11-star-experience"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "ONBOARDING.md",
         "onboarding.html"
       ],
@@ -3264,11 +2893,10 @@
         "operator.design-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.design.premium-mobile-craft",
-      "legacyId": "L24",
       "title": "Premium mobile craft",
       "domainId": "domain.design",
       "areaIds": [
@@ -3276,21 +2904,6 @@
       ],
       "trigger": "Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or \"premium feel\"",
       "negativeTriggers": [],
-      "action": [
-        "Load context.design and recover current source truth before changing premium mobile craft.",
-        "Execute the bounded premium mobile craft procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:ux-patterns exits 0",
-        "check:motion-contract exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.design",
-        "DESIGN.md",
-        "ux-patterns/UX_PATTERNS.md"
-      ],
-      "stoppingCondition": "check:ux-patterns exits 0 and check:motion-contract exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.design"
       ],
@@ -3302,8 +2915,8 @@
       "laneIds": [
         "lane.design"
       ],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "DESIGN.md",
         "ux-patterns/UX_PATTERNS.md"
       ],
@@ -3316,11 +2929,10 @@
         "operator.design-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.design.content-assets-remotion-generated-visuals",
-      "legacyId": "L25",
       "title": "Content assets / Remotion / generated visuals",
       "domainId": "domain.design",
       "areaIds": [
@@ -3328,20 +2940,6 @@
       ],
       "trigger": "Before rendered videos/stills, app previews, ad/social variants",
       "negativeTriggers": [],
-      "action": [
-        "Load context.design and recover current source truth before changing content assets / remotion / generated visuals.",
-        "Execute the bounded content assets / remotion / generated visuals procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:content-assets exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.content-assets",
-        "content-assets/CONTENT_ASSETS.md",
-        "content-assets/content-assets.html"
-      ],
-      "stoppingCondition": "check:content-assets exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.design"
       ],
@@ -3356,10 +2954,10 @@
       "laneIds": [
         "lane.content-assets"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.design.design-room-state-mutate-version-render"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "content-assets/CONTENT_ASSETS.md",
         "content-assets/content-assets.html"
       ],
@@ -3373,11 +2971,10 @@
         "operator.design-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.words.writing-quality-no-slop",
-      "legacyId": "L53",
       "title": "Writing quality (no-slop)",
       "domainId": "domain.words",
       "areaIds": [
@@ -3385,20 +2982,6 @@
       ],
       "trigger": "Before writing or reviewing any founder-facing copy or any marketing copy the skill generates",
       "negativeTriggers": [],
-      "action": [
-        "Load context.words and recover current source truth before changing writing quality (no-slop).",
-        "Execute the bounded writing quality (no-slop) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:no-slop exits 0",
-        "check:app-copy exits 0"
-      ],
-      "memory": [
-        "COPY_BRIEF.md",
-        "COPY_DECK.md"
-      ],
-      "stoppingCondition": "check:no-slop exits 0 and check:app-copy exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.words"
       ],
@@ -3408,8 +2991,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "COPY_BRIEF.md",
         "COPY_DECK.md"
       ],
@@ -3423,11 +3006,10 @@
         "operator.customer-success"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.store.aso-and-store-ops",
-      "legacyId": "L27",
       "title": "ASO & store ops",
       "domainId": "domain.store",
       "areaIds": [
@@ -3435,19 +3017,6 @@
       ],
       "trigger": "Before App Store/Play metadata, keyword research, ASA, or post-launch ASO loops",
       "negativeTriggers": [],
-      "action": [
-        "Load context.store and recover current source truth before changing aso & store ops.",
-        "Execute the bounded aso & store ops procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:aso-metadata exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.store-console",
-        "STORE_OPS.md"
-      ],
-      "stoppingCondition": "check:aso-metadata exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.store"
       ],
@@ -3461,10 +3030,10 @@
       "laneIds": [
         "lane.store-console"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.design.design-room-state-mutate-version-render"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "STORE_OPS.md"
       ],
       "gateCommands": [
@@ -3476,11 +3045,10 @@
         "operator.marketing-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.store.app-store-listing-prep-packet",
-      "legacyId": "L28",
       "title": "App Store listing prep packet",
       "domainId": "domain.store",
       "areaIds": [
@@ -3488,19 +3056,6 @@
       ],
       "trigger": "Before listing fields, privacy questionnaire, IAP/subscription field maps, CPPs, in-app events",
       "negativeTriggers": [],
-      "action": [
-        "Load context.store and recover current source truth before changing app store listing prep packet.",
-        "Execute the bounded app store listing prep packet procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:store-console exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.store-console",
-        "app-store-listing/APP_STORE_LISTING.md"
-      ],
-      "stoppingCondition": "check:store-console exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.store"
       ],
@@ -3514,10 +3069,10 @@
       "laneIds": [
         "lane.store-console"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.store.aso-and-store-ops"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "app-store-listing/APP_STORE_LISTING.md"
       ],
       "gateCommands": [
@@ -3529,11 +3084,10 @@
         "operator.marketing-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.store.apple-signing-and-release-readiness",
-      "legacyId": "L29",
       "title": "Apple signing & release readiness",
       "domainId": "domain.store",
       "areaIds": [
@@ -3541,19 +3095,6 @@
       ],
       "trigger": "Before Apple Developer enrollment, Team ID, signing, profiles, archive/upload, TestFlight",
       "negativeTriggers": [],
-      "action": [
-        "Load context.store and recover current source truth before changing apple signing & release readiness.",
-        "Execute the bounded apple signing & release readiness procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:apple-signing exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.apple-signing",
-        "APPLE_SIGNING.md"
-      ],
-      "stoppingCondition": "check:apple-signing exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.store"
       ],
@@ -3567,10 +3108,10 @@
       "laneIds": [
         "lane.apple-signing"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.store.app-store-listing-prep-packet"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "APPLE_SIGNING.md"
       ],
       "gateCommands": [
@@ -3586,11 +3127,10 @@
       "founderOnlyActions": [
         "approve signing and submission"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.store.apple-app-store-requirements-privacy-manifest",
-      "legacyId": "L30",
       "title": "Apple App Store requirements (privacy manifest)",
       "domainId": "domain.store",
       "areaIds": [
@@ -3598,20 +3138,6 @@
       ],
       "trigger": "Before ASC upload — PrivacyInfo.xcprivacy, required-reason APIs, App Privacy answers",
       "negativeTriggers": [],
-      "action": [
-        "Load context.store and recover current source truth before changing apple app store requirements (privacy manifest).",
-        "Execute the bounded apple app store requirements (privacy manifest) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:apple-requirements exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.store-console",
-        "PROJECT_STATE.yaml lane.privacy-legal",
-        "APPLE_APP_STORE_REQUIREMENTS.md"
-      ],
-      "stoppingCondition": "check:apple-requirements exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.store"
       ],
@@ -3626,11 +3152,11 @@
         "lane.store-console",
         "lane.privacy-legal"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.store.app-store-listing-prep-packet",
         "workflow.trust.privacy-and-terms"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "APPLE_APP_STORE_REQUIREMENTS.md"
       ],
       "gateCommands": [
@@ -3646,11 +3172,10 @@
       "founderOnlyActions": [
         "approve privacy answers"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.store.store-console-workflow",
-      "legacyId": "L31",
       "title": "Store console workflow",
       "domainId": "domain.store",
       "areaIds": [
@@ -3658,20 +3183,6 @@
       ],
       "trigger": "Before \"where do I click / what do I paste\" in ASC or Play Console",
       "negativeTriggers": [],
-      "action": [
-        "Load context.store and recover current source truth before changing store console workflow.",
-        "Execute the bounded store console workflow procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:store-console exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.store-console",
-        "STORE_CONSOLE.md",
-        "store-console.html"
-      ],
-      "stoppingCondition": "check:store-console exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.store"
       ],
@@ -3685,11 +3196,11 @@
       "laneIds": [
         "lane.store-console"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.store.app-store-listing-prep-packet",
         "workflow.store.apple-signing-and-release-readiness"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "STORE_CONSOLE.md",
         "store-console.html"
       ],
@@ -3707,11 +3218,10 @@
       "founderOnlyActions": [
         "approve external console mutations"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.store.asc-cli-automation",
-      "legacyId": "L32",
       "title": "ASC CLI automation",
       "domainId": "domain.store",
       "areaIds": [
@@ -3719,19 +3229,6 @@
       ],
       "trigger": "Before Rork asc CLI app creation, metadata, screenshots, TestFlight, RevenueCat sync",
       "negativeTriggers": [],
-      "action": [
-        "Load context.store and recover current source truth before changing asc cli automation.",
-        "Execute the bounded asc cli automation procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:asc-command-contract exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.store-console",
-        "STORE_CONSOLE.md"
-      ],
-      "stoppingCondition": "check:asc-command-contract exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.store"
       ],
@@ -3745,10 +3242,10 @@
       "laneIds": [
         "lane.store-console"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.store.store-console-workflow"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "STORE_CONSOLE.md"
       ],
       "gateCommands": [
@@ -3764,11 +3261,10 @@
       "founderOnlyActions": [
         "approve App Store Connect mutations"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.store.store-screenshots-production",
-      "legacyId": "L33",
       "title": "Store screenshots production",
       "domainId": "domain.store",
       "areaIds": [
@@ -3776,20 +3272,6 @@
       ],
       "trigger": "Store screenshots needed (raw capture → composed iPhone/iPad/Play assets)",
       "negativeTriggers": [],
-      "action": [
-        "Load context.store and recover current source truth before changing store screenshots production.",
-        "Execute the bounded store screenshots production procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:store-screenshots exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.store-console",
-        "PROJECT_STATE.yaml lane.content-assets",
-        "app-store-listing/SCREENSHOTS.md"
-      ],
-      "stoppingCondition": "check:store-screenshots exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.store"
       ],
@@ -3804,11 +3286,11 @@
         "lane.store-console",
         "lane.content-assets"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.design.design-room-state-mutate-version-render",
         "workflow.store.app-store-listing-prep-packet"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "app-store-listing/SCREENSHOTS.md"
       ],
       "gateCommands": [
@@ -3822,11 +3304,10 @@
         "operator.marketing-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.store.google-play-release",
-      "legacyId": "L34",
       "title": "Google Play release",
       "domainId": "domain.store",
       "areaIds": [
@@ -3834,19 +3315,6 @@
       ],
       "trigger": "Android in scope (platforms include android or an android bundle id exists)",
       "negativeTriggers": [],
-      "action": [
-        "Load context.store and recover current source truth before changing google play release.",
-        "Execute the bounded google play release procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:google-play exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.store-console",
-        "GOOGLE_PLAY_RELEASE.md"
-      ],
-      "stoppingCondition": "check:google-play exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.store"
       ],
@@ -3860,10 +3328,10 @@
       "laneIds": [
         "lane.store-console"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.store.app-store-listing-prep-packet"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "GOOGLE_PLAY_RELEASE.md"
       ],
       "gateCommands": [
@@ -3879,11 +3347,10 @@
       "founderOnlyActions": [
         "approve Play Console release"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.engineering.engineering-orchestration-ce-production-readiness",
-      "legacyId": "L35",
       "title": "Engineering orchestration (CE + production readiness)",
       "domainId": "domain.engineering",
       "areaIds": [
@@ -3891,23 +3358,6 @@
       ],
       "trigger": "Before actual app implementation, builder prompts, or production-readiness claims",
       "negativeTriggers": [],
-      "action": [
-        "Load context.engineering and recover current source truth before changing engineering orchestration (ce + production readiness).",
-        "Execute the bounded engineering orchestration (ce + production readiness) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:compound-engineering exits 0",
-        "check:orchestration exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.engineering",
-        "PROJECT_STATE.yaml lane.orchestration",
-        "ENGINEERING_PLAN.md",
-        "ORCHESTRATION.md",
-        "PRODUCTION_READINESS.md"
-      ],
-      "stoppingCondition": "check:compound-engineering exits 0 and check:orchestration exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.engineering"
       ],
@@ -3922,11 +3372,11 @@
         "lane.engineering",
         "lane.orchestration"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.process.launch-trace-and-build-contracts",
         "workflow.design.design-room-state-mutate-version-render"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "ENGINEERING_PLAN.md",
         "ORCHESTRATION.md",
         "PRODUCTION_READINESS.md"
@@ -3941,11 +3391,10 @@
         "operator.security-architect"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.engineering.backend-data-contract",
-      "legacyId": "L36",
       "title": "Backend data contract",
       "domainId": "domain.engineering",
       "areaIds": [
@@ -3953,19 +3402,6 @@
       ],
       "trigger": "Before schema/auth prompts or TECH_SPEC.md data/API sections harden",
       "negativeTriggers": [],
-      "action": [
-        "Load context.engineering and recover current source truth before changing backend data contract.",
-        "Execute the bounded backend data contract procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:backend-contract exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.engineering",
-        "TECH_SPEC.md"
-      ],
-      "stoppingCondition": "check:backend-contract exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.engineering"
       ],
@@ -3980,10 +3416,10 @@
       "laneIds": [
         "lane.engineering"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.process.launch-trace-and-build-contracts"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "TECH_SPEC.md"
       ],
       "gateCommands": [
@@ -3995,11 +3431,10 @@
         "operator.security-architect"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.engineering.app-agent-roster-and-repo-entrypoints",
-      "legacyId": "L37",
       "title": "App agent roster & repo entrypoints",
       "domainId": "domain.engineering",
       "areaIds": [
@@ -4007,21 +3442,6 @@
       ],
       "trigger": "Before builder handoff bundles, AGENTS.md/CLAUDE.md, APP_AGENTS.md, agents/",
       "negativeTriggers": [],
-      "action": [
-        "Load context.engineering and recover current source truth before changing app agent roster & repo entrypoints.",
-        "Execute the bounded app agent roster & repo entrypoints procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:agent-entrypoints exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.engineering",
-        "AGENTS.md",
-        "CLAUDE.md",
-        "APP_AGENTS.md"
-      ],
-      "stoppingCondition": "check:agent-entrypoints exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.engineering"
       ],
@@ -4035,10 +3455,10 @@
       "laneIds": [
         "lane.engineering"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.engineering.engineering-orchestration-ce-production-readiness"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "AGENTS.md",
         "CLAUDE.md",
         "APP_AGENTS.md"
@@ -4052,11 +3472,10 @@
         "operator.security-architect"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.engineering.mobai-device-automation-and-demo-videos",
-      "legacyId": "L38",
       "title": "MobAI device automation & demo videos",
       "domainId": "domain.engineering",
       "areaIds": [
@@ -4064,21 +3483,6 @@
       ],
       "trigger": "Before device automation, app-flow demo videos, app previews, bug-repro recordings",
       "negativeTriggers": [],
-      "action": [
-        "Load context.engineering and recover current source truth before changing mobai device automation & demo videos.",
-        "Execute the bounded mobai device automation & demo videos procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:mobai-proof exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.engineering",
-        "PROJECT_STATE.yaml lane.content-assets",
-        "DEMO_VIDEO.md",
-        "PRODUCTION_READINESS.md"
-      ],
-      "stoppingCondition": "check:mobai-proof exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.engineering"
       ],
@@ -4093,10 +3497,10 @@
         "lane.engineering",
         "lane.content-assets"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.engineering.engineering-orchestration-ce-production-readiness"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "DEMO_VIDEO.md",
         "PRODUCTION_READINESS.md"
       ],
@@ -4111,11 +3515,10 @@
         "operator.security-architect"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.engineering.native-ios-proof-route-ladder",
-      "legacyId": "L39",
       "title": "Native iOS proof (Route Ladder)",
       "domainId": "domain.engineering",
       "areaIds": [
@@ -4123,19 +3526,6 @@
       ],
       "trigger": "Before in-app iOS Simulator / Codex Desktop native iOS / XcodeBuildMCP / serve-sim / SnapshotPreviews proof",
       "negativeTriggers": [],
-      "action": [
-        "Load context.engineering and recover current source truth before changing native ios proof (route ladder).",
-        "Execute the bounded native ios proof (route ladder) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:native-ios exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.engineering",
-        "PRODUCTION_READINESS.md"
-      ],
-      "stoppingCondition": "check:native-ios exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.engineering"
       ],
@@ -4149,10 +3539,10 @@
       "laneIds": [
         "lane.engineering"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.engineering.engineering-orchestration-ce-production-readiness"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "PRODUCTION_READINESS.md"
       ],
       "gateCommands": [
@@ -4169,11 +3559,10 @@
         "operator.security-architect"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.data.analytics-and-attribution-blueprint",
-      "legacyId": "L11",
       "title": "Analytics & attribution blueprint",
       "domainId": "domain.data",
       "areaIds": [
@@ -4181,21 +3570,6 @@
       ],
       "trigger": "Before locking onboarding/paywall/funnels/store CTAs or any prompt naming events",
       "negativeTriggers": [],
-      "action": [
-        "Load context.data and recover current source truth before changing analytics & attribution blueprint.",
-        "Execute the bounded analytics & attribution blueprint procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:analytics-catalog exits 0",
-        "check:attribution exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.analytics-attribution",
-        "ANALYTICS.md",
-        "analytics-plan.html"
-      ],
-      "stoppingCondition": "check:analytics-catalog exits 0 and check:attribution exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.data"
       ],
@@ -4208,10 +3582,10 @@
       "laneIds": [
         "lane.analytics-attribution"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.research.research-backed-spec"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "ANALYTICS.md",
         "analytics-plan.html"
       ],
@@ -4227,11 +3601,10 @@
         "operator.marketing-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.growth.paid-user-acquisition-system",
-      "legacyId": "L15",
       "title": "Paid user-acquisition system",
       "domainId": "domain.growth",
       "areaIds": [
@@ -4239,19 +3612,6 @@
       ],
       "trigger": "Before paid ads, ASA, Meta/TikTok/Google campaigns, or spend-readiness claims",
       "negativeTriggers": [],
-      "action": [
-        "Load context.growth and recover current source truth before changing paid user-acquisition system.",
-        "Execute the bounded paid user-acquisition system procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:paid-ua exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.paid-user-acquisition",
-        "growth/PAID_UA.md"
-      ],
-      "stoppingCondition": "check:paid-ua exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.growth"
       ],
@@ -4265,10 +3625,10 @@
       "laneIds": [
         "lane.paid-user-acquisition"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.data.analytics-and-attribution-blueprint"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "growth/PAID_UA.md"
       ],
       "gateCommands": [
@@ -4285,11 +3645,10 @@
       "founderOnlyActions": [
         "approve ad-account access and spend"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.growth.viral-growth-loop",
-      "legacyId": "L16",
       "title": "Viral growth loop",
       "domainId": "domain.growth",
       "areaIds": [
@@ -4297,19 +3656,6 @@
       ],
       "trigger": "Before referral/share-to-unlock/invite/comment-loop mechanics",
       "negativeTriggers": [],
-      "action": [
-        "Load context.growth and recover current source truth before changing viral growth loop.",
-        "Execute the bounded viral growth loop procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:viral-growth exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.growth",
-        "growth/VIRAL_GROWTH.md"
-      ],
-      "stoppingCondition": "check:viral-growth exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.growth"
       ],
@@ -4323,10 +3669,10 @@
       "laneIds": [
         "lane.growth"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.data.analytics-and-attribution-blueprint"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "growth/VIRAL_GROWTH.md"
       ],
       "gateCommands": [
@@ -4337,11 +3683,10 @@
         "operator.marketing-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.growth.launch-narrative-and-cadence",
-      "legacyId": "L17",
       "title": "Launch narrative & cadence",
       "domainId": "domain.growth",
       "areaIds": [
@@ -4349,19 +3694,6 @@
       ],
       "trigger": "Before the public announcement, launch-day run-of-show, or weekly release rhythm",
       "negativeTriggers": [],
-      "action": [
-        "Load context.growth and recover current source truth before changing launch narrative & cadence.",
-        "Execute the bounded launch narrative & cadence procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:launch-narrative exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.growth",
-        "growth/LAUNCH_NARRATIVE.md"
-      ],
-      "stoppingCondition": "check:launch-narrative exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.growth"
       ],
@@ -4377,11 +3709,11 @@
       "laneIds": [
         "lane.growth"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.data.analytics-and-attribution-blueprint",
         "workflow.growth.viral-growth-loop"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "growth/LAUNCH_NARRATIVE.md"
       ],
       "gateCommands": [
@@ -4394,11 +3726,10 @@
       "founderOnlyActions": [
         "approve public launch posting"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.money.revenue-monetization",
-      "legacyId": "L40",
       "title": "Revenue monetization",
       "domainId": "domain.money",
       "areaIds": [
@@ -4406,19 +3737,6 @@
       ],
       "trigger": "Before RevenueCat/Stripe/web billing, products, paywall, entitlement, webhooks, pricing",
       "negativeTriggers": [],
-      "action": [
-        "Load context.money and recover current source truth before changing revenue monetization.",
-        "Execute the bounded revenue monetization procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:revenue exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.revenue",
-        "REVENUE_OPS.md"
-      ],
-      "stoppingCondition": "check:revenue exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.money"
       ],
@@ -4431,10 +3749,10 @@
       "laneIds": [
         "lane.revenue"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.process.launch-trace-and-build-contracts"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "REVENUE_OPS.md"
       ],
       "gateCommands": [
@@ -4451,11 +3769,10 @@
       "founderOnlyActions": [
         "approve pricing and product catalog"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.growth.geo-seo-public-visibility",
-      "legacyId": "L43",
       "title": "GEO/SEO public visibility",
       "domainId": "domain.growth",
       "areaIds": [
@@ -4463,19 +3780,6 @@
       ],
       "trigger": "Before editing any landing/policy/blog copy, robots.txt, llms.txt, sitemap, schema, metadata",
       "negativeTriggers": [],
-      "action": [
-        "Load context.growth and recover current source truth before changing geo/seo public visibility.",
-        "Execute the bounded geo/seo public visibility procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:landing-funnel exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.growth",
-        "GEO_SEO.md"
-      ],
-      "stoppingCondition": "check:landing-funnel exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.growth"
       ],
@@ -4489,10 +3793,10 @@
       "laneIds": [
         "lane.growth"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.process.launch-trace-and-build-contracts"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "GEO_SEO.md"
       ],
       "gateCommands": [
@@ -4503,11 +3807,10 @@
         "operator.marketing-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.growth.pre-launch-funnel-landing-waitlist",
-      "legacyId": "L44",
       "title": "Pre-launch funnel (landing/waitlist)",
       "domainId": "domain.growth",
       "areaIds": [
@@ -4515,19 +3818,6 @@
       ],
       "trigger": "Phase 4 — landing page, waitlist/referral loop, web funnel, live deploy verification",
       "negativeTriggers": [],
-      "action": [
-        "Load context.growth and recover current source truth before changing pre-launch funnel (landing/waitlist).",
-        "Execute the bounded pre-launch funnel (landing/waitlist) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:landing-funnel exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.growth",
-        "landing/"
-      ],
-      "stoppingCondition": "check:landing-funnel exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.growth"
       ],
@@ -4541,10 +3831,10 @@
       "laneIds": [
         "lane.growth"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.growth.geo-seo-public-visibility"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "landing/"
       ],
       "gateCommands": [
@@ -4555,11 +3845,10 @@
         "operator.marketing-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.growth.ugc-creator-engine",
-      "legacyId": "L45",
       "title": "UGC creator engine",
       "domainId": "domain.growth",
       "areaIds": [
@@ -4567,19 +3856,6 @@
       ],
       "trigger": "Before founder-led organic social, creator sourcing/contracts, format-discovery tests",
       "negativeTriggers": [],
-      "action": [
-        "Load context.growth and recover current source truth before changing ugc creator engine.",
-        "Execute the bounded ugc creator engine procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:viral-growth exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.growth",
-        "UGC_PLAYBOOK.md"
-      ],
-      "stoppingCondition": "check:viral-growth exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.growth"
       ],
@@ -4593,11 +3869,11 @@
       "laneIds": [
         "lane.growth"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.growth.viral-growth-loop",
         "workflow.growth.launch-narrative-and-cadence"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "UGC_PLAYBOOK.md"
       ],
       "gateCommands": [
@@ -4608,11 +3884,10 @@
         "operator.marketing-guru"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.growth.fastlane-growth-ops",
-      "legacyId": "L46",
       "title": "Fastlane growth ops",
       "domainId": "domain.growth",
       "areaIds": [
@@ -4620,20 +3895,6 @@
       ],
       "trigger": "After launch approval/public beta, or usefastlane.ai/Blitz setup, scheduling, social analytics",
       "negativeTriggers": [],
-      "action": [
-        "Load context.growth and recover current source truth before changing fastlane growth ops.",
-        "Execute the bounded fastlane growth ops procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:post-launch exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.growth",
-        "PROJECT_STATE.yaml lane.post-launch-ops",
-        "FASTLANE_OPS.md"
-      ],
-      "stoppingCondition": "check:post-launch exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.growth"
       ],
@@ -4648,10 +3909,10 @@
         "lane.growth",
         "lane.post-launch-ops"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.growth.launch-narrative-and-cadence"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "FASTLANE_OPS.md"
       ],
       "gateCommands": [
@@ -4664,11 +3925,10 @@
       "founderOnlyActions": [
         "approve social connections and scheduled posts"
       ],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.machine.runtime-freshness-gate-consumer-side",
-      "legacyId": "L01",
       "title": "Runtime freshness gate (consumer side)",
       "domainId": "domain.machine",
       "areaIds": [
@@ -4676,18 +3936,6 @@
       ],
       "trigger": "Before substantial launch/design/store/revenue/build work when the installed runtime may be behind source",
       "negativeTriggers": [],
-      "action": [
-        "Load context.machine and recover current source truth before changing runtime freshness gate (consumer side).",
-        "Execute the bounded runtime freshness gate (consumer side) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:skill-version exits 0"
-      ],
-      "memory": [
-        "skill-version.json"
-      ],
-      "stoppingCondition": "check:skill-version exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.machine"
       ],
@@ -4697,8 +3945,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "skill-version.json"
       ],
       "gateCommands": [
@@ -4710,11 +3958,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.machine.source-freshness-maintenance-maintainer",
-      "legacyId": "L48",
       "title": "Source-freshness maintenance (maintainer)",
       "domainId": "domain.machine",
       "areaIds": [
@@ -4722,18 +3969,6 @@
       ],
       "trigger": "Maintaining the skill, adding external URLs, refreshing third-party docs/commands",
       "negativeTriggers": [],
-      "action": [
-        "Load context.machine and recover current source truth before changing source-freshness maintenance (maintainer).",
-        "Execute the bounded source-freshness maintenance (maintainer) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:source-registry exits 0"
-      ],
-      "memory": [
-        "machine/source-registry.yaml"
-      ],
-      "stoppingCondition": "check:source-registry exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.machine"
       ],
@@ -4743,8 +3978,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "machine/source-registry.yaml"
       ],
       "gateCommands": [
@@ -4756,11 +3991,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.machine.skill-runtime-sync-and-version-discipline-maintainer",
-      "legacyId": "L50",
       "title": "Skill runtime sync & version discipline (maintainer)",
       "domainId": "domain.machine",
       "areaIds": [
@@ -4768,19 +4002,6 @@
       ],
       "trigger": "After any skill change — bump version, sync the installed runtime, run the readiness gate",
       "negativeTriggers": [],
-      "action": [
-        "Load context.machine and recover current source truth before changing skill runtime sync & version discipline (maintainer).",
-        "Execute the bounded skill runtime sync & version discipline (maintainer) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:version-discipline exits 0",
-        "check:skill-version exits 0"
-      ],
-      "memory": [
-        "skill-version.json"
-      ],
-      "stoppingCondition": "check:version-discipline exits 0 and check:skill-version exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.machine"
       ],
@@ -4790,10 +4011,10 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.machine.source-freshness-maintenance-maintainer"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "skill-version.json"
       ],
       "gateCommands": [
@@ -4806,11 +4027,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.machine.founder-language-translation-maintainer",
-      "legacyId": "L54",
       "title": "Founder-language translation (maintainer)",
       "domainId": "domain.machine",
       "areaIds": [
@@ -4818,18 +4038,6 @@
       ],
       "trigger": "Adding or renaming a lane, status, phase, autonomy mode, or provider route; any founder-visible surface change",
       "negativeTriggers": [],
-      "action": [
-        "Load context.machine and recover current source truth before changing founder-language translation (maintainer).",
-        "Execute the bounded founder-language translation (maintainer) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:founder-copy exits 0"
-      ],
-      "memory": [
-        "scripts/lib/founder-copy.ts"
-      ],
-      "stoppingCondition": "check:founder-copy exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.machine"
       ],
@@ -4839,10 +4047,10 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.words.writing-quality-no-slop"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "scripts/lib/founder-copy.ts"
       ],
       "gateCommands": [
@@ -4854,11 +4062,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.machine.skill-triggering-contract-maintainer",
-      "legacyId": "L55",
       "title": "Skill triggering contract (maintainer)",
       "domainId": "domain.machine",
       "areaIds": [
@@ -4866,18 +4073,6 @@
       ],
       "trigger": "Changing SKILL.md frontmatter, the skill description, or the trigger phrasing",
       "negativeTriggers": [],
-      "action": [
-        "Load context.machine and recover current source truth before changing skill triggering contract (maintainer).",
-        "Execute the bounded skill triggering contract (maintainer) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:autopilot exits 0"
-      ],
-      "memory": [
-        "SKILL.md"
-      ],
-      "stoppingCondition": "check:autopilot exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.machine"
       ],
@@ -4887,8 +4082,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "SKILL.md"
       ],
       "gateCommands": [
@@ -4900,11 +4095,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.machine.asc-command-contract-maintainer",
-      "legacyId": "L56",
       "title": "ASC command contract (maintainer)",
       "domainId": "domain.machine",
       "areaIds": [
@@ -4912,19 +4106,6 @@
       ],
       "trigger": "Before changing any documented asc command in playbook/store/app-store-connect-cli.md",
       "negativeTriggers": [],
-      "action": [
-        "Load context.machine and recover current source truth before changing asc command contract (maintainer).",
-        "Execute the bounded asc command contract (maintainer) procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:asc-command-contract exits 0"
-      ],
-      "memory": [
-        "PROJECT_STATE.yaml lane.store-console",
-        "playbook/store/app-store-connect-cli.md"
-      ],
-      "stoppingCondition": "check:asc-command-contract exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.machine"
       ],
@@ -4936,10 +4117,10 @@
       "laneIds": [
         "lane.store-console"
       ],
-      "upstreamWorkflowIds": [
+      "dependencies": [
         "workflow.store.asc-cli-automation"
       ],
-      "artifactPaths": [
+      "outputPaths": [
         "playbook/store/app-store-connect-cli.md"
       ],
       "gateCommands": [
@@ -4951,11 +4132,10 @@
         "operator.validator"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     },
     {
       "id": "workflow.machine.definition-graph-maintenance",
-      "legacyId": "L57",
       "title": "Definition graph maintenance",
       "domainId": "domain.machine",
       "areaIds": [
@@ -4963,21 +4143,6 @@
       ],
       "trigger": "Changing a domain, workflow, context pack, phase, lane, operator, provider, artifact, gate, or generated graph projection",
       "negativeTriggers": [],
-      "action": [
-        "Load context.machine and recover current source truth before changing definition graph maintenance.",
-        "Execute the bounded definition graph maintenance procedure, update its canonical artifacts, and reconcile PROJECT_STATE.yaml.",
-        "Run every deterministic gate named by this workflow and record proof or a concrete blocker."
-      ],
-      "proof": [
-        "check:skill-graph exits 0",
-        "render:skill-graph exits 0"
-      ],
-      "memory": [
-        "graph/generated/skill-graph.json",
-        "graph/generated/skill-graph.md",
-        "graph/generated/context-report.json"
-      ],
-      "stoppingCondition": "check:skill-graph exits 0 and render:skill-graph exits 0, or PROJECT_STATE.yaml records a dated founder-only gate or concrete blocker.",
       "contextPackIds": [
         "context.machine"
       ],
@@ -4987,8 +4152,8 @@
       ],
       "phaseIds": [],
       "laneIds": [],
-      "upstreamWorkflowIds": [],
-      "artifactPaths": [
+      "dependencies": [],
+      "outputPaths": [
         "graph/generated/skill-graph.json",
         "graph/generated/skill-graph.md",
         "graph/generated/context-report.json"
@@ -5004,7 +4169,7 @@
         "operator.renderer"
       ],
       "founderOnlyActions": [],
-      "sourcePath": "docs/history/skill-workflow-loops-2026-08-v0.64.0.md"
+      "sourcePath": "graph/workflows"
     }
   ],
   "artifacts": [
@@ -6702,7 +5867,7 @@
       "allowedActions": [
         "change graph definitions",
         "cut releases",
-        "accept compatibility migrations"
+        "approve catalog schema changes"
       ],
       "founderGatedActions": [],
       "forbiddenActions": [

@@ -121,7 +121,7 @@ export const operators = defineOperators([
     goal: "Own source architecture, releases, compatibility decisions, and the installed runtime.",
     domainIds: ["domain.machine"],
     contextPackIds: ["context.machine"],
-    allowedActions: ["change graph definitions", "cut releases", "accept compatibility migrations"],
+    allowedActions: ["change graph definitions", "cut releases", "approve catalog schema changes"],
     founderGatedActions: [],
     forbiddenActions: ["merge red changes", "publish secret-bearing fixtures"],
     artifactPaths: ["skill-version.json", "docs/architecture.md", "docs/validators.md"],

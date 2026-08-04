@@ -95,10 +95,10 @@ function renderGraphMarkdown(graph: SkillGraph): string {
   const workflowRows = graph.workflows
     .map(
       (workflow) =>
-        `| ${workflow.legacyId ?? ""} | \`${workflow.id}\` | ${workflow.title} | \`${workflow.domainId}\` | ${workflow.gateCommands.map((gate) => `\`${gate}\``).join(", ") || "artifact proof"} |`,
+        `| \`${workflow.id}\` | ${workflow.title} | \`${workflow.domainId}\` | ${workflow.gateCommands.map((gate) => `\`${gate}\``).join(", ") || "output contract"} |`,
     )
     .join("\n");
-  return `# Typed Skill Graph\n\nGenerated from the TypeScript definition graph. Edit graph definitions, not this file.\n\n## Business areas\n\n| ID | Name | Domains |\n| --- | --- | --- |\n${areaRows}\n\n## Workflows\n\n| Legacy | Stable ID | Workflow | Domain | Proof gates |\n| --- | --- | --- | --- | --- |\n${workflowRows}\n`;
+  return `# Typed Skill Graph\n\nGenerated from the TypeScript definition graph. Edit graph definitions, not this file.\n\n## Business areas\n\n| ID | Name | Domains |\n| --- | --- | --- |\n${areaRows}\n\n## Workflows\n\n| Stable ID | Workflow | Domain | Proof gates |\n| --- | --- | --- | --- |\n${workflowRows}\n`;
 }
 
 function renderMermaid(graph: SkillGraph): string {
@@ -109,7 +109,7 @@ function renderMermaid(graph: SkillGraph): string {
   }
   for (const domain of graph.domains) lines.push(`  ${mermaidId(domain.id)}["${escapeMermaid(domain.name)}"]`);
   for (const workflow of graph.workflows) {
-    lines.push(`  ${mermaidId(workflow.id)}["${escapeMermaid(`${workflow.legacyId ?? ""} ${workflow.title}`.trim())}"]`);
+    lines.push(`  ${mermaidId(workflow.id)}["${escapeMermaid(workflow.title)}"]`);
     lines.push(`  ${mermaidId(workflow.domainId)} --> ${mermaidId(workflow.id)}`);
     for (const laneId of workflow.laneIds) lines.push(`  ${mermaidId(workflow.id)} --> ${mermaidId(laneId)}`);
   }

@@ -38,7 +38,7 @@ export function validateSkillGraph(graph: SkillGraph, skillRoot: string): GraphI
   const referenceIds = new Set(graph.references.map((item) => item.id));
   const contextIds = new Set(graph.contextPacks.map((item) => item.id));
   const workflowIds = new Set(graph.workflows.map((item) => item.id));
-  const artifactPaths = new Set(graph.artifacts.map((item) => item.path));
+  const artifactsByPath = new Map(graph.artifacts.map((item) => [item.path, item.id]));
   const gateCommands = new Set(graph.gates.map((item) => item.command));
   const operatorIds = new Set(graph.operators.map((item) => item.id));
   const providerIds = new Set(graph.providers.map((item) => item.id));
@@ -101,8 +101,6 @@ export function validateSkillGraph(graph: SkillGraph, skillRoot: string): GraphI
       issues.push(error("skill_graph.reference.unrouted", `${reference.id} is not reachable through a context pack.`, reference.path));
     }
   }
-
-  uniqueBy(graph.workflows, (item) => item.legacyId ?? item.id, "skill_graph.workflow.legacy_id_duplicate", issues);
   for (const workflow of graph.workflows) {
     validateWorkflow(workflow, issues);
     checkKnown(issues, domainIds, workflow.domainId, "skill_graph.workflow.unknown_domain", workflow.id);
@@ -111,10 +109,10 @@ export function validateSkillGraph(graph: SkillGraph, skillRoot: string): GraphI
     for (const referenceId of workflow.referenceIds) checkKnown(issues, referenceIds, referenceId, "skill_graph.workflow.unknown_reference", workflow.id);
     for (const phaseId of workflow.phaseIds) checkKnown(issues, phaseIds, phaseId, "skill_graph.workflow.unknown_phase", workflow.id);
     for (const laneId of workflow.laneIds) checkKnown(issues, laneIds, laneId, "skill_graph.workflow.unknown_lane", workflow.id);
-    for (const upstreamId of workflow.upstreamWorkflowIds) checkKnown(issues, workflowIds, upstreamId, "skill_graph.workflow.unknown_upstream", workflow.id);
-    for (const artifactPath of workflow.artifactPaths) {
-      if (!artifactPaths.has(artifactPath))
-        issues.push(error("skill_graph.workflow.unknown_artifact", `${workflow.id} names unregistered artifact ${artifactPath}.`));
+    for (const dependencyId of workflow.dependencies) checkKnown(issues, workflowIds, dependencyId, "skill_graph.workflow.unknown_dependency", workflow.id);
+    for (const outputPath of workflow.outputPaths) {
+      if (!artifactsByPath.has(outputPath))
+        issues.push(error("skill_graph.workflow.unknown_output", `${workflow.id} names unregistered artifact ${outputPath}.`));
     }
     for (const command of workflow.gateCommands) {
       if (!gateCommands.has(command)) issues.push(error("skill_graph.workflow.unknown_gate", `${workflow.id} names unregistered gate command ${command}.`));
@@ -123,16 +121,10 @@ export function validateSkillGraph(graph: SkillGraph, skillRoot: string): GraphI
     for (const operatorId of workflow.operatorIds) checkKnown(issues, operatorIds, operatorId, "skill_graph.workflow.unknown_operator", workflow.id);
   }
   detectCycles(
-    graph.workflows.map((workflow) => ({ id: workflow.id, dependencies: workflow.upstreamWorkflowIds })),
+    graph.workflows.map((workflow) => ({ id: workflow.id, dependencies: workflow.dependencies })),
     "skill_graph.workflow.cycle",
     issues,
   );
-  for (let number = 1; number <= 57; number += 1) {
-    const expected = `L${String(number).padStart(2, "0")}`;
-    if (!graph.workflows.some((workflow) => workflow.legacyId === expected)) {
-      issues.push(error("skill_graph.workflow.inventory_gap", `Workflow inventory is missing ${expected}.`));
-    }
-  }
 
   uniqueBy(graph.artifacts, (item) => item.path, "skill_graph.artifact.path_duplicate", issues);
   for (const artifact of graph.artifacts) {
@@ -178,16 +170,10 @@ export function validateSkillGraph(graph: SkillGraph, skillRoot: string): GraphI
 
 function validateWorkflow(workflow: WorkflowDefinition, issues: GraphIssue[]): void {
   if (!workflow.trigger.trim()) issues.push(error("skill_graph.workflow.trigger_missing", `${workflow.id} has no trigger.`));
-  if (workflow.action.length === 0 || workflow.action.some((step) => !step.trim()))
-    issues.push(error("skill_graph.workflow.action_missing", `${workflow.id} has no complete action sequence.`));
-  if (workflow.proof.length === 0) issues.push(error("skill_graph.workflow.proof_missing", `${workflow.id} has no proof contract.`));
-  if (workflow.memory.length === 0) issues.push(error("skill_graph.workflow.memory_missing", `${workflow.id} has no durable memory destination.`));
-  if (!workflow.stoppingCondition.trim()) issues.push(error("skill_graph.workflow.stop_missing", `${workflow.id} has no stopping condition.`));
-  if (!/(exits? 0|PROJECT_STATE|records?|contains?|diff|grep|status|blocker|gate|artifact)/i.test(workflow.stoppingCondition)) {
-    issues.push(error("skill_graph.workflow.stop_unobservable", `${workflow.id} stopping condition is not observably checkable.`));
-  }
   if (workflow.contextPackIds.length === 0) issues.push(error("skill_graph.workflow.context_missing", `${workflow.id} has no context pack.`));
   if (workflow.operatorIds.length === 0) issues.push(error("skill_graph.workflow.operator_missing", `${workflow.id} has no eligible operator.`));
+  if (workflow.outputPaths.length === 0 && workflow.gateCommands.length === 0)
+    issues.push(error("skill_graph.workflow.contract_empty", `${workflow.id} has neither outputs nor verification gates.`));
 }
 
 function checkKnown<T extends GraphId>(issues: GraphIssue[], known: Set<T>, value: T, code: string, owner: string): void {

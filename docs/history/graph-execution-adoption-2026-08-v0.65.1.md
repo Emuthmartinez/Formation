@@ -1,3 +1,5 @@
+> Historical record: this proposal described the v0.65.1 graph execution gap in August 2026. The graph-native catalog cutover, executable runtime plan, and cleanup described here shipped in v0.66.0; this document is no longer current policy.
+
 # Adopting the graph as the execution model
 
 Status: proposal, not policy. The measurements in "What is in the tree" describe v0.65.1.

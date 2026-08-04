@@ -74,22 +74,17 @@ export interface ContextPackDefinition {
 
 export interface WorkflowDefinition {
   id: WorkflowId;
-  legacyId?: `L${string}`;
   title: string;
   domainId: DomainId;
   areaIds: AreaId[];
   trigger: string;
   negativeTriggers: string[];
-  action: string[];
-  proof: string[];
-  memory: string[];
-  stoppingCondition: string;
   contextPackIds: ContextPackId[];
   referenceIds: ReferenceId[];
   phaseIds: PhaseId[];
   laneIds: LaneId[];
-  upstreamWorkflowIds: WorkflowId[];
-  artifactPaths: string[];
+  dependencies: WorkflowId[];
+  outputPaths: string[];
   gateCommands: string[];
   providerIds: ProviderId[];
   operatorIds: OperatorId[];

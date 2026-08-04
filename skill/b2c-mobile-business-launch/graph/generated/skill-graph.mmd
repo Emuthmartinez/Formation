@@ -35,169 +35,169 @@ flowchart LR
   domain_data["Analytics And Tracking"]
   domain_trust["Privacy, Security, And Legal"]
   domain_machine["The Skill's Own Upkeep"]
-  workflow_orchestration_session_continuity_resume["L02 Session continuity / resume"]
+  workflow_orchestration_session_continuity_resume["Session continuity / resume"]
   domain_orchestration --> workflow_orchestration_session_continuity_resume
   workflow_orchestration_session_continuity_resume --> lane_orchestration
-  workflow_orchestration_orient_scaffold_and_state_cockpit_upkeep["L03 Orient, scaffold & state/cockpit upkeep"]
+  workflow_orchestration_orient_scaffold_and_state_cockpit_upkeep["Orient, scaffold & state/cockpit upkeep"]
   domain_orchestration --> workflow_orchestration_orient_scaffold_and_state_cockpit_upkeep
   workflow_orchestration_orient_scaffold_and_state_cockpit_upkeep --> lane_orchestration
-  workflow_process_provider_proof_verification["L07 Provider-proof verification"]
+  workflow_process_provider_proof_verification["Provider-proof verification"]
   domain_process --> workflow_process_provider_proof_verification
-  workflow_process_change_cascade["L08 Change cascade"]
+  workflow_process_change_cascade["Change cascade"]
   domain_process --> workflow_process_change_cascade
-  workflow_process_launch_trace_and_build_contracts["L18 Launch trace & build contracts"]
+  workflow_process_launch_trace_and_build_contracts["Launch trace & build contracts"]
   domain_process --> workflow_process_launch_trace_and_build_contracts
   workflow_process_launch_trace_and_build_contracts --> lane_traceability
-  workflow_process_business_control_plane_extension["L26 Business Control Plane extension"]
+  workflow_process_business_control_plane_extension["Business Control Plane extension"]
   domain_process --> workflow_process_business_control_plane_extension
-  workflow_process_launchbench_failure_cards_coverage_audit["L49 LaunchBench / failure-cards / coverage audit"]
+  workflow_process_launchbench_failure_cards_coverage_audit["LaunchBench / failure-cards / coverage audit"]
   domain_process --> workflow_process_launchbench_failure_cards_coverage_audit
-  workflow_operations_paid_tool_routing_and_fallback["L04 Paid-tool routing & fallback"]
+  workflow_operations_paid_tool_routing_and_fallback["Paid-tool routing & fallback"]
   domain_operations --> workflow_operations_paid_tool_routing_and_fallback
   workflow_operations_paid_tool_routing_and_fallback --> lane_paid_tool_routing
-  workflow_operations_secrets_baseline_and_routing["L05 Secrets baseline & routing"]
+  workflow_operations_secrets_baseline_and_routing["Secrets baseline & routing"]
   domain_operations --> workflow_operations_secrets_baseline_and_routing
   workflow_operations_secrets_baseline_and_routing --> lane_secrets
-  workflow_trust_security_architecture_and_release_gate["L19 Security architecture & release gate"]
+  workflow_trust_security_architecture_and_release_gate["Security architecture & release gate"]
   domain_trust --> workflow_trust_security_architecture_and_release_gate
   workflow_trust_security_architecture_and_release_gate --> lane_security
-  workflow_trust_privacy_and_terms["L41 Privacy & terms"]
+  workflow_trust_privacy_and_terms["Privacy & terms"]
   domain_trust --> workflow_trust_privacy_and_terms
   workflow_trust_privacy_and_terms --> lane_privacy_legal
-  workflow_operations_resend_email_ops["L42 Resend email ops"]
+  workflow_operations_resend_email_ops["Resend email ops"]
   domain_operations --> workflow_operations_resend_email_ops
   workflow_operations_resend_email_ops --> lane_email
-  workflow_operations_post_launch_operations["L47 Post-launch operations"]
+  workflow_operations_post_launch_operations["Post-launch operations"]
   domain_operations --> workflow_operations_post_launch_operations
   workflow_operations_post_launch_operations --> lane_post_launch_ops
-  workflow_operations_founder_zero_operator_bootstrap["L51 Founder-zero operator bootstrap"]
+  workflow_operations_founder_zero_operator_bootstrap["Founder-zero operator bootstrap"]
   domain_operations --> workflow_operations_founder_zero_operator_bootstrap
-  workflow_operations_agent_operations_ledger["L52 Agent operations ledger"]
+  workflow_operations_agent_operations_ledger["Agent operations ledger"]
   domain_operations --> workflow_operations_agent_operations_ledger
-  workflow_product_app_archetype_detection_and_starter["L06 App-archetype detection & starter"]
+  workflow_product_app_archetype_detection_and_starter["App-archetype detection & starter"]
   domain_product --> workflow_product_app_archetype_detection_and_starter
   workflow_product_app_archetype_detection_and_starter --> lane_product
-  workflow_research_research_backed_spec["L09 Research-backed spec"]
+  workflow_research_research_backed_spec["Research-backed spec"]
   domain_research --> workflow_research_research_backed_spec
   workflow_research_research_backed_spec --> lane_research
   workflow_research_research_backed_spec --> lane_product
-  workflow_research_localization_market_research["L10 Localization market research"]
+  workflow_research_localization_market_research["Localization market research"]
   domain_research --> workflow_research_localization_market_research
   workflow_research_localization_market_research --> lane_research
-  workflow_experience_11_star_experience["L12 11-star experience"]
+  workflow_experience_11_star_experience["11-star experience"]
   domain_experience --> workflow_experience_11_star_experience
   workflow_experience_11_star_experience --> lane_experience
-  workflow_experience_emotional_experience_design_producer["L13 Emotional experience design (producer)"]
+  workflow_experience_emotional_experience_design_producer["Emotional experience design (producer)"]
   domain_experience --> workflow_experience_emotional_experience_design_producer
   workflow_experience_emotional_experience_design_producer --> lane_emotional_design
-  workflow_experience_emotional_design_audit_auditor["L14 Emotional design audit (auditor)"]
+  workflow_experience_emotional_design_audit_auditor["Emotional design audit (auditor)"]
   domain_experience --> workflow_experience_emotional_design_audit_auditor
   workflow_experience_emotional_design_audit_auditor --> lane_emotional_design
-  workflow_design_design_room_state_mutate_version_render["L20 Design Room (state→mutate→version→render)"]
+  workflow_design_design_room_state_mutate_version_render["Design Room (state→mutate→version→render)"]
   domain_design --> workflow_design_design_room_state_mutate_version_render
   workflow_design_design_room_state_mutate_version_render --> lane_design
-  workflow_design_token_promotion["L21 Token promotion"]
+  workflow_design_token_promotion["Token promotion"]
   domain_design --> workflow_design_token_promotion
   workflow_design_token_promotion --> lane_design
-  workflow_design_ux_patterns_refero["L22 UX patterns (Refero)"]
+  workflow_design_ux_patterns_refero["UX patterns (Refero)"]
   domain_design --> workflow_design_ux_patterns_refero
   workflow_design_ux_patterns_refero --> lane_design
-  workflow_experience_onboarding_conversion["L23 Onboarding conversion"]
+  workflow_experience_onboarding_conversion["Onboarding conversion"]
   domain_experience --> workflow_experience_onboarding_conversion
   workflow_experience_onboarding_conversion --> lane_onboarding
-  workflow_design_premium_mobile_craft["L24 Premium mobile craft"]
+  workflow_design_premium_mobile_craft["Premium mobile craft"]
   domain_design --> workflow_design_premium_mobile_craft
   workflow_design_premium_mobile_craft --> lane_design
-  workflow_design_content_assets_remotion_generated_visuals["L25 Content assets / Remotion / generated visuals"]
+  workflow_design_content_assets_remotion_generated_visuals["Content assets / Remotion / generated visuals"]
   domain_design --> workflow_design_content_assets_remotion_generated_visuals
   workflow_design_content_assets_remotion_generated_visuals --> lane_content_assets
-  workflow_words_writing_quality_no_slop["L53 Writing quality (no-slop)"]
+  workflow_words_writing_quality_no_slop["Writing quality (no-slop)"]
   domain_words --> workflow_words_writing_quality_no_slop
-  workflow_store_aso_and_store_ops["L27 ASO & store ops"]
+  workflow_store_aso_and_store_ops["ASO & store ops"]
   domain_store --> workflow_store_aso_and_store_ops
   workflow_store_aso_and_store_ops --> lane_store_console
-  workflow_store_app_store_listing_prep_packet["L28 App Store listing prep packet"]
+  workflow_store_app_store_listing_prep_packet["App Store listing prep packet"]
   domain_store --> workflow_store_app_store_listing_prep_packet
   workflow_store_app_store_listing_prep_packet --> lane_store_console
-  workflow_store_apple_signing_and_release_readiness["L29 Apple signing & release readiness"]
+  workflow_store_apple_signing_and_release_readiness["Apple signing & release readiness"]
   domain_store --> workflow_store_apple_signing_and_release_readiness
   workflow_store_apple_signing_and_release_readiness --> lane_apple_signing
-  workflow_store_apple_app_store_requirements_privacy_manifest["L30 Apple App Store requirements (privacy manifest)"]
+  workflow_store_apple_app_store_requirements_privacy_manifest["Apple App Store requirements (privacy manifest)"]
   domain_store --> workflow_store_apple_app_store_requirements_privacy_manifest
   workflow_store_apple_app_store_requirements_privacy_manifest --> lane_store_console
   workflow_store_apple_app_store_requirements_privacy_manifest --> lane_privacy_legal
-  workflow_store_store_console_workflow["L31 Store console workflow"]
+  workflow_store_store_console_workflow["Store console workflow"]
   domain_store --> workflow_store_store_console_workflow
   workflow_store_store_console_workflow --> lane_store_console
-  workflow_store_asc_cli_automation["L32 ASC CLI automation"]
+  workflow_store_asc_cli_automation["ASC CLI automation"]
   domain_store --> workflow_store_asc_cli_automation
   workflow_store_asc_cli_automation --> lane_store_console
-  workflow_store_store_screenshots_production["L33 Store screenshots production"]
+  workflow_store_store_screenshots_production["Store screenshots production"]
   domain_store --> workflow_store_store_screenshots_production
   workflow_store_store_screenshots_production --> lane_store_console
   workflow_store_store_screenshots_production --> lane_content_assets
-  workflow_store_google_play_release["L34 Google Play release"]
+  workflow_store_google_play_release["Google Play release"]
   domain_store --> workflow_store_google_play_release
   workflow_store_google_play_release --> lane_store_console
-  workflow_engineering_engineering_orchestration_ce_production_readiness["L35 Engineering orchestration (CE + production readiness)"]
+  workflow_engineering_engineering_orchestration_ce_production_readiness["Engineering orchestration (CE + production readiness)"]
   domain_engineering --> workflow_engineering_engineering_orchestration_ce_production_readiness
   workflow_engineering_engineering_orchestration_ce_production_readiness --> lane_engineering
   workflow_engineering_engineering_orchestration_ce_production_readiness --> lane_orchestration
-  workflow_engineering_backend_data_contract["L36 Backend data contract"]
+  workflow_engineering_backend_data_contract["Backend data contract"]
   domain_engineering --> workflow_engineering_backend_data_contract
   workflow_engineering_backend_data_contract --> lane_engineering
-  workflow_engineering_app_agent_roster_and_repo_entrypoints["L37 App agent roster & repo entrypoints"]
+  workflow_engineering_app_agent_roster_and_repo_entrypoints["App agent roster & repo entrypoints"]
   domain_engineering --> workflow_engineering_app_agent_roster_and_repo_entrypoints
   workflow_engineering_app_agent_roster_and_repo_entrypoints --> lane_engineering
-  workflow_engineering_mobai_device_automation_and_demo_videos["L38 MobAI device automation & demo videos"]
+  workflow_engineering_mobai_device_automation_and_demo_videos["MobAI device automation & demo videos"]
   domain_engineering --> workflow_engineering_mobai_device_automation_and_demo_videos
   workflow_engineering_mobai_device_automation_and_demo_videos --> lane_engineering
   workflow_engineering_mobai_device_automation_and_demo_videos --> lane_content_assets
-  workflow_engineering_native_ios_proof_route_ladder["L39 Native iOS proof (Route Ladder)"]
+  workflow_engineering_native_ios_proof_route_ladder["Native iOS proof (Route Ladder)"]
   domain_engineering --> workflow_engineering_native_ios_proof_route_ladder
   workflow_engineering_native_ios_proof_route_ladder --> lane_engineering
-  workflow_data_analytics_and_attribution_blueprint["L11 Analytics & attribution blueprint"]
+  workflow_data_analytics_and_attribution_blueprint["Analytics & attribution blueprint"]
   domain_data --> workflow_data_analytics_and_attribution_blueprint
   workflow_data_analytics_and_attribution_blueprint --> lane_analytics_attribution
-  workflow_growth_paid_user_acquisition_system["L15 Paid user-acquisition system"]
+  workflow_growth_paid_user_acquisition_system["Paid user-acquisition system"]
   domain_growth --> workflow_growth_paid_user_acquisition_system
   workflow_growth_paid_user_acquisition_system --> lane_paid_user_acquisition
-  workflow_growth_viral_growth_loop["L16 Viral growth loop"]
+  workflow_growth_viral_growth_loop["Viral growth loop"]
   domain_growth --> workflow_growth_viral_growth_loop
   workflow_growth_viral_growth_loop --> lane_growth
-  workflow_growth_launch_narrative_and_cadence["L17 Launch narrative & cadence"]
+  workflow_growth_launch_narrative_and_cadence["Launch narrative & cadence"]
   domain_growth --> workflow_growth_launch_narrative_and_cadence
   workflow_growth_launch_narrative_and_cadence --> lane_growth
-  workflow_money_revenue_monetization["L40 Revenue monetization"]
+  workflow_money_revenue_monetization["Revenue monetization"]
   domain_money --> workflow_money_revenue_monetization
   workflow_money_revenue_monetization --> lane_revenue
-  workflow_growth_geo_seo_public_visibility["L43 GEO/SEO public visibility"]
+  workflow_growth_geo_seo_public_visibility["GEO/SEO public visibility"]
   domain_growth --> workflow_growth_geo_seo_public_visibility
   workflow_growth_geo_seo_public_visibility --> lane_growth
-  workflow_growth_pre_launch_funnel_landing_waitlist["L44 Pre-launch funnel (landing/waitlist)"]
+  workflow_growth_pre_launch_funnel_landing_waitlist["Pre-launch funnel (landing/waitlist)"]
   domain_growth --> workflow_growth_pre_launch_funnel_landing_waitlist
   workflow_growth_pre_launch_funnel_landing_waitlist --> lane_growth
-  workflow_growth_ugc_creator_engine["L45 UGC creator engine"]
+  workflow_growth_ugc_creator_engine["UGC creator engine"]
   domain_growth --> workflow_growth_ugc_creator_engine
   workflow_growth_ugc_creator_engine --> lane_growth
-  workflow_growth_fastlane_growth_ops["L46 Fastlane growth ops"]
+  workflow_growth_fastlane_growth_ops["Fastlane growth ops"]
   domain_growth --> workflow_growth_fastlane_growth_ops
   workflow_growth_fastlane_growth_ops --> lane_growth
   workflow_growth_fastlane_growth_ops --> lane_post_launch_ops
-  workflow_machine_runtime_freshness_gate_consumer_side["L01 Runtime freshness gate (consumer side)"]
+  workflow_machine_runtime_freshness_gate_consumer_side["Runtime freshness gate (consumer side)"]
   domain_machine --> workflow_machine_runtime_freshness_gate_consumer_side
-  workflow_machine_source_freshness_maintenance_maintainer["L48 Source-freshness maintenance (maintainer)"]
+  workflow_machine_source_freshness_maintenance_maintainer["Source-freshness maintenance (maintainer)"]
   domain_machine --> workflow_machine_source_freshness_maintenance_maintainer
-  workflow_machine_skill_runtime_sync_and_version_discipline_maintainer["L50 Skill runtime sync & version discipline (maintainer)"]
+  workflow_machine_skill_runtime_sync_and_version_discipline_maintainer["Skill runtime sync & version discipline (maintainer)"]
   domain_machine --> workflow_machine_skill_runtime_sync_and_version_discipline_maintainer
-  workflow_machine_founder_language_translation_maintainer["L54 Founder-language translation (maintainer)"]
+  workflow_machine_founder_language_translation_maintainer["Founder-language translation (maintainer)"]
   domain_machine --> workflow_machine_founder_language_translation_maintainer
-  workflow_machine_skill_triggering_contract_maintainer["L55 Skill triggering contract (maintainer)"]
+  workflow_machine_skill_triggering_contract_maintainer["Skill triggering contract (maintainer)"]
   domain_machine --> workflow_machine_skill_triggering_contract_maintainer
-  workflow_machine_asc_command_contract_maintainer["L56 ASC command contract (maintainer)"]
+  workflow_machine_asc_command_contract_maintainer["ASC command contract (maintainer)"]
   domain_machine --> workflow_machine_asc_command_contract_maintainer
   workflow_machine_asc_command_contract_maintainer --> lane_store_console
-  workflow_machine_definition_graph_maintenance["L57 Definition graph maintenance"]
+  workflow_machine_definition_graph_maintenance["Definition graph maintenance"]
   domain_machine --> workflow_machine_definition_graph_maintenance
   lane_paid_tool_routing["Paid-tool routing"]
   lane_secrets["Secrets"]
