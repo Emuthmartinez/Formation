@@ -1,9 +1,10 @@
 name: Format Graph Execution
 
 on:
-  push:
-    branches:
-      - agent/full-graph-execution
+  pull_request:
+    paths:
+      - skill/b2c-mobile-business-launch/graph/execution.ts
+      - .github/workflows/format-graph-execution.yml
 
 permissions:
   contents: read
