@@ -11,9 +11,9 @@
     "noUnusedLocals": true
   },
   "include": [
-    "graph/**/*.ts",
-    "gates/**/*.ts",
-    "machine/**/*.ts",
-    "scripts/**/*.ts"
+    "runtime/graph/**/*.ts",
+    "validation/business/**/*.ts",
+    "validation/repository/**/*.ts",
+    "tooling/**/*.ts"
   ]
 }

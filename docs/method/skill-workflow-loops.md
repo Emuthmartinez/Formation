@@ -2,10 +2,10 @@
 
 The live workflow inventory is generated from the typed definition graph:
 
-- source definitions: `skill/b2c-mobile-business-launch/graph/workflows/`
-- generated inventory: `skill/b2c-mobile-business-launch/graph/generated/skill-graph.md`
-- machine-readable graph: `skill/b2c-mobile-business-launch/graph/generated/skill-graph.json`
-- context budget: `skill/b2c-mobile-business-launch/graph/generated/context-report.json`
+- source definitions: `skill/b2c-mobile-business-launch/runtime/graph/workflows/`
+- generated inventory: `skill/b2c-mobile-business-launch/runtime/graph/generated/skill-graph.md`
+- machine-readable graph: `skill/b2c-mobile-business-launch/runtime/graph/generated/skill-graph.json`
+- context budget: `skill/b2c-mobile-business-launch/runtime/graph/generated/context-report.json`
 
 Every workflow keeps the five-part contract established by the original audit:
 

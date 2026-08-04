@@ -1,0 +1,11 @@
+id: control-plane-panels-unmodeled
+title: Control Plane panels remain future-only prose
+prompt: "Add a business control plane, but keep analytics, monetization, store ops, and growth as future ideas."
+expected_guardrail: "The skill must model required Control Plane panel shells in studio/seed/business.json and render them, not leave them as prose-only future concepts."
+validators:
+  - check-control-plane-contract
+must_catch:
+  - "analytics, monetization, store-ops, and growth must be first-class panels"
+  - "Design Room must remain active"
+should_say:
+  - "update studio/seed/business.json and re-render Design Room"

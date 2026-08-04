@@ -1,0 +1,86 @@
+{
+  "_comment_setup": [
+    "Copy this file to .claude/settings.json in the generated business repo root.",
+    "",
+    "PREREQUISITES",
+    "  jq: must be on PATH (brew install jq / apt install jq). Without jq every",
+    "    hook prints a WARN line to stderr and exits 0 (inactive but loud).",
+    "  SKILL_ROOT: must be set to the absolute path of the installed",
+    "    b2c-mobile-business-launch skill directory (e.g.",
+    "    ~/.codex/skills/b2c-mobile-business-launch or wherever the skill is",
+    "    installed). Without SKILL_ROOT the hooks fall back to '.' which only works",
+    "    when the business repo IS the skill root (local dev). In all other cases",
+    "    the hooks print a WARN line to stderr and exit 0 instead of failing",
+    "    silently. Set via: export SKILL_ROOT=/path/to/skill (or .env.local).",
+    "",
+    "BLOCKING vs ADVISORY",
+    "  Hooks that affect lane-coverage and store-screenshots at 'done' are",
+    "  BLOCKING (no '|| true') -- a real failure surfaces as a hook error and the",
+    "  agent turn is interrupted. All other validators are ADVISORY ('|| true') --",
+    "  they print warnings but do not stop the agent.",
+    "",
+    "PRODUCER != VERIFIER -- SEPARATE GRADING PASS (screenshot rubric)",
+    "  After final PNGs are written, the 'Final PNG hook' below emits a BLOCKING",
+    "  signal that routes the grade step to a separate agent/session. The signal",
+    "  exits non-zero so the agent sees the instruction as a hard requirement, not",
+    "  just advisory text. The grader MUST be a different agent/session than the",
+    "  builder. The grade-screenshots.ts scaffold emits the grading task template",
+    "  and validates the assembled ledger before writing screenshot-rubric-scores.json.",
+    "  store_console CANNOT be marked done until a validated separate-pass ledger exists.",
+    "",
+    "  Command: npx tsx tooling/grade-screenshots.ts --root . --state state/PROJECT_STATE.yaml",
+    "",
+    "  HONEST LIMIT: The validator enforces distinct session_id values and",
+    "  grading_pass.separate_pass=true, but cannot prove two truly independent",
+    "  processes ran. Founder approval is the ultimate backstop.",
+    "",
+    "  The Bash hook also intercepts final PNG writes via Bash write verbs (cp, mv,",
+    "  tee, install, ditto, sips, magick/convert, or shell redirection > / >>",
+    "  targeting screenshots/final/*.png) and emits the same BLOCKING signal.",
+    "  Honest limit: a crafted command string could evade the regex pattern.",
+    "  Founder review remains the ultimate backstop."
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "_managed": "b2c-mobile-business-launch",
+        "_comment": "Write/Edit hook: fires depth-check validators automatically after every relevant artifact write.",
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! command -v jq >/dev/null 2>&1; then echo 'WARN [b2c-mobile-business-launch hooks]: jq is not on PATH; depth-check and screenshot-grading hooks are INACTIVE until jq is installed (brew install jq / apt install jq).' >&2; exit 0; fi; if [ -z \"$SKILL_ROOT\" ] && [ ! -f \"./tooling/run-audit.ts\" ]; then echo 'WARN [b2c-mobile-business-launch hooks]: SKILL_ROOT is not set; validator hooks cannot resolve the installed skill and are INACTIVE. export SKILL_ROOT=/path/to/installed/b2c-mobile-business-launch.' >&2; exit 0; fi; f=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty' 2>/dev/null); if [ -z \"$f\" ]; then exit 0; fi; case \"$f\" in *SCREENSHOTS.md*) npm run --prefix \"${SKILL_ROOT:-.}\" check:store-screenshots -- --root . --state state/PROJECT_STATE.yaml 2>&1 ;; *state/PROJECT_STATE.yaml*) npm run --prefix \"${SKILL_ROOT:-.}\" check:lane-coverage -- --root . --state state/PROJECT_STATE.yaml 2>&1 ;; *analytics/ANALYTICS.md*) npm run --prefix \"${SKILL_ROOT:-.}\" check:attribution -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *revenue/REVENUE_OPS.md*) npm run --prefix \"${SKILL_ROOT:-.}\" check:revenue -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *growth/EMAIL_OPS.md*) npm run --prefix \"${SKILL_ROOT:-.}\" check:email -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *product/SPEC.md*|*APP_STORE_LISTING.md*) npm run --prefix \"${SKILL_ROOT:-.}\" check:aso-metadata -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *SECRETS.md*) npm run --prefix \"${SKILL_ROOT:-.}\" check:secrets -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *strategy/TOOL_DECISIONS.md*) npm run --prefix \"${SKILL_ROOT:-.}\" check:paid-tool-decisions -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *LOCALIZATION_MARKET_RESEARCH.md*) npm run --prefix \"${SKILL_ROOT:-.}\" check:localization-research -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *screenshot-rubric-scores.json*) npm run --prefix \"${SKILL_ROOT:-.}\" check:store-screenshots -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *revenuecat-proof.json*|*posthog-proof.json*) npm run --prefix \"${SKILL_ROOT:-.}\" check:provider-proof -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; esac",
+            "timeout": 60,
+            "statusMessage": "Running depth checks (Write/Edit)..."
+          }
+        ]
+      },
+      {
+        "_managed": "b2c-mobile-business-launch",
+        "_comment": "Bash hook: (1) catches proof artifacts written via touch/echo/tee/bash redirection -- complements the Write|Edit hook above; (2) intercepts final PNG writes via Bash write verbs (cp, mv, tee, install, ditto, sips, magick/convert, or shell redirection > / >> targeting screenshots/final/*.png) and emits the BLOCKING grading-pass signal identical to the Write|Edit Final PNG hook below. Regex intent: match write-verb or redirection constructs whose destination lands in screenshots/final/*.png; read-only verbs (ls, cat, grep, find) never match because they do not appear as write-verb tokens. Honest limit: a carefully crafted command could evade the regex; founder review is the backstop.",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! command -v jq >/dev/null 2>&1; then echo 'WARN [b2c-mobile-business-launch hooks]: jq is not on PATH; depth-check and screenshot-grading hooks are INACTIVE until jq is installed (brew install jq / apt install jq).' >&2; exit 0; fi; cmd=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.command // empty' 2>/dev/null); if [ -z \"$cmd\" ]; then exit 0; fi; if echo \"$cmd\" | grep -qE \"(^|;|[&][&]|[|][|])[[:space:]]*(cp|mv|tee|install|ditto|sips|magick|convert)[[:space:]][^;]*screenshots/final/[^;]*[.]png|[>][>]?[[:space:]]*screenshots/final/[^[:space:]]*[.]png\"; then echo ''; echo '=========================================================='; echo 'BLOCKING: PRODUCER != VERIFIER -- SEPARATE GRADING PASS REQUIRED'; echo '=========================================================='; echo 'A final screenshot PNG was written via Bash. You MUST run the grading'; echo 'pass as a SEPARATE agent or session before marking store_console done.'; echo ''; echo 'The grader MUST NOT be the same agent/session that built the PNGs.'; echo 'The validator (check:store-screenshots) will ERROR if:'; echo '  - grading_pass.separate_pass is not true in screenshot-rubric-scores.json'; echo '  - builder.session_id equals grader.session_id'; echo '  - any slot is missing grader_notes or observed_evidence'; echo ''; echo 'STEP 1 -- Generate the grading task template (run in THIS repo):'; echo '  npx tsx tooling/grade-screenshots.ts --root . --state state/PROJECT_STATE.yaml'; echo ''; echo 'STEP 2 -- Open a NEW grader session (different agent/session_id).'; echo '  Provide the task template + final PNGs to the grader agent.'; echo '  The grader reads each PNG and fills in dimensions + observed_evidence.'; echo ''; echo 'STEP 3 -- Validate and write the ledger:'; echo '  npx tsx tooling/grade-screenshots.ts --root . --state state/PROJECT_STATE.yaml --grading-input /tmp/grading-output.json --write screenshot-rubric-scores.json'; echo ''; echo 'STEP 4 -- Verify the full rubric check passes:'; echo \"  npm run --prefix ${SKILL_ROOT:-.} check:store-screenshots -- --root . --state state/PROJECT_STATE.yaml\"; echo ''; echo 'store_console CANNOT be marked done until all four steps complete.'; echo '=========================================================='; echo ''; exit 1; fi; if [ -z \"$SKILL_ROOT\" ] && [ ! -f \"./tooling/run-audit.ts\" ]; then echo 'WARN [b2c-mobile-business-launch hooks]: SKILL_ROOT is not set; validator hooks cannot resolve the installed skill and are INACTIVE. export SKILL_ROOT=/path/to/installed/b2c-mobile-business-launch.' >&2; exit 0; fi; case \"$cmd\" in *revenuecat-proof.json*|*posthog-proof.json*) npm run --prefix \"${SKILL_ROOT:-.}\" check:provider-proof -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *screenshot-rubric-scores.json*) npm run --prefix \"${SKILL_ROOT:-.}\" check:store-screenshots -- --root . --state state/PROJECT_STATE.yaml 2>&1 || true ;; *state/PROJECT_STATE.yaml*) npm run --prefix \"${SKILL_ROOT:-.}\" check:lane-coverage -- --root . --state state/PROJECT_STATE.yaml 2>&1 ;; esac",
+            "timeout": 60,
+            "statusMessage": "Running depth checks (Bash)..."
+          }
+        ]
+      },
+      {
+        "_managed": "b2c-mobile-business-launch",
+        "_comment": "Final PNG hook (BLOCKING): after any final screenshot PNG is written via the Write or Edit tool, routes to the SEPARATE grading pass and exits non-zero so the agent sees it as a hard requirement. store_console CANNOT be marked done until a separate-pass ledger exists. PREREQUISITES: jq on PATH; SKILL_ROOT set to skill root so npx resolves. The hook prints the exact grade-screenshots.ts command to run.",
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! command -v jq >/dev/null 2>&1; then echo 'WARN [b2c-mobile-business-launch hooks]: jq is not on PATH; depth-check and screenshot-grading hooks are INACTIVE until jq is installed (brew install jq / apt install jq).' >&2; exit 0; fi; f=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty' 2>/dev/null); if [ -z \"$f\" ]; then exit 0; fi; case \"$f\" in *screenshots/final/*.png) echo ''; echo '=========================================================='; echo 'BLOCKING: PRODUCER != VERIFIER -- SEPARATE GRADING PASS REQUIRED'; echo '=========================================================='; echo 'A final screenshot PNG was just written. You MUST run the grading'; echo 'pass as a SEPARATE agent or session before marking store_console done.'; echo ''; echo 'The grader MUST NOT be the same agent/session that built the PNGs.'; echo 'The validator (check:store-screenshots) will ERROR if:'; echo '  - grading_pass.separate_pass is not true in screenshot-rubric-scores.json'; echo '  - builder.session_id equals grader.session_id'; echo '  - any slot is missing grader_notes or observed_evidence'; echo ''; echo 'STEP 1 -- Generate the grading task template (run in THIS repo):'; echo '  npx tsx tooling/grade-screenshots.ts --root . --state state/PROJECT_STATE.yaml'; echo ''; echo 'STEP 2 -- Open a NEW grader session (different agent/session_id).'; echo '  Provide the task template + final PNGs to the grader agent.'; echo '  The grader reads each PNG and fills in dimensions + observed_evidence.'; echo ''; echo 'STEP 3 -- Validate and write the ledger:'; echo '  npx tsx tooling/grade-screenshots.ts --root . --state state/PROJECT_STATE.yaml --grading-input /tmp/grading-output.json --write screenshot-rubric-scores.json'; echo ''; echo 'STEP 4 -- Verify the full rubric check passes:'; echo \"  npm run --prefix ${SKILL_ROOT:-.} check:store-screenshots -- --root . --state state/PROJECT_STATE.yaml\"; echo ''; echo 'store_console CANNOT be marked done until all four steps complete.'; echo '=========================================================='; echo ''; exit 1 ;; esac",
+            "timeout": 10,
+            "statusMessage": "Routing to separate grader pass (BLOCKING)..."
+          }
+        ]
+      }
+    ]
+  }
+}

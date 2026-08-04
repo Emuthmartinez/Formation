@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-05-30",
+  "business": {
+    "name": "App Name",
+    "slug": "app-name",
+    "stage": "concept",
+    "positioning": "One-sentence promise still to be defined.",
+    "targetAudience": "Primary consumer segment still to be defined."
+  },
+  "theme": {
+    "tokensPath": "studio/seed/theme.tokens.json",
+    "status": "provisional"
+  },
+  "designRoom": {
+    "status": "not_started",
+    "renderPath": "design/design-room.html",
+    "versionLog": [
+      {
+        "id": "initial-state",
+        "createdAt": "2026-05-30",
+        "summary": "Empty Design Room state seeded from the skill template.",
+        "statePaths": [
+          "studio/seed/business.json",
+          "studio/seed/theme.tokens.json"
+        ],
+        "renderedArtifacts": [
+          "design/design-room.html"
+        ]
+      }
+    ],
+    "baselines": []
+  },
+  "surfaces": {
+    "webFunnels": [],
+    "landingPages": [],
+    "marketingAssets": [],
+    "mobileApp": {
+      "platforms": [
+        "ios"
+      ],
+      "screens": [],
+      "flows": []
+    },
+    "appStore": {
+      "defaultProductPage": {
+        "status": "not_started",
+        "positioning": "",
+        "screenshotCount": 0,
+        "appPreviewCount": 0,
+        "promotionalText": "",
+        "keywords": []
+      },
+      "customProductPages": [],
+      "productPageOptimizationTests": [],
+      "inAppEvents": []
+    }
+  },
+  "controlPlane": {
+    "panels": [
+      {
+        "id": "design-room",
+        "name": "Design Room",
+        "status": "active",
+        "stateRefs": [
+          "studio/seed/business.json",
+          "studio/seed/theme.tokens.json"
+        ],
+        "renderedArtifacts": [
+          "design/design-room.html"
+        ]
+      },
+      {
+        "id": "analytics",
+        "name": "Analytics",
+        "status": "planned",
+        "stateRefs": [
+          "state/PROJECT_STATE.yaml",
+          "analytics/ANALYTICS.md",
+          "analytics/analytics-plan.html"
+        ],
+        "renderedArtifacts": [
+          "analytics/analytics-plan.html"
+        ]
+      },
+      {
+        "id": "monetization",
+        "name": "Monetization",
+        "status": "planned",
+        "stateRefs": [
+          "state/PROJECT_STATE.yaml",
+          "revenue/REVENUE_OPS.md"
+        ],
+        "renderedArtifacts": [
+          "revenue-plan.html"
+        ]
+      },
+      {
+        "id": "store-ops",
+        "name": "Store Ops",
+        "status": "planned",
+        "stateRefs": [
+          "state/PROJECT_STATE.yaml",
+          "APP_STORE_LISTING.md",
+          "store/STORE_CONSOLE.md",
+          "SCREENSHOTS.md"
+        ],
+        "renderedArtifacts": [
+          "app-store-listing.html",
+          "store/store-console.html"
+        ]
+      },
+      {
+        "id": "growth",
+        "name": "Growth",
+        "status": "planned",
+        "stateRefs": [
+          "state/PROJECT_STATE.yaml",
+          "growth/PAID_UA.md",
+          "growth/VIRAL_GROWTH.md"
+        ],
+        "renderedArtifacts": [
+          "growth-plan.html"
+        ]
+      }
+    ],
+    "futurePanels": []
+  }
+}

@@ -31,7 +31,7 @@ Typical requests:
 
 ## The execution model
 
-The typed graph under [`skill/b2c-mobile-business-launch/graph/`](skill/b2c-mobile-business-launch/graph/) is the only normal dispatch source. It is executable architecture, not a diagram layered beside a separate workflow.
+The typed graph under [`skill/b2c-mobile-business-launch/runtime/graph/`](skill/b2c-mobile-business-launch/runtime/graph/) is the only normal dispatch source. It is executable architecture, not a diagram layered beside a separate workflow.
 
 It is layered:
 
@@ -73,7 +73,7 @@ ln -sfn ~/.codex/skills/b2c-mobile-business-launch ~/.agents/skills/b2c-mobile-b
 
 ## Business capability tree
 
-The copied `business/` workspace is organized by capability rather than a flat artifact list. See [`business/README.md`](skill/b2c-mobile-business-launch/business/README.md) for ownership and paths. Each capability directory owns its authored artifacts and points downward to narrower contracts instead of duplicating cross-repository guidance.
+The copied `business/` workspace is organized by capability rather than a flat artifact list. See [`workspace/business/README.md`](skill/b2c-mobile-business-launch/workspace/business/README.md) for ownership and paths. Each capability directory owns its authored artifacts and points downward to narrower contracts instead of duplicating cross-repository guidance.
 
 ## What lands in the app repository
 
@@ -94,14 +94,14 @@ The copied `business/` workspace is organized by capability rather than a flat a
 
 - [`skill/b2c-mobile-business-launch/SKILL.md`](skill/b2c-mobile-business-launch/SKILL.md): runtime entrypoint and always-on contracts
 - [`skill/b2c-mobile-business-launch/spine.md`](skill/b2c-mobile-business-launch/spine.md): phase-oriented launch walk
-- [`skill/b2c-mobile-business-launch/graph/README.md`](skill/b2c-mobile-business-launch/graph/README.md): graph semantics, compiler, scheduler, and run-state contract
+- [`skill/b2c-mobile-business-launch/runtime/graph/README.md`](skill/b2c-mobile-business-launch/runtime/graph/README.md): graph semantics, compiler, scheduler, and run-state contract
 - [`docs/architecture.md`](docs/architecture.md): current repository and execution architecture
 - [`docs/implementation/graph-execution-v2.md`](docs/implementation/graph-execution-v2.md): implementation details and extension rules
 - [`docs/validators.md`](docs/validators.md): validator and audit reference
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): development, release, and review workflow
 - [`AGENTS.md`](AGENTS.md): maintainer rules and repository map
 
-Every domain under [`playbook/`](skill/b2c-mobile-business-launch/playbook/) has its own `README.md` index with load conditions and bounded references. Those indexes describe knowledge routing. They do not define execution order. Execution order comes from the compiled graph and durable run state.
+Every domain under [`knowledge/`](skill/b2c-mobile-business-launch/knowledge/) has its own `README.md` index with load conditions and bounded references. Those indexes describe knowledge routing. They do not define execution order. Execution order comes from the compiled graph and durable run state.
 
 ## Validation
 

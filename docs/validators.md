@@ -4,7 +4,7 @@ Every gate this skill ships, what it checks, and how to run it. The short versio
 
 ## How the pipeline works
 
-`npm run audit` and `npm run audit:ci` both run [`scripts/run-audit.ts`](../skill/b2c-mobile-business-launch/scripts/run-audit.ts), the single orchestrator over the plan defined in [`scripts/lib/audit-plan.ts`](../skill/b2c-mobile-business-launch/scripts/lib/audit-plan.ts). Typecheck runs first, then every gate, with independent steps sharing a small concurrency pool.
+`npm run audit` and `npm run audit:ci` both run [`tooling/run-audit.ts`](../skill/b2c-mobile-business-launch/tooling/run-audit.ts), the single orchestrator over the plan defined in [`tooling/lib/audit-plan.ts`](../skill/b2c-mobile-business-launch/tooling/lib/audit-plan.ts). Typecheck runs first, then every gate, with independent steps sharing a small concurrency pool.
 
 ```bash
 npm install
@@ -60,9 +60,9 @@ npm run validate:launch-state -- --root /path/to/app
 | Command | What it checks |
 | --- | --- |
 | `check:founder-operator` | Business identity, Doppler, account access, and one-decision-at-a-time bootstrap |
-| `check:founder-copy` | No raw identifier, phase code, status value, or internal vocabulary reaches a founder-visible surface. `scripts/lib/founder-copy.ts` is the only sanctioned path from state to founder text |
-| `check:no-slop` | Banned words and named slop patterns in shipped copy and repo docs, with rules parsed from `playbook/words/no-slop-writing.md` |
-| `check:app-copy` | No internal vocabulary, placeholder filler, or raw identifier in the words a user reads: `product/copy/COPY_DECK.md` cells, the `product/ONBOARDING.md` Copy column, `engineering/TECH_SPEC.md`'s string-externalization contract, and the shipped starters. Rules parsed from `playbook/words/conversion-copy.md`; live apps (phase_6*) warn while their backfill is tracked |
+| `check:founder-copy` | No raw identifier, phase code, status value, or internal vocabulary reaches a founder-visible surface. `tooling/lib/founder-copy.ts` is the only sanctioned path from state to founder text |
+| `check:no-slop` | Banned words and named slop patterns in shipped copy and repo docs, with rules parsed from `knowledge/words/no-slop-writing.md` |
+| `check:app-copy` | No internal vocabulary, placeholder filler, or raw identifier in the words a user reads: `product/copy/COPY_DECK.md` cells, the `product/ONBOARDING.md` Copy column, `engineering/TECH_SPEC.md`'s string-externalization contract, and the shipped starters. Rules parsed from `knowledge/words/conversion-copy.md`; live apps (phase_6*) warn while their backfill is tracked |
 | `check:agent-operations` | Capability inventory, approval envelopes, exact account and environment targeting, prompt-injection policy, before/after evidence, redaction, and state reconciliation |
 | `migrate:founder-gates` | One-time migration of older founder-gate shapes |
 
@@ -81,12 +81,12 @@ npm run validate:launch-state -- --root /path/to/app
 
 | Command | What it checks |
 | --- | --- |
-| `validate:design-state` | `state/business.json` against its schema |
+| `validate:design-state` | `studio/seed/business.json` against its schema |
 | `check:design-room` | The Design Room artifact contract |
 | `check:control-plane` | Design Room, analytics, monetization, store ops, and growth are modeled as Control Plane panels |
 | `check:business-control-plane-workspace` | The committed generated workspace read model is not stale |
 | `check:emotional-design` | Emotional Experience System contract, per-card guardrails, PostHog event mapping, reduced-motion fallbacks, dark-pattern veto scans (spend-near-reward co-location is an error unless the copy states the separation or prohibits the pattern), and cross-file risk-tier parity between the `experience-cards.md` index and the `ethics-guardrail.md` risk table (one row per mechanism, valid tiers only) |
-| `check:token-promotion` | `state/theme.tokens.json` reached `design/system/` before handoff |
+| `check:token-promotion` | `studio/seed/theme.tokens.json` reached `design/system/` before handoff |
 | `promote:design-tokens` | Promotes theme tokens into `design/system/` |
 | `render:design-room` | Renders the Design Room, with a static fallback |
 | `render:business-control-plane-workspace` | Adapts state into the portable workspace read model and validates it against `state/schema/workspace.schema.json` |
@@ -162,8 +162,8 @@ These run against this repo rather than a target app.
 | `check:skill-version` | Whether the installed runtime is behind local source, emitting the upgrade gate when stale |
 | `check:version-discipline` | Meaningful skill changes bump `skill-version.json` in the same release commit |
 | `check:package-parity` | Source-root and runtime package versions, lockfiles, critical scripts, audit coverage, and runtime dependency parity |
-| `check:reference-size` | A 64KB per-file budget over `playbook/` and `machine/` and a 45KB budget on `SKILL.md`, with a reasoned exclusion list; `machine/evals/` and `machine/fixtures/` are exempt as machine-read data rather than agent-loaded prose |
-| `check:gates-layout` | `gates/` mirrors the `playbook/` domains: nothing sits at the `gates/` root, every gate folder names a real domain (read from `playbook/`, never hardcoded), and no basename is held by two script roots at once — a guarantee a flat `gates/` gave for free |
+| `check:reference-size` | A 64KB per-file budget over `knowledge/` and `validation/repository/` and a 45KB budget on `SKILL.md`, with a reasoned exclusion list; `validation/repository/evals/` and `validation/repository/fixtures/` are exempt as machine-read data rather than agent-loaded prose |
+| `check:gates-layout` | `validation/business/` mirrors the `knowledge/` domains: nothing sits at the `validation/business/` root, every gate folder names a real domain (read from `knowledge/`, never hardcoded), and no basename is held by two script roots at once — a guarantee a flat `validation/business/` gave for free |
 | `check:artifact-templates` | Every template `state/PROJECT_STATE.yaml` evidence path has a starter artifact |
 | `check:app-archetype` | The archetype packs cover their advertised shapes |
 | `check:archetype-starter` | Starter scaffolds: structure completeness with lockfiles, names-only `.env.example`, no secret patterns, RLS migrations plus pgTAP tests, snake_case event catalogs, and a prompt-to-scaffold map |

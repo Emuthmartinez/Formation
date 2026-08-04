@@ -12,7 +12,7 @@ Phases are a sequence, not a schedule. Several run in parallel once their inputs
 exist, and the launch scope (essentials is the first-launch default) decides which
 sub-phases apply at all.
 
-Full entry criteria, work, and exit criteria for each phase are in [`playbook/process/launch-phases.md`](playbook/process/launch-phases.md):
+Full entry criteria, work, and exit criteria for each phase are in [`knowledge/process/launch-phases.md`](./knowledge/process/launch-phases.md):
 
 <!-- graph-generated:start phase-spine -->
 | Phase | Focus | Primary output |

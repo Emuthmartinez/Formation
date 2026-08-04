@@ -25,7 +25,7 @@ validation with clear error messages.
 
 Strings: every user-facing label, headline, button, empty state, and error
 comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
-craft from playbook/words/conversion-copy.md), typed via the externalized resource
+craft from knowledge/words/conversion-copy.md), typed via the externalized resource
 named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
@@ -34,7 +34,7 @@ shipping strings.
 
 - OAuth client IDs/secrets and the Supabase service role key are secrets — route them through `SECRETS.md` (`secrets-management.md`), never hardcode. The forgot-password and verification emails route through `resend-email-ops.md`.
 - The profile-setup-on-first-login screen is an onboarding surface — run `onboarding-conversion.md`. The username + bio step is also a Commitment moment (`consumer-product-design-agency.md`).
-- The "clean, modern, dark theme, no generic Bootstrap look" instruction must reconcile with the Design Room tokens (`design-room.md`, `design-visual-system.md`) — pull the real palette/typography from `state/theme.tokens.json`, don't invent a one-off look.
+- The "clean, modern, dark theme, no generic Bootstrap look" instruction must reconcile with the Design Room tokens (`design-room.md`, `design-visual-system.md`) — pull the real palette/typography from `studio/seed/theme.tokens.json`, don't invent a one-off look.
 - Username availability check needs a debounced, rate-limited endpoint — note it as an abuse surface in `trust/SECURITY.md`.
 - Add auth events (`sign_up_started`, `sign_up_completed`, `oauth_used`, `profile_setup_completed`) to `analytics/ANALYTICS.md` before build.
 </content>

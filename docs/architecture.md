@@ -4,7 +4,7 @@ This document describes the architecture that exists today. `AGENTS.md` explains
 
 ## Design principles
 
-1. **Audience at the top level.** `playbook/` is agent knowledge, `business/` is the launch-repository artifact contract, `gates/` grades a launch, and `machine/` maintains the skill itself.
+1. **Audience at the top level.** `knowledge/` is agent knowledge, `business/` is the launch-repository artifact contract, `validation/business/` grades a launch, and `validation/repository/` maintains the skill itself.
 2. **Domain-organized knowledge.** Each playbook domain owns a `README.md` index with load conditions. Stage order lives in `spine.md`; execution order lives in the graph.
 3. **Stable identity over filesystem location.** Graph IDs identify workflows, artifacts, operators, providers, gates, phases, lanes, domains, and areas. Paths are mutable bindings.
 4. **One execution model.** Workflow definitions compile into a runtime-neutral run graph. No compatibility scheduler, prose task list, or manual collision map competes with it.
@@ -20,12 +20,12 @@ skill/b2c-mobile-business-launch/
   graph/                   typed definitions, compiler, scheduler, run state
     workflows/             native workflow contracts
     generated/             deterministic graph projections
-  playbook/                domain knowledge and README routing indexes
+  knowledge/                domain knowledge and README routing indexes
   business/                launch-repository artifact contract
   starters/                runnable archetype scaffolds
-  gates/                   deterministic business validators by domain
-  machine/                 versioning, fixtures, evals, parity, source freshness
-  scripts/                 renderers, audit runner, and shared libraries
+  validation/business/                   deterministic business validators by domain
+  validation/repository/                 versioning, fixtures, evals, parity, source freshness
+  tooling/                 renderers, audit runner, and shared libraries
   state/                   Design Room state and schemas
   design-system/           promoted design tokens
   render/                  Design Room renderer
@@ -68,7 +68,7 @@ Deterministic anchors take priority over model judgment: tests that ran, files t
 
 ## Generated documentation
 
-Generated files under `graph/generated/` and generated blocks in `SKILL.md` and `spine.md` come from graph definitions and renderers. Edit definitions, then run:
+Generated files under `runtime/graph/generated/` and generated blocks in `SKILL.md` and `spine.md` come from graph definitions and renderers. Edit definitions, then run:
 
 ```bash
 npm run render:skill-graph

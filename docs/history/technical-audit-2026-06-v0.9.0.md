@@ -2,7 +2,7 @@
 
 > **Historical record. Reflects skill v0.9.0 on 2026-06-09; the repo is now v0.26.0.** Read the Executive Summary below as the state of the repo in June 2026, not as the state today.
 >
-> Every finding it opens with was resolved on 2026-06-10 — the [Resolution Log](#resolution-log-2026-06-10) at the end of this file is that record. The headline finding has moved furthest. The audit pipeline no longer lives in `package.json`: `audit` and `audit:ci` both call [`scripts/run-audit.ts`](../../skill/b2c-mobile-business-launch/scripts/run-audit.ts) over the declarative plan in [`scripts/lib/audit-plan.ts`](../../skill/b2c-mobile-business-launch/scripts/lib/audit-plan.ts), and `check:package-parity` now fails when a `check:*` or `validate:*` script is neither a plan step nor a recorded exclusion.
+> Every finding it opens with was resolved on 2026-06-10 — the [Resolution Log](#resolution-log-2026-06-10) at the end of this file is that record. The headline finding has moved furthest. The audit pipeline no longer lives in `package.json`: `audit` and `audit:ci` both call [`tooling/run-audit.ts`](../../skill/b2c-mobile-business-launch/tooling/run-audit.ts) over the declarative plan in [`tooling/lib/audit-plan.ts`](../../skill/b2c-mobile-business-launch/tooling/lib/audit-plan.ts), and `check:package-parity` now fails when a `check:*` or `validate:*` script is neither a plan step nor a recorded exclusion.
 >
 > One item the Resolution Log left open has since closed. Open Question 1 asked whether LaunchBench should stay a definition lint or also execute scenarios against an agent; the answer was both. `npm run launchbench` lints the definitions inside the PR gate, and `npm run evals:behavioral` runs flagged scenarios against a live agent outside it (needs `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, or `--use-profile`).
 >
@@ -22,19 +22,19 @@ Date: 2026-06-09 · Auditor: principal-level review session · Scope: full repo 
 
 **Purpose.** A reusable Claude Code / Codex *skill* that drives an AI agent through launching a B2C subscription mobile app business end-to-end. It is not an app; the deliverable is playbooks (Markdown), templates (copied into generated business repos), and deterministic validators (TypeScript) that gate "launch-ready" claims.
 
-**Stack.** TypeScript (strict, `NodeNext`, `noUncheckedIndexedAccess`) run via `tsx`; `yaml` + `ajv` for state validation; a small React 19 + Vite 6 renderer for the Design Room; GitHub Actions for CI and a weekly source-freshness job. Node 22 in CI. ~349 files, ~4 MB, ~16,000 lines of TS in `scripts/`, ~17,000 lines of Markdown in `references/`.
+**Stack.** TypeScript (strict, `NodeNext`, `noUncheckedIndexedAccess`) run via `tsx`; `yaml` + `ajv` for state validation; a small React 19 + Vite 6 renderer for the Design Room; GitHub Actions for CI and a weekly source-freshness job. Node 22 in CI. ~349 files, ~4 MB, ~16,000 lines of TS in `tooling/`, ~17,000 lines of Markdown in `references/`.
 
 **Architecture sketch.** Three layers:
 1. **Playbooks** — `SKILL.md` (entrypoint, progressive-disclosure routing) → 50+ `references/*.md` lane guides.
-2. **State contract** — `business/state/PROJECT_STATE.yaml` (+ `state/business.json`, JSON schemas) is the machine-readable launch state that generated business repos carry.
-3. **Enforcement** — ~45 `scripts/check-*.ts` validators grep state + artifacts; `run-validator-fixtures.ts` exercises each with positive/negative fixtures; `run-launchbench.ts` schema-validates 78 failure-mode scenario YAMLs; `.github/workflows/source-freshness.yml` runs `audit:ci` on every PR and a weekly URL-freshness refresh over the 194-entry `source-registry.yaml`.
+2. **State contract** — `workspace/business/state/PROJECT_STATE.yaml` (+ `studio/seed/business.json`, JSON schemas) is the machine-readable launch state that generated business repos carry.
+3. **Enforcement** — ~45 `tooling/check-*.ts` validators grep state + artifacts; `run-validator-fixtures.ts` exercises each with positive/negative fixtures; `run-launchbench.ts` schema-validates 78 failure-mode scenario YAMLs; `.github/workflows/source-freshness.yml` runs `audit:ci` on every PR and a weekly URL-freshness refresh over the 194-entry `source-registry.yaml`.
 
 **Key directories.**
 | Path | What it is |
 | --- | --- |
 | `skill/b2c-mobile-business-launch/SKILL.md` | Skill entrypoint; routing rules for when to load each reference |
 | `…/references/` | 50+ launch-lane playbooks + `source-registry.yaml` (194 tracked URLs) |
-| `…/scripts/` | ~60 validators/renderers/probes; shared helpers in `scripts/lib/launch-state.ts` and `lib/design-state.ts` |
+| `…/tooling/` | ~60 validators/renderers/probes; shared helpers in `tooling/lib/launch-state.ts` and `lib/design-state.ts` |
 | `…/business/` | Artifacts copied into generated app repos (state, docs, Claude hooks `settings.json`, Swift design tokens, email templates) |
 | `…/evals/launchbench/` (78), `…/evals/agent-behavior/` (8), `…/evals/triggering/` (1) | Scenario YAML definitions |
 | `…/render/` | React/Vite Design Room renderer (small: `App.tsx` 267 lines) |
@@ -45,7 +45,7 @@ Date: 2026-06-09 · Auditor: principal-level review session · Scope: full repo 
 
 **Surprises.**
 - Every advertised gate actually runs and passes; README's script inventory matches `package.json` exactly. Rare.
-- The repo is self-aware about its weakest point: validators carry "anti-gaming" helpers (`scripts/lib/launch-state.ts:319-437`) and "HONEST LIMIT" comments (`business/engineering/repo-agent-entrypoints/settings.json`, `scripts/probe-posthog.ts:20-24`).
+- The repo is self-aware about its weakest point: validators carry "anti-gaming" helpers (`tooling/lib/launch-state.ts:319-437`) and "HONEST LIMIT" comments (`business/engineering/repo-agent-entrypoints/settings.json`, `tooling/probe-posthog.ts:20-24`).
 - The eval harness names ("LaunchBench", "agent evals") oversell what is executed — see A3.
 
 ---
@@ -62,10 +62,10 @@ There are **no Critical findings and no High security findings.** The ugliest pa
 `package.json:58` (`audit:ci`) and `package.json:59` (`audit`) are near-identical `&&`-chains of ~50 npm script invocations, differing only in `validate:skill`. The same pipeline is mirrored again in `skill/b2c-mobile-business-launch/package.json`. Consequence: adding a validator requires editing up to four places; a missed `&&` or omitted entry in one copy silently drops a gate with no error. `check-package-parity.ts` mitigates cross-file drift but nothing protects against editing `audit` and forgetting `audit:ci` content beyond string-diff parity. This is the single most fragile artifact in the repo.
 
 **A2 · Medium · [fact] — `run-validator-fixtures.ts` is a 2,083-line god file.**
-All ~124 fixtures, their builders (`writeCompleteAttribution`, `writeCompleteOrchestration` at 130 lines, etc.), and the runner share one file (`scripts/run-validator-fixtures.ts`). Consequence: contributors adding a validator must navigate and append to a 2k-line file; merge conflicts concentrate here; it is the hardest file in the repo to review.
+All ~124 fixtures, their builders (`writeCompleteAttribution`, `writeCompleteOrchestration` at 130 lines, etc.), and the runner share one file (`tooling/run-validator-fixtures.ts`). Consequence: contributors adding a validator must navigate and append to a 2k-line file; merge conflicts concentrate here; it is the hardest file in the repo to review.
 
 **A3 · Medium · [fact + judgment] — "LaunchBench" and "agent evals" never execute behavior.**
-`scripts/run-launchbench.ts:64-105` only checks that scenario YAML has `id/title/prompt/expected_guardrail/validators/must_catch` fields and that named validators exist; the `prompt` is never run against an agent. `run-agent-evals.ts` likewise validates definitions (README.md:168 says so). Fact: the only executed tests are the deterministic fixtures. Judgment: the names create an inflated sense of coverage — a maintainer reading "78 LaunchBench scenarios pass" may believe regression *behavior* is tested when only scenario *metadata* is. Either rename the gate (e.g., "scenario lint") or build a real execution harness; the current middle ground is the repo's biggest honesty gap with itself.
+`tooling/run-launchbench.ts:64-105` only checks that scenario YAML has `id/title/prompt/expected_guardrail/validators/must_catch` fields and that named validators exist; the `prompt` is never run against an agent. `run-agent-evals.ts` likewise validates definitions (README.md:168 says so). Fact: the only executed tests are the deterministic fixtures. Judgment: the names create an inflated sense of coverage — a maintainer reading "78 LaunchBench scenarios pass" may believe regression *behavior* is tested when only scenario *metadata* is. Either rename the gate (e.g., "scenario lint") or build a real execution harness; the current middle ground is the repo's biggest honesty gap with itself.
 
 **A4 · Low · [judgment] — Phrase-list validators are brittle in both directions.**
 Example: `check-onboarding-conversion.ts:112-126` requires the literal strings `review_prompt_eligible` / `review_prompt_requested`; `:96-102` requires one of six review-API phrases. A genuinely correct doc using `review_prompt_eligibility` fails; a doc that pastes the magic phrases without implementing anything passes. This is an accepted design tradeoff (acknowledged in `lib/launch-state.ts` anti-gaming comments), but the accepted-phrase vocabulary is invisible to template authors until the validator fails. Not a bug; a documentation/UX gap on the validators themselves.
@@ -150,7 +150,7 @@ No ESLint/Prettier/Biome config anywhere in the repo; style consistency across 1
 ## Improvement Strategy
 
 ### Theme 1 — The pipeline is data, not code (explains A1, P1, partially C1)
-The audit pipeline is the repo's spine, yet it lives as duplicated shell strings with per-step process-boot overhead. **Target state:** a single `scripts/run-audit.ts` orchestrator that owns the ordered validator list once, imports validators in-process (or spawns once via tsx), takes `--ci` to skip maintainer-only steps, and is invoked by both `audit` and `audit:ci`. **Principle:** one source of truth for anything that gates releases.
+The audit pipeline is the repo's spine, yet it lives as duplicated shell strings with per-step process-boot overhead. **Target state:** a single `tooling/run-audit.ts` orchestrator that owns the ordered validator list once, imports validators in-process (or spawns once via tsx), takes `--ci` to skip maintainer-only steps, and is invoked by both `audit` and `audit:ci`. **Principle:** one source of truth for anything that gates releases.
 
 ### Theme 2 — Shared validator kernel (explains C1, C2, A2)
 Validators were grown by accretion; helpers got copy-pasted. **Target state:** `lib/launch-state.ts` (or a new `lib/cli.ts`) is the only place `parseArgs`, `normalize`, `requireAny`, and issue reporting exist; `run-validator-fixtures.ts` becomes a thin runner over per-validator fixture modules. **Principle:** a contributor adding validator #46 should write ~100 new lines, not navigate 2,000.
@@ -173,8 +173,8 @@ Validators were grown by accretion; helpers got copy-pasted. **Target state:** `
 
 ### Definition of done (measurable)
 - The ordered validator list is defined in exactly **one** file; `package.json:58-59` are each ≤ 1 line.
-- `grep -l "function parseArgs" scripts/*.ts` returns **0** files (excluding the shared lib).
-- No source file in `scripts/` exceeds **600** lines.
+- `grep -l "function parseArgs" tooling/*.ts` returns **0** files (excluding the shared lib).
+- No source file in `tooling/` exceeds **600** lines.
 - CI: audit job runs with `contents: read`; all third-party actions SHA-pinned; `npm run lint` (format check) is a CI step that fails on violation.
 - `audit:ci` wall time reduced ≥ 50% from the current multi-minute baseline.
 - Zero contradictions: Node version, runtime-sync instructions, and README layout each state one truth.
@@ -188,7 +188,7 @@ Validators were grown by accretion; helpers got copy-pasted. **Target state:** `
 
 | # | Task | Files | Acceptance criteria | Effort | Risk | Deps |
 |---|---|---|---|---|---|---|
-| 0.1 | **Snapshot the current gate as the refactor oracle.** Capture the exact ordered list of commands `audit`/`audit:ci` run today (script that parses package.json and emits the list to a committed fixture), so the new orchestrator can be diffed against it. | `package.json`, new `scripts/lib/audit-plan.ts` + fixture | Committed canonical step list; a test fails if orchestrator coverage ≠ snapshot | S | None (additive) | — |
+| 0.1 | **Snapshot the current gate as the refactor oracle.** Capture the exact ordered list of commands `audit`/`audit:ci` run today (script that parses package.json and emits the list to a committed fixture), so the new orchestrator can be diffed against it. | `package.json`, new `tooling/lib/audit-plan.ts` + fixture | Committed canonical step list; a test fails if orchestrator coverage ≠ snapshot | S | None (additive) | — |
 | 0.2 | **Add CI formatter check.** Adopt Prettier (or Biome) with config matching current style; run `--check` in CI; one-time `--write` commit. | new config, `.github/workflows/source-freshness.yml`, whole-repo format commit | CI fails on unformatted code; format-only commit isolated from logic changes | M | Low (mechanical; review the one big diff) | — |
 
 ### Milestone 1 — Critical fixes (security & correctness)
@@ -204,20 +204,20 @@ Validators were grown by accretion; helpers got copy-pasted. **Target state:** `
 
 | # | Task | Files | Acceptance criteria | Effort | Risk | Deps |
 |---|---|---|---|---|---|---|
-| 2.1 | **Build `run-audit.ts` orchestrator; shrink package.json scripts to one-liners.** See sketch below. | new `scripts/run-audit.ts`, `package.json:58-59`, skill `package.json`, CI workflow | `audit`/`audit:ci` ≤ 1 line each; step list matches 0.1 snapshot; wall time ≥ 50% faster; parity check updated | L | **Medium** — this is the release gate itself; ship behind the 0.1 oracle | 0.1 |
-| 2.2 | **Extract shared CLI/text kernel; delete duplicates.** Move `parseArgs` variants into a parameterized `lib` helper; consolidate `normalize`/`requireAny`; type `run-launchbench.ts:12`. | 13 scripts listed in C1, `lib/launch-state.ts` | `grep "function parseArgs" scripts/*.ts` (excl. lib) = 0; fixtures all pass unchanged | M | Low-Medium (flag-parsing edge cases; fixtures cover exit codes) | — |
-| 2.3 | **Split `run-validator-fixtures.ts` into per-validator fixture modules.** `scripts/fixtures/<validator>.fixtures.ts` exporting cases; thin shared runner. | `run-validator-fixtures.ts` → ~30 modules + runner | Same 124 fixtures pass; no file > 600 lines; adding a fixture touches only its module | L | Low (pure mechanical move; oracle = identical PASS list) | 2.2 helpful |
-| 2.4 | **Rename or implement the behavioral eval gate.** Decision task (see Open Questions). Minimum: rename output/docs from "LaunchBench scenario validation" to "scenario definition lint" and say in README that prompts are not executed. Maximum: harness that runs N flagship scenarios against a live agent in a manual workflow. | `run-launchbench.ts`, `run-agent-evals.ts`, README.md:174, `machine/launchbench-evals.md` | Gate output and docs accurately describe what executed | S (rename) / XL (real harness) | Low (rename) | Owner decision |
+| 2.1 | **Build `run-audit.ts` orchestrator; shrink package.json scripts to one-liners.** See sketch below. | new `tooling/run-audit.ts`, `package.json:58-59`, skill `package.json`, CI workflow | `audit`/`audit:ci` ≤ 1 line each; step list matches 0.1 snapshot; wall time ≥ 50% faster; parity check updated | L | **Medium** — this is the release gate itself; ship behind the 0.1 oracle | 0.1 |
+| 2.2 | **Extract shared CLI/text kernel; delete duplicates.** Move `parseArgs` variants into a parameterized `lib` helper; consolidate `normalize`/`requireAny`; type `run-launchbench.ts:12`. | 13 scripts listed in C1, `lib/launch-state.ts` | `grep "function parseArgs" tooling/*.ts` (excl. lib) = 0; fixtures all pass unchanged | M | Low-Medium (flag-parsing edge cases; fixtures cover exit codes) | — |
+| 2.3 | **Split `run-validator-fixtures.ts` into per-validator fixture modules.** `tooling/fixtures/<validator>.fixtures.ts` exporting cases; thin shared runner. | `run-validator-fixtures.ts` → ~30 modules + runner | Same 124 fixtures pass; no file > 600 lines; adding a fixture touches only its module | L | Low (pure mechanical move; oracle = identical PASS list) | 2.2 helpful |
+| 2.4 | **Rename or implement the behavioral eval gate.** Decision task (see Open Questions). Minimum: rename output/docs from "LaunchBench scenario validation" to "scenario definition lint" and say in README that prompts are not executed. Maximum: harness that runs N flagship scenarios against a live agent in a manual workflow. | `run-launchbench.ts`, `run-agent-evals.ts`, README.md:174, `validation/repository/launchbench-evals.md` | Gate output and docs accurately describe what executed | S (rename) / XL (real harness) | Low (rename) | Owner decision |
 
 ### Milestone 3 — Quality & polish
 
 | # | Task | Files | Acceptance criteria | Effort | Risk | Deps |
 |---|---|---|---|---|---|---|
 | 3.1 | **Clean up fixture temp dirs.** `try/finally` + `rmSync(tempRoot, {recursive, force})` (keep on `--keep-temp` for debugging). | `run-validator-fixtures.ts:22` | `/tmp` clean after suite run | S | None | — |
-| 3.2 | **Extract shipped hooks from inline JSON to a tested script.** Move the shell logic from `settings.json` hooks into `scripts/hooks/post-tool-use.sh` (or `.ts`); hooks become short invocations; add a fixture that executes the script with sample `CLAUDE_TOOL_INPUT` payloads, including the no-`jq`/no-`SKILL_ROOT` paths (should warn loudly, not silently no-op). | `business/engineering/repo-agent-entrypoints/settings.json`, new script + fixture | Hook logic is testable; silent-failure modes produce visible warnings; `check:template-safety` passes | M | Medium (changes shipped behavior in generated repos; version-bump per discipline) | — |
-| 3.3 | **Add fixture coverage for `grade-screenshots.ts` and probe argument/artifact shapes.** Probes: golden-file test of the proof JSON writer with a mocked fetch; grader: template-emit and ledger-validation paths. | `scripts/fixtures/` | Proof-artifact shape changes break CI | M | Low | 2.3 |
+| 3.2 | **Extract shipped hooks from inline JSON to a tested script.** Move the shell logic from `settings.json` hooks into `tooling/hooks/post-tool-use.sh` (or `.ts`); hooks become short invocations; add a fixture that executes the script with sample `CLAUDE_TOOL_INPUT` payloads, including the no-`jq`/no-`SKILL_ROOT` paths (should warn loudly, not silently no-op). | `business/engineering/repo-agent-entrypoints/settings.json`, new script + fixture | Hook logic is testable; silent-failure modes produce visible warnings; `check:template-safety` passes | M | Medium (changes shipped behavior in generated repos; version-bump per discipline) | — |
+| 3.3 | **Add fixture coverage for `grade-screenshots.ts` and probe argument/artifact shapes.** Probes: golden-file test of the proof JSON writer with a mocked fetch; grader: template-emit and ledger-validation paths. | `tooling/fixtures/` | Proof-artifact shape changes break CI | M | Low | 2.3 |
 | 3.4 | **Concurrency pool for source refresh.** Pool of ~5 with per-host serialization; keep the politeness comment honest. | `refresh-source-freshness.ts:248-251` | Weekly job ≤ ~10 min at 194 sources; per-host sequential | S | Low | — |
-| 3.5 | **Document validator phrase vocabularies.** Per-validator "accepted phrases" section generated or hand-written next to each template, so authors know the contract before the red X (addresses A4). | `machine/launchbench-evals.md` or per-template notes | Each phrase-gated validator's vocabulary is discoverable without reading its source | M | None | — |
+| 3.5 | **Document validator phrase vocabularies.** Per-validator "accepted phrases" section generated or hand-written next to each template, so authors know the contract before the red X (addresses A4). | `validation/repository/launchbench-evals.md` or per-template notes | Each phrase-gated validator's vocabulary is discoverable without reading its source | M | None | — |
 
 ### Quick wins (high impact, S effort — do immediately)
 - **1.1** job-scoped CI permissions · **1.2** SHA-pin actions · **1.3** fix the impossible runtime-sync instruction · **1.4** Node/layout doc truth · **3.1** temp-dir cleanup · **2.4-minimum** rename the eval gate output honestly.
@@ -225,13 +225,13 @@ Validators were grown by accretion; helpers got copy-pasted. **Target state:** `
 ### Implementation sketches — top 3 tasks
 
 **2.1 `run-audit.ts` orchestrator.**
-Approach: declare `const steps: AuditStep[]` (`{ id, args | fn, ciOnly?, maintainerOnly?, serializeWith? }`) mirroring today's order exactly (oracle from 0.1). Phase 1: spawn each step via one shared tsx process pool (`spawnSync` per step is still fine — the win is deleting npm-boot overhead and the duplicate string). Phase 2 (optional): import validator mains in-process; this requires the small refactor of converting top-level-statement scripts (e.g., `check-onboarding-conversion.ts:4-33` runs at import time) into exported `main(args)` functions — do that incrementally, per validator, behind the same fixture suite. `audit` = `tsx scripts/run-audit.ts`, `audit:ci` = `tsx scripts/run-audit.ts --ci`. Gotchas: `validate:skill` is env-dependent (author machine), keep its soft-skip semantics; `check-package-parity.ts` asserts on script presence in both package.json files — update its expectations in the same commit; keep stdout format compatible with anything grepping `error(s), warning(s)`.
+Approach: declare `const steps: AuditStep[]` (`{ id, args | fn, ciOnly?, maintainerOnly?, serializeWith? }`) mirroring today's order exactly (oracle from 0.1). Phase 1: spawn each step via one shared tsx process pool (`spawnSync` per step is still fine — the win is deleting npm-boot overhead and the duplicate string). Phase 2 (optional): import validator mains in-process; this requires the small refactor of converting top-level-statement scripts (e.g., `check-onboarding-conversion.ts:4-33` runs at import time) into exported `main(args)` functions — do that incrementally, per validator, behind the same fixture suite. `audit` = `tsx tooling/run-audit.ts`, `audit:ci` = `tsx tooling/run-audit.ts --ci`. Gotchas: `validate:skill` is env-dependent (author machine), keep its soft-skip semantics; `check-package-parity.ts` asserts on script presence in both package.json files — update its expectations in the same commit; keep stdout format compatible with anything grepping `error(s), warning(s)`.
 
 **2.2 Shared CLI kernel.**
 Approach: extend `lib/launch-state.ts` with `parseFlags(argv, spec)` where `spec` maps flag→key (covers the 13 variants: they differ only in flag names like `--skill-root`, `--registry`, `--installed`). Migrate one script, run its fixtures, repeat; finish with a repo-wide grep gate (could even be a new self-check validator, in keeping with house culture). Gotchas: two scripts treat `--root` defaults differently (cwd vs script-relative); preserve each script's current default in its spec rather than unifying behavior silently.
 
 **2.3 Fixture suite split.**
-Approach: keep `runFixture`/`makeFixture`/`writeComplete*` builders in `scripts/fixtures/_harness.ts`; move each validator's cases into `scripts/fixtures/<validator>.fixtures.ts` exporting `register(harness)`. The runner globs modules, runs all, prints the identical `PASS <label>` lines (oracle: byte-compare the PASS list before/after). Gotchas: several builders are shared across validators (`writeCompleteOrchestration` used by orchestration *and* lane-coverage cases) — they live in the harness, not a validator module; preserve the single `mkdtemp` root so 3.1's cleanup stays in one place.
+Approach: keep `runFixture`/`makeFixture`/`writeComplete*` builders in `tooling/fixtures/_harness.ts`; move each validator's cases into `tooling/fixtures/<validator>.fixtures.ts` exporting `register(harness)`. The runner globs modules, runs all, prints the identical `PASS <label>` lines (oracle: byte-compare the PASS list before/after). Gotchas: several builders are shared across validators (`writeCompleteOrchestration` used by orchestration *and* lane-coverage cases) — they live in the harness, not a validator module; preserve the single `mkdtemp` root so 3.1's cleanup stays in one place.
 
 ---
 
@@ -252,20 +252,20 @@ All findings from this audit were resolved on this branch (skill version bumped 
 
 | Finding | Resolution | Evidence |
 |---|---|---|
-| A1 audit pipeline as duplicated shell strings | `scripts/run-audit.ts` orchestrator over a declarative plan in `scripts/lib/audit-plan.ts`; `audit`/`audit:ci` are one-liners in both packages | `package.json` scripts; `npm run audit:ci -- --list` |
-| A2 2,083-line fixture god-file | Split into `scripts/fixtures/` harness + builder/state modules + 8 domain modules (all <600 lines); entrypoint is ~45 lines; PASS-list byte-identical before/after | `scripts/fixtures/`, oracle diff in PR history |
-| A3 eval gate overstates coverage | Gate output renamed to "scenario definition lint (prompts are not executed against an agent)"; README and `machine/launchbench-evals.md` state the executed scope explicitly | `run-launchbench.ts`, README, launchbench-evals.md "Harness Shape" |
-| A4 phrase-list brittleness undocumented | New "Validator Phrase Contracts" section documents the literal-vocabulary design, its two edges, and the most-tripped tokens | `machine/launchbench-evals.md` |
-| C1 13 duplicate `parseArgs`, duplicated helpers | Shared kernel (`expandHome`, `parseFlags`, flag accessors, `normalizedIncludes`, `missingPhraseCode`, `normalizedStringArray`) in `lib/launch-state.ts`; all 13 scripts migrated with byte-identical CLI semantics; one deliberate non-dedupe (`check-parallel-orchestration`'s space-only `missingPhraseCode`) kept to preserve emitted issue codes | `scripts/lib/launch-state.ts` + migrated validators |
+| A1 audit pipeline as duplicated shell strings | `tooling/run-audit.ts` orchestrator over a declarative plan in `tooling/lib/audit-plan.ts`; `audit`/`audit:ci` are one-liners in both packages | `package.json` scripts; `npm run audit:ci -- --list` |
+| A2 2,083-line fixture god-file | Split into `tooling/fixtures/` harness + builder/state modules + 8 domain modules (all <600 lines); entrypoint is ~45 lines; PASS-list byte-identical before/after | `tooling/fixtures/`, oracle diff in PR history |
+| A3 eval gate overstates coverage | Gate output renamed to "scenario definition lint (prompts are not executed against an agent)"; README and `validation/repository/launchbench-evals.md` state the executed scope explicitly | `run-launchbench.ts`, README, launchbench-evals.md "Harness Shape" |
+| A4 phrase-list brittleness undocumented | New "Validator Phrase Contracts" section documents the literal-vocabulary design, its two edges, and the most-tripped tokens | `validation/repository/launchbench-evals.md` |
+| C1 13 duplicate `parseArgs`, duplicated helpers | Shared kernel (`expandHome`, `parseFlags`, flag accessors, `normalizedIncludes`, `missingPhraseCode`, `normalizedStringArray`) in `lib/launch-state.ts`; all 13 scripts migrated with byte-identical CLI semantics; one deliberate non-dedupe (`check-parallel-orchestration`'s space-only `missingPhraseCode`) kept to preserve emitted issue codes | `tooling/lib/launch-state.ts` + migrated validators |
 | C2 untyped `issues` array | `const issues: Issue[]` in `run-launchbench.ts` | `run-launchbench.ts:12` |
 | C4 fixture temp dirs never cleaned | `try/finally` + `rmSync(tempRoot)`; `--keep-temp` opt-out | `run-validator-fixtures.ts` |
 | S1 workflow-level write permissions | Workflow defaults to `contents: read`; write scopes re-granted only to `weekly-source-refresh` | `.github/workflows/source-freshness.yml` |
 | S2 tag-pinned actions | All four actions pinned to full commit SHAs (resolved via `git ls-remote`) with version comments | `.github/workflows/source-freshness.yml` |
-| T2 untested probes/grader/hooks | 12 new fixtures: probe no-credential paths, four `grade-screenshots` paths, six hook executions with sample `CLAUDE_TOOL_INPUT` payloads; plus a latent ESM `require()` bug found and fixed in `grade-screenshots.ts` (PNG dimension read was unreachable under tsx) | `scripts/fixtures/probes-and-grading.fixtures.ts`, `scripts/fixtures/hooks.fixtures.ts` |
+| T2 untested probes/grader/hooks | 12 new fixtures: probe no-credential paths, four `grade-screenshots` paths, six hook executions with sample `CLAUDE_TOOL_INPUT` payloads; plus a latent ESM `require()` bug found and fixed in `grade-screenshots.ts` (PNG dimension read was unreachable under tsx) | `tooling/fixtures/probes-and-grading.fixtures.ts`, `tooling/fixtures/hooks.fixtures.ts` |
 | T3/DOC Node + layout drift | README declares Node 22 (matches CI/CONTRIBUTING); layout lists `evals/agent-behavior/` and `evals/triggering/` | README.md |
-| P1 ~50 sequential npm boots | Orchestrator spawns tsx directly with a concurrency pool (typecheck barrier first, launchbench serialized); full `audit:ci` measured at ~1m23s wall | `scripts/run-audit.ts` |
+| P1 ~50 sequential npm boots | Orchestrator spawns tsx directly with a concurrency pool (typecheck barrier first, launchbench serialized); full `audit:ci` measured at ~1m23s wall | `tooling/run-audit.ts` |
 | P2 ~49-minute worst-case weekly refresh | Per-host-serialized fetch pool (5 workers) keeps politeness per docs site | `refresh-source-freshness.ts` |
-| X1 no lint/format enforcement | Prettier adopted (printWidth 160), `lint:format` step in the audit plan, one-time mechanical reformat of `scripts/**/*.ts` | `.prettierrc.json`, audit plan |
+| X1 no lint/format enforcement | Prettier adopted (printWidth 160), `lint:format` step in the audit plan, one-time mechanical reformat of `tooling/**/*.ts` | `.prettierrc.json`, audit plan |
 | X2 silent hook failure modes | Missing `jq`/`SKILL_ROOT` now warn loudly to stderr and exit 0; blocking screenshot gates still fire without `SKILL_ROOT`; behavior covered by executed-hook fixtures | `business/engineering/repo-agent-entrypoints/settings.json`, `fixtures/hooks.fixtures.ts` |
 | X3 impossible maintainer-machine instructions | Runtime-sync guidance in root `AGENTS.md`/`CLAUDE.md` is now conditional on the maintainer machine; clones/CI are told `audit:ci` is the gate | AGENTS.md, CLAUDE.md |
 

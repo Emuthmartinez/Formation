@@ -1061,7 +1061,7 @@
           ["Launch Cockpit", "See launch stage, blockers, milestones, provider proof, and next agent actions.", "state/launch-cockpit.html", "Ready"],
           ["Store Ops", "Inspect ASC metadata, screenshots, TestFlight notes, and release-readiness proof.", "business/store/", "Watch"],
           ["Growth", "Review viral loops, referral assets, paid UA notes, and source freshness.", "references/PAID_UA.md", "Draft"],
-          ["Analytics", "Check PostHog event contract, attribution status, retention events, and red/yellow gates.", "scripts/check-provider-proof.ts", "Gate"],
+          ["Analytics", "Check PostHog event contract, attribution status, retention events, and red/yellow gates.", "tooling/check-provider-proof.ts", "Gate"],
           ["Failure Cards", "Known misses and eval-backed regressions future agents should avoid.", "evals/launchbench/", "Active"]
         ]
       },
@@ -1129,7 +1129,7 @@
         lanes: [
           ["Offer Pages", "Public pricing, copy, route, and Cloudflare Pages proof.", "web/src/pages/", "Ready"],
           ["Subscription", "RevenueCat gating, account identity, and entitlement checks.", "flutter/lib/", "Watch"],
-          ["Android Build", "AAB generation, versioning, and Play upload handoff.", "scripts/build-android", "Ready"],
+          ["Android Build", "AAB generation, versioning, and Play upload handoff.", "tooling/build-android", "Ready"],
           ["Analytics", "Checkout intent, purchase events, and retention reporting.", "business/analytics/", "Draft"],
           ["Support", "Customer-facing docs, receipts, and account recovery.", "business/support/", "Draft"],
           ["Failure Cards", "Repeated pricing and entitlement misses.", "evals/launchbench/", "Active"]
@@ -1164,7 +1164,7 @@
         lanes: [
           ["Workspace", "Private business routes, control plane, and authenticated surfaces.", "workspace.clueless-creations.com", "Ready"],
           ["Public Site", "Public funnel, personal/agency split, and SEO/GEO assets.", "clueless-creations", "Ready"],
-          ["Artifacts", "R2/Supabase registry, local sync, and proof links.", "scripts/workspace-sync", "Watch"],
+          ["Artifacts", "R2/Supabase registry, local sync, and proof links.", "tooling/workspace-sync", "Watch"],
           ["Security", "Worker hardening, public config, and custom domain rules.", "workers/", "Gate"],
           ["Knowledge", "Business specs, generated docs, and repo handoff state.", "businesses/", "Ready"],
           ["Failure Cards", "Known surface-blur mistakes and validator targets.", "evals/launchbench/", "Active"]
@@ -1183,7 +1183,7 @@
 
     const operatorPanelCopy = {
       overview: "The overview keeps executive signal visible first: stage, risk, next lane, artifacts, and the most important review surfaces.",
-      design: "The Design Room panel renders from state/business.json and theme.tokens.json, then shows product promise, audience, positioning, visual direction, and screenshots.",
+      design: "The Design Room panel renders from studio/seed/business.json and theme.tokens.json, then shows product promise, audience, positioning, visual direction, and screenshots.",
       launch: "The Launch panel renders from state/PROJECT_STATE.yaml and shows milestones, blockers, launch lane ownership, source freshness, and proof gates.",
       store: "Store Ops gathers App Store Connect, Google Play, screenshots, What to Test, compliance notes, and release evidence.",
       revenue: "Revenue gathers RevenueCat, Stripe, pricing, paywall, attribution, and provider-proof gates without faking founder-owned setup.",

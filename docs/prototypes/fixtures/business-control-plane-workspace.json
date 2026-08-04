@@ -121,7 +121,7 @@
         {
           "title": "Analytics",
           "summary": "Check PostHog event contract, attribution status, retention events, and red/yellow gates.",
-          "path": "scripts/check-provider-proof.ts",
+          "path": "tooling/check-provider-proof.ts",
           "status": "Gate",
           "id": "panel.analytics"
         },
@@ -363,7 +363,7 @@
         {
           "title": "Android Build",
           "summary": "AAB generation, versioning, and Play upload handoff.",
-          "path": "scripts/build-android",
+          "path": "tooling/build-android",
           "status": "Ready",
           "id": "panel.android-build"
         },
@@ -491,7 +491,7 @@
         {
           "title": "Artifacts",
           "summary": "R2/Supabase registry, local sync, and proof links.",
-          "path": "scripts/workspace-sync",
+          "path": "tooling/workspace-sync",
           "status": "Watch",
           "id": "panel.artifacts"
         },
