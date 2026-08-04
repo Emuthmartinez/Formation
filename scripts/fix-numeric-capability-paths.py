@@ -23,65 +23,109 @@ for path in ROOT.rglob("*"):
     if updated != original:
         path.write_text(updated)
 
-# The repository migration moved the landing package under growth/landing. Keep
-# discovery backward-compatible for generated app repositories during the path
-# transition, while preferring the capability-owned location.
+# Landing discovery and proof paths are rewritten as whole blocks after every
+# migration pass. This avoids partial path duplication from generic replacements.
 landing_gate = SKILL / "gates" / "growth" / "check-landing-funnel.ts"
 landing_text = landing_gate.read_text()
-landing_text = landing_text.replace('path.join(args.root, "landing",', 'path.join(args.root, "growth", "landing",')
-landing_text = landing_text.replace('path.join(args.root, "landing")', 'path.join(args.root, "growth", "landing")')
-landing_text = landing_text.replace('"landing/README.md"', '"growth/landing/README.md"')
-landing_text = landing_text.replace('"landing/PRODUCTION_READINESS.md"', '"growth/landing/PRODUCTION_READINESS.md"')
-landing_text = landing_text.replace('"landing/index.html"', '"growth/landing/index.html"')
-landing_text = landing_text.replace('"landing/wrangler.toml"', '"growth/landing/wrangler.toml"')
+landing_text = re.sub(
+    r'const landingRoot = path\.join\(args\.root,[^;]+\);',
+    'const landingRoot = path.join(args.root, "growth", "landing");',
+    landing_text,
+    count=1,
+)
+landing_docs = '''const docs = [
+  path.join(args.root, "README.md"),
+  path.join(args.root, "engineering", "PRODUCTION_READINESS.md"),
+  path.join(args.root, "growth", "landing", "README.md"),
+  path.join(args.root, "growth", "landing", "PRODUCTION_READINESS.md"),
+  path.join(args.root, "landing", "README.md"),
+  path.join(args.root, "landing", "PRODUCTION_READINESS.md"),
+].filter(exists);'''
+landing_text = re.sub(
+    r'const docs = \[[\s\S]*?\]\.filter\(exists\);',
+    landing_docs,
+    landing_text,
+    count=1,
+)
 landing_text = landing_text.replace('growth/growth/landing/', 'growth/landing/')
 landing_gate.write_text(landing_text)
 
-# Ensure every landing fixture writes to the same final path the gate scans.
+# Every landing fixture writes into the final capability path scanned above.
 state_fixture = SKILL / "machine" / "fixtures" / "state-and-meta.fixtures.ts"
 state_text = state_fixture.read_text()
 state_text = re.sub(
-    r'path\.join\((?P<root>\w+), "landing"',
+    r'path\.join\((?P<root>\w+),\s*"(?:growth",\s*)?"landing"',
     r'path.join(\g<root>, "growth", "landing"',
     state_text,
 )
 state_text = state_text.replace('"growth", "growth", "landing"', '"growth", "landing"')
 state_fixture.write_text(state_text)
 
-# Localization evidence and its related listing/console claims live under the
-# strategy and store capabilities. Include the business prefix because the gate
-# can run against either a copied business root or the skill repository root.
+# Localization can be validated against either a copied business root or the
+# skill repository root. Replace the full declarations rather than individual
+# candidate strings so generic migration passes cannot leave stale variants.
 localization_gate = SKILL / "gates" / "research" / "check-localization-research.ts"
 localization_text = localization_gate.read_text()
-for old in [
-    'const research = firstExistingText(["LOCALIZATION_MARKET_RESEARCH.md", "localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"]);',
-    'const research = firstExistingText(["strategy/research/LOCALIZATION_MARKET_RESEARCH.md", "strategy/research/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"]);',
-    'const research = firstExistingText(["strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"]);',
-]:
-    localization_text = localization_text.replace(
-        old,
-        'const research = firstExistingText(["strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md", "business/strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"]);',
-    )
-localization_text = localization_text.replace(
-    'const listing = firstExistingText(["APP_STORE_LISTING.md", "app-store-listing/APP_STORE_LISTING.md"]);',
-    'const listing = firstExistingText(["store/APP_STORE_LISTING.md", "store/app-store-listing/APP_STORE_LISTING.md", "business/store/APP_STORE_LISTING.md", "business/store/app-store-listing/APP_STORE_LISTING.md"]);',
+localization_text = re.sub(
+    r'const research = firstExistingText\([^;]*\);',
+    '''const research = firstExistingText([
+  "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+  "localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+  "business/strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+  "business/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+]);''',
+    localization_text,
+    count=1,
 )
-localization_text = localization_text.replace(
-    'const storeConsole = firstExistingText(["STORE_CONSOLE.md"]);',
-    'const storeConsole = firstExistingText(["store/STORE_CONSOLE.md", "business/store/STORE_CONSOLE.md"]);',
+localization_text = re.sub(
+    r'const listing = firstExistingText\([^;]*\);',
+    '''const listing = firstExistingText([
+  "store/APP_STORE_LISTING.md",
+  "store/app-store-listing/APP_STORE_LISTING.md",
+  "APP_STORE_LISTING.md",
+  "app-store-listing/APP_STORE_LISTING.md",
+  "business/store/APP_STORE_LISTING.md",
+  "business/store/app-store-listing/APP_STORE_LISTING.md",
+]);''',
+    localization_text,
+    count=1,
+)
+localization_text = re.sub(
+    r'const storeConsole = firstExistingText\([^;]*\);',
+    '''const storeConsole = firstExistingText([
+  "store/STORE_CONSOLE.md",
+  "STORE_CONSOLE.md",
+  "business/store/STORE_CONSOLE.md",
+]);''',
+    localization_text,
+    count=1,
 )
 localization_gate.write_text(localization_text)
 
-# The missing-listing fixture must leave the complete copied console packet
-# intact so the only failure is the removed listing artifact.
+# Keep the purpose-built complete console packet at the actual migrated path,
+# then remove only the listing artifacts. The expected failure remains focused
+# on listing absence instead of unrelated console-template placeholders.
 store_fixture = SKILL / "machine" / "fixtures" / "store.fixtures.ts"
 store_text = store_fixture.read_text()
-store_text = store_text.replace(
+store_text = re.sub(
+    r'path\.join\(missingListingArtifacts,\s*(?:"store",\s*)?"(?:LEGACY_)?STORE_CONSOLE\.md"\)',
     'path.join(missingListingArtifacts, "store", "STORE_CONSOLE.md")',
-    'path.join(missingListingArtifacts, "LEGACY_STORE_CONSOLE.md")',
+    store_text,
 )
-store_text = store_text.replace(
+store_text = re.sub(
+    r'path\.join\(missingListingArtifacts,\s*(?:"store",\s*)?"(?:legacy-)?store-console\.html"\)',
     'path.join(missingListingArtifacts, "store", "store-console.html")',
-    'path.join(missingListingArtifacts, "legacy-store-console.html")',
+    store_text,
 )
+store_text = re.sub(
+    r'path\.join\(missingListingArtifacts,\s*(?:"store",\s*)?"app-store-listing"\)',
+    'path.join(missingListingArtifacts, "store", "app-store-listing")',
+    store_text,
+)
+store_text = re.sub(
+    r'path\.join\(missingListingArtifacts,\s*(?:"store",\s*)?"APP_STORE_LISTING\.md"\)',
+    'path.join(missingListingArtifacts, "store", "APP_STORE_LISTING.md")',
+    store_text,
+)
+store_text = store_text.replace('"store", "store",', '"store",')
 store_fixture.write_text(store_text)
