@@ -15,8 +15,8 @@ Generated from the TypeScript definition graph. Edit graph definitions, not this
 
 ## Workflows
 
-| Legacy | Stable ID | Workflow | Domain | Proof gates |
-| --- | --- | --- | --- | --- |
+| Stable ID | Workflow | Domain | Proof gates |
+| --- | --- | --- | --- |
 | `workflow.orchestration.session-continuity-resume` | Session continuity / resume | `domain.orchestration` | `check:continuity-contract` |
 | `workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep` | Orient, scaffold & state/cockpit upkeep | `domain.orchestration` | `validate:launch-state`, `render:launch-cockpit` |
 | `workflow.process.provider-proof-verification` | Provider-proof verification | `domain.process` | `check:provider-proof` |
