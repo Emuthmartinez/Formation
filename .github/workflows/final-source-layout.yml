@@ -41,6 +41,7 @@ jobs:
           npm run render:design-room --prefix skill/b2c-mobile-business-launch -- --root workspace/business --out design/design-room.html --static-only
       - name: Persist migrated tree
         run: |
+          git checkout origin/${{ github.head_ref }} -- .github/workflows
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
