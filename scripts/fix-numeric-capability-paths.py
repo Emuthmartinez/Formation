@@ -40,11 +40,18 @@ landing_gate.write_text(landing_text)
 
 state_fixture = SKILL / "machine" / "fixtures" / "state-and-meta.fixtures.ts"
 state_text = state_fixture.read_text()
-state_text = re.sub(
-    r'path\.join\((?P<root>[^,\n]+),\s*"landing"',
-    r'path.join(\g<root>, "growth", "landing"',
-    state_text,
-)
+for fixture_root in [
+    "landingInScopePass",
+    "landingInScopeFail",
+    "landingPackOnly",
+    "root",
+    "motionProseOnly",
+    "motionJsOnly",
+]:
+    state_text = state_text.replace(
+        f'path.join({fixture_root}, "landing"',
+        f'path.join({fixture_root}, "growth", "landing"',
+    )
 state_text = state_text.replace('"growth", "growth", "landing"', '"growth", "landing"')
 state_text = state_text.replace('"landing/', '"growth/landing/')
 state_text = state_text.replace(
