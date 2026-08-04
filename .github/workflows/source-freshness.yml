@@ -34,8 +34,16 @@ jobs:
       - run: python3 scripts/finalize-repository-ia-contract-owners.py
       - run: npm run format --prefix skill/b2c-mobile-business-launch
       - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
-      - run: npm run promote:design-tokens --prefix skill/b2c-mobile-business-launch
-      - run: npm run render:design-room --prefix skill/b2c-mobile-business-launch
+      - name: Promote canonical and business design tokens
+        working-directory: skill/b2c-mobile-business-launch
+        run: |
+          npm run promote:design-tokens
+          npm run promote:design-tokens -- --root business --state state/business.json --tokens state/theme.tokens.json
+      - name: Render canonical and business Design Rooms
+        working-directory: skill/b2c-mobile-business-launch
+        run: |
+          npm run render:design-room
+          npm run render:design-room -- --root business --state state/business.json --tokens state/theme.tokens.json
       - name: Remove temporary machinery and restore normal CI
         run: |
           rm scripts/finalize-repository-ia.py scripts/fix-repository-ia-rewrites.py scripts/repair-repository-ia-contracts.py scripts/fix-numeric-capability-paths.py scripts/finalize-repository-ia-contract-owners.py
