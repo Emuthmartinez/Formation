@@ -575,7 +575,7 @@ const mdFilesUnder = (relDir: string): string[] => {
   }
   return found;
 };
-for (const rel of [...mdFilesUnder("playbook"), ...mdFilesUnder("business")]) {
+for (const rel of [...mdFilesUnder("knowledge"), ...mdFilesUnder("workspace/business")]) {
   const text = readFileSync(path.join(skillRoot, rel), "utf8");
   if (swiftMotionMemberNames.size > 0) {
     for (const m of text.matchAll(/DesignTokens\.Motion\.([A-Za-z0-9_]+)/g)) {
@@ -635,8 +635,8 @@ for (const rel of [...mdFilesUnder("playbook"), ...mdFilesUnder("business")]) {
 // (the pre-reconciliation state: 120ms vs 220ms steps, celebrate vs 360ms reveals).
 // Soft-skipped when either template is absent, matching check 5's fixture tolerance.
 const CARD_MOMENTS = ["Commitment echo", "Perceived Effort", "Variable Reward", "Intent Mirror"];
-const DESIGN_TPL = "business/design/DESIGN.md";
-const EMOTIONAL_TPL = "business/product/experience/emotional-design/EMOTIONAL_DESIGN.md";
+const DESIGN_TPL = "workspace/business/design/DESIGN.md";
+const EMOTIONAL_TPL = "workspace/business/product/experience/emotional-design/EMOTIONAL_DESIGN.md";
 const designTplPath = path.join(skillRoot, DESIGN_TPL);
 const emotionalTplPath = path.join(skillRoot, EMOTIONAL_TPL);
 if (existsSync(designTplPath) && existsSync(emotionalTplPath)) {

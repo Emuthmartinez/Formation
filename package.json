@@ -77,7 +77,7 @@
     "validate:design-state": "tsx skill/b2c-mobile-business-launch/validation/business/design/validate-state.ts",
     "check:design-room": "tsx skill/b2c-mobile-business-launch/validation/business/design/check-design-room-contract.ts",
     "check:control-plane": "tsx skill/b2c-mobile-business-launch/validation/business/operations/check-control-plane-contract.ts",
-    "check:business-control-plane-workspace": "tsx skill/b2c-mobile-business-launch/tooling/render-business-control-plane-workspace.ts --root skill/b2c-mobile-business-launch/business --out ../state/workspace.generated.json --check",
+    "check:business-control-plane-workspace": "tsx skill/b2c-mobile-business-launch/tooling/render-business-control-plane-workspace.ts --root skill/b2c-mobile-business-launch/workspace/business --business-state ../../studio/seed/business.json --out ../../studio/seed/workspace.generated.json --check",
     "check:provider-proof": "tsx skill/b2c-mobile-business-launch/validation/business/data/check-live-provider-proof.ts",
     "check:artifact-templates": "tsx skill/b2c-mobile-business-launch/validation/business/process/check-artifact-templates.ts",
     "check:app-archetype": "tsx skill/b2c-mobile-business-launch/validation/business/product/check-app-archetype.ts",

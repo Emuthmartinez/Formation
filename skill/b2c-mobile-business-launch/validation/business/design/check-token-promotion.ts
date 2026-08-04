@@ -38,13 +38,15 @@ if (loaded.tokens) {
             "error",
             "token_promotion.json_stale",
             "design/system/tokens.json hash does not match studio/seed/theme.tokens.json.",
-            "design/system/tokens.json",
+            "studio/generated/system/tokens.json",
           ),
         );
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      issues.push(issue("error", "token_promotion.json_invalid", `design/system/tokens.json is invalid JSON: ${message}`, "design/system/tokens.json"));
+      issues.push(
+        issue("error", "token_promotion.json_invalid", `design/system/tokens.json is invalid JSON: ${message}`, "studio/generated/system/tokens.json"),
+      );
     }
   }
 
@@ -109,7 +111,7 @@ if (loaded.tokens) {
           "error",
           "token_promotion.swift_stale",
           "DesignTokens.swift hash does not match studio/seed/theme.tokens.json.",
-          "design/system/DesignTokens.swift",
+          "studio/generated/system/DesignTokens.swift",
         ),
       );
     }
@@ -119,7 +121,7 @@ if (loaded.tokens) {
           "error",
           "token_promotion.swift_contract_missing",
           "DesignTokens.swift must expose DesignTokens and the current primary color.",
-          "design/system/DesignTokens.swift",
+          "studio/generated/system/DesignTokens.swift",
         ),
       );
     }
@@ -130,7 +132,7 @@ if (loaded.tokens) {
           "error",
           "token_promotion.celebrate_swift_invalid",
           "DesignTokens.swift must expose a positive DesignTokens.Motion.durationCelebrate — a zero value silently disables celebration motion.",
-          "design/system/DesignTokens.swift",
+          "studio/generated/system/DesignTokens.swift",
         ),
       );
     }
@@ -140,7 +142,7 @@ if (loaded.tokens) {
           "error",
           "token_promotion.swift_motion_missing",
           "DesignTokens.swift must expose a Motion enum so the shipped SwiftUI app shares the tokenized motion scale (durations/easing) with web surfaces.",
-          "design/system/DesignTokens.swift",
+          "studio/generated/system/DesignTokens.swift",
         ),
       );
     }

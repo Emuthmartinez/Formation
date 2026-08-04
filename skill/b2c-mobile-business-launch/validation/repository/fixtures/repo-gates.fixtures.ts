@@ -69,10 +69,11 @@ function writeParityPair(root: string, options: { rootVersion: string; skillVers
  */
 function writeNoSlopRoots(root: string, brandCopy: string): { fixtureSkillRoot: string; fixtureTemplates: string } {
   const fixtureSkillRoot = path.join(root, "skill");
-  mkdirSync(path.join(fixtureSkillRoot, "playbook", "words"), { recursive: true });
-  cpSync(path.join(skillRoot, "knowledge", "words", "no-slop-writing.md"), path.join(fixtureSkillRoot, "playbook", "words", "no-slop-writing.md"));
-  const fixtureTemplates = path.join(root, "business");
-  mkdirSync(fixtureTemplates, { recursive: true });
+  mkdirSync(path.join(fixtureSkillRoot, "knowledge", "words"), { recursive: true });
+  cpSync(path.join(skillRoot, "knowledge", "words", "no-slop-writing.md"), path.join(fixtureSkillRoot, "knowledge", "words", "no-slop-writing.md"));
+  const fixtureTemplates = path.join(root, "workspace", "business");
+  mkdirSync(path.join(fixtureTemplates, "strategy"), { recursive: true });
+  mkdirSync(path.join(fixtureTemplates, "product"), { recursive: true });
   writeFileSync(path.join(fixtureTemplates, "strategy/BRAND.md"), `# Brand\n\n${brandCopy}\n`, "utf8");
   return { fixtureSkillRoot, fixtureTemplates };
 }
@@ -103,10 +104,10 @@ export function register(h: Harness): void {
   const layoutRoot = (name: string, build: (root: string) => void): string => {
     const root = makeEmptyFixture(name);
     for (const domain of ["money", "process"]) {
-      mkdirSync(path.join(root, "playbook", domain), { recursive: true });
+      mkdirSync(path.join(root, "knowledge", domain), { recursive: true });
     }
-    mkdirSync(path.join(root, "gates", "money"), { recursive: true });
-    writeFileSync(path.join(root, "gates", "money", "check-revenue.ts"), "// stub\n", "utf8");
+    mkdirSync(path.join(root, "validation", "business", "money"), { recursive: true });
+    writeFileSync(path.join(root, "validation", "business", "money", "check-revenue.ts"), "// stub\n", "utf8");
     build(root);
     return root;
   };
@@ -115,7 +116,7 @@ export function register(h: Harness): void {
   runScriptArgs("gates layout passes when every gate nests in a real domain", "check-gates-layout.ts", ["--skill-root", layoutClean], 0);
 
   const layoutUngrouped = layoutRoot("gates-layout-ungrouped", (root) => {
-    writeFileSync(path.join(root, "gates", "check-stray.ts"), "// stub\n", "utf8");
+    writeFileSync(path.join(root, "validation", "business", "check-stray.ts"), "// stub\n", "utf8");
   });
   runScriptArgs(
     "gates layout fails on a gate left at the validation/business/ root",
@@ -126,8 +127,8 @@ export function register(h: Harness): void {
   );
 
   const layoutUnknownDomain = layoutRoot("gates-layout-unknown-domain", (root) => {
-    mkdirSync(path.join(root, "gates", "finance"), { recursive: true });
-    writeFileSync(path.join(root, "gates", "finance", "check-invoices.ts"), "// stub\n", "utf8");
+    mkdirSync(path.join(root, "validation", "business", "finance"), { recursive: true });
+    writeFileSync(path.join(root, "validation", "business", "finance", "check-invoices.ts"), "// stub\n", "utf8");
   });
   runScriptArgs(
     "gates layout fails on a folder that is not a playbook domain",
@@ -138,10 +139,10 @@ export function register(h: Harness): void {
   );
 
   const layoutDuplicate = layoutRoot("gates-layout-duplicate-basename", (root) => {
-    mkdirSync(path.join(root, "gates", "process"), { recursive: true });
+    mkdirSync(path.join(root, "validation", "business", "process"), { recursive: true });
     // Same basename as validation/business/money/check-revenue.ts — impossible under a flat
     // validation/business/, permitted by the filesystem once the domains are folders.
-    writeFileSync(path.join(root, "gates", "process", "check-revenue.ts"), "// stub\n", "utf8");
+    writeFileSync(path.join(root, "validation", "business", "process", "check-revenue.ts"), "// stub\n", "utf8");
   });
   runScriptArgs(
     "gates layout fails when two domains hold the same basename",
@@ -157,10 +158,10 @@ export function register(h: Harness): void {
   // Prose cannot stop the next compaction re-making that cut, so the trigger is
   // pinned as required_terms and proven failable here.
   const autopilotStripped = makeEmptyFixture("autopilot-runtime-routing-stripped");
-  mkdirSync(path.join(autopilotStripped, "machine", "evals", "triggering"), { recursive: true });
+  mkdirSync(path.join(autopilotStripped, "validation", "repository", "evals", "triggering"), { recursive: true });
   cpSync(
     path.join(skillRoot, "validation", "repository", "evals", "triggering", "autopilot-triggering.yaml"),
-    path.join(autopilotStripped, "machine", "evals", "triggering", "autopilot-triggering.yaml"),
+    path.join(autopilotStripped, "validation", "repository", "evals", "triggering", "autopilot-triggering.yaml"),
   );
   writeFileSync(
     path.join(autopilotStripped, "SKILL.md"),
@@ -327,10 +328,10 @@ export function register(h: Harness): void {
   // literal and fails on the gap.
   const parityAllowlist = makeEmptyFixture("package-parity-launchbench-allowlist-gap");
   const allowlistPair = writeParityPair(parityAllowlist, { rootVersion: "0.0.1", skillVersion: "0.0.1" });
-  mkdirSync(path.join(allowlistPair.parityScriptRoot, "scripts"), { recursive: true });
-  writeFileSync(path.join(allowlistPair.parityScriptRoot, "scripts", "validate-project-state.ts"), "// stub\n", "utf8");
+  mkdirSync(path.join(allowlistPair.parityScriptRoot, "tooling"), { recursive: true });
+  writeFileSync(path.join(allowlistPair.parityScriptRoot, "tooling", "validate-project-state.ts"), "// stub\n", "utf8");
   writeFileSync(
-    path.join(allowlistPair.parityScriptRoot, "scripts", "run-launchbench.ts"),
+    path.join(allowlistPair.parityScriptRoot, "tooling", "run-launchbench.ts"),
     'const knownValidators = new Set(["validate-project-state"]);\nexport { knownValidators };\n',
     "utf8",
   );
@@ -350,10 +351,10 @@ export function register(h: Harness): void {
   // is now an error in its own right and is proven to fail here.
   const parityUnparseable = makeEmptyFixture("package-parity-unparseable-validator-command");
   const unparseablePair = writeParityPair(parityUnparseable, { rootVersion: "0.0.1", skillVersion: "0.0.1" });
-  mkdirSync(path.join(unparseablePair.parityScriptRoot, "scripts"), { recursive: true });
-  writeFileSync(path.join(unparseablePair.parityScriptRoot, "scripts", "validate-project-state.ts"), "// stub\n", "utf8");
+  mkdirSync(path.join(unparseablePair.parityScriptRoot, "tooling"), { recursive: true });
+  writeFileSync(path.join(unparseablePair.parityScriptRoot, "tooling", "validate-project-state.ts"), "// stub\n", "utf8");
   writeFileSync(
-    path.join(unparseablePair.parityScriptRoot, "scripts", "run-launchbench.ts"),
+    path.join(unparseablePair.parityScriptRoot, "tooling", "run-launchbench.ts"),
     'const knownValidators = new Set(["validate-project-state"]);\nexport { knownValidators };\n',
     "utf8",
   );
@@ -373,10 +374,10 @@ export function register(h: Harness): void {
 
   // --- audit-skill-links ---
   const wireLinkRoot = (root: string): void => {
-    mkdirSync(path.join(root, "playbook"), { recursive: true });
-    mkdirSync(path.join(root, "business"), { recursive: true });
-    writeFileSync(path.join(root, "playbook", "guide.md"), "See [the template](../business/artifact.md) for the artifact contract.\n", "utf8");
-    writeFileSync(path.join(root, "business", "artifact.md"), "# Artifact\nRouted from references/guide.md — keep both sides linked.\n", "utf8");
+    mkdirSync(path.join(root, "knowledge"), { recursive: true });
+    mkdirSync(path.join(root, "workspace", "business"), { recursive: true });
+    writeFileSync(path.join(root, "knowledge", "guide.md"), "See [the template](../workspace/business/artifact.md) for the artifact contract.\n", "utf8");
+    writeFileSync(path.join(root, "workspace", "business", "artifact.md"), "# Artifact\nRouted from references/guide.md — keep both sides linked.\n", "utf8");
   };
 
   const linksClean = makeEmptyFixture("skill-links-clean");
@@ -385,30 +386,38 @@ export function register(h: Harness): void {
 
   const linksBroken = makeEmptyFixture("skill-links-broken");
   wireLinkRoot(linksBroken);
-  writeFileSync(path.join(linksBroken, "playbook", "guide.md"), "See [the template](../business/missing.md); artifact.md still routes.\n", "utf8");
+  writeFileSync(path.join(linksBroken, "knowledge", "guide.md"), "See [the template](../workspace/business/missing.md); artifact.md still routes.\n", "utf8");
   runScriptArgs("link audit fails on a broken local link", "audit-skill-links.ts", ["--skill-root", linksBroken], 1, "skill_links.broken_local_link");
 
   const linksOrphan = makeEmptyFixture("skill-links-orphan");
   wireLinkRoot(linksOrphan);
-  writeFileSync(path.join(linksOrphan, "playbook", "unrouted.md"), "No other file mentions this reference, so no agent can load it.\n", "utf8");
+  writeFileSync(path.join(linksOrphan, "knowledge", "unrouted.md"), "No other file mentions this reference, so no agent can load it.\n", "utf8");
   runScriptArgs("link audit fails on an orphaned reference file", "audit-skill-links.ts", ["--skill-root", linksOrphan], 1, "skill_links.orphan_file");
 
   // Regression (verification pass): a basename that is a substring of another
   // mentioned file's basename ("lane.md" inside "sub-lane.md") is not a mention.
   const linksSubstringOrphan = makeEmptyFixture("skill-links-substring-orphan");
   wireLinkRoot(linksSubstringOrphan);
-  writeFileSync(path.join(linksSubstringOrphan, "playbook", "lane.md"), "Nothing references this file by its own name.\n", "utf8");
-  writeFileSync(path.join(linksSubstringOrphan, "playbook", "guide.md"), "See [the template](../business/artifact.md); also read sub-lane.md notes.\n", "utf8");
-  writeFileSync(path.join(linksSubstringOrphan, "playbook", "sub-lane.md"), "Routed from references/guide.md.\n", "utf8");
+  writeFileSync(path.join(linksSubstringOrphan, "knowledge", "lane.md"), "Nothing references this file by its own name.\n", "utf8");
+  writeFileSync(
+    path.join(linksSubstringOrphan, "knowledge", "guide.md"),
+    "See [the template](../workspace/business/artifact.md); also read sub-lane.md notes.\n",
+    "utf8",
+  );
+  writeFileSync(path.join(linksSubstringOrphan, "knowledge", "sub-lane.md"), "Routed from references/guide.md.\n", "utf8");
   runScriptArgs("link audit flags a basename-substring orphan", "audit-skill-links.ts", ["--skill-root", linksSubstringOrphan], 1, "skill_links.orphan_file");
 
   const linksDuplicate = makeEmptyFixture("skill-links-duplicate");
   wireLinkRoot(linksDuplicate);
   const duplicateBody =
     "# Duplicate body\nThis exact content is shipped twice under business/, which will drift apart silently over time once one copy is edited and the other is forgotten.\n";
-  writeFileSync(path.join(linksDuplicate, "business", "copy-one.md"), duplicateBody, "utf8");
-  writeFileSync(path.join(linksDuplicate, "business", "copy-two.md"), duplicateBody, "utf8");
-  writeFileSync(path.join(linksDuplicate, "playbook", "guide.md"), "See [the template](../business/artifact.md), plus copy-one.md and copy-two.md.\n", "utf8");
+  writeFileSync(path.join(linksDuplicate, "workspace", "business", "copy-one.md"), duplicateBody, "utf8");
+  writeFileSync(path.join(linksDuplicate, "workspace", "business", "copy-two.md"), duplicateBody, "utf8");
+  writeFileSync(
+    path.join(linksDuplicate, "knowledge", "guide.md"),
+    "See [the template](../workspace/business/artifact.md), plus copy-one.md and copy-two.md.\n",
+    "utf8",
+  );
   runScriptArgs(
     "link audit fails on byte-identical template duplicates",
     "audit-skill-links.ts",
@@ -475,7 +484,15 @@ export function register(h: Harness): void {
   runScriptArgs(
     "workspace render check passes against the committed output",
     "render-business-control-plane-workspace.ts",
-    ["--root", path.join(skillRoot, "workspace", "business"), "--out", path.join(skillRoot, "studio", "seed", "workspace.generated.json"), "--check"],
+    [
+      "--root",
+      path.join(skillRoot, "workspace", "business"),
+      "--business-state",
+      "../../studio/seed/business.json",
+      "--out",
+      path.join(skillRoot, "studio", "seed", "workspace.generated.json"),
+      "--check",
+    ],
     0,
   );
 
@@ -614,9 +631,9 @@ export function register(h: Harness): void {
   // Beats defined but never rendered was the original miss — a skill root
   // whose renderer lacks the celebration wiring must fail.
   const founderCopyUnwired = makeEmptyFixture("founder-copy-celebration-unwired");
-  mkdirSync(path.join(founderCopyUnwired, "skill", "scripts", "lib"), { recursive: true });
-  cpSync(path.join(skillRoot, "tooling", "lib", "founder-copy.ts"), path.join(founderCopyUnwired, "skill", "scripts", "lib", "founder-copy.ts"));
-  writeFileSync(path.join(founderCopyUnwired, "skill", "scripts", "render-launch-cockpit.ts"), "// stub renderer with no beat wiring\n", "utf8");
+  mkdirSync(path.join(founderCopyUnwired, "skill", "tooling", "lib"), { recursive: true });
+  cpSync(path.join(skillRoot, "tooling", "lib", "founder-copy.ts"), path.join(founderCopyUnwired, "skill", "tooling", "lib", "founder-copy.ts"));
+  writeFileSync(path.join(founderCopyUnwired, "skill", "tooling", "render-launch-cockpit.ts"), "// stub renderer with no beat wiring\n", "utf8");
   runScriptArgs(
     "renderer without celebration wiring fails founder copy",
     "check-founder-copy.ts",
@@ -636,17 +653,17 @@ export function register(h: Harness): void {
   function makeCardSkillRoot(name: string, stubs: { file: string; heading: string; tier: string }[], dictionary?: string): string {
     const root = makeEmptyFixture(name);
     const skill = path.join(root, "skill");
-    mkdirSync(path.join(skill, "scripts", "lib"), { recursive: true });
-    mkdirSync(path.join(skill, "playbook", "experience", "experience-cards"), { recursive: true });
+    mkdirSync(path.join(skill, "tooling", "lib"), { recursive: true });
+    mkdirSync(path.join(skill, "knowledge", "experience", "experience-cards"), { recursive: true });
     writeFileSync(
-      path.join(skill, "scripts", "lib", "founder-copy.ts"),
+      path.join(skill, "tooling", "lib", "founder-copy.ts"),
       dictionary ?? readFileSync(path.join(skillRoot, "tooling", "lib", "founder-copy.ts"), "utf8"),
       "utf8",
     );
-    cpSync(path.join(skillRoot, "tooling", "render-launch-cockpit.ts"), path.join(skill, "scripts", "render-launch-cockpit.ts"));
+    cpSync(path.join(skillRoot, "tooling", "render-launch-cockpit.ts"), path.join(skill, "tooling", "render-launch-cockpit.ts"));
     for (const stub of stubs) {
       writeFileSync(
-        path.join(skill, "playbook", "experience", "experience-cards", stub.file),
+        path.join(skill, "knowledge", "experience", "experience-cards", stub.file),
         [`# ${stub.heading} Card`, "", `**Risk tier.** ${stub.tier} — canonical in the routing table.`, ""].join("\n"),
         "utf8",
       );
@@ -762,18 +779,18 @@ export function register(h: Harness): void {
   const motionContractFiles = [
     "knowledge/design/motion-craft-benchmarks.md",
     "knowledge/design/premium-mobile-craft.md",
-    "design/system/tokens.json",
-    "design/system/DesignTokens.swift",
-    "business/design/system/tokens.json",
-    "business/design/system/DesignTokens.swift",
-    "business/design/system/PremiumCraft.swift",
+    "studio/generated/system/tokens.json",
+    "studio/generated/system/DesignTokens.swift",
+    "workspace/business/design/system/tokens.json",
+    "workspace/business/design/system/DesignTokens.swift",
+    "workspace/business/design/system/PremiumCraft.swift",
     "knowledge/experience/experience-cards/peak-end-card.md",
     "knowledge/experience/experience-cards/mastery-and-status-card.md",
     "knowledge/experience/experience-cards/variable-reward-card.md",
-    "business/design/DESIGN.md",
-    "business/product/experience/emotional-design/EMOTIONAL_DESIGN.md",
-    "business/design/motion-catalog/TokenSpring.swift",
-    "business/design/motion-catalog/motion-tokens.ts",
+    "workspace/business/design/DESIGN.md",
+    "workspace/business/product/experience/emotional-design/EMOTIONAL_DESIGN.md",
+    "workspace/business/design/motion-catalog/TokenSpring.swift",
+    "workspace/business/design/motion-catalog/motion-tokens.ts",
   ];
   const writeMotionContractRoot = (name: string, mutate?: (rel: string, text: string) => string): string => {
     const root = makeEmptyFixture(name);
@@ -1031,7 +1048,7 @@ export function register(h: Harness): void {
   );
 
   const motionCardMomentDrift = writeMotionContractRoot("motion-contract-card-moment-drift", (rel, text) =>
-    rel.endsWith("business/design/DESIGN.md")
+    rel.endsWith("workspace/business/design/DESIGN.md")
       ? text.replace("| Intent Mirror entrance | `motion.durationReveal` |", "| Intent Mirror entrance | `motion.durationSlow` |")
       : text,
   );
@@ -1095,7 +1112,7 @@ export function register(h: Harness): void {
   );
 
   const motionTemplateDrift = writeMotionContractRoot("motion-contract-template-token-drift", (rel, text) =>
-    rel === "business/design/system/tokens.json" ? text.replace('"durationBase": "220ms"', '"durationBase": "240ms"') : text,
+    rel === "workspace/business/design/system/tokens.json" ? text.replace('"durationBase": "220ms"', '"durationBase": "240ms"') : text,
   );
   runScriptArgs(
     "motion contract fails when the template token copy drifts from the top-level artifact",

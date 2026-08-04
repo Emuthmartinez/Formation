@@ -163,14 +163,14 @@ export function register(h: Harness): void {
   // Nested worktrees are excluded from the scan.
   const sourceRegistryWorktree = makeEmptyFixture("source-registry-worktree-copy");
   writeSourceRegistryFixture(sourceRegistryWorktree);
-  mkdirSync(path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "playbook"), { recursive: true });
+  mkdirSync(path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "knowledge"), { recursive: true });
   // Assembled from parts for the same reason as above: the worktree copy must
   // carry a full unregistered URL while THIS file stays invisible to the
   // repo-level registry scan. The fixture only passes because nested worktrees
   // are excluded.
   const worktreeUrl = ["https:/", "/worktree-drift.example.dev/design-visual-system"].join("");
   writeFileSync(
-    path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "playbook", "design-visual-system.md"),
+    path.join(sourceRegistryWorktree, ".claude", "worktrees", "other-agent", "knowledge", "design-visual-system.md"),
     `# Visual System Swipe File\n\nSource: ${worktreeUrl}\n`,
     "utf8",
   );

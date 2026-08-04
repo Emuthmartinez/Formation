@@ -162,9 +162,9 @@ export function register(h: Harness): void {
   // describe credential handling. These two fixtures pin the exemption to a name
   // that exists and prove it is still scoped rather than blanket.
   const extractionPlaybook = makeFixture("credential-extraction-playbook-exempt");
-  mkdirSync(path.join(extractionPlaybook, "playbook", "operations"), { recursive: true });
+  mkdirSync(path.join(extractionPlaybook, "knowledge", "operations"), { recursive: true });
   writeFileSync(
-    path.join(extractionPlaybook, "playbook", "operations", "secrets-management.md"),
+    path.join(extractionPlaybook, "knowledge", "operations", "secrets-management.md"),
     ["# Secrets management", "", "Never do this:", "", "VAR=$(awk -F= '/^ASC_ISSUER=/{print $2}' /path/to/file.env)", ""].join("\n"),
     "utf8",
   );

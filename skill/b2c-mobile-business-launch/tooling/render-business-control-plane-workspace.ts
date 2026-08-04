@@ -108,7 +108,7 @@ const pairSources =
   args.businessDirs.length > 0
     ? args.businessDirs.map((dir) => ({
         root: dir,
-        businessStatePath: resolveFrom(dir, "studio/seed/business.json"),
+        businessStatePath: resolveFrom(dir, "state/business.json"),
         launchStatePath: resolveFrom(dir, "state/PROJECT_STATE.yaml"),
       }))
     : [{ root: args.root, businessStatePath: args.businessStatePath, launchStatePath: args.launchStatePath }];
@@ -194,7 +194,7 @@ function parseArgs(argv: string[]): Args {
     { flags: ["--check"], key: "check", kind: "boolean" },
   ]);
   const root = flagString(flags, "root") ?? process.cwd();
-  const businessStatePath = flagString(flags, "businessState") ?? "studio/seed/business.json";
+  const businessStatePath = flagString(flags, "businessState") ?? "state/business.json";
   const launchStatePath = flagString(flags, "launchState") ?? "state/PROJECT_STATE.yaml";
   const schemaPath = flagString(flags, "schema") ?? path.join(skillRoot, "studio/seed/schema/workspace.schema.json");
   const outputPath = flagString(flags, "output");

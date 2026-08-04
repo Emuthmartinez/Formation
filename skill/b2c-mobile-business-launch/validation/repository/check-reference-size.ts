@@ -107,7 +107,7 @@ const presentRoots = KNOWLEDGE_ROOTS.map((name) => ({ name, dir: path.join(args.
 
 if (presentRoots.length === 0) {
   issues.push(
-    issue("error", "reference_size.dir_missing", `No knowledge roots found; expected ${KNOWLEDGE_ROOTS.join(" and ")} under ${args.skillRoot}.`, "playbook"),
+    issue("error", "reference_size.dir_missing", `No knowledge roots found; expected ${KNOWLEDGE_ROOTS.join(" and ")} under ${args.skillRoot}.`, "knowledge"),
   );
 }
 

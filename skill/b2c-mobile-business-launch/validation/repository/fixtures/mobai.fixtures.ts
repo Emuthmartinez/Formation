@@ -8,9 +8,9 @@ export function register(h: Harness): void {
   runScriptArgs("MobAI 2.5 stored contract passes", "check-mobai-proof.ts", ["--skill-root", skillRoot, "--contract-only"], 0);
 
   const staleContract = makeEmptyFixture("mobai-stale-version-command");
-  mkdirSync(path.join(staleContract, "playbook", "engineering"), { recursive: true });
+  mkdirSync(path.join(staleContract, "knowledge", "engineering"), { recursive: true });
   writeFileSync(
-    path.join(staleContract, "playbook", "engineering", "mobai-toolbelt.md"),
+    path.join(staleContract, "knowledge", "engineering", "mobai-toolbelt.md"),
     readFileSync(path.join(skillRoot, "knowledge", "engineering", "mobai-toolbelt.md"), "utf8"),
     "utf8",
   );

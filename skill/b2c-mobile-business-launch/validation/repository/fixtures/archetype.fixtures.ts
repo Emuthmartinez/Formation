@@ -50,13 +50,13 @@ export function register(h: Harness): void {
   runScriptArgs("references within context budget pass", "check-reference-size.ts", ["--skill-root", skillRoot], 0);
 
   const oversizedRef = makeEmptyFixture("reference-size-over-budget");
-  mkdirSync(path.join(oversizedRef, "playbook"), { recursive: true });
-  writeFileSync(path.join(oversizedRef, "playbook", "huge-lane.md"), `# Huge\n${"x".repeat(70 * 1024)}\n`, "utf8");
+  mkdirSync(path.join(oversizedRef, "knowledge"), { recursive: true });
+  writeFileSync(path.join(oversizedRef, "knowledge", "huge-lane.md"), `# Huge\n${"x".repeat(70 * 1024)}\n`, "utf8");
   runScriptArgs("oversized reference fails the context budget", "check-reference-size.ts", ["--skill-root", oversizedRef], 1, "reference_size.over_budget");
 
   const oversizedEntrypoint = makeEmptyFixture("entrypoint-size-over-budget");
-  mkdirSync(path.join(oversizedEntrypoint, "playbook"), { recursive: true });
-  writeFileSync(path.join(oversizedEntrypoint, "playbook", "small.md"), "# Small\nWithin budget.\n", "utf8");
+  mkdirSync(path.join(oversizedEntrypoint, "knowledge"), { recursive: true });
+  writeFileSync(path.join(oversizedEntrypoint, "knowledge", "small.md"), "# Small\nWithin budget.\n", "utf8");
   writeFileSync(path.join(oversizedEntrypoint, "SKILL.md"), `---\nname: fixture\n---\n${"x".repeat(70 * 1024)}\n`, "utf8");
   runScriptArgs(
     "oversized SKILL.md fails the entrypoint budget",
@@ -69,27 +69,27 @@ export function register(h: Harness): void {
   // A split reference is only useful if its index still routes to every topic
   // file, so each way that contract can rot gets a failing fixture.
   const unindexedSplit = makeEmptyFixture("reference-size-split-without-index");
-  mkdirSync(path.join(unindexedSplit, "playbook", "orphan-lane"), { recursive: true });
+  mkdirSync(path.join(unindexedSplit, "knowledge", "orphan-lane"), { recursive: true });
   writeFileSync(path.join(unindexedSplit, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
-  writeFileSync(path.join(unindexedSplit, "playbook", "orphan-lane", "one.md"), "# One\nBody.\n", "utf8");
+  writeFileSync(path.join(unindexedSplit, "knowledge", "orphan-lane", "one.md"), "# One\nBody.\n", "utf8");
   runScriptArgs("split reference without an index fails", "check-reference-size.ts", ["--skill-root", unindexedSplit], 1, "reference_size.index_missing");
 
   const incompleteSplit = makeEmptyFixture("reference-size-index-incomplete");
-  mkdirSync(path.join(incompleteSplit, "playbook", "lane"), { recursive: true });
+  mkdirSync(path.join(incompleteSplit, "knowledge", "lane"), { recursive: true });
   writeFileSync(path.join(incompleteSplit, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
-  writeFileSync(path.join(incompleteSplit, "playbook", "lane.md"), "# Lane\n[one](lane/one.md)\n", "utf8");
-  writeFileSync(path.join(incompleteSplit, "playbook", "lane", "one.md"), "# One\nBody.\n", "utf8");
-  writeFileSync(path.join(incompleteSplit, "playbook", "lane", "two.md"), "# Two\nUnreachable.\n", "utf8");
+  writeFileSync(path.join(incompleteSplit, "knowledge", "lane.md"), "# Lane\n[one](lane/one.md)\n", "utf8");
+  writeFileSync(path.join(incompleteSplit, "knowledge", "lane", "one.md"), "# One\nBody.\n", "utf8");
+  writeFileSync(path.join(incompleteSplit, "knowledge", "lane", "two.md"), "# Two\nUnreachable.\n", "utf8");
   runScriptArgs("index that misses a topic file fails", "check-reference-size.ts", ["--skill-root", incompleteSplit], 1, "reference_size.index_incomplete");
 
   // A bare mention reads as routed to a human but is not followable, so the
   // gate must require a real link rather than a substring hit.
   const mentionOnlySplit = makeEmptyFixture("reference-size-index-mention-only");
-  mkdirSync(path.join(mentionOnlySplit, "playbook", "lane"), { recursive: true });
+  mkdirSync(path.join(mentionOnlySplit, "knowledge", "lane"), { recursive: true });
   writeFileSync(path.join(mentionOnlySplit, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
-  writeFileSync(path.join(mentionOnlySplit, "playbook", "lane.md"), "# Lane\n[one](lane/one.md)\nRouting for `lane/two.md` is still to be written.\n", "utf8");
-  writeFileSync(path.join(mentionOnlySplit, "playbook", "lane", "one.md"), "# One\nBody.\n", "utf8");
-  writeFileSync(path.join(mentionOnlySplit, "playbook", "lane", "two.md"), "# Two\nMentioned but never linked.\n", "utf8");
+  writeFileSync(path.join(mentionOnlySplit, "knowledge", "lane.md"), "# Lane\n[one](lane/one.md)\nRouting for `lane/two.md` is still to be written.\n", "utf8");
+  writeFileSync(path.join(mentionOnlySplit, "knowledge", "lane", "one.md"), "# One\nBody.\n", "utf8");
+  writeFileSync(path.join(mentionOnlySplit, "knowledge", "lane", "two.md"), "# Two\nMentioned but never linked.\n", "utf8");
   runScriptArgs(
     "topic file mentioned in prose but never linked fails",
     "check-reference-size.ts",
@@ -99,10 +99,10 @@ export function register(h: Harness): void {
   );
 
   const danglingSplit = makeEmptyFixture("reference-size-index-dangling");
-  mkdirSync(path.join(danglingSplit, "playbook", "lane"), { recursive: true });
+  mkdirSync(path.join(danglingSplit, "knowledge", "lane"), { recursive: true });
   writeFileSync(path.join(danglingSplit, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
-  writeFileSync(path.join(danglingSplit, "playbook", "lane.md"), "# Lane\n[one](lane/one.md)\n[gone](lane/gone.md)\n", "utf8");
-  writeFileSync(path.join(danglingSplit, "playbook", "lane", "one.md"), "# One\nBody.\n", "utf8");
+  writeFileSync(path.join(danglingSplit, "knowledge", "lane.md"), "# Lane\n[one](lane/one.md)\n[gone](lane/gone.md)\n", "utf8");
+  writeFileSync(path.join(danglingSplit, "knowledge", "lane", "one.md"), "# One\nBody.\n", "utf8");
   runScriptArgs(
     "index routing to a missing topic file fails",
     "check-reference-size.ts",

@@ -2799,9 +2799,9 @@
         "workflow.design.design-room-state-mutate-version-render"
       ],
       "outputPaths": [
-        "design/system/tokens.json",
+        "studio/generated/system/tokens.json",
         "design/system/tokens.css",
-        "design/system/DesignTokens.swift"
+        "studio/generated/system/DesignTokens.swift"
       ],
       "gateCommands": [
         "check:token-promotion"
@@ -4253,26 +4253,8 @@
       "generated": false
     },
     {
-      "id": "artifact.design-system-designtokens-swift",
-      "path": "design/system/DesignTokens.swift",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.design"
-      ],
-      "generated": false
-    },
-    {
       "id": "artifact.design-system-tokens-css",
       "path": "design/system/tokens.css",
-      "ownerDomainId": "domain.design",
-      "laneIds": [
-        "lane.design"
-      ],
-      "generated": false
-    },
-    {
-      "id": "artifact.design-system-tokens-json",
-      "path": "design/system/tokens.json",
       "ownerDomainId": "domain.design",
       "laneIds": [
         "lane.design"
@@ -4853,6 +4835,24 @@
         "lane.paid-tool-routing"
       ],
       "generated": false
+    },
+    {
+      "id": "artifact.studio-generated-system-designtokens-swift",
+      "path": "studio/generated/system/DesignTokens.swift",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.design"
+      ],
+      "generated": true
+    },
+    {
+      "id": "artifact.studio-generated-system-tokens-json",
+      "path": "studio/generated/system/tokens.json",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "lane.design"
+      ],
+      "generated": true
     },
     {
       "id": "artifact.studio-seed-business-json",

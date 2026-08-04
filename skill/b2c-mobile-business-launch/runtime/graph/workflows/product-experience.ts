@@ -100,7 +100,7 @@ export const workflows = [
     laneIds: ["lane.design"],
     phaseIds: ["phase.2"],
     dependencies: ["workflow.design.design-room-state-mutate-version-render"],
-    outputPaths: ["design/system/tokens.json", "design/system/tokens.css", "design/system/DesignTokens.swift"],
+    outputPaths: ["studio/generated/system/tokens.json", "design/system/tokens.css", "studio/generated/system/DesignTokens.swift"],
     gates: ["check:token-promotion"],
     operators: ["operator.design-guru"],
   }),

@@ -758,8 +758,8 @@ if (root === path.join(skillRoot, "workspace", "business")) {
       issue(
         "error",
         "app_copy.deck_template_missing",
-        "business/product/copy/COPY_DECK.md is missing — the deck contract has no starting artifact.",
-        "business/product/copy/COPY_DECK.md",
+        "workspace/business/product/copy/COPY_DECK.md is missing — the deck contract has no starting artifact.",
+        "workspace/business/product/copy/COPY_DECK.md",
       ),
     );
   } else {
@@ -768,8 +768,8 @@ if (root === path.join(skillRoot, "workspace", "business")) {
         issue(
           "error",
           "app_copy.deck_template_status",
-          "business/product/copy/COPY_DECK.md must declare 'Status: template' — the shipped deck is example voice, and the status line is what exempts it from cell rules.",
-          "business/product/copy/COPY_DECK.md",
+          "workspace/business/product/copy/COPY_DECK.md must declare 'Status: template' — the shipped deck is example voice, and the status line is what exempts it from cell rules.",
+          "workspace/business/product/copy/COPY_DECK.md",
         ),
       );
     }
@@ -790,7 +790,7 @@ if (root === path.join(skillRoot, "workspace", "business")) {
           "error",
           "app_copy.deck_template_thin",
           `business/product/copy/COPY_DECK.md has ${rows.length} example rows; the template demonstrates the full surface set (expected at least 20 across onboarding, paywall, core loop, empty states, errors, settings).`,
-          "business/product/copy/COPY_DECK.md",
+          "workspace/business/product/copy/COPY_DECK.md",
         ),
       );
     }
@@ -812,8 +812,8 @@ if (root === path.join(skillRoot, "workspace", "business")) {
       issue(
         "error",
         "app_copy.brief_template_missing",
-        "business/product/copy/COPY_BRIEF.md is missing — conversion-copy.md requires the brief and the skill ships its starting artifact.",
-        "business/product/copy/COPY_BRIEF.md",
+        "workspace/business/product/copy/COPY_BRIEF.md is missing — conversion-copy.md requires the brief and the skill ships its starting artifact.",
+        "workspace/business/product/copy/COPY_BRIEF.md",
       ),
     );
   }

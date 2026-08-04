@@ -1002,7 +1002,7 @@ experience_card:
 
   const emotionalTierMismatch = makeFixture("emotional-risk-tier-mismatch");
   {
-    const refDir = path.join(emotionalTierMismatch, "playbook", "experience");
+    const refDir = path.join(emotionalTierMismatch, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1035,7 +1035,7 @@ experience_card:
 
   const emotionalTierConflict = makeFixture("emotional-risk-tier-conflict");
   {
-    const refDir = path.join(emotionalTierConflict, "playbook", "experience");
+    const refDir = path.join(emotionalTierConflict, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1058,7 +1058,7 @@ experience_card:
 
   const emotionalTierDuplicate = makeFixture("emotional-risk-tier-duplicate");
   {
-    const refDir = path.join(emotionalTierDuplicate, "playbook", "experience");
+    const refDir = path.join(emotionalTierDuplicate, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1081,7 +1081,7 @@ experience_card:
 
   const emotionalTierTypo = makeFixture("emotional-risk-tier-typo");
   {
-    const refDir = path.join(emotionalTierTypo, "playbook", "experience");
+    const refDir = path.join(emotionalTierTypo, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1104,7 +1104,7 @@ experience_card:
   // A blank line mid-table must not silently drop the rows below it from parity.
   const emotionalTierInterrupted = makeFixture("emotional-risk-tier-interrupted");
   {
-    const refDir = path.join(emotionalTierInterrupted, "playbook", "experience");
+    const refDir = path.join(emotionalTierInterrupted, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1129,7 +1129,7 @@ experience_card:
   // A placeholder tier is legitimate only on the motion-fallback row.
   const emotionalTierPlaceholderAbuse = makeFixture("emotional-risk-tier-placeholder-abuse");
   {
-    const refDir = path.join(emotionalTierPlaceholderAbuse, "playbook", "experience");
+    const refDir = path.join(emotionalTierPlaceholderAbuse, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1153,7 +1153,7 @@ experience_card:
   // permissive full range by min/max.
   const emotionalTierDescendingRange = makeFixture("emotional-risk-tier-descending-range");
   {
-    const refDir = path.join(emotionalTierDescendingRange, "playbook", "experience");
+    const refDir = path.join(emotionalTierDescendingRange, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1177,7 +1177,7 @@ experience_card:
   // name — the word "motion" inside an unrelated row name earns no exemption.
   const emotionalTierMotionWordAbuse = makeFixture("emotional-risk-tier-motion-word-abuse");
   {
-    const refDir = path.join(emotionalTierMotionWordAbuse, "playbook", "experience");
+    const refDir = path.join(emotionalTierMotionWordAbuse, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1198,7 +1198,7 @@ experience_card:
   // Equal-tier duplicates across bucket rows are still duplicate assignments.
   const emotionalTierBucketDuplicate = makeFixture("emotional-risk-tier-bucket-duplicate");
   {
-    const refDir = path.join(emotionalTierBucketDuplicate, "playbook", "experience");
+    const refDir = path.join(emotionalTierBucketDuplicate, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1222,7 +1222,7 @@ experience_card:
   // An explicit row may narrow a bucket range but must not contradict it.
   const emotionalTierBucketConflict = makeFixture("emotional-risk-tier-bucket-conflict");
   {
-    const refDir = path.join(emotionalTierBucketConflict, "playbook", "experience");
+    const refDir = path.join(emotionalTierBucketConflict, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1246,7 +1246,7 @@ experience_card:
   // A row that lost its leading pipe is a broken row, not prose.
   const emotionalTierBrokenRow = makeFixture("emotional-risk-tier-broken-row");
   {
-    const refDir = path.join(emotionalTierBrokenRow, "playbook", "experience");
+    const refDir = path.join(emotionalTierBrokenRow, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1270,7 +1270,7 @@ experience_card:
   // An ordered range spans its intermediate tiers: LOW-HIGH admits MEDIUM.
   const emotionalTierRangeSpan = makeFixture("emotional-risk-tier-range-span");
   {
-    const refDir = path.join(emotionalTierRangeSpan, "playbook", "experience");
+    const refDir = path.join(emotionalTierRangeSpan, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1307,7 +1307,7 @@ experience_card:
   // "Emotional Commitment" contains "motion" only as a substring — no placeholder pass.
   const emotionalTierMotionSubstring = makeFixture("emotional-risk-tier-motion-substring");
   {
-    const refDir = path.join(emotionalTierMotionSubstring, "playbook", "experience");
+    const refDir = path.join(emotionalTierMotionSubstring, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1328,7 +1328,7 @@ experience_card:
   // A misspelled index card name must not silently skip parity.
   const emotionalTierNameDrift = makeFixture("emotional-risk-tier-name-drift");
   {
-    const refDir = path.join(emotionalTierNameDrift, "playbook", "experience");
+    const refDir = path.join(emotionalTierNameDrift, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1362,7 +1362,7 @@ experience_card:
   // A truncated index name cannot inherit a canonical tier by prefix.
   const emotionalTierTruncatedName = makeFixture("emotional-risk-tier-truncated-name");
   {
-    const refDir = path.join(emotionalTierTruncatedName, "playbook", "experience");
+    const refDir = path.join(emotionalTierTruncatedName, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1396,7 +1396,7 @@ experience_card:
   // Deleting canonical cards from the index must not pass on the survivor.
   const emotionalTierIndexTruncated = makeFixture("emotional-risk-tier-index-truncated");
   {
-    const refDir = path.join(emotionalTierIndexTruncated, "playbook", "experience");
+    const refDir = path.join(emotionalTierIndexTruncated, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1431,7 +1431,7 @@ experience_card:
   // The routing index must not retain two Risk values for one card.
   const emotionalTierIndexDuplicate = makeFixture("emotional-risk-tier-index-duplicate");
   {
-    const refDir = path.join(emotionalTierIndexDuplicate, "playbook", "experience");
+    const refDir = path.join(emotionalTierIndexDuplicate, "knowledge", "experience");
     mkdirSync(refDir, { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),
@@ -1472,7 +1472,7 @@ experience_card:
    */
   function writeCardDeck(name: string, indexRows: string[], stubs: { file: string; heading: string; tier: string }[]): string {
     const root = makeFixture(name);
-    const refDir = path.join(root, "playbook", "experience");
+    const refDir = path.join(root, "knowledge", "experience");
     mkdirSync(path.join(refDir, "experience-cards"), { recursive: true });
     writeFileSync(
       path.join(refDir, "ethics-guardrail.md"),

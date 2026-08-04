@@ -260,7 +260,7 @@ export function register(h: Harness): void {
   runFixture("control plane without agent operations panel fails", missingPanel, "check-control-plane-contract.ts", 1, "control_plane.agent-ops.missing");
 
   const ascContract = makeEmptyFixture("asc-command-contract");
-  mkdirSync(path.join(ascContract, "playbook", "store"), { recursive: true });
+  mkdirSync(path.join(ascContract, "knowledge", "store"), { recursive: true });
   const currentAscCommands = [
     "asc apps view --id APP_ID",
     "asc status --app APP_ID",
@@ -270,9 +270,9 @@ export function register(h: Harness): void {
     "asc diff localizations --app APP_ID",
     "asc validate --app APP_ID --version VERSION_STRING or --version-id <VERSION_ID>",
   ].join("\n");
-  writeFileSync(path.join(ascContract, "playbook", "store", "app-store-connect-cli.md"), currentAscCommands, "utf8");
+  writeFileSync(path.join(ascContract, "knowledge", "store", "app-store-connect-cli.md"), currentAscCommands, "utf8");
   runScriptArgs("current ASC command contract passes", "check-asc-command-contract.ts", ["--skill-root", ascContract], 0);
-  writeFileSync(path.join(ascContract, "playbook", "store", "app-store-connect-cli.md"), `${currentAscCommands}\nasc apps get --id APP_ID\n`, "utf8");
+  writeFileSync(path.join(ascContract, "knowledge", "store", "app-store-connect-cli.md"), `${currentAscCommands}\nasc apps get --id APP_ID\n`, "utf8");
   runScriptArgs(
     "known-invalid ASC command fails",
     "check-asc-command-contract.ts",
