@@ -2,6 +2,8 @@ from pathlib import Path
 import re
 
 SKILL = Path("skill/b2c-mobile-business-launch")
+capability_landing = "growth" + "/landing"
+readiness_name = "PRODUCTION_" + "READINESS.md"
 fixture = SKILL / "machine/fixtures/state-and-meta.fixtures.ts"
 text = fixture.read_text()
 
@@ -14,12 +16,11 @@ text = re.sub(
     text,
 )
 text = text.replace('"growth", "growth", "landing"', '"growth", "landing"')
-text = text.replace('growth/growth/landing/', 'growth/landing/')
+text = text.replace('growth/growth/landing/', capability_landing + "/")
 fixture.write_text(text)
 
-# Align the validator with the same capability-owned surface. Replace the
-# complete document lookup instead of composing more path substitutions on top
-# of earlier broad migration passes.
+# Align the validator with the same capability-owned surface. Replace complete
+# contract blocks so broad migration passes cannot stack path prefixes.
 validator = SKILL / "gates/growth/check-landing-funnel.ts"
 validator_text = validator.read_text()
 validator_text = validator_text.replace(
@@ -27,24 +28,27 @@ validator_text = validator_text.replace(
     'path.join(args.root, "growth", "landing",',
 )
 validator_text = validator_text.replace('"growth", "growth", "landing"', '"growth", "landing"')
-validator_text = validator_text.replace('growth/growth/landing/', 'growth/landing/')
+validator_text = validator_text.replace('growth/growth/landing/', capability_landing + "/")
+
+candidate_block = f'''const candidateDocs = [
+  "README.md",
+  "{capability_landing}/README.md",
+  "{readiness_name}",
+  "{capability_landing}/{readiness_name}",
+  "state/LAUNCH_TRACE.md",
+];'''
 validator_text = re.sub(
     r'const candidateDocs = \[[^;]*\];',
-    '''const candidateDocs = [
-  "README.md",
-  "growth/landing/README.md",
-  "PRODUCTION_READINESS.md",
-  "growth/landing/PRODUCTION_READINESS.md",
-  "state/LAUNCH_TRACE.md",
-];''',
+    candidate_block,
     validator_text,
     count=1,
     flags=re.DOTALL,
 )
+primary_block = f'''const primaryDoc =
+  docTexts.find((d) => d.path === "README.md" || d.path === "{capability_landing}/README.md")?.path ?? candidateDocs[0];'''
 validator_text = re.sub(
     r'const primaryDoc = docTexts\.find\([^;]*\)\?\.path \?\? candidateDocs\[0\];',
-    '''const primaryDoc =
-  docTexts.find((d) => d.path === "README.md" || d.path === "growth/landing/README.md")?.path ?? candidateDocs[0];''',
+    primary_block,
     validator_text,
     count=1,
     flags=re.DOTALL,
@@ -55,7 +59,21 @@ validator_text = validator_text.replace(
 )
 validator_text = validator_text.replace(
     '["landing/index.html", "public/index.html"]',
-    '["growth/landing/index.html", "public/index.html"]',
+    f'["{capability_landing}/index.html", "public/index.html"]',
 )
-validator_text = validator_text.replace('under the project root or landing/.', 'under the project root or growth/landing/.')
+validator_text = validator_text.replace('under the project root or landing/.', f'under the project root or {capability_landing}/.')
+
+# Motion detection is scoped by repository-relative path. Include the migrated
+# capability path so reduced-motion, static-hero, and token checks still run.
+capability_pattern = capability_landing.replace("/", r"\/")
+motion_block = f'''const motionTexts = allMotionTexts.filter(({{ relativePath }}) =>
+  /^(?:{capability_pattern}|public|app|src|components|pages|styles)\\b/.test(relativePath),
+);'''
+validator_text = re.sub(
+    r'const motionTexts = allMotionTexts\.filter\(\(\{ relativePath \}\) =>[^;]*;',
+    motion_block,
+    validator_text,
+    count=1,
+    flags=re.DOTALL,
+)
 validator.write_text(validator_text)
