@@ -55,7 +55,7 @@ landing_gate.write_text(landing_text)
 state_fixture = SKILL / "machine" / "fixtures" / "state-and-meta.fixtures.ts"
 state_text = state_fixture.read_text()
 state_text = re.sub(
-    r'path\.join\((?P<root>\w+),\s*"(?:growth",\s*)?"landing"',
+    r'path\.join\((?P<root>[^,\n]+),\s*"landing"',
     r'path.join(\g<root>, "growth", "landing"',
     state_text,
 )
