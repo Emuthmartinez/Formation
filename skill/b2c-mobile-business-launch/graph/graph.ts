@@ -21,7 +21,7 @@ export function composeSkillGraph(skillRoot: string): SkillGraph {
   const discoveredArtifacts = discoverArtifacts(skillRoot, lanes, domains);
   const artifactsByPath = new Map(discoveredArtifacts.map((artifact) => [artifact.path, artifact]));
   for (const workflow of normalizedWorkflows) {
-    for (const artifactPath of workflow.artifactPaths) {
+    for (const artifactPath of workflow.outputPaths) {
       if (artifactsByPath.has(artifactPath)) continue;
       artifactsByPath.set(artifactPath, {
         id: graphId("artifact", artifactPath),

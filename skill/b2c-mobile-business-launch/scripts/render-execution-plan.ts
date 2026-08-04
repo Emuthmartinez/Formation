@@ -38,7 +38,7 @@ if (options.check) {
   mkdirSync(path.dirname(target), { recursive: true });
   writeFileSync(target, rendered);
   console.log(`Wrote runtime-neutral execution plan: ${target}`);
-  console.log(`${plan.nodes.length} node(s), ${batches.length} initial batch(es), compatibility edges ${plan.compatibility.legacyWorkflowEdges}.`);
+  console.log(`${plan.nodes.length} node(s), ${batches.length} initial batch(es), compatibility edges ${plan.catalog.dependencyEdges}.`);
 }
 
 function runtimeCapabilities(runtime: Options["runtime"]): RuntimeCapabilities {

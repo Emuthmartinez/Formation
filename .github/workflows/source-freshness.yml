@@ -9,55 +9,26 @@ on:
     - cron: "23 11 * * 1"
   workflow_dispatch:
 
+# Default to read-only; the weekly refresh job re-grants write scopes it needs.
 permissions:
   contents: read
 
 jobs:
   audit:
-    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' && github.actor != 'github-actions[bot]'
+    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: agent/graph-final-cleanup
-          fetch-depth: 0
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
           cache: npm
       - run: npm ci
       - run: npm ci --prefix skill/b2c-mobile-business-launch
-      - name: Apply graph-native catalog cutover
-        run: |
-          python3 scripts/cleanup-graph-catalog.py
-          python3 scripts/cleanup-graph-catalog-fixes.py
-          python3 - <<'PY'
-          from pathlib import Path
-
-          root = Path("skill/b2c-mobile-business-launch")
-          operator = root / "graph/operators.ts"
-          text = operator.read_text().replace('"accept compatibility migrations"', '"approve catalog schema changes"')
-          operator.write_text(text)
-          PY
-      - name: Remove migration scaffolding and superseded notes
-        run: |
-          rm -f .github/workflows/graph-final-cleanup.yml
-          rm -f scripts/cleanup-graph-catalog.py scripts/cleanup-graph-catalog-fixes.py
-          rm -f docs/brainstorms/graph-execution-adoption.md
-          git show origin/main:.github/workflows/source-freshness.yml > .github/workflows/source-freshness.yml
-      - run: npm run format --prefix skill/b2c-mobile-business-launch
-      - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
       - run: npm run audit:ci
       - run: npm pack --dry-run --json
-      - name: Commit final refactor
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add -A
-          git commit -m "refactor: complete graph-native catalog cutover"
-          git push origin HEAD:agent/graph-final-cleanup
 
   weekly-source-refresh:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -80,6 +51,8 @@ jobs:
       - name: Audit after refresh
         run: npm run audit:ci
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        # Surface the refresh output even when the post-refresh audit fails —
+        # seven scheduled runs failed with zero artifacts and nobody noticed.
         if: always()
         with:
           name: source-freshness-report
@@ -87,6 +60,10 @@ jobs:
             docs/source-freshness/SOURCE_REFRESH_REPORT.md
             docs/source-freshness/source-refresh.html
             docs/source-freshness/source-snapshots/current.json
+      # Source freshness tracks this third-party action:
+      # https://github.com/peter-evans/create-pull-request
+      # if: always() — a refresh whose audit fails must still land as a visible
+      # (red) PR for review, not vanish into a failed run log.
       - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         if: always()
         with:

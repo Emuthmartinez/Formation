@@ -13,7 +13,7 @@ The graph is not a graph database or long-running service. It is deterministic T
 
 `PROJECT_STATE.yaml` remains business truth. Workers do not mutate it directly during parallel execution. They return outputs, evidence, and proposed state patches; the orchestrator-owned reducer is the single writer to canonical state, the cockpit, git integration, and shared provider mutations.
 
-Paths are attributes. Stable graph IDs are identities. The compatibility compiler can bind current path-shaped workflow outputs while the catalogue migrates, but runtime edges and accepted versions use graph identities.
+Paths are attributes. Stable graph IDs are identities. Workflow dependencies and output contracts are native graph fields consumed directly by the compiler.
 
 ## Execution contract
 
@@ -51,6 +51,6 @@ Generated files under `graph/generated/` and generated blocks in `SKILL.md` and 
 
 ## Cutover rule
 
-The graph is the only normal dispatch source. Compatibility fields may be read while the 57 workflow contracts migrate, but they must not create a second scheduler. New orchestration behavior belongs in the compiler, run-state reducer, scheduler, verifier policy, or runtime adapters, not in another hand-authored task list or collision map.
+The graph is the only normal dispatch source. Workflow definitions, compiler output, run state, and evidence form one execution model without a compatibility scheduler. New orchestration behavior belongs in the compiler, run-state reducer, scheduler, verifier policy, or runtime adapters, not in another hand-authored task list or collision map.
 
 A manual emergency override must record an owner, dated reason, declared resources, proof requirement, and follow-up graph issue. It is an escape hatch, not an alternate workflow system.

@@ -82,9 +82,9 @@ export interface GraphExecutionPlan {
   compiledAt: string;
   nodes: CompiledRunNode[];
   artifactBindings: ArtifactBinding[];
-  compatibility: {
-    legacyWorkflowEdges: number;
-    inferredArtifactInputs: number;
+  catalog: {
+    dependencyEdges: number;
+    artifactInputs: number;
     sharedOutputArtifacts: ArtifactId[];
   };
 }
@@ -148,23 +148,23 @@ export function compileExecutionPlan(graph: SkillGraph, now = "1970-01-01T00:00:
   for (const workflow of graph.workflows) {
     outputsByWorkflow.set(
       workflow.id,
-      workflow.artifactPaths.map((path) => artifactsByPath.get(path)?.id).filter((id): id is ArtifactId => Boolean(id)),
+      workflow.outputPaths.map((path) => artifactsByPath.get(path)?.id).filter((id): id is ArtifactId => Boolean(id)),
     );
   }
 
   const runIdByWorkflow = new Map<WorkflowId, RunNodeId>(graph.workflows.map((workflow) => [workflow.id, toRunNodeId(workflow.id)]));
-  let inferredArtifactInputs = 0;
+  let artifactInputs = 0;
   const nodes = graph.workflows.map((workflow): CompiledRunNode => {
-    const inputs = unique(workflow.upstreamWorkflowIds.flatMap((upstreamId) => outputsByWorkflow.get(upstreamId) ?? []));
-    inferredArtifactInputs += inputs.length;
+    const inputs = unique(workflow.dependencies.flatMap((upstreamId) => outputsByWorkflow.get(upstreamId) ?? []));
+    artifactInputs += inputs.length;
     const outputs = outputsByWorkflow.get(workflow.id) ?? [];
     const gateIds = workflow.gateCommands.map((command) => graph.gates.find((gate) => gate.command === command)?.id).filter((id): id is GateId => Boolean(id));
     const judgment = workflow.domainId === "domain.research" || workflow.domainId === "domain.words" || workflow.domainId === "domain.design";
     const resources: ResourceClaim[] = [
-      ...workflow.artifactPaths.map((path) => ({ id: `resource.path.${normalizeResource(path)}`, mode: "exclusive" as const })),
+      ...workflow.outputPaths.map((path) => ({ id: `resource.path.${normalizeResource(path)}`, mode: "exclusive" as const })),
       ...workflow.providerIds.map((id) => ({ id: `resource.${id}`, mode: "exclusive" as const })),
     ];
-    if (workflow.artifactPaths.includes("PROJECT_STATE.yaml")) resources.push({ id: canonicalResources[0]!, mode: "exclusive" });
+    if (workflow.outputPaths.includes("PROJECT_STATE.yaml")) resources.push({ id: canonicalResources[0]!, mode: "exclusive" });
     if (workflow.founderOnlyActions.length > 0) resources.push({ id: "resource.founder.attention", mode: "exclusive" });
 
     return {
@@ -173,7 +173,7 @@ export function compileExecutionPlan(graph: SkillGraph, now = "1970-01-01T00:00:
       title: workflow.title,
       inputs,
       outputs,
-      dependencies: workflow.upstreamWorkflowIds.map((id) => runIdByWorkflow.get(id)!).filter(Boolean),
+      dependencies: workflow.dependencies.map((id) => runIdByWorkflow.get(id)!).filter(Boolean),
       statePredicates: workflow.laneIds.map((laneId) => ({ path: `lanes.${laneId.slice("lane.".length)}.status`, operator: "not_in", value: ["blocked"] })),
       approvals: workflow.founderOnlyActions.map((description, index) => ({ id: `${workflow.id}.approval.${index + 1}`, description })),
       resources: dedupeClaims(resources),
@@ -215,9 +215,9 @@ export function compileExecutionPlan(graph: SkillGraph, now = "1970-01-01T00:00:
     compiledAt: now,
     nodes,
     artifactBindings,
-    compatibility: {
-      legacyWorkflowEdges: graph.workflows.reduce((sum, workflow) => sum + workflow.upstreamWorkflowIds.length, 0),
-      inferredArtifactInputs,
+    catalog: {
+      dependencyEdges: graph.workflows.reduce((sum, workflow) => sum + workflow.dependencies.length, 0),
+      artifactInputs,
       sharedOutputArtifacts,
     },
   };

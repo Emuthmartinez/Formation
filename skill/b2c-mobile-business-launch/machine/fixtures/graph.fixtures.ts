@@ -7,9 +7,10 @@ export function register(harness: Harness): void {
   const baseline = composeSkillGraph(skillRoot);
   expectNoErrors(harness, "typed graph passes on shipped definitions", validateSkillGraph(baseline, skillRoot));
 
-  const withoutProof = clone(baseline);
-  withoutProof.workflows[0]!.proof = [];
-  expectIssue(harness, "typed graph rejects workflow without proof", withoutProof, "skill_graph.workflow.proof_missing");
+  const emptyContract = clone(baseline);
+  emptyContract.workflows[0]!.outputPaths = [];
+  emptyContract.workflows[0]!.gateCommands = [];
+  expectIssue(harness, "typed graph rejects workflow without outputs or gates", emptyContract, "skill_graph.workflow.contract_empty");
 
   const duplicateId = clone(baseline);
   duplicateId.domains[1]!.id = duplicateId.domains[0]!.id;
@@ -29,8 +30,8 @@ export function register(harness: Harness): void {
   expectIssue(harness, "typed graph rejects unregistered workflow gates", unknownGate, "skill_graph.workflow.unknown_gate");
 
   const workflowCycle = clone(baseline);
-  workflowCycle.workflows[0]!.upstreamWorkflowIds = [workflowCycle.workflows[1]!.id];
-  workflowCycle.workflows[1]!.upstreamWorkflowIds = [workflowCycle.workflows[0]!.id];
+  workflowCycle.workflows[0]!.dependencies = [workflowCycle.workflows[1]!.id];
+  workflowCycle.workflows[1]!.dependencies = [workflowCycle.workflows[0]!.id];
   expectIssue(harness, "typed graph rejects workflow cycles", workflowCycle, "skill_graph.workflow.cycle");
 
   const progressiveWithoutEntry = clone(baseline);
