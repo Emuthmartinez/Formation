@@ -14,11 +14,11 @@ Graph Execution v2 makes the typed graph executable without tying the skill to o
 - `scripts/render-execution-plan.ts` emits the same plan and initial dispatch batches for inline, Codex, or Claude runtimes.
 - `check:skill-graph` validates compiler determinism, runnable roots, resource naming, retries, dependency integrity, and fresh-context isolation.
 
-## Current compatibility boundary
+## Native catalog boundary
 
-The current 57 workflow contracts still declare `upstreamWorkflowIds` and path-shaped outputs. The compiler is the only compatibility reader: it binds paths to registered `ArtifactId` values and turns upstream outputs into explicit run-node inputs. Runtime code does not execute the prose task list or build a separate collision map.
+The workflow catalog now declares native `dependencies` and `outputPaths`. The compiler consumes those contracts directly, binds registered outputs to stable `ArtifactId` values, and derives explicit run-node inputs from dependency outputs. Runtime code does not execute prose task lists, infer legacy workflow IDs, or build a separate collision map.
 
-The remaining catalogue migration is mechanical rather than architectural: author explicit input identities and richer edge predicates on each workflow, compare them against compatibility inference, then delete the legacy fields after parity. The execution engine already uses the target semantics.
+Path bindings remain catalog metadata rather than execution identity. The runtime plan uses stable workflow and artifact identities, while current repository paths stay attached to their artifact definitions for reading, writing, and validation.
 
 ## Single-writer rule
 
@@ -47,10 +47,10 @@ An adapter may serialize work when a feature is unavailable. It may not weaken p
 - no downstream reuse after input invalidation
 - no provider or founder-gated action assumed idempotent
 
-## Next catalogue migration
+## Next contract enrichment
 
-1. Add authored `inputs`, typed predicates, and resource claims to workflow seeds.
-2. Compare authored contracts with compatibility inference in `check:skill-graph`.
-3. Resolve every mismatch explicitly.
-4. Remove `upstreamWorkflowIds` and workflow `artifactPaths` as execution inputs.
-5. Generate the orchestration preflight and founder-safe next action entirely from run state.
+1. Replace inferred artifact reads with authored stable input identities where a workflow needs stronger data-flow semantics.
+2. Add richer typed state predicates, decision prerequisites, and resource claims where dependency completion alone is insufficient.
+3. Compare authored contracts with compiler-derived behavior in `check:skill-graph` and resolve every mismatch explicitly.
+4. Generate orchestration preflight and founder-safe next actions entirely from durable run state.
+5. Keep path bindings on artifact definitions so repository moves do not change execution identity.
