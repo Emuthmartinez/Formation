@@ -34,6 +34,12 @@ jobs:
       - run: python3 scripts/finalize-repository-ia-contract-owners.py
       - run: python3 scripts/fix-numeric-capability-paths.py
       - run: python3 scripts/fix-landing-fixtures.py
+      - name: Verify landing migration
+        run: |
+          echo '--- fixture paths ---'
+          grep -nE 'landingInScopePass|withLandingSite|motionProseOnly|motionJsOnly|growth.*landing.*README|path\.join\(root' skill/b2c-mobile-business-launch/machine/fixtures/state-and-meta.fixtures.ts | head -n 120
+          echo '--- validator paths ---'
+          grep -nE 'candidateDocs|growth/landing|landingDir|tryFiles|hasLandingArtifacts' skill/b2c-mobile-business-launch/gates/growth/check-landing-funnel.ts | head -n 120
       - run: npm run format --prefix skill/b2c-mobile-business-launch
       - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
       - name: Promote canonical and business design tokens
