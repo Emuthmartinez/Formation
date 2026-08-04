@@ -103,6 +103,16 @@ text = re.sub(
 text = re.sub(r"[ \t]+\n", "\n", text)
 text = re.sub(r"\n{3,}", "\n\n", text)
 text = text.replace(
+    "launch, prepare, submit, market, design, version, baseline, operationalize, or have an agent run",
+    "launch, submit, market, design, or run",
+    1,
+)
+text = text.replace(
+    "from an idea, transcript, spec, early repo, or half-built app.",
+    "from an idea, spec, or repo.",
+    1,
+)
+text = text.replace(
     "Turn an app idea, transcript, spec, or half-built repo into a launchable business:",
     "Turn an app idea or repo into a launchable business:",
     1,
