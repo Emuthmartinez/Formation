@@ -69,22 +69,37 @@ jobs:
 
           fixture = skill / 'validation/repository/fixtures/repo-gates.fixtures.ts'
           text = fixture.read_text()
-          text = text.replace('business/studio/generated/system/', 'studio/generated/system/')
+          text = text.replace('"business/studio/generated/system/tokens.json"', '"studio/generated/system/tokens.json"')
+          text = text.replace('"business/studio/generated/system/DesignTokens.swift"', '"studio/generated/system/DesignTokens.swift"')
+          text = text.replace('"business", "studio/generated/system/tokens.json"', '"studio/generated/system/tokens.json"')
+          text = text.replace('"business", "studio/generated/system/DesignTokens.swift"', '"studio/generated/system/DesignTokens.swift"')
+          text = text.replace('"business", "studio", "generated", "system", "tokens.json"', '"studio", "generated", "system", "tokens.json"')
+          text = text.replace('"business", "studio", "generated", "system", "DesignTokens.swift"', '"studio", "generated", "system", "DesignTokens.swift"')
           text = text.replace('design/system/tokens.json', 'studio/generated/system/tokens.json')
           text = text.replace('design/system/DesignTokens.swift', 'studio/generated/system/DesignTokens.swift')
           fixture.write_text(text)
 
-          control_plane_script = (
+          root_package = Path('package.json')
+          data = json.loads(root_package.read_text())
+          data['scripts']['check:business-control-plane-workspace'] = (
+              'tsx skill/b2c-mobile-business-launch/tooling/render-business-control-plane-workspace.ts '
+              '--root skill/b2c-mobile-business-launch/workspace/business '
+              '--business-state state/business.json '
+              '--launch-state state/PROJECT_STATE.yaml '
+              '--schema skill/b2c-mobile-business-launch/studio/seed/schema/workspace.schema.json --check'
+          )
+          root_package.write_text(json.dumps(data, indent=2) + '\n')
+
+          runtime_package = skill / 'package.json'
+          data = json.loads(runtime_package.read_text())
+          data['scripts']['check:business-control-plane-workspace'] = (
               'tsx tooling/render-business-control-plane-workspace.ts '
               '--root workspace/business '
               '--business-state state/business.json '
               '--launch-state state/PROJECT_STATE.yaml '
               '--schema studio/seed/schema/workspace.schema.json --check'
           )
-          for package in [Path('package.json'), skill / 'package.json']:
-              data = json.loads(package.read_text())
-              data['scripts']['check:business-control-plane-workspace'] = control_plane_script
-              package.write_text(json.dumps(data, indent=2) + '\n')
+          runtime_package.write_text(json.dumps(data, indent=2) + '\n')
 
           entrypoint = skill / 'SKILL.md'
           lines = entrypoint.read_text().splitlines(keepends=True)
