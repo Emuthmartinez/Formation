@@ -83,6 +83,29 @@ fixture_text = helper_pattern.sub(
     fixture_text,
     count=1,
 )
+# Fixture mutations must target the capability-owned paths produced by the
+# migration, otherwise they leave the real artifact untouched and test the old
+# architecture by accident.
+fixture_text = re.sub(
+    r'path\.join\((?P<root>\w+), "app-store-listing"',
+    r'path.join(\g<root>, "store", "app-store-listing"',
+    fixture_text,
+)
+fixture_text = re.sub(
+    r'path\.join\((?P<root>\w+), "APP_STORE_LISTING\.md"\)',
+    r'path.join(\g<root>, "store", "APP_STORE_LISTING.md")',
+    fixture_text,
+)
+fixture_text = re.sub(
+    r'path\.join\((?P<root>\w+), "localization-market-research"',
+    r'path.join(\g<root>, "strategy", "research", "localization-market-research"',
+    fixture_text,
+)
+fixture_text = re.sub(
+    r'path\.join\((?P<root>\w+), "landing"',
+    r'path.join(\g<root>, "growth", "landing"',
+    fixture_text,
+)
 fixture_state.write_text(fixture_text)
 
 providers_fixture = SKILL / "machine/fixtures/providers-and-secrets.fixtures.ts"
@@ -125,6 +148,50 @@ design_text = re.sub(
     design_text,
 )
 design_fixture.write_text(design_text)
+
+# Growth content fixtures now live under growth/content-assets.
+content_fixture = SKILL / "machine/fixtures/growth.fixtures.ts"
+content_text = content_fixture.read_text()
+content_text = re.sub(
+    r'path\.join\((?P<root>\w+), "content-assets"',
+    r'path.join(\g<root>, "growth", "content-assets"',
+    content_text,
+)
+content_text = re.sub(
+    r'path\.join\((?P<root>\w+), "CONTENT_ASSETS\.md"\)',
+    r'path.join(\g<root>, "growth", "content-assets", "CONTENT_ASSETS.md")',
+    content_text,
+)
+content_fixture.write_text(content_text)
+
+# Store and trust fixtures assert stable issue codes, which include the new
+# capability-qualified artifact ids after migration.
+replace(
+    SKILL / "machine/fixtures/store.fixtures.ts",
+    {
+        'store_console.app_store_listing.markdown_missing': 'store_console.store_app_store_listing.markdown_missing',
+    },
+)
+replace(
+    SKILL / "machine/fixtures/core-artifacts.fixtures.ts",
+    {
+        'privacy_terms.privacy_md.placeholder_complete': 'privacy_terms.trust_privacy_md.placeholder_complete',
+        'privacy_terms.terms_md.placeholder_complete': 'privacy_terms.trust_terms_md.placeholder_complete',
+        'privacy_terms.terms_md.missing': 'privacy_terms.trust_terms_md.missing',
+    },
+)
+
+# The landing web pack is the one shipped template surface where motion/react is
+# permitted. Keep the fixture under the migrated growth/landing subtree so the
+# validator sees the intended exception.
+repo_fixture = SKILL / "machine/fixtures/repo-gates.fixtures.ts"
+repo_text = repo_fixture.read_text()
+repo_text = re.sub(
+    r'path\.join\((?P<root>\w+), "landing"',
+    r'path.join(\g<root>, "growth", "landing"',
+    repo_text,
+)
+repo_fixture.write_text(repo_text)
 
 for rel in [
     "scripts/promote-design-tokens.ts",
