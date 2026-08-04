@@ -64,7 +64,7 @@ export function workflow(seed: WorkflowSeed): WorkflowDefinition {
 }
 ''')
 
-for relative in ("graph/execution.ts", "graph/render.ts"):
+for relative in ("graph/execution.ts", "graph/graph.ts"):
     file = root / relative
     text = file.read_text()
     text = text.replace(".artifactPaths", ".outputPaths")
@@ -73,9 +73,22 @@ for relative in ("graph/execution.ts", "graph/render.ts"):
     text = text.replace("inferredArtifactInputs", "artifactInputs")
     if relative.endswith("execution.ts"):
         text = text.replace("compatibility:", "catalog:")
-    else:
-        text = text.replace("workflow.legacyId ?? workflow.id", "workflow.id")
     file.write_text(text)
+
+render = root / "graph/render.ts"
+text = render.read_text()
+text = text.replace("workflow.upstreamWorkflowIds", "workflow.dependencies")
+text = text.replace("workflow.artifactPaths", "workflow.outputPaths")
+text = text.replace(
+    '`| ${workflow.legacyId ?? ""} | \\`${workflow.id}\\` | ${workflow.title} | \\`${workflow.domainId}\\` | ${workflow.gateCommands.map((gate) => `\\`${gate}\\``).join(", ") || "artifact proof"} |`',
+    '`| \\`${workflow.id}\\` | ${workflow.title} | \\`${workflow.domainId}\\` | ${workflow.gateCommands.map((gate) => `\\`${gate}\\``).join(", ") || "output contract"} |`',
+)
+text = text.replace(
+    "| Legacy | Stable ID | Workflow | Domain | Proof gates |\n| --- | --- | --- | --- | --- |",
+    "| Stable ID | Workflow | Domain | Verification gates |\n| --- | --- | --- | --- |",
+)
+text = text.replace('`${workflow.legacyId ?? ""} ${workflow.title}`.trim()', "workflow.title")
+render.write_text(text)
 
 validate = root / "graph/validate.ts"
 text = validate.read_text()
@@ -106,12 +119,28 @@ text = re.sub(
 validate.write_text(text)
 
 fixtures = root / "machine/fixtures/graph.fixtures.ts"
-if fixtures.exists():
-    text = fixtures.read_text()
-    text = re.sub(r'\n\s*legacyId: "L\d+",', "", text)
-    text = text.replace("upstreamWorkflowIds:", "dependencies:")
-    text = text.replace("artifactPaths:", "outputPaths:")
-    for field in ("action", "proof", "memory"):
-        text = re.sub(rf'\n\s*{field}: \[[^\n]*\],', "", text)
-    text = re.sub(r'\n\s*stoppingCondition: [^\n]*,', "", text)
-    fixtures.write_text(text)
+text = fixtures.read_text()
+text = re.sub(
+    r'\n  const withoutProof = clone\(baseline\);.*?skill_graph\.workflow\.proof_missing"\);',
+    '''
+  const emptyContract = clone(baseline);
+  emptyContract.workflows[0]!.outputPaths = [];
+  emptyContract.workflows[0]!.gateCommands = [];
+  expectIssue(harness, "typed graph rejects workflow without outputs or gates", emptyContract, "skill_graph.workflow.contract_empty");''',
+    text,
+    flags=re.S,
+)
+text = text.replace("upstreamWorkflowIds", "dependencies")
+fixtures.write_text(text)
+
+readme = root / "graph/README.md"
+text = readme.read_text()
+text = text.replace(
+    "Paths are attributes. Stable graph IDs are identities. The compatibility compiler can bind current path-shaped workflow outputs while the catalogue migrates, but runtime edges and accepted versions use graph identities.",
+    "Paths are attributes. Stable graph IDs are identities. Workflow dependencies and output contracts are native graph fields consumed directly by the compiler.",
+)
+text = text.replace(
+    "The graph is the only normal dispatch source. Compatibility fields may be read while the 57 workflow contracts migrate, but they must not create a second scheduler.",
+    "The graph is the only normal dispatch source. Workflow definitions, compiler output, run state, and evidence form one execution model without a compatibility scheduler.",
+)
+readme.write_text(text)
