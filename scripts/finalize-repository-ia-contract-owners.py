@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,15 +60,19 @@ for rel in [
         },
     )
 
-# Fixture state files now live under state/. Create the parent before direct writes.
+# Fixture state files now live under state/. Create the parent after the fixture
+# declaration regardless of how Prettier wraps the following writeFileSync call.
 fixture_state = SKILL / "machine/fixtures/state-and-meta.fixtures.ts"
-replace(
-    fixture_state,
-    {
-        'const landingInScopePass = makeEmptyFixture("landing-funnel-in-scope-pass");\n  writeFileSync(path.join(landingInScopePass, "state", "PROJECT_STATE.yaml")': 'const landingInScopePass = makeEmptyFixture("landing-funnel-in-scope-pass");\n  mkdirSync(path.join(landingInScopePass, "state"), { recursive: true });\n  writeFileSync(path.join(landingInScopePass, "state", "PROJECT_STATE.yaml")',
-        'const landingInScopeFail = makeEmptyFixture("landing-funnel-in-scope-missing-gates");\n  writeFileSync(path.join(landingInScopeFail, "state", "PROJECT_STATE.yaml")': 'const landingInScopeFail = makeEmptyFixture("landing-funnel-in-scope-missing-gates");\n  mkdirSync(path.join(landingInScopeFail, "state"), { recursive: true });\n  writeFileSync(path.join(landingInScopeFail, "state", "PROJECT_STATE.yaml")',
-    },
-)
+fixture_text = fixture_state.read_text()
+for variable in ["landingInScopePass", "landingInScopeFail"]:
+    declaration = rf'(const {variable} = makeEmptyFixture\([^\n]+\);\n)(?!\s*mkdirSync\(path\.join\({variable}, "state"\))'
+    fixture_text = re.sub(
+        declaration,
+        rf'\1  mkdirSync(path.join({variable}, "state"), {{ recursive: true }});\n',
+        fixture_text,
+        count=1,
+    )
+fixture_state.write_text(fixture_text)
 
 for rel in [
     "scripts/promote-design-tokens.ts",
