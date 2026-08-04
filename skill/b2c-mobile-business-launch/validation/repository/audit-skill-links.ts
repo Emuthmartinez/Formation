@@ -4,14 +4,11 @@
  *
  * Three gates:
  *   1. Broken local markdown links ([text](path) targets that do not exist).
- *   2. Orphaned files under references/ and business/: a shipped file that no
- *      other file mentions by relative path, basename, or ancestor directory
- *      is dead weight no agent can ever route to. Basename and ancestor-dir
- *      matching keep validator-constructed paths (path.join(root, "tokens.json"))
- *      and copy-the-directory scaffolds (archetype starter/) from false-failing.
- *   3. Byte-identical duplicate files under business/ (outside the archetype
- *      starters, which intentionally share scaffold files): duplicates drift
- *      apart silently, and basename reachability cannot catch them.
+ *   2. Orphaned files under knowledge/, validation/repository/, workspace/business/,
+ *      and starters/: a shipped file that no other file mentions by relative path,
+ *      basename, or ancestor directory is dead weight no agent can ever route to.
+ *   3. Byte-identical duplicate files under workspace/business/ (outside the
+ *      archetype starters, which intentionally share scaffold files).
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
@@ -75,12 +72,12 @@ for (const file of collectAllFiles(skillRoot)) {
   corpus.set(file, readFileSync(file, "utf8"));
 }
 
-// ── Gate 2: orphaned references/ and business/ files ────────────────────────
+// ── Gate 2: orphaned canonical source files ─────────────────────────────────
 
 /**
  * Boundary-aware containment: "lane.md" inside "sub-lane.md" is NOT a mention
- * of lane.md. A preceding path separator ("skill/business/lane.md") still
- * counts — a longer path ending in the needle references the same file.
+ * of lane.md. A preceding path separator still counts because a longer path
+ * ending in the needle references the same file.
  */
 function mentionsNeedle(text: string, needle: string): boolean {
   const wordish = /[A-Za-z0-9_-]/;
@@ -102,10 +99,6 @@ function mentionsNeedle(text: string, needle: string): boolean {
 function isReachable(candidate: string): boolean {
   const relative = path.relative(skillRoot, candidate).split(path.sep).join("/");
   const needles = new Set<string>([relative, path.basename(candidate)]);
-  // Ancestor directories (copy-the-directory reachability), e.g.
-  // "starters/social-network/starter" covers every file below
-  // it. Stop above the bare subtree name ("business"/"references"), which
-  // appears in prose everywhere and would mark everything reachable.
   let ancestor = path.dirname(relative);
   while (ancestor.includes("/")) {
     needles.add(ancestor);
@@ -124,7 +117,7 @@ function isReachable(candidate: string): boolean {
   return false;
 }
 
-for (const subtree of ["playbook", "machine", "business", "starters"]) {
+for (const subtree of ["knowledge", "validation/repository", "workspace/business", "starters"]) {
   const subtreeRoot = path.join(skillRoot, subtree);
   if (!existsSync(subtreeRoot)) {
     continue;
@@ -142,7 +135,7 @@ for (const subtree of ["playbook", "machine", "business", "starters"]) {
         issue(
           "error",
           "skill_links.orphan_file",
-          `${relative} is never mentioned by path, basename, or parent directory in any other shipped file — no agent can route to it. Wire it into SKILL.md/references/scripts or delete it (add a reasoned ORPHAN_EXCLUSIONS entry only for deliberate exceptions).`,
+          `${relative} is never mentioned by path, basename, or parent directory in any other shipped file — no agent can route to it. Wire it into SKILL.md/knowledge/tooling or delete it (add a reasoned ORPHAN_EXCLUSIONS entry only for deliberate exceptions).`,
           relative,
         ),
       );
@@ -150,7 +143,7 @@ for (const subtree of ["playbook", "machine", "business", "starters"]) {
   }
 }
 
-// ── Gate 3: byte-identical duplicates under business/ ───────────────────────
+// ── Gate 3: byte-identical duplicates under workspace/business/ ─────────────
 
 const duplicateGroups = new Map<string, string[]>();
 const templatesRoot = path.join(skillRoot, "workspace", "business");
