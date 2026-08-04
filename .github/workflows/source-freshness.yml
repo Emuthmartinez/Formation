@@ -29,11 +29,14 @@ jobs:
       - run: npm ci --prefix skill/b2c-mobile-business-launch
       - run: python3 scripts/finalize-repository-ia.py
       - run: python3 scripts/fix-repository-ia-rewrites.py
+      - run: python3 scripts/repair-repository-ia-contracts.py
       - run: npm run format --prefix skill/b2c-mobile-business-launch
       - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
+      - run: npm run promote:design-tokens --prefix skill/b2c-mobile-business-launch
+      - run: npm run render:design-room --prefix skill/b2c-mobile-business-launch
       - name: Remove temporary machinery and restore normal CI
         run: |
-          rm scripts/finalize-repository-ia.py scripts/fix-repository-ia-rewrites.py
+          rm scripts/finalize-repository-ia.py scripts/fix-repository-ia-rewrites.py scripts/repair-repository-ia-contracts.py
           rm -f scripts/inventory-repository-ia.py docs/repository-ia-inventory.md
           git show origin/main:.github/workflows/source-freshness.yml > .github/workflows/source-freshness.yml
       - run: npm run audit:ci
