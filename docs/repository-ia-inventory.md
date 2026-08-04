@@ -29,6 +29,7 @@ Generated from the current branch to support the repository information-architec
 - `docs/implementation/graph-execution-v2.md`
 - `docs/method/loop-dryrun.md`
 - `docs/method/skill-workflow-loops.md`
+- `docs/repository-ia-inventory.md`
 - `docs/validators.md`
 - `skill/b2c-mobile-business-launch/SKILL.md`
 - `skill/b2c-mobile-business-launch/business/11-star-experience/11-star-experience.html`
