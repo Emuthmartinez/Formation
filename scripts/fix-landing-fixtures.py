@@ -17,22 +17,37 @@ text = text.replace('"growth", "growth", "landing"', '"growth", "landing"')
 text = text.replace('growth/growth/landing/', 'growth/landing/')
 fixture.write_text(text)
 
-# Align the validator with the same capability-owned surface. The previous
-# migration updated scope detection but left documentation and motion scans on
-# the legacy root-level landing directory.
+# Align the validator with the same capability-owned surface. Replace the
+# complete document lookup instead of composing more path substitutions on top
+# of earlier broad migration passes.
 validator = SKILL / "gates/growth/check-landing-funnel.ts"
 validator_text = validator.read_text()
 validator_text = validator_text.replace(
     'path.join(args.root, "landing",',
     'path.join(args.root, "growth", "landing",',
 )
-validator_text = validator_text.replace(
-    '["README.md", "landing/README.md", "PRODUCTION_READINESS.md", "landing/PRODUCTION_READINESS.md", "LAUNCH_TRACE.md"]',
-    '["README.md", "growth/landing/README.md", "PRODUCTION_READINESS.md", "growth/landing/PRODUCTION_READINESS.md", "LAUNCH_TRACE.md"]',
+validator_text = validator_text.replace('"growth", "growth", "landing"', '"growth", "landing"')
+validator_text = validator_text.replace('growth/growth/landing/', 'growth/landing/')
+validator_text = re.sub(
+    r'const candidateDocs = \[[^;]*\];',
+    '''const candidateDocs = [
+  "README.md",
+  "growth/landing/README.md",
+  "PRODUCTION_READINESS.md",
+  "growth/landing/PRODUCTION_READINESS.md",
+  "state/LAUNCH_TRACE.md",
+];''',
+    validator_text,
+    count=1,
+    flags=re.DOTALL,
 )
-validator_text = validator_text.replace(
-    'd.path === "README.md" || d.path === "landing/README.md"',
-    'd.path === "README.md" || d.path === "growth/landing/README.md"',
+validator_text = re.sub(
+    r'const primaryDoc = docTexts\.find\([^;]*\)\?\.path \?\? candidateDocs\[0\];',
+    '''const primaryDoc =
+  docTexts.find((d) => d.path === "README.md" || d.path === "growth/landing/README.md")?.path ?? candidateDocs[0];''',
+    validator_text,
+    count=1,
+    flags=re.DOTALL,
 )
 validator_text = validator_text.replace(
     'const landingDir = path.join(args.root, "landing");',
