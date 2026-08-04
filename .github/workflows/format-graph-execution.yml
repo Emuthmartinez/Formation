@@ -1,0 +1,23 @@
+name: Format Graph Execution
+
+on:
+  push:
+    branches:
+      - agent/full-graph-execution
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write skill/b2c-mobile-business-launch/graph/execution.ts
+      - name: Emit formatted file
+        run: base64 -w 0 skill/b2c-mobile-business-launch/graph/execution.ts
