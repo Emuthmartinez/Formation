@@ -6,7 +6,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "skill" / "b2c-mobile-business-launch"
-FIXTURES = SKILL / "validation" / "repository" / "fixtures"
 
 REPLACEMENTS = {
     'path.join(skillRoot, "playbook", ': 'path.join(skillRoot, "knowledge", ',
@@ -18,10 +17,12 @@ REPLACEMENTS = {
     'path.join(root, "scripts", ': 'path.join(root, "tooling", ',
     'path.join(root, "gates", ': 'path.join(root, "validation", "business", ',
     'path.join(root, "machine", ': 'path.join(root, "validation", "repository", ',
+    'path.join(root, "machine")': 'path.join(root, "validation", "repository")',
     'path.join(fixtureRoot, "playbook", ': 'path.join(fixtureRoot, "knowledge", ',
     'path.join(fixtureRoot, "scripts", ': 'path.join(fixtureRoot, "tooling", ',
     'path.join(fixtureRoot, "gates", ': 'path.join(fixtureRoot, "validation", "business", ',
     'path.join(fixtureRoot, "machine", ': 'path.join(fixtureRoot, "validation", "repository", ',
+    'path.join("business", "engineering/repo-agent-entrypoints", "settings.json")': 'path.join("workspace", "business", "engineering/repo-agent-entrypoints", "settings.json")',
     '"skill/playbook/': '"skill/knowledge/',
     "'skill/playbook/": "'skill/knowledge/",
     '"skill/scripts/': '"skill/tooling/',
@@ -71,6 +72,16 @@ changed = 0
 for path in SKILL.rglob("*"):
     if path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".mjs", ".md", ".json", ".yaml", ".yml"}:
         changed += int(rewrite(path))
+
+root_package_path = ROOT / "package.json"
+root_package = json.loads(root_package_path.read_text(encoding="utf-8"))
+root_package["scripts"]["check:business-control-plane-workspace"] = (
+    "tsx skill/b2c-mobile-business-launch/tooling/render-business-control-plane-workspace.ts "
+    "--root skill/b2c-mobile-business-launch/workspace/business "
+    "--business-state ../../../studio/seed/business.json "
+    "--out ../../../studio/seed/workspace.generated.json --check"
+)
+root_package_path.write_text(json.dumps(root_package, indent=2) + "\n", encoding="utf-8")
 
 manifest_path = SKILL / "skill-version.json"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
