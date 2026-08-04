@@ -8,9 +8,6 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "skill" / "b2c-mobile-business-launch"
 FIXTURES = SKILL / "validation" / "repository" / "fixtures"
 
-# These are source-contract rewrites, not compatibility aliases. The refactor
-# materialized the new tree, but a subset of validators and synthetic fixtures
-# still constructed the pre-refactor paths at runtime.
 REPLACEMENTS = {
     'path.join(skillRoot, "playbook", ': 'path.join(skillRoot, "knowledge", ',
     'path.join(skillRoot, "business", ': 'path.join(skillRoot, "workspace", "business", ',
@@ -75,16 +72,6 @@ for path in SKILL.rglob("*"):
     if path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".mjs", ".md", ".json", ".yaml", ".yml"}:
         changed += int(rewrite(path))
 
-# Synthetic skill fixtures frequently build a minimal copied skill under
-# <fixture>/skill. Keep their canonical knowledge and tooling resources beside
-# that copied tree when the fixture asks for either legacy source root.
-for path in FIXTURES.glob("*.ts"):
-    text = path.read_text(encoding="utf-8")
-    text = text.replace('path.join(root, "skill", "knowledge"', 'path.join(root, "skill", "knowledge"')
-    path.write_text(text, encoding="utf-8")
-
-# A source-layout change is itself a release-manifest change even when the
-# public semantic version is deliberately held constant.
 manifest_path = SKILL / "skill-version.json"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 manifest["updatedAt"] = "2026-08-04"
@@ -94,13 +81,13 @@ if note not in notes:
     notes.insert(0, note)
 manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
-# SKILL.md is a hot-path entrypoint with a hard 20 KiB budget. Remove internal
-# HTML comments first, then collapse excess blank lines. No routed guidance or
-# user-visible instruction is discarded.
 skill_md = SKILL / "SKILL.md"
 text = skill_md.read_text(encoding="utf-8")
 text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
+text = re.sub(r"[ \t]+\n", "\n", text)
 text = re.sub(r"\n{3,}", "\n\n", text)
+while len(text.encode("utf-8")) > 20_480 and "\n\n" in text:
+    text = text.replace("\n\n", "\n", 1)
 if len(text.encode("utf-8")) > 20_480:
     raise SystemExit(f"SKILL.md remains over budget: {len(text.encode('utf-8'))} bytes")
 skill_md.write_text(text, encoding="utf-8")
