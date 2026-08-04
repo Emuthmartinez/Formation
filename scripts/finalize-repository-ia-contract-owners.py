@@ -73,7 +73,6 @@ fixture_text = fixture_pattern.sub(
     ),
     fixture_text,
 )
-
 helper_pattern = re.compile(
     r'(const withLandingSite\s*=\s*\([\s\S]*?\): void => \{\n)'
     r'(?!\s*mkdirSync\(path\.join\(root, "state"\))',
@@ -85,6 +84,14 @@ fixture_text = helper_pattern.sub(
     count=1,
 )
 fixture_state.write_text(fixture_text)
+
+providers_fixture = SKILL / "machine/fixtures/providers-and-secrets.fixtures.ts"
+providers_text = providers_fixture.read_text()
+providers_text = providers_text.replace(
+    'const rawEnvExample = makeFixture("raw-env-example");\n',
+    'const rawEnvExample = makeFixture("raw-env-example");\n  mkdirSync(path.join(rawEnvExample, "trust", "secrets"), { recursive: true });\n',
+)
+providers_fixture.write_text(providers_text)
 
 for rel in [
     "scripts/promote-design-tokens.ts",
