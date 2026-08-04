@@ -72,6 +72,25 @@ export function createHarness(): Harness {
   const makeEmptyFixture = (name: string): string => {
     const fixtureRoot = path.join(tempRoot, name);
     mkdirSync(fixtureRoot, { recursive: true });
+    // Empty fixtures still model the capability-owned workspace. Precreating
+    // directory roots lets a fixture write one targeted artifact without every
+    // test needing to repeat filesystem setup after the information-architecture
+    // migration. Validators continue to determine presence from files, not dirs.
+    for (const capability of [
+      "state",
+      "strategy",
+      "product",
+      "design",
+      "engineering",
+      "analytics",
+      "growth",
+      "revenue",
+      "store",
+      "trust",
+      "operations",
+    ]) {
+      mkdirSync(path.join(fixtureRoot, capability), { recursive: true });
+    }
     return fixtureRoot;
   };
 
