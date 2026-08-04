@@ -32,21 +32,21 @@ Current shape, measured 2026-07-31 at `efa8532`:
 
 | Directory | Files | Holds |
 | --- | --- | --- |
-| `playbook/` | 104 | agent knowledge, 13 domain folders each with `README.md` |
+| `knowledge/` | 104 | agent knowledge, 13 domain folders each with `README.md` |
 | `business/` | 124 | what a launch produces |
 | `starters/` | 161 | runnable app scaffolds |
-| `gates/` | 55 | proves a **business launch**, mirrors playbook domains |
-| `machine/` | 165 | proves the **skill itself** — validators, evals, fixtures, harness |
-| `scripts/` | 25 | everything executable that is neither, plus `lib/` |
+| `validation/business/` | 55 | proves a **business launch**, mirrors playbook domains |
+| `validation/repository/` | 165 | proves the **skill itself** — validators, evals, fixtures, harness |
+| `tooling/` | 25 | everything executable that is neither, plus `lib/` |
 
-**The placement rule, already settled and documented:** `gates/` grades a business
-launch; `machine/` grades the skill itself — judged by the **subject of the
+**The placement rule, already settled and documented:** `validation/business/` grades a business
+launch; `validation/repository/` grades the skill itself — judged by the **subject of the
 assertion, not the root flag a validator takes**. Cross-cutting launch-method
-gates go to `gates/process/`. There is no top-level exception bucket.
+gates go to `validation/business/process/`. There is no top-level exception bucket.
 
-**Nothing may hardcode a script's directory.** `scripts/lib/script-paths.ts`
-resolves a spawnable script by basename across `gates/`, `machine/` and
-`scripts/`, and **throws** on unknown or ambiguous. Use `resolveScriptPath` when
+**Nothing may hardcode a script's directory.** `tooling/lib/script-paths.ts`
+resolves a spawnable script by basename across `validation/business/`, `validation/repository/` and
+`tooling/`, and **throws** on unknown or ambiguous. Use `resolveScriptPath` when
 about to spawn, `findScriptPath` when a miss should become a reported issue.
 
 ### Bar for done (every step)
@@ -97,9 +97,9 @@ round after each push.
    a file, grep that file for its *other* path assumptions. `check-package-parity`
    was fixed twice, one release apart, for the same class of bug.
 4. **A move can silently EXPAND a gate, not just break it.** Moving files into
-   `machine/` pulled 129 of them into `check-reference-size`. Preserve current
+   `validation/repository/` pulled 129 of them into `check-reference-size`. Preserve current
    scope; expanding a gate as a side effect of a move is not a decision anyone
-   made. `NON_KNOWLEDGE_DIRS` in `machine/check-reference-size.ts` is the
+   made. `NON_KNOWLEDGE_DIRS` in `validation/repository/check-reference-size.ts` is the
    existing precedent.
 5. **`path.join(a,"b","c")` is invisible to an `"a/b/c"` search.** Grep the bare
    quoted segment too.
@@ -112,7 +112,7 @@ round after each push.
    used `path.resolve(scriptDir, "..")`; two inlined `import.meta.url`, one via
    `new URL(...).pathname`. Verify by resolving every candidate against the
    filesystem, not by eye.
-8. **Folder names must survive `.gitignore`.** `playbook/build/` was untracked
+8. **Folder names must survive `.gitignore`.** `knowledge/build/` was untracked
    through a whole CI run. Run `git check-ignore -v` on any new directory name;
    `dist`, `build`, `tmp`, `out`, `target` are landmines.
 9. **A fixture asserting only exit 1 passes by crashing.** Assert the issue code.
@@ -131,26 +131,26 @@ round after each push.
 **Why first:** it is small, it is the only step that *prevents* future drift, and
 every later step moves files past the rule it enforces.
 
-Nothing currently stops a new `gates/check-foo.ts` landing at top level or in the
-wrong domain. Worse: a **flat** `gates/` made duplicate basenames structurally
+Nothing currently stops a new `validation/business/check-foo.ts` landing at top level or in the
+wrong domain. Worse: a **flat** `validation/business/` made duplicate basenames structurally
 impossible (one directory cannot hold two files of the same name); the mirrored
 layout does not. `script-paths.ts` throws on ambiguity, but only at spawn time —
 a backstop, not a gate.
 
-Add `skill/b2c-mobile-business-launch/machine/check-gates-layout.ts` asserting:
+Add `skill/b2c-mobile-business-launch/validation/repository/check-gates-layout.ts` asserting:
 
-1. Every `gates/**/*.ts` sits in a directory whose name is one of the playbook
-   domains — **read the domain list from `playbook/` itself**, never hardcode it,
+1. Every `validation/business/**/*.ts` sits in a directory whose name is one of the playbook
+   domains — **read the domain list from `knowledge/` itself**, never hardcode it,
    so the two trees cannot drift.
-2. No `.ts` file sits directly at `gates/` top level (the no-exception-bucket rule).
-3. No basename appears twice across `gates/`, `machine/` and `scripts/`. Reuse
-   `indexScripts()` from `scripts/lib/script-paths.ts` — it already detects this
+2. No `.ts` file sits directly at `validation/business/` top level (the no-exception-bucket rule).
+3. No basename appears twice across `validation/business/`, `validation/repository/` and `tooling/`. Reuse
+   `indexScripts()` from `tooling/lib/script-paths.ts` — it already detects this
    and throws; the gate should catch and report it as a normal issue.
 
 Wiring (all of it, or `check:package-parity` fails): npm script `check:gates-layout`
-in **both** `package.json` files, a step in `scripts/lib/audit-plan.ts`, an entry in
-`knownValidators` in `machine/run-launchbench.ts`, and at least one passing and one
-**failing** fixture in `machine/fixtures/repo-gates.fixtures.ts` asserting the issue
+in **both** `package.json` files, a step in `tooling/lib/audit-plan.ts`, an entry in
+`knownValidators` in `validation/repository/run-launchbench.ts`, and at least one passing and one
+**failing** fixture in `validation/repository/fixtures/repo-gates.fixtures.ts` asserting the issue
 code.
 
 Expect `audit:ci` → **71 ok**.
@@ -164,10 +164,10 @@ by the subject-of-the-assertion rule:
 
 | File | Grades | Argues for |
 | --- | --- | --- |
-| `scripts/audit-skill-links.ts` | the skill's own markdown links + orphans | `machine/` |
-| `scripts/refresh-source-freshness.ts` | the source registry | `machine/` |
-| `scripts/validate-project-state.ts` | a business repo's PROJECT_STATE | `gates/process/` |
-| `scripts/validate-state.ts` | a business repo's design state | `gates/design/` |
+| `tooling/audit-skill-links.ts` | the skill's own markdown links + orphans | `validation/repository/` |
+| `tooling/refresh-source-freshness.ts` | the source registry | `validation/repository/` |
+| `tooling/validate-project-state.ts` | a business repo's PROJECT_STATE | `validation/business/process/` |
+| `tooling/validate-state.ts` | a business repo's design state | `validation/business/design/` |
 
 Apply the settled rule (subject of the assertion). Note `validate-project-state.ts`
 is in `knownValidators` and is spawned by fixtures **by basename**, so
@@ -189,7 +189,7 @@ Four have a Markdown twin:
 
 | HTML | Markdown twin |
 | --- | --- |
-| `business/design/design-room.html` | `playbook/design/design-room.md` |
+| `business/design/design-room.html` | `knowledge/design/design-room.md` |
 | `business/design/design.html` | `business/design/DESIGN.md` |
 | `business/product/onboarding.html` | `business/product/ONBOARDING.md` |
 | `business/operations/orchestration.html` | `business/operations/ORCHESTRATION.md` |
@@ -220,9 +220,9 @@ The move happened; the merge did not. Two clusters remain.
 **Emotional design — 138,038 bytes across four files:**
 
 ```
-playbook/experience/emotional-design-system.md          42,051 B
-playbook/experience/emotional-experience-measurement.md 37,557 B
-playbook/experience/emotional-experience-design.md      29,617 B
+knowledge/experience/emotional-design-system.md          42,051 B
+knowledge/experience/emotional-experience-measurement.md 37,557 B
+knowledge/experience/emotional-experience-design.md      29,617 B
 business/product/experience/emotional-design/EMOTIONAL_DESIGN.md           28,813 B
 ```
 
@@ -232,7 +232,7 @@ fourth is a founder artifact — that boundary is real and should survive the
 merge. `check-reference-size`'s budget is 64KB/file, so a naive concatenation
 of the three playbook files would **break the budget** and need an index split.
 
-**Twelve experience cards** in `playbook/experience/experience-cards/`, indexed by
+**Twelve experience cards** in `knowledge/experience/experience-cards/`, indexed by
 `experience-cards.md`. docs/architecture.md calls them "twelve near-identical card
 files". Determine whether the near-identity is boilerplate worth extracting into
 the index, or genuine per-card content. **Do not collapse them blindly** — the
@@ -267,7 +267,7 @@ Measured precedent from the store domain: collapsing nine verbose routing rows
 into three index-pointing rows freed **2,787 bytes** while the folder move cost
 120. The entrypoint's fullness is detail living too high, not a budget problem.
 
-`machine/check-reference-size.ts` holds `ENTRYPOINT_BUDGET_BYTES = 45 * 1024`.
+`validation/repository/check-reference-size.ts` holds `ENTRYPOINT_BUDGET_BYTES = 45 * 1024`.
 **Ratchet it down** as `SKILL.md` shrinks — that is stated policy in the file's
 own comment, and leaving it at 45KB after a reduction silently re-opens the
 headroom the collapse just bought.

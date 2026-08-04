@@ -90,8 +90,8 @@ point; the dedup is the mechanism.
 
 | File | Kind | Action |
 | --- | --- | --- |
-| `design/design-room.html` | rendered by `scripts/render-design-room.ts` | leave |
-| `state/launch-cockpit.html` | rendered by `scripts/render-launch-cockpit.ts` | leave |
+| `design/design-room.html` | rendered by `tooling/render-design-room.ts` | leave |
+| `state/launch-cockpit.html` | rendered by `tooling/render-launch-cockpit.ts` | leave |
 | `design/design.html` (332 B) | **starter stub** — "Render the canonical Design Room from state before replacing this starter" | declare, do not generate |
 | `analytics/analytics-plan.html` (387 B) | **starter stub** — "Replace with rendered … once the live services are reporting real data" | declare, do not generate |
 | `product/onboarding.html` | authored ← `business/product/ONBOARDING.md` | generate |
@@ -105,7 +105,7 @@ be talked into "generate all eight" by the filename symmetry.
 
 ### Build order — the parser first, alone
 
-`scripts/lib/markdown-lite.ts` is the only genuinely new piece; everything else copies a
+`tooling/lib/markdown-lite.ts` is the only genuinely new piece; everything else copies a
 proven pattern. Build and prove it **in isolation** before writing the renderer, manifest,
 gate or any wiring. Feed it literal excerpts from the four real documents:
 
@@ -124,15 +124,15 @@ root and `check:package-parity` makes each half red).
 
 ### The rest
 
-1. `scripts/lib/render-artifact-page.ts` — shared page shell + escaping.
-2. `scripts/render-artifact-pages.ts` — reads a manifest of `{markdown → html}` pairs,
+1. `tooling/lib/render-artifact-page.ts` — shared page shell + escaping.
+2. `tooling/render-artifact-pages.ts` — reads a manifest of `{markdown → html}` pairs,
    renders each. Supports `--check`.
 3. The manifest — declares every `business/*.html` as exactly one of
    `rendered-by:<script>` / `starter-stub` / `authored-from:<markdown>`.
-4. `gates/process/check-generated-pages.ts` — it grades a business launch's artifacts, so
-   `gates/`, and it is cross-cutting, so `process/`.
+4. `validation/business/process/check-generated-pages.ts` — it grades a business launch's artifacts, so
+   `validation/business/`, and it is cross-cutting, so `process/`.
 
-**Copy the `--check` mechanics verbatim from `scripts/render-business-control-plane-workspace.ts:156-179`.**
+**Copy the `--check` mechanics verbatim from `tooling/render-business-control-plane-workspace.ts:156-179`.**
 It computes the full output in memory, then on `--check` compares byte-for-byte against
 disk, emitting `.output.missing` when the file is absent and `.output.drift` when it
 differs. That is the only existing check-mode pattern in the repo.
@@ -147,9 +147,9 @@ Output must be **deterministic** — no timestamps, no filesystem-iteration orde
 ### Wiring, all of it or `check:package-parity` fails
 
 npm script `check:generated-pages` in **both** `package.json` files · a step in
-`scripts/lib/audit-plan.ts` · an entry in `knownValidators` in
-`machine/run-launchbench.ts` · a **failing** fixture per issue code in
-`machine/fixtures/repo-gates.fixtures.ts`.
+`tooling/lib/audit-plan.ts` · an entry in `knownValidators` in
+`validation/repository/run-launchbench.ts` · a **failing** fixture per issue code in
+`validation/repository/fixtures/repo-gates.fixtures.ts`.
 
 ### One accepted downgrade, already decided
 
@@ -173,14 +173,14 @@ removal of fabricated content. Say this in the PR body rather than hiding it.
   `product/onboarding.html`'s `artifact-contracts.md` must-include list. Render an honest
   "not yet designed" placeholder from state instead.
 - Do not change any of the eight filenames. Four are evidence paths in
-  `business/state/PROJECT_STATE.yaml` and the set carries **194 references repo-wide**.
+  `workspace/business/state/PROJECT_STATE.yaml` and the set carries **194 references repo-wide**.
 
 ---
 
 ## Do not reopen
 
 **SKILL.md is done for now.** It is 20,057 B against a
-`machine/check-reference-size.ts` `ENTRYPOINT_BUDGET_BYTES` of 20,480 B — **423 bytes of
+`validation/repository/check-reference-size.ts` `ENTRYPOINT_BUDGET_BYTES` of 20,480 B — **423 bytes of
 headroom.** The old 12KB target was retired deliberately: it was written when the file
 was 46,975 B, and reaching it would mean halving Lane Routing (already collapsed to 15
 index rows at ~246 B each, no slack) or the always-on contracts. The ratchet now makes
@@ -208,7 +208,7 @@ loading secrets management.
    release apart, for the same class of bug — the second time at its *file-locate* line
    after the first fix landed inside its loop. After fixing one path assumption in a file,
    grep that file for its others.
-4. **A move can silently EXPAND a gate, not just break it.** Moving files into `machine/`
+4. **A move can silently EXPAND a gate, not just break it.** Moving files into `validation/repository/`
    pulled 129 of them into `check-reference-size`. `NON_KNOWLEDGE_DIRS` is the precedent
    for preserving scope.
 5. **When routing content OUT of an entrypoint, the new load trigger must fire for the
@@ -216,7 +216,7 @@ loading secrets management.
    "before proposing or running a workflow" — but Codex cannot run workflows, so the
    trigger never fired for the only runtime it existed for. No gate could catch this;
    Codex did. It is now pinned as `required_terms` in
-   `machine/evals/triggering/autopilot-triggering.yaml`.
+   `validation/repository/evals/triggering/autopilot-triggering.yaml`.
 6. **`required_terms` are matched against raw text and SKILL.md is hard-wrapped** — a term
    spanning a line break fails on reflow alone rather than on meaning.
 7. **`path.join(a,"b","c")` is invisible to an `"a/b/c"` search.** Grep the bare segment.
@@ -241,5 +241,5 @@ loading secrets management.
 
 ## First step
 
-Write `scripts/lib/markdown-lite.ts` and prove it against literal excerpts from all four
+Write `tooling/lib/markdown-lite.ts` and prove it against literal excerpts from all four
 real documents. Nothing else until it round-trips them.

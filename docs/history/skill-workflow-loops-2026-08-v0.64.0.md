@@ -1,5 +1,5 @@
 > **Historical record. Reconciled against v0.64.0 before the typed definition graph shipped in v0.65.0.**
-> The workflow inventory now lives in `skill/b2c-mobile-business-launch/graph/`; do not edit or execute this file as current policy.
+> The workflow inventory now lives in `skill/b2c-mobile-business-launch/runtime/graph/`; do not edit or execute this file as current policy.
 
 # Skill Loops — `b2c-mobile-business-launch`
 
@@ -15,7 +15,7 @@ workflow with its trigger, then emit exactly one grounded five-part loop
 coverage is complete with no gaps or overlaps.
 
 - **Skill read:** `skill/b2c-mobile-business-launch/SKILL.md` (full, 239 lines) +
-  directory listings of `references/`, `business/`, `scripts/`, and
+  directory listings of `references/`, `business/`, `tooling/`, and
   `package.json` scripts. Spot-read references: `change-cascade.md`,
   `control-plane.md`, `premium-mobile-craft.md`, `consumer-product-design-agency.md`.
 - **Grounding rule:** every loop's **action** steps cite a named section of the
@@ -91,7 +91,7 @@ Status legend: ✅ covered by exactly one loop · ⬜ uncovered.
 | 53 | Writing quality (no-slop) | Before writing or reviewing any founder-facing copy or any marketing copy the skill generates | L53 | ✅ |
 | 54 | Founder-language translation (maintainer) | Adding or renaming a lane, status, phase, autonomy mode, or provider route; any founder-visible surface change | L54 | ✅ |
 | 55 | Skill triggering contract (maintainer) | Changing `SKILL.md` frontmatter, the skill description, or the trigger phrasing | L55 | ✅ |
-| 56 | ASC command contract (maintainer) | Before changing any documented `asc` command in `playbook/store/app-store-connect-cli.md` | L56 | ✅ |
+| 56 | ASC command contract (maintainer) | Before changing any documented `asc` command in `knowledge/store/app-store-connect-cli.md` | L56 | ✅ |
 
 **Coverage:** 56 / 56 workflows mapped to exactly one loop. No uncovered rows; no
 two loops share trigger + primary artifact + validator (see Distinctness Notes).
@@ -152,7 +152,7 @@ that grounds them. Conventions used in every loop:
   a discrete `state/PROJECT_STATE.yaml` lane/gate state (per the Observable-stop rule
   above). For provider-backed lanes that terminator is a probe/validator output or
   a named founder-only gate — grounded in SKILL.md *Autopilot Run Contract*
-  (provider-proof paragraph) and `playbook/process/provider-proof.md`. No stop rests on
+  (provider-proof paragraph) and `knowledge/process/provider-proof.md`. No stop rests on
   an adjective ("complete", "reconciles", "looks good", "feels right").
 
 ### L01 — Runtime freshness gate (consumer side)
@@ -160,7 +160,7 @@ that grounds them. Conventions used in every loop:
 - **Action:**
   1. Run `npm run check:skill-version` from the installed skill (or compare `skill-version.json` manually if the helper is unavailable). → SKILL.md *Runtime Freshness Gate*; `Lane Routing`.
   2. If stale, pause the original request and ask — via AskUserQuestion, or plainly if unavailable — update-now vs continue-on-installed. → SKILL.md *Runtime Freshness Gate*.
-  3. Load `machine/skill-versioning.md` for the commands/sync rules before acting on the answer. → `Lane Routing` (skill-versioning).
+  3. Load `validation/repository/skill-versioning.md` for the commands/sync rules before acting on the answer. → `Lane Routing` (skill-versioning).
 - **Proof:** `check:skill-version` output (fresh, or `skill_version.stale` recorded); the founder's decision captured.
 - **Memory:** `state/PROJECT_STATE.yaml` records freshness status + the founder's update/continue choice.
 - **Stopping condition:** `check:skill-version` reports not-stale, **or** `state/PROJECT_STATE.yaml` records the founder's decline / latest-source-unavailable as a named gate — then continue. Never proceed while `check:skill-version` reports `skill_version.stale` without a recorded decision.
@@ -179,7 +179,7 @@ that grounds them. Conventions used in every loop:
 - **Trigger:** Broad "launch this app / turn this transcript into a business" request; or any lane/provider/proof/blocker status change thereafter.
 - **Action:**
   1. Recover source truth: business name, wedge, platform, monetization intent, current phase. → `Start Here`; Phase 0.
-  2. Create/refresh `state/PROJECT_STATE.yaml` from `business/state/PROJECT_STATE.yaml`; set autonomy mode and confirm `project.launch_tier` (full/lite) with the founder. → `Start Here`; Phase 0; Launch Tiers.
+  2. Create/refresh `state/PROJECT_STATE.yaml` from `workspace/business/state/PROJECT_STATE.yaml`; set autonomy mode and confirm `project.launch_tier` (full/lite) with the founder. → `Start Here`; Phase 0; Launch Tiers.
   3. Render `state/launch-cockpit.html` early and re-render whenever lane/provider/orchestration/proof/gate state changes (`npm run render:launch-cockpit`). → `Start Here`; *Operating Posture*.
 - **Proof:** `npm run validate:launch-state`; `state/launch-cockpit.html` re-rendered and reflects current lanes.
 - **Memory:** `state/PROJECT_STATE.yaml` + `state/launch-cockpit.html` are the durable state contract.
@@ -188,7 +188,7 @@ that grounds them. Conventions used in every loop:
 ### L04 — Paid-tool routing & fallback
 - **Trigger:** Before using or replacing any paid/account-gated tool (AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI, Fastlane, RevenueCat/Stripe/PostHog/Resend, etc.), or before a free fallback.
 - **Action:**
-  1. Load `playbook/operations/paid-tool-routing.md` and classify each paid/account-gated lane. → `Start Here`; Phase 0b.
+  1. Load `knowledge/operations/paid-tool-routing.md` and classify each paid/account-gated lane. → `Start Here`; Phase 0b.
   2. Ask the founder before substituting a free route; missing runtime access is not permission to spend tokens on a fallback. → `Start Here`; *Operating Posture* (no silent downgrade).
   3. Record decisions in `strategy/TOOL_DECISIONS.md`, separating blocked access from founder-approved fallback. → Phase 0b.
 - **Proof:** `npm run check:paid-tool-decisions`; `strategy/TOOL_DECISIONS.md` distinguishes blocked vs approved-fallback.
@@ -198,7 +198,7 @@ that grounds them. Conventions used in every loop:
 ### L05 — Secrets baseline & routing
 - **Trigger:** Before any new API key, token, OAuth credential, webhook signing secret, service-account file, CI/deploy env var, or local `.env`.
 - **Action:**
-  1. Load `playbook/operations/secrets-management.md` + `playbook/operations/provider-state-recipes.md`; default to Doppler and `doppler run --` unless the founder approves another path. → `Start Here`; Phase 0c.
+  1. Load `knowledge/operations/secrets-management.md` + `knowledge/operations/provider-state-recipes.md`; default to Doppler and `doppler run --` unless the founder approves another path. → `Start Here`; Phase 0c.
   2. Create/refresh `SECRETS.md`; map local/staging/production locations; add `doppler.yaml` / names-only `.env.example` from `business/trust/secrets/` when useful. → `Start Here`; Phase 0c.
   3. Refresh current provider docs / CLI `--help` before any setup command and record the docs/version basis. → `Start Here`; *Source Freshness*.
 - **Proof:** `npm run check:secrets` (secret-routing); `SECRETS.md` records the docs basis and no secret values are committed.
@@ -218,7 +218,7 @@ that grounds them. Conventions used in every loop:
 ### L07 — Provider-proof verification
 - **Trigger:** Before marking any provider-backed lane (analytics, revenue, email, store, security, engineering) done.
 - **Action:**
-  1. Load `playbook/process/provider-proof.md` and gather live proof for the lane (e.g., `npm run probe:posthog`, `npm run probe:revenuecat`). → `Start Here` *Autopilot Run Contract*; `Start Here` step (provider-proof load).
+  1. Load `knowledge/process/provider-proof.md` and gather live proof for the lane (e.g., `npm run probe:posthog`, `npm run probe:revenuecat`). → `Start Here` *Autopilot Run Contract*; `Start Here` step (provider-proof load).
   2. Record proof or an explicit founder-only gate in `operations/PROVIDER_PROOF.md`; setup prose alone cannot mark the lane done. → *Autopilot Run Contract*.
 - **Proof:** `npm run check:provider-proof`; live probe output or a named founder-only gate in `operations/PROVIDER_PROOF.md`.
 - **Memory:** `operations/PROVIDER_PROOF.md` + `state/PROJECT_STATE.yaml` lane proof field.
@@ -227,7 +227,7 @@ that grounds them. Conventions used in every loop:
 ### L08 — Change cascade
 - **Trigger:** Any change to a launched/near-launch app's feature, copy, brand vocabulary, pricing, products, design, or data behavior once a listing/landing/assets exist.
 - **Action:**
-  1. Classify the change against the Change Cascade Map. → `playbook/process/change-cascade.md` *Change Cascade Map*.
+  1. Classify the change against the Change Cascade Map. → `knowledge/process/change-cascade.md` *Change Cascade Map*.
   2. Enumerate impacted surfaces (in-app, ASC listing/products, RevenueCat, landing+meta/JSON-LD, SEO/GEO, email, analytics, legal, content) per `LOCALIZATION_MARKET_RESEARCH.md` tiers, and update or justify each. → `change-cascade.md` *Process* + *Surface Inventory*.
   3. Re-render derived assets (screenshots/App Preview/ad creative) where copy/UI changed; reconcile the lexicon. → `change-cascade.md` *Process* steps 4–5; *Operating Posture* (Cascade every change).
 - **Proof:** Every impacted surface updated or marked unaffected; derived assets re-rendered; lexicon consistent across surfaces.
@@ -247,7 +247,7 @@ that grounds them. Conventions used in every loop:
 ### L10 — Localization market research
 - **Trigger:** Before localizing any surface (metadata/keywords/screenshots, paywall/offers, landing, email, paid storefronts) or choosing which locales to ship.
 - **Action:**
-  1. Load `playbook/research/localization-market-research.md`; research per-storefront keyword popularity, difficulty, and demand (AppKittie, ASA, ASC App Analytics, XPOZ). → `Lane Routing` (localization); Phase 1.
+  1. Load `knowledge/research/localization-market-research.md`; research per-storefront keyword popularity, difficulty, and demand (AppKittie, ASA, ASC App Analytics, XPOZ). → `Lane Routing` (localization); Phase 1.
   2. Rank markets into priority tiers (Tier 1 full localize / Tier 2 metadata-only / Tier 3 defer); localize on demand, not language. → `Lane Routing`; *Operating Posture*.
   3. Produce `LOCALIZATION_MARKET_RESEARCH.md` + `localization-market-research.html`. → `Lane Routing`.
 - **Proof:** `npm run check:localization-research`; the opportunity matrix + priority tiers exist with demand evidence.
@@ -257,7 +257,7 @@ that grounds them. Conventions used in every loop:
 ### L11 — Analytics & attribution blueprint
 - **Trigger:** Before onboarding/paywalls/funnels/store CTAs/referrals/email lifecycle/paid UA, or any build prompt that names events.
 - **Action:**
-  1. Load `playbook/data/analytics-attribution.md`; map current PostHog docs, identity plan, and the self-reported attribution contract (early screen, stable source keys, `other` free text, person property, backend persistence, anon→identified reconciliation). → `Lane Routing`; Phase 1b.
+  1. Load `knowledge/data/analytics-attribution.md`; map current PostHog docs, identity plan, and the self-reported attribution contract (early screen, stable source keys, `other` free text, person property, backend persistence, anon→identified reconciliation). → `Lane Routing`; Phase 1b.
   2. Build the event catalog, dashboards, experiment plan, and privacy guardrails in `analytics/ANALYTICS.md`; events named in `product/ONBOARDING.md`/`EMOTIONAL_DESIGN.md`/`VIRAL_GROWTH.md` must exist here first. → `Lane Routing`; `Lane Routing` (analytics-catalog reconciliation).
   3. Render `analytics/analytics-plan.html` early so measurement is inspectable. → Phase 1b.
 - **Proof:** `npm run check:analytics-catalog` + `npm run check:attribution`; `analytics/analytics-plan.html` rendered.
@@ -267,7 +267,7 @@ that grounds them. Conventions used in every loop:
 ### L12 — 11-star experience
 - **Trigger:** "11-star run / pass" or before `product/SPEC.md`, onboarding, ads, store screenshots, content, or eng plans are treated as ready.
 - **Action:**
-  1. Load `playbook/experience/eleven-star-experience.md`; if the founder said "11-star run", follow the *11-Star Run Protocol* before any other output. → `Lane Routing`; `Lane Routing` (eleven-star-experience).
+  1. Load `knowledge/experience/eleven-star-experience.md`; if the founder said "11-star run", follow the *11-Star Run Protocol* before any other output. → `Lane Routing`; `Lane Routing` (eleven-star-experience).
   2. Define the 1/2/5/6/7/10/11-star ladder, draw the line of feasibility, and choose the V1 scalable slice. → Phase 1c.
   3. Produce `11_STAR_EXPERIENCE.md` + `11-star-experience.html`, then trace the V1 slice into product/design/analytics/revenue/store/content/build contracts. → `Lane Routing`.
 - **Proof:** `npm run check:11-star`; the ladder, feasibility line, and V1 slice exist and trace outward.
@@ -279,7 +279,7 @@ that grounds them. Conventions used in every loop:
 - **Action:**
   1. Load the Emotional Experience System set (`emotional-design-system.md` hub + `experience-cards.md` index, loading only in-scope per-card files); peer references `consumer-product-design-agency.md`/`quality-lens.md` cross-referenced. → `Lane Routing`; `Lane Routing`.
   2. Produce `EMOTIONAL_DESIGN.md` + `emotional-design.html`: Emotional North Star, target emotional curve, and a Card Application Map tying each magical moment to one named card + a PostHog event + a bright-line guardrail + a reduced-motion fallback. → `Lane Routing` (producer path).
-  3. For HIGH-risk cards (variable reward, streak, scarcity, urgency, social proof) add a user-control escape hatch, a counter-metric, and a truthfulness proof; run the bright-line dark-pattern test. → `Lane Routing`; `playbook/experience/ethics-guardrail.md`.
+  3. For HIGH-risk cards (variable reward, streak, scarcity, urgency, social proof) add a user-control escape hatch, a counter-metric, and a truthfulness proof; run the bright-line dark-pattern test. → `Lane Routing`; `knowledge/experience/ethics-guardrail.md`.
 - **Proof:** `npm run check:emotional-design`; every applied card emits a named event + ethics attestation; dark patterns vetoed.
 - **Memory:** `EMOTIONAL_DESIGN.md` + `state/PROJECT_STATE.yaml` emotional_design lane.
 - **Stopping condition:** `check:emotional-design` passes — every Card Application Map row names a card + PostHog event + bright-line guardrail + reduced-motion fallback, HIGH-risk rows carry escape-hatch/counter-metric/truthfulness fields, and the bright-line dark-pattern test reports none.
@@ -297,7 +297,7 @@ that grounds them. Conventions used in every loop:
 ### L15 — Paid user-acquisition system
 - **Trigger:** Before paid ads, Apple Search Ads, Meta/TikTok/Google campaigns, CPP campaign routing, MMP/SDK choices, paid creative tests, or spend-readiness claims.
 - **Action:**
-  1. Load `playbook/growth/paid-user-acquisition.md`; choose one-channel focus, creative production, and a tracking baseline. → `Lane Routing`; Phase 1d.
+  1. Load `knowledge/growth/paid-user-acquisition.md`; choose one-channel focus, creative production, and a tracking baseline. → `Lane Routing`; Phase 1d.
   2. Produce `PAID_UA.md`; trace blended reporting, RevenueCat LTV/CPA review, weekly cadence, and stop/scale rules into `analytics/ANALYTICS.md`/`revenue/REVENUE_OPS.md`/`APP_STORE_LISTING.md`/`state/LAUNCH_TRACE.md`. → `Lane Routing`.
   3. Mark founder-only spend gates explicitly. → `Lane Routing`; *Autopilot Run Contract* (founder gates).
 - **Proof:** `npm run check:paid-ua`; one-channel choice + tracking baseline + stop/scale + spend gates present and traced.
@@ -307,7 +307,7 @@ that grounds them. Conventions used in every loop:
 ### L16 — Viral growth loop
 - **Trigger:** Before referral unlocks, share-to-unlock, invite systems, social/comment loops, or features meant to spread on TikTok/Reels/Shorts.
 - **Action:**
-  1. Load `playbook/growth/viral-growth-loops.md`; tie the 11-star slice to a product-led sharing/referral loop. → `Lane Routing`; Phase 1e.
+  1. Load `knowledge/growth/viral-growth-loops.md`; tie the 11-star slice to a product-led sharing/referral loop. → `Lane Routing`; Phase 1e.
   2. Produce `VIRAL_GROWTH.md`; trace product loop, content loop, monetization timing, abuse controls, and stop/scale rules into `state/LAUNCH_TRACE.md`/`product/ONBOARDING.md`/`revenue/REVENUE_OPS.md`/`growth/UGC_PLAYBOOK.md`/`analytics/ANALYTICS.md`. → `Lane Routing`.
   3. Add abuse controls and analytics proof for every loop. → `Lane Routing`.
 - **Proof:** `npm run check:viral-growth`; loop + abuse controls + analytics proof + stop/scale present and traced.
@@ -317,7 +317,7 @@ that grounds them. Conventions used in every loop:
 ### L17 — Launch narrative & cadence
 - **Trigger:** Before drafting the announcement, the launch-day sequence, or the weekly release rhythm.
 - **Action:**
-  1. Load `playbook/growth/launch-narrative-cadence.md`; set a feeling-first launch thesis + named emotional angle and the tentpole-plus-weekly-cadence model. → `Lane Routing`; Phase 1e.
+  1. Load `knowledge/growth/launch-narrative-cadence.md`; set a feeling-first launch thesis + named emotional angle and the tentpole-plus-weekly-cadence model. → `Lane Routing`; Phase 1e.
   2. Produce `growth/LAUNCH_NARRATIVE.md` with a launch-day run-of-show, post copy in fenced blocks passing the 2026 guardrails (no hashtags/emojis; link in the first reply not the main post), a measurement plan, and founder-only posting gates. → `Lane Routing`.
   3. Trace it into `EMOTIONAL_DESIGN.md`/`11_STAR_EXPERIENCE.md`/`CONTENT_ASSETS.md`/`VIRAL_GROWTH.md`/`APP_STORE_LISTING.md`/`analytics/ANALYTICS.md`/`state/LAUNCH_TRACE.md`. → `Lane Routing`.
 - **Proof:** `npm run check:launch-narrative`; copy passes the guardrails and the cadence/run-of-show exist.
@@ -327,7 +327,7 @@ that grounds them. Conventions used in every loop:
 ### L18 — Launch trace & build contracts
 - **Trigger:** Moving from research to product experience / brand-design / implementation; deciding whether `engineering/TECH_SPEC.md` is needed.
 - **Action:**
-  1. Load `playbook/process/flow-traceability.md`; create `state/LAUNCH_TRACE.md` mapping evidence → product/11-star/paid-UA/viral/brand/design/build/analytics/revenue/privacy/store/verification. → `Lane Routing`; Phase 1f.
+  1. Load `knowledge/process/flow-traceability.md`; create `state/LAUNCH_TRACE.md` mapping evidence → product/11-star/paid-UA/viral/brand/design/build/analytics/revenue/privacy/store/verification. → `Lane Routing`; Phase 1f.
   2. Create `engineering/TECH_SPEC.md` when data/API/state/permissions/platform/integration behavior must be built. → `Lane Routing`; Phase 1f.
   3. Run the Lexicon Lock so one vocabulary holds across surfaces. → `flow-traceability.md` (Lexicon Lock, per change-cascade pairing).
 - **Proof:** `state/LAUNCH_TRACE.md` connects each build decision back to evidence; `engineering/TECH_SPEC.md` exists when implementation is in scope.
@@ -337,7 +337,7 @@ that grounds them. Conventions used in every loop:
 ### L19 — Security architecture & release gate
 - **Trigger:** Before threat modeling, hardening, OWASP MASVS/ASVS checks, MobSF/static scans, app-integrity decisions, Sentry/release-health, or any security-readiness claim.
 - **Action:**
-  1. Load `playbook/trust/security-release-hardening.md`; build the threat model, data classification, and platform-hardening decisions in `trust/SECURITY.md`. → `Start Here`; Phase 1g.
+  1. Load `knowledge/trust/security-release-hardening.md`; build the threat model, data classification, and platform-hardening decisions in `trust/SECURITY.md`. → `Start Here`; Phase 1g.
   2. Route Claude Security / Codex Security, run local scans (MobSF/static) or founder-approved paid security routes, and set entitlement/webhook abuse controls + monitoring/incident response. → `Start Here`; Phase 5c.
   3. Render `trust/security-review.html`, resolve/accept risks, and attach proof to `engineering/PRODUCTION_READINESS.md`. → Phase 5c.
 - **Proof:** `npm run check:security`; `trust/security-review.html` rendered with scan/proof attached.
@@ -347,26 +347,26 @@ that grounds them. Conventions used in every loop:
 ### L20 — Design Room (state → mutate → version → render)
 - **Trigger:** Any design, visual-system, cross-surface, App Store creative, landing, onboarding, paywall, or marketing-surface work.
 - **Action:**
-  1. **STATE:** read `state/business.json` + `state/theme.tokens.json` (seed from `state/` or `business/state/` if missing). → SKILL.md *Design Room Contract* step 1.
+  1. **STATE:** read `studio/seed/business.json` + `studio/seed/theme.tokens.json` (seed from `state/` or `business/state/` if missing). → SKILL.md *Design Room Contract* step 1.
   2. **MUTATE:** make one coherent JSON state mutation — no one-off proposal doc or ad-hoc HTML proof. → *Design Room Contract* step 2.
   3. **VERSION + RENDER:** `npm run validate:design-state`, `npm run render:design-room`, version with git (`git tag baseline/<name>`), and show `design/design-room.html` / `dist/design-room/`. → *Design Room Contract* steps 3–4; *Operating Posture* (design versioning is git state).
 - **Proof:** `npm run check:design-room` + `npm run validate:design-state`; rendered Design Room reflects the state mutation.
-- **Memory:** `state/business.json`, `state/theme.tokens.json`, git baselines + `state/PROJECT_STATE.yaml` design lane.
+- **Memory:** `studio/seed/business.json`, `studio/seed/theme.tokens.json`, git baselines + `state/PROJECT_STATE.yaml` design lane.
 - **Stopping condition:** `check:design-room` and `validate:design-state` both pass **and** the mutation is committed as a git baseline tag (`baseline/<name>`) with `design/design-room.html` re-rendered from it.
 
 ### L21 — Token promotion
 - **Trigger:** Theme tokens change and the design is accepted.
 - **Action:**
-  1. Run the token promotion path so `state/theme.tokens.json` flows into app-facing `design/system/` artifacts before implementation relies on the visual system (`npm run promote:design-tokens`). → SKILL.md *Design Room Contract* (token promotion paragraph); `Lane Routing`.
+  1. Run the token promotion path so `studio/seed/theme.tokens.json` flows into app-facing `design/system/` artifacts before implementation relies on the visual system (`npm run promote:design-tokens`). → SKILL.md *Design Room Contract* (token promotion paragraph); `Lane Routing`.
   2. Reconcile promoted tokens with `design/DESIGN.md` and downstream generated assets. → *Operating Posture* (token promotion as enforced contract).
 - **Proof:** `npm run check:token-promotion`; promoted `design/system/` artifacts match the accepted tokens.
 - **Memory:** `design/system/` artifacts + `state/PROJECT_STATE.yaml` design lane token state.
-- **Stopping condition:** `check:token-promotion` passes — the promoted `design/system/` artifacts diff-match `state/theme.tokens.json` before implementation consumes them.
+- **Stopping condition:** `check:token-promotion` passes — the promoted `design/system/` artifacts diff-match `studio/seed/theme.tokens.json` before implementation consumes them.
 
 ### L22 — UX patterns (Refero)
 - **Trigger:** Before flow maps, state matrices, `UX_PATTERNS.md`, bug-trap coverage, or replacing Refero with a free fallback.
 - **Action:**
-  1. Load `playbook/design/refero-ux-patterns.md`; research web/mobile patterns via Refero, or a founder-approved free route using `business/product/experience/ux-patterns/`. → `Lane Routing`; `Lane Routing` (refero-ux-patterns).
+  1. Load `knowledge/design/refero-ux-patterns.md`; research web/mobile patterns via Refero, or a founder-approved free route using `business/product/experience/ux-patterns/`. → `Lane Routing`; `Lane Routing` (refero-ux-patterns).
   2. Produce `UX_PATTERNS.md` with flow maps, state matrices, a Premium Craft Details section, and bug traps. → `Lane Routing`; `premium-mobile-craft.md` pattern contract.
 - **Proof:** `npm run check:ux-patterns`; flow maps + state matrices + bug traps present.
 - **Memory:** `UX_PATTERNS.md` + `state/PROJECT_STATE.yaml` design/ux lane.
@@ -375,7 +375,7 @@ that grounds them. Conventions used in every loop:
 ### L23 — Onboarding conversion
 - **Trigger:** Before onboarding quizzes, personalization, attribution questions, demo videos, App Review popups, paywall timing, trials, or first-session activation.
 - **Action:**
-  1. Load `playbook/experience/onboarding-conversion.md`; design the onboarding sequence as the sales surface (value reveal, personalization/attribution capture, paywall/offer routing). → `Lane Routing`; Phase 1c surfaces.
+  1. Load `knowledge/experience/onboarding-conversion.md`; design the onboarding sequence as the sales surface (value reveal, personalization/attribution capture, paywall/offer routing). → `Lane Routing`; Phase 1c surfaces.
   2. Place the native App Review popup immediately after the first value/value-reveal step. → `Lane Routing`.
   3. Wire onboarding analytics events into `analytics/ANALYTICS.md` (catalog reconciliation). → `Lane Routing`; L11.
 - **Proof:** `npm run check:onboarding`; review-prompt placement and paywall timing satisfy the validator.
@@ -385,7 +385,7 @@ that grounds them. Conventions used in every loop:
 ### L24 — Premium mobile craft
 - **Trigger:** Before in-app UI build/polish, wiring press states/animation/haptics/keyboard/loading-empty states, or a "premium feel" request.
 - **Action:**
-  1. Load `playbook/design/premium-mobile-craft.md`; apply the invisible-details layer under `design-visual-system.md`/`refero-ux-patterns.md`/`emotional-design-system.md`. → `Lane Routing` (premium craft).
+  1. Load `knowledge/design/premium-mobile-craft.md`; apply the invisible-details layer under `design-visual-system.md`/`refero-ux-patterns.md`/`emotional-design-system.md`. → `Lane Routing` (premium craft).
   2. Start from the shipped boilerplate `business/design/system/PremiumCraft.swift` (with RN/Flutter parity), honoring Reduce Motion and reading `DesignTokens.Motion`. → `premium-mobile-craft.md` (boilerplate section).
   3. Record the Premium Craft Details + bug traps in `business/product/experience/ux-patterns/UX_PATTERNS.md`. → `premium-mobile-craft.md` (pattern contract).
 - **Proof:** Press-state/haptics/keyboard/skeleton/empty-state details are implemented from the boilerplate and reflected in `UX_PATTERNS.md`; reduced-motion fallback present.
@@ -395,7 +395,7 @@ that grounds them. Conventions used in every loop:
 ### L25 — Content assets / Remotion / generated visuals
 - **Trigger:** Before rendered videos/stills, app-preview clips, ad/social/content variants, or claiming local rendered content assets are ready.
 - **Action:**
-  1. Load `playbook/design/remotion-content-assets.md` (and Higgsfield recipes in `tool-recipes/visual-and-motion-production.md`); decide Higgsfield vs Remotion local rendering per `paid-tool-routing.md`. → `Start Here` steps 15/22; `Lane Routing` (remotion-content-assets).
+  1. Load `knowledge/design/remotion-content-assets.md` (and Higgsfield recipes in `tool-recipes/visual-and-motion-production.md`); decide Higgsfield vs Remotion local rendering per `paid-tool-routing.md`. → `Start Here` steps 15/22; `Lane Routing` (remotion-content-assets).
   2. Produce assets carrying current `design/DESIGN.md` tokens; record each in `CONTENT_ASSETS.md` with `prompt_brief`, `source_job_id`, `virality_score`, marking superseded entries. → `change-cascade.md` *Generated-Asset Regeneration* guardrails.
   3. Keep generated output as supporting art only — never substituting for truthful real app UI in screenshots/App Preview. → `change-cascade.md` guardrails.
 - **Proof:** `npm run check:content-assets`; assets recorded with briefs/job ids and token basis.
@@ -405,16 +405,16 @@ that grounds them. Conventions used in every loop:
 ### L26 — Business Control Plane extension
 - **Trigger:** Extending the Design Room into new analytics/monetization/store-ops/growth panels over the same state store and theme tokens.
 - **Action:**
-  1. Load `playbook/process/control-plane.md`; add the new panel over `state/business.json` + `state/theme.tokens.json` + `state/schema/business.schema.json` rather than a separate store. → `Lane Routing` (control-plane load); `control-plane.md` *Current Panel*.
+  1. Load `knowledge/process/control-plane.md`; add the new panel over `studio/seed/business.json` + `studio/seed/theme.tokens.json` + `state/schema/business.schema.json` rather than a separate store. → `Lane Routing` (control-plane load); `control-plane.md` *Current Panel*.
   2. Keep the workspace read model consistent with the rendered panels. → *Operating Posture* (Control Plane as enforced contract).
 - **Proof:** `npm run check:control-plane` + `npm run check:business-control-plane-workspace`.
-- **Memory:** `state/business.json`/schema + the generated workspace read model + `state/PROJECT_STATE.yaml`.
-- **Stopping condition:** `check:control-plane` and `check:business-control-plane-workspace` both pass — new panels render from `state/business.json` + `state/theme.tokens.json` with no separate store.
+- **Memory:** `studio/seed/business.json`/schema + the generated workspace read model + `state/PROJECT_STATE.yaml`.
+- **Stopping condition:** `check:control-plane` and `check:business-control-plane-workspace` both pass — new panels render from `studio/seed/business.json` + `studio/seed/theme.tokens.json` with no separate store.
 
 ### L27 — ASO & store ops
 - **Trigger:** Before App Store/Play metadata, screenshots, keyword research, Apple Search Ads, launch reviews, or post-launch growth loops.
 - **Action:**
-  1. Load `playbook/store/aso-store-ops.md`; do keyword research and draft App Store/Play metadata (name/subtitle/keywords/description/What's New). → `Lane Routing`; Phase 3.
+  1. Load `knowledge/store/aso-store-ops.md`; do keyword research and draft App Store/Play metadata (name/subtitle/keywords/description/What's New). → `Lane Routing`; Phase 3.
   2. Plan ASA, ratings/reviews loops, and post-launch monitoring; localize per the `LOCALIZATION_MARKET_RESEARCH.md` tiers (L10). → `Lane Routing`.
 - **Proof:** `npm run check:aso-metadata`; metadata fields validate against keyword/length rules.
 - **Memory:** `APP_STORE_LISTING.md` ASO sections + `state/PROJECT_STATE.yaml` aso lane.
@@ -423,7 +423,7 @@ that grounds them. Conventions used in every loop:
 ### L28 — App Store listing prep packet
 - **Trigger:** Before listing fields, interactive privacy questionnaire, IAP/subscription field maps, custom product pages, in-app events, or App Store marketing material tied to the design system.
 - **Action:**
-  1. Load `playbook/store/app-store-listing-prep.md`; assemble `APP_STORE_LISTING.md` (default listing fields, App Privacy answers, pricing/subscription setup, CPPs, in-app events, localization matrix). → `Lane Routing`; Phase 3.
+  1. Load `knowledge/store/app-store-listing-prep.md`; assemble `APP_STORE_LISTING.md` (default listing fields, App Privacy answers, pricing/subscription setup, CPPs, in-app events, localization matrix). → `Lane Routing`; Phase 3.
   2. Align pricing/subscription copy with RevenueCat/Stripe/web-funnel (L40) and mark founder-only approval gates. → `Lane Routing`.
 - **Proof:** `APP_STORE_LISTING.md` packet complete; App Privacy answers reconcile with `trust/PRIVACY.md` (L41) and `store/GOOGLE_PLAY_RELEASE.md` Data Safety (L34).
 - **Memory:** `APP_STORE_LISTING.md` + `state/PROJECT_STATE.yaml` listing lane.
@@ -432,7 +432,7 @@ that grounds them. Conventions used in every loop:
 ### L29 — Apple signing & release readiness
 - **Trigger:** Before Apple Developer enrollment, Team ID, bundle/App IDs, signing, capabilities, certificates, profiles, archives, exports, uploads, or TestFlight.
 - **Action:**
-  1. Load `playbook/store/apple-signing-release.md`; record account/Team ID/bundle ID/app record/signing/certificate/profile/archive/export/upload/TestFlight state in `store/APPLE_SIGNING.md`. → `Lane Routing`; Phase 3.
+  1. Load `knowledge/store/apple-signing-release.md`; record account/Team ID/bundle ID/app record/signing/certificate/profile/archive/export/upload/TestFlight state in `store/APPLE_SIGNING.md`. → `Lane Routing`; Phase 3.
   2. State why simulator builds do or do not prove distribution readiness. → `Lane Routing`.
 - **Proof:** `npm run check:apple-signing`; the signing packet is complete with founder-gated account steps flagged.
 - **Memory:** `store/APPLE_SIGNING.md` + `state/PROJECT_STATE.yaml` signing lane.
@@ -450,7 +450,7 @@ that grounds them. Conventions used in every loop:
 ### L31 — Store console workflow
 - **Trigger:** Before "where do I click / what do I paste" handoffs in App Store Connect or Google Play Console.
 - **Action:**
-  1. Load `playbook/store/store-console-workflow.md`; produce `store/STORE_CONSOLE.md` + `store/store-console.html` naming the exact ASC/Play pages, the field-by-field paste values, and which items need founder approval. → `Lane Routing`; Phase 3.
+  1. Load `knowledge/store/store-console-workflow.md`; produce `store/STORE_CONSOLE.md` + `store/store-console.html` naming the exact ASC/Play pages, the field-by-field paste values, and which items need founder approval. → `Lane Routing`; Phase 3.
 - **Proof:** `npm run check:store-console`; the packet maps each console page to its paste values and approval gates.
 - **Memory:** `store/STORE_CONSOLE.md` + `store/store-console.html` + `state/PROJECT_STATE.yaml` store-console lane.
 - **Stopping condition:** `check:store-console` passes — `store/STORE_CONSOLE.md` maps every required ASC/Play page to its paste values and marks each founder-approval gate (grep finds no "set this up in the console" placeholder).
@@ -458,7 +458,7 @@ that grounds them. Conventions used in every loop:
 ### L32 — ASC CLI automation
 - **Trigger:** Before automating App Store Connect with the Rork `asc` CLI / CLI skill pack — app creation, metadata, screenshots, TestFlight, review status, RevenueCat catalog sync.
 - **Action:**
-  1. Load `playbook/store/app-store-connect-cli.md`; refresh local `asc` CLI help first. → `Lane Routing`; *Source Freshness*.
+  1. Load `knowledge/store/app-store-connect-cli.md`; refresh local `asc` CLI help first. → `Lane Routing`; *Source Freshness*.
   2. If `asc` is installed, run the auth-recovery ladder (keychain profiles, account-level keys, `asc auth init/login`) instead of reporting "cannot access ASC"; report any missing app/cert/RevenueCat record as a founder-gated setup step with the exact next command. → *Operating Posture* (ASC access as setup, not a wall).
 - **Proof:** `asc` auth succeeds or the exact founder-gated next command is recorded; CLI command basis matches refreshed help.
 - **Memory:** `store/STORE_CONSOLE.md`/`APP_STORE_LISTING.md` ASC-CLI notes + `state/PROJECT_STATE.yaml`.
@@ -476,7 +476,7 @@ that grounds them. Conventions used in every loop:
 ### L34 — Google Play release
 - **Trigger:** Android in scope — platforms include android, or an android bundle id exists.
 - **Action:**
-  1. Load `playbook/store/google-play-release.md`; produce `store/GOOGLE_PLAY_RELEASE.md` (developer account type, Data Safety reconciled with iOS labels, content rating, Play App Signing/AAB, target API level, release tracks). → `Lane Routing`; Phase 3.
+  1. Load `knowledge/store/google-play-release.md`; produce `store/GOOGLE_PLAY_RELEASE.md` (developer account type, Data Safety reconciled with iOS labels, content rating, Play App Signing/AAB, target API level, release tracks). → `Lane Routing`; Phase 3.
   2. Plan the personal-account closed-testing gate (12 testers / 14 days) into the launch calendar from day one and triage the pre-launch report. → `Lane Routing`.
 - **Proof:** `npm run check:google-play`; Data Safety reconciles with iOS privacy labels and the closed-testing gate is scheduled.
 - **Memory:** `store/GOOGLE_PLAY_RELEASE.md` + `state/PROJECT_STATE.yaml` google-play lane.
@@ -495,7 +495,7 @@ that grounds them. Conventions used in every loop:
 ### L36 — Backend data contract
 - **Trigger:** Before schema/auth prompts run or `engineering/TECH_SPEC.md` data/API sections harden; founder wants Firebase/custom instead of the Supabase default.
 - **Action:**
-  1. Load `playbook/engineering/backend-data-contract.md`; record Backend Selection (supabase default / firebase / custom) with a reason, the Data Model, the tested Authorization Model (RLS/security rules/middleware authz), and Migrations And Environments. → `Lane Routing`; Phase 5b.
+  1. Load `knowledge/engineering/backend-data-contract.md`; record Backend Selection (supabase default / firebase / custom) with a reason, the Data Model, the tested Authorization Model (RLS/security rules/middleware authz), and Migrations And Environments. → `Lane Routing`; Phase 5b.
   2. Adapt archetype prompts to the selected route instead of running the Supabase defaults verbatim. → `Lane Routing`.
 - **Proof:** `npm run check:backend-contract`; the authorization model is tested (RLS/security-rule tests) and the data contract is complete.
 - **Memory:** `engineering/TECH_SPEC.md` Data Contract section + `state/PROJECT_STATE.yaml` backend lane.
@@ -504,7 +504,7 @@ that grounds them. Conventions used in every loop:
 ### L37 — App agent roster & repo entrypoints
 - **Trigger:** Before builder handoff bundles, business `AGENTS.md`/`CLAUDE.md`, `APP_AGENTS.md`, or `agents/` role prompts.
 - **Action:**
-  1. Load `playbook/engineering/app-agent-roster.md`; fill the shipped `business/engineering/repo-agent-entrypoints/` `AGENTS.md`+`CLAUDE.md` with app-specific context so future agents keep using this skill without another founder prompt. → `Lane Routing`; Phase 5.
+  1. Load `knowledge/engineering/app-agent-roster.md`; fill the shipped `business/engineering/repo-agent-entrypoints/` `AGENTS.md`+`CLAUDE.md` with app-specific context so future agents keep using this skill without another founder prompt. → `Lane Routing`; Phase 5.
   2. Create `APP_AGENTS.md` + the seven role prompts under `agents/` (orchestrator, marketing-guru, engineering-leader, product-leader, design-guru, customer-success, security-architect). → `Lane Routing`.
 - **Proof:** `npm run check:agent-entrypoints`; the entrypoints + roster + seven roles exist and route back to the skill.
 - **Memory:** business `AGENTS.md`/`CLAUDE.md`, `APP_AGENTS.md`, `agents/` + `state/PROJECT_STATE.yaml` handoff lane.
@@ -513,7 +513,7 @@ that grounds them. Conventions used in every loop:
 ### L38 — MobAI device automation & demo videos
 - **Trigger:** Before MobAI device automation, app-flow demo videos, app-preview clips, or bug-repro recordings.
 - **Action:**
-  1. Load `playbook/engineering/mobai-toolbelt.md`; use MobAI recorder skills to capture flows (`.mob`/`screenplay.json`). → `Start Here` steps 13/22; `Lane Routing` (mobai-toolbelt).
+  1. Load `knowledge/engineering/mobai-toolbelt.md`; use MobAI recorder skills to capture flows (`.mob`/`screenplay.json`). → `Start Here` steps 13/22; `Lane Routing` (mobai-toolbelt).
   2. Record raw capture, final export, captions, upload copy, and rerender path in `growth/DEMO_VIDEO.md`/`CONTENT_ASSETS.md`. → Deliverable Standard (MobAI artifacts).
 - **Proof:** Demo artifacts recorded with `.mob`/`screenplay.json`, raw capture, export, captions, and rerender path; MobAI used per `paid-tool-routing.md` (L04).
 - **Memory:** `growth/DEMO_VIDEO.md`/`CONTENT_ASSETS.md` + `state/PROJECT_STATE.yaml` demo lane.
@@ -522,16 +522,16 @@ that grounds them. Conventions used in every loop:
 ### L39 — Native iOS proof (Route Ladder)
 - **Trigger:** Before any Apple simulator/device proof — in-app iOS Simulator (rung 0), Codex Desktop native iOS, XcodeBuildMCP, serve-sim, or SnapshotPreviews — or command examples.
 - **Action:**
-  1. Load `playbook/engineering/xcodebuildmcp-testing.md` and start at its Route Ladder; on a local Mac, rung 0 (the in-app iOS Simulator) needs no install at all. Refresh official docs + local `xcodebuildmcp --help`, tool lists, SnapshotPreviews + serve-sim READMEs before writing commands for the higher rungs. → `Lane Routing`; *Source Freshness*.
+  1. Load `knowledge/engineering/xcodebuildmcp-testing.md` and start at its Route Ladder; on a local Mac, rung 0 (the in-app iOS Simulator) needs no install at all. Refresh official docs + local `xcodebuildmcp --help`, tool lists, SnapshotPreviews + serve-sim READMEs before writing commands for the higher rungs. → `Lane Routing`; *Source Freshness*.
   2. Run device/simulator E2E and capture proof, marking SnapshotPreviews exports preview-only. For rung 0, record the local session, the simulated device and OS, the fixture account, and the coverage the route does not provide. → `Lane Routing`; Phase 5b.
-- **Proof:** `gates/engineering/check-native-ios-proof.ts` (run via `npm run audit`); E2E/screenshot proof attached with the docs/CLI basis recorded.
+- **Proof:** `validation/business/engineering/check-native-ios-proof.ts` (run via `npm run audit`); E2E/screenshot proof attached with the docs/CLI basis recorded.
 - **Memory:** `engineering/PRODUCTION_READINESS.md` native-iOS proof section + `state/PROJECT_STATE.yaml`.
-- **Stopping condition:** `gates/engineering/check-native-ios-proof.ts` passes under `audit:ci` — `engineering/PRODUCTION_READINESS.md` carries E2E/screenshot proof with the recorded docs/CLI basis (SnapshotPreviews rows marked preview-only), or the blocker is recorded.
+- **Stopping condition:** `validation/business/engineering/check-native-ios-proof.ts` passes under `audit:ci` — `engineering/PRODUCTION_READINESS.md` carries E2E/screenshot proof with the recorded docs/CLI basis (SnapshotPreviews rows marked preview-only), or the blocker is recorded.
 
 ### L40 — Revenue monetization
 - **Trigger:** Before RevenueCat, Stripe, app-store products, web billing, paywalls, subscriptions, webhooks, taxes, pricing, or entitlement validation.
 - **Action:**
-  1. Load `playbook/money/revenue-monetization.md`; choose RevenueCat + Stripe/Web Billing, define products, entitlement identity, paywall, and webhooks. → `Lane Routing`; Phase 3b.
+  1. Load `knowledge/money/revenue-monetization.md`; choose RevenueCat + Stripe/Web Billing, define products, entitlement identity, paywall, and webhooks. → `Lane Routing`; Phase 3b.
   2. Produce `revenue/REVENUE_OPS.md`; validate sandbox and production purchases and reconcile pricing with `APP_STORE_LISTING.md`/legal. → Phase 3b.
 - **Proof:** `npm run check:revenue` + `npm run probe:revenuecat`; sandbox + production purchase validation evidence (provider-proof, L07).
 - **Memory:** `revenue/REVENUE_OPS.md` + `state/PROJECT_STATE.yaml` revenue lane.
@@ -540,7 +540,7 @@ that grounds them. Conventions used in every loop:
 ### L41 — Privacy & terms
 - **Trigger:** Before drafting/publishing privacy policy, terms, EULA, subscription terms, data-deletion flows, or app-store privacy disclosures.
 - **Action:**
-  1. Load `playbook/trust/privacy-terms.md`; draft `trust/PRIVACY.md` + `trust/TERMS.md` (and account-deletion/subscription terms) from `business/trust/PRIVACY.md`/`trust/TERMS.md`. → `Lane Routing`.
+  1. Load `knowledge/trust/privacy-terms.md`; draft `trust/PRIVACY.md` + `trust/TERMS.md` (and account-deletion/subscription terms) from `business/trust/PRIVACY.md`/`trust/TERMS.md`. → `Lane Routing`.
   2. Reconcile App Store App Privacy answers + Play Data Safety with actual data collection/SDKs (pairs with L28/L30/L34). → `Lane Routing`; `change-cascade.md` privacy row.
 - **Proof:** `trust/PRIVACY.md`/`trust/TERMS.md` published; privacy answers reconcile with the manifest, Data Safety, and analytics/SDK reality.
 - **Memory:** `trust/PRIVACY.md`, `trust/TERMS.md` + `state/PROJECT_STATE.yaml` legal lane.
@@ -549,7 +549,7 @@ that grounds them. Conventions used in every loop:
 ### L42 — Resend email ops
 - **Trigger:** Before Resend domains/keys, transactional/lifecycle/broadcast email, contacts/topics, webhooks, inbound, unsubscribe, or deliverability work.
 - **Action:**
-  1. Load `playbook/operations/resend-email-ops.md`; configure sender-domain DNS (SPF/DKIM), API keys (via L05), and starter templates from `business/growth/resend/email-templates.ts`. → `Lane Routing`; Phase 4.
+  1. Load `knowledge/operations/resend-email-ops.md`; configure sender-domain DNS (SPF/DKIM), API keys (via L05), and starter templates from `business/growth/resend/email-templates.ts`. → `Lane Routing`; Phase 4.
   2. Produce `growth/EMAIL_OPS.md` recording the SPF/DKIM basis, unsubscribe handling, and the `design/DESIGN.md` brand-token mapping; populate brand/tone from `design/DESIGN.md`/`11_STAR_EXPERIENCE.md`. → `Lane Routing`; `Lane Routing` (resend).
 - **Proof:** `npm run check:email`; proof artifacts + `growth/EMAIL_OPS.md` with DNS basis, unsubscribe, and brand-token mapping (provider-proof, L07).
 - **Memory:** `growth/EMAIL_OPS.md` + `state/PROJECT_STATE.yaml` email lane.
@@ -558,7 +558,7 @@ that grounds them. Conventions used in every loop:
 ### L43 — GEO/SEO public visibility
 - **Trigger:** Before editing any file with landing/policy/blog copy, component-level copy, screenshot metadata, `robots.txt`, `llms.txt`, `sitemap.xml`, schema, or metadata — not after the rewrite.
 - **Action:**
-  1. Load `playbook/growth/geo-seo.md` before the first file edit; set target keywords, citability content, brand-entity signals, schema/JSON-LD, and AI-crawler access. → `Lane Routing`.
+  1. Load `knowledge/growth/geo-seo.md` before the first file edit; set target keywords, citability content, brand-entity signals, schema/JSON-LD, and AI-crawler access. → `Lane Routing`.
   2. Verify crawlability, schema marking, and AI-search discoverability after edits. → `Lane Routing`; *Operating Posture* (Verify what shipped).
 - **Proof:** Public pages are crawlable, schema-marked, and AI-discoverable (overlaps with `check:landing-funnel` checks where the funnel exists).
 - **Memory:** landing/policy files + `state/LAUNCH_TRACE.md` SEO/GEO notes + `state/PROJECT_STATE.yaml` geo lane.
@@ -576,7 +576,7 @@ that grounds them. Conventions used in every loop:
 ### L45 — UGC creator engine
 - **Trigger:** Before founder-led organic social, UGC sourcing, creator contracts/payments, or format-discovery tests.
 - **Action:**
-  1. Load `playbook/growth/ugc-creator-engine.md` (and `viral-growth-loops.md` first when the plan depends on referrals/share-to-unlock/paywall timing). → `Lane Routing`; `Lane Routing` (ugc-creator-engine).
+  1. Load `knowledge/growth/ugc-creator-engine.md` (and `viral-growth-loops.md` first when the plan depends on referrals/share-to-unlock/paywall timing). → `Lane Routing`; `Lane Routing` (ugc-creator-engine).
   2. Produce `growth/UGC_PLAYBOOK.md`: UGC fit decision, 90-day creator format-discovery plan, sourcing approach, creator budget, script/format loop, disclosure rules, and stop/scale thresholds. → Deliverable Standard (UGC fit).
 - **Proof:** `growth/UGC_PLAYBOOK.md` complete with fit decision, 90-day plan, disclosure rules, and stop/scale thresholds; creator spend founder-gated (L04).
 - **Memory:** `growth/UGC_PLAYBOOK.md` + `state/PROJECT_STATE.yaml` ugc lane.
@@ -585,7 +585,7 @@ that grounds them. Conventions used in every loop:
 ### L46 — Fastlane growth ops
 - **Trigger:** After launch approval/public beta, or usefastlane.ai setup, social account connection, Blitz angles/preferences, generated content, scheduling, or social analytics.
 - **Action:**
-  1. Load `playbook/growth/fastlane-growth-ops.md`; set up the Fastlane workspace, social connections, and Blitz angles/preferences, feeding MobAI/native iOS/Higgsfield/Remotion media inputs (L25/L38/L39). → `Lane Routing`; Phase 6.
+  1. Load `knowledge/growth/fastlane-growth-ops.md`; set up the Fastlane workspace, social connections, and Blitz angles/preferences, feeding MobAI/native iOS/Higgsfield/Remotion media inputs (L25/L38/L39). → `Lane Routing`; Phase 6.
   2. Produce `growth/FASTLANE_OPS.md`; QA generated/rendered content and run the weekly iteration loop. → Phase 6.
 - **Proof:** `growth/FASTLANE_OPS.md` workspace + connections + angles recorded; scheduling/posting founder-approved; analytics snapshots captured.
 - **Memory:** `growth/FASTLANE_OPS.md` + `state/PROJECT_STATE.yaml` fastlane lane.
@@ -594,7 +594,7 @@ that grounds them. Conventions used in every loop:
 ### L47 — Post-launch operations
 - **Trigger:** App live (phase_6/6b), "what now", weekly ops, incident response, review-response, or retention-review work.
 - **Action:**
-  1. Load `playbook/operations/post-launch-operations.md`; produce `operations/POST_LAUNCH_OPS.md` (Weekly Operating Rhythm, Crash Triage with route + release gate, Review Responses with an SLA, Release/Hotfix Cadence with staged rollout, Retention Review with cohort source + churn split, Support Operations). → `Lane Routing`; Phase 6b.
+  1. Load `knowledge/operations/post-launch-operations.md`; produce `operations/POST_LAUNCH_OPS.md` (Weekly Operating Rhythm, Crash Triage with route + release gate, Review Responses with an SLA, Release/Hotfix Cadence with staged rollout, Retention Review with cohort source + churn split, Support Operations). → `Lane Routing`; Phase 6b.
   2. Write `operations/LAUNCH_RETRO.md` at launch +7/30/90 days so misses become failure cards + LaunchBench candidates; revisit any lite-tier deferred lanes at day 30. → Phase 6b.
 - **Proof:** `npm run check:post-launch`; the weekly rhythm + retro cadence are present with SLAs and cohort sources.
 - **Memory:** `operations/POST_LAUNCH_OPS.md`, `operations/LAUNCH_RETRO.md` + `state/PROJECT_STATE.yaml` post_launch_ops lane.
@@ -603,7 +603,7 @@ that grounds them. Conventions used in every loop:
 ### L48 — Source-freshness maintenance (maintainer)
 - **Trigger:** Maintaining this skill, adding external URLs, refreshing third-party docs/commands, or reviewing weekly source diffs.
 - **Action:**
-  1. Load `machine/source-freshness-maintenance.md`; register every new external URL in `machine/source-registry.yaml`. → `Lane Routing`; AGENTS.md *Source Freshness*.
+  1. Load `validation/repository/source-freshness-maintenance.md`; register every new external URL in `validation/repository/source-registry.yaml`. → `Lane Routing`; AGENTS.md *Source Freshness*.
   2. Refresh official docs / local CLI `--help` before changing any fast-moving command guidance and record the basis. → AGENTS.md *Source Freshness*.
   3. Run `npm run check:source-registry` and `npm run refresh:source-freshness`. → AGENTS.md Commands.
 - **Proof:** `npm run check:source-registry` passes; refreshed candidates are reviewed before becoming accepted policy.
@@ -613,7 +613,7 @@ that grounds them. Conventions used in every loop:
 ### L49 — LaunchBench / failure-cards / coverage audit
 - **Trigger:** Before any launch-readiness claim, after a repeated agent miss, or when adding a validator/scenario.
 - **Action:**
-  1. Load `machine/launchbench-evals.md` + `playbook/process/failure-cards.md`; run `npm run launchbench` (definition lint + deterministic fixtures) and `npm run check:lane-coverage`. → `Lane Routing`; `Lane Routing` (launchbench/failure-cards).
+  1. Load `validation/repository/launchbench-evals.md` + `knowledge/process/failure-cards.md`; run `npm run launchbench` (definition lint + deterministic fixtures) and `npm run check:lane-coverage`. → `Lane Routing`; `Lane Routing` (launchbench/failure-cards).
   2. Turn known misses into failure cards or LaunchBench scenarios (not oral lore); keep the split honest — `evals:behavioral` is the opt-in live-agent subset, not the same as `launchbench`. → `Lane Routing`; `Lane Routing`.
 - **Proof:** `npm run launchbench` + `npm run check:lane-coverage` pass (or active failure cards are explicit); `npm run test:validators` green.
 - **Memory:** `operations/FAILURE_CARDS.md` + `evals/launchbench/` scenarios + `state/PROJECT_STATE.yaml` active failure cards.
@@ -622,7 +622,7 @@ that grounds them. Conventions used in every loop:
 ### L50 — Skill runtime sync & version discipline (maintainer)
 - **Trigger:** After any skill change — bump the version, sync the installed runtime (maintainer machine only), and run the readiness gate.
 - **Action:**
-  1. Load `machine/skill-versioning.md`; bump `skill-version.json` and pass `check:version-discipline`/`check:skill-version`. → `Lane Routing`; AGENTS.md *Runtime Sync*.
+  1. Load `validation/repository/skill-versioning.md`; bump `skill-version.json` and pass `check:version-discipline`/`check:skill-version`. → `Lane Routing`; AGENTS.md *Runtime Sync*.
   2. On the maintainer machine only (where `~/.codex/skills/b2c-mobile-business-launch` exists), mirror the checkout into the installed runtime, run the runtime audit, and verify the Claude/Agents symlinks; in clones/CI/cloud, skip runtime sync and use `npm run audit:ci` as the readiness gate. → CLAUDE.md (maintainer note); AGENTS.md *Runtime Sync*.
 - **Proof:** `npm run check:skill-version` + `npm run check:version-discipline` pass; `npm run audit`/`audit:ci` green; runtime `diff -qr` clean where sync applies.
 - **Memory:** `skill-version.json` manifest + the installed runtime copy (maintainer machine).
@@ -631,7 +631,7 @@ that grounds them. Conventions used in every loop:
 ### L51 — Founder-zero operator bootstrap
 - **Trigger:** Every broad launch start; before account/social/Doppler bootstrap; when the founder is unsure what to do next; whenever an agent is about to hand back a checklist instead of operating the business.
 - **Action:**
-  1. Load `playbook/operations/founder-zero-operator.md` and seed access state before asking the founder anything a repo read can answer. → `Start Here` (recover source truth); `Lane Routing` (founder-zero operating).
+  1. Load `knowledge/operations/founder-zero-operator.md` and seed access state before asking the founder anything a repo read can answer. → `Start Here` (recover source truth); `Lane Routing` (founder-zero operating).
   2. Record business identity, access, and the one-decision-at-a-time gates in `operations/BUSINESS_ACCESS.md` + `operations/business-access.json`. → `Lane Routing` (founder-zero operating).
   3. Run `npm run check:founder-operator -- --root skill/b2c-mobile-business-launch/templates --state state/PROJECT_STATE.yaml`. → AGENTS.md Commands.
 - **Proof:** `check:founder-operator` passes; the rendered cockpit phase matches `state/PROJECT_STATE.yaml`.
@@ -641,7 +641,7 @@ that grounds them. Conventions used in every loop:
 ### L52 — Agent operations ledger
 - **Trigger:** Before any authenticated browser, API, CLI, or native action against a provider, social, or store account.
 - **Action:**
-  1. Load `playbook/operations/frontier-agent-operations.md` before the first authenticated action. → `Lane Routing` (agent operations).
+  1. Load `knowledge/operations/frontier-agent-operations.md` before the first authenticated action. → `Lane Routing` (agent operations).
   2. Record the action, its authorization basis, and its outcome in `operations/AGENT_OPERATIONS.md` + `operations/agent-operations.json`. → `Lane Routing` (agent operations).
   3. Tie every provider-backed claim to `operations/PROVIDER_PROOF.md` rather than to prose. → `Prove It Before Calling It Done`.
   4. Run `npm run check:agent-operations -- --root skill/b2c-mobile-business-launch/templates --state state/PROJECT_STATE.yaml`. → AGENTS.md Commands.
@@ -652,22 +652,22 @@ that grounds them. Conventions used in every loop:
 ### L53 — Writing-quality gate (no-slop)
 - **Trigger:** Before writing or reviewing any founder-facing copy, or any marketing copy this skill generates — onboarding, store listing, landing, paywall, lifecycle email, ads, launch posts, UGC scripts, GEO/SEO metadata.
 - **Action:**
-  1. Load `playbook/words/no-slop-writing.md` and establish the voice being protected from `strategy/BRAND.md` and `11_STAR_EXPERIENCE.md` before cutting a word. → `Lane Routing` (writing quality); no-slop-writing.md §1.
+  1. Load `knowledge/words/no-slop-writing.md` and establish the voice being protected from `strategy/BRAND.md` and `11_STAR_EXPERIENCE.md` before cutting a word. → `Lane Routing` (writing quality); no-slop-writing.md §1.
   2. Cut the banned words and named slop patterns; apply the per-channel character limits. → no-slop-writing.md §§4–5, §7.
   3. Run `npm run check:no-slop -- --root skill/b2c-mobile-business-launch/templates --skill-root skill/b2c-mobile-business-launch`. The gate parses its rule table out of the reference, so edit the reference and the gate follows. → AGENTS.md *Founder-Facing Copy*.
 - **Proof:** `check:no-slop` reports zero errors; it errors on shipped copy surfaces and this repo's public docs, and warns on guidance prose.
-- **Memory:** the edited copy surfaces + the `playbook/words/no-slop-writing.md` rule table the gate parses.
+- **Memory:** the edited copy surfaces + the `knowledge/words/no-slop-writing.md` rule table the gate parses.
 - **Stopping condition:** the edited copy surface exists and is non-empty, **and** `check:no-slop` exits 0 with zero errors. The existence clause comes first because a zero-error result over an absent surface is vacuously true. The judgment-dependent rules are deliberately outside the gate, so the terminator is the error count alone, never an assessment of whether the copy reads well.
 
 ### L54 — Founder-language translation (maintainer)
 - **Trigger:** Adding or renaming a lane, status, phase, autonomy mode, or provider route; any change to a founder-visible surface.
 - **Action:**
-  1. Add the founder label in `scripts/lib/founder-copy.ts` in the *same commit* as the new lane, status, phase, autonomy mode, or provider route. → AGENTS.md *Founder-Facing Copy*.
+  1. Add the founder label in `tooling/lib/founder-copy.ts` in the *same commit* as the new lane, status, phase, autonomy mode, or provider route. → AGENTS.md *Founder-Facing Copy*.
   2. Route every founder-visible renderer through `lib/founder-copy.ts`; never print a raw `state/PROJECT_STATE.yaml` key into a founder surface. → AGENTS.md *Founder-Facing Copy*.
-  3. When renaming a founder-visible heading, grep `scripts/` first — `check-founder-operator-bootstrap.ts` and `check-agent-operations.ts` both split the rendered cockpit on a literal `<h2>` string, so the rename and the validator update are one commit. → AGENTS.md *Founder-Facing Copy*.
+  3. When renaming a founder-visible heading, grep `tooling/` first — `check-founder-operator-bootstrap.ts` and `check-agent-operations.ts` both split the rendered cockpit on a literal `<h2>` string, so the rename and the validator update are one commit. → AGENTS.md *Founder-Facing Copy*.
   4. Run `npm run check:founder-copy -- --root skill/b2c-mobile-business-launch/templates --skill-root skill/b2c-mobile-business-launch`. → AGENTS.md Commands.
 - **Proof:** `check:founder-copy` passes.
-- **Memory:** the label table in `scripts/lib/founder-copy.ts`; the rendered cockpit.
+- **Memory:** the label table in `tooling/lib/founder-copy.ts`; the rendered cockpit.
 - **Stopping condition:** `check:founder-copy` passes — every lane, status, phase, and autonomy mode in `lib/launch-state.ts` has founder copy, and no snake_case, SCREAMING_SNAKE, or pipe-delimited token reaches a founder-visible surface. Coverage is computed from `launch-state.ts`, so an unlabeled new lane fails the gate.
 
 ### L55 — Skill triggering contract (maintainer)
@@ -681,13 +681,13 @@ that grounds them. Conventions used in every loop:
 - **Stopping condition:** `check:autopilot` passes — the frontmatter parses to an object, the description is present, within length, angle-bracket-free, and carries its required terms, and the triggering eval parses. Fails closed when either file is missing.
 
 ### L56 — ASC command contract (maintainer)
-- **Trigger:** Before changing any documented `asc` command in `playbook/store/app-store-connect-cli.md`.
+- **Trigger:** Before changing any documented `asc` command in `knowledge/store/app-store-connect-cli.md`.
 - **Action:**
   1. Refresh the installed CLI's `--help`/version output first; never update a third-party command example from memory. → AGENTS.md *Source Freshness* and *Guardrails*.
   2. Reconcile every documented command against what the installed CLI actually reports. → `check-asc-command-contract.ts`.
   3. Run `npm run check:asc-command-contract -- --skill-root skill/b2c-mobile-business-launch`. → AGENTS.md Commands.
 - **Proof:** `check:asc-command-contract` reports zero errors.
-- **Memory:** the command table in `playbook/store/app-store-connect-cli.md`.
+- **Memory:** the command table in `knowledge/store/app-store-connect-cli.md`.
 - **Stopping condition:** `check:asc-command-contract` exits 0 with zero errors. A missing reference is an error, so the stop cannot fire on an absent artifact; an installed CLI older than the stored contract downgrades to a named `live_cli_stale` warning rather than blocking, which keeps the stop reachable on a machine with a shadowed `asc`.
 
 ---

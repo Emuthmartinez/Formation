@@ -19,7 +19,7 @@ eval that now covers this behavior. If the change genuinely cannot be checked, s
 - [ ] Edited the source under `skill/b2c-mobile-business-launch/`, not an installed runtime copy.
 - [ ] Bumped `skill-version.json` in this commit if anything under `skill/` changed, with a concrete release note.
 - [ ] Versions stay in parity across both `package.json` files, `skill-version.json`, and both lockfiles.
-- [ ] Any new external URL is registered in `machine/source-registry.yaml`.
+- [ ] Any new external URL is registered in `validation/repository/source-registry.yaml`.
 - [ ] Refreshed the official docs or local CLI `--help` before changing third-party command guidance.
 - [ ] No secrets, tokens, or real-looking secret values in state, templates, cockpits, or fixtures.
 - [ ] Updated every place that mirrors a changed command, reference, or template.

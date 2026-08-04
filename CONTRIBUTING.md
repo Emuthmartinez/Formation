@@ -22,7 +22,7 @@ Read these first, in order:
 3. [`CLAUDE.md`](CLAUDE.md): Claude-specific maintainer notes.
 4. [`docs/validators.md`](docs/validators.md): every gate and what it checks.
 5. `skill/b2c-mobile-business-launch/SKILL.md`: the skill entrypoint and routing.
-6. The specific `references/`, `business/`, `scripts/`, or `evals/` file you intend to change.
+6. The specific `references/`, `business/`, `tooling/`, or `evals/` file you intend to change.
 
 All real content lives under `skill/b2c-mobile-business-launch/`. The author's machine mirrors that into an installed runtime at `~/.codex/skills/...`; that sync is maintainer-only and external contributors never need to do it. Always edit the repo source.
 
@@ -74,7 +74,7 @@ Keep versions in parity across `package.json` (root), `skill/b2c-mobile-business
 
 ### Source freshness
 
-Any new external URL you reference anywhere in the repo must be registered in `skill/b2c-mobile-business-launch/machine/source-registry.yaml` with an `id`, `url`, `owner`, and the `locations` it appears in. `check:source-registry` enforces this at error severity, and it scans markdown, YAML, JSON, and TypeScript alike.
+Any new external URL you reference anywhere in the repo must be registered in `skill/b2c-mobile-business-launch/validation/repository/source-registry.yaml` with an `id`, `url`, `owner`, and the `locations` it appears in. `check:source-registry` enforces this at error severity, and it scans markdown, YAML, JSON, and TypeScript alike.
 
 For fast-moving third-party tools (Doppler, RevenueCat, Stripe, PostHog, Resend, Apple and App Store Connect, Google Play, Fastlane, Remotion), refresh the official docs or local CLI `--help` before changing command guidance. Do not rely on memory or old transcripts.
 
@@ -84,7 +84,7 @@ Never commit secrets. `.env.example` files are names-only. State files, cockpits
 
 ### Writing quality
 
-`check:no-slop` reads its banned words and slop patterns out of [`playbook/words/no-slop-writing.md`](skill/b2c-mobile-business-launch/playbook/words/no-slop-writing.md) and scans shipped copy templates, guidance references, and this repo's own root docs including `README.md` and `CONTRIBUTING.md`. Edit the reference and the gate follows. The judgment-dependent rules stay advisory on purpose, because turning "cut the adverb when it adds nothing" into a regex would flatten brand voice.
+`check:no-slop` reads its banned words and slop patterns out of [`knowledge/words/no-slop-writing.md`](skill/b2c-mobile-business-launch/knowledge/words/no-slop-writing.md) and scans shipped copy templates, guidance references, and this repo's own root docs including `README.md` and `CONTRIBUTING.md`. Edit the reference and the gate follows. The judgment-dependent rules stay advisory on purpose, because turning "cut the adverb when it adds nothing" into a regex would flatten brand voice.
 
 ### Prefer enforcement over reminders
 

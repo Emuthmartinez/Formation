@@ -13,7 +13,7 @@ Graph Execution v2 makes the typed graph executable without tying the skill to o
 - `buildDispatchBatches` groups only resource-compatible ready nodes and selects the strongest supported runtime mode without changing graph semantics.
 - `beginAttempt`, `reconcilePatch`, and `acceptVerification` separate production from acceptance and reject missing or undeclared outputs.
 - `invalidateDescendants` marks downstream work stale when accepted inputs change.
-- `scripts/render-execution-plan.ts` emits the same plan and initial dispatch batches for inline, Codex, or Claude runtimes.
+- `tooling/render-execution-plan.ts` emits the same plan and initial dispatch batches for inline, Codex, or Claude runtimes.
 - `check:skill-graph` validates compiler determinism, runnable roots, resource naming, retries, dependency integrity, and fresh-context isolation.
 
 ## Native catalog boundary

@@ -30,7 +30,7 @@ The orchestrator should execute that graph. It should not hand-build a task list
 invent dependencies turn by turn, or maintain a second file-collision map beside the graph.
 
 One boundary remains correct: the graph owns **work, state transitions, and proof**, not the
-knowledge inside a node. `playbook/` stays prose. A workflow node loads bounded knowledge,
+knowledge inside a node. `knowledge/` stays prose. A workflow node loads bounded knowledge,
 performs one contracted job, and returns typed output. Turning every reference or paragraph into
 a node would confuse content with control flow.
 
@@ -538,7 +538,7 @@ For one launch and one plan revision it should:
 
 The compiler's output is not evidence that the work passed. It is only a plan.
 
-`graph/generated/` remains the projection of the skill-owned definition graph. A real launch's
+`runtime/graph/generated/` remains the projection of the skill-owned definition graph. A real launch's
 instance plan, run state, and trace belong in the launch repo, not under the skill definition
 directory. The exact launch-repo location should be chosen as a versioned artifact-contract
 decision in the durable-state step, not smuggled into an earlier renderer.
@@ -759,7 +759,7 @@ The graph is fully adopted only when all of these are true:
 
 ## What not to do
 
-- Do not turn `playbook/` files into execution nodes.
+- Do not turn `knowledge/` files into execution nodes.
 - Do not use file paths as stable dependency identities.
 - Do not model every constraint as an artifact edge.
 - Do not convert resource collisions into permanent topology.

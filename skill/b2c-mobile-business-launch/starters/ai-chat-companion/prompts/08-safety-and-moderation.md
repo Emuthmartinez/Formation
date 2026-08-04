@@ -24,7 +24,7 @@ needed) and make the policy and thresholds config-driven.
 
 Strings: every user-facing label, headline, button, empty state, and error
 comes from product/copy/COPY_DECK.md (author missing rows first — voice from product/copy/COPY_BRIEF.md,
-craft from playbook/words/conversion-copy.md), typed via the externalized resource
+craft from knowledge/words/conversion-copy.md), typed via the externalized resource
 named in engineering/TECH_SPEC.md. Example copy in this prompt is voice guidance, not
 shipping strings.
 ```
