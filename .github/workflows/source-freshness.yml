@@ -5,75 +5,27 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: "23 11 * * 1"
   workflow_dispatch:
 
-# Default to read-only; the weekly refresh job re-grants write scopes it needs.
 permissions:
   contents: read
 
 jobs:
   audit:
-    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: "22"
-          cache: npm
-      - run: npm ci
-      - run: npm ci --prefix skill/b2c-mobile-business-launch
-      - run: npm run audit:ci
-      - run: npm pack --dry-run --json
-
-  weekly-source-refresh:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: agent/repository-information-architecture
           fetch-depth: 0
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: "22"
-          cache: npm
-      - run: npm ci
-      - run: npm ci --prefix skill/b2c-mobile-business-launch
-      - name: Refresh source registry and snapshots
-        run: npm run refresh:source-freshness
-      - name: Audit after refresh
-        run: npm run audit:ci
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        # Surface the refresh output even when the post-refresh audit fails —
-        # seven scheduled runs failed with zero artifacts and nobody noticed.
-        if: always()
-        with:
-          name: source-freshness-report
-          path: |
-            docs/source-freshness/SOURCE_REFRESH_REPORT.md
-            docs/source-freshness/source-refresh.html
-            docs/source-freshness/source-snapshots/current.json
-      # Source freshness tracks this third-party action:
-      # https://github.com/peter-evans/create-pull-request
-      # if: always() — a refresh whose audit fails must still land as a visible
-      # (red) PR for review, not vanish into a failed run log.
-      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        if: always()
-        with:
-          branch: chore/source-freshness-refresh
-          title: "Refresh skill source freshness"
-          commit-message: "Refresh skill source freshness"
-          body: |
-            Weekly source freshness refresh.
-
-            Review auto-discovered sources as candidates before treating them as canonical launch policy. If upstream changes affect behavior, update references/templates/validators/evals in this PR before merging.
-          add-paths: |
-            skill/b2c-mobile-business-launch/machine/source-registry.yaml
-            docs/source-freshness/
+      - run: python3 scripts/inventory-repository-ia.py
+      - name: Commit inventory
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/repository-ia-inventory.md
+          git commit -m "docs: inventory repository information architecture" || exit 0
+          git push origin HEAD:agent/repository-information-architecture
