@@ -1,0 +1,49 @@
+name: Final Source Layout
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/refactor-source-layout.py
+      - .github/workflows/final-source-layout.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    name: audit
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix skill/b2c-mobile-business-launch
+      - name: Apply source layout migration
+        run: python3 scripts/refactor-source-layout.py
+      - name: Format
+        run: npm run format --prefix skill/b2c-mobile-business-launch
+      - name: Regenerate graph projections
+        run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
+      - name: Remove migration machinery and restore normal CI
+        run: |
+          rm scripts/refactor-source-layout.py
+          rm .github/workflows/final-source-layout.yml
+          git show origin/main:.github/workflows/source-freshness.yml > .github/workflows/source-freshness.yml
+      - name: Full audit
+        run: npm run audit:ci
+      - name: Package dry run
+        run: npm pack --dry-run --json
+      - name: Commit final source layout
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor: consolidate skill source architecture"
+          git push origin HEAD:${{ github.head_ref }}
