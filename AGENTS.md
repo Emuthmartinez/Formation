@@ -180,3 +180,7 @@ Useful subagent lanes:
 - Do not update third-party command examples from memory.
 - Do not add a new known miss as prose only; add a validator or LaunchBench scenario when deterministic coverage is possible.
 - Do not call repo work complete until source audit, LaunchBench, validator fixtures, runtime sync, and git status are clean or blockers are explicit.
+
+## Documentation synchronization
+
+A behavior or schema change is incomplete until the repository README, `SKILL.md`, graph README, architecture guide, implementation guide, validator reference, affected domain README indexes, generated projections, and `skill-version.json` agree. Review every README even when only canonical surfaces need edits. Generated blocks are changed through definitions and renderers, never by hand.

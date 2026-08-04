@@ -9,66 +9,71 @@ on:
     - cron: "23 11 * * 1"
   workflow_dispatch:
 
+# Default to read-only; the weekly refresh job re-grants write scopes it needs.
 permissions:
   contents: read
 
 jobs:
   audit:
-    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' && github.actor != 'github-actions[bot]'
+    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: docs/graph-native-doc-refresh
-          fetch-depth: 0
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
           cache: npm
       - run: npm ci
       - run: npm ci --prefix skill/b2c-mobile-business-launch
-      - run: python3 scripts/finalize-doc-refresh.py
-      - name: Tighten SKILL runtime contract
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path("skill/b2c-mobile-business-launch/SKILL.md")
-          text = path.read_text()
-          start = text.index("When this skill activates for broad launch or business work")
-          end = text.index("\n\nAssume a beginner founder.", start)
-          replacement = "When this skill activates for broad launch/business work, keep running the launch workflow without asking the user to re-invoke this skill. Compile the applicable definition graph into the launch-specific run graph and execute its readiness frontier. Load the next needed reference yourself. Workers return outputs, evidence, and proposed state patches; the orchestrator-owned reducer is the only writer to update `PROJECT_STATE.yaml`, render `launch-cockpit.html`, mutate shared provider state, and reconcile integration state. Run the relevant validators before readiness claims. Do not stop with instructions. When the cockpit changes or the session ends, narrate what happened, what is next, and what needs the founder."
-          text = text[:start] + replacement + text[end:]
-
-          graph_heading = "### Graph Dispatch Contract\n"
-          runtime_heading = "### Runtime Routing And Dynamic Workflows\n"
-          if graph_heading in text:
-              graph_start = text.index(graph_heading)
-              runtime_start = text.index(runtime_heading, graph_start)
-              text = text[:graph_start] + text[runtime_start:]
-
-          path.write_text(text)
-          PY
-      - run: npm run format --prefix skill/b2c-mobile-business-launch
-      - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
-      - name: Remove temporary finalizer and restore CI
-        run: |
-          rm scripts/finalize-doc-refresh.py
-          git show origin/main:.github/workflows/source-freshness.yml > .github/workflows/source-freshness.yml
       - run: npm run audit:ci
       - run: npm pack --dry-run --json
-      - name: Commit documentation refresh
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add -A
-          git commit -m "docs: align all skill documentation with graph execution"
-          git push origin HEAD:docs/graph-native-doc-refresh
 
   weekly-source-refresh:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - run: echo skipped
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix skill/b2c-mobile-business-launch
+      - name: Refresh source registry and snapshots
+        run: npm run refresh:source-freshness
+      - name: Audit after refresh
+        run: npm run audit:ci
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        # Surface the refresh output even when the post-refresh audit fails —
+        # seven scheduled runs failed with zero artifacts and nobody noticed.
+        if: always()
+        with:
+          name: source-freshness-report
+          path: |
+            docs/source-freshness/SOURCE_REFRESH_REPORT.md
+            docs/source-freshness/source-refresh.html
+            docs/source-freshness/source-snapshots/current.json
+      # Source freshness tracks this third-party action:
+      # https://github.com/peter-evans/create-pull-request
+      # if: always() — a refresh whose audit fails must still land as a visible
+      # (red) PR for review, not vanish into a failed run log.
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        if: always()
+        with:
+          branch: chore/source-freshness-refresh
+          title: "Refresh skill source freshness"
+          commit-message: "Refresh skill source freshness"
+          body: |
+            Weekly source freshness refresh.
+
+            Review auto-discovered sources as candidates before treating them as canonical launch policy. If upstream changes affect behavior, update references/templates/validators/evals in this PR before merging.
+          add-paths: |
+            skill/b2c-mobile-business-launch/machine/source-registry.yaml
+            docs/source-freshness/

@@ -1,5 +1,7 @@
 # Graph Execution v2
 
+> Current implementation guide for the graph-native catalog and durable execution runtime. Compatibility-era workflow fields and the second scheduler have been removed.
+
 Graph Execution v2 makes the typed graph executable without tying the skill to one agent runtime.
 
 ## Shipped architecture
