@@ -107,6 +107,53 @@ repo_gates = repo_gates.replace(
 )
 repo_gates_path.write_text(repo_gates, encoding="utf-8")
 
+# Link reachability follows the canonical source roots.
+link_audit_path = SKILL / "validation" / "repository" / "audit-skill-links.ts"
+link_audit = link_audit_path.read_text(encoding="utf-8")
+link_audit = link_audit.replace(
+    'for (const subtree of ["playbook", "machine", "business", "starters"])',
+    'for (const subtree of ["knowledge", "validation/repository", "workspace/business", "starters"])',
+)
+link_audit_path.write_text(link_audit, encoding="utf-8")
+
+# Revenue example-copy detection resolves from the validator back to the skill root.
+revenue_check_path = SKILL / "validation" / "business" / "money" / "check-revenue.ts"
+revenue_check = revenue_check_path.read_text(encoding="utf-8")
+revenue_check = revenue_check.replace(
+    'path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "business", proofJsonExampleRelPath)',
+    'path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "workspace", "business", proofJsonExampleRelPath)',
+)
+revenue_check_path.write_text(revenue_check, encoding="utf-8")
+
+# Referenced MobAI host scripts must remain inside the flow directory so the
+# secret scanner, rather than the path traversal guard, evaluates the fixture.
+mobai_fixture_path = SKILL / "validation" / "repository" / "fixtures" / "mobai.fixtures.ts"
+mobai_fixture = mobai_fixture_path.read_text(encoding="utf-8")
+mobai_fixture = mobai_fixture.replace('script "../../../tooling/seed.js"', 'script "scripts/seed.js"')
+mobai_fixture_path.write_text(mobai_fixture, encoding="utf-8")
+
+# Self-scan fixtures mirror the canonical skill shape. Without workspace/, the
+# app-copy validator treats them as ordinary business repos and skips starter checks.
+copy_fixture_path = SKILL / "validation" / "repository" / "fixtures" / "copy.fixtures.ts"
+copy_fixture = copy_fixture_path.read_text(encoding="utf-8")
+copy_fixture = copy_fixture.replace(
+    'cpSync(path.join(skillRoot, "workspace", "business"), path.join(fakeRoot, "business"), { recursive: true });',
+    'cpSync(path.join(skillRoot, "workspace", "business"), path.join(fakeRoot, "workspace", "business"), { recursive: true });',
+)
+copy_fixture = copy_fixture.replace(
+    'mkdirSync(path.join(fakeRoot, "playbook", "words"), { recursive: true });',
+    'mkdirSync(path.join(fakeRoot, "knowledge", "words"), { recursive: true });',
+)
+copy_fixture = copy_fixture.replace(
+    'path.join(fakeRoot, "playbook", "words", "conversion-copy.md")',
+    'path.join(fakeRoot, "knowledge", "words", "conversion-copy.md")',
+)
+copy_fixture = copy_fixture.replace('path.join(promptNegatedRoute, "business")', 'path.join(promptNegatedRoute, "workspace", "business")')
+copy_fixture = copy_fixture.replace('path.join(starterTemplateLiteral, "business")', 'path.join(starterTemplateLiteral, "workspace", "business")')
+copy_fixture = copy_fixture.replace('path.join(starterComparison, "business")', 'path.join(starterComparison, "workspace", "business")')
+copy_fixture = copy_fixture.replace('path.join(starterTextNode, "business")', 'path.join(starterTextNode, "workspace", "business")')
+copy_fixture_path.write_text(copy_fixture, encoding="utf-8")
+
 # Per-business aggregate mode reads the business descriptor shipped with each
 # copied workspace, while the top-level committed board may still override it.
 renderer_path = SKILL / "tooling" / "render-business-control-plane-workspace.ts"
