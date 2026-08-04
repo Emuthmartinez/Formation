@@ -98,7 +98,7 @@ function renderGraphMarkdown(graph: SkillGraph): string {
         `| \`${workflow.id}\` | ${workflow.title} | \`${workflow.domainId}\` | ${workflow.gateCommands.map((gate) => `\`${gate}\``).join(", ") || "output contract"} |`,
     )
     .join("\n");
-  return `# Typed Skill Graph\n\nGenerated from the TypeScript definition graph. Edit graph definitions, not this file.\n\n## Business areas\n\n| ID | Name | Domains |\n| --- | --- | --- |\n${areaRows}\n\n## Workflows\n\n| Legacy | Stable ID | Workflow | Domain | Proof gates |\n| --- | --- | --- | --- | --- |\n${workflowRows}\n`;
+  return `# Typed Skill Graph\n\nGenerated from the TypeScript definition graph. Edit graph definitions, not this file.\n\n## Business areas\n\n| ID | Name | Domains |\n| --- | --- | --- |\n${areaRows}\n\n## Workflows\n\n| Stable ID | Workflow | Domain | Proof gates |\n| --- | --- | --- | --- |\n${workflowRows}\n`;
 }
 
 function renderMermaid(graph: SkillGraph): string {
