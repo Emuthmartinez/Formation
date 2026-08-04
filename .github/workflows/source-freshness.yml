@@ -9,7 +9,6 @@ on:
     - cron: "23 11 * * 1"
   workflow_dispatch:
 
-# Default to read-only; the weekly refresh job re-grants write scopes it needs.
 permissions:
   contents: read
 
@@ -27,8 +26,19 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm ci --prefix skill/b2c-mobile-business-launch
+      - name: Apply graph catalog cleanup candidate
+        run: python3 scripts/cleanup-graph-catalog.py
+      - run: npm run format --prefix skill/b2c-mobile-business-launch
+      - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
       - run: npm run audit:ci
       - run: npm pack --dry-run --json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: graph-final-cleanup-tree
+          path: |
+            skill/b2c-mobile-business-launch/graph/
+            skill/b2c-mobile-business-launch/machine/fixtures/graph.fixtures.ts
 
   weekly-source-refresh:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -51,8 +61,6 @@ jobs:
       - name: Audit after refresh
         run: npm run audit:ci
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        # Surface the refresh output even when the post-refresh audit fails —
-        # seven scheduled runs failed with zero artifacts and nobody noticed.
         if: always()
         with:
           name: source-freshness-report
@@ -60,10 +68,6 @@ jobs:
             docs/source-freshness/SOURCE_REFRESH_REPORT.md
             docs/source-freshness/source-refresh.html
             docs/source-freshness/source-snapshots/current.json
-      # Source freshness tracks this third-party action:
-      # https://github.com/peter-evans/create-pull-request
-      # if: always() — a refresh whose audit fails must still land as a visible
-      # (red) PR for review, not vanish into a failed run log.
       - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         if: always()
         with:
