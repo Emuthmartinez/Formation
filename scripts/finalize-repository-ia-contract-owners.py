@@ -20,8 +20,11 @@ for rel in [
     "gates/process/check-hooks-installed.ts",
     "gates/process/check-workflow-adherence.ts",
     "scripts/install-hooks.ts",
+    "scripts/lib/hook-contract.ts",
+    "machine/fixtures/_harness.ts",
     "machine/fixtures/hooks.fixtures.ts",
     "machine/fixtures/repo-gates.fixtures.ts",
+    "machine/fixtures/state-and-meta.fixtures.ts",
 ]:
     replace(
         SKILL / rel,
@@ -30,6 +33,8 @@ for rel in [
             '"app-agent-roster"': '"engineering/app-agent-roster"',
             'business/repo-agent-entrypoints/': 'business/engineering/repo-agent-entrypoints/',
             'business/app-agent-roster/': 'business/engineering/app-agent-roster/',
+            '"business", "repo-agent-entrypoints"': '"business", "engineering/repo-agent-entrypoints"',
+            '"business", "app-agent-roster"': '"business", "engineering/app-agent-roster"',
         },
     )
 
@@ -50,9 +55,20 @@ for rel in [
 for rel in [
     "scripts/promote-design-tokens.ts",
     "gates/design/check-token-promotion.ts",
-    "gates/design/check-motion-contract.ts",
 ]:
     replace(SKILL / rel, {'"design-system"': '"design/system"', 'design-system/': 'design/system/'})
+
+# Only the business-side copies move. The skill-owned design-system remains the
+# canonical source used to prove the business template has not drifted.
+replace(
+    SKILL / "gates/design/check-motion-contract.ts",
+    {
+        'business/design-system/': 'business/design/system/',
+        'const SWIFT = "business/design-system/PremiumCraft.swift";': 'const SWIFT = "business/design/system/PremiumCraft.swift";',
+        'const TEMPLATE_TOKENS = "business/design-system/tokens.json";': 'const TEMPLATE_TOKENS = "business/design/system/tokens.json";',
+        'const TEMPLATE_SWIFT_TOKENS = "business/design-system/DesignTokens.swift";': 'const TEMPLATE_SWIFT_TOKENS = "business/design/system/DesignTokens.swift";',
+    },
+)
 
 replace(
     SKILL / "scripts/render-design-room.ts",
@@ -62,16 +78,15 @@ replace(
 replace(
     SKILL / "gates/engineering/check-template-safety.ts",
     {
-        'relative.startsWith("landing/")': 'relative.startsWith("growth/landing/")',
-        'relative.includes("/landing/")': 'relative.includes("/growth/landing/")',
+        'if (path.relative(root, file).split(path.sep)[0] === "landing") {': 'const relativeSegments = path.relative(root, file).split(path.sep);\n  if (relativeSegments[0] === "growth" && relativeSegments[1] === "landing") {',
     },
 )
 
 replace(
     SKILL / "gates/words/check-founder-copy.ts",
     {
-        '"BUSINESS_ACCESS.md"': '"operations/BUSINESS_ACCESS.md"',
-        'business/BUSINESS_ACCESS.md': 'business/operations/BUSINESS_ACCESS.md',
+        '{ relative: "BUSINESS_ACCESS.md", kind: "markdown" }': '{ relative: "operations/BUSINESS_ACCESS.md", kind: "markdown" }',
+        '["operations/BUSINESS_ACCESS.md", "the founder\'s own access document, named in its own heading"]': '["BUSINESS_ACCESS.md", "the founder\'s own access document, named in its own heading"]',
     },
 )
 
