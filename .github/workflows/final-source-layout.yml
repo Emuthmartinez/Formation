@@ -79,7 +79,7 @@ jobs:
         rel.startsWith("business/design/system/") ? rel.replace("business/design/system/", "studio/generated/system/") : rel,
         rel.startsWith("design/system/") ? rel.replace("design/system/", "studio/generated/system/") : rel,
         rel.startsWith("business/") ? `workspace/${rel}` : rel,
-        rel.startsWith("playbook/") ? `workspace/${rel}` : rel,
+        rel.startsWith("playbook/") ? rel.replace("playbook/", "knowledge/") : rel,
       ];
       const sourceRel = sourceCandidates.find((candidate) => existsSync(path.join(skillRoot, candidate))) ?? rel;
       const text = readFileSync(path.join(skillRoot, sourceRel), "utf8");'''
@@ -89,13 +89,12 @@ jobs:
               text,
               count=1,
           )
-          if count == 0:
-              text, count = re.subn(
-                  r'const text = readFileSync\(path\.join\(skillRoot,\s*rel\),\s*["\']utf8["\']\);',
-                  replacement,
-                  text,
-                  count=1,
-              )
+          text, direct_count = re.subn(
+              r'const text = readFileSync\(path\.join\(skillRoot,\s*rel\),\s*["\']utf8["\']\);',
+              replacement,
+              text,
+          )
+          count += direct_count
           if count == 0:
               raise SystemExit('fixture helper source read was not found for normalization')
           fixture.write_text(text)
