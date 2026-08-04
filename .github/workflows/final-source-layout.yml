@@ -41,6 +41,7 @@ jobs:
           python3 scripts/repair-final-source-layout.py
           python3 - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           skill = Path('skill/b2c-mobile-business-launch')
@@ -69,10 +70,18 @@ jobs:
 
           fixture = skill / 'validation/repository/fixtures/repo-gates.fixtures.ts'
           text = fixture.read_text()
-          text = text.replace(
-              'const text = readFileSync(path.join(skillRoot, rel), "utf8");',
-              'const sourceRel = rel.startsWith("business/studio/generated/") ? rel.slice("business/".length) : rel;\n      const text = readFileSync(path.join(skillRoot, sourceRel), "utf8");',
+          replacement = (
+              'const sourceRel = rel.startsWith("business/studio/generated/") '
+              '? rel.slice("business/".length) : rel;\n'
+              '      const text = readFileSync(path.join(skillRoot, sourceRel), "utf8");'
           )
+          text, count = re.subn(
+              r'const text = readFileSync\(path\.join\(skillRoot,\s*rel\),\s*["\']utf8["\']\);',
+              replacement,
+              text,
+          )
+          if count == 0:
+              raise SystemExit('fixture helper source read was not found for normalization')
           fixture.write_text(text)
 
           root_package = Path('package.json')
