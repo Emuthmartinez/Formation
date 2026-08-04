@@ -29,6 +29,12 @@ REPLACEMENTS = {
     'path.join(fixtureRoot, "gates")': 'path.join(fixtureRoot, "validation", "business")',
     'path.join(fixtureRoot, "machine", ': 'path.join(fixtureRoot, "validation", "repository", ',
     'path.join(fixtureRoot, "machine")': 'path.join(fixtureRoot, "validation", "repository")',
+    ', "playbook",': ', "knowledge",',
+    ', "playbook")': ', "knowledge")',
+    ', "scripts",': ', "tooling",',
+    ', "scripts")': ', "tooling")',
+    ', "machine",': ', "validation", "repository",',
+    ', "machine")': ', "validation", "repository")',
     'path.join("business", "engineering/repo-agent-entrypoints", "settings.json")': 'path.join("workspace", "business", "engineering/repo-agent-entrypoints", "settings.json")',
     '"skill/playbook/': '"skill/knowledge/',
     "'skill/playbook/": "'skill/knowledge/",
@@ -119,10 +125,9 @@ text = text.replace(
     "from an idea, spec, early repo, or half-built app.",
     1,
 )
-text = text.replace("Trigger on natural requests like ", "Triggers include ", 1)
 text = text.replace(
     "Runs the end-to-end launch autopilot plus Design Room workflow:",
-    "Runs launch autopilot and Design Room:",
+    "Runs the end-to-end launch autopilot and Design Room:",
     1,
 )
 text = text.replace(
