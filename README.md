@@ -73,7 +73,7 @@ ln -sfn ~/.codex/skills/b2c-mobile-business-launch ~/.agents/skills/b2c-mobile-b
 
 ## Business capability tree
 
-The copied `business/` workspace is organized by capability rather than a flat artifact list. See [`business/README.md`](skill/b2c-mobile-business-launch/business/README.md) for ownership and paths.
+The copied `business/` workspace is organized by capability rather than a flat artifact list. See [`business/README.md`](skill/b2c-mobile-business-launch/business/README.md) for ownership and paths. Each capability directory owns its authored artifacts and points downward to narrower contracts instead of duplicating cross-repository guidance.
 
 ## What lands in the app repository
 
