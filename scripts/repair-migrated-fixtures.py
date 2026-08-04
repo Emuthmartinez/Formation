@@ -14,14 +14,21 @@ REPLACEMENTS = {
     'path.join(skillRoot, "gates", ': 'path.join(skillRoot, "validation", "business", ',
     'path.join(skillRoot, "machine", ': 'path.join(skillRoot, "validation", "repository", ',
     'path.join(root, "playbook", ': 'path.join(root, "knowledge", ',
+    'path.join(root, "playbook")': 'path.join(root, "knowledge")',
     'path.join(root, "scripts", ': 'path.join(root, "tooling", ',
+    'path.join(root, "scripts")': 'path.join(root, "tooling")',
     'path.join(root, "gates", ': 'path.join(root, "validation", "business", ',
+    'path.join(root, "gates")': 'path.join(root, "validation", "business")',
     'path.join(root, "machine", ': 'path.join(root, "validation", "repository", ',
     'path.join(root, "machine")': 'path.join(root, "validation", "repository")',
     'path.join(fixtureRoot, "playbook", ': 'path.join(fixtureRoot, "knowledge", ',
+    'path.join(fixtureRoot, "playbook")': 'path.join(fixtureRoot, "knowledge")',
     'path.join(fixtureRoot, "scripts", ': 'path.join(fixtureRoot, "tooling", ',
+    'path.join(fixtureRoot, "scripts")': 'path.join(fixtureRoot, "tooling")',
     'path.join(fixtureRoot, "gates", ': 'path.join(fixtureRoot, "validation", "business", ',
+    'path.join(fixtureRoot, "gates")': 'path.join(fixtureRoot, "validation", "business")',
     'path.join(fixtureRoot, "machine", ': 'path.join(fixtureRoot, "validation", "repository", ',
+    'path.join(fixtureRoot, "machine")': 'path.join(fixtureRoot, "validation", "repository")',
     'path.join("business", "engineering/repo-agent-entrypoints", "settings.json")': 'path.join("workspace", "business", "engineering/repo-agent-entrypoints", "settings.json")',
     '"skill/playbook/': '"skill/knowledge/',
     "'skill/playbook/": "'skill/knowledge/",
@@ -78,8 +85,8 @@ root_package = json.loads(root_package_path.read_text(encoding="utf-8"))
 root_package["scripts"]["check:business-control-plane-workspace"] = (
     "tsx skill/b2c-mobile-business-launch/tooling/render-business-control-plane-workspace.ts "
     "--root skill/b2c-mobile-business-launch/workspace/business "
-    "--business-state ../../../studio/seed/business.json "
-    "--out ../../../studio/seed/workspace.generated.json --check"
+    "--business-state ../../studio/seed/business.json "
+    "--out ../../studio/seed/workspace.generated.json --check"
 )
 root_package_path.write_text(json.dumps(root_package, indent=2) + "\n", encoding="utf-8")
 
@@ -109,7 +116,13 @@ text = text.replace(
 )
 text = text.replace(
     "from an idea, transcript, spec, early repo, or half-built app.",
-    "from an idea, spec, or repo.",
+    "from an idea, spec, early repo, or half-built app.",
+    1,
+)
+text = text.replace("Trigger on natural requests like ", "Triggers include ", 1)
+text = text.replace(
+    "Runs the end-to-end launch autopilot plus Design Room workflow:",
+    "Runs launch autopilot and Design Room:",
     1,
 )
 text = text.replace(
