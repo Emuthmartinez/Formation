@@ -1,9 +1,9 @@
 name: Graph Final Cleanup
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/graph-final-cleanup
+      - main
 
 permissions:
   contents: write
@@ -43,10 +43,8 @@ jobs:
           types = root / 'graph/types.ts'
           text = types.read_text()
           text = re.sub(r'\n\s*legacyId\?: `L\$\{string\}`;', '', text)
-          text = re.sub(r'\n\s*action: string\[\];', '', text)
-          text = re.sub(r'\n\s*proof: string\[\];', '', text)
-          text = re.sub(r'\n\s*memory: string\[\];', '', text)
-          text = re.sub(r'\n\s*stoppingCondition: string;', '', text)
+          for field in ('action: string[];', 'proof: string[];', 'memory: string[];', 'stoppingCondition: string;'):
+              text = text.replace('\n  ' + field, '')
           text = text.replace('upstreamWorkflowIds: WorkflowId[];', 'dependencies: WorkflowId[];')
           text = text.replace('artifactPaths: string[];', 'outputPaths: string[];')
           types.write_text(text)
@@ -93,23 +91,24 @@ export function workflow(seed: WorkflowSeed): WorkflowDefinition {
 }
 ''')
 
-          execution = root / 'graph/execution.ts'
-          text = execution.read_text()
-          text = text.replace('.artifactPaths', '.outputPaths')
-          text = text.replace('.upstreamWorkflowIds', '.dependencies')
-          text = text.replace('legacyWorkflowEdges', 'dependencyEdges')
-          text = text.replace('inferredArtifactInputs', 'artifactInputs')
-          text = text.replace('compatibility:', 'catalog:')
-          execution.write_text(text)
+          for relative in ('graph/execution.ts', 'graph/render.ts'):
+              file = root / relative
+              text = file.read_text()
+              text = text.replace('.artifactPaths', '.outputPaths').replace('.upstreamWorkflowIds', '.dependencies')
+              text = text.replace('legacyWorkflowEdges', 'dependencyEdges').replace('inferredArtifactInputs', 'artifactInputs')
+              if relative.endswith('execution.ts'):
+                  text = text.replace('compatibility:', 'catalog:')
+              else:
+                  text = text.replace('workflow.legacyId ?? workflow.id', 'workflow.id')
+              file.write_text(text)
 
           validate = root / 'graph/validate.ts'
           text = validate.read_text()
-          text = text.replace('const workflowIds = new Set(graph.workflows.map((item) => item.id));\n', 'const workflowIds = new Set(graph.workflows.map((item) => item.id));\n  const artifactIds = new Set(graph.artifacts.map((item) => item.id));\n')
           text = text.replace('const artifactPaths = new Set(graph.artifacts.map((item) => item.path));', 'const artifactsByPath = new Map(graph.artifacts.map((item) => [item.path, item.id]));')
-          text = text.replace('uniqueBy(graph.workflows, (item) => item.legacyId ?? item.id, "skill_graph.workflow.legacy_id_duplicate", issues);\n', '')
-          text = text.replace('for (const upstreamId of workflow.upstreamWorkflowIds) checkKnown(issues, workflowIds, upstreamId, "skill_graph.workflow.unknown_upstream", workflow.id);', 'for (const dependencyId of workflow.dependencies) checkKnown(issues, workflowIds, dependencyId, "skill_graph.workflow.unknown_dependency", workflow.id);')
-          text = text.replace('for (const artifactPath of workflow.artifactPaths) {\n      if (!artifactPaths.has(artifactPath))\n        issues.push(error("skill_graph.workflow.unknown_artifact", `${workflow.id} names unregistered artifact ${artifactPath}.`));\n    }', 'for (const outputPath of workflow.outputPaths) {\n      const artifactId = artifactsByPath.get(outputPath);\n      if (!artifactId || !artifactIds.has(artifactId)) issues.push(error("skill_graph.workflow.unknown_output", `${workflow.id} names unregistered output ${outputPath}.`));\n    }')
-          text = text.replace('graph.workflows.map((workflow) => ({ id: workflow.id, dependencies: workflow.upstreamWorkflowIds }))', 'graph.workflows.map((workflow) => ({ id: workflow.id, dependencies: workflow.dependencies }))')
+          text = re.sub(r'\n\s*uniqueBy\(graph\.workflows, \(item\) => item\.legacyId \?\? item\.id,.*?;', '', text)
+          text = text.replace('workflow.upstreamWorkflowIds', 'workflow.dependencies').replace('workflow.artifactPaths', 'workflow.outputPaths')
+          text = text.replace('upstreamId', 'dependencyId').replace('unknown_upstream', 'unknown_dependency')
+          text = text.replace('artifactPath', 'outputPath').replace('artifactPaths.has(outputPath)', 'artifactsByPath.has(outputPath)').replace('unknown_artifact', 'unknown_output')
           text = re.sub(r'\n  for \(let number = 1; number <= 57; number \+= 1\) \{.*?\n  \}', '', text, flags=re.S)
           text = re.sub(r'function validateWorkflow\(workflow: WorkflowDefinition, issues: GraphIssue\[\]\): void \{.*?\n\}', '''function validateWorkflow(workflow: WorkflowDefinition, issues: GraphIssue[]): void {
   if (!workflow.trigger.trim()) issues.push(error("skill_graph.workflow.trigger_missing", `${workflow.id} has no trigger.`));
@@ -119,22 +118,13 @@ export function workflow(seed: WorkflowSeed): WorkflowDefinition {
 }''', text, flags=re.S)
           validate.write_text(text)
 
-          render = root / 'graph/render.ts'
-          text = render.read_text()
-          text = text.replace('workflow.legacyId ?? workflow.id', 'workflow.id')
-          text = text.replace('workflow.upstreamWorkflowIds', 'workflow.dependencies')
-          text = text.replace('workflow.artifactPaths', 'workflow.outputPaths')
-          render.write_text(text)
-
           fixtures = root / 'machine/fixtures/graph.fixtures.ts'
           if fixtures.exists():
               text = fixtures.read_text()
               text = re.sub(r'\n\s*legacyId: "L\d+",', '', text)
-              text = text.replace('upstreamWorkflowIds:', 'dependencies:')
-              text = text.replace('artifactPaths:', 'outputPaths:')
-              text = re.sub(r'\n\s*action: \[[^\n]*\],', '', text)
-              text = re.sub(r'\n\s*proof: \[[^\n]*\],', '', text)
-              text = re.sub(r'\n\s*memory: \[[^\n]*\],', '', text)
+              text = text.replace('upstreamWorkflowIds:', 'dependencies:').replace('artifactPaths:', 'outputPaths:')
+              for field in ('action', 'proof', 'memory'):
+                  text = re.sub(rf'\n\s*{field}: \[[^\n]*\],', '', text)
               text = re.sub(r'\n\s*stoppingCondition: [^\n]*,', '', text)
               fixtures.write_text(text)
           PY
