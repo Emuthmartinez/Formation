@@ -86,6 +86,11 @@ text = skill_md.read_text(encoding="utf-8")
 text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
 text = re.sub(r"[ \t]+\n", "\n", text)
 text = re.sub(r"\n{3,}", "\n\n", text)
+text = text.replace(
+    "Turn an app idea, transcript, spec, or half-built repo into a launchable business:",
+    "Turn an app idea or repo into a launchable business:",
+    1,
+)
 while len(text.encode("utf-8")) > 20_480 and "\n\n" in text:
     text = text.replace("\n\n", "\n", 1)
 if len(text.encode("utf-8")) > 20_480:
