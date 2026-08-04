@@ -17,17 +17,22 @@ text = text.replace("legacyWorkflowEdges", "dependencyEdges")
 renderer.write_text(text)
 
 version = "0.66.0"
-release_note = (
-    "Completes the graph-native catalog cutover: workflow definitions now expose native dependencies and output contracts, "
-    "legacy L01-L57 identifiers and template-generated action/proof/memory prose are removed, execution-plan reporting uses "
-    "catalog terminology, and validators test executable contracts rather than helper-authored text."
-)
+release_notes = [
+    (
+        "Completes the graph-native catalog cutover: workflow definitions now expose native dependencies and output contracts, "
+        "while legacy L01-L57 identifiers and template-generated action, proof, memory, and stopping-condition prose are removed."
+    ),
+    (
+        "Updates the execution compiler, graph composition, renderers, generated projections, and validator fixtures to consume the native catalog directly; "
+        "execution-plan reporting now uses catalog terminology and workflow validation tests executable outputs or gates rather than helper-authored text."
+    ),
+]
 
 manifest_path = root / "skill-version.json"
 manifest = json.loads(manifest_path.read_text())
 manifest["version"] = version
 manifest["updatedAt"] = "2026-08-03"
-manifest["releaseNotes"] = [release_note]
+manifest["releaseNotes"] = release_notes
 manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
 for package_path in (Path("package.json"), root / "package.json"):
