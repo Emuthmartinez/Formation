@@ -75,6 +75,12 @@ fixture_text = fixture_pattern.sub(
     ),
     fixture_text,
 )
+
+# Shared landing-site builders also write the migrated state file directly.
+fixture_text = fixture_text.replace(
+    'const withLandingSite = (root: string, html: string): void => {\n    writeFileSync(path.join(root, "state", "PROJECT_STATE.yaml")',
+    'const withLandingSite = (root: string, html: string): void => {\n    mkdirSync(path.join(root, "state"), { recursive: true });\n    writeFileSync(path.join(root, "state", "PROJECT_STATE.yaml")',
+)
 fixture_state.write_text(fixture_text)
 
 for rel in [
