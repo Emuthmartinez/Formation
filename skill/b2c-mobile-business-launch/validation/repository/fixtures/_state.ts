@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
+/** Shared mutable-state helpers for validator fixtures. */
 export type MutableRecord = Record<string, unknown>;
 
 export function expectRecord(value: unknown, label: string): MutableRecord {
