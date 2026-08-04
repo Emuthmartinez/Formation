@@ -90,7 +90,7 @@ for path in SKILL.rglob("*"):
     if path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".mjs", ".md", ".json", ".yaml", ".yml"}:
         changed += int(rewrite(path))
 
-# Synthetic link-audit fixtures model the canonical source/template pair.
+# Synthetic link-audit and no-slop fixtures model the canonical source/template pair.
 repo_gates_path = SKILL / "validation" / "repository" / "fixtures" / "repo-gates.fixtures.ts"
 repo_gates = repo_gates_path.read_text(encoding="utf-8")
 repo_gates = repo_gates.replace('path.join(root, "business")', 'path.join(root, "workspace", "business")')
@@ -99,7 +99,7 @@ repo_gates = repo_gates.replace('path.join(linksDuplicate, "business", ', 'path.
 repo_gates = repo_gates.replace("../business/", "../workspace/business/")
 repo_gates = repo_gates.replace(
     'mkdirSync(fixtureTemplates, { recursive: true });\n  writeFileSync(path.join(fixtureTemplates, "strategy/BRAND.md")',
-    'mkdirSync(path.join(fixtureTemplates, "strategy"), { recursive: true });\n  writeFileSync(path.join(fixtureTemplates, "strategy/BRAND.md")',
+    'mkdirSync(path.join(fixtureTemplates, "strategy"), { recursive: true });\n  mkdirSync(path.join(fixtureTemplates, "product"), { recursive: true });\n  writeFileSync(path.join(fixtureTemplates, "strategy/BRAND.md")',
 )
 repo_gates = repo_gates.replace(
     '["--root", path.join(skillRoot, "workspace", "business"), "--out", path.join(skillRoot, "studio", "seed", "workspace.generated.json"), "--check"]',
