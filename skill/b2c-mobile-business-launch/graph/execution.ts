@@ -1,17 +1,7 @@
 import { createHash } from "node:crypto";
 import type { ArtifactId, GateId, OperatorId, ProviderId, SkillGraph, WorkflowId } from "./types.js";
 
-export type RunNodeStatus =
-  | "pending"
-  | "ready"
-  | "running"
-  | "waiting_human"
-  | "blocked"
-  | "succeeded"
-  | "failed"
-  | "skipped"
-  | "cancelled"
-  | "stale";
+export type RunNodeStatus = "pending" | "ready" | "running" | "waiting_human" | "blocked" | "succeeded" | "failed" | "skipped" | "cancelled" | "stale";
 
 export type ResourceMode = "shared" | "exclusive";
 export type ExecutionMode = "inline" | "serial_subagent" | "parallel_subagent" | "worktree" | "dynamic_workflow";
@@ -165,14 +155,10 @@ export function compileExecutionPlan(graph: SkillGraph, now = "1970-01-01T00:00:
   const runIdByWorkflow = new Map<WorkflowId, RunNodeId>(graph.workflows.map((workflow) => [workflow.id, toRunNodeId(workflow.id)]));
   let inferredArtifactInputs = 0;
   const nodes = graph.workflows.map((workflow): CompiledRunNode => {
-    const inputs = unique(
-      workflow.upstreamWorkflowIds.flatMap((upstreamId) => outputsByWorkflow.get(upstreamId) ?? []),
-    );
+    const inputs = unique(workflow.upstreamWorkflowIds.flatMap((upstreamId) => outputsByWorkflow.get(upstreamId) ?? []));
     inferredArtifactInputs += inputs.length;
     const outputs = outputsByWorkflow.get(workflow.id) ?? [];
-    const gateIds = workflow.gateCommands
-      .map((command) => graph.gates.find((gate) => gate.command === command)?.id)
-      .filter((id): id is GateId => Boolean(id));
+    const gateIds = workflow.gateCommands.map((command) => graph.gates.find((gate) => gate.command === command)?.id).filter((id): id is GateId => Boolean(id));
     const judgment = workflow.domainId === "domain.research" || workflow.domainId === "domain.words" || workflow.domainId === "domain.design";
     const resources: ResourceClaim[] = [
       ...workflow.artifactPaths.map((path) => ({ id: `resource.path.${normalizeResource(path)}`, mode: "exclusive" as const })),
@@ -238,9 +224,10 @@ export function compileExecutionPlan(graph: SkillGraph, now = "1970-01-01T00:00:
 }
 
 export function initializeRun(plan: GraphExecutionPlan, now = "1970-01-01T00:00:00.000Z"): GraphRunState {
-  const nodes = Object.fromEntries(
-    plan.nodes.map((node) => [node.id, { nodeId: node.id, status: "pending", attempts: [] } satisfies RunNodeState]),
-  ) as Record<RunNodeId, RunNodeState>;
+  const nodes = Object.fromEntries(plan.nodes.map((node) => [node.id, { nodeId: node.id, status: "pending", attempts: [] } satisfies RunNodeState])) as Record<
+    RunNodeId,
+    RunNodeState
+  >;
   const approvals = Object.fromEntries(plan.nodes.flatMap((node) => node.approvals.map((approval) => [approval.id, "pending" as const])));
   return {
     schemaVersion: "1.0.0",
@@ -348,7 +335,8 @@ export function acceptVerification(plan: GraphExecutionPlan, run: GraphRunState,
   const state = run.nodes[nodeId];
   const attempt = state?.attempts.at(-1);
   if (!node || !state || !attempt) throw new Error(`No attempt to verify for ${nodeId}`);
-  if (node.verification.kind !== "none" && evidence.length === 0 && node.verification.failClosed) throw new Error(`Verification for ${nodeId} requires evidence`);
+  if (node.verification.kind !== "none" && evidence.length === 0 && node.verification.failClosed)
+    throw new Error(`Verification for ${nodeId} requires evidence`);
   for (const artifactId of node.outputs) {
     const binding = run.artifactBindings.find((candidate) => candidate.artifactId === artifactId && candidate.attemptId === attempt.id);
     if (binding) binding.accepted = true;
@@ -357,7 +345,9 @@ export function acceptVerification(plan: GraphExecutionPlan, run: GraphRunState,
   attempt.status = "succeeded";
   attempt.finishedAt = now;
   state.status = "succeeded";
-  state.acceptedOutputFingerprint = sha256(node.outputs.map((id) => run.artifactBindings.find((binding) => binding.artifactId === id)?.fingerprint ?? "").join("|"));
+  state.acceptedOutputFingerprint = sha256(
+    node.outputs.map((id) => run.artifactBindings.find((binding) => binding.artifactId === id)?.fingerprint ?? "").join("|"),
+  );
   state.blocker = undefined;
   run.updatedAt = now;
 }
@@ -454,7 +444,9 @@ function getPath(value: unknown, dottedPath: string): unknown {
 }
 
 function fingerprintInputs(inputs: ArtifactId[], bindings: ArtifactBinding[]): string {
-  return sha256(inputs.map((artifactId) => `${artifactId}:${bindings.find((binding) => binding.artifactId === artifactId)?.fingerprint ?? "missing"}`).join("|"));
+  return sha256(
+    inputs.map((artifactId) => `${artifactId}:${bindings.find((binding) => binding.artifactId === artifactId)?.fingerprint ?? "missing"}`).join("|"),
+  );
 }
 
 function toRunNodeId(workflowId: WorkflowId): RunNodeId {
@@ -462,7 +454,10 @@ function toRunNodeId(workflowId: WorkflowId): RunNodeId {
 }
 
 function normalizeResource(value: string): string {
-  return value.replace(/[^a-zA-Z0-9]+/g, ".").replace(/^\.|\.$/g, "").toLowerCase();
+  return value
+    .replace(/[^a-zA-Z0-9]+/g, ".")
+    .replace(/^\.|\.$/g, "")
+    .toLowerCase();
 }
 
 function dedupeClaims(claims: ResourceClaim[]): ResourceClaim[] {
