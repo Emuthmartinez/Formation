@@ -18,8 +18,6 @@ DUPLICATE_REPLACEMENTS = {
     "studio/studio/seed": "studio/seed",
     "studio/studio/app": "studio/app",
     "studio/studio/generated": "studio/generated",
-    "workspace/business/studio/seed": "workspace/business/state",
-    "business/studio/seed": "workspace/business/state",
 }
 
 SKILL_ROOT_COMPONENTS = {
@@ -48,8 +46,6 @@ def repair_skill_root_resolver(path: Path, text: str) -> str:
     if SKILL not in path.parents:
         return text
     relative = os.path.relpath(SKILL, path.parent).replace(os.sep, "/")
-    if relative == ".":
-        relative = "."
     pattern = re.compile(
         r'(?P<prefix>const\s+(?:default)?(?:skillRoot|SkillRoot|SKILL_ROOT)\s*=\s*path\.resolve\((?P<base>[A-Za-z_$][\w$]*),\s*["\'])[^"\']+(?P<suffix>["\']\);)'
     )
@@ -105,13 +101,15 @@ def repair_motion_contract() -> None:
 def repair_design_state() -> None:
     path = SKILL / "tooling/lib/design-state.ts"
     text = path.read_text()
+    text = text.replace('let statePath = "studio/seed/business.json";', 'let statePath = "state/business.json";')
+    text = text.replace('let tokensPath = "studio/seed/theme.tokens.json";', 'let tokensPath = "state/theme.tokens.json";')
     text = text.replace('path.join(skillRoot, "state/schema/', 'path.join(skillRoot, "studio/seed/schema/')
     path.write_text(text)
 
 
 def repair_entrypoint_docs() -> None:
     agents = ROOT / "AGENTS.md"
-    text = agents.read_text()
+    text = normalize_text(agents.read_text())
     required = """
 
 ## Maintainer compatibility contract
@@ -128,28 +126,26 @@ Verify fast-moving provider sources before changing commands or external guidanc
 """
     if "This file is for maintaining this skill repo itself" not in text:
         text += required
-    agents.write_text(text)
+    agents.write_text(normalize_text(text))
 
     claude = ROOT / "CLAUDE.md"
-    text = claude.read_text()
+    text = normalize_text(claude.read_text())
     required = """
 
 This is a maintainer-only Claude-specific pointer. Do not copy it into businesses created by the skill. Generated app guidance comes from `workspace/business/engineering/repo-agent-entrypoints/CLAUDE.md`. Repository correctness is enforced through validators, and LaunchBench.
 """
     if "maintainer-only" not in text:
         text += required
-    claude.write_text(text)
+    claude.write_text(normalize_text(text))
 
 
 def repair_repository_checks() -> None:
-    # Knowledge/context-budget roots.
     reference = SKILL / "validation/repository/check-reference-size.ts"
     text = reference.read_text()
     text = text.replace('["playbook", "machine"]', '["knowledge", "validation/repository"]')
     text = text.replace("expected playbook and machine", "expected knowledge and validation/repository")
     reference.write_text(text)
 
-    # Source-layout names in required entrypoint checks.
     for rel in [
         "validation/business/process/check-agent-entrypoints.ts",
         "validation/business/process/check-workflow-adherence.ts",
@@ -160,9 +156,28 @@ def repair_repository_checks() -> None:
         path = SKILL / rel
         if not path.exists():
             continue
-        text = path.read_text().replace("business/engineering/", "workspace/business/engineering/")
+        text = path.read_text()
+        text = text.replace("business/engineering/", "workspace/business/engineering/")
         text = text.replace("business/operations/", "workspace/business/operations/")
-        path.write_text(text)
+        text = text.replace('"business", "engineering"', '"workspace", "business", "engineering"')
+        text = text.replace('"business", "operations"', '"workspace", "business", "operations"')
+        path.write_text(normalize_text(text))
+
+    script_paths = SKILL / "tooling/lib/script-paths.ts"
+    text = script_paths.read_text()
+    text = text.replace('["gates", "machine", "scripts"]', '["validation/business", "validation/repository", "tooling"]')
+    text = text.replace("under gates/, machine/, scripts/", "under validation/business/, validation/repository/, tooling/")
+    script_paths.write_text(text)
+
+
+def repair_control_plane_renderer() -> None:
+    path = SKILL / "tooling/render-business-control-plane-workspace.ts"
+    text = path.read_text()
+    text = text.replace('path.join(skillRoot, "state/schema/workspace.schema.json")', 'path.join(skillRoot, "studio/seed/schema/workspace.schema.json")')
+    text = text.replace('path.join(skillRoot, "business/studio/seed/business.json")', 'path.join(skillRoot, "studio/seed/business.json")')
+    text = text.replace('path.join(skillRoot, "business/state/PROJECT_STATE.yaml")', 'path.join(skillRoot, "workspace/business/state/PROJECT_STATE.yaml")')
+    text = text.replace('path.join(skillRoot, "state/workspace.generated.json")', 'path.join(skillRoot, "studio/seed/workspace.generated.json")')
+    path.write_text(normalize_text(text))
 
 
 def repair_package_files() -> None:
@@ -192,23 +207,38 @@ def trim_skill_entrypoint() -> None:
     path = SKILL / "SKILL.md"
     if not path.exists():
         return
-    text = path.read_text()
-    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", path.read_text())
+    removals = [
+        "The graph is executable architecture, not a diagram layered beside a separate workflow.\n",
+        "Filesystem proximity never creates an execution edge.\n",
+        "Stable graph IDs are identities; filesystem paths are bindings.\n",
+        "Treat the graph as the source of truth for routing and execution.\n",
+        "Generated projections must never be edited by hand.\n",
+        "Use the smallest relevant context pack for the current work.\n",
+    ]
+    for sentence in removals:
+        text = text.replace(sentence, "")
     if len(text.encode()) > 20480:
-        removals = [
-            "The graph is executable architecture, not a diagram layered beside a separate workflow.\n",
-            "Filesystem proximity never creates an execution edge.\n",
-            "Stable graph IDs are identities; filesystem paths are bindings.\n",
-        ]
-        for sentence in removals:
-            text = text.replace(sentence, "")
-            if len(text.encode()) <= 20480:
-                break
+        text = re.sub(r"\n> [^\n]+\n", "\n", text, count=2)
     path.write_text(text)
 
 
+def final_normalize() -> None:
+    for path in ROOT.rglob("*"):
+        if not path.is_file() or ".git" in path.parts or "node_modules" in path.parts:
+            continue
+        if path.suffix.lower() not in TEXT_SUFFIXES and path.name not in {"AGENTS.md", "CLAUDE.md", "SKILL.md"}:
+            continue
+        try:
+            text = path.read_text()
+        except UnicodeDecodeError:
+            continue
+        normalized = normalize_text(text)
+        if normalized != text:
+            path.write_text(normalized)
+
+
 def main() -> None:
-    # Normalize and correct skill-root calculations throughout the transformed tree.
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts or "node_modules" in path.parts:
             continue
@@ -228,8 +258,10 @@ def main() -> None:
     repair_design_state()
     repair_entrypoint_docs()
     repair_repository_checks()
+    repair_control_plane_renderer()
     repair_package_files()
     trim_skill_entrypoint()
+    final_normalize()
     print("Final source layout contracts repaired")
 
 
