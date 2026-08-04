@@ -35,6 +35,10 @@ REPLACEMENTS = {
     ', "scripts")': ', "tooling")',
     ', "machine",': ', "validation", "repository",',
     ', "machine")': ', "validation", "repository")',
+    'mdFilesUnder("playbook")': 'mdFilesUnder("knowledge")',
+    'mdFilesUnder("business")': 'mdFilesUnder("workspace/business")',
+    '["playbook", "business"]': '["knowledge", "workspace/business"]',
+    '["business", "playbook"]': '["workspace/business", "knowledge"]',
     'path.join("business", "engineering/repo-agent-entrypoints", "settings.json")': 'path.join("workspace", "business", "engineering/repo-agent-entrypoints", "settings.json")',
     '"skill/playbook/': '"skill/knowledge/',
     "'skill/playbook/": "'skill/knowledge/",
@@ -85,6 +89,27 @@ changed = 0
 for path in SKILL.rglob("*"):
     if path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".mjs", ".md", ".json", ".yaml", ".yml"}:
         changed += int(rewrite(path))
+
+# Synthetic link-audit fixtures model the canonical source/template pair.
+repo_gates_path = SKILL / "validation" / "repository" / "fixtures" / "repo-gates.fixtures.ts"
+repo_gates = repo_gates_path.read_text(encoding="utf-8")
+repo_gates = repo_gates.replace('path.join(root, "business")', 'path.join(root, "workspace", "business")')
+repo_gates = repo_gates.replace('path.join(root, "business", ', 'path.join(root, "workspace", "business", ')
+repo_gates = repo_gates.replace('path.join(linksDuplicate, "business", ', 'path.join(linksDuplicate, "workspace", "business", ')
+repo_gates = repo_gates.replace("../business/", "../workspace/business/")
+repo_gates = repo_gates.replace(
+    '["--root", path.join(skillRoot, "workspace", "business"), "--out", path.join(skillRoot, "studio", "seed", "workspace.generated.json"), "--check"]',
+    '["--root", path.join(skillRoot, "workspace", "business"), "--business-state", "../../studio/seed/business.json", "--out", path.join(skillRoot, "studio", "seed", "workspace.generated.json"), "--check"]',
+)
+repo_gates_path.write_text(repo_gates, encoding="utf-8")
+
+# Per-business aggregate mode reads the business descriptor shipped with each
+# copied workspace, while the top-level committed board may still override it.
+renderer_path = SKILL / "tooling" / "render-business-control-plane-workspace.ts"
+renderer = renderer_path.read_text(encoding="utf-8")
+renderer = renderer.replace('resolveFrom(dir, "studio/seed/business.json")', 'resolveFrom(dir, "state/business.json")')
+renderer = renderer.replace('flagString(flags, "businessState") ?? "studio/seed/business.json"', 'flagString(flags, "businessState") ?? "state/business.json"')
+renderer_path.write_text(renderer, encoding="utf-8")
 
 root_package_path = ROOT / "package.json"
 root_package = json.loads(root_package_path.read_text(encoding="utf-8"))
