@@ -6,6 +6,7 @@ on:
     paths:
       - scripts/refactor-source-layout.py
       - scripts/fix-source-layout-contracts.py
+      - scripts/repair-final-source-layout.py
       - .github/workflows/final-source-layout.yml
 
 permissions:
@@ -30,13 +31,18 @@ jobs:
         run: |
           python3 scripts/refactor-source-layout.py
           python3 scripts/fix-source-layout-contracts.py
+          python3 scripts/repair-final-source-layout.py
       - name: Format
         run: npm run format --prefix skill/b2c-mobile-business-launch
       - name: Regenerate graph projections
         run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
+      - name: Normalize generated outputs
+        run: |
+          python3 scripts/repair-final-source-layout.py
+          npm run format --prefix skill/b2c-mobile-business-launch
       - name: Remove migration machinery and restore normal CI
         run: |
-          rm scripts/refactor-source-layout.py scripts/fix-source-layout-contracts.py
+          rm scripts/refactor-source-layout.py scripts/fix-source-layout-contracts.py scripts/repair-final-source-layout.py
           rm .github/workflows/final-source-layout.yml
           git show origin/main:.github/workflows/source-freshness.yml > .github/workflows/source-freshness.yml
       - name: Full audit
