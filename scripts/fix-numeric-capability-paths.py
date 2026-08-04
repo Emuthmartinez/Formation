@@ -23,9 +23,6 @@ for path in ROOT.rglob("*"):
     if updated != original:
         path.write_text(updated)
 
-# The landing validator must inspect the same capability-owned tree used by the
-# migrated business workspace and fixtures. Rewrite every old root reference,
-# including scope signals, content scans, and candidate documentation paths.
 landing_gate = SKILL / "gates" / "growth" / "check-landing-funnel.ts"
 landing_text = landing_gate.read_text()
 landing_text = landing_text.replace(
@@ -38,14 +35,9 @@ landing_text = landing_text.replace(
     '"growth/landing/PRODUCTION_READINESS.md"',
 )
 landing_text = landing_text.replace('growth/growth/landing/', 'growth/landing/')
-landing_text = landing_text.replace(
-    '"growth", "growth", "landing"',
-    '"growth", "landing"',
-)
+landing_text = landing_text.replace('"growth", "growth", "landing"', '"growth", "landing"')
 landing_gate.write_text(landing_text)
 
-# Every migrated fixture must write and mutate the same capability-owned paths
-# that the validator inspects.
 state_fixture = SKILL / "machine" / "fixtures" / "state-and-meta.fixtures.ts"
 state_text = state_fixture.read_text()
 state_text = re.sub(
@@ -65,8 +57,6 @@ state_text = state_text.replace(
 )
 state_fixture.write_text(state_text)
 
-# Localization can be validated against either a copied business root or the
-# skill repository root.
 localization_gate = SKILL / "gates" / "research" / "check-localization-research.ts"
 localization_text = localization_gate.read_text()
 localization_text = re.sub(
@@ -105,8 +95,6 @@ localization_text = re.sub(
 )
 localization_gate.write_text(localization_text)
 
-# Keep the purpose-built complete console packet at the actual migrated path,
-# then remove only the listing artifacts.
 store_fixture = SKILL / "machine" / "fixtures" / "store.fixtures.ts"
 store_text = store_fixture.read_text()
 store_text = re.sub(
