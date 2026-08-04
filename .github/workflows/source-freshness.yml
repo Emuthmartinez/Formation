@@ -32,6 +32,7 @@ jobs:
       - run: python3 scripts/repair-repository-ia-contracts.py
       - run: python3 scripts/fix-numeric-capability-paths.py
       - run: python3 scripts/finalize-repository-ia-contract-owners.py
+      - run: python3 scripts/fix-numeric-capability-paths.py
       - run: npm run format --prefix skill/b2c-mobile-business-launch
       - run: npm run render:skill-graph --prefix skill/b2c-mobile-business-launch
       - name: Promote canonical and business design tokens
