@@ -39,6 +39,11 @@ jobs:
         with:
           name: graph-final-cleanup-tree
           path: |
+            package.json
+            package-lock.json
+            skill/b2c-mobile-business-launch/package.json
+            skill/b2c-mobile-business-launch/package-lock.json
+            skill/b2c-mobile-business-launch/skill-version.json
             skill/b2c-mobile-business-launch/graph/
             skill/b2c-mobile-business-launch/machine/fixtures/graph.fixtures.ts
             skill/b2c-mobile-business-launch/scripts/render-execution-plan.ts
