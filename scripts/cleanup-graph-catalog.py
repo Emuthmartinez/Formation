@@ -79,9 +79,10 @@ render = root / "graph/render.ts"
 text = render.read_text()
 text = text.replace("workflow.upstreamWorkflowIds", "workflow.dependencies")
 text = text.replace("workflow.artifactPaths", "workflow.outputPaths")
-text = text.replace(
-    '`| ${workflow.legacyId ?? ""} | \\`${workflow.id}\\` | ${workflow.title} | \\`${workflow.domainId}\\` | ${workflow.gateCommands.map((gate) => `\\`${gate}\\``).join(", ") || "artifact proof"} |`',
+text = re.sub(
+    r'`\| \$\{workflow\.legacyId \?\? ""\} \| `?\\?`\$\{workflow\.id\}\\?`? \| \$\{workflow\.title\} \| `?\\?`\$\{workflow\.domainId\}\\?`? \| \$\{workflow\.gateCommands\.map\(\(gate\) => `\\?`\$\{gate\}\\?``\)\.join\(", "\) \|\| "artifact proof"\} \|`',
     '`| \\`${workflow.id}\\` | ${workflow.title} | \\`${workflow.domainId}\\` | ${workflow.gateCommands.map((gate) => `\\`${gate}\\``).join(", ") || "output contract"} |`',
+    text,
 )
 text = text.replace(
     "| Legacy | Stable ID | Workflow | Domain | Proof gates |\n| --- | --- | --- | --- | --- |",
@@ -103,6 +104,7 @@ text = text.replace("upstreamId", "dependencyId")
 text = text.replace("unknown_upstream", "unknown_dependency")
 text = text.replace("artifactPath", "outputPath")
 text = text.replace("artifactPaths.has(outputPath)", "artifactsByPath.has(outputPath)")
+text = text.replace("outputPaths.has(outputPath)", "artifactsByPath.has(outputPath)")
 text = text.replace("unknown_artifact", "unknown_output")
 text = re.sub(r'\n  for \(let number = 1; number <= 57; number \+= 1\) \{.*?\n  \}', "", text, flags=re.S)
 text = re.sub(
