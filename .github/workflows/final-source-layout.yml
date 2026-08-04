@@ -69,14 +69,10 @@ jobs:
 
           fixture = skill / 'validation/repository/fixtures/repo-gates.fixtures.ts'
           text = fixture.read_text()
-          text = text.replace('"business/studio/generated/system/tokens.json"', '"studio/generated/system/tokens.json"')
-          text = text.replace('"business/studio/generated/system/DesignTokens.swift"', '"studio/generated/system/DesignTokens.swift"')
-          text = text.replace('"business", "studio/generated/system/tokens.json"', '"studio/generated/system/tokens.json"')
-          text = text.replace('"business", "studio/generated/system/DesignTokens.swift"', '"studio/generated/system/DesignTokens.swift"')
-          text = text.replace('"business", "studio", "generated", "system", "tokens.json"', '"studio", "generated", "system", "tokens.json"')
-          text = text.replace('"business", "studio", "generated", "system", "DesignTokens.swift"', '"studio", "generated", "system", "DesignTokens.swift"')
-          text = text.replace('design/system/tokens.json', 'studio/generated/system/tokens.json')
-          text = text.replace('design/system/DesignTokens.swift', 'studio/generated/system/DesignTokens.swift')
+          text = text.replace(
+              'const text = readFileSync(path.join(skillRoot, rel), "utf8");',
+              'const sourceRel = rel.startsWith("business/studio/generated/") ? rel.slice("business/".length) : rel;\n      const text = readFileSync(path.join(skillRoot, sourceRel), "utf8");',
+          )
           fixture.write_text(text)
 
           root_package = Path('package.json')
