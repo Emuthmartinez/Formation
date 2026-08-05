@@ -16,7 +16,16 @@ import type { Catalog, CatalogIssue } from "./types.js";
  */
 export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIssue[] {
   const issues: CatalogIssue[] = [];
-  const groups = [catalog.areas, catalog.domains, catalog.phases, catalog.lanes, catalog.references, catalog.workflows, catalog.artifacts, catalog.gates] as const;
+  const groups = [
+    catalog.areas,
+    catalog.domains,
+    catalog.phases,
+    catalog.lanes,
+    catalog.references,
+    catalog.workflows,
+    catalog.artifacts,
+    catalog.gates,
+  ] as const;
   const allIds = new Map<string, string>();
 
   for (const group of groups) {
@@ -81,7 +90,8 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     for (const phaseId of workflow.phaseIds) checkKnown(issues, phaseIds, phaseId, "catalog_graph.workflow.unknown_phase", workflow.id);
     for (const dependencyId of workflow.dependencies) checkKnown(issues, workflowIds, dependencyId, "catalog_graph.workflow.unknown_dependency", workflow.id);
     for (const outputPath of workflow.outputPaths) {
-      if (!artifactsByPath.has(outputPath)) issues.push(error("catalog_graph.workflow.unknown_output", `${workflow.id} names unregistered artifact ${outputPath}.`));
+      if (!artifactsByPath.has(outputPath))
+        issues.push(error("catalog_graph.workflow.unknown_output", `${workflow.id} names unregistered artifact ${outputPath}.`));
     }
     for (const command of workflow.gateCommands) {
       if (!gateCommands.has(command)) issues.push(error("catalog_graph.workflow.unknown_gate", `${workflow.id} names unregistered gate command ${command}.`));
@@ -98,7 +108,10 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     for (const outputPath of workflow.outputPaths) writerCounts.set(outputPath, (writerCounts.get(outputPath) ?? 0) + 1);
   }
   for (const [outputPath, count] of writerCounts) {
-    if (count > 1) issues.push(error("catalog_graph.workflow.ambiguous_write", `${outputPath} is declared as an output by ${count} workflows (single-writer rule).`, outputPath));
+    if (count > 1)
+      issues.push(
+        error("catalog_graph.workflow.ambiguous_write", `${outputPath} is declared as an output by ${count} workflows (single-writer rule).`, outputPath),
+      );
   }
 
   uniqueBy(catalog.artifacts, (item) => item.path, "catalog_graph.artifact.path_duplicate", issues);

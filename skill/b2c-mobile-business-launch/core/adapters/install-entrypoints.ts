@@ -8,9 +8,11 @@
  * settings.json key, are preserved untouched — this mirrors tooling/install-hooks.ts's own
  * non-destructive merge philosophy, just inverted (removal instead of installation).
  *
- * Reuses tooling/lib/hook-contract.ts's `isManagedEntry` marker/signature convention rather than
- * reimplementing it — the marker is the one thing an install and an uninstall (this script) must
- * never disagree about.
+ * Carries the v1 `isManagedEntry` marker/signature convention forward (ported from the deleted
+ * tooling/lib/hook-contract.ts at cutover, U11 — KTD8/R19 delete the Claude-only PostToolUse hook
+ * enforcement mechanism itself, but the marker check this file needs to recognize and strip a
+ * v1-installed entry survives here, its only remaining consumer) — the marker is the one thing an
+ * install and an uninstall (this script) must never disagree about.
  *
  * DEFAULT IS --dry-run (prints the plan, touches nothing); --apply is required to write. Fixtures
  * use temp target repos and pass --apply against them directly (this script never touches a real
@@ -24,10 +26,45 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { expandHome, flagBoolean, flagString, parseFlags } from "../../tooling/lib/launch-state.js";
-import { isManagedEntry, type HookEntry, type HookSettings } from "../../tooling/lib/hook-contract.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "..", "..");
+
+/** Marked a v1 PostToolUse entry as owned by this skill (tooling/lib/hook-contract.ts, deleted at cutover). */
+const MANAGED_MARKER = "b2c-mobile-business-launch";
+
+export interface HookCommand {
+  type?: string;
+  command?: string;
+  timeout?: number;
+  statusMessage?: string;
+}
+
+export interface HookEntry {
+  _managed?: string;
+  _comment?: string;
+  matcher?: string;
+  hooks?: HookCommand[];
+}
+
+export interface HookSettings {
+  env?: Record<string, string>;
+  hooks?: { PostToolUse?: HookEntry[]; [key: string]: unknown };
+  [key: string]: unknown;
+}
+
+/**
+ * An entry belongs to this skill when it carries the marker, or — for repos installed before the
+ * marker existed — when its command text names the skill. The legacy path matters: without it, a
+ * v1-installed repo's hook entries would silently survive the v2 entrypoint install instead of
+ * being stripped.
+ */
+function isManagedEntry(entry: HookEntry): boolean {
+  if (entry?._managed === MANAGED_MARKER) {
+    return true;
+  }
+  return (entry?.hooks ?? []).some((hook) => typeof hook?.command === "string" && hook.command.includes(MANAGED_MARKER));
+}
 
 export const ENTRYPOINT_TEMPLATE_RELATIVE = path.join("workspace-template", "repo-agent-entrypoints");
 

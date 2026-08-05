@@ -73,7 +73,7 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/design/premium-mobile-craft.md",
     domainId: "domain.design",
     title: "Premium Mobile Craft",
-    loadWhen: "building or polishing in-app UI; wiring press states, animation, haptics, keyboard, loading/empty states; any \"premium feel\" request",
+    loadWhen: 'building or polishing in-app UI; wiring press states, animation, haptics, keyboard, loading/empty states; any "premium feel" request',
   },
   {
     id: "reference.design.quality-lens",
@@ -88,7 +88,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/design/refero-ux-patterns.md",
     domainId: "domain.design",
     title: "Refero UX Patterns",
-    loadWhen: "before using Refero, replacing Refero with a free pattern route, creating UX_PATTERNS.md, drawing web/mobile flow maps, or auditing pattern coverage",
+    loadWhen:
+      "before using Refero, replacing Refero with a free pattern route, creating UX_PATTERNS.md, drawing web/mobile flow maps, or auditing pattern coverage",
   },
   {
     id: "reference.design.remotion-content-assets",
@@ -96,7 +97,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.design",
     title: "Remotion Content Assets",
     loadWhen:
-      "replacing Higgsfield with Remotion; scaffolding a Remotion project; code-rendered videos/stills; app-preview clips; social/ad/content variants; any \"local rendered assets are ready\" claim",
+      'replacing Higgsfield with Remotion; scaffolding a Remotion project; code-rendered videos/stills; app-preview clips; social/ad/content variants; any "local rendered assets are ready" claim',
   },
   {
     id: "reference.design.surfaces-b2c",
@@ -147,7 +148,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.engineering",
     title: "XcodeBuildMCP Testing",
     loadWhen:
-      "first for any \"run the app\", \"check this screen\", \"walk this flow\", or \"reproduce this bug\" request on a local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP; also Codex Desktop native iOS tools, SnapshotPreviews exports, serve-sim streaming, or simulator/device screenshots",
+      'first for any "run the app", "check this screen", "walk this flow", or "reproduce this bug" request on a local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP; also Codex Desktop native iOS tools, SnapshotPreviews exports, serve-sim streaming, or simulator/device screenshots',
   },
 
   // ---------------------------------------------------------------------------------
@@ -166,7 +167,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.experience",
     title: "Eleven-Star Experience",
     loadWhen:
-      "before product/SPEC.md, design/DESIGN.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on \"11-star run\"/\"11-star pass\" — follow the reference's 11-Star Run Protocol before any other output",
+      'before product/SPEC.md, design/DESIGN.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on "11-star run"/"11-star pass" — follow the reference\'s 11-Star Run Protocol before any other output',
   },
   {
     id: "reference.experience.emotional-design-system",
@@ -175,7 +176,7 @@ export const references: readonly CatalogReference[] = [
     title: "Emotional Design System",
     hub: true,
     loadWhen:
-      "any product, onboarding, core-loop, paywall, or return-session work targeting 6-star (\"better than expected\") or higher; \"charge this feature with emotion\", \"make users stick / build a habit\", \"apply the <name> card\", \"emotional UX audit\" — the methodology hub; see experience-cards.md for the card deck, emotional-experience-design.md for full producer detail, emotional-experience-measurement.md for instrumentation, and ethics-guardrail.md for the regulatory/legal contract",
+      'any product, onboarding, core-loop, paywall, or return-session work targeting 6-star ("better than expected") or higher; "charge this feature with emotion", "make users stick / build a habit", "apply the <name> card", "emotional UX audit" — the methodology hub; see experience-cards.md for the card deck, emotional-experience-design.md for full producer detail, emotional-experience-measurement.md for instrumentation, and ethics-guardrail.md for the regulatory/legal contract',
   },
   {
     id: "reference.experience.emotional-experience-design",
@@ -250,14 +251,16 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/experience/experience-cards/mastery-and-status-card.md",
     domainId: "domain.experience",
     title: "Mastery And Status Card",
-    loadWhen: "surfacing earned skill/status visibility to sustain intrinsic motivation; pins a canonical motion-contract spring — routed from experience-cards.md",
+    loadWhen:
+      "surfacing earned skill/status visibility to sustain intrinsic motivation; pins a canonical motion-contract spring — routed from experience-cards.md",
   },
   {
     id: "reference.experience.experience-cards.peak-end-card",
     path: "knowledge/experience/experience-cards/peak-end-card.md",
     domainId: "domain.experience",
     title: "Peak-End Card",
-    loadWhen: "engineering one session peak plus a strong close for memory-based re-engagement; pins a canonical motion-contract spring — routed from experience-cards.md",
+    loadWhen:
+      "engineering one session peak plus a strong close for memory-based re-engagement; pins a canonical motion-contract spring — routed from experience-cards.md",
   },
   {
     id: "reference.experience.experience-cards.perceived-effort-delay-card",
@@ -285,7 +288,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/experience/experience-cards/streak-and-loss-aversion-card.md",
     domainId: "domain.experience",
     title: "Streak And Loss-Aversion Card",
-    loadWhen: "HIGH-risk: a streak or earned-continuity mechanic a user could feel loss-averse about losing — escape hatch and counter-metric required — routed from experience-cards.md",
+    loadWhen:
+      "HIGH-risk: a streak or earned-continuity mechanic a user could feel loss-averse about losing — escape hatch and counter-metric required — routed from experience-cards.md",
   },
   {
     id: "reference.experience.experience-cards.variable-reward-card",
@@ -358,7 +362,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/growth/paid-user-acquisition.md",
     domainId: "domain.growth",
     title: "Paid User Acquisition",
-    loadWhen: "before paid ads, Apple Search Ads, Meta/TikTok/Google campaigns, custom product page campaign routing, MMP/ad-network SDK choices, paid creative tests, or spend-readiness claims",
+    loadWhen:
+      "before paid ads, Apple Search Ads, Meta/TikTok/Google campaigns, custom product page campaign routing, MMP/ad-network SDK choices, paid creative tests, or spend-readiness claims",
   },
   {
     id: "reference.growth.ugc-creator-engine",
@@ -385,7 +390,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/money/revenue-monetization.md",
     domainId: "domain.money",
     title: "Revenue Monetization",
-    loadWhen: "before RevenueCat, Stripe, app-store products, web billing, web purchase links, funnels, paywalls, subscriptions, webhooks, taxes, pricing, restore purchases, or entitlements",
+    loadWhen:
+      "before RevenueCat, Stripe, app-store products, web billing, web purchase links, funnels, paywalls, subscriptions, webhooks, taxes, pricing, restore purchases, or entitlements",
   },
 
   // ---------------------------------------------------------------------------------
@@ -396,7 +402,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/operations/founder-zero-operator.md",
     domainId: "domain.operations",
     title: "Founder-Zero Operator",
-    loadWhen: "every broad launch start; before account/social/Doppler bootstrap; when the founder is unsure; whenever an agent is about to hand back a checklist instead of operating the business",
+    loadWhen:
+      "every broad launch start; before account/social/Doppler bootstrap; when the founder is unsure; whenever an agent is about to hand back a checklist instead of operating the business",
   },
   {
     id: "reference.operations.frontier-agent-operations",
@@ -418,7 +425,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.operations",
     title: "Post-Launch Operations",
     loadWhen:
-      "once the app is live (phase_6/phase_6b); after first store approval; on \"what now\"; for weekly ops, incidents, review responses, retention and kill-or-scale reviews, or resuming a live app; when a second business exists",
+      'once the app is live (phase_6/phase_6b); after first store approval; on "what now"; for weekly ops, incidents, review responses, retention and kill-or-scale reviews, or resuming a live app; when a second business exists',
   },
   {
     id: "reference.operations.provider-state-recipes",
@@ -530,7 +537,7 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/process/launch-coverage.md",
     domainId: "domain.process",
     title: "Launch Coverage",
-    loadWhen: "\"what else is missing\", \"launch readiness\"; moving from planning to build or submission",
+    loadWhen: '"what else is missing", "launch readiness"; moving from planning to build or submission',
   },
   {
     id: "reference.process.launch-phases",
@@ -544,7 +551,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/process/provider-proof.md",
     domainId: "domain.process",
     title: "Provider Proof",
-    loadWhen: "before marking any provider-backed lane (analytics/revenue/email/store/security/eng) done — evidence rules and the minimum PROVIDER_PROOF.md ledger row shape",
+    loadWhen:
+      "before marking any provider-backed lane (analytics/revenue/email/store/security/eng) done — evidence rules and the minimum PROVIDER_PROOF.md ledger row shape",
   },
   {
     id: "reference.process.tool-recipes",
@@ -560,7 +568,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/process/tool-recipes/device-capture-and-proof.md",
     domainId: "domain.process",
     title: "Device Capture And Proof",
-    loadWhen: "capturing truthful app UI proof — the Route Ladder from the in-app iOS Simulator through XcodeBuildMCP/SnapshotPreviews/serve-sim — routed from tool-recipes.md",
+    loadWhen:
+      "capturing truthful app UI proof — the Route Ladder from the in-app iOS Simulator through XcodeBuildMCP/SnapshotPreviews/serve-sim — routed from tool-recipes.md",
   },
   {
     id: "reference.process.tool-recipes.engineering-and-agent-orchestration",
@@ -588,7 +597,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/process/tool-recipes/research-intelligence.md",
     domainId: "domain.process",
     title: "Research Intelligence",
-    loadWhen: "AppKittie store intelligence, XPOZ social-language research, Firecrawl web intelligence, Refero UX pattern research, or name/keyword collision checks — routed from tool-recipes.md",
+    loadWhen:
+      "AppKittie store intelligence, XPOZ social-language research, Firecrawl web intelligence, Refero UX pattern research, or name/keyword collision checks — routed from tool-recipes.md",
   },
   {
     id: "reference.process.tool-recipes.revenue-email-analytics",
@@ -609,7 +619,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/process/tool-recipes/visual-and-motion-production.md",
     domainId: "domain.process",
     title: "Visual And Motion Production",
-    loadWhen: "Higgsfield or Remotion production routing, including the six named chained recipes for ads/UGC/virality/seasonal restyle — routed from tool-recipes.md",
+    loadWhen:
+      "Higgsfield or Remotion production routing, including the six named chained recipes for ads/UGC/virality/seasonal restyle — routed from tool-recipes.md",
   },
 
   // ---------------------------------------------------------------------------------
@@ -620,21 +631,24 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/product/ai-chat-companion.md",
     domainId: "domain.product",
     title: "AI Chat Companion",
-    loadWhen: "\"an AI assistant\", \"a chatbot for <domain>\", \"an AI companion/character\", a coach/tutor chat app; before specing conversation schema, model integration, memory, usage metering, or the safety layer",
+    loadWhen:
+      '"an AI assistant", "a chatbot for <domain>", "an AI companion/character", a coach/tutor chat app; before specing conversation schema, model integration, memory, usage metering, or the safety layer',
   },
   {
     id: "reference.product.habit-tracker",
     path: "knowledge/product/habit-tracker.md",
     domainId: "domain.product",
     title: "Habit Tracker",
-    loadWhen: "\"a habit tracker\", \"a streak app\", a daily routine or wellness/productivity utility; before specing habits, check-ins, streaks, reminders, or insights",
+    loadWhen:
+      '"a habit tracker", "a streak app", a daily routine or wellness/productivity utility; before specing habits, check-ins, streaks, reminders, or insights',
   },
   {
     id: "reference.product.photo-ai-media",
     path: "knowledge/product/photo-ai-media.md",
     domainId: "domain.product",
     title: "Photo AI Media",
-    loadWhen: "AI headshots/avatars, photo enhancer/restorer, AI art studio, \"an app that turns photos into <X>\"; before specing media storage, the generation pipeline, credits/metering, sharing, or safety",
+    loadWhen:
+      'AI headshots/avatars, photo enhancer/restorer, AI art studio, "an app that turns photos into <X>"; before specing media storage, the generation pipeline, credits/metering, sharing, or safety',
   },
   {
     id: "reference.product.product-moat",
@@ -642,14 +656,15 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.product",
     title: "Product Moat",
     loadWhen:
-      "before product/SPEC.md, design/DESIGN.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on \"11-star run\"/\"11-star pass\" — follow the 11-Star Run Protocol before any other output",
+      'before product/SPEC.md, design/DESIGN.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on "11-star run"/"11-star pass" — follow the 11-Star Run Protocol before any other output',
   },
   {
     id: "reference.product.social-network",
     path: "knowledge/product/social-network.md",
     domainId: "domain.product",
     title: "Social Network",
-    loadWhen: "\"build a social network\", an X/Instagram/TikTok clone, \"a community app for <niche>\"; before specing schema, auth, feed, profiles, search, DMs, monetization, or invites",
+    loadWhen:
+      '"build a social network", an X/Instagram/TikTok clone, "a community app for <niche>"; before specing schema, auth, feed, profiles, search, DMs, monetization, or invites',
   },
 
   // ---------------------------------------------------------------------------------
@@ -660,7 +675,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/research/localization-market-research.md",
     domainId: "domain.research",
     title: "Localization Market Research",
-    loadWhen: "before localizing any surface (store metadata/keywords/screenshots, paywall/offers, landing/web, lifecycle email, paid storefronts) or choosing which locales to ship",
+    loadWhen:
+      "before localizing any surface (store metadata/keywords/screenshots, paywall/offers, landing/web, lifecycle email, paid storefronts) or choosing which locales to ship",
   },
 
   // ---------------------------------------------------------------------------------
@@ -671,7 +687,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/store/app-store-connect-cli.md",
     domainId: "domain.store",
     title: "App Store Connect CLI",
-    loadWhen: "before automating App Store Connect with the Rork asc CLI or CLI skill pack — app creation, metadata, screenshots, TestFlight, review status, RevenueCat catalog sync",
+    loadWhen:
+      "before automating App Store Connect with the Rork asc CLI or CLI skill pack — app creation, metadata, screenshots, TestFlight, review status, RevenueCat catalog sync",
   },
   {
     id: "reference.store.app-store-listing-prep",
@@ -693,21 +710,24 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/store/aso-store-ops.md",
     domainId: "domain.store",
     title: "ASO Store Ops",
-    loadWhen: "before App Store/Play metadata, screenshot planning, ASO audits, keyword research, Apple Search Ads, release/rejection handling, ratings/reviews, or post-launch monitoring",
+    loadWhen:
+      "before App Store/Play metadata, screenshot planning, ASO audits, keyword research, Apple Search Ads, release/rejection handling, ratings/reviews, or post-launch monitoring",
   },
   {
     id: "reference.store.google-play-release",
     path: "knowledge/store/google-play-release.md",
     domainId: "domain.store",
     title: "Google Play Release",
-    loadWhen: "Android is in scope (platforms include android, or an android bundle id exists); before Play Console setup, Data Safety answers, content rating, Play App Signing, release tracks, closed testing, or pre-launch report triage",
+    loadWhen:
+      "Android is in scope (platforms include android, or an android bundle id exists); before Play Console setup, Data Safety answers, content rating, Play App Signing, release tracks, closed testing, or pre-launch report triage",
   },
   {
     id: "reference.store.store-console-workflow",
     path: "knowledge/store/store-console-workflow.md",
     domainId: "domain.store",
     title: "Store Console Workflow",
-    loadWhen: "before App Store Connect or Play Console setup, privacy labels/Data safety, screenshot capture/upload, reviewer notes, account-deletion console work, or any \"where do I click and what do I paste\" handoff",
+    loadWhen:
+      'before App Store Connect or Play Console setup, privacy labels/Data safety, screenshot capture/upload, reviewer notes, account-deletion console work, or any "where do I click and what do I paste" handoff',
   },
 
   // ---------------------------------------------------------------------------------
@@ -718,7 +738,8 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/trust/privacy-terms.md",
     domainId: "domain.trust",
     title: "Privacy Terms",
-    loadWhen: "before drafting or publishing privacy policy, terms, EULA, subscription terms, account/data deletion flows, or app-store privacy/Data safety disclosures",
+    loadWhen:
+      "before drafting or publishing privacy policy, terms, EULA, subscription terms, account/data deletion flows, or app-store privacy/Data safety disclosures",
   },
   {
     id: "reference.trust.security-release-hardening",
@@ -737,13 +758,15 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/words/conversion-copy.md",
     domainId: "domain.words",
     title: "Conversion Copy",
-    loadWhen: "before writing any words a user reads: conversion copy (hero/CTA, store, paywall) and every in-app string (buttons, empty states, errors, settings); and l10n readiness",
+    loadWhen:
+      "before writing any words a user reads: conversion copy (hero/CTA, store, paywall) and every in-app string (buttons, empty states, errors, settings); and l10n readiness",
   },
   {
     id: "reference.words.no-slop-writing",
     path: "knowledge/words/no-slop-writing.md",
     domainId: "domain.words",
     title: "No-Slop Writing",
-    loadWhen: "before writing or reviewing any founder-facing copy, or any marketing copy this skill generates — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO",
+    loadWhen:
+      "before writing or reviewing any founder-facing copy, or any marketing copy this skill generates — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO",
   },
 ] as const;

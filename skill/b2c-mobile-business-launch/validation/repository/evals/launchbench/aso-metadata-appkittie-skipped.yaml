@@ -16,7 +16,6 @@ expected_guardrail: >
   copy, benefit paragraphs, and social proof unless the founder approves brevity with a
   recorded rationale. APP_STORE_LISTING.md must be created as the canonical artifact.
 validators:
-  - check-aso-metadata
   - check-store-console-packet
 must_catch:
   - Keyword set assembled without any AppKittie batch_keyword_difficulty or get_keyword_difficulty call.
@@ -27,4 +26,4 @@ should_say:
   - Invoke mcp__appkittie__batch_keyword_difficulty on the proposed keyword set before locking it.
   - Record difficulty scores, search volume, and the selection rationale in APP_STORE_LISTING.md.
   - Expand the description to at least 2500 chars with keyword-rich body copy, secondary benefit paragraphs, and social proof.
-  - Create APP_STORE_LISTING.md and run check:aso-metadata -- --root .
+  - Create APP_STORE_LISTING.md and run check:store-console -- --root .

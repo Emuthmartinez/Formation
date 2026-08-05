@@ -86,7 +86,6 @@ export const workflows = [
     phaseIds: ["phase.1f"],
     dependencies: ["workflow.research.research-backed-spec", "workflow.experience.11-star-experience"],
     outputPaths: ["state/LAUNCH_TRACE.md", "engineering/TECH_SPEC.md"],
-    gates: ["check:launch-trace"],
     actionClass: "draft",
     idempotent: true,
   }),

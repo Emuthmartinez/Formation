@@ -65,7 +65,7 @@ Acceptance:
 ## 3. Metadata And Keyword Gates
 
 Before locking metadata:
-- load `knowledge/words/no-slop-writing.md` before drafting name, subtitle, keyword-field terms, or description copy, and run the finished draft through its self-check (§6) before treating metadata as locked; `check:no-slop` gates the mechanical rules
+- load `knowledge/words/no-slop-writing.md` before drafting name, subtitle, keyword-field terms, or description copy, and run the finished draft through its self-check (§6) before treating metadata as locked
 - run keyword and name collision checks in the target country
 - separate brand language from search language
 - preserve App Store character counts and Play Store indexed-description strategy

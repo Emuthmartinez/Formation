@@ -1,12 +1,14 @@
 import type { CatalogDomain } from "./types.js";
 
 /**
- * Ported from runtime/graph/domains.ts (U8). Field shape is unchanged; `indexPath` still
- * points at the current knowledge/<slug>/README.md — those 15 files are DROP in the port
- * ledger (docs/plans/attachments/2026-08-port-ledger.md), superseded by
- * catalog/generated/routing.md, but U8 does not delete anything (KTD13), so the path
- * this validates against today is still real. U11 repoints or removes indexPath once the
- * README tree is culled.
+ * Ported from runtime/graph/domains.ts (U8). Field shape is unchanged, but at cutover (U11)
+ * the 14 `knowledge/<slug>/README.md` routing tables named in the port ledger
+ * (docs/plans/attachments/2026-08-port-ledger.md) were deleted — their sole job, the
+ * per-domain routing table, is superseded by `catalog/generated/routing.md`, generated from
+ * this file plus `catalog/references.ts`'s authored `loadWhen` data (R20). `indexPath` is
+ * removed for every domain whose README is gone rather than left dangling; `domain.machine`
+ * keeps its `indexPath` because `validation/repository/README.md` (a "merge" disposition in
+ * the ledger, not "drop") still exists.
  */
 export const domains: readonly CatalogDomain[] = [
   {
@@ -14,7 +16,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "process",
     name: "Running The Launch",
     areaIds: ["area.operating-system"],
-    indexPath: "knowledge/process/README.md",
     routeLabel: "Running the launch",
     routeWhen: "starting or auditing a launch: phases, coverage, artifact contracts, traceability, provider proof, or propagating a change across surfaces",
     order: 10,
@@ -24,7 +25,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "orchestration",
     name: "Driving The Work",
     areaIds: ["area.operating-system"],
-    indexPath: "knowledge/orchestration/README.md",
     routeLabel: "Driving the work",
     routeWhen: "resuming a session, durable state, how much to decide alone, subagents, dynamic workflows, engineering routing",
     order: 20,
@@ -34,7 +34,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "operations",
     name: "Running The Business",
     areaIds: ["area.business-operations-trust"],
-    indexPath: "knowledge/operations/README.md",
     routeLabel: "Running the business",
     routeWhen: "founder access and accounts, credentials and secrets, paid-tool decisions, authenticated actions, lifecycle email, and life after launch",
     order: 30,
@@ -44,7 +43,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "research",
     name: "Market Research",
     areaIds: ["area.product-experience"],
-    indexPath: "knowledge/research/README.md",
     routeLabel: "Market research",
     routeWhen: "before the spec hardens: category economics, competitors, review mining, social language, and which storefronts and locales are worth shipping",
     order: 40,
@@ -54,7 +52,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "product",
     name: "What You're Building",
     areaIds: ["area.product-experience"],
-    indexPath: "knowledge/product/README.md",
     routeLabel: "What you're building",
     routeWhen: "scope, the core loop, V1 versus later, the copy-proof test, and shipped app archetypes",
     order: 50,
@@ -64,7 +61,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "experience",
     name: "How The App Feels",
     areaIds: ["area.product-experience"],
-    indexPath: "knowledge/experience/README.md",
     routeLabel: "How the app feels",
     routeWhen:
       "the standout moment, onboarding and activation, engagement mechanics and their ethics limits, push lifecycle, and work targeting better-than-expected",
@@ -75,7 +71,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "design",
     name: "Look And Feel",
     areaIds: ["area.product-experience", "area.build-release"],
-    indexPath: "knowledge/design/README.md",
     routeLabel: "Look and feel",
     routeWhen:
       "brand, visual system, design tokens, motion, premium in-app craft, UX patterns, screen specs, rendered design state, and generated visual assets",
@@ -86,7 +81,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "words",
     name: "Every Word A User Reads",
     areaIds: ["area.product-experience", "area.growth-revenue"],
-    indexPath: "knowledge/words/README.md",
     routeLabel: "Every word a user reads",
     routeWhen: "conversion copy, every in-app string, brand voice, and the writing-quality bar for anything a human reads",
     order: 80,
@@ -96,7 +90,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "engineering",
     name: "Building The App",
     areaIds: ["area.build-release"],
-    indexPath: "knowledge/engineering/README.md",
     routeLabel: "Building the app",
     routeWhen: "architecture, backend and data contract, engineering orchestration, device and simulator proof, and agent roles handed to future sessions",
     order: 90,
@@ -106,7 +99,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "store",
     name: "App Store And Google Play",
     areaIds: ["area.build-release", "area.growth-revenue"],
-    indexPath: "knowledge/store/README.md",
     routeLabel: "App Store and Google Play",
     routeWhen:
       "metadata, ASO, keywords, screenshots, listing packets, privacy answers, locale choices, console walkthroughs, signing, uploads, release and rejection handling",
@@ -117,7 +109,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "money",
     name: "Pricing And Getting Paid",
     areaIds: ["area.growth-revenue"],
-    indexPath: "knowledge/money/README.md",
     routeLabel: "Pricing and getting paid",
     routeWhen: "RevenueCat, Stripe, store products, paywalls, subscriptions, entitlements, webhooks, taxes, restore purchases, and purchase proof",
     order: 110,
@@ -127,7 +118,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "growth",
     name: "Marketing And Growth",
     areaIds: ["area.growth-revenue"],
-    indexPath: "knowledge/growth/README.md",
     routeLabel: "Marketing and growth",
     routeWhen: "paid acquisition, viral and referral loops, launch narrative, creators, scheduled social, landing and funnel pages, and search visibility",
     order: 120,
@@ -137,7 +127,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "data",
     name: "Analytics And Tracking",
     areaIds: ["area.growth-revenue", "area.product-experience"],
-    indexPath: "knowledge/data/README.md",
     routeLabel: "Analytics and tracking",
     routeWhen: "before anything names an event: the event catalog, attribution, dashboards, funnels, flags, experiments, and replay",
     order: 130,
@@ -147,7 +136,6 @@ export const domains: readonly CatalogDomain[] = [
     slug: "trust",
     name: "Privacy, Security, And Legal",
     areaIds: ["area.business-operations-trust", "area.build-release"],
-    indexPath: "knowledge/trust/README.md",
     routeLabel: "Privacy, security, and legal",
     routeWhen: "threat modeling, platform hardening, scans, privacy policy and terms, account and data deletion, and store privacy disclosures",
     order: 140,

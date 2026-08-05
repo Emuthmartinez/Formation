@@ -3,8 +3,8 @@
 Use this reference when planning how a B2C mobile launch shows up in public: the tentpole
 announcement, the weekly feature-launch heartbeat, the launch-day run-of-show, and the copy
 craft that decides whether a release lands or dies on arrival. It produces
-[`growth/LAUNCH_NARRATIVE.md`](../../workspace/business/growth/LAUNCH_NARRATIVE.md) and is enforced by
-`npm run check:launch-narrative`.
+[`growth/LAUNCH_NARRATIVE.md`](../../workspace/business/growth/LAUNCH_NARRATIVE.md), held to the
+2026 DO-NOT-DO list below at every review.
 
 It is a peer reference to [`viral-growth-loops.md`](./viral-growth-loops.md) (in-product sharing
 loops), [`ugc-creator-engine.md`](./ugc-creator-engine.md) (creator-led organic), [`paid-user-acquisition.md`](./paid-user-acquisition.md)
@@ -131,9 +131,9 @@ a "cut formatting slop" edit soften that rule to "use emoji sparingly."
 - **Emotional angles that work:** a glimmer of hope; pointing at something broken and saying we are
   fixing it; a genuinely new take that reframes the whole category.
 
-### The 2026 DO-NOT-DO list (deterministically enforced)
+### The 2026 DO-NOT-DO list
 
-`check:launch-narrative` scans the post copy (fenced code blocks in `LAUNCH_NARRATIVE.md`) for these:
+Review the post copy (fenced code blocks in `LAUNCH_NARRATIVE.md`) against these before it ships:
 
 - **No hashtags.** They read as marketing and depress reach.
 - **No emojis carrying the message.** The verified high-performers use essentially none; let the
@@ -336,6 +336,5 @@ Before calling the launch-narrative lane ready:
 - [ ] All post copy lives in fenced code blocks and passes the copy guardrails (no hashtags, no
       emojis, no link in the main post).
 - [ ] Public claims are limited to what is true and attributable; no unverified view/revenue/credential claims.
-- [ ] All post copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` — banned words, empty phrases, and
+- [ ] All post copy passes the `no-slop-writing.md` self-check (§6) — banned words, empty phrases, and
       named patterns removed while the feeling-first hook and POV stay intact.
-- [ ] `npm run check:launch-narrative -- --root .` passes.

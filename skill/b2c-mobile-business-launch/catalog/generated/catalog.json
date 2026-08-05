@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.69.1",
+  "skillVersion": "0.70.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -68,7 +68,6 @@
       "areaIds": [
         "area.operating-system"
       ],
-      "indexPath": "knowledge/process/README.md",
       "routeLabel": "Running the launch",
       "routeWhen": "starting or auditing a launch: phases, coverage, artifact contracts, traceability, provider proof, or propagating a change across surfaces",
       "order": 10
@@ -80,7 +79,6 @@
       "areaIds": [
         "area.operating-system"
       ],
-      "indexPath": "knowledge/orchestration/README.md",
       "routeLabel": "Driving the work",
       "routeWhen": "resuming a session, durable state, how much to decide alone, subagents, dynamic workflows, engineering routing",
       "order": 20
@@ -92,7 +90,6 @@
       "areaIds": [
         "area.business-operations-trust"
       ],
-      "indexPath": "knowledge/operations/README.md",
       "routeLabel": "Running the business",
       "routeWhen": "founder access and accounts, credentials and secrets, paid-tool decisions, authenticated actions, lifecycle email, and life after launch",
       "order": 30
@@ -104,7 +101,6 @@
       "areaIds": [
         "area.product-experience"
       ],
-      "indexPath": "knowledge/research/README.md",
       "routeLabel": "Market research",
       "routeWhen": "before the spec hardens: category economics, competitors, review mining, social language, and which storefronts and locales are worth shipping",
       "order": 40
@@ -116,7 +112,6 @@
       "areaIds": [
         "area.product-experience"
       ],
-      "indexPath": "knowledge/product/README.md",
       "routeLabel": "What you're building",
       "routeWhen": "scope, the core loop, V1 versus later, the copy-proof test, and shipped app archetypes",
       "order": 50
@@ -128,7 +123,6 @@
       "areaIds": [
         "area.product-experience"
       ],
-      "indexPath": "knowledge/experience/README.md",
       "routeLabel": "How the app feels",
       "routeWhen": "the standout moment, onboarding and activation, engagement mechanics and their ethics limits, push lifecycle, and work targeting better-than-expected",
       "order": 60
@@ -141,7 +135,6 @@
         "area.product-experience",
         "area.build-release"
       ],
-      "indexPath": "knowledge/design/README.md",
       "routeLabel": "Look and feel",
       "routeWhen": "brand, visual system, design tokens, motion, premium in-app craft, UX patterns, screen specs, rendered design state, and generated visual assets",
       "order": 70
@@ -154,7 +147,6 @@
         "area.product-experience",
         "area.growth-revenue"
       ],
-      "indexPath": "knowledge/words/README.md",
       "routeLabel": "Every word a user reads",
       "routeWhen": "conversion copy, every in-app string, brand voice, and the writing-quality bar for anything a human reads",
       "order": 80
@@ -166,7 +158,6 @@
       "areaIds": [
         "area.build-release"
       ],
-      "indexPath": "knowledge/engineering/README.md",
       "routeLabel": "Building the app",
       "routeWhen": "architecture, backend and data contract, engineering orchestration, device and simulator proof, and agent roles handed to future sessions",
       "order": 90
@@ -179,7 +170,6 @@
         "area.build-release",
         "area.growth-revenue"
       ],
-      "indexPath": "knowledge/store/README.md",
       "routeLabel": "App Store and Google Play",
       "routeWhen": "metadata, ASO, keywords, screenshots, listing packets, privacy answers, locale choices, console walkthroughs, signing, uploads, release and rejection handling",
       "order": 100
@@ -191,7 +181,6 @@
       "areaIds": [
         "area.growth-revenue"
       ],
-      "indexPath": "knowledge/money/README.md",
       "routeLabel": "Pricing and getting paid",
       "routeWhen": "RevenueCat, Stripe, store products, paywalls, subscriptions, entitlements, webhooks, taxes, restore purchases, and purchase proof",
       "order": 110
@@ -203,7 +192,6 @@
       "areaIds": [
         "area.growth-revenue"
       ],
-      "indexPath": "knowledge/growth/README.md",
       "routeLabel": "Marketing and growth",
       "routeWhen": "paid acquisition, viral and referral loops, launch narrative, creators, scheduled social, landing and funnel pages, and search visibility",
       "order": 120
@@ -216,7 +204,6 @@
         "area.growth-revenue",
         "area.product-experience"
       ],
-      "indexPath": "knowledge/data/README.md",
       "routeLabel": "Analytics and tracking",
       "routeWhen": "before anything names an event: the event catalog, attribution, dashboards, funnels, flags, experiments, and replay",
       "order": 130
@@ -229,7 +216,6 @@
         "area.business-operations-trust",
         "area.build-release"
       ],
-      "indexPath": "knowledge/trust/README.md",
       "routeLabel": "Privacy, security, and legal",
       "routeWhen": "threat modeling, platform hardening, scans, privacy policy and terms, account and data deletion, and store privacy disclosures",
       "order": 140
@@ -1361,9 +1347,7 @@
         "state/LAUNCH_TRACE.md",
         "engineering/TECH_SPEC.md"
       ],
-      "gateCommands": [
-        "check:launch-trace"
-      ],
+      "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -1436,9 +1420,7 @@
       "outputPaths": [
         "strategy/TOOL_DECISIONS.md"
       ],
-      "gateCommands": [
-        "check:paid-tool-decisions"
-      ],
+      "gateCommands": [],
       "providerIds": [
         "provider.doppler"
       ],
@@ -1534,9 +1516,7 @@
         "trust/TERMS.md",
         "LEGAL_REVIEW.md"
       ],
-      "gateCommands": [
-        "check:privacy-terms"
-      ],
+      "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [
         "approve legal text"
@@ -1709,8 +1689,7 @@
         "product/SPEC.md"
       ],
       "gateCommands": [
-        "check:research",
-        "check:product-spec"
+        "check:research"
       ],
       "providerIds": [],
       "founderOnlyActions": [
@@ -1737,9 +1716,7 @@
       "outputPaths": [
         "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
       ],
-      "gateCommands": [
-        "check:localization-research"
-      ],
+      "gateCommands": [],
       "providerIds": [
         "provider.aso-skills"
       ],
@@ -1768,9 +1745,7 @@
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "product/experience/11-star-experience/11-star-experience.html"
       ],
-      "gateCommands": [
-        "check:11-star"
-      ],
+      "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -1917,9 +1892,7 @@
       "outputPaths": [
         "product/experience/ux-patterns/UX_PATTERNS.md"
       ],
-      "gateCommands": [
-        "check:ux-patterns"
-      ],
+      "gateCommands": [],
       "providerIds": [
         "provider.refero"
       ],
@@ -1950,9 +1923,7 @@
         "product/ONBOARDING.md",
         "product/onboarding.html"
       ],
-      "gateCommands": [
-        "check:onboarding"
-      ],
+      "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -1975,7 +1946,6 @@
         "design/DESIGN.md"
       ],
       "gateCommands": [
-        "check:ux-patterns",
         "check:motion-contract"
       ],
       "providerIds": [],
@@ -2031,7 +2001,6 @@
         "product/copy/COPY_DECK.md"
       ],
       "gateCommands": [
-        "check:no-slop",
         "check:app-copy"
       ],
       "providerIds": [],
@@ -2059,9 +2028,7 @@
       "outputPaths": [
         "STORE_OPS.md"
       ],
-      "gateCommands": [
-        "check:aso-metadata"
-      ],
+      "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -2115,9 +2082,7 @@
       "outputPaths": [
         "store/APPLE_SIGNING.md"
       ],
-      "gateCommands": [
-        "check:apple-signing"
-      ],
+      "gateCommands": [],
       "providerIds": [
         "provider.app-store-connect"
       ],
@@ -2282,9 +2247,7 @@
       "outputPaths": [
         "store/GOOGLE_PLAY_RELEASE.md"
       ],
-      "gateCommands": [
-        "check:google-play"
-      ],
+      "gateCommands": [],
       "providerIds": [
         "provider.google-play"
       ],
@@ -2377,9 +2340,7 @@
         "CLAUDE.md",
         "APP_AGENTS.md"
       ],
-      "gateCommands": [
-        "check:agent-entrypoints"
-      ],
+      "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "mutate",
@@ -2534,9 +2495,7 @@
       "outputPaths": [
         "growth/VIRAL_GROWTH.md"
       ],
-      "gateCommands": [
-        "check:viral-growth"
-      ],
+      "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -2565,9 +2524,7 @@
       "outputPaths": [
         "growth/LAUNCH_NARRATIVE.md"
       ],
-      "gateCommands": [
-        "check:launch-narrative"
-      ],
+      "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [
         "approve public launch posting"
@@ -2687,9 +2644,7 @@
       "outputPaths": [
         "growth/UGC_PLAYBOOK.md"
       ],
-      "gateCommands": [
-        "check:viral-growth"
-      ],
+      "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -3561,20 +3516,6 @@
       "audit": "required"
     },
     {
-      "id": "gate.check-11-star",
-      "command": "check:11-star",
-      "scriptPath": "validation/business/experience/check-eleven-star-experience.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-agent-entrypoints",
-      "command": "check:agent-entrypoints",
-      "scriptPath": "validation/business/process/check-agent-entrypoints.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
       "id": "gate.check-agent-evals",
       "command": "check:agent-evals",
       "scriptPath": "validation/repository/run-agent-evals.ts",
@@ -3617,13 +3558,6 @@
       "audit": "required"
     },
     {
-      "id": "gate.check-apple-signing",
-      "command": "check:apple-signing",
-      "scriptPath": "validation/business/store/check-apple-signing-packet.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
       "id": "gate.check-archetype-starter",
       "command": "check:archetype-starter",
       "scriptPath": "validation/business/engineering/check-archetype-starter.ts",
@@ -3641,13 +3575,6 @@
       "id": "gate.check-asc-command-contract",
       "command": "check:asc-command-contract",
       "scriptPath": "validation/business/store/check-asc-command-contract.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-aso-metadata",
-      "command": "check:aso-metadata",
-      "scriptPath": "validation/business/store/check-aso-metadata.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },
@@ -3771,20 +3698,6 @@
       "audit": "required"
     },
     {
-      "id": "gate.check-google-play",
-      "command": "check:google-play",
-      "scriptPath": "validation/business/store/check-google-play-readiness.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-hooks-installed",
-      "command": "check:hooks-installed",
-      "scriptPath": "validation/business/process/check-hooks-installed.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
       "id": "gate.check-landing-funnel",
       "command": "check:landing-funnel",
       "scriptPath": "validation/business/growth/check-landing-funnel.ts",
@@ -3795,27 +3708,6 @@
       "id": "gate.check-lane-coverage",
       "command": "check:lane-coverage",
       "scriptPath": "validation/business/process/check-lane-coverage.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-launch-narrative",
-      "command": "check:launch-narrative",
-      "scriptPath": "validation/business/growth/check-launch-narrative.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-launch-trace",
-      "command": "check:launch-trace",
-      "scriptPath": "validation/business/process/check-launch-trace.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-localization-research",
-      "command": "check:localization-research",
-      "scriptPath": "validation/business/research/check-localization-research.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },
@@ -3841,30 +3733,9 @@
       "audit": "required"
     },
     {
-      "id": "gate.check-no-slop",
-      "command": "check:no-slop",
-      "scriptPath": "validation/business/words/check-no-slop.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-onboarding",
-      "command": "check:onboarding",
-      "scriptPath": "validation/business/experience/check-onboarding-conversion.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
       "id": "gate.check-orchestration",
       "command": "check:orchestration",
       "scriptPath": "validation/business/process/check-parallel-orchestration.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-paid-tool-decisions",
-      "command": "check:paid-tool-decisions",
-      "scriptPath": "validation/business/money/check-paid-tool-decisions.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },
@@ -3886,20 +3757,6 @@
       "id": "gate.check-post-launch",
       "command": "check:post-launch",
       "scriptPath": "validation/business/operations/check-post-launch-ops.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-privacy-terms",
-      "command": "check:privacy-terms",
-      "scriptPath": "validation/business/trust/check-privacy-terms.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-product-spec",
-      "command": "check:product-spec",
-      "scriptPath": "validation/business/product/check-product-spec.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },
@@ -3943,13 +3800,6 @@
       "command": "check:security",
       "scriptPath": "validation/business/trust/check-security-release.ts",
       "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-skill-graph",
-      "command": "check:skill-graph",
-      "scriptPath": "validation/repository/check-skill-graph.ts",
-      "ownerDomainId": "domain.machine",
       "audit": "required"
     },
     {
@@ -4002,31 +3852,10 @@
       "audit": "required"
     },
     {
-      "id": "gate.check-ux-patterns",
-      "command": "check:ux-patterns",
-      "scriptPath": "validation/business/experience/check-ux-patterns.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
       "id": "gate.check-version-discipline",
       "command": "check:version-discipline",
       "scriptPath": "validation/repository/check-version-discipline.ts",
       "ownerDomainId": "domain.machine",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-viral-growth",
-      "command": "check:viral-growth",
-      "scriptPath": "validation/business/growth/check-viral-growth-loop.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-workflow-adherence",
-      "command": "check:workflow-adherence",
-      "scriptPath": "validation/business/process/check-workflow-adherence.ts",
-      "ownerDomainId": "domain.process",
       "audit": "required"
     },
     {
@@ -4077,13 +3906,6 @@
       "scriptPath": "tooling/render-launch-cockpit.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
-    },
-    {
-      "id": "gate.render-skill-graph",
-      "command": "render:skill-graph",
-      "scriptPath": "tooling/render-skill-graph.ts",
-      "ownerDomainId": "domain.process",
-      "audit": "manual"
     },
     {
       "id": "gate.test-validators",

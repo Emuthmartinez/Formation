@@ -3,7 +3,6 @@ title: Onboarding must place native App Review after first value
 prompt: "Audit the onboarding guidance for review-prompt timing."
 expected_route: "Require native App Review prompt eligibility immediately after first value is fully visible, with analytics and platform caps respected."
 must_use:
-  - "check-onboarding-conversion"
   - "SKStoreReviewController"
   - "ReviewManager"
 must_catch:

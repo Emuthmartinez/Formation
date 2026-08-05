@@ -66,49 +66,63 @@ export function register(h: Harness): void {
     "reference_size.entrypoint_over_budget",
   );
 
-  // A split reference is only useful if its index still routes to every topic
-  // file, so each way that contract can rot gets a failing fixture.
-  const unindexedSplit = makeEmptyFixture("reference-size-split-without-index");
-  mkdirSync(path.join(unindexedSplit, "knowledge", "orphan-lane"), { recursive: true });
-  writeFileSync(path.join(unindexedSplit, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
-  writeFileSync(path.join(unindexedSplit, "knowledge", "orphan-lane", "one.md"), "# One\nBody.\n", "utf8");
-  runScriptArgs("split reference without an index fails", "check-reference-size.ts", ["--skill-root", unindexedSplit], 1, "reference_size.index_missing");
-
-  const incompleteSplit = makeEmptyFixture("reference-size-index-incomplete");
-  mkdirSync(path.join(incompleteSplit, "knowledge", "lane"), { recursive: true });
-  writeFileSync(path.join(incompleteSplit, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
-  writeFileSync(path.join(incompleteSplit, "knowledge", "lane.md"), "# Lane\n[one](lane/one.md)\n", "utf8");
-  writeFileSync(path.join(incompleteSplit, "knowledge", "lane", "one.md"), "# One\nBody.\n", "utf8");
-  writeFileSync(path.join(incompleteSplit, "knowledge", "lane", "two.md"), "# Two\nUnreachable.\n", "utf8");
-  runScriptArgs("index that misses a topic file fails", "check-reference-size.ts", ["--skill-root", incompleteSplit], 1, "reference_size.index_incomplete");
-
-  // A bare mention reads as routed to a human but is not followable, so the
-  // gate must require a real link rather than a substring hit.
-  const mentionOnlySplit = makeEmptyFixture("reference-size-index-mention-only");
-  mkdirSync(path.join(mentionOnlySplit, "knowledge", "lane"), { recursive: true });
-  writeFileSync(path.join(mentionOnlySplit, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
-  writeFileSync(path.join(mentionOnlySplit, "knowledge", "lane.md"), "# Lane\n[one](lane/one.md)\nRouting for `lane/two.md` is still to be written.\n", "utf8");
-  writeFileSync(path.join(mentionOnlySplit, "knowledge", "lane", "one.md"), "# One\nBody.\n", "utf8");
-  writeFileSync(path.join(mentionOnlySplit, "knowledge", "lane", "two.md"), "# Two\nMentioned but never linked.\n", "utf8");
+  // knowledge/ reachability is indexed centrally by the GENERATED
+  // catalog/generated/routing.md (rendered by catalog/render-routing.ts from
+  // catalog/references.ts's authored loadWhen data, R20) — not a per-directory
+  // README/sibling file (that mechanism was dropped at cutover, U11, along with the 14
+  // knowledge/<slug>/README.md files it used to require; see check-reference-size.ts's
+  // "Index completeness" doc comment). validation/repository/ still uses the
+  // README/sibling mechanism (its own fixtures live in repo-gates.fixtures.ts).
+  const missingGeneratedIndex = makeEmptyFixture("reference-size-knowledge-no-generated-index");
+  mkdirSync(path.join(missingGeneratedIndex, "knowledge", "orphan-lane"), { recursive: true });
+  writeFileSync(path.join(missingGeneratedIndex, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
+  writeFileSync(path.join(missingGeneratedIndex, "knowledge", "orphan-lane", "one.md"), "# One\nBody.\n", "utf8");
   runScriptArgs(
-    "topic file mentioned in prose but never linked fails",
+    "knowledge file with no catalog/generated/routing.md at all fails",
     "check-reference-size.ts",
-    ["--skill-root", mentionOnlySplit],
+    ["--skill-root", missingGeneratedIndex],
+    1,
+    "reference_size.generated_index_missing",
+  );
+
+  const incompleteGeneratedIndex = makeEmptyFixture("reference-size-knowledge-generated-index-incomplete");
+  mkdirSync(path.join(incompleteGeneratedIndex, "knowledge", "lane"), { recursive: true });
+  mkdirSync(path.join(incompleteGeneratedIndex, "catalog", "generated"), { recursive: true });
+  writeFileSync(path.join(incompleteGeneratedIndex, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
+  writeFileSync(path.join(incompleteGeneratedIndex, "knowledge", "lane", "one.md"), "# One\nBody.\n", "utf8");
+  writeFileSync(path.join(incompleteGeneratedIndex, "knowledge", "lane", "two.md"), "# Two\nUnreachable.\n", "utf8");
+  writeFileSync(
+    path.join(incompleteGeneratedIndex, "catalog", "generated", "routing.md"),
+    "# Reference Index\n\n| Load when | Reference |\n| --- | --- |\n| always | [`knowledge/lane/one.md`](../../knowledge/lane/one.md) |\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "generated routing index that misses a knowledge file fails",
+    "check-reference-size.ts",
+    ["--skill-root", incompleteGeneratedIndex],
     1,
     "reference_size.index_incomplete",
   );
 
-  const danglingSplit = makeEmptyFixture("reference-size-index-dangling");
-  mkdirSync(path.join(danglingSplit, "knowledge", "lane"), { recursive: true });
-  writeFileSync(path.join(danglingSplit, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
-  writeFileSync(path.join(danglingSplit, "knowledge", "lane.md"), "# Lane\n[one](lane/one.md)\n[gone](lane/gone.md)\n", "utf8");
-  writeFileSync(path.join(danglingSplit, "knowledge", "lane", "one.md"), "# One\nBody.\n", "utf8");
+  // A bare mention reads as routed to a human but is not followable, so the
+  // gate must require a real link rather than a substring hit.
+  const mentionOnlyGeneratedIndex = makeEmptyFixture("reference-size-knowledge-generated-index-mention-only");
+  mkdirSync(path.join(mentionOnlyGeneratedIndex, "knowledge", "lane"), { recursive: true });
+  mkdirSync(path.join(mentionOnlyGeneratedIndex, "catalog", "generated"), { recursive: true });
+  writeFileSync(path.join(mentionOnlyGeneratedIndex, "SKILL.md"), "---\nname: fixture\n---\nEntrypoint.\n", "utf8");
+  writeFileSync(path.join(mentionOnlyGeneratedIndex, "knowledge", "lane", "one.md"), "# One\nBody.\n", "utf8");
+  writeFileSync(path.join(mentionOnlyGeneratedIndex, "knowledge", "lane", "two.md"), "# Two\nMentioned but never linked.\n", "utf8");
+  writeFileSync(
+    path.join(mentionOnlyGeneratedIndex, "catalog", "generated", "routing.md"),
+    "# Reference Index\n\n| always | [`knowledge/lane/one.md`](../../knowledge/lane/one.md) |\nRouting for `knowledge/lane/two.md` is still to be written.\n",
+    "utf8",
+  );
   runScriptArgs(
-    "index routing to a missing topic file fails",
+    "knowledge file mentioned in prose but never linked from the generated index fails",
     "check-reference-size.ts",
-    ["--skill-root", danglingSplit],
+    ["--skill-root", mentionOnlyGeneratedIndex],
     1,
-    "reference_size.index_dangling_link",
+    "reference_size.index_incomplete",
   );
 
   const untestedRls = makeArchetypeSkillRoot("archetype-starter-untested-rls");

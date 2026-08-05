@@ -51,5 +51,5 @@ These live in `studio/seed/theme.tokens.json` → promoted into `design/system/t
 - **Type:** self-host the real display webfont (subset, `font-display: swap`, preload). The token fallback stack is for dependency-free proofs only.
 - **Baked hero video:** opt-in per launch through the Remotion lane; always ship a poster and keep the mesh fallback.
 - **Smooth scroll (Lenis):** optional; if adopted it must degrade cleanly, respect reduced motion, and be registered in `source-registry.yaml` before use.
-- **Copy:** section copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` before `check:landing-funnel` runs — brand voice from `strategy/BRAND.md` wins over generic landing-page register.
+- **Copy:** section copy passes the `no-slop-writing.md` self-check (§6) before `check:landing-funnel` runs — brand voice from `strategy/BRAND.md` wins over generic landing-page register.
 - **Verification:** run `check:landing-funnel` (deploy gates + GEO/SEO files + copy guardrails + motion craft) before calling the landing lane ready; the LaunchBench scenario `landing-motion-progressive-enhancement-missing` locks the failure mode.

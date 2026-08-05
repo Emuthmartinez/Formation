@@ -310,7 +310,7 @@ evidence:
   - "emotional-design.html"
 impact: "Emotional journey not mapped for key feature or onboarding flow. Peak placement relative to paywall is unknown."
 next_action: "Run Lens 3 (Emotional Journey) from the Six-Lens Design Review on a real device for the affected feature. Produce the Emotional Curve in emotional-design.html. Verify curve peaks before the paywall marker."
-validator: "npm run check:11-star -- --root ."
+validator: "npm run check:emotional-design -- --root ."
 ```
 
 ```yaml

@@ -1,5 +1,3 @@
-import type { RunNodeStatus as V1RunNodeStatus } from "../../runtime/graph/execution.js";
-
 /**
  * The single status vocabulary shared by business-state lanes and engine run nodes
  * (KTD6: "the lane-status/RunNodeStatus split dies"). Keep in sync with
@@ -43,8 +41,11 @@ export type V1LaneStatus = "not_started" | "partial" | "blocked" | "not_needed" 
 
 export const v1LaneStatusValues: readonly V1LaneStatus[] = ["not_started", "partial", "blocked", "not_needed", "deferred", "done"];
 
-/** v1 run-node status (runtime/graph/execution.ts RunNodeStatus). */
-export type { V1RunNodeStatus };
+/**
+ * v1 run-node status, inlined (runtime/graph/execution.ts's RunNodeStatus literal union —
+ * that module is deleted at cutover, U11; KTD11 "dead engine code superseded by v2").
+ */
+export type V1RunNodeStatus = "pending" | "ready" | "running" | "waiting_human" | "blocked" | "succeeded" | "failed" | "skipped" | "cancelled" | "stale";
 
 export const v1RunNodeStatusValues: readonly V1RunNodeStatus[] = [
   "pending",

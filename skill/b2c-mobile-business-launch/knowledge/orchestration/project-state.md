@@ -92,7 +92,7 @@ If `engineering/PRODUCTION_READINESS.md` evidence is produced during an audit se
 
 ## State Rules
 
-- `autonomy.mode` controls what the agent may do without founder approval. See `autonomy-modes.md`.
+- `autonomy.mode` controls what the agent may do without founder approval.
 - `project.launch_scope` sizes the work to the product: `essentials` (the recommended default for a first launch, and the shipped template's seed) runs the core spine and defers the named breadth lanes with dated reasons through normal deferral mechanics; `full` runs every lane and is a deliberate flagship choice (see `launch-phases.md` "Launch Scopes"). Only `full`/`essentials` are valid, and the scope never silently disables a validator. It is named scope rather than tier because "tier" collided with the founder's own app pricing tiers, which is an unrelated decision. **Backward compatible:** the legacy `project.launch_tier` key is still read and the legacy value `lite` still resolves to `essentials`, so a business repo launched before the rename keeps validating without a migration. New state files use `launch_scope`.
 - top-level `orchestration` records preflight, strategy, candidate units, parallel-safe units, serialized units, spawned agents, collision checks, output review, state reconciliation, and validators.
 - top-level `compound_engineering` records whether Compound Engineering skills were available, used, blocked, or replaced with an equivalent fallback.
@@ -118,11 +118,8 @@ npm run validate:launch-state -- --root /path/to/app
 npm run check:attribution -- --root /path/to/app
 npm run check:secrets -- --root /path/to/app
 npm run check:security -- --root /path/to/app
-npm run check:11-star -- --root /path/to/app
-npm run check:viral-growth -- --root /path/to/app
 npm run check:paid-ua -- --root /path/to/app
 npm run check:orchestration -- --root /path/to/app
-npm run check:apple-signing -- --root /path/to/app
 npm run check:apple-requirements -- --root /path/to/app
 npm run check:store-console -- --root /path/to/app
 npm run check:store-screenshots -- --root /path/to/app

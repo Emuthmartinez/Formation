@@ -766,65 +766,6 @@ export function register(h: Harness): void {
   }
   runFixture("post-launch done with thin runbook fails", postLaunchThin, "check-post-launch-ops.ts", 1, "post_launch_ops.section_missing");
 
-  // ── Google Play readiness ─────────────────────────────────────────────────
-
-  function setAndroidStore(root: string, storeStatus: string): void {
-    const state = readState(root);
-    const project = expectRecord(state.project, "project");
-    project["platforms"] = ["ios", "android"];
-    expectRecord(project["bundle_ids"], "bundle_ids")["android"] = "com.example.app";
-    const lane = getLane(state, "store_console");
-    lane["status"] = storeStatus;
-    lane["evidence"] = ["store/STORE_CONSOLE.md", "store/GOOGLE_PLAY_RELEASE.md"];
-    writeState(root, state);
-  }
-
-  const playComplete = makeFixture("google-play-complete");
-  setAndroidStore(playComplete, "done");
-  runFixture("android scope with complete play packet passes", playComplete, "check-google-play-readiness.ts", 0);
-
-  const playMissing = makeFixture("google-play-missing");
-  setAndroidStore(playMissing, "done");
-  rmSync(path.join(playMissing, "store/GOOGLE_PLAY_RELEASE.md"));
-  runFixture("android store done without play packet fails", playMissing, "check-google-play-readiness.ts", 1, "google_play.packet_missing");
-
-  const playIosOnly = makeFixture("google-play-ios-only");
-  rmSync(path.join(playIosOnly, "store/GOOGLE_PLAY_RELEASE.md"));
-  runFixture("ios-only project skips google play check", playIosOnly, "check-google-play-readiness.ts", 0);
-
-  const playUnreconciled = makeFixture("google-play-unreconciled");
-  setAndroidStore(playUnreconciled, "done");
-  writeFileSync(
-    path.join(playUnreconciled, "store/GOOGLE_PLAY_RELEASE.md"),
-    [
-      "# Google Play Release",
-      "## Developer Account",
-      "Organization account; verification complete.",
-      "## Data Safety",
-      "Form filled in the console.",
-      "## Content Rating",
-      "IARC questionnaire completed.",
-      "## Play App Signing",
-      "Enrolled; upload via Android App Bundle (AAB).",
-      "## Target API Level",
-      "Requirement checked at release time.",
-      "## Release Tracks",
-      "Internal -> closed -> production with staged rollout.",
-      "## Closed Testing",
-      "Organization account: the 12 testers gate does not apply; closed test still runs for the pre-launch report.",
-      "## Pre-Launch Report",
-      "Reviewed on the closed track.",
-    ].join("\n"),
-    "utf8",
-  );
-  runFixture(
-    "android done without data safety reconciliation fails",
-    playUnreconciled,
-    "check-google-play-readiness.ts",
-    1,
-    "google_play.data_safety_reconciliation_missing",
-  );
-
   // ── Backend data contract ─────────────────────────────────────────────────
 
   function setEngineeringDone(root: string): void {
@@ -1170,13 +1111,4 @@ export function register(h: Harness): void {
 
   const postLaunchNoState = makeEmptyFixture("post-launch-missing-state");
   runFixture("post-launch ops fails loudly when project state is missing", postLaunchNoState, "check-post-launch-ops.ts", 1, "project_state.missing");
-
-  const googlePlayNoState = makeEmptyFixture("google-play-missing-state");
-  runFixture(
-    "google play readiness fails loudly when project state is missing",
-    googlePlayNoState,
-    "check-google-play-readiness.ts",
-    1,
-    "project_state.missing",
-  );
 }

@@ -72,7 +72,7 @@ function testWorkflows(): CatalogWorkflowNode[] {
       providerIds: [],
       laneIds: ["product"],
       founderOnlyActions: [],
-      gateCommands: ["check:product-spec"],
+      gateCommands: ["check:research"],
       idempotent: true,
     },
     {

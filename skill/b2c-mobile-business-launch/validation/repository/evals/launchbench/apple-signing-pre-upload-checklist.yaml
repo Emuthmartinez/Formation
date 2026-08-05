@@ -23,7 +23,6 @@ expected_guardrail: >
   capture dimensions via sips and block upload if width is below the device well minimum.
   Record all five sign-off lines in store/APPLE_SIGNING.md before proceeding.
 validators:
-  - check-apple-signing-packet
   - check-apple-app-store-requirements
   - check-store-screenshots
 must_catch:

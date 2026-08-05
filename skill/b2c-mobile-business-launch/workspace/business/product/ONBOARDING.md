@@ -60,4 +60,3 @@ The onboarding emotional curve must cross positive (+2) at or before the paywall
 - `analytics/ANALYTICS.md` includes all onboarding, attribution, review prompt, paywall, and activation events.
 - `EMOTIONAL_DESIGN.md` Card Application Map covers the onboarding card moments above with a measurement event each (when emotional design is in scope).
 - `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, and support links match the flow before implementation.
-- `npm run check:onboarding -- --root <app>` passes.

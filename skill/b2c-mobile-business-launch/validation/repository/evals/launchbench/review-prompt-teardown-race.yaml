@@ -4,7 +4,6 @@ prompt: "Implement the review prompt for this onboarding flow. The user taps 'Th
 expected_guardrail: "The review prompt must fire automatically after the value-reveal screen is mounted and visible, with a 1-2s async delay. Binding it to an acceptance tap that dismisses or navigates away from the screen creates a teardown race where the view may be deallocated before the review sheet can present."
 validators:
   - "validate-project-state"
-  - "check-onboarding-conversion"
 must_catch:
   - "firing the review prompt on an acceptance tap causes a teardown race"
   - "the trigger must fire after the value-reveal screen is fully visible, not on a tap that dismisses it"

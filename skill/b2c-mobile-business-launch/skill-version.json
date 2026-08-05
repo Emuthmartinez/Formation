@@ -1,11 +1,12 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.69.1",
+  "version": "0.70.0",
   "updatedAt": "2026-08-05",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Catalog routing projections now emit root-relative links so the standalone generated files pass the local link audit.",
-    "Registered the Resend email API endpoint in the source-freshness registry for the digest push transport.",
-    "Regenerated v1 skill-graph and context-report projections after audit-plan and registry changes."
+    "Cutover (U11): deleted the v1 runtime/graph engine, the legacy hook-enforcement path (install-hooks.ts, hook-contract.ts, the PostToolUse settings template), and 33 superseded validators/knowledge READMEs/LaunchBench scenarios named in the port ledger; core/ + catalog/ are now the only orchestration mechanism.",
+    "Rewrote SKILL.md as a thin router: the Autopilot Run Contract now describes the v2 operational model (state in workspace files, sessions via core/session/run.ts, autonomy via the control file plus core/session/onboard.ts, approvals via core/session/approve.ts), and the Lane Routing table is spliced live from catalog/render-routing.ts instead of hand-maintained per-domain README links.",
+    "Resolved the design-token triplication: deleted the stale skill-root design-system/ copy and repointed check-motion-contract.ts, check-landing-funnel.ts, and the motion-catalog exemplar pack to the generated studio/generated/system/ projection.",
+    "Regenerated docs/architecture.md's Repository layout and generated-documentation instructions against the actual v2 tree (core/, catalog/, content/, workspace-template/, verification/), replacing every reference to the deleted runtime/graph engine and render:skill-graph/check:skill-graph scripts."
   ]
 }

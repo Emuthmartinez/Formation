@@ -467,11 +467,9 @@ Update:
 - `revenue/REVENUE_OPS.md` when App Store products or RevenueCat mappings depend on the app record/bundle ID
 - `state/launch-cockpit.html` after signing or app-record state changes
 
-Run `npm run check:apple-signing -- --root .` or the installed-skill equivalent when the artifact exists and the repo uses the bundled validators.
-
 ## Common Failure Modes
 
-- Skipping the pre-archive/export/upload preflight checklist and discovering broken configuration only after upload — causes extra full archive/export/upload cycles. Add or activate the `apple-pre-upload-preflight-skipped` failure card in `state/PROJECT_STATE.yaml` and run `npm run check:apple-signing -- --root .` before each upload attempt.
+- Skipping the pre-archive/export/upload preflight checklist and discovering broken configuration only after upload — causes extra full archive/export/upload cycles. Add or activate the `apple-pre-upload-preflight-skipped` failure card in `state/PROJECT_STATE.yaml` and re-walk this checklist before each upload attempt.
 - Treating `xcodebuild` simulator success, or an in-app simulator run, as proof the app can be uploaded. The easier the simulator run is to reach, the easier this mistake is to make.
 - `DEVELOPMENT_TEAM` is blank but the agent claims signing is configured.
 - Only an `Apple Development` identity exists locally, but the agent claims App Store distribution is ready.

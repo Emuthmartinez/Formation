@@ -14,7 +14,6 @@ expected_guardrail: >
   read/dry-run route). The agent must run the live pull, record the output path, and
   diff against the target values — not reuse a stale log file.
 validators:
-  - check-aso-metadata
   - check-store-console-packet
 must_catch:
   - Build log cited as the source of live ASC metadata despite the ASC CLI being available.

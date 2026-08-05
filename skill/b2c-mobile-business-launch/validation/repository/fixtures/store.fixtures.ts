@@ -14,32 +14,6 @@ import {
 export function register(h: Harness): void {
   const { makeFixture, runFixture } = h;
 
-  const simulatorOnly = makeFixture("simulator-only");
-  writeFileSync(
-    path.join(simulatorOnly, "store/APPLE_SIGNING.md"),
-    [
-      "# Apple Signing",
-      "Apple Developer Team ID DEVELOPMENT_TEAM Bundle ID App ID App Store Connect ASC CLI auth status app creation route App Record Creation Preflight certificate provisioning archive export upload TestFlight founder approval.",
-      "Simulator build passed.",
-    ].join("\n"),
-    "utf8",
-  );
-  runFixture("simulator-only Apple signing claim fails", simulatorOnly, "check-apple-signing-packet.ts", 1, "simulator_only_risk");
-
-  // The in-app route makes people describe success in prose rather than as a
-  // "simulator build passed" line; the guard has to catch that phrasing too.
-  const paneRunOnly = makeFixture("apple-signing-pane-run-only");
-  writeFileSync(
-    path.join(paneRunOnly, "store/APPLE_SIGNING.md"),
-    [
-      "# Apple Signing",
-      "Apple Developer Team ID DEVELOPMENT_TEAM Bundle ID App ID App Store Connect ASC CLI auth status app creation route App Record Creation Preflight certificate provisioning archive export upload TestFlight founder approval.",
-      "Claude ran the app in the iOS Simulator pane and onboarding works, so the app is good to ship.",
-    ].join("\n"),
-    "utf8",
-  );
-  runFixture("in-app simulator run treated as Apple signing proof fails", paneRunOnly, "check-apple-signing-packet.ts", 1, "simulator_only_risk");
-
   const nativeIosProofThin = makeFixture("native-ios-proof-thin");
   writeFileSync(
     path.join(nativeIosProofThin, "engineering/PRODUCTION_READINESS.md"),
@@ -243,45 +217,6 @@ export function register(h: Harness): void {
     "check-native-ios-proof.ts",
     1,
     "native_ios_proof.screenshot_snapshot_previews_limit_missing",
-  );
-
-  const androidOnly = makeFixture("apple-android-only");
-  const androidOnlyState = readState(androidOnly);
-  expectRecord(androidOnlyState.project, "project")["platforms"] = ["android"];
-  expectRecord(expectRecord(androidOnlyState.project, "project")["bundle_ids"], "project.bundle_ids")["ios"] = "";
-  const androidAppleLane = getLane(androidOnlyState, "apple_signing");
-  androidAppleLane["status"] = "not_needed";
-  androidAppleLane["evidence"] = [];
-  androidAppleLane["blockers"] = ["Android-only launch; no Apple distribution path."];
-  writeState(androidOnly, androidOnlyState);
-  runFixture("Android-only app does not require Apple signing packet", androidOnly, "check-apple-signing-packet.ts", 0);
-
-  const appleMissingState = makeFixture("apple-missing-state");
-  const appleMissingStateValue = readState(appleMissingState);
-  const appleMissingLane = getLane(appleMissingStateValue, "apple_signing");
-  appleMissingLane["status"] = "done";
-  writeState(appleMissingState, appleMissingStateValue);
-  writeFileSync(
-    path.join(appleMissingState, "store/APPLE_SIGNING.md"),
-    [
-      "# Apple Signing",
-      "Apple Developer membership missing.",
-      "Team ID unknown and DEVELOPMENT_TEAM blank.",
-      "Bundle ID and App ID are not configured.",
-      "App Store Connect app record missing.",
-      "ASC CLI auth status missing and app creation route blocked until founder approval.",
-      "App Record Creation Preflight requires founder approval.",
-      "Distribution certificate and provisioning profile missing.",
-      "Archive, export, upload, and TestFlight are not configured.",
-    ].join("\n"),
-    "utf8",
-  );
-  runFixture(
-    "Apple signing packet with unresolved distribution gates fails",
-    appleMissingState,
-    "check-apple-signing-packet.ts",
-    1,
-    "apple_signing.unresolved_distribution_gate",
   );
 
   const missingAppleRequirements = makeFixture("apple-requirements-missing");

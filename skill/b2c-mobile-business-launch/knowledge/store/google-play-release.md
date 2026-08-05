@@ -162,8 +162,6 @@ Done-status requirements — do not mark the artifact or the Play side of `lanes
 
 Also update `store/STORE_CONSOLE.md` and `store/store-console.html` with the Play click paths and paste values, `state/PROJECT_STATE.yaml` (`lanes.store_console`, `tools.google_play`, failure cards), `SECRETS.md` for the upload keystore and `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, and `revenue/REVENUE_OPS.md` when Play Billing is in scope.
 
-Validator: `npm run check:google-play -- --root . --state state/PROJECT_STATE.yaml`.
-
 ## Founder-Only Gates
 
 Ask before:

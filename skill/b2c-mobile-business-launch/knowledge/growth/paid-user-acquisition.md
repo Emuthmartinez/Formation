@@ -223,7 +223,7 @@ npm run check:paid-ua -- --root .
 - Using RevenueCat products and paywalls without checking whether CPA can fit LTV and trial conversion.
 - Scaling creative volume before the app has real product UI, clear claims, and repeatable angle evidence.
 - Copying a big-team MMP/reporting stack when the first solo test only needs a small complete system.
-- Shipping ad copy that reads like generic ad-speak (weasel attribution, importance puffery) instead of passing the `no-slop-writing.md` self-check and `check:no-slop`.
+- Shipping ad copy that reads like generic ad-speak (weasel attribution, importance puffery) instead of passing the `no-slop-writing.md` self-check.
 
 ## Anti-Patterns (Spend And Sequencing Traps)
 

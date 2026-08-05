@@ -10,4 +10,4 @@ Builders type strings from `product/copy/COPY_DECK.md`, never from the spec: a w
 
 | Unit | Owner | Files | Validator | Proof |
 | --- | --- | --- | --- | --- |
-| first-value onboarding | orchestrator | product/ONBOARDING.md, product/copy/COPY_DECK.md, app flow | check:onboarding, check:app-copy | engineering/PRODUCTION_READINESS.md |
+| first-value onboarding | orchestrator | product/ONBOARDING.md, product/copy/COPY_DECK.md, app flow | check:app-copy | engineering/PRODUCTION_READINESS.md |

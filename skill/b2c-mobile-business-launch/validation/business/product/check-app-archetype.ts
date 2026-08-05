@@ -168,12 +168,14 @@ for (const pack of SHIPPED_PACKS) {
    * pack's own path in SKILL.md would pull every leaf back up into the
    * entrypoint, which is the accretion the collapse just undid. What has to
    * hold is that a reachable chain exists: SKILL.md -> index -> pack.
+   *
+   * U11/KTD11: the per-domain `knowledge/<slug>/README.md` index this used to check for
+   * is deleted at cutover (port ledger) — every domain's index is now the single
+   * generated `catalog/generated/routing.md` (R20), spliced into SKILL.md's Lane Routing
+   * table. The chain is therefore SKILL.md -> catalog/generated/routing.md -> pack.
    */
-  // Markdown paths are always forward-slashed; path.join yields backslashes on
-  // Windows, so the filesystem read and the SKILL.md text match use different forms.
-  const indexRelative = path.join(path.dirname(pack.reference), "README.md");
-  const indexRelativePosix = indexRelative.split(path.sep).join("/");
-  const indexPath = path.join(args.skillRoot, indexRelative);
+  const indexRelativePosix = "catalog/generated/routing.md";
+  const indexPath = path.join(args.skillRoot, indexRelativePosix);
   const indexText = existsSync(indexPath) ? readFileSync(indexPath, "utf8") : undefined;
   const packBasename = path.basename(pack.reference);
   const routedDirectly = skillText?.includes(pack.reference) ?? false;

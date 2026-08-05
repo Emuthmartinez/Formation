@@ -6,7 +6,6 @@ expected_guardrail: >
   Load xcodebuildmcp-testing.md. In Codex Desktop, use exposed native iOS/XcodeBuildMCP tools first: call session_show_defaults before build/run/test and record build_run_sim/test/screenshot/log evidence. For CLI proof, record SnapshotPreviews PNG/JSON exports and serve-sim booted-simulator URL/port when used. Pair app proof with operations/PROVIDER_PROOF.md and keep simulator/preview proof separate from store/APPLE_SIGNING.md distribution readiness.
 validators:
   - check-native-ios-proof
-  - check-apple-signing-packet
 must_catch:
   - Codex Desktop native iOS route was skipped even though tools were exposed
   - session_show_defaults and exposed MCP tool proof are missing
@@ -17,5 +16,5 @@ must_catch:
   - a done engineering lane needs existing xcresult, screenshot/video, log, JSON, or provider-correlation evidence paths
 should_say:
   - Open native-ios-proof-route-skipped.
-  - Run check:native-ios and check:apple-signing before iOS readiness claims.
+  - Run check:native-ios before iOS readiness claims, and keep store/APPLE_SIGNING.md's distribution-gate evidence current.
   - Update engineering/PRODUCTION_READINESS.md, SCREENSHOTS.md, operations/PROVIDER_PROOF.md, and store/APPLE_SIGNING.md with the separated proof.

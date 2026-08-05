@@ -17,7 +17,7 @@ Classify each lane as `done`, `partial`, `blocked`, `not needed`, or `deferred w
 
 | Lane | Required Evidence | Primary Tools |
 | --- | --- | --- |
-| Project state/cockpit | `state/PROJECT_STATE.yaml` phase/mode/lanes/providers/proof/failure cards, rendered `state/launch-cockpit.html`, validator status | `project-state.md`, `autonomy-modes.md`, bundled TS scripts |
+| Project state/cockpit | `state/PROJECT_STATE.yaml` phase/mode/lanes/providers/proof/failure cards, rendered `state/launch-cockpit.html`, validator status | `project-state.md`, bundled TS scripts |
 | Founder-zero operator bootstrap | beginner-assumed guidance, business identity spine, Doppler setup, account/social inventory, delegated access, recovery/2FA ownership, one founder action plus one agent action | `founder-zero-operator.md`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `check:founder-operator` |
 | Paid-tool routing | intended paid/account-gated tools, founder confirmation, selected fallback or blocked state, limitations | `strategy/TOOL_DECISIONS.md`, `paid-tool-routing.md` |
 | Secrets/config | Doppler or approved provider, `SECRETS.md`, command wrappers, CI/deploy injection, secret scan, public/server-only classification | Doppler CLI, `SECRETS.md`, platform secret stores |

@@ -260,4 +260,4 @@ Before calling the emotional/behavioral layer build-ready:
 - [ ] B=MAP audit row is in `product/ONBOARDING.md`.
 - [ ] Journey-map row in `state/LAUNCH_TRACE.md` covers trigger → word-of-mouth arc.
 - [ ] Day-7 retention unlock threshold recorded as hard stop/scale rule in `PAID_UA.md`.
-- [ ] `npm run check:11-star -- --root .` passes with all four cards mapped to a star level.
+- [ ] All four cards are mapped to a star level in `11_STAR_EXPERIENCE.md`.

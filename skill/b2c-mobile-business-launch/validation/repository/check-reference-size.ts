@@ -149,19 +149,65 @@ for (const root of presentRoots) {
  * pointing at a deleted file sends agents to a 404. So every directory holding
  * knowledge files needs an index that links each of its immediate children.
  *
- * Two index shapes are accepted, because both are load-bearing:
- *   - `<dir>/README.md`      — a domain folder explaining itself on its front
- *                              page (docs/architecture.md's convention for playbook
- *                              domains; needs no convention to be learned)
- *   - `<parent>/<name>.md`   — a sub-split inside a domain, where the index
- *                              sits beside the folder it routes into
+ * Two index mechanisms are accepted, because both are load-bearing:
+ *   - `knowledge/`             — indexed centrally by the GENERATED
+ *                                catalog/generated/routing.md's Reference Index section
+ *                                (rendered by catalog/render-routing.ts from
+ *                                catalog/references.ts's authored `loadWhen` data; a
+ *                                catalog reference entry is what makes a knowledge file
+ *                                reachable, R20 — the per-directory README/sibling-file
+ *                                indexes this used to require were dropped at cutover,
+ *                                U11, per the port ledger).
+ *   - everything else (today: `validation/repository/`) — the original per-directory
+ *                                `<dir>/README.md` or sibling `<parent>/<name>.md` index.
  *
  * Reachability means a real markdown link, not a mention. A filename that only
  * appears in prose or backticks reads as routed to a human skimming the index
  * but is not something an agent can follow, so both directions below are
  * checked against parsed link targets rather than raw text.
  */
-function checkDirectoryIndex(dir: string): void {
+let generatedIndexHrefs: Set<string> | undefined;
+
+/** Absolute, resolved link targets found in catalog/generated/routing.md, memoized. */
+function loadGeneratedIndexHrefs(): Set<string> | undefined {
+  if (generatedIndexHrefs) return generatedIndexHrefs;
+  const generatedIndexPath = path.join(args.skillRoot, "catalog", "generated", "routing.md");
+  if (!existsSync(generatedIndexPath)) return undefined;
+  const hrefs = linkedHrefs(readFileSync(generatedIndexPath, "utf8")).map((href) => path.resolve(path.dirname(generatedIndexPath), href));
+  generatedIndexHrefs = new Set(hrefs);
+  return generatedIndexHrefs;
+}
+
+function checkReachableViaGeneratedIndex(dir: string, files: Array<{ name: string }>): void {
+  const linked = loadGeneratedIndexHrefs();
+  if (!linked) {
+    issues.push(
+      issue(
+        "error",
+        "reference_size.generated_index_missing",
+        "catalog/generated/routing.md is missing; run `npm run catalog:render-routing` to regenerate it before knowledge/ reachability can be checked.",
+        "catalog/generated/routing.md",
+      ),
+    );
+    return;
+  }
+  for (const file of files) {
+    const fullPath = path.join(dir, file.name);
+    if (!linked.has(fullPath)) {
+      const relative = path.relative(args.skillRoot, fullPath).split(path.sep).join("/");
+      issues.push(
+        issue(
+          "error",
+          "reference_size.index_incomplete",
+          `catalog/generated/routing.md does not link ${relative}. Add a catalog/references.ts entry with a load-when trigger, or delete the unreachable file.`,
+          relative,
+        ),
+      );
+    }
+  }
+}
+
+function checkDirectoryIndex(dir: string, useGeneratedIndex: boolean): void {
   const children = readdirSync(dir, { withFileTypes: true });
   const files = children.filter((e) => e.isFile() && (e.name.endsWith(".md") || e.name.endsWith(".yaml")) && e.name !== "README.md");
   const subdirs = children.filter((e) => e.isDirectory());
@@ -169,9 +215,14 @@ function checkDirectoryIndex(dir: string): void {
   for (const sub of subdirs) {
     const subPath = path.join(dir, sub.name);
     if (isNonKnowledge(subPath)) continue;
-    checkDirectoryIndex(subPath);
+    checkDirectoryIndex(subPath, useGeneratedIndex);
   }
   if (files.length === 0) {
+    return;
+  }
+
+  if (useGeneratedIndex) {
+    checkReachableViaGeneratedIndex(dir, files);
     return;
   }
 
@@ -226,7 +277,7 @@ function checkDirectoryIndex(dir: string): void {
 }
 
 for (const root of presentRoots) {
-  checkDirectoryIndex(root.dir);
+  checkDirectoryIndex(root.dir, root.name === "knowledge");
 }
 
 const entrypointPath = path.join(args.skillRoot, "SKILL.md");

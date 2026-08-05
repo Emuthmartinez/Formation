@@ -221,16 +221,35 @@ export function register(harness: Harness): void {
     assert(!tbdRowPattern.test(text), "port ledger must not contain a row whose disposition column is TBD");
   });
 
-  harness.check("port ledger: every knowledge/**/*.{md,yaml,yml} file (excluding evals/fixtures dirs) appears exactly once", () => {
+  harness.check("port ledger: every surviving knowledge/**/*.{md,yaml,yml} file (excluding evals/fixtures dirs) appears exactly once", () => {
     const text = readFileSync(resolvedLedgerPath, "utf8");
-    const ledgerRows = new Set([...parseLedgerRows(text)].filter((p) => p.startsWith("knowledge/")));
+    // U11 cutover executed every "drop" disposition, so those ledger rows now describe files
+    // that no longer exist by design — the ledger is the historical record of the deletion,
+    // not a live description of current file state. The completeness check is therefore scoped
+    // to non-drop rows only; a "drop" row surviving on disk (or vice versa) is caught by the
+    // ledger-drop execution itself, not this fixture.
+    const ledgerRows = new Set(
+      [...parseLedgerRowsWithDisposition(text)].filter((row) => row.path.startsWith("knowledge/") && row.disposition !== "drop").map((row) => row.path),
+    );
     const onDisk = walkKnowledgeFiles(path.join(skillRoot, "knowledge"));
     assertOneToOne(onDisk, ledgerRows, "knowledge file");
   });
 
-  harness.check("port ledger: every check:*/validate:* script (both package.json manifests) targeting validation/business or validation/repository appears exactly once, plus the one documented addition", () => {
+  harness.check("port ledger: every surviving check:*/validate:* script (both package.json manifests) targeting validation/business or validation/repository appears exactly once, plus the one documented addition", () => {
     const text = readFileSync(resolvedLedgerPath, "utf8");
-    const ledgerRows = new Set([...parseLedgerRows(text)].filter((p) => p.startsWith("validation/")));
+    // validation/repository/check-skill-graph.ts is ledgered "port" (its referential-integrity +
+    // drift-check PATTERN is preserved), but its "port" target is a wholesale mechanism
+    // replacement in different files (catalog/validate.ts + catalog/render-routing.ts --check,
+    // shipped in an earlier unit) rather than an in-place rewrite — and the original file's own
+    // imports point at runtime/graph/*.ts, which U11 deletes. The cutover task explicitly names
+    // it for deletion alongside the rest of the runtime/graph cull, so — unlike every other
+    // "port" row, which stays at its path — this one is excluded here too.
+    const portedAwayFromOriginalPath = new Set(["validation/repository/check-skill-graph.ts"]);
+    const ledgerRows = new Set(
+      [...parseLedgerRowsWithDisposition(text)]
+        .filter((row) => row.path.startsWith("validation/") && row.disposition !== "drop" && !portedAwayFromOriginalPath.has(row.path))
+        .map((row) => row.path),
+    );
     const skillScripts = discoverValidatorScriptPaths(path.join(skillRoot, "package.json"));
     const rootScripts = discoverValidatorScriptPaths(path.join(repoRoot, "package.json")).map((p) => stripRepoPrefix(p));
     const validators = new Set<string>([...skillScripts, ...rootScripts]);
@@ -259,15 +278,6 @@ export function register(harness: Harness): void {
 // --- Port ledger parsing helpers --------------------------------------------------------
 
 const ledgerRowPattern = /^\|\s*((?:knowledge|validation)\/[^\s|]+)\s*\|\s*(keep|port|merge|drop)\s*\|/;
-
-function parseLedgerRows(text: string): Set<string> {
-  const rows = new Set<string>();
-  for (const line of text.split("\n")) {
-    const match = line.match(ledgerRowPattern);
-    if (match) rows.add(match[1]!);
-  }
-  return rows;
-}
 
 function parseLedgerRowsWithDisposition(text: string): Array<{ path: string; disposition: "keep" | "port" | "merge" | "drop" }> {
   const rows: Array<{ path: string; disposition: "keep" | "port" | "merge" | "drop" }> = [];

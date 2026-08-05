@@ -18,7 +18,6 @@ import { register as registerGrowth } from "./fixtures/growth.fixtures.js";
 import { register as registerEngineering } from "./fixtures/engineering.fixtures.js";
 import { register as registerLifecycle } from "./fixtures/lifecycle.fixtures.js";
 import { register as registerProbesAndGrading } from "./fixtures/probes-and-grading.fixtures.js";
-import { register as registerHooks } from "./fixtures/hooks.fixtures.js";
 import { register as registerRepoGates } from "./fixtures/repo-gates.fixtures.js";
 import { register as registerCoreArtifacts } from "./fixtures/core-artifacts.fixtures.js";
 import { register as registerArchetype } from "./fixtures/archetype.fixtures.js";
@@ -27,7 +26,6 @@ import { register as registerAgentOperations } from "./fixtures/agent-operations
 import { register as registerFounderOperator } from "./fixtures/founder-operator.fixtures.js";
 import { register as registerMobai } from "./fixtures/mobai.fixtures.js";
 import { register as registerCopy } from "./fixtures/copy.fixtures.js";
-import { register as registerGraph } from "./fixtures/graph.fixtures.js";
 
 const keepTemp = process.argv.includes("--keep-temp");
 const harness = createHarness();
@@ -42,7 +40,6 @@ try {
     registerEngineering,
     registerLifecycle,
     registerProbesAndGrading,
-    registerHooks,
     registerRepoGates,
     registerCoreArtifacts,
     registerArchetype,
@@ -51,7 +48,6 @@ try {
     registerFounderOperator,
     registerMobai,
     registerCopy,
-    registerGraph,
   ]) {
     register(harness);
     harness.cleanupFixtures();

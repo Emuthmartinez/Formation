@@ -1,4 +1,36 @@
-import { defineOperators } from "./define.js";
+import type { CatalogDomainId } from "./types.js";
+
+/**
+ * Ported from runtime/graph/operators.ts + runtime/graph/define.ts's defineOperators()
+ * (deleted at cutover, U11 — KTD11 "dead engine code superseded by v2"). defineOperators()
+ * was an identity function carrying only a generic-const type constraint; that constraint is
+ * inlined here as a direct `as const` annotation, matching every other catalog/*.ts module's
+ * convention (catalog/lanes.ts, catalog/phases.ts).
+ *
+ * Not part of the v2 Catalog shape composeCatalog() returns — no v2 consumer needs the full
+ * 12-operator roster except tooling/render-business-control-plane-workspace.ts, which reads
+ * four of these (`operator.orchestrator`, `operator.product-leader`, `operator.design-guru`,
+ * `operator.engineering-leader`) by id for the Business Control Plane's Agent Lanes panel.
+ * The full roster ports rather than trimming to those four: `contextPackIds`/`domainIds`/
+ * `promptPath` on the other eight (founder, marketing-guru, security-architect,
+ * customer-success, maintainer, validator, renderer) are real, still-accurate role
+ * definitions with live `promptPath` targets under
+ * workspace/business/engineering/app-agent-roster/agents/ — dropping them would be a content
+ * loss with no v2 consumer requiring it, not a cull the ledger or KTD11 calls for.
+ */
+export interface CatalogOperator {
+  id: string;
+  name: string;
+  kind: "human" | "agent" | "system";
+  goal: string;
+  domainIds: readonly CatalogDomainId[];
+  contextPackIds: readonly string[];
+  allowedActions: readonly string[];
+  founderGatedActions: readonly string[];
+  forbiddenActions: readonly string[];
+  artifactPaths: readonly string[];
+  promptPath?: string;
+}
 
 const founderGates = [
   "credentials and account access",
@@ -10,7 +42,7 @@ const founderGates = [
 ];
 const agentForbidden = ["disclose raw secrets", "silently approve founder-only actions", "claim readiness without deterministic proof"];
 
-export const operators = defineOperators([
+export const operators: readonly CatalogOperator[] = [
   {
     id: "operator.founder",
     name: "Founder",
@@ -148,6 +180,6 @@ export const operators = defineOperators([
     allowedActions: ["read canonical state", "write generated projections"],
     founderGatedActions: [],
     forbiddenActions: ["invent business truth", "write timestamps into deterministic projections"],
-    artifactPaths: ["state/launch-cockpit.html", "design/design-room.html", "runtime/graph/generated/skill-graph.json"],
+    artifactPaths: ["state/launch-cockpit.html", "design/design-room.html", "catalog/generated/catalog.json"],
   },
-] as const);
+] as const;

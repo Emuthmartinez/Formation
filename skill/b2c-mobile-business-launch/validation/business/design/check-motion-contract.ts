@@ -2,7 +2,7 @@
 /**
  * check:motion-contract — deterministic consistency gate for the motion craft
  * contract (premium-mobile-craft.md two-family spring canon + motion-craft-benchmarks.md
- * recipes) against the shipped token sources (design-system/tokens.json,
+ * recipes) against the shipped token sources (studio/generated/system/tokens.json,
  * business/design/system/PremiumCraft.swift) and the experience-card canon files.
  *
  * This is the machine-checkable half of the motion acceptance contract. It cannot
@@ -79,7 +79,7 @@ if (tokensRaw !== undefined && templateTokensRaw !== undefined) {
         issue(
           "error",
           "motion_contract.template_tokens.drift",
-          "business/design/system/tokens.json motion block differs from design-system/tokens.json — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
+          "business/design/system/tokens.json motion block differs from studio/generated/system/tokens.json — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
           TEMPLATE_TOKENS,
         ),
       );
@@ -98,7 +98,7 @@ if (swiftTokens !== undefined && templateSwiftTokens !== undefined) {
       issue(
         "error",
         "motion_contract.template_tokens.drift",
-        "business/design/system/DesignTokens.swift Motion enum differs from design-system/DesignTokens.swift — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
+        "business/design/system/DesignTokens.swift Motion enum differs from studio/generated/system/DesignTokens.swift — the copy shipped beside PremiumCraft.swift is the one apps compile against.",
         TEMPLATE_SWIFT_TOKENS,
       ),
     );

@@ -62,7 +62,7 @@ Landing pages and funnels are web surfaces, so framer-motion / the `motion` libr
 
 ## 4. Copy Compliance Pre-Edit Scan
 
-Run this scan before writing or accepting any landing copy, not only before deploy. These are trust-breaking patterns that have required founder corrections after deployment. Run `knowledge/words/no-slop-writing.md`'s self-check (§6) and `check:no-slop` alongside this scan — weasel attribution and importance puffery are both style slop and a compliance risk here.
+Run this scan before writing or accepting any landing copy, not only before deploy. These are trust-breaking patterns that have required founder corrections after deployment. Run `knowledge/words/no-slop-writing.md`'s self-check (§6) alongside this scan — weasel attribution and importance puffery are both style slop and a compliance risk here.
 
 **False or unverifiable claims — do not write without live proof:**
 - Superlatives tied to a ranked cohort: "Top N unlock", "Top 100 referrers get", "first N users receive". Remove unless the waitlist system actively enforces the cutoff and the size is not invented.

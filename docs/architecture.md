@@ -1,35 +1,42 @@
 # Architecture
 
-This document describes the architecture that exists today. `AGENTS.md` explains how maintainers work inside it; `SKILL.md` is the runtime entrypoint; the typed graph is the orchestration source of truth.
+This document describes the architecture that exists today. `AGENTS.md` explains how maintainers work inside it; `SKILL.md` is the runtime entrypoint; the typed catalog (`catalog/`) is the orchestration source of truth, and `core/` is the runtime-neutral engine that actually executes against it — a scheduled session or the current conversation, not prose telling an agent to imagine compiling a graph.
 
 ## Design principles
 
-1. **Audience at the top level.** `knowledge/` is agent knowledge, `business/` is the launch-repository artifact contract, `validation/business/` grades a launch, and `validation/repository/` maintains the skill itself.
-2. **Domain-organized knowledge.** Each playbook domain owns a `README.md` index with load conditions. Stage order lives in `spine.md`; execution order lives in the graph.
-3. **Stable identity over filesystem location.** Graph IDs identify workflows, artifacts, operators, providers, gates, phases, lanes, domains, and areas. Paths are mutable bindings.
-4. **One execution model.** Workflow definitions compile into a runtime-neutral run graph. No compatibility scheduler, prose task list, or manual collision map competes with it.
-5. **Durable truth.** `state/PROJECT_STATE.yaml`, accepted artifact versions, run attempts, approvals, evidence, and fingerprints survive sessions. Chat history does not.
-6. **Fail closed.** Missing nodes, missing outputs, partial fan-in, stale inputs, unverified claims, and resource conflicts cannot silently become success.
+1. **Audience at the top level.** `knowledge/` is agent knowledge, `workspace/business/` is the launch-repository artifact contract, `validation/business/` grades a launch, and `validation/repository/` maintains the skill itself.
+2. **Domain-organized knowledge, catalog-derived routing.** Load conditions are authored once as catalog data (`catalog/domains.ts`, `catalog/references.ts`) and generated into `catalog/generated/routing.md`; no hand-authored per-domain `README.md` index competes with it. Stage order lives in `catalog/generated/spine.md`; execution order lives in `core/engine`.
+3. **Stable identity over filesystem location.** Catalog IDs identify workflows, artifacts, operators, providers, gates, phases, lanes, domains, and areas. Paths are mutable bindings.
+4. **One execution model.** Catalog definitions compile into a runtime-neutral durable run (`core/engine`: compile -> frontier -> dispatch), executed by `core/session/run.ts` and reduced through `core/reducer`. No compatibility scheduler, prose task list, or manual collision map competes with it.
+5. **Durable truth.** `state/PROJECT_STATE.yaml`, the control file's grants and waivers, accepted artifact versions, run attempts, approvals, evidence, and fingerprints survive sessions. Chat history does not.
+6. **Fail closed.** Missing nodes, missing outputs, partial fan-in, stale inputs, unverified claims, lapsed grants, and resource conflicts cannot silently become success.
 
 ## Repository layout
 
 ```text
 skill/b2c-mobile-business-launch/
   SKILL.md                 runtime entrypoint and always-on contracts
-  spine.md                 phase-oriented launch walk
-  graph/                   typed definitions, compiler, scheduler, run state
-    workflows/             native workflow contracts
-    generated/             deterministic graph projections
-  knowledge/                domain knowledge and README routing indexes
-  business/                launch-repository artifact contract
-  starters/                runnable archetype scaffolds
-  validation/business/                   deterministic business validators by domain
-  validation/repository/                 versioning, fixtures, evals, parity, source freshness
-  tooling/                 renderers, audit runner, and shared libraries
-  state/                   Design Room state and schemas
-  design-system/           promoted design tokens
-  render/                  Design Room renderer
-  agents/                  runtime manifests
+  core/                     runtime-neutral engine
+    schema/                 durable-file contracts and one status vocabulary
+    engine/                 engine v2: compile -> frontier -> dispatch
+    reducer/                single writer: patches, hash-chained audit log, lock
+    autonomy/               grants/waivers/budget evaluator, kill switch, prerequisite probes
+    adapters/                entrypoint/hook-free install adapters
+    session/                run.ts (session runner), onboard.ts, approve.ts, brief/digest/executor
+  catalog/                  typed catalog: domains, workflows, phases, lanes, gates, references
+    workflows/              native workflow contracts by business area
+    generated/               deterministic projections (routing.md, spine.md, catalog.json) + SKILL.md splice
+  content/                  onboarding conversation scripts (content/onboarding/)
+  knowledge/                domain knowledge, indexed by the generated routing table (no per-domain README)
+  workspace/business/       launch-repository artifact contract (current template)
+  workspace-template/       versioned v2 workspace/entrypoint templates for generated app repos
+  starters/                 runnable archetype scaffolds
+  studio/                   maintainer Design Room / Business Control Plane renderer and generated design tokens
+  validation/business/      deterministic business validators by domain
+  validation/repository/    versioning, fixtures, evals, parity, source freshness
+  verification/             v2 fixture/boundary/parity suites, audit runner, rehearsal checklist
+  tooling/                  renderers, probes, and shared libraries
+  agents/                   runtime manifests
 docs/
   architecture.md
   implementation/
@@ -68,18 +75,18 @@ Deterministic anchors take priority over model judgment: tests that ran, files t
 
 ## Generated documentation
 
-Generated files under `runtime/graph/generated/` and generated blocks in `SKILL.md` and `spine.md` come from graph definitions and renderers. Edit definitions, then run:
+Generated files under `catalog/generated/` and the spliced Lane Routing block in `SKILL.md` come from catalog definitions and `catalog/render-routing.ts`. Edit the catalog, then run:
 
 ```bash
-npm run render:skill-graph
-npm run render:skill-graph -- --check
-npm run check:skill-graph
+npm run catalog:render-routing
+npm run catalog:render-routing -- --check
+npm run check:catalog
 ```
 
 ## Change rules
 
-- New orchestration behavior belongs in graph definitions, compiler logic, run-state transitions, scheduler policy, verifier policy, resource claims, or runtime adapters.
-- New knowledge belongs in the relevant playbook domain and its README index.
+- New orchestration behavior belongs in catalog definitions, `core/engine` compiler logic, run-state transitions, autonomy/scheduler policy, verifier policy, resource claims, or `core/adapters` runtime adapters.
+- New knowledge belongs in the relevant playbook domain (`catalog/references.ts`'s `loadWhen` data), not a hand-authored per-domain index.
 - New readiness claims require a gate and fixtures.
 - New recurring failures require a validator or LaunchBench scenario.
 - Generated output is never edited by hand.
@@ -87,7 +94,7 @@ npm run check:skill-graph
 
 ## Public artifact contract
 
-The shape of `business/` is the root layout produced in a launch repository. Moving those paths is a versioned product migration, not cosmetic cleanup. The root `state/PROJECT_STATE.yaml`, business-relative evidence paths, state directory, design-system payload, and provider packets are public contracts consumed by gates and existing launches.
+The shape of `business/` is the root layout produced in a launch repository. Moving those paths is a versioned product migration, not cosmetic cleanup. The root `state/PROJECT_STATE.yaml`, business-relative evidence paths, state directory, promoted design tokens (`business/design/system/`), and provider packets are public contracts consumed by gates and existing launches.
 
 ## Business artifact information architecture
 

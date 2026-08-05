@@ -315,4 +315,4 @@ Record each result in `growth/EMAIL_OPS.md`:
 - Automation trigger and run status checked
 - Inbound webhook tested if receiving is enabled
 - privacy/terms/vendor inventory updated
-- subject/preview/body copy for each template passes the `no-slop-writing.md` self-check (§6) in the project's brand voice, and `check:no-slop` passes
+- subject/preview/body copy for each template passes the `no-slop-writing.md` self-check (§6) in the project's brand voice

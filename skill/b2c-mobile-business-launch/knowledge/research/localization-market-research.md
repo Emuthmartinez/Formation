@@ -101,11 +101,11 @@ The post-launch ASO loop (`aso-store-ops.md` §10) refreshes this same matrix fr
 - `LOCALIZATION_MARKET_RESEARCH.md`: the market opportunity matrix, priority tiers, per-cell tool sourcing, surface rollout plan, rejected markets with reasons, and refresh cadence.
 - `localization-market-research.html`: founder-visible board of the ranked markets and tiers.
 - Updated `APP_STORE_LISTING.md` localization matrix, `state/LAUNCH_TRACE.md` traces, and (when in scope) `PAID_UA.md` storefront choices that draw from the tiers.
-- `npm run check:localization-research -- --root .` passes (or records why localization is `not_needed`/`deferred`).
+- The `research` lane's evidence in `state/PROJECT_STATE.yaml` records why localization is `not_needed`/`deferred`, or points at the completed opportunity matrix.
 
 ## 9. Common Failure Modes
 
-- **Translate-first:** localized metadata exists but there is no opportunity matrix or priority tiers — effort spent with no demand evidence. This is the failure `check-localization-research` catches.
+- **Translate-first:** localized metadata exists but there is no opportunity matrix or priority tiers — effort spent with no demand evidence.
 - **Literal keyword translation:** the localized keyword field is a machine translation of the English keywords instead of native search terms with their own popularity/difficulty evidence.
 - **Metadata-only drift:** translated keywords shipped with English screenshots and an un-adapted paywall, not recorded as an intentional Tier 2 decision.
 - **Single English paywall:** the listing is localized but the paywall/offers are not, under-serving whole regions.
