@@ -339,7 +339,6 @@ export interface ControlFile {
   schemaVersion: "1.0.0";
   updatedAt: string;
   businessSlug: string;
-  stateHash: string;
   killSwitch: { engaged: boolean; engagedAt: string; engagedBy: "" | "founder" | "system"; reason: string };
   grants: GrantsMap;
   waivers: Waiver[];

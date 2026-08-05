@@ -24,8 +24,9 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { expandHome, flagBoolean, flagString, parseFlags } from "../../tooling/lib/launch-state.js";
+import { isMainModule } from "../lib/cli.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "..", "..");
@@ -126,10 +127,6 @@ function loadSettings(settingsPath: string): HookSettings {
 
 // --- CLI ---------------------------------------------------------------------------------------
 
-function isMainModule(): boolean {
-  return process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
-}
-
 function fail(message: string): never {
   console.error(`install-entrypoints: ${message}`);
   process.exit(1);
@@ -205,6 +202,6 @@ function runMain(): void {
   );
 }
 
-if (isMainModule()) {
+if (isMainModule(import.meta.url)) {
   runMain();
 }

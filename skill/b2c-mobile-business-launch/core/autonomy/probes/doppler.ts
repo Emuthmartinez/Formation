@@ -40,7 +40,14 @@ export function createDopplerAuthVerifier(options: DopplerProbeOptions): Prerequ
       return { status: "lapsed", detail: `doppler me: ${me.status} — ${me.detail}` };
     }
 
-    const smoke = classifySpawnResult("doppler run", spawn(DOPPLER_CLI, ["run", "--project", options.project, "--config", options.config, "--", "printenv"]), "ok");
+    // `printenv` deliberately dumps every secret doppler injects to ITS OWN stdout — that's how
+    // this smoke test proves the injection actually worked. That stdout must never reach
+    // classifySpawnResult's `detail` (which can surface into anomalies/logs/digests): strip it
+    // before classifying, regardless of exit status, and classify on stderr (doppler's own error
+    // text, never a secret value) alone. `stdout` is not even passed through partially — no
+    // truncation, no "first N chars" — it is unconditionally replaced.
+    const rawSmoke = spawn(DOPPLER_CLI, ["run", "--project", options.project, "--config", options.config, "--", "printenv"]);
+    const smoke = classifySpawnResult("doppler run", { ...rawSmoke, stdout: "" }, "ok");
     if (smoke.status !== "ok") {
       return { status: "lapsed", detail: `doppler run smoke (${options.project}/${options.config}): ${smoke.status} — ${smoke.detail}` };
     }

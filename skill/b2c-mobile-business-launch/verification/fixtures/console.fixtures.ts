@@ -239,6 +239,30 @@ export function register(harness: Harness): void {
     assert(beforeSecond === afterSecond, "an unchanged repeat onboarding run must not rewrite control.json");
   });
 
+  // --- judgment scenario: a genuine second run (a real settings change, not idempotent) still succeeds under the new race-guard preconditions ----
+
+  harness.check("onboard: a legitimate sequential re-run that actually changes a setting still succeeds (the new precondition guards races, not ordinary re-onboarding)", () => {
+    const handle = makeWorkspace(harness, "sequential-update");
+    const answersPath = path.join(handle.dir, "answers.json");
+    writeJson(answersPath, baseAnswers("fixture-sequential"));
+
+    const first = runOnboard(["--workspace", handle.dir, "--answers", answersPath, "--now", "2026-08-05T00:00:00.000Z"]);
+    assert(first.code === 0, `expected exit 0 on the bootstrap run, got ${first.code}: ${first.output}`);
+    const afterFirst = JSON.parse(readFileSync(handle.controlPath, "utf8"));
+    assert(afterFirst.grants["domain.money"].level === "review-first", "expected the bootstrap default for domain.money");
+
+    // A real change: flip Revenue from review-first to full. This exercises the "update" branch
+    // (existingControl is now truthy) and its equals(updatedAt) precondition, not the bootstrap
+    // branch's not_exists(businessSlug) precondition.
+    writeJson(answersPath, baseAnswers("fixture-sequential", { units: { ...bulkDefaultUnits(), Revenue: { level: "full" } } }));
+    const second = runOnboard(["--workspace", handle.dir, "--answers", answersPath, "--now", "2026-08-05T01:00:00.000Z"]);
+    assert(second.code === 0, `expected exit 0 on a genuine settings-change re-run, got ${second.code}: ${second.output}`);
+    assert(!second.output.includes("precondition"), `a legitimate sequential update must never trip the race-guard precondition, got:\n${second.output}`);
+
+    const afterSecond = JSON.parse(readFileSync(handle.controlPath, "utf8"));
+    assert(afterSecond.grants["domain.money"].level === "full", `expected the updated grant level to be committed, got: ${JSON.stringify(afterSecond.grants["domain.money"])}`);
+  });
+
   // --- founder-vocabulary: the onboarding content itself carries no internal vocabulary ----------
 
   harness.check("founder copy: the onboarding content file uses no internal vocabulary", () => {

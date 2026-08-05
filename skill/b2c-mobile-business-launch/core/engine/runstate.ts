@@ -198,7 +198,10 @@ export function acceptVerification(plan: CompiledPlan, run: RunStateDocument, no
   const state = run.nodes[nodeId];
   const attempt = state?.attempts.at(-1);
   if (!node || !state || !attempt) throw new Error(`No attempt to verify for ${nodeId}`);
-  if (node.verification.kind !== "none" && evidence.length === 0 && node.verification.failClosed) {
+  // evidence:[""] (or all-whitespace entries) must count as no evidence at all — a bare
+  // `.length === 0` check lets an empty string slip through as if something had been verified.
+  const hasRealEvidence = evidence.some((entry) => entry.trim().length > 0);
+  if (node.verification.kind !== "none" && !hasRealEvidence && node.verification.failClosed) {
     throw new Error(`Verification for ${nodeId} requires evidence`);
   }
   for (const artifactId of node.outputs) {

@@ -26,6 +26,7 @@ function resolveTsxBin(): string {
 const tsxBin = resolveTsxBin();
 const reducerCliPath = path.join(skillRoot, "core/reducer/cli.ts");
 const runCliPath = path.join(skillRoot, "core/session/run.ts");
+const approveCliPath = path.join(skillRoot, "core/session/approve.ts");
 
 interface CliResult {
   readonly code: number;
@@ -46,6 +47,11 @@ function cleanEnv(): NodeJS.ProcessEnv {
 
 function runSession(args: string[]): CliResult {
   const result = spawnSync(tsxBin, [runCliPath, ...args], { cwd: skillRoot, encoding: "utf8", env: cleanEnv() });
+  return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
+}
+
+function runApprove(args: string[]): CliResult {
+  const result = spawnSync(tsxBin, [approveCliPath, ...args], { cwd: skillRoot, encoding: "utf8" });
   return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
 }
 
@@ -141,12 +147,11 @@ function bootstrapWorkspace(harness: Harness, name: string, catalog: CatalogInpu
       "control",
       [
         { op: "set", path: ["businessSlug"], value: name },
-        { op: "set", path: ["stateHash"], value: "" },
         { op: "set", path: ["killSwitch"], value: { engaged: false, engagedAt: "", engagedBy: "", reason: "" } },
         { op: "set", path: ["grants"], value: options.grants ?? {} },
         { op: "set", path: ["waivers"], value: options.waivers ?? [] },
       ],
-      [["businessSlug"], ["stateHash"], ["killSwitch"], ["grants"], ["waivers"]],
+      [["businessSlug"], ["killSwitch"], ["grants"], ["waivers"]],
     ),
   );
 
@@ -242,6 +247,46 @@ function comprehensiveCatalog(): CatalogInput {
   };
 }
 
+/** eng-change is deliberately capped at maxAttempts: 1 so a single hand-seeded prior attempt puts it at its ceiling. */
+function exhaustibleTwoNodeCatalog(): CatalogInput {
+  return {
+    version: "catalog.session-fixture.exhausted-attempts",
+    artifacts: [
+      { id: "artifact.growth-scan", path: "growth/scan.md" },
+      { id: "artifact.eng-change", path: "engineering/change.log" },
+    ],
+    workflows: [
+      { id: "workflow.growth-scan", title: "Scan what people are saying", domainId: "domain.growth", actionClass: "observe", dependencies: [], outputPaths: ["growth/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
+      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true, maxAttempts: 1 },
+    ],
+  };
+}
+
+/** A single node with a non-empty founderOnlyActions, so — once autonomy (grant+waiver+budget) allows it — it still lands waiting_founder pending an explicit approval decision. */
+function approvalGatedCatalog(): CatalogInput {
+  return {
+    version: "catalog.session-fixture.approval-gated",
+    artifacts: [{ id: "artifact.money-report", path: "money/report.md" }],
+    workflows: [
+      {
+        id: "workflow.money-report",
+        title: "Pull this week's revenue report",
+        domainId: "domain.money",
+        actionClass: "spend",
+        protectedCategory: "spend",
+        costEstimate: { amount: 25, currency: "USD" },
+        dependencies: [],
+        outputPaths: ["money/report.md"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: ["Approve pulling this week's revenue report"],
+        gateCommands: [],
+        idempotent: false,
+      },
+    ],
+  };
+}
+
 function singleGrowthNodeCatalog(): CatalogInput {
   return {
     version: "catalog.session-fixture.orphan",
@@ -307,6 +352,51 @@ export function register(harness: Harness): void {
     const advancedSection = text.split("## What moved forward")[1]!.split("## Needs your call")[0]!;
     assert(!advancedSection.includes("Update the onboarding copy"), `a failed node must not be reported as 'advanced', got advanced section:\n${advancedSection}`);
     assertNoInternalVocabulary("exec-failure", text);
+  });
+
+  // --- judgment scenario: a node that already exhausted its retries must park, never crash the whole session ----
+
+  harness.check("session: a node that already exhausted its retry budget is parked for that node only — the session keeps going and other nodes still advance", () => {
+    const handle = bootstrapWorkspace(harness, "exhausted-attempts", exhaustibleTwoNodeCatalog(), {
+      grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
+    });
+
+    // Pre-seed run-state with workflow.eng-change already at its (maxAttempts: 1) ceiling, status
+    // still "pending" so frontier still offers it as ready — this is exactly the shape beginAttempt
+    // throws on (state.attempts.length >= node.maxAttempts) if the dispatch loop doesn't guard it.
+    const catalog = exhaustibleTwoNodeCatalog();
+    const plan = compilePlan(catalog, "2026-08-01T00:00:00.000Z");
+    const businessState = JSON.parse(readFileSync(handle.statePath, "utf8"));
+    const run = seedRunState(plan, businessState, { ownerSessionId: "prior-session", ttlSeconds: 300, wallClockCapSeconds: 1800, now: "2026-08-01T00:00:00.000Z" });
+    const engNodeId = plan.nodes.find((node) => node.id.includes("eng-change"))!.id;
+    run.nodes[engNodeId]!.attempts.push({
+      id: `${engNodeId}.attempt.1`,
+      nodeId: engNodeId,
+      number: 1,
+      status: "failed",
+      ownerSessionId: "prior-session",
+      heartbeatAt: "2026-08-01T00:00:00.000Z",
+      ttlSeconds: 300,
+      inputFingerprint: "x",
+      startedAt: "2026-08-01T00:00:00.000Z",
+      finishedAt: "2026-08-01T00:00:05.000Z",
+      evidence: [],
+      readbackRequired: false,
+    });
+    mkdirSync(path.join(handle.dir, "run"), { recursive: true });
+    writeRunState(path.join(handle.dir, "run", "run-state.json"), run);
+
+    const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-exhausted-1", "--executor", "fixture"]);
+    assert(result.code === 0, `expected exit 0 — an exhausted-attempts node must park, not crash the whole session, got ${result.code}: ${result.output}`);
+
+    const text = readDigest(handle, "sess-exhausted-1");
+    assert(!text.toLowerCase().includes("something went wrong"), `expected no whole-session crash framing, got:\n${text}`);
+    assert(text.includes("Scan what people are saying"), `expected the independent, healthy node to still advance despite the other node's exhausted retries, got:\n${text}`);
+    const advancedSection = text.split("## What moved forward")[1]?.split("## Needs your call")[0] ?? "";
+    assert(!advancedSection.includes("Update the onboarding copy"), `the exhausted-attempts node must not be reported as advanced, got advanced section:\n${advancedSection}`);
+    assert(text.includes("Update the onboarding copy"), `expected the exhausted-attempts node's title to still be named (parked, not vanished), got:\n${text}`);
+    assert(text.includes("stopped trying it automatically"), `expected the translated exhausted-attempts blocker text, got:\n${text}`);
+    assertNoInternalVocabulary("exhausted-attempts", text);
   });
 
   // --- judgment scenario: an internal crash never leaks engine vocabulary into the digest ----
@@ -467,5 +557,42 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     assert(text.includes("Scan what people are saying"), `expected the in-scope growth node to advance, got:\n${text}`);
     assert(!text.includes("Pull this week's revenue report"), `expected the out-of-scope money node to be left untouched (neither advanced nor parked) this session, got:\n${text}`);
     assertNoInternalVocabulary("scope-hints", text);
+  });
+
+  // --- judgment scenario: approve.ts against a workspace with no run yet fails with a friendly message, never an uncaught exception ----
+
+  harness.check("session/approve: a workspace with no run state yet produces the friendly no_run_state message and exit 1, not an uncaught exception", () => {
+    const handle = bootstrapWorkspace(harness, "approve-no-run", singleNodeCatalog());
+    // Deliberately never run a session: run/run-state.json does not exist yet.
+    const result = runApprove(["--workspace", handle.dir, "--approval", "workflow.eng-change.approval.1", "--decision", "approved", "--session", "sess-approve-1"]);
+    assert(result.code === 1, `expected exit 1 when no run state exists yet, got ${result.code}: ${result.output}`);
+    assert(result.output.includes("ISSUE approve.no_run_state"), `expected the named no_run_state ISSUE, got:\n${result.output}`);
+    assert(!/at\s+\S+\s+\(.*:\d+:\d+\)/.test(result.output), `expected a friendly message, not a raw stack trace, got:\n${result.output}`);
+
+    const listResult = runApprove(["--workspace", handle.dir, "--list"]);
+    assert(listResult.code === 1, `expected --list to also fail cleanly with no run state, got ${listResult.code}: ${listResult.output}`);
+    assert(listResult.output.includes("ISSUE approve.no_run_state"), `expected the named no_run_state ISSUE on --list too, got:\n${listResult.output}`);
+  });
+
+  harness.check("session/approve: an existing pending approval can be listed and granted once a session has run", () => {
+    const handle = bootstrapWorkspace(harness, "approve-happy", approvalGatedCatalog(), {
+      grants: { "domain.money": grant("domain.money", "full") },
+      waivers: [waiver("waiver.money.1", "domain.money", "spend", "spend")],
+      balances: [{ unit: "Revenue", period: currentPeriod(), currency: "USD", allocated: 1000, committed: 0, spent: 0, remaining: 1000, updatedAt: "2026-08-01T00:00:00.000Z" }],
+      // Autonomy (grant+waiver+budget) is fully satisfied, but founderOnlyActions is non-empty,
+      // so the node still lands waiting_founder pending an explicit approval decision.
+    });
+    const sessionResult = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-approve-setup-1", "--executor", "fixture"]);
+    assert(sessionResult.code === 0, `expected exit 0 for the setup session, got ${sessionResult.code}: ${sessionResult.output}`);
+
+    const listResult = runApprove(["--workspace", handle.dir, "--list"]);
+    assert(listResult.code === 0, `expected exit 0 when a run state exists, got ${listResult.code}: ${listResult.output}`);
+    assert(listResult.output.includes("PENDING"), `expected at least one PENDING approval listed, got:\n${listResult.output}`);
+    const pendingId = listResult.output.match(/PENDING (\S+)/)?.[1];
+    assert(Boolean(pendingId), `could not parse a pending approval id from:\n${listResult.output}`);
+
+    const approveResult = runApprove(["--workspace", handle.dir, "--approval", pendingId!, "--decision", "approved", "--session", "sess-approve-grant-1"]);
+    assert(approveResult.code === 0, `expected exit 0 recording the approval, got ${approveResult.code}: ${approveResult.output}`);
+    assert(approveResult.output.includes(`RECORDED ${pendingId} approved`), `expected a RECORDED confirmation, got:\n${approveResult.output}`);
   });
 }

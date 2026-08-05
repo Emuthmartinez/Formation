@@ -24,6 +24,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/** True when a value carries real information worth warning about losing (not just boilerplate empties). */
+function hasContent(value: unknown): boolean {
+  if (typeof value === "string") return value.trim().length > 0;
+  if (Array.isArray(value)) return value.some(hasContent);
+  if (isRecord(value)) return Object.values(value).some(hasContent);
+  return value !== undefined && value !== null;
+}
+
 /**
  * v2's schema requires a `phase_` prefix; some live v1 states carry free-form phase labels
  * (e.g. a mid-rebuild marker). Prefix rather than reject — the label's meaning is the
@@ -85,10 +93,29 @@ function buildFounderOnlyGates(founderOnlyGates: unknown, now: string): PendingF
   });
 }
 
-function buildActiveGateFollowUp(operator: Record<string, unknown>, now: string): PendingFounderGate | undefined {
+/**
+ * Statuses under which it is genuinely correct for a v1 active gate to be dropped without a
+ * warning — the gate has already reached a terminal state and there is nothing left to
+ * re-present. Anything else (a typo, an unfamiliar value from a future v1 revision) is
+ * "unrecognized" and must warn rather than silently vanish.
+ */
+const RECOGNIZED_TERMINAL_GATE_STATUSES = new Set(["", "resolved", "none", "stale", "superseded"]);
+
+function buildActiveGateFollowUp(operator: Record<string, unknown>, now: string, warnings: string[]): PendingFounderGate | undefined {
   const activeGateId = asString(operator.active_gate_id);
-  const activeGateStatus = asString(operator.active_gate_status);
-  if (!activeGateId || activeGateStatus !== "pending") return undefined;
+  const activeGateStatus = asString(operator.active_gate_status).trim();
+  // Case-insensitive compare: "Pending"/"PENDING" must still carry the gate forward, not be
+  // silently treated as an unrecognized/terminal status just because the case didn't match.
+  const normalizedStatus = activeGateStatus.toLowerCase();
+  if (!activeGateId) return undefined;
+  if (normalizedStatus !== "pending") {
+    if (!RECOGNIZED_TERMINAL_GATE_STATUSES.has(normalizedStatus)) {
+      warnings.push(
+        `v1 business_operator.active_gate_id "${activeGateId}" has unrecognized active_gate_status "${activeGateStatus}"; migration is dropping it without re-presenting it as a founder gate (only "pending", case-insensitive, is carried forward)`,
+      );
+    }
+    return undefined;
+  }
   const activeGateClass = asString(operator.active_gate_class);
   const category: ProtectedCategory | "other" =
     activeGateClass === "spend"
@@ -132,8 +159,24 @@ export function migrateProjectStateV1(v1State: unknown, now: string = new Date()
     lanes[key] = migrateLane(lanesSource[key]);
   }
 
+  // v2's BusinessStateV2["project"] has no source_truth field at all — this is a genuine drop,
+  // not a rename, so a founder who recorded a transcript/repo/current_docs pointer here must be
+  // told rather than silently lose it.
+  if (isRecord(projectSource.source_truth) && hasContent(projectSource.source_truth)) {
+    warnings.push(
+      `v1 project.source_truth is dropped by migration (no v2 equivalent field); its content (transcript/repo/current_docs) is not carried forward into business state v2`,
+    );
+  }
+
+  // v2 has no autonomy-mode concept at this layer (autonomy is expressed via control.json
+  // grants/waivers instead) — a non-empty v1 autonomy.mode is discarded, so name what was lost.
+  const v1AutonomyMode = asString(autonomySource.mode);
+  if (v1AutonomyMode) {
+    warnings.push(`v1 autonomy.mode "${v1AutonomyMode}" has no v2 equivalent and is discarded by migration`);
+  }
+
   const pending = buildFounderOnlyGates(autonomySource.founder_only_gates, now);
-  const activeGateFollowUp = buildActiveGateFollowUp(operatorSource, now);
+  const activeGateFollowUp = buildActiveGateFollowUp(operatorSource, now, warnings);
   if (activeGateFollowUp) pending.push(activeGateFollowUp);
   if (pending.length === 0) {
     warnings.push("v1 state carried no founder_only_gates and no pending active gate; founderGates.pending is empty");
@@ -173,7 +216,6 @@ export function migrateProjectStateV1(v1State: unknown, now: string = new Date()
     schemaVersion: "1.0.0",
     updatedAt: now,
     businessSlug: businessState.project.slug,
-    stateHash: "",
     killSwitch: { engaged: false, engagedAt: "", engagedBy: "", reason: "" },
     grants: {},
     waivers: [],

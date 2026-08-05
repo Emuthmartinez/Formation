@@ -12,7 +12,6 @@ function baseControl(overrides: Partial<ControlFile["killSwitch"]> = {}): Contro
     schemaVersion: "1.0.0",
     updatedAt: NOW,
     businessSlug: "fixture-biz",
-    stateHash: "",
     killSwitch: { engaged: false, engagedAt: "", engagedBy: "", reason: "", ...overrides },
     grants: {},
     waivers: [],

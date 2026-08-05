@@ -1,12 +1,9 @@
 import type { CatalogArtifact as CompileArtifact, CatalogInput, CatalogWorkflowId, CatalogWorkflowNode } from "../core/engine/compile.js";
 import { grantableDomainIds, type GrantableDomainId } from "../core/schema/types.js";
-import { catalogId } from "./ids.js";
-import type { Catalog, CatalogWorkflowDef } from "./types.js";
+import { isGrantableDomainId, type Catalog, type CatalogDomainId, type CatalogWorkflowDef } from "./types.js";
 
-const grantableSet = new Set<string>(grantableDomainIds);
-
-function isGrantable(domainId: string): domainId is GrantableDomainId {
-  return grantableSet.has(domainId);
+function isGrantable(domainId: CatalogDomainId): domainId is GrantableDomainId {
+  return isGrantableDomainId(domainId, grantableDomainIds);
 }
 
 /**
@@ -35,14 +32,15 @@ function isGrantable(domainId: string): domainId is GrantableDomainId {
 export function toCatalogInput(catalog: Catalog): CatalogInput {
   const grantableWorkflows = catalog.workflows.filter((wf): wf is CatalogWorkflowDef & { domainId: GrantableDomainId } => isGrantable(wf.domainId));
   const grantableIds = new Set<CatalogWorkflowId>(grantableWorkflows.map((wf) => wf.id as CatalogWorkflowId));
+  const grantableOutputPaths = new Set<string>(grantableWorkflows.flatMap((wf) => wf.outputPaths));
 
-  const artifactsByPath = new Map<string, CompileArtifact>();
-  for (const wf of grantableWorkflows) {
-    for (const outputPath of wf.outputPaths) {
-      if (artifactsByPath.has(outputPath)) continue;
-      artifactsByPath.set(outputPath, { id: catalogId("artifact", outputPath) as CompileArtifact["id"], path: outputPath });
-    }
-  }
+  // Reuse catalog.artifacts (built once, by catalog/artifacts.ts's buildArtifacts(), from every
+  // workflow's outputPaths) rather than recomputing artifact ids independently here — two
+  // derivations of the same id from the same input have already diverged once in this repo's
+  // history (see catalog/artifacts.ts's own header on why there is now a single source).
+  const artifacts: CompileArtifact[] = catalog.artifacts
+    .filter((artifact) => grantableOutputPaths.has(artifact.path))
+    .map((artifact) => ({ id: artifact.id as CompileArtifact["id"], path: artifact.path }));
 
   const workflows: CatalogWorkflowNode[] = grantableWorkflows.map((wf) => ({
     id: wf.id as CatalogWorkflowId,
@@ -64,7 +62,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
 
   return {
     version: `${catalog.schemaVersion}+${catalog.skillVersion}`,
-    artifacts: [...artifactsByPath.values()],
+    artifacts,
     workflows,
   };
 }

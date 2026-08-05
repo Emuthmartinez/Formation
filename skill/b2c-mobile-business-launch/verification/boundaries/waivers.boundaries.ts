@@ -121,6 +121,22 @@ export function register(harness: Harness): void {
     assert(result.budget === undefined, "no cost estimate means no budget evidence to attach");
   });
 
+  harness.check("waivers: a NaN cost estimate fails closed on the maxPerAction cap rather than fail-open on 'NaN > cap' being false", () => {
+    const node = makeNode({ domainId: "domain.money", actionClass: "spend", protectedCategory: "spend", costEstimate: { amount: NaN, currency: "USD" } });
+    const waiver = makeWaiver({ domainId: "domain.money", actionClass: "spend", protectedCategory: "spend", maxPerAction: 100 });
+    const result = evaluateProtectedAction(node, [waiver], makeLedger([makeBalance("Revenue", "2026-08", 10_000)]), NOW);
+    assert(!result.ok, "expected a NaN cost estimate to reject, not silently pass the per-action cap");
+    assert(result.reasonCode === "autonomy.waiver_invalid_amount", `expected waiver_invalid_amount, got ${result.reasonCode}`);
+  });
+
+  harness.check("waivers: a non-finite maxPerPeriod cap fails closed rather than fail-open on 'spend > NaN' being false", () => {
+    const waiver = makeWaiver({ domainId: "domain.money", actionClass: "spend", protectedCategory: "spend", maxPerAction: 1_000, maxPerPeriod: NaN, budgetPeriod: "monthly" });
+    const node = makeNode({ domainId: "domain.money", actionClass: "spend", protectedCategory: "spend", costEstimate: { amount: 100, currency: "USD" } });
+    const result = evaluateProtectedAction(node, [waiver], makeLedger([makeBalance("Revenue", "2026-08", 10_000)]), NOW);
+    assert(!result.ok, "expected a non-finite maxPerPeriod cap to reject rather than silently allow spend");
+    assert(result.reasonCode === "autonomy.waiver_invalid_amount", `expected waiver_invalid_amount, got ${result.reasonCode}`);
+  });
+
   harness.check("waivers: scopeMatches supports '*' wildcards against workflow id, resource claims, and output artifacts", () => {
     const node = makeNode({ domainId: "domain.growth", actionClass: "publish", protectedCategory: "public_actions", workflowSlug: "growth-announce-launch" });
     assert(scopeMatches("*", node), "'*' should match anything");

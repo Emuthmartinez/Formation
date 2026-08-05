@@ -128,12 +128,11 @@ export function bootstrapScenarioWorkspace(harness: Harness, name: string, catal
       "control",
       [
         { op: "set", path: ["businessSlug"], value: name },
-        { op: "set", path: ["stateHash"], value: "" },
         { op: "set", path: ["killSwitch"], value: { engaged: false, engagedAt: "", engagedBy: "", reason: "" } },
         { op: "set", path: ["grants"], value: options.grants ?? {} },
         { op: "set", path: ["waivers"], value: [] },
       ],
-      [["businessSlug"], ["stateHash"], ["killSwitch"], ["grants"], ["waivers"]],
+      [["businessSlug"], ["killSwitch"], ["grants"], ["waivers"]],
     ),
   );
 

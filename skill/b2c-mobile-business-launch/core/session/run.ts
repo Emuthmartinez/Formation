@@ -492,7 +492,26 @@ async function main(): Promise<number> {
           }
 
           const attemptTime = sessionNow();
-          const attempt = beginAttempt(plan, run, nodeId, sessionId, attemptTime);
+          let attempt: ReturnType<typeof beginAttempt>;
+          try {
+            attempt = beginAttempt(plan, run, nodeId, sessionId, attemptTime);
+          } catch (error) {
+            // beginAttempt throws once a node has exhausted its maxAttempts (or on an internal
+            // plan/run mismatch). Left uncaught, this would escape to the outer catch and report
+            // the WHOLE session as "crashed" — dropping every already-succeeded node from this
+            // run's digest over a single node's retry budget. Park just this node instead (the
+            // fixed blocker string below matches digest.ts's BLOCKER_TEXT_EXACT so it renders as
+            // a plain sentence, never the raw error) and keep dispatching the rest of the batch.
+            console.error(`session.begin_attempt_failed ${nodeId}: ${error instanceof Error ? error.message : String(error)}`);
+            const nodeState = run.nodes[nodeId];
+            if (nodeState) {
+              nodeState.status = "blocked";
+              nodeState.blocker = "Ran out of attempts for this session.";
+              run.updatedAt = attemptTime;
+              writeRunState(paths.runState, run);
+            }
+            continue;
+          }
           writeRunState(paths.runState, run);
 
           const onHeartbeat = (): void => {

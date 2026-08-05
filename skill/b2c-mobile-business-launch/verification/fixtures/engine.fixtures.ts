@@ -496,6 +496,23 @@ export function register(harness: Harness): void {
     assert(Boolean(run.nodes[nodeId("research-scan")]!.acceptedOutputFingerprint), "succeeded node should carry an accepted output fingerprint");
   });
 
+  harness.check("runstate: acceptVerification rejects evidence containing only an empty string (fail closed, not a bare length check)", () => {
+    const plan = compilePlan(testCatalog(), now);
+    const { run } = seedFor([], plan);
+    const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-x", now);
+    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }] }, now);
+    assert(run.nodes[nodeId("research-scan")]!.status === "blocked", "fresh-context verification should land blocked pending acceptance");
+    let threw = false;
+    try {
+      acceptVerification(plan, run, nodeId("research-scan"), [""], now);
+    } catch (error) {
+      threw = true;
+      assert(String(error).includes("requires evidence"), `expected an evidence-required error, got: ${error}`);
+    }
+    assert(threw, "acceptVerification must reject evidence:[''] rather than accept it as if real evidence were provided");
+    assert(run.nodes[nodeId("research-scan")]!.status === "blocked", "the node must remain blocked after a rejected empty-string evidence attempt");
+  });
+
   harness.check("runstate: reconcilePatch rejects an undeclared attempt", () => {
     const plan = compilePlan(testCatalog(), now);
     const { run } = seedFor([], plan);

@@ -70,6 +70,40 @@ export function register(harness: Harness): void {
     assert(!result.detail.includes("auth_failed"), `a generic smoke failure must not be misclassified as auth_failed, got: ${result.detail}`);
   });
 
+  harness.check("probes/doppler: a secret value leaked onto stdout from a failing `doppler run` smoke never reaches the returned detail", () => {
+    // `doppler run -- printenv` materializes real secret values on ITS OWN stdout by design — that
+    // is how the smoke test proves injection works. If the run then fails for any reason (partial
+    // output before a crash, a killed process, etc.), that stdout must never be echoed back out
+    // through the probe's detail string.
+    const secretMarker = "STRIPE_SECRET_KEY=sk_live_should_never_leak_1234567890";
+    const spawn = fakeSpawn({
+      me: { status: 0, stdout: "logged in as founder@example.com\n", stderr: "" },
+      run: { status: 1, stdout: `${secretMarker}\n`, stderr: "doppler: run terminated unexpectedly" },
+    });
+    const verifier = createDopplerAuthVerifier({ project: "fixture-proj", config: "production", secretsMdPath: "/does/not/matter", spawn });
+    const result = verifier(dopplerAuthProbe(), NOW);
+    assert(result.status === "lapsed", `expected lapsed when the scoped smoke fails, got "${result.status}"`);
+    assert(!result.detail.includes(secretMarker), `secret value leaked into the doppler probe's detail string: ${result.detail}`);
+    assert(!result.detail.includes("sk_live"), `secret value fragment leaked into the doppler probe's detail string: ${result.detail}`);
+    assert(result.detail.includes("terminated unexpectedly"), "expected stderr (doppler's own error text, never a secret) to still be visible in the detail");
+  });
+
+  harness.check("probes/doppler: a leaked secret value that happens to match the auth-failure wording pattern still never reaches detail", () => {
+    // Proves the stdout-stripping happens BEFORE classification, not only on the plain
+    // generic-error path: a secret whose own text coincidentally contains auth-shaped wording
+    // (e.g. "login", "401") must not leak even via the auth_failed branch.
+    const secretMarker = "SOME_TOKEN=please-login-with-401-code-should-never-leak";
+    const spawn = fakeSpawn({
+      me: { status: 0, stdout: "logged in as founder@example.com\n", stderr: "" },
+      run: { status: 1, stdout: `${secretMarker}\n`, stderr: "" },
+    });
+    const verifier = createDopplerAuthVerifier({ project: "fixture-proj", config: "production", secretsMdPath: "/does/not/matter", spawn });
+    const result = verifier(dopplerAuthProbe(), NOW);
+    assert(result.status === "lapsed", `expected lapsed, got "${result.status}"`);
+    assert(!result.detail.includes(secretMarker), `secret value leaked into detail via the auth_failed path: ${result.detail}`);
+    assert(!result.detail.includes("should-never-leak"), `secret fragment leaked into detail: ${result.detail}`);
+  });
+
   harness.check("probes/doppler: both spawns ok but SECRETS.md is missing lapses without ever claiming verified", () => {
     const spawn = fakeSpawn({
       me: { status: 0, stdout: "logged in\n", stderr: "" },

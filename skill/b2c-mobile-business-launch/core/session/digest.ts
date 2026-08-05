@@ -138,6 +138,7 @@ const BLOCKER_TEXT_EXACT: Record<string, string> = {
   "Founder approval required": "This needs your yes before I go ahead.",
   "A required founder approval was rejected.": "You said no to this, so I'm leaving it alone.",
   "Verification required": "I finished the work here and I'm double-checking it before calling it done.",
+  "Ran out of attempts for this session.": "This didn't go through after a few tries, so I stopped trying it automatically and I'm flagging it for you.",
 };
 
 /** Translates a park reason (an autonomy reasonCode when one fired, else frontier's raw blocker text) into one plain sentence. Unknown input still resolves to a safe, vocabulary-free fallback. */

@@ -127,7 +127,10 @@ function runCommit(args: Record<string, string>): number {
   const lockPath = args.lock ?? `${filePath}.lock`;
   const acquireResult: AcquireResult = acquireLock(lockPath, {
     ownerSessionId: session,
-    ttlSeconds: Number(args["lock-ttl"] ?? 30),
+    // Aligned with core/session/run.ts's own --lock-ttl-seconds flag name for the same concept
+    // (lock TTL in seconds) — the two used to disagree (--lock-ttl vs --lock-ttl-seconds), so a
+    // value meant for this lock could never actually reach it under the old name.
+    ttlSeconds: Number(args["lock-ttl-seconds"] ?? 30),
     retries: Number(args["lock-retries"] ?? 3),
     retryDelayMs: Number(args["lock-retry-delay-ms"] ?? 25),
     breakStale: args["break-stale-verified"] === "true",

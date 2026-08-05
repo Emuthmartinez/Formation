@@ -243,7 +243,6 @@ function bootstrapWorkspace(harness: Harness, name: string): WorkspaceHandle {
       "control",
       [
         { op: "set", path: ["businessSlug"], value: name },
-        { op: "set", path: ["stateHash"], value: "" },
         { op: "set", path: ["killSwitch"], value: { engaged: false, engagedAt: "", engagedBy: "", reason: "" } },
         {
           // domain.engineering is deliberately absent: workflow.eng-change must park on
@@ -258,7 +257,7 @@ function bootstrapWorkspace(harness: Harness, name: string): WorkspaceHandle {
         },
         { op: "set", path: ["waivers"], value: [waiver("waiver.money.b", "domain.money", "spend", "spend")] },
       ],
-      [["businessSlug"], ["stateHash"], ["killSwitch"], ["grants"], ["waivers"]],
+      [["businessSlug"], ["killSwitch"], ["grants"], ["waivers"]],
     ),
   );
 

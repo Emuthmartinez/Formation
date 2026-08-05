@@ -75,6 +75,16 @@ export function evaluateProtectedAction(node: CompiledRunNode, waivers: readonly
     return { ok: true, reasonCode: "autonomy.waiver_ok", reason: "", waiver: chosen };
   }
 
+  // Same NaN fail-open hazard as budget.ts's evaluateBudget: a non-finite estimate or cap makes
+  // `>` false in both directions, silently passing the hard-stop. Fail closed instead.
+  if (!Number.isFinite(node.costEstimate.amount) || !Number.isFinite(chosen.caps.maxPerAction)) {
+    return {
+      ok: false,
+      reasonCode: "autonomy.waiver_invalid_amount",
+      reason: `Estimate amount "${node.costEstimate.amount}" or waiver "${chosen.id}" maxPerAction cap "${chosen.caps.maxPerAction}" is not a finite number; failing closed rather than risk a NaN comparison silently passing.`,
+      waiver: chosen,
+    };
+  }
   if (node.costEstimate.amount > chosen.caps.maxPerAction) {
     return {
       ok: false,
@@ -86,6 +96,14 @@ export function evaluateProtectedAction(node: CompiledRunNode, waivers: readonly
 
   const period = periodKeyFor(chosen.budgetPeriod, now, runId);
   const periodSpend = sumWaiverPeriodSpend(ledger, chosen.id, period);
+  if (!Number.isFinite(periodSpend) || !Number.isFinite(chosen.caps.maxPerPeriod)) {
+    return {
+      ok: false,
+      reasonCode: "autonomy.waiver_invalid_amount",
+      reason: `Already-recorded period spend "${periodSpend}" or waiver "${chosen.id}" maxPerPeriod cap "${chosen.caps.maxPerPeriod}" is not a finite number for period "${period}"; failing closed rather than risk a NaN comparison silently passing.`,
+      waiver: chosen,
+    };
+  }
   if (periodSpend + node.costEstimate.amount > chosen.caps.maxPerPeriod) {
     return {
       ok: false,

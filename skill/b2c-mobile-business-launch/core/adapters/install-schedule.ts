@@ -19,7 +19,8 @@ import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { expandHome, flagBoolean, flagNumber, flagString, parseFlags } from "../../tooling/lib/launch-state.js";
-import type { RuntimeId } from "./profile.js";
+import { isMainModule } from "../lib/cli.js";
+import { founderFacingRuntimeIds, type RuntimeId } from "./profile.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "..", "..");
@@ -70,6 +71,7 @@ const headless = profile.buildHeadlessCommand({
   maxConcurrency: profile.maxConcurrency,
 });
 const wrapped = wrapWithWallClock(headless, ${options.wallClockSeconds});
+if (wrapped.enforcementGap) console.error(\`wall-clock: \${wrapped.enforcementGap}\`);
 const result = spawnSync(wrapped.command, [...wrapped.args], { stdio: "inherit", cwd: ${JSON.stringify(options.skillRoot)} });
 process.exit(result.status ?? 1);
 `;
@@ -168,10 +170,6 @@ ${scheduleXml}  <key>RunAtLoad</key><false/>
 
 // --- CLI ---------------------------------------------------------------------------------------
 
-function isMainModule(): boolean {
-  return process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
-}
-
 function fail(message: string): never {
   console.error(`install-schedule: ${message}`);
   process.exit(1);
@@ -194,7 +192,7 @@ function buildOptions(argv: string[]): { options: ScheduleOptions; mechanism: Sc
   const workspaceDir = flagString(flags, "workspace") ? path.resolve(expandHome(flagString(flags, "workspace")!)) : undefined;
   if (!workspaceDir) fail("--workspace <business-workspace-dir> is required.");
   const runtime = flagString(flags, "runtime") as RuntimeId | undefined;
-  if (!runtime || !["claude", "codex", "cursor"].includes(runtime)) fail('--runtime claude|codex|cursor is required (inline is a fixture-only shape, never scheduled).');
+  if (!runtime || !founderFacingRuntimeIds.includes(runtime)) fail(`--runtime ${founderFacingRuntimeIds.join("|")} is required (inline is a fixture-only shape, never scheduled).`);
   const schedule = flagString(flags, "schedule");
   if (!schedule) fail('--schedule "<5-field cron expression>" is required, e.g. "*/30 * * * *".');
   const briefPath = flagString(flags, "brief") ? path.resolve(expandHome(flagString(flags, "brief")!)) : path.join(workspaceDir!, "brief.json");
@@ -275,6 +273,6 @@ function runMain(): void {
   console.log(`install-schedule: installed the launchd job for ${options.workspaceSlug}/${options.runtime}.`);
 }
 
-if (isMainModule()) {
+if (isMainModule(import.meta.url)) {
   runMain();
 }

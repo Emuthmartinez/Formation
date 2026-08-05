@@ -87,7 +87,6 @@ function validControlDoc() {
     schemaVersion: "1.0.0",
     updatedAt: now,
     businessSlug: "ocho",
-    stateHash: "",
     killSwitch: { engaged: false, engagedAt: "", engagedBy: "", reason: "" },
     grants: {},
     waivers: [],
@@ -330,6 +329,68 @@ export function register(harness: Harness): void {
       assert(Boolean(lane), `migrated business state is missing lane "${key}"`);
       assert(statusValues.includes(lane!.status), `migrated lane "${key}" has non-canonical status "${lane!.status}"`);
     }
+  });
+
+  harness.check("migration: a non-empty v1 project.source_truth is dropped with a warning naming the field", () => {
+    const v1State = { project: { name: "App", slug: "app", source_truth: { transcript: "", repo: "", current_docs: ["product/SPEC.md"] } }, lanes: {} };
+    const migrated = migrateProjectStateV1(v1State, now);
+    assert(
+      migrated.warnings.some((w) => w.includes("project.source_truth")),
+      `expected a warning naming project.source_truth, got: ${migrated.warnings.join(" | ")}`,
+    );
+    assert(!("sourceTruth" in migrated.businessState.project), "v2 project should carry no source_truth-derived field");
+  });
+
+  harness.check("migration: an all-empty v1 project.source_truth (no real content) does not warn", () => {
+    const v1State = { project: { name: "App", slug: "app", source_truth: { transcript: "", repo: "", current_docs: [] } }, lanes: {} };
+    const migrated = migrateProjectStateV1(v1State, now);
+    assert(!migrated.warnings.some((w) => w.includes("project.source_truth")), "an entirely-empty source_truth carries nothing to lose, so it should not warn");
+  });
+
+  harness.check("migration: a non-empty v1 autonomy.mode is discarded with a warning naming the mode", () => {
+    const v1State = { project: { name: "App", slug: "app" }, lanes: {}, autonomy: { mode: "prepare" } };
+    const migrated = migrateProjectStateV1(v1State, now);
+    assert(
+      migrated.warnings.some((w) => w.includes("autonomy.mode") && w.includes("prepare")),
+      `expected a warning naming the discarded autonomy.mode "prepare", got: ${migrated.warnings.join(" | ")}`,
+    );
+  });
+
+  harness.check("migration: a case-variant active_gate_status of 'Pending' still carries the gate forward (not dropped, no warning)", () => {
+    const v1State = {
+      project: { name: "App", slug: "app" },
+      lanes: {},
+      business_operator: { active_gate_id: "confirm-working-name", active_gate_status: "Pending", active_gate_class: "scope" },
+    };
+    const migrated = migrateProjectStateV1(v1State, now);
+    const carried = migrated.businessState.founderGates.pending.find((gate) => gate.sourceLegacyId === "confirm-working-name");
+    assert(Boolean(carried), `expected the case-variant 'Pending' active gate to be carried forward as a founder gate, got pending: ${JSON.stringify(migrated.businessState.founderGates.pending)}`);
+    assert(!migrated.warnings.some((w) => w.includes("unrecognized active_gate_status")), "a recognized case-variant of 'pending' must not be reported as unrecognized");
+  });
+
+  harness.check("migration: an unrecognized active_gate_status (with an active_gate_id present) warns rather than silently dropping the gate", () => {
+    const v1State = {
+      project: { name: "App", slug: "app" },
+      lanes: {},
+      business_operator: { active_gate_id: "confirm-working-name", active_gate_status: "awaiting_review", active_gate_class: "scope" },
+    };
+    const migrated = migrateProjectStateV1(v1State, now);
+    const carried = migrated.businessState.founderGates.pending.find((gate) => gate.sourceLegacyId === "confirm-working-name");
+    assert(!carried, "an unrecognized status is not itself carried forward as a re-presented gate");
+    assert(
+      migrated.warnings.some((w) => w.includes("unrecognized active_gate_status") && w.includes("confirm-working-name")),
+      `expected a warning naming the unrecognized active_gate_status, got: ${migrated.warnings.join(" | ")}`,
+    );
+  });
+
+  harness.check("migration: a recognized terminal active_gate_status ('resolved') is dropped without a warning", () => {
+    const v1State = {
+      project: { name: "App", slug: "app" },
+      lanes: {},
+      business_operator: { active_gate_id: "confirm-working-name", active_gate_status: "resolved", active_gate_class: "scope" },
+    };
+    const migrated = migrateProjectStateV1(v1State, now);
+    assert(!migrated.warnings.some((w) => w.includes("unrecognized active_gate_status")), "a known terminal status should not be reported as unrecognized");
   });
 
   harness.check("grant levels cover exactly review-first, run-with-guardrails, full", () => {

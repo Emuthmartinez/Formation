@@ -6,7 +6,7 @@ import { isMainModule, parseArgs } from "../lib/cli.js";
 import { runReducer } from "./reducer-cli.js";
 import { resolveWorkspacePaths } from "./run.js";
 import { validateControl, validateGrants, validateWaivers } from "../schema/index.js";
-import type { StatePatch, PatchOp, PatchPath } from "../reducer/patch.js";
+import type { StatePatch, PatchOp, PatchPath, PatchPrecondition } from "../reducer/patch.js";
 import type {
   BusinessUnit,
   ControlFile,
@@ -301,12 +301,11 @@ function main(): number {
     // once a before exists.
     ops.push(
       { op: "set", path: ["businessSlug"], value: answers.businessSlug },
-      { op: "set", path: ["stateHash"], value: "" },
       { op: "set", path: ["killSwitch"], value: { engaged: false, engagedAt: "", engagedBy: "", reason: "" } },
       { op: "set", path: ["grants"], value: candidateGrants },
       { op: "set", path: ["waivers"], value: candidateWaivers },
     );
-    declaredOutputs.push(["businessSlug"], ["stateHash"], ["killSwitch"], ["grants"], ["waivers"]);
+    declaredOutputs.push(["businessSlug"], ["killSwitch"], ["grants"], ["waivers"]);
   } else {
     if (grantsChanged) {
       ops.push({ op: "set", path: ["grants"], value: candidateGrants });
@@ -329,6 +328,15 @@ function main(): number {
     return 0;
   }
 
+  // Race guard: two onboarding runs against the same workspace must not silently clobber one
+  // another. Bootstrap asserts nothing has beaten us to creating this control doc; an update
+  // asserts the document is still exactly as we read it (optimistic concurrency on updatedAt) —
+  // either way, a racing commit that lands first makes the reducer reject this one with a named
+  // precondition failure instead of silently overwriting it.
+  const preconditions: PatchPrecondition[] = isBootstrap
+    ? [{ path: ["businessSlug"], operator: "not_exists" }]
+    : [{ path: ["updatedAt"], operator: "equals", value: existingControl!.updatedAt }];
+
   const patch: StatePatch = {
     schemaVersion: "1.0.0",
     patchId: `patch.onboard.${answers.businessSlug}.${Date.parse(now) || Date.now()}`,
@@ -336,7 +344,7 @@ function main(): number {
     reason: "Applying founder autonomy onboarding answers",
     authoredBy: "onboarding-driver",
     authoredAt: now,
-    preconditions: [],
+    preconditions,
     ops,
     declaredOutputs,
   };

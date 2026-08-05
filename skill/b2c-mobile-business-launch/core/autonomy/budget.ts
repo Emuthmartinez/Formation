@@ -89,6 +89,21 @@ export function evaluateBudget(ledger: BudgetLedgerDocument, node: CompiledRunNo
       remaining: balance.remaining,
     };
   }
+  // A NaN or non-finite estimate/remaining makes `>` false either way ("5 > NaN" and "NaN > 5"
+  // both evaluate false), which would otherwise fail this hard-stop OPEN. Fail closed instead —
+  // an unparseable amount is never treated as "within budget".
+  if (!Number.isFinite(estimate.amount) || !Number.isFinite(balance.remaining)) {
+    return {
+      ok: false,
+      reasonCode: "autonomy.budget_invalid_amount",
+      reason: `Estimate amount "${estimate.amount}" or remaining budget "${balance.remaining}" is not a finite number for unit "${unit}" period "${period}"; failing closed rather than risk a NaN comparison silently passing.`,
+      unit,
+      period,
+      estimateAmount: estimate.amount,
+      currency: estimate.currency,
+      remaining: balance.remaining,
+    };
+  }
   if (estimate.amount > balance.remaining) {
     return {
       ok: false,

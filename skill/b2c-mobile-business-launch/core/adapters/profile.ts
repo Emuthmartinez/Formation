@@ -145,14 +145,55 @@ export function buildFixedPrompt(invocation: SessionInvocation): string {
 /**
  * None of the three vendor CLIs document a native wall-clock-seconds flag (only turn/token
  * ceilings — R10's "runtime CLI's own max-turn/max-token flags" is a *different*, complementary
- * cap this file also relies on per adapter). The portable, POSIX-standard backstop is wrapping the
- * whole headless invocation in `timeout`; the scheduler installer (install-schedule.ts) is what
- * actually threads this into the generated wrapper script — this helper is the one place that
- * knows the wrapping shape, shared so the installer and any manual invocation agree.
+ * cap this file also relies on per adapter). The backstop is wrapping the whole headless
+ * invocation in `timeout` — GNU coreutils, standard on Linux, but NOT POSIX-standard and NOT
+ * present on a stock macOS install (BSD userland has no `timeout` at all). Homebrew's coreutils
+ * package installs the same binary renamed `gtimeout`, specifically to avoid clobbering any
+ * BSD tool. The scheduler installer (install-schedule.ts) is what threads this into the
+ * generated wrapper script; this helper is the one place that knows the wrapping shape, shared
+ * so the installer and any manual invocation agree.
  */
-export function wrapWithWallClock(headless: HeadlessCommand, wallClockSeconds: number): { readonly command: string; readonly args: readonly string[] } {
-  if (headless.wallClockEnforcedBy !== "external-wrapper") return { command: headless.command, args: headless.args };
-  return { command: "timeout", args: [`${Math.max(1, Math.round(wallClockSeconds))}s`, headless.command, ...headless.args] };
+export type BinaryOnPath = (command: string) => boolean;
+
+/** Real PATH probe (`<command> --version`, ENOENT means absent) — the default for production use; fixtures inject a fake instead. */
+export const defaultBinaryOnPath: BinaryOnPath = (command) => {
+  const result = nodeSpawnSync(command, ["--version"], { stdio: "ignore" });
+  return !(result.error && (result.error as NodeJS.ErrnoException).code === "ENOENT");
+};
+
+export interface WallClockWrap {
+  readonly command: string;
+  readonly args: readonly string[];
+  /** True only when the returned command is actually wrapped by a real OS-level timeout binary. */
+  readonly osLevelEnforced: boolean;
+  /**
+   * Set only when a wrapper was called for (wallClockEnforcedBy: "external-wrapper") but neither
+   * `timeout` nor `gtimeout` was found on PATH — names the gap so a caller can surface it (e.g.
+   * into a scheduled job's own log) instead of silently running unwrapped. Never set for
+   * "not-applicable" commands (inline), since no OS-level wrapper was ever expected there.
+   */
+  readonly enforcementGap?: string;
+}
+
+/**
+ * Resolves `timeout`, else `gtimeout` (coreutils on macOS), else emits the inner command with NO
+ * timeout wrapper at all — a missing optional OS-level backstop must never fail the whole
+ * invocation. core/session/run.ts's own `--wall-clock-seconds` cooperative cap (checked between
+ * dispatch batches) still applies regardless of which of these three shapes this returns; the
+ * OS-level wrapper is defense in depth on top of it, never the only cap.
+ */
+export function wrapWithWallClock(headless: HeadlessCommand, wallClockSeconds: number, binaryOnPath: BinaryOnPath = defaultBinaryOnPath): WallClockWrap {
+  if (headless.wallClockEnforcedBy !== "external-wrapper") return { command: headless.command, args: headless.args, osLevelEnforced: false };
+  const binary = binaryOnPath("timeout") ? "timeout" : binaryOnPath("gtimeout") ? "gtimeout" : undefined;
+  if (!binary) {
+    return {
+      command: headless.command,
+      args: headless.args,
+      osLevelEnforced: false,
+      enforcementGap: `Neither "timeout" nor "gtimeout" is on PATH, so this session has no OS-level wall-clock cap — only the inner --wall-clock-seconds cooperative cap applies. Install coreutils (e.g. "brew install coreutils" on macOS) to restore the OS-level backstop.`,
+    };
+  }
+  return { command: binary, args: [`${Math.max(1, Math.round(wallClockSeconds))}s`, headless.command, ...headless.args], osLevelEnforced: true };
 }
 
 // --- availability + smoke probes (module-level helpers; never invoked by fixtures) ----------

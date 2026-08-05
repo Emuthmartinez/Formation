@@ -40,9 +40,15 @@ function main(): number {
   }
   const workspace = path.resolve(args.workspace);
   const runStatePath = path.join(workspace, "run", "run-state.json");
-  const run = loadRunState(runStatePath);
-  if (!run) {
-    console.error(`ISSUE approve.no_run_state: ${runStatePath} does not exist — run a session first`);
+  // loadRunState throws (readFileSync ENOENTs, or schema validation fails) rather than ever
+  // returning a falsy value — an `if (!run)` check after a bare call is dead code that can never
+  // fire. Catch here instead, so a missing/invalid run state produces the friendly ISSUE message
+  // rather than an uncaught exception and a raw stack trace.
+  let run: RunStateDocument;
+  try {
+    run = loadRunState(runStatePath);
+  } catch (error) {
+    console.error(`ISSUE approve.no_run_state: ${runStatePath} does not exist or is not a valid run state — run a session first (${error instanceof Error ? error.message : String(error)})`);
     return 1;
   }
   if (args.list === "true") return listPending(run);

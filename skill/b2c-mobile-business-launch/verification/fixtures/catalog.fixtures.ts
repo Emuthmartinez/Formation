@@ -200,15 +200,29 @@ export function register(harness: Harness): void {
     harness.runScript("render-routing --check (clean)", "catalog/render-routing.ts", ["--check"], 0);
   });
 
-  harness.check("render: --check fails on a mutated generated file, and the file is restored after", () => {
-    const target = path.join(skillRoot, "catalog", "generated", "routing.md");
+  harness.check("render: --check fails on a mutated generated file — exercised against a scratch skill root, never the checked-in repo file", () => {
+    // The old version of this check mutated the real, checked-in catalog/generated/routing.md
+    // in place, restoring it in a `finally` — not SIGKILL-safe (a hard kill mid-test would leave
+    // the repo's own generated file corrupted). Operate on a scratch copy instead.
+    const tempSkillRoot = harness.makeTempDir("render-routing-check-drift");
+    // render-routing.ts's composeCatalog() only reads skill-version.json and package.json (for
+    // gate discovery) off `--skill-root`; every other catalog input (areas/domains/phases/lanes/
+    // references/workflows) is statically imported TS data, independent of the filesystem — so a
+    // two-file scratch root is enough for it to run standalone.
+    writeFileSync(path.join(tempSkillRoot, "package.json"), JSON.stringify({ scripts: {} }), "utf8");
+    writeFileSync(path.join(tempSkillRoot, "skill-version.json"), JSON.stringify({ version: "0.0.0-fixture" }), "utf8");
+
+    // Write mode first: populates catalog/generated/{routing.md,spine.md,catalog.json} under the
+    // scratch root with genuinely fresh, self-consistent content, so the "clean" baseline this
+    // test then mutates was never hand-constructed or copied from the real repo.
+    harness.runScript("render-routing (write, scratch root)", "catalog/render-routing.ts", ["--skill-root", tempSkillRoot], 0);
+
+    const target = path.join(tempSkillRoot, "catalog", "generated", "routing.md");
     const original = readFileSync(target, "utf8");
-    try {
-      writeFileSync(target, `${original}\n<!-- fixture-mutation -->\n`, "utf8");
-      harness.runScript("render-routing --check (mutated)", "catalog/render-routing.ts", ["--check"], 1, "catalog_render.generated_drift");
-    } finally {
-      writeFileSync(target, original, "utf8");
-    }
+    writeFileSync(target, `${original}\n<!-- fixture-mutation -->\n`, "utf8");
+    // No try/finally restore needed: this is a scratch directory the harness deletes wholesale in
+    // cleanup() — even a hard kill mid-test leaves the real checked-in file untouched.
+    harness.runScript("render-routing --check (mutated, scratch root)", "catalog/render-routing.ts", ["--skill-root", tempSkillRoot, "--check"], 1, "catalog_render.generated_drift");
   });
 
   // ---------------------------------------------------------------------

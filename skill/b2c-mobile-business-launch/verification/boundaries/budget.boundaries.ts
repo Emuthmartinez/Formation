@@ -68,4 +68,20 @@ export function register(harness: Harness): void {
     const result = evaluateBudget(ledger, node, "2026-08", { amount: 100, currency: "USD" });
     assert(result.ok, `expected an estimate exactly at the remaining balance to pass, got: ${result.reason}`);
   });
+
+  harness.check("budget: evaluateBudget fails closed on a NaN estimate amount rather than fail-open on 'NaN > remaining' being false", () => {
+    const node = makeNode({ domainId: "domain.money", actionClass: "spend" });
+    const ledger = makeLedger([makeBalance("Revenue", "2026-08", 100, "USD")]);
+    const result = evaluateBudget(ledger, node, "2026-08", { amount: NaN, currency: "USD" });
+    assert(!result.ok, "expected a NaN estimate amount to reject, not silently pass the budget hard-stop");
+    assert(result.reasonCode === "autonomy.budget_invalid_amount", `expected budget_invalid_amount, got ${result.reasonCode}`);
+  });
+
+  harness.check("budget: evaluateBudget fails closed when the ledger balance's remaining is non-finite", () => {
+    const node = makeNode({ domainId: "domain.money", actionClass: "spend" });
+    const ledger = makeLedger([{ ...makeBalance("Revenue", "2026-08", 100, "USD"), remaining: Infinity }]);
+    const result = evaluateBudget(ledger, node, "2026-08", { amount: 50, currency: "USD" });
+    assert(!result.ok, "expected a non-finite remaining balance to reject rather than silently allow spend");
+    assert(result.reasonCode === "autonomy.budget_invalid_amount", `expected budget_invalid_amount, got ${result.reasonCode}`);
+  });
 }

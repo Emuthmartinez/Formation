@@ -106,12 +106,11 @@ function controlBootstrapPatch(): Record<string, unknown> {
     "control",
     [
       { op: "set", path: ["businessSlug"], value: "app" },
-      { op: "set", path: ["stateHash"], value: "" },
       { op: "set", path: ["killSwitch"], value: { engaged: false, engagedAt: "", engagedBy: "", reason: "" } },
       { op: "set", path: ["grants"], value: {} },
       { op: "set", path: ["waivers"], value: [] },
     ],
-    [["businessSlug"], ["stateHash"], ["killSwitch"], ["grants"], ["waivers"]],
+    [["businessSlug"], ["killSwitch"], ["grants"], ["waivers"]],
   );
 }
 
