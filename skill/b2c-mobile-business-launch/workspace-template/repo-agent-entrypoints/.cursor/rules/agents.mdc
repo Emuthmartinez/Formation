@@ -1,0 +1,21 @@
+---
+description: Points every Cursor session at this business's canonical AGENTS.md and states the one Cursor-specific enforcement gap.
+alwaysApply: true
+---
+
+# Read AGENTS.md First
+
+`AGENTS.md` at the repo root is the canonical operating guide for this business. This file only
+adds what's specific to Cursor — it never restates or overrides `AGENTS.md`.
+
+## Cursor-Specific Notes
+
+- Scheduled sessions run headless (`cursor agent -p --sandbox enabled`). Cursor's sandbox gates the
+  whole workspace, not individual paths — it cannot mark `control/**` or `state/business-state.json`
+  read-only while leaving `run/`, `digests/`, and `schedule/` writable. The real protection is that
+  a scheduled session's prompt asks for exactly one thing: run `core/session/run.ts` and report its
+  output. Do not go further than that prompt asks, even if it looks safe to.
+- Cursor's structured/JSON output mode is undocumented as of this runtime's release — do not depend
+  on parsing a Cursor session's output as JSON; read it as plain text.
+- This file exists because Cursor previously had no entrypoint in this repo at all. If it looks
+  thin compared to `CLAUDE.md`, that is why — extend it here, not by duplicating `AGENTS.md`.
