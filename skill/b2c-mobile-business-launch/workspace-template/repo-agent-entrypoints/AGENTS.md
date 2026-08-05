@@ -33,8 +33,28 @@ tsx <skill-root>/core/reducer/cli.ts commit --patch <patch.json> --file <target-
 ```
 
 A direct edit to any of those five files is caught at the next session's preflight (a state-hash
-mismatch) and stops that session before it touches anything else. The reducer is not a suggestion —
-it is the only path that leaves the audit trail and out-of-band-tamper detection intact.
+mismatch) and, mid-session, at every dispatch-batch boundary — the run stops before it touches
+anything else. The reducer is not a suggestion — it is the only path that leaves the audit trail
+and out-of-band-tamper detection intact.
+
+## Autonomy Trust Boundary (deployment sets this up)
+
+The rules above are enforced in three layers, strongest last:
+
+1. **Adapter tool allowlist** — a scheduled session's `Write`/`Edit` tools are denied on the
+   `control/` paths, so the agent cannot edit an autonomy document with its file tools.
+2. **Founder-authority gate** — the reducer refuses a `control`/`grants`/`waivers` patch unless the
+   caller passes `--founder-authority`, which only the founder-initiated onboarding and approve
+   flows do. The autonomous session runner never passes it, so a stray control write from
+   autonomous work fails loudly. This defends against bugs, not a jailbroken agent that could pass
+   the flag itself.
+3. **OS write-protection (the real prevention layer — the founder/deploy step).** A scheduled
+   session still runs a shell. To make self-granting genuinely impossible, the `control/` directory
+   must be writable only by a uid the agent process does not run as: the scheduled session runs as
+   an unprivileged user with read-only access to `control/`, and the reducer commit for an
+   autonomy document runs as the founder (interactively, or via a small privileged helper the
+   scheduler invokes for founder-authorized patches). Without this OS boundary, layers 1–2 are
+   bug-defense only. Set it up before granting any autonomy above review-first.
 
 ## How A Scheduled Session Works
 
