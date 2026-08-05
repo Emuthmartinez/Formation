@@ -8,6 +8,7 @@ import { compilePlan, type CatalogInput } from "../../core/engine/compile.js";
 import { seedRunState, writeRunState } from "../../core/engine/runstate.js";
 import { internalVocabularyBlocklist } from "../../core/session/digest.js";
 import { pathToFileURL } from "node:url";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 
 /**
  * U5 session-runner fixtures: exercises core/session/run.ts as a real subprocess (mirroring
@@ -18,12 +19,7 @@ import { pathToFileURL } from "node:url";
  * transport instead.
  */
 
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
-
-const tsxBin = resolveTsxBin();
+const tsxBin = resolveTsxBin(skillRoot);
 const reducerCliPath = path.join(skillRoot, "core/reducer/cli.ts");
 const runCliPath = path.join(skillRoot, "core/session/run.ts");
 const approveCliPath = path.join(skillRoot, "core/session/approve.ts");
@@ -295,6 +291,17 @@ function singleGrowthNodeCatalog(): CatalogInput {
   };
 }
 
+/** ttlSeconds: 1 keeps the lock-liveness fixture fast — the slow-silent executor's delay is several multiples of this TTL, not real-world minutes. */
+function slowSilentCatalog(): CatalogInput {
+  return {
+    version: "catalog.session-fixture.slow-silent",
+    artifacts: [{ id: "artifact.eng-change", path: "engineering/change.log" }],
+    workflows: [
+      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true, ttlSeconds: 1 },
+    ],
+  };
+}
+
 export function register(harness: Harness): void {
   // --- scenario 1: all nodes gated exits cleanly with a parked digest, not silence -----------
 
@@ -497,6 +504,108 @@ export function register(harness: Harness): void {
     assertNoInternalVocabulary("lock-contention", text);
 
     releaseLock(lockPath, "other-session");
+  });
+
+  // --- judgment scenario: lock/attempt heartbeat liveness does not depend on the executor -----
+  // Run as a spawned driver script (same reason as the pushDigest driver below: this needs to
+  // poll a *running* child process while it executes, which the shared harness's synchronous
+  // `check` cannot do). The driver spawns run.ts itself against the --executor slow-silent stand-
+  // in (core/session/executor.ts), which sleeps well past the (deliberately tiny) TTL window and
+  // never calls context.heartbeat() — proving the session's own timer, not executor cooperation,
+  // is what keeps the lock's heartbeatAt fresh. The driver also bounds the child with a watchdog:
+  // if a lingering un-cleared timer kept the runner's event loop alive, the child would never emit
+  // its own 'exit' and the watchdog would fire, failing the test instead of hanging the suite.
+
+  harness.check("session: a slow, silent executor that never calls context.heartbeat still gets its lock/attempt heartbeat refreshed by the session's own timer, staying fresh past the TTL window, and the runner exits cleanly with no lingering handle", () => {
+    const handle = bootstrapWorkspace(harness, "slow-silent-heartbeat", slowSilentCatalog(), {
+      grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
+    });
+    const lockPath = path.join(handle.dir, "control", "session.lock");
+    const sessionId = "sess-slow-silent-1";
+    const ttlSeconds = 1;
+    const slowDelayMs = 3000;
+    const watchdogMs = slowDelayMs + 10_000;
+
+    const driverPath = path.join(harness.makeTempDir("session-heartbeat-driver"), "drive-heartbeat.mts");
+    const driverSource = `
+import { spawn } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+
+const tsxBin = ${JSON.stringify(tsxBin)};
+const runCliPath = ${JSON.stringify(runCliPath)};
+const skillRoot = ${JSON.stringify(skillRoot)};
+const workspace = ${JSON.stringify(handle.dir)};
+const briefPath = ${JSON.stringify(handle.briefPath)};
+const lockPath = ${JSON.stringify(lockPath)};
+const ttlSeconds = ${ttlSeconds};
+const slowDelayMs = ${slowDelayMs};
+const watchdogMs = ${watchdogMs};
+
+function readLockHeartbeat() {
+  if (!existsSync(lockPath)) return undefined;
+  try {
+    return JSON.parse(readFileSync(lockPath, "utf8")).heartbeatAt;
+  } catch {
+    return undefined;
+  }
+}
+
+async function main() {
+  const env = { ...process.env };
+  delete env.RESEND_API_KEY;
+  const child = spawn(tsxBin, [
+    runCliPath,
+    "--workspace", workspace,
+    "--brief", briefPath,
+    "--session", ${JSON.stringify(sessionId)},
+    "--executor", "slow-silent",
+    "--slow-delay-ms", String(slowDelayMs),
+    "--lock-ttl-seconds", String(ttlSeconds),
+    "--lock-retries", "0",
+  ], { cwd: skillRoot, env });
+
+  const seen = [];
+  const poller = setInterval(() => {
+    const hb = readLockHeartbeat();
+    if (hb && seen[seen.length - 1] !== hb) seen.push(hb);
+  }, 100);
+
+  const exitInfo = await new Promise((resolve, reject) => {
+    const watchdog = setTimeout(() => {
+      child.kill("SIGKILL");
+      reject(new Error("runner did not exit within the watchdog window (" + watchdogMs + "ms) — a lingering handle likely kept the process alive"));
+    }, watchdogMs);
+    watchdog.unref();
+    child.on("exit", (code, signal) => {
+      clearTimeout(watchdog);
+      resolve({ code, signal });
+    });
+    child.on("error", (error) => {
+      clearTimeout(watchdog);
+      reject(error);
+    });
+  });
+  clearInterval(poller);
+
+  if (exitInfo.code !== 0) throw new Error("expected exit 0, got " + exitInfo.code + " signal " + String(exitInfo.signal));
+  if (seen.length < 3) throw new Error("expected at least 3 distinct lock heartbeat refreshes during the " + slowDelayMs + "ms slow execution (TTL " + ttlSeconds + "s), saw " + seen.length + ": " + JSON.stringify(seen));
+
+  for (let i = 1; i < seen.length; i++) {
+    const gapMs = Date.parse(seen[i]) - Date.parse(seen[i - 1]);
+    const toleranceMs = ttlSeconds * 1000 + 750;
+    if (gapMs > toleranceMs) {
+      throw new Error("heartbeat gap " + gapMs + "ms between refreshes exceeded the TTL window (" + (ttlSeconds * 1000) + "ms, tolerance " + toleranceMs + "ms) — the lock would have gone stale mid-execution: " + JSON.stringify(seen));
+    }
+  }
+
+  console.log("HEARTBEAT_DRIVER_OK " + seen.length + " refreshes, clean exit, code " + exitInfo.code);
+}
+main().catch((error) => { console.error(String((error && error.stack) || error)); process.exit(1); });
+`;
+    writeFileSync(driverPath, driverSource, "utf8");
+    const result = spawnSync(tsxBin, [driverPath], { cwd: skillRoot, encoding: "utf8", timeout: watchdogMs + 15_000 });
+    const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+    assert(result.status === 0 && output.includes("HEARTBEAT_DRIVER_OK"), `heartbeat-liveness driver failed (exit ${result.status}, signal ${result.signal}):\n${output}`);
   });
 
   // --- judgment scenario: founder-vocabulary blocklist is real, not vacuous -------------------

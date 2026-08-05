@@ -22,7 +22,7 @@ import { createDopplerAuthVerifier } from "../autonomy/probes/doppler.js";
 import { createBudgetFundedVerifier } from "../autonomy/probes/budget.js";
 
 import { BriefInvalid, loadBrief, nodeInScope, type SessionBrief } from "./brief.js";
-import { createFixtureExecutor, noOpExecutor, type NodeExecutor } from "./executor.js";
+import { createFixtureExecutor, createSlowSilentExecutor, noOpExecutor, type NodeExecutor } from "./executor.js";
 import {
   formatAge,
   pushDigest,
@@ -284,7 +284,8 @@ async function main(): Promise<number> {
   mkdirSync(path.dirname(paths.runState), { recursive: true });
   const sessionId = args.session!;
   const startedAt = args.now ?? new Date().toISOString();
-  const executor: NodeExecutor = args.executor === "fixture" ? createFixtureExecutor() : noOpExecutor;
+  const executor: NodeExecutor =
+    args.executor === "fixture" ? createFixtureExecutor() : args.executor === "slow-silent" ? createSlowSilentExecutor(Number(args["slow-delay-ms"] ?? 2000)) : noOpExecutor;
   const maxConcurrency = Number(args["max-concurrency"] ?? 4);
 
   let lockAcquired = false;
@@ -325,9 +326,10 @@ async function main(): Promise<number> {
       return await finish("workspace_not_ready", {}, 1);
     }
 
+    const lockTtlSeconds = Number(args["lock-ttl-seconds"] ?? 120);
     const acquireResult: AcquireResult = acquireLock(paths.sessionLock, {
       ownerSessionId: sessionId,
-      ttlSeconds: Number(args["lock-ttl-seconds"] ?? 120),
+      ttlSeconds: lockTtlSeconds,
       retries: Number(args["lock-retries"] ?? 3),
       retryDelayMs: Number(args["lock-retry-delay-ms"] ?? 100),
       breakStale: args["break-stale-verified"] === "true",
@@ -514,16 +516,33 @@ async function main(): Promise<number> {
           }
           writeRunState(paths.runState, run);
 
-          const onHeartbeat = (): void => {
+          const refreshAttemptHeartbeat = (): void => {
             try {
               refreshHeartbeat(run, nodeId, sessionNow());
               writeRunState(paths.runState, run);
               heartbeat(paths.sessionLock, sessionId);
             } catch {
-              /* best effort: a mid-execution heartbeat refresh is an optimization, never load-bearing for this attempt's own result */
+              /* best effort: a heartbeat refresh is an optimization, never load-bearing for this attempt's own result */
             }
           };
-          const result = await executor.execute(node, { runId: run.runId, attemptId: attempt.id, workspaceDir: workspace, now: attemptTime, heartbeat: onHeartbeat });
+          // R12/R13 liveness must not depend on the executor voluntarily calling back: a
+          // slow-but-alive real executor (U6) that never calls `heartbeat` would otherwise let its
+          // own attempt/lock heartbeat go stale mid-run and risk a --break-stale-verified acquirer
+          // stealing the lock out from under it. This timer refreshes both independently of the
+          // executor for as long as execute() is in flight; the executor-supplied callback below is
+          // still honored as an extra signal, but neither one is load-bearing on its own now. The
+          // interval is a fraction of the tighter of the two TTLs in play so a refresh always lands
+          // comfortably inside the window; unref'd (never keeps this short-lived CLI's event loop
+          // alive on its own) and always cleared in `finally`, including when execute() throws.
+          const heartbeatIntervalMs = Math.max(50, (Math.min(attempt.ttlSeconds, lockTtlSeconds) * 1000) / 3);
+          const heartbeatTimer = setInterval(refreshAttemptHeartbeat, heartbeatIntervalMs);
+          heartbeatTimer.unref();
+          let result: Awaited<ReturnType<typeof executor.execute>>;
+          try {
+            result = await executor.execute(node, { runId: run.runId, attemptId: attempt.id, workspaceDir: workspace, now: attemptTime, heartbeat: refreshAttemptHeartbeat });
+          } finally {
+            clearInterval(heartbeatTimer);
+          }
           const finishedAt = sessionNow();
 
           if (result.status === "failed") {
