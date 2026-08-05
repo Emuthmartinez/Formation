@@ -95,6 +95,8 @@
     "render:launch-cockpit": "tsx skill/b2c-mobile-business-launch/tooling/render-launch-cockpit.ts",
     "render:business-control-plane-workspace": "tsx skill/b2c-mobile-business-launch/tooling/render-business-control-plane-workspace.ts",
     "render:artifact-pages": "tsx skill/b2c-mobile-business-launch/tooling/render-artifact-pages.ts",
+    "render:autonomy-console": "tsx skill/b2c-mobile-business-launch/tooling/render-autonomy-console.ts",
+    "onboard:run": "tsx skill/b2c-mobile-business-launch/core/session/onboard.ts",
     "test:validators": "tsx skill/b2c-mobile-business-launch/validation/repository/run-validator-fixtures.ts",
     "launchbench": "tsx skill/b2c-mobile-business-launch/validation/repository/run-launchbench.ts",
     "evals:behavioral": "tsx skill/b2c-mobile-business-launch/validation/repository/run-behavioral-evals.ts",

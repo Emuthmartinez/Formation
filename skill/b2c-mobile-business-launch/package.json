@@ -67,6 +67,8 @@
     "render:launch-cockpit": "tsx tooling/render-launch-cockpit.ts",
     "render:business-control-plane-workspace": "tsx tooling/render-business-control-plane-workspace.ts",
     "render:artifact-pages": "tsx tooling/render-artifact-pages.ts",
+    "render:autonomy-console": "tsx tooling/render-autonomy-console.ts",
+    "onboard:run": "tsx core/session/onboard.ts",
     "test:validators": "tsx validation/repository/run-validator-fixtures.ts",
     "test:fixtures": "tsx verification/fixtures/run.ts",
     "test:boundaries": "tsx verification/boundaries/run.ts",

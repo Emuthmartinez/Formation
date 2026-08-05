@@ -4051,6 +4051,13 @@
       "audit": "manual"
     },
     {
+      "id": "gate.render-autonomy-console",
+      "command": "render:autonomy-console",
+      "scriptPath": "tooling/render-autonomy-console.ts",
+      "ownerDomainId": "domain.process",
+      "audit": "manual"
+    },
+    {
       "id": "gate.render-business-control-plane-workspace",
       "command": "render:business-control-plane-workspace",
       "scriptPath": "tooling/render-business-control-plane-workspace.ts",
