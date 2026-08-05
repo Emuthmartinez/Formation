@@ -94,7 +94,9 @@
     "lint:format": "prettier --check \"runtime/graph/**/*.ts\" \"validation/business/**/*.ts\" \"validation/repository/**/*.ts\" \"tooling/**/*.ts\"",
     "format": "prettier --write \"runtime/graph/**/*.ts\" \"validation/business/**/*.ts\" \"validation/repository/**/*.ts\" \"tooling/**/*.ts\"",
     "check:skill-graph": "tsx validation/repository/check-skill-graph.ts",
-    "render:skill-graph": "tsx tooling/render-skill-graph.ts"
+    "render:skill-graph": "tsx tooling/render-skill-graph.ts",
+    "check:catalog": "tsx validation/repository/check-catalog.ts",
+    "catalog:render-routing": "tsx catalog/render-routing.ts"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.115.0",

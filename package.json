@@ -122,7 +122,9 @@
     "lint:format": "prettier --check \"skill/b2c-mobile-business-launch/runtime/graph/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/business/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/repository/**/*.ts\" \"skill/b2c-mobile-business-launch/tooling/**/*.ts\"",
     "format": "prettier --write \"skill/b2c-mobile-business-launch/runtime/graph/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/business/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/repository/**/*.ts\" \"skill/b2c-mobile-business-launch/tooling/**/*.ts\"",
     "check:skill-graph": "tsx skill/b2c-mobile-business-launch/validation/repository/check-skill-graph.ts",
-    "render:skill-graph": "tsx skill/b2c-mobile-business-launch/tooling/render-skill-graph.ts"
+    "render:skill-graph": "tsx skill/b2c-mobile-business-launch/tooling/render-skill-graph.ts",
+    "check:catalog": "tsx skill/b2c-mobile-business-launch/validation/repository/check-catalog.ts",
+    "catalog:render-routing": "tsx skill/b2c-mobile-business-launch/catalog/render-routing.ts"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.115.0",
