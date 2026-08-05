@@ -16,6 +16,7 @@
     "validation/repository/**/*.ts",
     "tooling/**/*.ts",
     "core/**/*.ts",
-    "verification/**/*.ts"
+    "verification/**/*.ts",
+    "catalog/**/*.ts"
   ]
 }

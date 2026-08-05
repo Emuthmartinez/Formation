@@ -70,6 +70,7 @@ const knownValidators = new Set([
   "check-reference-size",
   "check-skill-graph",
   "render-skill-graph",
+  "check-catalog",
   "check-email",
   "check-analytics-catalog",
   "run-behavioral-evals",

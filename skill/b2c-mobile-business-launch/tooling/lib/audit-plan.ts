@@ -99,6 +99,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:archetype-starter", kind: "script", args: ["--skill-root", S] },
     { id: "check:reference-size", kind: "script", args: ["--skill-root", S] },
     { id: "check:skill-graph", kind: "script", args: ["--skill-root", S] },
+    { id: "check:catalog", kind: "script", args: ["--skill-root", S] },
     { id: "check:gates-layout", kind: "script", args: ["--skill-root", S] },
     { id: "check:agent-evals", kind: "script" },
     { id: "launchbench", kind: "script", serial: true },
