@@ -11,6 +11,8 @@
     "noUnusedLocals": true
   },
   "include": [
+    "skill/b2c-mobile-business-launch/core/**/*.ts",
+    "skill/b2c-mobile-business-launch/verification/**/*.ts",
     "skill/b2c-mobile-business-launch/runtime/graph/**/*.ts",
     "skill/b2c-mobile-business-launch/validation/business/**/*.ts",
     "skill/b2c-mobile-business-launch/validation/repository/**/*.ts",
