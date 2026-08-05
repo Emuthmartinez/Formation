@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "skillVersion": "0.69.0",
+  "skillVersion": "0.69.1",
   "counts": {
     "areas": 6,
     "domains": 15,
@@ -204,7 +204,7 @@
       "initialReferenceCount": 2,
       "initialBytes": 17970,
       "availableReferenceCount": 4,
-      "availableBytes": 136889,
+      "availableBytes": 137286,
       "selectionRule": "Load the index or primary entry first, then disclose only references whose load condition matches the current work.",
       "entryPaths": [
         "validation/repository/launchbench-evals.md",

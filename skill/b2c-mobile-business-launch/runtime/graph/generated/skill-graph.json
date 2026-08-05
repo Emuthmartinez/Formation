@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "skillVersion": "0.69.0",
+  "skillVersion": "0.69.1",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1593,7 +1593,7 @@
       "domainId": "domain.machine",
       "title": "Source Registry",
       "loadWhen": "Registering a new external source the skill depends on",
-      "bytes": 115099,
+      "bytes": 115496,
       "index": false
     }
   ],
