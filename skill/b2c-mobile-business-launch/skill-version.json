@@ -1,9 +1,10 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.68.0",
+  "version": "0.68.1",
   "updatedAt": "2026-08-04",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
+    "Fixes the runtime check:business-control-plane-workspace script, which omitted --business-state and therefore rendered the studio seed projection from launch-instance state, failing the audit only when it ran from the installed runtime.",
     "Certifies the final canonical source layout with the complete audit, all LaunchBench fixtures, and package dry run.",
     "Consolidates runtime, knowledge, workspace, validation, tooling, studio, and starter sources under the final canonical layout.",
     "Reorganizes the reusable business workspace into capability-owned state, strategy, product, design, engineering, analytics, growth, revenue, store, trust, and operations directories.",
