@@ -69,6 +69,7 @@
     "render:artifact-pages": "tsx tooling/render-artifact-pages.ts",
     "test:validators": "tsx validation/repository/run-validator-fixtures.ts",
     "test:fixtures": "tsx verification/fixtures/run.ts",
+    "test:boundaries": "tsx verification/boundaries/run.ts",
     "launchbench": "tsx validation/repository/run-launchbench.ts",
     "evals:behavioral": "tsx validation/repository/run-behavioral-evals.ts",
     "audit": "tsx tooling/run-audit.ts",

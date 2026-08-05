@@ -47,6 +47,11 @@ export interface CatalogArtifact {
  * Deliberately small: readiness, conflict, and staleness logic must be provable against a
  * fixture catalog before the real 57-workflow catalog exists.
  */
+export interface CostEstimate {
+  amount: number;
+  currency: string;
+}
+
 export interface CatalogWorkflowNode {
   id: CatalogWorkflowId;
   title: string;
@@ -63,6 +68,8 @@ export interface CatalogWorkflowNode {
   maxAttempts?: number;
   ttlSeconds?: number;
   tokenBudget?: number;
+  /** Declared cost estimate (R10, KTD5): the autonomy engine (U4) requires this on any actionClass "spend" node before it will dispatch — absent here, it parks fail-closed rather than compiling it away. */
+  costEstimate?: CostEstimate;
 }
 
 export interface CatalogInput {
@@ -90,6 +97,7 @@ export interface CompiledRunNode {
   maxAttempts: number;
   ttlSeconds: number;
   tokenBudget: number;
+  costEstimate?: CostEstimate;
 }
 
 export interface CompiledPlan {
@@ -170,6 +178,7 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
       maxAttempts: workflow.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
       ttlSeconds: workflow.ttlSeconds ?? DEFAULT_TTL_SECONDS,
       tokenBudget: workflow.tokenBudget ?? (judgment ? JUDGMENT_TOKEN_BUDGET : DEFAULT_TOKEN_BUDGET),
+      costEstimate: workflow.costEstimate,
     };
   });
 
