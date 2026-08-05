@@ -1,4 +1,5 @@
-import { closeSync, fsyncSync, openSync, readFileSync, renameSync, writeSync } from "node:fs";
+import { closeSync, fsyncSync, mkdirSync, openSync, readFileSync, renameSync, writeSync } from "node:fs";
+import { dirname } from "node:path";
 import { randomUUID } from "node:crypto";
 import { validateCheckpoint, validateRunState } from "../schema/index.js";
 import type { ArtifactBindingV2, AttemptRecordV2, BusinessStateV2, CheckpointDocument, RunNodeStateV2, RunStateDocument, Status } from "../schema/types.js";
@@ -253,6 +254,7 @@ export function isWallClockExceeded(run: RunStateDocument, now: string): boolean
 
 /** Write to `<path>.tmp`, fsync, then rename — a reader never observes a partial write. */
 function writeAtomic(targetPath: string, contents: string): void {
+  mkdirSync(dirname(targetPath), { recursive: true });
   const tmpPath = `${targetPath}.tmp`;
   const fd = openSync(tmpPath, "w");
   try {
