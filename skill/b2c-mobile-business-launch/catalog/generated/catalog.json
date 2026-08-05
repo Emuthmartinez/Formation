@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.68.1",
+  "skillVersion": "0.69.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -3558,7 +3558,7 @@
       "command": "catalog:render-routing",
       "scriptPath": "catalog/render-routing.ts",
       "ownerDomainId": "domain.process",
-      "audit": "manual"
+      "audit": "required"
     },
     {
       "id": "gate.check-11-star",

@@ -1,9 +1,12 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.68.1",
-  "updatedAt": "2026-08-04",
+  "version": "0.69.0",
+  "updatedAt": "2026-08-05",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
+    "Adds the v2 verification harness: a single-source audit plan extension (catalog:render-routing, test:fixtures, test:boundaries, test:parity) exposed at verification/audit-plan.ts and verification/run-audit.ts, plus a cross-runtime parity suite proving claude/codex/cursor/inline sessions reach identical node status, approvals, and parked reasons from the same fixture catalog.",
+    "Implements the doppler_auth and budget_funded prerequisite probes as real, injectable PrerequisiteVerifiers (core/autonomy/probes/doppler.ts, core/autonomy/probes/budget.ts) and wires both into the production session runner, replacing the budget_funded gap where no verifier previously existed.",
+    "Ports the mechanically-checkable LaunchBench scenarios (continuity-from-durable-state, entrypoint installation proof, secret routing, parallel overlap) into executable fixture checks against the new core under verification/scenarios/, registered via verification/fixtures/scenarios.fixtures.ts.",
     "Fixes the runtime check:business-control-plane-workspace script, which omitted --business-state and therefore rendered the studio seed projection from launch-instance state, failing the audit only when it ran from the installed runtime.",
     "Certifies the final canonical source layout with the complete audit, all LaunchBench fixtures, and package dry run.",
     "Consolidates runtime, knowledge, workspace, validation, tooling, studio, and starter sources under the final canonical layout.",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "skillVersion": "0.68.1",
+  "skillVersion": "0.69.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -5073,6 +5073,14 @@
       "launchbenchValidator": "render-business-control-plane-workspace"
     },
     {
+      "id": "gate.check-catalog",
+      "command": "check:catalog",
+      "scriptPath": "validation/repository/check-catalog.ts",
+      "ownerDomainId": "domain.machine",
+      "audit": "required",
+      "launchbenchValidator": "check-catalog"
+    },
+    {
       "id": "gate.check-change-cascade",
       "command": "check:change-cascade",
       "scriptPath": "validation/business/process/check-change-cascade.ts",
@@ -5483,6 +5491,13 @@
       "id": "gate.render-artifact-pages",
       "command": "render:artifact-pages",
       "scriptPath": "tooling/render-artifact-pages.ts",
+      "ownerDomainId": "domain.process",
+      "audit": "manual"
+    },
+    {
+      "id": "gate.render-autonomy-console",
+      "command": "render:autonomy-console",
+      "scriptPath": "tooling/render-autonomy-console.ts",
       "ownerDomainId": "domain.process",
       "audit": "manual"
     },

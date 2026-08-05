@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.68.1",
+  "version": "0.69.0",
   "description": "An agent skill that takes a consumer mobile app from idea to a launched business, with deterministic validators between every claim and done.",
   "keywords": [
     "claude-code",
@@ -98,6 +98,9 @@
     "render:autonomy-console": "tsx skill/b2c-mobile-business-launch/tooling/render-autonomy-console.ts",
     "onboard:run": "tsx skill/b2c-mobile-business-launch/core/session/onboard.ts",
     "test:validators": "tsx skill/b2c-mobile-business-launch/validation/repository/run-validator-fixtures.ts",
+    "test:fixtures": "tsx skill/b2c-mobile-business-launch/verification/fixtures/run.ts",
+    "test:boundaries": "tsx skill/b2c-mobile-business-launch/verification/boundaries/run.ts",
+    "test:parity": "tsx skill/b2c-mobile-business-launch/verification/parity/run.ts",
     "launchbench": "tsx skill/b2c-mobile-business-launch/validation/repository/run-launchbench.ts",
     "evals:behavioral": "tsx skill/b2c-mobile-business-launch/validation/repository/run-behavioral-evals.ts",
     "audit:ci": "tsx skill/b2c-mobile-business-launch/tooling/run-audit.ts --ci",

@@ -100,9 +100,17 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:reference-size", kind: "script", args: ["--skill-root", S] },
     { id: "check:skill-graph", kind: "script", args: ["--skill-root", S] },
     { id: "check:catalog", kind: "script", args: ["--skill-root", S] },
+    { id: "catalog:render-routing", kind: "script", args: ["--check", "--skill-root", S] },
     { id: "check:gates-layout", kind: "script", args: ["--skill-root", S] },
     { id: "check:agent-evals", kind: "script" },
     { id: "launchbench", kind: "script", serial: true },
+    // U9's v2 verification surface (fixture suites, capability-boundary suites, cross-runtime
+    // parity suite). Each spawns many of its own tsx subprocesses internally, so — like
+    // launchbench above — it runs serially rather than sharing the concurrency pool with the
+    // lighter single-shot validators.
+    { id: "test:fixtures", kind: "script", serial: true },
+    { id: "test:boundaries", kind: "script", serial: true },
+    { id: "test:parity", kind: "script", serial: true },
     { id: "validate:launch-state", kind: "script", args: stateArgs },
     { id: "validate:design-state", kind: "script", args: rootArgs },
     { id: "check:design-room", kind: "script", args: rootArgs },

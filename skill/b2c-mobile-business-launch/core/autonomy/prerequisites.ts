@@ -1,5 +1,3 @@
-import { existsSync, statSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import type { Grant, PrerequisiteProbe, PrerequisiteStatus } from "../schema/types.js";
 
 /**
@@ -90,35 +88,7 @@ export function evaluatePrerequisites(cache: SessionPrerequisiteCache, grant: Gr
   return { ok: true, reasonCode: "autonomy.prerequisites_verified", reason: "", lapsedProbeIds: [] };
 }
 
-export interface DopplerProbeOptions {
-  readonly project: string;
-  readonly config: string;
-  readonly secretsMdPath: string;
-  readonly maxSecretsMdAgeDays?: number;
-}
-
-/**
- * Real doppler_auth probe (R7): `doppler me` (authenticated as the expected account) + a scoped
- * `doppler run -- printenv` smoke (the service token can actually inject secrets for this
- * project/config) + SECRETS.md freshness (knowledge/operations/secrets-management.md's recorded
- * recipe). Never call this from a fixture/boundary test — inject a fake PrerequisiteVerifier
- * instead; this function exists for evaluator.ts's production factory only.
- */
-export function createDopplerAuthVerifier(options: DopplerProbeOptions): PrerequisiteVerifier {
-  return (probe, now) => {
-    if (probe.kind !== "doppler_auth") return { status: "unverified", detail: `probe kind "${probe.kind}" is not doppler_auth` };
-
-    const me = spawnSync("doppler", ["me"], { encoding: "utf8" });
-    if (me.status !== 0) return { status: "lapsed", detail: `doppler me failed (exit ${String(me.status)}): ${(me.stderr || me.stdout || "").trim()}` };
-
-    const smoke = spawnSync("doppler", ["run", "--project", options.project, "--config", options.config, "--", "printenv"], { encoding: "utf8" });
-    if (smoke.status !== 0) return { status: "lapsed", detail: `doppler run smoke failed (exit ${String(smoke.status)}) for ${options.project}/${options.config}` };
-
-    if (!existsSync(options.secretsMdPath)) return { status: "lapsed", detail: `${options.secretsMdPath} is missing` };
-    const maxAgeDays = options.maxSecretsMdAgeDays ?? 30;
-    const ageDays = (Date.parse(now) - statSync(options.secretsMdPath).mtime.getTime()) / 86_400_000;
-    if (ageDays > maxAgeDays) return { status: "lapsed", detail: `${options.secretsMdPath} is ${Math.round(ageDays)} day(s) stale (max ${maxAgeDays})` };
-
-    return { status: "verified", verifiedAt: now, detail: "doppler me + scoped doppler run smoke + SECRETS.md freshness all passed" };
-  };
-}
+// The concrete doppler_auth probe (createDopplerAuthVerifier) and the budget_funded probe
+// (createBudgetFundedVerifier) live in ./probes/doppler.js and ./probes/budget.js (U9) — this
+// module stays the generic evaluation machinery (cache, TTL-once-per-session, composite dispatch)
+// that every probe kind shares, never a specific probe's own mechanism.

@@ -16,7 +16,9 @@ import { beginAttempt, detectOrphans, isWallClockExceeded, loadRunState, reconci
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
 import { createDispatchHooks } from "../autonomy/killswitch.js";
 import { domainBusinessUnit } from "../autonomy/budget.js";
-import { createCompositeVerifier, createDopplerAuthVerifier } from "../autonomy/prerequisites.js";
+import { createCompositeVerifier } from "../autonomy/prerequisites.js";
+import { createDopplerAuthVerifier } from "../autonomy/probes/doppler.js";
+import { createBudgetFundedVerifier } from "../autonomy/probes/budget.js";
 
 import { BriefInvalid, loadBrief, nodeInScope, type SessionBrief } from "./brief.js";
 import { createFixtureExecutor, noOpExecutor, type NodeExecutor } from "./executor.js";
@@ -359,12 +361,16 @@ async function main(): Promise<number> {
     const catalog = loadCatalogFile(paths.catalog);
     const plan = compilePlan(catalog, startedAt);
 
-    const dopplerVerifier = createCompositeVerifier({
+    // budget_funded closes over this ledger snapshot (captured once, before dispatch starts) —
+    // see core/autonomy/probes/budget.ts's doc comment on why a snapshot is the correct semantics
+    // for a "verified at most once per session" prerequisite, not a live-reread.
+    const prerequisiteVerifier = createCompositeVerifier({
       doppler_auth: createDopplerAuthVerifier({
         project: args["doppler-project"] ?? control.businessSlug,
         config: args["doppler-config"] ?? "production",
         secretsMdPath: args["secrets-md"] ?? path.join(workspace, "SECRETS.md"),
       }),
+      budget_funded: createBudgetFundedVerifier(ledger),
     });
 
     const wallClockCapSeconds = Number(args["wall-clock-seconds"] ?? brief.wallClockSecondsOverride ?? 1800);
@@ -396,7 +402,7 @@ async function main(): Promise<number> {
     writeRunState(paths.runState, run);
 
     const dispatchHooks: DispatchHooks = createDispatchHooks({ loadControl: () => loadControlFile(paths.control)!, lockPath: paths.sessionLock, ownerSessionId: sessionId });
-    const evaluator = createAutonomyEvaluator({ grants: control.grants, waivers: control.waivers, ledger, prerequisiteVerifier: dopplerVerifier, runId: run.runId });
+    const evaluator = createAutonomyEvaluator({ grants: control.grants, waivers: control.waivers, ledger, prerequisiteVerifier, runId: run.runId });
     const decisions = new Map<string, AutonomyDecisionDetail>();
     const captured = withCapture(evaluator, decisions);
 

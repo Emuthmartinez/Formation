@@ -196,8 +196,13 @@ const AUTH_FAILURE_PATTERN = /(unauthoriz\w*|not\s+logged\s*in|\blogin\b|invalid
  * smoke test: a missing binary is `not_found` (ENOENT), a nonzero exit whose output names an auth
  * problem is `auth_failed` (never a silent no-op — this is the "auth-expiry simulation" fixture
  * scenario), anything else nonzero is a named `error`, and exit 0 is success.
+ *
+ * `runtime` is a bare label used only to build the `not_found` detail string ("<label> CLI is not
+ * on PATH") — widened from `RuntimeId` to `string` so non-runtime spawn-and-classify callers (e.g.
+ * core/autonomy/probes/doppler.ts's `doppler me` / `doppler run` probe, U9) can reuse this same
+ * classification logic rather than re-deriving the ENOENT/auth-pattern rules a second time.
  */
-export function classifySpawnResult(runtime: RuntimeId, result: SpawnResult, successStatus: "available" | "ok"): { status: AvailabilityStatus | "ok"; detail: string; version?: string } {
+export function classifySpawnResult(runtime: string, result: SpawnResult, successStatus: "available" | "ok"): { status: AvailabilityStatus | "ok"; detail: string; version?: string } {
   if (result.error) {
     if (result.error.code === "ENOENT") return { status: "not_found", detail: `"${runtime}" CLI is not on PATH.` };
     return { status: "error", detail: result.error.message };
