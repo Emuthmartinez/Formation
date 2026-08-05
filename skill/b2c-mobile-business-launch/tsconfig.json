@@ -14,6 +14,8 @@
     "runtime/graph/**/*.ts",
     "validation/business/**/*.ts",
     "validation/repository/**/*.ts",
-    "tooling/**/*.ts"
+    "tooling/**/*.ts",
+    "core/**/*.ts",
+    "verification/**/*.ts"
   ]
 }
