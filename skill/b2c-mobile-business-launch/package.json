@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.68.0",
+  "version": "0.68.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -48,7 +48,7 @@
     "validate:design-state": "tsx validation/business/design/validate-state.ts",
     "check:design-room": "tsx validation/business/design/check-design-room-contract.ts",
     "check:control-plane": "tsx validation/business/operations/check-control-plane-contract.ts",
-    "check:business-control-plane-workspace": "tsx tooling/render-business-control-plane-workspace.ts --root workspace/business --out ../../studio/seed/workspace.generated.json --check",
+    "check:business-control-plane-workspace": "tsx tooling/render-business-control-plane-workspace.ts --root workspace/business --business-state ../../studio/seed/business.json --out ../../studio/seed/workspace.generated.json --check",
     "check:provider-proof": "tsx validation/business/data/check-live-provider-proof.ts",
     "check:artifact-templates": "tsx validation/business/process/check-artifact-templates.ts",
     "check:app-archetype": "tsx validation/business/product/check-app-archetype.ts",
