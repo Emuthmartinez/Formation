@@ -24,6 +24,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/**
+ * v2's schema requires a `phase_` prefix; some live v1 states carry free-form phase labels
+ * (e.g. a mid-rebuild marker). Prefix rather than reject — the label's meaning is the
+ * founder's, and losing it in migration would be silent data loss.
+ */
+function normalizePhase(value: string): string {
+  return value.startsWith("phase_") ? value : `phase_${value}`;
+}
+
 function asString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
 }
@@ -143,7 +152,7 @@ export function migrateProjectStateV1(v1State: unknown, now: string = new Date()
       name: asString(projectSource.name, "App Name"),
       slug: asString(projectSource.slug, "app-name"),
       owner: asString(projectSource.owner),
-      phase: asString(projectSource.phase, "phase_0_orient"),
+      phase: normalizePhase(asString(projectSource.phase, "phase_0_orient")),
       launchScope: migrateLaunchScope(projectSource),
       kickoffDate: asString(projectSource.kickoff_date),
       platforms: migratePlatforms(projectSource),
