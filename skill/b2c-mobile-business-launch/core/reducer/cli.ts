@@ -108,6 +108,21 @@ function runCommit(args: Record<string, string>): number {
     return 1;
   }
 
+  // Founder-authority gate for autonomy-defining documents. A patch to control/grants/waivers
+  // changes what the autonomous session is allowed to do, so it must not originate from the
+  // session's own autonomous work — only from a founder-initiated flow (onboarding, the approve
+  // CLI) that passes --founder-authority. This is a bug-defense and honesty layer, NOT a defense
+  // against a jailbroken Bash-capable agent that could pass the flag itself: the actual prevention
+  // is OS write-protection of the control/ directory from the session's uid (see the workspace
+  // AGENTS.md "Autonomy trust boundary" section). The session runner never passes this flag and
+  // never targets these documents, so a stray control write from autonomous work fails loudly here.
+  const AUTONOMY_DOCS: readonly PatchTargetDoc[] = ["control", "grants", "waivers"];
+  if (AUTONOMY_DOCS.includes(patch.targetDoc) && args["founder-authority"] !== "true") {
+    console.log(`ISSUE reducer.founder_authority_required: a patch to "${patch.targetDoc}" changes autonomy grants and requires --founder-authority (founder-initiated flow only)`);
+    console.log("RESULT: rejected");
+    return 1;
+  }
+
   const session = args.session ?? patch.authoredBy;
   const lockPath = args.lock ?? `${filePath}.lock`;
   const acquireResult: AcquireResult = acquireLock(lockPath, {

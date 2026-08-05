@@ -342,7 +342,9 @@ function main(): number {
   };
 
   const result = runReducer(
-    ["commit", "--file", paths.control, "--manifest", paths.manifest, "--audit", paths.audit, "--session", "onboarding-driver", "--now", now],
+    // Onboarding is a founder-initiated flow, so it carries --founder-authority: the reducer
+    // requires it for control/grants/waivers patches (autonomous session work never does).
+    ["commit", "--file", paths.control, "--manifest", paths.manifest, "--audit", paths.audit, "--session", "onboarding-driver", "--now", now, "--founder-authority", "true"],
     JSON.stringify(patch),
   );
   process.stdout.write(result.output);

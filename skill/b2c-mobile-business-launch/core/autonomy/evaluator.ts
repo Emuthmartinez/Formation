@@ -36,7 +36,13 @@ export interface AutonomyEvaluatorV2 extends AutonomyEvaluator {
 export interface AutonomyDeps {
   readonly grants: GrantsMap;
   readonly waivers: readonly Waiver[];
-  readonly ledger: BudgetLedgerDocument;
+  /**
+   * The budget ledger. Pass a **function** when the ledger is reloaded during a session (the
+   * scheduled-session runner reloads it after every spend commit): the evaluator resolves it at
+   * each `evaluate()` call so budget checks see the true remaining balance, not a session-start
+   * snapshot. A plain document is accepted for tests and single-shot callers where it never changes.
+   */
+  readonly ledger: BudgetLedgerDocument | (() => BudgetLedgerDocument);
   readonly prerequisiteVerifier: PrerequisiteVerifier;
   /** Needed only for waivers whose budgetPeriod is "per_run". */
   readonly runId?: string;
@@ -53,6 +59,7 @@ export interface AutonomyDeps {
  */
 export function createAutonomyEvaluator(deps: AutonomyDeps): AutonomyEvaluatorV2 {
   const now = deps.now ?? (() => new Date().toISOString());
+  const readLedger = typeof deps.ledger === "function" ? deps.ledger : () => deps.ledger as BudgetLedgerDocument;
   const prerequisiteCache = new SessionPrerequisiteCache(deps.prerequisiteVerifier, now);
 
   return {
@@ -71,7 +78,7 @@ export function createAutonomyEvaluator(deps: AutonomyDeps): AutonomyEvaluatorV2
       }
 
       const nowIso = now();
-      const waiverResult = evaluateProtectedAction(node, deps.waivers, deps.ledger, nowIso, deps.runId);
+      const waiverResult = evaluateProtectedAction(node, deps.waivers, readLedger(), nowIso, deps.runId);
       if (!waiverResult.ok) {
         return { ...base, allowed: false, parkReason: waiverResult.reason, reasonCode: waiverResult.reasonCode, grantLevel: grant.level, waiverId: waiverResult.waiver?.id };
       }

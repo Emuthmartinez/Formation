@@ -85,7 +85,9 @@ interface WorkspaceHandle {
 function commit(handle: WorkspaceHandle, targetFile: string, patch: Record<string, unknown>): CliResult {
   const patchPath = path.join(handle.dir, `${patch.patchId as string}.json`);
   writeJson(patchPath, patch);
-  const result = runReducer(["commit", "--patch", patchPath, "--file", targetFile, "--manifest", handle.manifestPath, "--audit", handle.auditPath, "--session", "session-fixture-setup"]);
+  // Workspace bootstrap stands in for the founder-initiated onboarding flow, so it carries
+  // --founder-authority (the reducer requires it for control/grants/waivers patches).
+  const result = runReducer(["commit", "--patch", patchPath, "--file", targetFile, "--manifest", handle.manifestPath, "--audit", handle.auditPath, "--session", "session-fixture-setup", "--founder-authority", "true"]);
   assert(result.code === 0, `workspace bootstrap commit failed: ${result.output}`);
   return result;
 }

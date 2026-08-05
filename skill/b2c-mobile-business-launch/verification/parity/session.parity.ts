@@ -105,7 +105,7 @@ interface WorkspaceHandle {
 function commit(dir: string, handle: WorkspaceHandle, targetFile: string, patch: Record<string, unknown>): void {
   const patchPath = path.join(dir, `${patch.patchId as string}.json`);
   writeJson(patchPath, patch);
-  const result = runReducer(["commit", "--patch", patchPath, "--file", targetFile, "--manifest", handle.manifestPath, "--audit", handle.auditPath, "--session", "parity-fixture-setup"]);
+  const result = runReducer(["commit", "--patch", patchPath, "--file", targetFile, "--manifest", handle.manifestPath, "--audit", handle.auditPath, "--session", "parity-fixture-setup", "--founder-authority", "true"]);
   assert(result.code === 0, `workspace bootstrap commit failed: ${result.output}`);
 }
 

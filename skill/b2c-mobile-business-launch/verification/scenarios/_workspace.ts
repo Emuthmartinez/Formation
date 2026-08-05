@@ -87,7 +87,7 @@ export interface BootstrapOptions {
 function commit(handle: ScenarioWorkspace, targetFile: string, patch: Record<string, unknown>): void {
   const patchPath = path.join(handle.dir, `${patch.patchId as string}.json`);
   writeJson(patchPath, patch);
-  const result = runReducer(["commit", "--patch", patchPath, "--file", targetFile, "--manifest", handle.manifestPath, "--audit", handle.auditPath, "--session", "scenario-fixture-setup"]);
+  const result = runReducer(["commit", "--patch", patchPath, "--file", targetFile, "--manifest", handle.manifestPath, "--audit", handle.auditPath, "--session", "scenario-fixture-setup", "--founder-authority", "true"]);
   assert(result.code === 0, `scenario workspace bootstrap commit failed: ${result.output}`);
 }
 

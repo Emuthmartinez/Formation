@@ -87,6 +87,21 @@ function nextPatchId(sessionId: string): string {
   return `patch.${sessionId}.${patchSequence}`;
 }
 
+/**
+ * The session's tamper backstop (R14): the reducer's manifest preflight confirms none of the five
+ * reducer-owned documents changed outside the reducer since the last commit, and verify-audit
+ * confirms the hash-chained audit log's chain is intact. Run at session start AND at every batch
+ * boundary so a same-session out-of-band edit is caught before the next batch, not next session.
+ * Note: this DETECTS out-of-band mutation; it does not by itself PREVENT a Bash-capable session
+ * from invoking the reducer — see the reducer's founder-authority gate and the OS-permission
+ * requirement in the workspace AGENTS.md for the prevention layers.
+ */
+function tamperCheckPasses(paths: WorkspacePaths): boolean {
+  if (runReducer(["preflight", "--manifest", paths.manifest]).code !== 0) return false;
+  if (existsSync(paths.audit) && runReducer(["verify-audit", "--audit", paths.audit]).code !== 0) return false;
+  return true;
+}
+
 interface GateOutcome {
   readonly allPassed: boolean;
   readonly evidence: string[];
@@ -324,8 +339,7 @@ async function main(): Promise<number> {
     }
     lockAcquired = true;
 
-    const preflight = runReducer(["preflight", "--manifest", paths.manifest]);
-    if (preflight.code !== 0) {
+    if (!tamperCheckPasses(paths)) {
       anomalies.push({ message: "This business's saved files don't match what I last recorded — something changed them outside of my normal process. I stopped before making anything worse." });
       return await finish("preflight_failed", {}, 3);
     }
@@ -392,7 +406,10 @@ async function main(): Promise<number> {
     writeRunState(paths.runState, run);
 
     const dispatchHooks: DispatchHooks = createDispatchHooks({ loadControl: () => loadControlFile(paths.control)!, lockPath: paths.sessionLock, ownerSessionId: sessionId });
-    const evaluator = createAutonomyEvaluator({ grants: control.grants, waivers: control.waivers, ledger, prerequisiteVerifier, runId: run.runId });
+    // Pass the ledger as a live accessor, not a snapshot: `ledger` is reassigned after every
+    // spend commit below, and the evaluator must see the true remaining balance so independently
+    // scoped spend nodes cannot each pass the hard-stop while collectively overrunning the budget (R10).
+    const evaluator = createAutonomyEvaluator({ grants: control.grants, waivers: control.waivers, ledger: () => ledger, prerequisiteVerifier, runId: run.runId });
     const decisions = new Map<string, AutonomyDecisionDetail>();
     const captured = withCapture(evaluator, decisions);
 
@@ -417,6 +434,14 @@ async function main(): Promise<number> {
       }
       if (boundary.halt) {
         haltReason = boundary.reason;
+        break;
+      }
+      // Re-run the tamper check at every batch boundary, not only at session start: a same-session
+      // out-of-band edit to control/state/ledger (e.g. re-disabling a kill switch, self-granting)
+      // or a forged audit entry is caught before the next batch dispatches, not next session (R14).
+      if (!tamperCheckPasses(paths)) {
+        anomalies.push({ message: "Partway through, this business's saved files stopped matching what I recorded — something changed them outside my normal process. I stopped rather than continue on top of it." });
+        haltReason = "kill_switch";
         break;
       }
       heartbeat(paths.sessionLock, sessionId);

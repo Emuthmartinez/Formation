@@ -99,6 +99,8 @@ function commit(handle: WorkspaceHandle, targetFile: string, patch: Record<strin
     handle.auditPath,
     "--session",
     "console-fixture-setup",
+    "--founder-authority",
+    "true",
   ]);
   assert(result.code === 0, `workspace bootstrap commit failed: ${result.output}`);
   return result;

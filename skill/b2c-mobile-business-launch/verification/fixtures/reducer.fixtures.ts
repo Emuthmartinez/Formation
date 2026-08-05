@@ -150,7 +150,10 @@ function sampleLedgerEntry(id: string): Record<string, unknown> {
 function commit(dir: string, target: ScenarioPaths, patch: Record<string, unknown>, extraArgs: string[] = []): CliResult {
   const patchPath = path.join(dir, `${patch.patchId as string}.json`);
   writeJson(patchPath, patch);
-  return runCli(["commit", "--patch", patchPath, "--file", target.file, "--manifest", target.manifest, "--audit", target.audit, "--session", "session-fixture", ...extraArgs]);
+  // These scenarios exercise reducer mechanics as a founder-authorized caller, so autonomy-doc
+  // patches (control/grants/waivers) carry --founder-authority. The gate's own rejection path is
+  // covered by a dedicated fixture below.
+  return runCli(["commit", "--patch", patchPath, "--file", target.file, "--manifest", target.manifest, "--audit", target.audit, "--session", "session-fixture", "--founder-authority", "true", ...extraArgs]);
 }
 
 export function register(harness: Harness): void {
@@ -164,6 +167,24 @@ export function register(harness: Harness): void {
     assert(noOutputs.some((issue) => issue.code === "patch.empty_declared_outputs"), `expected patch.empty_declared_outputs, got: ${JSON.stringify(noOutputs)}`);
     const badTarget = validatePatchShape({ ...base, targetDoc: "not-a-real-target" } as unknown as StatePatch);
     assert(badTarget.some((issue) => issue.code === "patch.unknown_target"), `expected patch.unknown_target, got: ${JSON.stringify(badTarget)}`);
+  });
+
+  // --- founder-authority gate: autonomy-doc patches require --founder-authority ------------
+
+  harness.check("reducer: a control/grants/waivers patch without --founder-authority is rejected (autonomous work cannot self-grant)", () => {
+    const p = scenarioPaths(harness, "founder-authority-gate", "control.json");
+    const patch = controlBootstrapPatch();
+    const patchPath = path.join(p.dir, `${patch.patchId as string}.json`);
+    writeJson(patchPath, patch);
+    // Directly via runCli WITHOUT --founder-authority — the shape the autonomous session runner
+    // would produce if it ever tried to write an autonomy document.
+    const denied = runCli(["commit", "--patch", patchPath, "--file", p.file, "--manifest", p.manifest, "--audit", p.audit, "--session", "autonomous-session"]);
+    assert(denied.code === 1, `expected exit 1 (rejected), got ${denied.code}: ${denied.output}`);
+    assert(denied.output.includes("reducer.founder_authority_required"), `expected the founder-authority issue code, got: ${denied.output}`);
+    assert(!existsSync(p.file), "control.json must not be written when the authority gate rejects the patch");
+    // The same patch WITH the flag (as onboarding/approve pass it) commits normally.
+    const allowed = commit(p.dir, p, controlBootstrapPatch());
+    assert(allowed.code === 0, `expected the founder-authorized commit to succeed, got ${allowed.code}: ${allowed.output}`);
   });
 
   // --- required scenario 1: a patch omitting a declared output rejects, fail-closed --------
