@@ -3,7 +3,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Ajv2020, type AnySchema, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 
-export * from "./types.js";
 import type { BudgetLedgerDocument, BusinessStateV2, CheckpointDocument, ControlFile, GrantsDocument, RunStateDocument, Waiver, WaiversDocument } from "./types.js";
 
 const schemaDir = path.dirname(fileURLToPath(import.meta.url));

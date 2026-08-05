@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
-import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { isMainModule, parseArgs } from "../lib/cli.js";
+import { runReducer } from "./reducer-cli.js";
 import { resolveWorkspacePaths } from "./run.js";
 import { validateControl, validateGrants, validateWaivers } from "../schema/index.js";
 import type { StatePatch, PatchOp, PatchPath } from "../reducer/patch.js";
@@ -214,27 +214,7 @@ export function buildWaivers(existing: readonly Waiver[], inputs: readonly Onboa
   return [...existing, ...added];
 }
 
-// --- workspace plumbing (mirrors core/session/run.ts's reducer-subprocess convention) -----------
-
-function skillRoot(): string {
-  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-}
-
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot(), "node_modules/.bin/tsx"), path.resolve(skillRoot(), "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
-
-interface ReducerResult {
-  readonly code: number;
-  readonly output: string;
-}
-
-function runReducer(args: string[], input?: string): ReducerResult {
-  const cliPath = path.join(skillRoot(), "core/reducer/cli.ts");
-  const result = spawnSync(resolveTsxBin(), [cliPath, ...args], { cwd: skillRoot(), encoding: "utf8", input });
-  return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
-}
+// --- workspace plumbing (shared with core/session/run.ts via ./reducer-cli.js) -------------------
 
 function tryLoadJson(filePath: string): unknown | undefined {
   if (!existsSync(filePath)) return undefined;
@@ -250,24 +230,6 @@ function loadExistingControl(controlPath: string): ControlFile | undefined {
   if (raw === undefined) return undefined;
   const result = validateControl(raw);
   return result.valid ? result.value : undefined;
-}
-
-function parseArgs(argv: string[]): Record<string, string> {
-  const args: Record<string, string> = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const token = argv[index];
-    if (token?.startsWith("--")) {
-      const key = token.slice(2);
-      const next = argv[index + 1];
-      if (next !== undefined && !next.startsWith("--")) {
-        args[key] = next;
-        index += 1;
-      } else {
-        args[key] = "true";
-      }
-    }
-  }
-  return args;
 }
 
 function deepEqual(a: unknown, b: unknown): boolean {
@@ -387,10 +349,6 @@ function main(): number {
   return result.code;
 }
 
-function isMainModule(): boolean {
-  return process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
-}
-
-if (isMainModule()) {
+if (isMainModule(import.meta.url)) {
   process.exitCode = main();
 }

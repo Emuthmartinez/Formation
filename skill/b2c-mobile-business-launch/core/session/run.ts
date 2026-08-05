@@ -3,8 +3,9 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { isMainModule, parseArgs } from "../lib/cli.js";
+import { runReducer, skillRoot, type ReducerResult } from "./reducer-cli.js";
 import { acquireLock, heartbeat, releaseLock, type AcquireResult } from "../reducer/lock.js";
 import type { PatchOp, PatchPath, StatePatch } from "../reducer/patch.js";
 import { validateBudgetLedger, validateBusinessState, validateControl } from "../schema/index.js";
@@ -78,44 +79,6 @@ export function resolveWorkspacePaths(root: string, catalogOverride?: string): W
     runState: path.join(root, "run", "run-state.json"),
     checkpoint: path.join(root, "run", "checkpoint.json"),
   };
-}
-
-function parseArgs(argv: string[]): Record<string, string> {
-  const args: Record<string, string> = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const token = argv[index];
-    if (token?.startsWith("--")) {
-      const key = token.slice(2);
-      const next = argv[index + 1];
-      if (next !== undefined && !next.startsWith("--")) {
-        args[key] = next;
-        index += 1;
-      } else {
-        args[key] = "true";
-      }
-    }
-  }
-  return args;
-}
-
-function skillRoot(): string {
-  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-}
-
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot(), "node_modules/.bin/tsx"), path.resolve(skillRoot(), "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
-
-interface ReducerResult {
-  readonly code: number;
-  readonly output: string;
-}
-
-function runReducer(args: string[], input?: string): ReducerResult {
-  const cliPath = path.join(skillRoot(), "core/reducer/cli.ts");
-  const result = spawnSync(resolveTsxBin(), [cliPath, ...args], { cwd: skillRoot(), encoding: "utf8", input });
-  return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
 }
 
 let patchSequence = 0;
@@ -620,11 +583,7 @@ async function main(): Promise<number> {
   }
 }
 
-function isMainModule(): boolean {
-  return process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
-}
-
-if (isMainModule()) {
+if (isMainModule(import.meta.url)) {
   main()
     .then((code) => {
       process.exitCode = code;

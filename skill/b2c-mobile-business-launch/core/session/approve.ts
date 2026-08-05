@@ -16,29 +16,11 @@
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { isMainModule, parseArgs } from "../lib/cli.js";
 import { appendAuditEntry } from "../reducer/audit.js";
 import { compilePlan, type CatalogInput, type RunNodeId } from "../engine/compile.js";
 import { loadRunState, writeRunState } from "../engine/runstate.js";
 import type { RunStateDocument } from "../schema/types.js";
-
-function parseArgs(argv: string[]): Record<string, string> {
-  const args: Record<string, string> = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const token = argv[index];
-    if (token?.startsWith("--")) {
-      const key = token.slice(2);
-      const next = argv[index + 1];
-      if (next !== undefined && !next.startsWith("--")) {
-        args[key] = next;
-        index += 1;
-      } else {
-        args[key] = "true";
-      }
-    }
-  }
-  return args;
-}
 
 function listPending(run: RunStateDocument): number {
   const pending = Object.entries(run.approvals).filter(([, status]) => status === "pending");
@@ -109,10 +91,6 @@ function main(): number {
   return 0;
 }
 
-function isMainModule(): boolean {
-  return process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
-}
-
-if (isMainModule()) {
+if (isMainModule(import.meta.url)) {
   process.exitCode = main();
 }

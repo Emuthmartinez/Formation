@@ -36,7 +36,3 @@ export function composeCatalog(skillRoot: string): Catalog {
     gates: discoverGates(skillRoot, domains),
   };
 }
-
-export * from "./business-units.js";
-export * from "./ids.js";
-export * from "./types.js";

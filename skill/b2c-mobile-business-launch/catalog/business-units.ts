@@ -3,11 +3,9 @@ import { businessUnitDomains, grantableDomainIds, type BusinessUnit, type Granta
 /**
  * Business-unit copy mapping (KTD3). Single source: core/schema/types.ts's
  * businessUnitDomains is the one place this many-to-one grouping is defined — catalog/
- * re-exports it and derives the reverse lookup rather than maintaining a second copy that
- * could silently diverge (see the duplicated-helpers-have-already-diverged lesson).
+ * derives the reverse lookup from it rather than maintaining a second copy that could
+ * silently diverge (see the duplicated-helpers-have-already-diverged lesson).
  */
-export { businessUnitDomains };
-export type { BusinessUnit };
 
 /** Reverse of businessUnitDomains: every grantable domain maps to exactly one business unit. */
 export const domainBusinessUnit: Record<GrantableDomainId, BusinessUnit> = Object.fromEntries(

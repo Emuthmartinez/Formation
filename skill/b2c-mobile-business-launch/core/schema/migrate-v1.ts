@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { isMainModule, parseArgs } from "../lib/cli.js";
 import { parse as parseYaml } from "yaml";
 import { laneKeys, mapV1LaneStatus, type BusinessStateV2, type ControlFile, type Lane, type PendingFounderGate, type ProtectedCategory, type Status, type V1LaneStatus } from "./types.js";
 
@@ -186,29 +186,7 @@ export function migrateProjectStateV1(v1State: unknown, now: string = new Date()
   return { businessState, control, warnings };
 }
 
-function isMainModule(): boolean {
-  return process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
-}
-
-function parseArgs(argv: string[]): Record<string, string> {
-  const args: Record<string, string> = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const token = argv[index];
-    if (token?.startsWith("--")) {
-      const key = token.slice(2);
-      const next = argv[index + 1];
-      if (next && !next.startsWith("--")) {
-        args[key] = next;
-        index += 1;
-      } else {
-        args[key] = "true";
-      }
-    }
-  }
-  return args;
-}
-
-if (isMainModule()) {
+if (isMainModule(import.meta.url)) {
   const args = parseArgs(process.argv.slice(2));
   const statePath = args.state ?? "workspace/business/state/PROJECT_STATE.yaml";
   const outState = args["out-state"] ?? statePath.replace(/\.ya?ml$/i, ".v2.json");

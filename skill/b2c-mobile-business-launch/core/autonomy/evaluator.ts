@@ -5,9 +5,6 @@ import { evaluateGrantCeiling } from "./grants.js";
 import { SessionPrerequisiteCache, evaluatePrerequisites, type PrerequisiteVerifier } from "./prerequisites.js";
 import { evaluateProtectedAction } from "./waivers.js";
 
-export type { DispatchHooksDeps } from "./killswitch.js";
-export { createDispatchHooks } from "./killswitch.js";
-
 /**
  * Structured decision (KTD5, U4 -> U5 handoff): the session runner (U5) turns this into
  * ledger/audit patches — this module only ever produces decisions and evidence payloads, never

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { isMainModule, parseArgs } from "../lib/cli.js";
 import { appendAuditEntry, verifyAuditChain } from "./audit.js";
 import { acquireLock, releaseLock, type AcquireResult } from "./lock.js";
 import {
@@ -48,24 +48,6 @@ interface ManifestEntry {
 interface ReducerManifest {
   schemaVersion: "1.0.0";
   entries: Record<string, ManifestEntry>;
-}
-
-function parseArgs(argv: string[]): Record<string, string> {
-  const args: Record<string, string> = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const token = argv[index];
-    if (token?.startsWith("--")) {
-      const key = token.slice(2);
-      const next = argv[index + 1];
-      if (next !== undefined && !next.startsWith("--")) {
-        args[key] = next;
-        index += 1;
-      } else {
-        args[key] = "true";
-      }
-    }
-  }
-  return args;
 }
 
 function readPatchInput(patchArg: string | undefined): string {
@@ -349,10 +331,6 @@ function main(): number {
   }
 }
 
-function isMainModule(): boolean {
-  return process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
-}
-
-if (isMainModule()) {
+if (isMainModule(import.meta.url)) {
   process.exitCode = main();
 }
