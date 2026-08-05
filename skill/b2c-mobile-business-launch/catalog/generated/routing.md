@@ -5,20 +5,20 @@ Generated from catalog/domains.ts. Edit the catalog, not this file.
 
 | Area of the business | Route here when | Load |
 | --- | --- | --- |
-| Running the launch | starting or auditing a launch: phases, coverage, artifact contracts, traceability, provider proof, or propagating a change across surfaces | [`knowledge/process/README.md`](knowledge/process/README.md) |
-| Driving the work | resuming a session, durable state, how much to decide alone, subagents, dynamic workflows, engineering routing | [`knowledge/orchestration/README.md`](knowledge/orchestration/README.md) |
-| Running the business | founder access and accounts, credentials and secrets, paid-tool decisions, authenticated actions, lifecycle email, and life after launch | [`knowledge/operations/README.md`](knowledge/operations/README.md) |
-| Market research | before the spec hardens: category economics, competitors, review mining, social language, and which storefronts and locales are worth shipping | [`knowledge/research/README.md`](knowledge/research/README.md) |
-| What you're building | scope, the core loop, V1 versus later, the copy-proof test, and shipped app archetypes | [`knowledge/product/README.md`](knowledge/product/README.md) |
-| How the app feels | the standout moment, onboarding and activation, engagement mechanics and their ethics limits, push lifecycle, and work targeting better-than-expected | [`knowledge/experience/README.md`](knowledge/experience/README.md) |
-| Look and feel | brand, visual system, design tokens, motion, premium in-app craft, UX patterns, screen specs, rendered design state, and generated visual assets | [`knowledge/design/README.md`](knowledge/design/README.md) |
-| Every word a user reads | conversion copy, every in-app string, brand voice, and the writing-quality bar for anything a human reads | [`knowledge/words/README.md`](knowledge/words/README.md) |
-| Building the app | architecture, backend and data contract, engineering orchestration, device and simulator proof, and agent roles handed to future sessions | [`knowledge/engineering/README.md`](knowledge/engineering/README.md) |
-| App Store and Google Play | metadata, ASO, keywords, screenshots, listing packets, privacy answers, locale choices, console walkthroughs, signing, uploads, release and rejection handling | [`knowledge/store/README.md`](knowledge/store/README.md) |
-| Pricing and getting paid | RevenueCat, Stripe, store products, paywalls, subscriptions, entitlements, webhooks, taxes, restore purchases, and purchase proof | [`knowledge/money/README.md`](knowledge/money/README.md) |
-| Marketing and growth | paid acquisition, viral and referral loops, launch narrative, creators, scheduled social, landing and funnel pages, and search visibility | [`knowledge/growth/README.md`](knowledge/growth/README.md) |
-| Analytics and tracking | before anything names an event: the event catalog, attribution, dashboards, funnels, flags, experiments, and replay | [`knowledge/data/README.md`](knowledge/data/README.md) |
-| Privacy, security, and legal | threat modeling, platform hardening, scans, privacy policy and terms, account and data deletion, and store privacy disclosures | [`knowledge/trust/README.md`](knowledge/trust/README.md) |
+| Running the launch | starting or auditing a launch: phases, coverage, artifact contracts, traceability, provider proof, or propagating a change across surfaces | [`knowledge/process/README.md`](../../knowledge/process/README.md) |
+| Driving the work | resuming a session, durable state, how much to decide alone, subagents, dynamic workflows, engineering routing | [`knowledge/orchestration/README.md`](../../knowledge/orchestration/README.md) |
+| Running the business | founder access and accounts, credentials and secrets, paid-tool decisions, authenticated actions, lifecycle email, and life after launch | [`knowledge/operations/README.md`](../../knowledge/operations/README.md) |
+| Market research | before the spec hardens: category economics, competitors, review mining, social language, and which storefronts and locales are worth shipping | [`knowledge/research/README.md`](../../knowledge/research/README.md) |
+| What you're building | scope, the core loop, V1 versus later, the copy-proof test, and shipped app archetypes | [`knowledge/product/README.md`](../../knowledge/product/README.md) |
+| How the app feels | the standout moment, onboarding and activation, engagement mechanics and their ethics limits, push lifecycle, and work targeting better-than-expected | [`knowledge/experience/README.md`](../../knowledge/experience/README.md) |
+| Look and feel | brand, visual system, design tokens, motion, premium in-app craft, UX patterns, screen specs, rendered design state, and generated visual assets | [`knowledge/design/README.md`](../../knowledge/design/README.md) |
+| Every word a user reads | conversion copy, every in-app string, brand voice, and the writing-quality bar for anything a human reads | [`knowledge/words/README.md`](../../knowledge/words/README.md) |
+| Building the app | architecture, backend and data contract, engineering orchestration, device and simulator proof, and agent roles handed to future sessions | [`knowledge/engineering/README.md`](../../knowledge/engineering/README.md) |
+| App Store and Google Play | metadata, ASO, keywords, screenshots, listing packets, privacy answers, locale choices, console walkthroughs, signing, uploads, release and rejection handling | [`knowledge/store/README.md`](../../knowledge/store/README.md) |
+| Pricing and getting paid | RevenueCat, Stripe, store products, paywalls, subscriptions, entitlements, webhooks, taxes, restore purchases, and purchase proof | [`knowledge/money/README.md`](../../knowledge/money/README.md) |
+| Marketing and growth | paid acquisition, viral and referral loops, launch narrative, creators, scheduled social, landing and funnel pages, and search visibility | [`knowledge/growth/README.md`](../../knowledge/growth/README.md) |
+| Analytics and tracking | before anything names an event: the event catalog, attribution, dashboards, funnels, flags, experiments, and replay | [`knowledge/data/README.md`](../../knowledge/data/README.md) |
+| Privacy, security, and legal | threat modeling, platform hardening, scans, privacy policy and terms, account and data deletion, and store privacy disclosures | [`knowledge/trust/README.md`](../../knowledge/trust/README.md) |
 
 <!-- catalog-generated:end domain-routing -->
 

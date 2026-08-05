@@ -26,7 +26,7 @@ export function renderDomainRouting(catalog: Catalog): string {
   const rows = catalog.domains
     .filter((domain) => domain.slug !== "machine")
     .sort((a, b) => a.order - b.order)
-    .map((domain) => `| ${domain.routeLabel} | ${domain.routeWhen} | [\`${domain.indexPath ?? ""}\`](${domain.indexPath ?? ""}) |`)
+    .map((domain) => `| ${domain.routeLabel} | ${domain.routeWhen} | [\`${domain.indexPath ?? ""}\`](../../${domain.indexPath ?? ""}) |`)
     .join("\n");
   return [
     generatedStart("domain-routing"),
