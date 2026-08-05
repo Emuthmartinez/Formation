@@ -16,7 +16,7 @@ Category/storefront strategy grounded in store data (not internal language) and 
 
 ## Differentiation And Moat
 
-Why a user who knows the incumbent switches, held to `product-moat.md`'s tests. The archetype positioning answers are transcribed here verbatim — a wedge that lives only in a chat is invisible to every gate. `check:product-spec` fails a done product lane without a real incumbent row and a named moat class.
+Why a user who knows the incumbent switches, held to `product-moat.md`'s tests. The archetype positioning answers are transcribed here verbatim — a wedge that lives only in a chat is invisible to every gate. A done product lane needs a real incumbent row and a named moat class recorded here.
 
 | Incumbent (top by revenue) | What it does well | The beat moment (where we win) | What stops a week-one copy |
 | --- | --- | --- | --- |

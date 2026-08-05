@@ -348,7 +348,7 @@ Acceptance:
 
 ## `state/LAUNCH_TRACE.md`
 
-Validator: `npm run check:launch-trace -- --root . --state state/PROJECT_STATE.yaml` enforces the structural floor (Decision Trace with TRACE-<n> IDs, Rejected Decisions, Founder-Only Decisions, Blockers, Verification, strategy/RESEARCH.md/product/SPEC.md links; no placeholders when the traceability lane is done).
+Structural floor: Decision Trace with TRACE-<n> IDs, Rejected Decisions, Founder-Only Decisions, Blockers, Verification, strategy/RESEARCH.md/product/SPEC.md links; no placeholders when the traceability lane is done.
 
 Use for any multi-artifact launch so the chain from research to implementation does not drift.
 
@@ -389,7 +389,7 @@ Acceptance:
 - The product doc has a `11-Star Experience` section or pointer to this artifact.
 - The visual board can be opened by the founder before implementation.
 - The V1 slice is narrow enough to build but strong enough to shape design, ad creative, screenshots, onboarding, and technical contracts.
-- `npm run check:11-star -- --root .` passes or leaves an active failure card.
+- No structural gap is left silent — an active failure card records any known miss.
 
 ## `engineering/TECH_SPEC.md`
 
@@ -513,7 +513,7 @@ Acceptance:
 
 ## `product/SPEC.md`
 
-Validator: `npm run check:product-spec -- --root . --state state/PROJECT_STATE.yaml` enforces the structural floor (Promise, 11-Star Experience, Category And Competitors, Differentiation And Moat, Core Product Loop, V1 Scalable Slice, Monetization Posture, Metrics, Acceptance Contract, Risks And Open Questions; at done, no placeholders plus a real incumbent row, a named moat class, and the one-week-copy test answer).
+Structural floor: Promise, 11-Star Experience, Category And Competitors, Differentiation And Moat, Core Product Loop, V1 Scalable Slice, Monetization Posture, Metrics, Acceptance Contract, Risks And Open Questions; at done, no placeholders plus a real incumbent row, a named moat class, and the one-week-copy test answer.
 
 Must include:
 - one-line promise
@@ -1063,7 +1063,7 @@ Acceptance:
 
 ## `trust/PRIVACY.md`
 
-Validator: `npm run check:privacy-terms -- --root . --state state/PROJECT_STATE.yaml` enforces the structural floor for trust/PRIVACY.md and trust/TERMS.md (effective dates, contacts, Data Inventory, Retention And Deletion, App Store Disclosure Mapping, subscriptions/refunds, disclaimers, governing law; no placeholders when privacy_legal is done). Founder/legal approval remains the final gate.
+Structural floor for trust/PRIVACY.md and trust/TERMS.md: effective dates, contacts, Data Inventory, Retention And Deletion, App Store Disclosure Mapping, subscriptions/refunds, disclaimers, governing law; no placeholders when privacy_legal is done. Founder/legal approval remains the final gate.
 
 Use as the source draft for privacy policy, privacy choices, account deletion, and app-store privacy disclosures. Also generate publishable pages from it when the launch has a public site.
 

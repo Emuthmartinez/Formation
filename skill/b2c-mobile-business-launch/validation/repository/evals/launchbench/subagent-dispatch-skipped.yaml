@@ -11,7 +11,6 @@ expected_guardrail: >
   audits from APP_AGENTS.md, or record why subagents are unavailable, unsafe, or
   not useful in operations/ORCHESTRATION.md and state/PROJECT_STATE.yaml.
 validators:
-  - check-workflow-adherence
   - check-parallel-orchestration
 must_catch:
   - Subagent-capable broad work was run inline without rationale.

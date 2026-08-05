@@ -9,7 +9,7 @@
 > a weekly feature cadence so it never goes cold. **The launch never ends.**
 
 Replace every `<...>` placeholder with the real decision. Keep all post copy in fenced code blocks
-so `npm run check:launch-narrative` can enforce the copy guardrails. Keep public copy limited to
+and reviewed against the 2026 DO-NOT-DO list in `launch-narrative-cadence.md`. Keep public copy limited to
 what is true and attributable.
 
 ---

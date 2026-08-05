@@ -2,9 +2,8 @@
  * app-copy-rules.ts — the machine-readable form of knowledge/words/conversion-copy.md
  * §Banned In App Copy, plus the product/copy/COPY_DECK.md table reader.
  *
- * The rule lists are PARSED OUT OF THE REFERENCE rather than duplicated here, the
- * same contract check-no-slop holds with no-slop-writing.md: the reference is the
- * single source of truth and this module is a reader for it. Only mechanically
+ * The rule lists are PARSED OUT OF THE REFERENCE rather than duplicated here: the
+ * reference is the single source of truth and this module is a reader for it. Only mechanically
  * checkable rules live here — banned internal vocabulary, placeholder shapes, and
  * identifier shapes. The judgment rules (tone, warmth, reading level) stay advisory
  * in the reference; regexing taste flattens brand voice.

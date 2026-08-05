@@ -48,7 +48,7 @@ In v1.2, grading is an **explicitly routed, separately invoked pass** — not ju
 #### Workflow
 
 1. **Builder session** writes final PNGs to `screenshots/final/` and records `builder: { agent, session_id }` in the ledger header.
-2. After final PNGs are written, the **BLOCKING settings.json hook** fires. It prints the exact `npx tsx tooling/grade-screenshots.ts` command and exits non-zero — the agent cannot continue without acknowledging the routing requirement.
+2. After final PNGs are written, the builder session stops and hands off — it must not run the grading pass itself. There is no hook to enforce this; `check:store-screenshots` catches a skipped or same-session grading pass after the fact by rejecting a ledger whose `builder.session_id` equals `grader.session_id`.
 3. **A separate grader session** (different `session_id`) is spawned. It runs:
    ```bash
    npx tsx tooling/grade-screenshots.ts --root . --state state/PROJECT_STATE.yaml

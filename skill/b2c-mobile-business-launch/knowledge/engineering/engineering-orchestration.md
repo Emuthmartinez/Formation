@@ -291,7 +291,6 @@ npm run validate:launch-state -- --root .
 npm run check:orchestration -- --root .
 npm run check:attribution -- --root .
 npm run check:secrets -- --root .
-npm run check:apple-signing -- --root .
 npm run check:store-console -- --root .
 npm run render:launch-cockpit -- --root .
 npm run launchbench

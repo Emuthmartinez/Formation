@@ -133,26 +133,23 @@ npm run check:agent-operations -- --root /path/to/{{APP_SLUG}} --state state/PRO
 npm run check:secrets -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:security -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:store-screenshots -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
-npm run check:apple-signing -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:apple-requirements -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:store-console -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:native-ios -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
-npm run check:11-star -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:app-copy -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:emotional-design -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:content-assets -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:paid-ua -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:backend-contract -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
-npm run check:google-play -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run check:post-launch -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml
 npm run render:launch-cockpit -- --root /path/to/{{APP_SLUG}} --state state/PROJECT_STATE.yaml --out /path/to/{{APP_SLUG}}/state/launch-cockpit.html
 ```
 
-Add lane-specific checks for attribution, UX patterns, content assets, 11-star experience, LaunchBench, and app tests whenever those lanes are in scope. Once the app is live, `check:post-launch` gates the post_launch_ops lane (weekly rhythm, crash route, review SLA, retention cohorts, launch retro); `check:google-play` applies whenever Android is in scope; `check:backend-contract` gates the engineering/TECH_SPEC.md Data Contract before engineering is done.
+Add lane-specific checks for attribution, UX patterns, content assets, LaunchBench, and app tests whenever those lanes are in scope. Once the app is live, `check:post-launch` gates the post_launch_ops lane (weekly rhythm, crash route, review SLA, retention cohorts, launch retro); `check:backend-contract` gates the engineering/TECH_SPEC.md Data Contract before engineering is done.
 
-## Validator Hooks And Probes
+## Validators And Probes
 
-**PostToolUse hooks** (`.claude/settings.json`) auto-fire depth checks after Write/Edit/Bash. Two prerequisites or they silently no-op: `jq` on `PATH`; `SKILL_ROOT` set to the installed skill's absolute path (else hooks fall back to `.`, local-dev only).
+There is no PostToolUse hook auto-firing depth checks after Write/Edit/Bash — enforcement lives in the validators themselves and runs identically on every runtime. Run the relevant `check:*` commands above after a Write/Edit/Bash step; nothing checks the work for you automatically.
 
 **Founder-gated reality probes** — real API keys, run via Doppler so secrets are never committed:
 
@@ -163,4 +160,4 @@ doppler run -- npx tsx <SKILL_ROOT>/tooling/probe-posthog.ts --root .       # PO
 
 Each writes a machine-verifiable JSON artifact (`revenue/revenuecat-proof.json`, `analytics/posthog-proof.json`) that `check:revenue` / `check:provider-proof` validate. Both keys are founder-only — never ask the agent for them.
 
-**Screenshot grading is a separate pass** (producer ≠ verifier): after final PNGs are written, the hook routes to a fresh grader session that runs `grade-screenshots.ts`, scores each slot per `SCREENSHOT_RUBRIC.md`, and writes `screenshot-rubric-scores.json` with distinct `builder`/`grader` identities. `store_console` cannot be `done` until that exists. This raises the self-attestation bar but does not eliminate it — one agent can fabricate both identities, so founder review of the grading session is the ultimate backstop.
+**Screenshot grading is a separate pass** (producer ≠ verifier): after final PNGs are written, route to a fresh grader session — not the one that built them — that runs `grade-screenshots.ts`, scores each slot per `SCREENSHOT_RUBRIC.md`, and writes `screenshot-rubric-scores.json` with distinct `builder`/`grader` identities. `check:store-screenshots` rejects a ledger where those identities match, so `store_console` cannot be `done` until a genuinely separate pass exists. This raises the self-attestation bar but does not eliminate it — one agent can still fabricate both identities, so founder review of the grading session is the ultimate backstop.

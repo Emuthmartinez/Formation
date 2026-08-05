@@ -14,23 +14,27 @@ This repository maintains the `b2c-mobile-business-launch` skill. These instruct
 
 | Layer | Owns | Must not own |
 | --- | --- | --- |
-| `runtime/` | graph identities, contracts, compilation, scheduling, run state, adapters | business policy prose or mutable launch state |
+| `core/` | the executed runtime — typed schemas, the engine (compile/frontier/dispatch/run state), the single-writer reducer, the autonomy evaluator, the scheduled-session runner, and runtime adapters | business policy prose or mutable launch state |
+| `catalog/` | the definition graph as data — domains, lanes, workflows, gates, references with load-when conditions — and the routing renderer | run state or business policy prose |
 | `knowledge/` | bounded reasoning guidance and official-source-backed doctrine | scheduling or generated business artifacts |
-| `workspace/` | reusable launch artifacts copied into app repositories | skill execution topology |
+| `content/` | founder-facing conversation content (onboarding) rendered by the session, in founder vocabulary | execution topology or generated artifacts |
+| `workspace/` and `workspace-template/` | reusable launch artifacts copied into app repositories, and the v2 workspace/entrypoint templates | skill execution topology |
 | `validation/` | launch gates, repository checks, fixtures, and LaunchBench | orchestration policy |
-| `tooling/` | renderers, probes, hooks, migrations, and runners | untestable durable policy |
+| `verification/` | the greenfield core's own proof — schema/engine/reducer fixtures, the capability-boundary suite, cross-runtime parity, scenario ports, and the audit runner | business-artifact grading (that is `validation/`'s job) |
+| `tooling/` | renderers, probes, migrations, and runners | untestable durable policy |
 | `studio/` | maintainer visual app, seed state, and generated visual outputs | launch-instance canonical state |
 | `starters/` | runnable product-archetype foundations | alternate orchestration systems |
 
-Dependencies point from runtime orchestration into bounded knowledge and workspace artifacts, then into deterministic validation. Filesystem proximity never creates an execution edge.
+Dependencies point from the core runtime into the catalog and bounded knowledge/content, then into deterministic validation and verification. Filesystem proximity never creates an execution edge.
 
 ## Authored and generated boundaries
 
-- Edit runtime graph definitions, not `runtime/graph/generated/`.
+- Edit catalog definitions (`catalog/*.ts`), not `catalog/generated/`.
 - Edit authored Markdown, JSON, or source components, not generated HTML.
 - Every generated file needs an owning renderer and a freshness check.
-- Stable graph IDs survive path moves. Paths are bindings, not identity.
+- Stable catalog IDs survive path moves. Paths are bindings, not identity.
 - App state belongs in `workspace/business/state/`; studio seed state belongs in `studio/seed/`.
+- Only the reducer CLI (`core/reducer/cli.ts`) writes reducer-owned business documents; the engine owns run-state/checkpoint files. Nothing else writes durable state.
 
 ## Change contract
 

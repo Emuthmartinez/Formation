@@ -53,7 +53,7 @@ The wedge lives in `product/SPEC.md`'s **Differentiation And Moat** section, not
 - the named moat class (§2) and the concrete build plan for it
 - the one-week-copy test answer in writing
 
-`check:product-spec` fails a done product lane without a real incumbent row and a named moat class — a positioning chat that never lands in the spec is the artifact-less wedge the 2026-07-26 audit found on real launches. The section feeds `state/LAUNCH_TRACE.md`, the 11-star ladder's magical-moment choice, and the Go/Pivot/Kill evidence row.
+A done product lane needs a real incumbent row and a named moat class recorded here — a positioning chat that never lands in the spec is the artifact-less wedge the 2026-07-26 audit found on real launches. The section feeds `state/LAUNCH_TRACE.md`, the 11-star ladder's magical-moment choice, and the Go/Pivot/Kill evidence row.
 
 ## 6. Anti-Patterns
 

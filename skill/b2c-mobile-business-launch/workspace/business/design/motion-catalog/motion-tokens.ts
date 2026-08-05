@@ -2,7 +2,7 @@
 //
 // The motion canon replayed in Remotion, for token-true previews, App Store
 // preview loops, and brand reels of the same choreography the SwiftUI
-// exemplars ship. Source of truth: design-system/tokens.json (motion block)
+// exemplars ship. Source of truth: studio/generated/system/tokens.json (motion block)
 // and business/design/system/PremiumCraft.swift (preset bounces).
 //
 // SwiftUI's Animation.spring(duration:bounce:) has a documented physical

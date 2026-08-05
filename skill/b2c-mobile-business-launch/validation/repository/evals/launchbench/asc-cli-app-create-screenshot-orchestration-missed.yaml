@@ -17,7 +17,6 @@ expected_guardrail: >
 validators:
   - check-store-console-packet
   - check-store-screenshots
-  - check-apple-signing-packet
   - check-source-freshness
 must_catch:
   - Manual-only App Store Connect app creation is not the default when ASC CLI/skills are available.

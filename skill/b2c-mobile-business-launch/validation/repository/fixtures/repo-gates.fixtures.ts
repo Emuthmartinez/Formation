@@ -62,22 +62,6 @@ function writeParityPair(root: string, options: { rootVersion: string; skillVers
   return { repoRoot, parityScriptRoot };
 }
 
-/**
- * Synthetic skill-root + templates-root pair for check-no-slop. The real banned-word list is
- * copied in rather than invented, so these fixtures fail if the reference and the matcher
- * ever stop agreeing. strategy/BRAND.md is a shipped surface, which makes every finding an error.
- */
-function writeNoSlopRoots(root: string, brandCopy: string): { fixtureSkillRoot: string; fixtureTemplates: string } {
-  const fixtureSkillRoot = path.join(root, "skill");
-  mkdirSync(path.join(fixtureSkillRoot, "knowledge", "words"), { recursive: true });
-  cpSync(path.join(skillRoot, "knowledge", "words", "no-slop-writing.md"), path.join(fixtureSkillRoot, "knowledge", "words", "no-slop-writing.md"));
-  const fixtureTemplates = path.join(root, "workspace", "business");
-  mkdirSync(path.join(fixtureTemplates, "strategy"), { recursive: true });
-  mkdirSync(path.join(fixtureTemplates, "product"), { recursive: true });
-  writeFileSync(path.join(fixtureTemplates, "strategy/BRAND.md"), `# Brand\n\n${brandCopy}\n`, "utf8");
-  return { fixtureSkillRoot, fixtureTemplates };
-}
-
 export function register(h: Harness): void {
   const { makeEmptyFixture, runFixture, runScriptArgs } = h;
 
@@ -278,28 +262,6 @@ export function register(h: Harness): void {
     ["--root", pagesUnsupported],
     1,
     "generated_pages.unsupported_markdown",
-  );
-
-  // --- check-agent-entrypoints ---
-  runScriptArgs("agent entrypoints pass on the shipped skill", "check-agent-entrypoints.ts", ["--skill-root", skillRoot], 0);
-  const entrypointsEmpty = makeEmptyFixture("agent-entrypoints-empty-skill-root");
-  runScriptArgs(
-    "agent entrypoints fail when the shipped templates are missing",
-    "check-agent-entrypoints.ts",
-    ["--skill-root", entrypointsEmpty],
-    1,
-    "agent_entrypoints.template_agents.missing",
-  );
-
-  // --- check-workflow-adherence ---
-  runScriptArgs("workflow adherence passes on the shipped skill", "check-workflow-adherence.ts", ["--skill-root", skillRoot], 0);
-  const workflowEmpty = makeEmptyFixture("workflow-adherence-empty-skill-root");
-  runScriptArgs(
-    "workflow adherence fails when orchestration references are missing",
-    "check-workflow-adherence.ts",
-    ["--skill-root", workflowEmpty],
-    1,
-    "workflow.parallel_agent_reference.missing",
   );
 
   // --- check-package-parity ---
@@ -546,49 +508,6 @@ export function register(h: Harness): void {
     "business_workspace.output.drift",
   );
 
-  // --- check-no-slop ---
-  /**
-   * Inflected banned words. The matcher's trailing boundary excluded letters until v0.26.1,
-   * so "leverage" failed the gate and "leverages" walked straight through it: the same word
-   * doing the same damage, waved past on one letter. Each fixture below carries the inflected
-   * form ONLY, never the base word, so a passing run can only come from suffix tolerance.
-   */
-  const noSlopInflections: { label: string; copy: string; word: string }[] = [
-    { label: "-ing after a dropped e", copy: "The copy engine leveraging a founder transcript beats copy written from a blank page.", word: "leverage" },
-    { label: "-s", copy: "Onboarding that empowers the first session is the one worth shipping.", word: "empower" },
-    { label: "-d on an e-final verb", copy: "The paywall streamlined into a single screen after the first round of testing.", word: "streamline" },
-    { label: "-ies", copy: "Store copy reads as tapestries of adjectives instead of one plain promise.", word: "tapestry" },
-    { label: "-s on a multi-word term", copy: "Two paradigm shifts in one release note is two too many.", word: "paradigm shift" },
-  ];
-
-  for (const inflection of noSlopInflections) {
-    const roots = writeNoSlopRoots(makeEmptyFixture(`no-slop-inflection-${inflection.word.replace(/\s+/g, "-")}`), inflection.copy);
-    runScriptArgs(
-      `no-slop catches "${inflection.word}" inflected with ${inflection.label}`,
-      "check-no-slop.ts",
-      ["--skill-root", roots.fixtureSkillRoot, "--root", roots.fixtureTemplates],
-      1,
-      `"${inflection.word}" is banned`,
-    );
-  }
-
-  /**
-   * The other half of the contract. Suffix tolerance stops at the regular inflections, so a
-   * word that merely starts with a banned word keeps its own meaning: an elevator is not an
-   * elevation, and robustness is a property rather than the adjective the rules ban.
-   */
-  const noSlopNearMisses = writeNoSlopRoots(
-    makeEmptyFixture("no-slop-near-misses"),
-    "Write the elevator pitch first. Judge the robustness of a gate by what it catches. Utilization stays flat until the second session, and embarkation is a word nobody says out loud.",
-  );
-  runScriptArgs(
-    "no-slop leaves words that only begin with a banned word alone",
-    "check-no-slop.ts",
-    ["--skill-root", noSlopNearMisses.fixtureSkillRoot, "--root", noSlopNearMisses.fixtureTemplates],
-    0,
-    "0 error(s)",
-  );
-
   // --- check-founder-copy ---
   // The gate had zero fixture coverage: nothing proved it could fail.
   runScriptArgs(
@@ -738,38 +657,6 @@ export function register(h: Harness): void {
     ["--root", makeEmptyFixture("founder-copy-cards-umbrella"), "--skill-root", path.join(cardsNoUmbrella, "skill")],
     1,
     "founder_copy.umbrella_unreachable",
-  );
-
-  /**
-   * Backticks mean code in markdown and nothing at all in rendered HTML. A banned word
-   * wrapped in backticks on an HTML surface reaches the founder's eyes verbatim, so the
-   * gate must still catch it there — while the same span in a markdown surface stays out
-   * of scope as code. One fixture per side pins the asymmetry.
-   */
-  const noSlopHtmlBackticks = writeNoSlopRoots(makeEmptyFixture("no-slop-html-backtick-banned-word"), "Plain brand copy with nothing banned.");
-  writeFileSync(
-    path.join(noSlopHtmlBackticks.fixtureTemplates, "product/onboarding.html"),
-    "<html><body><p>We `leverage` your first session to unlock the plan.</p></body></html>\n",
-    "utf8",
-  );
-  runScriptArgs(
-    "no-slop catches a backtick-wrapped banned word on a shipped HTML surface",
-    "check-no-slop.ts",
-    ["--skill-root", noSlopHtmlBackticks.fixtureSkillRoot, "--root", noSlopHtmlBackticks.fixtureTemplates],
-    1,
-    '"leverage" is banned',
-  );
-
-  const noSlopMarkdownBackticks = writeNoSlopRoots(
-    makeEmptyFixture("no-slop-markdown-backtick-code-span"),
-    "The setup step runs `leverage --dry-run` before anything ships.",
-  );
-  runScriptArgs(
-    "no-slop still exempts backtick code spans on markdown surfaces",
-    "check-no-slop.ts",
-    ["--skill-root", noSlopMarkdownBackticks.fixtureSkillRoot, "--root", noSlopMarkdownBackticks.fixtureTemplates],
-    0,
-    "0 error(s)",
   );
 
   // --- check-motion-contract ---

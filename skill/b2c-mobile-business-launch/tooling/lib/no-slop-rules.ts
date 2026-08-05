@@ -174,7 +174,7 @@ export function loadNoSlopRules(referencePath: string): NoSlopRules {
 function extractList(source: string, marker: string, referencePath: string, minimumExpected: number): string[] {
   const markerIndex = source.indexOf(marker);
   if (markerIndex === -1) {
-    throw new Error(`${referencePath} is missing the "${marker}" list. check:no-slop reads its rules from that list and cannot run without it.`);
+    throw new Error(`${referencePath} is missing the "${marker}" list. check:app-copy reads its rules from that list and cannot run without it.`);
   }
   const after = source.slice(markerIndex + marker.length);
   const lines = after.split("\n");
@@ -194,7 +194,7 @@ function extractList(source: string, marker: string, referencePath: string, mini
     .filter((item) => item.length > 0);
   if (items.length < minimumExpected) {
     throw new Error(
-      `${referencePath} lists only ${items.length} items under "${marker}", expected at least ${minimumExpected}. A truncated list would make check:no-slop pass copy it should catch.`,
+      `${referencePath} lists only ${items.length} items under "${marker}", expected at least ${minimumExpected}. A truncated list would make check:app-copy pass copy it should catch.`,
     );
   }
   return items;

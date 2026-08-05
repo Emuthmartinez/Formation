@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Ajv2020, type AnySchema, type ErrorObject } from "ajv/dist/2020.js";
-import { operators as operatorDefinitions } from "../runtime/graph/operators.js";
+import { operators as operatorDefinitions } from "../catalog/operators.js";
 import {
   asArray,
   asBoolean,

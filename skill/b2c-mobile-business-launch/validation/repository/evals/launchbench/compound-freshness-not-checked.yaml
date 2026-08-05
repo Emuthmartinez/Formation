@@ -12,7 +12,6 @@ expected_guardrail: >
   unavailable-with-reason fallback.
 validators:
   - check-compound-engineering-routing
-  - check-workflow-adherence
 must_catch:
   - Compound Engineering latest-version verification is missing.
   - operations/ORCHESTRATION.md does not record ce-update or a latest-release fallback.

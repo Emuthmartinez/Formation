@@ -21,6 +21,7 @@ import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { cpus } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { buildAuditPlan, type AuditLayout, type AuditStep } from "./lib/audit-plan.js";
 
 interface StepResult {
@@ -175,7 +176,7 @@ function printResult(result: StepResult, index: number, total: number): void {
   }
 }
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const options = parseOptions(process.argv.slice(2));
   const layout = detectLayout(options.packageRoot);
   const scripts = readScripts(options.packageRoot);
@@ -272,4 +273,12 @@ function finishUp(results: Array<StepResult | undefined>, total: number): void {
   }
 }
 
-await main();
+// exported so verification/run-audit.ts (U9's discoverable v2 audit entry point) can invoke the
+// exact same pipeline in-process, without spawning a second tsx process wrapping this one.
+function isMainModule(): boolean {
+  return process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+}
+
+if (isMainModule()) {
+  await main();
+}

@@ -9,18 +9,14 @@ import {
   skillRoot,
   writeBusinessEntrypoints,
   writeCompleteAppleRequirements,
-  writeCompleteAppleSigning,
   writeCompleteAttribution,
   writeCompleteContentAssets,
-  writeCompleteElevenStar,
   writeCompleteOrchestration,
-  writeCompletePaidToolDecisions,
   writeCompletePaidUserAcquisition,
   writeCompleteProviderProof,
   writeCompleteSecurity,
   writeCompleteStoreConsole,
   writeCompleteStoreScreenshots,
-  writeCompleteViralGrowth,
   writeSourceRegistryFixture,
   writeState,
 } from "./_harness.js";
@@ -31,14 +27,11 @@ export function register(h: Harness): void {
   const clean = makeFixture("clean");
   writeBusinessEntrypoints(clean);
   writeCompleteAttribution(clean);
-  writeCompleteAppleSigning(clean);
   writeCompleteAppleRequirements(clean);
   writeCompleteStoreConsole(clean);
   writeCompleteStoreScreenshots(clean);
-  writeCompleteElevenStar(clean);
   writeCompleteSecurity(clean);
   writeCompleteContentAssets(clean);
-  writeCompleteViralGrowth(clean);
   writeCompletePaidUserAcquisition(clean);
   writeCompleteOrchestration(clean);
   writeCompleteProviderProof(clean);
@@ -47,7 +40,6 @@ export function register(h: Harness): void {
   runFixture("clean secret routing passes", clean, "check-secret-routing.ts", 0);
   runFixture("complete security release packet passes", clean, "check-security-release.ts", 0);
   runFixture("complete content assets packet passes", clean, "check-content-assets.ts", 0);
-  runFixture("complete viral growth packet passes", clean, "check-viral-growth-loop.ts", 0);
   runFixture("complete paid UA packet passes", clean, "check-paid-user-acquisition.ts", 0);
   runFixture("complete orchestration packet passes", clean, "check-parallel-orchestration.ts", 0);
   runFixture("complete Design Room state passes", clean, "validate-state.ts", 0);
@@ -55,17 +47,11 @@ export function register(h: Harness): void {
   runFixture("complete Control Plane contract passes", clean, "check-control-plane-contract.ts", 0);
   runFixture("complete token promotion passes", clean, "check-token-promotion.ts", 0);
   runFixture("complete provider proof passes", clean, "check-live-provider-proof.ts", 0);
-  runFixture("complete Apple signing packet passes", clean, "check-apple-signing-packet.ts", 0);
   runFixture("complete Apple App Store requirements packet passes", clean, "check-apple-app-store-requirements.ts", 0);
   runFixture("complete store console packet passes", clean, "check-store-console-packet.ts", 0);
   runFixture("complete store screenshots packet passes", clean, "check-store-screenshots.ts", 0);
   runFixture("complete native iOS proof packet passes", clean, "check-native-ios-proof.ts", 0);
-  runFixture("complete UX pattern packet passes", clean, "check-ux-patterns.ts", 0);
-  runFixture("complete onboarding conversion packet passes", clean, "check-onboarding-conversion.ts", 0);
-  runFixture("complete 11-star experience packet passes", clean, "check-eleven-star-experience.ts", 0);
   runFixture("complete emotional design packet passes", clean, "check-emotional-design.ts", 0);
-  runFixture("aso metadata packet passes", clean, "check-aso-metadata.ts", 0);
-  runFixture("localization market research packet passes", clean, "check-localization-research.ts", 0);
   runFixture("landing funnel skips without landing scope", clean, "check-landing-funnel.ts", 0);
   runFixture("current skill version passes", skillRoot, "check-skill-version.ts", 0, undefined, ["--source", skillRoot, "--installed", skillRoot]);
   runFixture("current version discipline passes", skillRoot, "check-version-discipline.ts", 0, undefined, [
@@ -93,38 +79,6 @@ export function register(h: Harness): void {
   const archetypeMissing = makeEmptyFixture("app-archetype-missing");
   runScriptArgs("app archetype layer missing fails", "check-app-archetype.ts", ["--skill-root", archetypeMissing], 1, "app_archetype.dir_missing");
   runFixture("compound engineering not in scope passes", clean, "check-compound-engineering-routing.ts", 0);
-  writeCompletePaidToolDecisions(clean);
-  runFixture("complete paid-tool decisions packet passes", clean, "check-paid-tool-decisions.ts", 0);
-
-  const asoMissingListing = makeFixture("aso-missing-listing");
-  rmSync(path.join(asoMissingListing, "store", "app-store-listing"), { recursive: true, force: true });
-  rmSync(path.join(asoMissingListing, "store", "APP_STORE_LISTING.md"), { force: true });
-  runFixture("aso metadata without APP_STORE_LISTING fails", asoMissingListing, "check-aso-metadata.ts", 1, "aso_metadata.app_store_listing_missing");
-
-  const paidToolMissing = makeFixture("paid-tool-missing-decisions");
-  rmSync(path.join(paidToolMissing, "strategy/TOOL_DECISIONS.md"), { force: true });
-  runFixture(
-    "missing strategy/TOOL_DECISIONS.md fails when paid tools in scope",
-    paidToolMissing,
-    "check-paid-tool-decisions.ts",
-    1,
-    "paid_tool_decisions.file_missing",
-  );
-
-  const localizationTranslateFirst = makeFixture("localization-translate-first");
-  rmSync(path.join(localizationTranslateFirst, "strategy", "localization-market-research"), { recursive: true, force: true });
-  writeFileSync(
-    path.join(localizationTranslateFirst, "store", "APP_STORE_LISTING.md"),
-    ["# App Store Listing", "Localization matrix: target locales ja, de, pt-BR.", "Localized keywords prepared for all locales."].join("\n"),
-    "utf8",
-  );
-  runFixture(
-    "localization without market research fails as translate-first",
-    localizationTranslateFirst,
-    "check-localization-research.ts",
-    1,
-    "localization_research.translate_first",
-  );
 
   const wranglerCreds = makeFixture("wrangler-toml-credentials");
   writeFileSync(

@@ -100,7 +100,7 @@ export function resolveScriptPath(skillRoot: string, basename: string): string {
 
 /**
  * Extract a script basename from an npm command string such as
- * `tsx validation/business/store/check-aso-metadata.ts --root .`. Matches any depth under any
+ * `tsx validation/business/store/check-store-console-packet.ts --root .`. Matches any depth under any
  * of the three roots, so a domain subfolder does not hide a script from the
  * package-parity cross-checks the way a `tooling/`-only pattern would.
  */

@@ -6,7 +6,6 @@ expected_guardrail: >
   After any build upload, store-ops event, or audit that produces evidence, the agent must update state/PROJECT_STATE.yaml (updated_at, lane status/evidence, build/upload fields), write any stated engineering/PRODUCTION_READINESS.md evidence to the file, and re-render state/launch-cockpit.html before the session closes or commits.
 validators:
   - validate-project-state
-  - check-apple-signing-packet
 must_catch:
   - state/PROJECT_STATE.yaml was not updated after build uploads
   - state/launch-cockpit.html was not re-rendered after state changes

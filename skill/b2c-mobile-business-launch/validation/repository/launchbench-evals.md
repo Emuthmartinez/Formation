@@ -93,8 +93,6 @@ Most artifact validators are deterministic phrase/regex gates over Markdown and 
 
 Frequently-tripped literal tokens worth knowing before authoring artifacts by hand:
 
-- `product/ONBOARDING.md` (`check:onboarding`): must contain the literal analytics event names `review_prompt_eligible` and `review_prompt_requested`, a named native review API (`SKStoreReviewController`, `requestReview`, StoreKit, or Google Play In-App Review), a cooldown/frequency cap, and a suppressed-prompt fallback — see `validation/business/experience/check-onboarding-conversion.ts` for the full accepted lists.
-- `growth/LAUNCH_NARRATIVE.md` (`check:launch-narrative`): fenced post copy is scanned against the 2026 guardrails (no hashtags, no emojis, no link in the main post) — see `validation/business/growth/check-launch-narrative.ts`.
 - `analytics/ANALYTICS.md` (`check:attribution`): expects the stable event/person-property names (e.g. `attribution_source_selected`, `self_reported_source`) plus backend persistence and reconciliation language — see `validation/business/data/check-attribution-contract.ts`.
 - `SCREENSHOTS.md` (`check:store-screenshots`): expects raw-vs-final separation, device wells, and composition routing phrases — see `validation/business/store/check-store-screenshots.ts`.
 

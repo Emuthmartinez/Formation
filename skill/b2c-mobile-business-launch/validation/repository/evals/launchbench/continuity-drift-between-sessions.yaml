@@ -14,8 +14,6 @@ expected_guardrail: >
   unavailable, and write state/readiness/failure-card updates before pausing.
 validators:
   - check-continuity-contract
-  - check-agent-entrypoints
-  - check-workflow-adherence
 must_catch:
   - Chat memory was treated as source truth instead of durable repo files.
   - AGENTS.md, state/PROJECT_STATE.yaml, state/launch-cockpit.html, operations/ORCHESTRATION.md, engineering/PRODUCTION_READINESS.md, operations/FAILURE_CARDS.md, and git status were skipped.

@@ -424,7 +424,7 @@ if (animatedSources.length > 0) {
         landingStatus === "done" ? "error" : "warning",
         "landing_funnel.motion.untokenized_duration",
         `Landing motion uses raw duration literals without the tokenized --motion-* scale (${untokenized[0]?.relativePath ?? "landing"}). ` +
-          "Read durations/easings from design-system/tokens.css so the brand retimes in one place. See knowledge/design/landing-motion-craft.md.",
+          "Read durations/easings from studio/generated/system/tokens.css so the brand retimes in one place. See knowledge/design/landing-motion-craft.md.",
         untokenized[0]?.relativePath,
       ),
     );

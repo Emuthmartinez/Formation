@@ -19,6 +19,15 @@ sources:
       - skill/b2c-mobile-business-launch/validation/repository/skill-versioning.md
       - skill/b2c-mobile-business-launch/tooling/check-skill-version.ts
     notes: Remote manifest used when comparing installed runtime freshness against the pushed main branch.
+  - id: resend-api-emails
+    name: Resend email send API
+    source_type: official_docs
+    url: https://api.resend.com/emails
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/core/session/digest.ts
+    notes: HTTP endpoint the digest push transport posts to; verify request shape against Resend docs before changing the transport.
   - id: claude-com-claude-code
     name: Claude Code product page
     source_type: official_docs

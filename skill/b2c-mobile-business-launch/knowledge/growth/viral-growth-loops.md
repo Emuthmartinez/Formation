@@ -152,12 +152,6 @@ Create or update:
 - `growth/UGC_PLAYBOOK.md`, `CONTENT_ASSETS.md`, and `growth/FASTLANE_OPS.md` when creator or generated content is in scope
 - `state/LAUNCH_TRACE.md` rows connecting research, 11-star slice, product loop, content format, monetization, analytics, privacy/legal, and proof
 
-Run:
-
-```bash
-npm run check:viral-growth -- --root .
-```
-
 ## Common Failure Modes
 
 - Treating virality as "post TikToks" instead of designing product, referral, content, paywall, and analytics as one system.

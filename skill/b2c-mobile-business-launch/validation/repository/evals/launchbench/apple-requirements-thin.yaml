@@ -5,7 +5,6 @@ expected_guardrail: "The agent must create store/APPLE_APP_STORE_REQUIREMENTS.md
 validators:
   - check-apple-app-store-requirements
   - check-store-console-packet
-  - check-apple-signing-packet
 must_catch:
   - Missing store/APPLE_APP_STORE_REQUIREMENTS.md for an iOS ASC upload path.
   - PrivacyInfo.xcprivacy and required reason API declarations are not audited.

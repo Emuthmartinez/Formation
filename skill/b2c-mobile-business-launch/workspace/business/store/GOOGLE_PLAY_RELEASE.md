@@ -2,7 +2,7 @@
 
 Status: partial until the package name, track state, declarations, and signing posture are recorded against the live Play Console — not assumed from the iOS packet.
 
-Android distribution readiness for Google Play. This packet is the Play-side parity of `store/APPLE_SIGNING.md` + `store/APPLE_APP_STORE_REQUIREMENTS.md`; it must be reconciled with them, never copied from them. See `knowledge/store/google-play-release.md` and `npm run check:google-play -- --root . --state state/PROJECT_STATE.yaml`.
+Android distribution readiness for Google Play. This packet is the Play-side parity of `store/APPLE_SIGNING.md` + `store/APPLE_APP_STORE_REQUIREMENTS.md`; it must be reconciled with them, never copied from them. See `knowledge/store/google-play-release.md`.
 
 ## Developer Account
 

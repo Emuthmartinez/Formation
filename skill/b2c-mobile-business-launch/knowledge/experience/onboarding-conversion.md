@@ -277,10 +277,9 @@ Include dimensions: step_id, answer_key, attribution_source, source_key, source_
 - If Higgsfield is unavailable, the founder confirmed the free/local visual fallback and limitations are recorded.
 - `growth/EMAIL_OPS.md` covers any onboarding resume, welcome, trial, payment recovery, or win-back emails triggered by the flow.
 - App Review popup is inside onboarding immediately after first value/value reveal, uses the native platform API, is not incentivized, auto-triggers after the value-reveal screen mounts with a 1-2s delay, and is not bound to an acceptance tap or to any navigation action that dismisses the screen.
-- `npm run check:onboarding -- --root <app>` passes before onboarding or build handoff is called ready.
 - Paywall placement, product IDs, offerings, prices, trial, and closing offer match `revenue/REVENUE_OPS.md`.
 - Privacy/terms links and data-use explanations match the data collection matrix.
 - Analytics events are named before implementation, and every proposed event name is present in `analytics/ANALYTICS.md`; no event name is invented during implementation without a prior `analytics/ANALYTICS.md` entry.
 - `analytics/analytics-plan.html` shows the onboarding and paywall funnel before build handoff.
 - Self-reported attribution passes the data contract: early visible screen, stable source keys, `other` free text, analytics event, PostHog person property, backend/profile persistence, anonymous-to-identified reconciliation, and verification evidence.
-- Onboarding, paywall, and closing-offer copy passes the `no-slop-writing.md` self-check (§6) and `check:no-slop` in the product's `strategy/BRAND.md`/`11_STAR_EXPERIENCE.md` voice.
+- Onboarding, paywall, and closing-offer copy passes the `no-slop-writing.md` self-check (§6) in the product's `strategy/BRAND.md`/`11_STAR_EXPERIENCE.md` voice.

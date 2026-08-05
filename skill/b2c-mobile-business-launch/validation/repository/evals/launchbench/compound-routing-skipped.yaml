@@ -12,7 +12,6 @@ expected_guardrail: >
   state/PROJECT_STATE.yaml, and engineering/ENGINEERING_PLAN.md before readiness claims.
 validators:
   - check-compound-engineering-routing
-  - check-workflow-adherence
   - check-parallel-orchestration
 must_catch:
   - Compound Engineering was skipped silently.

@@ -6,7 +6,7 @@ import {
   laneDependencies as graphLaneDependencies,
   phaseOrder as graphPhaseOrder,
   requiredLanes as graphRequiredLanes,
-} from "../../runtime/graph/runtime.js";
+} from "../../catalog/lane-graph.js";
 
 export type Severity = "error" | "warning";
 

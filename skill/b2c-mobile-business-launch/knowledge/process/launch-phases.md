@@ -54,7 +54,7 @@ Do:
 - Load `founder-zero-operator.md`. Assume the founder is new to business tooling and make the agent responsible for sequencing and execution.
 - Inspect the provided transcript/spec/repo and list existing artifacts.
 - Identify current phase, business name, target platform, monetization model, data/backend assumptions, and launch surface.
-- Load `project-state.md` and `autonomy-modes.md`.
+- Load `project-state.md`.
 - Create or refresh `state/PROJECT_STATE.yaml` from `workspace/business/state/PROJECT_STATE.yaml`, set the current autonomy mode, and record lane status honestly.
 - Confirm the launch scope (see Launch Scopes above; recommend essentials for a first launch), record `project.launch_scope` and `project.kickoff_date` — the pre-build clock starts now — and defer essentials breadth lanes with dated reasons.
 - Render `state/launch-cockpit.html` once the first state pass exists.
@@ -83,7 +83,7 @@ Goal: make the launch inspectable and bounded before the agent starts executing.
 
 Do:
 - Use `operations/BUSINESS_ACCESS.md` as the ownership/account spine and keep Doppler, social, store, email, domain, recovery, and 2FA state current.
-- Load `project-state.md`, `autonomy-modes.md`, `provider-state-recipes.md`, `launchbench-evals.md`, and `failure-cards.md` only as needed.
+- Load `project-state.md`, `provider-state-recipes.md`, `launchbench-evals.md`, and `failure-cards.md` only as needed.
 - Set `autonomy.mode` to the least-powerful useful mode: usually `scout`, `draft`, `prepare`, or `apply`.
 - Copy `workspace/business/state/PROJECT_STATE.yaml` if no state file exists.
 - Fill phase, platform, bundle/package IDs when known, source-truth files, lane statuses, tool/provider routes, required secret names, founder-only gates, proof commands, and active failure cards.
@@ -280,7 +280,6 @@ Do:
 - Define backend/provider proof for referral unlocks, share rewards, creator codes, entitlements, duplicate handling, self-referral prevention, and abuse controls before implementation.
 - Add growth-loop events and dashboards to `analytics/ANALYTICS.md` and `analytics/analytics-plan.html`.
 - Update `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `growth/UGC_PLAYBOOK.md`, `CONTENT_ASSETS.md`, `growth/FASTLANE_OPS.md`, and `state/LAUNCH_TRACE.md` when the loop affects those surfaces.
-- Run `npm run check:viral-growth -- --root .` before claiming the growth lane is ready.
 
 Outputs:
 - `VIRAL_GROWTH.md`
@@ -554,7 +553,7 @@ Goal: package the business so another agent or builder can ship the app without 
 Do:
 - Load `flow-traceability.md` before writing builder prompts, `AGENTS.md`, or implementation specs.
 - Load `parallel-agent-orchestration.md` and `engineering-orchestration.md` before writing `operations/ORCHESTRATION.md`, `AGENTS.md`, `CLAUDE.md`, `PROMPTS.md`, or any implementation prompt.
-- Load `project-state.md`, `autonomy-modes.md`, `launchbench-evals.md`, and `failure-cards.md` before the handoff is considered complete.
+- Load `project-state.md`, `launchbench-evals.md`, and `failure-cards.md` before the handoff is considered complete.
 - Load `app-agent-roster.md` before writing repo-root `AGENTS.md`/`CLAUDE.md`, `APP_AGENTS.md`, app-local `agents/`, or specialist audit prompts.
 - Use `launch-coverage.md` before moving from docs to implementation or submission.
 - Create a business-specific `AGENTS.md` from `business/engineering/repo-agent-entrypoints/AGENTS.md` as canonical source of truth: brief, stack, business model, brand rules, doc map, V1/V2/V3 scope, implementation conventions, analytics rules, continued `b2c-mobile-business-launch` routing, Compound Engineering routing, `operations/ORCHESTRATION.md`, parallel-agent/worktree rules, MobAI/native iOS/device testing, and production-readiness gates.
