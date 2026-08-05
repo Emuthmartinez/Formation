@@ -274,6 +274,63 @@ function runVerifyAudit(args: Record<string, string>): number {
   return 0;
 }
 
+/**
+ * Adopt a pre-existing document as the reducer's baseline — the migration bootstrap path.
+ * The v1 migrator writes documents directly (there is no prior manifest to patch against),
+ * so adoption records the current content hash as a disclosed baseline plus an audit entry.
+ * Bootstrap-only: adopting over an already-tracked document is rejected, never silent.
+ */
+function runAdopt(args: Record<string, string>): number {
+  const missing = requireArgs(args, ["file", "target-doc", "manifest", "audit", "session"]);
+  if (missing) {
+    console.log(`ISSUE ${missing}`);
+    console.log("RESULT: rejected");
+    return 1;
+  }
+  const targetDoc = args["target-doc"] as PatchTargetDoc;
+  if (!(targetDoc in SCHEMA_VERSION_BY_TARGET)) {
+    console.log(`ISSUE reducer.unknown_target_doc: "${targetDoc}" is not a reducer-owned document`);
+    console.log("RESULT: rejected");
+    return 1;
+  }
+  const filePath = path.resolve(args.file!);
+  if (!existsSync(filePath)) {
+    console.log(`ISSUE reducer.adopt_missing_file: ${filePath} does not exist`);
+    console.log("RESULT: rejected");
+    return 1;
+  }
+  const contents = readFileSync(filePath, "utf8");
+  const issues = validateTargetDocument(targetDoc, JSON.parse(contents));
+  if (issues.length > 0) {
+    printIssues(issues);
+    console.log("RESULT: rejected");
+    return 1;
+  }
+  const manifestPath = path.resolve(args.manifest!);
+  const manifest = loadManifest(manifestPath);
+  if (manifest.entries[filePath]) {
+    console.log(`ISSUE reducer.adopt_already_tracked: ${filePath} already has a manifest baseline; adoption is bootstrap-only`);
+    console.log("RESULT: rejected");
+    return 1;
+  }
+  const stateHash = sha256Hex(contents);
+  const now = new Date().toISOString();
+  appendAuditEntry(path.resolve(args.audit!), {
+    sessionId: args.session!,
+    targetDoc,
+    patchId: `adopt:${args.session!}:${targetDoc}`,
+    action: "adopt",
+    summary: "adopted pre-existing document as reducer baseline (migration bootstrap)",
+    stateHash,
+    issueCodes: [],
+  });
+  manifest.entries[filePath] = { targetDoc, file: filePath, stateHash, updatedAt: now, lastPatchId: `adopt:${args.session!}:${targetDoc}` };
+  saveManifest(manifestPath, manifest);
+  console.log(`ADOPTED ${targetDoc} (${stateHash.slice(0, 12)})`);
+  console.log("RESULT: adopted");
+  return 0;
+}
+
 function main(): number {
   const [command, ...rest] = process.argv.slice(2);
   const args = parseArgs(rest);
@@ -284,8 +341,10 @@ function main(): number {
       return runPreflight(args);
     case "verify-audit":
       return runVerifyAudit(args);
+    case "adopt":
+      return runAdopt(args);
     default:
-      console.error(`Unknown reducer command "${command ?? ""}". Expected one of: commit, preflight, verify-audit.`);
+      console.error(`Unknown reducer command "${command ?? ""}". Expected one of: commit, preflight, verify-audit, adopt.`);
       return 1;
   }
 }

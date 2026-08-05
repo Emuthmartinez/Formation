@@ -243,13 +243,18 @@ export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument,
   return invalidated;
 }
 
-/** Session wall-clock deadline (KTD6), enforced independently of any single attempt's heartbeat TTL. */
-export function wallClockDeadline(run: RunStateDocument): string {
-  return new Date(Date.parse(run.createdAt) + run.wallClockCapSeconds * 1000).toISOString();
+/**
+ * Session wall-clock deadline (KTD6), enforced independently of any single attempt's heartbeat
+ * TTL. The cap bounds the CURRENT session, so the deadline is measured from the session's own
+ * start — a resumed run must not inherit a prior session's elapsed clock (R2's bounded-session
+ * contract; measuring from run.createdAt made every resume time out instantly).
+ */
+export function wallClockDeadline(run: RunStateDocument, sessionStartedAt: string = run.createdAt): string {
+  return new Date(Date.parse(sessionStartedAt) + run.wallClockCapSeconds * 1000).toISOString();
 }
 
-export function isWallClockExceeded(run: RunStateDocument, now: string): boolean {
-  return Date.parse(now) >= Date.parse(wallClockDeadline(run));
+export function isWallClockExceeded(run: RunStateDocument, now: string, sessionStartedAt: string = run.createdAt): boolean {
+  return Date.parse(now) >= Date.parse(wallClockDeadline(run, sessionStartedAt));
 }
 
 /** Write to `<path>.tmp`, fsync, then rename — a reader never observes a partial write. */

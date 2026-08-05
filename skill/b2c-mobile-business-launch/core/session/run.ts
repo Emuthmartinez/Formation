@@ -12,7 +12,7 @@ import type { BudgetLedgerDocument, BusinessStateV2, ControlFile } from "../sche
 import { compilePlan, type CatalogInput, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
 import { computeFrontier } from "../engine/frontier.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
-import { beginAttempt, detectOrphans, isWallClockExceeded, loadRunState, reconcilePatch, refreshHeartbeat, seedRunState, writeRunState, buildCheckpoint, writeCheckpoint, type OrphanEvent } from "../engine/runstate.js";
+import { acceptVerification, beginAttempt, detectOrphans, isWallClockExceeded, loadRunState, reconcilePatch, refreshHeartbeat, seedRunState, writeRunState, buildCheckpoint, writeCheckpoint, type OrphanEvent } from "../engine/runstate.js";
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
 import { createDispatchHooks } from "../autonomy/killswitch.js";
 import { domainBusinessUnit } from "../autonomy/budget.js";
@@ -122,6 +122,32 @@ let patchSequence = 0;
 function nextPatchId(sessionId: string): string {
   patchSequence += 1;
   return `patch.${sessionId}.${patchSequence}`;
+}
+
+interface GateOutcome {
+  readonly allPassed: boolean;
+  readonly evidence: string[];
+}
+
+/**
+ * Run a node's deterministic gates (npm `check:*`/`validate:*` scripts from the skill package)
+ * against the business workspace. BUSINESS_ROOT points the validator at the workspace; a gate
+ * that exits non-zero — or cannot run at all — counts as not-passed, never as accepted.
+ */
+function runDeterministicGates(gateIds: readonly string[], workspaceDir: string): GateOutcome {
+  const evidence: string[] = [];
+  for (const gate of gateIds) {
+    const result = spawnSync("npm", ["run", "--prefix", skillRoot(), gate], {
+      cwd: workspaceDir,
+      encoding: "utf8",
+      env: { ...process.env, BUSINESS_ROOT: workspaceDir },
+      timeout: 120_000,
+    });
+    const passed = result.status === 0;
+    evidence.push(`gate:${gate}=${passed ? "passed" : `exit ${result.status ?? "spawn-error"}`}`);
+    if (!passed) return { allPassed: false, evidence };
+  }
+  return { allPassed: true, evidence };
 }
 
 function commitPatch(targetFile: string, paths: WorkspacePaths, sessionId: string, patch: StatePatch): ReducerResult {
@@ -391,6 +417,7 @@ async function main(): Promise<number> {
     let orphanEvents: OrphanEvent[] = [];
     if (run) {
       run.ownerSessionId = sessionId;
+      run.wallClockCapSeconds = wallClockCapSeconds;
       orphanEvents = detectOrphans(plan, run, startedAt);
       for (const event of orphanEvents) {
         const title = plan.nodes.find((node) => node.id === event.nodeId)?.title ?? event.nodeId;
@@ -412,7 +439,7 @@ async function main(): Promise<number> {
 
     dispatchLoop: while (true) {
       const now = sessionNow();
-      if (isWallClockExceeded(run, now)) {
+      if (isWallClockExceeded(run, now, startedAt)) {
         timedOut = true;
         break;
       }
@@ -511,7 +538,22 @@ async function main(): Promise<number> {
               { nodeId, attemptId: attempt.id, outputs: result.outputs.map((output) => ({ artifactId: output.artifactId, path: output.path, fingerprint: output.fingerprint, evidence: [...output.evidence] })) },
               finishedAt,
             );
-            if (run.nodes[nodeId]!.status === "succeeded") advanced.push({ nodeId, title: node.title, unit: domainBusinessUnit(node.domainId) });
+            if (run.nodes[nodeId]!.status === "succeeded") {
+              advanced.push({ nodeId, title: node.title, unit: domainBusinessUnit(node.domainId) });
+            } else if (node.verification.kind === "deterministic" && node.verification.gateIds.length > 0) {
+              // Deterministic acceptance: the node's own gates are the verification (Verification
+              // Contract). Run them against the workspace; all pass -> accept, any fail -> the node
+              // stays verification-pending and the digest reports it as still being checked.
+              // False accepts are impossible here; a gate that cannot run counts as not-passed.
+              const gateOutcome = runDeterministicGates(node.verification.gateIds, workspace);
+              if (gateOutcome.allPassed) {
+                acceptVerification(plan, run, nodeId, gateOutcome.evidence, sessionNow());
+                const accepted = run.nodes[nodeId]!.status as string;
+                if (accepted === "succeeded") advanced.push({ nodeId, title: node.title, unit: domainBusinessUnit(node.domainId) });
+              } else {
+                anomalies.push({ message: `I finished "${node.title}" but its checks didn't pass yet, so I'm not calling it done.` });
+              }
+            }
 
             if (estimateEntryId) {
               const actualPatch = buildActualPatch(ledger, estimateEntryId, node, decision, sessionId, sessionNow());

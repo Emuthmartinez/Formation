@@ -539,6 +539,20 @@ export function register(harness: Harness): void {
     assert(isWallClockExceeded(run, plusSeconds(now, run.wallClockCapSeconds + 1)), "one second past the cap must be exceeded");
   });
 
+  harness.check("runstate: a resumed session measures the wall clock from its own start, never run creation (regression: every resume timed out instantly)", () => {
+    const plan = compilePlan(testCatalog(), now);
+    const { run } = seedFor([], plan);
+    const laterSessionStart = plusSeconds(run.createdAt, run.wallClockCapSeconds * 3);
+    assert(
+      !isWallClockExceeded(run, plusSeconds(laterSessionStart, run.wallClockCapSeconds - 1), laterSessionStart),
+      "a resumed session one second inside its own cap must not be exceeded, even long after run creation",
+    );
+    assert(
+      isWallClockExceeded(run, plusSeconds(laterSessionStart, run.wallClockCapSeconds + 1), laterSessionStart),
+      "a resumed session one second past its own cap must be exceeded",
+    );
+  });
+
   // ---------------------------------------------------------------------
   // runstate.ts: persistence (atomic checkpoint, cross-process reload)
   // ---------------------------------------------------------------------
