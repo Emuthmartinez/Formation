@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { api } from "../api";
-import { useWorkspace } from "../context";
+import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Recommendation, Task } from "../types";
 import { Icon } from "../components/Icon";
 import {
   Button,
+  ContradictionStatements,
   EmptyState,
   PageHeader,
   ProgressLine,
@@ -28,11 +29,11 @@ export function TodayPage() {
   const completeTask = async (task: Task) => {
     setUpdatingTask(task.id);
     try {
-      await api.updateTask(workspace.id, task.id, { status: "done" });
-      await reload();
-      notify("Task completed. Readiness has been recalculated.");
-    } catch (error) {
-      notify(error instanceof Error ? error.message : String(error), "error");
+      await runMutation(
+        { reload, notify },
+        () => api.updateTask(workspace.id, task.id, { status: "done" }),
+        "Task completed. Readiness has been recalculated.",
+      );
     } finally {
       setUpdatingTask(null);
     }
@@ -63,7 +64,14 @@ export function TodayPage() {
                       <span>{recommendation.confidence}% confidence</span>
                     </div>
                     <h2>{recommendation.title}</h2>
-                    <p>{recommendation.detail}</p>
+                    {recommendation.kind === "resolve-contradiction" ? (
+                      <ContradictionStatements
+                        entries={contradictions.find((entry) => `rec_${entry.id}` === recommendation.id)?.entries}
+                        fallback={recommendation.detail}
+                      />
+                    ) : (
+                      <p>{recommendation.detail}</p>
+                    )}
                     <p className="recommendation-row__rationale">Why now: {recommendation.rationale}</p>
                   </div>
                   <button className="recommendation-row__action" onClick={() => openRecommendation(recommendation)}>
@@ -87,7 +95,7 @@ export function TodayPage() {
             <strong>{readiness.score}</strong>
             <span>/ 100</span>
           </div>
-          <ProgressLine value={readiness.score} label="Launch readiness" />
+          <ProgressLine value={readiness.score} label="Launch readiness" hideValue />
           <p className="readiness-rail__note">
             The score discounts blocked work, unresolved critical decisions, and unfinished critical tasks. No vanity math allowed.
           </p>
@@ -107,7 +115,7 @@ export function TodayPage() {
           <div>
             <p className="eyebrow">Source-of-truth conflict</p>
             <h2>{primaryContradiction.title}</h2>
-            <p>{primaryContradiction.summary}</p>
+            <ContradictionStatements entries={primaryContradiction.entries} fallback={primaryContradiction.summary} />
           </div>
           <Button variant="secondary" onClick={() => navigate(`/workstreams/${primaryContradiction.workstreamIds[0] ?? "strategy"}`)}>
             Resolve conflict

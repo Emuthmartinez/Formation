@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
-import { Button, EmptyState, Field, PageHeader, Section, StatusText, formatDate } from "../components/Primitives";
-import { Icon } from "../components/Icon";
+import { Button, EmptyState, Field, PageHeader, StatusText, formatDate, humanize } from "../components/Primitives";
 import { useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Artifact, ArtifactSection } from "../types";
@@ -149,7 +148,7 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
           </div>
           {draft.sections.map((section, index) => (
             <section key={section.id} className="section-editor">
-              <div className="section-editor__head"><span>Section {index + 1}</span><button onClick={() => removeSection(index)} type="button" disabled={draft.sections.length <= 1}>Remove</button></div>
+              <div className="section-editor__head"><span>Section {index + 1}</span><button onClick={() => removeSection(index)} type="button" disabled={draft.sections.length <= 1} aria-label={`Remove section ${index + 1}: ${section.title}`}>Remove</button></div>
               <input value={section.title} onChange={(event) => updateSection(index, { title: event.target.value })} aria-label={`Title for section ${index + 1}`} />
               <textarea rows={Math.max(5, section.body.split("\n").length + 2)} value={section.body} onChange={(event) => updateSection(index, { body: event.target.value })} aria-label={`Body for ${section.title}`} />
             </section>
@@ -171,7 +170,7 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
       <footer className="deliverable-lineage">
         <div><p className="eyebrow">Context lineage</p><p>{sourceClaims.length || linkedDecisions.length ? "This deliverable is connected to the following accepted context." : "No explicit source links have been recorded yet."}</p></div>
         <div className="lineage-items">
-          {sourceClaims.map((claim) => <span key={claim.id}>{claim.kind}: {claim.statement}</span>)}
+          {sourceClaims.map((claim) => <span key={claim.id}>{humanize(claim.kind)}: {claim.statement}</span>)}
           {linkedDecisions.map((decision) => <span key={decision.id}>Decision: {decision.title}</span>)}
         </div>
       </footer>

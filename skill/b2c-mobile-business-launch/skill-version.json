@@ -1,10 +1,10 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.79.0",
+  "version": "0.80.0",
   "updatedAt": "2026-08-06",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "The final-source-layout workflow (.github/workflows/final-source-layout.yml) is removed. It was one-shot automation for the directory-migration arc that closed at v0.63.0, but it still carried `contents: write` and a step that self-commits to PR branches, and it would have fired again on any PR touching scripts/repair-migrated-fixtures.py or the workflow file itself. Same rationale as removing the expired pr99-publisher.yml in v0.76.0 (#120): a standing write-permission workflow whose job is done is risk with no remaining function.",
-    "The four migration scripts the workflow drove — scripts/fix-source-layout-contracts.py, scripts/refactor-source-layout.py, scripts/repair-final-source-layout.py, and scripts/repair-migrated-fixtures.py — are removed with it. A full-repo reference sweep found no caller outside the workflow: the workflow referenced one script, and nothing referenced the workflow. scripts/sync-skill-runtime.sh, the one live script in that directory, is untouched."
+    "Platform release: the founder UX review lands. Contradictions render as labeled claim entries instead of a joined sentence (detectContradictions now emits entries[] alongside summary, with a domain test), the Launch page gains 'The launch engine at work' — a founder-vocabulary step procession over the execution routes with session state, imported verified-result totals, and an explainer flow — and the review's confirmed accessibility, responsive, copy, and design-system fixes ship across every page. The engine's own state, reducer, and catalog are untouched; this manifest advances only to keep root package parity.",
+    "Brand surface: platform/web gains an SVG favicon and an Open Graph card (first-party URLs registered in source-registry.yaml), wired into index.html social metadata."
   ]
 }

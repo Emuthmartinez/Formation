@@ -11,7 +11,7 @@
 .decision-row__dates span { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
 .decision-row__dates strong { font-size: 12px; }
 .decision-row__actions { grid-area: actions; align-self: end; display: flex; gap: 8px; flex-wrap: wrap; }
-.decision-row__actions select { width: auto; font-size: 12px; padding: 8px; }
+.decision-row__actions select { width: auto; font-size: 13px; padding: 8px; }
 .decision-list--history .decision-row { background: transparent; }
 .archive-details { border-top: 1px solid var(--line-dark); padding-top: 18px; }
 .archive-details summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-bottom: 15px; }

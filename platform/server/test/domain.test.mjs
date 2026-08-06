@@ -55,6 +55,20 @@ test("contradiction detection ignores resolved claims and groups active values b
   assert.deepEqual(contradictions[0].claimIds, ["1", "2"]);
 });
 
+test("a contradiction keeps each conflicting claim individually attributable", () => {
+  const contradictions = detectContradictions([
+    { id: "1", key: "pricing.model", value: "annual", status: "active", kind: "assumption", statement: "Annual subscription.", workstreamId: "money" },
+    { id: "2", key: "pricing.model", value: "lifetime", status: "active", kind: "fact", statement: "One-time archive.", workstreamId: "strategy" },
+  ]);
+
+  // The founder-facing surfaces label each statement by kind; the joined summary stays for compatibility.
+  assert.deepEqual(contradictions[0].entries, [
+    { claimId: "1", kind: "assumption", workstreamId: "money", statement: "Annual subscription." },
+    { claimId: "2", kind: "fact", workstreamId: "strategy", statement: "One-time archive." },
+  ]);
+  assert.equal(contradictions[0].summary, "Annual subscription. / One-time archive.");
+});
+
 test("onboarding creates a durable company model rather than a disconnected report", () => {
   const bundle = createWorkspaceFromBrief({
     userId: "usr_1",

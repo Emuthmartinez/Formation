@@ -70,15 +70,21 @@ export function Shell({
               ? currentPath === "/"
               : currentPath === item.path || currentPath.startsWith(`${item.path}/`);
             return (
-              <button
+              <a
                 key={item.path}
+                href={item.path}
                 className={`nav-item ${active ? "nav-item--active" : ""}`}
-                onClick={() => go(item.path)}
+                onClick={(event) => {
+                  // Real hrefs keep open-in-new-tab and copy-link working; plain clicks stay in-app.
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                  event.preventDefault();
+                  go(item.path);
+                }}
                 aria-current={active ? "page" : undefined}
               >
                 <Icon name={item.icon} width={19} height={19} />
                 <span>{item.label}</span>
-              </button>
+              </a>
             );
           })}
         </nav>

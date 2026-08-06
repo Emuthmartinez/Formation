@@ -62,11 +62,11 @@ export function GenerateModal({ stream, onClose }: { stream: Workstream; onClose
           />
         </Field>
         {job ? (
-          <div className="generation-state">
+          <div className="generation-state" role="status" aria-live="polite">
             <span className="spinner" />
             <div>
               <strong>{job.status === "queued" ? "Queued" : "Building the draft"}</strong>
-              <p>The job is durable. Closing the browser will not lose it.</p>
+              <p>This draft is saved as it builds. Closing the browser will not lose it.</p>
             </div>
           </div>
         ) : null}
@@ -146,7 +146,7 @@ async function pollJob(workspaceId: string, jobId: string, update: (job: Job) =>
     if (["completed", "failed"].includes(current.status)) return current;
     await new Promise((resolve) => window.setTimeout(resolve, 350));
   }
-  throw new Error("The generation job is still running. It remains safely queued in the workspace.");
+  throw new Error("The draft is still generating. It stays queued in this workstream — check back in a moment.");
 }
 
 function defaultArtifactType(workstreamId: string) {

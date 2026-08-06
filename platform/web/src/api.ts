@@ -3,6 +3,7 @@ import type {
   Artifact,
   Claim,
   Decision,
+  FounderExecution,
   Job,
   PublicConfig,
   SessionPayload,
@@ -99,6 +100,7 @@ export const api = {
       body: JSON.stringify(patch),
     }),
   listApprovals: (workspaceId: string) => request<ApprovalsView>(`/api/workspaces/${workspaceId}/approvals`),
+  listExecutions: (workspaceId: string) => request<FounderExecution[]>(`/api/workspaces/${workspaceId}/executions`),
   answerApproval: (workspaceId: string, decisionId: string, payload: { answer: "approve" | "decline"; reason?: string }) =>
     request<Decision>(`/api/workspaces/${workspaceId}/approvals/${decisionId}`, {
       method: "POST",

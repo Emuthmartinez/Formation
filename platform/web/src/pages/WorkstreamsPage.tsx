@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { api } from "../api";
 import { Button, EmptyState, Field, PageHeader, ProgressLine, Section, StatusText } from "../components/Primitives";
-import { useWorkspace } from "../context";
+import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
+import { Icon } from "../components/Icon";
 import type { Task, Workstream } from "../types";
 import { GenerateModal, NewTaskModal } from "./workstreams/WorkstreamModals";
 
@@ -27,7 +28,8 @@ export function WorkstreamsOverviewPage() {
       />
       <div className="workstream-groups">
         {grouped.map(([group, streams]) => (
-          <Section key={group} title={group}>
+          <section key={group} className="workstream-group" aria-label={group}>
+            <p className="section-kicker workstream-group__kicker"><span>{group}</span></p>
             <div className="workstream-list">
               {streams.map((stream) => (
                 <button key={stream.id} className="workstream-row" onClick={() => navigate(`/workstreams/${stream.id}`)}>
@@ -37,7 +39,7 @@ export function WorkstreamsOverviewPage() {
                   </div>
                   <div className="workstream-row__state">
                     <StatusText status={stream.status} />
-                    <ProgressLine value={stream.progress} />
+                    <ProgressLine value={stream.progress} label={`${stream.title} progress`} />
                   </div>
                   <div className="workstream-row__next">
                     <span>Next action</span>
@@ -47,7 +49,7 @@ export function WorkstreamsOverviewPage() {
                 </button>
               ))}
             </div>
-          </Section>
+          </section>
         ))}
       </div>
     </div>
@@ -96,27 +98,34 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
   };
 
   const updateTask = async (task: Task, status: Task["status"]) => {
-    try {
-      await api.updateTask(snapshot.workspace.id, task.id, { status });
-      await reload();
-      notify("Task status updated.");
-    } catch (error) {
-      notify(error instanceof Error ? error.message : String(error), "error");
-    }
+    await runMutation(
+      { reload, notify },
+      () => api.updateTask(snapshot.workspace.id, task.id, { status }),
+      "Task status updated.",
+    );
   };
 
   const updateClaimStatus = async (claimId: string, status: string) => {
-    try {
-      await api.updateClaim(snapshot.workspace.id, claimId, { status });
-      await reload();
-      notify("Claim status updated and contradictions recalculated.");
-    } catch (error) {
-      notify(error instanceof Error ? error.message : String(error), "error");
-    }
+    await runMutation(
+      { reload, notify },
+      () => api.updateClaim(snapshot.workspace.id, claimId, { status }),
+      "Claim status updated and contradictions recalculated.",
+    );
   };
 
   return (
     <div className="page-stack">
+      <a
+        className="back-link"
+        href="/workstreams"
+        onClick={(event) => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+          event.preventDefault();
+          navigate("/workstreams");
+        }}
+      >
+        <Icon name="arrow" width={15} height={15} /> All workstreams
+      </a>
       <PageHeader
         eyebrow={`${stream.group} workstream`}
         title={stream.title}
@@ -137,7 +146,7 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
       <section className="workstream-hero">
         <div className="workstream-hero__progress">
           <div><p className="eyebrow">Progress</p><strong>{stream.progress}%</strong></div>
-          <ProgressLine value={stream.progress} />
+          <ProgressLine value={stream.progress} label={`${stream.title} progress`} hideValue />
         </div>
         <div className="workstream-hero__confidence">
           <p className="eyebrow">Decision confidence</p>

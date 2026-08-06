@@ -214,14 +214,65 @@ export interface Activity {
   createdAt: string;
 }
 
+export interface ContradictionEntry {
+  claimId: string;
+  kind: Claim["kind"];
+  workstreamId: string | null;
+  statement: string;
+}
+
 export interface Contradiction {
   id: string;
   key: string;
   severity: "high" | "medium";
   title: string;
   summary: string;
+  entries: ContradictionEntry[];
   claimIds: string[];
   workstreamIds: string[];
+}
+
+export interface ExecutionRunStep {
+  workflowId: string;
+  title: string;
+  status: "finished" | "ready" | "in-progress" | "needs-founder" | "held" | "failed" | "upcoming" | string;
+  reason?: string;
+}
+
+export interface ExecutionRunView {
+  generatedAt: string;
+  runStarted: boolean;
+  autonomyUnset: boolean;
+  headline: string;
+  counts: {
+    total: number;
+    finished: number;
+    ready: number;
+    inProgress: number;
+    waitingOnFounder: number;
+    held: number;
+    failed: number;
+    upcoming: number;
+  };
+  steps: ExecutionRunStep[];
+}
+
+export interface FounderExecution {
+  id: string;
+  workflowId: string | null;
+  title: string | null;
+  status: "queued" | "running" | "completed" | "failed" | string;
+  failureKind: string | null;
+  error: string | null;
+  notes: string[];
+  requestedBy: string;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+  sessionCount: number;
+  lastSessionAt: string | null;
+  report: ExecutionRunView | null;
+  importedResults: { verifiedResults: number } | null;
 }
 
 export interface Recommendation {
