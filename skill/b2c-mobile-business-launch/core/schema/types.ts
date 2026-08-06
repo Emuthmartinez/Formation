@@ -335,6 +335,13 @@ export interface BudgetLedgerDocument {
   entries: BudgetLedgerEntry[];
 }
 
+/** Non-secret provisioning config (core/provisioning), e.g. the digest from-address and a Doppler project/config binding. Optional and migrate-safe: absent means unset, never a placeholder default — secret values never live here, only Doppler/.env do. */
+export interface ProvisioningConfig {
+  digestFromAddress?: string;
+  dopplerProject?: string;
+  dopplerConfig?: string;
+}
+
 export interface ControlFile {
   schemaVersion: "1.0.0";
   updatedAt: string;
@@ -342,6 +349,7 @@ export interface ControlFile {
   killSwitch: { engaged: boolean; engagedAt: string; engagedBy: "" | "founder" | "system"; reason: string };
   grants: GrantsMap;
   waivers: Waiver[];
+  provisioning?: ProvisioningConfig;
 }
 
 export interface ArtifactBindingV2 {

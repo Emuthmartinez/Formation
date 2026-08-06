@@ -320,7 +320,7 @@ export function register(harness: Harness): void {
 
   // --- scenario 2: digest content (advanced/parked/spend/anomalies), founder vocabulary only -
 
-  harness.check("session: digest content is populated from run state (advanced/parked/spend) in founder vocabulary only, and push-skipped-no-key is recorded", () => {
+  harness.check("session: digest content is populated from run state (advanced/parked/spend) in founder vocabulary only, and push-skipped-no-from-address is recorded", () => {
     const period = currentPeriod();
     const handle = bootstrapWorkspace(harness, "comprehensive", comprehensiveCatalog(), {
       grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.money": grant("domain.money", "full") },
@@ -340,7 +340,10 @@ export function register(harness: Harness): void {
     assert(/waiting 3 days?/.test(text), `expected an age annotation on the parked founder-gate item, got:\n${text}`);
     assert(text.includes("$25.00 of $1000.00 spent"), `expected the spend section to reflect the recorded actual, got:\n${text}`);
     assert(text.includes("$975.00 left"), `expected the spend section to reflect the decremented remaining balance, got:\n${text}`);
-    assert(text.includes("Sent to your inbox: skipped (no key)."), `expected a push-skipped-no-key line, got:\n${text}`);
+    // run.ts calls pushDigest() with no `from` argument (that's the exact integration point the
+    // provisioning layer's from-address config is meant to fill in later — see core/provisioning),
+    // so today this always skips on the from-address check, before the key is even looked at.
+    assert(text.includes("Sent to your inbox: skipped (the digest from-address isn't configured yet"), `expected a push-skipped-no-from-address line, got:\n${text}`);
     assertNoInternalVocabulary("comprehensive", text);
   });
 
@@ -623,20 +626,26 @@ main().catch((error) => { console.error(String((error && error.stack) || error))
   // reportResults() rather than being awaited). A tiny driver script exercises the real,
   // async pushDigest with an injected fake transport; nothing here ever touches the real network.
 
-  harness.check("session/digest: pushDigest attempts a send only when a key is present, and a push failure never throws", () => {
+  harness.check("session/digest: pushDigest requires a configured from-address before it will even check for a key, attempts a send only once both are present, and a push failure never throws", () => {
     const digestModuleUrl = pathToFileURL(path.join(skillRoot, "core/session/digest.ts")).href;
     const driverPath = path.join(harness.makeTempDir("session-push-driver"), "drive-push.mts");
     const driverSource = `
 import { pushDigest, renderDigest } from ${JSON.stringify(digestModuleUrl)};
 const rendered = renderDigest({ sessionId: "s1", businessSlug: "app", startedAt: "2026-08-05T00:00:00.000Z", endedAt: "2026-08-05T00:05:00.000Z", outcome: "completed", advanced: [], parked: [], spend: [], anomalies: [] });
 async function main() {
-  const skipped = await pushDigest(rendered, "founder@example.com", { env: {} });
+  // No from-address at all: must skip before ever looking at the key, even when a key is present —
+  // this is the fix for the motivating bug (a hardcoded placeholder from-address).
+  const noFrom = await pushDigest(rendered, "founder@example.com", { env: { RESEND_API_KEY: "fixture-fake-key" } });
+  if (noFrom.attempted !== false || !noFrom.skippedReason || !noFrom.skippedReason.includes("from-address")) throw new Error("no-from-path failed: " + JSON.stringify(noFrom));
+
+  // From-address present, key absent: skip on the key, not the from-address.
+  const skipped = await pushDigest(rendered, "founder@example.com", { env: {}, from: "Launch Digest <digest@updates.fixture-domain.test>" });
   if (skipped.attempted !== false || skipped.skippedReason !== "no key") throw new Error("skip-path failed: " + JSON.stringify(skipped));
 
-  const ok = await pushDigest(rendered, "founder@example.com", { env: { RESEND_API_KEY: "fixture-fake-key" }, transport: { send: async () => ({ ok: true, id: "fixture-send-1" }) } });
+  const ok = await pushDigest(rendered, "founder@example.com", { env: { RESEND_API_KEY: "fixture-fake-key" }, from: "Launch Digest <digest@updates.fixture-domain.test>", transport: { send: async () => ({ ok: true, id: "fixture-send-1" }) } });
   if (!(ok.attempted && ok.ok === true && ok.id === "fixture-send-1")) throw new Error("ok-path failed: " + JSON.stringify(ok));
 
-  const failed = await pushDigest(rendered, "founder@example.com", { env: { RESEND_API_KEY: "fixture-fake-key" }, transport: { send: async () => ({ ok: false, error: "fixture: simulated network failure" }) } });
+  const failed = await pushDigest(rendered, "founder@example.com", { env: { RESEND_API_KEY: "fixture-fake-key" }, from: "Launch Digest <digest@updates.fixture-domain.test>", transport: { send: async () => ({ ok: false, error: "fixture: simulated network failure" }) } });
   if (!(failed.attempted && failed.ok === false && failed.error === "fixture: simulated network failure")) throw new Error("fail-path failed: " + JSON.stringify(failed));
 
   console.log("PUSH_DRIVER_OK");
