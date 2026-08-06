@@ -54,7 +54,20 @@ The rules above are enforced in three layers, strongest last:
    an unprivileged user with read-only access to `control/`, and the reducer commit for an
    autonomy document runs as the founder (interactively, or via a small privileged helper the
    scheduler invokes for founder-authorized patches). Without this OS boundary, layers 1–2 are
-   bug-defense only. Set it up before granting any autonomy above review-first.
+   bug-defense only. Set it up before granting any autonomy above review-first, with:
+   ```
+   tsx <skill-root>/core/adapters/install-control-permissions.ts --workspace . \
+       [--agent-user <name-of-the-unprivileged-scheduled-session-account>] --apply
+   ```
+   (`npm run install:control-permissions -- --workspace . --agent-user <name> --apply` from the
+   skill root works the same way.) Default is a dry run — it prints what it would change and
+   touches nothing until `--apply` is passed. It never runs `sudo`, never creates or modifies a
+   user account, and never `chown`s anything; if it needs privileges it doesn't have, it prints the
+   exact command for the founder to run themselves rather than attempting a workaround. Without
+   `--agent-user`, or if that account doesn't exist yet, the permissions it applies are advisory
+   only, not a real boundary — a scheduled session's own digest names this explicitly (via
+   `verifyControlBoundary`'s `enforced` / `advisory_only` / `unprotected` verdict) whenever a grant
+   above review-first is relying on a boundary that isn't genuinely enforced yet.
 
 ## How A Scheduled Session Works
 

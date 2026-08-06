@@ -57,6 +57,7 @@
     "render:artifact-pages": "tsx tooling/render-artifact-pages.ts",
     "render:autonomy-console": "tsx tooling/render-autonomy-console.ts",
     "onboard:run": "tsx core/session/onboard.ts",
+    "install:control-permissions": "tsx core/adapters/install-control-permissions.ts",
     "test:validators": "tsx validation/repository/run-validator-fixtures.ts",
     "test:fixtures": "tsx verification/fixtures/run.ts",
     "test:boundaries": "tsx verification/boundaries/run.ts",
