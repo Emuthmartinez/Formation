@@ -322,24 +322,36 @@ export interface PushDigestOptions {
   readonly env?: NodeJS.ProcessEnv;
   /** Defaults to a real Resend transport built from the env key; fixtures inject a fake transport so no real network call ever happens in a test. */
   readonly transport?: DigestPushTransport;
+  /**
+   * The verified sending address for this business. Required — there is deliberately NO
+   * placeholder default (see the file header on the motivating bug: a hardcoded `@updates.
+   * example.com` from-address meant every production push called the Resend API against a
+   * domain nobody had verified, and it 403'd). Callers source this from the workspace's
+   * provisioning config (control.provisioning.digestFromAddress — see core/provisioning) and
+   * pass it through explicitly; pushDigest never reads that config itself.
+   */
   readonly from?: string;
   readonly apiKeyEnvVar?: string;
 }
 
-const DEFAULT_FROM = "Launch Digest <digest@updates.example.com>";
-
 /**
- * R16/KTD9: attempted only when RESEND_API_KEY is present; never blocks or fails the session on
- * push failure. Never send real email autonomously outside an explicit human-approved send —
+ * R16/KTD9: attempted only when both a from-address and RESEND_API_KEY are present; never
+ * blocks or fails the session on push failure. The from-address is checked first and on its own
+ * — an unconfigured from-address must never even reach the "do we have a key" question, since
+ * calling the API with a guessed/placeholder from-address is exactly the failure this guards
+ * against. Never send real email autonomously outside an explicit human-approved send —
  * fixtures must always inject both a fake env and a fake transport (see session.fixtures.ts).
  */
 export async function pushDigest(rendered: RenderedDigest, to: string, options: PushDigestOptions = {}): Promise<PushOutcome> {
+  if (!options.from) {
+    return { attempted: false, skippedReason: "the digest from-address isn't configured yet — run the provisioning checklist (tsx core/provisioning/cli.ts plan) to set it" };
+  }
   const env = options.env ?? process.env;
   const keyVar = options.apiKeyEnvVar ?? "RESEND_API_KEY";
   const key = env[keyVar];
   if (!key) return { attempted: false, skippedReason: "no key" };
 
   const transport = options.transport ?? createResendTransport(key);
-  const result = await transport.send({ to, from: options.from ?? DEFAULT_FROM, subject: rendered.subject, html: rendered.html, text: rendered.markdown });
+  const result = await transport.send({ to, from: options.from, subject: rendered.subject, html: rendered.html, text: rendered.markdown });
   return result.ok ? { attempted: true, ok: true, id: result.id } : { attempted: true, ok: false, error: result.error };
 }

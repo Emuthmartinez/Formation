@@ -23,6 +23,16 @@
       }
     },
     "grants": { "$ref": "urn:b2c-mobile-business-launch:core:grants-schema#/$defs/grantsMap" },
-    "waivers": { "$ref": "urn:b2c-mobile-business-launch:core:waivers-schema#/$defs/waiverList" }
+    "waivers": { "$ref": "urn:b2c-mobile-business-launch:core:waivers-schema#/$defs/waiverList" },
+    "provisioning": {
+      "$comment": "Non-secret provisioning config (core/provisioning), e.g. the digest from-address and a Doppler project/config binding. Optional and migrate-safe: absent means unset, never a placeholder default. Secret values never live here — only Doppler/.env do.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "digestFromAddress": { "type": "string", "minLength": 1 },
+        "dopplerProject": { "type": "string", "minLength": 1 },
+        "dopplerConfig": { "type": "string", "minLength": 1 }
+      }
+    }
   }
 }
