@@ -138,6 +138,12 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
       { kind: "secret", name: "REVENUECAT_PUBLIC_IOS_KEY", why: "Client SDK key shipped in the app.", verifiable: true },
       {
         kind: "secret",
+        name: "REVENUECAT_PUBLIC_ANDROID_KEY",
+        why: "RevenueCat issues a separate public API key per platform app entry (the iOS app and the Android/Play app are two different entries) — this is that Android/Play client SDK key. Only needed once this business actually ships on Android; an iOS-only business has no use for it.",
+        verifiable: true,
+      },
+      {
+        kind: "secret",
         name: "REVENUECAT_WEBHOOK_SECRET",
         why: "Verifies RevenueCat webhook authenticity before trusting subscription-change events.",
         verifiable: true,
@@ -176,6 +182,24 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
       { kind: "secret", name: "STRIPE_SECRET_KEY", why: "Server-side API key for checkout/session/product calls.", verifiable: true },
       { kind: "secret", name: "STRIPE_WEBHOOK_SECRET", why: "Verifies webhook signatures before trusting payment/subscription events.", verifiable: true },
       { kind: "config", name: "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", why: "Public client key for Stripe.js/checkout embed.", verifiable: true },
+      {
+        kind: "external",
+        name: "Stripe account has a completed business profile, branding, support email, and statement descriptor",
+        why: "knowledge/money/revenue-monetization.md's Stripe setup checklist lists these as required before live mode — an incomplete business profile is exactly the kind of dashboard-state gap that blocks payouts even though every API key is valid.",
+        verifiable: false,
+      },
+      {
+        kind: "external",
+        name: "Payout bank account added and verified in the Stripe dashboard",
+        why: "Without a verified payout destination, collected revenue has nowhere to go even once checkout works end-to-end.",
+        verifiable: false,
+      },
+      {
+        kind: "external",
+        name: "Subscription/payment lifecycle events (paid, failed, action-required, canceled) tested against Stripe's CLI/sandbox before switching to live API keys",
+        why: "knowledge/money/revenue-monetization.md is explicit: use Stripe CLI/sandbox to test all lifecycle events before going live — skipping this risks discovering a broken webhook handler only after real money is moving.",
+        verifiable: false,
+      },
       {
         kind: "external",
         name: "A live webhook endpoint is registered in the Stripe dashboard and is actually receiving events",
@@ -268,6 +292,12 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
         kind: "external",
         name: "PrivacyInfo.xcprivacy is lint-clean and required-reason API categories are fully declared",
         why: "A structurally valid credential set and a passing local build can still get rejected/blocked at upload for an unrelated, undeclared privacy-manifest fact — the same shape as the Resend bug.",
+        verifiable: true,
+      },
+      {
+        kind: "external",
+        name: "Export compliance answer completed for the app record (ITSAppUsesNonExemptEncryption / encryption-use questionnaire)",
+        why: "Named as a blocking release-checklist item everywhere store readiness is described (Apple signing/release, launch-phases, artifact-contracts, ASO/store-ops) — Apple withholds release until it's answered, even when the binary, signing, and every other field are otherwise ready.",
         verifiable: true,
       },
     ],

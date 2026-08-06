@@ -105,13 +105,30 @@ function buildSources(args: Record<string, string>, workspace: string, control: 
   const dopplerProject = args["doppler-project"] ?? control?.provisioning?.dopplerProject;
   const dopplerConfig = args["doppler-config"] ?? control?.provisioning?.dopplerConfig;
   const doppler = lookupDopplerSecretNames({ workspaceDir: workspace, project: dopplerProject, config: dopplerConfig });
+
+  // Two-tier composition (knowledge/operations/doppler-organization.md): a shared `platform`
+  // project plus this business's own project. Cross-project inheritance is a paid Doppler
+  // feature, so the tiers are composed here — a second, independent lookup scoped to the
+  // platform project — rather than relied on from Doppler itself. Only attempted when a
+  // platform project is actually configured; there is no directory-scoped fallback for it the
+  // way the business tier has (the platform project is always named explicitly).
+  const dopplerPlatformProject = args["doppler-platform-project"] ?? control?.provisioning?.dopplerPlatformProject;
+  const dopplerPlatformConfig = args["doppler-platform-config"] ?? control?.provisioning?.dopplerPlatformConfig;
+  const dopplerPlatform = dopplerPlatformProject
+    ? lookupDopplerSecretNames({ workspaceDir: workspace, project: dopplerPlatformProject, config: dopplerPlatformConfig })
+    : undefined;
+
   const envFile = args["env-file"] ? lookupEnvFileKeys(path.resolve(args["env-file"])) : { found: false, keys: new Set<string>() };
   return {
     dopplerNames: doppler.names,
     dopplerReachable: doppler.reachable,
     dopplerDetail: doppler.detail,
+    dopplerPlatformNames: dopplerPlatform?.names,
+    dopplerPlatformReachable: dopplerPlatform?.reachable,
+    dopplerPlatformDetail: dopplerPlatform?.detail,
     envKeys: envFile.keys,
     envFileFound: envFile.found,
+    envFileRequested: Boolean(args["env-file"]),
     provisioningConfig: control?.provisioning,
     founderContactEmail: loadFounderContactEmail(args.brief),
   };
@@ -127,6 +144,14 @@ function inScopeProviderIds(control: ControlFile | undefined, catalog: CatalogIn
   // provider.doppler underlies every autonomous session regardless of which domain is granted
   // (core/session/run.ts wires doppler_auth as a global prerequisite, not a per-domain one).
   if (manifestIds.has("provider.doppler")) scoped.add("provider.doppler");
+  // provider.resend gets the identical carve-out: core/session/run.ts's finish() calls
+  // pushDigest(...) on EVERY exit path of EVERY scheduled session (nothing_to_do,
+  // workspace_not_ready, crashed, parked...), independent of which domains are granted — it is
+  // not gated behind domain.operations the way workflow.operations.resend-email-ops is. Without
+  // this, a business that granted only e.g. Product/Design would pass `provisioning check` and
+  // then silently fail to email its digest, exactly the plan-time-vs-runtime gap this feature
+  // exists to close.
+  if (manifestIds.has("provider.resend")) scoped.add("provider.resend");
   for (const workflow of catalog.workflows) {
     if (!grantedDomains.has(workflow.domainId)) continue;
     for (const providerId of workflow.providerIds) {
@@ -153,7 +178,11 @@ function renderPlan(resolutions: readonly ProviderResolution[]): string {
       lines.push(`- [${requirement.status === "satisfied" ? "x" : " "}] ${requirement.name} (${statusTag(requirement.status)})`);
       lines.push(`    Where it goes: ${whereText(requirement.kind, provider.providerId)}`);
       lines.push(`    Why: ${findWhy(provider.providerId, requirement.name)}`);
-      if (requirement.status !== "satisfied") lines.push(`    Current check: ${requirement.reason}`);
+      // Always shown, not just when missing: for a satisfied Doppler-backed item this is the
+      // only place a founder sees which tier actually supplied it (their business's own project
+      // vs. the shared platform project) — useful information the two-tier composition (KTD-
+      // provisioning) makes possible, not just a debugging aid for the unsatisfied case.
+      lines.push(`    Current check: ${requirement.reason}`);
       lines.push("");
     }
   }

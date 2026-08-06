@@ -14,10 +14,22 @@ import { PROVISIONING_MANIFEST, type ProvisioningProvider, type ProvisioningRequ
  *      resolve to "unverifiable" unless a live probe (not built here — see tooling/probe-
  *      posthog.ts, tooling/probe-revenuecat.ts for the two that exist) or a recorded founder
  *      confirmation says otherwise.
+ *
+ * Two-tier Doppler composition (knowledge/operations/doppler-organization.md): a portfolio keeps
+ * one shared `platform` Doppler project plus one project per business. Cross-project inheritance
+ * (`doppler configs update --inherits`) is a paid-tier feature, so this file composes the two
+ * tiers itself rather than depending on Doppler to do it — a name present in EITHER tier's
+ * lookup satisfies a requirement, with the business tier winning over the platform tier on
+ * conflict (matching `doppler run -p platform ... -- doppler run -p <business> ... --`, where the
+ * inner/business injection wins). Presence-only still holds across both tiers: this file never
+ * reads, returns, or logs which tier's *value* would actually be used, only which tier's name
+ * lookup satisfied the requirement — genuinely useful founder information ("this came from your
+ * shared platform project") that carries no secret value with it.
  */
 
 export type ResolutionStatus = "satisfied" | "missing" | "unverifiable";
-export type ResolutionSource = "doppler" | "env-file" | "workspace-config" | "founder-confirmed";
+/** "doppler-business" / "doppler-platform" report which tier of the two-tier composition (see file header) actually satisfied the requirement. */
+export type ResolutionSource = "doppler-business" | "doppler-platform" | "env-file" | "workspace-config" | "founder-confirmed";
 
 export interface RequirementResolution {
   readonly providerId: string;
@@ -122,21 +134,30 @@ export function lookupEnvFileKeys(envFilePath: string): EnvFileLookupResult {
 
 // --- workspace config (non-secret values recorded on the control file) --------------------------
 
-/** Mirrors core/schema/types.ts's ControlFile["provisioning"]; duplicated as a narrow local shape so this module never needs to import the full schema surface for three optional strings. */
+/** Mirrors core/schema/types.ts's ControlFile["provisioning"]; duplicated as a narrow local shape so this module never needs to import the full schema surface for five optional strings. */
 export interface ProvisioningConfigLike {
   readonly digestFromAddress?: string;
   readonly dopplerProject?: string;
   readonly dopplerConfig?: string;
+  readonly dopplerPlatformProject?: string;
+  readonly dopplerPlatformConfig?: string;
 }
 
 // --- resolution ------------------------------------------------------------------------------
 
 export interface ResolveSources {
+  /** This business's own Doppler project/config tier. */
   readonly dopplerNames: ReadonlySet<string>;
   readonly dopplerReachable: boolean;
   readonly dopplerDetail?: string;
+  /** The shared account-level `platform` tier (see file header). Optional: absent/undefined means no platform tier was configured or consulted, not that it was checked and found unreachable. */
+  readonly dopplerPlatformNames?: ReadonlySet<string>;
+  readonly dopplerPlatformReachable?: boolean;
+  readonly dopplerPlatformDetail?: string;
   readonly envKeys: ReadonlySet<string>;
   readonly envFileFound: boolean;
+  /** True when the caller actually asked for a .env file (--env-file). Distinguishes "this business doesn't use a .env file" from "the .env file it does use couldn't be read" — only the second is a gap worth reporting. */
+  readonly envFileRequested?: boolean;
   readonly provisioningConfig?: ProvisioningConfigLike;
   /** Sourced from the session brief, if one was supplied to the caller — see provider.resend's "Founder recipient email" requirement, which this repo already wires correctly through brief.founderContact.email rather than through this module. */
   readonly founderContactEmail?: string;
@@ -198,27 +219,116 @@ function resolveExternal(providerId: string, requirement: ProvisioningRequiremen
   };
 }
 
-function resolveSecret(requirement: ProvisioningRequirement, sources: ResolveSources): CheckOutcome {
-  if (sources.dopplerNames.has(requirement.name)) return { status: "satisfied", reason: "present in Doppler", source: "doppler" };
-  if (sources.envKeys.has(requirement.name)) return { status: "satisfied", reason: "present in the .env file", source: "env-file" };
-  if (!sources.dopplerReachable && !sources.envFileFound)
-    return { status: "missing", reason: "Doppler wasn't reachable and no .env file was checked — set it in one of the two" };
-  if (!sources.dopplerReachable)
-    return { status: "missing", reason: `Doppler wasn't reachable (${sources.dopplerDetail ?? "no detail"}) and it isn't in the .env file either` };
-  return { status: "missing", reason: "not found in Doppler or the .env file" };
+/**
+ * Which sources a resolution could actually speak to.
+ *
+ * "We searched there and it wasn't there" and "we could not read that source at all" are
+ * different facts, and only the first justifies a definitive missing. Keeping them apart is not
+ * cosmetic: once there is more than one Doppler tier, collapsing reachability into a single
+ * anywhere-reachable boolean makes the checker announce a confident absence for a project it
+ * never opened. The live case is a Doppler token that is valid but scoped to the wrong
+ * workplace — it authenticates fine and then cannot see the business project at all.
+ */
+interface SourceAvailability {
+  /** Sources genuinely searched, so absence from them is a real fact about this setup. */
+  readonly searched: readonly string[];
+  /** Sources that could not be searched, each carrying whatever detail explains why. */
+  readonly unreadable: readonly string[];
 }
 
-/** Config items whose name is (or contains) one or more ALL_CAPS_WITH_UNDERSCORE tokens are checked the same way a secret is — presence in Doppler or .env — since this repo stores non-secret config the same two places it stores secrets. Config items with no such token (pure prose) fall back to "unverifiable": there is no mechanical check for them yet. */
+function describeSources(sources: ResolveSources): SourceAvailability {
+  const searched: string[] = [];
+  const unreadable: string[] = [];
+
+  if (sources.dopplerReachable) searched.push("this business's Doppler project");
+  else unreadable.push(`this business's Doppler project couldn't be read (${sources.dopplerDetail ?? "no detail"})`);
+
+  // A platform tier that was never configured is neither searched nor unreadable — it simply
+  // isn't part of this business's setup, and saying anything about it would be noise.
+  if (sources.dopplerPlatformNames !== undefined || sources.dopplerPlatformReachable !== undefined) {
+    if (sources.dopplerPlatformReachable === true) searched.push("your shared platform Doppler project");
+    else unreadable.push(`your shared platform Doppler project couldn't be read (${sources.dopplerPlatformDetail ?? "no detail"})`);
+  }
+
+  // Same rule as the platform tier: a .env file that was never asked for isn't a gap in the
+  // check, it's a source this business doesn't use, and naming it would send the founder looking
+  // somewhere irrelevant. A .env file that WAS asked for and couldn't be read is a real gap.
+  if (sources.envFileFound) searched.push("the .env file");
+  else if (sources.envFileRequested) unreadable.push("the .env file you pointed at couldn't be read");
+
+  return { searched, unreadable };
+}
+
+/**
+ * Founder-facing reason for a missing item that never claims a source was searched when it
+ * wasn't. Three shapes, in order of how much the check actually established: nothing readable,
+ * everything readable, and the mixed case — where the honest answer names what was searched and
+ * then says plainly that the item may already be sitting in the part that couldn't be read.
+ */
+function missingReason(sources: ResolveSources, prefix = ""): string {
+  const { searched, unreadable } = describeSources(sources);
+  if (searched.length === 0) return `${prefix}couldn't be checked anywhere — ${unreadable.join("; ")}`;
+  const base = `${prefix}not found in ${searched.join(" or ")}`;
+  if (unreadable.length === 0) return base;
+  return `${base} — but ${unreadable.join("; ")}, so it may already be set there`;
+}
+
+/** Which place actually carries a given name, in the file header's precedence order (business tier, then platform tier, then .env). `undefined` means none of them do. */
+function tierOf(name: string, sources: ResolveSources): ResolutionSource | undefined {
+  if (sources.dopplerNames.has(name)) return "doppler-business";
+  if (sources.dopplerPlatformNames?.has(name)) return "doppler-platform";
+  if (sources.envKeys.has(name)) return "env-file";
+  return undefined;
+}
+
+/** Founder-facing name for a source that satisfied something. Deliberately worded the same as resolveSecret's satisfied reasons so the two read alike in the same report. */
+function satisfiedSourceLabel(source: ResolutionSource): string {
+  switch (source) {
+    case "doppler-business":
+      return "Doppler (this business's project)";
+    case "doppler-platform":
+      return "Doppler (your shared platform project)";
+    case "env-file":
+      return "the .env file";
+    default:
+      return source;
+  }
+}
+
+/** Business tier checked first — business wins on conflict (file header). Only when the business tier doesn't have it is the platform tier consulted. */
+function resolveSecret(requirement: ProvisioningRequirement, sources: ResolveSources): CheckOutcome {
+  const tier = tierOf(requirement.name, sources);
+  if (tier) return { status: "satisfied", reason: `present in ${satisfiedSourceLabel(tier)}`, source: tier };
+  return { status: "missing", reason: missingReason(sources) };
+}
+
+/** Config items whose name is (or contains) one or more ALL_CAPS_WITH_UNDERSCORE tokens are checked the same way a secret is — presence in Doppler (business tier, then platform tier) or .env — since this repo stores non-secret config the same places it stores secrets. Config items with no such token (pure prose) fall back to "unverifiable": there is no mechanical check for them yet. */
 function resolveConfig(requirement: ProvisioningRequirement, sources: ResolveSources): CheckOutcome {
   const tokens = extractEnvTokens(requirement.name);
   if (tokens.length === 0)
     return { status: "unverifiable", reason: "no automated check is wired up for this item yet — verify it directly against the checklist" };
 
-  const present = tokens.filter((token) => sources.dopplerNames.has(token) || sources.envKeys.has(token));
-  const missing = tokens.filter((token) => !present.includes(token));
-  if (missing.length === 0)
-    return { status: "satisfied", reason: `${tokens.join(", ")} all present in Doppler/.env`, source: sources.dopplerNames.size > 0 ? "doppler" : "env-file" };
-  return { status: "missing", reason: `still missing: ${missing.join(", ")}` };
+  // Per token, not per requirement: a multi-token config item can legitimately be satisfied out
+  // of more than one place, and picking a single winner by "does ANY token live here" would
+  // attribute the whole requirement to a tier that supplied only part of it.
+  const attributed = tokens.map((token) => ({ token, tier: tierOf(token, sources) }));
+  const missing = attributed.filter((entry) => !entry.tier).map((entry) => entry.token);
+  if (missing.length === 0) {
+    const firstTier = attributed[0]?.tier;
+    if (firstTier !== undefined && attributed.every((entry) => entry.tier === firstTier)) {
+      return { status: "satisfied", reason: `${tokens.join(", ")} all present in ${satisfiedSourceLabel(firstTier)}`, source: firstTier };
+    }
+    // Genuinely mixed. `source` is left unset rather than naming one of them, because every
+    // available answer would be wrong for at least one token; the per-token breakdown goes in
+    // the reason instead, where it is the more useful thing for a founder anyway.
+    return {
+      status: "satisfied",
+      reason: `all present, though not all from one place: ${attributed.map((entry) => `${entry.token} in ${satisfiedSourceLabel(entry.tier!)}`).join("; ")}`,
+    };
+  }
+  // Same honesty rule as resolveSecret: name the tokens still absent, but only claim they are
+  // absent from sources this run could actually read.
+  return { status: "missing", reason: missingReason(sources, `${missing.join(", ")} `) };
 }
 
 export function resolveRequirement(providerId: string, requirement: ProvisioningRequirement, sources: ResolveSources): RequirementResolution {

@@ -1,11 +1,14 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.71.0",
+  "version": "0.72.0",
   "updatedAt": "2026-08-05",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
     "Added the OS trust-boundary installer and an honest verifier that reports enforced / advisory-only / unprotected from an empirical write probe, never from mode bits alone, and names an unenforced boundary in the digest when a grant sits above review-first.",
     "Shared tsx-bin resolution across eleven call sites and made session lock liveness independent of executor cooperation, so a slow real executor can no longer let its own lock go stale.",
-    "Recorded the portfolio Doppler convention: one platform project plus one per business, repos map to configs, and the platform tier composes at the consumer because cross-project inheritance is a paid feature."
+    "Recorded the portfolio Doppler convention: one platform project plus one per business, repos map to configs, and the platform tier composes at the consumer because cross-project inheritance is a paid feature.",
+    "Declared every provider credential a business needs up front, split into secret / config / external, so a founder can set them before an autonomous session runs instead of discovering each gap when a run breaks on it.",
+    "Composed the two Doppler tiers in the resolver itself, business project winning over the shared platform project, and reported which tier actually supplied each item.",
+    "Made a missing credential say only what was actually checked: an unreadable Doppler tier is now named as unreadable instead of being reported as searched-and-empty, and a config item satisfied out of two different tiers is no longer attributed to just one of them."
   ]
 }

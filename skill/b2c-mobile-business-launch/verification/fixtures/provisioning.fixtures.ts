@@ -14,7 +14,9 @@ import {
   resolveRequirement,
   type ResolveSources,
 } from "../../core/provisioning/resolve.js";
-import { renderCheck, renderPlan } from "../../core/provisioning/cli.js";
+import { buildSources, inScopeProviderIds, renderCheck, renderPlan } from "../../core/provisioning/cli.js";
+import type { CatalogInput } from "../../core/engine/compile.js";
+import type { ControlFile, GrantableDomainId } from "../../core/schema/types.js";
 
 /**
  * core/provisioning fixtures: the manifest declares (requirements.ts), presence is resolved from
@@ -241,6 +243,75 @@ export function register(harness: Harness): void {
     assert(missingCount === 0, `expected zero missing when the in-scope set is empty, got ${missingCount} — check must not block on ungranted providers`);
   });
 
+  // --- provider.resend gets the same always-in-scope carve-out as provider.doppler -----------
+  // core/session/run.ts's finish() calls pushDigest() on EVERY exit path of EVERY scheduled
+  // session, independent of which domain is granted — so provider.resend must stay in scope even
+  // when the only granted domain is not domain.operations (the domain workflow.operations.resend-
+  // email-ops actually lives under).
+
+  function minimalControl(grantedDomainId: GrantableDomainId): ControlFile {
+    const now = "2026-08-05T00:00:00.000Z";
+    const grants: ControlFile["grants"] = {
+      [grantedDomainId]: { domainId: grantedDomainId, level: "run-with-guardrails", prerequisites: [], grantedAt: now, grantedBy: "founder", updatedAt: now },
+    };
+    return {
+      schemaVersion: "1.0.0",
+      updatedAt: now,
+      businessSlug: "fixture-biz",
+      killSwitch: { engaged: false, engagedAt: "", engagedBy: "", reason: "" },
+      grants,
+      waivers: [],
+    };
+  }
+
+  function catalogWorkflow(overrides: Partial<CatalogInput["workflows"][number]>): CatalogInput["workflows"][number] {
+    return {
+      id: "workflow.fixture.placeholder",
+      title: "Fixture workflow",
+      domainId: "domain.product",
+      actionClass: "draft",
+      dependencies: [],
+      outputPaths: [],
+      providerIds: [],
+      laneIds: [],
+      founderOnlyActions: [],
+      gateCommands: [],
+      idempotent: true,
+      ...overrides,
+    };
+  }
+
+  harness.check(
+    "provisioning/cli: provider.resend is force-scoped in-scope (same carve-out as provider.doppler) even when only a non-operations domain is granted",
+    () => {
+      // Only domain.product is granted — nowhere near domain.operations, which is where
+      // workflow.operations.resend-email-ops (and therefore provider.resend) actually lives.
+      const control = minimalControl("domain.product");
+      const catalog: CatalogInput = {
+        version: "catalog.fixture",
+        artifacts: [],
+        workflows: [
+          catalogWorkflow({ id: "workflow.operations.resend-email-ops", domainId: "domain.operations", providerIds: ["provider.resend"] }),
+          catalogWorkflow({ id: "workflow.product.some-granted-work", domainId: "domain.product", providerIds: [] }),
+        ],
+      };
+      const inScope = inScopeProviderIds(control, catalog);
+      assert(
+        inScope.has("provider.resend"),
+        "expected provider.resend to be force-scoped even though only domain.product (a non-operations domain) is granted — pushDigest() runs regardless of grants",
+      );
+      assert(!inScope.has("provider.stripe"), "sanity check: an unrelated, ungranted, unreferenced provider must not leak into scope");
+
+      // And it actually surfaces in `check` output: with nothing configured, RESEND_API_KEY must
+      // be reported as still needed, not silently skipped because no operations domain is granted.
+      const { output, missingCount } = renderCheck(resolveManifest(emptySources()), inScope);
+      assert(
+        missingCount > 0 && output.includes("RESEND_API_KEY"),
+        `expected check to report RESEND_API_KEY still needed even though only domain.product is granted:\n${output}`,
+      );
+    },
+  );
+
   harness.check(
     "provisioning/cli: main() exits non-zero end-to-end when a required item is missing (spawned; a PATH-shadowing stub guarantees no real `doppler` binary is ever invoked)",
     () => {
@@ -263,6 +334,193 @@ export function register(harness: Harness): void {
       });
       assert(result.status === 1, `expected exit 1 on an unprovisioned workspace, got ${result.status}\n${result.stdout}\n${result.stderr}`);
       assert((result.stdout ?? "").includes("still needed"), `expected human-readable missing-item output, got:\n${result.stdout}`);
+    },
+  );
+
+  // --- two-tier Doppler composition: shared platform project + this business's own project ----
+  // (knowledge/operations/doppler-organization.md). Cross-project inheritance is a paid Doppler
+  // feature, so resolve.ts composes the two tiers itself: business tier wins on conflict, and
+  // which tier actually satisfied a requirement is reported back (useful founder information).
+
+  harness.check("provisioning/resolve: two-tier composition — business overrides platform when both have the same name", () => {
+    const sources = emptySources({
+      dopplerNames: new Set(["RESEND_WEBHOOK_SECRET"]),
+      dopplerPlatformNames: new Set(["RESEND_WEBHOOK_SECRET"]),
+      dopplerPlatformReachable: true,
+    });
+    const provider = PROVISIONING_MANIFEST.find((entry) => entry.providerId === "provider.resend")!;
+    const requirement = provider.requirements.find((entry) => entry.name === "RESEND_WEBHOOK_SECRET")!;
+    const resolution = resolveRequirement(provider.providerId, requirement, sources);
+    assert(resolution.status === "satisfied", `expected satisfied, got ${resolution.status}`);
+    assert(
+      resolution.source === "doppler-business",
+      `expected the business tier to win and be reported when both tiers carry the same name, got source "${resolution.source}"`,
+    );
+  });
+
+  harness.check("provisioning/resolve: two-tier composition — a platform-only name still satisfies, reported as the platform tier", () => {
+    const sources = emptySources({
+      dopplerNames: new Set(), // business tier does NOT have it
+      dopplerPlatformNames: new Set(["RESEND_WEBHOOK_SECRET"]),
+      dopplerPlatformReachable: true,
+    });
+    const provider = PROVISIONING_MANIFEST.find((entry) => entry.providerId === "provider.resend")!;
+    const requirement = provider.requirements.find((entry) => entry.name === "RESEND_WEBHOOK_SECRET")!;
+    const resolution = resolveRequirement(provider.providerId, requirement, sources);
+    assert(resolution.status === "satisfied", `expected a platform-only name to satisfy the requirement, got ${resolution.status}`);
+    assert(resolution.source === "doppler-platform", `expected source "doppler-platform" when only the platform tier has it, got "${resolution.source}"`);
+    assert(resolution.reason.includes("platform"), `expected the reason to name the platform tier for founder visibility, got "${resolution.reason}"`);
+  });
+
+  harness.check("provisioning/resolve: two-tier composition — absent from both tiers (and .env) stays missing, regardless of reachability", () => {
+    const sources = emptySources({
+      dopplerNames: new Set(),
+      dopplerReachable: true,
+      dopplerPlatformNames: new Set(),
+      dopplerPlatformReachable: true,
+    });
+    const provider = PROVISIONING_MANIFEST.find((entry) => entry.providerId === "provider.resend")!;
+    const requirement = provider.requirements.find((entry) => entry.name === "RESEND_WEBHOOK_SECRET")!;
+    const resolution = resolveRequirement(provider.providerId, requirement, sources);
+    assert(resolution.status === "missing", `expected missing when neither tier nor .env has the name, got ${resolution.status}`);
+    assert(resolution.source === undefined, `a missing resolution must not claim a satisfying source, got "${resolution.source}"`);
+    assert(
+      !/couldn't be read/.test(resolution.reason),
+      `when every source WAS readable the reason must be a plain definitive miss with no unreadable-source caveat, got "${resolution.reason}"`,
+    );
+  });
+
+  // The honesty invariant, pinned in both directions. Reporting "not found in X" for an X that
+  // was never readable is the failure this module exists to prevent: a founder acts on it by
+  // re-adding a credential that may already be sitting in the tier the check couldn't open.
+  // Two cases because a single anywhere-reachable boolean passes one of them by accident.
+  for (const scenario of [
+    {
+      label: "the business tier",
+      unreadable: "this business's Doppler project",
+      readable: "your shared platform Doppler project",
+      overrides: { dopplerReachable: false, dopplerDetail: "token does not have access to requested project", dopplerPlatformNames: new Set<string>(), dopplerPlatformReachable: true },
+    },
+    {
+      label: "the platform tier",
+      unreadable: "your shared platform Doppler project",
+      readable: "this business's Doppler project",
+      overrides: { dopplerReachable: true, dopplerPlatformNames: new Set<string>(), dopplerPlatformReachable: false, dopplerPlatformDetail: "platform token expired" },
+    },
+  ]) {
+    harness.check(
+      `provisioning/resolve: two-tier composition — when ${scenario.label} is unreachable, a missing item never claims that tier was searched`,
+      () => {
+        const sources = emptySources(scenario.overrides);
+        const provider = PROVISIONING_MANIFEST.find((entry) => entry.providerId === "provider.resend")!;
+        const requirement = provider.requirements.find((entry) => entry.name === "RESEND_WEBHOOK_SECRET")!;
+        const resolution = resolveRequirement(provider.providerId, requirement, sources);
+        assert(resolution.status === "missing", `expected missing, got ${resolution.status}`);
+        assert(
+          !new RegExp(`not found in[^—]*${scenario.unreadable}`).test(resolution.reason),
+          `the reason must not claim ${scenario.unreadable} was searched when it was unreachable, got "${resolution.reason}"`,
+        );
+        assert(
+          resolution.reason.includes(scenario.readable),
+          `the reason should still name ${scenario.readable}, which genuinely was searched, got "${resolution.reason}"`,
+        );
+        assert(
+          resolution.reason.includes(`${scenario.unreadable} couldn't be read`),
+          `the reason must say plainly that ${scenario.unreadable} couldn't be read, got "${resolution.reason}"`,
+        );
+      },
+    );
+  }
+
+  harness.check("provisioning/resolve: a multi-token config item satisfied out of two different tiers is not attributed to just one of them", () => {
+    // POSTHOG_PROJECT_ID from the platform tier, POSTHOG_HOST from this business's own project.
+    // Naming either tier as *the* source would be false for the other token, so no source is
+    // claimed at all and the per-token breakdown carries the answer instead.
+    const sources = emptySources({
+      dopplerNames: new Set(["POSTHOG_HOST"]),
+      dopplerReachable: true,
+      dopplerPlatformNames: new Set(["POSTHOG_PROJECT_ID"]),
+      dopplerPlatformReachable: true,
+    });
+    const requirement = { kind: "config", name: "POSTHOG_PROJECT_ID and POSTHOG_HOST/region", why: "fixture", verifiable: true } as const;
+    const resolution = resolveRequirement("provider.posthog", requirement, sources);
+    assert(resolution.status === "satisfied", `expected satisfied when every token is present somewhere, got ${resolution.status}`);
+    assert(resolution.source === undefined, `a mixed-tier requirement must not claim one tier as the source, got "${resolution.source}"`);
+    assert(
+      resolution.reason.includes("POSTHOG_HOST in Doppler (this business's project)"),
+      `expected per-token attribution for the business-tier token, got "${resolution.reason}"`,
+    );
+    assert(
+      resolution.reason.includes("POSTHOG_PROJECT_ID in Doppler (your shared platform project)"),
+      `expected per-token attribution for the platform-tier token, got "${resolution.reason}"`,
+    );
+  });
+
+  harness.check(
+    "provisioning/resolve+cli: two-tier composition end-to-end through buildSources/plan, via a PATH-shadowed `doppler` stub that answers differently per --project (never a real Doppler invocation)",
+    () => {
+      // The stub differentiates its response purely by which --project it was called with, so one
+      // spawned process stands in for both the platform lookup and the business lookup buildSources
+      // makes. It never touches the network and never prints anything beyond a canned name list.
+      const stubDir = harness.makeTempDir("provisioning-two-tier-doppler-stub-bin");
+      const stubPath = path.join(stubDir, "doppler");
+      const stubScript = `#!/bin/sh
+project=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --project) project="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+if [ "$project" = "fixture-platform" ]; then
+  echo '["RESEND_API_KEY","RESEND_WEBHOOK_SECRET"]'
+elif [ "$project" = "fixture-business" ]; then
+  echo '["RESEND_WEBHOOK_SECRET"]'
+else
+  echo '[]'
+fi
+exit 0
+`;
+      writeFileSync(stubPath, stubScript, "utf8");
+      chmodSync(stubPath, 0o755);
+      const env = { ...process.env, PATH: `${stubDir}${path.delimiter}${process.env.PATH ?? ""}` };
+      const restorePath = process.env.PATH;
+      process.env.PATH = env.PATH;
+      try {
+        const workspace = harness.makeTempDir("provisioning-two-tier-buildsources-workspace");
+        const args = {
+          workspace,
+          "doppler-project": "fixture-business",
+          "doppler-config": "prd",
+          "doppler-platform-project": "fixture-platform",
+          "doppler-platform-config": "prd",
+        };
+        const sources = buildSources(args, workspace, undefined);
+        assert(sources.dopplerPlatformNames?.has("RESEND_API_KEY"), "expected the platform-tier lookup to have run and found RESEND_API_KEY");
+        assert(sources.dopplerNames.has("RESEND_WEBHOOK_SECRET"), "expected the business-tier lookup to have run and found RESEND_WEBHOOK_SECRET");
+
+        const provider = PROVISIONING_MANIFEST.find((entry) => entry.providerId === "provider.resend")!;
+        const apiKeyReq = provider.requirements.find((entry) => entry.name === "RESEND_API_KEY")!;
+        const webhookReq = provider.requirements.find((entry) => entry.name === "RESEND_WEBHOOK_SECRET")!;
+        const apiKeyResolution = resolveRequirement(provider.providerId, apiKeyReq, sources);
+        const webhookResolution = resolveRequirement(provider.providerId, webhookReq, sources);
+        assert(
+          apiKeyResolution.status === "satisfied" && apiKeyResolution.source === "doppler-platform",
+          `RESEND_API_KEY (platform-only) expected satisfied/doppler-platform, got ${JSON.stringify(apiKeyResolution)}`,
+        );
+        assert(
+          webhookResolution.status === "satisfied" && webhookResolution.source === "doppler-business",
+          `RESEND_WEBHOOK_SECRET (present in both, business must win) expected satisfied/doppler-business, got ${JSON.stringify(webhookResolution)}`,
+        );
+
+        // A name present in neither tier (DOPPLER_TOKEN, under this business's own doppler
+        // requirement) still reports missing through the same two-tier-aware plan output.
+        const plan = renderPlan(resolveManifest(sources));
+        assert(plan.includes("your shared platform project"), `expected the plan to surface platform-tier attribution in founder-facing text:\n${plan}`);
+        assert(plan.includes("this business's project"), `expected the plan to surface business-tier attribution in founder-facing text:\n${plan}`);
+      } finally {
+        process.env.PATH = restorePath;
+      }
     },
   );
 

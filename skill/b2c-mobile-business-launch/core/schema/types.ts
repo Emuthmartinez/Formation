@@ -335,11 +335,21 @@ export interface BudgetLedgerDocument {
   entries: BudgetLedgerEntry[];
 }
 
-/** Non-secret provisioning config (core/provisioning), e.g. the digest from-address and a Doppler project/config binding. Optional and migrate-safe: absent means unset, never a placeholder default — secret values never live here, only Doppler/.env do. */
+/**
+ * Non-secret provisioning config (core/provisioning), e.g. the digest from-address and a Doppler
+ * project/config binding. Optional and migrate-safe: absent means unset, never a placeholder
+ * default — secret values never live here, only Doppler/.env do. dopplerProject/dopplerConfig
+ * bind this business's own tier; dopplerPlatformProject/dopplerPlatformConfig optionally bind the
+ * shared account-level `platform` project (knowledge/operations/doppler-organization.md) — cross-
+ * project inheritance is a paid Doppler feature, so resolve.ts composes the two tiers itself,
+ * business winning over platform on conflict.
+ */
 export interface ProvisioningConfig {
   digestFromAddress?: string;
   dopplerProject?: string;
   dopplerConfig?: string;
+  dopplerPlatformProject?: string;
+  dopplerPlatformConfig?: string;
 }
 
 export interface ControlFile {
