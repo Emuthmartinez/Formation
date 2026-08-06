@@ -1,11 +1,10 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.77.0",
+  "version": "0.78.0",
   "updatedAt": "2026-08-06",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Platform-to-engine execution adapter slice 3 completes the P0: Formation now imports the engine's verified results. The boundary report (core/adapters/platform-execution.ts) exports results[] — settled, accepted attempts from the durable run only, with evidence, artifact candidates by reference, and declared token budgets and cost estimates — plus per-artifact acceptance state. A node pending verification, a partially-accepted node, or a lane-seeded completion exports nothing; a seed fingerprint is not importable work.",
-    "The engine's staleness primitive is now wired: reconcilePatch runs invalidateDescendants whenever a re-produced output replaces a previously accepted fingerprint, so a changed accepted input transitively stales downstream nodes and un-accepts their outputs. An identical re-production invalidates nothing. The boundary's status overrides translate stale run nodes as upcoming work that will be redone, never as finished.",
-    "Formation's import (platform/server/domain/results.mjs) maps each verified result to a recommendation claim carrying the attempt's evidence — never an accepted fact — and each artifact candidate to a draft deliverable with an immutable version. Re-imports are idempotent; a newer verified attempt supersedes the old claim and appends a version without touching founder-authored title, status, or sections. Failed steps mirror as founder tasks that close when the engine recovers. Staleness marks exactly the engine-identified deliverables and clears when acceptance returns. Trace and cost metadata is copied field-by-field — ids, names, and declared totals only — so undeclared report fields never reach the store."
+    "The shared account-level Doppler project was renamed from `platform` to `formation` alongside the repository's Formation rebrand (the live rename happened 2026-08-06 with zero service tokens attached, so no automation broke). knowledge/operations/doppler-organization.md now names the `formation` project in the rule, the composition command, and the per-workplace constraint, and the tier heading reads 'shared account tier' so it can no longer be confused with the Formation product platform.",
+    "Comment-only sweeps in core/provisioning/resolve.ts and core/schema/types.ts follow the same rename. The `doppler-platform` ResolutionSource identifier is deliberately unchanged: it is a stable serialized value that fixtures and consumers key on, and renaming it would be a behavior change dressed as documentation."
   ]
 }

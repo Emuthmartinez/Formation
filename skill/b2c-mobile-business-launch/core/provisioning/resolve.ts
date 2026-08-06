@@ -16,15 +16,15 @@ import { PROVISIONING_MANIFEST, type ProvisioningProvider, type ProvisioningRequ
  *      confirmation says otherwise.
  *
  * Two-tier Doppler composition (knowledge/operations/doppler-organization.md): a portfolio keeps
- * one shared `platform` Doppler project plus one project per business. Cross-project inheritance
+ * one shared account-level Doppler project (`formation`) plus one project per business. Cross-project inheritance
  * (`doppler configs update --inherits`) is a paid-tier feature, so this file composes the two
  * tiers itself rather than depending on Doppler to do it — a name present in EITHER tier's
  * lookup satisfies a requirement, with the business tier winning over the platform tier on
- * conflict (matching `doppler run -p platform ... -- doppler run -p <business> ... --`, where the
+ * conflict (matching `doppler run -p formation ... -- doppler run -p <business> ... --`, where the
  * inner/business injection wins). Presence-only still holds across both tiers: this file never
  * reads, returns, or logs which tier's *value* would actually be used, only which tier's name
  * lookup satisfied the requirement — genuinely useful founder information ("this came from your
- * shared platform project") that carries no secret value with it.
+ * shared account-level `formation` project") that carries no secret value with it.
  */
 
 export type ResolutionStatus = "satisfied" | "missing" | "unverifiable";
