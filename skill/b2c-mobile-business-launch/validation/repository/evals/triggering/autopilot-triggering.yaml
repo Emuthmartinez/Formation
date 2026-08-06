@@ -59,6 +59,31 @@ body_contract:
     # and on Codex it would never fire at all. Both halves are pinned.
     - "starting any pre-build stage"
     - "on a non-Claude runtime to run the surfacing protocol"
+    # Session bootstrap — Start Here moves 1-3. On 2026-08-05 a launch ran on a
+    # runtime four minor versions stale, never asked what it was allowed to do or
+    # to spend, and walked lanes serially by reading SKILL.md top to bottom. Every
+    # one of those had a built answer: a freshness gate, an autonomy onboarding
+    # conversation, a frontier engine. None was reachable, because the opening
+    # sequence named none of them and nothing here pinned them. Capability that
+    # the entrypoint does not route to is capability the run does not have, and
+    # that gap is invisible to every other check in this repo.
+    - "Prove the runtime is current"
+    - "check:skill-version"
+    - "never continue stale silently"
+    - "Establish autonomy and spend authority"
+    - "nothing is granted yet"
+    # The spend question specifically. Grants alone answer "may you act", never
+    # "how much may you commit" — the ledger has an allocated balance per unit and
+    # before this nothing ever asked the founder to fill it.
+    - "what this business may spend"
+    - "onboard:run"
+    - "silence never grants it"
+    - "Compute the ready frontier"
+    - "plan:frontier"
+    # The point of the frontier is not ordering alone but concurrency: without
+    # this term a future edit could keep the command and lose the reason for it.
+    - "parallel-safe"
+    - "not by reading this file top to bottom"
 should_trigger:
   - id: transcript-to-business
     prompt: "Take this transcript and turn it into a business I can launch."

@@ -1,11 +1,15 @@
 # Autonomy Onboarding
 
-Use this the first time a business sets up scheduled, unattended work, and again whenever the
-founder wants to change how much they've handed over in one area. It reuses the conversation
-shape in `knowledge/operations/founder-zero-operator.md` (phase and outcome first, plain
-definitions, two or three choices with the recommendation first, consequences spelled out, a
-safe way to skip or come back later) applied to one specific decision: how much this agent should
-be allowed to do on its own, area by area, while the founder isn't watching.
+Use this at the very start of a business's first session — interactive or scheduled, since both are
+sessions and both act — and again whenever the founder wants to change how much they've handed over
+in one area. Waiting for the first *unattended* run is too late: a founder who says "launch me a
+business" and watches it happen is not watching every step of it, and an agent that never held this
+conversation is one deciding its own permissions.
+
+It reuses the conversation shape in `knowledge/operations/founder-zero-operator.md` (phase and
+outcome first, plain definitions, two or three choices with the recommendation first, consequences
+spelled out, a safe way to skip or come back later) applied to two specific decisions: how much this
+agent should be allowed to do on its own, area by area, and how much it may spend doing it.
 
 Nothing here is settled by default. Every business ships with nothing turned on — the agent asks
 before it acts, everywhere — until the founder walks through this once.
@@ -16,6 +20,7 @@ before it acts, everywhere — until the founder walks through this once.
 - The Three Ways To Set Up Each Area
 - The Nine Areas Of The Business
 - Protected Moves And Your Okay
+- How Much It May Spend
 - The Fast Path
 - After The Conversation
 
@@ -180,6 +185,30 @@ it — a pre-approval with any of these missing does not take effect:
 Never record a pre-approval that's vague, open-ended, or covers more than one of these six kinds
 of move at a time. Each one is its own, specific yes.
 
+## How Much It May Spend
+
+The settings above answer whether the agent may act. They do not answer how much it may commit, and
+those are different questions — a business with all nine areas granted and no money answer still
+cannot pay for a web address. Ask this once, in the same conversation:
+
+> Separately from what I'm allowed to do: how much is this business willing to spend, and over what
+> stretch of time? I'll work inside that and stop when it's used up, instead of asking you to
+> approve every small thing. If you'd rather not set anything aside yet, that's a fine answer — I'll
+> bring you each spending decision as it comes.
+
+For each area that gets money, collect three things: **which area** it belongs to, **an amount and a
+currency**, and **how often it resets** — a day, a week, or a month. An amount covers one named
+period and does not renew itself, exactly like a pre-approval: when the period ends the founder is
+asked again rather than the number quietly rolling forward.
+
+Setting nothing aside is a real answer and the default. It blocks nothing that costs nothing; it
+means spending waits for the founder each time instead of running inside an agreed limit.
+
+Keep this separate from a pre-approval above. A pre-approval says *this one protected move is
+allowed*; an amount says *this area has this much to work with*. A founder who says "you can spend
+$200 a month on ads" has answered the second, not the first, and still owes a yes before the first
+campaign actually goes live.
+
 ## The Fast Path
 
 Some founders would rather not walk through nine areas one at a time. Offer this explicitly:
@@ -190,6 +219,9 @@ Some founders would rather not walk through nine areas one at a time. Offer this
 
 If they say yes, still name the two areas kept on the safer, ask-first setting (money; store and
 legal/privacy) so the founder knows what changed and what didn't, then confirm once and move on.
+
+The fast path covers the trust settings only. Ask the spending question anyway — it is one sentence,
+and there is no safe default anyone else can pick for someone else's money.
 
 ## After The Conversation
 

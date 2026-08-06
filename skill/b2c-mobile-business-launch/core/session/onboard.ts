@@ -5,9 +5,12 @@ import path from "node:path";
 import { isMainModule, parseArgs } from "../lib/cli.js";
 import { runReducer } from "./reducer-cli.js";
 import { resolveWorkspacePaths } from "./run.js";
-import { validateControl, validateGrants, validateWaivers } from "../schema/index.js";
+import { periodKeyFor } from "../autonomy/budget.js";
+import { validateBudgetLedger, validateControl, validateGrants, validateWaivers } from "../schema/index.js";
 import type { StatePatch, PatchOp, PatchPath, PatchPrecondition } from "../reducer/patch.js";
 import type {
+  BudgetBalance,
+  BudgetLedgerDocument,
   BusinessUnit,
   ControlFile,
   Grant,
@@ -27,7 +30,7 @@ import { businessUnitDomains, grantLevels } from "../schema/types.js";
  * The scripted onboarding driver (U7, R5): a founder onboarding conversation (run interactively
  * against content/onboarding/autonomy-onboarding.md, or replayed for a rehearsal/test) ends with
  * a recorded transcript — this file is what turns that transcript into the founder's actual
- * grants and waivers. It never writes control.json directly: every change is expressed as a
+ * grants, waivers, and spend allocations. It never writes control.json directly: every change is expressed as a
  * typed StatePatch and applied through core/reducer/cli.ts, exactly like every other write to a
  * reducer-owned document (KTD7). A waiver whose envelope (scope, cap+period, expiry, undo-or-
  * mitigation) is incomplete refuses the *entire* run before anything is committed — onboarding
@@ -54,6 +57,24 @@ export interface OnboardingWaiverInput {
   readonly undoContract: UndoContract;
 }
 
+/**
+ * How much this business may spend in one area, for one period. Distinct from a waiver's caps: a
+ * waiver answers "may you make this one protected move, up to this much"; this answers "how much
+ * does this area have to spend at all", which is what funds a grant's `budget_funded` prerequisite.
+ * Before this existed, `BudgetBalance.allocated` was a field nothing ever filled — grants answered
+ * whether the agent could act and nothing ever answered how much it could commit.
+ *
+ * "per_run" is deliberately not offered: its period key needs a runId, and onboarding is a founder
+ * conversation with no run in flight. Allocations are per named period and do not renew themselves,
+ * the same contract the founder is given for waiver expiry.
+ */
+export interface OnboardingBudgetInput {
+  readonly unit: BusinessUnit;
+  readonly currency: string;
+  readonly budgetPeriod: Exclude<BudgetPeriod, "per_run">;
+  readonly allocated: number;
+}
+
 export interface OnboardingAnswers {
   readonly schemaVersion: "1.0.0";
   readonly businessSlug: string;
@@ -61,6 +82,7 @@ export interface OnboardingAnswers {
   /** Not every unit needs an answer in one run: a unit absent here is left exactly as it was. */
   readonly units: Partial<Record<BusinessUnit, { readonly level: GrantLevel }>>;
   readonly waivers?: readonly OnboardingWaiverInput[];
+  readonly budgets?: readonly OnboardingBudgetInput[];
 }
 
 export class AnswersInvalid extends Error {
@@ -114,6 +136,31 @@ export function validateAnswersShape(value: unknown): string[] {
     else value.waivers.forEach((entry, index) => issues.push(...validateWaiverInputShape(entry, index)));
   }
 
+  if (value.budgets !== undefined) {
+    if (!Array.isArray(value.budgets)) issues.push("budgets, when present, must be an array");
+    else value.budgets.forEach((entry, index) => issues.push(...validateBudgetInputShape(entry, index)));
+  }
+
+  return issues;
+}
+
+/** "per_run" is excluded on purpose — see OnboardingBudgetInput. */
+const allocatablePeriods: readonly string[] = ["daily", "weekly", "monthly"];
+
+function validateBudgetInputShape(value: unknown, index: number): string[] {
+  const prefix = `budgets[${index}]`;
+  if (!isPlainObject(value)) return [`${prefix} must be an object`];
+  const issues: string[] = [];
+  if (!businessUnits.includes(value.unit as BusinessUnit)) {
+    issues.push(`${prefix}.unit must be one of ${businessUnits.join(", ")}`);
+  }
+  if (!isNonEmptyString(value.currency)) issues.push(`${prefix}.currency is required (e.g. "USD")`);
+  if (!allocatablePeriods.includes(value.budgetPeriod as string)) {
+    issues.push(`${prefix}.budgetPeriod must be one of ${allocatablePeriods.join(", ")} — "per_run" needs a run in flight, so it cannot be allocated during onboarding`);
+  }
+  if (typeof value.allocated !== "number" || !Number.isFinite(value.allocated) || value.allocated <= 0) {
+    issues.push(`${prefix}.allocated must be a positive number — allocating zero funds nothing and is indistinguishable from not answering`);
+  }
   return issues;
 }
 
@@ -191,6 +238,36 @@ function nextWaiverId(domainId: string): string {
   return `waiver.${domainId.slice("domain.".length)}.onboarding-${waiverSequence}`;
 }
 
+/**
+ * Folds allocations into the ledger's balances, keyed by unit plus the resolved period. Re-answering
+ * the same unit and period replaces that allocation rather than stacking a second row, and carries
+ * forward whatever is already committed and spent against it: raising a budget must never reset the
+ * spend history, or `remaining` — the number every budget check actually reads — becomes fiction.
+ */
+export function buildBudgetBalances(existing: readonly BudgetBalance[], inputs: readonly OnboardingBudgetInput[], now: string): BudgetBalance[] {
+  const next = [...existing];
+  for (const input of inputs) {
+    const period = periodKeyFor(input.budgetPeriod, now);
+    const index = next.findIndex((balance) => balance.unit === input.unit && balance.period === period);
+    const prior = index >= 0 ? next[index] : undefined;
+    const committed = prior?.committed ?? 0;
+    const spent = prior?.spent ?? 0;
+    const balance: BudgetBalance = {
+      unit: input.unit,
+      period,
+      currency: input.currency,
+      allocated: input.allocated,
+      committed,
+      spent,
+      remaining: input.allocated - committed - spent,
+      updatedAt: now,
+    };
+    if (index >= 0) next[index] = balance;
+    else next.push(balance);
+  }
+  return next;
+}
+
 /** Every founder pre-approval is a fresh, deliberate record — onboarding always appends, never silently overwrites a prior one. */
 export function buildWaivers(existing: readonly Waiver[], inputs: readonly OnboardingWaiverInput[], now: string): Waiver[] {
   const added: Waiver[] = inputs.map((input) => {
@@ -229,6 +306,14 @@ function loadExistingControl(controlPath: string): ControlFile | undefined {
   const raw = tryLoadJson(controlPath);
   if (raw === undefined) return undefined;
   const result = validateControl(raw);
+  return result.valid ? result.value : undefined;
+}
+
+/** Undefined means "no ledger yet", which is a legitimate first-run state, not a failure. */
+function loadExistingLedger(ledgerPath: string): BudgetLedgerDocument | undefined {
+  const raw = tryLoadJson(ledgerPath);
+  if (raw === undefined) return undefined;
+  const result = validateBudgetLedger(raw);
   return result.valid ? result.value : undefined;
 }
 
@@ -287,8 +372,25 @@ function main(): number {
     return 1;
   }
 
+  // Spend allocations validate here, alongside grants and waivers, so a malformed budget refuses
+  // the run before anything is written — the same all-or-nothing rule the waiver envelope gets.
+  const budgetInputs = answers.budgets ?? [];
+  const existingLedger = loadExistingLedger(paths.ledger);
+  const candidateLedger: BudgetLedgerDocument = {
+    schemaVersion: "1.0.0",
+    updatedAt: now,
+    balances: buildBudgetBalances(existingLedger?.balances ?? [], budgetInputs, now),
+    entries: existingLedger?.entries ?? [],
+  };
+  const ledgerCheck = validateBudgetLedger(candidateLedger);
+  if (!ledgerCheck.valid) {
+    for (const issue of ledgerCheck.issues) console.error(`ISSUE onboard.budget_invalid: ${issue.message} (${issue.path})`);
+    return 1;
+  }
+
   const grantsChanged = !deepEqual(existingControl?.grants ?? {}, candidateGrants);
   const waiversChanged = waiverInputs.length > 0; // always an append when present; never a no-op
+  const budgetsChanged = budgetInputs.length > 0;
 
   const ops: PatchOp[] = [];
   const declaredOutputs: PatchPath[] = [];
@@ -317,16 +419,60 @@ function main(): number {
     }
   }
 
-  if (ops.length === 0) {
+  if (ops.length === 0 && !budgetsChanged) {
     console.log("Nothing to update: every answered area already matches this business's current settings.");
     return 0;
   }
 
   if (dryRun) {
-    console.log(`DRY RUN: would ${isBootstrap ? "create" : "update"} ${paths.control} with:`);
-    console.log(JSON.stringify({ grants: grantsChanged ? candidateGrants : undefined, waivers: waiversChanged ? candidateWaivers : undefined }, null, 2));
+    if (budgetsChanged) {
+      console.log(`DRY RUN: would ${existingLedger ? "update" : "create"} ${paths.ledger} with:`);
+      console.log(JSON.stringify({ balances: candidateLedger.balances }, null, 2));
+    }
+    if (ops.length > 0) {
+      console.log(`DRY RUN: would ${isBootstrap ? "create" : "update"} ${paths.control} with:`);
+      console.log(JSON.stringify({ grants: grantsChanged ? candidateGrants : undefined, waivers: waiversChanged ? candidateWaivers : undefined }, null, 2));
+    }
     return 0;
   }
+
+  /**
+   * Two reducer-owned documents cannot be committed as one transaction — the reducer is
+   * per-document — so the order decides what a partial failure leaves behind, and the two
+   * outcomes are not equally honest. Ledger first: an allocation with no grants authorizes
+   * nothing and is inert. The reverse would put the founder's trust settings live while the
+   * money answer they just gave silently failed to land, which is the state most likely to be
+   * mistaken for success. Both candidates were validated above, so a failure here is lock
+   * contention or tamper detection, never a bad answer.
+   */
+  if (budgetsChanged) {
+    const ledgerPatch: StatePatch = {
+      schemaVersion: "1.0.0",
+      patchId: `patch.onboard-budget.${answers.businessSlug}.${Date.parse(now) || Date.now()}`,
+      targetDoc: "budget-ledger",
+      reason: "Applying founder spend allocations from autonomy onboarding",
+      authoredBy: "onboarding-driver",
+      authoredAt: now,
+      preconditions: existingLedger
+        ? [{ path: ["updatedAt"], operator: "equals", value: existingLedger.updatedAt }]
+        : [{ path: ["balances"], operator: "not_exists" }],
+      ops: existingLedger
+        ? [{ op: "set", path: ["balances"], value: candidateLedger.balances }]
+        : [
+            { op: "set", path: ["balances"], value: candidateLedger.balances },
+            { op: "set", path: ["entries"], value: candidateLedger.entries },
+          ],
+      declaredOutputs: existingLedger ? [["balances"]] : [["balances"], ["entries"]],
+    };
+    const ledgerResult = runReducer(
+      ["commit", "--file", paths.ledger, "--manifest", paths.manifest, "--audit", paths.audit, "--session", "onboarding-driver", "--now", now, "--founder-authority", "true"],
+      JSON.stringify(ledgerPatch),
+    );
+    process.stdout.write(ledgerResult.output);
+    if (ledgerResult.code !== 0) return ledgerResult.code;
+  }
+
+  if (ops.length === 0) return 0;
 
   // Race guard: two onboarding runs against the same workspace must not silently clobber one
   // another. Bootstrap asserts nothing has beaten us to creating this control doc; an update

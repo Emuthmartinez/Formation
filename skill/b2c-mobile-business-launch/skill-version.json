@@ -1,14 +1,14 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.72.0",
+  "version": "0.73.0",
   "updatedAt": "2026-08-05",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Added the OS trust-boundary installer and an honest verifier that reports enforced / advisory-only / unprotected from an empirical write probe, never from mode bits alone, and names an unenforced boundary in the digest when a grant sits above review-first.",
-    "Shared tsx-bin resolution across eleven call sites and made session lock liveness independent of executor cooperation, so a slow real executor can no longer let its own lock go stale.",
-    "Recorded the portfolio Doppler convention: one platform project plus one per business, repos map to configs, and the platform tier composes at the consumer because cross-project inheritance is a paid feature.",
-    "Declared every provider credential a business needs up front, split into secret / config / external, so a founder can set them before an autonomous session runs instead of discovering each gap when a run breaks on it.",
-    "Composed the two Doppler tiers in the resolver itself, business project winning over the shared platform project, and reported which tier actually supplied each item.",
-    "Made a missing credential say only what was actually checked: an unreadable Doppler tier is now named as unreadable instead of being reported as searched-and-empty, and a config item satisfied out of two different tiers is no longer attributed to just one of them."
+    "Opened every session with three moves the entrypoint named nowhere before: prove the runtime is current, establish autonomy and spend authority, and compute the ready frontier. All three capabilities already shipped; no interactive run could reach any of them, so launches improvised past the runtime they were meant to use.",
+    "Made the freshness check refuse to report a pass it did not earn — an installed runtime compared against itself is now an error naming `npm run sync:runtime`, while a source checkout comparing to itself stays silent, so the gate has teeth without nagging maintainers.",
+    "Added core/session/plan.ts, the frontier for a session that is a conversation: it evaluates the founder's real grants, waivers, and budget, reports ready work already grouped into parallel-safe batches alongside what is parked and why, and writes nothing.",
+    "Asked the founder how much the business may spend and over what period, recorded through the reducer as a budget-ledger allocation — BudgetBalance.allocated was a modelled field that no conversation ever filled.",
+    "Re-scoped autonomy onboarding off 'scheduled, unattended work' so it fires on a business's first session, interactive included, because an interactive launch acts too.",
+    "Pinned the session-bootstrap contract into the autopilot required terms, the same guard runtime routing already carries, so a later compaction cannot quietly drop it while every other check stays green."
   ]
 }

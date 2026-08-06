@@ -142,14 +142,20 @@ function tryLoadJson(filePath: string): unknown | undefined {
   }
 }
 
-function loadControlFile(controlPath: string): ControlFile | undefined {
+/**
+ * The four workspace loaders below are exported so core/session/plan.ts reads a workspace exactly
+ * the way a real session does. A second, private copy in the read-only planner is the one thing
+ * that would make its report diverge from what an actual run would then do — and a planner that
+ * disagrees with the runner is worse than no planner.
+ */
+export function loadControlFile(controlPath: string): ControlFile | undefined {
   const raw = tryLoadJson(controlPath);
   if (raw === undefined) return undefined;
   const result = validateControl(raw);
   return result.valid ? result.value : undefined;
 }
 
-function loadBusinessStateFile(statePath: string): BusinessStateV2 | undefined {
+export function loadBusinessStateFile(statePath: string): BusinessStateV2 | undefined {
   const raw = tryLoadJson(statePath);
   if (raw === undefined) return undefined;
   const result = validateBusinessState(raw);
@@ -161,14 +167,14 @@ function emptyLedger(now: string): BudgetLedgerDocument {
 }
 
 /** A business that hasn't set up a budget yet is a legitimate state, not an error — spend nodes simply park (autonomy.budget_unfunded). */
-function loadLedgerFile(ledgerPath: string, now: string): BudgetLedgerDocument {
+export function loadLedgerFile(ledgerPath: string, now: string): BudgetLedgerDocument {
   const raw = tryLoadJson(ledgerPath);
   if (raw === undefined) return emptyLedger(now);
   const result = validateBudgetLedger(raw);
   return result.valid ? result.value! : emptyLedger(now);
 }
 
-function loadCatalogFile(catalogPath: string): CatalogInput {
+export function loadCatalogFile(catalogPath: string): CatalogInput {
   const raw = tryLoadJson(catalogPath) as CatalogInput | undefined;
   return raw ?? { version: "catalog.empty", artifacts: [], workflows: [] };
 }
