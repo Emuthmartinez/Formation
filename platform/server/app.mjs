@@ -24,7 +24,7 @@ export function createFormationServer({
     applySecurityHeaders(response, requestId);
 
     try {
-      const url = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`);
+      const url = new URL(request.url ?? "/", requestOrigin(request));
       if (url.pathname.startsWith("/api/")) {
         await handleApi({ request, response, url, store, worker, allowDemoAuth, allowRegistration, authLimiters });
       } else {
@@ -48,6 +48,11 @@ export function createFormationServer({
   server.on("listening", () => worker.start());
   server.on("close", () => worker.stop());
   return { server, worker };
+}
+
+function requestOrigin(request) {
+  const protocol = request.socket?.encrypted === true ? "https" : "http";
+  return [protocol, "://", request.headers.host ?? "localhost"].join("");
 }
 
 export { defaultDistDir };
