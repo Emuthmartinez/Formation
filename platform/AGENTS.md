@@ -18,6 +18,7 @@ The historical skill runtime is an internal engine. Do not make the web applicat
 
 ## UI rules
 
+- Engine- or system-authored text reaches founders only through `server/domain/presentation.mjs`: board language on top, the original wording preserved for technical disclosure. Founder-authored words are never rewritten.
 - Every page has one primary job.
 - Prefer editorial hierarchy and decisive rows over card grids.
 - Do not add decorative metrics.

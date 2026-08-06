@@ -1,3 +1,4 @@
+import { boardStepTitle, presentApprovalAsk } from "./presentation.mjs";
 import { createId, launchWorkstreamId } from "./shared.mjs";
 
 /**
@@ -31,11 +32,21 @@ const CATEGORY_PHRASES = Object.freeze({
   destructive: "It makes changes that are hard to undo",
 });
 
-export function approvalRationale(workflowTitle, category) {
+export function approvalRationale(boardTitle, category) {
   const phrase = CATEGORY_PHRASES[category];
   return phrase
-    ? `The launch step "${workflowTitle}" is waiting for your go-ahead. ${phrase}, so it stays parked until you answer — no autonomy setting answers this for you.`
-    : `The launch step "${workflowTitle}" is waiting for your go-ahead. It stays parked until you answer — no autonomy setting answers this for you.`;
+    ? `“${boardTitle}” is waiting for your go-ahead. ${phrase}, so it stays parked until you answer — nothing answers this for you.`
+    : `“${boardTitle}” is waiting for your go-ahead. It stays parked until you answer — nothing answers this for you.`;
+}
+
+/** The board-ready text for one engine approval mirror: title, the ask, and the why. */
+function boardApprovalCopy(approval) {
+  const stepTitle = boardStepTitle(approval.workflowId, approval.workflowTitle);
+  return {
+    title: `Your go-ahead: ${stepTitle}`,
+    decision: presentApprovalAsk(approval.description, approval.protectedCategory),
+    rationale: approvalRationale(stepTitle, approval.protectedCategory),
+  };
 }
 
 function isEngineApproval(decision) {
@@ -81,14 +92,26 @@ export function syncEngineApprovals(database, workspace, report, now) {
       // If the engine says pending and no open mirror exists, create one — even when an older
       // record for this run was already resolved. A gate the engine is asking must always be
       // visible; a record that disagrees with the engine is history, never a reason to hide it.
-      if (open) continue;
+      const board = boardApprovalCopy(approval);
+      if (open) {
+        // Presentation is a shared, evolving capability: an open mirror created before the
+        // board-language table improved refreshes to the current copy. The engine's own wording
+        // stays untouched in `source` — this only re-presents, never re-answers.
+        if (open.title !== board.title || open.decision !== board.decision || open.rationale !== board.rationale) {
+          open.title = board.title;
+          open.decision = board.decision;
+          open.rationale = board.rationale;
+          open.updatedAt = now;
+        }
+        continue;
+      }
       const record = {
         id: createId("dec"),
         workspaceId: workspace.id,
         workstreamId: launchWorkstreamId(workspace),
-        title: `Launch approval: ${approval.workflowTitle}`,
-        decision: approval.description,
-        rationale: approvalRationale(approval.workflowTitle, approval.protectedCategory),
+        title: board.title,
+        decision: board.decision,
+        rationale: board.rationale,
         status: "open",
         owner: workspace.founder?.name ?? "Founder",
         decidedAt: null,
@@ -118,7 +141,7 @@ export function syncEngineApprovals(database, workspace, report, now) {
       const approved = approval.status === "approved";
       open.status = "decided";
       open.decidedAt = now.slice(0, 10);
-      open.decision = `${approved ? "Approved" : "Declined"}: ${approval.description}`;
+      open.decision = `${approved ? "Approved" : "Declined"}: ${presentApprovalAsk(approval.description, approval.protectedCategory)}`;
       open.answer = {
         value: approved ? "approved" : "declined",
         answeredBy: "Recorded with the launch engine",
@@ -141,8 +164,8 @@ export function recordApprovalActivity(database, workspaceId, changes, now) {
       id: createId("act"),
       workspaceId,
       type: "approval-requested",
-      title: `The launch engine needs your decision: ${record.source.workflowTitle}`,
-      detail: record.source.description,
+      title: `Your decision is needed: ${boardStepTitle(record.source.workflowId, record.source.workflowTitle)}`,
+      detail: record.decision,
       actor: "Formation",
       createdAt: now,
     });
@@ -152,8 +175,8 @@ export function recordApprovalActivity(database, workspaceId, changes, now) {
       id: createId("act"),
       workspaceId,
       type: "approval-answered",
-      title: `${record.answer.value === "approved" ? "Approved" : "Declined"} directly with the launch engine: ${record.source.workflowTitle}`,
-      detail: record.source.description,
+      title: `${record.answer.value === "approved" ? "Approved" : "Declined"}: ${boardStepTitle(record.source.workflowId, record.source.workflowTitle)}`,
+      detail: record.decision,
       actor: "Founder",
       createdAt: now,
     });
@@ -163,7 +186,7 @@ export function recordApprovalActivity(database, workspaceId, changes, now) {
       id: createId("act"),
       workspaceId,
       type: "approval-superseded",
-      title: `No longer asked: ${record.source.workflowTitle}`,
+      title: `No longer asked: ${boardStepTitle(record.source.workflowId, record.source.workflowTitle)}`,
       detail: record.note,
       actor: "Formation",
       createdAt: now,

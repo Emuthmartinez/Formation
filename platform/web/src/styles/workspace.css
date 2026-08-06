@@ -153,6 +153,17 @@
 .engine-step--needs-founder .engine-step__status, .engine-step--held .engine-step__status { color: var(--amber); }
 .engine-step--failed .engine-step__status { color: var(--red); }
 .engine-session__note { margin: 0; color: var(--muted); font-size: 13px; }
+/* The expandable technical layer under a board-level statement. Quiet by design. */
+.technical-disclosure { margin-top: 10px; font-size: 12px; }
+.technical-disclosure summary { cursor: pointer; color: var(--muted); font-weight: 700; list-style: none; display: inline-flex; align-items: center; gap: 6px; }
+.technical-disclosure summary::-webkit-details-marker { display: none; }
+.technical-disclosure summary::before { content: "›"; transition: transform 140ms ease; }
+.technical-disclosure[open] summary::before { transform: rotate(90deg); }
+.technical-disclosure summary:hover { color: var(--ink); }
+.technical-disclosure__body { margin-top: 8px; padding: 10px 12px; border-left: 2px solid var(--line-dark); color: var(--muted); line-height: 1.55; }
+.technical-disclosure__body p { margin: 0 0 6px; color: inherit; font-size: 12px; }
+.technical-disclosure__body ul { margin: 0; padding-left: 16px; }
+.technical-disclosure__body li { margin-bottom: 4px; }
 .engine-session__earlier { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 4px; }
 .engine-session__earlier p { margin: 0; font-size: 12px; }
 .engine-explainer { display: grid; gap: 22px; }

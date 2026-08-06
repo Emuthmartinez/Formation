@@ -235,6 +235,10 @@ export interface Contradiction {
 export interface ExecutionRunStep {
   workflowId: string;
   title: string;
+  /** Board-language one-liner: what this step gives the company. */
+  summary?: string;
+  /** The engine's own step name, when it differs from the board title. */
+  technical?: string;
   status: "finished" | "ready" | "in-progress" | "needs-founder" | "held" | "failed" | "upcoming" | string;
   reason?: string;
 }
@@ -261,6 +265,8 @@ export interface FounderExecution {
   id: string;
   workflowId: string | null;
   title: string | null;
+  /** The engine's own name for the work, when it differs from the board title. */
+  technicalTitle?: string;
   status: "queued" | "running" | "completed" | "failed" | string;
   failureKind: string | null;
   error: string | null;
