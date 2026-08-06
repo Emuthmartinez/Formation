@@ -30,7 +30,7 @@ When internet access is available and you need to compare against the pushed sou
 ```bash
 npm run check:skill-version -- \
   --installed ~/.codex/skills/b2c-mobile-business-launch \
-  --remote-url https://raw.githubusercontent.com/Emuthmartinez/b2c-mobile-business-launch-skill/main/skill/b2c-mobile-business-launch/skill-version.json
+  --remote-url https://raw.githubusercontent.com/Emuthmartinez/Formation/main/skill/b2c-mobile-business-launch/skill-version.json
 ```
 
 From the installed runtime:
@@ -38,13 +38,13 @@ From the installed runtime:
 ```bash
 cd ~/.codex/skills/b2c-mobile-business-launch
 # replace the --source path with your local clone of this repo
-npm run check:skill-version -- --source "$HOME/code/b2c-mobile-business-launch-skill/skill/b2c-mobile-business-launch" --installed .
+npm run check:skill-version -- --source "$HOME/code/Formation/skill/b2c-mobile-business-launch" --installed .
 ```
 
 When the founder approves an upgrade on this machine:
 
 ```bash
-repo_root="$HOME/code/b2c-mobile-business-launch-skill"  # path to your local clone of this repo
+repo_root="$HOME/code/Formation"  # path to your local clone of this repo
 rsync -a --delete --exclude node_modules \
   "$repo_root/skill/b2c-mobile-business-launch/" \
   ~/.codex/skills/b2c-mobile-business-launch/

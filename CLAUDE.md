@@ -1,6 +1,6 @@
 # Claude Repository Guide
 
-Operate through the ownership boundaries in `AGENTS.md`. Formation is the founder product; the graph-native skill is its internal launch engine and an independently maintained compatibility surface.
+This repository is Formation. Operate through the ownership boundaries in `AGENTS.md`. Formation, in `platform/`, is the founder product; the graph-native engine in `skill/b2c-mobile-business-launch/` is its internal launch engine and an independently maintained compatibility surface. The engine keeps its skill name and installed-runtime contract even though the repository is no longer a skill repo.
 
 ## Start here
 

@@ -1,11 +1,10 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.75.0",
+  "version": "0.76.0",
   "updatedAt": "2026-08-05",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "The platform execution boundary now reports founder approvals: core/adapters/platform-execution.ts joins the compiled plan's approval requirements with the durable run's decision record (id, description, workflow, status, effective protected category). Only the durable run is consulted — an approval that exists only on a throwaway seeded run has nothing an answer could be recorded against, so it is never advertised as answerable.",
-    "Formation mirrors each parked approval into its decision system and answers travel back exclusively through core/session/approve.ts, the engine's one sanctioned path out of waiting_founder. The platform never writes run state, control, grants, or waivers; a mirrored decision closes only after the engine confirms it recorded the answer, and editing the mirror into \"decided\" is refused.",
-    "Honesty at the gate boundary: an unreachable engine is reported as unreachable — never as \"no approvals waiting\" — and it can neither create, close, nor supersede a mirrored decision. Silence is never consent: an unanswered approval stays open with no timeout, and no autonomy setting or platform operating mode answers on the founder's behalf."
+    "The repository is now officially Formation. The GitHub repo, root package manifest, README, AGENTS.md, CLAUDE.md, and CONTRIBUTING.md all identify the founder platform as the product; the old b2c-mobile-business-launch-skill repo URLs redirect to Emuthmartinez/Formation. The engine keeps its own name, skill manifest, and installed-runtime contract unchanged under skill/b2c-mobile-business-launch/, so freshness checks that key on the skill field keep comparing the same identity.",
+    "Repository URL references moved with the rename: package.json homepage/repository/bugs, the .github issue templates, SECURITY.md, CODE_OF_CONDUCT.md, the source registry's self-referential repo entries, and the remote-manifest example in skill-versioning.md now point at the Formation repo. The expired PR #99 transport workflow (pr99-publisher.yml), which its own note said to remove after v0.66.0, is deleted rather than renamed."
   ]
 }

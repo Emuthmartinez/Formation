@@ -1,12 +1,12 @@
 # Reporting a vulnerability in this repo
 
-This policy covers **this repository**: the TypeScript validators under `skill/b2c-mobile-business-launch/tooling/`, the templates and references it ships, the GitHub Actions workflows, and the npm dependency chain behind them.
+This policy covers **this repository**: the Formation platform under `platform/` (its API, authentication, sessions, and persistence), the launch engine's TypeScript validators and tooling under `skill/b2c-mobile-business-launch/`, the templates and references the engine ships, the GitHub Actions workflows, and the npm dependency chain behind them.
 
-It does not cover apps launched with this skill. Those get their own security plan from `business/trust/SECURITY.md`, which is a different document for a different audience: the threat model, hardening, and release gates of a shipped consumer app.
+It does not cover apps launched with the engine. Those get their own security plan from `business/trust/SECURITY.md`, which is a different document for a different audience: the threat model, hardening, and release gates of a shipped consumer app.
 
 ## How to report
 
-Use [GitHub's private vulnerability reporting form](https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/security/advisories/new). Do not open a public issue for a security problem.
+Use [GitHub's private vulnerability reporting form](https://github.com/Emuthmartinez/Formation/security/advisories/new). Do not open a public issue for a security problem.
 
 Include, as far as you have it:
 
@@ -28,6 +28,7 @@ npm run check:skill-version -- \
 
 ## In scope
 
+- An authentication, session, workspace-membership, or same-origin bypass in the Formation platform under `platform/server/`, or a platform route that leaks another workspace's data.
 - A validator that passes copy, state, or configuration it exists to reject, where the miss lets a real secret, credential, or unsafe release through.
 - Secret values, tokens, or credentials committed anywhere in this repo, including fixtures and generated reports.
 - A template or starter scaffold that ships an insecure default into every business created from it. The archetype starters carry RLS policies and pgTAP tests precisely because this class of bug propagates.
@@ -37,7 +38,7 @@ npm run check:skill-version -- \
 
 ## Out of scope
 
-- Security issues in an app you launched with this skill. Those belong to that app.
+- Security issues in an app you launched with the engine. Those belong to that app.
 - Vulnerabilities in third-party services the playbooks reference (RevenueCat, Doppler, PostHog, Stripe, Resend, Apple, Google). Report those to the vendor.
 - Findings that require an attacker to already control your machine, your agent runtime, or your shell.
 - Missing hardening with no demonstrated impact.

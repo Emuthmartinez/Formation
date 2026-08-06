@@ -1,10 +1,12 @@
 # Formation
 
-Formation is an opinionated founder workspace for turning an idea into a decision-grade, launch-ready business.
+[![audit:ci](https://img.shields.io/github/actions/workflow/status/Emuthmartinez/Formation/source-freshness.yml?branch=main&label=audit%3Aci)](https://github.com/Emuthmartinez/Formation/actions/workflows/source-freshness.yml) [![release](https://img.shields.io/github/package-json/v/Emuthmartinez/Formation?label=release)](https://github.com/Emuthmartinez/Formation) ![node](https://img.shields.io/badge/node-22-informational) [![license](https://img.shields.io/github/license/Emuthmartinez/Formation)](LICENSE)
 
-It replaces the repository's original founder experience, which exposed an agent skill through generated Markdown and disconnected HTML pages, with one persistent product. Founders now work through a shared company source of truth, connected workstreams, explicit decisions, editable deliverables, prioritized tasks, and launch-readiness gates.
+Formation is an opinionated founder workspace for turning an idea into a decision-grade, launch-ready business. It is the product this repository exists to build.
 
-The graph-native launch runtime remains in the repository as an internal automation engine. It is no longer the product interface.
+Founders work through a shared company source of truth, connected workstreams, explicit decisions, editable deliverables, prioritized tasks, and launch-readiness gates.
+
+The project began as an agent skill. That lineage now lives on as the graph-native launch engine, which remains in the repository as internal automation and an independently maintained compatibility surface. It is not the product interface.
 
 ## What the platform does
 
@@ -28,6 +30,8 @@ Requirements:
 - the repository dependencies installed from the root lockfile
 
 ```bash
+git clone https://github.com/Emuthmartinez/Formation.git
+cd Formation
 npm ci
 node platform/run.mjs dev
 ```
@@ -70,7 +74,7 @@ Founder browser
   -> graph-native launch engine adapter (next integration boundary)
 ```
 
-The platform is intentionally separated from the historical skill runtime:
+The platform is intentionally separated from the launch engine:
 
 ```text
 platform/                              founder product
@@ -156,4 +160,4 @@ The engine still has its own contracts, catalog, validators, and release discipl
 
 Founder-facing product behavior belongs in `platform/`. Graph execution, launch automation, and reusable launch doctrine remain in `skill/b2c-mobile-business-launch/`.
 
-The root package manifest remains the engine compatibility and release manifest for this transition. Formation has its own private manifest in `platform/package.json` and uses the root lockfile so both systems remain reproducible without a half-migrated dependency tree.
+The root manifest is `formation`, the repository's release manifest. Its version moves in lockstep with the engine's `skill-version.json` under one release discipline. The web and server workspace has its own private manifest in `platform/package.json` and uses the root lockfile so both systems remain reproducible without a half-migrated dependency tree.

@@ -1,1 +1,0 @@
-Temporary protected publisher for PR #99. Remove immediately after the v0.66.0 implementation commit lands.
