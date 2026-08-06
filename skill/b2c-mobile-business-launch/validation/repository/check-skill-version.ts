@@ -268,7 +268,7 @@ function remoteFetchScript(): string {
   return `
 const https = require("node:https");
 const url = process.argv[1];
-https.get(url, { headers: { "user-agent": "b2c-mobile-business-launch-skill" } }, (response) => {
+https.get(url, { headers: { "user-agent": "b2c-mobile-business-launch" } }, (response) => {
   if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
     https.get(response.headers.location, (redirect) => redirect.pipe(process.stdout)).on("error", (error) => { console.error(error.message); process.exit(1); });
     return;

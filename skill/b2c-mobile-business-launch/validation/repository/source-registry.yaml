@@ -12,13 +12,12 @@ sources:
   - id: github-raw-b2c-launch-skill-version-main
     name: b2c-mobile-business-launch skill version manifest
     source_type: raw_manifest
-    url: https://raw.githubusercontent.com/Emuthmartinez/b2c-mobile-business-launch-skill/main/skill/b2c-mobile-business-launch/skill-version.json
+    url: https://raw.githubusercontent.com/Emuthmartinez/Formation/main/skill/b2c-mobile-business-launch/skill-version.json
     refresh_cadence_days: 7
     owner: source-freshness
     locations:
       - skill/b2c-mobile-business-launch/validation/repository/skill-versioning.md
-      - skill/b2c-mobile-business-launch/tooling/check-skill-version.ts
-    notes: Remote manifest used when comparing installed runtime freshness against the pushed main branch.
+    notes: Remote manifest used when comparing installed runtime freshness against the pushed main branch. The repo was renamed to Formation on 2026-08-05; the engine's path inside it is unchanged.
   - id: resend-api-emails
     name: Resend email send API
     source_type: official_docs
@@ -2130,17 +2129,17 @@ sources:
   - id: github-repo-b2c-launch-skill
     name: This repository on GitHub
     source_type: repository
-    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill
+    url: https://github.com/Emuthmartinez/Formation
     refresh_cadence_days: 90
     owner: maintainer
     locations:
       - README.md
       - package.json
-    notes: Canonical repo URL used by the README clone command and the package.json homepage field. Self-referential; tracked so the registry stays exhaustive rather than because it can drift upstream.
+    notes: Canonical repo URL used by the README clone command and the package.json homepage field. Self-referential; tracked so the registry stays exhaustive rather than because it can drift upstream. Renamed from b2c-mobile-business-launch-skill on 2026-08-05; GitHub redirects the old URL.
   - id: github-repo-b2c-launch-skill-git
     name: This repository, git clone URL
     source_type: repository
-    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill.git
+    url: https://github.com/Emuthmartinez/Formation.git
     refresh_cadence_days: 90
     owner: maintainer
     locations:
@@ -2149,7 +2148,7 @@ sources:
   - id: github-repo-b2c-launch-skill-issues
     name: This repository, issue tracker
     source_type: repository
-    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/issues
+    url: https://github.com/Emuthmartinez/Formation/issues
     refresh_cadence_days: 90
     owner: maintainer
     locations:
@@ -2158,7 +2157,7 @@ sources:
   - id: github-repo-b2c-launch-skill-ci-workflow
     name: This repository, audit workflow run history
     source_type: repository
-    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/actions/workflows/source-freshness.yml
+    url: https://github.com/Emuthmartinez/Formation/actions/workflows/source-freshness.yml
     refresh_cadence_days: 90
     owner: maintainer
     locations:
@@ -2167,18 +2166,18 @@ sources:
   - id: github-repo-b2c-launch-skill-security-advisory
     name: This repository, private vulnerability reporting
     source_type: repository
-    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/security/advisories/new
+    url: https://github.com/Emuthmartinez/Formation/security/advisories/new
     refresh_cadence_days: 90
     owner: maintainer
     locations:
-      - .github/trust/SECURITY.md
+      - .github/SECURITY.md
       - .github/CODE_OF_CONDUCT.md
       - .github/ISSUE_TEMPLATE/config.yml
     notes: The private disclosure channel for both security reports and code-of-conduct reports. Requires GitHub private vulnerability reporting to stay enabled on the repo.
   - id: github-repo-b2c-launch-skill-contributing
     name: This repository, CONTRIBUTING.md on main
     source_type: repository
-    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/CONTRIBUTING.md
+    url: https://github.com/Emuthmartinez/Formation/blob/main/CONTRIBUTING.md
     refresh_cadence_days: 90
     owner: maintainer
     locations:
@@ -2188,7 +2187,7 @@ sources:
   - id: github-repo-b2c-launch-skill-validators-doc
     name: This repository, docs/validators.md on main
     source_type: repository
-    url: https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/docs/validators.md
+    url: https://github.com/Emuthmartinez/Formation/blob/main/docs/validators.md
     refresh_cadence_days: 90
     owner: maintainer
     locations:
@@ -2197,7 +2196,7 @@ sources:
   - id: shields-io-badge-audit-ci
     name: Shields.io badge, audit:ci workflow status
     source_type: badge_endpoint
-    url: https://img.shields.io/github/actions/workflow/status/Emuthmartinez/b2c-mobile-business-launch-skill/source-freshness.yml?branch=main&label=audit%3Aci
+    url: https://img.shields.io/github/actions/workflow/status/Emuthmartinez/Formation/source-freshness.yml?branch=main&label=audit%3Aci
     refresh_cadence_days: 90
     owner: maintainer
     locations:
@@ -2206,7 +2205,7 @@ sources:
   - id: shields-io-badge-package-version
     name: Shields.io badge, package.json version
     source_type: badge_endpoint
-    url: https://img.shields.io/github/package-json/v/Emuthmartinez/b2c-mobile-business-launch-skill?label=skill
+    url: https://img.shields.io/github/package-json/v/Emuthmartinez/Formation?label=release
     refresh_cadence_days: 90
     owner: maintainer
     locations:
@@ -2224,7 +2223,7 @@ sources:
   - id: shields-io-badge-license
     name: Shields.io badge, repository license
     source_type: badge_endpoint
-    url: https://img.shields.io/github/license/Emuthmartinez/b2c-mobile-business-launch-skill
+    url: https://img.shields.io/github/license/Emuthmartinez/Formation
     refresh_cadence_days: 180
     owner: maintainer
     locations:

@@ -1,6 +1,6 @@
 # Validator reference
 
-Every gate this skill ships, what it checks, and how to run it. The short version lives in the [README](../README.md#validators); this file is the full map.
+Every gate the launch engine ships, what it checks, and how to run it. This file is the full map; [CONTRIBUTING.md](../CONTRIBUTING.md) has the short version.
 
 ## How the pipeline works
 

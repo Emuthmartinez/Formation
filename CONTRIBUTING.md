@@ -1,30 +1,30 @@
 # Contributing
 
-Thanks for wanting to improve the **B2C Mobile Business Launch Skill**. Humans and AI agents are both first-class contributors here, and both are held to the same gates.
+Thanks for wanting to improve **Formation**. Humans and AI agents are both first-class contributors here, and both are held to the same gates.
 
-This repo is a skill (markdown launch playbooks plus deterministic TypeScript validators), not an app. The validators are the contract. If your change matters, it should show up in a validator, a LaunchBench eval, a template, or a reference, not only in prose.
+This repo contains two bounded systems: the Formation founder platform under `platform/` (a real application: web client, API, auth, persistence) and the graph-native launch engine under `skill/b2c-mobile-business-launch/` (launch playbooks plus deterministic TypeScript validators). The validators and tests are the contract. If your change matters, it should show up in a validator, a test, a LaunchBench eval, a template, or a reference, not only in prose.
 
 ## TL;DR
 
 1. Fork or branch from `main`.
 2. `npm install` and `npm install --prefix skill/b2c-mobile-business-launch`.
-3. Make your change. Edit the source under `skill/b2c-mobile-business-launch/`, never the installed runtime copy.
+3. Make your change. Platform work lives under `platform/`; engine work lives under `skill/b2c-mobile-business-launch/`, never in an installed runtime copy.
 4. If you touched anything under `skill/`, bump the version manifest. See [Versioning discipline](#versioning-discipline).
-5. Run the gate. `npm run audit:ci` must pass green.
+5. Run the gate. `npm run audit:ci` must pass green. Platform changes also need `node platform/run.mjs check` and `node platform/run.mjs test` green.
 6. Open a **draft PR** and fill in the template. Mark it ready once CI is green.
 
 ## Project layout
 
 Read these first, in order:
 
-1. [`README.md`](README.md): what the skill is and who it's for.
+1. [`README.md`](README.md): what Formation is and who it's for.
 2. [`AGENTS.md`](AGENTS.md): the maintainer guide and repo map, canonical for how the repo is organized and maintained.
 3. [`CLAUDE.md`](CLAUDE.md): Claude-specific maintainer notes.
 4. [`docs/validators.md`](docs/validators.md): every gate and what it checks.
-5. `skill/b2c-mobile-business-launch/SKILL.md`: the skill entrypoint and routing.
-6. The specific `references/`, `business/`, `tooling/`, or `evals/` file you intend to change.
+5. `platform/AGENTS.md` for platform changes, or `skill/b2c-mobile-business-launch/SKILL.md` for the engine entrypoint and routing.
+6. The specific page, service, `references/`, `business/`, `tooling/`, or `evals/` file you intend to change.
 
-All real content lives under `skill/b2c-mobile-business-launch/`. The author's machine mirrors that into an installed runtime at `~/.codex/skills/...`; that sync is maintainer-only and external contributors never need to do it. Always edit the repo source.
+Platform code lives under `platform/`. Engine content lives under `skill/b2c-mobile-business-launch/`. The author's machine mirrors the engine into an installed runtime at `~/.codex/skills/...`; that sync is maintainer-only and external contributors never need to do it. Always edit the repo source.
 
 ## Local setup
 
@@ -122,11 +122,11 @@ If you are an agent working in this repo:
 
 ## Scope of the project
 
-This skill is opinionated and targets subscription and freemium consumer mobile apps. It does not currently cover one-time purchases or ad-based monetization. Contributions that deepen the existing lanes (research, design, onboarding, paywalls, store ops, growth, verification) are very welcome. Open an issue first to discuss proposals that expand scope.
+Formation is opinionated and targets founders launching subscription and freemium consumer mobile apps. It does not currently cover one-time purchases or ad-based monetization. Contributions that deepen the existing lanes (research, design, onboarding, paywalls, store ops, growth, verification) or the founder product (workstreams, decisions, deliverables, readiness) are very welcome. Open an issue first to discuss proposals that expand scope.
 
 ## Code of conduct and licensing
 
-Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Report security issues through [`.github/trust/SECURITY.md`](.github/trust/SECURITY.md) rather than a public issue.
+Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Report security issues through [`.github/SECURITY.md`](.github/SECURITY.md) rather than a public issue.
 
 By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE) that covers this repository.
 

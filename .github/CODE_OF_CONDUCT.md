@@ -26,7 +26,7 @@ This applies in every project space, including the repository, issues, pull requ
 
 ## Reporting
 
-Report unacceptable behavior privately through [GitHub's private reporting form](https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/security/advisories/new), which is the private channel available on this repository. Do not open a public issue.
+Report unacceptable behavior privately through [GitHub's private reporting form](https://github.com/Emuthmartinez/Formation/security/advisories/new), which is the private channel available on this repository. Do not open a public issue.
 
 Reports are read by the maintainer. Your identity stays confidential to the extent GitHub's tooling allows.
 

@@ -1,9 +1,9 @@
-# Repository Agent Guide
+# Formation Repository Agent Guide
 
-This repository contains two bounded systems:
+This repository is Formation, the founder platform. It contains two bounded systems:
 
-1. `platform/`, the Formation founder product.
-2. `skill/b2c-mobile-business-launch/`, the graph-native launch engine used behind the product and by existing agent workflows.
+1. `platform/`, the Formation founder product. This is the product.
+2. `skill/b2c-mobile-business-launch/`, the graph-native launch engine used behind the product and by existing agent workflows. The engine keeps its own name, versioning, and installed-runtime contract.
 
 Do not collapse their state models or expose engine files as founder navigation.
 

@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This skill is opinionated and scoped to subscription and freemium consumer mobile apps. Proposals that widen that scope are welcome as discussion, but read the scope section in [CONTRIBUTING.md](https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/blob/main/CONTRIBUTING.md) first so we start from the same place.
+        Formation is opinionated and scoped to founders launching subscription and freemium consumer mobile apps. Proposals that widen that scope are welcome as discussion, but read the scope section in [CONTRIBUTING.md](https://github.com/Emuthmartinez/Formation/blob/main/CONTRIBUTING.md) first so we start from the same place.
 
   - type: textarea
     id: problem

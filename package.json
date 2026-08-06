@@ -1,11 +1,11 @@
 {
-  "name": "b2c-mobile-business-launch-skill",
-  "version": "0.75.0",
-  "description": "An agent skill that takes a consumer mobile app from idea to a launched business, with deterministic validators between every claim and done.",
+  "name": "formation",
+  "version": "0.76.0",
+  "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
-    "claude-code",
-    "codex",
-    "agent-skill",
+    "formation",
+    "founder-platform",
+    "startup",
     "mobile",
     "ios",
     "app-store",
@@ -14,16 +14,16 @@
     "revenuecat",
     "posthog"
   ],
-  "homepage": "https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill#readme",
+  "homepage": "https://github.com/Emuthmartinez/Formation#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill.git"
+    "url": "git+https://github.com/Emuthmartinez/Formation.git"
   },
   "bugs": {
-    "url": "https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/issues"
+    "url": "https://github.com/Emuthmartinez/Formation/issues"
   },
   "author": "Emuthmartinez",
-  "private": false,
+  "private": true,
   "license": "MIT",
   "type": "module",
   "engines": {
