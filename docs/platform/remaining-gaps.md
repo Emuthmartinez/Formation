@@ -69,7 +69,7 @@ Implement a typed adapter that:
 - selects or accepts a stable catalog workflow — **shipped** (validated against the live boundary report from `core/adapters/platform-execution.ts`)
 - fingerprints scoped company context — **shipped** (`computeContextFingerprint`)
 - creates or resumes a durable engine run — **shipped** (the worker invokes `core/session/run.ts`; the engine's plan-matched run state is the durable identity)
-- exposes founder-readable run state — **shipped** (API-level; a founder page over these routes is still open)
+- exposes founder-readable run state — **shipped** (API-level, and surfaced on the Launch page: "The launch engine at work" renders each execution's step procession, session state, and imported-result totals, with an explainer flow when no session has run)
 - is idempotent across retries — **shipped** (one execution record per workspace, workflow, and context fingerprint; retries resume it)
 - preserves engine approvals and protected actions — **shipped** (a parked founder gate mirrors into `decisions` with engine provenance; answers travel only through `core/session/approve.ts` via `platform/server/execution.mjs`, owner-role required, and the mirror cannot be edited into "decided". No mode or timeout auto-answers a gate)
 - imports only verified results — **shipped** (the boundary report's `results[]` carries only settled, accepted attempts from the durable run; a node pending verification, a partially-accepted node, or a lane-seeded completion exports nothing, and `platform/server/domain/results.mjs` never reaches past the report into run internals)
@@ -77,7 +77,7 @@ Implement a typed adapter that:
 - marks affected downstream artifacts stale when accepted input context changes — **shipped** (`reconcilePatch` now runs the engine's own `invalidateDescendants` whenever a re-produced output replaces an accepted fingerprint, and Formation mirrors those conclusions off the report's per-artifact acceptance state — exactly the engine-identified descendants, cleared again when acceptance returns, never a second graph-walk)
 - carries trace and cost metadata without leaking secrets — **shipped** (run, plan, and attempt ids plus declared token budgets and cost estimates, copied field-by-field onto claim provenance and the execution record's rollup; undeclared report fields never reach the store)
 
-This P0 is complete at the API and record level; a founder page over these routes is still open, as noted above. Nothing the adapter does writes engine-owned state: the reducer, the session runner, and the founder-decision CLI remain the engine's only writers, and an unreachable engine is always reported as unreachable, never as an empty plan, "no approvals waiting", or "nothing to import".
+This P0 is complete at the API, record, and founder-page level. Nothing the adapter does writes engine-owned state: the reducer, the session runner, and the founder-decision CLI remain the engine's only writers, and an unreachable engine is always reported as unreachable, never as an empty plan, "no approvals waiting", or "nothing to import".
 
 ## P1: Existing launch repository importer
 

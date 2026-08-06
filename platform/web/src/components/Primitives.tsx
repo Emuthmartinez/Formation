@@ -79,12 +79,12 @@ export function StatusText({ status }: { status: string }) {
   );
 }
 
-export function ProgressLine({ value, label }: { value: number; label?: string }) {
+export function ProgressLine({ value, label, hideValue = false }: { value: number; label?: string; hideValue?: boolean }) {
   const clamped = Math.max(0, Math.min(100, value));
   return (
     <div className="progress-line">
       <progress className="progress-line__track" value={clamped} max={100} aria-label={label ?? "Progress"} />
-      <span className="progress-line__value">{clamped}%</span>
+      {hideValue ? null : <span className="progress-line__value">{clamped}%</span>}
     </div>
   );
 }
@@ -152,12 +152,59 @@ export function ErrorNotice({ message, onRetry }: { message: string; onRetry?: (
   );
 }
 
-export function Toast({ message, tone = "success" }: { message: string; tone?: "success" | "error" }) {
+export function Toast({
+  message,
+  tone = "success",
+  onDismiss,
+  onHoldChange,
+}: {
+  message: string;
+  tone?: "success" | "error";
+  onDismiss?: () => void;
+  onHoldChange?: (held: boolean) => void;
+}) {
   return (
-    <div className={`toast toast--${tone}`} role="status" aria-live="polite">
+    <div
+      className={`toast toast--${tone}`}
+      role="status"
+      aria-live="polite"
+      onMouseEnter={() => onHoldChange?.(true)}
+      onMouseLeave={() => onHoldChange?.(false)}
+      onFocus={() => onHoldChange?.(true)}
+      onBlur={() => onHoldChange?.(false)}
+    >
       <Icon name={tone === "success" ? "check" : "warning"} width={18} height={18} />
-      {message}
+      <span className="toast__message">{message}</span>
+      {onDismiss ? (
+        <button className="icon-button toast__dismiss" onClick={onDismiss} aria-label="Dismiss message">
+          <Icon name="close" width={16} height={16} />
+        </button>
+      ) : null}
     </div>
+  );
+}
+
+/**
+ * Two conflicting claims, each individually labeled by kind, so the founder can see which
+ * statement to retire instead of parsing one joined sentence.
+ */
+export function ContradictionStatements({
+  entries,
+  fallback,
+}: {
+  entries?: Array<{ claimId: string; kind: string; statement: string }>;
+  fallback: string;
+}) {
+  if (!entries || entries.length < 2) return <p>{fallback}</p>;
+  return (
+    <ul className="contradiction-entries">
+      {entries.map((entry) => (
+        <li key={entry.claimId}>
+          <span className="claim-kind">{humanize(entry.kind)}</span>
+          <span>{entry.statement}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 

@@ -22,10 +22,15 @@
 .version-row__body p { margin: 0 0 10px; color: var(--ink-soft); font-size: 13px; line-height: 1.5; }
 .version-row__body ul { margin: 0 0 14px; padding-left: 18px; color: var(--muted); font-size: 12px; }
 .version-row__current { color: var(--forest); font-size: 12px; font-weight: 700; }
-@media (max-width: 1180px) {
+/* Four claim columns are only comfortable on genuinely wide screens; ordinary laptop
+   widths (≤1440px) get two columns so each claim keeps a readable measure. */
+@media (max-width: 1440px) {
   .claim-columns { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .claim-column:nth-child(2) { border-right: 0; }
   .claim-column:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+}
+
+@media (max-width: 1180px) {
   .workstream-row { grid-template-columns: minmax(240px,1fr) 160px minmax(210px,.8fr); }
   .workstream-row__arrow { display: none; }
   .deliverable-workspace { grid-template-columns: 265px minmax(0,1fr); }
@@ -53,12 +58,31 @@
   .workstream-hero { grid-template-columns: 1fr 1fr; }
   .workstream-hero__status { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); padding: 18px 0 0; }
   .deliverable-workspace { grid-template-columns: 1fr; }
-  .deliverable-index { border-right: 0; border-bottom: 1px solid var(--line); max-height: 300px; overflow: auto; }
+  .deliverable-index {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    max-height: 300px;
+    overflow: auto;
+    /* Scrolling shadow in the index's own surface color: the cut edge reads as "more below". */
+    background:
+      linear-gradient(#ece9e1 30%, rgba(236,233,225,0)) top / 100% 24px,
+      linear-gradient(rgba(236,233,225,0), #ece9e1 70%) bottom / 100% 24px,
+      radial-gradient(farthest-side at 50% 0, rgba(23,32,27,.16), transparent) top / 100% 12px,
+      radial-gradient(farthest-side at 50% 100%, rgba(23,32,27,.16), transparent) bottom / 100% 12px;
+    background-color: #ece9e1;
+    background-repeat: no-repeat;
+    background-attachment: local, local, scroll, scroll;
+  }
   .launch-scoreboard { grid-template-columns: 1fr 1fr; }
   .launch-scoreboard__facts { grid-column: 1 / -1; }
   .signin-page { grid-template-columns: 1fr; }
-  .signin-story { min-height: 62vh; }
-  .signin-panel { min-height: 38vh; }
+  /* The story stays, but the sign-in form must land near the first screen. */
+  .signin-story { min-height: 0; padding-top: 30px; padding-bottom: 34px; }
+  .signin-story__copy { margin: 26px 0; }
+  .signin-story__copy h1 { font-size: clamp(38px, 9vw, 64px); }
+  .signin-panel { min-height: 0; }
+  .engine-explainer__flow { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .engine-explainer__flow li:not(:last-child)::after { content: none; }
 }
 
 @media (max-width: 680px) {
@@ -84,7 +108,7 @@
   .workstream-hero { grid-template-columns: 1fr; }
   .workstream-hero__status { grid-column: auto; }
   .ledger-row { grid-template-columns: 85px minmax(0,1fr); }
-  .ledger-row > span:nth-child(3), .ledger-row > .status-text { grid-column: 2; }
+  .ledger-row > span:nth-child(3), .ledger-row > select, .ledger-row > .status-text { grid-column: 2; justify-self: start; }
   .decision-row { grid-template-columns: 1fr; grid-template-areas: "meta" "content" "dates" "actions"; }
   .decision-row__dates { grid-template-columns: 1fr 1fr; }
   .deliverable-editor__head { padding: 24px 18px; }
@@ -97,16 +121,23 @@
   .launch-definition { display: grid; }
   .critical-path-row { grid-template-columns: 28px minmax(0,1fr); }
   .critical-path-row .button { grid-column: 2; justify-self: start; }
-  .signin-story { padding: 30px 24px; }
-  .signin-story__copy h1 { font-size: 50px; }
+  .signin-story { padding: 26px 24px; }
+  .signin-story__copy h1 { font-size: 42px; margin-bottom: 0; }
+  /* On a phone the headline carries the promise; the sign-in form must share the first screen. */
+  .signin-story__copy > p:last-child, .signin-story__note { display: none; }
   .signin-panel { padding: 35px 24px; }
   .modal { padding: 20px; }
   .toast { left: 16px; right: 16px; bottom: 16px; min-width: 0; }
+  .engine-explainer__flow { grid-template-columns: 1fr; gap: 18px; }
+  .engine-step { grid-template-columns: 22px minmax(0,1fr); }
+  .engine-step__status { grid-column: 2; }
+  /* 16px keeps iOS Safari from zoom-jumping into these controls on focus. */
+  .claim-row__controls select, .ledger-row select, .task-list--compact .task-row select, .decision-row__actions select { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
 .claim-row__controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.claim-row__controls select { width: auto; min-width: 92px; padding: 5px 23px 5px 7px; font-size: 10px; }
-.ledger-row select { width: 105px; padding: 6px 22px 6px 7px; font-size: 10px; }
+.claim-row__controls select { width: auto; min-width: 98px; padding: 6px 23px 6px 8px; font-size: 13px; }
+.ledger-row select { width: 118px; padding: 6px 22px 6px 8px; font-size: 13px; }

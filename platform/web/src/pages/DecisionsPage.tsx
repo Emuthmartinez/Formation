@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
 import { Button, EmptyState, Field, Modal, PageHeader, Section, StatusText, formatDate } from "../components/Primitives";
-import { useWorkspace } from "../context";
+import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Decision } from "../types";
 
@@ -28,7 +28,10 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
         setEngineNote(view.connected && !view.reachable ? "The launch engine could not be reached just now, so approvals shown here may be behind." : null);
         return reload();
       })
-      .catch(() => undefined);
+      .catch(() => {
+        // The guarantee above holds even when the check itself fails: say it out loud.
+        if (!cancelled) setEngineNote("Could not check the launch engine for new approvals just now.");
+      });
     return () => {
       cancelled = true;
     };
@@ -51,11 +54,11 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
   const updateStatus = async (decision: Decision, status: Decision["status"]) => {
     setUpdating(decision.id);
     try {
-      await api.updateDecision(snapshot.workspace.id, decision.id, { status });
-      await reload();
-      notify(status === "decided" ? "Decision accepted and propagated to the workspace." : "Decision status updated.");
-    } catch (error) {
-      notify(error instanceof Error ? error.message : String(error), "error");
+      await runMutation(
+        { reload, notify },
+        () => api.updateDecision(snapshot.workspace.id, decision.id, { status }),
+        status === "decided" ? "Decision accepted and propagated to the workspace." : "Decision status updated.",
+      );
     } finally {
       setUpdating(null);
     }
@@ -64,15 +67,13 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
   const answerApproval = async (decision: Decision, answer: "approve" | "decline") => {
     setUpdating(decision.id);
     try {
-      await api.answerApproval(snapshot.workspace.id, decision.id, { answer });
-      await reload();
-      notify(
+      await runMutation(
+        { reload, notify },
+        () => api.answerApproval(snapshot.workspace.id, decision.id, { answer }),
         answer === "approve"
           ? "Approved. The launch engine will pick this step up on its next work session."
           : "Declined. The launch engine will hold this step.",
       );
-    } catch (error) {
-      notify(error instanceof Error ? error.message : String(error), "error");
     } finally {
       setUpdating(null);
     }
@@ -166,8 +167,18 @@ function DecisionRow({
       ) : (
         <div className="decision-row__actions">
           {decision.status !== "decided" ? <Button onClick={() => onStatus(decision, "decided")} disabled={updating}>Accept decision</Button> : null}
-          <select value={decision.status} onChange={(event) => onStatus(decision, event.target.value as Decision["status"])} disabled={updating} aria-label={`Status for ${decision.title}`}>
-            <option value="open">Open</option><option value="proposed">Proposed</option><option value="decided">Decided</option><option value="revisit">Revisit</option><option value="superseded">Superseded</option>
+          {/* Accepting has one path — the button above. The select moves between the other states. */}
+          <select
+            value={decision.status}
+            onChange={(event) => onStatus(decision, event.target.value as Decision["status"])}
+            disabled={updating}
+            aria-label={`Move ${decision.title} to another status`}
+          >
+            {decision.status === "decided" ? <option value="decided">Decided</option> : null}
+            <option value="open">Open</option>
+            <option value="proposed">Proposed</option>
+            <option value="revisit">Revisit</option>
+            <option value="superseded">Superseded</option>
           </select>
         </div>
       )}
@@ -216,7 +227,9 @@ function NewDecisionModal({ onClose }: { onClose: () => void }) {
         <Field label="Why this is the right call now"><textarea rows={4} value={rationale} onChange={(event) => setRationale(event.target.value)} required /></Field>
         <div className="form-grid form-grid--three">
           <Field label="Workstream"><select value={workstreamId} onChange={(event) => setWorkstreamId(event.target.value)}>{snapshot.workspace.workstreams.map((stream) => <option key={stream.id} value={stream.id}>{stream.title}</option>)}</select></Field>
-          <Field label="Status"><select value={status} onChange={(event) => setStatus(event.target.value as Decision["status"])}><option value="open">Open question</option><option value="proposed">Proposed</option><option value="decided">Decided</option></select></Field>
+          <Field label="Status" hint="A fresh decision usually starts Open — an unanswered call.">
+            <select value={status} onChange={(event) => setStatus(event.target.value as Decision["status"])}><option value="open">Open</option><option value="proposed">Proposed</option><option value="decided">Decided</option></select>
+          </Field>
           <Field label="Review date"><input type="date" value={reviewAt} onChange={(event) => setReviewAt(event.target.value)} /></Field>
         </div>
         <div className="form-actions"><Button type="button" variant="secondary" onClick={onClose}>Cancel</Button><Button type="submit" disabled={busy}>{busy ? "Recording…" : "Record decision"}</Button></div>

@@ -100,12 +100,29 @@ export function detectContradictions(claims) {
       severity: entries.some((entry) => entry.kind === "fact") ? "high" : "medium",
       title: humanizeKey(key),
       summary: entries.map((entry) => entry.statement).join(" / "),
+      // Each conflicting claim stays individually attributable so a founder can see which
+      // statement is which kind and retire the right one, instead of parsing a joined sentence.
+      entries: entries.map((entry) => ({
+        claimId: entry.id,
+        kind: entry.kind,
+        workstreamId: entry.workstreamId ?? null,
+        statement: entry.statement,
+      })),
       claimIds: entries.map((entry) => entry.id),
       workstreamIds: unique(entries.map((entry) => entry.workstreamId).filter(Boolean)),
     });
   }
 
   return contradictions;
+}
+
+// Matches the client's formatDate style ("Aug 12, 2026") so server-composed prose never
+// drifts from the dates rendered around it.
+function formatFounderDate(value) {
+  if (!value) return "soon";
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00`) : new Date(value);
+  if (Number.isNaN(date.getTime())) return "soon";
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
 }
 
 export function buildRecommendations({ workspace, tasks, decisions, claims, artifacts }) {
@@ -149,7 +166,7 @@ export function buildRecommendations({ workspace, tasks, decisions, claims, arti
       id: `rec_${criticalTasks[0].id}`,
       kind: "task",
       title: criticalTasks[0].title,
-      detail: `Due ${criticalTasks[0].dueAt ?? "soon"}. Owner: ${criticalTasks[0].owner}.`,
+      detail: `Due ${formatFounderDate(criticalTasks[0].dueAt)}. Owner: ${criticalTasks[0].owner}.`,
       rationale: "This is the highest-impact unfinished task currently blocking launch confidence.",
       confidence: 80,
       workstreamId: criticalTasks[0].workstreamId,

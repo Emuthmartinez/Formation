@@ -148,7 +148,7 @@ export function SignInPage({ onSignedIn }: { onSignedIn: () => Promise<void> }) 
           ) : null}
 
           <p className="signin-panel__security">
-            Sessions use HTTP-only cookies. Workspace access is checked on the server for every read and mutation.
+            Your workspace stays private. Access is re-checked before anyone can see or change your company’s work.
           </p>
         </div>
       </section>

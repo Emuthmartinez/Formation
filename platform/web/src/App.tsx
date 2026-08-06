@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError, api } from "./api";
 import { Shell } from "./components/Shell";
 import { ErrorNotice, Toast } from "./components/Primitives";
@@ -24,11 +24,28 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+  const toastHeldRef = useRef(false);
 
   const notify = useCallback((message: string, tone: "success" | "error" = "success") => {
     setToast({ message, tone });
-    window.setTimeout(() => setToast((current) => current?.message === message ? null : current), 3_500);
+    const tryDismiss = () => {
+      // A held toast (hover or focus) stays until released; check again shortly after.
+      if (toastHeldRef.current) {
+        window.setTimeout(tryDismiss, 1_500);
+        return;
+      }
+      setToast((current) => (current?.message === message ? null : current));
+    };
+    window.setTimeout(tryDismiss, 5_000);
   }, []);
+
+  const toastElement = toast ? (
+    <Toast
+      {...toast}
+      onDismiss={() => setToast(null)}
+      onHoldChange={(held) => { toastHeldRef.current = held; }}
+    />
+  ) : null;
 
   const loadSession = useCallback(async () => {
     setError(null);
@@ -147,7 +164,7 @@ export function App() {
     return (
       <main className="standalone-new">
         <NewWorkspacePage onCreated={onCreated} />
-        {toast ? <Toast {...toast} /> : null}
+        {toastElement}
       </main>
     );
   }
@@ -164,7 +181,7 @@ export function App() {
       >
         {loading ? <div className="page-loading"><span className="spinner" /> Updating workspace…</div> : page}
       </Shell>
-      {toast ? <Toast {...toast} /> : null}
+      {toastElement}
     </WorkspaceProvider>
   );
 }

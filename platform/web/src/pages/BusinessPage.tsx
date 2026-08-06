@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
-import { Button, Field, Modal, PageHeader, Section, StatusText, humanize } from "../components/Primitives";
-import { useWorkspace } from "../context";
+import { Button, ContradictionStatements, Field, Modal, PageHeader, Section, humanize } from "../components/Primitives";
+import { runMutation, useWorkspace } from "../context";
 import type { Claim, Workspace } from "../types";
 
 const companyFieldLabels: Array<[keyof Workspace["company"], string, string]> = [
@@ -15,6 +15,13 @@ const companyFieldLabels: Array<[keyof Workspace["company"], string, string]> = 
   ["pricing", "Pricing hypothesis", "Current working price and packaging logic."],
   ["northStarMetric", "North-star metric", "A behavior that demonstrates recurring customer value."],
 ];
+
+const emptyClaimCopy: Record<Claim["kind"], string> = {
+  fact: "Nothing verified yet. When evidence lands, record it with “Add claim”.",
+  assumption: "No working assumptions. Capture what the plan is betting on with “Add claim”.",
+  recommendation: "No recommendations yet. They arrive as evidence and drafts accumulate.",
+  question: "No open questions. Add the ones that would change a decision.",
+};
 
 export function BusinessPage() {
   const { snapshot, reload, notify } = useWorkspace();
@@ -60,13 +67,11 @@ export function BusinessPage() {
   };
 
   const updateClaimStatus = async (claim: Claim, status: string) => {
-    try {
-      await api.updateClaim(snapshot.workspace.id, claim.id, { status });
-      await reload();
-      notify(status === "active" || status === "open" ? "Claim reopened." : "Claim status updated and contradictions recalculated.");
-    } catch (error) {
-      notify(error instanceof Error ? error.message : String(error), "error");
-    }
+    await runMutation(
+      { reload, notify },
+      () => api.updateClaim(snapshot.workspace.id, claim.id, { status }),
+      status === "active" || status === "open" ? "Claim reopened." : "Claim status updated and contradictions recalculated.",
+    );
   };
 
   return (
@@ -143,7 +148,7 @@ export function BusinessPage() {
         {primaryContradiction ? (
           <div className="source-conflict-inline">
             <strong>{snapshot.contradictions.length} contradiction{snapshot.contradictions.length === 1 ? "" : "s"} detected</strong>
-            <span>{primaryContradiction.summary}</span>
+            <ContradictionStatements entries={primaryContradiction.entries} fallback={primaryContradiction.summary} />
           </div>
         ) : null}
         <div className="claim-columns">
@@ -167,7 +172,7 @@ export function BusinessPage() {
                   </div>
                 </article>
               ))}
-              {!claims.length ? <p className="muted-copy">None recorded.</p> : null}
+              {!claims.length ? <p className="muted-copy">{emptyClaimCopy[kind]}</p> : null}
             </div>
           ))}
         </div>
