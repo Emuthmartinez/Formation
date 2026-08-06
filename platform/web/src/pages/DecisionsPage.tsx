@@ -9,10 +9,31 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
   const { snapshot, reload, notify } = useWorkspace();
   const [newOpen, setNewOpen] = useState(openNew);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [engineNote, setEngineNote] = useState<string | null>(null);
 
   useEffect(() => {
     setNewOpen(openNew);
   }, [openNew]);
+
+  // Ask the launch engine what it is waiting on, so a parked approval shows up here without a
+  // work session in between. An unreachable engine is said out loud, never shown as "no
+  // approvals waiting".
+  const workspaceId = snapshot.workspace.id;
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .listApprovals(workspaceId)
+      .then((view) => {
+        if (cancelled) return;
+        setEngineNote(view.connected && !view.reachable ? "The launch engine could not be reached just now, so approvals shown here may be behind." : null);
+        return reload();
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync once per workspace, not per snapshot reload
+  }, [workspaceId]);
 
   useEffect(() => {
     if (targetId) {
@@ -40,6 +61,23 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
     }
   };
 
+  const answerApproval = async (decision: Decision, answer: "approve" | "decline") => {
+    setUpdating(decision.id);
+    try {
+      await api.answerApproval(snapshot.workspace.id, decision.id, { answer });
+      await reload();
+      notify(
+        answer === "approve"
+          ? "Approved. The launch engine will pick this step up on its next work session."
+          : "Declined. The launch engine will hold this step.",
+      );
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error), "error");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   return (
     <div className="page-stack">
       <PageHeader
@@ -50,10 +88,11 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
       />
 
       <Section title="Needs a call" description="Unresolved choices that are holding back confidence or downstream work.">
+        {engineNote ? <p className="muted-copy">{engineNote}</p> : null}
         {sections.active.length ? (
           <div className="decision-list">
             {sections.active.map((decision) => (
-              <DecisionRow key={decision.id} decision={decision} updating={updating === decision.id} onStatus={updateStatus} />
+              <DecisionRow key={decision.id} decision={decision} updating={updating === decision.id} onStatus={updateStatus} onAnswer={answerApproval} />
             ))}
           </div>
         ) : <EmptyState title="No open decisions" description="The decision queue is clear. Formation will surface a new call when workstreams conflict or evidence changes." />}
@@ -62,7 +101,7 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
       <Section title="Decision log" description="Accepted decisions remain reviewable and can carry an explicit reconsideration date.">
         <div className="decision-list decision-list--history">
           {sections.decided.map((decision) => (
-            <DecisionRow key={decision.id} decision={decision} updating={updating === decision.id} onStatus={updateStatus} />
+            <DecisionRow key={decision.id} decision={decision} updating={updating === decision.id} onStatus={updateStatus} onAnswer={answerApproval} />
           ))}
           {!sections.decided.length ? <p className="muted-copy">No accepted decisions yet.</p> : null}
         </div>
@@ -72,7 +111,7 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
         <details className="archive-details">
           <summary>{sections.archived.length} superseded decision{sections.archived.length === 1 ? "" : "s"}</summary>
           <div className="decision-list decision-list--history">
-            {sections.archived.map((decision) => <DecisionRow key={decision.id} decision={decision} updating={false} onStatus={updateStatus} />)}
+            {sections.archived.map((decision) => <DecisionRow key={decision.id} decision={decision} updating={false} onStatus={updateStatus} onAnswer={answerApproval} />)}
           </div>
         </details>
       ) : null}
@@ -86,13 +125,16 @@ function DecisionRow({
   decision,
   updating,
   onStatus,
+  onAnswer,
 }: {
   decision: Decision;
   updating: boolean;
   onStatus: (decision: Decision, status: Decision["status"]) => void;
+  onAnswer: (decision: Decision, answer: "approve" | "decline") => void;
 }) {
   const { snapshot } = useWorkspace();
   const workstream = snapshot.workspace.workstreams.find((entry) => entry.id === decision.workstreamId);
+  const isEngineApproval = decision.source?.kind === "engine-approval";
 
   return (
     <article id={decision.id} className={`decision-row decision-row--${decision.status}`}>
@@ -100,22 +142,35 @@ function DecisionRow({
         <StatusText status={decision.status} />
         <span>{workstream?.title ?? decision.workstreamId}</span>
         <span>Owner: {decision.owner}</span>
+        {isEngineApproval ? <span>Launch engine</span> : null}
       </div>
       <div className="decision-row__content">
         <h2>{decision.title}</h2>
         <p className="decision-row__statement">{decision.decision}</p>
         <p><strong>Rationale:</strong> {decision.rationale}</p>
+        {decision.note ? <p className="muted-copy">{decision.note}</p> : null}
       </div>
       <div className="decision-row__dates">
         <div><span>Decided</span><strong>{formatDate(decision.decidedAt, "Not yet")}</strong></div>
         <div><span>Review</span><strong>{formatDate(decision.reviewAt, "No review set")}</strong></div>
       </div>
-      <div className="decision-row__actions">
-        {decision.status !== "decided" ? <Button onClick={() => onStatus(decision, "decided")} disabled={updating}>Accept decision</Button> : null}
-        <select value={decision.status} onChange={(event) => onStatus(decision, event.target.value as Decision["status"])} disabled={updating} aria-label={`Status for ${decision.title}`}>
-          <option value="open">Open</option><option value="proposed">Proposed</option><option value="decided">Decided</option><option value="revisit">Revisit</option><option value="superseded">Superseded</option>
-        </select>
-      </div>
+      {isEngineApproval ? (
+        // A launch approval is answered with the engine, never edited in place: the engine
+        // records the answer first and this record closes only after it confirms.
+        decision.status === "open" ? (
+          <div className="decision-row__actions">
+            <Button onClick={() => onAnswer(decision, "approve")} disabled={updating}>Approve</Button>
+            <Button variant="secondary" onClick={() => onAnswer(decision, "decline")} disabled={updating}>Decline</Button>
+          </div>
+        ) : null
+      ) : (
+        <div className="decision-row__actions">
+          {decision.status !== "decided" ? <Button onClick={() => onStatus(decision, "decided")} disabled={updating}>Accept decision</Button> : null}
+          <select value={decision.status} onChange={(event) => onStatus(decision, event.target.value as Decision["status"])} disabled={updating} aria-label={`Status for ${decision.title}`}>
+            <option value="open">Open</option><option value="proposed">Proposed</option><option value="decided">Decided</option><option value="revisit">Revisit</option><option value="superseded">Superseded</option>
+          </select>
+        </div>
+      )}
     </article>
   );
 }

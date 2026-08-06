@@ -9,7 +9,8 @@ import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEval
 import { createCompositeVerifier } from "../autonomy/prerequisites.js";
 import { createDopplerAuthVerifier } from "../autonomy/probes/doppler.js";
 import { createBudgetFundedVerifier } from "../autonomy/probes/budget.js";
-import type { BusinessStateV2, ControlFile, RunStateDocument } from "../schema/types.js";
+import { effectiveProtectedCategory } from "../autonomy/waivers.js";
+import type { BusinessStateV2, ControlFile, ProtectedCategory, RunStateDocument } from "../schema/types.js";
 import { loadBusinessStateFile, loadCatalogFile, loadControlFile, loadLedgerFile, resolveWorkspacePaths } from "../session/run.js";
 import { buildPlanReport, type HeldNode, type PlanReport } from "../session/plan.js";
 import { translateParkReason } from "../session/digest.js";
@@ -59,6 +60,52 @@ export interface ExecutionBoundaryReport {
   /** True when the workspace has no control file yet — nothing is granted, so every step parks. */
   readonly autonomyUnset?: boolean;
   readonly workflows?: readonly ExecutionWorkflowState[];
+  /**
+   * The durable run's founder approvals, in catalog order — empty until a durable run exists.
+   * Only the durable run is consulted: core/session/approve.ts records decisions onto
+   * run/run-state.json, so an approval that exists only on a throwaway seeded run has nothing an
+   * answer could be recorded against, and advertising it would invite the platform to collect an
+   * answer the engine can never accept.
+   */
+  readonly approvals?: readonly ExecutionApprovalState[];
+}
+
+export interface ExecutionApprovalState {
+  /** The stable approval id core/session/approve.ts accepts (`<workflowId>.approval.<n>`). */
+  readonly approvalId: string;
+  readonly workflowId: string;
+  readonly workflowTitle: string;
+  /** The catalog's founder-only action description — already founder-facing wording. */
+  readonly description: string;
+  readonly status: "pending" | "approved" | "rejected";
+  /** The node's effective protected category, when it has one. Engine vocabulary; the platform translates before showing a founder. */
+  readonly protectedCategory?: ProtectedCategory;
+}
+
+/**
+ * Joins the compiled plan's approval requirements with the durable run's decision record. The
+ * durable-run lookup upstream enforces planId equality, so the plan's approval ids and the run's
+ * approval map are guaranteed to describe the same plan; an id missing from the run map would
+ * mean that invariant broke, and the entry is skipped rather than invented as "pending".
+ */
+export function buildBoundaryApprovals(plan: CompiledPlan, run: RunStateDocument): ExecutionApprovalState[] {
+  const approvals: ExecutionApprovalState[] = [];
+  for (const node of plan.nodes) {
+    for (const approval of node.approvals) {
+      const status = run.approvals[approval.id];
+      if (status === undefined) continue;
+      const protectedCategory = effectiveProtectedCategory(node);
+      approvals.push({
+        approvalId: approval.id,
+        workflowId: node.workflowId,
+        workflowTitle: node.title,
+        description: approval.description,
+        status,
+        ...(protectedCategory ? { protectedCategory } : {}),
+      });
+    }
+  }
+  return approvals;
 }
 
 function founderReasonFor(node: HeldNode): string | undefined {
@@ -196,6 +243,7 @@ export function describeWorkspace(
     hasDurableRun: durable !== undefined,
     autonomyUnset: report.autonomyUnset,
     workflows: buildBoundaryWorkflows(plan, report, nodeStatuses),
+    approvals: durable ? buildBoundaryApprovals(plan, durable) : [],
   };
 }
 

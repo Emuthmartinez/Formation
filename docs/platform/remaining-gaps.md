@@ -71,13 +71,13 @@ Implement a typed adapter that:
 - creates or resumes a durable engine run — **shipped** (the worker invokes `core/session/run.ts`; the engine's plan-matched run state is the durable identity)
 - exposes founder-readable run state — **shipped** (API-level; a founder page over these routes is still open)
 - is idempotent across retries — **shipped** (one execution record per workspace, workflow, and context fingerprint; retries resume it)
-- preserves engine approvals and protected actions
+- preserves engine approvals and protected actions — **shipped** (a parked founder gate mirrors into `decisions` with engine provenance; answers travel only through `core/session/approve.ts` via `platform/server/execution.mjs`, owner-role required, and the mirror cannot be edited into "decided". No mode or timeout auto-answers a gate)
 - imports only verified results
 - maps proposed claims, evidence, tasks, blockers, and artifact candidates into Formation
 - marks affected downstream artifacts stale when accepted input context changes
 - carries trace and cost metadata without leaking secrets
 
-The unshipped behaviours are the import half of the boundary. Nothing the shipped half does writes engine-owned state: the reducer and session runner remain the engine's only writers, and an unreachable engine is always reported as unreachable, never as an empty plan.
+The unshipped behaviours are the import half of the boundary. Nothing the shipped half does writes engine-owned state: the reducer, the session runner, and the founder-decision CLI remain the engine's only writers, and an unreachable engine is always reported as unreachable, never as an empty plan or "no approvals waiting".
 
 ## P1: Existing launch repository importer
 

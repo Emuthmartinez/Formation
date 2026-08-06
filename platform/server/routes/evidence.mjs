@@ -144,6 +144,12 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       const workspace = requireWorkspace(database, workspaceId, user.id);
       const target = database.decisions.find((entry) => entry.id === decisionId && entry.workspaceId === workspaceId);
       if (!target) throw new HttpError(404, "Decision not found.");
+      // A launch approval must never be "decided" by editing its mirror — that would leave the
+      // engine's gate parked while Formation claims it was answered. The approvals flow records
+      // the answer with the engine first and closes the record only after it confirms.
+      if (target.source?.kind === "engine-approval") {
+        throw new HttpError(409, "This is a launch approval. Approve or decline it from the approvals flow so the launch engine records your answer.");
+      }
       if (patch.title !== undefined) target.title = requireText(patch.title, "Decision title", TEXT_LIMITS.title);
       if (patch.decision !== undefined) target.decision = requireText(patch.decision, "Decision statement", TEXT_LIMITS.long);
       if (patch.rationale !== undefined) target.rationale = requireText(patch.rationale, "Decision rationale", TEXT_LIMITS.long);

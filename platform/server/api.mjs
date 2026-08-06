@@ -1,5 +1,6 @@
 import { assertSameOrigin, getAuthenticatedUser } from "./auth.mjs";
 import { HttpError } from "./http.mjs";
+import { handleApprovalRoutes } from "./routes/approvals.mjs";
 import { handleArtifactRoutes } from "./routes/artifacts.mjs";
 import { handleEvidenceRoutes } from "./routes/evidence.mjs";
 import { handleExecutionRoutes } from "./routes/executions.mjs";
@@ -22,6 +23,8 @@ export async function handleApi({ request, response, url, store, worker, executi
   await handleWorkspaceRoutes(privateContext);
   if (response.writableEnded) return;
   await handleExecutionRoutes(privateContext);
+  if (response.writableEnded) return;
+  await handleApprovalRoutes(privateContext);
   if (response.writableEnded) return;
   await handleEvidenceRoutes(privateContext);
   if (response.writableEnded) return;

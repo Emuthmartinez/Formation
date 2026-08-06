@@ -1,4 +1,5 @@
 import type {
+  ApprovalsView,
   Artifact,
   Claim,
   Decision,
@@ -96,6 +97,12 @@ export const api = {
     request<Decision>(`/api/workspaces/${workspaceId}/decisions/${decisionId}`, {
       method: "PATCH",
       body: JSON.stringify(patch),
+    }),
+  listApprovals: (workspaceId: string) => request<ApprovalsView>(`/api/workspaces/${workspaceId}/approvals`),
+  answerApproval: (workspaceId: string, decisionId: string, payload: { answer: "approve" | "decline"; reason?: string }) =>
+    request<Decision>(`/api/workspaces/${workspaceId}/approvals/${decisionId}`, {
+      method: "POST",
+      body: JSON.stringify(payload),
     }),
   createTask: (workspaceId: string, payload: Partial<Task>) =>
     request<Task>(`/api/workspaces/${workspaceId}/tasks`, {

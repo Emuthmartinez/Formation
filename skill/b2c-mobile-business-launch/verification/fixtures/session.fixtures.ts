@@ -23,6 +23,7 @@ const tsxBin = resolveTsxBin(skillRoot);
 const reducerCliPath = path.join(skillRoot, "core/reducer/cli.ts");
 const runCliPath = path.join(skillRoot, "core/session/run.ts");
 const approveCliPath = path.join(skillRoot, "core/session/approve.ts");
+const boundaryCliPath = path.join(skillRoot, "core/adapters/platform-execution.ts");
 
 interface CliResult {
   readonly code: number;
@@ -49,6 +50,12 @@ function runSession(args: string[]): CliResult {
 function runApprove(args: string[]): CliResult {
   const result = spawnSync(tsxBin, [approveCliPath, ...args], { cwd: skillRoot, encoding: "utf8" });
   return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
+}
+
+/** stdout kept separate from stderr: the boundary CLI's stdout is a JSON document a caller parses. */
+function runBoundary(args: string[]): { code: number; stdout: string; stderr: string } {
+  const result = spawnSync(tsxBin, [boundaryCliPath, ...args], { cwd: skillRoot, encoding: "utf8" });
+  return { code: result.status ?? -1, stdout: result.stdout ?? "", stderr: result.stderr ?? "" };
 }
 
 function writeJson(filePath: string, value: unknown): void {
@@ -712,5 +719,49 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const approveResult = runApprove(["--workspace", handle.dir, "--approval", pendingId!, "--decision", "approved", "--session", "sess-approve-grant-1"]);
     assert(approveResult.code === 0, `expected exit 0 recording the approval, got ${approveResult.code}: ${approveResult.output}`);
     assert(approveResult.output.includes(`RECORDED ${pendingId} approved`), `expected a RECORDED confirmation, got:\n${approveResult.output}`);
+  });
+
+  // --- judgment scenario: the platform boundary reports approvals only from the durable run ----
+
+  harness.check("session/approve: the platform boundary reports a parked approval only once a durable run exists, and reflects the recorded decision", () => {
+    const handle = bootstrapWorkspace(harness, "approve-boundary", approvalGatedCatalog(), {
+      grants: { "domain.money": grant("domain.money", "full") },
+      waivers: [waiver("waiver.money.1", "domain.money", "spend", "spend")],
+      balances: [{ unit: "Revenue", period: currentPeriod(), currency: "USD", allocated: 1000, committed: 0, spent: 0, remaining: 1000, updatedAt: "2026-08-01T00:00:00.000Z" }],
+    });
+
+    // Before any session: the step is predicted as needs-founder, but there is no durable run to
+    // record an answer against, so no approval may be advertised as answerable.
+    const before = runBoundary(["--workspace", handle.dir]);
+    assert(before.code === 0, `expected exit 0 from the boundary before a run, got ${before.code}: ${before.stderr}`);
+    const beforeReport = JSON.parse(before.stdout);
+    assert(beforeReport.workspaceReady === true && beforeReport.hasDurableRun === false, `expected a ready workspace with no durable run, got: ${before.stdout}`);
+    assert(Array.isArray(beforeReport.approvals) && beforeReport.approvals.length === 0, `expected no answerable approvals before a durable run, got: ${JSON.stringify(beforeReport.approvals)}`);
+    assert(beforeReport.workflows.some((entry: { status: string }) => entry.status === "needs-founder"), `expected the gated step to report needs-founder, got: ${before.stdout}`);
+
+    const sessionResult = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-approve-boundary-1", "--executor", "fixture"]);
+    assert(sessionResult.code === 0, `expected exit 0 for the setup session, got ${sessionResult.code}: ${sessionResult.output}`);
+
+    const parked = runBoundary(["--workspace", handle.dir]);
+    assert(parked.code === 0, `expected exit 0 from the boundary after a run, got ${parked.code}: ${parked.stderr}`);
+    const parkedReport = JSON.parse(parked.stdout);
+    assert(parkedReport.hasDurableRun === true, `expected a durable run after the session, got: ${parked.stdout}`);
+    assert(parkedReport.approvals.length === 1, `expected exactly one approval, got: ${JSON.stringify(parkedReport.approvals)}`);
+    const approval = parkedReport.approvals[0];
+    assert(approval.approvalId === "workflow.money-report.approval.1", `unexpected approval id: ${JSON.stringify(approval)}`);
+    assert(approval.status === "pending", `expected a pending approval, got: ${JSON.stringify(approval)}`);
+    assert(approval.workflowId === "workflow.money-report" && approval.workflowTitle === "Pull this week's revenue report", `approval must carry its workflow identity: ${JSON.stringify(approval)}`);
+    assert(approval.description === "Approve pulling this week's revenue report", `approval must carry the catalog's founder-facing description: ${JSON.stringify(approval)}`);
+    assert(approval.protectedCategory === "spend", `expected the node's effective protected category, got: ${JSON.stringify(approval)}`);
+
+    const approveResult = runApprove(["--workspace", handle.dir, "--approval", approval.approvalId, "--decision", "approved", "--session", "sess-approve-boundary-2"]);
+    assert(approveResult.code === 0, `expected exit 0 recording the approval, got ${approveResult.code}: ${approveResult.output}`);
+
+    const after = runBoundary(["--workspace", handle.dir]);
+    assert(after.code === 0, `expected exit 0 from the boundary after approving, got ${after.code}: ${after.stderr}`);
+    const afterReport = JSON.parse(after.stdout);
+    assert(afterReport.approvals.length === 1 && afterReport.approvals[0].status === "approved", `expected the recorded decision to be reflected, got: ${JSON.stringify(afterReport.approvals)}`);
+    const step = afterReport.workflows.find((entry: { workflowId: string }) => entry.workflowId === "workflow.money-report");
+    assert(step.status === "ready", `expected the approved step to leave needs-founder and become ready, got: ${JSON.stringify(step)}`);
   });
 }
