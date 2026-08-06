@@ -65,6 +65,7 @@ It communicates only through the typed JSON API.
 - artifact editing and versioning
 - task, claim, and decision mutations
 - generation job lifecycle
+- engine execution requests, durable run resumption, and founder-readable run state
 - static application serving
 
 ### Persistence

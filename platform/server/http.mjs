@@ -4,6 +4,7 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import { AuthError } from "./auth.mjs";
+import { ExecutionError } from "./execution.mjs";
 import { GenerationError } from "./generation.mjs";
 
 export async function serveApplication({ request, response, url, staticRoot }) {
@@ -76,7 +77,7 @@ function contentType(extension) {
 }
 
 export function normalizeError(error) {
-  if (error instanceof HttpError || error instanceof AuthError || error instanceof GenerationError) {
+  if (error instanceof HttpError || error instanceof AuthError || error instanceof ExecutionError || error instanceof GenerationError) {
     return {
       status: error.status,
       message: error.message,
