@@ -1,10 +1,11 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { assert, skillRoot, type Harness } from "../fixtures/_harness.js";
 import { laneKeys, type RunStateDocument } from "../../core/schema/types.js";
 import type { CatalogInput } from "../../core/engine/compile.js";
 import { founderFacingRuntimeIds, buildSessionRunArgs, type SessionInvocation } from "../../core/adapters/profile.js";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 import { createClaudeProfile } from "../../core/adapters/claude.js";
 import { createCodexProfile } from "../../core/adapters/codex.js";
 import { createCursorProfile } from "../../core/adapters/cursor.js";
@@ -32,11 +33,7 @@ import type { RuntimeCapabilityProfile } from "../../core/adapters/profile.js";
  * real decisions it produced.
  */
 
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
-const tsxBin = resolveTsxBin();
+const tsxBin = resolveTsxBin(skillRoot);
 const reducerCliPath = path.join(skillRoot, "core/reducer/cli.ts");
 
 interface CliResult {

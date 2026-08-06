@@ -1,9 +1,10 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { Ajv2020, type AnySchema, type ErrorObject } from "ajv/dist/2020.js";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 
 export interface CaseResult {
   label: string;
@@ -18,11 +19,6 @@ export interface SchemaCheckResult {
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 export const skillRoot = path.resolve(scriptDir, "../..");
-
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
 
 function isDateTime(value: string | undefined): value is string {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && !Number.isNaN(new Date(value).getTime()));
@@ -77,7 +73,7 @@ export interface Harness {
 export function createHarness(schemaDir: string): Harness {
   const tempRoot = mkdtempSync(path.join(tmpdir(), "b2c-core-fixtures-"));
   const results: CaseResult[] = [];
-  const tsxBin = resolveTsxBin();
+  const tsxBin = resolveTsxBin(skillRoot);
   const ajv = createSchemaRegistry(schemaDir);
 
   const makeTempDir = (name: string): string => {

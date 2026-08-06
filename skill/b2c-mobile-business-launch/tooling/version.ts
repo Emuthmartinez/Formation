@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { cpSync, existsSync } from "node:fs";
-import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { parseDesignCliArgs, skillRoot } from "./lib/design-state.js";
 import { resolveScriptPath } from "./lib/script-paths.js";
+import { resolveTsxBin } from "./lib/tsx-bin.js";
 
 const args = parseDesignCliArgs(process.argv.slice(2));
 const [command, nameOrRef] = args.positionals;
@@ -98,11 +98,6 @@ function runChecked(binary: string, commandArgs: string[], cwd: string): void {
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
   }
-}
-
-function resolveTsxBin(cwd: string): string {
-  const candidates = [path.join(cwd, "node_modules/.bin/tsx"), path.join(path.dirname(path.dirname(cwd)), "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
 }
 
 function requireYes(operation: string): void {

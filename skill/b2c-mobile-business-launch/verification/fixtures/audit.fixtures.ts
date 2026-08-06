@@ -1,7 +1,8 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { assert, createHarness, skillRoot, type Harness } from "./_harness.js";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 
 /**
  * U9 meta-tests for the audit pipeline itself (KTD10's "single-source audit plan + parity
@@ -14,11 +15,7 @@ import { assert, createHarness, skillRoot, type Harness } from "./_harness.js";
 
 const repoRoot = path.resolve(skillRoot, "..", "..");
 
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
-const tsxBin = resolveTsxBin();
+const tsxBin = resolveTsxBin(skillRoot);
 
 function copyFile(from: string, to: string): void {
   mkdirSync(path.dirname(to), { recursive: true });

@@ -1,16 +1,11 @@
-import { existsSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 
 /** Repo root, resolved two levels above core/session — shared by every core/session CLI. */
 export function skillRoot(): string {
   return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-}
-
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot(), "node_modules/.bin/tsx"), path.resolve(skillRoot(), "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
 }
 
 export interface ReducerResult {
@@ -25,6 +20,6 @@ export interface ReducerResult {
  */
 export function runReducer(args: string[], input?: string): ReducerResult {
   const cliPath = path.join(skillRoot(), "core/reducer/cli.ts");
-  const result = spawnSync(resolveTsxBin(), [cliPath, ...args], { cwd: skillRoot(), encoding: "utf8", input });
+  const result = spawnSync(resolveTsxBin(skillRoot()), [cliPath, ...args], { cwd: skillRoot(), encoding: "utf8", input });
   return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
 }

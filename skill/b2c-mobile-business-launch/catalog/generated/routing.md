@@ -63,6 +63,7 @@ Generated from catalog/references.ts.
 
 | Load when | Reference |
 | --- | --- |
+| deciding which project or config a credential belongs in; setting up secrets for a new business; adding a second business to an existing secret store; or splitting secrets across web, mobile, backend, and CI — the portfolio-shape companion to secrets-management.md, which covers one secret at a time | [`knowledge/operations/doppler-organization.md`](../../knowledge/operations/doppler-organization.md) |
 | every broad launch start; before account/social/Doppler bootstrap; when the founder is unsure; whenever an agent is about to hand back a checklist instead of operating the business | [`knowledge/operations/founder-zero-operator.md`](../../knowledge/operations/founder-zero-operator.md) |
 | before authenticated browser/API/CLI/native action on any provider, social, or store account | [`knowledge/operations/frontier-agent-operations.md`](../../knowledge/operations/frontier-agent-operations.md) |
 | before using or replacing any paid/account-gated tool, before running a free fallback, or when a service is missing from the runtime | [`knowledge/operations/paid-tool-routing.md`](../../knowledge/operations/paid-tool-routing.md) |

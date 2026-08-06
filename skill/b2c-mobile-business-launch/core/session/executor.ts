@@ -72,3 +72,24 @@ export const noOpExecutor: NodeExecutor = {
     return { status: "failed", outputs: [], evidence: [], error: `no-op executor: real execution for "${node.id}" is not wired yet (arrives in U6)` };
   },
 };
+
+/**
+ * Test-only stand-in for a slow-but-alive real executor (U6's shape): waits `delayMs` and never
+ * calls `context.heartbeat()`, so a caller can prove that liveness — core/session/run.ts's own
+ * lock/attempt heartbeat refresh — no longer depends on the executor voluntarily cooperating.
+ * Exists for the run.ts fixture suite; not selected by any founder-facing runtime profile.
+ */
+export function createSlowSilentExecutor(delayMs: number): NodeExecutor {
+  return {
+    async execute(node): Promise<NodeExecutionResult> {
+      await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+      const outputs: NodeExecutionOutput[] = node.outputs.map((artifactId) => ({
+        artifactId,
+        path: `slow-silent://${node.id}/${artifactId}`,
+        fingerprint: `slow-silent-fp:${node.id}:${artifactId}`,
+        evidence: [`slow-silent executor: synthetic completion of ${node.id} after ${delayMs}ms without calling heartbeat`],
+      }));
+      return { status: "succeeded", outputs, evidence: [`slow-silent executor: ${node.id} completed after ${delayMs}ms without calling heartbeat`] };
+    },
+  };
+}

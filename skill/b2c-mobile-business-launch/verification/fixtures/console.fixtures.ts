@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { assert, assertSchemaValid, skillRoot, type Harness } from "./_harness.js";
 import { laneKeys } from "../../core/schema/types.js";
 import { founderSurfaceVocabularyBlocklist } from "../../tooling/render-autonomy-console.js";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 
 /**
  * U7 fixtures: the scripted onboarding driver (core/session/onboard.ts) and the autonomy console
@@ -12,12 +13,7 @@ import { founderSurfaceVocabularyBlocklist } from "../../tooling/render-autonomy
  * convention rather than importing internals and asserting in-process.
  */
 
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
-
-const tsxBin = resolveTsxBin();
+const tsxBin = resolveTsxBin(skillRoot);
 const reducerCliPath = path.join(skillRoot, "core/reducer/cli.ts");
 const onboardCliPath = path.join(skillRoot, "core/session/onboard.ts");
 const consoleCliPath = path.join(skillRoot, "tooling/render-autonomy-console.ts");

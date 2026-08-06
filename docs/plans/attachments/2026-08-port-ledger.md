@@ -76,7 +76,7 @@ are ground truth, not hand arithmetic.
 | Knowledge content files | 90 | 0 | 0 | 1 | 91 |
 | Additions beyond literal scope (2) | 1 | 0 | 1 | 0 | 2 |
 | Validators (67) | 23 | 27 | 0 | 17 | 67 |
-| **Total** | **114** | **27** | **1** | **33** | **175** |
+| **Total** | **115** | **27** | **1** | **33** | **176** |
 
 ---
 
@@ -236,6 +236,7 @@ matching `catalog/references.ts` entry, which already carries its authored `load
 | knowledge/operations/provider-state-recipes.md | keep | substantial per-provider state checklist (10 providers); distinct from secrets-management.md — Doppler is one entry among ten, not the focus |
 | knowledge/operations/resend-email-ops.md | keep | transactional/lifecycle email reference, `check:email` |
 | knowledge/operations/secrets-management.md | keep | deep secrets reference (discovery loop, classification, Doppler workflow); the file itself is substantial even though its README load-when line was a weak filename-restating placeholder — fixed in `catalog/references.ts`, not a reason to drop the file |
+| knowledge/operations/doppler-organization.md | keep | portfolio secret-store convention (platform vs per-business projects, configs-not-repos, consumer-side tier composition); written 2026-08-05 from a live multi-business account setup, and carries two constraints found there: cross-project inheritance is a paid feature and a least-privilege read-only subset needs its own project because branch configs inherit their root |
 
 ### domain.product (5 files, all keep)
 
