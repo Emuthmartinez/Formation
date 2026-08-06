@@ -1,10 +1,10 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.78.0",
+  "version": "0.79.0",
   "updatedAt": "2026-08-06",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "The shared account-level Doppler project was renamed from `platform` to `formation` alongside the repository's Formation rebrand (the live rename happened 2026-08-06 with zero service tokens attached, so no automation broke). knowledge/operations/doppler-organization.md now names the `formation` project in the rule, the composition command, and the per-workplace constraint, and the tier heading reads 'shared account tier' so it can no longer be confused with the Formation product platform.",
-    "Comment-only sweeps in core/provisioning/resolve.ts and core/schema/types.ts follow the same rename. The `doppler-platform` ResolutionSource identifier is deliberately unchanged: it is a stable serialized value that fixtures and consumers key on, and renaming it would be a behavior change dressed as documentation."
+    "The final-source-layout workflow (.github/workflows/final-source-layout.yml) is removed. It was one-shot automation for the directory-migration arc that closed at v0.63.0, but it still carried `contents: write` and a step that self-commits to PR branches, and it would have fired again on any PR touching scripts/repair-migrated-fixtures.py or the workflow file itself. Same rationale as removing the expired pr99-publisher.yml in v0.76.0 (#120): a standing write-permission workflow whose job is done is risk with no remaining function.",
+    "The four migration scripts the workflow drove — scripts/fix-source-layout-contracts.py, scripts/refactor-source-layout.py, scripts/repair-final-source-layout.py, and scripts/repair-migrated-fixtures.py — are removed with it. A full-repo reference sweep found no caller outside the workflow: the workflow referenced one script, and nothing referenced the workflow. scripts/sync-skill-runtime.sh, the one live script in that directory, is untouched."
   ]
 }
