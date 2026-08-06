@@ -104,6 +104,36 @@ export interface Decision {
   reviewAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Present on decisions mirrored from the launch engine's founder approvals. */
+  source?: {
+    kind: "engine-approval";
+    approvalId: string;
+    workflowId: string;
+    workflowTitle: string;
+    description: string;
+    category: string | null;
+    runId: string | null;
+    planId: string | null;
+  };
+  answer?: {
+    value: "approved" | "declined";
+    answeredBy: string;
+    answeredAt: string;
+    reason: string | null;
+    recordedVia: "formation" | "engine";
+  } | null;
+  /** Set when a mirrored approval was retired without an answer (the launch plan moved on). */
+  note?: string;
+}
+
+export interface ApprovalsView {
+  connected: boolean;
+  reachable: boolean;
+  ready?: boolean;
+  checkedAt?: string;
+  operatingMode: string | null;
+  reason?: string;
+  approvals: Decision[];
 }
 
 export interface ArtifactSection {

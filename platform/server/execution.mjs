@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createId } from "./domain.mjs";
+import { listEngineApprovals, recordApprovalActivity, syncEngineApprovals } from "./domain/approvals.mjs";
 
 /**
  * The platform half of the platform-to-engine execution adapter (docs/platform/remaining-gaps.md,
@@ -204,6 +205,23 @@ export class EngineBridge {
     }
     return { ran: true, code: result.code };
   }
+
+  /**
+   * Records a founder's answer to a parked approval through the engine's one sanctioned path,
+   * core/session/approve.ts — the reducer and that CLI stay the only writers of engine-owned
+   * state; the platform never touches run state, control, grants, or waivers itself.
+   */
+  async approve({ engineWorkspaceDir, approvalId, decision, sessionId, reason }) {
+    const args = ["--workspace", engineWorkspaceDir, "--approval", approvalId, "--decision", decision, "--session", sessionId];
+    if (reason) args.push("--reason", reason);
+    const result = await this.#spawnEngine("core/session/approve.ts", args, this.#describeTimeoutMs);
+    if (!result.started) return { recorded: false, kind: "unreachable", reason: result.reason };
+    if (result.code === 0 && result.stdout.includes(`RECORDED ${approvalId} ${decision}`)) return { recorded: true };
+    console.error(`Formation execution adapter: engine approve ${approvalId} exited ${result.code}: ${result.stderr.slice(0, 2_000)}`);
+    if (result.stderr.includes("approve.unknown_approval")) return { recorded: false, kind: "unknown_approval" };
+    if (result.stderr.includes("approve.no_run_state")) return { recorded: false, kind: "no_run" };
+    return { recorded: false, kind: "error" };
+  }
 }
 
 function defaultResolveEngineWorkspace(workspace) {
@@ -272,6 +290,129 @@ export class ExecutionWorker {
     if (!view.reachable) return { connected: true, reachable: false, checkedAt, reason: view.reason };
     if (!view.report.workspaceReady) return { connected: true, reachable: true, checkedAt, ready: false, reason: view.report.reason };
     return { connected: true, reachable: true, checkedAt, ready: true, run: founderRunView(view.report) };
+  }
+
+  /**
+   * The founder approvals view for one workspace: asks the engine what it is asking, mirrors
+   * that into the decision system, and returns the mirrored records. Only a reachable, ready
+   * engine answer may create, close, or supersede a record — an unreachable engine is reported
+   * as unreachable alongside the last known records, never as "no approvals waiting".
+   *
+   * `workspace.founder.operatingMode` shares the engine's grant-level vocabulary and is returned
+   * for display, but it never influences this boundary: the engine's own grants and waivers
+   * decide what runs without an approval, and no mode answers an approval on the founder's
+   * behalf.
+   */
+  async syncApprovals(workspace) {
+    const engineWorkspaceDir = this.#resolveEngineWorkspace(workspace);
+    const operatingMode = workspace.founder?.operatingMode ?? null;
+    if (!engineWorkspaceDir) {
+      const database = await this.#store.read();
+      return { connected: false, reachable: false, operatingMode, reason: "This company is not connected to its launch engine yet.", approvals: listEngineApprovals(database, workspace.id) };
+    }
+    const checkedAt = new Date().toISOString();
+    const view = await this.#engine.describe(engineWorkspaceDir);
+    if (!view.reachable) {
+      const database = await this.#store.read();
+      return { connected: true, reachable: false, checkedAt, operatingMode, reason: view.reason, approvals: listEngineApprovals(database, workspace.id) };
+    }
+    if (!view.report.workspaceReady) {
+      const database = await this.#store.read();
+      return { connected: true, reachable: true, ready: false, checkedAt, operatingMode, reason: view.report.reason, approvals: listEngineApprovals(database, workspace.id) };
+    }
+    const approvals = await this.#store.transaction((database) => {
+      const liveWorkspace = database.workspaces.find((entry) => entry.id === workspace.id);
+      if (!liveWorkspace) return [];
+      const now = new Date().toISOString();
+      const changes = syncEngineApprovals(database, liveWorkspace, view.report, now);
+      recordApprovalActivity(database, liveWorkspace.id, changes, now);
+      return listEngineApprovals(database, liveWorkspace.id);
+    });
+    return { connected: true, reachable: true, ready: true, checkedAt, operatingMode, approvals };
+  }
+
+  /**
+   * Records a founder's answer to a mirrored approval. The answer travels through
+   * core/session/approve.ts — the engine's only sanctioned path out of a founder gate — and the
+   * decision record closes only after the engine confirmed it recorded the answer. Any failure
+   * to reach the engine leaves the record open and says so: an unanswered approval stays
+   * unanswered, and nothing here times out into an answer.
+   */
+  async answerApproval({ workspaceId, user, decisionId, answer, reason }) {
+    const database = await this.#store.read();
+    const { workspace, membership } = requireMembership(database, workspaceId, user.id);
+    // Membership lets you see the company; answering for it is the owner's call alone.
+    if (membership.role !== "owner") throw new ExecutionError(403, "Only this company's owner can answer a launch approval.");
+
+    const decision = database.decisions.find((entry) => entry.id === decisionId && entry.workspaceId === workspaceId && entry.source?.kind === "engine-approval");
+    if (!decision) throw new ExecutionError(404, "Approval not found.");
+    if (decision.status !== "open") {
+      throw new ExecutionError(
+        409,
+        decision.status === "superseded"
+          ? "The launch plan moved on before this was answered, so the engine is no longer asking it."
+          : "This approval was already answered.",
+      );
+    }
+
+    const engineWorkspaceDir = this.#resolveEngineWorkspace(workspace);
+    if (!engineWorkspaceDir) throw new ExecutionError(409, "This company is not connected to its launch engine yet.");
+
+    // Confirm the engine still asks this exact question before recording anything: the mirror
+    // could be stale (plan moved on, or answered directly with the engine's own CLI).
+    const view = await this.#engine.describe(engineWorkspaceDir);
+    if (!view.reachable) throw new ExecutionError(502, `Nothing was recorded: ${view.reason}`);
+    if (!view.report.workspaceReady) {
+      throw new ExecutionError(409, `Nothing was recorded: ${view.report.reason ?? "the launch engine has no workspace for this company yet."}`);
+    }
+    const live = (view.report.approvals ?? []).find((entry) => entry.approvalId === decision.source.approvalId);
+    if ((view.report.runId ?? null) !== decision.source.runId || !live || live.status !== "pending") {
+      await this.#store.transaction((liveDatabase) => {
+        const liveWorkspace = liveDatabase.workspaces.find((entry) => entry.id === workspaceId);
+        if (!liveWorkspace) return;
+        const now = new Date().toISOString();
+        recordApprovalActivity(liveDatabase, liveWorkspace.id, syncEngineApprovals(liveDatabase, liveWorkspace, view.report, now), now);
+      });
+      throw new ExecutionError(409, "The launch engine is no longer asking this question. Refresh the approvals list for the current ones.");
+    }
+
+    const result = await this.#engine.approve({
+      engineWorkspaceDir,
+      approvalId: decision.source.approvalId,
+      decision: answer === "approve" ? "approved" : "rejected",
+      sessionId: `formation.approval.${decision.id}`,
+      reason,
+    });
+    if (!result.recorded) {
+      if (result.kind === "unreachable") throw new ExecutionError(502, `Nothing was recorded: ${result.reason}`);
+      if (result.kind === "unknown_approval" || result.kind === "no_run") {
+        throw new ExecutionError(409, "The launch engine is no longer asking this question. Refresh the approvals list for the current ones.");
+      }
+      throw new ExecutionError(502, "The launch engine could not record this answer, so nothing changed.");
+    }
+
+    const approved = answer === "approve";
+    return this.#store.transaction((liveDatabase) => {
+      const target = liveDatabase.decisions.find((entry) => entry.id === decisionId && entry.workspaceId === workspaceId);
+      const now = new Date().toISOString();
+      if (target) {
+        target.status = "decided";
+        target.decidedAt = now.slice(0, 10);
+        target.decision = `${approved ? "Approved" : "Declined"}: ${target.source.description}${reason ? ` — ${reason}` : ""}`;
+        target.answer = { value: approved ? "approved" : "declined", answeredBy: user.name, answeredAt: now, reason: reason ?? null, recordedVia: "formation" };
+        target.updatedAt = now;
+      }
+      liveDatabase.activity.push({
+        id: createId("act"),
+        workspaceId,
+        type: "approval-answered",
+        title: `${approved ? "Approval granted" : "Approval declined"}: ${decision.source.workflowTitle}`,
+        detail: `${decision.source.description}${reason ? ` — ${reason}` : ""}`,
+        actor: user.name,
+        createdAt: now,
+      });
+      return target ?? decision;
+    });
   }
 
   /**
@@ -464,6 +605,12 @@ export class ExecutionWorker {
             }
             live.engine = { runId, planId: after.report.planId, catalogVersion: after.report.catalogVersion };
             live.report = founderRunView(after.report);
+            // A session that parked work on a founder decision must surface that decision now,
+            // not on the next page view.
+            const liveWorkspace = nextDatabase.workspaces.find((entry) => entry.id === claimed.workspaceId);
+            if (liveWorkspace) {
+              recordApprovalActivity(nextDatabase, liveWorkspace.id, syncEngineApprovals(nextDatabase, liveWorkspace, after.report, finishedAt), finishedAt);
+            }
           } else {
             // The session itself finished; saying so is honest. Pretending we also know the
             // resulting state would not be — the read routes will say "could not be reached".
@@ -512,11 +659,15 @@ export class ExecutionWorker {
   }
 }
 
-function requireMemberWorkspace(database, workspaceId, userId) {
+function requireMembership(database, workspaceId, userId) {
   const membership = database.memberships.find((entry) => entry.workspaceId === workspaceId && entry.userId === userId);
   const workspace = database.workspaces.find((entry) => entry.id === workspaceId);
   if (!membership || !workspace) throw new ExecutionError(404, "Workspace not found.");
-  return workspace;
+  return { workspace, membership };
+}
+
+function requireMemberWorkspace(database, workspaceId, userId) {
+  return requireMembership(database, workspaceId, userId).workspace;
 }
 
 /**
