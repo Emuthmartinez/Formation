@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { assert, skillRoot, type Harness } from "./_harness.js";
+import { assert, repoCheckoutPresent, repoRoot, skillRoot, type Harness } from "./_harness.js";
 import { toCatalogInput } from "../../catalog/bridge.js";
 import { composeCatalog } from "../../catalog/index.js";
 import type { Catalog, CatalogWorkflowDef } from "../../catalog/types.js";
@@ -8,7 +8,6 @@ import { validateCatalog } from "../../catalog/validate.js";
 import { compilePlan } from "../../core/engine/compile.js";
 
 // skillRoot is skill/b2c-mobile-business-launch; the ledger lives at repo-root docs/plans/attachments/.
-const repoRoot = path.resolve(skillRoot, "..", "..");
 const resolvedLedgerPath = path.join(repoRoot, "docs", "plans", "attachments", "2026-08-port-ledger.md");
 
 function baseWorkflow(overrides: Partial<CatalogWorkflowDef> = {}): CatalogWorkflowDef {
@@ -229,13 +228,23 @@ export function register(harness: Harness): void {
   // Port ledger: completeness (every v1 file exactly once, no TBD rows)
   // ---------------------------------------------------------------------
 
-  harness.check("port ledger: file exists and has no TBD rows", () => {
+  // The ledger is a repository artifact under docs/, and an installed runtime ships no docs/ —
+  // so from the runtime these four assert something that is not merely failing but absent.
+  // Routed through the harness's skip so `npm run sync:runtime`, which runs this whole audit
+  // inside the installed copy, stops reporting red for a reason no install could ever fix.
+  // Dispatching on the case function rather than listing the labels twice keeps the skip list
+  // from drifting away from the cases it is supposed to cover.
+  const ledgerCase: (label: string, fn: () => void) => void = repoCheckoutPresent()
+    ? harness.check
+    : (label) => harness.skip(label, `repo-only: no port ledger at ${resolvedLedgerPath} (an installed runtime ships no docs/)`);
+
+  ledgerCase("port ledger: file exists and has no TBD rows", () => {
     const text = readFileSync(resolvedLedgerPath, "utf8");
     const tbdRowPattern = /^\|\s*(?:knowledge|validation)\/[^\s|]+\s*\|\s*TBD\s*\|/m;
     assert(!tbdRowPattern.test(text), "port ledger must not contain a row whose disposition column is TBD");
   });
 
-  harness.check("port ledger: every surviving knowledge/**/*.{md,yaml,yml} file (excluding evals/fixtures dirs) appears exactly once", () => {
+  ledgerCase("port ledger: every surviving knowledge/**/*.{md,yaml,yml} file (excluding evals/fixtures dirs) appears exactly once", () => {
     const text = readFileSync(resolvedLedgerPath, "utf8");
     // U11 cutover executed every "drop" disposition, so those ledger rows now describe files
     // that no longer exist by design — the ledger is the historical record of the deletion,
@@ -249,7 +258,7 @@ export function register(harness: Harness): void {
     assertOneToOne(onDisk, ledgerRows, "knowledge file");
   });
 
-  harness.check("port ledger: every surviving check:*/validate:* script (both package.json manifests) targeting validation/business or validation/repository appears exactly once, plus the one documented addition", () => {
+  ledgerCase("port ledger: every surviving check:*/validate:* script (both package.json manifests) targeting validation/business or validation/repository appears exactly once, plus the one documented addition", () => {
     const text = readFileSync(resolvedLedgerPath, "utf8");
     // validation/repository/check-skill-graph.ts is ledgered "port" (its referential-integrity +
     // drift-check PATTERN is preserved), but its "port" target is a wholesale mechanism
@@ -273,7 +282,7 @@ export function register(harness: Harness): void {
     assertOneToOne(validators, ledgerRows, "validator/addition");
   });
 
-  harness.check("port ledger: disposition counts match the summary table's grand total", () => {
+  ledgerCase("port ledger: disposition counts match the summary table's grand total", () => {
     const text = readFileSync(resolvedLedgerPath, "utf8");
     const rows = parseLedgerRowsWithDisposition(text);
     const counts = { keep: 0, port: 0, merge: 0, drop: 0 };

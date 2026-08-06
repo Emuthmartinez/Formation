@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { assert, skillRoot, type Harness } from "../fixtures/_harness.js";
+import { assert, skillRoot, type Harness, repoCheckoutPresent, repoRoot } from "../fixtures/_harness.js";
 import { ENTRYPOINT_FILES, readEntrypointTemplates } from "../../core/adapters/install-entrypoints.js";
 
 /**
@@ -21,10 +21,14 @@ import { ENTRYPOINT_FILES, readEntrypointTemplates } from "../../core/adapters/i
  * discipline: a drop-listed scenario is not this unit's to touch.
  */
 
-const repoRoot = path.resolve(skillRoot, "..", "..");
-
 export function register(harness: Harness): void {
-  harness.check("scenario/entrypoint-installation-proof (ports business-agent-entrypoints-missing): the v2 entrypoint templates are not a byte copy of the maintainer's own root AGENTS.md/CLAUDE.md", () => {
+  // Both compare shipped templates against the maintainer's own root AGENTS.md/CLAUDE.md, which
+  // live in the repository and are deliberately not shipped into an installed runtime.
+  const entrypointCase: (label: string, fn: () => void) => void = repoCheckoutPresent()
+    ? harness.check
+    : (label) => harness.skip(label, `repo-only: no maintainer root entrypoints at ${repoRoot} (installed runtime)`);
+
+  entrypointCase("scenario/entrypoint-installation-proof (ports business-agent-entrypoints-missing): the v2 entrypoint templates are not a byte copy of the maintainer's own root AGENTS.md/CLAUDE.md", () => {
     const templates = readEntrypointTemplates(skillRoot);
     const templateAgents = templates.get("AGENTS.md");
     const templateClaude = templates.get("CLAUDE.md");
@@ -44,7 +48,7 @@ export function register(harness: Harness): void {
     assert(maintainerClaude.toLowerCase().includes("do not copy"), "expected the maintainer root CLAUDE.md to still name this rule in its own prose (drift signal if it stops)");
   });
 
-  harness.check("scenario/entrypoint-installation-proof: what actually lands in a generated repo (via the real installer) is the app-specific template, filled for that business — never the maintainer's own file content", () => {
+  entrypointCase("scenario/entrypoint-installation-proof: what actually lands in a generated repo (via the real installer) is the app-specific template, filled for that business — never the maintainer's own file content", () => {
     const target = harness.makeTempDir("entrypoint-scenario-target");
     const tsxBin = (() => {
       const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
