@@ -1,4 +1,5 @@
 import { createId, launchWorkstreamId } from "./shared.mjs";
+import { boardStepTitle } from "./presentation.mjs";
 
 /**
  * Imports the launch engine's verified results into Formation's product records — the import half
@@ -163,7 +164,7 @@ function importVerifiedResults(database, workspace, report, now, changes) {
         workstreamId: launchWorkstreamId(workspace),
         kind: "recommendation",
         key: null,
-        statement: `The launch engine finished "${result.workflowTitle}" and the work ${phrase}. Review the result before treating it as fact.`,
+        statement: `The launch engine finished “${boardStepTitle(result.workflowId, result.workflowTitle)}” and the work ${phrase}. Review the result before treating it as fact.`,
         value: null,
         confidence: verificationConfidence(result.verification),
         status: "active",
@@ -199,7 +200,8 @@ function importArtifactCandidates(database, workspace, report, result, resultCla
     );
 
     if (!existing) {
-      const title = candidates.length > 1 ? `${result.workflowTitle} (${index + 1} of ${candidates.length})` : result.workflowTitle;
+      const boardTitle = boardStepTitle(result.workflowId, result.workflowTitle);
+      const title = candidates.length > 1 ? `${boardTitle} (${index + 1} of ${candidates.length})` : boardTitle;
       const phrase = verificationPhrase(result.verification);
       const artifact = {
         id: createId("art"),
@@ -210,12 +212,12 @@ function importArtifactCandidates(database, workspace, report, result, resultCla
         status: "draft",
         version: 1,
         confidence: verificationConfidence(result.verification),
-        summary: `The launch engine produced this while working on "${result.workflowTitle}", and the work ${phrase} before arriving here. It stays a draft until you review it.`,
+        summary: `The launch engine produced this while working on “${boardTitle}”, and the work ${phrase} before arriving here. It stays a draft until you review it.`,
         sections: [
           {
             id: `sec_${createId("x").slice(2, 10)}`,
             title: "Where this came from",
-            body: `The launch engine completed the step "${result.workflowTitle}" and the work ${phrase}. Formation imported the result as an editable draft — review it, adjust it, and approve it when it matches your intent. Nothing downstream should rely on it until you do.`,
+            body: `The launch engine completed “${boardTitle}” and the work ${phrase}. Formation imported the result as an editable draft — review it, adjust it, and approve it when it matches your intent. Nothing downstream should rely on it until you do.` + (result.workflowTitle && result.workflowTitle !== boardTitle ? ` (Technical step name: ${result.workflowTitle}.)` : ""),
           },
         ],
         sourceClaimIds: resultClaim ? [resultClaim.id] : [],
@@ -342,7 +344,7 @@ function syncBlockerTasks(database, workspace, report, now, changes) {
       id: createId("tsk"),
       workspaceId: workspace.id,
       workstreamId: launchWorkstreamId(workspace),
-      title: `Look into the launch step "${step.title}" — it did not go through`,
+      title: `A launch step needs attention: ${boardStepTitle(workflowId, step.title)} did not go through`,
       status: "next",
       priority: "high",
       owner: workspace.founder?.name ?? "Founder",

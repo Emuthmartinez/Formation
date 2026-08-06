@@ -7,6 +7,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createId } from "./domain.mjs";
 import { listEngineApprovals, recordApprovalActivity, syncEngineApprovals } from "./domain/approvals.mjs";
+import { boardStepTitle, presentApprovalAsk, presentStep } from "./domain/presentation.mjs";
 import { recordResultActivity, syncEngineResults } from "./domain/results.mjs";
 
 /**
@@ -414,8 +415,8 @@ export class ExecutionWorker {
         id: createId("act"),
         workspaceId,
         type: "approval-answered",
-        title: `${approved ? "Approval granted" : "Approval declined"}: ${decision.source.workflowTitle}`,
-        detail: `${decision.source.description}${reason ? ` — ${reason}` : ""}`,
+        title: `${approved ? "Approval granted" : "Approval declined"}: ${boardStepTitle(decision.source.workflowId, decision.source.workflowTitle)}`,
+        detail: `${presentApprovalAsk(decision.source.description, decision.source.category)}${reason ? ` — ${reason}` : ""}`,
         actor: user.name,
         createdAt: now,
       });
@@ -484,7 +485,7 @@ export class ExecutionWorker {
             id: createId("act"),
             workspaceId,
             type: "execution-requeued",
-            title: `Launch engine asked again: ${existing.workflowTitle}`,
+            title: `Queued again: ${boardStepTitle(existing.workflowId, existing.workflowTitle)}`,
             detail: "The earlier attempt did not finish, so the same request was queued again.",
             actor: user.name,
             createdAt: now,
@@ -649,7 +650,7 @@ export class ExecutionWorker {
           id: createId("act"),
           workspaceId: claimed.workspaceId,
           type: live.status === "completed" ? "execution-completed" : "execution-failed",
-          title: live.status === "completed" ? `Launch engine worked on ${live.workflowTitle}` : `Launch engine could not finish ${live.workflowTitle}`,
+          title: live.status === "completed" ? `Work session finished: ${boardStepTitle(live.workflowId, live.workflowTitle)}` : `Work session interrupted: ${boardStepTitle(live.workflowId, live.workflowTitle)}`,
           detail: live.status === "completed" ? "The engine session finished and the run state was refreshed." : (live.error ?? "The engine session did not complete."),
           actor: "Formation",
           createdAt: finishedAt,
@@ -725,21 +726,28 @@ export function founderRunView(report) {
     autonomyUnset: report.autonomyUnset === true,
     headline: `${parts.join("; ")}.`,
     counts,
-    steps: workflows.map((workflow) => ({
-      workflowId: workflow.workflowId,
-      title: workflow.title,
-      status: workflow.status,
-      ...(workflow.founderReason ? { reason: workflow.founderReason } : {}),
-    })),
+    steps: workflows.map((workflow) => {
+      const board = presentStep(workflow.workflowId, workflow.title);
+      return {
+        workflowId: workflow.workflowId,
+        title: board.title,
+        ...(board.summary ? { summary: board.summary } : {}),
+        ...(board.technical ? { technical: board.technical } : {}),
+        status: workflow.status,
+        ...(workflow.founderReason ? { reason: workflow.founderReason } : {}),
+      };
+    }),
   };
 }
 
 /** The API projection of one execution record. */
 export function toFounderExecution(execution) {
+  const board = presentStep(execution.workflowId, execution.workflowTitle);
   return {
     id: execution.id,
     workflowId: execution.workflowId,
-    title: execution.workflowTitle,
+    title: board.title,
+    ...(board.technical ? { technicalTitle: board.technical } : {}),
     status: execution.status,
     failureKind: execution.failureKind ?? null,
     error: execution.error ?? null,

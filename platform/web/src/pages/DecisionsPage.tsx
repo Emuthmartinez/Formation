@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
-import { Button, EmptyState, Field, Modal, PageHeader, Section, StatusText, formatDate } from "../components/Primitives";
+import { Button, EmptyState, Field, Modal, PageHeader, Section, StatusText, TechnicalDisclosure, formatDate } from "../components/Primitives";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Decision } from "../types";
@@ -150,6 +150,11 @@ function DecisionRow({
         <p className="decision-row__statement">{decision.decision}</p>
         <p><strong>Rationale:</strong> {decision.rationale}</p>
         {decision.note ? <p className="muted-copy">{decision.note}</p> : null}
+        {isEngineApproval && decision.source ? (
+          <TechnicalDisclosure>
+            <p>The team’s own name for this step: <strong>{decision.source.workflowTitle}</strong>. The specific ask: “{decision.source.description}”.</p>
+          </TechnicalDisclosure>
+        ) : null}
       </div>
       <div className="decision-row__dates">
         <div><span>Decided</span><strong>{formatDate(decision.decidedAt, "Not yet")}</strong></div>

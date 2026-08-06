@@ -185,6 +185,20 @@ export function Toast({
 }
 
 /**
+ * The expandable technical layer under a board-level statement. The top level stays in board
+ * language; a founder who wants the specifics opens this (design-system.md: "Reveal system
+ * detail only when useful").
+ */
+export function TechnicalDisclosure({ label = "Technical detail", children }: { label?: string; children: ReactNode }) {
+  return (
+    <details className="technical-disclosure">
+      <summary>{label}</summary>
+      <div className="technical-disclosure__body">{children}</div>
+    </details>
+  );
+}
+
+/**
  * Two conflicting claims, each individually labeled by kind, so the founder can see which
  * statement to retire instead of parsing one joined sentence.
  */

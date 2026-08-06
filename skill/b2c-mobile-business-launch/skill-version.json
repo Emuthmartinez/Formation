@@ -1,10 +1,10 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.80.0",
+  "version": "0.81.0",
   "updatedAt": "2026-08-06",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Platform release: the founder UX review lands. Contradictions render as labeled claim entries instead of a joined sentence (detectContradictions now emits entries[] alongside summary, with a domain test), the Launch page gains 'The launch engine at work' — a founder-vocabulary step procession over the execution routes with session state, imported verified-result totals, and an explainer flow — and the review's confirmed accessibility, responsive, copy, and design-system fixes ship across every page. The engine's own state, reducer, and catalog are untouched; this manifest advances only to keep root package parity.",
-    "Brand surface: platform/web gains an SVG favicon and an Open Graph card (first-party URLs registered in source-registry.yaml), wired into index.html social metadata."
+    "Platform release: the board-ready presentation boundary lands (platform/server/domain/presentation.mjs). Every engine- or system-authored text a founder sees now passes through a shared capability that presents it the way a chief of staff would present to the board \u2014 a curated board-language table for the full launch catalog, restated approval asks, a conservative jargon scrub for unknown steps, and an optional schema-validated AI polish hook (FORMATION_AI_PRESENTER_ENDPOINT) with deterministic fallback. The engine's own wording is preserved in each record's source and surfaces through an expandable Technical detail disclosure; founder-authored words are never rewritten. Open approval mirrors re-present themselves on sync as the table improves. The engine's state, reducer, and catalog are untouched; this manifest advances only to keep root package parity.",
+    "Surfaces wired through the boundary in the same release: approval mirrors (titles become 'Your go-ahead: \u2026' with the restated ask as the decision statement, and open mirrors re-present themselves on sync as the board-language table improves), founder run-view steps (board title, what-it-gives-the-company summary, technical name alongside), execution projections and activity entries, imported deliverable drafts, result claims, and blocker tasks. The client gains a quiet TechnicalDisclosure primitive used on decision rows and the Launch page's engine section; platform/AGENTS.md records the rule so future surfaces route through the boundary. Domain coverage: 5 new tests including mirror re-presentation, 56 passing."
   ]
 }

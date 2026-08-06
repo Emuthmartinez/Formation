@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { Button, EmptyState, PageHeader, ProgressLine, Section, StatusText, formatDate, timeAgo } from "../components/Primitives";
+import { Button, EmptyState, PageHeader, ProgressLine, Section, StatusText, TechnicalDisclosure, formatDate, timeAgo } from "../components/Primitives";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { FounderExecution, Task } from "../types";
@@ -204,18 +204,29 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
           </header>
 
           {latest.report?.steps.length ? (
-            <ol className="engine-steps">
-              {latest.report.steps.map((step) => (
-                <li key={step.workflowId} className={`engine-step engine-step--${step.status}`}>
-                  <span className="engine-step__marker" aria-hidden="true" />
-                  <div>
-                    <p className="engine-step__title">{step.title}</p>
-                    {step.reason ? <p className="engine-step__reason">{step.reason}</p> : null}
-                  </div>
-                  <span className="engine-step__status">{engineStepLabels[step.status] ?? step.status}</span>
-                </li>
-              ))}
-            </ol>
+            <>
+              <ol className="engine-steps">
+                {latest.report.steps.map((step) => (
+                  <li key={step.workflowId} className={`engine-step engine-step--${step.status}`}>
+                    <span className="engine-step__marker" aria-hidden="true" />
+                    <div>
+                      <p className="engine-step__title">{step.title}</p>
+                      {step.reason ? <p className="engine-step__reason">{step.reason}</p> : step.summary ? <p className="engine-step__reason">{step.summary}</p> : null}
+                    </div>
+                    <span className="engine-step__status">{engineStepLabels[step.status] ?? step.status}</span>
+                  </li>
+                ))}
+              </ol>
+              {latest.report.steps.some((step) => step.technical) ? (
+                <TechnicalDisclosure label="Technical detail — the team’s own step names">
+                  <ul>
+                    {latest.report.steps.filter((step) => step.technical).map((step) => (
+                      <li key={step.workflowId}><strong>{step.title}</strong> — {step.technical}</li>
+                    ))}
+                  </ul>
+                </TechnicalDisclosure>
+              ) : null}
+            </>
           ) : null}
 
           {latest.error ? <p className="engine-session__note">{latest.error}</p> : null}

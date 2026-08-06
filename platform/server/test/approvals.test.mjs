@@ -106,8 +106,11 @@ test("syncEngineApprovals mirrors pending approvals as open decisions, idempoten
   const mirror = database.decisions.find((entry) => entry.source?.approvalId === "workflow.money-report.approval.1");
   assert.equal(mirror.status, "open");
   assert.equal(mirror.workstreamId, "launch");
-  assert.equal(mirror.title, "Launch approval: Pull this week's revenue report");
-  assert.equal(mirror.decision, "Approve pulling this week's revenue report");
+  // The mirror surfaces board-ready copy; the engine's own wording stays in `source` for
+  // technical disclosure. An unknown workflow keeps its (scrubbed) title in the ask's context.
+  assert.equal(mirror.title, "Your go-ahead: Pull this week's revenue report");
+  assert.equal(mirror.decision, "Give your go-ahead on a step that spends money.");
+  assert.equal(mirror.source.description, "Approve pulling this week's revenue report");
   assert.ok(mirror.rationale.includes("It spends money"), mirror.rationale);
   assert.equal(mirror.owner, workspace.founder.name);
   assert.equal(mirror.source.kind, "engine-approval");
