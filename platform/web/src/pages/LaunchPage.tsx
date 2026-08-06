@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { Button, EmptyState, PageHeader, ProgressLine, Section, StatusText, TechnicalDisclosure, formatDate, timeAgo } from "../components/Primitives";
+import { Button, EmptyState, PageHeader, ProgressLine, Section, StatusText, TechnicalDisclosure, formatCount, formatDate, timeAgo } from "../components/Primitives";
+import { Motif } from "../components/Motif";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { FounderExecution, Task } from "../types";
@@ -33,7 +34,10 @@ export function LaunchPage() {
         <div className="launch-scoreboard__score">
           <p className="eyebrow">Readiness score</p>
           <strong>{readiness.score}</strong>
-          <ProgressLine value={readiness.score} label="Readiness score" hideValue />
+          <div className="score-rule">
+            <ProgressLine value={readiness.score} label="Readiness score" hideValue />
+            <span className="score-rule__annotation">{readiness.score} / 100</span>
+          </div>
         </div>
         <div className="launch-scoreboard__target">
           <p className="eyebrow">Target launch</p>
@@ -42,9 +46,9 @@ export function LaunchPage() {
         </div>
         <dl className="launch-scoreboard__facts">
           <div><dt>Base progress</dt><dd>{readiness.baseScore}%</dd></div>
-          <div><dt>Blocked areas</dt><dd>{readiness.blockedCount}</dd></div>
-          <div><dt>Open decisions</dt><dd>{readiness.openDecisionCount}</dd></div>
-          <div><dt>Critical tasks</dt><dd>{readiness.criticalTaskCount}</dd></div>
+          <div><dt>Blocked areas</dt><dd>{formatCount(readiness.blockedCount)}</dd></div>
+          <div><dt>Open decisions</dt><dd>{formatCount(readiness.openDecisionCount)}</dd></div>
+          <div><dt>Critical tasks</dt><dd>{formatCount(readiness.criticalTaskCount)}</dd></div>
         </dl>
       </section>
 
@@ -105,6 +109,7 @@ export function LaunchPage() {
       ) : null}
 
       <section className="launch-definition">
+        <Motif />
         <div>
           <p className="eyebrow">Launch definition</p>
           <h2>A launch is ready when the team can explain the customer, offer, evidence, economics, distribution, risks, and execution plan without contradicting itself.</h2>

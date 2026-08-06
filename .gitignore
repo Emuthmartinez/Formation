@@ -10,3 +10,6 @@ skill/b2c-mobile-business-launch/evals/behavioral-results/
 platform/data/*.json
 !platform/data/.gitkeep
 platform/dist/
+
+# Superdesign local design-context artifacts
+.superdesign/

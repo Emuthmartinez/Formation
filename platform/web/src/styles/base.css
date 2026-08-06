@@ -183,6 +183,13 @@ input[type="range"] { padding: 0; accent-color: var(--forest); box-shadow: none;
   font-size: 13px;
 }
 .workspace-switcher__new:hover { color: #fff; }
+/* Where the company sits on the road to growth — a quiet instrument reading, not a chart. */
+.workspace-stage { display: grid; gap: 8px; padding: 16px 7px 2px; }
+.workspace-stage__label { display: flex; justify-content: space-between; align-items: baseline; color: #98aaa0; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.workspace-stage__label strong { color: #d7e1da; font-weight: 750; }
+.workspace-stage__segments { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.workspace-stage__segments span { height: 3px; border-radius: 999px; background: rgba(255,255,255,.13); }
+.workspace-stage__segments span.is-done { background: #7fb094; }
 .sidebar__nav { padding: 18px 12px; display: grid; gap: 3px; }
 .nav-item {
   appearance: none;
@@ -198,9 +205,12 @@ input[type="range"] { padding: 0; accent-color: var(--forest); box-shadow: none;
   text-align: left;
   font-size: 14px;
   text-decoration: none;
+  position: relative;
 }
 .nav-item:hover { color: #fff; background: rgba(255,255,255,.055); }
 .nav-item--active { color: #fff; background: rgba(255,255,255,.09); }
+/* The current destination reads from the thin rule, not from background alone. */
+.nav-item--active::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 2px; border-radius: 999px; background: #7fb094; }
 .sidebar__footer { margin-top: auto; padding: 18px 16px 20px; border-top: 1px solid rgba(255,255,255,.09); }
 .sidebar__user { display: flex; align-items: center; gap: 10px; }
 .sidebar__user .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #d4e1d8; color: var(--forest-dark); font-size: 12px; font-weight: 800; }
@@ -227,7 +237,9 @@ input[type="range"] { padding: 0; accent-color: var(--forest); box-shadow: none;
   padding: 0 32px;
 }
 .topbar__menu { display: none; }
-.topbar__context { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; min-width: 0; }
+.topbar__context { display: flex; align-items: center; gap: 11px; color: var(--muted); font-size: 13px; min-width: 0; }
+.topbar__context strong { color: var(--ink); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.topbar__divider { width: 1px; height: 17px; background: var(--line-dark); flex-shrink: 0; }
 .topbar__context span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: min(55vw, 700px); }
 .main-content { padding: 42px 42px 80px; max-width: 1520px; margin: 0 auto; }
 .page-stack { display: grid; gap: 28px; animation: page-rise 240ms ease both; }
@@ -291,7 +303,13 @@ input[type="range"] { padding: 0; accent-color: var(--forest); box-shadow: none;
 .progress-line__track::-webkit-progress-bar { background: #deddd6; border-radius: 999px; }
 .progress-line__track::-webkit-progress-value { background: var(--forest); border-radius: 999px; transition: inline-size 240ms ease; }
 .progress-line__track::-moz-progress-bar { background: var(--forest); border-radius: 999px; }
-.progress-line__value { font-size: 11px; color: var(--muted); width: 32px; text-align: right; }
+.progress-line__value { font-size: 11px; color: var(--muted); width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+/* A score reads as one instrument: numeral above, rule below, quiet tabular annotation. */
+.score-rule { display: grid; gap: 6px; }
+.score-rule__annotation { justify-self: end; color: var(--muted); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; }
+/* The strata motif: identity texture only. Parents that carry it isolate their stacking
+   context so the engraving sits above the surface but beneath every word. */
+.motif { position: absolute; pointer-events: none; z-index: -1; color: var(--forest); opacity: .12; }
 
 .empty-state { padding: 34px 0; max-width: 520px; }
 .empty-state h3 { margin-bottom: 8px; font-size: 19px; }
@@ -315,7 +333,7 @@ input[type="range"] { padding: 0; accent-color: var(--forest); box-shadow: none;
 .modal__head p { margin: 0; color: var(--muted); }
 .modal .icon-button:hover { background: var(--paper-deep); }
 
-.loading-screen { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 14px; background: var(--forest-dark); color: #fff; }
+.loading-screen { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 14px; background: var(--forest-dark) url("/strata.jpg") right top / cover no-repeat; color: #fff; }
 .loading-screen__mark { width: 52px; height: 52px; border: 1px solid rgba(255,255,255,.55); border-radius: 50%; display: grid; place-items: center; font: 29px Georgia, serif; }
 .loading-screen p { color: #d5dfd9; margin: 0; }
 .spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; display: inline-block; }

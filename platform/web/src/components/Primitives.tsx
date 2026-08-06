@@ -317,6 +317,14 @@ export function humanize(value: string) {
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
+/**
+ * Ledger-style count: two digits so columns of counts align ("02", "14"). Only for
+ * counts that live in fact tables, never for scores or percentages.
+ */
+export function formatCount(value: number) {
+  return String(Math.max(0, Math.trunc(value))).padStart(2, "0");
+}
+
 export function formatDate(value: string | null | undefined, fallback = "Not set") {
   if (!value) return fallback;
   const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00`) : new Date(value);

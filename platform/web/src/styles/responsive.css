@@ -48,7 +48,8 @@
   .topbar__menu { display: grid; }
   .main-content { padding: 34px 24px 70px; }
   .today-grid { grid-template-columns: 1fr; }
-  .readiness-rail { position: static; border-left: 0; border-top: 1px solid var(--line-dark); padding: 22px 0 0; }
+  /* Relative, not static: the strata motif inside must keep anchoring to the rail. */
+  .readiness-rail { position: relative; top: 0; border-left: 0; border-top: 1px solid var(--line-dark); padding: 22px 0 0; }
   .two-column-layout { grid-template-columns: 1fr; gap: 25px; }
   .three-column-evidence { grid-template-columns: 1fr; }
   .evidence-column { border-right: 0; border-bottom: 1px solid var(--line); }

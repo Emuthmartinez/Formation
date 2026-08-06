@@ -4,6 +4,7 @@ import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Recommendation, Task } from "../types";
 import { Icon } from "../components/Icon";
+import { Motif } from "../components/Motif";
 import {
   Button,
   ContradictionStatements,
@@ -12,6 +13,7 @@ import {
   ProgressLine,
   Section,
   StatusText,
+  formatCount,
   formatDate,
   timeAgo,
 } from "../components/Primitives";
@@ -90,20 +92,23 @@ export function TodayPage() {
         </div>
 
         <aside className="readiness-rail">
+          <Motif />
           <p className="eyebrow">Launch readiness</p>
           <div className="readiness-score">
             <strong>{readiness.score}</strong>
-            <span>/ 100</span>
           </div>
-          <ProgressLine value={readiness.score} label="Launch readiness" hideValue />
+          <div className="score-rule">
+            <ProgressLine value={readiness.score} label="Launch readiness" hideValue />
+            <span className="score-rule__annotation">{readiness.score} / 100</span>
+          </div>
           <p className="readiness-rail__note">
             The score discounts blocked work, unresolved critical decisions, and unfinished critical tasks. No vanity math allowed.
           </p>
           <dl className="readiness-facts">
             <div><dt>Target</dt><dd>{formatDate(workspace.launchTarget)}</dd></div>
-            <div><dt>Open decisions</dt><dd>{readiness.openDecisionCount}</dd></div>
-            <div><dt>Critical tasks</dt><dd>{readiness.criticalTaskCount}</dd></div>
-            <div><dt>Blocked workstreams</dt><dd>{readiness.blockedCount}</dd></div>
+            <div><dt>Open decisions</dt><dd>{formatCount(readiness.openDecisionCount)}</dd></div>
+            <div><dt>Critical tasks</dt><dd>{formatCount(readiness.criticalTaskCount)}</dd></div>
+            <div><dt>Blocked workstreams</dt><dd>{formatCount(readiness.blockedCount)}</dd></div>
           </dl>
           <Button variant="secondary" onClick={() => navigate("/launch")}>Review launch path</Button>
         </aside>

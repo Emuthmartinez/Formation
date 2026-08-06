@@ -1,5 +1,7 @@
 .signin-page { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(420px, .8fr); }
-.signin-story { background: var(--forest-dark); color: #fff; padding: 44px clamp(35px, 6vw, 90px); display: flex; flex-direction: column; }
+/* The engraved strata panel: brand texture lives in the busy top-right corner; the
+   promise copy sits over the calm left two-thirds of the plate. */
+.signin-story { background: var(--forest-dark) url("/strata.jpg") right top / cover no-repeat; color: #fff; padding: 44px clamp(35px, 6vw, 90px); display: flex; flex-direction: column; }
 .signin-story__brand { font: 24px Georgia, serif; display: flex; align-items: center; gap: 12px; }
 .signin-story__brand span { width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.55); border-radius: 50%; display: grid; place-items: center; }
 .signin-story__copy { max-width: 800px; margin: auto 0; }
@@ -17,22 +19,24 @@
 .today-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; align-items: start; }
 .priority-column { min-width: 0; }
 .recommendation-list { list-style: none; padding: 0; margin: 0; }
-.recommendation-row { display: grid; grid-template-columns: 42px minmax(0,1fr) auto; gap: 18px; padding: 25px 0; border-bottom: 1px solid var(--line); align-items: start; }
-.recommendation-row__number { color: var(--muted); font: 15px Georgia, serif; }
+.recommendation-row { display: grid; grid-template-columns: 42px minmax(0,1fr) auto; gap: 18px; padding: 25px 0; border-bottom: 1px solid var(--line); align-items: start; transition: background 140ms ease; }
+.recommendation-row:hover { background: rgba(255,255,255,.4); }
+.recommendation-row__number { color: var(--muted); font: 15px Georgia, serif; font-variant-numeric: tabular-nums; }
 .recommendation-row__meta { display: flex; gap: 12px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
 .recommendation-row h2 { margin: 7px 0 8px; font-size: 27px; }
 .recommendation-row p { margin-bottom: 8px; line-height: 1.5; }
 .recommendation-row__rationale { color: var(--muted); font-size: 13px; }
 .recommendation-row__action { border: 0; background: transparent; color: var(--forest); padding: 6px; display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 13px; font-weight: 700; }
-.readiness-rail { position: sticky; top: 88px; border-left: 1px solid var(--line-dark); padding-left: 26px; }
-.readiness-score { display: flex; align-items: baseline; gap: 7px; margin-bottom: 12px; }
-.readiness-score strong { font: 72px/1 Georgia, serif; font-weight: 400; }
+.readiness-rail { position: sticky; top: 88px; border-left: 1px solid var(--line-dark); padding-left: 26px; isolation: isolate; overflow: hidden; }
+.readiness-rail .motif { top: -46px; right: -72px; width: 230px; height: 230px; }
+.readiness-score { display: flex; align-items: baseline; gap: 7px; margin-bottom: 10px; }
+.readiness-score strong { font: 72px/1 Georgia, serif; font-weight: 400; font-variant-numeric: tabular-nums; }
 .readiness-score span { color: var(--muted); }
 .readiness-rail__note { font-size: 12px; color: var(--muted); line-height: 1.5; margin: 14px 0 22px; }
 .readiness-facts { margin: 0 0 20px; }
 .readiness-facts div { display: flex; justify-content: space-between; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13px; }
 .readiness-facts dt { color: var(--muted); }
-.readiness-facts dd { margin: 0; font-weight: 700; }
+.readiness-facts dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
 .contradiction-banner { background: var(--rust-soft); border: 1px solid #d8b8aa; padding: 20px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: start; gap: 15px; border-radius: var(--radius); }
 .contradiction-banner h2 { margin: 0 0 6px; font-size: 24px; }
 .contradiction-banner p:last-child { margin: 0; }
