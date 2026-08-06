@@ -1,11 +1,11 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.70.1",
+  "version": "0.71.0",
   "updatedAt": "2026-08-05",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Closed three code-review P0s on the autonomy trust boundary: the budget evaluator now reads a live ledger accessor, tamper preflight plus audit-chain verify run at every dispatch batch boundary, and control/grants/waivers patches require an explicit founder-authority flag the autonomous session never passes.",
-    "Hardened fail-closed paths: NaN/non-finite budget and waiver amounts now reject, verification acceptance rejects empty-string evidence, and the migrator warns on dropped source_truth, autonomy.mode, and case-variant active gates instead of silently discarding them.",
-    "Removed the dead control.json stateHash field, aligned the reducer lock-ttl flag, made macOS wall-clock enforcement resolve gtimeout with an honest gap, and stopped the Doppler probe from ever surfacing a secret value."
+    "Added the OS trust-boundary installer and an honest verifier that reports enforced / advisory-only / unprotected from an empirical write probe, never from mode bits alone, and names an unenforced boundary in the digest when a grant sits above review-first.",
+    "Shared tsx-bin resolution across eleven call sites and made session lock liveness independent of executor cooperation, so a slow real executor can no longer let its own lock go stale.",
+    "Recorded the portfolio Doppler convention: one platform project plus one per business, repos map to configs, and the platform tier composes at the consumer because cross-project inheritance is a paid feature."
   ]
 }
