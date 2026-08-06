@@ -1,11 +1,11 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.73.1",
+  "version": "0.74.0",
   "updatedAt": "2026-08-05",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Stopped `npm run sync:runtime` reporting red on every successful install. It runs the full audit inside the installed runtime, where eight fixtures across three files assert repository invariants \u2014 the migration port ledger under docs/, cross-manifest audit-plan parity, and the maintainer's own root AGENTS.md/CLAUDE.md \u2014 none of which a runtime ships. They failed on ENOENT for a reason no install could fix, and a gate that is always red is a gate people stop reading.",
-    "Gave the fixture harness a skip state with a required reason, counted and printed separately from passes: a suite reporting 185 passed when eight were never evaluated is claiming coverage it does not have.",
-    "Shared one repoRoot/repoCheckoutPresent definition instead of the three identical local copies the repo-only fixtures each carried."
+    "Added core/adapters/platform-execution.ts, the engine half of the platform-to-engine execution boundary: one read-only CLI that reports a workspace's durable run as typed, stable catalog workflow ids with founder-plain reasons from the digest's own translation table. Exit 0 always means \"the engine answered\" — including the answer \"this workspace is not set up\" — so a caller can never mistake an unreachable engine for an empty plan.",
+    "The boundary report classifies the raw run statuses the planner files under \"waiting on earlier work\" (failed, running, orphaned, needs_readback, skipped, not_needed) for what they are. A failed step reported as \"upcoming\" is a lie to whoever is reading; the platform surface this feeds must not inherit that blind spot.",
+    "Submission deliberately stays out of the new CLI: the Formation platform creates or resumes a durable run by invoking core/session/run.ts, the sanctioned runner, so the reducer and the session runner remain the only writers of engine-owned state."
   ]
 }

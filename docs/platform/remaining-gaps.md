@@ -59,23 +59,25 @@ Every route should enforce role-level permissions in addition to membership.
 
 ### Why it matters
 
-The graph-native launch engine is the repository's major differentiator. Formation currently has the product model and structured generation boundary, but it does not yet submit work to the durable graph runtime or import independently verified results.
+The graph-native launch engine is the repository's major differentiator. Formation currently has the product model and structured generation boundary, but it does not yet import independently verified results.
 
 ### Required outcome
 
 Implement a typed adapter that:
 
-- receives an authorized Formation execution request
-- selects or accepts a stable catalog workflow
-- fingerprints scoped company context
-- creates or resumes a durable engine run
-- exposes founder-readable run state
+- receives an authorized Formation execution request — **shipped** (`platform/server/execution.mjs`, `platform/server/routes/executions.mjs`)
+- selects or accepts a stable catalog workflow — **shipped** (validated against the live boundary report from `core/adapters/platform-execution.ts`)
+- fingerprints scoped company context — **shipped** (`computeContextFingerprint`)
+- creates or resumes a durable engine run — **shipped** (the worker invokes `core/session/run.ts`; the engine's plan-matched run state is the durable identity)
+- exposes founder-readable run state — **shipped** (API-level; a founder page over these routes is still open)
+- is idempotent across retries — **shipped** (one execution record per workspace, workflow, and context fingerprint; retries resume it)
 - preserves engine approvals and protected actions
 - imports only verified results
 - maps proposed claims, evidence, tasks, blockers, and artifact candidates into Formation
 - marks affected downstream artifacts stale when accepted input context changes
 - carries trace and cost metadata without leaking secrets
-- is idempotent across retries
+
+The unshipped behaviours are the import half of the boundary. Nothing the shipped half does writes engine-owned state: the reducer and session runner remain the engine's only writers, and an unreachable engine is always reported as unreachable, never as an empty plan.
 
 ## P1: Existing launch repository importer
 

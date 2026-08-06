@@ -23,8 +23,9 @@ test("JSON store initializes, serializes concurrent writes, and persists valid d
   const database = await store.read();
   assert.equal(database.activity.filter((entry) => entry.id.startsWith("concurrent-")).length, 12);
   const persisted = JSON.parse(await readFile(filePath, "utf8"));
-  assert.equal(persisted.schemaVersion, 2);
+  assert.equal(persisted.schemaVersion, 3);
   assert.ok(persisted.artifactVersions.length > 0);
+  assert.ok(Array.isArray(persisted.executions));
   assert.ok(persisted.updatedAt);
 });
 
@@ -46,6 +47,7 @@ test("JSON store migrates schema 1 artifacts into immutable version history", as
   const legacy = createSeedDatabase();
   legacy.schemaVersion = 1;
   delete legacy.artifactVersions;
+  delete legacy.executions;
   await writeFile(filePath, `${JSON.stringify(legacy, null, 2)}
 `, { mode: 0o600 });
 
@@ -53,7 +55,25 @@ test("JSON store migrates schema 1 artifacts into immutable version history", as
   await store.initialize();
   const migrated = await store.read();
 
-  assert.equal(migrated.schemaVersion, 2);
+  assert.equal(migrated.schemaVersion, 3);
   assert.equal(migrated.artifactVersions.length, migrated.artifacts.length);
   assert.ok(migrated.artifactVersions.every((version) => version.createdBy === "Formation migration"));
+  assert.deepEqual(migrated.executions, []);
+});
+
+test("JSON store migrates a schema 2 file by adding the executions collection", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "formation-store-migration-v2-"));
+  const filePath = path.join(directory, "formation.json");
+  const previous = createSeedDatabase();
+  previous.schemaVersion = 2;
+  delete previous.executions;
+  await writeFile(filePath, `${JSON.stringify(previous, null, 2)}
+`, { mode: 0o600 });
+
+  const store = new JsonStore({ filePath, seedFactory: createSeedDatabase });
+  await store.initialize();
+  const migrated = await store.read();
+
+  assert.equal(migrated.schemaVersion, 3);
+  assert.deepEqual(migrated.executions, []);
 });

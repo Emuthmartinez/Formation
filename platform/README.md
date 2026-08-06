@@ -53,6 +53,10 @@ server/test/                    domain, storage, authorization, and API coverage
 
 Set `FORMATION_AI_ENDPOINT` and optionally `FORMATION_AI_API_KEY`. The endpoint receives a JSON body with the full scoped business context and required response schema. A non-conforming response fails the durable job instead of silently writing malformed content.
 
+## Launch engine execution
+
+Set `FORMATION_ENGINE_ROOT` to the directory that holds one engine workspace per company, named by workspace slug. With it set, `POST /api/workspaces/:id/executions` submits an authorized execution request: the adapter validates the requested catalog workflow against the engine's live answer (or selects the first ready one), fingerprints the scoped company context, and a durable worker creates or resumes the engine run through the engine's own session runner. Retrying the same request against the same context resumes the same execution — it never starts a second run. `GET` on the same routes reports founder-readable run state, and an unreachable engine is reported as unreachable, never as "no work ready". Without `FORMATION_ENGINE_ROOT`, execution requests are refused with a clear message; nothing else changes. Secret-shaped environment variables never cross into the engine process, and the platform never reads or writes engine workspace files itself.
+
 ## Deployment posture
 
 The server serves the built web application and API from one origin. This keeps cookie, CSRF, and deployment behavior simple. Credential registration and login work without an external service; the Storywell demo login is a separate development-only path. Production must be exposed through HTTPS. Set `TRUST_PROXY=true` only when the immediate proxy is trusted and owns the forwarded headers.

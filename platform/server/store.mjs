@@ -115,34 +115,43 @@ export class JsonStore {
 
 function migrateDatabase(database) {
   if (!database || typeof database !== "object" || Array.isArray(database)) return false;
-  if (database.schemaVersion !== 1) return false;
-  if (!Array.isArray(database.artifacts)) return false;
+  let migrated = false;
 
-  database.artifactVersions = database.artifacts.map((artifact) => ({
-    id: `ver_migrated_${artifact.id}_${artifact.version ?? 1}`,
-    artifactId: artifact.id,
-    workspaceId: artifact.workspaceId,
-    workstreamId: artifact.workstreamId,
-    version: Number.isInteger(artifact.version) ? artifact.version : 1,
-    title: artifact.title ?? "Untitled deliverable",
-    status: artifact.status ?? "draft",
-    confidence: Number.isFinite(artifact.confidence) ? artifact.confidence : 0,
-    summary: artifact.summary ?? "",
-    sections: Array.isArray(artifact.sections) ? structuredClone(artifact.sections) : [],
-    sourceClaimIds: Array.isArray(artifact.sourceClaimIds) ? [...artifact.sourceClaimIds] : [],
-    linkedDecisionIds: Array.isArray(artifact.linkedDecisionIds) ? [...artifact.linkedDecisionIds] : [],
-    createdAt: artifact.updatedAt ?? artifact.createdAt ?? new Date().toISOString(),
-    createdBy: "Formation migration",
-  }));
-  database.schemaVersion = 2;
-  return true;
+  if (database.schemaVersion === 1 && Array.isArray(database.artifacts)) {
+    database.artifactVersions = database.artifacts.map((artifact) => ({
+      id: `ver_migrated_${artifact.id}_${artifact.version ?? 1}`,
+      artifactId: artifact.id,
+      workspaceId: artifact.workspaceId,
+      workstreamId: artifact.workstreamId,
+      version: Number.isInteger(artifact.version) ? artifact.version : 1,
+      title: artifact.title ?? "Untitled deliverable",
+      status: artifact.status ?? "draft",
+      confidence: Number.isFinite(artifact.confidence) ? artifact.confidence : 0,
+      summary: artifact.summary ?? "",
+      sections: Array.isArray(artifact.sections) ? structuredClone(artifact.sections) : [],
+      sourceClaimIds: Array.isArray(artifact.sourceClaimIds) ? [...artifact.sourceClaimIds] : [],
+      linkedDecisionIds: Array.isArray(artifact.linkedDecisionIds) ? [...artifact.linkedDecisionIds] : [],
+      createdAt: artifact.updatedAt ?? artifact.createdAt ?? new Date().toISOString(),
+      createdBy: "Formation migration",
+    }));
+    database.schemaVersion = 2;
+    migrated = true;
+  }
+
+  if (database.schemaVersion === 2) {
+    database.executions = Array.isArray(database.executions) ? database.executions : [];
+    database.schemaVersion = 3;
+    migrated = true;
+  }
+
+  return migrated;
 }
 
 function validateDatabase(database) {
   if (!database || typeof database !== "object" || Array.isArray(database)) {
     throw new Error("Formation data store must contain one JSON object.");
   }
-  if (database.schemaVersion !== 2) {
+  if (database.schemaVersion !== 3) {
     throw new Error(`Unsupported Formation schema version: ${String(database.schemaVersion)}`);
   }
 
@@ -157,6 +166,7 @@ function validateDatabase(database) {
     "artifactVersions",
     "tasks",
     "jobs",
+    "executions",
     "activity",
   ];
   for (const name of requiredCollections) {
