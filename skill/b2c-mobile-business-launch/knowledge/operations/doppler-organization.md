@@ -5,10 +5,10 @@ existing account, or deciding where a newly required credential belongs.
 
 ## The rule
 
-**One project per business. One `platform` project for everything account-level.
+**One project per business. One shared `formation` project for everything account-level.
 Repos map to configs, never to projects.**
 
-A credential belongs in `platform` when one account serves every business (a
+A credential belongs in `formation` when one account serves every business (a
 Resend account hosting many sending domains, one Anthropic key, one App Store
 Connect key, one Cloudflare token). It belongs in the business project when it is
 that business's own (its Supabase keys, its RevenueCat app key, its PostHog
@@ -34,17 +34,17 @@ A branch config inherits its environment's root config, so `prd_server` sees
 everything in `prd` plus its own. A token scoped to `prd` cannot see the branch
 extras. That inheritance is core Doppler behavior, available on every plan.
 
-## Composing the platform tier
+## Composing the shared account tier
 
 Cross-project inheritance (`doppler configs update --inherits`) is a paid-tier
 feature. Do not depend on it. Compose at the consumer instead — this works on
 every plan and keeps the precedence rule in code we can test:
 
 ```bash
-doppler run -p platform -c prd -- doppler run -p <business> -c prd_server -- <command>
+doppler run -p formation -c prd -- doppler run -p <business> -c prd_server -- <command>
 ```
 
-The inner injection wins, so a business may override a platform value. The
+The inner injection wins, so a business may override a shared account-tier value. The
 provisioning resolver applies the same precedence when it checks which
 requirements are satisfied.
 
@@ -64,7 +64,7 @@ doppler setup --project <business> --config prd_server --no-interactive
 
 ## Constraints worth knowing before you plan
 
-- **Inheritance and tokens are per workplace.** A single `platform` project can
+- **Inheritance and tokens are per workplace.** A single shared `formation` project can
   only serve businesses in the same workplace. Businesses split across two
   workplaces cannot share it; consolidate before building the shared tier.
 - **Service tokens are per config.** Automation gets a read-only service token
