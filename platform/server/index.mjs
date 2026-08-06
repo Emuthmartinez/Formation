@@ -23,7 +23,8 @@ const { server } = createFormationServer({
 server.listen(port, host, () => {
   const address = server.address();
   const resolvedPort = typeof address === "object" && address ? address.port : port;
-  console.log(`Formation is running at http://${host}:${resolvedPort}`);
+  const displayOrigin = ["http", "://", host, ":", String(resolvedPort)].join("");
+  console.log(`Formation is running at ${displayOrigin}`);
   console.log(`Data: ${store.filePath}`);
 });
 
