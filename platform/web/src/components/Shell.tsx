@@ -13,6 +13,9 @@ const primaryNavigation = [
   { label: "Launch", path: "/launch", icon: "launch" as const },
 ];
 
+// Mirrors the server's WORKSPACE_STAGES vocabulary (platform/server/validation.mjs).
+const companyStages = ["idea", "discovery", "validation", "build", "beta", "launch", "growth"];
+
 export function Shell({
   session,
   workspace,
@@ -59,6 +62,7 @@ export function Shell({
               </option>
             ))}
           </Select>
+          <StageProgress stage={workspace.stage} />
           <button className="workspace-switcher__new" onClick={() => go("/new")}>
             <Icon name="plus" width={15} height={15} /> New workspace
           </button>
@@ -111,8 +115,8 @@ export function Shell({
             <Icon name="menu" width={22} height={22} />
           </button>
           <div className="topbar__context">
-            <span>{humanize(workspace.stage)}</span>
-            <span aria-hidden="true">·</span>
+            <strong>{humanize(workspace.stage)}</strong>
+            <span className="topbar__divider" aria-hidden="true" />
             <span>{workspace.company.currentGoal}</span>
           </div>
           <Button variant="quiet" icon="plus" onClick={() => go("/decisions?new=1")}>
@@ -121,6 +125,28 @@ export function Shell({
         </header>
         <main className="main-content">{children}</main>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Where the company sits on the road from idea to growth. The label carries the
+ * information; the segments are a glanceable echo of it.
+ */
+function StageProgress({ stage }: { stage: string }) {
+  const position = companyStages.indexOf(stage);
+  if (position === -1) return null;
+  return (
+    <div className="workspace-stage">
+      <span className="workspace-stage__label">
+        <span>Stage</span>
+        <strong>{humanize(stage)}</strong>
+      </span>
+      <span className="workspace-stage__segments" aria-hidden="true">
+        {companyStages.map((entry, index) => (
+          <span key={entry} className={index <= position ? "is-done" : ""} />
+        ))}
+      </span>
     </div>
   );
 }
