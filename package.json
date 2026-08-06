@@ -106,7 +106,7 @@
     "probe:revenuecat": "tsx skill/b2c-mobile-business-launch/tooling/probe-revenuecat.ts",
     "probe:posthog": "tsx skill/b2c-mobile-business-launch/tooling/probe-posthog.ts",
     "grade:screenshots": "tsx skill/b2c-mobile-business-launch/tooling/grade-screenshots.ts",
-    "sync:runtime": "bash tooling/sync-skill-runtime.sh",
+    "sync:runtime": "bash scripts/sync-skill-runtime.sh",
     "lint:format": "prettier --check \"skill/b2c-mobile-business-launch/catalog/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/business/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/repository/**/*.ts\" \"skill/b2c-mobile-business-launch/tooling/**/*.ts\"",
     "format": "prettier --write \"skill/b2c-mobile-business-launch/catalog/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/business/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/repository/**/*.ts\" \"skill/b2c-mobile-business-launch/tooling/**/*.ts\"",
     "check:catalog": "tsx skill/b2c-mobile-business-launch/validation/repository/check-catalog.ts",
