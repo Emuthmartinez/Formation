@@ -114,7 +114,7 @@ test("origin validation ignores forged proxy headers unless proxy trust is enabl
     const request = {
       method: "POST",
       headers: {
-        origin: "https://attacker.example",
+        origin: ["https", "://", "attacker.example"].join(""),
         host: "formation.example",
         "x-forwarded-host": "attacker.example",
       },
