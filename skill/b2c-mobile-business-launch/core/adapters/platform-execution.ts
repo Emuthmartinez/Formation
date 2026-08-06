@@ -2,7 +2,7 @@
 import path from "node:path";
 
 import { isMainModule, parseArgs } from "../lib/cli.js";
-import { compilePlan, type CompiledPlan, type CompiledRunNode } from "../engine/compile.js";
+import { compilePlan, type CompiledPlan, type CompiledRunNode, type CostEstimate, type VerificationKind } from "../engine/compile.js";
 import { computeFrontier } from "../engine/frontier.js";
 import { loadRunState, seedRunState } from "../engine/runstate.js";
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
@@ -21,8 +21,11 @@ import { translateParkReason } from "../session/digest.js";
  * shape, what this workspace's durable run looks like right now. It is core/session/plan.ts with
  * the agent-facing report swapped for a boundary document: per-workflow status keyed by *stable
  * catalog workflow id* (the id the platform is allowed to hold onto), founder-plain reasons from
- * the digest's own translation table (never the evaluator's internal sentences), and an explicit
- * answer to "does a durable run exist yet".
+ * the digest's own translation table (never the evaluator's internal sentences), an explicit
+ * answer to "does a durable run exist yet", the durable run's founder approvals, and — the import
+ * half of the boundary — its verified results and per-artifact acceptance state, so the platform
+ * can import settled work and mirror the engine's own staleness conclusions without re-deriving
+ * either.
  *
  * **It never writes** — same clone-and-drop discipline as the planner, and for the same reason:
  * computeFrontier mutates the run state it examines, and the reducer plus the session runner are
@@ -68,6 +71,56 @@ export interface ExecutionBoundaryReport {
    * answer the engine can never accept.
    */
   readonly approvals?: readonly ExecutionApprovalState[];
+  /**
+   * The durable run's verified results, in catalog order — empty until a durable run exists.
+   * "Verified" is the engine's settled acceptance state (acceptVerification or a kind:"none"
+   * policy that requires nothing), never merely "the node finished": a node reconciled but still
+   * blocked pending verification contributes nothing here, and neither does a node whose lanes
+   * were seeded done without an attempt (there is no attempt, no evidence, and no real output
+   * behind a seed fingerprint for a platform to import).
+   */
+  readonly results?: readonly ExecutionVerifiedResult[];
+  /**
+   * The durable run's current per-artifact acceptance state — the engine's own staleness
+   * conclusions (invalidateDescendants flips `accepted` off on every affected descendant), in a
+   * shape the platform can mirror without re-deriving the graph walk itself.
+   */
+  readonly artifacts?: readonly ExecutionArtifactState[];
+}
+
+/** One artifact an accepted attempt produced: a candidate for the platform to import, by reference. */
+export interface ExecutionResultArtifact {
+  readonly artifactId: string;
+  readonly fingerprint: string;
+}
+
+/**
+ * One verified node result. Trace and cost fields carry ids, names, and declared totals only —
+ * never environment values, tokens, or credential contents; the boundary's filtered-environment
+ * rule applies to what this document says just as much as to what the spawned process sees.
+ */
+export interface ExecutionVerifiedResult {
+  readonly workflowId: string;
+  readonly workflowTitle: string;
+  readonly attemptId: string;
+  readonly attemptNumber: number;
+  readonly finishedAt?: string;
+  readonly verification: VerificationKind;
+  readonly evidence: readonly string[];
+  readonly artifacts: readonly ExecutionResultArtifact[];
+  /** The node's declared token budget (CompiledRunNode.tokenBudget) — a declared ceiling, not a measured actual. */
+  readonly declaredTokenBudget: number;
+  /** The node's declared cost estimate, when the catalog declares one — an estimate, not a measured actual. */
+  readonly declaredCostEstimate?: CostEstimate;
+}
+
+/** Current acceptance state of one durable-run artifact binding, keyed by stable catalog ids. */
+export interface ExecutionArtifactState {
+  readonly artifactId: string;
+  /** The stable workflow id of the artifact's producer in the compiled plan. */
+  readonly workflowId?: string;
+  readonly accepted: boolean;
+  readonly fingerprint?: string;
 }
 
 export interface ExecutionApprovalState {
@@ -108,6 +161,65 @@ export function buildBoundaryApprovals(plan: CompiledPlan, run: RunStateDocument
   return approvals;
 }
 
+const EVIDENCE_ENTRY_LIMIT = 20;
+const EVIDENCE_ENTRY_LENGTH = 2_000;
+
+function boundEvidence(evidence: readonly string[]): string[] {
+  return evidence
+    .filter((entry) => entry.trim().length > 0)
+    .slice(0, EVIDENCE_ENTRY_LIMIT)
+    .map((entry) => (entry.length > EVIDENCE_ENTRY_LENGTH ? `${entry.slice(0, EVIDENCE_ENTRY_LENGTH - 1)}…` : entry));
+}
+
+/**
+ * The durable run's verified results. A node qualifies only when its state is settled succeeded
+ * through a real attempt AND every declared output's binding is accepted from that same attempt —
+ * a partially-accepted node contributes nothing, not "contributes provisionally". Seeded-succeeded
+ * nodes (lanes already done before this run) have no attempts and are excluded by construction.
+ */
+export function buildBoundaryResults(plan: CompiledPlan, run: RunStateDocument): ExecutionVerifiedResult[] {
+  const results: ExecutionVerifiedResult[] = [];
+  for (const node of plan.nodes) {
+    const state = run.nodes[node.id];
+    if (!state || state.status !== "succeeded") continue;
+    const attempt = state.attempts.at(-1);
+    if (!attempt || attempt.status !== "succeeded") continue;
+
+    const bindings = node.outputs.map((artifactId) =>
+      run.artifactBindings.find((candidate) => candidate.artifactId === artifactId && candidate.attemptId === attempt.id && candidate.accepted === true),
+    );
+    if (bindings.some((binding) => binding === undefined || !binding.fingerprint)) continue;
+
+    results.push({
+      workflowId: node.workflowId,
+      workflowTitle: node.title,
+      attemptId: attempt.id,
+      attemptNumber: attempt.number,
+      ...(attempt.finishedAt ? { finishedAt: attempt.finishedAt } : {}),
+      verification: node.verification.kind,
+      evidence: boundEvidence(attempt.evidence),
+      artifacts: bindings.map((binding) => ({ artifactId: binding!.artifactId, fingerprint: binding!.fingerprint! })),
+      declaredTokenBudget: node.tokenBudget,
+      ...(node.costEstimate ? { declaredCostEstimate: { amount: node.costEstimate.amount, currency: node.costEstimate.currency } } : {}),
+    });
+  }
+  return results;
+}
+
+/** Every durable-run binding's current acceptance state, producer resolved to its stable workflow id. */
+export function buildBoundaryArtifacts(plan: CompiledPlan, run: RunStateDocument): ExecutionArtifactState[] {
+  const workflowByNodeId = new Map(plan.nodes.map((node) => [node.id as string, node.workflowId as string]));
+  return run.artifactBindings.map((binding) => {
+    const workflowId = binding.producedBy ? workflowByNodeId.get(binding.producedBy) : undefined;
+    return {
+      artifactId: binding.artifactId,
+      ...(workflowId ? { workflowId } : {}),
+      accepted: binding.accepted,
+      ...(binding.fingerprint ? { fingerprint: binding.fingerprint } : {}),
+    };
+  });
+}
+
 function founderReasonFor(node: HeldNode): string | undefined {
   switch (node.reason) {
     case "founder_approval":
@@ -135,6 +247,9 @@ const STATUS_OVERRIDES: Record<string, { status: ExecutionWorkflowStatus; founde
   needs_readback: { status: "held", founderReason: "This is being double-checked before it's called done." },
   skipped: { status: "finished", founderReason: "This turned out not to be needed." },
   not_needed: { status: "finished", founderReason: "This turned out not to be needed." },
+  // Reachable since reconcilePatch started invalidating descendants of a changed accepted input:
+  // a stale node re-runs once its inputs settle, so it is upcoming work, never "finished".
+  stale: { status: "upcoming", founderReason: "Earlier work it was built on changed, so this will be redone." },
 };
 
 /**
@@ -244,6 +359,8 @@ export function describeWorkspace(
     autonomyUnset: report.autonomyUnset,
     workflows: buildBoundaryWorkflows(plan, report, nodeStatuses),
     approvals: durable ? buildBoundaryApprovals(plan, durable) : [],
+    results: durable ? buildBoundaryResults(plan, durable) : [],
+    artifacts: durable ? buildBoundaryArtifacts(plan, durable) : [],
   };
 }
 
