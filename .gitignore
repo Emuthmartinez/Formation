@@ -7,3 +7,6 @@ dist/
 build/
 behavioral-results/
 skill/b2c-mobile-business-launch/evals/behavioral-results/
+platform/data/*.json
+!platform/data/.gitkeep
+platform/dist/

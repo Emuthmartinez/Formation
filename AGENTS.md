@@ -1,68 +1,74 @@
 # Repository Agent Guide
 
-This repository maintains the `b2c-mobile-business-launch` skill. These instructions govern the skill source repository, not app repositories created by the skill.
+This repository contains two bounded systems:
+
+1. `platform/`, the Formation founder product.
+2. `skill/b2c-mobile-business-launch/`, the graph-native launch engine used behind the product and by existing agent workflows.
+
+Do not collapse their state models or expose engine files as founder navigation.
 
 ## Read order
 
-1. `README.md` for product scope
-2. `skill/b2c-mobile-business-launch/README.md` for the source map
-3. `docs/architecture.md` for system boundaries
-4. `skill/b2c-mobile-business-launch/SKILL.md` for runtime contracts
-5. the owning directory README and directly relevant files
+1. `README.md` for product scope and setup.
+2. `docs/architecture.md` for the platform and engine boundary.
+3. `platform/AGENTS.md` for founder-product changes.
+4. `skill/b2c-mobile-business-launch/README.md` and `SKILL.md` for engine changes.
+5. The owning directory documentation and directly relevant source.
 
 ## Source layers
 
 | Layer | Owns | Must not own |
 | --- | --- | --- |
-| `core/` | the executed runtime — typed schemas, the engine (compile/frontier/dispatch/run state), the single-writer reducer, the autonomy evaluator, the scheduled-session runner, and runtime adapters | business policy prose or mutable launch state |
-| `catalog/` | the definition graph as data — domains, lanes, workflows, gates, references with load-when conditions — and the routing renderer | run state or business policy prose |
-| `knowledge/` | bounded reasoning guidance and official-source-backed doctrine | scheduling or generated business artifacts |
-| `content/` | founder-facing conversation content (onboarding) rendered by the session, in founder vocabulary | execution topology or generated artifacts |
-| `workspace/` and `workspace-template/` | reusable launch artifacts copied into app repositories, and the v2 workspace/entrypoint templates | skill execution topology |
-| `validation/` | launch gates, repository checks, fixtures, and LaunchBench | orchestration policy |
-| `verification/` | the greenfield core's own proof — schema/engine/reducer fixtures, the capability-boundary suite, cross-runtime parity, scenario ports, and the audit runner | business-artifact grading (that is `validation/`'s job) |
-| `tooling/` | renderers, probes, migrations, and runners | untestable durable policy |
-| `studio/` | maintainer visual app, seed state, and generated visual outputs | launch-instance canonical state |
-| `starters/` | runnable product-archetype foundations | alternate orchestration systems |
+| `platform/web/` | Founder navigation, product pages, editing, responsive interaction, and the design system | Direct filesystem access, engine state, provider secrets, or authorization decisions |
+| `platform/server/` | Authentication, workspace tenancy, product domain state, persistence, structured generation, and product APIs | Graph execution internals or browser-only presentation state |
+| `skill/b2c-mobile-business-launch/core/` | Typed schemas, durable execution, reducer, autonomy, sessions, and runtime adapters | Founder product navigation or platform membership state |
+| `skill/b2c-mobile-business-launch/catalog/` | Definition graph, workflows, gates, references, and routing projections | Run state or founder-facing application state |
+| `skill/b2c-mobile-business-launch/knowledge/` | Bounded reasoning guidance and source-backed doctrine | Scheduling or mutable business records |
+| `skill/b2c-mobile-business-launch/content/` | Engine-rendered conversation content | Platform page structure or generated artifacts |
+| `skill/b2c-mobile-business-launch/workspace/` and `workspace-template/` | Engine business artifacts, exports, and app-repository templates | Platform tenancy or execution topology |
+| `skill/b2c-mobile-business-launch/validation/` | Business gates, repository checks, fixtures, and LaunchBench | Orchestration policy |
+| `skill/b2c-mobile-business-launch/verification/` | Runtime fixtures, capability boundaries, parity, scenarios, and audit proof | Founder product acceptance criteria |
+| `skill/b2c-mobile-business-launch/tooling/` | Renderers, probes, migrations, and engine mechanics | Untestable durable policy |
+| `skill/b2c-mobile-business-launch/studio/` | Maintainer visual QA, seed state, and generated output | Founder product state or primary navigation |
+| `skill/b2c-mobile-business-launch/starters/` | Runnable product-archetype foundations | Alternate orchestration systems |
 
-Dependencies point from the core runtime into the catalog and bounded knowledge/content, then into deterministic validation and verification. Filesystem proximity never creates an execution edge.
+The platform may request engine execution through a typed adapter. It must not read or mutate engine state files directly. The engine may return verified results through that adapter. It must not mutate platform persistence directly.
 
 ## Authored and generated boundaries
 
-- Edit catalog definitions (`catalog/*.ts`), not `catalog/generated/`.
+- Founder product behavior belongs in `platform/`; follow `platform/AGENTS.md`.
+- All durable platform mutations use the server store transaction and verify workspace membership.
+- Edit catalog definitions, not `catalog/generated/`.
 - Edit authored Markdown, JSON, or source components, not generated HTML.
-- Every generated file needs an owning renderer and a freshness check.
+- Every generated engine file needs an owning renderer and freshness check.
 - Stable catalog IDs survive path moves. Paths are bindings, not identity.
-- App state belongs in `workspace/business/state/`; studio seed state belongs in `studio/seed/`.
-- Only the reducer CLI (`core/reducer/cli.ts`) writes reducer-owned business documents; the engine owns run-state/checkpoint files. Nothing else writes durable state.
+- Only the engine reducer writes reducer-owned business documents; the engine owns run-state and checkpoint files.
+- Never commit founder data, credentials, provider secrets, or local build output.
 
 ## Change contract
 
-Structural or behavioral changes must update definitions, workspace artifacts, validators, fixtures or LaunchBench scenarios, generated projections, version metadata, and current documentation together. Archive completed plans under `docs/history/`.
+A platform change must update the product domain, API, page behavior, tests, and current documentation together. An engine change must update definitions, workspace artifacts, validators, fixtures or LaunchBench scenarios, generated projections, version metadata, and current documentation together. Cross-boundary changes require an explicit adapter contract and tests on both sides.
 
 ## Commands
 
 ```bash
-npm install
-npm run audit
+npm ci
+node platform/run.mjs check
+node platform/run.mjs test
+node platform/run.mjs build
 npm run audit:ci
 npm run launchbench
-npm run check:skill-graph
-npm run render:skill-graph -- --check
+npm run check:catalog
+npm run catalog:render-routing -- --check
 npm pack --dry-run --json
 ```
 
-Subagents may mutate bounded disjoint scopes. The orchestrator owns integration, git, canonical state, shared provider changes, public actions, spend, destructive actions, and release. Never commit secrets.
+Subagents may mutate bounded, disjoint scopes. The orchestrator owns integration, git, shared state, provider changes, public actions, spend, destructive actions, and releases.
 
+## Maintainer compatibility
 
-## Maintainer compatibility contract
+Root guidance is for this combined repository. Do not copy it into a launched business or generated app repository. Generated businesses receive their own entrypoints from the engine workspace templates.
 
-This file is for maintaining this skill repo itself. Do not copy these instructions into a launched business or generated app repo. Generated businesses receive their own entrypoints from `workspace/business/engineering/repo-agent-entrypoints/`. Keep this file a concise map; mechanical behavior belongs in a validator/eval.
+## Runtime sync and source freshness
 
-## Runtime Sync
-
-Use runtime sync only on the maintainer machine after repository validation.
-
-## Source Freshness
-
-Verify fast-moving provider sources before changing commands or external guidance.
+Use runtime sync only on the maintainer machine after repository validation. Verify fast-moving provider sources before changing external commands or guidance.

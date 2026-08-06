@@ -1,129 +1,159 @@
-# B2C Mobile Business Launch Skill
+# Formation
 
-An agent skill that takes a consumer mobile app from idea, transcript, specification, or half-built repository to a launched and operated business. It combines a graph-native orchestration model with durable business state, bounded specialist agents, founder approval interrupts, deterministic validators, and evidence-backed readiness claims.
+Formation is an opinionated founder workspace for turning an idea into a decision-grade, launch-ready business.
 
-[![audit:ci](https://img.shields.io/github/actions/workflow/status/Emuthmartinez/b2c-mobile-business-launch-skill/source-freshness.yml?branch=main&label=audit%3Aci)](https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill/actions/workflows/source-freshness.yml)
-[![skill version](https://img.shields.io/github/package-json/v/Emuthmartinez/b2c-mobile-business-launch-skill?label=skill)](skill/b2c-mobile-business-launch/skill-version.json)
-[![node 22](https://img.shields.io/badge/node-22-informational)](CONTRIBUTING.md)
-[![license MIT](https://img.shields.io/github/license/Emuthmartinez/b2c-mobile-business-launch-skill)](LICENSE)
+It replaces the repository's original founder experience, which exposed an agent skill through generated Markdown and disconnected HTML pages, with one persistent product. Founders now work through a shared company source of truth, connected workstreams, explicit decisions, editable deliverables, prioritized tasks, and launch-readiness gates.
 
-There is no application server to start. Install the skill into Claude Code, Codex, or another compatible agent runtime, open the app repository you want to launch, and ask for the outcome you want.
+The graph-native launch runtime remains in the repository as an internal automation engine. It is no longer the product interface.
 
-## What it does
+## What the platform does
 
-The skill can:
+Formation helps a founder:
 
-- recover a launch from an existing repository and durable state
-- research the category, buyers, competitors, pricing, and market language
-- define the product, experience, design system, copy, analytics, revenue, privacy, security, and store plan
-- coordinate implementation through bounded task and subgraph nodes
-- run independent verification in fresh contexts
-- pause only for protected founder decisions such as credentials, spend, pricing, legal approval, public actions, destructive actions, and release
-- leave behind machine-readable state, evidence, run history, and founder-readable status
+- establish a durable company and founder context once
+- separate facts, assumptions, recommendations, and unresolved questions
+- work through strategy, customer, market, product, business model, brand, go-to-market, and launch as connected workstreams
+- detect contradictory business claims before they spread into downstream work
+- record decisions with rationale, ownership, and review dates
+- generate structured deliverables from accumulated context
+- edit, inspect, and restore immutable deliverable versions instead of replacing work with another AI response
+- turn analysis into a small, prioritized work queue
+- evaluate launch readiness using blockers and decision quality, not decorative metrics
 
-Typical requests:
+## Run Formation
 
-> “Turn this transcript into a business I can launch.”
+Requirements:
 
-> “Take this half-built consumer app to TestFlight and App Store submission.”
-
-> “Resume this launch, determine what is stale or blocked, and keep going.”
-
-## The execution model
-
-The typed graph under [`skill/b2c-mobile-business-launch/runtime/graph/`](skill/b2c-mobile-business-launch/runtime/graph/) is the only normal dispatch source. It is executable architecture, not a diagram layered beside a separate workflow.
-
-It is layered:
-
-1. **Definition graph**: stable skill-owned identities and contracts for business areas, domains, workflows, context packs, phases, lanes, artifacts, gates, operators, and providers.
-2. **Business instance graph**: the launch-specific subset selected from scope, archetype, state, approvals, and available providers.
-3. **Durable run graph**: runnable nodes, attempts, dependencies, resource claims, retries, joins, approval interrupts, verification, and stale propagation.
-4. **Trace and evidence graph**: accepted artifact versions, producing attempts, proof, and lineage.
-
-The orchestrator compiles and executes this model. Agents perform judgment inside bounded nodes. Runtime adapters may serialize work when necessary, but they may not change prerequisites, proof requirements, founder gates, or completion semantics.
-
-`state/PROJECT_STATE.yaml` remains the canonical mutable state for one business. Parallel workers do not edit it directly. They return outputs, evidence, and proposed state changes to an orchestrator-owned reducer, which is the single writer to canonical state, the launch cockpit, shared provider mutations, and integration state.
-
-## Quickstart
+- Node.js 22 or later
+- the repository dependencies installed from the root lockfile
 
 ```bash
-git clone https://github.com/Emuthmartinez/b2c-mobile-business-launch-skill
-cd b2c-mobile-business-launch-skill
-
-mkdir -p ~/.codex/skills
-rsync -a --delete --exclude node_modules \
-  skill/b2c-mobile-business-launch/ \
-  ~/.codex/skills/b2c-mobile-business-launch/
-
-npm install --prefix ~/.codex/skills/b2c-mobile-business-launch
+npm ci
+node platform/run.mjs dev
 ```
 
-Then open your app repository and ask naturally:
+Open `http://127.0.0.1:4311`.
+
+The repository includes a realistic Storywell founder workspace and a local preview account. Founders can also create credential-backed accounts and start a fresh company workspace. The API runs on `http://127.0.0.1:4310`; Vite proxies `/api` during development.
+
+Production build:
+
+```bash
+node platform/run.mjs build
+NODE_ENV=production ALLOW_DEMO_AUTH=false node platform/run.mjs start
+```
+
+Production sessions require HTTPS. When TLS terminates at a trusted reverse proxy, set `TRUST_PROXY=true` so Formation can validate forwarded host, protocol, and client-address headers. See [`platform/.env.example`](platform/.env.example) for configuration.
+
+## Primary founder journey
+
+1. **Create a company workspace.** Formation asks for the company, primary customer, problem, proposed solution, current objective, and operating constraints.
+2. **Review Today.** The command center ranks the next useful moves and explains why each one matters now.
+3. **Strengthen the business source of truth.** The Business view keeps the thesis, customer, offer, positioning, economics, and metric definitions coherent.
+4. **Advance a workstream.** Each workstream has evidence, assumptions, open questions, tasks, deliverables, confidence, and one current next action.
+5. **Make the call.** Decisions retain their rationale and review date and remain visible to downstream work.
+6. **Create and edit deliverables.** Generated drafts are structured, versioned, editable, exportable, and connected to claims and decisions.
+7. **Inspect launch readiness.** Formation shows what is ready, what is blocked, and which calls or critical tasks prevent a clean launch claim.
+
+A detailed walkthrough is in [`docs/platform/founder-journey.md`](docs/platform/founder-journey.md).
+
+## Architecture
 
 ```text
-Read notes/idea.md, inspect this repo, and take the business to launch readiness.
+Founder browser
+  -> React 19 + Vite application
+  -> same-origin Node HTTP API
+  -> workspace authorization and domain services
+  -> atomic local persistence adapter
+  -> durable generation queue
+  -> optional structured AI provider
+  -> graph-native launch engine adapter (next integration boundary)
 ```
 
-For multiple runtimes, install one canonical copy and symlink the others to it:
+The platform is intentionally separated from the historical skill runtime:
+
+```text
+platform/                              founder product
+  web/                                 application shell and product pages
+  server/                              API, auth, persistence, domain logic, generation
+  data/                                ignored local state
+  run.mjs                              dev, build, start, check, and test entrypoint
+
+skill/b2c-mobile-business-launch/      internal launch automation engine
+  core/                                durable execution, reducer, autonomy, sessions
+  catalog/                             graph definitions and workflow contracts
+  knowledge/                           reusable domain guidance
+  workspace/                           engine artifact contracts and export sources
+  validation/ + verification/          deterministic engine and business checks
+```
+
+The platform domain model is documented in [`docs/platform/product-architecture.md`](docs/platform/product-architecture.md). Technical boundaries are documented in [`docs/platform/technical-architecture.md`](docs/platform/technical-architecture.md).
+
+## Commands
 
 ```bash
-ln -sfn ~/.codex/skills/b2c-mobile-business-launch ~/.claude/skills/b2c-mobile-business-launch
-ln -sfn ~/.codex/skills/b2c-mobile-business-launch ~/.agents/skills/b2c-mobile-business-launch
+node platform/run.mjs dev         # API and Vite development servers
+node platform/run.mjs check       # server syntax and strict TypeScript checks
+node platform/run.mjs test        # domain, persistence, auth, and API tests
+node platform/run.mjs build       # production web bundle
+node platform/run.mjs start       # serve API and production bundle
+node platform/run.mjs reset-data  # restore the realistic seed workspace
 ```
 
-## Business capability tree
+The platform CI workflow runs strict checks, the 25-test server and domain suite, and a production build on every relevant pull request.
 
-The copied `business/` workspace is organized by capability rather than a flat artifact list. See [`workspace/business/README.md`](skill/b2c-mobile-business-launch/workspace/business/README.md) for ownership and paths. Each capability directory owns its authored artifacts and points downward to narrower contracts instead of duplicating cross-repository guidance.
+## Generation contract
 
-## What lands in the app repository
+Without external configuration, Formation uses a deterministic structured generator so the full product can be evaluated locally.
 
-| Area | Durable output |
-| --- | --- |
-| State and status | `state/PROJECT_STATE.yaml`, run state, evidence, and `state/launch-cockpit.html` |
-| Founder operations | `operations/BUSINESS_ACCESS.md`, structured approvals, access proof, and one action at a time |
-| Research and positioning | market evidence, competitor and review mining, research verdicts, and `state/LAUNCH_TRACE.md` |
-| Product and experience | `product/SPEC.md`, `engineering/TECH_SPEC.md`, acceptance criteria, experience contracts, and scope locks |
-| Design | `design/DESIGN.md`, state-driven Design Room versions, tokens, baselines, and rendered proof |
-| Engineering | implementation plans, task ownership, device proof, backend contracts, and production readiness |
-| Revenue and growth | pricing, RevenueCat and Stripe contracts, paid acquisition, viral loops, lifecycle email, and funnel assets |
-| Store operations | signing, screenshots, metadata, privacy answers, submission packets, and rejection handling |
-| Trust | threat model, security proof, privacy, terms, deletion, monitoring, and accepted risk |
-| Analytics and copy | event catalog, attribution, experiments, dashboards, and validated user-facing copy |
+Set `FORMATION_AI_ENDPOINT` to use an external provider. Formation sends:
 
-## Documentation map
+- company and founder context
+- the active workstream
+- relevant facts, assumptions, recommendations, and questions
+- linked decisions
+- existing deliverable summaries
+- founder direction
+- an explicit structured response schema
 
-- [`skill/b2c-mobile-business-launch/SKILL.md`](skill/b2c-mobile-business-launch/SKILL.md): runtime entrypoint and always-on contracts
-- [`skill/b2c-mobile-business-launch/spine.md`](skill/b2c-mobile-business-launch/spine.md): phase-oriented launch walk
-- [`skill/b2c-mobile-business-launch/runtime/graph/README.md`](skill/b2c-mobile-business-launch/runtime/graph/README.md): graph semantics, compiler, scheduler, and run-state contract
-- [`docs/architecture.md`](docs/architecture.md): current repository and execution architecture
-- [`docs/implementation/graph-execution-v2.md`](docs/implementation/graph-execution-v2.md): implementation details and extension rules
-- [`docs/validators.md`](docs/validators.md): validator and audit reference
-- [`CONTRIBUTING.md`](CONTRIBUTING.md): development, release, and review workflow
-- [`AGENTS.md`](AGENTS.md): maintainer rules and repository map
+The provider must return a title, summary, confidence score, and editable sections. Provider responses do not become accepted facts. They enter the workspace as founder-reviewable drafts.
 
-Every domain under [`knowledge/`](skill/b2c-mobile-business-launch/knowledge/) has its own `README.md` index with load conditions and bounded references. Those indexes describe knowledge routing. They do not define execution order. Execution order comes from the compiled graph and durable run state.
+## Security and tenancy
 
-## Validation
+- credential passwords use salted, memory-hard scrypt hashes and are never returned by the API
+- failed sign-ins use generic responses and are rate limited
+- successful sign-in rotates to one random session token stored as a SHA-256 hash
+- session cookies are HTTP-only and SameSite=Lax
+- every workspace read and mutation checks membership server-side
+- cross-origin mutations are rejected
+- request bodies are bounded
+- production responses include a restrictive content security policy and related headers
+- data files are created with owner-only permissions
+- credential registration can be explicitly disabled when an external identity provider owns provisioning
+- demo authentication is disabled in production unless explicitly enabled
 
-```bash
-npm install
-npm run audit
-npm run audit:ci
-npm run audit -- --list
-npm run check:skill-graph
-npm run render:skill-graph -- --check
-npm run launchbench
-npm pack --dry-run --json
-```
+The included atomic file adapter supports local development, evaluation, and a single-process deployment with persistent storage. Transactional PostgreSQL persistence, complete account recovery and invitation flows, and the platform-to-engine execution adapter are the highest-impact remaining public-SaaS gaps. They are explicitly ranked in [`docs/platform/remaining-gaps.md`](docs/platform/remaining-gaps.md).
 
-The audit starts with TypeScript and formatting, validates the graph and generated projections, runs deterministic business gates, executes 700+ validator fixtures through LaunchBench, and checks package and version discipline.
+## Documentation
 
-The house rule is simple: when a failure can recur, strengthen the graph contract, validator, fixture, or LaunchBench scenario instead of adding another paragraph that nobody can reliably execute.
+- [Original repository audit](docs/platform/audit-original-repository.md)
+- [Product architecture and information architecture](docs/platform/product-architecture.md)
+- [Technical architecture](docs/platform/technical-architecture.md)
+- [Major decisions and tradeoffs](docs/platform/decisions-and-tradeoffs.md)
+- [Migration and retained/replaced systems](docs/platform/migration.md)
+- [Founder journey](docs/platform/founder-journey.md)
+- [Design system](docs/platform/design-system.md)
+- [Remaining gaps by product impact](docs/platform/remaining-gaps.md)
+- [Combined repository architecture](docs/architecture.md)
 
-## Scope
+## Working on the launch engine
 
-The skill is opinionated for subscription and freemium consumer mobile apps. One-time purchase and advertising-led businesses are not yet first-class paths. Provider integrations are optional until their lane is in scope, but the skill never silently replaces a required capability with a weaker fallback.
+The engine still has its own contracts, catalog, validators, and release discipline. Start with:
 
-## Security and license
+- [`skill/b2c-mobile-business-launch/README.md`](skill/b2c-mobile-business-launch/README.md)
+- [`skill/b2c-mobile-business-launch/SKILL.md`](skill/b2c-mobile-business-launch/SKILL.md)
+- [`skill/b2c-mobile-business-launch/catalog/generated/routing.md`](skill/b2c-mobile-business-launch/catalog/generated/routing.md)
 
-Report vulnerabilities through [`.github/trust/SECURITY.md`](.github/trust/SECURITY.md). Participation is governed by [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Licensed under [MIT](LICENSE).
+Founder-facing product behavior belongs in `platform/`. Graph execution, launch automation, and reusable launch doctrine remain in `skill/b2c-mobile-business-launch/`.
+
+The root package manifest remains the engine compatibility and release manifest for this transition. Formation has its own private manifest in `platform/package.json` and uses the root lockfile so both systems remain reproducible without a half-migrated dependency tree.

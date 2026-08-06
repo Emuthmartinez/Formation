@@ -1,0 +1,171 @@
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { api } from "../api";
+import { Button, EmptyState, Field, Modal, PageHeader, Section, StatusText, formatDate } from "../components/Primitives";
+import { useWorkspace } from "../context";
+import { navigate } from "../router";
+import type { Decision } from "../types";
+
+export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: boolean; targetId?: string }) {
+  const { snapshot, reload, notify } = useWorkspace();
+  const [newOpen, setNewOpen] = useState(openNew);
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNewOpen(openNew);
+  }, [openNew]);
+
+  useEffect(() => {
+    if (targetId) {
+      window.setTimeout(() => document.getElementById(targetId)?.scrollIntoView({ block: "center" }), 50);
+    }
+  }, [targetId]);
+
+  const sections = useMemo(() => {
+    const active = snapshot.decisions.filter((decision) => ["open", "proposed", "revisit"].includes(decision.status));
+    const decided = snapshot.decisions.filter((decision) => decision.status === "decided");
+    const archived = snapshot.decisions.filter((decision) => decision.status === "superseded");
+    return { active, decided, archived };
+  }, [snapshot.decisions]);
+
+  const updateStatus = async (decision: Decision, status: Decision["status"]) => {
+    setUpdating(decision.id);
+    try {
+      await api.updateDecision(snapshot.workspace.id, decision.id, { status });
+      await reload();
+      notify(status === "decided" ? "Decision accepted and propagated to the workspace." : "Decision status updated.");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error), "error");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  return (
+    <div className="page-stack">
+      <PageHeader
+        eyebrow="Decision system"
+        title="Make the important calls visible"
+        description="Formation keeps the decision, rationale, owner, review date, and downstream context together so yesterday’s choice does not become tomorrow’s mystery."
+        action={<Button icon="plus" onClick={() => navigate("/decisions?new=1")}>Record decision</Button>}
+      />
+
+      <Section title="Needs a call" description="Unresolved choices that are holding back confidence or downstream work.">
+        {sections.active.length ? (
+          <div className="decision-list">
+            {sections.active.map((decision) => (
+              <DecisionRow key={decision.id} decision={decision} updating={updating === decision.id} onStatus={updateStatus} />
+            ))}
+          </div>
+        ) : <EmptyState title="No open decisions" description="The decision queue is clear. Formation will surface a new call when workstreams conflict or evidence changes." />}
+      </Section>
+
+      <Section title="Decision log" description="Accepted decisions remain reviewable and can carry an explicit reconsideration date.">
+        <div className="decision-list decision-list--history">
+          {sections.decided.map((decision) => (
+            <DecisionRow key={decision.id} decision={decision} updating={updating === decision.id} onStatus={updateStatus} />
+          ))}
+          {!sections.decided.length ? <p className="muted-copy">No accepted decisions yet.</p> : null}
+        </div>
+      </Section>
+
+      {sections.archived.length ? (
+        <details className="archive-details">
+          <summary>{sections.archived.length} superseded decision{sections.archived.length === 1 ? "" : "s"}</summary>
+          <div className="decision-list decision-list--history">
+            {sections.archived.map((decision) => <DecisionRow key={decision.id} decision={decision} updating={false} onStatus={updateStatus} />)}
+          </div>
+        </details>
+      ) : null}
+
+      {newOpen ? <NewDecisionModal onClose={() => { setNewOpen(false); navigate("/decisions"); }} /> : null}
+    </div>
+  );
+}
+
+function DecisionRow({
+  decision,
+  updating,
+  onStatus,
+}: {
+  decision: Decision;
+  updating: boolean;
+  onStatus: (decision: Decision, status: Decision["status"]) => void;
+}) {
+  const { snapshot } = useWorkspace();
+  const workstream = snapshot.workspace.workstreams.find((entry) => entry.id === decision.workstreamId);
+
+  return (
+    <article id={decision.id} className={`decision-row decision-row--${decision.status}`}>
+      <div className="decision-row__meta">
+        <StatusText status={decision.status} />
+        <span>{workstream?.title ?? decision.workstreamId}</span>
+        <span>Owner: {decision.owner}</span>
+      </div>
+      <div className="decision-row__content">
+        <h2>{decision.title}</h2>
+        <p className="decision-row__statement">{decision.decision}</p>
+        <p><strong>Rationale:</strong> {decision.rationale}</p>
+      </div>
+      <div className="decision-row__dates">
+        <div><span>Decided</span><strong>{formatDate(decision.decidedAt, "Not yet")}</strong></div>
+        <div><span>Review</span><strong>{formatDate(decision.reviewAt, "No review set")}</strong></div>
+      </div>
+      <div className="decision-row__actions">
+        {decision.status !== "decided" ? <Button onClick={() => onStatus(decision, "decided")} disabled={updating}>Accept decision</Button> : null}
+        <select value={decision.status} onChange={(event) => onStatus(decision, event.target.value as Decision["status"])} disabled={updating} aria-label={`Status for ${decision.title}`}>
+          <option value="open">Open</option><option value="proposed">Proposed</option><option value="decided">Decided</option><option value="revisit">Revisit</option><option value="superseded">Superseded</option>
+        </select>
+      </div>
+    </article>
+  );
+}
+
+function NewDecisionModal({ onClose }: { onClose: () => void }) {
+  const { snapshot, reload, notify } = useWorkspace();
+  const [title, setTitle] = useState("");
+  const [decision, setDecision] = useState("");
+  const [rationale, setRationale] = useState("");
+  const [workstreamId, setWorkstreamId] = useState("strategy");
+  const [status, setStatus] = useState<Decision["status"]>("open");
+  const [reviewAt, setReviewAt] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      await api.createDecision(snapshot.workspace.id, {
+        title,
+        decision,
+        rationale,
+        workstreamId,
+        status,
+        reviewAt: reviewAt || null,
+        owner: snapshot.workspace.founder.name,
+      });
+      await reload();
+      notify("Decision recorded in the company source of truth.");
+      onClose();
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error), "error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Modal title="Record a business decision" description="Capture the call and the reasoning. A decision without rationale is just future archaeology." onClose={onClose}>
+      <form onSubmit={submit} className="editor-stack">
+        <Field label="Decision title"><input value={title} onChange={(event) => setTitle(event.target.value)} required /></Field>
+        <Field label="The call"><textarea rows={3} value={decision} onChange={(event) => setDecision(event.target.value)} required /></Field>
+        <Field label="Why this is the right call now"><textarea rows={4} value={rationale} onChange={(event) => setRationale(event.target.value)} required /></Field>
+        <div className="form-grid form-grid--three">
+          <Field label="Workstream"><select value={workstreamId} onChange={(event) => setWorkstreamId(event.target.value)}>{snapshot.workspace.workstreams.map((stream) => <option key={stream.id} value={stream.id}>{stream.title}</option>)}</select></Field>
+          <Field label="Status"><select value={status} onChange={(event) => setStatus(event.target.value as Decision["status"])}><option value="open">Open question</option><option value="proposed">Proposed</option><option value="decided">Decided</option></select></Field>
+          <Field label="Review date"><input type="date" value={reviewAt} onChange={(event) => setReviewAt(event.target.value)} /></Field>
+        </div>
+        <div className="form-actions"><Button type="button" variant="secondary" onClick={onClose}>Cancel</Button><Button type="submit" disabled={busy}>{busy ? "Recording…" : "Record decision"}</Button></div>
+      </form>
+    </Modal>
+  );
+}
