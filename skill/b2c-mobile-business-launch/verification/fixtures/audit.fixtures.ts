@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { assert, createHarness, skillRoot, type Harness } from "./_harness.js";
+import { assert, createHarness, repoCheckoutPresent, repoRoot, skillRoot, type Harness } from "./_harness.js";
 import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 
 /**
@@ -12,8 +12,6 @@ import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
  * the plan's directory-move trap list), and is every suite file actually reachable from a
  * runner's auto-discovery.
  */
-
-const repoRoot = path.resolve(skillRoot, "..", "..");
 
 const tsxBin = resolveTsxBin(skillRoot);
 
@@ -52,13 +50,20 @@ function runCheckPackageParity(args: string[]): { code: number; output: string }
 export function register(harness: Harness): void {
   // --- audit-plan parity: a check:* script the plan doesn't know about must fail the gate -------
 
-  harness.check("audit-plan parity: a faithful copy of the real manifests passes check-package-parity cleanly (the positive control for the next case)", () => {
+  // These two read the repository's own package.json/package-lock.json to build their fixture.
+  // An installed runtime has neither above it, so from there the subject is absent rather than
+  // wrong — skip with the reason instead of failing every `npm run sync:runtime`.
+  const parityCase: (label: string, fn: () => void) => void = repoCheckoutPresent()
+    ? harness.check
+    : (label) => harness.skip(label, `repo-only: no repository manifests at ${repoRoot} (installed runtime)`);
+
+  parityCase("audit-plan parity: a faithful copy of the real manifests passes check-package-parity cleanly (the positive control for the next case)", () => {
     const fixture = buildFaithfulParityFixture(harness);
     const result = runCheckPackageParity(["--repo-root", fixture.repoRoot, "--skill-root", fixture.skillRoot]);
     assert(result.code === 0, `expected a faithful, unmutated copy of the real manifests to pass check-package-parity, got ${result.code}:\n${result.output}`);
   });
 
-  harness.check("audit-plan parity: a check:* script not in tooling/lib/audit-plan.ts's plan (and not explicitly excluded) fails check-package-parity with a named reason", () => {
+  parityCase("audit-plan parity: a check:* script not in tooling/lib/audit-plan.ts's plan (and not explicitly excluded) fails check-package-parity with a named reason", () => {
     const fixture = buildFaithfulParityFixture(harness);
     const rootPackagePath = path.join(fixture.repoRoot, "package.json");
     const rootPackage = JSON.parse(readFileSync(rootPackagePath, "utf8")) as { scripts: Record<string, string> };

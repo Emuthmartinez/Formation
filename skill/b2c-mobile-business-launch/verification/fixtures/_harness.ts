@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
@@ -10,6 +10,12 @@ export interface CaseResult {
   label: string;
   ok: boolean;
   detail: string;
+  /**
+   * A case that could not be evaluated here, as distinct from one that passed. Skipped cases do
+   * not fail the suite and are never reported as passes — see `skip` on Harness for when this is
+   * legitimate, which is narrower than it looks.
+   */
+  skipped?: boolean;
 }
 
 export interface SchemaCheckResult {
@@ -19,6 +25,28 @@ export interface SchemaCheckResult {
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 export const skillRoot = path.resolve(scriptDir, "../..");
+
+/**
+ * The directory above the skill. In a checkout that is the repository root; in an installed
+ * runtime (`~/.codex/skills/b2c-mobile-business-launch`) it is `~/.codex`, which is not a
+ * repository at all. Exported so the fixtures that assert repo-level invariants share one
+ * definition of where they are looking rather than three identical local copies.
+ */
+export const repoRoot = path.resolve(skillRoot, "..", "..");
+
+/**
+ * True when this skill is running from a source checkout rather than an installed runtime.
+ *
+ * `npm run sync:runtime` copies the skill into the runtime and then runs the full audit there to
+ * prove the installed copy works. But a handful of fixtures assert things about the *repository* —
+ * the migration port ledger under `docs/`, cross-manifest audit-plan parity, the maintainer's own
+ * root AGENTS.md/CLAUDE.md — and the runtime deliberately ships none of that. Those cases were
+ * failing on ENOENT every sync, which makes the one command that proves an install is good report
+ * red no matter what, and a gate that is always red is a gate people stop reading.
+ */
+export function repoCheckoutPresent(): boolean {
+  return existsSync(path.join(repoRoot, "package.json"));
+}
 
 function isDateTime(value: string | undefined): value is string {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && !Number.isNaN(new Date(value).getTime()));
@@ -65,6 +93,13 @@ export interface Harness {
   readonly results: CaseResult[];
   makeTempDir: (name: string) => string;
   check: (label: string, fn: () => void) => void;
+  /**
+   * Record that a case could not be evaluated in this environment, with the reason. Use only when
+   * the case's *subject* is absent — not when it is merely inconvenient to set up, and never to
+   * quiet a case that is genuinely failing. The reason is printed, so an unexplained skip is
+   * visible rather than silent.
+   */
+  skip: (label: string, reason: string) => void;
   checkSchema: (schemaId: string, data: unknown) => SchemaCheckResult;
   runScript: (label: string, scriptPath: string, args: string[], expectedCode: number, expectedText?: string) => void;
   cleanup: () => void;
@@ -91,6 +126,10 @@ export function createHarness(schemaDir: string): Harness {
     }
   };
 
+  const skip = (label: string, reason: string): void => {
+    results.push({ label, ok: true, skipped: true, detail: reason });
+  };
+
   const checkSchema = (schemaId: string, data: unknown): SchemaCheckResult => {
     const validate = ajv.getSchema(schemaId);
     if (!validate) throw new Error(`Unknown schema $id: ${schemaId}`);
@@ -109,16 +148,20 @@ export function createHarness(schemaDir: string): Harness {
     rmSync(tempRoot, { recursive: true, force: true });
   };
 
-  return { tempRoot, results, makeTempDir, check, checkSchema, runScript, cleanup };
+  return { tempRoot, results, makeTempDir, check, skip, checkSchema, runScript, cleanup };
 }
 
 export function reportResults(results: CaseResult[]): number {
   const failed = results.filter((result) => !result.ok);
+  const skipped = results.filter((result) => result.skipped);
   console.log("Core fixture tests");
-  console.log(`${failed.length} failure(s), ${results.length - failed.length} passed`);
+  // Skips are counted out of "passed" rather than folded into it: a suite that reports 185 passed
+  // when 8 of them were never evaluated is claiming coverage it does not have.
+  const passed = results.length - failed.length - skipped.length;
+  console.log(`${failed.length} failure(s), ${passed} passed${skipped.length > 0 ? `, ${skipped.length} skipped` : ""}`);
   for (const result of results) {
-    console.log(`${result.ok ? "PASS" : "FAIL"} ${result.label}`);
-    if (!result.ok) console.log(`  ${result.detail}`);
+    console.log(`${result.skipped ? "SKIP" : result.ok ? "PASS" : "FAIL"} ${result.label}`);
+    if (!result.ok || result.skipped) console.log(`  ${result.detail}`);
   }
   return failed.length;
 }

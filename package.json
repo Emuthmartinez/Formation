@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill",
-  "version": "0.72.0",
+  "version": "0.73.1",
   "description": "An agent skill that takes a consumer mobile app from idea to a launched business, with deterministic validators between every claim and done.",
   "keywords": [
     "claude-code",
@@ -84,6 +84,7 @@
     "render:artifact-pages": "tsx skill/b2c-mobile-business-launch/tooling/render-artifact-pages.ts",
     "render:autonomy-console": "tsx skill/b2c-mobile-business-launch/tooling/render-autonomy-console.ts",
     "onboard:run": "tsx skill/b2c-mobile-business-launch/core/session/onboard.ts",
+    "plan:frontier": "tsx skill/b2c-mobile-business-launch/core/session/plan.ts",
     "test:validators": "tsx skill/b2c-mobile-business-launch/validation/repository/run-validator-fixtures.ts",
     "test:fixtures": "tsx skill/b2c-mobile-business-launch/verification/fixtures/run.ts",
     "test:boundaries": "tsx skill/b2c-mobile-business-launch/verification/boundaries/run.ts",
@@ -105,7 +106,7 @@
     "probe:revenuecat": "tsx skill/b2c-mobile-business-launch/tooling/probe-revenuecat.ts",
     "probe:posthog": "tsx skill/b2c-mobile-business-launch/tooling/probe-posthog.ts",
     "grade:screenshots": "tsx skill/b2c-mobile-business-launch/tooling/grade-screenshots.ts",
-    "sync:runtime": "bash tooling/sync-skill-runtime.sh",
+    "sync:runtime": "bash scripts/sync-skill-runtime.sh",
     "lint:format": "prettier --check \"skill/b2c-mobile-business-launch/catalog/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/business/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/repository/**/*.ts\" \"skill/b2c-mobile-business-launch/tooling/**/*.ts\"",
     "format": "prettier --write \"skill/b2c-mobile-business-launch/catalog/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/business/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/repository/**/*.ts\" \"skill/b2c-mobile-business-launch/tooling/**/*.ts\"",
     "check:catalog": "tsx skill/b2c-mobile-business-launch/validation/repository/check-catalog.ts",

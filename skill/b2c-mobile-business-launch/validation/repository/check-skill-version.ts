@@ -29,14 +29,28 @@ const installed = loadManifest(args.installed, "installed");
 const latest = args.remoteUrl ? loadRemoteManifest(args.remoteUrl) : loadManifest(args.source, "latest");
 issues.push(...installed.issues, ...latest.issues);
 
-if (!args.remoteUrl && samePath(args.source, args.installed) && !args.sourceExplicit) {
+/**
+ * A freshness check whose "latest" resolved to the runtime it is checking has compared nothing.
+ * Reporting that as a pass is the exact failure this gate exists to prevent: on 2026-08-05 a launch
+ * ran four minor versions behind (0.68.1 against 0.72.0) — no autonomy onboarding, no frontier,
+ * because neither existed yet in that copy — and nothing between the founder's request and the work
+ * ever produced a real comparison.
+ *
+ * Severity depends on which copy is in front of us, because self-comparison means two different
+ * things. A source checkout *is* the latest, so comparing it to itself is trivially true and stays
+ * quiet. An installed runtime's source lives somewhere else, so self-comparison is a false pass and
+ * fails — the same refusal verifyControlBoundary makes when asked to infer protection from mode
+ * bits instead of an actual probe.
+ */
+if (!args.remoteUrl && samePath(args.source, args.installed) && !args.sourceExplicit && !isSourceCheckout(args.installed)) {
   issues.push(
     issue(
-      "warning",
+      "error",
       "skill_version.source_unresolved",
       [
-        "No explicit --source or --remote-url was provided, and the latest source resolved to the installed runtime itself.",
-        "This only proves the runtime can read its own manifest; pass --source /path/to/source/skill or --remote-url before substantial launch/design/store/revenue/build work.",
+        "This compared the installed runtime against itself, so it did not check freshness at all.",
+        "Run `npm run sync:runtime` from the source checkout to sync every consumer and verify in one step,",
+        "or re-run with --source /path/to/checkout/skill/b2c-mobile-business-launch or --remote-url.",
       ].join(" "),
       path.relative(process.cwd(), path.join(args.installed, "skill-version.json")),
     ),
@@ -133,6 +147,32 @@ function normalizePath(value: string): string {
     return realpathSync(value);
   } catch {
     return path.resolve(value);
+  }
+}
+
+/**
+ * True when this root is the repository copy rather than an installed runtime. Two signals have to
+ * agree: the manifest's own sourcePath ("skill/b2c-mobile-business-launch") is the tail of the
+ * resolved path, and the directory above that tail carries a `.git`. An installed runtime under
+ * ~/.codex/skills satisfies neither, so it can never talk its way out of the freshness comparison.
+ *
+ * realpathSync first, because the consumer copies (~/.claude, ~/.agents, ~/.cursor) are symlinks
+ * into the Codex runtime — the link path is not what we need to classify. `.git` is checked with
+ * existsSync rather than a directory test so a git worktree, where `.git` is a file, still counts.
+ */
+function isSourceCheckout(root: string): boolean {
+  const resolved = normalizePath(root);
+  const manifestPath = path.join(resolved, "skill-version.json");
+  if (!existsSync(manifestPath)) return false;
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(manifestPath, "utf8"));
+    const sourcePath = isRecord(parsed) && typeof parsed.sourcePath === "string" ? parsed.sourcePath : undefined;
+    if (!sourcePath) return false;
+    const suffix = path.sep + sourcePath.split("/").join(path.sep);
+    if (!resolved.endsWith(suffix)) return false;
+    return existsSync(path.join(resolved.slice(0, resolved.length - suffix.length), ".git"));
+  } catch {
+    return false;
   }
 }
 

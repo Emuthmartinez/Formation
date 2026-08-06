@@ -1,14 +1,11 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.72.0",
+  "version": "0.73.1",
   "updatedAt": "2026-08-05",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Added the OS trust-boundary installer and an honest verifier that reports enforced / advisory-only / unprotected from an empirical write probe, never from mode bits alone, and names an unenforced boundary in the digest when a grant sits above review-first.",
-    "Shared tsx-bin resolution across eleven call sites and made session lock liveness independent of executor cooperation, so a slow real executor can no longer let its own lock go stale.",
-    "Recorded the portfolio Doppler convention: one platform project plus one per business, repos map to configs, and the platform tier composes at the consumer because cross-project inheritance is a paid feature.",
-    "Declared every provider credential a business needs up front, split into secret / config / external, so a founder can set them before an autonomous session runs instead of discovering each gap when a run breaks on it.",
-    "Composed the two Doppler tiers in the resolver itself, business project winning over the shared platform project, and reported which tier actually supplied each item.",
-    "Made a missing credential say only what was actually checked: an unreadable Doppler tier is now named as unreadable instead of being reported as searched-and-empty, and a config item satisfied out of two different tiers is no longer attributed to just one of them."
+    "Stopped `npm run sync:runtime` reporting red on every successful install. It runs the full audit inside the installed runtime, where eight fixtures across three files assert repository invariants \u2014 the migration port ledger under docs/, cross-manifest audit-plan parity, and the maintainer's own root AGENTS.md/CLAUDE.md \u2014 none of which a runtime ships. They failed on ENOENT for a reason no install could fix, and a gate that is always red is a gate people stop reading.",
+    "Gave the fixture harness a skip state with a required reason, counted and printed separately from passes: a suite reporting 185 passed when eight were never evaluated is claiming coverage it does not have.",
+    "Shared one repoRoot/repoCheckoutPresent definition instead of the three identical local copies the repo-only fixtures each carried."
   ]
 }

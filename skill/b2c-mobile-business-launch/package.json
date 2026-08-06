@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.72.0",
+  "version": "0.73.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -57,6 +57,7 @@
     "render:artifact-pages": "tsx tooling/render-artifact-pages.ts",
     "render:autonomy-console": "tsx tooling/render-autonomy-console.ts",
     "onboard:run": "tsx core/session/onboard.ts",
+    "plan:frontier": "tsx core/session/plan.ts",
     "install:control-permissions": "tsx core/adapters/install-control-permissions.ts",
     "test:validators": "tsx validation/repository/run-validator-fixtures.ts",
     "test:fixtures": "tsx verification/fixtures/run.ts",
