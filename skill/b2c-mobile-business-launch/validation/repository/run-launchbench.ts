@@ -5,15 +5,12 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { asArray, asString, isRecord, issue, reportAndExit, type Issue } from "../../tooling/lib/launch-state.js";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, "../..");
 const scenarioDir = path.resolve(scriptDir, "./evals/launchbench");
 const issues: Issue[] = [];
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
 
 const knownValidators = new Set([
   "check-gates-layout",
@@ -158,7 +155,7 @@ if (issues.some((item) => item.severity === "error")) {
   process.exitCode = 1;
 } else {
   const fixtureRunner = path.join(scriptDir, "run-validator-fixtures.ts");
-  const tsxBin = resolveTsxBin();
+  const tsxBin = resolveTsxBin(skillRoot);
   const result = spawnSync(tsxBin, [fixtureRunner], { cwd: skillRoot, encoding: "utf8" });
   process.stdout.write(result.stdout ?? "");
   process.stderr.write(result.stderr ?? "");

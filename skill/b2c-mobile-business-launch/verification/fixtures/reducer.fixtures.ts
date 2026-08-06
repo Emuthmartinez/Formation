@@ -6,13 +6,9 @@ import { laneKeys } from "../../core/schema/types.js";
 import { AUDIT_GENESIS_HASH, appendAuditEntry, readAuditLog, verifyAuditChain } from "../../core/reducer/audit.js";
 import { acquireLock, checkYield, heartbeat, readLock, releaseLock, requestInteractive } from "../../core/reducer/lock.js";
 import { sha256Hex, validatePatchShape, type StatePatch } from "../../core/reducer/patch.js";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
-
-const tsxBin = resolveTsxBin();
+const tsxBin = resolveTsxBin(skillRoot);
 const cliPath = path.join(skillRoot, "core/reducer/cli.ts");
 
 interface CliResult {

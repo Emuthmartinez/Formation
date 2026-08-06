@@ -9,7 +9,7 @@ import { runReducer, skillRoot, type ReducerResult } from "./reducer-cli.js";
 import { acquireLock, heartbeat, releaseLock, type AcquireResult } from "../reducer/lock.js";
 import type { PatchOp, PatchPath, StatePatch } from "../reducer/patch.js";
 import { validateBudgetLedger, validateBusinessState, validateControl } from "../schema/index.js";
-import type { BudgetLedgerDocument, BusinessStateV2, ControlFile } from "../schema/types.js";
+import { grantableDomainIds, type BudgetLedgerDocument, type BusinessStateV2, type ControlFile } from "../schema/types.js";
 import { compilePlan, type CatalogInput, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
 import { computeFrontier } from "../engine/frontier.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
@@ -20,9 +20,10 @@ import { domainBusinessUnit } from "../autonomy/budget.js";
 import { createCompositeVerifier } from "../autonomy/prerequisites.js";
 import { createDopplerAuthVerifier } from "../autonomy/probes/doppler.js";
 import { createBudgetFundedVerifier } from "../autonomy/probes/budget.js";
+import { verifyControlBoundary, type ControlBoundaryVerdict } from "../adapters/install-control-permissions.js";
 
 import { BriefInvalid, loadBrief, nodeInScope, type SessionBrief } from "./brief.js";
-import { createFixtureExecutor, noOpExecutor, type NodeExecutor } from "./executor.js";
+import { createFixtureExecutor, createSlowSilentExecutor, noOpExecutor, type NodeExecutor } from "./executor.js";
 import {
   formatAge,
   pushDigest,
@@ -270,6 +271,30 @@ function orphanSentence(event: OrphanEvent, title: string): string {
     : `"${title}" didn't finish cleanly last session, and I can't safely retry it blind — I need to check what actually happened before touching it again.`;
 }
 
+/**
+ * Layer 3 disclosure, never a gate (R14/AGENTS.md "Autonomy Trust Boundary"): once any granted
+ * business unit sits above the lowest level, the founder is relying on control/'s OS write
+ * protection to make that grant a real limit rather than a suggestion. If verifyControlBoundary
+ * hasn't proven that boundary is genuinely `enforced`, the founder is told in plain terms — this
+ * never blocks dispatch, and stays silent when every grant is at the lowest level (nothing to
+ * disclose). Pure and exported so it's testable without spawning a session subprocess; run.ts's
+ * own main() is the only caller in production.
+ */
+export function buildControlBoundaryAnomaly(control: ControlFile, verdict: ControlBoundaryVerdict, command: string): DigestAnomaly | undefined {
+  if (verdict.state === "enforced") return undefined;
+  const units = new Set<string>();
+  for (const domainId of grantableDomainIds) {
+    const grant = control.grants[domainId];
+    if (!grant || grant.level === "review-first") continue;
+    units.add(domainBusinessUnit(domainId));
+  }
+  if (units.size === 0) return undefined;
+  const unitList = [...units].sort().join(", ");
+  return {
+    message: `I'm set up to act on my own for ${unitList}, but the folder that holds those permissions isn't locked down yet, so those limits are guidance rather than a hard stop. Here's the one command that fixes it: ${command}`,
+  };
+}
+
 async function main(): Promise<number> {
   const args = parseArgs(process.argv.slice(2));
   const missing = ["workspace", "brief", "session"].filter((name) => !args[name]);
@@ -284,7 +309,8 @@ async function main(): Promise<number> {
   mkdirSync(path.dirname(paths.runState), { recursive: true });
   const sessionId = args.session!;
   const startedAt = args.now ?? new Date().toISOString();
-  const executor: NodeExecutor = args.executor === "fixture" ? createFixtureExecutor() : noOpExecutor;
+  const executor: NodeExecutor =
+    args.executor === "fixture" ? createFixtureExecutor() : args.executor === "slow-silent" ? createSlowSilentExecutor(Number(args["slow-delay-ms"] ?? 2000)) : noOpExecutor;
   const maxConcurrency = Number(args["max-concurrency"] ?? 4);
 
   let lockAcquired = false;
@@ -325,9 +351,10 @@ async function main(): Promise<number> {
       return await finish("workspace_not_ready", {}, 1);
     }
 
+    const lockTtlSeconds = Number(args["lock-ttl-seconds"] ?? 120);
     const acquireResult: AcquireResult = acquireLock(paths.sessionLock, {
       ownerSessionId: sessionId,
-      ttlSeconds: Number(args["lock-ttl-seconds"] ?? 120),
+      ttlSeconds: lockTtlSeconds,
       retries: Number(args["lock-retries"] ?? 3),
       retryDelayMs: Number(args["lock-retry-delay-ms"] ?? 100),
       breakStale: args["break-stale-verified"] === "true",
@@ -349,6 +376,19 @@ async function main(): Promise<number> {
       anomalies.push({ message: "This business isn't set up yet — I couldn't find its control settings." });
       return await finish("workspace_not_ready", {}, 1);
     }
+
+    // Disclosure, not a gate (see buildControlBoundaryAnomaly's doc comment): evaluated every
+    // session, before dispatch and before the kill switch even short-circuits, so a standing
+    // configuration gap is surfaced regardless of whether work happens this run.
+    const boundaryVerdict = verifyControlBoundary(workspace);
+    const boundaryCommand = `tsx ${path.join(skillRoot(), "core/adapters/install-control-permissions.ts")} --workspace ${workspace} --apply`;
+    const boundaryAnomaly = buildControlBoundaryAnomaly(control, boundaryVerdict, boundaryCommand);
+    if (boundaryAnomaly) {
+      // Technical detail stays in the run log; the digest only ever gets the founder-plain sentence.
+      console.error(`session.control_boundary: state=${boundaryVerdict.state} agentUidDiffers=${boundaryVerdict.agentUidDiffers} mode=${boundaryVerdict.controlMode} ownerUid=${boundaryVerdict.ownerUid} processUid=${boundaryVerdict.processUid} reasons=${JSON.stringify(boundaryVerdict.reasons)}`);
+      anomalies.push(boundaryAnomaly);
+    }
+
     if (control.killSwitch.engaged) {
       return await finish("parked_kill_switch", {}, 0);
     }
@@ -514,16 +554,33 @@ async function main(): Promise<number> {
           }
           writeRunState(paths.runState, run);
 
-          const onHeartbeat = (): void => {
+          const refreshAttemptHeartbeat = (): void => {
             try {
               refreshHeartbeat(run, nodeId, sessionNow());
               writeRunState(paths.runState, run);
               heartbeat(paths.sessionLock, sessionId);
             } catch {
-              /* best effort: a mid-execution heartbeat refresh is an optimization, never load-bearing for this attempt's own result */
+              /* best effort: a heartbeat refresh is an optimization, never load-bearing for this attempt's own result */
             }
           };
-          const result = await executor.execute(node, { runId: run.runId, attemptId: attempt.id, workspaceDir: workspace, now: attemptTime, heartbeat: onHeartbeat });
+          // R12/R13 liveness must not depend on the executor voluntarily calling back: a
+          // slow-but-alive real executor (U6) that never calls `heartbeat` would otherwise let its
+          // own attempt/lock heartbeat go stale mid-run and risk a --break-stale-verified acquirer
+          // stealing the lock out from under it. This timer refreshes both independently of the
+          // executor for as long as execute() is in flight; the executor-supplied callback below is
+          // still honored as an extra signal, but neither one is load-bearing on its own now. The
+          // interval is a fraction of the tighter of the two TTLs in play so a refresh always lands
+          // comfortably inside the window; unref'd (never keeps this short-lived CLI's event loop
+          // alive on its own) and always cleared in `finally`, including when execute() throws.
+          const heartbeatIntervalMs = Math.max(50, (Math.min(attempt.ttlSeconds, lockTtlSeconds) * 1000) / 3);
+          const heartbeatTimer = setInterval(refreshAttemptHeartbeat, heartbeatIntervalMs);
+          heartbeatTimer.unref();
+          let result: Awaited<ReturnType<typeof executor.execute>>;
+          try {
+            result = await executor.execute(node, { runId: run.runId, attemptId: attempt.id, workspaceDir: workspace, now: attemptTime, heartbeat: refreshAttemptHeartbeat });
+          } finally {
+            clearInterval(heartbeatTimer);
+          }
           const finishedAt = sessionNow();
 
           if (result.status === "failed") {

@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { assert, skillRoot, type Harness } from "../fixtures/_harness.js";
 import { laneKeys, type RunStateDocument } from "../../core/schema/types.js";
 import type { CatalogInput } from "../../core/engine/compile.js";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 
 /**
  * Shared workspace-bootstrap helper for the LaunchBench-ported scenario checks in this directory
@@ -20,11 +21,7 @@ import type { CatalogInput } from "../../core/engine/compile.js";
  * cover exhaustively.
  */
 
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
-const tsxBin = resolveTsxBin();
+const tsxBin = resolveTsxBin(skillRoot);
 const reducerCliPath = path.join(skillRoot, "core/reducer/cli.ts");
 const runCliPath = path.join(skillRoot, "core/session/run.ts");
 

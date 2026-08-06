@@ -451,6 +451,14 @@ export const references: readonly CatalogReference[] = [
     loadWhen:
       "before any new secret, key, token, env var, webhook secret, or .env; classifying a discovered secret; Doppler config preflight, shell-safety patterns, or production-readiness secret gates — the deep reference tool-recipes/secrets-and-environment.md routes into",
   },
+  {
+    id: "reference.operations.doppler-organization",
+    path: "knowledge/operations/doppler-organization.md",
+    domainId: "domain.operations",
+    title: "Doppler Organization Across A Portfolio",
+    loadWhen:
+      "deciding which project or config a credential belongs in; setting up secrets for a new business; adding a second business to an existing secret store; or splitting secrets across web, mobile, backend, and CI — the portfolio-shape companion to secrets-management.md, which covers one secret at a time",
+  },
 
   // ---------------------------------------------------------------------------------
   // domain.orchestration (autonomy-modes.md deliberately absent — see port ledger)

@@ -1,9 +1,10 @@
-import { cpSync, existsSync, mkdtempSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdtempSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { resolveScriptPath } from "../../../tooling/lib/script-paths.js";
+import { resolveTsxBin } from "../../../tooling/lib/tsx-bin.js";
 
 export interface FixtureResult {
   label: string;
@@ -16,11 +17,6 @@ export interface FixtureResult {
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 export const skillRoot = path.resolve(scriptDir, "../../..");
-
-function resolveTsxBin(): string {
-  const candidates = [path.join(skillRoot, "node_modules/.bin/tsx"), path.resolve(skillRoot, "../..", "node_modules/.bin/tsx")];
-  return candidates.find((candidate) => existsSync(candidate)) ?? "tsx";
-}
 
 export function writeBusinessEntrypoints(root: string): void {
   cpSync(path.join(skillRoot, "workspace", "business", "engineering/repo-agent-entrypoints", "AGENTS.md"), path.join(root, "AGENTS.md"));
@@ -55,7 +51,7 @@ export interface Harness {
 export function createHarness(): Harness {
   const tempRoot = mkdtempSync(path.join(tmpdir(), "b2c-validator-fixtures-"));
   const results: FixtureResult[] = [];
-  const tsxBin = resolveTsxBin();
+  const tsxBin = resolveTsxBin(skillRoot);
 
   const makeFixture = (name: string): string => {
     const fixtureRoot = path.join(tempRoot, name);
