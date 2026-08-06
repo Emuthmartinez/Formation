@@ -4,6 +4,16 @@ export function createId(prefix) {
   return `${prefix}_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
 }
 
+/**
+ * The workstream launch-engine records file under: the launch plan when the workspace has one.
+ * Shared by the approvals mirror and the results import so both halves of the engine boundary
+ * file into the same stream.
+ */
+export function launchWorkstreamId(workspace) {
+  const streams = workspace.workstreams ?? [];
+  return streams.find((entry) => entry.id === "launch")?.id ?? streams[0]?.id ?? "launch";
+}
+
 export function cleanText(value, fallback, maximumLength = 20_000) {
   return typeof value === "string" && value.trim() ? value.trim().slice(0, maximumLength) : fallback;
 }

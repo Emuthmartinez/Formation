@@ -7,13 +7,16 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createId } from "./domain.mjs";
 import { listEngineApprovals, recordApprovalActivity, syncEngineApprovals } from "./domain/approvals.mjs";
+import { recordResultActivity, syncEngineResults } from "./domain/results.mjs";
 
 /**
  * The platform half of the platform-to-engine execution adapter (docs/platform/remaining-gaps.md,
- * "Platform-to-engine execution adapter" — slice 1). It receives an authorized Formation
- * execution request, selects or accepts a stable catalog workflow, fingerprints the scoped
- * company context, creates or resumes a durable engine run, and exposes founder-readable run
- * state. Result import, approval mapping, staleness, and trace/cost metadata are later slices.
+ * "Platform-to-engine execution adapter"). It receives an authorized Formation execution request,
+ * selects or accepts a stable catalog workflow, fingerprints the scoped company context, creates
+ * or resumes a durable engine run, exposes founder-readable run state, mirrors engine approvals
+ * into the decision system, and imports the engine's verified results — claims, evidence,
+ * deliverable drafts, blocker tasks, staleness, and declared trace/cost metadata — through
+ * domain/results.mjs.
  *
  * Boundary rules this file enforces:
  * - The platform never reads or writes engine workspace files. Every engine interaction is a
@@ -298,6 +301,10 @@ export class ExecutionWorker {
    * engine answer may create, close, or supersede a record — an unreachable engine is reported
    * as unreachable alongside the last known records, never as "no approvals waiting".
    *
+   * The same ready answer also imports the engine's verified results (claims, deliverable
+   * drafts, staleness, blocker tasks): a founder checking in on the engine is the natural moment
+   * for Formation's records to catch up with work the engine settled since the last session.
+   *
    * `workspace.founder.operatingMode` shares the engine's grant-level vocabulary and is returned
    * for display, but it never influences this boundary: the engine's own grants and waivers
    * decide what runs without an approval, and no mode answers an approval on the founder's
@@ -326,6 +333,7 @@ export class ExecutionWorker {
       const now = new Date().toISOString();
       const changes = syncEngineApprovals(database, liveWorkspace, view.report, now);
       recordApprovalActivity(database, liveWorkspace.id, changes, now);
+      recordResultActivity(database, liveWorkspace.id, syncEngineResults(database, liveWorkspace, view.report, now), now);
       return listEngineApprovals(database, liveWorkspace.id);
     });
     return { connected: true, reachable: true, ready: true, checkedAt, operatingMode, approvals };
@@ -502,6 +510,7 @@ export class ExecutionWorker {
         sessions: [],
         notes: [],
         report: null,
+        importedResults: null,
         error: null,
       };
       liveDatabase.executions.push(execution);
@@ -606,10 +615,16 @@ export class ExecutionWorker {
             live.engine = { runId, planId: after.report.planId, catalogVersion: after.report.catalogVersion };
             live.report = founderRunView(after.report);
             // A session that parked work on a founder decision must surface that decision now,
-            // not on the next page view.
+            // not on the next page view — and work the session settled must land as records now,
+            // for the same reason.
             const liveWorkspace = nextDatabase.workspaces.find((entry) => entry.id === claimed.workspaceId);
             if (liveWorkspace) {
               recordApprovalActivity(nextDatabase, liveWorkspace.id, syncEngineApprovals(nextDatabase, liveWorkspace, after.report, finishedAt), finishedAt);
+              const resultChanges = syncEngineResults(nextDatabase, liveWorkspace, after.report, finishedAt);
+              recordResultActivity(nextDatabase, liveWorkspace.id, resultChanges, finishedAt);
+              // The execution record carries the run's declared trace/cost rollup: ids and totals
+              // only, never environment values or credential contents.
+              live.importedResults = resultChanges.totals;
             }
           } else {
             // The session itself finished; saying so is honest. Pretending we also know the
@@ -738,5 +753,6 @@ export function toFounderExecution(execution) {
     sessionCount: execution.sessions.length,
     lastSessionAt: execution.sessions.length > 0 ? execution.sessions[execution.sessions.length - 1].finishedAt : null,
     report: execution.report,
+    importedResults: execution.importedResults ?? null,
   };
 }

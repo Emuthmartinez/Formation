@@ -160,6 +160,13 @@ export interface RunStatePatch {
  * Fail-closed join (ported reconcilePatch): a patch omitting a declared output is a silent node
  * failure, rejected rather than partially applied. kind:"none" verification reaches succeeded
  * directly; anything else lands blocked pending acceptVerification.
+ *
+ * Staleness trigger: when a re-produced output replaces a fingerprint that downstream work was
+ * *accepted against*, the accepted input context of every descendant just changed — the old
+ * artifact no longer stands, whether or not the replacement is verified yet. That is exactly
+ * invalidateDescendants' contract, so it runs here, at the single site where an accepted
+ * fingerprint can be overwritten. A re-produced output with an identical fingerprint changes
+ * nothing downstream and must not invalidate anything (staleness stays honest in both directions).
  */
 export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch: RunStatePatch, now: string): void {
   const node = plan.nodes.find((candidate) => candidate.id === patch.nodeId);
@@ -173,10 +180,12 @@ export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch:
   const missing = [...expected].filter((artifactId) => !actual.has(artifactId));
   if (missing.length > 0) throw new Error(`Silent node failure: ${patch.nodeId} omitted declared output(s) ${missing.join(", ")}`);
 
+  const changedAcceptedInputs: string[] = [];
   for (const output of patch.outputs) {
     if (!expected.has(output.artifactId)) throw new Error(`${patch.nodeId} returned undeclared output ${output.artifactId}`);
     const binding = run.artifactBindings.find((candidate) => candidate.artifactId === output.artifactId);
     if (!binding) throw new Error(`Missing artifact binding ${output.artifactId}`);
+    if (binding.accepted && binding.fingerprint !== output.fingerprint) changedAcceptedInputs.push(output.artifactId);
     binding.path = output.path;
     binding.fingerprint = output.fingerprint;
     binding.accepted = node.verification.kind === "none";
@@ -190,6 +199,8 @@ export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch:
   state.status = node.verification.kind === "none" ? "succeeded" : "blocked";
   state.blocker = node.verification.kind === "none" ? undefined : "Verification required";
   run.updatedAt = now;
+
+  if (changedAcceptedInputs.length > 0) invalidateDescendants(plan, run, changedAcceptedInputs, now);
 }
 
 /** Producer never verifies its own work (R15): a separate acceptance step promotes a reconciled-but-blocked node to succeeded. */

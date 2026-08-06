@@ -205,6 +205,23 @@ test("execution adapter creates and resumes one durable engine run per request a
   assert.equal(firstStep.status, "finished");
   assert.ok(detailPayload.engineState.run.headline.includes("finished"));
 
+  // The session's verified result was imported: a recommendation claim (never a fact) with the
+  // attempt's evidence, a draft deliverable with an immutable version, and declared trace totals
+  // on the execution record.
+  assert.deepEqual(detailPayload.importedResults, { verifiedResults: 1, declaredTokenBudget: 8_000, declaredCostEstimates: [] });
+  const afterFirstImport = await app.store.read();
+  const importedClaims = afterFirstImport.claims.filter((entry) => entry.workspaceId === "wrk_storywell" && entry.source?.kind === "engine-result");
+  assert.equal(importedClaims.length, 1);
+  assert.equal(importedClaims[0].kind, "recommendation");
+  assert.equal(importedClaims[0].source.workflowId, "workflow.eng-change");
+  assert.equal(importedClaims[0].source.runId, completed.engine.runId);
+  assert.ok(importedClaims[0].evidence.length > 0, "the attempt's evidence must travel with the claim");
+  const importedArtifacts = afterFirstImport.artifacts.filter((entry) => entry.workspaceId === "wrk_storywell" && entry.source?.kind === "engine-artifact");
+  assert.equal(importedArtifacts.length, 1);
+  assert.equal(importedArtifacts[0].status, "draft");
+  assert.equal(importedArtifacts[0].stale, false);
+  assert.equal(afterFirstImport.artifactVersions.filter((entry) => entry.artifactId === importedArtifacts[0].id).length, 1);
+
   // Resubmitting the finished request resumes the completed record without a second run.
   const afterCompletion = await request(app.baseUrl, "/api/workspaces/wrk_storywell/executions", {
     cookie,
@@ -239,10 +256,63 @@ test("execution adapter creates and resumes one durable engine run per request a
   assert.equal(followupDone.status, "completed", `follow-up execution did not complete: ${JSON.stringify(followupDone, null, 2)}`);
   assert.equal(followupDone.engine.runId, completed.engine.runId, "the same durable engine run must be resumed, never replaced");
 
+  // Both verified results are imported now, and re-syncing (the approvals view runs the same
+  // import) stays idempotent — no duplicate claims, deliverables, or versions.
+  assert.equal(followupDone.importedResults.verifiedResults, 2);
+  assert.equal((await request(app.baseUrl, "/api/workspaces/wrk_storywell/approvals", { cookie })).status, 200);
+  const afterAllImports = await app.store.read();
+  const allClaims = afterAllImports.claims.filter((entry) => entry.workspaceId === "wrk_storywell" && entry.source?.kind === "engine-result");
+  assert.deepEqual(allClaims.map((entry) => entry.source.workflowId).sort(), ["workflow.eng-change", "workflow.eng-followup"]);
+  const allArtifacts = afterAllImports.artifacts.filter((entry) => entry.workspaceId === "wrk_storywell" && entry.source?.kind === "engine-artifact");
+  assert.equal(allArtifacts.length, 2);
+  assert.ok(allArtifacts.every((entry) => entry.status === "draft" && entry.stale === false));
+  assert.equal(afterAllImports.artifactVersions.filter((entry) => entry.createdBy === "Launch engine").length, 2);
+
   // The list route reports both executions, newest first, in founder shape.
   const list = await request(app.baseUrl, "/api/workspaces/wrk_storywell/executions", { cookie });
   const listPayload = await list.json();
   assert.equal(listPayload.length, 2);
   assert.equal(listPayload[0].id, followup.id);
   assert.ok(listPayload.every((entry) => entry.title && entry.status && entry.contextFingerprint));
+});
+
+// ---------------------------------------------------------------------------
+// The import half fails closed: a session whose work never verifies imports
+// nothing, and its failed steps surface as founder tasks instead.
+// ---------------------------------------------------------------------------
+
+test("an unverified session imports nothing — failed steps become founder tasks, never claims or deliverables", { timeout: 300_000 }, async (t) => {
+  assert.ok(tsxBin, "the engine's tsx runtime must be installed for this suite");
+  const engineRoot = await mkdtemp(path.join(os.tmpdir(), "formation-engine-noop-"));
+  bootstrapEngineWorkspace(engineRoot, "storywell");
+
+  // No executor override: the engine's default no-op executor runs, which fails every attempt
+  // honestly rather than fabricating progress.
+  const app = await startTestServer({
+    resolveEngineWorkspace: (workspace) => path.join(engineRoot, workspace.slug),
+    wallClockSeconds: 120,
+  });
+  t.after(app.close);
+  const cookie = await login(app.baseUrl);
+
+  const submitted = await request(app.baseUrl, "/api/workspaces/wrk_storywell/executions", { cookie, method: "POST", body: {} });
+  assert.equal(submitted.status, 201);
+  const created = await submitted.json();
+  const done = await waitForExecution(app.store, created.id, (entry) => entry.status === "completed" || entry.status === "failed");
+  assert.equal(done.status, "completed", `the session itself ran to completion: ${JSON.stringify(done, null, 2)}`);
+  assert.equal(done.importedResults.verifiedResults, 0);
+
+  const database = await app.store.read();
+  assert.equal(database.claims.filter((entry) => entry.source?.kind === "engine-result").length, 0, "an unverified node must contribute no claims");
+  assert.equal(database.artifacts.filter((entry) => entry.source?.kind === "engine-artifact").length, 0, "an unverified node must contribute no deliverables");
+
+  const blockerTasks = database.tasks.filter((entry) => entry.workspaceId === "wrk_storywell" && entry.source?.kind === "engine-blocker");
+  assert.equal(blockerTasks.length, 1);
+  assert.equal(blockerTasks[0].status, "next");
+  assert.match(blockerTasks[0].title, /Update the onboarding copy/);
+
+  // The approvals view re-runs the import; the mirror stays exact instead of duplicating.
+  assert.equal((await request(app.baseUrl, "/api/workspaces/wrk_storywell/approvals", { cookie })).status, 200);
+  const resynced = await app.store.read();
+  assert.equal(resynced.tasks.filter((entry) => entry.source?.kind === "engine-blocker").length, 1);
 });

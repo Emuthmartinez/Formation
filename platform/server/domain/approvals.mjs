@@ -1,4 +1,4 @@
-import { createId } from "./shared.mjs";
+import { createId, launchWorkstreamId } from "./shared.mjs";
 
 /**
  * Mirrors the launch engine's founder approvals into Formation's decision system (the
@@ -36,12 +36,6 @@ export function approvalRationale(workflowTitle, category) {
   return phrase
     ? `The launch step "${workflowTitle}" is waiting for your go-ahead. ${phrase}, so it stays parked until you answer — no autonomy setting answers this for you.`
     : `The launch step "${workflowTitle}" is waiting for your go-ahead. It stays parked until you answer — no autonomy setting answers this for you.`;
-}
-
-/** The workstream a launch-engine approval files under: the launch plan when it exists. */
-function approvalWorkstreamId(workspace) {
-  const streams = workspace.workstreams ?? [];
-  return streams.find((entry) => entry.id === "launch")?.id ?? streams[0]?.id ?? "launch";
 }
 
 function isEngineApproval(decision) {
@@ -91,7 +85,7 @@ export function syncEngineApprovals(database, workspace, report, now) {
       const record = {
         id: createId("dec"),
         workspaceId: workspace.id,
-        workstreamId: approvalWorkstreamId(workspace),
+        workstreamId: launchWorkstreamId(workspace),
         title: `Launch approval: ${approval.workflowTitle}`,
         decision: approval.description,
         rationale: approvalRationale(approval.workflowTitle, approval.protectedCategory),

@@ -2,10 +2,11 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { assert, skillRoot, type Harness } from "./_harness.js";
-import { laneKeys } from "../../core/schema/types.js";
+import { laneKeys, type BusinessStateV2 } from "../../core/schema/types.js";
 import { acquireLock, releaseLock } from "../../core/reducer/lock.js";
 import { compilePlan, type CatalogInput } from "../../core/engine/compile.js";
 import { seedRunState, writeRunState } from "../../core/engine/runstate.js";
+import { buildBoundaryArtifacts, buildBoundaryResults } from "../../core/adapters/platform-execution.js";
 import { internalVocabularyBlocklist } from "../../core/session/digest.js";
 import { pathToFileURL } from "node:url";
 import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
@@ -763,5 +764,94 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     assert(afterReport.approvals.length === 1 && afterReport.approvals[0].status === "approved", `expected the recorded decision to be reflected, got: ${JSON.stringify(afterReport.approvals)}`);
     const step = afterReport.workflows.find((entry: { workflowId: string }) => entry.workflowId === "workflow.money-report");
     assert(step.status === "ready", `expected the approved step to leave needs-founder and become ready, got: ${JSON.stringify(step)}`);
+  });
+
+  // --- judgment scenario: verified results cross the boundary, and only verified results --------
+
+  harness.check("session/boundary: a verified result crosses the boundary with evidence, artifact candidates, and declared cost — and only from a durable run", () => {
+    const handle = bootstrapWorkspace(harness, "results-boundary", singleNodeCatalog(), {
+      grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
+    });
+
+    // Before any session: reachable and ready, but no durable run — results and artifact state
+    // must be empty, never invented from the throwaway seeded run.
+    const before = runBoundary(["--workspace", handle.dir]);
+    assert(before.code === 0, `expected exit 0 from the boundary before a run, got ${before.code}: ${before.stderr}`);
+    const beforeReport = JSON.parse(before.stdout);
+    assert(beforeReport.hasDurableRun === false, `expected no durable run before a session, got: ${before.stdout}`);
+    assert(Array.isArray(beforeReport.results) && beforeReport.results.length === 0, `expected no results before a durable run, got: ${JSON.stringify(beforeReport.results)}`);
+    assert(Array.isArray(beforeReport.artifacts) && beforeReport.artifacts.length === 0, `expected no artifact state before a durable run, got: ${JSON.stringify(beforeReport.artifacts)}`);
+
+    const sessionResult = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-results-boundary-1", "--executor", "fixture"]);
+    assert(sessionResult.code === 0, `expected exit 0 for the session, got ${sessionResult.code}: ${sessionResult.output}`);
+
+    const after = runBoundary(["--workspace", handle.dir]);
+    assert(after.code === 0, `expected exit 0 from the boundary after the session, got ${after.code}: ${after.stderr}`);
+    const report = JSON.parse(after.stdout);
+    assert(report.results.length === 1, `expected exactly one verified result, got: ${JSON.stringify(report.results)}`);
+    const result = report.results[0];
+    assert(result.workflowId === "workflow.eng-change" && result.workflowTitle === "Update the onboarding copy", `result must carry its stable workflow identity: ${JSON.stringify(result)}`);
+    assert(result.attemptId.length > 0 && result.attemptNumber === 1, `result must carry its attempt identity: ${JSON.stringify(result)}`);
+    assert(result.verification === "none", `an ungated engineering node verifies as kind none, got: ${JSON.stringify(result)}`);
+    assert(Array.isArray(result.evidence) && result.evidence.length > 0, `result must carry the attempt's evidence: ${JSON.stringify(result)}`);
+    assert(result.artifacts.length === 1 && result.artifacts[0].artifactId === "artifact.eng-change" && result.artifacts[0].fingerprint.length > 0, `result must reference its accepted output: ${JSON.stringify(result)}`);
+    assert(typeof result.declaredTokenBudget === "number" && result.declaredTokenBudget > 0, `result must carry the node's declared token budget: ${JSON.stringify(result)}`);
+    const artifactState = report.artifacts.find((entry: { artifactId: string }) => entry.artifactId === "artifact.eng-change");
+    assert(artifactState.accepted === true && artifactState.workflowId === "workflow.eng-change", `artifact state must report acceptance and its producer: ${JSON.stringify(artifactState)}`);
+  });
+
+  harness.check("session/boundary: a node still pending verification exports no result — finished is not verified", () => {
+    // domain.research is a judgment domain: no gates, so verification is fresh_context and the
+    // fixture executor's completion lands blocked pending acceptance, never settled.
+    const researchCatalog: CatalogInput = {
+      version: "catalog.session-fixture.unverified-research",
+      artifacts: [{ id: "artifact.research-scan", path: "research/scan.md" }],
+      workflows: [
+        { id: "workflow.research-scan", title: "Research what people need", domainId: "domain.research", actionClass: "draft", dependencies: [], outputPaths: ["research/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
+      ],
+    };
+    const handle = bootstrapWorkspace(harness, "unverified-results", researchCatalog, {
+      grants: { "domain.research": grant("domain.research", "run-with-guardrails") },
+    });
+    const sessionResult = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-unverified-1", "--executor", "fixture"]);
+    assert(sessionResult.code === 0, `expected exit 0 for the session, got ${sessionResult.code}: ${sessionResult.output}`);
+
+    const boundary = runBoundary(["--workspace", handle.dir]);
+    assert(boundary.code === 0, `expected exit 0 from the boundary, got ${boundary.code}: ${boundary.stderr}`);
+    const report = JSON.parse(boundary.stdout);
+    assert(report.hasDurableRun === true, `expected a durable run, got: ${boundary.stdout}`);
+    assert(report.results.length === 0, `an unverified node must contribute nothing — not provisionally: ${JSON.stringify(report.results)}`);
+    const artifactState = report.artifacts.find((entry: { artifactId: string }) => entry.artifactId === "artifact.research-scan");
+    assert(artifactState.accepted === false, `the unverified output must report accepted: false, got: ${JSON.stringify(artifactState)}`);
+    const step = report.workflows.find((entry: { workflowId: string }) => entry.workflowId === "workflow.research-scan");
+    assert(step.status !== "finished", `a node pending verification must never report finished, got: ${JSON.stringify(step)}`);
+  });
+
+  harness.check("session/boundary: a lane-seeded succeeded node exports no result — a seed fingerprint is not importable work", () => {
+    const seededCatalog: CatalogInput = {
+      version: "catalog.session-fixture.seeded-results",
+      artifacts: [{ id: "artifact.eng-change", path: "engineering/change.log" }],
+      workflows: [
+        { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: ["engineering"], founderOnlyActions: [], gateCommands: [], idempotent: true },
+      ],
+    };
+    const plan = compilePlan(seededCatalog, "2026-08-05T00:00:00.000Z");
+    const lanes = minimalLanes() as Record<string, { status: string; evidence: string[]; blockers: string[] }>;
+    lanes.engineering = { status: "succeeded", evidence: [], blockers: [] };
+    const businessState = {
+      schemaVersion: "2.0.0",
+      updatedAt: "2026-08-05T00:00:00.000Z",
+      narrative: { sinceLastTime: "", rightNow: "", yourCall: "", lastCelebratedPhase: "" },
+      project: { name: "Fixture App", slug: "seeded-results", owner: "Founder", phase: "phase_0_orient", launchScope: "essentials", kickoffDate: "", platforms: ["ios"], bundleIds: { ios: "com.example.app", android: "" }, publicUrls: { landing: "", privacy: "", terms: "" } },
+      lanes,
+      founderGates: { pending: [] },
+    } as unknown as BusinessStateV2;
+    const run = seedRunState(plan, businessState, { ownerSessionId: "seeded-results-check", ttlSeconds: 300, wallClockCapSeconds: 0, now: "2026-08-05T00:00:00.000Z" });
+    assert(run.nodes["run.eng-change"]!.status === "succeeded", "the lane-done node must seed succeeded");
+
+    const results = buildBoundaryResults(plan, run);
+    assert(results.length === 0, `a seeded-succeeded node has no attempt, no evidence, and no real output — it must export nothing: ${JSON.stringify(results)}`);
+    const artifacts = buildBoundaryArtifacts(plan, run);
+    assert(artifacts.length === 1 && artifacts[0]!.accepted === true, `the seeded binding itself is still reported as accepted state: ${JSON.stringify(artifacts)}`);
   });
 }

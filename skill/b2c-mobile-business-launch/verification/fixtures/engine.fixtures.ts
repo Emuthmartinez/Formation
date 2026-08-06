@@ -543,6 +543,43 @@ export function register(harness: Harness): void {
     assert(!run.artifactBindings.find((b) => b.artifactId === "artifact.product-spec")!.accepted, "product-spec's output binding should be un-accepted");
   });
 
+  harness.check("runstate: reconciling a changed accepted output invalidates descendants automatically — the staleness trigger is wired, not merely available", () => {
+    const plan = compilePlan(testCatalog(), now);
+    const { run } = seedFor([], plan);
+    const first = beginAttempt(plan, run, nodeId("research-scan"), "session-x", now);
+    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: first.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v1", evidence: ["scan v1"] }] }, now);
+    acceptVerification(plan, run, nodeId("research-scan"), ["fresh-context reviewer signed off"], now);
+    const spec = beginAttempt(plan, run, nodeId("product-spec"), "session-x", plusSeconds(now, 1));
+    reconcilePatch(plan, run, { nodeId: nodeId("product-spec"), attemptId: spec.id, outputs: [{ artifactId: "artifact.product-spec", path: "product/spec.md", fingerprint: "spec-v1", evidence: [] }] }, plusSeconds(now, 1));
+    acceptVerification(plan, run, nodeId("product-spec"), ["gate:check:research=passed"], plusSeconds(now, 1));
+
+    const second = beginAttempt(plan, run, nodeId("research-scan"), "session-y", plusSeconds(now, 2));
+    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: second.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v2", evidence: ["scan v2"] }] }, plusSeconds(now, 2));
+
+    assert(getStatus(run, nodeId("product-spec")) === "stale", "product-spec must go stale when its accepted input's fingerprint changes");
+    assert(!run.artifactBindings.find((b) => b.artifactId === "artifact.product-spec")!.accepted, "product-spec's output binding must be un-accepted");
+    assert(getStatus(run, nodeId("engineering-build")) === "stale", "transitive descendant engineering-build must go stale too");
+    assert(getStatus(run, nodeId("growth-post")) === "pending", "unrelated growth-post must be untouched — invalidation must never over-mark");
+    assert(getStatus(run, nodeId("research-scan")) === "blocked", "the producer itself is pending its own re-verification, never stale");
+  });
+
+  harness.check("runstate: re-producing an identical output invalidates nothing — staleness stays honest in both directions", () => {
+    const plan = compilePlan(testCatalog(), now);
+    const { run } = seedFor([], plan);
+    const first = beginAttempt(plan, run, nodeId("research-scan"), "session-x", now);
+    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: first.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v1", evidence: [] }] }, now);
+    acceptVerification(plan, run, nodeId("research-scan"), ["fresh-context reviewer signed off"], now);
+    const spec = beginAttempt(plan, run, nodeId("product-spec"), "session-x", plusSeconds(now, 1));
+    reconcilePatch(plan, run, { nodeId: nodeId("product-spec"), attemptId: spec.id, outputs: [{ artifactId: "artifact.product-spec", path: "product/spec.md", fingerprint: "spec-v1", evidence: [] }] }, plusSeconds(now, 1));
+    acceptVerification(plan, run, nodeId("product-spec"), ["gate:check:research=passed"], plusSeconds(now, 1));
+
+    const second = beginAttempt(plan, run, nodeId("research-scan"), "session-y", plusSeconds(now, 2));
+    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: second.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v1", evidence: [] }] }, plusSeconds(now, 2));
+
+    assert(getStatus(run, nodeId("product-spec")) === "succeeded", "an identical re-production must not stale downstream work");
+    assert(run.artifactBindings.find((b) => b.artifactId === "artifact.product-spec")!.accepted === true, "product-spec's accepted output must stay accepted");
+  });
+
   // ---------------------------------------------------------------------
   // runstate.ts: wall-clock deadline
   // ---------------------------------------------------------------------
