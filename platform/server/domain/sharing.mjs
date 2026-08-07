@@ -61,11 +61,13 @@ export function listShares(database, workspaceId, now = new Date().toISOString()
 export function createShare(database, { workspaceId, scope, artifactId, createdBy, now = new Date().toISOString() }) {
   if (!SHARE_SCOPES.has(scope)) throw new ShareError(400, "A link can share one deliverable or the company overview.");
 
-  let label = "Company overview";
+  let label = "this company's overview";
+  let evidenceAtCreation = [];
   if (scope === "deliverable") {
     const artifact = database.artifacts.find((entry) => entry.id === artifactId && entry.workspaceId === workspaceId);
     if (!artifact) throw new ShareError(404, "Deliverable not found.");
     label = artifact.title;
+    evidenceAtCreation = [...(artifact.sourceClaimIds ?? [])];
   } else if (artifactId) {
     throw new ShareError(400, "A company overview link is not about one deliverable.");
   }
@@ -82,6 +84,12 @@ export function createShare(database, { workspaceId, scope, artifactId, createdB
     scope,
     artifactId: scope === "deliverable" ? artifactId : null,
     label,
+    // The evidence attached the moment the link was made, recorded rather than read live. The
+    // engine appends to an artifact's sourceClaimIds when it re-imports a verified result, with no
+    // founder action — reading that list at request time meant an ordinary background import could
+    // put new words in front of someone who already had the page open. The founder's own words
+    // still travel live; what an automated process can add does not.
+    evidenceClaimIds: scope === "deliverable" ? [...(evidenceAtCreation ?? [])] : [],
     tokenHash: hashShareToken(token),
     createdByUserId: createdBy.id,
     createdByName: createdBy.name,
@@ -192,9 +200,10 @@ export function sharedView(database, share) {
   const artifact = database.artifacts.find((entry) => entry.id === share.artifactId && entry.workspaceId === share.workspaceId);
   if (!artifact) return null;
 
-  // Only the evidence the founder attached to this deliverable travels with it, and only its
-  // words — not its confidence, status, or engine provenance.
-  const attached = new Set(artifact.sourceClaimIds ?? []);
+  // Only the evidence that was attached when the link was made, and only its words — not its
+  // confidence, status, or engine provenance. Links created before this was recorded fall back to
+  // the deliverable's current list, which is what they were already showing.
+  const attached = new Set(share.evidenceClaimIds ?? artifact.sourceClaimIds ?? []);
   const evidence = database.claims
     .filter((claim) => claim.workspaceId === share.workspaceId && attached.has(claim.id))
     .map((claim) => ({ kind: claim.kind, statement: claim.statement }));
@@ -216,10 +225,30 @@ export function sharedView(database, share) {
   };
 }
 
-/** A view is a fact about the link, and the founder can see it. */
-export function recordShareView(database, shareId, now = new Date().toISOString()) {
+/**
+ * A view is a fact about the link, and the founder can see it — but writing it down costs a full
+ * store rewrite, and a link handed to a mailing list would turn every read into one. Views are
+ * counted in memory and written at most once a minute per link, so the count stays honest and the
+ * writes stay bounded by time rather than by how many people opened the page.
+ */
+const pendingViews = new Map();
+const VIEW_FLUSH_MS = 60 * 1_000;
+
+/** Returns the number of views to write, or 0 when it is not yet time. */
+export function noteShareView(shareId, at = Date.now()) {
+  const pending = pendingViews.get(shareId) ?? { count: 0, flushedAt: 0 };
+  pending.count += 1;
+  if (at - pending.flushedAt < VIEW_FLUSH_MS) {
+    pendingViews.set(shareId, pending);
+    return 0;
+  }
+  pendingViews.set(shareId, { count: 0, flushedAt: at });
+  return pending.count;
+}
+
+export function recordShareView(database, shareId, views, now = new Date().toISOString()) {
   const share = database.shares.find((entry) => entry.id === shareId);
-  if (!share) return;
-  share.viewCount = (share.viewCount ?? 0) + 1;
+  if (!share || views <= 0) return;
+  share.viewCount = (share.viewCount ?? 0) + views;
   share.lastViewedAt = now;
 }

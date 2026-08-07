@@ -163,3 +163,4 @@
 .shared-evidence ul { margin: 0; padding-left: 18px; display: grid; gap: 9px; }
 .shared-evidence li { font-size: 14px; line-height: 1.6; }
 .shared-evidence .claim-kind { margin-right: 9px; }
+.share-list--flush { padding: 0; border-bottom: 0; }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "../api";
-import { Button, ConfidenceMark, EmptyState, Field, MarkdownBody, PageHeader, StatusText, formatDate, humanize } from "../components/Primitives";
+import { Button, ConfidenceMark, EmptyState, Field, MarkdownBody, PageHeader, ShareLinkNotice, StatusText, formatDate, humanize } from "../components/Primitives";
 import { useCan } from "../capabilities";
 import { useWorkspace } from "../context";
 import { navigate } from "../router";
@@ -103,6 +103,9 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
       notify("The link stopped working.");
     } catch (error) {
       notify(error instanceof Error ? error.message : String(error), "error");
+      // It may already have been stopped somewhere else. Whatever happened, the list on this page
+      // must stop claiming the link is live.
+      await loadShares();
     } finally {
       setSharing(false);
     }
@@ -198,7 +201,7 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
       </header>
 
       {createdShare ? <ShareLinkNotice created={createdShare} onDismiss={() => setCreatedShare(null)} /> : null}
-      {shares.length && can("share-manage") ? (
+      {shares.length ? (
         <div className="share-list">
           <p className="eyebrow">Live links to this deliverable</p>
           {shares.map((entry) => (
@@ -210,7 +213,9 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
                   {entry.lastViewedAt ? `, last on ${formatDate(entry.lastViewedAt)}` : ""} · stops {formatDate(entry.expiresAt)}
                 </p>
               </div>
-              <Button variant="quiet" disabled={sharing} onClick={() => void stopShare(entry.id)}>Stop this link</Button>
+              {can("share-manage") ? (
+                <Button variant="quiet" disabled={sharing} onClick={() => void stopShare(entry.id)}>Stop this link</Button>
+              ) : null}
             </div>
           ))}
         </div>
@@ -308,44 +313,4 @@ function downloadMarkdown(companyName: string, artifact: Artifact) {
   anchor.click();
   anchor.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
-/**
- * A share link, shown exactly once. Same shape as the invitation notice on the People page, and
- * the same honesty: a link that cannot be shown again must never be believed copied when it was not.
- */
-function ShareLinkNotice({ created, onDismiss }: { created: CreatedShare; onDismiss: () => void }) {
-  const link = `${window.location.origin}${created.viewPath}`;
-  const [copied, setCopied] = useState<boolean | "unavailable">(false);
-
-  const copy = async () => {
-    if (!navigator.clipboard) {
-      setCopied("unavailable");
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-    } catch {
-      setCopied("unavailable");
-    }
-  };
-
-  return (
-    <div className="invitation-link">
-      <p className="eyebrow">Anyone with this link can read this deliverable</p>
-      <p>{created.delivery}</p>
-      <code>{link}</code>
-      <div className="button-row">
-        <Button type="button" onClick={() => void copy()}>{copied === true ? "Copied" : "Copy link"}</Button>
-        <Button type="button" variant="secondary" onClick={onDismiss}>Done</Button>
-      </div>
-      {copied === "unavailable" ? (
-        <p className="muted-copy">This browser would not let Formation copy for you. Select the link above and copy it yourself.</p>
-      ) : null}
-      <p className="muted-copy">
-        This link is shown once. If you lose it, stop it and share again.
-      </p>
-    </div>
-  );
 }

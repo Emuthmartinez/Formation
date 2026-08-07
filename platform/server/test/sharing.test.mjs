@@ -265,3 +265,85 @@ test("guessing shared links is limited, and a real one is not a guess", async (t
     assert.equal((await call(app.baseUrl, `/api/shared/${token}`)).status, 200, `read ${attempt} was refused`);
   }
 });
+
+test("a link shows the evidence that was attached when it was made, not what arrives later", async (t) => {
+  const app = await startTestServer();
+  t.after(app.close);
+  const owner = await signIn(app.baseUrl);
+
+  const reviewed = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell/claims", {
+    cookie: owner,
+    method: "POST",
+    body: { workstreamId: "customer", kind: "fact", statement: "Evidence the founder reviewed before sharing." },
+  })).json();
+  await call(app.baseUrl, "/api/workspaces/wrk_storywell/artifacts/art_customer_brief", {
+    cookie: owner, method: "PATCH", body: { sourceClaimIds: [reviewed.id] },
+  });
+
+  const { token } = await share(app.baseUrl, owner, { scope: "deliverable", artifactId: "art_customer_brief" });
+  const before = await (await call(app.baseUrl, `/api/shared/${token}`)).json();
+  assert.equal(before.deliverable.evidence.length, 1);
+
+  // What a background engine import does: append a claim to the deliverable with no founder action.
+  await app.store.transaction((database) => {
+    const now = new Date().toISOString();
+    database.claims.push({
+      id: "clm_imported_later",
+      workspaceId: "wrk_storywell",
+      workstreamId: "customer",
+      kind: "recommendation",
+      key: null,
+      statement: "Arrived from the engine after the link was already out.",
+      value: null,
+      confidence: 60,
+      status: "active",
+      evidence: [],
+      createdAt: now,
+      updatedAt: now,
+    });
+    const artifact = database.artifacts.find((entry) => entry.id === "art_customer_brief");
+    artifact.sourceClaimIds = [...artifact.sourceClaimIds, "clm_imported_later"];
+  });
+
+  const after = await (await call(app.baseUrl, `/api/shared/${token}`)).text();
+  assert.ok(
+    !after.includes("Arrived from the engine after the link was already out."),
+    "an automated import put new words in front of someone who already had the link",
+  );
+  assert.equal(JSON.parse(after).deliverable.evidence.length, 1);
+
+  // A founder who wants the new evidence shown shares again, deliberately.
+  const { token: freshToken } = await share(app.baseUrl, owner, { scope: "deliverable", artifactId: "art_customer_brief" });
+  const fresh = await (await call(app.baseUrl, `/api/shared/${freshToken}`)).json();
+  assert.equal(fresh.deliverable.evidence.length, 2);
+});
+
+test("reading a link many times does not rewrite the store many times", async (t) => {
+  const app = await startTestServer();
+  t.after(app.close);
+  const owner = await signIn(app.baseUrl);
+  const { token } = await share(app.baseUrl, owner, { scope: "company" });
+
+  // A link on a mailing list. Every read must be answered; the writes must stay bounded by time.
+  const reads = await Promise.all(Array.from({ length: 50 }, () => call(app.baseUrl, `/api/shared/${token}`)));
+  assert.ok(reads.every((response) => response.status === 200), "a read was refused");
+
+  // The first read flushes, the rest accumulate in memory until the window moves.
+  const shares = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell/shares", { cookie: owner })).json();
+  assert.ok(shares.shares[0].viewCount <= 2, `${shares.shares[0].viewCount} writes for 50 reads`);
+  assert.ok(shares.shares[0].viewCount >= 1, "no read was ever recorded");
+});
+
+test("a malformed link is answered like any other bad one, not as a server error", async (t) => {
+  const app = await startTestServer();
+  t.after(app.close);
+  const owner = await signIn(app.baseUrl);
+  await share(app.baseUrl, owner, { scope: "company" });
+
+  const answers = await Promise.all(
+    ["%", "%zz", "%E0%A4%A", "a-token-that-never-existed"].map((token) => fetch(`${app.baseUrl}/api/shared/${token}`)),
+  );
+  const bodies = await Promise.all(answers.map((response) => response.json()));
+  assert.deepEqual(answers.map((response) => response.status), [404, 404, 404, 404]);
+  assert.equal(new Set(bodies.map((body) => body.error)).size, 1, "a malformed token is a distinguishable answer");
+});

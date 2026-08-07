@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
+import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
 import { Icon } from "./Icon";
+import type { CreatedShare } from "../types";
 
 export function Button({
   children,
@@ -514,4 +515,44 @@ export function MarkdownBody({ body }: { body: string }) {
   return <>{blocks.map((block, index) => block.startsWith("- ") ? (
     <ul key={index}>{block.split("\n").map((line, lineIndex) => <li key={`${index}-${lineIndex}`}>{line.replace(/^\-\s*/, "")}</li>)}</ul>
   ) : <p key={index}>{block}</p>)}</>;
+}
+
+/**
+ * A share link, shown exactly once. Same shape as the invitation notice on the People page, and
+ * the same honesty: a link that cannot be shown again must never be believed copied when it was not.
+ */
+export function ShareLinkNotice({ created, onDismiss }: { created: CreatedShare; onDismiss: () => void }) {
+  const link = `${window.location.origin}${created.viewPath}`;
+  const [copied, setCopied] = useState<boolean | "unavailable">(false);
+
+  const copy = async () => {
+    if (!navigator.clipboard) {
+      setCopied("unavailable");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+    } catch {
+      setCopied("unavailable");
+    }
+  };
+
+  return (
+    <div className="invitation-link">
+      <p className="eyebrow">Anyone with this link can read {created.share.label}</p>
+      <p>{created.delivery}</p>
+      <code>{link}</code>
+      <div className="button-row">
+        <Button type="button" onClick={() => void copy()}>{copied === true ? "Copied" : "Copy link"}</Button>
+        <Button type="button" variant="secondary" onClick={onDismiss}>Done</Button>
+      </div>
+      {copied === "unavailable" ? (
+        <p className="muted-copy">This browser would not let Formation copy for you. Select the link above and copy it yourself.</p>
+      ) : null}
+      <p className="muted-copy">
+        This link is shown once. If you lose it, stop it and share again.
+      </p>
+    </div>
+  );
 }

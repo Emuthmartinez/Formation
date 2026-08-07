@@ -27,6 +27,13 @@ export function createFormationServer({
       maximumFailures: 20,
       message: "Too many invitation links have been tried from this device. Wait a few minutes and try again.",
     }),
+    // Every read of a shared link pays this one, hit or miss: answering the route reads the whole
+    // store, and nothing about the caller is known. The ceiling is far above what reading a
+    // document looks like, and far below what a flood looks like.
+    sharedRead: new AuthRateLimiter({
+      maximumFailures: 300,
+      message: "Formation is receiving too many requests from this device. Wait a few minutes and try again.",
+    }),
   };
   const staticRoot = distDir ? path.resolve(distDir) : null;
   const server = http.createServer(async (request, response) => {

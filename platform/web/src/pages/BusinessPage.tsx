@@ -1,11 +1,11 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
-import { Button, ConfidenceMark, ContradictionStatements, Field, Modal, PageHeader, Section, formatCount, humanize } from "../components/Primitives";
+import { Button, ConfidenceMark, ContradictionStatements, Field, Modal, PageHeader, Section, ShareLinkNotice, formatCount, formatDate, humanize } from "../components/Primitives";
 import { Icon } from "../components/Icon";
 import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
-import type { Claim, Workspace } from "../types";
+import type { Claim, CreatedShare, ShareLink, Workspace } from "../types";
 
 const companyFieldLabels: Array<[keyof Workspace["company"], string, string]> = [
   ["thesis", "Business thesis", "The strategic case for why this company should exist and win."],
@@ -50,7 +50,49 @@ export function BusinessPage() {
   });
   const [saving, setSaving] = useState(false);
   const [claimModal, setClaimModal] = useState(false);
+  const [shares, setShares] = useState<ShareLink[]>([]);
+  const [createdShare, setCreatedShare] = useState<CreatedShare | null>(null);
+  const [sharing, setSharing] = useState(false);
   const primaryContradiction = snapshot.contradictions[0];
+
+  const loadShares = useCallback(async () => {
+    try {
+      const all = await api.shares(snapshot.workspace.id);
+      setShares(all.shares.filter((entry) => entry.scope === "company"));
+    } catch {
+      // The company still reads perfectly well when the link list is unavailable.
+    }
+  }, [snapshot.workspace.id]);
+
+  useEffect(() => {
+    void loadShares();
+  }, [loadShares]);
+
+  const shareOverview = async () => {
+    setSharing(true);
+    try {
+      setCreatedShare(await api.createShare(snapshot.workspace.id, { scope: "company" }));
+      await loadShares();
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error), "error");
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const stopShare = async (shareId: string) => {
+    setSharing(true);
+    try {
+      await api.stopShare(snapshot.workspace.id, shareId);
+      setCreatedShare(null);
+      notify("The link stopped working.");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error), "error");
+    } finally {
+      await loadShares();
+      setSharing(false);
+    }
+  };
 
   const claimsByKind = useMemo(() => {
     return ["fact", "assumption", "recommendation", "question"].map((kind) => ({
@@ -104,8 +146,39 @@ export function BusinessPage() {
             }}>Cancel</Button>
             <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save source of truth"}</Button>
           </div>
-        ) : can("company-write") ? <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit business</Button> : undefined}
+        ) : (
+          <div className="button-row">
+            {can("share-manage") ? (
+              <Button variant="quiet" disabled={sharing} onClick={() => void shareOverview()}>
+                {shares.length ? "Share again" : "Share overview"}
+              </Button>
+            ) : null}
+            {can("company-write") ? <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit business</Button> : null}
+          </div>
+        )}
       />
+
+      {createdShare ? <ShareLinkNotice created={createdShare} onDismiss={() => setCreatedShare(null)} /> : null}
+      {shares.length ? (
+        <Section title="Shared outside the company" description="Anyone holding one of these links can read the company overview — no account, no sign-in.">
+          <div className="share-list share-list--flush">
+            {shares.map((entry) => (
+              <div key={entry.id} className="share-row">
+                <div>
+                  <strong>Shared by {entry.createdBy}</strong>
+                  <p>
+                    Read {entry.viewCount === 1 ? "once" : `${entry.viewCount} times`}
+                    {entry.lastViewedAt ? `, last on ${formatDate(entry.lastViewedAt)}` : ""} · stops {formatDate(entry.expiresAt)}
+                  </p>
+                </div>
+                {can("share-manage") ? (
+                  <Button variant="quiet" disabled={sharing} onClick={() => void stopShare(entry.id)}>Stop this link</Button>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </Section>
+      ) : null}
 
       <Section className="business-overview" title="What this company is building" description="The stable context that keeps the platform from generating a new company every time you ask a question.">
         {editing ? (

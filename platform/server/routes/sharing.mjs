@@ -3,6 +3,7 @@ import {
   findLiveShare,
   founderShare,
   listShares,
+  noteShareView,
   recordShareView,
   revokeShare,
   sharedView,
@@ -85,12 +86,22 @@ export async function handleSharedRead({ request, response, method, pathname, st
   if (!match) return;
   if (method !== "GET") throw new HttpError(405, "Method not allowed.");
 
-  // The token is 32 random bytes, so this bucket is flood control rather than the thing standing
-  // between a stranger and the work. That makes the ordering matter more than the ceiling: the
-  // token is looked up first, and only a miss spends an attempt. A correct link is never refused
-  // because somebody else on the same connection guessed wrong ones.
+  // Two bounds, doing different jobs. A generous one every request pays, because answering this
+  // route reads the whole store and an unauthenticated caller must not be able to make the server
+  // do that without limit. And the guessing bucket, which only a miss spends — the token is 32
+  // random bytes, so guessing is not the threat, and a correct link must never be refused because
+  // somebody else on the same connection guessed wrong ones.
   const key = clientAddressKey(request);
-  const token = decodeURIComponent(match[1]);
+  authLimiters.sharedRead.claim(key);
+
+  let token;
+  try {
+    token = decodeURIComponent(match[1]);
+  } catch {
+    // Malformed percent-encoding is not a fourth kind of answer.
+    authLimiters.invitation.claim(key);
+    throw new HttpError(404, "This link is not available. It may have been stopped, or it may have expired.");
+  }
   const database = await store.read();
   const share = findLiveShare(database, token);
   const view = share ? sharedView(database, share) : null;
@@ -106,6 +117,8 @@ export async function handleSharedRead({ request, response, method, pathname, st
   json(response, 200, view);
 
   // Counted after the answer: a founder should see that their link was read, and a failure to
-  // record it must never cost the reader their page.
-  await store.transaction((live) => recordShareView(live, share.id)).catch(() => undefined);
+  // record it must never cost the reader their page. Batched, so a link on a mailing list does not
+  // turn every read into a store rewrite.
+  const views = noteShareView(share.id);
+  if (views > 0) await store.transaction((live) => recordShareView(live, share.id, views)).catch(() => undefined);
 }
