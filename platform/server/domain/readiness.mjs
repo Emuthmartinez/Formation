@@ -1,4 +1,5 @@
 import { capabilitiesForRole, hasCapability, resolveAccess } from "./capabilities.mjs";
+import { commentThreads } from "./comments.mjs";
 import { detectInconsistencies } from "./consistency.mjs";
 import { summariseVersionHistory } from "./versions.mjs";
 import { clampNumber, humanizeKey, priorityRank, slug, stableValue, unique } from "./shared.mjs";
@@ -320,6 +321,9 @@ export function buildWorkspaceSnapshot(database, workspaceId, userId) {
     tasks,
     jobs,
     activity,
+    // Conversation about the record, kept beside it and never counted as part of it: nothing
+    // downstream — readiness, contradictions, a provider request, a shared link — reads these.
+    comments: commentThreads(database, workspaceId),
     contradictions: detectContradictions(claims),
     // Disagreements that have nothing to do with two claims sharing a key — see domain/consistency.mjs.
     inconsistencies: detectInconsistencies({ workspace, claims, decisions, tasks, artifacts }),

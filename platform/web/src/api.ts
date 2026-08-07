@@ -1,5 +1,7 @@
 import type {
   AccountSession,
+  Comment,
+  CommentTarget,
   CreatedShare,
   ApprovalsView,
   Artifact,
@@ -110,6 +112,12 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(patch),
     }),
+  comment: (workspaceId: string, payload: { target: CommentTarget; body: string; parentId?: string }) =>
+    request<Comment>(`/api/workspaces/${workspaceId}/comments`, { method: "POST", body: JSON.stringify(payload) }),
+  updateComment: (workspaceId: string, commentId: string, patch: { body?: string; resolved?: boolean }) =>
+    request<Comment>(`/api/workspaces/${workspaceId}/comments/${commentId}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  deleteComment: (workspaceId: string, commentId: string) =>
+    request<{ removed: boolean }>(`/api/workspaces/${workspaceId}/comments/${commentId}`, { method: "DELETE" }),
   listApprovals: (workspaceId: string) => request<ApprovalsView>(`/api/workspaces/${workspaceId}/approvals`),
   listExecutions: (workspaceId: string) => request<FounderExecution[]>(`/api/workspaces/${workspaceId}/executions`),
   importSources: (workspaceId: string) => request<ImportSourceList>(`/api/workspaces/${workspaceId}/import-sources`),

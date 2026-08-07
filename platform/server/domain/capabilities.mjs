@@ -62,6 +62,11 @@ export const CAPABILITIES = {
     covers: "Recording and revising claims — facts, assumptions, recommendations, and open questions — and the evidence behind them.",
     denial: "You can read this company's evidence but not change it. Ask an owner to make you a reviewer.",
   },
+  "comment-write": {
+    minimumRole: "reviewer",
+    covers: "Talking about the work: starting a conversation on a claim, a decision, a deliverable, or a workstream, replying to one, and settling it.",
+    denial: "You can read this company's conversations but not add to them. Ask an owner to make you a reviewer.",
+  },
   "work-write": {
     minimumRole: "editor",
     covers: "The working record: workstream context and next actions, tasks, and deliverable edits.",

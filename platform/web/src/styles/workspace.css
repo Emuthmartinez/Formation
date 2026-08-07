@@ -288,6 +288,26 @@
 .version-changes li { display: grid; grid-template-columns: 104px minmax(0,1fr); gap: 10px; align-items: baseline; font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
 .version-changes__label { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
 
+/* Conversation about a record. Quiet by construction: a comment is not part of the record, so it
+   must never compete with the document it sits beside. */
+.conversation { margin-top: 14px; }
+.conversation__toggle { background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: 12px; font-weight: 700; color: var(--muted); }
+.conversation__toggle:hover { color: var(--ink); }
+.conversation__count { background: var(--forest-soft); color: var(--forest); border-radius: 20px; padding: 1px 8px; font-size: 11px; }
+.conversation__count--settled { background: var(--paper-deep); color: var(--muted); }
+.conversation__body { margin-top: 14px; display: grid; gap: 16px; border-left: 2px solid var(--line); padding-left: 15px; }
+.conversation-thread { display: grid; gap: 9px; }
+.conversation-thread--settled { opacity: .72; }
+.conversation-comment { display: grid; gap: 3px; }
+.conversation-comment__meta { margin: 0; display: flex; gap: 9px; align-items: baseline; font-size: 11px; color: var(--muted); }
+.conversation-comment__meta strong { color: var(--ink); font-size: 12.5px; }
+.conversation-comment__body { margin: 0; font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; max-width: 74ch; white-space: pre-wrap; }
+.conversation-thread__actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.conversation-thread__settled { font-size: 11.5px; color: var(--muted); }
+.conversation__compose { display: grid; gap: 8px; justify-items: start; }
+.conversation__compose textarea { width: 100%; max-width: 640px; font: inherit; font-size: 13.5px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); resize: vertical; }
+.conversation__note { margin: 0; font-size: 11.5px; color: var(--muted); max-width: 68ch; line-height: 1.55; }
+
 /* People and access
    ---------------------------------------------------------------------------------------------
    A decisive row per person, in the same idiom as the ledger and task rows: identity on the left,

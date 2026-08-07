@@ -179,17 +179,21 @@ Formation is designed for a founder to share work with a cofounder, advisor, inv
 
 Add:
 
-- comments on claims, decisions, and deliverable sections
-- mentions
+- comments on claims, decisions, and deliverable sections — **shipped** (`platform/server/domain/comments.mjs`), plus workstreams
+- mentions — **shipped**, resolved against this company's members only. In-product: a mention is found here rather than sent, because there is still no mail transport, and the surface says so.
 - review requests
 - assigned approvers
 - change summaries between artifact versions — **shipped** (`platform/server/domain/versions.mjs`): computed from the immutable versions rather than stored, so the summary cannot drift from the record it describes. Sections are matched by id, then title, then position — and position is refused when both sides carry ids that differ, because an edit that reads as one section removed and another added is the most misleading thing this summary could say.
 - optimistic concurrency and conflict resolution
 - presence where useful
 - decision and review notifications
-- resolved-comment history
+- resolved-comment history — **shipped**: resolving settles a thread and keeps it readable, with who settled it and when. Deleting the opening comment of a live conversation withdraws the words and keeps the thread, rather than orphaning every reply.
 
 Comments must not become a second source of truth. Accepted changes should update the underlying record.
+
+This is enforced rather than intended. Comments do not move readiness, are not weighed as evidence, are not sent to a provider, and never reach a shared link — `platform/server/test/comments.test.mjs` asserts the last two directly. Neither surface reads a comment today; the tests exist because both are built by naming fields, and the day somebody adds a convenient spread is the day a private argument between cofounders lands in a model's context or an investor's browser.
+
+Still open here: review requests, assigned approvers, optimistic concurrency, presence, and notifications. Notifications need the same mail transport the identity lifecycle is waiting on.
 
 ## P1: Rich exports and external sharing
 
