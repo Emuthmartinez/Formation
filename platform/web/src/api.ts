@@ -1,4 +1,5 @@
 import type {
+  AccountSession,
   ApprovalsView,
   Artifact,
   Claim,
@@ -135,6 +136,15 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   job: (workspaceId: string, jobId: string) => request<Job>(`/api/workspaces/${workspaceId}/jobs/${jobId}`),
+  sessions: () => request<{ sessions: AccountSession[] }>("/api/account/sessions"),
+  revokeSession: (sessionId: string) =>
+    request<{ revoked: number; endedCurrentSession: boolean }>(`/api/account/sessions/${sessionId}`, { method: "DELETE" }),
+  revokeOtherSessions: () => request<{ revoked: number }>("/api/account/sessions", { method: "DELETE" }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<{ changed: boolean; signedOutElsewhere: number }>("/api/account/password", {
+      method: "POST",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    }),
   people: (workspaceId: string) => request<PeopleView>(`/api/workspaces/${workspaceId}/members`),
   invite: (workspaceId: string, email: string, role: WorkspaceRole) =>
     request<CreatedInvitation>(`/api/workspaces/${workspaceId}/invitations`, {

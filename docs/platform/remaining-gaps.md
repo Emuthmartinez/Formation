@@ -48,7 +48,7 @@ Add:
 - workspace invitations — **shipped** (`platform/server/domain/members.mjs`: email-bound, single-use, hashed like a session token, and shown to the inviter exactly once)
 - owner, editor, reviewer, and viewer roles — **shipped** (`platform/server/domain/capabilities.mjs`: an ordinal ladder with one minimum role per capability, denying by default for any role the ladder does not recognise)
 - invitation expiry and revocation — **shipped** (14 days, revocable, and a cancelled, expired, spent, or never-existed link are one indistinguishable answer)
-- session and device management
+- session and device management — **shipped** (`platform/server/routes/account.mjs`: signing in on one device no longer signs you out of the others, each session is labelled with a coarse device description rather than the raw user-agent, and any device can be signed out from any other)
 - membership removal and ownership transfer — **shipped** (a company always keeps at least one owner: the last owner must promote a successor before stepping down or leaving, and anyone may leave on their own)
 - optional OIDC and SAML for larger teams
 - audit events for access changes — **shipped** (invited, joined, role changed, removed, left — in the company's own activity history rather than a separate log a founder has to know to look for)
@@ -59,7 +59,9 @@ Two surfaces that previously trusted their caller now check for themselves: the 
 
 An instance that has closed open registration still admits the people it invited: `POST /api/auth/register` accepts an invitation token, which opens the door for that one email address. Closing `ALLOW_REGISTRATION` is therefore a usable setting rather than one that silently breaks the invite flow.
 
-What remains here is the account lifecycle rather than the workspace one: email verification, password recovery, session and device management, and SSO. All three of the first group need a mail transport, which Formation does not have — the invitation flow deliberately says so and hands the founder the link instead of pretending to send it.
+Changing a password is part of the same surface: the current password is required even from a signed-in session, and every other device is signed out, because the reason to change a password is usually that one of them should not have it.
+
+What remains here needs something Formation does not have: a mail transport. Email verification, password recovery, and SSO all depend on reaching a person outside the product. Until that exists, the honest position is the one the invitation flow already takes — say so, and hand the founder the link rather than pretending to send it. Building a password-reset flow whose email cannot be delivered would be worse than not having one, because it would look like a way back into a locked-out account and would not be.
 
 ## P0: Platform-to-engine execution adapter
 

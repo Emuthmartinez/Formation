@@ -42,7 +42,7 @@ export async function handlePublicRoutes({ request, response, method, pathname, 
       }
     }
     try {
-      const session = await registerAccount(store, body);
+      const session = await registerAccount(store, body, request);
       authLimiters.account.clear(keys.account);
       response.setHeader("set-cookie", sessionCookie(session.token, request, session.expiresAt));
       json(response, 201, { user: session.user, expiresAt: session.expiresAt });
@@ -58,7 +58,7 @@ export async function handlePublicRoutes({ request, response, method, pathname, 
     const keys = authAttemptKeys(request, body.email);
     assertAuthAllowed(authLimiters, keys);
     try {
-      const session = await authenticatePassword(store, body);
+      const session = await authenticatePassword(store, body, request);
       authLimiters.account.clear(keys.account);
       response.setHeader("set-cookie", sessionCookie(session.token, request, session.expiresAt));
       json(response, 200, { user: session.user, expiresAt: session.expiresAt });
@@ -74,7 +74,7 @@ export async function handlePublicRoutes({ request, response, method, pathname, 
       throw new HttpError(404, "Demo authentication is disabled.");
     }
     const body = await readJsonBody(request);
-    const session = await createDemoSession(store, body.email ?? "founder@formation.local");
+    const session = await createDemoSession(store, body.email ?? "founder@formation.local", request);
     response.setHeader("set-cookie", sessionCookie(session.token, request, session.expiresAt));
     json(response, 200, { user: session.user, expiresAt: session.expiresAt });
     return;

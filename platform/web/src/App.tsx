@@ -8,6 +8,7 @@ import type { SessionPayload, WorkspaceSnapshot } from "./types";
 import { BusinessPage } from "./pages/BusinessPage";
 import { DecisionsPage } from "./pages/DecisionsPage";
 import { DeliverablesPage } from "./pages/DeliverablesPage";
+import { AccountPage } from "./pages/AccountPage";
 import { JoinPage } from "./pages/JoinPage";
 import { PeoplePage } from "./pages/PeoplePage";
 import { LaunchPage } from "./pages/LaunchPage";
@@ -155,6 +156,7 @@ export function App() {
     if (first === "deliverables") return <DeliverablesPage artifactId={second} />;
     if (first === "launch") return <LaunchPage />;
     if (first === "people") return <PeoplePage />;
+    if (first === "account") return <AccountPage />;
     if (first === "new") return <NewWorkspacePage onCreated={onCreated} />;
     return <TodayPage />;
   }, [route.path, route.query, route.hash, snapshot, onCreated]);

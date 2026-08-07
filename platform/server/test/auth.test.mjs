@@ -58,7 +58,7 @@ test("credential registration stores a scrypt hash and creates a usable session"
   assert.equal(user.passwordHash.includes("correct horse battery staple"), false);
 });
 
-test("credential login rotates the session and returns generic failures", async (t) => {
+test("credential login adds a session, keeps the others, and returns generic failures", async (t) => {
   const app = await startTestServer();
   t.after(app.close);
 
@@ -68,6 +68,7 @@ test("credential login rotates the session and returns generic failures", async 
     password: "correct horse battery staple",
   });
   assert.equal(registration.status, 201);
+  const firstDevice = registration.headers.get("set-cookie").split(";")[0];
 
   const wrongPassword = await post(app.baseUrl, "/api/auth/login", {
     email: "avery@example.com",
@@ -89,9 +90,18 @@ test("credential login rotates the session and returns generic failures", async 
   assert.equal(login.status, 200);
   assert.ok(login.headers.get("set-cookie"));
 
+  // Signing in somewhere new adds a session rather than replacing the ones that exist: the device
+  // that registered the account is still signed in.
   const database = await app.store.read();
   const user = database.users.find((entry) => entry.email === "avery@example.com");
-  assert.equal(database.sessions.filter((entry) => entry.userId === user.id).length, 1);
+  assert.equal(database.sessions.filter((entry) => entry.userId === user.id).length, 2);
+  const stillHere = await fetch(`${app.baseUrl}/api/session`, { headers: { cookie: firstDevice } });
+  assert.equal(stillHere.status, 200);
+
+  // A failed sign-in creates nothing.
+  await post(app.baseUrl, "/api/auth/login", { email: "avery@example.com", password: "still wrong" });
+  const after = await app.store.read();
+  assert.equal(after.sessions.filter((entry) => entry.userId === user.id).length, 2);
 });
 
 test("authentication limiter blocks repeated failures and resets after success", () => {

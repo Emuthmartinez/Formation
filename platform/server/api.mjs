@@ -1,5 +1,6 @@
 import { assertSameOrigin, getAuthenticatedUser } from "./auth.mjs";
 import { HttpError } from "./http.mjs";
+import { handleAccountRoutes } from "./routes/account.mjs";
 import { handleApprovalRoutes } from "./routes/approvals.mjs";
 import { handleArtifactRoutes } from "./routes/artifacts.mjs";
 import { handleEvidenceRoutes } from "./routes/evidence.mjs";
@@ -21,6 +22,8 @@ export async function handleApi({ request, response, url, store, worker, executi
   if (!user) throw new HttpError(401, "Sign in to continue.");
   const privateContext = { ...context, user };
 
+  await handleAccountRoutes(privateContext);
+  if (response.writableEnded) return;
   await handleWorkspaceRoutes(privateContext);
   if (response.writableEnded) return;
   await handleMemberRoutes(privateContext);

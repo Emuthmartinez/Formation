@@ -323,3 +323,17 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* The account block in the sidebar footer is now the way into account and device settings, so it
+   has to read as something you can press without becoming a second navigation item. */
+.sidebar__user {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 120ms ease;
+}
+.sidebar__user:hover { background: rgba(255, 255, 255, .06); }

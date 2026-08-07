@@ -367,6 +367,15 @@ export interface WorkspaceSnapshot {
   readiness: Readiness;
 }
 
+export interface AccountSession {
+  id: string;
+  device: string;
+  signedInAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  current: boolean;
+}
+
 export interface Member {
   id: string;
   userId: string;
