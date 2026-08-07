@@ -676,6 +676,14 @@ export const references: readonly CatalogReference[] = [
       '"an AI assistant", "a chatbot for <domain>", "an AI companion/character", a coach/tutor chat app; before specing conversation schema, model integration, memory, usage metering, or the safety layer',
   },
   {
+    id: "reference.product.core-loop-and-v1-scope",
+    path: "knowledge/product/core-loop-and-v1-scope.md",
+    domainId: "domain.product",
+    title: "Core Loop And V1 Scope (Non-Archetype Products)",
+    loadWhen:
+      "the product does not match one of the four shipped app archetypes (habit tracker, photo/AI media, social network, AI chat companion) — before naming the core loop, deciding which systems are in V1 vs. later, or specing schema for any other product shape",
+  },
+  {
     id: "reference.product.habit-tracker",
     path: "knowledge/product/habit-tracker.md",
     domainId: "domain.product",
@@ -711,6 +719,14 @@ export const references: readonly CatalogReference[] = [
   // ---------------------------------------------------------------------------------
   // domain.research
   // ---------------------------------------------------------------------------------
+  {
+    id: "reference.research.go-pivot-or-kill",
+    path: "knowledge/research/go-pivot-or-kill.md",
+    domainId: "domain.research",
+    title: "Go, Pivot, Or Kill: The Pre-Build Research Verdict",
+    loadWhen:
+      "writing or updating strategy/RESEARCH.md's Category Revenue Reality or Go, Pivot, Or Kill sections; deciding whether a category and wedge earn a build before Phase 2 design/build spend",
+  },
   {
     id: "reference.research.localization-market-research",
     path: "knowledge/research/localization-market-research.md",

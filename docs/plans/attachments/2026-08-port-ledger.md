@@ -73,10 +73,10 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 94 | 0 | 0 | 1 | 95 |
+| Knowledge content files | 96 | 0 | 0 | 1 | 97 |
 | Additions beyond literal scope (2) | 1 | 0 | 1 | 0 | 2 |
 | Validators (67) | 24 | 27 | 0 | 17 | 68 |
-| **Total** | **120** | **27** | **1** | **33** | **181** |
+| **Total** | **122** | **27** | **1** | **33** | **183** |
 
 ---
 
@@ -246,20 +246,30 @@ established hub-and-spoke pattern.
 | knowledge/operations/secrets-management.md | keep | deep secrets reference (discovery loop, classification, Doppler workflow); the file itself is substantial even though its README load-when line was a weak filename-restating placeholder — fixed in `catalog/references.ts`, not a reason to drop the file |
 | knowledge/operations/doppler-organization.md | keep | portfolio secret-store convention (platform vs per-business projects, configs-not-repos, consumer-side tier composition); written 2026-08-05 from a live multi-business account setup, and carries two constraints found there: cross-project inheritance is a paid feature and a least-privilege read-only subset needs its own project because branch configs inherit their root |
 
-### domain.product (5 files, all keep)
+### domain.product (6 files, all keep)
+
+2026-08 graph-consolidation audit's thin-domain rebalancing (PR-4a) added the sixth,
+non-archetype file: SKILL.md told agents to improvise core loop and V1 scope for any product
+outside the 4 shipped archetypes, so this file generalizes the archetypes' own method instead.
 
 | path | disposition | reason |
 |---|---|---|
 | knowledge/product/ai-chat-companion.md | keep | AI-chat archetype spec reference |
+| knowledge/product/core-loop-and-v1-scope.md | keep | core-loop and V1-vs-later scope method for any product outside the 4 shipped archetypes, generalized from their own shared shape |
 | knowledge/product/habit-tracker.md | keep | habit-tracker archetype spec reference |
 | knowledge/product/photo-ai-media.md | keep | photo/AI-media archetype spec reference |
 | knowledge/product/product-moat.md | keep | 11-star / product-moat reference, `check:11-star` |
 | knowledge/product/social-network.md | keep | social-network archetype spec reference |
 
-### domain.research (1 file, keep)
+### domain.research (2 files, all keep)
+
+2026-08 graph-consolidation audit's thin-domain rebalancing (PR-4a) added the second file:
+the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge file, only
+~200 lines of post-hoc judgment logic in check-research-evidence.ts's error messages.
 
 | path | disposition | reason |
 |---|---|---|
+| knowledge/research/go-pivot-or-kill.md | keep | Go/Pivot/Kill pre-build verdict judgment layer for the research-backed-spec workflow, restating check-research-evidence.ts's (check:research) enforced criteria |
 | knowledge/research/localization-market-research.md | keep | localization/locale-priority reference, `check:localization-research` |
 
 ### domain.store (6 files, all keep)

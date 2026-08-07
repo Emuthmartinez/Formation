@@ -85,5 +85,5 @@ Before calling a habit-tracker build ready:
 - [ ] The check-in loop is run through `11_STAR_EXPERIENCE.md`; Commitment and Streak/Loss-Aversion cards have complete attestation blocks (escape hatch, counter-metric, truthfulness proof, recovery mechanism) passing `check:emotional-design`.
 - [ ] Streak recovery/freeze exists, is free, and is never paired with a spend prompt; notification copy reviewed against the no-guilt rules and `strategy/BRAND.md §Voice`.
 - [ ] `habit_created`, `habit_checked_in`, `streak_extended`, `streak_recovered` (and selected optional-system events) exist in `analytics/ANALYTICS.md`.
-- [ ] Monetization (if in scope) surfaced the §10 trade-offs to the founder, uses the correct billing path for the surface, and never paywalls the escape hatch.
+- [ ] Monetization (if in scope) surfaced the `revenue-monetization.md` §3 trade-offs to the founder, uses the correct billing path for the surface, and never paywalls the escape hatch.
 - [ ] Social accountability (if in scope) is opt-in per habit, RLS-scoped, has block/report and invite abuse controls, and never broadcasts misses.

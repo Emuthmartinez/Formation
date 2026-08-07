@@ -76,6 +76,7 @@ Generated from catalog/references.ts.
 
 | Load when | Reference |
 | --- | --- |
+| writing or updating strategy/RESEARCH.md's Category Revenue Reality or Go, Pivot, Or Kill sections; deciding whether a category and wedge earn a build before Phase 2 design/build spend | [`knowledge/research/go-pivot-or-kill.md`](../../knowledge/research/go-pivot-or-kill.md) |
 | before localizing any surface (store metadata/keywords/screenshots, paywall/offers, landing/web, lifecycle email, paid storefronts) or choosing which locales to ship | [`knowledge/research/localization-market-research.md`](../../knowledge/research/localization-market-research.md) |
 
 ## What You're Building
@@ -83,6 +84,7 @@ Generated from catalog/references.ts.
 | Load when | Reference |
 | --- | --- |
 | "an AI assistant", "a chatbot for <domain>", "an AI companion/character", a coach/tutor chat app; before specing conversation schema, model integration, memory, usage metering, or the safety layer | [`knowledge/product/ai-chat-companion.md`](../../knowledge/product/ai-chat-companion.md) |
+| the product does not match one of the four shipped app archetypes (habit tracker, photo/AI media, social network, AI chat companion) — before naming the core loop, deciding which systems are in V1 vs. later, or specing schema for any other product shape | [`knowledge/product/core-loop-and-v1-scope.md`](../../knowledge/product/core-loop-and-v1-scope.md) |
 | "a habit tracker", "a streak app", a daily routine or wellness/productivity utility; before specing habits, check-ins, streaks, reminders, or insights | [`knowledge/product/habit-tracker.md`](../../knowledge/product/habit-tracker.md) |
 | AI headshots/avatars, photo enhancer/restorer, AI art studio, "an app that turns photos into <X>"; before specing media storage, the generation pipeline, credits/metering, sharing, or safety | [`knowledge/product/photo-ai-media.md`](../../knowledge/product/photo-ai-media.md) |
 | before product/SPEC.md, design/DESIGN.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on "11-star run"/"11-star pass" — follow the 11-Star Run Protocol before any other output | [`knowledge/product/product-moat.md`](../../knowledge/product/product-moat.md) |
