@@ -163,18 +163,27 @@ export class AuthRateLimiter {
   #windowMs;
   #maximumFailures;
   #maximumEntries;
+  #message;
 
-  constructor({ windowMs = 15 * 60 * 1000, maximumFailures = 7, maximumEntries = 10_000 } = {}) {
+  constructor({
+    windowMs = 15 * 60 * 1000,
+    maximumFailures = 7,
+    maximumEntries = 10_000,
+    message = "Too many sign-in attempts. Try again later.",
+  } = {}) {
     this.#windowMs = windowMs;
     this.#maximumFailures = maximumFailures;
     this.#maximumEntries = maximumEntries;
+    // What a person is told when they hit this bucket. A limiter guarding something that is not a
+    // sign-in must not tell them their sign-ins are the problem.
+    this.#message = message;
   }
 
   assertAllowed(key) {
     const entry = this.#current(key);
     if (entry.failures >= this.#maximumFailures) {
       const retryAfterSeconds = Math.max(1, Math.ceil((entry.resetAt - Date.now()) / 1_000));
-      throw new AuthError(429, "Too many sign-in attempts. Try again later.", { retryAfterSeconds });
+      throw new AuthError(429, this.#message, { retryAfterSeconds });
     }
   }
 

@@ -15,6 +15,8 @@ The historical skill runtime is an internal engine. Do not make the web applicat
 - Artifact changes increment versions.
 - Claims retain kind, confidence, status, and evidence.
 - Decisions retain rationale and review date.
+- A company always keeps at least one owner. Anything that could remove the last one is refused, not repaired afterwards.
+- Access changes — invited, joined, role changed, removed, left — are recorded in the company's activity, not a separate log.
 
 ## UI rules
 

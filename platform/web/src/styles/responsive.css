@@ -154,3 +154,11 @@
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
 .ledger-row select { width: 118px; padding: 6px 22px 6px 8px; font-size: 13px; }
+
+@media (max-width: 900px) {
+  .people-row { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .people-row__action { justify-content: flex-start; }
+  .people-row__role select { max-width: none; }
+  .join-card { padding: 28px; }
+  .join-card h1 { font-size: 26px; }
+}

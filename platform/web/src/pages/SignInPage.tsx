@@ -3,8 +3,13 @@ import { api } from "../api";
 import { Button, ErrorNotice, Field } from "../components/Primitives";
 import type { PublicConfig } from "../types";
 
-export function SignInPage({ onSignedIn }: { onSignedIn: () => Promise<void> }) {
-  const [mode, setMode] = useState<"login" | "register">("login");
+export function SignInPage({ onSignedIn, invitationToken }: {
+  onSignedIn: () => Promise<void>;
+  /** Present when someone arrived on an invitation link. It lets them create an account even on an
+   *  instance that has closed open registration — the owner already decided to let them in. */
+  invitationToken?: string;
+}) {
+  const [mode, setMode] = useState<"login" | "register">(invitationToken ? "register" : "login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +26,7 @@ export function SignInPage({ onSignedIn }: { onSignedIn: () => Promise<void> }) 
     setBusy(true);
     setError(null);
     try {
-      if (mode === "register") await api.register(name, email, password);
+      if (mode === "register") await api.register(name, email, password, invitationToken);
       else await api.login(email, password);
       await onSignedIn();
     } catch (caught) {
@@ -75,7 +80,7 @@ export function SignInPage({ onSignedIn }: { onSignedIn: () => Promise<void> }) 
             >
               Sign in
             </button>
-            {config?.registrationEnabled !== false ? (
+            {config?.registrationEnabled !== false || invitationToken ? (
               <button
                 className={mode === "register" ? "is-active" : ""}
                 type="button"
@@ -87,12 +92,20 @@ export function SignInPage({ onSignedIn }: { onSignedIn: () => Promise<void> }) 
             ) : null}
           </div>
 
-          <p className="eyebrow">{mode === "login" ? "Welcome back" : "Start a company workspace"}</p>
+          {invitationToken ? (
+            <p className="signin-invited">
+              You have been invited to a company on Formation. Use the email address the invitation was sent to —
+              an invitation belongs to one person, not to whoever holds the link.
+            </p>
+          ) : null}
+          <p className="eyebrow">{mode === "login" ? "Welcome back" : invitationToken ? "Accept your invitation" : "Start a company workspace"}</p>
           <h2>{mode === "login" ? "Continue building" : "Create your Formation account"}</h2>
           <p>
             {mode === "login"
               ? "Return to the business context, decisions, and next actions your team has already built."
-              : "Your first workspace starts with a guided business brief, not an empty dashboard."}
+              : invitationToken
+                ? "You are joining a company that already exists. Create the account, and Formation will show you what you have been offered before you accept it."
+                : "Your first workspace starts with a guided business brief, not an empty dashboard."}
           </p>
 
           <form className="signin-form" onSubmit={submit}>

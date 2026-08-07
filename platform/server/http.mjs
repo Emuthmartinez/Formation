@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { AuthError } from "./auth.mjs";
 import { ExecutionError } from "./execution.mjs";
 import { GenerationError } from "./generation.mjs";
+import { MemberError } from "./domain/members.mjs";
 
 export async function serveApplication({ request, response, url, staticRoot }) {
   if (!["GET", "HEAD"].includes(request.method ?? "GET")) throw new HttpError(405, "Method not allowed.");
@@ -77,7 +78,13 @@ function contentType(extension) {
 }
 
 export function normalizeError(error) {
-  if (error instanceof HttpError || error instanceof AuthError || error instanceof ExecutionError || error instanceof GenerationError) {
+  if (
+    error instanceof HttpError ||
+    error instanceof AuthError ||
+    error instanceof ExecutionError ||
+    error instanceof GenerationError ||
+    error instanceof MemberError
+  ) {
     return {
       status: error.status,
       message: error.message,

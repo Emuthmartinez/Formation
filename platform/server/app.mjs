@@ -20,6 +20,13 @@ export function createFormationServer({
   const authLimiters = {
     account: new AuthRateLimiter({ maximumFailures: 7 }),
     address: new AuthRateLimiter({ maximumFailures: 35 }),
+    // Redeeming an invitation is not signing in, and it must not share a bucket with it. Keyed on
+    // the device only — there is no account to key on until the link is accepted — with room for
+    // several people behind one address to each mistype a link.
+    invitation: new AuthRateLimiter({
+      maximumFailures: 20,
+      message: "Too many invitation links have been tried from this device. Wait a few minutes and try again.",
+    }),
   };
   const staticRoot = distDir ? path.resolve(distDir) : null;
   const server = http.createServer(async (request, response) => {

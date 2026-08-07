@@ -1,6 +1,10 @@
 import { mkdir, open, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+/** Mirrors ROLES in domain/capabilities.mjs. Duplicated deliberately: the store must not import
+ *  domain logic to validate a file it may be migrating from an older shape. */
+const MEMBERSHIP_ROLES = new Set(["viewer", "reviewer", "editor", "owner"]);
+
 export class JsonStore {
   #filePath;
   #seedFactory;
@@ -144,6 +148,34 @@ function migrateDatabase(database) {
     migrated = true;
   }
 
+  if (database.schemaVersion === 3) {
+    database.invitations = Array.isArray(database.invitations) ? database.invitations : [];
+    // A membership role the capability ladder does not recognise already holds nothing at runtime.
+    // Writing that decision down here means the file says what the server does, so an operator
+    // reading the store is not left to infer it — and a stale role cannot become meaningful again
+    // if a future release happens to add a role of that name.
+    const ownersByWorkspace = new Map();
+    for (const membership of database.memberships ?? []) {
+      if (membership.role !== "owner") continue;
+      ownersByWorkspace.set(membership.workspaceId, (ownersByWorkspace.get(membership.workspaceId) ?? 0) + 1);
+    }
+    for (const membership of database.memberships ?? []) {
+      if (MEMBERSHIP_ROLES.has(membership.role)) continue;
+      // Retiring a role must never leave a company with nobody who can run it. A workspace whose
+      // only membership carries an unknown role keeps its owner instead — a company nobody can
+      // administer is a worse outcome than a role that was already meaningless at runtime.
+      const owners = ownersByWorkspace.get(membership.workspaceId) ?? 0;
+      if (owners === 0) {
+        membership.role = "owner";
+        ownersByWorkspace.set(membership.workspaceId, 1);
+      } else {
+        membership.role = "viewer";
+      }
+    }
+    database.schemaVersion = 4;
+    migrated = true;
+  }
+
   return migrated;
 }
 
@@ -151,7 +183,7 @@ function validateDatabase(database) {
   if (!database || typeof database !== "object" || Array.isArray(database)) {
     throw new Error("Formation data store must contain one JSON object.");
   }
-  if (database.schemaVersion !== 3) {
+  if (database.schemaVersion !== 4) {
     throw new Error(`Unsupported Formation schema version: ${String(database.schemaVersion)}`);
   }
 
@@ -167,6 +199,7 @@ function validateDatabase(database) {
     "tasks",
     "jobs",
     "executions",
+    "invitations",
     "activity",
   ];
   for (const name of requiredCollections) {

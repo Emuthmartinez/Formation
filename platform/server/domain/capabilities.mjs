@@ -92,6 +92,11 @@ export const CAPABILITIES = {
     covers: "Answering a launch approval on the company's behalf.",
     denial: "Only this company's owner can answer a launch approval.",
   },
+  "member-manage": {
+    minimumRole: "owner",
+    covers: "Who is in the company: inviting people, cancelling invitations, changing what someone can do, and removing them.",
+    denial: "Only this company's owner can change who has access.",
+  },
 };
 
 /**
@@ -103,11 +108,14 @@ export const CAPABILITIES = {
  * - `GET /api/session` and `GET /api/workspaces` return only the caller's own memberships.
  * - `POST /api/workspaces` creates a company and makes the caller its owner. There is no existing
  *   company to hold a capability on.
+ * - `/api/invitations/…` is how someone who is *not yet* a member joins one. The invitation token
+ *   is the authorization, and it is checked against the signed-in account's own email address.
  */
 export const UNSCOPED_SURFACES = Object.freeze([
   "public-access",
   "own-session-read",
   "workspace-create",
+  "invitation-redeem",
 ]);
 
 const RANK = new Map(ROLES.map((role, index) => [role, index]));

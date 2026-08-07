@@ -2,14 +2,19 @@ import type {
   ApprovalsView,
   Artifact,
   Claim,
+  CreatedInvitation,
   Decision,
   FounderExecution,
+  InvitationPreview,
   Job,
+  Member,
+  PeopleView,
   PublicConfig,
   SessionPayload,
   Task,
   Workspace,
   WorkspaceBrief,
+  WorkspaceRole,
   WorkspaceSnapshot,
   Workstream,
 } from "./types";
@@ -50,10 +55,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ email, password }),
     }),
-  register: (name: string, email: string, password: string) =>
+  register: (name: string, email: string, password: string, invitationToken?: string) =>
     request<{ user: SessionPayload["user"]; expiresAt: string }>("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, ...(invitationToken ? { invitationToken } : {}) }),
     }),
   demoLogin: (email = "founder@formation.local") =>
     request<{ user: SessionPayload["user"]; expiresAt: string }>("/api/auth/demo", {
@@ -130,4 +135,28 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   job: (workspaceId: string, jobId: string) => request<Job>(`/api/workspaces/${workspaceId}/jobs/${jobId}`),
+  people: (workspaceId: string) => request<PeopleView>(`/api/workspaces/${workspaceId}/members`),
+  invite: (workspaceId: string, email: string, role: WorkspaceRole) =>
+    request<CreatedInvitation>(`/api/workspaces/${workspaceId}/invitations`, {
+      method: "POST",
+      body: JSON.stringify({ email, role }),
+    }),
+  cancelInvitation: (workspaceId: string, invitationId: string) =>
+    request<unknown>(`/api/workspaces/${workspaceId}/invitations/${invitationId}`, { method: "DELETE" }),
+  changeMemberRole: (workspaceId: string, membershipId: string, role: WorkspaceRole) =>
+    request<Member>(`/api/workspaces/${workspaceId}/members/${membershipId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+    }),
+  removeMember: (workspaceId: string, membershipId: string) =>
+    request<{ removed: boolean; leaving: boolean }>(`/api/workspaces/${workspaceId}/members/${membershipId}`, {
+      method: "DELETE",
+    }),
+  previewInvitation: (token: string) =>
+    request<InvitationPreview>("/api/invitations/preview", { method: "POST", body: JSON.stringify({ token }) }),
+  acceptInvitation: (token: string) =>
+    request<{ workspaceId: string; company: string; role: WorkspaceRole; alreadyMember: boolean }>(
+      "/api/invitations/accept",
+      { method: "POST", body: JSON.stringify({ token }) },
+    ),
 };

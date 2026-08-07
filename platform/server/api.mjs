@@ -4,6 +4,7 @@ import { handleApprovalRoutes } from "./routes/approvals.mjs";
 import { handleArtifactRoutes } from "./routes/artifacts.mjs";
 import { handleEvidenceRoutes } from "./routes/evidence.mjs";
 import { handleExecutionRoutes } from "./routes/executions.mjs";
+import { handleMemberRoutes } from "./routes/members.mjs";
 import { handlePublicRoutes } from "./routes/public.mjs";
 import { handleWorkspaceRoutes } from "./routes/workspaces.mjs";
 
@@ -21,6 +22,8 @@ export async function handleApi({ request, response, url, store, worker, executi
   const privateContext = { ...context, user };
 
   await handleWorkspaceRoutes(privateContext);
+  if (response.writableEnded) return;
+  await handleMemberRoutes(privateContext);
   if (response.writableEnded) return;
   await handleExecutionRoutes(privateContext);
   if (response.writableEnded) return;

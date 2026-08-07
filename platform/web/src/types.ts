@@ -367,6 +367,47 @@ export interface WorkspaceSnapshot {
   readiness: Readiness;
 }
 
+export interface Member {
+  id: string;
+  userId: string;
+  name: string;
+  email: string | null;
+  role: WorkspaceRole | string;
+  joinedAt: string | null;
+  invitedBy: string | null;
+}
+
+export interface Invitation {
+  id: string;
+  email: string;
+  role: WorkspaceRole;
+  invitedBy: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface PeopleView {
+  members: Member[];
+  invitations: Invitation[];
+  roles: WorkspaceRole[];
+  canManage: boolean;
+}
+
+export interface CreatedInvitation {
+  invitation: Invitation;
+  acceptPath: string;
+  delivery: string;
+}
+
+export interface InvitationPreview {
+  company: string;
+  role: WorkspaceRole;
+  invitedBy: string;
+  email: string;
+  matchesYou: boolean;
+  expiresAt: string;
+}
+
 export interface WorkspaceBrief {
   name: string;
   founderName: string;

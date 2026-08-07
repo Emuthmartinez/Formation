@@ -70,6 +70,23 @@ const WORKSPACE_SURFACES = [
     capability: "approval-decide",
     body: { answer: "approve" },
   },
+  { method: "GET", path: "/api/workspaces/:workspaceId/members", capability: "workspace-read" },
+  {
+    method: "PATCH",
+    path: "/api/workspaces/:workspaceId/members/:membershipId",
+    capability: "member-manage",
+    body: { role: "viewer" },
+  },
+  // Probed against a membership that is not the caller's own, which is the administrative act.
+  // Leaving a company is the caller's own to do at any role and is covered in members.test.mjs.
+  { method: "DELETE", path: "/api/workspaces/:workspaceId/members/:membershipId", capability: "member-manage" },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspaceId/invitations",
+    capability: "member-manage",
+    body: { email: "probe@example.com", role: "viewer" },
+  },
+  { method: "DELETE", path: "/api/workspaces/:workspaceId/invitations/:invitationId", capability: "member-manage" },
 ];
 
 /**
@@ -87,6 +104,10 @@ const UNSCOPED_ROUTES = new Set([
   "GET /api/session",
   "GET /api/workspaces",
   "POST /api/workspaces",
+  // Joining a company happens before there is a membership to hold a capability. The invitation
+  // token is the authorization, and it is checked against the signed-in account's own email.
+  "POST /api/invitations/preview",
+  "POST /api/invitations/accept",
 ]);
 
 test("the capability ladder denies by default and refuses unknown capability ids", () => {
@@ -257,7 +278,11 @@ function resolvePath(template, ids) {
     .replace(":taskId", ids.taskId)
     .replace(":artifactId", ids.artifactId)
     .replace(":executionId", "exe_absent")
-    .replace(":jobId", "job_absent");
+    .replace(":jobId", "job_absent")
+    // Absent on purpose: an owner must reach past the capability check (to a 404) rather than
+    // actually removing someone while the probe is walking the surface.
+    .replace(":membershipId", "mem_absent")
+    .replace(":invitationId", "inv_absent");
 }
 
 test("each role is answered by the server exactly as its capability says", async (t) => {
