@@ -284,10 +284,26 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
           {versions.map((version) => (
             <details key={version.id} className="version-row" open={version.version === draft.version}>
               <summary>
-                <span><strong>Version {version.version}</strong><small>{version.createdBy}</small></span>
+                <span>
+                  <strong>Version {version.version}</strong>
+                  <small>{version.createdBy}</small>
+                  {/* What this version actually did, on the row a founder scans before deciding
+                      whether to open it — the reason the history exists at all. */}
+                  {version.change ? <small className="version-row__headline">{version.change.headline}</small> : null}
+                </span>
                 <span><StatusText status={version.status} /><ConfidenceMark value={version.confidence} caption="Confidence" /><small>{formatDate(version.createdAt)}</small></span>
               </summary>
               <div className="version-row__body">
+                {version.change?.changes.length ? (
+                  <ul className="version-changes">
+                    {version.change.changes.map((entry, index) => (
+                      <li key={`${entry.kind}-${index}`}>
+                        <span className="version-changes__label">{entry.label}</span>
+                        <span>{entry.detail}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
                 <p>{version.summary || "No summary recorded for this version."}</p>
                 <ul>{version.sections.map((section) => <li key={section.id}>{section.title}</li>)}</ul>
                 {version.version === draft.version ? (

@@ -281,6 +281,13 @@
 .inconsistency-more summary:hover { color: var(--ink); }
 .inconsistency-more .inconsistency-list { margin-top: 14px; }
 
+/* What a version changed. The headline sits on the closed row because the whole point of the
+   history is answering "what happened here?" without opening anything. */
+.version-row__headline { display: block; margin-top: 3px; color: var(--ink-soft); }
+.version-changes { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; }
+.version-changes li { display: grid; grid-template-columns: 104px minmax(0,1fr); gap: 10px; align-items: baseline; font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
+.version-changes__label { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+
 /* People and access
    ---------------------------------------------------------------------------------------------
    A decisive row per person, in the same idiom as the ledger and task rows: identity on the left,

@@ -179,6 +179,22 @@ export interface Artifact {
   source?: RecordSource | null;
 }
 
+/** One thing that changed between a version and the one before it. */
+export interface VersionChangeEntry {
+  kind: string;
+  label: string;
+  detail: string;
+}
+
+export interface VersionChange {
+  version: number;
+  previousVersion: number | null;
+  createdAt: string;
+  createdBy: string;
+  headline: string;
+  changes: VersionChangeEntry[];
+}
+
 export interface ArtifactVersion {
   id: string;
   artifactId: string;
@@ -194,6 +210,8 @@ export interface ArtifactVersion {
   linkedDecisionIds: string[];
   createdAt: string;
   createdBy: string;
+  /** What this version changed from the one before it. Computed from the versions themselves. */
+  change?: VersionChange | null;
 }
 
 export interface Task {

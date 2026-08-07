@@ -183,7 +183,7 @@ Add:
 - mentions
 - review requests
 - assigned approvers
-- change summaries between artifact versions
+- change summaries between artifact versions — **shipped** (`platform/server/domain/versions.mjs`): computed from the immutable versions rather than stored, so the summary cannot drift from the record it describes. Sections are matched by id, then title, then position — and position is refused when both sides carry ids that differ, because an edit that reads as one section removed and another added is the most misleading thing this summary could say.
 - optimistic concurrency and conflict resolution
 - presence where useful
 - decision and review notifications
