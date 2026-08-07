@@ -67,7 +67,7 @@ project:
   bundle_ids:
     ios: "com.example.app"
   public_urls:
-    landing: "https://ocho.example"
+    landing: "https://ocho.test"
 business_operator:
   next_founder_action: "Approve the store submission so the release can go out."
 continuity:

@@ -350,7 +350,55 @@ export type Capability =
   | "company-write"
   | "approval-decide"
   | "share-manage"
-  | "member-manage";
+  | "member-manage"
+  | "launch-import";
+
+/** One launch workspace this server holds that a company could bring work in from. */
+export interface ImportSource {
+  id: string;
+  updatedAt: string | null;
+}
+
+export interface ImportSourceList {
+  /** False when this instance is not set up to bring in existing launch work at all. */
+  configured: boolean;
+  sources: ImportSource[];
+}
+
+export type ImportAction = "create" | "update" | "unchanged" | "drifted";
+
+/**
+ * What an import would do, or what it did. The same shape answers both, because the preview and
+ * the apply are one computation on the server — see server/domain/imports.mjs.
+ */
+export interface ImportPlan {
+  sourceId: string;
+  company: {
+    name: string;
+    oneLiner: string;
+    targetCustomer: string;
+    stage: string;
+    founderName: string;
+    liveSince: string | null;
+  } | null;
+  totals: {
+    creates: number;
+    updates: number;
+    unchanged: number;
+    flagged: number;
+    retires: number;
+    companyFieldsFilled: number;
+    companyFieldsDiffering: number;
+    contradictions: number;
+  };
+  companyFields: Array<{ label: string; action: "fill" | "differs" | "same"; current: string; proposed: string }>;
+  claims: Array<{ action: ImportAction; kind: string; statement: string }>;
+  decisions: Array<{ action: ImportAction; title: string }>;
+  tasks: Array<{ action: ImportAction; title: string }>;
+  deliverables: Array<{ action: ImportAction; title: string; sectionCount: number | null }>;
+  retiring: Array<{ kind: "claim" | "task"; label: string }>;
+  contradictions: Array<{ severity: "blocking" | "advisory"; message: string; sourcePath: string | null }>;
+}
 
 export interface WorkspaceSnapshot {
   workspace: Workspace;

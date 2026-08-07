@@ -15,6 +15,7 @@ import {
   timeAgo,
 } from "../components/Primitives";
 import { Motif } from "../components/Motif";
+import { ExistingWorkSection } from "./launch/ExistingWork";
 import { ReadinessLedger } from "../components/Readiness";
 import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
@@ -104,6 +105,8 @@ export function LaunchPage() {
       </Section>
 
       <EngineWorkSection workspaceId={workspace.id} workspaceName={workspace.name} />
+
+      <ExistingWorkSection />
 
       <div className="two-column-layout">
         <Section title="Critical path" description="Work that materially changes whether this launch is responsible and decision-grade.">

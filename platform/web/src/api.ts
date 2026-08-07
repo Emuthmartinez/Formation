@@ -7,6 +7,8 @@ import type {
   CreatedInvitation,
   Decision,
   FounderExecution,
+  ImportPlan,
+  ImportSourceList,
   InvitationPreview,
   Job,
   Member,
@@ -110,6 +112,17 @@ export const api = {
     }),
   listApprovals: (workspaceId: string) => request<ApprovalsView>(`/api/workspaces/${workspaceId}/approvals`),
   listExecutions: (workspaceId: string) => request<FounderExecution[]>(`/api/workspaces/${workspaceId}/executions`),
+  importSources: (workspaceId: string) => request<ImportSourceList>(`/api/workspaces/${workspaceId}/import-sources`),
+  previewImport: (workspaceId: string, sourceId: string) =>
+    request<ImportPlan>(`/api/workspaces/${workspaceId}/imports/preview`, {
+      method: "POST",
+      body: JSON.stringify({ sourceId }),
+    }),
+  applyImport: (workspaceId: string, sourceId: string) =>
+    request<ImportPlan>(`/api/workspaces/${workspaceId}/imports`, {
+      method: "POST",
+      body: JSON.stringify({ sourceId }),
+    }),
   answerApproval: (workspaceId: string, decisionId: string, payload: { answer: "approve" | "decline"; reason?: string }) =>
     request<Decision>(`/api/workspaces/${workspaceId}/approvals/${decisionId}`, {
       method: "POST",
