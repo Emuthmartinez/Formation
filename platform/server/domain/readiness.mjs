@@ -1,5 +1,6 @@
 import { capabilitiesForRole, hasCapability, resolveAccess } from "./capabilities.mjs";
 import { detectInconsistencies } from "./consistency.mjs";
+import { summariseVersionHistory } from "./versions.mjs";
 import { clampNumber, humanizeKey, priorityRank, slug, stableValue, unique } from "./shared.mjs";
 
 const READINESS_WEIGHTS = {
@@ -252,6 +253,24 @@ export function buildRecommendations({ workspace, tasks, decisions, claims, arti
   return recommendations.slice(0, 4);
 }
 
+/** Attaches each version's change summary, grouped by the deliverable it belongs to. */
+function withVersionChanges(versions) {
+  const byArtifact = new Map();
+  for (const version of versions) {
+    const group = byArtifact.get(version.artifactId) ?? [];
+    group.push(version);
+    byArtifact.set(version.artifactId, group);
+  }
+  const changeByVersionId = new Map();
+  for (const group of byArtifact.values()) {
+    for (const summary of summariseVersionHistory(group)) {
+      const owner = group.find((entry) => entry.version === summary.version);
+      if (owner) changeByVersionId.set(owner.id, summary);
+    }
+  }
+  return versions.map((version) => ({ ...version, change: changeByVersionId.get(version.id) ?? null }));
+}
+
 /**
  * Activity that names a person who is not a member. Anything added here is hidden from members who
  * cannot manage access — the list exists so a new sensitive event is a deliberate decision about
@@ -267,9 +286,14 @@ export function buildWorkspaceSnapshot(database, workspaceId, userId) {
   const claims = database.claims.filter((entry) => entry.workspaceId === workspaceId);
   const decisions = database.decisions.filter((entry) => entry.workspaceId === workspaceId);
   const artifacts = database.artifacts.filter((entry) => entry.workspaceId === workspaceId);
-  const artifactVersions = database.artifactVersions
-    .filter((entry) => entry.workspaceId === workspaceId)
-    .sort((a, b) => b.version - a.version || b.createdAt.localeCompare(a.createdAt));
+  // Each version carries what it changed from the one before it. Computed rather than stored: a
+  // note written when a version is saved is a claim about the change, and it can drift from the
+  // immutable record it describes. See domain/versions.mjs.
+  const artifactVersions = withVersionChanges(
+    database.artifactVersions
+      .filter((entry) => entry.workspaceId === workspaceId)
+      .sort((a, b) => b.version - a.version || b.createdAt.localeCompare(a.createdAt)),
+  );
   const tasks = database.tasks.filter((entry) => entry.workspaceId === workspaceId);
   const jobs = database.jobs.filter((entry) => entry.workspaceId === workspaceId);
   // An invitation names someone who is not in the company yet, so it is the owner's to see —
