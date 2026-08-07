@@ -98,10 +98,10 @@ export function ExistingWorkSection() {
     }
   };
 
-  const blocking = plan?.contradictions.filter((entry) => entry.severity === "blocking") ?? [];
-  const advisory = plan?.contradictions.filter((entry) => entry.severity === "advisory") ?? [];
+  const blocking = plan?.contradictions?.filter((entry) => entry.severity === "blocking") ?? [];
+  const advisory = plan?.contradictions?.filter((entry) => entry.severity === "advisory") ?? [];
   const arriving = plan ? plan.totals.creates : 0;
-  const pending = plan ? plan.totals.creates + plan.totals.updates + plan.totals.flagged + plan.totals.retires > 0 : false;
+  const pending = plan ? plan.totals.creates + plan.totals.updates + plan.totals.drifted + plan.totals.retires > 0 : false;
 
   return (
     <Section
@@ -153,6 +153,25 @@ export function ExistingWorkSection() {
                   <li key={`${entry.message}-${index}`}>
                     {entry.message}
                     {imported ? <span className="import-plan__note"> Kept as an open question for you.</span> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {plan.heldBack?.length ? (
+            <div className="wording-hold" role="note">
+              <p className="eyebrow">Wording that reads as an instruction</p>
+              <p>
+                {plan.heldBack.length === 1
+                  ? `One document in this launch workspace contains wording aimed at a machine rather than at a reader. It ${imported ? "came" : "will come"} across unchanged, but Formation ${imported ? "is leaving" : "will leave"} it out of anything it drafts until someone here confirms the wording is meant.`
+                  : `${plan.heldBack.length} documents in this launch workspace contain wording aimed at a machine rather than at a reader. They ${imported ? "came" : "will come"} across unchanged, but Formation ${imported ? "is leaving" : "will leave"} them out of anything it drafts until someone here confirms the wording is meant.`}
+              </p>
+              <ul>
+                {plan.heldBack.map((entry, index) => (
+                  <li key={`${entry.label}-${index}`}>
+                    <span>{entry.label} — {entry.reason}</span>
+                    <q>{entry.excerpt}</q>
                   </li>
                 ))}
               </ul>
@@ -299,12 +318,12 @@ const actionLabels: Record<string, string> = {
 };
 
 function summarise(plan: ImportPlan): string {
-  if (!plan.totals.creates && !plan.totals.updates && !plan.totals.flagged) {
+  if (!plan.totals.creates && !plan.totals.updates && !plan.totals.drifted) {
     return "Nothing new — this company already has everything that launch workspace recorded.";
   }
   const parts: string[] = [];
   if (plan.totals.creates) parts.push(`${plan.totals.creates} brought in`);
   if (plan.totals.updates) parts.push(`${plan.totals.updates} refreshed`);
-  if (plan.totals.flagged) parts.push(`${plan.totals.flagged} flagged for a look`);
+  if (plan.totals.drifted) parts.push(`${plan.totals.drifted} needing a look`);
   return `${parts.join(", ")}. Everything arrived as a draft.`;
 }

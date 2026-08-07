@@ -136,15 +136,28 @@ Add:
 - regression fixtures for each deliverable type
 - contradiction and terminology consistency checks
 - source-use and citation-quality evaluation
-- prompt-injection resistance for imported research and documents
+- prompt-injection resistance for imported research and documents — **shipped** (see below)
 - hallucination measurement
 - founder-review thresholds by consequence
 - cost, latency, and retry budgets
-- redaction policy
+- redaction policy — **partly shipped**: the provider request is built by naming the fields that may leave (`platform/server/domain/prompts.mjs`), so nothing reaches a provider that was not named. Redaction of *values* — a customer's name inside a claim — is still to do.
 - provider outage and fallback behavior
-- versioned generation instructions
+- versioned generation instructions — **shipped** (`GENERATION_INSTRUCTIONS_VERSION`, recorded on each draft's `generation` block)
 
 Important recommendations should expose supporting evidence and uncertainty, not only confidence scores.
+
+### Prompt-injection resistance
+
+The importer made this urgent rather than theoretical: a launch repository is a directory of Markdown that anyone with write access to it produced, and Formation reads it into the claims and deliverables it assembles into generation context.
+
+`platform/server/domain/trust.mjs` holds the posture:
+
+- **Provenance decides.** A record with no `source` was written by a member and is trusted. Engine results are trusted — an independent verifier accepted them before they arrived. Imported records are not, and a `source.kind` nobody registered is treated as imported rather than trusted by omission.
+- **Screening, not sanitising.** Untrusted text is examined for shapes that read as an instruction to a machine — disregard everything above, address the reader as a system, reveal your instructions, answer only with. The function has no way to return a changed string. Rewriting a founder's material would be a silent, unreliable edit; withholding it is neither.
+- **The document still imports, word for word.** What changes is that `domain/prompts.mjs` keeps it out of the provider request, the founder is told at import, an open question is left on the record, and one click confirms the wording is meant (`source.screenConfirmedAt`). The findings stay on the record after confirmation — confirmation is not amnesia.
+- **Founder-authored words are never screened.** A founder may write "disregard all earlier direction from the board" about their own company.
+
+A screen like this catches the obvious and misses the clever. Its value is not that no injection ever passes: it is that the untrusted half of the context is identified as untrusted, bounded, stated to the provider as data, and reviewable by a person — which holds for the phrasings the list does not know.
 
 ## P1: Collaboration and review
 

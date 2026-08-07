@@ -1,4 +1,5 @@
 import { createId, launchWorkstreamId } from "./shared.mjs";
+import { deliverableText, screenUntrustedText } from "./trust.mjs";
 
 /**
  * Brings an existing launch repository's recorded work into Formation — the platform half of the
@@ -24,6 +25,11 @@ import { createId, launchWorkstreamId } from "./shared.mjs";
  * - **Contradictions travel with the records they undermine.** The engine reports them; this
  *   module carries them into the plan and records them as open questions on apply, so the doubt
  *   ends up in front of the founder rather than being resolved on their behalf.
+ * - **Imported text that reads as an instruction is flagged, never edited.** A launch repository is
+ *   a directory of Markdown that anyone with write access to it produced, and Formation assembles
+ *   its own records into the context sent to a language model. `domain/trust.mjs` screens the text
+ *   on the way in; the document still imports, word for word, and the founder is told — and
+ *   `domain/prompts.mjs` keeps it out of a draft until they say otherwise.
  */
 
 /** Where each engine lane's work belongs in the founder's own workstreams. */
@@ -111,6 +117,7 @@ export function buildImportPlan(database, workspace, report, sourceId, now) {
     deliverables: [],
     retiredClaims: [],
     retiredTasks: [],
+    heldBack: [],
     contradictions: (report.contradictions ?? []).map((entry) => ({
       code: entry.code,
       severity: entry.severity,
@@ -125,6 +132,7 @@ export function buildImportPlan(database, workspace, report, sourceId, now) {
   planDecisions(database, workspace, report, sourceId, now, plan);
   planTasks(database, workspace, report, sourceId, now, plan);
   planDeliverables(database, workspace, report, sourceId, now, plan);
+  planScreenQuestions(database, workspace, sourceId, now, plan);
   planRetirements(database, workspace, report, plan);
 
   plan.totals = countPlan(plan);
@@ -138,7 +146,7 @@ function countPlan(plan) {
     creates: count("create"),
     updates: count("update"),
     unchanged: count("unchanged"),
-    flagged: count("drifted"),
+    drifted: count("drifted"),
     retires: plan.retiredClaims.length + plan.retiredTasks.length,
     companyFieldsFilled: plan.companyFields.filter((entry) => entry.action === "fill").length,
     companyFieldsDiffering: plan.companyFields.filter((entry) => entry.action === "differs").length,
@@ -297,6 +305,7 @@ function planDeliverables(database, workspace, report, sourceId, now, plan) {
   for (const deliverable of report.deliverables ?? []) {
     const found = byKey.get(deliverable.importKey);
     if (!found) {
+      const fresh = screenUntrustedText(deliverableText(deliverable));
       plan.deliverables.push({
         importKey: deliverable.importKey,
         action: "create",
@@ -305,9 +314,13 @@ function planDeliverables(database, workspace, report, sourceId, now, plan) {
         fingerprint: deliverable.fingerprint,
         workstreamId: workstreamFor(workspace, deliverable.origin?.laneKey),
         origin: deliverable.origin ?? null,
+        findings: fresh.findings,
         sourceId,
         now,
       });
+      if (fresh.findings.length) {
+        plan.heldBack.push({ kind: "deliverable", importKey: deliverable.importKey, label: deliverable.title, findings: fresh.findings });
+      }
       continue;
     }
     if (found.source.fingerprint === deliverable.fingerprint) {
@@ -315,6 +328,7 @@ function planDeliverables(database, workspace, report, sourceId, now, plan) {
       continue;
     }
     const founderEdited = sectionsSignature(found.sections) !== found.source.importedSignature;
+    const screen = screenUntrustedText(deliverableText(deliverable));
     plan.deliverables.push({
       importKey: deliverable.importKey,
       action: founderEdited ? "drifted" : "update",
@@ -322,8 +336,12 @@ function planDeliverables(database, workspace, report, sourceId, now, plan) {
       existingId: found.id,
       sections: deliverable.sections,
       fingerprint: deliverable.fingerprint,
+      findings: screen.findings,
       now,
     });
+    if (screen.findings.length && !founderEdited) {
+      plan.heldBack.push({ kind: "deliverable", importKey: deliverable.importKey, label: found.title, findings: screen.findings });
+    }
   }
 }
 
@@ -351,6 +369,49 @@ function planRetirements(database, workspace, report, plan) {
     plan.retiredTasks.push({ importKey: task.source.importKey, existingId: task.id, title: task.title });
   }
 }
+
+/**
+ * A question for every imported document whose own words read as an instruction to a machine.
+ *
+ * This is deliberately a question rather than a refusal. The document imports unchanged and stays
+ * readable — a launch repository is the founder's own material, and a screen that quietly dropped
+ * part of it would be worse than one that missed something. What the flag buys is that
+ * `domain/prompts.mjs` will not put the text in front of a model as company context until a person
+ * has looked at it, and that the founder finds out here rather than from a draft that behaved
+ * strangely. Keyed on the document, so a re-import asks once.
+ */
+function planScreenQuestions(database, workspace, sourceId, now, plan) {
+  if (!plan.heldBack.length) return;
+  const existing = new Set(
+    database.claims.filter((claim) => claim.workspaceId === workspace.id && isImported(claim)).map((claim) => claim.source.importKey),
+  );
+  for (const entry of plan.heldBack) {
+    const importKey = `screen:${entry.importKey}`;
+    if (existing.has(importKey) || plan.claims.some((claim) => claim.importKey === importKey)) {
+      plan.claims.push({ importKey, action: "unchanged", kind: "question", statement: entry.label });
+      continue;
+    }
+    const finding = entry.findings[0];
+    plan.claims.push({
+      importKey,
+      action: "create",
+      kind: "question",
+      statement: trim(
+        `“${entry.label}” came in from the launch workspace containing wording that reads as an instruction to a machine rather than a description of the business. ${finding?.reason ?? ""} It says: “${finding?.excerpt ?? ""}”. Formation is leaving this document out of anything it drafts until you confirm the wording is meant.`,
+        LIMIT_SCREEN_STATEMENT,
+      ),
+      evidence: [entry.importKey.replace(/^deliverable:/, "")].filter(Boolean),
+      confidence: IMPORTED_CONFIDENCE.contradiction,
+      workstreamId: launchWorkstreamId(workspace),
+      origin: null,
+      sourceId,
+      now,
+    });
+  }
+}
+
+/** Long enough to quote the wording and say what happens next, short enough to read at a glance. */
+const LIMIT_SCREEN_STATEMENT = 900;
 
 function trim(text, maximum) {
   const normalized = String(text ?? "").replace(/\s+/g, " ").trim();
@@ -467,6 +528,9 @@ export function applyImportPlan(database, workspace, plan, now) {
         source: provenance(entry.importKey, entry.origin, plan.sourceId, now, {
           fingerprint: entry.fingerprint,
           importedSignature: sectionsSignature(entry.sections),
+          // What the screen found, stored beside the document rather than only in the activity
+          // entry, so any surface that shows the document can say why it is being held back.
+          screened: entry.findings ?? [],
         }),
       };
       database.artifacts.push(artifact);
@@ -493,6 +557,7 @@ export function applyImportPlan(database, workspace, plan, now) {
         ...artifact.source,
         fingerprint: entry.fingerprint,
         importedSignature: sectionsSignature(entry.sections),
+        screened: entry.findings ?? [],
         importedAt: now,
       };
       database.artifactVersions.push(buildImportedVersion(artifact, now));
@@ -622,6 +687,12 @@ export function toFounderPlan(plan) {
       ...plan.retiredClaims.map((entry) => ({ kind: "claim", label: trim(entry.statement, 300) })),
       ...plan.retiredTasks.map((entry) => ({ kind: "task", label: trim(entry.title, 300) })),
     ],
+    heldBack: plan.heldBack.map((entry) => ({
+      kind: entry.kind,
+      label: trim(entry.label, 300),
+      reason: trim(entry.findings[0]?.reason ?? "", 300),
+      excerpt: trim(entry.findings[0]?.excerpt ?? "", 300),
+    })),
     contradictions: plan.contradictions.map((entry) => ({
       severity: entry.severity,
       message: trim(entry.message, 500),

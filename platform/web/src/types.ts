@@ -142,6 +142,23 @@ export interface ArtifactSection {
   body: string;
 }
 
+/** What the instruction screen found in one piece of imported wording. */
+export interface ScreenFinding {
+  code: string;
+  reason: string;
+  excerpt: string;
+}
+
+/** Where a record's words came from, when they did not come from someone in this company. */
+export interface RecordSource {
+  kind?: string;
+  sourcePath?: string | null;
+  laneTitle?: string | null;
+  screened?: ScreenFinding[];
+  screenConfirmedAt?: string | null;
+  screenConfirmedBy?: string | null;
+}
+
 export interface Artifact {
   id: string;
   workspaceId: string;
@@ -157,6 +174,9 @@ export interface Artifact {
   linkedDecisionIds: string[];
   createdAt: string;
   updatedAt: string;
+  stale?: boolean;
+  staleReason?: string | null;
+  source?: RecordSource | null;
 }
 
 export interface ArtifactVersion {
@@ -385,7 +405,7 @@ export interface ImportPlan {
     creates: number;
     updates: number;
     unchanged: number;
-    flagged: number;
+    drifted: number;
     retires: number;
     companyFieldsFilled: number;
     companyFieldsDiffering: number;
@@ -397,6 +417,8 @@ export interface ImportPlan {
   tasks: Array<{ action: ImportAction; title: string }>;
   deliverables: Array<{ action: ImportAction; title: string; sectionCount: number | null }>;
   retiring: Array<{ kind: "claim" | "task"; label: string }>;
+  /** Imported material whose own wording reads as an instruction to a machine. */
+  heldBack: Array<{ kind: string; label: string; reason: string; excerpt: string }>;
   contradictions: Array<{ severity: "blocking" | "advisory"; message: string; sourcePath: string | null }>;
 }
 

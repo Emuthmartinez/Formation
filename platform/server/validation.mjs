@@ -140,6 +140,12 @@ export function normalizeArtifactPatch(patch) {
   if (patch.linkedDecisionIds !== undefined) {
     normalized.linkedDecisionIds = textList(patch.linkedDecisionIds, "Linked decisions", 100, TEXT_LIMITS.key);
   }
+  // Confirming that imported wording is meant. Not a content change — it releases a document the
+  // instruction screen is holding back, without altering a word of it.
+  if (patch.wordingConfirmed !== undefined) {
+    if (typeof patch.wordingConfirmed !== "boolean") throw new HttpError(400, "Wording confirmation must be true or false.");
+    normalized.wordingConfirmed = patch.wordingConfirmed;
+  }
   if (Object.keys(normalized).length === 0) throw new HttpError(400, "No supported deliverable changes were provided.");
   return normalized;
 }
