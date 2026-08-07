@@ -1,7 +1,21 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { Button, EmptyState, PageHeader, ProgressLine, Section, StatusText, TechnicalDisclosure, formatCount, formatDate, timeAgo } from "../components/Primitives";
+import {
+  Button,
+  DateSignal,
+  EmptyState,
+  PageHeader,
+  Priority,
+  ProgressLine,
+  Section,
+  StatusText,
+  TechnicalDisclosure,
+  formatDate,
+  statusTone,
+  timeAgo,
+} from "../components/Primitives";
 import { Motif } from "../components/Motif";
+import { ReadinessLedger } from "../components/Readiness";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { FounderExecution, Task } from "../types";
@@ -35,32 +49,52 @@ export function LaunchPage() {
           <p className="eyebrow">Readiness score</p>
           <strong>{readiness.score}</strong>
           <div className="score-rule">
-            <ProgressLine value={readiness.score} label="Readiness score" hideValue />
+            <ProgressLine
+              value={readiness.score}
+              label="Readiness score"
+              hideValue
+              tone={readiness.score >= 70 ? "positive" : readiness.score >= 40 ? "caution" : "critical"}
+            />
             <span className="score-rule__annotation">{readiness.score} / 100</span>
           </div>
         </div>
         <div className="launch-scoreboard__target">
           <p className="eyebrow">Target launch</p>
           <strong>{formatDate(workspace.launchTarget)}</strong>
+          <DateSignal value={workspace.launchTarget} fallback="No target set" horizonDays={365} />
           <p>{workspace.company.currentGoal}</p>
         </div>
-        <dl className="launch-scoreboard__facts">
-          <div><dt>Base progress</dt><dd>{readiness.baseScore}%</dd></div>
-          <div><dt>Blocked areas</dt><dd>{formatCount(readiness.blockedCount)}</dd></div>
-          <div><dt>Open decisions</dt><dd>{formatCount(readiness.openDecisionCount)}</dd></div>
-          <div><dt>Critical tasks</dt><dd>{formatCount(readiness.criticalTaskCount)}</dd></div>
-        </dl>
+        {/* The same subtraction the founder sees on Today, at the size the launch page allows. */}
+        <div className="launch-scoreboard__ledger">
+          <p className="eyebrow">How the score was reached</p>
+          <ReadinessLedger readiness={readiness} />
+        </div>
       </section>
 
       <Section title="Readiness by business outcome" description="These are not departments. Each category represents a launch question that must have a credible answer.">
+        {/* Same column rhythm as the workstream ledger — outcome, state, progress, what is in
+            the way — so the two pages are read the same way. */}
+        <div className="readiness-category__head" aria-hidden="true">
+          <span>Launch question</span>
+          <span>State</span>
+          <span>Progress</span>
+          <span>What is in the way</span>
+        </div>
         <div className="readiness-category-list">
           {readiness.categories.map((category, index) => (
             <article key={category.id} className="readiness-category">
-              <span className="readiness-category__index">{String(index + 1).padStart(2, "0")}</span>
-              <div className="readiness-category__body">
-                <div><h3>{category.label}</h3><StatusText status={category.status} /></div>
-                <ProgressLine value={category.progress} label={`${category.label} progress`} />
-                {category.blockers.length ? <ul>{category.blockers.map((blocker) => <li key={blocker}>{blocker}</li>)}</ul> : <p>No active blocker recorded.</p>}
+              <div className="readiness-category__identity">
+                <span className="readiness-category__index">{String(index + 1).padStart(2, "0")}</span>
+                <h3>{category.label}</h3>
+              </div>
+              <StatusText status={category.status} />
+              <ProgressLine value={category.progress} label={`${category.label} progress`} tone={statusTone(category.status)} />
+              <div className="readiness-category__blockers">
+                {category.blockers.length ? (
+                  <ul>{category.blockers.map((blocker) => <li key={blocker}>{blocker}</li>)}</ul>
+                ) : (
+                  <p>No active blocker recorded.</p>
+                )}
               </div>
             </article>
           ))}
@@ -73,13 +107,14 @@ export function LaunchPage() {
         <Section title="Critical path" description="Work that materially changes whether this launch is responsible and decision-grade.">
           <div className="critical-path-list">
             {criticalTasks.length ? criticalTasks.map((task, index) => (
-              <article key={task.id} className="critical-path-row">
+              <article key={task.id} id={`task-${task.id}`} className="critical-path-row">
                 <span>{index + 1}</span>
                 <div>
                   <p className="eyebrow">{workspace.workstreams.find((stream) => stream.id === task.workstreamId)?.title}</p>
                   <h3>{task.title}</h3>
-                  <p>{task.owner} · {formatDate(task.dueAt, "No due date")}</p>
+                  <p className="task-row__line"><Priority value={task.priority} /> <span>{task.owner}</span></p>
                 </div>
+                <DateSignal value={task.dueAt} fallback="No due date" />
                 <Button variant="quiet" onClick={() => completeTask(task)}>Mark complete</Button>
               </article>
             )) : <EmptyState title="No unfinished critical work" description="The remaining path contains no task currently marked critical or high priority." />}
@@ -89,11 +124,13 @@ export function LaunchPage() {
         <Section title="Calls before launch" description="A launch date is not a substitute for these decisions.">
           <div className="launch-decision-list">
             {openDecisions.length ? openDecisions.map((decision) => (
-              <button key={decision.id} onClick={() => navigate(`/decisions#${decision.id}`)}>
-                <StatusText status={decision.status} />
+              <button key={decision.id} id={`decision-${decision.id}`} onClick={() => navigate(`/decisions#${decision.id}`)}>
+                <span className="launch-decision-list__head">
+                  <StatusText status={decision.status} />
+                  <DateSignal value={decision.reviewAt} fallback="Review now" />
+                </span>
                 <h3>{decision.title}</h3>
                 <p>{decision.decision}</p>
-                <span>Review {formatDate(decision.reviewAt, "now")}</span>
               </button>
             )) : <EmptyState title="No unresolved launch decisions" description="All currently recorded decisions have been accepted or superseded." />}
           </div>
@@ -102,9 +139,22 @@ export function LaunchPage() {
 
       {readiness.blockers.length ? (
         <Section title="What prevents a clean launch claim" description="Formation will not call the company launch-ready while these remain unresolved.">
-          <ol className="blocker-ledger">
-            {readiness.blockers.map((blocker, index) => <li key={blocker}><span>{String(index + 1).padStart(2, "0")}</span><p>{blocker}</p></li>)}
-          </ol>
+          {/* These are the same items listed inside the categories above and in the two panels
+              beside them. Naming the kind and linking to the record makes the repetition a
+              cross-reference rather than four unrelated lists; a red rank numeral implied an
+              order of importance the readiness calculation never assigns. */}
+          <ul className="blocker-ledger">
+            {(readiness.blockerRefs.length ? readiness.blockerRefs : readiness.blockers.map((label) => ({ id: label, kind: "workstream" as const, label }))).map((blocker) => (
+              <li key={`${blocker.kind}-${blocker.id}`}>
+                <span className="claim-kind">{blockerKindLabels[blocker.kind]}</span>
+                {blocker.kind === "workstream" ? (
+                  <p>{blocker.label}</p>
+                ) : (
+                  <a href={`#${blocker.kind}-${blocker.id}`}>{blocker.label}</a>
+                )}
+              </li>
+            ))}
+          </ul>
         </Section>
       ) : null}
 
@@ -119,6 +169,13 @@ export function LaunchPage() {
     </div>
   );
 }
+
+// What kind of thing is in the way, said the way a founder would say it.
+const blockerKindLabels: Record<string, string> = {
+  workstream: "Workstream",
+  task: "Task",
+  decision: "Decision",
+};
 
 function taskRank(task: Task) {
   const priority = { critical: 0, high: 1, medium: 2, low: 3 }[task.priority];

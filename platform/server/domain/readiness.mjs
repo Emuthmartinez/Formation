@@ -11,6 +11,18 @@ const READINESS_WEIGHTS = {
   launch: 1.25,
 };
 
+/**
+ * What a readiness score is docked for, and by how much. These live here rather than in the
+ * web app so the founder-facing subtraction is rendered from the same numbers that produced
+ * the score — a client-side copy of these weights would drift the moment one of them changes.
+ */
+const PENALTY_RULES = [
+  { id: "blocked", label: "Blocked workstreams", pointsEach: 5 },
+  { id: "critical-tasks", label: "Unfinished critical tasks", pointsEach: 3 },
+  { id: "open-decisions", label: "Unresolved decisions", pointsEach: 2 },
+];
+const PENALTY_CAP = 24;
+
 const READINESS_GROUPS = [
   { id: "foundation", label: "Business foundation", workstreams: ["strategy", "customer", "market"] },
   { id: "offer", label: "Product and economics", workstreams: ["product", "business-model"] },
@@ -39,7 +51,19 @@ export function calculateReadiness(workspace, tasks = [], decisions = []) {
   const blockedStreams = streams.filter((stream) => stream.status === "blocked");
 
   const baseScore = totalWeight > 0 ? Math.round(weightedProgress / totalWeight) : 0;
-  const penalty = Math.min(24, blockedStreams.length * 5 + openCriticalTasks.length * 3 + openDecisions.length * 2);
+  const penaltyCounts = {
+    blocked: blockedStreams.length,
+    "critical-tasks": openCriticalTasks.length,
+    "open-decisions": openDecisions.length,
+  };
+  const deductions = PENALTY_RULES.map((rule) => ({
+    id: rule.id,
+    label: rule.label,
+    count: penaltyCounts[rule.id] ?? 0,
+    points: (penaltyCounts[rule.id] ?? 0) * rule.pointsEach,
+  }));
+  const uncappedPenalty = deductions.reduce((sum, entry) => sum + entry.points, 0);
+  const penalty = Math.min(PENALTY_CAP, uncappedPenalty);
   const score = clampNumber(baseScore - penalty, 0, 100);
 
   const categories = READINESS_GROUPS.map((group) => {
@@ -47,21 +71,26 @@ export function calculateReadiness(workspace, tasks = [], decisions = []) {
     const progress = members.length
       ? Math.round(members.reduce((sum, stream) => sum + clampNumber(stream.progress, 0, 100), 0) / members.length)
       : 0;
-    const blockers = [
-      ...members.filter((stream) => stream.status === "blocked").map((stream) => stream.nextAction),
+    const refs = [
+      ...members.filter((stream) => stream.status === "blocked").map(blockerRef("workstream", "nextAction")),
       ...openCriticalTasks
         .filter((task) => members.some((stream) => stream.id === task.workstreamId))
-        .map((task) => task.title),
+        .map(blockerRef("task", "title")),
       ...openDecisions
         .filter((decision) => members.some((stream) => stream.id === decision.workstreamId))
-        .map((decision) => decision.title),
+        .map(blockerRef("decision", "title")),
     ];
+    const blockers = refs.map((ref) => ref.label);
     return {
       id: group.id,
       label: group.label,
       progress,
       status: blockers.length > 0 ? "blocked" : progress >= 80 ? "ready" : progress >= 55 ? "in-progress" : "not-ready",
       blockers: unique(blockers).slice(0, 3),
+      // The same blockers, each still attached to the record that causes it, so a founder can
+      // get from "what is in the way" to the task or call itself. `blockers` stays a plain
+      // string list — it is what the founder-facing prose reads from.
+      blockerRefs: uniqueRefs(refs).slice(0, 3),
     };
   });
 
@@ -71,13 +100,40 @@ export function calculateReadiness(workspace, tasks = [], decisions = []) {
     blockedCount: blockedStreams.length,
     openDecisionCount: openDecisions.length,
     criticalTaskCount: openCriticalTasks.length,
+    // `applied` is the deduction the founder can actually see in the arithmetic: base minus
+    // score. It differs from `penalty` only when the score floors at zero, and showing it
+    // keeps the displayed subtraction reconcilable in every case.
+    penalty: {
+      applied: baseScore - score,
+      total: penalty,
+      uncapped: uncappedPenalty,
+      cap: PENALTY_CAP,
+      capped: uncappedPenalty > PENALTY_CAP,
+      deductions,
+    },
     categories,
     blockers: unique([
       ...blockedStreams.map((stream) => stream.nextAction),
       ...openCriticalTasks.map((task) => task.title),
       ...openDecisions.map((decision) => decision.title),
     ]).slice(0, 8),
+    blockerRefs: uniqueRefs([
+      ...blockedStreams.map(blockerRef("workstream", "nextAction")),
+      ...openCriticalTasks.map(blockerRef("task", "title")),
+      ...openDecisions.map(blockerRef("decision", "title")),
+    ]).slice(0, 8),
   };
+}
+
+/** One blocker, still carrying the record it came from. */
+function blockerRef(kind, labelField) {
+  return (entry) => ({ id: entry.id, kind, label: entry[labelField] });
+}
+
+/** Deduplicate on the founder-visible label, matching how `blockers` is deduplicated. */
+function uniqueRefs(refs) {
+  const seen = new Set();
+  return refs.filter((ref) => (seen.has(ref.label) ? false : seen.add(ref.label)));
 }
 
 export function detectContradictions(claims) {

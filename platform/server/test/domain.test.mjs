@@ -43,6 +43,80 @@ test("readiness penalizes critical blockers instead of rewarding decorative prog
   assert.equal(penalized.categories.find((category) => category.id === "foundation").status, "blocked");
 });
 
+test("readiness reports the deduction that produced the score, line by line", () => {
+  const database = createSeedDatabase();
+  const workspace = structuredClone(database.workspaces[0]);
+  workspace.workstreams.forEach((stream) => {
+    stream.progress = 90;
+    stream.status = "on-track";
+  });
+  workspace.workstreams[0].status = "blocked";
+
+  const readiness = calculateReadiness(
+    workspace,
+    [{ workspaceId: workspace.id, workstreamId: "strategy", priority: "critical", status: "blocked", title: "Resolve proof" }],
+    [{ workspaceId: workspace.id, workstreamId: "strategy", status: "open", title: "Choose wedge" }],
+  );
+
+  const byId = Object.fromEntries(readiness.penalty.deductions.map((entry) => [entry.id, entry]));
+  assert.deepEqual(byId.blocked, { id: "blocked", label: "Blocked workstreams", count: 1, points: 5 });
+  assert.deepEqual(byId["critical-tasks"], { id: "critical-tasks", label: "Unfinished critical tasks", count: 1, points: 3 });
+  assert.deepEqual(byId["open-decisions"], { id: "open-decisions", label: "Unresolved decisions", count: 1, points: 2 });
+
+  // The founder-visible arithmetic must reconcile: base minus the shown deduction is the score.
+  assert.equal(readiness.penalty.uncapped, 10);
+  assert.equal(readiness.penalty.total, 10);
+  assert.equal(readiness.penalty.capped, false);
+  assert.equal(readiness.baseScore - readiness.penalty.applied, readiness.score);
+});
+
+test("every blocker keeps a reference to the record that causes it, without changing the string list", () => {
+  const database = createSeedDatabase();
+  const workspace = structuredClone(database.workspaces[0]);
+  workspace.workstreams.forEach((stream) => {
+    stream.progress = 90;
+    stream.status = "on-track";
+  });
+  const strategy = workspace.workstreams.find((stream) => stream.id === "strategy");
+  strategy.status = "blocked";
+
+  const readiness = calculateReadiness(
+    workspace,
+    [{ id: "tsk_proof", workspaceId: workspace.id, workstreamId: "strategy", priority: "critical", status: "blocked", title: "Resolve proof" }],
+    [{ id: "dec_wedge", workspaceId: workspace.id, workstreamId: "strategy", status: "open", title: "Choose wedge" }],
+  );
+
+  // The founder-facing string list is unchanged — prose still reads from it.
+  assert.deepEqual(readiness.blockers, [strategy.nextAction, "Resolve proof", "Choose wedge"]);
+  assert.deepEqual(readiness.blockerRefs, [
+    { id: "strategy", kind: "workstream", label: strategy.nextAction },
+    { id: "tsk_proof", kind: "task", label: "Resolve proof" },
+    { id: "dec_wedge", kind: "decision", label: "Choose wedge" },
+  ]);
+
+  // Categories carry the same pairing, so a launch row can link to the record it names.
+  const foundation = readiness.categories.find((category) => category.id === "foundation");
+  assert.deepEqual(foundation.blockers, foundation.blockerRefs.map((ref) => ref.label));
+  assert.deepEqual(foundation.blockerRefs.map((ref) => ref.kind), ["workstream", "task", "decision"]);
+});
+
+test("readiness caps the deduction and says so instead of scoring below the cap", () => {
+  const database = createSeedDatabase();
+  const workspace = structuredClone(database.workspaces[0]);
+  workspace.workstreams.forEach((stream) => {
+    stream.progress = 90;
+    stream.status = "blocked";
+  });
+
+  const readiness = calculateReadiness(workspace, [], []);
+
+  assert.equal(readiness.penalty.uncapped, workspace.workstreams.length * 5);
+  assert.equal(readiness.penalty.total, readiness.penalty.cap);
+  assert.equal(readiness.penalty.capped, true);
+  assert.equal(readiness.score, readiness.baseScore - readiness.penalty.cap);
+  assert.equal(readiness.baseScore - readiness.penalty.applied, readiness.score);
+});
+
 test("contradiction detection ignores resolved claims and groups active values by semantic key", () => {
   const contradictions = detectContradictions([
     { id: "1", key: "pricing.model", value: "annual", status: "active", kind: "assumption", statement: "Annual", workstreamId: "money" },

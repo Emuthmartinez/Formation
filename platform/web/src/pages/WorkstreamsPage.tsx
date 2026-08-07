@@ -1,6 +1,20 @@
 import { useMemo, useState } from "react";
 import { api } from "../api";
-import { Button, EmptyState, Field, PageHeader, ProgressLine, Section, StatusText } from "../components/Primitives";
+import {
+  Button,
+  ConfidenceMark,
+  DateSignal,
+  EmptyState,
+  Field,
+  PageHeader,
+  Priority,
+  ProgressLine,
+  Section,
+  StatusText,
+  Tally,
+  humanize,
+  statusTone,
+} from "../components/Primitives";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import { Icon } from "../components/Icon";
@@ -26,10 +40,24 @@ export function WorkstreamsOverviewPage() {
         title="One company, eight connected bodies of work"
         description="Each workstream has a specific decision to improve, a current source of truth, and one next action."
       />
+      {/* Column headings label progress and confidence once for the whole ledger, rather than
+          repeating a caption inside every row or above every group. */}
+      <div className="workstream-list__head" aria-hidden="true">
+        <span>Body of work</span>
+        <span>State</span>
+        <span>Progress</span>
+        <span>Confidence</span>
+        <span>Next action</span>
+        <span />
+      </div>
+
       <div className="workstream-groups">
         {grouped.map(([group, streams]) => (
           <section key={group} className="workstream-group" aria-label={group}>
-            <p className="section-kicker workstream-group__kicker"><span>{group}</span></p>
+            <div className="workstream-group__head">
+              <p className="section-kicker workstream-group__kicker"><span>{group}</span></p>
+              {streams.length > 1 ? <Tally items={statusTally(streams)} /> : null}
+            </div>
             <div className="workstream-list">
               {streams.map((stream) => (
                 <button key={stream.id} className="workstream-row" onClick={() => navigate(`/workstreams/${stream.id}`)}>
@@ -37,15 +65,13 @@ export function WorkstreamsOverviewPage() {
                     <span className="workstream-row__index">{String(snapshot.workspace.workstreams.indexOf(stream) + 1).padStart(2, "0")}</span>
                     <div><h3>{stream.title}</h3><p>{stream.summary}</p></div>
                   </div>
-                  <div className="workstream-row__state">
-                    <StatusText status={stream.status} />
-                    <ProgressLine value={stream.progress} label={`${stream.title} progress`} />
-                  </div>
+                  <StatusText status={stream.status} />
+                  <ProgressLine value={stream.progress} label={`${stream.title} progress`} tone={statusTone(stream.status)} />
+                  <ConfidenceMark value={stream.confidence} caption={`${stream.title} confidence`} />
                   <div className="workstream-row__next">
-                    <span>Next action</span>
                     <p>{stream.nextAction}</p>
                   </div>
-                  <span className="workstream-row__arrow">→</span>
+                  <span className="workstream-row__arrow" aria-hidden="true">→</span>
                 </button>
               ))}
             </div>
@@ -144,13 +170,15 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
       />
 
       <section className="workstream-hero">
-        <div className="workstream-hero__progress">
-          <div><p className="eyebrow">Progress</p><strong>{stream.progress}%</strong></div>
-          <ProgressLine value={stream.progress} label={`${stream.title} progress`} hideValue />
+        <div className="workstream-hero__reading">
+          <p className="eyebrow">Progress</p>
+          <strong>{stream.progress}%</strong>
+          <ProgressLine value={stream.progress} label={`${stream.title} progress`} hideValue tone={statusTone(stream.status)} />
         </div>
-        <div className="workstream-hero__confidence">
+        <div className="workstream-hero__reading">
           <p className="eyebrow">Decision confidence</p>
           <strong>{stream.confidence}%</strong>
+          <ConfidenceMark value={stream.confidence} caption="Decision confidence" />
           <p>Confidence reflects evidence quality, not how polished the document looks.</p>
         </div>
         <div className="workstream-hero__status">
@@ -205,7 +233,13 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
                 <button className={`task-check ${task.status === "done" ? "task-check--done" : ""}`} onClick={() => updateTask(task, task.status === "done" ? "next" : "done")} aria-label={task.status === "done" ? `Reopen ${task.title}` : `Complete ${task.title}`}>
                   {task.status === "done" ? "✓" : null}
                 </button>
-                <div><h3>{task.title}</h3><p>{task.owner} · {task.priority}</p></div>
+                <div>
+                  <h3>{task.title}</h3>
+                  {/* The queue used to name the priority in plain prose and drop the due date
+                      entirely, so nothing here said which task to pick up first. */}
+                  <p className="task-row__line"><Priority value={task.priority} /> <span>{task.owner}</span></p>
+                  <DateSignal value={task.dueAt} />
+                </div>
                 <select value={task.status} onChange={(event) => updateTask(task, event.target.value as Task["status"])} aria-label={`Status for ${task.title}`}>
                   <option value="backlog">Backlog</option><option value="next">Next</option><option value="in-progress">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option>
                 </select>
@@ -232,7 +266,7 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
             <article key={claim.id} className="ledger-row">
               <span className={`claim-kind claim-kind--${claim.kind}`}>{claim.kind}</span>
               <p>{claim.statement}</p>
-              <span>{claim.confidence}%</span>
+              <ConfidenceMark value={claim.confidence} caption="Confidence" />
               <select value={claim.status} onChange={(event) => updateClaimStatus(claim.id, event.target.value)} aria-label={`Status for ${claim.statement}`}>
                 <option value={claim.kind === "question" ? "open" : "active"}>{claim.kind === "question" ? "Open" : "Active"}</option>
                 <option value="resolved">Resolved</option>
@@ -248,6 +282,18 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
       {taskOpen ? <NewTaskModal stream={stream} onClose={() => setTaskOpen(false)} /> : null}
     </div>
   );
+}
+
+/** How a group of workstreams actually stands, so the founder does not have to count rows. */
+function statusTally(streams: Workstream[]) {
+  const counts = new Map<string, number>();
+  for (const stream of streams) counts.set(stream.status, (counts.get(stream.status) ?? 0) + 1);
+  return ["blocked", "needs-attention", "on-track", "complete", "not-started"].map((status) => ({
+    id: status,
+    label: humanize(status).toLowerCase(),
+    count: counts.get(status) ?? 0,
+    tone: statusTone(status),
+  }));
 }
 
 function EvidenceColumn({ title, items, empty }: { title: string; items: string[]; empty: string }) {

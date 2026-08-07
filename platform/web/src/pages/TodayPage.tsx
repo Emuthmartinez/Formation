@@ -2,20 +2,26 @@ import { useMemo, useState } from "react";
 import { api } from "../api";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
-import type { Recommendation, Task } from "../types";
+import type { Activity, Recommendation, Task } from "../types";
 import { Icon } from "../components/Icon";
 import { Motif } from "../components/Motif";
+import { ReadinessLedger } from "../components/Readiness";
 import {
   Button,
-  ContradictionStatements,
+  ConfidenceMark,
+  DateSignal,
   EmptyState,
+  ContradictionStatements,
   PageHeader,
+  Priority,
   ProgressLine,
   Section,
   StatusText,
-  formatCount,
-  formatDate,
+  Tally,
+  humanize,
+  statusTone,
   timeAgo,
+  type Tone,
 } from "../components/Primitives";
 
 export function TodayPage() {
@@ -27,6 +33,14 @@ export function TodayPage() {
     () => tasks.filter((task) => task.status !== "done").sort(compareTasks).slice(0, 5),
     [tasks],
   );
+  // Where the eight bodies of work actually stand. The founder would otherwise have to open
+  // Workstreams and count rows to learn this.
+  const workstreamTally = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const stream of workspace.workstreams) counts.set(stream.status, (counts.get(stream.status) ?? 0) + 1);
+    return ["blocked", "needs-attention", "on-track", "complete", "not-started"]
+      .map((status) => ({ id: status, label: humanize(status).toLowerCase(), count: counts.get(status) ?? 0, tone: statusTone(status) }));
+  }, [workspace.workstreams]);
 
   const completeTask = async (task: Task) => {
     setUpdatingTask(task.id);
@@ -63,7 +77,10 @@ export function TodayPage() {
                   <div className="recommendation-row__body">
                     <div className="recommendation-row__meta">
                       <span>{recommendation.kind.replaceAll("-", " ")}</span>
-                      <span>{recommendation.confidence}% confidence</span>
+                      {/* Which body of work this move belongs to — the row named the type and the
+                          confidence but never the part of the company it would change. */}
+                      <span>{workspace.workstreams.find((stream) => stream.id === recommendation.workstreamId)?.title}</span>
+                      <ConfidenceMark value={recommendation.confidence} />
                     </div>
                     <h2>{recommendation.title}</h2>
                     {recommendation.kind === "resolve-contradiction" ? (
@@ -92,25 +109,39 @@ export function TodayPage() {
         </div>
 
         <aside className="readiness-rail">
+          {/* The rule runs the full height of the band so the column reads as deliberate;
+              only the instrument inside it is sticky. */}
+          <div className="readiness-rail__inner">
           <Motif />
           <p className="eyebrow">Launch readiness</p>
           <div className="readiness-score">
             <strong>{readiness.score}</strong>
+            <span>/ 100</span>
           </div>
           <div className="score-rule">
-            <ProgressLine value={readiness.score} label="Launch readiness" hideValue />
-            <span className="score-rule__annotation">{readiness.score} / 100</span>
+            <ProgressLine
+              value={readiness.score}
+              label="Launch readiness"
+              hideValue
+              tone={readiness.score >= 70 ? "positive" : readiness.score >= 40 ? "caution" : "critical"}
+            />
           </div>
-          <p className="readiness-rail__note">
-            The score discounts blocked work, unresolved critical decisions, and unfinished critical tasks. No vanity math allowed.
-          </p>
-          <dl className="readiness-facts">
-            <div><dt>Target</dt><dd>{formatDate(workspace.launchTarget)}</dd></div>
-            <div><dt>Open decisions</dt><dd>{formatCount(readiness.openDecisionCount)}</dd></div>
-            <div><dt>Critical tasks</dt><dd>{formatCount(readiness.criticalTaskCount)}</dd></div>
-            <div><dt>Blocked workstreams</dt><dd>{formatCount(readiness.blockedCount)}</dd></div>
-          </dl>
+
+          <ReadinessLedger readiness={readiness} />
+
+          <div className="readiness-rail__target">
+            <span className="eyebrow">Target launch</span>
+            {/* The countdown to launch is the point of this date, so it keeps a long horizon. */}
+            <DateSignal value={workspace.launchTarget} fallback="No target set" horizonDays={365} />
+          </div>
+
+          <div className="readiness-rail__tally">
+            <span className="eyebrow">Where the work stands</span>
+            <Tally items={workstreamTally} />
+          </div>
+
           <Button variant="secondary" onClick={() => navigate("/launch")}>Review launch path</Button>
+          </div>
         </aside>
       </section>
 
@@ -150,8 +181,8 @@ export function TodayPage() {
                   <p>{workspace.workstreams.find((stream) => stream.id === task.workstreamId)?.title} · {task.owner}</p>
                 </div>
                 <div className="task-row__meta">
-                  <span className={`priority priority--${task.priority}`}>{task.priority}</span>
-                  <span>{formatDate(task.dueAt, "No date")}</span>
+                  <Priority value={task.priority} />
+                  <DateSignal value={task.dueAt} />
                 </div>
               </article>
             )) : <EmptyState title="The weekly queue is clear" description="Choose the next action from a workstream when you are ready to advance it." />}
@@ -167,7 +198,7 @@ export function TodayPage() {
                   <h3>{decision.title}</h3>
                   <p>{decision.decision}</p>
                 </div>
-                <span>{formatDate(decision.reviewAt, "Review now")}</span>
+                <DateSignal value={decision.reviewAt} fallback="Review now" />
               </button>
             ))}
           </div>
@@ -179,7 +210,7 @@ export function TodayPage() {
         <div className="activity-list">
           {activity.slice(0, 6).map((entry) => (
             <article key={entry.id} className="activity-row">
-              <span className="activity-row__line" />
+              <span className={`activity-row__line tone-${activityTone(entry)}`} />
               <div>
                 <h3>{entry.title}</h3>
                 <p>{entry.detail}</p>
@@ -191,6 +222,19 @@ export function TodayPage() {
       </Section>
     </div>
   );
+}
+
+/**
+ * What kind of movement an activity entry records. Every marker used to be forest green, so a
+ * failed work session and a resolved contradiction looked like equal progress.
+ *
+ * The decline check is a case-insensitive substring on purpose: the two code paths that record
+ * a decline title it differently ("Declined: …" and "Approval declined: …").
+ */
+function activityTone(entry: Activity): Tone {
+  if (entry.type.includes("failed") || entry.type === "contradiction" || /declined/i.test(entry.title)) return "critical";
+  if (entry.type.includes("requested") || entry.type.includes("queued")) return "caution";
+  return "positive";
 }
 
 function compareTasks(left: Task, right: Task) {

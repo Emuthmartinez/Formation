@@ -15,7 +15,10 @@
   --forest-soft: #dce8e1;
   --rust: #a45135;
   --rust-soft: #f0dfd7;
-  --amber: #9a6b1d;
+  /* 4.95:1 on --paper and 5.69:1 on --surface-strong. The previous value cleared AA only
+     against white, and amber now carries text — relative due dates, tally counts, engine step
+     states — not just dots and borders. */
+  --amber: #8a5e15;
   --amber-soft: #eee4cf;
   --red: #9b382e;
   --red-soft: #f3deda;
@@ -251,7 +254,11 @@ input[type="range"] { padding: 0; accent-color: var(--forest); box-shadow: none;
 .page-header__description { max-width: 780px; margin: 14px 0 0; font-size: 16px; line-height: 1.55; }
 .page-header__action { flex: 0 0 auto; padding-bottom: 2px; }
 
-.section { background: var(--surface); border-top: 1px solid var(--line-dark); padding: 24px 0 4px; }
+/* No fill. A tinted panel with no horizontal padding puts every right-aligned value flush
+   against a visible edge, and two of them side by side read as two boxes of different height
+   rather than two bodies of work. The rule and the spacing do the grouping
+   (design-system.md: "Spacing should create groups before borders do"). */
+.section { border-top: 1px solid var(--line-dark); padding: 24px 0 4px; }
 .section__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
 .section__head > div:first-child { min-width: 0; }
 .section__head > div:last-child:not(:first-child) { flex-shrink: 0; }
@@ -274,36 +281,41 @@ input[type="range"] { padding: 0; accent-color: var(--forest); box-shadow: none;
 .form-actions--sticky { position: sticky; bottom: 12px; background: rgba(242,239,231,.95); padding: 13px; border: 1px solid var(--line); border-radius: 8px; margin-top: 18px; backdrop-filter: blur(10px); }
 .form-error { color: var(--red); background: var(--red-soft); padding: 12px; border-radius: 6px; }
 
+/* One tone decision per element, applied by Primitives.statusTone(). A status dot, a progress
+   track, a due date, and a tally count all read their accent from --tone, so a state can never
+   be green in one instrument and amber in the next. Tone is always redundant with a word. */
+.tone-positive { --tone: var(--forest); }
+.tone-caution { --tone: var(--amber); }
+.tone-critical { --tone: var(--red); }
+.tone-info { --tone: var(--blue); }
+.tone-neutral { --tone: #8b928e; }
+
 .status-text { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; font-weight: 650; white-space: nowrap; }
-.status-text__dot { width: 7px; height: 7px; border-radius: 50%; background: #8b928e; }
-.status-text--on-track .status-text__dot,
-.status-text--complete .status-text__dot,
-.status-text--completed .status-text__dot,
-.status-text--finished .status-text__dot,
-.status-text--ready .status-text__dot,
-.status-text--decided .status-text__dot,
-.status-text--approved .status-text__dot,
-.status-text--reviewed .status-text__dot,
-.status-text--active .status-text__dot { background: var(--forest); }
-.status-text--blocked .status-text__dot,
-.status-text--failed .status-text__dot { background: var(--red); }
-.status-text--needs-attention .status-text__dot,
-.status-text--proposed .status-text__dot,
-.status-text--revisit .status-text__dot,
-.status-text--open .status-text__dot,
-.status-text--in-progress .status-text__dot,
-.status-text--running .status-text__dot,
-.status-text--needs-founder .status-text__dot,
-.status-text--held .status-text__dot,
-.status-text--processing .status-text__dot { background: var(--amber); }
-.status-text--draft .status-text__dot,
-.status-text--queued .status-text__dot { background: var(--blue); }
+.status-text__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--tone, #8b928e); }
 .progress-line { display: flex; align-items: center; gap: 10px; width: 100%; }
 .progress-line__track { appearance: none; width: 100%; height: 5px; flex: 1; border: 0; border-radius: 999px; overflow: hidden; background: #deddd6; }
 .progress-line__track::-webkit-progress-bar { background: #deddd6; border-radius: 999px; }
-.progress-line__track::-webkit-progress-value { background: var(--forest); border-radius: 999px; transition: inline-size 240ms ease; }
-.progress-line__track::-moz-progress-bar { background: var(--forest); border-radius: 999px; }
+.progress-line__track::-webkit-progress-value { background: var(--tone, var(--forest)); border-radius: 999px; transition: inline-size 240ms ease; }
+.progress-line__track::-moz-progress-bar { background: var(--tone, var(--forest)); border-radius: 999px; }
 .progress-line__value { font-size: 11px; color: var(--muted); width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Evidence quality: five ticks and the number. Same idiom as the sidebar stage strip. */
+.confidence-mark { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.confidence-mark__segments { display: inline-grid; grid-template-columns: repeat(5, 6px); gap: 2px; }
+.confidence-mark__segments span { height: 8px; border-radius: 1px; background: var(--line-dark); }
+.confidence-mark__segments span.is-on { background: var(--ink-soft); }
+.confidence-mark__value { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 650; }
+
+/* A ledger of counts, not a metric row: "02 blocked · 02 needs attention · 04 on track". */
+.tally { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.tally li { display: inline-flex; align-items: baseline; gap: 7px; font-size: 12px; color: var(--muted); }
+.tally strong { color: var(--tone, var(--ink)); font-variant-numeric: tabular-nums; font-weight: 750; font-size: 13px; }
+
+/* A deadline read as time remaining. The relative phrase carries the urgency; tone repeats it. */
+.date-signal { display: inline-grid; justify-items: end; gap: 2px; white-space: nowrap; }
+.date-signal__absolute { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.date-signal__relative { font-size: 11px; font-weight: 700; color: var(--tone, var(--muted)); }
+.date-signal.tone-neutral .date-signal__relative { color: var(--muted); font-weight: 650; }
 /* A score reads as one instrument: numeral above, rule below, quiet tabular annotation. */
 .score-rule { display: grid; gap: 6px; }
 .score-rule__annotation { justify-self: end; color: var(--muted); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; }

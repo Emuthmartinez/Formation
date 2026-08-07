@@ -8,7 +8,9 @@
 .signin-demo > span { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
 .signin-demo .button { margin-top: 0; }
 
-.version-history { margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--line-dark); }
+/* No margin above it: the editor surface is white and the lineage footer is not, so a gap here
+   renders as an orphan white band between two grey blocks. */
+.version-history { padding: 26px clamp(24px,5vw,65px) 34px; border-top: 1px solid var(--line-dark); background: var(--paper); }
 .version-history__head { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 8px; }
 .version-history__head h2 { margin: 3px 0 0; font-size: 24px; }
 .version-history__head > span { color: var(--muted); font-size: 12px; }
@@ -22,17 +24,19 @@
 .version-row__body p { margin: 0 0 10px; color: var(--ink-soft); font-size: 13px; line-height: 1.5; }
 .version-row__body ul { margin: 0 0 14px; padding-left: 18px; color: var(--muted); font-size: 12px; }
 .version-row__current { color: var(--forest); font-size: 12px; font-weight: 700; }
-/* Four claim columns are only comfortable on genuinely wide screens; ordinary laptop
-   widths (≤1440px) get two columns so each claim keeps a readable measure. */
-@media (max-width: 1440px) {
-  .claim-columns { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .claim-column:nth-child(2) { border-right: 0; }
-  .claim-column:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
-}
-
 @media (max-width: 1180px) {
-  .workstream-row { grid-template-columns: minmax(240px,1fr) 160px minmax(210px,.8fr); }
+  /* Below the ledger's budget the column headings stop matching the rows, so each row carries
+     its own shape: identity, then the three readings, then the next action. */
+  .workstream-list__head { display: none; }
+  .workstream-row { grid-template-columns: minmax(0,1fr) 132px 96px; row-gap: 12px; align-items: center; }
+  .workstream-row__identity, .workstream-row__next { grid-column: 1 / -1; }
+  .workstream-row .status-text { grid-column: 1; }
   .workstream-row__arrow { display: none; }
+  /* Same budget: the three scoreboard columns no longer fit, so the ledger takes its own row. */
+  .launch-scoreboard { grid-template-columns: 1fr 1fr; }
+  .launch-scoreboard__ledger { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); padding: 20px 0 0; }
+  .readiness-category__head,
+  .readiness-category { grid-template-columns: minmax(190px,.9fr) 116px 132px minmax(0,1fr); gap: 16px; }
   .deliverable-workspace { grid-template-columns: 265px minmax(0,1fr); }
   .deliverable-editor__head { display: grid; }
 }
@@ -48,14 +52,13 @@
   .topbar__menu { display: grid; }
   .main-content { padding: 34px 24px 70px; }
   .today-grid { grid-template-columns: 1fr; }
+  .readiness-rail { border-left: 0; border-top: 1px solid var(--line-dark); padding: 22px 0 0; }
   /* Relative, not static: the strata motif inside must keep anchoring to the rail. */
-  .readiness-rail { position: relative; top: 0; border-left: 0; border-top: 1px solid var(--line-dark); padding: 22px 0 0; }
+  .readiness-rail__inner { position: relative; top: 0; }
   .two-column-layout { grid-template-columns: 1fr; gap: 25px; }
   .three-column-evidence { grid-template-columns: 1fr; }
   .evidence-column { border-right: 0; border-bottom: 1px solid var(--line); }
   .evidence-column:last-child { border-bottom: 0; }
-  .workstream-row { grid-template-columns: 1fr 165px; }
-  .workstream-row__next { grid-column: 1 / -1; }
   .workstream-hero { grid-template-columns: 1fr 1fr; }
   .workstream-hero__status { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); padding: 18px 0 0; }
   .deliverable-workspace { grid-template-columns: 1fr; }
@@ -64,18 +67,19 @@
     border-bottom: 1px solid var(--line);
     max-height: 300px;
     overflow: auto;
-    /* Scrolling shadow in the index's own surface color: the cut edge reads as "more below". */
+    align-self: stretch;
+    /* Scrolling shadow in the index's own surface color (--paper-deep, #e9e5dc): the cut edge
+       reads as "more below". The rgba stops must track that token by hand — gradient color
+       stops cannot interpolate a var() to transparent reliably across engines. */
     background:
-      linear-gradient(#ece9e1 30%, rgba(236,233,225,0)) top / 100% 24px,
-      linear-gradient(rgba(236,233,225,0), #ece9e1 70%) bottom / 100% 24px,
+      linear-gradient(var(--paper-deep) 30%, rgba(233,229,220,0)) top / 100% 24px,
+      linear-gradient(rgba(233,229,220,0), var(--paper-deep) 70%) bottom / 100% 24px,
       radial-gradient(farthest-side at 50% 0, rgba(23,32,27,.16), transparent) top / 100% 12px,
       radial-gradient(farthest-side at 50% 100%, rgba(23,32,27,.16), transparent) bottom / 100% 12px;
-    background-color: #ece9e1;
+    background-color: var(--paper-deep);
     background-repeat: no-repeat;
     background-attachment: local, local, scroll, scroll;
   }
-  .launch-scoreboard { grid-template-columns: 1fr 1fr; }
-  .launch-scoreboard__facts { grid-column: 1 / -1; }
   .signin-page { grid-template-columns: 1fr; }
   /* The story stays, but the sign-in form must land near the first screen. */
   .signin-story { min-height: 0; padding-top: 30px; padding-bottom: 34px; }
@@ -103,24 +107,34 @@
   .activity-row > span:last-child { grid-column: 2; }
   .form-grid--two, .form-grid--three { grid-template-columns: 1fr; }
   .business-statement { grid-template-columns: 1fr; gap: 10px; }
-  .claim-columns { grid-template-columns: 1fr; }
-  .claim-column { border-right: 0; border-bottom: 1px solid var(--line); }
-  .workstream-row { grid-template-columns: 1fr; gap: 14px; }
+  .claim-ledger__row { grid-template-columns: minmax(0,1fr); row-gap: 10px; }
+  .claim-ledger__row .confidence-mark, .claim-ledger__row select { justify-self: start; }
+  .claim-ledger__row select { width: auto; }
+  .workstream-row { grid-template-columns: minmax(0,1fr) auto; gap: 12px 16px; }
+  .workstream-row .status-text, .workstream-row .progress-line { grid-column: 1 / -1; }
+  .workstream-row .confidence-mark { grid-column: 1 / -1; }
   .workstream-hero { grid-template-columns: 1fr; }
   .workstream-hero__status { grid-column: auto; }
   .ledger-row { grid-template-columns: 85px minmax(0,1fr); }
-  .ledger-row > span:nth-child(3), .ledger-row > select, .ledger-row > .status-text { grid-column: 2; justify-self: start; }
-  .decision-row { grid-template-columns: 1fr; grid-template-areas: "meta" "content" "dates" "actions"; }
-  .decision-row__dates { grid-template-columns: 1fr 1fr; }
+  .ledger-row > .confidence-mark, .ledger-row > select, .ledger-row > .status-text { grid-column: 2; justify-self: start; }
+  .decision-row { grid-template-columns: 1fr; grid-template-areas: "meta" "dates" "content" "actions"; }
+  .decision-row__dates { justify-content: flex-start; }
+  .decision-row__dates > div { justify-items: start; }
+  .decision-row__dates .date-signal { justify-items: start; }
+  .decision-row__actions { justify-content: flex-start; }
   .deliverable-editor__head { padding: 24px 18px; }
   .deliverable-editor__head h1, .title-input { font-size: 36px; }
   .deliverable-document, .deliverable-edit-form { padding: 30px 18px 50px; }
   .deliverable-lineage { grid-template-columns: 1fr; padding: 22px 18px; }
   .launch-scoreboard { grid-template-columns: 1fr; }
   .launch-scoreboard__target { border-left: 0; border-top: 1px solid var(--line); padding: 20px 0 0; }
-  .launch-scoreboard__facts { grid-column: auto; }
+  .launch-scoreboard__ledger { grid-column: auto; }
+  .readiness-category__head { display: none; }
+  .readiness-category { grid-template-columns: minmax(0,1fr) 132px; row-gap: 12px; align-items: center; }
+  .readiness-category__identity, .readiness-category__blockers { grid-column: 1 / -1; }
   .launch-definition { display: grid; }
-  .critical-path-row { grid-template-columns: 28px minmax(0,1fr); }
+  .critical-path-row { grid-template-columns: 28px minmax(0,1fr); row-gap: 10px; }
+  .critical-path-row .date-signal { grid-column: 2; justify-items: start; }
   .critical-path-row .button { grid-column: 2; justify-self: start; }
   .signin-story { padding: 26px 24px; }
   .signin-story__copy h1 { font-size: 42px; margin-bottom: 0; }
@@ -133,12 +147,10 @@
   .engine-step { grid-template-columns: 22px minmax(0,1fr); }
   .engine-step__status { grid-column: 2; }
   /* 16px keeps iOS Safari from zoom-jumping into these controls on focus. */
-  .claim-row__controls select, .ledger-row select, .task-list--compact .task-row select, .decision-row__actions select { font-size: 16px; }
+  .claim-ledger__row select, .ledger-row select, .task-list--compact .task-row select, .decision-row__actions select { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
-.claim-row__controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.claim-row__controls select { width: auto; min-width: 98px; padding: 6px 23px 6px 8px; font-size: 13px; }
 .ledger-row select { width: 118px; padding: 6px 22px 6px 8px; font-size: 13px; }
