@@ -348,7 +348,9 @@ export type Capability =
   | "generation-request"
   | "launch-engine-advance"
   | "company-write"
-  | "approval-decide";
+  | "approval-decide"
+  | "share-manage"
+  | "member-manage";
 
 export interface WorkspaceSnapshot {
   workspace: Workspace;
@@ -366,6 +368,54 @@ export interface WorkspaceSnapshot {
   recommendations: Recommendation[];
   readiness: Readiness;
 }
+
+export interface ShareLink {
+  id: string;
+  scope: "deliverable" | "company";
+  artifactId: string | null;
+  label: string;
+  createdBy: string;
+  createdAt: string;
+  expiresAt: string;
+  revokedAt: string | null;
+  viewCount: number;
+  lastViewedAt: string | null;
+}
+
+export interface CreatedShare {
+  share: ShareLink;
+  viewPath: string;
+  delivery: string;
+}
+
+/** What a link shows someone who has no account. Mirrors sharedView in domain/sharing.mjs. */
+export type SharedView = {
+  sharedBy: string;
+  expiresAt: string;
+  company: {
+    name: string;
+    stage: string;
+    oneLiner: string;
+    [field: string]: string | undefined;
+  };
+} & (
+  | {
+      scope: "deliverable";
+      deliverable: {
+        title: string;
+        status: string;
+        version: number;
+        summary: string;
+        updatedAt: string;
+        sections: Array<{ title: string; body: string }>;
+        evidence: Array<{ kind: string; statement: string }>;
+      };
+    }
+  | {
+      scope: "company";
+      workstreams: Array<{ id: string; title: string; group: string; summary: string; status: string; progress: number }>;
+    }
+);
 
 export interface AccountSession {
   id: string;

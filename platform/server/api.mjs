@@ -7,6 +7,7 @@ import { handleEvidenceRoutes } from "./routes/evidence.mjs";
 import { handleExecutionRoutes } from "./routes/executions.mjs";
 import { handleMemberRoutes } from "./routes/members.mjs";
 import { handlePublicRoutes } from "./routes/public.mjs";
+import { handleShareRoutes, handleSharedRead } from "./routes/sharing.mjs";
 import { handleWorkspaceRoutes } from "./routes/workspaces.mjs";
 
 export async function handleApi({ request, response, url, store, worker, executionWorker, allowDemoAuth, allowRegistration, authLimiters }) {
@@ -16,6 +17,9 @@ export async function handleApi({ request, response, url, store, worker, executi
   const context = { request, response, method, pathname, store, worker, executionWorker, allowDemoAuth, allowRegistration, authLimiters };
 
   await handlePublicRoutes(context);
+  if (response.writableEnded) return;
+  // The one authenticated-by-token read: the person holding a shared link has no account.
+  await handleSharedRead(context);
   if (response.writableEnded) return;
 
   const user = await getAuthenticatedUser(store, request);
@@ -27,6 +31,8 @@ export async function handleApi({ request, response, url, store, worker, executi
   await handleWorkspaceRoutes(privateContext);
   if (response.writableEnded) return;
   await handleMemberRoutes(privateContext);
+  if (response.writableEnded) return;
+  await handleShareRoutes(privateContext);
   if (response.writableEnded) return;
   await handleExecutionRoutes(privateContext);
   if (response.writableEnded) return;

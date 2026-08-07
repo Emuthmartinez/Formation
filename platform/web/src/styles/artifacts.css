@@ -121,3 +121,46 @@
 .launch-definition h2 { font-size: clamp(27px,3.6vw,46px); max-width: 940px; margin: 0; line-height: 1.08; }
 .launch-definition .button--secondary { color: #fff; border-color: rgba(255,255,255,.4); }
 
+
+/* Live share links, sitting between the deliverable's header and its body: close enough to the
+   work that a founder sees what is circulating while they read it. */
+.share-list { display: grid; gap: 10px; padding: 18px clamp(24px,5vw,65px); border-bottom: 1px solid var(--line); }
+.share-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.share-row strong { font-size: 14px; }
+.share-row p { margin: 3px 0 0; font-size: 12px; color: var(--muted); }
+
+/* What a reader with no account sees. No navigation, because there is nowhere for them to go. */
+.shared-page { min-height: 100vh; background: var(--paper); padding: 48px 20px 80px; }
+.shared-card {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 56px);
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.shared-head { display: flex; align-items: center; gap: 14px; padding-bottom: 22px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+.shared-head__note { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.shared-mark {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--forest);
+  color: #fff;
+  font-family: var(--serif, Georgia, serif);
+  font-size: 19px;
+}
+.shared-card h1 { margin: 0 0 12px; font-size: clamp(26px, 4vw, 38px); line-height: 1.15; }
+.shared-card h2 { margin: 30px 0 8px; font-size: 18px; }
+.shared-card p { line-height: 1.65; }
+.shared-meta { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; color: var(--muted); font-size: 12px; margin-bottom: 18px; }
+.shared-summary { font-size: 17px; color: var(--ink); }
+.shared-evidence { margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); }
+.shared-evidence ul { margin: 0; padding-left: 18px; display: grid; gap: 9px; }
+.shared-evidence li { font-size: 14px; line-height: 1.6; }
+.shared-evidence .claim-kind { margin-right: 9px; }
+.share-list--flush { padding: 0; border-bottom: 0; }
