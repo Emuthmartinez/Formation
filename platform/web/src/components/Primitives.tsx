@@ -503,3 +503,15 @@ export function timeAgo(value: string) {
   }
   return "just now";
 }
+
+/**
+ * The deliverable body language: paragraphs, and lines beginning with "- " as a list. Deliberately
+ * not a Markdown parser — this renders founder- and engine-authored text, so anything it does not
+ * understand must come out as the words that were written rather than as markup.
+ */
+export function MarkdownBody({ body }: { body: string }) {
+  const blocks = body.split(/\n\n+/);
+  return <>{blocks.map((block, index) => block.startsWith("- ") ? (
+    <ul key={index}>{block.split("\n").map((line, lineIndex) => <li key={`${index}-${lineIndex}`}>{line.replace(/^\-\s*/, "")}</li>)}</ul>
+  ) : <p key={index}>{block}</p>)}</>;
+}

@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "../api";
-import { Button, ConfidenceMark, EmptyState, Field, PageHeader, StatusText, formatDate, humanize } from "../components/Primitives";
+import { Button, ConfidenceMark, EmptyState, Field, MarkdownBody, PageHeader, StatusText, formatDate, humanize } from "../components/Primitives";
 import { useCan } from "../capabilities";
 import { useWorkspace } from "../context";
 import { navigate } from "../router";
-import type { Artifact, ArtifactSection } from "../types";
+import type { Artifact, ArtifactSection, CreatedShare, ShareLink } from "../types";
 
 export function DeliverablesPage({ artifactId }: { artifactId?: string }) {
   const { snapshot } = useWorkspace();
@@ -59,12 +59,54 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
   const [draft, setDraft] = useState(artifact);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [shares, setShares] = useState<ShareLink[]>([]);
+  const [createdShare, setCreatedShare] = useState<CreatedShare | null>(null);
+  const [sharing, setSharing] = useState(false);
   const workstream = snapshot.workspace.workstreams.find((stream) => stream.id === artifact.workstreamId);
   const linkedDecisions = snapshot.decisions.filter((decision) => artifact.linkedDecisionIds.includes(decision.id));
   const sourceClaims = snapshot.claims.filter((claim) => artifact.sourceClaimIds.includes(claim.id));
   const versions = snapshot.artifactVersions
     .filter((version) => version.artifactId === artifact.id)
     .sort((a, b) => b.version - a.version);
+
+  const loadShares = useCallback(async () => {
+    try {
+      const all = await api.shares(snapshot.workspace.id);
+      setShares(all.shares.filter((entry) => entry.artifactId === artifact.id));
+    } catch {
+      // A deliverable still reads perfectly well when the link list is unavailable.
+    }
+  }, [snapshot.workspace.id, artifact.id]);
+
+  useEffect(() => {
+    void loadShares();
+  }, [loadShares]);
+
+  const shareThis = async () => {
+    setSharing(true);
+    try {
+      setCreatedShare(await api.createShare(snapshot.workspace.id, { scope: "deliverable", artifactId: artifact.id }));
+      await loadShares();
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error), "error");
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const stopShare = async (shareId: string) => {
+    setSharing(true);
+    try {
+      await api.stopShare(snapshot.workspace.id, shareId);
+      setCreatedShare(null);
+      await loadShares();
+      notify("The link stopped working.");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error), "error");
+    } finally {
+      setSharing(false);
+    }
+  };
 
   const save = async () => {
     setSaving(true);
@@ -144,11 +186,35 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
         </div>
         <div className="button-row">
           <Button variant="quiet" icon="download" onClick={() => downloadMarkdown(snapshot.workspace.name, draft)}>Export</Button>
+          {can("share-manage") && !editing ? (
+            <Button variant="quiet" disabled={sharing} onClick={() => void shareThis()}>
+              {shares.length ? "Share again" : "Share by link"}
+            </Button>
+          ) : null}
           {editing ? (
             <><Button variant="secondary" onClick={() => { setDraft(artifact); setEditing(false); }}>Cancel</Button><Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save new version"}</Button></>
           ) : can("work-write") ? <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit</Button> : null}
         </div>
       </header>
+
+      {createdShare ? <ShareLinkNotice created={createdShare} onDismiss={() => setCreatedShare(null)} /> : null}
+      {shares.length && can("share-manage") ? (
+        <div className="share-list">
+          <p className="eyebrow">Live links to this deliverable</p>
+          {shares.map((entry) => (
+            <div key={entry.id} className="share-row">
+              <div>
+                <strong>Shared by {entry.createdBy}</strong>
+                <p>
+                  Read {entry.viewCount === 1 ? "once" : `${entry.viewCount} times`}
+                  {entry.lastViewedAt ? `, last on ${formatDate(entry.lastViewedAt)}` : ""} · stops {formatDate(entry.expiresAt)}
+                </p>
+              </div>
+              <Button variant="quiet" disabled={sharing} onClick={() => void stopShare(entry.id)}>Stop this link</Button>
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       {editing ? (
         <div className="deliverable-edit-form">
@@ -219,13 +285,6 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
   );
 }
 
-function MarkdownBody({ body }: { body: string }) {
-  const blocks = body.split(/\n\n+/);
-  return <>{blocks.map((block, index) => block.startsWith("- ") ? (
-    <ul key={index}>{block.split("\n").map((line, lineIndex) => <li key={`${index}-${lineIndex}`}>{line.replace(/^\-\s*/, "")}</li>)}</ul>
-  ) : <p key={index}>{block}</p>)}</>;
-}
-
 function downloadMarkdown(companyName: string, artifact: Artifact) {
   const source = [
     `# ${artifact.title}`,
@@ -249,4 +308,44 @@ function downloadMarkdown(companyName: string, artifact: Artifact) {
   anchor.click();
   anchor.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+/**
+ * A share link, shown exactly once. Same shape as the invitation notice on the People page, and
+ * the same honesty: a link that cannot be shown again must never be believed copied when it was not.
+ */
+function ShareLinkNotice({ created, onDismiss }: { created: CreatedShare; onDismiss: () => void }) {
+  const link = `${window.location.origin}${created.viewPath}`;
+  const [copied, setCopied] = useState<boolean | "unavailable">(false);
+
+  const copy = async () => {
+    if (!navigator.clipboard) {
+      setCopied("unavailable");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+    } catch {
+      setCopied("unavailable");
+    }
+  };
+
+  return (
+    <div className="invitation-link">
+      <p className="eyebrow">Anyone with this link can read this deliverable</p>
+      <p>{created.delivery}</p>
+      <code>{link}</code>
+      <div className="button-row">
+        <Button type="button" onClick={() => void copy()}>{copied === true ? "Copied" : "Copy link"}</Button>
+        <Button type="button" variant="secondary" onClick={onDismiss}>Done</Button>
+      </div>
+      {copied === "unavailable" ? (
+        <p className="muted-copy">This browser would not let Formation copy for you. Select the link above and copy it yourself.</p>
+      ) : null}
+      <p className="muted-copy">
+        This link is shown once. If you lose it, stop it and share again.
+      </p>
+    </div>
+  );
 }

@@ -136,13 +136,14 @@ export async function handleMemberRoutes({ request, response, method, pathname, 
     // must not be able to lock a colleague out of a real invitation — or be told their sign-ins
     // are the problem.
     const key = clientAddressKey(request);
-    authLimiters.invitation.claim(key);
     const database = await store.read();
     const invitation = findLiveInvitation(database, body.token);
     if (!invitation) {
+      // Only a miss spends an attempt: a real invitation must not depend on nobody else on the
+      // same connection having guessed.
+      authLimiters.invitation.claim(key);
       throw new HttpError(404, "That invitation link is not valid. It may have been used, cancelled, or expired.");
     }
-    authLimiters.invitation.release(key);
     const workspace = database.workspaces.find((entry) => entry.id === invitation.workspaceId);
     json(response, 200, {
       company: workspace?.name ?? "A company on Formation",
@@ -159,10 +160,8 @@ export async function handleMemberRoutes({ request, response, method, pathname, 
     if (method !== "POST") throw new HttpError(405, "Method not allowed.");
     const body = await readJsonBody(request);
     const key = clientAddressKey(request);
-    authLimiters.invitation.claim(key);
     try {
       const joined = await store.transaction((database) => acceptInvitation(database, { token: body.token, user }));
-      authLimiters.invitation.release(key);
       json(response, joined.alreadyMember ? 200 : 201, {
         workspaceId: joined.workspace.id,
         company: joined.workspace.name,
@@ -170,6 +169,7 @@ export async function handleMemberRoutes({ request, response, method, pathname, 
         alreadyMember: joined.alreadyMember,
       });
     } catch (error) {
+      authLimiters.invitation.claim(key);
       throw error;
     }
     return;

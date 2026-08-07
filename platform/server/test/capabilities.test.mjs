@@ -87,6 +87,14 @@ const WORKSPACE_SURFACES = [
     body: { email: "probe@example.com", role: "viewer" },
   },
   { method: "DELETE", path: "/api/workspaces/:workspaceId/invitations/:invitationId", capability: "member-manage" },
+  { method: "GET", path: "/api/workspaces/:workspaceId/shares", capability: "workspace-read" },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspaceId/shares",
+    capability: "share-manage",
+    body: { scope: "company" },
+  },
+  { method: "DELETE", path: "/api/workspaces/:workspaceId/shares/:shareId", capability: "share-manage" },
 ];
 
 /**
@@ -114,6 +122,9 @@ const UNSCOPED_ROUTES = new Set([
   "DELETE /api/account/sessions",
   "DELETE /api/account/sessions/:sessionId",
   "POST /api/account/password",
+  // Read by someone with no account at all. The link is the authorization, and what it reaches is
+  // a projection built field by field in domain/sharing.mjs rather than a filtered record.
+  "GET /api/shared/:token",
 ]);
 
 test("the capability ladder denies by default and refuses unknown capability ids", () => {
@@ -288,7 +299,8 @@ function resolvePath(template, ids) {
     // Absent on purpose: an owner must reach past the capability check (to a 404) rather than
     // actually removing someone while the probe is walking the surface.
     .replace(":membershipId", "mem_absent")
-    .replace(":invitationId", "inv_absent");
+    .replace(":invitationId", "inv_absent")
+    .replace(":shareId", "shr_absent");
 }
 
 test("each role is answered by the server exactly as its capability says", async (t) => {

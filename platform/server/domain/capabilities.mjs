@@ -92,6 +92,11 @@ export const CAPABILITIES = {
     covers: "Answering a launch approval on the company's behalf.",
     denial: "Only this company's owner can answer a launch approval.",
   },
+  "share-manage": {
+    minimumRole: "owner",
+    covers: "Showing the company's work to someone outside it: creating a read-only link, and stopping one.",
+    denial: "Only this company's owner can share its work outside the company.",
+  },
   "member-manage": {
     minimumRole: "owner",
     covers: "Who is in the company: inviting people, cancelling invitations, changing what someone can do, and removing them.",
@@ -116,6 +121,9 @@ export const UNSCOPED_SURFACES = Object.freeze([
   "own-session-read",
   "workspace-create",
   "invitation-redeem",
+  // A shared link is read by someone who has no account at all. The link is the authorization,
+  // and what it can reach is a projection built field by field rather than a filtered record.
+  "shared-view",
 ]);
 
 const RANK = new Map(ROLES.map((role, index) => [role, index]));

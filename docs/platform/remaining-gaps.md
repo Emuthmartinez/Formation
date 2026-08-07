@@ -168,10 +168,14 @@ Prioritize:
 2. Google Docs export or synchronization
 3. presentation output for advisors and investors
 4. spreadsheet-backed financial assumptions
-5. read-only secure sharing links
+5. read-only secure sharing links — **shipped** (`platform/server/domain/sharing.mjs`)
 6. export bundles with claims and decision lineage
 
 Exports should preserve artifact version, status, confidence, and date.
+
+A share link carries one deliverable or the company overview to someone who has no account and needs none. The link is the credential, so it behaves like one: 32 bytes of entropy, hashed at rest, shown to the founder exactly once, expiring after 30 days, revocable, and answered identically whether it was stopped, expired, or never existed. Sharing outside the company is the owner's call; every member can see what has been shared.
+
+The load-bearing part is not the token but `sharedView`, which builds the projection by naming the fields that may leave rather than by taking a record and removing what should not go. A record that grows a field later stays private until somebody names it. `platform/server/test/sharing.test.mjs` plants a private task, decision, and invited address in the workspace and asserts none of them — nor any member, email address, activity entry, engine id, or unattached claim — appears in either projection.
 
 ## P1: Financial assumptions and model
 

@@ -375,12 +375,18 @@ test("guessing invitation links cannot lock out the person holding a real one", 
   })).json();
   const { cookie: sam } = await register(app.baseUrl, { name: "Sam Rivera", email: "sam@example.com" });
 
-  // More wrong guesses than the sign-in limiter would ever allow, from the same address.
+  // Guess until the address is shut out entirely, from the same address the invitee will use.
   const { cookie: guesser } = await register(app.baseUrl, { name: "Guesser", email: "guesser@example.com" });
-  for (let attempt = 0; attempt < 10; attempt += 1) {
+  let shutOut = false;
+  for (let attempt = 0; attempt < 40; attempt += 1) {
     const response = await call(app.baseUrl, "/api/invitations/preview", { cookie: guesser, method: "POST", body: { token: `guess-${attempt}` } });
+    if (response.status === 429) {
+      shutOut = true;
+      break;
+    }
     assert.equal(response.status, 404, "a wrong guess is a wrong guess, not a rate-limit answer");
   }
+  assert.ok(shutOut, "unlimited invitation guessing was allowed");
 
   const accepted = await call(app.baseUrl, "/api/invitations/accept", {
     cookie: sam, method: "POST", body: { token: created.acceptPath.split("/").pop() },

@@ -1,5 +1,6 @@
 import type {
   AccountSession,
+  CreatedShare,
   ApprovalsView,
   Artifact,
   Claim,
@@ -12,6 +13,8 @@ import type {
   PeopleView,
   PublicConfig,
   SessionPayload,
+  ShareLink,
+  SharedView,
   Task,
   Workspace,
   WorkspaceBrief,
@@ -145,6 +148,12 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ currentPassword, newPassword }),
     }),
+  shares: (workspaceId: string) => request<{ shares: ShareLink[] }>(`/api/workspaces/${workspaceId}/shares`),
+  createShare: (workspaceId: string, payload: { scope: "deliverable" | "company"; artifactId?: string }) =>
+    request<CreatedShare>(`/api/workspaces/${workspaceId}/shares`, { method: "POST", body: JSON.stringify(payload) }),
+  stopShare: (workspaceId: string, shareId: string) =>
+    request<ShareLink>(`/api/workspaces/${workspaceId}/shares/${shareId}`, { method: "DELETE" }),
+  sharedView: (token: string) => request<SharedView>(`/api/shared/${encodeURIComponent(token)}`),
   people: (workspaceId: string) => request<PeopleView>(`/api/workspaces/${workspaceId}/members`),
   invite: (workspaceId: string, email: string, role: WorkspaceRole) =>
     request<CreatedInvitation>(`/api/workspaces/${workspaceId}/invitations`, {

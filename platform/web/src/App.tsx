@@ -9,6 +9,7 @@ import { BusinessPage } from "./pages/BusinessPage";
 import { DecisionsPage } from "./pages/DecisionsPage";
 import { DeliverablesPage } from "./pages/DeliverablesPage";
 import { AccountPage } from "./pages/AccountPage";
+import { SharedPage } from "./pages/SharedPage";
 import { JoinPage } from "./pages/JoinPage";
 import { PeoplePage } from "./pages/PeoplePage";
 import { LaunchPage } from "./pages/LaunchPage";
@@ -164,6 +165,12 @@ export function App() {
   // sign in carrying the token, so an instance with open registration closed still lets in the
   // person its owner invited.
   const invitationToken = route.segments[0] === "join" ? route.segments[1] : undefined;
+
+  // Someone reading a shared link has no account and needs none, so this is decided before
+  // anything asks whether they are signed in.
+  if (route.segments[0] === "shared" && route.segments[1]) {
+    return <SharedPage token={route.segments[1]} />;
+  }
 
   if (loading && !session) return <LoadingScreen />;
   if (!session) return <SignInPage onSignedIn={initialize} invitationToken={invitationToken} />;

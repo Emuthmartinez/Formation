@@ -7,6 +7,7 @@ import { AuthError } from "./auth.mjs";
 import { ExecutionError } from "./execution.mjs";
 import { GenerationError } from "./generation.mjs";
 import { MemberError } from "./domain/members.mjs";
+import { ShareError } from "./domain/sharing.mjs";
 
 export async function serveApplication({ request, response, url, staticRoot }) {
   if (!["GET", "HEAD"].includes(request.method ?? "GET")) throw new HttpError(405, "Method not allowed.");
@@ -83,7 +84,8 @@ export function normalizeError(error) {
     error instanceof AuthError ||
     error instanceof ExecutionError ||
     error instanceof GenerationError ||
-    error instanceof MemberError
+    error instanceof MemberError ||
+    error instanceof ShareError
   ) {
     return {
       status: error.status,
