@@ -103,6 +103,7 @@ const WORKSPACE_SURFACES = [
   },
   { method: "PATCH", path: "/api/workspaces/:workspaceId/economics/scenarios/:scenarioId", capability: "company-write", body: { name: "Renamed" } },
   { method: "DELETE", path: "/api/workspaces/:workspaceId/economics/scenarios/:scenarioId", capability: "company-write" },
+  { method: "GET", path: "/api/workspaces/:workspaceId/export", capability: "workspace-read" },
   { method: "GET", path: "/api/workspaces/:workspaceId/approvals", capability: "workspace-read" },
   {
     method: "POST",

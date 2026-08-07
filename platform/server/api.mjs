@@ -5,6 +5,7 @@ import { handleApprovalRoutes } from "./routes/approvals.mjs";
 import { handleArtifactRoutes } from "./routes/artifacts.mjs";
 import { handleCommentRoutes } from "./routes/comments.mjs";
 import { handleEconomicsRoutes } from "./routes/economics.mjs";
+import { handleExportRoutes } from "./routes/exports.mjs";
 import { handleReviewRoutes } from "./routes/reviews.mjs";
 import { handleEvidenceRoutes } from "./routes/evidence.mjs";
 import { handleExecutionRoutes } from "./routes/executions.mjs";
@@ -28,7 +29,7 @@ export async function handleApi({ request, response, url, store, worker, executi
 
   const user = await getAuthenticatedUser(store, request);
   if (!user) throw new HttpError(401, "Sign in to continue.");
-  const privateContext = { ...context, user };
+  const privateContext = { ...context, url, user };
 
   await handleAccountRoutes(privateContext);
   if (response.writableEnded) return;
@@ -51,6 +52,8 @@ export async function handleApi({ request, response, url, store, worker, executi
   await handleReviewRoutes(privateContext);
   if (response.writableEnded) return;
   await handleEconomicsRoutes(privateContext);
+  if (response.writableEnded) return;
+  await handleExportRoutes(privateContext);
   if (response.writableEnded) return;
   await handleArtifactRoutes(privateContext);
   if (response.writableEnded) return;

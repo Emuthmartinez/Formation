@@ -3,6 +3,7 @@ import { api } from "../api";
 import { Button, ConfidenceMark, ContradictionStatements, Field, Modal, PageHeader, Section, ShareLinkNotice, formatCount, formatDate, humanize } from "../components/Primitives";
 import { Icon } from "../components/Icon";
 import { Economics } from "../components/Economics";
+import { ExportBundle } from "../components/ExportBundle";
 import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
@@ -154,6 +155,7 @@ export function BusinessPage() {
                 {shares.length ? "Share again" : "Share overview"}
               </Button>
             ) : null}
+            <ExportBundle workspaceId={snapshot.workspace.id} />
             {can("company-write") ? <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit business</Button> : null}
           </div>
         )}

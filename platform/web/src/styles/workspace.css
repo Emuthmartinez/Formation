@@ -356,6 +356,13 @@
 .scenario-add .field { flex: 0 1 300px; }
 .scenario-add input { width: 100%; font: inherit; font-size: 14px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); }
 
+/* Taking the work out. Quiet: exporting is a thing a founder does occasionally and should not
+   compete with the work itself for attention. */
+.export-bundle { display: inline-flex; align-items: baseline; gap: 10px; font-size: 12.5px; }
+.export-bundle__label { color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: .06em; }
+.export-bundle a { color: var(--forest); font-weight: 650; text-decoration: none; border-bottom: 1px solid transparent; }
+.export-bundle a:hover { border-bottom-color: var(--forest); }
+
 /* People and access
    ---------------------------------------------------------------------------------------------
    A decisive row per person, in the same idiom as the ledger and task rows: identity on the left,
