@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
 import { Button, ConfidenceMark, ContradictionStatements, Field, Modal, PageHeader, Section, formatCount, humanize } from "../components/Primitives";
 import { Icon } from "../components/Icon";
+import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Claim, Workspace } from "../types";
@@ -38,6 +39,7 @@ const emptyClaimCopy: Record<Claim["kind"], string> = {
 
 export function BusinessPage() {
   const { snapshot, reload, notify } = useWorkspace();
+  const can = useCan();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(snapshot.workspace.company);
   const [workspaceDraft, setWorkspaceDraft] = useState({
@@ -102,7 +104,7 @@ export function BusinessPage() {
             }}>Cancel</Button>
             <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save source of truth"}</Button>
           </div>
-        ) : <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit business</Button>}
+        ) : can("company-write") ? <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit business</Button> : undefined}
       />
 
       <Section className="business-overview" title="What this company is building" description="The stable context that keeps the platform from generating a new company every time you ask a question.">
@@ -173,7 +175,7 @@ export function BusinessPage() {
       <Section
         title="Claims and evidence"
         description="Facts, assumptions, recommendations, and unresolved questions stay distinct. That is less magical, and much more useful."
-        action={<Button variant="secondary" icon="plus" onClick={() => setClaimModal(true)}>Add claim</Button>}
+        action={can("evidence-write") ? <Button variant="secondary" icon="plus" onClick={() => setClaimModal(true)}>Add claim</Button> : undefined}
       >
         {/* The same treatment Today gives a conflict. A contradiction between two claims is the
             single most consequential thing this page can report, and a quiet inline strip made
@@ -205,7 +207,7 @@ export function BusinessPage() {
                   <article key={claim.id} className="claim-ledger__row">
                     <p>{claim.statement}</p>
                     <ConfidenceMark value={claim.confidence} caption="Confidence" />
-                    <select value={claim.status} onChange={(event) => updateClaimStatus(claim, event.target.value)} aria-label={`Status for ${claim.statement}`}>
+                    <select value={claim.status} disabled={!can("evidence-write")} onChange={(event) => updateClaimStatus(claim, event.target.value)} aria-label={`Status for ${claim.statement}`}>
                       <option value={claim.kind === "question" ? "open" : "active"}>{claim.kind === "question" ? "Open" : "Active"}</option>
                       <option value="resolved">Resolved</option>
                       <option value="rejected">Rejected</option>

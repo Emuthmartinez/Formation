@@ -105,7 +105,7 @@ export async function handleWorkspaceRoutes({ request, response, method, pathnam
       const patch = await readJsonBody(request);
       requireSupportedPatch(patch, WORKSPACE_PATCH_FIELDS, "company operating context");
       const updated = await store.transaction((database) => {
-        const workspace = requireWorkspace(database, workspaceId, user.id);
+        const workspace = requireWorkspace(database, workspaceId, user.id, "company-write");
         if (patch.name !== undefined) workspace.name = requireText(patch.name, "Company name", TEXT_LIMITS.name);
         if (patch.stage !== undefined) {
           if (!WORKSPACE_STAGES.has(patch.stage)) throw new HttpError(400, "Invalid company stage.");
@@ -135,7 +135,7 @@ export async function handleWorkspaceRoutes({ request, response, method, pathnam
     const patch = await readJsonBody(request);
     requireSupportedPatch(patch, COMPANY_FIELDS, "company source of truth");
     const updated = await store.transaction((database) => {
-      const workspace = requireWorkspace(database, workspaceId, user.id);
+      const workspace = requireWorkspace(database, workspaceId, user.id, "company-write");
       for (const [key, value] of Object.entries(patch)) {
         if (!COMPANY_FIELDS.has(key)) continue;
         if (key === "constraints") {
@@ -158,7 +158,7 @@ export async function handleWorkspaceRoutes({ request, response, method, pathnam
     const patch = await readJsonBody(request);
     requireSupportedPatch(patch, WORKSTREAM_PATCH_FIELDS, "workstream");
     const updated = await store.transaction((database) => {
-      const workspace = requireWorkspace(database, workspaceId, user.id);
+      const workspace = requireWorkspace(database, workspaceId, user.id, "work-write");
       const workstream = workspace.workstreams.find((entry) => entry.id === workstreamId);
       if (!workstream) throw new HttpError(404, "Workstream not found.");
 

@@ -32,7 +32,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
     const value = normalizeClaimValue(body.value);
     const evidence = body.evidence === undefined ? [] : textList(body.evidence, "Evidence", 20, TEXT_LIMITS.listItem);
     const claim = await store.transaction((database) => {
-      const workspace = requireWorkspace(database, workspaceId, user.id);
+      const workspace = requireWorkspace(database, workspaceId, user.id, "evidence-write");
       requireWorkstream(workspace, body.workstreamId);
       const now = new Date().toISOString();
       const next = {
@@ -64,7 +64,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
     const patch = await readJsonBody(request);
     requireSupportedPatch(patch, CLAIM_PATCH_FIELDS, "claim");
     const claim = await store.transaction((database) => {
-      const workspace = requireWorkspace(database, workspaceId, user.id);
+      const workspace = requireWorkspace(database, workspaceId, user.id, "evidence-write");
       const target = database.claims.find((entry) => entry.id === claimId && entry.workspaceId === workspaceId);
       if (!target) throw new HttpError(404, "Claim not found.");
       if (patch.kind !== undefined) {
@@ -108,7 +108,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       throw new HttpError(400, "Invalid decision status.");
     }
     const decision = await store.transaction((database) => {
-      const workspace = requireWorkspace(database, workspaceId, user.id);
+      const workspace = requireWorkspace(database, workspaceId, user.id, "decision-write");
       requireWorkstream(workspace, body.workstreamId);
       const now = new Date().toISOString();
       const status = body.status ?? "open";
@@ -141,7 +141,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
     const patch = await readJsonBody(request);
     requireSupportedPatch(patch, DECISION_PATCH_FIELDS, "decision");
     const decision = await store.transaction((database) => {
-      const workspace = requireWorkspace(database, workspaceId, user.id);
+      const workspace = requireWorkspace(database, workspaceId, user.id, "decision-write");
       const target = database.decisions.find((entry) => entry.id === decisionId && entry.workspaceId === workspaceId);
       if (!target) throw new HttpError(404, "Decision not found.");
       // A launch approval must never be "decided" by editing its mirror — that would leave the
@@ -179,7 +179,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       throw new HttpError(400, "Invalid task priority.");
     }
     const task = await store.transaction((database) => {
-      const workspace = requireWorkspace(database, workspaceId, user.id);
+      const workspace = requireWorkspace(database, workspaceId, user.id, "work-write");
       requireWorkstream(workspace, body.workstreamId);
       const now = new Date().toISOString();
       const next = {
@@ -209,7 +209,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
     const patch = await readJsonBody(request);
     requireSupportedPatch(patch, TASK_PATCH_FIELDS, "task");
     const task = await store.transaction((database) => {
-      const workspace = requireWorkspace(database, workspaceId, user.id);
+      const workspace = requireWorkspace(database, workspaceId, user.id, "work-write");
       const target = database.tasks.find((entry) => entry.id === taskId && entry.workspaceId === workspaceId);
       if (!target) throw new HttpError(404, "Task not found.");
       if (patch.title !== undefined) target.title = requireText(patch.title, "Task title", TEXT_LIMITS.short);

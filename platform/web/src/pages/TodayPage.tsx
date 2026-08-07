@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { api } from "../api";
+import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Activity, Recommendation, Task } from "../types";
@@ -26,6 +27,7 @@ import {
 
 export function TodayPage() {
   const { snapshot, reload, notify } = useWorkspace();
+  const can = useCan();
   const { workspace, recommendations, readiness, tasks, decisions, contradictions, activity } = snapshot;
   const [updatingTask, setUpdatingTask] = useState<string | null>(null);
   const primaryContradiction = contradictions[0];
@@ -163,7 +165,7 @@ export function TodayPage() {
         <Section
           title="This week"
           description="The smallest set of work that changes a decision or removes a launch blocker."
-          action={<Button variant="quiet" icon="plus" onClick={() => navigate("/workstreams")}>Add from a workstream</Button>}
+          action={can("work-write") ? <Button variant="quiet" icon="plus" onClick={() => navigate("/workstreams")}>Add from a workstream</Button> : undefined}
         >
           <div className="task-list">
             {nextTasks.length ? nextTasks.map((task) => (
@@ -171,7 +173,7 @@ export function TodayPage() {
                 <button
                   className="task-check"
                   onClick={() => completeTask(task)}
-                  disabled={updatingTask === task.id}
+                  disabled={updatingTask === task.id || !can("work-write")}
                   aria-label={`Complete ${task.title}`}
                 >
                   {updatingTask === task.id ? <span className="spinner" /> : null}

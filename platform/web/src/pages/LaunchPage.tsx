@@ -16,12 +16,14 @@ import {
 } from "../components/Primitives";
 import { Motif } from "../components/Motif";
 import { ReadinessLedger } from "../components/Readiness";
+import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { FounderExecution, Task } from "../types";
 
 export function LaunchPage() {
   const { snapshot, reload, notify } = useWorkspace();
+  const can = useCan();
   const { workspace, readiness } = snapshot;
   const criticalTasks = snapshot.tasks
     .filter((task) => task.status !== "done" && ["critical", "high"].includes(task.priority))
@@ -115,7 +117,7 @@ export function LaunchPage() {
                   <p className="task-row__line"><Priority value={task.priority} /> <span>{task.owner}</span></p>
                 </div>
                 <DateSignal value={task.dueAt} fallback="No due date" />
-                <Button variant="quiet" onClick={() => completeTask(task)}>Mark complete</Button>
+                {can("work-write") ? <Button variant="quiet" onClick={() => completeTask(task)}>Mark complete</Button> : null}
               </article>
             )) : <EmptyState title="No unfinished critical work" description="The remaining path contains no task currently marked critical or high priority." />}
           </div>

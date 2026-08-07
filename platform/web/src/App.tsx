@@ -175,6 +175,8 @@ export function App() {
         session={session}
         workspace={snapshot.workspace}
         workspaces={session.workspaces}
+        role={snapshot.membership.role}
+        capabilities={snapshot.capabilities}
         currentPath={route.path}
         onWorkspaceChange={switchWorkspace}
         onLogout={logout}

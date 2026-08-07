@@ -336,9 +336,25 @@ export interface Readiness {
   blockerRefs: BlockerRef[];
 }
 
+/** The roles a member can hold on one company, least capable first. */
+export type WorkspaceRole = "viewer" | "reviewer" | "editor" | "owner";
+
+/** Mirrors the ids in server/domain/capabilities.mjs. The server decides who holds which. */
+export type Capability =
+  | "workspace-read"
+  | "evidence-write"
+  | "work-write"
+  | "decision-write"
+  | "generation-request"
+  | "launch-engine-advance"
+  | "company-write"
+  | "approval-decide";
+
 export interface WorkspaceSnapshot {
   workspace: Workspace;
-  membership: { id: string; role: string; userId: string; workspaceId: string };
+  membership: { id: string; role: WorkspaceRole | string; userId: string; workspaceId: string };
+  /** What the signed-in member may do here, as decided by the server. */
+  capabilities: Capability[];
   claims: Claim[];
   decisions: Decision[];
   artifacts: Artifact[];

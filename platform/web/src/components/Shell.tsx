@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
-import type { SessionPayload, Workspace, WorkspaceSummary } from "../types";
+import { accessSummary } from "../capabilities";
+import type { Capability, SessionPayload, Workspace, WorkspaceSummary } from "../types";
 import { navigate } from "../router";
 import { Icon } from "./Icon";
 import { Button, Select, humanize } from "./Primitives";
@@ -20,6 +21,8 @@ export function Shell({
   session,
   workspace,
   workspaces,
+  role,
+  capabilities,
   currentPath,
   onWorkspaceChange,
   onLogout,
@@ -28,12 +31,15 @@ export function Shell({
   session: SessionPayload;
   workspace: Workspace;
   workspaces: WorkspaceSummary[];
+  role: string;
+  capabilities: Capability[];
   currentPath: string;
   onWorkspaceChange: (workspaceId: string) => void;
   onLogout: () => void;
   children: ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const access = accessSummary(role, capabilities);
 
   const go = (path: string) => {
     setMobileOpen(false);
@@ -119,11 +125,18 @@ export function Shell({
             <span className="topbar__divider" aria-hidden="true" />
             <span>{workspace.company.currentGoal}</span>
           </div>
-          <Button variant="quiet" icon="plus" onClick={() => go("/decisions?new=1")}>
-            Record decision
-          </Button>
+          {capabilities.includes("decision-write") ? (
+            <Button variant="quiet" icon="plus" onClick={() => go("/decisions?new=1")}>
+              Record decision
+            </Button>
+          ) : null}
         </header>
-        <main className="main-content">{children}</main>
+        <main className="main-content">
+          {/* Said once, plainly, rather than as a greyed-out control beside every action a
+              member cannot take. A page of disabled buttons reads as a broken product. */}
+          {access ? <p className="access-note">{access}</p> : null}
+          {children}
+        </main>
       </div>
     </div>
   );

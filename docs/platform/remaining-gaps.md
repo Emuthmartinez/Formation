@@ -46,14 +46,18 @@ Add:
 - email verification
 - password recovery
 - workspace invitations
-- owner, editor, reviewer, and viewer roles
+- owner, editor, reviewer, and viewer roles — **shipped** (`platform/server/domain/capabilities.mjs`: an ordinal ladder with one minimum role per capability, denying by default for any role the ladder does not recognise)
 - invitation expiry and revocation
 - session and device management
 - membership removal and ownership transfer
 - optional OIDC and SAML for larger teams
 - audit events for access changes
 
-Every route should enforce role-level permissions in addition to membership.
+Every route should enforce role-level permissions in addition to membership — **shipped**. The capability is a required argument to the membership lookup, so a route that does not name what it is doing cannot resolve a member at all, and `platform/server/test/capabilities.test.mjs` fails on any route in source that is not declared with a capability before calling each declared surface as a member of every role.
+
+Two surfaces that previously trusted their caller now check for themselves: the execution worker's approval sync (a read that mirrors engine state into durable records) and the workspace snapshot builder. The founder-facing half reads the same answer the server enforces with — `snapshot.capabilities` — rather than keeping a second copy of the rules in the web app.
+
+What remains here is the membership lifecycle itself: until invitations ship, every membership is still created as `owner` at workspace creation, so the ladder is enforced but not yet exercised in production.
 
 ## P0: Platform-to-engine execution adapter
 

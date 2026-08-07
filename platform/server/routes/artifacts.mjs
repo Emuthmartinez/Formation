@@ -10,7 +10,7 @@ export async function handleArtifactRoutes({ request, response, method, pathname
     const artifactId = decodeURIComponent(artifactMatch[2]);
     const patch = normalizeArtifactPatch(await readJsonBody(request));
     const artifact = await store.transaction((database) => {
-      const workspace = requireWorkspace(database, workspaceId, user.id);
+      const workspace = requireWorkspace(database, workspaceId, user.id, "work-write");
       const index = database.artifacts.findIndex((entry) => entry.id === artifactId && entry.workspaceId === workspaceId);
       if (index < 0) throw new HttpError(404, "Deliverable not found.");
       if (patch.sourceClaimIds) {
@@ -36,7 +36,7 @@ export async function handleArtifactRoutes({ request, response, method, pathname
     const workspaceId = decodeURIComponent(generationMatch[1]);
     const body = await readJsonBody(request);
     const database = await store.read();
-    const workspace = requireWorkspace(database, workspaceId, user.id);
+    const workspace = requireWorkspace(database, workspaceId, user.id, "generation-request");
     requireWorkstream(workspace, body.workstreamId);
     const artifactType = body.artifactType === undefined || body.artifactType === null
       ? null
@@ -60,7 +60,7 @@ export async function handleArtifactRoutes({ request, response, method, pathname
     const workspaceId = decodeURIComponent(jobMatch[1]);
     const jobId = decodeURIComponent(jobMatch[2]);
     const database = await store.read();
-    requireWorkspace(database, workspaceId, user.id);
+    requireWorkspace(database, workspaceId, user.id, "workspace-read");
     const job = database.jobs.find((entry) => entry.id === jobId && entry.workspaceId === workspaceId);
     if (!job) throw new HttpError(404, "Generation job not found.");
     json(response, 200, job);

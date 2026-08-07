@@ -1,4 +1,5 @@
 import { createId } from "../domain.mjs";
+import { denialMessage, resolveAccess } from "../domain/capabilities.mjs";
 import { HttpError } from "../http.mjs";
 
 export function authAttemptKeys(request, email) {
@@ -23,14 +24,20 @@ export function recordAuthFailure(limiters, keys) {
   limiters.account.recordFailure(keys.account);
 }
 
-export function requireWorkspace(database, workspaceId, userId) {
-  const membership = database.memberships.find(
-    (entry) => entry.workspaceId === workspaceId && entry.userId === userId,
-  );
-  if (!membership) throw new HttpError(404, "Workspace not found.");
-  const workspace = database.workspaces.find((entry) => entry.id === workspaceId);
-  if (!workspace) throw new HttpError(404, "Workspace not found.");
-  return workspace;
+/**
+ * The one gate every workspace-scoped route passes through. The capability is required, not
+ * optional: a route that does not name what it is doing cannot look a membership up at all, which
+ * is what keeps a future handler from quietly inheriting a member's full authority.
+ *
+ * Someone with no membership is told the company was not found — a stranger learns nothing about
+ * which companies exist. A member who lacks the capability is told what they cannot do, because
+ * hiding it from them would only make the product feel broken.
+ */
+export function requireWorkspace(database, workspaceId, userId, capabilityId) {
+  const access = resolveAccess(database, workspaceId, userId, capabilityId);
+  if (!access.found) throw new HttpError(404, "Workspace not found.");
+  if (!access.allowed) throw new HttpError(403, denialMessage(capabilityId));
+  return access.workspace;
 }
 
 export function requireWorkstream(workspace, workstreamId) {

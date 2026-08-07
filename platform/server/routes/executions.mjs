@@ -23,7 +23,7 @@ export async function handleExecutionRoutes({ request, response, method, pathnam
 
     if (method === "GET") {
       const database = await store.read();
-      requireWorkspace(database, workspaceId, user.id);
+      requireWorkspace(database, workspaceId, user.id, "workspace-read");
       const executions = database.executions
         .filter((entry) => entry.workspaceId === workspaceId)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -54,7 +54,7 @@ export async function handleExecutionRoutes({ request, response, method, pathnam
     const executionId = decodeURIComponent(detailMatch[2]);
 
     const database = await store.read();
-    const workspace = requireWorkspace(database, workspaceId, user.id);
+    const workspace = requireWorkspace(database, workspaceId, user.id, "workspace-read");
     const execution = database.executions.find((entry) => entry.id === executionId && entry.workspaceId === workspaceId);
     if (!execution) throw new HttpError(404, "Execution not found.");
 

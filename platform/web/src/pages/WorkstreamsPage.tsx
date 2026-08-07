@@ -15,6 +15,7 @@ import {
   humanize,
   statusTone,
 } from "../components/Primitives";
+import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import { Icon } from "../components/Icon";
@@ -84,6 +85,7 @@ export function WorkstreamsOverviewPage() {
 
 export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string }) {
   const { snapshot, reload, notify } = useWorkspace();
+  const can = useCan();
   const stream = snapshot.workspace.workstreams.find((entry) => entry.id === workstreamId);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(stream ? toDraft(stream) : null);
@@ -163,8 +165,8 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
           </div>
         ) : (
           <div className="button-row">
-            <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit</Button>
-            <Button icon="spark" onClick={() => setGenerateOpen(true)}>Create deliverable</Button>
+            {can("work-write") ? <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit</Button> : null}
+            {can("generation-request") ? <Button icon="spark" onClick={() => setGenerateOpen(true)}>Create deliverable</Button> : null}
           </div>
         )}
       />
@@ -226,11 +228,11 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
       )}
 
       <div className="two-column-layout">
-        <Section title="Work queue" description="Tasks directly connected to this workstream." action={<Button variant="quiet" icon="plus" onClick={() => setTaskOpen(true)}>Add task</Button>}>
+        <Section title="Work queue" description="Tasks directly connected to this workstream." action={can("work-write") ? <Button variant="quiet" icon="plus" onClick={() => setTaskOpen(true)}>Add task</Button> : undefined}>
           <div className="task-list task-list--compact">
             {tasks.length ? tasks.map((task) => (
               <article key={task.id} className="task-row">
-                <button className={`task-check ${task.status === "done" ? "task-check--done" : ""}`} onClick={() => updateTask(task, task.status === "done" ? "next" : "done")} aria-label={task.status === "done" ? `Reopen ${task.title}` : `Complete ${task.title}`}>
+                <button className={`task-check ${task.status === "done" ? "task-check--done" : ""}`} disabled={!can("work-write")} onClick={() => updateTask(task, task.status === "done" ? "next" : "done")} aria-label={task.status === "done" ? `Reopen ${task.title}` : `Complete ${task.title}`}>
                   {task.status === "done" ? "✓" : null}
                 </button>
                 <div>
@@ -240,7 +242,7 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
                   <p className="task-row__line"><Priority value={task.priority} /> <span>{task.owner}</span></p>
                   <DateSignal value={task.dueAt} />
                 </div>
-                <select value={task.status} onChange={(event) => updateTask(task, event.target.value as Task["status"])} aria-label={`Status for ${task.title}`}>
+                <select value={task.status} disabled={!can("work-write")} onChange={(event) => updateTask(task, event.target.value as Task["status"])} aria-label={`Status for ${task.title}`}>
                   <option value="backlog">Backlog</option><option value="next">Next</option><option value="in-progress">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option>
                 </select>
               </article>
@@ -255,7 +257,7 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
                 <div><StatusText status={artifact.status} /><h3>{artifact.title}</h3><p>{artifact.summary}</p></div>
                 <span>v{artifact.version}</span>
               </button>
-            )) : <EmptyState title="No deliverable yet" description="Create a structured draft once the workstream has enough context to make it useful." action={<Button variant="secondary" icon="spark" onClick={() => setGenerateOpen(true)}>Create draft</Button>} />}
+            )) : <EmptyState title="No deliverable yet" description="Create a structured draft once the workstream has enough context to make it useful." action={can("generation-request") ? <Button variant="secondary" icon="spark" onClick={() => setGenerateOpen(true)}>Create draft</Button> : undefined} />}
           </div>
         </Section>
       </div>
@@ -267,7 +269,7 @@ export function WorkstreamDetailPage({ workstreamId }: { workstreamId: string })
               <span className={`claim-kind claim-kind--${claim.kind}`}>{claim.kind}</span>
               <p>{claim.statement}</p>
               <ConfidenceMark value={claim.confidence} caption="Confidence" />
-              <select value={claim.status} onChange={(event) => updateClaimStatus(claim.id, event.target.value)} aria-label={`Status for ${claim.statement}`}>
+              <select value={claim.status} disabled={!can("evidence-write")} onChange={(event) => updateClaimStatus(claim.id, event.target.value)} aria-label={`Status for ${claim.statement}`}>
                 <option value={claim.kind === "question" ? "open" : "active"}>{claim.kind === "question" ? "Open" : "Active"}</option>
                 <option value="resolved">Resolved</option>
                 <option value="rejected">Rejected</option>
