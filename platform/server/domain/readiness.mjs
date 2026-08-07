@@ -1,4 +1,4 @@
-import { capabilitiesForRole, resolveAccess } from "./capabilities.mjs";
+import { capabilitiesForRole, hasCapability, resolveAccess } from "./capabilities.mjs";
 import { clampNumber, humanizeKey, priorityRank, slug, stableValue, unique } from "./shared.mjs";
 
 const READINESS_WEIGHTS = {
@@ -251,6 +251,13 @@ export function buildRecommendations({ workspace, tasks, decisions, claims, arti
   return recommendations.slice(0, 4);
 }
 
+/**
+ * Activity that names a person who is not a member. Anything added here is hidden from members who
+ * cannot manage access — the list exists so a new sensitive event is a deliberate decision about
+ * who may read it, rather than an unnoticed second path to something withheld elsewhere.
+ */
+const INVITATION_ACTIVITY = new Set(["member-invited", "member-invite-revoked"]);
+
 export function buildWorkspaceSnapshot(database, workspaceId, userId) {
   const access = resolveAccess(database, workspaceId, userId, "workspace-read");
   if (!access.found || !access.allowed) return null;
@@ -264,8 +271,14 @@ export function buildWorkspaceSnapshot(database, workspaceId, userId) {
     .sort((a, b) => b.version - a.version || b.createdAt.localeCompare(a.createdAt));
   const tasks = database.tasks.filter((entry) => entry.workspaceId === workspaceId);
   const jobs = database.jobs.filter((entry) => entry.workspaceId === workspaceId);
+  // An invitation names someone who is not in the company yet, so it is the owner's to see —
+  // the members list withholds it from everyone else and the history has to agree. Once someone
+  // has actually joined, their name is on the members list anyway and their arrival is company
+  // history like any other.
+  const canSeeInvitations = hasCapability(membership.role, "member-manage");
   const activity = database.activity
     .filter((entry) => entry.workspaceId === workspaceId)
+    .filter((entry) => canSeeInvitations || !INVITATION_ACTIVITY.has(entry.type))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return {

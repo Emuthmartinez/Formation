@@ -12,7 +12,7 @@ import {
 } from "../domain/members.mjs";
 import { HttpError, json } from "../http.mjs";
 import { optionalText, readJsonBody } from "../validation.mjs";
-import { authAttemptKeys, assertAuthAllowed, recordAuthFailure, requireWorkspace } from "./shared.mjs";
+import { clientAddressKey, requireWorkspace } from "./shared.mjs";
 
 /**
  * Who is in a company, and how someone joins one.
@@ -132,14 +132,15 @@ export async function handleMemberRoutes({ request, response, method, pathname, 
   if (pathname === "/api/invitations/preview") {
     if (method !== "POST") throw new HttpError(405, "Method not allowed.");
     const body = await readJsonBody(request);
-    // Rate limited on the address alone: a token is not an account, so there is no account to key
-    // on, and an attacker guessing links must not get unlimited attempts.
-    const keys = authAttemptKeys(request, "invitation");
-    assertAuthAllowed(authLimiters, keys);
+    // Its own bucket, keyed on the device: a token is not an account, and someone guessing links
+    // must not be able to lock a colleague out of a real invitation — or be told their sign-ins
+    // are the problem.
+    const key = clientAddressKey(request);
+    authLimiters.invitation.assertAllowed(key);
     const database = await store.read();
     const invitation = findLiveInvitation(database, body.token);
     if (!invitation) {
-      recordAuthFailure(authLimiters, keys);
+      authLimiters.invitation.recordFailure(key);
       throw new HttpError(404, "That invitation link is not valid. It may have been used, cancelled, or expired.");
     }
     const workspace = database.workspaces.find((entry) => entry.id === invitation.workspaceId);
@@ -157,8 +158,8 @@ export async function handleMemberRoutes({ request, response, method, pathname, 
   if (pathname === "/api/invitations/accept") {
     if (method !== "POST") throw new HttpError(405, "Method not allowed.");
     const body = await readJsonBody(request);
-    const keys = authAttemptKeys(request, "invitation");
-    assertAuthAllowed(authLimiters, keys);
+    const key = clientAddressKey(request);
+    authLimiters.invitation.assertAllowed(key);
     try {
       const joined = await store.transaction((database) => acceptInvitation(database, { token: body.token, user }));
       json(response, joined.alreadyMember ? 200 : 201, {
@@ -168,7 +169,7 @@ export async function handleMemberRoutes({ request, response, method, pathname, 
         alreadyMember: joined.alreadyMember,
       });
     } catch (error) {
-      recordAuthFailure(authLimiters, keys);
+      authLimiters.invitation.recordFailure(key);
       throw error;
     }
     return;

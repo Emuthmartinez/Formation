@@ -256,7 +256,23 @@ function InviteForm({ workspaceId, onCreated }: { workspaceId: string; onCreated
  */
 function InvitationLink({ created, onDismiss }: { created: CreatedInvitation; onDismiss: () => void }) {
   const link = `${window.location.origin}${created.acceptPath}`;
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<boolean | "unavailable">(false);
+
+  // Optional chaining short-circuits the whole chain, so `navigator.clipboard?.writeText(…).then(…)`
+  // silently does nothing where the Clipboard API is absent — and a link that is shown once must
+  // never be believed copied when it was not.
+  const copy = async () => {
+    if (!navigator.clipboard) {
+      setCopied("unavailable");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+    } catch {
+      setCopied("unavailable");
+    }
+  };
 
   return (
     <div className="invitation-link">
@@ -264,19 +280,14 @@ function InvitationLink({ created, onDismiss }: { created: CreatedInvitation; on
       <p>{created.delivery}</p>
       <code>{link}</code>
       <div className="button-row">
-        <Button
-          type="button"
-          onClick={() => {
-            void navigator.clipboard?.writeText(link).then(
-              () => setCopied(true),
-              () => setCopied(false),
-            );
-          }}
-        >
-          {copied ? "Copied" : "Copy link"}
+        <Button type="button" onClick={() => void copy()}>
+          {copied === true ? "Copied" : "Copy link"}
         </Button>
         <Button type="button" variant="secondary" onClick={onDismiss}>Done</Button>
       </div>
+      {copied === "unavailable" ? (
+        <p className="muted-copy">This browser would not let Formation copy for you. Select the link above and copy it yourself.</p>
+      ) : null}
       <p className="muted-copy">
         This link is shown once. If you lose it, cancel the invitation and create a new one.
       </p>

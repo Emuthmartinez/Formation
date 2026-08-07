@@ -14,6 +14,11 @@ export function authAttemptKeys(request, email) {
   };
 }
 
+/** The requesting device, for limiters that have no account to key on. */
+export function clientAddressKey(request) {
+  return authAttemptKeys(request, "").address;
+}
+
 export function assertAuthAllowed(limiters, keys) {
   limiters.address.assertAllowed(keys.address);
   limiters.account.assertAllowed(keys.account);

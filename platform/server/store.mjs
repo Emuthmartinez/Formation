@@ -154,8 +154,23 @@ function migrateDatabase(database) {
     // Writing that decision down here means the file says what the server does, so an operator
     // reading the store is not left to infer it — and a stale role cannot become meaningful again
     // if a future release happens to add a role of that name.
+    const ownersByWorkspace = new Map();
     for (const membership of database.memberships ?? []) {
-      if (!MEMBERSHIP_ROLES.has(membership.role)) membership.role = "viewer";
+      if (membership.role !== "owner") continue;
+      ownersByWorkspace.set(membership.workspaceId, (ownersByWorkspace.get(membership.workspaceId) ?? 0) + 1);
+    }
+    for (const membership of database.memberships ?? []) {
+      if (MEMBERSHIP_ROLES.has(membership.role)) continue;
+      // Retiring a role must never leave a company with nobody who can run it. A workspace whose
+      // only membership carries an unknown role keeps its owner instead — a company nobody can
+      // administer is a worse outcome than a role that was already meaningless at runtime.
+      const owners = ownersByWorkspace.get(membership.workspaceId) ?? 0;
+      if (owners === 0) {
+        membership.role = "owner";
+        ownersByWorkspace.set(membership.workspaceId, 1);
+      } else {
+        membership.role = "viewer";
+      }
     }
     database.schemaVersion = 4;
     migrated = true;

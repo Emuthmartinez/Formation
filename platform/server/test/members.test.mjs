@@ -87,9 +87,12 @@ test("an invitation carries one person into a company at the role they were offe
     403,
   );
 
-  // The company's history records the access change rather than hiding it in a separate log.
-  assert.ok(snapshot.activity.some((entry) => entry.type === "member-invited"));
+  // The company's history records the access change rather than hiding it in a separate log —
+  // their arrival to everyone, the invitation that preceded it only to whoever manages access.
   assert.ok(snapshot.activity.some((entry) => entry.type === "member-joined"));
+  assert.ok(!snapshot.activity.some((entry) => entry.type === "member-invited"));
+  const ownerHistory = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell", { cookie: owner })).json();
+  assert.ok(ownerHistory.activity.some((entry) => entry.type === "member-invited"));
 });
 
 test("an invitation is single use, and using it again changes nothing", async (t) => {
@@ -325,4 +328,75 @@ test("a stranger cannot read, invite into, or discover a company they were not i
 
   const database = await app.store.read();
   assert.equal(database.memberships.filter((entry) => entry.workspaceId === "wrk_storywell").length, 1);
+});
+
+test("who is being courted stays with the owner, in the history as well as the list", async (t) => {
+  const app = await startTestServer();
+  t.after(app.close);
+  const owner = await signIn(app.baseUrl, "founder@formation.local");
+
+  // A viewer, already in the company.
+  const viewerInvite = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell/invitations", {
+    cookie: owner, method: "POST", body: { email: "vicky@example.com", role: "viewer" },
+  })).json();
+  const { cookie: vicky } = await register(app.baseUrl, { name: "Vicky Viewer", email: "vicky@example.com" });
+  await call(app.baseUrl, "/api/invitations/accept", { cookie: vicky, method: "POST", body: { token: viewerInvite.acceptPath.split("/").pop() } });
+
+  // Someone the founder is not ready to name to the team.
+  const sensitive = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell/invitations", {
+    cookie: owner, method: "POST", body: { email: "acquirer@example.com", role: "owner" },
+  })).json();
+
+  const asViewer = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell", { cookie: vicky })).json();
+  const titles = asViewer.activity.map((entry) => entry.title).join(" | ");
+  assert.ok(!titles.includes("acquirer@example.com"), `the viewer's history named an invited outsider: ${titles}`);
+  assert.ok(!asViewer.activity.some((entry) => entry.type === "member-invited"));
+
+  // Cancelling names them too, and must be withheld the same way.
+  await call(app.baseUrl, `/api/workspaces/wrk_storywell/invitations/${sensitive.invitation.id}`, { cookie: owner, method: "DELETE" });
+  const afterCancel = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell", { cookie: vicky })).json();
+  assert.ok(!afterCancel.activity.map((entry) => entry.title).join(" | ").includes("acquirer@example.com"));
+
+  // The owner keeps the full history — this hides a disclosure, it does not lose a record.
+  const asOwner = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell", { cookie: owner })).json();
+  assert.ok(asOwner.activity.some((entry) => entry.title.includes("acquirer@example.com invited as owner")));
+  assert.ok(asOwner.activity.some((entry) => entry.type === "member-invite-revoked"));
+
+  // Someone who actually joined is company history for everyone: their name is on the list anyway.
+  assert.ok(asViewer.activity.some((entry) => entry.type === "member-joined"));
+});
+
+test("guessing invitation links cannot lock out the person holding a real one", async (t) => {
+  const app = await startTestServer();
+  t.after(app.close);
+  const owner = await signIn(app.baseUrl, "founder@formation.local");
+  const created = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell/invitations", {
+    cookie: owner, method: "POST", body: { email: "sam@example.com", role: "editor" },
+  })).json();
+  const { cookie: sam } = await register(app.baseUrl, { name: "Sam Rivera", email: "sam@example.com" });
+
+  // More wrong guesses than the sign-in limiter would ever allow, from the same address.
+  const { cookie: guesser } = await register(app.baseUrl, { name: "Guesser", email: "guesser@example.com" });
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const response = await call(app.baseUrl, "/api/invitations/preview", { cookie: guesser, method: "POST", body: { token: `guess-${attempt}` } });
+    assert.equal(response.status, 404, "a wrong guess is a wrong guess, not a rate-limit answer");
+  }
+
+  const accepted = await call(app.baseUrl, "/api/invitations/accept", {
+    cookie: sam, method: "POST", body: { token: created.acceptPath.split("/").pop() },
+  });
+  assert.equal(accepted.status, 201, "someone else's wrong guesses must not stop a real invitation");
+});
+
+test("the only owner is told which act was refused, in the words of the act they took", async (t) => {
+  const app = await startTestServer();
+  t.after(app.close);
+  const owner = await signIn(app.baseUrl, "founder@formation.local");
+  const members = await (await call(app.baseUrl, "/api/workspaces/wrk_storywell/members", { cookie: owner })).json();
+  const only = members.members[0];
+
+  const left = await call(app.baseUrl, `/api/workspaces/wrk_storywell/members/${only.id}`, { cookie: owner, method: "DELETE" });
+  assert.equal(left.status, 409);
+  // They clicked "leave", so they are told about leaving — not about removing someone else.
+  assert.match((await left.json()).error, /before you leave/);
 });

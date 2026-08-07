@@ -242,11 +242,18 @@ export function changeMemberRole(database, { workspaceId, membershipId, role, ac
 export function removeMember(database, { workspaceId, membershipId, actor, now = new Date().toISOString() }) {
   const membership = database.memberships.find((entry) => entry.id === membershipId && entry.workspaceId === workspaceId);
   if (!membership) throw new MemberError(404, "That person is not part of this company.");
+  const leaving = membership.userId === actor.id;
   if (membership.role === "owner" && ownerCount(database, workspaceId) <= 1) {
-    throw new MemberError(409, "This is the company's only owner. Make someone else an owner before removing them.");
+    // Only the sole owner can ever reach this, and only by trying to leave — but say which act
+    // was refused rather than describing one they did not take.
+    throw new MemberError(
+      409,
+      leaving
+        ? "You are this company's only owner. Make someone else an owner before you leave."
+        : "This is the company's only owner. Make someone else an owner before removing them.",
+    );
   }
 
-  const leaving = membership.userId === actor.id;
   const user = database.users.find((entry) => entry.id === membership.userId);
   database.memberships = database.memberships.filter((entry) => entry.id !== membershipId);
   recordAccessChange(database, workspaceId, {

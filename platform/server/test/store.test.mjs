@@ -104,3 +104,28 @@ test("JSON store migrates a schema 3 file by adding invitations and retiring rol
   assert.equal(migrated.memberships.find((entry) => entry.id === "mem_editor").role, "editor");
   assert.equal(migrated.memberships.find((entry) => entry.id === "mem_storywell_owner").role, "owner");
 });
+
+test("retiring a role never leaves a company with nobody who can run it", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "formation-store-migration-lonely-"));
+  const filePath = path.join(directory, "formation.json");
+  const previous = createSeedDatabase();
+  previous.schemaVersion = 3;
+  delete previous.invitations;
+  // A company whose only membership carries a role the ladder never had.
+  previous.workspaces.push({ ...structuredClone(previous.workspaces[0]), id: "wrk_lonely", slug: "lonely" });
+  previous.memberships.push({ id: "mem_lonely", userId: "usr_demo_founder", workspaceId: "wrk_lonely", role: "founder", createdAt: "2026-08-05T00:00:00.000Z" });
+  await writeFile(filePath, `${JSON.stringify(previous, null, 2)}
+`, { mode: 0o600 });
+
+  const store = new JsonStore({ filePath, seedFactory: createSeedDatabase });
+  await store.initialize();
+  const migrated = await store.read();
+
+  // Least privilege gives way to leaving someone able to administer the company: a workspace
+  // nobody can run is worse than a role that already held nothing at runtime.
+  assert.equal(migrated.memberships.find((entry) => entry.id === "mem_lonely").role, "owner");
+  for (const workspace of migrated.workspaces) {
+    const owners = migrated.memberships.filter((entry) => entry.workspaceId === workspace.id && entry.role === "owner");
+    assert.ok(owners.length >= 1, `${workspace.id} came out of the migration with no owner`);
+  }
+});
