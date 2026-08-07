@@ -134,7 +134,8 @@ Add:
 
 - provider-specific response schema enforcement
 - regression fixtures for each deliverable type — **shipped for the built-in drafts** (`platform/server/test/deliverables.test.mjs`): every type is built from a complete company, from one with every optional field cleared, and from a workstream that has recorded nothing, and each result is held to the same bar — no empty section, no sentence with a hole in it, and nothing Formation would refuse if a founder submitted the same document as an edit. Fixtures for provider-produced drafts still need recorded provider answers to run against.
-- contradiction and terminology consistency checks
+- contradiction checks — **shipped** (`platform/server/domain/consistency.mjs`): structural self-disagreement, decided by looking at fields rather than at language — an unsupported fact, confidence without evidence, a deliverable on retired evidence, a settled deliverable whose every source is an assumption, a decision reviewed before it was made, work due after the launch it precedes, a launch date that quietly went by. Surfaced on Today, and nothing is repaired.
+- terminology consistency checks — **not shipped, deliberately.** Catching a company that says "families" in one document and "households" in another needs a record of the words that company has chosen. Formation has no lexicon, and a keyword matcher without one would flag synonyms as drift and miss the drift that matters. The honest next step is the record, not the matcher.
 - source-use and citation-quality evaluation
 - prompt-injection resistance for imported research and documents — **shipped** (see below)
 - hallucination measurement

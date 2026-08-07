@@ -422,6 +422,20 @@ export interface ImportPlan {
   contradictions: Array<{ severity: "blocking" | "advisory"; message: string; sourcePath: string | null }>;
 }
 
+/** One way the record disagrees with itself, decided by looking at fields rather than at language. */
+export interface Inconsistency {
+  id: string;
+  code: string;
+  severity: "high" | "medium" | "low";
+  title: string;
+  detail: string;
+  workstreamId: string | null;
+  claimIds?: string[];
+  taskIds?: string[];
+  artifactId?: string;
+  decisionId?: string;
+}
+
 export interface WorkspaceSnapshot {
   workspace: Workspace;
   membership: { id: string; role: WorkspaceRole | string; userId: string; workspaceId: string };
@@ -435,6 +449,7 @@ export interface WorkspaceSnapshot {
   jobs: Job[];
   activity: Activity[];
   contradictions: Contradiction[];
+  inconsistencies: Inconsistency[];
   recommendations: Recommendation[];
   readiness: Readiness;
 }
