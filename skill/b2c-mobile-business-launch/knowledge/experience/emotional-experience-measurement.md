@@ -2,6 +2,8 @@
 
 Use this when instrumenting the four named emotional-experience cards (Commitment Card, Variable Reward Card, Perceived Effort Delay Card, Intent Mirroring Card) so that "emotional experience" produces falsifiable PostHog signal, not vibes. Load this alongside `analytics-attribution.md`, `eleven-star-experience.md`, and `onboarding-conversion.md`. Do NOT duplicate event names from `analytics-attribution.md` — extend them.
 
+This file is the sole canonical source for the four cards' PostHog event names and properties. `consumer-product-design-agency.md` and `emotional-experience-design.md` point here rather than restate the event contract — if either ever appears to define `commitment_made` or the other card events differently, that is drift to fix here, not a second valid definition.
+
 The goal: every emotional moment must be traceable from a named PostHog event → a behavioral metric it moves → a counter-metric that reveals misuse → an A/B test that isolates causation.
 
 ## Contents

@@ -39,7 +39,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 
 **Guardrail (deterministic).** The commitment must be editable at any time from a settings or profile screen. If the user cannot update or delete their stated goal/commitment without a support ticket, this card is non-compliant.
 
-**PostHog events.** `commitment_made` with `commitment_type`, `commitment_value`, `flow_id`, `step_id`; `commitment_echoed` with `surface`, `commitment_type`, `commitment_value`.
+**PostHog events.** Defined once, canonically, in [`emotional-experience-measurement.md`](./emotional-experience-measurement.md) §4 (Commitment Card Measurement) — do not restate the event names or properties here.
 
 **11-star mapping.** Moves from 5-star (neutral setup form) to 6-star (product remembers me) or 7-star (product feels made for me). The commitment is evidence for the 7-star label in `11_STAR_EXPERIENCE.md`.
 
@@ -59,7 +59,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 
 **Guardrail (deterministic).** The result must be genuinely variable in content, not only in cosmetic framing. If the same user action always produces an identical backend result, the animation is deceptive. Implementation must pass a test where two consecutive completions of the same action produce observably different content outputs at least 30% of the time, OR the product can demonstrate that variation is real but unlikely to occur on consecutive attempts due to personalization convergence. Record the proof method in `engineering/PRODUCTION_READINESS.md`.
 
-**PostHog events.** `variable_reward_anticipation_started` with `surface`, `reward_type`, `flow_id`; `variable_reward_revealed` with `surface`, `reward_type`, `reward_variant`, `anticipation_duration_ms`.
+**PostHog events.** Defined once, canonically, in [`emotional-experience-measurement.md`](./emotional-experience-measurement.md) §5 (Variable Reward Card Measurement) — do not restate the event names or properties here.
 
 **11-star mapping.** Moves from 5-star (expected result shown immediately) to 6-star (result delivery feels meaningful) or 7-star (result feels personally discovered). Maps directly to the "dopamine pulse" moment in the experience ladder.
 
@@ -79,7 +79,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 
 **Guardrail (deterministic).** At least 50% of the displayed processing steps must correspond to a real computational operation (data fetch, model inference, sorting, filtering, formatting, or rendering). The product spec must document the step-to-operation map in `engineering/TECH_SPEC.md`. If this cannot be verified, use a simpler loading state instead.
 
-**PostHog events.** `perceived_effort_started` with `surface`, `effort_type`, `step_count`; `perceived_effort_completed` with `surface`, `effort_type`, `step_count`, `total_duration_ms`, `real_step_ratio`.
+**PostHog events.** Defined once, canonically, in [`emotional-experience-measurement.md`](./emotional-experience-measurement.md) §6 (Perceived Effort Delay Card Measurement) — do not restate the event names or properties here.
 
 **11-star mapping.** Moves from 5-star (instant generic result) to 6-star (result feels assembled for me) or 7-star (I believe the product worked hard on my behalf). Maps to the "higher perceived value" behavior on the star ladder.
 
@@ -99,7 +99,7 @@ For each card: implement the pattern, emit the named PostHog event, verify the b
 
 **Guardrail (deterministic).** The mirrored content must use only fields the user explicitly provided (answer selections, free text, goal statements, commitment values). It must never infer or manufacture emotional states the user did not express. The implementation must be reviewed against `strategy/BRAND.md §Voice` to ensure the tone is warm, not coercive. The mirror must not be followed by a paywall or hard CTA in the same screen. Record the trigger source and content source in `engineering/PRODUCTION_READINESS.md`.
 
-**PostHog events.** `intent_mirror_shown` with `surface`, `mirror_type`, `source_field`, `trigger_context`; `intent_mirror_continued` with `surface`, `next_action`.
+**PostHog events.** Defined once, canonically, in [`emotional-experience-measurement.md`](./emotional-experience-measurement.md) §7 (Intent Mirroring Card Measurement) — do not restate the event names or properties here.
 
 **11-star mapping.** This is the 7-star mechanic: "made for me." The mirror is the moment the user believes the product knows them, not just their data. It is the experience that produces word-of-mouth.
 
@@ -229,17 +229,12 @@ with itself across two files is worse than one that lives in a single place.
 
 ## Analytics Events For Emotional Moments
 
-Add these to `analytics/ANALYTICS.md` before implementation. Do not invent event names outside this catalog without first adding the candidate to `analytics/ANALYTICS.md`.
+The four required Experience Cards' events and properties are defined once, canonically, in
+[`emotional-experience-measurement.md`](./emotional-experience-measurement.md) §§4-7 — load that
+section rather than a second copy here, for the same reason the Emotional Curve spec above lives
+in one place. This file adds only the event below, which the measurement file does not own:
 
 ```
-commitment_made            surface, commitment_type, commitment_value, flow_id, step_id
-commitment_echoed          surface, commitment_type, commitment_value
-variable_reward_anticipation_started  surface, reward_type, flow_id
-variable_reward_revealed   surface, reward_type, reward_variant, anticipation_duration_ms
-perceived_effort_started   surface, effort_type, step_count
-perceived_effort_completed surface, effort_type, step_count, total_duration_ms, real_step_ratio
-intent_mirror_shown        surface, mirror_type, source_field, trigger_context
-intent_mirror_continued    surface, next_action
 peak_moment_reached     surface, step_id, emotional_target, score_contribution
 ```
 

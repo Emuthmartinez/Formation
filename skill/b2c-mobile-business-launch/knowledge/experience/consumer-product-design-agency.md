@@ -228,13 +228,12 @@ These apply to all five tiers and all four cards. Any implementation that crosse
 
 Every emotional moment must be measurable. These events are required in `analytics/ANALYTICS.md` before any Experience Card is shipped.
 
+The four required Experience Cards' PostHog event names and properties (`commitment_made`, `variable_reward_revealed`, `perceived_effort_completed`, `intent_mirror_shown`, `intent_mirror_dismissed`) are defined once, canonically, in [`emotional-experience-measurement.md`](./emotional-experience-measurement.md) §§4-7 — load that section rather than restate the property list here; a second copy is how the schema drifts.
+
+Events unique to this tier's AI-agency work, not owned by the card measurement file:
+
 | Event Name | Fires When | Required Properties |
 |---|---|---|
-| `commitment_made` | User completes Commitment Card step | `goal_text` (hashed or category), `goal_cadence`, `onboarding_step_index` |
-| `variable_reward_revealed` | Variable reward surfaces | `reward_type` (tribe/hunt/self), `trigger_action`, `reveal_animation_shown` (bool) |
-| `perceived_effort_completed` | Perceived effort sequence finishes | `stage_count`, `total_duration_ms`, `feature_context` |
-| `intent_mirror_shown` | Intent Mirroring Card surfaces | `trigger_context` (onboarding/session_end/post_value), `user_phrase_source` (committed_goal/last_action) |
-| `intent_mirror_dismissed` | User dismisses the mirror | `time_to_dismiss_ms` |
 | `ai_result_trust_signal_shown` | AI attribution copy renders on result screen | `feature_context` |
 | `ai_result_overridden` | User taps "change this" path on AI result | `feature_context`, `steps_to_override` |
 
