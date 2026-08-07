@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.98.0",
+  "skillVersion": "0.99.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1948,7 +1948,9 @@
         "design"
       ],
       "phaseIds": [],
-      "dependencies": [],
+      "dependencies": [
+        "workflow.design.design-room-state-mutate-version-render"
+      ],
       "outputPaths": [
         "design/DESIGN.md"
       ],
@@ -2314,7 +2316,8 @@
         "phase.5b"
       ],
       "dependencies": [
-        "workflow.process.launch-trace-and-build-contracts"
+        "workflow.process.launch-trace-and-build-contracts",
+        "workflow.design.design-room-state-mutate-version-render"
       ],
       "outputPaths": [],
       "gateCommands": [
@@ -2589,7 +2592,8 @@
         "phase.4"
       ],
       "dependencies": [
-        "workflow.process.launch-trace-and-build-contracts"
+        "workflow.process.launch-trace-and-build-contracts",
+        "workflow.data.analytics-and-attribution-blueprint"
       ],
       "outputPaths": [
         "GEO_SEO.md"

@@ -83,6 +83,8 @@ After research and before engineering specs are actioned, decide whether the pro
 
 Create or update `11_STAR_EXPERIENCE.md` and `11-star-experience.html` before engineering work starts. The engineering plan should inherit the V1 scalable slice, not invent the magical moment from screen sketches.
 
+When a feature's 11-star target is 6-star or higher, also load [`emotional-experience-design.md`](../experience/emotional-experience-design.md): a feature flagged for an Experience Card (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring, or one of the eight satellite cards in `experience-cards.md`) needs that card's PostHog events, ethics-guardrail attestation, and motion-contract spring implemented before engineering can call the screen done — this does not surface from naming the mechanic alone (a "streak screen" prompt, not "the Streak/Loss-Aversion card").
+
 Use `ce-brainstorm` when:
 - AppKittie/XPOZ/Firecrawl findings reveal competing wedges.
 - V1/V2/V3 boundaries are still disputed.
@@ -193,6 +195,7 @@ The plan must include:
 - `state/PROJECT_STATE.yaml` phase, autonomy mode, active blockers, and failure cards that constrain implementation
 - `engineering/TECH_SPEC.md` pointer or inline technical contracts when data/API/state/integration behavior is in scope
 - `product/copy/COPY_DECK.md` coverage for every screen the units build, and the string-externalization mechanism from `engineering/TECH_SPEC.md` §Strings And Localization Readiness
+- [`premium-mobile-craft.md`](../design/premium-mobile-craft.md) acceptance-criteria coverage for every screen the units build — press states, motion, haptics, loading/empty states — the same per-screen bar the COPY_DECK.md line above already sets for copy
 - implementation units with repo-relative file paths
 - orchestration strategy, candidate units, safe parallel lanes, serialized lanes, worktree needs, shared resources, and subagent forbidden actions from `operations/ORCHESTRATION.md`
 - frontend, backend, database, analytics, revenue, email, and store-console impacts
@@ -218,6 +221,7 @@ Required proof, adjusted to the product:
 - integration tests for app-to-backend, provider callbacks, database writes, entitlement projection, email sends, and analytics wrappers
 - browser E2E for web funnels, checkout, privacy/terms pages, support flows, and dashboards where applicable
 - mobile E2E for onboarding, attribution, paywall, restore, activation, settings, account deletion, and screenshot-critical flows: in-app iOS Simulator (rung 0) for iOS-only walkthroughs and repro, MobAI for Android coverage and repeatable suites, XcodeBuildMCP when the lane needs scripted/CI builds or physical hardware — record the rung used and the coverage it does not provide
+- on-device taste pass for every built screen against `premium-mobile-craft.md`/`quality-lens.md` (see §8 Device Loop's closing step) — functional E2E proof that a screen runs and can be captured is not proof it looks premium, on-brand, or non-generic
 - backend proof that frontend actions create the expected records/events in the real test backend, database, Firestore/Supabase/Postgres, RevenueCat, Stripe, Resend, or PostHog target
 - app integrity, rate-limit, idempotency, and abuse-path proof when paid access, user accounts, sensitive data, or backend mutation are in scope
 - release-build or staging-build verification that mocks are disabled, production flags are sane, and secrets are not bundled
@@ -272,6 +276,7 @@ Device loop:
 - wait for stable UI
 - observe again
 - capture screenshots only after the state is verified
+- before recording the screen as production-ready, run the captured screenshot through [`quality-lens.md`](../design/quality-lens.md)'s Anti-Generic Checks and, for surfaces `premium-mobile-craft.md`/`motion-craft-benchmarks.md` govern, confirm the spring/haptics/press-state recipe actually shipped — this loop proves the screen runs, not that it looks premium or on-brand
 
 For store screenshots, keep raw captures separate from composed assets. For E2E readiness, pair each MobAI action sequence with backend/provider verification:
 - onboarding answer appears in profile/backend state
@@ -293,10 +298,11 @@ npm run check:attribution -- --root .
 npm run check:secrets -- --root .
 npm run check:store-console -- --root .
 npm run render:launch-cockpit -- --root .
-npm run launchbench
 ```
 
 If the scripts are available only from the installed skill, call them with `tsx` and pass the app repo as `--root`.
+
+`npm run launchbench` and `npm run evals:behavioral` are skill-maintainer commands (see `validation/repository/README.md`) — they lint this skill's own LaunchBench scenario definitions and judge whether a fresh agent applies the skill's instructions correctly. Neither one inspects a shipped app's UI code, so do not run either against the app repo above or cite them as production-readiness proof. The `motion-craft-prose-never-applied` LaunchBench scenario exists precisely because motion craft has no deterministic app-side check today: verify it here through the on-device taste pass in §7/§8's Device Loop, or a specialist design-guru review against `premium-mobile-craft.md`/`quality-lens.md`, and record that evidence in `engineering/PRODUCTION_READINESS.md`.
 
 Use failure cards when a validator fails, a subagent finds a launch-grade gap, a provider mutation is blocked, or a known miss reappears. Cards should include severity, owner, evidence, impact, next action, validator, and closure proof. Keep active cards in `state/PROJECT_STATE.yaml`; use `operations/FAILURE_CARDS.md` only when more detail is useful.
 

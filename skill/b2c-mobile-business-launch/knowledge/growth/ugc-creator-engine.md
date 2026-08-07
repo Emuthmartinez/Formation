@@ -184,7 +184,7 @@ Guardrails for synthetic UGC:
 - Every generation prompt must carry `design/DESIGN.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface). Generating without this brief is a named failure mode.
 - Gate every generation behind spend confirmation per `paid-tool-routing.md`; surface current balance first (`mcp__claude_ai_Higgsfield__balance`).
 - Record all generated assets in `CONTENT_ASSETS.md` / `growth/content-assets/manifest.json` with `prompt_brief`, `soul_reference_id`, `avatar_id`, and `virality_score` fields.
-- Synthetic ads must pass brain-activity virality scoring before paid distribution (see **Virality Closed Loop** recipe in `tool-recipes/visual-and-motion-production.md`).
+- Synthetic ads must pass brain-activity virality scoring before paid distribution (see **Virality Closed Loop** recipe in `tool-recipes/visual-and-motion-production.md`) — and pass [`quality-lens.md`](../design/quality-lens.md)'s Anti-Generic Checks, which neither the virality score nor the design-token check evaluates.
 - Public posting and paid campaign launch remain founder-gated.
 
 **Long recordings → short clips (`personal_clipper`).** Use `personal_clipper` to cut long founder recordings, podcast appearances, demo walkthroughs, or app explainers into short-form clips for UGC distribution. `personal_clipper` is an MCP-tool capability only (`mcp__claude_ai_Higgsfield__personal_clipper_create` / `_jobs` / `_status`); confirm the exact invocation via the `higgsfield-generate` skill before running. Gate behind spend confirmation per `paid-tool-routing.md`. See the **Master → All Platforms** recipe in `tool-recipes/visual-and-motion-production.md`.
