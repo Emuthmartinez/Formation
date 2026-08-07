@@ -5,6 +5,7 @@ import { handleApi } from "./api.mjs";
 import { createId } from "./domain.mjs";
 import { ExecutionWorker } from "./execution.mjs";
 import { GenerationWorker } from "./generation.mjs";
+import { ImportService } from "./imports.mjs";
 import { applySecurityHeaders, defaultDistDir, json, normalizeError, serveApplication } from "./http.mjs";
 
 export function createFormationServer({
@@ -13,10 +14,12 @@ export function createFormationServer({
   allowDemoAuth = process.env.NODE_ENV !== "production",
   allowRegistration = process.env.ALLOW_REGISTRATION !== "false",
   execution,
+  imports,
 } = {}) {
   if (!store) throw new Error("createFormationServer requires a store.");
   const worker = new GenerationWorker(store);
   const executionWorker = new ExecutionWorker(store, execution);
+  const importService = new ImportService(store, imports);
   const authLimiters = {
     account: new AuthRateLimiter({ maximumFailures: 7 }),
     address: new AuthRateLimiter({ maximumFailures: 35 }),
@@ -43,7 +46,7 @@ export function createFormationServer({
     try {
       const url = new URL(request.url ?? "/", requestOrigin(request));
       if (url.pathname.startsWith("/api/")) {
-        await handleApi({ request, response, url, store, worker, executionWorker, allowDemoAuth, allowRegistration, authLimiters });
+        await handleApi({ request, response, url, store, worker, executionWorker, importService, allowDemoAuth, allowRegistration, authLimiters });
       } else {
         await serveApplication({ request, response, url, staticRoot });
       }
@@ -70,7 +73,7 @@ export function createFormationServer({
     worker.stop();
     executionWorker.stop();
   });
-  return { server, worker, executionWorker };
+  return { server, worker, executionWorker, importService };
 }
 
 function requestOrigin(request) {

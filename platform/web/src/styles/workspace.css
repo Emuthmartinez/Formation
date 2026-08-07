@@ -226,6 +226,37 @@
 .engine-explainer__flow h3 { margin: 0; font-size: 15px; }
 .engine-explainer__flow p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.55; }
 
+/* Bringing in an existing launch record
+   ---------------------------------------------------------------------------------------------
+   A preview the founder reads before anything happens, so the layout puts the disagreements
+   first, the company it found second, and what would arrive third. */
+.import-picker { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+.import-picker .field { flex: 1 1 320px; max-width: 460px; }
+.import-plan { display: grid; gap: 20px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+.import-plan__contradictions { padding: 14px 16px; border-left: 3px solid var(--red); background: var(--red-soft); border-radius: 0 7px 7px 0; }
+.import-plan__contradictions .eyebrow { color: var(--red); }
+.import-plan__contradictions ul { margin: 8px 0 0; padding-left: 17px; display: grid; gap: 6px; }
+.import-plan__contradictions li { color: var(--ink-soft); font-size: 13px; line-height: 1.55; }
+.import-plan__note { color: var(--muted); }
+.import-plan__company { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin: 0; }
+.import-plan__company div { display: grid; gap: 4px; align-content: start; }
+.import-plan__company dt { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+.import-plan__company dd { margin: 0; font-size: 14px; color: var(--ink); line-height: 1.5; }
+.import-plan__groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+.import-plan__group { display: grid; gap: 8px; align-content: start; }
+.import-plan__group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.import-plan__group li { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 9px; align-items: baseline; font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+.import-plan__action { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.import-plan__action--create { background: var(--forest-soft); color: var(--forest); }
+.import-plan__action--update { background: var(--blue-soft); color: var(--blue); }
+.import-plan__action--drifted { background: var(--amber-soft); color: var(--amber); }
+.import-plan__fields ul, .import-plan__retiring ul { margin: 8px 0 0; padding-left: 17px; display: grid; gap: 6px; }
+.import-plan__fields li, .import-plan__retiring li { font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+.import-plan__advisory { font-size: 12px; }
+.import-plan__advisory summary { cursor: pointer; color: var(--muted); font-weight: 700; }
+.import-plan__advisory summary:hover { color: var(--ink); }
+.import-plan__advisory ul { margin: 9px 0 0; padding-left: 17px; display: grid; gap: 6px; color: var(--muted); line-height: 1.55; }
+
 /* People and access
    ---------------------------------------------------------------------------------------------
    A decisive row per person, in the same idiom as the ledger and task rows: identity on the left,

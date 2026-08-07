@@ -99,16 +99,28 @@ The repository already has businesses represented by `PROJECT_STATE.yaml`, Markd
 
 Build a dry-run-first importer that:
 
-- reads current engine state and artifact manifests
-- maps business context to Formation company fields
-- classifies claims
-- extracts decisions and approvals
-- creates tasks from real blockers and next actions
-- initializes immutable artifact versions
-- preserves engine IDs as provenance metadata
-- flags contradictions and ambiguous classification
-- can be rerun idempotently
-- never deletes or rewrites the source repository
+- reads current engine state and artifact manifests — **shipped** (`core/adapters/platform-import.ts`: the launch workspace's `state/PROJECT_STATE.yaml`, `state/business.json`, `state/LAUNCH_TRACE.md`, every lane's evidence list, and the Markdown documents those lists name)
+- maps business context to Formation company fields — **shipped** (only where Formation has nothing recorded; see below)
+- classifies claims — **shipped** (a lane recorded finished becomes a `recommendation` to confirm, an open question becomes a `question`; nothing becomes a fact)
+- extracts decisions and approvals — **shipped** (the go/pivot/kill and kill-or-scale verdicts with the dates they were made, the launch trace's rejected routes as superseded decisions, and its founder-only gates as decided or still proposed)
+- creates tasks from real blockers and next actions — **shipped** (lane blockers, part-done and stuck lanes, the trace's blocker table, open failure cards, and the workspace's own `next_founder_action`)
+- initializes immutable artifact versions — **shipped** (each document arrives as a `draft` deliverable, split on its own headings, with version 1 attributed to the launch work rather than to a founder)
+- preserves engine IDs as provenance metadata — **shipped** (`source.kind: "legacy-import"` carries the import key, source id, workspace-relative path, lane key, and lane title)
+- flags contradictions and ambiguous classification — **shipped** (evidence a finished lane names but does not have, a lane finished over an unfinished dependency, a lane status the engine does not define, template example values still in place, and a workspace whose own state says it has not been reconciled)
+- can be rerun idempotently — **shipped** (every record keys on a content-derived import key, so a second import of an unchanged workspace creates nothing)
+- never deletes or rewrites the source repository — **shipped** (the engine CLI opens no handle for writing, and the platform half has no path back into the workspace at all)
+
+The load-bearing choices:
+
+**Preview and apply are one computation.** `buildImportPlan` decides everything and `applyImportPlan` only executes what the plan said, so a founder is never shown a rehearsal that differs from the performance. The plan is rebuilt inside the write transaction, against the state the write will actually see.
+
+**Founder work is never overwritten.** An empty company field is filled; a field the two records disagree on becomes a question quoting both, and the founder's own words stay. A deliverable the founder has edited is never rewritten by a later import — it is marked as having drifted from its source. An untouched draft is refreshed and appends a version.
+
+**Requests name a source id, never a path.** An import reads files off the server's own disk, so a path in a request body would be an authenticated arbitrary-file-read. The founder chooses from the launch workspaces found under `FORMATION_IMPORT_ROOT` (defaulting to `FORMATION_ENGINE_ROOT`), and an id resolves only by matching one of them — traversal is impossible by construction rather than by pattern-matching for `..`. With no root configured, importing is off and says so.
+
+**Contradictions outlive the preview.** A blocking contradiction becomes an open question in the record, so the doubt ends up in front of the founder rather than in a screen they saw once. The founder surface prints them above what would arrive, not below it.
+
+The capability is `launch-import`, owner-only. The founder surface is "Work you have already done" on the Launch page.
 
 ## P1: Production AI evaluation and safety
 

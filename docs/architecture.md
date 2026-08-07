@@ -149,9 +149,24 @@ A verified result contains:
 - verifier result
 - cost and provider metadata where permitted
 
+### Engine to platform, for an existing launch repository
+
+A launch repository predating Formation is read across the same boundary, by a second read-only CLI (`core/adapters/platform-import.ts`). Its report contains:
+
+- company context: name, founder, promise, primary customer, launch phase, platforms, go-live date
+- proposed claims, each classified as a recommendation to confirm or an open question
+- decisions, including the recorded founder verdicts with the dates they were made
+- outstanding work, with whether the workspace records it as stuck
+- documents, split on their own headings, with a content fingerprint
+- contradictions, each naming the record it undermines
+- a stable, content-derived import key per record, so the platform can re-import idempotently
+
+Nothing in that report is a fact. A launch repository is an agent's working record, and it enters the platform as drafts and questions for the founder.
+
 ### Authority rules
 
 - the browser cannot read or write engine files
+- importing a launch repository never writes to it: the engine's import CLI opens no handle for writing, and the platform has no path back into the workspace
 - the engine cannot bypass platform workspace authorization
 - engine output enters as proposed or reviewed product state according to policy
 - founder decisions remain authoritative for product-facing strategy

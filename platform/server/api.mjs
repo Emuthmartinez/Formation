@@ -5,16 +5,17 @@ import { handleApprovalRoutes } from "./routes/approvals.mjs";
 import { handleArtifactRoutes } from "./routes/artifacts.mjs";
 import { handleEvidenceRoutes } from "./routes/evidence.mjs";
 import { handleExecutionRoutes } from "./routes/executions.mjs";
+import { handleImportRoutes } from "./routes/imports.mjs";
 import { handleMemberRoutes } from "./routes/members.mjs";
 import { handlePublicRoutes } from "./routes/public.mjs";
 import { handleShareRoutes, handleSharedRead } from "./routes/sharing.mjs";
 import { handleWorkspaceRoutes } from "./routes/workspaces.mjs";
 
-export async function handleApi({ request, response, url, store, worker, executionWorker, allowDemoAuth, allowRegistration, authLimiters }) {
+export async function handleApi({ request, response, url, store, worker, executionWorker, importService, allowDemoAuth, allowRegistration, authLimiters }) {
   assertSameOrigin(request);
   const method = request.method ?? "GET";
   const pathname = url.pathname;
-  const context = { request, response, method, pathname, store, worker, executionWorker, allowDemoAuth, allowRegistration, authLimiters };
+  const context = { request, response, method, pathname, store, worker, executionWorker, importService, allowDemoAuth, allowRegistration, authLimiters };
 
   await handlePublicRoutes(context);
   if (response.writableEnded) return;
@@ -35,6 +36,8 @@ export async function handleApi({ request, response, url, store, worker, executi
   await handleShareRoutes(privateContext);
   if (response.writableEnded) return;
   await handleExecutionRoutes(privateContext);
+  if (response.writableEnded) return;
+  await handleImportRoutes(privateContext);
   if (response.writableEnded) return;
   await handleApprovalRoutes(privateContext);
   if (response.writableEnded) return;
