@@ -23,7 +23,7 @@ test("JSON store initializes, serializes concurrent writes, and persists valid d
   const database = await store.read();
   assert.equal(database.activity.filter((entry) => entry.id.startsWith("concurrent-")).length, 12);
   const persisted = JSON.parse(await readFile(filePath, "utf8"));
-  assert.equal(persisted.schemaVersion, 3);
+  assert.equal(persisted.schemaVersion, 4);
   assert.ok(persisted.artifactVersions.length > 0);
   assert.ok(Array.isArray(persisted.executions));
   assert.ok(persisted.updatedAt);
@@ -55,10 +55,11 @@ test("JSON store migrates schema 1 artifacts into immutable version history", as
   await store.initialize();
   const migrated = await store.read();
 
-  assert.equal(migrated.schemaVersion, 3);
+  assert.equal(migrated.schemaVersion, 4);
   assert.equal(migrated.artifactVersions.length, migrated.artifacts.length);
   assert.ok(migrated.artifactVersions.every((version) => version.createdBy === "Formation migration"));
   assert.deepEqual(migrated.executions, []);
+  assert.deepEqual(migrated.invitations, []);
 });
 
 test("JSON store migrates a schema 2 file by adding the executions collection", async () => {
@@ -74,6 +75,32 @@ test("JSON store migrates a schema 2 file by adding the executions collection", 
   await store.initialize();
   const migrated = await store.read();
 
-  assert.equal(migrated.schemaVersion, 3);
+  assert.equal(migrated.schemaVersion, 4);
   assert.deepEqual(migrated.executions, []);
+});
+
+test("JSON store migrates a schema 3 file by adding invitations and retiring roles it no longer knows", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "formation-store-migration-v3-"));
+  const filePath = path.join(directory, "formation.json");
+  const previous = createSeedDatabase();
+  previous.schemaVersion = 3;
+  delete previous.invitations;
+  previous.memberships.push(
+    { id: "mem_advisor", userId: "usr_advisor", workspaceId: "wrk_storywell", role: "advisor", createdAt: "2026-08-05T00:00:00.000Z" },
+    { id: "mem_editor", userId: "usr_editor", workspaceId: "wrk_storywell", role: "editor", createdAt: "2026-08-05T00:00:00.000Z" },
+  );
+  await writeFile(filePath, `${JSON.stringify(previous, null, 2)}
+`, { mode: 0o600 });
+
+  const store = new JsonStore({ filePath, seedFactory: createSeedDatabase });
+  await store.initialize();
+  const migrated = await store.read();
+
+  assert.equal(migrated.schemaVersion, 4);
+  assert.deepEqual(migrated.invitations, []);
+  // A role the ladder never had held nothing at runtime; the file now says so too.
+  assert.equal(migrated.memberships.find((entry) => entry.id === "mem_advisor").role, "viewer");
+  // Roles the ladder does know are left exactly as they were.
+  assert.equal(migrated.memberships.find((entry) => entry.id === "mem_editor").role, "editor");
+  assert.equal(migrated.memberships.find((entry) => entry.id === "mem_storywell_owner").role, "owner");
 });

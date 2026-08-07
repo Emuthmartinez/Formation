@@ -1,6 +1,10 @@
 import { mkdir, open, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+/** Mirrors ROLES in domain/capabilities.mjs. Duplicated deliberately: the store must not import
+ *  domain logic to validate a file it may be migrating from an older shape. */
+const MEMBERSHIP_ROLES = new Set(["viewer", "reviewer", "editor", "owner"]);
+
 export class JsonStore {
   #filePath;
   #seedFactory;
@@ -144,6 +148,19 @@ function migrateDatabase(database) {
     migrated = true;
   }
 
+  if (database.schemaVersion === 3) {
+    database.invitations = Array.isArray(database.invitations) ? database.invitations : [];
+    // A membership role the capability ladder does not recognise already holds nothing at runtime.
+    // Writing that decision down here means the file says what the server does, so an operator
+    // reading the store is not left to infer it — and a stale role cannot become meaningful again
+    // if a future release happens to add a role of that name.
+    for (const membership of database.memberships ?? []) {
+      if (!MEMBERSHIP_ROLES.has(membership.role)) membership.role = "viewer";
+    }
+    database.schemaVersion = 4;
+    migrated = true;
+  }
+
   return migrated;
 }
 
@@ -151,7 +168,7 @@ function validateDatabase(database) {
   if (!database || typeof database !== "object" || Array.isArray(database)) {
     throw new Error("Formation data store must contain one JSON object.");
   }
-  if (database.schemaVersion !== 3) {
+  if (database.schemaVersion !== 4) {
     throw new Error(`Unsupported Formation schema version: ${String(database.schemaVersion)}`);
   }
 
@@ -167,6 +184,7 @@ function validateDatabase(database) {
     "tasks",
     "jobs",
     "executions",
+    "invitations",
     "activity",
   ];
   for (const name of requiredCollections) {

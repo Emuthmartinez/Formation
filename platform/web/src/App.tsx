@@ -3,11 +3,13 @@ import { ApiError, api } from "./api";
 import { Shell } from "./components/Shell";
 import { ErrorNotice, Toast } from "./components/Primitives";
 import { WorkspaceProvider } from "./context";
-import { useRoute } from "./router";
+import { navigate, useRoute } from "./router";
 import type { SessionPayload, WorkspaceSnapshot } from "./types";
 import { BusinessPage } from "./pages/BusinessPage";
 import { DecisionsPage } from "./pages/DecisionsPage";
 import { DeliverablesPage } from "./pages/DeliverablesPage";
+import { JoinPage } from "./pages/JoinPage";
+import { PeoplePage } from "./pages/PeoplePage";
 import { LaunchPage } from "./pages/LaunchPage";
 import { NewWorkspacePage } from "./pages/NewWorkspacePage";
 import { SignInPage } from "./pages/SignInPage";
@@ -152,12 +154,32 @@ export function App() {
     if (first === "decisions") return <DecisionsPage openNew={route.query.get("new") === "1"} targetId={route.hash.slice(1)} />;
     if (first === "deliverables") return <DeliverablesPage artifactId={second} />;
     if (first === "launch") return <LaunchPage />;
+    if (first === "people") return <PeoplePage />;
     if (first === "new") return <NewWorkspacePage onCreated={onCreated} />;
     return <TodayPage />;
   }, [route.path, route.query, route.hash, snapshot, onCreated]);
 
+  // An invitation link is the one route a signed-out visitor is meant to reach. They are sent to
+  // sign in carrying the token, so an instance with open registration closed still lets in the
+  // person its owner invited.
+  const invitationToken = route.segments[0] === "join" ? route.segments[1] : undefined;
+
   if (loading && !session) return <LoadingScreen />;
-  if (!session) return <SignInPage onSignedIn={initialize} />;
+  if (!session) return <SignInPage onSignedIn={initialize} invitationToken={invitationToken} />;
+  if (invitationToken) {
+    return (
+      <>
+        <JoinPage
+          token={invitationToken}
+          onJoined={async (joinedWorkspaceId) => {
+            await onCreated(joinedWorkspaceId);
+            navigate("/");
+          }}
+        />
+        {toastElement}
+      </>
+    );
+  }
   if (error) return <main className="fatal-state"><ErrorNotice message={error} onRetry={initialize} /></main>;
 
   if (!snapshot) {

@@ -45,19 +45,21 @@ Add:
 
 - email verification
 - password recovery
-- workspace invitations
+- workspace invitations — **shipped** (`platform/server/domain/members.mjs`: email-bound, single-use, hashed like a session token, and shown to the inviter exactly once)
 - owner, editor, reviewer, and viewer roles — **shipped** (`platform/server/domain/capabilities.mjs`: an ordinal ladder with one minimum role per capability, denying by default for any role the ladder does not recognise)
-- invitation expiry and revocation
+- invitation expiry and revocation — **shipped** (14 days, revocable, and a cancelled, expired, spent, or never-existed link are one indistinguishable answer)
 - session and device management
-- membership removal and ownership transfer
+- membership removal and ownership transfer — **shipped** (a company always keeps at least one owner: the last owner must promote a successor before stepping down or leaving, and anyone may leave on their own)
 - optional OIDC and SAML for larger teams
-- audit events for access changes
+- audit events for access changes — **shipped** (invited, joined, role changed, removed, left — in the company's own activity history rather than a separate log a founder has to know to look for)
 
 Every route should enforce role-level permissions in addition to membership — **shipped**. The capability is a required argument to the membership lookup, so a route that does not name what it is doing cannot resolve a member at all, and `platform/server/test/capabilities.test.mjs` fails on any route in source that is not declared with a capability before calling each declared surface as a member of every role.
 
 Two surfaces that previously trusted their caller now check for themselves: the execution worker's approval sync (a read that mirrors engine state into durable records) and the workspace snapshot builder. The founder-facing half reads the same answer the server enforces with — `snapshot.capabilities` — rather than keeping a second copy of the rules in the web app.
 
-What remains here is the membership lifecycle itself: until invitations ship, every membership is still created as `owner` at workspace creation, so the ladder is enforced but not yet exercised in production.
+An instance that has closed open registration still admits the people it invited: `POST /api/auth/register` accepts an invitation token, which opens the door for that one email address. Closing `ALLOW_REGISTRATION` is therefore a usable setting rather than one that silently breaks the invite flow.
+
+What remains here is the account lifecycle rather than the workspace one: email verification, password recovery, session and device management, and SSO. All three of the first group need a mail transport, which Formation does not have — the invitation flow deliberately says so and hands the founder the link instead of pretending to send it.
 
 ## P0: Platform-to-engine execution adapter
 

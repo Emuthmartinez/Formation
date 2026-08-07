@@ -12,6 +12,7 @@ const primaryNavigation = [
   { label: "Decisions", path: "/decisions", icon: "decision" as const },
   { label: "Deliverables", path: "/deliverables", icon: "document" as const },
   { label: "Launch", path: "/launch", icon: "launch" as const },
+  { label: "People", path: "/people", icon: "business" as const },
 ];
 
 // Mirrors the server's WORKSPACE_STAGES vocabulary (platform/server/validation.mjs).
