@@ -21,6 +21,7 @@ The historical skill runtime is an internal engine. Do not make the web applicat
 - Store a coarse device label, never the raw user-agent. A browser build string is a fingerprint.
 - Anything reachable without a session is a projection built by naming the fields that may leave — never a record with fields removed. See `server/domain/sharing.mjs`.
 - Anything sent to a model provider follows the same rule and is built in `server/domain/prompts.mjs`. Never serialise a record, a workspace, or a gathered context object into a provider request.
+- A provider that cannot answer is reported as that, in four distinguishable outcomes, and never papered over with the built-in deterministic draft. `server/provider.mjs` owns the call, its budget, and its retry rules; nothing else calls a provider directly.
 - Words that did not come from a member of the company are untrusted. `server/domain/trust.mjs` decides which those are, and screens them for text that reads as an instruction rather than a description. Untrusted text is withheld from a provider request and reported — never edited, never dropped from the founder's own record.
 
 ## UI rules

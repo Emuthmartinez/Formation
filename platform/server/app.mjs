@@ -15,9 +15,10 @@ export function createFormationServer({
   allowRegistration = process.env.ALLOW_REGISTRATION !== "false",
   execution,
   imports,
+  provider,
 } = {}) {
   if (!store) throw new Error("createFormationServer requires a store.");
-  const worker = new GenerationWorker(store);
+  const worker = new GenerationWorker(store, { provider });
   const executionWorker = new ExecutionWorker(store, execution);
   const importService = new ImportService(store, imports);
   const authLimiters = {
