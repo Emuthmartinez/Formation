@@ -2,6 +2,7 @@ import type {
   AccountSession,
   Comment,
   CommentTarget,
+  EconomicsScenario,
   ReviewRequest,
   CreatedShare,
   ApprovalsView,
@@ -125,6 +126,12 @@ export const api = {
     request<ReviewRequest>(`/api/workspaces/${workspaceId}/reviews/${reviewId}`, { method: "POST", body: JSON.stringify(payload) }),
   withdrawReview: (workspaceId: string, reviewId: string) =>
     request<ReviewRequest>(`/api/workspaces/${workspaceId}/reviews/${reviewId}`, { method: "POST", body: JSON.stringify({ withdrawn: true }) }),
+  addScenario: (workspaceId: string, payload: { name: string; currency?: string }) =>
+    request<EconomicsScenario>(`/api/workspaces/${workspaceId}/economics/scenarios`, { method: "POST", body: JSON.stringify(payload) }),
+  updateScenario: (workspaceId: string, scenarioId: string, patch: Record<string, unknown>) =>
+    request<EconomicsScenario>(`/api/workspaces/${workspaceId}/economics/scenarios/${scenarioId}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  removeScenario: (workspaceId: string, scenarioId: string) =>
+    request<{ removed: boolean }>(`/api/workspaces/${workspaceId}/economics/scenarios/${scenarioId}`, { method: "DELETE" }),
   listApprovals: (workspaceId: string) => request<ApprovalsView>(`/api/workspaces/${workspaceId}/approvals`),
   listExecutions: (workspaceId: string) => request<FounderExecution[]>(`/api/workspaces/${workspaceId}/executions`),
   importSources: (workspaceId: string) => request<ImportSourceList>(`/api/workspaces/${workspaceId}/import-sources`),

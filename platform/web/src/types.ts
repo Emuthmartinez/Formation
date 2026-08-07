@@ -505,6 +505,47 @@ export interface WorkspacePerson {
   role: string;
 }
 
+export interface EconomicsFigure {
+  value: number | null;
+  unit: "money" | "percent" | "months" | "ratio" | "customers";
+  /** Named inputs this figure is waiting for. Empty when it could be computed. */
+  missing: string[];
+}
+
+export interface EconomicsScenario {
+  id: string;
+  name: string;
+  currency: string;
+  isPrimary: boolean;
+  price: { amount: number | null; per: "month" | "year" | "one-time" };
+  conversion: { visitorToTrial: number | null; trialToPaid: number | null };
+  retention: { monthlyChurn: number | null };
+  variableCostPerCustomer: number | null;
+  acquisitionCost: number | null;
+  capacity: { weeklyHours: number | null; monthlyOperatingCost: number | null };
+  cash: { onHand: number | null; monthlyBurn: number | null };
+  notes: string;
+  updatedAt: string;
+  lastChangedBy: string | null;
+  /** Computed on read from the inputs above. Never stored — see server/domain/economics.mjs. */
+  derived: {
+    grossMargin: EconomicsFigure;
+    monthlyContribution: EconomicsFigure;
+    lifetimeMonths: EconomicsFigure;
+    lifetimeValue: EconomicsFigure;
+    ltvToCac: EconomicsFigure;
+    paybackMonths: EconomicsFigure;
+    runwayMonths: EconomicsFigure;
+    customersToBreakEven: EconomicsFigure;
+  };
+}
+
+export interface EconomicsView {
+  currency: string;
+  scenarios: EconomicsScenario[];
+  sensitivity: { figure: string; base: number | null; inputs: Array<{ label: string; lower: number; higher: number; swingPercent: number | null }> } | null;
+}
+
 export interface WorkspaceSnapshot {
   workspace: Workspace;
   membership: { id: string; role: WorkspaceRole | string; userId: string; workspaceId: string };
@@ -518,6 +559,7 @@ export interface WorkspaceSnapshot {
   jobs: Job[];
   activity: Activity[];
   comments: CommentThread[];
+  economics: EconomicsView;
   reviews: ReviewRequest[];
   people: WorkspacePerson[];
   contradictions: Contradiction[];

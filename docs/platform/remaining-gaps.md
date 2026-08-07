@@ -228,17 +228,25 @@ Business model and pricing are represented as workstream context, but launch rea
 
 Add structured records for:
 
-- price and packaging scenarios
-- conversion assumptions
-- retention or repeat-use assumptions
-- variable costs
-- gross margin
-- acquisition cost
-- founder and operating capacity
-- cash runway
-- scenario sensitivity
+- price and packaging scenarios — **shipped** (`platform/server/domain/economics.mjs`), several per company, one primary
+- conversion assumptions — **shipped** (visitor-to-trial, trial-to-paid)
+- retention or repeat-use assumptions — **shipped** (monthly churn)
+- variable costs — **shipped**
+- gross margin — **shipped**, derived
+- acquisition cost — **shipped**, with payback and worth-against-cost-to-win derived
+- founder and operating capacity — **shipped** (weekly hours, monthly operating cost)
+- cash runway — **shipped**, derived from cash on hand and monthly spend
+- scenario sensitivity — **shipped**: how far each figure moves when an input is wrong by a fifth, loudest first
 
 Generated financial deliverables should reference structured assumptions rather than copy numbers into prose.
+
+The two rules that make this different from a spreadsheet pasted into a document:
+
+**A derived figure is never stored.** Margin, contribution, lifetime, payback, runway and break-even are recomputed from the inputs on every read. A stored derivation is a second copy of the truth that drifts the moment somebody edits a price and nobody recomputes — the exact contradiction this product exists to prevent.
+
+**A figure with a missing input is absent, not zero, and names what it is waiting for.** A margin of 0% and "you have not said what a customer costs you" lead to entirely different conversations, and in a company still working this out the second is far more common. Zero churn is reported as unbounded rather than infinite; a cost above the price is a real negative margin rather than an error; money is held in minor units as integers so a planning model cannot accumulate float error and disagree with itself about a number the founder typed exactly.
+
+Still open: linking generated deliverables to these records so a drafted financial section cites the scenario rather than restating its numbers.
 
 ## P2: Research ingestion and evidence library
 
