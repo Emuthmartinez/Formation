@@ -88,6 +88,14 @@ export function applyArtifactPatch(artifact, patch) {
   }
   if (Array.isArray(patch.sourceClaimIds)) next.sourceClaimIds = unique(patch.sourceClaimIds.map(String)).slice(0, 100);
   if (Array.isArray(patch.linkedDecisionIds)) next.linkedDecisionIds = unique(patch.linkedDecisionIds.map(String)).slice(0, 100);
+  // Confirming imported wording changes nothing a reader would see, so it is recorded on the
+  // record's provenance rather than on the record. Only a record that has a provenance can carry
+  // it: there is nothing to confirm about words the company wrote itself.
+  if (typeof patch.wordingConfirmed === "boolean" && next.source) {
+    next.source = patch.wordingConfirmed
+      ? { ...next.source, screenConfirmedAt: new Date().toISOString(), screenConfirmedBy: patch.confirmedBy ?? "Founder" }
+      : { ...next.source, screenConfirmedAt: null, screenConfirmedBy: null };
+  }
   next.version = Number.isInteger(artifact.version) ? artifact.version + 1 : 1;
   next.updatedAt = new Date().toISOString();
   return next;

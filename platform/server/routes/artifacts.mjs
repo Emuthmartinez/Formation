@@ -21,7 +21,7 @@ export async function handleArtifactRoutes({ request, response, method, pathname
         const validDecisionIds = new Set(database.decisions.filter((entry) => entry.workspaceId === workspaceId).map((entry) => entry.id));
         if (patch.linkedDecisionIds.some((id) => !validDecisionIds.has(id))) throw new HttpError(400, "A linked decision does not belong to this workspace.");
       }
-      const next = applyArtifactPatch(database.artifacts[index], patch);
+      const next = applyArtifactPatch(database.artifacts[index], { ...patch, confirmedBy: user.name });
       database.artifacts[index] = next;
       database.artifactVersions.push(createArtifactVersion(next, user.name));
       touchWorkspace(database, workspace, user.name, `${next.title} updated`, `Version ${next.version} saved.`);

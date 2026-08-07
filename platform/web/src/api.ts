@@ -138,7 +138,7 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(patch),
     }),
-  updateArtifact: (workspaceId: string, artifactId: string, patch: Partial<Artifact>) =>
+  updateArtifact: (workspaceId: string, artifactId: string, patch: Partial<Artifact> & { wordingConfirmed?: boolean }) =>
     request<Artifact>(`/api/workspaces/${workspaceId}/artifacts/${artifactId}`, {
       method: "PATCH",
       body: JSON.stringify(patch),

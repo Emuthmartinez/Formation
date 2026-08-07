@@ -1,4 +1,5 @@
 import { createArtifactVersion, createGeneratedArtifact, createId, generationClaims } from "./domain.mjs";
+import { GENERATION_INSTRUCTIONS_VERSION, buildProviderRequest, withheldNote } from "./domain/prompts.mjs";
 
 /**
  * How many drafts one company may request per hour.
@@ -128,7 +129,16 @@ export class GenerationWorker {
       if (!workspace || !workstream) throw new Error("The workspace changed before generation started.");
 
       const context = buildGenerationContext(database, workspace, workstream, claimed);
-      const artifact = await generateArtifact(context);
+      // What may leave, and what may not. Imported material that reads as an instruction never
+      // reaches the provider; the founder is told what was held back rather than left to wonder
+      // why the draft ignored a document they can see in their own workspace.
+      const { request, withheld } = buildProviderRequest(context);
+      const artifact = await generateArtifact(context, request);
+      artifact.generation = {
+        instructionsVersion: GENERATION_INSTRUCTIONS_VERSION,
+        contextRecords: request.evidence.length + request.decisions.length + request.existingDeliverables.length,
+        withheldRecords: withheld.length,
+      };
       artifact.sourceClaimIds = context.claims.map((entry) => entry.id);
       artifact.linkedDecisionIds = context.decisions.map((entry) => entry.id);
       const timestamp = new Date().toISOString();
@@ -168,6 +178,18 @@ export class GenerationWorker {
           actor: "Formation",
           createdAt: timestamp,
         });
+        const note = withheldNote(withheld);
+        if (note) {
+          nextDatabase.activity.push({
+            id: createId("act"),
+            workspaceId: claimed.workspaceId,
+            type: "context-withheld",
+            title: "Some imported material was left out of this draft",
+            detail: note,
+            actor: "Formation",
+            createdAt: timestamp,
+          });
+        }
       });
     } catch (error) {
       await this.#store.transaction((database) => {
@@ -182,7 +204,7 @@ export class GenerationWorker {
   }
 }
 
-async function generateArtifact(context) {
+async function generateArtifact(context, request) {
   const endpoint = process.env.FORMATION_AI_ENDPOINT?.trim();
   if (!endpoint) return createGeneratedArtifact(context);
 
@@ -204,16 +226,10 @@ async function generateArtifact(context) {
         ? { authorization: `Bearer ${process.env.FORMATION_AI_API_KEY}` }
         : {}),
     },
-    body: JSON.stringify({
-      task: "Create one structured, editable founder deliverable. Separate evidence, assumptions, recommendations, and open questions.",
-      context,
-      responseSchema: {
-        title: "string",
-        summary: "string",
-        confidence: "number 0-100",
-        sections: [{ title: "string", body: "markdown string" }],
-      },
-    }),
+    // The request is what domain/prompts.mjs named, and only that. The gathered context object is
+    // never serialised here: it holds whole records, and a whole record carries every field the
+    // platform has ever added to it.
+    body: JSON.stringify(request),
     signal: AbortSignal.timeout(45_000),
   });
   if (!response.ok) throw new Error(`AI provider returned ${response.status}.`);

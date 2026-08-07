@@ -154,6 +154,20 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
     }
   };
 
+  const confirmWording = async () => {
+    setSaving(true);
+    try {
+      const updated = await api.updateArtifact(snapshot.workspace.id, artifact.id, { wordingConfirmed: true });
+      setDraft(updated);
+      await reload();
+      notify("Confirmed. This document can be used in drafts again — its wording was not changed.");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error), "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const updateSection = (index: number, patch: Partial<ArtifactSection>) => {
     setDraft((current) => ({
       ...current,
@@ -199,6 +213,8 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
           ) : can("work-write") ? <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit</Button> : null}
         </div>
       </header>
+
+      <WordingHeldBack artifact={draft} onConfirm={confirmWording} busy={saving} />
 
       {createdShare ? <ShareLinkNotice created={createdShare} onDismiss={() => setCreatedShare(null)} /> : null}
       {shares.length ? (
@@ -287,6 +303,45 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
         </div>
       </section>
     </article>
+  );
+}
+
+/**
+ * A document brought in from a launch workspace whose own wording reads as an instruction to a
+ * machine rather than a description of the business.
+ *
+ * It is shown, in full, unchanged — the founder's material stays the founder's material. What is
+ * being said is narrower and worth saying plainly: Formation will not put this text in front of a
+ * model as company context until someone here says the wording is meant. The screen is a rough
+ * instrument and will sometimes be wrong, so confirming is one click and changes nothing.
+ */
+function WordingHeldBack({ artifact, onConfirm, busy }: { artifact: Artifact; onConfirm: () => void; busy: boolean }) {
+  const can = useCan();
+  const findings = artifact.source?.screened ?? [];
+  if (!findings.length || artifact.source?.screenConfirmedAt) return null;
+
+  return (
+    <div className="wording-hold" role="note">
+      <p className="eyebrow">Held back from drafts</p>
+      <p>
+        This came in from an existing launch workspace, and part of its wording reads as an instruction to a machine rather
+        than a description of the business. Formation is leaving it out of anything it drafts until someone here confirms
+        the wording is meant. Nothing has been changed, and the document is unaffected everywhere else.
+      </p>
+      <ul>
+        {findings.map((finding, index) => (
+          <li key={`${finding.code}-${index}`}>
+            <span>{finding.reason}</span>
+            <q>{finding.excerpt}</q>
+          </li>
+        ))}
+      </ul>
+      {can("work-write") ? (
+        <Button variant="secondary" disabled={busy} onClick={onConfirm}>
+          {busy ? "Working…" : "The wording is meant — use it"}
+        </Button>
+      ) : null}
+    </div>
   );
 }
 
