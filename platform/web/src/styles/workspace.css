@@ -326,6 +326,10 @@
 .waiting-list__who { margin: 0 0 3px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--amber); }
 .waiting-list__what { margin: 0; font-size: 14px; color: var(--ink); line-height: 1.5; }
 .waiting-list button { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 700; color: var(--forest); white-space: nowrap; }
+.edit-conflict { align-items: flex-start; }
+.edit-conflict p { margin: 0 0 6px; }
+.edit-conflict__reassurance { color: var(--ink-soft); font-size: 12.5px; }
+.edit-conflict .button-row { margin-top: 10px; }
 
 /* People and access
    ---------------------------------------------------------------------------------------------

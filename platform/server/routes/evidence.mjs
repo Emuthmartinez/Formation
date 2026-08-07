@@ -17,7 +17,7 @@ import {
   textList,
   validDateOrNull,
 } from "../validation.mjs";
-import { requireWorkspace, requireWorkstream, touchWorkspace } from "./shared.mjs";
+import { assertUnchanged, requireWorkspace, requireWorkstream, touchWorkspace } from "./shared.mjs";
 
 export async function handleEvidenceRoutes({ request, response, method, pathname, store, user }) {
   const claimsCollectionMatch = pathname.match(/^\/api\/workspaces\/([^/]+)\/claims$/);
@@ -67,6 +67,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       const workspace = requireWorkspace(database, workspaceId, user.id, "evidence-write");
       const target = database.claims.find((entry) => entry.id === claimId && entry.workspaceId === workspaceId);
       if (!target) throw new HttpError(404, "Claim not found.");
+      assertUnchanged(target, { updatedAt: patch.expectedUpdatedAt }, "version of this claim");
       if (patch.kind !== undefined) {
         if (!CLAIM_KINDS.has(patch.kind)) throw new HttpError(400, "Invalid claim kind.");
         target.kind = patch.kind;
@@ -87,6 +88,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       }
       if (patch.evidence !== undefined) target.evidence = textList(patch.evidence, "Evidence", 20, TEXT_LIMITS.listItem);
       target.updatedAt = new Date().toISOString();
+      target.lastChangedBy = user.name;
       touchWorkspace(database, workspace, user.name, "Business claim updated", target.statement);
       return target;
     });
@@ -144,6 +146,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       const workspace = requireWorkspace(database, workspaceId, user.id, "decision-write");
       const target = database.decisions.find((entry) => entry.id === decisionId && entry.workspaceId === workspaceId);
       if (!target) throw new HttpError(404, "Decision not found.");
+      assertUnchanged(target, { updatedAt: patch.expectedUpdatedAt }, "version of this decision");
       // A launch approval must never be "decided" by editing its mirror — that would leave the
       // engine's gate parked while Formation claims it was answered. The approvals flow records
       // the answer with the engine first and closes the record only after it confirms.
@@ -161,6 +164,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       }
       if (patch.reviewAt !== undefined) target.reviewAt = validDateOrNull(patch.reviewAt);
       target.updatedAt = new Date().toISOString();
+      target.lastChangedBy = user.name;
       touchWorkspace(database, workspace, user.name, "Decision updated", target.title);
       return target;
     });
@@ -212,6 +216,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       const workspace = requireWorkspace(database, workspaceId, user.id, "work-write");
       const target = database.tasks.find((entry) => entry.id === taskId && entry.workspaceId === workspaceId);
       if (!target) throw new HttpError(404, "Task not found.");
+      assertUnchanged(target, { updatedAt: patch.expectedUpdatedAt }, "version of this task");
       if (patch.title !== undefined) target.title = requireText(patch.title, "Task title", TEXT_LIMITS.short);
       if (patch.status !== undefined) {
         if (!TASK_STATUSES.has(patch.status)) throw new HttpError(400, "Invalid task status.");
@@ -224,6 +229,7 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       if (patch.owner !== undefined) target.owner = requireText(patch.owner, "Task owner", TEXT_LIMITS.owner);
       if (patch.dueAt !== undefined) target.dueAt = validDateOrNull(patch.dueAt);
       target.updatedAt = new Date().toISOString();
+      target.lastChangedBy = user.name;
       touchWorkspace(database, workspace, user.name, "Task updated", target.title);
       return target;
     });

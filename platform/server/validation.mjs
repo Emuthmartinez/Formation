@@ -146,6 +146,8 @@ export function normalizeArtifactPatch(patch) {
     if (typeof patch.wordingConfirmed !== "boolean") throw new HttpError(400, "Wording confirmation must be true or false.");
     normalized.wordingConfirmed = patch.wordingConfirmed;
   }
+  // expectedVersion is deliberately not copied into the patch: it says which version the caller
+  // read, and is consumed by the concurrency guard before any change is applied.
   if (Object.keys(normalized).length === 0) throw new HttpError(400, "No supported deliverable changes were provided.");
   return normalized;
 }
