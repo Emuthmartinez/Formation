@@ -8,6 +8,7 @@ import type { SessionPayload, WorkspaceSnapshot } from "./types";
 import { BusinessPage } from "./pages/BusinessPage";
 import { DecisionsPage } from "./pages/DecisionsPage";
 import { DeliverablesPage } from "./pages/DeliverablesPage";
+import { AccountPage } from "./pages/AccountPage";
 import { JoinPage } from "./pages/JoinPage";
 import { PeoplePage } from "./pages/PeoplePage";
 import { LaunchPage } from "./pages/LaunchPage";
@@ -181,6 +182,18 @@ export function App() {
     );
   }
   if (error) return <main className="fatal-state"><ErrorNotice message={error} onRetry={initialize} /></main>;
+
+  // The account belongs to the person, not to a company, so it stays reachable for a founder who
+  // has not created one yet — which is exactly when someone might want to check their devices or
+  // set a stronger password.
+  if (route.segments[0] === "account") {
+    return (
+      <main className="standalone-account">
+        <AccountPage session={session} notify={notify} standalone />
+        {toastElement}
+      </main>
+    );
+  }
 
   if (!snapshot) {
     return (

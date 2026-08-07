@@ -4,6 +4,8 @@ import { createId } from "./domain.mjs";
 
 const COOKIE_NAME = "formation_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+/** How many devices one account may stay signed in on at once. */
+const MAX_SESSIONS_PER_USER = 10;
 const PASSWORD_MIN_LENGTH = 12;
 const PASSWORD_MAX_LENGTH = 128;
 const SCRYPT_KEY_LENGTH = 64;
@@ -17,7 +19,7 @@ const scryptAsync = promisify(scrypt);
 const DUMMY_SALT = Buffer.from("formation-auth-dummy-salt", "utf8").subarray(0, 16);
 const DUMMY_HASH = Buffer.alloc(SCRYPT_KEY_LENGTH);
 
-export async function registerAccount(store, { name, email, password }) {
+export async function registerAccount(store, { name, email, password }, request) {
   const normalizedEmail = normalizeEmail(email);
   const normalizedName = String(name ?? "").trim();
   validatePassword(password);
@@ -42,10 +44,10 @@ export async function registerAccount(store, { name, email, password }) {
     return publicUser(next);
   });
 
-  return createSessionForUser(store, user.id);
+  return createSessionForUser(store, user.id, request);
 }
 
-export async function authenticatePassword(store, { email, password }) {
+export async function authenticatePassword(store, { email, password }, request) {
   const normalizedEmail = normalizeEmail(email);
   const suppliedPassword = String(password ?? "");
   if (!suppliedPassword || suppliedPassword.length > PASSWORD_MAX_LENGTH) {
@@ -59,15 +61,15 @@ export async function authenticatePassword(store, { email, password }) {
     : await verifyAgainstDummyHash(suppliedPassword);
   if (!found || !found.passwordHash || !valid) throw invalidCredentials();
 
-  return createSessionForUser(store, found.id);
+  return createSessionForUser(store, found.id, request);
 }
 
-export async function createDemoSession(store, email) {
+export async function createDemoSession(store, email, request) {
   const normalizedEmail = normalizeEmail(email);
   const database = await store.read();
   const found = database.users.find((entry) => entry.email.toLowerCase() === normalizedEmail);
   if (!found) throw new AuthError(403, "This account is not available in the local demo workspace.");
-  return createSessionForUser(store, found.id);
+  return createSessionForUser(store, found.id, request);
 }
 
 export async function getAuthenticatedUser(store, request) {
@@ -93,7 +95,13 @@ export async function getAuthenticatedUser(store, request) {
   if (!Number.isFinite(lastSeen) || now - lastSeen > 5 * 60 * 1_000) {
     await store.transaction((nextDatabase) => {
       const live = nextDatabase.sessions.find((entry) => entry.tokenHash === tokenHash);
-      if (live && new Date(live.expiresAt).getTime() > Date.now()) live.lastSeenAt = new Date().toISOString();
+      if (!live || new Date(live.expiresAt).getTime() <= Date.now()) return;
+      const seenAt = new Date();
+      live.lastSeenAt = seenAt.toISOString();
+      // Access runs from last use, not from sign-in: someone who opens Formation every day is not
+      // signed out every week, and a device left alone for the whole window still falls away. The
+      // account page says exactly this, and it has to be true.
+      live.expiresAt = new Date(seenAt.getTime() + SESSION_TTL_MS).toISOString();
     });
   }
   return publicUser(user);
@@ -179,20 +187,33 @@ export class AuthRateLimiter {
     this.#message = message;
   }
 
-  assertAllowed(key) {
+  /**
+   * Take an attempt from the bucket, or refuse.
+   *
+   * Counting on the way in rather than after the answer is the whole point. Verifying a password
+   * is deliberately slow, so a caller that checked first and counted afterwards let every request
+   * in a concurrent wave pass the check before any of them had recorded a thing — forty guesses
+   * against a bucket of seven, all answered. An attempt is spent the moment it is made; a caller
+   * that turns out to be legitimate gives it back.
+   */
+  claim(key) {
     const entry = this.#current(key);
     if (entry.failures >= this.#maximumFailures) {
       const retryAfterSeconds = Math.max(1, Math.ceil((entry.resetAt - Date.now()) / 1_000));
       throw new AuthError(429, this.#message, { retryAfterSeconds });
     }
-  }
-
-  recordFailure(key) {
-    const entry = this.#current(key);
     entry.failures += 1;
     this.#attempts.set(key, entry);
   }
 
+  /** Give back one claimed attempt that turned out not to be a guess. */
+  release(key) {
+    const entry = this.#attempts.get(String(key));
+    if (!entry) return;
+    entry.failures = Math.max(0, entry.failures - 1);
+  }
+
+  /** Forget this key's attempts entirely — what a correct answer earns. */
   clear(key) {
     this.#attempts.delete(key);
   }
@@ -232,7 +253,7 @@ export class AuthError extends Error {
   }
 }
 
-async function createSessionForUser(store, userId) {
+async function createSessionForUser(store, userId, request) {
   const token = randomBytes(32).toString("base64url");
   const tokenHash = hashToken(token);
   const now = new Date();
@@ -242,9 +263,21 @@ async function createSessionForUser(store, userId) {
     const found = database.users.find((entry) => entry.id === userId);
     if (!found) throw new AuthError(403, "Unable to start a session.");
 
+    // Expired sessions go, everyone else's stay, and so do this person's other devices: signing
+    // in on a phone must not sign you out of the laptop you were working on.
     database.sessions = database.sessions.filter(
-      (session) => session.userId !== userId && new Date(session.expiresAt).getTime() > now.getTime(),
+      (session) => new Date(session.expiresAt).getTime() > now.getTime(),
     );
+    const mine = database.sessions
+      .filter((session) => session.userId === userId)
+      .sort((a, b) => String(a.lastSeenAt).localeCompare(String(b.lastSeenAt)));
+    // A bound, so a long-lived account cannot accumulate sessions without limit. The device that
+    // has gone longest without being used is the one that goes.
+    while (mine.length >= MAX_SESSIONS_PER_USER) {
+      const oldest = mine.shift();
+      database.sessions = database.sessions.filter((session) => session.id !== oldest.id);
+    }
+
     database.sessions.push({
       id: createId("ses"),
       userId: found.id,
@@ -252,11 +285,52 @@ async function createSessionForUser(store, userId) {
       createdAt: now.toISOString(),
       expiresAt,
       lastSeenAt: now.toISOString(),
+      // A coarse description, derived once and stored instead of the raw user-agent string: it is
+      // enough to recognise your own devices, and it is not a fingerprint.
+      device: describeDevice(request),
     });
     return publicUser(found);
   });
 
   return { user, token, expiresAt };
+}
+
+/**
+ * "Chrome on macOS" — enough for someone to recognise which of their own devices a session is,
+ * and no more. The raw user-agent identifies a browser build precisely enough to be a tracking
+ * identifier, so it is read and discarded rather than stored.
+ */
+export function describeDevice(request) {
+  const raw = String(request?.headers?.["user-agent"] ?? "");
+  if (!raw) return "An unrecognised device";
+  const browser = raw.includes("Firefox/")
+    ? "Firefox"
+    : raw.includes("Edg/")
+      ? "Edge"
+      : raw.includes("OPR/")
+        ? "Opera"
+        : raw.includes("Chrome/")
+          ? "Chrome"
+          : raw.includes("Safari/")
+            ? "Safari"
+            : null;
+  const platform = /iPhone/.test(raw)
+    ? "iPhone"
+    : /iPad/.test(raw)
+      ? "iPad"
+      : /Android/.test(raw)
+        ? "Android"
+        : /Mac OS X|Macintosh/.test(raw)
+          ? "macOS"
+          : /Windows/.test(raw)
+            ? "Windows"
+            : /Linux|X11/.test(raw)
+              ? "Linux"
+              : null;
+  if (browser && platform) return `${browser} on ${platform}`;
+  if (platform) return `A browser on ${platform}`;
+  if (browser) return browser;
+  return "An unrecognised device";
 }
 
 async function hashPassword(password) {
@@ -378,4 +452,104 @@ function isSecureRequest(request) {
     ? forwardedProto[0]
     : String(forwardedProto ?? "").split(",")[0].trim();
   return request.socket?.encrypted === true || protocol === "https";
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * The account's own security surface: which devices are signed in, and changing the password.
+ * Everything here is scoped to the acting user by construction — there is no id from the request
+ * that could point at somebody else's account.
+ * ------------------------------------------------------------------------------------------- */
+
+/** This account's live sessions, most recently used first, with the current one marked. */
+export async function listSessions(store, request, userId) {
+  const currentHash = currentTokenHash(request);
+  const now = Date.now();
+  const database = await store.read();
+  return database.sessions
+    .filter((session) => session.userId === userId && new Date(session.expiresAt).getTime() > now)
+    .sort((a, b) => String(b.lastSeenAt).localeCompare(String(a.lastSeenAt)))
+    .map((session) => ({
+      id: session.id,
+      device: session.device ?? "An unrecognised device",
+      signedInAt: session.createdAt,
+      lastSeenAt: session.lastSeenAt,
+      expiresAt: session.expiresAt,
+      current: session.tokenHash === currentHash,
+    }));
+}
+
+/**
+ * Sign one device out. Signing out the device you are on is allowed — it is the same as signing
+ * out — but the caller is told so it can end the session cleanly rather than leaving a page that
+ * appears signed in.
+ */
+export async function revokeSession(store, request, userId, sessionId) {
+  const currentHash = currentTokenHash(request);
+  return store.transaction((database) => {
+    const session = database.sessions.find((entry) => entry.id === sessionId && entry.userId === userId);
+    if (!session) throw new AuthError(404, "That device is not signed in.");
+    const wasCurrent = session.tokenHash === currentHash;
+    database.sessions = database.sessions.filter((entry) => entry.id !== sessionId);
+    return { revoked: 1, endedCurrentSession: wasCurrent };
+  });
+}
+
+/** Sign out everywhere except here. The device in your hand is the one you can still trust. */
+export async function revokeOtherSessions(store, request, userId) {
+  const currentHash = currentTokenHash(request);
+  return store.transaction((database) => {
+    const before = database.sessions.length;
+    database.sessions = database.sessions.filter(
+      (entry) => entry.userId !== userId || entry.tokenHash === currentHash,
+    );
+    return { revoked: before - database.sessions.length };
+  });
+}
+
+/**
+ * Change the password.
+ *
+ * The current password is required even though the caller is already signed in: a session someone
+ * else walked up to must not be enough to take the account. Every other device is signed out,
+ * because the reason to change a password is usually that one of them should not have it.
+ */
+export async function changePassword(store, request, userId, { currentPassword, newPassword }) {
+  validatePassword(newPassword);
+  const supplied = String(currentPassword ?? "");
+  const database = await store.read();
+  const user = database.users.find((entry) => entry.id === userId);
+  if (!user) throw new AuthError(403, "Unable to change this password.");
+
+  const valid = user.passwordHash
+    ? await verifyPassword(supplied, user.passwordHash)
+    : await verifyAgainstDummyHash(supplied);
+  if (!user.passwordHash || !valid) throw new AuthError(403, "Your current password is not correct.");
+  if (supplied === String(newPassword)) throw new AuthError(400, "The new password must be different from the current one.");
+
+  const passwordHash = await hashPassword(newPassword);
+  const currentHash = currentTokenHash(request);
+  return store.transaction((nextDatabase) => {
+    const live = nextDatabase.users.find((entry) => entry.id === userId);
+    if (!live) throw new AuthError(403, "Unable to change this password.");
+    live.passwordHash = passwordHash;
+    live.passwordChangedAt = new Date().toISOString();
+    const before = nextDatabase.sessions.length;
+    nextDatabase.sessions = nextDatabase.sessions.filter(
+      (entry) => entry.userId !== userId || entry.tokenHash === currentHash,
+    );
+    return { changed: true, signedOutElsewhere: before - nextDatabase.sessions.length };
+  });
+}
+
+function currentTokenHash(request) {
+  const token = parseCookies(request.headers.cookie ?? "")[COOKIE_NAME];
+  return token ? hashToken(token) : null;
+}
+
+/**
+ * A stable name for the session making this request, safe to use as a rate-limit key: it is the
+ * same hash the store holds, so it identifies the session without ever handling the token.
+ */
+export function currentSessionKey(request) {
+  return currentTokenHash(request);
 }

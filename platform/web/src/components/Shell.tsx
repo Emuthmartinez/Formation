@@ -101,13 +101,13 @@ export function Shell({
         </nav>
 
         <div className="sidebar__footer">
-          <div className="sidebar__user">
+          <button className="sidebar__user" onClick={() => go("/account")} aria-label="Your account and devices">
             <span className="avatar">{initials(session.user.name)}</span>
             <div>
               <strong>{session.user.name}</strong>
               <span>{session.user.email}</span>
             </div>
-          </div>
+          </button>
           <button className="sidebar__logout" onClick={onLogout}>
             <Icon name="logout" width={17} height={17} /> Sign out
           </button>

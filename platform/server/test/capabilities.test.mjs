@@ -108,6 +108,12 @@ const UNSCOPED_ROUTES = new Set([
   // token is the authorization, and it is checked against the signed-in account's own email.
   "POST /api/invitations/preview",
   "POST /api/invitations/accept",
+  // The account's own security surface. Scoped to the signed-in user by construction — no
+  // identifier in any of these requests can point at somebody else's account.
+  "GET /api/account/sessions",
+  "DELETE /api/account/sessions",
+  "DELETE /api/account/sessions/:sessionId",
+  "POST /api/account/password",
 ]);
 
 test("the capability ladder denies by default and refuses unknown capability ids", () => {
