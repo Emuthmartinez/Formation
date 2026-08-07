@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { Button, ConfidenceMark, EmptyState, Field, PageHeader, StatusText, formatDate, humanize } from "../components/Primitives";
+import { useCan } from "../capabilities";
 import { useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Artifact, ArtifactSection } from "../types";
@@ -54,6 +55,7 @@ export function DeliverablesPage({ artifactId }: { artifactId?: string }) {
 
 function DeliverableEditor({ artifact }: { artifact: Artifact }) {
   const { snapshot, reload, notify } = useWorkspace();
+  const can = useCan();
   const [draft, setDraft] = useState(artifact);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -144,7 +146,7 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
           <Button variant="quiet" icon="download" onClick={() => downloadMarkdown(snapshot.workspace.name, draft)}>Export</Button>
           {editing ? (
             <><Button variant="secondary" onClick={() => { setDraft(artifact); setEditing(false); }}>Cancel</Button><Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save new version"}</Button></>
-          ) : <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit</Button>}
+          ) : can("work-write") ? <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit</Button> : null}
         </div>
       </header>
 
@@ -201,11 +203,13 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
               <div className="version-row__body">
                 <p>{version.summary || "No summary recorded for this version."}</p>
                 <ul>{version.sections.map((section) => <li key={section.id}>{section.title}</li>)}</ul>
-                {version.version !== draft.version ? (
+                {version.version === draft.version ? (
+                  <span className="version-row__current">Current version</span>
+                ) : can("work-write") ? (
                   <Button type="button" variant="secondary" onClick={() => void restoreVersion(version)} disabled={saving}>
                     Restore as new version
                   </Button>
-                ) : <span className="version-row__current">Current version</span>}
+                ) : null}
               </div>
             </details>
           ))}

@@ -7,6 +7,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createId } from "./domain.mjs";
 import { listEngineApprovals, recordApprovalActivity, syncEngineApprovals } from "./domain/approvals.mjs";
+import { denialMessage, resolveAccess } from "./domain/capabilities.mjs";
 import { boardStepTitle, presentApprovalAsk, presentStep } from "./domain/presentation.mjs";
 import { recordResultActivity, syncEngineResults } from "./domain/results.mjs";
 
@@ -311,7 +312,14 @@ export class ExecutionWorker {
    * decide what runs without an approval, and no mode answers an approval on the founder's
    * behalf.
    */
-  async syncApprovals(workspace) {
+  async syncApprovals(workspace, actingUserId) {
+    // This read mirrors engine state into durable records, so it re-checks the asker itself rather
+    // than trusting that a route validated them a moment ago.
+    const guard = await this.#store.read();
+    const access = resolveAccess(guard, workspace.id, actingUserId, "workspace-read");
+    if (!access.found) throw new ExecutionError(404, "Workspace not found.");
+    if (!access.allowed) throw new ExecutionError(403, denialMessage("workspace-read"));
+
     const engineWorkspaceDir = this.#resolveEngineWorkspace(workspace);
     const operatingMode = workspace.founder?.operatingMode ?? null;
     if (!engineWorkspaceDir) {
@@ -349,9 +357,8 @@ export class ExecutionWorker {
    */
   async answerApproval({ workspaceId, user, decisionId, answer, reason }) {
     const database = await this.#store.read();
-    const { workspace, membership } = requireMembership(database, workspaceId, user.id);
     // Membership lets you see the company; answering for it is the owner's call alone.
-    if (membership.role !== "owner") throw new ExecutionError(403, "Only this company's owner can answer a launch approval.");
+    const { workspace } = requireMembership(database, workspaceId, user.id, "approval-decide");
 
     const decision = database.decisions.find((entry) => entry.id === decisionId && entry.workspaceId === workspaceId && entry.source?.kind === "engine-approval");
     if (!decision) throw new ExecutionError(404, "Approval not found.");
@@ -432,7 +439,7 @@ export class ExecutionWorker {
    */
   async submit({ workspaceId, user, workflowId }) {
     const database = await this.#store.read();
-    const workspace = requireMemberWorkspace(database, workspaceId, user.id);
+    const workspace = requireMemberWorkspace(database, workspaceId, user.id, "launch-engine-advance");
 
     const engineWorkspaceDir = this.#resolveEngineWorkspace(workspace);
     if (!engineWorkspaceDir) throw new ExecutionError(409, "This company is not connected to its launch engine yet.");
@@ -467,7 +474,7 @@ export class ExecutionWorker {
     const engineRef = { runId: view.report.runId ?? null, planId: view.report.planId, catalogVersion: view.report.catalogVersion };
 
     const outcome = await this.#store.transaction((liveDatabase) => {
-      const liveWorkspace = requireMemberWorkspace(liveDatabase, workspaceId, user.id);
+      const liveWorkspace = requireMemberWorkspace(liveDatabase, workspaceId, user.id, "launch-engine-advance");
       const contextFingerprint = computeContextFingerprint(liveWorkspace);
       const now = new Date().toISOString();
 
@@ -675,15 +682,21 @@ export class ExecutionWorker {
   }
 }
 
-function requireMembership(database, workspaceId, userId) {
-  const membership = database.memberships.find((entry) => entry.workspaceId === workspaceId && entry.userId === userId);
-  const workspace = database.workspaces.find((entry) => entry.id === workspaceId);
-  if (!membership || !workspace) throw new ExecutionError(404, "Workspace not found.");
-  return { workspace, membership };
+/**
+ * The execution side of the same capability gate the routes use. Named capability required: the
+ * engine surfaces are the most consequential in the product — they spend money and move a real
+ * launch plan — so "who is asking" is answered here, inside the worker, and not left to whichever
+ * route happened to call in.
+ */
+function requireMembership(database, workspaceId, userId, capabilityId) {
+  const access = resolveAccess(database, workspaceId, userId, capabilityId);
+  if (!access.found) throw new ExecutionError(404, "Workspace not found.");
+  if (!access.allowed) throw new ExecutionError(403, denialMessage(capabilityId));
+  return { workspace: access.workspace, membership: access.membership };
 }
 
-function requireMemberWorkspace(database, workspaceId, userId) {
-  return requireMembership(database, workspaceId, userId).workspace;
+function requireMemberWorkspace(database, workspaceId, userId, capabilityId) {
+  return requireMembership(database, workspaceId, userId, capabilityId).workspace;
 }
 
 /**

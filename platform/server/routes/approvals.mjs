@@ -17,8 +17,8 @@ export async function handleApprovalRoutes({ request, response, method, pathname
     if (method !== "GET") throw new HttpError(405, "Method not allowed.");
     const workspaceId = decodeURIComponent(collectionMatch[1]);
     const database = await store.read();
-    const workspace = requireWorkspace(database, workspaceId, user.id);
-    json(response, 200, await executionWorker.syncApprovals(workspace));
+    const workspace = requireWorkspace(database, workspaceId, user.id, "workspace-read");
+    json(response, 200, await executionWorker.syncApprovals(workspace, user.id));
     return;
   }
 

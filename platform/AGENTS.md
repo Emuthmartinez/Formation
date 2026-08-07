@@ -9,7 +9,7 @@ The historical skill runtime is an internal engine. Do not make the web applicat
 ## State rules
 
 - All durable mutations go through the server store transaction.
-- Every workspace operation checks membership server-side.
+- Every workspace operation checks membership server-side, by naming the capability it needs. `requireWorkspace(database, workspaceId, userId, capability)` in `server/routes/shared.mjs` and `requireMembership(...)` in `server/execution.mjs` both take the capability as a required argument; the ladder itself lives in `server/domain/capabilities.mjs`. A route that does not say what it is doing cannot look a membership up at all.
 - Never accept workspace ownership from the request body.
 - Do not turn generated content into facts automatically.
 - Artifact changes increment versions.
@@ -25,6 +25,7 @@ The historical skill runtime is an internal engine. Do not make the web applicat
 - Keep controls visible near the work they change.
 - Preserve keyboard focus, labels, semantic headings, and reduced-motion behavior.
 - Empty states must explain the next useful action.
+- Gate controls on `snapshot.capabilities`, never on a client-side copy of the role rules. State what a member cannot do once, in plain words, instead of showing a disabled control beside every action.
 
 ## Verification
 
@@ -37,3 +38,5 @@ node platform/run.mjs build
 ```
 
 Add a domain test when changing readiness, contradiction, onboarding, generation, versioning, or authorization behavior. Add an API test for every new mutation route.
+
+A new route must also be declared in `server/test/capabilities.test.mjs` — `WORKSPACE_SURFACES` with the capability that guards it, or `UNSCOPED_ROUTES` with a reason. That test fails on any undeclared route and then calls every declared one as a member of each role, so a forgotten check is caught by the suite rather than by a customer.

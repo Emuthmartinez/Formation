@@ -1,3 +1,4 @@
+import { capabilitiesForRole, resolveAccess } from "./capabilities.mjs";
 import { clampNumber, humanizeKey, priorityRank, slug, stableValue, unique } from "./shared.mjs";
 
 const READINESS_WEIGHTS = {
@@ -251,13 +252,9 @@ export function buildRecommendations({ workspace, tasks, decisions, claims, arti
 }
 
 export function buildWorkspaceSnapshot(database, workspaceId, userId) {
-  const membership = database.memberships.find(
-    (entry) => entry.userId === userId && entry.workspaceId === workspaceId,
-  );
-  if (!membership) return null;
-
-  const workspace = database.workspaces.find((entry) => entry.id === workspaceId);
-  if (!workspace) return null;
+  const access = resolveAccess(database, workspaceId, userId, "workspace-read");
+  if (!access.found || !access.allowed) return null;
+  const { membership, workspace } = access;
 
   const claims = database.claims.filter((entry) => entry.workspaceId === workspaceId);
   const decisions = database.decisions.filter((entry) => entry.workspaceId === workspaceId);
@@ -274,6 +271,10 @@ export function buildWorkspaceSnapshot(database, workspaceId, userId) {
   return {
     workspace,
     membership,
+    // What this member may do, derived from the same ladder the server enforces with. The web app
+    // reads this rather than keeping its own copy of the rules — a second copy would go stale the
+    // first time a capability moved, and it would go stale silently.
+    capabilities: capabilitiesForRole(membership.role),
     claims,
     decisions,
     artifacts,

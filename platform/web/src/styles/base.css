@@ -245,6 +245,20 @@ input[type="range"] { padding: 0; accent-color: var(--forest); box-shadow: none;
 .topbar__divider { width: 1px; height: 17px; background: var(--line-dark); flex-shrink: 0; }
 .topbar__context span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: min(55vw, 700px); }
 .main-content { padding: 42px 42px 80px; max-width: 1520px; margin: 0 auto; }
+
+/*
+ * What a member who is not the owner can and cannot do here. Stated once at the top of the work
+ * rather than repeated as a disabled control beside every action — a quiet line reads as a company
+ * with people in different jobs; a page of greyed-out buttons reads as a product that is broken.
+ */
+.access-note {
+  margin: 0 0 26px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--line-dark);
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
 .page-stack { display: grid; gap: 28px; animation: page-rise 240ms ease both; }
 @keyframes page-rise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 .page-stack--narrow { max-width: 960px; margin: 0 auto; }

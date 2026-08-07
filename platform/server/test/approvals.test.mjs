@@ -182,7 +182,7 @@ test("an unreachable engine leaves mirrored approvals untouched and is reported 
     resolveEngineWorkspace: () => "/nonexistent/engine/workspace",
   });
 
-  const view = await worker.syncApprovals((await store.read()).workspaces[0]);
+  const view = await worker.syncApprovals((await store.read()).workspaces[0], "usr_demo_founder");
   assert.equal(view.connected, true);
   assert.equal(view.reachable, false);
   assert.ok(view.reason.includes("not installed"));
@@ -234,11 +234,11 @@ test("an answer against a run the engine replaced is refused and the stale mirro
   assert.equal(database.decisions.find((entry) => entry.id === decisionId).status, "superseded");
 });
 
-test("membership without the owner role can see approvals but never answer them", async () => {
+test("a reviewer can see approvals but never answer them", async () => {
   const { store, decisionId } = await storeWithMirroredApproval();
   await store.transaction((database) => {
     database.users.push({ id: "usr_advisor", email: "advisor@example.com", name: "Avery Advisor", createdAt: "2026-08-05T00:00:00.000Z" });
-    database.memberships.push({ id: "mem_advisor", userId: "usr_advisor", workspaceId: "wrk_storywell", role: "advisor", createdAt: "2026-08-05T00:00:00.000Z" });
+    database.memberships.push({ id: "mem_advisor", userId: "usr_advisor", workspaceId: "wrk_storywell", role: "reviewer", createdAt: "2026-08-05T00:00:00.000Z" });
   });
   const worker = new ExecutionWorker(store, {
     engine: { describe: async () => ({ reachable: true, report: pendingReport() }) },
@@ -336,7 +336,7 @@ test("engine founder gates surface in Formation and answers travel back through 
   assert.equal(runState.approvals["workflow.money-report.approval.1"], "pending");
   assert.equal(runState.approvals["workflow.money-renewal.approval.1"], "pending");
 
-  // Strangers get a 404; a member without the owner role can look but not answer.
+  // Strangers get a 404; a reviewer can look but not answer.
   const registered = await request(app.baseUrl, "/api/auth/register", {
     method: "POST",
     body: { name: "Outsider", email: "outsider@example.com", password: "a-long-enough-password" },
@@ -350,7 +350,7 @@ test("engine founder gates surface in Formation and answers travel back through 
   );
   const outsiderId = (await app.store.read()).users.find((entry) => entry.email === "outsider@example.com").id;
   await app.store.transaction((liveDatabase) => {
-    liveDatabase.memberships.push({ id: "mem_advisor", userId: outsiderId, workspaceId: "wrk_storywell", role: "advisor", createdAt: new Date().toISOString() });
+    liveDatabase.memberships.push({ id: "mem_advisor", userId: outsiderId, workspaceId: "wrk_storywell", role: "reviewer", createdAt: new Date().toISOString() });
   });
   assert.equal((await request(app.baseUrl, "/api/workspaces/wrk_storywell/approvals", { cookie: outsiderCookie })).status, 200);
   const advisorAnswer = await request(app.baseUrl, `/api/workspaces/wrk_storywell/approvals/${reportDecision.id}`, {

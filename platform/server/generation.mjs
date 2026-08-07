@@ -1,5 +1,17 @@
 import { createArtifactVersion, createGeneratedArtifact, createId, generationClaims } from "./domain.mjs";
 
+/**
+ * How many drafts one company may request per hour.
+ *
+ * Drafting costs money, and once invited members can request it, the cost of a mistake — or of
+ * someone who should not have been invited — is whatever the loop can run before anyone notices.
+ * A queue-depth cap would not bound that: the worker drains continuously, so a caller could
+ * enqueue, wait, and enqueue again forever. A rolling window bounds the spend itself, and bounds
+ * the queue as a side effect.
+ */
+const HOURLY_JOB_LIMIT = 30;
+const HOUR_MS = 60 * 60 * 1_000;
+
 export class GenerationWorker {
   #store;
   #running = false;
@@ -38,6 +50,18 @@ export class GenerationWorker {
       const workspace = database.workspaces.find((entry) => entry.id === workspaceId);
       const workstream = workspace?.workstreams.find((entry) => entry.id === workstreamId);
       if (!workspace || !workstream) throw new GenerationError(404, "Workstream not found.");
+
+      // The bound is per company, so one company's spending never limits another's.
+      const windowStart = Date.now() - HOUR_MS;
+      const recent = database.jobs.filter(
+        (entry) => entry.workspaceId === workspaceId && new Date(entry.createdAt).getTime() >= windowStart,
+      ).length;
+      if (recent >= HOURLY_JOB_LIMIT) {
+        throw new GenerationError(
+          429,
+          `This company has requested ${recent} drafts in the past hour, which is as many as Formation will draft at once. Review what is already here, then ask again later.`,
+        );
+      }
 
       const now = new Date().toISOString();
       const next = {

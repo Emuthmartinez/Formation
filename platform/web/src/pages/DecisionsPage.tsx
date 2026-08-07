@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
 import { Button, DateSignal, EmptyState, Field, Modal, PageHeader, Section, StatusText, Tally, TechnicalDisclosure, dateSignal, formatDate } from "../components/Primitives";
+import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Decision } from "../types";
@@ -43,6 +44,8 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
       window.setTimeout(() => document.getElementById(targetId)?.scrollIntoView({ block: "center" }), 50);
     }
   }, [targetId]);
+
+  const can = useCan();
 
   const sections = useMemo(() => {
     const active = snapshot.decisions.filter((decision) => ["open", "proposed", "revisit"].includes(decision.status));
@@ -94,7 +97,7 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
         eyebrow="Decision system"
         title="Make the important calls visible"
         description="Formation keeps the decision, rationale, owner, review date, and downstream context together so yesterday’s choice does not become tomorrow’s mystery."
-        action={<Button icon="plus" onClick={() => navigate("/decisions?new=1")}>Record decision</Button>}
+        action={can("decision-write") ? <Button icon="plus" onClick={() => navigate("/decisions?new=1")}>Record decision</Button> : undefined}
       />
 
       <Section
@@ -151,6 +154,7 @@ function DecisionRow({
   onAnswer: (decision: Decision, answer: "approve" | "decline") => void;
 }) {
   const { snapshot } = useWorkspace();
+  const can = useCan();
   const workstream = snapshot.workspace.workstreams.find((entry) => entry.id === decision.workstreamId);
   const isEngineApproval = decision.source?.kind === "engine-approval";
 
@@ -180,13 +184,13 @@ function DecisionRow({
       {isEngineApproval ? (
         // A launch approval is answered with the engine, never edited in place: the engine
         // records the answer first and this record closes only after it confirms.
-        decision.status === "open" ? (
+        decision.status === "open" && can("approval-decide") ? (
           <div className="decision-row__actions">
             <Button onClick={() => onAnswer(decision, "approve")} disabled={updating}>Approve</Button>
             <Button variant="secondary" onClick={() => onAnswer(decision, "decline")} disabled={updating}>Decline</Button>
           </div>
         ) : null
-      ) : (
+      ) : can("decision-write") ? (
         <div className="decision-row__actions">
           {decision.status !== "decided" ? <Button onClick={() => onStatus(decision, "decided")} disabled={updating}>Accept decision</Button> : null}
           {/* Accepting has one path — the button above. The select moves between the other states. */}
@@ -203,7 +207,7 @@ function DecisionRow({
             <option value="superseded">Superseded</option>
           </select>
         </div>
-      )}
+      ) : null}
     </article>
   );
 }
