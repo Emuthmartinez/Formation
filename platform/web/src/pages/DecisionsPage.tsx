@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
 import { Button, DateSignal, EmptyState, Field, Modal, PageHeader, Section, StatusText, Tally, TechnicalDisclosure, dateSignal, formatDate } from "../components/Primitives";
 import { Conversation } from "../components/Conversation";
+import { ReviewRequests } from "../components/ReviewRequests";
 import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
@@ -210,7 +211,10 @@ function DecisionRow({
         </div>
       ) : null}
 
-      <Conversation target={{ kind: "decision", id: decision.id }} label="Conversation about this call" />
+      <div className="collaboration-row">
+        <Conversation target={{ kind: "decision", id: decision.id }} label="Conversation about this call" />
+        <ReviewRequests target={{ kind: "decision", id: decision.id }} label="Reviews of this call" />
+      </div>
     </article>
   );
 }

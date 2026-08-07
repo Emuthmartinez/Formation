@@ -1,6 +1,7 @@
 import { capabilitiesForRole, hasCapability, resolveAccess } from "./capabilities.mjs";
 import { commentThreads } from "./comments.mjs";
 import { detectInconsistencies } from "./consistency.mjs";
+import { reviewList } from "./reviews.mjs";
 import { summariseVersionHistory } from "./versions.mjs";
 import { clampNumber, humanizeKey, priorityRank, slug, stableValue, unique } from "./shared.mjs";
 
@@ -324,6 +325,16 @@ export function buildWorkspaceSnapshot(database, workspaceId, userId) {
     // Conversation about the record, kept beside it and never counted as part of it: nothing
     // downstream — readiness, contradictions, a provider request, a shared link — reads these.
     comments: commentThreads(database, workspaceId),
+    // Who is in the company, by name — enough to address a review request or read a mention, and
+    // nothing more. Email addresses stay on the members surface, which is where deciding who has
+    // access happens; a name is what the rest of the product needs to render a person.
+    people: database.memberships
+      .filter((entry) => entry.workspaceId === workspaceId)
+      .map((entry) => ({ userId: entry.userId, name: database.users.find((user) => user.id === entry.userId)?.name ?? "Someone", role: entry.role }))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+    // A review is an opinion recorded beside the record, never an authority over it: nothing
+    // downstream reads these either. See domain/reviews.mjs.
+    reviews: reviewList(database, workspaceId),
     contradictions: detectContradictions(claims),
     // Disagreements that have nothing to do with two claims sharing a key — see domain/consistency.mjs.
     inconsistencies: detectInconsistencies({ workspace, claims, decisions, tasks, artifacts }),

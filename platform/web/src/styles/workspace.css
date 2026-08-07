@@ -307,6 +307,25 @@
 .conversation__compose { display: grid; gap: 8px; justify-items: start; }
 .conversation__compose textarea { width: 100%; max-width: 640px; font: inherit; font-size: 13.5px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); resize: vertical; }
 .conversation__note { margin: 0; font-size: 11.5px; color: var(--muted); max-width: 68ch; line-height: 1.55; }
+.collaboration-row { display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-start; }
+.collaboration-row > * { flex: 1 1 320px; min-width: 0; }
+.reviews { margin-top: 14px; }
+.review-row { display: grid; gap: 5px; justify-items: start; }
+.review-row--requested { border-left: 2px solid var(--amber); padding-left: 12px; }
+.review-row--approved { border-left: 2px solid var(--forest); padding-left: 12px; }
+.review-row--changes-requested { border-left: 2px solid var(--rust); padding-left: 12px; }
+.review-row--withdrawn { opacity: .6; padding-left: 14px; }
+.review-row__line { margin: 0; display: flex; gap: 9px; align-items: baseline; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); }
+.review-row__line strong { color: var(--ink); font-size: 13px; }
+.review-row__note, .review-row__answer { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.55; max-width: 62ch; }
+.review-row__answer { font-style: italic; }
+.review-ask { display: grid; gap: 9px; justify-items: start; }
+.review-ask textarea { width: 100%; max-width: 520px; font: inherit; font-size: 13.5px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); resize: vertical; }
+.waiting-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.waiting-list li { display: flex; justify-content: space-between; gap: 20px; align-items: center; padding-left: 14px; border-left: 3px solid var(--amber); }
+.waiting-list__who { margin: 0 0 3px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--amber); }
+.waiting-list__what { margin: 0; font-size: 14px; color: var(--ink); line-height: 1.5; }
+.waiting-list button { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 700; color: var(--forest); white-space: nowrap; }
 
 /* People and access
    ---------------------------------------------------------------------------------------------

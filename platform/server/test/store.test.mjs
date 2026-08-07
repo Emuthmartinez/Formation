@@ -23,7 +23,7 @@ test("JSON store initializes, serializes concurrent writes, and persists valid d
   const database = await store.read();
   assert.equal(database.activity.filter((entry) => entry.id.startsWith("concurrent-")).length, 12);
   const persisted = JSON.parse(await readFile(filePath, "utf8"));
-  assert.equal(persisted.schemaVersion, 6);
+  assert.equal(persisted.schemaVersion, 7);
   assert.ok(persisted.artifactVersions.length > 0);
   assert.ok(Array.isArray(persisted.executions));
   assert.ok(persisted.updatedAt);
@@ -55,7 +55,7 @@ test("JSON store migrates schema 1 artifacts into immutable version history", as
   await store.initialize();
   const migrated = await store.read();
 
-  assert.equal(migrated.schemaVersion, 6);
+  assert.equal(migrated.schemaVersion, 7);
   assert.equal(migrated.artifactVersions.length, migrated.artifacts.length);
   assert.ok(migrated.artifactVersions.every((version) => version.createdBy === "Formation migration"));
   assert.deepEqual(migrated.executions, []);
@@ -76,7 +76,7 @@ test("JSON store migrates a schema 2 file by adding the executions collection", 
   await store.initialize();
   const migrated = await store.read();
 
-  assert.equal(migrated.schemaVersion, 6);
+  assert.equal(migrated.schemaVersion, 7);
   assert.deepEqual(migrated.executions, []);
 });
 
@@ -97,7 +97,7 @@ test("JSON store migrates a schema 3 file by adding invitations and retiring rol
   await store.initialize();
   const migrated = await store.read();
 
-  assert.equal(migrated.schemaVersion, 6);
+  assert.equal(migrated.schemaVersion, 7);
   assert.deepEqual(migrated.invitations, []);
   assert.deepEqual(migrated.shares, []);
   // A role the ladder never had held nothing at runtime; the file now says so too.
@@ -120,7 +120,7 @@ test("JSON store migrates a schema 4 file by adding the shares collection", asyn
   await store.initialize();
   const migrated = await store.read();
 
-  assert.equal(migrated.schemaVersion, 6);
+  assert.equal(migrated.schemaVersion, 7);
   assert.deepEqual(migrated.shares, []);
   // Nothing was shared by a migration.
   assert.equal(migrated.invitations.length, previous.invitations.length);
@@ -138,12 +138,29 @@ test("JSON store migrates a schema 5 file by adding the comments collection", as
   await store.initialize();
   const migrated = await store.read();
 
-  assert.equal(migrated.schemaVersion, 6);
+  assert.equal(migrated.schemaVersion, 7);
   assert.deepEqual(migrated.comments, [], "a company that predates comments starts with none, not with an invented one");
   // The migration adds a collection and touches nothing else.
   assert.equal(migrated.workspaces.length, previous.workspaces.length);
   assert.equal(migrated.claims.length, previous.claims.length);
   assert.equal(migrated.shares.length, previous.shares.length);
+});
+
+test("JSON store migrates a schema 6 file by adding the reviews collection", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "formation-store-migration-v6-"));
+  const filePath = path.join(directory, "formation.json");
+  const previous = createSeedDatabase();
+  previous.schemaVersion = 6;
+  delete previous.reviews;
+  await writeFile(filePath, `${JSON.stringify(previous, null, 2)}\n`, { mode: 0o600 });
+
+  const store = new JsonStore({ filePath, seedFactory: createSeedDatabase });
+  await store.initialize();
+  const migrated = await store.read();
+
+  assert.equal(migrated.schemaVersion, 7);
+  assert.deepEqual(migrated.reviews, [], "a company that predates review requests starts with none");
+  assert.equal(migrated.comments.length, previous.comments.length, "the migration adds a collection and touches nothing else");
 });
 
 test("retiring a role never leaves a company with nobody who can run it", async () => {

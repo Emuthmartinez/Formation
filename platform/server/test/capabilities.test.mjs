@@ -86,6 +86,15 @@ const WORKSPACE_SURFACES = [
   },
   { method: "PATCH", path: "/api/workspaces/:workspaceId/comments/:commentId", capability: "comment-write", body: { resolved: true } },
   { method: "DELETE", path: "/api/workspaces/:workspaceId/comments/:commentId", capability: "comment-write" },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspaceId/reviews",
+    capability: "comment-write",
+    body: { target: { kind: "workstream", id: "strategy" }, assigneeId: "usr_absent" },
+  },
+  // Answering is probed against an absent request: a held capability must reach past the role check
+  // (to a 404) rather than actually answering on someone else's behalf while the probe walks by.
+  { method: "POST", path: "/api/workspaces/:workspaceId/reviews/:reviewId", capability: "comment-write", body: { answer: "approved" } },
   { method: "GET", path: "/api/workspaces/:workspaceId/approvals", capability: "workspace-read" },
   {
     method: "POST",
@@ -325,7 +334,8 @@ function resolvePath(template, ids) {
     .replace(":membershipId", "mem_absent")
     .replace(":invitationId", "inv_absent")
     .replace(":shareId", "shr_absent")
-    .replace(":commentId", "cmt_absent");
+    .replace(":commentId", "cmt_absent")
+    .replace(":reviewId", "rvw_absent");
 }
 
 test("each role is answered by the server exactly as its capability says", async (t) => {
