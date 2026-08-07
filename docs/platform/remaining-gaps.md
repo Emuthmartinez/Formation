@@ -184,7 +184,7 @@ Add:
 - review requests — **shipped** (`platform/server/domain/reviews.mjs`): one person, one record, one question, open until answered. Surfaced on the record and, for the assignee, first on Today.
 - assigned approvers — **shipped as review assignees.** Deliberately *not* as approvers: a review is an opinion, not an authority. Approving one promotes nothing, decides nothing, and moves no readiness — otherwise a reviewer who cannot edit a deliverable could settle one by approving a review of it, and the capability ladder would have a back door nobody opened on purpose.
 - change summaries between artifact versions — **shipped** (`platform/server/domain/versions.mjs`): computed from the immutable versions rather than stored, so the summary cannot drift from the record it describes. Sections are matched by id, then title, then position — and position is refused when both sides carry ids that differ, because an edit that reads as one section removed and another added is the most misleading thing this summary could say.
-- optimistic concurrency and conflict resolution
+- optimistic concurrency and conflict resolution — **shipped** (`assertUnchanged` in `platform/server/routes/shared.mjs`): a save may name the version or timestamp it was built from, and one built from a replaced read is refused with who moved it and when. Opt-in, so callers that did not read first are unaffected. The editor keeps the founder's unsaved text on a refusal and offers to read theirs or save over it — refusing without preserving the draft would move the loss rather than remove it.
 - presence where useful
 - decision and review notifications
 - resolved-comment history — **shipped**: resolving settles a thread and keeps it readable, with who settled it and when. Deleting the opening comment of a live conversation withdraws the words and keeps the thread, rather than orphaning every reply.
@@ -193,7 +193,7 @@ Comments must not become a second source of truth. Accepted changes should updat
 
 This is enforced rather than intended. Comments do not move readiness, are not weighed as evidence, are not sent to a provider, and never reach a shared link — `platform/server/test/comments.test.mjs` asserts the last two directly. Neither surface reads a comment today; the tests exist because both are built by naming fields, and the day somebody adds a convenient spread is the day a private argument between cofounders lands in a model's context or an investor's browser.
 
-Still open here: optimistic concurrency, presence, and notifications. Notifications need the same mail transport the identity lifecycle is waiting on.
+Still open here: presence, and notifications. Notifications need the same mail transport the identity lifecycle is waiting on.
 
 ## P1: Rich exports and external sharing
 

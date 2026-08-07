@@ -57,6 +57,41 @@ export function requireWorkspace(database, workspaceId, userId, capabilityId) {
   return access.workspace;
 }
 
+/**
+ * Refuses a change built from a version of a record that somebody else has already replaced.
+ *
+ * Two members editing one deliverable used to end in silence: whoever saved second overwrote the
+ * first, whose work survived only in version history nobody had a reason to open. The first person
+ * had no way to know it had happened.
+ *
+ * The guard is **opt-in by the caller**. A request that names the version or timestamp it was built
+ * from is checked; one that names neither proceeds, because a caller who did not read the record
+ * first is not claiming to have. That keeps every existing integration working and makes the web
+ * app's editor — the one place a person spends minutes on a change — the place that opts in.
+ *
+ * The refusal names who moved it and when, because "someone changed this" is not a sentence anyone
+ * can act on. Recovering the caller's unsaved work is the client's job, and the client does it:
+ * refusing without preserving their text would be worse than the overwrite this replaces.
+ */
+export function assertUnchanged(record, expected, label) {
+  if (expected?.version !== undefined && expected.version !== null) {
+    if (!Number.isInteger(expected.version)) throw new HttpError(400, "The version being changed must be a whole number.");
+    if (record.version !== expected.version) throw new HttpError(409, conflictMessage(record, label));
+  }
+  if (expected?.updatedAt !== undefined && expected.updatedAt !== null) {
+    if (typeof expected.updatedAt !== "string") throw new HttpError(400, "The version being changed must be named by its timestamp.");
+    if (record.updatedAt !== expected.updatedAt) throw new HttpError(409, conflictMessage(record, label));
+  }
+}
+
+function conflictMessage(record, label) {
+  const who = record.lastChangedBy ?? record.createdBy ?? null;
+  const when = record.updatedAt ? ` at ${record.updatedAt.slice(11, 16)} UTC on ${record.updatedAt.slice(0, 10)}` : "";
+  return who
+    ? `${who} saved a newer ${label}${when}. Nothing was lost — read theirs, then decide whether yours still applies.`
+    : `Someone else saved a newer ${label}${when}. Nothing was lost — read theirs, then decide whether yours still applies.`;
+}
+
 export function requireWorkstream(workspace, workstreamId) {
   if (typeof workstreamId !== "string" || !workspace.workstreams.some((entry) => entry.id === workstreamId)) {
     throw new HttpError(400, "A valid workstream is required.");

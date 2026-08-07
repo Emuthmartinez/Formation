@@ -1,18 +1,22 @@
 import { applyArtifactPatch, createArtifactVersion } from "../domain.mjs";
 import { HttpError, json } from "../http.mjs";
 import { TEXT_LIMITS, normalizeArtifactPatch, optionalText, readJsonBody, requireText } from "../validation.mjs";
-import { requireWorkspace, requireWorkstream, touchWorkspace } from "./shared.mjs";
+import { assertUnchanged, requireWorkspace, requireWorkstream, touchWorkspace } from "./shared.mjs";
 
 export async function handleArtifactRoutes({ request, response, method, pathname, store, user, worker }) {
   const artifactMatch = pathname.match(/^\/api\/workspaces\/([^/]+)\/artifacts\/([^/]+)$/);
   if (artifactMatch && method === "PATCH") {
     const workspaceId = decodeURIComponent(artifactMatch[1]);
     const artifactId = decodeURIComponent(artifactMatch[2]);
-    const patch = normalizeArtifactPatch(await readJsonBody(request));
+    const body = await readJsonBody(request);
+    // Named separately from the patch: it says which version the caller read, not what to change.
+    const expectedVersion = body.expectedVersion;
+    const patch = normalizeArtifactPatch(body);
     const artifact = await store.transaction((database) => {
       const workspace = requireWorkspace(database, workspaceId, user.id, "work-write");
       const index = database.artifacts.findIndex((entry) => entry.id === artifactId && entry.workspaceId === workspaceId);
       if (index < 0) throw new HttpError(404, "Deliverable not found.");
+      assertUnchanged(database.artifacts[index], { version: expectedVersion }, "version of this deliverable");
       if (patch.sourceClaimIds) {
         const validClaimIds = new Set(database.claims.filter((entry) => entry.workspaceId === workspaceId).map((entry) => entry.id));
         if (patch.sourceClaimIds.some((id) => !validClaimIds.has(id))) throw new HttpError(400, "A source claim does not belong to this workspace.");
@@ -22,6 +26,7 @@ export async function handleArtifactRoutes({ request, response, method, pathname
         if (patch.linkedDecisionIds.some((id) => !validDecisionIds.has(id))) throw new HttpError(400, "A linked decision does not belong to this workspace.");
       }
       const next = applyArtifactPatch(database.artifacts[index], { ...patch, confirmedBy: user.name });
+      next.lastChangedBy = user.name;
       database.artifacts[index] = next;
       database.artifactVersions.push(createArtifactVersion(next, user.name));
       touchWorkspace(database, workspace, user.name, `${next.title} updated`, `Version ${next.version} saved.`);

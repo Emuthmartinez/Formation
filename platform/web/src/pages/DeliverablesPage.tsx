@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { api } from "../api";
+import { ApiError, api } from "../api";
 import { Button, ConfidenceMark, EmptyState, Field, MarkdownBody, PageHeader, ShareLinkNotice, StatusText, formatDate, humanize } from "../components/Primitives";
 import { Conversation } from "../components/Conversation";
 import { ReviewRequests } from "../components/ReviewRequests";
@@ -61,6 +61,7 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
   const [draft, setDraft] = useState(artifact);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [conflict, setConflict] = useState<string | null>(null);
   const [shares, setShares] = useState<ShareLink[]>([]);
   const [createdShare, setCreatedShare] = useState<CreatedShare | null>(null);
   const [sharing, setSharing] = useState(false);
@@ -113,7 +114,15 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
     }
   };
 
-  const save = async () => {
+  /**
+   * Saves the edit, naming the version it was built from.
+   *
+   * On a refusal the draft stays exactly where it is and the founder is offered the choice: read
+   * what the other person wrote, or save theirs on top anyway. Refusing without keeping their text
+   * would be worse than the silent overwrite this replaces — the point is that nobody's minutes of
+   * work disappear without them knowing.
+   */
+  const save = async (force = false) => {
     setSaving(true);
     try {
       const updated = await api.updateArtifact(snapshot.workspace.id, artifact.id, {
@@ -121,13 +130,20 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
         summary: draft.summary,
         status: draft.status,
         sections: draft.sections,
+        ...(force ? {} : { expectedVersion: artifact.version }),
       });
       setDraft(updated);
+      setConflict(null);
       await reload();
       setEditing(false);
       notify(`${updated.title} saved as version ${updated.version}.`);
     } catch (error) {
-      notify(error instanceof Error ? error.message : String(error), "error");
+      const message = error instanceof Error ? error.message : String(error);
+      if (error instanceof ApiError && error.status === 409) {
+        setConflict(message);
+      } else {
+        notify(message, "error");
+      }
     } finally {
       setSaving(false);
     }
@@ -211,7 +227,7 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
             </Button>
           ) : null}
           {editing ? (
-            <><Button variant="secondary" onClick={() => { setDraft(artifact); setEditing(false); }}>Cancel</Button><Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save new version"}</Button></>
+            <><Button variant="secondary" onClick={() => { setDraft(artifact); setEditing(false); }}>Cancel</Button><Button onClick={() => void save()} disabled={saving}>{saving ? "Saving…" : "Save new version"}</Button></>
           ) : can("work-write") ? <Button variant="secondary" icon="edit" onClick={() => setEditing(true)}>Edit</Button> : null}
         </div>
       </header>
@@ -236,6 +252,19 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
               ) : null}
             </div>
           ))}
+        </div>
+      ) : null}
+
+      {conflict ? (
+        <div className="notice notice--error edit-conflict" role="alert">
+          <div>
+            <p>{conflict}</p>
+            <p className="edit-conflict__reassurance">Your unsaved text is still on this page.</p>
+            <div className="button-row">
+              <Button variant="secondary" disabled={saving} onClick={() => { setConflict(null); void reload(); }}>Read theirs first</Button>
+              <Button variant="quiet" disabled={saving} onClick={() => void save(true)}>Save mine as the next version</Button>
+            </div>
+          </div>
         </div>
       ) : null}
 
