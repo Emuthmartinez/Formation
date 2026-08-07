@@ -47,7 +47,11 @@ export const workflows = [
     trigger: "Before listing fields, privacy questionnaire, IAP/subscription field maps, CPPs, in-app events",
     laneIds: ["store_console"],
     phaseIds: ["phase.3"],
-    dependencies: ["workflow.store.aso-and-store-ops"],
+    // Listing IAP/subscription field maps must name the same products RevenueCat already owns
+    // (see check:store-console's cross-check against revenue/REVENUE_OPS.md) — without this
+    // edge, store console work and RevenueCat product setup could each create the "same" live
+    // App Store/Play product with no ordering guarantee or drift detection.
+    dependencies: ["workflow.store.aso-and-store-ops", "workflow.money.revenue-monetization"],
     outputPaths: ["store/app-store-listing/APP_STORE_LISTING.md"],
     gates: ["check:store-console"],
     actionClass: "draft",

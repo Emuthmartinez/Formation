@@ -182,7 +182,7 @@ Benchmarks to tune, not worship:
 
 - **Revenue per download (ARPU).** The playbook targets ~$2 in month one. Content style moves it: broad low-intent UGC reach pulls it down; creator posts that clearly explain the app pull it up. A falling ARPU with rising views means the content is buying the wrong audience.
 - **Effective CPM per creator over time.** Weekly recurring deals should trend cheaper as post-window views accrue.
-- **Views alone prove nothing** — the k-computation rule in `viral-growth-loops.md` and the vanity-reach anti-pattern in `revenue-monetization.md` §10 apply here unchanged.
+- **Views alone prove nothing** — the k-computation rule in `viral-growth-loops.md` and the vanity-reach anti-pattern in `revenue-monetization.md` §3 apply here unchanged.
 
 ## Channel Sequencing
 

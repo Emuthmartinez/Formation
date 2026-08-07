@@ -67,21 +67,7 @@ Update `state/PROJECT_STATE.yaml` before calling analytics ready:
 - attribution contract booleans, stable keys, event name, person properties, backend persistence, anonymous reconciliation, and verification status
 - active failure cards for missing analytics, attribution, privacy, replay/survey, or dashboard proof
 
-`analytics/ANALYTICS.md` must include:
-- measurement goals and north-star metric
-- vendor stack: PostHog primary, GA4 or ad-network tools if useful, RevenueCat subscription truth, Stripe/web checkout truth, Sentry for errors
-- PostHog project/host/region decision and whether one project spans website, mobile app, web app, and backend
-- identity map: anonymous ID, app user ID, auth UID, PostHog distinct ID, RevenueCat App User ID, Stripe customer ID, email ID, push token, referral code
-- event naming rules and event owner
-- event catalog by surface and lifecycle stage
-- required event properties and super-properties
-- attribution model: UTMs, click IDs, referrer, deep links, referral codes, creator codes, vanity URLs, self-reported source, and store/ad-platform limits
-- paid UA measurement model when in scope: selected channel, target event, baseline window, blended report, RevenueCat LTV/CPA source, ad-network SDK/native report, MMP decision, and founder-approved spend state
-- dashboard/insight plan with exact funnel definitions
-- feature flag and experiment registry for onboarding, paywall, offers, pricing, referral, and lifecycle tests
-- session replay, survey, and feedback plan, including privacy controls
-- data governance: PII rules, retention, opt-out/consent, privacy-policy/store-disclosure mapping
-- QA plan with smoke events, dashboard checks, activity-tab checks, and launch-blocking failures
+`analytics/ANALYTICS.md`'s required sections are defined once, canonically, in [`artifact-contracts.md`](../process/artifact-contracts.md) `analytics/ANALYTICS.md` — load that section rather than a second checklist here; a second copy is how the two lists drift on exactly the details that matter (event grouping, the identity-map fields).
 
 Create `analytics/analytics-plan.html` or an analytics section in `design/design.html` early:
 - show the acquisition-to-revenue journey as a visual map

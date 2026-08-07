@@ -43,7 +43,7 @@ Design triggers as a segmentation table, not ad-hoc sends. The standard set, ada
 | At-risk save | usage declining vs own baseline | after 2x the user's normal gap | one concrete resume point, no guilt copy (ethics contract) |
 | Streak/milestone | earned event just occurred | at the moment it happens | celebrate the earned thing; never a fake milestone |
 | Dormant win-back | no session 14–30 days, still subscribed or high prior intent | once at 14d, once at 30d, then stop | what changed since they left; easy re-entry point |
-| Renewal/billing | trial ending, payment failed | per `revenue-monetization.md` §8a timing | plain statement of state and the one action; billing pushes are transactional, not promotional |
+| Renewal/billing | trial ending, payment failed | per `billing-health-and-reactivation.md` §2 timing | plain statement of state and the one action; billing pushes are transactional, not promotional |
 
 Every row deep-links to the exact screen that fulfills the promise; a push that lands on the home screen breaks the contract.
 

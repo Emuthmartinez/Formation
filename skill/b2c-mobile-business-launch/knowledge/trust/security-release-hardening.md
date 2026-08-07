@@ -101,7 +101,7 @@ Any monetized app must prove:
 - RevenueCat offering/product/entitlement IDs match app-store products and `revenue/REVENUE_OPS.md`.
 - App access is granted from backend/provider truth, not client-only events.
 - Stripe web checkout maps to the same entitlement as app-store purchases.
-- Webhooks verify signatures and use idempotency/replay protection before mutating entitlements.
+- Webhooks verify signatures and use idempotency/replay protection before mutating entitlements — the RevenueCat and Stripe webhook setup steps live in `revenuecat-and-store-products.md` and `stripe-and-web-billing.md`; this is the security posture those steps must satisfy, not a second setup guide.
 - Restore purchases is tested end to end.
 - Refund/cancel/grace-period states are reflected in app access.
 - Support-granted entitlements record owner, reason, expiry, and rollback path.

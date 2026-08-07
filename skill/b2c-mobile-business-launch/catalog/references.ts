@@ -348,7 +348,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.growth",
     title: "Influencer Sponsorship Engine",
     loadWhen:
-      "before founder-led organic social, TikTok/Reels/Shorts UGC, creator sourcing/contracts/payments, creator-marketplace use, format-discovery tests, paid influencer sponsorships, CPM/view-guarantee deals, or meme-page amplification",
+      "before sponsoring established creators who already have an audience to integrate the app into their own content — sponsorship DMs/deal calls, flat/CPM/view-guarantee structures, brand-account credibility, meme/topic-page amplification, or per-deal payback tracking",
   },
   {
     id: "reference.growth.launch-narrative-cadence",
@@ -371,7 +371,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.growth",
     title: "UGC Creator Engine",
     loadWhen:
-      "before founder-led organic social, TikTok/Reels/Shorts UGC, creator sourcing/contracts/payments, creator-marketplace use, format-discovery tests, paid influencer sponsorships, CPM/view-guarantee deals, or meme-page amplification",
+      "before founder-run creator operations on new niche accounts the program controls — TikTok/Reels/Shorts UGC, founder-led format-discovery experiments, hired micro-creator sourcing/contracts/payments, or post-launch social distribution where the algorithm, not an existing audience, is the distribution engine",
   },
   {
     id: "reference.growth.viral-growth-loops",
@@ -390,8 +390,41 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/money/revenue-monetization.md",
     domainId: "domain.money",
     title: "Revenue Monetization",
+    hub: true,
     loadWhen:
-      "before RevenueCat, Stripe, app-store products, web billing, web purchase links, funnels, paywalls, subscriptions, webhooks, taxes, pricing, restore purchases, or entitlements",
+      "before RevenueCat, Stripe, app-store products, web billing, web purchase links, funnels, paywalls, subscriptions, webhooks, taxes, pricing, restore purchases, or entitlements — the Decision Matrix, Founder-Only Gates, and anti-pattern digest hub; see revenuecat-and-store-products.md, stripe-and-web-billing.md, paywall-pricing-and-experiments.md, and billing-health-and-reactivation.md for setup and procedure detail",
+  },
+  {
+    id: "reference.money.revenuecat-and-store-products",
+    path: "knowledge/money/revenuecat-and-store-products.md",
+    domainId: "domain.money",
+    title: "RevenueCat And Store Products",
+    loadWhen:
+      "RevenueCat project/product/entitlement/offering setup, App Store or Play product gates, MISSING_METADATA or RevenueCat product-type reconciliation, paywall smoke proof, or promotional IAP/subscription art — routed from revenue-monetization.md",
+  },
+  {
+    id: "reference.money.stripe-and-web-billing",
+    path: "knowledge/money/stripe-and-web-billing.md",
+    domainId: "domain.money",
+    title: "Stripe And Web Billing",
+    loadWhen:
+      "Stripe account/checkout/webhook/customer-portal setup, or RevenueCat Web Billing, Web Purchase Links, Web Funnels, Web SDK, or Redemption Links — routed from revenue-monetization.md",
+  },
+  {
+    id: "reference.money.paywall-pricing-and-experiments",
+    path: "knowledge/money/paywall-pricing-and-experiments.md",
+    domainId: "domain.money",
+    title: "Paywall, Pricing, And Experiments",
+    loadWhen:
+      "paywall timing/placement/trials/offers, pricing disclosure rules, the price-point decision procedure, or the standing paywall experiment cadence — routed from revenue-monetization.md",
+  },
+  {
+    id: "reference.money.billing-health-and-reactivation",
+    path: "knowledge/money/billing-health-and-reactivation.md",
+    domainId: "domain.money",
+    title: "Billing Health And Reactivation",
+    loadWhen:
+      "the purchase-events backend/analytics contract, involuntary billing-failure recovery, or reactivation and win-back after a purchase already happened — routed from revenue-monetization.md",
   },
 
   // ---------------------------------------------------------------------------------
@@ -441,7 +474,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.operations",
     title: "Resend Email Ops",
     loadWhen:
-      "before push permission priming or notification lifecycle work; before Resend, API keys, transactional email, lifecycle automations, broadcasts, contacts/topics, webhooks, inbound email, unsubscribe, deliverability, or templates",
+      "before Resend, API keys, transactional email, lifecycle automations, broadcasts, contacts/topics, webhooks, inbound email, unsubscribe, deliverability, or templates",
   },
   {
     id: "reference.operations.secrets-management",

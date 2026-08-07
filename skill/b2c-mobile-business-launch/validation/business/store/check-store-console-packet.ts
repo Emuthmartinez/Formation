@@ -84,6 +84,38 @@ function requirePhrases(text: string, phrases: string[], prefix: string, file: s
   }
 }
 
+// revenue/REVENUE_OPS.md's "Products And Offering" table is where RevenueCat product
+// setup records the store products it created; STORE_CONSOLE.md is the ASC/Play packet
+// that walks the same console. Without this cross-check, the same IAP product can be
+// created (or renamed) on one side with no signal that the other side drifted.
+function extractRevenueProductIds(text: string): Array<{ storeProductId: string; rcProductId: string }> {
+  const lines = text.split(/\r?\n/);
+  const headerIndex = lines.findIndex((line) => /^\s*\|\s*Store Product ID\s*\|/i.test(line));
+  if (headerIndex === -1) {
+    return [];
+  }
+  const products: Array<{ storeProductId: string; rcProductId: string }> = [];
+  for (let row = headerIndex + 2; row < lines.length; row += 1) {
+    const line = lines[row];
+    if (!line || !/^\s*\|/.test(line)) {
+      break;
+    }
+    const cells = line
+      .trim()
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map((cell) => cell.trim());
+    const storeProductId = cells[0] ?? "";
+    // Example rows are written as "_example: com.app.premium.monthly_" — skip them.
+    if (!storeProductId || /^_.*_$/.test(storeProductId)) {
+      continue;
+    }
+    products.push({ storeProductId, rcProductId: cells[1] ?? "" });
+  }
+  return products;
+}
+
 function checkUnresolvedStoreLines(text: string, file: string, terms: string[]): void {
   for (const line of text.split(/\r?\n/)) {
     const trimmed = line.trim();
@@ -249,6 +281,27 @@ if (!markdown) {
   ];
   if (storeConsoleDone || statusLineClaimsReady(markdown)) {
     checkUnresolvedStoreLines(markdown, markdownPath, guardedTerms);
+  }
+
+  if (revenueInScope) {
+    const revenueOpsText = readText(args.root, "revenue/REVENUE_OPS.md");
+    if (revenueOpsText) {
+      const products = extractRevenueProductIds(revenueOpsText);
+      const markdownLower = markdown.toLowerCase();
+      const severity: "error" | "warning" = storeConsoleDone || revenueStatus === "done" ? "error" : "warning";
+      for (const product of products) {
+        if (!markdownLower.includes(product.storeProductId.toLowerCase())) {
+          issues.push(
+            issue(
+              severity,
+              "store_console.revenue_product_id_missing",
+              `revenue/REVENUE_OPS.md lists store product "${product.storeProductId}" (RevenueCat product "${product.rcProductId}") but ${markdownPath} never names it. The same IAP product must not be created independently on both sides with no cross-check — confirm this is the same product ASC/Play console shows, or reconcile the two records.`,
+              markdownPath,
+            ),
+          );
+        }
+      }
+    }
   }
 }
 

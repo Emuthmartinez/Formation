@@ -108,7 +108,7 @@ Benchmark cited: <!-- e.g. RevenueCat State of Subscription Apps 2026 §4c -->
 
 ### Competitor Anchor
 
-<!-- 5-10 direct competitors from strategy/RESEARCH.md, per revenue-monetization.md §7a.
+<!-- 5-10 direct competitors from strategy/RESEARCH.md, per paywall-pricing-and-experiments.md §3.
      Prices from AppKittie IAP data plus the live store listing, with the date checked. -->
 
 | Competitor | Store | Monthly | Annual | Checked |
@@ -119,16 +119,16 @@ Category range and median: <!-- e.g. $4.99-$14.99 monthly, median $9.99 -->
 
 Candidate points considered: <!-- 2-3 candidates and the one-line rationale for each -->
 
-Founder approved: <!-- YYYY-MM-DD — pricing is founder-only (revenue-monetization.md §9) -->
+Founder approved: <!-- YYYY-MM-DD — pricing is founder-only (revenue-monetization.md §2) -->
 
 ### Cancellation-Reason Mix
 
-Aggregated from `cancellation_reason_selected` (taxonomy in `revenue-monetization.md` §8b);
+Aggregated from `cancellation_reason_selected` (taxonomy in `billing-health-and-reactivation.md` §3);
 reviewed at each kill-or-scale checkpoint — a too_expensive majority is pricing evidence.
 
 ### Billing And Reactivation Events
 
-The revenue lifecycle events this document depends on (`revenue-monetization.md` §8a/§8b).
+The revenue lifecycle events this document depends on (`billing-health-and-reactivation.md` §2/§3).
 Every name below must stay in the `analytics/ANALYTICS.md` Event Contract — `check:analytics-catalog`
 reconciles this list against the catalog, so a rename or removal fails instead of drifting:
 
@@ -156,7 +156,7 @@ reconciles this list against the catalog, so a rename or removal fails instead o
 
 ## Paywall Experiment Backlog
 
-The first paywall is a hypothesis. This backlog is the standing program that iterates it (`revenue-monetization.md` §7b): one experiment at a time per surface, judged on cohort economics over at least one renewal-decision window, price/offer changes founder-approved. `check:revenue` requires current activity once the app has been live four weeks with this lane done: an active row, a completed row started within the last eight weeks, or a planned row dated to start within 60 days.
+The first paywall is a hypothesis. This backlog is the standing program that iterates it (`paywall-pricing-and-experiments.md` §4): one experiment at a time per surface, judged on cohort economics over at least one renewal-decision window, price/offer changes founder-approved. `check:revenue` requires current activity once the app has been live four weeks with this lane done: an active row, a completed row started within the last eight weeks, or a planned row dated to start within 60 days.
 
 | Started | Hypothesis | Variant | Primary metric | Status (planned / active / completed) | Result / decision |
 | --- | --- | --- | --- | --- | --- |

@@ -130,18 +130,7 @@ Do not let generated builders rely on a prompt only. Durable repo-local instruct
 
 ### 4b. App-Local Agent Roster
 
-Every real app build or builder handoff should include `APP_AGENTS.md` and a tiny `agents/` directory so future work can continue without reinventing responsibilities.
-
-Required roles:
-- orchestrator: owns canonical docs, `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, failure cards, sequencing, subagent routing, file-overlap checks, integration, git/release coordination, and production-readiness proof
-- marketing guru: owns ASO, GEO/SEO, Fastlane, UGC, reviews, launch calendar, claims, attribution learning, and channel experiments
-- engineering leader: owns architecture, `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, provider/backend/frontend proof, Apple signing/release gates, observability, tests, and readiness gates
-- security architect: owns `trust/SECURITY.md`, threat model, security tool routing, platform hardening, app integrity, entitlement/webhook abuse controls, scanner/review proof, accepted risks, and incident response
-- product leader: owns ICP, V1/V2/V3 scope, onboarding, activation, retention loops, and evidence-to-product traceability
-- design guru: owns `design/DESIGN.md`, `design.md`, HTML visual proofs, accessibility, screenshots, icons, motion, and Higgsfield asset fit
-- customer success: owns support/privacy/delete/refund/restore paths, FAQ/help, lifecycle copy, review responses, and feedback triage
-
-Keep each role prompt short: mission, canonical docs to read first, responsibilities, forbidden actions, founder-only gates, and required output shape. Role agents review and propose by default. They may implement only when the orchestrator assigns an isolated unit with a file-overlap check and verification plan.
+Every real app build or builder handoff should include `APP_AGENTS.md` and a tiny `agents/` directory so future work can continue without reinventing responsibilities. Use `app-agent-roster.md` as the detailed contract — the seven required roles, their ownership, the subagent audit pattern, and the attribution audit gate are defined there, not restated here.
 
 ## 5. Parallel Agent Orchestration
 

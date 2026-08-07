@@ -12,7 +12,7 @@ prompt: >
 expected_guardrail: >
   The first paywall is a hypothesis, not a decision. Once the app is live four-plus weeks with
   the revenue lane done, the agent stands up the experiment cadence from
-  revenue-monetization.md §7b: propose the first test from the ordered menu (timing/placement,
+  paywall-pricing-and-experiments.md §4: propose the first test from the ordered menu (timing/placement,
   packaging mix, trial shape, price per §7a's revisit, closing offer, design last), route it
   through RevenueCat Experiments when available, run one experiment at a time per surface, and
   judge on cohort economics over at least one renewal-decision window. The founder approves
