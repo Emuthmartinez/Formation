@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { businessUnitCoversAllGrantableDomains } from "./business-units.js";
+import { GATE_OWNER_OVERRIDES, inferGateDomain } from "./gates.js";
 import { isCatalogId, type CatalogId } from "./ids.js";
 import { composeCatalog } from "./index.js";
 import type { Catalog, CatalogIssue } from "./types.js";
@@ -126,6 +127,33 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     }
     if ((gate.command.startsWith("check:") || gate.command.startsWith("validate:")) && gate.audit === "manual") {
       issues.push(error("catalog_graph.gate.audit_unregistered", `${gate.command} is neither in the audit plan nor explicitly excluded.`));
+    }
+  }
+
+  // GATE_OWNER_OVERRIDES (catalog/gates.ts) pins a declared owner for gates whose directory
+  // does not reflect their true cross-cutting subject. Both failure modes below are
+  // undetectable from the override map alone -- they only surface by cross-checking it
+  // against the live discovered gates, which is why this lives here rather than in gates.ts.
+  const gatesByCommand = new Map(catalog.gates.map((gate) => [gate.command, gate]));
+  for (const [command, override] of Object.entries(GATE_OWNER_OVERRIDES)) {
+    if (!override) continue;
+    const gate = gatesByCommand.get(command);
+    if (!gate) {
+      issues.push(
+        error(
+          "catalog_graph.gate.override_unknown_command",
+          `GATE_OWNER_OVERRIDES names "${command}", which is not a discovered gate. Remove the stale override or fix the command name.`,
+        ),
+      );
+      continue;
+    }
+    if (inferGateDomain(gate.scriptPath, gate.command, catalog.domains) === override.domainId) {
+      issues.push(
+        error(
+          "catalog_graph.gate.override_stale",
+          `GATE_OWNER_OVERRIDES' entry for "${command}" (${override.domainId}) now matches its directory-derived domain. The override is no longer doing anything -- remove it.`,
+        ),
+      );
     }
   }
 

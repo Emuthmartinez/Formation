@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.100.0",
+  "skillVersion": "0.100.1",
   "areas": [
     {
       "id": "area.operating-system",
@@ -3567,42 +3567,42 @@
       "id": "gate.check-agent-operations",
       "command": "check:agent-operations",
       "scriptPath": "validation/business/operations/check-agent-operations.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.operations",
       "audit": "required"
     },
     {
       "id": "gate.check-analytics-catalog",
       "command": "check:analytics-catalog",
       "scriptPath": "validation/business/data/check-analytics-catalog.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.data",
       "audit": "required"
     },
     {
       "id": "gate.check-app-archetype",
       "command": "check:app-archetype",
       "scriptPath": "validation/business/product/check-app-archetype.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.product",
       "audit": "required"
     },
     {
       "id": "gate.check-app-copy",
       "command": "check:app-copy",
       "scriptPath": "validation/business/words/check-app-copy.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.words",
       "audit": "required"
     },
     {
       "id": "gate.check-apple-requirements",
       "command": "check:apple-requirements",
       "scriptPath": "validation/business/store/check-apple-app-store-requirements.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.store",
       "audit": "required"
     },
     {
       "id": "gate.check-archetype-starter",
       "command": "check:archetype-starter",
       "scriptPath": "validation/business/engineering/check-archetype-starter.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.engineering",
       "audit": "required"
     },
     {
@@ -3616,14 +3616,14 @@
       "id": "gate.check-asc-command-contract",
       "command": "check:asc-command-contract",
       "scriptPath": "validation/business/store/check-asc-command-contract.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.store",
       "audit": "required"
     },
     {
       "id": "gate.check-attribution",
       "command": "check:attribution",
       "scriptPath": "validation/business/data/check-attribution-contract.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.data",
       "audit": "required"
     },
     {
@@ -3637,7 +3637,7 @@
       "id": "gate.check-backend-contract",
       "command": "check:backend-contract",
       "scriptPath": "validation/business/engineering/check-backend-data-contract.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.engineering",
       "audit": "required"
     },
     {
@@ -3665,28 +3665,28 @@
       "id": "gate.check-compound-engineering",
       "command": "check:compound-engineering",
       "scriptPath": "validation/business/engineering/check-compound-engineering-routing.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.engineering",
       "audit": "required"
     },
     {
       "id": "gate.check-content-assets",
       "command": "check:content-assets",
       "scriptPath": "validation/business/design/check-content-assets.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.design",
       "audit": "required"
     },
     {
       "id": "gate.check-continuity-contract",
       "command": "check:continuity-contract",
       "scriptPath": "validation/business/orchestration/check-continuity-contract.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.orchestration",
       "audit": "required"
     },
     {
       "id": "gate.check-control-plane",
       "command": "check:control-plane",
       "scriptPath": "validation/business/operations/check-control-plane-contract.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.operations",
       "audit": "required"
     },
     {
@@ -3700,28 +3700,28 @@
       "id": "gate.check-email",
       "command": "check:email",
       "scriptPath": "validation/business/operations/check-email.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.operations",
       "audit": "required"
     },
     {
       "id": "gate.check-emotional-design",
       "command": "check:emotional-design",
       "scriptPath": "validation/business/experience/check-emotional-design.ts",
-      "ownerDomainId": "domain.design",
+      "ownerDomainId": "domain.experience",
       "audit": "required"
     },
     {
       "id": "gate.check-founder-copy",
       "command": "check:founder-copy",
       "scriptPath": "validation/business/words/check-founder-copy.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.words",
       "audit": "required"
     },
     {
       "id": "gate.check-founder-operator",
       "command": "check:founder-operator",
       "scriptPath": "validation/business/operations/check-founder-operator-bootstrap.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.operations",
       "audit": "required"
     },
     {
@@ -3749,7 +3749,7 @@
       "id": "gate.check-landing-funnel",
       "command": "check:landing-funnel",
       "scriptPath": "validation/business/growth/check-landing-funnel.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.growth",
       "audit": "excluded"
     },
     {
@@ -3763,49 +3763,49 @@
       "id": "gate.check-mobai-proof",
       "command": "check:mobai-proof",
       "scriptPath": "validation/business/engineering/check-mobai-proof.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.engineering",
       "audit": "required"
     },
     {
       "id": "gate.check-motion-contract",
       "command": "check:motion-contract",
       "scriptPath": "validation/business/design/check-motion-contract.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.design",
       "audit": "required"
     },
     {
       "id": "gate.check-native-ios",
       "command": "check:native-ios",
       "scriptPath": "validation/business/engineering/check-native-ios-proof.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.engineering",
       "audit": "required"
     },
     {
       "id": "gate.check-orchestration",
       "command": "check:orchestration",
       "scriptPath": "validation/business/orchestration/check-parallel-orchestration.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.orchestration",
       "audit": "required"
     },
     {
       "id": "gate.check-paid-ua",
       "command": "check:paid-ua",
       "scriptPath": "validation/business/growth/check-paid-user-acquisition.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.growth",
       "audit": "required"
     },
     {
       "id": "gate.check-portfolio-registry",
       "command": "check:portfolio-registry",
       "scriptPath": "validation/business/operations/check-portfolio-registry.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.operations",
       "audit": "required"
     },
     {
       "id": "gate.check-post-launch",
       "command": "check:post-launch",
       "scriptPath": "validation/business/operations/check-post-launch-ops.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.operations",
       "audit": "required"
     },
     {
@@ -3826,28 +3826,28 @@
       "id": "gate.check-research",
       "command": "check:research",
       "scriptPath": "validation/business/research/check-research-evidence.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.research",
       "audit": "required"
     },
     {
       "id": "gate.check-revenue",
       "command": "check:revenue",
       "scriptPath": "validation/business/money/check-revenue.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.money",
       "audit": "required"
     },
     {
       "id": "gate.check-secrets",
       "command": "check:secrets",
       "scriptPath": "validation/business/trust/check-secret-routing.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.trust",
       "audit": "required"
     },
     {
       "id": "gate.check-security",
       "command": "check:security",
       "scriptPath": "validation/business/trust/check-security-release.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.trust",
       "audit": "required"
     },
     {
@@ -3875,28 +3875,28 @@
       "id": "gate.check-store-console",
       "command": "check:store-console",
       "scriptPath": "validation/business/store/check-store-console-packet.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.store",
       "audit": "required"
     },
     {
       "id": "gate.check-store-screenshots",
       "command": "check:store-screenshots",
       "scriptPath": "validation/business/store/check-store-screenshots.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.store",
       "audit": "required"
     },
     {
       "id": "gate.check-template-safety",
       "command": "check:template-safety",
       "scriptPath": "validation/business/engineering/check-template-safety.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.engineering",
       "audit": "required"
     },
     {
       "id": "gate.check-token-promotion",
       "command": "check:token-promotion",
       "scriptPath": "validation/business/design/check-token-promotion.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.design",
       "audit": "required"
     },
     {
@@ -3973,7 +3973,7 @@
       "id": "gate.validate-launch-state",
       "command": "validate:launch-state",
       "scriptPath": "validation/business/orchestration/validate-project-state.ts",
-      "ownerDomainId": "domain.process",
+      "ownerDomainId": "domain.orchestration",
       "audit": "required"
     },
     {
