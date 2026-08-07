@@ -17,6 +17,8 @@ Without a transactional shared store and queue, Formation cannot safely support:
 - operational failover
 - database-enforced tenant isolation
 
+The adapter's cost model is also now load-bearing in a way it was not before. Every request reads and deep-clones the whole file, and every write rewrites it. That was tolerable while every route required a session; the public share route means an unauthenticated caller can ask for that work. It is bounded today by a per-address request budget and by batching view counts, which is defence in depth rather than a fix — a store that reads one row instead of the whole file is the fix.
+
 ### Required outcome
 
 Implement PostgreSQL persistence behind the existing store and domain boundaries.
