@@ -331,6 +331,31 @@
 .edit-conflict__reassurance { color: var(--ink-soft); font-size: 12.5px; }
 .edit-conflict .button-row { margin-top: 10px; }
 
+/* Economics. Inputs on the left, what follows from them on the right, and the assumption the plan
+   rests on underneath — read top to bottom it is an argument rather than a dashboard. */
+.scenario-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.scenario-tabs__item { background: none; border: 1px solid var(--line); border-radius: 20px; padding: 5px 14px; font: inherit; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+.scenario-tabs__item--active { border-color: var(--forest); background: var(--forest-soft); color: var(--forest); font-weight: 650; }
+.scenario-tabs__item:disabled { cursor: default; }
+.scenario { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 34px; align-items: start; }
+.scenario__inputs { display: grid; gap: 13px; }
+.scenario__inputs input { width: 100%; font: inherit; font-size: 14px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); }
+.scenario__derived { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px 26px; margin: 0; }
+.derived { display: grid; gap: 3px; align-content: start; }
+.derived dt { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.derived dd { margin: 0; font-size: 22px; font-family: Georgia, "Times New Roman", serif; color: var(--ink); }
+.derived--waiting dd { font-size: 12.5px; font-family: inherit; color: var(--muted); line-height: 1.5; }
+.sensitivity { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line); }
+.sensitivity__lead { margin: 8px 0 16px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; max-width: 74ch; }
+.sensitivity ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.sensitivity li { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) 62px; gap: 14px; align-items: center; font-size: 13px; color: var(--ink-soft); }
+.sensitivity__bar { height: 7px; background: var(--paper-deep); border-radius: 4px; overflow: hidden; }
+.sensitivity__bar span { display: block; height: 100%; background: var(--forest); }
+.sensitivity__swing { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 650; }
+.scenario-add { display: flex; gap: 14px; align-items: flex-end; margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line); }
+.scenario-add .field { flex: 0 1 300px; }
+.scenario-add input { width: 100%; font: inherit; font-size: 14px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); }
+
 /* People and access
    ---------------------------------------------------------------------------------------------
    A decisive row per person, in the same idiom as the ledger and task rows: identity on the left,

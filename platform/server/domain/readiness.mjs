@@ -1,6 +1,7 @@
 import { capabilitiesForRole, hasCapability, resolveAccess } from "./capabilities.mjs";
 import { commentThreads } from "./comments.mjs";
 import { detectInconsistencies } from "./consistency.mjs";
+import { economicsView } from "./economics.mjs";
 import { reviewList } from "./reviews.mjs";
 import { summariseVersionHistory } from "./versions.mjs";
 import { clampNumber, humanizeKey, priorityRank, slug, stableValue, unique } from "./shared.mjs";
@@ -335,6 +336,9 @@ export function buildWorkspaceSnapshot(database, workspaceId, userId) {
     // A review is an opinion recorded beside the record, never an authority over it: nothing
     // downstream reads these either. See domain/reviews.mjs.
     reviews: reviewList(database, workspaceId),
+    // Every figure here is computed from the inputs on read; none of it is stored. See
+    // domain/economics.mjs on why a stored derivation is a second copy of the truth.
+    economics: economicsView(workspace),
     contradictions: detectContradictions(claims),
     // Disagreements that have nothing to do with two claims sharing a key — see domain/consistency.mjs.
     inconsistencies: detectInconsistencies({ workspace, claims, decisions, tasks, artifacts }),

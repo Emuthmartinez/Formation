@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { api } from "../api";
 import { Button, ConfidenceMark, ContradictionStatements, Field, Modal, PageHeader, Section, ShareLinkNotice, formatCount, formatDate, humanize } from "../components/Primitives";
 import { Icon } from "../components/Icon";
+import { Economics } from "../components/Economics";
 import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
@@ -244,6 +245,8 @@ export function BusinessPage() {
           </div>
         )}
       </Section>
+
+      <Economics />
 
       <Section
         title="Claims and evidence"

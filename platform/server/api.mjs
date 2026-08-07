@@ -4,6 +4,7 @@ import { handleAccountRoutes } from "./routes/account.mjs";
 import { handleApprovalRoutes } from "./routes/approvals.mjs";
 import { handleArtifactRoutes } from "./routes/artifacts.mjs";
 import { handleCommentRoutes } from "./routes/comments.mjs";
+import { handleEconomicsRoutes } from "./routes/economics.mjs";
 import { handleReviewRoutes } from "./routes/reviews.mjs";
 import { handleEvidenceRoutes } from "./routes/evidence.mjs";
 import { handleExecutionRoutes } from "./routes/executions.mjs";
@@ -48,6 +49,8 @@ export async function handleApi({ request, response, url, store, worker, executi
   await handleCommentRoutes(privateContext);
   if (response.writableEnded) return;
   await handleReviewRoutes(privateContext);
+  if (response.writableEnded) return;
+  await handleEconomicsRoutes(privateContext);
   if (response.writableEnded) return;
   await handleArtifactRoutes(privateContext);
   if (response.writableEnded) return;
