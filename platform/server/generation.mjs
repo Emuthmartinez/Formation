@@ -1,5 +1,6 @@
 import { createArtifactVersion, createGeneratedArtifact, createId, generationClaims } from "./domain.mjs";
 import { GENERATION_INSTRUCTIONS_VERSION, buildProviderRequest, withheldNote } from "./domain/prompts.mjs";
+import { ProviderError, callProvider } from "./provider.mjs";
 
 /**
  * How many drafts one company may request per hour.
@@ -15,11 +16,14 @@ const HOUR_MS = 60 * 60 * 1_000;
 
 export class GenerationWorker {
   #store;
+  #providerOptions;
   #running = false;
   #timer;
 
-  constructor(store) {
+  /** `provider` injects the fetch, sleep, clock, and budget the suites drive every branch with. */
+  constructor(store, { provider } = {}) {
     this.#store = store;
+    this.#providerOptions = provider;
   }
 
   start() {
@@ -133,11 +137,14 @@ export class GenerationWorker {
       // reaches the provider; the founder is told what was held back rather than left to wonder
       // why the draft ignored a document they can see in their own workspace.
       const { request, withheld } = buildProviderRequest(context);
-      const artifact = await generateArtifact(context, request);
+      const { artifact, diagnostics } = await generateArtifact(context, request, this.#providerOptions);
       artifact.generation = {
         instructionsVersion: GENERATION_INSTRUCTIONS_VERSION,
         contextRecords: request.evidence.length + request.decisions.length + request.existingDeliverables.length,
         withheldRecords: withheld.length,
+        attempts: diagnostics.attempts,
+        elapsedMs: diagnostics.elapsedMs,
+        declaredUsage: diagnostics.declaredUsage,
       };
       artifact.sourceClaimIds = context.claims.map((entry) => entry.id);
       artifact.linkedDecisionIds = context.decisions.map((entry) => entry.id);
@@ -192,11 +199,21 @@ export class GenerationWorker {
         }
       });
     } catch (error) {
+      // A provider failure is reported in the words a founder can act on, and the technical
+      // detail goes to the server log. Anything else is a bug in Formation, and its message is
+      // not founder-facing either.
+      if (error instanceof ProviderError) {
+        console.error(`Formation drafting provider ${error.outcome} after ${error.diagnostics.attempts} attempt(s): ${error.detail ?? "no detail"}`);
+      } else {
+        console.error("Formation generation failed:", error instanceof Error ? (error.stack ?? error.message) : String(error));
+      }
       await this.#store.transaction((database) => {
         const job = database.jobs.find((entry) => entry.id === claimed.id);
         if (!job) return;
         job.status = "failed";
-        job.error = error instanceof Error ? error.message : String(error);
+        job.error = error instanceof ProviderError ? error.message : "Formation could not finish this draft. Nothing was written.";
+        job.outcome = error instanceof ProviderError ? error.outcome : "failed";
+        job.diagnostics = error instanceof ProviderError ? error.diagnostics : null;
         job.updatedAt = new Date().toISOString();
       });
     }
@@ -204,50 +221,18 @@ export class GenerationWorker {
   }
 }
 
-async function generateArtifact(context, request) {
+async function generateArtifact(context, request, providerOptions) {
   const endpoint = process.env.FORMATION_AI_ENDPOINT?.trim();
-  if (!endpoint) return createGeneratedArtifact(context);
+  if (!endpoint) return { artifact: createGeneratedArtifact(context), diagnostics: { outcome: "built-in", attempts: 0, elapsedMs: 0, declaredUsage: null } };
 
-  let providerUrl;
-  try {
-    providerUrl = new URL(endpoint);
-  } catch {
-    throw new Error("FORMATION_AI_ENDPOINT must be a valid URL.");
-  }
-  if (process.env.NODE_ENV === "production" && providerUrl.protocol !== "https:") {
-    throw new Error("The production generation endpoint must use HTTPS.");
-  }
-
-  const response = await fetch(providerUrl, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      ...(process.env.FORMATION_AI_API_KEY
-        ? { authorization: `Bearer ${process.env.FORMATION_AI_API_KEY}` }
-        : {}),
-    },
-    // The request is what domain/prompts.mjs named, and only that. The gathered context object is
-    // never serialised here: it holds whole records, and a whole record carries every field the
-    // platform has ever added to it.
-    body: JSON.stringify(request),
-    signal: AbortSignal.timeout(45_000),
+  // No fallback here on purpose: when a drafting service is configured and cannot answer, the
+  // honest outcome is that nothing was written. Handing back the built-in deterministic draft
+  // would look exactly like the document the founder asked for and would not be it.
+  const { payload, diagnostics } = await callProvider(request, {
+    endpoint,
+    apiKey: process.env.FORMATION_AI_API_KEY,
+    ...providerOptions,
   });
-  if (!response.ok) throw new Error(`AI provider returned ${response.status}.`);
-
-  const source = await response.text();
-  if (Buffer.byteLength(source, "utf8") > 1_000_000) {
-    throw new Error("AI provider response exceeded the 1 MB safety limit.");
-  }
-
-  let payload;
-  try {
-    payload = JSON.parse(source);
-  } catch {
-    throw new Error("AI provider did not return valid JSON.");
-  }
-  if (!payload || typeof payload !== "object" || !Array.isArray(payload.sections)) {
-    throw new Error("AI provider did not return the required structured artifact schema.");
-  }
 
   const fallback = createGeneratedArtifact(context);
   const sections = payload.sections
@@ -259,20 +244,23 @@ async function generateArtifact(context, request) {
       body: boundedText(section.body, 20_000),
     }))
     .filter((section) => section.title && section.body);
-  if (!sections.length) throw new Error("AI provider returned no usable artifact sections.");
+  if (!sections.length) {
+    throw new ProviderError(
+      { id: "unusable-answer", transient: false, message: "The drafting service answered with something Formation could not use. Nothing was written; the draft was not partially saved." },
+      diagnostics,
+      "answer contained no usable sections",
+    );
+  }
 
   return {
-    ...fallback,
-    title: typeof payload.title === "string" && payload.title.trim()
-      ? boundedText(payload.title, 200)
-      : fallback.title,
-    summary: typeof payload.summary === "string"
-      ? boundedText(payload.summary, 2_000)
-      : fallback.summary,
-    confidence: Number.isFinite(payload.confidence)
-      ? Math.max(0, Math.min(100, Math.round(payload.confidence)))
-      : fallback.confidence,
-    sections,
+    artifact: {
+      ...fallback,
+      title: typeof payload.title === "string" && payload.title.trim() ? boundedText(payload.title, 200) : fallback.title,
+      summary: typeof payload.summary === "string" ? boundedText(payload.summary, 2_000) : fallback.summary,
+      confidence: Number.isFinite(payload.confidence) ? Math.max(0, Math.min(100, Math.round(payload.confidence))) : fallback.confidence,
+      sections,
+    },
+    diagnostics,
   };
 }
 

@@ -139,12 +139,21 @@ Add:
 - prompt-injection resistance for imported research and documents — **shipped** (see below)
 - hallucination measurement
 - founder-review thresholds by consequence
-- cost, latency, and retry budgets
+- cost, latency, and retry budgets — **partly shipped** (`platform/server/provider.mjs`): attempts, per-attempt timeout, and total wall clock are all bounded, and each draft records the attempts and elapsed time that produced it plus whatever usage the provider declared. A spend budget in money still needs a provider that reports one — Formation records declared usage and never invents a cost.
 - redaction policy — **partly shipped**: the provider request is built by naming the fields that may leave (`platform/server/domain/prompts.mjs`), so nothing reaches a provider that was not named. Redaction of *values* — a customer's name inside a claim — is still to do.
-- provider outage and fallback behavior
+- provider outage and fallback behavior — **shipped**: four distinguishable outcomes (unreachable, refused, unusable answer, misconfigured), retried only where retrying can help, each with a founder-plain sentence carrying no status code, no URL, and no stack. There is deliberately no fallback: when a drafting service is configured and cannot answer, Formation does not substitute its own built-in deterministic draft.
 - versioned generation instructions — **shipped** (`GENERATION_INSTRUCTIONS_VERSION`, recorded on each draft's `generation` block)
 
 Important recommendations should expose supporting evidence and uncertainty, not only confidence scores.
+
+### Provider failure
+
+`platform/server/provider.mjs` owns the call. The rules, and why each one is there:
+
+- **Bounded in three ways.** Attempts, per attempt, and in total. A per-attempt timeout alone lets three slow attempts hold a worker for the sum of them.
+- **Retry only what retrying can fix.** A network failure, a timeout, a 429, and a 5xx are worth another attempt; a 401 or a 400 is an answer. Valid JSON in the wrong shape is also an answer — the provider understood and replied wrongly, so it is final. A body that is not JSON at all is usually a gateway's error page, so it gets one more attempt inside the budget.
+- **No silent fallback.** The built-in deterministic draft is what a Formation instance with no provider configured produces. Substituting it for a failed provider call would hand the founder a document that looks like the one they asked for and is not.
+- **Nothing half-written.** A failure writes no deliverable, no version, and no claim; the job carries the outcome and the diagnostics.
 
 ### Prompt-injection resistance
 

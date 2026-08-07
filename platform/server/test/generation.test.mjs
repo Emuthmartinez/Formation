@@ -99,3 +99,90 @@ test("generation worker recovers an interrupted durable job", async (t) => {
   assert.ok(database.artifacts.some((artifact) => artifact.id === completed.artifactId));
   assert.ok(database.artifactVersions.some((version) => version.artifactId === completed.artifactId));
 });
+
+/**
+ * What a founder is left with when the drafting service cannot answer.
+ *
+ * The rule the two cases below hold: an outage never produces a document. Handing back the
+ * built-in deterministic draft would look exactly like the one that was asked for and would not be
+ * it, and half-writing one would be worse still.
+ */
+async function workerWith(provider) {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "formation-generation-outage-"));
+  const store = new JsonStore({ filePath: path.join(directory, "formation.json"), seedFactory: createSeedDatabase });
+  await store.initialize();
+  return { store, worker: new GenerationWorker(store, { provider }) };
+}
+
+const usableAnswer = JSON.stringify({ title: "Positioning brief", summary: "A summary.", confidence: 72, sections: [{ title: "Promise", body: "The promise." }] });
+
+function fixedTime() {
+  let current = 0;
+  return { clock: () => current, sleep: async (ms) => { current += ms; } };
+}
+
+/**
+ * Waits for the durable queue to settle this job. `enqueue` already kicks the worker on a
+ * microtask, so calling `kick()` again returns immediately against the running drain — reading the
+ * store at that moment catches the job mid-flight rather than finished.
+ */
+async function settle(store, jobId) {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const database = await store.read();
+    const job = database.jobs.find((entry) => entry.id === jobId);
+    if (job && ["completed", "failed"].includes(job.status)) return database;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  return store.read();
+}
+
+test("a drafting service that cannot be reached fails the request and writes nothing", async (t) => {
+  process.env.FORMATION_AI_ENDPOINT = "https://provider.test/draft";
+  t.after(() => delete process.env.FORMATION_AI_ENDPOINT);
+
+  const { store, worker } = await workerWith({
+    fetchImpl: async () => { throw new Error("getaddrinfo ENOTFOUND provider.test"); },
+    budget: { attempts: 2, attemptTimeoutMs: 1_000, totalMs: 5_000, firstBackoffMs: 10, backoffFactor: 2, maxBackoffMs: 20, responseLimitBytes: 1_000_000 },
+    ...fixedTime(),
+  });
+
+  const before = await store.read();
+  const job = await worker.enqueue({ workspaceId: "wrk_storywell", workstreamId: "market", artifactType: null, instruction: "", requestedBy: "Maya Chen" });
+  const after = await settle(store, job.id);
+  const settled = after.jobs.find((entry) => entry.id === job.id);
+  assert.equal(settled.status, "failed");
+  assert.equal(settled.outcome, "unreachable");
+  assert.match(settled.error, /could not reach the drafting service/);
+  assert.match(settled.error, /Nothing was written/);
+  assert.ok(!/\b5\d\d\b|ENOTFOUND/.test(settled.error), "a founder must not be shown a status code or a system error");
+  assert.equal(after.artifacts.length, before.artifacts.length, "an outage must not create a deliverable");
+  assert.equal(after.artifactVersions.length, before.artifactVersions.length);
+  assert.ok(settled.diagnostics.attempts >= 1);
+});
+
+test("a drafting service that answers is written once, with what the answer cost recorded", async (t) => {
+  process.env.FORMATION_AI_ENDPOINT = "https://provider.test/draft";
+  t.after(() => delete process.env.FORMATION_AI_ENDPOINT);
+
+  let calls = 0;
+  const { store, worker } = await workerWith({
+    fetchImpl: async () => {
+      calls += 1;
+      if (calls === 1) return { ok: false, status: 503, headers: { get: () => null }, text: async () => "" };
+      return { ok: true, status: 200, headers: { get: () => null }, text: async () => usableAnswer };
+    },
+    budget: { attempts: 3, attemptTimeoutMs: 1_000, totalMs: 5_000, firstBackoffMs: 10, backoffFactor: 2, maxBackoffMs: 20, responseLimitBytes: 1_000_000 },
+    ...fixedTime(),
+  });
+
+  const job = await worker.enqueue({ workspaceId: "wrk_storywell", workstreamId: "market", artifactType: null, instruction: "", requestedBy: "Maya Chen" });
+  const after = await settle(store, job.id);
+  const settled = after.jobs.find((entry) => entry.id === job.id);
+  assert.equal(settled.status, "completed", settled.error ?? "");
+  const artifact = after.artifacts.find((entry) => entry.id === settled.artifactId);
+  assert.equal(artifact.title, "Positioning brief");
+  assert.equal(artifact.generation.attempts, 2, "the retry that produced the draft is recorded");
+  assert.ok(Number.isFinite(artifact.generation.elapsedMs));
+  assert.ok(artifact.generation.instructionsVersion, "a draft records which instructions produced it");
+  assert.equal(after.artifacts.filter((entry) => entry.title === "Positioning brief").length, 1, "a retried request must not write two deliverables");
+});
