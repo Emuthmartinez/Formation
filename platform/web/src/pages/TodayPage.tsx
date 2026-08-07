@@ -3,7 +3,7 @@ import { api } from "../api";
 import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
-import type { Activity, Recommendation, Task } from "../types";
+import type { Activity, Inconsistency, Recommendation, Task } from "../types";
 import { Icon } from "../components/Icon";
 import { Motif } from "../components/Motif";
 import { ReadinessLedger } from "../components/Readiness";
@@ -28,7 +28,7 @@ import {
 export function TodayPage() {
   const { snapshot, reload, notify } = useWorkspace();
   const can = useCan();
-  const { workspace, recommendations, readiness, tasks, decisions, contradictions, activity } = snapshot;
+  const { workspace, recommendations, readiness, tasks, decisions, contradictions, inconsistencies, activity } = snapshot;
   const [updatingTask, setUpdatingTask] = useState<string | null>(null);
   const primaryContradiction = contradictions[0];
   const nextTasks = useMemo(
@@ -208,6 +208,8 @@ export function TodayPage() {
         </Section>
       </div>
 
+      <SelfContradictionSection findings={inconsistencies ?? []} />
+
       <Section title="Recent movement" description="A plain record of what changed and why it matters.">
         <div className="activity-list">
           {activity.slice(0, 6).map((entry) => (
@@ -237,6 +239,48 @@ function activityTone(entry: Activity): Tone {
   if (entry.type.includes("failed") || entry.type === "contradiction" || /declined/i.test(entry.title)) return "critical";
   if (entry.type.includes("requested") || entry.type.includes("queued")) return "caution";
   return "positive";
+}
+
+/**
+ * Where the record disagrees with itself.
+ *
+ * Absent when there is nothing to say — a panel that is usually empty teaches the founder to stop
+ * looking at it, and this one should be read every time it appears. The findings are already
+ * ordered by how much they matter, so the section says the serious ones first and folds the rest.
+ */
+function SelfContradictionSection({ findings }: { findings: Inconsistency[] }) {
+  if (!findings.length) return null;
+  const serious = findings.filter((entry) => entry.severity === "high");
+  const rest = findings.filter((entry) => entry.severity !== "high");
+
+  return (
+    <Section
+      title="Where this record disagrees with itself"
+      description="Nothing here has been changed. Each of these is two parts of your own record saying different things, and which one is right is yours to decide."
+    >
+      <ul className="inconsistency-list">
+        {serious.map((finding) => (
+          <li key={finding.id} className="inconsistency inconsistency--high">
+            <h3>{finding.title}</h3>
+            <p>{finding.detail}</p>
+          </li>
+        ))}
+      </ul>
+      {rest.length ? (
+        <details className="inconsistency-more">
+          <summary>{rest.length} more worth looking at</summary>
+          <ul className="inconsistency-list">
+            {rest.map((finding) => (
+              <li key={finding.id} className={`inconsistency inconsistency--${finding.severity}`}>
+                <h3>{finding.title}</h3>
+                <p>{finding.detail}</p>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </Section>
+  );
 }
 
 function compareTasks(left: Task, right: Task) {

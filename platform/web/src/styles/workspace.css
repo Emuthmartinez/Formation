@@ -267,6 +267,20 @@
 .wording-hold q { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 7px 9px; overflow-wrap: anywhere; }
 .wording-hold .button { justify-self: start; }
 
+/* Where the record disagrees with itself. Deliberately plain: these are statements about the
+   founder's own record, not alerts, and the severity shows in one rule rather than in colour
+   across the whole row. */
+.inconsistency-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.inconsistency { display: grid; gap: 5px; padding-left: 14px; border-left: 3px solid var(--line-dark); }
+.inconsistency--high { border-left-color: var(--red); }
+.inconsistency--medium { border-left-color: var(--amber); }
+.inconsistency h3 { margin: 0; font-size: 15px; font-weight: 650; color: var(--ink); }
+.inconsistency p { margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.6; max-width: 78ch; }
+.inconsistency-more { margin-top: 16px; font-size: 12px; }
+.inconsistency-more summary { cursor: pointer; color: var(--muted); font-weight: 700; }
+.inconsistency-more summary:hover { color: var(--ink); }
+.inconsistency-more .inconsistency-list { margin-top: 14px; }
+
 /* People and access
    ---------------------------------------------------------------------------------------------
    A decisive row per person, in the same idiom as the ledger and task rows: identity on the left,

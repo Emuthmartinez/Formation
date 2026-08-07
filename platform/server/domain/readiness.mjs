@@ -1,4 +1,5 @@
 import { capabilitiesForRole, hasCapability, resolveAccess } from "./capabilities.mjs";
+import { detectInconsistencies } from "./consistency.mjs";
 import { clampNumber, humanizeKey, priorityRank, slug, stableValue, unique } from "./shared.mjs";
 
 const READINESS_WEIGHTS = {
@@ -296,6 +297,8 @@ export function buildWorkspaceSnapshot(database, workspaceId, userId) {
     jobs,
     activity,
     contradictions: detectContradictions(claims),
+    // Disagreements that have nothing to do with two claims sharing a key — see domain/consistency.mjs.
+    inconsistencies: detectInconsistencies({ workspace, claims, decisions, tasks, artifacts }),
     recommendations: buildRecommendations({ workspace, tasks, decisions, claims, artifacts }),
     readiness: calculateReadiness(workspace, tasks, decisions),
   };
