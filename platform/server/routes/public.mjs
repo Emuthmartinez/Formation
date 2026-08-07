@@ -1,3 +1,6 @@
+import { checkHealth, healthStatusCode } from "../domain/health.mjs";
+import { EngineBridge } from "../execution.mjs";
+import { defaultImportRoot } from "../imports.mjs";
 import {
   authenticatePassword,
   createDemoSession,
@@ -13,7 +16,18 @@ import { authAttemptKeys, claimAuthAttempt, settleAuthSuccess } from "./shared.m
 
 export async function handlePublicRoutes({ request, response, method, pathname, store, allowDemoAuth, allowRegistration, authLimiters }) {
   if (method === "GET" && pathname === "/api/health") {
-    json(response, 200, { ok: true, service: "formation", time: new Date().toISOString() });
+    // Answered before authentication, so it says what an operator needs and nothing a stranger
+    // could use — no paths, no environment values, no error text from inside the process.
+    const report = await checkHealth(
+      {
+        readStore: () => store.read(),
+        engineAvailability: () => new EngineBridge().unavailableReason(),
+        providerEndpoint: process.env.FORMATION_AI_ENDPOINT,
+        importRoot: defaultImportRoot(),
+      },
+      new Date().toISOString(),
+    );
+    json(response, healthStatusCode(report.status), report);
     return;
   }
 
