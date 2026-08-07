@@ -78,6 +78,14 @@ const WORKSPACE_SURFACES = [
     capability: "launch-import",
     body: { sourceId: "absent-source" },
   },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspaceId/comments",
+    capability: "comment-write",
+    body: { target: { kind: "workstream", id: "strategy" }, body: "Is this still the wedge?" },
+  },
+  { method: "PATCH", path: "/api/workspaces/:workspaceId/comments/:commentId", capability: "comment-write", body: { resolved: true } },
+  { method: "DELETE", path: "/api/workspaces/:workspaceId/comments/:commentId", capability: "comment-write" },
   { method: "GET", path: "/api/workspaces/:workspaceId/approvals", capability: "workspace-read" },
   {
     method: "POST",
@@ -316,7 +324,8 @@ function resolvePath(template, ids) {
     // actually removing someone while the probe is walking the surface.
     .replace(":membershipId", "mem_absent")
     .replace(":invitationId", "inv_absent")
-    .replace(":shareId", "shr_absent");
+    .replace(":shareId", "shr_absent")
+    .replace(":commentId", "cmt_absent");
 }
 
 test("each role is answered by the server exactly as its capability says", async (t) => {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { Button, ConfidenceMark, EmptyState, Field, MarkdownBody, PageHeader, ShareLinkNotice, StatusText, formatDate, humanize } from "../components/Primitives";
+import { Conversation } from "../components/Conversation";
 import { useCan } from "../capabilities";
 import { useWorkspace } from "../context";
 import { navigate } from "../router";
@@ -271,6 +272,8 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
           {linkedDecisions.map((decision) => <span key={decision.id}>Decision: {decision.title}</span>)}
         </div>
       </footer>
+
+      <Conversation target={{ kind: "deliverable", id: artifact.id }} label="Conversation about this document" />
 
       <section className="version-history" aria-labelledby="version-history-title">
         <div className="version-history__head">

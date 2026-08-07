@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
 import { Button, DateSignal, EmptyState, Field, Modal, PageHeader, Section, StatusText, Tally, TechnicalDisclosure, dateSignal, formatDate } from "../components/Primitives";
+import { Conversation } from "../components/Conversation";
 import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
@@ -208,6 +209,8 @@ function DecisionRow({
           </select>
         </div>
       ) : null}
+
+      <Conversation target={{ kind: "decision", id: decision.id }} label="Conversation about this call" />
     </article>
   );
 }

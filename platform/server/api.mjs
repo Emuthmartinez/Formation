@@ -3,6 +3,7 @@ import { HttpError } from "./http.mjs";
 import { handleAccountRoutes } from "./routes/account.mjs";
 import { handleApprovalRoutes } from "./routes/approvals.mjs";
 import { handleArtifactRoutes } from "./routes/artifacts.mjs";
+import { handleCommentRoutes } from "./routes/comments.mjs";
 import { handleEvidenceRoutes } from "./routes/evidence.mjs";
 import { handleExecutionRoutes } from "./routes/executions.mjs";
 import { handleImportRoutes } from "./routes/imports.mjs";
@@ -42,6 +43,8 @@ export async function handleApi({ request, response, url, store, worker, executi
   await handleApprovalRoutes(privateContext);
   if (response.writableEnded) return;
   await handleEvidenceRoutes(privateContext);
+  if (response.writableEnded) return;
+  await handleCommentRoutes(privateContext);
   if (response.writableEnded) return;
   await handleArtifactRoutes(privateContext);
   if (response.writableEnded) return;

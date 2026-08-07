@@ -389,7 +389,8 @@ export type Capability =
   | "approval-decide"
   | "share-manage"
   | "member-manage"
-  | "launch-import";
+  | "launch-import"
+  | "comment-write";
 
 /** One launch workspace this server holds that a company could bring work in from. */
 export interface ImportSource {
@@ -454,6 +455,32 @@ export interface Inconsistency {
   decisionId?: string;
 }
 
+/** What a conversation is attached to. A deliverable thread may name one of its sections. */
+export interface CommentTarget {
+  kind: "claim" | "decision" | "deliverable" | "workstream";
+  id: string;
+  sectionId?: string | null;
+}
+
+export interface Comment {
+  id: string;
+  authorId: string;
+  authorName: string;
+  body: string;
+  mentions: string[];
+  createdAt: string;
+  editedAt: string | null;
+  withdrawnAt: string | null;
+}
+
+export interface CommentThread {
+  id: string;
+  target: CommentTarget;
+  resolvedAt: string | null;
+  resolvedBy: string | null;
+  comments: Comment[];
+}
+
 export interface WorkspaceSnapshot {
   workspace: Workspace;
   membership: { id: string; role: WorkspaceRole | string; userId: string; workspaceId: string };
@@ -466,6 +493,7 @@ export interface WorkspaceSnapshot {
   tasks: Task[];
   jobs: Job[];
   activity: Activity[];
+  comments: CommentThread[];
   contradictions: Contradiction[];
   inconsistencies: Inconsistency[];
   recommendations: Recommendation[];

@@ -182,6 +182,12 @@ function migrateDatabase(database) {
     migrated = true;
   }
 
+  if (database.schemaVersion === 5) {
+    database.comments = Array.isArray(database.comments) ? database.comments : [];
+    database.schemaVersion = 6;
+    migrated = true;
+  }
+
   return migrated;
 }
 
@@ -189,7 +195,7 @@ function validateDatabase(database) {
   if (!database || typeof database !== "object" || Array.isArray(database)) {
     throw new Error("Formation data store must contain one JSON object.");
   }
-  if (database.schemaVersion !== 5) {
+  if (database.schemaVersion !== 6) {
     throw new Error(`Unsupported Formation schema version: ${String(database.schemaVersion)}`);
   }
 
@@ -207,6 +213,7 @@ function validateDatabase(database) {
     "executions",
     "invitations",
     "shares",
+    "comments",
     "activity",
   ];
   for (const name of requiredCollections) {
