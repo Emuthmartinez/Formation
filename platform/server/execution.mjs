@@ -120,6 +120,14 @@ export class EngineBridge {
     this.#describeTimeoutMs = describeTimeoutMs;
   }
 
+  /**
+   * Why the engine cannot be reached, or null when it can. Public so the health probe can ask the
+   * same question the adapter asks rather than keeping a second copy of the answer that drifts.
+   */
+  unavailableReason() {
+    return this.#unavailableReason();
+  }
+
   #unavailableReason() {
     if (!existsSync(this.#skillDir)) return "The launch engine is not installed on this server.";
     if (!this.#tsxBin) return "The launch engine's runtime is not installed on this server.";

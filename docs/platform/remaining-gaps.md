@@ -291,7 +291,7 @@ Add:
 - workspace audit log export
 - support impersonation with explicit controls and audit
 - feature flags
-- health and dependency probes
+- health and dependency probes — **shipped** (`platform/server/domain/health.mjs`): `GET /api/health` reports the store, the launch engine, the drafting provider, and the import source, and answers 503 when the store cannot be read. It previously returned `{ ok: true }` unconditionally — a probe that cannot report failure tells an operator nothing and keeps a load balancer pointed at an instance that cannot serve a request. Only the store decides fitness for traffic: a capability a deployment deliberately does not have is `not-configured`, not a fault, because reporting an instance as broken for being configured the way its operator configured it teaches them to ignore the probe. "Absent" and "misconfigured" are different answers. Nothing in the response names a path, an environment value, or an error from inside the process.
 - retention and deletion operations
 
 ## P2: Notifications and operating cadence
