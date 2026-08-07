@@ -73,10 +73,10 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 90 | 0 | 0 | 1 | 91 |
+| Knowledge content files | 94 | 0 | 0 | 1 | 95 |
 | Additions beyond literal scope (2) | 1 | 0 | 1 | 0 | 2 |
-| Validators (67) | 23 | 27 | 0 | 17 | 67 |
-| **Total** | **115** | **27** | **1** | **33** | **176** |
+| Validators (67) | 24 | 27 | 0 | 17 | 68 |
+| **Total** | **120** | **27** | **1** | **33** | **181** |
 
 ---
 
@@ -219,11 +219,19 @@ matching `catalog/references.ts` entry, which already carries its authored `load
 | knowledge/growth/ugc-creator-engine.md | keep | UGC/creator-sourcing reference |
 | knowledge/growth/viral-growth-loops.md | keep | referral/loop mechanics reference, `check:viral-growth` |
 
-### domain.money (1 file, keep)
+### domain.money (5 files, keep)
+
+2026-08 graph-consolidation audit split the original single-file monolith into a routing
+hub (revenue-monetization.md) plus four spokes, mirroring tool-recipes.md/experience-cards.md's
+established hub-and-spoke pattern.
 
 | path | disposition | reason |
 |---|---|---|
-| knowledge/money/revenue-monetization.md | keep | RevenueCat/Stripe/pricing reference, `check:revenue`, `probe:revenuecat` |
+| knowledge/money/billing-health-and-reactivation.md | keep | purchase-events backend/analytics contract, involuntary-billing-failure recovery, and reactivation/win-back spoke of the revenue-monetization.md hub |
+| knowledge/money/paywall-pricing-and-experiments.md | keep | paywall timing/placement/trials/offers, pricing disclosure rules, price-point decision procedure, and paywall experiment cadence spoke of the revenue-monetization.md hub |
+| knowledge/money/revenue-monetization.md | keep | monetization decision matrix, founder-only gates, and anti-pattern digest — the routing hub, `check:revenue`, `probe:revenuecat` |
+| knowledge/money/revenuecat-and-store-products.md | keep | RevenueCat project/product/entitlement/offering setup and App Store/Play product gates spoke of the revenue-monetization.md hub |
+| knowledge/money/stripe-and-web-billing.md | keep | Stripe account/checkout/webhooks/customer-portal and RevenueCat Web Billing spoke of the revenue-monetization.md hub |
 
 ### domain.operations (7 files, all keep)
 
@@ -303,7 +311,7 @@ split noted).
 |---|---|---|
 | validation/business/data/check-analytics-catalog.ts | keep | STRUCTURAL — cross-references backticked event names against ANALYTICS.md, real ID reconciliation |
 | validation/business/data/check-attribution-contract.ts | port | HYBRID, LIVE-PROOF-leaning — PROJECT_STATE fields + PROVIDER_PROOF.md row are structural, captured `posthog-proof.json` anti-gaming is real; duplicates PROVIDER_PROOF.md-row parsing with check-live-provider-proof.ts — consolidate at port time |
-| validation/business/data/check-live-provider-proof.ts | port | HYBRID, LIVE-PROOF-leaning — evidence-path-exists-on-disk half is real, keyword-presence half is WORD-PATTERN; port the evidence-exists half as a capability/provider-proof test |
+| validation/business/process/check-live-provider-proof.ts | port | HYBRID, LIVE-PROOF-leaning — evidence-path-exists-on-disk half is real, keyword-presence half is WORD-PATTERN; port the evidence-exists half as a capability/provider-proof test. Relocated from validation/business/data/ to validation/business/process/ (2026-08 graph-consolidation audit: directory-inferred gate ownership was misattributing it by path). |
 
 ### validation/business/design/
 
@@ -338,8 +346,8 @@ split noted).
 
 | path | disposition | reason |
 |---|---|---|
-| validation/business/growth/check-content-assets.ts | port | HYBRID — manifest.json asset-record + existsSync validation is structural (good model for structured-catalog-instead-of-prose); markdown-section presence is WORD-PATTERN |
-| validation/business/growth/check-email.ts | port | HYBRID — proof-file existence, Doppler-routed RESEND_API_KEY, and hard-fail on a leaked key in .env are real; doc-content section checks are WORD-PATTERN |
+| validation/business/design/check-content-assets.ts | port | HYBRID — manifest.json asset-record + existsSync validation is structural (good model for structured-catalog-instead-of-prose); markdown-section presence is WORD-PATTERN. Relocated from validation/business/growth/ to validation/business/design/ (2026-08 graph-consolidation audit). |
+| validation/business/operations/check-email.ts | port | HYBRID — proof-file existence, Doppler-routed RESEND_API_KEY, and hard-fail on a leaked key in .env are real; doc-content section checks are WORD-PATTERN. Relocated from validation/business/growth/ to validation/business/operations/ (2026-08 graph-consolidation audit). |
 | validation/business/growth/check-landing-funnel.ts | port | HYBRID — robots/llms/sitemap existence, JSON-LD parse, and real source scans for motion/banned-claims are structural; deploy-gate doc-mention claims are unverifiable WORD-PATTERN (could be replaced by a real `git status`/deploy-target probe) |
 | validation/business/growth/check-launch-narrative.ts | drop | WORD-PATTERN — required-section presence plus a fenced-block hashtag/emoji/link scan; deterministic but still self-declared prose, no proof of actual posting |
 | validation/business/growth/check-paid-user-acquisition.ts | port | HYBRID — numeric-threshold and report-data-row presence add shallow real structure; section/mention checking is WORD-PATTERN; no live RevenueCat/ad-platform call exists to port yet |
@@ -369,14 +377,14 @@ split noted).
 | validation/business/process/check-agent-entrypoints.ts | drop | WORD-PATTERN — required-term presence across generated docs; heavily overlaps check-continuity-contract.ts and check-workflow-adherence.ts's term lists |
 | validation/business/process/check-artifact-templates.ts | keep | STRUCTURAL — clean cross-reference: every lane's evidence path has a matching starter file on disk |
 | validation/business/process/check-change-cascade.ts | keep | STRUCTURAL — validates recorded change_cascade entries against the structured cascade-edges.yaml map; the exact "edges as data" model the catalog itself now follows |
-| validation/business/process/check-continuity-contract.ts | port | HYBRID — term-list half duplicates check-agent-entrypoints.ts (WORD-PATTERN); continuity-block shape and source-file-exists half is structural |
+| validation/business/orchestration/check-continuity-contract.ts | port | HYBRID — term-list half duplicates check-agent-entrypoints.ts (WORD-PATTERN); continuity-block shape and source-file-exists half is structural. Relocated from validation/business/process/ to validation/business/orchestration/ (2026-08 graph-consolidation audit). |
 | validation/business/process/check-generated-pages.ts | keep | STRUCTURAL — manifest existence plus byte-match drift check against a fresh render of the markdown source |
 | validation/business/process/check-hooks-installed.ts | drop | confirmed by full read: every check in this file (234 lines) is specifically about the PostToolUse hook JSON — template well-formedness, installed-vs-shipped signature diffing, jq/SKILL_ROOT warnings. KTD8/R19 delete the Claude-only hook enforcement mechanism entirely at cutover in favor of reducer+validator enforcement that runs identically everywhere; this file's entire subject matter ceases to exist. Nothing to port. |
 | validation/business/process/check-lane-coverage.ts | keep | STRUCTURAL — status enums, evidence/blocker rules, dependency-graph validation, staleness dates; near-duplicate of validate-project-state.ts's lane logic (flagged for consolidation at port time, not pre-merged here per the duplicated-helpers lesson — dedupe only after diffing output) |
 | validation/business/process/check-launch-trace.ts | drop | WORD-PATTERN — pure required-section/ID/cross-ref phrase presence |
-| validation/business/process/check-parallel-orchestration.ts | port | HYBRID — the file-ownership collision algorithm is genuinely structural/algorithmic; ORCHESTRATION.md prose-policy checks only confirm the doc *describes* the policy, not that it was followed (WORD-PATTERN) |
+| validation/business/orchestration/check-parallel-orchestration.ts | port | HYBRID — the file-ownership collision algorithm is genuinely structural/algorithmic; ORCHESTRATION.md prose-policy checks only confirm the doc *describes* the policy, not that it was followed (WORD-PATTERN). Relocated from validation/business/process/ to validation/business/orchestration/ (2026-08 graph-consolidation audit). |
 | validation/business/process/check-workflow-adherence.ts | drop | WORD-PATTERN — ~200 lines of `.includes()` term lists across knowledge docs/templates/fixtures; overlaps check-agent-entrypoints.ts and check-continuity-contract.ts |
-| validation/business/process/validate-project-state.ts | keep | STRUCTURAL — the core PROJECT_STATE.yaml schema validator: fields, date formats, enums, per-lane rules, evidence-path existence; largest structural file in the set |
+| validation/business/orchestration/validate-project-state.ts | keep | STRUCTURAL — the core PROJECT_STATE.yaml schema validator: fields, date formats, enums, per-lane rules, evidence-path existence; largest structural file in the set. Relocated from validation/business/process/ to validation/business/orchestration/ (2026-08 graph-consolidation audit). |
 
 ### validation/business/product/ + validation/business/research/
 
@@ -421,6 +429,7 @@ split noted).
 |---|---|---|
 | validation/repository/check-autopilot-contract.ts | port | HYBRID — eval-object shape validation is structural; keyword-grepping SKILL.md description/body prose is WORD-PATTERN |
 | validation/repository/check-gates-layout.ts | keep | STRUCTURAL — pure filesystem/shape check: validation/business/ mirrors knowledge/ domains 1:1, no ungrouped gates, no duplicate script basenames |
+| validation/repository/check-hub-spoke.ts | keep | STRUCTURAL — no v1 precedent, added with the 2026-08 graph-consolidation audit's money-domain hub-and-spoke split; verifies every knowledge/ spoke's "Part of the [Hub]" backlink is reciprocated by a link back from the hub |
 | validation/repository/check-package-parity.ts | keep | STRUCTURAL — compares the two package manifests/lockfiles against skill-version.json; wired only via the repo-root package.json's `check:package-parity` script (absent from the skill-scoped manifest, which is exactly why literal-scope discovery would have missed it) |
 | validation/repository/check-reference-size.ts | keep | STRUCTURAL — per-file byte budgets on knowledge/, link-graph regex only extracts targets (doesn't grade content) |
 | validation/repository/check-skill-graph.ts | port | confirmed by full read: the checking *pattern* (referential integrity across 11 node categories + generated-projection drift-check) is exactly right and worth preserving, but the file is hardcoded one-to-one against the current `runtime/graph/*.ts` module layout (4 specific relative imports, 2 specific generated-file block markers) that this rebuild is restructuring. This same unit (U8) ships its replacement: `catalog/validate.ts` (referential integrity, cycles, load-when presence) + `catalog/render-routing.ts --check` (drift). |

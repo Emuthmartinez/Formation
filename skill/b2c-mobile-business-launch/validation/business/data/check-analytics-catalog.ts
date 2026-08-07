@@ -49,7 +49,7 @@ function severityFor(docLabel: string): "error" | "warning" {
 
 // Surface docs that name events (first existing path wins per doc).
 // revenue/REVENUE_OPS.md joined the list when the billing-lifecycle events prescribed
-// in revenue-monetization.md §8a/§8b turned out to live only in reference
+// in billing-health-and-reactivation.md §2/§3 turned out to live only in reference
 // prose — a revenue doc naming an event the catalog does not carry is the
 // same invented-inline miss as an onboarding doc doing it.
 const SOURCE_DOCS: Array<{ label: string; paths: string[] }> = [

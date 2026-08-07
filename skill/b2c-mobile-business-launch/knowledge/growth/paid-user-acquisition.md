@@ -229,7 +229,7 @@ npm run check:paid-ua -- --root .
 
 ## Anti-Patterns (Spend And Sequencing Traps)
 
-The paid-acquisition entries in the monetization-and-growth digest in [`revenue-monetization.md`](../money/revenue-monetization.md) §10. These are the cozy moves that feel like progress but burn budget. The Meta dashboard being "right there and shiny" is not a reason to spend.
+The paid-acquisition entries in the monetization-and-growth digest in [`revenue-monetization.md`](../money/revenue-monetization.md) §3. These are the cozy moves that feel like progress but burn budget. The Meta dashboard being "right there and shiny" is not a reason to spend.
 
 **8. Run ads before you can read the result.** Below a meaningful daily conversion volume, every paywall, trial, and creative test is statistical noise — you spend the budget, get random numbers, declare them "insights," and build strategy on a coin flip. Do not start paid spend until the baseline window and minimum volume needed for a readable result are defined (see Tracking And Baseline and Stop And Scale Rules: "baseline cannot be established" is a stop condition). If volume is too low to reach significance, the correct move is more organic/ASO signal or a longer window, not more spend.
 

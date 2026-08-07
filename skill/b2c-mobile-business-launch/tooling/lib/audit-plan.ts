@@ -90,6 +90,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:app-archetype", kind: "script", args: ["--skill-root", S] },
     { id: "check:archetype-starter", kind: "script", args: ["--skill-root", S] },
     { id: "check:reference-size", kind: "script", args: ["--skill-root", S] },
+    { id: "check:hub-spoke", kind: "script", args: ["--skill-root", S] },
     { id: "check:catalog", kind: "script", args: ["--skill-root", S] },
     { id: "catalog:render-routing", kind: "script", args: ["--check", "--skill-root", S] },
     { id: "check:gates-layout", kind: "script", args: ["--skill-root", S] },

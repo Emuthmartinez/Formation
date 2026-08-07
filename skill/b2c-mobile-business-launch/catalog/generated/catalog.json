@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.99.2",
+  "skillVersion": "0.100.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -873,7 +873,7 @@
       "path": "knowledge/growth/influencer-sponsorship-engine.md",
       "domainId": "domain.growth",
       "title": "Influencer Sponsorship Engine",
-      "loadWhen": "before founder-led organic social, TikTok/Reels/Shorts UGC, creator sourcing/contracts/payments, creator-marketplace use, format-discovery tests, paid influencer sponsorships, CPM/view-guarantee deals, or meme-page amplification"
+      "loadWhen": "before sponsoring established creators who already have an audience to integrate the app into their own content — sponsorship DMs/deal calls, flat/CPM/view-guarantee structures, brand-account credibility, meme/topic-page amplification, or per-deal payback tracking"
     },
     {
       "id": "reference.growth.launch-narrative-cadence",
@@ -894,7 +894,7 @@
       "path": "knowledge/growth/ugc-creator-engine.md",
       "domainId": "domain.growth",
       "title": "UGC Creator Engine",
-      "loadWhen": "before founder-led organic social, TikTok/Reels/Shorts UGC, creator sourcing/contracts/payments, creator-marketplace use, format-discovery tests, paid influencer sponsorships, CPM/view-guarantee deals, or meme-page amplification"
+      "loadWhen": "before founder-run creator operations on new niche accounts the program controls — TikTok/Reels/Shorts UGC, founder-led format-discovery experiments, hired micro-creator sourcing/contracts/payments, or post-launch social distribution where the algorithm, not an existing audience, is the distribution engine"
     },
     {
       "id": "reference.growth.viral-growth-loops",
@@ -908,7 +908,36 @@
       "path": "knowledge/money/revenue-monetization.md",
       "domainId": "domain.money",
       "title": "Revenue Monetization",
-      "loadWhen": "before RevenueCat, Stripe, app-store products, web billing, web purchase links, funnels, paywalls, subscriptions, webhooks, taxes, pricing, restore purchases, or entitlements"
+      "hub": true,
+      "loadWhen": "before RevenueCat, Stripe, app-store products, web billing, web purchase links, funnels, paywalls, subscriptions, webhooks, taxes, pricing, restore purchases, or entitlements — the Decision Matrix, Founder-Only Gates, and anti-pattern digest hub; see revenuecat-and-store-products.md, stripe-and-web-billing.md, paywall-pricing-and-experiments.md, and billing-health-and-reactivation.md for setup and procedure detail"
+    },
+    {
+      "id": "reference.money.revenuecat-and-store-products",
+      "path": "knowledge/money/revenuecat-and-store-products.md",
+      "domainId": "domain.money",
+      "title": "RevenueCat And Store Products",
+      "loadWhen": "RevenueCat project/product/entitlement/offering setup, App Store or Play product gates, MISSING_METADATA or RevenueCat product-type reconciliation, paywall smoke proof, or promotional IAP/subscription art — routed from revenue-monetization.md"
+    },
+    {
+      "id": "reference.money.stripe-and-web-billing",
+      "path": "knowledge/money/stripe-and-web-billing.md",
+      "domainId": "domain.money",
+      "title": "Stripe And Web Billing",
+      "loadWhen": "Stripe account/checkout/webhook/customer-portal setup, or RevenueCat Web Billing, Web Purchase Links, Web Funnels, Web SDK, or Redemption Links — routed from revenue-monetization.md"
+    },
+    {
+      "id": "reference.money.paywall-pricing-and-experiments",
+      "path": "knowledge/money/paywall-pricing-and-experiments.md",
+      "domainId": "domain.money",
+      "title": "Paywall, Pricing, And Experiments",
+      "loadWhen": "paywall timing/placement/trials/offers, pricing disclosure rules, the price-point decision procedure, or the standing paywall experiment cadence — routed from revenue-monetization.md"
+    },
+    {
+      "id": "reference.money.billing-health-and-reactivation",
+      "path": "knowledge/money/billing-health-and-reactivation.md",
+      "domainId": "domain.money",
+      "title": "Billing Health And Reactivation",
+      "loadWhen": "the purchase-events backend/analytics contract, involuntary billing-failure recovery, or reactivation and win-back after a purchase already happened — routed from revenue-monetization.md"
     },
     {
       "id": "reference.operations.founder-zero-operator",
@@ -950,7 +979,7 @@
       "path": "knowledge/operations/resend-email-ops.md",
       "domainId": "domain.operations",
       "title": "Resend Email Ops",
-      "loadWhen": "before push permission priming or notification lifecycle work; before Resend, API keys, transactional email, lifecycle automations, broadcasts, contacts/topics, webhooks, inbound email, unsubscribe, deliverability, or templates"
+      "loadWhen": "before Resend, API keys, transactional email, lifecycle automations, broadcasts, contacts/topics, webhooks, inbound email, unsubscribe, deliverability, or templates"
     },
     {
       "id": "reference.operations.secrets-management",
@@ -2058,7 +2087,8 @@
         "phase.3"
       ],
       "dependencies": [
-        "workflow.store.aso-and-store-ops"
+        "workflow.store.aso-and-store-ops",
+        "workflow.money.revenue-monetization"
       ],
       "outputPaths": [
         "store/app-store-listing/APP_STORE_LISTING.md"
@@ -3641,14 +3671,14 @@
     {
       "id": "gate.check-content-assets",
       "command": "check:content-assets",
-      "scriptPath": "validation/business/growth/check-content-assets.ts",
+      "scriptPath": "validation/business/design/check-content-assets.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },
     {
       "id": "gate.check-continuity-contract",
       "command": "check:continuity-contract",
-      "scriptPath": "validation/business/process/check-continuity-contract.ts",
+      "scriptPath": "validation/business/orchestration/check-continuity-contract.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },
@@ -3669,7 +3699,7 @@
     {
       "id": "gate.check-email",
       "command": "check:email",
-      "scriptPath": "validation/business/growth/check-email.ts",
+      "scriptPath": "validation/business/operations/check-email.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },
@@ -3706,6 +3736,13 @@
       "command": "check:generated-pages",
       "scriptPath": "validation/business/process/check-generated-pages.ts",
       "ownerDomainId": "domain.process",
+      "audit": "required"
+    },
+    {
+      "id": "gate.check-hub-spoke",
+      "command": "check:hub-spoke",
+      "scriptPath": "validation/repository/check-hub-spoke.ts",
+      "ownerDomainId": "domain.machine",
       "audit": "required"
     },
     {
@@ -3746,7 +3783,7 @@
     {
       "id": "gate.check-orchestration",
       "command": "check:orchestration",
-      "scriptPath": "validation/business/process/check-parallel-orchestration.ts",
+      "scriptPath": "validation/business/orchestration/check-parallel-orchestration.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },
@@ -3774,7 +3811,7 @@
     {
       "id": "gate.check-provider-proof",
       "command": "check:provider-proof",
-      "scriptPath": "validation/business/data/check-live-provider-proof.ts",
+      "scriptPath": "validation/business/process/check-live-provider-proof.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },
@@ -3935,7 +3972,7 @@
     {
       "id": "gate.validate-launch-state",
       "command": "validate:launch-state",
-      "scriptPath": "validation/business/process/validate-project-state.ts",
+      "scriptPath": "validation/business/orchestration/validate-project-state.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
     },

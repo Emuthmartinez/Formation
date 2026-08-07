@@ -433,7 +433,7 @@ Acceptance:
 ## `analytics/ANALYTICS.md`
 
 Must include:
-- vendor and identity model
+- vendor and identity model, including the identity map: anonymous ID, app user ID, auth UID, PostHog distinct ID, RevenueCat App User ID, Stripe customer ID, email ID, push token, referral code
 - current PostHog docs checked, date checked, and stack-specific doc links
 - PostHog host/region and project-grouping decision
 - north-star metric and launch learning questions

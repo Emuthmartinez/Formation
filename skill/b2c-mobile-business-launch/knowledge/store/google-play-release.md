@@ -121,7 +121,7 @@ Every upload to a testing track triggers an automatic Google crawl of the app on
 Load `revenue-monetization.md` before any Play Billing product, base plan, offer, or price work.
 
 - Model subscriptions with Play's base plans and offers: one subscription product, base plans for billing periods, offers for intro pricing/free trials. Map every product ID, base plan ID, and offer ID to the RevenueCat product catalog and entitlements; the Play catalog, RevenueCat, the paywall, and the App Store products must tell one consistent price/trial/renewal story.
-- Enable grace period and account hold for involuntary-churn recovery, and handle the recovery states through RevenueCat or the backend, per `revenue-monetization.md` §8a. Confirm exact RTDN state names against current Play billing docs before implementing.
+- Enable grace period and account hold for involuntary-churn recovery, and handle the recovery states through RevenueCat or the backend, per `billing-health-and-reactivation.md` §2. Confirm exact RTDN state names against current Play billing docs before implementing.
 - Configure Real-time developer notifications (RTDN) so RevenueCat or the backend receives entitlement changes; record the topic/route in `revenue/REVENUE_OPS.md`.
 - Price changes on live subscriptions have notice/consent mechanics that affect existing subscribers — founder approval and a doc refresh are required before any live price change.
 - Do not mark Play monetization ready until product IDs, prices, trials, and cancellation/refund posture agree across Play Console, RevenueCat, `revenue/REVENUE_OPS.md`, the paywall, and the store listing.

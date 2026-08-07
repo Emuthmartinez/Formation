@@ -464,7 +464,7 @@ if (revenueDone && revenueOpsText) {
       issue(
         "error",
         "revenue.pricing_decision.missing",
-        'revenue/REVENUE_OPS.md has no "Pricing Decision" section. Run the price-point decision procedure (revenue-monetization.md §7a) and record the anchor table, candidates, and founder approval before the revenue lane is marked done.',
+        'revenue/REVENUE_OPS.md has no "Pricing Decision" section. Run the price-point decision procedure (paywall-pricing-and-experiments.md §3) and record the anchor table, candidates, and founder approval before the revenue lane is marked done.',
         revenueOpsPath,
       ),
     );
@@ -491,7 +491,7 @@ if (revenueDone && revenueOpsText) {
         issue(
           "error",
           "revenue.pricing_anchor.empty",
-          "The Pricing Decision section has no real competitor anchor rows. Price against the category (revenue-monetization.md §7a step 1) — an empty anchor table means the price was picked from air.",
+          "The Pricing Decision section has no real competitor anchor rows. Price against the category (paywall-pricing-and-experiments.md §3 step 1) — an empty anchor table means the price was picked from air.",
           revenueOpsPath,
         ),
       );
@@ -502,7 +502,7 @@ if (revenueDone && revenueOpsText) {
         issue(
           "error",
           "revenue.pricing_approval.undated",
-          "The Pricing Decision section records no dated founder approval. Pricing is founder-only (revenue-monetization.md §9) — record the ISO date the founder approved the chosen points.",
+          "The Pricing Decision section records no dated founder approval. Pricing is founder-only (revenue-monetization.md §2 Founder-Only Gates) — record the ISO date the founder approved the chosen points.",
           revenueOpsPath,
         ),
       );
@@ -535,7 +535,7 @@ if (revenueDone && revenueOpsText) {
           "error",
           "revenue.experiment_backlog.missing",
           'revenue/REVENUE_OPS.md has no "Paywall Experiment Backlog" section and the app has been live four-plus weeks. The first paywall is a ' +
-            "hypothesis, not a decision — stand up the experiment program (revenue-monetization.md §7b) before the plateau sets in.",
+            "hypothesis, not a decision — stand up the experiment program (paywall-pricing-and-experiments.md §4) before the plateau sets in.",
           revenueOpsPath,
         ),
       );
@@ -635,7 +635,7 @@ if (revenueDone && revenueOpsText) {
             `The Paywall Experiment Backlog has no dated active or completed experiment row, no planned row dated to start within ` +
               `${NEXT_EXPERIMENT_HORIZON_DAYS} days, and the app has been live ${liveDays} days. ` +
               "A backlog of empty headers is the one-and-done plateau wearing a green check — start the first timing/packaging/trial test " +
-              "(revenue-monetization.md §7b) and record it with its start date.",
+              "(paywall-pricing-and-experiments.md §4) and record it with its start date.",
             revenueOpsPath,
           ),
         );
@@ -646,7 +646,7 @@ if (revenueDone && revenueOpsText) {
             "revenue.experiment_backlog.stale",
             `The Paywall Experiment Backlog's most recent completed experiment started more than ${EXPERIMENT_RECENCY_DAYS} days ago, nothing is active, ` +
               `and no planned row is dated to start within ${NEXT_EXPERIMENT_HORIZON_DAYS} days. The cadence is a standing program, not a one-time checkbox ` +
-              "(revenue-monetization.md §7b) — one historical test satisfying this gate forever recreates the one-and-done plateau. Start the next " +
+              "(paywall-pricing-and-experiments.md §4) — one historical test satisfying this gate forever recreates the one-and-done plateau. Start the next " +
               "experiment or date the next planned row.",
             revenueOpsPath,
           ),
@@ -933,7 +933,7 @@ if (!revenueSkipped && revenueOpsText) {
         issue(
           "warning",
           "revenue.freemium.rationale_missing",
-          "Freemium model chosen but no network-effect, UGC, or word-of-mouth rationale is documented. Per benchmarks, freemium yields ~5x lower D35 conversion vs. hard paywall. Document the deliberate reason (see revenue-monetization.md §10 anti-pattern 2).",
+          "Freemium model chosen but no network-effect, UGC, or word-of-mouth rationale is documented. Per benchmarks, freemium yields ~5x lower D35 conversion vs. hard paywall. Document the deliberate reason (see revenue-monetization.md §3 anti-pattern 2).",
           revenueOpsPath,
         ),
       );
@@ -961,7 +961,7 @@ if (!revenueSkipped && revenueOpsText) {
         issue(
           "warning",
           "revenue.involuntary_churn_recovery.unaddressed",
-          "Revenue lane is done but involuntary-churn recovery (grace period, billing-issue webhook, dunning) is not addressed in revenue/REVENUE_OPS.md or engineering/PRODUCTION_READINESS.md. On Google Play ~31% of cancellations are involuntary billing failures (see revenue-monetization.md §8a).",
+          "Revenue lane is done but involuntary-churn recovery (grace period, billing-issue webhook, dunning) is not addressed in revenue/REVENUE_OPS.md or engineering/PRODUCTION_READINESS.md. On Google Play ~31% of cancellations are involuntary billing failures (see billing-health-and-reactivation.md §2).",
           revenueOpsPath,
         ),
       );

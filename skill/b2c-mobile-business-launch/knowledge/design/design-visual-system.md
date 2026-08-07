@@ -110,31 +110,9 @@ Do not merge them unless the launch is tiny and no builder handoff is expected. 
 
 Before generating assets, translate `design/DESIGN.md` into the generation brief: palette names and hexes, type mood, shape/radius language, illustration style, motion energy, forbidden aesthetics, and intended surface.
 
-Higgsfield is paid/account-gated. Do not infer that the founder lacks access because the current runtime cannot call it.
-
-**Soul Characters preflight.** Before proposing `higgsfield-soul-id` training, call `mcp__claude_ai_Higgsfield__show_characters` to list existing Soul Characters. If a matching character exists, reuse its `reference_id` — record it in `state/PROJECT_STATE.yaml` under `tools.higgsfield.identity.soul_reference_id` — and skip training. Train only when no suitable character exists and the founder has confirmed spend.
-
-**media_upload/media_confirm preflight.** Before Soul training (`--image`), Virality scoring (`--video`), ad-reference creation, or custom avatar creation, upload the source file with `mcp__claude_ai_Higgsfield__media_upload` and confirm with `mcp__claude_ai_Higgsfield__media_confirm`. Do not pass a raw local path as input without completing this step.
-
-Use local Higgsfield skills by intent:
-- `higgsfield-product-photoshoot` for brand/product visuals, hero banners, lifestyle shots, Pinterest pins, social carousels, and paid-social static packs. Landing-page hero and feature-section art uses `hero_banner` or `lifestyle_scene` modes.
-- `higgsfield-generate` with GPT Image 2 for app icons, graphic UI imagery, text-forward visual concepts, and high-fidelity general images.
-- `higgsfield-generate` with Nano Banana 2/Pro for mascots, character sheets, expressive icon-like illustrations, and reference-driven character work.
-- `higgsfield-generate` with Soul Location (`soul_location`) for environments and backgrounds — onboarding scenes, paywall hero environments, empty-state environments. Prompt-only; no people.
-- `higgsfield-generate` with Soul Cast (`soul_cast`) for a text-only characterful mascot or persona when no reference photo is available.
-- `higgsfield-generate` with Seedance 2.0 for 4-15 second product demo clips, onboarding motion, image-to-video, and multi-shot product moments.
-- `higgsfield-generate` Marketing Studio for UGC-style ads, presenter videos, unboxing/review formats, product demos, hooks, settings, and avatar/product workflows.
-- `higgsfield-soul-id` only when the app needs a consistent human face, founder avatar, presenter identity, or recurring character based on owned reference photos. Choose the Soul variant at training time: use `--soul-2` (`text2image_soul_v2`) for stills and editorial; use `--soul-cinematic` (`soul_cinematic`) when the launch needs talking-head or presenter VIDEO. Record the variant in `state/PROJECT_STATE.yaml` under `tools.higgsfield.identity.soul_variant`.
-- Virality Predictor (`brain_activity`) for finished demo/ad/onboarding clips before publishing or using them in a launch funnel.
+The Higgsfield skill/model routing, media preflight steps, and asset-labeling rules are the canonical recipe body in [`tool-recipes/visual-and-motion-production.md`](../process/tool-recipes/visual-and-motion-production.md) — load that section rather than a second, drifting copy here.
 
 **App Icon Direction Batch.** Before locking an app icon direction: check the `icon_style` token in `design/DESIGN.md`. If the style is `character`, `cartoon`, or `mascot`, route to `nano_banana_2` or `nano_banana_pro`; otherwise route to `gpt_image_2`. Produce a minimum 3-concept batch before direction lock. See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md` for the z_image draft → production-model run workflow. Cheap-first is offered only as a spend-reduction option at the `paid-tool-routing.md` spend-confirmation prompt — never applied silently.
-
-Rules:
-- Do not generate visuals that ignore `design/DESIGN.md`; every prompt or backend brief must explicitly carry the design-system constraints.
-- Do not rely on generated art as the only proof. Embed final candidates in `design/design.html`, `product/onboarding.html`, screenshot HTML, or landing HTML and verify them in layout.
-- Label each asset as `direction`, `draft`, or `production`, with source model/tool, date, prompt summary, and permission/license caveats.
-- For app-store screenshots, combine real app UI with generated backgrounds/characters only when the underlying app screen remains truthful and readable.
-- For animations, create a storyboard in HTML first, generate the Higgsfield clip second, then include the clip or keyframes in the HTML proof with reduced-motion fallback notes.
 
 ## Motion: Web Surfaces vs Mobile Binary
 
