@@ -97,6 +97,12 @@ export const CAPABILITIES = {
     covers: "Showing the company's work to someone outside it: creating a read-only link, and stopping one.",
     denial: "Only this company's owner can share its work outside the company.",
   },
+  "launch-import": {
+    minimumRole: "owner",
+    covers:
+      "Bringing an existing launch workspace's recorded work into this company: seeing which ones this server holds, previewing what would arrive, and accepting it.",
+    denial: "Only this company's owner can bring in work from an existing launch workspace.",
+  },
   "member-manage": {
     minimumRole: "owner",
     covers: "Who is in the company: inviting people, cancelling invitations, changing what someone can do, and removing them.",

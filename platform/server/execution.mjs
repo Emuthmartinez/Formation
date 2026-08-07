@@ -195,6 +195,27 @@ export class EngineBridge {
   }
 
   /**
+   * Read-only: what business does an existing launch repository already contain? Same contract as
+   * `describe` — a parseable answer or an honest "unreachable", never an empty report standing in
+   * for one. The engine CLI it spawns opens no handle for writing, so a founder can point this at
+   * a live launch repository without risking it.
+   */
+  async describeLaunchRepository(launchRepositoryDir) {
+    const result = await this.#spawnEngine("core/adapters/platform-import.ts", ["--workspace", launchRepositoryDir], this.#describeTimeoutMs);
+    if (!result.started) return { reachable: false, reason: result.reason };
+    if (result.code !== 0) {
+      console.error(`Formation import adapter: engine read exited ${result.code}: ${result.stderr.slice(0, 2_000)}`);
+      return { reachable: false, reason: "The launch engine could not read that launch workspace." };
+    }
+    try {
+      return { reachable: true, report: JSON.parse(result.stdout) };
+    } catch {
+      console.error(`Formation import adapter: engine read returned unparseable output: ${result.stdout.slice(0, 2_000)}`);
+      return { reachable: false, reason: "The launch engine returned an answer that could not be read." };
+    }
+  }
+
+  /**
    * Creates or resumes the durable engine run by invoking the engine's own session runner — the
    * sanctioned entry point that seeds or resumes run state, honors grants and the kill switch,
    * and writes a digest on every exit path. The runner's default executor never fabricates

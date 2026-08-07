@@ -63,6 +63,21 @@ const WORKSPACE_SURFACES = [
   { method: "GET", path: "/api/workspaces/:workspaceId/executions", capability: "workspace-read" },
   { method: "GET", path: "/api/workspaces/:workspaceId/executions/:executionId", capability: "workspace-read" },
   { method: "POST", path: "/api/workspaces/:workspaceId/executions", capability: "launch-engine-advance", body: {} },
+  // Which launch workspaces this server holds is not company data — it is a fact about the host.
+  // It sits behind the same owner-level capability as the import itself rather than behind read.
+  { method: "GET", path: "/api/workspaces/:workspaceId/import-sources", capability: "launch-import" },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspaceId/imports/preview",
+    capability: "launch-import",
+    body: { sourceId: "absent-source" },
+  },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspaceId/imports",
+    capability: "launch-import",
+    body: { sourceId: "absent-source" },
+  },
   { method: "GET", path: "/api/workspaces/:workspaceId/approvals", capability: "workspace-read" },
   {
     method: "POST",
@@ -215,11 +230,12 @@ test("routes reach engine mirrors only through the checked execution worker", as
   const files = (await readdir(routesDir)).filter((name) => name.endsWith(".mjs"));
   for (const name of files) {
     const source = await readFile(path.join(routesDir, name), "utf8");
-    // domain/approvals.mjs and domain/results.mjs mutate the decision and deliverable record with
-    // no notion of who is asking — execution.mjs is the only caller that has already checked.
+    // domain/approvals.mjs, domain/results.mjs, and domain/imports.mjs mutate the claim, decision,
+    // task, and deliverable record with no notion of who is asking — execution.mjs and imports.mjs
+    // are the only callers, and both are handed a workspace a route has already checked.
     assert.ok(
-      !/from "\.\.\/domain\/(approvals|results)\.mjs"/.test(source),
-      `${name} imports an unchecked engine mirror directly; go through the execution worker instead.`,
+      !/from "\.\.\/domain\/(approvals|results|imports)\.mjs"/.test(source),
+      `${name} imports an unchecked engine mirror directly; go through the execution worker or the import service instead.`,
     );
   }
 });

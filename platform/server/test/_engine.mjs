@@ -225,11 +225,11 @@ export function twoStepEngineeringCatalog() {
 // Platform server harness.
 // ---------------------------------------------------------------------------
 
-export async function startTestServer(execution, { storePrefix = "formation-execution-" } = {}) {
+export async function startTestServer(execution, { storePrefix = "formation-execution-", imports } = {}) {
   const directory = await mkdtemp(path.join(os.tmpdir(), storePrefix));
   const store = new JsonStore({ filePath: path.join(directory, "formation.json"), seedFactory: createSeedDatabase });
   await store.initialize();
-  const { server, executionWorker } = createFormationServer({ store, allowDemoAuth: true, execution });
+  const { server, executionWorker } = createFormationServer({ store, allowDemoAuth: true, execution, imports });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address();
   return {
