@@ -208,11 +208,15 @@ Prioritize:
 1. PDF with stable pagination and branded cover
 2. Google Docs export or synchronization
 3. presentation output for advisors and investors
-4. spreadsheet-backed financial assumptions
+4. spreadsheet-backed financial assumptions — **shipped**: the pricing scenarios and everything derived from them export as CSV, money in minor units with the unit named in every column header
 5. read-only secure sharing links — **shipped** (`platform/server/domain/sharing.mjs`)
-6. export bundles with claims and decision lineage
+6. export bundles with claims and decision lineage — **shipped** (`platform/server/domain/exports.mjs`): every deliverable leaves with the claims it rests on and the decisions it is linked to, resolved to what they say rather than to their identifiers, and an unresolvable citation is counted rather than dropped
 
 Exports should preserve artifact version, status, confidence, and date.
+
+The bundle is built by naming the fields that may leave, so no conversation, review request, invitation, session, email address, or engine internal can reach it. Its manifest states what was deliberately left out — a reader who cannot see the omissions cannot tell a complete record from a filtered one.
+
+Still open: PDF with stable pagination, presentation output, and Google Docs. Each needs a rendering or authentication dependency this repository does not carry, which is a decision about what Formation depends on rather than a piece of missing work.
 
 A share link carries one deliverable or the company overview to someone who has no account and needs none. The link is the credential, so it behaves like one: 32 bytes of entropy, hashed at rest, shown to the founder exactly once, expiring after 30 days, revocable, and answered identically whether it was stopped, expired, or never existed. Sharing outside the company is the owner's call; every member can see what has been shared.
 
