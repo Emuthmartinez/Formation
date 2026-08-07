@@ -61,6 +61,8 @@ Document:
 - campaign destination: store listing, custom product page, web funnel, landing page, or web purchase link
 - founder-approved budget cap and date range, or blocker if not approved
 
+When the campaign destination is a custom product page, load [`surfaces-b2c.md`](../design/surfaces-b2c.md) for Apple's CPP/PPO/In-App Event numeric ceilings and [`design-room.md`](../design/design-room.md) for the mandatory STATE→MUTATE→VERSION→RENDER modeling loop before committing spend — a CPP is versioned Design Room state, not a campaign-only asset.
+
 ## Creative Production System
 
 Before spend, define the first creative batch:
@@ -72,7 +74,7 @@ Before spend, define the first creative batch:
 - copy and claim constraints from `APP_STORE_LISTING.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, `revenue/REVENUE_OPS.md`, and `trust/SECURITY.md`
 - each creative tied to `11_STAR_EXPERIENCE.md`, `CONTENT_ASSETS.md`, and `state/LAUNCH_TRACE.md`
 
-Use `remotion-content-assets.md` when repeatable ad variants, motion screenshots, captions, cutdowns, or local render proof are needed. Use Higgsfield only after design-system constraints and paid-tool routing are recorded. Use real app UI wherever a user must inspect the actual product.
+Use `remotion-content-assets.md` when repeatable ad variants, motion screenshots, captions, cutdowns, or local render proof are needed. Use Higgsfield only after design-system constraints and paid-tool routing are recorded. Use real app UI wherever a user must inspect the actual product. Before any creative is scored or spent on, run it through [`quality-lens.md`](../design/quality-lens.md)'s Anti-Generic Checks — design-token compliance and a `brain_activity` virality score both pass a generic, off-brand, or overclaiming asset; taste is the check neither of them performs.
 
 **Competitor ad-library mining.** Before inventing angles, mine the platform's public ad library (Meta Ad Library for Meta/Instagram) for the incumbent and adjacent apps: filter for ads with high impressions and long run time — nobody keeps paying for an ad that does not return — and for each winner ask why it works and how the structure maps to this app's truthful claims. Replicate the angle and structure with this app's real UI and claims, never the competitor's assets, footage, or claims verbatim. Authentic low-production formats frequently outperform polished ones; test them before assuming production value is the constraint. Record mined angles in the angle map above.
 
@@ -190,7 +192,7 @@ Outsource execution, not strategy, until the founder understands the channel eco
 
 Always ask before:
 - connecting ad accounts or creating campaigns
-- installing or enabling ad-network SDKs that change privacy disclosures or ATT posture
+- installing or enabling ad-network SDKs that change privacy disclosures or ATT posture — load [`privacy-terms.md`](../trust/privacy-terms.md) for the policy/questionnaire update and [`store-console-workflow.md`](../store/store-console-workflow.md) for Data safety/privacy label changes before enabling one
 - committing paid spend, changing budgets, or turning on automated rules that affect spend
 - using paid MMP/ad/ASO tooling
 - changing pricing, trials, intro offers, subscription terms, paywall behavior, or legal copy

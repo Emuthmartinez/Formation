@@ -112,7 +112,7 @@ change_types:
       - landing_web
       - lifecycle_email
       - content_ugc_ads
-    notes: "store screenshots and App Preview need a re-render, not a doc edit; App Icon too when the brand mark changed"
+    notes: "app_in_app is the change itself, not a downstream effect — the in-app UI updates first, everything else re-renders or re-describes it; store screenshots and App Preview need a re-render, not a doc edit; App Icon too when the brand mark changed"
 
   iap_product_change:
     label: "New / renamed IAP or subscription product"
@@ -124,7 +124,7 @@ change_types:
       - app_in_app
       - legal
       - analytics
-    notes: "asc_products carries the promoted-IAP promotional image (unique per product, never the app icon) and the App Review Information notes"
+    notes: "asc_products carries the promoted-IAP promotional image (unique per product, never the app icon) and the App Review Information notes; asc_listing is check-and-justify because the app description, keyword field, or in-app-event copy sometimes names the plan/tier — usually unaffected, but the product name change makes it worth a look rather than an assumption"
 
   privacy_change:
     label: "Privacy / data / SDK change"
@@ -135,7 +135,7 @@ change_types:
       - asc_products
       - legal
       - analytics
-    notes: "app_in_app covers PrivacyInfo.xcprivacy and required-reason APIs; legal covers App Privacy answers, Play Data safety, privacy policy and terms; asc_products covers App Review notes for external services"
+    notes: "app_in_app covers PrivacyInfo.xcprivacy and required-reason APIs; legal covers App Privacy answers, Play Data safety, privacy policy and terms; asc_products covers App Review notes for external services; asc_listing is check-and-justify because the app description or keyword field can carry a privacy claim (e.g. \"no ads\", \"no tracking\") that a new SDK invalidates"
 
   domain_brand_change:
     label: "Domain / brand / company-name change"

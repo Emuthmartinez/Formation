@@ -174,7 +174,10 @@ export const workflows = [
     trigger: "Before schema/auth prompts or engineering/TECH_SPEC.md data/API sections harden",
     laneIds: ["engineering"],
     phaseIds: ["phase.1f", "phase.5b"],
-    dependencies: ["workflow.process.launch-trace-and-build-contracts"],
+    // lane.engineering's dependencyIds (catalog/lanes.ts) name both lane.design and
+    // lane.traceability; this workflow previously enforced only traceability, so it could
+    // dispatch before Design Room output existed (routing-depth audit, 2026-08-07).
+    dependencies: ["workflow.process.launch-trace-and-build-contracts", "workflow.design.design-room-state-mutate-version-render"],
     // outputPaths intentionally empty: hardens engineering/TECH_SPEC.md's data/API
     // sections; workflow.process.launch-trace-and-build-contracts already owns the file
     // (see this file's header).

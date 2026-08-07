@@ -32,6 +32,8 @@ The raw iOS permission dialog converts poorly when it appears cold; a primed ask
 
 ## 3. Lifecycle Trigger Table
 
+Load [`no-slop-writing.md`](../words/no-slop-writing.md) (its §7 covers push/lifecycle subject-line and body limits) before drafting any Content contract copy below, and self-check each trigger's copy against it — the guilt-copy ban in this file's ethics contract is necessary but not sufficient; empty phrases and weasel language are a separate failure mode no-slop-writing.md exists to catch.
+
 Design triggers as a segmentation table, not ad-hoc sends. The standard set, adapted per app:
 
 | Trigger | Segment | Timing | Content contract |

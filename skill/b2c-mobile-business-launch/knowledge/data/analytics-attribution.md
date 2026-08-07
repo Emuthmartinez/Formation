@@ -167,6 +167,7 @@ Campaign convention:
 
 Store and mobile caveats:
 - Do not promise perfect attribution from app install to purchase. App-store privacy rules, browser handoffs, SKAdNetwork/AdAttributionKit, Play Install Referrer, tracking blockers, and user behavior create gaps.
+- Adopting an ad-network SDK to close that gap changes privacy disclosures and ATT posture — load [`privacy-terms.md`](../trust/privacy-terms.md) and [`store-console-workflow.md`](../store/store-console-workflow.md) before enabling one, not after.
 - Use self-reported attribution to catch word-of-mouth, creator, social, and AI-search discovery that UTMs miss.
 - Preserve campaign context from landing page to store CTA, deep link, waitlist, web checkout, and email where the platform allows it.
 

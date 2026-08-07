@@ -195,6 +195,7 @@ For localization:
 Screenshots and previews should start from real app UI. When marketing compositions need more than raw screenshots:
 - use `design/DESIGN.md` and `design.md` for tokens, typography, voice, screen specs, and asset constraints
 - use `11_STAR_EXPERIENCE.md` for the magical moment and line of feasibility so screenshots and ads do not overpromise
+- load [`design-visual-system.md`](../design/design-visual-system.md) for the screenshot-frame HTML-proof contract and Higgsfield production routing, and run composed frames through its [`quality-lens.md`](../design/quality-lens.md) Anti-Generic Checks before calling a screenshot deck done — a technically correct, on-brand screenshot can still read as generic
 - use the in-app iOS Simulator (rung 0, Claude Code Desktop pane or Codex `build-ios-apps`) for real iOS captures on a local Mac; record device, OS, locale, fixture account, and native capture dimensions, and copy files off the Desktop into `screenshots/raw/`
 - use MobAI for real iOS/Android captures when Android or a repeatable capture matrix is in scope; use XcodeBuildMCP for scripted/CI capture and record project/scheme/simulator/device/output paths in `engineering/PRODUCTION_READINESS.md`
 - use serve-sim for browser-visible booted-simulator capture/control when CLI users need a URL; record URL/port, actions, logs, and limitations

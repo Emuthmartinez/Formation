@@ -161,6 +161,12 @@ export const workflows = [
     areaIds: ["area.product-experience"],
     trigger: 'Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or "premium feel"',
     laneIds: ["design"],
+    // lane.design's own dependencyIds chain (catalog/lanes.ts) implies this waits on
+    // lane.product; every sibling domain.design workflow gets that transitively through
+    // design-room-state-mutate-version-render, and this one previously had no
+    // `dependencies` at all, so it was frontier-eligible before a spec or design state
+    // existed (routing-depth audit, 2026-08-07).
+    dependencies: ["workflow.design.design-room-state-mutate-version-render"],
     // product/experience/ux-patterns/UX_PATTERNS.md dropped: workflow.design.ux-patterns-refero
     // is its dedicated producer (see file header).
     outputPaths: ["design/DESIGN.md"],

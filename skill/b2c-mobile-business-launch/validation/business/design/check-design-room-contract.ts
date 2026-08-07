@@ -53,6 +53,25 @@ if (hasDesignState) {
         ),
       );
     }
+
+    // Machine-checkable slice of quality-lens.md's Anti-Generic Checks ("the palette is
+    // not a single-hue default"): flag primary/accent tokens that sit within the same
+    // narrow hue band while both carry real saturation — the generic "one brand color at
+    // different opacities" look the checklist exists to catch. Warning only: the other six
+    // checks in that list (nouns/verbs, typography, claims-match-scope, ...) need judgment
+    // this script cannot apply, so this covers the one item that is pure arithmetic.
+    const accent = String(getToken(loaded.tokens, "color.accent") ?? "");
+    const hueDrift = singleHueDrift(primary, accent);
+    if (hueDrift !== undefined && hueDrift.hueDelta < 12 && hueDrift.minSaturation > 0.15) {
+      issues.push(
+        issue(
+          "warning",
+          "design_room.palette_single_hue",
+          `color.primary and color.accent are only ${hueDrift.hueDelta.toFixed(0)}deg apart in hue (both saturated) — this reads as the single-hue-default look quality-lens.md's Anti-Generic Checks warns against. Pick a genuinely distinct accent hue, or a deliberately desaturated/neutral one.`,
+          "studio/seed/theme.tokens.json",
+        ),
+      );
+    }
   }
 
   if (loaded.state && loaded.stateHash) {
@@ -154,4 +173,37 @@ function contrastRatio(foreground: string, background: string): number | undefin
   const lighter = Math.max(relativeLuminance(fg), relativeLuminance(bg));
   const darker = Math.min(relativeLuminance(fg), relativeLuminance(bg));
   return (lighter + 0.05) / (darker + 0.05);
+}
+
+function hexToHsl(hex: string): { hue: number; saturation: number } | undefined {
+  const rgb = parseHex(hex);
+  if (!rgb) {
+    return undefined;
+  }
+  const r = rgb[0] / 255;
+  const g = rgb[1] / 255;
+  const b = rgb[2] / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  let hue = 0;
+  if (delta !== 0) {
+    if (max === r) hue = 60 * (((g - b) / delta) % 6);
+    else if (max === g) hue = 60 * ((b - r) / delta + 2);
+    else hue = 60 * ((r - g) / delta + 4);
+  }
+  if (hue < 0) hue += 360;
+  const lightness = (max + min) / 2;
+  const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
+  return { hue, saturation };
+}
+
+function singleHueDrift(primaryHex: string, accentHex: string): { hueDelta: number; minSaturation: number } | undefined {
+  const primary = hexToHsl(primaryHex);
+  const accent = hexToHsl(accentHex);
+  if (!primary || !accent) {
+    return undefined;
+  }
+  const rawDelta = Math.abs(primary.hue - accent.hue);
+  return { hueDelta: Math.min(rawDelta, 360 - rawDelta), minSaturation: Math.min(primary.saturation, accent.saturation) };
 }

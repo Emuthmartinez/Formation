@@ -87,7 +87,11 @@ export const workflows = [
     trigger: "Before editing any landing/policy/blog copy, robots.txt, llms.txt, sitemap, schema, metadata",
     laneIds: ["growth"],
     phaseIds: ["phase.4"],
-    dependencies: ["workflow.process.launch-trace-and-build-contracts"],
+    // lane.growth depends on lane.analytics-attribution (catalog/lanes.ts); this workflow
+    // and workflow.growth.pre-launch-funnel-landing-waitlist (which depends on it
+    // transitively) previously enforced only traceability, so a landing/funnel page could
+    // publish before event tracking existed (routing-depth audit, 2026-08-07).
+    dependencies: ["workflow.process.launch-trace-and-build-contracts", "workflow.data.analytics-and-attribution-blueprint"],
     outputPaths: ["GEO_SEO.md"],
     gates: ["check:landing-funnel"],
     actionClass: "publish",
