@@ -481,6 +481,30 @@ export interface CommentThread {
   comments: Comment[];
 }
 
+export type ReviewStatus = "requested" | "approved" | "changes-requested" | "withdrawn";
+
+export interface ReviewRequest {
+  id: string;
+  target: CommentTarget;
+  requestedBy: string;
+  requestedByName: string;
+  assigneeId: string;
+  assigneeName: string;
+  note: string;
+  dueAt: string | null;
+  status: ReviewStatus;
+  answerNote: string | null;
+  answeredAt: string | null;
+  createdAt: string;
+}
+
+/** Who is in the company, by name. Enough to address a review or read a mention, and nothing more. */
+export interface WorkspacePerson {
+  userId: string;
+  name: string;
+  role: string;
+}
+
 export interface WorkspaceSnapshot {
   workspace: Workspace;
   membership: { id: string; role: WorkspaceRole | string; userId: string; workspaceId: string };
@@ -494,6 +518,8 @@ export interface WorkspaceSnapshot {
   jobs: Job[];
   activity: Activity[];
   comments: CommentThread[];
+  reviews: ReviewRequest[];
+  people: WorkspacePerson[];
   contradictions: Contradiction[];
   inconsistencies: Inconsistency[];
   recommendations: Recommendation[];

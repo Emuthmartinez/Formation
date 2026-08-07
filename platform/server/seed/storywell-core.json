@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "users": [
     {
       "id": "usr_demo_founder",
@@ -21,6 +21,7 @@
   "invitations": [],
   "shares": [],
   "comments": [],
+  "reviews": [],
   "workspaces": [
     {
       "id": "wrk_storywell",

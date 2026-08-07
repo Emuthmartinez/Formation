@@ -188,6 +188,12 @@ function migrateDatabase(database) {
     migrated = true;
   }
 
+  if (database.schemaVersion === 6) {
+    database.reviews = Array.isArray(database.reviews) ? database.reviews : [];
+    database.schemaVersion = 7;
+    migrated = true;
+  }
+
   return migrated;
 }
 
@@ -195,7 +201,7 @@ function validateDatabase(database) {
   if (!database || typeof database !== "object" || Array.isArray(database)) {
     throw new Error("Formation data store must contain one JSON object.");
   }
-  if (database.schemaVersion !== 6) {
+  if (database.schemaVersion !== 7) {
     throw new Error(`Unsupported Formation schema version: ${String(database.schemaVersion)}`);
   }
 
@@ -214,6 +220,7 @@ function validateDatabase(database) {
     "invitations",
     "shares",
     "comments",
+    "reviews",
     "activity",
   ];
   for (const name of requiredCollections) {

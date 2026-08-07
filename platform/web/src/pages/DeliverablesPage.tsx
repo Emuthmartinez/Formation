@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { Button, ConfidenceMark, EmptyState, Field, MarkdownBody, PageHeader, ShareLinkNotice, StatusText, formatDate, humanize } from "../components/Primitives";
 import { Conversation } from "../components/Conversation";
+import { ReviewRequests } from "../components/ReviewRequests";
 import { useCan } from "../capabilities";
 import { useWorkspace } from "../context";
 import { navigate } from "../router";
@@ -273,7 +274,10 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
         </div>
       </footer>
 
-      <Conversation target={{ kind: "deliverable", id: artifact.id }} label="Conversation about this document" />
+      <div className="collaboration-row">
+        <Conversation target={{ kind: "deliverable", id: artifact.id }} label="Conversation about this document" />
+        <ReviewRequests target={{ kind: "deliverable", id: artifact.id }} label="Reviews of this document" />
+      </div>
 
       <section className="version-history" aria-labelledby="version-history-title">
         <div className="version-history__head">

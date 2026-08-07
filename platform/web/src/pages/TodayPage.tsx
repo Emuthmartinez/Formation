@@ -3,7 +3,7 @@ import { api } from "../api";
 import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
-import type { Activity, Inconsistency, Recommendation, Task } from "../types";
+import type { Activity, Inconsistency, Recommendation, ReviewRequest, Task } from "../types";
 import { Icon } from "../components/Icon";
 import { Motif } from "../components/Motif";
 import { ReadinessLedger } from "../components/Readiness";
@@ -208,6 +208,8 @@ export function TodayPage() {
         </Section>
       </div>
 
+      <WaitingOnYouSection reviews={(snapshot.reviews ?? []).filter((review) => review.status === "requested" && review.assigneeId === snapshot.membership.userId)} />
+
       <SelfContradictionSection findings={inconsistencies ?? []} />
 
       <Section title="Recent movement" description="A plain record of what changed and why it matters.">
@@ -281,6 +283,41 @@ function SelfContradictionSection({ findings }: { findings: Inconsistency[] }) {
       ) : null}
     </Section>
   );
+}
+
+/**
+ * Reviews somebody is waiting on this member for.
+ *
+ * Absent when there are none, and first when there are: an unanswered question addressed to you by
+ * name outranks anything the product worked out on its own about what you should do next.
+ */
+function WaitingOnYouSection({ reviews }: { reviews: ReviewRequest[] }) {
+  if (!reviews.length) return null;
+  return (
+    <Section
+      title="Waiting on you"
+      description="Someone in this company asked you to look at something and has not heard back. Answering is on the record it is about."
+    >
+      <ul className="waiting-list">
+        {reviews.map((review) => (
+          <li key={review.id}>
+            <div>
+              <p className="waiting-list__who">{review.requestedByName} asked, {timeAgo(review.createdAt)}</p>
+              <p className="waiting-list__what">{review.note || "No note — they just want your eyes on it."}</p>
+            </div>
+            <button type="button" onClick={() => navigate(targetPath(review))}>Open it</button>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+/** Where a review's subject lives, so "Open it" opens the thing rather than a search for it. */
+function targetPath(review: ReviewRequest) {
+  if (review.target.kind === "deliverable") return `/deliverables/${review.target.id}`;
+  if (review.target.kind === "decision") return `/decisions#${review.target.id}`;
+  return "/workstreams";
 }
 
 function compareTasks(left: Task, right: Task) {

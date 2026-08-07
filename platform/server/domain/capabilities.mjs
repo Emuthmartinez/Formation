@@ -64,7 +64,8 @@ export const CAPABILITIES = {
   },
   "comment-write": {
     minimumRole: "reviewer",
-    covers: "Talking about the work: starting a conversation on a claim, a decision, a deliverable, or a workstream, replying to one, and settling it.",
+    covers:
+      "Talking about the work: starting a conversation on a claim, a decision, a deliverable, or a workstream, replying to one, settling it, and asking someone to review something. Answering a review is the assignee's alone, whatever their role.",
     denial: "You can read this company's conversations but not add to them. Ask an owner to make you a reviewer.",
   },
   "work-write": {

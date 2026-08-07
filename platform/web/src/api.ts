@@ -2,6 +2,7 @@ import type {
   AccountSession,
   Comment,
   CommentTarget,
+  ReviewRequest,
   CreatedShare,
   ApprovalsView,
   Artifact,
@@ -118,6 +119,12 @@ export const api = {
     request<Comment>(`/api/workspaces/${workspaceId}/comments/${commentId}`, { method: "PATCH", body: JSON.stringify(patch) }),
   deleteComment: (workspaceId: string, commentId: string) =>
     request<{ removed: boolean }>(`/api/workspaces/${workspaceId}/comments/${commentId}`, { method: "DELETE" }),
+  requestReview: (workspaceId: string, payload: { target: CommentTarget; assigneeId: string; note?: string; dueAt?: string | null }) =>
+    request<ReviewRequest>(`/api/workspaces/${workspaceId}/reviews`, { method: "POST", body: JSON.stringify(payload) }),
+  answerReview: (workspaceId: string, reviewId: string, payload: { answer: "approved" | "changes-requested"; note?: string }) =>
+    request<ReviewRequest>(`/api/workspaces/${workspaceId}/reviews/${reviewId}`, { method: "POST", body: JSON.stringify(payload) }),
+  withdrawReview: (workspaceId: string, reviewId: string) =>
+    request<ReviewRequest>(`/api/workspaces/${workspaceId}/reviews/${reviewId}`, { method: "POST", body: JSON.stringify({ withdrawn: true }) }),
   listApprovals: (workspaceId: string) => request<ApprovalsView>(`/api/workspaces/${workspaceId}/approvals`),
   listExecutions: (workspaceId: string) => request<FounderExecution[]>(`/api/workspaces/${workspaceId}/executions`),
   importSources: (workspaceId: string) => request<ImportSourceList>(`/api/workspaces/${workspaceId}/import-sources`),
