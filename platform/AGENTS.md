@@ -17,7 +17,7 @@ The historical skill runtime is an internal engine. Do not make the web applicat
 - Decisions retain rationale and review date.
 - A company always keeps at least one owner. Anything that could remove the last one is refused, not repaired afterwards.
 - Access changes — invited, joined, role changed, removed, left — are recorded in the company's activity, not a separate log.
-- One account may be signed in on several devices. Signing in never signs another device out; only the person, a password change, or an expiry does.
+- One account may be signed in on several devices, up to a bound. Signing in signs nothing else out until that bound is reached, and then only the device that has gone longest unused. Otherwise a session ends because the person ended it, a password changed, or it went unused past its window.
 - Store a coarse device label, never the raw user-agent. A browser build string is a fingerprint.
 
 ## UI rules

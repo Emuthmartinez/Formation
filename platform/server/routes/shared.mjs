@@ -19,14 +19,26 @@ export function clientAddressKey(request) {
   return authAttemptKeys(request, "").address;
 }
 
-export function assertAuthAllowed(limiters, keys) {
-  limiters.address.assertAllowed(keys.address);
-  limiters.account.assertAllowed(keys.account);
+/**
+ * Spend an attempt before doing the slow work of checking it. A caller that turns out to be
+ * legitimate settles it with `settleAuthSuccess`; anything else has already been counted, so a
+ * failure path has nothing left to do.
+ */
+export function claimAuthAttempt(limiters, keys) {
+  limiters.address.claim(keys.address);
+  try {
+    limiters.account.claim(keys.account);
+  } catch (error) {
+    // The account bucket refused, so the address attempt was never really made.
+    limiters.address.release(keys.address);
+    throw error;
+  }
 }
 
-export function recordAuthFailure(limiters, keys) {
-  limiters.address.recordFailure(keys.address);
-  limiters.account.recordFailure(keys.account);
+/** A correct answer: forget this account's attempts, and give the address its attempt back. */
+export function settleAuthSuccess(limiters, keys) {
+  limiters.address.release(keys.address);
+  limiters.account.clear(keys.account);
 }
 
 /**

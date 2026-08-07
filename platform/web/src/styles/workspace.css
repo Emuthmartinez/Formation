@@ -337,3 +337,7 @@
   transition: background 120ms ease;
 }
 .sidebar__user:hover { background: rgba(255, 255, 255, .06); }
+
+/* The account page reached before a company exists: same reading measure as the shell gives it,
+   without the shell around it. */
+.standalone-account { max-width: 1000px; margin: 0 auto; padding: 48px 24px 80px; }

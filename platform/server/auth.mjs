@@ -95,7 +95,13 @@ export async function getAuthenticatedUser(store, request) {
   if (!Number.isFinite(lastSeen) || now - lastSeen > 5 * 60 * 1_000) {
     await store.transaction((nextDatabase) => {
       const live = nextDatabase.sessions.find((entry) => entry.tokenHash === tokenHash);
-      if (live && new Date(live.expiresAt).getTime() > Date.now()) live.lastSeenAt = new Date().toISOString();
+      if (!live || new Date(live.expiresAt).getTime() <= Date.now()) return;
+      const seenAt = new Date();
+      live.lastSeenAt = seenAt.toISOString();
+      // Access runs from last use, not from sign-in: someone who opens Formation every day is not
+      // signed out every week, and a device left alone for the whole window still falls away. The
+      // account page says exactly this, and it has to be true.
+      live.expiresAt = new Date(seenAt.getTime() + SESSION_TTL_MS).toISOString();
     });
   }
   return publicUser(user);
@@ -181,20 +187,33 @@ export class AuthRateLimiter {
     this.#message = message;
   }
 
-  assertAllowed(key) {
+  /**
+   * Take an attempt from the bucket, or refuse.
+   *
+   * Counting on the way in rather than after the answer is the whole point. Verifying a password
+   * is deliberately slow, so a caller that checked first and counted afterwards let every request
+   * in a concurrent wave pass the check before any of them had recorded a thing — forty guesses
+   * against a bucket of seven, all answered. An attempt is spent the moment it is made; a caller
+   * that turns out to be legitimate gives it back.
+   */
+  claim(key) {
     const entry = this.#current(key);
     if (entry.failures >= this.#maximumFailures) {
       const retryAfterSeconds = Math.max(1, Math.ceil((entry.resetAt - Date.now()) / 1_000));
       throw new AuthError(429, this.#message, { retryAfterSeconds });
     }
-  }
-
-  recordFailure(key) {
-    const entry = this.#current(key);
     entry.failures += 1;
     this.#attempts.set(key, entry);
   }
 
+  /** Give back one claimed attempt that turned out not to be a guess. */
+  release(key) {
+    const entry = this.#attempts.get(String(key));
+    if (!entry) return;
+    entry.failures = Math.max(0, entry.failures - 1);
+  }
+
+  /** Forget this key's attempts entirely — what a correct answer earns. */
   clear(key) {
     this.#attempts.delete(key);
   }
@@ -525,4 +544,12 @@ export async function changePassword(store, request, userId, { currentPassword, 
 function currentTokenHash(request) {
   const token = parseCookies(request.headers.cookie ?? "")[COOKIE_NAME];
   return token ? hashToken(token) : null;
+}
+
+/**
+ * A stable name for the session making this request, safe to use as a rate-limit key: it is the
+ * same hash the store holds, so it identifies the session without ever handling the token.
+ */
+export function currentSessionKey(request) {
+  return currentTokenHash(request);
 }

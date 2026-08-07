@@ -156,7 +156,6 @@ export function App() {
     if (first === "deliverables") return <DeliverablesPage artifactId={second} />;
     if (first === "launch") return <LaunchPage />;
     if (first === "people") return <PeoplePage />;
-    if (first === "account") return <AccountPage />;
     if (first === "new") return <NewWorkspacePage onCreated={onCreated} />;
     return <TodayPage />;
   }, [route.path, route.query, route.hash, snapshot, onCreated]);
@@ -183,6 +182,18 @@ export function App() {
     );
   }
   if (error) return <main className="fatal-state"><ErrorNotice message={error} onRetry={initialize} /></main>;
+
+  // The account belongs to the person, not to a company, so it stays reachable for a founder who
+  // has not created one yet — which is exactly when someone might want to check their devices or
+  // set a stronger password.
+  if (route.segments[0] === "account") {
+    return (
+      <main className="standalone-account">
+        <AccountPage session={session} notify={notify} standalone />
+        {toastElement}
+      </main>
+    );
+  }
 
   if (!snapshot) {
     return (

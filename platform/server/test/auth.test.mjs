@@ -104,17 +104,52 @@ test("credential login adds a session, keeps the others, and returns generic fai
   assert.equal(after.sessions.filter((entry) => entry.userId === user.id).length, 2);
 });
 
-test("authentication limiter blocks repeated failures and resets after success", () => {
+test("an attempt is spent when it is made, not after it turns out to be wrong", () => {
+  const key = "client:founder@example.com";
   const limiter = new AuthRateLimiter({ windowMs: 60_000, maximumFailures: 2 });
-  limiter.assertAllowed("client:founder@example.com");
-  limiter.recordFailure("client:founder@example.com");
-  limiter.recordFailure("client:founder@example.com");
+
+  // Claiming counts immediately, so callers that check first and count later — the shape that let
+  // a whole concurrent wave through — cannot exist: there is nothing to count later.
+  limiter.claim(key);
+  limiter.claim(key);
   assert.throws(
-    () => limiter.assertAllowed("client:founder@example.com"),
+    () => limiter.claim(key),
     (error) => error.status === 429 && error.metadata.retryAfterSeconds > 0,
   );
-  limiter.clear("client:founder@example.com");
-  assert.doesNotThrow(() => limiter.assertAllowed("client:founder@example.com"));
+
+  // A caller that turned out to be legitimate gives its attempt back.
+  limiter.release(key);
+  assert.doesNotThrow(() => limiter.claim(key));
+  assert.throws(() => limiter.claim(key), (error) => error.status === 429);
+
+  // Releasing never goes below zero, and never resurrects a bucket that was cleared.
+  for (let index = 0; index < 10; index += 1) limiter.release(key);
+  limiter.claim(key);
+  limiter.claim(key);
+  assert.throws(() => limiter.claim(key), (error) => error.status === 429);
+
+  limiter.clear(key);
+  assert.doesNotThrow(() => limiter.claim(key));
+});
+
+test("a wave of concurrent guesses cannot outrun the bucket", async () => {
+  const limiter = new AuthRateLimiter({ windowMs: 60_000, maximumFailures: 7 });
+  const key = "client:victim@example.com";
+
+  // Each guess claims, then does slow work, then fails — exactly the shape of a password check.
+  const attempt = async () => {
+    try {
+      limiter.claim(key);
+    } catch {
+      return "refused";
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    return "checked";
+  };
+
+  const wave = await Promise.all(Array.from({ length: 40 }, attempt));
+  assert.equal(wave.filter((entry) => entry === "checked").length, 7);
+  assert.equal(wave.filter((entry) => entry === "refused").length, 33);
 });
 
 test("origin validation ignores forged proxy headers unless proxy trust is enabled", () => {

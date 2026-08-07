@@ -2,6 +2,7 @@ import { changePassword, expiredSessionCookie, listSessions, revokeOtherSessions
 import { HttpError, json } from "../http.mjs";
 import { readJsonBody } from "../validation.mjs";
 import { clientAddressKey } from "./shared.mjs";
+import { currentSessionKey } from "../auth.mjs";
 
 /**
  * The account's own security surface.
@@ -45,19 +46,24 @@ export async function handleAccountRoutes({ request, response, method, pathname,
       if (!PASSWORD_FIELDS.has(key)) throw new HttpError(400, "Only currentPassword and newPassword may be provided.");
     }
     // Guessing the current password from an already-signed-in session is still guessing, and is
-    // limited the same way signing in is.
-    const keys = { address: clientAddressKey(request), account: `account:password:${user.id}` };
-    authLimiters.address.assertAllowed(keys.address);
-    authLimiters.account.assertAllowed(keys.account);
+    // limited the same way signing in is — spent on the way in, so a wave of concurrent guesses
+    // cannot all pass the check before any of them is counted.
+    //
+    // Keyed on the session rather than the account: changing the password is exactly how an owner
+    // evicts a session that should not be there, so a hostile session must not be able to spend
+    // the owner's attempts and hold that door shut.
+    const keys = { address: clientAddressKey(request), account: `password:${currentSessionKey(request) ?? user.id}` };
+    authLimiters.address.claim(keys.address);
     try {
-      const result = await changePassword(store, request, user.id, body);
-      authLimiters.account.clear(keys.account);
-      json(response, 200, result);
+      authLimiters.account.claim(keys.account);
     } catch (error) {
-      authLimiters.address.recordFailure(keys.address);
-      authLimiters.account.recordFailure(keys.account);
+      authLimiters.address.release(keys.address);
       throw error;
     }
+    const result = await changePassword(store, request, user.id, body);
+    authLimiters.address.release(keys.address);
+    authLimiters.account.clear(keys.account);
+    json(response, 200, result);
     return;
   }
 }

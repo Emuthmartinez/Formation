@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { api } from "../api";
 import { Button, ErrorNotice, Field, PageHeader, Section, formatDate } from "../components/Primitives";
-import { useWorkspace } from "../context";
+import { navigate } from "../router";
+import type { WorkspaceContextValue } from "../context";
 import type { AccountSession } from "../types";
+
+type AccountProps = Pick<WorkspaceContextValue, "session" | "notify">;
+
+/** Rendered outside the shell when a founder has no company yet, so it carries its own way back. */
+type AccountPageProps = AccountProps & { standalone?: boolean };
 
 /**
  * The account's own security surface: which devices are signed in, and changing the password.
@@ -10,8 +16,7 @@ import type { AccountSession } from "../types";
  * Nothing on this page belongs to a company — a founder who works on three companies has one
  * account, and this is where they look after it.
  */
-export function AccountPage() {
-  const { session, notify } = useWorkspace();
+export function AccountPage({ session, notify, standalone = false }: AccountPageProps) {
   const [sessions, setSessions] = useState<AccountSession[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -68,6 +73,11 @@ export function AccountPage() {
 
   return (
     <div className="page-stack">
+      {standalone ? (
+        <Button variant="quiet" onClick={() => navigate("/")}>
+          ← Back to Formation
+        </Button>
+      ) : null}
       <PageHeader
         eyebrow="Your account"
         title={session.user.name}
@@ -85,8 +95,9 @@ export function AccountPage() {
           ) : undefined
         }
       >
-        {error ? <ErrorNotice message={error} onRetry={load} /> : null}
-        {sessions ? (
+        {error ? (
+          <ErrorNotice message={error} onRetry={load} />
+        ) : sessions ? (
           <div className="people-list">
             {sessions.map((entry) => (
               <article key={entry.id} className="people-row">
@@ -119,14 +130,13 @@ export function AccountPage() {
         title="Change your password"
         description="Your current password is required even here — a session someone else walked up to should not be enough to take the account."
       >
-        <PasswordForm onChanged={load} />
+        <PasswordForm notify={notify} onChanged={load} />
       </Section>
     </div>
   );
 }
 
-function PasswordForm({ onChanged }: { onChanged: () => Promise<void> }) {
-  const { notify } = useWorkspace();
+function PasswordForm({ notify, onChanged }: { notify: AccountProps["notify"]; onChanged: () => Promise<void> }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [busy, setBusy] = useState(false);

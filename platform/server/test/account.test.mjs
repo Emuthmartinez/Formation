@@ -231,3 +231,65 @@ test("an account cannot accumulate sessions without limit", async (t) => {
   // The device that has gone longest unused is the one that went.
   assert.equal((await call(app.baseUrl, "/api/session", { cookie: first })).status, 401);
 });
+
+test("a wave of concurrent password guesses does not outrun the limit", async (t) => {
+  const app = await startTestServer();
+  t.after(app.close);
+  const cookie = await register(app.baseUrl, { userAgent: "Chrome/120 (Macintosh)" });
+
+  // Forty at once, the correct password among them. Verifying a password is deliberately slow, so
+  // a limiter that counted only after the answer let every one of these through.
+  const guesses = Array.from({ length: 40 }, (_, index) =>
+    call(app.baseUrl, "/api/account/password", {
+      cookie,
+      method: "POST",
+      body: { currentPassword: index === 5 ? PASSWORD : `guess-${index}`, newPassword: "a-brand-new-password" },
+    }),
+  );
+  const statuses = (await Promise.all(guesses)).map((response) => response.status);
+  const evaluated = statuses.filter((status) => status !== 429).length;
+  assert.ok(evaluated <= 7, `${evaluated} of 40 concurrent guesses were evaluated against a bucket of 7`);
+  assert.ok(statuses.includes(429), "no guess in the wave was refused");
+});
+
+test("a hostile session cannot hold the door shut on the owner's password change", async (t) => {
+  const app = await startTestServer();
+  t.after(app.close);
+  const owner = await register(app.baseUrl, { userAgent: "Chrome/120 (Macintosh)" });
+  const hostile = await signIn(app.baseUrl, { userAgent: "Mozilla/5.0 (iPhone) Safari/604.1" });
+
+  // The session that should not be there burns every attempt it can.
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    await call(app.baseUrl, "/api/account/password", {
+      cookie: hostile, method: "POST", body: { currentPassword: `guess-${attempt}`, newPassword: "a-brand-new-password" },
+    });
+  }
+
+  // Changing the password is how the owner evicts it, so that door has to stay open.
+  const changed = await call(app.baseUrl, "/api/account/password", {
+    cookie: owner, method: "POST", body: { currentPassword: PASSWORD, newPassword: "a-brand-new-password" },
+  });
+  assert.equal(changed.status, 200, "the owner was locked out of the one action that evicts the session");
+  assert.equal((await call(app.baseUrl, "/api/session", { cookie: hostile })).status, 401);
+});
+
+test("access runs from last use, so a device in daily use is not signed out weekly", async (t) => {
+  const app = await startTestServer();
+  t.after(app.close);
+  const cookie = await register(app.baseUrl, { userAgent: "Chrome/120 (Macintosh)" });
+
+  const before = (await (await call(app.baseUrl, "/api/account/sessions", { cookie })).json()).sessions[0];
+
+  // Age the session past the refresh interval without touching its expiry, then use it.
+  await app.store.transaction((database) => {
+    database.sessions[0].lastSeenAt = new Date(Date.now() - 60 * 60 * 1_000).toISOString();
+  });
+  assert.equal((await call(app.baseUrl, "/api/session", { cookie })).status, 200);
+
+  const after = (await (await call(app.baseUrl, "/api/account/sessions", { cookie })).json()).sessions[0];
+  assert.ok(
+    new Date(after.expiresAt).getTime() > new Date(before.expiresAt).getTime(),
+    "using a device did not extend its access, but the account page says it does",
+  );
+  assert.ok(new Date(after.lastSeenAt).getTime() > new Date(before.lastSeenAt).getTime() - 1);
+});
