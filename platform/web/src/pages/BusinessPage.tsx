@@ -1,7 +1,9 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
-import { Button, ContradictionStatements, Field, Modal, PageHeader, Section, humanize } from "../components/Primitives";
+import { Button, ConfidenceMark, ContradictionStatements, Field, Modal, PageHeader, Section, formatCount, humanize } from "../components/Primitives";
+import { Icon } from "../components/Icon";
 import { runMutation, useWorkspace } from "../context";
+import { navigate } from "../router";
 import type { Claim, Workspace } from "../types";
 
 const companyFieldLabels: Array<[keyof Workspace["company"], string, string]> = [
@@ -14,6 +16,17 @@ const companyFieldLabels: Array<[keyof Workspace["company"], string, string]> = 
   ["businessModel", "Business model", "What the customer buys and how value recurs."],
   ["pricing", "Pricing hypothesis", "Current working price and packaging logic."],
   ["northStarMetric", "North-star metric", "A behavior that demonstrates recurring customer value."],
+];
+
+/**
+ * Ten consecutive statements read as one undifferentiated wall, so a founder looking for the
+ * pricing logic has to scan all of it. These three headings are the questions the statements
+ * answer, which lets the reader jump to the part of the company they came to check.
+ */
+const statementGroups: Array<{ id: string; title: string; fields: Array<keyof Workspace["company"]> }> = [
+  { id: "thesis", title: "Who this is for and why it matters", fields: ["thesis", "targetCustomer", "problem"] },
+  { id: "offer", title: "What the company actually sells", fields: ["solution", "positioning", "differentiation"] },
+  { id: "economics", title: "How it makes money and what proves it", fields: ["businessModel", "pricing", "northStarMetric"] },
 ];
 
 const emptyClaimCopy: Record<Claim["kind"], string> = {
@@ -125,17 +138,34 @@ export function BusinessPage() {
             </Field>
           </div>
         ) : (
-          <div className="business-statement-list">
-            {companyFieldLabels.map(([key, label, hint]) => (
-              <article key={key} className="business-statement">
-                <div><p className="eyebrow">{label}</p><p className="business-statement__hint">{hint}</p></div>
-                <p>{String(snapshot.workspace.company[key])}</p>
-              </article>
+          <div className="business-statement-groups">
+            {statementGroups.map((group) => (
+              <section key={group.id} className="business-statement-group" aria-label={group.title}>
+                <h3 className="business-statement-group__title">{group.title}</h3>
+                <div className="business-statement-list">
+                  {group.fields.map((key) => {
+                    const entry = companyFieldLabels.find(([field]) => field === key);
+                    if (!entry) return null;
+                    const [, label, hint] = entry;
+                    return (
+                      <article key={key} className="business-statement">
+                        <div><p className="eyebrow">{label}</p><p className="business-statement__hint">{hint}</p></div>
+                        <p>{String(snapshot.workspace.company[key])}</p>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
             ))}
-            <article className="business-statement">
-              <div><p className="eyebrow">Operating constraints</p><p className="business-statement__hint">Boundaries the plan must respect.</p></div>
-              <ul>{snapshot.workspace.company.constraints.map((constraint) => <li key={constraint}>{constraint}</li>)}</ul>
-            </article>
+            <section className="business-statement-group" aria-label="Boundaries the plan must respect">
+              <h3 className="business-statement-group__title">Boundaries the plan must respect</h3>
+              <div className="business-statement-list">
+                <article className="business-statement">
+                  <div><p className="eyebrow">Operating constraints</p><p className="business-statement__hint">What the plan is not allowed to assume away.</p></div>
+                  <ul>{snapshot.workspace.company.constraints.map((constraint) => <li key={constraint}>{constraint}</li>)}</ul>
+                </article>
+              </div>
+            </section>
           </div>
         )}
       </Section>
@@ -145,35 +175,48 @@ export function BusinessPage() {
         description="Facts, assumptions, recommendations, and unresolved questions stay distinct. That is less magical, and much more useful."
         action={<Button variant="secondary" icon="plus" onClick={() => setClaimModal(true)}>Add claim</Button>}
       >
+        {/* The same treatment Today gives a conflict. A contradiction between two claims is the
+            single most consequential thing this page can report, and a quiet inline strip made
+            it read as a footnote to the list it sits above. */}
         {primaryContradiction ? (
-          <div className="source-conflict-inline">
-            <strong>{snapshot.contradictions.length} contradiction{snapshot.contradictions.length === 1 ? "" : "s"} detected</strong>
-            <ContradictionStatements entries={primaryContradiction.entries} fallback={primaryContradiction.summary} />
-          </div>
+          <section className="contradiction-banner">
+            <Icon name="warning" width={22} height={22} />
+            <div>
+              <p className="eyebrow">Source-of-truth conflict</p>
+              <h2>{primaryContradiction.title}</h2>
+              <ContradictionStatements entries={primaryContradiction.entries} fallback={primaryContradiction.summary} />
+            </div>
+            <Button variant="secondary" onClick={() => navigate(`/workstreams/${primaryContradiction.workstreamIds[0] ?? "strategy"}`)}>
+              Resolve conflict
+            </Button>
+          </section>
         ) : null}
-        <div className="claim-columns">
+        {/* One ledger grouped by kind rather than four columns of unequal length: a column grid
+            leaves three quarters of the band empty whenever the evidence is not evenly spread. */}
+        <div className="claim-ledger">
           {claimsByKind.map(({ kind, claims }) => (
-            <div key={kind} className="claim-column">
-              <div className="claim-column__head">
+            <section key={kind} className="claim-ledger__group" aria-label={`${humanize(kind)}s`}>
+              <div className="claim-ledger__head">
                 <h3>{humanize(kind)}s</h3>
-                <span>{claims.length}</span>
+                <span>{formatCount(claims.length)}</span>
               </div>
-              {claims.map((claim) => (
-                <article key={claim.id} className="claim-row">
-                  <p>{claim.statement}</p>
-                  <div className="claim-row__controls">
-                    <span>{claim.confidence}% confidence</span>
+              {claims.length ? (
+                claims.map((claim) => (
+                  <article key={claim.id} className="claim-ledger__row">
+                    <p>{claim.statement}</p>
+                    <ConfidenceMark value={claim.confidence} caption="Confidence" />
                     <select value={claim.status} onChange={(event) => updateClaimStatus(claim, event.target.value)} aria-label={`Status for ${claim.statement}`}>
                       <option value={claim.kind === "question" ? "open" : "active"}>{claim.kind === "question" ? "Open" : "Active"}</option>
                       <option value="resolved">Resolved</option>
                       <option value="rejected">Rejected</option>
                       <option value="superseded">Superseded</option>
                     </select>
-                  </div>
-                </article>
-              ))}
-              {!claims.length ? <p className="muted-copy">{emptyClaimCopy[kind]}</p> : null}
-            </div>
+                  </article>
+                ))
+              ) : (
+                <p className="claim-ledger__empty">{emptyClaimCopy[kind]}</p>
+              )}
+            </section>
           ))}
         </div>
       </Section>

@@ -70,22 +70,130 @@ export function Section({
   );
 }
 
+/**
+ * The four readings any state can have. Every founder-facing status vocabulary — workstream,
+ * decision, deliverable, task, readiness category, launch-engine step — collapses to one of
+ * these, so a status dot, a progress track, and a due date can all be tinted from the same
+ * decision instead of from three separate colour lists.
+ */
+export type Tone = "positive" | "caution" | "critical" | "info" | "neutral";
+
+const STATUS_TONES: Record<string, Tone> = {
+  "on-track": "positive",
+  complete: "positive",
+  completed: "positive",
+  finished: "positive",
+  ready: "positive",
+  decided: "positive",
+  approved: "positive",
+  reviewed: "positive",
+  active: "positive",
+  blocked: "critical",
+  failed: "critical",
+  "needs-attention": "caution",
+  // A launch category below the in-progress threshold is unfinished work, not an absent state;
+  // left neutral it reads exactly like "not started".
+  "not-ready": "caution",
+  proposed: "caution",
+  revisit: "caution",
+  open: "caution",
+  "in-progress": "caution",
+  running: "caution",
+  "needs-founder": "caution",
+  held: "caution",
+  processing: "caution",
+  draft: "info",
+  queued: "info",
+};
+
+export function statusTone(status: string): Tone {
+  return STATUS_TONES[status] ?? "neutral";
+}
+
 export function StatusText({ status }: { status: string }) {
   return (
-    <span className={`status-text status-text--${status}`}>
+    <span className={`status-text tone-${statusTone(status)}`}>
       <span className="status-text__dot" />
       {humanize(status)}
     </span>
   );
 }
 
-export function ProgressLine({ value, label, hideValue = false }: { value: number; label?: string; hideValue?: boolean }) {
-  const clamped = Math.max(0, Math.min(100, value));
+/**
+ * Progress carries its own state. A blocked body of work at 46% must not draw the same
+ * healthy bar as an on-track one — the track is tinted from the status beside it, which makes
+ * the colour redundant with the word rather than the only way to read the state.
+ */
+export function ProgressLine({
+  value,
+  label,
+  hideValue = false,
+  tone = "positive",
+}: {
+  value: number;
+  label?: string;
+  hideValue?: boolean;
+  tone?: Tone;
+}) {
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
   return (
-    <div className="progress-line">
+    <div className={`progress-line tone-${tone}`}>
       <progress className="progress-line__track" value={clamped} max={100} aria-label={label ?? "Progress"} />
       {hideValue ? null : <span className="progress-line__value">{clamped}%</span>}
     </div>
+  );
+}
+
+/**
+ * Evidence quality at a glance: five ledger ticks plus the number itself. It borrows the
+ * sidebar stage strip's shape on purpose — one instrument idiom across the product — and it
+ * is deliberately coarse, because a 3%-wide difference in confidence is not a real difference.
+ */
+export function ConfidenceMark({ value, caption = "Confidence" }: { value: number; caption?: string }) {
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  const filled = Math.round(clamped / 20);
+  return (
+    <span className="confidence-mark" role="img" aria-label={`${caption} ${clamped}%`}>
+      <span className="confidence-mark__segments" aria-hidden="true">
+        {[0, 1, 2, 3, 4].map((index) => (
+          <span key={index} className={index < filled ? "is-on" : ""} />
+        ))}
+      </span>
+      <span className="confidence-mark__value">{clamped}%</span>
+    </span>
+  );
+}
+
+/**
+ * How much a task matters, in the same dot-and-word shape as a status. Only critical and high
+ * carry an urgent tint; medium and low stay calm on purpose — half the queue tinted amber is
+ * not urgency, it is noise.
+ */
+export function Priority({ value }: { value: "critical" | "high" | "medium" | "low" }) {
+  return (
+    <span className={`priority priority--${value}`}>
+      <span className="priority__dot" aria-hidden="true" />
+      {value}
+    </span>
+  );
+}
+
+/**
+ * A short ledger of counts — "02 blocked · 02 needs attention · 04 on track". Used where a
+ * founder would otherwise have to count rows themselves. Counts only; never a computed metric.
+ */
+export function Tally({ items }: { items: Array<{ id: string; label: string; count: number; tone?: Tone }> }) {
+  const shown = items.filter((item) => item.count > 0);
+  if (!shown.length) return null;
+  return (
+    <ul className="tally">
+      {shown.map((item) => (
+        <li key={item.id} className={`tone-${item.tone ?? "neutral"}`}>
+          <strong>{formatCount(item.count)}</strong>
+          <span>{item.label}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -330,6 +438,51 @@ export function formatDate(value: string | null | undefined, fallback = "Not set
   const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00`) : new Date(value);
   if (Number.isNaN(date.getTime())) return fallback;
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(date);
+}
+
+/**
+ * A date a founder is accountable to, read as time remaining rather than as a calendar
+ * coordinate. "Aug 12, 2026" does not tell anyone whether to act today; "in 6 days" does.
+ * The words carry the urgency on their own — the tone only reinforces what the text says.
+ */
+export function dateSignal(value: string | null | undefined, fallback = "No date", horizonDays = 30) {
+  const absolute = formatDate(value, fallback);
+  if (!value) return { absolute, relative: null, tone: "neutral" as Tone, days: null };
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00`) : new Date(value);
+  if (Number.isNaN(parsed.getTime())) return { absolute, relative: null, tone: "neutral" as Tone, days: null };
+
+  // Compare whole calendar days so a deadline stops being "today" at midnight, not at the
+  // same clock time it was recorded.
+  const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const days = Math.round((startOfDay(parsed) - startOfDay(new Date())) / 86_400_000);
+
+  if (days < 0) return { absolute, relative: days === -1 ? "1 day late" : `${-days} days late`, tone: "critical" as Tone, days };
+  if (days === 0) return { absolute, relative: "Today", tone: "caution" as Tone, days };
+  if (days === 1) return { absolute, relative: "Tomorrow", tone: "caution" as Tone, days };
+  if (days <= 7) return { absolute, relative: `In ${days} days`, tone: "caution" as Tone, days };
+  // Past the horizon the day count stops helping anyone plan and the date itself is the useful
+  // fact — except where the horizon is the point, like the launch target, which passes its own.
+  if (days <= horizonDays) return { absolute, relative: `In ${days} days`, tone: "neutral" as Tone, days };
+  return { absolute, relative: null, tone: "neutral" as Tone, days };
+}
+
+/** The date and how much time is left, as one unit of metadata. */
+export function DateSignal({
+  value,
+  fallback = "No date",
+  horizonDays = 30,
+}: {
+  value: string | null | undefined;
+  fallback?: string;
+  horizonDays?: number;
+}) {
+  const signal = dateSignal(value, fallback, horizonDays);
+  return (
+    <span className={`date-signal tone-${signal.tone}`}>
+      <span className="date-signal__absolute">{signal.absolute}</span>
+      {signal.relative ? <span className="date-signal__relative">{signal.relative}</span> : null}
+    </span>
+  );
 }
 
 export function timeAgo(value: string) {

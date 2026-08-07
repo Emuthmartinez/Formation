@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
-import { Button, EmptyState, Field, PageHeader, StatusText, formatDate, humanize } from "../components/Primitives";
+import { Button, ConfidenceMark, EmptyState, Field, PageHeader, StatusText, formatDate, humanize } from "../components/Primitives";
 import { useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Artifact, ArtifactSection } from "../types";
@@ -32,7 +32,12 @@ export function DeliverablesPage({ artifactId }: { artifactId?: string }) {
             {sorted.map((artifact) => (
               <button key={artifact.id} className={`deliverable-index__item ${selected?.id === artifact.id ? "deliverable-index__item--active" : ""}`} onClick={() => navigate(`/deliverables/${artifact.id}`)}>
                 <div><StatusText status={artifact.status} /><h3>{artifact.title}</h3><p>{artifact.summary}</p></div>
-                <span>{formatDate(artifact.updatedAt)}</span>
+                {/* Version and evidence quality decide whether a document is worth opening. */}
+                <div className="deliverable-index__signals">
+                  <span>{formatDate(artifact.updatedAt)}</span>
+                  <span>v{artifact.version}</span>
+                  <ConfidenceMark value={artifact.confidence} caption={`${artifact.title} confidence`} />
+                </div>
               </button>
             ))}
           </aside>
@@ -129,7 +134,10 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
           <p className="eyebrow">{workstream?.title ?? artifact.workstreamId}</p>
           {editing ? <input className="title-input" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /> : <h1>{draft.title}</h1>}
           <div className="deliverable-editor__meta">
-            <StatusText status={draft.status} /><span>Version {draft.version}</span><span>{draft.confidence}% confidence</span><span>Updated {formatDate(draft.updatedAt)}</span>
+            <StatusText status={draft.status} />
+            <span>Version {draft.version}</span>
+            <ConfidenceMark value={draft.confidence} caption="Confidence" />
+            <span>Updated {formatDate(draft.updatedAt)}</span>
           </div>
         </div>
         <div className="button-row">
@@ -188,7 +196,7 @@ function DeliverableEditor({ artifact }: { artifact: Artifact }) {
             <details key={version.id} className="version-row" open={version.version === draft.version}>
               <summary>
                 <span><strong>Version {version.version}</strong><small>{version.createdBy}</small></span>
-                <span><StatusText status={version.status} /><small>{formatDate(version.createdAt)}</small></span>
+                <span><StatusText status={version.status} /><ConfidenceMark value={version.confidence} caption="Confidence" /><small>{formatDate(version.createdAt)}</small></span>
               </summary>
               <div className="version-row__body">
                 <p>{version.summary || "No summary recorded for this version."}</p>

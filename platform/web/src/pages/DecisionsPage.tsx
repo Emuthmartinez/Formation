@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "../api";
-import { Button, EmptyState, Field, Modal, PageHeader, Section, StatusText, TechnicalDisclosure, formatDate } from "../components/Primitives";
+import { Button, DateSignal, EmptyState, Field, Modal, PageHeader, Section, StatusText, Tally, TechnicalDisclosure, dateSignal, formatDate } from "../components/Primitives";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
 import type { Decision } from "../types";
@@ -51,6 +51,15 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
     return { active, decided, archived };
   }, [snapshot.decisions]);
 
+  // How big the open queue is, and how much of it has already slipped past its review date.
+  const openTally = useMemo(() => {
+    const overdue = sections.active.filter((decision) => (dateSignal(decision.reviewAt).days ?? 0) < 0).length;
+    return [
+      { id: "open", label: "unresolved", count: sections.active.length, tone: "caution" as const },
+      { id: "overdue", label: "past review", count: overdue, tone: "critical" as const },
+    ];
+  }, [sections.active]);
+
   const updateStatus = async (decision: Decision, status: Decision["status"]) => {
     setUpdating(decision.id);
     try {
@@ -88,7 +97,11 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
         action={<Button icon="plus" onClick={() => navigate("/decisions?new=1")}>Record decision</Button>}
       />
 
-      <Section title="Needs a call" description="Unresolved choices that are holding back confidence or downstream work.">
+      <Section
+        title="Needs a call"
+        description="Unresolved choices that are holding back confidence or downstream work."
+        action={<Tally items={openTally} />}
+      >
         {engineNote ? <p className="muted-copy">{engineNote}</p> : null}
         {sections.active.length ? (
           <div className="decision-list">
@@ -99,7 +112,11 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
         ) : <EmptyState title="No open decisions" description="The decision queue is clear. Formation will surface a new call when workstreams conflict or evidence changes." />}
       </Section>
 
-      <Section title="Decision log" description="Accepted decisions remain reviewable and can carry an explicit reconsideration date.">
+      <Section
+        title="Decision log"
+        description="Accepted decisions remain reviewable and can carry an explicit reconsideration date."
+        action={<Tally items={[{ id: "decided", label: "accepted", count: sections.decided.length, tone: "positive" as const }]} />}
+      >
         <div className="decision-list decision-list--history">
           {sections.decided.map((decision) => (
             <DecisionRow key={decision.id} decision={decision} updating={updating === decision.id} onStatus={updateStatus} onAnswer={answerApproval} />
@@ -148,7 +165,7 @@ function DecisionRow({
       <div className="decision-row__content">
         <h2>{decision.title}</h2>
         <p className="decision-row__statement">{decision.decision}</p>
-        <p><strong>Rationale:</strong> {decision.rationale}</p>
+        <p className="decision-row__rationale"><strong>Rationale:</strong> {decision.rationale}</p>
         {decision.note ? <p className="muted-copy">{decision.note}</p> : null}
         {isEngineApproval && decision.source ? (
           <TechnicalDisclosure>
@@ -158,7 +175,7 @@ function DecisionRow({
       </div>
       <div className="decision-row__dates">
         <div><span>Decided</span><strong>{formatDate(decision.decidedAt, "Not yet")}</strong></div>
-        <div><span>Review</span><strong>{formatDate(decision.reviewAt, "No review set")}</strong></div>
+        <div><span>Review</span><DateSignal value={decision.reviewAt} fallback="No review set" /></div>
       </div>
       {isEngineApproval ? (
         // A launch approval is answered with the engine, never edited in place: the engine

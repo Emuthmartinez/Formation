@@ -293,12 +293,27 @@ export interface Recommendation {
   actionLabel: string;
 }
 
+export interface BlockerRef {
+  id: string;
+  kind: "workstream" | "task" | "decision";
+  label: string;
+}
+
 export interface ReadinessCategory {
   id: string;
   label: string;
   progress: number;
   status: "ready" | "blocked" | "in-progress" | "not-ready";
   blockers: string[];
+  /** The same blockers, each still attached to the record that causes it. */
+  blockerRefs: BlockerRef[];
+}
+
+export interface ReadinessDeduction {
+  id: string;
+  label: string;
+  count: number;
+  points: number;
 }
 
 export interface Readiness {
@@ -307,8 +322,18 @@ export interface Readiness {
   blockedCount: number;
   openDecisionCount: number;
   criticalTaskCount: number;
+  /** The subtraction behind the score, so the number can be shown as arithmetic rather than asserted. */
+  penalty: {
+    applied: number;
+    total: number;
+    uncapped: number;
+    cap: number;
+    capped: boolean;
+    deductions: ReadinessDeduction[];
+  };
   categories: ReadinessCategory[];
   blockers: string[];
+  blockerRefs: BlockerRef[];
 }
 
 export interface WorkspaceSnapshot {
