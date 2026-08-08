@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.102.0",
+  "skillVersion": "0.103.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2899,6 +2899,29 @@
       "founderOnlyActions": [],
       "actionClass": "mutate",
       "idempotent": true
+    },
+    {
+      "id": "workflow.machine.eval-suite-execution-maintainer",
+      "title": "Eval suite execution (maintainer)",
+      "domainId": "domain.machine",
+      "areaIds": [
+        "area.skill-maintenance"
+      ],
+      "trigger": "Adding, removing, or renaming a validator, a LaunchBench scenario, or an agent-behavior eval; before trusting that any of them still catch what they claim to. Also run `npm run launchbench` (scenario lint + validator fixture suite) directly, and `npm run evals:behavioral` by hand when a live-agent signal is worth the cost and variance.",
+      "laneIds": [],
+      "phaseIds": [],
+      "dependencies": [],
+      "outputPaths": [
+        "validation/repository/evals/launchbench/",
+        "validation/repository/evals/agent-behavior/"
+      ],
+      "gateCommands": [
+        "check:agent-evals"
+      ],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
     }
   ],
   "artifacts": [
@@ -3545,6 +3568,20 @@
       "laneIds": [
         "privacy_legal"
       ],
+      "generated": false
+    },
+    {
+      "id": "artifact.validation-repository-evals-agent-behavior",
+      "path": "validation/repository/evals/agent-behavior/",
+      "ownerDomainId": "domain.machine",
+      "laneIds": [],
+      "generated": false
+    },
+    {
+      "id": "artifact.validation-repository-evals-launchbench",
+      "path": "validation/repository/evals/launchbench/",
+      "ownerDomainId": "domain.machine",
+      "laneIds": [],
       "generated": false
     },
     {
