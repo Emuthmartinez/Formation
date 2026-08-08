@@ -90,9 +90,7 @@ function renderSourceArtifactPage(markdown: string, markdownName: string): strin
   const title = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim() || "Artifact";
   const status = markdown.match(/^Status:\s*`?([^`\n]+)`?/m)?.[1]?.trim() || "unknown";
   const digest = createHash("sha256").update(markdown).digest("hex").slice(0, 16);
-  const headings = [...markdown.matchAll(/^##\s+(.+)$/gm)]
-    .map((match) => match[1]?.trim())
-    .filter(Boolean) as string[];
+  const headings = [...markdown.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim()).filter(Boolean) as string[];
   const sectionList = headings.map((heading) => `<li>${escapeHtml(displayHeading(heading))}</li>`).join("\n");
 
   return `<!doctype html>

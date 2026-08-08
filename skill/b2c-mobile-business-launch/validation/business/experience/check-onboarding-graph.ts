@@ -5,16 +5,7 @@
  * This validator does not grade conversion taste. It proves that the canonical artifact carries the graph, evidence joins, first-value and activation distinctions,
  * screen and control contracts, provider and policy research, typed analytics, compliant review timing, visual design requirements, and replacement-mode deletion plan.
  */
-import {
-  asString,
-  getPath,
-  issue,
-  loadProjectState,
-  parseCliArgs,
-  readText,
-  reportAndExit,
-  type Issue,
-} from "../../../tooling/lib/launch-state.js";
+import { asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
@@ -95,12 +86,7 @@ if (artifact) {
   for (const section of requiredSections) {
     if (!hasHeading(text, section)) {
       issues.push(
-        issue(
-          "error",
-          `onboarding_graph.section_${codeFor(section)}_missing`,
-          `${relativePath} must include a "## ${section}" section.`,
-          relativePath,
-        ),
+        issue("error", `onboarding_graph.section_${codeFor(section)}_missing`, `${relativePath} must include a "## ${section}" section.`, relativePath),
       );
     }
   }
@@ -282,14 +268,7 @@ function graphRunNodeDone(text: string, node: string): boolean {
   });
 }
 
-function requirePhrases(
-  target: Issue[],
-  relativePath: string,
-  text: string,
-  code: string,
-  phrases: string[],
-  message: string,
-): void {
+function requirePhrases(target: Issue[], relativePath: string, text: string, code: string, phrases: string[], message: string): void {
   const missing = phrases.filter((phrase) => !text.toLowerCase().includes(phrase.toLowerCase()));
   if (missing.length === 0) return;
   target.push(issue("error", code, `${message} Missing: ${missing.join(", ")}.`, relativePath));

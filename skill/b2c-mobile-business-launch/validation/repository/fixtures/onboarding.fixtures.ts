@@ -56,23 +56,11 @@ export function register(h: Harness): void {
 
   const controlContractMissing = makeFixture("onboarding-graph-control-contract-missing");
   mutateOnboarding(controlContractMissing, (text) => text.replaceAll("ONB-CTL-001", "CONTROL-TBD"));
-  runFixture(
-    "onboarding without stable control IDs fails",
-    controlContractMissing,
-    "check-onboarding-graph.ts",
-    1,
-    "onboarding_graph.design_contract",
-  );
+  runFixture("onboarding without stable control IDs fails", controlContractMissing, "check-onboarding-graph.ts", 1, "onboarding_graph.design_contract");
 
   const zeroLegacyMissing = makeFixture("onboarding-graph-zero-legacy-missing");
   mutateOnboarding(zeroLegacyMissing, (text) => text.replaceAll("Do not keep the old runtime", "Keep the old runtime"));
-  runFixture(
-    "replacement plan that keeps the old runtime fails",
-    zeroLegacyMissing,
-    "check-onboarding-graph.ts",
-    1,
-    "onboarding_graph.replacement_contract",
-  );
+  runFixture("replacement plan that keeps the old runtime fails", zeroLegacyMissing, "check-onboarding-graph.ts", 1, "onboarding_graph.replacement_contract");
 
   const doneWithPlaceholders = makeFixture("onboarding-graph-done-with-placeholders");
   {
