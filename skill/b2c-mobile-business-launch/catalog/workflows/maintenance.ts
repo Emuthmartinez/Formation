@@ -93,4 +93,24 @@ export const workflows = [
     actionClass: "mutate",
     idempotent: true,
   }),
+  workflow({
+    id: "workflow.machine.eval-suite-execution-maintainer",
+    title: "Eval suite execution (maintainer)",
+    domainId: "domain.machine",
+    areaIds: ["area.skill-maintenance"],
+    // domain.machine's own routeWhen names "evals" as a pillar, but no workflow owned it —
+    // the suites ran inside `npm run audit` with no dispatchable node a maintainer session
+    // could point at. launchbench cannot appear in gates below: discoverGates() only picks
+    // up check:/validate:/render:/catalog:-prefixed scripts, and launchbench is named for
+    // the aggregate harness it runs seriously as its own audit step, not a narrow check.
+    // evals:behavioral (live-agent runs against a real model) is excluded from gates for a
+    // different reason — cost and run-to-run variance make it unfit as a merge gate — and
+    // is run by hand when a live behavioral signal is actually needed, never automatically.
+    trigger:
+      "Adding, removing, or renaming a validator, a LaunchBench scenario, or an agent-behavior eval; before trusting that any of them still catch what they claim to. Also run `npm run launchbench` (scenario lint + validator fixture suite) directly, and `npm run evals:behavioral` by hand when a live-agent signal is worth the cost and variance.",
+    outputPaths: ["validation/repository/evals/launchbench/", "validation/repository/evals/agent-behavior/"],
+    gates: ["check:agent-evals"],
+    actionClass: "observe",
+    idempotent: true,
+  }),
 ] as const;
