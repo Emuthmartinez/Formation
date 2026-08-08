@@ -150,7 +150,7 @@ export function register(harness: Harness): void {
     const issues = validateCatalog(catalog, skillRoot).filter((issue) => issue.severity === "error");
     assert(issues.length === 0, `expected the real catalog to be clean, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
     assert(catalog.domains.length === 15, `expected 15 domains, got ${catalog.domains.length}`);
-    assert(catalog.workflows.length === 58, `expected 58 workflows, got ${catalog.workflows.length}`);
+    assert(catalog.workflows.length === 80, `expected 80 workflows, got ${catalog.workflows.length}`);
   });
 
   // ---------------------------------------------------------------------
@@ -165,7 +165,7 @@ export function register(harness: Harness): void {
     // into `input.workflows`, so the exclusion is a compile-time guarantee, not just a
     // runtime filter. What's left to prove at runtime: the bridge actually narrowed the
     // set (it's a strict subset), and what remains still compiles cleanly.
-    assert(input.workflows.length < catalog.workflows.length, "the bridged input should be a strict subset of the full 58-workflow catalog");
+    assert(input.workflows.length < catalog.workflows.length, "the bridged input should be a strict subset of the full 80-workflow catalog");
     const excludedCount = catalog.workflows.length - input.workflows.length;
     assert(excludedCount === 15, `expected exactly 15 excluded system/machine-domain workflows (7 process/orchestration + 8 machine), got ${excludedCount}`);
 

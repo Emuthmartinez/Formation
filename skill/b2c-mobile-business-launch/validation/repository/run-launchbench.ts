@@ -32,6 +32,7 @@ const knownValidators = new Set([
   "check-parallel-orchestration",
   "check-generated-pages",
   "check-emotional-design",
+  "check-onboarding-graph",
   "check-source-freshness",
   "check-autopilot-contract",
   "check-continuity-contract",

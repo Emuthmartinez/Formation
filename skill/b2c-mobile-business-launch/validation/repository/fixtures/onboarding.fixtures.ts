@@ -56,23 +56,11 @@ export function register(h: Harness): void {
 
   const controlContractMissing = makeFixture("onboarding-graph-control-contract-missing");
   mutateOnboarding(controlContractMissing, (text) => text.replaceAll("ONB-CTL-001", "CONTROL-TBD"));
-  runFixture(
-    "onboarding without stable control IDs fails",
-    controlContractMissing,
-    "check-onboarding-graph.ts",
-    1,
-    "onboarding_graph.design_contract",
-  );
+  runFixture("onboarding without stable control IDs fails", controlContractMissing, "check-onboarding-graph.ts", 1, "onboarding_graph.design_contract");
 
   const zeroLegacyMissing = makeFixture("onboarding-graph-zero-legacy-missing");
   mutateOnboarding(zeroLegacyMissing, (text) => text.replaceAll("Do not keep the old runtime", "Keep the old runtime"));
-  runFixture(
-    "replacement plan that keeps the old runtime fails",
-    zeroLegacyMissing,
-    "check-onboarding-graph.ts",
-    1,
-    "onboarding_graph.replacement_contract",
-  );
+  runFixture("replacement plan that keeps the old runtime fails", zeroLegacyMissing, "check-onboarding-graph.ts", 1, "onboarding_graph.replacement_contract");
 
   const deferredWithLegacyArtifact = makeFixture("onboarding-graph-deferred-with-legacy-artifact");
   {
@@ -83,12 +71,7 @@ export function register(h: Harness): void {
     writeState(deferredWithLegacyArtifact, state);
     writeFileSync(onboardingPath(deferredWithLegacyArtifact), "# Legacy onboarding notes\n\nRetained for history.\n", "utf8");
   }
-  runFixture(
-    "explicitly deferred onboarding ignores a retained legacy artifact",
-    deferredWithLegacyArtifact,
-    "check-onboarding-graph.ts",
-    0,
-  );
+  runFixture("explicitly deferred onboarding ignores a retained legacy artifact", deferredWithLegacyArtifact, "check-onboarding-graph.ts", 0);
 
   const doneWithPlaceholders = makeFixture("onboarding-graph-done-with-placeholders");
   {
@@ -118,10 +101,5 @@ export function register(h: Harness): void {
       return `${completed}\nThis remains the canonical execution record for the completed onboarding system.\n`;
     });
   }
-  runFixture(
-    "completed onboarding may use the ordinary word record outside template cells",
-    doneWithOrdinaryRecordProse,
-    "check-onboarding-graph.ts",
-    0,
-  );
+  runFixture("completed onboarding may use the ordinary word record outside template cells", doneWithOrdinaryRecordProse, "check-onboarding-graph.ts", 0);
 }

@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.103.0",
+  "version": "0.104.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -84,7 +84,8 @@
     "lint:format": "prettier --check \"catalog/**/*.ts\" \"validation/business/**/*.ts\" \"validation/repository/**/*.ts\" \"tooling/**/*.ts\"",
     "format": "prettier --write \"catalog/**/*.ts\" \"validation/business/**/*.ts\" \"validation/repository/**/*.ts\" \"tooling/**/*.ts\"",
     "check:catalog": "tsx validation/repository/check-catalog.ts",
-    "catalog:render-routing": "tsx catalog/render-routing.ts"
+    "catalog:render-routing": "tsx catalog/render-routing.ts",
+    "check:onboarding-graph": "tsx validation/business/experience/check-onboarding-graph.ts"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.115.0",

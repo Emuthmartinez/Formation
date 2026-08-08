@@ -126,6 +126,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:native-ios", kind: "script", args: stateArgs },
     { id: "check:orchestration", kind: "script", args: stateArgs },
     { id: "check:emotional-design", kind: "script", args: stateArgs },
+    { id: "check:onboarding-graph", kind: "script", args: stateArgs },
     { id: "check:attribution", kind: "script", args: stateArgs },
     { id: "check:secrets", kind: "script", args: stateArgs },
     { id: "check:lane-coverage", kind: "script", args: stateArgs },

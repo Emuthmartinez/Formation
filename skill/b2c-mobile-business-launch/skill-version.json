@@ -1,11 +1,11 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.103.0",
+  "version": "0.104.0",
   "updatedAt": "2026-08-08",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Replaced the coarse onboarding doctrine with a generalized ONB-00 through ONB-22 nested graph. The graph now traces the running system, fans out current guidance, competitor review, authorized Onbo Hub, internal B2C, provider and policy, and 60fps evidence, joins decisions before design, and continues through first value, activation, state, analytics, complete screen and control design, visual proof, Compound Engineering planning, hard cutover, and zero-legacy verification.",
-    "Rebuilt product/ONBOARDING.md and its generated HTML as the canonical graph execution artifact. It now carries evidence and complaint traceability, the seven-principle activation audit, full RevenueCat and regional policy decisions, effort and question usefulness, canonical identity and entitlement state, typed analytics and expected sequences, policy-safe review timing outside first-run onboarding, screen/control/paywall/error contracts, prototype proof, and one-time durable-data transformation plus deletion manifests.",
-    "Added typed catalog execution nodes plus check-onboarding-graph.ts with deterministic fixtures, updated the app-agent roster and role prompts to execute the graph, and replaced the obsolete review-after-first-value agent eval with policy-safe review eligibility and full onboarding-rebuild scenarios. The finalizer promotes this change as a new engine version and wires it into the standard audit."
+    "Expanded onboarding into typed ONB-00 through ONB-22 catalog nodes so the durable engine can schedule, fan out, join, checkpoint, retry, resume, and verify the complete consumer onboarding system rather than executing one coarse prose node.",
+    "Rebuilt product/ONBOARDING.md as the canonical evidence, first-value, state, identity, analytics, design, monetization, lifecycle, implementation, hard-cutover, and zero-legacy contract, with a faithful searchable generated HTML view.",
+    "Added check:onboarding-graph to both package layouts and the standard audit, with deterministic fixtures for review timing, deferrals, placeholder completion, typed screen and control contracts, and legacy removal. Updated app-agent roles to continue the graph through Compound Engineering implementation and final proof."
   ]
 }

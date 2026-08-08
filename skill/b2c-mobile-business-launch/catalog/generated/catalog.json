@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.103.0",
+  "skillVersion": "0.104.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1951,13 +1951,419 @@
       "idempotent": true
     },
     {
-      "id": "workflow.experience.onboarding-conversion",
-      "title": "Onboarding conversion",
+      "id": "workflow.experience.onboarding-system.onb-00-resume-scope",
+      "title": "Onboarding ONB-00: resume and classify scope",
       "domainId": "domain.experience",
       "areaIds": [
         "area.product-experience"
       ],
-      "trigger": "Before onboarding quizzes, review-prompt timing, paywall timing, or first-session activation",
+      "trigger": "Consumer onboarding work begins or resumes; classify greenfield, replacement, audit-only, or explicitly bounded incremental mode",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.data.analytics-and-attribution-blueprint",
+        "workflow.experience.11-star-experience"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-00-resume-scope.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-01-current-state-trace",
+      "title": "Onboarding ONB-01: current-state trace",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Trace the actual onboarding implementation, documents, routes, state, providers, events, failures, tests, and legacy surfaces",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-00-resume-scope"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-01-current-state-trace.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-02-evidence-plan",
+      "title": "Onboarding ONB-02: evidence plan",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Define the onboarding evidence hierarchy, access constraints, sample plan, and freshness cutoff",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-01-current-state-trace"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-02-evidence-plan.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-03-current-guidance",
+      "title": "Onboarding ONB-03: current guidance research",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Research current consumer onboarding evidence, platform guidance, benchmarks, and practitioner heuristics",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-02-evidence-plan"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-03-current-guidance.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-04-competitor-reviews",
+      "title": "Onboarding ONB-04: competitor review analysis",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Mine direct and adjacent competitor reviews, including negative themes and a positive-review control",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-02-evidence-plan"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-04-competitor-reviews.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-05-onbo-hub-atlas",
+      "title": "Onboarding ONB-05: authorized flow atlas",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Build an authorized Onbo Hub flow atlas without scraping, bypassing access controls, or inferring locked screens",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-02-evidence-plan"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-05-onbo-hub-atlas.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-06-internal-guidance-audit",
+      "title": "Onboarding ONB-06: internal guidance audit",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Audit applicable Formation and internal B2C guidance and resolve conflicts or outdated rules",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-02-evidence-plan"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-06-internal-guidance-audit.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-07-provider-policy-landscape",
+      "title": "Onboarding ONB-07: provider and policy landscape",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Refresh monetization, identity, analytics, RevenueCat, billing, platform-policy, and regional capability facts",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-02-evidence-plan"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-07-provider-policy-landscape.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [
+        "provider.revenuecat",
+        "provider.posthog",
+        "provider.app-store-connect",
+        "provider.google-play"
+      ],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-08-motion-research",
+      "title": "Onboarding ONB-08: motion research",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Research interaction and motion references with 60fps and translate them into the target framework",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-02-evidence-plan"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-08-motion-research.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-09-evidence-join",
+      "title": "Onboarding ONB-09: evidence join",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Join guidance, reviews, flow evidence, internal doctrine, provider facts, policy, and motion research into explicit decisions",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-03-current-guidance",
+        "workflow.experience.onboarding-system.onb-04-competitor-reviews",
+        "workflow.experience.onboarding-system.onb-05-onbo-hub-atlas",
+        "workflow.experience.onboarding-system.onb-06-internal-guidance-audit",
+        "workflow.experience.onboarding-system.onb-07-provider-policy-landscape",
+        "workflow.experience.onboarding-system.onb-08-motion-research"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-09-evidence-join.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-10-first-value-activation",
+      "title": "Onboarding ONB-10: first value and activation",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Define first value rendered, first value engaged, activation, habit, and retention hypotheses",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-09-evidence-join"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-10-first-value-activation.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-11-effort-question-audit",
+      "title": "Onboarding ONB-11: effort and question audit",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Audit effort before value, question usefulness, permissions, interruption budget, and visible personalization proof",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-09-evidence-join"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-11-effort-question-audit.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-12-state-identity-contract",
+      "title": "Onboarding ONB-12: state and identity contract",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Define canonical journey, profile, identity, entitlement, continuity, and cross-surface state transitions",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-09-evidence-join"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-12-state-identity-contract.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [
+        "provider.revenuecat"
+      ],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-13-analytics-experiments",
+      "title": "Onboarding ONB-13: analytics and experiments",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Define typed analytics, authoritative emitters, identity stitching, deduplication, experiment assignment, exposure, and expected sequences",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-09-evidence-join"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-13-analytics-experiments.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [
+        "provider.posthog",
+        "provider.revenuecat"
+      ],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-14-trust-lifecycle-policy",
+      "title": "Onboarding ONB-14: trust, lifecycle, and policy",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Define review timing, permissions, lifecycle, privacy, security, accessibility, and policy behavior",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.1c"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-09-evidence-join"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-14-trust-lifecycle-policy.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-15-architecture-decision",
+      "title": "Onboarding ONB-15: architecture decision",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Compare native-first, hosted-funnel-first, hybrid, web-first, and evidence-backed alternatives and select one target architecture",
       "laneIds": [
         "onboarding"
       ],
@@ -1966,17 +2372,214 @@
         "phase.2"
       ],
       "dependencies": [
-        "workflow.data.analytics-and-attribution-blueprint",
-        "workflow.experience.11-star-experience"
+        "workflow.experience.onboarding-system.onb-10-first-value-activation",
+        "workflow.experience.onboarding-system.onb-11-effort-question-audit",
+        "workflow.experience.onboarding-system.onb-12-state-identity-contract",
+        "workflow.experience.onboarding-system.onb-13-analytics-experiments",
+        "workflow.experience.onboarding-system.onb-14-trust-lifecycle-policy"
       ],
       "outputPaths": [
-        "product/ONBOARDING.md",
-        "product/onboarding.html"
+        "product/onboarding/graph/ONB-15-architecture-decision.md"
       ],
       "gateCommands": [],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-16-journey-graph",
+      "title": "Onboarding ONB-16: canonical journey graph",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Define acquisition-specific journeys that converge on one semantic onboarding state graph",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.2"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-15-architecture-decision"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-16-journey-graph.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-17-screen-control-paywall-contract",
+      "title": "Onboarding ONB-17: screen, control, and paywall contract",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Specify every onboarding screen, copy key, control, action, paywall state, failure, recovery, accessibility, and localization behavior",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.2"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-16-journey-graph"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-17-screen-control-paywall-contract.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [
+        "provider.revenuecat"
+      ],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-18-visual-design-prototype",
+      "title": "Onboarding ONB-18: visual design and prototype",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Produce actual high-fidelity onboarding design, motion, an interactive prototype, and design QA",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.2"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-16-journey-graph"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-18-visual-design-prototype.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "mutate",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-19-implementation-cutover-contract",
+      "title": "Onboarding ONB-19: implementation and cutover contract",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Define implementation units, reliability, performance, observability, privacy, migration, hard cutover, and deletion work",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.2",
+        "phase.5b"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-16-journey-graph"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-19-implementation-cutover-contract.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-20-adversarial-qa",
+      "title": "Onboarding ONB-20: adversarial QA",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Run the synthetic one-star pre-mortem, policy review, instrumentation QA, accessibility review, and provider-realism review",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.2",
+        "phase.5b"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-17-screen-control-paywall-contract",
+        "workflow.experience.onboarding-system.onb-18-visual-design-prototype",
+        "workflow.experience.onboarding-system.onb-19-implementation-cutover-contract"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-20-adversarial-qa.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-system.onb-21-compound-engineering-plan",
+      "title": "Onboarding ONB-21: Compound Engineering plan",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Translate the accepted onboarding graph into an implementation-ready Compound Engineering plan, or the Formation-equivalent fallback",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.5b"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-20-adversarial-qa"
+      ],
+      "outputPaths": [
+        "product/onboarding/graph/ONB-21-compound-engineering-plan.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
+    },
+    {
+      "id": "workflow.experience.onboarding-conversion",
+      "title": "Onboarding ONB-22: execute, cut over, and verify",
+      "domainId": "domain.experience",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Implement or finalize the accepted onboarding graph, verify the canonical artifacts, cut over, and prove zero legacy",
+      "laneIds": [
+        "onboarding"
+      ],
+      "phaseIds": [
+        "phase.2",
+        "phase.5b"
+      ],
+      "dependencies": [
+        "workflow.experience.onboarding-system.onb-21-compound-engineering-plan"
+      ],
+      "outputPaths": [
+        "product/ONBOARDING.md",
+        "product/onboarding.html"
+      ],
+      "gateCommands": [
+        "check:onboarding-graph"
+      ],
+      "providerIds": [
+        "provider.revenuecat",
+        "provider.posthog"
+      ],
+      "founderOnlyActions": [],
+      "actionClass": "mutate",
       "idempotent": true
     },
     {
@@ -3314,6 +3917,204 @@
       "generated": false
     },
     {
+      "id": "artifact.product-onboarding-graph-onb-00-resume-scope-md",
+      "path": "product/onboarding/graph/ONB-00-resume-scope.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-01-current-state-trace-md",
+      "path": "product/onboarding/graph/ONB-01-current-state-trace.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-02-evidence-plan-md",
+      "path": "product/onboarding/graph/ONB-02-evidence-plan.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-03-current-guidance-md",
+      "path": "product/onboarding/graph/ONB-03-current-guidance.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-04-competitor-reviews-md",
+      "path": "product/onboarding/graph/ONB-04-competitor-reviews.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-05-onbo-hub-atlas-md",
+      "path": "product/onboarding/graph/ONB-05-onbo-hub-atlas.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-06-internal-guidance-audit-md",
+      "path": "product/onboarding/graph/ONB-06-internal-guidance-audit.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-07-provider-policy-landscape-md",
+      "path": "product/onboarding/graph/ONB-07-provider-policy-landscape.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-08-motion-research-md",
+      "path": "product/onboarding/graph/ONB-08-motion-research.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-09-evidence-join-md",
+      "path": "product/onboarding/graph/ONB-09-evidence-join.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-10-first-value-activation-md",
+      "path": "product/onboarding/graph/ONB-10-first-value-activation.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-11-effort-question-audit-md",
+      "path": "product/onboarding/graph/ONB-11-effort-question-audit.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-12-state-identity-contract-md",
+      "path": "product/onboarding/graph/ONB-12-state-identity-contract.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-13-analytics-experiments-md",
+      "path": "product/onboarding/graph/ONB-13-analytics-experiments.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-14-trust-lifecycle-policy-md",
+      "path": "product/onboarding/graph/ONB-14-trust-lifecycle-policy.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-15-architecture-decision-md",
+      "path": "product/onboarding/graph/ONB-15-architecture-decision.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-16-journey-graph-md",
+      "path": "product/onboarding/graph/ONB-16-journey-graph.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-17-screen-control-paywall-contract-md",
+      "path": "product/onboarding/graph/ONB-17-screen-control-paywall-contract.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-18-visual-design-prototype-md",
+      "path": "product/onboarding/graph/ONB-18-visual-design-prototype.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-19-implementation-cutover-contract-md",
+      "path": "product/onboarding/graph/ONB-19-implementation-cutover-contract.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-20-adversarial-qa-md",
+      "path": "product/onboarding/graph/ONB-20-adversarial-qa.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.product-onboarding-graph-onb-21-compound-engineering-plan-md",
+      "path": "product/onboarding/graph/ONB-21-compound-engineering-plan.md",
+      "ownerDomainId": "domain.experience",
+      "laneIds": [
+        "onboarding"
+      ],
+      "generated": false
+    },
+    {
       "id": "artifact.product-spec-md",
       "path": "product/SPEC.md",
       "ownerDomainId": "domain.research",
@@ -3836,6 +4637,13 @@
       "command": "check:no-slop",
       "scriptPath": "validation/business/words/check-no-slop.ts",
       "ownerDomainId": "domain.words",
+      "audit": "required"
+    },
+    {
+      "id": "gate.check-onboarding-graph",
+      "command": "check:onboarding-graph",
+      "scriptPath": "validation/business/experience/check-onboarding-graph.ts",
+      "ownerDomainId": "domain.experience",
       "audit": "required"
     },
     {
