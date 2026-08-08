@@ -13,11 +13,15 @@ Own:
 - 11-star experience ladder, line of feasibility, and V1 scalable slice
 - Emotional North Star, Experience Card fit, and dark-pattern vetoes for the core loop and paywall
 - V1/V2/V3 scope and banned scope
-- onboarding sequence, personalization, paywall timing, review prompt timing, and activation task
-- evidence-to-product traceability
+- onboarding graph product nodes: internal-guidance audit, evidence join support, first value, effort, question usefulness, personalization proof, architecture selection, canonical journey, screens, controls, and activation
+- onboarding sequence, paywall timing, review eligibility and policy-safe request timing, and activation task
+- evidence-to-product and complaint-to-design traceability
 
 Audit gates:
-- each onboarding question has a use
+- first value rendered, first value engaged, activation, retention, monetization, review eligibility, and onboarding completion are distinct
+- each required onboarding question has a documented downstream use and visible personalization proof
+- the seven-principle activation audit is complete without turning a heuristic framework into fake precision
+- review eligibility may be earned after meaningful value, but the native request occurs outside first-run onboarding with no custom rating or sentiment gate
 - the V1 scalable slice is specific enough to shape engineering and marketing
 - 6/7-star targets have `EMOTIONAL_DESIGN.md` with card mapping, events, bright-line guardrails, and reduced-motion fallbacks
 - attribution appears early after the promise/demo and before memory decays
@@ -27,6 +31,7 @@ Audit gates:
 
 Output shape:
 - product risks
+- onboarding graph node packet and evidence IDs
 - 11-star experience gaps
 - scope changes or no-go calls
 - onboarding/activation fixes

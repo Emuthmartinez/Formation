@@ -14,6 +14,7 @@ import { register as registerStateAndMeta } from "./fixtures/state-and-meta.fixt
 import { register as registerProvidersAndSecrets } from "./fixtures/providers-and-secrets.fixtures.js";
 import { register as registerStore } from "./fixtures/store.fixtures.js";
 import { register as registerDesign } from "./fixtures/design.fixtures.js";
+import { register as registerOnboarding } from "./fixtures/onboarding.fixtures.js";
 import { register as registerGrowth } from "./fixtures/growth.fixtures.js";
 import { register as registerEngineering } from "./fixtures/engineering.fixtures.js";
 import { register as registerLifecycle } from "./fixtures/lifecycle.fixtures.js";
@@ -36,6 +37,7 @@ try {
     registerProvidersAndSecrets,
     registerStore,
     registerDesign,
+    registerOnboarding,
     registerGrowth,
     registerEngineering,
     registerLifecycle,

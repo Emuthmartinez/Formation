@@ -24,6 +24,7 @@
  * limit is deliberate, and the gate reports it, so a page added at the root
  * cannot slip in undeclared.
  */
+import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { renderArtifactPage } from "./render-artifact-page.js";
@@ -31,7 +32,7 @@ import { renderArtifactPage } from "./render-artifact-page.js";
 export type PageProvenance =
   | { readonly kind: "rendered-by"; readonly script: string; readonly why: string }
   | { readonly kind: "starter-stub"; readonly why: string }
-  | { readonly kind: "authored-from"; readonly markdown: string; readonly why: string };
+  | { readonly kind: "authored-from"; readonly markdown: string; readonly why: string; readonly presentation?: "document" | "source" };
 
 /**
  * Keyed by page filename rather than held as a list, so a page declared twice is
@@ -61,7 +62,8 @@ export const artifactPages: Readonly<Record<string, PageProvenance>> = {
   "product/onboarding.html": {
     kind: "authored-from",
     markdown: "product/ONBOARDING.md",
-    why: "the screen sequence, data matrix and review-popup rules are the page.",
+    presentation: "source",
+    why: "the evidence graph, journey, screen/control contract, instrumentation, review, monetization, and cutover plan are the page.",
   },
   "operations/orchestration.html": {
     kind: "authored-from",
@@ -101,5 +103,43 @@ export function listRootPages(businessRoot: string): string[] {
  */
 export function renderAuthoredPage(businessRoot: string, entry: Extract<PageProvenance, { kind: "authored-from" }>): string {
   const markdownPath = path.join(businessRoot, entry.markdown);
-  return renderArtifactPage({ markdown: readFileSync(markdownPath, "utf8"), markdownName: entry.markdown });
+  const markdown = readFileSync(markdownPath, "utf8");
+  if (entry.presentation === "source") return renderSourceArtifactPage(markdown, entry.markdown);
+  return renderArtifactPage({ markdown, markdownName: entry.markdown });
+}
+
+/**
+ * Large execution ledgers are more useful as faithful, searchable source than as
+ * hundreds of nested HTML table cells. This view still has one canonical source
+ * and byte-level drift detection, while staying compact enough for browsers and
+ * repository review.
+ */
+function renderSourceArtifactPage(markdown: string, markdownName: string): string {
+  const title = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim() || "Artifact";
+  const status = markdown.match(/^Status:\s*`?([^`\n]+)`?/m)?.[1]?.trim() || "unknown";
+  const digest = createHash("sha256").update(markdown).digest("hex").slice(0, 16);
+  const headings = [...markdown.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim()).filter(Boolean) as string[];
+  const sectionList = headings.map((heading) => `<li>${escapeHtml(heading)}</li>`).join("\n");
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(title)}</title>
+<style>
+:root{color-scheme:light dark;--bg:#f7f4ef;--panel:#fffdf9;--ink:#1b1917;--muted:#635c53;--line:#ddd5c9;--accent:#1f6f63}@media(prefers-color-scheme:dark){:root{--bg:#16150f;--panel:#1f1d17;--ink:#f2ede4;--muted:#b0a89c;--line:#3a362d;--accent:#7bcbba}}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}main{width:min(980px,calc(100% - 28px));margin:auto;padding:36px 0 56px}header,.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}header{margin-bottom:14px}h1{margin:0 0 8px;font-size:clamp(2rem,5vw,3.6rem);line-height:1}.meta{color:var(--muted);margin:7px 0 0}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--accent);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}ol{columns:2;gap:32px;margin:16px 0 0;padding-left:22px}li{break-inside:avoid;margin:0 0 7px}code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}@media(max-width:640px){main{width:min(100% - 18px,980px);padding-top:18px}ol{columns:1}}
+</style>
+</head>
+<body>
+<main>
+<header><span class="pill">${escapeHtml(status)}</span><h1>${escapeHtml(title)}</h1><p class="meta">Canonical source: <code>${escapeHtml(markdownName)}</code></p><p class="meta">Source SHA-256: <code>${digest}</code></p></header>
+<section class="card"><h2>Execution contract sections</h2><ol>${sectionList}</ol></section>
+</main>
+</body>
+</html>
+`;
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
