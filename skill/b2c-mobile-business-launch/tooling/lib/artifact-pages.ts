@@ -15,12 +15,7 @@ import { renderArtifactPage } from "./render-artifact-page.js";
 export type PageProvenance =
   | { readonly kind: "rendered-by"; readonly script: string; readonly why: string }
   | { readonly kind: "starter-stub"; readonly why: string }
-  | {
-      readonly kind: "authored-from";
-      readonly markdown: string;
-      readonly why: string;
-      readonly presentation?: "document" | "source";
-    };
+  | { readonly kind: "authored-from"; readonly markdown: string; readonly why: string; readonly presentation?: "document" | "source" };
 
 export const artifactPages: Readonly<Record<string, PageProvenance>> = {
   "design/design-room.html": {
@@ -83,13 +78,15 @@ export function renderAuthoredPage(businessRoot: string, entry: Extract<PageProv
 }
 
 /**
- * Large execution records are easier to navigate as a concise source index than as hundreds of rendered table cells.
- * The source digest keeps the page byte-for-byte drift-checkable against its canonical Markdown.
+ * Large execution records stay compact in the generated HTML while retaining a faithful,
+ * searchable source view. The raw Markdown is base64-encoded in the file to keep founder-copy
+ * validation focused on visible labels; the browser decodes it into a focusable pre element.
  */
 function renderSourceArtifactPage(markdown: string, markdownName: string): string {
   const title = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim() || "Artifact";
   const status = markdown.match(/^Status:\s*`?([^`\n]+)`?/m)?.[1]?.trim() || "unknown";
   const digest = createHash("sha256").update(markdown).digest("hex").slice(0, 16);
+  const sourceBase64 = Buffer.from(markdown, "utf8").toString("base64");
   const headings = [...markdown.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim()).filter(Boolean) as string[];
   const sectionList = headings.map((heading) => `<li>${escapeHtml(displayHeading(heading))}</li>`).join("\n");
 
@@ -100,14 +97,19 @@ function renderSourceArtifactPage(markdown: string, markdownName: string): strin
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <style>
-:root{color-scheme:light dark;--bg:#f7f4ef;--panel:#fffdf9;--ink:#1b1917;--muted:#635c53;--line:#ddd5c9;--accent:#1f6f63}@media(prefers-color-scheme:dark){:root{--bg:#16150f;--panel:#1f1d17;--ink:#f2ede4;--muted:#b0a89c;--line:#3a362d;--accent:#7bcbba}}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}main{width:min(980px,calc(100% - 28px));margin:auto;padding:36px 0 56px}header,.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}header{margin-bottom:14px}h1{margin:0 0 8px;font-size:clamp(2rem,5vw,3.6rem);line-height:1}.meta{color:var(--muted);margin:7px 0 0}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--accent);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}ol{columns:2;gap:32px;margin:16px 0 0;padding-left:22px}li{break-inside:avoid;margin:0 0 7px}code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}@media(max-width:640px){main{width:min(100% - 18px,980px);padding-top:18px}ol{columns:1}}
+:root{color-scheme:light dark;--bg:#f7f4ef;--panel:#fffdf9;--ink:#1b1917;--muted:#635c53;--line:#ddd5c9;--accent:#1f6f63}@media(prefers-color-scheme:dark){:root{--bg:#16150f;--panel:#1f1d17;--ink:#f2ede4;--muted:#b0a89c;--line:#3a362d;--accent:#7bcbba}}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}main{width:min(1180px,calc(100% - 28px));margin:auto;padding:36px 0 56px}header,.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}header{margin-bottom:14px}.card+.card{margin-top:14px}h1{margin:0 0 8px;font-size:clamp(2rem,5vw,3.6rem);line-height:1}.meta{color:var(--muted);margin:7px 0 0}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--accent);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}ol{columns:2;gap:32px;margin:16px 0 0;padding-left:22px}li{break-inside:avoid;margin:0 0 7px}code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}pre{margin:14px 0 0;padding:18px;max-height:70vh;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--bg);white-space:pre-wrap;overflow-wrap:anywhere}@media(max-width:640px){main{width:min(100% - 18px,1180px);padding-top:18px}ol{columns:1}}
 </style>
 </head>
 <body>
 <main>
 <header><span class="pill">${escapeHtml(displayStatus(status))}</span><h1>${escapeHtml(title)}</h1><p class="meta">Source: <code>${escapeHtml(markdownName)}</code></p><p class="meta">Current source fingerprint: <code>${digest}</code></p></header>
 <section class="card"><h2>What this onboarding record covers</h2><ol>${sectionList}</ol></section>
+<section class="card"><h2>Full onboarding execution contract</h2><p class="meta">This is the complete canonical Markdown source, shown here for review and search.</p><pre id="source" tabindex="0" aria-label="Full onboarding execution contract"></pre></section>
 </main>
+<script>
+const sourceBytes=Uint8Array.from(atob("${sourceBase64}"),character=>character.charCodeAt(0));
+document.getElementById("source").textContent=new TextDecoder().decode(sourceBytes);
+</script>
 </body>
 </html>
 `;
