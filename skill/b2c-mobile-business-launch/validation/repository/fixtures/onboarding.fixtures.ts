@@ -17,13 +17,7 @@ export function register(h: Harness): void {
 
   const graphNodeMissing = makeFixture("onboarding-graph-node-missing");
   mutateOnboarding(graphNodeMissing, (text) => text.replaceAll("ONB-22", "ONB-FINAL"));
-  runFixture(
-    "onboarding graph missing a canonical node fails",
-    graphNodeMissing,
-    "check-onboarding-graph.ts",
-    1,
-    "onboarding_graph.node_missing",
-  );
+  runFixture("onboarding graph missing a canonical node fails", graphNodeMissing, "check-onboarding-graph.ts", 1, "onboarding_graph.node_missing");
 
   const evidenceMissing = makeFixture("onboarding-graph-evidence-missing");
   mutateOnboarding(evidenceMissing, (text) => text.replace("## Onbo Hub Pattern Atlas", "## Flow Pattern Notes"));
@@ -51,9 +45,7 @@ export function register(h: Harness): void {
   );
 
   const unobservableReview = makeFixture("onboarding-graph-unobservable-review-event");
-  mutateOnboarding(unobservableReview, (text) =>
-    text.replace("`review_request_returned`", "`review_prompt_shown`"),
-  );
+  mutateOnboarding(unobservableReview, (text) => text.replace("`review_request_returned`", "`review_prompt_shown`"));
   runFixture(
     "analytics cannot claim that the platform displayed a review prompt",
     unobservableReview,

@@ -1,72 +1,31 @@
 # Onboarding System Graph
 
-Use this reference whenever a consumer product needs new onboarding, an onboarding audit, a conversion redesign, a first-value change, a paywall or trial change, review-request timing, web-to-app continuity, or a full replacement of an existing onboarding system.
+Use this reference for consumer onboarding, first-value, activation, paywall, trial, review timing, cross-surface continuity, or replacement work. Onboarding is one system:
 
-This is a graph execution contract, not a list of fashionable screens. The graph begins with evidence, joins product and architecture decisions before design, and ends only after implementation proof and legacy removal. Load the routed references for analytics, 11-star experience, emotional design, design room, copy, engineering orchestration, revenue, privacy, security, store policy, and lifecycle before their nodes run.
+`acquisition -> first open -> minimum useful input -> first value -> engagement -> activation -> monetization -> identity -> normal product use -> retention -> reactivation`
 
-## 1. Default mandate
+Do not optimize for a small diff. Optimize for early real value, low cognitive load, progressive profiling, visible personalization, trustworthy monetization, one state and analytics model, remote experimentability, accessibility, privacy, recovery, and deletion of obsolete architecture.
 
-Treat onboarding as one product and conversion system spanning:
-
-`acquisition promise -> first open -> minimum useful input -> first meaningful value -> value engagement -> activation -> monetization -> identity continuity -> normal product use -> retention -> reactivation`
-
-Optimize for:
-
-- the shortest credible path to meaningful value
-- low cognitive load and progressive commitment
-- questions that materially change the experience
-- visible proof that personalization mattered
-- trustworthy monetization and trial disclosure
-- one canonical state, identity, entitlement, analytics, and experiment model
-- cross-surface continuity
-- remotely configurable content and offers where appropriate
-- accessibility, localization, privacy, security, and recovery
-- deletion of obsolete architecture rather than permanent compatibility
-
-Do not optimize for a small diff.
-
-## 2. Execution modes
-
-The orchestrator classifies the run before dispatch.
+## Execution modes
 
 | Mode | Use when | Legacy rule |
 | --- | --- | --- |
 | `greenfield` | No production onboarding exists | Build only the target system |
-| `replacement` | An existing product is being rebuilt from first principles | Hard cutover; no permanent old/new coexistence |
-| `audit_only` | The user asked for findings without implementation | Produce evidence, target graph, and implementation plan; do not mutate product code |
-| `incremental` | The founder explicitly limits scope to a bounded change | Preserve only the named boundary; never infer this mode from effort |
+| `replacement` | Existing onboarding is rebuilt from first principles | Hard cutover; no permanent coexistence |
+| `audit_only` | Findings are requested without implementation | Produce evidence, target graph, and plan |
+| `incremental` | The founder explicitly limits scope | Preserve only the named boundary |
 
-A request to rebuild, standardize, replace, or rethink onboarding defaults to `replacement`, not `incremental`.
+Rebuild, replace, standardize, and rethink requests default to `replacement`. Preserve durable user value through an isolated, rehearsed, one-time transformation, then delete the transformation and every obsolete route, state, event, provider object, test, and document.
 
-In replacement mode, do not keep adapters, shims, v1 routes, dual reads, dual writes, old event aliases, old paywalls, old state models, or stale documents. A one-time transformation may preserve durable user value such as paid entitlements, accounts, user-created content, consent records, and legally required transaction history. That transformation is isolated, rehearsed, audited, and deleted after cutover.
+## Ownership and dispatch
 
-## 3. Graph semantics
+`workflow.experience.onboarding-conversion` owns the nested graph. The orchestrator is the single writer for `product/ONBOARDING.md`, `product/onboarding.html`, state, canonical IDs, pricing, provider mutations, cutover, and final readiness.
 
-The onboarding formation is a nested DAG owned by `workflow.experience.onboarding-conversion`.
+Specialists may parallelize read-only research or disjoint implementation packets. Evidence branches may fan out. State, IDs, provider mutations, migrations, release actions, and final decisions serialize through the orchestrator.
 
-The orchestrator is the single writer for:
+Every node returns status, inputs and freshness, evidence or implementation checks, decisions and rejected alternatives, artifact paths, blockers, and newly eligible nodes. A prose artifact is not completion; the node exit gate must pass.
 
-- `product/ONBOARDING.md`
-- `product/onboarding.html`
-- `state/PROJECT_STATE.yaml`
-- `operations/ORCHESTRATION.md`
-- final cross-domain decisions
-
-Specialists may run in parallel only when they are producing read-only evidence packets or mutating disjoint artifacts. Research, review mining, provider scans, visual-reference research, and policy research can fan out. State models, analytics names, screen IDs, pricing, provider configuration, migrations, and final readiness serialize through the orchestrator.
-
-Every node returns:
-
-- node ID and status
-- inputs and freshness dates
-- evidence or implementation proof
-- decisions and rejected alternatives
-- artifact paths or read-only packet
-- blockers
-- next eligible nodes
-
-A node is not complete because prose exists. Its exit gate must pass.
-
-## 4. Canonical graph
+## Canonical graph
 
 ```text
 ONB-00 -> ONB-01 -> ONB-02
@@ -78,78 +37,78 @@ ONB-16 -> [ONB-17, ONB-18, ONB-19]
 [ONB-17..19] -> ONB-20 -> ONB-21 -> ONB-22
 ```
 
-| Node | Job | Primary owner | Exit gate |
-| --- | --- | --- | --- |
-| `ONB-00` | Resume state, classify execution mode, identify surfaces and founder-only actions | Orchestrator | Scope, source roots, and mode recorded |
-| `ONB-01` | Trace the current implementation, documents, providers, state, routes, events, and failure paths | Engineering + product | Code-backed current-state map exists |
-| `ONB-02` | Build the evidence plan, source hierarchy, sampling plan, and freshness cutoff | Research | Evidence questions and access limits recorded |
-| `ONB-03` | Research current consumer onboarding, platform guidance, and practitioner heuristics | Research + product | Claims classified by evidence quality |
-| `ONB-04` | Mine direct and adjacent competitor reviews, including a positive-review control | Research + customer success | Coded review matrix and root-cause classification exist |
-| `ONB-05` | Build an authorized Onbo Hub flow and pattern atlas | Research + design | Screen-level pattern, effort, value, and paywall data recorded |
-| `ONB-06` | Audit all applicable Formation or internal B2C guidance | Product | Pass, partial, fail, outdated, and conflict decisions recorded |
-| `ONB-07` | Refresh monetization, identity, analytics, policy, and provider capabilities | Money + engineering + trust | Capability matrix and regional policy matrix exist |
-| `ONB-08` | Research interaction and motion with 60fps plus current product references | Design | Motion reference register and target-framework translation exist |
-| `ONB-09` | Join evidence into a decision ledger and complaint-to-design traceability map | Orchestrator | Every material finding has a disposition |
-| `ONB-10` | Define first value, first-value engagement, activation, and habit hypotheses | Product + data | Terms are distinct and measurable |
-| `ONB-11` | Audit effort, questions, permissions, and personalization proof | Product + design | Every required effort has a use and value exchange |
-| `ONB-12` | Design canonical state, identity, entitlement, continuity, and cross-surface contracts | Engineering + money | Authoritative owners and transitions are explicit |
-| `ONB-13` | Design analytics, attribution, experimentation, review eligibility, and lifecycle measurement | Data + product | Typed event contract and expected sequences exist |
-| `ONB-14` | Define review, permissions, lifecycle, trust, privacy, security, and policy behavior | Trust + customer success | No policy or trust blocker is hidden |
-| `ONB-15` | Compare architecture models and select the target system | Orchestrator | Weighted decision and rejected alternatives recorded |
-| `ONB-16` | Produce the canonical journey graph and acquisition-specific branches | Product | Every branch converges on the same semantic model |
-| `ONB-17` | Specify every screen, copy state, control, action, paywall, and error path | Product + words + money | Stable screen/control IDs and exact behavior exist |
-| `ONB-18` | Create actual visual designs, motion, prototype, and design QA | Design | Inspectable visual proof and prototype exist |
-| `ONB-19` | Produce implementation, reliability, accessibility, localization, privacy, and cutover contracts | Engineering + trust | Build units and deletion manifest are executable |
-| `ONB-20` | Run adversarial review, synthetic one-star pre-mortem, and instrumentation QA | Cross-functional reviewers | Preventable risks are fixed or accepted |
-| `ONB-21` | Route the accepted graph through Compound Engineering planning | Orchestrator + engineering | Implementation-ready plan maps every requirement to work and deletion |
-| `ONB-22` | Execute, review, test, cut over, and prove zero legacy | Engineering + orchestrator | New system is the only runtime and all gates pass |
+| Node | Contract |
+| --- | --- |
+| `ONB-00` | Resume state, classify mode, identify surfaces and founder-only actions |
+| `ONB-01` | Trace real code, documents, providers, state, routes, events, tests, failures, and legacy items |
+| `ONB-02` | Set source hierarchy, sampling, access limits, and freshness cutoff |
+| `ONB-03` | Research current platform guidance, evidence, benchmarks, and practitioner heuristics |
+| `ONB-04` | Mine negative competitor reviews plus a positive-review control and code root causes |
+| `ONB-05` | Build an authorized Onbo Hub flow atlas without scraping or inferring locked screens |
+| `ONB-06` | Audit applicable Formation and internal B2C guidance; resolve outdated rules |
+| `ONB-07` | Refresh provider, RevenueCat, billing, identity, analytics, policy, and regional capability facts |
+| `ONB-08` | Research interaction and motion using 60fps references and target-framework translation |
+| `ONB-09` | Join evidence into adopted, test, rejected, and investigate decisions |
+| `ONB-10` | Define first value rendered, first value engaged, activation, habit, and retention hypotheses |
+| `ONB-11` | Audit effort, questions, permissions, interruption budget, and personalization proof |
+| `ONB-12` | Define canonical identity, journey, profile, activation, entitlement, experiment, review, permission, and lifecycle state |
+| `ONB-13` | Define typed analytics, authoritative emitters, stitching, deduplication, exposure, and expected sequences |
+| `ONB-14` | Define review timing, permissions, lifecycle, privacy, security, and policy behavior |
+| `ONB-15` | Compare native-first, funnel-first, hybrid, web-first, and evidence-backed alternatives; choose one |
+| `ONB-16` | Produce acquisition-specific journeys that converge on one semantic model |
+| `ONB-17` | Specify every screen, copy key, control, action, paywall state, error, and recovery path |
+| `ONB-18` | Produce actual high-fidelity design, motion, interactive prototype, and design QA |
+| `ONB-19` | Define implementation, reliability, accessibility, localization, privacy, performance, and cutover units |
+| `ONB-20` | Run adversarial review, synthetic one-star pre-mortem, policy review, and instrumentation QA |
+| `ONB-21` | Run Compound Engineering planning when available, preserving graph IDs and deletion work |
+| `ONB-22` | Implement, review, test, cut over, delete legacy, and verify the target is the only runtime |
 
-When Compound Engineering is available, use `ce-plan` at `ONB-21`, `ce-work` for implementation, and the available review and test skills at `ONB-22`. If unavailable, use the Formation fallback while preserving the same node outputs and gates.
+## Evidence contract
 
-## 5. ONB-00 and ONB-01: scope and forensic trace
+Use current official policy and provider documentation first, followed by implementation truth, reliable product data, direct research, current first-party reviews, disclosed-method quantitative work, direct flow observation, original practitioner sources, and secondary commentary.
 
-Read current product, design, analytics, revenue, trust, store, engineering, lifecycle, and agent documents. Trace claims into code and provider configuration.
+Classify each recommendation as platform requirement, evidence-backed guidance, benchmark, direct user finding, competitor pattern, practitioner heuristic, product hypothesis, or experiment question. Record source, date, market, version, method, confidence, and implication.
 
-Inventory at minimum:
+Competitor review analysis separates onboarding, expectation, monetization, identity, lifecycle, core product, support, platform limitation, and insufficient evidence. Never present sample frequency as population prevalence. Never onboarding-wash a product defect.
 
-- first launch and route guards
-- every onboarding renderer and branch
-- local and remote state
-- anonymous and authenticated identity
-- profile and product setup
-- first-value request, generation, rendering, and persistence
-- account creation and linking
-- permissions
-- paywalls, products, offerings, trials, purchase, restore, and subscription management
-- web funnels and web-to-app handoff
-- deep links and redemption
-- analytics calls and raw event strings
-- experiments and remote configuration
-- review-request logic
-- lifecycle messaging
-- errors, retries, offline behavior, and resume behavior
-- tests, dashboards, alerts, runbooks, and documentation
-- all legacy modules and configuration that replacement mode will delete
+Onbo Hub is authorized access only. Revenue estimates remain estimates. Record screens reviewed, effort, first-value class, account, permissions, paywall, trial, restore, close, accessibility, trust, and related positive and negative review evidence.
 
-Documentation is evidence, not authority. When code and documents disagree, record the drift.
+For subscription products, refresh the full relevant RevenueCat surface: SDK, products, packages, offerings, placements, entitlements, identity, paywalls, targeting, experiments, Funnels, Web, Purchases.js, purchase links and buttons, Billing, Stripe, Paddle, Redemption Links, Customer Center, webhooks, analytics, lifecycle, refunds, grace, pending purchases, restore, and newer official capabilities. Separate technically possible, policy permitted, and recommended by platform and region.
 
-The current-state output must use:
+Use the 60fps MCP with `search_shots`, `get_shot`, `get_motion_breakdown`, and `get_related_shots`; use motion code only when useful. Translate interaction principles, never another product's brand, assets, copy, exact layout, or implementation.
 
-`owner -> source of truth -> persisted state -> API or event contract -> consumers -> failure behavior`
+Audit the seven-principle heuristic: define activation, show value before disproportionate effort, ask only useful questions, keep one dominant action, use purposeful motion, show visible personalization, and finish with meaningful value in a populated normal product state. Record pass, partial, or fail with evidence, not a fake score.
 
+## Product and architecture contract
 
-## 6. Routed execution modules
+First value rendered, first value engaged, activation, retention, monetization, review eligibility, and onboarding completion are distinct. A render is not activation. First value must be real, understandable, actionable, persistent, recoverable, and connected to the acquisition promise.
 
-Load only the module needed by the ready graph nodes. The hub owns sequencing; the modules own the exhaustive acceptance details.
+Every required question identifies the behavior it changes and the screen where the user sees personalization proof. Every required effort has an explicit value exchange. A name inserted into generic copy is not personalization.
 
-| Ready nodes | Load | Purpose |
-| --- | --- | --- |
-| `ONB-02` through `ONB-09` | [`onboarding-evidence-research.md`](./onboarding-evidence-research.md) | Current guidance, competitor reviews, authorized Onbo Hub, internal guidance, provider and policy research, 60fps references, and evidence joins |
-| `ONB-10` through `ONB-14` | [`onboarding-product-contracts.md`](./onboarding-product-contracts.md) | First value, activation, effort, questions, state, identity, analytics, experiments, reviews, permissions, lifecycle, privacy, and trust |
-| `ONB-15` through `ONB-22` | [`onboarding-design-delivery.md`](./onboarding-design-delivery.md) | Architecture selection, journey, complete screen/control design, prototype, Compound Engineering implementation, hard cutover, and zero-legacy proof |
+Separate identity, journey, profile completeness, activation, entitlement, experiment assignment and exposure, review eligibility, permission and consent, and lifecycle state. Define authoritative owner, persistence, transition trigger, event, idempotency, retry, failure, compensation, and consumers. Support anonymous-to-authenticated linking, purchase before account, web-to-app redemption, reinstall, cross-device, restore, entitlement delay, interrupted journeys, churn, win-back, and identity collision without repeating successful work.
 
-Do not preload all three modules. The orchestrator loads a module when its first node reaches the ready frontier and records the loaded basis in `operations/ORCHESTRATION.md`.
+Analytics uses one machine-readable schema and typed clients. Distinguish client interaction, backend-confirmed product outcome, provider-confirmed monetization, and derived metrics. One business outcome has one authoritative emitter. Define event IDs, identity stitching, offline queueing, ordering, deduplication, replay, webhook idempotency, experiment exposure, privacy, and expected event-sequence tests. Analytics failure never blocks first value.
 
-## 7. Completion rule
+Earn review eligibility after real value and engagement. Request through native platform APIs outside first-run onboarding at a later natural success. No custom star screen, sentiment gate, incentive, or happy-user routing. Record only observable eligibility, suppression, request attempt, and API return facts.
 
-The onboarding lane cannot be `done` until every `ONB-00` through `ONB-22` node is done, the canonical `product/ONBOARDING.md` contains the joined decisions and proof, actual design and prototype evidence exist, the analytics and provider contracts reconcile, policy-safe review behavior is implemented, and replacement mode leaves no legacy runtime or one-time transformation tooling. Run `check-onboarding-graph.ts` before any readiness claim.
+Request protected permissions only after a user action with visible benefit. Define denial, limited access, retry, settings, privacy, and fallback. One lifecycle strategy owns onboarding recovery, progressive profiling, trial, post-purchase activation, habit, billing recovery, dormancy, churn, and win-back suppression.
+
+Compare architecture models using conversion, retention, first-value fidelity, file or image needs, resume, identity, experimentation, analytics, policy, economics, accessibility, localization, latency, offline behavior, operations, and lock-in. Different acquisition surfaces may render differently but converge on one semantic state graph.
+
+## Design and delivery contract
+
+Every screen and control has a stable semantic ID. Specify exact copy keys, hierarchy, states, local and canonical mutations, API or provider action, idempotency, analytics, navigation, repeated taps, errors, retries, offline and interruption behavior, accessibility, localization, haptics, motion, and reduced-motion behavior.
+
+Produce actual high-fidelity design and an interactive prototype. Contract HTML is not visual design. Cover trial eligibility, packages, restore, existing subscriber, unavailable product, offline, pending, canceled, failed, success, delayed entitlement, web handoff, and regional variants. Motion clarifies state and never disguises latency.
+
+Define behavior and observability for termination, network loss, slow or malformed generation, upload failure, analytics or config outage, provider outage, pending purchase, delayed webhook, restore or redemption failure, deep-link failure, identity collision, unsupported client, and review API unavailability.
+
+The implementation plan maps every screen, control, state, event, provider configuration, test, and legacy item to exact repository paths, dependencies, acceptance criteria, deletion, roll-forward behavior, parallel safety, and owner.
+
+Replacement mode uses hard cutover: freeze legacy changes, build and verify the target, rehearse the one-time transformation, enforce a minimum client when required, cut traffic, verify production, delete every old runtime and configuration surface, delete transformation tooling, run a repository-wide zero-legacy search, and roll forward on defects. Do not keep the old runtime as a standing fallback.
+
+## Completion
+
+The lane cannot be done until `ONB-00` through `ONB-22` are done, `product/ONBOARDING.md` carries the joined decisions and implementation checks, actual design and prototype artifacts exist, analytics and provider contracts reconcile, review behavior is policy safe, and replacement mode leaves zero legacy runtime or transformation tooling.
+
+Run `validation/business/experience/check-onboarding-graph.ts` before any readiness claim.

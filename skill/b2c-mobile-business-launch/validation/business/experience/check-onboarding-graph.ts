@@ -1,17 +1,10 @@
 #!/usr/bin/env node
 /**
- * check-onboarding-graph.ts
- *
  * Deterministic contract gate for the generalized onboarding system graph.
  *
- * This validator does not grade taste or conversion claims. It proves that the
- * canonical artifact carries the graph, evidence joins, first-value and
- * activation distinctions, screen/control contracts, provider and policy
- * research, typed analytics, compliant review timing, visual proof, and
- * replacement-mode deletion plan that agents must complete before claiming the
- * onboarding lane done.
+ * This validator does not grade conversion taste. It proves that the canonical artifact carries the graph, evidence joins, first-value and activation distinctions,
+ * screen and control contracts, provider and policy research, typed analytics, compliant review timing, visual design requirements, and replacement-mode deletion plan.
  */
-
 import {
   asString,
   getPath,
@@ -53,7 +46,7 @@ if (!skip && !artifact) {
     issue(
       "error",
       "onboarding_graph.artifact_missing",
-      "product/ONBOARDING.md is required as the canonical onboarding graph, evidence, journey, screen/control, analytics, and cutover contract.",
+      "product/ONBOARDING.md is required as the canonical onboarding graph, evidence, journey, screen, control, analytics, and cutover contract.",
       "product/ONBOARDING.md",
     ),
   );
@@ -61,8 +54,7 @@ if (!skip && !artifact) {
 
 if (artifact) {
   const text = artifact.text ?? "";
-  const path = artifact.relativePath;
-
+  const relativePath = artifact.relativePath;
   const requiredSections = [
     "Execution Mode",
     "Graph Run",
@@ -106,8 +98,8 @@ if (artifact) {
         issue(
           "error",
           `onboarding_graph.section_${codeFor(section)}_missing`,
-          `${path} must include a "## ${section}" section.`,
-          path,
+          `${relativePath} must include a "## ${section}" section.`,
+          relativePath,
         ),
       );
     }
@@ -120,8 +112,8 @@ if (artifact) {
         issue(
           "error",
           "onboarding_graph.node_missing",
-          `${path} must include graph node ${node}; the nested onboarding DAG runs ONB-00 through ONB-22.`,
-          path,
+          `${relativePath} must include graph node ${node}; the nested onboarding graph runs ONB-00 through ONB-22.`,
+          relativePath,
         ),
       );
     }
@@ -129,7 +121,7 @@ if (artifact) {
 
   requirePhrases(
     issues,
-    path,
+    relativePath,
     text,
     "onboarding_graph.evidence_contract",
     [
@@ -145,44 +137,30 @@ if (artifact) {
       "policy permitted",
       "seven-principle",
     ],
-    "The evidence contract must cover authorized Onbo Hub research, review controls, 60fps MCP, provider capabilities, policy distinctions, and the seven-principle activation audit.",
+    "The evidence contract must cover authorized Onbo Hub research, review controls, 60fps MCP, provider capabilities, policy distinctions, and the seven-principle audit.",
   );
 
   requirePhrases(
     issues,
-    path,
+    relativePath,
     text,
     "onboarding_graph.activation_contract",
-    [
-      "First value rendered",
-      "First value engaged",
-      "Activation",
-      "Effort-Before-Value",
-      "personalization proof",
-      "populated normal product",
-    ],
+    ["First value rendered", "First value engaged", "Activation", "Effort-Before-Value", "personalization proof", "populated normal product"],
     "The artifact must distinguish first value, engagement, activation, effort, visible personalization proof, and entry into a populated product experience.",
   );
 
   requirePhrases(
     issues,
-    path,
+    relativePath,
     text,
     "onboarding_graph.design_contract",
-    [
-      "ONB-SCR-001",
-      "ONB-CTL-001",
-      "Every screen has one dominant",
-      "Actual high-fidelity",
-      "interactive",
-      "reduced motion",
-    ],
-    "The artifact must carry stable screen/control IDs, one dominant action, actual visual and interactive proof, and reduced-motion behavior.",
+    ["ONB-SCR-001", "ONB-CTL-001", "Every screen has one dominant", "Actual high-fidelity", "interactive", "reduced motion"],
+    "The artifact must carry stable screen and control IDs, one dominant action, actual visual and interactive design requirements, and reduced-motion behavior.",
   );
 
   requirePhrases(
     issues,
-    path,
+    relativePath,
     text,
     "onboarding_graph.analytics_contract",
     [
@@ -201,7 +179,7 @@ if (artifact) {
 
   requirePhrases(
     issues,
-    path,
+    relativePath,
     text,
     "onboarding_graph.review_contract",
     [
@@ -213,98 +191,78 @@ if (artifact) {
       "review_request_attempted",
       "remote kill switch",
     ],
-    "Review eligibility may be earned early, but the request must be native, outside first-run onboarding, ungated by sentiment, measurable only through observable events, and remotely suppressible.",
+    "Review eligibility may be earned early, but the request must be native, outside first-run onboarding, ungated by sentiment, observable, and remotely suppressible.",
   );
 
   for (const forbiddenEvent of ["review_prompt_shown", "review_submitted", "review_rating_value"]) {
-    if (new RegExp(`\\b${escapeRegex(forbiddenEvent)}\\b`).test(text)) {
+    if (new RegExp(`\b${escapeRegex(forbiddenEvent)}\b`).test(text)) {
       issues.push(
         issue(
           "error",
           "onboarding_graph.review_unobservable_event",
-          `${path} names ${forbiddenEvent}, which claims a platform outcome the app cannot reliably observe. Record eligibility, suppression, API attempt, and API return only.`,
-          path,
+          `${relativePath} names ${forbiddenEvent}, which claims a platform outcome the app cannot reliably observe. Record eligibility, suppression, API attempt, and API return only.`,
+          relativePath,
         ),
       );
     }
   }
 
-  if (/native (?:app )?review (?:prompt|request).{0,80}immediately after first value/i.test(text) || /immediately after first value.{0,80}(?:review|rating)/i.test(text)) {
+  const reviewInsideFirstRun =
+    /native (?:app )?review (?:prompt|request) immediately after first value inside first-run onboarding/i.test(text) ||
+    /immediately after first value inside first-run onboarding.{0,80}(?:review|rating)/i.test(text);
+  if (reviewInsideFirstRun) {
     issues.push(
       issue(
         "error",
         "onboarding_graph.review_inside_first_run",
-        `${path} still directs a review request immediately after first value. Earn eligibility there if appropriate, finish first-run onboarding, and request at a later natural success in normal product use.`,
-        path,
+        `${relativePath} directs a review request immediately after first value inside onboarding. Earn eligibility there if appropriate, finish onboarding, and request at a later natural success.`,
+        relativePath,
       ),
     );
   }
 
   requirePhrases(
     issues,
-    path,
+    relativePath,
     text,
     "onboarding_graph.replacement_contract",
-    [
-      "hard cutover",
-      "durable user value",
-      "one-time",
-      "Deletion Manifest",
-      "minimum supported client",
-      "Do not keep the old runtime",
-      "zero-legacy",
-    ],
-    "Replacement mode must preserve durable user value through an isolated one-time transformation while hard-cutting to one runtime and deleting all legacy architecture.",
+    ["hard cutover", "durable user value", "one-time", "Deletion Manifest", "minimum supported client", "Do not keep the old runtime", "zero-legacy"],
+    "Replacement mode must preserve durable user value through an isolated one-time transformation while hard-cutting to one runtime and deleting legacy architecture.",
   );
 
   requirePhrases(
     issues,
-    path,
+    relativePath,
     text,
     "onboarding_graph.reliability_contract",
-    [
-      "Purchase pending",
-      "Restore",
-      "deep link",
-      "identity",
-      "Analytics failure does not block first value",
-      "unsupported client",
-      "observability",
-    ],
+    ["Purchase pending", "Restore", "deep link", "identity", "Analytics failure does not block first value", "unsupported client", "observability"],
     "The artifact must cover purchase, restore, handoff, identity, nonblocking analytics, unsupported-client, and observability behavior.",
   );
 
   if (laneStatus === "done") {
-    const live = stripFencedBlocks(text);
-    const placeholders = [
-      /\bnot_started\b/i,
-      /\bTODO\b/i,
-      /\bTBD\b/i,
-      /\bplaceholder\b/i,
-      /\bRecord (?:the|exact|current|source|decision|path|stable|products?|requirements?|behavior|date|owner|authority|state|screen|event|proof|risk|method|count|result|values?|copy|input|recovery|route|implementation|provider|platform|context|configuration|sequence|condition|requirement|access|artifact|reason|metric|test|IDs?|target|sample|flow|app|storefront|journey|transition|properties|process|exclusions|class|work|tasks?|data|fields?|economics|disposition|confidence|impact|use|change|mapping|status|timing|values?)\b/i,
-    ];
-    const hit = placeholders.find((pattern) => pattern.test(live));
-    if (hit) {
+    const liveText = stripFencedBlocks(text);
+    const placeholders = [/\bnot_started\b/i, /\bTODO\b/i, /\bTBD\b/i, /\bplaceholder\b/i, /\bRecord\b/i];
+    if (placeholders.some((pattern) => pattern.test(liveText))) {
       issues.push(
         issue(
           "error",
           "onboarding_graph.placeholder_complete",
-          `${path} cannot support lanes.onboarding.status=done while template placeholders or not_started graph nodes remain.`,
-          path,
+          `${relativePath} cannot support lanes.onboarding.status=done while template placeholders or not_started graph nodes remain.`,
+          relativePath,
         ),
       );
     }
 
     for (let index = 0; index <= 22; index += 1) {
       const node = `ONB-${String(index).padStart(2, "0")}`;
-      const row = new RegExp(`\\|\\s*\`${escapeRegex(node)}\`\\s*\\|\\s*done\\s*\\|`, "i");
+      const row = new RegExp(`\|\s*\`${escapeRegex(node)}\`\s*\|\s*done\s*\|`, "i");
       if (!row.test(text)) {
         issues.push(
           issue(
             "error",
             "onboarding_graph.node_not_done",
-            `${path} claims the onboarding lane is done but graph node ${node} is not recorded as done in the Graph Run table.`,
-            path,
+            `${relativePath} claims the onboarding lane is done but graph node ${node} is not recorded as done in the Graph Run table.`,
+            relativePath,
           ),
         );
       }
@@ -315,7 +273,7 @@ if (artifact) {
 reportAndExit("Onboarding system graph check", issues);
 
 function hasHeading(text: string, heading: string): boolean {
-  return new RegExp(`^##\\s+${escapeRegex(heading)}\\s*$`, "mi").test(text);
+  return new RegExp(`^##\s+${escapeRegex(heading)}\s*$`, "mi").test(text);
 }
 
 function requirePhrases(
@@ -328,14 +286,7 @@ function requirePhrases(
 ): void {
   const missing = phrases.filter((phrase) => !text.toLowerCase().includes(phrase.toLowerCase()));
   if (missing.length === 0) return;
-  target.push(
-    issue(
-      "error",
-      code,
-      `${message} Missing: ${missing.join(", ")}.`,
-      relativePath,
-    ),
-  );
+  target.push(issue("error", code, `${message} Missing: ${missing.join(", ")}.`, relativePath));
 }
 
 function stripFencedBlocks(text: string): string {
@@ -350,5 +301,5 @@ function codeFor(value: string): string {
 }
 
 function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\$&");
 }
