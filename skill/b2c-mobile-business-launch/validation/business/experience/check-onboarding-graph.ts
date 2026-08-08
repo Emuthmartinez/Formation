@@ -195,7 +195,7 @@ if (artifact) {
   );
 
   for (const forbiddenEvent of ["review_prompt_shown", "review_submitted", "review_rating_value"]) {
-    if (new RegExp(`\b${escapeRegex(forbiddenEvent)}\b`).test(text)) {
+    if (text.includes(forbiddenEvent)) {
       issues.push(
         issue(
           "error",
@@ -255,8 +255,7 @@ if (artifact) {
 
     for (let index = 0; index <= 22; index += 1) {
       const node = `ONB-${String(index).padStart(2, "0")}`;
-      const row = new RegExp(`\|\s*\`${escapeRegex(node)}\`\s*\|\s*done\s*\|`, "i");
-      if (!row.test(text)) {
+      if (!graphRunNodeDone(text, node)) {
         issues.push(
           issue(
             "error",
@@ -273,7 +272,14 @@ if (artifact) {
 reportAndExit("Onboarding system graph check", issues);
 
 function hasHeading(text: string, heading: string): boolean {
-  return new RegExp(`^##\s+${escapeRegex(heading)}\s*$`, "mi").test(text);
+  return text.split(/\r?\n/).some((line) => line.trim() === `## ${heading}`);
+}
+
+function graphRunNodeDone(text: string, node: string): boolean {
+  return text.split(/\r?\n/).some((line) => {
+    const cells = line.split("|").map((cell) => cell.trim());
+    return cells.includes(`\`${node}\``) && cells.includes("done");
+  });
 }
 
 function requirePhrases(
@@ -298,8 +304,4 @@ function codeFor(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
-}
-
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\$&");
 }
