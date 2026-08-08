@@ -235,7 +235,7 @@ if (!skip && artifact) {
         issue(
           "error",
           "onboarding_graph.placeholder_complete",
-          `${relativePath} cannot support lanes.onboarding.status=done while template placeholders or not_started graph nodes remain.`,
+          `${relativePath} cannot support lanes.onboarding.status=done while template directives, generic completion labels, or not_started graph nodes remain.`,
           relativePath,
         ),
       );
@@ -259,6 +259,50 @@ if (!skip && artifact) {
 
 reportAndExit("Onboarding system graph check", issues);
 
+const TEMPLATE_DIRECTIVE_VERBS = new Set([
+  "add",
+  "added",
+  "capture",
+  "captured",
+  "choose",
+  "chosen",
+  "complete",
+  "completed",
+  "define",
+  "defined",
+  "describe",
+  "described",
+  "document",
+  "documented",
+  "enter",
+  "entered",
+  "fill",
+  "filled",
+  "finish",
+  "finished",
+  "include",
+  "included",
+  "insert",
+  "inserted",
+  "mark",
+  "marked",
+  "note",
+  "noted",
+  "provide",
+  "provided",
+  "record",
+  "replace",
+  "replaced",
+  "select",
+  "selected",
+  "specify",
+  "specified",
+  "update",
+  "updated",
+  "write",
+  "written",
+]);
+
 function hasHeading(text: string, heading: string): boolean {
   return text.split(/\r?\n/).some((line) => line.trim() === `## ${heading}`);
 }
@@ -271,12 +315,32 @@ function graphRunNodeDone(text: string, node: string): boolean {
 }
 
 function tablePlaceholderCells(text: string): string[] {
-  return text
+  const cells = text
     .split(/\r?\n/)
     .filter((line) => line.trim().startsWith("|"))
     .flatMap((line) => line.split("|").slice(1, -1))
     .map((cell) => cell.trim().replaceAll("`", ""))
-    .filter((cell) => /^Record(?:\b|$)/i.test(cell) || /^placeholder$/i.test(cell));
+    .filter((cell) => cell.length > 0 && !/^:?-{3,}:?$/.test(cell));
+
+  const firstWordCounts = new Map<string, number>();
+  for (const cell of cells) {
+    const words = cell.match(/[A-Za-z][A-Za-z-]*/g) ?? [];
+    if (words.length < 2) continue;
+    const firstWord = words[0]!.toLowerCase();
+    firstWordCounts.set(firstWord, (firstWordCounts.get(firstWord) ?? 0) + 1);
+  }
+  const repeatedThreshold = Math.max(8, Math.ceil(cells.length * 0.15));
+  const repeatedPrefixes = new Set(
+    [...firstWordCounts.entries()].filter(([, count]) => count >= repeatedThreshold).map(([firstWord]) => firstWord),
+  );
+
+  return cells.filter((cell) => {
+    if (/^placeholder$/i.test(cell) || /^(?:completed|done|ready|pass|passed|yes|no|n\/a|na)$/i.test(cell)) return true;
+    const firstWord = cell.match(/^[A-Za-z][A-Za-z-]*/)?.[0]?.toLowerCase();
+    if (!firstWord) return false;
+    if (TEMPLATE_DIRECTIVE_VERBS.has(firstWord)) return true;
+    return repeatedPrefixes.has(firstWord);
+  });
 }
 
 function requirePhrases(target: Issue[], relativePath: string, text: string, code: string, phrases: string[], message: string): void {
