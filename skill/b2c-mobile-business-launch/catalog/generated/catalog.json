@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.101.1",
+  "skillVersion": "0.102.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -3792,6 +3792,13 @@
       "command": "check:native-ios",
       "scriptPath": "validation/business/engineering/check-native-ios-proof.ts",
       "ownerDomainId": "domain.engineering",
+      "audit": "required"
+    },
+    {
+      "id": "gate.check-no-slop",
+      "command": "check:no-slop",
+      "scriptPath": "validation/business/words/check-no-slop.ts",
+      "ownerDomainId": "domain.words",
       "audit": "required"
     },
     {

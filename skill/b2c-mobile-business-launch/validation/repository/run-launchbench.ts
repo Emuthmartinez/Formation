@@ -64,6 +64,7 @@ const knownValidators = new Set([
   "check-research-evidence",
   "check-revenue",
   "check-app-copy",
+  "check-no-slop",
   "check-change-cascade",
   "check-founder-copy",
   "check-template-safety",

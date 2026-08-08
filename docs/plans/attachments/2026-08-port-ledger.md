@@ -75,8 +75,8 @@ are ground truth, not hand arithmetic.
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
 | Knowledge content files | 96 | 0 | 0 | 1 | 97 |
 | Additions beyond literal scope (2) | 1 | 0 | 1 | 0 | 2 |
-| Validators (67) | 24 | 27 | 0 | 17 | 68 |
-| **Total** | **122** | **27** | **1** | **33** | **183** |
+| Validators (67) | 25 | 27 | 0 | 16 | 68 |
+| **Total** | **123** | **27** | **1** | **32** | **183** |
 
 ---
 
@@ -431,7 +431,7 @@ split noted).
 |---|---|---|
 | validation/business/words/check-app-copy.ts | port | HYBRID — the real static scan of starter app source for hardcoded JSX text not routed through lib/strings.ts is structural and a strong capability-test candidate ("ship hardcoded text, assert rejection"); COPY_DECK.md banned-term scan is WORD-PATTERN |
 | validation/business/words/check-founder-copy.ts | port | HYBRID, most structural of the three words/ files — lane/status dictionary coverage, celebration-beat wiring, and experience-card tier-drift checks are real cross-file logic, not prose grading; the rendered-page banned-vocabulary scan is WORD-PATTERN |
-| validation/business/words/check-no-slop.ts | drop | WORD-PATTERN — the purest case in the entire set; the file's own header explicitly self-describes as "mechanical patterns only" over prose, no structural or live component |
+| validation/business/words/check-no-slop.ts | keep | Reversal of this row's original "drop" (2026-08 graph-consolidation audit, superseding the U11 disposition below). This row's drop reasoning was sound in isolation — WORD-PATTERN, "mechanical patterns only" per its own header — but the U11 plan never applied that reasoning consistently: `check-app-copy.ts` and `check-founder-copy.ts` in this same directory were dispositioned `port` (word-pattern half to be stripped, structural half to survive) and, two months later, remain fully unchanged HYBRID validators still running the exact word-pattern logic the philosophy said to drop. A gate that scans this repo's own front-door docs (README/CONTRIBUTING/SECURITY/CODE_OF_CONDUCT/AGENTS/CLAUDE) for the banned words and slop patterns `knowledge/words/no-slop-writing.md` §2 already promises to enforce there is real, working, tested value (7 fixture cases; a live inject-and-catch verification) that a partially-executed philosophy should not block. The original 2026-07-25 file had already proven this once — it drove a 302-to-140-line README rewrite and added the CODE_OF_CONDUCT.md/SECURITY.md the repo lacked. Follow-up owed, not deferred indefinitely: strip or formally re-justify the still-unstripped word-pattern halves of `check-app-copy.ts`/`check-founder-copy.ts` so the "port" disposition either becomes true or is itself revised — tracked as of 2026-08-07, not a someday |
 
 ### validation/repository/
 
@@ -450,7 +450,12 @@ split noted).
 
 ---
 
-## Ten most consequential drop decisions
+## Nine most consequential drop decisions
+
+(Was ten. `validation/business/words/check-no-slop.ts`, formerly #7 here, was reinstated
+2026-08-07 — see its row above for why "purest word-pattern validator" was not, in
+practice, a consistently-applied reason to drop one validator while leaving its two
+siblings' identical logic untouched.)
 
 1. **The 15 knowledge domain README.md index files** (§1) — the direct implementation of
    R20's routing-authority inversion; every one of them is superseded by
@@ -469,13 +474,11 @@ split noted).
    evidentiary weight.
 6. **`validation/business/product/check-product-spec.ts`** — hand-rolled negation/concession
    detection over prose; sophisticated regex work in service of grading tone, not truth.
-7. **`validation/business/words/check-no-slop.ts`** — the purest word-pattern validator in
-   the set; its own header calls itself "mechanical patterns only."
-8. **`validation/business/process/check-workflow-adherence.ts`** — ~200 lines of duplicated
+7. **`validation/business/process/check-workflow-adherence.ts`** — ~200 lines of duplicated
    `.includes()` term-list scaffolding shared with two sibling validators, none of which
    verify anything beyond a document containing the right words.
-9. **`validation/business/store/check-apple-signing-packet.ts`** — a 25-phrase checklist
+8. **`validation/business/store/check-apple-signing-packet.ts`** — a 25-phrase checklist
    with zero file, binary, or live verification anywhere in the file.
-10. **`validation/business/trust/check-privacy-terms.ts`** — a required-phrase checklist on
+9. **`validation/business/trust/check-privacy-terms.ts`** — a required-phrase checklist on
     legal text that is, definitionally, purely self-attestable; no mechanism confirms the
     published policy matches what the checklist graded.
