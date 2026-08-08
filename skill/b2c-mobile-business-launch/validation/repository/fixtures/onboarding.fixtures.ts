@@ -75,11 +75,7 @@ export function register(h: Harness): void {
 
   const doneWithPlaceholders = makeFixture("onboarding-graph-done-with-placeholders");
   {
-    const state = readState(doneWithPlaceholders);
-    const lane = getLane(state, "onboarding");
-    lane["status"] = "done";
-    lane["evidence"] = ["product/ONBOARDING.md", "product/onboarding.html"];
-    writeState(doneWithPlaceholders, state);
+    markOnboardingDone(doneWithPlaceholders);
   }
   runFixture(
     "done onboarding lane with not_started nodes and template records fails",
@@ -89,17 +85,52 @@ export function register(h: Harness): void {
     "onboarding_graph.placeholder_complete",
   );
 
+  const doneWithRenamedPlaceholders = makeFixture("onboarding-graph-done-with-renamed-placeholders");
+  {
+    markOnboardingDone(doneWithRenamedPlaceholders);
+    mutateOnboarding(doneWithRenamedPlaceholders, (text) => text.replaceAll("not_started", "done").replaceAll("Record", "Completed"));
+  }
+  runFixture(
+    "renaming template directives does not create a completed onboarding contract",
+    doneWithRenamedPlaceholders,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.placeholder_complete",
+  );
+
   const doneWithOrdinaryRecordProse = makeFixture("onboarding-graph-done-with-ordinary-record-prose");
   {
-    const state = readState(doneWithOrdinaryRecordProse);
-    const lane = getLane(state, "onboarding");
-    lane["status"] = "done";
-    lane["evidence"] = ["product/ONBOARDING.md", "product/onboarding.html"];
-    writeState(doneWithOrdinaryRecordProse, state);
+    markOnboardingDone(doneWithOrdinaryRecordProse);
     mutateOnboarding(doneWithOrdinaryRecordProse, (text) => {
-      const completed = text.replaceAll("not_started", "done").replaceAll("Record", "Completed");
+      const completed = fillTemplateDirectiveCells(text.replaceAll("not_started", "done"));
       return `${completed}\nThis remains the canonical execution record for the completed onboarding system.\n`;
     });
   }
   runFixture("completed onboarding may use the ordinary word record outside template cells", doneWithOrdinaryRecordProse, "check-onboarding-graph.ts", 0);
+
+  function markOnboardingDone(fixtureRoot: string): void {
+    const state = readState(fixtureRoot);
+    const lane = getLane(state, "onboarding");
+    lane["status"] = "done";
+    lane["evidence"] = ["product/ONBOARDING.md", "product/onboarding.html"];
+    writeState(fixtureRoot, state);
+  }
+
+  function fillTemplateDirectiveCells(text: string): string {
+    let evidenceNumber = 0;
+    return text
+      .split("\n")
+      .map((line) => {
+        if (!line.trim().startsWith("|")) return line;
+        return line
+          .split("|")
+          .map((cell) => {
+            if (!/^\s*Record(?:\b|$)/i.test(cell)) return cell;
+            evidenceNumber += 1;
+            return ` Evidence-${evidenceNumber}: source-backed implementation detail dated 2026-08-08 `;
+          })
+          .join("|");
+      })
+      .join("\n");
+  }
 }
