@@ -1072,4 +1072,104 @@ export function register(h: Harness): void {
     1,
     "motion_contract.cinematic.in_craft_doctrine",
   );
+
+  // --- check-no-slop ---
+  //
+  // The gate had zero fixture coverage: nothing proved the tier split (public
+  // front-door docs error, maintainer-only docs warn) or the advisory-only
+  // status of empty adverbs/phrases could actually fire. The real
+  // no-slop-writing.md is copied in rather than a fixture-only word list, so a
+  // rule added there is exercised here without duplicating it.
+  runScriptArgs("no-slop passes on the shipped repo's own front door", "check-no-slop.ts", ["--skill-root", skillRoot], 0);
+
+  function writeNoSlopRoot(name: string, overrides: Partial<Record<string, string>> = {}): { repoRoot: string; skillRoot: string } {
+    const root = makeEmptyFixture(name);
+    const repoRoot = path.join(root, "repo");
+    const fixtureSkillRoot = path.join(repoRoot, "skill", "pkg");
+    mkdirSync(path.join(fixtureSkillRoot, "knowledge", "words"), { recursive: true });
+    const defaults: Record<string, string> = {
+      "README.md": "# Example\n\nA plain description of what this project does.\n",
+      "CONTRIBUTING.md": "# Contributing\n\nOpen a pull request with a clear description of the change.\n",
+      ".github/SECURITY.md": "# Security\n\nReport issues to security@example.com.\n",
+      ".github/CODE_OF_CONDUCT.md": "# Code Of Conduct\n\nBe respectful in every interaction.\n",
+      "AGENTS.md": "# Agents\n\nFollow the repository conventions documented here.\n",
+      "CLAUDE.md": "# Claude Instructions\n\nFollow the repository conventions documented here.\n",
+    };
+    for (const [relative, content] of Object.entries({ ...defaults, ...overrides })) {
+      if (content === undefined) continue;
+      const target = path.join(repoRoot, relative);
+      mkdirSync(path.dirname(target), { recursive: true });
+      writeFileSync(target, content, "utf8");
+    }
+    cpSync(path.join(skillRoot, "knowledge", "words", "no-slop-writing.md"), path.join(fixtureSkillRoot, "knowledge", "words", "no-slop-writing.md"));
+    return { repoRoot, skillRoot: fixtureSkillRoot };
+  }
+
+  const noSlopClean = writeNoSlopRoot("no-slop-clean");
+  runScriptArgs(
+    "no-slop passes on a synthetic clean front door",
+    "check-no-slop.ts",
+    ["--repo-root", noSlopClean.repoRoot, "--skill-root", noSlopClean.skillRoot],
+    0,
+  );
+
+  const noSlopMissing = writeNoSlopRoot("no-slop-missing-file");
+  rmSync(path.join(noSlopMissing.repoRoot, "CONTRIBUTING.md"));
+  runScriptArgs(
+    "no-slop fails when a declared front-door file is missing",
+    "check-no-slop.ts",
+    ["--repo-root", noSlopMissing.repoRoot, "--skill-root", noSlopMissing.skillRoot],
+    1,
+    "no_slop.front_door_missing",
+  );
+
+  const noSlopBannedReadme = writeNoSlopRoot("no-slop-banned-word-readme", {
+    "README.md": "# Example\n\nThis tool leverages a robust workflow.\n",
+  });
+  runScriptArgs(
+    "no-slop fails when the repo's own README uses a banned word",
+    "check-no-slop.ts",
+    ["--repo-root", noSlopBannedReadme.repoRoot, "--skill-root", noSlopBannedReadme.skillRoot],
+    1,
+    "no_slop.banned_word",
+  );
+
+  const noSlopPattern = writeNoSlopRoot("no-slop-pattern-throat-clearing", {
+    "CONTRIBUTING.md": "# Contributing\n\nHere's the thing: open a pull request with a clear description.\n",
+  });
+  runScriptArgs(
+    "no-slop fails on a mechanical slop pattern, not just banned words",
+    "check-no-slop.ts",
+    ["--repo-root", noSlopPattern.repoRoot, "--skill-root", noSlopPattern.skillRoot],
+    1,
+    "no_slop.pattern.throat_clearing",
+  );
+
+  // AGENTS.md and CLAUDE.md are maintainer-only guidance: the same banned word
+  // that fails the gate on README.md only warns here, per no-slop-writing.md
+  // §2's own documented tier split.
+  const noSlopBannedAgents = writeNoSlopRoot("no-slop-banned-word-agents", {
+    "AGENTS.md": "# Agents\n\nThis skill leverages a shared runtime.\n",
+  });
+  runScriptArgs(
+    "no-slop demotes the same banned word to a warning on maintainer-only docs",
+    "check-no-slop.ts",
+    ["--repo-root", noSlopBannedAgents.repoRoot, "--skill-root", noSlopBannedAgents.skillRoot],
+    0,
+    "WARNING no_slop.banned_word",
+  );
+
+  // Empty adverbs/phrases are documented as advisory-only in every
+  // no-slop-rules.ts consumer, never promoted to an error even on a
+  // public-front-door file — this is the fixture that proves it.
+  const noSlopAdverb = writeNoSlopRoot("no-slop-empty-adverb-readme", {
+    "README.md": "# Example\n\nThis actually just describes what the project does.\n",
+  });
+  runScriptArgs(
+    "no-slop keeps an empty adverb a warning even on a public front-door file",
+    "check-no-slop.ts",
+    ["--repo-root", noSlopAdverb.repoRoot, "--skill-root", noSlopAdverb.skillRoot],
+    0,
+    "WARNING no_slop.empty_adverb",
+  );
 }

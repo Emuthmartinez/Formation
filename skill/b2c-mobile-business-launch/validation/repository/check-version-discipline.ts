@@ -4,6 +4,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { flagString, issue, isRecord, parseFlags, reportAndExit, type Issue } from "../../tooling/lib/launch-state.js";
+import { findGitRoot } from "../../tooling/lib/git-root.js";
 
 interface Args {
   repoRoot: string;
@@ -111,11 +112,6 @@ function loadManifest(filePath: string): { version: string; updatedAt: string; r
     issues.push(issue("error", "version_discipline.manifest_parse_error", `skill-version.json is invalid JSON: ${message}`, filePath));
     return undefined;
   }
-}
-
-function findGitRoot(start: string): string | undefined {
-  const result = git(["rev-parse", "--show-toplevel"], start);
-  return result.status === 0 ? result.stdout.trim() : undefined;
 }
 
 function git(argv: string[], cwd: string): { status: number | null; stdout: string; stderr: string } {
