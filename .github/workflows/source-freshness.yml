@@ -51,6 +51,8 @@ jobs:
       - name: Audit after refresh
         run: npm run audit:ci
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        # Surface the refresh output even when the post-refresh audit fails —
+        # seven scheduled runs failed with zero artifacts and nobody noticed.
         if: always()
         with:
           name: source-freshness-report
@@ -58,6 +60,10 @@ jobs:
             docs/source-freshness/SOURCE_REFRESH_REPORT.md
             docs/source-freshness/source-refresh.html
             docs/source-freshness/source-snapshots/current.json
+      # Source freshness tracks this third-party action:
+      # https://github.com/peter-evans/create-pull-request
+      # if: always() — a refresh whose audit fails must still land as a visible
+      # (red) PR for review, not vanish into a failed run log.
       - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         if: always()
         with:
@@ -71,135 +77,3 @@ jobs:
           add-paths: |
             skill/b2c-mobile-business-launch/machine/source-registry.yaml
             docs/source-freshness/
-
-  finalize-onboarding-graph:
-    if: github.event_name == 'pull_request' && github.head_ref == 'agent/onboarding-system-graph'
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version: "22"
-          cache: npm
-      - run: npm ci
-      - run: npm ci --prefix skill/b2c-mobile-business-launch
-      - name: Update release, audit, and catalog metadata
-        shell: bash
-        run: |
-          cat > /tmp/finalize-onboarding.mjs <<'NODE'
-          import fs from "node:fs";
-
-          const readJson = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
-          const writeJson = (file, value) => fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
-
-          const rootPackage = readJson("package.json");
-          rootPackage.version = "0.104.0";
-          rootPackage.scripts["check:onboarding-graph"] =
-            "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-graph.ts";
-          writeJson("package.json", rootPackage);
-
-          const runtimePath = "skill/b2c-mobile-business-launch/package.json";
-          const runtimePackage = readJson(runtimePath);
-          runtimePackage.version = "0.104.0";
-          runtimePackage.scripts["check:onboarding-graph"] = "tsx validation/business/experience/check-onboarding-graph.ts";
-          writeJson(runtimePath, runtimePackage);
-
-          const lock = readJson("package-lock.json");
-          lock.version = "0.104.0";
-          if (lock.packages?.[""]) lock.packages[""].version = "0.104.0";
-          writeJson("package-lock.json", lock);
-
-          const runtimeLockPath = "skill/b2c-mobile-business-launch/package-lock.json";
-          const runtimeLock = readJson(runtimeLockPath);
-          runtimeLock.version = "0.104.0";
-          if (runtimeLock.packages?.[""]) runtimeLock.packages[""].version = "0.104.0";
-          writeJson(runtimeLockPath, runtimeLock);
-
-          const manifestPath = "skill/b2c-mobile-business-launch/skill-version.json";
-          const manifest = readJson(manifestPath);
-          manifest.version = "0.104.0";
-          manifest.updatedAt = "2026-08-08";
-          manifest.releaseNotes = [
-            "Expanded onboarding into typed ONB-00 through ONB-22 catalog nodes so the durable engine can schedule, fan out, join, checkpoint, retry, resume, and verify the complete consumer onboarding system rather than executing one coarse prose node.",
-            "Rebuilt product/ONBOARDING.md as the canonical evidence, first-value, state, identity, analytics, design, monetization, lifecycle, implementation, hard-cutover, and zero-legacy contract, with a faithful searchable generated HTML view.",
-            "Added check:onboarding-graph to both package layouts and the standard audit, with deterministic fixtures for review timing, deferrals, placeholder completion, typed screen and control contracts, and legacy removal. Updated app-agent roles to continue the graph through Compound Engineering implementation and final proof."
-          ];
-          writeJson(manifestPath, manifest);
-
-          const auditPath = "skill/b2c-mobile-business-launch/tooling/lib/audit-plan.ts";
-          let audit = fs.readFileSync(auditPath, "utf8");
-          if (!audit.includes('id: "check:onboarding-graph"')) {
-            const anchor = '    { id: "check:emotional-design", kind: "script", args: stateArgs },\n';
-            if (!audit.includes(anchor)) throw new Error("audit-plan onboarding insertion anchor not found");
-            audit = audit.replace(anchor, `${anchor}    { id: "check:onboarding-graph", kind: "script", args: stateArgs },\n`);
-            fs.writeFileSync(auditPath, audit, "utf8");
-          }
-
-          const launchbenchPath = "skill/b2c-mobile-business-launch/validation/repository/run-launchbench.ts";
-          let launchbench = fs.readFileSync(launchbenchPath, "utf8");
-          if (!launchbench.includes('"check-onboarding-graph"')) {
-            const anchor = '  "check-emotional-design",\n';
-            if (!launchbench.includes(anchor)) throw new Error("LaunchBench validator insertion anchor not found");
-            launchbench = launchbench.replace(anchor, `${anchor}  "check-onboarding-graph",\n`);
-            fs.writeFileSync(launchbenchPath, launchbench, "utf8");
-          }
-
-          const fixturePath = "skill/b2c-mobile-business-launch/verification/fixtures/catalog.fixtures.ts";
-          let fixture = fs.readFileSync(fixturePath, "utf8");
-          fixture = fixture
-            .replaceAll("catalog.workflows.length === 58", "catalog.workflows.length === 80")
-            .replaceAll("expected 58 workflows", "expected 80 workflows")
-            .replaceAll("full 58-workflow catalog", "full 80-workflow catalog");
-          fs.writeFileSync(fixturePath, fixture, "utf8");
-
-          const workflowIndexPath = "skill/b2c-mobile-business-launch/catalog/workflows/index.ts";
-          let workflowIndex = fs.readFileSync(workflowIndexPath, "utf8");
-          workflowIndex = workflowIndex.replace(
-            "/** All 57 catalog workflows, ported from runtime/graph/workflows/*.ts (U8). */",
-            "/** All 80 catalog workflows, including the typed ONB-00 through ONB-22 onboarding expansion. */",
-          );
-          fs.writeFileSync(workflowIndexPath, workflowIndex, "utf8");
-
-          const productPath = "skill/b2c-mobile-business-launch/catalog/workflows/product-experience.ts";
-          let product = fs.readFileSync(productPath, "utf8");
-          const onboardingIds = [...product.matchAll(/id: "(workflow\.experience\.onboarding-system\.onb-(\d{2})-([^"]+))"/g)].map(
-            (match) => ({ id: match[1], number: match[2], slug: match[3] }),
-          );
-          if (onboardingIds.length !== 22) throw new Error(`expected 22 intermediate ONB nodes, found ${onboardingIds.length}`);
-          for (const node of onboardingIds) {
-            const token = `id: "${node.id}",`;
-            const start = product.indexOf(token);
-            const next = product.indexOf("  workflow({", start + token.length);
-            const end = next === -1 ? product.indexOf("] as const;", start) : next;
-            const block = product.slice(start, end);
-            if (block.includes("outputPaths:")) continue;
-            const actionOffset = block.indexOf("    actionClass:");
-            if (actionOffset === -1) throw new Error(`actionClass missing for ${node.id}`);
-            const insertion = start + actionOffset;
-            const outputPath = `product/onboarding/graph/ONB-${node.number}-${node.slug}.md`;
-            product = `${product.slice(0, insertion)}    outputPaths: ["${outputPath}"],\n${product.slice(insertion)}`;
-          }
-          fs.writeFileSync(productPath, product, "utf8");
-          NODE
-          node /tmp/finalize-onboarding.mjs
-      - run: npm run format
-      - run: npm run catalog:render-routing
-      - run: npm run render:artifact-pages -- --root skill/b2c-mobile-business-launch/workspace/business
-      - run: npm run check:catalog
-      - run: npm run check:onboarding-graph -- --root skill/b2c-mobile-business-launch/workspace/business --state state/PROJECT_STATE.yaml
-      - run: npm run test:validators
-      - run: npm run check:generated-pages -- --root skill/b2c-mobile-business-launch/workspace/business
-      - run: npm run check:package-parity
-      - name: Commit and push generated integration
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "chore: finalize onboarding graph integration"
-          git push origin HEAD:${{ github.head_ref }}
