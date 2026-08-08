@@ -114,6 +114,12 @@ jobs:
           if (lock.packages?.[""]) lock.packages[""].version = "0.104.0";
           writeJson("package-lock.json", lock);
 
+          const runtimeLockPath = "skill/b2c-mobile-business-launch/package-lock.json";
+          const runtimeLock = readJson(runtimeLockPath);
+          runtimeLock.version = "0.104.0";
+          if (runtimeLock.packages?.[""]) runtimeLock.packages[""].version = "0.104.0";
+          writeJson(runtimeLockPath, runtimeLock);
+
           const manifestPath = "skill/b2c-mobile-business-launch/skill-version.json";
           const manifest = readJson(manifestPath);
           manifest.version = "0.104.0";
@@ -132,6 +138,15 @@ jobs:
             if (!audit.includes(anchor)) throw new Error("audit-plan onboarding insertion anchor not found");
             audit = audit.replace(anchor, `${anchor}    { id: "check:onboarding-graph", kind: "script", args: stateArgs },\n`);
             fs.writeFileSync(auditPath, audit, "utf8");
+          }
+
+          const launchbenchPath = "skill/b2c-mobile-business-launch/validation/repository/run-launchbench.ts";
+          let launchbench = fs.readFileSync(launchbenchPath, "utf8");
+          if (!launchbench.includes('"check-onboarding-graph"')) {
+            const anchor = '  "check-emotional-design",\n';
+            if (!launchbench.includes(anchor)) throw new Error("LaunchBench validator insertion anchor not found");
+            launchbench = launchbench.replace(anchor, `${anchor}  "check-onboarding-graph",\n`);
+            fs.writeFileSync(launchbenchPath, launchbench, "utf8");
           }
 
           const fixturePath = "skill/b2c-mobile-business-launch/verification/fixtures/catalog.fixtures.ts";
