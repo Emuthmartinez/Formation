@@ -51,8 +51,6 @@ jobs:
       - name: Audit after refresh
         run: npm run audit:ci
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        # Surface the refresh output even when the post-refresh audit fails —
-        # seven scheduled runs failed with zero artifacts and nobody noticed.
         if: always()
         with:
           name: source-freshness-report
@@ -60,10 +58,6 @@ jobs:
             docs/source-freshness/SOURCE_REFRESH_REPORT.md
             docs/source-freshness/source-refresh.html
             docs/source-freshness/source-snapshots/current.json
-      # Source freshness tracks this third-party action:
-      # https://github.com/peter-evans/create-pull-request
-      # if: always() — a refresh whose audit fails must still land as a visible
-      # (red) PR for review, not vanish into a failed run log.
       - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         if: always()
         with:
@@ -155,6 +149,27 @@ jobs:
             "/** All 80 catalog workflows, including the typed ONB-00 through ONB-22 onboarding expansion. */",
           );
           fs.writeFileSync(workflowIndexPath, workflowIndex, "utf8");
+
+          const productPath = "skill/b2c-mobile-business-launch/catalog/workflows/product-experience.ts";
+          let product = fs.readFileSync(productPath, "utf8");
+          const onboardingIds = [...product.matchAll(/id: "(workflow\.experience\.onboarding-system\.onb-(\d{2})-([^"]+))"/g)].map(
+            (match) => ({ id: match[1], number: match[2], slug: match[3] }),
+          );
+          if (onboardingIds.length !== 22) throw new Error(`expected 22 intermediate ONB nodes, found ${onboardingIds.length}`);
+          for (const node of onboardingIds) {
+            const token = `id: "${node.id}",`;
+            const start = product.indexOf(token);
+            const next = product.indexOf("  workflow({", start + token.length);
+            const end = next === -1 ? product.indexOf("] as const;", start) : next;
+            const block = product.slice(start, end);
+            if (block.includes("outputPaths:")) continue;
+            const actionOffset = block.indexOf("    actionClass:");
+            if (actionOffset === -1) throw new Error(`actionClass missing for ${node.id}`);
+            const insertion = start + actionOffset;
+            const outputPath = `product/onboarding/graph/ONB-${node.number}-${node.slug}.md`;
+            product = `${product.slice(0, insertion)}    outputPaths: ["${outputPath}"],\n${product.slice(insertion)}`;
+          }
+          fs.writeFileSync(productPath, product, "utf8");
           NODE
           node /tmp/finalize-onboarding.mjs
       - run: npm run format
