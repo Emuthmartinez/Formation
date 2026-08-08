@@ -195,19 +195,9 @@ jobs:
       - run: npm run test:validators
       - run: npm run check:generated-pages -- --root skill/b2c-mobile-business-launch/workspace/business
       - run: npm run check:package-parity
-      - name: Restore workflow files and commit generated integration
+      - name: Commit and push generated integration
         shell: bash
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('.github/workflows/source-freshness.yml')
-          text = path.read_text()
-          marker = '\n  finalize-onboarding-graph:\n'
-          if marker not in text:
-              raise SystemExit('finalizer marker missing')
-          path.write_text(text.split(marker, 1)[0] + '\n')
-          PY
-          rm -f .github/workflows/finalize-onboarding-graph.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
