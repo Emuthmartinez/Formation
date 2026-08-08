@@ -451,7 +451,7 @@ if (revenueDone && revenueOpsText) {
     );
   }
 
-  // 2b. Pricing decision floor — the §7a procedure's output. The heading, at
+  // 2b. Pricing decision floor — the paywall-pricing-and-experiments.md §3 procedure's output. The heading, at
   //     least one real competitor row in the anchor table, and a dated founder
   //     approval must all be present before the lane is done: a price chosen
   //     with no anchor and no recorded approval is a default, not a decision.
@@ -509,7 +509,7 @@ if (revenueDone && revenueOpsText) {
     }
   }
 
-  // 2c. Paywall experiment cadence — the §7b program's output. The first
+  // 2c. Paywall experiment cadence — the paywall-pricing-and-experiments.md §4 program's output. The first
   //     paywall is a hypothesis; once the app has been live four weeks with the
   //     revenue lane done, the backlog must show at least one active or
   //     completed experiment row. One reasonable paywall shipped and never
@@ -569,7 +569,7 @@ if (revenueDone && revenueOpsText) {
       // experiments — only emptiness and placeholders disqualify.
       const identifierCell = (cell: string): boolean =>
         cell.replace(/[^a-z0-9]/gi, "").length >= 2 && !BACKLOG_PLACEHOLDER.test(cell) && !NEGATIVE_CELL.test(cell.trim());
-      // One historical row must not satisfy the cadence forever (§7b is a
+      // One historical row must not satisfy the cadence forever (paywall-pricing-and-experiments.md §4 is a
       // standing program): current activity means an active experiment, a
       // completed one started inside the recency window, or a planned row
       // dated to start soon — each on a round-tripped real calendar date.
@@ -593,7 +593,7 @@ if (revenueDone && revenueOpsText) {
           substantiveCell(cells[variantColumn] ?? "") &&
           identifierCell(cells[metricColumn] ?? "");
         // A completed test is judged on cohort economics over a renewal
-        // window (§7b) — a day-one conversion delta alone is not a decision.
+        // window (paywall-pricing-and-experiments.md §4) — a day-one conversion delta alone is not a decision.
         const resultCell = cells[resultColumn] ?? "";
         // Clause-level polarity: a cohort noun counts only in a clause with no
         // negation or availability negative — "No cohort evidence was

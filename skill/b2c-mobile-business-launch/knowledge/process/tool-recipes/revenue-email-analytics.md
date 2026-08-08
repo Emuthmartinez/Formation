@@ -29,10 +29,10 @@ Rules:
 
 Purpose: get the revenue numbers out of the dashboard and into decisions on a fixed cadence — the offering/entitlement probe (`probe:revenuecat`) proves the plumbing works, this recipe reads what flows through it. Run it before every kill-or-scale checkpoint (`post-launch-operations.md` §9) and each Weekly Ops Review growth step once spend is active.
 
-1. Refresh the current RevenueCat charts/metrics docs from the §1 sources in `revenue-monetization.md` before relying on chart names or API shapes — dashboards and endpoints move; record the docs basis and checked date with the numbers.
-2. Pull four numbers for the trailing window: MRR, realized LTV per paying customer, download-to-paid (initial) conversion, and churn split voluntary vs. involuntary by platform (the §8a events make the split readable in PostHog when RevenueCat's own view is too coarse).
+1. Refresh the current RevenueCat charts/metrics docs from the §1 sources in `revenuecat-and-store-products.md` before relying on chart names or API shapes — dashboards and endpoints move; record the docs basis and checked date with the numbers.
+2. Pull four numbers for the trailing window: MRR, realized LTV per paying customer, download-to-paid (initial) conversion, and churn split voluntary vs. involuntary by platform (the `billing-health-and-reactivation.md` §2 events make the split readable in PostHog when RevenueCat's own view is too coarse).
 3. Land them in the `revenue/REVENUE_OPS.md` Economics Snapshot row for the date, with the source named per row.
-4. Route the consequences, not just the numbers: LTV and payback feed the `growth/PAID_UA.md` blended report and its Decision Thresholds; the cancellation-reason mix feeds the Pricing Decision revisit (§7a step 5); the whole row feeds the kill-or-scale evidence pack.
+4. Route the consequences, not just the numbers: LTV and payback feed the `growth/PAID_UA.md` blended report and its Decision Thresholds; the cancellation-reason mix feeds the Pricing Decision revisit (`paywall-pricing-and-experiments.md` §3 step 5); the whole row feeds the kill-or-scale evidence pack.
 5. Numbers that would change a founder-gated decision (price, spend, kill/scale) get surfaced in the reply per the narration contract — never only written to the file.
 
 ## Resend Email Routing

@@ -291,7 +291,7 @@ export function register(h: Harness): void {
   );
   runFixture("done revenue lane with a clearance column answering no fails", revenueClearanceNo, "check-revenue.ts", 1, "revenue.missing_metadata.unresolved");
 
-  // Paywall experiment cadence (§7b): once the app has been live four weeks
+  // Paywall experiment cadence (paywall-pricing-and-experiments.md §4): once the app has been live four weeks
   // with the revenue lane done, the backlog needs a dated active or completed
   // row — the one-and-done paywall is the plateau the gate exists to stop.
   const experimentIsoDaysAgo = (days: number): string => {
@@ -671,7 +671,7 @@ export function register(h: Harness): void {
     "revenue.product_type.non_renewing_subscription",
   );
 
-  // Pricing decision floor (§7a): heading, real anchor rows, dated approval.
+  // Pricing decision floor (paywall-pricing-and-experiments.md §3): heading, real anchor rows, dated approval.
   // The shipped template carries the structure with example-only content, so a
   // done lane on the untouched template fails the anchor and approval checks.
   const revenuePricingUnfilled = makeFixture("revenue-pricing-unfilled");
