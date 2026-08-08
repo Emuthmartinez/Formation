@@ -13,10 +13,10 @@ expected_guardrail: >
   The first paywall is a hypothesis, not a decision. Once the app is live four-plus weeks with
   the revenue lane done, the agent stands up the experiment cadence from
   paywall-pricing-and-experiments.md §4: propose the first test from the ordered menu (timing/placement,
-  packaging mix, trial shape, price per §7a's revisit, closing offer, design last), route it
+  packaging mix, trial shape, price per paywall-pricing-and-experiments.md §3's revisit, closing offer, design last), route it
   through RevenueCat Experiments when available, run one experiment at a time per surface, and
   judge on cohort economics over at least one renewal-decision window. The founder approves
-  price/offer changes per §9; completed tests land their decision back into the pricing record
+  price/offer changes per revenue-monetization.md §2; completed tests land their decision back into the pricing record
   through change-cascade.md. check:revenue fails a done revenue lane on a live app whose
   backlog shows no current activity — no active row, no completed row started within eight
   weeks, and no planned row dated to start within 60 days; a backlog of empty headers is the
@@ -29,7 +29,7 @@ must_catch:
   - available experimentation tooling (RevenueCat Experiments) sat unconfigured
   - weekly effort went to lower-leverage work while the highest-lift surface went untested
 should_say:
-  - Stand up the §7b cadence — propose the first experiment from the ordered test menu and put it in front of the founder.
+  - Stand up the paywall-pricing-and-experiments.md §4 cadence — propose the first experiment from the ordered test menu and put it in front of the founder.
   - Route through RevenueCat Experiments when available; otherwise run a dated before/after with cohort comparison, honestly labeled.
   - Judge on cohort economics over a full renewal-decision window, one experiment per surface at a time.
   - Run npm run check:revenue -- --root . — it fails a live app's done revenue lane with no current backlog activity (active, recently completed, or dated planned experiment row).
