@@ -43,7 +43,7 @@ if (!skip && !artifact) {
   );
 }
 
-if (artifact) {
+if (!skip && artifact) {
   const text = artifact.text ?? "";
   const relativePath = artifact.relativePath;
   const requiredSections = [
@@ -227,8 +227,10 @@ if (artifact) {
 
   if (laneStatus === "done") {
     const liveText = stripFencedBlocks(text);
-    const placeholders = [/\bnot_started\b/i, /\bTODO\b/i, /\bTBD\b/i, /\bplaceholder\b/i, /\bRecord\b/i];
-    if (placeholders.some((pattern) => pattern.test(liveText))) {
+    const genericPlaceholders = [/\bnot_started\b/i, /\bTODO\b/i, /\bTBD\b/i];
+    const placeholderCells = tablePlaceholderCells(liveText);
+
+    if (genericPlaceholders.some((pattern) => pattern.test(liveText)) || placeholderCells.length > 0) {
       issues.push(
         issue(
           "error",
@@ -266,6 +268,15 @@ function graphRunNodeDone(text: string, node: string): boolean {
     const cells = line.split("|").map((cell) => cell.trim());
     return cells.includes(`\`${node}\``) && cells.includes("done");
   });
+}
+
+function tablePlaceholderCells(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .filter((line) => line.trim().startsWith("|"))
+    .flatMap((line) => line.split("|").slice(1, -1))
+    .map((cell) => cell.trim().replaceAll("`", ""))
+    .filter((cell) => /^Record(?:\b|$)/i.test(cell) || /^placeholder$/i.test(cell));
 }
 
 function requirePhrases(target: Issue[], relativePath: string, text: string, code: string, phrases: string[], message: string): void {
