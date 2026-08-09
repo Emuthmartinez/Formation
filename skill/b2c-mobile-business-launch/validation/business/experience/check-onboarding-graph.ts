@@ -51,6 +51,10 @@ const TEMPLATE_DIRECTIVE_VERBS = new Set([
   "written",
 ]);
 
+// Not a shared parseCliArgs flag: this is the one caller-specific switch that turns the
+// lane-state-derived strict check into an unconditional one, used only by ONB-22's own gate
+// invocation (check:onboarding-graph-complete) -- see the requireDone block below.
+const requireDone = process.argv.includes("--require-done");
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues: Issue[] = [...loaded.issues];
@@ -269,7 +273,22 @@ if (!skip && artifact) {
     "The artifact must cover purchase, restore, handoff, identity, nonblocking analytics, unsupported-client, and observability behavior.",
   );
 
-  if (laneStatus === "done") {
+  // requireDone forces the strict block below to run even while lanes.onboarding.status is
+  // still not_started -- otherwise ONB-22's gate (whose only check this is) can pass on the
+  // unfilled shipped template, since nothing else forces the lane to actually be marked done
+  // before the engine accepts the final "execute, cut over, verify" node as complete.
+  if (requireDone && laneStatus !== "done") {
+    issues.push(
+      issue(
+        "error",
+        "onboarding_graph.not_marked_done",
+        `${relativePath}'s owning workflow gate requires lanes.onboarding.status=done before it can be accepted, but state/PROJECT_STATE.yaml has lanes.onboarding.status=${laneStatus ?? "(unset)"}.`,
+        "state/PROJECT_STATE.yaml",
+      ),
+    );
+  }
+
+  if (laneStatus === "done" || requireDone) {
     const liveText = stripFencedBlocks(text);
     const genericPlaceholders = [/\bnot_started\b/i, /\bTODO\b/i, /\bTBD\b/i];
     const placeholderCells = tablePlaceholderCells(liveText);

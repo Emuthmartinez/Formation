@@ -115,6 +115,21 @@ export function register(h: Harness): void {
     });
   }
   runFixture("completed onboarding may use the ordinary word record outside template cells", doneWithOrdinaryRecordProse, "check-onboarding-graph.ts", 0);
+  runFixture("a genuinely completed onboarding graph also satisfies --require-done", doneWithOrdinaryRecordProse, "check-onboarding-graph.ts", 0, undefined, [
+    "--require-done",
+  ]);
+
+  // ONB-22's own catalog gate (check:onboarding-graph-complete) passes --require-done
+  // unconditionally -- the shipped template's lane is still not_started, so this is the
+  // one case that must fail even though the lenient baseline case above passes clean.
+  runFixture(
+    "the shipped template's own gate (--require-done) refuses to accept an unstarted onboarding lane",
+    baseline,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.not_marked_done",
+    ["--require-done"],
+  );
 
   function markOnboardingDone(fixtureRoot: string): void {
     const state = readState(fixtureRoot);

@@ -267,7 +267,11 @@ const onboardingGraphWorkflows = [
     trigger: "Produce actual high-fidelity onboarding design, motion, an interactive prototype, and design QA",
     laneIds: ["onboarding"],
     phaseIds: ["phase.2"],
-    dependencies: ["workflow.experience.onboarding-system.onb-16-journey-graph"],
+    // Depends on (not merely narrates) the workflow that actually produces the rendered
+    // design-state artifacts -- without this, the engine could accept ONB-18 and unblock
+    // ONB-20 on this node's own Markdown packet alone, with no real high-fidelity design or
+    // interactive prototype behind it.
+    dependencies: ["workflow.experience.onboarding-system.onb-16-journey-graph", "workflow.design.design-room-state-mutate-version-render"],
     outputPaths: ["product/onboarding/graph/ONB-18-visual-design-prototype.md"],
     actionClass: "mutate",
     idempotent: true,
@@ -451,7 +455,7 @@ export const workflows = [
     phaseIds: ["phase.2", "phase.5b"],
     dependencies: ["workflow.experience.onboarding-system.onb-21-compound-engineering-plan"],
     outputPaths: ["product/ONBOARDING.md", "product/onboarding.html"],
-    gates: ["check:onboarding-graph"],
+    gates: ["check:onboarding-graph-complete"],
     providers: ["provider.revenuecat", "provider.posthog"],
     actionClass: "mutate",
     idempotent: true,

@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.109.0",
+  "version": "0.110.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -69,6 +69,8 @@
     "evals:behavioral": "tsx validation/repository/run-behavioral-evals.ts",
     "audit": "tsx tooling/run-audit.ts",
     "check:emotional-design": "tsx validation/business/experience/check-emotional-design.ts",
+    "check:onboarding-graph": "tsx validation/business/experience/check-onboarding-graph.ts",
+    "check:onboarding-graph-complete": "tsx validation/business/experience/check-onboarding-graph.ts --require-done",
     "check:lane-coverage": "tsx validation/business/process/check-lane-coverage.ts",
     "check:change-cascade": "tsx validation/business/process/check-change-cascade.ts",
     "check:research": "tsx validation/business/research/check-research-evidence.ts",

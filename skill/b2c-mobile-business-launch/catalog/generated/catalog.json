@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.109.0",
+  "skillVersion": "0.110.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2456,7 +2456,8 @@
         "phase.2"
       ],
       "dependencies": [
-        "workflow.experience.onboarding-system.onb-16-journey-graph"
+        "workflow.experience.onboarding-system.onb-16-journey-graph",
+        "workflow.design.design-room-state-mutate-version-render"
       ],
       "outputPaths": [
         "product/onboarding/graph/ONB-18-visual-design-prototype.md"
@@ -2572,7 +2573,7 @@
         "product/onboarding.html"
       ],
       "gateCommands": [
-        "check:onboarding-graph"
+        "check:onboarding-graph-complete"
       ],
       "providerIds": [
         "provider.revenuecat",
@@ -4638,6 +4639,20 @@
       "scriptPath": "validation/business/words/check-no-slop.ts",
       "ownerDomainId": "domain.words",
       "audit": "required"
+    },
+    {
+      "id": "gate.check-onboarding-graph",
+      "command": "check:onboarding-graph",
+      "scriptPath": "validation/business/experience/check-onboarding-graph.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "required"
+    },
+    {
+      "id": "gate.check-onboarding-graph-complete",
+      "command": "check:onboarding-graph-complete",
+      "scriptPath": "validation/business/experience/check-onboarding-graph.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
     },
     {
       "id": "gate.check-orchestration",

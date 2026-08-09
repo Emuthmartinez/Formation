@@ -284,7 +284,7 @@ Card timing relative to the paywall and App Review popup is governed by `onboard
 - **Commitment Card**: during onboarding, at the first personalization question. Echo appears before the paywall.
 - **Perceived Effort Delay Card**: at the personalized plan reveal, before the paywall.
 - **Intent Mirroring Card**: after first value or at session end. Must not appear on the same screen as a paywall CTA.
-- **App Review popup**: immediately after the first value moment (the peak of the Emotional Curve), with a 1–2 second async delay after the screen mounts. Must not be bound to a tap that dismisses the screen.
+- **App Review popup**: never inside first-run onboarding. Earn eligibility at the first value moment (the peak of the Emotional Curve), then request through the native platform API outside first-run onboarding, at a later natural success in normal product use, with a 1–2 second async delay after that screen mounts. Must not be bound to a tap that dismisses the screen.
 - **Paywall**: shown after the Emotional Curve peak, not before.
 
 ### Analytics Attribution (`analytics-attribution.md`)
