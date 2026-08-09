@@ -12,6 +12,14 @@ export function register(h: Harness): void {
     writeFileSync(file, mutate(readFileSync(file, "utf8")), "utf8");
   };
 
+  // Mirrors check-onboarding-graph.ts's own TEMPLATE_DIRECTIVE_VERBS set: this fixture needs
+  // to fill every cell the validator itself would call a placeholder, not just the ones
+  // literally starting with "Record" -- the shipped template also opens cells with "Define",
+  // "Choose", etc., and leaving those unfilled means this "completed" fixture was never
+  // actually complete, so its assertions proved nothing about the cells it didn't touch.
+  const TEMPLATE_DIRECTIVE_VERBS_PATTERN =
+    /^\s*(?:add|added|capture|captured|choose|chosen|complete|completed|define|defined|describe|described|document|documented|enter|entered|fill|filled|finish|finished|include|included|insert|inserted|mark|marked|note|noted|provide|provided|record|replace|replaced|select|selected|specify|specified|update|updated|write|written)\b/i;
+
   const baseline = makeFixture("onboarding-graph-baseline");
   runFixture("shipped onboarding graph template passes before completion", baseline, "check-onboarding-graph.ts", 0);
 
@@ -125,7 +133,7 @@ export function register(h: Harness): void {
         return line
           .split("|")
           .map((cell) => {
-            if (!/^\s*Record(?:\b|$)/i.test(cell)) return cell;
+            if (!TEMPLATE_DIRECTIVE_VERBS_PATTERN.test(cell)) return cell;
             evidenceNumber += 1;
             return ` Evidence-${evidenceNumber}: source-backed implementation detail dated 2026-08-08 `;
           })

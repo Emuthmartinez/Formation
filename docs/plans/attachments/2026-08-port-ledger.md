@@ -74,9 +74,9 @@ are ground truth, not hand arithmetic.
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
 | Knowledge content files | 96 | 0 | 0 | 1 | 97 |
-| Additions beyond literal scope (2) | 1 | 0 | 1 | 0 | 2 |
+| Additions beyond literal scope (3) | 2 | 0 | 1 | 0 | 3 |
 | Validators (67) | 27 | 25 | 0 | 16 | 68 |
-| **Total** | **125** | **25** | **1** | **32** | **183** |
+| **Total** | **126** | **25** | **1** | **32** | **184** |
 
 ---
 
@@ -299,12 +299,19 @@ the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge
 
 ---
 
-## 3. Additions beyond literal scope (2)
+## 3. Additions beyond literal scope (3)
+
+Two of these three were deliberate, in-scope additions made by the original U8 audit
+itself. The third — `check-onboarding-graph.ts` — is a later, unrelated addition: a
+brand-new validator a subsequent unit wired up, with no v1 precedent to triage, appended
+here purely so the completeness fixture's "every validator script appears exactly once"
+invariant keeps holding.
 
 | path | disposition | reason |
 |---|---|---|
 | validation/repository/README.md | merge | its unique content — the business/repository validator-ownership split rationale and the 7-validator "who grades what" table — folds into a maintainer doc (e.g. this catalog's own header comments / a future docs/architecture.md section) rather than porting standalone; its routing-table portion (launchbench-evals.md / skill-versioning.md / source-freshness-maintenance.md / source-registry.yaml / graph README rows) is superseded by generated routing.md exactly like the 14 knowledge domain READMEs |
 | validation/repository/check-catalog.ts | keep | no v1 precedent — new U8 file, not a port; thin wired entry point for the `check:catalog` npm script so it resolves under `validation/repository/` per `tooling/lib/script-paths.ts`'s three-root convention (needed for `check-package-parity.ts`'s LaunchBench-coverage cross-check); the real structural-validation logic lives in `catalog/validate.ts`, which stays directly runnable as `tsx catalog/validate.ts` per this unit's own file list |
+| validation/business/experience/check-onboarding-graph.ts | keep | no v1 precedent — new post-U8 file, not a port; deterministic contract gate for the generalized onboarding system graph, added alongside product/ONBOARDING.md as its canonical artifact |
 
 ---
 

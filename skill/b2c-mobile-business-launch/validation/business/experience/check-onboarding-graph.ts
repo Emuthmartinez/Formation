@@ -7,6 +7,50 @@
  */
 import { asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
 
+const TEMPLATE_DIRECTIVE_VERBS = new Set([
+  "add",
+  "added",
+  "capture",
+  "captured",
+  "choose",
+  "chosen",
+  "complete",
+  "completed",
+  "define",
+  "defined",
+  "describe",
+  "described",
+  "document",
+  "documented",
+  "enter",
+  "entered",
+  "fill",
+  "filled",
+  "finish",
+  "finished",
+  "include",
+  "included",
+  "insert",
+  "inserted",
+  "mark",
+  "marked",
+  "note",
+  "noted",
+  "provide",
+  "provided",
+  "record",
+  "replace",
+  "replaced",
+  "select",
+  "selected",
+  "specify",
+  "specified",
+  "update",
+  "updated",
+  "write",
+  "written",
+]);
+
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
 const issues: Issue[] = [...loaded.issues];
@@ -259,50 +303,6 @@ if (!skip && artifact) {
 
 reportAndExit("Onboarding system graph check", issues);
 
-const TEMPLATE_DIRECTIVE_VERBS = new Set([
-  "add",
-  "added",
-  "capture",
-  "captured",
-  "choose",
-  "chosen",
-  "complete",
-  "completed",
-  "define",
-  "defined",
-  "describe",
-  "described",
-  "document",
-  "documented",
-  "enter",
-  "entered",
-  "fill",
-  "filled",
-  "finish",
-  "finished",
-  "include",
-  "included",
-  "insert",
-  "inserted",
-  "mark",
-  "marked",
-  "note",
-  "noted",
-  "provide",
-  "provided",
-  "record",
-  "replace",
-  "replaced",
-  "select",
-  "selected",
-  "specify",
-  "specified",
-  "update",
-  "updated",
-  "write",
-  "written",
-]);
-
 function hasHeading(text: string, heading: string): boolean {
   return text.split(/\r?\n/).some((line) => line.trim() === `## ${heading}`);
 }
@@ -322,24 +322,25 @@ function tablePlaceholderCells(text: string): string[] {
     .map((cell) => cell.trim().replaceAll("`", ""))
     .filter((cell) => cell.length > 0 && !/^:?-{3,}:?$/.test(cell));
 
-  const firstWordCounts = new Map<string, number>();
+  // Repetition signals still-templated content only when the *whole cell* repeats verbatim
+  // (e.g. every row left as "TBD"). Keying on the first word alone false-positives on a
+  // legitimately filled table where many distinct rows share a label prefix by convention
+  // (e.g. "Evidence-1: ...", "Evidence-2: ..." in a large Evidence Ledger) -- their content
+  // differs past the shared prefix, so they are not placeholders.
+  const cellTextCounts = new Map<string, number>();
   for (const cell of cells) {
-    const words = cell.match(/[A-Za-z][A-Za-z-]*/g) ?? [];
-    if (words.length < 2) continue;
-    const firstWord = words[0]!.toLowerCase();
-    firstWordCounts.set(firstWord, (firstWordCounts.get(firstWord) ?? 0) + 1);
+    cellTextCounts.set(cell, (cellTextCounts.get(cell) ?? 0) + 1);
   }
   const repeatedThreshold = Math.max(8, Math.ceil(cells.length * 0.15));
-  const repeatedPrefixes = new Set(
-    [...firstWordCounts.entries()].filter(([, count]) => count >= repeatedThreshold).map(([firstWord]) => firstWord),
-  );
 
   return cells.filter((cell) => {
-    if (/^placeholder$/i.test(cell) || /^(?:completed|done|ready|pass|passed|yes|no|n\/a|na)$/i.test(cell)) return true;
+    // "done" is the Graph Run table's own correct terminal status value (graphRunNodeDone()
+    // requires it literally), not a generic filler word -- unlike "ready"/"pass"/"yes"/etc.,
+    // which have no legitimate table home and only ever show up as lazy completion labels.
+    if (/^placeholder$/i.test(cell) || /^(?:completed|ready|pass|passed|yes|no|n\/a|na)$/i.test(cell)) return true;
     const firstWord = cell.match(/^[A-Za-z][A-Za-z-]*/)?.[0]?.toLowerCase();
-    if (!firstWord) return false;
-    if (TEMPLATE_DIRECTIVE_VERBS.has(firstWord)) return true;
-    return repeatedPrefixes.has(firstWord);
+    if (firstWord && TEMPLATE_DIRECTIVE_VERBS.has(firstWord)) return true;
+    return (cellTextCounts.get(cell) ?? 0) >= repeatedThreshold;
   });
 }
 
