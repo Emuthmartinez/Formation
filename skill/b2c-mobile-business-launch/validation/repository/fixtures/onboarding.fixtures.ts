@@ -134,6 +134,24 @@ export function register(h: Harness): void {
     "onboarding_graph.section_synthetic_one_star_pre_mortem_missing",
   );
 
+  const requiredHeadingIndented = makeFixture("onboarding-graph-required-heading-indented");
+  mutateOnboarding(requiredHeadingIndented, (text) =>
+    // Indenting the heading line by 4 spaces turns it into a CommonMark indented code block (a
+    // completely different construct from a heading) rather than a fence or comment -- it is
+    // preceded by a blank line in the shipped template, which is what lets an indented line begin
+    // a code block instead of lazily continuing a paragraph. hasHeading() has no notion of
+    // indentation and only ever compares each line's own *trimmed* text, so an indented,
+    // non-rendering heading line still registered as the section being present.
+    text.replace("## Verification\n", "    ## Verification\n"),
+  );
+  runFixture(
+    "a required heading indented into a CommonMark code block still fails as missing",
+    requiredHeadingIndented,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_verification_missing",
+  );
+
   const reviewInsideFirstRun = makeFixture("onboarding-graph-review-inside-first-run");
   mutateOnboarding(reviewInsideFirstRun, (text) =>
     text.replace(
@@ -258,6 +276,35 @@ export function register(h: Harness): void {
     "check-onboarding-graph.ts",
     1,
     "onboarding_graph.placeholder_complete",
+    ["--require-done"],
+  );
+
+  const doneWithIndentedGraphRunTable = makeFixture("onboarding-graph-done-with-indented-graph-run-table");
+  {
+    markOnboardingDone(doneWithIndentedGraphRunTable);
+    mutateOnboarding(doneWithIndentedGraphRunTable, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      // Indenting the whole Graph Run table by 4 spaces turns it into a CommonMark indented code
+      // block (preceded by the blank line right after the "## Graph Run" heading) -- a rendered
+      // page shows this as inert code text, not as the graph's actual completion record.
+      // graphRunRows() has no notion of indentation and only ever matches each line's own
+      // *trimmed* text against "starts with |", so an indented, non-rendering table still
+      // registered every node as done.
+      const table = completed.match(/\| Node \| Status \| Owner \| Result or next action \|\n(?:\|.*\|\n?)+/);
+      if (!table) throw new Error("fixture setup: could not locate the Graph Run table to indent");
+      const indented = table[0]
+        .split("\n")
+        .map((line) => (line.length > 0 ? `    ${line}` : line))
+        .join("\n");
+      return completed.replace(table[0], indented);
+    });
+  }
+  runFixture(
+    "a Graph Run table indented into a CommonMark code block still fails every node as not done",
+    doneWithIndentedGraphRunTable,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.node_not_done",
     ["--require-done"],
   );
 
@@ -909,6 +956,30 @@ export function register(h: Harness): void {
   runFixture(
     "an evidence packet whose only content sits past a shorter inner fence run still fails as thin",
     evidencePacketShortInnerFenceOnly,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_too_thin",
+    ["--node", "ONB-04", "--path", "product/onboarding/graph/ONB-04-competitor-reviews.md"],
+  );
+
+  const evidencePacketIndentedContentOnly = makeFixture("onboarding-evidence-packet-indented-content-only");
+  writeEvidencePacket(
+    evidencePacketIndentedContentOnly,
+    "product/onboarding/graph/ONB-04-competitor-reviews.md",
+    // Every line indented 4 spaces at the very start of the document is a CommonMark indented
+    // code block (the document start counts the same as a preceding blank line for the "cannot
+    // interrupt a paragraph" rule) -- a rendered page shows this whole packet as inert code text,
+    // not as a real finding. Without stripping indented code blocks the same way fenced and
+    // commented-out blocks are stripped, a packet that never actually renders as prose still
+    // cleared the substantive-length check.
+    substantiveResearchProse("a competitor review that was never actually written, only indented into a CommonMark code block")
+      .split("\n")
+      .map((line) => (line.length > 0 ? `    ${line}` : line))
+      .join("\n"),
+  );
+  runFixture(
+    "an evidence packet whose only content is indented into a CommonMark code block still fails as thin",
+    evidencePacketIndentedContentOnly,
     evidenceScript,
     1,
     "onboarding_evidence.packet_too_thin",

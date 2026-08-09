@@ -748,13 +748,61 @@ function stripFenceChar(text: string, ch: "`" | "~"): string {
 }
 
 /**
+ * Strips CommonMark indented code blocks: a line indented at least 4 spaces starts a code block
+ * only where it cannot interrupt a paragraph -- i.e. only right after a blank line, or at the
+ * very start of the document (CommonMark's own rule; a 4+-space-indented line immediately after
+ * an ordinary paragraph or table line is a lazy continuation of that block, not code, so it is
+ * left untouched here). Once a block opens this way, it absorbs every subsequent indented line
+ * and any blank lines between them; a non-indented, non-blank line ends it, and any trailing
+ * blank lines immediately before that line belong to what follows, not to the code block. This is
+ * what stops a required heading, Graph Run row, checklist item, or evidence-packet paragraph from
+ * being satisfied by content a rendered page shows only as inert code text, never as live
+ * document structure or prose.
+ */
+function stripIndentedCodeBlocks(text: string): string {
+  const lines = text.split("\n");
+  const kept: string[] = [];
+  let previousBlank = true;
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    const isBlank = line.trim().length === 0;
+    const isIndented = /^ {4,}\S/.test(line);
+    if (isIndented && previousBlank) {
+      let j = i;
+      while (j < lines.length) {
+        const candidate = lines[j] ?? "";
+        const candidateBlank = candidate.trim().length === 0;
+        const candidateIndented = /^ {4,}\S/.test(candidate);
+        if (candidateIndented || candidateBlank) {
+          j++;
+          continue;
+        }
+        break;
+      }
+      let end = j;
+      while (end > i && (lines[end - 1] ?? "").trim().length === 0) end--;
+      i = end;
+      previousBlank = true;
+      continue;
+    }
+    kept.push(line);
+    previousBlank = isBlank;
+    i++;
+  }
+  return kept.join("\n");
+}
+
+/**
  * Strips every form of Markdown that does not render as visible prose: HTML comments (which
- * render nothing at all) and backtick/tilde fenced code blocks (CommonMark accepts both
- * delimiters equally, and a shorter same-character run than the opener never closes a fence --
- * see stripFenceChar). Used by every check that must not mistake hidden or fenced-off content
- * for a live, human-visible finding, section, or completion signal.
+ * render nothing at all), backtick/tilde fenced code blocks (CommonMark accepts both delimiters
+ * equally, and a shorter same-character run than the opener never closes a fence -- see
+ * stripFenceChar), and indented code blocks (see stripIndentedCodeBlocks). Used by every check
+ * that must not mistake hidden, fenced-off, or code-block-only content for a live, human-visible
+ * finding, section, or completion signal.
  */
 export function stripNonRenderedMarkdown(text: string): string {
   const withoutComments = text.replace(/<!--[\s\S]*?(?:-->|$)/g, "");
-  return stripFenceChar(stripFenceChar(withoutComments, "`"), "~");
+  const withoutFences = stripFenceChar(stripFenceChar(withoutComments, "`"), "~");
+  return stripIndentedCodeBlocks(withoutFences);
 }
