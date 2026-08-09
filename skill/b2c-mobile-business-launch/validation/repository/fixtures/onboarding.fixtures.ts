@@ -37,6 +37,25 @@ export function register(h: Harness): void {
     "onboarding_graph.section_onbo_hub_pattern_atlas_missing",
   );
 
+  const requiredSectionInFence = makeFixture("onboarding-graph-required-section-in-fence");
+  mutateOnboarding(requiredSectionInFence, (text) => {
+    // Relocate the entire live "## Privacy And Security" section into a fenced code sample,
+    // leaving it absent from the live document -- hasHeading() has no notion of fences, so
+    // before liveText was computed up front (and used for every structural check, not only the
+    // deep --require-done block) this would have still been accepted as present.
+    const section = text.match(/## Privacy And Security\n[\s\S]*?(?=\n## )/)?.[0];
+    if (!section) throw new Error("fixture setup: could not locate the Privacy And Security section to relocate");
+    const withoutLiveSection = text.replace(section, "");
+    return `${withoutLiveSection}\n\`\`\`markdown\n${section}\n\`\`\`\n`;
+  });
+  runFixture(
+    "a required section relocated into a fenced example still fails as missing",
+    requiredSectionInFence,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_privacy_and_security_missing",
+  );
+
   const reviewInsideFirstRun = makeFixture("onboarding-graph-review-inside-first-run");
   mutateOnboarding(reviewInsideFirstRun, (text) =>
     text.replace(
@@ -633,6 +652,21 @@ export function register(h: Harness): void {
     "--path",
     "product/onboarding/graph/ONB-04-competitor-reviews.md",
   ]);
+
+  const evidencePacketHtmlCommentOnly = makeFixture("onboarding-evidence-packet-html-comment-only");
+  writeEvidencePacket(
+    evidencePacketHtmlCommentOnly,
+    "product/onboarding/graph/ONB-04-competitor-reviews.md",
+    `<!--\n${substantiveResearchProse("a competitor review that was never actually written, only faked inside this comment")}\n-->\n`,
+  );
+  runFixture(
+    "an evidence packet whose only content is inside an HTML comment still fails as thin",
+    evidencePacketHtmlCommentOnly,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_too_thin",
+    ["--node", "ONB-04", "--path", "product/onboarding/graph/ONB-04-competitor-reviews.md"],
+  );
 
   const evidencePacketPlaceholder = makeFixture("onboarding-evidence-packet-placeholder");
   writeEvidencePacket(

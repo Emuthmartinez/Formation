@@ -50,7 +50,14 @@ if (!relativePath) {
       ),
     );
   } else {
-    const stripped = text.replace(/```[\s\S]*?```/g, "").trim();
+    // Strip fenced code blocks and HTML comments before measuring: an <!-- ... --> block is
+    // invisible in the rendered artifact but would otherwise inflate the substantive-length
+    // count and its first non-blank line (if it doesn't start with #, |, or -) would pass the
+    // hasProse check below, letting a comment stand in for a finding no reviewer ever wrote.
+    const stripped = text
+      .replace(/```[\s\S]*?```/g, "")
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .trim();
 
     if (stripped.length < MIN_SUBSTANTIVE_LENGTH) {
       issues.push(

@@ -151,6 +151,13 @@ if (!skip && !artifact) {
 
 if (!skip && artifact) {
   const text = artifact.text ?? "";
+  // Fence-stripped once, up front, and used for every structural check below (required
+  // sections, node presence, required-phrase contracts, forbidden-event names, review-timing
+  // regex) -- not only the deep --require-done completion block. hasHeading()/requirePhrases()
+  // etc. have no notion of fences, so a required live section (or phrase, or node ID) deleted
+  // from the live document and relocated into a fenced code example would otherwise still be
+  // found and accepted as present.
+  const liveText = stripFencedBlocks(text);
   const relativePath = artifact.relativePath;
   const requiredSections = [
     "Execution Mode",
@@ -190,7 +197,7 @@ if (!skip && artifact) {
   ];
 
   for (const section of requiredSections) {
-    if (!hasHeading(text, section)) {
+    if (!hasHeading(liveText, section)) {
       issues.push(
         issue("error", `onboarding_graph.section_${codeFor(section)}_missing`, `${relativePath} must include a "## ${section}" section.`, relativePath),
       );
@@ -199,7 +206,7 @@ if (!skip && artifact) {
 
   for (let index = 0; index <= 22; index += 1) {
     const node = `ONB-${String(index).padStart(2, "0")}`;
-    if (!text.includes(node)) {
+    if (!liveText.includes(node)) {
       issues.push(
         issue(
           "error",
@@ -214,7 +221,7 @@ if (!skip && artifact) {
   requirePhrases(
     issues,
     relativePath,
-    text,
+    liveText,
     "onboarding_graph.evidence_contract",
     [
       "authorized Onbo Hub",
@@ -235,7 +242,7 @@ if (!skip && artifact) {
   requirePhrases(
     issues,
     relativePath,
-    text,
+    liveText,
     "onboarding_graph.activation_contract",
     ["First value rendered", "First value engaged", "Activation", "Effort-Before-Value", "personalization proof", "populated normal product"],
     "The artifact must distinguish first value, engagement, activation, effort, visible personalization proof, and entry into a populated product experience.",
@@ -244,7 +251,7 @@ if (!skip && artifact) {
   requirePhrases(
     issues,
     relativePath,
-    text,
+    liveText,
     "onboarding_graph.design_contract",
     ["ONB-SCR-001", "ONB-CTL-001", "Every screen has one dominant", "Actual high-fidelity", "interactive", "reduced motion"],
     "The artifact must carry stable screen and control IDs, one dominant action, actual visual and interactive design requirements, and reduced-motion behavior.",
@@ -253,7 +260,7 @@ if (!skip && artifact) {
   requirePhrases(
     issues,
     relativePath,
-    text,
+    liveText,
     "onboarding_graph.analytics_contract",
     [
       "machine-readable schema",
@@ -272,7 +279,7 @@ if (!skip && artifact) {
   requirePhrases(
     issues,
     relativePath,
-    text,
+    liveText,
     "onboarding_graph.review_contract",
     [
       "outside first-run onboarding",
@@ -287,7 +294,7 @@ if (!skip && artifact) {
   );
 
   for (const forbiddenEvent of ["review_prompt_shown", "review_submitted", "review_rating_value"]) {
-    if (text.includes(forbiddenEvent)) {
+    if (liveText.includes(forbiddenEvent)) {
       issues.push(
         issue(
           "error",
@@ -300,8 +307,8 @@ if (!skip && artifact) {
   }
 
   const reviewInsideFirstRun =
-    /native (?:app )?review (?:prompt|request) immediately after first value inside first-run onboarding/i.test(text) ||
-    /immediately after first value inside first-run onboarding.{0,80}(?:review|rating)/i.test(text);
+    /native (?:app )?review (?:prompt|request) immediately after first value inside first-run onboarding/i.test(liveText) ||
+    /immediately after first value inside first-run onboarding.{0,80}(?:review|rating)/i.test(liveText);
   if (reviewInsideFirstRun) {
     issues.push(
       issue(
@@ -316,7 +323,7 @@ if (!skip && artifact) {
   requirePhrases(
     issues,
     relativePath,
-    text,
+    liveText,
     "onboarding_graph.replacement_contract",
     ["hard cutover", "durable user value", "one-time", "Deletion Manifest", "minimum supported client", "Do not keep the old runtime", "zero-legacy"],
     "Replacement mode must preserve durable user value through an isolated one-time transformation while hard-cutting to one runtime and deleting legacy architecture.",
@@ -325,7 +332,7 @@ if (!skip && artifact) {
   requirePhrases(
     issues,
     relativePath,
-    text,
+    liveText,
     "onboarding_graph.reliability_contract",
     ["Purchase pending", "Restore", "deep link", "identity", "Analytics failure does not block first value", "unsupported client", "observability"],
     "The artifact must cover purchase, restore, handoff, identity, nonblocking analytics, unsupported-client, and observability behavior.",
@@ -345,7 +352,6 @@ if (!skip && artifact) {
   // and onboarding_graph.node_not_done for every node), so removing this precondition does not
   // weaken the gate against an incomplete launch.
   if (requireDone || laneStatus === "done") {
-    const liveText = stripFencedBlocks(text);
     const genericPlaceholders = [/\bnot_started\b/i, /\bTODO\b/i, /\bTBD\b/i];
     const placeholderCells = tablePlaceholderCells(liveText);
     const placeholderProseLines = proseDirectiveLines(liveText);
