@@ -854,18 +854,120 @@ function stripNonRenderingHtmlBlocks(text: string): string {
   return kept.join("\n");
 }
 
+// The recognized CommonMark HTML-block-type-6 tag names (a curated common subset -- block-level
+// container/structural elements). This is a DIFFERENT closing rule from stripNonRenderingHtmlBlocks'
+// script/style/template family (CommonMark type 1): a type-6 block is not looking for a matching
+// closing tag at all -- it simply runs until the next blank line (or end of document), regardless
+// of whether any of the lines it absorbs mention a closing tag. Markdown syntax (headings, table
+// rows, checklist items) inside one of these tags -- with no blank line separating it from the
+// tag -- is never parsed as Markdown by a real renderer; it displays as literal, inert text
+// alongside the tag markup, the exact scenario this function exists to catch.
+const GENERIC_HTML_BLOCK_TAGS = new Set([
+  "address",
+  "article",
+  "aside",
+  "blockquote",
+  "body",
+  "caption",
+  "center",
+  "col",
+  "colgroup",
+  "dd",
+  "details",
+  "dialog",
+  "dir",
+  "div",
+  "dl",
+  "dt",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "frame",
+  "frameset",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "head",
+  "header",
+  "hr",
+  "html",
+  "legend",
+  "li",
+  "main",
+  "menu",
+  "menuitem",
+  "nav",
+  "ol",
+  "optgroup",
+  "option",
+  "p",
+  "param",
+  "section",
+  "summary",
+  "table",
+  "tbody",
+  "td",
+  "tfoot",
+  "th",
+  "thead",
+  "title",
+  "tr",
+  "ul",
+]);
+
+/**
+ * Strips CommonMark HTML-block-type-6 content: a line-level block-level container tag (div,
+ * section, table, p, li, ...; see GENERIC_HTML_BLOCK_TAGS). A block only OPENS at the true start
+ * of its own line (up to 3 leading spaces, the same tolerance every other stripper in this file
+ * uses), an opening or closing angle bracket immediately followed by one of the recognized tag
+ * names, itself followed by whitespace, ">", "/", or end of line -- never mid-line, so a sentence
+ * mentioning one of these tags inside an inline code span is never mistaken for a real block.
+ * Unlike stripNonRenderingHtmlBlocks (script/style/template), this block type's closing condition
+ * is NOT a matching closing tag -- CommonMark simply runs it through the next blank line (or end
+ * of document), whatever content that line carries. A required heading, Graph Run row, or
+ * checklist item placed inside one of these tags with no blank line separating it from the tag is
+ * exactly the content this strips: a real renderer shows it as literal text beside the markup,
+ * never as parsed Markdown structure.
+ */
+function stripGenericHtmlBlocks(text: string): string {
+  const openerLine = new RegExp(`^ {0,3}<\\/?([A-Za-z][A-Za-z0-9]*)(?=[\\s>/]|$)`);
+  const lines = text.split("\n");
+  const kept: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    const openMatch = line.match(openerLine);
+    const tag = (openMatch?.[1] ?? "").toLowerCase();
+    if (!openMatch || !GENERIC_HTML_BLOCK_TAGS.has(tag)) {
+      kept.push(line);
+      i++;
+      continue;
+    }
+    let j = i;
+    while (j < lines.length && (lines[j] ?? "").trim().length > 0) j++;
+    i = j;
+  }
+  return kept.join("\n");
+}
+
 /**
  * Strips every form of Markdown (and raw HTML) that does not render as visible prose: HTML
  * comments (which render nothing at all), script/style/template blocks (see
- * stripNonRenderingHtmlBlocks), backtick/tilde fenced code blocks (CommonMark accepts both
- * delimiters equally, and a shorter same-character run than the opener never closes a fence -- see
+ * stripNonRenderingHtmlBlocks), generic block-level HTML container tags (see
+ * stripGenericHtmlBlocks), backtick/tilde fenced code blocks (CommonMark accepts both delimiters
+ * equally, and a shorter same-character run than the opener never closes a fence -- see
  * stripFenceChar), and indented code blocks (see stripIndentedCodeBlocks). Used by every check
  * that must not mistake hidden, fenced-off, or code-block-only content for a live, human-visible
  * finding, section, or completion signal.
  */
 export function stripNonRenderedMarkdown(text: string): string {
   const withoutComments = text.replace(/<!--[\s\S]*?(?:-->|$)/g, "");
-  const withoutHtmlBlocks = stripNonRenderingHtmlBlocks(withoutComments);
+  const withoutHtmlBlocks = stripGenericHtmlBlocks(stripNonRenderingHtmlBlocks(withoutComments));
   const withoutFences = stripFenceChar(stripFenceChar(withoutHtmlBlocks, "`"), "~");
   return stripIndentedCodeBlocks(withoutFences);
 }

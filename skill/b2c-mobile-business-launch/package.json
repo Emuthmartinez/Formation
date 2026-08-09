@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.130.0",
+  "version": "0.131.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -72,6 +72,7 @@
     "check:emotional-design": "tsx validation/business/experience/check-emotional-design.ts",
     "check:onboarding-graph": "tsx validation/business/experience/check-onboarding-graph.ts",
     "check:onboarding-graph-complete": "tsx validation/business/experience/check-onboarding-graph.ts --require-done",
+    "check:onboarding-cutover-repository": "tsx validation/business/experience/check-onboarding-cutover-repository.ts",
     "check:onboarding-evidence-onb-00": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-00 --path product/onboarding/graph/ONB-00-resume-scope.md",
     "check:onboarding-evidence-onb-01": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-01 --path product/onboarding/graph/ONB-01-current-state-trace.md",
     "check:onboarding-evidence-onb-02": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-02 --path product/onboarding/graph/ONB-02-evidence-plan.md",

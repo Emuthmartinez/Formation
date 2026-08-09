@@ -74,9 +74,9 @@ are ground truth, not hand arithmetic.
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
 | Knowledge content files | 96 | 0 | 0 | 1 | 97 |
-| Additions beyond literal scope (4) | 3 | 0 | 1 | 0 | 4 |
+| Additions beyond literal scope (5) | 4 | 0 | 1 | 0 | 5 |
 | Validators (67) | 27 | 25 | 0 | 16 | 68 |
-| **Total** | **127** | **25** | **1** | **32** | **185** |
+| **Total** | **128** | **25** | **1** | **32** | **186** |
 
 ---
 
@@ -299,13 +299,14 @@ the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge
 
 ---
 
-## 3. Additions beyond literal scope (4)
+## 3. Additions beyond literal scope (5)
 
-Two of these four were deliberate, in-scope additions made by the original U8 audit
-itself. The other two — `check-onboarding-graph.ts` and `check-onboarding-evidence-packet.ts`
-— are later, unrelated additions: brand-new validators subsequent units wired up, with no
-v1 precedent to triage, appended here purely so the completeness fixture's "every
-validator script appears exactly once" invariant keeps holding.
+Two of these five were deliberate, in-scope additions made by the original U8 audit
+itself. The other three — `check-onboarding-graph.ts`, `check-onboarding-evidence-packet.ts`,
+and `check-onboarding-cutover-repository.ts` — are later, unrelated additions: brand-new
+validators subsequent units wired up, with no v1 precedent to triage, appended here purely
+so the completeness fixture's "every validator script appears exactly once" invariant keeps
+holding.
 
 | path | disposition | reason |
 |---|---|---|
@@ -313,6 +314,7 @@ validator script appears exactly once" invariant keeps holding.
 | validation/repository/check-catalog.ts | keep | no v1 precedent — new U8 file, not a port; thin wired entry point for the `check:catalog` npm script so it resolves under `validation/repository/` per `tooling/lib/script-paths.ts`'s three-root convention (needed for `check-package-parity.ts`'s LaunchBench-coverage cross-check); the real structural-validation logic lives in `catalog/validate.ts`, which stays directly runnable as `tsx catalog/validate.ts` per this unit's own file list |
 | validation/business/experience/check-onboarding-graph.ts | keep | no v1 precedent — new post-U8 file, not a port; deterministic contract gate for the generalized onboarding system graph, added alongside product/ONBOARDING.md as its canonical artifact |
 | validation/business/experience/check-onboarding-evidence-packet.ts | keep | no v1 precedent — new post-U8 file, not a port; deterministic per-node gate for ONB-03..ONB-08's own evidence-research output packet, wired via six npm scripts (`check:onboarding-evidence-onb-03` through `-08`) because core/session/run.ts's production runner has no caller for fresh_context (judgment) acceptance outside test fixtures, so a deterministic gate is the only path that actually promotes these nodes to succeeded |
+| validation/business/experience/check-onboarding-cutover-repository.ts | keep | no v1 precedent — new post-U8 file, not a port; independent, filesystem-grounded verification for ONB-22's Deletion Manifest — check-onboarding-graph.ts and its --require-done variant only ever read product/ONBOARDING.md's own self-authored prose, so a row claiming Disposition "delete" for an artifact that was never actually removed went unverified until this check, mirroring check-live-provider-proof.ts's existing evidence-exists-on-disk pattern |
 
 ---
 

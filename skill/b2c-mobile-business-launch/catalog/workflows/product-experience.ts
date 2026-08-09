@@ -555,7 +555,12 @@ export const workflows = [
     // would make ONB-22's own acceptance depend on an unrelated page elsewhere in the manifest
     // (e.g. operations/orchestration.html) being fresh too, coupling this node to lanes it does
     // not own.
-    gates: ["check:onboarding-graph-complete", "check:onboarding-page-fresh"],
+    // check:onboarding-cutover-repository and check:provider-proof are the independent
+    // verification half: the two gates above only ever read product/ONBOARDING.md's own
+    // self-authored text, so a Deletion Manifest row claiming "delete" or a provider row
+    // claiming captured evidence would otherwise be trusted without ever checking the
+    // repository or operations/PROVIDER_PROOF.md for the corresponding proof.
+    gates: ["check:onboarding-graph-complete", "check:onboarding-page-fresh", "check:onboarding-cutover-repository", "check:provider-proof"],
     providers: ["provider.revenuecat", "provider.posthog"],
     // Hard cutover and legacy deletion, not a retryable content mutation -- classifying it
     // "mutate" would let the durable engine execute production deletion under an ordinary

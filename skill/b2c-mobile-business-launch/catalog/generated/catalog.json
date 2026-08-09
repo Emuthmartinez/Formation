@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.130.0",
+  "skillVersion": "0.131.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2618,7 +2618,9 @@
       ],
       "gateCommands": [
         "check:onboarding-graph-complete",
-        "check:onboarding-page-fresh"
+        "check:onboarding-page-fresh",
+        "check:onboarding-cutover-repository",
+        "check:provider-proof"
       ],
       "providerIds": [
         "provider.revenuecat",
@@ -4685,6 +4687,13 @@
       "command": "check:no-slop",
       "scriptPath": "validation/business/words/check-no-slop.ts",
       "ownerDomainId": "domain.words",
+      "audit": "required"
+    },
+    {
+      "id": "gate.check-onboarding-cutover-repository",
+      "command": "check:onboarding-cutover-repository",
+      "scriptPath": "validation/business/experience/check-onboarding-cutover-repository.ts",
+      "ownerDomainId": "domain.experience",
       "audit": "required"
     },
     {

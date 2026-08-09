@@ -171,6 +171,30 @@ export function register(h: Harness): void {
     "onboarding_graph.section_failure_and_recovery_missing",
   );
 
+  const requiredSectionInDivBlock = makeFixture("onboarding-graph-required-section-in-div-block");
+  mutateOnboarding(requiredSectionInDivBlock, (text) => {
+    // Relocate the entire live "## Evidence Decision And Complaint Traceability" section into a
+    // <div> block, with no blank line between the opening tag and the heading -- CommonMark's
+    // HTML-block-type-6 rule (div, section, table, p, li, ... -- a different rule from the
+    // script/style/template family above) runs the block through the next blank line, not until a
+    // matching closing tag, so the heading line (the first line after the opener, with no blank
+    // line separating them) is absorbed into the block regardless of what happens later in the
+    // section body. A real renderer shows the heading as literal text beside the <div> markup,
+    // never as a parsed heading, but before this fix stripNonRenderedMarkdown() had no notion of
+    // this tag family at all and left it live and findable.
+    const section = text.match(/## Evidence Decision And Complaint Traceability\n[\s\S]*?(?=\n## )/)?.[0];
+    if (!section) throw new Error("fixture setup: could not locate the Evidence Decision And Complaint Traceability section to relocate");
+    const withoutLiveSection = text.replace(section, "");
+    return `${withoutLiveSection}\n<div>\n${section}\n</div>\n`;
+  });
+  runFixture(
+    "a required section relocated into a div block still fails as missing",
+    requiredSectionInDivBlock,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_evidence_decision_and_complaint_traceability_missing",
+  );
+
   const requiredHeadingTabIndented = makeFixture("onboarding-graph-required-heading-tab-indented");
   mutateOnboarding(requiredHeadingTabIndented, (text) =>
     // A single leading tab expands to CommonMark's own 4-column tab stop, the same indentation
@@ -1487,6 +1511,40 @@ export function register(h: Harness): void {
     undefined,
     ["--node", "ONB-19", "--path", "product/onboarding/graph/ONB-19-implementation-cutover-contract.md"],
   );
+
+  // --- check-onboarding-cutover-repository.ts ---
+  // check-onboarding-graph.ts (and its --require-done variant) only ever read
+  // product/ONBOARDING.md's own prose. A Deletion Manifest row can claim Disposition
+  // "delete" for an artifact that was never actually removed and both gates above stay
+  // silent -- this is the independent, filesystem-grounded check that closes that gap.
+  const cutoverScript = "check-onboarding-cutover-repository.ts";
+
+  const cutoverBaseline = makeFixture("onboarding-cutover-baseline");
+  runFixture("shipped Deletion Manifest template passes: no path-like span to verify yet", cutoverBaseline, cutoverScript, 0);
+
+  const cutoverUnverifiable = makeFixture("onboarding-cutover-deletion-unverifiable");
+  mutateOnboarding(cutoverUnverifiable, (text) => text.replace("| `LEGACY-001` | Record the item |", "| LEGACY-001 | Record the item |"));
+  runFixture(
+    "a delete-disposition row naming no backtick-quoted artifact is unverifiable",
+    cutoverUnverifiable,
+    cutoverScript,
+    1,
+    "onboarding_cutover.deletion_unverifiable",
+  );
+
+  const cutoverNotVerified = makeFixture("onboarding-cutover-deletion-not-verified");
+  mutateOnboarding(cutoverNotVerified, (text) => text.replace("| `LEGACY-001` | Record the item |", "| `state/PROJECT_STATE.yaml` | Record the item |"));
+  runFixture(
+    "a delete-disposition row naming a path that still exists on disk fails",
+    cutoverNotVerified,
+    cutoverScript,
+    1,
+    "onboarding_cutover.deletion_not_verified",
+  );
+
+  const cutoverVerified = makeFixture("onboarding-cutover-deletion-verified");
+  mutateOnboarding(cutoverVerified, (text) => text.replace("| `LEGACY-001` | Record the item |", "| `legacy/old-onboarding-flow.ts` | Record the item |"));
+  runFixture("a delete-disposition row naming a path genuinely absent from disk passes", cutoverVerified, cutoverScript, 0);
 
   function checkVerificationItems(text: string): string {
     return text.replace(/^-\s*\[\s*\]/gm, "- [x]");

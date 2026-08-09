@@ -9,7 +9,7 @@ const issues: Issue[] = [...loaded.issues];
 const proofPath = path.join(args.root, "operations/PROVIDER_PROOF.md");
 const proofText = existsSync(proofPath) ? readFileSync(proofPath, "utf8") : "";
 
-const proofRequiredLanes = ["analytics_attribution", "revenue", "email", "store_console", "apple_signing", "security", "engineering"];
+const proofRequiredLanes = ["analytics_attribution", "revenue", "email", "store_console", "apple_signing", "security", "engineering", "onboarding"];
 
 /**
  * Providers whose Proof Ledger row must be grounded on disk once a mapped lane
@@ -17,8 +17,8 @@ const proofRequiredLanes = ["analytics_attribution", "revenue", "email", "store_
  * have their own validators and legitimately route through non-MobAI tooling.
  */
 const providerLaneMap: Array<{ provider: string; lanes: string[] }> = [
-  { provider: "PostHog", lanes: ["analytics_attribution"] },
-  { provider: "RevenueCat", lanes: ["revenue"] },
+  { provider: "PostHog", lanes: ["analytics_attribution", "onboarding"] },
+  { provider: "RevenueCat", lanes: ["revenue", "onboarding"] },
   { provider: "Resend", lanes: ["email"] },
   { provider: "App Store Connect", lanes: ["store_console", "apple_signing"] },
   { provider: "Sentry", lanes: ["security"] },

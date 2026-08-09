@@ -341,6 +341,77 @@ export function register(h: Harness): void {
     "provider_proof.posthog.status_unproven",
   );
 
+  // Regression: "onboarding" was absent from proofRequiredLanes and providerLaneMap, so a
+  // done onboarding lane (ONB-22's own lane) never required operations/PROVIDER_PROOF.md to
+  // exist at all, even though ONB-22 declares provider.revenuecat and provider.posthog.
+  const providerProofOnboardingMissing = makeFixture("provider-proof-onboarding-missing");
+  {
+    const state = readState(providerProofOnboardingMissing);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofOnboardingMissing, state);
+    rmSync(path.join(providerProofOnboardingMissing, "operations/PROVIDER_PROOF.md"), { force: true });
+  }
+  runFixture(
+    "done onboarding lane without proof now fails, same as any other provider-backed lane",
+    providerProofOnboardingMissing,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.file_missing",
+  );
+
+  // The onboarding lane maps to both PostHog and RevenueCat: grounding only one must not
+  // silence the other.
+  const providerProofOnboardingRevenueCatUngrounded = makeFixture("provider-proof-onboarding-revenuecat-ungrounded");
+  {
+    const state = readState(providerProofOnboardingRevenueCatUngrounded);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofOnboardingRevenueCatUngrounded, state);
+    writeCompleteProviderProof(providerProofOnboardingRevenueCatUngrounded);
+    mkdirSync(path.join(providerProofOnboardingRevenueCatUngrounded, "analytics"), { recursive: true });
+    writeFileSync(
+      path.join(providerProofOnboardingRevenueCatUngrounded, "analytics", "posthog-proof.md"),
+      "Captured live event and person property on 2026-08-08.\n",
+      "utf8",
+    );
+    // The shipped workspace template ships an (unfilled) revenue/revenuecat-proof.md stub, so
+    // "ungrounded" has to remove it explicitly -- its mere presence would otherwise satisfy the
+    // existsSync check regardless of content.
+    rmSync(path.join(providerProofOnboardingRevenueCatUngrounded, "revenue", "revenuecat-proof.md"), { force: true });
+  }
+  runFixture(
+    "done onboarding lane with PostHog grounded but RevenueCat evidence missing still fails",
+    providerProofOnboardingRevenueCatUngrounded,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.revenuecat.evidence_path_missing",
+  );
+
+  const providerProofOnboardingGrounded = makeFixture("provider-proof-onboarding-grounded");
+  {
+    const state = readState(providerProofOnboardingGrounded);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofOnboardingGrounded, state);
+    writeCompleteProviderProof(providerProofOnboardingGrounded);
+    mkdirSync(path.join(providerProofOnboardingGrounded, "analytics"), { recursive: true });
+    writeFileSync(
+      path.join(providerProofOnboardingGrounded, "analytics", "posthog-proof.md"),
+      "Captured live event and person property on 2026-08-08.\n",
+      "utf8",
+    );
+    mkdirSync(path.join(providerProofOnboardingGrounded, "revenue"), { recursive: true });
+    writeFileSync(
+      path.join(providerProofOnboardingGrounded, "revenue", "revenuecat-proof.md"),
+      "Sandbox purchase confirmed: entitlement active and access granted inside the app.\n",
+      "utf8",
+    );
+  }
+  runFixture(
+    "done onboarding lane with both PostHog and RevenueCat evidence on disk passes",
+    providerProofOnboardingGrounded,
+    "check-live-provider-proof.ts",
+    0,
+  );
+
   const artifactTemplateGap = makeFixture("artifact-template-gap");
   {
     const state = readState(artifactTemplateGap);
