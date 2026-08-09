@@ -74,7 +74,19 @@ interface GovernedFile {
 
 const governed: GovernedFile[] = [];
 
-for (const relative of ["docs/architecture.md", "docs/validators.md", "docs/platform/technical-architecture.md", "docs/platform/product-architecture.md"]) {
+// docs/ stays an explicit list rather than a scanned directory like ADDITIONAL_GOVERNED_
+// DIRECTORIES below: docs/platform/ also holds exploratory and point-in-time content (a
+// historical repo audit, a founder-journey narrative, an open backlog) this repo's own
+// conventions already keep outside every gate, so a blanket scan would govern files that
+// were never meant to be governed. Add a new architecture doc, ADR, or validator reference
+// here by name once it exists.
+for (const relative of [
+  "docs/architecture.md",
+  "docs/validators.md",
+  "docs/platform/technical-architecture.md",
+  "docs/platform/product-architecture.md",
+  "docs/platform/decisions-and-tradeoffs.md",
+]) {
   const absolute = path.join(repoRoot, relative);
   if (!existsSync(absolute)) continue;
   governed.push({ displayPath: relative, absolute, tier: "warning" });
@@ -143,10 +155,13 @@ function truncate(text: string): string {
 }
 
 /**
- * Prose a reader actually reads: drops fenced/inline code, HTML comments, link targets
- * (mirroring check-no-slop.ts's proseText), and double-quoted spans — a quoted phrase is a
- * cited or illustrative example (this file's own §3 table quotes both "Do" and intentionally
- * bad "Don't" examples), not the author's own assertion, so it should not be graded as one.
+ * Prose a reader actually reads: drops fenced/inline code, HTML comments, and link targets
+ * (mirroring check-no-slop.ts's proseText). Double-quoted spans stay in general — a quoted
+ * UI label or error message inside a real sentence is still the author's own prose and must
+ * still be graded. The one exemption is narrower and lives in the table-row branch below: a
+ * table cell that is nothing BUT a single quoted string (this file's own §3 table quotes both
+ * "Do" and intentionally bad "Don't" examples this way) is a cited illustration, not an
+ * assertion, so only that whole-cell case is dropped.
  */
 function sentencesOf(source: string): string[] {
   const stripped = source
@@ -154,8 +169,7 @@ function sentencesOf(source: string): string[] {
     .replace(/~~~[\s\S]*?~~~/g, " ")
     .replace(/<!--[\s\S]*?-->/g, " ")
     .replace(/\]\([^)]*\)/g, "] ")
-    .replace(/`[^`\n]*`/g, " ")
-    .replace(/"[^"\n]*"/g, " ");
+    .replace(/`[^`\n]*`/g, " ");
 
   const filteredLines = stripped.split("\n").filter((line) => {
     const trimmed = line.trim();
@@ -173,12 +187,15 @@ function sentencesOf(source: string): string[] {
     const trimmed = line.trim();
     // A table row's cells are discrete units, same reasoning as a list item — force a
     // boundary at each cell so a long or present-perfect cell can't hide by merging with its
-    // neighbors, and the row can't merge into surrounding prose either.
+    // neighbors, and the row can't merge into surrounding prose either. A cell that is nothing
+    // but a single quoted string (a cited Do/Don't example, not the author's own assertion) is
+    // dropped; a cell with only a partial or embedded quote stays and is graded in full.
     if (isTableRowLine(trimmed)) {
       return trimmed
         .split("|")
         .map((cell) => cell.trim())
         .filter(Boolean)
+        .filter((cell) => !/^"[^"]*"\.?$/.test(cell))
         .map((cell) => (/[.!?]$/.test(cell) ? cell : `${cell}.`))
         .join(" ");
     }

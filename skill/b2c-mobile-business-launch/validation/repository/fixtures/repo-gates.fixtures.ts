@@ -1498,4 +1498,52 @@ export function register(h: Harness): void {
     ["--repo-root", ste100TableQuotedExample.repoRoot, "--skill-root", ste100TableQuotedExample.skillRoot],
     0,
   );
+
+  // A real gap Codex caught: docs/platform/decisions-and-tradeoffs.md (an ADR, current and
+  // real, same as the two architecture docs already governed) was outside the hardcoded docs/
+  // list, so an edit to it got no signal despite the repo policy governing architecture docs.
+  const ste100Adr = writeSte100Root("ste100-adr-scanned");
+  mkdirSync(path.join(ste100Adr.repoRoot, "docs", "platform"), { recursive: true });
+  writeFileSync(
+    path.join(ste100Adr.repoRoot, "docs", "platform", "decisions-and-tradeoffs.md"),
+    "# Decisions And Tradeoffs\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "ste100 scans docs/platform/decisions-and-tradeoffs.md, an ADR outside the prior docs/ list",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Adr.repoRoot, "--skill-root", ste100Adr.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [docs/platform/decisions-and-tradeoffs.md]",
+  );
+
+  // A real gap Codex caught: the prior blanket double-quote strip erased ANY quoted span before
+  // grading, not just a whole-cell illustrative example — so an ordinary quoted UI string or
+  // error message sitting inside real prose lost its own violation along with its quote marks.
+  // A quoted span in plain prose is the author's own sentence, not a cited example, and must
+  // stay fully counted.
+  const ste100QuotedProseViolation = writeSte100Root("ste100-quoted-prose-still-counted", {
+    steFile: '# Doc\n\nThe tooltip literally says "the validator has confirmed this already" every time it runs.\n',
+  });
+  runScriptArgs(
+    "ste100 still catches present-perfect tense hiding inside a quoted phrase in plain prose",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100QuotedProseViolation.repoRoot, "--skill-root", ste100QuotedProseViolation.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
+
+  // The table-cell exemption is narrow on purpose: it drops a cell only when the ENTIRE trimmed
+  // cell is one quoted string. A cell that merely contains a quote alongside other text is not
+  // an illustrative example — it is prose with a quote in it — and must stay fully counted.
+  const ste100PartialQuoteInCell = writeSte100Root("ste100-partial-quote-in-cell-counted", {
+    steFile: '# Doc\n\n| Rule | Example |\n|---|---|\n| Tense | Example: "the validator has confirmed this" already |\n',
+  });
+  runScriptArgs(
+    "ste100 still catches a violation in a table cell whose quote is partial, not whole-cell",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PartialQuoteInCell.repoRoot, "--skill-root", ste100PartialQuoteInCell.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
 }
