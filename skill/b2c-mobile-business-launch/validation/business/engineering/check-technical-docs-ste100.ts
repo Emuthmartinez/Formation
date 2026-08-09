@@ -64,7 +64,7 @@ interface GovernedFile {
 
 const governed: GovernedFile[] = [];
 
-for (const relative of ["docs/architecture.md", "docs/validators.md"]) {
+for (const relative of ["docs/architecture.md", "docs/validators.md", "docs/platform/technical-architecture.md", "docs/platform/product-architecture.md"]) {
   const absolute = path.join(repoRoot, relative);
   if (!existsSync(absolute)) continue;
   governed.push({ displayPath: relative, absolute, tier: "warning" });
@@ -140,32 +140,43 @@ function sentencesOf(source: string): string[] {
     .replace(/\]\([^)]*\)/g, "] ")
     .replace(/`[^`\n]*`/g, " ");
 
-  const lines = stripped
-    .split("\n")
-    .filter((line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return false;
-      if (trimmed.startsWith("#")) return false;
-      if (trimmed.startsWith("|")) return false;
-      if (/^[-*_]{3,}$/.test(trimmed)) return false;
-      return true;
-    })
-    .map((line) => {
-      // A list item is a discrete unit by definition — force a boundary at its end so it
-      // never merges with the next bullet into one oversized chunk, even when the item
-      // itself is a short phrase with no terminal punctuation.
-      const trimmed = line.trim();
-      const isListItem = /^(?:[-*]|\d+[.)])\s/.test(trimmed);
-      return isListItem && !/[.!?:]$/.test(trimmed) ? `${trimmed}.` : trimmed;
-    });
+  const filteredLines = stripped.split("\n").filter((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+    if (trimmed.startsWith("#")) return false;
+    if (trimmed.startsWith("|")) return false;
+    if (/^[-*_]{3,}$/.test(trimmed)) return false;
+    return true;
+  });
+
+  const isListItemLine = (value: string): boolean => /^(?:[-*]|\d+[.)])\s/.test(value);
+
+  const lines = filteredLines.map((line, index) => {
+    const trimmed = line.trim();
+    // A list item is a discrete unit by definition — force a boundary at its end so it never
+    // merges with the next bullet into one oversized chunk, even when the item itself is a
+    // short phrase with no terminal punctuation.
+    if (isListItemLine(trimmed)) {
+      return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+    }
+    // A colon does NOT end a sentence in general — "Follow this procedure: open the file,
+    // read line one, ..." is one long instruction a colon must not let escape the word-count
+    // rule by splitting it into two short-looking halves. The one structural exception: a
+    // line that ends with ':' specifically to introduce the list that follows it. There, the
+    // colon is punctuation between two document *structures* (an intro and a list), not
+    // punctuation inside one grammatical sentence, so converting it to a real boundary is
+    // safe and keeps that intro from merging into the first bullet's own chunk.
+    const nextTrimmed = filteredLines[index + 1]?.trim();
+    if (nextTrimmed !== undefined && isListItemLine(nextTrimmed) && /:$/.test(trimmed)) {
+      return trimmed.replace(/:$/, ".");
+    }
+    return trimmed;
+  });
 
   const joined = lines.join(" ");
   // A trailing prose chunk with no terminal punctuation would otherwise fall off the end of
   // the match below unseen — force a boundary so the final segment always gets checked too.
-  const closed = /[.!?:]\s*$/.test(joined) ? joined : `${joined}.`;
-  // ":" ends a chunk too — a colon-introduced clause or list reads as its own unit, and
-  // splitting there only ever shortens a chunk's word count, never lengthens one, so this
-  // cannot turn a passing sentence into a failing one anywhere in the governed surface.
-  const rawSentences = closed.match(/[^.!?:]+[.!?:]+/g) ?? [];
+  const closed = /[.!?]\s*$/.test(joined) ? joined : `${joined}.`;
+  const rawSentences = closed.match(/[^.!?]+[.!?]+/g) ?? [];
   return rawSentences.map((entry) => entry.trim()).filter(Boolean);
 }

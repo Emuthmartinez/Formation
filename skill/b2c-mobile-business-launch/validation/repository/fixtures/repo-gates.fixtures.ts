@@ -1416,4 +1416,32 @@ export function register(h: Harness): void {
     1,
     "ste100.sentence_too_long",
   );
+
+  // A colon inside a real, single grammatical sentence must NOT end the sentence-length count
+  // early — a real gap Codex caught: this 23-word instruction splits into a 9-word half and a
+  // 14-word half at its mid-sentence colon, and the old "colon always ends a chunk" rule let
+  // both halves pass individually while the sentence as a whole broke the 20-word ceiling.
+  const ste100MidSentenceColon = writeSte100Root("ste100-mid-sentence-colon", {
+    steFile:
+      "# Doc\n\nFollow this procedure carefully and read every step twice: open the file first, then check the value against the reference table before continuing.\n",
+  });
+  runScriptArgs(
+    "ste100 keeps a mid-sentence colon inside the same sentence, not a second short one",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100MidSentenceColon.repoRoot, "--skill-root", ste100MidSentenceColon.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // The list-introducing colon exception must stay narrow: it fires only when the very next
+  // line is a list item, never for an ordinary colon-joined sentence sitting in plain prose.
+  const ste100ColonNoList = writeSte100Root("ste100-colon-no-list-follows", {
+    steFile: "# Doc\n\nRead this short line: it stays one sentence.\n\nA second short paragraph follows here with no list after it at all.\n",
+  });
+  runScriptArgs(
+    "ste100 passes a colon-joined sentence under the ceiling when no list follows it",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100ColonNoList.repoRoot, "--skill-root", ste100ColonNoList.skillRoot],
+    0,
+  );
 }
