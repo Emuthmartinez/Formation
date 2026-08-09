@@ -46,6 +46,26 @@ const PAST_PARTICIPLE =
 const presentPerfectPattern = new RegExp(`\\b(?:has|have|had)\\s+(?:not\\s+|never\\s+|already\\s+|just\\s+|recently\\s+)?${PAST_PARTICIPLE}\\b`, "i");
 
 /**
+ * A period that ends an abbreviation ("e.g.", "etc.") or sits inside a decimal or version
+ * number ("3.5", "v0.114.0") is not a sentence boundary. Left alone, the sentence-splitting
+ * regex below reads every one of those periods as one, so a real sentence over the word
+ * ceiling can pass by fragmenting into short-looking pieces at each abbreviation. Swapped for
+ * this Private-Use-Area sentinel (never appears in real markdown, and unlike a null byte
+ * carries no risk of a downstream tool reading the string as binary) before splitting, then
+ * restored to '.' once sentence boundaries are final.
+ */
+const PROTECTED_PERIOD = "\uE000";
+// "no" and "st" are deliberately excluded: both are common as ordinary sentence-final words
+// ("the answer is no.", "first, second, ... last."), and protecting their period would merge
+// a real sentence boundary into the next sentence instead of fixing a false split.
+const ABBREVIATION_PERIOD = /\b(?:e\.g|i\.e|etc|vs|approx|cf|fig|mr|mrs|ms|dr|jr|sr|et al)\.(?=\s|$)/gi;
+const DECIMAL_OR_VERSION_PERIOD = /(\d)\.(?=\d)/g;
+
+function protectNonTerminalPeriods(text: string): string {
+  return text.replace(ABBREVIATION_PERIOD, (match) => match.replace(/\./g, PROTECTED_PERIOD)).replace(DECIMAL_OR_VERSION_PERIOD, `$1${PROTECTED_PERIOD}`);
+}
+
+/**
  * skill-root-relative paths this reference can currently guarantee compliant. This is the
  * one file so far: the reference itself, hand-written to its own rules.
  */
@@ -86,6 +106,7 @@ for (const relative of [
   "docs/platform/technical-architecture.md",
   "docs/platform/product-architecture.md",
   "docs/platform/decisions-and-tradeoffs.md",
+  "docs/implementation/graph-execution-v2.md",
 ]) {
   const absolute = path.join(repoRoot, relative);
   if (!existsSync(absolute)) continue;
@@ -164,12 +185,14 @@ function truncate(text: string): string {
  * assertion, so only that whole-cell case is dropped.
  */
 function sentencesOf(source: string): string[] {
-  const stripped = source
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/~~~[\s\S]*?~~~/g, " ")
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    .replace(/\]\([^)]*\)/g, "] ")
-    .replace(/`[^`\n]*`/g, " ");
+  const stripped = protectNonTerminalPeriods(
+    source
+      .replace(/```[\s\S]*?```/g, " ")
+      .replace(/~~~[\s\S]*?~~~/g, " ")
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      .replace(/\]\([^)]*\)/g, "] ")
+      .replace(/`[^`\n]*`/g, " "),
+  );
 
   const filteredLines = stripped.split("\n").filter((line) => {
     const trimmed = line.trim();
@@ -224,5 +247,5 @@ function sentencesOf(source: string): string[] {
   // the match below unseen — force a boundary so the final segment always gets checked too.
   const closed = /[.!?]\s*$/.test(joined) ? joined : `${joined}.`;
   const rawSentences = closed.match(/[^.!?]+[.!?]+/g) ?? [];
-  return rawSentences.map((entry) => entry.trim()).filter(Boolean);
+  return rawSentences.map((entry) => entry.trim().split(PROTECTED_PERIOD).join(".")).filter(Boolean);
 }

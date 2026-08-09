@@ -1546,4 +1546,52 @@ export function register(h: Harness): void {
     1,
     "ste100.present_perfect",
   );
+
+  // A real gap Codex caught: docs/implementation/graph-execution-v2.md, the current guide for
+  // the graph compiler, durable runtime, scheduler, and verification boundary (named as such
+  // by docs/implementation/README.md), was outside the hardcoded docs/ list.
+  const ste100GraphExecutionGuide = writeSte100Root("ste100-graph-execution-guide-scanned");
+  mkdirSync(path.join(ste100GraphExecutionGuide.repoRoot, "docs", "implementation"), { recursive: true });
+  writeFileSync(
+    path.join(ste100GraphExecutionGuide.repoRoot, "docs", "implementation", "graph-execution-v2.md"),
+    "# Graph Execution V2\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "ste100 scans docs/implementation/graph-execution-v2.md, the current graph-compiler guide",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100GraphExecutionGuide.repoRoot, "--skill-root", ste100GraphExecutionGuide.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [docs/implementation/graph-execution-v2.md]",
+  );
+
+  // A real gap Codex caught: the sentence-splitting regex reads every period as a boundary,
+  // including the two inside "e.g." — so a real sentence over the word ceiling could pass by
+  // fragmenting into short-looking pieces at an abbreviation. This 24-word sentence splits
+  // into three fragments of 14, 1, and 10 words at "e.g." without the fix, none over the
+  // ceiling; with the fix it stays one sentence and is caught.
+  const ste100AbbreviationPeriod = writeSte100Root("ste100-abbreviation-period-not-a-boundary", {
+    steFile:
+      "# Doc\n\nPick the canonical product name once and reuse it everywhere across every screen, e.g. onboarding, paywall, and email subjects, without ever renaming it again.\n",
+  });
+  runScriptArgs(
+    "ste100 does not let e.g. fragment a real sentence into short-looking pieces under the ceiling",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AbbreviationPeriod.repoRoot, "--skill-root", ste100AbbreviationPeriod.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A decimal or version-number period ("v0.114.0") must not be read as a sentence boundary
+  // either — the same class of bug, a different period shape.
+  const ste100VersionNumberPeriod = writeSte100Root("ste100-version-number-period-not-a-boundary", {
+    steFile: "# Doc\n\nThe fixture suite runs clean against release v0.114.0 and every prior tagged release before it, including the ones from last quarter.\n",
+  });
+  runScriptArgs(
+    "ste100 does not let a version-number period fragment a real sentence into short-looking pieces",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100VersionNumberPeriod.repoRoot, "--skill-root", ste100VersionNumberPeriod.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
 }
