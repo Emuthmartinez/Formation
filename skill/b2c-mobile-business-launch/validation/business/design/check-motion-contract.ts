@@ -480,6 +480,43 @@ if (celebrateBand) {
   }
 }
 
+// --- 3b. A recipe's own restated numeric window (e.g. R12's "(360–600ms total)") must match
+// tokens.json's actual values for the tokens it names — otherwise a future token edit can
+// invert the range or drift the cap while this recipe's prose, and this gate, stay green. ---
+if (bench !== undefined && Object.keys(motionTokens).length > 0) {
+  const windowRe = /`motion\.(\w+)`[–-]`(\w+)` window \((\d+)[–-](\d+)ms total\)/g;
+  for (const m of bench.matchAll(windowRe)) {
+    const bounds: Array<[string, string, string]> = [
+      [g(m, 1), g(m, 3), "low"],
+      [g(m, 2), g(m, 4), "high"],
+    ];
+    for (const [tokenName, stated, label] of bounds) {
+      const actual = motionTokens[tokenName];
+      if (actual === undefined) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_window.unknown_token",
+            `A recipe states a window ${label} bound against motion.${tokenName}, which does not exist in tokens.json.`,
+            BENCH,
+          ),
+        );
+        continue;
+      }
+      if (actual !== `${stated}ms`) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_window.value_drift",
+            `A recipe states its window ${label} bound as ${stated}ms (motion.${tokenName}) but tokens.json ships motion.${tokenName} = ${actual}.`,
+            BENCH,
+          ),
+        );
+      }
+    }
+  }
+}
+
 // --- 4. The cinematic token stays out of the in-app doctrine and rides only web/brand routes. ---
 if (craft !== undefined && craft.includes("durationCinematic")) {
   issues.push(

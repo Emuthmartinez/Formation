@@ -734,6 +734,17 @@ export function register(h: Harness): void {
     "motion_contract.token_row.value_drift",
   );
 
+  const motionRecipeWindowDrift = writeMotionContractRoot("motion-contract-recipe-window-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("window (360–600ms total)", "window (360–650ms total)") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a recipe's own restated window drifts from tokens.json",
+    "check-motion-contract.ts",
+    ["--skill-root", motionRecipeWindowDrift],
+    1,
+    "motion_contract.recipe_window.value_drift",
+  );
+
   const motionCanonDrift = writeMotionContractRoot("motion-contract-canon-outside-band", (rel, text) =>
     rel.endsWith("peak-end-card.md") ? text.replace(".spring(response: 0.45, dampingFraction: 0.7)", ".spring(response: 0.45, dampingFraction: 0.85)") : text,
   );

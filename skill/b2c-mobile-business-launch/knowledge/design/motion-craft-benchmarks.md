@@ -165,17 +165,17 @@ A cold-launch splash reads as intentional when the hold has a real reason and th
 
 - [ ] The hold lasts exactly as long as the real asset/font/data load it is masking — never padded to "feel like a splash."
 - [ ] The exit is a hard cut or an authored dissolve, chosen deliberately per the boundary it crosses, never a generic fade applied by default.
-- [ ] Nothing on the splash is interactive; it is absent from the accessibility tree until the destination screen mounts.
-- [ ] Reduce Motion: the destination screen renders immediately; the hold never extends to "let the animation play."
+- [ ] Nothing on the splash is interactive. Decorative branding (logo, wordmark, background art) is absent from the accessibility tree; a real, still-loading state exposes a noninteractive loading status — and any failure/retry state — so a screen-reader user is not left in silence during a stalled load.
+- [ ] Reduce Motion skips only the authored transition, never the real loading gate: the hold still lasts as long as the actual asset/font/data load takes, then cuts to the destination the instant that load completes, with no dissolve. "Renders immediately" means "no animated exit," not "before loading is done."
 
 **Exemplars:** static-splash-then-hard-cut sequences (top-welcome-screens research set, Strava/onX Hunt/SCRL-inspired references); loader hard-cut into a final page (MyFitnessPal-inspired reference).
 
 ### R12 — Staggered multi-asset splash entrance
 
-**Serves:** a welcome screen whose composition is several small assets — icons, props, ornaments — arriving together, distinct from R3's single hero object. **Rides:** `motion.stagger` sets the per-asset floor; reference entrances space assets 2–3× that (120–180ms) apart across a `motion.durationSlow`–`durationReveal` window (0.3–0.6s total); each asset settles on the press-family spring (response 0.3–0.4, damping 0.7–0.8) — a calm arrival, never the celebrate family, because nothing has been earned yet at cold launch.
+**Serves:** a welcome screen whose composition is several small assets — icons, props, ornaments — arriving together, distinct from R3's single hero object. **Rides:** `motion.stagger` sets the per-asset floor; reference entrances space assets 2–3× that (120–180ms) apart, capped at **3 assets** at the full reference offset, so the total spread — last stagger offset plus that asset's press-family settle (response 0.3–0.4s) — stays inside the `motion.durationSlow`–`durationReveal` window (360–600ms total); each asset settles on the press-family spring (response 0.3–0.4, damping 0.7–0.8) — a calm arrival, never the celebrate family, because nothing has been earned yet at cold launch. For 4 or more assets, the 120–180ms reference offset no longer fits: derive a smaller offset as (`durationReveal` − last asset's settle time) ÷ (asset count − 1), or split the composition into a staggered group of up to 3 plus a static remainder instead of stretching one long cascade.
 
 - [ ] Each asset animates independently — its own stagger offset and its own settle — never one shared fade/scale applied to the group.
-- [ ] Total entrance window stays inside `motion.durationReveal` (600ms); a longer spread reads as sluggish rather than staggered.
+- [ ] Total entrance window — last stagger offset plus that asset's settle, not just the offsets — stays inside `motion.durationReveal` (600ms); at 4+ assets, derive the offset from the asset count (see Rides above) instead of reusing the 120–180ms reference spacing, which only fits 2–3 assets before the window is blown.
 - [ ] Press-family spring only; a celebrate-family overshoot on a splash asset misreads a cold-launch moment as a reward (see R8's scope boundary).
 - [ ] Reduce Motion: all assets render in their settled position with no stagger.
 
@@ -198,9 +198,9 @@ A cold-launch splash reads as intentional when the hold has a real reason and th
 
 - [ ] Each page transition is a horizontal slide, not a fade-through-black or a cut; the deck reads as one continuous surface.
 - [ ] The final CTA's entrance is a separate, later beat from the page settling — earned, not simultaneous.
-- [ ] Every cold-open ships two states beyond the animated entrance: a **deterministic final state** (renders instantly, no animation, for a "skip intro" or slow-device path) and a **replay path** (a mounted instance restarts from a prop/state change without a full remount).
-- [ ] Never invent an entrance the product has no real content for — a screen with only a final marketing state and no captured motion reference ships that final state immediately rather than fabricating a plausible-looking animation.
-- [ ] Reduce Motion renders the deterministic final state described above, immediately.
+- [ ] Every cold-open ships two paths beyond the animated entrance: a **skip-intro path** — an explicit, user-selected control that jumps straight to the deck's final page — and a **replay path** (a mounted instance restarts from a prop/state change without a full remount). The skip-intro jump is a deliberate user choice, never an automatic one.
+- [ ] Never invent an entrance the product has no real content for — a screen with only a final marketing state and no captured motion reference ships that final state immediately rather than fabricating a plausible-looking animation. This is the one case where jumping straight to a final state has no page content to lose, because there was never a real paged entrance.
+- [ ] Reduce Motion still presents every page, in the same order and with the same navigation as the animated version — only the slide between pages becomes a cut and the CTA's fade becomes an instant appearance. Never route Reduce Motion straight to the final page automatically: that silently drops page content the user did not choose to skip. Jumping straight to the final page stays reserved for the explicit skip-intro control above and the no-real-entrance case in the item above it.
 
 **Exemplars:** paged cold-open with final-CTA fade (top-welcome-screens research set, Speak: Language Learning and Speak & Learn-inspired references); final-state-only welcome screen with no invented entrance (top-welcome-screens research set, Perplexity-inspired reference) — the same restraint R14's fourth checklist item generalizes.
 
