@@ -162,6 +162,13 @@ const onboardingGraphWorkflows = [
       "workflow.experience.onboarding-system.onb-08-motion-research",
     ],
     outputPaths: ["product/onboarding/graph/ONB-09-evidence-join.md"],
+    // Same production-verification rationale as ONB-03 above: with no gate, this node compiled to
+    // verification "none", so an executor could return the declared ONB-09 artifact ID and
+    // fingerprint without producing a substantive evidence-to-decision join, and reconcilePatch()
+    // would still mark it succeeded immediately -- unblocking ONB-10 through ONB-14 and eventually
+    // the destructive ONB-22 cutover even though ONB-22's own gate never inspects
+    // ONB-09-evidence-join.md.
+    gates: ["check:onboarding-evidence-onb-09"],
     actionClass: "draft",
     idempotent: true,
   }),

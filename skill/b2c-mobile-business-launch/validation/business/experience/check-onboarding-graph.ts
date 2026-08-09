@@ -67,19 +67,25 @@ const TEMPLATE_DIRECTIVE_VERBS = new Set([
 // invocation (check:onboarding-graph-complete) -- see the requireDone block below.
 const requireDone = process.argv.includes("--require-done");
 const args = parseCliArgs(process.argv.slice(2));
-let loaded = loadProjectState(args);
 // A durable-engine-managed workspace's canonical state lives at state/business-state.json (v2),
 // not state/PROJECT_STATE.yaml (v1) -- core/session/run.ts's resolveWorkspacePaths() treats it as
-// canonical, and a v2 workspace may have no PROJECT_STATE.yaml at all. Without this fallback,
-// ONB-22's own gate would report the lane permanently missing on every genuinely completed v2
-// run. Only triggers when v1 is missing outright, not when it exists but is invalid YAML.
+// canonical. A migrated workspace can retain a stale v1 file alongside the live v2 one (the engine
+// only ever writes v2), so v2's mere presence -- not just v1's absence -- decides precedence: check
+// it first, and use it whenever it exists, so a stale retained v1 file can never override canonical
+// v2. An existing-but-invalid v2 document fails closed here (never silently falls back to v1 --
+// v1 could be equally stale, and a corrupt canonical file must not quietly authorize the
+// destructive ONB-22 cutover on unverified data).
 let stateSourceFile = "state/PROJECT_STATE.yaml";
-if (loaded.issues.some((entry) => entry.code === "project_state.missing")) {
-  const v2Lane = loadLaneFromBusinessStateV2(args.root, "onboarding");
-  if (v2Lane) {
-    loaded = { state: { lanes: { onboarding: v2Lane } }, issues: [] };
-    stateSourceFile = "state/business-state.json";
-  }
+let loaded: { state?: unknown; issues: Issue[] };
+const v2Lane = loadLaneFromBusinessStateV2(args.root, "onboarding");
+if (v2Lane.kind === "found") {
+  loaded = { state: { lanes: { onboarding: { status: v2Lane.status, blockers: v2Lane.blockers, reason: v2Lane.reason } } }, issues: [] };
+  stateSourceFile = "state/business-state.json";
+} else if (v2Lane.kind === "invalid") {
+  stateSourceFile = "state/business-state.json";
+  loaded = { issues: [issue("error", "onboarding_graph.business_state_invalid", v2Lane.message, stateSourceFile)] };
+} else {
+  loaded = loadProjectState(args);
 }
 const issues: Issue[] = [...loaded.issues];
 const state = loaded.state;
@@ -366,7 +372,17 @@ if (!skip && artifact) {
 
     for (let index = 0; index <= 22; index += 1) {
       const node = `ONB-${String(index).padStart(2, "0")}`;
-      if (!graphRunNodeDone(text, node)) {
+      const status = graphRunNodeStatus(text, node);
+      if (status === "duplicate") {
+        issues.push(
+          issue(
+            "error",
+            "onboarding_graph.node_duplicate_row",
+            `${relativePath} claims the onboarding lane is done but graph node ${node} has more than one row in the Graph Run table; a resumed or merged run must leave exactly one row per node instead of retaining conflicting rows.`,
+            relativePath,
+          ),
+        );
+      } else if (status !== "done") {
         issues.push(
           issue(
             "error",
@@ -412,26 +428,39 @@ function isTableSeparatorRow(line: string): boolean {
   return /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?$/.test(line);
 }
 
-// Reads the node's status from the Graph Run table's own Status column (located by the header
-// row), not from any cell in the row -- an owner/result cell that happens to mention "done" in
-// prose must not be mistaken for the node's actual recorded status.
-function graphRunNodeDone(text: string, node: string): boolean {
+// Reads every row's node and status from the Graph Run table's own Node and Status columns
+// (located by the header row), not from any other cell -- an owner/result cell that happens to
+// mention "done" in prose must not be mistaken for the node's actual recorded status.
+function graphRunRows(text: string): Array<{ node: string; status: string }> {
   const tableLines = sectionBody(text, "Graph Run")
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.startsWith("|"));
   const headerLine = tableLines[0];
-  if (!headerLine) return false;
+  if (!headerLine) return [];
   const header = headerLine.split("|").map((cell) => cell.trim().toLowerCase());
   const nodeIndex = header.indexOf("node");
   const statusIndex = header.indexOf("status");
-  if (nodeIndex === -1 || statusIndex === -1) return false;
+  if (nodeIndex === -1 || statusIndex === -1) return [];
 
-  return tableLines.slice(1).some((line) => {
-    if (isTableSeparatorRow(line)) return false;
-    const cells = line.split("|").map((cell) => cell.trim());
-    return cells[nodeIndex] === `\`${node}\`` && cells[statusIndex] === "done";
-  });
+  return tableLines
+    .slice(1)
+    .filter((line) => !isTableSeparatorRow(line))
+    .map((line) => {
+      const cells = line.split("|").map((cell) => cell.trim());
+      return { node: cells[nodeIndex] ?? "", status: cells[statusIndex] ?? "" };
+    });
+}
+
+// A resumed or merged run must retain exactly one Graph Run row per node. If it retains a stale
+// row (e.g. `partial`) alongside an appended row (e.g. `done`) for the same node, that conflict
+// has to be surfaced and fixed in the artifact itself -- this must not silently resolve it by
+// accepting the node because *some* row says done.
+function graphRunNodeStatus(text: string, node: string): "done" | "not_done" | "duplicate" {
+  const rows = graphRunRows(text).filter((row) => row.node === `\`${node}\``);
+  if (rows.length > 1) return "duplicate";
+  if (rows.length === 0) return "not_done";
+  return rows[0]?.status === "done" ? "done" : "not_done";
 }
 
 function countUncheckedItems(section: string): number {

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.118.0",
+  "skillVersion": "0.119.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2227,7 +2227,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-09-evidence-join.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-09"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -4697,6 +4699,13 @@
     {
       "id": "gate.check-onboarding-evidence-onb-08",
       "command": "check:onboarding-evidence-onb-08",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-09",
+      "command": "check:onboarding-evidence-onb-09",
       "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
       "ownerDomainId": "domain.experience",
       "audit": "excluded"

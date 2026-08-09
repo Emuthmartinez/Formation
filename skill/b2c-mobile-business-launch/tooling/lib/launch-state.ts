@@ -7,6 +7,9 @@ import {
   phaseOrder as graphPhaseOrder,
   requiredLanes as graphRequiredLanes,
 } from "../../catalog/lane-graph.js";
+// tooling/ already crosses into core/ elsewhere (render-autonomy-console.ts) -- unlike
+// validation/business/*, this layer is not confined to the v1-only side of the migration.
+import { validateBusinessState } from "../../core/schema/index.js";
 
 export type Severity = "error" | "warning";
 
@@ -421,6 +424,9 @@ const v1LaneStatusFromCanonicalStatus: Readonly<Record<string, string>> = {
   succeeded: "done",
 };
 
+export type LaneFromBusinessStateV2Result =
+  { kind: "absent" } | { kind: "invalid"; message: string } | { kind: "found"; status: string; blockers: string[]; reason?: string };
+
 /**
  * A durable-engine-managed workspace's canonical state lives at state/business-state.json (v2) --
  * core/session/run.ts's resolveWorkspacePaths() treats it as canonical, and a v2 workspace may
@@ -429,25 +435,38 @@ const v1LaneStatusFromCanonicalStatus: Readonly<Record<string, string>> = {
  * blockers/reason, not the whole v1 document: v2's other sections (project, narrative, autonomy,
  * continuity, control-plane) live across multiple v2 files with no verified 1:1 v1 shape, and a
  * wrong silent mapping there would be worse than the current clear "state is missing" error, so
- * this stays scoped to the one field a lane-status gate actually needs. Returns undefined if
- * state/business-state.json is absent, unreadable, or has no status recorded for this lane.
+ * this stays scoped to the one field a lane-status gate actually needs.
+ *
+ * Runs the parsed document through the repository's own validateBusinessState() schema check
+ * before trusting anything in it -- a malformed or partially-written business-state.json (missing
+ * required top-level fields, or the wrong shape) must fail closed here rather than having its one
+ * requested field extracted anyway, since a corrupt canonical document is exactly the case where a
+ * gate must not quietly authorize the destructive ONB-22 cutover on unverified data. The caller
+ * decides what "invalid" means for its own error reporting; this never silently falls back to v1
+ * on an invalid v2 document -- v2 existing at all is itself the signal this workspace is
+ * durable-engine-managed, where v1 may be stale or absent.
  */
-export function loadLaneFromBusinessStateV2(root: string, lane: string): { status: string; blockers: string[]; reason?: string } | undefined {
+export function loadLaneFromBusinessStateV2(root: string, lane: string): LaneFromBusinessStateV2Result {
   const v2Path = path.join(root, "state", "business-state.json");
-  if (!existsSync(v2Path)) return undefined;
+  if (!existsSync(v2Path)) return { kind: "absent" };
   let parsed: unknown;
   try {
     parsed = JSON.parse(readFileSync(v2Path, "utf8"));
-  } catch {
-    return undefined;
+  } catch (error) {
+    return { kind: "invalid", message: `state/business-state.json is not valid JSON: ${error instanceof Error ? error.message : String(error)}` };
   }
-  const laneState = getPath(parsed, `lanes.${lane}`);
-  const canonicalStatus = asString(getPath(laneState, "status"));
-  if (!canonicalStatus) return undefined;
+  const validated = validateBusinessState(parsed);
+  if (!validated.valid || !validated.value) {
+    const detail = validated.issues.map((entry) => `${entry.path}: ${entry.message}`).join("; ") || "schema validation failed";
+    return { kind: "invalid", message: `state/business-state.json failed schema validation (${detail}).` };
+  }
+  const laneState = (validated.value.lanes as unknown as Record<string, { status: string; blockers: string[]; reason?: unknown }>)[lane];
+  if (!laneState) return { kind: "invalid", message: `state/business-state.json's lanes has no entry for "${lane}".` };
   return {
-    status: v1LaneStatusFromCanonicalStatus[canonicalStatus] ?? canonicalStatus,
-    blockers: asArray(getPath(laneState, "blockers")).filter((entry): entry is string => typeof entry === "string"),
-    reason: asString(getPath(laneState, "reason")),
+    kind: "found",
+    status: v1LaneStatusFromCanonicalStatus[laneState.status] ?? laneState.status,
+    blockers: laneState.blockers.filter((entry): entry is string => typeof entry === "string"),
+    reason: typeof laneState.reason === "string" ? laneState.reason : undefined,
   };
 }
 

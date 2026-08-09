@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.118.0",
+  "version": "0.119.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -77,6 +77,7 @@
     "check:onboarding-evidence-onb-06": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-06 --path product/onboarding/graph/ONB-06-internal-guidance-audit.md",
     "check:onboarding-evidence-onb-07": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-07 --path product/onboarding/graph/ONB-07-provider-policy-landscape.md",
     "check:onboarding-evidence-onb-08": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-08 --path product/onboarding/graph/ONB-08-motion-research.md",
+    "check:onboarding-evidence-onb-09": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-09 --path product/onboarding/graph/ONB-09-evidence-join.md",
     "check:onboarding-evidence-onb-20": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-20 --path product/onboarding/graph/ONB-20-adversarial-qa.md",
     "check:onboarding-evidence-onb-21": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-21 --path product/onboarding/graph/ONB-21-compound-engineering-plan.md",
     "check:lane-coverage": "tsx validation/business/process/check-lane-coverage.ts",

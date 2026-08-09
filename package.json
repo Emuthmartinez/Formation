@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.118.0",
+  "version": "0.119.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -59,6 +59,7 @@
     "check:onboarding-evidence-onb-06": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-06 --path product/onboarding/graph/ONB-06-internal-guidance-audit.md",
     "check:onboarding-evidence-onb-07": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-07 --path product/onboarding/graph/ONB-07-provider-policy-landscape.md",
     "check:onboarding-evidence-onb-08": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-08 --path product/onboarding/graph/ONB-08-motion-research.md",
+    "check:onboarding-evidence-onb-09": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-09 --path product/onboarding/graph/ONB-09-evidence-join.md",
     "check:onboarding-evidence-onb-20": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-20 --path product/onboarding/graph/ONB-20-adversarial-qa.md",
     "check:onboarding-evidence-onb-21": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-21 --path product/onboarding/graph/ONB-21-compound-engineering-plan.md",
     "check:orchestration": "tsx skill/b2c-mobile-business-launch/validation/business/orchestration/check-parallel-orchestration.ts",
