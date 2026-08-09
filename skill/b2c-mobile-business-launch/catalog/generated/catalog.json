@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.114.0",
+  "skillVersion": "0.115.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2032,7 +2032,7 @@
     {
       "id": "workflow.experience.onboarding-system.onb-03-current-guidance",
       "title": "Onboarding ONB-03: current guidance research",
-      "domainId": "domain.research",
+      "domainId": "domain.experience",
       "areaIds": [
         "area.product-experience"
       ],
@@ -2049,7 +2049,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-03-current-guidance.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-03"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "observe",
@@ -2058,7 +2060,7 @@
     {
       "id": "workflow.experience.onboarding-system.onb-04-competitor-reviews",
       "title": "Onboarding ONB-04: competitor review analysis",
-      "domainId": "domain.research",
+      "domainId": "domain.experience",
       "areaIds": [
         "area.product-experience"
       ],
@@ -2075,7 +2077,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-04-competitor-reviews.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-04"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "observe",
@@ -2084,7 +2088,7 @@
     {
       "id": "workflow.experience.onboarding-system.onb-05-onbo-hub-atlas",
       "title": "Onboarding ONB-05: authorized flow atlas",
-      "domainId": "domain.research",
+      "domainId": "domain.experience",
       "areaIds": [
         "area.product-experience"
       ],
@@ -2101,7 +2105,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-05-onbo-hub-atlas.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-05"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "observe",
@@ -2110,7 +2116,7 @@
     {
       "id": "workflow.experience.onboarding-system.onb-06-internal-guidance-audit",
       "title": "Onboarding ONB-06: internal guidance audit",
-      "domainId": "domain.research",
+      "domainId": "domain.experience",
       "areaIds": [
         "area.product-experience"
       ],
@@ -2127,7 +2133,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-06-internal-guidance-audit.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-06"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "observe",
@@ -2136,7 +2144,7 @@
     {
       "id": "workflow.experience.onboarding-system.onb-07-provider-policy-landscape",
       "title": "Onboarding ONB-07: provider and policy landscape",
-      "domainId": "domain.research",
+      "domainId": "domain.experience",
       "areaIds": [
         "area.product-experience"
       ],
@@ -2153,7 +2161,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-07-provider-policy-landscape.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-07"
+      ],
       "providerIds": [
         "provider.revenuecat",
         "provider.posthog",
@@ -2167,7 +2177,7 @@
     {
       "id": "workflow.experience.onboarding-system.onb-08-motion-research",
       "title": "Onboarding ONB-08: motion research",
-      "domainId": "domain.research",
+      "domainId": "domain.experience",
       "areaIds": [
         "area.product-experience"
       ],
@@ -2184,7 +2194,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-08-motion-research.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-08"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "observe",
@@ -3949,7 +3961,7 @@
     {
       "id": "artifact.product-onboarding-graph-onb-03-current-guidance-md",
       "path": "product/onboarding/graph/ONB-03-current-guidance.md",
-      "ownerDomainId": "domain.research",
+      "ownerDomainId": "domain.experience",
       "laneIds": [
         "onboarding"
       ],
@@ -3958,7 +3970,7 @@
     {
       "id": "artifact.product-onboarding-graph-onb-04-competitor-reviews-md",
       "path": "product/onboarding/graph/ONB-04-competitor-reviews.md",
-      "ownerDomainId": "domain.research",
+      "ownerDomainId": "domain.experience",
       "laneIds": [
         "onboarding"
       ],
@@ -3967,7 +3979,7 @@
     {
       "id": "artifact.product-onboarding-graph-onb-05-onbo-hub-atlas-md",
       "path": "product/onboarding/graph/ONB-05-onbo-hub-atlas.md",
-      "ownerDomainId": "domain.research",
+      "ownerDomainId": "domain.experience",
       "laneIds": [
         "onboarding"
       ],
@@ -3976,7 +3988,7 @@
     {
       "id": "artifact.product-onboarding-graph-onb-06-internal-guidance-audit-md",
       "path": "product/onboarding/graph/ONB-06-internal-guidance-audit.md",
-      "ownerDomainId": "domain.research",
+      "ownerDomainId": "domain.experience",
       "laneIds": [
         "onboarding"
       ],
@@ -3985,7 +3997,7 @@
     {
       "id": "artifact.product-onboarding-graph-onb-07-provider-policy-landscape-md",
       "path": "product/onboarding/graph/ONB-07-provider-policy-landscape.md",
-      "ownerDomainId": "domain.research",
+      "ownerDomainId": "domain.experience",
       "laneIds": [
         "onboarding"
       ],
@@ -3994,7 +4006,7 @@
     {
       "id": "artifact.product-onboarding-graph-onb-08-motion-research-md",
       "path": "product/onboarding/graph/ONB-08-motion-research.md",
-      "ownerDomainId": "domain.research",
+      "ownerDomainId": "domain.experience",
       "laneIds": [
         "onboarding"
       ],
@@ -4641,6 +4653,48 @@
       "scriptPath": "validation/business/words/check-no-slop.ts",
       "ownerDomainId": "domain.words",
       "audit": "required"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-03",
+      "command": "check:onboarding-evidence-onb-03",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-04",
+      "command": "check:onboarding-evidence-onb-04",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-05",
+      "command": "check:onboarding-evidence-onb-05",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-06",
+      "command": "check:onboarding-evidence-onb-06",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-07",
+      "command": "check:onboarding-evidence-onb-07",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-08",
+      "command": "check:onboarding-evidence-onb-08",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
     },
     {
       "id": "gate.check-onboarding-graph",

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, getLane, readState, writeState } from "./_harness.js";
 
@@ -326,6 +326,92 @@ export function register(h: Harness): void {
     undefined,
     ["--require-done"],
   );
+
+  // check-onboarding-evidence-packet.ts: ONB-03..ONB-08's own per-node deterministic gate
+  // (round 5's production-verification fix). It reads --root and --path exactly the way
+  // runDeterministicGates() invokes it.
+  const evidenceScript = "check-onboarding-evidence-packet.ts";
+  const writeEvidencePacket = (fixtureRoot: string, relativePath: string, content: string): void => {
+    const filePath = path.join(fixtureRoot, relativePath);
+    mkdirSync(path.dirname(filePath), { recursive: true });
+    writeFileSync(filePath, content, "utf8");
+  };
+  const substantiveResearchProse = (topic: string): string => {
+    const sentence = `This is a substantive, source-backed paragraph describing real research into ${topic}. `;
+    return `## Findings\n\n${sentence.repeat(15)}\n`;
+  };
+
+  const evidencePacketMissing = makeFixture("onboarding-evidence-packet-missing");
+  runFixture(
+    "ONB-03's gate fails when its evidence packet does not exist yet",
+    evidencePacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-03", "--path", "product/onboarding/graph/ONB-03-current-guidance.md"],
+  );
+
+  const evidencePacketThin = makeFixture("onboarding-evidence-packet-thin");
+  writeEvidencePacket(evidencePacketThin, "product/onboarding/graph/ONB-04-competitor-reviews.md", "## Findings\n\nDone.\n");
+  runFixture("ONB-04's gate rejects a stub-length evidence packet", evidencePacketThin, evidenceScript, 1, "onboarding_evidence.packet_too_thin", [
+    "--node",
+    "ONB-04",
+    "--path",
+    "product/onboarding/graph/ONB-04-competitor-reviews.md",
+  ]);
+
+  const evidencePacketPlaceholder = makeFixture("onboarding-evidence-packet-placeholder");
+  writeEvidencePacket(
+    evidencePacketPlaceholder,
+    "product/onboarding/graph/ONB-05-onbo-hub-atlas.md",
+    `${substantiveResearchProse("the authorized Onbo Hub flow atlas")}\n\nTODO: fill in the rest once access is granted.\n`,
+  );
+  runFixture(
+    "ONB-05's gate rejects a packet that still carries a TODO/TBD/PLACEHOLDER marker",
+    evidencePacketPlaceholder,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_placeholder",
+    ["--node", "ONB-05", "--path", "product/onboarding/graph/ONB-05-onbo-hub-atlas.md"],
+  );
+
+  const evidencePacketNoProse = makeFixture("onboarding-evidence-packet-no-prose");
+  writeEvidencePacket(
+    evidencePacketNoProse,
+    "product/onboarding/graph/ONB-06-internal-guidance-audit.md",
+    `## Findings\n\n| Rule | Status |\n| --- | --- |\n${"| internal-guidance-rule | resolved |\n".repeat(20)}`,
+  );
+  runFixture(
+    "ONB-06's gate rejects a packet with a long table but no prose finding",
+    evidencePacketNoProse,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_no_prose",
+    ["--node", "ONB-06", "--path", "product/onboarding/graph/ONB-06-internal-guidance-audit.md"],
+  );
+
+  const evidencePacketMissingPathFlag = makeFixture("onboarding-evidence-packet-missing-path-flag");
+  runFixture(
+    "the evidence-packet gate refuses to run without --path",
+    evidencePacketMissingPathFlag,
+    evidenceScript,
+    1,
+    "onboarding_evidence.missing_path_flag",
+    ["--node", "ONB-07"],
+  );
+
+  const evidencePacketComplete = makeFixture("onboarding-evidence-packet-complete");
+  writeEvidencePacket(
+    evidencePacketComplete,
+    "product/onboarding/graph/ONB-08-motion-research.md",
+    substantiveResearchProse("60fps motion references translated into the target framework"),
+  );
+  runFixture("ONB-08's gate passes a genuinely substantive, marker-free evidence packet", evidencePacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-08",
+    "--path",
+    "product/onboarding/graph/ONB-08-motion-research.md",
+  ]);
 
   function checkVerificationItems(text: string): string {
     return text.replace(/^-\s*\[\s*\]/gm, "- [x]");

@@ -46,6 +46,18 @@ export const auditExcludedScripts: Record<string, string> = {
   "test:validators": "executed by the launchbench step, which lints scenario definitions and then runs the validator fixture suite",
   "check:onboarding-graph-complete":
     "a strict --require-done wrapper around check:onboarding-graph (already an audit step), used only as ONB-22's own catalog gate; the shipped onboarding template is deliberately not marked done, so running this in the general audit would always fail",
+  "check:onboarding-evidence-onb-03":
+    "ONB-03's own catalog gate: verifies that specific node's own output packet (product/onboarding/graph/ONB-03-current-guidance.md), which only exists once a durable run has actually produced it; the shipped template has never run the onboarding graph, so this always fails in the general audit",
+  "check:onboarding-evidence-onb-04":
+    "ONB-04's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-05":
+    "ONB-05's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-06":
+    "ONB-06's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-07":
+    "ONB-07's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-08":
+    "ONB-08's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
 };
 
 /** Relative business-artifact root for the layout. */

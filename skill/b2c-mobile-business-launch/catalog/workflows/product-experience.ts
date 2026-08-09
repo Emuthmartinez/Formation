@@ -50,68 +50,75 @@ const onboardingGraphWorkflows = [
   workflow({
     id: "workflow.experience.onboarding-system.onb-03-current-guidance",
     title: "Onboarding ONB-03: current guidance research",
-    // domain.research (not domain.experience) so compilePlan() routes this node through
-    // fresh-context judgment verification -- otherwise, with no gate command either, the node
-    // compiles to verification "none" and an empty or fabricated research packet can unlock
-    // ONB-09's evidence join unchecked. Matches the existing workflow.research.* convention:
-    // domainId drives verification, areaIds stays area.product-experience.
-    domainId: "domain.research",
+    // domain.experience, not domain.research: core/session/run.ts's production runner only ever
+    // calls acceptVerification() from its deterministic-gate branch -- fresh_context (judgment)
+    // acceptance has no production caller at all, only test fixtures, so a domain.research
+    // reassignment with no gate would leave this node permanently blocked in a real run. A
+    // deterministic gate (check:onboarding-evidence-onb-03) is the only path that actually
+    // promotes the node to succeeded; it cannot judge truthfulness, only reject an empty,
+    // stub-length, or still-templated packet. Keeping domain.experience also keeps this node
+    // inside an experience-scoped session brief (scopeHints: ["domain.experience"]).
+    domainId: "domain.experience",
     areaIds: ["area.product-experience"],
     trigger: "Research current consumer onboarding evidence, platform guidance, benchmarks, and practitioner heuristics",
     laneIds: ["onboarding"],
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-02-evidence-plan"],
     outputPaths: ["product/onboarding/graph/ONB-03-current-guidance.md"],
+    gates: ["check:onboarding-evidence-onb-03"],
     actionClass: "observe",
     idempotent: true,
   }),
   workflow({
     id: "workflow.experience.onboarding-system.onb-04-competitor-reviews",
     title: "Onboarding ONB-04: competitor review analysis",
-    // Same fresh-context verification rationale as ONB-03 above.
-    domainId: "domain.research",
+    // Same production-verification rationale as ONB-03 above.
+    domainId: "domain.experience",
     areaIds: ["area.product-experience"],
     trigger: "Mine direct and adjacent competitor reviews, including negative themes and a positive-review control",
     laneIds: ["onboarding"],
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-02-evidence-plan"],
     outputPaths: ["product/onboarding/graph/ONB-04-competitor-reviews.md"],
+    gates: ["check:onboarding-evidence-onb-04"],
     actionClass: "observe",
     idempotent: true,
   }),
   workflow({
     id: "workflow.experience.onboarding-system.onb-05-onbo-hub-atlas",
     title: "Onboarding ONB-05: authorized flow atlas",
-    // Same fresh-context verification rationale as ONB-03 above.
-    domainId: "domain.research",
+    // Same production-verification rationale as ONB-03 above.
+    domainId: "domain.experience",
     areaIds: ["area.product-experience"],
     trigger: "Build an authorized Onbo Hub flow atlas without scraping, bypassing access controls, or inferring locked screens",
     laneIds: ["onboarding"],
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-02-evidence-plan"],
     outputPaths: ["product/onboarding/graph/ONB-05-onbo-hub-atlas.md"],
+    gates: ["check:onboarding-evidence-onb-05"],
     actionClass: "observe",
     idempotent: true,
   }),
   workflow({
     id: "workflow.experience.onboarding-system.onb-06-internal-guidance-audit",
     title: "Onboarding ONB-06: internal guidance audit",
-    // Same fresh-context verification rationale as ONB-03 above.
-    domainId: "domain.research",
+    // Same production-verification rationale as ONB-03 above.
+    domainId: "domain.experience",
     areaIds: ["area.product-experience"],
     trigger: "Audit applicable Formation and internal B2C guidance and resolve conflicts or outdated rules",
     laneIds: ["onboarding"],
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-02-evidence-plan"],
     outputPaths: ["product/onboarding/graph/ONB-06-internal-guidance-audit.md"],
+    gates: ["check:onboarding-evidence-onb-06"],
     actionClass: "observe",
     idempotent: true,
   }),
   workflow({
     id: "workflow.experience.onboarding-system.onb-07-provider-policy-landscape",
     title: "Onboarding ONB-07: provider and policy landscape",
-    // Same fresh-context verification rationale as ONB-03 above.
-    domainId: "domain.research",
+    // Same production-verification rationale as ONB-03 above.
+    domainId: "domain.experience",
     areaIds: ["area.product-experience"],
     trigger: "Refresh monetization, identity, analytics, RevenueCat, billing, platform-policy, and regional capability facts",
     laneIds: ["onboarding"],
@@ -119,20 +126,22 @@ const onboardingGraphWorkflows = [
     dependencies: ["workflow.experience.onboarding-system.onb-02-evidence-plan"],
     providers: ["provider.revenuecat", "provider.posthog", "provider.app-store-connect", "provider.google-play"],
     outputPaths: ["product/onboarding/graph/ONB-07-provider-policy-landscape.md"],
+    gates: ["check:onboarding-evidence-onb-07"],
     actionClass: "observe",
     idempotent: true,
   }),
   workflow({
     id: "workflow.experience.onboarding-system.onb-08-motion-research",
     title: "Onboarding ONB-08: motion research",
-    // Same fresh-context verification rationale as ONB-03 above.
-    domainId: "domain.research",
+    // Same production-verification rationale as ONB-03 above.
+    domainId: "domain.experience",
     areaIds: ["area.product-experience"],
     trigger: "Research interaction and motion references with 60fps and translate them into the target framework",
     laneIds: ["onboarding"],
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-02-evidence-plan"],
     outputPaths: ["product/onboarding/graph/ONB-08-motion-research.md"],
+    gates: ["check:onboarding-evidence-onb-08"],
     actionClass: "observe",
     idempotent: true,
   }),

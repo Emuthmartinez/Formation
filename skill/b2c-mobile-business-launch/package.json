@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.114.0",
+  "version": "0.115.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -71,6 +71,12 @@
     "check:emotional-design": "tsx validation/business/experience/check-emotional-design.ts",
     "check:onboarding-graph": "tsx validation/business/experience/check-onboarding-graph.ts",
     "check:onboarding-graph-complete": "tsx validation/business/experience/check-onboarding-graph.ts --require-done",
+    "check:onboarding-evidence-onb-03": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-03 --path product/onboarding/graph/ONB-03-current-guidance.md",
+    "check:onboarding-evidence-onb-04": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-04 --path product/onboarding/graph/ONB-04-competitor-reviews.md",
+    "check:onboarding-evidence-onb-05": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-05 --path product/onboarding/graph/ONB-05-onbo-hub-atlas.md",
+    "check:onboarding-evidence-onb-06": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-06 --path product/onboarding/graph/ONB-06-internal-guidance-audit.md",
+    "check:onboarding-evidence-onb-07": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-07 --path product/onboarding/graph/ONB-07-provider-policy-landscape.md",
+    "check:onboarding-evidence-onb-08": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-08 --path product/onboarding/graph/ONB-08-motion-research.md",
     "check:lane-coverage": "tsx validation/business/process/check-lane-coverage.ts",
     "check:change-cascade": "tsx validation/business/process/check-change-cascade.ts",
     "check:research": "tsx validation/business/research/check-research-evidence.ts",
