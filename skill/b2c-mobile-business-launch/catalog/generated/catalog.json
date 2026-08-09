@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.123.0",
+  "skillVersion": "0.124.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2255,7 +2255,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-10-first-value-activation.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-10"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -2281,7 +2283,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-11-effort-question-audit.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-11"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -2307,7 +2311,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-12-state-identity-contract.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-12"
+      ],
       "providerIds": [
         "provider.revenuecat"
       ],
@@ -2335,7 +2341,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-13-analytics-experiments.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-13"
+      ],
       "providerIds": [
         "provider.posthog",
         "provider.revenuecat"
@@ -2364,7 +2372,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-14-trust-lifecycle-policy.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-14"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -2395,7 +2405,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-15-architecture-decision.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-15"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -2421,7 +2433,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-16-journey-graph.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-16"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -2478,7 +2492,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-18-visual-design-prototype.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-18"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "mutate",
@@ -4715,8 +4731,64 @@
       "audit": "excluded"
     },
     {
+      "id": "gate.check-onboarding-evidence-onb-10",
+      "command": "check:onboarding-evidence-onb-10",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-11",
+      "command": "check:onboarding-evidence-onb-11",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-12",
+      "command": "check:onboarding-evidence-onb-12",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-13",
+      "command": "check:onboarding-evidence-onb-13",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-14",
+      "command": "check:onboarding-evidence-onb-14",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-15",
+      "command": "check:onboarding-evidence-onb-15",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-16",
+      "command": "check:onboarding-evidence-onb-16",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
       "id": "gate.check-onboarding-evidence-onb-17",
       "command": "check:onboarding-evidence-onb-17",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-18",
+      "command": "check:onboarding-evidence-onb-18",
       "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
       "ownerDomainId": "domain.experience",
       "audit": "excluded"

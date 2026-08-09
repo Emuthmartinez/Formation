@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.123.0",
+  "version": "0.124.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -79,7 +79,15 @@
     "check:onboarding-evidence-onb-07": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-07 --path product/onboarding/graph/ONB-07-provider-policy-landscape.md",
     "check:onboarding-evidence-onb-08": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-08 --path product/onboarding/graph/ONB-08-motion-research.md",
     "check:onboarding-evidence-onb-09": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-09 --path product/onboarding/graph/ONB-09-evidence-join.md",
+    "check:onboarding-evidence-onb-10": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-10 --path product/onboarding/graph/ONB-10-first-value-activation.md",
+    "check:onboarding-evidence-onb-11": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-11 --path product/onboarding/graph/ONB-11-effort-question-audit.md",
+    "check:onboarding-evidence-onb-12": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-12 --path product/onboarding/graph/ONB-12-state-identity-contract.md",
+    "check:onboarding-evidence-onb-13": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-13 --path product/onboarding/graph/ONB-13-analytics-experiments.md",
+    "check:onboarding-evidence-onb-14": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-14 --path product/onboarding/graph/ONB-14-trust-lifecycle-policy.md",
+    "check:onboarding-evidence-onb-15": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-15 --path product/onboarding/graph/ONB-15-architecture-decision.md",
+    "check:onboarding-evidence-onb-16": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-16 --path product/onboarding/graph/ONB-16-journey-graph.md",
     "check:onboarding-evidence-onb-17": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-17 --path product/onboarding/graph/ONB-17-screen-control-paywall-contract.md",
+    "check:onboarding-evidence-onb-18": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-18 --path product/onboarding/graph/ONB-18-visual-design-prototype.md",
     "check:onboarding-evidence-onb-19": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-19 --path product/onboarding/graph/ONB-19-implementation-cutover-contract.md",
     "check:onboarding-evidence-onb-20": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-20 --path product/onboarding/graph/ONB-20-adversarial-qa.md",
     "check:onboarding-evidence-onb-21": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-21 --path product/onboarding/graph/ONB-21-compound-engineering-plan.md",

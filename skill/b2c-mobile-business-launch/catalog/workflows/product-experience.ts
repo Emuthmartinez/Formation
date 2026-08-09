@@ -182,6 +182,14 @@ const onboardingGraphWorkflows = [
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-09-evidence-join"],
     outputPaths: ["product/onboarding/graph/ONB-10-first-value-activation.md"],
+    // Same production-verification rationale as ONB-03/ONB-09/ONB-17 above: with no gate, this
+    // node compiled to verification "none", so an executor could return the declared artifact ID
+    // and fingerprint without ever writing substantive first-value, activation, habit, or
+    // retention hypotheses -- and neither ONB-15 (architecture decision, which depends on this
+    // node) nor the final graph gate ever reads ONB-10-first-value-activation.md, letting the
+    // downstream decision chain and the destructive ONB-22 cutover proceed on a node that never
+    // actually produced its claimed content.
+    gates: ["check:onboarding-evidence-onb-10"],
     actionClass: "draft",
     idempotent: true,
   }),
@@ -195,6 +203,8 @@ const onboardingGraphWorkflows = [
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-09-evidence-join"],
     outputPaths: ["product/onboarding/graph/ONB-11-effort-question-audit.md"],
+    // Same production-verification rationale as ONB-10 above.
+    gates: ["check:onboarding-evidence-onb-11"],
     actionClass: "draft",
     idempotent: true,
   }),
@@ -209,6 +219,8 @@ const onboardingGraphWorkflows = [
     dependencies: ["workflow.experience.onboarding-system.onb-09-evidence-join"],
     providers: ["provider.revenuecat"],
     outputPaths: ["product/onboarding/graph/ONB-12-state-identity-contract.md"],
+    // Same production-verification rationale as ONB-10 above.
+    gates: ["check:onboarding-evidence-onb-12"],
     actionClass: "draft",
     idempotent: true,
   }),
@@ -223,6 +235,8 @@ const onboardingGraphWorkflows = [
     dependencies: ["workflow.experience.onboarding-system.onb-09-evidence-join"],
     providers: ["provider.posthog", "provider.revenuecat"],
     outputPaths: ["product/onboarding/graph/ONB-13-analytics-experiments.md"],
+    // Same production-verification rationale as ONB-10 above.
+    gates: ["check:onboarding-evidence-onb-13"],
     actionClass: "draft",
     idempotent: true,
   }),
@@ -236,6 +250,8 @@ const onboardingGraphWorkflows = [
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-09-evidence-join"],
     outputPaths: ["product/onboarding/graph/ONB-14-trust-lifecycle-policy.md"],
+    // Same production-verification rationale as ONB-10 above.
+    gates: ["check:onboarding-evidence-onb-14"],
     actionClass: "draft",
     idempotent: true,
   }),
@@ -255,6 +271,10 @@ const onboardingGraphWorkflows = [
       "workflow.experience.onboarding-system.onb-14-trust-lifecycle-policy",
     ],
     outputPaths: ["product/onboarding/graph/ONB-15-architecture-decision.md"],
+    // Same production-verification rationale as ONB-10 above -- this node is the fan-in point
+    // for ONB-10..14, so an unverified ONB-15 could also mask any of those five having been
+    // accepted vacuously (each already has its own gate, but this one did not have its own).
+    gates: ["check:onboarding-evidence-onb-15"],
     actionClass: "draft",
     idempotent: true,
   }),
@@ -268,6 +288,9 @@ const onboardingGraphWorkflows = [
     phaseIds: ["phase.2"],
     dependencies: ["workflow.experience.onboarding-system.onb-15-architecture-decision"],
     outputPaths: ["product/onboarding/graph/ONB-16-journey-graph.md"],
+    // Same production-verification rationale as ONB-10 above -- ONB-17, ONB-18, ONB-19, and
+    // ONB-20's own gate all depend on this node without ever reading its file directly.
+    gates: ["check:onboarding-evidence-onb-16"],
     actionClass: "draft",
     idempotent: true,
   }),
@@ -306,6 +329,14 @@ const onboardingGraphWorkflows = [
     // interactive prototype behind it.
     dependencies: ["workflow.experience.onboarding-system.onb-16-journey-graph", "workflow.design.design-room-state-mutate-version-render"],
     outputPaths: ["product/onboarding/graph/ONB-18-visual-design-prototype.md"],
+    // The Design Room dependency above proves the generic design workflow produced rendered
+    // artifacts; it does not prove THIS node's own ONB-18-visual-design-prototype.md packet is
+    // substantive. Same production-verification rationale as ONB-10 above: with no gate on its
+    // own output, an executor could return the declared artifact ID and fingerprint with an
+    // empty or stub packet, and neither ONB-20's own gate nor the final graph gate reads this
+    // file, letting ONB-20's adversarial QA proceed against a prototype packet that was never
+    // actually written.
+    gates: ["check:onboarding-evidence-onb-18"],
     actionClass: "mutate",
     idempotent: true,
   }),

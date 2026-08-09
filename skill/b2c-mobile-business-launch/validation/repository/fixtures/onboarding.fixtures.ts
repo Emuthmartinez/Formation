@@ -839,6 +839,171 @@ export function register(h: Harness): void {
     "product/onboarding/graph/ONB-09-evidence-join.md",
   ]);
 
+  const onb10PacketMissing = makeFixture("onboarding-evidence-onb10-missing");
+  runFixture(
+    "ONB-10's gate fails when the first-value and activation packet does not exist yet",
+    onb10PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-10", "--path", "product/onboarding/graph/ONB-10-first-value-activation.md"],
+  );
+
+  const onb10PacketComplete = makeFixture("onboarding-evidence-onb10-complete");
+  writeEvidencePacket(
+    onb10PacketComplete,
+    "product/onboarding/graph/ONB-10-first-value-activation.md",
+    substantiveResearchProse("first value rendered, first value engaged, activation, habit, and retention hypotheses"),
+  );
+  runFixture("ONB-10's gate passes a genuinely substantive, marker-free first-value and activation packet", onb10PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-10",
+    "--path",
+    "product/onboarding/graph/ONB-10-first-value-activation.md",
+  ]);
+
+  const onb11PacketMissing = makeFixture("onboarding-evidence-onb11-missing");
+  runFixture(
+    "ONB-11's gate fails when the effort and question audit does not exist yet",
+    onb11PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-11", "--path", "product/onboarding/graph/ONB-11-effort-question-audit.md"],
+  );
+
+  const onb11PacketComplete = makeFixture("onboarding-evidence-onb11-complete");
+  writeEvidencePacket(
+    onb11PacketComplete,
+    "product/onboarding/graph/ONB-11-effort-question-audit.md",
+    substantiveResearchProse("effort before value, question usefulness, permissions, interruption budget, and visible personalization proof"),
+  );
+  runFixture("ONB-11's gate passes a genuinely substantive, marker-free effort and question audit", onb11PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-11",
+    "--path",
+    "product/onboarding/graph/ONB-11-effort-question-audit.md",
+  ]);
+
+  const onb12PacketMissing = makeFixture("onboarding-evidence-onb12-missing");
+  runFixture(
+    "ONB-12's gate fails when the state and identity contract does not exist yet",
+    onb12PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-12", "--path", "product/onboarding/graph/ONB-12-state-identity-contract.md"],
+  );
+
+  const onb12PacketComplete = makeFixture("onboarding-evidence-onb12-complete");
+  writeEvidencePacket(
+    onb12PacketComplete,
+    "product/onboarding/graph/ONB-12-state-identity-contract.md",
+    substantiveResearchProse("the canonical journey, profile, identity, entitlement, continuity, and cross-surface state transitions"),
+  );
+  runFixture("ONB-12's gate passes a genuinely substantive, marker-free state and identity contract", onb12PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-12",
+    "--path",
+    "product/onboarding/graph/ONB-12-state-identity-contract.md",
+  ]);
+
+  const onb13PacketMissing = makeFixture("onboarding-evidence-onb13-missing");
+  runFixture(
+    "ONB-13's gate fails when the analytics and experiments packet does not exist yet",
+    onb13PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-13", "--path", "product/onboarding/graph/ONB-13-analytics-experiments.md"],
+  );
+
+  const onb13PacketComplete = makeFixture("onboarding-evidence-onb13-complete");
+  writeEvidencePacket(
+    onb13PacketComplete,
+    "product/onboarding/graph/ONB-13-analytics-experiments.md",
+    substantiveResearchProse(
+      "typed analytics, authoritative emitters, identity stitching, deduplication, experiment assignment, exposure, and expected sequences",
+    ),
+  );
+  runFixture("ONB-13's gate passes a genuinely substantive, marker-free analytics and experiments packet", onb13PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-13",
+    "--path",
+    "product/onboarding/graph/ONB-13-analytics-experiments.md",
+  ]);
+
+  const onb14PacketMissing = makeFixture("onboarding-evidence-onb14-missing");
+  runFixture(
+    "ONB-14's gate fails when the trust, lifecycle, and policy packet does not exist yet",
+    onb14PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-14", "--path", "product/onboarding/graph/ONB-14-trust-lifecycle-policy.md"],
+  );
+
+  const onb14PacketComplete = makeFixture("onboarding-evidence-onb14-complete");
+  writeEvidencePacket(
+    onb14PacketComplete,
+    "product/onboarding/graph/ONB-14-trust-lifecycle-policy.md",
+    substantiveResearchProse("review timing, permissions, lifecycle, privacy, security, accessibility, and policy behavior"),
+  );
+  runFixture(
+    "ONB-14's gate passes a genuinely substantive, marker-free trust, lifecycle, and policy packet",
+    onb14PacketComplete,
+    evidenceScript,
+    0,
+    undefined,
+    ["--node", "ONB-14", "--path", "product/onboarding/graph/ONB-14-trust-lifecycle-policy.md"],
+  );
+
+  const onb15PacketMissing = makeFixture("onboarding-evidence-onb15-missing");
+  runFixture(
+    "ONB-15's gate fails when the architecture decision does not exist yet",
+    onb15PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-15", "--path", "product/onboarding/graph/ONB-15-architecture-decision.md"],
+  );
+
+  const onb15PacketComplete = makeFixture("onboarding-evidence-onb15-complete");
+  writeEvidencePacket(
+    onb15PacketComplete,
+    "product/onboarding/graph/ONB-15-architecture-decision.md",
+    substantiveResearchProse("the native-first, hosted-funnel-first, hybrid, web-first, and evidence-backed architecture comparison and selection"),
+  );
+  runFixture("ONB-15's gate passes a genuinely substantive, marker-free architecture decision", onb15PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-15",
+    "--path",
+    "product/onboarding/graph/ONB-15-architecture-decision.md",
+  ]);
+
+  const onb16PacketMissing = makeFixture("onboarding-evidence-onb16-missing");
+  runFixture(
+    "ONB-16's gate fails when the canonical journey graph does not exist yet",
+    onb16PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-16", "--path", "product/onboarding/graph/ONB-16-journey-graph.md"],
+  );
+
+  const onb16PacketComplete = makeFixture("onboarding-evidence-onb16-complete");
+  writeEvidencePacket(
+    onb16PacketComplete,
+    "product/onboarding/graph/ONB-16-journey-graph.md",
+    substantiveResearchProse("the acquisition-specific journeys that converge on one semantic onboarding state graph"),
+  );
+  runFixture("ONB-16's gate passes a genuinely substantive, marker-free canonical journey graph", onb16PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-16",
+    "--path",
+    "product/onboarding/graph/ONB-16-journey-graph.md",
+  ]);
+
   const onb17PacketMissing = makeFixture("onboarding-evidence-onb17-missing");
   runFixture(
     "ONB-17's gate fails when the screen, control, and paywall contract does not exist yet",
@@ -862,6 +1027,31 @@ export function register(h: Harness): void {
     0,
     undefined,
     ["--node", "ONB-17", "--path", "product/onboarding/graph/ONB-17-screen-control-paywall-contract.md"],
+  );
+
+  const onb18PacketMissing = makeFixture("onboarding-evidence-onb18-missing");
+  runFixture(
+    "ONB-18's gate fails when the visual design and prototype packet does not exist yet",
+    onb18PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-18", "--path", "product/onboarding/graph/ONB-18-visual-design-prototype.md"],
+  );
+
+  const onb18PacketComplete = makeFixture("onboarding-evidence-onb18-complete");
+  writeEvidencePacket(
+    onb18PacketComplete,
+    "product/onboarding/graph/ONB-18-visual-design-prototype.md",
+    substantiveResearchProse("the high-fidelity onboarding design, motion, interactive prototype, and design QA"),
+  );
+  runFixture(
+    "ONB-18's gate passes a genuinely substantive, marker-free visual design and prototype packet",
+    onb18PacketComplete,
+    evidenceScript,
+    0,
+    undefined,
+    ["--node", "ONB-18", "--path", "product/onboarding/graph/ONB-18-visual-design-prototype.md"],
   );
 
   const onb19PacketMissing = makeFixture("onboarding-evidence-onb19-missing");

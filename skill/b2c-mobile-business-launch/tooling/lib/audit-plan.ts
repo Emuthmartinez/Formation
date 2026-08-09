@@ -66,6 +66,22 @@ export const auditExcludedScripts: Record<string, string> = {
     "ONB-21's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
   "check:onboarding-evidence-onb-09":
     "ONB-09's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-10":
+    "ONB-10's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-11":
+    "ONB-11's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-12":
+    "ONB-12's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-13":
+    "ONB-13's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-14":
+    "ONB-14's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-15":
+    "ONB-15's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-16":
+    "ONB-16's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-18":
+    "ONB-18's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
   "check:onboarding-evidence-onb-17":
     "ONB-17's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
   "check:onboarding-evidence-onb-19":
