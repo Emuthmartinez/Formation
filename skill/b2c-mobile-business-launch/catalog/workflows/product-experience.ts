@@ -50,7 +50,12 @@ const onboardingGraphWorkflows = [
   workflow({
     id: "workflow.experience.onboarding-system.onb-03-current-guidance",
     title: "Onboarding ONB-03: current guidance research",
-    domainId: "domain.experience",
+    // domain.research (not domain.experience) so compilePlan() routes this node through
+    // fresh-context judgment verification -- otherwise, with no gate command either, the node
+    // compiles to verification "none" and an empty or fabricated research packet can unlock
+    // ONB-09's evidence join unchecked. Matches the existing workflow.research.* convention:
+    // domainId drives verification, areaIds stays area.product-experience.
+    domainId: "domain.research",
     areaIds: ["area.product-experience"],
     trigger: "Research current consumer onboarding evidence, platform guidance, benchmarks, and practitioner heuristics",
     laneIds: ["onboarding"],
@@ -63,7 +68,8 @@ const onboardingGraphWorkflows = [
   workflow({
     id: "workflow.experience.onboarding-system.onb-04-competitor-reviews",
     title: "Onboarding ONB-04: competitor review analysis",
-    domainId: "domain.experience",
+    // Same fresh-context verification rationale as ONB-03 above.
+    domainId: "domain.research",
     areaIds: ["area.product-experience"],
     trigger: "Mine direct and adjacent competitor reviews, including negative themes and a positive-review control",
     laneIds: ["onboarding"],
@@ -76,7 +82,8 @@ const onboardingGraphWorkflows = [
   workflow({
     id: "workflow.experience.onboarding-system.onb-05-onbo-hub-atlas",
     title: "Onboarding ONB-05: authorized flow atlas",
-    domainId: "domain.experience",
+    // Same fresh-context verification rationale as ONB-03 above.
+    domainId: "domain.research",
     areaIds: ["area.product-experience"],
     trigger: "Build an authorized Onbo Hub flow atlas without scraping, bypassing access controls, or inferring locked screens",
     laneIds: ["onboarding"],
@@ -89,7 +96,8 @@ const onboardingGraphWorkflows = [
   workflow({
     id: "workflow.experience.onboarding-system.onb-06-internal-guidance-audit",
     title: "Onboarding ONB-06: internal guidance audit",
-    domainId: "domain.experience",
+    // Same fresh-context verification rationale as ONB-03 above.
+    domainId: "domain.research",
     areaIds: ["area.product-experience"],
     trigger: "Audit applicable Formation and internal B2C guidance and resolve conflicts or outdated rules",
     laneIds: ["onboarding"],
@@ -102,7 +110,8 @@ const onboardingGraphWorkflows = [
   workflow({
     id: "workflow.experience.onboarding-system.onb-07-provider-policy-landscape",
     title: "Onboarding ONB-07: provider and policy landscape",
-    domainId: "domain.experience",
+    // Same fresh-context verification rationale as ONB-03 above.
+    domainId: "domain.research",
     areaIds: ["area.product-experience"],
     trigger: "Refresh monetization, identity, analytics, RevenueCat, billing, platform-policy, and regional capability facts",
     laneIds: ["onboarding"],
@@ -116,7 +125,8 @@ const onboardingGraphWorkflows = [
   workflow({
     id: "workflow.experience.onboarding-system.onb-08-motion-research",
     title: "Onboarding ONB-08: motion research",
-    domainId: "domain.experience",
+    // Same fresh-context verification rationale as ONB-03 above.
+    domainId: "domain.research",
     areaIds: ["area.product-experience"],
     trigger: "Research interaction and motion references with 60fps and translate them into the target framework",
     laneIds: ["onboarding"],

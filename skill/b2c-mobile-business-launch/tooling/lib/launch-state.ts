@@ -198,7 +198,13 @@ export function validateLaneDependencyGraph(issues: Issue[]): void {
 const ignoredDirs = new Set([".git", "node_modules", ".next", "dist", "build", "DerivedData", ".expo", ".turbo", "coverage"]);
 
 export function parseCliArgs(argv: string[]): CliArgs {
-  let root = process.cwd();
+  // The durable engine's runDeterministicGates() (core/session/run.ts) invokes every gate via
+  // `npm run --prefix <skillRoot> <gate>`, which npm executes with the skill package as the
+  // process's cwd regardless of the caller's actual working directory -- so process.cwd() alone
+  // can never resolve to the business workspace under engine execution. The engine sets
+  // BUSINESS_ROOT precisely so a gate can recover the real target; honor it here, before an
+  // explicit --root flag (checked below) can still override it for direct CLI invocations.
+  let root = process.env.BUSINESS_ROOT ? path.resolve(process.env.BUSINESS_ROOT) : process.cwd();
   let statePath = "state/PROJECT_STATE.yaml";
   let outputPath: string | undefined;
 
