@@ -412,6 +412,98 @@ export function register(h: Harness): void {
     0,
   );
 
+  // Regression: the ready-claim/open-blocker check scanned the whole PROVIDER_PROOF.md document,
+  // so an unrelated provider's still-pending row could block ONB-22 even though its own declared
+  // providers (PostHog, RevenueCat) are genuinely ready. --providers scopes that specific check to
+  // the named providers' own rows; every other check in this file (keyword presence, per-provider
+  // ledger grounding) is unaffected and still runs against the whole document either way.
+  const providerProofUnrelatedBlockerScoped = makeFixture("provider-proof-unrelated-blocker-scoped");
+  {
+    const state = readState(providerProofUnrelatedBlockerScoped);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofUnrelatedBlockerScoped, state);
+    writeFileSync(
+      path.join(providerProofUnrelatedBlockerScoped, "operations/PROVIDER_PROOF.md"),
+      [
+        "# Provider Proof",
+        "Status: PostHog and RevenueCat are verified.",
+        "Proof Ledger",
+        "| Provider | current status | proof command | evidence path | founder-only gate |",
+        "| --- | --- | --- | --- | --- |",
+        "| PostHog | event and person property captured | inspect dashboard/API | analytics/posthog-proof.md | founder-only account access |",
+        "| RevenueCat | sandbox purchase grants entitlement | sandbox purchase and entitlement check | revenue/revenuecat-proof.md | founder-only store product setup |",
+        "| Resend | domain verification pending | send test email | email/resend-proof.md | founder-only DNS access |",
+        "| App Store Connect | app record and metadata inspected | asc validation commands | store/asc-proof.md | founder-only submission access |",
+        "| Sentry | release event captured | trigger handled test event | security/sentry-proof.md | founder-only project access |",
+        "| MobAI | target-user onboarding walkthrough captured | run mobile walkthrough | mobile/mobai-proof.md | founder-only device access |",
+        "| Doppler | runtime injection captured | doppler run -- printenv APP_ENV | secrets/doppler-proof.md | founder-only secrets access |",
+        "No raw secrets, private account screenshots, signing material, or credential screenshots are stored in proof artifacts.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    mkdirSync(path.join(providerProofUnrelatedBlockerScoped, "analytics"), { recursive: true });
+    writeFileSync(path.join(providerProofUnrelatedBlockerScoped, "analytics", "posthog-proof.md"), "Captured live event on 2026-08-09.\n", "utf8");
+    mkdirSync(path.join(providerProofUnrelatedBlockerScoped, "revenue"), { recursive: true });
+    writeFileSync(
+      path.join(providerProofUnrelatedBlockerScoped, "revenue", "revenuecat-proof.md"),
+      "Sandbox purchase confirmed: entitlement active on 2026-08-09.\n",
+      "utf8",
+    );
+  }
+  runFixture(
+    "the unscoped provider-proof check fails on an unrelated pending provider row",
+    providerProofUnrelatedBlockerScoped,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.ready_claim_with_blocker",
+  );
+  runFixture(
+    "the --providers-scoped provider-proof check ignores that same unrelated pending row",
+    providerProofUnrelatedBlockerScoped,
+    "check-live-provider-proof.ts",
+    0,
+    undefined,
+    ["--providers", "PostHog,RevenueCat"],
+  );
+
+  // The scope must not become a blanket bypass: a blocker inside one of the NAMED providers' own
+  // rows still fails even under --providers.
+  const providerProofOwnBlockerStillScoped = makeFixture("provider-proof-own-blocker-still-scoped");
+  {
+    const state = readState(providerProofOwnBlockerStillScoped);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofOwnBlockerStillScoped, state);
+    writeFileSync(
+      path.join(providerProofOwnBlockerStillScoped, "operations/PROVIDER_PROOF.md"),
+      [
+        "# Provider Proof",
+        "Status: PostHog and RevenueCat are verified.",
+        "Proof Ledger",
+        "| Provider | current status | proof command | evidence path | founder-only gate |",
+        "| --- | --- | --- | --- | --- |",
+        "| PostHog | event capture pending | inspect dashboard/API | analytics/posthog-proof.md | founder-only account access |",
+        "| RevenueCat | sandbox purchase grants entitlement | sandbox purchase and entitlement check | revenue/revenuecat-proof.md | founder-only store product setup |",
+        "| Resend | domain and test send captured | send test email | email/resend-proof.md | founder-only DNS access |",
+        "| App Store Connect | app record and metadata inspected | asc validation commands | store/asc-proof.md | founder-only submission access |",
+        "| Sentry | release event captured | trigger handled test event | security/sentry-proof.md | founder-only project access |",
+        "| MobAI | target-user onboarding walkthrough captured | run mobile walkthrough | mobile/mobai-proof.md | founder-only device access |",
+        "| Doppler | runtime injection captured | doppler run -- printenv APP_ENV | secrets/doppler-proof.md | founder-only secrets access |",
+        "No raw secrets, private account screenshots, signing material, or credential screenshots are stored in proof artifacts.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "the --providers-scoped provider-proof check still fails on a blocker inside a named provider's own row",
+    providerProofOwnBlockerStillScoped,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.ready_claim_with_blocker",
+    ["--providers", "PostHog,RevenueCat"],
+  );
+
   const artifactTemplateGap = makeFixture("artifact-template-gap");
   {
     const state = readState(artifactTemplateGap);

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.132.0",
+  "skillVersion": "0.133.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2620,7 +2620,7 @@
         "check:onboarding-graph-complete",
         "check:onboarding-page-fresh",
         "check:onboarding-cutover-repository",
-        "check:provider-proof"
+        "check:provider-proof-onboarding"
       ],
       "providerIds": [
         "provider.revenuecat",
@@ -4905,6 +4905,13 @@
       "scriptPath": "validation/business/process/check-live-provider-proof.ts",
       "ownerDomainId": "domain.process",
       "audit": "required"
+    },
+    {
+      "id": "gate.check-provider-proof-onboarding",
+      "command": "check:provider-proof-onboarding",
+      "scriptPath": "validation/business/process/check-live-provider-proof.ts",
+      "ownerDomainId": "domain.process",
+      "audit": "excluded"
     },
     {
       "id": "gate.check-reference-size",

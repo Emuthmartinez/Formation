@@ -48,6 +48,8 @@ export const auditExcludedScripts: Record<string, string> = {
   "test:validators": "executed by the launchbench step, which lints scenario definitions and then runs the validator fixture suite",
   "check:onboarding-graph-complete":
     "a strict --require-done wrapper around check:onboarding-graph (already an audit step), used only as ONB-22's own catalog gate; the shipped onboarding template is deliberately not marked done, so running this in the general audit would always fail",
+  "check:provider-proof-onboarding":
+    "a --providers-scoped invocation of check:provider-proof (already an audit step) for PostHog/RevenueCat only, used as ONB-22's own catalog gate so its acceptance does not depend on an unrelated provider row (Resend, App Store Connect, Sentry, ...) elsewhere in operations/PROVIDER_PROOF.md; running the repo-wide check:provider-proof step already covers this file too, so running both in the general audit would duplicate the step",
   "check:onboarding-evidence-onb-00":
     "ONB-00's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
   "check:onboarding-evidence-onb-01":

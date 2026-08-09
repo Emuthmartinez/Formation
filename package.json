@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.132.0",
+  "version": "0.133.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -93,6 +93,7 @@
     "check:control-plane": "tsx skill/b2c-mobile-business-launch/validation/business/operations/check-control-plane-contract.ts",
     "check:business-control-plane-workspace": "tsx skill/b2c-mobile-business-launch/tooling/render-business-control-plane-workspace.ts --root skill/b2c-mobile-business-launch/workspace/business --business-state ../../studio/seed/business.json --out ../../studio/seed/workspace.generated.json --check",
     "check:provider-proof": "tsx skill/b2c-mobile-business-launch/validation/business/process/check-live-provider-proof.ts",
+    "check:provider-proof-onboarding": "tsx skill/b2c-mobile-business-launch/validation/business/process/check-live-provider-proof.ts --providers PostHog,RevenueCat",
     "check:artifact-templates": "tsx skill/b2c-mobile-business-launch/validation/business/process/check-artifact-templates.ts",
     "check:app-archetype": "tsx skill/b2c-mobile-business-launch/validation/business/product/check-app-archetype.ts",
     "check:archetype-starter": "tsx skill/b2c-mobile-business-launch/validation/business/engineering/check-archetype-starter.ts",

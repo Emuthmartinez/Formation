@@ -195,6 +195,45 @@ export function register(h: Harness): void {
     "onboarding_graph.section_evidence_decision_and_complaint_traceability_missing",
   );
 
+  const requiredSectionInPreBlock = makeFixture("onboarding-graph-required-section-in-pre-block");
+  mutateOnboarding(requiredSectionInPreBlock, (text) => {
+    // Relocate the entire live "## Competitor Review Matrix" section into a <pre> block.
+    // stripNonRenderingHtmlBlocks() originally only recognized script/style/template -- <pre>'s
+    // content DOES render visibly (unlike script/style/template), which is exactly why it was
+    // deliberately left unstripped, but "renders visibly" is the wrong test: a heading inside
+    // <pre> displays as literal preformatted text, never as a parsed heading a real renderer or
+    // this validator's own hasHeading()/graphRunRows()/countChecklistItems() would recognize.
+    const section = text.match(/## Competitor Review Matrix\n[\s\S]*?(?=\n## )/)?.[0];
+    if (!section) throw new Error("fixture setup: could not locate the Competitor Review Matrix section to relocate");
+    const withoutLiveSection = text.replace(section, "");
+    return `${withoutLiveSection}\n<pre>\n${section}\n</pre>\n`;
+  });
+  runFixture(
+    "a required section relocated into a pre block still fails as missing",
+    requiredSectionInPreBlock,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_competitor_review_matrix_missing",
+  );
+
+  const requiredSectionInTextareaBlock = makeFixture("onboarding-graph-required-section-in-textarea-block");
+  mutateOnboarding(requiredSectionInTextareaBlock, (text) => {
+    // Same gap, <textarea> this time: a form control's raw value renders visibly too, but a
+    // heading placed inside one is a literal string inside a control, never live document
+    // structure -- the same "renders visibly but is not parsed Markdown" case as <pre>.
+    const section = text.match(/## Internal Guidance Audit\n[\s\S]*?(?=\n## )/)?.[0];
+    if (!section) throw new Error("fixture setup: could not locate the Internal Guidance Audit section to relocate");
+    const withoutLiveSection = text.replace(section, "");
+    return `${withoutLiveSection}\n<textarea>\n${section}\n</textarea>\n`;
+  });
+  runFixture(
+    "a required section relocated into a textarea block still fails as missing",
+    requiredSectionInTextareaBlock,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_internal_guidance_audit_missing",
+  );
+
   const requiredHeadingTabIndented = makeFixture("onboarding-graph-required-heading-tab-indented");
   mutateOnboarding(requiredHeadingTabIndented, (text) =>
     // A single leading tab expands to CommonMark's own 4-column tab stop, the same indentation
@@ -601,6 +640,49 @@ export function register(h: Harness): void {
     0,
   );
 
+  // --- check-live-provider-proof.ts's v1/v2 bridge ---
+  // Regression: check-live-provider-proof.ts used to call the v1-only loadProjectState()
+  // unconditionally. A genuine v2-managed workspace with no PROJECT_STATE.yaml at all reported a
+  // spurious project_state.missing error on every run; a workspace with BOTH a canonical v2
+  // business-state.json and a stale retained v1 file (the engine only ever writes v2) silently
+  // read the stale v1 lane status instead, so a done v2 onboarding lane never actually triggered
+  // its PostHog/RevenueCat provider-proof requirement.
+  const providerProofV2OnlyNoFalsePositive = makeFixture("provider-proof-v2-only-no-false-positive");
+  {
+    rmSync(path.join(providerProofV2OnlyNoFalsePositive, "state/PROJECT_STATE.yaml"), { force: true });
+    writeFileSync(
+      path.join(providerProofV2OnlyNoFalsePositive, "state/business-state.json"),
+      JSON.stringify(buildValidBusinessStateV2({ status: "pending", evidence: [], blockers: [] })),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a v2-only workspace (no PROJECT_STATE.yaml, onboarding lane still pending) reports no project_state.missing false positive",
+    providerProofV2OnlyNoFalsePositive,
+    "check-live-provider-proof.ts",
+    0,
+  );
+
+  const providerProofV2WinsOverStaleV1 = makeFixture("provider-proof-v2-wins-over-stale-v1");
+  {
+    const v1State = readState(providerProofV2WinsOverStaleV1);
+    getLane(v1State, "onboarding")["status"] = "not_started";
+    writeState(providerProofV2WinsOverStaleV1, v1State);
+    writeFileSync(
+      path.join(providerProofV2WinsOverStaleV1, "state/business-state.json"),
+      JSON.stringify(buildValidBusinessStateV2({ status: "succeeded", evidence: ["product/ONBOARDING.md"], blockers: [] })),
+      "utf8",
+    );
+    rmSync(path.join(providerProofV2WinsOverStaleV1, "operations/PROVIDER_PROOF.md"), { force: true });
+  }
+  runFixture(
+    "a done v2 onboarding lane requires provider proof even while a stale v1 file still says not_started",
+    providerProofV2WinsOverStaleV1,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.file_missing",
+  );
+
   const doneWithUncheckedVerification = makeFixture("onboarding-graph-done-with-unchecked-verification");
   {
     markOnboardingDone(doneWithUncheckedVerification);
@@ -708,6 +790,30 @@ export function register(h: Harness): void {
     "check-onboarding-graph.ts",
     1,
     "onboarding_graph.verification_items_missing",
+    ["--require-done"],
+  );
+
+  const verificationChecklistDeletedAndDuplicated = makeFixture("onboarding-graph-verification-checklist-deleted-and-duplicated");
+  {
+    markOnboardingDone(verificationChecklistDeletedAndDuplicated);
+    mutateOnboarding(verificationChecklistDeletedAndDuplicated, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      // Delete the first canonical assertion and duplicate the second one in its place --
+      // verificationItemCount still reaches 11 and countUncheckedItems() still reads 0, so a
+      // count-only check would accept this even though a required assertion is now genuinely
+      // missing, replaced by a copy of an unrelated one.
+      return completed.replace(
+        "- [x] `ONB-00` through `ONB-22` are done, or the lane is not claimed done\n- [x] Evidence, reviews, authorized Onbo Hub, internal guidance, provider, policy, seven-principle, and 60fps research are joined\n",
+        "- [x] Evidence, reviews, authorized Onbo Hub, internal guidance, provider, policy, seven-principle, and 60fps research are joined\n- [x] Evidence, reviews, authorized Onbo Hub, internal guidance, provider, policy, seven-principle, and 60fps research are joined\n",
+      );
+    });
+  }
+  runFixture(
+    "deleting one canonical assertion and duplicating another still fails even though the count and unchecked total both look correct",
+    verificationChecklistDeletedAndDuplicated,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.verification_assertion_missing",
     ["--require-done"],
   );
 
@@ -1520,7 +1626,7 @@ export function register(h: Harness): void {
   const cutoverScript = "check-onboarding-cutover-repository.ts";
 
   const cutoverBaseline = makeFixture("onboarding-cutover-baseline");
-  runFixture("shipped Deletion Manifest template passes: no path-like span to verify yet", cutoverBaseline, cutoverScript, 0);
+  runFixture("shipped Deletion Manifest template passes: its only span, LEGACY-001, does not exist on disk", cutoverBaseline, cutoverScript, 0);
 
   const cutoverUnverifiable = makeFixture("onboarding-cutover-deletion-unverifiable");
   mutateOnboarding(cutoverUnverifiable, (text) => text.replace("| `LEGACY-001` | Record the item |", "| LEGACY-001 | Record the item |"));
@@ -1545,6 +1651,20 @@ export function register(h: Harness): void {
   const cutoverVerified = makeFixture("onboarding-cutover-deletion-verified");
   mutateOnboarding(cutoverVerified, (text) => text.replace("| `LEGACY-001` | Record the item |", "| `legacy/old-onboarding-flow.ts` | Record the item |"));
   runFixture("a delete-disposition row naming a path genuinely absent from disk passes", cutoverVerified, cutoverScript, 0);
+
+  // Regression: a punctuation heuristic ("must contain / or .") used to skip verifying any
+  // extensionless span entirely, so a bare directory name naming a real, still-existing target
+  // silently passed. `state` is a directory the fixture root always ships (copied from
+  // workspace/business), so this is a genuine on-disk collision, not a synthetic one.
+  const cutoverExtensionlessNotVerified = makeFixture("onboarding-cutover-deletion-extensionless-not-verified");
+  mutateOnboarding(cutoverExtensionlessNotVerified, (text) => text.replace("| `LEGACY-001` | Record the item |", "| `state` | Record the item |"));
+  runFixture(
+    "a delete-disposition row naming an extensionless path that still exists on disk fails",
+    cutoverExtensionlessNotVerified,
+    cutoverScript,
+    1,
+    "onboarding_cutover.deletion_not_verified",
+  );
 
   function checkVerificationItems(text: string): string {
     return text.replace(/^-\s*\[\s*\]/gm, "- [x]");

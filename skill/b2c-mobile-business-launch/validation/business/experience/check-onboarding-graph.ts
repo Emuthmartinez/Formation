@@ -68,6 +68,26 @@ const TEMPLATE_DIRECTIVE_VERBS = new Set([
 // it would read 0 unchecked items just as happily as a genuinely complete checklist.
 const EXPECTED_VERIFICATION_ITEM_COUNT = 11;
 
+// A distinguishing substring from each of the shipped template's 11 canonical checklist
+// assertions. verificationItemCount alone only counts checked-looking lines: deleting one
+// canonical assertion and duplicating a remaining checked line keeps the count at 11 and the
+// unchecked count at 0, so the destructive ONB-22 completion gate would accept a checklist that
+// no longer actually contains every required assertion. requirePhrases() below verifies each
+// assertion's own text is still present, not just that eleven lines exist.
+const VERIFICATION_ITEM_FINGERPRINTS = [
+  "ONB-00` through `ONB-22` are done, or the lane is not claimed done",
+  "internal guidance, provider, policy, seven-principle, and 60fps research are joined",
+  "review eligibility, and completion are distinct",
+  "personalization proof, and the interruption budget are justified",
+  "Experiment, review, permission, and lifecycle owners are explicit",
+  "paywall, error, and recovery state is specified and designed",
+  "interactive prototype, accessibility, localization, privacy, security, performance, and observability checks exist",
+  "provider-confirmed outcomes, and Expected Event Sequences pass",
+  "Compound Engineering planning, implementation, review, tests, and provider validation pass",
+  "Hard cutover preserves durable user value and leaves zero-legacy runtime or transformation tooling",
+  "check-onboarding-graph.ts` passes",
+];
+
 // Not a shared parseCliArgs flag: this is the one caller-specific switch that turns the
 // lane-state-derived strict check into an unconditional one, used only by ONB-22's own gate
 // invocation (check:onboarding-graph-complete) -- see the requireDone block below.
@@ -424,6 +444,15 @@ if (!skip && artifact) {
         ),
       );
     }
+
+    requirePhrases(
+      issues,
+      relativePath,
+      verificationSection,
+      "onboarding_graph.verification_assertion_missing",
+      VERIFICATION_ITEM_FINGERPRINTS,
+      "The Verification section must still contain every one of the eleven canonical checklist assertions, not merely eleven checklist-shaped lines.",
+    );
 
     const uncheckedVerificationItems = countUncheckedItems(verificationSection);
     if (uncheckedVerificationItems > 0) {

@@ -813,8 +813,15 @@ function stripIndentedCodeBlocks(text: string): string {
 }
 
 /**
- * Strips content inside raw HTML block elements whose content a browser never renders as visible
- * document text -- script, style, and template. A block only OPENS at the true start of its own
+ * Strips content inside raw HTML block elements whose content never functions as live, parseable
+ * Markdown structure -- script, style, template, pre, and textarea. script/style/template are
+ * inert-by-default in every browser (rendering nothing at all); pre and textarea are the opposite
+ * case that matters just as much -- their content DOES render, but only as literal preformatted
+ * text (or a form control's raw value), never as an actual parsed heading, table, or checklist. A
+ * required document structure placed inside either kind of block is equally invisible to
+ * hasHeading()/graphRunRows()/countChecklistItems(): the criterion for this function is "does a
+ * real renderer parse this as Markdown," not "is it visible on the page," and pre/textarea fail
+ * that test exactly like script/style/template do. A block only OPENS at the true start of its own
  * line (up to 3 leading spaces of indentation, the same tolerance stripFenceChar and
  * stripIndentedCodeBlocks already use), with the tag name immediately followed by whitespace,
  * ">", or end of line -- never mid-line. This is what tells a real block apart from a sentence
@@ -828,12 +835,11 @@ function stripIndentedCodeBlocks(text: string): string {
  * opener with no closer runs to the end of the document, matching how an unterminated one of
  * these blocks still hides everything after it on a real page too. This is distinct from
  * stripIndentedCodeBlocks and stripFenceChar: those hide content because it is a code-like
- * construct; this hides content because these three tags are specifically inert-by-default in
- * every browser (unlike, say, <pre> or <textarea>, whose content *does* render visibly and so is
- * deliberately left alone).
+ * construct; this hides content because these five tags all suppress real Markdown parsing of
+ * whatever they contain, whether or not that content ends up visible.
  */
 function stripNonRenderingHtmlBlocks(text: string): string {
-  const openerLine = /^ {0,3}<(script|style|template)(?=[\s>]|$)/i;
+  const openerLine = /^ {0,3}<(script|style|template|pre|textarea)(?=[\s>]|$)/i;
   const lines = text.split("\n");
   const kept: string[] = [];
   let i = 0;
@@ -856,7 +862,7 @@ function stripNonRenderingHtmlBlocks(text: string): string {
 
 // The recognized CommonMark HTML-block-type-6 tag names (a curated common subset -- block-level
 // container/structural elements). This is a DIFFERENT closing rule from stripNonRenderingHtmlBlocks'
-// script/style/template family (CommonMark type 1): a type-6 block is not looking for a matching
+// script/style/template/pre/textarea family (CommonMark type 1): a type-6 block is not looking for a matching
 // closing tag at all -- it simply runs until the next blank line (or end of document), regardless
 // of whether any of the lines it absorbs mention a closing tag. Markdown syntax (headings, table
 // rows, checklist items) inside one of these tags -- with no blank line separating it from the
@@ -927,7 +933,7 @@ const GENERIC_HTML_BLOCK_TAGS = new Set([
  * uses), an opening or closing angle bracket immediately followed by one of the recognized tag
  * names, itself followed by whitespace, ">", "/", or end of line -- never mid-line, so a sentence
  * mentioning one of these tags inside an inline code span is never mistaken for a real block.
- * Unlike stripNonRenderingHtmlBlocks (script/style/template), this block type's closing condition
+ * Unlike stripNonRenderingHtmlBlocks (script/style/template/pre/textarea), this block type's closing condition
  * is NOT a matching closing tag -- CommonMark simply runs it through the next blank line (or end
  * of document), whatever content that line carries. A required heading, Graph Run row, or
  * checklist item placed inside one of these tags with no blank line separating it from the tag is
@@ -956,14 +962,15 @@ function stripGenericHtmlBlocks(text: string): string {
 }
 
 /**
- * Strips every form of Markdown (and raw HTML) that does not render as visible prose: HTML
- * comments (which render nothing at all), script/style/template blocks (see
- * stripNonRenderingHtmlBlocks), generic block-level HTML container tags (see
- * stripGenericHtmlBlocks), backtick/tilde fenced code blocks (CommonMark accepts both delimiters
- * equally, and a shorter same-character run than the opener never closes a fence -- see
- * stripFenceChar), and indented code blocks (see stripIndentedCodeBlocks). Used by every check
- * that must not mistake hidden, fenced-off, or code-block-only content for a live, human-visible
- * finding, section, or completion signal.
+ * Strips every form of Markdown (and raw HTML) that a real renderer does not parse as live
+ * document structure: HTML comments (which render nothing at all), script/style/template/pre/
+ * textarea blocks (see stripNonRenderingHtmlBlocks -- some of these render nothing, others render
+ * only as literal preformatted text, but neither case is a parsed heading/table/checklist),
+ * generic block-level HTML container tags (see stripGenericHtmlBlocks), backtick/tilde fenced code
+ * blocks (CommonMark accepts both delimiters equally, and a shorter same-character run than the
+ * opener never closes a fence -- see stripFenceChar), and indented code blocks (see
+ * stripIndentedCodeBlocks). Used by every check that must not mistake hidden, fenced-off, or
+ * code-block-only content for a live, parseable finding, section, or completion signal.
  */
 export function stripNonRenderedMarkdown(text: string): string {
   const withoutComments = text.replace(/<!--[\s\S]*?(?:-->|$)/g, "");

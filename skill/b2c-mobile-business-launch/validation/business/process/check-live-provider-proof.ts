@@ -1,10 +1,42 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { asString, getPath, isRecord, issue, loadProjectState, parseCliArgs, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
+import {
+  asString,
+  flagString,
+  getPath,
+  isRecord,
+  issue,
+  loadLaneFromBusinessStateV2,
+  loadProjectState,
+  parseCliArgs,
+  parseFlags,
+  reportAndExit,
+  type Issue,
+} from "../../../tooling/lib/launch-state.js";
 
-const args = parseCliArgs(process.argv.slice(2));
-const loaded = loadProjectState(args);
+const argv = process.argv.slice(2);
+const args = parseCliArgs(argv);
+// Not a shared parseCliArgs flag: --providers scopes the ready-claim/open-blocker check below to
+// a caller-named subset of the ledger's own providers, used only by ONB-22's own catalog gate
+// (check:provider-proof-onboarding) so its acceptance does not depend on an unrelated provider row
+// (Resend, App Store Connect, Sentry, ...) elsewhere in operations/PROVIDER_PROOF.md. The default
+// (unscoped) invocation -- the general check:provider-proof audit step and
+// workflow.process.provider-proof-verification -- keeps scanning the whole document.
+const scopedProviders = flagString(parseFlags(argv, [{ flags: ["--providers"], key: "providers", kind: "string" }]), "providers")
+  ?.split(",")
+  .map((entry) => entry.trim().toLowerCase())
+  .filter((entry) => entry.length > 0);
+// A durable-engine-managed workspace's canonical state lives at state/business-state.json (v2),
+// not state/PROJECT_STATE.yaml (v1) -- see check-onboarding-graph.ts's identical bridge for the
+// full rationale. Before this bridge, this validator called the v1-only loadProjectState()
+// unconditionally: a genuine v2 workspace with no PROJECT_STATE.yaml at all failed permanently on
+// project_state.missing, and a stale retained v1 file (the engine only ever writes v2) silently
+// hid the real v2 lane status, so a done onboarding lane's PostHog/RevenueCat evidence requirement
+// was never actually evaluated. v1 is now consulted only when v2's business-state.json does not
+// exist at all -- its absence is normal for a v2-managed workspace, not an error to surface here.
+const v2Exists = existsSync(path.join(args.root, "state", "business-state.json"));
+const loaded = v2Exists ? { issues: [] as Issue[] } : loadProjectState(args);
 const issues: Issue[] = [...loaded.issues];
 const proofPath = path.join(args.root, "operations/PROVIDER_PROOF.md");
 const proofText = existsSync(proofPath) ? readFileSync(proofPath, "utf8") : "";
@@ -24,7 +56,23 @@ const providerLaneMap: Array<{ provider: string; lanes: string[] }> = [
   { provider: "Sentry", lanes: ["security"] },
 ];
 
+// loadLaneFromBusinessStateV2's document-level failures (invalid JSON, failed schema validation)
+// repeat identically across every lane call against the same file, so this dedupes them by
+// message rather than reporting the same underlying problem once per proofRequiredLanes entry.
+const reportedInvalidStateMessages = new Set<string>();
+
 function laneStatus(lane: string): string | undefined {
+  const v2Lane = loadLaneFromBusinessStateV2(args.root, lane);
+  if (v2Lane.kind === "found") return v2Lane.status;
+  if (v2Lane.kind === "invalid") {
+    if (!reportedInvalidStateMessages.has(v2Lane.message)) {
+      reportedInvalidStateMessages.add(v2Lane.message);
+      issues.push(issue("error", "provider_proof.business_state_invalid", v2Lane.message, "state/business-state.json"));
+    }
+    return undefined;
+  }
+  // v2Lane.kind === "absent": no state/business-state.json at all, so v1 is this workspace's only
+  // state source (loaded.state is populated in exactly this case -- see the v2Exists branch above).
   return loaded.state && isRecord(loaded.state) ? asString(getPath(loaded.state, `lanes.${lane}.status`)) : undefined;
 }
 
@@ -46,6 +94,23 @@ const ledgerRows: Array<{ cells: string[]; raw: string }> = proofText
   }))
   .filter(({ cells }) => cells.length >= 4 && !/^-+$/.test(cells[0] ?? "") && !/provider/i.test(cells[0] ?? ""));
 
+/**
+ * proofText with every ledger row belonging to an out-of-scope provider removed, when
+ * --providers was passed; the unscoped default returns proofText unchanged. Only ledger table
+ * rows are ever removed -- prose, headers, and the matching providers' own rows all stay, so the
+ * ready-claim/open-blocker check below still sees genuinely relevant context, just not an
+ * unrelated provider's still-pending row.
+ */
+function scopedProofText(): string {
+  if (!scopedProviders || scopedProviders.length === 0) return proofText;
+  const outOfScopeRows = new Set(ledgerRows.filter((row) => !scopedProviders.includes((row.cells[0] ?? "").toLowerCase())).map((row) => row.raw));
+  if (outOfScopeRows.size === 0) return proofText;
+  return proofText
+    .split("\n")
+    .filter((line) => !outOfScopeRows.has(line))
+    .join("\n");
+}
+
 /** Path-like tokens: backtick-quoted spans (which may contain spaces) plus bare tokens with an extension. */
 function pathTokens(text: string): string[] {
   const tokens: string[] = [];
@@ -64,12 +129,14 @@ function pathTokens(text: string): string[] {
 // cautionary boilerplate ("Do not mark this app launch-ready until ...")
 // matches any naive readiness regex, so text alone must not hard-fail a repo
 // where nothing is done yet.
+// laneStatus() is self-sufficient across v1 and v2, so no outer "is there any state at all" guard
+// is needed here -- unlike the old v1-only laneStatus(), which returned undefined for every lane
+// whenever loaded.state was absent, silently skipping this whole loop even when v2 held the real
+// answer.
 let requiresProof = false;
-if (loaded.state && isRecord(loaded.state)) {
-  for (const lane of proofRequiredLanes) {
-    if (laneStatus(lane) === "done") {
-      requiresProof = true;
-    }
+for (const lane of proofRequiredLanes) {
+  if (laneStatus(lane) === "done") {
+    requiresProof = true;
   }
 }
 const readinessText = readOptional("engineering/PRODUCTION_READINESS.md");
@@ -116,8 +183,9 @@ if (!proofText.trim()) {
     }
   }
 
-  const claimsReady = /\b(verified|ready|launch[- ]ready|production[- ]ready|live proof complete)\b/i.test(proofText);
-  const containsOpenBlocker = /\b(not verified|pending|todo|unknown|placeholder|blocked|founder-only blocker)\b/i.test(proofText);
+  const readyClaimScope = scopedProofText();
+  const claimsReady = /\b(verified|ready|launch[- ]ready|production[- ]ready|live proof complete)\b/i.test(readyClaimScope);
+  const containsOpenBlocker = /\b(not verified|pending|todo|unknown|placeholder|blocked|founder-only blocker)\b/i.test(readyClaimScope);
   if (claimsReady && containsOpenBlocker) {
     issues.push(
       issue(

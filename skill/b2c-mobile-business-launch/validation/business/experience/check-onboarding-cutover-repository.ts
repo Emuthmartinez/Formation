@@ -43,7 +43,11 @@ if (artifact) {
       continue;
     }
     for (const span of spans) {
-      if (!/[/.]/.test(span)) continue;
+      // Every concrete span is checked, not just ones that look path-shaped by punctuation: a
+      // bare extensionless directory name (e.g. `legacy`) is a legitimate deletion target with
+      // neither a "/" nor a "." in it, and a punctuation heuristic silently exempted exactly that
+      // shape from verification. A non-path identifier (a Legacy ID, a provider name, an env var)
+      // simply will not exist on disk, so checking it costs nothing.
       if (existsSync(path.join(args.root, span))) {
         issues.push(
           issue(
