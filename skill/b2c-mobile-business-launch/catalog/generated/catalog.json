@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.108.0",
+  "skillVersion": "0.109.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -690,6 +690,13 @@
       "domainId": "domain.engineering",
       "title": "MobAI Toolbelt",
       "loadWhen": "before MobAI device automation, .mob generation/healing, repeat or host-script actions, Sync Mode/multi-device work, performance gates, screenshots, polished demo videos, app previews, bug repro recordings, MobAI CI, or recorder-skill setup"
+    },
+    {
+      "id": "reference.engineering.technical-documentation-ste100",
+      "path": "knowledge/engineering/technical-documentation-ste100.md",
+      "domainId": "domain.engineering",
+      "title": "Technical Documentation In ASD-STE100",
+      "loadWhen": "writing or editing docs/architecture.md, docs/validators.md, this skill's own README.md/SKILL.md, any knowledge/*.md reference file, an ADR, a runbook, an API/config reference, or an engineering/TECH_SPEC.md-style spec authored for this repository itself; not root README.md/AGENTS.md/CLAUDE.md or founder/marketing copy, which stay with no-slop-writing.md"
     },
     {
       "id": "reference.engineering.xcodebuildmcp-testing",
