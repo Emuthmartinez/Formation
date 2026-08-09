@@ -413,6 +413,29 @@ export function register(h: Harness): void {
     "product/onboarding/graph/ONB-08-motion-research.md",
   ]);
 
+  const onb20PacketMissing = makeFixture("onboarding-evidence-onb20-missing");
+  runFixture(
+    "ONB-20's gate fails when the adversarial-QA packet does not exist yet",
+    onb20PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-20", "--path", "product/onboarding/graph/ONB-20-adversarial-qa.md"],
+  );
+
+  const onb20PacketComplete = makeFixture("onboarding-evidence-onb20-complete");
+  writeEvidencePacket(
+    onb20PacketComplete,
+    "product/onboarding/graph/ONB-20-adversarial-qa.md",
+    substantiveResearchProse("the synthetic one-star pre-mortem, policy review, instrumentation QA, and accessibility review"),
+  );
+  runFixture("ONB-20's gate passes a genuinely substantive, marker-free adversarial-QA packet", onb20PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-20",
+    "--path",
+    "product/onboarding/graph/ONB-20-adversarial-qa.md",
+  ]);
+
   function checkVerificationItems(text: string): string {
     return text.replace(/^-\s*\[\s*\]/gm, "- [x]");
   }

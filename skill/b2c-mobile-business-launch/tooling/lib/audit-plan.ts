@@ -58,6 +58,8 @@ export const auditExcludedScripts: Record<string, string> = {
     "ONB-07's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
   "check:onboarding-evidence-onb-08":
     "ONB-08's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-20":
+    "ONB-20's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
 };
 
 /** Relative business-artifact root for the layout. */

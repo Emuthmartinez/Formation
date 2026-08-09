@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.115.0",
+  "skillVersion": "0.116.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2530,7 +2530,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-20-adversarial-qa.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-20"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "observe",
@@ -4692,6 +4694,13 @@
     {
       "id": "gate.check-onboarding-evidence-onb-08",
       "command": "check:onboarding-evidence-onb-08",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-20",
+      "command": "check:onboarding-evidence-onb-20",
       "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
       "ownerDomainId": "domain.experience",
       "audit": "excluded"

@@ -322,6 +322,11 @@ const onboardingGraphWorkflows = [
       "workflow.experience.onboarding-system.onb-19-implementation-cutover-contract",
     ],
     outputPaths: ["product/onboarding/graph/ONB-20-adversarial-qa.md"],
+    // Same production-verification rationale as ONB-03 above: with no gate, this node compiled
+    // to verification "none", so an empty ONB-20-adversarial-qa.md could unlock ONB-21 and the
+    // destructive ONB-22 cutover with no policy, instrumentation, accessibility, or provider QA
+    // behind it at all.
+    gates: ["check:onboarding-evidence-onb-20"],
     actionClass: "observe",
     idempotent: true,
   }),

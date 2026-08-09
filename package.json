@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.115.0",
+  "version": "0.116.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -59,6 +59,7 @@
     "check:onboarding-evidence-onb-06": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-06 --path product/onboarding/graph/ONB-06-internal-guidance-audit.md",
     "check:onboarding-evidence-onb-07": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-07 --path product/onboarding/graph/ONB-07-provider-policy-landscape.md",
     "check:onboarding-evidence-onb-08": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-08 --path product/onboarding/graph/ONB-08-motion-research.md",
+    "check:onboarding-evidence-onb-20": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-20 --path product/onboarding/graph/ONB-20-adversarial-qa.md",
     "check:orchestration": "tsx skill/b2c-mobile-business-launch/validation/business/orchestration/check-parallel-orchestration.ts",
     "check:generated-pages": "tsx skill/b2c-mobile-business-launch/validation/business/process/check-generated-pages.ts",
     "check:source-registry": "tsx skill/b2c-mobile-business-launch/validation/repository/check-source-freshness.ts --root . --registry skill/b2c-mobile-business-launch/validation/repository/source-registry.yaml",
