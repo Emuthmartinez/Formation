@@ -1319,7 +1319,7 @@ export function register(h: Harness): void {
 
   function writeSte100Root(
     name: string,
-    overrides: { steFile?: string; extraKnowledgeFile?: { relative: string; content: string } } = {},
+    overrides: { steFile?: string; extraKnowledgeFile?: { relative: string; content: string }; readmeContent?: string } = {},
   ): { repoRoot: string; skillRoot: string } {
     const root = makeEmptyFixture(name);
     const repoRoot = path.join(root, "repo");
@@ -1333,6 +1333,9 @@ export function register(h: Harness): void {
       const target = path.join(fixtureSkillRoot, "knowledge", overrides.extraKnowledgeFile.relative);
       mkdirSync(path.dirname(target), { recursive: true });
       writeFileSync(target, overrides.extraKnowledgeFile.content, "utf8");
+    }
+    if (overrides.readmeContent) {
+      writeFileSync(path.join(fixtureSkillRoot, "README.md"), overrides.readmeContent, "utf8");
     }
     return { repoRoot, skillRoot: fixtureSkillRoot };
   }
@@ -1383,5 +1386,34 @@ export function register(h: Harness): void {
     ["--repo-root", ste100WarningTier.repoRoot, "--skill-root", ste100WarningTier.skillRoot],
     0,
     "WARNING ste100.sentence_too_long",
+  );
+
+  // Both explicitly named in the reference's own trigger line — a real gap Codex caught: the
+  // governed-file discovery never enqueued either one, so an edit to either received no signal.
+  const ste100Readme = writeSte100Root("ste100-readme-scanned", {
+    readmeContent:
+      "# Package\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+  });
+  runScriptArgs(
+    "ste100 scans this skill's own README.md, named in the reference's trigger line",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Readme.repoRoot, "--skill-root", ste100Readme.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [skill/pkg/README.md]",
+  );
+
+  // A trailing prose paragraph with no terminal punctuation used to fall off the end of the
+  // sentence match entirely — a real gap Codex caught: an oversized or present-perfect closing
+  // sentence passed silently as long as the file just stopped instead of ending in . ! ? or :
+  const ste100Unterminated = writeSte100Root("ste100-unterminated-final-sentence", {
+    steFile:
+      "# Doc\n\nShort opening sentence here.\n\nThis closing sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces",
+  });
+  runScriptArgs(
+    "ste100 still catches a violation in the final sentence when the file ends with no terminal punctuation",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Unterminated.repoRoot, "--skill-root", ste100Unterminated.skillRoot],
+    1,
+    "ste100.sentence_too_long",
   );
 }

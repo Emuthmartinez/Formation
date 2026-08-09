@@ -70,6 +70,16 @@ for (const relative of ["docs/architecture.md", "docs/validators.md"]) {
   governed.push({ displayPath: relative, absolute, tier: "warning" });
 }
 
+// The trigger line in knowledge/engineering/technical-documentation-ste100.md names this
+// skill's own README.md and SKILL.md as governed — include them explicitly, since neither
+// lives under knowledge/ where the walk below would otherwise find them.
+for (const relative of ["README.md", "SKILL.md"]) {
+  const absolute = path.join(skillRoot, relative);
+  if (!existsSync(absolute)) continue;
+  const displayPath = path.relative(repoRoot, absolute).split(path.sep).join("/");
+  governed.push({ displayPath, absolute, tier: "warning" });
+}
+
 const knowledgeRoot = path.join(skillRoot, "knowledge");
 if (existsSync(knowledgeRoot) && statSync(knowledgeRoot).isDirectory()) {
   for (const absolute of collectFiles(knowledgeRoot, new Set([".md"]))) {
@@ -150,9 +160,12 @@ function sentencesOf(source: string): string[] {
     });
 
   const joined = lines.join(" ");
+  // A trailing prose chunk with no terminal punctuation would otherwise fall off the end of
+  // the match below unseen — force a boundary so the final segment always gets checked too.
+  const closed = /[.!?:]\s*$/.test(joined) ? joined : `${joined}.`;
   // ":" ends a chunk too — a colon-introduced clause or list reads as its own unit, and
   // splitting there only ever shortens a chunk's word count, never lengthens one, so this
   // cannot turn a passing sentence into a failing one anywhere in the governed surface.
-  const rawSentences = joined.match(/[^.!?:]+[.!?:]+/g) ?? [];
+  const rawSentences = closed.match(/[^.!?:]+[.!?:]+/g) ?? [];
   return rawSentences.map((entry) => entry.trim()).filter(Boolean);
 }
