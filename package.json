@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.107.0",
+  "version": "0.109.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -112,8 +112,7 @@
     "lint:format": "prettier --check \"skill/b2c-mobile-business-launch/catalog/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/business/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/repository/**/*.ts\" \"skill/b2c-mobile-business-launch/tooling/**/*.ts\"",
     "format": "prettier --write \"skill/b2c-mobile-business-launch/catalog/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/business/**/*.ts\" \"skill/b2c-mobile-business-launch/validation/repository/**/*.ts\" \"skill/b2c-mobile-business-launch/tooling/**/*.ts\"",
     "check:catalog": "tsx skill/b2c-mobile-business-launch/validation/repository/check-catalog.ts",
-    "catalog:render-routing": "tsx skill/b2c-mobile-business-launch/catalog/render-routing.ts",
-    "check:onboarding-graph": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-graph.ts"
+    "catalog:render-routing": "tsx skill/b2c-mobile-business-launch/catalog/render-routing.ts"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.115.0",

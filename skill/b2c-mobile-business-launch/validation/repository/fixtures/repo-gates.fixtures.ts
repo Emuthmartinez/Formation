@@ -734,6 +734,123 @@ export function register(h: Harness): void {
     "motion_contract.token_row.value_drift",
   );
 
+  const motionRecipeWindowDrift = writeMotionContractRoot("motion-contract-recipe-window-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("window (360–600ms total)", "window (360–650ms total)") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a recipe's own restated window drifts from tokens.json",
+    "check-motion-contract.ts",
+    ["--skill-root", motionRecipeWindowDrift],
+    1,
+    "motion_contract.recipe_window.value_drift",
+  );
+
+  const motionRecipeWindowReworded = writeMotionContractRoot("motion-contract-recipe-window-reworded", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("window (360–600ms total)", "window (fits comfortably inside the cap)") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when no recipe window statement is parseable, instead of silently checking nothing",
+    "check-motion-contract.ts",
+    ["--skill-root", motionRecipeWindowReworded],
+    1,
+    "motion_contract.recipe_window.none_found",
+  );
+
+  const motionRecipeFamilyInlineDrift = writeMotionContractRoot("motion-contract-recipe-family-inline-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text.replace("press-family spring (response 0.3–0.4s, damping 0.7–0.8)", "press-family spring (response 0.3–0.4s, damping 0.7–0.9)")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a recipe's inline spring-family restatement drifts from the craft table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionRecipeFamilyInlineDrift],
+    1,
+    "motion_contract.recipe_family_inline.drift",
+  );
+
+  const motionRecipeFamilyInlineReworded = writeMotionContractRoot("motion-contract-recipe-family-inline-reworded", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("press-family spring (response 0.3–0.4s, damping 0.7–0.8)", "a calm, restrained spring") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when no recipe spring-family restatement is parseable, instead of silently checking nothing",
+    "check-motion-contract.ts",
+    ["--skill-root", motionRecipeFamilyInlineReworded],
+    1,
+    "motion_contract.recipe_family_inline.none_found",
+  );
+
+  const motionOffsetTableRowDrift = writeMotionContractRoot("motion-contract-offset-table-row-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 3 | 2 | 100ms | up to 100ms | 600ms |", "| 3 | 2 | 100ms | up to 180ms | 600ms |") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when an offset-table row's offset and total disagree with each other",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableRowDrift],
+    1,
+    "motion_contract.recipe_offset_table.row_internally_inconsistent",
+  );
+
+  const motionOffsetTableBoundaryDrift = writeMotionContractRoot("motion-contract-offset-table-boundary-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 5+ | 4+ |", "| 6+ | 5+ |") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the offset table's unachievable-asset-count boundary drifts from the recomputed value",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableBoundaryDrift],
+    1,
+    "motion_contract.recipe_offset_table.boundary_drift",
+  );
+
+  const motionOffsetTableDrift = writeMotionContractRoot("motion-contract-offset-table-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text.replace(
+          "| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 598ms |",
+          "| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 588ms |",
+        )
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when an offset-table row's total drifts from what its own offset computes",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableDrift],
+    1,
+    "motion_contract.recipe_offset_table.row_internally_inconsistent",
+  );
+
+  const motionOffsetTableGapsDrift = writeMotionContractRoot("motion-contract-offset-table-gaps-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 3 | 2 | 100ms | up to 100ms | 600ms |", "| 3 | 3 | 100ms | up to 100ms | 600ms |") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when an offset-table row's Gaps cell disagrees with its own asset count",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableGapsDrift],
+    1,
+    "motion_contract.recipe_offset_table.gaps_drift",
+  );
+
+  const motionOffsetTableGapBudgetDrift = writeMotionContractRoot("motion-contract-offset-table-gap-budget-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 3 | 2 | 100ms | up to 100ms | 600ms |", "| 3 | 2 | 120ms | up to 100ms | 600ms |") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when an offset-table row's Gap-budget-÷-gaps cell disagrees with the recomputed value",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableGapBudgetDrift],
+    1,
+    "motion_contract.recipe_offset_table.gap_budget_drift",
+  );
+
+  const motionOffsetTableMissingAssetCountRow = writeMotionContractRoot("motion-contract-offset-table-missing-row", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 3 | 2 | 100ms | up to 100ms | 600ms |\n", "") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when an achievable asset count has no row at all in the offset table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableMissingAssetCountRow],
+    1,
+    "motion_contract.recipe_offset_table.missing_asset_count_row",
+  );
+
   const motionCanonDrift = writeMotionContractRoot("motion-contract-canon-outside-band", (rel, text) =>
     rel.endsWith("peak-end-card.md") ? text.replace(".spring(response: 0.45, dampingFraction: 0.7)", ".spring(response: 0.45, dampingFraction: 0.85)") : text,
   );

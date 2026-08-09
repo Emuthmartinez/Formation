@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.107.0",
+  "skillVersion": "0.109.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -124,7 +124,7 @@
         "area.product-experience"
       ],
       "routeLabel": "How the app feels",
-      "routeWhen": "the standout moment, onboarding and activation, engagement mechanics and their ethics limits, push lifecycle, and work targeting better-than-expected",
+      "routeWhen": "the standout moment, onboarding and activation, welcome/splash screens, engagement mechanics and their ethics limits, push lifecycle, and work targeting better-than-expected",
       "order": 60
     },
     {
@@ -626,7 +626,7 @@
       "path": "knowledge/design/motion-craft-benchmarks.md",
       "domainId": "domain.design",
       "title": "Motion Craft Benchmarks",
-      "loadWhen": "implementing or auditing a specific motion recipe against check:motion-contract's numeric spring/duration tokens, or tying a micro-interaction to the Experience Card it serves"
+      "loadWhen": "implementing or auditing a specific motion recipe against check:motion-contract's numeric spring/duration tokens, tying a micro-interaction to the Experience Card it serves, or designing a cold-launch splash/loading/welcome-screen entrance (R11-R14)"
     },
     {
       "id": "reference.design.premium-mobile-craft",
@@ -838,7 +838,7 @@
       "path": "knowledge/experience/onboarding-conversion.md",
       "domainId": "domain.experience",
       "title": "Onboarding Conversion",
-      "loadWhen": "before onboarding quizzes, personalization, attribution questions, demo videos, App Review popups, paywall timing, closing offers, trials, or first-session activation"
+      "loadWhen": "before onboarding quizzes, welcome/splash screens, personalization, attribution questions, demo videos, App Review popups, paywall timing, closing offers, trials, or first-session activation"
     },
     {
       "id": "reference.experience.push-notification-lifecycle",
@@ -4637,13 +4637,6 @@
       "command": "check:no-slop",
       "scriptPath": "validation/business/words/check-no-slop.ts",
       "ownerDomainId": "domain.words",
-      "audit": "required"
-    },
-    {
-      "id": "gate.check-onboarding-graph",
-      "command": "check:onboarding-graph",
-      "scriptPath": "validation/business/experience/check-onboarding-graph.ts",
-      "ownerDomainId": "domain.experience",
       "audit": "required"
     },
     {

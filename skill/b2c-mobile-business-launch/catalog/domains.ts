@@ -63,7 +63,7 @@ export const domains: readonly CatalogDomain[] = [
     areaIds: ["area.product-experience"],
     routeLabel: "How the app feels",
     routeWhen:
-      "the standout moment, onboarding and activation, engagement mechanics and their ethics limits, push lifecycle, and work targeting better-than-expected",
+      "the standout moment, onboarding and activation, welcome/splash screens, engagement mechanics and their ethics limits, push lifecycle, and work targeting better-than-expected",
     order: 60,
   },
   {

@@ -113,6 +113,7 @@ Record the following when optimizing attribution quality. These do not block lau
 | Event | When | Properties | Provider proof |
 | --- | --- | --- | --- |
 | attribution_source_selected | early onboarding source screen | self_reported_source, self_reported_source_label | PostHog event and person property evidence |
+| cold_launch_viewed | a paged cold-open (R14) with real page content mounts | recipe_id, page_id | onboarding proof |
 | review_prompt_eligible | after first value is visible | first_value_id, surface | onboarding proof |
 | review_prompt_requested | native review API called | platform, surface | onboarding proof |
 | onboarding_started | first onboarding screen mounts | flow_id, step_id | onboarding proof |
