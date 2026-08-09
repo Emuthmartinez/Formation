@@ -34,6 +34,7 @@ const knownValidators = new Set([
   "check-emotional-design",
   "check-onboarding-graph",
   "check-onboarding-evidence-packet",
+  "check-onboarding-cutover-repository",
   "check-source-freshness",
   "check-autopilot-contract",
   "check-continuity-contract",
