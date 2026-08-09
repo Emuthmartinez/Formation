@@ -1319,7 +1319,12 @@ export function register(h: Harness): void {
 
   function writeSte100Root(
     name: string,
-    overrides: { steFile?: string; extraKnowledgeFile?: { relative: string; content: string }; readmeContent?: string } = {},
+    overrides: {
+      steFile?: string;
+      extraKnowledgeFile?: { relative: string; content: string };
+      readmeContent?: string;
+      extraSkillFile?: { relative: string; content: string };
+    } = {},
   ): { repoRoot: string; skillRoot: string } {
     const root = makeEmptyFixture(name);
     const repoRoot = path.join(root, "repo");
@@ -1336,6 +1341,11 @@ export function register(h: Harness): void {
     }
     if (overrides.readmeContent) {
       writeFileSync(path.join(fixtureSkillRoot, "README.md"), overrides.readmeContent, "utf8");
+    }
+    if (overrides.extraSkillFile) {
+      const target = path.join(fixtureSkillRoot, overrides.extraSkillFile.relative);
+      mkdirSync(path.dirname(target), { recursive: true });
+      writeFileSync(target, overrides.extraSkillFile.content, "utf8");
     }
     return { repoRoot, skillRoot: fixtureSkillRoot };
   }
@@ -1442,6 +1452,50 @@ export function register(h: Harness): void {
     "ste100 passes a colon-joined sentence under the ceiling when no list follows it",
     "check-technical-docs-ste100.ts",
     ["--repo-root", ste100ColonNoList.repoRoot, "--skill-root", ste100ColonNoList.skillRoot],
+    0,
+  );
+
+  // A real gap Codex caught: an active maintenance runbook (validation/repository/*.md) named
+  // by the reference's own scope ("a runbook") was outside both the hardcoded docs/ list and
+  // the knowledge/ walk, so an edit to it got no signal at all.
+  const ste100Runbook = writeSte100Root("ste100-runbook-scanned", {
+    extraSkillFile: {
+      relative: "validation/repository/some-runbook.md",
+      content:
+        "# Some Runbook\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    },
+  });
+  runScriptArgs(
+    "ste100 scans validation/repository/, a maintainer-runbook directory outside docs/ and knowledge/",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Runbook.repoRoot, "--skill-root", ste100Runbook.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [skill/pkg/validation/repository/some-runbook.md]",
+  );
+
+  // A real gap Codex caught: table rows were dropped outright, so an unquoted present-perfect
+  // sentence hiding in a table cell got no signal — even inside the error-tier reference file.
+  const ste100TableViolation = writeSte100Root("ste100-table-cell-violation", {
+    steFile: "# Doc\n\n| Rule | Example |\n|---|---|\n| Tense | The validator has read the file already |\n",
+  });
+  runScriptArgs(
+    "ste100 now scans table cells and catches a violation hiding inside one",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100TableViolation.repoRoot, "--skill-root", ste100TableViolation.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
+
+  // Scanning table cells must not break on this reference's own §3 table, whose "Don't"
+  // column intentionally quotes bad examples (including a present-perfect one) to teach the
+  // rule — a quoted example is cited text, not the document's own assertion.
+  const ste100TableQuotedExample = writeSte100Root("ste100-table-quoted-example-exempt", {
+    steFile: '# Doc\n\n| Rule | Don\'t |\n|---|---|\n| Tense | "The validator has read the file." |\n',
+  });
+  runScriptArgs(
+    "ste100 exempts a quoted illustrative example inside a table cell from the tense rule",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100TableQuotedExample.repoRoot, "--skill-root", ste100TableQuotedExample.skillRoot],
     0,
   );
 }

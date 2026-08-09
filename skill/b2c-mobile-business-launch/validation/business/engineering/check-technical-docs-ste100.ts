@@ -51,9 +51,19 @@ const presentPerfectPattern = new RegExp(`\\b(?:has|have|had)\\s+(?:not\\s+|neve
  */
 const ERROR_TIER_SKILL_RELATIVE = new Set<string>(["knowledge/engineering/technical-documentation-ste100.md"]);
 
-/** knowledge/ subdirectories excluded from the governed surface: words/ keeps no-slop-writing.md's register, evals/fixtures are test data, not documentation. */
+/** Excluded from every governed directory below: evals/fixtures are test data, not documentation. */
+const EXCLUDED_ANY_SEGMENT = new Set(["evals", "fixtures"]);
+/** Excluded from knowledge/ specifically: words/ keeps no-slop-writing.md's voice-preserving register instead. */
 const EXCLUDED_KNOWLEDGE_TOP_SEGMENTS = new Set(["words"]);
-const EXCLUDED_KNOWLEDGE_ANY_SEGMENT = new Set(["evals", "fixtures"]);
+
+/**
+ * Maintainer runbook and reference directories outside docs/ and knowledge/ that this
+ * reference's own scope names ("a runbook", "validator/gate references") but that live
+ * elsewhere in the repo layout — e.g. validation/repository/source-freshness-maintenance.md.
+ * Scanned recursively for .md files, skill-root-relative. Add a directory here — not a new
+ * bespoke discovery block — when a future runbook lands somewhere not yet covered.
+ */
+const ADDITIONAL_GOVERNED_DIRECTORIES = ["validation/repository", "tooling"];
 
 interface GovernedFile {
   /** Path shown in issue output, relative to repoRoot. */
@@ -80,17 +90,23 @@ for (const relative of ["README.md", "SKILL.md"]) {
   governed.push({ displayPath, absolute, tier: "warning" });
 }
 
-const knowledgeRoot = path.join(skillRoot, "knowledge");
-if (existsSync(knowledgeRoot) && statSync(knowledgeRoot).isDirectory()) {
-  for (const absolute of collectFiles(knowledgeRoot, new Set([".md"]))) {
-    const relativeToKnowledge = path.relative(knowledgeRoot, absolute).split(path.sep).join("/");
-    const segments = relativeToKnowledge.split("/");
-    if (EXCLUDED_KNOWLEDGE_TOP_SEGMENTS.has(segments[0] ?? "")) continue;
-    if (segments.some((segment) => EXCLUDED_KNOWLEDGE_ANY_SEGMENT.has(segment))) continue;
-    const skillRelative = `knowledge/${relativeToKnowledge}`;
+function collectGovernedMarkdown(baseRelative: string, excludedTopSegments: Set<string>): void {
+  const baseDir = path.join(skillRoot, baseRelative);
+  if (!existsSync(baseDir) || !statSync(baseDir).isDirectory()) return;
+  for (const absolute of collectFiles(baseDir, new Set([".md"]))) {
+    const relativeToBase = path.relative(baseDir, absolute).split(path.sep).join("/");
+    const segments = relativeToBase.split("/");
+    if (excludedTopSegments.has(segments[0] ?? "")) continue;
+    if (segments.some((segment) => EXCLUDED_ANY_SEGMENT.has(segment))) continue;
+    const skillRelative = `${baseRelative}/${relativeToBase}`;
     const displayPath = path.relative(repoRoot, absolute).split(path.sep).join("/");
     governed.push({ displayPath, absolute, tier: ERROR_TIER_SKILL_RELATIVE.has(skillRelative) ? "error" : "warning" });
   }
+}
+
+collectGovernedMarkdown("knowledge", EXCLUDED_KNOWLEDGE_TOP_SEGMENTS);
+for (const directory of ADDITIONAL_GOVERNED_DIRECTORIES) {
+  collectGovernedMarkdown(directory, new Set());
 }
 
 for (const file of governed) {
@@ -127,10 +143,10 @@ function truncate(text: string): string {
 }
 
 /**
- * Prose a reader actually reads: drops fenced/inline code, HTML comments, and link targets
- * (mirroring check-no-slop.ts's proseText), plus markdown table rows and headings — cells and
- * titles are not narrative sentences, and applying a sentence-length ceiling to them produces
- * noise rather than signal.
+ * Prose a reader actually reads: drops fenced/inline code, HTML comments, link targets
+ * (mirroring check-no-slop.ts's proseText), and double-quoted spans — a quoted phrase is a
+ * cited or illustrative example (this file's own §3 table quotes both "Do" and intentionally
+ * bad "Don't" examples), not the author's own assertion, so it should not be graded as one.
  */
 function sentencesOf(source: string): string[] {
   const stripped = source
@@ -138,21 +154,34 @@ function sentencesOf(source: string): string[] {
     .replace(/~~~[\s\S]*?~~~/g, " ")
     .replace(/<!--[\s\S]*?-->/g, " ")
     .replace(/\]\([^)]*\)/g, "] ")
-    .replace(/`[^`\n]*`/g, " ");
+    .replace(/`[^`\n]*`/g, " ")
+    .replace(/"[^"\n]*"/g, " ");
 
   const filteredLines = stripped.split("\n").filter((line) => {
     const trimmed = line.trim();
     if (!trimmed) return false;
     if (trimmed.startsWith("#")) return false;
-    if (trimmed.startsWith("|")) return false;
+    if (/^\|[\s:|-]+\|?$/.test(trimmed)) return false; // table separator row, e.g. |---|---|
     if (/^[-*_]{3,}$/.test(trimmed)) return false;
     return true;
   });
 
   const isListItemLine = (value: string): boolean => /^(?:[-*]|\d+[.)])\s/.test(value);
+  const isTableRowLine = (value: string): boolean => value.startsWith("|") && value.endsWith("|");
 
   const lines = filteredLines.map((line, index) => {
     const trimmed = line.trim();
+    // A table row's cells are discrete units, same reasoning as a list item — force a
+    // boundary at each cell so a long or present-perfect cell can't hide by merging with its
+    // neighbors, and the row can't merge into surrounding prose either.
+    if (isTableRowLine(trimmed)) {
+      return trimmed
+        .split("|")
+        .map((cell) => cell.trim())
+        .filter(Boolean)
+        .map((cell) => (/[.!?]$/.test(cell) ? cell : `${cell}.`))
+        .join(" ");
+    }
     // A list item is a discrete unit by definition — force a boundary at its end so it never
     // merges with the next bullet into one oversized chunk, even when the item itself is a
     // short phrase with no terminal punctuation.
