@@ -1,11 +1,12 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.104.0",
-  "updatedAt": "2026-08-08",
+  "version": "0.105.0",
+  "updatedAt": "2026-08-09",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
     "Expanded onboarding into typed ONB-00 through ONB-22 catalog nodes so the durable engine can schedule, fan out, join, checkpoint, retry, resume, and verify the complete consumer onboarding system rather than executing one coarse prose node.",
     "Rebuilt product/ONBOARDING.md as the canonical evidence, first-value, state, identity, analytics, design, monetization, lifecycle, implementation, hard-cutover, and zero-legacy contract, with a faithful searchable generated HTML view.",
-    "Added check:onboarding-graph to both package layouts and the standard audit, with deterministic fixtures for review timing, deferrals, placeholder completion, typed screen and control contracts, and legacy removal. Updated app-agent roles to continue the graph through Compound Engineering implementation and final proof."
+    "Added check:onboarding-graph to both package layouts and the standard audit, with deterministic fixtures for review timing, deferrals, placeholder completion, typed screen and control contracts, and legacy removal. Updated app-agent roles to continue the graph through Compound Engineering implementation and final proof.",
+    "CI review pass: fixed a ReferenceError in check-onboarding-graph.ts where TEMPLATE_DIRECTIVE_VERBS was declared after tablePlaceholderCells() could already be called from top-level script code (moved the const above its first use), applied Prettier formatting, and added the missing docs/plans/attachments/2026-08-port-ledger.md row (plus rebased onto origin/main, which had advanced with unrelated merges since this branch was cut)."
   ]
 }
