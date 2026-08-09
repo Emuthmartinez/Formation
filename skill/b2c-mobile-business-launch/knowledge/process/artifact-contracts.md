@@ -60,7 +60,7 @@ DESIGN_SYSTEM.md          # optional expanded app-specific design appendix
 design.md                 # screen-by-screen implementation design spec
 design/design.html               # rendered visual system, components, and screen proofs
 product/ONBOARDING.md             # onboarding, personalization, review prompt, paywall timing, and activation contract
-product/onboarding.html           # rendered onboarding/paywall/review/offer flow proof
+product/onboarding.html           # rendered execution record for onboarding, review-eligibility, paywall, and cutover decisions
 LAUNCH.md                 # ASO, screenshots, ads, launch sequence, metrics
 store/APPLE_SIGNING.md          # Apple Developer account, Team ID, bundle ID/App ID, signing, archive/export/upload, and TestFlight gates
 store/APPLE_APP_STORE_REQUIREMENTS.md # Apple pre-ASC requirements: privacy manifest, required reason APIs, SDK manifests/signatures, App Privacy labels, purpose strings, ATT, review notes, upload warnings
@@ -667,7 +667,7 @@ Must include:
 - attribution question and answer taxonomy with stable stored keys, display labels, `other` free text, analytics event properties, PostHog person properties, backend/profile fields, and anonymous-to-identified reconciliation
 - mascot/guide plan with Higgsfield source assets, emotion states, and accessibility fallback when used
 - demo-video plan, including aha moment, duration, source UI, captions/no-audio fallback, and Higgsfield generation/scoring path or Remotion render path when used
-- App Review popup trigger immediately after the first value/value-reveal screen, native platform API, automatic mounted-screen timing, cooldown, analytics, compliance notes, and fallback when the prompt is not shown
+- App Review popup eligibility earned after real value and engagement, requested through the native platform API outside first-run onboarding at a later natural success, automatic mounted-screen timing, cooldown, analytics, compliance notes, and fallback when the prompt is not shown
 - hard/soft paywall decision, paywall placement, RevenueCat offering/experiment, restore path, and product package matrix
 - closing-offer or reverse-trial behavior after paywall dismissal, if used
 - first-session activation task and Day 0 cancellation prevention notes
@@ -675,24 +675,22 @@ Must include:
 Acceptance:
 - Every onboarding question has a reason beyond "engagement".
 - Self-reported attribution is visible early in the rendered flow and passes the analytics/backend data contract; it is not just a local UI choice.
-- App Review popup behavior is native-platform compliant, not incentivized, and placed immediately after first value before paywall or activation detours.
+- App Review popup behavior is native-platform compliant, not incentivized, earns eligibility after real value and engagement, and is requested outside first-run onboarding at a later natural success rather than immediately after first value.
 - Paywall, pricing, trial, and closing offer match `revenue/REVENUE_OPS.md`, `trust/TERMS.md`, store products, and analytics events.
 
 ## `product/onboarding.html`
 
-Use this as the visual proof for onboarding and paywall flow. It can be a standalone file or a section inside `design/design.html` for small launches.
+This is the rendered execution record for `product/ONBOARDING.md` -- the decisions, journey, screen and control contracts, instrumentation, monetization, and cutover record, mirrored for review and search. It is not the visual proof for onboarding and paywall flow; that lives in `design/design.html` (fulfilled by the rendered Design Room), which already requires mobile-first onboarding screen frames, mascot states, App Review popup placement, paywall, and closing-offer visuals labeled `direction`/`draft`/`production`. Do not duplicate that requirement here.
 
 Must include:
-- all onboarding screens at mobile dimensions
-- mascot states, question UI, personalized plan or first-value reveal, demo video placeholder/clip, App Review popup placeholder immediately after first value, paywall, closing offer, loading/error/offline states, and post-paywall activation
-- CSS variables from `design/DESIGN.md`
-- embedded Higgsfield assets, Remotion outputs, or local references with `direction`, `draft`, or `production` labels
-- reduced-motion and no-video fallback notes
+- a section index matching `product/ONBOARDING.md`'s headings, so a reader can see what the record covers without reading the full source
+- the current Status from `product/ONBOARDING.md`
+- the complete canonical Markdown source, reachable from the page even if collapsed behind a disclosure by default
 
 Acceptance:
-- The full onboarding path is inspectable in a browser before implementation.
-- Text does not clip or overlap on mobile.
-- Visuals, icons, and animations use the design system instead of a separate generated style.
+- The page's Status and section index agree with the current `product/ONBOARDING.md`.
+- The full Markdown source is reachable from the page.
+- Onboarding and paywall visual proof is verified against `design/design.html`, not this page.
 
 ## `LAUNCH.md`
 

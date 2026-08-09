@@ -479,14 +479,25 @@ export const workflows = [
     phaseIds: ["phase.2", "phase.5b"],
     dependencies: ["workflow.experience.onboarding-system.onb-21-compound-engineering-plan"],
     outputPaths: ["product/ONBOARDING.md", "product/onboarding.html"],
-    gates: ["check:onboarding-graph-complete"],
+    // check:onboarding-graph-complete reads only product/ONBOARDING.md and project state -- it
+    // has no way to notice product/onboarding.html drifting stale or going missing. check:generated-pages
+    // is the existing mechanism that byte-matches every authored-from page against a fresh render
+    // of its Markdown source; citing it here closes that gap for ONB-22's own acceptance gate
+    // rather than relying on the separate, node-unaware repo-wide audit to eventually catch it.
+    gates: ["check:onboarding-graph-complete", "check:generated-pages"],
     providers: ["provider.revenuecat", "provider.posthog"],
     // Hard cutover and legacy deletion, not a retryable content mutation -- classifying it
     // "mutate" would let the durable engine execute production deletion under an ordinary
     // experience-domain grant instead of the autonomy engine's protected destructive waiver path.
     actionClass: "destructive",
     founderOnlyActions: ["approve the hard cutover and legacy runtime deletion"],
-    idempotent: true,
+    // Not idempotent: detectOrphans() treats an idempotent node's lost-heartbeat attempt as safe
+    // to hand straight back to "ready" for the next dispatch cycle to blindly re-attempt. This
+    // node applies a one-time provider/runtime transformation and deletes legacy architecture --
+    // an orphaned attempt may have partially applied that before the heartbeat died, so a blind
+    // retry could repeat destructive work. idempotent: false routes an orphan to needs_readback
+    // instead, where it stays until a provider read-back establishes ground truth.
+    idempotent: false,
   }),
   workflow({
     id: "workflow.design.premium-mobile-craft",

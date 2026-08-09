@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.116.0",
+  "skillVersion": "0.117.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2587,7 +2587,8 @@
         "product/onboarding.html"
       ],
       "gateCommands": [
-        "check:onboarding-graph-complete"
+        "check:onboarding-graph-complete",
+        "check:generated-pages"
       ],
       "providerIds": [
         "provider.revenuecat",
@@ -2597,7 +2598,7 @@
         "approve the hard cutover and legacy runtime deletion"
       ],
       "actionClass": "destructive",
-      "idempotent": true
+      "idempotent": false
     },
     {
       "id": "workflow.design.premium-mobile-craft",

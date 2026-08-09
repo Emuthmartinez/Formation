@@ -34,7 +34,13 @@ import { artifactPageEntries, artifactPages, listRootPages, renderAuthoredPage }
 import { flagString, issue, parseFlags, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const defaultBusinessRoot = path.join(path.resolve(scriptDir, "../.."), "business");
+const skillRootDir = path.resolve(scriptDir, "../../..");
+// The durable engine's runDeterministicGates() (core/session/run.ts) invokes every gate via
+// `npm run --prefix <skillRoot> <gate>` with BUSINESS_ROOT set in the environment rather than a
+// --root flag -- so this must honor BUSINESS_ROOT before falling back to the skill's own
+// workspace/business template, the same default the audit's rootArgs (tooling/lib/audit-plan.ts)
+// point at for local/CI runs.
+const defaultBusinessRoot = process.env.BUSINESS_ROOT ? path.resolve(process.env.BUSINESS_ROOT) : path.join(skillRootDir, "workspace", "business");
 
 const flags = parseFlags(process.argv.slice(2), [{ flags: ["--root", "--business"], key: "root" }]);
 const businessRoot = flagString(flags, "root") ?? defaultBusinessRoot;
