@@ -340,6 +340,12 @@ const onboardingGraphWorkflows = [
     phaseIds: ["phase.5b"],
     dependencies: ["workflow.experience.onboarding-system.onb-20-adversarial-qa"],
     outputPaths: ["product/onboarding/graph/ONB-21-compound-engineering-plan.md"],
+    // Same production-verification rationale as ONB-03 above: with no gate, this node compiled
+    // to verification "none", so an executor could return the declared artifact ID and fingerprint
+    // without ever writing a substantive implementation plan, and reconcilePatch() would still mark
+    // it succeeded immediately -- unblocking ONB-22's destructive cutover even though ONB-22's own
+    // gate reads only ONBOARDING.md, never ONB-21-compound-engineering-plan.md.
+    gates: ["check:onboarding-evidence-onb-21"],
     actionClass: "draft",
     idempotent: true,
   }),

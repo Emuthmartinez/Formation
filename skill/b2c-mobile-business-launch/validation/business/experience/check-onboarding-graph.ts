@@ -5,7 +5,18 @@
  * This validator does not grade conversion taste. It proves that the canonical artifact carries the graph, evidence joins, first-value and activation distinctions,
  * screen and control contracts, provider and policy research, typed analytics, compliant review timing, visual design requirements, and replacement-mode deletion plan.
  */
-import { asArray, asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
+import {
+  asArray,
+  asString,
+  getPath,
+  issue,
+  loadLaneFromBusinessStateV2,
+  loadProjectState,
+  parseCliArgs,
+  readText,
+  reportAndExit,
+  type Issue,
+} from "../../../tooling/lib/launch-state.js";
 
 const TEMPLATE_DIRECTIVE_VERBS = new Set([
   "add",
@@ -56,7 +67,20 @@ const TEMPLATE_DIRECTIVE_VERBS = new Set([
 // invocation (check:onboarding-graph-complete) -- see the requireDone block below.
 const requireDone = process.argv.includes("--require-done");
 const args = parseCliArgs(process.argv.slice(2));
-const loaded = loadProjectState(args);
+let loaded = loadProjectState(args);
+// A durable-engine-managed workspace's canonical state lives at state/business-state.json (v2),
+// not state/PROJECT_STATE.yaml (v1) -- core/session/run.ts's resolveWorkspacePaths() treats it as
+// canonical, and a v2 workspace may have no PROJECT_STATE.yaml at all. Without this fallback,
+// ONB-22's own gate would report the lane permanently missing on every genuinely completed v2
+// run. Only triggers when v1 is missing outright, not when it exists but is invalid YAML.
+let stateSourceFile = "state/PROJECT_STATE.yaml";
+if (loaded.issues.some((entry) => entry.code === "project_state.missing")) {
+  const v2Lane = loadLaneFromBusinessStateV2(args.root, "onboarding");
+  if (v2Lane) {
+    loaded = { state: { lanes: { onboarding: v2Lane } }, issues: [] };
+    stateSourceFile = "state/business-state.json";
+  }
+}
 const issues: Issue[] = [...loaded.issues];
 const state = loaded.state;
 
@@ -81,8 +105,8 @@ if (laneExempt && !hasDeferralReason) {
     issue(
       "error",
       "onboarding_graph.deferred_without_reason",
-      `state/PROJECT_STATE.yaml marks lanes.onboarding ${laneStatus} but records no blockers or reason explaining why. Record a dated blocker or reason before this exemption applies.`,
-      "state/PROJECT_STATE.yaml",
+      `${stateSourceFile} marks lanes.onboarding ${laneStatus} but records no blockers or reason explaining why. Record a dated blocker or reason before this exemption applies.`,
+      stateSourceFile,
     ),
   );
 }
@@ -97,8 +121,8 @@ if (!skip && laneAbsent) {
     issue(
       "error",
       "onboarding_graph.lane_missing",
-      "state/PROJECT_STATE.yaml must include lanes.onboarding unless the lane is explicitly not_needed or deferred with a founder-approved reason.",
-      "state/PROJECT_STATE.yaml",
+      `${stateSourceFile} must include lanes.onboarding unless the lane is explicitly not_needed or deferred with a founder-approved reason.`,
+      stateSourceFile,
     ),
   );
 }
@@ -305,8 +329,8 @@ if (!skip && artifact) {
       issue(
         "error",
         "onboarding_graph.not_marked_done",
-        `${relativePath}'s owning workflow gate requires lanes.onboarding.status=done before it can be accepted, but state/PROJECT_STATE.yaml has lanes.onboarding.status=${laneStatus ?? "(unset)"}.`,
-        "state/PROJECT_STATE.yaml",
+        `${relativePath}'s owning workflow gate requires lanes.onboarding.status=done before it can be accepted, but ${stateSourceFile} has lanes.onboarding.status=${laneStatus ?? "(unset)"}.`,
+        stateSourceFile,
       ),
     );
   }

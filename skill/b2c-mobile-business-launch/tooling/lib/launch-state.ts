@@ -405,6 +405,52 @@ export function loadProjectState(args: CliArgs): { state?: unknown; raw?: string
   }
 }
 
+/**
+ * v1 lane status vocabulary (state/PROJECT_STATE.yaml), mirrored by hand from core/schema/
+ * types.ts's V1LaneStatus/v1LaneStatusToStatus -- validation/business/* stays on the v1-only side
+ * of the v1/v2 migration and does not import from core/, so this is a standalone copy, not a
+ * shared import. core/schema/migrate-v1.ts's migrateLaneStatus() guarantees a v2 lane's status is
+ * always exactly one of this map's six keys, so the inverse here is total for this one field.
+ */
+const v1LaneStatusFromCanonicalStatus: Readonly<Record<string, string>> = {
+  pending: "not_started",
+  running: "partial",
+  blocked: "blocked",
+  not_needed: "not_needed",
+  deferred: "deferred",
+  succeeded: "done",
+};
+
+/**
+ * A durable-engine-managed workspace's canonical state lives at state/business-state.json (v2) --
+ * core/session/run.ts's resolveWorkspacePaths() treats it as canonical, and a v2 workspace may
+ * have no state/PROJECT_STATE.yaml at all, so loadProjectState() alone would report the lane
+ * permanently missing under real engine execution. This bridges exactly one lane's status/
+ * blockers/reason, not the whole v1 document: v2's other sections (project, narrative, autonomy,
+ * continuity, control-plane) live across multiple v2 files with no verified 1:1 v1 shape, and a
+ * wrong silent mapping there would be worse than the current clear "state is missing" error, so
+ * this stays scoped to the one field a lane-status gate actually needs. Returns undefined if
+ * state/business-state.json is absent, unreadable, or has no status recorded for this lane.
+ */
+export function loadLaneFromBusinessStateV2(root: string, lane: string): { status: string; blockers: string[]; reason?: string } | undefined {
+  const v2Path = path.join(root, "state", "business-state.json");
+  if (!existsSync(v2Path)) return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(v2Path, "utf8"));
+  } catch {
+    return undefined;
+  }
+  const laneState = getPath(parsed, `lanes.${lane}`);
+  const canonicalStatus = asString(getPath(laneState, "status"));
+  if (!canonicalStatus) return undefined;
+  return {
+    status: v1LaneStatusFromCanonicalStatus[canonicalStatus] ?? canonicalStatus,
+    blockers: asArray(getPath(laneState, "blockers")).filter((entry): entry is string => typeof entry === "string"),
+    reason: asString(getPath(laneState, "reason")),
+  };
+}
+
 export function requireString(state: unknown, dottedPath: string, issues: Issue[]): void {
   const value = getPath(state, dottedPath);
   if (!asString(value)?.trim()) {

@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, getLane, readState, writeState } from "./_harness.js";
 
@@ -129,6 +129,56 @@ export function register(h: Harness): void {
     1,
     "onboarding_graph.not_marked_done",
     ["--require-done"],
+  );
+
+  // A durable-engine-managed v2 workspace has no state/PROJECT_STATE.yaml at all (its canonical
+  // state is state/business-state.json, per core/session/run.ts's resolveWorkspacePaths()) --
+  // without loadLaneFromBusinessStateV2()'s fallback in check-onboarding-graph.ts, ONB-22's own
+  // --require-done gate would report the lane permanently missing on every genuinely completed
+  // v2 run, since loadProjectState() alone only ever reads the v1 file.
+  const v2LaneComplete = makeFixture("onboarding-graph-v2-business-state-complete");
+  {
+    rmSync(path.join(v2LaneComplete, "state/PROJECT_STATE.yaml"), { force: true });
+    writeFileSync(
+      path.join(v2LaneComplete, "state/business-state.json"),
+      JSON.stringify({
+        schemaVersion: "2.0.0",
+        lanes: { onboarding: { status: "succeeded", evidence: ["product/ONBOARDING.md", "product/onboarding.html"], blockers: [] } },
+      }),
+      "utf8",
+    );
+    mutateOnboarding(v2LaneComplete, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      return `${completed}\nThis remains the canonical execution record for the completed onboarding system.\n`;
+    });
+  }
+  runFixture(
+    "a v2 workspace with no PROJECT_STATE.yaml reads a completed lanes.onboarding from state/business-state.json and satisfies --require-done",
+    v2LaneComplete,
+    "check-onboarding-graph.ts",
+    0,
+    undefined,
+    ["--require-done"],
+  );
+
+  const v2LanePending = makeFixture("onboarding-graph-v2-business-state-pending");
+  {
+    rmSync(path.join(v2LanePending, "state/PROJECT_STATE.yaml"), { force: true });
+    writeFileSync(
+      path.join(v2LanePending, "state/business-state.json"),
+      JSON.stringify({ schemaVersion: "2.0.0", lanes: { onboarding: { status: "pending", evidence: [], blockers: [] } } }),
+      "utf8",
+    );
+  }
+  runFixture(
+    "a v2 workspace with an unfinished onboarding lane still fails --require-done, citing state/business-state.json not the absent v1 file",
+    v2LanePending,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.not_marked_done",
+    ["--require-done"],
+    undefined,
+    "state/PROJECT_STATE.yaml",
   );
 
   const doneWithUncheckedVerification = makeFixture("onboarding-graph-done-with-unchecked-verification");
@@ -434,6 +484,29 @@ export function register(h: Harness): void {
     "ONB-20",
     "--path",
     "product/onboarding/graph/ONB-20-adversarial-qa.md",
+  ]);
+
+  const onb21PacketMissing = makeFixture("onboarding-evidence-onb21-missing");
+  runFixture(
+    "ONB-21's gate fails when the Compound Engineering plan does not exist yet",
+    onb21PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-21", "--path", "product/onboarding/graph/ONB-21-compound-engineering-plan.md"],
+  );
+
+  const onb21PacketComplete = makeFixture("onboarding-evidence-onb21-complete");
+  writeEvidencePacket(
+    onb21PacketComplete,
+    "product/onboarding/graph/ONB-21-compound-engineering-plan.md",
+    substantiveResearchProse("the implementation-ready Compound Engineering plan translated from the accepted onboarding graph"),
+  );
+  runFixture("ONB-21's gate passes a genuinely substantive, marker-free implementation plan", onb21PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-21",
+    "--path",
+    "product/onboarding/graph/ONB-21-compound-engineering-plan.md",
   ]);
 
   function checkVerificationItems(text: string): string {
