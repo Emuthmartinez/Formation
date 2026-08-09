@@ -707,29 +707,44 @@ export function validateReason(reason: string | undefined, lanePath: string, con
 // ---------------------------------------------------------------------------
 
 /**
- * Strips one fenced-code delimiter character (backtick or tilde) from text: every run of 3+
- * of that character opens a block that only a run of EQUAL OR GREATER length of the same
- * character closes (CommonMark's actual rule) -- a shorter run inside the block is literal
- * fence content, not a closer. An opener with no qualifying closer runs to the end of the text,
- * matching how an unterminated fence still renders as code (never prose) through end of document.
+ * Strips one fenced-code delimiter character (backtick or tilde) from text, one line at a time.
+ * A fence only opens or closes at the true start of its own line (up to 3 leading spaces of
+ * indentation, matching CommonMark's own tolerance -- 4+ spaces starts an indented code block
+ * instead, a different construct this function does not touch), never mid-line. A backtick
+ * fence's info string (anything trailing the opening run on that same line) additionally cannot
+ * itself contain a backtick, per CommonMark; a tilde fence's info string has no such restriction.
+ * This is what tells a real fence apart from an inline code span using the same character (e.g.
+ * a sentence that displays `TODO` as an example using triple backticks) -- an unanchored,
+ * position-blind match would treat that inline span as a fence and strip real, rendered,
+ * checkable content along with it.
+ *
+ * A qualifying opener's block only closes at a later line consisting of nothing but (up to 3
+ * leading spaces, then) a run of the same character AT LEAST as long as the opener's (a shorter
+ * run is literal fence content, not a closer -- CommonMark's rule). An opener with no qualifying
+ * closer runs to the end of the text, matching how an unterminated fence still renders as code
+ * (never prose) through end of document.
  */
 function stripFenceChar(text: string, ch: "`" | "~"): string {
-  const opener = new RegExp(`${ch}{3,}`, "g");
-  let result = "";
-  let cursor = 0;
-  let match: RegExpExecArray | null;
-  while ((match = opener.exec(text))) {
-    if (match.index < cursor) continue;
-    result += text.slice(cursor, match.index);
-    const openerLength = match[0].length;
-    const closer = new RegExp(`${ch}{${openerLength},}`, "g");
-    closer.lastIndex = match.index + openerLength;
-    const closerMatch = closer.exec(text);
-    cursor = closerMatch ? closerMatch.index + closerMatch[0].length : text.length;
-    opener.lastIndex = cursor;
+  const infoStringChars = ch === "`" ? "[^`\\n]*" : "[^\\n]*";
+  const openerLine = new RegExp(`^ {0,3}(${ch}{3,})${infoStringChars}$`);
+  const lines = text.split("\n");
+  const kept: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    const openMatch = line.match(openerLine);
+    if (!openMatch) {
+      kept.push(line);
+      i++;
+      continue;
+    }
+    const openerLength = (openMatch[1] ?? "").length;
+    const closerLine = new RegExp(`^ {0,3}${ch}{${openerLength},}\\s*$`);
+    let j = i + 1;
+    while (j < lines.length && !closerLine.test(lines[j] ?? "")) j++;
+    i = j < lines.length ? j + 1 : lines.length;
   }
-  result += text.slice(cursor);
-  return result;
+  return kept.join("\n");
 }
 
 /**

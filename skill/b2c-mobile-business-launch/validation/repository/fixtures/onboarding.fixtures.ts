@@ -216,6 +216,51 @@ export function register(h: Harness): void {
     "--require-done",
   ]);
 
+  const doneWithTodoInInlineCodeSpan = makeFixture("onboarding-graph-done-with-todo-in-inline-code-span");
+  {
+    markOnboardingDone(doneWithTodoInInlineCodeSpan);
+    mutateOnboarding(doneWithTodoInInlineCodeSpan, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      // A triple-backtick code SPAN (CommonMark allows any run length as a code-span delimiter,
+      // not just single backticks) sitting mid-line inside a sentence -- not alone on its own
+      // line -- is not a fence at all; the rendered document shows TODO right there, in the open.
+      // A fence-stripper that matches a run of 3+ backticks anywhere, ignoring line position,
+      // cannot tell this apart from a real fence and would erase the word along with its
+      // delimiters, hiding a genuine unfinished-work marker from the placeholder scan below.
+      return `${completed}\nThis section still displays \`\`\`TODO\`\`\` inline as a worked example of what NOT to leave in a finished artifact.\n`;
+    });
+  }
+  runFixture(
+    "a TODO marker inside an inline triple-backtick code span still fails --require-done as incomplete",
+    doneWithTodoInInlineCodeSpan,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.placeholder_complete",
+    ["--require-done"],
+  );
+
+  const doneWithTodoAfterIndentedFenceLookalike = makeFixture("onboarding-graph-done-with-todo-after-indented-fence-lookalike");
+  {
+    markOnboardingDone(doneWithTodoAfterIndentedFenceLookalike);
+    mutateOnboarding(doneWithTodoAfterIndentedFenceLookalike, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      // Both backtick runs are indented 4 spaces -- CommonMark's own cutoff for "this indentation
+      // starts an indented code block instead of a fence" (a fence may be indented at most 3
+      // spaces). A position-blind stripper that ignores indentation would still pair these two
+      // runs as an opener/closer and erase the live TODO line sitting between them; a real
+      // renderer never treats either line as a fence delimiter, so the TODO stays visible.
+      return `${completed}\n    \`\`\`\nThis line still visibly says TODO and sits between two over-indented backtick runs.\n    \`\`\`\n`;
+    });
+  }
+  runFixture(
+    "a TODO marker between two over-indented (4-space) backtick runs still fails --require-done as incomplete",
+    doneWithTodoAfterIndentedFenceLookalike,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.placeholder_complete",
+    ["--require-done"],
+  );
+
   // ONB-22's own catalog gate (check:onboarding-graph-complete) passes --require-done
   // unconditionally -- the shipped template's Graph Run table still reads not_started for every
   // node, so this is the one case that must fail even though the lenient baseline case above
@@ -868,6 +913,25 @@ export function register(h: Harness): void {
     1,
     "onboarding_evidence.packet_too_thin",
     ["--node", "ONB-04", "--path", "product/onboarding/graph/ONB-04-competitor-reviews.md"],
+  );
+
+  const evidencePacketTodoInInlineCodeSpan = makeFixture("onboarding-evidence-packet-todo-in-inline-code-span");
+  writeEvidencePacket(
+    evidencePacketTodoInInlineCodeSpan,
+    "product/onboarding/graph/ONB-05-onbo-hub-atlas.md",
+    // The TODO sits inside a mid-sentence triple-backtick code span, not alone on its own line --
+    // a real render shows it in the open, as inline code. A position-blind fence stripper that
+    // matches any run of 3+ backticks, wherever it appears, would erase the span and the word
+    // along with it, letting a packet that visibly still says TODO pass the placeholder scan.
+    `${substantiveResearchProse("the authorized Onbo Hub flow atlas")}\n\nThis draft still shows \`\`\`TODO\`\`\` inline where the real citation belongs.\n`,
+  );
+  runFixture(
+    "ONB-05's gate rejects a TODO marker hidden inside an inline triple-backtick code span",
+    evidencePacketTodoInInlineCodeSpan,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_placeholder",
+    ["--node", "ONB-05", "--path", "product/onboarding/graph/ONB-05-onbo-hub-atlas.md"],
   );
 
   const evidencePacketPlaceholder = makeFixture("onboarding-evidence-packet-placeholder");
