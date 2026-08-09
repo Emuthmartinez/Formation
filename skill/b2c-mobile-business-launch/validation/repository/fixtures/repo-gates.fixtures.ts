@@ -769,31 +769,53 @@ export function register(h: Harness): void {
     "motion_contract.recipe_family_inline.drift",
   );
 
-  const motionOffsetTableDrift = writeMotionContractRoot("motion-contract-offset-table-drift", (rel, text) =>
-    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 598ms |", "| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 588ms |") : text,
+  const motionRecipeFamilyInlineReworded = writeMotionContractRoot("motion-contract-recipe-family-inline-reworded", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("press-family spring (response 0.3–0.4s, damping 0.7–0.8)", "a calm, restrained spring") : text,
   );
   runScriptArgs(
-    "motion contract fails when R12's offset table worst-case total drifts from the recomputed value",
+    "motion contract fails when no recipe spring-family restatement is parseable, instead of silently checking nothing",
     "check-motion-contract.ts",
-    ["--skill-root", motionOffsetTableDrift],
+    ["--skill-root", motionRecipeFamilyInlineReworded],
     1,
-    "motion_contract.recipe_offset_table.value_drift",
+    "motion_contract.recipe_family_inline.none_found",
   );
 
-  const motionOffsetTableFloorBoundaryLost = writeMotionContractRoot("motion-contract-offset-table-floor-boundary-lost", (rel, text) =>
+  const motionOffsetTableRowDrift = writeMotionContractRoot("motion-contract-offset-table-row-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 3 | 2 | 100ms | up to 100ms | 600ms |", "| 3 | 2 | 100ms | up to 180ms | 600ms |") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when an offset-table row's offset and total disagree with each other",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableRowDrift],
+    1,
+    "motion_contract.recipe_offset_table.row_internally_inconsistent",
+  );
+
+  const motionOffsetTableBoundaryDrift = writeMotionContractRoot("motion-contract-offset-table-boundary-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 5+ | 4+ |", "| 6+ | 5+ |") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the offset table's unachievable-asset-count boundary drifts from the recomputed value",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableBoundaryDrift],
+    1,
+    "motion_contract.recipe_offset_table.boundary_drift",
+  );
+
+  const motionOffsetTableDrift = writeMotionContractRoot("motion-contract-offset-table-drift", (rel, text) =>
     rel.endsWith("motion-craft-benchmarks.md")
       ? text.replace(
-          "| 5+ | 4+ | ≤50ms | below the 60ms stagger floor — not achievable as pure stagger | — |",
-          "| 5+ | 4+ | ≤50ms | split into a smaller staggered group | — |",
+          "| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 598ms |",
+          "| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 588ms |",
         )
       : text,
   );
   runScriptArgs(
-    "motion contract fails when the offset table stops saying an asset count is unachievable as pure stagger, even though recomputing from tokens still puts it below the stagger floor",
+    "motion contract fails when an offset-table row's total drifts from what its own offset computes",
     "check-motion-contract.ts",
-    ["--skill-root", motionOffsetTableFloorBoundaryLost],
+    ["--skill-root", motionOffsetTableDrift],
     1,
-    "motion_contract.recipe_offset_table.missing_floor_boundary",
+    "motion_contract.recipe_offset_table.row_internally_inconsistent",
   );
 
   const motionCanonDrift = writeMotionContractRoot("motion-contract-canon-outside-band", (rel, text) =>
