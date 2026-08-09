@@ -814,16 +814,44 @@ function stripIndentedCodeBlocks(text: string): string {
 
 /**
  * Strips content inside raw HTML block elements whose content a browser never renders as visible
- * document text -- script, style, and template. Case-insensitive; an unterminated opener (no
- * matching closing tag anywhere after it) still strips to the end of the document, matching how a
- * real page shows nothing from an unterminated one of these blocks either, the same reasoning
- * already applied to an unterminated fence. This is distinct from stripIndentedCodeBlocks and
- * stripFenceChar: those hide content because it is a code-like construct; this hides content
- * because these three tags are specifically inert-by-default in every browser (unlike, say,
- * <pre> or <textarea>, whose content *does* render visibly and so is deliberately left alone).
+ * document text -- script, style, and template. A block only OPENS at the true start of its own
+ * line (up to 3 leading spaces of indentation, the same tolerance stripFenceChar and
+ * stripIndentedCodeBlocks already use), with the tag name immediately followed by whitespace,
+ * ">", or end of line -- never mid-line. This is what tells a real block apart from a sentence
+ * that mentions one of these tags inside an inline code span (e.g. a worked example showing
+ * `<style>`) -- a position-blind match would treat that mention as an opener and, finding no
+ * closing tag anywhere after it, strip everything through end of document along with it, hiding
+ * whatever real content (including a live placeholder marker) followed. Once a line qualifies as
+ * an opener, the block closes at the first line (checked starting from the opener line itself,
+ * case-insensitively) containing the matching closing tag anywhere in that line -- CommonMark's
+ * own closing condition for this HTML block type is unanchored, unlike its opening condition. An
+ * opener with no closer runs to the end of the document, matching how an unterminated one of
+ * these blocks still hides everything after it on a real page too. This is distinct from
+ * stripIndentedCodeBlocks and stripFenceChar: those hide content because it is a code-like
+ * construct; this hides content because these three tags are specifically inert-by-default in
+ * every browser (unlike, say, <pre> or <textarea>, whose content *does* render visibly and so is
+ * deliberately left alone).
  */
 function stripNonRenderingHtmlBlocks(text: string): string {
-  return text.replace(/<(script|style|template)\b[^>]*>[\s\S]*?(?:<\/\1\s*>|$)/gi, "");
+  const openerLine = /^ {0,3}<(script|style|template)(?=[\s>]|$)/i;
+  const lines = text.split("\n");
+  const kept: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    const openMatch = line.match(openerLine);
+    if (!openMatch) {
+      kept.push(line);
+      i++;
+      continue;
+    }
+    const tag = (openMatch[1] ?? "").toLowerCase();
+    const closerPattern = new RegExp(`</${tag}\\s*>`, "i");
+    let j = closerPattern.test(line) ? i : i + 1;
+    while (j < lines.length && !closerPattern.test(lines[j] ?? "")) j++;
+    i = j < lines.length ? j + 1 : lines.length;
+  }
+  return kept.join("\n");
 }
 
 /**

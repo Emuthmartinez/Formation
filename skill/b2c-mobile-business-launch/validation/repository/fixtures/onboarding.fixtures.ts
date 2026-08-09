@@ -314,6 +314,29 @@ export function register(h: Harness): void {
     ["--require-done"],
   );
 
+  const doneWithTodoAfterInlineHtmlTagMention = makeFixture("onboarding-graph-done-with-todo-after-inline-html-tag-mention");
+  {
+    markOnboardingDone(doneWithTodoAfterInlineHtmlTagMention);
+    mutateOnboarding(doneWithTodoAfterInlineHtmlTagMention, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      // The tag mention sits inside an inline code span mid-sentence, not alone at the start of its
+      // own line -- CommonMark never treats it as a real HTML block opener, so the rendered
+      // document shows both this sentence and the later TODO line right there, in the open. A
+      // position-blind stripper that matches the tag name anywhere in the raw text would still read
+      // this as an unterminated opener and, finding no closing tag anywhere after it, erase
+      // everything through end of document -- including the live TODO line below -- along with it.
+      return `${completed}\nThis section still mentions \`<style>\` inline as a worked example of a tag name, not a real block.\nThis line still visibly says TODO, well after that inline mention.\n`;
+    });
+  }
+  runFixture(
+    "a TODO marker after an inline mid-sentence HTML tag mention still fails --require-done as incomplete",
+    doneWithTodoAfterInlineHtmlTagMention,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.placeholder_complete",
+    ["--require-done"],
+  );
+
   const doneWithIndentedGraphRunTable = makeFixture("onboarding-graph-done-with-indented-graph-run-table");
   {
     markOnboardingDone(doneWithIndentedGraphRunTable);
@@ -1076,6 +1099,29 @@ export function register(h: Harness): void {
   runFixture(
     "ONB-05's gate rejects a TODO marker hidden inside an inline triple-backtick code span",
     evidencePacketTodoInInlineCodeSpan,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_placeholder",
+    ["--node", "ONB-05", "--path", "product/onboarding/graph/ONB-05-onbo-hub-atlas.md"],
+  );
+
+  const evidencePacketTodoAfterInlineHtmlTagMention = makeFixture("onboarding-evidence-packet-todo-after-inline-html-tag-mention");
+  writeEvidencePacket(
+    evidencePacketTodoAfterInlineHtmlTagMention,
+    "product/onboarding/graph/ONB-05-onbo-hub-atlas.md",
+    // The tag mention sits inside an inline code span mid-sentence, not alone at the start of its
+    // own line -- never a real HTML block opener. A position-blind stripper that matches the tag
+    // name anywhere in the raw text would still read this as an unterminated opener and, finding
+    // no closing tag anywhere after it, erase everything through end of document -- including the
+    // real TODO line below -- letting a packet that visibly still says TODO pass the placeholder
+    // scan.
+    `${substantiveResearchProse(
+      "the authorized Onbo Hub flow atlas",
+    )}\n\nThis draft still mentions \`<style>\` inline as a worked example of a tag name, not a real block.\nTODO: fill in the rest once access is granted.\n`,
+  );
+  runFixture(
+    "ONB-05's gate rejects a TODO marker that follows an inline mid-sentence HTML tag mention",
+    evidencePacketTodoAfterInlineHtmlTagMention,
     evidenceScript,
     1,
     "onboarding_evidence.packet_placeholder",
