@@ -1665,4 +1665,80 @@ export function register(h: Harness): void {
     1,
     "ste100.sentence_too_long",
   );
+
+  // A real gap Codex caught, grounded in this repo's own knowledge/engineering/backend-data-
+  // contract.md ("a migration tool (e.g. Prisma Migrate, Alembic, node-pg-migrate) in the
+  // contract"): the previous round's lowercase-only check assumed a capitalized continuation
+  // always starts a new sentence, but "e.g." is routinely followed by a capitalized product
+  // name mid-sentence. Only "etc." keeps the lowercase-only check; "e.g." and its siblings are
+  // protected unconditionally.
+  const ste100AbbreviationBeforeCapitalizedTerm = writeSte100Root("ste100-abbreviation-before-capitalized-term-still-protected", {
+    steFile:
+      "# Doc\n\nUse supported databases, e.g. PostgreSQL, MySQL, SQLite, or another relational engine your team already knows well from a prior production deployment.\n",
+  });
+  runScriptArgs(
+    "ste100 still protects e.g. even when a capitalized product name follows it",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AbbreviationBeforeCapitalizedTerm.repoRoot, "--skill-root", ste100AbbreviationBeforeCapitalizedTerm.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught: "+" is a valid CommonMark unordered-list marker alongside "-" and
+  // "*", but the marker pattern only recognized the other two -- a compliant 20-word "+" bullet
+  // was left undetected as a list item at all, so its marker counted as an extra word (21) and
+  // it also never got a forced sentence boundary.
+  const ste100PlusMarkerNotAWord = writeSte100Root("ste100-plus-list-marker-not-a-word", {
+    steFile:
+      "# Doc\n\n+ One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty.\n",
+  });
+  runScriptArgs(
+    "ste100 does not count a + bullet's own marker as one of its words",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PlusMarkerNotAWord.repoRoot, "--skill-root", ste100PlusMarkerNotAWord.skillRoot],
+    0,
+  );
+
+  // Recognizing "+" as a marker must not blind the checker to a real violation in a "+" bullet.
+  const ste100PlusMarkerStillCatchesReal = writeSte100Root("ste100-plus-list-marker-still-catches-real-violation", {
+    steFile:
+      "# Doc\n\n+ One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyone.\n",
+  });
+  runScriptArgs(
+    "ste100 still catches a real violation in a + bullet after stripping its marker",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PlusMarkerStillCatchesReal.repoRoot, "--skill-root", ste100PlusMarkerStillCatchesReal.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught: a list item that wraps onto a following physical line (no blank
+  // line between) is one logical sentence, but each physical line got its own forced boundary,
+  // so a real over-ceiling instruction could hide by fragmenting across its own soft wrap.
+  const ste100WrappedListContinuation = writeSte100Root("ste100-wrapped-list-continuation-stays-one-sentence", {
+    steFile:
+      "# Doc\n\n- This instruction wraps onto a second physical line before its own terminal\n  punctuation lands, which pushes the true combined word count well past the limit.\n",
+  });
+  runScriptArgs(
+    "ste100 keeps a wrapped list continuation as one sentence and catches a violation split across it",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100WrappedListContinuation.repoRoot, "--skill-root", ste100WrappedListContinuation.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // Grouping continuations must not merge across a genuine paragraph break: a blank line, or a
+  // following line that is itself a new list item, table row, or heading, must start fresh. Each
+  // half here is a compliant 12 words; merged across the blank line they would be 24 -- over the
+  // ceiling -- so an incorrect merge is directly visible as a false violation.
+  const ste100ListContinuationStopsAtBlankLine = writeSte100Root("ste100-list-continuation-stops-at-blank-line", {
+    steFile:
+      "# Doc\n\n- One two three four five six seven eight nine ten eleven twelve.\n\nAlpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu.\n",
+  });
+  runScriptArgs(
+    "ste100 does not merge a list item with an unrelated paragraph across a blank line",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100ListContinuationStopsAtBlankLine.repoRoot, "--skill-root", ste100ListContinuationStopsAtBlankLine.skillRoot],
+    0,
+  );
 }

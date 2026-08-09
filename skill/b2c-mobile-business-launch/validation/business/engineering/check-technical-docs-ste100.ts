@@ -56,29 +56,36 @@ const presentPerfectPattern = new RegExp(`\\b(?:has|have|had)\\s+(?:not\\s+|neve
  */
 const PROTECTED_PERIOD = "\uE000";
 // Only the technical/citation abbreviations this repo's own governed prose actually uses are
-// protected -- title abbreviations (Mr., Dr., ...) are deliberately excluded: they're almost
-// always followed by a capitalized proper noun, which would collide with the lowercase-only
-// lookahead below and reintroduce the exact false-split bug this is fixing. "no" and "st" are
-// excluded too: both are common as ordinary sentence-final words ("the answer is no.", "first,
-// second, ... last."), and protecting their period would merge a real sentence boundary into
-// the next sentence instead of fixing a false split.
+// protected -- title abbreviations (Mr., Dr., ...) are deliberately excluded, since they never
+// occur in this repo's technical documentation. "no" and "st" are excluded too: both are common
+// as ordinary sentence-final words ("the answer is no.", "first, second, ... last."), and
+// protecting their period would merge a real sentence boundary into the next sentence instead
+// of fixing a false split.
 //
-// A genuine mid-sentence abbreviation is followed by a lowercase continuation ("e.g. the core
-// feature name"). An abbreviation that is ALSO the sentence's own final word is followed by
-// whitespace and a capital letter (the next sentence) or by nothing at all -- so only a
-// lowercase continuation should protect the period. This check has to run case-sensitively as
-// a plain string test, not as a regex lookahead on the same pattern: the abbreviation match
-// itself needs the "i" flag ("E.g." and "e.g." both count), and "i" would make a `[a-z]`
+// "e.g.", "i.e.", "cf.", "vs.", "approx.", "fig.", and "et al." grammatically always introduce
+// more of the same sentence -- none of them, used correctly, is ever the last word of a
+// complete sentence -- so their period is protected unconditionally. This repo's own
+// knowledge/engineering/backend-data-contract.md proves why a lowercase-only check would be
+// wrong here: it reads "...a migration tool (e.g. Prisma Migrate, Alembic, node-pg-migrate) in
+// the contract", where "e.g." is followed by a capitalized product name, not a lowercase word.
+const ALWAYS_MID_SENTENCE_ABBREVIATION = /\b(?:e\.g|i\.e|vs|approx|cf|fig|et al)\.(?=\s)/gi;
+// "etc." ("and so forth") is the one exception with genuine ambiguity: unlike the abbreviations
+// above, it commonly IS the last word of its own sentence ("Bring pens, paper, etc."). Its
+// period is protected only when a lowercase continuation follows -- a real mid-sentence use
+// ("etc. and so on") -- and left as a real sentence boundary otherwise. This check has to run
+// case-sensitively as a plain string test, not as a regex lookahead on the same pattern: the
+// match itself needs the "i" flag ("Etc." and "etc." both count), and "i" would make a `[a-z]`
 // lookahead match uppercase too, silently defeating the whole check.
-const ABBREVIATION_WORD = /\b(?:e\.g|i\.e|etc|vs|approx|cf|fig|et al)\./gi;
+const ETC_ABBREVIATION = /\betc\.(?=\s)/gi;
 const DECIMAL_OR_VERSION_PERIOD = /(\d)\.(?=\d)/g;
 
 function protectNonTerminalPeriods(text: string): string {
-  const withAbbreviationsProtected = text.replace(ABBREVIATION_WORD, (match, offset: number) => {
-    const continuesLowercase = /^\s+[a-z]/.test(text.slice(offset + match.length));
+  const withAlwaysProtected = text.replace(ALWAYS_MID_SENTENCE_ABBREVIATION, (match) => match.replace(/\./g, PROTECTED_PERIOD));
+  const withEtcProtected = withAlwaysProtected.replace(ETC_ABBREVIATION, (match, offset: number) => {
+    const continuesLowercase = /^\s+[a-z]/.test(withAlwaysProtected.slice(offset + match.length));
     return continuesLowercase ? match.replace(/\./g, PROTECTED_PERIOD) : match;
   });
-  return withAbbreviationsProtected.replace(DECIMAL_OR_VERSION_PERIOD, `$1${PROTECTED_PERIOD}`);
+  return withEtcProtected.replace(DECIMAL_OR_VERSION_PERIOD, `$1${PROTECTED_PERIOD}`);
 }
 
 /**
@@ -210,7 +217,42 @@ function sentencesOf(source: string): string[] {
       .replace(/`[^`\n]*`/g, " "),
   );
 
-  const filteredLines = stripped.split("\n").filter((line) => {
+  // Matches a bullet/numbered marker -- "-", "*", or "+" are all valid CommonMark unordered
+  // markers -- and, optionally, a GFM task-list checkbox right after it ("- [ ] " or "1. [x] ").
+  // Both the marker and the checkbox are formatting, not words, and both inflate the word count
+  // the same way if left in place.
+  const LIST_MARKER = /^(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/;
+
+  // A list item that wraps onto a following physical line (no blank line between, and that
+  // line isn't itself a new block -- a list item, a table row, a heading, a rule) is one
+  // logical sentence split across lines. Grouped BEFORE the blank-line filter below, so a real
+  // paragraph break still starts a new group; left ungrouped, each physical line would get its
+  // own forced sentence boundary further down, letting a real over-ceiling instruction hide by
+  // fragmenting across its own soft-wrapped lines.
+  function groupWrappedListContinuations(rawLines: string[]): string[] {
+    const grouped: string[] = [];
+    for (const rawLine of rawLines) {
+      const trimmed = rawLine.trim();
+      const previous = grouped[grouped.length - 1];
+      const previousIsListItem = previous !== undefined && LIST_MARKER.test(previous.trimStart());
+      const isContinuation =
+        previousIsListItem &&
+        trimmed.length > 0 &&
+        /^\s/.test(rawLine) &&
+        !LIST_MARKER.test(trimmed) &&
+        !trimmed.startsWith("#") &&
+        !trimmed.startsWith("|") &&
+        !/^[-*_]{3,}$/.test(trimmed);
+      if (isContinuation) {
+        grouped[grouped.length - 1] = `${previous.trimEnd()} ${trimmed}`;
+      } else {
+        grouped.push(rawLine);
+      }
+    }
+    return grouped;
+  }
+
+  const filteredLines = groupWrappedListContinuations(stripped.split("\n")).filter((line) => {
     const trimmed = line.trim();
     if (!trimmed) return false;
     if (trimmed.startsWith("#")) return false;
@@ -219,10 +261,6 @@ function sentencesOf(source: string): string[] {
     return true;
   });
 
-  // Matches a bullet/numbered marker and, optionally, a GFM task-list checkbox right after it
-  // ("- [ ] " or "1. [x] ") — both are formatting, not words, and both inflate the word count
-  // the same way if left in place.
-  const LIST_MARKER = /^(?:[-*]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/;
   const isListItemLine = (value: string): boolean => LIST_MARKER.test(value);
   const isTableRowLine = (value: string): boolean => value.startsWith("|") && value.endsWith("|");
 
