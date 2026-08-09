@@ -66,7 +66,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.design",
     title: "Motion Craft Benchmarks",
     loadWhen:
-      "implementing or auditing a specific motion recipe against check:motion-contract's numeric spring/duration tokens, or tying a micro-interaction to the Experience Card it serves",
+      "implementing or auditing a specific motion recipe against check:motion-contract's numeric spring/duration tokens, tying a micro-interaction to the Experience Card it serves, or designing a cold-launch splash/loading/welcome-screen entrance (R11-R14)",
   },
   {
     id: "reference.design.premium-mobile-craft",
@@ -305,7 +305,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.experience",
     title: "Onboarding Conversion",
     loadWhen:
-      "before onboarding quizzes, personalization, attribution questions, demo videos, App Review popups, paywall timing, closing offers, trials, or first-session activation",
+      "before onboarding quizzes, welcome/splash screens, personalization, attribution questions, demo videos, App Review popups, paywall timing, closing offers, trials, or first-session activation",
   },
   {
     id: "reference.experience.push-notification-lifecycle",

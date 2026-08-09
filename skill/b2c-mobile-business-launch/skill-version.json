@@ -1,12 +1,10 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.104.0",
+  "version": "0.105.0",
   "updatedAt": "2026-08-08",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Added 'Product Ad Structure And Prompt Craft' to knowledge/process/tool-recipes/visual-and-motion-production.md: a four-beat structure (identification hook, usage/function, creative escalation, final hero shot) that replaces the vague '<hook + design/DESIGN.md brief>' placeholder previously used, unfilled, across five separate --prompt calls in the Higgsfield Chained Recipes.",
-    "Added a literal Master Prompt Template and a Market Category Modifiers table under the same section, so a --prompt can be composed from a tested starting text instead of written from scratch each time. Both are adapted for this skill's actual output (a mobile app's screenshots/UI, not a physical ecommerce product) and route Recipe 1 step 8 / Recipe 2 step 4 to the new structure instead of the old placeholder.",
-    "Updated the tool-recipes.md lane index to list 'Product Ad Structure And Prompt Craft' alongside the existing Higgsfield/Remotion entries for the Visual And Motion Production lane.",
-    "PR review (Codex) caught two real defects in the Master Prompt Template before merge: its hardcoded 'Format: horizontal 16:9' contradicted every --aspect_ratio 9:16 call in Recipe 1/2 that would actually use it, and its 'silently analyze' step asked the model to infer packaging/materials/ingredients for what is, in this skill's core case, an app screenshot -- contrary to the truthful-UI accuracy rules stated immediately above it. Both fixed: Format is now a placeholder matched to the calling recipe's aspect ratio, the analysis step branches on app-reference vs. physical-product-reference, and the Tech/Electronics modifier's 'ports' language is now conditional instead of assumed."
+    "Generalized the welcome-screen prompt library from Appllama's top-welcome-screens (github.com/Appllama/top-welcome-screens) into the skill as motion-craft-benchmarks.md's R11-R14: splash hold-and-cut, staggered multi-asset entrance, honest loader state-switch/skeleton reveal, and paged cold-open with a deterministic final state. Followed the file's existing 60fps.design pattern exactly — numeric, checkable recipes bound to the token scale, never a named app's mascot/wordmark/copy — so the source repo's own NOTICE.md licensing requirement and this file's recipe format agree by construction.",
+    "Cross-linked onboarding-conversion.md with a new Cold-Launch / Splash Entrance subsection under Conversion Patterns, pointing to the R11-R14 recipes before the screen-by-screen sequence table starts. Registered github-appllama-top-welcome-screens in source-registry.yaml (inspiration_benchmark) and widened the motion-craft-benchmarks.md and onboarding-conversion.md reference loadWhen triggers plus domain.experience's routeWhen to name welcome/splash screens explicitly, so the capability is discoverable from SKILL.md's Domain Routing table, not just reachable by an agent that already knew to look."
   ]
 }
