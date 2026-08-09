@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.110.0",
+  "skillVersion": "0.111.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2579,8 +2579,10 @@
         "provider.revenuecat",
         "provider.posthog"
       ],
-      "founderOnlyActions": [],
-      "actionClass": "mutate",
+      "founderOnlyActions": [
+        "approve the hard cutover and legacy runtime deletion"
+      ],
+      "actionClass": "destructive",
       "idempotent": true
     },
     {

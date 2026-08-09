@@ -67,7 +67,11 @@ const artifact = candidates
 
 const laneStatus = state ? asString(getPath(state, "lanes.onboarding.status")) : undefined;
 const laneAbsent = state ? getPath(state, "lanes.onboarding") === undefined : true;
-const skip = laneStatus === "not_needed" || laneStatus === "deferred";
+// The not_needed/deferred exemption belongs to the general (lenient) invocation only. Under
+// --require-done -- ONB-22's own gate -- a deferred or not_needed lane must still fail: skipping
+// it here would let the engine accept the final execute/cutover/verify node on a workspace that
+// never finished onboarding at all.
+const skip = (laneStatus === "not_needed" || laneStatus === "deferred") && !requireDone;
 
 if (!skip && laneAbsent) {
   issues.push(
@@ -317,6 +321,18 @@ if (!skip && artifact) {
         );
       }
     }
+
+    const uncheckedVerificationItems = countUncheckedItems(sectionBody(liveText, "Verification"));
+    if (uncheckedVerificationItems > 0) {
+      issues.push(
+        issue(
+          "error",
+          "onboarding_graph.verification_incomplete",
+          `${relativePath} claims the onboarding lane is done but its Verification section still has ${uncheckedVerificationItems} unchecked item(s).`,
+          relativePath,
+        ),
+      );
+    }
   }
 }
 
@@ -326,11 +342,44 @@ function hasHeading(text: string, heading: string): boolean {
   return text.split(/\r?\n/).some((line) => line.trim() === `## ${heading}`);
 }
 
+/** Returns the line range right after a "## {heading}" line, up to (not including) the next "## " heading or the end of the artifact. */
+function sectionBody(text: string, heading: string): string {
+  const lines = text.split(/\r?\n/);
+  const startIndex = lines.findIndex((line) => line.trim() === `## ${heading}`);
+  if (startIndex === -1) return "";
+  const rest = lines.slice(startIndex + 1);
+  const endIndex = rest.findIndex((line) => /^##\s/.test(line.trim()));
+  return (endIndex === -1 ? rest : rest.slice(0, endIndex)).join("\n");
+}
+
+function isTableSeparatorRow(line: string): boolean {
+  return /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?$/.test(line);
+}
+
+// Reads the node's status from the Graph Run table's own Status column (located by the header
+// row), not from any cell in the row -- an owner/result cell that happens to mention "done" in
+// prose must not be mistaken for the node's actual recorded status.
 function graphRunNodeDone(text: string, node: string): boolean {
-  return text.split(/\r?\n/).some((line) => {
+  const tableLines = sectionBody(text, "Graph Run")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|"));
+  const headerLine = tableLines[0];
+  if (!headerLine) return false;
+  const header = headerLine.split("|").map((cell) => cell.trim().toLowerCase());
+  const nodeIndex = header.indexOf("node");
+  const statusIndex = header.indexOf("status");
+  if (nodeIndex === -1 || statusIndex === -1) return false;
+
+  return tableLines.slice(1).some((line) => {
+    if (isTableSeparatorRow(line)) return false;
     const cells = line.split("|").map((cell) => cell.trim());
-    return cells.includes(`\`${node}\``) && cells.includes("done");
+    return cells[nodeIndex] === `\`${node}\`` && cells[statusIndex] === "done";
   });
+}
+
+function countUncheckedItems(section: string): number {
+  return (section.match(/^-\s*\[\s*\]/gm) ?? []).length;
 }
 
 function tablePlaceholderCells(text: string): string[] {
@@ -353,10 +402,12 @@ function tablePlaceholderCells(text: string): string[] {
   const repeatedThreshold = Math.max(8, Math.ceil(cells.length * 0.15));
 
   return cells.filter((cell) => {
-    // "done" is the Graph Run table's own correct terminal status value (graphRunNodeDone()
-    // requires it literally), not a generic filler word -- unlike "ready"/"pass"/"yes"/etc.,
-    // which have no legitimate table home and only ever show up as lazy completion labels.
-    if (/^placeholder$/i.test(cell) || /^(?:completed|ready|pass|passed|yes|no|n\/a|na)$/i.test(cell)) return true;
+    // "Yes"/"No"/"N/A"/"Pass"/"done"/etc. are legitimate prescribed terminal answers in the
+    // template's own matrices (Effort-Before-Value, policy, Prototype And Design Proof, Graph
+    // Run status) -- rejecting them as generic filler words would make a genuinely completed
+    // artifact unable to pass without replacing truthful answers with artificial prose. Only
+    // the literal word "placeholder" itself has no legitimate answer use.
+    if (/^placeholder$/i.test(cell)) return true;
     const firstWord = cell.match(/^[A-Za-z][A-Za-z-]*/)?.[0]?.toLowerCase();
     if (firstWord && TEMPLATE_DIRECTIVE_VERBS.has(firstWord)) return true;
     return (cellTextCounts.get(cell) ?? 0) >= repeatedThreshold;

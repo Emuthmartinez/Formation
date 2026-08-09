@@ -110,7 +110,7 @@ export function register(h: Harness): void {
   {
     markOnboardingDone(doneWithOrdinaryRecordProse);
     mutateOnboarding(doneWithOrdinaryRecordProse, (text) => {
-      const completed = fillTemplateDirectiveCells(text.replaceAll("not_started", "done"));
+      const completed = checkVerificationItems(fillTemplateDirectiveCells(text.replaceAll("not_started", "done")));
       return `${completed}\nThis remains the canonical execution record for the completed onboarding system.\n`;
     });
   }
@@ -130,6 +130,87 @@ export function register(h: Harness): void {
     "onboarding_graph.not_marked_done",
     ["--require-done"],
   );
+
+  const doneWithUncheckedVerification = makeFixture("onboarding-graph-done-with-unchecked-verification");
+  {
+    markOnboardingDone(doneWithUncheckedVerification);
+    // Same table-filling treatment as the passing "genuinely completed" fixture above, but the
+    // Verification section's own "- [ ]" checklist is deliberately left untouched.
+    mutateOnboarding(doneWithUncheckedVerification, (text) => fillTemplateDirectiveCells(text.replaceAll("not_started", "done")));
+  }
+  runFixture(
+    "a done lane with every Verification checklist item still unchecked fails",
+    doneWithUncheckedVerification,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.verification_incomplete",
+    ["--require-done"],
+  );
+
+  const statusColumnSpoofed = makeFixture("onboarding-graph-status-column-spoofed");
+  {
+    markOnboardingDone(statusColumnSpoofed);
+    mutateOnboarding(statusColumnSpoofed, (text) => {
+      const filled = checkVerificationItems(fillTemplateDirectiveCells(text.replaceAll("not_started", "done")));
+      // ONB-01's row now reads "done" in the Status column like every other row from the blanket
+      // replace above; put it back to "partial" there while planting the literal word "done" in
+      // its Result cell, proving the checker reads the Status column specifically, not any cell
+      // in the row.
+      return filled.replace(
+        "| `ONB-01` | done | Engineering and product | Trace the current implementation |",
+        "| `ONB-01` | partial | Engineering and product | done, this work is done |",
+      );
+    });
+  }
+  runFixture(
+    "a Graph Run row's non-status cell mentioning done does not substitute for its Status column",
+    statusColumnSpoofed,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.node_not_done",
+    ["--require-done"],
+  );
+
+  const doneWithLegitimateAnswerWords = makeFixture("onboarding-graph-done-with-legitimate-answer-words");
+  {
+    markOnboardingDone(doneWithLegitimateAnswerWords);
+    mutateOnboarding(doneWithLegitimateAnswerWords, (text) => {
+      const filled = checkVerificationItems(fillTemplateDirectiveCells(text.replaceAll("not_started", "done")));
+      // The template itself prescribes these as the terminal answer format ("Yes or no" / "Pass
+      // or gaps"); a real completed launch collapses them to the single chosen word.
+      return filled.replaceAll("Yes or no", "Yes").replaceAll("Pass or gaps", "Pass");
+    });
+  }
+  runFixture(
+    "completed onboarding may answer Required/QA cells with the template's own prescribed Yes/Pass terminal words",
+    doneWithLegitimateAnswerWords,
+    "check-onboarding-graph.ts",
+    0,
+    undefined,
+    ["--require-done"],
+  );
+
+  const deferredRequireDone = makeFixture("onboarding-graph-deferred-require-done");
+  {
+    const state = readState(deferredRequireDone);
+    const lane = getLane(state, "onboarding");
+    lane["status"] = "deferred";
+    lane["blockers"] = ["2026-08-08 founder deferred onboarding until the product hypothesis is validated"];
+    writeState(deferredRequireDone, state);
+  }
+  runFixture("the general onboarding-graph check still honors an explicit deferral", deferredRequireDone, "check-onboarding-graph.ts", 0);
+  runFixture(
+    "a deferred onboarding lane still fails ONB-22's own --require-done gate",
+    deferredRequireDone,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.not_marked_done",
+    ["--require-done"],
+  );
+
+  function checkVerificationItems(text: string): string {
+    return text.replace(/^-\s*\[\s*\]/gm, "- [x]");
+  }
 
   function markOnboardingDone(fixtureRoot: string): void {
     const state = readState(fixtureRoot);

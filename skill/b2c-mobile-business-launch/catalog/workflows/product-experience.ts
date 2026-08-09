@@ -457,7 +457,11 @@ export const workflows = [
     outputPaths: ["product/ONBOARDING.md", "product/onboarding.html"],
     gates: ["check:onboarding-graph-complete"],
     providers: ["provider.revenuecat", "provider.posthog"],
-    actionClass: "mutate",
+    // Hard cutover and legacy deletion, not a retryable content mutation -- classifying it
+    // "mutate" would let the durable engine execute production deletion under an ordinary
+    // experience-domain grant instead of the autonomy engine's protected destructive waiver path.
+    actionClass: "destructive",
+    founderOnlyActions: ["approve the hard cutover and legacy runtime deletion"],
     idempotent: true,
   }),
   workflow({

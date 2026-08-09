@@ -79,8 +79,14 @@ export function renderAuthoredPage(businessRoot: string, entry: Extract<PageProv
 
 /**
  * Large execution records stay compact in the generated HTML while retaining a faithful,
- * searchable source view. The raw Markdown is base64-encoded in the file to keep founder-copy
- * validation focused on visible labels; the browser decodes it into a focusable pre element.
+ * searchable source view. The raw Markdown carries internal vocabulary (lane, gate, artifact,
+ * not_started, ...) a founder should not read as prose, so the decoded view lives inside the
+ * same sanctioned <details> technical-details disclosure check-founder-copy.ts already exempts
+ * from its scan (see that file's founderVisibleHtmlText) -- the same pattern render-launch-
+ * cockpit.ts and render-design-room.ts use for their own technical detail. The Markdown is
+ * base64-encoded in the file only to keep the *default* founder-visible page free of raw
+ * identifiers before the disclosure is expanded; the browser decodes it into a focusable pre
+ * element once opened.
  */
 function renderSourceArtifactPage(markdown: string, markdownName: string): string {
   const title = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim() || "Artifact";
@@ -104,7 +110,7 @@ function renderSourceArtifactPage(markdown: string, markdownName: string): strin
 <main>
 <header><span class="pill">${escapeHtml(displayStatus(status))}</span><h1>${escapeHtml(title)}</h1><p class="meta">Source: <code>${escapeHtml(markdownName)}</code></p><p class="meta">Current source fingerprint: <code>${digest}</code></p></header>
 <section class="card"><h2>What this onboarding record covers</h2><ol>${sectionList}</ol></section>
-<section class="card"><h2>Full onboarding execution contract</h2><p class="meta">This is the complete canonical Markdown source, shown here for review and search.</p><pre id="source" tabindex="0" aria-label="Full onboarding execution contract"></pre></section>
+<details class="card"><summary>Technical details, for whoever picks this up next</summary><p class="meta">This is the complete canonical Markdown source, shown here for review and search.</p><pre id="source" tabindex="0" aria-label="Full onboarding execution contract"></pre></details>
 </main>
 <script>
 const sourceBytes=Uint8Array.from(atob("${sourceBase64}"),character=>character.charCodeAt(0));

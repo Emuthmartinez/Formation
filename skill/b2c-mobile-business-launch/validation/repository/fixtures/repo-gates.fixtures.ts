@@ -549,6 +549,56 @@ export function register(h: Harness): void {
     "founder_copy.internal_vocabulary",
   );
 
+  // tooling/lib/artifact-pages.ts's renderSourceArtifactPage base64-embeds real Markdown in a
+  // <script> and decodes it client-side into a target element by id -- a raw <script> body is
+  // dropped from the scan as code, not prose, so without decoding it here too, that payload
+  // could carry any internal vocabulary straight past this gate. These two fixtures prove the
+  // decode step actually runs: a payload landing outside the sanctioned <details> disclosure
+  // must still fail, and the identical payload landing inside it must still pass.
+  const decodedPayload = Buffer.from("Your onboarding lane is almost done.", "utf8").toString("base64");
+  const founderCopyDecodedScriptLeak = makeEmptyFixture("founder-copy-decoded-script-leak");
+  writeFileSync(
+    path.join(founderCopyDecodedScriptLeak, "product/onboarding.html"),
+    [
+      "<html><body>",
+      '<section><pre id="source"></pre></section>',
+      "<script>",
+      `document.getElementById("source").textContent = atob("${decodedPayload}");`,
+      "</script>",
+      "</body></html>",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runScriptArgs(
+    "a base64-decoded script payload outside the technical-details disclosure fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyDecodedScriptLeak, "--skill-root", skillRoot],
+    1,
+    "founder_copy.internal_vocabulary",
+  );
+
+  const founderCopyDecodedScriptInDetails = makeEmptyFixture("founder-copy-decoded-script-in-details");
+  writeFileSync(
+    path.join(founderCopyDecodedScriptInDetails, "product/onboarding.html"),
+    [
+      "<html><body>",
+      '<details><summary>Technical details</summary><pre id="source"></pre></details>',
+      "<script>",
+      `document.getElementById("source").textContent = atob("${decodedPayload}");`,
+      "</script>",
+      "</body></html>",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runScriptArgs(
+    "the identical decoded payload passes founder copy once its target sits inside the technical-details disclosure",
+    "check-founder-copy.ts",
+    ["--root", founderCopyDecodedScriptInDetails, "--skill-root", skillRoot],
+    0,
+  );
+
   // The narrative-freshness rule the PROJECT_STATE template comment has
   // promised since v0.25.0: empty narrative past orient is an error.
   const founderCopyStaleNarrative = makeEmptyFixture("founder-copy-stale-narrative");
