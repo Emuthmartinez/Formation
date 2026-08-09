@@ -482,10 +482,23 @@ if (celebrateBand) {
 
 // --- 3b. A recipe's own restated numeric window (e.g. R12's "(360–600ms total)") must match
 // tokens.json's actual values for the tokens it names — otherwise a future token edit can
-// invert the range or drift the cap while this recipe's prose, and this gate, stay green. ---
+// invert the range or drift the cap while this recipe's prose, and this gate, stay green.
+// The match count is itself asserted (not just each match's values): rewording or dropping
+// the parenthetical would otherwise make this loop silently validate zero windows. ---
 if (bench !== undefined && Object.keys(motionTokens).length > 0) {
   const windowRe = /`motion\.(\w+)`[–-]`(\w+)` window \((\d+)[–-](\d+)ms total\)/g;
-  for (const m of bench.matchAll(windowRe)) {
+  const windowMatches = [...bench.matchAll(windowRe)];
+  if (windowMatches.length === 0) {
+    issues.push(
+      issue(
+        "error",
+        "motion_contract.recipe_window.none_found",
+        "No recipe states a `motion.TOKEN`–`TOKEN` window (N–Nms total) — either every such statement was removed (fine, update this check too) or one was reworded into a form this check no longer parses, which would silently stop validating it.",
+        BENCH,
+      ),
+    );
+  }
+  for (const m of windowMatches) {
     const bounds: Array<[string, string, string]> = [
       [g(m, 1), g(m, 3), "low"],
       [g(m, 2), g(m, 4), "high"],
@@ -513,6 +526,95 @@ if (bench !== undefined && Object.keys(motionTokens).length > 0) {
           ),
         );
       }
+    }
+  }
+}
+
+// --- 3c. A recipe's own inline restatement of a spring family's band (e.g. R12's
+// "press-family spring (response 0.3-0.4s, damping 0.7-0.8)") must match the family
+// table in premium-mobile-craft.md, the same drift class as the family_mirror check
+// above but for a recipe body instead of the top-of-file summary sentence. ---
+if (bench !== undefined && bands.size > 0) {
+  const familyInlineRe = /(press|celebrate)-family spring \(response (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)s?, damping (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)\)/g;
+  for (const m of bench.matchAll(familyInlineRe)) {
+    const family = g(m, 1);
+    const band = bands.get(family);
+    if (!band) continue;
+    const stated: Array<[number, number, string]> = [
+      [Number(g(m, 2)), band.respLo, `${family} response low`],
+      [Number(g(m, 3)), band.respHi, `${family} response high`],
+      [Number(g(m, 4)), band.dampLo, `${family} damping low`],
+      [Number(g(m, 5)), band.dampHi, `${family} damping high`],
+    ];
+    for (const [got, want, label] of stated) {
+      if (got !== want) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_family_inline.drift",
+            `A recipe restates ${label} = ${got} but premium-mobile-craft.md's table says ${want}.`,
+            BENCH,
+          ),
+        );
+      }
+    }
+  }
+}
+
+// --- 3d. R12's per-asset-count offset table (the "Gap budget ÷ gaps" / "Offset to use" /
+// "Worst-case total" rows) is a derivation from motion.durationReveal, motion.stagger, and
+// the press family's slowest settle (0.4s) -- not standalone prose. Recompute it from the
+// actual tokens/bands and assert the derived worst-case totals, and the asset count where
+// pure stagger stops being achievable, still appear verbatim in the recipe -- so a token
+// edit that shifts the safe offset or the "5+ is unachievable" boundary can't drift the
+// table silently while this gate stays green. ---
+if (bench !== undefined && Object.keys(motionTokens).length > 0 && bands.has("press")) {
+  const durationRevealMs = Number.parseInt(motionTokens["durationReveal"] ?? "", 10);
+  const staggerFloorMs = Number.parseInt(motionTokens["stagger"] ?? "", 10);
+  const press = bands.get("press")!;
+  const worstCaseSettleMs = Math.round(press.respHi * 1000);
+  if (Number.isFinite(durationRevealMs) && Number.isFinite(staggerFloorMs) && Number.isFinite(worstCaseSettleMs)) {
+    const gapBudgetMs = durationRevealMs - worstCaseSettleMs;
+    let sawUnachievableAssetCount = false;
+    for (let assets = 2; assets <= 6; assets++) {
+      const gaps = assets - 1;
+      const rawOffsetMs = Math.floor(gapBudgetMs / gaps);
+      if (rawOffsetMs < staggerFloorMs) {
+        sawUnachievableAssetCount = true;
+        continue;
+      }
+      const worstCaseTotalMs = rawOffsetMs * gaps + worstCaseSettleMs;
+      if (worstCaseTotalMs > durationRevealMs) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_offset_table.exceeds_window",
+            `Recomputing R12's offset table for ${assets} assets from the current tokens (motion.durationReveal=${durationRevealMs}ms, motion.stagger=${staggerFloorMs}ms, press settle=${worstCaseSettleMs}ms) gives a worst-case total of ${worstCaseTotalMs}ms, which exceeds motion.durationReveal.`,
+            BENCH,
+          ),
+        );
+        continue;
+      }
+      if (!bench.includes(`${worstCaseTotalMs}ms`)) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_offset_table.value_drift",
+            `R12's offset table should state a worst-case total of ${worstCaseTotalMs}ms for ${assets} assets (recomputed from the current tokens), but that figure no longer appears in the recipe text.`,
+            BENCH,
+          ),
+        );
+      }
+    }
+    if (sawUnachievableAssetCount && !/stagger floor.*not achievable|not achievable as pure stagger/.test(bench)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.recipe_offset_table.missing_floor_boundary",
+          `Recomputing R12's offset table from the current tokens means some documented asset count now drops the per-asset offset below motion.stagger (${staggerFloorMs}ms), but the recipe no longer says any asset count is unachievable as pure stagger -- the split-into-groups escape hatch may have silently gone missing or the boundary shifted without the prose catching up.`,
+          BENCH,
+        ),
+      );
     }
   }
 }

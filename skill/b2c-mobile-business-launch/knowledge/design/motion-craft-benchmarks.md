@@ -172,11 +172,20 @@ A cold-launch splash reads as intentional when the hold has a real reason and th
 
 ### R12 — Staggered multi-asset splash entrance
 
-**Serves:** a welcome screen whose composition is several small assets — icons, props, ornaments — arriving together, distinct from R3's single hero object. **Rides:** `motion.stagger` sets the per-asset floor; reference entrances space assets 2–3× that (120–180ms) apart, capped at **3 assets** at the full reference offset, so the total spread — last stagger offset plus that asset's press-family settle (response 0.3–0.4s) — stays inside the `motion.durationSlow`–`durationReveal` window (360–600ms total); each asset settles on the press-family spring (response 0.3–0.4, damping 0.7–0.8) — a calm arrival, never the celebrate family, because nothing has been earned yet at cold launch. For 4 or more assets, the 120–180ms reference offset no longer fits: derive a smaller offset as (`durationReveal` − last asset's settle time) ÷ (asset count − 1), or split the composition into a staggered group of up to 3 plus a static remainder instead of stretching one long cascade.
+**Serves:** a welcome screen whose composition is several small assets — icons, props, ornaments — arriving together, distinct from R3's single hero object. **Rides:** `motion.stagger` (60ms) sets the per-asset floor; each asset settles on the press-family spring (response 0.3–0.4s, damping 0.7–0.8) — a calm arrival, never the celebrate family, because nothing has been earned yet at cold launch. The offset must hold for the worst case a valid implementation can pick — the last asset's stagger offset plus its own settle at the press family's slowest response (0.4s = 400ms) — inside the `motion.durationSlow`–`durationReveal` window (360–600ms total). That worst-case settle leaves a 200ms gap budget (600ms − 400ms) to split across the asset count's gaps, which is why the safe offset shrinks as assets are added:
+
+| Assets | Gaps | Gap budget ÷ gaps | Offset to use | Worst-case total |
+| --- | --- | --- | --- | --- |
+| 2 | 1 | 200ms | 120–180ms (full reference range) | 580ms |
+| 3 | 2 | 100ms | up to 100ms | 600ms |
+| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 598ms |
+| 5+ | 4+ | ≤50ms | below the 60ms stagger floor — not achievable as pure stagger | — |
 
 - [ ] Each asset animates independently — its own stagger offset and its own settle — never one shared fade/scale applied to the group.
-- [ ] Total entrance window — last stagger offset plus that asset's settle, not just the offsets — stays inside `motion.durationReveal` (600ms); at 4+ assets, derive the offset from the asset count (see Rides above) instead of reusing the 120–180ms reference spacing, which only fits 2–3 assets before the window is blown.
+- [ ] The offset used matches the asset count in the table above — never the full 120–180ms reference range for 3 or more assets; that range is only proven safe at 2 assets.
+- [ ] Total entrance window — last stagger offset plus that asset's settle, assuming the press family's slowest 0.4s response, not just the offsets — stays inside `motion.durationReveal` (600ms).
 - [ ] Press-family spring only; a celebrate-family overshoot on a splash asset misreads a cold-launch moment as a reward (see R8's scope boundary).
+- [ ] 5 or more assets cannot fit pure stagger inside both the 600ms window and the 60ms stagger floor at once (the table's own arithmetic proves it) — split into a staggered group of up to 4 plus a static remainder instead of stretching one long cascade or dropping the offset below the stagger floor.
 - [ ] Reduce Motion: all assets render in their settled position with no stagger.
 
 **Exemplars:** multi-icon staggered-spring splash entrance (top-welcome-screens research set, Yazio-inspired reference).

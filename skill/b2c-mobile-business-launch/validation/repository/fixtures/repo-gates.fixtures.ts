@@ -745,6 +745,57 @@ export function register(h: Harness): void {
     "motion_contract.recipe_window.value_drift",
   );
 
+  const motionRecipeWindowReworded = writeMotionContractRoot("motion-contract-recipe-window-reworded", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("window (360–600ms total)", "window (fits comfortably inside the cap)") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when no recipe window statement is parseable, instead of silently checking nothing",
+    "check-motion-contract.ts",
+    ["--skill-root", motionRecipeWindowReworded],
+    1,
+    "motion_contract.recipe_window.none_found",
+  );
+
+  const motionRecipeFamilyInlineDrift = writeMotionContractRoot("motion-contract-recipe-family-inline-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text.replace("press-family spring (response 0.3–0.4s, damping 0.7–0.8)", "press-family spring (response 0.3–0.4s, damping 0.7–0.9)")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a recipe's inline spring-family restatement drifts from the craft table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionRecipeFamilyInlineDrift],
+    1,
+    "motion_contract.recipe_family_inline.drift",
+  );
+
+  const motionOffsetTableDrift = writeMotionContractRoot("motion-contract-offset-table-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 598ms |", "| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 588ms |") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when R12's offset table worst-case total drifts from the recomputed value",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableDrift],
+    1,
+    "motion_contract.recipe_offset_table.value_drift",
+  );
+
+  const motionOffsetTableFloorBoundaryLost = writeMotionContractRoot("motion-contract-offset-table-floor-boundary-lost", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text.replace(
+          "| 5+ | 4+ | ≤50ms | below the 60ms stagger floor — not achievable as pure stagger | — |",
+          "| 5+ | 4+ | ≤50ms | split into a smaller staggered group | — |",
+        )
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when the offset table stops saying an asset count is unachievable as pure stagger, even though recomputing from tokens still puts it below the stagger floor",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableFloorBoundaryLost],
+    1,
+    "motion_contract.recipe_offset_table.missing_floor_boundary",
+  );
+
   const motionCanonDrift = writeMotionContractRoot("motion-contract-canon-outside-band", (rel, text) =>
     rel.endsWith("peak-end-card.md") ? text.replace(".spring(response: 0.45, dampingFraction: 0.7)", ".spring(response: 0.45, dampingFraction: 0.85)") : text,
   );
