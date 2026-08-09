@@ -1741,4 +1741,53 @@ export function register(h: Harness): void {
     ["--repo-root", ste100ListContinuationStopsAtBlankLine.repoRoot, "--skill-root", ste100ListContinuationStopsAtBlankLine.skillRoot],
     0,
   );
+
+  // A real gap Codex caught: platform/README.md documents provider configuration, execution API
+  // routes, environment variables, and deployment requirements -- a current API/config
+  // reference -- but was outside every discovery path (not under docs/, not under skill/).
+  const ste100PlatformReadme = writeSte100Root("ste100-platform-readme-scanned");
+  mkdirSync(path.join(ste100PlatformReadme.repoRoot, "platform"), { recursive: true });
+  writeFileSync(
+    path.join(ste100PlatformReadme.repoRoot, "platform", "README.md"),
+    "# Platform\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "ste100 scans platform/README.md, the platform's own API/config developer guide",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PlatformReadme.repoRoot, "--skill-root", ste100PlatformReadme.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [platform/README.md]",
+  );
+
+  // A real gap Codex caught: the previous round's continuation grouping required the follow-on
+  // line to be indented, but CommonMark's "lazy continuation" rule counts an UNindented follow-on
+  // line (no blank line before it) as part of the same list item too. This bullet's second line
+  // has no leading whitespace at all.
+  const ste100UnindentedLazyContinuation = writeSte100Root("ste100-unindented-lazy-continuation-stays-one-sentence", {
+    steFile:
+      "# Doc\n\n- This instruction wraps onto a second physical line before its own terminal\npunctuation lands, which pushes the true combined word count well past the limit.\n",
+  });
+  runScriptArgs(
+    "ste100 keeps an unindented lazy list continuation as one sentence and catches a violation split across it",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100UnindentedLazyContinuation.repoRoot, "--skill-root", ste100UnindentedLazyContinuation.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught: the present-perfect heuristic only recognized five hard-coded
+  // intervening modifiers (not/never/already/just/recently), so any other adverb between the
+  // auxiliary and the participle -- "successfully" here -- let a present-perfect sentence pass
+  // undetected, even in the error-tier reference itself.
+  const ste100AdverbInPresentPerfect = writeSte100Root("ste100-adverb-in-present-perfect-still-caught", {
+    steFile: "# Doc\n\nThe validator has successfully checked the file against every governed rule today.\n",
+  });
+  runScriptArgs(
+    "ste100 still catches present-perfect tense with a general adverb between auxiliary and participle",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AdverbInPresentPerfect.repoRoot, "--skill-root", ste100AdverbInPresentPerfect.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
 }

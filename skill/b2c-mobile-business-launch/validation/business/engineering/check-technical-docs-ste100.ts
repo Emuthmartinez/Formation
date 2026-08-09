@@ -43,7 +43,14 @@ const MAX_SENTENCE_WORDS = 20;
 /** Common regular (-ed) and irregular past-participle shapes, for the present-perfect heuristic below. */
 const PAST_PARTICIPLE =
   "(?:\\w+ed|been|done|gone|known|shown|written|given|taken|made|found|become|begun|chosen|come|drawn|driven|fallen|felt|gotten|got|grown|held|kept|left|lost|met|paid|run|said|seen|sent|set|spoken|spent|stood|taught|thought|told|understood|won|worked|read|meant|built|bought|caught|brought|fought|sought)";
-const presentPerfectPattern = new RegExp(`\\b(?:has|have|had)\\s+(?:not\\s+|never\\s+|already\\s+|just\\s+|recently\\s+)?${PAST_PARTICIPLE}\\b`, "i");
+// An adverb between the auxiliary and the participle ("has successfully checked") does not stop
+// the sentence from being present perfect -- a fixed list of five modifiers (not/never/already/
+// just/recently) missed every other adverb, so "has successfully checked" passed even in the
+// error-tier reference. \w+ly covers the regular case (most English adverbs); the fixed words
+// cover the common irregular ones that don't end in -ly. Zero or more, so stacked adverbs
+// ("has already successfully checked") are covered too.
+const INTERVENING_ADVERB = "(?:not|never|already|just|\\w+ly)";
+const presentPerfectPattern = new RegExp(`\\b(?:has|have|had)\\s+(?:${INTERVENING_ADVERB}\\s+)*${PAST_PARTICIPLE}\\b`, "i");
 
 /**
  * A period that ends an abbreviation ("e.g.", "etc.") or sits inside a decimal or version
@@ -117,12 +124,12 @@ interface GovernedFile {
 
 const governed: GovernedFile[] = [];
 
-// docs/ stays an explicit list rather than a scanned directory like ADDITIONAL_GOVERNED_
-// DIRECTORIES below: docs/platform/ also holds exploratory and point-in-time content (a
-// historical repo audit, a founder-journey narrative, an open backlog) this repo's own
-// conventions already keep outside every gate, so a blanket scan would govern files that
-// were never meant to be governed. Add a new architecture doc, ADR, or validator reference
-// here by name once it exists.
+// This repo-root-relative allowlist stays explicit rather than a scanned directory like
+// ADDITIONAL_GOVERNED_DIRECTORIES below: docs/platform/ also holds exploratory and
+// point-in-time content (a historical repo audit, a founder-journey narrative, an open
+// backlog) this repo's own conventions already keep outside every gate, so a blanket scan
+// would govern files that were never meant to be governed. Add a new architecture doc, ADR,
+// validator reference, or top-level product/platform README here by name once it exists.
 for (const relative of [
   "docs/architecture.md",
   "docs/validators.md",
@@ -130,6 +137,7 @@ for (const relative of [
   "docs/platform/product-architecture.md",
   "docs/platform/decisions-and-tradeoffs.md",
   "docs/implementation/graph-execution-v2.md",
+  "platform/README.md",
 ]) {
   const absolute = path.join(repoRoot, relative);
   if (!existsSync(absolute)) continue;
@@ -225,10 +233,12 @@ function sentencesOf(source: string): string[] {
 
   // A list item that wraps onto a following physical line (no blank line between, and that
   // line isn't itself a new block -- a list item, a table row, a heading, a rule) is one
-  // logical sentence split across lines. Grouped BEFORE the blank-line filter below, so a real
-  // paragraph break still starts a new group; left ungrouped, each physical line would get its
-  // own forced sentence boundary further down, letting a real over-ceiling instruction hide by
-  // fragmenting across its own soft-wrapped lines.
+  // logical sentence split across lines. This is true whether or not the continuation line is
+  // indented: CommonMark's "lazy continuation" rule counts an unindented follow-on line as part
+  // of the same list item too, as long as nothing blank or block-starting comes first. Grouped
+  // BEFORE the blank-line filter below, so a real paragraph break still starts a new group;
+  // left ungrouped, each physical line would get its own forced sentence boundary further down,
+  // letting a real over-ceiling instruction hide by fragmenting across its own wrapped lines.
   function groupWrappedListContinuations(rawLines: string[]): string[] {
     const grouped: string[] = [];
     for (const rawLine of rawLines) {
@@ -238,7 +248,6 @@ function sentencesOf(source: string): string[] {
       const isContinuation =
         previousIsListItem &&
         trimmed.length > 0 &&
-        /^\s/.test(rawLine) &&
         !LIST_MARKER.test(trimmed) &&
         !trimmed.startsWith("#") &&
         !trimmed.startsWith("|") &&
