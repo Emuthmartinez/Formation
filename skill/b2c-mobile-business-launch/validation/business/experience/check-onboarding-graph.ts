@@ -62,6 +62,11 @@ const TEMPLATE_DIRECTIVE_VERBS = new Set([
   "written",
 ]);
 
+// The shipped template's own Verification section carries 11 checklist items (product/ONBOARDING.md).
+// Deleting an item outright, rather than checking it off, is invisible to countUncheckedItems() --
+// it would read 0 unchecked items just as happily as a genuinely complete checklist.
+const EXPECTED_VERIFICATION_ITEM_COUNT = 11;
+
 // Not a shared parseCliArgs flag: this is the one caller-specific switch that turns the
 // lane-state-derived strict check into an unconditional one, used only by ONB-22's own gate
 // invocation (check:onboarding-graph-complete) -- see the requireDone block below.
@@ -370,7 +375,11 @@ if (!skip && artifact) {
 
     for (let index = 0; index <= 22; index += 1) {
       const node = `ONB-${String(index).padStart(2, "0")}`;
-      const status = graphRunNodeStatus(text, node);
+      // Reads liveText (fence-stripped), not text -- otherwise a fenced code sample containing
+      // its own fake "## Graph Run" heading and 23 done rows would be parsed as the canonical
+      // run record by sectionBody()/graphRunRows(), letting ONB-22's destructive gate pass while
+      // the real, live Graph Run table stays incomplete.
+      const status = graphRunNodeStatus(liveText, node);
       if (status === "duplicate") {
         issues.push(
           issue(
@@ -392,7 +401,24 @@ if (!skip && artifact) {
       }
     }
 
-    const uncheckedVerificationItems = countUncheckedItems(sectionBody(liveText, "Verification"));
+    const verificationSection = sectionBody(liveText, "Verification");
+    // countUncheckedItems() alone only catches an item left as "- [ ]"; it reads 0 just as
+    // happily when every item was deleted outright instead of checked off. Require the section
+    // to still carry at least the shipped template's own checklist item count (checked or not) so
+    // a shortened/emptied Verification section cannot pass by having nothing left to be unchecked.
+    const verificationItemCount = countChecklistItems(verificationSection);
+    if (verificationItemCount < EXPECTED_VERIFICATION_ITEM_COUNT) {
+      issues.push(
+        issue(
+          "error",
+          "onboarding_graph.verification_items_missing",
+          `${relativePath} claims the onboarding lane is done but its Verification section has only ${verificationItemCount} checklist item(s); the canonical checklist requires ${EXPECTED_VERIFICATION_ITEM_COUNT}.`,
+          relativePath,
+        ),
+      );
+    }
+
+    const uncheckedVerificationItems = countUncheckedItems(verificationSection);
     if (uncheckedVerificationItems > 0) {
       issues.push(
         issue(
@@ -463,6 +489,10 @@ function graphRunNodeStatus(text: string, node: string): "done" | "not_done" | "
 
 function countUncheckedItems(section: string): number {
   return (section.match(/^-\s*\[\s*\]/gm) ?? []).length;
+}
+
+function countChecklistItems(section: string): number {
+  return (section.match(/^-\s*\[[ xX]\]/gm) ?? []).length;
 }
 
 /** The artifact's own "Status: `word`" header, mirrored from tooling/lib/artifact-pages.ts's renderSourceArtifactPage. */

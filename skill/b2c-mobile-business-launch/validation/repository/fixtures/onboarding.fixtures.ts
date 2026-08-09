@@ -393,6 +393,53 @@ export function register(h: Harness): void {
     ["--require-done"],
   );
 
+  const fencedFakeGraphRunTable = makeFixture("onboarding-graph-fenced-fake-table");
+  {
+    markOnboardingDone(fencedFakeGraphRunTable);
+    mutateOnboarding(fencedFakeGraphRunTable, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      const graphRunSection = completed.match(/## Graph Run\n[\s\S]*?(?=\n## )/)?.[0];
+      if (!graphRunSection) throw new Error("fixture setup: could not locate the Graph Run section to relocate");
+      // Remove the live "## Graph Run" heading and table entirely and relocate the exact same
+      // (all-done) content into a fenced code sample instead -- it is now the ONLY "## Graph Run"
+      // heading anywhere in the document. sectionBody()'s own line search finds whichever "##
+      // Graph Run" line comes first with no regard for fences, so before this fix this fenced
+      // sample would have been picked up as the canonical run record and accepted every node as
+      // done; after the fix, graphRunNodeStatus() reads only the fence-stripped live text, finds
+      // no live Graph Run table at all, and correctly reports every node as not recorded.
+      const withoutLiveTable = completed.replace(graphRunSection, "");
+      return `${withoutLiveTable}\n\`\`\`markdown\n${graphRunSection}\n\`\`\`\n`;
+    });
+  }
+  runFixture(
+    "a fenced fake Graph Run table cannot substitute for the removed live one",
+    fencedFakeGraphRunTable,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.node_not_done",
+    ["--require-done"],
+  );
+
+  const verificationChecklistDeleted = makeFixture("onboarding-graph-verification-checklist-deleted");
+  {
+    markOnboardingDone(verificationChecklistDeleted);
+    mutateOnboarding(verificationChecklistDeleted, (text) => {
+      const completed = fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done")));
+      // Delete every Verification checklist item outright (not just leave it unchecked) --
+      // countUncheckedItems() alone reads 0 just as happily on an emptied section as on a
+      // genuinely completed one, so this must be caught by a minimum-item-count check instead.
+      return completed.replace(/## Verification[\s\S]*$/, "## Verification\n");
+    });
+  }
+  runFixture(
+    "deleting the Verification checklist outright still fails even though nothing is left unchecked",
+    verificationChecklistDeleted,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.verification_items_missing",
+    ["--require-done"],
+  );
+
   const doneWithLegitimateAnswerWords = makeFixture("onboarding-graph-done-with-legitimate-answer-words");
   {
     markOnboardingDone(doneWithLegitimateAnswerWords);
