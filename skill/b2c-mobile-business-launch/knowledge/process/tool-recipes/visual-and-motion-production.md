@@ -76,7 +76,7 @@ A literal starting point for the four-beat structure above — use this as the `
 ```
 Use all attached images as references for one product commercial.
 Create a highly creative premium product advertisement for the exact product shown in the reference images.
-Format: horizontal 16:9 cinematic widescreen.
+Format: [match the --aspect_ratio of the generation call this prompt is passed to — 9:16 vertical for Recipe 1 and every Recipe 2 mode below; 16:9 only if that specific call requests horizontal].
 Duration: maximum 15 seconds.
 Goal: make the viewer immediately understand what the product is, what it is used for, why it is desirable, and what emotional/visual world belongs to it.
 
@@ -84,7 +84,7 @@ Important:
 This must be a clear advertising creative, not an abstract VFX film. Do not begin with random dust, ice, smoke, particles, explosions, liquid, or abstract textures unless the actual product is visible and understandable in the same moment. The product must appear clearly within the first 1-2 seconds.
 
 First, silently analyze the attached references:
-Identify the main product, its packaging, shape, label, color, material, ingredients, usage ritual, target customer, desired result, and emotional promise.
+For a mobile app reference (screenshot, icon, or App Store listing) — this skill's primary case — identify the screen or feature shown, its controls, the state transition or action it performs, its color and shape language, target user, desired outcome, and emotional promise. Do not infer packaging, physical materials, or ingredients for an app reference. For a physical-product reference (used only with the Market Category Modifiers below, outside this skill's core scope), identify the main product, its packaging, shape, label, color, material, ingredients, usage ritual, target customer, desired result, and emotional promise.
 
 Universal creative rule:
 Build the concept from the product itself. The ad can be surreal, cinematic, luxurious, playful, futuristic, sensory, scientific, mythic, or dramatic, but it must always stay anchored to the real product and its use.
@@ -118,7 +118,7 @@ Append the matching row's modifier text to the end of the Master Prompt above; r
 
 | Category | What the video must prove | Modifier text |
 |---|---|---|
-| Tech / Electronics | Setup, response, or functional change | Show [main feature] during realistic use. Include an interaction shot, a visible response, and a close-up of [physical detail]. Keep interfaces, ports, proportions, and behavior accurate. |
+| Tech / Electronics | Setup, response, or functional change | Show [main feature] during realistic use. Include an interaction shot, a visible response, and a close-up of [physical detail, or for an app the specific UI control]. Keep interfaces, controls or ports (whichever the reference actually has), proportions, and behavior accurate. |
 | Skincare / Beauty | Texture, application, finish, or routine | Show the real texture, amount, application, and cosmetic finish of [product]. Use soft light and clean macro details. Do not invent ingredients, medical effects, or unrealistic transformations. |
 | Automotive / Accessories | Installation, fit, visibility, or before/after appearance | Show where [product] attaches, how it fits, and the off/on or before/after difference. Keep scale, mounting position, reflections, and light behavior realistic. |
 | Fashion / Apparel | Fit, silhouette, fabric behavior, and construction | Show [product] on the body from useful angles. Include texture, seams, fastening details, and movement demonstrating [stretch, support, or drape]. Preserve its real cut, color, and material. |
