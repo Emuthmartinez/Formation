@@ -1,7 +1,7 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.105.0",
-  "updatedAt": "2026-08-08",
+  "version": "0.106.0",
+  "updatedAt": "2026-08-09",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
     "Generalized the welcome-screen prompt library from Appllama's top-welcome-screens (github.com/Appllama/top-welcome-screens) into the skill as motion-craft-benchmarks.md's R11-R14: splash hold-and-cut, staggered multi-asset entrance, honest loader state-switch/skeleton reveal, and paged cold-open with a deterministic final state. Followed the file's existing 60fps.design pattern exactly — numeric, checkable recipes bound to the token scale, never a named app's mascot/wordmark/copy — so the source repo's own NOTICE.md licensing requirement and this file's recipe format agree by construction.",
