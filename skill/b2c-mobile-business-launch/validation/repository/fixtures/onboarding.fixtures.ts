@@ -110,7 +110,7 @@ export function register(h: Harness): void {
   {
     markOnboardingDone(doneWithOrdinaryRecordProse);
     mutateOnboarding(doneWithOrdinaryRecordProse, (text) => {
-      const completed = checkVerificationItems(fillTemplateDirectiveCells(text.replaceAll("not_started", "done")));
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
       return `${completed}\nThis remains the canonical execution record for the completed onboarding system.\n`;
     });
   }
@@ -134,9 +134,9 @@ export function register(h: Harness): void {
   const doneWithUncheckedVerification = makeFixture("onboarding-graph-done-with-unchecked-verification");
   {
     markOnboardingDone(doneWithUncheckedVerification);
-    // Same table-filling treatment as the passing "genuinely completed" fixture above, but the
-    // Verification section's own "- [ ]" checklist is deliberately left untouched.
-    mutateOnboarding(doneWithUncheckedVerification, (text) => fillTemplateDirectiveCells(text.replaceAll("not_started", "done")));
+    // Same table- and prose-filling treatment as the passing "genuinely completed" fixture
+    // above, but the Verification section's own "- [ ]" checklist is deliberately left untouched.
+    mutateOnboarding(doneWithUncheckedVerification, (text) => fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
   }
   runFixture(
     "a done lane with every Verification checklist item still unchecked fails",
@@ -151,7 +151,7 @@ export function register(h: Harness): void {
   {
     markOnboardingDone(statusColumnSpoofed);
     mutateOnboarding(statusColumnSpoofed, (text) => {
-      const filled = checkVerificationItems(fillTemplateDirectiveCells(text.replaceAll("not_started", "done")));
+      const filled = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
       // ONB-01's row now reads "done" in the Status column like every other row from the blanket
       // replace above; put it back to "partial" there while planting the literal word "done" in
       // its Result cell, proving the checker reads the Status column specifically, not any cell
@@ -175,7 +175,7 @@ export function register(h: Harness): void {
   {
     markOnboardingDone(doneWithLegitimateAnswerWords);
     mutateOnboarding(doneWithLegitimateAnswerWords, (text) => {
-      const filled = checkVerificationItems(fillTemplateDirectiveCells(text.replaceAll("not_started", "done")));
+      const filled = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
       // The template itself prescribes these as the terminal answer format ("Yes or no" / "Pass
       // or gaps"); a real completed launch collapses them to the single chosen word.
       return filled.replaceAll("Yes or no", "Yes").replaceAll("Pass or gaps", "Pass");
@@ -187,6 +187,43 @@ export function register(h: Harness): void {
     "check-onboarding-graph.ts",
     0,
     undefined,
+    ["--require-done"],
+  );
+
+  const doneWithUnfilledProseDirective = makeFixture("onboarding-graph-done-with-unfilled-prose-directive");
+  {
+    markOnboardingDone(doneWithUnfilledProseDirective);
+    // Table cells, checklist, and status header are all completed, but the Execution Mode
+    // section's own directive-verb-led paragraph ("Record `greenfield`, ...") is left exactly
+    // as the shipped template wrote it -- table-only placeholder detection would miss this.
+    mutateOnboarding(doneWithUnfilledProseDirective, (text) => checkVerificationItems(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+  }
+  runFixture(
+    "a done lane with an unfilled prose directive (Execution Mode, evidence trace, ...) fails",
+    doneWithUnfilledProseDirective,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.placeholder_complete",
+    ["--require-done"],
+  );
+
+  const staleStatusHeader = makeFixture("onboarding-graph-stale-status-header");
+  {
+    markOnboardingDone(staleStatusHeader);
+    mutateOnboarding(staleStatusHeader, (text) => {
+      const filled = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      // Every node, checklist item, and table cell now says done; put only the artifact's own
+      // top-of-document "Status: `done`" header back to "partial" to prove it is independently
+      // required to agree, not just inferred from everything else being done.
+      return filled.replace("Status: `done`", "Status: `partial`");
+    });
+  }
+  runFixture(
+    "a done lane whose artifact Status header still says partial fails",
+    staleStatusHeader,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.artifact_status_not_done",
     ["--require-done"],
   );
 
@@ -234,6 +271,26 @@ export function register(h: Harness): void {
             return ` Evidence-${evidenceNumber}: source-backed implementation detail dated 2026-08-08 `;
           })
           .join("|");
+      })
+      .join("\n");
+  }
+
+  // Mirrors check-onboarding-graph.ts's own proseDirectiveLines(): fills paragraph-level
+  // directive lines (Execution Mode, Source Map And Current-State Trace, ...) the table-cell
+  // filler above never touches. Several of these same sentences are also where requirePhrases()
+  // finds its required doctrine phrases (e.g. line 105's "Define First value rendered, First
+  // value engaged, Activation, ..." carries three of onboarding_graph.activation_contract's
+  // required phrases) -- replacing the whole line would make those checks fail too. Swap only
+  // the leading verb for a word outside TEMPLATE_DIRECTIVE_VERBS_PATTERN, keeping the rest of
+  // the sentence (and its required phrases) verbatim.
+  function fillProseDirectiveLines(text: string): string {
+    return text
+      .split("\n")
+      .map((line) => {
+        const trimmed = line.trim();
+        if (trimmed.length === 0 || trimmed.startsWith("|") || trimmed.startsWith("#") || trimmed.startsWith("-")) return line;
+        if (!TEMPLATE_DIRECTIVE_VERBS_PATTERN.test(line)) return line;
+        return line.replace(/^(\s*)[A-Za-z]+/, "$1Confirmed");
       })
       .join("\n");
   }

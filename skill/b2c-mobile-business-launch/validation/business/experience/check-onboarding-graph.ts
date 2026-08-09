@@ -296,13 +296,26 @@ if (!skip && artifact) {
     const liveText = stripFencedBlocks(text);
     const genericPlaceholders = [/\bnot_started\b/i, /\bTODO\b/i, /\bTBD\b/i];
     const placeholderCells = tablePlaceholderCells(liveText);
+    const placeholderProseLines = proseDirectiveLines(liveText);
 
-    if (genericPlaceholders.some((pattern) => pattern.test(liveText)) || placeholderCells.length > 0) {
+    if (genericPlaceholders.some((pattern) => pattern.test(liveText)) || placeholderCells.length > 0 || placeholderProseLines.length > 0) {
       issues.push(
         issue(
           "error",
           "onboarding_graph.placeholder_complete",
           `${relativePath} cannot support lanes.onboarding.status=done while template directives, generic completion labels, or not_started graph nodes remain.`,
+          relativePath,
+        ),
+      );
+    }
+
+    const headerStatus = artifactStatus(liveText);
+    if (headerStatus !== "done") {
+      issues.push(
+        issue(
+          "error",
+          "onboarding_graph.artifact_status_not_done",
+          `${relativePath} claims the onboarding lane is done but its own "Status: \`${headerStatus ?? "(missing)"}\`" header does not say done.`,
           relativePath,
         ),
       );
@@ -380,6 +393,26 @@ function graphRunNodeDone(text: string, node: string): boolean {
 
 function countUncheckedItems(section: string): number {
   return (section.match(/^-\s*\[\s*\]/gm) ?? []).length;
+}
+
+/** The artifact's own "Status: `word`" header, mirrored from tooling/lib/artifact-pages.ts's renderSourceArtifactPage. */
+function artifactStatus(text: string): string | undefined {
+  return text.match(/^Status:\s*`?([^`\n]+)`?/m)?.[1]?.trim();
+}
+
+// tablePlaceholderCells() only ever looked at table rows; the shipped template also opens
+// several sections (Execution Mode, Source Map And Current-State Trace, First Value And
+// Activation, ...) with an ordinary directive-verb-led paragraph rather than a table, and those
+// were never checked -- a "done" artifact could authorize ONB-22's destructive cutover while
+// its own execution mode, evidence trace, and activation contract were still literally the
+// unfilled instruction text.
+function proseDirectiveLines(text: string): string[] {
+  return text.split(/\r?\n/).filter((line) => {
+    const trimmed = line.trim();
+    if (trimmed.length === 0 || trimmed.startsWith("|") || trimmed.startsWith("#") || trimmed.startsWith("-")) return false;
+    const firstWord = trimmed.match(/^[A-Za-z][A-Za-z-]*/)?.[0]?.toLowerCase();
+    return !!(firstWord && TEMPLATE_DIRECTIVE_VERBS.has(firstWord));
+  });
 }
 
 function tablePlaceholderCells(text: string): string[] {
