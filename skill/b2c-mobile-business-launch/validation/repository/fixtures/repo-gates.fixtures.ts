@@ -1594,4 +1594,75 @@ export function register(h: Harness): void {
     1,
     "ste100.sentence_too_long",
   );
+
+  // A real gap Codex caught: the list-item marker ("-", "1.", "- [ ]") was left in place before
+  // counting words, so it counted as a word itself -- a genuinely compliant 20-word bullet was
+  // reported as 21 and failed. This exact bullet is 20 words without its marker.
+  const ste100ListMarkerNotAWord = writeSte100Root("ste100-list-marker-not-a-word", {
+    steFile:
+      "# Doc\n\n- One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty.\n",
+  });
+  runScriptArgs(
+    "ste100 does not count a bullet's own marker as one of its words",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100ListMarkerNotAWord.repoRoot, "--skill-root", ste100ListMarkerNotAWord.skillRoot],
+    0,
+  );
+
+  // Same bug, the GFM task-list shape: the checkbox ("[ ]"/"[x]") is formatting too, and must
+  // not inflate the count either.
+  const ste100TaskListCheckboxNotAWord = writeSte100Root("ste100-task-list-checkbox-not-a-word", {
+    steFile:
+      "# Doc\n\n- [ ] One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty.\n",
+  });
+  runScriptArgs(
+    "ste100 does not count a task-list checkbox as one of its bullet's words",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100TaskListCheckboxNotAWord.repoRoot, "--skill-root", ste100TaskListCheckboxNotAWord.skillRoot],
+    0,
+  );
+
+  // Stripping the marker must not blind the checker to a real violation: this bullet is 21
+  // words even with its marker removed.
+  const ste100ListMarkerStillCatchesReal = writeSte100Root("ste100-list-marker-strip-still-catches-real-violation", {
+    steFile:
+      "# Doc\n\n- One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyone.\n",
+  });
+  runScriptArgs(
+    "ste100 still catches a real violation in a bullet after stripping its marker",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100ListMarkerStillCatchesReal.repoRoot, "--skill-root", ste100ListMarkerStillCatchesReal.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught: the abbreviation-period fix from the previous round protected the
+  // period whenever whitespace followed, even when that period was ALSO the end of its own
+  // sentence -- so two independent, individually compliant sentences ("Use the standard
+  // process, etc." + a fresh 16-word sentence) merged into one 21-word blob and produced a
+  // false violation. Each half is under the ceiling alone; only the false merge is over it.
+  const ste100AbbreviationSentenceFinal = writeSte100Root("ste100-abbreviation-sentence-final-still-a-boundary", {
+    steFile:
+      "# Doc\n\nUse the standard process, etc. Read the next instruction that follows immediately after this one very carefully every single time now.\n",
+  });
+  runScriptArgs(
+    "ste100 keeps a sentence-final abbreviation period as a real boundary, not a false merge",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AbbreviationSentenceFinal.repoRoot, "--skill-root", ste100AbbreviationSentenceFinal.skillRoot],
+    0,
+  );
+
+  // The sentence-final fix must not reopen the mid-sentence bug the previous round fixed: an
+  // abbreviation followed by a lowercase continuation must still protect its period.
+  const ste100AbbreviationMidSentenceStillProtected = writeSte100Root("ste100-abbreviation-mid-sentence-still-protected", {
+    steFile:
+      "# Doc\n\nPick the canonical product name once and reuse it everywhere across every screen, e.g. onboarding, paywall, and email subjects, without ever renaming it again.\n",
+  });
+  runScriptArgs(
+    "ste100 still protects a mid-sentence abbreviation period followed by a lowercase continuation",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AbbreviationMidSentenceStillProtected.repoRoot, "--skill-root", ste100AbbreviationMidSentenceStillProtected.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
 }

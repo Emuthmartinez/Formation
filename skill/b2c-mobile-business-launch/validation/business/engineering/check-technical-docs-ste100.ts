@@ -55,14 +55,30 @@ const presentPerfectPattern = new RegExp(`\\b(?:has|have|had)\\s+(?:not\\s+|neve
  * restored to '.' once sentence boundaries are final.
  */
 const PROTECTED_PERIOD = "\uE000";
-// "no" and "st" are deliberately excluded: both are common as ordinary sentence-final words
-// ("the answer is no.", "first, second, ... last."), and protecting their period would merge
-// a real sentence boundary into the next sentence instead of fixing a false split.
-const ABBREVIATION_PERIOD = /\b(?:e\.g|i\.e|etc|vs|approx|cf|fig|mr|mrs|ms|dr|jr|sr|et al)\.(?=\s|$)/gi;
+// Only the technical/citation abbreviations this repo's own governed prose actually uses are
+// protected -- title abbreviations (Mr., Dr., ...) are deliberately excluded: they're almost
+// always followed by a capitalized proper noun, which would collide with the lowercase-only
+// lookahead below and reintroduce the exact false-split bug this is fixing. "no" and "st" are
+// excluded too: both are common as ordinary sentence-final words ("the answer is no.", "first,
+// second, ... last."), and protecting their period would merge a real sentence boundary into
+// the next sentence instead of fixing a false split.
+//
+// A genuine mid-sentence abbreviation is followed by a lowercase continuation ("e.g. the core
+// feature name"). An abbreviation that is ALSO the sentence's own final word is followed by
+// whitespace and a capital letter (the next sentence) or by nothing at all -- so only a
+// lowercase continuation should protect the period. This check has to run case-sensitively as
+// a plain string test, not as a regex lookahead on the same pattern: the abbreviation match
+// itself needs the "i" flag ("E.g." and "e.g." both count), and "i" would make a `[a-z]`
+// lookahead match uppercase too, silently defeating the whole check.
+const ABBREVIATION_WORD = /\b(?:e\.g|i\.e|etc|vs|approx|cf|fig|et al)\./gi;
 const DECIMAL_OR_VERSION_PERIOD = /(\d)\.(?=\d)/g;
 
 function protectNonTerminalPeriods(text: string): string {
-  return text.replace(ABBREVIATION_PERIOD, (match) => match.replace(/\./g, PROTECTED_PERIOD)).replace(DECIMAL_OR_VERSION_PERIOD, `$1${PROTECTED_PERIOD}`);
+  const withAbbreviationsProtected = text.replace(ABBREVIATION_WORD, (match, offset: number) => {
+    const continuesLowercase = /^\s+[a-z]/.test(text.slice(offset + match.length));
+    return continuesLowercase ? match.replace(/\./g, PROTECTED_PERIOD) : match;
+  });
+  return withAbbreviationsProtected.replace(DECIMAL_OR_VERSION_PERIOD, `$1${PROTECTED_PERIOD}`);
 }
 
 /**
@@ -203,7 +219,11 @@ function sentencesOf(source: string): string[] {
     return true;
   });
 
-  const isListItemLine = (value: string): boolean => /^(?:[-*]|\d+[.)])\s/.test(value);
+  // Matches a bullet/numbered marker and, optionally, a GFM task-list checkbox right after it
+  // ("- [ ] " or "1. [x] ") — both are formatting, not words, and both inflate the word count
+  // the same way if left in place.
+  const LIST_MARKER = /^(?:[-*]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/;
+  const isListItemLine = (value: string): boolean => LIST_MARKER.test(value);
   const isTableRowLine = (value: string): boolean => value.startsWith("|") && value.endsWith("|");
 
   const lines = filteredLines.map((line, index) => {
@@ -224,9 +244,12 @@ function sentencesOf(source: string): string[] {
     }
     // A list item is a discrete unit by definition — force a boundary at its end so it never
     // merges with the next bullet into one oversized chunk, even when the item itself is a
-    // short phrase with no terminal punctuation.
+    // short phrase with no terminal punctuation. The marker itself ("-", "*", "1.") is struck
+    // first: it is formatting, not a word, and left in place it inflates the word count by one,
+    // enough to fail an exactly-20-word compliant bullet.
     if (isListItemLine(trimmed)) {
-      return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+      const withoutMarker = trimmed.replace(LIST_MARKER, "");
+      return /[.!?]$/.test(withoutMarker) ? withoutMarker : `${withoutMarker}.`;
     }
     // A colon does NOT end a sentence in general — "Follow this procedure: open the file,
     // read line one, ..." is one long instruction a colon must not let escape the word-count
