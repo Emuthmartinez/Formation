@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.122.0",
+  "version": "0.123.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -26,6 +26,7 @@
     "check:paid-ua": "tsx validation/business/growth/check-paid-user-acquisition.ts",
     "check:orchestration": "tsx validation/business/orchestration/check-parallel-orchestration.ts",
     "check:generated-pages": "tsx validation/business/process/check-generated-pages.ts",
+    "check:onboarding-page-fresh": "tsx validation/business/process/check-generated-pages.ts --page product/onboarding.html",
     "check:source-registry": "tsx validation/repository/check-source-freshness.ts",
     "check:source-freshness": "tsx validation/repository/check-source-freshness.ts",
     "refresh:source-freshness": "tsx validation/repository/check-source-freshness.ts --write-discovered && tsx validation/repository/refresh-source-freshness.ts",
@@ -78,6 +79,7 @@
     "check:onboarding-evidence-onb-07": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-07 --path product/onboarding/graph/ONB-07-provider-policy-landscape.md",
     "check:onboarding-evidence-onb-08": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-08 --path product/onboarding/graph/ONB-08-motion-research.md",
     "check:onboarding-evidence-onb-09": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-09 --path product/onboarding/graph/ONB-09-evidence-join.md",
+    "check:onboarding-evidence-onb-17": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-17 --path product/onboarding/graph/ONB-17-screen-control-paywall-contract.md",
     "check:onboarding-evidence-onb-19": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-19 --path product/onboarding/graph/ONB-19-implementation-cutover-contract.md",
     "check:onboarding-evidence-onb-20": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-20 --path product/onboarding/graph/ONB-20-adversarial-qa.md",
     "check:onboarding-evidence-onb-21": "tsx validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-21 --path product/onboarding/graph/ONB-21-compound-engineering-plan.md",

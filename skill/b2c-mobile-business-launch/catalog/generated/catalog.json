@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.122.0",
+  "skillVersion": "0.123.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2447,7 +2447,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-17-screen-control-paywall-contract.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-17"
+      ],
       "providerIds": [
         "provider.revenuecat"
       ],
@@ -2594,7 +2596,7 @@
       ],
       "gateCommands": [
         "check:onboarding-graph-complete",
-        "check:generated-pages"
+        "check:onboarding-page-fresh"
       ],
       "providerIds": [
         "provider.revenuecat",
@@ -4713,6 +4715,13 @@
       "audit": "excluded"
     },
     {
+      "id": "gate.check-onboarding-evidence-onb-17",
+      "command": "check:onboarding-evidence-onb-17",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
       "id": "gate.check-onboarding-evidence-onb-19",
       "command": "check:onboarding-evidence-onb-19",
       "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
@@ -4745,6 +4754,13 @@
       "command": "check:onboarding-graph-complete",
       "scriptPath": "validation/business/experience/check-onboarding-graph.ts",
       "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-page-fresh",
+      "command": "check:onboarding-page-fresh",
+      "scriptPath": "validation/business/process/check-generated-pages.ts",
+      "ownerDomainId": "domain.process",
       "audit": "excluded"
     },
     {

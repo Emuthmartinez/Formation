@@ -586,7 +586,15 @@ function requirePhrases(target: Issue[], relativePath: string, text: string, cod
 }
 
 function stripFencedBlocks(text: string): string {
-  return text.replace(/```[\s\S]*?```/g, "");
+  // A required heading, Graph Run row, or checklist item hidden inside any of these three forms
+  // is exactly as invisible in the rendered artifact as inside a triple-backtick fence: an HTML
+  // comment renders nothing at all, and CommonMark accepts a run of 3+ tildes as an equally valid
+  // fence delimiter, not just backticks. All three must be stripped before every structural check
+  // below, or the hidden form just moves rather than closes.
+  return text
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/`{3,}[\s\S]*?`{3,}/g, "")
+    .replace(/~{3,}[\s\S]*?~{3,}/g, "");
 }
 
 function codeFor(value: string): string {

@@ -43,6 +43,8 @@ export const auditExcludedScripts: Record<string, string> = {
   "check:landing-funnel":
     "requires a generated business repo with a deployed landing funnel; the shipped templates contain no deployable funnel (workspace/business/growth/landing/ is a section component library, deliberately not site-shaped, and the validator's scope check ignores it)",
   "check:source-freshness": "alias of check:source-registry (same script and registry); running both would duplicate the step",
+  "check:onboarding-page-fresh":
+    "a --page-scoped invocation of check:generated-pages (already an audit step) for product/onboarding.html only, used as ONB-22's own catalog gate so its acceptance does not depend on an unrelated page elsewhere in the manifest; running the repo-wide check:generated-pages step already covers this page too, so running both in the general audit would duplicate the step",
   "test:validators": "executed by the launchbench step, which lints scenario definitions and then runs the validator fixture suite",
   "check:onboarding-graph-complete":
     "a strict --require-done wrapper around check:onboarding-graph (already an audit step), used only as ONB-22's own catalog gate; the shipped onboarding template is deliberately not marked done, so running this in the general audit would always fail",
@@ -64,6 +66,8 @@ export const auditExcludedScripts: Record<string, string> = {
     "ONB-21's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
   "check:onboarding-evidence-onb-09":
     "ONB-09's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-17":
+    "ONB-17's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
   "check:onboarding-evidence-onb-19":
     "ONB-19's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
 };

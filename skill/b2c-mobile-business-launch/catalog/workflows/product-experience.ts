@@ -282,6 +282,13 @@ const onboardingGraphWorkflows = [
     dependencies: ["workflow.experience.onboarding-system.onb-16-journey-graph"],
     providers: ["provider.revenuecat"],
     outputPaths: ["product/onboarding/graph/ONB-17-screen-control-paywall-contract.md"],
+    // Same production-verification rationale as ONB-19/ONB-20/ONB-21 above: with no gate, this
+    // node compiled to verification "none", so an executor could return the declared artifact ID
+    // and fingerprint without ever writing a substantive screen, control, or paywall contract --
+    // and ONB-20's own gate (which inspects only its own packet) and the final graph gate (which
+    // never reads ONB-17-screen-control-paywall-contract.md) would both miss it, letting ONB-20's
+    // adversarial QA run against a contract that does not actually exist.
+    gates: ["check:onboarding-evidence-onb-17"],
     actionClass: "draft",
     idempotent: true,
   }),
@@ -500,11 +507,14 @@ export const workflows = [
     dependencies: ["workflow.experience.onboarding-system.onb-21-compound-engineering-plan"],
     outputPaths: ["product/ONBOARDING.md", "product/onboarding.html"],
     // check:onboarding-graph-complete reads only product/ONBOARDING.md and project state -- it
-    // has no way to notice product/onboarding.html drifting stale or going missing. check:generated-pages
-    // is the existing mechanism that byte-matches every authored-from page against a fresh render
-    // of its Markdown source; citing it here closes that gap for ONB-22's own acceptance gate
-    // rather than relying on the separate, node-unaware repo-wide audit to eventually catch it.
-    gates: ["check:onboarding-graph-complete", "check:generated-pages"],
+    // has no way to notice product/onboarding.html drifting stale or going missing.
+    // check:onboarding-page-fresh reuses check:generated-pages's own byte-match-against-a-fresh-
+    // render mechanism, scoped with --page to product/onboarding.html only; the unscoped
+    // check:generated-pages iterates every artifactPageEntries() entry, so citing it directly here
+    // would make ONB-22's own acceptance depend on an unrelated page elsewhere in the manifest
+    // (e.g. operations/orchestration.html) being fresh too, coupling this node to lanes it does
+    // not own.
+    gates: ["check:onboarding-graph-complete", "check:onboarding-page-fresh"],
     providers: ["provider.revenuecat", "provider.posthog"],
     // Hard cutover and legacy deletion, not a retryable content mutation -- classifying it
     // "mutate" would let the durable engine execute production deletion under an ordinary

@@ -56,6 +56,42 @@ export function register(h: Harness): void {
     "onboarding_graph.section_privacy_and_security_missing",
   );
 
+  const requiredSectionInHtmlComment = makeFixture("onboarding-graph-required-section-in-html-comment");
+  mutateOnboarding(requiredSectionInHtmlComment, (text) => {
+    // Same relocation as requiredSectionInFence, but into an HTML comment rather than a
+    // triple-backtick fence -- a comment renders nothing at all, yet stripFencedBlocks() only
+    // ever stripped backtick fences, so this form stayed live and readable to every structural
+    // check.
+    const section = text.match(/## Performance And Observability\n[\s\S]*?(?=\n## )/)?.[0];
+    if (!section) throw new Error("fixture setup: could not locate the Performance And Observability section to relocate");
+    const withoutLiveSection = text.replace(section, "");
+    return `${withoutLiveSection}\n<!--\n${section}\n-->\n`;
+  });
+  runFixture(
+    "a required section relocated into an HTML comment still fails as missing",
+    requiredSectionInHtmlComment,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_performance_and_observability_missing",
+  );
+
+  const requiredSectionInTildeFence = makeFixture("onboarding-graph-required-section-in-tilde-fence");
+  mutateOnboarding(requiredSectionInTildeFence, (text) => {
+    // Same relocation again, into a CommonMark tilde fence (~~~) -- an equally valid fence
+    // delimiter to triple backticks, which stripFencedBlocks() never recognized at all.
+    const section = text.match(/## Accessibility And Localization\n[\s\S]*?(?=\n## )/)?.[0];
+    if (!section) throw new Error("fixture setup: could not locate the Accessibility And Localization section to relocate");
+    const withoutLiveSection = text.replace(section, "");
+    return `${withoutLiveSection}\n~~~markdown\n${section}\n~~~\n`;
+  });
+  runFixture(
+    "a required section relocated into a tilde fence still fails as missing",
+    requiredSectionInTildeFence,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_accessibility_and_localization_missing",
+  );
+
   const reviewInsideFirstRun = makeFixture("onboarding-graph-review-inside-first-run");
   mutateOnboarding(reviewInsideFirstRun, (text) =>
     text.replace(
@@ -668,6 +704,21 @@ export function register(h: Harness): void {
     ["--node", "ONB-04", "--path", "product/onboarding/graph/ONB-04-competitor-reviews.md"],
   );
 
+  const evidencePacketTildeFenceOnly = makeFixture("onboarding-evidence-packet-tilde-fence-only");
+  writeEvidencePacket(
+    evidencePacketTildeFenceOnly,
+    "product/onboarding/graph/ONB-04-competitor-reviews.md",
+    `~~~markdown\n${substantiveResearchProse("a competitor review that was never actually written, only faked inside this tilde fence")}\n~~~\n`,
+  );
+  runFixture(
+    "an evidence packet whose only content is inside a tilde fence still fails as thin",
+    evidencePacketTildeFenceOnly,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_too_thin",
+    ["--node", "ONB-04", "--path", "product/onboarding/graph/ONB-04-competitor-reviews.md"],
+  );
+
   const evidencePacketPlaceholder = makeFixture("onboarding-evidence-packet-placeholder");
   writeEvidencePacket(
     evidencePacketPlaceholder,
@@ -787,6 +838,31 @@ export function register(h: Harness): void {
     "--path",
     "product/onboarding/graph/ONB-09-evidence-join.md",
   ]);
+
+  const onb17PacketMissing = makeFixture("onboarding-evidence-onb17-missing");
+  runFixture(
+    "ONB-17's gate fails when the screen, control, and paywall contract does not exist yet",
+    onb17PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-17", "--path", "product/onboarding/graph/ONB-17-screen-control-paywall-contract.md"],
+  );
+
+  const onb17PacketComplete = makeFixture("onboarding-evidence-onb17-complete");
+  writeEvidencePacket(
+    onb17PacketComplete,
+    "product/onboarding/graph/ONB-17-screen-control-paywall-contract.md",
+    substantiveResearchProse("every onboarding screen, copy key, control, action, paywall state, failure, recovery, accessibility, and localization behavior"),
+  );
+  runFixture(
+    "ONB-17's gate passes a genuinely substantive, marker-free screen, control, and paywall contract",
+    onb17PacketComplete,
+    evidenceScript,
+    0,
+    undefined,
+    ["--node", "ONB-17", "--path", "product/onboarding/graph/ONB-17-screen-control-paywall-contract.md"],
+  );
 
   const onb19PacketMissing = makeFixture("onboarding-evidence-onb19-missing");
   runFixture(

@@ -25,7 +25,12 @@
  * at once, so it is filed under the cross-cutting process domain.
  *
  * npm script: check:generated-pages
- * Usage: tsx validation/business/process/check-generated-pages.ts [--root /path/to/business]
+ * Usage: tsx validation/business/process/check-generated-pages.ts [--root /path/to/business] [--page <html-path>]
+ *
+ * --page scopes assertions 2 and 3 to one declared page (used by a node-specific gate, such as
+ * ONB-22's own acceptance check, that must not fail because an unrelated page elsewhere in the
+ * manifest is stale). Assertion 1 (every page on disk is declared) is inherently repo-wide and is
+ * skipped in this mode -- an undeclared sibling page is not this node's problem to catch.
  */
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -42,30 +47,51 @@ const skillRootDir = path.resolve(scriptDir, "../../..");
 // point at for local/CI runs.
 const defaultBusinessRoot = process.env.BUSINESS_ROOT ? path.resolve(process.env.BUSINESS_ROOT) : path.join(skillRootDir, "workspace", "business");
 
-const flags = parseFlags(process.argv.slice(2), [{ flags: ["--root", "--business"], key: "root" }]);
+const flags = parseFlags(process.argv.slice(2), [
+  { flags: ["--root", "--business"], key: "root" },
+  { flags: ["--page"], key: "page", kind: "string" },
+]);
 const businessRoot = flagString(flags, "root") ?? defaultBusinessRoot;
+const pageFilter = flagString(flags, "page");
 const issues: Issue[] = [];
 
 if (!existsSync(businessRoot)) {
   issues.push(issue("error", "generated_pages.business_root_missing", `Business directory is missing: ${businessRoot}`, businessRoot));
   reportAndExit("Generated pages", issues);
 } else {
-  // 1. Every page on disk is declared.
-  for (const page of listRootPages(businessRoot)) {
-    // hasOwn, not `in`: `in` walks the prototype chain, so a page whose name
-    // collided with an Object.prototype key would read as already declared.
-    if (Object.hasOwn(artifactPages, page)) continue;
+  if (!pageFilter) {
+    // 1. Every page on disk is declared. Repo-wide only: an undeclared sibling page is not
+    // a specific --page invocation's problem to catch, and would otherwise make a node-scoped
+    // gate fail on drift it has no ownership of.
+    for (const page of listRootPages(businessRoot)) {
+      // hasOwn, not `in`: `in` walks the prototype chain, so a page whose name
+      // collided with an Object.prototype key would read as already declared.
+      if (Object.hasOwn(artifactPages, page)) continue;
+      issues.push(
+        issue(
+          "error",
+          "generated_pages.undeclared_page",
+          `${page} sits at the root of business/ with no entry in tooling/lib/artifact-pages.ts. Declare where it comes from: a script that renders it, a starter placeholder, or the Markdown document it is written from.`,
+          page,
+        ),
+      );
+    }
+  }
+
+  const entries = pageFilter ? artifactPageEntries().filter(([html]) => html === pageFilter) : artifactPageEntries();
+
+  if (pageFilter && entries.length === 0) {
     issues.push(
       issue(
         "error",
-        "generated_pages.undeclared_page",
-        `${page} sits at the root of business/ with no entry in tooling/lib/artifact-pages.ts. Declare where it comes from: a script that renders it, a starter placeholder, or the Markdown document it is written from.`,
-        page,
+        "generated_pages.page_not_declared",
+        `--page ${pageFilter} does not match any entry in tooling/lib/artifact-pages.ts. Fix the gate invocation or the manifest.`,
+        pageFilter,
       ),
     );
   }
 
-  for (const [html, entry] of artifactPageEntries()) {
+  for (const [html, entry] of entries) {
     // 2. Every declared page exists.
     const outputPath = path.join(businessRoot, html);
     if (!existsSync(outputPath)) {
@@ -123,5 +149,5 @@ if (!existsSync(businessRoot)) {
     }
   }
 
-  reportAndExit("Generated pages", issues);
+  reportAndExit(pageFilter ? `Generated pages (${pageFilter})` : "Generated pages", issues);
 }

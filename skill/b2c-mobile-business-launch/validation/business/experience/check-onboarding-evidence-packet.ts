@@ -50,13 +50,15 @@ if (!relativePath) {
       ),
     );
   } else {
-    // Strip fenced code blocks and HTML comments before measuring: an <!-- ... --> block is
-    // invisible in the rendered artifact but would otherwise inflate the substantive-length
+    // Strip every form of non-rendered Markdown before measuring: an <!-- ... --> comment
+    // renders nothing, and CommonMark accepts a run of 3+ tildes as an equally valid fence
+    // delimiter, not just backticks -- either would otherwise inflate the substantive-length
     // count and its first non-blank line (if it doesn't start with #, |, or -) would pass the
-    // hasProse check below, letting a comment stand in for a finding no reviewer ever wrote.
+    // hasProse check below, letting hidden content stand in for a finding no reviewer ever wrote.
     const stripped = text
-      .replace(/```[\s\S]*?```/g, "")
       .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/`{3,}[\s\S]*?`{3,}/g, "")
+      .replace(/~{3,}[\s\S]*?~{3,}/g, "")
       .trim();
 
     if (stripped.length < MIN_SUBSTANTIVE_LENGTH) {
