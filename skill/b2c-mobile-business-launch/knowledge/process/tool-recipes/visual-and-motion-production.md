@@ -48,6 +48,85 @@ Rules:
 - Do not present generated screenshots as real app functionality. Store screenshots must show truthful app UI and avoid unsupported claims, prices, or features.
 - For animations, write the storyboard and reduced-motion fallback before generation, then verify the clip in layout.
 
+## Product Ad Structure And Prompt Craft
+
+Purpose: replace the `<hook + design/DESIGN.md brief>` placeholder used across the Chained Recipes below with a concrete structure, so a generated ad proves one specific feature instead of drifting into abstract mood with no UI on screen. Applies to every `--prompt` passed to `marketing_studio_video` (`ugc`, `ugc_unboxing`, `product_review`, `tv_spot`) and to any Remotion ad/social composition.
+
+Before writing the prompt, fix two things:
+- **The reference.** Which screenshot, icon, or UI state is actually in frame, and its real shape, color, and layout — the prompt must not contradict it.
+- **The one claim.** What the feature is, what it does, and why it is worth opening the app for. One claim per ad; do not stack three features into one 15-second cut.
+
+Four-beat structure (scale the timings below to the recipe's `--duration`; ratios assume a 15s ad):
+1. **Identification hook (0–2s).** The app or feature is on screen in a clean hero shot before anything else happens. Never open on abstract particles, smoke, or a transition effect with no real UI visible — hiding the product for the first two seconds loses the viewer who would have recognized it.
+2. **Usage / function (2–8s).** Show the feature being used, or the screen changing state, in a way that makes the mechanism obvious without narration — a tap, a result appearing, a before/after.
+3. **Creative escalation (8–12s).** Turn the benefit into one memorable image. Stay anchored to the real product here — escalate the feeling, not the feature list.
+4. **Final hero shot (12–15s).** End clean, on the app's actual icon or screen, matching `design/DESIGN.md` palette and motion energy.
+
+Consistency and accuracy rules — apply regardless of which tool renders the ad:
+- Keep exact screens, copy, icons, and proportions from the real app; do not invent functionality, ratings, or claims the product does not have. This is the same truthful-UI rule the block above states for store screenshots — it applies to ad creative too.
+- Cut on action (hard cut, match cut, cut on motion) between beats. Avoid morphing/dissolve transitions mid-cut — they make the product illegible at the exact moment a viewer would recognize it.
+- Match the beat to the feature type: a utility feature reads best as a before/after; a creative/output feature needs the result visible; a habit/streak feature needs the moment of use shown, not just the icon.
+
+Fill the `--prompt` argument in Recipe 1 step 8 and Recipe 2 step 4 below with the four beats above, written specifically to the feature being advertised and the current `design/DESIGN.md` tokens — then discard the placeholder text.
+
+### Master Prompt Template
+
+A literal starting point for the four-beat structure above — use this as the `--prompt` body when a call needs the full text instead of being composed from scratch. Attach the app's actual screenshot/icon references as the generation input; the block below is the text prompt only. Keep the structure and rules intact; only the bracketed brief content should change per app/feature.
+
+```
+Use all attached images as references for one product commercial.
+Create a highly creative premium product advertisement for the exact product shown in the reference images.
+Format: horizontal 16:9 cinematic widescreen.
+Duration: maximum 15 seconds.
+Goal: make the viewer immediately understand what the product is, what it is used for, why it is desirable, and what emotional/visual world belongs to it.
+
+Important:
+This must be a clear advertising creative, not an abstract VFX film. Do not begin with random dust, ice, smoke, particles, explosions, liquid, or abstract textures unless the actual product is visible and understandable in the same moment. The product must appear clearly within the first 1-2 seconds.
+
+First, silently analyze the attached references:
+Identify the main product, its packaging, shape, label, color, material, ingredients, usage ritual, target customer, desired result, and emotional promise.
+
+Universal creative rule:
+Build the concept from the product itself. The ad can be surreal, cinematic, luxurious, playful, futuristic, sensory, scientific, mythic, or dramatic, but it must always stay anchored to the real product and its use.
+
+Ad structure:
+0-3 seconds — PRODUCT IDENTIFICATION HOOK:
+Open with the product clearly visible in a premium hero shot.
+3-8 seconds — USAGE / FUNCTION / TRANSFORMATION:
+Show the product being used or interacting with its world in a way that makes its purpose obvious.
+8-12 seconds — CREATIVE ESCALATION:
+Turn the product's benefit into a memorable cinematic image.
+12-15 seconds — FINAL HERO SHOT:
+End with a clean, premium final product shot.
+
+Camera:
+macro close-ups for texture, clean product hero shots for packaging, hands-in-action for usage, slow luxury push-ins for premium feeling, fast precise cuts for performance.
+
+Lighting:
+soft clean light for hygiene, glossy reflections for premium, rim light for silhouette, warm light for comfort, clinical light for precision, dramatic contrast for power.
+
+CRITICAL — Editing:
+Do not use morphing transitions. Every cut must be a clean editorial transition: hard cut, match cut, cut on motion, whip-pan cut, or product close-up cut.
+
+Product accuracy:
+Keep the product visually consistent with the reference image. Preserve its main shape, colors, materials, proportions.
+```
+
+### Market Category Modifiers
+
+Append the matching row's modifier text to the end of the Master Prompt above; replace bracketed placeholders with the app's real feature detail. For this skill's actual output — a mobile app — Tech / Electronics (functional/setup features) and Everyday Products (single-benefit features) are the nearest fit; keep the remaining rows for a founder producing ecommerce or physical-product ad creative outside this skill's core app-launch scope, or for an app feature that genuinely behaves like one of these categories (e.g. a fitness app's workout feature under Sports / Fitness).
+
+| Category | What the video must prove | Modifier text |
+|---|---|---|
+| Tech / Electronics | Setup, response, or functional change | Show [main feature] during realistic use. Include an interaction shot, a visible response, and a close-up of [physical detail]. Keep interfaces, ports, proportions, and behavior accurate. |
+| Skincare / Beauty | Texture, application, finish, or routine | Show the real texture, amount, application, and cosmetic finish of [product]. Use soft light and clean macro details. Do not invent ingredients, medical effects, or unrealistic transformations. |
+| Automotive / Accessories | Installation, fit, visibility, or before/after appearance | Show where [product] attaches, how it fits, and the off/on or before/after difference. Keep scale, mounting position, reflections, and light behavior realistic. |
+| Fashion / Apparel | Fit, silhouette, fabric behavior, and construction | Show [product] on the body from useful angles. Include texture, seams, fastening details, and movement demonstrating [stretch, support, or drape]. Preserve its real cut, color, and material. |
+| Food / Drink | Preparation, texture, serving moment, and appetite appeal | Show [product] being prepared, opened, served, or consumed realistically. Use macro texture and appetite cues. Add steam, splashes, or ingredients only when physically relevant. |
+| Home / Lifestyle | Scale, setup, spatial use, and everyday benefit | Establish the product's real size in a believable environment. Show setup, interaction, and the change created by [main benefit]. Preserve its dimensions and construction. |
+| Sports / Fitness | Fit, grip, resistance, support, or movement | Show [product] during its intended activity. Use close-ups of grip, material, contact points, and movement to demonstrate [specific function]. Avoid unsupported claims. |
+| Everyday Products | One simple problem and one visible payoff | Use one sequence: [problem] → [product action] → [visible result]. Show the product immediately and increase perceived value without disguising what it is. |
+
 ## Higgsfield Chained Recipes
 
 These are the canonical recipe bodies. Other files route to a recipe by name and add only their surface-specific note.
@@ -76,7 +155,7 @@ Purpose: create a reusable founder/presenter Soul identity once, then produce we
      --url <app-store-url> --wait
    ```
 7. **Spend confirm for ad batch.** Surface current balance via `mcp__claude_ai_Higgsfield__balance`. Confirm weekly generation spend with the founder per `paid-tool-routing.md`.
-8. **Generate ads (weekly).** Inject design/DESIGN.md tokens into every `--prompt`:
+8. **Generate ads (weekly).** Inject design/DESIGN.md tokens into every `--prompt`, structured per **Product Ad Structure And Prompt Craft** above:
    ```bash
    higgsfield generate create marketing_studio_video \
      --prompt "<hook + design/DESIGN.md brief>" \
@@ -109,7 +188,7 @@ Purpose: turn the live App Store listing into a multi-format UGC ad batch withou
    ```
 2. **Pick avatar.** Use a preset avatar or a custom Soul avatar. For custom Soul, confirm `avatar_id` exists in `state/PROJECT_STATE.yaml`; if not, run Recipe 1 steps 2–5 first.
 3. **Spend confirm.** Surface balance via `mcp__claude_ai_Higgsfield__balance`. Confirm spend for the planned mode batch with the founder per `paid-tool-routing.md`.
-4. **Generate parallel mode batch.** Inject design/DESIGN.md tokens into every `--prompt`. The `--url` shortcut reuses the backend entity but does NOT inject brief — always add `--prompt` explicitly:
+4. **Generate parallel mode batch.** Inject design/DESIGN.md tokens into every `--prompt`, structured per **Product Ad Structure And Prompt Craft** above. The `--url` shortcut reuses the backend entity but does NOT inject brief — always add `--prompt` explicitly:
    ```bash
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \

@@ -1,11 +1,11 @@
 {
   "skill": "b2c-mobile-business-launch",
-  "version": "0.103.1",
-  "updatedAt": "2026-08-07",
+  "version": "0.104.0",
+  "updatedAt": "2026-08-08",
   "sourcePath": "skill/b2c-mobile-business-launch",
   "releaseNotes": [
-    "Resolved a two-month-old port-ledger inconsistency (docs/plans/attachments/2026-08-port-ledger.md): check-app-copy.ts and check-founder-copy.ts were dispositioned \"port\" by U8's original triage (structural/live-proof kernel survives, word-pattern prose-grading half dropped), but the split never executed -- both remained fully unchanged HYBRID validators. An llm-council review found the \"port\" disposition itself was the error: unlike validators that grade a self-attested report about a separate process (the disease \"port\"/\"drop\" target), the prose these two gates scan IS the shipped artifact itself -- COPY_DECK.md cells become literal app strings, founder-visible HTML/markdown is literally what a founder reads. Both rows revised port -> keep under this artifact-vs-report criterion, the same test that justified check-no-slop.ts's prior reinstatement -- closing the follow-up that row's reason column promised.",
-    "The council's chairman flagged that nobody had empirically re-verified the disputed word-pattern checks before trusting them (this repo's own standing rule: a gate is real only once it has been watched to fail). check-app-copy.ts's word-pattern half already had extensive fail-then-catch fixture coverage (verified live: 604/604 passing). check-founder-copy.ts's did not: the general banned-vocabulary rule (founder_copy.internal_vocabulary) had zero fixture coverage -- only a narrower technique-naming special case was tested. Verified live with a hand-injected banned term, then closed permanently with a new fixture case in validation/repository/fixtures/repo-gates.fixtures.ts.",
-    "No validator code changed -- both files keep their full original logic. Ledger summary/Total counts updated (port 27->25, keep 123->125) to stay in sync with verification/fixtures/catalog.fixtures.ts's mechanical ledger-completeness check."
+    "Added 'Product Ad Structure And Prompt Craft' to knowledge/process/tool-recipes/visual-and-motion-production.md: a four-beat structure (identification hook, usage/function, creative escalation, final hero shot) that replaces the vague '<hook + design/DESIGN.md brief>' placeholder previously used, unfilled, across five separate --prompt calls in the Higgsfield Chained Recipes.",
+    "Added a literal Master Prompt Template and a Market Category Modifiers table under the same section, so a --prompt can be composed from a tested starting text instead of written from scratch each time. Both are adapted for this skill's actual output (a mobile app's screenshots/UI, not a physical ecommerce product) and route Recipe 1 step 8 / Recipe 2 step 4 to the new structure instead of the old placeholder.",
+    "Updated the tool-recipes.md lane index to list 'Product Ad Structure And Prompt Craft' alongside the existing Higgsfield/Remotion entries for the Visual And Motion Production lane."
   ]
 }
