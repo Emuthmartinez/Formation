@@ -628,8 +628,40 @@ if (bench !== undefined && Object.keys(motionTokens).length > 0 && bands.has("pr
       const headerCells = splitCells(lines[headerRow] ?? "");
       const col = {
         assets: headerCells.findIndex((c) => /assets/i.test(c)),
+        gaps: headerCells.findIndex((c) => /gaps/i.test(c)),
+        gapBudget: headerCells.findIndex((c) => /budget/i.test(c)),
         offset: headerCells.findIndex((c) => /offset/i.test(c)),
         total: headerCells.findIndex((c) => /total/i.test(c)),
+      };
+      // Cross-checks a row's own Gaps and Gap-budget-÷-gaps cells against the same derivation
+      // the Offset/Total cells are already checked against, for the given gap count -- so a row
+      // can no longer state a wrong gap count or budget while its offset/total stay internally
+      // consistent with each other (Codex's 4th-round finding: only Assets/Offset/Total were
+      // parsed, so Gaps and Gap budget could drift freely).
+      const checkGapsAndBudget = (gaps: number, gapsCell: string, budgetCell: string, rowLabel: string, isTerminal: boolean): void => {
+        const expectedGapsCell = isTerminal ? `${gaps}+` : String(gaps);
+        if (gapsCell.replace(/\s/g, "") !== expectedGapsCell) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.gaps_drift",
+              `R12's offset table states "${gapsCell || "(empty)"}" gap(s) for ${rowLabel}, but that row's own asset count implies ${expectedGapsCell} gap(s).`,
+              BENCH,
+            ),
+          );
+        }
+        const expectedBudgetMs = Math.floor(gapBudgetMs / gaps);
+        const budgetMatch = /(\d+)ms/.exec(budgetCell);
+        if (!budgetMatch || Number(budgetMatch[1]) !== expectedBudgetMs) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.gap_budget_drift",
+              `R12's offset table states a gap budget of "${budgetCell || "(unparseable)"}" for ${rowLabel}, but (motion.durationReveal − press settle) ÷ ${gaps} gap(s) computes to ${expectedBudgetMs}ms.`,
+              BENCH,
+            ),
+          );
+        }
       };
       let sawUnachievableRow = false;
       let recomputedFirstUnachievable: number | undefined;
@@ -641,6 +673,7 @@ if (bench !== undefined && Object.keys(motionTokens).length > 0 && bands.has("pr
         }
       }
 
+      const parsedAssetCounts = new Set<number>();
       let rowIndex = headerRow + 2;
       let parsedAnyNumericRow = false;
       for (; rowIndex < lines.length; rowIndex++) {
@@ -667,12 +700,15 @@ if (bench !== undefined && Object.keys(motionTokens).length > 0 && bands.has("pr
                 ),
               );
             }
+            checkGapsAndBudget(recomputedFirstUnachievable - 1, cells[col.gaps] ?? "", cells[col.gapBudget] ?? "", "the terminal row", true);
           }
           continue;
         }
         parsedAnyNumericRow = true;
         const assets = Number(assetsMatch[1]);
+        parsedAssetCounts.add(assets);
         const gaps = assets - 1;
+        checkGapsAndBudget(gaps, cells[col.gaps] ?? "", cells[col.gapBudget] ?? "", `${assets} assets`, false);
         const offsetNums = [...offsetCell.matchAll(/(\d+)ms/g)].map((x) => Number(x[1]));
         const totalMatch = /^(\d+)ms$/.exec(totalCell);
         if (offsetNums.length === 0 || !totalMatch) {
@@ -738,6 +774,26 @@ if (bench !== undefined && Object.keys(motionTokens).length > 0 && bands.has("pr
             BENCH,
           ),
         );
+      }
+      // Every asset count that is actually achievable (2 up to the recomputed boundary) needs
+      // its own row -- otherwise deleting an interior row (e.g. the 3-asset row) still leaves
+      // the 2-asset row, the terminal "N+" row, and every other check green, silently dropping
+      // guidance for a supported asset count (Codex's 4th-round finding).
+      if (recomputedFirstUnachievable !== undefined) {
+        const missingCounts: number[] = [];
+        for (let assets = 2; assets < recomputedFirstUnachievable; assets++) {
+          if (!parsedAssetCounts.has(assets)) missingCounts.push(assets);
+        }
+        if (missingCounts.length > 0) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.missing_asset_count_row",
+              `R12's offset table has no row for asset count(s) ${missingCounts.join(", ")}, even though pure stagger is achievable there (below the recomputed ${recomputedFirstUnachievable}-asset boundary) — every achievable asset count needs its own row.`,
+              BENCH,
+            ),
+          );
+        }
       }
     }
   }

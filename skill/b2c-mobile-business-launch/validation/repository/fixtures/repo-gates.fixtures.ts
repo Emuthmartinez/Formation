@@ -818,6 +818,39 @@ export function register(h: Harness): void {
     "motion_contract.recipe_offset_table.row_internally_inconsistent",
   );
 
+  const motionOffsetTableGapsDrift = writeMotionContractRoot("motion-contract-offset-table-gaps-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 3 | 2 | 100ms | up to 100ms | 600ms |", "| 3 | 3 | 100ms | up to 100ms | 600ms |") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when an offset-table row's Gaps cell disagrees with its own asset count",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableGapsDrift],
+    1,
+    "motion_contract.recipe_offset_table.gaps_drift",
+  );
+
+  const motionOffsetTableGapBudgetDrift = writeMotionContractRoot("motion-contract-offset-table-gap-budget-drift", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 3 | 2 | 100ms | up to 100ms | 600ms |", "| 3 | 2 | 120ms | up to 100ms | 600ms |") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when an offset-table row's Gap-budget-÷-gaps cell disagrees with the recomputed value",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableGapBudgetDrift],
+    1,
+    "motion_contract.recipe_offset_table.gap_budget_drift",
+  );
+
+  const motionOffsetTableMissingAssetCountRow = writeMotionContractRoot("motion-contract-offset-table-missing-row", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("| 3 | 2 | 100ms | up to 100ms | 600ms |\n", "") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when an achievable asset count has no row at all in the offset table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionOffsetTableMissingAssetCountRow],
+    1,
+    "motion_contract.recipe_offset_table.missing_asset_count_row",
+  );
+
   const motionCanonDrift = writeMotionContractRoot("motion-contract-canon-outside-band", (rel, text) =>
     rel.endsWith("peak-end-card.md") ? text.replace(".spring(response: 0.45, dampingFraction: 0.7)", ".spring(response: 0.45, dampingFraction: 0.85)") : text,
   );
