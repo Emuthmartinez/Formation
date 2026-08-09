@@ -591,10 +591,14 @@ function stripFencedBlocks(text: string): string {
   // comment renders nothing at all, and CommonMark accepts a run of 3+ tildes as an equally valid
   // fence delimiter, not just backticks. All three must be stripped before every structural check
   // below, or the hidden form just moves rather than closes.
+  // Each closing delimiter is optional (`|$`): CommonMark renders an unterminated comment or
+  // fence as extending to the end of the document, so a required section relocated after an
+  // opened-but-never-closed delimiter is exactly as hidden as one inside a properly closed one --
+  // stopping the strip at "no closing delimiter found" would leave it live and readable instead.
   return text
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/`{3,}[\s\S]*?`{3,}/g, "")
-    .replace(/~{3,}[\s\S]*?~{3,}/g, "");
+    .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
+    .replace(/`{3,}[\s\S]*?(?:`{3,}|$)/g, "")
+    .replace(/~{3,}[\s\S]*?(?:~{3,}|$)/g, "");
 }
 
 function codeFor(value: string): string {

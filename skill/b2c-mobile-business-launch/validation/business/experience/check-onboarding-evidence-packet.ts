@@ -55,10 +55,14 @@ if (!relativePath) {
     // delimiter, not just backticks -- either would otherwise inflate the substantive-length
     // count and its first non-blank line (if it doesn't start with #, |, or -) would pass the
     // hasProse check below, letting hidden content stand in for a finding no reviewer ever wrote.
+    // Each closing delimiter is optional (`|$`): CommonMark renders an unterminated comment or
+    // fence as extending to the end of the document, not as prose, so a packet that opens one of
+    // these forms and never closes it must have everything after the opener stripped too, or an
+    // unbounded amount of trailing text would still be counted as a real, rendered finding.
     const stripped = text
-      .replace(/<!--[\s\S]*?-->/g, "")
-      .replace(/`{3,}[\s\S]*?`{3,}/g, "")
-      .replace(/~{3,}[\s\S]*?~{3,}/g, "")
+      .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
+      .replace(/`{3,}[\s\S]*?(?:`{3,}|$)/g, "")
+      .replace(/~{3,}[\s\S]*?(?:~{3,}|$)/g, "")
       .trim();
 
     if (stripped.length < MIN_SUBSTANTIVE_LENGTH) {

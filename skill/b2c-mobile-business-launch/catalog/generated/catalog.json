@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.124.0",
+  "skillVersion": "0.125.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1971,7 +1971,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-00-resume-scope.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-00"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "observe",
@@ -1997,7 +1999,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-01-current-state-trace.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-01"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "observe",
@@ -2023,7 +2027,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-02-evidence-plan.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-02"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "observe",
@@ -4680,6 +4686,27 @@
       "scriptPath": "validation/business/words/check-no-slop.ts",
       "ownerDomainId": "domain.words",
       "audit": "required"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-00",
+      "command": "check:onboarding-evidence-onb-00",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-01",
+      "command": "check:onboarding-evidence-onb-01",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-02",
+      "command": "check:onboarding-evidence-onb-02",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
     },
     {
       "id": "gate.check-onboarding-evidence-onb-03",

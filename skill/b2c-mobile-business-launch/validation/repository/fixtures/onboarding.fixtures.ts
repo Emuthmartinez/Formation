@@ -92,6 +92,26 @@ export function register(h: Harness): void {
     "onboarding_graph.section_accessibility_and_localization_missing",
   );
 
+  const requiredSectionInUnterminatedFence = makeFixture("onboarding-graph-required-section-in-unterminated-fence");
+  mutateOnboarding(requiredSectionInUnterminatedFence, (text) => {
+    // Same relocation again, but the opening fence is never closed -- CommonMark still renders
+    // an unterminated fence as extending to the end of the document (code, not prose), yet the
+    // old paired-delimiter regex required a closing run of backticks to match anything at all,
+    // so with no closer present it stripped nothing and left the relocated heading exactly as
+    // live and findable as if it had never been fenced.
+    const section = text.match(/## Prototype And Design Proof\n[\s\S]*?(?=\n## )/)?.[0];
+    if (!section) throw new Error("fixture setup: could not locate the Prototype And Design Proof section to relocate");
+    const withoutLiveSection = text.replace(section, "");
+    return `${withoutLiveSection}\n\`\`\`markdown\n${section}\n`;
+  });
+  runFixture(
+    "a required section relocated into an unterminated fence still fails as missing",
+    requiredSectionInUnterminatedFence,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_prototype_and_design_proof_missing",
+  );
+
   const reviewInsideFirstRun = makeFixture("onboarding-graph-review-inside-first-run");
   mutateOnboarding(reviewInsideFirstRun, (text) =>
     text.replace(
@@ -670,6 +690,73 @@ export function register(h: Harness): void {
     return `## Findings\n\n${sentence.repeat(15)}\n`;
   };
 
+  const onb00PacketMissing = makeFixture("onboarding-evidence-onb00-missing");
+  runFixture(
+    "ONB-00's gate fails when the resume/scope packet does not exist yet",
+    onb00PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-00", "--path", "product/onboarding/graph/ONB-00-resume-scope.md"],
+  );
+
+  const onb00PacketComplete = makeFixture("onboarding-evidence-onb00-complete");
+  writeEvidencePacket(
+    onb00PacketComplete,
+    "product/onboarding/graph/ONB-00-resume-scope.md",
+    substantiveResearchProse("whether this run is greenfield, replacement, audit-only, or a bounded incremental scope"),
+  );
+  runFixture("ONB-00's gate passes a genuinely substantive, marker-free resume/scope packet", onb00PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-00",
+    "--path",
+    "product/onboarding/graph/ONB-00-resume-scope.md",
+  ]);
+
+  const onb01PacketMissing = makeFixture("onboarding-evidence-onb01-missing");
+  runFixture(
+    "ONB-01's gate fails when the current-state trace does not exist yet",
+    onb01PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-01", "--path", "product/onboarding/graph/ONB-01-current-state-trace.md"],
+  );
+
+  const onb01PacketComplete = makeFixture("onboarding-evidence-onb01-complete");
+  writeEvidencePacket(
+    onb01PacketComplete,
+    "product/onboarding/graph/ONB-01-current-state-trace.md",
+    substantiveResearchProse("the actual onboarding implementation, documents, routes, state, providers, events, failures, tests, and legacy surfaces"),
+  );
+  runFixture("ONB-01's gate passes a genuinely substantive, marker-free current-state trace", onb01PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-01",
+    "--path",
+    "product/onboarding/graph/ONB-01-current-state-trace.md",
+  ]);
+
+  const onb02PacketMissing = makeFixture("onboarding-evidence-onb02-missing");
+  runFixture("ONB-02's gate fails when the evidence plan does not exist yet", onb02PacketMissing, evidenceScript, 1, "onboarding_evidence.packet_missing", [
+    "--node",
+    "ONB-02",
+    "--path",
+    "product/onboarding/graph/ONB-02-evidence-plan.md",
+  ]);
+
+  const onb02PacketComplete = makeFixture("onboarding-evidence-onb02-complete");
+  writeEvidencePacket(
+    onb02PacketComplete,
+    "product/onboarding/graph/ONB-02-evidence-plan.md",
+    substantiveResearchProse("the onboarding evidence hierarchy, access constraints, sample plan, and freshness cutoff"),
+  );
+  runFixture("ONB-02's gate passes a genuinely substantive, marker-free evidence plan", onb02PacketComplete, evidenceScript, 0, undefined, [
+    "--node",
+    "ONB-02",
+    "--path",
+    "product/onboarding/graph/ONB-02-evidence-plan.md",
+  ]);
+
   const evidencePacketMissing = makeFixture("onboarding-evidence-packet-missing");
   runFixture(
     "ONB-03's gate fails when its evidence packet does not exist yet",
@@ -713,6 +800,25 @@ export function register(h: Harness): void {
   runFixture(
     "an evidence packet whose only content is inside a tilde fence still fails as thin",
     evidencePacketTildeFenceOnly,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_too_thin",
+    ["--node", "ONB-04", "--path", "product/onboarding/graph/ONB-04-competitor-reviews.md"],
+  );
+
+  const evidencePacketUnterminatedFenceOnly = makeFixture("onboarding-evidence-packet-unterminated-fence-only");
+  writeEvidencePacket(
+    evidencePacketUnterminatedFenceOnly,
+    "product/onboarding/graph/ONB-04-competitor-reviews.md",
+    // The opening fence is never closed. CommonMark still renders everything after it as code,
+    // not prose, to the end of the document -- but the old paired-delimiter regex only stripped
+    // a fence when it found a matching close, so with none present here it stripped nothing and
+    // this faked content still cleared the 400-character substantive-length check.
+    `\`\`\`markdown\n${substantiveResearchProse("a competitor review that was never actually written, only faked inside this unterminated fence")}\n`,
+  );
+  runFixture(
+    "an evidence packet whose only content is inside an unterminated fence still fails as thin",
+    evidencePacketUnterminatedFenceOnly,
     evidenceScript,
     1,
     "onboarding_evidence.packet_too_thin",

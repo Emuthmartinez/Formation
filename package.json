@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.124.0",
+  "version": "0.125.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -53,6 +53,9 @@
     "check:emotional-design": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-emotional-design.ts",
     "check:onboarding-graph": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-graph.ts",
     "check:onboarding-graph-complete": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-graph.ts --require-done",
+    "check:onboarding-evidence-onb-00": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-00 --path product/onboarding/graph/ONB-00-resume-scope.md",
+    "check:onboarding-evidence-onb-01": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-01 --path product/onboarding/graph/ONB-01-current-state-trace.md",
+    "check:onboarding-evidence-onb-02": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-02 --path product/onboarding/graph/ONB-02-evidence-plan.md",
     "check:onboarding-evidence-onb-03": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-03 --path product/onboarding/graph/ONB-03-current-guidance.md",
     "check:onboarding-evidence-onb-04": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-04 --path product/onboarding/graph/ONB-04-competitor-reviews.md",
     "check:onboarding-evidence-onb-05": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-onboarding-evidence-packet.ts --node ONB-05 --path product/onboarding/graph/ONB-05-onbo-hub-atlas.md",

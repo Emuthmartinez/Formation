@@ -11,6 +11,11 @@ const onboardingGraphWorkflows = [
   workflow({
     id: "workflow.experience.onboarding-system.onb-00-resume-scope",
     title: "Onboarding ONB-00: resume and classify scope",
+    // Same production-verification rationale as ONB-03 below: with no gate, this entry node
+    // compiled to verification "none", so an executor could return the declared scope-packet
+    // artifact ID and fingerprint without ever writing a real resume/classify decision -- and
+    // ONB-01 would become runnable immediately, with nothing downstream reading ONB-00's own
+    // packet, letting the entire graph proceed without its foundational scope classification.
     domainId: "domain.experience",
     areaIds: ["area.product-experience"],
     trigger: "Consumer onboarding work begins or resumes; classify greenfield, replacement, audit-only, or explicitly bounded incremental mode",
@@ -18,12 +23,14 @@ const onboardingGraphWorkflows = [
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.data.analytics-and-attribution-blueprint", "workflow.experience.11-star-experience"],
     outputPaths: ["product/onboarding/graph/ONB-00-resume-scope.md"],
+    gates: ["check:onboarding-evidence-onb-00"],
     actionClass: "observe",
     idempotent: true,
   }),
   workflow({
     id: "workflow.experience.onboarding-system.onb-01-current-state-trace",
     title: "Onboarding ONB-01: current-state trace",
+    // Same production-verification rationale as ONB-00 above.
     domainId: "domain.experience",
     areaIds: ["area.product-experience"],
     trigger: "Trace the actual onboarding implementation, documents, routes, state, providers, events, failures, tests, and legacy surfaces",
@@ -31,12 +38,14 @@ const onboardingGraphWorkflows = [
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-00-resume-scope"],
     outputPaths: ["product/onboarding/graph/ONB-01-current-state-trace.md"],
+    gates: ["check:onboarding-evidence-onb-01"],
     actionClass: "observe",
     idempotent: true,
   }),
   workflow({
     id: "workflow.experience.onboarding-system.onb-02-evidence-plan",
     title: "Onboarding ONB-02: evidence plan",
+    // Same production-verification rationale as ONB-00 above.
     domainId: "domain.experience",
     areaIds: ["area.product-experience"],
     trigger: "Define the onboarding evidence hierarchy, access constraints, sample plan, and freshness cutoff",
@@ -44,6 +53,7 @@ const onboardingGraphWorkflows = [
     phaseIds: ["phase.1c"],
     dependencies: ["workflow.experience.onboarding-system.onb-01-current-state-trace"],
     outputPaths: ["product/onboarding/graph/ONB-02-evidence-plan.md"],
+    gates: ["check:onboarding-evidence-onb-02"],
     actionClass: "observe",
     idempotent: true,
   }),
