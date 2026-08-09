@@ -531,6 +531,24 @@ export function register(h: Harness): void {
     "founder_copy.raw_identifier",
   );
 
+  // Rule 3's general banned-vocabulary scan against founder-visible prose had
+  // no fixture of its own -- only the narrower rule-4b technique-naming
+  // special case exercised the dictionary. This is the direct case: a banned
+  // term in ordinary prose, not a technique name.
+  const founderCopyBannedVocabulary = makeEmptyFixture("founder-copy-banned-vocabulary");
+  writeFileSync(
+    path.join(founderCopyBannedVocabulary, "state/launch-cockpit.html"),
+    "<html><body><h2>Progress</h2><p>Your onboarding lane is almost done.</p></body></html>\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "banned internal vocabulary in founder-visible prose fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyBannedVocabulary, "--skill-root", skillRoot],
+    1,
+    "founder_copy.internal_vocabulary",
+  );
+
   // The narrative-freshness rule the PROJECT_STATE template comment has
   // promised since v0.25.0: empty narrative past orient is an error.
   const founderCopyStaleNarrative = makeEmptyFixture("founder-copy-stale-narrative");
