@@ -2,7 +2,7 @@
 
 Use this before designing onboarding, quizzes, personalization, attribution capture, mascot guidance, demo videos, review prompts, paywall timing, closing offers, trials, or first-session activation.
 
-Load `paid-tool-routing.md` before replacing Higgsfield, MobAI Plus/Pro or intended cross-platform coverage, XcodeBuildMCP-approved fallback, RevenueCat experiments, PostHog experiments/surveys/replay, or any paid/account-gated onboarding tool with a free/manual route. MobAI Free needs no spend gate when it covers the lane. Load `remotion-content-assets.md` before using Remotion for onboarding demo clips, animated explainers, app-preview cuts, social hook clips, or local rendered assets.
+Load `paid-tool-routing.md` before replacing Higgsfield, MobAI Plus/Pro or intended cross-platform coverage, XcodeBuildMCP-approved fallback, RevenueCat experiments, PostHog experiments/surveys/replay, or any paid/account-gated onboarding tool with a free/manual route. MobAI Free needs no spend gate when it covers the lane. Load `remotion-content-assets.md` before using Remotion for onboarding demo clips, animated explainers, app-preview cuts, social hook clips, or local rendered assets. Load [`motion-craft-benchmarks.md`](../design/motion-craft-benchmarks.md)'s R11–R14 recipes before designing the cold-launch splash, loading, or welcome-screen sequence that precedes this file's screen-by-screen table — the numeric, checkable acceptance criteria for that moment live there, not here.
 
 ## Contents
 
@@ -109,6 +109,12 @@ Implementation definition of done:
 Do not describe attribution as "wired", "complete", or "launch-ready" if it only updates local state or emits a one-off event. It is wired only when the source is represented by a stable key, forwarded to analytics, attached to the person/profile identity, and persisted to the app backend once identity exists.
 
 ## Conversion Patterns
+
+### Cold-Launch / Splash Entrance
+
+Before any onboarding question, mascot, or demo, most apps need a genuine cold-launch moment: a hold while fonts, images, or first data load, then either a hard cut or an authored dissolve into the first real screen. This is a distinct beat from the onboarding sequence itself — it has no question, no copy decision, and no paywall stake — so its acceptance criteria live in [`motion-craft-benchmarks.md`](../design/motion-craft-benchmarks.md)'s R11–R14 (splash hold-and-cut, staggered multi-asset entrance, honest loader state-switch and skeleton reveal, paged cold-open with a deterministic final state), not in this file's screen-sequence contract below.
+
+Do not invent an entrance the product has no real content for: a product with no distinct cold-launch moment renders its first real screen immediately, per R14's restraint. When a cold-launch sequence exists, name the recipe it follows (R11–R14) in `product/ONBOARDING.md`'s screen-sequence row for that screen instead of describing it as a generic "fade in."
 
 ### Mascot Or Guide
 

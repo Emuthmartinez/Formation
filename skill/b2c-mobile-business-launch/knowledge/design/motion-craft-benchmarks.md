@@ -151,6 +151,68 @@ Two more scope boundaries, both caught when the 2026-07-28 adversarial review gr
 
 **Exemplars:** scratch-to-reveal reward card (eng 1,904 — the gamification family's top post); Duolingo reward mechanics (7 catalog posts, eng 2,935 combined across mascot joy, treasure chest, and streaks — the catalog's most-featured app).
 
+## Cold-Launch Entrance Recipes (R11–R14)
+
+Second inspiration source, same discipline. [Appllama's top-welcome-screens](https://github.com/Appllama/top-welcome-screens) recovers measured entrance timings for ten shipped apps' cold-launch sequences — splash, loading, and welcome screens — from 30fps reference clips. The same two ground rules from above apply without exception: these recipes are checkable numbers bound to the token scale, never a named app's mascot, wordmark, illustration, or copy. That discipline is also why this source needs no separate legal reconciliation — the source repo's own notice requires exactly the same thing before any of its reference implementations ships, so this file's recipe format and the source's licensing terms agree by construction rather than needing a waiver.
+
+Scope: these four recipes cover the moment before onboarding's screen-by-screen sequence begins — the cold open `onboarding-conversion.md` assumes already resolved. Load them before authoring that sequence's first row.
+
+### R11 — Splash hold-and-cut
+
+**Serves:** the cold-launch moment before onboarding starts. **Rides:** no duration token governs the hold itself — it is bounded by real asset/font/data loading, not an arbitrary timer; the exit uses `motion.durationFast`–`durationBase` when a transition is authored, or a genuine 0ms cut when it is not.
+
+A cold-launch splash reads as intentional when the hold has a real reason and the exit is one of exactly two moves: a **hard cut** (zero-duration, for a loading-to-content boundary that should read as "it's ready now") or a **dissolve-out** (`durationFast`–`durationBase`, for a branded-splash-to-destination boundary that should read as a considered transition). There is no third default — a slow ambient crossfade chosen because nothing else was authored is the failure mode this recipe rules out.
+
+- [ ] The hold lasts exactly as long as the real asset/font/data load it is masking — never padded to "feel like a splash."
+- [ ] The exit is a hard cut or an authored dissolve, chosen deliberately per the boundary it crosses, never a generic fade applied by default.
+- [ ] Nothing on the splash is interactive. Decorative branding (logo, wordmark, background art) is absent from the accessibility tree; a real, still-loading state exposes a noninteractive loading status — and any failure/retry state — so a screen-reader user is not left in silence during a stalled load.
+- [ ] Reduce Motion skips only the authored transition, never the real loading gate: the hold still lasts as long as the actual asset/font/data load takes, then cuts to the destination the instant that load completes, with no dissolve. "Renders immediately" means "no animated exit," not "before loading is done."
+
+**Exemplars:** static-splash-then-hard-cut sequences (top-welcome-screens research set, Strava/onX Hunt/SCRL-inspired references); loader hard-cut into a final page (MyFitnessPal-inspired reference).
+
+### R12 — Staggered multi-asset splash entrance
+
+**Serves:** a welcome screen whose composition is several small assets — icons, props, ornaments — arriving together, distinct from R3's single hero object. **Rides:** `motion.stagger` (60ms) sets the per-asset floor; each asset settles on the press-family spring (response 0.3–0.4s, damping 0.7–0.8) — a calm arrival, never the celebrate family, because nothing has been earned yet at cold launch. The offset must hold for the worst case a valid implementation can pick — the last asset's stagger offset plus its own settle at the press family's slowest response (0.4s = 400ms) — inside the `motion.durationSlow`–`durationReveal` window (360–600ms total). That worst-case settle leaves a 200ms gap budget (600ms − 400ms) to split across the asset count's gaps, which is why the safe offset shrinks as assets are added:
+
+| Assets | Gaps | Gap budget ÷ gaps | Offset to use | Worst-case total |
+| --- | --- | --- | --- | --- |
+| 2 | 1 | 200ms | 120–180ms (full reference range) | 580ms |
+| 3 | 2 | 100ms | up to 100ms | 600ms |
+| 4 | 3 | 66ms | up to 66ms (still ≥ the 60ms stagger floor) | 598ms |
+| 5+ | 4+ | ≤50ms | below the 60ms stagger floor — not achievable as pure stagger | — |
+
+- [ ] Each asset animates independently — its own stagger offset and its own settle — never one shared fade/scale applied to the group.
+- [ ] The offset used matches the asset count in the table above — never the full 120–180ms reference range for 3 or more assets; that range is only proven safe at 2 assets.
+- [ ] Total entrance window — last stagger offset plus that asset's settle, assuming the press family's slowest 0.4s response, not just the offsets — stays inside `motion.durationReveal` (600ms).
+- [ ] Press-family spring only; a celebrate-family overshoot on a splash asset misreads a cold-launch moment as a reward (see R8's scope boundary).
+- [ ] 5 or more assets cannot fit pure stagger inside both the 600ms window and the 60ms stagger floor at once (the table's own arithmetic proves it) — split into a staggered group of up to 4 plus a static remainder instead of stretching one long cascade or dropping the offset below the stagger floor.
+- [ ] Reduce Motion: all assets render in their settled position with no stagger.
+
+**Exemplars:** multi-icon staggered-spring splash entrance (top-welcome-screens research set, Yazio-inspired reference).
+
+### R13 — Honest loader state-switch and skeleton reveal
+
+**Serves:** any loading screen backed by real async work, and the Held Value Reveal rule in [`onboarding-conversion.md`](../experience/onboarding-conversion.md): a progress animation over nothing is deception, not suspense. **Rides:** the copy swap is a hard cut (0ms — a dissolving loader label reads as decoration, not progress); the post-cut skeleton reveal staggers its regions (background, header, primary content, CTA) on separately-timed ease-out opacity curves across `motion.durationBase`–`durationSlow`.
+
+- [ ] A loader that changes its label switches on a real state transition, hard-cut, never a timed/fake progression.
+- [ ] The skeleton's regions reveal in a fixed order with separately-timed ease-out curves — never one simultaneous fade-in of the whole shell.
+- [ ] The loader never promises progress it is not making; if there is no real async work behind it, skip the loader and render the content.
+- [ ] Reduce Motion: regions appear in their final state in the same fixed order, without the opacity ramp.
+
+**Exemplars:** loader copy-switch without a dissolve (top-welcome-screens research set, MyFitnessPal-inspired reference); staged background/copy/CTA skeleton reveal (top-welcome-screens research set, SCRL-inspired reference).
+
+### R14 — Paged cold-open with a deterministic final state
+
+**Serves:** a multi-page welcome/onboarding cold-open — a value-prop carousel or tap-through intro — that precedes the question-based sequence `onboarding-conversion.md` governs. **Rides:** page-to-page slides ride `motion.durationSlow` with an ease-out curve; the final CTA arrives on its own fade after the last page settles, never bundled into the slide transition.
+
+- [ ] Each page transition is a horizontal slide, not a fade-through-black or a cut; the deck reads as one continuous surface.
+- [ ] The final CTA's entrance is a separate, later beat from the page settling — earned, not simultaneous.
+- [ ] Every cold-open ships two paths beyond the animated entrance: a **skip-intro path** — an explicit, user-selected control that jumps straight to the deck's final page — and a **replay path** (a mounted instance restarts from a prop/state change without a full remount). The skip-intro jump is a deliberate user choice, never an automatic one.
+- [ ] Never invent an entrance the product has no real content for — a screen with only a final marketing state and no captured motion reference ships that final state immediately rather than fabricating a plausible-looking animation. This is the one case where jumping straight to a final state has no page content to lose, because there was never a real paged entrance.
+- [ ] Reduce Motion still presents every page, in the same order and with the same navigation as the animated version — only the slide between pages becomes a cut and the CTA's fade becomes an instant appearance. Never route Reduce Motion straight to the final page automatically: that silently drops page content the user did not choose to skip. Jumping straight to the final page stays reserved for the explicit skip-intro control above and the no-real-entrance case in the item above it.
+
+**Exemplars:** paged cold-open with final-CTA fade (top-welcome-screens research set, Speak: Language Learning and Speak & Learn-inspired references); final-state-only welcome screen with no invented entrance (top-welcome-screens research set, Perplexity-inspired reference) — the same restraint R14's fourth checklist item generalizes.
+
 ## Gesture & Scroll Physics
 
 The catalog's hardest-bookmarked family per post (rollout wheel scrub eng 3,037; pinch-to-close thread 601; Good Air scrub 1,804) — mechanics designers save to reuse. These rules govern any in-app gesture surface and read the same tokens as everything above.
@@ -204,6 +266,7 @@ Runnable reproductions of these recipes ship in [`business/design/motion-catalog
 ## Provenance & Refresh
 
 - Source: the 60fps.design catalog, mined 2026-07-26 (300 posts, 123 showcase). Registered as `x-com-60fpsdesign-catalog` (`inspiration_benchmark`) in `source-registry.yaml` with a 30-day refresh cadence. The live MCP endpoint (`https://60fps.design/mcp`) is registered separately as `sixty-fps-design-mcp`.
+- R11–R14 source: [Appllama's top-welcome-screens](https://github.com/Appllama/top-welcome-screens), ten shipped-app cold-launch sequences with timings recovered from 30fps reference clips (that repo's `docs/MOTION_SPEC.md`). Registered as `github-appllama-top-welcome-screens` (`inspiration_benchmark`) in `source-registry.yaml`.
 - Recipe timings and damping values come from frame-reads of the catalog's top videos, estimated from sampled frames (±1 frame-interval). Where a frame-read gave only a qualitative cue, this file states an operational threshold so reviews have a number to check — R1's ~200ms adjacency window, R2's 3–5% contraction and ≤15ms clone stagger are that kind of operationalization, not catalog measurements.
 - The Gesture & Scroll Physics numbers (rubber-band ≈0.55, 60–80pt refresh threshold, ~1,000pt/s dismiss velocity, 1/3 displacement) are platform-behavior defaults from iOS convention, stated here as the baseline to match; the catalog motivates the section but did not produce those constants.
 - Engagement numbers rank patterns within this catalog only; never repeat them as external claims.

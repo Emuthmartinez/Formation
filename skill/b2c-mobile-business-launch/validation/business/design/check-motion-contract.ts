@@ -480,6 +480,325 @@ if (celebrateBand) {
   }
 }
 
+// --- 3b. A recipe's own restated numeric window (e.g. R12's "(360–600ms total)") must match
+// tokens.json's actual values for the tokens it names — otherwise a future token edit can
+// invert the range or drift the cap while this recipe's prose, and this gate, stay green.
+// The match count is itself asserted (not just each match's values): rewording or dropping
+// the parenthetical would otherwise make this loop silently validate zero windows. ---
+if (bench !== undefined && Object.keys(motionTokens).length > 0) {
+  const windowRe = /`motion\.(\w+)`[–-]`(\w+)` window \((\d+)[–-](\d+)ms total\)/g;
+  const windowMatches = [...bench.matchAll(windowRe)];
+  if (windowMatches.length === 0) {
+    issues.push(
+      issue(
+        "error",
+        "motion_contract.recipe_window.none_found",
+        "No recipe states a `motion.TOKEN`–`TOKEN` window (N–Nms total) — either every such statement was removed (fine, update this check too) or one was reworded into a form this check no longer parses, which would silently stop validating it.",
+        BENCH,
+      ),
+    );
+  }
+  for (const m of windowMatches) {
+    const bounds: Array<[string, string, string]> = [
+      [g(m, 1), g(m, 3), "low"],
+      [g(m, 2), g(m, 4), "high"],
+    ];
+    for (const [tokenName, stated, label] of bounds) {
+      const actual = motionTokens[tokenName];
+      if (actual === undefined) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_window.unknown_token",
+            `A recipe states a window ${label} bound against motion.${tokenName}, which does not exist in tokens.json.`,
+            BENCH,
+          ),
+        );
+        continue;
+      }
+      if (actual !== `${stated}ms`) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_window.value_drift",
+            `A recipe states its window ${label} bound as ${stated}ms (motion.${tokenName}) but tokens.json ships motion.${tokenName} = ${actual}.`,
+            BENCH,
+          ),
+        );
+      }
+    }
+  }
+}
+
+// --- 3c. A recipe's own inline restatement of a spring family's band (e.g. R12's
+// "press-family spring (response 0.3-0.4s, damping 0.7-0.8)") must match the family
+// table in premium-mobile-craft.md, the same drift class as the family_mirror check
+// above but for a recipe body instead of the top-of-file summary sentence. ---
+if (bench !== undefined && bands.size > 0) {
+  const familyInlineRe = /(press|celebrate)-family spring \(response (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)s?, damping (\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)\)/g;
+  const familyInlineMatches = [...bench.matchAll(familyInlineRe)];
+  if (familyInlineMatches.length === 0) {
+    issues.push(
+      issue(
+        "error",
+        "motion_contract.recipe_family_inline.none_found",
+        "No recipe states a `<family>-family spring (response N-Ns, damping N-N)` restatement — either every such statement was removed (fine, update this check too) or one was reworded into a form this check no longer parses, which would silently stop validating it.",
+        BENCH,
+      ),
+    );
+  }
+  for (const m of familyInlineMatches) {
+    const family = g(m, 1);
+    const band = bands.get(family);
+    if (!band) continue;
+    const stated: Array<[number, number, string]> = [
+      [Number(g(m, 2)), band.respLo, `${family} response low`],
+      [Number(g(m, 3)), band.respHi, `${family} response high`],
+      [Number(g(m, 4)), band.dampLo, `${family} damping low`],
+      [Number(g(m, 5)), band.dampHi, `${family} damping high`],
+    ];
+    for (const [got, want, label] of stated) {
+      if (got !== want) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_family_inline.drift",
+            `A recipe restates ${label} = ${got} but premium-mobile-craft.md's table says ${want}.`,
+            BENCH,
+          ),
+        );
+      }
+    }
+  }
+}
+
+// --- 3d. R12's per-asset-count offset table is a derivation from motion.durationReveal,
+// motion.stagger, and the press family's slowest settle (0.4s) -- not standalone prose.
+// Parse each row's own asset count, offset, and total together (not "does this number
+// appear somewhere in the file") so a row whose offset and total disagree with each
+// other, or with the current tokens, cannot pass just because the right digits exist
+// elsewhere in the recipe. Also recompute the asset count where pure stagger stops being
+// achievable and assert the table's own terminal row states that same boundary. ---
+if (bench !== undefined && Object.keys(motionTokens).length > 0 && bands.has("press")) {
+  const durationRevealMs = Number.parseInt(motionTokens["durationReveal"] ?? "", 10);
+  const staggerFloorMs = Number.parseInt(motionTokens["stagger"] ?? "", 10);
+  const press = bands.get("press")!;
+  const worstCaseSettleMs = Math.round(press.respHi * 1000);
+  if (Number.isFinite(durationRevealMs) && Number.isFinite(staggerFloorMs) && Number.isFinite(worstCaseSettleMs)) {
+    const gapBudgetMs = durationRevealMs - worstCaseSettleMs;
+
+    // Locate the table by its header (any order-tolerant subset of these column names)
+    // and parse each data row generically, the same cell-splitting approach
+    // check-analytics-catalog.ts uses for its own header-column table scan.
+    const lines = bench.split(/\r?\n/);
+    let headerRow = -1;
+    for (let i = 0; i < lines.length; i++) {
+      const header = lines[i];
+      const divider = lines[i + 1];
+      if (
+        header &&
+        divider &&
+        /^\s*\|/.test(header) &&
+        /^\s*\|[\s|:-]+\|\s*$/.test(divider) &&
+        /assets/i.test(header) &&
+        /offset/i.test(header) &&
+        /total/i.test(header)
+      ) {
+        headerRow = i;
+        break;
+      }
+    }
+    if (headerRow === -1) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.recipe_offset_table.none_found",
+          "No Assets/Offset/Worst-case-total table found for R12 — either it was removed (fine, update this check too) or reworded into a form this check no longer parses, which would silently stop validating it.",
+          BENCH,
+        ),
+      );
+    } else {
+      const splitCells = (line: string): string[] =>
+        line
+          .trim()
+          .replace(/^\|/, "")
+          .replace(/\|$/, "")
+          .split("|")
+          .map((cell) => cell.trim());
+      const headerCells = splitCells(lines[headerRow] ?? "");
+      const col = {
+        assets: headerCells.findIndex((c) => /assets/i.test(c)),
+        gaps: headerCells.findIndex((c) => /gaps/i.test(c)),
+        gapBudget: headerCells.findIndex((c) => /budget/i.test(c)),
+        offset: headerCells.findIndex((c) => /offset/i.test(c)),
+        total: headerCells.findIndex((c) => /total/i.test(c)),
+      };
+      // Cross-checks a row's own Gaps and Gap-budget-÷-gaps cells against the same derivation
+      // the Offset/Total cells are already checked against, for the given gap count -- so a row
+      // can no longer state a wrong gap count or budget while its offset/total stay internally
+      // consistent with each other (Codex's 4th-round finding: only Assets/Offset/Total were
+      // parsed, so Gaps and Gap budget could drift freely).
+      const checkGapsAndBudget = (gaps: number, gapsCell: string, budgetCell: string, rowLabel: string, isTerminal: boolean): void => {
+        const expectedGapsCell = isTerminal ? `${gaps}+` : String(gaps);
+        if (gapsCell.replace(/\s/g, "") !== expectedGapsCell) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.gaps_drift",
+              `R12's offset table states "${gapsCell || "(empty)"}" gap(s) for ${rowLabel}, but that row's own asset count implies ${expectedGapsCell} gap(s).`,
+              BENCH,
+            ),
+          );
+        }
+        const expectedBudgetMs = Math.floor(gapBudgetMs / gaps);
+        const budgetMatch = /(\d+)ms/.exec(budgetCell);
+        if (!budgetMatch || Number(budgetMatch[1]) !== expectedBudgetMs) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.gap_budget_drift",
+              `R12's offset table states a gap budget of "${budgetCell || "(unparseable)"}" for ${rowLabel}, but (motion.durationReveal − press settle) ÷ ${gaps} gap(s) computes to ${expectedBudgetMs}ms.`,
+              BENCH,
+            ),
+          );
+        }
+      };
+      let sawUnachievableRow = false;
+      let recomputedFirstUnachievable: number | undefined;
+      for (let assets = 2; assets <= 6; assets++) {
+        const gaps = assets - 1;
+        const rawOffsetMs = Math.floor(gapBudgetMs / gaps);
+        if (rawOffsetMs < staggerFloorMs && recomputedFirstUnachievable === undefined) {
+          recomputedFirstUnachievable = assets;
+        }
+      }
+
+      const parsedAssetCounts = new Set<number>();
+      let rowIndex = headerRow + 2;
+      let parsedAnyNumericRow = false;
+      for (; rowIndex < lines.length; rowIndex++) {
+        const line = lines[rowIndex];
+        if (!line || !/^\s*\|/.test(line)) break;
+        const cells = splitCells(line);
+        const assetsCell = cells[col.assets] ?? "";
+        const offsetCell = cells[col.offset] ?? "";
+        const totalCell = cells[col.total] ?? "";
+        const assetsMatch = /^(\d+)$/.exec(assetsCell);
+        if (!assetsMatch) {
+          // Terminal row (e.g. "5+"): must name the boundary this file just recomputed.
+          const boundaryMatch = /^(\d+)\+$/.exec(assetsCell);
+          if (boundaryMatch && recomputedFirstUnachievable !== undefined) {
+            sawUnachievableRow = true;
+            const statedBoundary = Number(boundaryMatch[1]);
+            if (statedBoundary !== recomputedFirstUnachievable) {
+              issues.push(
+                issue(
+                  "error",
+                  "motion_contract.recipe_offset_table.boundary_drift",
+                  `R12's offset table names ${assetsCell} as the first unachievable-as-pure-stagger asset count, but recomputing from the current tokens (motion.durationReveal=${durationRevealMs}ms, motion.stagger=${staggerFloorMs}ms, press settle=${worstCaseSettleMs}ms) gives ${recomputedFirstUnachievable}.`,
+                  BENCH,
+                ),
+              );
+            }
+            checkGapsAndBudget(recomputedFirstUnachievable - 1, cells[col.gaps] ?? "", cells[col.gapBudget] ?? "", "the terminal row", true);
+          }
+          continue;
+        }
+        parsedAnyNumericRow = true;
+        const assets = Number(assetsMatch[1]);
+        parsedAssetCounts.add(assets);
+        const gaps = assets - 1;
+        checkGapsAndBudget(gaps, cells[col.gaps] ?? "", cells[col.gapBudget] ?? "", `${assets} assets`, false);
+        const offsetNums = [...offsetCell.matchAll(/(\d+)ms/g)].map((x) => Number(x[1]));
+        const totalMatch = /^(\d+)ms$/.exec(totalCell);
+        if (offsetNums.length === 0 || !totalMatch) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.row_unparseable",
+              `R12's offset table row for ${assets} assets has an offset or total cell this check cannot parse ("${offsetCell}" / "${totalCell}") — recompute and restate it in the "Nms" form the other rows use.`,
+              BENCH,
+            ),
+          );
+          continue;
+        }
+        const rowOffsetMs = Math.max(...offsetNums);
+        const rowTotalMs = Number(totalMatch[1]);
+        if (rowOffsetMs < staggerFloorMs) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.below_stagger_floor",
+              `R12's offset table states ${rowOffsetMs}ms for ${assets} assets, which is below motion.stagger (${staggerFloorMs}ms) — the recipe's own stated floor.`,
+              BENCH,
+            ),
+          );
+        }
+        const computedTotalMs = rowOffsetMs * gaps + worstCaseSettleMs;
+        if (computedTotalMs !== rowTotalMs) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.row_internally_inconsistent",
+              `R12's offset table states ${rowTotalMs}ms total for ${assets} assets, but that row's own offset (${rowOffsetMs}ms) × ${gaps} gap(s) plus the press family's worst-case settle (${worstCaseSettleMs}ms) computes to ${computedTotalMs}ms.`,
+              BENCH,
+            ),
+          );
+        } else if (computedTotalMs > durationRevealMs) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.exceeds_window",
+              `R12's offset table row for ${assets} assets computes to ${computedTotalMs}ms worst case, which exceeds motion.durationReveal (${durationRevealMs}ms).`,
+              BENCH,
+            ),
+          );
+        }
+      }
+      if (!parsedAnyNumericRow) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_offset_table.no_numeric_rows",
+            "R12's offset table has no row this check could parse as a numeric asset count — the table format may have changed under this check.",
+            BENCH,
+          ),
+        );
+      }
+      if (recomputedFirstUnachievable !== undefined && !sawUnachievableRow) {
+        issues.push(
+          issue(
+            "error",
+            "motion_contract.recipe_offset_table.missing_floor_boundary",
+            `Recomputing R12's offset table from the current tokens means some asset count now drops the per-asset offset below motion.stagger (${staggerFloorMs}ms) starting at ${recomputedFirstUnachievable} assets, but the table has no terminal "N+" row naming that boundary.`,
+            BENCH,
+          ),
+        );
+      }
+      // Every asset count that is actually achievable (2 up to the recomputed boundary) needs
+      // its own row -- otherwise deleting an interior row (e.g. the 3-asset row) still leaves
+      // the 2-asset row, the terminal "N+" row, and every other check green, silently dropping
+      // guidance for a supported asset count (Codex's 4th-round finding).
+      if (recomputedFirstUnachievable !== undefined) {
+        const missingCounts: number[] = [];
+        for (let assets = 2; assets < recomputedFirstUnachievable; assets++) {
+          if (!parsedAssetCounts.has(assets)) missingCounts.push(assets);
+        }
+        if (missingCounts.length > 0) {
+          issues.push(
+            issue(
+              "error",
+              "motion_contract.recipe_offset_table.missing_asset_count_row",
+              `R12's offset table has no row for asset count(s) ${missingCounts.join(", ")}, even though pure stagger is achievable there (below the recomputed ${recomputedFirstUnachievable}-asset boundary) — every achievable asset count needs its own row.`,
+              BENCH,
+            ),
+          );
+        }
+      }
+    }
+  }
+}
+
 // --- 4. The cinematic token stays out of the in-app doctrine and rides only web/brand routes. ---
 if (craft !== undefined && craft.includes("durationCinematic")) {
   issues.push(

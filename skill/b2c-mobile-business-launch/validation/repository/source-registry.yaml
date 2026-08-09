@@ -1825,6 +1825,20 @@ sources:
       details from best-in-class consumer apps. Inspiration benchmark for the
       in-app motion lane — the mobile counterpart to motionsites-ai for landing.
       Engagement figures cited from it are point-in-time and unverified.
+  - id: github-appllama-top-welcome-screens
+    name: Appllama top-welcome-screens (React Native Expo welcome-screen reference gallery)
+    source_type: inspiration_benchmark
+    url: https://github.com/Appllama/top-welcome-screens
+    refresh_cadence_days: 90
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/knowledge/design/motion-craft-benchmarks.md
+    notes: Ten shipped-app cold-launch (splash/loading/welcome) sequences with timings
+      recovered from 30fps reference clips, distilled into motion-craft-benchmarks.md's
+      R11-R14. Inspiration benchmark only, same as x-com-60fpsdesign-catalog — mechanics
+      transfer, branded assets (mascot, wordmark, illustration, copy) do not. The source
+      repo's own NOTICE.md independently requires the same before any of its reference
+      implementations ships, so no separate legal reconciliation is needed.
   - id: retention-mechanics-mcp
     name: Retention Mechanics MCP server
     source_type: api
