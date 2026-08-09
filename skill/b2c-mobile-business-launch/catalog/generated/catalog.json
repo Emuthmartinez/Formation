@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.109.0",
+  "skillVersion": "0.110.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -3752,6 +3752,13 @@
       "command": "check:design-room",
       "scriptPath": "validation/business/design/check-design-room-contract.ts",
       "ownerDomainId": "domain.design",
+      "audit": "required"
+    },
+    {
+      "id": "gate.check-documentation-ste100",
+      "command": "check:documentation-ste100",
+      "scriptPath": "validation/business/engineering/check-technical-docs-ste100.ts",
+      "ownerDomainId": "domain.engineering",
       "audit": "required"
     },
     {

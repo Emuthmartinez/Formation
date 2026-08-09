@@ -1307,4 +1307,81 @@ export function register(h: Harness): void {
     0,
     "WARNING no_slop.empty_adverb",
   );
+
+  // --- check-technical-docs-ste100 ---
+  //
+  // The mechanical subset of knowledge/engineering/technical-documentation-ste100.md: sentence
+  // length and present-perfect tense, at two severity tiers (error on the one file the
+  // reference can currently guarantee compliant, warning on the rest of the governed surface),
+  // the same tier split check-no-slop.ts proves above. Every case here proves the checker can
+  // actually fire, not just pass — a gate is only real once it has been watched to fail.
+  runScriptArgs("ste100 passes on the shipped repo's own error-tier file", "check-technical-docs-ste100.ts", ["--skill-root", skillRoot], 0);
+
+  function writeSte100Root(
+    name: string,
+    overrides: { steFile?: string; extraKnowledgeFile?: { relative: string; content: string } } = {},
+  ): { repoRoot: string; skillRoot: string } {
+    const root = makeEmptyFixture(name);
+    const repoRoot = path.join(root, "repo");
+    const fixtureSkillRoot = path.join(repoRoot, "skill", "pkg");
+    mkdirSync(path.join(fixtureSkillRoot, "knowledge", "engineering"), { recursive: true });
+    const steContent =
+      overrides.steFile ??
+      "# Technical Documentation In Simplified Technical English (ASD-STE100)\n\nThis file follows its own rule. Every sentence stays short. The checker reads this file first.\n";
+    writeFileSync(path.join(fixtureSkillRoot, "knowledge", "engineering", "technical-documentation-ste100.md"), steContent, "utf8");
+    if (overrides.extraKnowledgeFile) {
+      const target = path.join(fixtureSkillRoot, "knowledge", overrides.extraKnowledgeFile.relative);
+      mkdirSync(path.dirname(target), { recursive: true });
+      writeFileSync(target, overrides.extraKnowledgeFile.content, "utf8");
+    }
+    return { repoRoot, skillRoot: fixtureSkillRoot };
+  }
+
+  const ste100Clean = writeSte100Root("ste100-clean");
+  runScriptArgs(
+    "ste100 passes on a synthetic clean error-tier file",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Clean.repoRoot, "--skill-root", ste100Clean.skillRoot],
+    0,
+  );
+
+  const ste100LongSentence = writeSte100Root("ste100-long-sentence", {
+    steFile:
+      "# Doc\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+  });
+  runScriptArgs(
+    "ste100 fails the error-tier file on a sentence over the 20-word ceiling",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100LongSentence.repoRoot, "--skill-root", ste100LongSentence.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  const ste100PresentPerfect = writeSte100Root("ste100-present-perfect", {
+    steFile: "# Doc\n\nThe validator has checked this file already.\n",
+  });
+  runScriptArgs(
+    "ste100 fails the error-tier file on present-perfect tense",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PresentPerfect.repoRoot, "--skill-root", ste100PresentPerfect.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
+
+  // A violation in a file outside the error-tier list is real, visible signal — but a warning,
+  // never a build failure, matching no-slop's own maintainer-tier demotion above.
+  const ste100WarningTier = writeSte100Root("ste100-warning-tier", {
+    extraKnowledgeFile: {
+      relative: "product/notes.md",
+      content:
+        "# Notes\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    },
+  });
+  runScriptArgs(
+    "ste100 demotes the same violation to a warning outside the error-tier file",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100WarningTier.repoRoot, "--skill-root", ste100WarningTier.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long",
+  );
 }

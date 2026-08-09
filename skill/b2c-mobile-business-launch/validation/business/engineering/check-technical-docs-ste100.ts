@@ -1,0 +1,158 @@
+#!/usr/bin/env node
+/**
+ * check-technical-docs-ste100.ts — the mechanically checkable subset of ASD-STE100.
+ *
+ * knowledge/engineering/technical-documentation-ste100.md names two rules a machine can
+ * verify without judgment: sentence length and present-perfect tense. Everything else in
+ * its §3 (one word per meaning, active voice, noun-cluster length) stays judgment-only, the
+ * same limit tooling/lib/no-slop-rules.ts documents for the sibling standard — a regex would
+ * punish good writing as often as it catches bad writing.
+ *
+ * Two severity tiers, mirroring check-no-slop.ts's own front-door split: error tier applies
+ * only to files this reference can currently guarantee compliant (today, just the reference
+ * itself); warning tier applies to the rest of the governed surface — docs/architecture.md,
+ * docs/validators.md, and every knowledge/**\/*.md file outside knowledge/words/ (which keeps
+ * no-slop-writing.md's voice-preserving register instead). This gives real, repo-wide signal
+ * on every edit without failing the build over prose written before this standard existed.
+ * Promoting a file to error tier means auditing it against the reference's §3/§4 first, then
+ * adding its skill-root-relative path to ERROR_TIER_SKILL_RELATIVE below.
+ *
+ * npm script: check:documentation-ste100
+ * Usage: tsx validation/business/engineering/check-technical-docs-ste100.ts [--repo-root /path] [--skill-root /path]
+ */
+import { existsSync, readFileSync, statSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { collectFiles, flagString, issue, parseFlags, reportAndExit, type Issue, type Severity } from "../../../tooling/lib/launch-state.js";
+import { findGitRoot } from "../../../tooling/lib/git-root.js";
+
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const defaultSkillRoot = path.resolve(scriptDir, "../../..");
+
+const flags = parseFlags(process.argv.slice(2), [
+  { flags: ["--repo-root"], key: "repoRoot" },
+  { flags: ["--skill-root"], key: "skillRoot" },
+]);
+const skillRoot = path.resolve(flagString(flags, "skillRoot") ?? defaultSkillRoot);
+const repoRoot = path.resolve(flagString(flags, "repoRoot") ?? findGitRoot(skillRoot) ?? path.resolve(skillRoot, "../.."));
+
+const issues: Issue[] = [];
+
+const MAX_SENTENCE_WORDS = 20;
+
+/** Common regular (-ed) and irregular past-participle shapes, for the present-perfect heuristic below. */
+const PAST_PARTICIPLE =
+  "(?:\\w+ed|been|done|gone|known|shown|written|given|taken|made|found|become|begun|chosen|come|drawn|driven|fallen|felt|gotten|got|grown|held|kept|left|lost|met|paid|run|said|seen|sent|set|spoken|spent|stood|taught|thought|told|understood|won|worked|read|meant|built|bought|caught|brought|fought|sought)";
+const presentPerfectPattern = new RegExp(`\\b(?:has|have|had)\\s+(?:not\\s+|never\\s+|already\\s+|just\\s+|recently\\s+)?${PAST_PARTICIPLE}\\b`, "i");
+
+/**
+ * skill-root-relative paths this reference can currently guarantee compliant. This is the
+ * one file so far: the reference itself, hand-written to its own rules.
+ */
+const ERROR_TIER_SKILL_RELATIVE = new Set<string>(["knowledge/engineering/technical-documentation-ste100.md"]);
+
+/** knowledge/ subdirectories excluded from the governed surface: words/ keeps no-slop-writing.md's register, evals/fixtures are test data, not documentation. */
+const EXCLUDED_KNOWLEDGE_TOP_SEGMENTS = new Set(["words"]);
+const EXCLUDED_KNOWLEDGE_ANY_SEGMENT = new Set(["evals", "fixtures"]);
+
+interface GovernedFile {
+  /** Path shown in issue output, relative to repoRoot. */
+  displayPath: string;
+  absolute: string;
+  tier: Severity;
+}
+
+const governed: GovernedFile[] = [];
+
+for (const relative of ["docs/architecture.md", "docs/validators.md"]) {
+  const absolute = path.join(repoRoot, relative);
+  if (!existsSync(absolute)) continue;
+  governed.push({ displayPath: relative, absolute, tier: "warning" });
+}
+
+const knowledgeRoot = path.join(skillRoot, "knowledge");
+if (existsSync(knowledgeRoot) && statSync(knowledgeRoot).isDirectory()) {
+  for (const absolute of collectFiles(knowledgeRoot, new Set([".md"]))) {
+    const relativeToKnowledge = path.relative(knowledgeRoot, absolute).split(path.sep).join("/");
+    const segments = relativeToKnowledge.split("/");
+    if (EXCLUDED_KNOWLEDGE_TOP_SEGMENTS.has(segments[0] ?? "")) continue;
+    if (segments.some((segment) => EXCLUDED_KNOWLEDGE_ANY_SEGMENT.has(segment))) continue;
+    const skillRelative = `knowledge/${relativeToKnowledge}`;
+    const displayPath = path.relative(repoRoot, absolute).split(path.sep).join("/");
+    governed.push({ displayPath, absolute, tier: ERROR_TIER_SKILL_RELATIVE.has(skillRelative) ? "error" : "warning" });
+  }
+}
+
+for (const file of governed) {
+  const source = readFileSync(file.absolute, "utf8");
+  for (const sentence of sentencesOf(source)) {
+    const wordCount = sentence.split(/\s+/).filter(Boolean).length;
+    if (wordCount > MAX_SENTENCE_WORDS) {
+      issues.push(
+        issue(
+          file.tier,
+          "ste100.sentence_too_long",
+          `Sentence runs ${wordCount} words, over ASD-STE100's ${MAX_SENTENCE_WORDS}-word ceiling (technical-documentation-ste100.md §3): "${truncate(sentence)}"`,
+          file.displayPath,
+        ),
+      );
+    }
+    if (presentPerfectPattern.test(sentence)) {
+      issues.push(
+        issue(
+          file.tier,
+          "ste100.present_perfect",
+          `Sentence uses present-perfect tense, not the simple tense ASD-STE100 §3 requires: "${truncate(sentence)}"`,
+          file.displayPath,
+        ),
+      );
+    }
+  }
+}
+
+reportAndExit("Technical docs: ASD-STE100 mechanical subset", issues);
+
+function truncate(text: string): string {
+  return text.length > 100 ? `${text.slice(0, 100)}…` : text;
+}
+
+/**
+ * Prose a reader actually reads: drops fenced/inline code, HTML comments, and link targets
+ * (mirroring check-no-slop.ts's proseText), plus markdown table rows and headings — cells and
+ * titles are not narrative sentences, and applying a sentence-length ceiling to them produces
+ * noise rather than signal.
+ */
+function sentencesOf(source: string): string[] {
+  const stripped = source
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/~~~[\s\S]*?~~~/g, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/\]\([^)]*\)/g, "] ")
+    .replace(/`[^`\n]*`/g, " ");
+
+  const lines = stripped
+    .split("\n")
+    .filter((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return false;
+      if (trimmed.startsWith("#")) return false;
+      if (trimmed.startsWith("|")) return false;
+      if (/^[-*_]{3,}$/.test(trimmed)) return false;
+      return true;
+    })
+    .map((line) => {
+      // A list item is a discrete unit by definition — force a boundary at its end so it
+      // never merges with the next bullet into one oversized chunk, even when the item
+      // itself is a short phrase with no terminal punctuation.
+      const trimmed = line.trim();
+      const isListItem = /^(?:[-*]|\d+[.)])\s/.test(trimmed);
+      return isListItem && !/[.!?:]$/.test(trimmed) ? `${trimmed}.` : trimmed;
+    });
+
+  const joined = lines.join(" ");
+  // ":" ends a chunk too — a colon-introduced clause or list reads as its own unit, and
+  // splitting there only ever shortens a chunk's word count, never lengthens one, so this
+  // cannot turn a passing sentence into a failing one anywhere in the governed surface.
+  const rawSentences = joined.match(/[^.!?:]+[.!?:]+/g) ?? [];
+  return rawSentences.map((entry) => entry.trim()).filter(Boolean);
+}
