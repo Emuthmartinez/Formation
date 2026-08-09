@@ -5,7 +5,7 @@
  * This validator does not grade conversion taste. It proves that the canonical artifact carries the graph, evidence joins, first-value and activation distinctions,
  * screen and control contracts, provider and policy research, typed analytics, compliant review timing, visual design requirements, and replacement-mode deletion plan.
  */
-import { asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
+import { asArray, asString, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
 
 const TEMPLATE_DIRECTIVE_VERBS = new Set([
   "add",
@@ -67,11 +67,30 @@ const artifact = candidates
 
 const laneStatus = state ? asString(getPath(state, "lanes.onboarding.status")) : undefined;
 const laneAbsent = state ? getPath(state, "lanes.onboarding") === undefined : true;
-// The not_needed/deferred exemption belongs to the general (lenient) invocation only. Under
-// --require-done -- ONB-22's own gate -- a deferred or not_needed lane must still fail: skipping
-// it here would let the engine accept the final execute/cutover/verify node on a workspace that
-// never finished onboarding at all.
-const skip = (laneStatus === "not_needed" || laneStatus === "deferred") && !requireDone;
+const laneExempt = laneStatus === "not_needed" || laneStatus === "deferred";
+// check-lane-coverage.ts also treats nonempty evidence as sufficient rationale for a skip --
+// evidence answers "did the lane produce anything," not "why is it not happening," so a
+// deferred/not_needed onboarding lane with no recorded reason still isn't actually explained.
+const laneBlockers = state
+  ? asArray(getPath(state, "lanes.onboarding.blockers")).filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+  : [];
+const laneReason = state ? asString(getPath(state, "lanes.onboarding.reason")) : undefined;
+const hasDeferralReason = laneBlockers.length > 0 || Boolean(laneReason?.trim());
+if (laneExempt && !hasDeferralReason) {
+  issues.push(
+    issue(
+      "error",
+      "onboarding_graph.deferred_without_reason",
+      `state/PROJECT_STATE.yaml marks lanes.onboarding ${laneStatus} but records no blockers or reason explaining why. Record a dated blocker or reason before this exemption applies.`,
+      "state/PROJECT_STATE.yaml",
+    ),
+  );
+}
+// The not_needed/deferred exemption belongs to the general (lenient) invocation only, and only
+// once it is actually explained. Under --require-done -- ONB-22's own gate -- a deferred or
+// not_needed lane must still fail: skipping it here would let the engine accept the final
+// execute/cutover/verify node on a workspace that never finished onboarding at all.
+const skip = laneExempt && hasDeferralReason && !requireDone;
 
 if (!skip && laneAbsent) {
   issues.push(
@@ -407,12 +426,29 @@ function artifactStatus(text: string): string | undefined {
 // its own execution mode, evidence trace, and activation contract were still literally the
 // unfilled instruction text.
 function proseDirectiveLines(text: string): string[] {
-  return text.split(/\r?\n/).filter((line) => {
-    const trimmed = line.trim();
-    if (trimmed.length === 0 || trimmed.startsWith("|") || trimmed.startsWith("#") || trimmed.startsWith("-")) return false;
+  const lines = text.split(/\r?\n/);
+  const flagged: string[] = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const trimmed = lines[index]?.trim() ?? "";
+    if (trimmed.length === 0 || trimmed.startsWith("|") || trimmed.startsWith("#") || trimmed.startsWith("-")) continue;
     const firstWord = trimmed.match(/^[A-Za-z][A-Za-z-]*/)?.[0]?.toLowerCase();
-    return !!(firstWord && TEMPLATE_DIRECTIVE_VERBS.has(firstWord));
-  });
+    if (!firstWord || !TEMPLATE_DIRECTIVE_VERBS.has(firstWord)) continue;
+    // A directive sentence is the fill-in surface only when nothing else in its own section
+    // (down to the next heading) captures the answer. Analytics Contract's "Define a
+    // machine-readable schema and typed clients..." sits directly above that contract's own
+    // capture table and also carries onboarding_graph.analytics_contract's required doctrine
+    // phrases verbatim -- flagging it would reject a genuinely complete artifact for preserving
+    // canonical requirement language the table, not this sentence, is meant to answer.
+    let hasTableInSection = false;
+    for (let cursor = index + 1; cursor < lines.length && !(lines[cursor]?.trim().startsWith("#") ?? false); cursor += 1) {
+      if (lines[cursor]?.trim().startsWith("|")) {
+        hasTableInSection = true;
+        break;
+      }
+    }
+    if (!hasTableInSection) flagged.push(lines[index] ?? "");
+  }
+  return flagged;
 }
 
 function tablePlaceholderCells(text: string): string[] {
@@ -423,14 +459,18 @@ function tablePlaceholderCells(text: string): string[] {
     .map((cell) => cell.trim().replaceAll("`", ""))
     .filter((cell) => cell.length > 0 && !/^:?-{3,}:?$/.test(cell));
 
-  // Repetition signals still-templated content only when the *whole cell* repeats verbatim
-  // (e.g. every row left as "TBD"). Keying on the first word alone false-positives on a
-  // legitimately filled table where many distinct rows share a label prefix by convention
-  // (e.g. "Evidence-1: ...", "Evidence-2: ..." in a large Evidence Ledger) -- their content
-  // differs past the shared prefix, so they are not placeholders.
+  // Repetition signals still-templated content when the *whole cell* repeats verbatim (e.g.
+  // every row left as "TBD"), or when the same boilerplate repeats with only an embedded number
+  // varying (e.g. "Evidence-1: source-backed implementation detail dated 2026-08-08", "Evidence-
+  // 2: ..." -- a counter making otherwise-identical filler technically "unique" is not content).
+  // A normalized count (digits collapsed to "#") catches the counter case without rejecting
+  // legitimately distinct rows, whose differing words survive normalization untouched.
   const cellTextCounts = new Map<string, number>();
+  const normalizedCellCounts = new Map<string, number>();
   for (const cell of cells) {
     cellTextCounts.set(cell, (cellTextCounts.get(cell) ?? 0) + 1);
+    const normalized = normalizeForRepetition(cell);
+    normalizedCellCounts.set(normalized, (normalizedCellCounts.get(normalized) ?? 0) + 1);
   }
   const repeatedThreshold = Math.max(8, Math.ceil(cells.length * 0.15));
 
@@ -443,8 +483,13 @@ function tablePlaceholderCells(text: string): string[] {
     if (/^placeholder$/i.test(cell)) return true;
     const firstWord = cell.match(/^[A-Za-z][A-Za-z-]*/)?.[0]?.toLowerCase();
     if (firstWord && TEMPLATE_DIRECTIVE_VERBS.has(firstWord)) return true;
-    return (cellTextCounts.get(cell) ?? 0) >= repeatedThreshold;
+    if ((cellTextCounts.get(cell) ?? 0) >= repeatedThreshold) return true;
+    return (normalizedCellCounts.get(normalizeForRepetition(cell)) ?? 0) >= repeatedThreshold;
   });
+}
+
+function normalizeForRepetition(cell: string): string {
+  return cell.replace(/\d+/g, "#");
 }
 
 function requirePhrases(target: Issue[], relativePath: string, text: string, code: string, phrases: string[], message: string): void {

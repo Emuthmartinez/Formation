@@ -245,6 +245,88 @@ export function register(h: Harness): void {
     ["--require-done"],
   );
 
+  const deferredWithoutReason = makeFixture("onboarding-graph-deferred-without-reason");
+  {
+    const state = readState(deferredWithoutReason);
+    const lane = getLane(state, "onboarding");
+    lane["status"] = "deferred";
+    // Deliberately no blockers or reason recorded -- evidence alone (already present from
+    // markOnboardingDone-adjacent shipped state) is not an explanation of why the lane stopped.
+    writeState(deferredWithoutReason, state);
+  }
+  runFixture(
+    "a deferred lane with no recorded blockers or reason fails even the general check",
+    deferredWithoutReason,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.deferred_without_reason",
+  );
+
+  const doneWithCounterBoilerplate = makeFixture("onboarding-graph-done-with-counter-boilerplate");
+  {
+    markOnboardingDone(doneWithCounterBoilerplate);
+    // Every directive cell gets the exact same boilerplate sentence with only an incrementing
+    // number varying -- technically unique per cellTextCounts, but not real content.
+    let counter = 0;
+    mutateOnboarding(doneWithCounterBoilerplate, (text) =>
+      checkVerificationItems(
+        fillProseDirectiveLines(
+          text
+            .replaceAll("not_started", "done")
+            .split("\n")
+            .map((line) => {
+              if (!line.trim().startsWith("|")) return line;
+              return line
+                .split("|")
+                .map((cell) => {
+                  if (!TEMPLATE_DIRECTIVE_VERBS_PATTERN.test(cell)) return cell;
+                  counter += 1;
+                  return ` Evidence-${counter}: source-backed implementation detail dated 2026-08-08 `;
+                })
+                .join("|");
+            })
+            .join("\n"),
+        ),
+      ),
+    );
+  }
+  runFixture(
+    "a done lane whose table cells are all the same counter-varying boilerplate fails",
+    doneWithCounterBoilerplate,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.placeholder_complete",
+    ["--require-done"],
+  );
+
+  const doneWithFixedDoctrineProse = makeFixture("onboarding-graph-done-with-fixed-doctrine-prose");
+  {
+    markOnboardingDone(doneWithFixedDoctrineProse);
+    mutateOnboarding(doneWithFixedDoctrineProse, (text) => {
+      const filled = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      // fillProseDirectiveLines swaps every directive-verb-led line's leading word, including
+      // two sentences that sit directly above their own capture table (Analytics Contract's
+      // "Define a machine-readable schema..." and First Value And Activation's "Define First
+      // value rendered..."). Put those two back to literally "Define ..." -- exactly as shipped
+      // -- while every genuine fill-in line stays filled, proving the validator's own
+      // has-table-in-section exemption rather than a swapped-verb version of the same text.
+      return filled
+        .replace(
+          "Confirmed First value rendered, First value engaged, Activation, habit signal, retention, monetization, review eligibility, and onboarding completion separately.",
+          "Define First value rendered, First value engaged, Activation, habit signal, retention, monetization, review eligibility, and onboarding completion separately.",
+        )
+        .replace("Confirmed a machine-readable schema and typed clients.", "Define a machine-readable schema and typed clients.");
+    });
+  }
+  runFixture(
+    "fixed doctrine prose above a capture table passes even though it starts with a directive verb",
+    doneWithFixedDoctrineProse,
+    "check-onboarding-graph.ts",
+    0,
+    undefined,
+    ["--require-done"],
+  );
+
   function checkVerificationItems(text: string): string {
     return text.replace(/^-\s*\[\s*\]/gm, "- [x]");
   }
@@ -257,18 +339,44 @@ export function register(h: Harness): void {
     writeState(fixtureRoot, state);
   }
 
+  // check-onboarding-graph.ts's tablePlaceholderCells() now also rejects boilerplate that
+  // repeats with only an embedded counter varying (e.g. "Evidence-1: ...", "Evidence-2: ..."),
+  // since that is exactly the shape of filler that is technically unique but carries no real
+  // content. This filler derives each cell's text from its own table's column header and its
+  // row's own identifying content instead of a counter, so distinct rows and columns produce
+  // genuinely distinct text -- the same way a real completed launch's answers would differ
+  // because they are about different things, not because of an incrementing label.
   function fillTemplateDirectiveCells(text: string): string {
-    let evidenceNumber = 0;
-    return text
-      .split("\n")
+    const lines = text.split("\n");
+    let header: string[] | null = null;
+    let pendingHeader: string[] | null = null;
+
+    return lines
       .map((line) => {
-        if (!line.trim().startsWith("|")) return line;
-        return line
-          .split("|")
-          .map((cell) => {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("|")) {
+          header = null;
+          pendingHeader = null;
+          return line;
+        }
+        if (/^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?$/.test(trimmed)) {
+          header = pendingHeader;
+          pendingHeader = null;
+          return line;
+        }
+        if (header === null) {
+          pendingHeader = line.split("|").map((cell) => cell.trim());
+          return line;
+        }
+        const rawCells = line.split("|");
+        const trimmedCells = rawCells.map((cell) => cell.trim().replaceAll("`", ""));
+        const rowIdentity = trimmedCells.slice(1, -1).find((cell) => cell.length > 0 && !TEMPLATE_DIRECTIVE_VERBS_PATTERN.test(cell)) || "this row";
+        const resolvedHeader = header;
+        return rawCells
+          .map((cell, index) => {
             if (!TEMPLATE_DIRECTIVE_VERBS_PATTERN.test(cell)) return cell;
-            evidenceNumber += 1;
-            return ` Evidence-${evidenceNumber}: source-backed implementation detail dated 2026-08-08 `;
+            const columnName = (resolvedHeader?.[index] || "field").toLowerCase();
+            return ` Confirmed ${columnName} for ${rowIdentity} `;
           })
           .join("|");
       })
