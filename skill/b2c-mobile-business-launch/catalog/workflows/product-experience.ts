@@ -312,6 +312,13 @@ const onboardingGraphWorkflows = [
     phaseIds: ["phase.2", "phase.5b"],
     dependencies: ["workflow.experience.onboarding-system.onb-16-journey-graph"],
     outputPaths: ["product/onboarding/graph/ONB-19-implementation-cutover-contract.md"],
+    // Same production-verification rationale as ONB-03/ONB-09/ONB-20/ONB-21 above: with no gate,
+    // this node compiled to verification "none", so an executor could return the declared
+    // artifact ID and fingerprint without ever writing a substantive implementation, migration,
+    // reliability, or deletion plan -- and neither ONB-20's own gate (which inspects only its own
+    // packet) nor the final graph gate (which never reads ONB-19-implementation-cutover-contract.md)
+    // would catch it, letting the destructive ONB-22 cutover proceed with no real cutover plan.
+    gates: ["check:onboarding-evidence-onb-19"],
     actionClass: "draft",
     idempotent: true,
   }),

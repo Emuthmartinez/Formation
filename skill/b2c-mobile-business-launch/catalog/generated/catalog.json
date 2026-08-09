@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.119.0",
+  "skillVersion": "0.120.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2503,7 +2503,9 @@
       "outputPaths": [
         "product/onboarding/graph/ONB-19-implementation-cutover-contract.md"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:onboarding-evidence-onb-19"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "draft",
@@ -4706,6 +4708,13 @@
     {
       "id": "gate.check-onboarding-evidence-onb-09",
       "command": "check:onboarding-evidence-onb-09",
+      "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
+      "ownerDomainId": "domain.experience",
+      "audit": "excluded"
+    },
+    {
+      "id": "gate.check-onboarding-evidence-onb-19",
+      "command": "check:onboarding-evidence-onb-19",
       "scriptPath": "validation/business/experience/check-onboarding-evidence-packet.ts",
       "ownerDomainId": "domain.experience",
       "audit": "excluded"

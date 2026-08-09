@@ -120,14 +120,40 @@ export function register(h: Harness): void {
   ]);
 
   // ONB-22's own catalog gate (check:onboarding-graph-complete) passes --require-done
-  // unconditionally -- the shipped template's lane is still not_started, so this is the
-  // one case that must fail even though the lenient baseline case above passes clean.
+  // unconditionally -- the shipped template's Graph Run table still reads not_started for every
+  // node, so this is the one case that must fail even though the lenient baseline case above
+  // passes clean. This no longer depends on lanes.onboarding.status: the content checks below
+  // (which --require-done always runs, regardless of that field's value) reject the unstarted
+  // template on their own.
   runFixture(
     "the shipped template's own gate (--require-done) refuses to accept an unstarted onboarding lane",
     baseline,
     "check-onboarding-graph.ts",
     1,
-    "onboarding_graph.not_marked_done",
+    "onboarding_graph.placeholder_complete",
+    ["--require-done"],
+  );
+
+  const completeArtifactLaneNeverMarkedDone = makeFixture("onboarding-graph-complete-artifact-lane-never-marked-done");
+  {
+    // Deliberately does NOT call markOnboardingDone -- lanes.onboarding.status stays at the
+    // shipped default (not_started), exactly as it would in a real durable-engine run: no
+    // production code path ever commits lanes.onboarding.status to "done" as a *result* of
+    // ONB-22's gate passing (core/engine/runstate.ts's reconcilePatch()/acceptVerification() only
+    // mutate run-state.json, never business-state.json). Requiring that field to already say done
+    // as --require-done's own precondition was therefore a deadlock the engine could never
+    // legitimately clear -- this proves the artifact's own content is sufficient on its own.
+    mutateOnboarding(completeArtifactLaneNeverMarkedDone, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      return `${completed}\nThis remains the canonical execution record for the completed onboarding system.\n`;
+    });
+  }
+  runFixture(
+    "ONB-22's --require-done gate passes on a genuinely complete artifact even though lanes.onboarding.status was never externally marked done",
+    completeArtifactLaneNeverMarkedDone,
+    "check-onboarding-graph.ts",
+    0,
+    undefined,
     ["--require-done"],
   );
 
@@ -211,24 +237,50 @@ export function register(h: Harness): void {
     ["--require-done"],
   );
 
-  const v2LanePending = makeFixture("onboarding-graph-v2-business-state-pending");
+  const v2LanePendingIncompleteArtifact = makeFixture("onboarding-graph-v2-business-state-pending-incomplete-artifact");
   {
-    rmSync(path.join(v2LanePending, "state/PROJECT_STATE.yaml"), { force: true });
+    rmSync(path.join(v2LanePendingIncompleteArtifact, "state/PROJECT_STATE.yaml"), { force: true });
     writeFileSync(
-      path.join(v2LanePending, "state/business-state.json"),
+      path.join(v2LanePendingIncompleteArtifact, "state/business-state.json"),
       JSON.stringify(buildValidBusinessStateV2({ status: "pending", evidence: [], blockers: [] })),
       "utf8",
     );
   }
   runFixture(
-    "a v2 workspace with an unfinished onboarding lane still fails --require-done, citing state/business-state.json not the absent v1 file",
-    v2LanePending,
+    "a v2 workspace with an unfinished onboarding lane and an unfinished artifact still fails --require-done",
+    v2LanePendingIncompleteArtifact,
     "check-onboarding-graph.ts",
     1,
-    "onboarding_graph.not_marked_done",
+    "onboarding_graph.placeholder_complete",
     ["--require-done"],
+  );
+
+  // lanes.onboarding.status never legitimately becomes "succeeded" as a *result* of ONB-22's own
+  // gate passing under the durable engine (core/engine/runstate.ts's reconcilePatch()/
+  // acceptVerification() only ever mutate run-state.json, never business-state.json) -- so a
+  // canonical v2 lane realistically sits at "pending" for the entire run, including at the exact
+  // moment ONB-22 itself finally executes. --require-done must not deadlock on that: it validates
+  // the artifact's own content, not an externally-tracked field nothing ever sets to done for it.
+  const v2LanePendingCompleteArtifact = makeFixture("onboarding-graph-v2-business-state-pending-complete-artifact");
+  {
+    rmSync(path.join(v2LanePendingCompleteArtifact, "state/PROJECT_STATE.yaml"), { force: true });
+    writeFileSync(
+      path.join(v2LanePendingCompleteArtifact, "state/business-state.json"),
+      JSON.stringify(buildValidBusinessStateV2({ status: "pending", evidence: [], blockers: [] })),
+      "utf8",
+    );
+    mutateOnboarding(v2LanePendingCompleteArtifact, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      return `${completed}\nThis remains the canonical execution record for the completed onboarding system.\n`;
+    });
+  }
+  runFixture(
+    "ONB-22's --require-done gate does not deadlock on a canonical v2 lane still pending once the artifact itself is genuinely complete",
+    v2LanePendingCompleteArtifact,
+    "check-onboarding-graph.ts",
+    0,
     undefined,
-    "state/PROJECT_STATE.yaml",
+    ["--require-done"],
   );
 
   // check-onboarding-graph.ts must fail closed on a malformed/partial business-state.json, never
@@ -252,9 +304,14 @@ export function register(h: Harness): void {
   );
 
   // A migrated workspace can retain a stale v1 PROJECT_STATE.yaml alongside the live v2 document --
-  // the engine only ever writes v2, so v2 must win even when v1 is also present, in both
-  // directions: a stale v1 "not_started" must not block a truly completed v2 lane, and (more
-  // seriously) a stale v1 "done" must not authorize the cutover while canonical v2 is still pending.
+  // the engine only ever writes v2, so v2 must win even when v1 is also present. --require-done no
+  // longer depends on lanes.onboarding.status's value at all (see the deadlock fixtures above), but
+  // the general (non-strict) check still uses it to decide whether to run the deep completion
+  // checks in the first place: if it wrongly trusted a stale v1 "done" over canonical v2's
+  // "pending", it would run those checks against this fixture's deliberately untouched (still
+  // unstarted) artifact and fail on the placeholder content -- passing cleanly here proves it
+  // correctly used v2's "pending" (which the general check does not treat as a completion claim)
+  // instead.
   const v2WinsOverStaleV1Done = makeFixture("onboarding-graph-v2-wins-over-stale-v1-done");
   {
     const v1State = readState(v2WinsOverStaleV1Done);
@@ -267,12 +324,10 @@ export function register(h: Harness): void {
     );
   }
   runFixture(
-    "canonical v2 pending overrides a stale v1 done -- the retained legacy file cannot authorize the cutover",
+    "the general onboarding-graph check trusts canonical v2 pending over a stale v1 done, rather than running deep checks against an unfinished artifact",
     v2WinsOverStaleV1Done,
     "check-onboarding-graph.ts",
-    1,
-    "onboarding_graph.not_marked_done",
-    ["--require-done"],
+    0,
   );
 
   const doneWithUncheckedVerification = makeFixture("onboarding-graph-done-with-unchecked-verification");
@@ -403,12 +458,17 @@ export function register(h: Harness): void {
     writeState(deferredRequireDone, state);
   }
   runFixture("the general onboarding-graph check still honors an explicit deferral", deferredRequireDone, "check-onboarding-graph.ts", 0);
+  // --require-done's skip variable is deliberately `laneExempt && hasDeferralReason && !requireDone`
+  // -- the deferral exemption belongs to the general (lenient) invocation only. Under
+  // --require-done, ONB-22's own gate still runs the full content checks against this fixture's
+  // deliberately untouched (still unstarted) artifact regardless of the deferred status, and fails
+  // on the same placeholder content the baseline unstarted-template fixture does.
   runFixture(
     "a deferred onboarding lane still fails ONB-22's own --require-done gate",
     deferredRequireDone,
     "check-onboarding-graph.ts",
     1,
-    "onboarding_graph.not_marked_done",
+    "onboarding_graph.placeholder_complete",
     ["--require-done"],
   );
 
@@ -646,6 +706,31 @@ export function register(h: Harness): void {
     "--path",
     "product/onboarding/graph/ONB-09-evidence-join.md",
   ]);
+
+  const onb19PacketMissing = makeFixture("onboarding-evidence-onb19-missing");
+  runFixture(
+    "ONB-19's gate fails when the implementation and cutover contract does not exist yet",
+    onb19PacketMissing,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_missing",
+    ["--node", "ONB-19", "--path", "product/onboarding/graph/ONB-19-implementation-cutover-contract.md"],
+  );
+
+  const onb19PacketComplete = makeFixture("onboarding-evidence-onb19-complete");
+  writeEvidencePacket(
+    onb19PacketComplete,
+    "product/onboarding/graph/ONB-19-implementation-cutover-contract.md",
+    substantiveResearchProse("the implementation units, reliability, performance, observability, privacy, migration, hard cutover, and deletion plan"),
+  );
+  runFixture(
+    "ONB-19's gate passes a genuinely substantive, marker-free implementation and cutover contract",
+    onb19PacketComplete,
+    evidenceScript,
+    0,
+    undefined,
+    ["--node", "ONB-19", "--path", "product/onboarding/graph/ONB-19-implementation-cutover-contract.md"],
+  );
 
   function checkVerificationItems(text: string): string {
     return text.replace(/^-\s*\[\s*\]/gm, "- [x]");

@@ -326,22 +326,20 @@ if (!skip && artifact) {
     "The artifact must cover purchase, restore, handoff, identity, nonblocking analytics, unsupported-client, and observability behavior.",
   );
 
-  // requireDone forces the strict block below to run even while lanes.onboarding.status is
-  // still not_started -- otherwise ONB-22's gate (whose only check this is) can pass on the
-  // unfilled shipped template, since nothing else forces the lane to actually be marked done
-  // before the engine accepts the final "execute, cut over, verify" node as complete.
-  if (requireDone && laneStatus !== "done") {
-    issues.push(
-      issue(
-        "error",
-        "onboarding_graph.not_marked_done",
-        `${relativePath}'s owning workflow gate requires lanes.onboarding.status=done before it can be accepted, but ${stateSourceFile} has lanes.onboarding.status=${laneStatus ?? "(unset)"}.`,
-        stateSourceFile,
-      ),
-    );
-  }
-
-  if (laneStatus === "done" || requireDone) {
+  // requireDone forces the strict block below to run unconditionally, independent of
+  // lanes.onboarding.status: no production path ever commits that field to "done"/"succeeded" as
+  // a *result* of ONB-22's gate passing (core/engine/runstate.ts's reconcilePatch()/
+  // acceptVerification() only mutate run-state.json, never business-state.json), and pre-setting
+  // it beforehand instead makes seedRunState() pre-accept the entire onboarding graph -- including
+  // ONB-22 -- without ever running this gate for real. Requiring the field to already say "done"
+  // as its own precondition is therefore a deadlock the durable engine can never clear on a
+  // genuine run. The artifact-content checks below (Graph Run table, placeholders, prose
+  // directives, artifact Status header, Verification checklist) are the real proof of completion
+  // and are sufficient on their own; they still reject the shipped, unstarted template exactly as
+  // before (its Graph Run rows all read not_started, tripping onboarding_graph.placeholder_complete
+  // and onboarding_graph.node_not_done for every node), so removing this precondition does not
+  // weaken the gate against an incomplete launch.
+  if (requireDone || laneStatus === "done") {
     const liveText = stripFencedBlocks(text);
     const genericPlaceholders = [/\bnot_started\b/i, /\bTODO\b/i, /\bTBD\b/i];
     const placeholderCells = tablePlaceholderCells(liveText);
