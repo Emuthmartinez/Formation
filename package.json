@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.108.0",
+  "version": "0.118.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -42,6 +42,7 @@
     "check:founder-copy": "tsx skill/b2c-mobile-business-launch/validation/business/words/check-founder-copy.ts",
     "check:app-copy": "tsx skill/b2c-mobile-business-launch/validation/business/words/check-app-copy.ts",
     "check:no-slop": "tsx skill/b2c-mobile-business-launch/validation/business/words/check-no-slop.ts",
+    "check:documentation-ste100": "tsx skill/b2c-mobile-business-launch/validation/business/engineering/check-technical-docs-ste100.ts",
     "migrate:founder-gates": "tsx skill/b2c-mobile-business-launch/tooling/migrate-founder-gates.ts",
     "check:asc-command-contract": "tsx skill/b2c-mobile-business-launch/validation/business/store/check-asc-command-contract.ts",
     "check:motion-contract": "tsx skill/b2c-mobile-business-launch/validation/business/design/check-motion-contract.ts",

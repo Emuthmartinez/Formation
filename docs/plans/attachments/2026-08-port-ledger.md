@@ -73,10 +73,10 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 96 | 0 | 0 | 1 | 97 |
+| Knowledge content files | 97 | 0 | 0 | 1 | 98 |
 | Additions beyond literal scope (2) | 1 | 0 | 1 | 0 | 2 |
-| Validators (67) | 27 | 25 | 0 | 16 | 68 |
-| **Total** | **125** | **25** | **1** | **32** | **183** |
+| Validators (67) | 28 | 25 | 0 | 16 | 69 |
+| **Total** | **127** | **25** | **1** | **32** | **185** |
 
 ---
 
@@ -170,7 +170,7 @@ matching `catalog/references.ts` entry, which already carries its authored `load
 | knowledge/design/remotion-content-assets.md | keep | Remotion content-asset reference, `check:content-assets` |
 | knowledge/design/surfaces-b2c.md | keep | unique CPP/PPO/In-App Event schema content with Apple's numeric limits; not redundant — see design-room.md note |
 
-### domain.engineering (5 files, all keep)
+### domain.engineering (6 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
@@ -178,6 +178,7 @@ matching `catalog/references.ts` entry, which already carries its authored `load
 | knowledge/engineering/backend-data-contract.md | keep | backend selection/data-model reference, `check:backend-contract` |
 | knowledge/engineering/engineering-orchestration.md | keep | CE routing / Standalone Engineering Loop reference |
 | knowledge/engineering/mobai-toolbelt.md | keep | device automation reference, `check:mobai-proof` |
+| knowledge/engineering/technical-documentation-ste100.md | keep | ASD-STE100 technical-documentation standard reference, `reference.engineering.technical-documentation-ste100` |
 | knowledge/engineering/xcodebuildmcp-testing.md | keep | Route Ladder proof reference, `check:native-ios` |
 
 ### domain.experience (21 files, all keep)
@@ -341,6 +342,7 @@ split noted).
 | validation/business/engineering/check-compound-engineering-routing.ts | port | HYBRID — doc-phrase requirement is WORD-PATTERN, PROJECT_STATE enum/field validation is structural |
 | validation/business/engineering/check-mobai-proof.ts | port | HYBRID — readiness-doc field checks are WORD-PATTERN, real `.mob` script static analysis (unbounded repeats, embedded secrets) and evidence-path grounding are real; port the `.mob`-analysis half |
 | validation/business/engineering/check-native-ios-proof.ts | port | HYBRID, WORD-PATTERN-heavy — bulk is keyword-presence grading against PRODUCTION_READINESS.md, but the evidence-path-exists-on-disk requirement for test-matrix rows is real; salvage that half |
+| validation/business/engineering/check-technical-docs-ste100.ts | keep | STRUCTURAL — mechanical two-rule subset (sentence length, present-perfect heuristic) of the ASD-STE100 reference, added 2026-08 alongside knowledge/engineering/technical-documentation-ste100.md; error-tier on the one file this change can currently guarantee compliant, warning-tier across the rest of the governed knowledge/**/*.md surface until each file is individually re-audited and promoted |
 | validation/business/engineering/check-template-safety.ts | keep | STRUCTURAL — regex-lints shipped template code for forbidden imports/hardcoded strings, a real static-analysis check on code syntax |
 
 ### validation/business/experience/

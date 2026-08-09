@@ -1307,4 +1307,487 @@ export function register(h: Harness): void {
     0,
     "WARNING no_slop.empty_adverb",
   );
+
+  // --- check-technical-docs-ste100 ---
+  //
+  // The mechanical subset of knowledge/engineering/technical-documentation-ste100.md: sentence
+  // length and present-perfect tense, at two severity tiers (error on the one file the
+  // reference can currently guarantee compliant, warning on the rest of the governed surface),
+  // the same tier split check-no-slop.ts proves above. Every case here proves the checker can
+  // actually fire, not just pass — a gate is only real once it has been watched to fail.
+  runScriptArgs("ste100 passes on the shipped repo's own error-tier file", "check-technical-docs-ste100.ts", ["--skill-root", skillRoot], 0);
+
+  function writeSte100Root(
+    name: string,
+    overrides: {
+      steFile?: string;
+      extraKnowledgeFile?: { relative: string; content: string };
+      readmeContent?: string;
+      extraSkillFile?: { relative: string; content: string };
+    } = {},
+  ): { repoRoot: string; skillRoot: string } {
+    const root = makeEmptyFixture(name);
+    const repoRoot = path.join(root, "repo");
+    const fixtureSkillRoot = path.join(repoRoot, "skill", "pkg");
+    mkdirSync(path.join(fixtureSkillRoot, "knowledge", "engineering"), { recursive: true });
+    const steContent =
+      overrides.steFile ??
+      "# Technical Documentation In Simplified Technical English (ASD-STE100)\n\nThis file follows its own rule. Every sentence stays short. The checker reads this file first.\n";
+    writeFileSync(path.join(fixtureSkillRoot, "knowledge", "engineering", "technical-documentation-ste100.md"), steContent, "utf8");
+    if (overrides.extraKnowledgeFile) {
+      const target = path.join(fixtureSkillRoot, "knowledge", overrides.extraKnowledgeFile.relative);
+      mkdirSync(path.dirname(target), { recursive: true });
+      writeFileSync(target, overrides.extraKnowledgeFile.content, "utf8");
+    }
+    if (overrides.readmeContent) {
+      writeFileSync(path.join(fixtureSkillRoot, "README.md"), overrides.readmeContent, "utf8");
+    }
+    if (overrides.extraSkillFile) {
+      const target = path.join(fixtureSkillRoot, overrides.extraSkillFile.relative);
+      mkdirSync(path.dirname(target), { recursive: true });
+      writeFileSync(target, overrides.extraSkillFile.content, "utf8");
+    }
+    return { repoRoot, skillRoot: fixtureSkillRoot };
+  }
+
+  const ste100Clean = writeSte100Root("ste100-clean");
+  runScriptArgs(
+    "ste100 passes on a synthetic clean error-tier file",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Clean.repoRoot, "--skill-root", ste100Clean.skillRoot],
+    0,
+  );
+
+  const ste100LongSentence = writeSte100Root("ste100-long-sentence", {
+    steFile:
+      "# Doc\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+  });
+  runScriptArgs(
+    "ste100 fails the error-tier file on a sentence over the 20-word ceiling",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100LongSentence.repoRoot, "--skill-root", ste100LongSentence.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  const ste100PresentPerfect = writeSte100Root("ste100-present-perfect", {
+    steFile: "# Doc\n\nThe validator has checked this file already.\n",
+  });
+  runScriptArgs(
+    "ste100 fails the error-tier file on present-perfect tense",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PresentPerfect.repoRoot, "--skill-root", ste100PresentPerfect.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
+
+  // A violation in a file outside the error-tier list is real, visible signal — but a warning,
+  // never a build failure, matching no-slop's own maintainer-tier demotion above.
+  const ste100WarningTier = writeSte100Root("ste100-warning-tier", {
+    extraKnowledgeFile: {
+      relative: "product/notes.md",
+      content:
+        "# Notes\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    },
+  });
+  runScriptArgs(
+    "ste100 demotes the same violation to a warning outside the error-tier file",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100WarningTier.repoRoot, "--skill-root", ste100WarningTier.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long",
+  );
+
+  // Both explicitly named in the reference's own trigger line — a real gap Codex caught: the
+  // governed-file discovery never enqueued either one, so an edit to either received no signal.
+  const ste100Readme = writeSte100Root("ste100-readme-scanned", {
+    readmeContent:
+      "# Package\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+  });
+  runScriptArgs(
+    "ste100 scans this skill's own README.md, named in the reference's trigger line",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Readme.repoRoot, "--skill-root", ste100Readme.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [skill/pkg/README.md]",
+  );
+
+  // A trailing prose paragraph with no terminal punctuation used to fall off the end of the
+  // sentence match entirely — a real gap Codex caught: an oversized or present-perfect closing
+  // sentence passed silently as long as the file just stopped instead of ending in . ! ? or :
+  const ste100Unterminated = writeSte100Root("ste100-unterminated-final-sentence", {
+    steFile:
+      "# Doc\n\nShort opening sentence here.\n\nThis closing sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces",
+  });
+  runScriptArgs(
+    "ste100 still catches a violation in the final sentence when the file ends with no terminal punctuation",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Unterminated.repoRoot, "--skill-root", ste100Unterminated.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A colon inside a real, single grammatical sentence must NOT end the sentence-length count
+  // early — a real gap Codex caught: this 23-word instruction splits into a 9-word half and a
+  // 14-word half at its mid-sentence colon, and the old "colon always ends a chunk" rule let
+  // both halves pass individually while the sentence as a whole broke the 20-word ceiling.
+  const ste100MidSentenceColon = writeSte100Root("ste100-mid-sentence-colon", {
+    steFile:
+      "# Doc\n\nFollow this procedure carefully and read every step twice: open the file first, then check the value against the reference table before continuing.\n",
+  });
+  runScriptArgs(
+    "ste100 keeps a mid-sentence colon inside the same sentence, not a second short one",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100MidSentenceColon.repoRoot, "--skill-root", ste100MidSentenceColon.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // The list-introducing colon exception must stay narrow: it fires only when the very next
+  // line is a list item, never for an ordinary colon-joined sentence sitting in plain prose.
+  const ste100ColonNoList = writeSte100Root("ste100-colon-no-list-follows", {
+    steFile: "# Doc\n\nRead this short line: it stays one sentence.\n\nA second short paragraph follows here with no list after it at all.\n",
+  });
+  runScriptArgs(
+    "ste100 passes a colon-joined sentence under the ceiling when no list follows it",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100ColonNoList.repoRoot, "--skill-root", ste100ColonNoList.skillRoot],
+    0,
+  );
+
+  // A real gap Codex caught: an active maintenance runbook (validation/repository/*.md) named
+  // by the reference's own scope ("a runbook") was outside both the hardcoded docs/ list and
+  // the knowledge/ walk, so an edit to it got no signal at all.
+  const ste100Runbook = writeSte100Root("ste100-runbook-scanned", {
+    extraSkillFile: {
+      relative: "validation/repository/some-runbook.md",
+      content:
+        "# Some Runbook\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    },
+  });
+  runScriptArgs(
+    "ste100 scans validation/repository/, a maintainer-runbook directory outside docs/ and knowledge/",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Runbook.repoRoot, "--skill-root", ste100Runbook.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [skill/pkg/validation/repository/some-runbook.md]",
+  );
+
+  // A real gap Codex caught: table rows were dropped outright, so an unquoted present-perfect
+  // sentence hiding in a table cell got no signal — even inside the error-tier reference file.
+  const ste100TableViolation = writeSte100Root("ste100-table-cell-violation", {
+    steFile: "# Doc\n\n| Rule | Example |\n|---|---|\n| Tense | The validator has read the file already |\n",
+  });
+  runScriptArgs(
+    "ste100 now scans table cells and catches a violation hiding inside one",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100TableViolation.repoRoot, "--skill-root", ste100TableViolation.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
+
+  // Scanning table cells must not break on this reference's own §3 table, whose "Don't"
+  // column intentionally quotes bad examples (including a present-perfect one) to teach the
+  // rule — a quoted example is cited text, not the document's own assertion.
+  const ste100TableQuotedExample = writeSte100Root("ste100-table-quoted-example-exempt", {
+    steFile: '# Doc\n\n| Rule | Don\'t |\n|---|---|\n| Tense | "The validator has read the file." |\n',
+  });
+  runScriptArgs(
+    "ste100 exempts a quoted illustrative example inside a table cell from the tense rule",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100TableQuotedExample.repoRoot, "--skill-root", ste100TableQuotedExample.skillRoot],
+    0,
+  );
+
+  // A real gap Codex caught: docs/platform/decisions-and-tradeoffs.md (an ADR, current and
+  // real, same as the two architecture docs already governed) was outside the hardcoded docs/
+  // list, so an edit to it got no signal despite the repo policy governing architecture docs.
+  const ste100Adr = writeSte100Root("ste100-adr-scanned");
+  mkdirSync(path.join(ste100Adr.repoRoot, "docs", "platform"), { recursive: true });
+  writeFileSync(
+    path.join(ste100Adr.repoRoot, "docs", "platform", "decisions-and-tradeoffs.md"),
+    "# Decisions And Tradeoffs\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "ste100 scans docs/platform/decisions-and-tradeoffs.md, an ADR outside the prior docs/ list",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100Adr.repoRoot, "--skill-root", ste100Adr.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [docs/platform/decisions-and-tradeoffs.md]",
+  );
+
+  // A real gap Codex caught: the prior blanket double-quote strip erased ANY quoted span before
+  // grading, not just a whole-cell illustrative example — so an ordinary quoted UI string or
+  // error message sitting inside real prose lost its own violation along with its quote marks.
+  // A quoted span in plain prose is the author's own sentence, not a cited example, and must
+  // stay fully counted.
+  const ste100QuotedProseViolation = writeSte100Root("ste100-quoted-prose-still-counted", {
+    steFile: '# Doc\n\nThe tooltip literally says "the validator has confirmed this already" every time it runs.\n',
+  });
+  runScriptArgs(
+    "ste100 still catches present-perfect tense hiding inside a quoted phrase in plain prose",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100QuotedProseViolation.repoRoot, "--skill-root", ste100QuotedProseViolation.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
+
+  // The table-cell exemption is narrow on purpose: it drops a cell only when the ENTIRE trimmed
+  // cell is one quoted string. A cell that merely contains a quote alongside other text is not
+  // an illustrative example — it is prose with a quote in it — and must stay fully counted.
+  const ste100PartialQuoteInCell = writeSte100Root("ste100-partial-quote-in-cell-counted", {
+    steFile: '# Doc\n\n| Rule | Example |\n|---|---|\n| Tense | Example: "the validator has confirmed this" already |\n',
+  });
+  runScriptArgs(
+    "ste100 still catches a violation in a table cell whose quote is partial, not whole-cell",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PartialQuoteInCell.repoRoot, "--skill-root", ste100PartialQuoteInCell.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
+
+  // A real gap Codex caught: docs/implementation/graph-execution-v2.md, the current guide for
+  // the graph compiler, durable runtime, scheduler, and verification boundary (named as such
+  // by docs/implementation/README.md), was outside the hardcoded docs/ list.
+  const ste100GraphExecutionGuide = writeSte100Root("ste100-graph-execution-guide-scanned");
+  mkdirSync(path.join(ste100GraphExecutionGuide.repoRoot, "docs", "implementation"), { recursive: true });
+  writeFileSync(
+    path.join(ste100GraphExecutionGuide.repoRoot, "docs", "implementation", "graph-execution-v2.md"),
+    "# Graph Execution V2\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "ste100 scans docs/implementation/graph-execution-v2.md, the current graph-compiler guide",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100GraphExecutionGuide.repoRoot, "--skill-root", ste100GraphExecutionGuide.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [docs/implementation/graph-execution-v2.md]",
+  );
+
+  // A real gap Codex caught: the sentence-splitting regex reads every period as a boundary,
+  // including the two inside "e.g." — so a real sentence over the word ceiling could pass by
+  // fragmenting into short-looking pieces at an abbreviation. This 24-word sentence splits
+  // into three fragments of 14, 1, and 10 words at "e.g." without the fix, none over the
+  // ceiling; with the fix it stays one sentence and is caught.
+  const ste100AbbreviationPeriod = writeSte100Root("ste100-abbreviation-period-not-a-boundary", {
+    steFile:
+      "# Doc\n\nPick the canonical product name once and reuse it everywhere across every screen, e.g. onboarding, paywall, and email subjects, without ever renaming it again.\n",
+  });
+  runScriptArgs(
+    "ste100 does not let e.g. fragment a real sentence into short-looking pieces under the ceiling",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AbbreviationPeriod.repoRoot, "--skill-root", ste100AbbreviationPeriod.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A decimal or version-number period ("v0.114.0") must not be read as a sentence boundary
+  // either — the same class of bug, a different period shape.
+  const ste100VersionNumberPeriod = writeSte100Root("ste100-version-number-period-not-a-boundary", {
+    steFile: "# Doc\n\nThe fixture suite runs clean against release v0.114.0 and every prior tagged release before it, including the ones from last quarter.\n",
+  });
+  runScriptArgs(
+    "ste100 does not let a version-number period fragment a real sentence into short-looking pieces",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100VersionNumberPeriod.repoRoot, "--skill-root", ste100VersionNumberPeriod.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught: the list-item marker ("-", "1.", "- [ ]") was left in place before
+  // counting words, so it counted as a word itself -- a genuinely compliant 20-word bullet was
+  // reported as 21 and failed. This exact bullet is 20 words without its marker.
+  const ste100ListMarkerNotAWord = writeSte100Root("ste100-list-marker-not-a-word", {
+    steFile:
+      "# Doc\n\n- One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty.\n",
+  });
+  runScriptArgs(
+    "ste100 does not count a bullet's own marker as one of its words",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100ListMarkerNotAWord.repoRoot, "--skill-root", ste100ListMarkerNotAWord.skillRoot],
+    0,
+  );
+
+  // Same bug, the GFM task-list shape: the checkbox ("[ ]"/"[x]") is formatting too, and must
+  // not inflate the count either.
+  const ste100TaskListCheckboxNotAWord = writeSte100Root("ste100-task-list-checkbox-not-a-word", {
+    steFile:
+      "# Doc\n\n- [ ] One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty.\n",
+  });
+  runScriptArgs(
+    "ste100 does not count a task-list checkbox as one of its bullet's words",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100TaskListCheckboxNotAWord.repoRoot, "--skill-root", ste100TaskListCheckboxNotAWord.skillRoot],
+    0,
+  );
+
+  // Stripping the marker must not blind the checker to a real violation: this bullet is 21
+  // words even with its marker removed.
+  const ste100ListMarkerStillCatchesReal = writeSte100Root("ste100-list-marker-strip-still-catches-real-violation", {
+    steFile:
+      "# Doc\n\n- One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyone.\n",
+  });
+  runScriptArgs(
+    "ste100 still catches a real violation in a bullet after stripping its marker",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100ListMarkerStillCatchesReal.repoRoot, "--skill-root", ste100ListMarkerStillCatchesReal.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught: the abbreviation-period fix from the previous round protected the
+  // period whenever whitespace followed, even when that period was ALSO the end of its own
+  // sentence -- so two independent, individually compliant sentences ("Use the standard
+  // process, etc." + a fresh 16-word sentence) merged into one 21-word blob and produced a
+  // false violation. Each half is under the ceiling alone; only the false merge is over it.
+  const ste100AbbreviationSentenceFinal = writeSte100Root("ste100-abbreviation-sentence-final-still-a-boundary", {
+    steFile:
+      "# Doc\n\nUse the standard process, etc. Read the next instruction that follows immediately after this one very carefully every single time now.\n",
+  });
+  runScriptArgs(
+    "ste100 keeps a sentence-final abbreviation period as a real boundary, not a false merge",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AbbreviationSentenceFinal.repoRoot, "--skill-root", ste100AbbreviationSentenceFinal.skillRoot],
+    0,
+  );
+
+  // The sentence-final fix must not reopen the mid-sentence bug the previous round fixed: an
+  // abbreviation followed by a lowercase continuation must still protect its period.
+  const ste100AbbreviationMidSentenceStillProtected = writeSte100Root("ste100-abbreviation-mid-sentence-still-protected", {
+    steFile:
+      "# Doc\n\nPick the canonical product name once and reuse it everywhere across every screen, e.g. onboarding, paywall, and email subjects, without ever renaming it again.\n",
+  });
+  runScriptArgs(
+    "ste100 still protects a mid-sentence abbreviation period followed by a lowercase continuation",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AbbreviationMidSentenceStillProtected.repoRoot, "--skill-root", ste100AbbreviationMidSentenceStillProtected.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught, grounded in this repo's own knowledge/engineering/backend-data-
+  // contract.md ("a migration tool (e.g. Prisma Migrate, Alembic, node-pg-migrate) in the
+  // contract"): the previous round's lowercase-only check assumed a capitalized continuation
+  // always starts a new sentence, but "e.g." is routinely followed by a capitalized product
+  // name mid-sentence. Only "etc." keeps the lowercase-only check; "e.g." and its siblings are
+  // protected unconditionally.
+  const ste100AbbreviationBeforeCapitalizedTerm = writeSte100Root("ste100-abbreviation-before-capitalized-term-still-protected", {
+    steFile:
+      "# Doc\n\nUse supported databases, e.g. PostgreSQL, MySQL, SQLite, or another relational engine your team already knows well from a prior production deployment.\n",
+  });
+  runScriptArgs(
+    "ste100 still protects e.g. even when a capitalized product name follows it",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AbbreviationBeforeCapitalizedTerm.repoRoot, "--skill-root", ste100AbbreviationBeforeCapitalizedTerm.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught: "+" is a valid CommonMark unordered-list marker alongside "-" and
+  // "*", but the marker pattern only recognized the other two -- a compliant 20-word "+" bullet
+  // was left undetected as a list item at all, so its marker counted as an extra word (21) and
+  // it also never got a forced sentence boundary.
+  const ste100PlusMarkerNotAWord = writeSte100Root("ste100-plus-list-marker-not-a-word", {
+    steFile:
+      "# Doc\n\n+ One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty.\n",
+  });
+  runScriptArgs(
+    "ste100 does not count a + bullet's own marker as one of its words",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PlusMarkerNotAWord.repoRoot, "--skill-root", ste100PlusMarkerNotAWord.skillRoot],
+    0,
+  );
+
+  // Recognizing "+" as a marker must not blind the checker to a real violation in a "+" bullet.
+  const ste100PlusMarkerStillCatchesReal = writeSte100Root("ste100-plus-list-marker-still-catches-real-violation", {
+    steFile:
+      "# Doc\n\n+ One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyone.\n",
+  });
+  runScriptArgs(
+    "ste100 still catches a real violation in a + bullet after stripping its marker",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PlusMarkerStillCatchesReal.repoRoot, "--skill-root", ste100PlusMarkerStillCatchesReal.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught: a list item that wraps onto a following physical line (no blank
+  // line between) is one logical sentence, but each physical line got its own forced boundary,
+  // so a real over-ceiling instruction could hide by fragmenting across its own soft wrap.
+  const ste100WrappedListContinuation = writeSte100Root("ste100-wrapped-list-continuation-stays-one-sentence", {
+    steFile:
+      "# Doc\n\n- This instruction wraps onto a second physical line before its own terminal\n  punctuation lands, which pushes the true combined word count well past the limit.\n",
+  });
+  runScriptArgs(
+    "ste100 keeps a wrapped list continuation as one sentence and catches a violation split across it",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100WrappedListContinuation.repoRoot, "--skill-root", ste100WrappedListContinuation.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // Grouping continuations must not merge across a genuine paragraph break: a blank line, or a
+  // following line that is itself a new list item, table row, or heading, must start fresh. Each
+  // half here is a compliant 12 words; merged across the blank line they would be 24 -- over the
+  // ceiling -- so an incorrect merge is directly visible as a false violation.
+  const ste100ListContinuationStopsAtBlankLine = writeSte100Root("ste100-list-continuation-stops-at-blank-line", {
+    steFile:
+      "# Doc\n\n- One two three four five six seven eight nine ten eleven twelve.\n\nAlpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu.\n",
+  });
+  runScriptArgs(
+    "ste100 does not merge a list item with an unrelated paragraph across a blank line",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100ListContinuationStopsAtBlankLine.repoRoot, "--skill-root", ste100ListContinuationStopsAtBlankLine.skillRoot],
+    0,
+  );
+
+  // A real gap Codex caught: platform/README.md documents provider configuration, execution API
+  // routes, environment variables, and deployment requirements -- a current API/config
+  // reference -- but was outside every discovery path (not under docs/, not under skill/).
+  const ste100PlatformReadme = writeSte100Root("ste100-platform-readme-scanned");
+  mkdirSync(path.join(ste100PlatformReadme.repoRoot, "platform"), { recursive: true });
+  writeFileSync(
+    path.join(ste100PlatformReadme.repoRoot, "platform", "README.md"),
+    "# Platform\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    "utf8",
+  );
+  runScriptArgs(
+    "ste100 scans platform/README.md, the platform's own API/config developer guide",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100PlatformReadme.repoRoot, "--skill-root", ste100PlatformReadme.skillRoot],
+    0,
+    "WARNING ste100.sentence_too_long [platform/README.md]",
+  );
+
+  // A real gap Codex caught: the previous round's continuation grouping required the follow-on
+  // line to be indented, but CommonMark's "lazy continuation" rule counts an UNindented follow-on
+  // line (no blank line before it) as part of the same list item too. This bullet's second line
+  // has no leading whitespace at all.
+  const ste100UnindentedLazyContinuation = writeSte100Root("ste100-unindented-lazy-continuation-stays-one-sentence", {
+    steFile:
+      "# Doc\n\n- This instruction wraps onto a second physical line before its own terminal\npunctuation lands, which pushes the true combined word count well past the limit.\n",
+  });
+  runScriptArgs(
+    "ste100 keeps an unindented lazy list continuation as one sentence and catches a violation split across it",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100UnindentedLazyContinuation.repoRoot, "--skill-root", ste100UnindentedLazyContinuation.skillRoot],
+    1,
+    "ste100.sentence_too_long",
+  );
+
+  // A real gap Codex caught: the present-perfect heuristic only recognized five hard-coded
+  // intervening modifiers (not/never/already/just/recently), so any other adverb between the
+  // auxiliary and the participle -- "successfully" here -- let a present-perfect sentence pass
+  // undetected, even in the error-tier reference itself.
+  const ste100AdverbInPresentPerfect = writeSte100Root("ste100-adverb-in-present-perfect-still-caught", {
+    steFile: "# Doc\n\nThe validator has successfully checked the file against every governed rule today.\n",
+  });
+  runScriptArgs(
+    "ste100 still catches present-perfect tense with a general adverb between auxiliary and participle",
+    "check-technical-docs-ste100.ts",
+    ["--repo-root", ste100AdverbInPresentPerfect.repoRoot, "--skill-root", ste100AdverbInPresentPerfect.skillRoot],
+    1,
+    "ste100.present_perfect",
+  );
 }

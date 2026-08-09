@@ -156,6 +156,19 @@ async function runStep(step: AuditStep, scripts: Record<string, string>, options
   return finish(result.code, result.output);
 }
 
+/**
+ * A passing step's own warning count (the shared reportAndExit summary line — "N error(s), N
+ * warning(s)" — used by check-no-slop.ts, check-technical-docs-ste100.ts, and every other
+ * two-tier validator) so a real, non-blocking violation shows up even without
+ * B2C_AUDIT_VERBOSE. Without this, a passing step's warnings are invisible in CI: only errors
+ * force the verbose output block below, so a warning tier that exists to give "real, visible
+ * signal" gave none in the one place a maintainer actually reads the audit.
+ */
+function warningCountFrom(output: string): number | undefined {
+  const match = output.match(/\d+ error\(s\), (\d+) warning\(s\)/);
+  return match ? Number(match[1]) : undefined;
+}
+
 function printResult(result: StepResult, index: number, total: number): void {
   const heading = `[${index + 1}/${total}] ${result.step.id}`;
   if (result.skipped) {
@@ -164,7 +177,9 @@ function printResult(result: StepResult, index: number, total: number): void {
   }
   const status = result.code === 0 ? "ok" : `FAILED (exit ${result.code ?? "null"})`;
   const seconds = (result.durationMs / 1000).toFixed(1);
-  console.log(`${heading} — ${status} in ${seconds}s`);
+  const warningCount = result.code === 0 ? warningCountFrom(result.output) : undefined;
+  const warningSuffix = warningCount ? ` (${warningCount} warning${warningCount === 1 ? "" : "s"})` : "";
+  console.log(`${heading} — ${status}${warningSuffix} in ${seconds}s`);
   const trimmed = result.output.trimEnd();
   if (trimmed && (result.code !== 0 || process.env.B2C_AUDIT_VERBOSE === "1")) {
     console.log(

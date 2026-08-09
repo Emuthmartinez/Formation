@@ -49,6 +49,10 @@ The platform may request engine execution through a typed adapter. It must not r
 
 A platform change must update the product domain, API, page behavior, tests, and current documentation together. An engine change must update definitions, workspace artifacts, validators, fixtures or LaunchBench scenarios, generated projections, version metadata, and current documentation together. Cross-boundary changes require an explicit adapter contract and tests on both sides.
 
+## Documentation style
+
+Technical documentation (architecture docs, engineering specs, ADRs, runbooks, API/config references, and the engine's own `knowledge/*.md` files) always uses Simplified Technical English (ASD-STE100) — see `skill/b2c-mobile-business-launch/knowledge/engineering/technical-documentation-ste100.md`, loaded via the engine's catalog reference graph. This file, root `README.md`, and other founder/marketing copy keep following `skill/b2c-mobile-business-launch/knowledge/words/no-slop-writing.md` instead.
+
 ## Commands
 
 ```bash
