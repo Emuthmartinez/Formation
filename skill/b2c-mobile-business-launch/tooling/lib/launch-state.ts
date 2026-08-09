@@ -748,33 +748,52 @@ function stripFenceChar(text: string, ch: "`" | "~"): string {
 }
 
 /**
- * Strips CommonMark indented code blocks: a line indented at least 4 spaces starts a code block
- * only where it cannot interrupt a paragraph -- i.e. only right after a blank line, or at the
- * very start of the document (CommonMark's own rule; a 4+-space-indented line immediately after
- * an ordinary paragraph or table line is a lazy continuation of that block, not code, so it is
- * left untouched here). Once a block opens this way, it absorbs every subsequent indented line
- * and any blank lines between them; a non-indented, non-blank line ends it, and any trailing
- * blank lines immediately before that line belong to what follows, not to the code block. This is
- * what stops a required heading, Graph Run row, checklist item, or evidence-packet paragraph from
- * being satisfied by content a rendered page shows only as inert code text, never as live
- * document structure or prose.
+ * Column width of a line's leading whitespace, expanding tabs to CommonMark's own 4-column tab
+ * stop (a tab advances to the next multiple of 4, not a flat 4 columns) rather than treating tabs
+ * as literal characters. Stops at the first non-whitespace character. This is what lets a single
+ * leading tab (or a run of spaces plus a tab that reaches column 4) count as indented-code-block
+ * indentation exactly the way a real renderer would, instead of only ever recognizing four literal
+ * space characters.
+ */
+function leadingWhitespaceColumns(line: string): number {
+  let columns = 0;
+  for (const ch of line) {
+    if (ch === " ") columns += 1;
+    else if (ch === "\t") columns += 4 - (columns % 4);
+    else break;
+  }
+  return columns;
+}
+
+/**
+ * Strips CommonMark indented code blocks: a line whose leading whitespace reaches column 4 (see
+ * leadingWhitespaceColumns -- spaces and tabs both count, tabs expanding to the next 4-column tab
+ * stop) starts a code block only where it cannot interrupt a paragraph -- i.e. only right after a
+ * blank line, or at the very start of the document (CommonMark's own rule; an indented line
+ * immediately after an ordinary paragraph or table line is a lazy continuation of that block, not
+ * code, so it is left untouched here). Once a block opens this way, it absorbs every subsequent
+ * indented line and any blank lines between them; a non-indented, non-blank line ends it, and any
+ * trailing blank lines immediately before that line belong to what follows, not to the code block.
+ * This is what stops a required heading, Graph Run row, checklist item, or evidence-packet
+ * paragraph from being satisfied by content a rendered page shows only as inert code text, never
+ * as live document structure or prose.
  */
 function stripIndentedCodeBlocks(text: string): string {
   const lines = text.split("\n");
   const kept: string[] = [];
   let previousBlank = true;
   let i = 0;
+  const isIndentedLine = (line: string): boolean => leadingWhitespaceColumns(line) >= 4 && line.trim().length > 0;
   while (i < lines.length) {
     const line = lines[i] ?? "";
     const isBlank = line.trim().length === 0;
-    const isIndented = /^ {4,}\S/.test(line);
+    const isIndented = isIndentedLine(line);
     if (isIndented && previousBlank) {
       let j = i;
       while (j < lines.length) {
         const candidate = lines[j] ?? "";
         const candidateBlank = candidate.trim().length === 0;
-        const candidateIndented = /^ {4,}\S/.test(candidate);
-        if (candidateIndented || candidateBlank) {
+        if (isIndentedLine(candidate) || candidateBlank) {
           j++;
           continue;
         }
@@ -794,15 +813,31 @@ function stripIndentedCodeBlocks(text: string): string {
 }
 
 /**
- * Strips every form of Markdown that does not render as visible prose: HTML comments (which
- * render nothing at all), backtick/tilde fenced code blocks (CommonMark accepts both delimiters
- * equally, and a shorter same-character run than the opener never closes a fence -- see
+ * Strips content inside raw HTML block elements whose content a browser never renders as visible
+ * document text -- script, style, and template. Case-insensitive; an unterminated opener (no
+ * matching closing tag anywhere after it) still strips to the end of the document, matching how a
+ * real page shows nothing from an unterminated one of these blocks either, the same reasoning
+ * already applied to an unterminated fence. This is distinct from stripIndentedCodeBlocks and
+ * stripFenceChar: those hide content because it is a code-like construct; this hides content
+ * because these three tags are specifically inert-by-default in every browser (unlike, say,
+ * <pre> or <textarea>, whose content *does* render visibly and so is deliberately left alone).
+ */
+function stripNonRenderingHtmlBlocks(text: string): string {
+  return text.replace(/<(script|style|template)\b[^>]*>[\s\S]*?(?:<\/\1\s*>|$)/gi, "");
+}
+
+/**
+ * Strips every form of Markdown (and raw HTML) that does not render as visible prose: HTML
+ * comments (which render nothing at all), script/style/template blocks (see
+ * stripNonRenderingHtmlBlocks), backtick/tilde fenced code blocks (CommonMark accepts both
+ * delimiters equally, and a shorter same-character run than the opener never closes a fence -- see
  * stripFenceChar), and indented code blocks (see stripIndentedCodeBlocks). Used by every check
  * that must not mistake hidden, fenced-off, or code-block-only content for a live, human-visible
  * finding, section, or completion signal.
  */
 export function stripNonRenderedMarkdown(text: string): string {
   const withoutComments = text.replace(/<!--[\s\S]*?(?:-->|$)/g, "");
-  const withoutFences = stripFenceChar(stripFenceChar(withoutComments, "`"), "~");
+  const withoutHtmlBlocks = stripNonRenderingHtmlBlocks(withoutComments);
+  const withoutFences = stripFenceChar(stripFenceChar(withoutHtmlBlocks, "`"), "~");
   return stripIndentedCodeBlocks(withoutFences);
 }

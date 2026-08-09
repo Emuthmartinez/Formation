@@ -152,6 +152,41 @@ export function register(h: Harness): void {
     "onboarding_graph.section_verification_missing",
   );
 
+  const requiredSectionInScriptBlock = makeFixture("onboarding-graph-required-section-in-script-block");
+  mutateOnboarding(requiredSectionInScriptBlock, (text) => {
+    // Relocate the entire live "## Failure And Recovery" section into a <script type="text/plain">
+    // block -- a browser never renders script content as visible page text, the same reasoning
+    // already applied to HTML comments and fences, but stripNonRenderedMarkdown() had no notion of
+    // raw HTML blocks at all, so before this fix the relocated heading stayed live and findable.
+    const section = text.match(/## Failure And Recovery\n[\s\S]*?(?=\n## )/)?.[0];
+    if (!section) throw new Error("fixture setup: could not locate the Failure And Recovery section to relocate");
+    const withoutLiveSection = text.replace(section, "");
+    return `${withoutLiveSection}\n<script type="text/plain">\n${section}\n</script>\n`;
+  });
+  runFixture(
+    "a required section relocated into a script block still fails as missing",
+    requiredSectionInScriptBlock,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_failure_and_recovery_missing",
+  );
+
+  const requiredHeadingTabIndented = makeFixture("onboarding-graph-required-heading-tab-indented");
+  mutateOnboarding(requiredHeadingTabIndented, (text) =>
+    // A single leading tab expands to CommonMark's own 4-column tab stop, the same indentation
+    // threshold as four literal spaces -- it is preceded by a blank line in the shipped template,
+    // so it opens an indented code block exactly like the space-indented case above. A check that
+    // only recognized four literal space characters would miss this and still find the heading.
+    text.replace("## Permissions And Lifecycle\n", "\t## Permissions And Lifecycle\n"),
+  );
+  runFixture(
+    "a required heading indented with a tab into a CommonMark code block still fails as missing",
+    requiredHeadingTabIndented,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_permissions_and_lifecycle_missing",
+  );
+
   const reviewInsideFirstRun = makeFixture("onboarding-graph-review-inside-first-run");
   mutateOnboarding(reviewInsideFirstRun, (text) =>
     text.replace(
@@ -980,6 +1015,48 @@ export function register(h: Harness): void {
   runFixture(
     "an evidence packet whose only content is indented into a CommonMark code block still fails as thin",
     evidencePacketIndentedContentOnly,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_too_thin",
+    ["--node", "ONB-04", "--path", "product/onboarding/graph/ONB-04-competitor-reviews.md"],
+  );
+
+  const evidencePacketStyleBlockOnly = makeFixture("onboarding-evidence-packet-style-block-only");
+  writeEvidencePacket(
+    evidencePacketStyleBlockOnly,
+    "product/onboarding/graph/ONB-04-competitor-reviews.md",
+    // A browser never renders <style> content as visible page text, the same non-rendering
+    // reasoning already applied to HTML comments and fences -- but stripNonRenderedMarkdown() had
+    // no notion of raw HTML blocks at all, so this faked content still cleared the 400-character
+    // substantive-length check before this fix.
+    `<style type="text/plain">\n${substantiveResearchProse(
+      "a competitor review that was never actually written, only faked inside this style block",
+    )}\n</style>\n`,
+  );
+  runFixture(
+    "an evidence packet whose only content is inside a style block still fails as thin",
+    evidencePacketStyleBlockOnly,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_too_thin",
+    ["--node", "ONB-04", "--path", "product/onboarding/graph/ONB-04-competitor-reviews.md"],
+  );
+
+  const evidencePacketTabIndentedContentOnly = makeFixture("onboarding-evidence-packet-tab-indented-content-only");
+  writeEvidencePacket(
+    evidencePacketTabIndentedContentOnly,
+    "product/onboarding/graph/ONB-04-competitor-reviews.md",
+    // A single leading tab expands to CommonMark's own 4-column tab stop, the same indentation
+    // threshold as four literal spaces -- a check that only recognized literal space characters
+    // would miss this and let the faked content clear the substantive-length check.
+    substantiveResearchProse("a competitor review that was never actually written, only tab-indented into a CommonMark code block")
+      .split("\n")
+      .map((line) => (line.length > 0 ? `\t${line}` : line))
+      .join("\n"),
+  );
+  runFixture(
+    "an evidence packet whose only content is tab-indented into a CommonMark code block still fails as thin",
+    evidencePacketTabIndentedContentOnly,
     evidenceScript,
     1,
     "onboarding_evidence.packet_too_thin",
