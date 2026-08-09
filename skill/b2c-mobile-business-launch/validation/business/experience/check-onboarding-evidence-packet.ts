@@ -11,7 +11,16 @@
  * stub-length, or still-templated packet, closing the "any returned artifact ID is accepted"
  * gap enough to stop a trivially empty or placeholder packet from unlocking ONB-09.
  */
-import { flagString, issue, parseCliArgs, parseFlags, readText, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
+import {
+  flagString,
+  issue,
+  parseCliArgs,
+  parseFlags,
+  readText,
+  reportAndExit,
+  stripNonRenderedMarkdown,
+  type Issue,
+} from "../../../tooling/lib/launch-state.js";
 
 const argv = process.argv.slice(2);
 const args = parseCliArgs(argv);
@@ -50,20 +59,12 @@ if (!relativePath) {
       ),
     );
   } else {
-    // Strip every form of non-rendered Markdown before measuring: an <!-- ... --> comment
-    // renders nothing, and CommonMark accepts a run of 3+ tildes as an equally valid fence
-    // delimiter, not just backticks -- either would otherwise inflate the substantive-length
-    // count and its first non-blank line (if it doesn't start with #, |, or -) would pass the
-    // hasProse check below, letting hidden content stand in for a finding no reviewer ever wrote.
-    // Each closing delimiter is optional (`|$`): CommonMark renders an unterminated comment or
-    // fence as extending to the end of the document, not as prose, so a packet that opens one of
-    // these forms and never closes it must have everything after the opener stripped too, or an
-    // unbounded amount of trailing text would still be counted as a real, rendered finding.
-    const stripped = text
-      .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
-      .replace(/`{3,}[\s\S]*?(?:`{3,}|$)/g, "")
-      .replace(/~{3,}[\s\S]*?(?:~{3,}|$)/g, "")
-      .trim();
+    // Strip every form of non-rendered Markdown before measuring -- see stripNonRenderedMarkdown's
+    // own doc comment for what it strips and why (comments, fences, unterminated openers, and
+    // opener/closer length matching); leaving any of that live would let hidden content inflate
+    // the substantive-length count or pass the hasProse check below, standing in for a finding no
+    // reviewer ever wrote.
+    const stripped = stripNonRenderedMarkdown(text).trim();
 
     if (stripped.length < MIN_SUBSTANTIVE_LENGTH) {
       issues.push(

@@ -701,3 +701,45 @@ export function validateReason(reason: string | undefined, lanePath: string, con
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Non-rendered Markdown stripping
+// ---------------------------------------------------------------------------
+
+/**
+ * Strips one fenced-code delimiter character (backtick or tilde) from text: every run of 3+
+ * of that character opens a block that only a run of EQUAL OR GREATER length of the same
+ * character closes (CommonMark's actual rule) -- a shorter run inside the block is literal
+ * fence content, not a closer. An opener with no qualifying closer runs to the end of the text,
+ * matching how an unterminated fence still renders as code (never prose) through end of document.
+ */
+function stripFenceChar(text: string, ch: "`" | "~"): string {
+  const opener = new RegExp(`${ch}{3,}`, "g");
+  let result = "";
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+  while ((match = opener.exec(text))) {
+    if (match.index < cursor) continue;
+    result += text.slice(cursor, match.index);
+    const openerLength = match[0].length;
+    const closer = new RegExp(`${ch}{${openerLength},}`, "g");
+    closer.lastIndex = match.index + openerLength;
+    const closerMatch = closer.exec(text);
+    cursor = closerMatch ? closerMatch.index + closerMatch[0].length : text.length;
+    opener.lastIndex = cursor;
+  }
+  result += text.slice(cursor);
+  return result;
+}
+
+/**
+ * Strips every form of Markdown that does not render as visible prose: HTML comments (which
+ * render nothing at all) and backtick/tilde fenced code blocks (CommonMark accepts both
+ * delimiters equally, and a shorter same-character run than the opener never closes a fence --
+ * see stripFenceChar). Used by every check that must not mistake hidden or fenced-off content
+ * for a live, human-visible finding, section, or completion signal.
+ */
+export function stripNonRenderedMarkdown(text: string): string {
+  const withoutComments = text.replace(/<!--[\s\S]*?(?:-->|$)/g, "");
+  return stripFenceChar(stripFenceChar(withoutComments, "`"), "~");
+}

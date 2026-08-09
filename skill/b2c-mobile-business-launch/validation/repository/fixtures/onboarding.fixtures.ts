@@ -112,6 +112,28 @@ export function register(h: Harness): void {
     "onboarding_graph.section_prototype_and_design_proof_missing",
   );
 
+  const requiredSectionAfterShortInnerFence = makeFixture("onboarding-graph-required-section-after-short-inner-fence");
+  mutateOnboarding(requiredSectionAfterShortInnerFence, (text) => {
+    // Opens with a four-backtick fence, then contains a three-backtick run before the relocated
+    // section and a real four-backtick closer after it. CommonMark only closes a fence with a
+    // same-character run at least as long as the opener, so the inner three-backtick line is
+    // literal fence content, not a closer -- the whole block, including the relocated section,
+    // stays hidden until the real four-backtick closer. A naive "any run of 3+ backticks closes
+    // it" strip would stop at the inner three-backtick line instead, leaving the section (and the
+    // real closer line after it) live and readable.
+    const section = text.match(/## Synthetic One-Star Pre-Mortem\n[\s\S]*?(?=\n## )/)?.[0];
+    if (!section) throw new Error("fixture setup: could not locate the Synthetic One-Star Pre-Mortem section to relocate");
+    const withoutLiveSection = text.replace(section, "");
+    return `${withoutLiveSection}\n\`\`\`\`markdown\nA decoy line that looks like a fence close but is too short to be one.\n\`\`\`\n${section}\n\`\`\`\`\n`;
+  });
+  runFixture(
+    "a required section placed after a shorter inner fence run (not a real closer) still fails as missing",
+    requiredSectionAfterShortInnerFence,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.section_synthetic_one_star_pre_mortem_missing",
+  );
+
   const reviewInsideFirstRun = makeFixture("onboarding-graph-review-inside-first-run");
   mutateOnboarding(reviewInsideFirstRun, (text) =>
     text.replace(
@@ -819,6 +841,29 @@ export function register(h: Harness): void {
   runFixture(
     "an evidence packet whose only content is inside an unterminated fence still fails as thin",
     evidencePacketUnterminatedFenceOnly,
+    evidenceScript,
+    1,
+    "onboarding_evidence.packet_too_thin",
+    ["--node", "ONB-04", "--path", "product/onboarding/graph/ONB-04-competitor-reviews.md"],
+  );
+
+  const evidencePacketShortInnerFenceOnly = makeFixture("onboarding-evidence-packet-short-inner-fence-only");
+  writeEvidencePacket(
+    evidencePacketShortInnerFenceOnly,
+    "product/onboarding/graph/ONB-04-competitor-reviews.md",
+    // Four-backtick opener, a three-backtick decoy line, the faked content, then a real
+    // four-backtick closer. CommonMark requires a closer at least as long as the opener, so the
+    // decoy never closes the block -- the faked content stays hidden inside the fence the entire
+    // way to the real closer. A strip that accepted any run of 3+ backticks as a valid closer
+    // would stop at the decoy and let everything after it, including the real closer line, count
+    // as live substantive text.
+    `\`\`\`\`markdown\nA decoy line that looks like a fence close but is too short to be one.\n\`\`\`\n${substantiveResearchProse(
+      "a competitor review that was never actually written, only faked past a too-short inner fence run",
+    )}\n\`\`\`\`\n`,
+  );
+  runFixture(
+    "an evidence packet whose only content sits past a shorter inner fence run still fails as thin",
+    evidencePacketShortInnerFenceOnly,
     evidenceScript,
     1,
     "onboarding_evidence.packet_too_thin",
