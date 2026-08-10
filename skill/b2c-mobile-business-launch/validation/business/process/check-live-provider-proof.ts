@@ -202,17 +202,32 @@ if (!proofText.trim()) {
   // work), and at least one path in its evidence-path cell must exist on disk.
   // Keyword presence alone cannot mark a provider-backed lane done.
   for (const mapping of providerLaneMap) {
-    const doneLanes = mapping.lanes.filter((lane) => laneStatus(lane) === "done");
-    if (doneLanes.length === 0) {
+    const isScopedTarget = Boolean(scopedProviders && scopedProviders.length > 0 && scopedProviders.includes(mapping.provider.toLowerCase()));
+    // A scoped invocation (ONB-22's own check:provider-proof-onboarding gate) is itself the
+    // precondition for marking the onboarding lane done: at the point it actually needs to run,
+    // the onboarding lane cannot yet be "done", and neither analytics_attribution nor revenue is
+    // guaranteed done either in a mobile-only launch. Gating this grounding check on doneLanes
+    // alone -- as the unscoped check still correctly does -- would make it a permanent no-op for
+    // exactly the providers it names, letting ONB-22's destructive cutover proceed against an
+    // untouched, still-"needs ... evidence" ledger row. A named provider's evidence is required
+    // unconditionally once scoped; an out-of-scope provider is skipped entirely, matching this
+    // check's whole design intent that a scoped invocation's acceptance depends only on its own
+    // named providers.
+    if (scopedProviders && scopedProviders.length > 0 && !isScopedTarget) {
       continue;
     }
+    const doneLanes = mapping.lanes.filter((lane) => laneStatus(lane) === "done");
+    if (doneLanes.length === 0 && !isScopedTarget) {
+      continue;
+    }
+    const reason = doneLanes.length > 0 ? `lanes.${doneLanes[0]} is done` : `ONB-22 requires ${mapping.provider} evidence before onboarding can be marked done`;
     const row = ledgerRows.find(({ cells }) => cells[0]?.toLowerCase().includes(mapping.provider.toLowerCase()));
     if (!row) {
       issues.push(
         issue(
           "error",
           `provider_proof.${slug(mapping.provider)}.row_missing`,
-          `lanes.${doneLanes[0]} is done but operations/PROVIDER_PROOF.md has no ledger row for ${mapping.provider}.`,
+          `${reason} but operations/PROVIDER_PROOF.md has no ledger row for ${mapping.provider}.`,
           "operations/PROVIDER_PROOF.md",
         ),
       );
@@ -224,7 +239,7 @@ if (!proofText.trim()) {
         issue(
           "error",
           `provider_proof.${slug(mapping.provider)}.status_unproven`,
-          `lanes.${doneLanes[0]} is done but the ${mapping.provider} ledger status still reads as planned work ("${statusCell.trim()}"). Capture the live evidence or keep the lane partial/blocked.`,
+          `${reason} but the ${mapping.provider} ledger status still reads as planned work ("${statusCell.trim()}"). Capture the live evidence or keep the lane partial/blocked.`,
           "operations/PROVIDER_PROOF.md",
         ),
       );
@@ -238,7 +253,7 @@ if (!proofText.trim()) {
         issue(
           "error",
           `provider_proof.${slug(mapping.provider)}.evidence_path_unrecorded`,
-          `lanes.${doneLanes[0]} is done but the ${mapping.provider} ledger row names no file path. Record the captured artifact's path (backtick-quote paths that contain spaces).`,
+          `${reason} but the ${mapping.provider} ledger row names no file path. Record the captured artifact's path (backtick-quote paths that contain spaces).`,
           "operations/PROVIDER_PROOF.md",
         ),
       );
@@ -247,7 +262,7 @@ if (!proofText.trim()) {
         issue(
           "error",
           `provider_proof.${slug(mapping.provider)}.evidence_path_missing`,
-          `lanes.${doneLanes[0]} is done but none of the ${mapping.provider} evidence paths exist on disk (${evidencePaths.join(", ")}). Run the live probe/capture so the artifact exists before marking the lane done.`,
+          `${reason} but none of the ${mapping.provider} evidence paths exist on disk (${evidencePaths.join(", ")}). Run the live probe/capture so the artifact exists before marking the lane done.`,
           evidencePaths[0],
         ),
       );

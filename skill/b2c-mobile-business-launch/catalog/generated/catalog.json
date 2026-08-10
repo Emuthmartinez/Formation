@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.133.0",
+  "skillVersion": "0.134.0",
   "areas": [
     {
       "id": "area.operating-system",

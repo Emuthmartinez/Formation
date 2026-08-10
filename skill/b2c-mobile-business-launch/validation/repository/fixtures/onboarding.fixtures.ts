@@ -817,6 +817,33 @@ export function register(h: Harness): void {
     ["--require-done"],
   );
 
+  // Regression (round 23): the round-22 fix above still matched a fingerprint against the whole
+  // section's raw text, so it passed as long as the deleted item's distinguishing text existed
+  // ANYWHERE in the section -- including as ordinary prose that was never actually a checked
+  // checklist line. Deleting the first item's checked line, leaving its exact text behind as a
+  // floating (non-list) sentence, and duplicating the second item's checked line to keep the
+  // total count at 11 used to satisfy every existing check: the item count, the unchecked count,
+  // and a substring-anywhere fingerprint search all stayed green.
+  const verificationFingerprintNotActuallyChecked = makeFixture("onboarding-graph-verification-fingerprint-not-actually-checked");
+  {
+    markOnboardingDone(verificationFingerprintNotActuallyChecked);
+    mutateOnboarding(verificationFingerprintNotActuallyChecked, (text) => {
+      const completed = checkVerificationItems(fillProseDirectiveLines(fillTemplateDirectiveCells(text.replaceAll("not_started", "done"))));
+      return completed.replace(
+        "- [x] `ONB-00` through `ONB-22` are done, or the lane is not claimed done\n- [x] Evidence, reviews, authorized Onbo Hub, internal guidance, provider, policy, seven-principle, and 60fps research are joined\n",
+        "Historical note: `ONB-00` through `ONB-22` are done, or the lane is not claimed done -- see the retired checklist archive for detail.\n- [x] Evidence, reviews, authorized Onbo Hub, internal guidance, provider, policy, seven-principle, and 60fps research are joined\n- [x] Evidence, reviews, authorized Onbo Hub, internal guidance, provider, policy, seven-principle, and 60fps research are joined\n",
+      );
+    });
+  }
+  runFixture(
+    "a deleted assertion's text surviving only as floating prose still fails, not just a fully-vanished assertion",
+    verificationFingerprintNotActuallyChecked,
+    "check-onboarding-graph.ts",
+    1,
+    "onboarding_graph.verification_assertion_missing",
+    ["--require-done"],
+  );
+
   const doneWithLegitimateAnswerWords = makeFixture("onboarding-graph-done-with-legitimate-answer-words");
   {
     markOnboardingDone(doneWithLegitimateAnswerWords);
@@ -1664,6 +1691,42 @@ export function register(h: Harness): void {
     cutoverScript,
     1,
     "onboarding_cutover.deletion_not_verified",
+  );
+
+  // Regression (round 23): deletionManifestRows() used to return an empty array whenever the
+  // "### Deletion Manifest" heading itself was missing, and the caller's for-of loop over an
+  // empty array reports zero issues -- indistinguishable from "nothing to verify". Renaming the
+  // heading while leaving the phrase "Deletion Manifest" elsewhere satisfies check-onboarding-
+  // graph.ts's unrelated phrase-presence checks, so ONB-22 could pass both completion gates
+  // without ever checking a single repository target.
+  const cutoverManifestMissing = makeFixture("onboarding-cutover-manifest-missing");
+  mutateOnboarding(cutoverManifestMissing, (text) =>
+    text.replace("### Deletion Manifest", "### Legacy Removal Notes (see the Deletion Manifest process elsewhere)"),
+  );
+  runFixture(
+    "an artifact with no parseable Deletion Manifest heading fails instead of silently passing",
+    cutoverManifestMissing,
+    cutoverScript,
+    1,
+    "onboarding_cutover.deletion_manifest_missing",
+  );
+
+  // Same silent-pass gap, reached by renaming the table's Disposition column instead of removing
+  // the heading: the heading and table both still exist, but header.indexOf("disposition") ===
+  // -1 also used to return an empty array.
+  const cutoverManifestDispositionRenamed = makeFixture("onboarding-cutover-manifest-disposition-renamed");
+  mutateOnboarding(cutoverManifestDispositionRenamed, (text) =>
+    text.replace(
+      "| Legacy ID | Code, data, config, provider, analytics, test, doc, dashboard, alert, or secret | Disposition | Delete task | Verification |",
+      "| Legacy ID | Code, data, config, provider, analytics, test, doc, dashboard, alert, or secret | Action | Delete task | Verification |",
+    ),
+  );
+  runFixture(
+    "a Deletion Manifest table with its Disposition column renamed fails instead of silently passing",
+    cutoverManifestDispositionRenamed,
+    cutoverScript,
+    1,
+    "onboarding_cutover.deletion_manifest_unparseable",
   );
 
   function checkVerificationItems(text: string): string {

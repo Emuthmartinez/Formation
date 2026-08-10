@@ -504,6 +504,30 @@ export function register(h: Harness): void {
     ["--providers", "PostHog,RevenueCat"],
   );
 
+  // Regression (round 23): the per-provider ledger-grounding loop above still only ran once one
+  // of a provider's mapped lanes read "done" -- but check:provider-proof-onboarding is invoked as
+  // the PRECONDITION for marking the onboarding lane done, so at the point it actually needs to
+  // run, the onboarding lane cannot yet be "done", and neither analytics_attribution nor revenue
+  // is guaranteed done either. Against the untouched shipped workspace (no lane done anywhere,
+  // PostHog/RevenueCat rows still reading their own shipped "needs ... evidence" status), the
+  // scoped invocation used to pass trivially, letting ONB-22's destructive cutover proceed
+  // without ever grounding its own declared providers.
+  const providerProofScopedRequiresEvidenceBeforeLaneDone = makeFixture("provider-proof-scoped-requires-evidence-before-lane-done");
+  runFixture(
+    "the unscoped provider-proof check still passes against the untouched workspace with no lane done",
+    providerProofScopedRequiresEvidenceBeforeLaneDone,
+    "check-live-provider-proof.ts",
+    0,
+  );
+  runFixture(
+    "the --providers-scoped provider-proof check requires named-provider evidence even before any lane is done",
+    providerProofScopedRequiresEvidenceBeforeLaneDone,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.posthog.status_unproven",
+    ["--providers", "PostHog,RevenueCat"],
+  );
+
   const artifactTemplateGap = makeFixture("artifact-template-gap");
   {
     const state = readState(artifactTemplateGap);

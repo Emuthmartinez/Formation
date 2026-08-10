@@ -72,8 +72,9 @@ const EXPECTED_VERIFICATION_ITEM_COUNT = 11;
 // assertions. verificationItemCount alone only counts checked-looking lines: deleting one
 // canonical assertion and duplicating a remaining checked line keeps the count at 11 and the
 // unchecked count at 0, so the destructive ONB-22 completion gate would accept a checklist that
-// no longer actually contains every required assertion. requirePhrases() below verifies each
-// assertion's own text is still present, not just that eleven lines exist.
+// no longer actually contains every required assertion. requireUniqueCheckedFingerprints() below
+// verifies each assertion's own text is still carried by its own distinct checked line, not just
+// present as text anywhere in the section.
 const VERIFICATION_ITEM_FINGERPRINTS = [
   "ONB-00` through `ONB-22` are done, or the lane is not claimed done",
   "internal guidance, provider, policy, seven-principle, and 60fps research are joined",
@@ -445,13 +446,12 @@ if (!skip && artifact) {
       );
     }
 
-    requirePhrases(
+    requireUniqueCheckedFingerprints(
       issues,
       relativePath,
       verificationSection,
       "onboarding_graph.verification_assertion_missing",
       VERIFICATION_ITEM_FINGERPRINTS,
-      "The Verification section must still contain every one of the eleven canonical checklist assertions, not merely eleven checklist-shaped lines.",
     );
 
     const uncheckedVerificationItems = countUncheckedItems(verificationSection);
@@ -529,6 +529,41 @@ function countUncheckedItems(section: string): number {
 
 function countChecklistItems(section: string): number {
   return (section.match(/^-\s*\[[ xX]\]/gm) ?? []).length;
+}
+
+/** Text of every checked ("- [x]" / "- [X]") checklist line, in document order. */
+function checkedItemTexts(section: string): string[] {
+  return [...section.matchAll(/^-\s*\[[xX]\]\s*(.*)$/gm)].map((match) => match[1] ?? "");
+}
+
+/**
+ * Verifies each canonical fingerprint is still carried by its own distinct checked checklist
+ * line, not merely present anywhere in the section's raw text. A plain requirePhrases() substring
+ * search over the whole section passes even when a canonical item's checked line was deleted
+ * outright and its distinguishing text left behind as ordinary (unchecked or non-list) prose
+ * elsewhere -- with a different checked line duplicated to keep the total count at eleven, the
+ * item count, unchecked count, and phrase-presence checks all stay green while the checklist no
+ * longer actually asserts that item. Matching against a pool of checked lines, each consumable at
+ * most once, closes that gap without letting one physical line satisfy two fingerprints either.
+ */
+function requireUniqueCheckedFingerprints(target: Issue[], relativePath: string, section: string, code: string, fingerprints: string[]): void {
+  const pool = checkedItemTexts(section);
+  const consumed = new Array(pool.length).fill(false);
+  for (const fingerprint of fingerprints) {
+    const matchIndex = pool.findIndex((text, index) => !consumed[index] && text.includes(fingerprint));
+    if (matchIndex === -1) {
+      target.push(
+        issue(
+          "error",
+          code,
+          `${relativePath}'s Verification section has no distinct checked checklist item carrying "${fingerprint}". Every one of the eleven canonical assertions must be its own checked item, not merely present as text elsewhere in the section.`,
+          relativePath,
+        ),
+      );
+    } else {
+      consumed[matchIndex] = true;
+    }
+  }
 }
 
 /** The artifact's own "Status: `word`" header, mirrored from tooling/lib/artifact-pages.ts's renderSourceArtifactPage. */
