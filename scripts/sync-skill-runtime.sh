@@ -122,7 +122,11 @@ echo "Runtime version: $(node -p "require('${RUNTIME}/skill-version.json').versi
 
 # --- 3. Prove the source is green before mirroring anything ------------------
 step "Auditing source"
-npm install --silent
+# `npm install` may rewrite optional-platform metadata when the maintainer's
+# npm version differs from the one that produced the committed lockfile. A
+# runtime sync must preserve byte parity, so install exactly from the lockfile
+# and fail instead of updating it.
+npm ci --silent --no-audit --no-fund
 npm run audit
 
 # --- 4. Mirror source -> runtime --------------------------------------------
@@ -164,7 +168,7 @@ echo "mirrored."
 # The runtime legitimately runs one fewer gate than the repo: check:package-parity
 # compares the repo root package.json to the skill's, and there is no repo root here.
 step "Auditing installed runtime"
-( cd "$RUNTIME" && npm install --silent && npm run audit )
+( cd "$RUNTIME" && npm ci --silent --no-audit --no-fund && npm run audit )
 
 # --- 6. Prove byte parity ----------------------------------------------------
 step "Verifying parity"

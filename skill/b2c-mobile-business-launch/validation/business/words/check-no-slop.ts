@@ -18,12 +18,12 @@
  * gate cannot make, only flag.
  *
  * npm script: check:no-slop
- * Usage: tsx validation/business/words/check-no-slop.ts [--repo-root /path] [--skill-root /path]
+ * Usage: tsx validation/business/words/check-no-slop.ts [--repo-root /path] [--skill-root /path] [--skip-repo-front-door]
  */
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { flagString, issue, parseFlags, reportAndExit, type Issue, type Severity } from "../../../tooling/lib/launch-state.js";
+import { flagBoolean, flagString, issue, parseFlags, reportAndExit, type Issue, type Severity } from "../../../tooling/lib/launch-state.js";
 import { findGitRoot } from "../../../tooling/lib/git-root.js";
 import { emDashProblem, loadNoSlopRules, matchesTerm, slopPatterns } from "../../../tooling/lib/no-slop-rules.js";
 
@@ -33,9 +33,11 @@ const defaultSkillRoot = path.resolve(scriptDir, "../../..");
 const flags = parseFlags(process.argv.slice(2), [
   { flags: ["--repo-root"], key: "repoRoot" },
   { flags: ["--skill-root"], key: "skillRoot" },
+  { flags: ["--skip-repo-front-door"], key: "skipRepoFrontDoor", kind: "boolean" },
 ]);
 const skillRoot = path.resolve(flagString(flags, "skillRoot") ?? defaultSkillRoot);
 const repoRoot = path.resolve(flagString(flags, "repoRoot") ?? findGitRoot(skillRoot) ?? path.resolve(skillRoot, "../.."));
+const skipRepoFrontDoor = flagBoolean(flags, "skipRepoFrontDoor");
 
 const issues: Issue[] = [];
 
@@ -56,7 +58,7 @@ const publicFrontDoor: { relative: string; tier: Severity }[] = [
 const referencePath = path.join(skillRoot, "knowledge/words/no-slop-writing.md");
 const rules = loadNoSlopRules(referencePath);
 
-for (const surface of publicFrontDoor) {
+for (const surface of skipRepoFrontDoor ? [] : publicFrontDoor) {
   const absolute = path.join(repoRoot, surface.relative);
   if (!existsSync(absolute)) {
     issues.push(
