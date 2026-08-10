@@ -94,13 +94,13 @@
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.0.5",
     "ajv": "^8.20.0",
-    "motion": "^12.43.0",
+    "motion": "^13.0.0",
     "prettier": "^3.9.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.10",
     "typescript": "^7.0.2",
-    "vite": "^8.2.0",
+    "vite": "^8.2.1",
     "yaml": "^2.6.1"
   }
 }
