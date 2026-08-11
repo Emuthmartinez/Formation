@@ -151,8 +151,12 @@ function parityCatalog(): CatalogInput {
       { id: "artifact.trust-review", path: "trust/review.md" },
     ],
     workflows: [
-      { id: "workflow.growth-scan", title: "Scan what people are saying", domainId: "domain.growth", actionClass: "observe", dependencies: [], outputPaths: ["growth/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
-      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
+      // check:gates-layout is a real, workspace-independent, deterministic gate: gateless
+      // outputs no longer auto-accept (the 2026-08 verification flip), and this suite needs
+      // nodes that genuinely SUCCEED to compare profiles — a deterministic gate keeps the
+      // outcome concurrency-invariant, which is the property the suite isolates.
+      { id: "workflow.growth-scan", title: "Scan what people are saying", domainId: "domain.growth", actionClass: "observe", dependencies: [], outputPaths: ["growth/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: ["check:gates-layout"], idempotent: true },
+      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: ["check:gates-layout"], idempotent: true },
       {
         id: "workflow.money-report-a",
         title: "Pull this week's revenue report (unwaived)",

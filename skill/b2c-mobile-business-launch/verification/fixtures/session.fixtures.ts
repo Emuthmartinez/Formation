@@ -24,6 +24,7 @@ const tsxBin = resolveTsxBin(skillRoot);
 const reducerCliPath = path.join(skillRoot, "core/reducer/cli.ts");
 const runCliPath = path.join(skillRoot, "core/session/run.ts");
 const approveCliPath = path.join(skillRoot, "core/session/approve.ts");
+const verifyCliPath = path.join(skillRoot, "core/session/verify.ts");
 const boundaryCliPath = path.join(skillRoot, "core/adapters/platform-execution.ts");
 
 interface CliResult {
@@ -50,6 +51,11 @@ function runSession(args: string[]): CliResult {
 
 function runApprove(args: string[]): CliResult {
   const result = spawnSync(tsxBin, [approveCliPath, ...args], { cwd: skillRoot, encoding: "utf8" });
+  return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
+}
+
+function runVerify(args: string[]): CliResult {
+  const result = spawnSync(tsxBin, [verifyCliPath, ...args], { cwd: skillRoot, encoding: "utf8" });
   return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
 }
 
@@ -218,6 +224,22 @@ function singleNodeCatalog(): CatalogInput {
     workflows: [
       { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
     ],
+  };
+}
+
+/**
+ * Same single node, but carrying a real, workspace-independent gate (check:gates-layout defends
+ * the skill's own validation/ tree, so it passes against any BUSINESS_ROOT). Since gateless
+ * outputs stopped auto-accepting (the 2026-08 verification flip), a scenario that needs a node
+ * to reach VERIFIED inside one headless session must give it a deterministic gate — this is the
+ * sanctioned path, not a fixture cheat.
+ */
+function gatedSingleNodeCatalog(): CatalogInput {
+  const catalog = singleNodeCatalog();
+  return {
+    ...catalog,
+    version: "catalog.session-fixture.single-gated",
+    workflows: catalog.workflows.map((workflowNode) => ({ ...workflowNode, gateCommands: ["check:gates-layout"] })),
   };
 }
 
@@ -781,7 +803,7 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
   // --- judgment scenario: verified results cross the boundary, and only verified results --------
 
   harness.check("session/boundary: a verified result crosses the boundary with evidence, artifact candidates, and declared cost — and only from a durable run", () => {
-    const handle = bootstrapWorkspace(harness, "results-boundary", singleNodeCatalog(), {
+    const handle = bootstrapWorkspace(harness, "results-boundary", gatedSingleNodeCatalog(), {
       grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
     });
 
@@ -804,8 +826,8 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const result = report.results[0];
     assert(result.workflowId === "workflow.eng-change" && result.workflowTitle === "Update the onboarding copy", `result must carry its stable workflow identity: ${JSON.stringify(result)}`);
     assert(result.attemptId.length > 0 && result.attemptNumber === 1, `result must carry its attempt identity: ${JSON.stringify(result)}`);
-    assert(result.verification === "none", `an ungated engineering node verifies as kind none, got: ${JSON.stringify(result)}`);
-    assert(Array.isArray(result.evidence) && result.evidence.length > 0, `result must carry the attempt's evidence: ${JSON.stringify(result)}`);
+    assert(result.verification === "deterministic", `a gated engineering node verifies deterministically, got: ${JSON.stringify(result)}`);
+    assert(Array.isArray(result.evidence) && result.evidence.some((line: string) => line.includes("gate:check:gates-layout=passed")), `result must carry the gate's own pass evidence: ${JSON.stringify(result)}`);
     assert(result.artifacts.length === 1 && result.artifacts[0].artifactId === "artifact.eng-change" && result.artifacts[0].fingerprint.length > 0, `result must reference its accepted output: ${JSON.stringify(result)}`);
     assert(typeof result.declaredTokenBudget === "number" && result.declaredTokenBudget > 0, `result must carry the node's declared token budget: ${JSON.stringify(result)}`);
     const artifactState = report.artifacts.find((entry: { artifactId: string }) => entry.artifactId === "artifact.eng-change");
@@ -837,6 +859,34 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     assert(artifactState.accepted === false, `the unverified output must report accepted: false, got: ${JSON.stringify(artifactState)}`);
     const step = report.workflows.find((entry: { workflowId: string }) => entry.workflowId === "workflow.research-scan");
     assert(step.status !== "finished", `a node pending verification must never report finished, got: ${JSON.stringify(step)}`);
+
+    // The sanctioned way OUT of blocked-pending-verification: core/session/verify.ts. Refuses
+    // the producer's own session and empty evidence; a different session with evidence promotes
+    // the node, and the boundary then exports the verified result it withheld above.
+    const listed = runVerify(["--workspace", handle.dir, "--list"]);
+    assert(listed.code === 0 && listed.output.includes("PENDING run.research-scan"), `expected the pending node listed, got: ${listed.output}`);
+    const producerAttempt = runVerify(["--workspace", handle.dir, "--node", "workflow.research-scan", "--session", "sess-unverified-1", "--evidence", "looks right"]);
+    assert(producerAttempt.code === 1 && producerAttempt.output.includes("verify.producer_cannot_verify"), `the producing session must be refused, got: ${producerAttempt.output}`);
+    const noEvidence = runVerify(["--workspace", handle.dir, "--node", "workflow.research-scan", "--session", "sess-reviewer-1"]);
+    assert(noEvidence.code === 1 && noEvidence.output.includes("verify.evidence_required"), `empty evidence must be refused, got: ${noEvidence.output}`);
+    const accepted = runVerify([
+      "--workspace",
+      handle.dir,
+      "--node",
+      "workflow.research-scan",
+      "--session",
+      "sess-reviewer-1",
+      "--evidence",
+      "fresh-context review: brief matches the category evidence and names sources",
+    ]);
+    assert(accepted.code === 0 && accepted.output.includes("VERIFIED run.research-scan"), `expected acceptance, got: ${accepted.output}`);
+    const afterVerify = JSON.parse(runBoundary(["--workspace", handle.dir]).stdout);
+    assert(afterVerify.results.length === 1, `the verified result must now cross the boundary, got: ${JSON.stringify(afterVerify.results)}`);
+    assert(afterVerify.results[0].verification === "fresh_context", `the result must carry its verification kind, got: ${JSON.stringify(afterVerify.results[0])}`);
+    assert(
+      afterVerify.results[0].producedBySessionId === "sess-unverified-1" && afterVerify.results[0].verifiedBySessionId === "sess-reviewer-1",
+      `the exported result must carry producer and verifier provenance, got: ${JSON.stringify(afterVerify.results[0])}`,
+    );
   });
 
   harness.check("session/boundary: a lane-seeded succeeded node exports no result — a seed fingerprint is not importable work", () => {

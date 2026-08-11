@@ -9,6 +9,7 @@ import type { ActionClass, GrantableDomainId, LaneKey, ProtectedCategory } from 
  */
 
 export type AreaId = `area.${string}`;
+export type RoleId = `role.${string}`;
 /** Broader than core/schema's GrantableDomainId: also covers domain.process, domain.orchestration, domain.machine (KTD3 system domains). */
 export type CatalogDomainId = `domain.${string}`;
 export type PhaseId = `phase.${string}`;
@@ -67,8 +68,33 @@ export interface CatalogReference {
   domainId: CatalogDomainId;
   title: string;
   loadWhen: string;
-  /** True for a domain hub/index file that itself routes to satellite references (e.g. experience-cards.md, tool-recipes.md). */
+  /**
+   * True for a backlink-enforced hub: a routing file whose spokes each open with a "Part of the
+   * [Hub](...)" backlink. check:hub-spoke enforces the flag in both directions (a flagged hub
+   * must have real spokes; a file with spokes must be flagged), so this is data code checks —
+   * not a rhetorical label.
+   */
   hub?: boolean;
+  /**
+   * True for always-on/orientation references a SESSION loads (Start Here, Always-On Contracts,
+   * autonomy, writing bar) rather than any one workflow node. Every reference must either be
+   * bound by at least one workflow's referenceIds or carry this flag — an unbound, unflagged
+   * reference is knowledge nothing routes to, and validate.ts rejects it
+   * (catalog_graph.reference.unbound).
+   */
+  sessionScoped?: boolean;
+}
+
+/**
+ * A specialist role a workflow node routes to (the app-agent roster promoted to catalog data —
+ * see catalog/roles.ts). `promptPath` is workspace-relative: the roster ships inside each
+ * provisioned business, so the catalog validates the id, not the file.
+ */
+export interface CatalogRole {
+  id: RoleId;
+  name: string;
+  promptPath: string;
+  scope: string;
 }
 
 /**
@@ -82,6 +108,39 @@ export interface CatalogWorkflowDef {
   domainId: CatalogDomainId;
   areaIds: AreaId[];
   trigger: string;
+  /**
+   * The node's working instructions: what a worker with fresh context should actually DO and how
+   * it knows it is done. Required (catalog_graph.workflow.instructions_missing) — a node whose
+   * only content is its title dispatches a worker with nothing to work from, which is the exact
+   * failure the 2026-08 contract audit found. Instructions stay compact; the depth lives in the
+   * bound references below.
+   */
+  instructions: string;
+  /**
+   * Authored input contract: the workspace paths this node actually consumes (upstream artifacts
+   * and durable state files). `reads` is BLOCKING: compile.ts maps each entry that names another
+   * workflow's artifact into the node's inputs, so the frontier holds the node until that
+   * artifact is produced AND accepted (a read of the node's own output is the read-modify-write
+   * pattern and is excluded; durable state files gate nothing). A file this node merely
+   * cross-checks when it exists belongs in `consults`, not here. Each entry must resolve to a
+   * declared artifact path or a workspace-template file (catalog_graph.workflow.read_unresolvable).
+   */
+  reads: string[];
+  /**
+   * Open-if-present references: files the worker should consult WHEN they exist, without holding
+   * readiness on their producers (e.g. a phase-1 node that cross-checks a phase-3 artifact on its
+   * later firings). Same resolvability rule as reads (catalog_graph.workflow.consult_unresolvable);
+   * a path may not appear in both lists.
+   */
+  consults: string[];
+  /**
+   * Knowledge bound to this node (R20 completed: loadWhen text routed humans; this routes the
+   * engine). Every id must exist in catalog/references.ts, and every non-sessionScoped reference
+   * must be bound by at least one workflow — both directions validate.
+   */
+  referenceIds: ReferenceId[];
+  /** The specialist role that owns this node's work (catalog/roles.ts; the app-agent roster promoted to a routing key). */
+  roleId: RoleId;
   laneIds: LaneKey[];
   phaseIds: PhaseId[];
   dependencies: WorkflowId[];
@@ -96,6 +155,8 @@ export interface CatalogWorkflowDef {
   maxAttempts?: number;
   ttlSeconds?: number;
   tokenBudget?: number;
+  /** Declared cost for actionClass "spend" nodes (required there — catalog_graph.workflow.cost_estimate_missing); the autonomy engine parks spend nodes without one. */
+  costEstimate?: { amount: number; currency: string };
 }
 
 export interface CatalogGate {
@@ -121,6 +182,7 @@ export interface Catalog {
   domains: CatalogDomain[];
   phases: CatalogPhase[];
   lanes: CatalogLane[];
+  roles: CatalogRole[];
   references: CatalogReference[];
   workflows: CatalogWorkflowDef[];
   artifacts: CatalogArtifact[];

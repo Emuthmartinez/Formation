@@ -7,6 +7,7 @@ import { discoverGates } from "./gates.js";
 import { lanes } from "./lanes.js";
 import { phases } from "./phases.js";
 import { references } from "./references.js";
+import { roles } from "./roles.js";
 import type { Catalog } from "./types.js";
 import { workflows } from "./workflows/index.js";
 
@@ -30,6 +31,7 @@ export function composeCatalog(skillRoot: string): Catalog {
     domains: [...domains].sort((a, b) => a.order - b.order),
     phases: [...phases].sort((a, b) => a.order - b.order),
     lanes: [...lanes],
+    roles: [...roles],
     references: [...references],
     workflows: [...workflows],
     artifacts: buildArtifacts(workflows),

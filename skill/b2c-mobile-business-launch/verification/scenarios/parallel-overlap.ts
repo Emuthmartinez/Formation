@@ -34,8 +34,11 @@ function overlappingResourceCatalog(): CatalogInput {
       { id: "artifact.plan-detail", path: "engineering/plan/base/detail.md" },
     ],
     workflows: [
-      { id: "workflow.plan-base", title: "Update the shared engineering plan (base section)", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/plan/base"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
-      { id: "workflow.plan-detail", title: "Update the shared engineering plan (detail section)", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/plan/base/detail.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
+      // check:gates-layout: real, workspace-independent gate — gateless outputs no longer
+      // auto-accept (2026-08 verification flip), and this scenario needs both nodes to settle
+      // to prove the batching/binding claims, not to test verification itself.
+      { id: "workflow.plan-base", title: "Update the shared engineering plan (base section)", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/plan/base"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: ["check:gates-layout"], idempotent: true },
+      { id: "workflow.plan-detail", title: "Update the shared engineering plan (detail section)", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/plan/base/detail.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: ["check:gates-layout"], idempotent: true },
     ],
   };
 }

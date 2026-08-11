@@ -313,6 +313,21 @@ export class ExecutionWorker {
     });
   }
 
+  /**
+   * Whether this worker's engine sessions can complete steps by themselves. Today that is true
+   * only for tests that inject the engine's fixture executor — the production engine plans,
+   * checks, and routes work but does not yet do hands-on steps itself (its own docs reserve that
+   * as the U6 arc). Read routes surface this so the founder learns it BEFORE asking for work,
+   * not from a finished session that verified nothing.
+   */
+  selfServeExecution() {
+    if (this.#executor) return { available: true };
+    return {
+      available: false,
+      reason: "Formation plans and checks this company's launch and routes steps that need doing to you and your team. It does not yet do hands-on steps by itself.",
+    };
+  }
+
   /** Live engine view for one workspace, for the read routes. Never throws for engine trouble — it reports it. */
   async inspect(workspace) {
     const engineWorkspaceDir = this.#resolveEngineWorkspace(workspace);
@@ -321,9 +336,10 @@ export class ExecutionWorker {
     }
     const checkedAt = new Date().toISOString();
     const view = await this.#engine.describe(engineWorkspaceDir);
-    if (!view.reachable) return { connected: true, reachable: false, checkedAt, reason: view.reason };
-    if (!view.report.workspaceReady) return { connected: true, reachable: true, checkedAt, ready: false, reason: view.report.reason };
-    return { connected: true, reachable: true, checkedAt, ready: true, run: founderRunView(view.report) };
+    if (!view.reachable) return { connected: true, reachable: false, checkedAt, reason: view.reason, selfServeExecution: this.selfServeExecution() };
+    if (!view.report.workspaceReady)
+      return { connected: true, reachable: true, checkedAt, ready: false, reason: view.report.reason, selfServeExecution: this.selfServeExecution() };
+    return { connected: true, reachable: true, checkedAt, ready: true, run: founderRunView(view.report), selfServeExecution: this.selfServeExecution() };
   }
 
   /**
@@ -687,7 +703,15 @@ export class ExecutionWorker {
           workspaceId: claimed.workspaceId,
           type: live.status === "completed" ? "execution-completed" : "execution-failed",
           title: live.status === "completed" ? `Work session finished: ${boardStepTitle(live.workflowId, live.workflowTitle)}` : `Work session interrupted: ${boardStepTitle(live.workflowId, live.workflowTitle)}`,
-          detail: live.status === "completed" ? "The engine session finished and the run state was refreshed." : (live.error ?? "The engine session did not complete."),
+          // "Finished" with nothing verified must not read as progress: say what actually
+          // happened and where the undone work went (founder tasks), instead of implying the
+          // step was completed.
+          detail:
+            live.status === "completed"
+              ? live.importedResults && live.importedResults.verifiedResults === 0
+                ? "The session ran and checked the plan, but no step was completed and verified. Work that needs doing appears in your tasks."
+                : "The engine session finished and the run state was refreshed."
+              : (live.error ?? "The engine session did not complete."),
           actor: "Formation",
           createdAt: finishedAt,
         });

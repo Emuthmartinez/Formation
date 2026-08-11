@@ -39,7 +39,10 @@ function approvalGatedCatalog() {
     providerIds: [],
     laneIds: [],
     founderOnlyActions: [ask],
-    gateCommands: [],
+    // check:gates-layout is a real, workspace-independent engine gate: gateless outputs no
+    // longer auto-accept (the 2026-08 verification flip), and this suite needs the freed step
+    // to genuinely reach "finished" — it is testing the approval round-trip, not verification.
+    gateCommands: ["check:gates-layout"],
     idempotent: false,
   });
   return {

@@ -201,7 +201,10 @@ export function twoStepEngineeringCatalog() {
         providerIds: [],
         laneIds: [],
         founderOnlyActions: [],
-        gateCommands: [],
+        // Real, workspace-independent engine gate: gateless outputs no longer auto-accept
+        // (2026-08 verification flip), and these suites need steps that can genuinely finish.
+        // The no-op-executor suite is unaffected — its attempts fail before verification.
+        gateCommands: ["check:gates-layout"],
         idempotent: true,
       },
       {
@@ -214,7 +217,10 @@ export function twoStepEngineeringCatalog() {
         providerIds: [],
         laneIds: [],
         founderOnlyActions: [],
-        gateCommands: [],
+        // Real, workspace-independent engine gate: gateless outputs no longer auto-accept
+        // (2026-08 verification flip), and these suites need steps that can genuinely finish.
+        // The no-op-executor suite is unaffected — its attempts fail before verification.
+        gateCommands: ["check:gates-layout"],
         idempotent: true,
       },
     ],

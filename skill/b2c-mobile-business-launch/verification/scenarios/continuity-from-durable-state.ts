@@ -26,8 +26,11 @@ function twoNodeCatalog(): CatalogInput {
       { id: "artifact.eng-change", path: "engineering/change.log" },
     ],
     workflows: [
-      { id: "workflow.growth-scan", title: "Scan what people are saying", domainId: "domain.growth", actionClass: "observe", dependencies: [], outputPaths: ["growth/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
-      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
+      // check:gates-layout is a real, workspace-independent gate: since gateless outputs stopped
+      // auto-accepting (the 2026-08 verification flip), a scenario node that must reach VERIFIED
+      // inside one headless session needs a deterministic gate that can genuinely pass here.
+      { id: "workflow.growth-scan", title: "Scan what people are saying", domainId: "domain.growth", actionClass: "observe", dependencies: [], outputPaths: ["growth/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: ["check:gates-layout"], idempotent: true },
+      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: ["check:gates-layout"], idempotent: true },
     ],
   };
 }

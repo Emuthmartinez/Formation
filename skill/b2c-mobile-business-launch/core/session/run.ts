@@ -617,7 +617,7 @@ async function main(): Promise<number> {
               // False accepts are impossible here; a gate that cannot run counts as not-passed.
               const gateOutcome = runDeterministicGates(node.verification.gateIds, workspace);
               if (gateOutcome.allPassed) {
-                acceptVerification(plan, run, nodeId, gateOutcome.evidence, sessionNow());
+                acceptVerification(plan, run, nodeId, gateOutcome.evidence, sessionNow(), sessionId);
                 const accepted = run.nodes[nodeId]!.status as string;
                 if (accepted === "succeeded") advanced.push({ nodeId, title: node.title, unit: domainBusinessUnit(node.domainId) });
               } else {

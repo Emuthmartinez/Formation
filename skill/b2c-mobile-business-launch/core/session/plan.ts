@@ -4,6 +4,7 @@ import path from "node:path";
 import { isMainModule, parseArgs } from "../lib/cli.js";
 import { buildDispatchBatches } from "../engine/dispatch.js";
 import { compilePlan, type CompiledPlan, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
+import { composeNodeBrief, renderNodeBrief, type NodeBrief } from "../engine/node-brief.js";
 import { computeFrontier } from "../engine/frontier.js";
 import { loadRunState, seedRunState } from "../engine/runstate.js";
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
@@ -67,6 +68,13 @@ export interface PlanReport {
   readonly done: number;
   /** Ready work, already grouped so that everything inside one group can run at the same time. */
   readonly batches: readonly (readonly HeldNode[])[];
+  /**
+   * One worker brief per ready node (same order as the flattened batches): the authored contract
+   * — instructions, files to open, knowledge to load, outputs, verification — so an interactive
+   * session executes the node from its brief instead of re-deriving what to load from prose
+   * routing tables.
+   */
+  readonly readyBriefs: readonly NodeBrief[];
   readonly held: readonly HeldNode[];
   /** True when this workspace has no control file yet, so no domain has been granted anything. */
   readonly autonomyUnset: boolean;
@@ -126,8 +134,9 @@ export function buildPlanReport(
       return describe(node, "upstream", "");
     }),
   );
+  const readyBriefs = batches.flat().map((entry) => composeNodeBrief(byId.get(entry.nodeId)!, plan));
 
-  return { planId: plan.planId, catalogVersion: plan.catalogVersion, totalNodes: plan.nodes.length, done, batches, held, autonomyUnset };
+  return { planId: plan.planId, catalogVersion: plan.catalogVersion, totalNodes: plan.nodes.length, done, batches, readyBriefs, held, autonomyUnset };
 }
 
 const HELD_HEADING: Record<HeldReason, string> = {
@@ -165,6 +174,14 @@ export function renderReport(report: PlanReport): string {
       lines.push(`  Group ${index + 1}:`);
       for (const node of batch) lines.push(`    - ${node.title}  [${node.nodeId}]`);
     });
+    // The briefs are the point of the report: an interactive session works each ready node from
+    // its brief (do/open/load/produce/verify) instead of re-deriving what to load from prose.
+    lines.push("");
+    lines.push("Briefs for ready work:");
+    for (const brief of report.readyBriefs) {
+      lines.push("");
+      lines.push(renderNodeBrief(brief));
+    }
   }
 
   for (const reason of HELD_ORDER) {

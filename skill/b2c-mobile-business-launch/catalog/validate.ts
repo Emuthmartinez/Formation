@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { businessUnitCoversAllGrantableDomains } from "./business-units.js";
@@ -22,6 +22,7 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     catalog.domains,
     catalog.phases,
     catalog.lanes,
+    catalog.roles,
     catalog.references,
     catalog.workflows,
     catalog.artifacts,
@@ -84,6 +85,42 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     }
   }
 
+  const roleIds = new Set(catalog.roles.map((item) => item.id));
+  const referenceIds = new Set(catalog.references.map((item) => item.id));
+  const boundReferenceIds = new Set(catalog.workflows.flatMap((workflow) => workflow.referenceIds));
+
+  // Knowledge must be routable by the engine, not just present on disk: every reference is either
+  // bound to at least one workflow node or explicitly session-scoped (Start Here / Always-On
+  // material a session loads). An unbound, unflagged reference is knowledge nothing routes to —
+  // the exact "98 references no code evaluates" failure the 2026-08 audit found.
+  for (const reference of catalog.references) {
+    if (!boundReferenceIds.has(reference.id) && !reference.sessionScoped) {
+      issues.push(
+        error("catalog_graph.reference.unbound", `${reference.id} is bound by no workflow and not sessionScoped — nothing routes to it.`, reference.path),
+      );
+    }
+  }
+
+  // The other direction: a knowledge file on disk with no CatalogReference is invisible to every
+  // routing surface (Codex round 1). Swept only when this catalog registers knowledge/ references
+  // at all, so minimal fixture catalogs (whose references point at fixture paths) are not judged
+  // against the real skill tree.
+  if (catalog.references.some((reference) => reference.path.startsWith("knowledge/"))) {
+    const registeredPaths = new Set(catalog.references.map((reference) => reference.path));
+    for (const filePath of walkFiles(path.join(skillRoot, "knowledge"))) {
+      const relative = path.relative(skillRoot, filePath).split(path.sep).join("/");
+      if (!registeredPaths.has(relative)) {
+        issues.push(
+          error(
+            "catalog_graph.reference.file_unregistered",
+            `${relative} exists on disk but has no CatalogReference — knowledge nothing can route to.`,
+            relative,
+          ),
+        );
+      }
+    }
+  }
+
   for (const workflow of catalog.workflows) {
     validateWorkflow(workflow, issues);
     checkKnown(issues, domainIds, workflow.domainId, "catalog_graph.workflow.unknown_domain", workflow.id);
@@ -96,6 +133,43 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     }
     for (const command of workflow.gateCommands) {
       if (!gateCommands.has(command)) issues.push(error("catalog_graph.workflow.unknown_gate", `${workflow.id} names unregistered gate command ${command}.`));
+    }
+    if (!roleIds.has(workflow.roleId)) {
+      issues.push(error("catalog_graph.workflow.role_unknown", `${workflow.id} names unregistered role ${workflow.roleId}.`));
+    }
+    for (const referenceId of workflow.referenceIds) {
+      if (!referenceIds.has(referenceId)) {
+        issues.push(error("catalog_graph.workflow.reference_unknown", `${workflow.id} binds unregistered reference ${referenceId}.`));
+      }
+    }
+    // reads is the authored input contract: every entry must be a path some workflow produces or
+    // a durable workspace file the template ships — an unresolvable read is a worker sent to open
+    // a file that will never exist. consults follows the same resolvability rule, and a path may
+    // not sit in both lists (blocking and open-if-present are contradictory claims).
+    for (const read of workflow.reads) {
+      if (!artifactsByPath.has(read) && !existsSync(path.join(skillRoot, "workspace/business", read))) {
+        issues.push(
+          error(
+            "catalog_graph.workflow.read_unresolvable",
+            `${workflow.id} reads ${read}, which no workflow produces and the workspace template does not ship.`,
+          ),
+        );
+      }
+    }
+    for (const consult of workflow.consults) {
+      if (!artifactsByPath.has(consult) && !existsSync(path.join(skillRoot, "workspace/business", consult))) {
+        issues.push(
+          error(
+            "catalog_graph.workflow.consult_unresolvable",
+            `${workflow.id} consults ${consult}, which no workflow produces and the workspace template does not ship.`,
+          ),
+        );
+      }
+      if (workflow.reads.includes(consult)) {
+        issues.push(
+          error("catalog_graph.workflow.read_consult_conflict", `${workflow.id} lists ${consult} as both a read (blocking) and a consult (open-if-present).`),
+        );
+      }
     }
   }
   detectCycles(
@@ -164,11 +238,57 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
   return issues;
 }
 
+/** Protected action classes: real-world consequences, so every node must name the protected category that authorizes it (grants/waivers) — verification gates are a separate, after-the-fact control. */
+const PROTECTED_ACTION_CLASSES = new Set(["publish", "spend", "release", "destructive"]);
+
 function validateWorkflow(workflow: Catalog["workflows"][number], issues: CatalogIssue[]): void {
   if (!workflow.trigger.trim()) issues.push(error("catalog_graph.workflow.trigger_missing", `${workflow.id} has no trigger.`));
   if (workflow.outputPaths.length === 0 && workflow.gateCommands.length === 0) {
     issues.push(error("catalog_graph.workflow.contract_empty", `${workflow.id} has neither outputs nor verification gates.`));
   }
+  // Instructions are the node's working contract; a title echo or one-liner dispatches a worker
+  // with nothing to work from. The length floor is a tripwire, not a quality bar — the quality
+  // bar is the fresh-context review recorded in the contract authoring pass.
+  const instructions = workflow.instructions.trim();
+  if (instructions.length < 40) {
+    issues.push(error("catalog_graph.workflow.instructions_missing", `${workflow.id} has no usable instructions (under 40 characters).`));
+  } else if (instructions.toLowerCase() === workflow.title.trim().toLowerCase() || instructions.toLowerCase() === workflow.trigger.trim().toLowerCase()) {
+    issues.push(error("catalog_graph.workflow.instructions_missing", `${workflow.id} instructions merely echo its title or trigger.`));
+  }
+  // A spend node without an authored estimate parks fail-closed until the founder's approved
+  // amount exists — that park is the designed control (an invented placeholder both mis-parks a
+  // smaller approved budget and gets recorded as the actual), so the absence is surfaced, not
+  // rejected.
+  if (workflow.actionClass === "spend" && !workflow.costEstimate) {
+    issues.push({
+      severity: "warning",
+      code: "catalog_graph.workflow.cost_estimate_missing",
+      message: `${workflow.id} is a spend node with no declared costEstimate — the autonomy engine parks it fail-closed until a founder-approved amount exists.`,
+    });
+  }
+  // Authorization and verification are different controls: a deterministic gate checks the work
+  // AFTER it happens, while protectedCategory is what the autonomy engine's grant/waiver
+  // machinery authorizes BEFORE dispatch. A protected-class node without its category runs on an
+  // ordinary grant no matter how good its gates are.
+  if (PROTECTED_ACTION_CLASSES.has(workflow.actionClass) && !workflow.protectedCategory) {
+    issues.push(
+      error(
+        "catalog_graph.workflow.protected_category_missing",
+        `${workflow.id} is ${workflow.actionClass}-class with no protectedCategory — gates verify after the fact, but nothing authorizes the action before dispatch.`,
+      ),
+    );
+  }
+}
+
+function walkFiles(root: string): string[] {
+  if (!existsSync(root)) return [];
+  const files: string[] = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const fullPath = path.join(root, entry.name);
+    if (entry.isDirectory()) files.push(...walkFiles(fullPath));
+    else if (entry.isFile()) files.push(fullPath);
+  }
+  return files.sort();
 }
 
 function checkKnown(issues: CatalogIssue[], known: Set<CatalogId>, value: CatalogId, code: string, owner: string): void {

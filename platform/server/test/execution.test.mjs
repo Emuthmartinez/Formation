@@ -75,7 +75,12 @@ test("submitting for a company with no engine binding is refused, not queued", a
   assert.ok(payload.error.includes("not connected"));
 
   const list = await request(app.baseUrl, "/api/workspaces/wrk_storywell/executions", { cookie });
-  assert.deepEqual(await list.json(), []);
+  const listPayload = await list.json();
+  assert.deepEqual(listPayload.executions, []);
+  // The capability rides the page's actual read path: a founder learns the engine cannot yet do
+  // hands-on steps itself BEFORE asking for work, with a plain-language reason.
+  assert.equal(listPayload.selfServeExecution.available, false);
+  assert.ok(listPayload.selfServeExecution.reason.length > 0);
 });
 
 test("an unreachable engine is reported as unreachable, never as no work ready", async (t) => {
@@ -126,6 +131,19 @@ test("worker inspect distinguishes unreachable from unready", async () => {
   assert.equal(unreadyView.reachable, true);
   assert.equal(unreadyView.ready, false);
   assert.ok(unreadyView.reason.length > 0);
+
+  // Every connected view says up front whether the engine can do hands-on steps itself. In
+  // production it cannot (no real executor is wired yet); only tests injecting the fixture
+  // executor report otherwise. The founder learns this before asking for work, not after.
+  assert.equal(unreachableView.selfServeExecution.available, false);
+  assert.ok(unreachableView.selfServeExecution.reason.length > 0);
+  assert.equal(unreadyView.selfServeExecution.available, false);
+  const fixtureBacked = new ExecutionWorker(store, {
+    engine: new EngineBridge({ skillDir }),
+    resolveEngineWorkspace: () => directory,
+    executor: "fixture",
+  });
+  assert.equal(fixtureBacked.selfServeExecution().available, true);
 });
 
 // ---------------------------------------------------------------------------
@@ -268,12 +286,14 @@ test("execution adapter creates and resumes one durable engine run per request a
   assert.ok(allArtifacts.every((entry) => entry.status === "draft" && entry.stale === false));
   assert.equal(afterAllImports.artifactVersions.filter((entry) => entry.createdBy === "Launch engine").length, 2);
 
-  // The list route reports both executions, newest first, in founder shape.
+  // The list route reports both executions, newest first, in founder shape — alongside the
+  // self-serve capability the page reads before requesting work.
   const list = await request(app.baseUrl, "/api/workspaces/wrk_storywell/executions", { cookie });
   const listPayload = await list.json();
-  assert.equal(listPayload.length, 2);
-  assert.equal(listPayload[0].id, followup.id);
-  assert.ok(listPayload.every((entry) => entry.title && entry.status && entry.contextFingerprint));
+  assert.equal(listPayload.executions.length, 2);
+  assert.equal(listPayload.executions[0].id, followup.id);
+  assert.ok(listPayload.executions.every((entry) => entry.title && entry.status && entry.contextFingerprint));
+  assert.equal(typeof listPayload.selfServeExecution.available, "boolean");
 });
 
 // ---------------------------------------------------------------------------
@@ -310,6 +330,12 @@ test("an unverified session imports nothing — failed steps become founder task
   assert.equal(blockerTasks.length, 1);
   assert.equal(blockerTasks[0].status, "next");
   assert.match(blockerTasks[0].title, /Update the onboarding copy/);
+
+  // The completion notice must not read as progress when nothing verified: the founder is told
+  // the session checked the plan and the undone work landed in tasks.
+  const completedActivity = database.activity.filter((entry) => entry.workspaceId === "wrk_storywell" && entry.type === "execution-completed");
+  assert.equal(completedActivity.length, 1);
+  assert.match(completedActivity[0].detail, /no step was completed and verified/);
 
   // The approvals view re-runs the import; the mirror stays exact instead of duplicating.
   assert.equal((await request(app.baseUrl, "/api/workspaces/wrk_storywell/approvals", { cookie })).status, 200);

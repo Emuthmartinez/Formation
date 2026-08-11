@@ -7,9 +7,11 @@ import type { CatalogReference } from "./types.js";
  * DATA; catalog/render-routing.ts projects it back OUT into catalog/generated/routing.md,
  * so the direction of authority flips from prose->code to code->prose.
  *
- * Only the 90 v1 knowledge files disposed "keep" in the port ledger
- * (docs/plans/attachments/2026-08-port-ledger.md) get an entry. The 14 domain README.md
- * files plus the top-level knowledge/README.md are themselves "drop" — their sole job was
+ * Every file under knowledge/ gets an entry (98 at the 2026-08 contract-audit recount — the
+ * original port kept 90 of v1's files and later work added more; catalog/validate.ts's
+ * existsSync check plus the reference.unbound rule keep the set exact in both directions).
+ * The 14 domain README.md files plus the top-level knowledge/README.md are themselves
+ * "drop" per the port ledger (docs/plans/attachments/2026-08-port-ledger.md) — their sole job was
  * the routing table this file now replaces — and knowledge/orchestration/autonomy-modes.md
  * is "drop", superseded by the autonomy engine's typed grant/waiver data (KTD3/KTD4).
  *
@@ -41,7 +43,6 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/design/design-room.md",
     domainId: "domain.design",
     title: "Design Room",
-    hub: true,
     loadWhen:
       "designing, versioning, baselining, restoring, wiping, or rendering B2C design state; custom product page, PPO, In-App Event, landing, onboarding, paywall, or marketing-surface proposals; whenever a design output would otherwise be freeform — the STATE→MUTATE→VERSION→RENDER hub; see surfaces-b2c.md for App Store surface schemas and quality-lens.md for the taste filter applied during a mutation",
   },
@@ -182,7 +183,6 @@ export const references: readonly CatalogReference[] = [
     path: "knowledge/experience/emotional-design-system.md",
     domainId: "domain.experience",
     title: "Emotional Design System",
-    hub: true,
     loadWhen:
       'any product, onboarding, core-loop, paywall, or return-session work targeting 6-star ("better than expected") or higher; "charge this feature with emotion", "make users stick / build a habit", "apply the <name> card", "emotional UX audit" — the methodology hub; see experience-cards.md for the card deck, emotional-experience-design.md for full producer detail, emotional-experience-measurement.md for instrumentation, and ethics-guardrail.md for the regulatory/legal contract',
   },

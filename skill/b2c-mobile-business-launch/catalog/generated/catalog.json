@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.119.0",
+  "skillVersion": "0.123.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -591,6 +591,50 @@
       ]
     }
   ],
+  "roles": [
+    {
+      "id": "role.orchestrator",
+      "name": "Orchestrator",
+      "promptPath": "agents/orchestrator.md",
+      "scope": "State owner, integration owner, sequencing, and the final readiness gatekeeper."
+    },
+    {
+      "id": "role.product-leader",
+      "name": "Product leader",
+      "promptPath": "agents/product-leader.md",
+      "scope": "ICP, 11-star experience, scope, onboarding, activation, retention, roadmap, traceability."
+    },
+    {
+      "id": "role.design-guru",
+      "name": "Design guru",
+      "promptPath": "agents/design-guru.md",
+      "scope": "Design system, visual proof, screenshots, accessibility, icons, motion, content assets."
+    },
+    {
+      "id": "role.engineering-leader",
+      "name": "Engineering leader",
+      "promptPath": "agents/engineering-leader.md",
+      "scope": "Architecture, implementation, provider proof, signing/release gates, tests, readiness."
+    },
+    {
+      "id": "role.marketing-guru",
+      "name": "Marketing guru",
+      "promptPath": "agents/marketing-guru.md",
+      "scope": "ASO, GEO/SEO, UGC, social, analytics read-back, reviews, launch calendar, channels."
+    },
+    {
+      "id": "role.security-architect",
+      "name": "Security architect",
+      "promptPath": "agents/security-architect.md",
+      "scope": "Threat model, hardening, app integrity, abuse controls, accepted risks, incident response."
+    },
+    {
+      "id": "role.customer-success",
+      "name": "Customer success",
+      "promptPath": "agents/customer-success.md",
+      "scope": "Support, FAQ, privacy/delete/refund/restore, lifecycle copy, response queues, feedback."
+    }
+  ],
   "references": [
     {
       "id": "reference.data.analytics-attribution",
@@ -604,7 +648,6 @@
       "path": "knowledge/design/design-room.md",
       "domainId": "domain.design",
       "title": "Design Room",
-      "hub": true,
       "loadWhen": "designing, versioning, baselining, restoring, wiping, or rendering B2C design state; custom product page, PPO, In-App Event, landing, onboarding, paywall, or marketing-surface proposals; whenever a design output would otherwise be freeform — the STATE→MUTATE→VERSION→RENDER hub; see surfaces-b2c.md for App Store surface schemas and quality-lens.md for the taste filter applied during a mutation"
     },
     {
@@ -724,7 +767,6 @@
       "path": "knowledge/experience/emotional-design-system.md",
       "domainId": "domain.experience",
       "title": "Emotional Design System",
-      "hub": true,
       "loadWhen": "any product, onboarding, core-loop, paywall, or return-session work targeting 6-star (\"better than expected\") or higher; \"charge this feature with emotion\", \"make users stick / build a habit\", \"apply the <name> card\", \"emotional UX audit\" — the methodology hub; see experience-cards.md for the card deck, emotional-experience-design.md for full producer detail, emotional-experience-measurement.md for instrumentation, and ethics-guardrail.md for the regulatory/legal contract"
     },
     {
@@ -1293,6 +1335,21 @@
         "area.operating-system"
       ],
       "trigger": "New session, resume, status check, or handoff on an existing launch",
+      "instructions": "Before doing anything else, reconstruct current state from durable repo artifacts, not from prior chat turns: read `AGENTS.md`, `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/ORCHESTRATION.md`, `engineering/PRODUCTION_READINESS.md`, `operations/FAILURE_CARDS.md`, and `git status --short`. Populate the top-level `continuity` block (source files reviewed, git status reviewed, next action, drift risks) so the next session inherits a concrete next step instead of a vague status summary. `check:continuity-contract` only passes when that reconstruction actually happened against the files on disk, so a plausible-sounding chat-memory answer still fails it.",
+      "reads": [
+        "AGENTS.md",
+        "state/PROJECT_STATE.yaml",
+        "state/launch-cockpit.html",
+        "operations/ORCHESTRATION.md",
+        "engineering/PRODUCTION_READINESS.md",
+        "operations/FAILURE_CARDS.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.orchestration.parallel-agent-orchestration",
+        "reference.orchestration.project-state"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [
         "orchestration"
       ],
@@ -1315,6 +1372,22 @@
         "area.operating-system"
       ],
       "trigger": "\"Launch this app\" / broad launch request; any lane/provider/proof/blocker status change",
+      "instructions": "On a broad launch request or any lane/provider/proof/blocker status change, create or update `state/PROJECT_STATE.yaml` as the compact source of truth for phase, autonomy mode, lane statuses, provider routes, and active failure cards — a lane is never `done` from prose alone, it needs an evidence path or live proof — then render `state/launch-cockpit.html` so the founder can see it in one file. Record `project.kickoff_date` on first orient and size the work with `project.launch_scope` (essentials by default); `validate:launch-state` enforces the pre-build clock and the lane-dependency edges (a lane can't be `done` while an upstream lane it depends on is still `partial` or `blocked`). Decide the orchestration strategy for the work ahead — inline, serial/parallel subagents, worktrees, hybrid, or a Dynamic Workflow for a long adversarial pre-build stage — and record it rather than defaulting silently to inline. Whenever the cockpit is (re)rendered, say the narrative in the reply itself — what changed, what's happening now, what needs the founder — because nobody may be watching the HTML file.",
+      "reads": [
+        "state/PROJECT_STATE.yaml",
+        "operations/ORCHESTRATION.md",
+        "operations/FAILURE_CARDS.md",
+        "engineering/PRODUCTION_READINESS.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.orchestration.project-state",
+        "reference.process.launch-phases",
+        "reference.process.artifact-contracts",
+        "reference.orchestration.dynamic-workflows",
+        "reference.process.tool-recipes"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [
         "orchestration"
       ],
@@ -1343,6 +1416,17 @@
         "area.operating-system"
       ],
       "trigger": "Before marking any provider-backed lane (analytics/revenue/email/store/security/eng) done",
+      "instructions": "Before marking any provider-backed lane (analytics/revenue/email/store/security/eng) done, populate or update `operations/PROVIDER_PROOF.md` with one row per provider: name, current status, proof command or inspection route, evidence path, and any founder-only gate. Planned setup and green unit tests are not proof — the row's status must read as captured live evidence, and `check:provider-proof` fails unless at least one file named anywhere in the row actually exists on disk. If access is founder-only, record the gate explicitly and keep the lane `partial` or `blocked` rather than claiming done.",
+      "reads": [
+        "operations/PROVIDER_PROOF.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.process.provider-proof",
+        "reference.process.launch-coverage"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -1370,6 +1454,19 @@
         "area.operating-system"
       ],
       "trigger": "Any change to a launched/near-launch app's feature, copy, brand, pricing, products, or data behavior",
+      "instructions": "Classify the change against the Change Cascade Map (feature, lexicon/brand-vocabulary, onboarding-flow, paywall/pricing, visual/design-token, new IAP, privacy/data, domain/brand, or a design-token/copy/pricing change that invalidates already-generated assets — the last routes through the Generated-Asset Regeneration guardrails), then enumerate every surface that change type touches — in-app, App Store listing/products, RevenueCat/billing, landing/web + JSON-LD, SEO/GEO, lifecycle email, analytics, legal, content/UGC/ads — and update each or record why it's unaffected. Record the result as a `change_cascade` entry in `state/PROJECT_STATE.yaml`, one line per surface (`updated`+evidence, `unaffected`+reason, or `blocked`+blocker); a surface left out by omission fails `check:change-cascade` as `change_cascade.<id>.<surface>.unaccounted`, graded against the machine-readable twin in `cascade-edges.yaml` — edit both files together. Re-render any screenshot, App Preview, or ad creative whose underlying copy/UI changed, and reconcile the locked lexicon in `design/DESIGN.md` across every surface before calling the change done.",
+      "reads": [
+        "state/PROJECT_STATE.yaml",
+        "state/LAUNCH_TRACE.md",
+        "design/DESIGN.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.process.change-cascade",
+        "reference.process.cascade-edges",
+        "reference.process.flow-traceability"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -1390,6 +1487,19 @@
         "area.operating-system"
       ],
       "trigger": "Crossing research → product/design/build; deciding if engineering/TECH_SPEC.md is needed",
+      "instructions": "When work crosses from research into product/design/build, create or update `state/LAUNCH_TRACE.md` as the decision-trace table (evidence ID, source, tool route, research finding, experience/product/brand decision, build contract, analytics/security/revenue/privacy/store impact, verification, status) so every screen, claim, or paywall behavior traces back to the evidence that produced it. Decide whether `engineering/TECH_SPEC.md` is needed — create it when the app has backend APIs, database/storage, auth, subscriptions, email, analytics, AI, push, account deletion, or non-trivial platform behavior, and cover the data model, API/RPC/webhook contracts, state machines, permissions, and integration contracts so a builder never has to invent schema or endpoint behavior. Do not let a claim, screen, onboarding question, or paywall behavior move forward without a trace row or an explicit, documented founder-only decision.",
+      "reads": [
+        "strategy/RESEARCH.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.process.flow-traceability",
+        "reference.process.artifact-contracts",
+        "reference.process.launch-coverage"
+      ],
+      "roleId": "role.product-leader",
       "laneIds": [
         "traceability"
       ],
@@ -1418,6 +1528,19 @@
         "area.operating-system"
       ],
       "trigger": "Extending the Design Room into new analytics/monetization/store/growth panels over the same state",
+      "instructions": "When adding a new Business Control Plane panel (Analytics, Monetization, Store Ops, or Growth) over the same state store as the Design Room, model it as a state-backed shell first: add it under `studio/seed/business.json`'s `controlPlane.panels` with `stateRefs` and `renderedArtifacts`, wire it into `design/design-room.html`, and render — never hand-author — the view from `state/PROJECT_STATE.yaml` and `studio/seed/theme.tokens.json`. Add a validator before shipping the panel so the Control Plane doesn't become another long prose checklist, then re-render `state/workspace.generated.json` through the Business Control workspace adapter and run `check:control-plane` plus `check:business-control-plane-workspace` before calling it maintained. Keep stable graph IDs for operators, panels, views, lanes, artifacts, and gates — UI labels are projections that may change without changing identity.",
+      "reads": [
+        "studio/seed/business.json",
+        "studio/seed/theme.tokens.json",
+        "state/PROJECT_STATE.yaml",
+        "design/design-room.html"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.process.control-plane",
+        "reference.orchestration.project-state"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -1441,6 +1564,19 @@
         "area.operating-system"
       ],
       "trigger": "Before any launch-readiness claim, after a repeated miss, or adding a validator/scenario",
+      "instructions": "Before any launch-readiness claim, after a repeated agent miss, or when adding a validator or scenario, run `npm run launchbench` (the deterministic validator/scenario suite) and turn any known regression into a durable card in `operations/FAILURE_CARDS.md` (card ID, severity, owner, status, detected date, evidence, impact, next action, validator) instead of leaving it as a chat note. Record scenarios run, validators run, expected failures caught, and unexpected misses in `LAUNCHBENCH.md`, and close a card only with evidence or command proof attached — never on 'noted' language alone. `check:lane-coverage` cross-checks open lanes against the Coverage Matrix so a launch-ready claim can't be made while a lane is `done` on top of an upstream lane that is still `partial` or `blocked`.",
+      "reads": [
+        "operations/FAILURE_CARDS.md",
+        "state/PROJECT_STATE.yaml",
+        "engineering/PRODUCTION_READINESS.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.process.failure-cards",
+        "reference.process.launch-coverage",
+        "reference.process.artifact-contracts"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [
@@ -1467,6 +1603,16 @@
         "area.business-operations-trust"
       ],
       "trigger": "Before using or replacing any paid/account-gated tool, or before a free fallback",
+      "instructions": "Before using, skipping, or replacing any paid/account-gated tool (AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI, Retention Mechanics), run ToolSearch for the tool's `mcp__<TOOLNAME>__` prefix and check for founder-supplied exports before concluding it is unavailable — a missing connector is not proof the founder lacks the tool. Present the three-choice Confirmation Prompt (use/provision, export/fallback, defer) through AskUserQuestion rather than a free-text blocker, and record the decision in `strategy/TOOL_DECISIONS.md` with tool, lane, access status, selected route, and fallback limitation. Treat MobAI's free tier (single device, Testing Mode) as needing no spend gate at all — only an upgrade or trial does. Never present a fallback artifact as equivalent to the paid-tool output; label it with confidence and the limitation, and route any credit/subscription spend through a separate protected ceiling, never inferred from the fallback choice.",
+      "reads": [
+        "strategy/TOOL_DECISIONS.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.operations.paid-tool-routing"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [
         "paid_tool_routing"
       ],
@@ -1495,6 +1641,20 @@
         "area.business-operations-trust"
       ],
       "trigger": "Before any new secret, key, token, env var, webhook secret, or .env",
+      "instructions": "Before any new secret, API key, token, webhook signing secret, or `.env` value is introduced, classify it (public_client_config, server_secret, webhook_signing_secret, store_credential, oauth_or_refresh_token, ci_deploy_secret, runtime_user_secret, or local_operator_secret) and route it into Doppler by default — the business's own project for business-specific credentials, the shared `formation` project for account-level ones — recording only the name, class, and location in `trust/secrets/SECRETS.md`, never the value. Resolve the Doppler config name from `SECRETS.md` or `doppler configs --project <name>` before constructing any `doppler run` command; never guess between naming conventions like `prod` and `prd`. Set automation-consumed secrets with `masked` (not `restricted`) visibility so `doppler run --` can inject them, and never `source` an `.env`/`.p8` file — extract single values with `awk -F= '/^KEY=/{print $2}' file`. `check:secrets` fails the lane if a raw secret value appears in git, docs, screenshots, or logs, or if production uses a personal CLI token instead of a service token or OIDC.",
+      "reads": [
+        "trust/secrets/SECRETS.md",
+        "strategy/TOOL_DECISIONS.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.operations.secrets-management",
+        "reference.operations.doppler-organization",
+        "reference.operations.provider-state-recipes",
+        "reference.process.tool-recipes.secrets-and-environment"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "secrets"
       ],
@@ -1526,6 +1686,21 @@
         "area.business-operations-trust"
       ],
       "trigger": "Before threat modeling, hardening, scans, or any security-readiness claim",
+      "instructions": "Create or refresh `trust/SECURITY.md` early enough (phase 1g) to shape `engineering/TECH_SPEC.md`, `trust/PRIVACY.md`, and `revenue/REVENUE_OPS.md`, then re-verify it as the release gate (phase 5c) before beta/TestFlight/store submission. Cover every required section — threat model, mobile hardening (Keychain/ATS/App Attest for iOS, Keystore/Network Security Config/Play Integrity for Android), backend/API controls, and revenue/entitlement abuse (RevenueCat/Stripe webhook signature verification, restore-purchases testing) — and mark platforms not in scope explicitly rather than omitting the section. Security is proven with evidence, not prose: attach scanner/review results or a founder-approved blocked route from `strategy/TOOL_DECISIONS.md` for each paid security tool (Claude Security, Codex Security, MobSF, Snyk/Semgrep) before claiming a section done. `npm run check:security` verifies the SECURITY.md contract shape, not vulnerabilities — pair it with an actual scan or review, and get founder sign-off on any accepted residual risk with an owner and revisit date.",
+      "reads": [
+        "trust/SECURITY.md",
+        "engineering/TECH_SPEC.md",
+        "strategy/TOOL_DECISIONS.md"
+      ],
+      "consults": [
+        "trust/PRIVACY.md",
+        "revenue/REVENUE_OPS.md"
+      ],
+      "referenceIds": [
+        "reference.trust.security-release-hardening",
+        "reference.trust.privacy-terms"
+      ],
+      "roleId": "role.security-architect",
       "laneIds": [
         "security"
       ],
@@ -1559,6 +1734,16 @@
         "area.business-operations-trust"
       ],
       "trigger": "Before privacy policy, terms, EULA, subscription terms, account-deletion, store disclosures",
+      "instructions": "Build the data inventory before drafting any policy text — trace actual data flows from `state/LAUNCH_TRACE.md` and `engineering/TECH_SPEC.md` (accounts, user content, device permissions, analytics/ads vendors, payments, AI processing) rather than starting from a template. Draft `trust/PRIVACY.md` and `trust/TERMS.md` to match actual practice — Apple's App Privacy answers and Google Play Data safety must match the same inventory — and publish stable `/privacy`, `/terms`, and `/delete-account` pages that return HTTP 200 and are linked from settings, App Store Connect, and Play Console. Produce `LEGAL_REVIEW.md` with sources checked, the data inventory table, store-disclosure mapping, and an explicit founder/counsel approval checkbox; never mark legal pages final without that approval. Verify contact-email MX records with `dig MX yourdomain.com +short` before writing any `@yourdomain.com` address into published copy — an unverified address that never receives mail is a store-policy and reputation risk.",
+      "reads": [
+        "state/LAUNCH_TRACE.md",
+        "engineering/TECH_SPEC.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.trust.privacy-terms"
+      ],
+      "roleId": "role.customer-success",
       "laneIds": [
         "privacy_legal"
       ],
@@ -1590,6 +1775,21 @@
         "area.business-operations-trust"
       ],
       "trigger": "Before Resend domains/keys, transactional/lifecycle/broadcast email, deliverability",
+      "instructions": "Set up Resend with a purpose-specific sending subdomain (never the apex domain), add SPF/DKIM, then DMARC starting at `p=none` before tightening — verify all three pass on a real test send before any production email goes out. Classify every email as transactional, lifecycle, marketing/broadcast, or inbound/support; trigger lifecycle Automations from events that already exist in `analytics/ANALYTICS.md`, and adapt the starter pack at `growth/resend/email-templates.ts` with brand tokens pulled from `design/DESIGN.md` into `LaunchEmailBrand.designSystem` and tone from `11_STAR_EXPERIENCE.md` — do not ship generic-looking email. Verify webhooks against the raw request body and store processed `svix-id` values, since Resend webhooks are at-least-once and may duplicate. Every subject/preview/body must pass the `no-slop-writing.md` self-check in the product's brand voice, and `check:email` gates production sends on a verified domain, server-only API keys, and unsubscribe handling on every non-transactional message.",
+      "reads": [
+        "design/DESIGN.md",
+        "analytics/ANALYTICS.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "growth/resend/email-templates.ts"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.operations.resend-email-ops",
+        "reference.words.no-slop-writing",
+        "reference.data.analytics-attribution",
+        "reference.process.tool-recipes.revenue-email-analytics"
+      ],
+      "roleId": "role.customer-success",
       "laneIds": [
         "email"
       ],
@@ -1612,6 +1812,7 @@
       ],
       "founderOnlyActions": [],
       "actionClass": "publish",
+      "protectedCategory": "public_actions",
       "idempotent": false
     },
     {
@@ -1622,6 +1823,23 @@
         "area.business-operations-trust"
       ],
       "trigger": "App live (phase_6/6b), \"what now\", weekly ops, incident response, retention reviews",
+      "instructions": "Run the named Weekly Ops Review in fixed order — metrics pull (PostHog/RevenueCat/console numbers, not adjectives), crash/review triage, support sweep, ASO delta, growth/spend review against `growth/PAID_UA.md`'s stop/scale rules, then ship one user-visible improvement — and log a one-line delta per step in `operations/POST_LAUNCH_OPS.md` dated against `lanes.post_launch_ops.live_since`. Route involuntary billing churn through the recovery levers, not written off as normal, and when retention cohorts show a consistent drop at one step, open it through `change-cascade.md` rather than patching only the surface that failed. At the day-30 and day-90 checkpoints, prepare the Kill/Hold/Fix/Scale evidence pack (MRR trajectory, D7/D30 retention trend, CAC/LTV payback, founder hours) in `operations/LAUNCH_RETRO.md` — the agent assembles evidence, the founder makes the verdict. `check:post-launch` fails a checkpoint left uncompleted past its due date or a metric cell holding a placeholder instead of a number.",
+      "reads": [
+        "state/PROJECT_STATE.yaml",
+        "operations/POST_LAUNCH_OPS.md",
+        "operations/LAUNCH_RETRO.md"
+      ],
+      "consults": [
+        "growth/PAID_UA.md"
+      ],
+      "referenceIds": [
+        "reference.operations.post-launch-operations",
+        "reference.growth.paid-user-acquisition",
+        "reference.money.billing-health-and-reactivation",
+        "reference.process.change-cascade",
+        "reference.store.aso-store-ops"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [
         "post_launch_ops"
       ],
@@ -1653,6 +1871,19 @@
         "area.business-operations-trust"
       ],
       "trigger": "Every broad launch start; before account/social/Doppler bootstrap; when an agent is about to hand back a checklist",
+      "instructions": "At the start of every broad launch, run the Business Bootstrap Sequence in order — confirm business identity and founder-owned contact, establish the ownership spine (recovery email/phone, 2FA), install/verify Doppler as the default secret manager, inventory existing accounts, then create/claim/delegate only what's authorized — and keep exactly one structured `activeFounderGate` in `operations/business-access.json` at a time, set to `null` while the agent has enough state to keep working. Never dump the full launch checklist on the founder: present one plain-language next decision via AskUserQuestion with the recommended choice first, defined jargon, and an explicit skip/defer route, then continue immediately into the next agent action yourself. Doppler login and social-platform login stay founder-only actions — never request a password, 2FA code, recovery code, or session token in chat — everything else (research, drafts, setup, verification) is the agent's job. `check:founder-operator` fails when access setup completes but the next business operation never starts, or when a deferred gate is treated as silent consent instead of being re-presented after 30 days.",
+      "reads": [
+        "operations/BUSINESS_ACCESS.md",
+        "operations/business-access.json",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.operations.founder-zero-operator",
+        "reference.operations.frontier-agent-operations",
+        "reference.operations.secrets-management"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -1679,6 +1910,20 @@
         "area.business-operations-trust"
       ],
       "trigger": "Before any authenticated browser/API/CLI/native action on a provider, social, or store account",
+      "instructions": "Before any authenticated action on a provider, social platform, or store console, classify it into one of seven action classes (observe/draft/mutate/publish/spend/release/destructive) and confirm it binds to a matching approval envelope in `operations/agent-operations.json` — envelopes need an exact account/project/environment, allowed classes, and expiry, and are consumed one-shot or standing, never widened by analogy. Select the narrowest reliable route (purpose-built connector, then API/CLI, then authenticated browser, manual packet last), capture sanitized before-state, act only inside the envelope, then read back the result from the provider itself rather than trusting a click or exit code. Sticky identity/legal fields — app name, bundle ID, seller identity, banking/tax, pricing, credential roles — stay founder-gated even inside an otherwise-approved mutate envelope. Reconcile every completed action into `operations/AGENT_OPERATIONS.md`, cross-reference `operations/PROVIDER_PROOF.md` for provider-backed lanes, and run `npm run check:agent-operations` before claiming any authenticated operation, provider mutation, or public response is ready.",
+      "reads": [
+        "operations/AGENT_OPERATIONS.md",
+        "operations/agent-operations.json",
+        "operations/PROVIDER_PROOF.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.operations.frontier-agent-operations",
+        "reference.operations.founder-zero-operator",
+        "reference.operations.secrets-management"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -1710,6 +1955,18 @@
         "area.product-experience"
       ],
       "trigger": "Request matches a known product shape (social / AI-chat / habit / photo-AI)",
+      "instructions": "Confirm the product's shape against the four shipped archetypes (habit-tracker, photo-AI-media, social-network, AI-chat-companion) with the founder via AskUserQuestion, then copy the matched starter scaffold from starters/<archetype>/ into the business repo rather than improvising the same wiring from scratch. Record the confirmed archetype and shape answers (e.g. habit_model, primary_surface) in state/PROJECT_STATE.yaml so later sessions do not re-litigate it. Do not write product/SPEC.md here — that single-writer role belongs to research-backed-spec; this node's proof is the starter scaffold itself, checked by check:archetype-starter alongside check:app-archetype. If the product only contains a feature that resembles one of the four shapes without being its center of gravity, stop and route to the general core-loop-and-v1-scope method instead of forcing a mismatched pack.",
+      "reads": [
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.product.habit-tracker",
+        "reference.product.photo-ai-media",
+        "reference.product.social-network",
+        "reference.product.ai-chat-companion"
+      ],
+      "roleId": "role.product-leader",
       "laneIds": [
         "product"
       ],
@@ -1733,6 +1990,18 @@
         "area.product-experience"
       ],
       "trigger": "Need category economics, competitor, review/social-language, keyword, or name-collision evidence",
+      "instructions": "Assemble category-economics, competitor, review/social-language, keyword, and name-collision evidence into strategy/RESEARCH.md's Category Revenue Reality table — a sourced, dated revenue estimate per competitor row judged against a stated bar (default: top-10 category gross ≥$5M/year combined with 2+ apps clearing $1M/year each) — then run the mandatory Go/Pivot/Kill table; check:research fails a pass verdict with no stated threshold or a table with rows but no judgment line. Before product/SPEC.md hardens, run the product-moat one-week-copy test naming which moat class the wedge is building toward and the specific beat moment against the top incumbents; a wedge with no surviving beat moment is Go/Pivot/Kill evidence, not a reason to soften the table. For a product that doesn't match one of the four shipped archetypes, use core-loop-and-v1-scope's general method to name the core loop and draw the V1 line instead of improvising. The founder alone decides Go, Pivot, or Kill — present the evidence, do not decide for them.",
+      "reads": [
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.research.go-pivot-or-kill",
+        "reference.product.product-moat",
+        "reference.product.core-loop-and-v1-scope",
+        "reference.process.tool-recipes.research-intelligence"
+      ],
+      "roleId": "role.product-leader",
       "laneIds": [
         "research",
         "product"
@@ -1763,6 +2032,15 @@
         "area.product-experience"
       ],
       "trigger": "Before localizing any surface or choosing locales",
+      "instructions": "Research search-demand evidence per market (AppKittie keyword popularity/difficulty and download/revenue estimates by country, App Store Connect/Play Console territory data when the app is live, XPOZ in-language social vocabulary) before recommending any locale — localization is a market-selection decision made from evidence, not a translate-everything-to-be-safe pass. Produce strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md (and its .html) with ranked priority tiers per market, naming which tool produced each cell and whether the data is a first-party or estimated basis. A market that does not clear the popularity/competition/opportunity bar gets deferred, not localized on the strength of language alone.",
+      "reads": [
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.research.localization-market-research"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "research"
       ],
@@ -1789,6 +2067,15 @@
         "area.product-experience"
       ],
       "trigger": "\"11-star run\" / before SPEC, onboarding, ads, store creative, or eng plans harden",
+      "instructions": "Run the 11-Star Run Protocol: for the product's core promise, name what would happen at 1★ (failure), 2★ (friction), 5★ (expected/works-but-forgettable), and the absurd 9-11★ concierge version, then work backward to the feasible 6-7★ slice that still carries the magic and is buildable in V1. Write the ladder into 11_STAR_EXPERIENCE.md and its visual storyboard into 11-star-experience.html, and trace the promise through product/design/engineering/analytics/revenue/store/content in state/LAUNCH_TRACE.md so downstream nodes inherit the same target instead of re-deciding it. The decision that matters most is the V1 cut line — which normal product, design, onboarding, and paywall calls change because of the chosen slice — not the impressive 11★ idea itself, which stays inspiration.",
+      "reads": [
+        "product/SPEC.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.experience.eleven-star-experience"
+      ],
+      "roleId": "role.product-leader",
       "laneIds": [
         "experience"
       ],
@@ -1816,6 +2103,20 @@
         "area.product-experience"
       ],
       "trigger": "Feature whose 11-star target is 6★+ / \"charge this with emotion\", \"build a habit\"",
+      "instructions": "Implement all four required Experience Cards (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring) per emotional-experience-design.md's producer recipes, each with its deterministic guardrail satisfied (e.g. Variable Reward's result must differ across at least 30% of consecutive completions, Commitment's goal must be user-editable at any time) and evidence recorded in engineering/PRODUCTION_READINESS.md — a card that cannot be verified on a running app does not ship. Route any additional card from the 12-card deck (experience-cards.md's Card Routing table) only when the product moment genuinely fits; give every emotional moment a named PostHog event per emotional-experience-measurement.md before build, not invented ad hoc. Apply the three-question bright-line test from ethics-guardrail.md (goal alignment, truthfulness, informed exit) to each card before it ships — any NO answer means redesign, not a documented exception — and check:emotional-design enforces the resulting attestation fields in EMOTIONAL_DESIGN.md.",
+      "reads": [
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "analytics/ANALYTICS.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.experience.emotional-design-system",
+        "reference.experience.emotional-experience-design",
+        "reference.experience.experience-cards",
+        "reference.experience.ethics-guardrail",
+        "reference.experience.emotional-experience-measurement"
+      ],
+      "roleId": "role.product-leader",
       "laneIds": [
         "emotional_design"
       ],
@@ -1845,6 +2146,29 @@
         "area.product-experience"
       ],
       "trigger": "\"Audit this app's emotional design\" / \"emotional UX audit\"",
+      "instructions": "Audit EMOTIONAL_DESIGN.md against every card the app actually implements — for each, verify the specific bright-line/dark-line test from that card's own file (experience-cards/<name>-card.md) and consumer-product-design-agency.md's four-required-card checklist actually passes, not just that a card is named. HIGH-risk cards (Variable Reward, Streak & Loss Aversion) get the strictest read: confirm the escape hatch, counter-metric, and non-empty fallback are real, not aspirational language. Write findings as EMOTIONAL_AUDIT.md's Audit Output Contract, and any dark-pattern violation or missing per-card attestation field becomes a failure card per failure-cards.md rather than a note to fix later — check:emotional-design enforces the attestation fields this audit must produce.",
+      "reads": [
+        "product/experience/emotional-design/EMOTIONAL_DESIGN.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.experience.emotional-design-system",
+        "reference.experience.consumer-product-design-agency",
+        "reference.experience.ethics-guardrail",
+        "reference.experience.experience-cards.commitment-card",
+        "reference.experience.experience-cards.variable-reward-card",
+        "reference.experience.experience-cards.perceived-effort-delay-card",
+        "reference.experience.experience-cards.intent-mirroring-card",
+        "reference.experience.experience-cards.endowed-progress-card",
+        "reference.experience.experience-cards.peak-end-card",
+        "reference.experience.experience-cards.streak-and-loss-aversion-card",
+        "reference.experience.experience-cards.reciprocity-card",
+        "reference.experience.experience-cards.identity-and-self-expression-card",
+        "reference.experience.experience-cards.fresh-start-card",
+        "reference.experience.experience-cards.mastery-and-status-card",
+        "reference.experience.experience-cards.recovery-and-trust-repair-card"
+      ],
+      "roleId": "role.security-architect",
       "laneIds": [
         "emotional_design"
       ],
@@ -1873,6 +2197,20 @@
         "area.product-experience"
       ],
       "trigger": "Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work",
+      "instructions": "Follow the mandatory STATE→MUTATE→VERSION→RENDER loop: read studio/seed/business.json and studio/seed/theme.tokens.json, make one coherent, reviewable mutation (one audience, one surface cluster, one token pass, or one wipe — never a mixed batch), then validate, render, and commit the state change as a git version over state/ and design/design-room.html. Never freehand a one-off DESIGN_PROPOSAL.md, mood board, or ad-hoc HTML proof outside this loop — the rendered Design Room is the only proof the founder reviews. When the surface touched is a landing/funnel page, model it against surfaces-b2c.md's Surface Families and apply quality-lens.md's Anti-Generic Checks before calling the mutation done; the founder's approval of final brand direction is the gate this node cannot self-clear.",
+      "reads": [
+        "studio/seed/business.json",
+        "studio/seed/theme.tokens.json",
+        "state/LAUNCH_TRACE.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.design.design-room",
+        "reference.design.surfaces-b2c",
+        "reference.design.landing-motion-craft",
+        "reference.design.quality-lens"
+      ],
+      "roleId": "role.design-guru",
       "laneIds": [
         "design"
       ],
@@ -1907,6 +2245,16 @@
         "area.product-experience"
       ],
       "trigger": "Theme tokens change and the design is accepted",
+      "instructions": "Run npm run promote:design-tokens to derive studio/generated/system/tokens.json, design/system/tokens.css, and studio/generated/system/DesignTokens.swift from the accepted studio/seed/theme.tokens.json — this is a mechanical promotion step, not a redesign, so the promoted values must match the seed exactly, not a reinterpretation. Only run it after the founder has accepted the design in the Design Room; promoting unaccepted tokens ships a design nobody approved. check:token-promotion is the proof — a promoted file that drifts from the seed tokens fails it.",
+      "reads": [
+        "studio/seed/theme.tokens.json"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.design.design-room",
+        "reference.design.design-visual-system"
+      ],
+      "roleId": "role.design-guru",
       "laneIds": [
         "design"
       ],
@@ -1937,6 +2285,15 @@
         "area.product-experience"
       ],
       "trigger": "Before flow maps, state matrices, UX_PATTERNS.md, or bug-trap coverage",
+      "instructions": "Query Refero (refero_search_flows / refero_search_screens) for 2-4 real shipped flows relevant to the surfaces modeled in studio/seed/business.json, and summarize step count, friction, recovery, and system response into product/experience/ux-patterns/UX_PATTERNS.md and its rendered ux-patterns.html — Refero is evidence for pattern quality, not a replacement for this skill's own onboarding-conversion doctrine. If Refero access is unavailable, load paid-tool-routing.md and get founder confirmation before falling back to the bundled baseline pattern pack, and record the decision in strategy/TOOL_DECISIONS.md and state/PROJECT_STATE.yaml.tools.refero. Refero's iOS/mobile records cover journey structure only for Android — do not claim Android-specific UX proof from Refero alone.",
+      "reads": [
+        "studio/seed/business.json"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.design.refero-ux-patterns"
+      ],
+      "roleId": "role.design-guru",
       "laneIds": [
         "design"
       ],
@@ -1965,6 +2322,19 @@
         "area.product-experience"
       ],
       "trigger": "Before onboarding quizzes, review-prompt timing, paywall timing, or first-session activation",
+      "instructions": "Design the screen-by-screen onboarding sequence in product/ONBOARDING.md — purpose, question/copy, state, visual asset, animation, and analytics event per screen — so the user sees the 11-star V1 slice's magic before being asked for payment, long setup, or sensitive data. Place the native App Review popup and the push-permission soft-prime at the first-value moment, but never in the same session step as each other (value moment claims one; the other waits for the next earned moment per push-notification-lifecycle.md), and sequence the Commitment (first goal question), Perceived Effort Delay (plan/result generation), and Intent Mirroring (immediately pre-paywall, never on the paywall or cancel screen) card triggers against that same moment. Pull the final on-screen words from product/copy/COPY_DECK.md by key — check:app-copy fails a flow whose deck rows are missing or still placeholder-shaped — and confirm the onboarding curve crosses positive before the paywall, not just that a paywall exists.",
+      "reads": [
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "analytics/ANALYTICS.md",
+        "product/copy/COPY_DECK.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.experience.onboarding-conversion",
+        "reference.experience.push-notification-lifecycle",
+        "reference.experience.eleven-star-experience"
+      ],
+      "roleId": "role.product-leader",
       "laneIds": [
         "onboarding"
       ],
@@ -1994,6 +2364,18 @@
         "area.product-experience"
       ],
       "trigger": "Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or \"premium feel\"",
+      "instructions": "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give (celebration choreography, gesture physics, hero transitions), route to motion-craft-benchmarks.md's numbered recipes for the checkable acceptance criteria; check:motion-contract is what proves the tokens were actually used, not adjectives in design/DESIGN.md.",
+      "reads": [
+        "studio/seed/theme.tokens.json"
+      ],
+      "consults": [
+        "product/experience/ux-patterns/UX_PATTERNS.md"
+      ],
+      "referenceIds": [
+        "reference.design.premium-mobile-craft",
+        "reference.design.motion-craft-benchmarks"
+      ],
+      "roleId": "role.design-guru",
       "laneIds": [
         "design"
       ],
@@ -2020,6 +2402,18 @@
         "area.product-experience"
       ],
       "trigger": "Before rendered videos/stills, app previews, ad/social variants",
+      "instructions": "Decide the production route per asset before generating anything: Higgsfield for net-new AI-generated imagery, mascots, or presenter/UGC video; Remotion for reproducible compositions built from real app UI, design/DESIGN.md tokens, screenshots, copy, and data where many variants (hooks, formats, dimensions, locales) are needed. Do not generate when the founder has not approved the intended paid route's fallback, Remotion commercial-license eligibility for this business is unclear, or the source UI/asset rights are missing. Record every produced asset in growth/content-assets/CONTENT_ASSETS.md (and its content-assets.html) with its route, token/source inputs, and license basis — check:content-assets proves the manifest matches what actually rendered, and this node is not idempotent because each run can legitimately produce new asset variants.",
+      "reads": [
+        "design/DESIGN.md",
+        "studio/seed/theme.tokens.json"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.design.remotion-content-assets",
+        "reference.design.design-visual-system",
+        "reference.process.tool-recipes.visual-and-motion-production"
+      ],
+      "roleId": "role.design-guru",
       "laneIds": [
         "content_assets"
       ],
@@ -2052,6 +2446,17 @@
         "area.product-experience"
       ],
       "trigger": "Before writing or reviewing any founder-facing copy or any marketing copy the skill generates",
+      "instructions": "Before any founder-facing or marketing copy ships, identify which voice you are protecting — this skill's own direct/no-filler voice for founder-facing surfaces, or the launched business's strategy/BRAND.md voice and the tone 11_STAR_EXPERIENCE.md set for marketing copy — and make the minimum effective edit: strip filler, hedging, and importance-inflation without flattening a brand's playful or clinical register into generic 'clean' English. Author every user-facing string as a keyed row in product/copy/COPY_DECK.md (with product/copy/COPY_BRIEF.md as the brief that precedes it) before any builder consumes it — builders read deck keys, they do not invent strings from the spec. Run the banned-words/patterns self-check and channel-specific limits (store character counts, push/email subject limits) before handoff; check:app-copy is the gate that fails a placeholder-shaped or missing deck row.",
+      "reads": [
+        "strategy/BRAND.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.words.no-slop-writing",
+        "reference.words.conversion-copy"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -2075,6 +2480,20 @@
         "area.build-release"
       ],
       "trigger": "Before App Store/Play metadata, keyword research, ASA, or post-launch ASO loops",
+      "instructions": "Build app-marketing-context (app name, category, target country, top competitors, primary/secondary/long-tail keyword candidates, current listing state, and public support/privacy URLs) before locking a single metadata field, then run keyword and name-collision checks in the target country and separate brand language from search language. Route any localization call through the demand-first priority tiers in LOCALIZATION_MARKET_RESEARCH.md rather than translating on inference, and route Apple Search Ads storefront targeting from the same tiers. Draft final metadata fields plus rejected alternatives with rationale into STORE_OPS.md, and run every metadata/keyword string through the no-slop-writing.md self-check before calling it locked. For the recurring post-launch loop, track keyword rank deltas, ASA search-term mining, and localization opportunities weekly rather than treating ASO as a one-time pass.",
+      "reads": [
+        "design/DESIGN.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.aso-store-ops",
+        "reference.growth.paid-user-acquisition",
+        "reference.research.localization-market-research",
+        "reference.words.no-slop-writing",
+        "reference.process.tool-recipes.growth-and-store-routing"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "store_console"
       ],
@@ -2101,6 +2520,21 @@
         "area.build-release"
       ],
       "trigger": "Before listing fields, privacy questionnaire, IAP/subscription field maps, CPPs, in-app events",
+      "instructions": "Build APP_STORE_LISTING.md as the bridge document: default listing fields, App Privacy answers derived from the actual data inventory and SDK/vendor behavior (never from policy prose alone), and pricing/subscription mapping reconciled against revenue/REVENUE_OPS.md's RevenueCat/Stripe/web-funnel state. Anchor screenshot, App Preview, custom-product-page, and In-App Event concepts to the real V1 scalable slice in 11_STAR_EXPERIENCE.md so the listing never invents a promise the app cannot keep. Run the finished description/keyword/promotional-text copy through the no-slop-writing.md self-check, then confirm `npm run check:store-console -- --root .` passes before calling the packet ready. Founder approval gates any live product creation, price change, or submission — draft the packet, do not publish it.",
+      "reads": [
+        "STORE_OPS.md",
+        "revenue/REVENUE_OPS.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.app-store-listing-prep",
+        "reference.money.revenue-monetization",
+        "reference.experience.eleven-star-experience",
+        "reference.words.no-slop-writing"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "store_console"
       ],
@@ -2130,6 +2564,18 @@
         "area.build-release"
       ],
       "trigger": "Before Apple Developer enrollment, Team ID, signing, profiles, archive/upload, TestFlight",
+      "instructions": "Classify the Apple account state (membership, Team ID, role, agreements signed) before any TestFlight/App Store distribution claim, and treat a simulator build as engineering proof only, never distribution readiness. Run the five-item pre-archive/export/upload preflight checklist — SDK keys actually injected into the archived Info.plist, `plutil -lint` on PrivacyInfo.xcprivacy, NSPrivacyAccessedAPITypes coverage, API-key (not interactive-session) export auth, and native screenshot dimension floors — and record pass/BLOCKED for each in store/APPLE_SIGNING.md before archiving. Do not begin `xcodebuild archive` until every item is pass or ready; a blocked item stays open, it does not get re-archived on hope. Founder approval is required before enrolling, creating/rotating certificates, uploading a build, or submitting for review — this node prepares that approval, it does not grant itself autonomy to submit.",
+      "reads": [
+        "store/app-store-listing/APP_STORE_LISTING.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.apple-signing-release",
+        "reference.store.app-store-connect-cli",
+        "reference.operations.secrets-management"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "apple_signing"
       ],
@@ -2161,6 +2607,22 @@
         "area.build-release"
       ],
       "trigger": "Before ASC upload — PrivacyInfo.xcprivacy, required-reason APIs, App Privacy answers",
+      "instructions": "Reconcile the App Privacy answers against the real data inventory: code/SDK list, analytics/ANALYTICS.md, revenue/REVENUE_OPS.md, backend schema, and the public privacy/terms pages — never answer from policy prose alone. Prove the bundled PrivacyInfo.xcprivacy lints clean, NSPrivacyAccessedAPITypes covers every required-reason API the code actually uses (UserDefaults, file-timestamp APIs, etc.), and third-party SDK manifests/signatures plus the Xcode privacy report are reconciled before any ASC upload-readiness claim. Write the result to store/APPLE_APP_STORE_REQUIREMENTS.md and pass `npm run check:apple-requirements -- --root .`; a passed App Store Connect upload with an invalid or incomplete privacy manifest is a release blocker, not post-submit cleanup. Founder approval is required on the final App Privacy answers before they are published in App Store Connect.",
+      "reads": [
+        "store/app-store-listing/APP_STORE_LISTING.md",
+        "trust/PRIVACY.md",
+        "trust/TERMS.md",
+        "analytics/ANALYTICS.md",
+        "revenue/REVENUE_OPS.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.app-store-listing-prep",
+        "reference.trust.privacy-terms",
+        "reference.store.store-console-workflow"
+      ],
+      "roleId": "role.security-architect",
       "laneIds": [
         "store_console",
         "privacy_legal"
@@ -2196,6 +2658,20 @@
         "area.build-release"
       ],
       "trigger": "Before \"where do I click / what do I paste\" in ASC or Play Console",
+      "instructions": "Produce the console-ready packet that tells the founder exactly where to click, what to paste, and what still needs their approval: fill store/STORE_CONSOLE.md field-by-field (click path, character limit, paste-ready value, evidence source, status) for every App Store Connect and Google Play Console page in scope, then render store/store-console.html as the copy-paste surface grouped by console page. Distinguish the Apple readiness states explicitly — simulator-build-ok, apple-account-ready, bundle-id-ready, app-record-ready, signing-ready, archive-ready, upload-ready — and never call the launch 'TestFlight-ready' from a simulator build alone. Reconcile Apple App Privacy answers against Google Play Data safety answers so the two stores never contradict each other for the same codebase, then confirm `npm run check:store-console -- --root .` passes. Founder approval is required before any external console mutation — app creation, metadata apply, screenshot upload, submission.",
+      "reads": [
+        "store/app-store-listing/APP_STORE_LISTING.md",
+        "store/APPLE_SIGNING.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.store-console-workflow",
+        "reference.store.apple-signing-release",
+        "reference.store.google-play-release",
+        "reference.store.app-store-connect-cli"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "store_console"
       ],
@@ -2232,6 +2708,19 @@
         "area.build-release"
       ],
       "trigger": "Before Rork asc CLI app creation, metadata, screenshots, TestFlight, RevenueCat sync",
+      "instructions": "Default to the `asc` CLI/skill-pack route for App Store Connect work — reads, ID resolution, metadata/screenshot dry-runs, and TestFlight/review-status checks are safe without new approval; do not tell the founder an agent cannot create the app or manage state until `asc auth status`, `asc auth doctor`, and the refreshed skill-pack docs actually prove a blocker. Work the auth ladder before reporting ASC as blocked: check an existing keychain profile first (`asc --profile <Name>`), never `source` a credential `.env` file, and treat 'app record not found' as a setup step, not inaccessibility. Confirm `--help` before any subcommand not already verified here, and never run a mutating command (`--confirm`, metadata apply, screenshot upload, submit/release) without both the CLI flag and explicit founder approval. Pass `npm run check:asc-command-contract -- --root .` and update state/PROJECT_STATE.yaml plus store/STORE_CONSOLE.md after every action that changes build, metadata, or TestFlight state.",
+      "reads": [
+        "store/STORE_CONSOLE.md",
+        "store/store-console.html",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.app-store-connect-cli",
+        "reference.store.store-console-workflow",
+        "reference.operations.secrets-management"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "store_console"
       ],
@@ -2263,6 +2752,24 @@
         "area.build-release"
       ],
       "trigger": "Store screenshots needed (raw capture → composed iPhone/iPad/Play assets)",
+      "instructions": "Capture raw app UI first — in-app iOS Simulator (rung 0) for a local Mac, MobAI for Android or a repeatable matrix — and treat those raw captures as proof inputs, never final store creative. Compose final assets from the Asset Knowledge Brief (strategy/RESEARCH.md's user/problem, 11_STAR_EXPERIENCE.md's magical moment, the emotion/card from EMOTIONAL_DESIGN.md, design/DESIGN.md's tokens) with headline, copy overlay, device frame, and export every required iPhone/iPad/Play well — never a generic, knowledge-free hook. Run every composed frame through quality-lens.md's Anti-Generic Checks before calling the deck done, and write the raw-path/composition-path/upload-status table to SCREENSHOTS.md. Pass `npm run check:store-screenshots -- --root .`; a technically correct, on-brand screenshot that still reads as generic fails the done bar.",
+      "reads": [
+        "design/DESIGN.md",
+        "store/app-store-listing/APP_STORE_LISTING.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "strategy/RESEARCH.md",
+        "product/experience/emotional-design/EMOTIONAL_DESIGN.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.aso-store-ops",
+        "reference.design.design-visual-system",
+        "reference.design.quality-lens",
+        "reference.process.tool-recipes.device-capture-and-proof",
+        "reference.engineering.mobai-toolbelt"
+      ],
+      "roleId": "role.design-guru",
       "laneIds": [
         "store_console",
         "content_assets"
@@ -2295,6 +2802,19 @@
         "area.build-release"
       ],
       "trigger": "Android in scope (platforms include android or an android bundle id exists)",
+      "instructions": "Classify the Play developer account (organization vs personal, verification status, payments profile) before any Android readiness claim, and if personal, plan the 12-tester/14-continuous-day closed-testing production gate into the launch timeline now — it is a calendar gate, not a paperwork gate. Complete every Policy > App content task (Data safety, content rating, App access demo credentials, account deletion) and reconcile the Data safety answers against the same data inventory used for Apple App Privacy; a divergence between the two stores for one codebase is a reconciliation failure unless explicitly documented. Enroll in Play App Signing, upload an AAB (never an APK) as the readiness artifact, and stage production rollout in percentages with a named halt owner rather than 0% straight to 100%. Write the eight required sections (Developer Account, Data Safety, Content Rating, Play App Signing, Target API Level, Release Tracks, Closed Testing, Pre-Launch Report) to store/GOOGLE_PLAY_RELEASE.md before calling the Play side of lanes.store_console done.",
+      "reads": [
+        "store/app-store-listing/APP_STORE_LISTING.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.google-play-release",
+        "reference.store.store-console-workflow",
+        "reference.trust.privacy-terms",
+        "reference.money.revenue-monetization"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "store_console"
       ],
@@ -2326,6 +2846,25 @@
         "area.build-release"
       ],
       "trigger": "Before actual app implementation, builder prompts, or production-readiness claims",
+      "instructions": "Route non-trivial implementation through the Compound Engineering loop (ce-brainstorm when product shape is still ambiguous, ce-plan, ce-work, ce-code-review, ce-test, ce-proof); when CE is unavailable, run the five-stage Standalone Engineering Loop instead — plan, bounded slices, adversarial review by someone other than the producer, test, proof — recorded in engineering/ENGINEERING_PLAN.md, never a silent downgrade. Before implementation starts, set the autonomy mode in state/PROJECT_STATE.yaml (scout/draft/prepare/apply/mutate/ship) and decide the parallel-vs-serial split for candidate units, recording collisions and serialized resources in operations/ORCHESTRATION.md. Do not mark production readiness from unit tests alone: require build/typecheck/lint, integration tests against real providers, mobile E2E paired with backend/provider verification, and an on-device taste pass against premium-mobile-craft.md/quality-lens.md, all written to engineering/PRODUCTION_READINESS.md. Pass `npm run check:compound-engineering -- --root .` and `npm run check:orchestration -- --root .` before calling the engineering lane done.",
+      "reads": [
+        "engineering/TECH_SPEC.md",
+        "state/LAUNCH_TRACE.md",
+        "design/DESIGN.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.engineering.engineering-orchestration",
+        "reference.orchestration.compound-engineering-routing",
+        "reference.orchestration.parallel-agent-orchestration",
+        "reference.orchestration.project-state",
+        "reference.experience.eleven-star-experience",
+        "reference.design.premium-mobile-craft",
+        "reference.design.quality-lens",
+        "reference.process.tool-recipes.engineering-and-agent-orchestration"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "engineering",
         "orchestration"
@@ -2359,6 +2898,22 @@
         "area.build-release"
       ],
       "trigger": "Before schema/auth prompts or engineering/TECH_SPEC.md data/API sections harden",
+      "instructions": "Pick one backend route (Supabase, Firebase, or custom), record the reason in engineering/TECH_SPEC.md's Backend Selection sub-section, and never silently substitute another route mid-build — a switch is a change-cascade event and a founder-only gate. Write the Data Model as one row per entity (owner, key fields, relationships, retention/deletion path, PII class) and the Authorization Model as a create/read/update/delete matrix expressed in the route's actual enforcement mechanism — RLS policies, Firestore security rules, or middleware authz — deny by default. Treat untested authorization as absent: exercise owner/anonymous/other-user access for every matrix row and record the exact test command and evidence path, not just 'RLS' in prose. Pass `npm run check:backend-contract -- --root . --state state/PROJECT_STATE.yaml`; the account-deletion promise in this contract's retention rules must match trust/PRIVACY.md's deletion promise exactly, not just approximately.",
+      "reads": [
+        "engineering/TECH_SPEC.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [
+        "design/DESIGN.md",
+        "trust/PRIVACY.md"
+      ],
+      "referenceIds": [
+        "reference.engineering.backend-data-contract",
+        "reference.process.flow-traceability",
+        "reference.trust.privacy-terms",
+        "reference.operations.secrets-management"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "engineering"
       ],
@@ -2387,6 +2942,20 @@
         "area.build-release"
       ],
       "trigger": "Before builder handoff bundles, AGENTS.md/CLAUDE.md, APP_AGENTS.md, agents/",
+      "instructions": "Fill AGENTS.md, CLAUDE.md, APP_AGENTS.md, and the seven-file agents/ roster (orchestrator, product-leader, design-guru, engineering-leader, marketing-guru, security-architect, customer-success) from the current business's own source-of-truth docs, not from this skill repo's maintainer files. AGENTS.md must explicitly tell future agents to keep using the b2c-mobile-business-launch workflow, update state/PROJECT_STATE.yaml, rerender state/launch-cockpit.html, and run validators until a founder-only gate — a builder handoff that relies on a prompt alone loses this instruction on the next session. Assign each role its subagent-audit surface (the review-lane table in app-agent-roster.md) so future launches can dispatch independent review instead of self-attesting completeness, and make explicit that specialists propose, never stage/commit/release/spend/submit without an orchestrator-assigned scope. The proof that matters most: a fresh agent reading only AGENTS.md and this roster can resume the launch without reconstructing decisions from chat memory.",
+      "reads": [
+        "engineering/ENGINEERING_PLAN.md",
+        "operations/ORCHESTRATION.md",
+        "engineering/PRODUCTION_READINESS.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.engineering.app-agent-roster",
+        "reference.orchestration.parallel-agent-orchestration",
+        "reference.process.artifact-contracts"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [
         "engineering"
       ],
@@ -2415,6 +2984,19 @@
         "area.build-release"
       ],
       "trigger": "Before device automation, app-flow demo videos, app previews, bug-repro recordings",
+      "instructions": "Run the MobAI session-startup checklist (refresh the live MCP surface, verify device discovery, start the bridge, pin the device ID) before any automation command — most 'device not found' failures come from skipping it. Use MobAI's free tier without a spend gate for one device/current quota; load paid-tool-routing.md and ask the founder before any Plus/Pro spend or before narrowing an intended cross-platform route to Apple-only. For demo videos, follow the recorder's explore -> script -> dry-run -> record -> edit/export sequence exactly — never improvise during final recording — and write the choreography path, raw capture, final export, and privacy/sensitive-screen review to growth/DEMO_VIDEO.md. Pass `npm run check:mobai-proof -- --root .`; pair every action sequence with backend/provider verification (the onboarding answer actually lands in profile state) because a clean UI pass is not proof the mutation landed.",
+      "reads": [
+        "engineering/ENGINEERING_PLAN.md",
+        "engineering/PRODUCTION_READINESS.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.engineering.mobai-toolbelt",
+        "reference.process.tool-recipes.device-capture-and-proof",
+        "reference.operations.paid-tool-routing"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "engineering",
         "content_assets"
@@ -2446,6 +3028,19 @@
         "area.build-release"
       ],
       "trigger": "Before in-app iOS Simulator / Codex Desktop native iOS / XcodeBuildMCP / serve-sim / SnapshotPreviews proof",
+      "instructions": "Start at rung 0 (the in-app iOS Simulator — Claude Code Desktop's pane, or Codex's build-ios-apps plugin) for any 'run the app / check this screen / walk this flow' request; it needs no install and no account, and escalating straight to XcodeBuildMCP or MobAI for a single screen check wastes founder time. Escalate only for what rung 0 cannot cover: physical devices or CI need XcodeBuildMCP (rung 2), deterministic preview PNG/JSON needs SnapshotPreviews, a browser-visible stream for a remote/CLI session needs serve-sim — record the rung chosen and why in strategy/TOOL_DECISIONS.md. Use fixture or sandbox accounts only on any device the agent drives, since device screenshots leave the machine and are retained under normal conversation policy; never sign a real founder/customer/store account into an agent-driven simulator. Attach the exact simulator/device, OS, tool route, and screenshot/log paths as evidence in engineering/PRODUCTION_READINESS.md and pass `npm run check:native-ios -- --root .`; a cloud/SSH session cannot reach a local Mac's simulators at all, so record that as a named blocker rather than narrating a run that did not happen.",
+      "reads": [
+        "engineering/PRODUCTION_READINESS.md",
+        "engineering/ENGINEERING_PLAN.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.engineering.xcodebuildmcp-testing",
+        "reference.process.tool-recipes.device-capture-and-proof",
+        "reference.store.apple-signing-release"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "engineering"
       ],
@@ -2477,6 +3072,19 @@
         "area.growth-revenue"
       ],
       "trigger": "Before locking onboarding/paywall/funnels/store CTAs or any prompt naming events",
+      "instructions": "Write analytics/ANALYTICS.md and render analytics/analytics-plan.html before onboarding, paywall, funnel, or store-CTA copy locks: define the identity model (one internal user ID reused across PostHog, RevenueCat, Stripe, Resend, and support), the dual attribution model (UTMs/click-IDs plus self-reported source using stable stored keys, never display labels), and the event catalog grouped by surface with owner/trigger/properties/QA method per event. Flip state/PROJECT_STATE.yaml's attribution contract booleans to true only after each is implemented and proven, not planned. The node is done when check:analytics-catalog and check:attribution pass and at least one real event shows up in PostHog activity — a local event log is implementation proof, not live proof.",
+      "reads": [
+        "strategy/RESEARCH.md",
+        "product/SPEC.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.data.analytics-attribution",
+        "reference.process.artifact-contracts",
+        "reference.process.provider-proof"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "analytics_attribution"
       ],
@@ -2509,6 +3117,20 @@
         "area.growth-revenue"
       ],
       "trigger": "Before paid ads, ASA, Meta/TikTok/Google campaigns, or spend-readiness claims",
+      "instructions": "Write growth/PAID_UA.md: record the fit-gate decision, commit to exactly one paid channel with its target event and campaign destination, and mine the platform's public ad library for high-impression, long-running competitor ads before inventing angles. Build the RevenueCat/App-Store/PostHog/self-reported tracking baseline before any spend and record the four Decision Thresholds — attribution tolerance (default +/-20%), payback window (default 90 days), creative signal floor (default 2x target CPA or 7 days per creative), scale trigger (default 14 consecutive days at/under target CPA) — so growth/paid-ua-report.csv can be judged against a number, not a feeling. Target only the storefronts LOCALIZATION_MARKET_RESEARCH.md ranks Tier 1. Connecting ad accounts, creating campaigns, or committing spend is a founder-only gate that must be confirmed before check:paid-ua passes.",
+      "reads": [
+        "analytics/ANALYTICS.md",
+        "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.growth.paid-user-acquisition",
+        "reference.operations.paid-tool-routing",
+        "reference.research.localization-market-research",
+        "reference.money.revenue-monetization"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "paid_user_acquisition"
       ],
@@ -2544,6 +3166,20 @@
         "area.growth-revenue"
       ],
       "trigger": "Before referral/share-to-unlock/invite/comment-loop mechanics",
+      "instructions": "Write growth/VIRAL_GROWTH.md: record the fit-gate decision, the product-specific growth thesis (audience/platform, visible result, emotional trigger, product loop, content loop, conversion moment), and the full Product Loop Contract (trigger, reward, recipient value, share artifact, surface, fallback, abuse controls, policy constraints). Sequence monetization timing so the paywall catches demand after emotional investment forms, not before, per onboarding-conversion.md and revenue-monetization.md. Compute the loop's real economics weekly in the Loop Economics section — viral coefficient k = (invites/shares per active user) x (recipient conversion rate to install/activation), plus cycle time — since k below 0.15 means the loop is decoration, not a growth engine, and share/view counts alone never justify calling the lane done. Any referral/share/unlock mechanic carrying streak, scarcity, or social-proof pressure gets an ethics-guardrail pass before it ships.",
+      "reads": [
+        "analytics/ANALYTICS.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.growth.viral-growth-loops",
+        "reference.experience.onboarding-conversion",
+        "reference.money.revenue-monetization",
+        "reference.experience.ethics-guardrail"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "growth"
       ],
@@ -2570,6 +3206,21 @@
         "area.growth-revenue"
       ],
       "trigger": "Before the public announcement, launch-day run-of-show, or weekly release rhythm",
+      "instructions": "Write growth/LAUNCH_NARRATIVE.md covering the Fit Gate, feeling-first Launch Thesis, the Two Launch Types (rare tentpole vs. weekly feature-launch heartbeat), the Launch-Day Run-of-Show, and all post copy in fenced code blocks. Every post shapes a feeling before naming the feature and clears the 2026 DO-NOT-DO list: no hashtags, no emojis carrying the message, no link in the root post (first self-reply only), no seeded 'congrats!' replies, plus the no-slop-writing.md self-check. Public claims are limited to what is true and attributable — never launder the launch agency's own aggregate stats as this app's results — and any rage-bait line clears an ethics-guardrail review before it ships. Public posting, account connections, and paid amplification spend are founder-only gates that must be confirmed before launch goes live.",
+      "reads": [
+        "growth/VIRAL_GROWTH.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
+      ],
+      "consults": [
+        "growth/content-assets/CONTENT_ASSETS.md"
+      ],
+      "referenceIds": [
+        "reference.growth.launch-narrative-cadence",
+        "reference.words.no-slop-writing",
+        "reference.experience.ethics-guardrail",
+        "reference.growth.viral-growth-loops"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "growth"
       ],
@@ -2602,6 +3253,21 @@
         "area.growth-revenue"
       ],
       "trigger": "Before RevenueCat/Stripe/web billing, products, paywall, entitlement, webhooks, pricing",
+      "instructions": "Write revenue/REVENUE_OPS.md across all four spokes: RevenueCat project/entitlement/offering setup with the App Store container price held at Free (a Lifetime offer is a NON_CONSUMABLE IAP, never the container price), Stripe/web-billing setup when a web funnel is in scope, and the Price-Point Decision Procedure's competitor anchor table (5-10 rows from strategy/RESEARCH.md, dated) under a 'Pricing Decision' heading. Resolve the three named paywall-breaking gaps before calling any paywall ready: Apple MISSING_METADATA subscription-group localization, RevenueCat product-type reconciliation against the App Store counterpart, and a Release-scheme (not debug-preview) smoke check confirming currentOffering.packages is non-empty. Stand up the billing-health recovery system (grace period/account hold, billing-issue webhook to dunning push/email, one-tap update-payment) — roughly 31% of Play cancellations and 14% of App Store cancellations are involuntary billing failures, not churn. Creating live products, changing any price/trial/renewal term, or enabling live checkout is a founder-only gate; check:revenue is the pass signal.",
+      "reads": [
+        "state/LAUNCH_TRACE.md",
+        "strategy/RESEARCH.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.money.revenue-monetization",
+        "reference.money.revenuecat-and-store-products",
+        "reference.money.stripe-and-web-billing",
+        "reference.money.paywall-pricing-and-experiments",
+        "reference.money.billing-health-and-reactivation"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "revenue"
       ],
@@ -2636,6 +3302,19 @@
         "area.growth-revenue"
       ],
       "trigger": "Before editing any landing/policy/blog copy, robots.txt, llms.txt, sitemap, schema, metadata",
+      "instructions": "Write GEO_SEO.md before editing any landing/policy/blog file, not after: run the Copy Compliance Pre-Edit Scan for false or unverifiable claims (ranked-cohort superlatives, unshipped-feature promises, implied-authority claims, lifetime/free-tier promises that don't match revenue/REVENUE_OPS.md) and the no-slop-writing.md self-check before any title tag, meta description, or answer-style section ships. Produce and live-verify the technical surface — title/description/canonical/OG/Twitter cards, robots.txt, sitemap.xml, llms.txt, JSON-LD schema — with a curl/HTTP-200 check and a JSON.parse pass on every JSON-LD block, not just files existing locally. Localize hreflang/llms.txt/schema/answer sections only for the markets LOCALIZATION_MARKET_RESEARCH.md ranks Tier 1 with real demand evidence, never by translating every page into every language. check:landing-funnel is the pass signal once the funnel this feeds is verified live.",
+      "reads": [
+        "state/LAUNCH_TRACE.md",
+        "analytics/ANALYTICS.md",
+        "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.growth.geo-seo",
+        "reference.research.localization-market-research",
+        "reference.words.no-slop-writing"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "growth"
       ],
@@ -2655,6 +3334,7 @@
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "publish",
+      "protectedCategory": "public_actions",
       "idempotent": true
     },
     {
@@ -2665,6 +3345,22 @@
         "area.growth-revenue"
       ],
       "trigger": "Phase 4 — landing page, waitlist/referral loop, web funnel, live deploy verification",
+      "instructions": "Build the landing/waitlist funnel in growth/landing/ and write CRO_AUDIT.md: pick the single conversion goal, verify the above-the-fold promise/subhead/CTA/proof element needs no scroll, and match the hero promise to whichever ad or creative drove the click. Run the Friction Audit (cut every non-essential field or click) and the Mobile Viewport Rules (thumb-reachable sticky CTA, Core Web Vitals pass on a mid-tier device) since most B2C traffic is mobile. Any waitlist email-capture endpoint must return HTTP 200, not 4xx, on a duplicate submission — test it before calling the funnel live — and declare landing_viewed/landing_cta_clicked/waitlist_submitted events in analytics/ANALYTICS.md before implementing them. check:landing-funnel's live-deploy and form-smoke-test gates are the pass signal; motion is progressive enhancement that must never delay LCP/INP or hide text from crawlers.",
+      "reads": [
+        "GEO_SEO.md",
+        "analytics/ANALYTICS.md",
+        "product/copy/COPY_BRIEF.md",
+        "design/DESIGN.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.growth.cro-landing",
+        "reference.design.landing-motion-craft",
+        "reference.data.analytics-attribution",
+        "reference.words.conversion-copy",
+        "reference.process.tool-recipes.funnel-domain-and-privacy"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "growth"
       ],
@@ -2683,6 +3379,7 @@
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "publish",
+      "protectedCategory": "public_actions",
       "idempotent": false
     },
     {
@@ -2693,6 +3390,20 @@
         "area.growth-revenue"
       ],
       "trigger": "Before founder-led organic social, creator sourcing/contracts, format-discovery tests",
+      "instructions": "Write growth/UGC_PLAYBOOK.md: record the fit-gate decision, then run the Day 0 format-discovery model — 3-5 creators, founder-written scripts for the first 4-8 weeks, same-day time-coded feedback, 5-8 reps per format before judging it — and only call a format scale-ready after 2-3 hits from the same structure across 2+ creators plus downstream install/referral/revenue evidence. Every script in ugc/script-bank.md survives the judge panel (separate reviewer passes with fresh context, one job each — pacing, vocabulary, idea strength, structure — at least one grounded in a real creator's transcript corpus) before it earns filming or generation spend; record script_id and a passed/survived judge_verdict, since check:content-assets blocks any UGC-family generation missing either. Route to influencer-sponsorship-engine.md instead when the plan is paying creators who already have an audience rather than running new niche accounts. Creator payments, paid creator-platform spend, and public posting/scheduling are founder-only gates.",
+      "reads": [
+        "growth/VIRAL_GROWTH.md",
+        "growth/LAUNCH_NARRATIVE.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.growth.ugc-creator-engine",
+        "reference.growth.influencer-sponsorship-engine",
+        "reference.growth.viral-growth-loops",
+        "reference.words.no-slop-writing"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "growth"
       ],
@@ -2720,6 +3431,19 @@
         "area.growth-revenue"
       ],
       "trigger": "After launch approval/public beta, or usefastlane.ai/Blitz setup, scheduling, social analytics",
+      "instructions": "Write growth/FASTLANE_OPS.md and the fastlane/ artifact set (campaign-brief.md, prompts.md, angles.json, preferences.json, schedule.json) only after the Launch Readiness Gate is true: live store/TestFlight URL, current brand/onboarding/design docs, and product claims matching store/legal/revenue docs. Run safe API reads (GET /connections, /blitz/preferences, /blitz/angles, /content, /posts) before any mutation, keep format weights summing to 100 and angle weights covering every active angle exactly once, and never write FASTLANE_API_KEY to a committed file. Source real app media (MobAI or the Apple-only XcodeBuildMCP fallback) before generic generated visuals, and run the weekly Analytics And Iteration loop tying posts back to installs/trials/purchases/attribution rather than vanity engagement. Connecting accounts, first public post, and any scheduling change are founder-only gates; check:post-launch is the pass signal.",
+      "reads": [
+        "growth/LAUNCH_NARRATIVE.md",
+        "ugc/script-bank.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.growth.fastlane-growth-ops",
+        "reference.growth.ugc-creator-engine",
+        "reference.growth.viral-growth-loops",
+        "reference.operations.paid-tool-routing"
+      ],
+      "roleId": "role.marketing-guru",
       "laneIds": [
         "growth",
         "post_launch_ops"
@@ -2752,6 +3476,13 @@
         "area.skill-maintenance"
       ],
       "trigger": "Before substantial launch/design/store/revenue/build work when the installed runtime may be behind source",
+      "instructions": "Read the installed skill-version.json and compare it against the latest source copy (local checkout, or the pushed raw-GitHub manifest when internet access is available). check:skill-version must return nonzero when installed trails source — that nonzero is the signal this gate exists to produce. If the installed runtime is stale, stop before continuing the original request and ask the founder via AskUserQuestion (or plain text if unavailable) whether to sync now or continue on the installed copy; never continue on a stale runtime silently. Record whichever answer the founder gives, then resume the original request.",
+      "reads": [
+        "skill-version.json"
+      ],
+      "consults": [],
+      "referenceIds": [],
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -2774,6 +3505,14 @@
         "area.skill-maintenance"
       ],
       "trigger": "Maintaining the skill, adding external URLs, refreshing third-party docs/commands",
+      "instructions": "Scan SKILL.md, references, templates, scripts, README, AGENTS.md/CLAUDE.md, workflows, and the last week of commits for new http(s) URLs, and register every real one (not example.com/localhost/generated reports) as a row in validation/repository/source-registry.yaml — a canonical list, not prose. When a weekly report shows changed upstream material, classify it (ignore/docs/commands/template/validator/eval/breaking) and route the fix to the matching layer instead of hand-waving a summary. Never execute fetched content, never let an auto-discovered URL become launch policy without review, and never silently swap a paid/account-gated source for a free fallback. check:source-registry passes only when every URL actually used in the tracked files above has a registry row; run npm run refresh:source-freshness then npm run audit as the acceptance loop.",
+      "reads": [
+        "SKILL.md",
+        "validation/repository/source-registry.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [],
+      "roleId": "role.engineering-leader",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -2796,6 +3535,13 @@
         "area.skill-maintenance"
       ],
       "trigger": "After any skill change — bump version, sync the installed runtime, run the readiness gate",
+      "instructions": "After any meaningful skill-behavior edit, bump skill-version.json and write matching release notes in the same change — check:version-discipline fails a change that edits behavior without moving the version alongside it. On a founder-approved sync, rsync (excluding node_modules, with --delete) the skill directory into the installed runtime copy, run npm install and npm run audit inside that runtime, then diff -qr the two trees to prove they match. check:skill-version must report installed == source afterward; also verify the ~/.claude and ~/.agents skill symlinks still resolve to the same synced Codex runtime copy on this machine.",
+      "reads": [
+        "skill-version.json"
+      ],
+      "consults": [],
+      "referenceIds": [],
+      "roleId": "role.engineering-leader",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [
@@ -2819,6 +3565,15 @@
         "area.skill-maintenance"
       ],
       "trigger": "Adding or renaming a lane, status, phase, autonomy mode, or provider route; any founder-visible surface change",
+      "instructions": "Add or update the founder-visible label and one-line blurb in tooling/lib/founder-copy.ts for every new or renamed lane, status, phase, autonomy mode, or provider route — this file is the only sanctioned path from machine state (lane ids, status enums, phase codes, route enums) to text a founder reads. Labels are sentence case, plain language, and free of internal vocabulary; never put an identifier, enum value, or tool name in a label, and keep the explanation in the blurb. check:founder-copy fails when a value in launch-state.ts has no matching label here, so add both in the same commit — the failure mode this guards is a founder reading raw machine state like \"paid_tool_routing | not_started\" on their own dashboard. One deliberate exception (check-founder-copy.ts Rule 4): the twelve Experience Card technique names are kept verbatim in lane blurbs, never translated into friendlier language.",
+      "reads": [
+        "tooling/lib/founder-copy.ts"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.words.no-slop-writing"
+      ],
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [
@@ -2843,6 +3598,15 @@
         "area.skill-maintenance"
       ],
       "trigger": "Changing SKILL.md frontmatter, the skill description, or the trigger phrasing",
+      "instructions": "Edit SKILL.md's YAML frontmatter description whenever the skill's claimed scope changes, or a lane/status/phase/autonomy mode/provider route is added or renamed enough to shift what requests should route here. check:autopilot (check-autopilot-contract.ts) validates the frontmatter against validation/repository/evals/triggering/autopilot-triggering.yaml: the description must exist, parse as valid frontmatter, stay at or under the eval's max_chars, contain every required_terms entry, carry no angle brackets, and its should_trigger/should_not_trigger cases must still hold. The decision that matters is whether the description still accurately routes the requests it should and excludes the ones it should not — an untested trigger phrasing is capability nothing routes to. Write the description in the flat STE100 register per technical-documentation-ste100.md: one meaning per word, active voice, simple tense, sentences at or under 20 words.",
+      "reads": [
+        "SKILL.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.engineering.technical-documentation-ste100"
+      ],
+      "roleId": "role.product-leader",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -2865,6 +3629,16 @@
         "area.skill-maintenance"
       ],
       "trigger": "Before changing any documented asc command in knowledge/store/app-store-connect-cli.md",
+      "instructions": "Before storing any asc command as executable guidance in knowledge/store/app-store-connect-cli.md, refresh it against local `asc --help`/skill-pack help and the current official Apple/Rork docs — never update command syntax from memory. check:asc-command-contract fails closed when a known-invalid command family (e.g. `asc apps get`, `asc validate app-store-version`) still appears anywhere in stored guidance, and separately checks that current commands (e.g. `asc apps view`) are the ones documented. When upstream CLI or skill-pack docs change but stale snippets remain, that is the `asc-command-guidance-stale` failure card — fix the reference, any evals, and business templates in the same change, not just this one file.",
+      "reads": [
+        "knowledge/store/app-store-connect-cli.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.app-store-connect-cli",
+        "reference.process.failure-cards"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "store_console"
       ],
@@ -2891,6 +3665,14 @@
         "area.skill-maintenance"
       ],
       "trigger": "Changing a domain, workflow, phase, lane, artifact, gate, reference, or generated catalog projection",
+      "instructions": "Edit the authored catalog data (catalog/domains.ts, catalog/workflows/*.ts, catalog/references.ts, catalog/roles.ts, etc.) when adding, renaming, or rewiring a domain, workflow, phase, lane, artifact, gate, or reference — keep every existing catalog id stable even when the underlying file path moves, since ids are the routing key other nodes' dependencies point at. Never hand-edit catalog/generated/routing.md or catalog/generated/spine.md; they are projected FROM the authored data by catalog/render-routing.ts (the R20 inversion — code is the source of truth, generated prose follows it). check:catalog (catalog/validate.ts) must report zero errors — duplicate/invalid ids, dangling references, cycles, unbound references, missing files — before catalog:render-routing --check confirms the generated projection matches; run render-routing without --check to regenerate, then rerun --check clean.",
+      "reads": [
+        "catalog/generated/routing.md",
+        "catalog/generated/spine.md"
+      ],
+      "consults": [],
+      "referenceIds": [],
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
@@ -2915,6 +3697,16 @@
         "area.skill-maintenance"
       ],
       "trigger": "Adding, removing, or renaming a validator, a LaunchBench scenario, or an agent-behavior eval; before trusting that any of them still catch what they claim to. Also run `npm run launchbench` (scenario lint + validator fixture suite) directly, and `npm run evals:behavioral` by hand when a live-agent signal is worth the cost and variance.",
+      "instructions": "When a validator, LaunchBench scenario, or agent-behavior eval is added, removed, or renamed — or after any repeated real-world miss — add or update the scenario/fixture under validation/repository/evals/launchbench/ or evals/agent-behavior/ so the same miss cannot recur silently. Keep the deterministic/behavioral split honest: `npm run launchbench` is a scenario-definition lint plus the deterministic validator-fixture suite only, never live-agent execution, and must not be described as behavioral coverage; `npm run evals:behavioral` is the separate live-agent run against the opt-in `behavioral: true` flagship subset, advisory and cost/variance-bearing, never PR-gating. check:agent-evals is the wired gate; the flagship set (stale-installed-skill-runtime, live-provider-proof-missing, post-launch-ops-runbook-missing, launch-tier-overproduction, monetization-cozy-default-stack-unexamined, founder-zero-operator-skipped, founder-gate-jargon-without-choice) must keep `behavioral: true` — the launchbench lint enforces that this list cannot silently shrink.",
+      "reads": [
+        "validation/repository/evals/launchbench/",
+        "validation/repository/evals/agent-behavior/"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.process.failure-cards"
+      ],
+      "roleId": "role.engineering-leader",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],

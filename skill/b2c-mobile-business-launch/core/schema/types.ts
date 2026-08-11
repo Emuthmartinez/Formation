@@ -394,6 +394,14 @@ export interface RunNodeStateV2 {
   acceptedOutputFingerprint?: string;
   attempts: AttemptRecordV2[];
   blocker?: string;
+  /**
+   * The session that accepted this node's verification (gate-running session for deterministic
+   * nodes, the reviewing session for fresh-context ones). Run-state provenance, not a trusted
+   * identity by itself — the execution boundary refuses to export a fresh-context result whose
+   * verifier session equals the producing attempt's owner, so self-verification cannot cross to
+   * the platform as independent work.
+   */
+  verifiedBySessionId?: string;
 }
 
 export interface RunStateDocument {
