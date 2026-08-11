@@ -134,7 +134,7 @@ Use a short looping product demo to answer "what does it actually do?"
 - show the actual product state or a truthful prototype, not abstract feature bullets
 - center the aha moment
 - design for muted playback with captions or visible UI states
-- generate/refine clips with Higgsfield Seedance 2.0 or Marketing Studio when no real capture exists
+- generate/refine clips with Higgsfield Seedance 2.5 (or the newest Seedance available) or Marketing Studio when no real capture exists
 - score finished ad/demo clips with Higgsfield Virality Predictor when used for paid/social acquisition
 
 ### Data Collection

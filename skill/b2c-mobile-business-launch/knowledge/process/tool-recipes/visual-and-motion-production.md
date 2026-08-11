@@ -27,7 +27,7 @@ Model intent:
 - Soul Location: environment/background art, paywall scene backgrounds, empty-state art, and abstract scenes — prompt-only, no reference photo required.
 - Soul Cast: text-only characterful mascot or persona generation when no reference photo is available.
 - Seedream 4.5: vector/flat-illustration sequences and face-anchored complex scene edits.
-- Seedance 2.0: 4-15 second product demos, onboarding animation clips, image-to-video, multi-shot motion.
+- Seedance 2.5 (or the newest Seedance the account exposes — confirm the model id via the `higgsfield-generate` skill): 4-15 second product demos, onboarding animation clips, image-to-video, multi-shot motion, and believable-person UGC video. Seedance 2.5 is the first version whose skin texture reads as human on a phone screen; for any clip that must pass as a real person, do not use an older Seedance without flagging the downgrade.
 - Marketing Studio: UGC ads, presenter videos, product demos, unboxing/review formats, hooks/settings/avatars/products.
 - Virality Predictor: score finished demo/ad/onboarding videos for hook, attention, retention, and distraction risk.
 
@@ -50,7 +50,7 @@ Rules:
 
 ## Product Ad Structure And Prompt Craft
 
-Purpose: replace the `<hook + design/DESIGN.md brief>` placeholder used across the Chained Recipes below with a concrete structure, so a generated ad proves one specific feature instead of drifting into abstract mood with no UI on screen. Applies to every `--prompt` passed to `marketing_studio_video` (`ugc`, `ugc_unboxing`, `product_review`, `tv_spot`) and to any Remotion ad/social composition.
+Purpose: replace the `<hook + design/DESIGN.md brief>` placeholder used across the Chained Recipes below with a concrete structure, so a generated ad proves one specific feature instead of drifting into abstract mood with no UI on screen. Applies to `--prompt` text for polished, openly-an-ad output: `tv_spot`, product demos, hero ads, and any Remotion ad/social composition. For the UGC-family modes (`ugc`, `ugc_how_to`, `ugc_unboxing`, `product_review`) and any clip meant to pass as a real person filming themselves, use the **UGC Realism Prompt Structure** below instead — the two registers are opposites, and mixing them kills both.
 
 Before writing the prompt, fix two things:
 - **The reference.** Which screenshot, icon, or UI state is actually in frame, and its real shape, color, and layout — the prompt must not contradict it.
@@ -67,7 +67,7 @@ Consistency and accuracy rules — apply regardless of which tool renders the ad
 - Cut on action (hard cut, match cut, cut on motion) between beats. Avoid morphing/dissolve transitions mid-cut — they make the product illegible at the exact moment a viewer would recognize it.
 - Match the beat to the feature type: a utility feature reads best as a before/after; a creative/output feature needs the result visible; a habit/streak feature needs the moment of use shown, not just the icon.
 
-Fill the `--prompt` argument in Recipe 1 step 8 and Recipe 2 step 4 below with the four beats above, written specifically to the feature being advertised and the current `design/DESIGN.md` tokens — then discard the placeholder text.
+Fill the `--prompt` argument in Recipe 1 step 8 and Recipe 2 step 4 below with the structure that matches the mode: the four beats above for `tv_spot`, the **UGC Realism Prompt Structure** for the UGC-family modes — written specifically to the feature being advertised and the current `design/DESIGN.md` tokens. Then discard the placeholder text.
 
 ### Master Prompt Template
 
@@ -127,6 +127,66 @@ Append the matching row's modifier text to the end of the Master Prompt above; r
 | Sports / Fitness | Fit, grip, resistance, support, or movement | Show [product] during its intended activity. Use close-ups of grip, material, contact points, and movement to demonstrate [specific function]. Avoid unsupported claims. |
 | Everyday Products | One simple problem and one visible payoff | Use one sequence: [problem] → [product action] → [visible result]. Show the product immediately and increase perceived value without disguising what it is. |
 
+## UGC Realism Prompt Structure
+
+Purpose: the prompt discipline for any clip that must pass as a real person filming themselves — the UGC-family Marketing Studio modes (`ugc`, `ugc_how_to`, `ugc_unboxing`, `product_review`) and the first-frame → Seedance path in Recipe 7. The job is not a good ad. The job is a moment that accidentally became content. The viewer must never register that it is an ad or that it is AI — and both die the same way: polish. Maximize stop rate, watch-through, and believability. Minimize creator energy, ad delivery, and narrative polish.
+
+**Script first.** The script is where the viewer is kept or lost; the model cannot fix it. Seedance renders a weak script exactly as beautifully as a strong one — that is the trap. No UGC generation spend before the script survives the judge-panel loop in `ugc-creator-engine.md` (Script Bank And Judge Panel). If the hook would not stop a scroll, say so before generating. If the script makes a claim the product cannot back, flag it — the truthful-UI rule above applies to spoken claims too.
+
+Five realism principles — every prompt encodes all five:
+
+1. **Social context truth.** The person is mid-conversation, replying, or thinking out loud — never presenting. There is always an implied reason the clip is being filmed.
+2. **Imperfect presence.** Posture realism, casual gestures, micro hesitation. No clean delivery, no punchlines.
+3. **Thought-while-talking.** "like", "i don't know", trailing thoughts, one real pause. Spoken logic, not written logic.
+4. **Alive environment.** Background motion, lighting inconsistency, room tone.
+5. **No resolution.** End unresolved or interrupted. Never a payoff, lesson, or slogan.
+
+### First-Frame Prompt (GPT Image 2 / Nano Banana)
+
+One specific person in one specific place — invent the specifics and commit. Always stack the realism keywords; each one removed moves the output toward the plastic AI look. Template (adapt the person and place, keep the stack):
+
+```
+ultra realistic iphone front camera selfie, [specific person, age range] in [specific
+lived-in place], [named light source — window left, lamp behind, afternoon light through
+a windshield — never "good lighting"], real skin texture with visible pores, light
+under-eye shadows, candid mid-sentence expression, eyes off lens, one hand raised talking
+to camera, lived-in background with one imperfect detail, shallow depth of field,
+authentic tiktok vlog aesthetic, no text, no captions, 9:16
+```
+
+### Video Prompt (Seedance 2.5, first frame as reference)
+
+Feed the first frame in as the reference image. Write the prompt as a second-by-second shot breakdown, never a vibe description. Scale the timestamps to the clip duration, and match the generation duration to the timestamps — a mismatch desyncs the delivery. Template:
+
+```
+subject: the person from the reference frame — same hair, same clothes, same place
+
+camera: handheld front camera selfie perspective, chest-up framing, natural micro
+shakes, 9:16
+
+audio: clear phone-mic voice with light room tone, one ambient sound event, no music
+
+00:00-00:03 — hook mid-sentence, as if we joined late: [hook line]
+00:03-00:12 — natural blinks, one gaze break, one filler word, one micro pause, body
+shifts once: [script body]
+00:12-00:15 — CTA as an afterthought, trailing off, never a slogan: [cta line]
+
+keep the skin texture, no beauty-filter look, lips synced
+```
+
+Behavioral beats: pick 2-3 per video and vary the set every video — glance away, lean back, shrug, adjust phone grip, react to a sound, half-laugh at own sentence.
+
+Rules that hold across a batch:
+- Never polish the script into ad copy. Imperfect beats polished. If it sounds written, rewrite it so it sounds said.
+- Every video in a batch gets a different person, room, light source, and beat set. Repetition is the #1 tell.
+- Generate at 720p first; upscale only the take that survives review. Per-clip cost runs a few dollars at 720p across platforms — prices and model access move fast, so verify live pricing at the `paid-tool-routing.md` spend confirmation instead of trusting a remembered number.
+
+**Converted-reference shortcut.** When a UGC video already converted for a comparable product, do not prompt from scratch. Run it through video analysis (`mcp__claude_ai_Higgsfield__video_analysis_create`, or Gemini as fallback) and ask for a 1:1 timestamped breakdown of everything on screen. That breakdown becomes the video prompt; the judge-approved script goes in as the dialogue.
+
+**Edit pass.** The generation is raw footage — treat it like footage. Cut the dead space at the start, tighten every pause, add captions, drop a sound under it, the same way a real creator's selfie video gets cut. Remotion (below) handles captions/cutdowns reproducibly; a manual editor pass is fine at low volume.
+
+**Believability test.** Before scale, show the finished clip to a real human who did not make it. If they clock it as AI or as an ad, the problem is almost always the script — go back to the judge panel, not the model settings. Virality scoring (Recipe 3) still applies before paid distribution; it measures attention, not believability, so run both.
+
 ## Higgsfield Chained Recipes
 
 These are the canonical recipe bodies. Other files route to a recipe by name and add only their surface-specific note.
@@ -155,7 +215,7 @@ Purpose: create a reusable founder/presenter Soul identity once, then produce we
      --url <app-store-url> --wait
    ```
 7. **Spend confirm for ad batch.** Surface current balance via `mcp__claude_ai_Higgsfield__balance`. Confirm weekly generation spend with the founder per `paid-tool-routing.md`.
-8. **Generate ads (weekly).** Inject design/DESIGN.md tokens into every `--prompt`, structured per **Product Ad Structure And Prompt Craft** above:
+8. **Generate ads (weekly).** Inject design/DESIGN.md tokens into every `--prompt`, structured per **UGC Realism Prompt Structure** above for the `ugc` mode shown here (use **Product Ad Structure And Prompt Craft** only when this recipe runs a `tv_spot`), with a judge-panel-surviving script per `ugc-creator-engine.md`:
    ```bash
    higgsfield generate create marketing_studio_video \
      --prompt "<hook + design/DESIGN.md brief>" \
@@ -188,7 +248,7 @@ Purpose: turn the live App Store listing into a multi-format UGC ad batch withou
    ```
 2. **Pick avatar.** Use a preset avatar or a custom Soul avatar. For custom Soul, confirm `avatar_id` exists in `state/PROJECT_STATE.yaml`; if not, run Recipe 1 steps 2–5 first.
 3. **Spend confirm.** Surface balance via `mcp__claude_ai_Higgsfield__balance`. Confirm spend for the planned mode batch with the founder per `paid-tool-routing.md`.
-4. **Generate parallel mode batch.** Inject design/DESIGN.md tokens into every `--prompt`, structured per **Product Ad Structure And Prompt Craft** above. The `--url` shortcut reuses the backend entity but does NOT inject brief — always add `--prompt` explicitly:
+4. **Generate parallel mode batch.** Inject design/DESIGN.md tokens into every `--prompt`. Structure the three UGC-family calls (`ugc`, `ugc_unboxing`, `product_review`) per **UGC Realism Prompt Structure** above with judge-panel-surviving scripts, and the `tv_spot` call per **Product Ad Structure And Prompt Craft**. Vary person, room, light, and beat set across the UGC calls — a batch that repeats one avatar in one room is the #1 tell. The `--url` shortcut reuses the backend entity but does NOT inject brief — always add `--prompt` explicitly:
    ```bash
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \
@@ -313,6 +373,23 @@ Purpose: minimize credit spend on direction-finding before committing production
 7. **Design proof.** Update `design/design.html` with `status:draft` variants in a side-by-side layout.
 8. **Founder selects.** Founder picks final production asset. Label selected output `status:production`.
 9. **CONTENT_ASSETS.md.** Record prompt_brief (design/DESIGN.md tokens), model used at each stage, direction outputs (status:direction), draft outputs (status:draft), final output (status:production), output paths, QA, and approval state.
+
+---
+
+### Recipe 7: Script-First Believable-Person UGC (First Frame → Seedance 2.5)
+
+Purpose: produce a UGC clip that passes as a real person, from a judged script, without Marketing Studio avatars — the two-prompt path: one first-frame image, one reference-driven video.
+
+1. **Script gate.** The script must already have survived the judge-panel loop in `ugc-creator-engine.md` (Script Bank And Judge Panel). No panel verdict, no generation. Batches work better — judge 10+ scripts, generate the survivors.
+2. **Converted-reference check.** If a converting UGC video exists for a comparable product, run the **Converted-reference shortcut** from the UGC Realism Prompt Structure above and skip to step 4 with the breakdown as the video prompt.
+3. **First frame.** Generate with `gpt_image_2` (or `nano_banana_2` where the person needs a stylized edge) using the **First-Frame Prompt** template above. One specific person in one specific place; commit to the specifics. Label the output `status:draft`.
+4. **Spend confirm.** Surface balance via `mcp__claude_ai_Higgsfield__balance`. Confirm the batch spend with the founder per `paid-tool-routing.md`; verify live per-clip pricing there rather than trusting remembered numbers.
+5. **Generate video.** Seedance 2.5 (confirm the exact model id via the `higgsfield-generate` skill), image-to-video with the first frame as reference, prompt per the **Video Prompt** template above. 9:16, 720p first. Match `--duration` to the prompt's timestamps or the delivery desyncs.
+6. **Edit pass.** Treat the output as raw footage per the UGC Realism Prompt Structure: cut dead space, tighten pauses, captions, sound. Remotion route for reproducible caption/cutdown variants.
+7. **Believability test.** Show the cut to a real human who did not make it. Clocked as AI or ad → back to the judge panel (script), not the model settings. Record the verdict in `CONTENT_ASSETS.md`.
+8. **Score virality.** Media preflight the winner, then `brain_activity` per Recipe 3. Upscale only the winning take.
+9. **CONTENT_ASSETS.md.** Record script id (from `ugc/script-bank.md`), judge verdict, first-frame prompt, video prompt, model ids, output paths, believability result, virality_score, QA, and approval state.
+10. **Founder gate.** Founder approves before public posting or paid distribution. Batch rule holds: every clip in a batch gets a different person, room, light, and beat set.
 
 ## Remotion Content Asset Production
 
