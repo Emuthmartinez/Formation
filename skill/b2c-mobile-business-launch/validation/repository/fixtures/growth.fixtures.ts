@@ -410,6 +410,44 @@ export function register(h: Harness): void {
     "content_assets.manifest.assets.0.judge_verdict.not_passing",
   );
 
+  const ugcSpentRemoteJob = makeFixture("content-ugc-spent-remote-job");
+  writeSurvivingScriptRow(ugcSpentRemoteJob);
+  writeUgcManifest(
+    ugcSpentRemoteJob,
+    ugcAsset({
+      status: "draft",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "pending — panel booked for next week",
+      source_job_id: "hf-job-8271",
+    }),
+  );
+  runFixture(
+    "draft UGC asset with a provider job id but no passing verdict fails",
+    ugcSpentRemoteJob,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.judge_verdict.not_passing",
+  );
+
+  const ugcSpentRemoteUrl = makeFixture("content-ugc-spent-remote-url");
+  writeSurvivingScriptRow(ugcSpentRemoteUrl);
+  writeUgcManifest(
+    ugcSpentRemoteUrl,
+    ugcAsset({
+      status: "draft",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "pending — panel booked for next week",
+      outputs: ["https://example.com/generations/believable-person-ugc.mp4"],
+    }),
+  );
+  runFixture(
+    "draft UGC asset with a remote output URL but no passing verdict fails",
+    ugcSpentRemoteUrl,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.judge_verdict.not_passing",
+  );
+
   const ugcApprovedNoBelievability = makeFixture("content-ugc-approved-no-believability");
   writeSurvivingScriptRow(ugcApprovedNoBelievability);
   writeUgcManifest(

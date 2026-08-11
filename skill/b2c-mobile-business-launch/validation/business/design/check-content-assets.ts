@@ -301,13 +301,19 @@ if (manifestText) {
     if (assetKind === "ugc" || looksUgc) {
       const ugcStatus = asString(asset.status)?.toLowerCase() ?? "";
       const ugcDoneTier = ["done", "ready", "production", "approved"].includes(ugcStatus);
-      // An output file on disk is evidence generation spend already happened, so
-      // the no-generation-before-panel gate must hold even at draft status —
-      // otherwise a planned template entry and a spent draft clip look identical.
-      const generationOccurred = asArray(asset.outputs)
-        .map(asString)
-        .filter((item): item is string => Boolean(item?.trim()))
-        .some((output) => !/^[a-z]+:/i.test(output) && !output.startsWith("#") && existsSync(path.join(args.root, output)));
+      // Generation evidence activates the gate even at draft status — otherwise a
+      // planned template entry and a spent clip look identical. Evidence is an
+      // output file on disk, a remote output URL, or a provider job id: a
+      // provider-backed generation spends credits before any file is downloaded.
+      const generationOccurred =
+        Boolean((asString(asset.source_job_id) ?? "").trim()) ||
+        asArray(asset.outputs)
+          .map(asString)
+          .filter((item): item is string => Boolean(item?.trim()))
+          .some(
+            (output) =>
+              /^[a-z][a-z0-9+.-]*:\/\//i.test(output) || (!/^[a-z]+:/i.test(output) && !output.startsWith("#") && existsSync(path.join(args.root, output))),
+          );
       const scriptGateActive = ugcDoneTier || generationOccurred;
       const scriptGateReason = ugcDoneTier ? `status "${ugcStatus}"` : "generated output on disk";
       const scriptId = (asString(asset.script_id) ?? "").trim();
