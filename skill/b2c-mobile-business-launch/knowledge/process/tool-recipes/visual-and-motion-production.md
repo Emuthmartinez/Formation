@@ -185,7 +185,7 @@ Rules that hold across a batch:
 
 **Edit pass.** The generation is raw footage; treat it as footage. Cut the dead space at the start. Tighten every pause. Add captions. Put a sound under it. Edit it the same way a real creator's selfie video gets edited. Remotion (below) renders caption and cutdown variants reproducibly. A manual editor pass is acceptable at low volume.
 
-**Believability test.** Before scale, show the finished clip to one real human who did not make it. If they identify it as AI or as an ad, the script is the usual cause. Return to the judge panel, not to the model settings. Record the result in the manifest `believability` field; `check:content-assets` blocks a done-tier status without it. Virality scoring (Recipe 3) still applies before paid distribution. The virality score measures attention, not believability. Run both.
+**Believability test.** Before scale, show the finished clip to one real human who did not make it. If they identify it as AI or as an ad, the script is the usual cause. Return to the judge panel, not to the model settings. Record `passed — <detail>` or `failed — <detail>` in the manifest `believability` field; `check:content-assets` blocks a done-tier status without an explicit pass. Virality scoring (Recipe 3) still applies before paid distribution. The virality score measures attention, not believability. Run both.
 
 ## Higgsfield Chained Recipes
 
@@ -380,7 +380,7 @@ Purpose: minimize credit spend on direction-finding before committing production
 
 Purpose: produce a UGC clip that passes as a real person, from a judged script, without Marketing Studio avatars. The path is two prompts: one first-frame image, then one reference-driven video.
 
-1. **Script gate.** The script must first survive the judge-panel loop in `ugc-creator-engine.md` (Script Bank And Judge Panel). No panel verdict, no generation. Judge 10+ scripts per batch; generate only the survivors. Record `script_id` and `judge_verdict` for the manifest — `check:content-assets` requires both on every UGC-family asset.
+1. **Script gate.** The script must first survive the judge-panel loop in `ugc-creator-engine.md` (Script Bank And Judge Panel). No panel verdict, no generation. Judge 10+ scripts per batch; generate only the survivors. Record `script_id` (`ugc/script-bank.md#<format-id>`, resolving to a recorded row) and `judge_verdict` (`passed — <detail>` or `survived — <detail>`) for the manifest — `check:content-assets` requires both on every UGC-family asset and rejects a failing verdict at any status.
 2. **Converted-reference check.** If a converting UGC video exists for a comparable product, run the **Converted-reference shortcut** above. The breakdown becomes the video-prompt skeleton for step 5. Step 3 still runs; Seedance needs the first-frame reference image.
 3. **First frame.** Generate with `gpt_image_2` (or `nano_banana_2` for a stylized person) using the **First-Frame Prompt** template above. One specific person in one specific place; commit to the specifics. Label the output `status:draft`.
 4. **Spend confirm.** Surface balance via `mcp__claude_ai_Higgsfield__balance`. Confirm the batch spend with the founder per `paid-tool-routing.md`. Verify live per-clip pricing there; do not trust remembered numbers.
@@ -388,7 +388,7 @@ Purpose: produce a UGC clip that passes as a real person, from a judged script, 
 6. **Edit pass.** Treat the output as raw footage per the **Edit pass** rules above: cut dead space, tighten pauses, captions, sound. Use the Remotion route for reproducible caption and cutdown variants.
 7. **Believability test.** Show the cut to one real human who did not make it. If they identify it as AI or as an ad, return to the judge panel (the script), not to the model settings. Record the result in the manifest `believability` field.
 8. **Score virality.** Media preflight the winner, then `brain_activity` per Recipe 3. Upscale only the winning take.
-9. **CONTENT_ASSETS.md.** Record script_id, judge_verdict, prompt_brief (design/DESIGN.md tokens), first-frame prompt, video prompt, model ids, output paths, believability, virality_score, QA, and approval state. `check:content-assets` blocks a UGC-family asset without script_id and judge_verdict. It also blocks a done-tier status without a completed believability result.
+9. **CONTENT_ASSETS.md.** Set `asset_kind: ugc` on the manifest asset — every generated video must classify itself, because a Seedance route name alone does not reveal a believable-person clip. Record script_id, judge_verdict, prompt_brief (design/DESIGN.md tokens), first-frame prompt, video prompt, model ids, output paths, believability, virality_score, QA, and approval state. `check:content-assets` blocks a UGC-family asset without a resolving script_id and a passing judge_verdict. It also blocks a done-tier status without a `passed` believability result.
 10. **Founder gate.** Founder approves before public posting or paid distribution. The batch rule holds: every clip gets a different person, room, light, and beat set.
 
 ## Remotion Content Asset Production
