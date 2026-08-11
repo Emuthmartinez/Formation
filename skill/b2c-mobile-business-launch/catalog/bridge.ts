@@ -33,6 +33,8 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
   const grantableWorkflows = catalog.workflows.filter((wf): wf is CatalogWorkflowDef & { domainId: GrantableDomainId } => isGrantable(wf.domainId));
   const grantableIds = new Set<CatalogWorkflowId>(grantableWorkflows.map((wf) => wf.id as CatalogWorkflowId));
   const grantableOutputPaths = new Set<string>(grantableWorkflows.flatMap((wf) => wf.outputPaths));
+  const referencesById = new Map(catalog.references.map((reference) => [reference.id, reference]));
+  const rolesById = new Map(catalog.roles.map((role) => [role.id, role]));
 
   // Reuse catalog.artifacts (built once, by catalog/artifacts.ts's buildArtifacts(), from every
   // workflow's outputPaths) rather than recomputing artifact ids independently here — two
@@ -48,6 +50,23 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
     domainId: wf.domainId,
     actionClass: wf.actionClass,
     protectedCategory: wf.protectedCategory,
+    // The full authored node contract crosses the bridge (the 2026-08 contract audit found this
+    // map dropped trigger and carried no instructions/knowledge at all, leaving a dispatched
+    // worker a bare title). References resolve to path+loadWhen here so the engine never needs
+    // the catalog module to compose a worker brief.
+    trigger: wf.trigger,
+    instructions: wf.instructions,
+    reads: wf.reads,
+    references: wf.referenceIds.map((referenceId) => {
+      const reference = referencesById.get(referenceId);
+      if (!reference) throw new Error(`${wf.id} binds unknown reference ${referenceId}`);
+      return { id: reference.id, path: reference.path, title: reference.title, loadWhen: reference.loadWhen };
+    }),
+    role: (() => {
+      const role = rolesById.get(wf.roleId);
+      if (!role) throw new Error(`${wf.id} names unknown role ${wf.roleId}`);
+      return { id: role.id, name: role.name, promptPath: role.promptPath };
+    })(),
     dependencies: wf.dependencies.filter((dependencyId): dependencyId is CatalogWorkflowId => grantableIds.has(dependencyId as CatalogWorkflowId)),
     outputPaths: wf.outputPaths,
     providerIds: wf.providerIds,
@@ -58,6 +77,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
     maxAttempts: wf.maxAttempts,
     ttlSeconds: wf.ttlSeconds,
     tokenBudget: wf.tokenBudget,
+    costEstimate: wf.costEstimate,
   }));
 
   return {

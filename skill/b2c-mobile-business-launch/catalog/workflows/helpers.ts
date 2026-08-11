@@ -1,5 +1,5 @@
 import type { LaneKey } from "../../core/schema/types.js";
-import type { AreaId, CatalogDomainId, CatalogWorkflowDef, PhaseId, WorkflowId } from "../types.js";
+import type { AreaId, CatalogDomainId, CatalogWorkflowDef, PhaseId, ReferenceId, RoleId, WorkflowId } from "../types.js";
 
 export interface WorkflowSeed {
   id: WorkflowId;
@@ -7,6 +7,11 @@ export interface WorkflowSeed {
   domainId: CatalogDomainId;
   areaIds: AreaId[];
   trigger: string;
+  /** Required node contract (see CatalogWorkflowDef): what to do, what to open, which knowledge to load, who owns it. */
+  instructions: string;
+  reads?: string[];
+  referenceIds?: ReferenceId[];
+  roleId: RoleId;
   laneIds?: LaneKey[];
   phaseIds?: PhaseId[];
   dependencies?: WorkflowId[];
@@ -20,6 +25,7 @@ export interface WorkflowSeed {
   maxAttempts?: number;
   ttlSeconds?: number;
   tokenBudget?: number;
+  costEstimate?: CatalogWorkflowDef["costEstimate"];
 }
 
 /**
@@ -36,6 +42,10 @@ export function workflow(seed: WorkflowSeed): CatalogWorkflowDef {
     domainId: seed.domainId,
     areaIds: seed.areaIds,
     trigger: seed.trigger,
+    instructions: seed.instructions,
+    reads: seed.reads ?? [],
+    referenceIds: seed.referenceIds ?? [],
+    roleId: seed.roleId,
     laneIds: seed.laneIds ?? [],
     phaseIds: seed.phaseIds ?? [],
     dependencies: seed.dependencies ?? [],
@@ -49,5 +59,6 @@ export function workflow(seed: WorkflowSeed): CatalogWorkflowDef {
     maxAttempts: seed.maxAttempts,
     ttlSeconds: seed.ttlSeconds,
     tokenBudget: seed.tokenBudget,
+    costEstimate: seed.costEstimate,
   };
 }

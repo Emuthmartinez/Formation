@@ -126,6 +126,19 @@ test("worker inspect distinguishes unreachable from unready", async () => {
   assert.equal(unreadyView.reachable, true);
   assert.equal(unreadyView.ready, false);
   assert.ok(unreadyView.reason.length > 0);
+
+  // Every connected view says up front whether the engine can do hands-on steps itself. In
+  // production it cannot (no real executor is wired yet); only tests injecting the fixture
+  // executor report otherwise. The founder learns this before asking for work, not after.
+  assert.equal(unreachableView.selfServeExecution.available, false);
+  assert.ok(unreachableView.selfServeExecution.reason.length > 0);
+  assert.equal(unreadyView.selfServeExecution.available, false);
+  const fixtureBacked = new ExecutionWorker(store, {
+    engine: new EngineBridge({ skillDir }),
+    resolveEngineWorkspace: () => directory,
+    executor: "fixture",
+  });
+  assert.equal(fixtureBacked.selfServeExecution().available, true);
 });
 
 // ---------------------------------------------------------------------------
@@ -310,6 +323,12 @@ test("an unverified session imports nothing — failed steps become founder task
   assert.equal(blockerTasks.length, 1);
   assert.equal(blockerTasks[0].status, "next");
   assert.match(blockerTasks[0].title, /Update the onboarding copy/);
+
+  // The completion notice must not read as progress when nothing verified: the founder is told
+  // the session checked the plan and the undone work landed in tasks.
+  const completedActivity = database.activity.filter((entry) => entry.workspaceId === "wrk_storywell" && entry.type === "execution-completed");
+  assert.equal(completedActivity.length, 1);
+  assert.match(completedActivity[0].detail, /no step was completed and verified/);
 
   // The approvals view re-runs the import; the mirror stays exact instead of duplicating.
   assert.equal((await request(app.baseUrl, "/api/workspaces/wrk_storywell/approvals", { cookie })).status, 200);

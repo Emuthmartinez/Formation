@@ -89,6 +89,10 @@ Implement a typed adapter that:
 
 This P0 is complete at the API, record, and founder-page level. Nothing the adapter does writes engine-owned state: the reducer, the session runner, and the founder-decision CLI remain the engine's only writers, and an unreachable engine is always reported as unreachable, never as an empty plan, "no approvals waiting", or "nothing to import".
 
+### Remaining half: the real per-node executor (the engine's own U6 arc)
+
+`core/session/run.ts` still selects only fixture/no-op executors: a scheduled or platform-queued session plans, batches, syncs approvals, and imports honestly, but no node's real work is performed by the engine itself. The read surfaces now say this up front (`selfServeExecution` on every engine view, and completion copy that distinguishes "checked the plan" from "completed a step"). The v0.120.0 node-contract work removed the blocker on this arc's input side: every catalog node now carries authored instructions, reads, bound knowledge references, and an owning role, composed by `core/engine/node-brief.ts` into exactly the worker brief a real executor must hand a runtime CLI. What remains is the executor itself — per-node runtime invocation under the adapter tool-allowlists, spend recording against real usage, and the wall-clock/heartbeat discipline `executor.ts`'s interface already specifies — reviewed as its own arc because it moves the trust boundary.
+
 ## P1: Existing launch repository importer
 
 ### Why it matters

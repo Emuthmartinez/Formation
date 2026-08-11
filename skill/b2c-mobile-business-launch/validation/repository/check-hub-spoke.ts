@@ -19,6 +19,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { composeCatalog } from "../../catalog/index.js";
 import { flagString, issue, parseFlags, reportAndExit, type Issue } from "../../tooling/lib/launch-state.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -73,6 +74,8 @@ function resolveLinkTarget(rawTarget: string, fromFile: string): string | undefi
   return path.resolve(path.dirname(fromFile), cleaned);
 }
 
+const discoveredHubPaths = new Set<string>();
+
 for (const spokeFile of collectMarkdownFiles(knowledgeRoot)) {
   const text = readFileSync(spokeFile, "utf8");
   const rawTarget = findBacklinkTarget(text);
@@ -85,6 +88,7 @@ for (const spokeFile of collectMarkdownFiles(knowledgeRoot)) {
     // audit-skill-links.ts already reports dangling local markdown links repo-wide.
     continue;
   }
+  discoveredHubPaths.add(path.relative(skillRoot, hubPath).split(path.sep).join("/"));
 
   const spokeRelative = path.relative(skillRoot, spokeFile).split(path.sep).join("/");
   const hubRelative = path.relative(skillRoot, hubPath).split(path.sep).join("/");
@@ -99,6 +103,37 @@ for (const spokeFile of collectMarkdownFiles(knowledgeRoot)) {
         "hub_spoke.backlink_not_reciprocated",
         `${spokeRelative} declares itself part of the ${hubRelative} hub, but ${hubRelative} has no link back to ${spokeRelative}. A spoke missing from its own hub's routing table is invisible to anyone reading the hub top-down -- add it to the hub's spoke/routing list, or fix the backlink if the hub moved.`,
         spokeRelative,
+      ),
+    );
+  }
+}
+
+// The catalog's `hub` flag must mean exactly what this gate enforces — a backlink-declared hub
+// with real spokes — in both directions. Before this cross-check the flag was dead metadata no
+// code read, and two references carried it with zero spokes anywhere (the 2026-08 contract
+// audit); a flag the validator ignores is words, not work.
+const catalog = composeCatalog(skillRoot);
+for (const reference of catalog.references) {
+  if (reference.hub && !discoveredHubPaths.has(reference.path)) {
+    issues.push(
+      issue(
+        "error",
+        "hub_spoke.catalog_hub_without_spokes",
+        `${reference.id} is flagged hub:true in catalog/references.ts, but no knowledge file declares itself "${BACKLINK_MARKER}" that hub. Either add real spokes with backlinks or drop the flag.`,
+        reference.path,
+      ),
+    );
+  }
+}
+const flaggedHubPaths = new Set(catalog.references.filter((reference) => reference.hub).map((reference) => reference.path));
+for (const hubPath of discoveredHubPaths) {
+  if (!flaggedHubPaths.has(hubPath)) {
+    issues.push(
+      issue(
+        "error",
+        "hub_spoke.discovered_hub_unflagged",
+        `${hubPath} has spoke files declaring membership, but its catalog/references.ts entry is not flagged hub:true. Flag it so the catalog knows this file routes onward.`,
+        hubPath,
       ),
     );
   }

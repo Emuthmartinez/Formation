@@ -17,6 +17,10 @@ function baseWorkflow(overrides: Partial<CatalogWorkflowDef> = {}): CatalogWorkf
     domainId: "domain.research",
     areaIds: ["area.product-experience"],
     trigger: "fixture trigger",
+    instructions: "Produce the fixture output artifact and stop; this synthetic contract exists only to satisfy validation.",
+    reads: [],
+    referenceIds: [],
+    roleId: "role.fixture",
     laneIds: [],
     phaseIds: [],
     dependencies: [],
@@ -50,6 +54,7 @@ function baseFixtureCatalog(): Catalog {
     ],
     phases: [],
     lanes: [],
+    roles: [{ id: "role.fixture", name: "Fixture Role", promptPath: "agents/fixture.md", scope: "fixture" }],
     references: [],
     workflows: [baseWorkflow()],
     artifacts: [{ id: "artifact.fixture.output.md", path: "fixture/output.md", ownerDomainId: "domain.research", laneIds: [], generated: false }],
@@ -143,6 +148,107 @@ export function register(harness: Harness): void {
       issues.some((issue) => issue.code === "catalog_graph.reference.path_missing"),
       `expected catalog_graph.reference.path_missing, got: ${issues.map((i) => i.code).join(", ")}`,
     );
+  });
+
+  // ---------------------------------------------------------------------
+  // catalog/validate.ts: the 2026-08 node-contract rules — every new gate is
+  // exercised failing at least once here, never trusted green-by-vacuity.
+  // ---------------------------------------------------------------------
+
+  harness.check("validate: instructions under the 40-char floor are caught with a named issue code", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.workflows = [baseWorkflow({ instructions: "too short" })];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.workflow.instructions_missing"),
+      `expected catalog_graph.workflow.instructions_missing, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+  });
+
+  harness.check("validate: instructions that merely echo the trigger are caught with the same issue code", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.workflows = [
+      baseWorkflow({
+        trigger: "a trigger sentence comfortably over the length floor for this scenario",
+        instructions: "A trigger sentence comfortably over the length floor for this scenario",
+      }),
+    ];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.workflow.instructions_missing"),
+      `expected catalog_graph.workflow.instructions_missing for a trigger echo, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+  });
+
+  harness.check("validate: an unregistered roleId is caught with a named issue code", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.workflows = [baseWorkflow({ roleId: "role.does-not-exist" })];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.workflow.role_unknown"),
+      `expected catalog_graph.workflow.role_unknown, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+  });
+
+  harness.check("validate: a workflow binding an unregistered reference is caught with a named issue code", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.workflows = [baseWorkflow({ referenceIds: ["reference.research.does-not-exist"] })];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.workflow.reference_unknown"),
+      `expected catalog_graph.workflow.reference_unknown, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+  });
+
+  harness.check("validate: a reference no workflow binds is caught, and sessionScoped clears it", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.references = [{ id: "reference.research.fixture", path: "package.json", domainId: "domain.research", title: "Fixture", loadWhen: "fixture" }];
+    const unbound = validateCatalog(catalog, skillRoot);
+    assert(
+      unbound.some((issue) => issue.code === "catalog_graph.reference.unbound"),
+      `expected catalog_graph.reference.unbound, got: ${unbound.map((i) => i.code).join(", ")}`,
+    );
+    catalog.references = [
+      { id: "reference.research.fixture", path: "package.json", domainId: "domain.research", title: "Fixture", loadWhen: "fixture", sessionScoped: true },
+    ];
+    const scoped = validateCatalog(catalog, skillRoot);
+    assert(!scoped.some((issue) => issue.code === "catalog_graph.reference.unbound"), "sessionScoped: true should clear reference.unbound");
+  });
+
+  harness.check("validate: a read that nothing produces and the template does not ship is caught; an artifact-path read passes", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.workflows = [baseWorkflow({ reads: ["nowhere/does-not-exist.md"] })];
+    const bad = validateCatalog(catalog, skillRoot);
+    assert(
+      bad.some((issue) => issue.code === "catalog_graph.workflow.read_unresolvable"),
+      `expected catalog_graph.workflow.read_unresolvable, got: ${bad.map((i) => i.code).join(", ")}`,
+    );
+    catalog.workflows = [baseWorkflow({ reads: ["fixture/output.md"] })];
+    const good = validateCatalog(catalog, skillRoot);
+    assert(!good.some((issue) => issue.code === "catalog_graph.workflow.read_unresolvable"), "a declared artifact path must resolve as a read");
+  });
+
+  harness.check("validate: a spend workflow without costEstimate is caught with a named issue code", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.workflows = [baseWorkflow({ actionClass: "spend", founderOnlyActions: ["approve spend"] })];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.workflow.cost_estimate_missing"),
+      `expected catalog_graph.workflow.cost_estimate_missing, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+  });
+
+  harness.check("validate: a protected-class workflow with neither gate nor founder-only action is caught, and either control clears it", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.workflows = [baseWorkflow({ actionClass: "release" })];
+    const naked = validateCatalog(catalog, skillRoot);
+    assert(
+      naked.some((issue) => issue.code === "catalog_graph.workflow.protected_control_missing"),
+      `expected catalog_graph.workflow.protected_control_missing, got: ${naked.map((i) => i.code).join(", ")}`,
+    );
+    catalog.workflows = [baseWorkflow({ actionClass: "release", founderOnlyActions: ["approve the release"] })];
+    const approved = validateCatalog(catalog, skillRoot);
+    assert(!approved.some((issue) => issue.code === "catalog_graph.workflow.protected_control_missing"), "a founder-only action is a real control and must clear the issue");
   });
 
   harness.check("validate: the real catalog composed from disk has zero structural errors", () => {

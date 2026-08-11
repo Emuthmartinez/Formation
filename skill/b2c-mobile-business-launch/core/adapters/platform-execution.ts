@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { isMainModule, parseArgs } from "../lib/cli.js";
 import { compilePlan, type CompiledPlan, type CompiledRunNode, type CostEstimate, type VerificationKind } from "../engine/compile.js";
+import { composeNodeBrief, type NodeBrief } from "../engine/node-brief.js";
 import { computeFrontier } from "../engine/frontier.js";
 import { loadRunState, seedRunState } from "../engine/runstate.js";
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
@@ -47,6 +48,13 @@ export interface ExecutionWorkflowState {
   readonly status: ExecutionWorkflowStatus;
   /** Founder-plain sentence for anything not simply upcoming/finished. Sourced from the digest translation layer, never from evaluator internals. */
   readonly founderReason?: string;
+  /**
+   * The authored worker contract for READY steps only (composeNodeBrief): what doing this step
+   * involves — instructions, files to open, knowledge to load, outputs, verification. Ready-only
+   * because that is the decision surface; finished or parked steps would bloat the boundary
+   * payload with contracts nobody can act on.
+   */
+  readonly brief?: NodeBrief;
 }
 
 export interface ExecutionBoundaryReport {
@@ -266,7 +274,7 @@ export function buildBoundaryWorkflows(plan: CompiledPlan, report: PlanReport, n
   for (const batch of report.batches) {
     for (const entry of batch) {
       const node = byNodeId.get(entry.nodeId)!;
-      states.set(node.workflowId, { workflowId: node.workflowId, title: node.title, status: "ready" });
+      states.set(node.workflowId, { workflowId: node.workflowId, title: node.title, status: "ready", brief: composeNodeBrief(node, plan) });
     }
   }
 

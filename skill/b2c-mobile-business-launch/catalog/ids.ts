@@ -4,7 +4,7 @@
  * (R20), and the greenfield tree must not depend on the tree U11 deletes.
  */
 
-export type CatalogNodeKind = "area" | "domain" | "phase" | "lane" | "reference" | "workflow" | "artifact" | "gate";
+export type CatalogNodeKind = "area" | "domain" | "phase" | "lane" | "role" | "reference" | "workflow" | "artifact" | "gate";
 
 export type CatalogId = `${CatalogNodeKind}.${string}`;
 
@@ -23,5 +23,5 @@ export function catalogId<T extends CatalogNodeKind>(kind: T, ...parts: string[]
 }
 
 export function isCatalogId(value: string): value is CatalogId {
-  return /^(area|domain|phase|lane|reference|workflow|artifact|gate)\.[a-z0-9][a-z0-9.-]*$/.test(value);
+  return /^(area|domain|phase|lane|role|reference|workflow|artifact|gate)\.[a-z0-9][a-z0-9.-]*$/.test(value);
 }

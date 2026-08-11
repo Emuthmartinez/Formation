@@ -52,12 +52,39 @@ export interface CostEstimate {
   currency: string;
 }
 
+/** A knowledge reference resolved at the bridge, so briefs compose without the catalog module. */
+export interface NodeReference {
+  id: string;
+  path: string;
+  title: string;
+  loadWhen: string;
+}
+
+/** The specialist role that owns a node's work; promptPath is workspace-relative (the roster ships with the business). */
+export interface NodeRole {
+  id: string;
+  name: string;
+  promptPath: string;
+}
+
 export interface CatalogWorkflowNode {
   id: CatalogWorkflowId;
   title: string;
   domainId: GrantableDomainId;
   actionClass: ActionClass;
   protectedCategory?: ProtectedCategory;
+  /**
+   * The authored node contract (2026-08): what to do (instructions + trigger), what to open
+   * (reads), which knowledge to load (references), who owns it (role). Optional at THIS boundary
+   * only so the pre-contract fixture catalogs stay valid — the real bridge (catalog/bridge.ts)
+   * always supplies them, and catalog/validate.ts rejects a real catalog that omits any.
+   * composeNodeBrief() marks absent fields explicitly rather than papering over them.
+   */
+  trigger?: string;
+  instructions?: string;
+  reads?: string[];
+  references?: NodeReference[];
+  role?: NodeRole;
   dependencies: CatalogWorkflowId[];
   outputPaths: string[];
   providerIds: string[];
@@ -85,6 +112,12 @@ export interface CompiledRunNode {
   domainId: GrantableDomainId;
   actionClass: ActionClass;
   protectedCategory?: ProtectedCategory;
+  /** The authored contract, carried verbatim from CatalogWorkflowNode (see that type's doc comment for why these are optional at the type level). */
+  trigger?: string;
+  instructions?: string;
+  reads?: string[];
+  references?: NodeReference[];
+  role?: NodeRole;
   inputs: CatalogArtifactId[];
   outputs: CatalogArtifactId[];
   dependencies: RunNodeId[];
@@ -161,6 +194,11 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
       domainId: workflow.domainId,
       actionClass: workflow.actionClass,
       protectedCategory: workflow.protectedCategory,
+      trigger: workflow.trigger,
+      instructions: workflow.instructions,
+      reads: workflow.reads,
+      references: workflow.references,
+      role: workflow.role,
       inputs,
       outputs,
       dependencies: workflow.dependencies.map((id) => runIdByWorkflow.get(id)!),
@@ -168,11 +206,17 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
       laneIds: workflow.laneIds,
       approvals: workflow.founderOnlyActions.map((description, index) => ({ id: `${workflow.id}.approval.${index + 1}`, description })),
       resources: dedupeClaims(resources),
+      // A node that declares outputs but no gate used to compile to kind "none", which
+      // runstate.ts auto-accepted the moment any executor reported bytes — the 2026-08 audit
+      // found 9 grantable nodes (2 of them release-class) shipping through that hole. Gateless
+      // outputs now verify as fresh_context/fail-closed: the producing attempt lands blocked
+      // pending acceptVerification with evidence from a verifier that is not the producer.
+      // "none" survives only for nodes with no outputs at all (gate-only contracts).
       verification: {
-        kind: gateIds.length > 0 ? "deterministic" : judgment ? "fresh_context" : "none",
+        kind: gateIds.length > 0 ? "deterministic" : judgment || outputs.length > 0 ? "fresh_context" : "none",
         gateIds,
-        freshContext: judgment,
-        failClosed: gateIds.length > 0 || judgment,
+        freshContext: judgment || (gateIds.length === 0 && outputs.length > 0),
+        failClosed: gateIds.length > 0 || judgment || outputs.length > 0,
       },
       idempotent: workflow.idempotent,
       maxAttempts: workflow.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,

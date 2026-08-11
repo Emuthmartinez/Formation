@@ -221,6 +221,22 @@ function singleNodeCatalog(): CatalogInput {
   };
 }
 
+/**
+ * Same single node, but carrying a real, workspace-independent gate (check:gates-layout defends
+ * the skill's own validation/ tree, so it passes against any BUSINESS_ROOT). Since gateless
+ * outputs stopped auto-accepting (the 2026-08 verification flip), a scenario that needs a node
+ * to reach VERIFIED inside one headless session must give it a deterministic gate — this is the
+ * sanctioned path, not a fixture cheat.
+ */
+function gatedSingleNodeCatalog(): CatalogInput {
+  const catalog = singleNodeCatalog();
+  return {
+    ...catalog,
+    version: "catalog.session-fixture.single-gated",
+    workflows: catalog.workflows.map((workflowNode) => ({ ...workflowNode, gateCommands: ["check:gates-layout"] })),
+  };
+}
+
 function comprehensiveCatalog(): CatalogInput {
   return {
     version: "catalog.session-fixture.comprehensive",
@@ -781,7 +797,7 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
   // --- judgment scenario: verified results cross the boundary, and only verified results --------
 
   harness.check("session/boundary: a verified result crosses the boundary with evidence, artifact candidates, and declared cost — and only from a durable run", () => {
-    const handle = bootstrapWorkspace(harness, "results-boundary", singleNodeCatalog(), {
+    const handle = bootstrapWorkspace(harness, "results-boundary", gatedSingleNodeCatalog(), {
       grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
     });
 
@@ -804,8 +820,8 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const result = report.results[0];
     assert(result.workflowId === "workflow.eng-change" && result.workflowTitle === "Update the onboarding copy", `result must carry its stable workflow identity: ${JSON.stringify(result)}`);
     assert(result.attemptId.length > 0 && result.attemptNumber === 1, `result must carry its attempt identity: ${JSON.stringify(result)}`);
-    assert(result.verification === "none", `an ungated engineering node verifies as kind none, got: ${JSON.stringify(result)}`);
-    assert(Array.isArray(result.evidence) && result.evidence.length > 0, `result must carry the attempt's evidence: ${JSON.stringify(result)}`);
+    assert(result.verification === "deterministic", `a gated engineering node verifies deterministically, got: ${JSON.stringify(result)}`);
+    assert(Array.isArray(result.evidence) && result.evidence.some((line: string) => line.includes("gate:check:gates-layout=passed")), `result must carry the gate's own pass evidence: ${JSON.stringify(result)}`);
     assert(result.artifacts.length === 1 && result.artifacts[0].artifactId === "artifact.eng-change" && result.artifacts[0].fingerprint.length > 0, `result must reference its accepted output: ${JSON.stringify(result)}`);
     assert(typeof result.declaredTokenBudget === "number" && result.declaredTokenBudget > 0, `result must carry the node's declared token budget: ${JSON.stringify(result)}`);
     const artifactState = report.artifacts.find((entry: { artifactId: string }) => entry.artifactId === "artifact.eng-change");
