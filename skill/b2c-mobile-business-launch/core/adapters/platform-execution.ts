@@ -120,6 +120,10 @@ export interface ExecutionVerifiedResult {
   readonly declaredTokenBudget: number;
   /** The node's declared cost estimate, when the catalog declares one — an estimate, not a measured actual. */
   readonly declaredCostEstimate?: CostEstimate;
+  /** The session that owned the producing attempt — provenance the importer can display and reconcile. */
+  readonly producedBySessionId: string;
+  /** The session that accepted verification (gate-runner or fresh-context reviewer). Present on every exported fresh-context result — see buildBoundaryResults. */
+  readonly verifiedBySessionId?: string;
 }
 
 /** Current acceptance state of one durable-run artifact binding, keyed by stable catalog ids. */
@@ -198,6 +202,13 @@ export function buildBoundaryResults(plan: CompiledPlan, run: RunStateDocument):
     );
     if (bindings.some((binding) => binding === undefined || !binding.fingerprint)) continue;
 
+    // Fresh-context verification is only independent when the recorded verifier is a DIFFERENT
+    // session from the producing attempt's owner. A result with no recorded verifier, or one
+    // whose verifier is its own producer, does not cross the boundary as verified work — the
+    // caller-supplied labels in core/session/verify.ts are a first gate; this is the one that
+    // holds (Codex round 2).
+    if (node.verification.kind === "fresh_context" && (!state.verifiedBySessionId || state.verifiedBySessionId === attempt.ownerSessionId)) continue;
+
     results.push({
       workflowId: node.workflowId,
       workflowTitle: node.title,
@@ -209,6 +220,8 @@ export function buildBoundaryResults(plan: CompiledPlan, run: RunStateDocument):
       artifacts: bindings.map((binding) => ({ artifactId: binding!.artifactId, fingerprint: binding!.fingerprint! })),
       declaredTokenBudget: node.tokenBudget,
       ...(node.costEstimate ? { declaredCostEstimate: { amount: node.costEstimate.amount, currency: node.costEstimate.currency } } : {}),
+      producedBySessionId: attempt.ownerSessionId,
+      ...(state.verifiedBySessionId ? { verifiedBySessionId: state.verifiedBySessionId } : {}),
     });
   }
   return results;

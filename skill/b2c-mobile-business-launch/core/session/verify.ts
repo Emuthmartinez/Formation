@@ -89,16 +89,22 @@ function main(): number {
     console.error(`ISSUE verify.not_pending: ${nodeId} is ${state.status}${state.blocker ? ` (${state.blocker})` : ""}, not blocked pending verification`);
     return 1;
   }
-  const producingAttempt = [...state.attempts].reverse().find((attempt) => attempt.status === "blocked");
-  if (producingAttempt && producingAttempt.ownerSessionId === sessionId) {
+  // Refuse any session that ever owned an attempt on this node, not just the latest — a producer
+  // must not verify its own work under any of its attempts. This binds to run-state provenance,
+  // not to the label alone; the residual (a local caller minting a fresh id) is caught where it
+  // matters: the execution boundary refuses to export a fresh-context result whose recorded
+  // verifier equals the producing attempt's owner, and this CLI's acceptance is attested in the
+  // hash-chained audit log either way.
+  const priorOwner = state.attempts.find((attempt) => attempt.ownerSessionId === sessionId);
+  if (priorOwner) {
     console.error(
-      `ISSUE verify.producer_cannot_verify: ${producingAttempt.ownerSessionId} produced this attempt — a different session must judge it (producer never verifies its own work)`,
+      `ISSUE verify.producer_cannot_verify: ${sessionId} owns attempt ${priorOwner.id} on this node — a different session must judge it (producer never verifies its own work)`,
     );
     return 1;
   }
 
   const now = new Date().toISOString();
-  acceptVerification(plan, run, nodeId, [evidence], now);
+  acceptVerification(plan, run, nodeId, [evidence], now, sessionId);
   writeRunState(runStatePath, run);
   appendAuditEntry(path.join(workspace, "control", "audit.jsonl"), {
     sessionId,

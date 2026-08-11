@@ -6,6 +6,7 @@ import { compilePlan, type CatalogArtifact, type CatalogInput, type CatalogWorkf
 import { allowAllAutonomyEvaluator, computeFrontier, type AutonomyEvaluator } from "../../core/engine/frontier.js";
 import { buildDispatchBatches, checkBatchBoundary, neverHaltDispatchHooks } from "../../core/engine/dispatch.js";
 import { composeNodeBrief, renderNodeBrief } from "../../core/engine/node-brief.js";
+import { buildBoundaryResults } from "../../core/adapters/platform-execution.js";
 import {
   acceptVerification,
   beginAttempt,
@@ -529,6 +530,36 @@ export function register(harness: Harness): void {
     assert(run.nodes[nodeId("engineering-build")]!.status === "succeeded", "acceptVerification with evidence promotes the node");
     assert(run.artifactBindings.find((b) => b.artifactId === "artifact.engineering-build")!.accepted === true, "acceptance follows verification, not delivery");
     assertSchemaValid(harness.checkSchema(RUN_STATE_SCHEMA, run), "run state after verified acceptance");
+  });
+
+  harness.check("boundary: a fresh-context result is exported only when its recorded verifier differs from the producing session — self-verification never crosses (Codex round 2)", () => {
+    const plan = compilePlan(testCatalog(), now);
+    // Self-verified: the recorded verifier IS the producer — the boundary must withhold it.
+    {
+      const { run } = seedFor([], plan);
+      const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-producer", now);
+      reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }] }, now);
+      acceptVerification(plan, run, nodeId("research-scan"), ["I checked my own work"], now, "session-producer");
+      assert(buildBoundaryResults(plan, run).length === 0, "a result whose verifier equals its producer must not cross the boundary");
+    }
+    // No recorded verifier at all: equally withheld — absence is not independence.
+    {
+      const { run } = seedFor([], plan);
+      const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-producer", now);
+      reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }] }, now);
+      acceptVerification(plan, run, nodeId("research-scan"), ["accepted with no recorded verifier"], now);
+      assert(buildBoundaryResults(plan, run).length === 0, "a fresh-context result with no recorded verifier must not cross the boundary");
+    }
+    // Independent verifier: exported, carrying both provenance fields.
+    {
+      const { run } = seedFor([], plan);
+      const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-producer", now);
+      reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }] }, now);
+      acceptVerification(plan, run, nodeId("research-scan"), ["fresh-context reviewer signed off"], now, "session-reviewer");
+      const exported = buildBoundaryResults(plan, run);
+      assert(exported.length === 1, "an independently verified result must cross the boundary");
+      assert(exported[0]!.producedBySessionId === "session-producer" && exported[0]!.verifiedBySessionId === "session-reviewer", "the result must carry producer and verifier provenance");
+    }
   });
 
   harness.check("runstate: reconcilePatch requiring verification lands blocked, acceptVerification promotes to succeeded", () => {

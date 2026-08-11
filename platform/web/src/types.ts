@@ -319,6 +319,17 @@ export interface FounderExecution {
   importedResults: { verifiedResults: number } | null;
 }
 
+/** Whether the engine can do hands-on steps itself, said before work is requested — with the plain-language reason when it cannot. */
+export interface SelfServeExecution {
+  available: boolean;
+  reason?: string;
+}
+
+export interface ExecutionList {
+  executions: FounderExecution[];
+  selfServeExecution: SelfServeExecution;
+}
+
 export interface Recommendation {
   id: string;
   kind: string;

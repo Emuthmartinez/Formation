@@ -10,7 +10,7 @@ import type {
   Claim,
   CreatedInvitation,
   Decision,
-  FounderExecution,
+  ExecutionList,
   ImportPlan,
   ImportSourceList,
   InvitationPreview,
@@ -133,7 +133,7 @@ export const api = {
   removeScenario: (workspaceId: string, scenarioId: string) =>
     request<{ removed: boolean }>(`/api/workspaces/${workspaceId}/economics/scenarios/${scenarioId}`, { method: "DELETE" }),
   listApprovals: (workspaceId: string) => request<ApprovalsView>(`/api/workspaces/${workspaceId}/approvals`),
-  listExecutions: (workspaceId: string) => request<FounderExecution[]>(`/api/workspaces/${workspaceId}/executions`),
+  listExecutions: (workspaceId: string) => request<ExecutionList>(`/api/workspaces/${workspaceId}/executions`),
   importSources: (workspaceId: string) => request<ImportSourceList>(`/api/workspaces/${workspaceId}/import-sources`),
   previewImport: (workspaceId: string, sourceId: string) =>
     request<ImportPlan>(`/api/workspaces/${workspaceId}/imports/preview`, {

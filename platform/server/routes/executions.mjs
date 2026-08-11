@@ -28,7 +28,10 @@ export async function handleExecutionRoutes({ request, response, method, pathnam
         .filter((entry) => entry.workspaceId === workspaceId)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
         .map(toFounderExecution);
-      json(response, 200, executions);
+      // The capability travels on the page's actual read path (Codex round 2): the founder
+      // learns whether the engine can do hands-on steps itself BEFORE asking for work, not from
+      // a detail view they only reach afterwards.
+      json(response, 200, { executions, selfServeExecution: executionWorker.selfServeExecution() });
       return;
     }
 

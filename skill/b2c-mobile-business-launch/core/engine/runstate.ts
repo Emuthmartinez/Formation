@@ -204,7 +204,7 @@ export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch:
 }
 
 /** Producer never verifies its own work (R15): a separate acceptance step promotes a reconciled-but-blocked node to succeeded. */
-export function acceptVerification(plan: CompiledPlan, run: RunStateDocument, nodeId: RunNodeId, evidence: string[], now: string): void {
+export function acceptVerification(plan: CompiledPlan, run: RunStateDocument, nodeId: RunNodeId, evidence: string[], now: string, verifiedBySessionId?: string): void {
   const node = plan.nodes.find((candidate) => candidate.id === nodeId);
   const state = run.nodes[nodeId];
   const attempt = state?.attempts.at(-1);
@@ -225,6 +225,7 @@ export function acceptVerification(plan: CompiledPlan, run: RunStateDocument, no
   state.status = "succeeded";
   state.acceptedOutputFingerprint = sha256(node.outputs.map((id) => run.artifactBindings.find((binding) => binding.artifactId === id)?.fingerprint ?? "").join("|"));
   state.blocker = undefined;
+  if (verifiedBySessionId) state.verifiedBySessionId = verifiedBySessionId;
   run.updatedAt = now;
 }
 

@@ -883,6 +883,10 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const afterVerify = JSON.parse(runBoundary(["--workspace", handle.dir]).stdout);
     assert(afterVerify.results.length === 1, `the verified result must now cross the boundary, got: ${JSON.stringify(afterVerify.results)}`);
     assert(afterVerify.results[0].verification === "fresh_context", `the result must carry its verification kind, got: ${JSON.stringify(afterVerify.results[0])}`);
+    assert(
+      afterVerify.results[0].producedBySessionId === "sess-unverified-1" && afterVerify.results[0].verifiedBySessionId === "sess-reviewer-1",
+      `the exported result must carry producer and verifier provenance, got: ${JSON.stringify(afterVerify.results[0])}`,
+    );
   });
 
   harness.check("session/boundary: a lane-seeded succeeded node exports no result — a seed fingerprint is not importable work", () => {
