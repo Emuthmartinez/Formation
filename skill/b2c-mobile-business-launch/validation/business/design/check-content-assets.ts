@@ -251,29 +251,6 @@ if (manifestText) {
       }
     }
 
-    if (route && (route.includes("higgsfield") || route.includes("marketing_studio"))) {
-      const promptBrief = asString(asset.prompt_brief) ?? "";
-      if (!promptBrief.trim()) {
-        issues.push(
-          issue(
-            "error",
-            `content_assets.manifest.assets.${index}.prompt_brief.missing`,
-            `Manifest asset ${index} uses a Higgsfield/Marketing Studio route but records no prompt_brief carrying the design/DESIGN.md tokens used for generation. Generating without the design/DESIGN.md brief is a named failure mode.`,
-            manifestText.relativePath,
-          ),
-        );
-      } else if (!/design\.md|design system|design token|palette|typography/i.test(promptBrief)) {
-        issues.push(
-          issue(
-            "warning",
-            `content_assets.manifest.assets.${index}.prompt_brief.no_design_reference`,
-            `Manifest asset ${index} prompt_brief should reference the design/DESIGN.md tokens (palette, typography, banned aesthetics) carried into the generation prompt.`,
-            manifestText.relativePath,
-          ),
-        );
-      }
-    }
-
     // UGC-family assets (Marketing Studio ugc/ugc_how_to/ugc_unboxing/product_review
     // modes, or the Recipe 7 Seedance believable-person path) carry gates the
     // knowledge layer alone cannot enforce: a script that survived the judge panel
@@ -288,6 +265,32 @@ if (manifestText) {
     const looksUgc = /\bugc(?:_how_to|_unboxing)?\b|\bproduct_review\b/i.test([route, asString(asset.mode) ?? "", renderProofText, assetKind].join(" "));
     const KNOWN_VIDEO_ASSET_KINDS = ["ugc", "product_ad", "b_roll", "demo", "app_preview"];
     const isGeneratedVideo = /\bseedance|marketing_studio|cinema_studio|\bveo\b/i.test(`${route} ${renderProofText}`);
+
+    // The brief requirement keys on generation, not on one provider's name: a
+    // bare seedance_2_5 route generates just as much UI-bearing video as a
+    // higgsfield_* route does.
+    if ((route && (route.includes("higgsfield") || route.includes("marketing_studio"))) || isGeneratedVideo) {
+      const promptBrief = asString(asset.prompt_brief) ?? "";
+      if (!promptBrief.trim()) {
+        issues.push(
+          issue(
+            "error",
+            `content_assets.manifest.assets.${index}.prompt_brief.missing`,
+            `Manifest asset ${index} uses a generated-media route but records no prompt_brief carrying the design/DESIGN.md tokens used for generation. Generating without the design/DESIGN.md brief is a named failure mode.`,
+            manifestText.relativePath,
+          ),
+        );
+      } else if (!/design\.md|design system|design token|palette|typography/i.test(promptBrief)) {
+        issues.push(
+          issue(
+            "warning",
+            `content_assets.manifest.assets.${index}.prompt_brief.no_design_reference`,
+            `Manifest asset ${index} prompt_brief should reference the design/DESIGN.md tokens (palette, typography, banned aesthetics) carried into the generation prompt.`,
+            manifestText.relativePath,
+          ),
+        );
+      }
+    }
     if (isGeneratedVideo && !KNOWN_VIDEO_ASSET_KINDS.includes(assetKind)) {
       issues.push(
         issue(

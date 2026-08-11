@@ -410,6 +410,26 @@ export function register(h: Harness): void {
     "content_assets.manifest.assets.0.judge_verdict.not_passing",
   );
 
+  const seedanceNoBrief = makeFixture("content-seedance-no-brief");
+  writeSurvivingScriptRow(seedanceNoBrief);
+  writeUgcManifest(
+    seedanceNoBrief,
+    ugcAsset({
+      prompt_brief: undefined,
+      route: "seedance_2_5",
+      render_proof: "higgsfield generate create seedance_2_5 --image first-frame.png --duration 15 --aspect_ratio 9:16 --wait",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived — panel 2026-08-10",
+    }),
+  );
+  runFixture(
+    "bare Seedance route without prompt_brief fails",
+    seedanceNoBrief,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.prompt_brief.missing",
+  );
+
   const ugcSpentRemoteJob = makeFixture("content-ugc-spent-remote-job");
   writeSurvivingScriptRow(ugcSpentRemoteJob);
   writeUgcManifest(
