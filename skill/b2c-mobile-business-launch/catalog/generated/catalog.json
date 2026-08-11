@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.120.0",
+  "skillVersion": "0.121.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1799,6 +1799,7 @@
       ],
       "founderOnlyActions": [],
       "actionClass": "publish",
+      "protectedCategory": "public_actions",
       "idempotent": false
     },
     {
@@ -3108,11 +3109,7 @@
       ],
       "actionClass": "spend",
       "protectedCategory": "spend",
-      "idempotent": false,
-      "costEstimate": {
-        "amount": 300,
-        "currency": "USD"
-      }
+      "idempotent": false
     },
     {
       "id": "workflow.growth.viral-growth-loop",
@@ -3285,6 +3282,7 @@
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "publish",
+      "protectedCategory": "public_actions",
       "idempotent": true
     },
     {
@@ -3328,6 +3326,7 @@
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "publish",
+      "protectedCategory": "public_actions",
       "idempotent": false
     },
     {

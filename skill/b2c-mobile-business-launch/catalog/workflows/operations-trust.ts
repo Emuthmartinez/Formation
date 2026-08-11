@@ -121,6 +121,9 @@ export const workflows = [
     gates: ["check:email"],
     providers: ["provider.resend"],
     actionClass: "publish",
+    // Production sends and DNS changes are public actions: the category is the authorization
+    // control (grants/waivers), independent of check:email's after-the-fact verification.
+    protectedCategory: "public_actions",
     idempotent: false,
   }),
   workflow({

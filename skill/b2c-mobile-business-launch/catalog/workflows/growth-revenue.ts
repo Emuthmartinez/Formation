@@ -41,10 +41,11 @@ export const workflows = [
       "reference.money.revenue-monetization",
     ],
     roleId: "role.marketing-guru",
-    // Neither paid-user-acquisition.md nor revenue-monetization.md names a starter dollar figure
-    // (spend defers to the founder-approved budget cap), so this is the catalog's own
-    // conservative placeholder for an unspecified starter budget — not a schema default.
-    costEstimate: { amount: 300, currency: "USD" },
+    // costEstimate is deliberately ABSENT: paid-user-acquisition.md defers the amount to the
+    // founder-approved budget cap, and an authored placeholder would both mis-park a smaller
+    // approved budget and be recorded as the actual by buildActualPatch. Without it the autonomy
+    // engine parks this node fail-closed until the founder's approved amount exists — that park
+    // IS the control, and validate.ts surfaces the absence as a warning, not an error.
     laneIds: ["paid_user_acquisition"],
     phaseIds: ["phase.1d"],
     dependencies: ["workflow.data.analytics-and-attribution-blueprint"],
@@ -153,6 +154,8 @@ export const workflows = [
     outputPaths: ["GEO_SEO.md"],
     gates: ["check:landing-funnel"],
     actionClass: "publish",
+    // Publishing public web/SEO surfaces is a public action; the category authorizes, the gate verifies.
+    protectedCategory: "public_actions",
     idempotent: true,
   }),
   workflow({
@@ -178,6 +181,8 @@ export const workflows = [
     outputPaths: ["growth/landing/"],
     gates: ["check:landing-funnel"],
     actionClass: "publish",
+    // A live landing/waitlist funnel is a public action; the category authorizes, the gate verifies.
+    protectedCategory: "public_actions",
     idempotent: false,
   }),
   workflow({

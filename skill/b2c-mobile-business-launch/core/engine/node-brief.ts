@@ -59,7 +59,7 @@ export function renderNodeBrief(brief: NodeBrief): string {
   lines.push(
     brief.verify.gateCommands.length > 0
       ? `Verify: ${brief.verify.gateCommands.join(", ")}`
-      : `Verify: ${brief.verify.kind}${brief.verify.failClosed ? " (fail-closed: outputs stay unaccepted until a non-producer verifier accepts with evidence)" : ""}`,
+      : `Verify: ${brief.verify.kind}${brief.verify.failClosed ? " (fail-closed: outputs stay unaccepted until a non-producer verifier accepts with evidence — `npm run verify:node`)" : ""}`,
   );
   if (brief.approvals.length > 0) lines.push(`Founder-only: ${brief.approvals.join("; ")}`);
   return lines.join("\n");

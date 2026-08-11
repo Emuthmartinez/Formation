@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { assert, repoCheckoutPresent, repoRoot, skillRoot, type Harness } from "./_harness.js";
 import { toCatalogInput } from "../../catalog/bridge.js";
@@ -228,27 +228,49 @@ export function register(harness: Harness): void {
     assert(!good.some((issue) => issue.code === "catalog_graph.workflow.read_unresolvable"), "a declared artifact path must resolve as a read");
   });
 
-  harness.check("validate: a spend workflow without costEstimate is caught with a named issue code", () => {
+  harness.check("validate: a spend workflow without costEstimate is surfaced as a WARNING — the fail-closed park is the designed control, not a defect", () => {
     const catalog = baseFixtureCatalog();
-    catalog.workflows = [baseWorkflow({ actionClass: "spend", founderOnlyActions: ["approve spend"] })];
+    catalog.workflows = [baseWorkflow({ actionClass: "spend", protectedCategory: "spend", founderOnlyActions: ["approve spend"] })];
     const issues = validateCatalog(catalog, skillRoot);
-    assert(
-      issues.some((issue) => issue.code === "catalog_graph.workflow.cost_estimate_missing"),
-      `expected catalog_graph.workflow.cost_estimate_missing, got: ${issues.map((i) => i.code).join(", ")}`,
-    );
+    const found = issues.find((issue) => issue.code === "catalog_graph.workflow.cost_estimate_missing");
+    assert(Boolean(found), `expected catalog_graph.workflow.cost_estimate_missing, got: ${issues.map((i) => i.code).join(", ")}`);
+    assert(found!.severity === "warning", `cost_estimate_missing must be a warning (the park is the control), got severity ${found!.severity}`);
   });
 
-  harness.check("validate: a protected-class workflow with neither gate nor founder-only action is caught, and either control clears it", () => {
+  harness.check("validate: a protected-class workflow without protectedCategory is caught — gates verify after the fact, the category authorizes before dispatch", () => {
     const catalog = baseFixtureCatalog();
-    catalog.workflows = [baseWorkflow({ actionClass: "release" })];
+    catalog.workflows = [baseWorkflow({ actionClass: "release", gateCommands: ["check:catalog"], founderOnlyActions: ["approve the release"] })];
     const naked = validateCatalog(catalog, skillRoot);
     assert(
-      naked.some((issue) => issue.code === "catalog_graph.workflow.protected_control_missing"),
-      `expected catalog_graph.workflow.protected_control_missing, got: ${naked.map((i) => i.code).join(", ")}`,
+      naked.some((issue) => issue.code === "catalog_graph.workflow.protected_category_missing"),
+      `expected catalog_graph.workflow.protected_category_missing even with a gate and founder-only action present, got: ${naked.map((i) => i.code).join(", ")}`,
     );
-    catalog.workflows = [baseWorkflow({ actionClass: "release", founderOnlyActions: ["approve the release"] })];
-    const approved = validateCatalog(catalog, skillRoot);
-    assert(!approved.some((issue) => issue.code === "catalog_graph.workflow.protected_control_missing"), "a founder-only action is a real control and must clear the issue");
+    catalog.workflows = [baseWorkflow({ actionClass: "release", protectedCategory: "release" })];
+    const categorized = validateCatalog(catalog, skillRoot);
+    assert(!categorized.some((issue) => issue.code === "catalog_graph.workflow.protected_category_missing"), "naming the protected category clears the issue");
+  });
+
+  harness.check("validate: a knowledge file on disk with no CatalogReference is caught (disk-to-catalog sweep), and registering it clears the issue", () => {
+    const tempSkillRoot = harness.makeTempDir("validate-knowledge-sweep");
+    const knowledgeDir = path.join(tempSkillRoot, "knowledge", "research");
+    mkdirSync(knowledgeDir, { recursive: true });
+    writeFileSync(path.join(knowledgeDir, "registered.md"), "# registered\n", "utf8");
+    writeFileSync(path.join(knowledgeDir, "orphan.md"), "# orphan\n", "utf8");
+    const catalog = baseFixtureCatalog();
+    catalog.references = [
+      { id: "reference.research.registered", path: "knowledge/research/registered.md", domainId: "domain.research", title: "Registered", loadWhen: "fixture", sessionScoped: true },
+    ];
+    const swept = validateCatalog(catalog, tempSkillRoot);
+    assert(
+      swept.some((issue) => issue.code === "catalog_graph.reference.file_unregistered" && issue.path === "knowledge/research/orphan.md"),
+      `expected catalog_graph.reference.file_unregistered for orphan.md, got: ${swept.map((i) => i.code).join(", ")}`,
+    );
+    catalog.references = [
+      ...catalog.references,
+      { id: "reference.research.orphan", path: "knowledge/research/orphan.md", domainId: "domain.research", title: "Orphan", loadWhen: "fixture", sessionScoped: true },
+    ];
+    const registered = validateCatalog(catalog, tempSkillRoot);
+    assert(!registered.some((issue) => issue.code === "catalog_graph.reference.file_unregistered"), "registering the file clears the sweep issue");
   });
 
   harness.check("validate: the real catalog composed from disk has zero structural errors", () => {

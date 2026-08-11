@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { businessUnitCoversAllGrantableDomains } from "./business-units.js";
@@ -98,6 +98,26 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
       issues.push(
         error("catalog_graph.reference.unbound", `${reference.id} is bound by no workflow and not sessionScoped — nothing routes to it.`, reference.path),
       );
+    }
+  }
+
+  // The other direction: a knowledge file on disk with no CatalogReference is invisible to every
+  // routing surface (Codex round 1). Swept only when this catalog registers knowledge/ references
+  // at all, so minimal fixture catalogs (whose references point at fixture paths) are not judged
+  // against the real skill tree.
+  if (catalog.references.some((reference) => reference.path.startsWith("knowledge/"))) {
+    const registeredPaths = new Set(catalog.references.map((reference) => reference.path));
+    for (const filePath of walkFiles(path.join(skillRoot, "knowledge"))) {
+      const relative = path.relative(skillRoot, filePath).split(path.sep).join("/");
+      if (!registeredPaths.has(relative)) {
+        issues.push(
+          error(
+            "catalog_graph.reference.file_unregistered",
+            `${relative} exists on disk but has no CatalogReference — knowledge nothing can route to.`,
+            relative,
+          ),
+        );
+      }
     }
   }
 
@@ -202,7 +222,7 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
   return issues;
 }
 
-/** Protected action classes: real-world consequences, so a node must carry a mechanical gate or a founder approval — never neither. */
+/** Protected action classes: real-world consequences, so every node must name the protected category that authorizes it (grants/waivers) — verification gates are a separate, after-the-fact control. */
 const PROTECTED_ACTION_CLASSES = new Set(["publish", "spend", "release", "destructive"]);
 
 function validateWorkflow(workflow: Catalog["workflows"][number], issues: CatalogIssue[]): void {
@@ -219,22 +239,40 @@ function validateWorkflow(workflow: Catalog["workflows"][number], issues: Catalo
   } else if (instructions.toLowerCase() === workflow.title.trim().toLowerCase() || instructions.toLowerCase() === workflow.trigger.trim().toLowerCase()) {
     issues.push(error("catalog_graph.workflow.instructions_missing", `${workflow.id} instructions merely echo its title or trigger.`));
   }
+  // A spend node without an authored estimate parks fail-closed until the founder's approved
+  // amount exists — that park is the designed control (an invented placeholder both mis-parks a
+  // smaller approved budget and gets recorded as the actual), so the absence is surfaced, not
+  // rejected.
   if (workflow.actionClass === "spend" && !workflow.costEstimate) {
+    issues.push({
+      severity: "warning",
+      code: "catalog_graph.workflow.cost_estimate_missing",
+      message: `${workflow.id} is a spend node with no declared costEstimate — the autonomy engine parks it fail-closed until a founder-approved amount exists.`,
+    });
+  }
+  // Authorization and verification are different controls: a deterministic gate checks the work
+  // AFTER it happens, while protectedCategory is what the autonomy engine's grant/waiver
+  // machinery authorizes BEFORE dispatch. A protected-class node without its category runs on an
+  // ordinary grant no matter how good its gates are.
+  if (PROTECTED_ACTION_CLASSES.has(workflow.actionClass) && !workflow.protectedCategory) {
     issues.push(
       error(
-        "catalog_graph.workflow.cost_estimate_missing",
-        `${workflow.id} is a spend node with no declared costEstimate — the autonomy engine parks it fail-closed.`,
+        "catalog_graph.workflow.protected_category_missing",
+        `${workflow.id} is ${workflow.actionClass}-class with no protectedCategory — gates verify after the fact, but nothing authorizes the action before dispatch.`,
       ),
     );
   }
-  if (PROTECTED_ACTION_CLASSES.has(workflow.actionClass) && workflow.gateCommands.length === 0 && workflow.founderOnlyActions.length === 0) {
-    issues.push(
-      error(
-        "catalog_graph.workflow.protected_control_missing",
-        `${workflow.id} is ${workflow.actionClass}-class with neither a gate nor a founder-only action — nothing stands between it and the outside world.`,
-      ),
-    );
+}
+
+function walkFiles(root: string): string[] {
+  if (!existsSync(root)) return [];
+  const files: string[] = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const fullPath = path.join(root, entry.name);
+    if (entry.isDirectory()) files.push(...walkFiles(fullPath));
+    else if (entry.isFile()) files.push(fullPath);
   }
+  return files.sort();
 }
 
 function checkKnown(issues: CatalogIssue[], known: Set<CatalogId>, value: CatalogId, code: string, owner: string): void {
