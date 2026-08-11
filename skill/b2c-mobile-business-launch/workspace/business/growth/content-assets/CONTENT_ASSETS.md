@@ -54,9 +54,9 @@ Required fields per asset:
 Optional fields for Higgsfield / Marketing Studio assets:
 - `prompt_brief` — the `design/DESIGN.md` tokens carried into the generation prompt
 - `asset_kind` — REQUIRED for every generated video (Seedance, Marketing Studio, Cinema Studio, Veo routes): one of `ugc`, `product_ad`, `b_roll`, `demo`, `app_preview`. `ugc` activates the gates below; a believable-person clip must not hide behind a provider route name.
-- `script_id` — REQUIRED for UGC-family assets (`asset_kind: ugc`, or `ugc`/`ugc_how_to`/`ugc_unboxing`/`product_review` modes, or Recipe 7): `<script-bank path>#<format-id>`, e.g. `ugc/script-bank.md#FMT-001`. The reference must resolve to a recorded entry.
-- `judge_verdict` — REQUIRED for UGC-family assets. Record `passed — <detail>` or `survived — <detail>`; `failed`/`rejected` blocks the asset at any status, and a done-tier status requires an explicit pass.
-- `believability` — REQUIRED for UGC-family assets before a done-tier status. Record `passed — <detail>` or `failed — <detail>`; completion alone is not a pass, and `failed` blocks done-tier statuses.
+- `script_id` — REQUIRED for UGC-family assets (`asset_kind: ugc`, or `ugc`/`ugc_how_to`/`ugc_unboxing`/`product_review` modes, or Recipe 7): `<script-bank path>#<format-id>`, e.g. `ugc/script-bank.md#FMT-001`. The path must be a `script-bank.md` file and the id must match a row's Format ID cell. At a done-tier status the row must hold real (non-placeholder) script text and a passing row verdict.
+- `judge_verdict` — REQUIRED for UGC-family assets. The value must START with `passed` or `survived` (`passed — <detail>` form) at a done-tier status; the prefix is parsed, so a negated pass does not count. `failed`/`rejected` blocks the asset at any status.
+- `believability` — REQUIRED for UGC-family assets before a done-tier status. The value must START with `passed` (`passed — <detail>` form) or record `failed — <detail>`; completion alone is not a pass, a negated pass is not a pass, and `failed` blocks done-tier statuses.
 - `soul_reference_id` / `avatar_id` — reused Soul identity, mirrored in `state/PROJECT_STATE.yaml` `tools.higgsfield.identity`
 - `webproduct_id` — Marketing Studio product/webproduct entity
 - `source_job_id` — origin job for `reframe`/`personal_clipper` derivatives

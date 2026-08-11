@@ -187,6 +187,24 @@ export function register(h: Harness): void {
     writeFileSync(path.join(root, "growth", "content-assets", "manifest.json"), JSON.stringify({ assets: [asset] }, null, 2), "utf8");
   };
 
+  // A real surviving row (FMT-002) beside the template's placeholder FMT-001 row,
+  // so done-tier fixtures can reference a script that actually passed the panel.
+  const writeSurvivingScriptRow = (root: string): void => {
+    mkdirSync(path.join(root, "ugc"), { recursive: true });
+    writeFileSync(
+      path.join(root, "ugc", "script-bank.md"),
+      [
+        "# UGC Script Bank",
+        "",
+        "| Format ID | Hook | Script | Judge verdict | Judge notes | CTA mechanic | Product insertion |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| FMT-001 | replace with the surviving hook line | replace with the surviving script text | pending | notes | app search | app screen |",
+        "| FMT-002 | ur telling me this app tracked it for free | i wasnt going to post this but the screen is right there | survived — panel 2026-08-10, passed on rewrite 2 | pacing tight, vocab natural | app search | app screen visible mid-script |",
+      ].join("\n"),
+      "utf8",
+    );
+  };
+
   const ugcNoScript = makeFixture("content-ugc-no-script");
   writeUgcManifest(ugcNoScript, ugcAsset({}));
   runFixture(
@@ -248,12 +266,85 @@ export function register(h: Harness): void {
     "content_assets.manifest.assets.0.judge_verdict.failed",
   );
 
+  const ugcWrongBank = makeFixture("content-ugc-wrong-bank");
+  writeUgcManifest(
+    ugcWrongBank,
+    ugcAsset({
+      script_id: "growth/UGC_PLAYBOOK.md#FMT-001",
+      judge_verdict: "survived — panel 2026-08-10",
+    }),
+  );
+  runFixture(
+    "UGC asset whose script_id points outside a script-bank file fails",
+    ugcWrongBank,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.bank_not_script_bank",
+  );
+
+  const ugcPlaceholderRow = makeFixture("content-ugc-placeholder-row");
+  writeUgcManifest(
+    ugcPlaceholderRow,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-001",
+      judge_verdict: "survived — panel 2026-08-10",
+      believability: "passed — watched by one human who did not make it",
+    }),
+  );
+  runFixture(
+    "approved UGC asset referencing the placeholder template row fails",
+    ugcPlaceholderRow,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.row_placeholder",
+  );
+
+  const ugcNegatedVerdict = makeFixture("content-ugc-negated-verdict");
+  writeSurvivingScriptRow(ugcNegatedVerdict);
+  writeUgcManifest(
+    ugcNegatedVerdict,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "not passed — panel did not approve",
+      believability: "passed — watched by one human who did not make it",
+    }),
+  );
+  runFixture(
+    "approved UGC asset with a negated pass judge_verdict fails",
+    ugcNegatedVerdict,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.judge_verdict.not_passing",
+  );
+
+  const ugcNegatedBelievability = makeFixture("content-ugc-negated-believability");
+  writeSurvivingScriptRow(ugcNegatedBelievability);
+  writeUgcManifest(
+    ugcNegatedBelievability,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived — panel 2026-08-10",
+      believability: "not passed — viewer identified it as AI",
+    }),
+  );
+  runFixture(
+    "approved UGC asset with a negated pass believability fails",
+    ugcNegatedBelievability,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.believability.not_passing",
+  );
+
   const ugcApprovedNoBelievability = makeFixture("content-ugc-approved-no-believability");
+  writeSurvivingScriptRow(ugcApprovedNoBelievability);
   writeUgcManifest(
     ugcApprovedNoBelievability,
     ugcAsset({
       status: "approved",
-      script_id: "ugc/script-bank.md#FMT-001",
+      script_id: "ugc/script-bank.md#FMT-002",
       judge_verdict: "survived — panel 2026-08-10; pacing and vocabulary judges passed on rewrite 2",
     }),
   );
@@ -266,11 +357,12 @@ export function register(h: Harness): void {
   );
 
   const ugcFailedBelievability = makeFixture("content-ugc-failed-believability");
+  writeSurvivingScriptRow(ugcFailedBelievability);
   writeUgcManifest(
     ugcFailedBelievability,
     ugcAsset({
       status: "approved",
-      script_id: "ugc/script-bank.md#FMT-001",
+      script_id: "ugc/script-bank.md#FMT-002",
       judge_verdict: "survived — panel 2026-08-10",
       believability: "failed — viewer identified it as AI and as an ad",
     }),
@@ -284,19 +376,20 @@ export function register(h: Harness): void {
   );
 
   const ugcComplete = makeFixture("content-ugc-complete");
+  writeSurvivingScriptRow(ugcComplete);
   mkdirSync(path.join(ugcComplete, "growth", "content-assets", "out"), { recursive: true });
   writeFileSync(path.join(ugcComplete, "growth", "content-assets", "out", "believable-person-ugc.mp4"), "fixture-bytes", "utf8");
   writeUgcManifest(
     ugcComplete,
     ugcAsset({
       status: "approved",
-      script_id: "ugc/script-bank.md#FMT-001",
+      script_id: "ugc/script-bank.md#FMT-002",
       judge_verdict: "survived — panel 2026-08-10; pacing and vocabulary judges passed on rewrite 2",
       believability: "passed — watched by one human who did not make it 2026-08-10; not clocked as AI or ad",
     }),
   );
   runFixture(
-    "approved UGC-family asset with resolving script, passing verdict, and passing believability passes",
+    "approved UGC-family asset with surviving script row, passing verdict, and passing believability passes",
     ugcComplete,
     "check-content-assets.ts",
     0,

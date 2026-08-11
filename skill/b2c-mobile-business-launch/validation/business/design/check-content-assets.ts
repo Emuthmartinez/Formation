@@ -299,6 +299,8 @@ if (manifestText) {
       );
     }
     if (assetKind === "ugc" || looksUgc) {
+      const ugcStatus = asString(asset.status)?.toLowerCase() ?? "";
+      const ugcDoneTier = ["done", "ready", "production", "approved"].includes(ugcStatus);
       const scriptId = (asString(asset.script_id) ?? "").trim();
       if (!scriptId) {
         issues.push(
@@ -310,8 +312,9 @@ if (manifestText) {
           ),
         );
       } else {
-        // script_id must resolve to a durable script-bank entry: `<path>#<format-id>`.
-        // A nonempty string that names no recorded script is not a script gate.
+        // script_id must resolve to a durable script-bank row: `<path>#<format-id>`.
+        // A nonempty string that names no recorded script is not a script gate, and
+        // a token found in an unrelated file is not a script bank.
         const hashIndex = scriptId.indexOf("#");
         const bankFile = hashIndex >= 0 ? scriptId.slice(0, hashIndex).trim() : "";
         const anchorToken =
@@ -330,6 +333,15 @@ if (manifestText) {
               manifestText.relativePath,
             ),
           );
+        } else if (!/script-bank\.md$/i.test(bankFile)) {
+          issues.push(
+            issue(
+              "error",
+              `content_assets.manifest.assets.${index}.script_id.bank_not_script_bank`,
+              `Manifest asset ${index} script_id points at ${bankFile}, which is not a script-bank.md file. A format id found in an unrelated file is not a recorded script.`,
+              manifestText.relativePath,
+            ),
+          );
         } else if (!existsSync(path.join(args.root, bankFile))) {
           issues.push(
             issue(
@@ -339,15 +351,51 @@ if (manifestText) {
               manifestText.relativePath,
             ),
           );
-        } else if (!(readText(args.root, bankFile) ?? "").includes(anchorToken)) {
-          issues.push(
-            issue(
-              "error",
-              `content_assets.manifest.assets.${index}.script_id.anchor_unrecorded`,
-              `Manifest asset ${index} script_id names ${anchorToken}, but ${bankFile} records no such entry. The script bank entry is the durable evidence the panel ran.`,
-              manifestText.relativePath,
-            ),
-          );
+        } else {
+          // The row is the durable evidence: the Format ID cell must equal the id,
+          // and before a done-tier status the row itself must hold a surviving,
+          // non-placeholder script — a resolvable pointer to a pending template
+          // row is not a script gate either.
+          const bankRow = (readText(args.root, bankFile) ?? "").split(/\r?\n/).find((line) => {
+            if (!line.trimStart().startsWith("|")) {
+              return false;
+            }
+            return (line.split("|")[1] ?? "").trim() === anchorToken;
+          });
+          if (!bankRow) {
+            issues.push(
+              issue(
+                "error",
+                `content_assets.manifest.assets.${index}.script_id.anchor_unrecorded`,
+                `Manifest asset ${index} script_id names ${anchorToken}, but ${bankFile} has no table row whose Format ID cell is ${anchorToken}. The script bank row is the durable evidence the panel ran.`,
+                manifestText.relativePath,
+              ),
+            );
+          } else if (ugcDoneTier) {
+            const cells = bankRow.split("|").map((cell) => cell.trim());
+            const hookCell = cells[2] ?? "";
+            const scriptCell = cells[3] ?? "";
+            const rowVerdict = cells[4] ?? "";
+            if (!hookCell || !scriptCell || /\breplace with\b/i.test(`${hookCell} ${scriptCell}`)) {
+              issues.push(
+                issue(
+                  "error",
+                  `content_assets.manifest.assets.${index}.script_id.row_placeholder`,
+                  `Manifest asset ${index} has status "${ugcStatus}" but the referenced ${anchorToken} row still holds placeholder hook/script text. Record the real surviving script before a done-tier status.`,
+                  manifestText.relativePath,
+                ),
+              );
+            } else if (!/^(passed|survived)\b/i.test(rowVerdict)) {
+              issues.push(
+                issue(
+                  "error",
+                  `content_assets.manifest.assets.${index}.script_id.row_not_passing`,
+                  `Manifest asset ${index} has status "${ugcStatus}" but the ${anchorToken} row's Judge verdict cell does not start with "passed" or "survived". The bank row and the manifest verdict must agree before a done-tier status.`,
+                  manifestText.relativePath,
+                ),
+              );
+            }
+          }
         }
       }
       const judgeVerdict = asString(asset.judge_verdict) ?? "";
@@ -370,14 +418,14 @@ if (manifestText) {
           ),
         );
       }
-      const ugcStatus = asString(asset.status)?.toLowerCase() ?? "";
-      if (["done", "ready", "production", "approved"].includes(ugcStatus)) {
-        if (!/\b(passed|survived)\b/i.test(judgeVerdict)) {
+      if (ugcDoneTier) {
+        // Prefix parse, not substring search: "not passed — ..." must not read as a pass.
+        if (!/^\s*(passed|survived)\b/i.test(judgeVerdict)) {
           issues.push(
             issue(
               "error",
               `content_assets.manifest.assets.${index}.judge_verdict.not_passing`,
-              `Manifest asset ${index} has status "${ugcStatus}" but judge_verdict records no passing outcome. Record "passed — <detail>" or "survived — <detail>" before a done-tier status.`,
+              `Manifest asset ${index} has status "${ugcStatus}" but judge_verdict does not start with "passed" or "survived". Record "passed — <detail>" or "survived — <detail>" before a done-tier status.`,
               manifestText.relativePath,
             ),
           );
@@ -401,12 +449,12 @@ if (manifestText) {
               manifestText.relativePath,
             ),
           );
-        } else if (!/\bpassed\b/i.test(believability)) {
+        } else if (!/^\s*passed\b/i.test(believability)) {
           issues.push(
             issue(
               "error",
               `content_assets.manifest.assets.${index}.believability.not_passing`,
-              `Manifest asset ${index} has status "${ugcStatus}" but the believability result records no explicit pass. Record "passed — <detail>" or "failed — <detail>"; completion alone is not a pass.`,
+              `Manifest asset ${index} has status "${ugcStatus}" but the believability result does not start with "passed". Record "passed — <detail>" or "failed — <detail>"; completion alone is not a pass, and a negated pass is not a pass.`,
               manifestText.relativePath,
             ),
           );
