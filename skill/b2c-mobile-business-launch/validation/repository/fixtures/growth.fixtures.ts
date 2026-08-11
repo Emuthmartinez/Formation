@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, writeCompletePaidUserAcquisition } from "./_harness.js";
 
@@ -336,6 +336,78 @@ export function register(h: Harness): void {
     "check-content-assets.ts",
     1,
     "content_assets.manifest.assets.0.believability.not_passing",
+  );
+
+  const escapeBankFor = (root: string): string => {
+    const escapeDir = path.join(root, "..", `${path.basename(root)}-escape-ugc`);
+    mkdirSync(escapeDir, { recursive: true });
+    writeFileSync(
+      path.join(escapeDir, "script-bank.md"),
+      [
+        "| Format ID | Hook | Script | Judge verdict | Judge notes | CTA mechanic | Product insertion |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| FMT-002 | outside hook | outside script | survived — panel 2026-08-10 | notes | app search | app screen |",
+      ].join("\n"),
+      "utf8",
+    );
+    return escapeDir;
+  };
+
+  const ugcTraversalBank = makeFixture("content-ugc-traversal-bank");
+  const traversalEscapeDir = escapeBankFor(ugcTraversalBank);
+  writeUgcManifest(
+    ugcTraversalBank,
+    ugcAsset({
+      script_id: `../${path.basename(traversalEscapeDir)}/script-bank.md#FMT-002`,
+      judge_verdict: "survived — panel 2026-08-10",
+    }),
+  );
+  runFixture(
+    "UGC asset whose script_id traverses outside the workspace fails",
+    ugcTraversalBank,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.bank_outside_workspace",
+  );
+
+  const ugcSymlinkBank = makeFixture("content-ugc-symlink-bank");
+  const symlinkEscapeDir = escapeBankFor(ugcSymlinkBank);
+  rmSync(path.join(ugcSymlinkBank, "ugc", "script-bank.md"), { force: true });
+  mkdirSync(path.join(ugcSymlinkBank, "ugc"), { recursive: true });
+  symlinkSync(path.join(symlinkEscapeDir, "script-bank.md"), path.join(ugcSymlinkBank, "ugc", "script-bank.md"));
+  writeUgcManifest(
+    ugcSymlinkBank,
+    ugcAsset({
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived — panel 2026-08-10",
+    }),
+  );
+  runFixture(
+    "UGC asset whose script bank is a symlink escaping the workspace fails",
+    ugcSymlinkBank,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.bank_outside_workspace",
+  );
+
+  const ugcSpentDraft = makeFixture("content-ugc-spent-draft");
+  writeSurvivingScriptRow(ugcSpentDraft);
+  mkdirSync(path.join(ugcSpentDraft, "growth", "content-assets", "out"), { recursive: true });
+  writeFileSync(path.join(ugcSpentDraft, "growth", "content-assets", "out", "believable-person-ugc.mp4"), "fixture-bytes", "utf8");
+  writeUgcManifest(
+    ugcSpentDraft,
+    ugcAsset({
+      status: "draft",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "pending — panel booked for next week",
+    }),
+  );
+  runFixture(
+    "draft UGC asset with generated output but no passing verdict fails",
+    ugcSpentDraft,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.judge_verdict.not_passing",
   );
 
   const ugcApprovedNoBelievability = makeFixture("content-ugc-approved-no-believability");

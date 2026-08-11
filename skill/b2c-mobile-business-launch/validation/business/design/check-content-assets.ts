@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import path from "node:path";
 import {
   asArray,
@@ -301,6 +301,15 @@ if (manifestText) {
     if (assetKind === "ugc" || looksUgc) {
       const ugcStatus = asString(asset.status)?.toLowerCase() ?? "";
       const ugcDoneTier = ["done", "ready", "production", "approved"].includes(ugcStatus);
+      // An output file on disk is evidence generation spend already happened, so
+      // the no-generation-before-panel gate must hold even at draft status —
+      // otherwise a planned template entry and a spent draft clip look identical.
+      const generationOccurred = asArray(asset.outputs)
+        .map(asString)
+        .filter((item): item is string => Boolean(item?.trim()))
+        .some((output) => !/^[a-z]+:/i.test(output) && !output.startsWith("#") && existsSync(path.join(args.root, output)));
+      const scriptGateActive = ugcDoneTier || generationOccurred;
+      const scriptGateReason = ugcDoneTier ? `status "${ugcStatus}"` : "generated output on disk";
       const scriptId = (asString(asset.script_id) ?? "").trim();
       if (!scriptId) {
         issues.push(
@@ -342,58 +351,89 @@ if (manifestText) {
               manifestText.relativePath,
             ),
           );
-        } else if (!existsSync(path.join(args.root, bankFile))) {
-          issues.push(
-            issue(
-              "error",
-              `content_assets.manifest.assets.${index}.script_id.bank_missing`,
-              `Manifest asset ${index} script_id points at ${bankFile}, but that script bank does not exist. Record the judged script before generation spend.`,
-              manifestText.relativePath,
-            ),
-          );
         } else {
-          // The row is the durable evidence: the Format ID cell must equal the id,
-          // and before a done-tier status the row itself must hold a surviving,
-          // non-placeholder script — a resolvable pointer to a pending template
-          // row is not a script gate either.
-          const bankRow = (readText(args.root, bankFile) ?? "").split(/\r?\n/).find((line) => {
-            if (!line.trimStart().startsWith("|")) {
-              return false;
-            }
-            return (line.split("|")[1] ?? "").trim() === anchorToken;
-          });
-          if (!bankRow) {
+          // The bank must live inside the audited workspace: a traversal path or a
+          // symlink pointing at another checkout would make the audit depend on
+          // host files outside this business.
+          const lexicalRoot = path.resolve(args.root);
+          const lexicalBank = path.resolve(args.root, bankFile);
+          const insideLexically = lexicalBank === lexicalRoot || lexicalBank.startsWith(lexicalRoot + path.sep);
+          if (!insideLexically) {
             issues.push(
               issue(
                 "error",
-                `content_assets.manifest.assets.${index}.script_id.anchor_unrecorded`,
-                `Manifest asset ${index} script_id names ${anchorToken}, but ${bankFile} has no table row whose Format ID cell is ${anchorToken}. The script bank row is the durable evidence the panel ran.`,
+                `content_assets.manifest.assets.${index}.script_id.bank_outside_workspace`,
+                `Manifest asset ${index} script_id resolves outside the audited workspace: ${bankFile}. The script bank must live inside this business.`,
                 manifestText.relativePath,
               ),
             );
-          } else if (ugcDoneTier) {
-            const cells = bankRow.split("|").map((cell) => cell.trim());
-            const hookCell = cells[2] ?? "";
-            const scriptCell = cells[3] ?? "";
-            const rowVerdict = cells[4] ?? "";
-            if (!hookCell || !scriptCell || /\breplace with\b/i.test(`${hookCell} ${scriptCell}`)) {
+          } else if (!existsSync(lexicalBank)) {
+            issues.push(
+              issue(
+                "error",
+                `content_assets.manifest.assets.${index}.script_id.bank_missing`,
+                `Manifest asset ${index} script_id points at ${bankFile}, but that script bank does not exist. Record the judged script before generation spend.`,
+                manifestText.relativePath,
+              ),
+            );
+          } else {
+            const realRoot = realpathSync(lexicalRoot);
+            const realBank = realpathSync(lexicalBank);
+            if (!(realBank === realRoot || realBank.startsWith(realRoot + path.sep))) {
               issues.push(
                 issue(
                   "error",
-                  `content_assets.manifest.assets.${index}.script_id.row_placeholder`,
-                  `Manifest asset ${index} has status "${ugcStatus}" but the referenced ${anchorToken} row still holds placeholder hook/script text. Record the real surviving script before a done-tier status.`,
+                  `content_assets.manifest.assets.${index}.script_id.bank_outside_workspace`,
+                  `Manifest asset ${index} script_id resolves outside the audited workspace via a symlink: ${bankFile}. The script bank must live inside this business.`,
                   manifestText.relativePath,
                 ),
               );
-            } else if (!/^(passed|survived)\b/i.test(rowVerdict)) {
-              issues.push(
-                issue(
-                  "error",
-                  `content_assets.manifest.assets.${index}.script_id.row_not_passing`,
-                  `Manifest asset ${index} has status "${ugcStatus}" but the ${anchorToken} row's Judge verdict cell does not start with "passed" or "survived". The bank row and the manifest verdict must agree before a done-tier status.`,
-                  manifestText.relativePath,
-                ),
-              );
+            } else {
+              // The row is the durable evidence: the Format ID cell must equal the
+              // id, and once the asset reaches a done-tier status OR generation
+              // has already happened, the row itself must hold a surviving,
+              // non-placeholder script — a resolvable pointer to a pending
+              // template row is not a script gate either.
+              const bankRow = (readText(args.root, bankFile) ?? "").split(/\r?\n/).find((line) => {
+                if (!line.trimStart().startsWith("|")) {
+                  return false;
+                }
+                return (line.split("|")[1] ?? "").trim() === anchorToken;
+              });
+              if (!bankRow) {
+                issues.push(
+                  issue(
+                    "error",
+                    `content_assets.manifest.assets.${index}.script_id.anchor_unrecorded`,
+                    `Manifest asset ${index} script_id names ${anchorToken}, but ${bankFile} has no table row whose Format ID cell is ${anchorToken}. The script bank row is the durable evidence the panel ran.`,
+                    manifestText.relativePath,
+                  ),
+                );
+              } else if (scriptGateActive) {
+                const cells = bankRow.split("|").map((cell) => cell.trim());
+                const hookCell = cells[2] ?? "";
+                const scriptCell = cells[3] ?? "";
+                const rowVerdict = cells[4] ?? "";
+                if (!hookCell || !scriptCell || /\breplace with\b/i.test(`${hookCell} ${scriptCell}`)) {
+                  issues.push(
+                    issue(
+                      "error",
+                      `content_assets.manifest.assets.${index}.script_id.row_placeholder`,
+                      `Manifest asset ${index} has ${scriptGateReason} but the referenced ${anchorToken} row still holds placeholder hook/script text. The panel runs before generation spend; record the real surviving script.`,
+                      manifestText.relativePath,
+                    ),
+                  );
+                } else if (!/^(passed|survived)\b/i.test(rowVerdict)) {
+                  issues.push(
+                    issue(
+                      "error",
+                      `content_assets.manifest.assets.${index}.script_id.row_not_passing`,
+                      `Manifest asset ${index} has ${scriptGateReason} but the ${anchorToken} row's Judge verdict cell does not start with "passed" or "survived". The bank row and the manifest verdict must agree.`,
+                      manifestText.relativePath,
+                    ),
+                  );
+                }
+              }
             }
           }
         }
@@ -418,18 +458,22 @@ if (manifestText) {
           ),
         );
       }
-      if (ugcDoneTier) {
-        // Prefix parse, not substring search: "not passed — ..." must not read as a pass.
+      if (scriptGateActive) {
+        // Prefix parse, not substring search: "not passed — ..." must not read as
+        // a pass. Active at done-tier statuses AND once generation has happened —
+        // the panel runs before spend, so a spent draft needs a passing verdict too.
         if (!/^\s*(passed|survived)\b/i.test(judgeVerdict)) {
           issues.push(
             issue(
               "error",
               `content_assets.manifest.assets.${index}.judge_verdict.not_passing`,
-              `Manifest asset ${index} has status "${ugcStatus}" but judge_verdict does not start with "passed" or "survived". Record "passed — <detail>" or "survived — <detail>" before a done-tier status.`,
+              `Manifest asset ${index} has ${scriptGateReason} but judge_verdict does not start with "passed" or "survived". The panel verdict comes before generation spend; record "passed — <detail>" or "survived — <detail>".`,
               manifestText.relativePath,
             ),
           );
         }
+      }
+      if (ugcDoneTier) {
         const believability = asString(asset.believability) ?? "";
         if (!believability.trim() || /\bpending\b/i.test(believability)) {
           issues.push(
