@@ -10,6 +10,7 @@ export interface WorkflowSeed {
   /** Required node contract (see CatalogWorkflowDef): what to do, what to open, which knowledge to load, who owns it. */
   instructions: string;
   reads?: string[];
+  consults?: string[];
   referenceIds?: ReferenceId[];
   roleId: RoleId;
   laneIds?: LaneKey[];
@@ -44,6 +45,7 @@ export function workflow(seed: WorkflowSeed): CatalogWorkflowDef {
     trigger: seed.trigger,
     instructions: seed.instructions,
     reads: seed.reads ?? [],
+    consults: seed.consults ?? [],
     referenceIds: seed.referenceIds ?? [],
     roleId: seed.roleId,
     laneIds: seed.laneIds ?? [],

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.122.0",
+  "skillVersion": "0.123.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1344,6 +1344,7 @@
         "engineering/PRODUCTION_READINESS.md",
         "operations/FAILURE_CARDS.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.orchestration.parallel-agent-orchestration",
         "reference.orchestration.project-state"
@@ -1378,6 +1379,7 @@
         "operations/FAILURE_CARDS.md",
         "engineering/PRODUCTION_READINESS.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.orchestration.project-state",
         "reference.process.launch-phases",
@@ -1419,6 +1421,7 @@
         "operations/PROVIDER_PROOF.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.process.provider-proof",
         "reference.process.launch-coverage"
@@ -1457,6 +1460,7 @@
         "state/LAUNCH_TRACE.md",
         "design/DESIGN.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.process.change-cascade",
         "reference.process.cascade-edges",
@@ -1489,6 +1493,7 @@
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.process.flow-traceability",
         "reference.process.artifact-contracts",
@@ -1530,6 +1535,7 @@
         "state/PROJECT_STATE.yaml",
         "design/design-room.html"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.process.control-plane",
         "reference.orchestration.project-state"
@@ -1564,6 +1570,7 @@
         "state/PROJECT_STATE.yaml",
         "engineering/PRODUCTION_READINESS.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.process.failure-cards",
         "reference.process.launch-coverage",
@@ -1601,6 +1608,7 @@
         "strategy/TOOL_DECISIONS.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.operations.paid-tool-routing"
       ],
@@ -1639,6 +1647,7 @@
         "strategy/TOOL_DECISIONS.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.operations.secrets-management",
         "reference.operations.doppler-organization",
@@ -1681,9 +1690,11 @@
       "reads": [
         "trust/SECURITY.md",
         "engineering/TECH_SPEC.md",
-        "trust/PRIVACY.md",
-        "revenue/REVENUE_OPS.md",
         "strategy/TOOL_DECISIONS.md"
+      ],
+      "consults": [
+        "trust/PRIVACY.md",
+        "revenue/REVENUE_OPS.md"
       ],
       "referenceIds": [
         "reference.trust.security-release-hardening",
@@ -1728,6 +1739,7 @@
         "state/LAUNCH_TRACE.md",
         "engineering/TECH_SPEC.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.trust.privacy-terms"
       ],
@@ -1770,6 +1782,7 @@
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "growth/resend/email-templates.ts"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.operations.resend-email-ops",
         "reference.words.no-slop-writing",
@@ -1814,7 +1827,9 @@
       "reads": [
         "state/PROJECT_STATE.yaml",
         "operations/POST_LAUNCH_OPS.md",
-        "operations/LAUNCH_RETRO.md",
+        "operations/LAUNCH_RETRO.md"
+      ],
+      "consults": [
         "growth/PAID_UA.md"
       ],
       "referenceIds": [
@@ -1862,6 +1877,7 @@
         "operations/business-access.json",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.operations.founder-zero-operator",
         "reference.operations.frontier-agent-operations",
@@ -1901,6 +1917,7 @@
         "operations/PROVIDER_PROOF.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.operations.frontier-agent-operations",
         "reference.operations.founder-zero-operator",
@@ -1942,6 +1959,7 @@
       "reads": [
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.product.habit-tracker",
         "reference.product.photo-ai-media",
@@ -1976,6 +1994,7 @@
       "reads": [
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.research.go-pivot-or-kill",
         "reference.product.product-moat",
@@ -2017,6 +2036,7 @@
       "reads": [
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.research.localization-market-research"
       ],
@@ -2051,6 +2071,7 @@
       "reads": [
         "product/SPEC.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.experience.eleven-star-experience"
       ],
@@ -2087,6 +2108,7 @@
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "analytics/ANALYTICS.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.experience.emotional-design-system",
         "reference.experience.emotional-experience-design",
@@ -2128,6 +2150,7 @@
       "reads": [
         "product/experience/emotional-design/EMOTIONAL_DESIGN.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.experience.emotional-design-system",
         "reference.experience.consumer-product-design-agency",
@@ -2180,6 +2203,7 @@
         "studio/seed/theme.tokens.json",
         "state/LAUNCH_TRACE.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.design.design-room",
         "reference.design.surfaces-b2c",
@@ -2225,6 +2249,7 @@
       "reads": [
         "studio/seed/theme.tokens.json"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.design.design-room",
         "reference.design.design-visual-system"
@@ -2264,6 +2289,7 @@
       "reads": [
         "studio/seed/business.json"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.design.refero-ux-patterns"
       ],
@@ -2302,6 +2328,7 @@
         "analytics/ANALYTICS.md",
         "product/copy/COPY_DECK.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.experience.onboarding-conversion",
         "reference.experience.push-notification-lifecycle",
@@ -2339,7 +2366,9 @@
       "trigger": "Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or \"premium feel\"",
       "instructions": "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give (celebration choreography, gesture physics, hero transitions), route to motion-craft-benchmarks.md's numbered recipes for the checkable acceptance criteria; check:motion-contract is what proves the tokens were actually used, not adjectives in design/DESIGN.md.",
       "reads": [
-        "studio/seed/theme.tokens.json",
+        "studio/seed/theme.tokens.json"
+      ],
+      "consults": [
         "product/experience/ux-patterns/UX_PATTERNS.md"
       ],
       "referenceIds": [
@@ -2378,6 +2407,7 @@
         "design/DESIGN.md",
         "studio/seed/theme.tokens.json"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.design.remotion-content-assets",
         "reference.design.design-visual-system",
@@ -2421,6 +2451,7 @@
         "strategy/BRAND.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.words.no-slop-writing",
         "reference.words.conversion-copy"
@@ -2454,6 +2485,7 @@
         "design/DESIGN.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.store.aso-store-ops",
         "reference.growth.paid-user-acquisition",
@@ -2495,6 +2527,7 @@
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.store.app-store-listing-prep",
         "reference.money.revenue-monetization",
@@ -2536,6 +2569,7 @@
         "store/app-store-listing/APP_STORE_LISTING.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.store.apple-signing-release",
         "reference.store.app-store-connect-cli",
@@ -2582,6 +2616,7 @@
         "revenue/REVENUE_OPS.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.store.app-store-listing-prep",
         "reference.trust.privacy-terms",
@@ -2629,6 +2664,7 @@
         "store/APPLE_SIGNING.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.store.store-console-workflow",
         "reference.store.apple-signing-release",
@@ -2678,6 +2714,7 @@
         "store/store-console.html",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.store.app-store-connect-cli",
         "reference.store.store-console-workflow",
@@ -2724,6 +2761,7 @@
         "product/experience/emotional-design/EMOTIONAL_DESIGN.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.store.aso-store-ops",
         "reference.design.design-visual-system",
@@ -2769,6 +2807,7 @@
         "store/app-store-listing/APP_STORE_LISTING.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.store.google-play-release",
         "reference.store.store-console-workflow",
@@ -2814,6 +2853,7 @@
         "design/DESIGN.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.engineering.engineering-orchestration",
         "reference.orchestration.compound-engineering-routing",
@@ -2861,9 +2901,11 @@
       "instructions": "Pick one backend route (Supabase, Firebase, or custom), record the reason in engineering/TECH_SPEC.md's Backend Selection sub-section, and never silently substitute another route mid-build — a switch is a change-cascade event and a founder-only gate. Write the Data Model as one row per entity (owner, key fields, relationships, retention/deletion path, PII class) and the Authorization Model as a create/read/update/delete matrix expressed in the route's actual enforcement mechanism — RLS policies, Firestore security rules, or middleware authz — deny by default. Treat untested authorization as absent: exercise owner/anonymous/other-user access for every matrix row and record the exact test command and evidence path, not just 'RLS' in prose. Pass `npm run check:backend-contract -- --root . --state state/PROJECT_STATE.yaml`; the account-deletion promise in this contract's retention rules must match trust/PRIVACY.md's deletion promise exactly, not just approximately.",
       "reads": [
         "engineering/TECH_SPEC.md",
-        "design/DESIGN.md",
-        "trust/PRIVACY.md",
         "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [
+        "design/DESIGN.md",
+        "trust/PRIVACY.md"
       ],
       "referenceIds": [
         "reference.engineering.backend-data-contract",
@@ -2907,6 +2949,7 @@
         "engineering/PRODUCTION_READINESS.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.engineering.app-agent-roster",
         "reference.orchestration.parallel-agent-orchestration",
@@ -2947,6 +2990,7 @@
         "engineering/PRODUCTION_READINESS.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.engineering.mobai-toolbelt",
         "reference.process.tool-recipes.device-capture-and-proof",
@@ -2990,6 +3034,7 @@
         "engineering/ENGINEERING_PLAN.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.engineering.xcodebuildmcp-testing",
         "reference.process.tool-recipes.device-capture-and-proof",
@@ -3033,6 +3078,7 @@
         "product/SPEC.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.data.analytics-attribution",
         "reference.process.artifact-contracts",
@@ -3077,6 +3123,7 @@
         "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.growth.paid-user-acquisition",
         "reference.operations.paid-tool-routing",
@@ -3125,6 +3172,7 @@
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.growth.viral-growth-loops",
         "reference.experience.onboarding-conversion",
@@ -3161,7 +3209,9 @@
       "instructions": "Write growth/LAUNCH_NARRATIVE.md covering the Fit Gate, feeling-first Launch Thesis, the Two Launch Types (rare tentpole vs. weekly feature-launch heartbeat), the Launch-Day Run-of-Show, and all post copy in fenced code blocks. Every post shapes a feeling before naming the feature and clears the 2026 DO-NOT-DO list: no hashtags, no emojis carrying the message, no link in the root post (first self-reply only), no seeded 'congrats!' replies, plus the no-slop-writing.md self-check. Public claims are limited to what is true and attributable — never launder the launch agency's own aggregate stats as this app's results — and any rage-bait line clears an ethics-guardrail review before it ships. Public posting, account connections, and paid amplification spend are founder-only gates that must be confirmed before launch goes live.",
       "reads": [
         "growth/VIRAL_GROWTH.md",
-        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
+      ],
+      "consults": [
         "growth/content-assets/CONTENT_ASSETS.md"
       ],
       "referenceIds": [
@@ -3209,6 +3259,7 @@
         "strategy/RESEARCH.md",
         "state/PROJECT_STATE.yaml"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.money.revenue-monetization",
         "reference.money.revenuecat-and-store-products",
@@ -3257,6 +3308,7 @@
         "analytics/ANALYTICS.md",
         "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.growth.geo-seo",
         "reference.research.localization-market-research",
@@ -3300,6 +3352,7 @@
         "product/copy/COPY_BRIEF.md",
         "design/DESIGN.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.growth.cro-landing",
         "reference.design.landing-motion-craft",
@@ -3343,6 +3396,7 @@
         "growth/LAUNCH_NARRATIVE.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.growth.ugc-creator-engine",
         "reference.growth.influencer-sponsorship-engine",
@@ -3382,6 +3436,7 @@
         "growth/LAUNCH_NARRATIVE.md",
         "ugc/script-bank.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.growth.fastlane-growth-ops",
         "reference.growth.ugc-creator-engine",
@@ -3425,6 +3480,7 @@
       "reads": [
         "skill-version.json"
       ],
+      "consults": [],
       "referenceIds": [],
       "roleId": "role.orchestrator",
       "laneIds": [],
@@ -3454,6 +3510,7 @@
         "SKILL.md",
         "validation/repository/source-registry.yaml"
       ],
+      "consults": [],
       "referenceIds": [],
       "roleId": "role.engineering-leader",
       "laneIds": [],
@@ -3482,6 +3539,7 @@
       "reads": [
         "skill-version.json"
       ],
+      "consults": [],
       "referenceIds": [],
       "roleId": "role.engineering-leader",
       "laneIds": [],
@@ -3511,6 +3569,7 @@
       "reads": [
         "tooling/lib/founder-copy.ts"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.words.no-slop-writing"
       ],
@@ -3543,6 +3602,7 @@
       "reads": [
         "SKILL.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.engineering.technical-documentation-ste100"
       ],
@@ -3573,6 +3633,7 @@
       "reads": [
         "knowledge/store/app-store-connect-cli.md"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.store.app-store-connect-cli",
         "reference.process.failure-cards"
@@ -3609,6 +3670,7 @@
         "catalog/generated/routing.md",
         "catalog/generated/spine.md"
       ],
+      "consults": [],
       "referenceIds": [],
       "roleId": "role.orchestrator",
       "laneIds": [],
@@ -3640,6 +3702,7 @@
         "validation/repository/evals/launchbench/",
         "validation/repository/evals/agent-behavior/"
       ],
+      "consults": [],
       "referenceIds": [
         "reference.process.failure-cards"
       ],

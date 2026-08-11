@@ -243,9 +243,10 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
 
   const latest = executions?.[0] ?? null;
   const earlier = executions && executions.length > 1 ? executions.slice(1, 4) : [];
-  // Never overclaim: until the engine can do hands-on steps itself, this section says what it
-  // actually does today — plan, check, verify, and route — using the server's own reason.
-  const canSelfServe = selfServe ? selfServe.available : true;
+  // Never overclaim: unknown means unavailable. Until the server has SAID the engine can do
+  // hands-on steps itself — not while loading, not after a failed check — this section describes
+  // the plan-check-route reality, using the server's own reason when it has one.
+  const canSelfServe = selfServe?.available === true;
 
   return (
     <Section
@@ -253,7 +254,7 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
       description={
         canSelfServe
           ? "Formation can execute launch work for this company. Every result is verified before it enters your workspace, and the consequential calls always come back to you."
-          : `${selfServe?.reason ?? "Formation plans and checks this company's launch and routes steps that need doing to you and your agents."} Every result is verified before it enters your workspace, and the consequential calls always come back to you.`
+          : `${selfServe?.reason ?? "Formation plans and checks this company's launch and routes steps that need doing to you and your team."} Every result is verified before it enters your workspace, and the consequential calls always come back to you.`
       }
     >
       {failed ? (
@@ -340,7 +341,7 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
               ) : (
                 <>
                   <h3>The work gets planned and routed</h3>
-                  <p>Each launch step becomes a clear brief with its own checks. Steps that need hands-on work come to you and your agents — the engine does not yet do them by itself.</p>
+                  <p>Each launch step becomes a clear brief with its own checks. Steps that need hands-on work come to you and your team — the engine does not yet do them by itself.</p>
                 </>
               )}
             </li>

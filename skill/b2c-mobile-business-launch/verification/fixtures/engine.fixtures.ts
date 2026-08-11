@@ -502,6 +502,26 @@ export function register(harness: Harness): void {
     assert(bare.verification.kind === "none", "a node with no outputs and no gates is the only remaining kind:none shape");
   });
 
+  harness.check("compile+frontier: authored reads gate readiness — read artifacts join inputs (own outputs and consults never do) and the frontier holds until they are accepted (Codex round 3)", () => {
+    const catalog = testCatalog();
+    const engineeringBuild = catalog.workflows.find((workflowNode) => workflowNode.id === "workflow.engineering-build")!;
+    engineeringBuild.dependencies = []; // deliberately no edge to the producer — the read alone must hold readiness
+    engineeringBuild.reads = ["research/brief.md", "foo"];
+    engineeringBuild.consults = ["growth/post.md"];
+    const plan = compilePlan(catalog, now);
+    const node = plan.nodes.find((candidate) => candidate.id === nodeId("engineering-build"))!;
+    assert(node.inputs.includes("artifact.research-brief"), "a read naming another workflow's artifact must join the node's inputs");
+    assert(!node.inputs.includes("artifact.engineering-build"), "a node's own output is the read-modify-write pattern, never an input");
+    assert(!node.inputs.includes("artifact.growth-post"), "a consult is open-if-present and must never gate");
+
+    const dayOne = seedFor([], plan);
+    const early = computeFrontier(plan, dayOne.run, dayOne.businessState, allowAllAutonomyEvaluator);
+    assert(!early.ready.includes(nodeId("engineering-build")), "the node must not be ready while its read artifact is unproduced, even with no dependency edge");
+    const afterResearch = seedFor(["research"], plan);
+    const later = computeFrontier(plan, afterResearch.run, afterResearch.businessState, allowAllAutonomyEvaluator);
+    assert(later.ready.includes(nodeId("engineering-build")), "the node becomes ready once the read artifact is produced and accepted");
+  });
+
   harness.check("node-brief: composeNodeBrief carries the full authored contract, and an unauthored node degrades to an explicit marker — never a silent title-only brief", () => {
     const plan = compilePlan(testCatalog(), now);
     const byId = new Map(plan.nodes.map((node) => [node.id, node]));

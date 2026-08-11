@@ -273,7 +273,11 @@ export const workflows = [
     trigger: "Before schema/auth prompts or engineering/TECH_SPEC.md data/API sections harden",
     instructions:
       "Pick one backend route (Supabase, Firebase, or custom), record the reason in engineering/TECH_SPEC.md's Backend Selection sub-section, and never silently substitute another route mid-build — a switch is a change-cascade event and a founder-only gate. Write the Data Model as one row per entity (owner, key fields, relationships, retention/deletion path, PII class) and the Authorization Model as a create/read/update/delete matrix expressed in the route's actual enforcement mechanism — RLS policies, Firestore security rules, or middleware authz — deny by default. Treat untested authorization as absent: exercise owner/anonymous/other-user access for every matrix row and record the exact test command and evidence path, not just 'RLS' in prose. Pass `npm run check:backend-contract -- --root . --state state/PROJECT_STATE.yaml`; the account-deletion promise in this contract's retention rules must match trust/PRIVACY.md's deletion promise exactly, not just approximately.",
-    reads: ["engineering/TECH_SPEC.md", "design/DESIGN.md", "trust/PRIVACY.md", "state/PROJECT_STATE.yaml"],
+    reads: ["engineering/TECH_SPEC.md", "state/PROJECT_STATE.yaml"],
+    // DESIGN.md and PRIVACY.md land after this node's phase-1f architecture firing — consults,
+    // so the early data contract is not held on later lanes; the deletion-promise exact-match is
+    // re-enforced by change-cascade once trust/PRIVACY.md exists.
+    consults: ["design/DESIGN.md", "trust/PRIVACY.md"],
     referenceIds: [
       "reference.engineering.backend-data-contract",
       "reference.process.flow-traceability",

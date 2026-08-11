@@ -64,7 +64,11 @@ export const workflows = [
     trigger: "Before threat modeling, hardening, scans, or any security-readiness claim",
     instructions:
       "Create or refresh `trust/SECURITY.md` early enough (phase 1g) to shape `engineering/TECH_SPEC.md`, `trust/PRIVACY.md`, and `revenue/REVENUE_OPS.md`, then re-verify it as the release gate (phase 5c) before beta/TestFlight/store submission. Cover every required section — threat model, mobile hardening (Keychain/ATS/App Attest for iOS, Keystore/Network Security Config/Play Integrity for Android), backend/API controls, and revenue/entitlement abuse (RevenueCat/Stripe webhook signature verification, restore-purchases testing) — and mark platforms not in scope explicitly rather than omitting the section. Security is proven with evidence, not prose: attach scanner/review results or a founder-approved blocked route from `strategy/TOOL_DECISIONS.md` for each paid security tool (Claude Security, Codex Security, MobSF, Snyk/Semgrep) before claiming a section done. `npm run check:security` verifies the SECURITY.md contract shape, not vulnerabilities — pair it with an actual scan or review, and get founder sign-off on any accepted residual risk with an owner and revisit date.",
-    reads: ["trust/SECURITY.md", "engineering/TECH_SPEC.md", "trust/PRIVACY.md", "revenue/REVENUE_OPS.md", "strategy/TOOL_DECISIONS.md"],
+    reads: ["trust/SECURITY.md", "engineering/TECH_SPEC.md", "strategy/TOOL_DECISIONS.md"],
+    // PRIVACY.md and REVENUE_OPS.md land at phase 3/3b, after this node's phase-1g threat-model
+    // firing — consults, so the early half is not held hostage to later lanes; the 5c release
+    // gate still cross-checks them via check:security once they exist.
+    consults: ["trust/PRIVACY.md", "revenue/REVENUE_OPS.md"],
     referenceIds: ["reference.trust.security-release-hardening", "reference.trust.privacy-terms"],
     roleId: "role.security-architect",
     laneIds: ["security"],
@@ -134,7 +138,10 @@ export const workflows = [
     trigger: 'App live (phase_6/6b), "what now", weekly ops, incident response, retention reviews',
     instructions:
       "Run the named Weekly Ops Review in fixed order — metrics pull (PostHog/RevenueCat/console numbers, not adjectives), crash/review triage, support sweep, ASO delta, growth/spend review against `growth/PAID_UA.md`'s stop/scale rules, then ship one user-visible improvement — and log a one-line delta per step in `operations/POST_LAUNCH_OPS.md` dated against `lanes.post_launch_ops.live_since`. Route involuntary billing churn through the recovery levers, not written off as normal, and when retention cohorts show a consistent drop at one step, open it through `change-cascade.md` rather than patching only the surface that failed. At the day-30 and day-90 checkpoints, prepare the Kill/Hold/Fix/Scale evidence pack (MRR trajectory, D7/D30 retention trend, CAC/LTV payback, founder hours) in `operations/LAUNCH_RETRO.md` — the agent assembles evidence, the founder makes the verdict. `check:post-launch` fails a checkpoint left uncompleted past its due date or a metric cell holding a placeholder instead of a number.",
-    reads: ["state/PROJECT_STATE.yaml", "operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md", "growth/PAID_UA.md"],
+    reads: ["state/PROJECT_STATE.yaml", "operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"],
+    // PAID_UA.md's producer is the spend node, which parks until the founder funds it — a launch
+    // that never buys ads still runs post-launch operations, so this is a consult.
+    consults: ["growth/PAID_UA.md"],
     referenceIds: [
       "reference.operations.post-launch-operations",
       "reference.growth.paid-user-acquisition",

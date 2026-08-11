@@ -19,6 +19,7 @@ function baseWorkflow(overrides: Partial<CatalogWorkflowDef> = {}): CatalogWorkf
     trigger: "fixture trigger",
     instructions: "Produce the fixture output artifact and stop; this synthetic contract exists only to satisfy validation.",
     reads: [],
+    consults: [],
     referenceIds: [],
     roleId: "role.fixture",
     laneIds: [],

@@ -118,13 +118,21 @@ export interface CatalogWorkflowDef {
   instructions: string;
   /**
    * Authored input contract: the workspace paths this node actually consumes (upstream artifacts
-   * and durable state files). Distinct from compile.ts's derived inputs (the union of dependency
-   * outputs, kept for readiness gating): `reads` is ground truth for what the worker should open,
-   * so a brief can say "read these" instead of "read everything upstream produced". Each entry
-   * must resolve to a declared artifact path or a workspace-template file
-   * (catalog_graph.workflow.read_unresolvable).
+   * and durable state files). `reads` is BLOCKING: compile.ts maps each entry that names another
+   * workflow's artifact into the node's inputs, so the frontier holds the node until that
+   * artifact is produced AND accepted (a read of the node's own output is the read-modify-write
+   * pattern and is excluded; durable state files gate nothing). A file this node merely
+   * cross-checks when it exists belongs in `consults`, not here. Each entry must resolve to a
+   * declared artifact path or a workspace-template file (catalog_graph.workflow.read_unresolvable).
    */
   reads: string[];
+  /**
+   * Open-if-present references: files the worker should consult WHEN they exist, without holding
+   * readiness on their producers (e.g. a phase-1 node that cross-checks a phase-3 artifact on its
+   * later firings). Same resolvability rule as reads (catalog_graph.workflow.consult_unresolvable);
+   * a path may not appear in both lists.
+   */
+  consults: string[];
   /**
    * Knowledge bound to this node (R20 completed: loadWhen text routed humans; this routes the
    * engine). Every id must exist in catalog/references.ts, and every non-sessionScoped reference

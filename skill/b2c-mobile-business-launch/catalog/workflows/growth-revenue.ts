@@ -88,7 +88,10 @@ export const workflows = [
     trigger: "Before the public announcement, launch-day run-of-show, or weekly release rhythm",
     instructions:
       "Write growth/LAUNCH_NARRATIVE.md covering the Fit Gate, feeling-first Launch Thesis, the Two Launch Types (rare tentpole vs. weekly feature-launch heartbeat), the Launch-Day Run-of-Show, and all post copy in fenced code blocks. Every post shapes a feeling before naming the feature and clears the 2026 DO-NOT-DO list: no hashtags, no emojis carrying the message, no link in the root post (first self-reply only), no seeded 'congrats!' replies, plus the no-slop-writing.md self-check. Public claims are limited to what is true and attributable — never launder the launch agency's own aggregate stats as this app's results — and any rage-bait line clears an ethics-guardrail review before it ships. Public posting, account connections, and paid amplification spend are founder-only gates that must be confirmed before launch goes live.",
-    reads: ["growth/VIRAL_GROWTH.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md", "growth/content-assets/CONTENT_ASSETS.md"],
+    reads: ["growth/VIRAL_GROWTH.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"],
+    // CONTENT_ASSETS.md is a consult: this node's phase-1e narrative-thesis firing predates the
+    // producer (phase 2/3); the phase-3/6 firings pick the hero asset up once it exists.
+    consults: ["growth/content-assets/CONTENT_ASSETS.md"],
     referenceIds: [
       "reference.growth.launch-narrative-cadence",
       "reference.words.no-slop-writing",

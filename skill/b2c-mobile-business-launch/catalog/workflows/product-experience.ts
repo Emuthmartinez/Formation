@@ -253,7 +253,11 @@ export const workflows = [
     trigger: 'Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or "premium feel"',
     instructions:
       "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give (celebration choreography, gesture physics, hero transitions), route to motion-craft-benchmarks.md's numbered recipes for the checkable acceptance criteria; check:motion-contract is what proves the tokens were actually used, not adjectives in design/DESIGN.md.",
-    reads: ["studio/seed/theme.tokens.json", "product/experience/ux-patterns/UX_PATTERNS.md"],
+    reads: ["studio/seed/theme.tokens.json"],
+    // UX_PATTERNS.md is a consult, not a read: its producer (ux-patterns-refero) can park
+    // indefinitely on paid-tool routing, and design/DESIGN.md sits upstream of half the launch —
+    // premium craft must not stall the graph waiting for optional pattern evidence.
+    consults: ["product/experience/ux-patterns/UX_PATTERNS.md"],
     referenceIds: ["reference.design.premium-mobile-craft", "reference.design.motion-craft-benchmarks"],
     roleId: "role.design-guru",
     laneIds: ["design"],

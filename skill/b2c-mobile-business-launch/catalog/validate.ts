@@ -144,7 +144,8 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     }
     // reads is the authored input contract: every entry must be a path some workflow produces or
     // a durable workspace file the template ships — an unresolvable read is a worker sent to open
-    // a file that will never exist.
+    // a file that will never exist. consults follows the same resolvability rule, and a path may
+    // not sit in both lists (blocking and open-if-present are contradictory claims).
     for (const read of workflow.reads) {
       if (!artifactsByPath.has(read) && !existsSync(path.join(skillRoot, "workspace/business", read))) {
         issues.push(
@@ -152,6 +153,21 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
             "catalog_graph.workflow.read_unresolvable",
             `${workflow.id} reads ${read}, which no workflow produces and the workspace template does not ship.`,
           ),
+        );
+      }
+    }
+    for (const consult of workflow.consults) {
+      if (!artifactsByPath.has(consult) && !existsSync(path.join(skillRoot, "workspace/business", consult))) {
+        issues.push(
+          error(
+            "catalog_graph.workflow.consult_unresolvable",
+            `${workflow.id} consults ${consult}, which no workflow produces and the workspace template does not ship.`,
+          ),
+        );
+      }
+      if (workflow.reads.includes(consult)) {
+        issues.push(
+          error("catalog_graph.workflow.read_consult_conflict", `${workflow.id} lists ${consult} as both a read (blocking) and a consult (open-if-present).`),
         );
       }
     }

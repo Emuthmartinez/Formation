@@ -324,8 +324,7 @@ export class ExecutionWorker {
     if (this.#executor) return { available: true };
     return {
       available: false,
-      reason:
-        "Formation plans and checks this company's launch and routes steps that need doing to you and your agents. It does not yet do hands-on steps by itself.",
+      reason: "Formation plans and checks this company's launch and routes steps that need doing to you and your team. It does not yet do hands-on steps by itself.",
     };
   }
 

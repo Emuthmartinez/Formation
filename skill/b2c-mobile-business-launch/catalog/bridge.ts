@@ -57,6 +57,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
     trigger: wf.trigger,
     instructions: wf.instructions,
     reads: wf.reads,
+    consults: wf.consults,
     references: wf.referenceIds.map((referenceId) => {
       const reference = referencesById.get(referenceId);
       if (!reference) throw new Error(`${wf.id} binds unknown reference ${referenceId}`);

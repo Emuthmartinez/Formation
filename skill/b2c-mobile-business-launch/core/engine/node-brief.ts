@@ -19,6 +19,8 @@ export interface NodeBrief {
   instructions: string;
   /** Workspace paths the worker should open, in authored order. */
   open: string[];
+  /** Open-if-present references — consulted when they exist, never a readiness gate. */
+  consult: string[];
   /** Knowledge to load before working: path plus the authored load condition. */
   load: Array<{ path: string; title: string; loadWhen: string }>;
   /** Declared outputs the worker must produce (workspace paths). */
@@ -40,6 +42,7 @@ export function composeNodeBrief(node: CompiledRunNode, plan: CompiledPlan): Nod
     role: node.role,
     instructions: node.instructions?.trim() || NOT_AUTHORED,
     open: node.reads ?? [],
+    consult: node.consults ?? [],
     load: (node.references ?? []).map((reference) => ({ path: reference.path, title: reference.title, loadWhen: reference.loadWhen })),
     produce: node.outputs.map((artifactId) => pathsByArtifactId.get(artifactId) ?? artifactId),
     verify: { kind: node.verification.kind, gateCommands: node.verification.gateIds, failClosed: node.verification.failClosed },
@@ -54,6 +57,7 @@ export function renderNodeBrief(brief: NodeBrief): string {
   if (brief.role) lines.push(`Role: ${brief.role.name} (${brief.role.promptPath})`);
   lines.push(`Do: ${brief.instructions}`);
   if (brief.open.length > 0) lines.push(`Open: ${brief.open.join(", ")}`);
+  if (brief.consult.length > 0) lines.push(`Consult when present: ${brief.consult.join(", ")}`);
   if (brief.load.length > 0) lines.push(`Load: ${brief.load.map((entry) => entry.path).join(", ")}`);
   if (brief.produce.length > 0) lines.push(`Produce: ${brief.produce.join(", ")}`);
   lines.push(

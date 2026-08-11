@@ -83,6 +83,7 @@ export interface CatalogWorkflowNode {
   trigger?: string;
   instructions?: string;
   reads?: string[];
+  consults?: string[];
   references?: NodeReference[];
   role?: NodeRole;
   dependencies: CatalogWorkflowId[];
@@ -116,6 +117,7 @@ export interface CompiledRunNode {
   trigger?: string;
   instructions?: string;
   reads?: string[];
+  consults?: string[];
   references?: NodeReference[];
   role?: NodeRole;
   inputs: CatalogArtifactId[];
@@ -176,8 +178,18 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
     const unknownDependency = workflow.dependencies.find((dependency) => !knownWorkflowIds.has(dependency));
     if (unknownDependency) throw new Error(`${workflow.id} depends on unknown workflow ${unknownDependency}`);
 
-    const inputs = unique(workflow.dependencies.flatMap((upstreamId) => outputsByWorkflow.get(upstreamId) ?? []));
     const outputs = outputsByWorkflow.get(workflow.id) ?? [];
+    // Inputs are the union of dependency outputs (edge topology) and authored reads that name
+    // another workflow's artifact (Codex round 3: a declared read is a readiness requirement —
+    // the frontier must not offer a node whose read target is still unproduced placeholder
+    // content). A read of the node's OWN output is the read-modify-write pattern and gates
+    // nothing; reads of durable state files map to no artifact and gate nothing; `consults`
+    // never gates by definition.
+    const ownOutputs = new Set(outputs);
+    const readArtifacts = (workflow.reads ?? [])
+      .map((readPath) => artifactsByPath.get(readPath))
+      .filter((artifactId): artifactId is CatalogArtifactId => Boolean(artifactId) && !ownOutputs.has(artifactId!));
+    const inputs = unique([...workflow.dependencies.flatMap((upstreamId) => outputsByWorkflow.get(upstreamId) ?? []), ...readArtifacts]);
     const judgment = JUDGMENT_DOMAINS.includes(workflow.domainId);
     const gateIds = workflow.gateCommands;
 
@@ -197,6 +209,7 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
       trigger: workflow.trigger,
       instructions: workflow.instructions,
       reads: workflow.reads,
+      consults: workflow.consults,
       references: workflow.references,
       role: workflow.role,
       inputs,
