@@ -53,6 +53,9 @@ Required fields per asset:
 
 Optional fields for Higgsfield / Marketing Studio assets:
 - `prompt_brief` — the `design/DESIGN.md` tokens carried into the generation prompt
+- `script_id` — REQUIRED for UGC-family assets (`ugc`, `ugc_how_to`, `ugc_unboxing`, `product_review`, Recipe 7): the `ugc/script-bank.md` entry that survived the judge panel
+- `judge_verdict` — REQUIRED for UGC-family assets: the panel result; must not read pending at a done-tier status
+- `believability` — REQUIRED for UGC-family assets before a done-tier status: one real human who did not make the clip watched it; record the result
 - `soul_reference_id` / `avatar_id` — reused Soul identity, mirrored in `state/PROJECT_STATE.yaml` `tools.higgsfield.identity`
 - `webproduct_id` — Marketing Studio product/webproduct entity
 - `source_job_id` — origin job for `reframe`/`personal_clipper` derivatives

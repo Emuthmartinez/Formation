@@ -165,6 +165,74 @@ export function register(h: Harness): void {
     "content_assets.manifest.assets.0.prompt_brief.missing",
   );
 
+  const ugcAsset = (overrides: Record<string, unknown>): Record<string, unknown> => ({
+    asset_id: "believable-person-ugc",
+    surface: "tiktok_paid",
+    route: "higgsfield_marketing_studio",
+    status: "draft",
+    dimensions: "1080x1920",
+    prompt_brief: "design/DESIGN.md palette and banned aesthetics for the app UI in frame; realism register for person and scene",
+    inputs: ["design/DESIGN.md", "ugc/script-bank.md"],
+    outputs: ["growth/content-assets/out/believable-person-ugc.mp4"],
+    truth_constraints: ["spoken claims match the product"],
+    approvals: ["founder approval before public posting"],
+    render_proof: "higgsfield generate create marketing_studio_video --mode ugc --aspect_ratio 9:16 --wait",
+    license_status: "Higgsfield account/credit route",
+    ...overrides,
+  });
+
+  const writeUgcManifest = (root: string, asset: Record<string, unknown>): void => {
+    mkdirSync(path.join(root, "growth", "content-assets"), { recursive: true });
+    writeFileSync(path.join(root, "growth", "content-assets", "manifest.json"), JSON.stringify({ assets: [asset] }, null, 2), "utf8");
+  };
+
+  const ugcNoScript = makeFixture("content-ugc-no-script");
+  writeUgcManifest(ugcNoScript, ugcAsset({}));
+  runFixture(
+    "UGC-family manifest asset without script_id and judge_verdict fails",
+    ugcNoScript,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.missing_for_ugc",
+  );
+
+  const ugcApprovedNoBelievability = makeFixture("content-ugc-approved-no-believability");
+  writeUgcManifest(
+    ugcApprovedNoBelievability,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived the judge panel 2026-08-10; pacing and vocabulary judges passed on rewrite 2",
+    }),
+  );
+  runFixture(
+    "approved UGC-family asset without a believability result fails",
+    ugcApprovedNoBelievability,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.believability.missing_for_ugc",
+  );
+
+  const ugcComplete = makeFixture("content-ugc-complete");
+  writeUgcManifest(
+    ugcComplete,
+    ugcAsset({
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived the judge panel 2026-08-10; pacing and vocabulary judges passed on rewrite 2",
+      believability: "watched by one human who did not make it 2026-08-10; not clocked as AI or ad",
+    }),
+  );
+  runFixture(
+    "UGC-family asset with script_id, judge_verdict, and believability passes",
+    ugcComplete,
+    "check-content-assets.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "missing_for_ugc",
+  );
+
   const paidUaMissing = makeFixture("paid-ua-missing");
   rmSync(path.join(paidUaMissing, "growth", "PAID_UA.md"), { force: true });
   runFixture("missing paid UA packet fails", paidUaMissing, "check-paid-user-acquisition.ts", 1, "paid_ua.markdown_missing");

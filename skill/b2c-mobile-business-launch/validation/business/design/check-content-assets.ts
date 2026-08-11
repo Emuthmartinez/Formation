@@ -274,6 +274,61 @@ if (manifestText) {
       }
     }
 
+    // UGC-family assets (Marketing Studio ugc/ugc_how_to/ugc_unboxing/product_review
+    // modes, or the Recipe 7 Seedance believable-person path) carry two gates the
+    // knowledge layer alone cannot enforce: a script that survived the judge panel
+    // (ugc-creator-engine.md, Script Bank And Judge Panel) and a recorded human
+    // believability result before any done-tier status. asset_id is excluded from
+    // the signal on purpose — a name like "founder-ugc-ad" is not a mode claim.
+    const ugcSignals = [route, asString(asset.mode) ?? "", asString(asset.render_proof) ?? ""].join(" ");
+    if (/\bugc(?:_how_to|_unboxing)?\b|\bproduct_review\b/i.test(ugcSignals)) {
+      if (!(asString(asset.script_id) ?? "").trim()) {
+        issues.push(
+          issue(
+            "error",
+            `content_assets.manifest.assets.${index}.script_id.missing_for_ugc`,
+            `Manifest asset ${index} is a UGC-family generation but records no script_id pointing into ugc/script-bank.md. UGC generation without a judged script is a named failure mode.`,
+            manifestText.relativePath,
+          ),
+        );
+      }
+      const judgeVerdict = asString(asset.judge_verdict) ?? "";
+      if (!judgeVerdict.trim()) {
+        issues.push(
+          issue(
+            "error",
+            `content_assets.manifest.assets.${index}.judge_verdict.missing_for_ugc`,
+            `Manifest asset ${index} is a UGC-family generation but records no judge_verdict. The script must survive the judge panel (ugc-creator-engine.md) before generation spend; record the verdict.`,
+            manifestText.relativePath,
+          ),
+        );
+      }
+      const ugcStatus = asString(asset.status)?.toLowerCase() ?? "";
+      if (["done", "ready", "production", "approved"].includes(ugcStatus)) {
+        if (/\bpending\b/i.test(judgeVerdict)) {
+          issues.push(
+            issue(
+              "error",
+              `content_assets.manifest.assets.${index}.judge_verdict.pending_at_done`,
+              `Manifest asset ${index} has status "${ugcStatus}" but judge_verdict still reads pending. A UGC asset cannot reach a done-tier status before the panel verdict is recorded.`,
+              manifestText.relativePath,
+            ),
+          );
+        }
+        const believability = asString(asset.believability) ?? "";
+        if (!believability.trim() || /\bpending\b/i.test(believability)) {
+          issues.push(
+            issue(
+              "error",
+              `content_assets.manifest.assets.${index}.believability.missing_for_ugc`,
+              `Manifest asset ${index} has status "${ugcStatus}" but records no completed believability result. One real human who did not make the clip must watch it before a done-tier status (UGC Realism Prompt Structure, Recipe 7).`,
+              manifestText.relativePath,
+            ),
+          );
+        }
+      }
+    }
+
     maybeRequireDoneOutputs(asset, index, manifestText.relativePath);
   }
 }
