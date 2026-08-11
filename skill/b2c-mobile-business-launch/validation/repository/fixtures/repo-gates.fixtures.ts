@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, skillRoot } from "./_harness.js";
 import { artifactPageEntries } from "../../../tooling/lib/artifact-pages.js";
@@ -1215,7 +1215,20 @@ export function register(h: Harness): void {
   // status of empty adverbs/phrases could actually fire. The real
   // no-slop-writing.md is copied in rather than a fixture-only word list, so a
   // rule added there is exercised here without duplicating it.
-  runScriptArgs("no-slop passes on the shipped repo's own front door", "check-no-slop.ts", ["--skill-root", skillRoot], 0);
+  // The installed skill runtime intentionally contains only the skill package,
+  // not the Formation repository's public front-door files. Exercise this
+  // repository-positive control only when the checkout's actual front door is
+  // present; the synthetic positive/negative controls below still run in both
+  // source and installed-runtime audits.
+  const shippedRepoRoot = path.resolve(skillRoot, "../..");
+  if (
+    existsSync(path.join(shippedRepoRoot, "README.md")) &&
+    existsSync(path.join(shippedRepoRoot, "CONTRIBUTING.md")) &&
+    existsSync(path.join(shippedRepoRoot, ".github", "SECURITY.md")) &&
+    existsSync(path.join(shippedRepoRoot, ".github", "CODE_OF_CONDUCT.md"))
+  ) {
+    runScriptArgs("no-slop passes on the shipped repo's own front door", "check-no-slop.ts", ["--repo-root", shippedRepoRoot, "--skill-root", skillRoot], 0);
+  }
 
   function writeNoSlopRoot(name: string, overrides: Partial<Record<string, string>> = {}): { repoRoot: string; skillRoot: string } {
     const root = makeEmptyFixture(name);

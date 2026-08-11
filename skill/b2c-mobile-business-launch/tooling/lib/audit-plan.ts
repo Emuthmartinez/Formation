@@ -112,7 +112,14 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:template-safety", kind: "script" },
     { id: "check:founder-copy", kind: "script", args: [...rootArgs, "--skill-root", S] },
     { id: "check:app-copy", kind: "script", args: [...stateArgs, "--skill-root", S] },
-    { id: "check:no-slop", kind: "script", args: ["--skill-root", S] },
+    {
+      id: "check:no-slop",
+      kind: "script",
+      // The installed skill package deliberately does not ship Formation's
+      // repository-level front-door files. LaunchBench still exercises the
+      // checker's synthetic positive and negative controls in both layouts.
+      args: layout === "repo" ? ["--skill-root", S] : ["--skill-root", S, "--skip-repo-front-door"],
+    },
     { id: "check:documentation-ste100", kind: "script", args: ["--skill-root", S] },
     { id: "check:founder-operator", kind: "script", args: stateArgs },
     { id: "check:agent-operations", kind: "script", args: stateArgs },

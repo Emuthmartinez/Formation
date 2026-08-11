@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { type Harness, writeCompletePaidUserAcquisition } from "./_harness.js";
 
@@ -163,6 +163,370 @@ export function register(h: Harness): void {
     "check-content-assets.ts",
     1,
     "content_assets.manifest.assets.0.prompt_brief.missing",
+  );
+
+  const ugcAsset = (overrides: Record<string, unknown>): Record<string, unknown> => ({
+    asset_id: "believable-person-ugc",
+    surface: "tiktok_paid",
+    route: "higgsfield_marketing_studio",
+    asset_kind: "ugc",
+    status: "draft",
+    dimensions: "1080x1920",
+    prompt_brief: "design/DESIGN.md palette and banned aesthetics for the app UI in frame; realism register for person and scene",
+    inputs: ["design/DESIGN.md", "ugc/script-bank.md"],
+    outputs: ["growth/content-assets/out/believable-person-ugc.mp4"],
+    truth_constraints: ["spoken claims match the product"],
+    approvals: ["founder approval before public posting"],
+    render_proof: "higgsfield generate create marketing_studio_video --mode ugc --aspect_ratio 9:16 --wait",
+    license_status: "Higgsfield account/credit route",
+    ...overrides,
+  });
+
+  const writeUgcManifest = (root: string, asset: Record<string, unknown>): void => {
+    mkdirSync(path.join(root, "growth", "content-assets"), { recursive: true });
+    writeFileSync(path.join(root, "growth", "content-assets", "manifest.json"), JSON.stringify({ assets: [asset] }, null, 2), "utf8");
+  };
+
+  // A real surviving row (FMT-002) beside the template's placeholder FMT-001 row,
+  // so done-tier fixtures can reference a script that actually passed the panel.
+  const writeSurvivingScriptRow = (root: string): void => {
+    mkdirSync(path.join(root, "ugc"), { recursive: true });
+    writeFileSync(
+      path.join(root, "ugc", "script-bank.md"),
+      [
+        "# UGC Script Bank",
+        "",
+        "| Format ID | Hook | Script | Judge verdict | Judge notes | CTA mechanic | Product insertion |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| FMT-001 | replace with the surviving hook line | replace with the surviving script text | pending | notes | app search | app screen |",
+        "| FMT-002 | ur telling me this app tracked it for free | i wasnt going to post this but the screen is right there | survived — panel 2026-08-10, passed on rewrite 2 | pacing tight, vocab natural | app search | app screen visible mid-script |",
+      ].join("\n"),
+      "utf8",
+    );
+  };
+
+  const ugcNoScript = makeFixture("content-ugc-no-script");
+  writeUgcManifest(ugcNoScript, ugcAsset({}));
+  runFixture(
+    "UGC-family manifest asset without script_id and judge_verdict fails",
+    ugcNoScript,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.missing_for_ugc",
+  );
+
+  // A Recipe 7 asset routed as bare Seedance carries no "ugc" token anywhere —
+  // the exact dodge the asset_kind requirement exists to close.
+  const seedanceNoKind = makeFixture("content-seedance-no-asset-kind");
+  writeUgcManifest(
+    seedanceNoKind,
+    ugcAsset({
+      asset_kind: undefined,
+      route: "higgsfield_seedance_2_5",
+      render_proof: "higgsfield generate create seedance_2_5 --image first-frame.png --duration 15 --aspect_ratio 9:16 --wait",
+    }),
+  );
+  runFixture(
+    "generated Seedance video without asset_kind fails",
+    seedanceNoKind,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.asset_kind.missing_for_generated_video",
+  );
+
+  const ugcUnrecordedScript = makeFixture("content-ugc-unrecorded-script");
+  writeUgcManifest(
+    ugcUnrecordedScript,
+    ugcAsset({
+      script_id: "ugc/script-bank.md#FMT-999",
+      judge_verdict: "survived — panel 2026-08-10",
+    }),
+  );
+  runFixture(
+    "UGC asset whose script_id names an unrecorded script fails",
+    ugcUnrecordedScript,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.anchor_unrecorded",
+  );
+
+  const ugcFailedVerdict = makeFixture("content-ugc-failed-verdict");
+  writeUgcManifest(
+    ugcFailedVerdict,
+    ugcAsset({
+      script_id: "ugc/script-bank.md#FMT-001",
+      judge_verdict: "rejected by the panel after rewrite 3",
+    }),
+  );
+  runFixture(
+    "UGC asset with a failing judge_verdict fails at any status",
+    ugcFailedVerdict,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.judge_verdict.failed",
+  );
+
+  const ugcWrongBank = makeFixture("content-ugc-wrong-bank");
+  writeUgcManifest(
+    ugcWrongBank,
+    ugcAsset({
+      script_id: "growth/UGC_PLAYBOOK.md#FMT-001",
+      judge_verdict: "survived — panel 2026-08-10",
+    }),
+  );
+  runFixture(
+    "UGC asset whose script_id points outside a script-bank file fails",
+    ugcWrongBank,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.bank_not_script_bank",
+  );
+
+  const ugcPlaceholderRow = makeFixture("content-ugc-placeholder-row");
+  writeUgcManifest(
+    ugcPlaceholderRow,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-001",
+      judge_verdict: "survived — panel 2026-08-10",
+      believability: "passed — watched by one human who did not make it",
+    }),
+  );
+  runFixture(
+    "approved UGC asset referencing the placeholder template row fails",
+    ugcPlaceholderRow,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.row_placeholder",
+  );
+
+  const ugcNegatedVerdict = makeFixture("content-ugc-negated-verdict");
+  writeSurvivingScriptRow(ugcNegatedVerdict);
+  writeUgcManifest(
+    ugcNegatedVerdict,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "not passed — panel did not approve",
+      believability: "passed — watched by one human who did not make it",
+    }),
+  );
+  runFixture(
+    "approved UGC asset with a negated pass judge_verdict fails",
+    ugcNegatedVerdict,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.judge_verdict.not_passing",
+  );
+
+  const ugcNegatedBelievability = makeFixture("content-ugc-negated-believability");
+  writeSurvivingScriptRow(ugcNegatedBelievability);
+  writeUgcManifest(
+    ugcNegatedBelievability,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived — panel 2026-08-10",
+      believability: "not passed — viewer identified it as AI",
+    }),
+  );
+  runFixture(
+    "approved UGC asset with a negated pass believability fails",
+    ugcNegatedBelievability,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.believability.not_passing",
+  );
+
+  const escapeBankFor = (root: string): string => {
+    const escapeDir = path.join(root, "..", `${path.basename(root)}-escape-ugc`);
+    mkdirSync(escapeDir, { recursive: true });
+    writeFileSync(
+      path.join(escapeDir, "script-bank.md"),
+      [
+        "| Format ID | Hook | Script | Judge verdict | Judge notes | CTA mechanic | Product insertion |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| FMT-002 | outside hook | outside script | survived — panel 2026-08-10 | notes | app search | app screen |",
+      ].join("\n"),
+      "utf8",
+    );
+    return escapeDir;
+  };
+
+  const ugcTraversalBank = makeFixture("content-ugc-traversal-bank");
+  const traversalEscapeDir = escapeBankFor(ugcTraversalBank);
+  writeUgcManifest(
+    ugcTraversalBank,
+    ugcAsset({
+      script_id: `../${path.basename(traversalEscapeDir)}/script-bank.md#FMT-002`,
+      judge_verdict: "survived — panel 2026-08-10",
+    }),
+  );
+  runFixture(
+    "UGC asset whose script_id traverses outside the workspace fails",
+    ugcTraversalBank,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.bank_outside_workspace",
+  );
+
+  const ugcSymlinkBank = makeFixture("content-ugc-symlink-bank");
+  const symlinkEscapeDir = escapeBankFor(ugcSymlinkBank);
+  rmSync(path.join(ugcSymlinkBank, "ugc", "script-bank.md"), { force: true });
+  mkdirSync(path.join(ugcSymlinkBank, "ugc"), { recursive: true });
+  symlinkSync(path.join(symlinkEscapeDir, "script-bank.md"), path.join(ugcSymlinkBank, "ugc", "script-bank.md"));
+  writeUgcManifest(
+    ugcSymlinkBank,
+    ugcAsset({
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived — panel 2026-08-10",
+    }),
+  );
+  runFixture(
+    "UGC asset whose script bank is a symlink escaping the workspace fails",
+    ugcSymlinkBank,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.script_id.bank_outside_workspace",
+  );
+
+  const ugcSpentDraft = makeFixture("content-ugc-spent-draft");
+  writeSurvivingScriptRow(ugcSpentDraft);
+  mkdirSync(path.join(ugcSpentDraft, "growth", "content-assets", "out"), { recursive: true });
+  writeFileSync(path.join(ugcSpentDraft, "growth", "content-assets", "out", "believable-person-ugc.mp4"), "fixture-bytes", "utf8");
+  writeUgcManifest(
+    ugcSpentDraft,
+    ugcAsset({
+      status: "draft",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "pending — panel booked for next week",
+    }),
+  );
+  runFixture(
+    "draft UGC asset with generated output but no passing verdict fails",
+    ugcSpentDraft,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.judge_verdict.not_passing",
+  );
+
+  const seedanceNoBrief = makeFixture("content-seedance-no-brief");
+  writeSurvivingScriptRow(seedanceNoBrief);
+  writeUgcManifest(
+    seedanceNoBrief,
+    ugcAsset({
+      prompt_brief: undefined,
+      route: "seedance_2_5",
+      render_proof: "higgsfield generate create seedance_2_5 --image first-frame.png --duration 15 --aspect_ratio 9:16 --wait",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived — panel 2026-08-10",
+    }),
+  );
+  runFixture(
+    "bare Seedance route without prompt_brief fails",
+    seedanceNoBrief,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.prompt_brief.missing",
+  );
+
+  const ugcSpentRemoteJob = makeFixture("content-ugc-spent-remote-job");
+  writeSurvivingScriptRow(ugcSpentRemoteJob);
+  writeUgcManifest(
+    ugcSpentRemoteJob,
+    ugcAsset({
+      status: "draft",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "pending — panel booked for next week",
+      source_job_id: "hf-job-8271",
+    }),
+  );
+  runFixture(
+    "draft UGC asset with a provider job id but no passing verdict fails",
+    ugcSpentRemoteJob,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.judge_verdict.not_passing",
+  );
+
+  const ugcSpentRemoteUrl = makeFixture("content-ugc-spent-remote-url");
+  writeSurvivingScriptRow(ugcSpentRemoteUrl);
+  writeUgcManifest(
+    ugcSpentRemoteUrl,
+    ugcAsset({
+      status: "draft",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "pending — panel booked for next week",
+      outputs: ["https://example.com/generations/believable-person-ugc.mp4"],
+    }),
+  );
+  runFixture(
+    "draft UGC asset with a remote output URL but no passing verdict fails",
+    ugcSpentRemoteUrl,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.judge_verdict.not_passing",
+  );
+
+  const ugcApprovedNoBelievability = makeFixture("content-ugc-approved-no-believability");
+  writeSurvivingScriptRow(ugcApprovedNoBelievability);
+  writeUgcManifest(
+    ugcApprovedNoBelievability,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived — panel 2026-08-10; pacing and vocabulary judges passed on rewrite 2",
+    }),
+  );
+  runFixture(
+    "approved UGC-family asset without a believability result fails",
+    ugcApprovedNoBelievability,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.believability.missing_for_ugc",
+  );
+
+  const ugcFailedBelievability = makeFixture("content-ugc-failed-believability");
+  writeSurvivingScriptRow(ugcFailedBelievability);
+  writeUgcManifest(
+    ugcFailedBelievability,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived — panel 2026-08-10",
+      believability: "failed — viewer identified it as AI and as an ad",
+    }),
+  );
+  runFixture(
+    "approved UGC-family asset with a failed believability result fails",
+    ugcFailedBelievability,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.believability.failed",
+  );
+
+  const ugcComplete = makeFixture("content-ugc-complete");
+  writeSurvivingScriptRow(ugcComplete);
+  mkdirSync(path.join(ugcComplete, "growth", "content-assets", "out"), { recursive: true });
+  writeFileSync(path.join(ugcComplete, "growth", "content-assets", "out", "believable-person-ugc.mp4"), "fixture-bytes", "utf8");
+  writeUgcManifest(
+    ugcComplete,
+    ugcAsset({
+      status: "approved",
+      script_id: "ugc/script-bank.md#FMT-002",
+      judge_verdict: "survived — panel 2026-08-10; pacing and vocabulary judges passed on rewrite 2",
+      believability: "passed — watched by one human who did not make it 2026-08-10; not clocked as AI or ad",
+    }),
+  );
+  runFixture(
+    "approved UGC-family asset with surviving script row, passing verdict, and passing believability passes",
+    ugcComplete,
+    "check-content-assets.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "_for_ugc",
   );
 
   const paidUaMissing = makeFixture("paid-ua-missing");

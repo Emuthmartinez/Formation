@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import path from "node:path";
 import {
   asArray,
@@ -251,14 +251,32 @@ if (manifestText) {
       }
     }
 
-    if (route && (route.includes("higgsfield") || route.includes("marketing_studio"))) {
+    // UGC-family assets (Marketing Studio ugc/ugc_how_to/ugc_unboxing/product_review
+    // modes, or the Recipe 7 Seedance believable-person path) carry gates the
+    // knowledge layer alone cannot enforce: a script that survived the judge panel
+    // (ugc-creator-engine.md, Script Bank And Judge Panel) and a passing human
+    // believability result before any done-tier status. asset_id is excluded from
+    // the signal on purpose — a name like "founder-ugc-ad" is not a mode claim.
+    // Provider text alone cannot be trusted either: a Recipe 7 route such as
+    // seedance_2_5 carries no "ugc" token, so every generated-video asset must
+    // classify itself via asset_kind. Silence is not a classification.
+    const renderProofText = asString(asset.render_proof) ?? "";
+    const assetKind = asString(asset.asset_kind)?.trim().toLowerCase() ?? "";
+    const looksUgc = /\bugc(?:_how_to|_unboxing)?\b|\bproduct_review\b/i.test([route, asString(asset.mode) ?? "", renderProofText, assetKind].join(" "));
+    const KNOWN_VIDEO_ASSET_KINDS = ["ugc", "product_ad", "b_roll", "demo", "app_preview"];
+    const isGeneratedVideo = /\bseedance|marketing_studio|cinema_studio|\bveo\b/i.test(`${route} ${renderProofText}`);
+
+    // The brief requirement keys on generation, not on one provider's name: a
+    // bare seedance_2_5 route generates just as much UI-bearing video as a
+    // higgsfield_* route does.
+    if ((route && (route.includes("higgsfield") || route.includes("marketing_studio"))) || isGeneratedVideo) {
       const promptBrief = asString(asset.prompt_brief) ?? "";
       if (!promptBrief.trim()) {
         issues.push(
           issue(
             "error",
             `content_assets.manifest.assets.${index}.prompt_brief.missing`,
-            `Manifest asset ${index} uses a Higgsfield/Marketing Studio route but records no prompt_brief carrying the design/DESIGN.md tokens used for generation. Generating without the design/DESIGN.md brief is a named failure mode.`,
+            `Manifest asset ${index} uses a generated-media route but records no prompt_brief carrying the design/DESIGN.md tokens used for generation. Generating without the design/DESIGN.md brief is a named failure mode.`,
             manifestText.relativePath,
           ),
         );
@@ -271,6 +289,229 @@ if (manifestText) {
             manifestText.relativePath,
           ),
         );
+      }
+    }
+    if (isGeneratedVideo && !KNOWN_VIDEO_ASSET_KINDS.includes(assetKind)) {
+      issues.push(
+        issue(
+          "error",
+          `content_assets.manifest.assets.${index}.asset_kind.missing_for_generated_video`,
+          `Manifest asset ${index} is a generated video but declares no recognized asset_kind (one of: ${KNOWN_VIDEO_ASSET_KINDS.join(", ")}). "ugc" activates the script/judge/believability gates; a believable-person clip must not hide behind a provider route name.`,
+          manifestText.relativePath,
+        ),
+      );
+    }
+    if (assetKind === "ugc" || looksUgc) {
+      const ugcStatus = asString(asset.status)?.toLowerCase() ?? "";
+      const ugcDoneTier = ["done", "ready", "production", "approved"].includes(ugcStatus);
+      // Generation evidence activates the gate even at draft status — otherwise a
+      // planned template entry and a spent clip look identical. Evidence is an
+      // output file on disk, a remote output URL, or a provider job id: a
+      // provider-backed generation spends credits before any file is downloaded.
+      const generationOccurred =
+        Boolean((asString(asset.source_job_id) ?? "").trim()) ||
+        asArray(asset.outputs)
+          .map(asString)
+          .filter((item): item is string => Boolean(item?.trim()))
+          .some(
+            (output) =>
+              /^[a-z][a-z0-9+.-]*:\/\//i.test(output) || (!/^[a-z]+:/i.test(output) && !output.startsWith("#") && existsSync(path.join(args.root, output))),
+          );
+      const scriptGateActive = ugcDoneTier || generationOccurred;
+      const scriptGateReason = ugcDoneTier ? `status "${ugcStatus}"` : "generated output on disk";
+      const scriptId = (asString(asset.script_id) ?? "").trim();
+      if (!scriptId) {
+        issues.push(
+          issue(
+            "error",
+            `content_assets.manifest.assets.${index}.script_id.missing_for_ugc`,
+            `Manifest asset ${index} is a UGC-family generation but records no script_id pointing into ugc/script-bank.md. UGC generation without a judged script is a named failure mode.`,
+            manifestText.relativePath,
+          ),
+        );
+      } else {
+        // script_id must resolve to a durable script-bank row: `<path>#<format-id>`.
+        // A nonempty string that names no recorded script is not a script gate, and
+        // a token found in an unrelated file is not a script bank.
+        const hashIndex = scriptId.indexOf("#");
+        const bankFile = hashIndex >= 0 ? scriptId.slice(0, hashIndex).trim() : "";
+        const anchorToken =
+          hashIndex >= 0
+            ? (scriptId
+                .slice(hashIndex + 1)
+                .trim()
+                .split(/\s+/)[0] ?? "")
+            : "";
+        if (!bankFile || !anchorToken) {
+          issues.push(
+            issue(
+              "error",
+              `content_assets.manifest.assets.${index}.script_id.unparseable`,
+              `Manifest asset ${index} script_id must be "<script-bank path>#<format-id>" (example: ugc/script-bank.md#FMT-001), got: ${scriptId}.`,
+              manifestText.relativePath,
+            ),
+          );
+        } else if (!/script-bank\.md$/i.test(bankFile)) {
+          issues.push(
+            issue(
+              "error",
+              `content_assets.manifest.assets.${index}.script_id.bank_not_script_bank`,
+              `Manifest asset ${index} script_id points at ${bankFile}, which is not a script-bank.md file. A format id found in an unrelated file is not a recorded script.`,
+              manifestText.relativePath,
+            ),
+          );
+        } else {
+          // The bank must live inside the audited workspace: a traversal path or a
+          // symlink pointing at another checkout would make the audit depend on
+          // host files outside this business.
+          const lexicalRoot = path.resolve(args.root);
+          const lexicalBank = path.resolve(args.root, bankFile);
+          const insideLexically = lexicalBank === lexicalRoot || lexicalBank.startsWith(lexicalRoot + path.sep);
+          if (!insideLexically) {
+            issues.push(
+              issue(
+                "error",
+                `content_assets.manifest.assets.${index}.script_id.bank_outside_workspace`,
+                `Manifest asset ${index} script_id resolves outside the audited workspace: ${bankFile}. The script bank must live inside this business.`,
+                manifestText.relativePath,
+              ),
+            );
+          } else if (!existsSync(lexicalBank)) {
+            issues.push(
+              issue(
+                "error",
+                `content_assets.manifest.assets.${index}.script_id.bank_missing`,
+                `Manifest asset ${index} script_id points at ${bankFile}, but that script bank does not exist. Record the judged script before generation spend.`,
+                manifestText.relativePath,
+              ),
+            );
+          } else {
+            const realRoot = realpathSync(lexicalRoot);
+            const realBank = realpathSync(lexicalBank);
+            if (!(realBank === realRoot || realBank.startsWith(realRoot + path.sep))) {
+              issues.push(
+                issue(
+                  "error",
+                  `content_assets.manifest.assets.${index}.script_id.bank_outside_workspace`,
+                  `Manifest asset ${index} script_id resolves outside the audited workspace via a symlink: ${bankFile}. The script bank must live inside this business.`,
+                  manifestText.relativePath,
+                ),
+              );
+            } else {
+              // The row is the durable evidence: the Format ID cell must equal the
+              // id, and once the asset reaches a done-tier status OR generation
+              // has already happened, the row itself must hold a surviving,
+              // non-placeholder script — a resolvable pointer to a pending
+              // template row is not a script gate either.
+              const bankRow = (readText(args.root, bankFile) ?? "").split(/\r?\n/).find((line) => {
+                if (!line.trimStart().startsWith("|")) {
+                  return false;
+                }
+                return (line.split("|")[1] ?? "").trim() === anchorToken;
+              });
+              if (!bankRow) {
+                issues.push(
+                  issue(
+                    "error",
+                    `content_assets.manifest.assets.${index}.script_id.anchor_unrecorded`,
+                    `Manifest asset ${index} script_id names ${anchorToken}, but ${bankFile} has no table row whose Format ID cell is ${anchorToken}. The script bank row is the durable evidence the panel ran.`,
+                    manifestText.relativePath,
+                  ),
+                );
+              } else if (scriptGateActive) {
+                const cells = bankRow.split("|").map((cell) => cell.trim());
+                const hookCell = cells[2] ?? "";
+                const scriptCell = cells[3] ?? "";
+                const rowVerdict = cells[4] ?? "";
+                if (!hookCell || !scriptCell || /\breplace with\b/i.test(`${hookCell} ${scriptCell}`)) {
+                  issues.push(
+                    issue(
+                      "error",
+                      `content_assets.manifest.assets.${index}.script_id.row_placeholder`,
+                      `Manifest asset ${index} has ${scriptGateReason} but the referenced ${anchorToken} row still holds placeholder hook/script text. The panel runs before generation spend; record the real surviving script.`,
+                      manifestText.relativePath,
+                    ),
+                  );
+                } else if (!/^(passed|survived)\b/i.test(rowVerdict)) {
+                  issues.push(
+                    issue(
+                      "error",
+                      `content_assets.manifest.assets.${index}.script_id.row_not_passing`,
+                      `Manifest asset ${index} has ${scriptGateReason} but the ${anchorToken} row's Judge verdict cell does not start with "passed" or "survived". The bank row and the manifest verdict must agree.`,
+                      manifestText.relativePath,
+                    ),
+                  );
+                }
+              }
+            }
+          }
+        }
+      }
+      const judgeVerdict = asString(asset.judge_verdict) ?? "";
+      if (!judgeVerdict.trim()) {
+        issues.push(
+          issue(
+            "error",
+            `content_assets.manifest.assets.${index}.judge_verdict.missing_for_ugc`,
+            `Manifest asset ${index} is a UGC-family generation but records no judge_verdict. The script must survive the judge panel (ugc-creator-engine.md) before generation spend; record "passed — <detail>" or "survived — <detail>".`,
+            manifestText.relativePath,
+          ),
+        );
+      } else if (/\b(failed|rejected)\b/i.test(judgeVerdict)) {
+        issues.push(
+          issue(
+            "error",
+            `content_assets.manifest.assets.${index}.judge_verdict.failed`,
+            `Manifest asset ${index} records a failing judge_verdict. A script that failed the panel does not generate; this asset should not exist. Kill the asset or re-run the panel on a rewrite.`,
+            manifestText.relativePath,
+          ),
+        );
+      }
+      if (scriptGateActive) {
+        // Prefix parse, not substring search: "not passed — ..." must not read as
+        // a pass. Active at done-tier statuses AND once generation has happened —
+        // the panel runs before spend, so a spent draft needs a passing verdict too.
+        if (!/^\s*(passed|survived)\b/i.test(judgeVerdict)) {
+          issues.push(
+            issue(
+              "error",
+              `content_assets.manifest.assets.${index}.judge_verdict.not_passing`,
+              `Manifest asset ${index} has ${scriptGateReason} but judge_verdict does not start with "passed" or "survived". The panel verdict comes before generation spend; record "passed — <detail>" or "survived — <detail>".`,
+              manifestText.relativePath,
+            ),
+          );
+        }
+      }
+      if (ugcDoneTier) {
+        const believability = asString(asset.believability) ?? "";
+        if (!believability.trim() || /\bpending\b/i.test(believability)) {
+          issues.push(
+            issue(
+              "error",
+              `content_assets.manifest.assets.${index}.believability.missing_for_ugc`,
+              `Manifest asset ${index} has status "${ugcStatus}" but records no completed believability result. One real human who did not make the clip must watch it before a done-tier status (UGC Realism Prompt Structure, Recipe 7).`,
+              manifestText.relativePath,
+            ),
+          );
+        } else if (/\bfailed\b/i.test(believability)) {
+          issues.push(
+            issue(
+              "error",
+              `content_assets.manifest.assets.${index}.believability.failed`,
+              `Manifest asset ${index} has status "${ugcStatus}" but the believability result records a failure. A clip identified as AI or as an ad goes back to the judge panel, not to a done-tier status.`,
+              manifestText.relativePath,
+            ),
+          );
+        } else if (!/^\s*passed\b/i.test(believability)) {
+          issues.push(
+            issue(
+              "error",
+              `content_assets.manifest.assets.${index}.believability.not_passing`,
+              `Manifest asset ${index} has status "${ugcStatus}" but the believability result does not start with "passed". Record "passed — <detail>" or "failed — <detail>"; completion alone is not a pass, and a negated pass is not a pass.`,
+              manifestText.relativePath,
+            ),
+          );
+        }
       }
     }
 

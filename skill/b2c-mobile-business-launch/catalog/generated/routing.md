@@ -48,7 +48,7 @@ Generated from catalog/references.ts.
 | AppKittie store intelligence, XPOZ social-language research, Firecrawl web intelligence, Refero UX pattern research, or name/keyword collision checks — routed from tool-recipes.md | [`knowledge/process/tool-recipes/research-intelligence.md`](../../knowledge/process/tool-recipes/research-intelligence.md) |
 | routing RevenueCat/Stripe, Resend, or PostHog setup work, including the RevenueCat Economics Pull recipe — routed from tool-recipes.md | [`knowledge/process/tool-recipes/revenue-email-analytics.md`](../../knowledge/process/tool-recipes/revenue-email-analytics.md) |
 | the routing pointer into secrets-management.md, plus the config-name-preflight and env-file-extraction rules — routed from tool-recipes.md | [`knowledge/process/tool-recipes/secrets-and-environment.md`](../../knowledge/process/tool-recipes/secrets-and-environment.md) |
-| Higgsfield or Remotion production routing, including the six named chained recipes for ads/UGC/virality/seasonal restyle — routed from tool-recipes.md | [`knowledge/process/tool-recipes/visual-and-motion-production.md`](../../knowledge/process/tool-recipes/visual-and-motion-production.md) |
+| Higgsfield or Remotion production routing, including the seven named chained recipes for ads/UGC/virality/seasonal restyle and the UGC-realism prompt structure for believable-person clips — routed from tool-recipes.md | [`knowledge/process/tool-recipes/visual-and-motion-production.md`](../../knowledge/process/tool-recipes/visual-and-motion-production.md) |
 
 ## Driving The Work
 
