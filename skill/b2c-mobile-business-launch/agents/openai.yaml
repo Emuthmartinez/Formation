@@ -2,7 +2,7 @@ interface:
   display_name: "B2C Mobile Launch"
   short_description: "Launch and design B2C app businesses"
   brand_color: "#FF6F5C"
-  default_prompt: "Take my B2C mobile app idea, transcript, spec, or repo and run the launch autopilot until a real founder-only gate. Create state/PROJECT_STATE.yaml, state/launch-cockpit.html, studio/seed/business.json, theme.tokens.json, design/design-room.html, 11_STAR_EXPERIENCE.md, PAID_UA.md, VIRAL_GROWTH.md, operations/ORCHESTRATION.md, launch artifacts, trust/SECURITY.md, source freshness proof, validators, and production-readiness proof."
+  default_prompt: "Take my B2C mobile app idea, transcript, spec, or repo and run the launch autopilot until a real founder-only gate. Use the predetermined expert prompts in APP_AGENTS.md, dispatch independent bounded reviews in parallel when safe, and keep shared state, git, providers, public actions, and release decisions with the orchestrator. Create durable state, founder-readable design and launch views, launch artifacts, security evidence, validators, and production-readiness proof."
 
 policy:
   allow_implicit_invocation: true

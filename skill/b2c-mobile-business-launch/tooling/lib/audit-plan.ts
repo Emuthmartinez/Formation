@@ -76,6 +76,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:asc-command-contract", kind: "script", args: ["--skill-root", S] },
     { id: "check:motion-contract", kind: "script", args: ["--skill-root", S] },
     { id: "check:mobai-proof", kind: "script", args: ["--skill-root", S, ...stateArgs] },
+    { id: "check:source-checkpoint", kind: "script", args: rootArgs },
     { id: "check:continuity-contract", kind: "script" },
     { id: "check:autopilot", kind: "script" },
     { id: "check:skill-version", kind: "script", args: ["--source", S, "--installed", S] },

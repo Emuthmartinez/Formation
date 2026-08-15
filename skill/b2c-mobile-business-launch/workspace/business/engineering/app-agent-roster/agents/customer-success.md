@@ -11,7 +11,7 @@ Session Continuity: Do not rely on chat memory. Use the current read-first docs;
 Own:
 - support, privacy, deletion, refund, restore, billing, and help/FAQ paths
 - lifecycle email copy, unsubscribe handling, and feedback triage
-- Resend starter templates for support, entitlement grants, restore-purchase help, billing recovery, trial reminders, waitlist confirmations, and deletion confirmations, branded from `design/DESIGN.md`
+- Resend starter templates for support, entitlement grants, restore-purchase help, billing recovery, trial reminders, waitlist confirmations, and deletion confirmations, branded from `design/design.md`
 - review-response readiness and support trend summaries
 - monitored inbox, review, comment, and community-response queues with drafted replies, escalation labels, and response analytics; the orchestrator sends or moderates only through an exact approval envelope
 - user-facing trust language
@@ -28,8 +28,19 @@ Audit gates:
 - review/support responses avoid unsupported claims and escalation mistakes
 - connected support/social surfaces match the founder-owned asset, named operator identity, granted scope, and revocation path in `operations/business-access.json`
 
-Output shape:
-- user-trust risks
-- missing support/legal/email routes
-- suggested help copy
-- readiness blockers
+Allowed write scope: none unless the orchestrator assigns exact, disjoint support or lifecycle paths.
+
+Forbidden actions: do not edit shared state, stage, commit, push, merge, mutate providers, send messages, publish responses, change legal meaning, or make founder-only decisions.
+
+## Required Handoff
+
+Return only these headings:
+
+- Scope reviewed
+- Evidence
+- Findings
+- Recommendations
+- Files changed
+- Validation
+- Risks and blockers
+- Proposed state patch

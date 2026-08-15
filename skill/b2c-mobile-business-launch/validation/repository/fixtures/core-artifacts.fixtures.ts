@@ -215,7 +215,7 @@ export function register(h: Harness): void {
     research["status"] = "partial";
     const design = getLane(state, "design");
     design["status"] = "partial";
-    design["evidence"] = ["design/DESIGN.md"];
+    design["evidence"] = ["design/design.md"];
     writeState(researchDesignActive, state);
   }
   runFixture(

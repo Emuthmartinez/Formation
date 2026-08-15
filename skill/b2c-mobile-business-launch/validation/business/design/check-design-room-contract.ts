@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { getToken, loadDesignState, parseDesignCliArgs, rel } from "../../../tooling/lib/design-state.js";
+import { getToken, loadDesignState, parseDesignCliArgs, rel, summarizeSurfaces } from "../../../tooling/lib/design-state.js";
 import { collectAllFiles, issue, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
+import { asArray, asString, isRecord } from "../../../tooling/lib/launch-state.js";
 
 const args = parseDesignCliArgs(process.argv.slice(2));
 const issues: Issue[] = [];
@@ -23,6 +24,52 @@ if (designArtifacts.length > 0 && !hasDesignState) {
 if (hasDesignState) {
   const loaded = loadDesignState(args);
   issues.push(...loaded.issues);
+
+  const contractPath = path.join(args.root, "design/design.md");
+  if (!existsSync(contractPath)) {
+    issues.push(issue("error", "design_room.contract_missing", "design/design.md is required for all product design work.", rel(args.root, contractPath)));
+  } else {
+    const contract = readFileSync(contractPath, "utf8");
+    const requiredSections = [
+      "Source Ownership",
+      "Product Experience",
+      "Visual Direction",
+      "Interaction System",
+      "Onboarding",
+      "Motion and haptics",
+      "Cross-Surface Direction",
+      "Accessibility",
+      "Implementation Rules",
+      "Decision Log",
+    ];
+    for (const section of requiredSections) {
+      if (!new RegExp(`^#{2,3} ${escapeRegExp(section)}\\s*$`, "im").test(contract)) {
+        issues.push(
+          issue("error", "design_room.contract_section_missing", `design/design.md must include the section: ${section}.`, rel(args.root, contractPath)),
+        );
+      }
+    }
+    for (const sourcePath of ["studio/seed/business.json", "studio/seed/theme.tokens.json", "design/design-room.html"]) {
+      if (!contract.includes(sourcePath)) {
+        issues.push(
+          issue("error", "design_room.contract_source_missing", `design/design.md must name its source: ${sourcePath}.`, rel(args.root, contractPath)),
+        );
+      }
+    }
+
+    const designRoom = loaded.state && isRecord(loaded.state) && isRecord(loaded.state.designRoom) ? loaded.state.designRoom : {};
+    const status = asString(designRoom.status);
+    if ((status === "rendered" || status === "baselined") && containsTemplatePlaceholder(contract)) {
+      issues.push(
+        issue(
+          "error",
+          "design_room.contract_placeholder",
+          "design/design.md contains starter text although the Design Room status claims review-ready work.",
+          rel(args.root, contractPath),
+        ),
+      );
+    }
+  }
 
   if (loaded.tokens) {
     // WCAG AA contrast check on the tokenized palette, mirroring the ui-ux-pro-max
@@ -102,6 +149,57 @@ if (hasDesignState) {
           ),
         );
       }
+
+      const state = loaded.state;
+      if (isRecord(state)) {
+        const business = isRecord(state.business) ? state.business : {};
+        const designRoom = isRecord(state.designRoom) ? state.designRoom : {};
+        const renderedText = htmlText(html);
+        const expectedText = [asString(business.name), asString(business.positioning), asString(business.targetAudience)].filter((value): value is string =>
+          Boolean(value),
+        );
+        const latestVersion = asArray(designRoom.versionLog).at(-1);
+        if (isRecord(latestVersion)) {
+          const summary = asString(latestVersion.summary);
+          if (summary) expectedText.push(summary);
+        }
+        for (const expected of expectedText) {
+          if (!renderedText.includes(normalizeText(expected))) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.render_semantic_mismatch",
+                `design/design-room.html does not show the current state value: ${expected}`,
+                rel(args.root, renderPath),
+              ),
+            );
+          }
+        }
+        for (const summary of summarizeSurfaces(state)) {
+          const expected = `${summary.label} ${summary.count} ${summary.ready} ready / ${summary.blocked} blocked / ${summary.notStarted} draft`;
+          if (!renderedText.includes(normalizeText(expected))) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.render_surface_mismatch",
+                `design/design-room.html does not match the current ${summary.label} surface totals.`,
+                rel(args.root, renderPath),
+              ),
+            );
+          }
+        }
+        const status = asString(designRoom.status);
+        if ((status === "rendered" || status === "baselined") && containsTemplatePlaceholder(renderedText)) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.render_placeholder",
+              "design/design-room.html contains starter text although the Design Room status claims review-ready work.",
+              rel(args.root, renderPath),
+            ),
+          );
+        }
+      }
     }
   }
 }
@@ -120,6 +218,34 @@ for (const artifact of designArtifacts) {
 }
 
 reportAndExit("Design Room contract validation", issues);
+
+function containsTemplatePlaceholder(value: string): boolean {
+  return /\bApp Name\b|One-sentence promise still to be defined|Primary consumer segment still to be defined|Empty Design Room state seeded|\bNot defined\b|\bNot captured\b|\bNot recorded\b|\bPending\b|\bTBD\b|\bTODO\b/i.test(
+    value,
+  );
+}
+
+function htmlText(value: string): string {
+  return normalizeText(
+    value
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">"),
+  );
+}
+
+function normalizeText(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 function collectDesignArtifacts(root: string): string[] {
   const ignoredSegments = new Set(["node_modules", ".git", "dist", "state", "render"]);

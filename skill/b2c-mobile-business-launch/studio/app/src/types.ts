@@ -15,6 +15,7 @@ export interface BusinessState {
   designBrief?: DesignBrief;
   designRoom: {
     status: string;
+    contractPath: string;
     renderPath: string;
     versionLog: Array<{
       id: string;

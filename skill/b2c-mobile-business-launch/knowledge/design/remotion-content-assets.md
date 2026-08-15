@@ -2,7 +2,7 @@
 
 Use this when a launch needs reusable videos, stills, store-art compositions, app-preview clips, demo loops, social posts, ad variants, UGC overlays, or campaign assets and Higgsfield is unavailable, not approved, too expensive for the lane, or less appropriate than code-rendered product truth.
 
-Remotion is not a drop-in replacement for Higgsfield. Higgsfield is the premium generative route for net-new imagery, mascots, presenter ads, image-to-video, photoreal scenes, Marketing Studio, and Virality Predictor. Remotion is the deterministic route for assets built from real app UI, founder-owned media, licensed/public-domain inputs, `design/DESIGN.md` tokens, copy variants, data, captions, and repeatable React compositions.
+Remotion is not a drop-in replacement for Higgsfield. Higgsfield is the premium generative route for net-new imagery, mascots, presenter ads, image-to-video, photoreal scenes, Marketing Studio, and Virality Predictor. Remotion is the deterministic route for assets built from real app UI, founder-owned media, licensed/public-domain inputs, `design/design.md` tokens, copy variants, data, captions, and repeatable React compositions.
 
 ## Contents
 
@@ -56,7 +56,7 @@ Remotion can be lower-cost, but it is not universally free for every commercial 
 Use truthful inputs before rendered embellishment:
 - real app screenshots or recordings from MobAI, XcodeBuildMCP, simulator/device capture, Android emulator/ADB, or founder-owned captures
 - `11_STAR_EXPERIENCE.md` for the magical moment, line of feasibility, and V1 scalable slice the asset should express
-- `design/DESIGN.md` tokens, typography, voice, shape, spacing, and banned aesthetics
+- `design/design.md` tokens, typography, voice, shape, spacing, and banned aesthetics
 - `design.md`, `product/ONBOARDING.md`, `APP_STORE_LISTING.md`, `revenue/REVENUE_OPS.md`, `analytics/ANALYTICS.md`, and legal docs for claim and pricing truth
 - founder-owned logos, icons, photos, audio, and product media
 - licensed or public-domain assets with source/license notes
@@ -245,7 +245,7 @@ Update `state/PROJECT_STATE.yaml`:
 - Treating Higgsfield unavailability as automatic permission to use Remotion.
 - Calling Remotion a free fallback without checking license eligibility.
 - Rendering polished mock UI and letting it drift into store screenshots or product claims.
-- Creating videos without `design/DESIGN.md`, source screenshots, captions, text-fit checks, or claim review.
+- Creating videos without `design/design.md`, source screenshots, captions, text-fit checks, or claim review.
 - Making one-off assets with no manifest, render command, or rerender path.
 - Forgetting that public posting, scheduling, store uploads, paid campaigns, and creator spend require founder approval.
 - Bundling a heavy Remotion project inside this skill instead of creating it in the launch repo that owns the media.

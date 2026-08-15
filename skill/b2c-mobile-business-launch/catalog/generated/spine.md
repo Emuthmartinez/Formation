@@ -15,7 +15,7 @@ Generated from catalog/phases.ts. Edit the catalog, not this file.
 | 1e | Viral growth loop contract | VIRAL_GROWTH.md, growth/LAUNCH_NARRATIVE.md |
 | 1f | Launch trace and build contracts | state/LAUNCH_TRACE.md, engineering/TECH_SPEC.md |
 | 1g | Security architecture | trust/SECURITY.md, trust/security-review.html |
-| 2 | Brand and design | strategy/BRAND.md, design/DESIGN.md, design.md, rendered proofs, key assets |
+| 2 | Brand and design | strategy/BRAND.md, design/design.md, rendered proofs, key assets |
 | 3 | Launch dossier and store operations | Store listing, signing, console, screenshot, content-asset, and launch packets |
 | 3b | Revenue and monetization operations | revenue/REVENUE_OPS.md and sandbox/production purchase validation |
 | 4 | Pre-launch funnel | Landing page, waitlist/referral loop, email/domain routes, analytics, deploy proof |

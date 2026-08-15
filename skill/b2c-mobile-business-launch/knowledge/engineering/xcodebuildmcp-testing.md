@@ -385,7 +385,7 @@ When UI tests crash with signal kill, time out, or flake, escalate in order — 
 For App Store screenshot work:
 - in-app simulator captures (pane **Cmd+S**/**Cmd+R**, or the Codex screenshot tool) are valid raw real-app UI; copy them off the Desktop into the repo's raw capture directory and record the device, OS, locale, and fixture account
 - use real app UI from XcodeBuildMCP captures when MobAI is not approved/available
-- compose final screenshots through `design/DESIGN.md` tokens and screenshot HTML
+- compose final screenshots through `design/design.md` tokens and screenshot HTML
 - keep raw captures separate from final upload assets
 - map each final image to Apple display wells and Google device classes
 - a simulator capture is a simulated device: confirm the display well's pixel dimensions before upload rather than assuming the pane's stream resolution matches Apple's required size

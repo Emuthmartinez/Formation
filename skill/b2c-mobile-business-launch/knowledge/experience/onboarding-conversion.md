@@ -66,7 +66,7 @@ Recommended Refero searches when access is available:
 Create `product/onboarding.html` or include an onboarding section in `design/design.html`:
 - render every onboarding screen at mobile dimensions
 - include mascot states, data question UI, demo-video placeholder or clip, Remotion-rendered asset placeholder when selected, plan summary, paywall, closing offer, review prompt placeholder, loading/error/offline states, and post-paywall activation
-- use CSS variables from `design/DESIGN.md`
+- use CSS variables from `design/design.md`
 - include reduced-motion behavior and no-video fallback
 
 ## Out-Of-Box Attribution Data Contract
@@ -122,7 +122,7 @@ Use a mascot when the product benefits from warmth, reassurance, habit formation
 - react to answers and progress
 - soften friction without hiding cost, privacy, or limitations
 - have 4-8 reusable emotion states before implementation
-- be generated or refined with Higgsfield against `design/DESIGN.md`
+- be generated or refined with Higgsfield against `design/design.md`
 - appear in HTML proofs before app implementation
 
 Do not use a mascot when it makes a serious, regulated, or high-stakes product feel unserious.
@@ -215,13 +215,13 @@ RevenueCat's 2026 report calls the moment after paywall dismissal a high-leverag
 Route generated art by surface:
 
 - **Paywall hero / background art** — use `soul_location` (environment/scene, prompt-only) or `gpt_image_2` via the `higgsfield-generate` skill. These are decorative backgrounds embedded in HTML proofs; they are never substitutes for real app UI.
-- **Onboarding illustrations, empty-state art, and celebration frames** — use the `higgsfield-generate` skill. Every prompt must carry `design/DESIGN.md` tokens (palette, type mood, shapes, texture, banned aesthetics, intended surface); generating without the brief is a named failure mode.
+- **Onboarding illustrations, empty-state art, and celebration frames** — use the `higgsfield-generate` skill. Every prompt must carry `design/design.md` tokens (palette, type mood, shapes, texture, banned aesthetics, intended surface); generating without the brief is a named failure mode.
 - **Direction iteration before committing production-model credits** — route through the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md`. Per that recipe's Rule-5 reconciliation, cheap-first is offered as a spend-reduction option at the `paid-tool-routing.md` spend-confirmation prompt — never applied silently.
 
 Guardrails:
 - Generated art is decoration embedded in HTML proofs; it is **never** a substitute for truthful real app UI in store screenshots or product claims.
 - Spend-confirmation applies before every generation run; confirm with the founder per `paid-tool-routing.md` and surface current balance when possible.
-- Record every generated asset in `CONTENT_ASSETS.md` with route, prompt brief (`design/DESIGN.md` tokens used), output paths, QA, and approval gate.
+- Record every generated asset in `CONTENT_ASSETS.md` with route, prompt brief (`design/design.md` tokens used), output paths, QA, and approval gate.
 
 ### Plan And Trial Mix
 

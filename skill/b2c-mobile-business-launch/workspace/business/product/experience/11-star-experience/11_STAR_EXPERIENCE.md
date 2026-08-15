@@ -60,7 +60,7 @@ This artifact defines the product's extreme experience, the feasible V1 slice, a
 ## Visual Storyboard
 
 - Visual proof: `11-star-experience.html`
-- Design-system source: `design/DESIGN.md`
+- Design-system source: `design/design.md`
 - Screen spec source: `design.md`
 - Content asset source: `CONTENT_ASSETS.md`
 - Paid UA source: `PAID_UA.md`
@@ -70,7 +70,7 @@ This artifact defines the product's extreme experience, the feasible V1 slice, a
 
 | Trace ID | Experience decision | Source evidence | Product impact | Design impact | Build contract | Verification |
 | --- | --- | --- | --- | --- | --- | --- |
-| EXP-001 | Pending | `strategy/RESEARCH.md` | `product/SPEC.md` | `design/DESIGN.md` | `engineering/TECH_SPEC.md` | `engineering/PRODUCTION_READINESS.md` |
+| EXP-001 | Pending | `strategy/RESEARCH.md` | `product/SPEC.md` | `design/design.md` | `engineering/TECH_SPEC.md` | `engineering/PRODUCTION_READINESS.md` |
 
 ## Engineering Contract
 
@@ -89,5 +89,5 @@ This artifact defines the product's extreme experience, the feasible V1 slice, a
 - [ ] `Line Of Feasibility` separates V1, manual assist, deferred inspiration, and not-in-scope ideas.
 - [ ] `V1 Scalable Slice` names the magical moment the app will actually prove.
 - [ ] Surface matrix covers product, onboarding, paywall, ad, App Store, landing, email, support, and engineering.
-- [ ] `product/SPEC.md`, `design/DESIGN.md`, `product/ONBOARDING.md`, `engineering/TECH_SPEC.md`, and `state/LAUNCH_TRACE.md` reference this artifact before build handoff.
+- [ ] `product/SPEC.md`, `design/design.md`, `product/ONBOARDING.md`, `engineering/TECH_SPEC.md`, and `state/LAUNCH_TRACE.md` reference this artifact before build handoff.
 - [ ] `11-star-experience.html` renders a visual ladder that the founder can inspect.

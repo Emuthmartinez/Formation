@@ -7,7 +7,7 @@ Cross-references (do NOT duplicate; integrate):
 - `knowledge/design/quality-lens.md` — "specific to the user's emotional job, not a generic SaaS wrapper."
 - `knowledge/experience/onboarding-conversion.md` — onboarding is the primary sales surface; card timing relative to paywall and App Review popup is governed here.
 - `knowledge/data/analytics-attribution.md` — every emotional moment must emit a named PostHog event; the event catalog is extended here, not duplicated.
-- `knowledge/design/design-room.md` / `knowledge/design/design-visual-system.md` — motion is a delight lever; every card-level motion moment must declare a `prefers-reduced-motion` / OS reduce-motion fallback in `design/DESIGN.md`.
+- `knowledge/design/design-room.md` / `knowledge/design/design-visual-system.md` — motion is a delight lever; every card-level motion moment must declare a `prefers-reduced-motion` / OS reduce-motion fallback in `design/design.md`.
 - `knowledge/process/failure-cards.md` — dark-pattern violations and missing card attestations become failure cards.
 - `knowledge/experience/ethics-guardrail.md` — the Guardrail Contract and per-mechanism prohibitions are the compliance boundary for every card applied by this system.
 - `knowledge/experience/consumer-product-design-agency.md` — the five-tier academic source synthesis; this file operationalizes it.
@@ -55,7 +55,7 @@ Tier hierarchy for decision-making:
 
 1. **Tier 1 — Human-Centered Design.** (Norman, Nielsen, Miller, Hick, WCAG.) Cognitive load, accessibility, and formative research. Determines onboarding screen count, choices per screen, and contrast/motion safety gates. Failure: onboarding that felt obvious to the team confuses real users.
 
-2. **Tier 2 — Emotional Design.** (Norman visceral/behavioral/reflective, Picard, Cooper, Garrett.) The three Norman levels fire simultaneously from the first frame. `design/DESIGN.md` must encode a deliberate choice at each level before any screen is built. Failure: the app sits at 5-star because it is functionally correct but emotionally neutral.
+2. **Tier 2 — Emotional Design.** (Norman visceral/behavioral/reflective, Picard, Cooper, Garrett.) The three Norman levels fire simultaneously from the first frame. `design/design.md` must encode a deliberate choice at each level before any screen is built. Failure: the app sits at 5-star because it is functionally correct but emotionally neutral.
 
 3. **Tier 3 — Behavioral Science.** (Fogg B=MAP, Kahneman peak-end rule, Cialdini, Skinner, Schultz, Berridge, Eyal, Ariely, Thaler, Dai fresh-start.) The Four Required Cards are the primary Tier 3 artifacts. Peak-end rule governs session architecture. B=MAP governs onboarding conversion. Failure: Day-7 retention is low not because the loop is broken but because no deliberate peak was designed.
 
@@ -102,7 +102,7 @@ Evidence required: `product/SPEC.md` JTBD statement or `11_STAR_EXPERIENCE.md` u
 
 What emotion should the user feel during and after this interaction? Name it specifically (confidence, relief, surprise, pride, curiosity, belonging). A feature that produces no deliberate emotion produces no memory. A feature that produces the wrong emotion (anxiety, confusion, guilt) damages trust.
 
-Evidence required: the `design/DESIGN.md` three-level emotional tone block (visceral/behavioral/reflective) for this screen or feature cluster.
+Evidence required: the `design/design.md` three-level emotional tone block (visceral/behavioral/reflective) for this screen or feature cluster.
 
 ### Lens 3 — Emotional Journey
 
@@ -125,7 +125,7 @@ Does the feature work at all three Norman levels simultaneously?
 
 Score 0 if any level is absent or actively harmful. Score 2 only if all three are deliberate.
 
-Evidence required: the three-level tone block in `design/DESIGN.md` and signifier audit in `product/ONBOARDING.md`.
+Evidence required: the three-level tone block in `design/design.md` and signifier audit in `product/ONBOARDING.md`.
 
 ### Lens 6 — Service Design
 
@@ -176,7 +176,7 @@ This protocol produces `EMOTIONAL_DESIGN.md` updates, card applications, measure
 
 7. **Update `analytics/ANALYTICS.md`.** Add the card-specific PostHog events to the event catalog. Do not reuse existing event names — extend them per the naming rules in `analytics-attribution.md`.
 
-8. **Update `design/DESIGN.md`.** Add the three-level emotional tone block for this feature if absent. Add the motion spec for each card's delight moment with a reduce-motion fallback.
+8. **Update `design/design.md`.** Add the three-level emotional tone block for this feature if absent. Add the motion spec for each card's delight moment with a reduce-motion fallback.
 
 9. **Update `engineering/TECH_SPEC.md`.** Add the frontstage/backstage dependency table row for each card-carrying screen.
 
@@ -243,7 +243,7 @@ Create or update before calling the emotional layer build-ready:
 - `EMOTIONAL_DESIGN.md`: the applied card deck for this product. Sections: Review Scores, Card Applications (one block per applied card), Emotional Curve (text representation; rendered in `emotional-design.html`), Ethics Attestations.
 - `emotional-design.html`: rendered Emotional Curve using design tokens; position markers for each card, paywall, and App Review popup.
 - `analytics/ANALYTICS.md`: card-specific PostHog events added to the event catalog.
-- `design/DESIGN.md`: three-level emotional tone block; motion spec per card with reduce-motion fallback.
+- `design/design.md`: three-level emotional tone block; motion spec per card with reduce-motion fallback.
 - `engineering/TECH_SPEC.md`: frontstage/backstage dependency table for each card-carrying screen.
 - `engineering/PRODUCTION_READINESS.md`: card application evidence rows; real-device verification status.
 - `operations/FAILURE_CARDS.md` (or `state/PROJECT_STATE.yaml`): open cards for any dark-pattern findings, missing cards on key screens, or validator errors.
@@ -300,7 +300,7 @@ Every card emits PostHog events. The events are named and specified in `emotiona
 
 Motion is a delight lever, not decoration. Rules:
 - Every card-level delight moment must reference a named `DesignTokens.Motion` token (for SwiftUI / Flutter / Reanimated native targets) or a `--motion-*` CSS variable (for web).
-- Every motion moment must declare a `prefers-reduced-motion` / OS reduce-motion fallback in `design/DESIGN.md`.
+- Every motion moment must declare a `prefers-reduced-motion` / OS reduce-motion fallback in `design/design.md`.
 - The Emotional Curve rendered in `emotional-design.html` uses the project's motion tokens for its own animation.
 - Generated or token-derived motion proofs must live in `emotional-design.html`, not in a standalone mood board.
 
@@ -320,7 +320,7 @@ Card-level failure shapes to open when violations are found:
 | `experience-card-dark-pattern` | Any applied card fails the three-question bright-line test or uses a prohibited pattern from `ethics-guardrail.md §Non-Negotiable Prohibitions` | Stop implementation; remove or redesign the mechanism; run `check:emotional-design`; open as severity critical |
 | `emotional-curve-peak-after-paywall` | The Emotional Curve plot in `EMOTIONAL_DESIGN.md` or `emotional-design.html` shows the emotional peak occurring after the paywall marker | Redesign the flow so the peak occurs before the paywall; re-render `emotional-design.html` |
 | `experience-card-event-missing` | A card is applied in `EMOTIONAL_DESIGN.md` but no corresponding event exists in `analytics/ANALYTICS.md` | Add the event to `analytics/ANALYTICS.md` before implementation; verify with `check:attribution` |
-| `experience-card-motion-no-fallback` | A card's motion moment is specified in `design/DESIGN.md` without a `prefers-reduced-motion` fallback | Add the fallback; re-run `check:token-promotion` |
+| `experience-card-motion-no-fallback` | A card's motion moment is specified in `design/design.md` without a `prefers-reduced-motion` fallback | Add the fallback; re-run `check:token-promotion` |
 | `emotional-audit-unintegrated` | An audit (`EMOTIONAL_AUDIT.md`) exists but findings have not been converted to failure cards or `state/PROJECT_STATE.yaml` updates | Accept or reject each finding; open failure cards; update `state/PROJECT_STATE.yaml` |
 
 ---

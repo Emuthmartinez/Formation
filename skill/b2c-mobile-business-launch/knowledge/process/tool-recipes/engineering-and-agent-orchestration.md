@@ -51,7 +51,7 @@ Record in `operations/ORCHESTRATION.md` and `state/PROJECT_STATE.yaml`:
 
 Record in `engineering/ENGINEERING_PLAN.md`:
 - product brainstorm source or skip rationale
-- requirements trace to `state/LAUNCH_TRACE.md`, `engineering/TECH_SPEC.md`, `product/SPEC.md`, `design/DESIGN.md`, `design.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `growth/EMAIL_OPS.md`, `trust/PRIVACY.md`, `store/APPLE_SIGNING.md`, and `store/STORE_CONSOLE.md`
+- requirements trace to `state/LAUNCH_TRACE.md`, `engineering/TECH_SPEC.md`, `product/SPEC.md`, `design/design.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `growth/EMAIL_OPS.md`, `trust/PRIVACY.md`, `store/APPLE_SIGNING.md`, and `store/STORE_CONSOLE.md`
 - implementation units, repo-relative paths, serial dependencies, worktree needs, safe parallel lanes, serialized resources, and subagent output contracts
 - frontend, backend, database, analytics, revenue, email, privacy, store-console, app-integrity, permission, and state-machine impacts
 - test scenarios, MobAI E2E scenarios, backend/provider verification, release gates, and blockers

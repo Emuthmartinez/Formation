@@ -252,7 +252,7 @@ export function register(h: Harness): void {
   runFixture("raw secret in referenced proof fails", secretProof, "check-agent-operations.ts", 1, "raw_secret_detected");
 
   const missingPanel = makeFixture("agent-operations-control-panel-missing");
-  const businessPath = path.join(missingPanel, "state", "business.json");
+  const businessPath = path.join(missingPanel, "studio", "seed", "business.json");
   const business = JSON.parse(readFileSync(businessPath, "utf8")) as Record<string, unknown>;
   const controlPlane = business.controlPlane as Record<string, unknown>;
   controlPlane.panels = (controlPlane.panels as Array<Record<string, unknown>>).filter((panel) => panel.id !== "agent-ops");

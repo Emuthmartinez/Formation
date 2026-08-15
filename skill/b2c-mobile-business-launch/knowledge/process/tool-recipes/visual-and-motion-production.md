@@ -10,7 +10,7 @@ Part of the [Tool Recipes](../tool-recipes.md) index. Before using any paid or a
 
 Purpose: produce launch visuals, mockups, icons, mascots, animations, demo videos, screenshot art, and ad creative from the locked design system.
 
-Use after `design/DESIGN.md` exists or after a provisional design direction is explicitly labeled `draft`.
+Use after `design/design.md` exists or after a provisional design direction is explicitly labeled `draft`.
 
 Access:
 - Higgsfield is a paid/account-gated visual production path. If unavailable, ask before using Remotion, local HTML/CSS/SVG/canvas, founder-owned assets, public-domain assets, or real app screenshots as the free fallback.
@@ -42,7 +42,7 @@ Ad-reference caution: ad references (`--ad-reference-id`) are MUTUALLY EXCLUSIVE
 Cost-Tier Discipline: by default, use the quality-first model for each task (matching the upstream `higgsfield-generate` skill default). The cheap-first z_image → production-model path (Recipe 6 below) is a spend-reduction option offered ONLY at the `paid-tool-routing.md` spend-confirmation prompt, never applied silently. This intentionally overrides the upstream quality-first default because this skill is spend-sensitive and founder-gated.
 
 Rules:
-- Put `design/DESIGN.md` constraints into the generation brief: palette, typography mood, shapes, texture, motion energy, banned aesthetics, and intended surface.
+- Put `design/design.md` constraints into the generation brief: palette, typography mood, shapes, texture, motion energy, banned aesthetics, and intended surface.
 - All generated assets must be embedded or referenced in HTML proofs: `design/design.html`, `product/onboarding.html`, screenshot HTML, landing HTML, or ad-preview HTML.
 - Label assets as `direction`, `draft`, or `production`.
 - Do not present generated screenshots as real app functionality. Store screenshots must show truthful app UI and avoid unsupported claims, prices, or features.
@@ -50,7 +50,7 @@ Rules:
 
 ## Product Ad Structure And Prompt Craft
 
-Purpose: replace the `<hook + design/DESIGN.md brief>` placeholder used across the Chained Recipes below with a concrete structure, so a generated ad proves one specific feature instead of drifting into abstract mood with no UI on screen. Applies to `--prompt` text for polished, openly-an-ad output: `tv_spot`, product demos, hero ads, and any Remotion ad/social composition. For the UGC-family modes (`ugc`, `ugc_how_to`, `ugc_unboxing`, `product_review`), use the **UGC Realism Prompt Structure** below instead. The same applies to any clip that must read as a real person filming themselves. The two registers are opposites. A mix fails as both.
+Purpose: replace the `<hook + design/design.md brief>` placeholder used across the Chained Recipes below with a concrete structure, so a generated ad proves one specific feature instead of drifting into abstract mood with no UI on screen. Applies to `--prompt` text for polished, openly-an-ad output: `tv_spot`, product demos, hero ads, and any Remotion ad/social composition. For the UGC-family modes (`ugc`, `ugc_how_to`, `ugc_unboxing`, `product_review`), use the **UGC Realism Prompt Structure** below instead. The same applies to any clip that must read as a real person filming themselves. The two registers are opposites. A mix fails as both.
 
 Before writing the prompt, fix two things:
 - **The reference.** Which screenshot, icon, or UI state is actually in frame, and its real shape, color, and layout — the prompt must not contradict it.
@@ -60,14 +60,14 @@ Four-beat structure (scale the timings below to the recipe's `--duration`; ratio
 1. **Identification hook (0–2s).** The app or feature is on screen in a clean hero shot before anything else happens. Never open on abstract particles, smoke, or a transition effect with no real UI visible — hiding the product for the first two seconds loses the viewer who would have recognized it.
 2. **Usage / function (2–8s).** Show the feature being used, or the screen changing state, in a way that makes the mechanism obvious without narration — a tap, a result appearing, a before/after.
 3. **Creative escalation (8–12s).** Turn the benefit into one memorable image. Stay anchored to the real product here — escalate the feeling, not the feature list.
-4. **Final hero shot (12–15s).** End clean, on the app's actual icon or screen, matching `design/DESIGN.md` palette and motion energy.
+4. **Final hero shot (12–15s).** End clean, on the app's actual icon or screen, matching `design/design.md` palette and motion energy.
 
 Consistency and accuracy rules — apply regardless of which tool renders the ad:
 - Keep exact screens, copy, icons, and proportions from the real app; do not invent functionality, ratings, or claims the product does not have. This is the same truthful-UI rule the block above states for store screenshots — it applies to ad creative too.
 - Cut on action (hard cut, match cut, cut on motion) between beats. Avoid morphing/dissolve transitions mid-cut — they make the product illegible at the exact moment a viewer would recognize it.
 - Match the beat to the feature type: a utility feature reads best as a before/after; a creative/output feature needs the result visible; a habit/streak feature needs the moment of use shown, not just the icon.
 
-Fill the `--prompt` argument in Recipe 1 step 8 and Recipe 2 step 4 with the structure that matches the mode. `tv_spot` takes the four beats above. UGC-family modes take the **UGC Realism Prompt Structure**. Write the prompt for the specific feature and the current `design/DESIGN.md` tokens. Then discard the placeholder text.
+Fill the `--prompt` argument in Recipe 1 step 8 and Recipe 2 step 4 with the structure that matches the mode. `tv_spot` takes the four beats above. UGC-family modes take the **UGC Realism Prompt Structure**. Write the prompt for the specific feature and the current `design/design.md` tokens. Then discard the placeholder text.
 
 ### Master Prompt Template
 
@@ -215,10 +215,10 @@ Purpose: create a reusable founder/presenter Soul identity once, then produce we
      --url <app-store-url> --wait
    ```
 7. **Spend confirm for ad batch.** Surface current balance via `mcp__claude_ai_Higgsfield__balance`. Confirm weekly generation spend with the founder per `paid-tool-routing.md`.
-8. **Generate ads (weekly).** Inject design/DESIGN.md tokens into every `--prompt`. Structure the `ugc` mode shown here per **UGC Realism Prompt Structure** above. Use **Product Ad Structure And Prompt Craft** only when this recipe runs a `tv_spot`. The script must first survive the judge panel per `ugc-creator-engine.md`:
+8. **Generate ads (weekly).** Inject design/design.md tokens into every `--prompt`. Structure the `ugc` mode shown here per **UGC Realism Prompt Structure** above. Use **Product Ad Structure And Prompt Craft** only when this recipe runs a `tv_spot`. The script must first survive the judge panel per `ugc-creator-engine.md`:
    ```bash
    higgsfield generate create marketing_studio_video \
-     --prompt "<hook + design/DESIGN.md brief>" \
+     --prompt "<hook + design/design.md brief>" \
      --avatars @avatars.json \
      --product_ids @products.json \
      --mode ugc \
@@ -248,29 +248,29 @@ Purpose: turn the live App Store listing into a multi-format UGC ad batch withou
    ```
 2. **Pick avatar.** Use a preset avatar or a custom Soul avatar. For custom Soul, confirm `avatar_id` exists in `state/PROJECT_STATE.yaml`; if not, run Recipe 1 steps 2–5 first.
 3. **Spend confirm.** Surface balance via `mcp__claude_ai_Higgsfield__balance`. Confirm spend for the planned mode batch with the founder per `paid-tool-routing.md`.
-4. **Generate parallel mode batch.** Inject design/DESIGN.md tokens into every `--prompt`. Structure the three UGC-family calls (`ugc`, `ugc_unboxing`, `product_review`) per **UGC Realism Prompt Structure** above, each with a judge-panel-surviving script. Structure the `tv_spot` call per **Product Ad Structure And Prompt Craft**. Vary person, room, light, and beat set across the UGC calls. A batch that repeats one avatar in one room is the #1 tell. The `--url` shortcut reuses the backend entity but does NOT inject brief — always add `--prompt` explicitly:
+4. **Generate parallel mode batch.** Inject design/design.md tokens into every `--prompt`. Structure the three UGC-family calls (`ugc`, `ugc_unboxing`, `product_review`) per **UGC Realism Prompt Structure** above, each with a judge-panel-surviving script. Structure the `tv_spot` call per **Product Ad Structure And Prompt Craft**. Vary person, room, light, and beat set across the UGC calls. A batch that repeats one avatar in one room is the #1 tell. The `--url` shortcut reuses the backend entity but does NOT inject brief — always add `--prompt` explicitly:
    ```bash
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \
-     --prompt "<hook + design/DESIGN.md brief>" \
+     --prompt "<hook + design/design.md brief>" \
      --mode ugc --duration 15 --aspect_ratio 9:16 \
      --output-dir ./ads/ugc --wait
 
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \
-     --prompt "<hook + design/DESIGN.md brief>" \
+     --prompt "<hook + design/design.md brief>" \
      --mode ugc_unboxing --duration 15 --aspect_ratio 9:16 \
      --output-dir ./ads/ugc_unboxing --wait
 
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \
-     --prompt "<hook + design/DESIGN.md brief>" \
+     --prompt "<hook + design/design.md brief>" \
      --mode product_review --duration 15 --aspect_ratio 9:16 \
      --output-dir ./ads/product_review --wait
 
    higgsfield generate create marketing_studio_video \
      --url <app-store-url> \
-     --prompt "<hook + design/DESIGN.md brief>" \
+     --prompt "<hook + design/design.md brief>" \
      --mode tv_spot --duration 15 --aspect_ratio 9:16 \
      --output-dir ./ads/tv_spot --wait
    ```
@@ -331,13 +331,13 @@ Purpose: refresh CPP backgrounds, event art, and supporting screenshot art for s
    ```bash
    higgsfield product-photoshoot create \
      --mode restyle \
-     --prompt "<seasonal context + design/DESIGN.md palette: colors, texture, mood, banned aesthetics>" \
+     --prompt "<seasonal context + design/design.md palette: colors, texture, mood, banned aesthetics>" \
      --image ./supporting-art/background.jpg \
      --count 3 \
      --output-dir ./seasonal/<season>
    ```
    Generate 2–3 variants. Label all outputs `status:draft`.
-5. **CONTENT_ASSETS.md.** Record prompt_brief (with design/DESIGN.md tokens and seasonal context), source asset, output paths, variant labels (status:draft), and approval gate.
+5. **CONTENT_ASSETS.md.** Record prompt_brief (with design/design.md tokens and seasonal context), source asset, output paths, variant labels (status:draft), and approval gate.
 6. **Founder gate.** Founder must approve before CPP upload, App Store event submission, or IAP promotional art upload. Do not upload any seasonal restyle without explicit founder approval.
 7. **Upload.** On approval, use `app-store-connect-cli.md` upload procedures for CPP/event/IAP art.
 
@@ -350,12 +350,12 @@ Purpose: minimize credit spend on direction-finding before committing production
 **Rule-5 reconciliation:** the upstream `higgsfield-generate` skill defaults to quality-first and says do NOT pre-optimize for cheaper models unless asked. In this spend-sensitive, founder-gated skill, cheap-first is offered ONLY as a spend-reduction option at the `paid-tool-routing.md` spend-confirmation prompt — never applied silently. Present it as an option, let the founder choose, then proceed.
 
 1. **At spend-confirmation prompt.** Offer the cheap-first path as an option: "Run z_image drafts first (cheaper) to lock direction, then production model on the winner. Saves approximately X credits vs. running production model on all variants. Proceed with cheap-first or production-only?"
-2. **Translate design/DESIGN.md brief.** Extract palette, typography mood, shapes, texture, banned aesthetics, and intended surface into a tight prompt.
-3. **Check icon_style token.** If `design/DESIGN.md` `icon_style` is `character`, `cartoon`, or `mascot`, use `nano_banana_2` or `nano_banana_pro` for drafts, not `z_image`. Otherwise, use `z_image` for cheap drafts.
+2. **Translate design/design.md brief.** Extract palette, typography mood, shapes, texture, banned aesthetics, and intended surface into a tight prompt.
+3. **Check icon_style token.** If `design/design.md` `icon_style` is `character`, `cartoon`, or `mascot`, use `nano_banana_2` or `nano_banana_pro` for drafts, not `z_image`. Otherwise, use `z_image` for cheap drafts.
 4. **Draft run (z_image, 5–8 variants):**
    ```bash
    higgsfield generate create z_image \
-     --prompt "<design/DESIGN.md brief>" \
+     --prompt "<design/design.md brief>" \
      --aspect_ratio 1:1 \
      --wait
    ```
@@ -364,7 +364,7 @@ Purpose: minimize credit spend on direction-finding before committing production
 6. **Production-model run on confirmed directions:**
    ```bash
    higgsfield generate create gpt_image_2 \
-     --prompt "<design/DESIGN.md brief, on-image text if needed>" \
+     --prompt "<design/design.md brief, on-image text if needed>" \
      --aspect_ratio 1:1 \
      --wait
    ```
@@ -372,7 +372,7 @@ Purpose: minimize credit spend on direction-finding before committing production
    Label promoted outputs `status:draft`.
 7. **Design proof.** Update `design/design.html` with `status:draft` variants in a side-by-side layout.
 8. **Founder selects.** Founder picks final production asset. Label selected output `status:production`.
-9. **CONTENT_ASSETS.md.** Record prompt_brief (design/DESIGN.md tokens), model used at each stage, direction outputs (status:direction), draft outputs (status:draft), final output (status:production), output paths, QA, and approval state.
+9. **CONTENT_ASSETS.md.** Record prompt_brief (design/design.md tokens), model used at each stage, direction outputs (status:direction), draft outputs (status:draft), final output (status:production), output paths, QA, and approval state.
 
 ---
 
@@ -384,11 +384,11 @@ Purpose: produce a UGC clip that passes as a real person, from a judged script, 
 2. **Converted-reference check.** If a converting UGC video exists for a comparable product, run the **Converted-reference shortcut** above. The breakdown becomes the video-prompt skeleton for step 5. Step 3 still runs; Seedance needs the first-frame reference image.
 3. **Spend confirm.** Surface balance via `mcp__claude_ai_Higgsfield__balance`. Confirm the batch spend with the founder per `paid-tool-routing.md` before any generation call. The approved ceiling covers both the first-frame image credits and the video credits. Verify live per-clip pricing there; do not trust remembered numbers.
 4. **First frame.** Generate with `gpt_image_2` (or `nano_banana_2` for a stylized person) using the **First-Frame Prompt** template above. One specific person in one specific place; commit to the specifics. Label the output `status:draft`.
-5. **Generate video.** Seedance 2.5 — confirm the exact model id via the `higgsfield-generate` skill. Image-to-video with the first frame as reference; prompt per the **Video Prompt** template above. 9:16, 720p first. Match `--duration` to the prompt's timestamps; a mismatch desyncs the delivery. Record a `prompt_brief` that carries the `design/DESIGN.md` tokens for any app UI shown in frame; the realism register governs the person and the scene.
+5. **Generate video.** Seedance 2.5 — confirm the exact model id via the `higgsfield-generate` skill. Image-to-video with the first frame as reference; prompt per the **Video Prompt** template above. 9:16, 720p first. Match `--duration` to the prompt's timestamps; a mismatch desyncs the delivery. Record a `prompt_brief` that carries the `design/design.md` tokens for any app UI shown in frame; the realism register governs the person and the scene.
 6. **Edit pass.** Treat the output as raw footage per the **Edit pass** rules above: cut dead space, tighten pauses, captions, sound. Use the Remotion route for reproducible caption and cutdown variants.
 7. **Believability test.** Show the cut to one real human who did not make it. If they identify it as AI or as an ad, return to the judge panel (the script), not to the model settings. Record the result in the manifest `believability` field.
 8. **Score virality.** Media preflight the winner, then `brain_activity` per Recipe 3. Upscale only the winning take.
-9. **CONTENT_ASSETS.md.** Set `asset_kind: ugc` on the manifest asset — every generated video must classify itself, because a Seedance route name alone does not reveal a believable-person clip. Record script_id, judge_verdict, prompt_brief (design/DESIGN.md tokens), first-frame prompt, video prompt, model ids, output paths, believability, virality_score, QA, and approval state. `check:content-assets` blocks a UGC-family asset without a resolving script_id and a passing judge_verdict. It also blocks a done-tier status without a `passed` believability result.
+9. **CONTENT_ASSETS.md.** Set `asset_kind: ugc` on the manifest asset — every generated video must classify itself, because a Seedance route name alone does not reveal a believable-person clip. Record script_id, judge_verdict, prompt_brief (design/design.md tokens), first-frame prompt, video prompt, model ids, output paths, believability, virality_score, QA, and approval state. `check:content-assets` blocks a UGC-family asset without a resolving script_id and a passing judge_verdict. It also blocks a done-tier status without a `passed` believability result.
 10. **Founder gate.** Founder approves before public posting or paid distribution. The batch rule holds: every clip gets a different person, room, light, and beat set.
 
 ## Remotion Content Asset Production

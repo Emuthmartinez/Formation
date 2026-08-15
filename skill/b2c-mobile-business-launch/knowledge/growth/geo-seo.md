@@ -73,7 +73,7 @@ Run this scan before writing or accepting any landing copy, not only before depl
 
 **JSON-LD schema check:**
 - After writing or modifying any page that includes `application/ld+json`, verify the JSON parses (`JSON.parse(...)` locally or via `jq .` on the raw tag value). Invalid JSON-LD is silent in browsers but blocks structured-data rich results.
-- If schema sections reference product names, prices, or dates, cross-check them against `design/DESIGN.md`, `revenue/REVENUE_OPS.md`, and current copy before deploy.
+- If schema sections reference product names, prices, or dates, cross-check them against `design/design.md`, `revenue/REVENUE_OPS.md`, and current copy before deploy.
 
 **Waitlist idempotency contract:**
 - Any landing page that collects email for a waitlist must guarantee: duplicate email submissions return HTTP 200 (not 4xx), with a de-duplicated response message. Test with a repeated submit before marking the funnel live.

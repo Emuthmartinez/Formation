@@ -189,6 +189,19 @@ if (state && !skip) {
     const candidateUnits = asArray(orchestration.candidate_units);
     const spawnedAgents = asArray(orchestration.spawned_agents);
     const parallelUnitIds = new Set(normalizedStringArray(orchestration.parallel_safe_units));
+    const managerPattern = asBoolean(orchestration.manager_pattern) === true;
+    const dispatchReason = asString(orchestration.dispatch_reason)?.trim();
+
+    if (managerPattern && spawnedAgents.length === 0 && !dispatchReason) {
+      issues.push(
+        issue(
+          "error",
+          "orchestration.manager_dispatch_missing",
+          "manager_pattern: true requires at least one spawned_agents entry or a concrete dispatch_reason.",
+          "state/PROJECT_STATE.yaml",
+        ),
+      );
+    }
 
     if ((strategy === "serial_subagents" || requiresParallelSafety(strategy, spawnedAgents)) && candidateUnits.length === 0) {
       issues.push(
@@ -215,6 +228,23 @@ if (state && !skip) {
     if (spawnedAgents.length > 0 && strategy === "inline") {
       issues.push(
         issue("error", "orchestration.spawned_agents_inline_strategy", "spawned_agents is non-empty but strategy is inline.", "state/PROJECT_STATE.yaml"),
+      );
+    }
+
+    if (
+      managerPattern &&
+      asBoolean(orchestration.preflight_done) === true &&
+      ["serial_subagents", "parallel_subagents", "worktrees", "hybrid"].includes(strategy ?? "") &&
+      spawnedAgents.length === 0 &&
+      dispatchReason
+    ) {
+      issues.push(
+        issue(
+          "warning",
+          "orchestration.selected_dispatch_not_started",
+          "The selected manager strategy names delegated work, but no spawned agent is recorded. Keep the lane partial and explain the dispatch delay.",
+          "state/PROJECT_STATE.yaml",
+        ),
       );
     }
 

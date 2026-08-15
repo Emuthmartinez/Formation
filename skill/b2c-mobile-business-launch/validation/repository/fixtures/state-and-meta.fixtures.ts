@@ -510,7 +510,7 @@ export function register(h: Harness): void {
   const depUnlocked = makeFixture("lane-dependency-unlocked");
   const depUnlockedState = readState(depUnlocked);
   expectRecord(depUnlockedState.project, "state/PROJECT_STATE.yaml project").phase = "phase_2_design";
-  Object.assign(getLane(depUnlockedState, "design"), { status: "done", evidence: ["design/DESIGN.md"] });
+  Object.assign(getLane(depUnlockedState, "design"), { status: "done", evidence: ["design/design.md"] });
   Object.assign(getLane(depUnlockedState, "product"), { status: "partial", evidence: ["product/SPEC.md"] });
   writeState(depUnlocked, depUnlockedState);
   runFixture("lane done on a partial upstream lane fails coverage", depUnlocked, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
@@ -519,7 +519,7 @@ export function register(h: Harness): void {
   const depBlocked = makeFixture("lane-dependency-blocked-upstream");
   const depBlockedState = readState(depBlocked);
   expectRecord(depBlockedState.project, "state/PROJECT_STATE.yaml project").phase = "phase_2_design";
-  Object.assign(getLane(depBlockedState, "design"), { status: "done", evidence: ["design/DESIGN.md"] });
+  Object.assign(getLane(depBlockedState, "design"), { status: "done", evidence: ["design/design.md"] });
   Object.assign(getLane(depBlockedState, "product"), { status: "blocked", blockers: ["Awaiting founder call on the V2 boundary."] });
   writeState(depBlocked, depBlockedState);
   runFixture("lane done on a blocked upstream lane fails coverage", depBlocked, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
@@ -683,7 +683,7 @@ export function register(h: Harness): void {
   const depOverrideState = readState(depOverride);
   Object.assign(getLane(depOverrideState, "design"), {
     status: "done",
-    evidence: ["design/DESIGN.md"],
+    evidence: ["design/design.md"],
     dependency_override:
       "2026-07-25 Brand and type system locked from founder identity work; the open product/SPEC.md item is a V2 scope question that does not touch any design token.",
   });
@@ -702,7 +702,7 @@ export function register(h: Harness): void {
   // the error — the exact words-not-work bypass this gate exists to refuse.
   const depOverrideThin = makeFixture("lane-dependency-override-thin");
   withLane(depOverrideThin, "product", { status: "partial", evidence: ["product/SPEC.md"] });
-  withLane(depOverrideThin, "design", { status: "done", evidence: ["design/DESIGN.md"], dependency_override: "not needed" });
+  withLane(depOverrideThin, "design", { status: "done", evidence: ["design/design.md"], dependency_override: "not needed" });
   runFixture("undated dependency_override does not unlock the edge", depOverrideThin, "check-lane-coverage.ts", 1, "lane_coverage.design.dependency_unlocked");
   runFixture("undated dependency_override is itself flagged as thin", depOverrideThin, "check-lane-coverage.ts", 1, "lanes.design.reason_undated_or_trivial");
 
@@ -712,7 +712,7 @@ export function register(h: Harness): void {
   withLane(depOverrideStale, "product", { status: "partial", evidence: ["product/SPEC.md"] });
   withLane(depOverrideStale, "design", {
     status: "done",
-    evidence: ["design/DESIGN.md"],
+    evidence: ["design/design.md"],
     dependency_override:
       "2025-01-05 Brand and type system locked from founder identity work; the open product/SPEC.md item is a V2 scope question that does not touch any design token.",
   });

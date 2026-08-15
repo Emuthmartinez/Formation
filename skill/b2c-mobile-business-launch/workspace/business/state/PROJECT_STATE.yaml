@@ -108,6 +108,7 @@ orchestration:
   rationale: "No orchestration preflight has been evaluated yet."
   integration_owner: "orchestrator"
   manager_pattern: true
+  dispatch_reason: "No specialist has been dispatched because the orchestration preflight is not complete."
   file_overlap_checked: false
   actual_file_collision_check: false
   agent_outputs_reviewed: false
@@ -211,10 +212,10 @@ lanes:
     status: "not_started"
     evidence:
       - "strategy/BRAND.md"
-      - "design/DESIGN.md"
+      - "design/design.md"
       - "product/copy/COPY_BRIEF.md"
       - "product/copy/COPY_DECK.md"
-      - "design/screen-design/design.md"
+      - "design/design.md"
       - "product/experience/ux-patterns/UX_PATTERNS.md"
       - "design/design.html"
       - "product/experience/ux-patterns/ux-patterns.html"
@@ -449,7 +450,7 @@ tools:
     source_inputs:
       - "screenshots/raw/"
       - "app-icon/app-icon-1024.png"
-      - "design/DESIGN.md"
+      - "design/design.md"
       - "design.md"
       - "11_STAR_EXPERIENCE.md"
       - "APP_STORE_LISTING.md"
@@ -464,7 +465,7 @@ tools:
     route: "optional_paid_or_account_tool"
     docs_checked_at: ""
     required_secrets: []
-    preflight: "Confirm design/DESIGN.md tokens, asset family, prompt brief, source rights, and whether the output is screenshot support, App Icon, CPP/event art, preview thumbnail, or UGC/ad creative."
+    preflight: "Confirm design/design.md tokens, asset family, prompt brief, source rights, and whether the output is screenshot support, App Icon, CPP/event art, preview thumbnail, or UGC/ad creative."
     validation: "CONTENT_ASSETS.md and SCREENSHOTS.md record route, prompt summary, source inputs, output paths, visual QA, and founder approval gates."
     fallback: "Remotion, HTML/CSS composition, founder-owned media, public-domain assets, or raw screenshots only after founder approval and limitation notes."
     identity:

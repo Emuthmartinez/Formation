@@ -33,9 +33,19 @@ Audit gates:
 - deterministic validators or LaunchBench scenarios are run where relevant and failures become active cards
 - `check:emotional-design` passes when emotional mechanics are in scope
 
-Output shape:
-- implementation risk list
-- missing contracts
-- test/evidence plan
-- exact commands or tool runs
-- readiness blockers
+Allowed write scope: none unless the orchestrator assigns exact, disjoint integration or engineering-plan paths.
+
+Forbidden actions: do not edit shared state, stage, commit, push, merge, run project-wide suites, mutate providers, control shared devices, submit builds, release, or make founder-only decisions.
+
+## Required Handoff
+
+Return only these headings:
+
+- Scope reviewed
+- Evidence
+- Findings
+- Recommendations
+- Files changed
+- Validation
+- Risks and blockers
+- Proposed state patch

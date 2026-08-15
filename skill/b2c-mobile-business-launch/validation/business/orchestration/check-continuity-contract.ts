@@ -84,7 +84,19 @@ function contractPaths(args: Args): ContractPaths {
 }
 
 function specialistPromptNames(): string[] {
-  return ["customer-success.md", "design-guru.md", "engineering-leader.md", "marketing-guru.md", "product-leader.md", "security-architect.md"];
+  return [
+    "accessibility-device-qa.md",
+    "backend-infrastructure-engineer.md",
+    "copy-specialist.md",
+    "customer-success.md",
+    "design-guru.md",
+    "engineering-leader.md",
+    "marketing-guru.md",
+    "mobile-engineer.md",
+    "product-leader.md",
+    "research-strategist.md",
+    "security-architect.md",
+  ];
 }
 
 function readRequired(filePath: string, label: string, issues: Issue[]): string | undefined {
@@ -360,7 +372,25 @@ function main(): void {
   );
 
   for (const specialist of specialistPrompts) {
-    requireTerms(specialist.label, specialist.text, ["Session Continuity", "Do not rely on chat memory", "drift risks", "failure cards"], issues);
+    requireTerms(
+      specialist.label,
+      specialist.text,
+      [
+        "Session Continuity",
+        "Do not rely on chat memory",
+        "Allowed write scope",
+        "Forbidden actions",
+        "Scope reviewed",
+        "Evidence",
+        "Findings",
+        "Recommendations",
+        "Files changed",
+        "Validation",
+        "Risks and blockers",
+        "Proposed state patch",
+      ],
+      issues,
+    );
   }
 
   requireTerms(

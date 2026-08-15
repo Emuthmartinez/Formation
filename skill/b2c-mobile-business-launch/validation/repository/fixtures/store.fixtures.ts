@@ -433,7 +433,7 @@ export function register(h: Harness): void {
       "Production Composition Matrix",
       "Device Wells: iPhone and iPad wells are covered.",
       "headline and copy overlay are not needed because raw screenshots are ready.",
-      "design/DESIGN.md, 11_STAR_EXPERIENCE.md, Higgsfield, Remotion, App Icon, App Preview, asc-screenshot-resize, alpha, color space, thumbnail, visual QA, Google Play, feature graphic, and founder approval are mentioned.",
+      "design/design.md, 11_STAR_EXPERIENCE.md, Higgsfield, Remotion, App Icon, App Preview, asc-screenshot-resize, alpha, color space, thumbnail, visual QA, Google Play, feature graphic, and founder approval are mentioned.",
     ].join("\n"),
     "utf8",
   );
@@ -449,7 +449,7 @@ export function register(h: Harness): void {
       "Raw Capture Matrix",
       "Production Composition Matrix",
       "Device Wells",
-      "headline, copy overlay, design/DESIGN.md, 11_STAR_EXPERIENCE.md, MobAI, Higgsfield, Remotion, ParthJadhav/app-store-screenshots, App Icon, App Preview, asc-screenshot-resize, ASC device_type, screenshot count, required, scaled, version localization ID, alpha, color space, sRGB, thumbnail, visual QA, founder approval, iPhone, iPad, Google Play, and feature graphic are mentioned.",
+      "headline, copy overlay, design/design.md, 11_STAR_EXPERIENCE.md, MobAI, Higgsfield, Remotion, ParthJadhav/app-store-screenshots, App Icon, App Preview, asc-screenshot-resize, ASC device_type, screenshot count, required, scaled, version localization ID, alpha, color space, sRGB, thumbnail, visual QA, founder approval, iPhone, iPad, Google Play, and feature graphic are mentioned.",
       "Production artwork was styled with the external screenshot skill, but no saved board state or upload orchestration proof is recorded.",
     ].join("\n"),
     "utf8",

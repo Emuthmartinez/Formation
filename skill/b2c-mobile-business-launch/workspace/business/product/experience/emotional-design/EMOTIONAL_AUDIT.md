@@ -371,7 +371,7 @@ One block per audited journey. Walk each on a real device (see Device Walk Proto
 
 ## Emotional Curve
 
-One curve per journey, plotted from the **Valence** column of that journey's per-journey table — so curve data is collected automatically during every walk, not as a separate step. Render one line chart per journey in `emotional-design.html` / `design/design.html` using design tokens from `design/DESIGN.md` (CSS variables).
+One curve per journey, plotted from the **Valence** column of that journey's per-journey table — so curve data is collected automatically during every walk, not as a separate step. Render one line chart per journey in `emotional-design.html` / `design/design.html` using design tokens from `design/design.md` (CSS variables).
 
 **Acceptance Rule:** the curve must cross **+2** (emotional value threshold) at or before that journey's paywall / spend marker. A journey whose first +2 crossing occurs after the paywall is a conversion design failure → open `emotional-curve-peak-after-paywall`. A journey with no rendered curve → open `emotional-curve-missing`.
 

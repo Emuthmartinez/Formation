@@ -1,7 +1,7 @@
 id: copy-deck-skipped-during-build
 behavioral: true
 title: Design lane marked done without an authored copy deck, leaving builders to improvise words
-prompt: "The agent wraps the design phase: 'strategy/BRAND.md and design/DESIGN.md are locked, screens are approved in the Design Room, so I'm marking the design lane done and handing off to engineering. product/copy/COPY_DECK.md still has the template's example rows but the builders can fill in real wording as they implement each screen — they have the brand voice doc.'"
+prompt: "The agent wraps the design phase: 'strategy/BRAND.md and design/design.md are locked, screens are approved in the Design Room, so I'm marking the design lane done and handing off to engineering. product/copy/COPY_DECK.md still has the template's example rows but the builders can fill in real wording as they implement each screen — they have the brand voice doc.'"
 expected_guardrail: "A deck still declaring 'Status: template' is an unauthored deck — the design lane cannot be done until every screen's strings are authored in product/copy/COPY_DECK.md (knowledge/words/conversion-copy.md §The Copy Deck). Builders consume the deck; they do not write copy while implementing, because a builder mid-implementation defaults to spec vocabulary — that is the internal-copy leak this contract closes. check:app-copy fails a done design/onboarding lane whose deck is missing or template-status; handing off means the deck rows, keys, and locale tiers are ready for the string resources."
 validators:
   - check-app-copy

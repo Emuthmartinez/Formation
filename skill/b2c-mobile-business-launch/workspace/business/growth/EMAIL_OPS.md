@@ -45,14 +45,14 @@ Automation statuses are freeform. The validator scans for the string `done` or `
 
 ## Brand Tokens
 
-Production templates pull their design system from `design/DESIGN.md` — never hardcoded hex values. `business/growth/resend/email-templates.ts` documents the contract (`LaunchEmailDesignSystem`: colors, typography, radius, spacing, email layout). Record the mapping here before production sends; `check:email` flags a missing mapping.
+Production templates pull their design system from `design/design.md` — never hardcoded hex values. `business/growth/resend/email-templates.ts` documents the contract (`LaunchEmailDesignSystem`: colors, typography, radius, spacing, email layout). Record the mapping here before production sends; `check:email` flags a missing mapping.
 
-| LaunchEmailDesignSystem field | design/DESIGN.md token | Value basis |
+| LaunchEmailDesignSystem field | design/design.md token | Value basis |
 | --- | --- | --- |
-| colors.accent / accentText | <!-- e.g. color.accent.primary --> | <!-- design/DESIGN.md section --> |
-| typography.bodyFontFamily | <!-- e.g. font.body --> | <!-- design/DESIGN.md section --> |
-| radius.card / radius.button | <!-- e.g. radius.md --> | <!-- design/DESIGN.md section --> |
-| spacing.* / email.maxWidth | <!-- e.g. space scale --> | <!-- design/DESIGN.md section --> |
+| colors.accent / accentText | <!-- e.g. color.accent.primary --> | <!-- design/design.md section --> |
+| typography.bodyFontFamily | <!-- e.g. font.body --> | <!-- design/design.md section --> |
+| radius.card / radius.button | <!-- e.g. radius.md --> | <!-- design/design.md section --> |
+| spacing.* / email.maxWidth | <!-- e.g. space scale --> | <!-- design/design.md section --> |
 
 ---
 

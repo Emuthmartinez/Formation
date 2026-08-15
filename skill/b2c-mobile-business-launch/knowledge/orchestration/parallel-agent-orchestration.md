@@ -21,7 +21,7 @@ Refresh current provider guidance before changing runtime-specific orchestration
 Current synthesis for this skill:
 
 - Start with a strong single orchestrator. Split only when tool overload, context separation, independent breadth, or specialist consistency justifies the coordination cost.
-- Prefer a manager pattern for B2C launches: one orchestrator owns the user thread, state, integration, git, provider mutations, and release calls.
+- Prefer a manager pattern for B2C launches: one orchestrator owns the user thread, shared state, integration, git, provider mutations, public actions, device control, and release calls. Specialists never perform these actions.
 - Use parallel subagents for breadth-first work and bounded independent units, not for shared-file editing, device/simulator control, account mutations, or final launch decisions.
 - Treat subagents as tools with narrow objectives, explicit inputs, output contracts, forbidden actions, and blast-radius limits.
 - Parallelism is not free. It can burn tokens, duplicate work, create merge conflicts, and make hidden assumptions harder to catch unless the orchestrator records the plan and reconciles outputs.
@@ -44,7 +44,7 @@ The orchestrator must answer:
 5. Which tasks must be serialized because they mutate the same source of truth?
 6. What proof will show subagent findings were reviewed, integrated, and validated?
 
-If the answer is "no useful parallelism," record `strategy: inline` with a short reason. If the runtime lacks a callable subagent facility, record `strategy: blocked` or `inline` with `subagents_unavailable` in the rationale and run the role audits serially or inline from `APP_AGENTS.md`. The preflight still matters because it proves the agent considered parallelism deliberately.
+If the answer is "no useful parallelism," record `strategy: inline` and a concrete `dispatch_reason`. If the runtime lacks a callable subagent facility, record `strategy: blocked` or `inline`, put the limitation in `dispatch_reason`, and run the specialist briefs serially or inline from `APP_AGENTS.md`. Do not set `manager_pattern: true` and leave both `spawned_agents` and `dispatch_reason` empty. The preflight must show whether delegation happened and why.
 
 **MCP catalog overflow (a common silent subagent failure).** When many MCP servers are connected, the combined tool catalog can overflow a subagent's context before it starts — the subagent returns empty with ~0 tokens in a few seconds, or fails with "Prompt is too long." If a dispatched subagent exits in under ~5 seconds with no output, treat it as a context-overflow signal, not a task result. Mitigation: prefer `strategy: inline` for MCP-tool-heavy research (run it in the parent session); if background dispatch is required, enable on-demand tool loading (e.g. `ENABLE_TOOL_SEARCH=true`, which typically needs a client restart) and confirm it is active before dispatch. Record the overflow and the chosen mitigation in `operations/ORCHESTRATION.md`; do not silently retry the same dispatch.
 
@@ -108,6 +108,22 @@ After agents return:
 5. Run focused validators first, then full launch validators.
 6. Update `state/PROJECT_STATE.yaml`, failure cards, and `engineering/PRODUCTION_READINESS.md`.
 
+## Predetermined Specialist Prompts
+
+Use the prompts in `agents/` through `APP_AGENTS.md`. Broad launch work has nine standard specialist reviews:
+
+1. Research strategist: market, customer, competitor, review, social-language, and source-quality evidence.
+2. Product and UX designer: core loop, scope, onboarding, activation, retention, and interaction behavior.
+3. Visual designer: visual direction, hierarchy, composition, tokens, component expression, imagery, and motion.
+4. Copy specialist: brand voice, product copy, conversion copy, comprehension, and claim discipline.
+5. Marketing and growth strategist: positioning, store conversion, acquisition, lifecycle, and measurable channel tests.
+6. Mobile engineer: native app architecture, implementation, performance, platform behavior, and mobile tests.
+7. Backend and infrastructure engineer: data, API, auth, jobs, observability, deployment, and provider integration.
+8. Accessibility and device QA specialist: assistive technology, localization stress, device coverage, and real-flow evidence.
+9. Security and release reviewer: threat model, privacy/security controls, signing, store requirements, and release evidence.
+
+Select only roles that match ready work. Dispatch independent read-only reviews together. Dispatch edits together only when their allowed paths do not overlap. Give each specialist only the minimum source set in its prompt. Do not pass the full conversation or every launch document by default.
+
 ## Standard Subagent Instructions
 
 Every parallel subagent prompt should include:
@@ -118,12 +134,15 @@ Your assigned objective: <objective>.
 Read first: <specific docs/files>.
 Allowed write scope: <paths> or read-only.
 Forbidden actions: do not stage files, commit, push, merge, run project-wide suites, mutate providers, change credentials, post publicly, submit builds, or make founder-only decisions.
-Output exactly:
-- docs/files read
-- findings or changes
-- files changed, if any
-- validation run or validation recommended
-- blockers and failure cards
+Return only this handoff:
+- Scope reviewed
+- Evidence
+- Findings
+- Recommendations
+- Files changed
+- Validation
+- Risks and blockers
+- Proposed state patch
 ```
 
 For read-only audits, set `Allowed write scope: none`.
@@ -136,11 +155,15 @@ Use this dispatch map when a launch request is broad and the repo/runtime permit
 
 | Lane | Parallel role | Output |
 | --- | --- | --- |
-| Product | product leader | scope risks, onboarding/activation fixes, traceability gaps |
-| Marketing | marketing guru | ASO/GEO/UGC/Fastlane claims and channel findings |
-| Design | design guru | design-system, screenshot, accessibility, Higgsfield/Remotion asset gaps |
-| Engineering | engineering leader | implementation risks, test plan, frontend/backend/provider proof gaps |
-| Security | security architect | threat model, app integrity, entitlement/webhook, supply-chain, incident response gaps |
+| Research | research strategist | evidence quality, customer language, category and competitor findings |
+| Product and UX | product and UX designer | scope, core-loop, onboarding, activation, retention, and interaction findings |
+| Visual design | visual designer | hierarchy, composition, tokens, imagery, motion, and cross-surface findings |
+| Copy | copy specialist | voice, clarity, conversion, product-string, and claim findings |
+| Marketing and growth | marketing and growth strategist | positioning, ASO/GEO, acquisition, lifecycle, and channel-test findings |
+| Mobile engineering | mobile engineer | mobile architecture, implementation, performance, platform, and test findings |
+| Backend and infrastructure | backend and infrastructure engineer | API, data, auth, jobs, deployment, observability, and provider findings |
+| Accessibility and device QA | accessibility and device QA specialist | assistive-technology, device, localization, and end-to-end proof gaps |
+| Security and release | security and release reviewer | threat model, hardening, signing, store, supply-chain, and incident-response gaps |
 | Customer success | customer success | support, privacy/delete/refund/restore, lifecycle, review-response gaps |
 | Orchestrator | main agent | state, integration, file collision check, git/release, final proof |
 
@@ -169,6 +192,7 @@ orchestration:
   rationale: "No orchestration preflight has been evaluated yet."
   integration_owner: "orchestrator"
   manager_pattern: true
+  dispatch_reason: "No specialist is dispatched until the preflight identifies a bounded unit."
   file_overlap_checked: false
   actual_file_collision_check: false
   agent_outputs_reviewed: false
@@ -216,6 +240,8 @@ orchestration:
   status: "completed"
   output_path: "orchestration/security-audit.md"
 ```
+
+When `manager_pattern` is `true`, record at least one `spawned_agents` entry after dispatch. If no specialist is dispatched, record a concrete `dispatch_reason`. A general strategy rationale is not a dispatch reason.
 
 ## Required Artifacts
 

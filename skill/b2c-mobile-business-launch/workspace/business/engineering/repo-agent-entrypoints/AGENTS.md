@@ -21,7 +21,7 @@ Assume the founder is new to business operations. The agent runs the workflow an
 - Design Room: `studio/seed/business.json`, `studio/seed/theme.tokens.json`, `design/design-room.html`
 - Product and trace: `product/SPEC.md`, `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `EMOTIONAL_DESIGN.md`, `strategy/BRAND.md`
 - Words users read: `product/copy/COPY_BRIEF.md` (promise and voice), `product/copy/COPY_DECK.md` (every user-facing string — builders type deck rows, never spec vocabulary; `check:app-copy` gates it)
-- Build and operations: `engineering/TECH_SPEC.md`, `design/DESIGN.md`, `analytics/ANALYTICS.md`, `SECRETS.md`, `trust/SECURITY.md`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`
+- Build and operations: `engineering/TECH_SPEC.md`, `design/design.md`, `analytics/ANALYTICS.md`, `SECRETS.md`, `trust/SECURITY.md`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`
 - Orchestration and readiness: `operations/ORCHESTRATION.md`, `engineering/PRODUCTION_READINESS.md`, `APP_AGENTS.md`
 
 If a listed file does not exist yet, create or update it through the relevant `b2c-mobile-business-launch` reference instead of inventing a one-off replacement.
@@ -41,7 +41,7 @@ This file is a map, not a product spec. Keep durable product truth in the files 
 - Design Room state: `studio/seed/business.json`, `studio/seed/theme.tokens.json`, `design/design-room.html`, and `dist/design-room/`
 - Product and evidence: `strategy/RESEARCH.md`, `product/SPEC.md`, `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, `EMOTIONAL_DESIGN.md`, `EMOTIONAL_AUDIT.md`
 - Implementation: `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `operations/ORCHESTRATION.md`, `engineering/PRODUCTION_READINESS.md`
-- Design and content: `strategy/BRAND.md`, `design/DESIGN.md`, `design.md`, `design/design.html`, `UX_PATTERNS.md`, `CONTENT_ASSETS.md`, `growth/DEMO_VIDEO.md`
+- Design and content: `strategy/BRAND.md`, `design/design.md`, `design/design.html`, `UX_PATTERNS.md`, `CONTENT_ASSETS.md`, `growth/DEMO_VIDEO.md`
 - Growth and stores: `LAUNCH.md`, `GEO_SEO.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `growth/UGC_PLAYBOOK.md`, `growth/FASTLANE_OPS.md`, `APP_STORE_LISTING.md`, `store/APPLE_APP_STORE_REQUIREMENTS.md`, `SCREENSHOTS.md`, `store/STORE_CONSOLE.md`, `store/APPLE_SIGNING.md`
 - Revenue, lifecycle, and trust: `revenue/REVENUE_OPS.md`, `analytics/ANALYTICS.md`, `growth/EMAIL_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, `SECRETS.md`, `trust/SECURITY.md`, `trust/security-review.html`
 - Role routing: `APP_AGENTS.md` and `agents/`
@@ -78,7 +78,7 @@ Do not let builders or agents add product behavior that is not traced from `stat
 ## Design And UX
 
 - All design work follows STATE -> MUTATE -> VERSION -> RENDER. Mutate `studio/seed/business.json` and `studio/seed/theme.tokens.json`, render `design/design-room.html`, and version/baseline with git instead of creating one-off design proposal files.
-- `design/DESIGN.md` owns tokens, voice, components, visual rules, and the tokenized `motion.*` scale.
+- `design/design.md` owns tokens, voice, components, visual rules, and the tokenized `motion.*` scale.
 - Motion is tokenized and platform-split. Web surfaces (landing, funnels, web paywall, Design Room preview) ship motion with framer-motion / the `motion` library reading the promoted `--motion-*` CSS variables; the mobile binary (SwiftUI/Flutter/React Native) uses native animation from `DesignTokens.Motion` and must never import framer-motion. Honor reduced motion on every surface. When the `ui-ux-pro-max` skill is installed, use it (reference-only, do not copy its data) for senior-grade web UI, design-system reasoning, and motion/anti-pattern guidance.
 - The optional `state.designBrief` (seed it with `npm run seed:design-brief`, then adapt ui-ux-pro-max output) records recommended style, palette/typography mood, key effects, and anti-patterns, and renders in `design/design-room.html`. `check:template-safety` fails CI if framer-motion/`motion` is imported from app/template code; keep it on web surfaces only.
 - HTML proofs must be opened and checked on mobile and desktop before visual work is called ready.

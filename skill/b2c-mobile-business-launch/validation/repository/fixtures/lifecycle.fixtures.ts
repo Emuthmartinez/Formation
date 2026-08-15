@@ -948,9 +948,9 @@ export function register(h: Harness): void {
   setEmailDone(emailDoneUnbranded);
   {
     const emailOpsPath = path.join(emailDoneUnbranded, "growth/EMAIL_OPS.md");
-    writeFileSync(emailOpsPath, readFileSync(emailOpsPath, "utf8").replaceAll("design/DESIGN.md", "the design doc"), "utf8");
+    writeFileSync(emailOpsPath, readFileSync(emailOpsPath, "utf8").replaceAll("design/design.md", "the design doc"), "utf8");
   }
-  runFixture("email lane done without design/DESIGN.md brand tokens fails", emailDoneUnbranded, "check-email.ts", 1, "email.brand_tokens_missing");
+  runFixture("email lane done without design/design.md brand tokens fails", emailDoneUnbranded, "check-email.ts", 1, "email.brand_tokens_missing");
 
   const emailDoneNoDns = makeFixture("email-done-no-dns");
   setEmailDone(emailDoneNoDns);
@@ -962,7 +962,7 @@ export function register(h: Harness): void {
       "| Email | From address | Template | Unsubscribe required |",
       "| --- | --- | --- | --- |",
       "| welcome | hello@mail.example.com | resend/email-templates.ts `welcomeEmail` | no (transactional) |",
-      "Brand tokens pulled from design/DESIGN.md per email-templates.ts.",
+      "Brand tokens pulled from design/design.md per email-templates.ts.",
     ].join("\n"),
     "utf8",
   );

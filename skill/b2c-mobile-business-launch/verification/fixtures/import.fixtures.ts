@@ -90,7 +90,7 @@ lanes:
   design:
     status: "done"
     evidence:
-      - "design/DESIGN.md"
+      - "design/design.md"
     blockers: []
   engineering:
     status: "blocked"
@@ -156,7 +156,7 @@ const FILLED_TRACE = `# Launch Trace
 function buildFilledWorkspace(harness: Harness, name: string): string {
   const root = harness.makeTempDir(name);
   write(root, "state/PROJECT_STATE.yaml", FILLED_STATE);
-  write(root, "state/business.json", FILLED_BUSINESS);
+  write(root, "studio/seed/business.json", FILLED_BUSINESS);
   write(root, "state/LAUNCH_TRACE.md", FILLED_TRACE);
   write(root, "strategy/RESEARCH.md", "# Market research\n\n## What we learned\n\nFamilies play weekly.\n\n## What we do not know\n\nWhether they will pay.\n");
   write(root, "product/SPEC.md", "# Product spec\n\nThe app is a domino game.\n");
@@ -284,7 +284,7 @@ export function register(harness: Harness): void {
     assert(research!.title === "Market research", `expected the document's own H1 as the title, got ${research!.title}`);
     assert(research!.sections.length === 2, `expected one section per H2, got ${research!.sections.length}`);
     assert(research!.fingerprint.length === 64, "a deliverable must carry a content fingerprint so a re-import can tell whether it changed");
-    const missing = report.deliverables!.find((entry) => entry.importKey === "deliverable:design/DESIGN.md");
+    const missing = report.deliverables!.find((entry) => entry.importKey === "deliverable:design/design.md");
     assert(missing === undefined, "a document a lane names but that is not on disk must not be invented");
   });
 

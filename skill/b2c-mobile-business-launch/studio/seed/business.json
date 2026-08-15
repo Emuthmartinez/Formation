@@ -26,6 +26,7 @@
   },
   "designRoom": {
     "status": "not_started",
+    "contractPath": "design/design.md",
     "renderPath": "design/design-room.html",
     "versionLog": [
       {

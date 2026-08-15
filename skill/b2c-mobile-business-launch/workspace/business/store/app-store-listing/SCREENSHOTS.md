@@ -10,7 +10,7 @@ Raw device captures prove the product exists. Final store screenshots are compos
 
 | Source | Role | Status | Notes |
 | --- | --- | --- | --- |
-| `design/DESIGN.md` | tokens, type, color, frame style, App Icon direction | Pending | Required before production composition |
+| `design/design.md` | tokens, type, color, frame style, App Icon direction | Pending | Required before production composition |
 | `design.md` | screen inventory and screenshot-critical states | Pending | Use real or faithful production screens |
 | `11_STAR_EXPERIENCE.md` | V1 scalable slice and line of feasibility | Pending | Screenshot claims must stay inside this line |
 | `APP_STORE_LISTING.md` | metadata, privacy, pricing, CPP/event alignment | Pending | Copy and offers must match listing truth |
@@ -32,7 +32,7 @@ Store assets are not generic marketing — they are engineered from everything t
 | `strategy/RESEARCH.md` | target user, the problem in their own pain language, top objections to answer, competitor visual conventions to break from |
 | `11_STAR_EXPERIENCE.md` | the one magical V1 moment — this is the hook payoff and Screenshot 1 |
 | `EMOTIONAL_DESIGN.md` + `knowledge/experience/experience-cards.md` | the Emotional North Star (the feeling the 5-second hook must create), the target emotional curve, and which Experience Card the hook instantiates |
-| `design/DESIGN.md` + `strategy/BRAND.md` | tokens, type, color, motion, and voice so every asset is design-aligned |
+| `design/design.md` + `strategy/BRAND.md` | tokens, type, color, motion, and voice so every asset is design-aligned |
 | `APP_STORE_LISTING.md` | keyword/positioning alignment so captions reinforce the metadata |
 
 ### Per-Slot Knowledge Map
@@ -78,7 +78,7 @@ Preferred local route: ParthJadhav/app-store-screenshots.
 Inputs:
 - real app captures from `screenshots/raw/`
 - `app-icon/app-icon-1024.png`
-- `design/DESIGN.md`, `design.md`, and `11_STAR_EXPERIENCE.md`
+- `design/design.md`, and `11_STAR_EXPERIENCE.md`
 - headline/copy story from `APP_STORE_LISTING.md`
 - Higgsfield supporting art only when recorded in `CONTENT_ASSETS.md`
 
@@ -109,7 +109,7 @@ Run current sizing before export. Record ready, blocked, or not needed for each 
 
 | Asset | Source | Route | Output | QA | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1024x1024 App Icon | `design/DESIGN.md` + competitor icon context | Higgsfield or designer/founder-owned asset | `app-icon/app-icon-1024.png` | no alpha, no rounded corners, thumbnail test, category differentiation | blocked |
+| 1024x1024 App Icon | `design/design.md` + competitor icon context | Higgsfield or designer/founder-owned asset | `app-icon/app-icon-1024.png` | no alpha, no rounded corners, thumbnail test, category differentiation | blocked |
 
 ## App Preview Video (Autoplay Hook)
 

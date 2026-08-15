@@ -948,20 +948,20 @@ for (const rel of [...mdFilesUnder("knowledge"), ...mdFilesUnder("workspace/busi
 }
 
 // --- 6. The two seeded templates must prescribe the same per-moment motion tokens. ---
-// design/DESIGN.md's "Card motion spec" table and EMOTIONAL_DESIGN.md's design/DESIGN.md integration
+// design/design.md's "Card motion spec" table and EMOTIONAL_DESIGN.md's design/design.md integration
 // row describe the SAME four card moments; when both seed a business repo they must
 // agree on the tokens per moment, or the generated artifacts contradict each other
 // (the pre-reconciliation state: 120ms vs 220ms steps, celebrate vs 360ms reveals).
 // Soft-skipped when either template is absent, matching check 5's fixture tolerance.
 const CARD_MOMENTS = ["Commitment echo", "Perceived Effort", "Variable Reward", "Intent Mirror"];
-const DESIGN_TPL = "workspace/business/design/DESIGN.md";
+const DESIGN_TPL = "workspace/business/design/design.md";
 const EMOTIONAL_TPL = "workspace/business/product/experience/emotional-design/EMOTIONAL_DESIGN.md";
 const designTplPath = path.join(skillRoot, DESIGN_TPL);
 const emotionalTplPath = path.join(skillRoot, EMOTIONAL_TPL);
 if (existsSync(designTplPath) && existsSync(emotionalTplPath)) {
   const tokensCited = (chunk: string): string[] => [...chunk.matchAll(/`motion\.([A-Za-z0-9_]+)`/g)].map((m) => g(m, 1)).sort();
 
-  // design/DESIGN.md: one table row per moment; the row's cells carry its tokens.
+  // design/design.md: one table row per moment; the row's cells carry its tokens.
   const designText = readFileSync(designTplPath, "utf8");
   const designMoments = new Map<string, string[]>();
   for (const line of designText.split("\n")) {

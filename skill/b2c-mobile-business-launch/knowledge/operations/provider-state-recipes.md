@@ -49,7 +49,7 @@ Each provider entry in `state/PROJECT_STATE.yaml` should include:
 ### Resend
 
 - record sending domain, SPF/DKIM/DMARC, sender identities, reply-to, inbound route, contacts/topics, unsubscribe headers, webhooks, idempotency keys, and lifecycle automations
-- adapt `business/growth/resend/email-templates.ts` from `design/DESIGN.md`
+- adapt `business/growth/resend/email-templates.ts` from `design/design.md`
 - verify a real test send and provider log/webhook where in scope
 
 ### Sentry

@@ -109,7 +109,7 @@ Rules:
 - Final upload candidates need production composition: headline, copy overlay, device frame or intentional frameless treatment, export target, and visual QA.
 - Use current `asc screenshots sizes --all` before choosing device types; do not rely on stale dimension tables.
 - Final upload candidates need alpha transparency removed, color-space checked, size validated, and associated with the correct version localization ID.
-- Higgsfield may create supporting visuals, icons, backgrounds, mascots, CPP/event media, or thumbnails only when tied to `design/DESIGN.md`.
+- Higgsfield may create supporting visuals, icons, backgrounds, mascots, CPP/event media, or thumbnails only when tied to `design/design.md`.
 - Store screenshots and previews should express the V1 scalable slice from `11_STAR_EXPERIENCE.md` without crossing the line of feasibility.
 - Remotion may render screenshot frames, app previews, captioned demo clips, CPP/event variants, or social/store cuts from real UI only after `CONTENT_ASSETS.md` records route approval, license status, source inputs, render proof, and output paths.
 - Generated or rendered visuals must not imply unsupported features, claims, prices, or endorsements.
@@ -118,7 +118,7 @@ Rules:
 
 | Asset | Store surface | Source | Route | Output | QA | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| App Icon | App Store search, product page, device install | `design/DESIGN.md`, category/competitor icon audit | Higgsfield, designer/founder-owned asset, or approved fallback | `app-icon/app-icon-1024.png` | no alpha, no rounded corners, thumbnail contrast, category differentiation | blocked |
+| App Icon | App Store search, product page, device install | `design/design.md`, category/competitor icon audit | Higgsfield, designer/founder-owned asset, or approved fallback | `app-icon/app-icon-1024.png` | no alpha, no rounded corners, thumbnail contrast, category differentiation | blocked |
 | App Preview 1 | App Store search/product page | real in-app footage | in-app simulator (Cmd+R)/MobAI/native iOS recording + Remotion edit, or approved founder-deferred route | `previews/ios-preview-1.mp4` | muted readability, poster frame, in-app footage only, no unsupported CTA | blocked |
 | Google Play promo | Play Store product page | real app footage or approved marketing footage | Remotion, Higgsfield, or owned media | YouTube URL pending | Play metadata compliance, captions, thumbnail | optional |
 

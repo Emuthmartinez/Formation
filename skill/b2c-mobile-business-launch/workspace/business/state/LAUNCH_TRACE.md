@@ -6,7 +6,7 @@ Status: partial until research, product, design, onboarding, revenue, analytics,
 
 | Trace ID | Source evidence | Product decision | Design decision | Build contract | Verification |
 | --- | --- | --- | --- | --- | --- |
-| TRACE-001 | strategy/RESEARCH.md | product/SPEC.md | design/DESIGN.md | engineering/TECH_SPEC.md | engineering/PRODUCTION_READINESS.md |
+| TRACE-001 | strategy/RESEARCH.md | product/SPEC.md | design/design.md | engineering/TECH_SPEC.md | engineering/PRODUCTION_READINESS.md |
 
 ## Rejected Decisions
 

@@ -134,6 +134,7 @@
       "additionalProperties": false,
       "required": [
         "status",
+        "contractPath",
         "renderPath",
         "versionLog",
         "baselines"
@@ -148,6 +149,10 @@
             "baselined",
             "blocked"
           ]
+        },
+        "contractPath": {
+          "type": "string",
+          "const": "design/design.md"
         },
         "renderPath": {
           "type": "string",

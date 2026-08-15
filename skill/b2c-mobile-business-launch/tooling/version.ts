@@ -20,7 +20,7 @@ function run(commandName: string, value?: string): void {
     const message = args.message ?? "design: update design room state";
     runSkillScript("validate-state.ts", ["--root", args.root]);
     renderAndCheckDesignRoom(true);
-    runChecked("git", ["add", "studio/seed/business.json", "studio/seed/theme.tokens.json", "design/design-room.html"], args.root);
+    runChecked("git", ["add", "studio/seed/business.json", "studio/seed/theme.tokens.json", "design/design.md", "design/design-room.html"], args.root);
     runChecked("git", ["commit", "-m", message], args.root);
     return;
   }
@@ -59,7 +59,7 @@ function run(commandName: string, value?: string): void {
     cpSync(args.emptyStatePath, args.statePath);
     runSkillScript("validate-state.ts", ["--root", args.root]);
     renderAndCheckDesignRoom(false);
-    runChecked("git", ["add", "studio/seed/business.json", "studio/seed/theme.tokens.json", "design/design-room.html"], args.root);
+    runChecked("git", ["add", "studio/seed/business.json", "studio/seed/theme.tokens.json", "design/design.md", "design/design-room.html"], args.root);
     runChecked("git", ["commit", "-m", args.message ?? "design: wipe slate"], args.root);
   }
 }

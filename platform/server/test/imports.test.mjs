@@ -76,15 +76,23 @@ function write(root, relativePath, contents) {
 }
 
 /** A launch repository on disk, under a root the import service will be pointed at. */
-async function makeImportRoot(sourceId = "ocho", { state = LAUNCH_STATE } = {}) {
+async function makeImportRoot(sourceId = "ocho", { state = LAUNCH_STATE, legacyBusinessPath = false } = {}) {
   const root = await mkdtemp(path.join(os.tmpdir(), "formation-import-root-"));
   const workspace = path.join(root, sourceId);
   write(workspace, "state/PROJECT_STATE.yaml", state);
-  write(workspace, "state/business.json", LAUNCH_BUSINESS);
+  write(workspace, legacyBusinessPath ? "state/business.json" : "studio/seed/business.json", LAUNCH_BUSINESS);
   write(workspace, "strategy/RESEARCH.md", "# Market research\n\n## What we learned\n\nFamilies play weekly.\n");
   write(workspace, "product/SPEC.md", "# Product spec\n\nThe app is a domino game.\n");
   return { root, workspace };
 }
+
+test("the importer reads the canonical Design Room business state and the legacy path", async () => {
+  const current = await makeImportRoot("current");
+  const legacy = await makeImportRoot("legacy", { legacyBusinessPath: true });
+
+  assert.equal((await readReport(current.root, "current")).company?.oneLiner, "A domino game you can actually play with your family.");
+  assert.equal((await readReport(legacy.root, "legacy")).company?.oneLiner, "A domino game you can actually play with your family.");
+});
 
 async function makeStore() {
   const directory = await mkdtemp(path.join(os.tmpdir(), "formation-import-store-"));

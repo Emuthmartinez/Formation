@@ -193,7 +193,7 @@ Packet should include:
 - whether value is editable after submission or version-gated
 - source evidence or policy source
 
-Also create `APP_STORE_LISTING.md` rows for any field that affects marketing, privacy, pricing, or discoverability. The App Information section should agree with `design/DESIGN.md`, `app-marketing-context.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, `SCREENSHOTS.md`, and public support/privacy URLs.
+Also create `APP_STORE_LISTING.md` rows for any field that affects marketing, privacy, pricing, or discoverability. The App Information section should agree with `design/design.md`, `app-marketing-context.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, `SCREENSHOTS.md`, and public support/privacy URLs.
 
 ### App Privacy
 
@@ -331,7 +331,7 @@ Packet should include:
 - common-task matrix: first launch, login, purchase, primary app task, settings, restore purchase, account deletion, and any app-specific critical task
 - feature support decision by device: VoiceOver, Voice Control, Larger Text, Dark Interface, Differentiate without Color Alone, Sufficient Contrast, Reduced Motion, Captions, Audio Descriptions, or current App Store Connect feature set
 - accessibility URL value when the app has public accessibility notes
-- evidence path: `design/DESIGN.md`, `design/design.html`, MobAI/manual device test notes, screenshots/video proof, and `engineering/PRODUCTION_READINESS.md`
+- evidence path: `design/design.md`, `design/design.html`, MobAI/manual device test notes, screenshots/video proof, and `engineering/PRODUCTION_READINESS.md`
 - exact publish status and founder approval
 
 Rules:
@@ -534,7 +534,7 @@ Screenshots should start from real app UI captured locally, then be composed wit
 Raw captures are never the final App Store or Google Play artwork by themselves. They are the proof layer that feeds production screenshot compositions, App Icon checks, App Preview/poster frames, device-well exports, and upload validation.
 
 Use:
-- `design/DESIGN.md` for visual rules
+- `design/design.md` for visual rules
 - `design/design.html` or screenshot HTML for framed concepts
 - ParthJadhav/app-store-screenshots for a reusable local screenshot editor/export board that can combine real app captures, app icon, design-system style, headline/copy overlays, locale variants, iPhone/iPad decks, and bulk PNG export
 - MobAI for real app screenshots from simulator/device
@@ -570,7 +570,7 @@ MobAI recorder route:
 - Refresh `https://github.com/MobAI-App/mobile-recorder-skill` before install or command syntax.
 - Follow upstream flow: explore -> `.mob` choreography -> dry-run -> native record -> edit/export.
 - Save `.mob`, raw video, final video, captions, upload copy, target device, fixture, duration, dimensions, and rerender instructions.
-- Use `design/DESIGN.md` for phone bezel/background, captions, thumbnail/frame treatment, and upload copy voice.
+- Use `design/design.md` for phone bezel/background, captions, thumbnail/frame treatment, and upload copy voice.
 
 ### XcodeBuildMCP Fallback
 

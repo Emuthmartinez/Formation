@@ -14,8 +14,8 @@ export function App() {
 
   useEffect(() => {
     Promise.all([
-      fetch("../../seed/business.json").then((response) => response.json() as Promise<BusinessState>),
-      fetch("../../seed/theme.tokens.json").then((response) => response.json() as Promise<ThemeTokens>),
+      fetch("./state/business.json").then((response) => response.json() as Promise<BusinessState>),
+      fetch("./state/theme.tokens.json").then((response) => response.json() as Promise<ThemeTokens>),
     ])
       .then(([business, tokens]) => {
         setLoadState({ business, tokens });
@@ -47,26 +47,13 @@ export function App() {
           Loading Design Room...
         </motion.main>
       ) : (
-        <DesignRoom
-          key="room"
-          business={loadState.business}
-          tokens={loadState.tokens}
-          reduceMotion={Boolean(reduceMotion)}
-        />
+        <DesignRoom key="room" business={loadState.business} tokens={loadState.tokens} reduceMotion={Boolean(reduceMotion)} />
       )}
     </AnimatePresence>
   );
 }
 
-function DesignRoom({
-  business,
-  tokens,
-  reduceMotion,
-}: {
-  business: BusinessState;
-  tokens: ThemeTokens;
-  reduceMotion: boolean;
-}) {
+function DesignRoom({ business, tokens, reduceMotion }: { business: BusinessState; tokens: ThemeTokens; reduceMotion: boolean }) {
   const summaries = useMemo(() => {
     const appStore = business.surfaces.appStore;
     return [
@@ -88,20 +75,12 @@ function DesignRoom({
     hidden: {},
     visible: { transition: { staggerChildren: stagger } },
   };
-  const item: Variants = reduceMotion
-    ? { hidden: { opacity: 0 }, visible: { opacity: 1 } }
-    : { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
+  const item: Variants = reduceMotion ? { hidden: { opacity: 0 }, visible: { opacity: 1 } } : { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
   const itemTransition = transitionFor(reduceMotion, base);
   const tap = reduceMotion ? undefined : { scale: 0.985 };
 
   return (
-    <motion.main
-      className="shell"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={transitionFor(reduceMotion, base)}
-    >
+    <motion.main className="shell" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transitionFor(reduceMotion, base)}>
       <header className="hero">
         <p className="eyebrow">Design Room</p>
         <h1>{business.business.name}</h1>
@@ -172,13 +151,7 @@ function DesignRoom({
         </div>
         <motion.div className="metrics" variants={container} initial="hidden" animate="visible">
           {summaries.map(([label, count]) => (
-            <motion.article
-              key={label}
-              className="metric"
-              variants={item}
-              transition={itemTransition}
-              whileTap={tap}
-            >
+            <motion.article key={label} className="metric" variants={item} transition={itemTransition} whileTap={tap}>
               <span>{label}</span>
               <strong>{count}</strong>
             </motion.article>
@@ -209,14 +182,19 @@ function DesignRoom({
           <p className="eyebrow">Latest Mutation</p>
           <h2>{latest?.summary ?? "No mutation recorded"}</h2>
           <p>{latest?.createdAt ?? ""}</p>
+          <p>
+            <strong>Design contract:</strong> {business.designRoom.contractPath}
+          </p>
         </article>
         <article className="panel tokenPanel">
           <p className="eyebrow">Colors</p>
-          {Object.entries(tokens.tokens.color).slice(0, 8).map(([name, value]) => (
-            <span key={name} className="swatch" style={{ ["--swatch" as string]: value }}>
-              {toLabel(name)}
-            </span>
-          ))}
+          {Object.entries(tokens.tokens.color)
+            .slice(0, 8)
+            .map(([name, value]) => (
+              <span key={name} className="swatch" style={{ ["--swatch" as string]: value }}>
+                {toLabel(name)}
+              </span>
+            ))}
         </article>
       </section>
     </motion.main>

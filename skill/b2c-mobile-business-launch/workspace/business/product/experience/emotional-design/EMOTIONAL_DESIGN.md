@@ -4,7 +4,7 @@ This artifact defines the emotional experience contract for {{APP_NAME}}: the in
 
 **Use this when:** designing or reviewing any feature that touches emotional state — onboarding, first value reveal, paywall, return session, streaks, core loop completion. Complete before engineering handoff.
 
-**Depends on:** `11_STAR_EXPERIENCE.md`, `product/ONBOARDING.md`, `analytics/ANALYTICS.md`, `design/DESIGN.md`.
+**Depends on:** `11_STAR_EXPERIENCE.md`, `product/ONBOARDING.md`, `analytics/ANALYTICS.md`, `design/design.md`.
 
 ---
 
@@ -315,7 +315,7 @@ This artifact integrates with the following surfaces. Do not duplicate their con
 | `11_STAR_EXPERIENCE.md` | Emotional North Star maps to the 6-star ("better than expected") and 7-star ("made for me") levels. Intent Mirroring Card is the primary 7-star mechanic. All card activations must be tagged with their star-ladder level. |
 | `product/ONBOARDING.md` | Commitment Card fires during onboarding personalization. Perceived Effort Delay fires at plan generation. Intent Mirroring fires before the paywall. The onboarding sequence must reflect the Target Emotional Journey curve from this document: curve peaks before the paywall marker. |
 | `analytics/ANALYTICS.md` | All events in the Measurement Plan must appear in `analytics/ANALYTICS.md` before implementation. Do not implement events that are absent from the catalog. |
-| `design/DESIGN.md` | Motion tokens for each card moment: Commitment echo uses `motion.durationFast` (120ms fade); Variable Reward anticipation uses a pulse loop timed on `motion.durationBase` + a celebrate-family spring reveal; Perceived Effort step transitions use `motion.durationFast` + a celebrate-family final reveal; Intent Mirror entrance uses `motion.durationReveal` (600ms). Web surfaces use `motion/react` with CSS `--motion-*` variables. Mobile binary uses `DesignTokens.Motion`. Every delight moment has a `prefers-reduced-motion` / OS reduce-motion fallback declared in `engineering/TECH_SPEC.md`. |
+| `design/design.md` | Motion tokens for each card moment: Commitment echo uses `motion.durationFast` (120ms fade); Variable Reward anticipation uses a pulse loop timed on `motion.durationBase` + a celebrate-family spring reveal; Perceived Effort step transitions use `motion.durationFast` + a celebrate-family final reveal; Intent Mirror entrance uses `motion.durationReveal` (600ms). Web surfaces use `motion/react` with CSS `--motion-*` variables. Mobile binary uses `DesignTokens.Motion`. Every delight moment has a `prefers-reduced-motion` / OS reduce-motion fallback declared in `engineering/TECH_SPEC.md`. |
 | `knowledge/experience/emotional-experience-design.md` | Producer recipes for all four cards, Six-Lens Design Review framework, Emotional Curve artifact format, bright-line governance. |
 | `knowledge/experience/emotional-experience-measurement.md` | Full per-card event catalogs, counter-metric thresholds, A/B experiment templates, dark-pattern detection protocol. |
 | `knowledge/experience/ethics-guardrail.md` | Guardrail Contract, per-mechanism risk table, non-negotiable prohibitions, validator rules for `check:emotional-design`. |
@@ -345,6 +345,6 @@ Before any feature that applies an Experience Card is called build-ready:
 - [ ] Variable Reward: variation is real (content differs, not only cosmetic framing). Proof method in `engineering/PRODUCTION_READINESS.md`.
 - [ ] Star-ladder level tagged in each card attestation block; matches `11_STAR_EXPERIENCE.md` ladder entries.
 - [ ] `product/ONBOARDING.md` references this document for emotional curve sequence.
-- [ ] `design/DESIGN.md` motion tokens for each card moment are present.
+- [ ] `design/design.md` motion tokens for each card moment are present.
 - [ ] `npm run check:emotional-design -- --root .` passes with zero errors.
 - [ ] `npm run check:emotional-design -- --root .` passes or an open failure card tracks the gap.

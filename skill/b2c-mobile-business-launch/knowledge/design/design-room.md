@@ -4,12 +4,13 @@ Use this reference before designing, changing, comparing, baselining, restoring,
 
 ## Governing Loop
 
-**STATE -> MUTATE -> VERSION -> RENDER** is mandatory for design work.
+**STATE -> MUTATE -> CONTRACT -> VERSION -> RENDER** is mandatory for design work.
 
-1. **STATE**: read `studio/seed/business.json` and `studio/seed/theme.tokens.json` in the app repo. If missing, copy the skill's `state/` seed or `business/state/` into the app repo.
+1. **STATE**: read `studio/seed/business.json` and `studio/seed/theme.tokens.json` in the app repo.
 2. **MUTATE**: make one coherent change to the JSON state. Keep the mutation small enough to review: one audience, one surface cluster, one token pass, one store experiment, or one wipe.
-3. **VERSION**: validate, render, and commit the state change. A design version is a git commit over `state/` and `design/design-room.html`, not a Markdown label.
-4. **RENDER**: run the renderer and show the user `design/design-room.html` or `dist/design-room/index.html`. Do not freehand a one-off `DESIGN_PROPOSAL.md`, mood board, or ad-hoc HTML proof.
+3. **CONTRACT**: update `design/design.md` when the change affects design intent or implementation guidance.
+4. **VERSION**: validate and commit the state, contract, tokens, and render together.
+5. **RENDER**: run the renderer. Show `design/design-room.html` or `dist/design-room/index.html` to the founder.
 
 The user looks at the rendered Design Room. The agent edits only the state.
 
@@ -20,6 +21,7 @@ In the business repo:
 ```text
 studio/seed/business.json       # identity, positioning, surfaces, Design Room version log, Control Plane panels
 studio/seed/theme.tokens.json   # semantic tokens (color/font/space/radius/motion) used by every rendered surface; motion.* promotes to web (--motion-* / framer-motion) and DesignTokens.Motion (SwiftUI)
+design/design.md                # design intent, interaction rules, accessibility, and cross-surface guidance
 design/design-room.html          # static fallback render with design-state-hash
 dist/design-room/         # React/Vite build, when available
 ```
@@ -27,7 +29,8 @@ dist/design-room/         # React/Vite build, when available
 In the skill:
 
 ```text
-state/schema/business.schema.json
+studio/seed/schema/business.schema.json
+studio/seed/schema/business.empty.json
 validation/business/design/validate-state.ts
 tooling/render-design-room.ts
 tooling/version.ts
@@ -37,7 +40,9 @@ validation/business/design/check-token-promotion.ts
 render/
 ```
 
-`state/PROJECT_STATE.yaml` and `state/launch-cockpit.html` remain the launch-status cockpit. `studio/seed/business.json` and `design/design-room.html` are the design/control-plane cockpit. Keep both current when design changes affect launch lanes.
+`design/design.md` does not own exact state or token values. The JSON files own those values.
+
+The Design Room must show the current JSON state. The validator checks the state hash and visible state values.
 
 ## Commands
 
@@ -76,7 +81,11 @@ Before editing state, choose the mutation boundary:
 - **Baseline mutation**: tags the current commit as `baseline/<name>` after validation and render pass.
 - **Wipe mutation**: replaces `studio/seed/business.json` with the schema-valid empty skeleton and commits the reset.
 
-Each mutation should update `designRoom.versionLog` with a short summary, `statePaths`, and `renderedArtifacts`.
+Each mutation must update `designRoom.versionLog`. Include a short summary, `statePaths`, and `renderedArtifacts`.
+
+Every design worker must read `design/design.md` first. This rule applies to app UI, onboarding, and motion.
+
+It also applies to landing pages, icons, store creative, ads, and lifecycle marketing.
 
 Theme mutations that are accepted for implementation must also promote tokens into `design/system/tokens.json`, `design/system/tokens.css`, and `design/system/DesignTokens.swift`. Treat those files as generated handoff artifacts from the Design Room, not as a second source of truth.
 
@@ -105,8 +114,11 @@ Never inline brand colors, type choices, radius, or spacing in one-off artifacts
 Design work is ready for review only when:
 
 - `studio/seed/business.json` and `studio/seed/theme.tokens.json` validate.
+- `design/design.md` exists and contains all required sections.
 - `designRoom.versionLog` names the mutation and rendered artifacts.
 - `design/design-room.html` hash matches the current state.
+- The rendered name, positioning, audience, mutation summary, and surface totals match the current state.
+- A rendered or baselined design contains no starter text.
 - React/Vite build exists when dependencies are installed, or the static fallback is explicitly recorded.
 - `check-design-room-contract` passes.
 - `check-token-promotion` passes when theme tokens changed or implementation is about to consume the design system.
