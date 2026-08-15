@@ -70,7 +70,7 @@ Do not treat one viral UGC video as a reusable Fastlane angle. Promote a structu
 Do not start public Fastlane posting until these are true or explicitly marked blocked/deferred:
 - public App Store/Play Store URL or TestFlight/beta URL exists
 - landing page exists when web funnel is part of acquisition
-- `11_STAR_EXPERIENCE.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `LAUNCH.md`, and `product/ONBOARDING.md` are current enough to constrain content
+- `11_STAR_EXPERIENCE.md`, `strategy/BRAND.md`, `design/design.md`, `LAUNCH.md`, and `product/ONBOARDING.md` are current enough to constrain content
 - privacy/terms/support links are live if content drives signups, purchases, or data collection
 - product claims, screenshots, pricing, and subscription disclosures match store/legal/revenue docs
 - UGC creator rights, disclosure rules, and account ownership are documented when creator content is reused or remixed
@@ -90,7 +90,7 @@ Capture in `growth/FASTLANE_OPS.md`:
 - banned claims and compliance notes
 - brand voice notes from `strategy/BRAND.md`
 - 11-star V1 scalable slice and line of feasibility from `11_STAR_EXPERIENCE.md`
-- visual constraints and asset sources from `design/DESIGN.md` and `design/design.html`
+- visual constraints and asset sources from `design/design.md` and `design/design.html`
 
 If the Fastlane guide/onboarding asks for product context, fill it from canonical launch docs instead of ad hoc copy.
 
@@ -151,7 +151,7 @@ Never use write endpoints as schema probes. Live API reads are the authority whe
 Build `fastlane/campaign-brief.md` from:
 - `product/SPEC.md`: problem, wedge, ICP, moat, V1 behavior
 - `strategy/BRAND.md`: voice, banned words, owned words
-- `design/DESIGN.md`/`design/design.html`: visual tone and asset constraints
+- `design/design.md`/`design/design.html`: visual tone and asset constraints
 - `LAUNCH.md`: ASO keywords, launch calendar, screenshot claims, ad angles
 - `product/ONBOARDING.md`: aha moment, personalization, paywall timing, review prompt
 - `revenue/REVENUE_OPS.md`: offer, pricing, trial, subscription restrictions
@@ -200,7 +200,7 @@ Use real app media before generic generated visuals:
 - serve-sim browser-visible simulator streams for CLI proof, with URL/port, actions, logs, and limitations recorded
 - SnapshotPreviews PNG/JSON preview exports for component/preview evidence only; do not treat them as runtime app-demo footage
 - app preview clips and store screenshots from `SCREENSHOTS.md`
-- Higgsfield assets for supporting characters, backgrounds, hooks, and motion when constrained by `design/DESIGN.md`
+- Higgsfield assets for supporting characters, backgrounds, hooks, and motion when constrained by `design/design.md`
 - founder/UGC clips only when the founder approves identity use
 
 MobAI capture rules:

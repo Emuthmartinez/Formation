@@ -39,7 +39,7 @@ If an ASO skill pack is installed, delegate narrow work instead of re-creating i
 - Activation and retention: `onboarding-optimization`, `retention-optimization`, `referral-program`.
 - Ratings, reviews, and quality: `review-management`, `rating-prompt-strategy`, `crash-analytics`, `app-rejection-recovery`.
 - Analytics and first-party performance: `app-analytics`, `asc-metrics`.
-- Launch and publicity: `app-launch`, `creator-ugc-marketing`, `press-and-pr` (for press kit imagery: use `product-photoshoot --mode conceptual_product` for premium product art and `soul-id create --soul-cinematic` → marketing-studio avatar for founder editorial headshots; full brief required from design/DESIGN.md; gate behind spend confirmation per `knowledge/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md` with license and approval gate before distribution).
+- Launch and publicity: `app-launch`, `creator-ugc-marketing`, `press-and-pr` (for press kit imagery: use `product-photoshoot --mode conceptual_product` for premium product art and `soul-id create --soul-cinematic` → marketing-studio avatar for founder editorial headshots; full brief required from design/design.md; gate behind spend confirmation per `knowledge/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md` with license and approval gate before distribution).
 
 If these skills are not directly discoverable in the current runtime, search installed skill/plugin paths for the names above, read the matching `SKILL.md`, and proceed with the same output contract manually. Do not assume Claude and Codex expose the same installed plugin surface.
 
@@ -121,7 +121,7 @@ Required Apple marketing surfaces:
 - custom product page strategy by audience/channel/keyword set, including deep links and measurement plan
 - In-App Event strategy only when the app has real event content, schedule, media, deep link, localization, and App Review readiness
 - localization matrix for metadata, keyword fields, screenshots, privacy/support URLs, and cultural review
-- visual asset route: real app UI captures first, Higgsfield for high-quality supporting art/icons/backgrounds/CPP/event imagery when needed, always tied to `11_STAR_EXPERIENCE.md` and `design/DESIGN.md`
+- visual asset route: real app UI captures first, Higgsfield for high-quality supporting art/icons/backgrounds/CPP/event imagery when needed, always tied to `11_STAR_EXPERIENCE.md` and `design/design.md`
 
 Use the ASO skill set when available: `app-marketing-context`, `keyword-research`, `metadata-optimization`, `screenshot-optimization`, `custom-product-pages`, `in-app-events`, `localization`, `apple-search-ads`, `review-management`, `monetization-strategy`, and `subscription-lifecycle`.
 
@@ -155,7 +155,7 @@ Google Play checklist:
 - privacy policy URL is active, public, non-geofenced, non-editable, and not a PDF
 - Data safety answers match actual collection, sharing, retention, deletion, security, and vendor behavior
 - account deletion web resource exists when accounts can be created
-- feature graphic (1024x500), screenshots, short description, long description, and store listing experiments are prepared; produce the feature graphic via `product-photoshoot --mode hero_banner` with full design/DESIGN.md tokens — gate behind spend confirmation per `knowledge/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md`; founder approval before upload
+- feature graphic (1024x500), screenshots, short description, long description, and store listing experiments are prepared; produce the feature graphic via `product-photoshoot --mode hero_banner` with full design/design.md tokens — gate behind spend confirmation per `knowledge/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md`; founder approval before upload
 - App content declarations, app access instructions, sensitive-permission declarations, and pre-launch report status are tracked before production release
 - staged rollout/managed publishing choice is explicit
 
@@ -246,7 +246,7 @@ Run a weekly loop for the first 6-8 weeks after launch:
 - competitor metadata, screenshot, ranking, ad, pricing, and review changes
 - localization opportunities by country revenue/downloads: refresh `LOCALIZATION_MARKET_RESEARCH.md` from first-party App Analytics/Play statistics — promote Tier 2/3 markets that are downloading or converting, prune localized markets that under-deliver (see `localization-market-research.md` §7)
 
-When keyword or CVR analysis flags a priority angle, produce a 3-5 slide social carousel via `product-photoshoot --mode social_carousel` (design/DESIGN.md brief required; gate behind spend confirmation per `knowledge/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md`; founder approval required before distribution); add the produced carousel to the prioritized-experiments output below.
+When keyword or CVR analysis flags a priority angle, produce a 3-5 slide social carousel via `product-photoshoot --mode social_carousel` (design/design.md brief required; gate behind spend confirmation per `knowledge/operations/paid-tool-routing.md`; record in `CONTENT_ASSETS.md`; founder approval required before distribution); add the produced carousel to the prioritized-experiments output below.
 
 Output:
 - weekly change log

@@ -94,10 +94,10 @@ Use `ugc-creator-engine.md` before:
 - adapting creator videos into ads or Fastlane campaigns
 
 Inputs:
-- `product/SPEC.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `product/ONBOARDING.md`, `LAUNCH.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`
+- `product/SPEC.md`, `strategy/BRAND.md`, `design/design.md`, `product/ONBOARDING.md`, `LAUNCH.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`
 - AppKittie/XPOZ/review evidence for audience language and competitor creator patterns
 - real app screenshots/recordings from MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, or approved fallback
-- Higgsfield visuals only as supporting assets constrained by `design/DESIGN.md`
+- Higgsfield visuals only as supporting assets constrained by `design/design.md`
 
 Outputs:
 - `growth/UGC_PLAYBOOK.md`
@@ -130,7 +130,7 @@ Delegate:
 - build `growth/FASTLANE_OPS.md` and `fastlane/` artifacts before generating or scheduling content
 
 Inputs:
-- `product/SPEC.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `LAUNCH.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, and `strategy/RESEARCH.md`
+- `product/SPEC.md`, `strategy/BRAND.md`, `design/design.md`, `LAUNCH.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, and `strategy/RESEARCH.md`
 - MobAI screenshots/recordings for real app proof
 - Codex Desktop native iOS/XcodeBuildMCP or serve-sim screenshots/recordings when Apple-platform media proof is available or approved as a fallback
 - Higgsfield assets for design-system constrained hooks, mascots, backgrounds, and motion

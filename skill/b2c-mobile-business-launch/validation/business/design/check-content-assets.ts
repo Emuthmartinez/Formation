@@ -276,7 +276,7 @@ if (manifestText) {
           issue(
             "error",
             `content_assets.manifest.assets.${index}.prompt_brief.missing`,
-            `Manifest asset ${index} uses a generated-media route but records no prompt_brief carrying the design/DESIGN.md tokens used for generation. Generating without the design/DESIGN.md brief is a named failure mode.`,
+            `Manifest asset ${index} uses a generated-media route but records no prompt_brief carrying the design/design.md tokens used for generation. Generating without the design/design.md brief is a named failure mode.`,
             manifestText.relativePath,
           ),
         );
@@ -285,7 +285,7 @@ if (manifestText) {
           issue(
             "warning",
             `content_assets.manifest.assets.${index}.prompt_brief.no_design_reference`,
-            `Manifest asset ${index} prompt_brief should reference the design/DESIGN.md tokens (palette, typography, banned aesthetics) carried into the generation prompt.`,
+            `Manifest asset ${index} prompt_brief should reference the design/design.md tokens (palette, typography, banned aesthetics) carried into the generation prompt.`,
             manifestText.relativePath,
           ),
         );

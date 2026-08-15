@@ -3,7 +3,7 @@
 Status: partial
 Owner: founder + design-guru + marketing-guru
 
-`strategy/BRAND.md` is the source of truth for voice, owned vocabulary, naming, claim boundaries, and reusable launch language. Keep it consistent with `design/DESIGN.md`, `strategy/RESEARCH.md`, `11_STAR_EXPERIENCE.md`, `EMOTIONAL_DESIGN.md`, `APP_STORE_LISTING.md`, `product/copy/COPY_DECK.md` (every in-app string speaks this voice), lifecycle email, paywall copy, and support responses.
+`strategy/BRAND.md` is the source of truth for voice, owned vocabulary, naming, claim boundaries, and reusable launch language. Keep it consistent with `design/design.md`, `strategy/RESEARCH.md`, `11_STAR_EXPERIENCE.md`, `EMOTIONAL_DESIGN.md`, `APP_STORE_LISTING.md`, `product/copy/COPY_DECK.md` (every in-app string speaks this voice), lifecycle email, paywall copy, and support responses.
 
 ## Positioning
 
@@ -40,7 +40,7 @@ Owner: founder + design-guru + marketing-guru
 
 ## Cross-Surface Consistency
 
-- [ ] `design/DESIGN.md` tone, typography, color, and motion match this voice.
+- [ ] `design/design.md` tone, typography, color, and motion match this voice.
 - [ ] `APP_STORE_LISTING.md`, `SCREENSHOTS.md`, and `growth/DEMO_VIDEO.md` use the same promise and owned words.
 - [ ] `analytics/ANALYTICS.md` event names and `state/LAUNCH_TRACE.md` trace IDs use canonical product terms.
 - [ ] `product/copy/COPY_DECK.md` in-app strings — buttons, empty states, errors, permission primes, settings — carry this voice, not spec vocabulary (`check:app-copy`).

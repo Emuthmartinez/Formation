@@ -78,7 +78,7 @@ export const phases: readonly CatalogPhase[] = [
     key: "phase_2",
     label: "2",
     focus: "Brand and design",
-    primaryOutput: "strategy/BRAND.md, design/DESIGN.md, design.md, rendered proofs, key assets",
+    primaryOutput: "strategy/BRAND.md, design/design.md, rendered proofs, key assets",
     order: 11,
   },
   {

@@ -13,7 +13,6 @@ import {
   modeLabel,
   ownerLabel,
   phaseLabel,
-  routeLabel,
   serviceLabel,
   statusLabel,
 } from "./lib/founder-copy.js";
@@ -67,10 +66,6 @@ if (!loaded.state) {
    * rather than repeating its exact sentence. The two used to render the same string back
    * to back, which read like a glitch.
    */
-  const hasOpenDecision =
-    (asString(businessOperator.next_founder_action) ?? "").trim().length > 0 && asString(businessOperator.active_gate_status) !== "resolved";
-  const yourCallFallback = hasOpenDecision ? "One decision, spelled out just below." : emptyCopy.noDecision;
-
   /**
    * The earned-but-unspoken progress beat. A beat is earned once the project has
    * moved past the phase whose exit it marks; the latest earned beat renders as a
@@ -126,7 +121,7 @@ if (!loaded.state) {
               ? "partial"
               : "not_started";
       const progress = counted.length > 0 ? `${doneCount} of ${counted.length} done` : emptyCopy.noneNeeded;
-      return `<tr><td><strong>${escapeHtml(milestone.label)}</strong><br /><span class="muted">${escapeHtml(milestone.blurb)}</span></td><td><span class="status ${cls}">${escapeHtml(summary)}</span></td><td>${escapeHtml(progress)}</td></tr>`;
+      return `<tr data-milestone="${escapeHtml(milestone.id)}" data-progress="${doneCount}/${counted.length}"><td><strong>${escapeHtml(milestone.label)}</strong><br /><span class="muted">${escapeHtml(milestone.blurb)}</span></td><td><span class="status ${cls}">${escapeHtml(summary)}</span></td><td>${escapeHtml(progress)}</td></tr>`;
     })
     .join("");
 
@@ -140,24 +135,32 @@ if (!loaded.state) {
   const blockerItems = laneEntries.flatMap((lane) => lane.blockers.map((blocker) => `${laneLabel(lane.id)}: ${asString(blocker) ?? ""}`));
 
   /**
-   * The founder's view of a service: what it is, how we are using it, which keys it needs,
-   * and whether it has been checked. Secret names stay visible because a founder pastes
-   * those exact strings into a provider, but they render inside <code> so they read as
-   * identifiers rather than as prose. The verification wording behind each service is
-   * agent-facing and lives in the technical-details table instead.
+   * The main page gives one useful service summary. Exact service routes, secret names,
+   * and setup commands are implementation detail. They stay in the closed handoff block.
    */
-  const toolRows = Object.entries(tools)
-    .map(([name, value]) => {
-      const record = isRecord(value) ? value : {};
-      const secrets = asArray(record.required_secrets);
-      const secretMarkup =
-        secrets.length === 0
-          ? `<span class="muted">${escapeHtml(emptyCopy.noneNeeded)}</span>`
-          : `<ul>${secrets.map((secret) => `<li><code>${escapeHtml(asString(secret) ?? "")}</code></li>`).join("")}</ul>`;
-      const checked = asString(record.docs_checked_at)?.trim();
-      return `<tr><td>${escapeHtml(serviceLabel(name))}</td><td>${escapeHtml(routeLabel(asString(record.route) ?? ""))}</td><td>${secretMarkup}</td><td>${escapeHtml(checked && checked.length > 0 ? checked : emptyCopy.notCheckedYet)}</td></tr>`;
-    })
-    .join("");
+  const serviceSummaries = Object.entries(tools).map(([name, value]) => {
+    const record = isRecord(value) ? value : {};
+    const explicitStatus = (asString(record.connection_status) ?? asString(record.status) ?? "").toLowerCase();
+    const route = (asString(record.route) ?? "").toLowerCase();
+    const connected = ["active", "connected", "done", "ready", "verified"].includes(explicitStatus);
+    const waiting = ["blocked", "access_pending", "founder_action_needed"].includes(explicitStatus) || route.includes("blocked");
+    return { name, connected, waiting };
+  });
+  const connectedServices = serviceSummaries.filter((service) => service.connected);
+  const waitingServices = serviceSummaries.filter((service) => service.waiting && !service.connected);
+  const servicesSummaryMarkup = `<div class="grid" data-connected="${connectedServices.length}" data-waiting="${waitingServices.length}" data-planned="${serviceSummaries.length - connectedServices.length - waitingServices.length}">
+    <article class="card"><h3>Ready to use</h3><p>${connectedServices.length}</p><p class="muted">${
+      connectedServices.length > 0
+        ? connectedServices.map((service) => escapeHtml(serviceLabel(service.name))).join(", ")
+        : "No service has live connection evidence yet."
+    }</p></article>
+    <article class="card"><h3>Waiting for access</h3><p>${waitingServices.length}</p><p class="muted">${
+      waitingServices.length > 0
+        ? "I will ask for the next required access when it becomes the current action."
+        : "No service access is holding up the current work."
+    }</p></article>
+    <article class="card"><h3>Planned or optional</h3><p>${serviceSummaries.length - connectedServices.length - waitingServices.length}</p><p class="muted">I will set these up only when the product needs them.</p></article>
+  </div>`;
 
   /** Full service detail, including the verification wording, for whoever picks this up. */
   const toolDetailRows = Object.entries(tools)
@@ -183,7 +186,8 @@ if (!loaded.state) {
   const commandMarkup = proofCommands
     .map((command) => {
       const record = isRecord(command) ? command : {};
-      return `<article class="proof"><p><strong>${text(record.expected, "Checked")}</strong></p><p>Result: ${text(record.actual, emptyCopy.notCheckedYet)}</p><p class="muted">Saved at: ${text(record.evidence, emptyCopy.notRecorded)}</p></article>`;
+      const hasEvidence = (asString(record.evidence) ?? "").trim().length > 0;
+      return `<article class="proof"><p><strong>${text(record.expected, "Checked")}</strong></p><p>Result: ${text(record.actual, hasEvidence ? "Result recorded" : emptyCopy.notCheckedYet)}</p><p class="muted">Saved at: ${text(record.evidence, emptyCopy.notRecorded)}</p></article>`;
     })
     .join("");
 
@@ -269,11 +273,10 @@ if (!loaded.state) {
   </header>
   <main>
     <section class="narrative">
-      <h2>Where We Are</h2>
+      <h2>Your Current Update</h2>
       ${unspokenCelebration ? `<article class="beat celebrate"><h3>Worth a moment</h3><p>${escapeHtml(unspokenCelebration)}</p></article>` : ""}
-      <article class="beat"><h3>Since last time</h3><p>${text(narrative.since_last_time, "This is the first update, so there is nothing to catch up on yet.")}</p></article>
-      <article class="beat"><h3>What I am doing now</h3><p>${text(narrative.right_now, asString(businessOperator.next_agent_action) ?? emptyCopy.notRecorded)}</p></article>
-      <article class="beat your-call"><h3>What I need from you</h3><p>${text(narrative.your_call, yourCallFallback)}</p></article>
+      <article class="beat"><h3>What changed</h3><p>${text(narrative.since_last_time, "This is the first update, so there is nothing to catch up on yet.")}</p></article>
+      <article class="beat"><h3>What happens next</h3><p>${text(narrative.right_now, asString(businessOperator.next_agent_action) ?? emptyCopy.notRecorded)}</p></article>
     </section>
     <section>
       <h2>What I Need From You</h2>
@@ -290,13 +293,8 @@ if (!loaded.state) {
       <div class="grid">${cardMarkup || `<p class="muted">${escapeHtml(emptyCopy.nothing)}</p>`}</div>
     </section>
     <section>
-      <h2>What Only You Can Decide</h2>
-      <p class="muted">I will always stop and ask before any of these. I never assume a yes from silence.</p>
-      ${list(gates)}
-    </section>
-    <section>
       <h2>Your Connected Tools And Services</h2>
-      <table><thead><tr><th>Service</th><th>How we are using it</th><th>Keys it needs</th><th>Checked</th></tr></thead><tbody>${toolRows}</tbody></table>
+      ${servicesSummaryMarkup}
     </section>
     <section>
       <h2>How I Checked My Work</h2>
@@ -310,6 +308,8 @@ if (!loaded.state) {
           <table><thead><tr><th>Area</th><th>Where it stands</th><th>What proves it</th><th>What is in the way</th></tr></thead><tbody>${laneRows}</tbody></table>
           <h3>Service verification detail</h3>
           <table><thead><tr><th>Service key</th><th>Route</th><th>Preflight</th><th>Validation</th></tr></thead><tbody>${toolDetailRows}</tbody></table>
+          <h3>Decisions that always stay with the founder</h3>
+          ${list(gates)}
           <h2>Behind The Scenes</h2>
           ${agentOperationsMarkup}
           <h3>How the work is split up</h3>

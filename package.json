@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.123.0",
+  "version": "0.124.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -30,13 +30,14 @@
     "node": ">=22"
   },
   "scripts": {
-    "validate:skill": "f=\"$HOME/.codex/skills/.system/skill-creator/tooling/quick_validate.py\"; if [ -f \"$f\" ]; then uv run --with pyyaml python \"$f\" skill/b2c-mobile-business-launch; else echo 'skill-creator quick_validate not installed; skipping maintainer-only skill lint (expected outside the author machine)'; fi",
+    "validate:skill": "f=\"$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py\"; if [ -f \"$f\" ]; then uv run --with pyyaml python \"$f\" skill/b2c-mobile-business-launch; else echo 'skill-creator quick_validate not installed; skipping maintainer-only skill lint (expected outside the author machine)'; fi",
     "validate:launch-state": "tsx skill/b2c-mobile-business-launch/validation/business/orchestration/validate-project-state.ts",
     "check:attribution": "tsx skill/b2c-mobile-business-launch/validation/business/data/check-attribution-contract.ts",
     "check:apple-requirements": "tsx skill/b2c-mobile-business-launch/validation/business/store/check-apple-app-store-requirements.ts",
     "check:store-console": "tsx skill/b2c-mobile-business-launch/validation/business/store/check-store-console-packet.ts",
     "check:store-screenshots": "tsx skill/b2c-mobile-business-launch/validation/business/store/check-store-screenshots.ts",
     "check:native-ios": "tsx skill/b2c-mobile-business-launch/validation/business/engineering/check-native-ios-proof.ts",
+    "check:source-checkpoint": "tsx skill/b2c-mobile-business-launch/validation/business/engineering/check-source-checkpoint.ts",
     "check:agent-operations": "tsx skill/b2c-mobile-business-launch/validation/business/operations/check-agent-operations.ts",
     "check:founder-operator": "tsx skill/b2c-mobile-business-launch/validation/business/operations/check-founder-operator-bootstrap.ts",
     "check:founder-copy": "tsx skill/b2c-mobile-business-launch/validation/business/words/check-founder-copy.ts",

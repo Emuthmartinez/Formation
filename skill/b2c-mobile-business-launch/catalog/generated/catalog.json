@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.123.0",
+  "skillVersion": "0.124.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -331,7 +331,7 @@
       "key": "phase_2",
       "label": "2",
       "focus": "Brand and design",
-      "primaryOutput": "strategy/BRAND.md, design/DESIGN.md, design.md, rendered proofs, key assets",
+      "primaryOutput": "strategy/BRAND.md, design/design.md, rendered proofs, key assets",
       "order": 11
     },
     {
@@ -655,7 +655,7 @@
       "path": "knowledge/design/design-visual-system.md",
       "domainId": "domain.design",
       "title": "Design Visual System",
-      "loadWhen": "creating or changing design/DESIGN.md, lowercase design.md, visual systems, UI mockups, generated visual concepts, Higgsfield-backed visuals/motion/icons/mascots, mobile screen specs, App Store creative, screenshot frames, design audits, or HTML visual artifacts"
+      "loadWhen": "creating or changing the canonical design/design.md contract, visual systems, UI mockups, generated visual concepts, Higgsfield-backed visuals/motion/icons/mascots, mobile screen specs, App Store creative, screenshot frames, design audits, or HTML visual artifacts"
     },
     {
       "id": "reference.design.landing-motion-craft",
@@ -760,7 +760,7 @@
       "path": "knowledge/experience/eleven-star-experience.md",
       "domainId": "domain.experience",
       "title": "Eleven-Star Experience",
-      "loadWhen": "before product/SPEC.md, design/DESIGN.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on \"11-star run\"/\"11-star pass\" — follow the reference's 11-Star Run Protocol before any other output"
+      "loadWhen": "before product/SPEC.md, design/design.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on \"11-star run\"/\"11-star pass\" — follow the reference's 11-Star Run Protocol before any other output"
     },
     {
       "id": "reference.experience.emotional-design-system",
@@ -1232,7 +1232,7 @@
       "path": "knowledge/product/product-moat.md",
       "domainId": "domain.product",
       "title": "Product Moat",
-      "loadWhen": "before product/SPEC.md, design/DESIGN.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on \"11-star run\"/\"11-star pass\" — follow the 11-Star Run Protocol before any other output"
+      "loadWhen": "before product/SPEC.md, design/design.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on \"11-star run\"/\"11-star pass\" — follow the 11-Star Run Protocol before any other output"
     },
     {
       "id": "reference.product.social-network",
@@ -1454,11 +1454,11 @@
         "area.operating-system"
       ],
       "trigger": "Any change to a launched/near-launch app's feature, copy, brand, pricing, products, or data behavior",
-      "instructions": "Classify the change against the Change Cascade Map (feature, lexicon/brand-vocabulary, onboarding-flow, paywall/pricing, visual/design-token, new IAP, privacy/data, domain/brand, or a design-token/copy/pricing change that invalidates already-generated assets — the last routes through the Generated-Asset Regeneration guardrails), then enumerate every surface that change type touches — in-app, App Store listing/products, RevenueCat/billing, landing/web + JSON-LD, SEO/GEO, lifecycle email, analytics, legal, content/UGC/ads — and update each or record why it's unaffected. Record the result as a `change_cascade` entry in `state/PROJECT_STATE.yaml`, one line per surface (`updated`+evidence, `unaffected`+reason, or `blocked`+blocker); a surface left out by omission fails `check:change-cascade` as `change_cascade.<id>.<surface>.unaccounted`, graded against the machine-readable twin in `cascade-edges.yaml` — edit both files together. Re-render any screenshot, App Preview, or ad creative whose underlying copy/UI changed, and reconcile the locked lexicon in `design/DESIGN.md` across every surface before calling the change done.",
+      "instructions": "Classify the change against the Change Cascade Map (feature, lexicon/brand-vocabulary, onboarding-flow, paywall/pricing, visual/design-token, new IAP, privacy/data, domain/brand, or a design-token/copy/pricing change that invalidates already-generated assets — the last routes through the Generated-Asset Regeneration guardrails), then enumerate every surface that change type touches — in-app, App Store listing/products, RevenueCat/billing, landing/web + JSON-LD, SEO/GEO, lifecycle email, analytics, legal, content/UGC/ads — and update each or record why it's unaffected. Record the result as a `change_cascade` entry in `state/PROJECT_STATE.yaml`, one line per surface (`updated`+evidence, `unaffected`+reason, or `blocked`+blocker); a surface left out by omission fails `check:change-cascade` as `change_cascade.<id>.<surface>.unaccounted`, graded against the machine-readable twin in `cascade-edges.yaml` — edit both files together. Re-render any screenshot, App Preview, or ad creative whose underlying copy/UI changed, and reconcile the locked lexicon in `design/design.md` across every surface before calling the change done.",
       "reads": [
         "state/PROJECT_STATE.yaml",
         "state/LAUNCH_TRACE.md",
-        "design/DESIGN.md"
+        "design/design.md"
       ],
       "consults": [],
       "referenceIds": [
@@ -1775,9 +1775,9 @@
         "area.business-operations-trust"
       ],
       "trigger": "Before Resend domains/keys, transactional/lifecycle/broadcast email, deliverability",
-      "instructions": "Set up Resend with a purpose-specific sending subdomain (never the apex domain), add SPF/DKIM, then DMARC starting at `p=none` before tightening — verify all three pass on a real test send before any production email goes out. Classify every email as transactional, lifecycle, marketing/broadcast, or inbound/support; trigger lifecycle Automations from events that already exist in `analytics/ANALYTICS.md`, and adapt the starter pack at `growth/resend/email-templates.ts` with brand tokens pulled from `design/DESIGN.md` into `LaunchEmailBrand.designSystem` and tone from `11_STAR_EXPERIENCE.md` — do not ship generic-looking email. Verify webhooks against the raw request body and store processed `svix-id` values, since Resend webhooks are at-least-once and may duplicate. Every subject/preview/body must pass the `no-slop-writing.md` self-check in the product's brand voice, and `check:email` gates production sends on a verified domain, server-only API keys, and unsubscribe handling on every non-transactional message.",
+      "instructions": "Set up Resend with a purpose-specific sending subdomain (never the apex domain), add SPF/DKIM, then DMARC starting at `p=none` before tightening — verify all three pass on a real test send before any production email goes out. Classify every email as transactional, lifecycle, marketing/broadcast, or inbound/support; trigger lifecycle Automations from events that already exist in `analytics/ANALYTICS.md`, and adapt the starter pack at `growth/resend/email-templates.ts` with brand tokens pulled from `design/design.md` into `LaunchEmailBrand.designSystem` and tone from `11_STAR_EXPERIENCE.md` — do not ship generic-looking email. Verify webhooks against the raw request body and store processed `svix-id` values, since Resend webhooks are at-least-once and may duplicate. Every subject/preview/body must pass the `no-slop-writing.md` self-check in the product's brand voice, and `check:email` gates production sends on a verified domain, server-only API keys, and unsubscribe handling on every non-transactional message.",
       "reads": [
-        "design/DESIGN.md",
+        "design/design.md",
         "analytics/ANALYTICS.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "growth/resend/email-templates.ts"
@@ -2197,8 +2197,9 @@
         "area.product-experience"
       ],
       "trigger": "Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work",
-      "instructions": "Follow the mandatory STATE→MUTATE→VERSION→RENDER loop: read studio/seed/business.json and studio/seed/theme.tokens.json, make one coherent, reviewable mutation (one audience, one surface cluster, one token pass, or one wipe — never a mixed batch), then validate, render, and commit the state change as a git version over state/ and design/design-room.html. Never freehand a one-off DESIGN_PROPOSAL.md, mood board, or ad-hoc HTML proof outside this loop — the rendered Design Room is the only proof the founder reviews. When the surface touched is a landing/funnel page, model it against surfaces-b2c.md's Surface Families and apply quality-lens.md's Anti-Generic Checks before calling the mutation done; the founder's approval of final brand direction is the gate this node cannot self-clear.",
+      "instructions": "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
       "reads": [
+        "design/design.md",
         "studio/seed/business.json",
         "studio/seed/theme.tokens.json",
         "state/LAUNCH_TRACE.md"
@@ -2221,6 +2222,7 @@
         "workflow.process.launch-trace-and-build-contracts"
       ],
       "outputPaths": [
+        "design/design.md",
         "studio/seed/business.json",
         "studio/seed/theme.tokens.json",
         "design/design-room.html"
@@ -2324,6 +2326,7 @@
       "trigger": "Before onboarding quizzes, review-prompt timing, paywall timing, or first-session activation",
       "instructions": "Design the screen-by-screen onboarding sequence in product/ONBOARDING.md — purpose, question/copy, state, visual asset, animation, and analytics event per screen — so the user sees the 11-star V1 slice's magic before being asked for payment, long setup, or sensitive data. Place the native App Review popup and the push-permission soft-prime at the first-value moment, but never in the same session step as each other (value moment claims one; the other waits for the next earned moment per push-notification-lifecycle.md), and sequence the Commitment (first goal question), Perceived Effort Delay (plan/result generation), and Intent Mirroring (immediately pre-paywall, never on the paywall or cancel screen) card triggers against that same moment. Pull the final on-screen words from product/copy/COPY_DECK.md by key — check:app-copy fails a flow whose deck rows are missing or still placeholder-shaped — and confirm the onboarding curve crosses positive before the paywall, not just that a paywall exists.",
       "reads": [
+        "design/design.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "analytics/ANALYTICS.md",
         "product/copy/COPY_DECK.md"
@@ -2364,8 +2367,10 @@
         "area.product-experience"
       ],
       "trigger": "Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or \"premium feel\"",
-      "instructions": "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give (celebration choreography, gesture physics, hero transitions), route to motion-craft-benchmarks.md's numbered recipes for the checkable acceptance criteria; check:motion-contract is what proves the tokens were actually used, not adjectives in design/DESIGN.md.",
+      "instructions": "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give (celebration choreography, gesture physics, hero transitions), route to motion-craft-benchmarks.md's numbered recipes for the checkable acceptance criteria; check:motion-contract is what proves the tokens were actually used, not adjectives in design/design.md.",
       "reads": [
+        "design/design.md",
+        "studio/seed/business.json",
         "studio/seed/theme.tokens.json"
       ],
       "consults": [
@@ -2383,9 +2388,7 @@
       "dependencies": [
         "workflow.design.design-room-state-mutate-version-render"
       ],
-      "outputPaths": [
-        "design/DESIGN.md"
-      ],
+      "outputPaths": [],
       "gateCommands": [
         "check:motion-contract"
       ],
@@ -2402,9 +2405,9 @@
         "area.product-experience"
       ],
       "trigger": "Before rendered videos/stills, app previews, ad/social variants",
-      "instructions": "Decide the production route per asset before generating anything: Higgsfield for net-new AI-generated imagery, mascots, or presenter/UGC video; Remotion for reproducible compositions built from real app UI, design/DESIGN.md tokens, screenshots, copy, and data where many variants (hooks, formats, dimensions, locales) are needed. Do not generate when the founder has not approved the intended paid route's fallback, Remotion commercial-license eligibility for this business is unclear, or the source UI/asset rights are missing. Record every produced asset in growth/content-assets/CONTENT_ASSETS.md (and its content-assets.html) with its route, token/source inputs, and license basis — check:content-assets proves the manifest matches what actually rendered, and this node is not idempotent because each run can legitimately produce new asset variants.",
+      "instructions": "Decide the production route per asset before generating anything: Higgsfield for net-new AI-generated imagery, mascots, or presenter/UGC video; Remotion for reproducible compositions built from real app UI, design/design.md tokens, screenshots, copy, and data where many variants (hooks, formats, dimensions, locales) are needed. Do not generate when the founder has not approved the intended paid route's fallback, Remotion commercial-license eligibility for this business is unclear, or the source UI/asset rights are missing. Record every produced asset in growth/content-assets/CONTENT_ASSETS.md (and its content-assets.html) with its route, token/source inputs, and license basis — check:content-assets proves the manifest matches what actually rendered, and this node is not idempotent because each run can legitimately produce new asset variants.",
       "reads": [
-        "design/DESIGN.md",
+        "design/design.md",
         "studio/seed/theme.tokens.json"
       ],
       "consults": [],
@@ -2482,7 +2485,7 @@
       "trigger": "Before App Store/Play metadata, keyword research, ASA, or post-launch ASO loops",
       "instructions": "Build app-marketing-context (app name, category, target country, top competitors, primary/secondary/long-tail keyword candidates, current listing state, and public support/privacy URLs) before locking a single metadata field, then run keyword and name-collision checks in the target country and separate brand language from search language. Route any localization call through the demand-first priority tiers in LOCALIZATION_MARKET_RESEARCH.md rather than translating on inference, and route Apple Search Ads storefront targeting from the same tiers. Draft final metadata fields plus rejected alternatives with rationale into STORE_OPS.md, and run every metadata/keyword string through the no-slop-writing.md self-check before calling it locked. For the recurring post-launch loop, track keyword rank deltas, ASA search-term mining, and localization opportunities weekly rather than treating ASO as a one-time pass.",
       "reads": [
-        "design/DESIGN.md",
+        "design/design.md",
         "state/PROJECT_STATE.yaml"
       ],
       "consults": [],
@@ -2522,6 +2525,7 @@
       "trigger": "Before listing fields, privacy questionnaire, IAP/subscription field maps, CPPs, in-app events",
       "instructions": "Build APP_STORE_LISTING.md as the bridge document: default listing fields, App Privacy answers derived from the actual data inventory and SDK/vendor behavior (never from policy prose alone), and pricing/subscription mapping reconciled against revenue/REVENUE_OPS.md's RevenueCat/Stripe/web-funnel state. Anchor screenshot, App Preview, custom-product-page, and In-App Event concepts to the real V1 scalable slice in 11_STAR_EXPERIENCE.md so the listing never invents a promise the app cannot keep. Run the finished description/keyword/promotional-text copy through the no-slop-writing.md self-check, then confirm `npm run check:store-console -- --root .` passes before calling the packet ready. Founder approval gates any live product creation, price change, or submission — draft the packet, do not publish it.",
       "reads": [
+        "design/design.md",
         "STORE_OPS.md",
         "revenue/REVENUE_OPS.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
@@ -2752,9 +2756,9 @@
         "area.build-release"
       ],
       "trigger": "Store screenshots needed (raw capture → composed iPhone/iPad/Play assets)",
-      "instructions": "Capture raw app UI first — in-app iOS Simulator (rung 0) for a local Mac, MobAI for Android or a repeatable matrix — and treat those raw captures as proof inputs, never final store creative. Compose final assets from the Asset Knowledge Brief (strategy/RESEARCH.md's user/problem, 11_STAR_EXPERIENCE.md's magical moment, the emotion/card from EMOTIONAL_DESIGN.md, design/DESIGN.md's tokens) with headline, copy overlay, device frame, and export every required iPhone/iPad/Play well — never a generic, knowledge-free hook. Run every composed frame through quality-lens.md's Anti-Generic Checks before calling the deck done, and write the raw-path/composition-path/upload-status table to SCREENSHOTS.md. Pass `npm run check:store-screenshots -- --root .`; a technically correct, on-brand screenshot that still reads as generic fails the done bar.",
+      "instructions": "Capture raw app UI first — in-app iOS Simulator (rung 0) for a local Mac, MobAI for Android or a repeatable matrix — and treat those raw captures as proof inputs, never final store creative. Compose final assets from the Asset Knowledge Brief (strategy/RESEARCH.md's user/problem, 11_STAR_EXPERIENCE.md's magical moment, the emotion/card from EMOTIONAL_DESIGN.md, design/design.md's tokens) with headline, copy overlay, device frame, and export every required iPhone/iPad/Play well — never a generic, knowledge-free hook. Run every composed frame through quality-lens.md's Anti-Generic Checks before calling the deck done, and write the raw-path/composition-path/upload-status table to SCREENSHOTS.md. Pass `npm run check:store-screenshots -- --root .`; a technically correct, on-brand screenshot that still reads as generic fails the done bar.",
       "reads": [
-        "design/DESIGN.md",
+        "design/design.md",
         "store/app-store-listing/APP_STORE_LISTING.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "strategy/RESEARCH.md",
@@ -2850,7 +2854,7 @@
       "reads": [
         "engineering/TECH_SPEC.md",
         "state/LAUNCH_TRACE.md",
-        "design/DESIGN.md",
+        "design/design.md",
         "state/PROJECT_STATE.yaml"
       ],
       "consults": [],
@@ -2904,7 +2908,7 @@
         "state/PROJECT_STATE.yaml"
       ],
       "consults": [
-        "design/DESIGN.md",
+        "design/design.md",
         "trust/PRIVACY.md"
       ],
       "referenceIds": [
@@ -3119,6 +3123,7 @@
       "trigger": "Before paid ads, ASA, Meta/TikTok/Google campaigns, or spend-readiness claims",
       "instructions": "Write growth/PAID_UA.md: record the fit-gate decision, commit to exactly one paid channel with its target event and campaign destination, and mine the platform's public ad library for high-impression, long-running competitor ads before inventing angles. Build the RevenueCat/App-Store/PostHog/self-reported tracking baseline before any spend and record the four Decision Thresholds — attribution tolerance (default +/-20%), payback window (default 90 days), creative signal floor (default 2x target CPA or 7 days per creative), scale trigger (default 14 consecutive days at/under target CPA) — so growth/paid-ua-report.csv can be judged against a number, not a feeling. Target only the storefronts LOCALIZATION_MARKET_RESEARCH.md ranks Tier 1. Connecting ad accounts, creating campaigns, or committing spend is a founder-only gate that must be confirmed before check:paid-ua passes.",
       "reads": [
+        "design/design.md",
         "analytics/ANALYTICS.md",
         "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
         "state/PROJECT_STATE.yaml"
@@ -3168,6 +3173,7 @@
       "trigger": "Before referral/share-to-unlock/invite/comment-loop mechanics",
       "instructions": "Write growth/VIRAL_GROWTH.md: record the fit-gate decision, the product-specific growth thesis (audience/platform, visible result, emotional trigger, product loop, content loop, conversion moment), and the full Product Loop Contract (trigger, reward, recipient value, share artifact, surface, fallback, abuse controls, policy constraints). Sequence monetization timing so the paywall catches demand after emotional investment forms, not before, per onboarding-conversion.md and revenue-monetization.md. Compute the loop's real economics weekly in the Loop Economics section — viral coefficient k = (invites/shares per active user) x (recipient conversion rate to install/activation), plus cycle time — since k below 0.15 means the loop is decoration, not a growth engine, and share/view counts alone never justify calling the lane done. Any referral/share/unlock mechanic carrying streak, scarcity, or social-proof pressure gets an ethics-guardrail pass before it ships.",
       "reads": [
+        "design/design.md",
         "analytics/ANALYTICS.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
         "state/PROJECT_STATE.yaml"
@@ -3208,6 +3214,7 @@
       "trigger": "Before the public announcement, launch-day run-of-show, or weekly release rhythm",
       "instructions": "Write growth/LAUNCH_NARRATIVE.md covering the Fit Gate, feeling-first Launch Thesis, the Two Launch Types (rare tentpole vs. weekly feature-launch heartbeat), the Launch-Day Run-of-Show, and all post copy in fenced code blocks. Every post shapes a feeling before naming the feature and clears the 2026 DO-NOT-DO list: no hashtags, no emojis carrying the message, no link in the root post (first self-reply only), no seeded 'congrats!' replies, plus the no-slop-writing.md self-check. Public claims are limited to what is true and attributable — never launder the launch agency's own aggregate stats as this app's results — and any rage-bait line clears an ethics-guardrail review before it ships. Public posting, account connections, and paid amplification spend are founder-only gates that must be confirmed before launch goes live.",
       "reads": [
+        "design/design.md",
         "growth/VIRAL_GROWTH.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
       ],
@@ -3350,7 +3357,7 @@
         "GEO_SEO.md",
         "analytics/ANALYTICS.md",
         "product/copy/COPY_BRIEF.md",
-        "design/DESIGN.md"
+        "design/design.md"
       ],
       "consults": [],
       "referenceIds": [
@@ -3392,6 +3399,7 @@
       "trigger": "Before founder-led organic social, creator sourcing/contracts, format-discovery tests",
       "instructions": "Write growth/UGC_PLAYBOOK.md: record the fit-gate decision, then run the Day 0 format-discovery model — 3-5 creators, founder-written scripts for the first 4-8 weeks, same-day time-coded feedback, 5-8 reps per format before judging it — and only call a format scale-ready after 2-3 hits from the same structure across 2+ creators plus downstream install/referral/revenue evidence. Every script in ugc/script-bank.md survives the judge panel (separate reviewer passes with fresh context, one job each — pacing, vocabulary, idea strength, structure — at least one grounded in a real creator's transcript corpus) before it earns filming or generation spend; record script_id and a passed/survived judge_verdict, since check:content-assets blocks any UGC-family generation missing either. Route to influencer-sponsorship-engine.md instead when the plan is paying creators who already have an audience rather than running new niche accounts. Creator payments, paid creator-platform spend, and public posting/scheduling are founder-only gates.",
       "reads": [
+        "design/design.md",
         "growth/VIRAL_GROWTH.md",
         "growth/LAUNCH_NARRATIVE.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
@@ -3433,6 +3441,7 @@
       "trigger": "After launch approval/public beta, or usefastlane.ai/Blitz setup, scheduling, social analytics",
       "instructions": "Write growth/FASTLANE_OPS.md and the fastlane/ artifact set (campaign-brief.md, prompts.md, angles.json, preferences.json, schedule.json) only after the Launch Readiness Gate is true: live store/TestFlight URL, current brand/onboarding/design docs, and product claims matching store/legal/revenue docs. Run safe API reads (GET /connections, /blitz/preferences, /blitz/angles, /content, /posts) before any mutation, keep format weights summing to 100 and angle weights covering every active angle exactly once, and never write FASTLANE_API_KEY to a committed file. Source real app media (MobAI or the Apple-only XcodeBuildMCP fallback) before generic generated visuals, and run the weekly Analytics And Iteration loop tying posts back to installs/trials/purchases/attribution rather than vanity engagement. Connecting accounts, first public post, and any scheduling change are founder-only gates; check:post-launch is the pass signal.",
       "reads": [
+        "design/design.md",
         "growth/LAUNCH_NARRATIVE.md",
         "ugc/script-bank.md"
       ],
@@ -3794,7 +3803,7 @@
     },
     {
       "id": "artifact.design-design-md",
-      "path": "design/DESIGN.md",
+      "path": "design/design.md",
       "ownerDomainId": "domain.design",
       "laneIds": [
         "design"
@@ -4719,6 +4728,13 @@
       "command": "check:skill-version",
       "scriptPath": "validation/repository/check-skill-version.ts",
       "ownerDomainId": "domain.machine",
+      "audit": "required"
+    },
+    {
+      "id": "gate.check-source-checkpoint",
+      "command": "check:source-checkpoint",
+      "scriptPath": "validation/business/engineering/check-source-checkpoint.ts",
+      "ownerDomainId": "domain.engineering",
       "audit": "required"
     },
     {

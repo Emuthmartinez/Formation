@@ -118,13 +118,13 @@ export function writeCompleteStoreScreenshots(root: string): void {
     [
       "# Store Screenshots",
       "Status: partial until founder approval for upload.",
-      "Source Ledger: design/DESIGN.md, design.md, 11_STAR_EXPERIENCE.md, APP_STORE_LISTING.md, CONTENT_ASSETS.md, MobAI raw captures, Codex Desktop native iOS/XcodeBuildMCP captures, serve-sim streams, SnapshotPreviews preview-only proof, Higgsfield supporting visuals, Remotion rendered frames, ParthJadhav/app-store-screenshots export board, app-store-screenshots.json state, and asc-screenshot-resize validation.",
+      "Source Ledger: design/design.md, 11_STAR_EXPERIENCE.md, APP_STORE_LISTING.md, CONTENT_ASSETS.md, MobAI raw captures, Codex Desktop native iOS/XcodeBuildMCP captures, serve-sim streams, SnapshotPreviews preview-only proof, Higgsfield supporting visuals, Remotion rendered frames, ParthJadhav/app-store-screenshots export board, app-store-screenshots.json state, and asc-screenshot-resize validation.",
       "Narrative: Slot 1 sells the core outcome; slots 2-3 prove the V1 scalable slice; later slots show one benefit per frame.",
       "App Icon: 1024x1024 PNG, no alpha, no rounded corners, tested at App Store search thumbnail size, with Higgsfield route recorded when generated.",
       "App Preview Video (Autoplay Hook): app previews autoplay muted and always precede screenshots; the first preview's first 3-5 seconds are the muted hook showing the magical moment first, produced via aso-skills:app-preview-video, with a poster frame, real in-app footage, and founder approval before upload.",
       "Asset Knowledge Brief: every asset draws on strategy/RESEARCH.md (target user/problem), 11_STAR_EXPERIENCE.md (magical moment), and EMOTIONAL_DESIGN.md (Emotional North Star and Experience Card) so screenshots and the app preview are knowledge-leveraged, not generic.",
       "Composition And Export Route: ParthJadhav/app-store-screenshots writes app-store-screenshots.json and a reusable screenshots/index.html board from real UI, app icon, design tokens, localized copy, and optional Higgsfield support assets.",
-      "Definition of Good (Present / Proven / Optimized): PRESENT — matrices filled; PROVEN — real raw captures and final PNGs exist, app-store-screenshots.json references them, the ParthJadhav theme is derived from theme.tokens.json, and captions reinforce APP_STORE_LISTING.md keywords; OPTIMIZED — screenshot-rubric-scores.json records a passing grade per SCREENSHOT_RUBRIC.md or a logged founder override.",
+      "Definition of Good (Present / Proven / Optimized): PRESENT — matrices filled; PROVEN — real raw captures and final PNGs exist, app-store-screenshots.json references them, the ParthJadhav theme is derived from studio/seed/theme.tokens.json, and captions reinforce APP_STORE_LISTING.md keywords; OPTIMIZED — screenshot-rubric-scores.json records a passing grade per SCREENSHOT_RUBRIC.md or a logged founder override.",
       "Raw Capture Matrix",
       "| Slot | Platform | Device | Locale | Source screen | Capture tool | Raw path | Version localization ID | Status |",
       "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -134,8 +134,8 @@ export function writeCompleteStoreScreenshots(root: string): void {
       "Production Composition Matrix",
       "| Slot | Headline | Copy overlay | Layout | Supporting asset | Route | Final upload path | Dimensions | Alpha/color space | Visual QA |",
       "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
-      "| 1 | See the win fast | yes | framed iPhone app store screenshot | Higgsfield background tied to design/DESIGN.md | ParthJadhav/app-store-screenshots composition from real UI | screenshots/final/iphone-69-slot-1.png | 1320x2868 | alpha removed, sRGB color space | thumbnail and mobile proof passed |",
-      "| 2 | Built for big screens | yes | framed iPad app store screenshot | design/DESIGN.md gradient panel | ParthJadhav/app-store-screenshots composition from real UI | screenshots/final/ipad-13-slot-2.png | 2064x2752 | alpha removed, sRGB color space | iPad well proof passed |",
+      "| 1 | See the win fast | yes | framed iPhone app store screenshot | Higgsfield background tied to design/design.md | ParthJadhav/app-store-screenshots composition from real UI | screenshots/final/iphone-69-slot-1.png | 1320x2868 | alpha removed, sRGB color space | thumbnail and mobile proof passed |",
+      "| 2 | Built for big screens | yes | framed iPad app store screenshot | design/design.md gradient panel | ParthJadhav/app-store-screenshots composition from real UI | screenshots/final/ipad-13-slot-2.png | 2064x2752 | alpha removed, sRGB color space | iPad well proof passed |",
       "Device Wells",
       "| Platform | Well | Required/scaled decision | ASC device_type | Screenshot count | Dimensions | Target file | Validation proof | Status |",
       "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -187,7 +187,7 @@ export function writeCompleteElevenStar(root: string): void {
       "Traceability",
       "| Trace ID | Experience decision | Source evidence | Product impact | Design impact | Build contract | Verification |",
       "| --- | --- | --- | --- | --- | --- | --- |",
-      "| EXP-001 | Context-aware result is the magical moment. | strategy/RESEARCH.md | product/SPEC.md | design/DESIGN.md | engineering/TECH_SPEC.md | engineering/PRODUCTION_READINESS.md |",
+      "| EXP-001 | Context-aware result is the magical moment. | strategy/RESEARCH.md | product/SPEC.md | design/design.md | engineering/TECH_SPEC.md | engineering/PRODUCTION_READINESS.md |",
       "Engineering Contract: engineering/TECH_SPEC.md owns the state machine, data model, API/RPC/webhook contracts, permissions, offline/error states, analytics events, test fixture, and E2E proof path.",
     ].join("\n"),
     "utf8",
@@ -199,7 +199,7 @@ export function writeCompleteElevenStar(root: string): void {
   );
   for (const [file, text] of [
     ["product/SPEC.md", "# Spec\n\n## 11-Star Experience\n\nSource: 11_STAR_EXPERIENCE.md. Trace: EXP-001.\n"],
-    ["design/DESIGN.md", "# Design\n\nThis design expresses the 11-star V1 slice from 11_STAR_EXPERIENCE.md. Trace: EXP-001.\n"],
+    ["design/design.md", "# Design\n\nThis design expresses the 11-star V1 slice from 11_STAR_EXPERIENCE.md. Trace: EXP-001.\n"],
     [
       "product/ONBOARDING.md",
       [
@@ -218,7 +218,7 @@ export function writeCompleteElevenStar(root: string): void {
     ["engineering/TECH_SPEC.md", "# Tech Spec\n\nThe state, API, analytics, and fixture contracts implement EXP-001 from 11_STAR_EXPERIENCE.md.\n"],
     [
       "state/LAUNCH_TRACE.md",
-      "# Launch Trace\n\nEXP-001 maps research to 11_STAR_EXPERIENCE.md, product/SPEC.md, design/DESIGN.md, product/ONBOARDING.md, engineering/TECH_SPEC.md, and proof.\n",
+      "# Launch Trace\n\nEXP-001 maps research to 11_STAR_EXPERIENCE.md, product/SPEC.md, design/design.md, product/ONBOARDING.md, engineering/TECH_SPEC.md, and proof.\n",
     ],
   ] as const) {
     writeFileSync(path.join(root, file), text, "utf8");

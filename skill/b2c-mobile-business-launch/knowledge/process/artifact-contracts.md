@@ -6,7 +6,7 @@ These are the reusable document shapes from the model launch session. Keep docs 
 
 - Canonical File Map
 - Core docs: `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `studio/seed/business.json`, `studio/seed/theme.tokens.json`, `design/design-room.html`, `AGENTS.md`, `APP_AGENTS.md`, `strategy/TOOL_DECISIONS.md`, `SECRETS.md`, `trust/SECURITY.md`, `trust/security-review.html`, `analytics/ANALYTICS.md`, `analytics/analytics-plan.html`, `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, `product/SPEC.md`, `strategy/RESEARCH.md`, `strategy/BRAND.md`
-- Design docs: `design/DESIGN.md`, `DESIGN_SYSTEM.md`, `design.md`, `design/design.html`
+- Design docs: `design/design.md`, optional `DESIGN_SYSTEM.md` appendix, and `design/design.html`
 - Conversion docs: `product/ONBOARDING.md`, `product/onboarding.html`
 - Launch ops: `LAUNCH.md`, `store/APPLE_SIGNING.md`, `store/APPLE_APP_STORE_REQUIREMENTS.md`, `APP_STORE_LISTING.md`, `app-store-listing.html`, `app-privacy-questionnaire.html`, `store/STORE_CONSOLE.md`, `store/store-console.html`, `SCREENSHOTS.md`, `CONTENT_ASSETS.md`, `content-assets.html`, `STORE_OPS.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `growth/UGC_PLAYBOOK.md`, `growth/FASTLANE_OPS.md`
 - Business ops: `growth/EMAIL_OPS.md`, `revenue/REVENUE_OPS.md`, `GEO_SEO.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, `LEGAL_REVIEW.md`
@@ -55,7 +55,7 @@ PROMPTS.md                # sequenced builder/Rork prompts
 strategy/RESEARCH.md               # AppKittie, XPOZ, Firecrawl, review, keyword, and competitor evidence
 product/SPEC.md                   # research-grounded product spec
 strategy/BRAND.md                  # name, voice, brand rules, copy calibration
-design/DESIGN.md                 # google design.md token/prose design system source of truth
+design/design.md                 # google design.md token/prose design system source of truth
 DESIGN_SYSTEM.md          # optional expanded app-specific design appendix
 design.md                 # screen-by-screen implementation design spec
 design/design.html               # rendered visual system, components, and screen proofs
@@ -126,7 +126,7 @@ rork-ready/
   LAUNCHBENCH.md
   operations/FAILURE_CARDS.md
   PROMPTS.md
-  design/DESIGN.md
+  design/design.md
   design.md
   design/design.html
   product/ONBOARDING.md
@@ -189,7 +189,7 @@ Must include:
 - `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, LaunchBench/failure-card rules, and the current autonomy mode contract
 - `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, and `engineering/TECH_SPEC.md` when they exist
 - brand voice rules and banned/owned words
-- `design/DESIGN.md` and HTML visual-proof enforcement rules
+- `design/design.md` and HTML visual-proof enforcement rules
 - onboarding, review prompt, paywall, closing offer, and activation rules when in scope
 - architecture conventions
 - V1 scope, V2/V3 scope, and banned scope
@@ -224,7 +224,7 @@ Must include:
 - one marketing guru role for ASO, GEO/SEO, Fastlane, UGC, attribution learning, reviews, launch calendar, claims, and channel experiments
 - one engineering leader role for `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, frontend/backend/provider integration, test strategy, observability, and production-readiness evidence
 - one product leader role for ICP, problem framing, V1/V2/V3 scope, onboarding, activation, retention loops, and evidence-to-product traceability
-- one design guru role for `design/DESIGN.md`, `design.md`, `design/design.html`, `CONTENT_ASSETS.md`, visual QA, accessibility, screenshots, icons, motion, Higgsfield asset use, and Remotion rendered content
+- one design guru role for `design/design.md`, `design/design.html`, `CONTENT_ASSETS.md`, visual QA, accessibility, screenshots, icons, motion, Higgsfield asset use, and Remotion rendered content
 - one customer success role for support email, help/FAQ, privacy/delete/refund/restore paths, review responses, lifecycle copy, and feedback triage
 - one security architect role for `trust/SECURITY.md`, security tool routing, threat model, platform hardening, app integrity, abuse controls, scanner/review evidence, accepted risks, and incident response
 - each role's inputs, outputs, forbidden actions, and when to ask the founder
@@ -376,7 +376,7 @@ Use before `product/SPEC.md`, design, onboarding, ad/store concepts, content ass
 - visible line of feasibility separating V1, light manual/concierge support, deferred inspiration, and explicitly not-in-scope ideas
 - V1 scalable slice with product behavior, data/state/API needs, design/motion needs, analytics proof, and production-readiness proof
 - surface matrix for product, onboarding, paywall, ad/creator hook, App Store screenshots, landing, lifecycle email, support, and engineering
-- traceability rows that connect experience decisions to `strategy/RESEARCH.md`, `product/SPEC.md`, `design/DESIGN.md`, `product/ONBOARDING.md`, `engineering/TECH_SPEC.md`, `state/LAUNCH_TRACE.md`, and `engineering/PRODUCTION_READINESS.md`
+- traceability rows that connect experience decisions to `strategy/RESEARCH.md`, `product/SPEC.md`, `design/design.md`, `product/ONBOARDING.md`, `engineering/TECH_SPEC.md`, `state/LAUNCH_TRACE.md`, and `engineering/PRODUCTION_READINESS.md`
 
 `11-star-experience.html` must include:
 - visual vertical or staged ladder similar in structure to the 1/2/5/6/7/10/11-star framework, but with product-specific labels
@@ -580,7 +580,7 @@ Acceptance:
 - Brand choices map back to research/product evidence instead of generic taste.
 - Any use of a creator/expert/framework name is constrained by permission status.
 
-## `design/DESIGN.md`
+## `design/design.md`
 
 Use this as the canonical design-system source of truth, following the Google Labs `design.md` format: YAML front matter for machine-readable tokens plus Markdown prose for rationale and application rules.
 
@@ -593,13 +593,13 @@ Must include:
 - export or implementation notes for the target app stack: CSS variables, Tailwind theme, SwiftUI tokens, React Native theme, Flutter theme, or Rork/builder prompt rules
 
 Acceptance:
-- `npx @google/design.md lint design/DESIGN.md` passes when the CLI is available, or validation is marked blocked with the exact error.
+- `npx @google/design.md lint design/design.md` passes when the CLI is available, or validation is marked blocked with the exact error.
 - Tokens are specific enough for a builder to implement without inventing fonts, colors, spacing, or components.
-- Any existing `DESIGN_SYSTEM.md` defers to `design/DESIGN.md` for token truth.
+- Any existing `DESIGN_SYSTEM.md` defers to `design/design.md` for token truth.
 
 ## `DESIGN_SYSTEM.md`
 
-Use only when the project needs a larger appendix than `design/DESIGN.md` can comfortably hold, or when the target repo already has this convention. It must not conflict with `design/DESIGN.md`.
+Use only when the project needs a larger appendix than `design/design.md` can comfortably hold, or when the target repo already has this convention. It must not conflict with `design/design.md`.
 
 Must include:
 - color tokens
@@ -615,9 +615,9 @@ Acceptance:
 - New screens can be built from tokens and components only.
 - Design drift can be called a bug with a file reference.
 
-## `design.md`
+## Screen Implementation Rules
 
-Use this as the builder-facing screen implementation spec. It should reference `design/DESIGN.md` for tokens and visual rules rather than redefining them.
+Keep screen implementation rules in `design/design.md`. Do not create a second root design contract.
 
 Must include:
 - product surfaces
@@ -636,14 +636,14 @@ Acceptance:
 - The builder can implement the screen without asking what it looks like.
 - The builder can tell why each screen exists and which product/research decision it implements.
 - The design spec references `analytics/ANALYTICS.md` for event names.
-- The design spec references `design/DESIGN.md` for token names and component rules.
+- The design spec references `design/design.md` for token names and component rules.
 
 ## `design/design.html`
 
 Use this as the human-visible proof that the design system works in real layout. Every visual artifact created by this skill should be represented in HTML, even if it also uses generated images or exported screenshots.
 
 Must include:
-- CSS variables or theme definitions derived from `design/DESIGN.md`
+- CSS variables or theme definitions derived from `design/design.md`
 - token swatches, typography specimens, spacing/radius/motion examples, and component states
 - mobile-first screen frames for onboarding, aha moment, core loop, paywall/revenue surface when relevant, settings/account, empty/loading/error states, and share/referral surfaces when relevant
 - desktop or responsive variants for public landing, legal, support, and checkout/funnel pages when relevant
@@ -685,7 +685,7 @@ Use this as the visual proof for onboarding and paywall flow. It can be a standa
 Must include:
 - all onboarding screens at mobile dimensions
 - mascot states, question UI, personalized plan or first-value reveal, demo video placeholder/clip, App Review popup placeholder immediately after first value, paywall, closing offer, loading/error/offline states, and post-paywall activation
-- CSS variables from `design/DESIGN.md`
+- CSS variables from `design/design.md`
 - embedded Higgsfield assets, Remotion outputs, or local references with `direction`, `draft`, or `production` labels
 - reduced-motion and no-video fallback notes
 
@@ -843,7 +843,7 @@ Must include:
 
 Acceptance:
 - The user can copy values from the HTML without scanning a long Markdown file.
-- It uses the project `design/DESIGN.md` tokens when available, but reads as an operator console rather than a marketing page.
+- It uses the project `design/design.md` tokens when available, but reads as an operator console rather than a marketing page.
 - It can be opened locally and is usable on desktop and mobile.
 
 ## `SCREENSHOTS.md`
@@ -873,7 +873,7 @@ Must include:
 - route matrix: Higgsfield, Remotion, raw screenshots, founder-owned media, public-domain assets, blocked, deferred, or not needed
 - paid-tool and fallback approvals, especially when Remotion replaces an intended Higgsfield path
 - Remotion license status or founder approval before commercial output
-- source input inventory: screenshots, recordings, `design/DESIGN.md`, copy files, audio, captions, logos, and rights notes
+- source input inventory: screenshots, recordings, `design/design.md`, copy files, audio, captions, logos, and rights notes
 - composition manifest with asset ID, surface, route, status, composition ID, dimensions, duration, inputs, outputs, truth constraints, approvals, render proof, and license status
 - render commands for Remotion previews, stills, and videos when Remotion is selected
 - claim review against `APP_STORE_LISTING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, onboarding/paywall copy, and store policy constraints

@@ -33,7 +33,7 @@ export const workflows = [
     // revenue/REVENUE_OPS.md is deliberately NOT in reads: its producer runs at phase.3b while
     // this node fires at phase.1d, so the file structurally cannot exist yet — pricing-claim
     // cross-checks happen once revenue-monetization has run.
-    reads: ["analytics/ANALYTICS.md", "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md", "state/PROJECT_STATE.yaml"],
+    reads: ["design/design.md", "analytics/ANALYTICS.md", "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md", "state/PROJECT_STATE.yaml"],
     referenceIds: [
       "reference.growth.paid-user-acquisition",
       "reference.operations.paid-tool-routing",
@@ -65,7 +65,7 @@ export const workflows = [
     trigger: "Before referral/share-to-unlock/invite/comment-loop mechanics",
     instructions:
       "Write growth/VIRAL_GROWTH.md: record the fit-gate decision, the product-specific growth thesis (audience/platform, visible result, emotional trigger, product loop, content loop, conversion moment), and the full Product Loop Contract (trigger, reward, recipient value, share artifact, surface, fallback, abuse controls, policy constraints). Sequence monetization timing so the paywall catches demand after emotional investment forms, not before, per onboarding-conversion.md and revenue-monetization.md. Compute the loop's real economics weekly in the Loop Economics section — viral coefficient k = (invites/shares per active user) x (recipient conversion rate to install/activation), plus cycle time — since k below 0.15 means the loop is decoration, not a growth engine, and share/view counts alone never justify calling the lane done. Any referral/share/unlock mechanic carrying streak, scarcity, or social-proof pressure gets an ethics-guardrail pass before it ships.",
-    reads: ["analytics/ANALYTICS.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md", "state/PROJECT_STATE.yaml"],
+    reads: ["design/design.md", "analytics/ANALYTICS.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md", "state/PROJECT_STATE.yaml"],
     referenceIds: [
       "reference.growth.viral-growth-loops",
       "reference.experience.onboarding-conversion",
@@ -88,7 +88,7 @@ export const workflows = [
     trigger: "Before the public announcement, launch-day run-of-show, or weekly release rhythm",
     instructions:
       "Write growth/LAUNCH_NARRATIVE.md covering the Fit Gate, feeling-first Launch Thesis, the Two Launch Types (rare tentpole vs. weekly feature-launch heartbeat), the Launch-Day Run-of-Show, and all post copy in fenced code blocks. Every post shapes a feeling before naming the feature and clears the 2026 DO-NOT-DO list: no hashtags, no emojis carrying the message, no link in the root post (first self-reply only), no seeded 'congrats!' replies, plus the no-slop-writing.md self-check. Public claims are limited to what is true and attributable — never launder the launch agency's own aggregate stats as this app's results — and any rage-bait line clears an ethics-guardrail review before it ships. Public posting, account connections, and paid amplification spend are founder-only gates that must be confirmed before launch goes live.",
-    reads: ["growth/VIRAL_GROWTH.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"],
+    reads: ["design/design.md", "growth/VIRAL_GROWTH.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"],
     // CONTENT_ASSETS.md is a consult: this node's phase-1e narrative-thesis firing predates the
     // producer (phase 2/3); the phase-3/6 firings pick the hero asset up once it exists.
     consults: ["growth/content-assets/CONTENT_ASSETS.md"],
@@ -169,7 +169,7 @@ export const workflows = [
     trigger: "Phase 4 — landing page, waitlist/referral loop, web funnel, live deploy verification",
     instructions:
       "Build the landing/waitlist funnel in growth/landing/ and write CRO_AUDIT.md: pick the single conversion goal, verify the above-the-fold promise/subhead/CTA/proof element needs no scroll, and match the hero promise to whichever ad or creative drove the click. Run the Friction Audit (cut every non-essential field or click) and the Mobile Viewport Rules (thumb-reachable sticky CTA, Core Web Vitals pass on a mid-tier device) since most B2C traffic is mobile. Any waitlist email-capture endpoint must return HTTP 200, not 4xx, on a duplicate submission — test it before calling the funnel live — and declare landing_viewed/landing_cta_clicked/waitlist_submitted events in analytics/ANALYTICS.md before implementing them. check:landing-funnel's live-deploy and form-smoke-test gates are the pass signal; motion is progressive enhancement that must never delay LCP/INP or hide text from crawlers.",
-    reads: ["GEO_SEO.md", "analytics/ANALYTICS.md", "product/copy/COPY_BRIEF.md", "design/DESIGN.md"],
+    reads: ["GEO_SEO.md", "analytics/ANALYTICS.md", "product/copy/COPY_BRIEF.md", "design/design.md"],
     referenceIds: [
       "reference.growth.cro-landing",
       "reference.design.landing-motion-craft",
@@ -196,7 +196,7 @@ export const workflows = [
     trigger: "Before founder-led organic social, creator sourcing/contracts, format-discovery tests",
     instructions:
       "Write growth/UGC_PLAYBOOK.md: record the fit-gate decision, then run the Day 0 format-discovery model — 3-5 creators, founder-written scripts for the first 4-8 weeks, same-day time-coded feedback, 5-8 reps per format before judging it — and only call a format scale-ready after 2-3 hits from the same structure across 2+ creators plus downstream install/referral/revenue evidence. Every script in ugc/script-bank.md survives the judge panel (separate reviewer passes with fresh context, one job each — pacing, vocabulary, idea strength, structure — at least one grounded in a real creator's transcript corpus) before it earns filming or generation spend; record script_id and a passed/survived judge_verdict, since check:content-assets blocks any UGC-family generation missing either. Route to influencer-sponsorship-engine.md instead when the plan is paying creators who already have an audience rather than running new niche accounts. Creator payments, paid creator-platform spend, and public posting/scheduling are founder-only gates.",
-    reads: ["growth/VIRAL_GROWTH.md", "growth/LAUNCH_NARRATIVE.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"],
+    reads: ["design/design.md", "growth/VIRAL_GROWTH.md", "growth/LAUNCH_NARRATIVE.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"],
     referenceIds: [
       "reference.growth.ugc-creator-engine",
       "reference.growth.influencer-sponsorship-engine",
@@ -222,7 +222,7 @@ export const workflows = [
     // growth/UGC_PLAYBOOK.md is deliberately NOT in reads: ugc-creator-engine (its producer)
     // shares phase.6 with this node but is not a dependency, so the file may not exist when this
     // fires — Fastlane sourcing works from the narrative and script bank it can rely on.
-    reads: ["growth/LAUNCH_NARRATIVE.md", "ugc/script-bank.md"],
+    reads: ["design/design.md", "growth/LAUNCH_NARRATIVE.md", "ugc/script-bank.md"],
     referenceIds: [
       "reference.growth.fastlane-growth-ops",
       "reference.growth.ugc-creator-engine",

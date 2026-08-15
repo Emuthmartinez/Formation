@@ -124,7 +124,7 @@ The product doc should not duplicate the whole ladder unless the launch is tiny.
 
 Before implementation:
 
-- `design/DESIGN.md` translates the emotional tone, visual metaphor, and interaction energy into tokens and components.
+- `design/design.md` translates the emotional tone, visual metaphor, and interaction energy into tokens and components.
 - `design.md` maps the magical moment to concrete screens, states, copy, motion, and analytics hooks.
 - `product/ONBOARDING.md` reflects the user back to themselves before asking for payment or long setup.
 - `engineering/TECH_SPEC.md` specifies every data/state/API/permission contract needed to deliver the V1 scalable slice.
@@ -175,7 +175,7 @@ Do not move to engineering handoff until:
 - the `Line of Feasibility` is visible.
 - the V1 scalable slice is named.
 - at least product, onboarding, ad, App Store, and engineering surfaces are translated.
-- `product/SPEC.md`, `design/DESIGN.md`, `product/ONBOARDING.md`, and `engineering/TECH_SPEC.md` either reference the experience contract or are explicitly not ready yet.
+- `product/SPEC.md`, `design/design.md`, `product/ONBOARDING.md`, and `engineering/TECH_SPEC.md` either reference the experience contract or are explicitly not ready yet.
 - `state/LAUNCH_TRACE.md` includes trace rows for the magical moment and V1 slice.
 - `11-star-experience.html` or `design/design.html` renders the ladder visually for founder review.
 
@@ -184,7 +184,7 @@ Do not move to engineering handoff until:
 - The artifact says "11-star" but only describes premium styling.
 - The ladder copies Airbnb labels instead of mapping the current product's experience.
 - The impossible levels are skipped, so the V1 slice remains timid.
-- The visual board exists but does not affect `product/SPEC.md`, `design/DESIGN.md`, `product/ONBOARDING.md`, `engineering/TECH_SPEC.md`, or launch surfaces.
+- The visual board exists but does not affect `product/SPEC.md`, `design/design.md`, `product/ONBOARDING.md`, `engineering/TECH_SPEC.md`, or launch surfaces.
 - Ads and screenshots sell a different promise than the product can deliver.
 - The engineering plan implements screens but not the state/data/API behavior needed for the magical moment.
 - The 11-star board is prose-only and cannot be inspected visually.

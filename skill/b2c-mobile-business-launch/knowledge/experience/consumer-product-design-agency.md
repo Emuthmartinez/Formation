@@ -48,7 +48,7 @@ Every B2C mobile launch produced by this skill must implement four named cards. 
 
 **Deterministic guardrail.** Every variable reward path must have a non-empty fallback (a non-variable version of the same outcome). The reward reveal animation must respect `prefers-reduced-motion` / OS reduce-motion (per `design-visual-system.md`). The PostHog event for the reward reveal must be in `analytics/ANALYTICS.md` before build.
 
-**Artifact.** Name every variable-reward moment in `product/SPEC.md` with the trigger action, the reward type (tribe/hunt/self), the fallback, and the PostHog event. Map each to a star level in `11_STAR_EXPERIENCE.md`. Motion spec goes in `design/DESIGN.md`.
+**Artifact.** Name every variable-reward moment in `product/SPEC.md` with the trigger action, the reward type (tribe/hunt/self), the fallback, and the PostHog event. Map each to a star level in `11_STAR_EXPERIENCE.md`. Motion spec goes in `design/design.md`.
 
 ---
 
@@ -94,12 +94,12 @@ Every B2C mobile launch produced by this skill must implement four named cards. 
 
 **2. Cognitive load caps conversion.** Miller's 7±2 working-memory limit (attribution-uncertain: Miller 1956 is real, but the 7±2 framing is approximate) and Hick's Law (reaction time rises with number of choices) are the HCI-side explanation for why onboarding flows with >5 choices per screen or >7 screens to paywall perform poorly. The decision that changes: every onboarding question must have a single, narrow purpose; options per screen ≤4; required decisions before first value ≤3.
 
-**3. Accessibility is a launch gate, not a cleanup task.** WCAG 2.2 AA contrast minimums, Dynamic Type support (iOS) / Accessibility Settings (Android), and VoiceOver/TalkBack labels are correctness requirements for App Store Review, not polish. The decision that changes: token system must encode contrast-safe palettes from the start (`design/DESIGN.md`); motion must have OS reduce-motion fallbacks (`design-visual-system.md`); build gates must include accessibility smoke tests via `xcodebuildmcp-testing.md` or `mobai-toolbelt.md`.
+**3. Accessibility is a launch gate, not a cleanup task.** WCAG 2.2 AA contrast minimums, Dynamic Type support (iOS) / Accessibility Settings (Android), and VoiceOver/TalkBack labels are correctness requirements for App Store Review, not polish. The decision that changes: token system must encode contrast-safe palettes from the start (`design/design.md`); motion must have OS reduce-motion fallbacks (`design-visual-system.md`); build gates must include accessibility smoke tests via `xcodebuildmcp-testing.md` or `mobai-toolbelt.md`.
 
 ### Artifact This Tier Produces
 
 - In `product/ONBOARDING.md`: a "cognitive load audit" row for each onboarding screen listing: choices count, text density rating (low/medium/high), and the single decision the screen owns.
-- In `design/DESIGN.md`: contrast token validation note (WCAG AA confirmed or blocked-with-evidence).
+- In `design/design.md`: contrast token validation note (WCAG AA confirmed or blocked-with-evidence).
 - Blocker card `hcd-formative-research-skipped` (see Failure Cards shape) if no user test or data-informed finding exists before onboarding is locked.
 
 ### Failure Mode If Tier Is Ignored
@@ -114,7 +114,7 @@ The app ships with onboarding that felt obvious to the team and confuses real us
 
 ### Ideas That Change A Launch Decision
 
-**1. Three design levels operate simultaneously.** Norman's visceral (appearance/feel), behavioral (usability/function), and reflective (meaning/identity) levels are not sequential — all three fire from the first frame the user sees. A B2C mobile app that nails behavioral (works) but misses visceral (looks cheap) or reflective (feels generic) fails at the 5-star level and cannot reach 6 or 7 without a visual and copy redesign. The decision that changes: `design/DESIGN.md` must contain a deliberate choice for each level (palette/motion = visceral, interaction pattern = behavioral, brand voice/identity = reflective) before any screen is built. The `quality-lens.md` anti-generic check enforces the reflective level.
+**1. Three design levels operate simultaneously.** Norman's visceral (appearance/feel), behavioral (usability/function), and reflective (meaning/identity) levels are not sequential — all three fire from the first frame the user sees. A B2C mobile app that nails behavioral (works) but misses visceral (looks cheap) or reflective (feels generic) fails at the 5-star level and cannot reach 6 or 7 without a visual and copy redesign. The decision that changes: `design/design.md` must contain a deliberate choice for each level (palette/motion = visceral, interaction pattern = behavioral, brand voice/identity = reflective) before any screen is built. The `quality-lens.md` anti-generic check enforces the reflective level.
 
 **2. Affordances and signifiers shape whether users discover features.** Norman distinguishes affordance (the action a thing can perform) from signifier (what signals that action to the user). An icon with no label affords a tap but signals nothing. Copy that says "Start" signals differently from "Build my plan." The decision that changes: every primary CTA in onboarding and the core loop must use the user's goal verb, not a generic action verb. Signifier audit belongs in the `product/ONBOARDING.md` copy column.
 
@@ -122,7 +122,7 @@ The app ships with onboarding that felt obvious to the team and confuses real us
 
 ### Artifact This Tier Produces
 
-- In `design/DESIGN.md`: a three-level emotional tone block (visceral target, behavioral target, reflective target) — brief, one sentence each, before the token table.
+- In `design/design.md`: a three-level emotional tone block (visceral target, behavioral target, reflective target) — brief, one sentence each, before the token table.
 - In `product/ONBOARDING.md`: a signifier audit column for each primary CTA confirming the button label uses the user's goal domain, not a generic verb.
 - In `11_STAR_EXPERIENCE.md`: the 6-star and 7-star levels must map to at least one of the three Norman levels explicitly.
 
@@ -198,7 +198,7 @@ The product launches with a polished frontstage (beautiful onboarding, smooth an
 
 ### Artifact This Tier Produces
 
-- In `strategy/BRAND.md §Voice` (or `design/DESIGN.md §Copy Rules`): a hard copy rule: every AI-generated result in the UI must include one sentence attributing the result to user-provided context. No AI output may claim certainty it cannot verify.
+- In `strategy/BRAND.md §Voice` (or `design/design.md §Copy Rules`): a hard copy rule: every AI-generated result in the UI must include one sentence attributing the result to user-provided context. No AI output may claim certainty it cannot verify.
 - In `product/SPEC.md`: for every AI feature, a "user agency path" specification: the specific tap path that lets the user override, redo, or dismiss the AI result within ≤2 taps.
 - In `product/ONBOARDING.md`: a "trust ramp" note on the first AI reveal screen — what the system shows to signal that it has processed the user's specific input, not a generic output.
 
@@ -218,7 +218,7 @@ These apply to all five tiers and all four cards. Any implementation that crosse
 | Variable Reward | Reward is a real product outcome, variability in quality/surprise | Artificial withholding, slots-style monetization, requires payment/share to reveal | Does a non-variable fallback exist? |
 | Perceived Effort Delay | Each stage label maps to a real computation step | Fabricated stages, reset-near-100% fake progress bar, implies AI capability that does not exist | Is each label in engineering/TECH_SPEC.md? |
 | Intent Mirror | Uses user's own words, dismissable in ≤1 tap, ≤once per session | Guilt before paywall, blocks navigation, generic urgency copy | Does it use user-authored phrase from committed goal? |
-| Variable Reward motion | `DesignTokens.Motion` compliant, reduce-motion fallback | Motion plays on OS reduce-motion enabled | Is fallback in design/DESIGN.md? |
+| Variable Reward motion | `DesignTokens.Motion` compliant, reduce-motion fallback | Motion plays on OS reduce-motion enabled | Is fallback in design/design.md? |
 | AI results | Attributes result to user context, ≤2-tap override | Claims certainty it cannot verify, removes user choice silently | Is attribution copy in strategy/BRAND.md §Voice? |
 | Fresh-start | Temporal landmarks user can recognize | Fake scarcity timers that reset | Is countdown enforced server-side? |
 
@@ -249,11 +249,11 @@ Before calling the emotional/behavioral layer build-ready:
 - [ ] Each card's bright-line guardrail is met (see table above).
 - [ ] Dark-line tests pass: no guilt-trigger on churn, no artificial withholding, no fabricated AI stages, no intent mirror that blocks navigation.
 - [ ] Perceived Effort Delay stage labels all trace to a step in `engineering/TECH_SPEC.md`.
-- [ ] Variable Reward motion has a `prefers-reduced-motion` fallback in `design/DESIGN.md`.
+- [ ] Variable Reward motion has a `prefers-reduced-motion` fallback in `design/design.md`.
 - [ ] Intent Mirror copy includes a user-authored phrase (Commitment Card stored key or last session action) — brand-voice attestation attached.
 - [ ] AI result screens have attribution copy and ≤2-tap override path specified in `product/SPEC.md`.
 - [ ] All seven analytics events from the Analytics Contract are in `analytics/ANALYTICS.md`.
-- [ ] Three-level emotional tone block (visceral/behavioral/reflective) is in `design/DESIGN.md`.
+- [ ] Three-level emotional tone block (visceral/behavioral/reflective) is in `design/design.md`.
 - [ ] Frontstage/backstage dependency table is in `engineering/TECH_SPEC.md` for each Experience Card screen.
 - [ ] Peak-end event pair (reward reveal + session close) is in `analytics/ANALYTICS.md`.
 - [ ] B=MAP audit row is in `product/ONBOARDING.md`.

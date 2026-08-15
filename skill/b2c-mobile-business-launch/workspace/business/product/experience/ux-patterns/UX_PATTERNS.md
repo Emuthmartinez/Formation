@@ -1,6 +1,6 @@
 # {{APP_NAME}} UX Patterns
 
-This packet records Refero or founder-approved fallback UX research. It is a pattern contract, not a mood board. Do not copy one source directly; adapt observed patterns to this product's strategy, `design/DESIGN.md`, analytics, privacy, and implementation constraints.
+This packet records Refero or founder-approved fallback UX research. It is a pattern contract, not a mood board. Do not copy one source directly; adapt observed patterns to this product's strategy, `design/design.md`, analytics, privacy, and implementation constraints.
 
 ## Refero Route
 
@@ -92,7 +92,7 @@ Keep this sequence unless a named experiment is approved:
 - Web purchase does not map to mobile entitlement.
 - Account deletion exists in docs but not in the app/store console.
 - Mobile text fits in English but clips at larger accessibility sizes.
-- HTML proof uses different tokens than `design/DESIGN.md`.
+- HTML proof uses different tokens than `design/design.md`.
 - Motion uses ad-hoc durations instead of the tokenized `motion.*` scale.
 - framer-motion / `motion` imports leak into the mobile binary (SwiftUI/Flutter) instead of staying on web surfaces.
 - Animations ignore `prefers-reduced-motion`.
@@ -141,4 +141,4 @@ These details are additive to the State Matrix above, not a replacement: the Sta
 - [ ] State matrix covers loading/error/offline/permission/premium/destructive states.
 - [ ] Premium Craft details (press states, subtle motion, haptics discipline, keyboard behavior, skeleton/empty states) are honored on in-app surfaces with reduced-motion handling.
 - [ ] `ux-patterns.html` or `design/design.html` renders the flow architecture.
-- [ ] Decisions map to `design/DESIGN.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, and `engineering/PRODUCTION_READINESS.md`.
+- [ ] Decisions map to `design/design.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, and `engineering/PRODUCTION_READINESS.md`.

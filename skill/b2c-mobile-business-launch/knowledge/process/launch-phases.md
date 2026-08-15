@@ -233,7 +233,7 @@ Outputs:
 - `11_STAR_EXPERIENCE.md`
 - `11-star-experience.html`
 - requirements/brainstorm document when product shape is ambiguous
-- updated `product/SPEC.md`, `product/ONBOARDING.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `design/DESIGN.md`, and `engineering/TECH_SPEC.md` decisions when the experience or brainstorm changes product behavior
+- updated `product/SPEC.md`, `product/ONBOARDING.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `design/design.md`, and `engineering/TECH_SPEC.md` decisions when the experience or brainstorm changes product behavior
 - decision log explaining whether the brainstorm was used or intentionally skipped
 
 Acceptance:
@@ -302,7 +302,7 @@ Do:
 - Refresh `state/PROJECT_STATE.yaml` before creating trace rows so status reflects the current phase and blockers.
 - Create or update `state/LAUNCH_TRACE.md` unless the launch is tiny enough for a clearly labeled trace section in `strategy/RESEARCH.md`.
 - Assign stable trace IDs for major research findings, 11-star experience decisions, product decisions, claims, onboarding questions, paywall choices, data collection, store-console answers, and build-critical flows.
-- Map each trace row to affected docs: `product/SPEC.md`, `11_STAR_EXPERIENCE.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `design.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `store/STORE_CONSOLE.md`, `engineering/ENGINEERING_PLAN.md`, and `engineering/PRODUCTION_READINESS.md` where applicable.
+- Map each trace row to affected docs: `product/SPEC.md`, `11_STAR_EXPERIENCE.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `strategy/BRAND.md`, `design/design.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `store/STORE_CONSOLE.md`, `engineering/ENGINEERING_PLAN.md`, and `engineering/PRODUCTION_READINESS.md` where applicable.
 - Decide whether `engineering/TECH_SPEC.md` is needed. Create it when app/backend/web implementation needs data model, API/RPC/webhook contracts, state machines, permissions, integrations, app integrity, feature flags, or test fixtures.
 - Record rejected decisions so future agents do not reintroduce weak claims, unproven features, generic styling, or unsupported monetization behavior.
 
@@ -359,10 +359,10 @@ Do:
 - Load `onboarding-conversion.md` before locking onboarding, demo videos, personalization questions, review prompts, paywall timing, or first-session activation.
 - Build a compact brand strategy: name, tagline, archetype, voice, banned words, owned words, proof constraints.
 - Use the Layers product-design workflow when the user need, conceptual model, or interaction flow is under-specified before choosing surface style.
-- Create a canonical `design/DESIGN.md` using the Google Labs `design.md` token/prose format: colors, type, spacing, radius, component tokens, rationale, do/don't rules, and implementation notes.
+- Create a canonical `design/design.md` using the Google Labs `design.md` token/prose format: colors, type, spacing, radius, component tokens, rationale, do/don't rules, and implementation notes.
 - Use Taste and Impeccable guidance when available to set visual direction, avoid generic defaults, audit hierarchy/contrast/responsiveness, and polish final surfaces.
-- Use Higgsfield for generated visuals, mockups, icons, mascots, screenshot art, demo videos, onboarding animation clips, and ad creative, using `design/DESIGN.md` as the source constraints.
-- Produce lowercase `design.md` in an agent-friendly format: screen inventory, flows, states, copy calibration, animation specs, component contracts, implementation constraints, and analytics hooks.
+- Use Higgsfield for generated visuals, mockups, icons, mascots, screenshot art, demo videos, onboarding animation clips, and ad creative, using `design/design.md` as the source constraints.
+- Add screen inventory, flows, states, copy keys, motion, component rules, constraints, and analytics hooks to `design/design.md`.
 - Produce `product/ONBOARDING.md` when onboarding, personalization, review prompts, paywalls, or first-session activation are in scope.
 - Render the design system and key visuals in HTML. Include component gallery, onboarding/paywall flow, mobile screen frames, responsive landing/funnel views, screenshot concepts, and any generated imagery embedded with direction/production labels.
 - Generate or source only high-leverage visual assets: app icon direction, mascot/character sheet if relevant, hero/aha moment, onboarding reveal, share artifact, screenshot frames. Any asset board must also appear inside an HTML proof.
@@ -371,7 +371,7 @@ Do:
 Outputs:
 - `strategy/BRAND.md`
 - updated `analytics/ANALYTICS.md` screen/event hooks and `analytics/analytics-plan.html` if screens changed the measurement plan
-- `design/DESIGN.md`
+- `design/design.md`
 - `DESIGN_SYSTEM.md` only when useful as an expanded appendix or required by repo convention
 - `design.md`
 - `design/design.html` or equivalent rendered visual-system proof
@@ -385,8 +385,8 @@ Acceptance:
 - A copywriter can reject off-brand copy using the voice rules.
 - Brand voice, screen choices, and generated visual directions cite the research/product trace rows they express.
 - AI-generated visuals are labeled as references unless final production-ready.
-- `design/DESIGN.md` is linted with `npx @google/design.md lint design/DESIGN.md` when available, or the validation blocker is recorded.
-- Visual artifacts are inspectable in HTML and use the same tokens/components as `design/DESIGN.md`.
+- `design/design.md` is linted with `npx @google/design.md lint design/design.md` when available, or the validation blocker is recorded.
+- Visual artifacts are inspectable in HTML and use the same tokens/components as `design/design.md`.
 - Mobile and desktop HTML proofs are checked for text fit, overlap, contrast, and responsive framing.
 - Onboarding questions, mascot states, review prompt, paywall, closing offer, trial, and activation task are specified before builder handoff.
 
@@ -497,7 +497,7 @@ Default stack from the model session:
 Do:
 - Load `analytics-attribution.md` before building the funnel, waitlist/referral loop, PostHog setup, GA4 setup, web checkout, or campaign links.
 - Load `secrets-management.md` before adding backend, email, analytics, deploy, database, or CI environment variables.
-- Build the landing page around the locked brand, not a generic marketing template; hero, lifestyle, and feature-illustration art route through Higgsfield (`hero_banner` / `lifestyle_scene` modes) using a `design/DESIGN.md` brief, after confirming spend per `paid-tool-routing.md`, with every generated asset recorded in `CONTENT_ASSETS.md` (see the App Store URL → UGC Ad Batch recipe and the Cheap-First Direction recipe in `tool-recipes/visual-and-motion-production.md`).
+- Build the landing page around the locked brand, not a generic marketing template; hero, lifestyle, and feature-illustration art route through Higgsfield (`hero_banner` / `lifestyle_scene` modes) using a `design/design.md` brief, after confirming spend per `paid-tool-routing.md`, with every generated asset recorded in `CONTENT_ASSETS.md` (see the App Store URL → UGC Ad Batch recipe and the Cheap-First Direction recipe in `tool-recipes/visual-and-motion-production.md`).
 - Add email waitlist and optional referral loop; avoid fake scarcity.
 - Load `resend-email-ops.md` before configuring Resend, transactional sends, waitlist confirmations, lifecycle automations, broadcasts, inbound email, unsubscribe handling, or email webhooks.
 - If monetization is active, wire only the approved checkout path (RevenueCat Web Purchase Link / Web Funnel / Web SDK, Stripe Checkout/Payment Link, or none); do not mix billing engines casually.

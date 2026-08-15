@@ -13,7 +13,7 @@ import { workflow } from "./helpers.js";
  * proves that separately, against `starters/`), not a competing SPEC.md, so it declares no
  * output. `product/experience/ux-patterns/UX_PATTERNS.md` was declared by both
  * `ux-patterns-refero` (its dedicated producer, via provider.refero) and
- * `premium-mobile-craft`, whose real distinctive output is `design/DESIGN.md`.
+ * `premium-mobile-craft`. The Design Room workflow owns `design/design.md`.
  */
 export const workflows = [
   workflow({
@@ -172,14 +172,14 @@ export const workflows = [
     areaIds: ["area.product-experience"],
     trigger: "Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work",
     instructions:
-      "Follow the mandatory STATE→MUTATE→VERSION→RENDER loop: read studio/seed/business.json and studio/seed/theme.tokens.json, make one coherent, reviewable mutation (one audience, one surface cluster, one token pass, or one wipe — never a mixed batch), then validate, render, and commit the state change as a git version over state/ and design/design-room.html. Never freehand a one-off DESIGN_PROPOSAL.md, mood board, or ad-hoc HTML proof outside this loop — the rendered Design Room is the only proof the founder reviews. When the surface touched is a landing/funnel page, model it against surfaces-b2c.md's Surface Families and apply quality-lens.md's Anti-Generic Checks before calling the mutation done; the founder's approval of final brand direction is the gate this node cannot self-clear.",
-    reads: ["studio/seed/business.json", "studio/seed/theme.tokens.json", "state/LAUNCH_TRACE.md"],
+      "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
+    reads: ["design/design.md", "studio/seed/business.json", "studio/seed/theme.tokens.json", "state/LAUNCH_TRACE.md"],
     referenceIds: ["reference.design.design-room", "reference.design.surfaces-b2c", "reference.design.landing-motion-craft", "reference.design.quality-lens"],
     roleId: "role.design-guru",
     laneIds: ["design"],
     phaseIds: ["phase.2"],
     dependencies: ["workflow.process.launch-trace-and-build-contracts"],
-    outputPaths: ["studio/seed/business.json", "studio/seed/theme.tokens.json", "design/design-room.html"],
+    outputPaths: ["design/design.md", "studio/seed/business.json", "studio/seed/theme.tokens.json", "design/design-room.html"],
     gates: ["validate:design-state", "check:design-room", "render:design-room"],
     founderOnlyActions: ["approve final brand direction"],
     actionClass: "mutate",
@@ -231,7 +231,7 @@ export const workflows = [
     trigger: "Before onboarding quizzes, review-prompt timing, paywall timing, or first-session activation",
     instructions:
       "Design the screen-by-screen onboarding sequence in product/ONBOARDING.md — purpose, question/copy, state, visual asset, animation, and analytics event per screen — so the user sees the 11-star V1 slice's magic before being asked for payment, long setup, or sensitive data. Place the native App Review popup and the push-permission soft-prime at the first-value moment, but never in the same session step as each other (value moment claims one; the other waits for the next earned moment per push-notification-lifecycle.md), and sequence the Commitment (first goal question), Perceived Effort Delay (plan/result generation), and Intent Mirroring (immediately pre-paywall, never on the paywall or cancel screen) card triggers against that same moment. Pull the final on-screen words from product/copy/COPY_DECK.md by key — check:app-copy fails a flow whose deck rows are missing or still placeholder-shaped — and confirm the onboarding curve crosses positive before the paywall, not just that a paywall exists.",
-    reads: ["product/experience/11-star-experience/11_STAR_EXPERIENCE.md", "analytics/ANALYTICS.md", "product/copy/COPY_DECK.md"],
+    reads: ["design/design.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md", "analytics/ANALYTICS.md", "product/copy/COPY_DECK.md"],
     referenceIds: [
       "reference.experience.onboarding-conversion",
       "reference.experience.push-notification-lifecycle",
@@ -252,10 +252,10 @@ export const workflows = [
     areaIds: ["area.product-experience"],
     trigger: 'Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or "premium feel"',
     instructions:
-      "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give (celebration choreography, gesture physics, hero transitions), route to motion-craft-benchmarks.md's numbered recipes for the checkable acceptance criteria; check:motion-contract is what proves the tokens were actually used, not adjectives in design/DESIGN.md.",
-    reads: ["studio/seed/theme.tokens.json"],
+      "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give (celebration choreography, gesture physics, hero transitions), route to motion-craft-benchmarks.md's numbered recipes for the checkable acceptance criteria; check:motion-contract is what proves the tokens were actually used, not adjectives in design/design.md.",
+    reads: ["design/design.md", "studio/seed/business.json", "studio/seed/theme.tokens.json"],
     // UX_PATTERNS.md is a consult, not a read: its producer (ux-patterns-refero) can park
-    // indefinitely on paid-tool routing, and design/DESIGN.md sits upstream of half the launch —
+    // indefinitely on paid-tool routing, and design/design.md sits upstream of half the launch —
     // premium craft must not stall the graph waiting for optional pattern evidence.
     consults: ["product/experience/ux-patterns/UX_PATTERNS.md"],
     referenceIds: ["reference.design.premium-mobile-craft", "reference.design.motion-craft-benchmarks"],
@@ -267,9 +267,9 @@ export const workflows = [
     // `dependencies` at all, so it was frontier-eligible before a spec or design state
     // existed (routing-depth audit, 2026-08-07).
     dependencies: ["workflow.design.design-room-state-mutate-version-render"],
-    // product/experience/ux-patterns/UX_PATTERNS.md dropped: workflow.design.ux-patterns-refero
-    // is its dedicated producer (see file header).
-    outputPaths: ["design/DESIGN.md"],
+    // The Design Room workflow owns design/design.md. This workflow verifies that
+    // implementation uses the approved contract and promoted tokens.
+    outputPaths: [],
     gates: ["check:motion-contract"],
     actionClass: "mutate",
     idempotent: true,
@@ -281,8 +281,8 @@ export const workflows = [
     areaIds: ["area.product-experience"],
     trigger: "Before rendered videos/stills, app previews, ad/social variants",
     instructions:
-      "Decide the production route per asset before generating anything: Higgsfield for net-new AI-generated imagery, mascots, or presenter/UGC video; Remotion for reproducible compositions built from real app UI, design/DESIGN.md tokens, screenshots, copy, and data where many variants (hooks, formats, dimensions, locales) are needed. Do not generate when the founder has not approved the intended paid route's fallback, Remotion commercial-license eligibility for this business is unclear, or the source UI/asset rights are missing. Record every produced asset in growth/content-assets/CONTENT_ASSETS.md (and its content-assets.html) with its route, token/source inputs, and license basis — check:content-assets proves the manifest matches what actually rendered, and this node is not idempotent because each run can legitimately produce new asset variants.",
-    reads: ["design/DESIGN.md", "studio/seed/theme.tokens.json"],
+      "Decide the production route per asset before generating anything: Higgsfield for net-new AI-generated imagery, mascots, or presenter/UGC video; Remotion for reproducible compositions built from real app UI, design/design.md tokens, screenshots, copy, and data where many variants (hooks, formats, dimensions, locales) are needed. Do not generate when the founder has not approved the intended paid route's fallback, Remotion commercial-license eligibility for this business is unclear, or the source UI/asset rights are missing. Record every produced asset in growth/content-assets/CONTENT_ASSETS.md (and its content-assets.html) with its route, token/source inputs, and license basis — check:content-assets proves the manifest matches what actually rendered, and this node is not idempotent because each run can legitimately produce new asset variants.",
+    reads: ["design/design.md", "studio/seed/theme.tokens.json"],
     referenceIds: [
       "reference.design.remotion-content-assets",
       "reference.design.design-visual-system",

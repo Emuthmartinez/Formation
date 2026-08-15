@@ -42,7 +42,13 @@ Do not ask the founder to choose between two ordinary implementation approaches.
 
 A direct request authorizes the reversible preparation it names. Draft the guide, comparison, copy, or plan first; use choices afterward to explain rigor, evidence treatment, or optional next routes. Do not convert already-requested preparation into a new permission gate.
 
-The protocol above covers moments that need a decision. Routine progress needs telling too: whenever the cockpit is re-rendered or a session wraps up, say in the reply what happened, what is next, and what (if anything) waits on the founder — do not leave good news and open questions sitting inside a rendered file the founder does not know to open.
+The protocol above covers moments that need a decision. Routine progress needs telling too. Use one short milestone digest when the cockpit changes or the session ends:
+
+1. State the concrete result that the founder can now see or use.
+2. State the next work in one sentence.
+3. State one current founder action, or say that no action is needed.
+
+Do not narrate state-writing mechanics, internal work areas, worker order, check counts, or file propagation. Do not repeat the same decision in later updates unless new information changes the recommendation or the decision becomes current again. A long-running session can keep detailed logs in the repository. The founder receives the integrated result.
 
 ## Business Bootstrap Sequence
 

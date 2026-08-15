@@ -58,7 +58,7 @@ When a Design Room decision is accepted:
 
 1. Commit the state and render.
 2. Run `promote-design-tokens` when theme tokens changed, then commit `design/system/tokens.json`, `design/system/tokens.css`, and `design/system/DesignTokens.swift`.
-3. Cascade the accepted decision to canonical business docs such as `design/DESIGN.md`, `design.md`, `APP_STORE_LISTING.md`, `product/ONBOARDING.md`, `CONTENT_ASSETS.md`, and `revenue/REVENUE_OPS.md` only when those files are in scope.
+3. Cascade the accepted decision to canonical business docs such as `design/design.md`, `APP_STORE_LISTING.md`, `product/ONBOARDING.md`, `CONTENT_ASSETS.md`, and `revenue/REVENUE_OPS.md` only when those files are in scope.
 4. Update `state/PROJECT_STATE.yaml` if launch readiness changed.
 5. Render both `design/design-room.html` and `state/launch-cockpit.html` when both state layers changed.
 6. Re-render the Business Control workspace read model and run `check:business-control-plane-workspace` before calling it maintained.

@@ -943,7 +943,7 @@ if (screenshotPacket) {
     "Device Wells",
     "headline",
     "copy overlay",
-    "design/DESIGN.md",
+    "design/design.md",
     "11_STAR_EXPERIENCE.md",
     "MobAI",
     "Higgsfield",

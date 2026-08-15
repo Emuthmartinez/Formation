@@ -1,4 +1,5 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { type Harness, skillRoot } from "./_harness.js";
 import { artifactPageEntries } from "../../../tooling/lib/artifact-pages.js";
@@ -467,8 +468,8 @@ export function register(h: Harness): void {
   cpSync(path.join(skillRoot, "workspace", "business"), aggregateA, { recursive: true });
   cpSync(path.join(skillRoot, "workspace", "business"), aggregateB, { recursive: true });
   writeFileSync(
-    path.join(aggregateB, "state", "business.json"),
-    readFileSync(path.join(aggregateB, "state", "business.json"), "utf8").replace(/"slug": "[^"]*"/, '"slug": "second-app"'),
+    path.join(aggregateB, "studio", "seed", "business.json"),
+    readFileSync(path.join(aggregateB, "studio", "seed", "business.json"), "utf8").replace(/"slug": "[^"]*"/, '"slug": "second-app"'),
     "utf8",
   );
   runScriptArgs(
@@ -563,6 +564,124 @@ export function register(h: Harness): void {
     ["--root", founderCopyStaleNarrative, "--skill-root", skillRoot],
     1,
     "founder_copy.narrative_stale.since_last_time",
+  );
+
+  const founderCopyTemplateName = makeEmptyFixture("founder-copy-template-name");
+  writeFileSync(
+    path.join(founderCopyTemplateName, "state/PROJECT_STATE.yaml"),
+    [
+      "narrative:",
+      '  since_last_time: "The market review is complete."',
+      '  right_now: "I am turning the findings into the product decision."',
+      '  your_call: "No action is needed from you right now."',
+      "project:",
+      '  name: "App Name"',
+      '  phase: "phase_1"',
+    ].join("\n"),
+    "utf8",
+  );
+  runScriptArgs(
+    "template project name after setup fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyTemplateName, "--skill-root", skillRoot],
+    1,
+    "founder_copy.template_project_name",
+  );
+
+  const founderCopyRepeatedUpdate = makeEmptyFixture("founder-copy-repeated-update");
+  writeFileSync(
+    path.join(founderCopyRepeatedUpdate, "state/PROJECT_STATE.yaml"),
+    [
+      "narrative:",
+      '  since_last_time: "The first device flow now works from start to finish."',
+      '  right_now: "The first device flow now works from start to finish."',
+      '  your_call: "No action is needed from you right now."',
+      "project:",
+      '  name: "Shelf"',
+      '  phase: "phase_5b"',
+    ].join("\n"),
+    "utf8",
+  );
+  runScriptArgs(
+    "repeated milestone narration fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyRepeatedUpdate, "--skill-root", skillRoot],
+    1,
+    "founder_copy.repeated_update",
+  );
+
+  const founderCopyConnectedBlocked = makeEmptyFixture("founder-copy-connected-blocked");
+  writeFileSync(
+    path.join(founderCopyConnectedBlocked, "state/PROJECT_STATE.yaml"),
+    ["project:", '  name: "Shelf"', '  phase: "phase_0_orient"', "tools:", "  posthog:", '    status: "connected"', '    route: "blocked"'].join("\n"),
+    "utf8",
+  );
+  runScriptArgs(
+    "connected service with blocked route fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyConnectedBlocked, "--skill-root", skillRoot],
+    1,
+    "founder_copy.connected_tool_contradiction",
+  );
+
+  const founderCopyEvidenceNoResult = makeEmptyFixture("founder-copy-evidence-no-result");
+  writeFileSync(
+    path.join(founderCopyEvidenceNoResult, "state/PROJECT_STATE.yaml"),
+    [
+      "project:",
+      '  name: "Shelf"',
+      '  phase: "phase_0_orient"',
+      "proof:",
+      "  commands:",
+      '    - expected: "The device flow completes"',
+      '      actual: ""',
+      '      evidence: "proof/device-flow.mp4"',
+    ].join("\n"),
+    "utf8",
+  );
+  runScriptArgs(
+    "saved evidence without a result fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyEvidenceNoResult, "--skill-root", skillRoot],
+    1,
+    "founder_copy.proof_result_missing",
+  );
+
+  const noCommitCheckpoint = makeEmptyFixture("source-checkpoint-no-commit");
+  writeFileSync(
+    path.join(noCommitCheckpoint, "state/PROJECT_STATE.yaml"),
+    'project:\n  phase: "phase_5b"\nlanes:\n  engineering:\n    status: "partial"\n',
+    "utf8",
+  );
+  git(noCommitCheckpoint, ["init"]);
+  runScriptArgs(
+    "build work without a first commit fails source checkpoint",
+    "check-source-checkpoint.ts",
+    ["--root", noCommitCheckpoint],
+    1,
+    "source_checkpoint.no_commit",
+  );
+
+  const untrackedCheckpoint = makeEmptyFixture("source-checkpoint-untracked-source");
+  writeFileSync(
+    path.join(untrackedCheckpoint, "state/PROJECT_STATE.yaml"),
+    'project:\n  phase: "phase_5b"\nlanes:\n  engineering:\n    status: "partial"\n',
+    "utf8",
+  );
+  writeFileSync(path.join(untrackedCheckpoint, "README.md"), "# Fixture\n", "utf8");
+  git(untrackedCheckpoint, ["init"]);
+  git(untrackedCheckpoint, ["config", "user.email", "fixture@example.test"]);
+  git(untrackedCheckpoint, ["config", "user.name", "Fixture"]);
+  git(untrackedCheckpoint, ["add", "state/PROJECT_STATE.yaml", "README.md"]);
+  git(untrackedCheckpoint, ["commit", "-m", "initial checkpoint"]);
+  mkdirSync(path.join(untrackedCheckpoint, "lib"), { recursive: true });
+  writeFileSync(path.join(untrackedCheckpoint, "lib/app.dart"), "void main() {}\n", "utf8");
+  runScriptArgs(
+    "untracked app source during build work fails source checkpoint",
+    "check-source-checkpoint.ts",
+    ["--root", untrackedCheckpoint],
+    1,
+    "source_checkpoint.untracked_source",
   );
 
   // Beats defined but never rendered was the original miss — a skill root
@@ -692,7 +811,7 @@ export function register(h: Harness): void {
     "knowledge/experience/experience-cards/peak-end-card.md",
     "knowledge/experience/experience-cards/mastery-and-status-card.md",
     "knowledge/experience/experience-cards/variable-reward-card.md",
-    "workspace/business/design/DESIGN.md",
+    "workspace/business/design/design.md",
     "workspace/business/product/experience/emotional-design/EMOTIONAL_DESIGN.md",
     "workspace/business/design/motion-catalog/TokenSpring.swift",
     "workspace/business/design/motion-catalog/motion-tokens.ts",
@@ -1070,8 +1189,8 @@ export function register(h: Harness): void {
   );
 
   const motionCardMomentDrift = writeMotionContractRoot("motion-contract-card-moment-drift", (rel, text) =>
-    rel.endsWith("workspace/business/design/DESIGN.md")
-      ? text.replace("| Intent Mirror entrance | `motion.durationReveal` |", "| Intent Mirror entrance | `motion.durationSlow` |")
+    rel.endsWith("workspace/business/design/design.md")
+      ? text.replace("| Intent Mirror | Use `motion.durationReveal`", "| Intent Mirror | Use `motion.durationSlow`")
       : text,
   );
   runScriptArgs(
@@ -1803,4 +1922,9 @@ export function register(h: Harness): void {
     1,
     "ste100.present_perfect",
   );
+}
+
+function git(root: string, args: string[]): void {
+  const result = spawnSync("git", ["-C", root, ...args], { encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`Git fixture setup failed: ${result.stderr}`);
 }

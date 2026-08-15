@@ -104,7 +104,7 @@ Every real app build or builder handoff should create or update a business-speci
 - 60-second product brief
 - explicit instruction to keep using `b2c-mobile-business-launch` for broad launch/business work without requiring another founder prompt
 - repo map and first files to read
-- source-of-truth docs: `product/SPEC.md`, `strategy/RESEARCH.md`, `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `engineering/TECH_SPEC.md`, `design/DESIGN.md`, `design.md`, `product/copy/COPY_DECK.md` (every user-facing string; builders type deck rows, never spec vocabulary — `conversion-copy.md`), `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `store/APPLE_SIGNING.md`, `store/STORE_CONSOLE.md`
+- source-of-truth docs: `product/SPEC.md`, `strategy/RESEARCH.md`, `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `engineering/TECH_SPEC.md`, `design/design.md`, `product/copy/COPY_DECK.md` (every user-facing string; builders type deck rows, never spec vocabulary — `conversion-copy.md`), `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `store/APPLE_SIGNING.md`, `store/STORE_CONSOLE.md`
 - `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, active failure cards, and autonomy mode
 - V1 scope, V2/V3 scope, and banned scope
 - design-system and HTML proof rules
@@ -301,7 +301,7 @@ Engineering-heavy work is done only when:
 - `AGENTS.md` exists and points to canonical docs.
 - `state/PROJECT_STATE.yaml` exists, is current, and `state/launch-cockpit.html` has been rendered when the launch has multiple lanes.
 - `CLAUDE.md` exists when Claude/builders need compatibility guidance.
-- `APP_AGENTS.md` and the seven-file `agents/` roster exist for real app builds or handoffs, including `security-architect.md`.
+- `APP_AGENTS.md` and its predetermined specialist prompt pack exist for real app builds or handoffs. The pack includes research, product and UX, visual design, copy, marketing and growth, mobile engineering, backend and infrastructure, accessibility and device QA, and security and release review.
 - `state/LAUNCH_TRACE.md` exists or equivalent trace rows are embedded in `strategy/RESEARCH.md`.
 - `engineering/TECH_SPEC.md` exists when data/API/state/platform contracts are non-trivial.
 - `engineering/ENGINEERING_PLAN.md` exists when actual implementation is in scope.

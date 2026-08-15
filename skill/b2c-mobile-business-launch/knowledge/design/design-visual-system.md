@@ -2,6 +2,12 @@
 
 Use this reference before any brand, UI, screenshot, landing-page, paywall, onboarding, or generated-app handoff work. The goal is to make visual decisions durable for agents and inspectable by humans.
 
+Read `design/design.md` before you change a user-facing surface. This file contains the design intent.
+
+Read `studio/seed/business.json` for the surface inventory. Read `studio/seed/theme.tokens.json` for exact values.
+
+Do not create a second visual-system document. Update the contract and structured sources in one change.
+
 ## Contents
 
 - Source Tooling
@@ -33,7 +39,7 @@ If matching local skills are installed, load and use them. If Refero or Higgsfie
 1. **Trace and experience first.** Load `flow-traceability.md` and `eleven-star-experience.md`; identify the research/product trace rows, magical moment, line of feasibility, and V1 scalable slice the brand and visual system must express.
 2. **Layers first when product clarity is weak.** Use Layers-style thinking to verify observed behavior, domain language, user needs, product strategy, conceptual model, interaction flow, and surface decisions before locking screens.
 3. **Refero or baseline UX patterns for real flow shape.** Use `refero-ux-patterns.md` to study styles, screens, and flows before locking interaction structure. If Refero is unavailable, use the bundled `business/product/experience/ux-patterns/` pack only after founder-approved fallback routing.
-4. **Google `design.md` for token truth.** Produce `design/DESIGN.md` as the canonical machine-readable and human-readable design system: YAML tokens first, Markdown rationale second.
+4. **Canonical design contract.** Produce `design/design.md`. Keep intent, screens, states, and implementation rules in this file.
 5. **Taste for direction.** Apply this skill's own [`quality-lens.md`](./quality-lens.md) Anti-Generic Checks first — it is the in-repo, concrete taste contract with a Review Prompt built for exactly this step. Then use Taste-style review (Source Tooling above) to avoid generic output, set variance/motion/density, and choose a design language that fits the category instead of default SaaS patterns.
 6. **Impeccable for audit and polish.** Use Impeccable-style checks for typography, color/contrast, spatial design, motion, interaction states, responsive behavior, and UX writing.
 6a. **Premium craft for in-app feel.** Load [`premium-mobile-craft.md`](./premium-mobile-craft.md) before building or polishing in-app UI. It carries the five invisible details — press states/spring physics, subtle motion, haptics discipline, keyboard behavior, and loading/empty states — and ships them as SwiftUI boilerplate (`business/design/system/PremiumCraft.swift`) with React Native and Flutter parity, all reading `DesignTokens.Motion` and honoring Reduce Motion. When a surface needs celebration choreography, shared-element continuity, or gesture physics beyond the five details, it routes to [`motion-craft-benchmarks.md`](./motion-craft-benchmarks.md) for the numeric recipe layer.
@@ -43,33 +49,25 @@ If matching local skills are installed, load and use them. If Refero or Higgsfie
 
 ## Required Artifacts
 
-### `design/DESIGN.md`
+### `design/design.md`
 
-Follow the Google Labs format:
-- YAML front matter with `name`, `description`, `colors`, `typography`, `rounded`, `spacing`, and `components`
-- Markdown sections in this order when present: Overview, Colors, Typography, Layout/Spacing, Elevation/Depth, Shapes, Components, Do's and Don'ts
-- component tokens for primary/secondary buttons, inputs, tabs/segmented controls, cards/lists, sheets/modals, nav, paywall, store screenshot frames, and share/referral surfaces when relevant
-- implementation notes for CSS variables, Tailwind, SwiftUI, React Native, Flutter, or generated-app prompts
+Use `design/design.md` as the only design contract. It must contain:
+
+- Product experience and anti-patterns
+- Visual direction and semantic token references
+- Surface inventory and navigation model
+- Screen states, copy keys, analytics hooks, and proof paths
+- Onboarding, motion, haptics, and reduced-motion behavior
+- Landing, icon, store, ad, and lifecycle marketing direction
+- Accessibility and implementation rules
 
 Validate when possible:
 
 ```bash
-npx @google/design.md lint design/DESIGN.md
+npx @google/design.md lint design/design.md
 ```
 
 If the CLI is unavailable or the package registry fails, record the exact blocker and manually check token references, contrast, section order, and duplicate headings.
-
-### `design.md`
-
-Use lowercase `design.md` for the screen implementation spec. It must reference `design/DESIGN.md` for tokens and include:
-- surface inventory and navigation model
-- 11-star experience slice: magical moment, line of feasibility, and which screens carry the V1 scalable slice
-- trace IDs from `state/LAUNCH_TRACE.md` for build-critical screens, claims, onboarding questions, paywall choices, and store screenshot concepts
-- onboarding, aha moment, core loop, paywall/revenue surface, settings/account, share/referral, and support/privacy surfaces when relevant
-- state matrix: empty, loading, error, permission denied, offline, success, premium locked, restored purchase
-- animation and transition specs with reduced-motion behavior
-- copy calibration and analytics hooks by screen
-- path to the corresponding HTML proof for each key surface
 
 ### `design/design.html`
 
@@ -97,22 +95,17 @@ Render the same material in `ux-patterns.html` or inside `design/design.html` so
 
 ## Naming Contract
 
-Keep both names unless the project already has a strong conflicting convention:
+Use only `design/design.md` as the design contract. Do not create a root `design.md` or `design/DESIGN.md`.
 
-- `design/DESIGN.md` is the canonical design-system source of truth. It stores tokens, component rules, rationale, and implementation notes.
-- lowercase `design.md` is the screen implementation spec. It maps flows, states, copy, analytics hooks, and HTML proof paths back to `design/DESIGN.md`.
-
-Renaming either file usually does not break the running app by itself, but it does break launch-package convention unless all skill references, app-local agents, `AGENTS.md`, `CLAUDE.md`, builder prompts, validators, and handoff docs are updated together.
-
-Do not merge them unless the launch is tiny and no builder handoff is expected. If a target repo already uses `DESIGN_SYSTEM.md`, make it an appendix that explicitly defers token truth to `design/DESIGN.md`.
+If a target repo uses `DESIGN_SYSTEM.md`, make it an appendix. It must defer to `design/design.md`.
 
 ## Higgsfield Production Routing
 
-Before generating assets, translate `design/DESIGN.md` into the generation brief: palette names and hexes, type mood, shape/radius language, illustration style, motion energy, forbidden aesthetics, and intended surface.
+Before generating assets, translate `design/design.md` into the generation brief: palette names and hexes, type mood, shape/radius language, illustration style, motion energy, forbidden aesthetics, and intended surface.
 
 The Higgsfield skill/model routing, media preflight steps, and asset-labeling rules are the canonical recipe body in [`tool-recipes/visual-and-motion-production.md`](../process/tool-recipes/visual-and-motion-production.md) — load that section rather than a second, drifting copy here.
 
-**App Icon Direction Batch.** Before locking an app icon direction: check the `icon_style` token in `design/DESIGN.md`. If the style is `character`, `cartoon`, or `mascot`, route to `nano_banana_2` or `nano_banana_pro`; otherwise route to `gpt_image_2`. Produce a minimum 3-concept batch before direction lock. See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md` for the z_image draft → production-model run workflow. Cheap-first is offered only as a spend-reduction option at the `paid-tool-routing.md` spend-confirmation prompt — never applied silently.
+**App Icon Direction Batch.** Before locking an app icon direction: check the `icon_style` token in `design/design.md`. If the style is `character`, `cartoon`, or `mascot`, route to `nano_banana_2` or `nano_banana_pro`; otherwise route to `gpt_image_2`. Produce a minimum 3-concept batch before direction lock. See the **Cheap-First Direction** recipe in `tool-recipes/visual-and-motion-production.md` for the z_image draft → production-model run workflow. Cheap-first is offered only as a spend-reduction option at the `paid-tool-routing.md` spend-confirmation prompt — never applied silently.
 
 ## Motion: Web Surfaces vs Mobile Binary
 
@@ -120,7 +113,7 @@ Motion is a tokenized, cross-platform contract. Values live once in `studio/seed
 
 Where each tool applies:
 
-- **Web surfaces ship motion.** Landing pages, marketing funnels, web paywall, and the Design Room render app (`render/src/`) animate with framer-motion / the `motion` library (`import { motion } from "motion/react"`), reading durations from the promoted `--motion-*` variables. This is the natural home for framer-motion and for `ui-ux-pro-max`'s Magic UI / motion patterns (staggered reveals, `AnimatePresence`, `whileTap`, layout transitions).
+- **Web surfaces ship motion.** Landing pages, marketing funnels, web paywall, and the Design Room app (`studio/app/src/`) animate with framer-motion / the `motion` library (`import { motion } from "motion/react"`), reading durations from the promoted `--motion-*` variables. This is the natural home for framer-motion and for `ui-ux-pro-max`'s Magic UI / motion patterns (staggered reveals, `AnimatePresence`, `whileTap`, layout transitions).
 - **The shipped mobile binary does not use framer-motion.** SwiftUI uses `DesignTokens.Motion` with `.animation`; Flutter uses implicit/explicit animations; React Native uses Reanimated/Moti. All read the same token values so motion stays consistent across web and app.
 - **Reduced motion is mandatory everywhere.** Honor `prefers-reduced-motion` on web (`useReducedMotion()` plus reduced-motion CSS) and OS reduce-motion on device; degrade to opacity-only or instant changes and never block first paint on an animation.
 - **`ui-ux-pro-max` is reference-only (MIT).** Invoke the skill or adapt its motion/anti-pattern guidance (smooth 150-300ms transitions, visible focus states, reduced-motion support). Do not copy its CSV datasets into templates or business repos; independently authored WCAG values are fine. Capture the adapted recommendation in `state.designBrief` (schema-backed; seed it with `npm run seed:design-brief`).
@@ -128,7 +121,7 @@ Where each tool applies:
 
 ## HTML Implementation Rules
 
-- Use CSS variables derived from `design/DESIGN.md` token names.
+- Use CSS variables derived from `design/design.md` token names.
 - Keep the HTML self-contained unless the target repo already has an asset pipeline.
 - Build mobile-first frames with stable dimensions and responsive desktop variants where relevant.
 - Avoid placeholder-only UI. Real copy, real state labels, and realistic content density expose design problems earlier.
@@ -141,8 +134,8 @@ Where each tool applies:
 Before moving to ASO, landing implementation, or builder handoff:
 - `state/LAUNCH_TRACE.md` shows which research/product decisions the visual system expresses.
 - `11_STAR_EXPERIENCE.md` and `11-star-experience.html` show the product's magical moment and V1 scalable slice before screens are locked.
-- `design/DESIGN.md` exists and is the token source of truth.
-- lowercase `design.md` maps screens to tokens, states, analytics hooks, and HTML proof paths.
+- `design/design.md` exists and is the token source of truth.
+- `design/design.md` maps screens to tokens, states, analytics hooks, and HTML proof paths.
 - `UX_PATTERNS.md` exists, records Refero or founder-approved fallback research, and preserves the onboarding playbook.
 - `ux-patterns.html` or a dedicated `design/design.html` section renders the pattern inventory, flow maps, and state matrix.
 - `design/design.html` or equivalent loads locally and shows mobile plus relevant desktop states.
@@ -154,17 +147,17 @@ Before moving to ASO, landing implementation, or builder handoff:
 
 Before rewriting any landing page, onboarding, paywall, or in-app copy, check two documents in this order:
 
-1. **`strategy/BRAND.md` owned-words list and `design/DESIGN.md` §7 calibration set (or equivalent).** These sections define phrases that belong exclusively to the product's brand voice. Do not replace, rephrase, or delete them unless the founder has explicitly approved a brand-voice change. Scanning for third-party IP risk is not a license to rewrite owned vocabulary.
+1. **`strategy/BRAND.md` owned-words list and `design/design.md` §7 calibration set (or equivalent).** These sections define phrases that belong exclusively to the product's brand voice. Do not replace, rephrase, or delete them unless the founder has explicitly approved a brand-voice change. Scanning for third-party IP risk is not a license to rewrite owned vocabulary.
 
 2. **Third-party IP risk scan scope.** IP risk scanning covers only: names of third-party frameworks, SDKs, companies, or products presented as if they are the app's own capability; phrases from competitor marketing or product copy; trademarked terms used in a confusing or endorsing way. It does not cover product-specific metaphors, brand names, or calibrated copy phrases the app owns.
 
-Rule: if a copy change removes or alters a phrase that appears in `strategy/BRAND.md` or `design/DESIGN.md` calibration set, that change must be flagged as out-of-scope for IP scanning and requires founder approval before the rewrite is applied.
+Rule: if a copy change removes or alters a phrase that appears in `strategy/BRAND.md` or `design/design.md` calibration set, that change must be flagged as out-of-scope for IP scanning and requires founder approval before the rewrite is applied.
 
 ## Locked Production Design
 
 When native production code — a SwiftUI component library, a Flutter widget package, a React Native design-system package, or equivalent locked implementation — is the founder's canonical visual source, these rules apply before any design audit, asset generation, or doc update:
 
-**Establishing the lock.** A production native implementation is canonical when the founder explicitly says so ("this component is locked", "don't change the character geometry", "the existing app look is final") or when a named source file (e.g. `OchoComponents.swift`, `AppCharacter.kt`) is described as the truth for geometry, palette, or animation. Record this in `design/DESIGN.md` as a `visual_lock` block:
+**Establishing the lock.** A production native implementation is canonical when the founder explicitly says so ("this component is locked", "don't change the character geometry", "the existing app look is final") or when a named source file (e.g. `OchoComponents.swift`, `AppCharacter.kt`) is described as the truth for geometry, palette, or animation. Record this in `design/design.md` as a `visual_lock` block:
 
 ```yaml
 visual_lock:
@@ -179,7 +172,7 @@ visual_lock:
   generated_asset_role: "concept-only"
 ```
 
-**Generated assets are concept-only when a lock exists.** All Higgsfield, Remotion, or other generated outputs created after a visual lock is declared are `concept` or `direction` assets — never `canonical visual targets`. This applies regardless of how the assets are labeled in older docs. If `design.md` or `design/DESIGN.md` currently calls any generated asset a "canonical visual target," update that language before doing any audit or handoff work.
+**Generated assets are concept-only when a lock exists.** Generated outputs after a visual lock are `concept` or `direction` assets. If `design/design.md` calls one a canonical target, correct it before handoff.
 
 **`CONTENT_ASSETS.md` manifest status.** When a visual lock is in effect, any generated asset in `growth/content-assets/manifest.json` must use `status: concept`, `status: direction`, or `status: draft` — never `status: production` or `status: approved` for a field (`truth_constraints`) that conflicts with the locked native implementation.
 
@@ -190,16 +183,16 @@ visual_lock:
 - Do not propose re-generating assets to narrow the gap; ask the founder whether the generated assets are still needed as concept references.
 
 **Failure card.** Raise `design-canonical-conflict` when any of these conditions exist:
-- `design.md` or `design/DESIGN.md` labels a generated asset as "canonical visual target" and native production code exists.
+- `design/design.md` labels a generated asset as a canonical visual target and native production code exists.
 - `CONTENT_ASSETS.md` manifest lists a generated asset as `production` or `approved` when the native implementation is locked.
 - A design-guru or audit subagent spent more than one iteration comparing generated assets to locked native code without correcting the doc conflict first.
 
 ## Common Failures
 
-- `DESIGN_SYSTEM.md` and `design/DESIGN.md` disagree; fix by making `design/DESIGN.md` canonical and reducing the other doc to an appendix.
+- `DESIGN_SYSTEM.md` and `design/design.md` disagree; fix by making `design/design.md` canonical and reducing the other doc to an appendix.
 - screenshot or landing visuals look good as images but are impossible to build because tokens/components were never specified.
 - generated images carry the brand while the actual app UI stays generic; require HTML app frames using the same design language.
 - Phase 2 jumps straight to surface style even though user needs, conceptual model, or flow are unresolved; run Layers-style orientation first.
 - no browser/mobile proof exists, so cramped copy, broken contrast, and clipped controls are discovered during implementation or store screenshot production.
-- copy rewrite sweeps that target IP risk also alter brand-owned phrases from `design/DESIGN.md` calibration set or `strategy/BRAND.md`; scope IP-risk sweeps to third-party names only and preserve owned vocabulary.
+- copy rewrite sweeps that target IP risk also alter brand-owned phrases from `design/design.md` calibration set or `strategy/BRAND.md`; scope IP-risk sweeps to third-party names only and preserve owned vocabulary.
 - `design.md` calls Higgsfield-generated assets "canonical visual targets" while a locked native component library is the true canonical source; correct the doc before auditing assets, not after.

@@ -177,7 +177,7 @@ Before filming:
 - prepare a truthful demo account/fixture with realistic data
 - mark any generated or mock UI as non-production until the real app exists
 
-Use Higgsfield only for supporting visuals, mascots, backgrounds, hooks, or motion after `design/DESIGN.md` exists. Do not use generated visuals as a substitute for truthful app UI in store screenshots or product claims.
+Use Higgsfield only for supporting visuals, mascots, backgrounds, hooks, or motion after `design/design.md` exists. Do not use generated visuals as a substitute for truthful app UI in store screenshots or product claims.
 
 **Synthetic founder-voice content (before real creators are onboarded).** Marketing Studio supports four UGC-family modes suited to pre-roster founder-led content: `ugc`, `ugc_how_to`, `ugc_unboxing`, and `product_review`. Use these to generate synthetic founder-voice ads during format discovery before a real creator roster is running. Synthetic UGC complements real creator content — it does not replace it; real creators produce authentic human variability, comment-bait tension, and niche credibility that generated video cannot replicate. See the **Soul-Once Founder-Face Ads** recipe in `tool-recipes/visual-and-motion-production.md`. When no founder face should appear, use the **Script-First Believable-Person UGC** recipe (Recipe 7) in the same file. Recipe 7 uses a first-frame image plus a Seedance 2.5 reference-driven video. It needs no Soul and no avatar.
 
@@ -187,7 +187,7 @@ Guardrails for synthetic UGC:
 - Believability. Before scaling a synthetic format, one real human who did not make the clip watches it. If they identify it as AI or as an ad, suspect the script first, then the prompt, last the model. Record `passed — <detail>` or `failed — <detail>` in the manifest `believability` field; a done-tier status without an explicit pass fails `check:content-assets`.
 - Automation last. Scale the flow into an automated pipeline only after it passes the believability test repeatedly by hand. Automation of a broken flow makes slop faster.
 - Founder-face content additionally requires a trained founder Soul (`soul-cinematic` variant) and a custom avatar; see `tool-recipes/visual-and-motion-production.md`.
-- Every generation prompt must carry `design/DESIGN.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface). Generating without this brief is a named failure mode.
+- Every generation prompt must carry `design/design.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface). Generating without this brief is a named failure mode.
 - Gate every generation behind spend confirmation per `paid-tool-routing.md`; surface current balance first (`mcp__claude_ai_Higgsfield__balance`).
 - Record all generated assets in `CONTENT_ASSETS.md` / `growth/content-assets/manifest.json` with `prompt_brief`, `soul_reference_id`, `avatar_id`, and `virality_score` fields.
 - Synthetic ads must pass brain-activity virality scoring before paid distribution (see **Virality Closed Loop** recipe in `tool-recipes/visual-and-motion-production.md`) — and pass [`quality-lens.md`](../design/quality-lens.md)'s Anti-Generic Checks, which neither the virality score nor the design-token check evaluates.

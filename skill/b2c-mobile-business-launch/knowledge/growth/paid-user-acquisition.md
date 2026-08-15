@@ -80,7 +80,7 @@ Use `remotion-content-assets.md` when repeatable ad variants, motion screenshots
 
 ### Higgsfield Creative Production
 
-Before generating any Higgsfield asset: confirm spend with the founder per `paid-tool-routing.md`, carry `design/DESIGN.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface) in every prompt, and record every output in `CONTENT_ASSETS.md`.
+Before generating any Higgsfield asset: confirm spend with the founder per `paid-tool-routing.md`, carry `design/design.md` tokens (palette, type mood, shapes, texture, motion energy, banned aesthetics, surface) in every prompt, and record every output in `CONTENT_ASSETS.md`.
 
 **Routed recipes** (bodies in `tool-recipes/visual-and-motion-production.md` — do not re-copy here):
 - **App Store URL → UGC Ad Batch (Click-to-Ad)** — webproducts fetch → avatar pick → parallel mode batch → score → save winners → founder approval.
@@ -95,7 +95,7 @@ higgsfield marketing-studio dtc-ads generate --format-id <id> [--brand-kit-id <i
 
 **Hook A/B protocol.** Before committing to a production run, test breadth before depth: run 4 hooks × 1 mode first to find the winning hook, then 1 hook × 4 modes to find the winning mode. Score each variant with `brain_activity` before expanding.
 
-**Click-to-Ad `--url` note.** The `--url <app-store-url>` shortcut bypasses brief injection — `design/DESIGN.md` tokens are NOT carried automatically. Always inject them explicitly into `--prompt`.
+**Click-to-Ad `--url` note.** The `--url <app-store-url>` shortcut bypasses brief injection — `design/design.md` tokens are NOT carried automatically. Always inject them explicitly into `--prompt`.
 
 **Win-back / re-engagement creatives.** For lapsed-user campaigns, generate `marketing_studio_video --mode product_review` ads with "do you miss X" hooks, plus `product-photoshoot --mode lifestyle_scene` static re-engagement visuals; score the video with `brain_activity` before allocating any spend. Record `virality_score` and `hook_dmn_risk` in `CONTENT_ASSETS.md` before distributing.
 

@@ -24,7 +24,7 @@ if (!args.staticOnly) {
   const distPath = args.distPath ?? path.join(args.root, "dist/design-room");
   const viteBin = resolveViteBin();
   if (viteBin) {
-    const result = spawnSync(viteBin, ["build", "--config", path.join(skillRoot, "render/vite.config.ts"), "--outDir", distPath], {
+    const result = spawnSync(viteBin, ["build", "--config", path.join(skillRoot, "studio/app/vite.config.ts"), "--outDir", distPath], {
       cwd: skillRoot,
       encoding: "utf8",
     });
@@ -76,6 +76,7 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
   const business = isRecord(state) && isRecord(state.business) ? state.business : {};
   const designBrief = isRecord(state) && isRecord(state.designBrief) ? state.designBrief : undefined;
   const designRoom = isRecord(state) && isRecord(state.designRoom) ? state.designRoom : {};
+  const contractPath = asString(designRoom.contractPath) ?? "design/design.md";
   const appStore = isRecord(state) && isRecord(state.surfaces) && isRecord(state.surfaces.appStore) ? state.surfaces.appStore : {};
   const controlPlane = isRecord(state) && isRecord(state.controlPlane) ? state.controlPlane : {};
   const latestVersion = asArray(designRoom.versionLog).at(-1);
@@ -101,6 +102,7 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="design-state-hash" content="${escapeHtml(stateHash)}" />
+  <meta name="design-contract-path" content="${escapeHtml(contractPath)}" />
   <title>${escapeHtml(business.name ?? "App")} Design Room</title>
   <style>
     :root {
@@ -175,6 +177,7 @@ function renderStaticHtml(state: unknown, tokens: unknown, stateHash: string): s
         <article class="panel"><h3>Positioning</h3><p>${escapeHtml(business.positioning ?? "") || '<span class="muted">Not defined</span>'}</p></article>
         <article class="panel"><h3>Audience</h3><p>${escapeHtml(business.targetAudience ?? "") || '<span class="muted">Not defined</span>'}</p></article>
         <article class="panel"><h3>Latest Mutation</h3><p>${escapeHtml(isRecord(latestVersion) ? latestVersion.summary : "No mutation recorded")}</p></article>
+        <article class="panel"><h3>Design Contract</h3><p>${escapeHtml(contractPath)}</p><p class="muted">The contract explains the intent. State and tokens hold the exact values.</p></article>
       </div>
     </section>
     ${

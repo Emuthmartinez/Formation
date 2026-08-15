@@ -32,7 +32,7 @@ Classify each lane as `done`, `partial`, `blocked`, `not needed`, or `deferred w
 | Engineering orchestration | product brainstorm decision, `operations/ORCHESTRATION.md`, `AGENTS.md`, `CLAUDE.md` when needed, implementation plan, parallel-agent map, serialized resource map, E2E readiness proof | Compound Engineering, MobAI, `engineering/ENGINEERING_PLAN.md`, `engineering/PRODUCTION_READINESS.md` |
 | Agent operations | capability inventory, exact approval envelopes, authenticated browser/API/native action ledger, research/media provenance, provider read-back, cross-artifact reconciliation | `frontier-agent-operations.md`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `check:agent-operations` |
 | Technical build contracts | data model, API/RPC/webhooks, auth/session, app states, permissions, integrations, app integrity, fixtures; `engineering/TECH_SPEC.md` Data Contract (backend selection, authorization model, migrations/environments) | `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `backend-data-contract.md`, `check:backend-contract` |
-| Brand/design | voice, `design/DESIGN.md` token system, screen spec, rendered HTML proofs, asset rules, accessibility | `strategy/BRAND.md`, `design/DESIGN.md`, `design.md`, `design/design.html` |
+| Brand/design | voice, `design/design.md` token system, screen spec, rendered HTML proofs, asset rules, accessibility | `strategy/BRAND.md`, `design/design.md`, `design/design.html` |
 | Onboarding/conversion | personalization, mascot/demo, attribution, review prompt, paywall timing, closing offer, activation | `product/ONBOARDING.md`, `product/onboarding.html`, `analytics/ANALYTICS.md` |
 | ASO/store listing | metadata, keyword map, App Store listing packet, screenshots, category, localization, custom product pages, In-App Events, review strategy | ASO skills, AppKittie, Higgsfield |
 | Localization market research | `LOCALIZATION_MARKET_RESEARCH.md` market opportunity matrix (per-storefront keyword popularity, difficulty, demand), priority tiers (Tier 1 full / Tier 2 metadata-only / Tier 3 defer), native-keyword sourcing, cross-surface rollout, post-launch refresh | `localization-market-research.md`, AppKittie, Apple Search Ads, App Store Connect App Analytics, XPOZ |
@@ -68,7 +68,7 @@ Required unless explicitly marked not applicable:
 - `11_STAR_EXPERIENCE.md` and `11-star-experience.html` before build handoff, so the V1 scalable slice shapes product, onboarding, paywall, ads, screenshots, content, and engineering contracts
 - `EMOTIONAL_DESIGN.md` and `emotional-design.html` before build handoff when the 11-star target is 6-star or higher, so the core loop, onboarding, and paywall carry engineered emotion: a Card Application Map (each magical moment → an Experience Card + PostHog event + bright-line guardrail + reduced-motion fallback), an ethics attestation for every applied card, and a user-control escape hatch + counter-metric + truthfulness proof for every HIGH-risk card (variable reward, streak, scarcity, urgency, social proof); `EMOTIONAL_AUDIT.md` when auditing an existing app, with every journey enumerated, scored through the six-lens review, and given a pathway to a better state; `check:emotional-design` must pass
 - product brainstorm checkpoint after research and before engineering plans when multiple product shapes remain viable
-- canonical `design/DESIGN.md` and rendered HTML visual proof when visual design, screenshots, or landing UI are in scope
+- canonical `design/design.md` and rendered HTML visual proof when visual design, screenshots, or landing UI are in scope
 - `engineering/TECH_SPEC.md` when implementation includes backend APIs, database/storage, auth, subscriptions, email, analytics, AI, push, account deletion, app integrity, or non-trivial platform behavior
 - `AGENTS.md` for any real app build or builder handoff, plus `CLAUDE.md` when Claude/Rork/tooling expects it
 - `engineering/ENGINEERING_PLAN.md` before implementation when actual frontend/backend/app build work is in scope
@@ -106,9 +106,9 @@ Add when the launch depends on paid acquisition, creators, web checkout, or rapi
 - safe parallel agents/worktrees for independent research, static audits, frontend/backend units, fixtures, and test lanes, with the orchestrator owning integration, git, and full suites
 - `state/launch-cockpit.html` refreshed after each material provider, store, analytics, revenue, email, or readiness change
 - Compound Engineering `ce-proof` or `ce-demo-reel` artifacts for founder/reviewer inspection of shipped app behavior
-- Higgsfield-generated mascot, app icon, demo video, screenshot art, ad creative, and animation clips constrained by `design/DESIGN.md`
-- Higgsfield-generated landing-page hero and feature-section visuals (product-photoshoot `hero_banner` / `lifestyle_scene` / `ad_creative_pack` modes, design/DESIGN.md brief required); route recorded in `CONTENT_ASSETS.md` — see the **Cheap-First Direction (z_image → production model)** recipe in `tool-recipes/visual-and-motion-production.md`
-- Higgsfield-generated press/PR imagery (product-photoshoot `lifestyle_scene` or `conceptual_product` mode, or `gpt_image_2` for flat editorial art, design/DESIGN.md brief required); route recorded in `CONTENT_ASSETS.md` — see the **Cheap-First Direction (z_image → production model)** recipe in `tool-recipes/visual-and-motion-production.md`
+- Higgsfield-generated mascot, app icon, demo video, screenshot art, ad creative, and animation clips constrained by `design/design.md`
+- Higgsfield-generated landing-page hero and feature-section visuals (product-photoshoot `hero_banner` / `lifestyle_scene` / `ad_creative_pack` modes, design/design.md brief required); route recorded in `CONTENT_ASSETS.md` — see the **Cheap-First Direction (z_image → production model)** recipe in `tool-recipes/visual-and-motion-production.md`
+- Higgsfield-generated press/PR imagery (product-photoshoot `lifestyle_scene` or `conceptual_product` mode, or `gpt_image_2` for flat editorial art, design/design.md brief required); route recorded in `CONTENT_ASSETS.md` — see the **Cheap-First Direction (z_image → production model)** recipe in `tool-recipes/visual-and-motion-production.md`
 - Higgsfield win-back ad creative for lapsed/cancelled subscribers (marketing_studio_video `ugc` or `product_review` mode, or Soul-Once Founder-Face flow); route recorded in `CONTENT_ASSETS.md` — see the **Soul-Once Founder-Face Ads** and **App Store URL → UGC Ad Batch (Click-to-Ad)** recipes in `tool-recipes/visual-and-motion-production.md`
 - MobAI-backed screenshot capture matrix for real app screens before final store compositions
 - MobAI `mobile-recorder-skill` or `desktop-recorder-skill` for polished reproducible app-flow demos: `.mob` or `screenplay.json`, raw capture, edited export, captions, and upload copy
@@ -167,7 +167,7 @@ Flag these aggressively:
 - XcodeBuildMCP commands, MCP tool names, setup snippets, privacy settings, or screenshot/test proof were copied from stale local skills without checking official docs and `xcodebuildmcp --help`/tool listings.
 - Engineering was declared done from unit/widget tests only; no frontend-to-backend, provider, entitlement, analytics, email, or database proof exists.
 - `engineering/PRODUCTION_READINESS.md` is missing, or it lacks command outcomes, fixture/account details, evidence paths, blocked E2E flows, and founder-only gates.
-- `design/DESIGN.md` is missing, unlinted, or duplicated by conflicting design-token docs.
+- `design/design.md` is missing, unlinted, or duplicated by conflicting design-token docs.
 - Visual direction exists only as prose, screenshots, or image files; no rendered HTML proof uses the design system.
 - Higgsfield was skipped for visuals/motion, or generated assets ignore the design system.
 - A generated-asset surface (win-back creative, landing-page hero/feature visuals, press/PR imagery) has no recorded Higgsfield route or approved fallback in `CONTENT_ASSETS.md`.
@@ -239,7 +239,7 @@ The Coverage Matrix above asks "does this lane have evidence?". This checklist a
 **Brand and design**
 
 - what the brand sounds and looks like
-- what `design/DESIGN.md` tokens/components govern the UI, what `UX_PATTERNS.md` says about Refero/fallback research, flow maps, state matrices, and bug traps, and what HTML proofs demonstrate the system in use
+- what `design/design.md` tokens/components govern the UI, what `UX_PATTERNS.md` says about Refero/fallback research, flow maps, state matrices, and bug traps, and what HTML proofs demonstrate the system in use
 
 **Measurement and growth**
 
@@ -269,7 +269,7 @@ The Coverage Matrix above asks "does this lane have evidence?". This checklist a
 - what RevenueCat/Stripe/app-store products unlock, how purchases map to entitlements, and how web purchases redeem in app
 - what privacy, terms, account deletion, subscription, and app-store data disclosures say
 - what support/privacy/security email addresses exist, route to, and have been tested
-- what transactional, lifecycle, broadcast, unsubscribe, and inbound/reply email paths exist, how Resend is configured, which starter templates were copied or adapted, and how those templates map to `design/DESIGN.md`
+- what transactional, lifecycle, broadcast, unsubscribe, and inbound/reply email paths exist, how Resend is configured, which starter templates were copied or adapted, and how those templates map to `design/design.md`
 - what public pages are crawlable, citeable, schema-marked, and discoverable by AI/search systems
 
 **Build, security, and proof**

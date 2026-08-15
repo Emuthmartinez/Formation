@@ -80,6 +80,23 @@ export function register(h: Harness): void {
     "orchestration.parallel_file_overlap",
   );
 
+  const orchestrationManagerWithoutDispatch = makeFixture("orchestration-manager-without-dispatch");
+  const managerWithoutDispatchState = readState(orchestrationManagerWithoutDispatch);
+  const managerWithoutDispatch = expectRecord(managerWithoutDispatchState["orchestration"], "orchestration");
+  managerWithoutDispatch["preflight_done"] = true;
+  managerWithoutDispatch["strategy"] = "inline";
+  managerWithoutDispatch["rationale"] = "The orchestrator chose a manager pattern for broad work.";
+  delete managerWithoutDispatch["dispatch_reason"];
+  managerWithoutDispatch["spawned_agents"] = [];
+  writeState(orchestrationManagerWithoutDispatch, managerWithoutDispatchState);
+  runFixture(
+    "manager pattern without dispatch evidence or reason fails",
+    orchestrationManagerWithoutDispatch,
+    "check-parallel-orchestration.ts",
+    1,
+    "orchestration.manager_dispatch_missing",
+  );
+
   const orchestrationAgentGit = makeFixture("orchestration-agent-git");
   const orchestrationAgentGitState = readState(orchestrationAgentGit);
   orchestrationAgentGitState["orchestration"] = {
@@ -224,9 +241,34 @@ export function register(h: Harness): void {
     "design_room.freeform_design_artifact",
   );
 
+  const designRoomSemanticMismatch = makeFixture("design-room-semantic-mismatch");
+  {
+    const renderPath = path.join(designRoomSemanticMismatch, "design/design-room.html");
+    const render = readFileSync(renderPath, "utf8").replaceAll("App Name", "Wrong App");
+    writeFileSync(renderPath, render, "utf8");
+  }
+  runFixture(
+    "Design Room visible values must match state",
+    designRoomSemanticMismatch,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.render_semantic_mismatch",
+  );
+
+  const designRoomPlaceholderReady = makeFixture("design-room-placeholder-ready");
+  {
+    const statePath = path.join(designRoomPlaceholderReady, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+  }
+  runFixture("render placeholder-ready Design Room fixture", designRoomPlaceholderReady, "render-design-room.ts", 0, undefined, ["--static-only"]);
+  runFixture("review-ready Design Room rejects starter text", designRoomPlaceholderReady, "check-design-room-contract.ts", 1, "design_room.render_placeholder");
+
   const controlPlaneMissing = makeFixture("control-plane-missing-panel");
   {
-    const designStatePath = path.join(controlPlaneMissing, "state", "business.json");
+    const designStatePath = path.join(controlPlaneMissing, "studio", "seed", "business.json");
     const designState = JSON.parse(readFileSync(designStatePath, "utf8")) as MutableRecord;
     const controlPlane = expectRecord(designState["controlPlane"], "controlPlane");
     controlPlane["panels"] = [];
@@ -370,7 +412,7 @@ export function register(h: Harness): void {
 
   const tokenPromotionStale = makeFixture("token-promotion-stale");
   {
-    const tokensPath = path.join(tokenPromotionStale, "state", "theme.tokens.json");
+    const tokensPath = path.join(tokenPromotionStale, "studio", "seed", "theme.tokens.json");
     const tokens = JSON.parse(readFileSync(tokensPath, "utf8")) as MutableRecord;
     const tokenRoot = expectRecord(tokens["tokens"], "tokens");
     expectRecord(tokenRoot["color"], "tokens.color")["primary"] = "#123456";

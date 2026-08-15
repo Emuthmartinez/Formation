@@ -13,7 +13,7 @@ Use LaunchBench for failure modes that have happened before or would be expensiv
 - MobAI is unavailable and the agent silently switches to XcodeBuildMCP or the in-app iOS Simulator without recording the lost Android/repeatable-suite/CI/physical-device coverage; neither MobAI Free nor the built-in in-app simulator needs spend approval
 - MobAI desktop, MCP, and CLI versions are collapsed into one number, 2.5-era repeat/host-script safety is omitted, or AI-healed flows are accepted without diff review and a passing rerun
 - RevenueCat products exist but entitlement grant, restore, webhook, or backend projection is unproven
-- Resend templates ignore `design/DESIGN.md`, unsubscribe rules, sender-domain proof, or support reply paths
+- Resend templates ignore `design/design.md`, unsubscribe rules, sender-domain proof, or support reply paths
 - a new API key/env var appears but `SECRETS.md`, Doppler, CI injection, or public/server-only classification is not updated
 - a new third-party docs/tooling URL appears but is not added to `source-registry.yaml`
 - upstream App Store Connect CLI skills or provider docs change but stale command snippets remain in references/templates
@@ -37,7 +37,7 @@ Use LaunchBench for failure modes that have happened before or would be expensiv
 - Higgsfield is unavailable and the agent silently uses Remotion or local media without founder-approved fallback routing
 - Remotion content assets are marked ready without license status, source inputs, manifest entries, render proof, or claim review
 - paid video creatives move to distribution without a Virality Predictor (`brain_activity`) score and a recorded `virality_score`/`hook_dmn_risk` in `PAID_UA.md`
-- a Higgsfield/Marketing Studio manifest asset is generated without a `prompt_brief` carrying the `design/DESIGN.md` tokens, or the Click-to-Ad `--url` shortcut is used without injecting the brief into `--prompt`
+- a Higgsfield/Marketing Studio manifest asset is generated without a `prompt_brief` carrying the `design/design.md` tokens, or the Click-to-Ad `--url` shortcut is used without injecting the brief into `--prompt`
 - a Soul identity is retrained from scratch while `state/PROJECT_STATE.yaml` `tools.higgsfield.identity` already holds a usable `soul_reference_id`/`avatar_id`, without checking `show_characters` first
 - broad launch work starts without an orchestration preflight, critical-path/sidecar split, or `operations/ORCHESTRATION.md`
 - parallel agents are marked safe while sharing files, provider accounts, devices, migrations, git actions, or final readiness decisions

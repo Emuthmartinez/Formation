@@ -149,9 +149,9 @@ These notes exist because agents repeatedly burned live-store cycles guessing fl
 
 ## Promoted In-App Purchase Images
 
-If any in-app purchase or subscription is **promoted** on the App Store (or has a promotional image attached), each promoted product needs its own **unique 1024×1024 promotional image that depicts that specific product**. Reusing the app icon, or the same image across weekly/yearly/lifetime products, triggers a Guideline 2.3.2 "Accurate Metadata" rejection. Generate distinct on-brand images (Higgsfield tied to `design/DESIGN.md`), set each via the ASC IAP/subscription image route (confirm the exact verb with `--help`), or remove the promotional image for products you will not promote. (Failure card: `asc-promoted-iap-image-duplicate`.)
+If any in-app purchase or subscription is **promoted** on the App Store (or has a promotional image attached), each promoted product needs its own **unique 1024×1024 promotional image that depicts that specific product**. Reusing the app icon, or the same image across weekly/yearly/lifetime products, triggers a Guideline 2.3.2 "Accurate Metadata" rejection. Generate distinct on-brand images (Higgsfield tied to `design/design.md`), set each via the ASC IAP/subscription image route (confirm the exact verb with `--help`), or remove the promotional image for products you will not promote. (Failure card: `asc-promoted-iap-image-duplicate`.)
 
-Each unique promotional image should be generated with `higgsfield generate create gpt_image_2` using a design/DESIGN.md brief that names the specific product and its price point. Record every generated asset (prompt brief, output path, approval status) in `CONTENT_ASSETS.md`. See `app-store-listing-prep.md` for the full IAP asset workflow.
+Each unique promotional image should be generated with `higgsfield generate create gpt_image_2` using a design/design.md brief that names the specific product and its price point. Record every generated asset (prompt brief, output path, approval status) in `CONTENT_ASSETS.md`. See `app-store-listing-prep.md` for the full IAP asset workflow.
 
 ## App Store URL → Ad Creative Seeding
 
@@ -161,7 +161,7 @@ A live App Store URL can seed a Higgsfield Marketing Studio webproduct entity, w
 higgsfield marketing-studio webproducts fetch --url <app store url> --wait
 ```
 
-The `--url` Click-to-Ad shortcut bypasses design/DESIGN.md brief injection by default — always pass `--prompt` with explicit design/DESIGN.md tokens, and confirm spend per `paid-tool-routing.md` before generation. See the **App Store URL → UGC Ad Batch (Click-to-Ad)** recipe in `tool-recipes/visual-and-motion-production.md` for the full sequence (webproduct fetch → avatar pick → spend confirm → parallel `marketing_studio_video` modes → virality scoring → CONTENT_ASSETS.md → founder approval). For paid campaign context, see `paid-user-acquisition.md`.
+The `--url` Click-to-Ad shortcut bypasses design/design.md brief injection by default — always pass `--prompt` with explicit design/design.md tokens, and confirm spend per `paid-tool-routing.md` before generation. See the **App Store URL → UGC Ad Batch (Click-to-Ad)** recipe in `tool-recipes/visual-and-motion-production.md` for the full sequence (webproduct fetch → avatar pick → spend confirm → parallel `marketing_studio_video` modes → virality scoring → CONTENT_ASSETS.md → founder approval). For paid campaign context, see `paid-user-acquisition.md`.
 
 ## Post-Action State Update
 

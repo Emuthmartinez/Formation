@@ -18,7 +18,7 @@
  *   - growth/EMAIL_OPS.md references the sender-domain DNS records (SPF and DKIM)
  *     that the proof artifacts attest to
  *   - growth/EMAIL_OPS.md documents unsubscribe handling
- *   - growth/EMAIL_OPS.md maps brand tokens from design/DESIGN.md (the resend
+ *   - growth/EMAIL_OPS.md maps brand tokens from design/design.md (the resend
  *     email-templates.ts LaunchEmailDesignSystem contract)
  *
  * OPTIMIZED (warning always, regardless of lane status):
@@ -179,14 +179,14 @@ if (!emailOpsText) {
     );
   }
 
-  // Brand tokens: production templates pull their design system from design/DESIGN.md
+  // Brand tokens: production templates pull their design system from design/design.md
   // (business/growth/resend/email-templates.ts LaunchEmailDesignSystem contract).
-  if (!emailOpsText.includes("design/DESIGN.md")) {
+  if (!emailOpsText.includes("design/design.md")) {
     issues.push(
       issue(
         presentSeverity(),
         "email.brand_tokens_missing",
-        "growth/EMAIL_OPS.md does not record the design/DESIGN.md brand-token mapping. Email templates must pull colors/typography/radius/spacing from design/DESIGN.md (the email-templates.ts LaunchEmailDesignSystem contract) before production sends.",
+        "growth/EMAIL_OPS.md does not record the design/design.md brand-token mapping. Email templates must pull colors/typography/radius/spacing from design/design.md (the email-templates.ts LaunchEmailDesignSystem contract) before production sends.",
         emailOpsPath,
       ),
     );

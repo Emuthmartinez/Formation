@@ -6,19 +6,24 @@
 
 - Product: `product/SPEC.md`, `11_STAR_EXPERIENCE.md`, `11-star-experience.html`, `EMOTIONAL_DESIGN.md`, `EMOTIONAL_AUDIT.md`, `state/LAUNCH_TRACE.md`, `strategy/RESEARCH.md`
 - State, ownership, access, and external actions: `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `LAUNCHBENCH.md`, `operations/FAILURE_CARDS.md`
-- Design: `strategy/BRAND.md`, `design/DESIGN.md`, `design.md`, `design/design.html`, `SCREENSHOTS.md`, `CONTENT_ASSETS.md`, `content-assets.html`, `growth/DEMO_VIDEO.md`
+- Design: `strategy/BRAND.md`, `design/design.md`, `design/design.html`, `SCREENSHOTS.md`, `CONTENT_ASSETS.md`, `content-assets.html`, `growth/DEMO_VIDEO.md`
 - Onboarding and analytics: `product/ONBOARDING.md`, `product/onboarding.html`, `analytics/ANALYTICS.md`, `analytics/analytics-plan.html`
 - Revenue, email, legal, store, secrets, security: `revenue/REVENUE_OPS.md`, `growth/EMAIL_OPS.md`, `SECRETS.md`, `trust/SECURITY.md`, `trust/security-review.html`, `trust/PRIVACY.md`, `trust/TERMS.md`, `store/APPLE_SIGNING.md`, `store/APPLE_APP_STORE_REQUIREMENTS.md`, `APP_STORE_LISTING.md`, `store/STORE_CONSOLE.md`
 - Engineering: `engineering/TECH_SPEC.md`, `operations/ORCHESTRATION.md`, `engineering/ENGINEERING_PLAN.md`, `engineering/PRODUCTION_READINESS.md`
 
-## Roles
+## Predetermined Specialist Prompts
 
 - `agents/orchestrator.md`: state owner, integration owner, and final readiness gate.
-- `agents/marketing-guru.md`: ASO, GEO/SEO, UGC, Fastlane, social research/profile/content queues, analytics read-back, reviews, launch calendar, claims, and channel learning.
-- `agents/engineering-leader.md`: architecture, implementation, backend/frontend/provider proof, Apple signing/release gates, tests, and readiness.
-- `agents/security-architect.md`: threat model, security tool routing, platform hardening, app integrity, abuse controls, accepted risks, and incident response.
-- `agents/product-leader.md`: ICP, 11-star experience, scope, onboarding, activation, retention, roadmap, and traceability.
-- `agents/design-guru.md`: design system, 11-star visual proof, HTML visual proofs, screenshots, accessibility, icons, motion, Higgsfield fit, and Remotion content assets.
+- `agents/research-strategist.md`: market, customer, competitor, review, social-language, and source-quality evidence.
+- `agents/product-leader.md`: expert product and UX review of the core loop, scope, onboarding, activation, retention, and interaction behavior.
+- `agents/design-guru.md`: expert visual-design review of hierarchy, composition, tokens, components, imagery, motion, and cross-surface coherence.
+- `agents/copy-specialist.md`: product and conversion copy, brand voice, comprehension, customer language, and claim discipline.
+- `agents/marketing-guru.md`: positioning, ASO/GEO, acquisition, lifecycle, conversion, and measurable channel learning.
+- `agents/mobile-engineer.md`: mobile architecture, implementation, performance, platform behavior, and focused mobile tests.
+- `agents/backend-infrastructure-engineer.md`: data, API, auth, jobs, deployment, observability, and provider integration.
+- `agents/accessibility-device-qa.md`: assistive technology, screen and locale stress, device coverage, and real-flow evidence.
+- `agents/security-architect.md`: threat model, privacy and security controls, signing, store requirements, and release evidence.
+- `agents/engineering-leader.md`: cross-stack integration review and engineering-plan coherence.
 - `agents/customer-success.md`: support, FAQ, privacy/delete/refund/restore, lifecycle copy, monitored inbox/comment/review response queues, and feedback triage.
 
 ## Operating Rules
@@ -26,18 +31,33 @@
 - Session Continuity: before role work after a new session, resume, status check, or handoff, the orchestrator reconstructs current state from `AGENTS.md`, `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `operations/ORCHESTRATION.md`, `engineering/PRODUCTION_READINESS.md`, `operations/FAILURE_CARDS.md`, and `git status --short`. Do not rely on chat memory; role prompts inherit this source set.
 - The orchestrator owns `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `operations/ORCHESTRATION.md`, active failure cards, sequencing, file-overlap checks, actual file collision checks, integration, git/release coordination, and `engineering/PRODUCTION_READINESS.md`.
 - Assume beginner founder knowledge. The orchestrator runs the business workflow, surfaces one plain-language founder action, and resumes the agent's next action immediately after the gate clears.
-- Specialists review and propose by default. They implement only when assigned an isolated unit with paths and verification.
-- No role may stage, commit, release, submit app-store builds, publish social posts, spend money, change pricing, or connect accounts without founder approval and orchestrator assignment.
+- Give each specialist only its read-first files and the files required by the current objective. Do not send the full chat transcript or the full repository context by default.
+- Specialists review and propose by default. They implement only when assigned an isolated unit with exact allowed paths and focused verification.
+- Specialists never mutate shared state, stage, commit, push, merge, mutate providers or accounts, publish, spend, submit builds, or release. Only the orchestrator performs those actions, and founder approval is still required for protected actions.
 - No role may print, paste, commit, screenshot, or log raw secret values. New secrets must be routed through `SECRETS.md` and Doppler or the approved provider before work is called complete.
 - Use parallel agents only for independent audits or isolated work with recorded file ownership; serialize shared files, migrations, provider/account mutations, device automation, git, releases, pricing/legal/public posting/submission decisions, and final readiness calls.
+- When independent specialist reviews are ready, dispatch them together. Do not claim the manager pattern unless `spawned_agents` records a dispatch or `dispatch_reason` explains why no dispatch occurred.
 - Run deterministic validators or LaunchBench scenarios where available before declaring launch-ready, and record the outcome in `state/PROJECT_STATE.yaml`.
+
+## Fixed Handoff Schema
+
+Every specialist returns only these headings so the orchestrator can compare and integrate outputs without interpreting a free-form essay:
+
+- Scope reviewed
+- Evidence
+- Findings
+- Recommendations
+- Files changed
+- Validation
+- Risks and blockers
+- Proposed state patch
 
 ## Required Audit Before Launch-Ready
 
 - Product: 11-star V1 scalable slice, scope, onboarding, activation, and retention match evidence.
 - Emotional design: `EMOTIONAL_DESIGN.md` or `EMOTIONAL_AUDIT.md` maps applicable moments to Experience Cards, events, bright-line guardrails, reduced-motion fallbacks, and counter-metrics; `check:emotional-design` passes.
 - Marketing: ASO, store console, Apple pre-ASC requirements, claims, UGC/Fastlane, GEO/SEO, and attribution channels are ready.
-- Design: HTML proofs match `design/DESIGN.md`, no mobile clipping/overlap, `SCREENSHOTS.md` separates raw captures from composed iPhone/iPad/Play assets, and generated/rendered content assets are traceable in `CONTENT_ASSETS.md`.
+- Design: HTML proofs match `design/design.md`, no mobile clipping/overlap, `SCREENSHOTS.md` separates raw captures from composed iPhone/iPad/Play assets, and generated/rendered content assets are traceable in `CONTENT_ASSETS.md`.
 - Engineering: app, backend, revenue, email, analytics, provider, Apple signing/release, and device paths are verified.
 - Secrets: new env vars, webhook secrets, provider keys, CI/deploy secrets, and store credentials are listed in `SECRETS.md` and injected through Doppler or the approved provider.
 - Security: `trust/SECURITY.md`, `trust/security-review.html`, threat model, paid/free security-tool route, platform hardening, app integrity, Apple privacy manifest/purpose-string/ATT checks, revenue/webhook abuse controls, supply-chain checks, Sentry/release health, public reporting route, and accepted risks are current.

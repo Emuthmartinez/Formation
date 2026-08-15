@@ -34,7 +34,7 @@ export const workflows = [
     trigger: "Before App Store/Play metadata, keyword research, ASA, or post-launch ASO loops",
     instructions:
       "Build app-marketing-context (app name, category, target country, top competitors, primary/secondary/long-tail keyword candidates, current listing state, and public support/privacy URLs) before locking a single metadata field, then run keyword and name-collision checks in the target country and separate brand language from search language. Route any localization call through the demand-first priority tiers in LOCALIZATION_MARKET_RESEARCH.md rather than translating on inference, and route Apple Search Ads storefront targeting from the same tiers. Draft final metadata fields plus rejected alternatives with rationale into STORE_OPS.md, and run every metadata/keyword string through the no-slop-writing.md self-check before calling it locked. For the recurring post-launch loop, track keyword rank deltas, ASA search-term mining, and localization opportunities weekly rather than treating ASO as a one-time pass.",
-    reads: ["design/DESIGN.md", "state/PROJECT_STATE.yaml"],
+    reads: ["design/design.md", "state/PROJECT_STATE.yaml"],
     referenceIds: [
       "reference.store.aso-store-ops",
       "reference.growth.paid-user-acquisition",
@@ -58,7 +58,13 @@ export const workflows = [
     trigger: "Before listing fields, privacy questionnaire, IAP/subscription field maps, CPPs, in-app events",
     instructions:
       "Build APP_STORE_LISTING.md as the bridge document: default listing fields, App Privacy answers derived from the actual data inventory and SDK/vendor behavior (never from policy prose alone), and pricing/subscription mapping reconciled against revenue/REVENUE_OPS.md's RevenueCat/Stripe/web-funnel state. Anchor screenshot, App Preview, custom-product-page, and In-App Event concepts to the real V1 scalable slice in 11_STAR_EXPERIENCE.md so the listing never invents a promise the app cannot keep. Run the finished description/keyword/promotional-text copy through the no-slop-writing.md self-check, then confirm `npm run check:store-console -- --root .` passes before calling the packet ready. Founder approval gates any live product creation, price change, or submission — draft the packet, do not publish it.",
-    reads: ["STORE_OPS.md", "revenue/REVENUE_OPS.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md", "state/PROJECT_STATE.yaml"],
+    reads: [
+      "design/design.md",
+      "STORE_OPS.md",
+      "revenue/REVENUE_OPS.md",
+      "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
+      "state/PROJECT_STATE.yaml",
+    ],
     referenceIds: [
       "reference.store.app-store-listing-prep",
       "reference.money.revenue-monetization",
@@ -185,9 +191,9 @@ export const workflows = [
     areaIds: ["area.build-release"],
     trigger: "Store screenshots needed (raw capture → composed iPhone/iPad/Play assets)",
     instructions:
-      "Capture raw app UI first — in-app iOS Simulator (rung 0) for a local Mac, MobAI for Android or a repeatable matrix — and treat those raw captures as proof inputs, never final store creative. Compose final assets from the Asset Knowledge Brief (strategy/RESEARCH.md's user/problem, 11_STAR_EXPERIENCE.md's magical moment, the emotion/card from EMOTIONAL_DESIGN.md, design/DESIGN.md's tokens) with headline, copy overlay, device frame, and export every required iPhone/iPad/Play well — never a generic, knowledge-free hook. Run every composed frame through quality-lens.md's Anti-Generic Checks before calling the deck done, and write the raw-path/composition-path/upload-status table to SCREENSHOTS.md. Pass `npm run check:store-screenshots -- --root .`; a technically correct, on-brand screenshot that still reads as generic fails the done bar.",
+      "Capture raw app UI first — in-app iOS Simulator (rung 0) for a local Mac, MobAI for Android or a repeatable matrix — and treat those raw captures as proof inputs, never final store creative. Compose final assets from the Asset Knowledge Brief (strategy/RESEARCH.md's user/problem, 11_STAR_EXPERIENCE.md's magical moment, the emotion/card from EMOTIONAL_DESIGN.md, design/design.md's tokens) with headline, copy overlay, device frame, and export every required iPhone/iPad/Play well — never a generic, knowledge-free hook. Run every composed frame through quality-lens.md's Anti-Generic Checks before calling the deck done, and write the raw-path/composition-path/upload-status table to SCREENSHOTS.md. Pass `npm run check:store-screenshots -- --root .`; a technically correct, on-brand screenshot that still reads as generic fails the done bar.",
     reads: [
-      "design/DESIGN.md",
+      "design/design.md",
       "store/app-store-listing/APP_STORE_LISTING.md",
       "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
       "strategy/RESEARCH.md",
@@ -245,7 +251,7 @@ export const workflows = [
     trigger: "Before actual app implementation, builder prompts, or production-readiness claims",
     instructions:
       "Route non-trivial implementation through the Compound Engineering loop (ce-brainstorm when product shape is still ambiguous, ce-plan, ce-work, ce-code-review, ce-test, ce-proof); when CE is unavailable, run the five-stage Standalone Engineering Loop instead — plan, bounded slices, adversarial review by someone other than the producer, test, proof — recorded in engineering/ENGINEERING_PLAN.md, never a silent downgrade. Before implementation starts, set the autonomy mode in state/PROJECT_STATE.yaml (scout/draft/prepare/apply/mutate/ship) and decide the parallel-vs-serial split for candidate units, recording collisions and serialized resources in operations/ORCHESTRATION.md. Do not mark production readiness from unit tests alone: require build/typecheck/lint, integration tests against real providers, mobile E2E paired with backend/provider verification, and an on-device taste pass against premium-mobile-craft.md/quality-lens.md, all written to engineering/PRODUCTION_READINESS.md. Pass `npm run check:compound-engineering -- --root .` and `npm run check:orchestration -- --root .` before calling the engineering lane done.",
-    reads: ["engineering/TECH_SPEC.md", "state/LAUNCH_TRACE.md", "design/DESIGN.md", "state/PROJECT_STATE.yaml"],
+    reads: ["engineering/TECH_SPEC.md", "state/LAUNCH_TRACE.md", "design/design.md", "state/PROJECT_STATE.yaml"],
     referenceIds: [
       "reference.engineering.engineering-orchestration",
       "reference.orchestration.compound-engineering-routing",
@@ -277,7 +283,7 @@ export const workflows = [
     // DESIGN.md and PRIVACY.md land after this node's phase-1f architecture firing — consults,
     // so the early data contract is not held on later lanes; the deletion-promise exact-match is
     // re-enforced by change-cascade once trust/PRIVACY.md exists.
-    consults: ["design/DESIGN.md", "trust/PRIVACY.md"],
+    consults: ["design/design.md", "trust/PRIVACY.md"],
     referenceIds: [
       "reference.engineering.backend-data-contract",
       "reference.process.flow-traceability",

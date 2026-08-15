@@ -12,7 +12,7 @@
       "inputs": [
         "screenshots/raw/onboarding.png",
         "11_STAR_EXPERIENCE.md",
-        "design/DESIGN.md",
+        "design/design.md",
         "growth/content-assets/copy/hooks.json"
       ],
       "outputs": [
@@ -38,7 +38,7 @@
       "status": "draft",
       "dimensions": "1080x1920",
       "duration_seconds": 15,
-      "prompt_brief": "design/DESIGN.md palette, typography mood, and banned aesthetics injected into the marketing_studio_video --prompt",
+      "prompt_brief": "design/design.md palette, typography mood, and banned aesthetics injected into the marketing_studio_video --prompt",
       "asset_kind": "ugc",
       "script_id": "ugc/script-bank.md#FMT-001",
       "judge_verdict": "pending — the judge panel must clear the script before generation spend (ugc-creator-engine.md, Script Bank And Judge Panel)",
@@ -49,7 +49,7 @@
       "source_job_id": "",
       "virality_score": "brain_activity: overall pending, peak hook second pending, sustain % pending, Default Mode risk pending",
       "inputs": [
-        "design/DESIGN.md",
+        "design/design.md",
         "state/PROJECT_STATE.yaml tools.higgsfield.identity",
         "growth/content-assets/copy/hooks.json"
       ],

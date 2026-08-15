@@ -32,7 +32,7 @@ Do not move a claim, screen, onboarding question, paywall behavior, pricing stat
 
 ### Lexicon Lock (one vocabulary across every surface)
 
-Pick the canonical product nouns/verbs once (e.g. the core feature name, the unit users act on, the metric names) and use the **same words everywhere**: in-app copy, onboarding, landing page hero/method/FAQ, SEO meta description, JSON-LD/structured data, App Store listing, paywall, and email. Record the locked terms in `design/DESIGN.md` (or `strategy/BRAND.md`) as the single source of truth.
+Pick the canonical product nouns/verbs once (e.g. the core feature name, the unit users act on, the metric names) and use the **same words everywhere**: in-app copy, onboarding, landing page hero/method/FAQ, SEO meta description, JSON-LD/structured data, App Store listing, paywall, and email. Record the locked terms in `design/design.md` (or `strategy/BRAND.md`) as the single source of truth.
 
 When a term changes, grep every surface and update them together — including the landing page's component files, `<meta>` description, and JSON-LD `description`/FAQ blocks, which are easy to miss. A term that means one thing in the app and another on the landing page (or a stale value left in one surface) reads as a different, less-trustworthy product and is a recurring drift bug. Treat "eliminate cross-surface inconsistency" as a sweep across all surfaces, not a single-file edit.
 
@@ -61,7 +61,7 @@ Tool route: paid tool | user export | free fallback | blocked | founder decision
 Research finding: what we learned
 Experience decision: what changes in 11_STAR_EXPERIENCE.md or 11-star-experience.html
 Product decision: what changes in product/SPEC.md or product/ONBOARDING.md
-Brand/design decision: what changes in strategy/BRAND.md, design/DESIGN.md, design.md, PAID_UA.md, VIRAL_GROWTH.md, growth/UGC_PLAYBOOK.md, or HTML proofs
+Brand/design decision: what changes in strategy/BRAND.md, design/design.md, PAID_UA.md, VIRAL_GROWTH.md, growth/UGC_PLAYBOOK.md, or HTML proofs
 Build contract: screen/component/API/data/state/task that must exist
 Analytics/security/revenue/privacy/store impact: event, entitlement, threat/abuse control, data disclosure, screenshot, console field, signing/release gate, or legal note
 Verification: test, MobAI path, backend/provider proof, browser proof, dashboard check, or founder approval
@@ -98,9 +98,9 @@ Pass only when:
 - `11_STAR_EXPERIENCE.md` defines the magical moment, and `11-star-experience.html` visually shows the ladder and line of feasibility
 - core loop, aha moment, onboarding, paywall, support/privacy, settings, and error states have screen implications
 - each public claim has an evidence/proof constraint
-- `design/DESIGN.md`, `design.md`, `design/design.html`, and `product/onboarding.html` cite the trace IDs they express
+- `design/design.md`, `design/design.html`, and `product/onboarding.html` cite the trace IDs they express
 - accessibility and localization constraints are visible before screenshots or implementation prompts
-- `state/launch-cockpit.html` shows the design lane as partial until `design/DESIGN.md`, `design.md`, and HTML proofs exist
+- `state/launch-cockpit.html` shows the design lane as partial until `design/design.md`, and HTML proofs exist
 
 ### Design To Build
 
@@ -158,7 +158,7 @@ Before sending to Rork, Claude, Codex, or another builder:
 - `VIRAL_GROWTH.md` exists when growth depends on referral/share loops, creator CTAs, TikTok/Reels/Shorts mechanics, or viral paywall/onboarding behavior
 - `11_STAR_EXPERIENCE.md` and `11-star-experience.html` exist unless the experience lane is explicitly deferred/not needed with a reason
 - `strategy/TOOL_DECISIONS.md` exists when paid/account-gated tools or fallbacks shaped evidence, screenshots, testing, store ops, or growth
-- `product/SPEC.md`, `strategy/BRAND.md`, `design/DESIGN.md`, `design.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `trust/SECURITY.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `store/APPLE_SIGNING.md`, `APP_STORE_LISTING.md`, and `store/STORE_CONSOLE.md` are internally consistent for in-scope surfaces
+- `product/SPEC.md`, `strategy/BRAND.md`, `design/design.md`, `analytics/ANALYTICS.md`, `product/ONBOARDING.md`, `trust/SECURITY.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `store/APPLE_SIGNING.md`, `APP_STORE_LISTING.md`, and `store/STORE_CONSOLE.md` are internally consistent for in-scope surfaces
 - `engineering/TECH_SPEC.md` exists when data/API/integration/state behavior is non-trivial
 - `engineering/ENGINEERING_PLAN.md` references trace IDs and breaks work into implementation units
 - `AGENTS.md` points builders to trace, design, analytics, technical contracts, and readiness gates

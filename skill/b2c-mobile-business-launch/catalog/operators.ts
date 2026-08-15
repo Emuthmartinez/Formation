@@ -130,7 +130,7 @@ export const operators: readonly CatalogOperator[] = [
     allowedActions: ["mutate design state", "render visual proof", "audit accessibility"],
     founderGatedActions: ["approve final brand", "purchase visual tools", "publish assets"],
     forbiddenActions: agentForbidden,
-    artifactPaths: ["strategy/BRAND.md", "design/DESIGN.md", "design/design.html", "growth/content-assets/CONTENT_ASSETS.md"],
+    artifactPaths: ["strategy/BRAND.md", "design/design.md", "design/design.html", "growth/content-assets/CONTENT_ASSETS.md"],
     promptPath: "workspace/business/engineering/app-agent-roster/agents/design-guru.md",
   },
   {

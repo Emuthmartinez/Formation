@@ -16,7 +16,9 @@ Manager pattern: one orchestrator owns user thread, state, integration, git, pro
 
 Subagent availability:
 
-If broad work is kept inline, record why subagents are unavailable, unsafe, or not useful.
+Dispatch reason when no specialist is started:
+
+If broad work is kept inline, record why specialists are unavailable, unsafe, or not useful. Do not leave both the dispatch record and the reason empty.
 
 ## Session Continuity
 
@@ -89,13 +91,13 @@ Specialists may edit only the file paths assigned in their prompt. Read-only aud
 
 ## Subagent Instructions
 
-All subagents receive:
+All specialists receive a predetermined role prompt from `APP_AGENTS.md` and this bounded assignment:
 
 ```text
 You are not alone in this repo. Do not revert or overwrite work by other agents.
 Allowed write scope: read-only unless a specific path list is assigned.
 Forbidden actions: do not stage files, commit, push, merge, run project-wide suites, mutate providers, change credentials, post publicly, submit builds, or make founder-only decisions.
-Output: docs/files read, findings or changes, files changed if any, validation run or recommended, blockers, and failure cards.
+Return only this handoff: Scope reviewed; Evidence; Findings; Recommendations; Files changed; Validation; Risks and blockers; Proposed state patch.
 ```
 
 ## Integration Plan

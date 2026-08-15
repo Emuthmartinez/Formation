@@ -1,12 +1,12 @@
 id: "resend-template-unbranded"
 title: "Resend templates ignore the design system"
-prompt: "The launch includes Resend transactional templates, but they use generic colors and no design/DESIGN.md tokens, support reply-to, unsubscribe posture, or idempotency key hints."
-expected_guardrail: "Email templates must be branded from design/DESIGN.md and cover sender, reply-to, unsubscribe, support/legal footer, idempotency, and provider proof."
+prompt: "The launch includes Resend transactional templates, but they use generic colors and no design/design.md tokens, support reply-to, unsubscribe posture, or idempotency key hints."
+expected_guardrail: "Email templates must be branded from design/design.md and cover sender, reply-to, unsubscribe, support/legal footer, idempotency, and provider proof."
 validators:
   - "check-secret-routing"
   - "validate-project-state"
 must_catch:
-  - "design/DESIGN.md tokens are not mapped into email templates"
+  - "design/design.md tokens are not mapped into email templates"
   - "unsubscribe/support/legal footer posture is missing"
   - "Resend API key and webhook secret routing must be in SECRETS.md"
 should_say:

@@ -41,7 +41,7 @@ why it has no skill-local script). Excluded from the countable set for the same 
 `check:business-control-plane-workspace` targets `tooling/render-business-control-plane-workspace.ts`,
 not a `validation/` path — it's a renderer, not a validator.
 
-**Two deliberate additions beyond both literal buckets.** `validation/repository/README.md`
+**Three deliberate additions beyond the v1 scope.** `validation/repository/README.md`
 is domain.machine's `indexPath` (`catalog/domains.ts`) and plays the identical routing-table
 role the 14 dropped `knowledge/<domain>/README.md` files play, but it isn't a `.md` under
 `knowledge/` and isn't a validator script — it would fall through both buckets on a literal
@@ -52,6 +52,8 @@ LaunchBench coverage), while `catalog/validate.ts` keeps the real logic and its 
 runnable `tsx catalog/validate.ts` CLI. Neither file is a v1 row being triaged, but both are
 now real files the validator-completeness glob will find — thoroughness over literalism means
 both get a row rather than silently falling outside the ledger's own completeness invariant.
+`validation/business/engineering/check-source-checkpoint.ts` is the third addition. It
+requires a recoverable Git checkpoint before broad build work can claim progress.
 
 Research basis: every `knowledge/<domain>/README.md` load-when table was read in full by
 the implementing session; every file flagged as an orphan (not in any README table),
@@ -74,9 +76,9 @@ are ground truth, not hand arithmetic.
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
 | Knowledge content files | 97 | 0 | 0 | 1 | 98 |
-| Additions beyond literal scope (2) | 1 | 0 | 1 | 0 | 2 |
+| Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
 | Validators (67) | 28 | 25 | 0 | 16 | 69 |
-| **Total** | **127** | **25** | **1** | **32** | **185** |
+| **Total** | **128** | **25** | **1** | **32** | **186** |
 
 ---
 
@@ -342,6 +344,7 @@ split noted).
 | validation/business/engineering/check-compound-engineering-routing.ts | port | HYBRID — doc-phrase requirement is WORD-PATTERN, PROJECT_STATE enum/field validation is structural |
 | validation/business/engineering/check-mobai-proof.ts | port | HYBRID — readiness-doc field checks are WORD-PATTERN, real `.mob` script static analysis (unbounded repeats, embedded secrets) and evidence-path grounding are real; port the `.mob`-analysis half |
 | validation/business/engineering/check-native-ios-proof.ts | port | HYBRID, WORD-PATTERN-heavy — bulk is keyword-presence grading against PRODUCTION_READINESS.md, but the evidence-path-exists-on-disk requirement for test-matrix rows is real; salvage that half |
+| validation/business/engineering/check-source-checkpoint.ts | keep | STRUCTURAL — checks repository identity, first-commit existence, and untracked source before build progress claims |
 | validation/business/engineering/check-technical-docs-ste100.ts | keep | STRUCTURAL — mechanical two-rule subset (sentence length, present-perfect heuristic) of the ASD-STE100 reference, added 2026-08 alongside knowledge/engineering/technical-documentation-ste100.md; error-tier on the one file this change can currently guarantee compliant, warning-tier across the rest of the governed knowledge/**/*.md surface until each file is individually re-audited and promoted |
 | validation/business/engineering/check-template-safety.ts | keep | STRUCTURAL — regex-lints shipped template code for forbidden imports/hardcoded strings, a real static-analysis check on code syntax |
 

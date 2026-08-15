@@ -322,7 +322,7 @@ export const celebrationBeats: { phase: string; earnedBy: string; say: string }[
   },
   {
     phase: "phase_2",
-    earnedBy: "strategy/BRAND.md and design/DESIGN.md are accepted and rendered",
+    earnedBy: "strategy/BRAND.md and design/design.md are accepted and rendered",
     say: "Your app has a name, a look, and screens you can point at. It stopped being an idea today.",
   },
   {
@@ -490,6 +490,9 @@ export const bannedFounderVocabulary: { term: string; sayInstead: string }[] = [
   { term: "protected gate", sayInstead: "something only you can decide" },
   { term: "artifact", sayInstead: "document, or name the file" },
   { term: "provider state", sayInstead: "your connected tools and services" },
+  { term: "reducer", sayInstead: "nothing — describe the business change, not the state-writing mechanism" },
+  { term: "change cascade", sayInstead: "where this change also needs to appear" },
+  { term: "tooling", sayInstead: "tools, or name the result the tools produced" },
   { term: "failure card", sayInstead: "something I am watching" },
   { term: "proof", sayInstead: "how I checked my work" },
   { term: "evidence ledger", sayInstead: "what we learned and where it came from" },

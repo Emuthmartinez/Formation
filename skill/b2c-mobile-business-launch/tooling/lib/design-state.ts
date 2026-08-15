@@ -42,8 +42,8 @@ export const skillRoot = path.resolve(libDir, "../..");
 
 export function parseDesignCliArgs(argv: string[]): DesignCliArgs {
   let root = process.cwd();
-  let statePath = "state/business.json";
-  let tokensPath = "state/theme.tokens.json";
+  let statePath = "studio/seed/business.json";
+  let tokensPath = "studio/seed/theme.tokens.json";
   let schemaPath = path.join(skillRoot, "studio/seed/schema/business.schema.json");
   let emptyStatePath = path.join(skillRoot, "studio/seed/schema/business.empty.json");
   let outputPath: string | undefined;
@@ -222,7 +222,11 @@ function validateCrossSurfaceState(state: unknown, tokens: unknown, filePath: st
   }
 
   const designRoom = isRecord(state.designRoom) ? state.designRoom : {};
+  const contractPath = asString(designRoom.contractPath);
   const renderPath = asString(designRoom.renderPath);
+  if (contractPath !== "design/design.md") {
+    issues.push(issue("error", "design_state.contract_path", "designRoom.contractPath must be design/design.md.", filePath));
+  }
   const latestVersion = asArray(designRoom.versionLog).at(-1);
   if (!isRecord(latestVersion)) {
     issues.push(issue("error", "design_state.version_log_missing", "designRoom.versionLog must include at least one mutation entry.", filePath));

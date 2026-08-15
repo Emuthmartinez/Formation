@@ -273,7 +273,7 @@ Default launch prompt shape:
 
 ```text
 Record a 30s vertical demo of the onboarding flow on iPhone 16 Pro.
-Use the app's design/DESIGN.md for background, captions, bezel treatment, and export copy.
+Use the app's design/design.md for background, captions, bezel treatment, and export copy.
 Save the .mob choreography, raw recording, final mp4, captions, and upload copy.
 ```
 
@@ -307,7 +307,7 @@ Default launch prompt shape:
 
 ```text
 Record a polished 30s product demo of the web onboarding flow.
-Use the app's design/DESIGN.md for background, captions, cursor/ripple styling, and export copy.
+Use the app's design/design.md for background, captions, cursor/ripple styling, and export copy.
 Save screenplay.json, raw recording, final mp4, captions, and upload copy.
 ```
 
@@ -335,7 +335,7 @@ Create `growth/DEMO_VIDEO.md` when demo videos are part of the launch package.
 `growth/DEMO_VIDEO.md` should include:
 - selected recorder skill and repo commit/date checked
 - app flow, target platform/device/window, fixture account, locale/theme, and build
-- design-system source: `design/DESIGN.md`, `design/design.html`, or screenshot frame spec
+- design-system source: `design/design.md`, `design/design.html`, or screenshot frame spec
 - choreography path: `.mob` or `screenplay.json`
 - dry-run outcome
 - raw recording path

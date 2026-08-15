@@ -12,7 +12,7 @@ Owner: design-guru + marketing-guru + orchestrator
 | `11_STAR_EXPERIENCE.md` | magical moment and line of feasibility | blocked |
 | `EMOTIONAL_DESIGN.md` | Emotional North Star and Experience Card for the hook | blocked |
 | `strategy/BRAND.md` | voice, owned words, banned claims | blocked |
-| `design/DESIGN.md` | tokens, type, motion, caption style | blocked |
+| `design/design.md` | tokens, type, motion, caption style | blocked |
 | `SCREENSHOTS.md` | App Preview and screenshot story | blocked |
 | In-app iOS Simulator (Cmd+R) / MobAI / native iOS / device capture | real in-app footage | blocked |
 | `CONTENT_ASSETS.md` + manifest | route, license, output registry | blocked |

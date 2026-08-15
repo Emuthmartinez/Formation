@@ -55,7 +55,7 @@ Also update `state/PROJECT_STATE.yaml` with Apple provider state: docs checked d
 
 Separate flexible names from platform identity:
 
-- `design/DESIGN.md` and lowercase `design.md` are repo-local conventions. Renaming them will not break the mobile binary unless code or tooling references the files, but it will break this skill's routing, app-local agents, validation prompts, and handoff expectations unless every reference is updated.
+- `design/design.md` is the repo-local design contract. A rename breaks routing, validation, and handoff expectations.
 - App display name is more flexible. Apple allows editing before review and later with a new version or when the app version status permits it.
 - `Bundle ID` is platform identity. It must match the Xcode target bundle identifier and cannot be changed in App Store Connect after a build is uploaded.
 - `SKU` is internal App Store Connect tracking identity and cannot be changed after the app is added to the account.

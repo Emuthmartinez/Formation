@@ -37,8 +37,26 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { asString, flagString, getPath, isPastOrientPhase, issue, parseFlags, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
-import { attestedTechniques, bannedFounderVocabulary, coverageGaps, experienceCardUmbrella, milestones } from "../../../tooling/lib/founder-copy.js";
+import {
+  asArray,
+  asString,
+  flagString,
+  getPath,
+  isPastOrientPhase,
+  isRecord,
+  issue,
+  parseFlags,
+  reportAndExit,
+  type Issue,
+} from "../../../tooling/lib/launch-state.js";
+import {
+  attestedTechniques,
+  bannedFounderVocabulary,
+  coverageGaps,
+  experienceCardUmbrella,
+  laneMilestone,
+  milestones,
+} from "../../../tooling/lib/founder-copy.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "../../..");
@@ -162,7 +180,19 @@ if (existsSync(statePath)) {
   try {
     const state: unknown = parseYaml(readFileSync(statePath, "utf8"));
     const phase = asString(getPath(state, "project.phase")) ?? "";
+    const projectName = (asString(getPath(state, "project.name")) ?? "").trim();
     if (isPastOrientPhase(phase)) {
+      if (/^(app name|untitled app|your app|project name|tbd|todo)$/i.test(projectName)) {
+        issues.push(
+          issue(
+            "error",
+            "founder_copy.template_project_name",
+            `project.name still contains template text (${projectName || "blank"}) after setup. Record the working name before presenting the cockpit as current.`,
+            "state/PROJECT_STATE.yaml",
+          ),
+        );
+      }
+
       for (const field of ["since_last_time", "right_now", "your_call"] as const) {
         const value = (asString(getPath(state, `narrative.${field}`)) ?? "").trim();
         if (value.length === 0 || /^(todo|tbd|n\/a|placeholder|\.\.\.)$/i.test(value)) {
@@ -173,6 +203,117 @@ if (existsSync(statePath)) {
               `narrative.${field} is empty or placeholder text while the project is past orient (${phase}). ` +
                 `The narrated update is the founder's first read on the cockpit — write what actually happened, in plain language.`,
               "state/PROJECT_STATE.yaml",
+            ),
+          );
+        }
+      }
+
+      const narrativeValues = ["since_last_time", "right_now", "your_call"]
+        .map((field) => ({ field, value: (asString(getPath(state, `narrative.${field}`)) ?? "").trim() }))
+        .filter((entry) => entry.value.length >= 20);
+      for (let left = 0; left < narrativeValues.length; left += 1) {
+        for (let right = left + 1; right < narrativeValues.length; right += 1) {
+          if (normalizeSentence(narrativeValues[left]!.value) !== normalizeSentence(narrativeValues[right]!.value)) continue;
+          issues.push(
+            issue(
+              "error",
+              "founder_copy.repeated_update",
+              `narrative.${narrativeValues[left]!.field} and narrative.${narrativeValues[right]!.field} repeat the same update. Use one concrete sentence for what changed, one for what happens next, and one current founder action.`,
+              "state/PROJECT_STATE.yaml",
+            ),
+          );
+        }
+      }
+    }
+
+    const tools = isRecord(getPath(state, "tools")) ? (getPath(state, "tools") as Record<string, unknown>) : {};
+    const serviceCounts = { connected: 0, waiting: 0, planned: 0 };
+    for (const [name, value] of Object.entries(tools)) {
+      const record = isRecord(value) ? value : {};
+      const explicitStatus = (asString(record.connection_status) ?? asString(record.status) ?? "").toLowerCase();
+      const route = (asString(record.route) ?? "").toLowerCase();
+      const connected = ["active", "connected", "done", "ready", "verified"].includes(explicitStatus);
+      const waiting = ["blocked", "access_pending", "founder_action_needed"].includes(explicitStatus) || route.includes("blocked");
+      if (connected && waiting) {
+        issues.push(
+          issue(
+            "error",
+            "founder_copy.connected_tool_contradiction",
+            `${name} is recorded as connected but its route is still blocked. Reconcile the service state before rendering the cockpit.`,
+            "state/PROJECT_STATE.yaml",
+          ),
+        );
+      }
+      if (connected) serviceCounts.connected += 1;
+      else if (waiting) serviceCounts.waiting += 1;
+      else serviceCounts.planned += 1;
+    }
+
+    for (const [index, command] of asArray(getPath(state, "proof.commands")).entries()) {
+      const record = isRecord(command) ? command : {};
+      const evidence = (asString(record.evidence) ?? "").trim();
+      const actual = (asString(record.actual) ?? "").trim();
+      if (evidence.length > 0 && actual.length === 0) {
+        issues.push(
+          issue(
+            "error",
+            "founder_copy.proof_result_missing",
+            `proof.commands.${index} has saved evidence but no recorded result. State what the check found instead of showing “Not checked yet.”`,
+            "state/PROJECT_STATE.yaml",
+          ),
+        );
+      }
+    }
+
+    const cockpitPath = path.join(root, "state/launch-cockpit.html");
+    if (existsSync(cockpitPath)) {
+      const cockpit = readFileSync(cockpitPath, "utf8");
+      const visible = founderVisibleHtmlText(cockpit);
+      if (projectName && !cockpit.includes(`<h1>${escapeRegExpFreeHtml(projectName)}</h1>`)) {
+        issues.push(
+          issue(
+            "error",
+            "founder_copy.cockpit_project_stale",
+            "state/launch-cockpit.html does not show the current project name. Render it again from state/PROJECT_STATE.yaml.",
+            "state/launch-cockpit.html",
+          ),
+        );
+      }
+      if (isPastOrientPhase(phase) && /\b(?:empty .* template|one-sentence promise still to be defined|app name)\b/i.test(visible)) {
+        issues.push(
+          issue(
+            "error",
+            "founder_copy.cockpit_template_text",
+            "state/launch-cockpit.html still shows setup template text after setup. Replace the placeholder source and render the cockpit again.",
+            "state/launch-cockpit.html",
+          ),
+        );
+      }
+      const expectedServiceCounts = `data-connected="${serviceCounts.connected}" data-waiting="${serviceCounts.waiting}" data-planned="${serviceCounts.planned}"`;
+      if (cockpit.includes("data-connected=") && !cockpit.includes(expectedServiceCounts)) {
+        issues.push(
+          issue(
+            "error",
+            "founder_copy.cockpit_service_status_stale",
+            "The connected-service summary does not match state/PROJECT_STATE.yaml. Render the cockpit again before showing it to the founder.",
+            "state/launch-cockpit.html",
+          ),
+        );
+      }
+      const lanes = isRecord(getPath(state, "lanes")) ? (getPath(state, "lanes") as Record<string, unknown>) : {};
+      for (const milestone of milestones) {
+        const members = Object.entries(lanes).filter(([id]) => laneMilestone(id) === milestone.id);
+        const counted = members.filter(([, value]) => !isRecord(value) || asString(value.status) !== "not_needed");
+        if (counted.length === 0) continue;
+        const done = counted.filter(([, value]) => isRecord(value) && asString(value.status) === "done").length;
+        const marker = `data-milestone="${milestone.id}" data-progress="${done}/${counted.length}"`;
+        if (cockpit.includes(`data-milestone="${milestone.id}"`) && !cockpit.includes(marker)) {
+          issues.push(
+            issue(
+              "error",
+              "founder_copy.cockpit_progress_stale",
+              `The ${milestone.label.toLowerCase()} progress summary contradicts state/PROJECT_STATE.yaml. Render the cockpit again.`,
+              "state/launch-cockpit.html",
             ),
           );
         }
@@ -298,6 +439,18 @@ for (const surface of founderSurfaces) {
 }
 
 reportAndExit("Founder copy", issues);
+
+function normalizeSentence(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** Match renderer output without turning this validator into a second HTML renderer. */
+function escapeRegExpFreeHtml(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
 
 // ---------------------------------------------------------------------------
 // Text extraction

@@ -11,7 +11,7 @@ This packet records generated, rendered, edited, and source-backed launch media.
 
 ## Remotion Route
 
-- Use Remotion when assets should be reproducible from screenshots, recordings, `design/DESIGN.md` tokens, copy, captions, data, and local media.
+- Use Remotion when assets should be reproducible from screenshots, recordings, `design/design.md` tokens, copy, captions, data, and local media.
 - Load `knowledge/design/remotion-content-assets.md` and the `remotion-best-practices` skill before writing Remotion code.
 - Record current Remotion docs checked date, CLI version or package version, and license decision before commercial output.
 - Do not add Remotion dependencies to the skill package; scaffold a launch-local `growth/content-assets/remotion/` project only when needed.
@@ -30,7 +30,7 @@ This packet records generated, rendered, edited, and source-backed launch media.
 | --- | --- | --- | --- | --- |
 | `screenshots/raw/onboarding.png` | in-app iOS Simulator (Cmd+S / Cmd+R, exported from the Desktop), MobAI, Codex Desktop native iOS/XcodeBuildMCP, serve-sim, simulator/device, SnapshotPreviews preview-only proof, or founder-owned capture | Must be verified before production | App preview and social demo | Real app UI must remain visible; preview-only proof does not replace runtime E2E; agent-driven simulator captures require a fixture account and must contain no real user data |
 | `11_STAR_EXPERIENCE.md` | Product experience contract | Required | Store, ads, UGC, demo clips | Use the V1 scalable slice and stay inside the line of feasibility |
-| `design/DESIGN.md` | Project design system | Required | All rendered assets | Tokens, type, voice, motion, banned aesthetics |
+| `design/design.md` | Project design system | Required | All rendered assets | Tokens, type, voice, motion, banned aesthetics |
 | `copy/hooks.json` | Founder-approved or research-backed copy | Draft | Social and ad variants | Claims must match listing, revenue, privacy, and legal docs |
 
 ## Composition Manifest
@@ -52,7 +52,7 @@ Required fields per asset:
 - `license_status`
 
 Optional fields for Higgsfield / Marketing Studio assets:
-- `prompt_brief` — the `design/DESIGN.md` tokens carried into the generation prompt
+- `prompt_brief` — the `design/design.md` tokens carried into the generation prompt
 - `asset_kind` — REQUIRED for every generated video (Seedance, Marketing Studio, Cinema Studio, Veo routes): one of `ugc`, `product_ad`, `b_roll`, `demo`, `app_preview`. `ugc` activates the gates below; a believable-person clip must not hide behind a provider route name.
 - `script_id` — REQUIRED for UGC-family assets (`asset_kind: ugc`, or `ugc`/`ugc_how_to`/`ugc_unboxing`/`product_review` modes, or Recipe 7): `<script-bank path>#<format-id>`, e.g. `ugc/script-bank.md#FMT-001`. The path must be a `script-bank.md` file inside this workspace (no traversal, no symlink escapes) and the id must match a row's Format ID cell. Once the asset reaches a done-tier status OR generation evidence exists (an output file on disk, a remote output URL, or a `source_job_id`), the row must hold real (non-placeholder) script text and a passing row verdict.
 - `judge_verdict` — REQUIRED for UGC-family assets. The value must START with `passed` or `survived` (`passed — <detail>` form) at a done-tier status or once generation evidence exists — the panel runs before generation spend. The prefix is parsed, so a negated pass does not count. `failed`/`rejected` blocks the asset at any status.

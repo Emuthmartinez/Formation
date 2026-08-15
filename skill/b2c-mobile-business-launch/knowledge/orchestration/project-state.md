@@ -50,7 +50,7 @@ lanes:
   design:
     status: "done"
     evidence:
-      - "design/DESIGN.md"
+      - "design/design.md"
     # Dated, substantive reason. Downgrades the edge error to a standing warning
     # and is itself checked for staleness. An undated or trivial override buys
     # nothing — the edge error stands until the reason carries an ISO date and
@@ -87,6 +87,14 @@ Update `state/PROJECT_STATE.yaml`:
 - after validation or LaunchBench runs
 - after any Design Room mutation that changes launch surfaces, App Store creative, onboarding, paywalls, landing pages, or marketing assets
 - before final handoff or commit
+
+Create the Git repository and the first source checkpoint before broad build work starts. The checkpoint must include the source that the build uses. Run `check:source-checkpoint` before you report engineering progress. The check gives a warning during setup. The check gives an error after build work starts in these conditions:
+
+- The project is not the repository root.
+- The repository contains no commit.
+- The repository contains untracked source files.
+
+Build output and an engine audit log do not replace a source checkpoint.
 
 If `engineering/PRODUCTION_READINESS.md` evidence is produced during an audit session, write it to the file in that session — do not defer the write. Verbal or in-chat readiness notes that are not written to `engineering/PRODUCTION_READINESS.md` are not counted as evidence by validators. (Failure card: `project-state-stale-after-upload`.)
 
@@ -125,6 +133,7 @@ npm run check:store-console -- --root /path/to/app
 npm run check:store-screenshots -- --root /path/to/app
 npm run check:agent-operations -- --root /path/to/app
 npm run check:founder-operator -- --root /path/to/app
+npm run check:source-checkpoint -- --root /path/to/app
 npm run render:launch-cockpit -- --root /path/to/app
 ```
 
@@ -145,6 +154,24 @@ Render `state/launch-cockpit.html` whenever state changes materially. It should 
 - latest proof commands and blocked next actions
 
 The cockpit is not a replacement for canonical docs. It is a dashboard over them.
+
+The first section is a short milestone digest. It contains only:
+
+- the concrete result since the prior update
+- the work that happens next
+- one current founder action, when the work needs one
+
+Do not repeat the founder action in several summary sections. Put its choices and consequences in the decision section. Do not show the complete service inventory or secret-name list on the main page. Show counts for services that are ready, waiting for access, or planned. Keep exact routes and service setup detail in the closed technical section.
+
+The cockpit must agree with its source state. `check:founder-copy` detects these errors:
+
+- a stale project name or template text after setup
+- service or progress counts that do not agree with the state
+- a connected service that is also blocked
+- saved check evidence without a result
+- repeated or empty update sentences
+
+Correct the source state. Then, render the cockpit again.
 
 Rendering the file is necessary but not sufficient. The founder does not sit refreshing an HTML file in a git repo — in autopilot runs, subagent dispatches, and long workflow sessions nobody may be watching anything when the render lands. Whenever the cockpit is (re)rendered or a launch session ends, say the narrative in the reply itself: what changed since last time, what is happening now, and what needs the founder (the same three beats the cockpit's `narrative` block carries). A milestone the founder was never told about did not land as a milestone.
 

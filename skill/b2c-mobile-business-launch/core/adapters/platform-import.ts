@@ -153,7 +153,7 @@ export interface ImportBoundaryReport {
 }
 
 const STATE_FILE = path.join("state", "PROJECT_STATE.yaml");
-const BUSINESS_FILE = path.join("state", "business.json");
+const BUSINESS_FILES = [path.join("studio", "seed", "business.json"), path.join("state", "business.json")] as const;
 const TRACE_FILE = path.join("state", "LAUNCH_TRACE.md");
 
 /**
@@ -440,7 +440,8 @@ export function describeLaunchRepository(root: string, options: { now?: string }
     return notReady("This launch workspace is still the untouched template — there is no business in it yet to bring across.", now);
   }
 
-  const businessSource = readWorkspaceFile(root, BUSINESS_FILE);
+  const businessFile = BUSINESS_FILES.find((candidate) => existsSync(path.join(root, candidate))) ?? BUSINESS_FILES[0];
+  const businessSource = readWorkspaceFile(root, businessFile);
   let business: unknown;
   try {
     business = businessSource ? JSON.parse(businessSource) : undefined;
@@ -464,7 +465,7 @@ export function describeLaunchRepository(root: string, options: { now?: string }
   collectVerdictDecisions(laneEntries, decisions);
   collectTraceRecords(traceSource, decisions, tasks);
   collectOperatingRecords(state, tasks, claims);
-  collectPlaceholderContradictions(state, businessBlock, contradictions);
+  collectPlaceholderContradictions(state, businessBlock, businessFile, contradictions);
   collectReconciliationContradictions(state, laneEntries, contradictions);
 
   return {
@@ -772,6 +773,7 @@ function collectOperatingRecords(state: Record<string, unknown>, tasks: ImportTa
 function collectPlaceholderContradictions(
   state: Record<string, unknown>,
   businessBlock: Record<string, unknown>,
+  businessFile: string,
   contradictions: ImportContradiction[],
 ): void {
   const project = isRecord(state.project) ? state.project : {};
@@ -792,7 +794,7 @@ function collectPlaceholderContradictions(
       code: "placeholder_value",
       severity: "advisory",
       message: `The business's ${field === "positioning" ? "promise" : "primary customer"} is still the template's placeholder text, so it was never answered.`,
-      origin: { sourcePath: BUSINESS_FILE },
+      origin: { sourcePath: businessFile },
     });
   }
 }

@@ -76,7 +76,7 @@ Create `analytics/analytics-plan.html` or an analytics section in `design/design
 - show an attribution matrix with UTM/source/deep-link/self-report examples
 - show dashboard wireframes or screenshot placeholders
 - mark founder-only decisions and blocked credentials
-- use `design/DESIGN.md` tokens when available; otherwise label it as provisional
+- use `design/design.md` tokens when available; otherwise label it as provisional
 
 Render or refresh `state/launch-cockpit.html` after analytics status changes so the founder can see what is planned, what is wired, and what is still unverified.
 

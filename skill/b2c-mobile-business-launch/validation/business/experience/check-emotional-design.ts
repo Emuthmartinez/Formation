@@ -600,7 +600,7 @@ if (design) {
     }
   }
 
-  for (const ref of ["11_STAR_EXPERIENCE.md", "analytics/ANALYTICS.md", "design/DESIGN.md", "product/ONBOARDING.md"]) {
+  for (const ref of ["11_STAR_EXPERIENCE.md", "analytics/ANALYTICS.md", "design/design.md", "product/ONBOARDING.md"]) {
     if (!design.text.includes(ref)) {
       issues.push(
         issue(

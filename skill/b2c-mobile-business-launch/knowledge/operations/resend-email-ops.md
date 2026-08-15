@@ -151,7 +151,7 @@ Choose one template strategy:
 Every template needs:
 - before drafting subject, preview text, or body copy: load `knowledge/words/no-slop-writing.md` — its §7 covers push/lifecycle email subject-line limits specifically; keep the tone `11_STAR_EXPERIENCE.md`/`strategy/BRAND.md` set for this product, not generic transactional-email English
 - subject, preview text where supported, HTML, plain text, sender, reply-to, purpose, owner
-- brand fields and required email-safe design tokens derived from `design/DESIGN.md`: logo, app name, accent color, text colors, surface/border colors, typography, radius, spacing, max width, logo height, and footer rules
+- brand fields and required email-safe design tokens derived from `design/design.md`: logo, app name, accent color, text colors, surface/border colors, typography, radius, spacing, max width, logo height, and footer rules
 - experience tone derived from `11_STAR_EXPERIENCE.md`, especially lifecycle copy that should feel like the product remembered the user's goal
 - mobile-safe layout and accessible links/buttons
 - unsubscribe/preference link for non-transactional messages
@@ -197,7 +197,7 @@ Win-back, trial-reminder, and billing-recovery emails can carry Higgsfield-gener
 Generate both via the `higgsfield-product-photoshoot` skill. See the **Seasonal restyle Refresh** and **Cheap-First Direction** recipes in `tool-recipes/visual-and-motion-production.md` for the generation workflow; use `--mode hero_banner` or `--mode lifestyle_scene` in the `higgsfield product-photoshoot create` call.
 
 Rules:
-- Every prompt must carry design/DESIGN.md brand tokens (palette, type mood, shapes, texture, banned aesthetics). design/DESIGN.md tokens are already pulled for email `LaunchEmailBrand.designSystem`; reuse the same token set.
+- Every prompt must carry design/design.md brand tokens (palette, type mood, shapes, texture, banned aesthetics). design/design.md tokens are already pulled for email `LaunchEmailBrand.designSystem`; reuse the same token set.
 - Generated images are supporting art only. They must not substitute for truthful real UI or make product claims.
 - Confirm spend with the founder before each photoshoot run per `paid-tool-routing.md`; surface current credit balance.
 - Record every generated asset in `CONTENT_ASSETS.md` with `prompt_brief`, output path, intended email surface (`hero_banner` / `lifestyle_scene`), and approval gate.
@@ -275,7 +275,7 @@ Before public traffic:
 
 ## Starter Template Pack
 
-Use `business/growth/resend/email-templates.ts` as the out-of-the-box pack for B2C app launches. Copy it into the product repo when Resend is selected, then adapt brand copy, links, legal footer, support SLAs, `LaunchEmailBrand.designSystem` from the project's canonical `design/DESIGN.md`, and lifecycle tone from `11_STAR_EXPERIENCE.md`.
+Use `business/growth/resend/email-templates.ts` as the out-of-the-box pack for B2C app launches. Copy it into the product repo when Resend is selected, then adapt brand copy, links, legal footer, support SLAs, `LaunchEmailBrand.designSystem` from the project's canonical `design/design.md`, and lifecycle tone from `11_STAR_EXPERIENCE.md`.
 
 Included templates:
 - `waitlistConfirmationEmail` - confirms waitlist signup and optional referral link.
@@ -288,7 +288,7 @@ Included templates:
 - `accountDeletionConfirmedEmail` - confirms privacy/account deletion completion.
 
 Rules:
-- Do not ship generic-looking email. `LaunchEmailBrand.designSystem` is required and must be populated from the business design system before production sends. Set `designSystem.source` to `design/DESIGN.md` or the project-specific design artifact used, and fill every required token group: `colors`, `typography`, `radius`, `spacing`, and `email`.
+- Do not ship generic-looking email. `LaunchEmailBrand.designSystem` is required and must be populated from the business design system before production sends. Set `designSystem.source` to `design/design.md` or the project-specific design artifact used, and fill every required token group: `colors`, `typography`, `radius`, `spacing`, and `email`.
 - Use email-safe interpretations of design tokens: hex colors, web-safe or hosted font stacks, conservative radii, fixed max width, accessible contrast, and inline styles.
 - Treat the pack as starter implementation, not legal copy. Match `trust/PRIVACY.md`, `trust/TERMS.md`, subscription disclosures, and app-store billing rules before production.
 - For `entitlementGrantedEmail`, verify the RevenueCat grant in dashboard/API proof first. Do not imply that a granted entitlement changes billing, cancels a subscription, creates a paid subscription, or issues a refund.

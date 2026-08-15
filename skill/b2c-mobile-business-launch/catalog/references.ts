@@ -52,7 +52,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.design",
     title: "Design Visual System",
     loadWhen:
-      "creating or changing design/DESIGN.md, lowercase design.md, visual systems, UI mockups, generated visual concepts, Higgsfield-backed visuals/motion/icons/mascots, mobile screen specs, App Store creative, screenshot frames, design audits, or HTML visual artifacts",
+      "creating or changing the canonical design/design.md contract, visual systems, UI mockups, generated visual concepts, Higgsfield-backed visuals/motion/icons/mascots, mobile screen specs, App Store creative, screenshot frames, design audits, or HTML visual artifacts",
   },
   {
     id: "reference.design.landing-motion-craft",
@@ -176,7 +176,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.experience",
     title: "Eleven-Star Experience",
     loadWhen:
-      'before product/SPEC.md, design/DESIGN.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on "11-star run"/"11-star pass" — follow the reference\'s 11-Star Run Protocol before any other output',
+      'before product/SPEC.md, design/design.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on "11-star run"/"11-star pass" — follow the reference\'s 11-Star Run Protocol before any other output',
   },
   {
     id: "reference.experience.emotional-design-system",
@@ -713,7 +713,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.product",
     title: "Product Moat",
     loadWhen:
-      'before product/SPEC.md, design/DESIGN.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on "11-star run"/"11-star pass" — follow the 11-Star Run Protocol before any other output',
+      'before product/SPEC.md, design/design.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on "11-star run"/"11-star pass" — follow the 11-Star Run Protocol before any other output',
   },
   {
     id: "reference.product.social-network",
