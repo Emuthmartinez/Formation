@@ -1,4 +1,10 @@
+import { createHash } from "node:crypto";
+import { spawn, spawnSync } from "node:child_process";
+import { existsSync, lstatSync, readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
 import type { CompiledRunNode } from "../engine/compile.js";
+import { composeNodeBrief } from "../engine/node-brief.js";
+import { buildWorkerPrompt, validateKnowledgeReceipt } from "./worker-prompt.js";
 
 /**
  * The seam real runtime execution (U6) plugs into. A session (U5) never knows HOW a node's work
@@ -29,6 +35,8 @@ export interface NodeExecutionContext {
   readonly attemptId: string;
   readonly workspaceDir: string;
   readonly now: string;
+  readonly skillRootDir: string;
+  readonly artifactPaths: Readonly<Record<string, string>>;
   /**
    * Refreshes this attempt's own heartbeat (and the session lock's) mid-execution. The fixture/
    * no-op executors resolve instantly and never need it, but a real executor (U6) awaiting a
@@ -37,6 +45,154 @@ export interface NodeExecutionContext {
    * treats still-in-progress work as a dead attempt.
    */
   readonly heartbeat: () => void;
+}
+
+export type WorkerRuntime = "auto" | "claude" | "codex" | "cursor";
+
+export interface WorkerCommand {
+  readonly runtime: Exclude<WorkerRuntime, "auto">;
+  readonly command: string;
+  readonly args: readonly string[];
+  readonly prompt: string;
+}
+
+const runtimeCommands: Record<Exclude<WorkerRuntime, "auto">, string> = { claude: "claude", codex: "codex", cursor: "cursor-agent" };
+
+function available(command: string): boolean {
+  const result = spawnSync(command, ["--version"], { stdio: "ignore" });
+  return result.status === 0;
+}
+
+export function resolveWorkerRuntime(requested: WorkerRuntime): Exclude<WorkerRuntime, "auto"> | undefined {
+  if (requested !== "auto") return available(runtimeCommands[requested]) ? requested : undefined;
+  return (["codex", "claude", "cursor"] as const).find((runtime) => available(runtimeCommands[runtime]));
+}
+
+function workerRuntimeCandidates(requested: WorkerRuntime): Array<Exclude<WorkerRuntime, "auto">> {
+  if (requested !== "auto") return available(runtimeCommands[requested]) ? [requested] : [];
+  return (["codex", "claude", "cursor"] as const).filter((runtime) => available(runtimeCommands[runtime]));
+}
+
+export function buildWorkerCommand(runtime: Exclude<WorkerRuntime, "auto">, prompt: string): WorkerCommand {
+  if (runtime === "codex") return { runtime, command: "codex", args: ["exec", "--sandbox", "workspace-write", "--json", prompt], prompt };
+  if (runtime === "claude") return { runtime, command: "claude", args: ["-p", "--bare", "--output-format", "json", "--max-turns", "30", prompt], prompt };
+  return { runtime, command: "cursor-agent", args: ["agent", "-p", prompt, "--sandbox", "enabled"], prompt };
+}
+
+function fingerprintPath(target: string): string {
+  const hash = createHash("sha256");
+  const visit = (current: string, relative: string): void => {
+    const stat = lstatSync(current);
+    hash.update(`${relative}\0${stat.mode}\0${stat.size}\0`);
+    if (stat.isDirectory()) {
+      for (const name of readdirSync(current).sort()) visit(path.join(current, name), path.posix.join(relative, name));
+    } else if (stat.isFile()) {
+      hash.update(readFileSync(current));
+    }
+  };
+  visit(target, ".");
+  return hash.digest("hex");
+}
+
+async function runWorker(
+  command: WorkerCommand,
+  cwd: string,
+  timeoutMs: number,
+): Promise<{ status: number | null; stdout: string; stderr: string; timedOut: boolean }> {
+  return await new Promise((resolve) => {
+    const child = spawn(command.command, [...command.args], { cwd, env: process.env, stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "";
+    let stderr = "";
+    const cap = (value: string, chunk: Buffer): string => `${value}${chunk.toString("utf8")}`.slice(-2_000_000);
+    child.stdout.on("data", (chunk: Buffer) => (stdout = cap(stdout, chunk)));
+    child.stderr.on("data", (chunk: Buffer) => (stderr = cap(stderr, chunk)));
+    let timedOut = false;
+    const timer = setTimeout(
+      () => {
+        timedOut = true;
+        child.kill("SIGTERM");
+        setTimeout(() => child.kill("SIGKILL"), 2_000).unref();
+      },
+      Math.max(1_000, timeoutMs),
+    );
+    timer.unref();
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      resolve({ status: null, stdout, stderr: `${stderr}\n${error.message}`, timedOut });
+    });
+    child.on("close", (status) => {
+      clearTimeout(timer);
+      resolve({ status, stdout, stderr, timedOut });
+    });
+  });
+}
+
+/** Real bounded worker executor used by scheduled sessions. */
+export function createCliExecutor(requestedRuntime: WorkerRuntime = "auto"): NodeExecutor {
+  return {
+    async execute(node, context): Promise<NodeExecutionResult> {
+      const runtimes = workerRuntimeCandidates(requestedRuntime);
+      if (runtimes.length === 0)
+        return { status: "failed", outputs: [], evidence: [], error: `no worker CLI is installed for requested runtime ${requestedRuntime}` };
+      const artifactBindings = Object.entries(context.artifactPaths).map(([artifactId, artifactPath]) => ({ artifactId, path: artifactPath, accepted: false }));
+      const brief = composeNodeBrief(node, {
+        planId: context.runId,
+        planRevision: 0,
+        catalogVersion: "runtime",
+        compiledAt: context.now,
+        nodes: [node],
+        artifactBindings,
+      });
+      for (const contractPath of brief.contractFiles) {
+        if (!existsSync(path.join(context.workspaceDir, contractPath)))
+          return { status: "failed", outputs: [], evidence: [], error: `worker contract file is missing: ${contractPath}` };
+      }
+      for (const reference of brief.load) {
+        if (!existsSync(path.join(context.skillRootDir, reference.path)))
+          return { status: "failed", outputs: [], evidence: [], error: `mandatory worker knowledge is missing: ${reference.path}` };
+      }
+      const prompt = buildWorkerPrompt(brief, context.workspaceDir, context.skillRootDir);
+      let runtime = runtimes[0]!;
+      let result: Awaited<ReturnType<typeof runWorker>> | undefined;
+      const authFailures: string[] = [];
+      for (const candidate of runtimes) {
+        runtime = candidate;
+        result = await runWorker(buildWorkerCommand(candidate, prompt), context.workspaceDir, node.ttlSeconds * 1000);
+        const failureText = `${result.stdout}\n${result.stderr}`;
+        if (result.status === 0 || requestedRuntime !== "auto" || !/(auth|log[ -]?in|api[_ -]?key|unauthori[sz]ed|credential)/i.test(failureText)) break;
+        authFailures.push(`${candidate}: authentication unavailable`);
+      }
+      if (!result) return { status: "failed", outputs: [], evidence: [], error: "worker runtime selection produced no invocation" };
+      if (result.timedOut) return { status: "failed", outputs: [], evidence: [], error: `${runtime} worker exceeded ${node.ttlSeconds}s TTL` };
+      if (result.status !== 0) {
+        const tried = authFailures.length > 0 ? `; fallbacks tried: ${authFailures.join(", ")}` : "";
+        return {
+          status: "failed",
+          outputs: [],
+          evidence: [],
+          error: `${runtime} worker exited ${String(result.status)}: ${result.stderr.trim().slice(-800)}${tried}`,
+        };
+      }
+      const receiptIssues = validateKnowledgeReceipt(`${result.stdout}\n${result.stderr}`, brief);
+      if (receiptIssues.length > 0)
+        return { status: "failed", outputs: [], evidence: [], error: `worker knowledge receipt rejected: ${receiptIssues.join("; ")}` };
+      const outputs: NodeExecutionOutput[] = [];
+      for (const artifactId of node.outputs) {
+        const relativePath = context.artifactPaths[artifactId];
+        if (!relativePath) return { status: "failed", outputs: [], evidence: [], error: `no path binding for declared output ${artifactId}` };
+        const absolutePath = path.join(context.workspaceDir, relativePath);
+        if (!existsSync(absolutePath))
+          return { status: "failed", outputs: [], evidence: [], error: `worker exited successfully but declared output is missing: ${relativePath}` };
+        outputs.push({
+          artifactId,
+          path: relativePath,
+          fingerprint: fingerprintPath(absolutePath),
+          evidence: [`${runtime} worker produced ${relativePath}`, `knowledge receipt accepted for ${node.workflowId}`],
+        });
+      }
+      return { status: "succeeded", outputs, evidence: [`${runtime} worker completed ${node.workflowId}`, `knowledge receipt accepted`] };
+    },
+  };
 }
 
 export interface NodeExecutor {
@@ -63,7 +219,8 @@ export function createFixtureExecutor(): NodeExecutor {
 }
 
 /**
- * The safe default (KTD1: real execution "arrives in U6"). A no-op executor never claims false
+ * Explicit diagnostic fallback. Production sessions now default to createCliExecutor("auto"); a
+ * no-op executor never claims false
  * success — every attempt fails cleanly with a named reason, so a session run against a real
  * business without a real executor wired makes zero progress rather than fabricating outputs.
  */

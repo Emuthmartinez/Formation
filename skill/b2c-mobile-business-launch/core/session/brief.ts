@@ -15,6 +15,8 @@ export interface SessionBrief {
   /** Overrides the default wall-clock cap; the CLI's own --wall-clock-seconds flag outranks this. */
   readonly wallClockSecondsOverride?: number;
   readonly notes?: string;
+  /** Preferred CLI for fresh-context node workers. `auto` selects the first available runtime. */
+  readonly workerRuntime?: "auto" | "claude" | "codex" | "cursor";
 }
 
 export class BriefInvalid extends Error {
@@ -56,6 +58,9 @@ export function validateBriefShape(value: unknown): string[] {
   }
 
   if (candidate.notes !== undefined && typeof candidate.notes !== "string") issues.push("notes, when present, must be a string");
+  if (candidate.workerRuntime !== undefined && !["auto", "claude", "codex", "cursor"].includes(String(candidate.workerRuntime))) {
+    issues.push('workerRuntime, when present, must be "auto", "claude", "codex", or "cursor"');
+  }
 
   return issues;
 }

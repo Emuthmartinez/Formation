@@ -1,18 +1,25 @@
 # Change Cascade
 
-A change to a launched (or near-launch) B2C app rarely lives on one surface. Rename a feature and the App Store description, screenshots, landing page, JSON-LD, paywall copy, and RevenueCat product names can all go stale at once. This reference is the **impact-propagation checklist**: given a change, enumerate every surface it touches, update each (or record why it is unaffected), and reconcile before calling the change done.
+A B2C app change rarely affects only one surface. A feature rename can make store, landing, paywall, billing, and screenshot content stale.
 
-Use this **after any change to the app, product, brand, pricing, or data behavior** once an App Store listing, landing page, or store assets exist. It pairs with the "Lexicon Lock" in [`flow-traceability.md`](./flow-traceability.md) (one vocabulary across every surface).
+This reference is the impact checklist. List each affected surface. Update it or record why the change does not affect it.
+
+Use this reference when `design/design.md` is first accepted. This first run creates the public-surface baseline.
+
+Use it again after each app, product, brand, copy, price, product, or data change. Do not wait for public assets to exist.
+
+Run the affected work while the next app slice continues. Use the Lexicon Lock in [`flow-traceability.md`](./flow-traceability.md).
 
 ## Surface Inventory
 
 The full set of surfaces a B2C mobile launch maintains. A cascade check walks the relevant rows of this list.
 
 - **App (in-app):** onboarding copy/flow, core feature UI + copy, paywall copy + plan labels, settings, empty/error states, push/notification copy.
-- **App Store Connect listing:** app name, subtitle, promotional text, description, keyword field, "What's New", **screenshots + caption overlays**, **App Preview** video, **App Icon**, **in-app events**, **custom product pages**, and **every localization** of all of the above.
+- **App Store Connect listing:** name, subtitle, promotional text, description, keywords, What's New, screenshots, App Preview, App Icon, events, custom product pages, and localizations.
+- **Google Play listing:** name, short and full descriptions, screenshots, feature graphic, promo video, custom store listings, events, and localizations.
 - **App Store Connect products:** IAP/subscription **display names + descriptions**, **promoted-IAP promotional images** (unique per product, never the app icon — see `app-store-connect-cli.md`), pricing, intro/trial offers, **App Review Information notes**.
 - **RevenueCat / billing:** offering/package/product display names, paywall configuration, entitlement identifiers, Stripe/web-funnel product copy and prices.
-- **Landing / web:** hero, method/how-it-works, FAQ, pricing section, footer, **`<meta>` description + Open Graph**, **JSON-LD / structured data** (description, FAQ, product schema), `robots.txt`/`llms.txt`/`sitemap.xml`.
+- **Landing / web:** hero, method, optional web onboarding, FAQ, prices, footer, metadata, Open Graph, JSON-LD, crawler files, and app screenshots.
 - **SEO / GEO:** target keywords, citability content, brand-entity signals.
 - **Lifecycle email:** transactional + lifecycle templates, brand tokens, plan/price/feature mentions.
 - **Analytics:** event names, funnel/dashboard definitions, attribution sources.
@@ -42,11 +49,12 @@ Every surface the map says the change type touches must be accounted for: `updat
 
 | Change type | Cascade to |
 | --- | --- |
-| **Feature added / changed / removed** | in-app copy → App Store description + keywords + "What's New" + screenshots/captions + App Preview + in-app events → custom product pages → landing (hero/method/FAQ + meta + JSON-LD) → SEO/GEO keywords → lifecycle email feature mentions → analytics events → privacy/Data safety (if new data/SDK) → ad creative |
-| **Core copy / feature name / brand vocabulary change** (lexicon) | **every** surface that names it: in-app, onboarding, paywall, App Store name/subtitle/description/keywords + all localizations, landing hero/method/FAQ + meta description + JSON-LD/FAQ schema, RevenueCat product/offering names, email, ad copy. Run the Lexicon Lock sweep — grep all surfaces, update together. |
-| **Onboarding flow change** | onboarding screenshots + App Store screenshot set (if it shows onboarding) → App Preview → activation analytics events/funnels → review-prompt timing → landing "how it works" |
-| **Paywall / pricing / plan / trial change** | paywall copy → App Store screenshots that show pricing → IAP/subscription display names + prices + intro offers → RevenueCat offering/packages → Stripe/web funnel → landing pricing section → terms (auto-renew/price disclosure) → lifecycle email (trial/renewal/win-back) → analytics revenue events |
-| **Visual / UI / design-token change** | in-app UI (the change itself) → App Store screenshots (re-render) → App Preview → App Icon (if brand mark changed) → landing UI → email brand tokens → ad creative → `design/design.md` |
+| **Design contract accepted** | app → landing and optional web onboarding → Apple and Google Play product pages → screenshot plans → marketing assets → lifecycle email → prices and products when applicable |
+| **Feature added / changed / removed** | app → Apple and Google Play descriptions, keywords, release notes, screenshots, previews, events, and custom pages → landing → GEO/SEO → email → analytics → legal when needed → ads |
+| **Core copy / feature name / brand vocabulary change** (lexicon) | every surface that uses the term: app, onboarding, paywall, both stores, landing, schema, billing products, email, and ads |
+| **Onboarding flow change** | app onboarding → Apple and Google Play screenshot sets → previews → activation analytics → review timing → landing method and web onboarding |
+| **Paywall / pricing / plan / trial change** | paywall → store screenshots and products → billing → web funnel → landing prices → terms → lifecycle email → revenue analytics |
+| **Visual / UI / design-token change** | app → Apple and Google Play screenshots and previews → icons and feature graphics → landing → email tokens → ads → `design/design.md` |
 | **New / renamed IAP or subscription product** | RevenueCat product+entitlement+offering → App Store product display name/description/**promo image** → App Store listing (check whether the app description, keyword field, or in-app-event copy names the plan/tier) → paywall copy → pricing/terms → analytics product IDs → review notes |
 | **Privacy / data / SDK change** | `PrivacyInfo.xcprivacy` + required-reason APIs → App Privacy answers → Play Data safety → privacy policy + terms → App Review notes (external services) → App Store listing (check for an invalidated claim, e.g. "no ads"/"no tracking", in the description or keyword field) → analytics/attribution |
 | **Domain / brand / company-name change** | everything in "lexicon" + email sender domains + legal entity references + landing footer + App Store seller/marketing URLs |
@@ -80,14 +88,18 @@ Higgsfield-generated assets embed design tokens, feature names, copy, and pricin
 
 ## Process
 
-1. **Classify the change** against the map above (a change can be more than one type).
-2. **Enumerate impacted surfaces.** List each surface from the matching rows. For surfaces with localizations, the cascade applies to **every localized locale** — and "which locales" is defined by the `LOCALIZATION_MARKET_RESEARCH.md` priority tiers (see [`localization-market-research.md`](../research/localization-market-research.md)), not every language the stores support. Cascade Tier 1 markets across all surfaces (incl. paywall/offers), Tier 2 markets across metadata only.
-3. **Update or justify each.** Edit the surface, or record one line of why it is unaffected. A surface left stale by omission is the `change-cascade-incomplete` failure card.
-4. **Re-render derived assets.** Copy or UI changes that appear in App Store screenshots, App Preview, or ad creative require a **re-render**, not just a doc edit — old screenshots showing old copy will drift and can draw a Guideline 2.3 metadata rejection.
-5. **Reconcile the lexicon.** Confirm the canonical terms (from `design/design.md`/`strategy/BRAND.md`) read identically across in-app, store, landing, schema, RevenueCat, and email.
-6. **Record the cascade.** Note the change and the surfaces touched in `state/LAUNCH_TRACE.md` (or a `CHANGE_LOG.md` for a live app), update `state/PROJECT_STATE.yaml` lane evidence, and re-render `state/launch-cockpit.html`.
-7. **Gate the public surfaces.** App Store metadata/screenshot/product changes, landing deploys, public posting, pricing, and legal edits remain founder-approved.
+1. Classify the change. A change can have more than one type.
+2. Start a read-only surface audit before the changed app slice merges.
+3. List each affected surface. Include each Tier 1 locale and each required store device size.
+4. Assign update tasks with disjoint file paths. Run them while the next app slice continues.
+5. Update each surface or record why it is not affected. Record a blocker when the source does not exist yet.
+6. Re-render derived assets. Do not use a document edit as proof of a screenshot or video update.
+7. Check canonical terms across the app, both stores, landing, schema, billing, and email.
+8. Record the cascade in `state/LAUNCH_TRACE.md` and `state/PROJECT_STATE.yaml`. Render the cockpit again.
+9. Keep public deployment, store changes, prices, legal changes, and paid generation behind founder approval.
 
 ## Done Definition
 
-A change is not "done" until: every impacted surface is updated or explicitly marked unaffected; derived assets (screenshots, App Preview, ad creative) are re-rendered where copy/UI changed; the lexicon is consistent across all surfaces; the cascade is recorded in `state/LAUNCH_TRACE.md`/`CHANGE_LOG.md` and `state/PROJECT_STATE.yaml`; and public-surface updates are founder-approved.
+A change is done only when each affected surface has a recorded result. Re-render each affected asset. Keep terms consistent across all surfaces.
+
+Record the cascade in state and trace files. Obtain founder approval before each protected public action.

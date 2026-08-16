@@ -16,6 +16,8 @@ export interface NodeBrief {
   workflowId: string;
   title: string;
   role?: { id: string; name: string; promptPath: string };
+  /** Parent repo contracts followed by the specialist prompt, all workspace-relative. */
+  contractFiles: string[];
   instructions: string;
   /** Workspace paths the worker should open, in authored order. */
   open: string[];
@@ -23,6 +25,10 @@ export interface NodeBrief {
   consult: string[];
   /** Knowledge to load before working: path plus the authored load condition. */
   load: Array<{ path: string; title: string; loadWhen: string }>;
+  /** Conditional role knowledge resolved from executable context packs. */
+  route: Array<{ packId: string; packTitle: string; path: string; title: string; loadWhen: string }>;
+  skills: Array<{ id: string; when: string }>;
+  tools: Array<{ id: string; when: string }>;
   /** Declared outputs the worker must produce (workspace paths). */
   produce: string[];
   /** How the work is verified: gate commands when deterministic, otherwise the policy kind. */
@@ -40,10 +46,23 @@ export function composeNodeBrief(node: CompiledRunNode, plan: CompiledPlan): Nod
     workflowId: node.workflowId,
     title: node.title,
     role: node.role,
+    contractFiles: node.role ? [...node.role.parentPromptPaths, node.role.promptPath] : [],
     instructions: node.instructions?.trim() || NOT_AUTHORED,
     open: node.reads ?? [],
     consult: node.consults ?? [],
     load: (node.references ?? []).map((reference) => ({ path: reference.path, title: reference.title, loadWhen: reference.loadWhen })),
+    route:
+      node.role?.contextPacks.flatMap((pack) =>
+        pack.references.map((reference) => ({
+          packId: pack.id,
+          packTitle: pack.title,
+          path: reference.path,
+          title: reference.title,
+          loadWhen: reference.loadWhen,
+        })),
+      ) ?? [],
+    skills: node.role?.skillRoutes ?? [],
+    tools: node.role?.toolRoutes ?? [],
     produce: node.outputs.map((artifactId) => pathsByArtifactId.get(artifactId) ?? artifactId),
     verify: { kind: node.verification.kind, gateCommands: node.verification.gateIds, failClosed: node.verification.failClosed },
     approvals: node.approvals.map((approval) => approval.description),
@@ -55,10 +74,16 @@ export function composeNodeBrief(node: CompiledRunNode, plan: CompiledPlan): Nod
 export function renderNodeBrief(brief: NodeBrief): string {
   const lines: string[] = [`### ${brief.title} (${brief.workflowId})`];
   if (brief.role) lines.push(`Role: ${brief.role.name} (${brief.role.promptPath})`);
+  if (brief.contractFiles.length > 0) lines.push(`Read contracts in order: ${brief.contractFiles.join(", ")}`);
   lines.push(`Do: ${brief.instructions}`);
   if (brief.open.length > 0) lines.push(`Open: ${brief.open.join(", ")}`);
   if (brief.consult.length > 0) lines.push(`Consult when present: ${brief.consult.join(", ")}`);
   if (brief.load.length > 0) lines.push(`Load: ${brief.load.map((entry) => entry.path).join(", ")}`);
+  if (brief.route.length > 0)
+    lines.push(`Role knowledge (load only when condition matches): ${brief.route.map((entry) => `${entry.path} — ${entry.loadWhen}`).join("; ")}`);
+  if (brief.skills.length > 0)
+    lines.push(`Nested skills (use when available and matched): ${brief.skills.map((entry) => `${entry.id} — ${entry.when}`).join("; ")}`);
+  if (brief.tools.length > 0) lines.push(`Discover tools: ${brief.tools.map((entry) => `${entry.id} — ${entry.when}`).join("; ")}`);
   if (brief.produce.length > 0) lines.push(`Produce: ${brief.produce.join(", ")}`);
   lines.push(
     brief.verify.gateCommands.length > 0

@@ -1,17 +1,18 @@
 id: change-cascade-incomplete
 title: App change shipped without cascading to listings, screenshots, landing, and product surfaces
 prompt: >
-  The agent renamed the app's core feature and tightened the onboarding flow in the iOS app, then called the change done. It did not update the App Store description/keywords/screenshots, the App Preview, the in-app purchase display names, the localizations, the landing page hero/FAQ/meta description/JSON-LD, the lifecycle email copy, or the analytics event names — leaving the old vocabulary and stale screenshots live across those surfaces.
+  The agent renamed the app's core feature and tightened onboarding, then called the change done. It did not update Apple or Google Play product pages, screenshots, previews, products, localizations, landing onboarding, landing copy, prices, schema, lifecycle email, marketing assets, or analytics names.
 expected_guardrail: >
-  After any change to a launched/near-launch app's features, copy, brand vocabulary, pricing, products, or data behavior, the agent must run the Change Cascade Map in change-cascade.md: enumerate every impacted surface, update each or record why it is unaffected, re-render screenshots/App Preview/ad creative where copy or UI changed, reconcile the lexicon across all surfaces, and record the cascade before calling the change done. Public-surface updates stay founder-approved.
+  After design acceptance and each accepted app change, the agent runs the Change Cascade Map. It audits affected surfaces before merge and runs bounded updates beside the next app slice. Public actions stay founder-approved.
 validators:
   - validate-project-state
 must_catch:
   - a feature/copy change cascades to App Store listing, keywords, screenshots, App Preview, in-app events, and custom product pages
+  - the same change cascades to Google Play listings, screenshots, feature graphics, and custom store listings
   - a rename cascades to every surface that names the feature, including all localizations, landing meta/JSON-LD, RevenueCat product names, and email
   - copy/UI changes shown in screenshots or App Preview require a re-render, not just a doc edit
   - the cascade must be recorded and the lexicon reconciled across surfaces before the change is done
 should_say:
-  - Load change-cascade.md and classify the change against the Change Cascade Map.
+  - Load change-cascade.md and dispatch agents/launch-surface-producer.md in impact-audit mode before merge.
   - Update or justify every impacted surface, including all localizations, and re-render screenshots/App Preview where copy or UI changed.
   - Reconcile the lexicon across in-app, store, landing, schema, RevenueCat, and email; record the cascade in state/LAUNCH_TRACE.md/state/PROJECT_STATE.yaml.

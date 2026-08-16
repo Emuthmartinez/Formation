@@ -613,7 +613,7 @@ export function register(h: Harness): void {
     "founder_operator.ready_with_setup_gaps",
   );
   runFixture(
-    "ready state cannot retain the initial founder-name gate",
+    "ready state cannot retain the initial step-away gate",
     prematureReady,
     "check-founder-operator-bootstrap.ts",
     1,

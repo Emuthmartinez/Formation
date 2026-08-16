@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { businessUnitCoversAllGrantableDomains } from "./business-units.js";
 import { GATE_OWNER_OVERRIDES, inferGateDomain } from "./gates.js";
 import { isCatalogId, type CatalogId } from "./ids.js";
 import { composeCatalog } from "./index.js";
+import { operators } from "./operators.js";
 import type { Catalog, CatalogIssue } from "./types.js";
 
 /**
@@ -23,6 +24,7 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     catalog.phases,
     catalog.lanes,
     catalog.roles,
+    catalog.contextPacks,
     catalog.references,
     catalog.workflows,
     catalog.artifacts,
@@ -75,6 +77,7 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
   );
 
   uniqueBy(catalog.references, (item) => item.path, "catalog_graph.reference.path_duplicate", issues);
+  uniqueBy(catalog.contextPacks, (item) => item.id, "catalog_graph.context_pack.id_duplicate", issues);
   for (const reference of catalog.references) {
     checkKnown(issues, domainIds, reference.domainId, "catalog_graph.reference.unknown_domain", reference.id);
     if (!existsSync(path.join(skillRoot, reference.path))) {
@@ -87,6 +90,7 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
 
   const roleIds = new Set(catalog.roles.map((item) => item.id));
   const referenceIds = new Set(catalog.references.map((item) => item.id));
+  const contextPackIds = new Set(catalog.contextPacks.map((item) => item.id));
   const boundReferenceIds = new Set(catalog.workflows.flatMap((workflow) => workflow.referenceIds));
 
   // Knowledge must be routable by the engine, not just present on disk: every reference is either
@@ -98,6 +102,63 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
       issues.push(
         error("catalog_graph.reference.unbound", `${reference.id} is bound by no workflow and not sessionScoped — nothing routes to it.`, reference.path),
       );
+    }
+  }
+
+  for (const pack of catalog.contextPacks) {
+    if (pack.referenceIds.length === 0) issues.push(error("catalog_graph.context_pack.empty", `${pack.id} has no reference routes.`));
+    for (const referenceId of pack.referenceIds) checkKnown(issues, referenceIds, referenceId, "catalog_graph.context_pack.reference_unknown", pack.id);
+  }
+
+  for (const role of catalog.roles) {
+    if (role.parentPromptPaths.length === 0) issues.push(error("catalog_graph.role.parent_contract_missing", `${role.id} has no parent prompt contract.`));
+    if (!role.parentPromptPaths.includes("AGENTS.md") || !role.parentPromptPaths.includes("APP_AGENTS.md")) {
+      issues.push(error("catalog_graph.role.parent_contract_incomplete", `${role.id} must inherit AGENTS.md and APP_AGENTS.md.`));
+    }
+    if (role.skillRoutes.length === 0) issues.push(error("catalog_graph.role.skill_routes_missing", `${role.id} has no nested skill routes.`));
+    if (role.toolRoutes.length === 0) issues.push(error("catalog_graph.role.tool_routes_missing", `${role.id} has no tool-discovery routes.`));
+    for (const packId of role.contextPackIds) checkKnown(issues, contextPackIds, packId, "catalog_graph.role.context_pack_unknown", role.id);
+  }
+
+  // The real shipped roster and role registry are one executable surface. Fixture catalogs do
+  // not carry role.orchestrator and intentionally skip this repository-specific parity sweep.
+  if (roleIds.has("role.orchestrator")) {
+    const rosterDir = path.join(skillRoot, "workspace", "business", "engineering", "app-agent-roster", "agents");
+    const promptNames = existsSync(rosterDir)
+      ? walkFiles(rosterDir)
+          .filter((filePath) => filePath.endsWith(".md"))
+          .map((filePath) => path.basename(filePath, ".md"))
+      : [];
+    const rolePromptNames = catalog.roles.map((role) => path.basename(role.promptPath, ".md"));
+    for (const promptName of promptNames) {
+      if (!rolePromptNames.includes(promptName)) issues.push(error("catalog_graph.role.prompt_unregistered", `agents/${promptName}.md has no catalog role.`));
+    }
+    for (const role of catalog.roles) {
+      if (!promptNames.includes(path.basename(role.promptPath, ".md"))) {
+        issues.push(error("catalog_graph.role.prompt_missing", `${role.id} points to missing roster prompt ${role.promptPath}.`));
+      } else {
+        const promptName = path.basename(role.promptPath, ".md");
+        const promptText = readFileSync(path.join(rosterDir, `${promptName}.md`), "utf8");
+        if (!promptText.includes("Inherited dispatch contract:")) {
+          issues.push(error("catalog_graph.role.inheritance_missing", `${role.promptPath} does not declare the inherited dispatch contract.`));
+        }
+        if (!promptText.includes(`Stable operator ID: \`operator.${promptName}\``)) {
+          issues.push(error("catalog_graph.role.operator_id_mismatch", `${role.promptPath} must declare operator.${promptName}.`));
+        }
+      }
+    }
+    const operatorPromptNames = operators
+      .filter((operator) => operator.kind === "agent" && operator.promptPath)
+      .map((operator) => path.basename(operator.promptPath!, ".md"));
+    for (const promptName of promptNames) {
+      if (!operatorPromptNames.includes(promptName))
+        issues.push(error("catalog_graph.operator.prompt_unregistered", `agents/${promptName}.md has no executable operator record.`));
+    }
+    for (const operator of operators) {
+      for (const packId of operator.contextPackIds) {
+        if (!contextPackIds.has(packId as `context.${string}`))
+          issues.push(error("catalog_graph.operator.context_pack_unknown", `${operator.id} names unknown context pack ${packId}.`));
+      }
     }
   }
 

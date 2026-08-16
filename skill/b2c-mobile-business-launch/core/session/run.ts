@@ -13,7 +13,20 @@ import { grantableDomainIds, type BudgetLedgerDocument, type BusinessStateV2, ty
 import { compilePlan, type CatalogInput, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
 import { computeFrontier } from "../engine/frontier.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
-import { acceptVerification, beginAttempt, detectOrphans, isWallClockExceeded, loadRunState, reconcilePatch, refreshHeartbeat, seedRunState, writeRunState, buildCheckpoint, writeCheckpoint, type OrphanEvent } from "../engine/runstate.js";
+import {
+  acceptVerification,
+  beginAttempt,
+  detectOrphans,
+  isWallClockExceeded,
+  loadRunState,
+  reconcilePatch,
+  refreshHeartbeat,
+  seedRunState,
+  writeRunState,
+  buildCheckpoint,
+  writeCheckpoint,
+  type OrphanEvent,
+} from "../engine/runstate.js";
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
 import { createDispatchHooks } from "../autonomy/killswitch.js";
 import { domainBusinessUnit } from "../autonomy/budget.js";
@@ -21,9 +34,10 @@ import { createCompositeVerifier } from "../autonomy/prerequisites.js";
 import { createDopplerAuthVerifier } from "../autonomy/probes/doppler.js";
 import { createBudgetFundedVerifier } from "../autonomy/probes/budget.js";
 import { verifyControlBoundary, type ControlBoundaryVerdict } from "../adapters/install-control-permissions.js";
+import { applyStandingApprovals } from "../autonomy/standing-approvals.js";
 
 import { BriefInvalid, loadBrief, nodeInScope, type SessionBrief } from "./brief.js";
-import { createFixtureExecutor, createSlowSilentExecutor, noOpExecutor, type NodeExecutor } from "./executor.js";
+import { createCliExecutor, createFixtureExecutor, createSlowSilentExecutor, noOpExecutor, type NodeExecutor, type WorkerRuntime } from "./executor.js";
 import {
   formatAge,
   pushDigest,
@@ -65,6 +79,7 @@ export interface WorkspacePaths {
   readonly catalog: string;
   readonly runState: string;
   readonly checkpoint: string;
+  readonly agentOperations: string;
 }
 
 export function resolveWorkspacePaths(root: string, catalogOverride?: string): WorkspacePaths {
@@ -79,6 +94,7 @@ export function resolveWorkspacePaths(root: string, catalogOverride?: string): W
     catalog: catalogOverride ?? path.join(root, "catalog.json"),
     runState: path.join(root, "run", "run-state.json"),
     checkpoint: path.join(root, "run", "checkpoint.json"),
+    agentOperations: path.join(root, "operations", "agent-operations.json"),
   };
 }
 
@@ -204,8 +220,20 @@ function pushIfChanged(ops: PatchOp[], declaredOutputs: PatchPath[], path: Patch
 }
 
 /** Estimate ledger entry + balance decrement, committed via the reducer (never a direct write) — R10's "hard-stop before, actuals after" estimate half. */
-function buildEstimatePatch(ledger: BudgetLedgerDocument, node: CompiledRunNode, decision: AutonomyDecisionDetail, sessionId: string, now: string): { patch: StatePatch; entryId: string } | undefined {
-  if (decision.estimateAmount === undefined || decision.budgetUnit === undefined || decision.budgetPeriod === undefined || decision.estimateCurrency === undefined) return undefined;
+function buildEstimatePatch(
+  ledger: BudgetLedgerDocument,
+  node: CompiledRunNode,
+  decision: AutonomyDecisionDetail,
+  sessionId: string,
+  now: string,
+): { patch: StatePatch; entryId: string } | undefined {
+  if (
+    decision.estimateAmount === undefined ||
+    decision.budgetUnit === undefined ||
+    decision.budgetPeriod === undefined ||
+    decision.estimateCurrency === undefined
+  )
+    return undefined;
   const entryId = `ledger.${sessionId}.${randomUUID().slice(0, 8)}`;
   const entry = {
     id: entryId,
@@ -233,7 +261,17 @@ function buildEstimatePatch(ledger: BudgetLedgerDocument, node: CompiledRunNode,
   }
   return {
     entryId,
-    patch: { schemaVersion: "1.0.0", patchId: nextPatchId(sessionId), targetDoc: "budget-ledger", reason: `Recording estimated spend for ${node.title}`, authoredBy: sessionId, authoredAt: now, preconditions: [], ops, declaredOutputs },
+    patch: {
+      schemaVersion: "1.0.0",
+      patchId: nextPatchId(sessionId),
+      targetDoc: "budget-ledger",
+      reason: `Recording estimated spend for ${node.title}`,
+      authoredBy: sessionId,
+      authoredAt: now,
+      preconditions: [],
+      ops,
+      declaredOutputs,
+    },
   };
 }
 
@@ -243,7 +281,14 @@ function buildEstimatePatch(ledger: BudgetLedgerDocument, node: CompiledRunNode,
  * is recorded equal to the estimate — a deliberate, named placeholder until U6's real executor can
  * report a true actual.
  */
-function buildActualPatch(ledger: BudgetLedgerDocument, entryId: string, node: CompiledRunNode, decision: AutonomyDecisionDetail, sessionId: string, now: string): StatePatch | undefined {
+function buildActualPatch(
+  ledger: BudgetLedgerDocument,
+  entryId: string,
+  node: CompiledRunNode,
+  decision: AutonomyDecisionDetail,
+  sessionId: string,
+  now: string,
+): StatePatch | undefined {
   if (decision.estimateAmount === undefined || decision.budgetUnit === undefined || decision.estimateCurrency === undefined) return undefined;
   const entryIndex = ledger.entries.findIndex((entry) => entry.id === entryId);
   if (entryIndex < 0) return undefined;
@@ -268,7 +313,17 @@ function buildActualPatch(ledger: BudgetLedgerDocument, entryId: string, node: C
     ops.push({ op: "set", path: ["balances", String(balanceIndex), "updatedAt"], value: now });
     declaredOutputs.push(["balances", String(balanceIndex), "updatedAt"]);
   }
-  return { schemaVersion: "1.0.0", patchId: nextPatchId(sessionId), targetDoc: "budget-ledger", reason: `Recording actual spend for ${node.title}`, authoredBy: sessionId, authoredAt: now, preconditions: [], ops, declaredOutputs };
+  return {
+    schemaVersion: "1.0.0",
+    patchId: nextPatchId(sessionId),
+    targetDoc: "budget-ledger",
+    reason: `Recording actual spend for ${node.title}`,
+    authoredBy: sessionId,
+    authoredAt: now,
+    preconditions: [],
+    ops,
+    declaredOutputs,
+  };
 }
 
 function orphanSentence(event: OrphanEvent, title: string): string {
@@ -315,23 +370,39 @@ async function main(): Promise<number> {
   mkdirSync(path.dirname(paths.runState), { recursive: true });
   const sessionId = args.session!;
   const startedAt = args.now ?? new Date().toISOString();
-  const executor: NodeExecutor =
-    args.executor === "fixture" ? createFixtureExecutor() : args.executor === "slow-silent" ? createSlowSilentExecutor(Number(args["slow-delay-ms"] ?? 2000)) : noOpExecutor;
+  let executor: NodeExecutor = noOpExecutor;
   const maxConcurrency = Number(args["max-concurrency"] ?? 4);
 
   let lockAcquired = false;
   let brief: SessionBrief | undefined;
   const anomalies: DigestAnomaly[] = [];
 
-  const finish = async (outcome: DigestOutcome, extra: { advanced?: DigestAdvancedItem[]; parked?: DigestParkedItem[]; spend?: DigestSpendLine[] } = {}, exitCode = 0): Promise<number> => {
+  const finish = async (
+    outcome: DigestOutcome,
+    extra: { advanced?: DigestAdvancedItem[]; parked?: DigestParkedItem[]; spend?: DigestSpendLine[] } = {},
+    exitCode = 0,
+  ): Promise<number> => {
     const endedAt = new Date().toISOString();
     const businessSlug = brief?.businessSlug ?? path.basename(workspace);
-    const input: DigestInput = { sessionId, businessSlug, startedAt, endedAt, outcome, advanced: extra.advanced ?? [], parked: extra.parked ?? [], spend: extra.spend ?? [], anomalies };
+    const input: DigestInput = {
+      sessionId,
+      businessSlug,
+      startedAt,
+      endedAt,
+      outcome,
+      advanced: extra.advanced ?? [],
+      parked: extra.parked ?? [],
+      spend: extra.spend ?? [],
+      anomalies,
+    };
     const rendered = renderDigest(input);
     const to = brief?.founderContact.email;
     if (to) {
       const push = await pushDigest(rendered, to);
-      if (push.attempted && push.ok === false) anomalies.push({ message: `I tried to email you this update and it didn't go through (${push.error ?? "an unknown error"}). It's still saved in this business's digests folder.` });
+      if (push.attempted && push.ok === false)
+        anomalies.push({
+          message: `I tried to email you this update and it didn't go through (${push.error ?? "an unknown error"}). It's still saved in this business's digests folder.`,
+        });
       input.push = push;
     } else {
       input.push = { attempted: false, skippedReason: "no founder contact on file" };
@@ -357,6 +428,16 @@ async function main(): Promise<number> {
       return await finish("workspace_not_ready", {}, 1);
     }
 
+    const executorMode = args.executor ?? "auto";
+    executor =
+      executorMode === "fixture"
+        ? createFixtureExecutor()
+        : executorMode === "slow-silent"
+          ? createSlowSilentExecutor(Number(args["slow-delay-ms"] ?? 2000))
+          : executorMode === "noop"
+            ? noOpExecutor
+            : createCliExecutor((args["worker-runtime"] ?? brief.workerRuntime ?? process.env.B2C_WORKER_RUNTIME ?? "auto") as WorkerRuntime);
+
     const lockTtlSeconds = Number(args["lock-ttl-seconds"] ?? 120);
     const acquireResult: AcquireResult = acquireLock(paths.sessionLock, {
       ownerSessionId: sessionId,
@@ -367,13 +448,18 @@ async function main(): Promise<number> {
     });
     if (!acquireResult.ok) {
       const outcome: DigestOutcome = acquireResult.reason === "held" ? "did_not_run_lock_held" : "did_not_run_lock_stale";
-      anomalies.push({ message: `Another session (or one that may not have shut down cleanly) already had this business locked, so I backed off rather than risk a collision.` });
+      anomalies.push({
+        message: `Another session (or one that may not have shut down cleanly) already had this business locked, so I backed off rather than risk a collision.`,
+      });
       return await finish(outcome, {}, 2);
     }
     lockAcquired = true;
 
     if (!tamperCheckPasses(paths)) {
-      anomalies.push({ message: "This business's saved files don't match what I last recorded — something changed them outside of my normal process. I stopped before making anything worse." });
+      anomalies.push({
+        message:
+          "This business's saved files don't match what I last recorded — something changed them outside of my normal process. I stopped before making anything worse.",
+      });
       return await finish("preflight_failed", {}, 3);
     }
 
@@ -391,7 +477,9 @@ async function main(): Promise<number> {
     const boundaryAnomaly = buildControlBoundaryAnomaly(control, boundaryVerdict, boundaryCommand);
     if (boundaryAnomaly) {
       // Technical detail stays in the run log; the digest only ever gets the founder-plain sentence.
-      console.error(`session.control_boundary: state=${boundaryVerdict.state} agentUidDiffers=${boundaryVerdict.agentUidDiffers} mode=${boundaryVerdict.controlMode} ownerUid=${boundaryVerdict.ownerUid} processUid=${boundaryVerdict.processUid} reasons=${JSON.stringify(boundaryVerdict.reasons)}`);
+      console.error(
+        `session.control_boundary: state=${boundaryVerdict.state} agentUidDiffers=${boundaryVerdict.agentUidDiffers} mode=${boundaryVerdict.controlMode} ownerUid=${boundaryVerdict.ownerUid} processUid=${boundaryVerdict.processUid} reasons=${JSON.stringify(boundaryVerdict.reasons)}`,
+      );
       anomalies.push(boundaryAnomaly);
     }
 
@@ -451,11 +539,21 @@ async function main(): Promise<number> {
     }
     writeRunState(paths.runState, run);
 
-    const dispatchHooks: DispatchHooks = createDispatchHooks({ loadControl: () => loadControlFile(paths.control)!, lockPath: paths.sessionLock, ownerSessionId: sessionId });
+    const dispatchHooks: DispatchHooks = createDispatchHooks({
+      loadControl: () => loadControlFile(paths.control)!,
+      lockPath: paths.sessionLock,
+      ownerSessionId: sessionId,
+    });
     // Pass the ledger as a live accessor, not a snapshot: `ledger` is reassigned after every
     // spend commit below, and the evaluator must see the true remaining balance so independently
     // scoped spend nodes cannot each pass the hard-stop while collectively overrunning the budget (R10).
-    const evaluator = createAutonomyEvaluator({ grants: control.grants, waivers: control.waivers, ledger: () => ledger, prerequisiteVerifier, runId: run.runId });
+    const evaluator = createAutonomyEvaluator({
+      grants: control.grants,
+      waivers: control.waivers,
+      ledger: () => ledger,
+      prerequisiteVerifier,
+      runId: run.runId,
+    });
     const decisions = new Map<string, AutonomyDecisionDetail>();
     const captured = withCapture(evaluator, decisions);
 
@@ -486,12 +584,16 @@ async function main(): Promise<number> {
       // out-of-band edit to control/state/ledger (e.g. re-disabling a kill switch, self-granting)
       // or a forged audit entry is caught before the next batch dispatches, not next session (R14).
       if (!tamperCheckPasses(paths)) {
-        anomalies.push({ message: "Partway through, this business's saved files stopped matching what I recorded — something changed them outside my normal process. I stopped rather than continue on top of it." });
+        anomalies.push({
+          message:
+            "Partway through, this business's saved files stopped matching what I recorded — something changed them outside my normal process. I stopped rather than continue on top of it.",
+        });
         haltReason = "kill_switch";
         break;
       }
       heartbeat(paths.sessionLock, sessionId);
 
+      applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const frontier = computeFrontier(plan, run, businessState, captured);
       let readyIds: RunNodeId[] = frontier.ready;
       if (brief.scopeHints && brief.scopeHints.length > 0) {
@@ -531,7 +633,9 @@ async function main(): Promise<number> {
                 ledger = loadLedgerFile(paths.ledger, sessionNow());
                 estimateEntryId = built.entryId;
               } else {
-                anomalies.push({ message: `I couldn't record the expected cost for "${node.title}" before starting it, so I left it for you to look at instead of spending blind.` });
+                anomalies.push({
+                  message: `I couldn't record the expected cost for "${node.title}" before starting it, so I left it for you to look at instead of spending blind.`,
+                });
                 continue;
               }
             }
@@ -583,7 +687,15 @@ async function main(): Promise<number> {
           heartbeatTimer.unref();
           let result: Awaited<ReturnType<typeof executor.execute>>;
           try {
-            result = await executor.execute(node, { runId: run.runId, attemptId: attempt.id, workspaceDir: workspace, now: attemptTime, heartbeat: refreshAttemptHeartbeat });
+            result = await executor.execute(node, {
+              runId: run.runId,
+              attemptId: attempt.id,
+              workspaceDir: workspace,
+              skillRootDir: skillRoot(),
+              artifactPaths: Object.fromEntries(plan.artifactBindings.map((binding) => [binding.artifactId, binding.path])),
+              now: attemptTime,
+              heartbeat: refreshAttemptHeartbeat,
+            });
           } finally {
             clearInterval(heartbeatTimer);
           }
@@ -605,7 +717,16 @@ async function main(): Promise<number> {
             reconcilePatch(
               plan,
               run,
-              { nodeId, attemptId: attempt.id, outputs: result.outputs.map((output) => ({ artifactId: output.artifactId, path: output.path, fingerprint: output.fingerprint, evidence: [...output.evidence] })) },
+              {
+                nodeId,
+                attemptId: attempt.id,
+                outputs: result.outputs.map((output) => ({
+                  artifactId: output.artifactId,
+                  path: output.path,
+                  fingerprint: output.fingerprint,
+                  evidence: [...output.evidence],
+                })),
+              },
               finishedAt,
             );
             if (run.nodes[nodeId]!.status === "succeeded") {
@@ -630,7 +751,8 @@ async function main(): Promise<number> {
               if (actualPatch) {
                 const actualResult = commitPatch(paths.ledger, paths, sessionId, actualPatch);
                 if (actualResult.code === 0) ledger = loadLedgerFile(paths.ledger, sessionNow());
-                else anomalies.push({ message: `I finished "${node.title}" but couldn't record the final cost — the estimate is saved, the actual isn't yet.` });
+                else
+                  anomalies.push({ message: `I finished "${node.title}" but couldn't record the final cost — the estimate is saved, the actual isn't yet.` });
               }
             }
           }
@@ -641,6 +763,7 @@ async function main(): Promise<number> {
 
     // One final, side-effect-free frontier pass so run.nodes reflects the latest classification for the digest, regardless of why the loop exited.
     try {
+      applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       computeFrontier(plan, run, businessState, captured);
     } catch {
       /* best effort snapshot only */
@@ -662,13 +785,27 @@ async function main(): Promise<number> {
     }
     for (const gate of businessState.founderGates.pending) {
       if (parked.some((item) => gate.reason.includes(item.title))) continue;
-      parked.push({ nodeId: gate.id, title: gate.reason, unit: "Operations", reasonText: "This has been waiting on you.", ageText: formatAge(gate.createdAt, sessionNow()) });
+      parked.push({
+        nodeId: gate.id,
+        title: gate.reason,
+        unit: "Operations",
+        reasonText: "This has been waiting on you.",
+        ageText: formatAge(gate.createdAt, sessionNow()),
+      });
     }
 
     if (haltReason) anomalies.push({ message: `I stopped partway through because ${translateHaltReason(haltReason)}.` });
     if (timedOut) anomalies.push({ message: "I hit my time limit for this session and stopped on purpose rather than run indefinitely." });
 
-    const spend: DigestSpendLine[] = ledger.balances.map((balance) => ({ unit: balance.unit, period: balance.period, currency: balance.currency, allocated: balance.allocated, committed: balance.committed, spent: balance.spent, remaining: balance.remaining }));
+    const spend: DigestSpendLine[] = ledger.balances.map((balance) => ({
+      unit: balance.unit,
+      period: balance.period,
+      currency: balance.currency,
+      allocated: balance.allocated,
+      committed: balance.committed,
+      spent: balance.spent,
+      remaining: balance.remaining,
+    }));
 
     const finalNow = sessionNow();
     run.heartbeatAt = finalNow;
@@ -677,7 +814,15 @@ async function main(): Promise<number> {
     const checkpointHash = `checkpoint:${plan.planId}:${run.runId}:${run.updatedAt}`;
     writeCheckpoint(paths.checkpoint, buildCheckpoint(run, sessionId, checkpointHash, finalNow));
 
-    const outcome: DigestOutcome = timedOut ? "timed_out" : haltReason === "kill_switch" ? "halted_kill_switch" : haltReason === "cooperative_yield" ? "halted_interactive_yield" : advanced.length === 0 && parked.length === 0 ? "nothing_to_do" : "completed";
+    const outcome: DigestOutcome = timedOut
+      ? "timed_out"
+      : haltReason === "kill_switch"
+        ? "halted_kill_switch"
+        : haltReason === "cooperative_yield"
+          ? "halted_interactive_yield"
+          : advanced.length === 0 && parked.length === 0
+            ? "nothing_to_do"
+            : "completed";
 
     return await finish(outcome, { advanced, parked, spend }, 0);
   } catch (error) {
@@ -696,7 +841,7 @@ if (isMainModule(import.meta.url)) {
       process.exitCode = code;
     })
     .catch((error) => {
-      console.error(`session.fatal: ${error instanceof Error ? error.stack ?? error.message : String(error)}`);
+      console.error(`session.fatal: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`);
       process.exitCode = 1;
     });
 }

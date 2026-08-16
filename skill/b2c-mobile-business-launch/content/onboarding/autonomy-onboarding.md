@@ -2,7 +2,7 @@
 
 Use this at the very start of a business's first session — interactive or scheduled, since both are
 sessions and both act — and again whenever the founder wants to change how much they've handed over
-in one area. Waiting for the first *unattended* run is too late: a founder who says "launch me a
+in one area. Waiting for the first _unattended_ run is too late: a founder who says "launch me a
 business" and watches it happen is not watching every step of it, and an agent that never held this
 conversation is one deciding its own permissions.
 
@@ -11,14 +11,15 @@ outcome first, plain definitions, two or three choices with the recommendation f
 spelled out, a safe way to skip or come back later) applied to two specific decisions: how much this
 agent should be allowed to do on its own, area by area, and how much it may spend doing it.
 
-Nothing here is settled by default. Every business ships with nothing turned on — the agent asks
-before it acts, everywhere — until the founder walks through this once.
+Nothing here is settled by silence. The first session offers one recommended operator-ready setup.
+This setup lets the founder step away after the agent verifies access, tools, limits, and targets.
 
 ## Contents
 
 - The Promise
 - The Three Ways To Set Up Each Area
 - The Nine Areas Of The Business
+- The Step-Away Readiness Check
 - Protected Moves And Your Okay
 - How Much It May Spend
 - The Fast Path
@@ -28,11 +29,10 @@ before it acts, everywhere — until the founder walks through this once.
 
 Open with something like:
 
-> I want to know how much you trust me to run each part of this business on my own, while you're
-> not around. For each area, you pick one of three settings. I'll explain each area in plain terms,
-> tell you what I'd recommend, and you can always change your mind later — this isn't a one-time
-> lock-in. If you'd rather not think about it right now, say so and I'll use the safe defaults
-> everywhere and we'll revisit it later.
+> I can prepare this business so you can step away. I will check the accounts, roles, tools,
+> deployment targets, store access, signing access, and spending limit now. I will then build,
+> create assets, deploy the approved website, and upload approved store material without asking
+> again. You can change or revoke this access later.
 
 ## The Three Ways To Set Up Each Area
 
@@ -44,11 +44,9 @@ area:
 - **Handle the routine stuff.** I do the everyday work in this area myself and tell you what I did
   afterward. I still stop and ask before anything unusual, risky, or outside the ordinary pattern
   for this area.
-- **Full trust.** I run this area on my own judgment, start to finish. Even here, a small set of
-  especially sensitive moves — spending beyond what's routine, deleting or permanently changing
-  something, submitting the app for release, sharing a login or credential, changing a price or a
-  legal term, or posting something publicly beyond what's already approved — always still need a
-  separate okay from you. See "Protected Moves And Your Okay" below.
+- **Full trust.** I run this area on my own judgment, start to finish. I use standing approvals for
+  named accounts and routine public work. I stop only when the work exceeds a recorded limit or
+  changes a protected item. See "Protected Moves And Your Okay" below.
 
 If the founder isn't sure about an area, the safe move is to skip it: nothing in that area happens
 on its own until they decide, and it comes back up later rather than staying an open question
@@ -115,8 +113,8 @@ Analytics and tracking: knowing what's working and what isn't.
 
 Pricing and getting paid: subscriptions, purchases, and the money side.
 
-- **Recommended: ask me first.** Money touches you directly, so the safe default here is that I
-  bring you the numbers and the options, and you decide.
+- **Recommended: handle the routine stuff.** I keep products, entitlements, approved offers, and
+  billing operations current. I do not choose a new price, trial, or payment account.
 - Handle the routine stuff, if you want me managing the everyday money work myself and only
   flagging anything unusual.
 - Full trust, if you want me running this independently. Spending beyond what's routine is always
@@ -127,9 +125,10 @@ Pricing and getting paid: subscriptions, purchases, and the money side.
 
 App Store and Google Play: the listing, screenshots, and the submission itself.
 
-- **Recommended: ask me first.** Submitting the app for release is always a protected move no
-  matter what you pick here, but everything leading up to it — the listing, the screenshots, the
-  description — is safer to review before it's live.
+- **Recommended: full trust.** I create and update listings, screenshots, previews, product pages,
+  release notes, and review information. I upload builds to TestFlight and internal or closed Play
+  tracks when the standing approval names the app, account, and track. I do not publish a final
+  production release unless that exact release is also approved.
 - Handle the routine stuff, if you're comfortable with me keeping the listing current on my own.
 - Full trust, if you want me managing this independently.
 - Not sure? Skip it for now.
@@ -138,8 +137,8 @@ App Store and Google Play: the listing, screenshots, and the submission itself.
 
 Privacy, security, and legal: keeping the app, and your users' data, safe and compliant.
 
-- **Recommended: ask me first.** Changes here can carry real legal and safety weight, so the safe
-  default is that you see them before they're final.
+- **Recommended: handle the routine stuff.** I keep security, privacy inventories, disclosures,
+  and compliance evidence current. New legal promises and final legal text stay protected.
 - Handle the routine stuff, if you want me keeping this current on my own and flagging anything
   that changes what the app promises.
 - Full trust, if you want me running this independently. Changing a price or a legal term stays a
@@ -156,23 +155,58 @@ Running the business day to day: accounts, tools, and the operating work behind 
 - Full trust, if you want me running this independently.
 - Not sure? Skip it for now.
 
+## The Step-Away Readiness Check
+
+Run this once before build work starts. Ask one combined question, not one question per provider.
+Offer the operator-ready choice first. Then inspect and verify each item yourself.
+
+The check covers:
+
+- autonomy grants for all nine business areas
+- a spending amount, currency, period, and stop condition
+- founder-owned business email, recovery, 2FA, and revocation paths
+- Doppler or the approved secret manager and a durable operator identity
+- source control, CI, hosting, DNS, and the exact website project and environment
+- image, video, copy, screenshot, device, simulator, and localization tools
+- Apple Developer, App Store Connect, signing, TestFlight, and upload roles
+- Google Play Console, service-account access, app signing, and testing-track roles
+- analytics, revenue, email, support, and social accounts that are in scope
+- standing approval envelopes for the routine operations below
+
+The agent records the matching protected authorization and separate standing approvals behind this
+conversation. Each approval names the provider, account, project or app, environment, exact work
+and resources, exclusions, expiry, and rollback route. It cannot use a broad wildcard. Prepare
+approvals for:
+
+1. Deploy the approved landing site to the named preview and production project.
+2. Generate and revise marketing, landing, store, and lifecycle assets inside the spending limit.
+3. Apply approved website copy, onboarding, metadata, screenshots, previews, and product pages.
+4. Upload signed builds to TestFlight and approved Play testing tracks.
+5. Update approved prices only when the exact price table has separate pricing approval.
+
+Do not ask again when a current capability and standing envelope match the action. Record the
+action, read back the result, and continue. If several permissions or tools are missing, combine
+them into one founder handoff. Continue all work that does not depend on those missing items.
+
+The founder can choose an assisted setup instead. In that mode, use ask-me-first settings and
+prepare drafts without publishing. A skipped answer grants nothing.
+
 ## Protected Moves And Your Okay
 
-Even at full trust, six kinds of moves are never automatic unless the founder specifically
-pre-approves them ahead of time:
+Even at full trust, six kinds of moves need a current standing or one-shot approval:
 
 - Spending money beyond the routine, already-approved amount
-- Sharing or using a login, password, or other credential
+- Connecting a new account or changing a credential role
 - Changing a price or a legal term
-- Posting something publicly beyond what's already approved
-- Submitting the app for release to a store
+- Publishing outside the approved site, store, channel, copy, or voice scope
+- Submitting or releasing an app outside an exact approved release envelope
 - Deleting or otherwise permanently changing something
 
 If the founder wants to pre-approve one of these, collect all of the following before recording
 it — a pre-approval with any of these missing does not take effect:
 
-1. **Exactly what this covers.** A specific, narrow description of the one thing being
-   pre-approved — never "everything in this area."
+1. **Exactly what this covers.** Name the provider, account, project, environment, allowed
+   operations, resources, and exclusions.
 2. **A cap, and how often it resets.** A maximum for one action, a maximum for a stretch of time,
    and whether that stretch is a day, a week, a month, or a single work session.
 3. **When this pre-approval runs out.** A firm date. It does not renew itself — when it passes,
@@ -182,8 +216,8 @@ it — a pre-approval with any of these missing does not take effect:
    something for good — a plain acknowledgment that it can't be undone, plus the exact steps that
    limit the damage if it does go wrong.
 
-Never record a pre-approval that's vague, open-ended, or covers more than one of these six kinds
-of move at a time. Each one is its own, specific yes.
+Never record a vague or open-ended pre-approval. One onboarding answer can create several separate
+envelopes. Each envelope must cover only one protected category and one clear operation family.
 
 ## How Much It May Spend
 
@@ -197,31 +231,31 @@ cannot pay for a web address. Ask this once, in the same conversation:
 > bring you each spending decision as it comes.
 
 For each area that gets money, collect three things: **which area** it belongs to, **an amount and a
-currency**, and **how often it resets** — a day, a week, or a month. An amount covers one named
-period and does not renew itself, exactly like a pre-approval: when the period ends the founder is
-asked again rather than the number quietly rolling forward.
+currency**, and **how often it resets** — a day, a week, or a month. The founder can approve a
+repeating budget during onboarding. The agent stops at the ceiling and reports actual spending.
+It does not infer a higher limit.
 
 Setting nothing aside is a real answer and the default. It blocks nothing that costs nothing; it
 means spending waits for the founder each time instead of running inside an agreed limit.
 
-Keep this separate from a pre-approval above. A pre-approval says *this one protected move is
-allowed*; an amount says *this area has this much to work with*. A founder who says "you can spend
-$200 a month on ads" has answered the second, not the first, and still owes a yes before the first
-campaign actually goes live.
+Keep this separate from a pre-approval above. An approval envelope says which operations are
+allowed. A budget says how much the area may use. Collect both during step-away setup so routine
+spending does not create repeated questions.
 
 ## The Fast Path
 
-Some founders would rather not walk through nine areas one at a time. Offer this explicitly:
+Offer this first:
 
-> Or, I can use my recommended setting everywhere — ask-me-first for money, store submissions, and
-> anything privacy or legal, and handle-the-routine-stuff for everything else — and you can adjust
-> any single area later without redoing the rest. Want me to just do that?
+> I can set up step-away mode now. I will use full trust for product, design, engineering, growth,
+> store, and operations. I will use routine authority for analytics, revenue, and trust. I will
+> verify every required account and tool, and create separate standing approvals for website
+> deployment, asset creation, store material, and test-build uploads. I will stop only for missing
+> access, a budget overrun, a new price or legal promise, an identity change, deletion, or a final
+> public release that you did not approve here. Do you want this recommended setup?
 
-If they say yes, still name the two areas kept on the safer, ask-first setting (money; store and
-legal/privacy) so the founder knows what changed and what didn't, then confirm once and move on.
-
-The fast path covers the trust settings only. Ask the spending question anyway — it is one sentence,
-and there is no safe default anyone else can pick for someone else's money.
+If they say yes, collect the spending limit and release choice in the same exchange. The release
+choice is either test uploads only or one exact production release. Do not add later confirmation
+steps for operations already covered by the resulting standing envelopes.
 
 ## After The Conversation
 

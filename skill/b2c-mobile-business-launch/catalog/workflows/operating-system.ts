@@ -97,12 +97,12 @@ export const workflows = [
     title: "Change cascade",
     domainId: "domain.process",
     areaIds: ["area.operating-system"],
-    trigger: "Any change to a launched/near-launch app's feature, copy, brand, pricing, products, or data behavior",
+    trigger: "When design/design.md is accepted, and after each app, product, copy, brand, pricing, product, or data change",
     instructions:
-      "Classify the change against the Change Cascade Map (feature, lexicon/brand-vocabulary, onboarding-flow, paywall/pricing, visual/design-token, new IAP, privacy/data, domain/brand, or a design-token/copy/pricing change that invalidates already-generated assets — the last routes through the Generated-Asset Regeneration guardrails), then enumerate every surface that change type touches — in-app, App Store listing/products, RevenueCat/billing, landing/web + JSON-LD, SEO/GEO, lifecycle email, analytics, legal, content/UGC/ads — and update each or record why it's unaffected. Record the result as a `change_cascade` entry in `state/PROJECT_STATE.yaml`, one line per surface (`updated`+evidence, `unaffected`+reason, or `blocked`+blocker); a surface left out by omission fails `check:change-cascade` as `change_cascade.<id>.<surface>.unaccounted`, graded against the machine-readable twin in `cascade-edges.yaml` — edit both files together. Re-render any screenshot, App Preview, or ad creative whose underlying copy/UI changed, and reconcile the locked lexicon in `design/design.md` across every surface before calling the change done.",
+      "Run a design_contract_lock cascade when design/design.md is first accepted. This creates the public-surface baseline while app implementation starts. After that, classify each accepted app or business change against the Change Cascade Map. Use agents/launch-surface-producer.md for the surface audit and bounded update tasks. Check the app, Apple App Store, Google Play, store products, billing, landing site, web onboarding, GEO/SEO, lifecycle email, analytics, legal pages, screenshots, and marketing assets. Update each affected surface or record why it is unaffected. Record one change_cascade entry in state/PROJECT_STATE.yaml. Each required surface needs updated evidence, an unaffected reason, or a blocker. Re-render any screenshot, App Preview, Play feature graphic, landing screenshot, or ad asset whose source changed. Reconcile the locked lexicon in design/design.md before the change is done.",
     reads: ["state/PROJECT_STATE.yaml", "state/LAUNCH_TRACE.md", "design/design.md"],
     referenceIds: ["reference.process.change-cascade", "reference.process.cascade-edges", "reference.process.flow-traceability"],
-    roleId: "role.orchestrator",
+    roleId: "role.launch-surface-producer",
     // outputPaths intentionally empty: propagates an existing change_cascade record rather
     // than authoring PROJECT_STATE.yaml or LAUNCH_TRACE.md fresh (see file header).
     gates: ["check:change-cascade"],

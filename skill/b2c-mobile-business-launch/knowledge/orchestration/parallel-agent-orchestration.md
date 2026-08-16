@@ -75,6 +75,38 @@ Parallel agents are useful when each unit has a clear output and does not need a
 - test fixture creation, static validator authoring, and documentation updates when file ownership is disjoint
 - LaunchBench prompt review against known failure modes
 
+## Design-Lock Fan-Out
+
+Run this fan-out when `design/design.md` is accepted. Do not wait for the app build to finish.
+
+The graph makes these units ready from the same design dependency:
+
+| Unit | Workflow or prompt | Write scope |
+| --- | --- | --- |
+| App implementation | `workflow.engineering.engineering-orchestration-ce-production-readiness` | assigned app source paths |
+| Local landing build | `workflow.growth.pre-launch-funnel-landing-waitlist` | `growth/landing/` |
+| Store position and keywords | `workflow.store.aso-and-store-ops` | `STORE_OPS.md` |
+| Screenshot and product-page plan | `agents/launch-surface-producer.md` | exact store planning paths |
+| Marketing assets | `workflow.design.content-assets-remotion-generated-visuals` | content asset paths |
+| Copy and price check | `agents/launch-surface-producer.md` | exact copy paths |
+
+Use `initial-build` mode for the landing unit. A public deployment is a different workflow and remains founder-approved.
+
+Do not skip landing work because final app captures do not exist. Build screenshot slots and the capture plan now. Add real captures when app flows are stable.
+
+## Continuous Surface Sync
+
+Run this loop for each accepted app slice:
+
+1. Dispatch `agents/launch-surface-producer.md` in `impact-audit` mode before the slice merges.
+2. Classify the change with `change-cascade.md`.
+3. Assign each affected path set to a separate bounded-update unit.
+4. Continue the next app slice while those update units run.
+5. Serialize shared store documents, provider changes, device capture, and public actions.
+6. Integrate the updates. Run focused checks and `check:change-cascade`.
+
+The audit checks landing onboarding, copy, prices, screenshots, marketing assets, Apple product pages, Google Play listings, and localizations.
+
 ## Work To Serialize
 
 Do not parallelize these unless they are isolated in separate worktrees and the orchestrator owns final integration:
@@ -121,6 +153,17 @@ Use the prompts in `agents/` through `APP_AGENTS.md`. Broad launch work has nine
 7. Backend and infrastructure engineer: data, API, auth, jobs, observability, deployment, and provider integration.
 8. Accessibility and device QA specialist: assistive technology, localization stress, device coverage, and real-flow evidence.
 9. Security and release reviewer: threat model, privacy/security controls, signing, store requirements, and release evidence.
+
+The launch-surface producer is a prepared execution prompt. Use it after design acceptance and after each accepted app change.
+The operator-readiness prompt is a registered graph role. Founder-zero bootstrap routes to it before
+the graph fans out. It resolves tools, access, budgets, and standing envelopes so later workers do
+not create repeated founder gates. Provider mutations remain serialized and reconcile through the
+orchestrator.
+
+Never send a role prompt by itself. Dispatch the assembled node brief: parent repo contracts,
+task-local artifacts, mandatory catalog knowledge, conditional role context packs, matching nested
+skills, current tool-discovery routes, outputs, verification, and the machine-checkable knowledge
+receipt. A missing receipt is a failed attempt.
 
 Select only roles that match ready work. Dispatch independent read-only reviews together. Dispatch edits together only when their allowed paths do not overlap. Give each specialist only the minimum source set in its prompt. Do not pass the full conversation or every launch document by default.
 

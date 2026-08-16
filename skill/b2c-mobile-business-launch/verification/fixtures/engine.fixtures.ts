@@ -1,12 +1,22 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { assert, assertSchemaValid, type Harness } from "./_harness.js";
 import { laneKeys, type BusinessStateV2, type LaneKey, type RunStateDocument, type Status } from "../../core/schema/types.js";
-import { compilePlan, type CatalogArtifact, type CatalogInput, type CatalogWorkflowNode, type CompiledPlan, type RunNodeId } from "../../core/engine/compile.js";
+import {
+  compilePlan,
+  type CatalogArtifact,
+  type CatalogInput,
+  type CatalogWorkflowNode,
+  type CompiledPlan,
+  type RunNodeId,
+} from "../../core/engine/compile.js";
 import { allowAllAutonomyEvaluator, computeFrontier, type AutonomyEvaluator } from "../../core/engine/frontier.js";
 import { buildDispatchBatches, checkBatchBoundary, neverHaltDispatchHooks } from "../../core/engine/dispatch.js";
 import { composeNodeBrief, renderNodeBrief } from "../../core/engine/node-brief.js";
 import { buildBoundaryResults } from "../../core/adapters/platform-execution.js";
+import { buildWorkerCommand } from "../../core/session/executor.js";
+import { buildWorkerPrompt, validateKnowledgeReceipt } from "../../core/session/worker-prompt.js";
+import { applyStandingApprovals } from "../../core/autonomy/standing-approvals.js";
 import {
   acceptVerification,
   beginAttempt,
@@ -63,7 +73,23 @@ function testWorkflows(): CatalogWorkflowNode[] {
       instructions: "Scan the category and write the brief.",
       reads: ["state/PROJECT_STATE.yaml"],
       references: [{ id: "reference.research.fixture", path: "knowledge/research/fixture.md", title: "Fixture Research", loadWhen: "fixture moment" }],
-      role: { id: "role.product-leader", name: "Product leader", promptPath: "agents/product-leader.md" },
+      role: {
+        id: "role.product-leader",
+        name: "Product leader",
+        promptPath: "agents/product-leader.md",
+        parentPromptPaths: ["AGENTS.md", "APP_AGENTS.md"],
+        contextPacks: [
+          {
+            id: "context.research",
+            title: "Research",
+            references: [
+              { id: "reference.research.role", path: "knowledge/research/role.md", title: "Role Research", loadWhen: "competitor evidence is needed" },
+            ],
+          },
+        ],
+        skillRoutes: [{ id: "fixture-product-skill", when: "fixture" }],
+        toolRoutes: [{ id: "fixture-product-tool", when: "fixture" }],
+      },
       dependencies: [],
       outputPaths: ["research/brief.md"],
       providerIds: [],
@@ -445,8 +471,14 @@ export function register(harness: Harness): void {
     const resumedAt = plusSeconds(now, idempotentTtl + 60);
     const events = detectOrphans(plan, run, resumedAt);
 
-    assert(events.some((event) => event.nodeId === idempotentId && event.resolution === "ready"), "idempotent node should resolve to ready");
-    assert(events.some((event) => event.nodeId === nonIdempotentId && event.resolution === "needs_readback"), "non-idempotent node should resolve to needs_readback");
+    assert(
+      events.some((event) => event.nodeId === idempotentId && event.resolution === "ready"),
+      "idempotent node should resolve to ready",
+    );
+    assert(
+      events.some((event) => event.nodeId === nonIdempotentId && event.resolution === "needs_readback"),
+      "non-idempotent node should resolve to needs_readback",
+    );
     assert(run.nodes[idempotentId]!.status === "ready", "idempotent node status should be ready after orphan resolution");
     assert(run.nodes[nonIdempotentId]!.status === "needs_readback", "non-idempotent node status should be needs_readback");
     assert(run.nodes[nonIdempotentId]!.attempts.at(-1)!.readbackRequired === true, "the orphaned non-idempotent attempt should require readback");
@@ -484,109 +516,264 @@ export function register(harness: Harness): void {
     assert(threw, "reconcilePatch must reject a patch that omits a declared output");
   });
 
-  harness.check("compile: verification policy derivation — gates are deterministic, gateless outputs are fail-closed fresh-context, kind none survives only for no-output nodes", () => {
+  harness.check(
+    "compile: verification policy derivation — gates are deterministic, gateless outputs are fail-closed fresh-context, kind none survives only for no-output nodes",
+    () => {
+      const plan = compilePlan(testCatalog(), now);
+      const byId = new Map(plan.nodes.map((node) => [node.id, node]));
+      const gated = byId.get(nodeId("product-spec"))!;
+      assert(gated.verification.kind === "deterministic", "a node with gateCommands must verify deterministically");
+      const gateless = byId.get(nodeId("engineering-build"))!;
+      assert(gateless.verification.kind === "fresh_context", "a gateless node WITH outputs must require fresh-context verification, never auto-accept");
+      assert(gateless.verification.failClosed === true, "gateless-output verification must fail closed");
+      // "none" is reachable only for a NON-JUDGMENT node with neither outputs nor gates — a shape
+      // catalog/validate.ts rejects in real catalogs (contract_empty), kept here to pin the enum.
+      // (research-scan would not do: domain.research is a judgment domain, fresh_context regardless.)
+      const catalog = testCatalog();
+      const engineeringBuild = catalog.workflows.find((workflowNode) => workflowNode.id === "workflow.engineering-build")!;
+      engineeringBuild.outputPaths = [];
+      const bare = compilePlan(catalog, now).nodes.find((node) => node.id === nodeId("engineering-build"))!;
+      assert(bare.verification.kind === "none", "a node with no outputs and no gates is the only remaining kind:none shape");
+    },
+  );
+
+  harness.check(
+    "compile+frontier: authored reads gate readiness — read artifacts join inputs (own outputs and consults never do) and the frontier holds until they are accepted (Codex round 3)",
+    () => {
+      const catalog = testCatalog();
+      const engineeringBuild = catalog.workflows.find((workflowNode) => workflowNode.id === "workflow.engineering-build")!;
+      engineeringBuild.dependencies = []; // deliberately no edge to the producer — the read alone must hold readiness
+      engineeringBuild.reads = ["research/brief.md", "foo"];
+      engineeringBuild.consults = ["growth/post.md"];
+      const plan = compilePlan(catalog, now);
+      const node = plan.nodes.find((candidate) => candidate.id === nodeId("engineering-build"))!;
+      assert(node.inputs.includes("artifact.research-brief"), "a read naming another workflow's artifact must join the node's inputs");
+      assert(!node.inputs.includes("artifact.engineering-build"), "a node's own output is the read-modify-write pattern, never an input");
+      assert(!node.inputs.includes("artifact.growth-post"), "a consult is open-if-present and must never gate");
+
+      const dayOne = seedFor([], plan);
+      const early = computeFrontier(plan, dayOne.run, dayOne.businessState, allowAllAutonomyEvaluator);
+      assert(
+        !early.ready.includes(nodeId("engineering-build")),
+        "the node must not be ready while its read artifact is unproduced, even with no dependency edge",
+      );
+      const afterResearch = seedFor(["research"], plan);
+      const later = computeFrontier(plan, afterResearch.run, afterResearch.businessState, allowAllAutonomyEvaluator);
+      assert(later.ready.includes(nodeId("engineering-build")), "the node becomes ready once the read artifact is produced and accepted");
+    },
+  );
+
+  harness.check(
+    "node-brief: composeNodeBrief carries the full authored contract, and an unauthored node degrades to an explicit marker — never a silent title-only brief",
+    () => {
+      const plan = compilePlan(testCatalog(), now);
+      const byId = new Map(plan.nodes.map((node) => [node.id, node]));
+      const authored = composeNodeBrief(byId.get(nodeId("research-scan"))!, plan);
+      assert(authored.instructions === "Scan the category and write the brief.", "instructions must pass through verbatim");
+      assert(authored.open.includes("state/PROJECT_STATE.yaml"), "authored reads must surface as files to open");
+      assert(
+        authored.load.some((entry) => entry.path === "knowledge/research/fixture.md" && entry.loadWhen === "fixture moment"),
+        "bound references must surface as knowledge to load with their load conditions",
+      );
+      assert(authored.role?.id === "role.product-leader", "the owning role must ride the brief");
+      assert(
+        authored.contractFiles.join(",") === "AGENTS.md,APP_AGENTS.md,agents/product-leader.md",
+        "parent and specialist contracts must be ordered in the brief",
+      );
+      assert(
+        authored.route.some((entry) => entry.path === "knowledge/research/role.md"),
+        "role context packs must resolve to conditional knowledge routes",
+      );
+      assert(
+        authored.skills.some((entry) => entry.id === "fixture-product-skill"),
+        "nested skill routes must ride the brief",
+      );
+      assert(
+        authored.tools.some((entry) => entry.id === "fixture-product-tool"),
+        "tool discovery routes must ride the brief",
+      );
+      assert(authored.produce.includes("research/brief.md"), "declared outputs must resolve to workspace paths");
+      assert(authored.verify.kind === "fresh_context" && authored.verify.failClosed === true, "the brief must state the verification contract");
+      const unauthored = composeNodeBrief(byId.get(nodeId("engineering-build"))!, plan);
+      assert(unauthored.instructions.includes("not authored"), "a node without instructions must say so explicitly in the brief");
+      const rendered = renderNodeBrief(authored);
+      assert(
+        rendered.includes("Do: Scan the category") && rendered.includes("Load: knowledge/research/fixture.md"),
+        "the markdown rendering must carry the contract lines",
+      );
+    },
+  );
+
+  harness.check("worker-prompt: a fresh worker receives the complete nesting contract and cannot pass without an exact knowledge receipt", () => {
     const plan = compilePlan(testCatalog(), now);
-    const byId = new Map(plan.nodes.map((node) => [node.id, node]));
-    const gated = byId.get(nodeId("product-spec"))!;
-    assert(gated.verification.kind === "deterministic", "a node with gateCommands must verify deterministically");
-    const gateless = byId.get(nodeId("engineering-build"))!;
-    assert(gateless.verification.kind === "fresh_context", "a gateless node WITH outputs must require fresh-context verification, never auto-accept");
-    assert(gateless.verification.failClosed === true, "gateless-output verification must fail closed");
-    // "none" is reachable only for a NON-JUDGMENT node with neither outputs nor gates — a shape
-    // catalog/validate.ts rejects in real catalogs (contract_empty), kept here to pin the enum.
-    // (research-scan would not do: domain.research is a judgment domain, fresh_context regardless.)
-    const catalog = testCatalog();
-    const engineeringBuild = catalog.workflows.find((workflowNode) => workflowNode.id === "workflow.engineering-build")!;
-    engineeringBuild.outputPaths = [];
-    const bare = compilePlan(catalog, now).nodes.find((node) => node.id === nodeId("engineering-build"))!;
-    assert(bare.verification.kind === "none", "a node with no outputs and no gates is the only remaining kind:none shape");
+    const node = plan.nodes.find((entry) => entry.id === nodeId("research-scan"))!;
+    const brief = composeNodeBrief(node, plan);
+    const prompt = buildWorkerPrompt(brief, "/tmp/business", "/tmp/skill");
+    assert(prompt.includes("AGENTS.md") && prompt.includes("agents/product-leader.md"), "worker prompt must carry parent and specialist contracts");
+    assert(
+      prompt.includes("knowledge/research/fixture.md") && prompt.includes("knowledge/research/role.md"),
+      "worker prompt must carry mandatory and conditional knowledge",
+    );
+    assert(
+      prompt.includes("fixture-product-skill") && prompt.includes("fixture-product-tool"),
+      "worker prompt must carry nested skill and tool discovery routes",
+    );
+    const command = buildWorkerCommand("codex", prompt);
+    assert(command.args.includes(prompt), "the runtime command must receive the composed worker prompt, not a title-only surrogate");
+    assert(validateKnowledgeReceipt("finished", brief).length > 0, "a conclusion without a knowledge receipt must fail");
+    const receipt = [
+      "CONTRACT_FILES_LOADED:",
+      ...brief.contractFiles.map((entry) => `- ${entry}`),
+      "KNOWLEDGE_LOADED:",
+      ...brief.load.map((entry) => `- ${entry.path}`),
+      "ROLE_KNOWLEDGE_USED:\n- none — condition did not match",
+      "SKILLS_USED:\n- fixture-product-skill",
+      "TOOLS_USED:\n- fixture-product-tool",
+    ].join("\n");
+    assert(validateKnowledgeReceipt(receipt, brief).length === 0, "an exact parent + mandatory-knowledge receipt must pass");
   });
 
-  harness.check("compile+frontier: authored reads gate readiness — read artifacts join inputs (own outputs and consults never do) and the frontier holds until they are accepted (Codex round 3)", () => {
-    const catalog = testCatalog();
-    const engineeringBuild = catalog.workflows.find((workflowNode) => workflowNode.id === "workflow.engineering-build")!;
-    engineeringBuild.dependencies = []; // deliberately no edge to the producer — the read alone must hold readiness
-    engineeringBuild.reads = ["research/brief.md", "foo"];
-    engineeringBuild.consults = ["growth/post.md"];
-    const plan = compilePlan(catalog, now);
-    const node = plan.nodes.find((candidate) => candidate.id === nodeId("engineering-build"))!;
-    assert(node.inputs.includes("artifact.research-brief"), "a read naming another workflow's artifact must join the node's inputs");
-    assert(!node.inputs.includes("artifact.engineering-build"), "a node's own output is the read-modify-write pattern, never an input");
-    assert(!node.inputs.includes("artifact.growth-post"), "a consult is open-if-present and must never gate");
+  harness.check(
+    "standing approvals: an exact active envelope clears the existing founder gate without a repeat prompt, while broad or expired envelopes do not",
+    () => {
+      const plan = compilePlan(testCatalog(), now);
+      const { run } = seedFor(["research", "product", "engineering"], plan);
+      const ledgerPath = path.join(harness.makeTempDir("standing-approval"), "agent-operations.json");
+      const envelope = {
+        id: "APR-revenue-report",
+        provider: "Stripe",
+        actionClasses: ["spend"],
+        operations: ["workflow.revenue-report"],
+        resourcePatterns: ["revenue/report.md", "provider.stripe"],
+        exclusions: [],
+        mode: "standing",
+        expiresAt: "2027-08-01T00:00:00.000Z",
+        status: "active",
+      };
+      writeFileSync(ledgerPath, JSON.stringify({ approvalEnvelopes: [envelope] }));
+      const matches = applyStandingApprovals(plan, run, ledgerPath, now);
+      assert(
+        matches.some((entry) => entry.workflowId === "workflow.revenue-report" && entry.envelopeId === envelope.id),
+        "exact standing envelope must be consumed as current authority",
+      );
+      assert(run.approvals["workflow.revenue-report.approval.1"] === "approved", "matching envelope must approve the run-state gate");
 
-    const dayOne = seedFor([], plan);
-    const early = computeFrontier(plan, dayOne.run, dayOne.businessState, allowAllAutonomyEvaluator);
-    assert(!early.ready.includes(nodeId("engineering-build")), "the node must not be ready while its read artifact is unproduced, even with no dependency edge");
-    const afterResearch = seedFor(["research"], plan);
-    const later = computeFrontier(plan, afterResearch.run, afterResearch.businessState, allowAllAutonomyEvaluator);
-    assert(later.ready.includes(nodeId("engineering-build")), "the node becomes ready once the read artifact is produced and accepted");
-  });
+      run.approvals["workflow.revenue-report.approval.1"] = "pending";
+      envelope.operations = ["workflow.*"];
+      writeFileSync(ledgerPath, JSON.stringify({ approvalEnvelopes: [envelope] }));
+      assert(applyStandingApprovals(plan, run, ledgerPath, now).length === 0, "a broad wildcard operation must not widen authority by analogy");
+    },
+  );
 
-  harness.check("node-brief: composeNodeBrief carries the full authored contract, and an unauthored node degrades to an explicit marker — never a silent title-only brief", () => {
-    const plan = compilePlan(testCatalog(), now);
-    const byId = new Map(plan.nodes.map((node) => [node.id, node]));
-    const authored = composeNodeBrief(byId.get(nodeId("research-scan"))!, plan);
-    assert(authored.instructions === "Scan the category and write the brief.", "instructions must pass through verbatim");
-    assert(authored.open.includes("state/PROJECT_STATE.yaml"), "authored reads must surface as files to open");
-    assert(authored.load.some((entry) => entry.path === "knowledge/research/fixture.md" && entry.loadWhen === "fixture moment"), "bound references must surface as knowledge to load with their load conditions");
-    assert(authored.role?.id === "role.product-leader", "the owning role must ride the brief");
-    assert(authored.produce.includes("research/brief.md"), "declared outputs must resolve to workspace paths");
-    assert(authored.verify.kind === "fresh_context" && authored.verify.failClosed === true, "the brief must state the verification contract");
-    const unauthored = composeNodeBrief(byId.get(nodeId("engineering-build"))!, plan);
-    assert(unauthored.instructions.includes("not authored"), "a node without instructions must say so explicitly in the brief");
-    const rendered = renderNodeBrief(authored);
-    assert(rendered.includes("Do: Scan the category") && rendered.includes("Load: knowledge/research/fixture.md"), "the markdown rendering must carry the contract lines");
-  });
+  harness.check(
+    "runstate: a gateless node's outputs no longer auto-accept — reconcile lands blocked and acceptVerification with evidence promotes (the 2026-08 auto-accept hole, closed)",
+    () => {
+      const plan = compilePlan(testCatalog(), now);
+      const { run } = seedFor(["research", "product"], plan);
+      const attempt = beginAttempt(plan, run, nodeId("engineering-build"), "session-x", now);
+      reconcilePatch(
+        plan,
+        run,
+        {
+          nodeId: nodeId("engineering-build"),
+          attemptId: attempt.id,
+          outputs: [{ artifactId: "artifact.engineering-build", path: "foo", fingerprint: "abc123", evidence: ["log line"] }],
+        },
+        now,
+      );
+      assert(
+        run.nodes[nodeId("engineering-build")]!.status === "blocked",
+        "a gateless node's reconcile must land blocked pending verification, never auto-succeed",
+      );
+      const binding = run.artifactBindings.find((b) => b.artifactId === "artifact.engineering-build")!;
+      assert(binding.accepted === false, "the output binding must stay unaccepted until a verifier accepts with evidence");
+      acceptVerification(plan, run, nodeId("engineering-build"), ["non-producer verifier signed off"], now);
+      assert(run.nodes[nodeId("engineering-build")]!.status === "succeeded", "acceptVerification with evidence promotes the node");
+      assert(
+        run.artifactBindings.find((b) => b.artifactId === "artifact.engineering-build")!.accepted === true,
+        "acceptance follows verification, not delivery",
+      );
+      assertSchemaValid(harness.checkSchema(RUN_STATE_SCHEMA, run), "run state after verified acceptance");
+    },
+  );
 
-  harness.check("runstate: a gateless node's outputs no longer auto-accept — reconcile lands blocked and acceptVerification with evidence promotes (the 2026-08 auto-accept hole, closed)", () => {
-    const plan = compilePlan(testCatalog(), now);
-    const { run } = seedFor(["research", "product"], plan);
-    const attempt = beginAttempt(plan, run, nodeId("engineering-build"), "session-x", now);
-    reconcilePatch(plan, run, { nodeId: nodeId("engineering-build"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.engineering-build", path: "foo", fingerprint: "abc123", evidence: ["log line"] }] }, now);
-    assert(run.nodes[nodeId("engineering-build")]!.status === "blocked", "a gateless node's reconcile must land blocked pending verification, never auto-succeed");
-    const binding = run.artifactBindings.find((b) => b.artifactId === "artifact.engineering-build")!;
-    assert(binding.accepted === false, "the output binding must stay unaccepted until a verifier accepts with evidence");
-    acceptVerification(plan, run, nodeId("engineering-build"), ["non-producer verifier signed off"], now);
-    assert(run.nodes[nodeId("engineering-build")]!.status === "succeeded", "acceptVerification with evidence promotes the node");
-    assert(run.artifactBindings.find((b) => b.artifactId === "artifact.engineering-build")!.accepted === true, "acceptance follows verification, not delivery");
-    assertSchemaValid(harness.checkSchema(RUN_STATE_SCHEMA, run), "run state after verified acceptance");
-  });
-
-  harness.check("boundary: a fresh-context result is exported only when its recorded verifier differs from the producing session — self-verification never crosses (Codex round 2)", () => {
-    const plan = compilePlan(testCatalog(), now);
-    // Self-verified: the recorded verifier IS the producer — the boundary must withhold it.
-    {
-      const { run } = seedFor([], plan);
-      const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-producer", now);
-      reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }] }, now);
-      acceptVerification(plan, run, nodeId("research-scan"), ["I checked my own work"], now, "session-producer");
-      assert(buildBoundaryResults(plan, run).length === 0, "a result whose verifier equals its producer must not cross the boundary");
-    }
-    // No recorded verifier at all: equally withheld — absence is not independence.
-    {
-      const { run } = seedFor([], plan);
-      const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-producer", now);
-      reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }] }, now);
-      acceptVerification(plan, run, nodeId("research-scan"), ["accepted with no recorded verifier"], now);
-      assert(buildBoundaryResults(plan, run).length === 0, "a fresh-context result with no recorded verifier must not cross the boundary");
-    }
-    // Independent verifier: exported, carrying both provenance fields.
-    {
-      const { run } = seedFor([], plan);
-      const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-producer", now);
-      reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }] }, now);
-      acceptVerification(plan, run, nodeId("research-scan"), ["fresh-context reviewer signed off"], now, "session-reviewer");
-      const exported = buildBoundaryResults(plan, run);
-      assert(exported.length === 1, "an independently verified result must cross the boundary");
-      assert(exported[0]!.producedBySessionId === "session-producer" && exported[0]!.verifiedBySessionId === "session-reviewer", "the result must carry producer and verifier provenance");
-    }
-  });
+  harness.check(
+    "boundary: a fresh-context result is exported only when its recorded verifier differs from the producing session — self-verification never crosses (Codex round 2)",
+    () => {
+      const plan = compilePlan(testCatalog(), now);
+      // Self-verified: the recorded verifier IS the producer — the boundary must withhold it.
+      {
+        const { run } = seedFor([], plan);
+        const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-producer", now);
+        reconcilePatch(
+          plan,
+          run,
+          {
+            nodeId: nodeId("research-scan"),
+            attemptId: attempt.id,
+            outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }],
+          },
+          now,
+        );
+        acceptVerification(plan, run, nodeId("research-scan"), ["I checked my own work"], now, "session-producer");
+        assert(buildBoundaryResults(plan, run).length === 0, "a result whose verifier equals its producer must not cross the boundary");
+      }
+      // No recorded verifier at all: equally withheld — absence is not independence.
+      {
+        const { run } = seedFor([], plan);
+        const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-producer", now);
+        reconcilePatch(
+          plan,
+          run,
+          {
+            nodeId: nodeId("research-scan"),
+            attemptId: attempt.id,
+            outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }],
+          },
+          now,
+        );
+        acceptVerification(plan, run, nodeId("research-scan"), ["accepted with no recorded verifier"], now);
+        assert(buildBoundaryResults(plan, run).length === 0, "a fresh-context result with no recorded verifier must not cross the boundary");
+      }
+      // Independent verifier: exported, carrying both provenance fields.
+      {
+        const { run } = seedFor([], plan);
+        const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-producer", now);
+        reconcilePatch(
+          plan,
+          run,
+          {
+            nodeId: nodeId("research-scan"),
+            attemptId: attempt.id,
+            outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }],
+          },
+          now,
+        );
+        acceptVerification(plan, run, nodeId("research-scan"), ["fresh-context reviewer signed off"], now, "session-reviewer");
+        const exported = buildBoundaryResults(plan, run);
+        assert(exported.length === 1, "an independently verified result must cross the boundary");
+        assert(
+          exported[0]!.producedBySessionId === "session-producer" && exported[0]!.verifiedBySessionId === "session-reviewer",
+          "the result must carry producer and verifier provenance",
+        );
+      }
+    },
+  );
 
   harness.check("runstate: reconcilePatch requiring verification lands blocked, acceptVerification promotes to succeeded", () => {
     const plan = compilePlan(testCatalog(), now);
     const { run } = seedFor([], plan);
     const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-x", now);
-    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }] }, now);
+    reconcilePatch(
+      plan,
+      run,
+      {
+        nodeId: nodeId("research-scan"),
+        attemptId: attempt.id,
+        outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }],
+      },
+      now,
+    );
     assert(run.nodes[nodeId("research-scan")]!.status === "blocked", "fresh-context verification should land blocked pending acceptance");
     acceptVerification(plan, run, nodeId("research-scan"), ["fresh-context reviewer signed off"], now);
     assert(run.nodes[nodeId("research-scan")]!.status === "succeeded", "acceptVerification should promote the node to succeeded");
@@ -597,7 +784,16 @@ export function register(harness: Harness): void {
     const plan = compilePlan(testCatalog(), now);
     const { run } = seedFor([], plan);
     const attempt = beginAttempt(plan, run, nodeId("research-scan"), "session-x", now);
-    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: attempt.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }] }, now);
+    reconcilePatch(
+      plan,
+      run,
+      {
+        nodeId: nodeId("research-scan"),
+        attemptId: attempt.id,
+        outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "abc", evidence: [] }],
+      },
+      now,
+    );
     assert(run.nodes[nodeId("research-scan")]!.status === "blocked", "fresh-context verification should land blocked pending acceptance");
     let threw = false;
     try {
@@ -640,38 +836,95 @@ export function register(harness: Harness): void {
     assert(!run.artifactBindings.find((b) => b.artifactId === "artifact.product-spec")!.accepted, "product-spec's output binding should be un-accepted");
   });
 
-  harness.check("runstate: reconciling a changed accepted output invalidates descendants automatically — the staleness trigger is wired, not merely available", () => {
-    const plan = compilePlan(testCatalog(), now);
-    const { run } = seedFor([], plan);
-    const first = beginAttempt(plan, run, nodeId("research-scan"), "session-x", now);
-    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: first.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v1", evidence: ["scan v1"] }] }, now);
-    acceptVerification(plan, run, nodeId("research-scan"), ["fresh-context reviewer signed off"], now);
-    const spec = beginAttempt(plan, run, nodeId("product-spec"), "session-x", plusSeconds(now, 1));
-    reconcilePatch(plan, run, { nodeId: nodeId("product-spec"), attemptId: spec.id, outputs: [{ artifactId: "artifact.product-spec", path: "product/spec.md", fingerprint: "spec-v1", evidence: [] }] }, plusSeconds(now, 1));
-    acceptVerification(plan, run, nodeId("product-spec"), ["gate:check:research=passed"], plusSeconds(now, 1));
+  harness.check(
+    "runstate: reconciling a changed accepted output invalidates descendants automatically — the staleness trigger is wired, not merely available",
+    () => {
+      const plan = compilePlan(testCatalog(), now);
+      const { run } = seedFor([], plan);
+      const first = beginAttempt(plan, run, nodeId("research-scan"), "session-x", now);
+      reconcilePatch(
+        plan,
+        run,
+        {
+          nodeId: nodeId("research-scan"),
+          attemptId: first.id,
+          outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v1", evidence: ["scan v1"] }],
+        },
+        now,
+      );
+      acceptVerification(plan, run, nodeId("research-scan"), ["fresh-context reviewer signed off"], now);
+      const spec = beginAttempt(plan, run, nodeId("product-spec"), "session-x", plusSeconds(now, 1));
+      reconcilePatch(
+        plan,
+        run,
+        {
+          nodeId: nodeId("product-spec"),
+          attemptId: spec.id,
+          outputs: [{ artifactId: "artifact.product-spec", path: "product/spec.md", fingerprint: "spec-v1", evidence: [] }],
+        },
+        plusSeconds(now, 1),
+      );
+      acceptVerification(plan, run, nodeId("product-spec"), ["gate:check:research=passed"], plusSeconds(now, 1));
 
-    const second = beginAttempt(plan, run, nodeId("research-scan"), "session-y", plusSeconds(now, 2));
-    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: second.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v2", evidence: ["scan v2"] }] }, plusSeconds(now, 2));
+      const second = beginAttempt(plan, run, nodeId("research-scan"), "session-y", plusSeconds(now, 2));
+      reconcilePatch(
+        plan,
+        run,
+        {
+          nodeId: nodeId("research-scan"),
+          attemptId: second.id,
+          outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v2", evidence: ["scan v2"] }],
+        },
+        plusSeconds(now, 2),
+      );
 
-    assert(getStatus(run, nodeId("product-spec")) === "stale", "product-spec must go stale when its accepted input's fingerprint changes");
-    assert(!run.artifactBindings.find((b) => b.artifactId === "artifact.product-spec")!.accepted, "product-spec's output binding must be un-accepted");
-    assert(getStatus(run, nodeId("engineering-build")) === "stale", "transitive descendant engineering-build must go stale too");
-    assert(getStatus(run, nodeId("growth-post")) === "pending", "unrelated growth-post must be untouched — invalidation must never over-mark");
-    assert(getStatus(run, nodeId("research-scan")) === "blocked", "the producer itself is pending its own re-verification, never stale");
-  });
+      assert(getStatus(run, nodeId("product-spec")) === "stale", "product-spec must go stale when its accepted input's fingerprint changes");
+      assert(!run.artifactBindings.find((b) => b.artifactId === "artifact.product-spec")!.accepted, "product-spec's output binding must be un-accepted");
+      assert(getStatus(run, nodeId("engineering-build")) === "stale", "transitive descendant engineering-build must go stale too");
+      assert(getStatus(run, nodeId("growth-post")) === "pending", "unrelated growth-post must be untouched — invalidation must never over-mark");
+      assert(getStatus(run, nodeId("research-scan")) === "blocked", "the producer itself is pending its own re-verification, never stale");
+    },
+  );
 
   harness.check("runstate: re-producing an identical output invalidates nothing — staleness stays honest in both directions", () => {
     const plan = compilePlan(testCatalog(), now);
     const { run } = seedFor([], plan);
     const first = beginAttempt(plan, run, nodeId("research-scan"), "session-x", now);
-    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: first.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v1", evidence: [] }] }, now);
+    reconcilePatch(
+      plan,
+      run,
+      {
+        nodeId: nodeId("research-scan"),
+        attemptId: first.id,
+        outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v1", evidence: [] }],
+      },
+      now,
+    );
     acceptVerification(plan, run, nodeId("research-scan"), ["fresh-context reviewer signed off"], now);
     const spec = beginAttempt(plan, run, nodeId("product-spec"), "session-x", plusSeconds(now, 1));
-    reconcilePatch(plan, run, { nodeId: nodeId("product-spec"), attemptId: spec.id, outputs: [{ artifactId: "artifact.product-spec", path: "product/spec.md", fingerprint: "spec-v1", evidence: [] }] }, plusSeconds(now, 1));
+    reconcilePatch(
+      plan,
+      run,
+      {
+        nodeId: nodeId("product-spec"),
+        attemptId: spec.id,
+        outputs: [{ artifactId: "artifact.product-spec", path: "product/spec.md", fingerprint: "spec-v1", evidence: [] }],
+      },
+      plusSeconds(now, 1),
+    );
     acceptVerification(plan, run, nodeId("product-spec"), ["gate:check:research=passed"], plusSeconds(now, 1));
 
     const second = beginAttempt(plan, run, nodeId("research-scan"), "session-y", plusSeconds(now, 2));
-    reconcilePatch(plan, run, { nodeId: nodeId("research-scan"), attemptId: second.id, outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v1", evidence: [] }] }, plusSeconds(now, 2));
+    reconcilePatch(
+      plan,
+      run,
+      {
+        nodeId: nodeId("research-scan"),
+        attemptId: second.id,
+        outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "brief-v1", evidence: [] }],
+      },
+      plusSeconds(now, 2),
+    );
 
     assert(getStatus(run, nodeId("product-spec")) === "succeeded", "an identical re-production must not stale downstream work");
     assert(run.artifactBindings.find((b) => b.artifactId === "artifact.product-spec")!.accepted === true, "product-spec's accepted output must stay accepted");
@@ -690,19 +943,22 @@ export function register(harness: Harness): void {
     assert(isWallClockExceeded(run, plusSeconds(now, run.wallClockCapSeconds + 1)), "one second past the cap must be exceeded");
   });
 
-  harness.check("runstate: a resumed session measures the wall clock from its own start, never run creation (regression: every resume timed out instantly)", () => {
-    const plan = compilePlan(testCatalog(), now);
-    const { run } = seedFor([], plan);
-    const laterSessionStart = plusSeconds(run.createdAt, run.wallClockCapSeconds * 3);
-    assert(
-      !isWallClockExceeded(run, plusSeconds(laterSessionStart, run.wallClockCapSeconds - 1), laterSessionStart),
-      "a resumed session one second inside its own cap must not be exceeded, even long after run creation",
-    );
-    assert(
-      isWallClockExceeded(run, plusSeconds(laterSessionStart, run.wallClockCapSeconds + 1), laterSessionStart),
-      "a resumed session one second past its own cap must be exceeded",
-    );
-  });
+  harness.check(
+    "runstate: a resumed session measures the wall clock from its own start, never run creation (regression: every resume timed out instantly)",
+    () => {
+      const plan = compilePlan(testCatalog(), now);
+      const { run } = seedFor([], plan);
+      const laterSessionStart = plusSeconds(run.createdAt, run.wallClockCapSeconds * 3);
+      assert(
+        !isWallClockExceeded(run, plusSeconds(laterSessionStart, run.wallClockCapSeconds - 1), laterSessionStart),
+        "a resumed session one second inside its own cap must not be exceeded, even long after run creation",
+      );
+      assert(
+        isWallClockExceeded(run, plusSeconds(laterSessionStart, run.wallClockCapSeconds + 1), laterSessionStart),
+        "a resumed session one second past its own cap must be exceeded",
+      );
+    },
+  );
 
   // ---------------------------------------------------------------------
   // runstate.ts: persistence (atomic checkpoint, cross-process reload)

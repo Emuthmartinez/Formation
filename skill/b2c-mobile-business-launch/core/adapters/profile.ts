@@ -41,7 +41,8 @@ export interface SessionInvocation {
   readonly wallClockSeconds: number;
   readonly maxConcurrency?: number;
   readonly catalogPath?: string;
-  readonly executor?: "fixture" | "noop";
+  readonly executor?: "auto" | "fixture" | "noop";
+  readonly workerRuntime?: "auto" | "claude" | "codex" | "cursor";
 }
 
 export type WallClockEnforcement = "external-wrapper" | "not-applicable";
@@ -107,6 +108,7 @@ export function buildSessionRunArgs(invocation: SessionInvocation): string[] {
   ];
   if (invocation.catalogPath) args.push("--catalog", invocation.catalogPath);
   if (invocation.executor) args.push("--executor", invocation.executor);
+  if (invocation.workerRuntime) args.push("--worker-runtime", invocation.workerRuntime);
   if (invocation.maxConcurrency !== undefined) args.push("--max-concurrency", String(invocation.maxConcurrency));
   return args;
 }

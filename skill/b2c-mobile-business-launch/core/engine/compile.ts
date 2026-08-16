@@ -65,6 +65,10 @@ export interface NodeRole {
   id: string;
   name: string;
   promptPath: string;
+  parentPromptPaths: string[];
+  contextPacks: Array<{ id: string; title: string; references: NodeReference[] }>;
+  skillRoutes: Array<{ id: string; when: string }>;
+  toolRoutes: Array<{ id: string; when: string }>;
 }
 
 export interface CatalogWorkflowNode {
@@ -122,6 +126,8 @@ export interface CompiledRunNode {
   role?: NodeRole;
   inputs: CatalogArtifactId[];
   outputs: CatalogArtifactId[];
+  outputPaths: string[];
+  providerIds: string[];
   dependencies: RunNodeId[];
   statePredicates: StatePredicate[];
   laneIds: LaneKey[];
@@ -214,6 +220,8 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
       role: workflow.role,
       inputs,
       outputs,
+      outputPaths: workflow.outputPaths,
+      providerIds: workflow.providerIds,
       dependencies: workflow.dependencies.map((id) => runIdByWorkflow.get(id)!),
       statePredicates: workflow.laneIds.map((laneKey) => ({ path: `lanes.${laneKey}.status`, operator: "not_in" as const, value: ["blocked"] })),
       laneIds: workflow.laneIds,

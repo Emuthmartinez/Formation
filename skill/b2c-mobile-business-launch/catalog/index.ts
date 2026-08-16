@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { areas } from "./areas.js";
 import { buildArtifacts } from "./artifacts.js";
+import { contextPacks } from "./context-packs.js";
 import { domains } from "./domains.js";
 import { discoverGates } from "./gates.js";
 import { lanes } from "./lanes.js";
@@ -32,6 +33,7 @@ export function composeCatalog(skillRoot: string): Catalog {
     phases: [...phases].sort((a, b) => a.order - b.order),
     lanes: [...lanes],
     roles: [...roles],
+    contextPacks: [...contextPacks],
     references: [...references],
     workflows: [...workflows],
     artifacts: buildArtifacts(workflows),
