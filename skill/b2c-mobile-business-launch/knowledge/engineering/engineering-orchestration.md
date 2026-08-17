@@ -1,5 +1,11 @@
 # Engineering Orchestration And Production Readiness
 
+## Mobile Quality And Software Supply Chain
+
+Keep a third-party SDK inventory. Record the owner, version, purpose, permissions, data use, update route, and removal route. Review privacy manifests and transitive dependencies before release.
+
+Test adaptive layouts, offline behavior, startup time, app size, and battery use on supported devices. Record measured evidence in `engineering/APP_QUALITY.md`. Do not use a simulator-only build as proof for battery or production-vitals claims.
+
 Use this before building the actual app, coordinating frontend/backend work, writing `AGENTS.md` or `CLAUDE.md`, creating `engineering/TECH_SPEC.md` or `engineering/ENGINEERING_PLAN.md`, dispatching subagents, using Compound Engineering skills, or declaring production readiness.
 
 Load `parallel-agent-orchestration.md` alongside this file before multi-lane work, subagent dispatch, worktree routing, `operations/ORCHESTRATION.md`, or any claim that parallel agents were used safely.

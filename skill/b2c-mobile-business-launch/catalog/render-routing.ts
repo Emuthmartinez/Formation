@@ -11,8 +11,8 @@ import type { Catalog } from "./types.js";
  * tooling/render-skill-graph.ts's CLI/--check pattern, restructured against catalog/
  * types. This is the concrete implementation of R20's inversion: domain routing and the
  * phase spine are now GENERATED from catalog/domains.ts, catalog/phases.ts, and
- * catalog/references.ts's authored loadWhen data, rather than the old catalog scraping a
- * hand-authored README table (see catalog/references.ts's file header).
+ * self-registering knowledge-package manifests, rather than the old catalog scraping a
+ * hand-authored README table.
  *
  * These render into catalog/generated/ AND splice into SKILL.md's Lane Routing table
  * (KTD13/U11: the 14 knowledge/<slug>/README.md routing tables that used to anchor each
@@ -91,7 +91,7 @@ export function renderReferenceIndex(catalog: Catalog): string {
     generatedStart("reference-index"),
     "# Reference Index",
     "",
-    "Generated from catalog/references.ts.",
+    "Generated from catalog/knowledge/**/*.yaml.",
     "",
     sections,
     "",

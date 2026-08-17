@@ -1,5 +1,6 @@
 import type { BusinessStateV2, RunStateDocument, Status } from "../schema/types.js";
 import type { CompiledPlan, CompiledRunNode, RunNodeId, StatePredicate } from "./compile.js";
+import { reconcileWorkflowApplicability } from "./runstate.js";
 
 export interface AutonomyDecision {
   allowed: boolean;
@@ -43,6 +44,7 @@ const READY_ELIGIBLE_STATUSES: readonly Status[] = ["pending", "ready", "stale"]
  * waiting_founder.
  */
 export function computeFrontier(plan: CompiledPlan, run: RunStateDocument, businessState: BusinessStateV2, evaluator: AutonomyEvaluator): FrontierResult {
+  reconcileWorkflowApplicability(plan, run, businessState, new Date().toISOString());
   const accepted = new Set(run.artifactBindings.filter((binding) => binding.accepted).map((binding) => binding.artifactId));
   const ready: RunNodeId[] = [];
   const parked: ParkedNode[] = [];

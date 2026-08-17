@@ -5,7 +5,7 @@ import type { CatalogDomain } from "./types.js";
  * the 14 `knowledge/<slug>/README.md` routing tables named in the port ledger
  * (docs/plans/attachments/2026-08-port-ledger.md) were deleted — their sole job, the
  * per-domain routing table, is superseded by `catalog/generated/routing.md`, generated from
- * this file plus `catalog/references.ts`'s authored `loadWhen` data (R20). `indexPath` is
+ * this file plus the knowledge manifests' authored `loadWhen` data (R20). `indexPath` is
  * removed for every domain whose README is gone rather than left dangling; `domain.machine`
  * keeps its `indexPath` because `validation/repository/README.md` (a "merge" disposition in
  * the ledger, not "drop") still exists.

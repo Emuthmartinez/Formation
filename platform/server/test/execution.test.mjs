@@ -146,6 +146,31 @@ test("worker inspect distinguishes unreachable from unready", async () => {
   assert.equal(fixtureBacked.selfServeExecution().available, true);
 });
 
+test("launch matrix is returned only from a ready 1.1 engine", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "formation-matrix-"));
+  const store = new JsonStore({ filePath: path.join(directory, "formation.json"), seedFactory: createSeedDatabase });
+  await store.initialize();
+  const workspace = { id: "wrk_storywell", slug: "storywell" };
+  const older = new ExecutionWorker(store, {
+    engine: { describe: async () => ({ reachable: true, report: { schemaVersion: "1.0.0", workspaceReady: true } }) },
+    resolveEngineWorkspace: () => directory,
+  });
+  const unavailable = await older.launchMatrix(workspace);
+  assert.equal(unavailable.available, false);
+  assert.ok(unavailable.reason.includes("does not support"));
+
+  const groups = [{ id: "market-product", title: "Market and product", order: 1 }];
+  const workflows = [{ workflowId: "workflow.research.fixture", groupId: "market-product", title: "Research", status: "ready" }];
+  const current = new ExecutionWorker(store, {
+    engine: { describe: async () => ({ reachable: true, report: { schemaVersion: "1.1.0", workspaceReady: true, generatedAt: "2026-08-17T00:00:00.000Z", launchMatrix: { groups, workflows, systemSummary: { total: 1, counts: { ready: 1 } } } } }) },
+    resolveEngineWorkspace: () => directory,
+  });
+  const available = await current.launchMatrix(workspace);
+  assert.equal(available.available, true);
+  assert.deepEqual(available.groups, groups);
+  assert.deepEqual(available.workflows, workflows);
+});
+
 // ---------------------------------------------------------------------------
 // The full boundary: authorized request -> stable workflow -> fingerprint ->
 // durable engine run -> founder-readable state, idempotent across retries.

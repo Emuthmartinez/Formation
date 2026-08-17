@@ -342,6 +342,20 @@ export class ExecutionWorker {
     return { connected: true, reachable: true, checkedAt, ready: true, run: founderRunView(view.report), selfServeExecution: this.selfServeExecution() };
   }
 
+  /** Read-only matrix projection. Older engines are explicit unavailable states, not empty data. */
+  async launchMatrix(workspace) {
+    const engineWorkspaceDir = this.#resolveEngineWorkspace(workspace);
+    if (!engineWorkspaceDir) return { available: false, reason: "This company is not connected to its launch engine yet." };
+    const checkedAt = new Date().toISOString();
+    const view = await this.#engine.describe(engineWorkspaceDir);
+    if (!view.reachable) return { available: false, checkedAt, reason: view.reason };
+    if (!view.report.workspaceReady) return { available: false, checkedAt, reason: view.report.reason ?? "The launch workspace is not ready." };
+    if (view.report.schemaVersion !== "1.1.0" || !view.report.launchMatrix) {
+      return { available: false, checkedAt, reason: "The connected launch engine does not support the launch matrix yet." };
+    }
+    return { available: true, checkedAt, generatedAt: view.report.generatedAt, ...view.report.launchMatrix };
+  }
+
   /**
    * The founder approvals view for one workspace: asks the engine what it is asking, mirrors
    * that into the decision system, and returns the mirrored records. Only a reachable, ready

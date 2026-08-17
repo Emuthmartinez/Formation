@@ -17,6 +17,16 @@ function normalizeWorkflowId(value) {
 }
 
 export async function handleExecutionRoutes({ request, response, method, pathname, store, executionWorker, user }) {
+  const matrixMatch = pathname.match(/^\/api\/workspaces\/([^/]+)\/launch-matrix$/);
+  if (matrixMatch) {
+    if (method !== "GET") throw new HttpError(405, "Method not allowed.");
+    const workspaceId = decodeURIComponent(matrixMatch[1]);
+    const database = await store.read();
+    const workspace = requireWorkspace(database, workspaceId, user.id, "workspace-read");
+    json(response, 200, await executionWorker.launchMatrix(workspace));
+    return;
+  }
+
   const collectionMatch = pathname.match(/^\/api\/workspaces\/([^/]+)\/executions$/);
   if (collectionMatch) {
     const workspaceId = decodeURIComponent(collectionMatch[1]);

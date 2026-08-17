@@ -1,5 +1,9 @@
 # Revenue, Monetization, And Purchase Funnels
 
+## Tax And Payout Readiness
+
+Record the legal owner for each store and payment provider. Confirm tax forms, banking details, payout currency, payout schedule, reserve or hold state, and reconciliation ownership. Keep sensitive values in the approved provider or secret manager. Record only status and sanitized evidence in the launch workspace. An incomplete tax or payout setup blocks a revenue-readiness claim.
+
 Use this before setting up RevenueCat, Stripe, App Store/Google Play products, web billing, web purchase links, web funnels, paywalls, subscriptions, taxes, webhooks, pricing, entitlement identity, or purchase validation. This is the routing hub — it carries the decision matrix, the founder-only gates, and the anti-pattern digest; the setup and procedure detail live in the four spokes below.
 
 This is not a payment approval. Founder approval is required before changing prices, creating live billing products, enabling paid checkout, spending on ads, publishing subscription terms, or submitting store builds with monetization changes.

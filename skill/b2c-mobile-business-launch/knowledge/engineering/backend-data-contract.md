@@ -110,6 +110,12 @@ Mobile-client considerations apply on every route:
 
 ## Archetype Pack Adaptation
 
+## Data Export And Portability
+
+Define a user-data export before launch. List the included entities, file formats, media handling, request route, authentication check, delivery method, retention period, and deletion behavior. Use an open format when practical. Test one complete export and one failed or expired request. Record the owner and the recovery route. The export must match the data inventory and the privacy policy.
+
+## Archetype Pack Adaptation
+
 The shipped archetype prompt packs (`starters/social-network`, `starters/ai-chat-companion`) assume Supabase. When the founder selects Firebase or a custom backend, **adapt each schema/auth prompt to the selected route before running it** — do not run the Supabase prompts verbatim and patch the output later. Use this parity table when rewriting a prompt:
 
 | Supabase concept (as shipped) | Firebase equivalent | Custom-backend equivalent |

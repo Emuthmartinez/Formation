@@ -13,7 +13,7 @@ import {
 import { allowAllAutonomyEvaluator, computeFrontier, type AutonomyEvaluator } from "../../core/engine/frontier.js";
 import { buildDispatchBatches, checkBatchBoundary, neverHaltDispatchHooks } from "../../core/engine/dispatch.js";
 import { composeNodeBrief, renderNodeBrief } from "../../core/engine/node-brief.js";
-import { buildBoundaryResults } from "../../core/adapters/platform-execution.js";
+import { buildBoundaryResults, buildLaunchMatrix } from "../../core/adapters/platform-execution.js";
 import { buildWorkerCommand, receiptFileDigest } from "../../core/session/executor.js";
 import { buildWorkerPrompt, validateKnowledgeReceipt } from "../../core/session/worker-prompt.js";
 import {
@@ -36,6 +36,7 @@ import {
   loadRunState,
   reconcilePatch,
   refreshHeartbeat,
+  reconcileWorkflowApplicability,
   seedRunState,
   wallClockDeadline,
   writeCheckpoint,
@@ -340,6 +341,63 @@ export function register(harness: Harness): void {
     assert(result.ready.includes(nodeId("growth-post")), "growth-post (no deps) should be ready on day one");
     assert(!result.ready.includes(nodeId("product-spec")), "product-spec should not be ready before research-scan succeeds");
     assert(!result.ready.includes(nodeId("engineering-build")), "engineering-build should not be ready before product-spec succeeds");
+  });
+
+  harness.check("applicability: unknown, required, and not-needed conditional verdicts are explicit", () => {
+    const conditional: CatalogWorkflowNode = {
+      ...testWorkflows().find((item) => item.id === "workflow.growth-post")!,
+      applicability: { mode: "conditional", question: "Does this app generate content?" },
+    };
+    const plan = compilePlan({ version: "catalog.applicability", artifacts: testArtifacts().filter((item) => item.path === "growth/post.md"), workflows: [conditional] }, now);
+    const unknownState = baseBusinessState();
+    const unknownRun = seedRunState(plan, unknownState, { ownerSessionId: "scope", ttlSeconds: 60, wallClockCapSeconds: 60, now });
+    assert(getStatus(unknownRun, nodeId("growth-post")) === "waiting_founder", "unknown conditional scope did not wait for founder");
+    assert(unknownRun.nodes[nodeId("growth-post")]!.blocker?.includes("Scope answer needed"), "unknown scope did not name the question");
+
+    const requiredState = baseBusinessState();
+    requiredState.workflowApplicability = { "workflow.growth-post": { verdict: "required", reason: "The accepted spec includes generation.", evidence: ["product/spec.md"], updatedAt: now } };
+    const requiredRun = seedRunState(plan, requiredState, { ownerSessionId: "scope", ttlSeconds: 60, wallClockCapSeconds: 60, now });
+    assert(computeFrontier(plan, requiredRun, requiredState, allowAllAutonomyEvaluator).ready.includes(nodeId("growth-post")), "required conditional scope did not reach ready");
+
+    const notNeededState = baseBusinessState();
+    notNeededState.workflowApplicability = { "workflow.growth-post": { verdict: "not-needed", reason: "The accepted spec has no generated content.", evidence: ["product/spec.md"], updatedAt: now } };
+    const notNeededRun = seedRunState(plan, notNeededState, { ownerSessionId: "scope", ttlSeconds: 60, wallClockCapSeconds: 60, now });
+    assert(getStatus(notNeededRun, nodeId("growth-post")) === "not_needed", "not-needed conditional scope did not retire the workflow");
+  });
+
+  harness.check("applicability: a changed verdict reopens work and invalidates accepted output", () => {
+    const conditional: CatalogWorkflowNode = { ...testWorkflows().find((item) => item.id === "workflow.growth-post")!, applicability: { mode: "conditional", question: "Is growth publishing needed?" } };
+    const plan = compilePlan({ version: "catalog.applicability-change", artifacts: testArtifacts().filter((item) => item.path === "growth/post.md"), workflows: [conditional] }, now);
+    const state = baseBusinessState();
+    state.workflowApplicability = { "workflow.growth-post": { verdict: "not-needed", reason: "Initial scope.", evidence: ["product/spec.md"], updatedAt: now } };
+    const run = seedRunState(plan, state, { ownerSessionId: "scope", ttlSeconds: 60, wallClockCapSeconds: 60, now });
+    const binding = run.artifactBindings[0]!;
+    binding.accepted = true;
+    binding.fingerprint = "old-proof";
+    run.nodes[nodeId("growth-post")]!.acceptedOutputFingerprint = "old-proof";
+    state.workflowApplicability["workflow.growth-post"] = { verdict: "required", reason: "The product scope changed.", evidence: ["product/spec.md#change"], updatedAt: plusSeconds(now, 60) };
+    reconcileWorkflowApplicability(plan, run, state, plusSeconds(now, 60));
+    assert(getStatus(run, nodeId("growth-post")) === "pending", "required verdict did not reopen the workflow");
+    assert(!run.artifactBindings[0]!.accepted && run.artifactBindings[0]!.fingerprint === undefined, "changed verdict did not invalidate old output proof");
+  });
+
+  harness.check("boundary matrix: non-ready work keeps compact graph metadata and declarations stay planned without proof", () => {
+    const matrixWorkflow: CatalogWorkflowNode = {
+      ...testWorkflows().find((item) => item.id === "workflow.growth-post")!,
+      groupId: "revenue-growth",
+      phaseIds: ["phase.4"],
+      applicability: { mode: "always" },
+    };
+    const plan = compilePlan({ version: "catalog.matrix", artifacts: testArtifacts().filter((item) => item.path === "growth/post.md"), workflows: [matrixWorkflow] }, now);
+    const state = baseBusinessState();
+    const run = seedRunState(plan, state, { ownerSessionId: "matrix", ttlSeconds: 60, wallClockCapSeconds: 60, now });
+    const projection = buildLaunchMatrix(plan, run, [{ workflowId: matrixWorkflow.id, title: matrixWorkflow.title, status: "upcoming" }], state, {});
+    assert(projection.workflows.length === 1, "matrix omitted non-ready work");
+    const item = projection.workflows[0]!;
+    assert(item.groupId === "revenue-growth" && item.phaseIds.includes("phase.4"), "matrix lost presentation or phase metadata");
+    assert(item.services[0]?.state === "planned", "a catalog provider declaration was overclaimed as connected");
+    assert(item.agentTools.some((tool) => tool.id === "fixture-product-tool") === false, "matrix invented role tools");
+    assert(!JSON.stringify(item.services).match(/token|secret|password/iu), "service projection leaked credential-shaped fields");
   });
 
   harness.check("frontier: mid-launch seeding excludes completed work but still surfaces next work", () => {

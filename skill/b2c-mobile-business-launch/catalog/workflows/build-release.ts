@@ -35,13 +35,6 @@ export const workflows = [
     instructions:
       "Build app-marketing-context (app name, category, target country, top competitors, primary/secondary/long-tail keyword candidates, current listing state, and public support/privacy URLs) before locking a single metadata field, then run keyword and name-collision checks in the target country and separate brand language from search language. Route any localization call through the demand-first priority tiers in LOCALIZATION_MARKET_RESEARCH.md rather than translating on inference, and route Apple Search Ads storefront targeting from the same tiers. Draft final metadata fields plus rejected alternatives with rationale into STORE_OPS.md, and run every metadata/keyword string through the no-slop-writing.md self-check before calling it locked. For the recurring post-launch loop, track keyword rank deltas, ASA search-term mining, and localization opportunities weekly rather than treating ASO as a one-time pass.",
     reads: ["design/design.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: [
-      "reference.store.aso-store-ops",
-      "reference.growth.paid-user-acquisition",
-      "reference.research.localization-market-research",
-      "reference.words.no-slop-writing",
-      "reference.process.tool-recipes.growth-and-store-routing",
-    ],
     roleId: "role.marketing-guru",
     laneIds: ["store_console"],
     phaseIds: ["phase.3"],
@@ -65,12 +58,6 @@ export const workflows = [
       "product/experience/11-star-experience/11_STAR_EXPERIENCE.md",
       "state/PROJECT_STATE.yaml",
     ],
-    referenceIds: [
-      "reference.store.app-store-listing-prep",
-      "reference.money.revenue-monetization",
-      "reference.experience.eleven-star-experience",
-      "reference.words.no-slop-writing",
-    ],
     roleId: "role.marketing-guru",
     laneIds: ["store_console"],
     phaseIds: ["phase.3"],
@@ -93,7 +80,6 @@ export const workflows = [
     instructions:
       "Classify the Apple account state (membership, Team ID, role, agreements signed) before any TestFlight/App Store distribution claim, and treat a simulator build as engineering proof only, never distribution readiness. Run the five-item pre-archive/export/upload preflight checklist — SDK keys actually injected into the archived Info.plist, `plutil -lint` on PrivacyInfo.xcprivacy, NSPrivacyAccessedAPITypes coverage, API-key (not interactive-session) export auth, and native screenshot dimension floors — and record pass/BLOCKED for each in store/APPLE_SIGNING.md before archiving. Do not begin `xcodebuild archive` until every item is pass or ready. A current exact TestFlight upload standing envelope authorizes archive/upload without another prompt; read back the build state and record proof. Enrollment, certificate creation/rotation, agreements, pricing, final review submission, and production release remain founder decisions unless the opening envelope names that exact action.",
     reads: ["store/app-store-listing/APP_STORE_LISTING.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.store.apple-signing-release", "reference.store.app-store-connect-cli", "reference.operations.secrets-management"],
     roleId: "role.engineering-leader",
     laneIds: ["apple_signing"],
     phaseIds: ["phase.3"],
@@ -121,7 +107,6 @@ export const workflows = [
       "revenue/REVENUE_OPS.md",
       "state/PROJECT_STATE.yaml",
     ],
-    referenceIds: ["reference.store.app-store-listing-prep", "reference.trust.privacy-terms", "reference.store.store-console-workflow"],
     roleId: "role.security-architect",
     laneIds: ["store_console", "privacy_legal"],
     phaseIds: ["phase.3"],
@@ -143,12 +128,6 @@ export const workflows = [
     instructions:
       "Produce the console-ready packet that tells the founder exactly where to click, what to paste, and what still needs their approval: fill store/STORE_CONSOLE.md field-by-field (click path, character limit, paste-ready value, evidence source, status) for every App Store Connect and Google Play Console page in scope, then render store/store-console.html as the copy-paste surface grouped by console page. Distinguish the Apple readiness states explicitly — simulator-build-ok, apple-account-ready, bundle-id-ready, app-record-ready, signing-ready, archive-ready, upload-ready — and never call the launch 'TestFlight-ready' from a simulator build alone. Reconcile Apple App Privacy answers against Google Play Data safety answers so the two stores never contradict each other for the same codebase, then confirm `npm run check:store-console -- --root .` passes. Founder approval is required before any external console mutation — app creation, metadata apply, screenshot upload, submission.",
     reads: ["store/app-store-listing/APP_STORE_LISTING.md", "store/APPLE_SIGNING.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: [
-      "reference.store.store-console-workflow",
-      "reference.store.apple-signing-release",
-      "reference.store.google-play-release",
-      "reference.store.app-store-connect-cli",
-    ],
     roleId: "role.marketing-guru",
     laneIds: ["store_console"],
     phaseIds: ["phase.3"],
@@ -170,7 +149,6 @@ export const workflows = [
     instructions:
       "Default to the `asc` CLI/skill-pack route for App Store Connect work — reads, ID resolution, metadata/screenshot dry-runs, and TestFlight/review-status checks are safe without new approval. Work the auth ladder before reporting ASC as blocked: check an existing keychain profile first (`asc --profile <Name>`), never `source` a credential `.env` file, and treat 'app record not found' as a setup step. Confirm `--help` before any unverified subcommand. Apply approved metadata, screenshots, previews, product pages, and TestFlight uploads automatically when an exact current standing envelope covers the workflow, target, resource, and action class; use the required confirmation flag, capture before-state, and read back the provider result. Ask only when that scope is absent or expired. Pricing, agreements, final review submission, and public release remain exceptional unless explicitly named in the envelope. Pass `npm run check:asc-command-contract -- --root .` and return the state/STORE_CONSOLE reconciliation patch after every external change.",
     reads: ["store/STORE_CONSOLE.md", "store/store-console.html", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.store.app-store-connect-cli", "reference.store.store-console-workflow", "reference.operations.secrets-management"],
     roleId: "role.engineering-leader",
     laneIds: ["store_console"],
     phaseIds: ["phase.3"],
@@ -200,13 +178,6 @@ export const workflows = [
       "product/experience/emotional-design/EMOTIONAL_DESIGN.md",
       "state/PROJECT_STATE.yaml",
     ],
-    referenceIds: [
-      "reference.store.aso-store-ops",
-      "reference.design.design-visual-system",
-      "reference.design.quality-lens",
-      "reference.process.tool-recipes.device-capture-and-proof",
-      "reference.engineering.mobai-toolbelt",
-    ],
     roleId: "role.design-guru",
     laneIds: ["store_console", "content_assets"],
     phaseIds: ["phase.3"],
@@ -226,12 +197,6 @@ export const workflows = [
     instructions:
       "Classify the Play developer account (organization vs personal, verification status, payments profile) before any Android readiness claim, and if personal, plan the 12-tester/14-continuous-day closed-testing production gate into the launch timeline now — it is a calendar gate, not a paperwork gate. Complete every Policy > App content task (Data safety, content rating, App access demo credentials, account deletion) and reconcile the Data safety answers against the same data inventory used for Apple App Privacy; a divergence between the two stores for one codebase is a reconciliation failure unless explicitly documented. Enroll in Play App Signing, upload an AAB (never an APK) as the readiness artifact, and stage production rollout in percentages with a named halt owner rather than 0% straight to 100%. Write the eight required sections (Developer Account, Data Safety, Content Rating, Play App Signing, Target API Level, Release Tracks, Closed Testing, Pre-Launch Report) to store/GOOGLE_PLAY_RELEASE.md before calling the Play side of lanes.store_console done.",
     reads: ["store/app-store-listing/APP_STORE_LISTING.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: [
-      "reference.store.google-play-release",
-      "reference.store.store-console-workflow",
-      "reference.trust.privacy-terms",
-      "reference.money.revenue-monetization",
-    ],
     roleId: "role.engineering-leader",
     laneIds: ["store_console"],
     phaseIds: ["phase.3"],
@@ -252,7 +217,6 @@ export const workflows = [
     instructions:
       "Apply only the approved Google Play listing text, localized metadata, custom store listings, and promotional content covered by the exact current standing envelope. Verify account, package, track-neutral resource IDs, locales, payload digest, and capability immediately before mutation. Capture before-state and read back every locale. Write store/proof/google-play-metadata-apply.json with approval ID, request digest, before state, provider operation IDs, readback state, and timestamps. Do not upload media, change products, submit a release, or widen the envelope.",
     reads: ["store/STORE_CONSOLE.md", "store/app-store-listing/APP_STORE_LISTING.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.store.google-play-release", "reference.store.store-console-workflow"],
     roleId: "role.marketing-guru",
     laneIds: ["store_console"],
     phaseIds: ["phase.3"],
@@ -274,7 +238,6 @@ export const workflows = [
     instructions:
       "Upload only the locale, device-family, custom-store-listing, screenshot, feature-graphic, and promo-video assets covered by the exact current standing envelope. Verify every file digest and Play resource ID immediately before upload. Capture before-state and read back the resulting media set. Write store/proof/google-play-media-apply.json with approval ID, per-file digest, locale, device family, product-page/listing ID, provider operation IDs, readback state, and timestamps. Do not apply text metadata, products, testing tracks, or release state.",
     reads: ["store/STORE_CONSOLE.md", "store/app-store-listing/SCREENSHOTS.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.store.google-play-release", "reference.store.aso-store-ops"],
     roleId: "role.marketing-guru",
     laneIds: ["store_console", "content_assets"],
     phaseIds: ["phase.3"],
@@ -296,7 +259,6 @@ export const workflows = [
     instructions:
       "Upload the exact AAB digest and assign it only to the named internal or closed-testing track covered by the current standing envelope. Verify package, signing, version code, tester cohort, country scope, rollout state, and release notes immediately before upload. Read back processing and tester availability. Write store/proof/google-play-testing-track-apply.json with approval ID, AAB digest, version code, track, provider operation ID, processing/readback state, tester cohort, and timestamps. Production submission and public rollout remain separate founder decisions.",
     reads: ["store/GOOGLE_PLAY_RELEASE.md", "engineering/PRODUCTION_READINESS.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.store.google-play-release", "reference.process.provider-proof"],
     roleId: "role.engineering-leader",
     laneIds: ["store_console", "engineering"],
     phaseIds: ["phase.5b"],
@@ -318,7 +280,6 @@ export const workflows = [
     instructions:
       "Fingerprint the mobile source roots, dependency locks, build configuration, localization resources, analytics schema, onboarding, paywall, and privacy manifests. Compare them with the last accepted checkpoint. Write engineering/SOURCE_CHANGE_MANIFEST.json with changed paths, before/after digests, and every applicable Change Cascade Map type. A change can carry multiple types. Open the matching change-cascade work before the app slice merges. An empty change list is valid only when the current aggregate digest matches the accepted checkpoint.",
     reads: ["run/app-source-fingerprint.sha256", "design/design.md", "engineering/TECH_SPEC.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.process.change-cascade", "reference.process.cascade-edges", "reference.process.flow-traceability"],
     roleId: "role.mobile-engineer",
     laneIds: ["engineering", "orchestration"],
     phaseIds: ["phase.3"],
@@ -337,16 +298,6 @@ export const workflows = [
     instructions:
       "Route non-trivial implementation through the Compound Engineering loop. Use the five-stage Standalone Engineering Loop when CE is unavailable. Record the route in engineering/ENGINEERING_PLAN.md. When design/design.md is accepted, start app implementation and the local landing build in the same ready batch. Also dispatch the prepared launch-surface prompt for store copy, product-page plans, screenshot plans, marketing assets, and price-copy checks. Give each agent a disjoint write scope. Before each app slice merges, start a read-only launch-surface impact audit. Apply affected public-surface updates in parallel with the next app slice. Record file ownership and serialized resources in operations/ORCHESTRATION.md. Require build, typecheck, lint, integration tests, mobile end-to-end proof, provider proof, and an on-device taste pass. Write the results to engineering/PRODUCTION_READINESS.md. Run check:compound-engineering and check:orchestration before the engineering lane is done.",
     reads: ["engineering/TECH_SPEC.md", "state/LAUNCH_TRACE.md", "design/design.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: [
-      "reference.engineering.engineering-orchestration",
-      "reference.orchestration.compound-engineering-routing",
-      "reference.orchestration.parallel-agent-orchestration",
-      "reference.orchestration.project-state",
-      "reference.experience.eleven-star-experience",
-      "reference.design.premium-mobile-craft",
-      "reference.design.quality-lens",
-      "reference.process.tool-recipes.engineering-and-agent-orchestration",
-    ],
     roleId: "role.engineering-leader",
     laneIds: ["engineering", "orchestration"],
     phaseIds: ["phase.5b"],
@@ -374,12 +325,6 @@ export const workflows = [
     // so the early data contract is not held on later lanes; the deletion-promise exact-match is
     // re-enforced by change-cascade once trust/PRIVACY.md exists.
     consults: ["design/design.md", "trust/PRIVACY.md"],
-    referenceIds: [
-      "reference.engineering.backend-data-contract",
-      "reference.process.flow-traceability",
-      "reference.trust.privacy-terms",
-      "reference.operations.secrets-management",
-    ],
     roleId: "role.backend-infrastructure-engineer",
     laneIds: ["engineering"],
     phaseIds: ["phase.1f", "phase.5b"],
@@ -403,7 +348,6 @@ export const workflows = [
     instructions:
       "Fill AGENTS.md, CLAUDE.md, APP_AGENTS.md, and the complete agents/ roster from the current business documents. Include agents/launch-surface-producer.md. AGENTS.md must tell future agents to keep using the b2c-mobile-business-launch workflow. It must require state updates, cockpit renders, validators, and the design-lock fan-out. Assign each role its audit surface. Specialists can edit only an assigned disjoint scope. They never stage, commit, release, spend, submit, or publish. A fresh agent must be able to resume from AGENTS.md and the roster without chat history.",
     reads: ["engineering/ENGINEERING_PLAN.md", "operations/ORCHESTRATION.md", "engineering/PRODUCTION_READINESS.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.engineering.app-agent-roster", "reference.orchestration.parallel-agent-orchestration", "reference.process.artifact-contracts"],
     roleId: "role.orchestrator",
     laneIds: ["engineering"],
     phaseIds: ["phase.5"],
@@ -421,7 +365,6 @@ export const workflows = [
     instructions:
       "Run the MobAI session-startup checklist (refresh the live MCP surface, verify device discovery, start the bridge, pin the device ID) before any automation command — most 'device not found' failures come from skipping it. Use MobAI's free tier without a spend gate for one device/current quota; load paid-tool-routing.md and ask the founder before any Plus/Pro spend or before narrowing an intended cross-platform route to Apple-only. For demo videos, follow the recorder's explore -> script -> dry-run -> record -> edit/export sequence exactly — never improvise during final recording — and write the choreography path, raw capture, final export, and privacy/sensitive-screen review to growth/DEMO_VIDEO.md. Pass `npm run check:mobai-proof -- --root .`; pair every action sequence with backend/provider verification (the onboarding answer actually lands in profile state) because a clean UI pass is not proof the mutation landed.",
     reads: ["engineering/ENGINEERING_PLAN.md", "engineering/PRODUCTION_READINESS.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.engineering.mobai-toolbelt", "reference.process.tool-recipes.device-capture-and-proof", "reference.operations.paid-tool-routing"],
     roleId: "role.accessibility-device-qa",
     laneIds: ["engineering", "content_assets"],
     phaseIds: ["phase.5b"],
@@ -441,11 +384,6 @@ export const workflows = [
     instructions:
       "Start at rung 0 (the in-app iOS Simulator — Claude Code Desktop's pane, or Codex's build-ios-apps plugin) for any 'run the app / check this screen / walk this flow' request; it needs no install and no account, and escalating straight to XcodeBuildMCP or MobAI for a single screen check wastes founder time. Escalate only for what rung 0 cannot cover: physical devices or CI need XcodeBuildMCP (rung 2), deterministic preview PNG/JSON needs SnapshotPreviews, a browser-visible stream for a remote/CLI session needs serve-sim — record the rung chosen and why in strategy/TOOL_DECISIONS.md. Use fixture or sandbox accounts only on any device the agent drives, since device screenshots leave the machine and are retained under normal conversation policy; never sign a real founder/customer/store account into an agent-driven simulator. Attach the exact simulator/device, OS, tool route, and screenshot/log paths as evidence in engineering/PRODUCTION_READINESS.md and pass `npm run check:native-ios -- --root .`; a cloud/SSH session cannot reach a local Mac's simulators at all, so record that as a named blocker rather than narrating a run that did not happen.",
     reads: ["engineering/PRODUCTION_READINESS.md", "engineering/ENGINEERING_PLAN.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: [
-      "reference.engineering.xcodebuildmcp-testing",
-      "reference.process.tool-recipes.device-capture-and-proof",
-      "reference.store.apple-signing-release",
-    ],
     roleId: "role.accessibility-device-qa",
     laneIds: ["engineering"],
     phaseIds: ["phase.5b"],
@@ -457,5 +395,61 @@ export const workflows = [
     providers: ["provider.in-app-ios-simulator", "provider.codex-native-ios", "provider.snapshot-previews", "provider.serve-sim"],
     actionClass: "mutate",
     idempotent: false,
+  }),
+  workflow({
+    id: "workflow.engineering.accessibility-common-task-proof",
+    title: "Accessibility common-task proof",
+    domainId: "domain.engineering",
+    areaIds: ["area.build-release"],
+    trigger: "Before beta or store submission on every mobile launch",
+    instructions:
+      "Define the common tasks that a customer must complete. Test each task with platform assistive technology, large text, reduced motion, sufficient contrast, and keyboard or switch access where the platform supports it. Record the device, operating system, build, result, defect, owner, and evidence. Reconcile the proof with the App Store accessibility declarations. Write engineering/ACCESSIBILITY_READINESS.md. Do not claim readiness from static lint results alone.",
+    reads: ["engineering/PRODUCTION_READINESS.md", "design/design.md"],
+    roleId: "role.accessibility-device-qa",
+    laneIds: ["engineering"],
+    phaseIds: ["phase.5b"],
+    dependencies: ["workflow.engineering.engineering-orchestration-ce-production-readiness"],
+    outputPaths: ["engineering/ACCESSIBILITY_READINESS.md"],
+    providers: ["provider.in-app-ios-simulator", "provider.mobai"],
+    actionClass: "mutate",
+    idempotent: true,
+  }),
+  workflow({
+    id: "workflow.engineering.app-quality-and-vitals",
+    title: "App quality and vitals",
+    domainId: "domain.engineering",
+    areaIds: ["area.build-release"],
+    trigger: "Before beta or store submission on every mobile launch",
+    instructions:
+      "Measure crash-free operation, application-not-responding events, startup time, battery use, app size, offline behavior, and adaptive-layout behavior on supported devices. Define release thresholds and owners. Record observed values and evidence in engineering/APP_QUALITY.md. Mark missing device or production evidence as a blocker. Do not replace measured results with general guidance.",
+    reads: ["engineering/PRODUCTION_READINESS.md", "engineering/TECH_SPEC.md"],
+    roleId: "role.engineering-leader",
+    laneIds: ["engineering"],
+    phaseIds: ["phase.5b"],
+    dependencies: ["workflow.engineering.engineering-orchestration-ce-production-readiness"],
+    outputPaths: ["engineering/APP_QUALITY.md"],
+    providers: ["provider.sentry"],
+    actionClass: "mutate",
+    idempotent: true,
+  }),
+  workflow({
+    id: "workflow.store.marketplace-regional-compliance",
+    title: "Marketplace and regional compliance",
+    domainId: "domain.store",
+    areaIds: ["area.build-release"],
+    trigger: "Before store distribution in every selected region",
+    instructions:
+      "List each store and distribution region. Confirm seller or trader status, identity verification, banking, tax, payout, age rating, content declarations, and local contact requirements. Record the responsible owner and evidence in store/MARKETPLACE_COMPLIANCE.md. Separate global requirements from region-specific requirements. Treat an incomplete declaration or verification as a release blocker.",
+    reads: ["store/app-store-listing/APP_STORE_LISTING.md", "operations/business-access.json"],
+    roleId: "role.engineering-leader",
+    laneIds: ["store_console", "privacy_legal"],
+    phaseIds: ["phase.3", "phase.5c"],
+    dependencies: ["workflow.store.app-store-listing-prep-packet", "workflow.operations.agent-operations-ledger"],
+    outputPaths: ["store/MARKETPLACE_COMPLIANCE.md"],
+    providers: ["provider.app-store-connect", "provider.google-play"],
+    founderOnlyActions: ["confirm seller identity, trader status, banking, tax, and payout details"],
+    actionClass: "mutate",
+    protectedCategory: "legal_pricing",
+    idempotent: true,
   }),
 ] as const;

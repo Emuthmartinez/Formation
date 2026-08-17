@@ -1,0 +1,19 @@
+schema_version: 1.0.0
+id: reference.design.design-room
+title: Design Room
+domain_id: domain.design
+document_path: knowledge/design/design-room.md
+load_when: designing, versioning, baselining, restoring, wiping, or rendering B2C design state; custom product page,
+  PPO, In-App Event, landing, onboarding, paywall, or marketing-surface proposals; whenever a design output would
+  otherwise be freeform — the STATE→MUTATE→VERSION→RENDER hub; see surfaces-b2c.md for App Store surface schemas and
+  quality-lens.md for the taste filter applied during a mutation
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.design.design-room-state-mutate-version-render
+    - workflow.design.token-promotion
+  context_pack_ids:
+    - context.design
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

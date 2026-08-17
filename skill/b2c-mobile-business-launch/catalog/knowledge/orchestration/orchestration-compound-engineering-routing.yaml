@@ -1,0 +1,23 @@
+schema_version: 1.0.0
+id: reference.orchestration.compound-engineering-routing
+title: Compound Engineering Routing
+domain_id: domain.orchestration
+document_path: knowledge/orchestration/compound-engineering-routing.md
+load_when: before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees,
+  engineering/ENGINEERING_PLAN.md, engineering/PRODUCTION_READINESS.md, or production-readiness claims
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.engineering.engineering-orchestration-ce-production-readiness
+  context_pack_ids:
+    - context.orchestration
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources:
+  - id: github-com-everyinc-compound-engineering-plugin-releases
+    name: Compound Engineering plugin releases
+    source_type: release_feed
+    url: https://github.com/EveryInc/compound-engineering-plugin/releases
+    review_cadence_days: 7
+    claim_scope: Tracks latest Compound Engineering plugin releases for ce-update and local freshness checks.
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers

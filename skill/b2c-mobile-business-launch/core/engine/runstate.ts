@@ -40,7 +40,7 @@ export function seedRunState(plan: CompiledPlan, businessState: BusinessStateV2,
 
   const approvals = Object.fromEntries(plan.nodes.flatMap((node) => node.approvals.map((approval) => [approval.id, "pending" as const])));
 
-  return {
+  const run: RunStateDocument = {
     schemaVersion: "1.0.0",
     runId: options.runId ?? `run.${plan.planId.slice("plan.".length)}.${randomUUID().slice(0, 8)}`,
     planId: plan.planId,
@@ -56,6 +56,41 @@ export function seedRunState(plan: CompiledPlan, businessState: BusinessStateV2,
     artifactBindings,
     nodes,
   };
+  reconcileWorkflowApplicability(plan, run, businessState, now);
+  return run;
+}
+
+/** Apply durable scope verdicts before frontier selection. A verdict change invalidates old proof. */
+export function reconcileWorkflowApplicability(plan: CompiledPlan, run: RunStateDocument, businessState: BusinessStateV2, now: string): void {
+  for (const node of plan.nodes) {
+    if (node.applicability.mode === "always") continue;
+    const state = run.nodes[node.id];
+    if (!state) continue;
+    const record = businessState.workflowApplicability?.[node.workflowId];
+    const fingerprint = sha256(JSON.stringify(record ?? { verdict: "unknown" }));
+    if (state.applicabilityFingerprint === fingerprint) continue;
+
+    for (const binding of run.artifactBindings.filter((item) => node.outputs.some((artifactId) => artifactId === item.artifactId))) {
+      binding.accepted = false;
+      binding.fingerprint = undefined;
+      binding.producedBy = undefined;
+      binding.attemptId = undefined;
+    }
+    state.acceptedOutputFingerprint = undefined;
+    state.verifiedBySessionId = undefined;
+    state.applicabilityFingerprint = fingerprint;
+    if (!record) {
+      state.status = "waiting_founder";
+      state.blocker = `Scope answer needed: ${node.applicability.question}`;
+    } else if (record.verdict === "not-needed") {
+      state.status = "not_needed";
+      state.blocker = `Not needed: ${record.reason}`;
+    } else {
+      state.status = "pending";
+      state.blocker = undefined;
+    }
+    run.updatedAt = now;
+  }
 }
 
 /** Begins a new attempt with owner session id, heartbeat, and TTL (R12). */

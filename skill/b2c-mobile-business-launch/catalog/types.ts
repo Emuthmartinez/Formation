@@ -84,6 +84,28 @@ export interface CatalogReference {
    * (catalog_graph.reference.unbound).
    */
   sessionScoped?: boolean;
+  lifecycle: "draft" | "active" | "deprecated";
+  applicabilityNotes: string;
+  sourceExemption?: string;
+  sources: CatalogKnowledgeSource[];
+  replacementIds: ReferenceId[];
+}
+
+export interface CatalogKnowledgeSource {
+  id: string;
+  name: string;
+  sourceType: string;
+  url: string;
+  reviewCadenceDays: number;
+  claimScope: string;
+  lastReviewDate: string;
+  reviewer: string;
+}
+
+export interface CatalogKnowledgePackage extends CatalogReference {
+  workflowIds: WorkflowId[];
+  contextPackIds: ContextPackId[];
+  manifestPath: string;
 }
 
 /**
@@ -159,7 +181,7 @@ export interface CatalogWorkflowDef {
   consults: string[];
   /**
    * Knowledge bound to this node (R20 completed: loadWhen text routed humans; this routes the
-   * engine). Every id must exist in catalog/references.ts, and every non-sessionScoped reference
+   * engine). Every id must resolve from a knowledge manifest, and every non-sessionScoped reference
    * must be bound by at least one workflow — both directions validate.
    */
   referenceIds: ReferenceId[];
@@ -181,6 +203,17 @@ export interface CatalogWorkflowDef {
   tokenBudget?: number;
   /** Declared cost for actionClass "spend" nodes (required there — catalog_graph.workflow.cost_estimate_missing); the autonomy engine parks spend nodes without one. */
   costEstimate?: { amount: number; currency: string };
+  applicability: { mode: "always" } | { mode: "conditional"; question: string };
+}
+
+export type LaunchMatrixGroupId = "market-product" | "experience-brand" | "build-measurement" | "revenue-growth" | "release-trust" | "operate-improve";
+
+export interface LaunchMatrixGroup {
+  id: LaunchMatrixGroupId;
+  title: string;
+  description: string;
+  order: number;
+  domainIds: CatalogDomainId[];
 }
 
 export interface CatalogGate {
@@ -212,6 +245,7 @@ export interface Catalog {
   workflows: CatalogWorkflowDef[];
   artifacts: CatalogArtifact[];
   gates: CatalogGate[];
+  presentationGroups: LaunchMatrixGroup[];
 }
 
 export interface CatalogIssue {

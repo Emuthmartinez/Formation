@@ -1,5 +1,5 @@
 import type { LaneKey } from "../../core/schema/types.js";
-import type { AreaId, CatalogDomainId, CatalogWorkflowDef, PhaseId, ReferenceId, RoleId, WorkflowId } from "../types.js";
+import type { AreaId, CatalogDomainId, CatalogWorkflowDef, PhaseId, RoleId, WorkflowId } from "../types.js";
 
 export interface WorkflowSeed {
   id: WorkflowId;
@@ -11,7 +11,6 @@ export interface WorkflowSeed {
   instructions: string;
   reads?: string[];
   consults?: string[];
-  referenceIds?: ReferenceId[];
   roleId: RoleId;
   laneIds?: LaneKey[];
   phaseIds?: PhaseId[];
@@ -27,6 +26,7 @@ export interface WorkflowSeed {
   ttlSeconds?: number;
   tokenBudget?: number;
   costEstimate?: CatalogWorkflowDef["costEstimate"];
+  applicability?: CatalogWorkflowDef["applicability"];
 }
 
 const READINESS_WORKFLOW: WorkflowId = "workflow.operations.agent-operations-ledger";
@@ -61,7 +61,7 @@ export function workflow(seed: WorkflowSeed): CatalogWorkflowDef {
     instructions: seed.instructions,
     reads: seed.reads ?? [],
     consults: seed.consults ?? [],
-    referenceIds: seed.referenceIds ?? [],
+    referenceIds: [],
     roleId: seed.roleId,
     laneIds: seed.laneIds ?? [],
     phaseIds: seed.phaseIds ?? [],
@@ -77,5 +77,6 @@ export function workflow(seed: WorkflowSeed): CatalogWorkflowDef {
     ttlSeconds: seed.ttlSeconds,
     tokenBudget: seed.tokenBudget,
     costEstimate: seed.costEstimate,
+    applicability: seed.applicability ?? { mode: "always" },
   };
 }

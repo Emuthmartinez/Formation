@@ -129,6 +129,21 @@ function sourceRecords(registry: MutableRecord): MutableRecord[] {
   return Array.isArray(registry.sources) ? registry.sources.filter(isRecord) : [];
 }
 
+function knowledgePackageUrls(root: string): Set<string> {
+  const result = new Set<string>();
+  const marker = `${path.sep}catalog${path.sep}knowledge${path.sep}`;
+  for (const file of collectAllFiles(root, 20000)) {
+    if (!file.includes(marker) || !/\.ya?ml$/u.test(file)) continue;
+    const parsed = parseYaml(readFileSync(file, "utf8"));
+    if (!isRecord(parsed) || !Array.isArray(parsed.sources)) continue;
+    for (const source of parsed.sources.filter(isRecord)) {
+      const url = normalizeUrl(String(source.url ?? ""));
+      if (url) result.add(url);
+    }
+  }
+  return result;
+}
+
 function discoverCurrentUrls(args: Args): Map<string, DiscoveredUrl> {
   const discovered = new Map<string, DiscoveredUrl>();
   for (const file of collectAllFiles(args.root, 20000)) {
@@ -273,6 +288,7 @@ const registeredUrls = new Set(
     .map((source) => normalizeUrl(String(source.url ?? "")))
     .filter((url): url is string => Boolean(url)),
 );
+for (const url of knowledgePackageUrls(args.root)) registeredUrls.add(url);
 
 const missing = Array.from(discovered.values()).filter((entry) => !registeredUrls.has(entry.url));
 

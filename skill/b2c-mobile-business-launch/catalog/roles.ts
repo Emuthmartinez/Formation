@@ -270,7 +270,7 @@ export const roles: CatalogRole[] = [
     ],
     [route("accessibility tree and simulator/device controls", "runtime UI exists"), route("screenshot and recording export", "visual evidence is required")],
     ["provider.mobai", "provider.in-app-ios-simulator", "provider.codex-native-ios", "provider.snapshot-previews", "provider.serve-sim"],
-    ["growth/DEMO_VIDEO.md"],
+    ["growth/DEMO_VIDEO.md", "engineering/ACCESSIBILITY_READINESS.md"],
   ),
   role(
     "role.security-architect",
@@ -301,7 +301,7 @@ export const roles: CatalogRole[] = [
       route("repository validation and CI", "always before readiness"),
       route("provider and distribution proof tools", "provider-backed or store work is claimed complete"),
     ],
-    ["provider.doppler", "provider.app-store-connect", "provider.google-play", "provider.revenuecat", "provider.stripe"],
+    ["provider.doppler", "provider.app-store-connect", "provider.google-play", "provider.revenuecat", "provider.stripe", "provider.sentry"],
     ["engineering/", "operations/ORCHESTRATION.md", "trust/secrets/SECRETS.md", "store/", "revenue/", "validation/", "knowledge/store/"],
   ),
   role(

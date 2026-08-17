@@ -119,7 +119,7 @@ for (const reference of catalog.references) {
       issue(
         "error",
         "hub_spoke.catalog_hub_without_spokes",
-        `${reference.id} is flagged hub:true in catalog/references.ts, but no knowledge file declares itself "${BACKLINK_MARKER}" that hub. Either add real spokes with backlinks or drop the flag.`,
+        `${reference.id} is flagged hub:true in its knowledge manifest, but no knowledge file declares itself "${BACKLINK_MARKER}" that hub. Either add real spokes with backlinks or drop the flag.`,
         reference.path,
       ),
     );
@@ -132,7 +132,7 @@ for (const hubPath of discoveredHubPaths) {
       issue(
         "error",
         "hub_spoke.discovered_hub_unflagged",
-        `${hubPath} has spoke files declaring membership, but its catalog/references.ts entry is not flagged hub:true. Flag it so the catalog knows this file routes onward.`,
+        `${hubPath} has spoke files declaring membership, but its knowledge manifest is not flagged hub:true. Flag it so the catalog knows this file routes onward.`,
         hubPath,
       ),
     );

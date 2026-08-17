@@ -70,6 +70,8 @@ export function makeNode(overrides: NodeOverrides = {}): CompiledRunNode {
     ttlSeconds: 300,
     tokenBudget: 8_000,
     costEstimate: overrides.costEstimate,
+    phaseIds: [],
+    applicability: { mode: "always" },
   };
 }
 

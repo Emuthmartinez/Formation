@@ -1,0 +1,19 @@
+schema_version: 1.0.0
+id: reference.orchestration.project-state
+title: Project State
+domain_id: domain.orchestration
+document_path: knowledge/orchestration/project-state.md
+load_when: start of multi-lane work; resuming a prior session; before provider/store mutations, handoff, or subagent
+  dispatch; when rendering the cockpit
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.orchestration.session-continuity-resume
+    - workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep
+    - workflow.process.business-control-plane-extension
+    - workflow.engineering.engineering-orchestration-ce-production-readiness
+  context_pack_ids:
+    - context.orchestration
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

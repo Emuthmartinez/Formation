@@ -1,0 +1,21 @@
+schema_version: 1.0.0
+id: reference.process.tool-recipes.growth-and-store-routing
+title: Growth And Store Routing
+domain_id: domain.process
+document_path: knowledge/process/tool-recipes/growth-and-store-routing.md
+load_when: routing ASO/paid-UA/viral-loop/UGC/Fastlane/GEO work to the right specialist reference — routed from tool-recipes.md
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.store.aso-and-store-ops
+  context_pack_ids: []
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources:
+  - id: github-com-eronred-aso-skills
+    name: github.com
+    source_type: github
+    url: https://github.com/Eronred/aso-skills
+    review_cadence_days: 7
+    claim_scope: Auto-discovered from recently added repository content.
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers

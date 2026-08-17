@@ -25,7 +25,7 @@ Generated from catalog/domains.ts. Edit the catalog, not this file.
 <!-- catalog-generated:start reference-index -->
 # Reference Index
 
-Generated from catalog/references.ts.
+Generated from catalog/knowledge/**/*.yaml.
 
 ## Running The Launch
 
@@ -141,7 +141,9 @@ Generated from catalog/references.ts.
 
 | Load when | Reference |
 | --- | --- |
+| before accessibility declarations, beta readiness, or store submission | [`knowledge/engineering/accessibility-readiness.md`](../../knowledge/engineering/accessibility-readiness.md) |
 | before app handoffs, builder-ready bundles, business-repo AGENTS.md/CLAUDE.md, or post-launch operating docs | [`knowledge/engineering/app-agent-roster.md`](../../knowledge/engineering/app-agent-roster.md) |
+| before beta, store submission, production-readiness, or mobile performance claims | [`knowledge/engineering/app-quality.md`](../../knowledge/engineering/app-quality.md) |
 | before engineering/TECH_SPEC.md data/API sections harden; before archetype schema/auth prompts run; when the founder wants Firebase or a custom backend instead of the Supabase default; auditing an existing data layer | [`knowledge/engineering/backend-data-contract.md`](../../knowledge/engineering/backend-data-contract.md) |
 | before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees, engineering/ENGINEERING_PLAN.md, engineering/PRODUCTION_READINESS.md, or production-readiness claims | [`knowledge/engineering/engineering-orchestration.md`](../../knowledge/engineering/engineering-orchestration.md) |
 | before MobAI device automation, .mob generation/healing, repeat or host-script actions, Sync Mode/multi-device work, performance gates, screenshots, polished demo videos, app previews, bug repro recordings, MobAI CI, or recorder-skill setup | [`knowledge/engineering/mobai-toolbelt.md`](../../knowledge/engineering/mobai-toolbelt.md) |
@@ -157,6 +159,7 @@ Generated from catalog/references.ts.
 | before ASC upload readiness on any iOS submission path | [`knowledge/store/apple-signing-release.md`](../../knowledge/store/apple-signing-release.md) |
 | before App Store/Play metadata, screenshot planning, ASO audits, keyword research, Apple Search Ads, release/rejection handling, ratings/reviews, or post-launch monitoring | [`knowledge/store/aso-store-ops.md`](../../knowledge/store/aso-store-ops.md) |
 | Android is in scope (platforms include android, or an android bundle id exists); before Play Console setup, Data Safety answers, content rating, Play App Signing, release tracks, closed testing, or pre-launch report triage | [`knowledge/store/google-play-release.md`](../../knowledge/store/google-play-release.md) |
+| before store distribution in any selected region | [`knowledge/store/marketplace-regional-compliance.md`](../../knowledge/store/marketplace-regional-compliance.md) |
 | before App Store Connect or Play Console setup, privacy labels/Data safety, screenshot capture/upload, reviewer notes, account-deletion console work, or any "where do I click and what do I paste" handoff | [`knowledge/store/store-console-workflow.md`](../../knowledge/store/store-console-workflow.md) |
 
 ## Pricing And Getting Paid
@@ -192,6 +195,8 @@ Generated from catalog/references.ts.
 
 | Load when | Reference |
 | --- | --- |
+| when users can create, share, discover, or message content | [`knowledge/trust/community-safety.md`](../../knowledge/trust/community-safety.md) |
+| when the app generates text, images, audio, or video | [`knowledge/trust/generative-ai-safety.md`](../../knowledge/trust/generative-ai-safety.md) |
 | before drafting or publishing privacy policy, terms, EULA, subscription terms, account/data deletion flows, or app-store privacy/Data safety disclosures | [`knowledge/trust/privacy-terms.md`](../../knowledge/trust/privacy-terms.md) |
 | before threat modeling, hardening, scans, or any security-readiness claim — Default Output contract, OWASP MASVS/ASVS and platform security basis, paid-tool routing with fallbacks, mobile hardening checklists, and revenue/entitlement abuse controls feeding trust/SECURITY.md | [`knowledge/trust/security-release-hardening.md`](../../knowledge/trust/security-release-hardening.md) |
 
