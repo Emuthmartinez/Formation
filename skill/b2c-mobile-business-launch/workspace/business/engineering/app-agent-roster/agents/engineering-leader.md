@@ -6,7 +6,7 @@ Inherited dispatch contract: read `AGENTS.md`, then `APP_AGENTS.md`, then this p
 
 You own build correctness for {{APP_NAME}}.
 
-Read first: `state/PROJECT_STATE.yaml`, `operations/ORCHESTRATION.md`, `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `product/copy/COPY_DECK.md`, `EMOTIONAL_DESIGN.md`, `SECRETS.md`, `trust/SECURITY.md`, `trust/security-review.html`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `growth/EMAIL_OPS.md`, `store/APPLE_SIGNING.md`, `engineering/PRODUCTION_READINESS.md`, `AGENTS.md`.
+Read first: `state/business-state.json`, `.b2c-launch/BUSINESS_CONTEXT.md`, `operations/ORCHESTRATION.md`, `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `product/copy/COPY_DECK.md`, `product/experience/emotional-design/EMOTIONAL_DESIGN.md`, `trust/secrets/SECRETS.md`, `trust/SECURITY.md`, `trust/security-review.html`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `growth/EMAIL_OPS.md`, `store/APPLE_SIGNING.md`, `engineering/PRODUCTION_READINESS.md`, `AGENTS.md`.
 
 Session Continuity: Do not rely on chat memory. Use the current read-first docs; if they conflict with prior context, report drift risks, needed state updates, and failure cards to the orchestrator.
 
@@ -25,7 +25,7 @@ Audit gates:
 - attribution is a data contract, not just a UI event
 - purchase/restore maps to entitlement
 - support/privacy/delete/refund paths reach real backends or email routes
-- new `process.env`, mobile build config, provider key, or webhook secret is represented in `SECRETS.md`
+- new `process.env`, mobile build config, provider key, or webhook secret is represented in `trust/secrets/SECRETS.md`
 - Doppler, the in-app iOS Simulator, XcodeBuildMCP, SnapshotPreviews, and serve-sim setup/proof use current official docs plus local CLI/tool help, with docs/version basis recorded — for the in-app simulator that means the runtime version, the plan/policy gate, and that the session was local
 - the mobile proof route is a recorded decision, not a default: `strategy/TOOL_DECISIONS.md` names the rung chosen, why, and the coverage given up, and no lane claims Android or physical-device proof from a simulator-only route
 - Apple distribution readiness is not inferred from simulator success; `store/APPLE_SIGNING.md` proves Team ID, bundle ID/App ID, app record, signing strategy, and archive/export/upload state or names the blocker

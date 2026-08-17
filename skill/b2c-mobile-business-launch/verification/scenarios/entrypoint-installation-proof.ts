@@ -1,8 +1,10 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { assert, skillRoot, type Harness, repoCheckoutPresent, repoRoot } from "../fixtures/_harness.js";
 import { ENTRYPOINT_FILES, readEntrypointTemplates } from "../../core/adapters/install-entrypoints.js";
+import { compilePlan } from "../../core/engine/compile.js";
+import { loadCatalogFile } from "../../core/session/run.js";
 
 /**
  * Ports LaunchBench scenario `business-agent-entrypoints-missing.yaml` (validator cited there:
@@ -117,6 +119,44 @@ export function register(harness: Harness): void {
       assert(
         installedAppAgents.includes("Predetermined Specialist Prompts"),
         "the real installer must bootstrap APP_AGENTS.md before the first specialist worker can run",
+      );
+      const manifest = JSON.parse(readFileSync(path.join(target, ".b2c-launch", "runtime.json"), "utf8")) as {
+        skillVersion: string;
+        catalogPath: string;
+        skillRootEnv: string;
+      };
+      const sourceVersion = JSON.parse(readFileSync(path.join(skillRoot, "skill-version.json"), "utf8")) as { version: string };
+      assert(manifest.skillVersion === sourceVersion.version, "installed runtime binding must match the source skill version");
+      assert(manifest.catalogPath === "catalog.json", "installed runtime binding must point at the session runner's default catalog path");
+      assert(manifest.skillRootEnv === "B2C_LAUNCH_SKILL_ROOT", "installed runtime binding must provide a portable environment override");
+      const installedCatalog = loadCatalogFile(path.join(target, "catalog.json"));
+      assert(installedCatalog.version.endsWith(manifest.skillVersion), "installed catalog version must match the runtime manifest");
+      const plan = compilePlan(installedCatalog, "2026-08-16T00:00:00.000Z");
+      assert(plan.nodes.length > 0, "the installed catalog must load and compile through the real session boundary");
+
+      const contextPath = path.join(target, ".b2c-launch", "BUSINESS_CONTEXT.md");
+      const founderContext = "# Scenario context\n\nLocale: es-MX\n";
+      writeFileSync(contextPath, founderContext, "utf8");
+      writeFileSync(path.join(target, "AGENTS.md"), `${installedAgents}\nFounder-specific legacy note.\n`, "utf8");
+      const refresh = spawnSync(
+        tsxBin,
+        [
+          path.join(skillRoot, "core/adapters/install-entrypoints.ts"),
+          "--target",
+          target,
+          "--skill-root",
+          skillRoot,
+          "--apply",
+          "--var",
+          "APP_NAME=ScenarioFixtureApp",
+        ],
+        { cwd: skillRoot, encoding: "utf8" },
+      );
+      assert(refresh.status === 0, `expected entrypoint refresh to succeed: ${refresh.stdout}\n${refresh.stderr}`);
+      assert(readFileSync(contextPath, "utf8") === founderContext, "entrypoint refresh must never overwrite founder-owned business context");
+      assert(
+        existsSync(path.join(target, ".b2c-launch", "preserved-entrypoints", "AGENTS.md")),
+        "entrypoint refresh must preserve replaced prompt bytes for recovery",
       );
     },
   );

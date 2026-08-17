@@ -12,7 +12,7 @@
 # When change-cascade.md's table changes, change this file in the same edit.
 # Every surface id used below must exist in `surfaces`.
 
-schema_version: "1"
+schema_version: "2"
 
 # The surface inventory a B2C mobile launch maintains
 # (change-cascade.md "Surface Inventory").
@@ -29,12 +29,21 @@ surfaces:
   asc_products:
     label: "App Store Connect products"
     covers: "IAP/subscription display names + descriptions, promoted-IAP promotional images, pricing, intro/trial offers, App Review Information notes"
+    evidence_dimensions: [product]
+  google_play_products:
+    label: "Google Play products"
+    covers: "one-time products and subscriptions, base plans, offers, localized names and descriptions, prices, tags, and review notes"
+    evidence_dimensions: [product, locale]
   revenuecat_billing:
     label: "RevenueCat / billing"
     covers: "offering/package/product display names, paywall configuration, entitlement identifiers, Stripe/web-funnel product copy and prices"
   landing_web:
     label: "Landing / web"
     covers: "hero, method/how-it-works, optional web onboarding, FAQ, pricing, footer, app screenshots, metadata, Open Graph, JSON-LD, robots.txt, llms.txt, and sitemap.xml"
+    evidence_dimensions: [locale]
+  landing_onboarding:
+    label: "Landing onboarding"
+    covers: "web qualification/onboarding steps, questions, branching, consent, completion state, and handoff into install, waitlist, or purchase"
   seo_geo:
     label: "SEO / GEO"
     covers: "target keywords, citability content, brand-entity signals"
@@ -50,6 +59,7 @@ surfaces:
   content_ugc_ads:
     label: "Content / UGC / ads"
     covers: "ad creative, demo videos, screenshots reused in ads, creator scripts"
+    evidence_dimensions: [asset]
 
 # Change type -> surfaces that must be updated or explicitly justified as
 # unaffected. Mirrors the change-cascade.md "Change Cascade Map" rows; the
@@ -63,8 +73,10 @@ change_types:
       - asc_listing
       - google_play_listing
       - asc_products
+      - google_play_products
       - revenuecat_billing
       - landing_web
+      - landing_onboarding
       - seo_geo
       - lifecycle_email
       - analytics
@@ -80,6 +92,7 @@ change_types:
       - asc_listing
       - google_play_listing
       - landing_web
+      - landing_onboarding
       - seo_geo
       - lifecycle_email
       - analytics
@@ -95,8 +108,10 @@ change_types:
       - asc_listing
       - google_play_listing
       - asc_products
+      - google_play_products
       - revenuecat_billing
       - landing_web
+      - landing_onboarding
       - lifecycle_email
       - content_ugc_ads
     notes: "run the Lexicon Lock sweep from flow-traceability.md — grep every surface that names the term and update them together, including landing component files, <meta> description, and JSON-LD description/FAQ blocks"
@@ -110,6 +125,7 @@ change_types:
       - google_play_listing
       - analytics
       - landing_web
+      - landing_onboarding
     notes: "asc_listing covers the screenshot set and App Preview when they show onboarding; analytics covers activation events/funnels and review-prompt timing"
 
   pricing_change:
@@ -120,6 +136,7 @@ change_types:
       - asc_listing
       - google_play_listing
       - asc_products
+      - google_play_products
       - revenuecat_billing
       - landing_web
       - legal
@@ -145,6 +162,7 @@ change_types:
     cascade_to:
       - revenuecat_billing
       - asc_products
+      - google_play_products
       - asc_listing
       - google_play_listing
       - app_in_app
@@ -160,8 +178,12 @@ change_types:
       - asc_listing
       - google_play_listing
       - asc_products
+      - google_play_products
       - legal
       - analytics
+      - landing_web
+      - lifecycle_email
+      - content_ugc_ads
     notes: "app_in_app covers PrivacyInfo.xcprivacy and required-reason APIs; legal covers App Privacy answers, Play Data safety, privacy policy and terms; asc_products covers App Review notes for external services; asc_listing is check-and-justify because the app description or keyword field can carry a privacy claim (e.g. \"no ads\", \"no tracking\") that a new SDK invalidates"
 
   domain_brand_change:
@@ -172,6 +194,7 @@ change_types:
       - asc_listing
       - google_play_listing
       - asc_products
+      - google_play_products
       - revenuecat_billing
       - landing_web
       - seo_geo
@@ -188,5 +211,7 @@ change_types:
       - asc_listing
       - google_play_listing
       - asc_products
+      - google_play_products
       - lifecycle_email
+      - landing_web
     notes: "generated assets embed tokens, feature names, copy, and pricing at generation time — regenerate per the Generated-Asset Regeneration table in change-cascade.md, record each new asset in CONTENT_ASSETS.md, and mark prior entries status:superseded. Generated output is supporting art only and never substitutes for truthful real app UI"

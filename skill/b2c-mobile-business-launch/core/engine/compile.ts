@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { ActionClass, ArtifactBindingV2, GrantableDomainId, LaneKey, ProtectedCategory } from "../schema/types.js";
+import type { ActionClass, ArtifactBindingV2, DomainId, GrantableDomainId, LaneKey, ProtectedCategory } from "../schema/types.js";
 
 /**
  * Ported from runtime/graph/execution.ts (KTD6), rewritten against v2 types. RunNodeId stays a
@@ -74,7 +74,7 @@ export interface NodeRole {
 export interface CatalogWorkflowNode {
   id: CatalogWorkflowId;
   title: string;
-  domainId: GrantableDomainId;
+  domainId: DomainId;
   actionClass: ActionClass;
   protectedCategory?: ProtectedCategory;
   /**
@@ -114,7 +114,7 @@ export interface CompiledRunNode {
   id: RunNodeId;
   workflowId: CatalogWorkflowId;
   title: string;
-  domainId: GrantableDomainId;
+  domainId: DomainId;
   actionClass: ActionClass;
   protectedCategory?: ProtectedCategory;
   /** The authored contract, carried verbatim from CatalogWorkflowNode (see that type's doc comment for why these are optional at the type level). */
@@ -164,6 +164,8 @@ const JUDGMENT_DOMAINS: readonly GrantableDomainId[] = ["domain.research", "doma
  * the same output artifact (an ambiguous shared write with no reducer-owned merge semantics here).
  */
 export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.000Z"): CompiledPlan {
+  const machineWorkflow = catalog.workflows.find((workflow) => workflow.domainId === "domain.machine");
+  if (machineWorkflow) throw new Error(`${machineWorkflow.id} is a maintainer-only domain.machine workflow and cannot enter a business execution plan`);
   const artifactsByPath = new Map(catalog.artifacts.map((artifact) => [artifact.path, artifact.id]));
   const knownWorkflowIds = new Set(catalog.workflows.map((workflow) => workflow.id));
 
@@ -196,7 +198,7 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
       .map((readPath) => artifactsByPath.get(readPath))
       .filter((artifactId): artifactId is CatalogArtifactId => Boolean(artifactId) && !ownOutputs.has(artifactId!));
     const inputs = unique([...workflow.dependencies.flatMap((upstreamId) => outputsByWorkflow.get(upstreamId) ?? []), ...readArtifacts]);
-    const judgment = JUDGMENT_DOMAINS.includes(workflow.domainId);
+    const judgment = JUDGMENT_DOMAINS.some((domainId) => domainId === workflow.domainId);
     const gateIds = workflow.gateCommands;
 
     const resources: ResourceClaim[] = [

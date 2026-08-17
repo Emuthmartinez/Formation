@@ -6,9 +6,9 @@ Inherited dispatch contract: read `AGENTS.md`, then `APP_AGENTS.md`, then this p
 
 Use this prompt at the first broad launch session and before unattended work resumes.
 
-Read first: `AGENTS.md`, `state/PROJECT_STATE.yaml`, `operations/BUSINESS_ACCESS.md`,
+Read first: `AGENTS.md`, `.b2c-launch/runtime.json`, `catalog.json`, `.b2c-launch/BUSINESS_CONTEXT.md`, `state/business-state.json`, `control/control.json`, `control/budget-ledger.json`, `operations/BUSINESS_ACCESS.md`,
 `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`,
-`operations/agent-operations.json`, `strategy/TOOL_DECISIONS.md`, `SECRETS.md`,
+`operations/agent-operations.json`, `strategy/TOOL_DECISIONS.md`, `trust/secrets/SECRETS.md`,
 `design/design.md`, `engineering/TECH_SPEC.md`, `store/STORE_CONSOLE.md`, and
 `operations/PROVIDER_PROOF.md`.
 

@@ -165,8 +165,16 @@ export const workflows = [
     areaIds: ["area.growth-revenue"],
     trigger: "Immediately after design/design.md is accepted — build the local landing site while app implementation runs",
     instructions:
-      "Build a runnable local landing site in growth/landing/ as soon as design/design.md is accepted. Do this work in parallel with app implementation. Use the launch-surface-producer prompt in agents/launch-surface-producer.md. Include one conversion goal, the approved promise, a mobile CTA, proof, responsive behavior, and a local build check. Include a short web onboarding or qualification flow only when the product contract needs it. Use current COPY_DECK.md strings. Show prices only when revenue/REVENUE_OPS.md records founder-approved prices. Create truthful screenshot slots and an update route, but label design renders as previews until real app captures exist. Declare landing_viewed, landing_cta_clicked, and waitlist_submitted before implementation. Keep motion progressive. Do not deploy from this node.",
-    reads: ["GEO_SEO.md", "analytics/ANALYTICS.md", "product/copy/COPY_BRIEF.md", "design/design.md"],
+      "Build a runnable local landing site in growth/landing/ as soon as design/design.md is accepted. Do this work in parallel with app implementation. Use the launch-surface-producer prompt in agents/launch-surface-producer.md. Include one conversion goal, the approved promise, a mobile CTA, proof, responsive behavior, and a local build check. Include a short web onboarding or qualification flow only when the product contract needs it. Use current COPY_DECK.md strings. Show prices only when revenue/REVENUE_OPS.md records founder-approved prices. Create truthful screenshot slots and an update route, but label design renders as previews until real app captures exist. Declare landing_viewed, landing_cta_clicked, and waitlist_submitted before implementation. Write growth/landing/surface-contract.json with SHA-256 digests for every canonical input, each Tier 1 locale, pricing/onboarding applicability decisions, and screenshot evidence. Keep motion progressive. Do not deploy from this node.",
+    reads: [
+      "GEO_SEO.md",
+      "analytics/ANALYTICS.md",
+      "product/copy/COPY_BRIEF.md",
+      "product/copy/COPY_DECK.md",
+      "product/ONBOARDING.md",
+      "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+      "design/design.md",
+    ],
     referenceIds: [
       "reference.growth.cro-landing",
       "reference.design.landing-motion-craft",

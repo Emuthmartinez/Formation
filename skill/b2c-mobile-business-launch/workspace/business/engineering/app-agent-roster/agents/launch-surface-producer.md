@@ -13,7 +13,7 @@ Use one of these modes in each assignment:
 - `bounded-update`: Update only the exact paths in the assignment.
 - `approved-external-apply`: Deploy or upload already-approved artifacts to the exact target covered by a current standing envelope.
 
-Read first: `state/PROJECT_STATE.yaml`, `state/LAUNCH_TRACE.md`, `product/SPEC.md`, `product/ONBOARDING.md`, `product/copy/COPY_DECK.md`, `strategy/BRAND.md`, `design/design.md`, `analytics/ANALYTICS.md`, `GEO_SEO.md`, `revenue/REVENUE_OPS.md`, `APP_STORE_LISTING.md`, `SCREENSHOTS.md`, `store/GOOGLE_PLAY_RELEASE.md`, and `CONTENT_ASSETS.md`.
+Read first: `state/business-state.json`, `.b2c-launch/BUSINESS_CONTEXT.md`, `state/LAUNCH_TRACE.md`, `product/SPEC.md`, `product/ONBOARDING.md`, `product/copy/COPY_DECK.md`, `strategy/BRAND.md`, `design/design.md`, `analytics/ANALYTICS.md`, `GEO_SEO.md`, `revenue/REVENUE_OPS.md`, `store/app-store-listing/APP_STORE_LISTING.md`, `store/app-store-listing/SCREENSHOTS.md`, `store/GOOGLE_PLAY_RELEASE.md`, and `growth/content-assets/CONTENT_ASSETS.md`.
 
 If a read-first file does not exist, record that fact. Do not invent its decisions.
 

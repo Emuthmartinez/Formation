@@ -17,6 +17,8 @@ export interface SessionBrief {
   readonly notes?: string;
   /** Preferred CLI for fresh-context node workers. `auto` selects the first available runtime. */
   readonly workerRuntime?: "auto" | "claude" | "codex" | "cursor";
+  /** Installer-pinned catalog version. Scheduled runs reject drift instead of silently compiling stale knowledge. */
+  readonly expectedCatalogVersion?: string;
 }
 
 export class BriefInvalid extends Error {
@@ -60,6 +62,9 @@ export function validateBriefShape(value: unknown): string[] {
   if (candidate.notes !== undefined && typeof candidate.notes !== "string") issues.push("notes, when present, must be a string");
   if (candidate.workerRuntime !== undefined && !["auto", "claude", "codex", "cursor"].includes(String(candidate.workerRuntime))) {
     issues.push('workerRuntime, when present, must be "auto", "claude", "codex", or "cursor"');
+  }
+  if (candidate.expectedCatalogVersion !== undefined && !isNonEmptyString(candidate.expectedCatalogVersion)) {
+    issues.push("expectedCatalogVersion, when present, must be a non-empty string");
   }
 
   return issues;

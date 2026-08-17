@@ -8,6 +8,11 @@ import type { CatalogContextPack } from "./types.js";
  */
 export const contextPacks: readonly CatalogContextPack[] = [
   {
+    id: "context.founder-language",
+    title: "Always-on founder language",
+    referenceIds: ["reference.words.no-slop-writing", "reference.operations.founder-zero-operator"],
+  },
+  {
     id: "context.process",
     title: "Launch process",
     referenceIds: [
@@ -49,6 +54,16 @@ export const contextPacks: readonly CatalogContextPack[] = [
   },
   { id: "context.product", title: "Product", referenceIds: ["reference.product.core-loop-and-v1-scope", "reference.product.product-moat"] },
   {
+    id: "context.archetypes",
+    title: "Matched product archetype",
+    referenceIds: [
+      "reference.product.habit-tracker",
+      "reference.product.photo-ai-media",
+      "reference.product.social-network",
+      "reference.product.ai-chat-companion",
+    ],
+  },
+  {
     id: "context.experience",
     title: "Experience",
     referenceIds: ["reference.experience.eleven-star-experience", "reference.experience.onboarding-conversion", "reference.experience.ethics-guardrail"],
@@ -62,6 +77,24 @@ export const contextPacks: readonly CatalogContextPack[] = [
       "reference.design.premium-mobile-craft",
       "reference.design.quality-lens",
       "reference.design.surfaces-b2c",
+    ],
+  },
+  {
+    id: "context.experience-cards",
+    title: "Implemented emotional experience cards",
+    referenceIds: [
+      "reference.experience.experience-cards.commitment-card",
+      "reference.experience.experience-cards.variable-reward-card",
+      "reference.experience.experience-cards.perceived-effort-delay-card",
+      "reference.experience.experience-cards.intent-mirroring-card",
+      "reference.experience.experience-cards.endowed-progress-card",
+      "reference.experience.experience-cards.peak-end-card",
+      "reference.experience.experience-cards.streak-and-loss-aversion-card",
+      "reference.experience.experience-cards.reciprocity-card",
+      "reference.experience.experience-cards.identity-and-self-expression-card",
+      "reference.experience.experience-cards.fresh-start-card",
+      "reference.experience.experience-cards.mastery-and-status-card",
+      "reference.experience.experience-cards.recovery-and-trust-repair-card",
     ],
   },
   { id: "context.words", title: "Words", referenceIds: ["reference.words.conversion-copy", "reference.words.no-slop-writing"] },
@@ -105,6 +138,20 @@ export const contextPacks: readonly CatalogContextPack[] = [
       "reference.growth.launch-narrative-cadence",
       "reference.growth.paid-user-acquisition",
       "reference.growth.ugc-creator-engine",
+    ],
+  },
+  {
+    id: "context.launch-surfaces",
+    title: "Cross-surface launch production",
+    referenceIds: [
+      "reference.growth.cro-landing",
+      "reference.growth.geo-seo",
+      "reference.store.app-store-listing-prep",
+      "reference.store.store-console-workflow",
+      "reference.design.surfaces-b2c",
+      "reference.words.conversion-copy",
+      "reference.money.paywall-pricing-and-experiments",
+      "reference.data.analytics-attribution",
     ],
   },
   { id: "context.data", title: "Analytics", referenceIds: ["reference.data.analytics-attribution"] },

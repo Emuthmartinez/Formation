@@ -99,12 +99,11 @@ export const workflows = [
     areaIds: ["area.operating-system"],
     trigger: "When design/design.md is accepted, and after each app, product, copy, brand, pricing, product, or data change",
     instructions:
-      "Run a design_contract_lock cascade when design/design.md is first accepted. This creates the public-surface baseline while app implementation starts. After that, classify each accepted app or business change against the Change Cascade Map. Use agents/launch-surface-producer.md for the surface audit and bounded update tasks. Check the app, Apple App Store, Google Play, store products, billing, landing site, web onboarding, GEO/SEO, lifecycle email, analytics, legal pages, screenshots, and marketing assets. Update each affected surface or record why it is unaffected. Record one change_cascade entry in state/PROJECT_STATE.yaml. Each required surface needs updated evidence, an unaffected reason, or a blocker. Re-render any screenshot, App Preview, Play feature graphic, landing screenshot, or ad asset whose source changed. Reconcile the locked lexicon in design/design.md before the change is done.",
-    reads: ["state/PROJECT_STATE.yaml", "state/LAUNCH_TRACE.md", "design/design.md"],
+      "Run a design_contract_lock cascade when design/design.md is first accepted. This creates the public-surface baseline while app implementation starts. After that, ingest engineering/SOURCE_CHANGE_MANIFEST.json and classify each accepted change with every applicable Change Cascade Map type, not one convenient primary type. Use agents/launch-surface-producer.md for the surface audit and bounded update tasks. Check the app, Apple App Store, Google Play, Apple and Play products, billing, landing site, web onboarding, GEO/SEO, lifecycle email, analytics, legal pages and public privacy claims, screenshots, and marketing assets. Update each affected surface or record why it is unaffected. Record one change_cascade entry in state/PROJECT_STATE.yaml with `types`. Updated localized, product, device, product-page, or asset surfaces need one evidence variant per applicable dimension. Re-render any screenshot, App Preview, Play feature graphic, landing screenshot, or ad asset whose source digest changed. Reconcile the locked lexicon in design/design.md before the change is done and write the checked ledger digest to state/CHANGE_CASCADE_RECEIPT.json.",
+    reads: ["state/PROJECT_STATE.yaml", "state/LAUNCH_TRACE.md", "design/design.md", "engineering/SOURCE_CHANGE_MANIFEST.json"],
     referenceIds: ["reference.process.change-cascade", "reference.process.cascade-edges", "reference.process.flow-traceability"],
-    roleId: "role.launch-surface-producer",
-    // outputPaths intentionally empty: propagates an existing change_cascade record rather
-    // than authoring PROJECT_STATE.yaml or LAUNCH_TRACE.md fresh (see file header).
+    roleId: "role.orchestrator",
+    outputPaths: ["state/CHANGE_CASCADE_RECEIPT.json"],
     gates: ["check:change-cascade"],
     actionClass: "mutate",
     idempotent: true,

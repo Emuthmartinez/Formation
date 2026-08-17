@@ -1,8 +1,9 @@
-import { businessUnitDomains, type BudgetBalance, type BudgetLedgerDocument, type BudgetPeriod, type BusinessUnit, type GrantableDomainId } from "../schema/types.js";
+import { businessUnitDomains, isSystemDomainId, type BudgetBalance, type BudgetLedgerDocument, type BudgetPeriod, type BusinessUnit, type DomainId, type GrantableDomainId } from "../schema/types.js";
 import type { CompiledRunNode } from "../engine/compile.js";
 
 /** businessUnitDomains (KTD3) is total over the 12 grantable domains; this inverts it for lookup. */
-export function domainBusinessUnit(domainId: GrantableDomainId): BusinessUnit {
+export function domainBusinessUnit(domainId: DomainId): BusinessUnit {
+  if (isSystemDomainId(domainId)) return "Operations";
   for (const [unit, domains] of Object.entries(businessUnitDomains) as Array<[BusinessUnit, readonly GrantableDomainId[]]>) {
     if (domains.includes(domainId)) return unit;
   }

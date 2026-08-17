@@ -1,4 +1,4 @@
-import type { ActionClass, BudgetLedgerDocument, GrantLevel, GrantsMap, ProtectedCategory, Waiver } from "../schema/types.js";
+import { isSystemDomainId, type ActionClass, type BudgetLedgerDocument, type GrantLevel, type GrantsMap, type ProtectedCategory, type Waiver } from "../schema/types.js";
 import type { AutonomyDecision, AutonomyEvaluator } from "../engine/frontier.js";
 import type { CompiledRunNode, RunNodeId } from "../engine/compile.js";
 import { evaluateGrantCeiling } from "./grants.js";
@@ -65,6 +65,27 @@ export function createAutonomyEvaluator(deps: AutonomyDeps): AutonomyEvaluatorV2
   return {
     evaluate(node: CompiledRunNode): AutonomyDecisionDetail {
       const base = { nodeId: node.id, domainId: node.domainId, actionClass: node.actionClass, protectedCategory: node.protectedCategory, evidenceRefs: [] as readonly string[] };
+
+      // Process/orchestration/machine nodes are the operating system itself, not business work
+      // delegated by a founder grant. Admit only provably internal work. A catalog author cannot
+      // use a system domain to smuggle an external, protected, spend, release, destructive, or
+      // approval-bearing action around the autonomy boundary.
+      if (isSystemDomainId(node.domainId)) {
+        const internalAction = node.actionClass === "observe" || node.actionClass === "draft" || node.actionClass === "mutate";
+        // Provider identifiers on an observe node scope a read-back; they do not authorize a
+        // provider mutation. Draft/mutate system work remains local-only and therefore cannot
+        // name a provider at all.
+        const providerSafe = node.actionClass === "observe" || node.providerIds.length === 0;
+        const safe = internalAction && providerSafe && !node.protectedCategory && node.approvals.length === 0 && !node.costEstimate;
+        return safe
+          ? { ...base, allowed: true, reasonCode: "autonomy.system_internal", evidenceRefs: [`system-domain:${node.domainId}`, `node:${node.id}`] }
+          : {
+              ...base,
+              allowed: false,
+              parkReason: `System-domain node ${node.id} declares an external, protected, costed, or founder-approved action; failing closed.`,
+              reasonCode: "autonomy.system_boundary_violation",
+            };
+      }
 
       const ceiling = evaluateGrantCeiling(deps.grants, node.domainId, node.actionClass);
       if (!ceiling.ok) {

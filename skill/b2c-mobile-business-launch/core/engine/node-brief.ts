@@ -42,6 +42,16 @@ const NOT_AUTHORED = "(not authored — this node predates the contract fields; 
 
 export function composeNodeBrief(node: CompiledRunNode, plan: CompiledPlan): NodeBrief {
   const pathsByArtifactId = new Map(plan.artifactBindings.map((binding) => [binding.artifactId, binding.path]));
+  const load = (node.references ?? []).map((reference) => ({ path: reference.path, title: reference.title, loadWhen: reference.loadWhen }));
+  const seenKnowledgePaths = new Set(load.map((reference) => reference.path));
+  const route =
+    node.role?.contextPacks.flatMap((pack) =>
+      pack.references.flatMap((reference) => {
+        if (seenKnowledgePaths.has(reference.path)) return [];
+        seenKnowledgePaths.add(reference.path);
+        return [{ packId: pack.id, packTitle: pack.title, path: reference.path, title: reference.title, loadWhen: reference.loadWhen }];
+      }),
+    ) ?? [];
   return {
     workflowId: node.workflowId,
     title: node.title,
@@ -50,17 +60,8 @@ export function composeNodeBrief(node: CompiledRunNode, plan: CompiledPlan): Nod
     instructions: node.instructions?.trim() || NOT_AUTHORED,
     open: node.reads ?? [],
     consult: node.consults ?? [],
-    load: (node.references ?? []).map((reference) => ({ path: reference.path, title: reference.title, loadWhen: reference.loadWhen })),
-    route:
-      node.role?.contextPacks.flatMap((pack) =>
-        pack.references.map((reference) => ({
-          packId: pack.id,
-          packTitle: pack.title,
-          path: reference.path,
-          title: reference.title,
-          loadWhen: reference.loadWhen,
-        })),
-      ) ?? [],
+    load,
+    route,
     skills: node.role?.skillRoutes ?? [],
     tools: node.role?.toolRoutes ?? [],
     produce: node.outputs.map((artifactId) => pathsByArtifactId.get(artifactId) ?? artifactId),

@@ -104,6 +104,10 @@ export interface CatalogRole {
   skillRoutes: CatalogCapabilityRoute[];
   /** Runtime capabilities to discover before work that needs them; schemas/current --help outrank stored examples. */
   toolRoutes: CatalogCapabilityRoute[];
+  /** Provider/capability ids this role can actually exercise. Workflow providerIds must be a subset. */
+  capabilityIds: string[];
+  /** Workspace-relative output prefixes this role is allowed to produce. Empty means review-only. */
+  outputPathPrefixes: string[];
 }
 
 export interface CatalogCapabilityRoute {

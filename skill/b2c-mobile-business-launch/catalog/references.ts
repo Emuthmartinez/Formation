@@ -444,7 +444,7 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.operations",
     title: "Founder-Zero Operator",
     loadWhen:
-      "every broad launch start; before account/social/Doppler bootstrap; when the founder is unsure; whenever an agent is about to hand back a checklist instead of operating the business",
+      "always for dispatched business workers; especially every broad launch start, account/social/Doppler bootstrap, founder uncertainty, or attempted checklist handoff",
   },
   {
     id: "reference.operations.frontier-agent-operations",
@@ -832,6 +832,6 @@ export const references: readonly CatalogReference[] = [
     domainId: "domain.words",
     title: "No-Slop Writing",
     loadWhen:
-      "before writing or reviewing any founder-facing copy, or any marketing copy this skill generates — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO",
+      "always for dispatched business workers; apply directly before founder-facing or marketing copy — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO",
   },
 ] as const;

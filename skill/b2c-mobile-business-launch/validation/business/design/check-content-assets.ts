@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { existsSync, realpathSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import {
   asArray,
@@ -221,6 +222,55 @@ if (manifestText) {
     }
     for (const field of ["inputs", "outputs", "truth_constraints", "approvals"]) {
       requireArrayField(asset, field, index, manifestText.relativePath);
+    }
+
+    const assetStatus = asString(asset.status)?.toLowerCase() ?? "";
+    const digestRequired =
+      ["done", "ready", "production", "approved"].includes(assetStatus) ||
+      Boolean(asString(asset.source_job_id)?.trim()) ||
+      asArray(asset.outputs)
+        .map(asString)
+        .filter((value): value is string => Boolean(value?.trim()))
+        .some((output) => /^[a-z][a-z0-9+.-]*:\/\//i.test(output) || (!/^[a-z]+:/i.test(output) && existsSync(path.join(args.root, output))));
+    const inputDigests = isRecord(asset.input_digests) ? asset.input_digests : {};
+    for (const input of asArray(asset.inputs)
+      .map(asString)
+      .filter((value): value is string => Boolean(value?.trim()))) {
+      if (!digestRequired) continue;
+      if (/^[a-z][a-z0-9+.-]*:/i.test(input) || input.startsWith("#")) continue;
+      const absoluteInput = path.join(args.root, input);
+      if (!existsSync(absoluteInput)) {
+        issues.push(
+          issue(
+            "error",
+            `content_assets.manifest.assets.${index}.input_missing`,
+            `Manifest asset ${index} input does not exist: ${input}.`,
+            manifestText.relativePath,
+          ),
+        );
+        continue;
+      }
+      const expectedDigest = createHash("sha256").update(readFileSync(absoluteInput)).digest("hex");
+      const recordedDigest = asString(inputDigests[input]);
+      if (!recordedDigest) {
+        issues.push(
+          issue(
+            "error",
+            `content_assets.manifest.assets.${index}.input_digest.missing`,
+            `Manifest asset ${index} must record input_digests["${input}"] so later design, copy, feature, or price changes make the generated output stale deterministically.`,
+            manifestText.relativePath,
+          ),
+        );
+      } else if (recordedDigest !== expectedDigest) {
+        issues.push(
+          issue(
+            "error",
+            `content_assets.manifest.assets.${index}.input_digest.stale`,
+            `Manifest asset ${index} was generated from a stale digest for ${input}. Regenerate it and mark the previous output superseded.`,
+            manifestText.relativePath,
+          ),
+        );
+      }
     }
 
     const route = asString(asset.route)?.toLowerCase();

@@ -91,7 +91,10 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
   const roleIds = new Set(catalog.roles.map((item) => item.id));
   const referenceIds = new Set(catalog.references.map((item) => item.id));
   const contextPackIds = new Set(catalog.contextPacks.map((item) => item.id));
-  const boundReferenceIds = new Set(catalog.workflows.flatMap((workflow) => workflow.referenceIds));
+  const boundReferenceIds = new Set([
+    ...catalog.workflows.flatMap((workflow) => workflow.referenceIds),
+    ...catalog.contextPacks.flatMap((pack) => pack.referenceIds),
+  ]);
 
   // Knowledge must be routable by the engine, not just present on disk: every reference is either
   // bound to at least one workflow node or explicitly session-scoped (Start Here / Always-On
@@ -117,6 +120,11 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     }
     if (role.skillRoutes.length === 0) issues.push(error("catalog_graph.role.skill_routes_missing", `${role.id} has no nested skill routes.`));
     if (role.toolRoutes.length === 0) issues.push(error("catalog_graph.role.tool_routes_missing", `${role.id} has no tool-discovery routes.`));
+    if (!role.contextPackIds.includes("context.founder-language")) {
+      issues.push(error("catalog_graph.role.founder_language_missing", `${role.id} does not load the always-on founder-language contract.`));
+    }
+    uniqueStrings(role.capabilityIds, "catalog_graph.role.capability_duplicate", role.id, issues);
+    uniqueStrings(role.outputPathPrefixes, "catalog_graph.role.output_prefix_duplicate", role.id, issues);
     for (const packId of role.contextPackIds) checkKnown(issues, contextPackIds, packId, "catalog_graph.role.context_pack_unknown", role.id);
   }
 
@@ -197,6 +205,26 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     }
     if (!roleIds.has(workflow.roleId)) {
       issues.push(error("catalog_graph.workflow.role_unknown", `${workflow.id} names unregistered role ${workflow.roleId}.`));
+    } else {
+      const owner = catalog.roles.find((role) => role.id === workflow.roleId)!;
+      for (const providerId of workflow.providerIds) {
+        if (!owner.capabilityIds.includes(providerId)) {
+          issues.push(
+            error("catalog_graph.workflow.role_capability_missing", `${workflow.id} requires ${providerId}, but ${owner.id} does not declare that capability.`),
+          );
+        }
+      }
+      for (const outputPath of workflow.outputPaths) {
+        if (!owner.outputPathPrefixes.some((prefix) => outputPath === prefix || outputPath.startsWith(prefix))) {
+          issues.push(
+            error(
+              "catalog_graph.workflow.role_output_out_of_scope",
+              `${workflow.id} assigns ${outputPath} to ${owner.id}, outside its declared output scope.`,
+              outputPath,
+            ),
+          );
+        }
+      }
     }
     for (const referenceId of workflow.referenceIds) {
       if (!referenceIds.has(referenceId)) {
@@ -362,6 +390,15 @@ function uniqueBy<T>(items: readonly T[], key: (item: T) => string, code: string
     const value = key(item);
     if (seen.has(value)) issues.push(error(code, `Duplicate value ${value}.`));
     seen.add(value);
+  }
+}
+
+function uniqueStrings(items: readonly string[], code: string, owner: string, issues: CatalogIssue[]): void {
+  const seen = new Set<string>();
+  for (const item of items) {
+    if (!item.trim()) issues.push(error(code, `${owner} contains an empty capability or output prefix.`));
+    if (seen.has(item)) issues.push(error(code, `${owner} repeats ${item}.`));
+    seen.add(item);
   }
 }
 

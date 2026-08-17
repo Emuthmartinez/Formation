@@ -62,13 +62,24 @@ function baseFixtureCatalog(): Catalog {
         promptPath: "agents/fixture.md",
         scope: "fixture",
         parentPromptPaths: ["AGENTS.md", "APP_AGENTS.md"],
-        contextPackIds: [],
+        contextPackIds: ["context.founder-language"],
         skillRoutes: [{ id: "fixture-skill", when: "fixture" }],
         toolRoutes: [{ id: "fixture-tool", when: "fixture" }],
+        capabilityIds: [],
+        outputPathPrefixes: ["fixture/"],
       },
     ],
-    contextPacks: [],
-    references: [],
+    contextPacks: [{ id: "context.founder-language", title: "Founder language", referenceIds: ["reference.research.fixture"] }],
+    references: [
+      {
+        id: "reference.research.fixture",
+        path: "package.json",
+        domainId: "domain.research",
+        title: "Fixture knowledge",
+        loadWhen: "always",
+        sessionScoped: true,
+      },
+    ],
     workflows: [baseWorkflow()],
     artifacts: [{ id: "artifact.fixture.output.md", path: "fixture/output.md", ownerDomainId: "domain.research", laneIds: [], generated: false }],
     gates: [],
@@ -84,6 +95,37 @@ export function register(harness: Harness): void {
     const catalog = baseFixtureCatalog();
     const issues = validateCatalog(catalog, skillRoot).filter((issue) => issue.severity === "error");
     assert(issues.length === 0, `expected no errors, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
+  });
+
+  harness.check("validate: workflow providers must be executable by the assigned role", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.workflows = [baseWorkflow({ providerIds: ["provider.fixture"] })];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.workflow.role_capability_missing"),
+      `expected catalog_graph.workflow.role_capability_missing, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+  });
+
+  harness.check("validate: workflow outputs must stay inside the assigned role's write scope", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.artifacts = [{ id: "artifact.fixture.outside.md", path: "outside.md", ownerDomainId: "domain.research", laneIds: [], generated: false }];
+    catalog.workflows = [baseWorkflow({ outputPaths: ["outside.md"] })];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.workflow.role_output_out_of_scope"),
+      `expected catalog_graph.workflow.role_output_out_of_scope, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+  });
+
+  harness.check("validate: every dispatched role must inherit always-on founder-language knowledge", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.roles[0]!.contextPackIds = [];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.role.founder_language_missing"),
+      `expected catalog_graph.role.founder_language_missing, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
   });
 
   harness.check("validate: a dangling reference id is caught with a named issue code", () => {
@@ -213,17 +255,17 @@ export function register(harness: Harness): void {
     );
   });
 
-  harness.check("validate: a reference no workflow binds is caught, and sessionScoped clears it", () => {
+  harness.check("validate: a reference no workflow or context pack binds is caught, and sessionScoped clears it", () => {
     const catalog = baseFixtureCatalog();
-    catalog.references = [{ id: "reference.research.fixture", path: "package.json", domainId: "domain.research", title: "Fixture", loadWhen: "fixture" }];
+    catalog.references.push({ id: "reference.research.orphan", path: "README.md", domainId: "domain.research", title: "Orphan", loadWhen: "fixture" });
     const unbound = validateCatalog(catalog, skillRoot);
     assert(
       unbound.some((issue) => issue.code === "catalog_graph.reference.unbound"),
       `expected catalog_graph.reference.unbound, got: ${unbound.map((i) => i.code).join(", ")}`,
     );
-    catalog.references = [
-      { id: "reference.research.fixture", path: "package.json", domainId: "domain.research", title: "Fixture", loadWhen: "fixture", sessionScoped: true },
-    ];
+    catalog.references = catalog.references.map((reference) =>
+      reference.id === "reference.research.orphan" ? { ...reference, sessionScoped: true } : reference,
+    );
     const scoped = validateCatalog(catalog, skillRoot);
     assert(!scoped.some((issue) => issue.code === "catalog_graph.reference.unbound"), "sessionScoped: true should clear reference.unbound");
   });
@@ -311,7 +353,7 @@ export function register(harness: Harness): void {
     const issues = validateCatalog(catalog, skillRoot).filter((issue) => issue.severity === "error");
     assert(issues.length === 0, `expected the real catalog to be clean, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
     assert(catalog.domains.length === 15, `expected 15 domains, got ${catalog.domains.length}`);
-    assert(catalog.workflows.length === 59, `expected 59 workflows, got ${catalog.workflows.length}`);
+    assert(catalog.workflows.length === 63, `expected 63 workflows, got ${catalog.workflows.length}`);
 
     const landingBuild = catalog.workflows.find((wf) => wf.id === "workflow.growth.pre-launch-funnel-landing-waitlist");
     const landingPublish = catalog.workflows.find((wf) => wf.id === "workflow.growth.landing-funnel-publication-and-live-proof");
@@ -334,17 +376,17 @@ export function register(harness: Harness): void {
   // catalog/bridge.ts: toCatalogInput() -> compile.ts compatibility
   // ---------------------------------------------------------------------
 
-  harness.check("bridge: toCatalogInput() excludes system/machine domains and compilePlan() accepts the result", () => {
+  harness.check("bridge: toCatalogInput() executes process/orchestration knowledge, excludes machine maintenance, and compiles", () => {
     const catalog = composeCatalog(skillRoot);
     const input = toCatalogInput(catalog);
-    // CatalogWorkflowNode.domainId is typed GrantableDomainId (compile.ts) — a
-    // domain.process/orchestration/machine workflow literally cannot type-check its way
-    // into `input.workflows`, so the exclusion is a compile-time guarantee, not just a
-    // runtime filter. What's left to prove at runtime: the bridge actually narrowed the
-    // set (it's a strict subset), and what remains still compiles cleanly.
-    assert(input.workflows.length < catalog.workflows.length, "the bridged input should be a strict subset of the full 59-workflow catalog");
+    assert(input.workflows.length < catalog.workflows.length, "the bridged input should exclude maintenance-only machine workflows");
     const excludedCount = catalog.workflows.length - input.workflows.length;
-    assert(excludedCount === 15, `expected exactly 15 excluded system/machine-domain workflows (7 process/orchestration + 8 machine), got ${excludedCount}`);
+    assert(excludedCount === 8, `expected exactly 8 excluded machine-domain workflows, got ${excludedCount}`);
+    assert(
+      input.workflows.some((workflow) => workflow.id === "workflow.process.change-cascade") &&
+        input.workflows.some((workflow) => workflow.id === "workflow.orchestration.session-continuity-resume"),
+      "process and orchestration knowledge must survive into the executable graph",
+    );
 
     // Must not throw: proves no dangling dependency survived the domain filter and no
     // artifact-path collision survived either.
@@ -352,7 +394,7 @@ export function register(harness: Harness): void {
     assert(plan.nodes.length === input.workflows.length, "compiled plan should have one node per bridged workflow");
   });
 
-  harness.check("bridge: a grantable workflow's dependency on an excluded system-domain workflow is stripped, not left dangling", () => {
+  harness.check("bridge: a business workflow retains its executable process dependency", () => {
     const catalog = composeCatalog(skillRoot);
     const designRoom = catalog.workflows.find((wf) => wf.id === "workflow.design.design-room-state-mutate-version-render");
     assert(Boolean(designRoom), "expected workflow.design.design-room-state-mutate-version-render to exist in the full catalog");
@@ -363,8 +405,8 @@ export function register(harness: Harness): void {
     const input = toCatalogInput(catalog);
     const bridged = input.workflows.find((wf) => wf.id === "workflow.design.design-room-state-mutate-version-render")!;
     assert(
-      !bridged.dependencies.includes("workflow.process.launch-trace-and-build-contracts" as never),
-      "the bridged node must not carry a dependency on an excluded system-domain workflow",
+      bridged.dependencies.includes("workflow.process.launch-trace-and-build-contracts"),
+      "the bridged node must retain the process dependency that supplies its launch trace and build contract",
     );
   });
 
@@ -395,6 +437,34 @@ export function register(harness: Harness): void {
         landing.dependencies.includes("workflow.design.design-room-state-mutate-version-render"),
       "app and landing work must share the accepted design dependency so they can fan out together",
     );
+  });
+
+  harness.check("dispatch registry: prompts use the v2 state model, canonical artifact paths, and complete launch-surface nesting", () => {
+    const catalog = composeCatalog(skillRoot);
+    const promptRoot = path.join(skillRoot, "workspace", "business", "engineering", "app-agent-roster");
+    const promptText = [path.join(promptRoot, "APP_AGENTS.md"), ...readdirSync(path.join(promptRoot, "agents")).map((name) => path.join(promptRoot, "agents", name))]
+      .map((filePath) => readFileSync(filePath, "utf8"))
+      .join("\n");
+    for (const stale of [
+      "state/PROJECT_STATE.yaml",
+      "`APP_STORE_LISTING.md`",
+      "`SCREENSHOTS.md`",
+      "`CONTENT_ASSETS.md`",
+      "`SECRETS.md`",
+      "`11_STAR_EXPERIENCE.md`",
+    ]) {
+      assert(!promptText.includes(stale), `prepared prompts must not reference stale or noncanonical path ${stale}`);
+    }
+    assert(promptText.includes("state/business-state.json"), "prepared prompts must use the canonical v2 state document");
+    assert(promptText.includes(".b2c-launch/BUSINESS_CONTEXT.md"), "prepared prompts must preserve and load business-specific context");
+    const producer = catalog.roles.find((role) => role.id === "role.launch-surface-producer")!;
+    assert(producer.contextPackIds.includes("context.process"), "launch-surface work must load the executable change-process doctrine");
+    for (const skillId of ["ios-screenshots", "pricing", "paywalls", "analytics", "video", "remotion", "usefastlane-ai"]) {
+      assert(producer.skillRoutes.some((route) => route.id === skillId), `launch-surface producer must route nested skill ${skillId}`);
+    }
+    for (const role of catalog.roles) {
+      assert(role.contextPackIds.includes("context.founder-language"), `${role.id} must carry always-on founder-language knowledge`);
+    }
   });
 
   // ---------------------------------------------------------------------

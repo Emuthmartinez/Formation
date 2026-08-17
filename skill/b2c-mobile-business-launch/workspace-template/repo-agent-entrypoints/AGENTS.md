@@ -10,6 +10,10 @@ and `.cursor/rules/` only add runtime-specific notes; they never restate or over
 Reconstruct truth from these files, never from chat memory or a prior transcript:
 
 - `state/business-state.json` — canonical business state (lanes, phase, founder-gates, narrative)
+- `.b2c-launch/runtime.json`, `catalog.json` — portable skill locator/version plus the
+  executable catalog installed for this business; reject dispatch if their versions disagree
+- `.b2c-launch/BUSINESS_CONTEXT.md` — founder-owned stack, provider, locale, pricing, deploy,
+  store-team, and voice context; the installer never overwrites it
 - `control/control.json` — kill switch, autonomy grants, and waivers (founder-set, per business unit)
 - `control/budget-ledger.json` — spend estimates, actuals, and remaining balance per unit/period
 - `run/run-state.json`, `run/checkpoint.json` — the current or most recent scheduled run's progress
@@ -21,6 +25,14 @@ Reconstruct truth from these files, never from chat memory or a prior transcript
 
 If any of these is missing, this workspace has not finished onboarding — say so plainly rather than
 inventing a starting state.
+
+Resolve the skill root from `B2C_LAUNCH_SKILL_ROOT` first, then the configured path, then the
+installed skill named in `.b2c-launch/runtime.json`; verify its `skill-version.json` matches the
+manifest before resolving knowledge paths. Do not assume the source checkout is the current
+runtime, and do not dispatch unless `catalog.json.version` ends with the manifest's
+`skillVersion`. A refresh may preserve replaced entrypoints under
+`.b2c-launch/preserved-entrypoints/`; reconcile intentional business-specific material into
+`.b2c-launch/BUSINESS_CONTEXT.md` rather than restoring an obsolete prompt wholesale.
 
 ## The One Rule: Never Write Around The Reducer
 
@@ -102,6 +114,8 @@ parent contracts, task-local artifacts, mandatory skill references, conditional 
 packs, matching installed skills, current tool-discovery routes, declared outputs, and verification.
 Every worker returns `CONTRACT_FILES_LOADED`, `KNOWLEDGE_LOADED`, `ROLE_KNOWLEDGE_USED`,
 `SKILLS_USED`, and `TOOLS_USED`; a missing receipt is a failed attempt.
+Every specialist also reads `.b2c-launch/BUSINESS_CONTEXT.md` when it exists. Founder-facing text
+must load the always-on founder-language context pack even when the task's domain pack is narrower.
 
 ## Kill Switch
 

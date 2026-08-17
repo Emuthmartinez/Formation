@@ -25,12 +25,9 @@ export const workflows = [
     instructions:
       "Confirm the product's shape against the four shipped archetypes (habit-tracker, photo-AI-media, social-network, AI-chat-companion) with the founder via AskUserQuestion, then copy the matched starter scaffold from starters/<archetype>/ into the business repo rather than improvising the same wiring from scratch. Record the confirmed archetype and shape answers (e.g. habit_model, primary_surface) in state/PROJECT_STATE.yaml so later sessions do not re-litigate it. Do not write product/SPEC.md here — that single-writer role belongs to research-backed-spec; this node's proof is the starter scaffold itself, checked by check:archetype-starter alongside check:app-archetype. If the product only contains a feature that resembles one of the four shapes without being its center of gravity, stop and route to the general core-loop-and-v1-scope method instead of forcing a mismatched pack.",
     reads: ["state/PROJECT_STATE.yaml"],
-    referenceIds: [
-      "reference.product.habit-tracker",
-      "reference.product.photo-ai-media",
-      "reference.product.social-network",
-      "reference.product.ai-chat-companion",
-    ],
+    // The mobile role receives the four archetypes as conditional routes and must load only
+    // the founder-confirmed match; they are not four mandatory, mutually contradictory reads.
+    referenceIds: ["reference.product.core-loop-and-v1-scope"],
     roleId: "role.mobile-engineer",
     laneIds: ["product"],
     // outputPaths intentionally empty: workflow.research.research-backed-spec is
@@ -134,27 +131,11 @@ export const workflows = [
     instructions:
       "Audit EMOTIONAL_DESIGN.md against every card the app actually implements — for each, verify the specific bright-line/dark-line test from that card's own file (experience-cards/<name>-card.md) and consumer-product-design-agency.md's four-required-card checklist actually passes, not just that a card is named. HIGH-risk cards (Variable Reward, Streak & Loss Aversion) get the strictest read: confirm the escape hatch, counter-metric, and non-empty fallback are real, not aspirational language. Write findings as EMOTIONAL_AUDIT.md's Audit Output Contract, and any dark-pattern violation or missing per-card attestation field becomes a failure card per failure-cards.md rather than a note to fix later — check:emotional-design enforces the attestation fields this audit must produce.",
     reads: ["product/experience/emotional-design/EMOTIONAL_DESIGN.md"],
-    // The 12-card deck's satellite files are catalog-required to be bound by some workflow
-    // (validate.ts's reference.unbound check); the auditor is where they belong — it must
-    // verify whichever subset of the deck a given app actually implemented, which the
-    // producer node (bound to the deck's hub + the four required cards' full recipes) does
-    // not need pre-loaded per the deck's own "load only the cards in scope" routing rule.
     referenceIds: [
       "reference.experience.emotional-design-system",
       "reference.experience.consumer-product-design-agency",
       "reference.experience.ethics-guardrail",
-      "reference.experience.experience-cards.commitment-card",
-      "reference.experience.experience-cards.variable-reward-card",
-      "reference.experience.experience-cards.perceived-effort-delay-card",
-      "reference.experience.experience-cards.intent-mirroring-card",
-      "reference.experience.experience-cards.endowed-progress-card",
-      "reference.experience.experience-cards.peak-end-card",
-      "reference.experience.experience-cards.streak-and-loss-aversion-card",
-      "reference.experience.experience-cards.reciprocity-card",
-      "reference.experience.experience-cards.identity-and-self-expression-card",
-      "reference.experience.experience-cards.fresh-start-card",
-      "reference.experience.experience-cards.mastery-and-status-card",
-      "reference.experience.experience-cards.recovery-and-trust-repair-card",
+      "reference.experience.experience-cards",
     ],
     roleId: "role.security-architect",
     laneIds: ["emotional_design"],
