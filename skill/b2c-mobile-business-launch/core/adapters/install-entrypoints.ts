@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * install-entrypoints.ts — writes the v2 entrypoint set (AGENTS.md canonical, CLAUDE.md thin
- * pointer, `.cursor/rules/agents.mdc` addendum) into a target business repo, and removes any v1
+ * pointer, Cursor addendum, APP_AGENTS.md, and the role roster) into a target business repo, and removes any v1
  * `_managed` PostToolUse hook entries from that repo's `.claude/settings.json` (KTD8: enforcement
  * moved to the reducer and validators, which run identically everywhere — replacing the
  * Claude-only PostToolUse hook mechanism). Founder-owned settings.json entries, and every other
@@ -70,11 +70,46 @@ function isManagedEntry(entry: HookEntry): boolean {
 export const ENTRYPOINT_TEMPLATE_RELATIVE = path.join("workspace-template", "repo-agent-entrypoints");
 
 export interface EntrypointFile {
-  /** Path relative to the template root and, unchanged, relative to the target repo root. */
+  /** Destination path relative to the target repo root. */
   readonly relativePath: string;
+  /** Authored source path relative to the skill root. */
+  readonly sourceRelativePath: string;
 }
 
-export const ENTRYPOINT_FILES: readonly EntrypointFile[] = [{ relativePath: "AGENTS.md" }, { relativePath: "CLAUDE.md" }, { relativePath: path.join(".cursor", "rules", "agents.mdc") }];
+const entrypointTemplate = (relativePath: string): EntrypointFile => ({
+  relativePath,
+  sourceRelativePath: path.join(ENTRYPOINT_TEMPLATE_RELATIVE, relativePath),
+});
+
+const rosterTemplate = (relativePath: string): EntrypointFile => ({
+  relativePath,
+  sourceRelativePath: path.join("workspace", "business", "engineering", "app-agent-roster", relativePath),
+});
+
+const ROSTER_PROMPTS = [
+  "accessibility-device-qa.md",
+  "backend-infrastructure-engineer.md",
+  "copy-specialist.md",
+  "customer-success.md",
+  "design-guru.md",
+  "engineering-leader.md",
+  "launch-surface-producer.md",
+  "marketing-guru.md",
+  "mobile-engineer.md",
+  "operator-readiness.md",
+  "orchestrator.md",
+  "product-leader.md",
+  "research-strategist.md",
+  "security-architect.md",
+] as const;
+
+export const ENTRYPOINT_FILES: readonly EntrypointFile[] = [
+  entrypointTemplate("AGENTS.md"),
+  entrypointTemplate("CLAUDE.md"),
+  entrypointTemplate(path.join(".cursor", "rules", "agents.mdc")),
+  rosterTemplate("APP_AGENTS.md"),
+  ...ROSTER_PROMPTS.map((name) => rosterTemplate(path.join("agents", name))),
+];
 
 /** `{{KEY}}` -> value. A placeholder with no supplied value is left intact, never silently blanked — matches the v1 template convention (check-agent-entrypoints.ts asserts the shipped template keeps its own {{...}} tokens). */
 export function applyTemplateVars(content: string, vars: Readonly<Record<string, string>>): string {
@@ -82,10 +117,9 @@ export function applyTemplateVars(content: string, vars: Readonly<Record<string,
 }
 
 export function readEntrypointTemplates(skillRoot: string): Map<string, string> {
-  const templateRoot = path.join(skillRoot, ENTRYPOINT_TEMPLATE_RELATIVE);
   const files = new Map<string, string>();
   for (const file of ENTRYPOINT_FILES) {
-    const source = path.join(templateRoot, file.relativePath);
+    const source = path.join(skillRoot, file.sourceRelativePath);
     if (!existsSync(source)) throw new Error(`entrypoint template is missing at ${source}.`);
     files.set(file.relativePath, readFileSync(source, "utf8"));
   }

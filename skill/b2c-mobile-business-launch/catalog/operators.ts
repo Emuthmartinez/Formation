@@ -8,13 +8,12 @@ import type { CatalogDomainId } from "./types.js";
  * convention (catalog/lanes.ts, catalog/phases.ts).
  *
  * Not part of the v2 Catalog shape composeCatalog() returns — no v2 consumer needs the full
- * 12-operator roster except tooling/render-business-control-plane-workspace.ts, which reads
+ * operator roster except tooling/render-business-control-plane-workspace.ts, which reads
  * four of these (`operator.orchestrator`, `operator.product-leader`, `operator.design-guru`,
  * `operator.engineering-leader`) by id for the Business Control Plane's Agent Lanes panel.
- * The full roster ports rather than trimming to those four: `contextPackIds`/`domainIds`/
- * `promptPath` on the other eight (founder, marketing-guru, security-architect,
- * customer-success, maintainer, validator, renderer) are real, still-accurate role
- * definitions with live `promptPath` targets under
+ * The full roster remains available for parity checks and tooling. Its `contextPackIds` now point
+ * to executable catalog/context-packs.ts definitions, and every prepared agent prompt has both a
+ * CatalogRole and CatalogOperator record with a live `promptPath` under
  * workspace/business/engineering/app-agent-roster/agents/ — dropping them would be a content
  * loss with no v2 consumer requiring it, not a cull the ledger or KTD11 calls for.
  */
@@ -82,6 +81,24 @@ export const operators: readonly CatalogOperator[] = [
     promptPath: "workspace/business/engineering/app-agent-roster/agents/marketing-guru.md",
   },
   {
+    id: "operator.launch-surface-producer",
+    name: "Launch Surface Producer",
+    kind: "agent",
+    goal: "Build the landing site and keep every public launch surface synchronized with the accepted product and design contracts.",
+    domainIds: ["domain.growth", "domain.store", "domain.design", "domain.words", "domain.money"],
+    contextPackIds: ["context.growth", "context.store", "context.design", "context.words", "context.money"],
+    allowedActions: ["build local public surfaces", "audit cross-surface drift", "prepare store and marketing updates"],
+    founderGatedActions: ["pricing changes", "public deployment", "store mutations", "paid asset generation"],
+    forbiddenActions: agentForbidden,
+    artifactPaths: [
+      "growth/landing/",
+      "store/app-store-listing/APP_STORE_LISTING.md",
+      "store/app-store-listing/SCREENSHOTS.md",
+      "growth/content-assets/CONTENT_ASSETS.md",
+    ],
+    promptPath: "workspace/business/engineering/app-agent-roster/agents/launch-surface-producer.md",
+  },
+  {
     id: "operator.engineering-leader",
     name: "Engineering Leader",
     kind: "agent",
@@ -145,6 +162,84 @@ export const operators: readonly CatalogOperator[] = [
     forbiddenActions: agentForbidden,
     artifactPaths: ["growth/EMAIL_OPS.md", "operations/POST_LAUNCH_OPS.md", "trust/PRIVACY.md", "trust/TERMS.md"],
     promptPath: "workspace/business/engineering/app-agent-roster/agents/customer-success.md",
+  },
+  {
+    id: "operator.operator-readiness",
+    name: "Operator Readiness",
+    kind: "agent",
+    goal: "Verify capabilities, access, budgets, and standing authority once so unattended work can continue.",
+    domainIds: ["domain.operations", "domain.store", "domain.engineering"],
+    contextPackIds: ["context.operations", "context.store", "context.device"],
+    allowedActions: ["inventory tools and accounts", "verify delegated roles", "prepare standing envelopes", "consolidate missing access"],
+    founderGatedActions: founderGates,
+    forbiddenActions: agentForbidden,
+    artifactPaths: ["operations/BUSINESS_ACCESS.md", "operations/AGENT_OPERATIONS.md", "operations/agent-operations.json"],
+    promptPath: "workspace/business/engineering/app-agent-roster/agents/operator-readiness.md",
+  },
+  {
+    id: "operator.research-strategist",
+    name: "Research Strategist",
+    kind: "agent",
+    goal: "Produce current, source-backed category, customer, competitor, review, and localization evidence.",
+    domainIds: ["domain.research", "domain.product"],
+    contextPackIds: ["context.research", "context.product"],
+    allowedActions: ["search and inspect sources", "synthesize evidence", "prepare research artifacts"],
+    founderGatedActions: ["paid research-tool spend", "Go Pivot or Kill decision"],
+    forbiddenActions: agentForbidden,
+    artifactPaths: ["strategy/RESEARCH.md", "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"],
+    promptPath: "workspace/business/engineering/app-agent-roster/agents/research-strategist.md",
+  },
+  {
+    id: "operator.copy-specialist",
+    name: "Copy Specialist",
+    kind: "agent",
+    goal: "Keep product, conversion, lifecycle, and store language clear, truthful, and lexicon-locked.",
+    domainIds: ["domain.words", "domain.growth", "domain.store"],
+    contextPackIds: ["context.words", "context.product", "context.growth", "context.store"],
+    allowedActions: ["draft copy", "audit claims", "reconcile approved language"],
+    founderGatedActions: ["new public claims", "pricing language", "legal promises"],
+    forbiddenActions: agentForbidden,
+    artifactPaths: ["product/copy/COPY_BRIEF.md", "product/copy/COPY_DECK.md", "APP_STORE_LISTING.md"],
+    promptPath: "workspace/business/engineering/app-agent-roster/agents/copy-specialist.md",
+  },
+  {
+    id: "operator.mobile-engineer",
+    name: "Mobile Engineer",
+    kind: "agent",
+    goal: "Implement the accepted mobile product and design contracts with focused build and runtime proof.",
+    domainIds: ["domain.engineering", "domain.design", "domain.experience"],
+    contextPackIds: ["context.engineering", "context.design", "context.experience", "context.device"],
+    allowedActions: ["implement bounded app slices", "run builds and tests", "capture local proof"],
+    founderGatedActions: ["signing changes", "build upload", "release"],
+    forbiddenActions: agentForbidden,
+    artifactPaths: ["engineering/ENGINEERING_PLAN.md", "engineering/PRODUCTION_READINESS.md"],
+    promptPath: "workspace/business/engineering/app-agent-roster/agents/mobile-engineer.md",
+  },
+  {
+    id: "operator.backend-infrastructure-engineer",
+    name: "Backend Infrastructure Engineer",
+    kind: "agent",
+    goal: "Implement data, API, auth, jobs, observability, and provider contracts with live proof.",
+    domainIds: ["domain.engineering", "domain.data", "domain.money", "domain.trust"],
+    contextPackIds: ["context.engineering", "context.data", "context.money", "context.trust", "context.operations"],
+    allowedActions: ["implement bounded backend changes", "run provider tests", "prepare deployment proof"],
+    founderGatedActions: ["production mutation", "credential-role change", "destructive migration"],
+    forbiddenActions: agentForbidden,
+    artifactPaths: ["engineering/TECH_SPEC.md", "analytics/ANALYTICS.md", "operations/PROVIDER_PROOF.md"],
+    promptPath: "workspace/business/engineering/app-agent-roster/agents/backend-infrastructure-engineer.md",
+  },
+  {
+    id: "operator.accessibility-device-qa",
+    name: "Accessibility And Device QA",
+    kind: "agent",
+    goal: "Prove critical flows across assistive technology, locales, screens, and target devices.",
+    domainIds: ["domain.engineering", "domain.design", "domain.store"],
+    contextPackIds: ["context.device", "context.design", "context.store", "context.trust"],
+    allowedActions: ["audit accessibility", "run device tests", "capture sanitized evidence"],
+    founderGatedActions: ["physical-device account access", "store upload", "release"],
+    forbiddenActions: agentForbidden,
+    artifactPaths: ["engineering/PRODUCTION_READINESS.md", "store/app-store-listing/SCREENSHOTS.md", "growth/DEMO_VIDEO.md"],
+    promptPath: "workspace/business/engineering/app-agent-roster/agents/accessibility-device-qa.md",
   },
   {
     id: "operator.maintainer",

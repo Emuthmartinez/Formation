@@ -749,6 +749,7 @@ export function register(h: Harness): void {
       surfaces: {
         app_in_app: { status: "updated", evidence: "product/ONBOARDING.md" },
         asc_listing: { status: "updated", evidence: "APP_STORE_LISTING.md" },
+        google_play_listing: { status: "updated", evidence: "store/GOOGLE_PLAY_RELEASE.md" },
         asc_products: { status: "updated", evidence: "revenue/REVENUE_OPS.md" },
         revenuecat_billing: { status: "updated", evidence: "revenue/REVENUE_OPS.md" },
         landing_web: { status: "updated", evidence: "growth/landing/index.html" },

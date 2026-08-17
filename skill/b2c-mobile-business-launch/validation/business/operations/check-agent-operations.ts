@@ -171,6 +171,9 @@ function validateSemantics(value: Record<string, unknown>): void {
     "serializeAuthenticatedSurfaces",
     "readBackAfterAction",
     "reconcileCanonicalState",
+    "preflightStepAwayCapabilitiesBeforeBuild",
+    "consumeStandingApprovalsWithoutReprompt",
+    "consolidateMissingAccess",
   ]) {
     if (policies[key] !== true) {
       issues.push(

@@ -10,6 +10,7 @@ import type { ActionClass, GrantableDomainId, LaneKey, ProtectedCategory } from 
 
 export type AreaId = `area.${string}`;
 export type RoleId = `role.${string}`;
+export type ContextPackId = `context.${string}`;
 /** Broader than core/schema's GrantableDomainId: also covers domain.process, domain.orchestration, domain.machine (KTD3 system domains). */
 export type CatalogDomainId = `domain.${string}`;
 export type PhaseId = `phase.${string}`;
@@ -95,6 +96,25 @@ export interface CatalogRole {
   name: string;
   promptPath: string;
   scope: string;
+  /** Parent repo contracts a fresh worker must read before the specialist prompt. */
+  parentPromptPaths: string[];
+  /** Role-level knowledge routes. Their references remain conditional; workflow references are mandatory. */
+  contextPackIds: ContextPackId[];
+  /** Installed skills to invoke when the assignment matches `when`; unavailable optional skills never block work. */
+  skillRoutes: CatalogCapabilityRoute[];
+  /** Runtime capabilities to discover before work that needs them; schemas/current --help outrank stored examples. */
+  toolRoutes: CatalogCapabilityRoute[];
+}
+
+export interface CatalogCapabilityRoute {
+  id: string;
+  when: string;
+}
+
+export interface CatalogContextPack {
+  id: ContextPackId;
+  title: string;
+  referenceIds: ReferenceId[];
 }
 
 /**
@@ -183,6 +203,7 @@ export interface Catalog {
   phases: CatalogPhase[];
   lanes: CatalogLane[];
   roles: CatalogRole[];
+  contextPacks: CatalogContextPack[];
   references: CatalogReference[];
   workflows: CatalogWorkflowDef[];
   artifacts: CatalogArtifact[];

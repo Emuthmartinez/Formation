@@ -23,6 +23,9 @@ surfaces:
   asc_listing:
     label: "App Store Connect listing"
     covers: "name, subtitle, promotional text, description, keyword field, What's New, screenshots + caption overlays, App Preview, App Icon, in-app events, custom product pages, and every localization of all of the above"
+  google_play_listing:
+    label: "Google Play listing"
+    covers: "name, short and full descriptions, screenshots, feature graphic, promo video, custom store listings, promotional content, and localizations"
   asc_products:
     label: "App Store Connect products"
     covers: "IAP/subscription display names + descriptions, promoted-IAP promotional images, pricing, intro/trial offers, App Review Information notes"
@@ -31,7 +34,7 @@ surfaces:
     covers: "offering/package/product display names, paywall configuration, entitlement identifiers, Stripe/web-funnel product copy and prices"
   landing_web:
     label: "Landing / web"
-    covers: "hero, method/how-it-works, FAQ, pricing section, footer, <meta> description + Open Graph, JSON-LD / structured data, robots.txt / llms.txt / sitemap.xml"
+    covers: "hero, method/how-it-works, optional web onboarding, FAQ, pricing, footer, app screenshots, metadata, Open Graph, JSON-LD, robots.txt, llms.txt, and sitemap.xml"
   seo_geo:
     label: "SEO / GEO"
     covers: "target keywords, citability content, brand-entity signals"
@@ -52,12 +55,30 @@ surfaces:
 # unaffected. Mirrors the change-cascade.md "Change Cascade Map" rows; the
 # `mirrors` field names the row so drift between the two is visible.
 change_types:
+  design_contract_lock:
+    label: "Design contract accepted"
+    mirrors: "Design contract accepted"
+    cascade_to:
+      - app_in_app
+      - asc_listing
+      - google_play_listing
+      - asc_products
+      - revenuecat_billing
+      - landing_web
+      - seo_geo
+      - lifecycle_email
+      - analytics
+      - legal
+      - content_ugc_ads
+    notes: "create the baseline as soon as design/design.md is accepted; build the local landing site while app implementation runs; mark price and product surfaces unaffected or blocked when they do not apply yet"
+
   feature_change:
     label: "Feature added / changed / removed"
     mirrors: "Feature added / changed / removed"
     cascade_to:
       - app_in_app
       - asc_listing
+      - google_play_listing
       - landing_web
       - seo_geo
       - lifecycle_email
@@ -72,6 +93,7 @@ change_types:
     cascade_to:
       - app_in_app
       - asc_listing
+      - google_play_listing
       - asc_products
       - revenuecat_billing
       - landing_web
@@ -85,6 +107,7 @@ change_types:
     cascade_to:
       - app_in_app
       - asc_listing
+      - google_play_listing
       - analytics
       - landing_web
     notes: "asc_listing covers the screenshot set and App Preview when they show onboarding; analytics covers activation events/funnels and review-prompt timing"
@@ -95,6 +118,7 @@ change_types:
     cascade_to:
       - app_in_app
       - asc_listing
+      - google_play_listing
       - asc_products
       - revenuecat_billing
       - landing_web
@@ -109,6 +133,7 @@ change_types:
     cascade_to:
       - app_in_app
       - asc_listing
+      - google_play_listing
       - landing_web
       - lifecycle_email
       - content_ugc_ads
@@ -121,6 +146,7 @@ change_types:
       - revenuecat_billing
       - asc_products
       - asc_listing
+      - google_play_listing
       - app_in_app
       - legal
       - analytics
@@ -132,6 +158,7 @@ change_types:
     cascade_to:
       - app_in_app
       - asc_listing
+      - google_play_listing
       - asc_products
       - legal
       - analytics
@@ -143,6 +170,7 @@ change_types:
     cascade_to:
       - app_in_app
       - asc_listing
+      - google_play_listing
       - asc_products
       - revenuecat_billing
       - landing_web
@@ -158,6 +186,7 @@ change_types:
     cascade_to:
       - content_ugc_ads
       - asc_listing
+      - google_play_listing
       - asc_products
       - lifecycle_email
     notes: "generated assets embed tokens, feature names, copy, and pricing at generation time — regenerate per the Generated-Asset Regeneration table in change-cascade.md, record each new asset in CONTENT_ASSETS.md, and mark prior entries status:superseded. Generated output is supporting art only and never substitutes for truthful real app UI"

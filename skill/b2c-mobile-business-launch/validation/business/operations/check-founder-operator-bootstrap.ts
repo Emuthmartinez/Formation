@@ -772,10 +772,8 @@ function validateState(
     const unresolvedAccounts = accounts.filter((entry) => !["access_ready", "not_needed"].includes(asString(entry.status) ?? ""));
     const businessEmail = accounts.find((entry) => entry.id === "business_email");
     const gate = isRecord(founder.activeFounderGate) ? founder.activeFounderGate : {};
-    if (asString(gate.id) === "confirm-working-name") {
-      issues.push(
-        issue("error", "founder_operator.ready_with_stale_gate", "Ready state cannot retain the initial business-name founder gate.", ledgerRelative),
-      );
+    if (["confirm-working-name", "confirm-step-away-readiness"].includes(asString(gate.id) ?? "")) {
+      issues.push(issue("error", "founder_operator.ready_with_stale_gate", "Ready state cannot retain the initial setup founder gate.", ledgerRelative));
     }
     if (!["ready", "not_needed"].includes(asString(doppler.status) ?? "") || unresolvedAccounts.length > 0 || businessEmail?.status !== "access_ready") {
       issues.push(

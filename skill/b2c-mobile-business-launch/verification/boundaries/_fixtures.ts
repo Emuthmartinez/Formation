@@ -46,7 +46,8 @@ export function makeNode(overrides: NodeOverrides = {}): CompiledRunNode {
   nodeCounter += 1;
   const slug = overrides.workflowSlug ?? `fixture-node-${nodeCounter}`;
   const outputs = (overrides.outputs ?? [`artifact.${slug}`]).map((id) => (id.startsWith("artifact.") ? id : `artifact.${id}`)) as `artifact.${string}`[];
-  const resources: ResourceClaim[] = overrides.resources ?? outputs.map((id) => ({ id: `resource.path.${id.slice("artifact.".length)}`, mode: "exclusive" as const }));
+  const resources: ResourceClaim[] =
+    overrides.resources ?? outputs.map((id) => ({ id: `resource.path.${id.slice("artifact.".length)}`, mode: "exclusive" as const }));
   return {
     id: `run.${slug}`,
     workflowId: `workflow.${slug}`,
@@ -56,6 +57,8 @@ export function makeNode(overrides: NodeOverrides = {}): CompiledRunNode {
     protectedCategory: overrides.protectedCategory,
     inputs: [],
     outputs,
+    outputPaths: outputs.map((id) => id.slice("artifact.".length)),
+    providerIds: [],
     dependencies: [],
     statePredicates: [],
     laneIds: [],
@@ -105,7 +108,11 @@ export function makeWaiver(overrides: WaiverOverrides): Waiver {
     caps: { maxPerAction: overrides.maxPerAction ?? 1_000, maxPerPeriod: overrides.maxPerPeriod ?? 10_000, currency: "USD" },
     budgetPeriod: overrides.budgetPeriod ?? "monthly",
     expiry: overrides.expiry ?? plusSeconds(NOW, 365 * 24 * 3600),
-    undoContract: { kind: "mitigation", irreversibilityAcknowledgment: "This fixture waiver models an irreversible action for boundary testing.", mitigationSteps: ["Review the audit log", "Notify the founder"] },
+    undoContract: {
+      kind: "mitigation",
+      irreversibilityAcknowledgment: "This fixture waiver models an irreversible action for boundary testing.",
+      mitigationSteps: ["Review the audit log", "Notify the founder"],
+    },
     auditRef: "audit.fixture",
     status: overrides.status ?? "active",
     createdAt: NOW,

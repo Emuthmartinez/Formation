@@ -55,7 +55,19 @@ function baseFixtureCatalog(): Catalog {
     ],
     phases: [],
     lanes: [],
-    roles: [{ id: "role.fixture", name: "Fixture Role", promptPath: "agents/fixture.md", scope: "fixture" }],
+    roles: [
+      {
+        id: "role.fixture",
+        name: "Fixture Role",
+        promptPath: "agents/fixture.md",
+        scope: "fixture",
+        parentPromptPaths: ["AGENTS.md", "APP_AGENTS.md"],
+        contextPackIds: [],
+        skillRoutes: [{ id: "fixture-skill", when: "fixture" }],
+        toolRoutes: [{ id: "fixture-tool", when: "fixture" }],
+      },
+    ],
+    contextPacks: [],
     references: [],
     workflows: [baseWorkflow()],
     artifacts: [{ id: "artifact.fixture.output.md", path: "fixture/output.md", ownerDomainId: "domain.research", laneIds: [], generated: false }],
@@ -238,18 +250,24 @@ export function register(harness: Harness): void {
     assert(found!.severity === "warning", `cost_estimate_missing must be a warning (the park is the control), got severity ${found!.severity}`);
   });
 
-  harness.check("validate: a protected-class workflow without protectedCategory is caught — gates verify after the fact, the category authorizes before dispatch", () => {
-    const catalog = baseFixtureCatalog();
-    catalog.workflows = [baseWorkflow({ actionClass: "release", gateCommands: ["check:catalog"], founderOnlyActions: ["approve the release"] })];
-    const naked = validateCatalog(catalog, skillRoot);
-    assert(
-      naked.some((issue) => issue.code === "catalog_graph.workflow.protected_category_missing"),
-      `expected catalog_graph.workflow.protected_category_missing even with a gate and founder-only action present, got: ${naked.map((i) => i.code).join(", ")}`,
-    );
-    catalog.workflows = [baseWorkflow({ actionClass: "release", protectedCategory: "release" })];
-    const categorized = validateCatalog(catalog, skillRoot);
-    assert(!categorized.some((issue) => issue.code === "catalog_graph.workflow.protected_category_missing"), "naming the protected category clears the issue");
-  });
+  harness.check(
+    "validate: a protected-class workflow without protectedCategory is caught — gates verify after the fact, the category authorizes before dispatch",
+    () => {
+      const catalog = baseFixtureCatalog();
+      catalog.workflows = [baseWorkflow({ actionClass: "release", gateCommands: ["check:catalog"], founderOnlyActions: ["approve the release"] })];
+      const naked = validateCatalog(catalog, skillRoot);
+      assert(
+        naked.some((issue) => issue.code === "catalog_graph.workflow.protected_category_missing"),
+        `expected catalog_graph.workflow.protected_category_missing even with a gate and founder-only action present, got: ${naked.map((i) => i.code).join(", ")}`,
+      );
+      catalog.workflows = [baseWorkflow({ actionClass: "release", protectedCategory: "release" })];
+      const categorized = validateCatalog(catalog, skillRoot);
+      assert(
+        !categorized.some((issue) => issue.code === "catalog_graph.workflow.protected_category_missing"),
+        "naming the protected category clears the issue",
+      );
+    },
+  );
 
   harness.check("validate: a knowledge file on disk with no CatalogReference is caught (disk-to-catalog sweep), and registering it clears the issue", () => {
     const tempSkillRoot = harness.makeTempDir("validate-knowledge-sweep");
@@ -259,7 +277,14 @@ export function register(harness: Harness): void {
     writeFileSync(path.join(knowledgeDir, "orphan.md"), "# orphan\n", "utf8");
     const catalog = baseFixtureCatalog();
     catalog.references = [
-      { id: "reference.research.registered", path: "knowledge/research/registered.md", domainId: "domain.research", title: "Registered", loadWhen: "fixture", sessionScoped: true },
+      {
+        id: "reference.research.registered",
+        path: "knowledge/research/registered.md",
+        domainId: "domain.research",
+        title: "Registered",
+        loadWhen: "fixture",
+        sessionScoped: true,
+      },
     ];
     const swept = validateCatalog(catalog, tempSkillRoot);
     assert(
@@ -268,7 +293,14 @@ export function register(harness: Harness): void {
     );
     catalog.references = [
       ...catalog.references,
-      { id: "reference.research.orphan", path: "knowledge/research/orphan.md", domainId: "domain.research", title: "Orphan", loadWhen: "fixture", sessionScoped: true },
+      {
+        id: "reference.research.orphan",
+        path: "knowledge/research/orphan.md",
+        domainId: "domain.research",
+        title: "Orphan",
+        loadWhen: "fixture",
+        sessionScoped: true,
+      },
     ];
     const registered = validateCatalog(catalog, tempSkillRoot);
     assert(!registered.some((issue) => issue.code === "catalog_graph.reference.file_unregistered"), "registering the file clears the sweep issue");
@@ -279,7 +311,23 @@ export function register(harness: Harness): void {
     const issues = validateCatalog(catalog, skillRoot).filter((issue) => issue.severity === "error");
     assert(issues.length === 0, `expected the real catalog to be clean, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
     assert(catalog.domains.length === 15, `expected 15 domains, got ${catalog.domains.length}`);
-    assert(catalog.workflows.length === 58, `expected 58 workflows, got ${catalog.workflows.length}`);
+    assert(catalog.workflows.length === 59, `expected 59 workflows, got ${catalog.workflows.length}`);
+
+    const landingBuild = catalog.workflows.find((wf) => wf.id === "workflow.growth.pre-launch-funnel-landing-waitlist");
+    const landingPublish = catalog.workflows.find((wf) => wf.id === "workflow.growth.landing-funnel-publication-and-live-proof");
+    const appBuild = catalog.workflows.find((wf) => wf.id === "workflow.engineering.engineering-orchestration-ce-production-readiness");
+    assert(Boolean(landingBuild && landingPublish && appBuild), "expected local landing, landing publish, and app build workflows");
+    assert(
+      landingBuild!.dependencies.includes("workflow.design.design-room-state-mutate-version-render") &&
+        appBuild!.dependencies.includes("workflow.design.design-room-state-mutate-version-render"),
+      "local landing and app implementation must share the design-lock dependency",
+    );
+    assert(landingBuild!.actionClass !== "publish", "the local landing build must not be blocked by public-action approval");
+    assert(landingPublish!.actionClass === "publish", "the live landing deployment must remain a protected public action");
+    assert(
+      landingPublish!.dependencies.includes("workflow.growth.pre-launch-funnel-landing-waitlist"),
+      "the public landing workflow must depend on the local build",
+    );
   });
 
   // ---------------------------------------------------------------------
@@ -294,7 +342,7 @@ export function register(harness: Harness): void {
     // into `input.workflows`, so the exclusion is a compile-time guarantee, not just a
     // runtime filter. What's left to prove at runtime: the bridge actually narrowed the
     // set (it's a strict subset), and what remains still compiles cleanly.
-    assert(input.workflows.length < catalog.workflows.length, "the bridged input should be a strict subset of the full 58-workflow catalog");
+    assert(input.workflows.length < catalog.workflows.length, "the bridged input should be a strict subset of the full 59-workflow catalog");
     const excludedCount = catalog.workflows.length - input.workflows.length;
     assert(excludedCount === 15, `expected exactly 15 excluded system/machine-domain workflows (7 process/orchestration + 8 machine), got ${excludedCount}`);
 
@@ -317,6 +365,35 @@ export function register(harness: Harness): void {
     assert(
       !bridged.dependencies.includes("workflow.process.launch-trace-and-build-contracts" as never),
       "the bridged node must not carry a dependency on an excluded system-domain workflow",
+    );
+  });
+
+  harness.check("dispatch registry: every prepared specialist is graph-addressable, used, and the readiness node gates both app and landing work", () => {
+    const catalog = composeCatalog(skillRoot);
+    const promptDir = path.join(skillRoot, "workspace", "business", "engineering", "app-agent-roster", "agents");
+    const promptNames = readdirSync(promptDir)
+      .filter((name) => name.endsWith(".md"))
+      .map((name) => name.replace(/\.md$/, ""))
+      .sort();
+    const roleNames = catalog.roles.map((role) => path.basename(role.promptPath, ".md")).sort();
+    assert(
+      JSON.stringify(promptNames) === JSON.stringify(roleNames),
+      `prepared prompts and catalog roles must match exactly: prompts=${promptNames.join(",")} roles=${roleNames.join(",")}`,
+    );
+    const unusedRoles = catalog.roles.filter((role) => !catalog.workflows.some((workflow) => workflow.roleId === role.id));
+    assert(unusedRoles.length === 0, `every prepared specialist must own at least one workflow: ${unusedRoles.map((role) => role.id).join(",")}`);
+    const readiness = catalog.workflows.find((workflow) => workflow.id === "workflow.operations.agent-operations-ledger")!;
+    const app = catalog.workflows.find((workflow) => workflow.id === "workflow.engineering.engineering-orchestration-ce-production-readiness")!;
+    const landing = catalog.workflows.find((workflow) => workflow.id === "workflow.growth.pre-launch-funnel-landing-waitlist")!;
+    assert(readiness.roleId === "role.operator-readiness", "capability preflight must route to the prepared operator-readiness prompt");
+    assert(
+      app.dependencies.includes(readiness.id) && landing.dependencies.includes(readiness.id),
+      "app and landing work must both wait for the one-pass capability preflight",
+    );
+    assert(
+      app.dependencies.includes("workflow.design.design-room-state-mutate-version-render") &&
+        landing.dependencies.includes("workflow.design.design-room-state-mutate-version-render"),
+      "app and landing work must share the accepted design dependency so they can fan out together",
     );
   });
 
@@ -350,7 +427,13 @@ export function register(harness: Harness): void {
     writeFileSync(target, `${original}\n<!-- fixture-mutation -->\n`, "utf8");
     // No try/finally restore needed: this is a scratch directory the harness deletes wholesale in
     // cleanup() — even a hard kill mid-test leaves the real checked-in file untouched.
-    harness.runScript("render-routing --check (mutated, scratch root)", "catalog/render-routing.ts", ["--skill-root", tempSkillRoot, "--check"], 1, "catalog_render.generated_drift");
+    harness.runScript(
+      "render-routing --check (mutated, scratch root)",
+      "catalog/render-routing.ts",
+      ["--skill-root", tempSkillRoot, "--check"],
+      1,
+      "catalog_render.generated_drift",
+    );
   });
 
   // ---------------------------------------------------------------------
@@ -387,29 +470,32 @@ export function register(harness: Harness): void {
     assertOneToOne(onDisk, ledgerRows, "knowledge file");
   });
 
-  ledgerCase("port ledger: every surviving check:*/validate:* script (both package.json manifests) targeting validation/business or validation/repository appears exactly once, plus the one documented addition", () => {
-    const text = readFileSync(resolvedLedgerPath, "utf8");
-    // validation/repository/check-skill-graph.ts is ledgered "port" (its referential-integrity +
-    // drift-check PATTERN is preserved), but its "port" target is a wholesale mechanism
-    // replacement in different files (catalog/validate.ts + catalog/render-routing.ts --check,
-    // shipped in an earlier unit) rather than an in-place rewrite — and the original file's own
-    // imports point at runtime/graph/*.ts, which U11 deletes. The cutover task explicitly names
-    // it for deletion alongside the rest of the runtime/graph cull, so — unlike every other
-    // "port" row, which stays at its path — this one is excluded here too.
-    const portedAwayFromOriginalPath = new Set(["validation/repository/check-skill-graph.ts"]);
-    const ledgerRows = new Set(
-      [...parseLedgerRowsWithDisposition(text)]
-        .filter((row) => row.path.startsWith("validation/") && row.disposition !== "drop" && !portedAwayFromOriginalPath.has(row.path))
-        .map((row) => row.path),
-    );
-    const skillScripts = discoverValidatorScriptPaths(path.join(skillRoot, "package.json"));
-    const rootScripts = discoverValidatorScriptPaths(path.join(repoRoot, "package.json")).map((p) => stripRepoPrefix(p));
-    const validators = new Set<string>([...skillScripts, ...rootScripts]);
-    // The one documented addition beyond the two literal buckets (see the ledger's own
-    // "Scope and methodology" section).
-    validators.add("validation/repository/README.md");
-    assertOneToOne(validators, ledgerRows, "validator/addition");
-  });
+  ledgerCase(
+    "port ledger: every surviving check:*/validate:* script (both package.json manifests) targeting validation/business or validation/repository appears exactly once, plus the one documented addition",
+    () => {
+      const text = readFileSync(resolvedLedgerPath, "utf8");
+      // validation/repository/check-skill-graph.ts is ledgered "port" (its referential-integrity +
+      // drift-check PATTERN is preserved), but its "port" target is a wholesale mechanism
+      // replacement in different files (catalog/validate.ts + catalog/render-routing.ts --check,
+      // shipped in an earlier unit) rather than an in-place rewrite — and the original file's own
+      // imports point at runtime/graph/*.ts, which U11 deletes. The cutover task explicitly names
+      // it for deletion alongside the rest of the runtime/graph cull, so — unlike every other
+      // "port" row, which stays at its path — this one is excluded here too.
+      const portedAwayFromOriginalPath = new Set(["validation/repository/check-skill-graph.ts"]);
+      const ledgerRows = new Set(
+        [...parseLedgerRowsWithDisposition(text)]
+          .filter((row) => row.path.startsWith("validation/") && row.disposition !== "drop" && !portedAwayFromOriginalPath.has(row.path))
+          .map((row) => row.path),
+      );
+      const skillScripts = discoverValidatorScriptPaths(path.join(skillRoot, "package.json"));
+      const rootScripts = discoverValidatorScriptPaths(path.join(repoRoot, "package.json")).map((p) => stripRepoPrefix(p));
+      const validators = new Set<string>([...skillScripts, ...rootScripts]);
+      // The one documented addition beyond the two literal buckets (see the ledger's own
+      // "Scope and methodology" section).
+      validators.add("validation/repository/README.md");
+      assertOneToOne(validators, ledgerRows, "validator/addition");
+    },
+  );
 
   ledgerCase("port ledger: disposition counts match the summary table's grand total", () => {
     const text = readFileSync(resolvedLedgerPath, "utf8");

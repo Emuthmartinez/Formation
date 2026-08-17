@@ -381,8 +381,8 @@ export function register(harness: Harness): void {
 
   harness.check("session: a node execution failure is neither 'advanced' nor silently dropped — it shows up as something to watch", () => {
     const handle = bootstrapWorkspace(harness, "exec-failure", singleNodeCatalog(), { grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") } });
-    // Deliberately omit --executor: the default no-op executor fails every attempt.
-    const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-exec-failure-1"]);
+    // Explicit no-op mode fails every attempt without invoking a real worker CLI.
+    const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-exec-failure-1", "--executor", "noop"]);
     assert(result.code === 0, `expected exit 0 (a node failure is not a session crash), got ${result.code}: ${result.output}`);
 
     const text = readDigest(handle, "sess-exec-failure-1");

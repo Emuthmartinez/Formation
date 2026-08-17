@@ -4,27 +4,36 @@ Nothing is set up yet. That is normal at this point, and it is my job rather tha
 
 ## Founder-Zero Promise
 
-The agent runs setup and ongoing operations, one plain-language step at a time. You keep ownership, account recovery, 2FA, money, legal identity, and the final say on anything public or released. You should never have to manage a checklist or learn platform jargon before your business can move.
+The agent runs setup and ongoing operations, one plain-language step at a time. The first exchange
+prepares step-away access, tools, limits, and standing approvals. You keep ownership, account
+recovery, 2FA, legal identity, and any final release that you do not approve up front. You should
+not manage a checklist.
 
 ## One Next Action
 
-**Right now I need one thing from you.** Tell me the working business or app name you want to use; I will explain and handle the rest one step at a time.
+**Right now I need one thing from you.** Choose the recommended step-away setup or an assisted setup.
 
-**Why this comes first.** Establish the founder-owned business identity that every account will use. It prevents scattered personal logins and makes later operator access revocable. This is a working-scope choice, not a legal or platform rule, so a rough answer is genuinely fine.
+The step-away setup covers autonomy, budget, accounts, tools, website deployment, asset creation,
+store material, and test-build uploads. I will identify any unavoidable ownership authentication
+in one handoff.
+
+Choose whether the agent should prepare the business for unattended work.
+
+**Why this comes first.** This resolves required tools, roles, limits, deployments, assets, and store uploads before build work.
 
 **Where this gets us.** Set the foundation. A clear working identity and the next safe setup step.
 
 ### Your options
 
-**Choose a name (recommended).** The name remains provisional until collision and storefront checks are complete. Then I will: Inspect current repo and public identity state, then guide the first secure business account step. We can keep moving with a working name and change it later.
+**Step-away mode (recommended).** The agent can build, deploy the named website, create assets, update store material, and upload test builds without repeat approvals. Then I will: Run the consolidated readiness preflight, record standing envelopes, and start every ready area. The ledger shows unattended readiness or one consolidated list of missing items.
 
-**Decide later.** Account creation and public naming remain blocked, but reversible product inspection continues. Then I will: Continue repo and product-state inspection without creating identity-bound accounts or public assets. Naming stays unfinished, so we cannot call this part done yet.
+**Assisted mode.** The founder stays involved for provider changes, deployments, and uploads. Then I will: Continue reversible local work and bring one consolidated external-action request when needed. The ledger records assisted-only readiness.
 
 ### If you are not ready
 
-Say so and nothing breaks. A working name can be deferred because private, reversible discovery does not depend on it. Continue private product and repo discovery without creating identity-bound accounts. I will raise it again at the next point where it actually matters: Before creating public accounts, buying a domain, or locking store metadata.
+Say so and nothing breaks. Local and reversible work can continue without standing external authority. Continue research, design, local builds, drafts, and readiness discovery. I will raise it again: Before the first provider mutation, website deployment, asset spend, or store upload.
 
-While I wait: Continue read-only repo and product-state inspection; do not infer consent or create public identity assets.
+While I wait: Continue research, design, local builds, drafts, and read-only capability discovery; do not infer consent.
 
 ### Definitions
 
@@ -32,9 +41,9 @@ No unfamiliar terms are needed for this decision. When one comes up, I define it
 
 ### After you answer
 
-Inspect current repo and public identity state, then guide the first secure business account step. Once we have a working name, I move on to secure account setup, market research, your social profiles, content, support, analytics, store work, and launch, in that order.
+Run the consolidated readiness preflight, record standing envelopes, and start every ready area. Begin research, product, design, app, landing, asset, provider, and store work as soon as each dependency is ready.
 
-We will know this worked when: Business identity and the next account are recorded in operations/BUSINESS_ACCESS.md and this ledger.
+We will know this worked when: The access and operations ledgers show exact capabilities, roles, envelopes, limits, blockers, and next work.
 
 ## Business Identity
 
@@ -87,7 +96,10 @@ Prefer platform roles, business portfolios, channel permissions, OAuth, or a ded
 
 ## Authorization Boundaries
 
-Working access does not automatically authorize posting, replying publicly, spending, changing pricing, changing legal/business identity, managing payment methods, submitting an app, releasing, deleting, or widening permissions. Those actions use the exact approval envelope in `operations/agent-operations.json`.
+Working access does not automatically authorize external action. The opening setup records exact
+standing envelopes for routine public work. The agent uses those envelopes without asking again.
+New pricing, legal or business identity, payment methods, deletion, wider permissions, and any final
+release outside an exact envelope remain protected.
 
 ## Operator Handoff
 

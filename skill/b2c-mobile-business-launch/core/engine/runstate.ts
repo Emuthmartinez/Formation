@@ -52,6 +52,7 @@ export function seedRunState(plan: CompiledPlan, businessState: BusinessStateV2,
     ttlSeconds: options.ttlSeconds,
     wallClockCapSeconds: options.wallClockCapSeconds,
     approvals,
+    approvalProvenance: {},
     artifactBindings,
     nodes,
   };
@@ -84,7 +85,9 @@ export function beginAttempt(plan: CompiledPlan, run: RunStateDocument, nodeId: 
 }
 
 function fingerprintInputs(inputs: readonly string[], bindings: readonly ArtifactBindingV2[]): string {
-  return sha256(inputs.map((artifactId) => `${artifactId}:${bindings.find((binding) => binding.artifactId === artifactId)?.fingerprint ?? "missing"}`).join("|"));
+  return sha256(
+    inputs.map((artifactId) => `${artifactId}:${bindings.find((binding) => binding.artifactId === artifactId)?.fingerprint ?? "missing"}`).join("|"),
+  );
 }
 
 /** Refreshes the running attempt's heartbeat and the run-level owner heartbeat together. */
@@ -204,7 +207,14 @@ export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch:
 }
 
 /** Producer never verifies its own work (R15): a separate acceptance step promotes a reconciled-but-blocked node to succeeded. */
-export function acceptVerification(plan: CompiledPlan, run: RunStateDocument, nodeId: RunNodeId, evidence: string[], now: string, verifiedBySessionId?: string): void {
+export function acceptVerification(
+  plan: CompiledPlan,
+  run: RunStateDocument,
+  nodeId: RunNodeId,
+  evidence: string[],
+  now: string,
+  verifiedBySessionId?: string,
+): void {
   const node = plan.nodes.find((candidate) => candidate.id === nodeId);
   const state = run.nodes[nodeId];
   const attempt = state?.attempts.at(-1);
@@ -223,7 +233,9 @@ export function acceptVerification(plan: CompiledPlan, run: RunStateDocument, no
   attempt.status = "succeeded";
   attempt.finishedAt = now;
   state.status = "succeeded";
-  state.acceptedOutputFingerprint = sha256(node.outputs.map((id) => run.artifactBindings.find((binding) => binding.artifactId === id)?.fingerprint ?? "").join("|"));
+  state.acceptedOutputFingerprint = sha256(
+    node.outputs.map((id) => run.artifactBindings.find((binding) => binding.artifactId === id)?.fingerprint ?? "").join("|"),
+  );
   state.blocker = undefined;
   if (verifiedBySessionId) state.verifiedBySessionId = verifiedBySessionId;
   run.updatedAt = now;

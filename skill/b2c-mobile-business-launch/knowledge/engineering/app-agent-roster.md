@@ -14,11 +14,13 @@ CLAUDE.md
 APP_AGENTS.md
 agents/
   orchestrator.md
+  operator-readiness.md
   research-strategist.md
   product-leader.md
   design-guru.md
   copy-specialist.md
   marketing-guru.md
+  launch-surface-producer.md
   mobile-engineer.md
   backend-infrastructure-engineer.md
   accessibility-device-qa.md
@@ -35,12 +37,16 @@ The app-local roster is not a replacement for `AGENTS.md`, `11_STAR_EXPERIENCE.m
 
 - Orchestrator owns sequencing, source truth, founder-zero business operations, `operations/BUSINESS_ACCESS.md`, its structured ledger, `state/PROJECT_STATE.yaml`, cockpit, orchestration, failure cards, validators, integration, git/release coordination, and final proof.
 - Orchestrator owns Session Continuity: read `AGENTS.md`, state/cockpit, both business/agent operations ledgers, orchestration/readiness/failure docs, and git status; do not rely on chat memory over durable state.
-- Orchestrator assumes beginner founder knowledge, gives one plain-language founder action, executes everything else, and continues from the recorded next agent action instead of returning a checklist.
+- Orchestrator assumes beginner founder knowledge. It runs `operator-readiness.md` once at orient,
+  creates standing authority for routine external work, and combines missing access into one handoff.
+- Every prepared prompt has matching `catalog/roles.ts` and `catalog/operators.ts` records. A prompt that cannot be selected by the graph is a validation failure.
+- Dispatch nesting is fixed: `AGENTS.md` → `APP_AGENTS.md` → specialist prompt → mandatory workflow references → matching role context-pack references → matching installed skills → current tool schemas. The worker returns an exact knowledge receipt before its output can reconcile.
 - Research strategist owns source quality, customer language, market/category evidence, competitor evidence, and research-to-decision traceability.
 - Product leader acts as the product and UX expert for ICP, scope, core loop, onboarding, activation, retention, interaction behavior, and evidence-to-product traceability.
 - Design guru acts as the visual-design expert for hierarchy, composition, design-system expression, HTML visual proofs, screenshots, icons, imagery, and motion.
 - Copy specialist owns product copy, conversion copy, brand voice, comprehension, customer language, and claim discipline.
 - Marketing guru acts as the marketing and growth expert for positioning, ASO, GEO/SEO, acquisition, lifecycle, conversion, reviews, and channel learning.
+- Launch surface producer builds the local landing site after design acceptance. This role also keeps public surfaces synchronized with app changes.
 - Mobile engineer owns iOS and Android architecture, implementation, performance, platform behavior, and focused mobile tests.
 - Backend and infrastructure engineer owns data, API, auth, jobs, deployment, observability, and provider integration.
 - Accessibility and device QA specialist owns assistive-technology checks, device coverage, locale and screen stress, and real-flow evidence.
@@ -55,13 +61,15 @@ For non-trivial launches, select the specialists that match ready work. Run inde
 - Product leader reviews `product/SPEC.md`, `11_STAR_EXPERIENCE.md`, `state/LAUNCH_TRACE.md`, `product/ONBOARDING.md`, and activation/retention assumptions.
 - Marketing guru reviews `strategy/RESEARCH.md`, `LAUNCH.md`, `store/STORE_CONSOLE.md`, `GEO_SEO.md`, `PAID_UA.md`, `VIRAL_GROWTH.md`, `growth/UGC_PLAYBOOK.md`, `growth/FASTLANE_OPS.md`, and attribution-channel learning.
 - Design guru reviews `design/design.md`, `design/design.html`, `11-star-experience.html`, `product/onboarding.html`, screenshots, accessibility, and visual consistency.
+- Launch surface producer uses `initial-build` mode when `design/design.md` is accepted. Use `impact-audit` mode before each accepted app slice merges.
+- Orchestrator uses `operator-readiness.md` before build work and before an unattended resume with stale capabilities. This is a serialized provider prompt, not a specialist mutation lane.
 - Engineering leader reviews `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `store/APPLE_SIGNING.md`, analytics/revenue/email/backend contracts, signing/release readiness, and test coverage.
 - Security architect reviews `trust/SECURITY.md`, `trust/security-review.html`, `SECRETS.md`, `engineering/TECH_SPEC.md`, `revenue/REVENUE_OPS.md`, `analytics/ANALYTICS.md`, `growth/EMAIL_OPS.md`, `trust/PRIVACY.md`, `store/APPLE_SIGNING.md`, `engineering/PRODUCTION_READINESS.md`, scanner/review evidence, app-integrity posture, and accepted risks.
 - Customer success reviews `trust/PRIVACY.md`, `trust/TERMS.md`, support routes, refund/restore/delete paths, lifecycle email, FAQ, and review-response readiness.
 - Engineering leader and orchestrator review `SECRETS.md` for each new secret, new env vars, Doppler/provider routing, `doppler run --` command wrappers, service token/provider-integration plan, CI/deploy injection, `.env.example` names-only coverage, and public-bundle safety.
 - Orchestrator merges findings, resolves conflicts, updates source-of-truth docs, updates `operations/ORCHESTRATION.md`, updates `state/PROJECT_STATE.yaml`, rerenders `state/launch-cockpit.html`, and records proof or blockers in `engineering/PRODUCTION_READINESS.md`.
 
-Specialist agents should review and propose by default. They may implement only when the orchestrator assigns an isolated unit with file paths, acceptance checks, forbidden actions, and a verification method recorded in `operations/ORCHESTRATION.md`. Specialists must not mutate shared state, stage, commit, release, change pricing, connect accounts, spend money, submit store builds, or publish social posts.
+Specialist agents should review and propose by default. They may implement only when the orchestrator assigns an isolated unit with file paths, acceptance checks, forbidden actions, and a verification method recorded in `operations/ORCHESTRATION.md`. They never mutate shared state, stage, commit, spend, change protected pricing/legal/identity fields, or decide a final release. They may apply an approved provider mutation, public artifact, store-media/metadata update, or test-build upload only in an exact assigned workflow with a matching current standing envelope, before-state, and provider read-back.
 
 Every prompt uses the same handoff headings: Scope reviewed, Evidence, Findings, Recommendations, Files changed, Validation, Risks and blockers, and Proposed state patch. The orchestrator accepts or rejects the proposed patch and is the only writer of shared state.
 
@@ -86,7 +94,8 @@ If any item is missing, do not call attribution wired, complete, or launch-ready
 - `AGENTS.md` and `CLAUDE.md` are filled for the current business, not copied from this skill repo's maintainer docs.
 - `AGENTS.md` tells future agents to keep using `b2c-mobile-business-launch`, update `state/PROJECT_STATE.yaml`, rerender `state/launch-cockpit.html`, and run validators until a founder-only gate.
 - `AGENTS.md`, `CLAUDE.md`, `APP_AGENTS.md`, `operations/ORCHESTRATION.md`, and `state/PROJECT_STATE.yaml` encode the Session Continuity source set and next-action handoff.
-- The orchestrator, nine expert specialist prompts, engineering integration prompt, and customer-success prompt exist and remain short enough to be used.
+- The orchestrator, specialist prompts, engineering integration prompt, and customer-success prompt exist and remain short enough to be used.
+- The launch-surface prompt gives future agents exact initial-build, impact-audit, bounded-update, and approved-external-apply modes.
 - Each role has clear responsibilities, forbidden actions, founder-only gates, and output shape.
 - The roster gives future agents a clean way to audit and continue the app without duplicating product truth.
 - The orchestrator can show the founder current state through `state/launch-cockpit.html`, keep orchestration decisions inspectable in `operations/ORCHESTRATION.md`, and keep known misses visible as failure cards.

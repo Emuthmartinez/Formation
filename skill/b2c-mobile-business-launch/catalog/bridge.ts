@@ -35,6 +35,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
   const grantableOutputPaths = new Set<string>(grantableWorkflows.flatMap((wf) => wf.outputPaths));
   const referencesById = new Map(catalog.references.map((reference) => [reference.id, reference]));
   const rolesById = new Map(catalog.roles.map((role) => [role.id, role]));
+  const contextPacksById = new Map(catalog.contextPacks.map((pack) => [pack.id, pack]));
 
   // Reuse catalog.artifacts (built once, by catalog/artifacts.ts's buildArtifacts(), from every
   // workflow's outputPaths) rather than recomputing artifact ids independently here — two
@@ -66,7 +67,27 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
     role: (() => {
       const role = rolesById.get(wf.roleId);
       if (!role) throw new Error(`${wf.id} names unknown role ${wf.roleId}`);
-      return { id: role.id, name: role.name, promptPath: role.promptPath };
+      return {
+        id: role.id,
+        name: role.name,
+        promptPath: role.promptPath,
+        parentPromptPaths: role.parentPromptPaths,
+        contextPacks: role.contextPackIds.map((packId) => {
+          const pack = contextPacksById.get(packId);
+          if (!pack) throw new Error(`${role.id} names unknown context pack ${packId}`);
+          return {
+            id: pack.id,
+            title: pack.title,
+            references: pack.referenceIds.map((referenceId) => {
+              const reference = referencesById.get(referenceId);
+              if (!reference) throw new Error(`${pack.id} binds unknown reference ${referenceId}`);
+              return { id: reference.id, path: reference.path, title: reference.title, loadWhen: reference.loadWhen };
+            }),
+          };
+        }),
+        skillRoutes: role.skillRoutes,
+        toolRoutes: role.toolRoutes,
+      };
     })(),
     dependencies: wf.dependencies.filter((dependencyId): dependencyId is CatalogWorkflowId => grantableIds.has(dependencyId as CatalogWorkflowId)),
     outputPaths: wf.outputPaths,

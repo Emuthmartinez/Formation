@@ -13,6 +13,8 @@ Reconstruct truth from these files, never from chat memory or a prior transcript
 - `control/control.json` — kill switch, autonomy grants, and waivers (founder-set, per business unit)
 - `control/budget-ledger.json` — spend estimates, actuals, and remaining balance per unit/period
 - `run/run-state.json`, `run/checkpoint.json` — the current or most recent scheduled run's progress
+- `APP_AGENTS.md`, then the selected `agents/<role>.md` — specialist routing and bounded handoff
+- `operations/agent-operations.json` — verified capabilities and exact standing approval envelopes
 - `digests/` — one file per scheduled session, written in founder-plain language; the founder's own
   view of what happened, not an internal log
 - `git status --short` — anything changed outside the files above
@@ -75,7 +77,8 @@ An external trigger (cron/launchd, or a vendor scheduler) invokes this business'
 which runs a headless agent CLI with one fixed instruction: execute
 `tsx <skill-root>/core/session/run.ts --workspace . --brief <brief-file> --session <id> --wall-clock-seconds <n>`
 and report its output verbatim. That command — not the agent — decides what work is ready, checks
-the kill switch and every autonomy grant, dispatches within budget, and writes the session's
+the kill switch and every autonomy grant, dispatches fresh-context specialist workers through a
+real CLI executor, verifies their knowledge receipts and declared outputs, and writes the session's
 digest. An interactive agent session in this repo follows the same state-first posture even though
 it isn't invoked this way: read state, propose the same patches a scheduled session would produce,
 and let the reducer apply them.
@@ -86,10 +89,19 @@ The founder has set a grant level — review-first, run-with-guardrails, or full
 unit (Product, Design, Engineering, Growth, Analytics, Revenue, Store, Trust, Operations) in
 `control/control.json`. Spend, credential/access, legal/pricing, public-posting,
 release/store-submission, and destructive actions additionally require an explicit, time-boxed
-waiver even at the "full" grant level — a grant alone never authorizes one of those six. Do not
+waiver or exact current standing envelope even at the "full" grant level — a grant alone never authorizes one of those six. Do not
 treat a high grant level as blanket permission for a protected action; check for an active,
-in-scope waiver first, and if there isn't one, park the action and let the digest carry it to the
-founder rather than asking mid-session.
+in-scope waiver or envelope first. Exact standing envelopes for website deployment, approved
+assets, store metadata/media, and TestFlight/Play testing uploads are consumed without asking
+again. If neither exists, park the action for the consolidated founder handoff.
+
+## Specialist Dispatch Contract
+
+Never send a role prompt alone. Use the graph's assembled node brief, which supplies the ordered
+parent contracts, task-local artifacts, mandatory skill references, conditional role context
+packs, matching installed skills, current tool-discovery routes, declared outputs, and verification.
+Every worker returns `CONTRACT_FILES_LOADED`, `KNOWLEDGE_LOADED`, `ROLE_KNOWLEDGE_USED`,
+`SKILLS_USED`, and `TOOLS_USED`; a missing receipt is a failed attempt.
 
 ## Kill Switch
 

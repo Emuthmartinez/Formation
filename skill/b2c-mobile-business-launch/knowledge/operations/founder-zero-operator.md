@@ -24,11 +24,11 @@ Use this at the beginning of every broad launch or business-operations task. Ass
 
 The default opening should be equivalent to:
 
-> I will run the business setup with you. I will explain each step in plain language and ask for only one thing at a time. You keep ownership, recovery, 2FA, money, legal, and final publishing decisions. I handle the operating work and show you proof.
+> I will prepare the business so you can step away. I will ask once for the authority, accounts, roles, and spending limit that the work needs. I will then build, create assets, deploy the approved website, and upload store material without repeated approvals. You keep ownership, recovery, 2FA, legal identity, and any final release that you do not approve up front.
 
 ## Conversation Protocol
 
-For each founder gate, use this question contract:
+Prefer one opening readiness question. Use this question contract when a real exception remains:
 
 1. **Phase and outcome:** say which launch phase is active, what the agent is doing, and what this decision unlocks.
 2. **What and why:** explain the gate in one sentence each; define any unfamiliar role, research, provider, or business term before using it.
@@ -52,7 +52,7 @@ Do not narrate state-writing mechanics, internal work areas, worker order, check
 
 ## Business Bootstrap Sequence
 
-Create `operations/BUSINESS_ACCESS.md` and `operations/business-access.json` during orient, before provider setup sprawls. Keep `currentPhase` visible and at most one structured `activeFounderGate` with phase, origin, class, definitions, choices, bypass/defer policy, lifecycle, next actions, and proof. Set the active gate to `null` while no founder decision is needed; the agent keeps working from `nextAgentAction`. Also record the next business operation so access setup cannot become a dead end. Run the sequence continuously:
+Create `operations/BUSINESS_ACCESS.md` and `operations/business-access.json` during orient, before provider setup sprawls. Keep `currentPhase` visible and at most one structured `activeFounderGate` with phase, origin, class, definitions, choices, bypass/defer policy, lifecycle, next actions, and proof. Set the active gate to `null` while no founder decision is needed; the agent keeps working from `nextAgentAction`. Also record the next business operation so access setup cannot become a dead end. The first gate should be one combined step-away readiness choice. It must cover autonomy, budget, access, tools, upload roles, deployment targets, and optional final-release authority. Run the sequence continuously:
 
 1. **Business identity:** confirm the working business/app name, founder-owned contact email, region, and whether a legal entity already exists. Do not force incorporation before it is needed.
 2. **Ownership spine:** establish a founder-controlled business email, recovery email/phone, password-manager or passkey posture, and 2FA ownership. The founder remains the owner of record.
@@ -62,6 +62,7 @@ Create `operations/BUSINESS_ACCESS.md` and `operations/business-access.json` dur
 6. **Delegate:** grant the narrowest revocable operator role or OAuth scope. Avoid shared personal logins.
 7. **Verify:** read back the exact account, business asset, role, permissions, environment, recovery owner, and 2FA owner. Capture sanitized proof.
 8. **Operate:** move into research, content, customer response, store, analytics, and launch work. Access setup is an unlock, not the deliverable.
+9. **Stay unattended:** record the matching protected control waiver and exact workflow-scoped standing envelopes, then consume them without asking again. Combine any new missing permissions into one handoff and continue independent work.
 
 ### Plain-Language Research Example
 
@@ -137,11 +138,13 @@ Do not stop after saying "create an account." Offer handle options from the appr
 
 ## Authorization Boundaries
 
-Account access authorizes capability discovery and approved operating work, not everything the account can technically do. Continue using `frontier-agent-operations.md` and its approval envelopes.
+Account access and approval are separate records. Resolve both during onboarding when possible. Continue using `frontier-agent-operations.md` and its approval envelopes.
 
 - Observe and draft autonomously inside the business scope.
-- Connect accounts only after the founder approves the exact account and role.
+- Connect accounts after the founder approves the exact account and role during the readiness setup.
 - Publish, reply publicly, send broadcasts, spend, change pricing, alter legal/business identity, manage payment methods, submit stores, release, or delete only under the matching current approval envelope.
+- Use a matching standing envelope without another confirmation.
+- Website deployment, asset generation, store media/metadata, and test-build uploads should get both the required control waiver and standing envelopes during onboarding. Each envelope names exact catalog workflow IDs and exact output/provider resource prefixes; never record `workflow.*`.
 - The founder owns final public voice policy until a standing voice envelope is recorded.
 - Never widen a social role, OAuth scope, finance permission, or admin privilege merely to remove friction.
 
@@ -171,4 +174,7 @@ Flag and repair these immediately:
 - a personal social login is shared when delegated access or OAuth exists
 - a social account is called ready without exact handle, role, recovery/2FA ownership, sanitized proof, and an operating next step
 - account access is treated as approval to publish, spend, reply, change identity, or delete
+- the founder is interrupted for each account instead of receiving one consolidated readiness request
+- a matching standing envelope exists but the agent asks for the same approval again
+- the agent reaches deployment or store upload before checking required tools, roles, signing, and authentication
 - the agent completes access setup but does not begin the next business operation

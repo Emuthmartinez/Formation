@@ -35,7 +35,9 @@ function listPending(run: RunStateDocument): number {
 function main(): number {
   const args = parseArgs(process.argv.slice(2));
   if (!args.workspace) {
-    console.error("Usage: tsx core/session/approve.ts --workspace <dir> [--list] --approval <id> --decision approved|rejected --session <id> [--reason <text>]");
+    console.error(
+      "Usage: tsx core/session/approve.ts --workspace <dir> [--list] --approval <id> --decision approved|rejected --session <id> [--reason <text>]",
+    );
     return 1;
   }
   const workspace = path.resolve(args.workspace);
@@ -48,7 +50,9 @@ function main(): number {
   try {
     run = loadRunState(runStatePath);
   } catch (error) {
-    console.error(`ISSUE approve.no_run_state: ${runStatePath} does not exist or is not a valid run state — run a session first (${error instanceof Error ? error.message : String(error)})`);
+    console.error(
+      `ISSUE approve.no_run_state: ${runStatePath} does not exist or is not a valid run state — run a session first (${error instanceof Error ? error.message : String(error)})`,
+    );
     return 1;
   }
   if (args.list === "true") return listPending(run);
@@ -66,12 +70,11 @@ function main(): number {
   }
   const now = new Date().toISOString();
   run.approvals[approvalId] = decision;
+  if (run.approvalProvenance) delete run.approvalProvenance[approvalId];
   const catalogPath = path.join(workspace, "catalog.json");
   const catalog = JSON.parse(readFileSync(catalogPath, "utf8")) as CatalogInput;
   const plan = compilePlan(catalog);
-  const affected = new Set<RunNodeId>(
-    plan.nodes.filter((node) => node.approvals.some((approval) => approval.id === approvalId)).map((node) => node.id),
-  );
+  const affected = new Set<RunNodeId>(plan.nodes.filter((node) => node.approvals.some((approval) => approval.id === approvalId)).map((node) => node.id));
   for (const node of Object.values(run.nodes)) {
     if (!affected.has(node.nodeId as RunNodeId) || node.status !== "waiting_founder") continue;
     if (decision === "approved") {
