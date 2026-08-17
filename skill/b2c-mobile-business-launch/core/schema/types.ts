@@ -416,6 +416,15 @@ export interface RunStateDocument {
   ttlSeconds: number;
   wallClockCapSeconds: number;
   approvals: Record<string, "pending" | "approved" | "rejected">;
+  approvalProvenance?: Record<
+    string,
+    {
+      source: "standing_envelope";
+      envelopeId: string;
+      actionId: string;
+      validatedAt: string;
+    }
+  >;
   artifactBindings: ArtifactBindingV2[];
   nodes: Record<string, RunNodeStateV2>;
 }

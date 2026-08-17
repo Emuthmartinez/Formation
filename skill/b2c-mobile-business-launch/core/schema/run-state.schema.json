@@ -33,6 +33,20 @@
     "ttlSeconds": { "type": "integer", "minimum": 1 },
     "wallClockCapSeconds": { "type": "integer", "minimum": 1 },
     "approvals": { "type": "object", "additionalProperties": { "enum": ["pending", "approved", "rejected"] } },
+    "approvalProvenance": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "envelopeId", "actionId", "validatedAt"],
+        "properties": {
+          "source": { "const": "standing_envelope" },
+          "envelopeId": { "type": "string", "minLength": 1 },
+          "actionId": { "type": "string", "minLength": 1 },
+          "validatedAt": { "$ref": "#/$defs/dateTime" }
+        }
+      }
+    },
     "artifactBindings": { "type": "array", "items": { "$ref": "#/$defs/artifactBinding" } },
     "nodes": { "type": "object", "additionalProperties": { "$ref": "#/$defs/runNode" } }
   },

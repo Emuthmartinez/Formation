@@ -150,6 +150,7 @@ function testWorkflows(): CatalogWorkflowNode[] {
       founderOnlyActions: ["Approve spend for paid acquisition test"],
       gateCommands: [],
       idempotent: false,
+      costEstimate: { amount: 25, currency: "USD" },
     },
     {
       id: "workflow.growth-post",
@@ -209,6 +210,10 @@ function setStatus(run: RunStateDocument, id: RunNodeId, status: Status): void {
 /** Same rationale as setStatus: reads through a call so an equality check here doesn't narrow a stable `const` key across an intervening mutating call. */
 function getStatus(run: RunStateDocument, id: RunNodeId): Status {
   return run.nodes[id]!.status;
+}
+
+function getApprovalStatus(run: RunStateDocument, id: string): "pending" | "approved" | "rejected" | undefined {
+  return run.approvals[id];
 }
 
 export function register(harness: Harness): void {
@@ -633,37 +638,161 @@ export function register(harness: Harness): void {
     assert(validateKnowledgeReceipt(receipt, brief).length === 0, "an exact parent + mandatory-knowledge receipt must pass");
   });
 
-  harness.check(
-    "standing approvals: an exact active envelope clears the existing founder gate without a repeat prompt, while broad or expired envelopes do not",
-    () => {
-      const plan = compilePlan(testCatalog(), now);
-      const { run } = seedFor(["research", "product", "engineering"], plan);
-      const ledgerPath = path.join(harness.makeTempDir("standing-approval"), "agent-operations.json");
-      const envelope = {
-        id: "APR-revenue-report",
-        provider: "Stripe",
-        actionClasses: ["spend"],
-        operations: ["workflow.revenue-report"],
-        resourcePatterns: ["revenue/report.md", "provider.stripe"],
-        exclusions: [],
-        mode: "standing",
-        expiresAt: "2027-08-01T00:00:00.000Z",
-        status: "active",
-      };
-      writeFileSync(ledgerPath, JSON.stringify({ approvalEnvelopes: [envelope] }));
-      const matches = applyStandingApprovals(plan, run, ledgerPath, now);
-      assert(
-        matches.some((entry) => entry.workflowId === "workflow.revenue-report" && entry.envelopeId === envelope.id),
-        "exact standing envelope must be consumed as current authority",
-      );
-      assert(run.approvals["workflow.revenue-report.approval.1"] === "approved", "matching envelope must approve the run-state gate");
+  harness.check("standing approvals: exact target, payload, spend, capability, and provenance are revalidated before reuse", () => {
+    const plan = compilePlan(testCatalog(), now);
+    const { run } = seedFor(["research", "product", "engineering"], plan);
+    const ledgerPath = path.join(harness.makeTempDir("standing-approval"), "agent-operations.json");
+    const payloadDigest = `sha256:${"a".repeat(64)}`;
+    const envelope = {
+      id: "APR-revenue-report",
+      provider: "Stripe",
+      account: "acct_fixture",
+      team: "growth",
+      project: "fixture-app",
+      environment: "production",
+      actionClasses: ["spend"],
+      operations: ["workflow.revenue-report"],
+      resourcePatterns: ["revenue/report.md", "provider.stripe"],
+      payloadDigests: [payloadDigest],
+      exclusions: [],
+      mode: "standing",
+      expiresAt: "2027-08-01T00:00:00.000Z",
+      status: "active",
+      spendCeiling: 50,
+      voicePolicy: "",
+    };
+    const capability = {
+      id: "stripe-cli",
+      provider: "Stripe",
+      status: "available",
+      account: "acct_fixture",
+      team: "growth",
+      project: "fixture-app",
+      environment: "production",
+      modes: ["spend"],
+    };
+    const action = {
+      id: "ACT-revenue-report",
+      class: "spend",
+      operation: "workflow.revenue-report",
+      resource: "revenue/report.md",
+      capabilityId: "stripe-cli",
+      provider: "Stripe",
+      account: "acct_fixture",
+      team: "growth",
+      project: "fixture-app",
+      environment: "production",
+      payloadDigest,
+      spendAmount: 25,
+      currency: "USD",
+      voicePolicy: "",
+      authorization: { approvalId: envelope.id },
+      preflight: { targetVerified: true },
+      result: { status: "planned" },
+    };
+    const writeLedger = (): void => writeFileSync(ledgerPath, JSON.stringify({ approvalEnvelopes: [envelope], capabilities: [capability], actions: [action] }));
+    writeLedger();
+    const matches = applyStandingApprovals(plan, run, ledgerPath, now);
+    assert(
+      matches.some((entry) => entry.workflowId === "workflow.revenue-report" && entry.envelopeId === envelope.id),
+      "exact standing envelope must be consumed as current authority",
+    );
+    assert(run.approvals["workflow.revenue-report.approval.1"] === "approved", "matching envelope must approve the run-state gate");
+    assert(
+      run.approvalProvenance?.["workflow.revenue-report.approval.1"]?.actionId === action.id,
+      "a standing approval must persist its exact envelope/action provenance",
+    );
 
-      run.approvals["workflow.revenue-report.approval.1"] = "pending";
-      envelope.operations = ["workflow.*"];
-      writeFileSync(ledgerPath, JSON.stringify({ approvalEnvelopes: [envelope] }));
-      assert(applyStandingApprovals(plan, run, ledgerPath, now).length === 0, "a broad wildcard operation must not widen authority by analogy");
-    },
-  );
+    envelope.status = "revoked";
+    writeLedger();
+    assert(applyStandingApprovals(plan, run, ledgerPath, now).length === 0, "a revoked envelope must not remain reusable");
+    assert(getApprovalStatus(run, "workflow.revenue-report.approval.1") === "pending", "revocation must reset a standing-sourced approval to pending");
+    assert(run.approvalProvenance?.["workflow.revenue-report.approval.1"] === undefined, "revocation must remove stale provenance");
+
+    envelope.status = "active";
+    action.project = "other-project";
+    writeLedger();
+    assert(applyStandingApprovals(plan, run, ledgerPath, now).length === 0, "an action for another project must not inherit this envelope");
+
+    action.project = envelope.project;
+    envelope.operations = ["workflow.*"];
+    writeLedger();
+    assert(applyStandingApprovals(plan, run, ledgerPath, now).length === 0, "a broad wildcard operation must not widen authority by analogy");
+
+    envelope.operations = ["workflow.revenue-report"];
+    action.spendAmount = 75;
+    writeLedger();
+    assert(applyStandingApprovals(plan, run, ledgerPath, now).length === 0, "an action above the envelope and catalog estimate must stay gated");
+
+    run.approvals["workflow.revenue-report.approval.1"] = "approved";
+    run.approvalProvenance = {};
+    envelope.status = "revoked";
+    writeLedger();
+    applyStandingApprovals(plan, run, ledgerPath, now);
+    assert(run.approvals["workflow.revenue-report.approval.1"] === "approved", "a manual founder approval without standing provenance must remain durable");
+  });
+
+  harness.check("standing approvals: public work requires the exact approved voice policy", () => {
+    const catalog = testCatalog();
+    catalog.workflows.find((workflow) => workflow.id === "workflow.growth-post")!.founderOnlyActions = ["Approve this public post"];
+    const plan = compilePlan(catalog, now);
+    const { run } = seedFor([], plan);
+    const ledgerPath = path.join(harness.makeTempDir("standing-publish-voice"), "agent-operations.json");
+    const payloadDigest = `sha256:${"b".repeat(64)}`;
+    const envelope = {
+      id: "APR-growth-post",
+      provider: "Resend",
+      account: "acct_growth",
+      team: "marketing",
+      project: "fixture-app",
+      environment: "production",
+      actionClasses: ["publish"],
+      operations: ["workflow.growth-post"],
+      resourcePatterns: ["growth/post.md"],
+      payloadDigests: [payloadDigest],
+      exclusions: [],
+      mode: "standing",
+      expiresAt: "2027-08-01T00:00:00.000Z",
+      status: "active",
+      spendCeiling: null,
+      voicePolicy: "approved-brand-voice-v1",
+    };
+    const capability = {
+      id: "resend-api",
+      provider: "Resend",
+      status: "available",
+      account: envelope.account,
+      team: envelope.team,
+      project: envelope.project,
+      environment: envelope.environment,
+      modes: ["publish"],
+    };
+    const action = {
+      id: "ACT-growth-post",
+      class: "publish",
+      operation: "workflow.growth-post",
+      resource: "growth/post.md",
+      capabilityId: capability.id,
+      provider: envelope.provider,
+      account: envelope.account,
+      team: envelope.team,
+      project: envelope.project,
+      environment: envelope.environment,
+      payloadDigest,
+      spendAmount: null,
+      currency: "",
+      voicePolicy: "another-voice",
+      authorization: { approvalId: envelope.id },
+      preflight: { targetVerified: true },
+      result: { status: "planned" },
+    };
+    const writeLedger = (): void => writeFileSync(ledgerPath, JSON.stringify({ approvalEnvelopes: [envelope], capabilities: [capability], actions: [action] }));
+    writeLedger();
+    assert(applyStandingApprovals(plan, run, ledgerPath, now).length === 0, "a voice-policy mismatch must keep public work gated");
+    action.voicePolicy = envelope.voicePolicy;
+    writeLedger();
+    assert(applyStandingApprovals(plan, run, ledgerPath, now).length === 1, "the exact approved voice policy should unlock the planned public action");
+  });
 
   harness.check(
     "runstate: a gateless node's outputs no longer auto-accept — reconcile lands blocked and acceptVerification with evidence promotes (the 2026-08 auto-accept hole, closed)",

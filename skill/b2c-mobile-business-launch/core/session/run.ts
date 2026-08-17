@@ -622,6 +622,21 @@ async function main(): Promise<number> {
 
         for (const nodeId of batch.nodeIds) {
           const node = plan.nodes.find((candidate) => candidate.id === nodeId)!;
+          // Standing authority is time- and target-bound. Re-read it at the final dispatch seam,
+          // after the batch boundary and immediately before any estimate or worker starts. A
+          // revoked/expired envelope or changed planned action resets its sourced approvals to
+          // pending, even when an earlier frontier pass had classified this node as ready.
+          applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
+          if (node.approvals.some((approval) => run.approvals[approval.id] !== "approved")) {
+            const nodeState = run.nodes[nodeId];
+            if (nodeState) {
+              nodeState.status = "waiting_founder";
+              nodeState.blocker = "Founder approval required";
+              run.updatedAt = sessionNow();
+              writeRunState(paths.runState, run);
+            }
+            continue;
+          }
           const decision = decisions.get(nodeId) ?? captured.evaluate(node);
 
           let estimateEntryId: string | undefined;
