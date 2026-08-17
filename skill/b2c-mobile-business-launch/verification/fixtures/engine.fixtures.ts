@@ -14,9 +14,15 @@ import { allowAllAutonomyEvaluator, computeFrontier, type AutonomyEvaluator } fr
 import { buildDispatchBatches, checkBatchBoundary, neverHaltDispatchHooks } from "../../core/engine/dispatch.js";
 import { composeNodeBrief, renderNodeBrief } from "../../core/engine/node-brief.js";
 import { buildBoundaryResults } from "../../core/adapters/platform-execution.js";
-import { buildWorkerCommand } from "../../core/session/executor.js";
+import { buildWorkerCommand, receiptFileDigest } from "../../core/session/executor.js";
 import { buildWorkerPrompt, validateKnowledgeReceipt } from "../../core/session/worker-prompt.js";
-import { fingerprintAppSource, ingestSourceFingerprint } from "../../core/engine/source-fingerprint.js";
+import {
+  APP_SOURCE_FINGERPRINT_PATH,
+  fingerprintAppSource,
+  ingestSourceFingerprint,
+  observeAppSourceFingerprint,
+} from "../../core/engine/source-fingerprint.js";
+import { runtimeCatalogVersion } from "../../core/session/run.js";
 import { createAutonomyEvaluator } from "../../core/autonomy/evaluator.js";
 import { applyStandingApprovals } from "../../core/autonomy/standing-approvals.js";
 import {
@@ -283,23 +289,35 @@ export function register(harness: Harness): void {
       domainId: "domain.process",
       actionClass: "mutate",
       dependencies: ["workflow.research-scan"],
-      outputPaths: [], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true,
+      outputPaths: [],
+      providerIds: [],
+      laneIds: [],
+      founderOnlyActions: [],
+      gateCommands: [],
+      idempotent: true,
     });
     const plan = compilePlan(catalog, now);
     const system = plan.nodes.find((node) => node.workflowId === "workflow.system-cascade")!;
     assert(system.dependencies.includes(nodeId("research-scan")), "system workflow must preserve its authored dependency edge");
     const evaluator = createAutonomyEvaluator({
-      grants: {}, waivers: [],
+      grants: {},
+      waivers: [],
       ledger: { schemaVersion: "1.0.0", updatedAt: now, balances: [], entries: [] },
       prerequisiteVerifier: () => ({ status: "unverified" as const, detail: "fixture" }),
       now: () => now,
     });
     assert(evaluator.evaluate(system).allowed, "safe internal system work must not require a founder grant");
-    assert(evaluator.evaluate({ ...system, actionClass: "observe", providerIds: ["provider.test"] }).allowed, "read-only provider proof must be allowed as internal observation");
+    assert(
+      evaluator.evaluate({ ...system, actionClass: "observe", providerIds: ["provider.test"] }).allowed,
+      "read-only provider proof must be allowed as internal observation",
+    );
     assert(!evaluator.evaluate({ ...system, actionClass: "publish", providerIds: ["provider.test"] }).allowed, "external system-domain work must fail closed");
     let machineRejected = false;
-    try { compilePlan({ ...catalog, workflows: [{ ...catalog.workflows[0]!, id: "workflow.machine-maintenance", domainId: "domain.machine" }] }, now); }
-    catch (error) { machineRejected = String(error).includes("maintainer-only"); }
+    try {
+      compilePlan({ ...catalog, workflows: [{ ...catalog.workflows[0]!, id: "workflow.machine-maintenance", domainId: "domain.machine" }] }, now);
+    } catch (error) {
+      machineRejected = String(error).includes("maintainer-only");
+    }
     assert(machineRejected, "domain.machine maintenance must stay out of business execution plans");
   });
 
@@ -643,9 +661,21 @@ export function register(harness: Harness): void {
     const plan = compilePlan(testCatalog(), now);
     const node = plan.nodes.find((entry) => entry.id === nodeId("research-scan"))!;
     const brief = composeNodeBrief(node, plan);
-    const fileDigests = Object.fromEntries([...brief.contractFiles, ...brief.open, ...brief.load.map((entry) => entry.path), ...brief.route.map((entry) => entry.path)].map((entry, index) => [entry, `sha256:${String(index + 1).padStart(64, "a")}`]));
+    const fileDigests = Object.fromEntries(
+      [...brief.contractFiles, ...brief.open, ...brief.load.map((entry) => entry.path), ...brief.route.map((entry) => entry.path)].map((entry, index) => [
+        entry,
+        `sha256:${String(index + 1).padStart(64, "a")}`,
+      ]),
+    );
     const expectations = { fileDigests };
     const prompt = buildWorkerPrompt(brief, "/tmp/business", "/tmp/skill", expectations);
+    assert(prompt.includes("standard SHA-256 of the file bytes only"), "the worker must receive the exact reproducible receipt digest algorithm");
+    const digestFixture = path.join(harness.makeTempDir("receipt-digest"), "known.txt");
+    writeFileSync(digestFixture, "abc", "utf8");
+    assert(
+      receiptFileDigest(digestFixture) === "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+      "receipt digest must equal standard SHA-256 file bytes",
+    );
     assert(prompt.includes("AGENTS.md") && prompt.includes("agents/product-leader.md"), "worker prompt must carry parent and specialist contracts");
     assert(
       prompt.includes("knowledge/research/fixture.md") && prompt.includes("knowledge/research/role.md"),
@@ -655,25 +685,51 @@ export function register(harness: Harness): void {
       prompt.includes("fixture-product-skill") && prompt.includes("fixture-product-tool"),
       "worker prompt must carry nested skill and tool discovery routes",
     );
-    assert(prompt.includes(`TOKEN BUDGET: ${brief.tokenBudget}`) && prompt.includes("AUTHORIZATION DIGEST: none"), "worker prompt must pin budget and authority");
+    assert(
+      prompt.includes(`TOKEN BUDGET: ${brief.tokenBudget}`) && prompt.includes("AUTHORIZATION DIGEST: none"),
+      "worker prompt must pin budget and authority",
+    );
     const command = buildWorkerCommand("codex", prompt);
     assert(command.args.includes(prompt), "the runtime command must receive the composed worker prompt, not a title-only surrogate");
     assert(validateKnowledgeReceipt("finished", brief).length > 0, "a conclusion without a knowledge receipt must fail");
     const receiptBody = {
-      schemaVersion: "2.0.0", workflowId: brief.workflowId, tokenBudget: brief.tokenBudget, authorizationDigest: "none",
+      schemaVersion: "2.0.0",
+      workflowId: brief.workflowId,
+      tokenBudget: brief.tokenBudget,
+      authorizationDigest: "none",
       contractFiles: brief.contractFiles.map((entry) => ({ path: entry, sha256: fileDigests[entry] })),
       taskArtifacts: brief.open.map((entry) => ({ path: entry, sha256: fileDigests[entry] })),
       mandatoryKnowledge: brief.load.map((entry) => ({ path: entry.path, sha256: fileDigests[entry.path] })),
-      conditionalKnowledge: brief.route.map((entry) => ({ id: `${entry.packId}:${entry.path}`, decision: "used", reason: "competitor evidence is required", sha256: fileDigests[entry.path] })),
-      skills: brief.skills.map((entry) => ({ id: entry.id, decision: "used", reason: "fixture condition matched", evidence: "/skills/fixture-product-skill/SKILL.md" })),
+      conditionalKnowledge: brief.route.map((entry) => ({
+        id: `${entry.packId}:${entry.path}`,
+        decision: "used",
+        reason: "competitor evidence is required",
+        sha256: fileDigests[entry.path],
+      })),
+      skills: brief.skills.map((entry) => ({
+        id: entry.id,
+        decision: "used",
+        reason: "fixture condition matched",
+        evidence: "/skills/fixture-product-skill/SKILL.md",
+      })),
       tools: brief.tools.map((entry) => ({ id: entry.id, decision: "used", reason: "fixture condition matched", evidence: "fixture-product-tool --help" })),
-      outputEvidence: brief.produce.map((entry) => ({ outputPath: entry, knowledgePaths: [brief.load[0]!.path], summary: "Research rules shaped the evidence and conclusions." })),
+      outputEvidence: brief.produce.map((entry) => ({
+        outputPath: entry,
+        knowledgePaths: [brief.load[0]!.path],
+        summary: "Research rules shaped the evidence and conclusions.",
+      })),
     };
     const receipt = `BEGIN_KNOWLEDGE_RECEIPT\n${JSON.stringify(receiptBody)}\nEND_KNOWLEDGE_RECEIPT`;
     assert(validateKnowledgeReceipt(receipt, brief, expectations).length === 0, "an exact structured knowledge receipt must pass");
-    assert(validateKnowledgeReceipt(`noise ${brief.contractFiles.join(" ")} ${brief.load.map((entry) => entry.path).join(" ")}`, brief, expectations).length > 0, "path echoing outside structured JSON must fail");
+    assert(
+      validateKnowledgeReceipt(`noise ${brief.contractFiles.join(" ")} ${brief.load.map((entry) => entry.path).join(" ")}`, brief, expectations).length > 0,
+      "path echoing outside structured JSON must fail",
+    );
     const spoofed = { ...receiptBody, conditionalKnowledge: [] };
-    assert(validateKnowledgeReceipt(`BEGIN_KNOWLEDGE_RECEIPT\n${JSON.stringify(spoofed)}\nEND_KNOWLEDGE_RECEIPT`, brief, expectations).length > 0, "omitting a conditional route decision must fail");
+    assert(
+      validateKnowledgeReceipt(`BEGIN_KNOWLEDGE_RECEIPT\n${JSON.stringify(spoofed)}\nEND_KNOWLEDGE_RECEIPT`, brief, expectations).length > 0,
+      "omitting a conditional route decision must fail",
+    );
   });
 
   harness.check("source fingerprint: content changes invalidate graph descendants while identical snapshots do not", () => {
@@ -683,11 +739,26 @@ export function register(harness: Harness): void {
     writeFileSync(path.join(sourceDir, "app.ts"), "export const version = 1;\n");
     const catalog: CatalogInput = {
       version: "catalog.source.1",
-      artifacts: [{ id: "artifact.source", path: "run/app-source.json" }, { id: "artifact.surface", path: "growth/landing.md" }],
-      workflows: [{
-        id: "workflow.surface", title: "Refresh surface", domainId: "domain.growth", actionClass: "mutate",
-        reads: ["run/app-source.json"], dependencies: [], outputPaths: ["growth/landing.md"], providerIds: [], laneIds: ["growth"], founderOnlyActions: [], gateCommands: [], idempotent: true,
-      }],
+      artifacts: [
+        { id: "artifact.source", path: "run/app-source.json" },
+        { id: "artifact.surface", path: "growth/landing.md" },
+      ],
+      workflows: [
+        {
+          id: "workflow.surface",
+          title: "Refresh surface",
+          domainId: "domain.growth",
+          actionClass: "mutate",
+          reads: ["run/app-source.json"],
+          dependencies: [],
+          outputPaths: ["growth/landing.md"],
+          providerIds: [],
+          laneIds: ["growth"],
+          founderOnlyActions: [],
+          gateCommands: [],
+          idempotent: true,
+        },
+      ],
     };
     const plan = compilePlan(catalog, now);
     const run = seedRunState(plan, baseBusinessState(), { ownerSessionId: "session.source", ttlSeconds: 60, wallClockCapSeconds: 60, now });
@@ -699,6 +770,70 @@ export function register(harness: Harness): void {
     const second = fingerprintAppSource(dir, ["src"]);
     assert(ingestSourceFingerprint(plan, run, "artifact.source", second, plusSeconds(now, 2)) === "changed", "changed source must be ingested");
     assert(getStatus(run, nodeId("surface")) === "stale", "source change must invalidate its surface consumer");
+  });
+
+  harness.check("source fingerprint: live observer persists the external input before frontier computation", () => {
+    const dir = harness.makeTempDir("source-observer");
+    mkdirSync(path.join(dir, "src"), { recursive: true });
+    writeFileSync(path.join(dir, "src", "app.ts"), "export const live = true;\n", "utf8");
+    const catalog: CatalogInput = {
+      version: "catalog.source-observer.1",
+      artifacts: [
+        { id: "artifact.source-observer", path: APP_SOURCE_FINGERPRINT_PATH },
+        { id: "artifact.source-manifest", path: "engineering/SOURCE_CHANGE_MANIFEST.json" },
+      ],
+      workflows: [
+        {
+          id: "workflow.source-manifest",
+          title: "Source manifest",
+          domainId: "domain.engineering",
+          actionClass: "draft",
+          reads: [APP_SOURCE_FINGERPRINT_PATH],
+          dependencies: [],
+          outputPaths: ["engineering/SOURCE_CHANGE_MANIFEST.json"],
+          providerIds: [],
+          laneIds: ["engineering"],
+          founderOnlyActions: [],
+          gateCommands: [],
+          idempotent: true,
+        },
+      ],
+    };
+    const plan = compilePlan(catalog, now);
+    const run = seedRunState(plan, baseBusinessState(), { ownerSessionId: "session.source-observer", ttlSeconds: 60, wallClockCapSeconds: 60, now });
+    assert(observeAppSourceFingerprint(plan, run, dir, now) === "baseline", "live observer must establish the source baseline");
+    assert(existsSync(path.join(dir, APP_SOURCE_FINGERPRINT_PATH)), "live observer must write the exact task artifact the manifest worker opens");
+    assert(
+      computeFrontier(plan, run, baseBusinessState(), allowAllAutonomyEvaluator).ready.includes(nodeId("source-manifest")),
+      "accepted external source input must make the source-manifest node ready",
+    );
+    run.nodes[nodeId("source-manifest")]!.status = "succeeded";
+    writeFileSync(path.join(dir, "src", "app.ts"), "export const live = false;\n", "utf8");
+    assert(
+      observeAppSourceFingerprint(plan, run, dir, plusSeconds(now, 1)) === "changed",
+      "later source edits must be observed without waiting for a workflow output",
+    );
+    assert(getStatus(run, nodeId("source-manifest")) === "stale", "live source change must stale the manifest producer before the next frontier");
+    const runSource = readFileSync(path.join(path.dirname(new URL(import.meta.url).pathname), "../../core/session/run.ts"), "utf8");
+    assert(
+      runSource.indexOf("observeAppSourceFingerprint") < runSource.indexOf("computeFrontier(plan"),
+      "session runner must observe source before computing its first frontier",
+    );
+  });
+
+  harness.check("runtime binding: installed catalog version is discovered automatically and missing parity data fails closed", () => {
+    const workspace = harness.makeTempDir("runtime-catalog-version");
+    mkdirSync(path.join(workspace, ".b2c-launch"), { recursive: true });
+    writeFileSync(path.join(workspace, ".b2c-launch", "runtime.json"), JSON.stringify({ catalogVersion: "2.0.0+0.128.0" }), "utf8");
+    assert(runtimeCatalogVersion(workspace) === "2.0.0+0.128.0", "session must derive expected catalog version from installed runtime.json");
+    writeFileSync(path.join(workspace, ".b2c-launch", "runtime.json"), JSON.stringify({ skillVersion: "0.128.0" }), "utf8");
+    let failedClosed = false;
+    try {
+      runtimeCatalogVersion(workspace);
+    } catch {
+      failedClosed = true;
+    }
+    assert(failedClosed, "a present stale runtime binding without catalogVersion must fail closed");
   });
 
   harness.check("standing approvals: exact target, payload, spend, capability, and provenance are revalidated before reuse", () => {

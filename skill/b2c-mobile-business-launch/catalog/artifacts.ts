@@ -1,5 +1,7 @@
 import { catalogId } from "./ids.js";
 import type { CatalogArtifact, CatalogWorkflowDef } from "./types.js";
+import { APP_SOURCE_FINGERPRINT_PATH } from "../core/engine/source-fingerprint.js";
+export { APP_SOURCE_FINGERPRINT_PATH } from "../core/engine/source-fingerprint.js";
 
 /**
  * Artifacts are derived from workflow outputPaths, not hand-authored — one entry per
@@ -8,12 +10,21 @@ import type { CatalogArtifact, CatalogWorkflowDef } from "./types.js";
  * artifacts from `workspace/business/state/PROJECT_STATE.yaml` lane evidence (a second,
  * looser source of artifact identity that tolerated the same path being claimed by more
  * than one workflow — see catalog/workflows/*.ts headers for the collisions that produced
- * in this rebuild). v2 has a single source: each output path has exactly one producing
- * workflow (compile.ts enforces this at compile time; the workflow files were fixed to
- * satisfy it), so deriving artifacts straight from workflows is sufficient and can't drift.
+ * in this rebuild). v2 has one derived source for produced artifacts: each output path has
+ * exactly one producing workflow. The sole explicit exception is the session-observed app
+ * source fingerprint. It is an external graph input so source edits can stale consumers before
+ * the frontier is computed.
  */
 export function buildArtifacts(workflows: readonly CatalogWorkflowDef[]): CatalogArtifact[] {
-  const artifacts: CatalogArtifact[] = [];
+  const artifacts: CatalogArtifact[] = [
+    {
+      id: catalogId("artifact", APP_SOURCE_FINGERPRINT_PATH),
+      path: APP_SOURCE_FINGERPRINT_PATH,
+      ownerDomainId: "domain.engineering",
+      laneIds: ["engineering"],
+      generated: true,
+    },
+  ];
   for (const wf of workflows) {
     for (const outputPath of wf.outputPaths) {
       artifacts.push({

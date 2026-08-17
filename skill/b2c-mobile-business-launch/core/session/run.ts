@@ -12,6 +12,7 @@ import { validateBudgetLedger, validateBusinessState, validateControl } from "..
 import { grantableDomainIds, type BudgetLedgerDocument, type BusinessStateV2, type ControlFile } from "../schema/types.js";
 import { compilePlan, type CatalogInput, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
 import { computeFrontier } from "../engine/frontier.js";
+import { observeAppSourceFingerprint } from "../engine/source-fingerprint.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
 import {
   acceptVerification,
@@ -198,8 +199,20 @@ export function loadCatalogFile(catalogPath: string): CatalogInput {
 /** Hook used by installed briefs/CI to reject a stale or substituted executable catalog. */
 export function assertCatalogCompatibility(catalog: CatalogInput, expectedVersion?: string): void {
   if (!catalog.version || catalog.version === "catalog.empty") throw new Error("catalog.version_missing: executable catalog is missing or invalid");
-  if (expectedVersion && catalog.version !== expectedVersion)
-    throw new Error(`catalog.version_stale: expected ${expectedVersion}, found ${catalog.version}`);
+  if (expectedVersion && catalog.version !== expectedVersion) throw new Error(`catalog.version_stale: expected ${expectedVersion}, found ${catalog.version}`);
+}
+
+/** Load the installer-owned catalog version automatically; a present but incomplete binding fails closed. */
+export function runtimeCatalogVersion(workspace: string): string | undefined {
+  const manifestPath = path.join(workspace, ".b2c-launch", "runtime.json");
+  if (!existsSync(manifestPath)) return undefined;
+  const manifest = tryLoadJson(manifestPath);
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) throw new Error("catalog.runtime_binding_invalid: runtime.json is not an object");
+  const version = (manifest as Record<string, unknown>).catalogVersion;
+  if (typeof version !== "string" || !version.trim()) {
+    throw new Error("catalog.runtime_binding_stale: runtime.json has no catalogVersion; refresh the installed entrypoints");
+  }
+  return version;
 }
 
 /** Records evaluator.evaluate()'s full decision detail per node id as frontier examines it, so the digest can translate the *precise* reasonCode rather than a generic fallback. */
@@ -503,7 +516,12 @@ async function main(): Promise<number> {
     const sessionNow = () => new Date().toISOString();
     let ledger = loadLedgerFile(paths.ledger, startedAt);
     const catalog = loadCatalogFile(paths.catalog);
-    assertCatalogCompatibility(catalog, brief.expectedCatalogVersion ?? process.env.B2C_EXPECTED_CATALOG_VERSION);
+    const explicitCatalogVersion = brief.expectedCatalogVersion ?? process.env.B2C_EXPECTED_CATALOG_VERSION;
+    const installedCatalogVersion = runtimeCatalogVersion(workspace);
+    if (explicitCatalogVersion && installedCatalogVersion && explicitCatalogVersion !== installedCatalogVersion) {
+      throw new Error(`catalog.version_binding_conflict: brief expected ${explicitCatalogVersion}, installed runtime expected ${installedCatalogVersion}`);
+    }
+    assertCatalogCompatibility(catalog, explicitCatalogVersion ?? installedCatalogVersion);
     const plan = compilePlan(catalog, startedAt);
 
     // budget_funded closes over this ledger snapshot (captured once, before dispatch starts) —
@@ -545,6 +563,7 @@ async function main(): Promise<number> {
     } else {
       run = seedRunState(plan, businessState, { ownerSessionId: sessionId, ttlSeconds: 300, wallClockCapSeconds, now: startedAt });
     }
+    observeAppSourceFingerprint(plan, run, workspace, startedAt);
     writeRunState(paths.runState, run);
 
     const dispatchHooks: DispatchHooks = createDispatchHooks({
@@ -601,6 +620,8 @@ async function main(): Promise<number> {
       }
       heartbeat(paths.sessionLock, sessionId);
 
+      observeAppSourceFingerprint(plan, run, workspace, sessionNow());
+      writeRunState(paths.runState, run);
       applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const frontier = computeFrontier(plan, run, businessState, captured);
       let readyIds: RunNodeId[] = frontier.ready;

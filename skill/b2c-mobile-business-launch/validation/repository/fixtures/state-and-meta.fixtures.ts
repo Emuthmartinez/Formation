@@ -50,6 +50,56 @@ export function register(h: Harness): void {
   runFixture("complete Apple App Store requirements packet passes", clean, "check-apple-app-store-requirements.ts", 0);
   runFixture("complete store console packet passes", clean, "check-store-console-packet.ts", 0);
   runFixture("complete store screenshots packet passes", clean, "check-store-screenshots.ts", 0);
+  const iphoneOnlyScreenshots = makeFixture("iphone-only-screenshot-matrix");
+  writeCompleteStoreScreenshots(iphoneOnlyScreenshots);
+  const iphoneOnlyState = readState(iphoneOnlyScreenshots);
+  const iphoneOnlyProject = expectRecord(iphoneOnlyState.project, "project");
+  iphoneOnlyProject.supported_device_families = ["iphone"];
+  iphoneOnlyProject.platforms = ["ios"];
+  expectRecord(iphoneOnlyProject.bundle_ids, "bundle_ids").android = "";
+  Object.assign(getLane(iphoneOnlyState, "store_console"), { status: "done", evidence: ["SCREENSHOTS.md"] });
+  writeState(iphoneOnlyScreenshots, iphoneOnlyState);
+  const rubricExample = JSON.parse(
+    readFileSync(path.join(skillRoot, "workspace/business/store/app-store-listing/screenshot-rubric-scores.example.json"), "utf8"),
+  ) as { slots: Array<Record<string, unknown>> };
+  const iphoneSlot = {
+    ...rubricExample.slots[0],
+    product_page: "default",
+    observed_evidence: "iPhone-only fixture shows the blue primary action and truthful headline.",
+  };
+  writeFileSync(
+    path.join(iphoneOnlyScreenshots, "screenshot-rubric-scores.json"),
+    `${JSON.stringify({ ...rubricExample, generated_at: "2026-08-17T00:00:00Z", slots: [iphoneSlot] }, null, 2)}\n`,
+    "utf8",
+  );
+  runFixture(
+    "completed iPhone-only matrix does not fabricate an iPad requirement",
+    iphoneOnlyScreenshots,
+    "check-store-screenshots.ts",
+    1,
+    "store_screenshots.rubric_final_png_missing",
+    [],
+    undefined,
+    "store_screenshots.matrix.en-US.ipad_missing",
+  );
+  const ipadCapableScreenshots = makeFixture("ipad-capable-screenshot-matrix");
+  writeCompleteStoreScreenshots(ipadCapableScreenshots);
+  const ipadState = readState(ipadCapableScreenshots);
+  expectRecord(ipadState.project, "project").supported_device_families = ["iphone", "ipad"];
+  Object.assign(getLane(ipadState, "store_console"), { status: "done", evidence: ["SCREENSHOTS.md"] });
+  writeState(ipadCapableScreenshots, ipadState);
+  writeFileSync(
+    path.join(ipadCapableScreenshots, "screenshot-rubric-scores.json"),
+    `${JSON.stringify({ ...rubricExample, generated_at: "2026-08-17T00:00:00Z", slots: [iphoneSlot] }, null, 2)}\n`,
+    "utf8",
+  );
+  runFixture(
+    "completed iPad-capable matrix still requires an iPad well",
+    ipadCapableScreenshots,
+    "check-store-screenshots.ts",
+    1,
+    "store_screenshots.matrix.en-US.ipad_missing",
+  );
   runFixture("complete native iOS proof packet passes", clean, "check-native-ios-proof.ts", 0);
   runFixture("complete emotional design packet passes", clean, "check-emotional-design.ts", 0);
   runFixture("landing funnel skips without landing scope", clean, "check-landing-funnel.ts", 0);

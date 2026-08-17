@@ -81,16 +81,22 @@ export function buildWorkerCommand(runtime: Exclude<WorkerRuntime, "auto">, prom
   return { runtime, command: "cursor-agent", args: ["agent", "-p", prompt, "--sandbox", "enabled"], prompt };
 }
 
-function fingerprintPath(target: string): string {
+/** Standard SHA-256 of file bytes, reproducible with `sha256sum` or `shasum -a 256`. */
+export function receiptFileDigest(target: string): string {
+  const stat = lstatSync(target);
+  if (!stat.isFile()) throw new Error(`receipt digest target must be a regular file: ${target}`);
+  return createHash("sha256").update(readFileSync(target)).digest("hex");
+}
+
+/** Internal artifact fingerprint supports directory outputs; it is not a worker receipt digest. */
+function outputFingerprintPath(target: string): string {
   const hash = createHash("sha256");
   const visit = (current: string, relative: string): void => {
     const stat = lstatSync(current);
     hash.update(`${relative}\0${stat.mode}\0${stat.size}\0`);
     if (stat.isDirectory()) {
       for (const name of readdirSync(current).sort()) visit(path.join(current, name), path.posix.join(relative, name));
-    } else if (stat.isFile()) {
-      hash.update(readFileSync(current));
-    }
+    } else if (stat.isFile()) hash.update(readFileSync(current));
   };
   visit(target, ".");
   return hash.digest("hex");
@@ -137,7 +143,11 @@ function workerEnvironment(runtime: Exclude<WorkerRuntime, "auto">): NodeJS.Proc
   // Doppler is the skill's approved secret-injection boundary. Forward its service token, not
   // arbitrary provider-specific variables; operators may add narrowly reviewed names explicitly.
   allowed.push("DOPPLER_TOKEN");
-  for (const key of (process.env.B2C_WORKER_ENV_ALLOWLIST ?? "").split(",").map((entry) => entry.trim()).filter(Boolean)) allowed.push(key);
+  for (const key of (process.env.B2C_WORKER_ENV_ALLOWLIST ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean))
+    allowed.push(key);
   const env: NodeJS.ProcessEnv = {};
   for (const key of allowed) if (process.env[key] !== undefined) env[key] = process.env[key];
   env.B2C_WORKER_SANDBOX = "workspace-write";
@@ -171,25 +181,25 @@ export function createCliExecutor(requestedRuntime: WorkerRuntime = "auto"): Nod
         const absolute = resolvedInside(context.workspaceDir, contractPath);
         if (!absolute || !existsSync(absolute))
           return { status: "failed", outputs: [], evidence: [], error: `worker contract file is missing: ${contractPath}` };
-        fileDigests[contractPath] = `sha256:${fingerprintPath(absolute)}`;
+        fileDigests[contractPath] = `sha256:${receiptFileDigest(absolute)}`;
       }
       for (const artifactPath of brief.open) {
         const absolute = resolvedInside(context.workspaceDir, artifactPath);
         if (!absolute || !existsSync(absolute))
           return { status: "failed", outputs: [], evidence: [], error: `required worker task artifact is missing: ${artifactPath}` };
-        fileDigests[artifactPath] = `sha256:${fingerprintPath(absolute)}`;
+        fileDigests[artifactPath] = `sha256:${receiptFileDigest(absolute)}`;
       }
       for (const reference of brief.load) {
         const absolute = resolvedInside(context.skillRootDir, reference.path);
         if (!absolute || !existsSync(absolute))
           return { status: "failed", outputs: [], evidence: [], error: `mandatory worker knowledge is missing: ${reference.path}` };
-        fileDigests[reference.path] = `sha256:${fingerprintPath(absolute)}`;
+        fileDigests[reference.path] = `sha256:${receiptFileDigest(absolute)}`;
       }
       for (const reference of brief.route) {
         const absolute = resolvedInside(context.skillRootDir, reference.path);
         if (!absolute || !existsSync(absolute))
           return { status: "failed", outputs: [], evidence: [], error: `conditional worker knowledge route is missing: ${reference.path}` };
-        fileDigests[reference.path] = `sha256:${fingerprintPath(absolute)}`;
+        fileDigests[reference.path] = `sha256:${receiptFileDigest(absolute)}`;
       }
       const expectations = { fileDigests, authorization: context.authorization };
       const prompt = buildWorkerPrompt(brief, context.workspaceDir, context.skillRootDir, expectations);
@@ -227,7 +237,7 @@ export function createCliExecutor(requestedRuntime: WorkerRuntime = "auto"): Nod
         outputs.push({
           artifactId,
           path: relativePath,
-          fingerprint: fingerprintPath(absolutePath),
+          fingerprint: outputFingerprintPath(absolutePath),
           evidence: [`${runtime} worker produced ${relativePath}`, `knowledge receipt accepted for ${node.workflowId}`],
         });
       }

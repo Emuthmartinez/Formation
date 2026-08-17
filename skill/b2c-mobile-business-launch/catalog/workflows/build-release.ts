@@ -317,7 +317,7 @@ export const workflows = [
     trigger: "When design is accepted and after every accepted app-source, build-config, localization, onboarding, feature, paywall, SDK, or visual change",
     instructions:
       "Fingerprint the mobile source roots, dependency locks, build configuration, localization resources, analytics schema, onboarding, paywall, and privacy manifests. Compare them with the last accepted checkpoint. Write engineering/SOURCE_CHANGE_MANIFEST.json with changed paths, before/after digests, and every applicable Change Cascade Map type. A change can carry multiple types. Open the matching change-cascade work before the app slice merges. An empty change list is valid only when the current aggregate digest matches the accepted checkpoint.",
-    reads: ["design/design.md", "engineering/TECH_SPEC.md", "state/PROJECT_STATE.yaml"],
+    reads: ["run/app-source-fingerprint.sha256", "design/design.md", "engineering/TECH_SPEC.md", "state/PROJECT_STATE.yaml"],
     referenceIds: ["reference.process.change-cascade", "reference.process.cascade-edges", "reference.process.flow-traceability"],
     roleId: "role.mobile-engineer",
     laneIds: ["engineering", "orchestration"],

@@ -122,6 +122,7 @@ export function register(harness: Harness): void {
       );
       const manifest = JSON.parse(readFileSync(path.join(target, ".b2c-launch", "runtime.json"), "utf8")) as {
         skillVersion: string;
+        catalogVersion: string;
         catalogPath: string;
         skillRootEnv: string;
       };
@@ -130,6 +131,7 @@ export function register(harness: Harness): void {
       assert(manifest.catalogPath === "catalog.json", "installed runtime binding must point at the session runner's default catalog path");
       assert(manifest.skillRootEnv === "B2C_LAUNCH_SKILL_ROOT", "installed runtime binding must provide a portable environment override");
       const installedCatalog = loadCatalogFile(path.join(target, "catalog.json"));
+      assert(manifest.catalogVersion === installedCatalog.version, "installed runtime binding must pin the exact executable catalog version");
       assert(installedCatalog.version.endsWith(manifest.skillVersion), "installed catalog version must match the runtime manifest");
       const plan = compilePlan(installedCatalog, "2026-08-16T00:00:00.000Z");
       assert(plan.nodes.length > 0, "the installed catalog must load and compile through the real session boundary");

@@ -4009,6 +4009,7 @@
       "trigger": "When design is accepted and after every accepted app-source, build-config, localization, onboarding, feature, paywall, SDK, or visual change",
       "instructions": "Fingerprint the mobile source roots, dependency locks, build configuration, localization resources, analytics schema, onboarding, paywall, and privacy manifests. Compare them with the last accepted checkpoint. Write engineering/SOURCE_CHANGE_MANIFEST.json with changed paths, before/after digests, and every applicable Change Cascade Map type. A change can carry multiple types. Open the matching change-cascade work before the app slice merges. An empty change list is valid only when the current aggregate digest matches the accepted checkpoint.",
       "reads": [
+        "run/app-source-fingerprint.sha256",
         "design/design.md",
         "engineering/TECH_SPEC.md",
         "state/PROJECT_STATE.yaml"
@@ -5402,6 +5403,15 @@
         "revenue"
       ],
       "generated": false
+    },
+    {
+      "id": "artifact.run-app-source-fingerprint-sha256",
+      "path": "run/app-source-fingerprint.sha256",
+      "ownerDomainId": "domain.engineering",
+      "laneIds": [
+        "engineering"
+      ],
+      "generated": true
     },
     {
       "id": "artifact.skill-version-json",

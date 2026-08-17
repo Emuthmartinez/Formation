@@ -139,6 +139,7 @@ export interface InstalledRuntimeManifest {
   skillRoot: string;
   skillRootEnv: "B2C_LAUNCH_SKILL_ROOT";
   installedSkillName: "b2c-mobile-business-launch";
+  catalogVersion: string;
   catalogPath: string;
   knowledgeRoot: string;
 }
@@ -153,6 +154,7 @@ export function buildInstalledRuntimeManifest(skillRoot: string): InstalledRunti
     skillRoot: path.resolve(skillRoot),
     skillRootEnv: "B2C_LAUNCH_SKILL_ROOT",
     installedSkillName: MANAGED_MARKER,
+    catalogVersion: toCatalogInput(catalog).version,
     catalogPath: RUNTIME_CATALOG_PATH,
     knowledgeRoot: path.join(path.resolve(skillRoot), "knowledge"),
   };
@@ -264,7 +266,9 @@ function runMain(): void {
   const stripped = stripManagedHookEntries(settings);
 
   if (!apply) {
-    console.log(`install-entrypoints: DRY RUN — would write ${templates.size} managed entrypoint file(s), a versioned catalog, and a runtime binding under ${target}:`);
+    console.log(
+      `install-entrypoints: DRY RUN — would write ${templates.size} managed entrypoint file(s), a versioned catalog, and a runtime binding under ${target}:`,
+    );
     for (const relativePath of templates.keys()) console.log(`  ${path.join(target, relativePath)}`);
     console.log(
       stripped.changed

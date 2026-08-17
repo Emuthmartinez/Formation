@@ -1,5 +1,6 @@
 import type { CatalogArtifact as CompileArtifact, CatalogInput, CatalogWorkflowId, CatalogWorkflowNode } from "../core/engine/compile.js";
 import { grantableDomainIds, type DomainId, type GrantableDomainId } from "../core/schema/types.js";
+import { APP_SOURCE_FINGERPRINT_PATH } from "./artifacts.js";
 import { isGrantableDomainId, systemCatalogDomainIds, type Catalog, type CatalogDomainId, type CatalogWorkflowDef } from "./types.js";
 
 function isGrantable(domainId: CatalogDomainId): domainId is GrantableDomainId {
@@ -32,7 +33,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
   // derivations of the same id from the same input have already diverged once in this repo's
   // history (see catalog/artifacts.ts's own header on why there is now a single source).
   const artifacts: CompileArtifact[] = catalog.artifacts
-    .filter((artifact) => runtimeOutputPaths.has(artifact.path))
+    .filter((artifact) => runtimeOutputPaths.has(artifact.path) || artifact.path === APP_SOURCE_FINGERPRINT_PATH)
     .map((artifact) => ({ id: artifact.id as CompileArtifact["id"], path: artifact.path }));
 
   const workflows: CatalogWorkflowNode[] = runtimeWorkflows.map((wf) => ({
