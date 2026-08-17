@@ -7,7 +7,8 @@ import { domains } from "./domains.js";
 import { discoverGates } from "./gates.js";
 import { lanes } from "./lanes.js";
 import { phases } from "./phases.js";
-import { references } from "./references.js";
+import { loadKnowledgePackages, resolveKnowledgeGraph } from "./knowledge-packages.js";
+import { presentationGroups } from "./presentation.js";
 import { roles } from "./roles.js";
 import type { Catalog } from "./types.js";
 import { workflows } from "./workflows/index.js";
@@ -25,6 +26,7 @@ export function readSkillVersion(skillRoot: string): string {
  * the R20 inversion this unit exists to ship.
  */
 export function composeCatalog(skillRoot: string): Catalog {
+  const knowledge = resolveKnowledgeGraph(loadKnowledgePackages(skillRoot), workflows, contextPacks);
   return {
     schemaVersion: "2.0.0",
     skillVersion: readSkillVersion(skillRoot),
@@ -33,10 +35,11 @@ export function composeCatalog(skillRoot: string): Catalog {
     phases: [...phases].sort((a, b) => a.order - b.order),
     lanes: [...lanes],
     roles: [...roles],
-    contextPacks: [...contextPacks],
-    references: [...references],
-    workflows: [...workflows],
-    artifacts: buildArtifacts(workflows),
+    contextPacks: knowledge.contextPacks,
+    references: knowledge.references,
+    workflows: knowledge.workflows,
+    artifacts: buildArtifacts(knowledge.workflows),
     gates: discoverGates(skillRoot, domains),
+    presentationGroups: [...presentationGroups],
   };
 }

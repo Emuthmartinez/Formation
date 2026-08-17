@@ -20,7 +20,6 @@ export const workflows = [
     instructions:
       "Before using, skipping, or replacing any paid/account-gated tool (AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI, Retention Mechanics), run ToolSearch for the tool's `mcp__<TOOLNAME>__` prefix and check for founder-supplied exports before concluding it is unavailable — a missing connector is not proof the founder lacks the tool. Present the three-choice Confirmation Prompt (use/provision, export/fallback, defer) through AskUserQuestion rather than a free-text blocker, and record the decision in `strategy/TOOL_DECISIONS.md` with tool, lane, access status, selected route, and fallback limitation. Treat MobAI's free tier (single device, Testing Mode) as needing no spend gate at all — only an upgrade or trial does. Never present a fallback artifact as equivalent to the paid-tool output; label it with confidence and the limitation, and route any credit/subscription spend through a separate protected ceiling, never inferred from the fallback choice.",
     reads: ["strategy/TOOL_DECISIONS.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.operations.paid-tool-routing"],
     roleId: "role.operator-readiness",
     laneIds: ["paid_tool_routing"],
     phaseIds: ["phase.0b"],
@@ -39,12 +38,6 @@ export const workflows = [
     instructions:
       "Before any new secret, API key, token, webhook signing secret, or `.env` value is introduced, classify it (public_client_config, server_secret, webhook_signing_secret, store_credential, oauth_or_refresh_token, ci_deploy_secret, runtime_user_secret, or local_operator_secret) and route it into Doppler by default — the business's own project for business-specific credentials, the shared `formation` project for account-level ones — recording only the name, class, and location in `trust/secrets/SECRETS.md`, never the value. Resolve the Doppler config name from `SECRETS.md` or `doppler configs --project <name>` before constructing any `doppler run` command; never guess between naming conventions like `prod` and `prd`. Set automation-consumed secrets with `masked` (not `restricted`) visibility so `doppler run --` can inject them, and never `source` an `.env`/`.p8` file — extract single values with `awk -F= '/^KEY=/{print $2}' file`. `check:secrets` fails the lane if a raw secret value appears in git, docs, screenshots, or logs, or if production uses a personal CLI token instead of a service token or OIDC.",
     reads: ["trust/secrets/SECRETS.md", "strategy/TOOL_DECISIONS.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: [
-      "reference.operations.secrets-management",
-      "reference.operations.doppler-organization",
-      "reference.operations.provider-state-recipes",
-      "reference.process.tool-recipes.secrets-and-environment",
-    ],
     roleId: "role.engineering-leader",
     laneIds: ["secrets"],
     phaseIds: ["phase.0c"],
@@ -69,7 +62,6 @@ export const workflows = [
     // firing — consults, so the early half is not held hostage to later lanes; the 5c release
     // gate still cross-checks them via check:security once they exist.
     consults: ["trust/PRIVACY.md", "revenue/REVENUE_OPS.md"],
-    referenceIds: ["reference.trust.security-release-hardening", "reference.trust.privacy-terms"],
     roleId: "role.security-architect",
     laneIds: ["security"],
     phaseIds: ["phase.1g", "phase.5c"],
@@ -89,7 +81,6 @@ export const workflows = [
     instructions:
       "Build the data inventory before drafting any policy text — trace actual data flows from `state/LAUNCH_TRACE.md` and `engineering/TECH_SPEC.md` (accounts, user content, device permissions, analytics/ads vendors, payments, AI processing) rather than starting from a template. Draft `trust/PRIVACY.md` and `trust/TERMS.md` to match actual practice — Apple's App Privacy answers and Google Play Data safety must match the same inventory — and publish stable `/privacy`, `/terms`, and `/delete-account` pages that return HTTP 200 and are linked from settings, App Store Connect, and Play Console. Produce `LEGAL_REVIEW.md` with sources checked, the data inventory table, store-disclosure mapping, and an explicit founder/counsel approval checkbox; never mark legal pages final without that approval. Verify contact-email MX records with `dig MX yourdomain.com +short` before writing any `@yourdomain.com` address into published copy — an unverified address that never receives mail is a store-policy and reputation risk.",
     reads: ["state/LAUNCH_TRACE.md", "engineering/TECH_SPEC.md"],
-    referenceIds: ["reference.trust.privacy-terms"],
     roleId: "role.customer-success",
     laneIds: ["privacy_legal"],
     phaseIds: ["phase.3"],
@@ -109,12 +100,6 @@ export const workflows = [
     instructions:
       "Set up Resend with a purpose-specific sending subdomain (never the apex domain), add SPF/DKIM, then DMARC starting at `p=none` before tightening — verify all three pass on a real test send before any production email goes out. Classify every email as transactional, lifecycle, marketing/broadcast, or inbound/support; trigger lifecycle Automations from events that already exist in `analytics/ANALYTICS.md`, and adapt the starter pack at `growth/resend/email-templates.ts` with brand tokens pulled from `design/design.md` into `LaunchEmailBrand.designSystem` and tone from `11_STAR_EXPERIENCE.md` — do not ship generic-looking email. Verify webhooks against the raw request body and store processed `svix-id` values, since Resend webhooks are at-least-once and may duplicate. Every subject/preview/body must pass the `no-slop-writing.md` self-check in the product's brand voice, and `check:email` gates production sends on a verified domain, server-only API keys, and unsubscribe handling on every non-transactional message.",
     reads: ["design/design.md", "analytics/ANALYTICS.md", "product/experience/11-star-experience/11_STAR_EXPERIENCE.md", "growth/resend/email-templates.ts"],
-    referenceIds: [
-      "reference.operations.resend-email-ops",
-      "reference.words.no-slop-writing",
-      "reference.data.analytics-attribution",
-      "reference.process.tool-recipes.revenue-email-analytics",
-    ],
     // customer-success over marketing-guru: the roster scopes "lifecycle copy" and the monitored
     // inbox to customer success; the DNS/webhook setup half follows the runbook either way.
     roleId: "role.customer-success",
@@ -142,13 +127,6 @@ export const workflows = [
     // PAID_UA.md's producer is the spend node, which parks until the founder funds it — a launch
     // that never buys ads still runs post-launch operations, so this is a consult.
     consults: ["growth/PAID_UA.md"],
-    referenceIds: [
-      "reference.operations.post-launch-operations",
-      "reference.growth.paid-user-acquisition",
-      "reference.money.billing-health-and-reactivation",
-      "reference.process.change-cascade",
-      "reference.store.aso-store-ops",
-    ],
     roleId: "role.orchestrator",
     laneIds: ["post_launch_ops"],
     phaseIds: ["phase.6b"],
@@ -168,7 +146,6 @@ export const workflows = [
     instructions:
       "At the start of every broad launch, offer one recommended step-away setup before build work. In that exchange, settle autonomy and budget, confirm business identity and founder-owned recovery/2FA, verify Doppler or the approved secret manager, inventory every in-scope account and tool, confirm durable operator roles, and record the requested exact deployment, signing, App Store Connect, Google Play, asset, screenshot, and test-upload authority in operations/business-access.json. The following agent-operations node verifies those capabilities and materializes separate standing envelopes for the named website deploy, asset generation inside the ceiling, approved store metadata/media, and TestFlight or Play testing-track uploads. Keep exactly one structured `activeFounderGate`, and set it to `null` while the agent can work. Combine missing tools and roles into one founder handoff. Never request a password, 2FA code, recovery code, or session token in chat. Consume matching standing envelopes without another prompt, read back each result, and continue. Pause later only for missing or expired scope, a ceiling overrun, protected identity/legal/pricing/credential changes, destruction, or a final public release not approved in the opening envelope.",
     reads: ["operations/BUSINESS_ACCESS.md", "operations/business-access.json", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.operations.founder-zero-operator", "reference.operations.frontier-agent-operations", "reference.operations.secrets-management"],
     roleId: "role.operator-readiness",
     outputPaths: ["operations/BUSINESS_ACCESS.md", "operations/business-access.json"],
     gates: ["check:founder-operator"],
@@ -186,7 +163,6 @@ export const workflows = [
     instructions:
       "Before build work starts, derive the required capability list from launch scope and inspect connectors, APIs/CLIs, authenticated browser access, devices, source control, CI, hosting/DNS, asset generation, screenshots, signing, App Store Connect, Google Play, analytics, revenue, email, and support as applicable. Record exact accounts, projects/apps, environments, modes, checked times, and durable operator roles in `operations/agent-operations.json`. Create separate standing envelopes for website deployment, asset work, approved store metadata/media, and TestFlight or Play testing-track uploads. For each later action, classify it as observe/draft/mutate/publish/spend/release/destructive and bind it to a matching current envelope. Consume a matching standing envelope automatically; never ask twice. Select the narrowest route, capture sanitized before-state, act, read back provider state, and reconcile proof. Combine missing capabilities or authority into one handoff while other work continues. Sticky identity/legal fields — app name, bundle ID, seller identity, banking/tax, pricing, credential roles — and any unapproved final public release remain exceptional gates. Run `npm run check:agent-operations` before an unattended-readiness or authenticated-operation claim.",
     reads: ["operations/AGENT_OPERATIONS.md", "operations/agent-operations.json", "operations/PROVIDER_PROOF.md", "state/PROJECT_STATE.yaml"],
-    referenceIds: ["reference.operations.frontier-agent-operations", "reference.operations.founder-zero-operator", "reference.operations.secrets-management"],
     roleId: "role.operator-readiness",
     dependencies: [
       "workflow.operations.founder-zero-operator-bootstrap",
@@ -218,5 +194,47 @@ export const workflows = [
     ],
     actionClass: "mutate",
     idempotent: true,
+  }),
+  workflow({
+    id: "workflow.trust.community-and-user-safety",
+    title: "Community and user safety",
+    domainId: "domain.trust",
+    areaIds: ["area.business-operations-trust"],
+    trigger: "When the product includes social, chat, creator, or other user-generated content",
+    instructions:
+      "Confirm whether users can create, share, discover, or message content. When required, define moderation, reporting, blocking, escalation, support contact, age controls, response targets, and evidence. Record the operating model in trust/COMMUNITY_SAFETY.md. Test the common abuse and recovery paths. Do not mark this work as not needed without a reason and product evidence.",
+    reads: ["product/SPEC.md", "trust/PRIVACY.md"],
+    roleId: "role.security-architect",
+    laneIds: ["security", "privacy_legal"],
+    phaseIds: ["phase.3", "phase.5c"],
+    dependencies: ["workflow.research.research-backed-spec"],
+    outputPaths: ["trust/COMMUNITY_SAFETY.md"],
+    actionClass: "mutate",
+    idempotent: true,
+    applicability: {
+      mode: "conditional",
+      question: "Does the product include social, chat, creator, or other user-generated content?",
+    },
+  }),
+  workflow({
+    id: "workflow.trust.generative-ai-safety",
+    title: "Generative-AI safety",
+    domainId: "domain.trust",
+    areaIds: ["area.business-operations-trust"],
+    trigger: "When the product generates text, images, audio, or video",
+    instructions:
+      "Confirm whether the product generates text, images, audio, or video. When required, define prohibited uses, input and output controls, reporting, enforcement, human escalation, age controls, and model or provider responsibilities. Test harmful, deceptive, exploitative, and sexual-content abuse cases. Record controls and evidence in trust/AI_SAFETY.md. Do not mark this work as not needed without a reason and product evidence.",
+    reads: ["product/SPEC.md", "trust/SECURITY.md", "trust/PRIVACY.md"],
+    roleId: "role.security-architect",
+    laneIds: ["security", "privacy_legal"],
+    phaseIds: ["phase.3", "phase.5c"],
+    dependencies: ["workflow.research.research-backed-spec"],
+    outputPaths: ["trust/AI_SAFETY.md"],
+    actionClass: "mutate",
+    idempotent: true,
+    applicability: {
+      mode: "conditional",
+      question: "Does the product generate text, images, audio, or video?",
+    },
   }),
 ] as const;

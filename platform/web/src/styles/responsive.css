@@ -92,6 +92,18 @@
 }
 
 @media (max-width: 680px) {
+  .matrix-scroll { overflow: visible; }
+  .launch-matrix-table { min-width: 0; display: block; }
+  .launch-matrix-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .launch-matrix-table tbody, .launch-matrix-table tr, .launch-matrix-table th, .launch-matrix-table td { display: block; width: auto; }
+  .launch-matrix-row { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+  .launch-matrix-table .launch-matrix-row th, .launch-matrix-table .launch-matrix-row td { border-bottom: 1px solid var(--line); padding: 11px 13px 11px 42%; position: relative; min-height: 18px; }
+  .launch-matrix-table .launch-matrix-row th::before, .launch-matrix-table .launch-matrix-row td::before { content: attr(data-label); position: absolute; left: 13px; width: 36%; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .07em; }
+  .launch-matrix-detail td { padding: 0 13px 18px; }
+  .matrix-detail-grid { grid-template-columns: 1fr; }
+  .matrix-controls { align-items: stretch; }
+  .matrix-filter { overflow-x: auto; }
+  .matrix-filter button { white-space: nowrap; }
   .main-content { padding: 26px 16px 60px; }
   .topbar { height: 56px; padding: 0 12px; }
   .topbar__context { display: none; }

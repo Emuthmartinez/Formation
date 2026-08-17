@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 import { isMainModule, parseArgs } from "../lib/cli.js";
@@ -15,6 +16,7 @@ import type { BusinessStateV2, ControlFile, ProtectedCategory, RunStateDocument 
 import { loadBusinessStateFile, loadCatalogFile, loadControlFile, loadLedgerFile, resolveWorkspacePaths } from "../session/run.js";
 import { buildPlanReport, type HeldNode, type PlanReport } from "../session/plan.js";
 import { translateParkReason } from "../session/digest.js";
+import { PROVISIONING_MANIFEST } from "../provisioning/requirements.js";
 
 /**
  * The engine half of the platform-to-engine execution boundary (docs/architecture.md,
@@ -58,7 +60,7 @@ export interface ExecutionWorkflowState {
 }
 
 export interface ExecutionBoundaryReport {
-  readonly schemaVersion: "1.0.0";
+  readonly schemaVersion: "1.1.0";
   readonly generatedAt: string;
   readonly workspaceReady: boolean;
   /** Present when workspaceReady is false: why the engine cannot plan against this workspace. */
@@ -94,6 +96,32 @@ export interface ExecutionBoundaryReport {
    * shape the platform can mirror without re-deriving the graph walk itself.
    */
   readonly artifacts?: readonly ExecutionArtifactState[];
+  readonly launchMatrix?: LaunchMatrixProjection;
+}
+
+export interface LaunchMatrixWorkflow {
+  readonly workflowId: string;
+  readonly groupId: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly status: string;
+  readonly founderReason?: string;
+  readonly applicability: "required" | "not-needed" | "unknown";
+  readonly phaseIds: string[];
+  readonly dependencyWorkflowIds: string[];
+  readonly dependentWorkflowIds: string[];
+  readonly role?: { id: string; name: string };
+  readonly knowledge: Array<{ id: string; title: string; loadWhen: string; freshness: string }>;
+  readonly services: Array<{ id: string; name: string; purpose: string; state: string; checkedAt?: string }>;
+  readonly agentTools: Array<{ id: string; when: string }>;
+  readonly outputs: Array<{ artifactId: string; title: string; state: string }>;
+  readonly verification: { kind: string; state: string; evidenceCount: number };
+}
+
+export interface LaunchMatrixProjection {
+  readonly groups: Array<{ id: string; title: string; order: number }>;
+  readonly workflows: LaunchMatrixWorkflow[];
+  readonly systemSummary: { total: number; counts: Record<string, number> };
 }
 
 /** One artifact an accepted attempt produced: a candidate for the platform to import, by reference. */
@@ -312,7 +340,99 @@ export function buildBoundaryWorkflows(plan: CompiledPlan, report: PlanReport, n
 }
 
 function notReady(reason: string, now: string): ExecutionBoundaryReport {
-  return { schemaVersion: "1.0.0", generatedAt: now, workspaceReady: false, reason };
+  return { schemaVersion: "1.1.0", generatedAt: now, workspaceReady: false, reason };
+}
+
+interface SanitizedAgentOperations {
+  capabilities?: Array<{ id?: string; provider?: string; status?: string; checkedAt?: string }>;
+  actions?: Array<{ provider?: string; occurredAt?: string; redactionAttested?: boolean; result?: { status?: string } }>;
+}
+
+function readAgentOperations(filePath: string): SanitizedAgentOperations {
+  if (!existsSync(filePath)) return {};
+  try {
+    const parsed = JSON.parse(readFileSync(filePath, "utf8")) as SanitizedAgentOperations;
+    return { capabilities: parsed.capabilities ?? [], actions: parsed.actions ?? [] };
+  } catch {
+    return {};
+  }
+}
+
+function serviceName(providerId: string): string {
+  return providerId.replace(/^provider\./u, "").split(/[.-]/u).map((part) => part ? `${part[0]!.toUpperCase()}${part.slice(1)}` : part).join(" ");
+}
+
+function providerMatches(providerId: string, label = ""): boolean {
+  const needle = providerId.replace(/^provider\./u, "").replaceAll("-", " ").toLowerCase();
+  const candidate = label.trim().toLowerCase();
+  return candidate.length > 0 && (candidate.includes(needle) || needle.includes(candidate));
+}
+
+export function buildLaunchMatrix(
+  plan: CompiledPlan,
+  run: RunStateDocument,
+  workflowStates: readonly ExecutionWorkflowState[],
+  businessState: BusinessStateV2,
+  agentOperations: SanitizedAgentOperations,
+): LaunchMatrixProjection {
+  const stateByWorkflow = new Map(workflowStates.map((item) => [item.workflowId, item]));
+  const workflowByNode = new Map(plan.nodes.map((node) => [node.id, node.workflowId]));
+  const dependents = new Map<string, string[]>();
+  for (const node of plan.nodes) {
+    for (const dependency of node.dependencies) dependents.set(dependency, [...(dependents.get(dependency) ?? []), node.workflowId]);
+  }
+  const groups = plan.presentationGroups ?? [];
+  const systemNodes = plan.nodes.filter((node) => node.domainId === "domain.process" || node.domainId === "domain.orchestration");
+  const systemCounts: Record<string, number> = {};
+  for (const node of systemNodes) {
+    const status = stateByWorkflow.get(node.workflowId)?.status ?? "upcoming";
+    systemCounts[status] = (systemCounts[status] ?? 0) + 1;
+  }
+  const workflows = plan.nodes.filter((node) => node.groupId).map((node): LaunchMatrixWorkflow => {
+    const state = stateByWorkflow.get(node.workflowId)!;
+    const scope = businessState.workflowApplicability?.[node.workflowId];
+    const applicability = node.applicability.mode === "always" ? "required" : scope?.verdict ?? "unknown";
+    const latestAttempt = run.nodes[node.id]?.attempts.at(-1);
+    const services = node.providerIds.map((providerId) => {
+      const declaration = PROVISIONING_MANIFEST.find((item) => item.providerId === providerId);
+      const capability = agentOperations.capabilities?.find((item) => providerMatches(providerId, `${item.provider ?? ""} ${item.id ?? ""}`));
+      const proof = agentOperations.actions?.find((item) => providerMatches(providerId, item.provider) && item.result?.status === "succeeded" && item.redactionAttested === true);
+      const attemptProof = latestAttempt?.status === "succeeded" && latestAttempt.evidence.some((entry) => entry.toLowerCase().includes(providerId.toLowerCase()));
+      return {
+        id: providerId,
+        name: serviceName(providerId),
+        purpose: declaration?.unlocks ?? `Supports ${node.title}.`,
+        state: proof || attemptProof ? "verified" : capability?.status === "available" ? "connected" : capability?.status === "unavailable" || capability?.status === "blocked" ? capability.status : "planned",
+        ...(proof?.occurredAt || (attemptProof ? latestAttempt?.finishedAt : undefined) || capability?.checkedAt ? { checkedAt: proof?.occurredAt || (attemptProof ? latestAttempt?.finishedAt : undefined) || capability?.checkedAt } : {}),
+      };
+    });
+    return {
+      workflowId: node.workflowId,
+      groupId: node.groupId!,
+      title: node.title,
+      summary: node.trigger ?? `Complete ${node.title}.`,
+      status: state.status,
+      ...(state.founderReason ? { founderReason: state.founderReason } : {}),
+      applicability,
+      phaseIds: [...node.phaseIds],
+      dependencyWorkflowIds: node.dependencies.map((id) => workflowByNode.get(id)!).filter(Boolean),
+      dependentWorkflowIds: dependents.get(node.id) ?? [],
+      ...(node.role ? { role: { id: node.role.id, name: node.role.name } } : {}),
+      knowledge: (node.references ?? []).map((reference) => ({ id: reference.id, title: reference.title, loadWhen: reference.loadWhen, freshness: reference.freshness ?? "unknown" })),
+      services,
+      agentTools: node.role?.toolRoutes.map((tool) => ({ id: tool.id, when: tool.when })) ?? [],
+      outputs: node.outputs.map((artifactId) => {
+        const binding = run.artifactBindings.find((item) => item.artifactId === artifactId);
+        return { artifactId, title: binding?.path ?? artifactId, state: binding?.accepted ? "accepted" : binding?.fingerprint ? "produced" : "pending" };
+      }),
+      verification: {
+        kind: node.verification.kind,
+        state: run.nodes[node.id]?.status === "succeeded" ? "verified" : run.nodes[node.id]?.status === "failed" ? "failed" : "pending",
+        evidenceCount: latestAttempt?.evidence.length ?? 0,
+      },
+    };
+  });
+  return { groups, workflows, systemSummary: { total: systemNodes.length, counts: systemCounts } };
 }
 
 export function describeWorkspace(
@@ -369,8 +489,9 @@ export function describeWorkspace(
   const report = buildPlanReport(plan, scratch, frontier.ready, parked, decisions, 4, control === undefined);
   const nodeStatuses = new Map(Object.entries(scratch.nodes).map(([nodeId, state]) => [nodeId, state.status as string]));
 
+  const boundaryWorkflows = buildBoundaryWorkflows(plan, report, nodeStatuses);
   return {
-    schemaVersion: "1.0.0",
+    schemaVersion: "1.1.0",
     generatedAt: now,
     workspaceReady: true,
     planId: plan.planId,
@@ -378,10 +499,11 @@ export function describeWorkspace(
     runId: durable ? durable.runId : null,
     hasDurableRun: durable !== undefined,
     autonomyUnset: report.autonomyUnset,
-    workflows: buildBoundaryWorkflows(plan, report, nodeStatuses),
+    workflows: boundaryWorkflows,
     approvals: durable ? buildBoundaryApprovals(plan, durable) : [],
-    results: durable ? buildBoundaryResults(plan, durable) : [],
-    artifacts: durable ? buildBoundaryArtifacts(plan, durable) : [],
+    results: durable ? buildBoundaryResults(plan, scratch) : [],
+    artifacts: durable ? buildBoundaryArtifacts(plan, scratch) : [],
+    launchMatrix: buildLaunchMatrix(plan, scratch, boundaryWorkflows, businessState, readAgentOperations(paths.agentOperations)),
   };
 }
 

@@ -153,7 +153,7 @@ for (const root of presentRoots) {
  *   - `knowledge/`             — indexed centrally by the GENERATED
  *                                catalog/generated/routing.md's Reference Index section
  *                                (rendered by catalog/render-routing.ts from
- *                                catalog/references.ts's authored `loadWhen` data; a
+ *                                knowledge manifests' authored `loadWhen` data; a
  *                                catalog reference entry is what makes a knowledge file
  *                                reachable, R20 — the per-directory README/sibling-file
  *                                indexes this used to require were dropped at cutover,
@@ -199,7 +199,7 @@ function checkReachableViaGeneratedIndex(dir: string, files: Array<{ name: strin
         issue(
           "error",
           "reference_size.index_incomplete",
-          `catalog/generated/routing.md does not link ${relative}. Add a catalog/references.ts entry with a load-when trigger, or delete the unreachable file.`,
+          `catalog/generated/routing.md does not link ${relative}. Add a knowledge manifest with a load-when trigger, or delete the unreachable file.`,
           relative,
         ),
       );

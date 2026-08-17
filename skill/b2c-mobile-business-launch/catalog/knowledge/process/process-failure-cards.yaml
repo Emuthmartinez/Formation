@@ -1,0 +1,17 @@
+schema_version: 1.0.0
+id: reference.process.failure-cards
+title: Failure Cards
+domain_id: domain.process
+document_path: knowledge/process/failure-cards.md
+load_when: before readiness claims; after a repeated agent miss; when adding a validator or scenario
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.process.launchbench-failure-cards-coverage-audit
+    - workflow.machine.asc-command-contract-maintainer
+    - workflow.machine.eval-suite-execution-maintainer
+  context_pack_ids:
+    - context.machine
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

@@ -1,5 +1,9 @@
 # Founder-Zero Business Operator
 
+## Support And Recovery Ownership
+
+Assign a durable owner for support, provider recovery, store-account recovery, billing disputes, security incidents, and data-export requests. Confirm that recovery email, phone, two-factor authentication, and backup-code custody belong to the business. Never store recovery secrets in the workspace. Test the escalation route and record sanitized proof before unattended operation.
+
 Use this at the beginning of every broad launch or business-operations task. Assume the founder knows the product idea and desired outcome but may know nothing about accounts, providers, social platforms, domains, analytics, stores, security, or launch sequencing. The agent is the operating lead: explain plainly, choose the next useful step, execute everything it safely can, and pause only for the smallest founder-only action.
 
 ## Contents

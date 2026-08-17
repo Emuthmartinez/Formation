@@ -282,6 +282,44 @@ export function boardStepTitle(workflowId, engineTitle) {
   return presentStep(workflowId, engineTitle).title;
 }
 
+const SERVICE_ACCESS = Object.freeze({
+  planned: "Setup planned",
+  connected: "Access available",
+  verified: "Access proven",
+  unavailable: "Not available",
+  blocked: "Needs attention",
+});
+
+/** Founder-safe service copy. Raw engine fields remain available only as technical detail. */
+export function presentMatrixService(service, workTitle) {
+  return {
+    name: scrubTitle(service.name || "Business service"),
+    purpose: `Helps complete ${workTitle}.`,
+    access: SERVICE_ACCESS[service.state] ?? "Access not checked",
+    ...(service.checkedAt ? { checkedAt: service.checkedAt } : {}),
+    technical: { id: service.id, state: service.state, purpose: service.purpose },
+  };
+}
+
+/** Founder-safe specialist capability copy. Internal routes remain in technical detail. */
+export function presentMatrixTool(tool, workTitle) {
+  const id = String(tool.id ?? "").toLowerCase();
+  const name = /image|visual|design|motion|video/.test(id)
+    ? "Visual production support"
+    : /device|mobile|xcode|ios|android|simulator/.test(id)
+      ? "Device testing support"
+      : /research|search|market/.test(id)
+        ? "Research support"
+        : /analytics|measure|data/.test(id)
+          ? "Measurement support"
+          : "Specialist support";
+  return {
+    name,
+    purpose: `Helps the team complete ${workTitle}.`,
+    technical: { id: tool.id, when: tool.when },
+  };
+}
+
 /**
  * Board presentation of one engine approval: what the founder is deciding, in one sentence.
  * The engine's raw ask survives in the mirrored decision's `source` for technical disclosure.

@@ -196,6 +196,18 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     for (const areaId of workflow.areaIds) checkKnown(issues, areaIds, areaId, "catalog_graph.workflow.unknown_area", workflow.id);
     for (const phaseId of workflow.phaseIds) checkKnown(issues, phaseIds, phaseId, "catalog_graph.workflow.unknown_phase", workflow.id);
     for (const dependencyId of workflow.dependencies) checkKnown(issues, workflowIds, dependencyId, "catalog_graph.workflow.unknown_dependency", workflow.id);
+    for (const dependencyId of workflow.dependencies) {
+      const dependency = catalog.workflows.find((candidate) => candidate.id === dependencyId);
+      if (!dependency || dependency.applicability?.mode !== "conditional") continue;
+      if (workflow.applicability?.mode !== "conditional" || workflow.applicability.question !== dependency.applicability.question) {
+        issues.push(
+          error(
+            "catalog_graph.workflow.conditional_dependency_ambiguous",
+            `${workflow.id} depends on conditional ${dependency.id} without the same applicability condition.`,
+          ),
+        );
+      }
+    }
     for (const outputPath of workflow.outputPaths) {
       if (!artifactsByPath.has(outputPath))
         issues.push(error("catalog_graph.workflow.unknown_output", `${workflow.id} names unregistered artifact ${outputPath}.`));

@@ -3,6 +3,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { composeCatalog } from "../../catalog/index.js";
 import { validateCatalog } from "../../catalog/validate.js";
+import { loadKnowledgePackages } from "../../catalog/knowledge-packages.js";
+import { validateKnowledgePackages } from "../../catalog/knowledge-validation.js";
+import { domains } from "../../catalog/domains.js";
+import { workflows } from "../../catalog/workflows/index.js";
+import { contextPacks } from "../../catalog/context-packs.js";
 
 /**
  * Wired entry point for the `check:catalog` npm script. `catalog/validate.ts` carries the
@@ -19,7 +24,15 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "../..");
 const skillRoot = parseSkillRoot(process.argv.slice(2));
 const catalog = composeCatalog(skillRoot);
-const issues = validateCatalog(catalog, skillRoot);
+const issues = [
+  ...validateCatalog(catalog, skillRoot),
+  ...validateKnowledgePackages(loadKnowledgePackages(skillRoot), skillRoot, domains, workflows, contextPacks).map((item) => ({
+    severity: "error" as const,
+    code: item.code,
+    message: item.message,
+    path: undefined,
+  })),
+];
 
 const errors = issues.filter((issue) => issue.severity === "error");
 const warnings = issues.filter((issue) => issue.severity === "warning");

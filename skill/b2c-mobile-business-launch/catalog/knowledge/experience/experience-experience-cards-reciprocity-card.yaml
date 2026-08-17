@@ -1,0 +1,14 @@
+schema_version: 1.0.0
+id: reference.experience.experience-cards.reciprocity-card
+title: Reciprocity Card
+domain_id: domain.experience
+document_path: knowledge/experience/experience-cards/reciprocity-card.md
+load_when: giving unannounced real value before making any ask — routed from experience-cards.md
+lifecycle: active
+bindings:
+  workflow_ids: []
+  context_pack_ids:
+    - context.experience-cards
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

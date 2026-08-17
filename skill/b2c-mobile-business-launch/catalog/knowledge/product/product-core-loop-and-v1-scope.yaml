@@ -1,0 +1,18 @@
+schema_version: 1.0.0
+id: reference.product.core-loop-and-v1-scope
+title: Core Loop And V1 Scope (Non-Archetype Products)
+domain_id: domain.product
+document_path: knowledge/product/core-loop-and-v1-scope.md
+load_when: the product does not match one of the four shipped app archetypes (habit tracker, photo/AI media, social
+  network, AI chat companion) — before naming the core loop, deciding which systems are in V1 vs. later, or specing
+  schema for any other product shape
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.product.app-archetype-detection-and-starter
+    - workflow.research.research-backed-spec
+  context_pack_ids:
+    - context.product
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

@@ -1,0 +1,15 @@
+schema_version: 1.0.0
+id: reference.design.remotion-content-assets
+title: Remotion Content Assets
+domain_id: domain.design
+document_path: knowledge/design/remotion-content-assets.md
+load_when: replacing Higgsfield with Remotion; scaffolding a Remotion project; code-rendered videos/stills; app-preview
+  clips; social/ad/content variants; any "local rendered assets are ready" claim
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.design.content-assets-remotion-generated-visuals
+  context_pack_ids: []
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

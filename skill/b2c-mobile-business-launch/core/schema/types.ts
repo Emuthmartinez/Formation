@@ -410,6 +410,7 @@ export interface RunNodeStateV2 {
    * the platform as independent work.
    */
   verifiedBySessionId?: string;
+  applicabilityFingerprint?: string;
 }
 
 export interface RunStateDocument {
@@ -480,4 +481,8 @@ export interface BusinessStateV2 {
   lanes: LanesMap;
   founderGates: { pending: PendingFounderGate[] };
   continuity?: { lastStateReview?: string; sourceFiles?: string[]; gitStatusReviewed?: boolean; nextAction?: string };
+  workflowApplicability?: Record<
+    string,
+    { verdict: "required" | "not-needed"; reason: string; evidence: string[]; updatedAt: string }
+  >;
 }

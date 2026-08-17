@@ -1,0 +1,17 @@
+schema_version: 1.0.0
+id: reference.trust.security-release-hardening
+title: Security Release Hardening
+domain_id: domain.trust
+document_path: knowledge/trust/security-release-hardening.md
+load_when: before threat modeling, hardening, scans, or any security-readiness claim — Default Output contract, OWASP
+  MASVS/ASVS and platform security basis, paid-tool routing with fallbacks, mobile hardening checklists, and
+  revenue/entitlement abuse controls feeding trust/SECURITY.md
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.trust.security-architecture-and-release-gate
+  context_pack_ids:
+    - context.trust
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

@@ -31,6 +31,7 @@ function baseWorkflow(overrides: Partial<CatalogWorkflowDef> = {}): CatalogWorkf
     founderOnlyActions: [],
     actionClass: "draft",
     idempotent: true,
+    applicability: { mode: "always" },
     ...overrides,
   };
 }
@@ -78,11 +79,17 @@ function baseFixtureCatalog(): Catalog {
         title: "Fixture knowledge",
         loadWhen: "always",
         sessionScoped: true,
+        lifecycle: "active",
+        applicabilityNotes: "Fixture.",
+        sourceExemption: "Fixture.",
+        sources: [],
+        replacementIds: [],
       },
     ],
     workflows: [baseWorkflow()],
     artifacts: [{ id: "artifact.fixture.output.md", path: "fixture/output.md", ownerDomainId: "domain.research", laneIds: [], generated: false }],
     gates: [],
+    presentationGroups: [],
   };
 }
 
@@ -169,6 +176,16 @@ export function register(harness: Harness): void {
     );
   });
 
+  harness.check("validate: an always workflow cannot depend ambiguously on conditional work", () => {
+    const catalog = baseFixtureCatalog();
+    const conditional = baseWorkflow({ id: "workflow.research.conditional", outputPaths: [], applicability: { mode: "conditional", question: "Is this work required?" } });
+    const dependent = baseWorkflow({ id: "workflow.research.dependent", dependencies: [conditional.id], outputPaths: [] });
+    catalog.workflows = [conditional, dependent];
+    catalog.artifacts = [];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(issues.some((issue) => issue.code === "catalog_graph.workflow.conditional_dependency_ambiguous"), "expected conditional dependency error");
+  });
+
   harness.check("validate: two workflows declaring the same output is caught with a named issue code", () => {
     const catalog = baseFixtureCatalog();
     catalog.artifacts = [{ id: "artifact.fixture", path: "fixture.md", ownerDomainId: "domain.research", laneIds: [], generated: false }];
@@ -185,7 +202,7 @@ export function register(harness: Harness): void {
 
   harness.check("validate: a reference with no load-when text is caught with a named issue code", () => {
     const catalog = baseFixtureCatalog();
-    catalog.references = [{ id: "reference.research.fixture", path: "package.json", domainId: "domain.research", title: "Fixture", loadWhen: "   " }];
+    catalog.references = [{ ...catalog.references[0]!, title: "Fixture", loadWhen: "   " }];
     const issues = validateCatalog(catalog, skillRoot);
     assert(
       issues.some((issue) => issue.code === "catalog_graph.reference.load_when_missing"),
@@ -195,9 +212,7 @@ export function register(harness: Harness): void {
 
   harness.check("validate: a reference pointing at a missing file is caught with a named issue code", () => {
     const catalog = baseFixtureCatalog();
-    catalog.references = [
-      { id: "reference.research.fixture", path: "knowledge/research/does-not-exist.md", domainId: "domain.research", title: "Fixture", loadWhen: "fixture" },
-    ];
+    catalog.references = [{ ...catalog.references[0]!, path: "knowledge/research/does-not-exist.md", title: "Fixture", loadWhen: "fixture" }];
     const issues = validateCatalog(catalog, skillRoot);
     assert(
       issues.some((issue) => issue.code === "catalog_graph.reference.path_missing"),
@@ -257,7 +272,14 @@ export function register(harness: Harness): void {
 
   harness.check("validate: a reference no workflow or context pack binds is caught, and sessionScoped clears it", () => {
     const catalog = baseFixtureCatalog();
-    catalog.references.push({ id: "reference.research.orphan", path: "README.md", domainId: "domain.research", title: "Orphan", loadWhen: "fixture" });
+    catalog.references.push({
+      ...catalog.references[0]!,
+      id: "reference.research.orphan",
+      path: "README.md",
+      title: "Orphan",
+      loadWhen: "fixture",
+      sessionScoped: false,
+    });
     const unbound = validateCatalog(catalog, skillRoot);
     assert(
       unbound.some((issue) => issue.code === "catalog_graph.reference.unbound"),
@@ -320,6 +342,7 @@ export function register(harness: Harness): void {
     const catalog = baseFixtureCatalog();
     catalog.references = [
       {
+        ...catalog.references[0]!,
         id: "reference.research.registered",
         path: "knowledge/research/registered.md",
         domainId: "domain.research",
@@ -336,6 +359,7 @@ export function register(harness: Harness): void {
     catalog.references = [
       ...catalog.references,
       {
+        ...catalog.references[0]!,
         id: "reference.research.orphan",
         path: "knowledge/research/orphan.md",
         domainId: "domain.research",
@@ -353,7 +377,8 @@ export function register(harness: Harness): void {
     const issues = validateCatalog(catalog, skillRoot).filter((issue) => issue.severity === "error");
     assert(issues.length === 0, `expected the real catalog to be clean, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
     assert(catalog.domains.length === 15, `expected 15 domains, got ${catalog.domains.length}`);
-    assert(catalog.workflows.length === 63, `expected 63 workflows, got ${catalog.workflows.length}`);
+    assert(catalog.workflows.length === 68, `expected 68 workflows, got ${catalog.workflows.length}`);
+    assert(catalog.references.length === 103, `expected 103 references, got ${catalog.references.length}`);
 
     const landingBuild = catalog.workflows.find((wf) => wf.id === "workflow.growth.pre-launch-funnel-landing-waitlist");
     const landingPublish = catalog.workflows.find((wf) => wf.id === "workflow.growth.landing-funnel-publication-and-live-proof");

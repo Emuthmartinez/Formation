@@ -3,7 +3,7 @@
 | Directory | Responsibility |
 | --- | --- |
 | `core/` | Typed schemas, the execution engine (compile/frontier/dispatch/run state), the single-writer reducer, the autonomy evaluator, the scheduled-session runner, and runtime adapters |
-| `catalog/` | The definition graph as data — domains, lanes, workflows, gates, references — and the routing renderer |
+| `catalog/` | The definition graph as data — domains, lanes, workflows, gates, knowledge manifests, and presentation groups — and the routing renderer |
 | `knowledge/` | Bounded domain knowledge loaded by catalog context contracts |
 | `content/` | Founder-facing conversation content (onboarding) rendered by the session |
 | `workspace/`, `workspace-template/` | Reusable business artifacts copied into app repositories, and the v2 workspace/entrypoint templates |
@@ -14,3 +14,12 @@
 | `starters/` | Runnable product-archetype foundations |
 
 `SKILL.md` is the runtime entrypoint. `spine.md` is the phase-oriented narrative. Stable catalog IDs are identities; filesystem paths are bindings.
+
+## Knowledge Package Commands
+
+- `npm run knowledge:add -- --id reference.<domain>.<name> --title "Title" --domain domain.<domain>` creates a draft document and manifest.
+- `npm run knowledge:refresh -- --id reference.<domain>.<name>` creates a temporary review bundle. It does not change tracked files.
+- `npm run knowledge:promote -- --id reference.<domain>.<name> --reviewer "Name"` promotes a reviewed draft.
+- `npm run knowledge:check` validates lifecycle, provenance, freshness, paths, and graph bindings.
+
+No command promotes new material automatically.

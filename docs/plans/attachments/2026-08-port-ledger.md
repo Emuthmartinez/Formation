@@ -75,17 +75,17 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 97 | 0 | 0 | 1 | 98 |
+| Knowledge content files | 102 | 0 | 0 | 1 | 103 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
 | Validators (67) | 28 | 25 | 0 | 16 | 69 |
-| **Total** | **128** | **25** | **1** | **32** | **186** |
+| **Total** | **133** | **25** | **1** | **32** | **191** |
 
 ---
 
 ## 1. Knowledge domain README indexes — all DROP
 
 Superseded by `catalog/generated/routing.md` (rendered by `catalog/render-routing.ts` from
-`catalog/references.ts`'s authored `loadWhen` data). R20 names this inversion directly: the
+the self-registering manifests under `catalog/knowledge/`). R20 names this inversion directly: the
 current shape has `runtime/graph/catalog.ts`'s `loadWhenMap()` *scraping* these
 hand-authored tables; the v2 shape authors the load-when text as catalog data and
 *generates* the table. Once these files' sole job (the routing table plus a short domain
@@ -116,7 +116,7 @@ implementation of R20, and the most consequential single disposition in this led
 ## 2. Knowledge content files
 
 90 keep, 1 drop (91 total). Every "keep" row ports into `content/<domain>/` at U11 keyed by the
-matching `catalog/references.ts` entry, which already carries its authored `loadWhen` text
+matching knowledge manifest, which carries its authored `loadWhen` text
 — the reason column here stays short since the full rationale lives there.
 
 ### domain.orchestration — the one content drop
@@ -178,6 +178,8 @@ matching `catalog/references.ts` entry, which already carries its authored `load
 |---|---|---|
 | knowledge/engineering/app-agent-roster.md | keep | AGENTS.md/CLAUDE.md handoff-bundle reference |
 | knowledge/engineering/backend-data-contract.md | keep | backend selection/data-model reference, `check:backend-contract` |
+| knowledge/engineering/accessibility-readiness.md | keep | common-task accessibility proof and store declaration reconciliation |
+| knowledge/engineering/app-quality.md | keep | app vitals, adaptive layout, offline, size, battery, and SDK supply-chain proof |
 | knowledge/engineering/engineering-orchestration.md | keep | CE routing / Standalone Engineering Loop reference |
 | knowledge/engineering/mobai-toolbelt.md | keep | device automation reference, `check:mobai-proof` |
 | knowledge/engineering/technical-documentation-ste100.md | keep | ASD-STE100 technical-documentation standard reference, `reference.engineering.technical-documentation-ste100` |
@@ -246,7 +248,7 @@ established hub-and-spoke pattern.
 | knowledge/operations/post-launch-operations.md | keep | weekly-ops/kill-or-scale reference, `check:post-launch` |
 | knowledge/operations/provider-state-recipes.md | keep | substantial per-provider state checklist (10 providers); distinct from secrets-management.md — Doppler is one entry among ten, not the focus |
 | knowledge/operations/resend-email-ops.md | keep | transactional/lifecycle email reference, `check:email` |
-| knowledge/operations/secrets-management.md | keep | deep secrets reference (discovery loop, classification, Doppler workflow); the file itself is substantial even though its README load-when line was a weak filename-restating placeholder — fixed in `catalog/references.ts`, not a reason to drop the file |
+| knowledge/operations/secrets-management.md | keep | deep secrets reference (discovery loop, classification, Doppler workflow); the file itself is substantial even though its README load-when line was a weak filename-restating placeholder — fixed in its knowledge manifest, not a reason to drop the file |
 | knowledge/operations/doppler-organization.md | keep | portfolio secret-store convention (platform vs per-business projects, configs-not-repos, consumer-side tier composition); written 2026-08-05 from a live multi-business account setup, and carries two constraints found there: cross-project inheritance is a paid feature and a least-privilege read-only subset needs its own project because branch configs inherit their root |
 
 ### domain.product (6 files, all keep)
@@ -285,6 +287,7 @@ the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge
 | knowledge/store/aso-store-ops.md | keep | ASO/store-ops reference, `check:aso-metadata` |
 | knowledge/store/google-play-release.md | keep | Play Console reference, `check:google-play` |
 | knowledge/store/store-console-workflow.md | keep | console walkthrough reference, `check:store-console` |
+| knowledge/store/marketplace-regional-compliance.md | keep | marketplace identity, tax, payout, and regional declaration proof |
 
 ### domain.trust (2 files, all keep)
 
@@ -292,6 +295,8 @@ the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge
 |---|---|---|
 | knowledge/trust/privacy-terms.md | keep | privacy/terms drafting reference, `check:privacy-terms` |
 | knowledge/trust/security-release-hardening.md | keep | one of the denser files reviewed; OWASP-basis hardening reference, `check:security` |
+| knowledge/trust/community-safety.md | keep | conditional moderation, reporting, blocking, and age-control proof |
+| knowledge/trust/generative-ai-safety.md | keep | conditional generative-AI abuse-control proof |
 
 ### domain.words (2 files, all keep)
 

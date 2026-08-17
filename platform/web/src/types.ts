@@ -330,6 +330,42 @@ export interface ExecutionList {
   selfServeExecution: SelfServeExecution;
 }
 
+export interface LaunchMatrixWorkflow {
+  workflowId: string;
+  groupId: string;
+  title: string;
+  summary: string;
+  status: string;
+  founderReason?: string;
+  applicability: "required" | "not-needed" | "unknown";
+  phaseIds: string[];
+  dependencyWorkflowIds: string[];
+  dependentWorkflowIds: string[];
+  role?: { id: string; name: string };
+  knowledge: Array<{ id: string; title: string; loadWhen: string; freshness: string }>;
+  services: Array<{
+    name: string;
+    purpose: string;
+    access: string;
+    checkedAt?: string;
+    technical: { id: string; state: string; purpose: string };
+  }>;
+  agentTools: Array<{ name: string; purpose: string; technical: { id: string; when: string } }>;
+  outputs: Array<{ artifactId: string; title: string; state: string }>;
+  verification: { kind: string; state: string; evidenceCount: number };
+  technical: { workflowId: string; title: string | null; phaseIds: string[] };
+}
+
+export interface LaunchMatrixResponse {
+  available: boolean;
+  reason?: string;
+  checkedAt?: string;
+  generatedAt?: string;
+  groups?: Array<{ id: string; title: string; order: number }>;
+  workflows?: LaunchMatrixWorkflow[];
+  systemSummary?: { total: number; counts: Record<string, number> };
+}
+
 export interface Recommendation {
   id: string;
   kind: string;

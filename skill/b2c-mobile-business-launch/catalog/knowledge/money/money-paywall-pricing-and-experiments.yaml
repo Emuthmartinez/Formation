@@ -1,0 +1,17 @@
+schema_version: 1.0.0
+id: reference.money.paywall-pricing-and-experiments
+title: Paywall, Pricing, And Experiments
+domain_id: domain.money
+document_path: knowledge/money/paywall-pricing-and-experiments.md
+load_when: paywall timing/placement/trials/offers, pricing disclosure rules, the price-point decision procedure, or the
+  standing paywall experiment cadence — routed from revenue-monetization.md
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.money.revenue-monetization
+  context_pack_ids:
+    - context.launch-surfaces
+    - context.money
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

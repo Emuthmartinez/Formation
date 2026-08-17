@@ -1,0 +1,34 @@
+schema_version: 1.0.0
+id: reference.store.app-store-connect-cli
+title: App Store Connect CLI
+domain_id: domain.store
+document_path: knowledge/store/app-store-connect-cli.md
+load_when: before automating App Store Connect with the Rork asc CLI or CLI skill pack — app creation, metadata,
+  screenshots, TestFlight, review status, RevenueCat catalog sync
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.store.apple-signing-and-release-readiness
+    - workflow.store.store-console-workflow
+    - workflow.store.asc-cli-automation
+    - workflow.machine.asc-command-contract-maintainer
+  context_pack_ids:
+    - context.store
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources:
+  - id: github-com-rorkai-app-store-connect-cli
+    name: github.com
+    source_type: github
+    url: https://github.com/rorkai/App-Store-Connect-CLI
+    review_cadence_days: 7
+    claim_scope: Auto-discovered from recently added repository content.
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: github-com-rorkai-app-store-connect-cli-skills
+    name: github.com
+    source_type: github
+    url: https://github.com/rorkai/app-store-connect-cli-skills
+    review_cadence_days: 7
+    claim_scope: Auto-discovered from recently added repository content.
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers

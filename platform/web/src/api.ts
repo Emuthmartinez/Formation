@@ -11,6 +11,7 @@ import type {
   CreatedInvitation,
   Decision,
   ExecutionList,
+  LaunchMatrixResponse,
   ImportPlan,
   ImportSourceList,
   InvitationPreview,
@@ -134,6 +135,7 @@ export const api = {
     request<{ removed: boolean }>(`/api/workspaces/${workspaceId}/economics/scenarios/${scenarioId}`, { method: "DELETE" }),
   listApprovals: (workspaceId: string) => request<ApprovalsView>(`/api/workspaces/${workspaceId}/approvals`),
   listExecutions: (workspaceId: string) => request<ExecutionList>(`/api/workspaces/${workspaceId}/executions`),
+  launchMatrix: (workspaceId: string) => request<LaunchMatrixResponse>(`/api/workspaces/${workspaceId}/launch-matrix`),
   importSources: (workspaceId: string) => request<ImportSourceList>(`/api/workspaces/${workspaceId}/import-sources`),
   previewImport: (workspaceId: string, sourceId: string) =>
     request<ImportPlan>(`/api/workspaces/${workspaceId}/imports/preview`, {

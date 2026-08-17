@@ -185,6 +185,39 @@
 
 /* The launch engine at work — a work session as a founder-readable step procession. */
 .engine-session { display: grid; gap: 20px; }
+.matrix-controls { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+.matrix-filter { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-soft); }
+.matrix-filter button { border: 0; border-radius: 5px; background: transparent; color: var(--muted); padding: 7px 10px; font: inherit; font-size: 11px; cursor: pointer; }
+.matrix-filter button.is-active { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgb(30 28 24 / 10%); }
+.matrix-scroll { overflow-x: auto; }
+.launch-matrix-table, .launch-phase-matrix { width: 100%; border-collapse: collapse; min-width: 860px; }
+.launch-matrix-table thead th, .launch-phase-matrix thead th { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line-dark); }
+.launch-matrix-table td, .launch-matrix-table tbody th, .launch-phase-matrix td, .launch-phase-matrix tbody th { padding: 14px 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+.launch-matrix-table button { border: 0; background: transparent; color: inherit; font: inherit; text-align: left; padding: 0; cursor: pointer; }
+.launch-matrix-table tbody th button { display: grid; gap: 3px; }
+.launch-matrix-table tbody th button strong { font-size: 14px; }
+.launch-matrix-table tbody th button span, .launch-matrix-table td small { color: var(--muted); font-size: 10px; line-height: 1.4; display: block; margin-top: 4px; }
+.launch-matrix-table td > button { color: var(--forest); font-size: 12px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.matrix-state { font-size: 12px; font-weight: 700; }
+.launch-matrix-detail td { padding: 0 10px 20px; background: var(--paper-soft); }
+.matrix-workflow { padding: 18px 0; border-bottom: 1px solid var(--line); }
+.matrix-workflow:last-child { border-bottom: 0; }
+.matrix-workflow header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.matrix-workflow header > div { display: flex; gap: 10px; align-items: center; }
+.matrix-workflow h3 { margin: 0; font-size: 16px; }
+.matrix-workflow h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.matrix-workflow p, .matrix-workflow li { color: var(--ink-soft); font-size: 12px; line-height: 1.5; }
+.matrix-workflow header > span { color: var(--muted); font-size: 11px; }
+.matrix-note { color: var(--amber) !important; }
+.matrix-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 14px; }
+.matrix-card-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.matrix-card-list li { border: 1px solid var(--line); background: var(--paper); padding: 10px 12px; border-radius: 6px; }
+.matrix-card-list li > strong, .matrix-card-list li > span, .matrix-card-list button > strong, .matrix-card-list button > span { display: block; }
+.matrix-card-list li > span, .matrix-card-list button > span { color: var(--muted); font-size: 10px; margin-top: 2px; }
+.matrix-card-list p { margin: 6px 0 0; }
+.matrix-system-summary { margin: 12px 0 0; color: var(--muted); font-size: 11px; }
+.launch-phase-matrix tbody th { font-size: 13px; }
+.launch-phase-matrix td { color: var(--muted); font-size: 11px; }
 .engine-session__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
 .engine-session__head h3 { margin: 8px 0 6px; font-size: 21px; font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
 .engine-session__headline { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.55; max-width: 640px; }

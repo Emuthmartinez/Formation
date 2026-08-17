@@ -1,6 +1,7 @@
 import type { CatalogArtifact as CompileArtifact, CatalogInput, CatalogWorkflowId, CatalogWorkflowNode } from "../core/engine/compile.js";
 import { grantableDomainIds, type DomainId, type GrantableDomainId } from "../core/schema/types.js";
 import { APP_SOURCE_FINGERPRINT_PATH } from "./artifacts.js";
+import { presentationGroupFor } from "./presentation.js";
 import { isGrantableDomainId, systemCatalogDomainIds, type Catalog, type CatalogDomainId, type CatalogWorkflowDef } from "./types.js";
 
 function isGrantable(domainId: CatalogDomainId): domainId is GrantableDomainId {
@@ -9,6 +10,17 @@ function isGrantable(domainId: CatalogDomainId): domainId is GrantableDomainId {
 
 function isBusinessRuntimeDomain(domainId: CatalogDomainId): domainId is DomainId {
   return isGrantable(domainId) || systemCatalogDomainIds.includes(domainId);
+}
+
+function referenceFreshness(reference: Catalog["references"][number]): string {
+  if (reference.sources.length === 0) return "internal";
+  const newestReview = [...reference.sources]
+    .map((source) => source.lastReviewDate)
+    .sort()
+    .at(-1);
+  // The executable plan must be stable for identical source bytes. The separate knowledge
+  // freshness validator evaluates review cadence against the current date and fails when stale.
+  return `reviewed ${newestReview}`;
 }
 
 /**
@@ -53,7 +65,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
     references: wf.referenceIds.map((referenceId) => {
       const reference = referencesById.get(referenceId);
       if (!reference) throw new Error(`${wf.id} binds unknown reference ${referenceId}`);
-      return { id: reference.id, path: reference.path, title: reference.title, loadWhen: reference.loadWhen };
+      return { id: reference.id, path: reference.path, title: reference.title, loadWhen: reference.loadWhen, freshness: referenceFreshness(reference) };
     }),
     role: (() => {
       const role = rolesById.get(wf.roleId);
@@ -72,7 +84,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
             references: pack.referenceIds.map((referenceId) => {
               const reference = referencesById.get(referenceId);
               if (!reference) throw new Error(`${pack.id} binds unknown reference ${referenceId}`);
-              return { id: reference.id, path: reference.path, title: reference.title, loadWhen: reference.loadWhen };
+              return { id: reference.id, path: reference.path, title: reference.title, loadWhen: reference.loadWhen, freshness: referenceFreshness(reference) };
             }),
           };
         }),
@@ -91,12 +103,16 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
     ttlSeconds: wf.ttlSeconds,
     tokenBudget: wf.tokenBudget,
     costEstimate: wf.costEstimate,
+    phaseIds: wf.phaseIds,
+    groupId: presentationGroupFor(wf.id, wf.domainId),
+    applicability: wf.applicability,
   }));
 
   return {
     version: `${catalog.schemaVersion}+${catalog.skillVersion}`,
     artifacts,
     workflows,
+    presentationGroups: catalog.presentationGroups.map(({ id, title, order }) => ({ id, title, order })),
   };
 }
 

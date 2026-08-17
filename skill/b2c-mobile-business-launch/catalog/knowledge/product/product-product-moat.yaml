@@ -1,0 +1,16 @@
+schema_version: 1.0.0
+id: reference.product.product-moat
+title: Product Moat
+domain_id: domain.product
+document_path: knowledge/product/product-moat.md
+load_when: before product/SPEC.md, design/design.md, onboarding, ads, store screenshots, content assets, or engineering
+  plans are treated as ready; on "11-star run"/"11-star pass" — follow the 11-Star Run Protocol before any other output
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.research.research-backed-spec
+  context_pack_ids:
+    - context.product
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

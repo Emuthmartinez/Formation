@@ -68,7 +68,7 @@ export function register(h: Harness): void {
 
   // knowledge/ reachability is indexed centrally by the GENERATED
   // catalog/generated/routing.md (rendered by catalog/render-routing.ts from
-  // catalog/references.ts's authored loadWhen data, R20) — not a per-directory
+  // knowledge manifests' authored loadWhen data, R20) — not a per-directory
   // README/sibling file (that mechanism was dropped at cutover, U11, along with the 14
   // knowledge/<slug>/README.md files it used to require; see check-reference-size.ts's
   // "Index completeness" doc comment). validation/repository/ still uses the

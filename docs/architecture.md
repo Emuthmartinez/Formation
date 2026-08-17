@@ -96,7 +96,11 @@ The engine remains under `skill/b2c-mobile-business-launch/`.
 
 ### Definition graph
 
-`catalog/` contains stable definitions for business areas, domains, workflows, phases, lanes, artifacts, gates, operators, providers, and references.
+`catalog/` contains stable definitions for business areas, domains, workflows, phases, lanes, artifacts, gates, operators, providers, and presentation groups.
+
+Each knowledge document has one YAML manifest under `catalog/knowledge/`. The manifest owns its stable reference ID. It also owns lifecycle, graph bindings, applicability, sources, review data, and replacements. Catalog composition discovers the manifests. It includes only active packages in runtime routing.
+
+The manifest model uses two established graph principles. Provenance records identify the source, claim scope, review time, and reviewer. Shape validation rejects invalid nodes and edges before graph composition. These principles follow [W3C PROV-O](https://www.w3.org/TR/prov-o/) and [SHACL](https://www.w3.org/TR/shacl/). The implementation uses the existing YAML and TypeScript stack. It does not add RDF infrastructure.
 
 ### Business instance graph
 
@@ -149,6 +153,10 @@ A verified result contains:
 - verifier result
 - cost and provider metadata where permitted
 
+The read-only execution boundary uses schema `1.1.0`. It also returns a compact launch-matrix projection. The projection contains display metadata for every business workflow. It keeps full node briefs only for ready work. It reports process and orchestration counts separately. It does not include maintenance workflows.
+
+Formation reads the projection through `GET /api/workspaces/:workspaceId/launch-matrix`. The route verifies workspace membership. An older or unavailable engine returns `available: false` with a reason. It does not return an empty matrix.
+
 ### Engine to platform, for an existing launch repository
 
 A launch repository predating Formation is read across the same boundary, by a second read-only CLI (`core/adapters/platform-import.ts`). Its report contains:
@@ -172,6 +180,9 @@ Nothing in that report is a fact. A launch repository is an agent's working reco
 - founder decisions remain authoritative for product-facing strategy
 - accepted platform context is fingerprinted when sent to an engine run
 - changed upstream context can mark downstream deliverables stale
+- the launch matrix is a read model and does not store separate graph state
+- a conditional workflow requires a durable `required` or `not-needed` verdict
+- a changed applicability verdict invalidates prior output proof when the scope changes
 
 ## Repository layout
 

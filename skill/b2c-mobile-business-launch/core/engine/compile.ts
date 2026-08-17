@@ -58,6 +58,7 @@ export interface NodeReference {
   path: string;
   title: string;
   loadWhen: string;
+  freshness?: string;
 }
 
 /** The specialist role that owns a node's work; promptPath is workspace-relative (the roster ships with the business). */
@@ -102,12 +103,16 @@ export interface CatalogWorkflowNode {
   tokenBudget?: number;
   /** Declared cost estimate (R10, KTD5): the autonomy engine (U4) requires this on any actionClass "spend" node before it will dispatch — absent here, it parks fail-closed rather than compiling it away. */
   costEstimate?: CostEstimate;
+  phaseIds?: string[];
+  groupId?: string;
+  applicability?: { mode: "always" } | { mode: "conditional"; question: string };
 }
 
 export interface CatalogInput {
   version: string;
   artifacts: CatalogArtifact[];
   workflows: CatalogWorkflowNode[];
+  presentationGroups?: Array<{ id: string; title: string; order: number }>;
 }
 
 export interface CompiledRunNode {
@@ -139,6 +144,9 @@ export interface CompiledRunNode {
   ttlSeconds: number;
   tokenBudget: number;
   costEstimate?: CostEstimate;
+  phaseIds: string[];
+  groupId?: string;
+  applicability: { mode: "always" } | { mode: "conditional"; question: string };
 }
 
 export interface CompiledPlan {
@@ -148,6 +156,7 @@ export interface CompiledPlan {
   compiledAt: string;
   nodes: CompiledRunNode[];
   artifactBindings: ArtifactBindingV2[];
+  presentationGroups?: Array<{ id: string; title: string; order: number }>;
 }
 
 const DEFAULT_MAX_ATTEMPTS = 3;
@@ -246,11 +255,15 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
       ttlSeconds: workflow.ttlSeconds ?? DEFAULT_TTL_SECONDS,
       tokenBudget: workflow.tokenBudget ?? (judgment ? JUDGMENT_TOKEN_BUDGET : DEFAULT_TOKEN_BUDGET),
       costEstimate: workflow.costEstimate,
+      phaseIds: workflow.phaseIds ?? [],
+      groupId: workflow.groupId,
+      applicability: workflow.applicability ?? { mode: "always" },
     };
   });
 
   const artifactBindings: ArtifactBindingV2[] = catalog.artifacts.map((artifact) => ({ artifactId: artifact.id, path: artifact.path, accepted: false }));
-  const planBody = JSON.stringify({ catalogVersion: catalog.version, nodes, artifactBindings });
+  const presentationGroups = catalog.presentationGroups ?? [];
+  const planBody = JSON.stringify({ catalogVersion: catalog.version, nodes, artifactBindings, presentationGroups });
 
   return {
     planId: `plan.${sha256(planBody).slice(0, 16)}`,
@@ -259,6 +272,7 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
     compiledAt: now,
     nodes,
     artifactBindings,
+    presentationGroups,
   };
 }
 
