@@ -160,7 +160,16 @@ test("launch matrix is returned only from a ready 1.1 engine", async () => {
   assert.ok(unavailable.reason.includes("does not support"));
 
   const groups = [{ id: "market-product", title: "Market and product", order: 1 }];
-  const workflows = [{ workflowId: "workflow.research.fixture", groupId: "market-product", title: "Research", status: "ready" }];
+  const workflows = [{
+    workflowId: "workflow.research.fixture",
+    groupId: "market-product",
+    title: "Research",
+    summary: "Run research tooling.",
+    status: "ready",
+    phaseIds: ["phase.1"],
+    services: [{ id: "provider.fixture", name: "Fixture API", purpose: "Supports provider workflow proof.", state: "verified" }],
+    agentTools: [{ id: "research-internal-route", when: "Use the research tool." }],
+  }];
   const current = new ExecutionWorker(store, {
     engine: { describe: async () => ({ reachable: true, report: { schemaVersion: "1.1.0", workspaceReady: true, generatedAt: "2026-08-17T00:00:00.000Z", launchMatrix: { groups, workflows, systemSummary: { total: 1, counts: { ready: 1 } } } } }) },
     resolveEngineWorkspace: () => directory,
@@ -168,7 +177,13 @@ test("launch matrix is returned only from a ready 1.1 engine", async () => {
   const available = await current.launchMatrix(workspace);
   assert.equal(available.available, true);
   assert.deepEqual(available.groups, groups);
-  assert.deepEqual(available.workflows, workflows);
+  assert.equal(available.workflows[0].services[0].purpose, "Helps complete Research.");
+  assert.equal(available.workflows[0].services[0].access, "Access proven");
+  assert.equal(available.workflows[0].services[0].technical.id, "provider.fixture");
+  assert.equal(available.workflows[0].agentTools[0].name, "Research support");
+  assert.equal(available.workflows[0].technical.workflowId, "workflow.research.fixture");
+  assert.equal("id" in available.workflows[0].services[0], false);
+  assert.equal("id" in available.workflows[0].agentTools[0], false);
 });
 
 // ---------------------------------------------------------------------------

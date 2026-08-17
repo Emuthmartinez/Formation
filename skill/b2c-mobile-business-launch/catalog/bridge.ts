@@ -18,11 +18,9 @@ function referenceFreshness(reference: Catalog["references"][number]): string {
     .map((source) => source.lastReviewDate)
     .sort()
     .at(-1);
-  const stale = reference.sources.some((source) => {
-    const reviewedAt = Date.parse(`${source.lastReviewDate}T00:00:00Z`);
-    return !Number.isFinite(reviewedAt) || Date.now() - reviewedAt > source.reviewCadenceDays * 86_400_000;
-  });
-  return stale ? "stale" : `reviewed ${newestReview}`;
+  // The executable plan must be stable for identical source bytes. The separate knowledge
+  // freshness validator evaluates review cadence against the current date and fails when stale.
+  return `reviewed ${newestReview}`;
 }
 
 /**

@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import { contextPacks } from "../catalog/context-packs.js";
 import { domains } from "../catalog/domains.js";
@@ -9,8 +10,8 @@ import { loadKnowledgePackages } from "../catalog/knowledge-packages.js";
 import { validateKnowledgePackages } from "../catalog/knowledge-validation.js";
 import { workflows } from "../catalog/workflows/index.js";
 
-const repoRoot = path.resolve(process.cwd());
-const skillRoot = path.join(repoRoot, "skill/b2c-mobile-business-launch");
+const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = path.resolve(skillRoot, "../..");
 
 function options(): Map<string, string> {
   const result = new Map<string, string>();

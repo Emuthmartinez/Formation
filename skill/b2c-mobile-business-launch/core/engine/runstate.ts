@@ -67,7 +67,9 @@ export function reconcileWorkflowApplicability(plan: CompiledPlan, run: RunState
     const state = run.nodes[node.id];
     if (!state) continue;
     const record = businessState.workflowApplicability?.[node.workflowId];
-    const fingerprint = sha256(JSON.stringify(record ?? { verdict: "unknown" }));
+    // Reason, evidence, and timestamp edits explain the verdict but do not change scope. Only a
+    // verdict transition can retire or reopen work and invalidate its accepted output.
+    const fingerprint = sha256(record?.verdict ?? "unknown");
     if (state.applicabilityFingerprint === fingerprint) continue;
 
     for (const binding of run.artifactBindings.filter((item) => node.outputs.some((artifactId) => artifactId === item.artifactId))) {

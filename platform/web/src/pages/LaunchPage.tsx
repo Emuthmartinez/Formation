@@ -220,10 +220,23 @@ function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    void api.launchMatrix(workspaceId).then((value) => {
-      if (!cancelled) { setMatrix(value); setFailed(false); }
-    }).catch(() => { if (!cancelled) setFailed(true); });
-    return () => { cancelled = true; };
+    let timer: number | undefined;
+    const load = async () => {
+      try {
+        const value = await api.launchMatrix(workspaceId);
+        if (cancelled) return;
+        setMatrix(value);
+        setFailed(false);
+      } catch {
+        if (!cancelled) setFailed(true);
+      }
+      if (!cancelled) timer = window.setTimeout(load, 12_000);
+    };
+    void load();
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
   }, [workspaceId]);
 
   const workflows = matrix?.workflows ?? [];
@@ -289,7 +302,7 @@ function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
                   <td data-label="Current work"><button aria-expanded={active && expanded?.detail === "work"} onClick={() => toggle(group.id, "work")}>{groupWork.length} visible</button></td>
                   <td data-label="Dependencies"><button aria-expanded={active && expanded?.detail === "dependencies"} onClick={() => toggle(group.id, "dependencies")}>{new Set(groupWork.flatMap((item) => item.dependencyWorkflowIds)).size} upstream</button></td>
                   <td data-label="Knowledge"><button aria-expanded={active && expanded?.detail === "knowledge"} onClick={() => toggle(group.id, "knowledge")}>{new Set(groupWork.flatMap((item) => item.knowledge.map((guide) => guide.id))).size} guides</button></td>
-                  <td data-label="Tools"><button aria-expanded={active && expanded?.detail === "tools"} onClick={() => toggle(group.id, "tools")}>{new Set(groupWork.flatMap((item) => [...item.services.map((service) => service.id), ...item.agentTools.map((tool) => tool.id)])).size} tools</button></td>
+                  <td data-label="Tools"><button aria-expanded={active && expanded?.detail === "tools"} onClick={() => toggle(group.id, "tools")}>{new Set(groupWork.flatMap((item) => [...item.services.map((service) => service.technical.id), ...item.agentTools.map((tool) => tool.technical.id)])).size} tools</button></td>
                   <td data-label="Result and proof"><button aria-expanded={active && expanded?.detail === "results"} onClick={() => toggle(group.id, "results")}>{groupWork.filter((item) => item.verification.state === "verified").length} verified</button></td>
                 </tr>,
                 active ? <tr key={`${group.id}-detail`} className="launch-matrix-detail"><td colSpan={7}>{groupWork.length ? groupWork.map((workflow) => <MatrixWorkflowDetail key={workflow.workflowId} workflow={workflow} detail={expanded!.detail} workflows={byId} />) : <p>No work in this area matches the current filter.</p>}</td></tr> : null,
@@ -309,9 +322,9 @@ function MatrixWorkflowDetail({ workflow, detail, workflows }: { workflow: Launc
     {detail === "work" ? <><p>{workflow.summary}</p>{workflow.founderReason ? <p className="matrix-note">{workflow.founderReason}</p> : null}{workflow.role ? <p>Owner: {workflow.role.name}</p> : null}</> : null}
     {detail === "dependencies" ? <div className="matrix-detail-grid"><div><h4>Waiting on</h4>{workflow.dependencyWorkflowIds.length ? <ul>{workflow.dependencyWorkflowIds.map((id) => { const item = workflows.get(id); return <li key={id}>{item?.title ?? id} — {item?.founderReason ?? engineStepLabels[item?.status ?? ""] ?? item?.status ?? "state unavailable"}</li>; })}</ul> : <p>Nothing upstream.</p>}</div><div><h4>Unlocks</h4>{workflow.dependentWorkflowIds.length ? <ul>{workflow.dependentWorkflowIds.map((id) => { const item = workflows.get(id); return <li key={id}>{item?.title ?? id} — {engineStepLabels[item?.status ?? ""] ?? item?.status ?? "state unavailable"}</li>; })}</ul> : <p>No downstream work.</p>}</div></div> : null}
     {detail === "knowledge" ? workflow.knowledge.length ? <ul className="matrix-card-list">{workflow.knowledge.map((guide) => <li key={guide.id}><strong>{guide.title}</strong><span>{guide.freshness}</span><p>{guide.loadWhen}</p><p>Affects: {workflow.outputs.map((output) => output.title).join(", ") || workflow.title}</p></li>)}</ul> : <p>No guide is bound to this work.</p> : null}
-    {detail === "tools" ? <div className="matrix-detail-grid"><div><h4>Services</h4>{workflow.services.length ? <ul className="matrix-card-list">{workflow.services.map((service) => <li key={service.id}><strong>{service.name}</strong><span>{service.state}{service.checkedAt ? ` · checked ${timeAgo(service.checkedAt)}` : ""}</span><p>{service.purpose}</p></li>)}</ul> : <p>No external service is required.</p>}</div><div><h4>Agent tools</h4>{workflow.agentTools.length ? <ul>{workflow.agentTools.map((tool) => <li key={tool.id}><strong>{tool.id}</strong> — {tool.when}</li>)}</ul> : <p>No additional agent tool is declared.</p>}</div></div> : null}
+    {detail === "tools" ? <div className="matrix-detail-grid"><div><h4>Business services</h4>{workflow.services.length ? <ul className="matrix-card-list">{workflow.services.map((service) => <li key={service.technical.id}><strong>{service.name}</strong><span>{service.access}{service.checkedAt ? ` · checked ${timeAgo(service.checkedAt)}` : ""}</span><p>{service.purpose}</p></li>)}</ul> : <p>No external service is required.</p>}</div><div><h4>Specialist support</h4>{workflow.agentTools.length ? <ul>{workflow.agentTools.map((tool) => <li key={tool.technical.id}><strong>{tool.name}</strong> — {tool.purpose}</li>)}</ul> : <p>No additional specialist support is declared.</p>}</div></div> : null}
     {detail === "results" ? <><p>Verification: {workflow.verification.state} · {workflow.verification.kind} · {workflow.verification.evidenceCount} evidence items</p>{workflow.outputs.length ? <ul className="matrix-card-list">{workflow.outputs.map((output) => <li key={output.artifactId}><button onClick={() => navigate("/deliverables")}><strong>{output.title}</strong><span>{output.state}</span></button></li>)}</ul> : <p>This work has no separate deliverable.</p>}</> : null}
-    <TechnicalDisclosure label="Technical detail"><p>{workflow.workflowId}</p><p>Phases: {workflow.phaseIds.join(", ") || "none"}</p></TechnicalDisclosure>
+    <TechnicalDisclosure label="Technical detail"><p>{workflow.technical.workflowId}</p>{workflow.technical.title ? <p>Engine title: {workflow.technical.title}</p> : null}<p>Phases: {workflow.technical.phaseIds.join(", ") || "none"}</p>{workflow.services.map((service) => <p key={service.technical.id}>Service: {service.technical.id} · {service.technical.state} · {service.technical.purpose}</p>)}{workflow.agentTools.map((tool) => <p key={tool.technical.id}>Route: {tool.technical.id} · {tool.technical.when}</p>)}</TechnicalDisclosure>
   </article>;
 }
 

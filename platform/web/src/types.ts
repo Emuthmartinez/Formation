@@ -343,10 +343,17 @@ export interface LaunchMatrixWorkflow {
   dependentWorkflowIds: string[];
   role?: { id: string; name: string };
   knowledge: Array<{ id: string; title: string; loadWhen: string; freshness: string }>;
-  services: Array<{ id: string; name: string; purpose: string; state: string; checkedAt?: string }>;
-  agentTools: Array<{ id: string; when: string }>;
+  services: Array<{
+    name: string;
+    purpose: string;
+    access: string;
+    checkedAt?: string;
+    technical: { id: string; state: string; purpose: string };
+  }>;
+  agentTools: Array<{ name: string; purpose: string; technical: { id: string; when: string } }>;
   outputs: Array<{ artifactId: string; title: string; state: string }>;
   verification: { kind: string; state: string; evidenceCount: number };
+  technical: { workflowId: string; title: string | null; phaseIds: string[] };
 }
 
 export interface LaunchMatrixResponse {

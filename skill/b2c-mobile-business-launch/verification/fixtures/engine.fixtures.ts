@@ -379,6 +379,19 @@ export function register(harness: Harness): void {
     reconcileWorkflowApplicability(plan, run, state, plusSeconds(now, 60));
     assert(getStatus(run, nodeId("growth-post")) === "pending", "required verdict did not reopen the workflow");
     assert(!run.artifactBindings[0]!.accepted && run.artifactBindings[0]!.fingerprint === undefined, "changed verdict did not invalidate old output proof");
+
+    run.nodes[nodeId("growth-post")]!.status = "succeeded";
+    run.artifactBindings[0]!.accepted = true;
+    run.artifactBindings[0]!.fingerprint = "new-proof";
+    state.workflowApplicability["workflow.growth-post"] = {
+      verdict: "required",
+      reason: "The explanation was corrected without changing scope.",
+      evidence: ["product/spec.md#corrected"],
+      updatedAt: plusSeconds(now, 120),
+    };
+    reconcileWorkflowApplicability(plan, run, state, plusSeconds(now, 120));
+    assert(getStatus(run, nodeId("growth-post")) === "succeeded", "a reason-only edit reopened completed work");
+    assert(run.artifactBindings[0]!.accepted, "a reason-only edit invalidated accepted proof");
   });
 
   harness.check("boundary matrix: non-ready work keeps compact graph metadata and declarations stay planned without proof", () => {

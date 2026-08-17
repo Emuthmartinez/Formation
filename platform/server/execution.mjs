@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { createId } from "./domain.mjs";
 import { listEngineApprovals, recordApprovalActivity, syncEngineApprovals } from "./domain/approvals.mjs";
 import { denialMessage, resolveAccess } from "./domain/capabilities.mjs";
-import { boardStepTitle, presentApprovalAsk, presentStep } from "./domain/presentation.mjs";
+import { boardStepTitle, presentApprovalAsk, presentMatrixService, presentMatrixTool, presentStep } from "./domain/presentation.mjs";
 import { recordResultActivity, syncEngineResults } from "./domain/results.mjs";
 
 /**
@@ -353,7 +353,19 @@ export class ExecutionWorker {
     if (view.report.schemaVersion !== "1.1.0" || !view.report.launchMatrix) {
       return { available: false, checkedAt, reason: "The connected launch engine does not support the launch matrix yet." };
     }
-    return { available: true, checkedAt, generatedAt: view.report.generatedAt, ...view.report.launchMatrix };
+    const matrix = view.report.launchMatrix;
+    const workflows = (matrix.workflows ?? []).map((workflow) => {
+      const step = presentStep(workflow.workflowId, workflow.title);
+      return {
+        ...workflow,
+        title: step.title,
+        summary: step.summary ?? workflow.summary,
+        services: (workflow.services ?? []).map((service) => presentMatrixService(service, step.title)),
+        agentTools: (workflow.agentTools ?? []).map((tool) => presentMatrixTool(tool, step.title)),
+        technical: { workflowId: workflow.workflowId, title: step.technical, phaseIds: workflow.phaseIds ?? [] },
+      };
+    });
+    return { available: true, checkedAt, generatedAt: view.report.generatedAt, ...matrix, workflows };
   }
 
   /**
