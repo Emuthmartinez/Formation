@@ -267,8 +267,10 @@ interface RubricOverride {
 
 interface RubricSlot {
   slot?: number;
+  platform?: string;
   locale?: string;
   device_well?: string;
+  product_page?: string;
   final_png?: string;
   pass?: boolean;
   override?: RubricOverride | null;
@@ -628,6 +630,60 @@ function checkRubricScores(storeStatus: string | undefined): void {
     return;
   }
 
+  if (storeStatus === "done") {
+    const locales = [...new Set(slots.map((slot) => slot.locale?.trim()).filter((value): value is string => Boolean(value)))];
+    if (locales.length === 0) {
+      issues.push(issue("error", "store_screenshots.matrix.locale_missing", "The completed screenshot ledger has no locale-keyed slots.", ledgerRelPath));
+    }
+    for (const locale of locales) {
+      const localeSlots = slots.filter((slot) => slot.locale === locale);
+      const wells = localeSlots.map((slot) => (slot.device_well ?? "").toLowerCase().replace(/_/g, "-"));
+      if (hasIos) {
+        const requiredAppleFamilies = [supportsIphone ? "iphone" : undefined, supportsIpad ? "ipad" : undefined].filter((family): family is "iphone" | "ipad" =>
+          Boolean(family),
+        );
+        for (const family of requiredAppleFamilies) {
+          if (!wells.some((well) => well.startsWith(family))) {
+            issues.push(
+              issue(
+                "error",
+                `store_screenshots.matrix.${locale}.${family}_missing`,
+                `Locale ${locale} has no ${family} screenshot well. A completed Apple matrix must cover every supported device family for every launch locale.`,
+                ledgerRelPath,
+              ),
+            );
+          }
+        }
+      }
+      if (hasAndroid) {
+        for (const family of ["play-phone", "play-7-tablet", "play-10-tablet"]) {
+          if (!wells.includes(family)) {
+            issues.push(
+              issue(
+                "error",
+                `store_screenshots.matrix.${locale}.${family}_missing`,
+                `Locale ${locale} has no ${family} slot. The completed Google Play matrix must cover phone, 7-inch tablet, and 10-inch tablet wells.`,
+                ledgerRelPath,
+              ),
+            );
+          }
+        }
+      }
+      for (const slot of localeSlots) {
+        if (!slot.product_page?.trim()) {
+          issues.push(
+            issue(
+              "error",
+              "store_screenshots.matrix.product_page_missing",
+              `Slot ${slot.slot ?? "?"} (${locale}/${slot.device_well ?? "?"}) has no product_page key. Use default, an App Store custom product page ID, or a Google Play custom store listing ID.`,
+              ledgerRelPath,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // TIER 2: Producer != Verifier — builder/grader identity + grading_pass provenance
   //
@@ -908,6 +964,19 @@ const iosBundleId = state ? asString(getPath(state, "project.bundle_ids.ios")) :
 const androidBundleId = state ? asString(getPath(state, "project.bundle_ids.android")) : undefined;
 const hasIos = state ? platforms.includes("ios") || Boolean(iosBundleId?.trim()) : true;
 const hasAndroid = state ? platforms.includes("android") || Boolean(androidBundleId?.trim()) : true;
+const declaredDeviceFamilies = state
+  ? asArray(getPath(state, "project.supported_device_families"))
+      .map((item) =>
+        asString(item)
+          ?.toLowerCase()
+          .replace(/[_\s]+/g, "-"),
+      )
+      .filter((item): item is string => Boolean(item))
+  : [];
+// Existing projects without this field retain the prior iPhone+iPad expectation. An
+// intentionally iPhone-only app opts out explicitly with supported_device_families: [iphone].
+const supportsIphone = declaredDeviceFamilies.length === 0 || declaredDeviceFamilies.some((family) => ["iphone", "ios-phone"].includes(family));
+const supportsIpad = declaredDeviceFamilies.length === 0 || declaredDeviceFamilies.some((family) => ["ipad", "ipados", "ios-tablet"].includes(family));
 const storeStatus = state ? asString(getPath(state, "lanes.store_console.status"))?.toLowerCase() : undefined;
 const storeSkipped = ["not_needed", "deferred"].includes(storeStatus ?? "");
 const shouldCheck = !storeSkipped && (hasIos || hasAndroid || !state);

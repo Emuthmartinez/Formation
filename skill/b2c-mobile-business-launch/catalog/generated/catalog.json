@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.127.0",
+  "skillVersion": "0.128.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -602,6 +602,7 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.process",
         "context.orchestration",
         "context.operations"
@@ -621,6 +622,24 @@
           "id": "git and repository validators",
           "when": "integrating any completed unit"
         }
+      ],
+      "capabilityIds": [
+        "provider.posthog",
+        "provider.revenuecat",
+        "provider.resend",
+        "provider.app-store-connect"
+      ],
+      "outputPathPrefixes": [
+        "state/",
+        "operations/",
+        "engineering/",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "APP_AGENTS.md",
+        "LAUNCHBENCH.md",
+        "skill-version.json",
+        "tooling/",
+        "catalog/"
       ]
     },
     {
@@ -633,6 +652,7 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.operations",
         "context.store",
         "context.device"
@@ -649,6 +669,38 @@
         {
           "id": "chrome:control-chrome",
           "when": "the founder explicitly chose Chrome"
+        },
+        {
+          "id": "ios-screenshots",
+          "when": "verifying screenshot production capability"
+        },
+        {
+          "id": "building-with-xcode",
+          "when": "verifying Apple build, signing, or upload capability"
+        },
+        {
+          "id": "analytics",
+          "when": "verifying analytics access and live-event proof"
+        },
+        {
+          "id": "pricing",
+          "when": "verifying approved prices and store-product access"
+        },
+        {
+          "id": "paywalls",
+          "when": "verifying paywall and entitlement tooling"
+        },
+        {
+          "id": "video",
+          "when": "verifying preview, demo, or ad-video production"
+        },
+        {
+          "id": "remotion",
+          "when": "verifying Remotion rendering capability when installed"
+        },
+        {
+          "id": "usefastlane-ai",
+          "when": "verifying Fastlane AI capability when selected"
         }
       ],
       "toolRoutes": [
@@ -664,6 +716,31 @@
           "id": "native device/simulator inventory",
           "when": "mobile build, screenshots, or store upload is in scope"
         }
+      ],
+      "capabilityIds": [
+        "provider.doppler",
+        "provider.app-store-connect",
+        "provider.google-play",
+        "provider.posthog",
+        "provider.revenuecat",
+        "provider.stripe",
+        "provider.resend",
+        "provider.app-store-screenshots",
+        "provider.higgsfield",
+        "provider.mobai",
+        "provider.in-app-ios-simulator",
+        "provider.codex-native-ios",
+        "provider.snapshot-previews",
+        "provider.serve-sim",
+        "provider.aso-skills",
+        "provider.refero",
+        "provider.security-review",
+        "provider.sentry",
+        "provider.paid-ad-channels"
+      ],
+      "outputPathPrefixes": [
+        "operations/",
+        "strategy/TOOL_DECISIONS.md"
       ]
     },
     {
@@ -676,6 +753,7 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.research",
         "context.product"
       ],
@@ -702,6 +780,14 @@
           "id": "AppKittie/XPOZ or approved equivalents",
           "when": "category, keyword, review, or social-language evidence is required"
         }
+      ],
+      "capabilityIds": [
+        "provider.aso-skills"
+      ],
+      "outputPathPrefixes": [
+        "strategy/RESEARCH.md",
+        "strategy/localization-market-research/",
+        "product/SPEC.md"
       ]
     },
     {
@@ -714,8 +800,10 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.product",
         "context.experience",
+        "context.experience-cards",
         "context.research"
       ],
       "skillRoutes": [
@@ -741,6 +829,13 @@
           "id": "simulator/browser product inspection",
           "when": "auditing an implemented flow"
         }
+      ],
+      "capabilityIds": [],
+      "outputPathPrefixes": [
+        "state/LAUNCH_TRACE.md",
+        "engineering/TECH_SPEC.md",
+        "product/",
+        "SKILL.md"
       ]
     },
     {
@@ -753,6 +848,7 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.design",
         "context.experience",
         "context.words"
@@ -769,6 +865,18 @@
         {
           "id": "image",
           "when": "creating or editing visual assets"
+        },
+        {
+          "id": "ios-screenshots",
+          "when": "producing App Store screenshots or preview frames"
+        },
+        {
+          "id": "video",
+          "when": "producing marketing video or app-preview footage"
+        },
+        {
+          "id": "remotion",
+          "when": "rendering versioned motion assets when the Remotion plugin or skill is available"
         }
       ],
       "toolRoutes": [
@@ -780,6 +888,18 @@
           "id": "Design Room renderer",
           "when": "design state or tokens change"
         }
+      ],
+      "capabilityIds": [
+        "provider.refero",
+        "provider.higgsfield",
+        "provider.app-store-screenshots"
+      ],
+      "outputPathPrefixes": [
+        "design/",
+        "studio/",
+        "product/experience/ux-patterns/",
+        "growth/content-assets/",
+        "store/app-store-listing/SCREENSHOTS.md"
       ]
     },
     {
@@ -792,6 +912,7 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.words",
         "context.product",
         "context.growth",
@@ -816,6 +937,10 @@
           "id": "copy and claim validators",
           "when": "before returning final copy"
         }
+      ],
+      "capabilityIds": [],
+      "outputPathPrefixes": [
+        "product/copy/"
       ]
     },
     {
@@ -828,6 +953,7 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.growth",
         "context.store",
         "context.data",
@@ -853,6 +979,18 @@
         {
           "id": "social",
           "when": "organic social execution"
+        },
+        {
+          "id": "analytics",
+          "when": "measurement, attribution, or campaign event design"
+        },
+        {
+          "id": "usefastlane-ai",
+          "when": "Fastlane AI growth operations are selected"
+        },
+        {
+          "id": "pricing",
+          "when": "campaign or store copy depends on pricing strategy"
         }
       ],
       "toolRoutes": [
@@ -860,6 +998,19 @@
           "id": "current ASO, analytics, ad, and social provider tools",
           "when": "the relevant channel is in scope"
         }
+      ],
+      "capabilityIds": [
+        "provider.app-store-connect",
+        "provider.google-play",
+        "provider.paid-ad-channels",
+        "provider.posthog",
+        "provider.revenuecat"
+      ],
+      "outputPathPrefixes": [
+        "STORE_OPS.md",
+        "store/",
+        "growth/",
+        "GEO_SEO.md"
       ]
     },
     {
@@ -872,11 +1023,9 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
-        "context.growth",
-        "context.store",
-        "context.design",
-        "context.words",
-        "context.money"
+        "context.founder-language",
+        "context.process",
+        "context.launch-surfaces"
       ],
       "skillRoutes": [
         {
@@ -906,6 +1055,30 @@
         {
           "id": "image",
           "when": "marketing or store visual generation"
+        },
+        {
+          "id": "pricing",
+          "when": "landing, paywall, or store prices are affected"
+        },
+        {
+          "id": "paywalls",
+          "when": "web onboarding or purchase surfaces include a paywall"
+        },
+        {
+          "id": "analytics",
+          "when": "landing, onboarding, or store attribution events are affected"
+        },
+        {
+          "id": "video",
+          "when": "App Preview, Play promo video, demo, or ad motion is affected"
+        },
+        {
+          "id": "remotion",
+          "when": "versioned marketing motion assets are affected and the plugin or skill is available"
+        },
+        {
+          "id": "usefastlane-ai",
+          "when": "Fastlane-managed growth or product-page distribution is affected"
         }
       ],
       "toolRoutes": [
@@ -921,6 +1094,20 @@
           "id": "device capture and composition tools",
           "when": "screenshots or previews are affected"
         }
+      ],
+      "capabilityIds": [
+        "provider.app-store-connect",
+        "provider.google-play",
+        "provider.app-store-screenshots",
+        "provider.higgsfield",
+        "provider.posthog",
+        "provider.revenuecat",
+        "provider.stripe"
+      ],
+      "outputPathPrefixes": [
+        "growth/",
+        "store/",
+        "GEO_SEO.md"
       ]
     },
     {
@@ -933,9 +1120,11 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.engineering",
         "context.design",
         "context.experience",
+        "context.archetypes",
         "context.device"
       ],
       "skillRoutes": [
@@ -973,6 +1162,14 @@
           "id": "MobAI",
           "when": "Android, physical-device, repeatable-matrix, or cross-platform proof is required"
         }
+      ],
+      "capabilityIds": [
+        "provider.app-store-connect"
+      ],
+      "outputPathPrefixes": [
+        "store/APPLE_SIGNING.md",
+        "engineering/",
+        "operations/ORCHESTRATION.md"
       ]
     },
     {
@@ -985,11 +1182,13 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.engineering",
         "context.data",
         "context.money",
         "context.trust",
-        "context.operations"
+        "context.operations",
+        "context.archetypes"
       ],
       "skillRoutes": [
         {
@@ -1018,6 +1217,12 @@
           "id": "Doppler or approved secret manager",
           "when": "credentials are required"
         }
+      ],
+      "capabilityIds": [
+        "provider.posthog"
+      ],
+      "outputPathPrefixes": [
+        "analytics/"
       ]
     },
     {
@@ -1030,10 +1235,12 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.device",
         "context.design",
         "context.store",
-        "context.trust"
+        "context.trust",
+        "context.archetypes"
       ],
       "skillRoutes": [
         {
@@ -1062,6 +1269,16 @@
           "id": "screenshot and recording export",
           "when": "visual evidence is required"
         }
+      ],
+      "capabilityIds": [
+        "provider.mobai",
+        "provider.in-app-ios-simulator",
+        "provider.codex-native-ios",
+        "provider.snapshot-previews",
+        "provider.serve-sim"
+      ],
+      "outputPathPrefixes": [
+        "growth/DEMO_VIDEO.md"
       ]
     },
     {
@@ -1074,9 +1291,11 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.trust",
         "context.engineering",
-        "context.operations"
+        "context.operations",
+        "context.experience-cards"
       ],
       "skillRoutes": [
         {
@@ -1097,6 +1316,16 @@
           "id": "current platform security documentation",
           "when": "store or platform rules may have changed"
         }
+      ],
+      "capabilityIds": [
+        "provider.security-review",
+        "provider.sentry",
+        "provider.app-store-connect"
+      ],
+      "outputPathPrefixes": [
+        "trust/",
+        "product/experience/emotional-design/EMOTIONAL_AUDIT.md",
+        "store/APPLE_APP_STORE_REQUIREMENTS.md"
       ]
     },
     {
@@ -1109,10 +1338,12 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.engineering",
         "context.orchestration",
         "context.store",
-        "context.trust"
+        "context.trust",
+        "context.archetypes"
       ],
       "skillRoutes": [
         {
@@ -1137,6 +1368,22 @@
           "id": "provider and distribution proof tools",
           "when": "provider-backed or store work is claimed complete"
         }
+      ],
+      "capabilityIds": [
+        "provider.doppler",
+        "provider.app-store-connect",
+        "provider.google-play",
+        "provider.revenuecat",
+        "provider.stripe"
+      ],
+      "outputPathPrefixes": [
+        "engineering/",
+        "operations/ORCHESTRATION.md",
+        "trust/secrets/SECRETS.md",
+        "store/",
+        "revenue/",
+        "validation/",
+        "knowledge/store/"
       ]
     },
     {
@@ -1149,6 +1396,7 @@
         "APP_AGENTS.md"
       ],
       "contextPackIds": [
+        "context.founder-language",
         "context.operations",
         "context.trust",
         "context.words"
@@ -1168,10 +1416,26 @@
           "id": "support/email provider tools",
           "when": "live queues or delivery are in scope"
         }
+      ],
+      "capabilityIds": [
+        "provider.resend"
+      ],
+      "outputPathPrefixes": [
+        "trust/",
+        "growth/EMAIL_OPS.md",
+        "LEGAL_REVIEW.md"
       ]
     }
   ],
   "contextPacks": [
+    {
+      "id": "context.founder-language",
+      "title": "Always-on founder language",
+      "referenceIds": [
+        "reference.words.no-slop-writing",
+        "reference.operations.founder-zero-operator"
+      ]
+    },
     {
       "id": "context.process",
       "title": "Launch process",
@@ -1221,6 +1485,16 @@
       ]
     },
     {
+      "id": "context.archetypes",
+      "title": "Matched product archetype",
+      "referenceIds": [
+        "reference.product.habit-tracker",
+        "reference.product.photo-ai-media",
+        "reference.product.social-network",
+        "reference.product.ai-chat-companion"
+      ]
+    },
+    {
       "id": "context.experience",
       "title": "Experience",
       "referenceIds": [
@@ -1238,6 +1512,24 @@
         "reference.design.premium-mobile-craft",
         "reference.design.quality-lens",
         "reference.design.surfaces-b2c"
+      ]
+    },
+    {
+      "id": "context.experience-cards",
+      "title": "Implemented emotional experience cards",
+      "referenceIds": [
+        "reference.experience.experience-cards.commitment-card",
+        "reference.experience.experience-cards.variable-reward-card",
+        "reference.experience.experience-cards.perceived-effort-delay-card",
+        "reference.experience.experience-cards.intent-mirroring-card",
+        "reference.experience.experience-cards.endowed-progress-card",
+        "reference.experience.experience-cards.peak-end-card",
+        "reference.experience.experience-cards.streak-and-loss-aversion-card",
+        "reference.experience.experience-cards.reciprocity-card",
+        "reference.experience.experience-cards.identity-and-self-expression-card",
+        "reference.experience.experience-cards.fresh-start-card",
+        "reference.experience.experience-cards.mastery-and-status-card",
+        "reference.experience.experience-cards.recovery-and-trust-repair-card"
       ]
     },
     {
@@ -1288,6 +1580,20 @@
         "reference.growth.launch-narrative-cadence",
         "reference.growth.paid-user-acquisition",
         "reference.growth.ugc-creator-engine"
+      ]
+    },
+    {
+      "id": "context.launch-surfaces",
+      "title": "Cross-surface launch production",
+      "referenceIds": [
+        "reference.growth.cro-landing",
+        "reference.growth.geo-seo",
+        "reference.store.app-store-listing-prep",
+        "reference.store.store-console-workflow",
+        "reference.design.surfaces-b2c",
+        "reference.words.conversion-copy",
+        "reference.money.paywall-pricing-and-experiments",
+        "reference.data.analytics-attribution"
       ]
     },
     {
@@ -1683,7 +1989,7 @@
       "path": "knowledge/operations/founder-zero-operator.md",
       "domainId": "domain.operations",
       "title": "Founder-Zero Operator",
-      "loadWhen": "every broad launch start; before account/social/Doppler bootstrap; when the founder is unsure; whenever an agent is about to hand back a checklist instead of operating the business"
+      "loadWhen": "always for dispatched business workers; especially every broad launch start, account/social/Doppler bootstrap, founder uncertainty, or attempted checklist handoff"
     },
     {
       "id": "reference.operations.frontier-agent-operations",
@@ -2013,7 +2319,7 @@
       "path": "knowledge/words/no-slop-writing.md",
       "domainId": "domain.words",
       "title": "No-Slop Writing",
-      "loadWhen": "before writing or reviewing any founder-facing copy, or any marketing copy this skill generates — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO"
+      "loadWhen": "always for dispatched business workers; apply directly before founder-facing or marketing copy — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO"
     }
   ],
   "workflows": [
@@ -2144,11 +2450,12 @@
         "area.operating-system"
       ],
       "trigger": "When design/design.md is accepted, and after each app, product, copy, brand, pricing, product, or data change",
-      "instructions": "Run a design_contract_lock cascade when design/design.md is first accepted. This creates the public-surface baseline while app implementation starts. After that, classify each accepted app or business change against the Change Cascade Map. Use agents/launch-surface-producer.md for the surface audit and bounded update tasks. Check the app, Apple App Store, Google Play, store products, billing, landing site, web onboarding, GEO/SEO, lifecycle email, analytics, legal pages, screenshots, and marketing assets. Update each affected surface or record why it is unaffected. Record one change_cascade entry in state/PROJECT_STATE.yaml. Each required surface needs updated evidence, an unaffected reason, or a blocker. Re-render any screenshot, App Preview, Play feature graphic, landing screenshot, or ad asset whose source changed. Reconcile the locked lexicon in design/design.md before the change is done.",
+      "instructions": "Run a design_contract_lock cascade when design/design.md is first accepted. This creates the public-surface baseline while app implementation starts. After that, ingest engineering/SOURCE_CHANGE_MANIFEST.json and classify each accepted change with every applicable Change Cascade Map type, not one convenient primary type. Use agents/launch-surface-producer.md for the surface audit and bounded update tasks. Check the app, Apple App Store, Google Play, Apple and Play products, billing, landing site, web onboarding, GEO/SEO, lifecycle email, analytics, legal pages and public privacy claims, screenshots, and marketing assets. Update each affected surface or record why it is unaffected. Record one change_cascade entry in state/PROJECT_STATE.yaml with `types`. Updated localized, product, device, product-page, or asset surfaces need one evidence variant per applicable dimension. Re-render any screenshot, App Preview, Play feature graphic, landing screenshot, or ad asset whose source digest changed. Reconcile the locked lexicon in design/design.md before the change is done and write the checked ledger digest to state/CHANGE_CASCADE_RECEIPT.json.",
       "reads": [
         "state/PROJECT_STATE.yaml",
         "state/LAUNCH_TRACE.md",
-        "design/design.md"
+        "design/design.md",
+        "engineering/SOURCE_CHANGE_MANIFEST.json"
       ],
       "consults": [],
       "referenceIds": [
@@ -2156,11 +2463,13 @@
         "reference.process.cascade-edges",
         "reference.process.flow-traceability"
       ],
-      "roleId": "role.launch-surface-producer",
+      "roleId": "role.orchestrator",
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [],
-      "outputPaths": [],
+      "outputPaths": [
+        "state/CHANGE_CASCADE_RECEIPT.json"
+      ],
       "gateCommands": [
         "check:change-cascade"
       ],
@@ -2398,7 +2707,9 @@
         "phase.1g",
         "phase.5c"
       ],
-      "dependencies": [],
+      "dependencies": [
+        "workflow.operations.agent-operations-ledger"
+      ],
       "outputPaths": [
         "trust/SECURITY.md",
         "trust/security-review.html"
@@ -2489,7 +2800,8 @@
       ],
       "dependencies": [
         "workflow.design.design-room-state-mutate-version-render",
-        "workflow.data.analytics-and-attribution-blueprint"
+        "workflow.data.analytics-and-attribution-blueprint",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "growth/EMAIL_OPS.md"
@@ -2617,7 +2929,9 @@
       "laneIds": [],
       "phaseIds": [],
       "dependencies": [
-        "workflow.operations.founder-zero-operator-bootstrap"
+        "workflow.operations.founder-zero-operator-bootstrap",
+        "workflow.operations.paid-tool-routing-and-fallback",
+        "workflow.operations.secrets-baseline-and-routing"
       ],
       "outputPaths": [
         "operations/AGENT_OPERATIONS.md",
@@ -2627,10 +2941,25 @@
         "check:agent-operations"
       ],
       "providerIds": [
+        "provider.doppler",
         "provider.app-store-connect",
         "provider.google-play",
         "provider.posthog",
-        "provider.revenuecat"
+        "provider.revenuecat",
+        "provider.stripe",
+        "provider.resend",
+        "provider.app-store-screenshots",
+        "provider.higgsfield",
+        "provider.mobai",
+        "provider.in-app-ios-simulator",
+        "provider.codex-native-ios",
+        "provider.snapshot-previews",
+        "provider.serve-sim",
+        "provider.aso-skills",
+        "provider.refero",
+        "provider.security-review",
+        "provider.sentry",
+        "provider.paid-ad-channels"
       ],
       "founderOnlyActions": [],
       "actionClass": "mutate",
@@ -2650,10 +2979,7 @@
       ],
       "consults": [],
       "referenceIds": [
-        "reference.product.habit-tracker",
-        "reference.product.photo-ai-media",
-        "reference.product.social-network",
-        "reference.product.ai-chat-companion"
+        "reference.product.core-loop-and-v1-scope"
       ],
       "roleId": "role.mobile-engineer",
       "laneIds": [
@@ -2736,7 +3062,9 @@
       "phaseIds": [
         "phase.1"
       ],
-      "dependencies": [],
+      "dependencies": [
+        "workflow.operations.agent-operations-ledger"
+      ],
       "outputPaths": [
         "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md"
       ],
@@ -2844,18 +3172,7 @@
         "reference.experience.emotional-design-system",
         "reference.experience.consumer-product-design-agency",
         "reference.experience.ethics-guardrail",
-        "reference.experience.experience-cards.commitment-card",
-        "reference.experience.experience-cards.variable-reward-card",
-        "reference.experience.experience-cards.perceived-effort-delay-card",
-        "reference.experience.experience-cards.intent-mirroring-card",
-        "reference.experience.experience-cards.endowed-progress-card",
-        "reference.experience.experience-cards.peak-end-card",
-        "reference.experience.experience-cards.streak-and-loss-aversion-card",
-        "reference.experience.experience-cards.reciprocity-card",
-        "reference.experience.experience-cards.identity-and-self-expression-card",
-        "reference.experience.experience-cards.fresh-start-card",
-        "reference.experience.experience-cards.mastery-and-status-card",
-        "reference.experience.experience-cards.recovery-and-trust-repair-card"
+        "reference.experience.experience-cards"
       ],
       "roleId": "role.security-architect",
       "laneIds": [
@@ -2992,7 +3309,8 @@
         "phase.2"
       ],
       "dependencies": [
-        "workflow.design.design-room-state-mutate-version-render"
+        "workflow.design.design-room-state-mutate-version-render",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "product/experience/ux-patterns/UX_PATTERNS.md"
@@ -3114,7 +3432,8 @@
         "phase.3"
       ],
       "dependencies": [
-        "workflow.design.design-room-state-mutate-version-render"
+        "workflow.design.design-room-state-mutate-version-render",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "growth/content-assets/CONTENT_ASSETS.md",
@@ -3268,7 +3587,7 @@
         "reference.store.app-store-connect-cli",
         "reference.operations.secrets-management"
       ],
-      "roleId": "role.mobile-engineer",
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "apple_signing"
       ],
@@ -3276,7 +3595,8 @@
         "phase.3"
       ],
       "dependencies": [
-        "workflow.store.app-store-listing-prep-packet"
+        "workflow.store.app-store-listing-prep-packet",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "store/APPLE_SIGNING.md"
@@ -3325,7 +3645,8 @@
       ],
       "dependencies": [
         "workflow.store.app-store-listing-prep-packet",
-        "workflow.trust.privacy-and-terms"
+        "workflow.trust.privacy-and-terms",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "store/APPLE_APP_STORE_REQUIREMENTS.md"
@@ -3373,7 +3694,8 @@
       ],
       "dependencies": [
         "workflow.store.app-store-listing-prep-packet",
-        "workflow.store.apple-signing-and-release-readiness"
+        "workflow.store.apple-signing-and-release-readiness",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "store/STORE_CONSOLE.md",
@@ -3421,7 +3743,8 @@
         "phase.3"
       ],
       "dependencies": [
-        "workflow.store.store-console-workflow"
+        "workflow.store.store-console-workflow",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [],
       "gateCommands": [
@@ -3472,7 +3795,8 @@
       ],
       "dependencies": [
         "workflow.design.design-room-state-mutate-version-render",
-        "workflow.store.app-store-listing-prep-packet"
+        "workflow.store.app-store-listing-prep-packet",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "store/app-store-listing/SCREENSHOTS.md"
@@ -3515,7 +3839,8 @@
         "phase.3"
       ],
       "dependencies": [
-        "workflow.store.app-store-listing-prep-packet"
+        "workflow.store.app-store-listing-prep-packet",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "store/GOOGLE_PLAY_RELEASE.md"
@@ -3530,6 +3855,192 @@
       "actionClass": "release",
       "protectedCategory": "release",
       "idempotent": false
+    },
+    {
+      "id": "workflow.store.google-play-metadata-standing-envelope",
+      "title": "Google Play metadata standing envelope",
+      "domainId": "domain.store",
+      "areaIds": [
+        "area.build-release"
+      ],
+      "trigger": "Google Play listing metadata is ready and a matching metadata standing envelope is current",
+      "instructions": "Apply only the approved Google Play listing text, localized metadata, custom store listings, and promotional content covered by the exact current standing envelope. Verify account, package, track-neutral resource IDs, locales, payload digest, and capability immediately before mutation. Capture before-state and read back every locale. Write store/proof/google-play-metadata-apply.json with approval ID, request digest, before state, provider operation IDs, readback state, and timestamps. Do not upload media, change products, submit a release, or widen the envelope.",
+      "reads": [
+        "store/STORE_CONSOLE.md",
+        "store/app-store-listing/APP_STORE_LISTING.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.google-play-release",
+        "reference.store.store-console-workflow"
+      ],
+      "roleId": "role.marketing-guru",
+      "laneIds": [
+        "store_console"
+      ],
+      "phaseIds": [
+        "phase.3"
+      ],
+      "dependencies": [
+        "workflow.store.store-console-workflow",
+        "workflow.operations.agent-operations-ledger"
+      ],
+      "outputPaths": [
+        "store/proof/google-play-metadata-apply.json"
+      ],
+      "gateCommands": [
+        "check:store-console",
+        "check:provider-proof"
+      ],
+      "providerIds": [
+        "provider.google-play"
+      ],
+      "founderOnlyActions": [
+        "approve Google Play metadata when no exact standing envelope exists"
+      ],
+      "actionClass": "mutate",
+      "protectedCategory": "credentials_access",
+      "idempotent": false
+    },
+    {
+      "id": "workflow.store.google-play-media-standing-envelope",
+      "title": "Google Play media standing envelope",
+      "domainId": "domain.store",
+      "areaIds": [
+        "area.build-release"
+      ],
+      "trigger": "Google Play screenshots, feature graphics, or promo video are ready and a matching media standing envelope is current",
+      "instructions": "Upload only the locale, device-family, custom-store-listing, screenshot, feature-graphic, and promo-video assets covered by the exact current standing envelope. Verify every file digest and Play resource ID immediately before upload. Capture before-state and read back the resulting media set. Write store/proof/google-play-media-apply.json with approval ID, per-file digest, locale, device family, product-page/listing ID, provider operation IDs, readback state, and timestamps. Do not apply text metadata, products, testing tracks, or release state.",
+      "reads": [
+        "store/STORE_CONSOLE.md",
+        "store/app-store-listing/SCREENSHOTS.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.google-play-release",
+        "reference.store.aso-store-ops"
+      ],
+      "roleId": "role.marketing-guru",
+      "laneIds": [
+        "store_console",
+        "content_assets"
+      ],
+      "phaseIds": [
+        "phase.3"
+      ],
+      "dependencies": [
+        "workflow.store.store-screenshots-production",
+        "workflow.store.store-console-workflow",
+        "workflow.operations.agent-operations-ledger"
+      ],
+      "outputPaths": [
+        "store/proof/google-play-media-apply.json"
+      ],
+      "gateCommands": [
+        "check:store-screenshots"
+      ],
+      "providerIds": [
+        "provider.google-play"
+      ],
+      "founderOnlyActions": [
+        "approve Google Play media upload when no exact standing envelope exists"
+      ],
+      "actionClass": "mutate",
+      "protectedCategory": "credentials_access",
+      "idempotent": false
+    },
+    {
+      "id": "workflow.store.google-play-testing-track-standing-envelope",
+      "title": "Google Play testing-track standing envelope",
+      "domainId": "domain.store",
+      "areaIds": [
+        "area.build-release"
+      ],
+      "trigger": "An AAB is proven and an exact internal or closed-testing track standing envelope is current",
+      "instructions": "Upload the exact AAB digest and assign it only to the named internal or closed-testing track covered by the current standing envelope. Verify package, signing, version code, tester cohort, country scope, rollout state, and release notes immediately before upload. Read back processing and tester availability. Write store/proof/google-play-testing-track-apply.json with approval ID, AAB digest, version code, track, provider operation ID, processing/readback state, tester cohort, and timestamps. Production submission and public rollout remain separate founder decisions.",
+      "reads": [
+        "store/GOOGLE_PLAY_RELEASE.md",
+        "engineering/PRODUCTION_READINESS.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.store.google-play-release",
+        "reference.process.provider-proof"
+      ],
+      "roleId": "role.engineering-leader",
+      "laneIds": [
+        "store_console",
+        "engineering"
+      ],
+      "phaseIds": [
+        "phase.5b"
+      ],
+      "dependencies": [
+        "workflow.store.google-play-release",
+        "workflow.engineering.engineering-orchestration-ce-production-readiness",
+        "workflow.operations.agent-operations-ledger"
+      ],
+      "outputPaths": [
+        "store/proof/google-play-testing-track-apply.json"
+      ],
+      "gateCommands": [
+        "check:provider-proof"
+      ],
+      "providerIds": [
+        "provider.google-play"
+      ],
+      "founderOnlyActions": [
+        "approve testing-track upload when no exact standing envelope exists"
+      ],
+      "actionClass": "release",
+      "protectedCategory": "release",
+      "idempotent": false
+    },
+    {
+      "id": "workflow.engineering.source-change-manifest",
+      "title": "App source change ingestion",
+      "domainId": "domain.engineering",
+      "areaIds": [
+        "area.build-release"
+      ],
+      "trigger": "When design is accepted and after every accepted app-source, build-config, localization, onboarding, feature, paywall, SDK, or visual change",
+      "instructions": "Fingerprint the mobile source roots, dependency locks, build configuration, localization resources, analytics schema, onboarding, paywall, and privacy manifests. Compare them with the last accepted checkpoint. Write engineering/SOURCE_CHANGE_MANIFEST.json with changed paths, before/after digests, and every applicable Change Cascade Map type. A change can carry multiple types. Open the matching change-cascade work before the app slice merges. An empty change list is valid only when the current aggregate digest matches the accepted checkpoint.",
+      "reads": [
+        "run/app-source-fingerprint.sha256",
+        "design/design.md",
+        "engineering/TECH_SPEC.md",
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.process.change-cascade",
+        "reference.process.cascade-edges",
+        "reference.process.flow-traceability"
+      ],
+      "roleId": "role.mobile-engineer",
+      "laneIds": [
+        "engineering",
+        "orchestration"
+      ],
+      "phaseIds": [
+        "phase.3"
+      ],
+      "dependencies": [
+        "workflow.design.design-room-state-mutate-version-render"
+      ],
+      "outputPaths": [
+        "engineering/SOURCE_CHANGE_MANIFEST.json"
+      ],
+      "gateCommands": [
+        "check:change-cascade"
+      ],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true
     },
     {
       "id": "workflow.engineering.engineering-orchestration-ce-production-readiness",
@@ -3557,7 +4068,7 @@
         "reference.design.quality-lens",
         "reference.process.tool-recipes.engineering-and-agent-orchestration"
       ],
-      "roleId": "role.mobile-engineer",
+      "roleId": "role.engineering-leader",
       "laneIds": [
         "engineering",
         "orchestration"
@@ -3568,7 +4079,8 @@
       "dependencies": [
         "workflow.process.launch-trace-and-build-contracts",
         "workflow.design.design-room-state-mutate-version-render",
-        "workflow.operations.agent-operations-ledger"
+        "workflow.operations.agent-operations-ledger",
+        "workflow.engineering.source-change-manifest"
       ],
       "outputPaths": [
         "engineering/ENGINEERING_PLAN.md",
@@ -3699,7 +4211,8 @@
         "phase.5b"
       ],
       "dependencies": [
-        "workflow.engineering.engineering-orchestration-ce-production-readiness"
+        "workflow.engineering.engineering-orchestration-ce-production-readiness",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "growth/DEMO_VIDEO.md"
@@ -3742,7 +4255,8 @@
         "phase.5b"
       ],
       "dependencies": [
-        "workflow.engineering.engineering-orchestration-ce-production-readiness"
+        "workflow.engineering.engineering-orchestration-ce-production-readiness",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [],
       "gateCommands": [
@@ -3786,7 +4300,8 @@
         "phase.1b"
       ],
       "dependencies": [
-        "workflow.research.research-backed-spec"
+        "workflow.research.research-backed-spec",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "analytics/ANALYTICS.md",
@@ -3833,7 +4348,8 @@
         "phase.1d"
       ],
       "dependencies": [
-        "workflow.data.analytics-and-attribution-blueprint"
+        "workflow.data.analytics-and-attribution-blueprint",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "growth/PAID_UA.md"
@@ -3972,7 +4488,8 @@
         "phase.3b"
       ],
       "dependencies": [
-        "workflow.process.launch-trace-and-build-contracts"
+        "workflow.process.launch-trace-and-build-contracts",
+        "workflow.operations.agent-operations-ledger"
       ],
       "outputPaths": [
         "revenue/REVENUE_OPS.md"
@@ -4039,11 +4556,14 @@
         "area.growth-revenue"
       ],
       "trigger": "Immediately after design/design.md is accepted — build the local landing site while app implementation runs",
-      "instructions": "Build a runnable local landing site in growth/landing/ as soon as design/design.md is accepted. Do this work in parallel with app implementation. Use the launch-surface-producer prompt in agents/launch-surface-producer.md. Include one conversion goal, the approved promise, a mobile CTA, proof, responsive behavior, and a local build check. Include a short web onboarding or qualification flow only when the product contract needs it. Use current COPY_DECK.md strings. Show prices only when revenue/REVENUE_OPS.md records founder-approved prices. Create truthful screenshot slots and an update route, but label design renders as previews until real app captures exist. Declare landing_viewed, landing_cta_clicked, and waitlist_submitted before implementation. Keep motion progressive. Do not deploy from this node.",
+      "instructions": "Build a runnable local landing site in growth/landing/ as soon as design/design.md is accepted. Do this work in parallel with app implementation. Use the launch-surface-producer prompt in agents/launch-surface-producer.md. Include one conversion goal, the approved promise, a mobile CTA, proof, responsive behavior, and a local build check. Include a short web onboarding or qualification flow only when the product contract needs it. Use current COPY_DECK.md strings. Show prices only when revenue/REVENUE_OPS.md records founder-approved prices. Create truthful screenshot slots and an update route, but label design renders as previews until real app captures exist. Declare landing_viewed, landing_cta_clicked, and waitlist_submitted before implementation. Write growth/landing/surface-contract.json with SHA-256 digests for every canonical input, each Tier 1 locale, pricing/onboarding applicability decisions, and screenshot evidence. Keep motion progressive. Do not deploy from this node.",
       "reads": [
         "GEO_SEO.md",
         "analytics/ANALYTICS.md",
         "product/copy/COPY_BRIEF.md",
+        "product/copy/COPY_DECK.md",
+        "product/ONBOARDING.md",
+        "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
         "design/design.md"
       ],
       "consults": [
@@ -4574,6 +5094,16 @@
       "generated": false
     },
     {
+      "id": "artifact.engineering-source-change-manifest-json",
+      "path": "engineering/SOURCE_CHANGE_MANIFEST.json",
+      "ownerDomainId": "domain.engineering",
+      "laneIds": [
+        "engineering",
+        "orchestration"
+      ],
+      "generated": false
+    },
+    {
       "id": "artifact.engineering-tech-spec-md",
       "path": "engineering/TECH_SPEC.md",
       "ownerDomainId": "domain.process",
@@ -4875,6 +5405,15 @@
       "generated": false
     },
     {
+      "id": "artifact.run-app-source-fingerprint-sha256",
+      "path": "run/app-source-fingerprint.sha256",
+      "ownerDomainId": "domain.engineering",
+      "laneIds": [
+        "engineering"
+      ],
+      "generated": true
+    },
+    {
       "id": "artifact.skill-version-json",
       "path": "skill-version.json",
       "ownerDomainId": "domain.machine",
@@ -4885,6 +5424,13 @@
       "id": "artifact.skill-md",
       "path": "SKILL.md",
       "ownerDomainId": "domain.machine",
+      "laneIds": [],
+      "generated": false
+    },
+    {
+      "id": "artifact.state-change-cascade-receipt-json",
+      "path": "state/CHANGE_CASCADE_RECEIPT.json",
+      "ownerDomainId": "domain.process",
       "laneIds": [],
       "generated": false
     },
@@ -4975,6 +5521,35 @@
       "ownerDomainId": "domain.store",
       "laneIds": [
         "store_console"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.store-proof-google-play-media-apply-json",
+      "path": "store/proof/google-play-media-apply.json",
+      "ownerDomainId": "domain.store",
+      "laneIds": [
+        "store_console",
+        "content_assets"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.store-proof-google-play-metadata-apply-json",
+      "path": "store/proof/google-play-metadata-apply.json",
+      "ownerDomainId": "domain.store",
+      "laneIds": [
+        "store_console"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.store-proof-google-play-testing-track-apply-json",
+      "path": "store/proof/google-play-testing-track-apply.json",
+      "ownerDomainId": "domain.store",
+      "laneIds": [
+        "store_console",
+        "engineering"
       ],
       "generated": false
     },

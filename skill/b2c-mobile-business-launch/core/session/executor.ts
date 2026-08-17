@@ -4,7 +4,7 @@ import { existsSync, lstatSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import type { CompiledRunNode } from "../engine/compile.js";
 import { composeNodeBrief } from "../engine/node-brief.js";
-import { buildWorkerPrompt, validateKnowledgeReceipt } from "./worker-prompt.js";
+import { buildWorkerPrompt, validateKnowledgeReceipt, type WorkerAuthorization } from "./worker-prompt.js";
 
 /**
  * The seam real runtime execution (U6) plugs into. A session (U5) never knows HOW a node's work
@@ -37,6 +37,8 @@ export interface NodeExecutionContext {
   readonly now: string;
   readonly skillRootDir: string;
   readonly artifactPaths: Readonly<Record<string, string>>;
+  /** Exact dispatch-time authority, hashed into the prompt/receipt so a worker cannot widen it. */
+  readonly authorization?: WorkerAuthorization;
   /**
    * Refreshes this attempt's own heartbeat (and the session lock's) mid-execution. The fixture/
    * no-op executors resolve instantly and never need it, but a real executor (U6) awaiting a
@@ -79,16 +81,22 @@ export function buildWorkerCommand(runtime: Exclude<WorkerRuntime, "auto">, prom
   return { runtime, command: "cursor-agent", args: ["agent", "-p", prompt, "--sandbox", "enabled"], prompt };
 }
 
-function fingerprintPath(target: string): string {
+/** Standard SHA-256 of file bytes, reproducible with `sha256sum` or `shasum -a 256`. */
+export function receiptFileDigest(target: string): string {
+  const stat = lstatSync(target);
+  if (!stat.isFile()) throw new Error(`receipt digest target must be a regular file: ${target}`);
+  return createHash("sha256").update(readFileSync(target)).digest("hex");
+}
+
+/** Internal artifact fingerprint supports directory outputs; it is not a worker receipt digest. */
+function outputFingerprintPath(target: string): string {
   const hash = createHash("sha256");
   const visit = (current: string, relative: string): void => {
     const stat = lstatSync(current);
     hash.update(`${relative}\0${stat.mode}\0${stat.size}\0`);
     if (stat.isDirectory()) {
       for (const name of readdirSync(current).sort()) visit(path.join(current, name), path.posix.join(relative, name));
-    } else if (stat.isFile()) {
-      hash.update(readFileSync(current));
-    }
+    } else if (stat.isFile()) hash.update(readFileSync(current));
   };
   visit(target, ".");
   return hash.digest("hex");
@@ -100,7 +108,7 @@ async function runWorker(
   timeoutMs: number,
 ): Promise<{ status: number | null; stdout: string; stderr: string; timedOut: boolean }> {
   return await new Promise((resolve) => {
-    const child = spawn(command.command, [...command.args], { cwd, env: process.env, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(command.command, [...command.args], { cwd, env: workerEnvironment(command.runtime), stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
     const cap = (value: string, chunk: Buffer): string => `${value}${chunk.toString("utf8")}`.slice(-2_000_000);
@@ -127,6 +135,31 @@ async function runWorker(
   });
 }
 
+/** Do not leak arbitrary session/provider secrets into a specialist subprocess. */
+function workerEnvironment(runtime: Exclude<WorkerRuntime, "auto">): NodeJS.ProcessEnv {
+  const allowed = ["PATH", "HOME", "SHELL", "TMPDIR", "TMP", "TEMP", "LANG", "LC_ALL", "TERM", "COLORTERM", "CI", "XDG_CONFIG_HOME", "CODEX_HOME"];
+  if (runtime === "codex") allowed.push("OPENAI_API_KEY");
+  if (runtime === "claude") allowed.push("ANTHROPIC_API_KEY");
+  // Doppler is the skill's approved secret-injection boundary. Forward its service token, not
+  // arbitrary provider-specific variables; operators may add narrowly reviewed names explicitly.
+  allowed.push("DOPPLER_TOKEN");
+  for (const key of (process.env.B2C_WORKER_ENV_ALLOWLIST ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean))
+    allowed.push(key);
+  const env: NodeJS.ProcessEnv = {};
+  for (const key of allowed) if (process.env[key] !== undefined) env[key] = process.env[key];
+  env.B2C_WORKER_SANDBOX = "workspace-write";
+  return env;
+}
+
+function resolvedInside(root: string, relativePath: string): string | undefined {
+  const resolvedRoot = path.resolve(root);
+  const resolved = path.resolve(resolvedRoot, relativePath);
+  return resolved === resolvedRoot || resolved.startsWith(`${resolvedRoot}${path.sep}`) ? resolved : undefined;
+}
+
 /** Real bounded worker executor used by scheduled sessions. */
 export function createCliExecutor(requestedRuntime: WorkerRuntime = "auto"): NodeExecutor {
   return {
@@ -143,15 +176,33 @@ export function createCliExecutor(requestedRuntime: WorkerRuntime = "auto"): Nod
         nodes: [node],
         artifactBindings,
       });
+      const fileDigests: Record<string, string> = {};
       for (const contractPath of brief.contractFiles) {
-        if (!existsSync(path.join(context.workspaceDir, contractPath)))
+        const absolute = resolvedInside(context.workspaceDir, contractPath);
+        if (!absolute || !existsSync(absolute))
           return { status: "failed", outputs: [], evidence: [], error: `worker contract file is missing: ${contractPath}` };
+        fileDigests[contractPath] = `sha256:${receiptFileDigest(absolute)}`;
+      }
+      for (const artifactPath of brief.open) {
+        const absolute = resolvedInside(context.workspaceDir, artifactPath);
+        if (!absolute || !existsSync(absolute))
+          return { status: "failed", outputs: [], evidence: [], error: `required worker task artifact is missing: ${artifactPath}` };
+        fileDigests[artifactPath] = `sha256:${receiptFileDigest(absolute)}`;
       }
       for (const reference of brief.load) {
-        if (!existsSync(path.join(context.skillRootDir, reference.path)))
+        const absolute = resolvedInside(context.skillRootDir, reference.path);
+        if (!absolute || !existsSync(absolute))
           return { status: "failed", outputs: [], evidence: [], error: `mandatory worker knowledge is missing: ${reference.path}` };
+        fileDigests[reference.path] = `sha256:${receiptFileDigest(absolute)}`;
       }
-      const prompt = buildWorkerPrompt(brief, context.workspaceDir, context.skillRootDir);
+      for (const reference of brief.route) {
+        const absolute = resolvedInside(context.skillRootDir, reference.path);
+        if (!absolute || !existsSync(absolute))
+          return { status: "failed", outputs: [], evidence: [], error: `conditional worker knowledge route is missing: ${reference.path}` };
+        fileDigests[reference.path] = `sha256:${receiptFileDigest(absolute)}`;
+      }
+      const expectations = { fileDigests, authorization: context.authorization };
+      const prompt = buildWorkerPrompt(brief, context.workspaceDir, context.skillRootDir, expectations);
       let runtime = runtimes[0]!;
       let result: Awaited<ReturnType<typeof runWorker>> | undefined;
       const authFailures: string[] = [];
@@ -173,20 +224,20 @@ export function createCliExecutor(requestedRuntime: WorkerRuntime = "auto"): Nod
           error: `${runtime} worker exited ${String(result.status)}: ${result.stderr.trim().slice(-800)}${tried}`,
         };
       }
-      const receiptIssues = validateKnowledgeReceipt(`${result.stdout}\n${result.stderr}`, brief);
+      const receiptIssues = validateKnowledgeReceipt(`${result.stdout}\n${result.stderr}`, brief, expectations);
       if (receiptIssues.length > 0)
         return { status: "failed", outputs: [], evidence: [], error: `worker knowledge receipt rejected: ${receiptIssues.join("; ")}` };
       const outputs: NodeExecutionOutput[] = [];
       for (const artifactId of node.outputs) {
         const relativePath = context.artifactPaths[artifactId];
         if (!relativePath) return { status: "failed", outputs: [], evidence: [], error: `no path binding for declared output ${artifactId}` };
-        const absolutePath = path.join(context.workspaceDir, relativePath);
-        if (!existsSync(absolutePath))
+        const absolutePath = resolvedInside(context.workspaceDir, relativePath);
+        if (!absolutePath || !existsSync(absolutePath))
           return { status: "failed", outputs: [], evidence: [], error: `worker exited successfully but declared output is missing: ${relativePath}` };
         outputs.push({
           artifactId,
           path: relativePath,
-          fingerprint: fingerprintPath(absolutePath),
+          fingerprint: outputFingerprintPath(absolutePath),
           evidence: [`${runtime} worker produced ${relativePath}`, `knowledge receipt accepted for ${node.workflowId}`],
         });
       }

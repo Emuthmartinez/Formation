@@ -345,7 +345,7 @@ function main(): void {
       "Session Continuity",
       "Do not rely on chat memory",
       "role prompts",
-      "state/PROJECT_STATE.yaml",
+      "state/business-state.json",
       "operations/BUSINESS_ACCESS.md",
       "operations/business-access.json",
       "operations/AGENT_OPERATIONS.md",

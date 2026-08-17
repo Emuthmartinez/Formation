@@ -1,4 +1,5 @@
 import { mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { type Harness, writeCompletePaidUserAcquisition } from "./_harness.js";
 
@@ -516,6 +517,14 @@ export function register(h: Harness): void {
       script_id: "ugc/script-bank.md#FMT-002",
       judge_verdict: "survived — panel 2026-08-10; pacing and vocabulary judges passed on rewrite 2",
       believability: "passed — watched by one human who did not make it 2026-08-10; not clocked as AI or ad",
+      input_digests: {
+        "design/design.md": createHash("sha256")
+          .update(readFileSync(path.join(ugcComplete, "design/design.md")))
+          .digest("hex"),
+        "ugc/script-bank.md": createHash("sha256")
+          .update(readFileSync(path.join(ugcComplete, "ugc/script-bank.md")))
+          .digest("hex"),
+      },
     }),
   );
   runFixture(
@@ -606,4 +615,50 @@ export function register(h: Harness): void {
   writeCompletePaidUserAcquisition(paidUaStubReport);
   writeFileSync(path.join(paidUaStubReport, "growth", "paid-ua-report.csv"), "done\n", "utf8");
   runFixture("done paid UA with a stub report file fails", paidUaStubReport, "check-paid-user-acquisition.ts", 1, "paid_ua.report_content_thin");
+
+  const contentAssetMissingDigest = makeFixture("content-asset-input-digest-missing");
+  mkdirSync(path.join(contentAssetMissingDigest, "growth", "content-assets"), { recursive: true });
+  mkdirSync(path.join(contentAssetMissingDigest, "growth", "content-assets", "out"), { recursive: true });
+  writeFileSync(path.join(contentAssetMissingDigest, "growth", "content-assets", "out", "landing-hero.webp"), "fixture-bytes", "utf8");
+  writeFileSync(
+    path.join(contentAssetMissingDigest, "growth", "content-assets", "CONTENT_ASSETS.md"),
+    [
+      "# Content Assets",
+      "Route Matrix: Higgsfield or Remotion with Founder approval.",
+      "License status: commercial use checked.",
+      "Source Inputs",
+      "Composition Manifest",
+      "Render Commands",
+      "Claim Review",
+      "Output Registry",
+      "Public Use Gates",
+    ].join("\n"),
+    "utf8",
+  );
+  writeFileSync(
+    path.join(contentAssetMissingDigest, "growth", "content-assets", "manifest.json"),
+    JSON.stringify({
+      assets: [
+        {
+          asset_id: "landing-hero",
+          surface: "landing",
+          route: "local_composition",
+          status: "approved",
+          license_status: "owned",
+          inputs: ["design/design.md"],
+          outputs: ["growth/content-assets/out/landing-hero.webp"],
+          truth_constraints: ["no invented app UI"],
+          approvals: ["founder approval before public use"],
+        },
+      ],
+    }),
+    "utf8",
+  );
+  runFixture(
+    "generated asset without canonical input digest fails",
+    contentAssetMissingDigest,
+    "check-content-assets.ts",
+    1,
+    "content_assets.manifest.assets.0.input_digest.missing",
+  );
 }

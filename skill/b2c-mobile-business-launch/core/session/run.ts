@@ -12,6 +12,7 @@ import { validateBudgetLedger, validateBusinessState, validateControl } from "..
 import { grantableDomainIds, type BudgetLedgerDocument, type BusinessStateV2, type ControlFile } from "../schema/types.js";
 import { compilePlan, type CatalogInput, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
 import { computeFrontier } from "../engine/frontier.js";
+import { observeAppSourceFingerprint } from "../engine/source-fingerprint.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
 import {
   acceptVerification,
@@ -193,6 +194,25 @@ export function loadLedgerFile(ledgerPath: string, now: string): BudgetLedgerDoc
 export function loadCatalogFile(catalogPath: string): CatalogInput {
   const raw = tryLoadJson(catalogPath) as CatalogInput | undefined;
   return raw ?? { version: "catalog.empty", artifacts: [], workflows: [] };
+}
+
+/** Hook used by installed briefs/CI to reject a stale or substituted executable catalog. */
+export function assertCatalogCompatibility(catalog: CatalogInput, expectedVersion?: string): void {
+  if (!catalog.version || catalog.version === "catalog.empty") throw new Error("catalog.version_missing: executable catalog is missing or invalid");
+  if (expectedVersion && catalog.version !== expectedVersion) throw new Error(`catalog.version_stale: expected ${expectedVersion}, found ${catalog.version}`);
+}
+
+/** Load the installer-owned catalog version automatically; a present but incomplete binding fails closed. */
+export function runtimeCatalogVersion(workspace: string): string | undefined {
+  const manifestPath = path.join(workspace, ".b2c-launch", "runtime.json");
+  if (!existsSync(manifestPath)) return undefined;
+  const manifest = tryLoadJson(manifestPath);
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) throw new Error("catalog.runtime_binding_invalid: runtime.json is not an object");
+  const version = (manifest as Record<string, unknown>).catalogVersion;
+  if (typeof version !== "string" || !version.trim()) {
+    throw new Error("catalog.runtime_binding_stale: runtime.json has no catalogVersion; refresh the installed entrypoints");
+  }
+  return version;
 }
 
 /** Records evaluator.evaluate()'s full decision detail per node id as frontier examines it, so the digest can translate the *precise* reasonCode rather than a generic fallback. */
@@ -496,6 +516,12 @@ async function main(): Promise<number> {
     const sessionNow = () => new Date().toISOString();
     let ledger = loadLedgerFile(paths.ledger, startedAt);
     const catalog = loadCatalogFile(paths.catalog);
+    const explicitCatalogVersion = brief.expectedCatalogVersion ?? process.env.B2C_EXPECTED_CATALOG_VERSION;
+    const installedCatalogVersion = runtimeCatalogVersion(workspace);
+    if (explicitCatalogVersion && installedCatalogVersion && explicitCatalogVersion !== installedCatalogVersion) {
+      throw new Error(`catalog.version_binding_conflict: brief expected ${explicitCatalogVersion}, installed runtime expected ${installedCatalogVersion}`);
+    }
+    assertCatalogCompatibility(catalog, explicitCatalogVersion ?? installedCatalogVersion);
     const plan = compilePlan(catalog, startedAt);
 
     // budget_funded closes over this ledger snapshot (captured once, before dispatch starts) —
@@ -537,6 +563,7 @@ async function main(): Promise<number> {
     } else {
       run = seedRunState(plan, businessState, { ownerSessionId: sessionId, ttlSeconds: 300, wallClockCapSeconds, now: startedAt });
     }
+    observeAppSourceFingerprint(plan, run, workspace, startedAt);
     writeRunState(paths.runState, run);
 
     const dispatchHooks: DispatchHooks = createDispatchHooks({
@@ -593,6 +620,8 @@ async function main(): Promise<number> {
       }
       heartbeat(paths.sessionLock, sessionId);
 
+      observeAppSourceFingerprint(plan, run, workspace, sessionNow());
+      writeRunState(paths.runState, run);
       applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const frontier = computeFrontier(plan, run, businessState, captured);
       let readyIds: RunNodeId[] = frontier.ready;
@@ -637,7 +666,20 @@ async function main(): Promise<number> {
             }
             continue;
           }
-          const decision = decisions.get(nodeId) ?? captured.evaluate(node);
+          // Re-evaluate at the final dispatch seam. Frontier decisions are planning evidence,
+          // not authority: grants, prerequisites, waivers, budgets, and time bounds may have
+          // changed since that pass, just as standing envelopes may have above.
+          const decision = captured.evaluate(node);
+          if (!decision.allowed) {
+            const nodeState = run.nodes[nodeId];
+            if (nodeState) {
+              nodeState.status = "blocked";
+              nodeState.blocker = decision.parkReason ?? "Dispatch-time authority no longer permits this work.";
+              run.updatedAt = sessionNow();
+              writeRunState(paths.runState, run);
+            }
+            continue;
+          }
 
           let estimateEntryId: string | undefined;
           if (decision.allowed && decision.estimateAmount !== undefined) {
@@ -702,12 +744,45 @@ async function main(): Promise<number> {
           heartbeatTimer.unref();
           let result: Awaited<ReturnType<typeof executor.execute>>;
           try {
+            const authorization = {
+              workflowId: node.workflowId,
+              runId: run.runId,
+              attemptId: attempt.id,
+              evaluatedAt: attemptTime,
+              actionClass: node.actionClass,
+              ...(node.protectedCategory ? { protectedCategory: node.protectedCategory } : {}),
+              approvalRequirements: node.approvals.map((approval) => {
+                const provenance = run.approvalProvenance?.[approval.id];
+                return {
+                  id: approval.id,
+                  description: approval.description,
+                  status: run.approvals[approval.id] ?? "pending",
+                  ...(provenance
+                    ? {
+                        envelopeId: provenance.envelopeId,
+                        actionId: provenance.actionId,
+                        validatedAt: provenance.validatedAt,
+                      }
+                    : {}),
+                };
+              }),
+              autonomy: {
+                reasonCode: decision.reasonCode,
+                ...(decision.grantLevel ? { grantLevel: decision.grantLevel } : {}),
+                ...(decision.waiverId ? { waiverId: decision.waiverId } : {}),
+                evidenceRefs: [...decision.evidenceRefs],
+                ...(decision.estimateAmount !== undefined ? { estimateAmount: decision.estimateAmount } : {}),
+                ...(decision.estimateCurrency ? { estimateCurrency: decision.estimateCurrency } : {}),
+                ...(decision.remainingBudget !== undefined ? { remainingBudget: decision.remainingBudget } : {}),
+              },
+            } as const;
             result = await executor.execute(node, {
               runId: run.runId,
               attemptId: attempt.id,
               workspaceDir: workspace,
               skillRootDir: skillRoot(),
               artifactPaths: Object.fromEntries(plan.artifactBindings.map((binding) => [binding.artifactId, binding.path])),
+              authorization,
               now: attemptTime,
               heartbeat: refreshAttemptHeartbeat,
             });

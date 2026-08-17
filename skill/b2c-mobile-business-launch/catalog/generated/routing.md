@@ -64,7 +64,7 @@ Generated from catalog/references.ts.
 | Load when | Reference |
 | --- | --- |
 | deciding which project or config a credential belongs in; setting up secrets for a new business; adding a second business to an existing secret store; or splitting secrets across web, mobile, backend, and CI — the portfolio-shape companion to secrets-management.md, which covers one secret at a time | [`knowledge/operations/doppler-organization.md`](../../knowledge/operations/doppler-organization.md) |
-| every broad launch start; before account/social/Doppler bootstrap; when the founder is unsure; whenever an agent is about to hand back a checklist instead of operating the business | [`knowledge/operations/founder-zero-operator.md`](../../knowledge/operations/founder-zero-operator.md) |
+| always for dispatched business workers; especially every broad launch start, account/social/Doppler bootstrap, founder uncertainty, or attempted checklist handoff | [`knowledge/operations/founder-zero-operator.md`](../../knowledge/operations/founder-zero-operator.md) |
 | before authenticated browser/API/CLI/native action on any provider, social, or store account | [`knowledge/operations/frontier-agent-operations.md`](../../knowledge/operations/frontier-agent-operations.md) |
 | before using or replacing any paid/account-gated tool, before running a free fallback, or when a service is missing from the runtime | [`knowledge/operations/paid-tool-routing.md`](../../knowledge/operations/paid-tool-routing.md) |
 | once the app is live (phase_6/phase_6b); after first store approval; on "what now"; for weekly ops, incidents, review responses, retention and kill-or-scale reviews, or resuming a live app; when a second business exists | [`knowledge/operations/post-launch-operations.md`](../../knowledge/operations/post-launch-operations.md) |
@@ -135,7 +135,7 @@ Generated from catalog/references.ts.
 | Load when | Reference |
 | --- | --- |
 | before writing any words a user reads: conversion copy (hero/CTA, store, paywall) and every in-app string (buttons, empty states, errors, settings); and l10n readiness | [`knowledge/words/conversion-copy.md`](../../knowledge/words/conversion-copy.md) |
-| before writing or reviewing any founder-facing copy, or any marketing copy this skill generates — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO | [`knowledge/words/no-slop-writing.md`](../../knowledge/words/no-slop-writing.md) |
+| always for dispatched business workers; apply directly before founder-facing or marketing copy — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO | [`knowledge/words/no-slop-writing.md`](../../knowledge/words/no-slop-writing.md) |
 
 ## Building The App
 

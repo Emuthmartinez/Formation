@@ -29,6 +29,21 @@ export interface WorkflowSeed {
   costEstimate?: CatalogWorkflowDef["costEstimate"];
 }
 
+const READINESS_WORKFLOW: WorkflowId = "workflow.operations.agent-operations-ledger";
+const READINESS_BOOTSTRAP_WORKFLOWS = new Set<WorkflowId>([
+  "workflow.operations.paid-tool-routing-and-fallback",
+  "workflow.operations.secrets-baseline-and-routing",
+  "workflow.operations.founder-zero-operator-bootstrap",
+  READINESS_WORKFLOW,
+]);
+
+function dependenciesFor(seed: WorkflowSeed): WorkflowId[] {
+  const dependencies = [...(seed.dependencies ?? [])];
+  const businessProviderWork = seed.providers?.length && !seed.domainId.startsWith("domain.process") && !seed.domainId.startsWith("domain.orchestration");
+  if (businessProviderWork && !READINESS_BOOTSTRAP_WORKFLOWS.has(seed.id) && !dependencies.includes(READINESS_WORKFLOW)) dependencies.push(READINESS_WORKFLOW);
+  return dependencies;
+}
+
 /**
  * Ported from runtime/graph/workflows/helpers.ts, restructured for the v2 shape. Two
  * differences from v1: `negativeTriggers` is dropped (grep-confirmed dead — every v1
@@ -50,7 +65,7 @@ export function workflow(seed: WorkflowSeed): CatalogWorkflowDef {
     roleId: seed.roleId,
     laneIds: seed.laneIds ?? [],
     phaseIds: seed.phaseIds ?? [],
-    dependencies: seed.dependencies ?? [],
+    dependencies: dependenciesFor(seed),
     outputPaths: seed.outputPaths ?? [],
     gateCommands: seed.gates ?? [],
     providerIds: seed.providers ?? [],

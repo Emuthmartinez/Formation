@@ -45,7 +45,7 @@ const defaultSkillRoot = path.resolve(scriptDir, "../../..");
 const SURFACE_STATUSES = new Set(["updated", "unaffected", "blocked"]);
 
 interface CascadeMap {
-  surfaces: Record<string, { label?: string }>;
+  surfaces: Record<string, { label?: string; evidenceDimensions: string[] }>;
   changeTypes: Record<string, { label?: string; cascade_to: string[] }>;
 }
 
@@ -90,7 +90,13 @@ function loadCascadeMap(skillRoot: string, issues: Issue[]): CascadeMap | undefi
 
   const surfaces: CascadeMap["surfaces"] = {};
   for (const [id, value] of Object.entries(surfacesRaw)) {
-    surfaces[id] = { label: isRecord(value) ? asString(value.label) : undefined };
+    surfaces[id] = {
+      label: isRecord(value) ? asString(value.label) : undefined,
+      evidenceDimensions:
+        isRecord(value) && Array.isArray(value.evidence_dimensions)
+          ? value.evidence_dimensions.filter((entry): entry is string => typeof entry === "string")
+          : [],
+    };
   }
 
   const changeTypes: CascadeMap["changeTypes"] = {};
@@ -129,8 +135,6 @@ issues.push(...loaded.issues);
 if (map && loaded.state) {
   const recorded = getPath(loaded.state, "change_cascade");
 
-  // An absent or empty block is clean: most launches have not shipped a
-  // post-launch change yet. This gate gets teeth the moment one is recorded.
   const entries = Array.isArray(recorded) ? recorded : [];
   if (recorded !== undefined && !Array.isArray(recorded)) {
     issues.push(
@@ -138,6 +142,25 @@ if (map && loaded.state) {
         "error",
         "change_cascade.block_malformed",
         "state/PROJECT_STATE.yaml change_cascade must be a list of recorded changes.",
+        "state/PROJECT_STATE.yaml",
+      ),
+    );
+  }
+
+  const designStatus = asString(getPath(loaded.state, "lanes.design.status"))?.toLowerCase();
+  if (
+    ["done", "accepted"].includes(designStatus ?? "") &&
+    !entries.some((entry) => {
+      if (!isRecord(entry)) return false;
+      const values = Array.isArray(entry.types) ? entry.types : [entry.type];
+      return values.some((value) => asString(value) === "design_contract_lock");
+    })
+  ) {
+    issues.push(
+      issue(
+        "error",
+        "change_cascade.design_contract_lock.missing",
+        "The design lane is accepted, but no design_contract_lock cascade exists. Create the landing baseline and account for every public surface before build work can be called ready.",
         "state/PROJECT_STATE.yaml",
       ),
     );
@@ -159,28 +182,29 @@ if (map && loaded.state) {
     }
 
     const id = asString(entry.id) ?? `#${index}`;
-    const type = asString(entry.type);
+    const legacyType = asString(entry.type);
+    const types = Array.isArray(entry.types) ? entry.types.map(asString).filter((value): value is string => Boolean(value)) : legacyType ? [legacyType] : [];
 
-    if (!type) {
+    if (types.length === 0) {
       issues.push(
         issue(
           "error",
           `change_cascade.${id}.type_missing`,
-          `change_cascade entry "${id}" has no type. Classify it against the Change Cascade Map before calling the change done.`,
+          `change_cascade entry "${id}" has no types. Classify every applicable type before calling the change done.`,
           "state/PROJECT_STATE.yaml",
         ),
       );
       return;
     }
 
-    const definition = map.changeTypes[type];
-    if (!definition) {
+    const unknownTypes = types.filter((type) => !map.changeTypes[type]);
+    if (unknownTypes.length > 0) {
       const known = Object.keys(map.changeTypes).join(", ");
       issues.push(
         issue(
           "error",
           `change_cascade.${id}.unknown_type`,
-          `change_cascade entry "${id}" has type "${type}", which is not in cascade-edges.yaml. Known types: ${known}.`,
+          `change_cascade entry "${id}" has unknown type(s) "${unknownTypes.join(", ")}". Known types: ${known}.`,
           "state/PROJECT_STATE.yaml",
         ),
       );
@@ -189,9 +213,10 @@ if (map && loaded.state) {
 
     graded += 1;
     const surfacesRecorded = isRecord(entry.surfaces) ? entry.surfaces : {};
+    const requiredSurfaces = [...new Set(types.flatMap((type) => map.changeTypes[type]?.cascade_to ?? []))];
 
     // Every surface the map says is impacted must be accounted for.
-    for (const surface of definition.cascade_to) {
+    for (const surface of requiredSurfaces) {
       const record = surfacesRecorded[surface];
       const label = map.surfaces[surface]?.label ?? surface;
 
@@ -200,7 +225,7 @@ if (map && loaded.state) {
           issue(
             "error",
             `change_cascade.${id}.${surface}.unaccounted`,
-            `change_cascade entry "${id}" (${definition.label ?? type}) does not account for the ${label} surface. ` +
+            `change_cascade entry "${id}" (${types.join(" + ")}) does not account for the ${label} surface. ` +
               `Record it as updated with evidence, unaffected with a reason, or blocked — a surface left out by omission is the change-cascade-incomplete failure card.`,
             "state/PROJECT_STATE.yaml",
           ),
@@ -230,6 +255,22 @@ if (map && loaded.state) {
             "state/PROJECT_STATE.yaml",
           ),
         );
+      }
+
+      if (status === "updated") {
+        const variants = Array.isArray(record.variants) ? record.variants : [];
+        for (const dimension of map.surfaces[surface]?.evidenceDimensions ?? []) {
+          if (!variants.some((variant) => isRecord(variant) && asString(variant[dimension])?.trim() && asString(variant.evidence)?.trim())) {
+            issues.push(
+              issue(
+                "error",
+                `change_cascade.${id}.${surface}.${dimension}_evidence_missing`,
+                `change_cascade entry "${id}" marks ${label} updated but has no ${dimension}-keyed variant evidence. Record every applicable ${dimension} separately.`,
+                "state/PROJECT_STATE.yaml",
+              ),
+            );
+          }
+        }
       }
 
       if (status === "unaffected" && !asString(record.reason)?.trim()) {

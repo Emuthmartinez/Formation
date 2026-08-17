@@ -86,6 +86,8 @@ growth/FASTLANE_OPS.md           # Fastlane workspace, connections, content engi
 OUTREACH.md               # endorsement/partner drafts when relevant
 brand.html                # optional rendered brand book
 landing/                  # optional pre-launch funnel
+growth/landing/surface-contract.json # canonical input digests plus locale, pricing, onboarding, analytics, and screenshot reconciliation
+engineering/SOURCE_CHANGE_MANIFEST.json # app-source checkpoint and typed changed-path manifest
 screenshots/              # raw MobAI/native iOS/device captures, compositions, and final store upload assets
 content-assets/           # Remotion/local media workspace, manifest, copy inputs, render inputs, and rendered outputs
 fastlane/                 # campaign brief, prompts, angles, preferences, sanitized API logs, runs, schedules, metrics
@@ -853,6 +855,7 @@ Use when App Store or Play Store screenshots, previews, icons, feature graphics,
 Must include:
 - current official screenshot/asset sources checked with URLs and dates
 - device matrix by platform, device class, display well, locale, required/optional status, and dimensions
+- complete locale × supported device-family × product-page coverage: iPhone and iPad for Apple; phone, 7-inch tablet, and 10-inch tablet for Google Play; default and each custom page or listing in scope
 - raw MobAI/native iOS/device capture path, Codex Desktop native iOS/XcodeBuildMCP capture path, serve-sim stream capture path, SnapshotPreviews preview-only path when applicable, production composition path, design-system frame path, final upload path, visual proof path, and upload status
 - screenshot slot strategy: first three conversion frames, source screen, headline, copy overlay, claim risk, localization, and production readiness
 - App Icon and App Preview route, source inputs, output paths, thumbnail/poster-frame QA, and founder approval gate when in scope
@@ -875,6 +878,7 @@ Must include:
 - Remotion license status or founder approval before commercial output
 - source input inventory: screenshots, recordings, `design/design.md`, copy files, audio, captions, logos, and rights notes
 - composition manifest with asset ID, surface, route, status, composition ID, dimensions, duration, inputs, outputs, truth constraints, approvals, render proof, and license status
+- `input_digests` with a SHA-256 digest for every local input. A mismatch makes the asset stale and requires regeneration; retain the prior row as `superseded`.
 - render commands for Remotion previews, stills, and videos when Remotion is selected
 - claim review against `APP_STORE_LISTING.md`, `revenue/REVENUE_OPS.md`, `trust/PRIVACY.md`, `trust/TERMS.md`, onboarding/paywall copy, and store policy constraints
 - output registry with target surface, local path, QA state, and next gate

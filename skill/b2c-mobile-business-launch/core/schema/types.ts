@@ -131,6 +131,14 @@ export const grantableDomainIds: readonly GrantableDomainId[] = [
 
 export const systemDomainIds: readonly string[] = ["domain.process", "domain.orchestration"];
 
+/** Every domain the execution engine may compile. System domains are runtime-owned and never founder-grantable. */
+export type SystemDomainId = "domain.process" | "domain.orchestration" | "domain.machine";
+export type DomainId = GrantableDomainId | SystemDomainId;
+
+export function isSystemDomainId(value: string): value is SystemDomainId {
+  return value === "domain.process" || value === "domain.orchestration" || value === "domain.machine";
+}
+
 /** Business units are a copy-layer grouping over domains (KTD3); a unit selection writes the same grant level to every member domain. */
 export type BusinessUnit = "Product" | "Design" | "Engineering" | "Growth" | "Analytics" | "Revenue" | "Store" | "Trust" | "Operations";
 

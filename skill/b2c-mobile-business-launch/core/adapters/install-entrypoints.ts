@@ -25,6 +25,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { toCatalogInput } from "../../catalog/bridge.js";
+import { composeCatalog } from "../../catalog/index.js";
 import { expandHome, flagBoolean, flagString, parseFlags } from "../../tooling/lib/launch-state.js";
 import { isMainModule } from "../lib/cli.js";
 
@@ -33,6 +35,10 @@ const defaultSkillRoot = path.resolve(scriptDir, "..", "..");
 
 /** Marked a v1 PostToolUse entry as owned by this skill (tooling/lib/hook-contract.ts, deleted at cutover). */
 const MANAGED_MARKER = "b2c-mobile-business-launch";
+const RUNTIME_DIR = ".b2c-launch";
+const BUSINESS_CONTEXT_PATH = path.join(RUNTIME_DIR, "BUSINESS_CONTEXT.md");
+const RUNTIME_MANIFEST_PATH = path.join(RUNTIME_DIR, "runtime.json");
+const RUNTIME_CATALOG_PATH = "catalog.json";
 
 export interface HookCommand {
   type?: string;
@@ -126,6 +132,56 @@ export function readEntrypointTemplates(skillRoot: string): Map<string, string> 
   return files;
 }
 
+export interface InstalledRuntimeManifest {
+  schemaVersion: "1.0.0";
+  skill: "b2c-mobile-business-launch";
+  skillVersion: string;
+  skillRoot: string;
+  skillRootEnv: "B2C_LAUNCH_SKILL_ROOT";
+  installedSkillName: "b2c-mobile-business-launch";
+  catalogVersion: string;
+  catalogPath: string;
+  knowledgeRoot: string;
+}
+
+/** Durable binding from a generated business repo to the exact skill knowledge and catalog used. */
+export function buildInstalledRuntimeManifest(skillRoot: string): InstalledRuntimeManifest {
+  const catalog = composeCatalog(skillRoot);
+  return {
+    schemaVersion: "1.0.0",
+    skill: MANAGED_MARKER,
+    skillVersion: catalog.skillVersion,
+    skillRoot: path.resolve(skillRoot),
+    skillRootEnv: "B2C_LAUNCH_SKILL_ROOT",
+    installedSkillName: MANAGED_MARKER,
+    catalogVersion: toCatalogInput(catalog).version,
+    catalogPath: RUNTIME_CATALOG_PATH,
+    knowledgeRoot: path.join(path.resolve(skillRoot), "knowledge"),
+  };
+}
+
+function preserveBeforeManagedRewrite(target: string, relativePath: string, nextContent: string): string | undefined {
+  const destination = path.join(target, relativePath);
+  if (!existsSync(destination)) return undefined;
+  const current = readFileSync(destination, "utf8");
+  if (current === nextContent) return undefined;
+  const preservedPath = path.join(target, RUNTIME_DIR, "preserved-entrypoints", relativePath);
+  mkdirSync(path.dirname(preservedPath), { recursive: true });
+  writeFileSync(preservedPath, current);
+  return path.relative(target, preservedPath).split(path.sep).join("/");
+}
+
+function ensureBusinessContext(target: string, vars: Readonly<Record<string, string>>): void {
+  const destination = path.join(target, BUSINESS_CONTEXT_PATH);
+  if (existsSync(destination)) return;
+  mkdirSync(path.dirname(destination), { recursive: true });
+  const appName = vars.APP_NAME ?? "this app";
+  writeFileSync(
+    destination,
+    `# ${appName} Business Context\n\nThis founder-owned file survives entrypoint refreshes. Record business-specific stack, providers, locales, approved pricing, deploy targets, store teams, voice constraints, and role-specific exceptions here. Do not put secrets in this file.\n`,
+  );
+}
+
 export interface HookStripResult {
   readonly settings: HookSettings;
   readonly removedCount: number;
@@ -210,7 +266,9 @@ function runMain(): void {
   const stripped = stripManagedHookEntries(settings);
 
   if (!apply) {
-    console.log(`install-entrypoints: DRY RUN — would write ${templates.size} entrypoint file(s) under ${target}:`);
+    console.log(
+      `install-entrypoints: DRY RUN — would write ${templates.size} managed entrypoint file(s), a versioned catalog, and a runtime binding under ${target}:`,
+    );
     for (const relativePath of templates.keys()) console.log(`  ${path.join(target, relativePath)}`);
     console.log(
       stripped.changed
@@ -220,15 +278,27 @@ function runMain(): void {
     return;
   }
 
+  const preserved: string[] = [];
   for (const [relativePath, content] of templates) {
     const destination = path.join(target, relativePath);
+    const rendered = applyTemplateVars(content, vars);
+    const preservedPath = preserveBeforeManagedRewrite(target, relativePath, rendered);
+    if (preservedPath) preserved.push(preservedPath);
     mkdirSync(path.dirname(destination), { recursive: true });
-    writeFileSync(destination, applyTemplateVars(content, vars));
+    writeFileSync(destination, rendered);
   }
+  ensureBusinessContext(target, vars);
+  const catalog = composeCatalog(skillRoot);
+  const manifest = buildInstalledRuntimeManifest(skillRoot);
+  mkdirSync(path.join(target, RUNTIME_DIR), { recursive: true });
+  writeFileSync(path.join(target, RUNTIME_CATALOG_PATH), `${JSON.stringify(toCatalogInput(catalog), null, 2)}\n`);
+  writeFileSync(path.join(target, RUNTIME_MANIFEST_PATH), `${JSON.stringify(manifest, null, 2)}\n`);
   if (stripped.changed) {
     writeFileSync(settingsPath, `${JSON.stringify(stripped.settings, null, 2)}\n`);
   }
   console.log(`install-entrypoints: wrote ${templates.size} entrypoint file(s) under ${target}.`);
+  console.log(`install-entrypoints: bound skill ${manifest.skillVersion} at ${manifest.skillRoot} and wrote ${RUNTIME_CATALOG_PATH}.`);
+  if (preserved.length > 0) console.log(`install-entrypoints: preserved ${preserved.length} replaced file(s) under ${RUNTIME_DIR}/preserved-entrypoints/.`);
   console.log(
     stripped.changed
       ? `install-entrypoints: removed ${stripped.removedCount} managed hook entr${stripped.removedCount === 1 ? "y" : "ies"} from ${settingsPath} (${stripped.preservedForeignCount} foreign entr${stripped.preservedForeignCount === 1 ? "y" : "ies"} preserved).`

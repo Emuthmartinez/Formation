@@ -34,6 +34,11 @@ project:
   kickoff_date: ""
   platforms:
     - ios
+  # Declare the Apple device families the binary actually supports. Remove ipad for an
+  # intentionally iPhone-only app; screenshot validation uses this list instead of guessing.
+  supported_device_families:
+    - iphone
+    - ipad
   bundle_ids:
     ios: "com.example.app"
     android: ""

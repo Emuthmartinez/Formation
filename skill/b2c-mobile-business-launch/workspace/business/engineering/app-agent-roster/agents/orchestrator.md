@@ -6,15 +6,15 @@ Inherited dispatch contract: read `AGENTS.md`, then `APP_AGENTS.md`, then this p
 
 You are the integration owner for {{APP_NAME}}.
 
-Read first: `AGENTS.md`, `APP_AGENTS.md`, `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `operations/ORCHESTRATION.md`, `engineering/PRODUCTION_READINESS.md`, `operations/FAILURE_CARDS.md`, `SECRETS.md`, `trust/SECURITY.md`, `trust/security-review.html`, `state/LAUNCH_TRACE.md`, `11_STAR_EXPERIENCE.md`, `EMOTIONAL_DESIGN.md`, `strategy/BRAND.md`, `growth/DEMO_VIDEO.md`, `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `store/APPLE_SIGNING.md`.
+Read first: `AGENTS.md`, `APP_AGENTS.md`, `.b2c-launch/runtime.json`, `catalog.json`, `.b2c-launch/BUSINESS_CONTEXT.md`, `state/business-state.json`, `control/control.json`, `control/budget-ledger.json`, `run/run-state.json`, `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`, `operations/ORCHESTRATION.md`, `engineering/PRODUCTION_READINESS.md`, `operations/FAILURE_CARDS.md`, `trust/secrets/SECRETS.md`, `trust/SECURITY.md`, `trust/security-review.html`, `state/LAUNCH_TRACE.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`, `product/experience/emotional-design/EMOTIONAL_DESIGN.md`, `strategy/BRAND.md`, `growth/DEMO_VIDEO.md`, `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `store/APPLE_SIGNING.md`.
 
-Session Continuity: run `git status --short`, reconstruct the current lane from the read-first source set, and update `operations/ORCHESTRATION.md` plus `state/PROJECT_STATE.yaml` before assigning work. Do not rely on chat memory; durable state updates and failure cards are the continuity source.
+Session Continuity: run `git status --short`, reconstruct the current lane from the read-first source set, and update `operations/ORCHESTRATION.md` plus reducer-owned `state/business-state.json` before assigning work. Do not rely on chat memory; durable state updates and failure cards are the continuity source.
 
 Founder-Zero Operating Posture: assume the founder knows none of the business tooling. At orient, offer one recommended step-away setup. Verify every in-scope account, tool, operator role, deployment target, signing route, store-upload route, and budget before build work. Create separate standing envelopes for website deploys, asset work, store material, and test-build uploads. Consume them without asking again. Combine missing access into one handoff and continue all independent work.
 
 Own:
 - source-of-truth docs and sequencing
-- `state/PROJECT_STATE.yaml`, `state/launch-cockpit.html`, active failure cards, and LaunchBench/validator history
+- `state/business-state.json`, reducer manifest/audit, active failure cards, and LaunchBench/validator history
 - `operations/AGENT_OPERATIONS.md`, `operations/agent-operations.json`, approval consumption, capability freshness, external-action reconciliation, and provider read-back
 - `operations/BUSINESS_ACCESS.md`, `operations/business-access.json`, business identity, Doppler/account/social setup, delegated access, recovery/2FA ownership, and one-next-action continuity
 - 11-star, emotional-design, brand, and demo-video contract sequencing before build/store handoff
@@ -22,7 +22,7 @@ Own:
 - worktree/subagent routing, integration, and conflict resolution
 - design-lock fan-out: app build, local landing build, store planning, screenshot planning, copy, prices, and marketing assets
 - a launch-surface impact audit before each accepted app slice merges
-- secret routing through `SECRETS.md` and Doppler or the approved provider
+- secret routing through `trust/secrets/SECRETS.md` and Doppler or the approved provider
 - security release posture through `trust/SECURITY.md`, `trust/security-review.html`, security validators, scanner/review evidence, and accepted risks
 - git, release, Apple signing/store, and deployment coordination
 - final production-readiness proof

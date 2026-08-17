@@ -50,6 +50,56 @@ export function register(h: Harness): void {
   runFixture("complete Apple App Store requirements packet passes", clean, "check-apple-app-store-requirements.ts", 0);
   runFixture("complete store console packet passes", clean, "check-store-console-packet.ts", 0);
   runFixture("complete store screenshots packet passes", clean, "check-store-screenshots.ts", 0);
+  const iphoneOnlyScreenshots = makeFixture("iphone-only-screenshot-matrix");
+  writeCompleteStoreScreenshots(iphoneOnlyScreenshots);
+  const iphoneOnlyState = readState(iphoneOnlyScreenshots);
+  const iphoneOnlyProject = expectRecord(iphoneOnlyState.project, "project");
+  iphoneOnlyProject.supported_device_families = ["iphone"];
+  iphoneOnlyProject.platforms = ["ios"];
+  expectRecord(iphoneOnlyProject.bundle_ids, "bundle_ids").android = "";
+  Object.assign(getLane(iphoneOnlyState, "store_console"), { status: "done", evidence: ["SCREENSHOTS.md"] });
+  writeState(iphoneOnlyScreenshots, iphoneOnlyState);
+  const rubricExample = JSON.parse(
+    readFileSync(path.join(skillRoot, "workspace/business/store/app-store-listing/screenshot-rubric-scores.example.json"), "utf8"),
+  ) as { slots: Array<Record<string, unknown>> };
+  const iphoneSlot = {
+    ...rubricExample.slots[0],
+    product_page: "default",
+    observed_evidence: "iPhone-only fixture shows the blue primary action and truthful headline.",
+  };
+  writeFileSync(
+    path.join(iphoneOnlyScreenshots, "screenshot-rubric-scores.json"),
+    `${JSON.stringify({ ...rubricExample, generated_at: "2026-08-17T00:00:00Z", slots: [iphoneSlot] }, null, 2)}\n`,
+    "utf8",
+  );
+  runFixture(
+    "completed iPhone-only matrix does not fabricate an iPad requirement",
+    iphoneOnlyScreenshots,
+    "check-store-screenshots.ts",
+    1,
+    "store_screenshots.rubric_final_png_missing",
+    [],
+    undefined,
+    "store_screenshots.matrix.en-US.ipad_missing",
+  );
+  const ipadCapableScreenshots = makeFixture("ipad-capable-screenshot-matrix");
+  writeCompleteStoreScreenshots(ipadCapableScreenshots);
+  const ipadState = readState(ipadCapableScreenshots);
+  expectRecord(ipadState.project, "project").supported_device_families = ["iphone", "ipad"];
+  Object.assign(getLane(ipadState, "store_console"), { status: "done", evidence: ["SCREENSHOTS.md"] });
+  writeState(ipadCapableScreenshots, ipadState);
+  writeFileSync(
+    path.join(ipadCapableScreenshots, "screenshot-rubric-scores.json"),
+    `${JSON.stringify({ ...rubricExample, generated_at: "2026-08-17T00:00:00Z", slots: [iphoneSlot] }, null, 2)}\n`,
+    "utf8",
+  );
+  runFixture(
+    "completed iPad-capable matrix still requires an iPad well",
+    ipadCapableScreenshots,
+    "check-store-screenshots.ts",
+    1,
+    "store_screenshots.matrix.en-US.ipad_missing",
+  );
   runFixture("complete native iOS proof packet passes", clean, "check-native-ios-proof.ts", 0);
   runFixture("complete emotional design packet passes", clean, "check-emotional-design.ts", 0);
   runFixture("landing funnel skips without landing scope", clean, "check-landing-funnel.ts", 0);
@@ -325,8 +375,25 @@ export function register(h: Harness): void {
   );
   mkdirSync(path.join(landingInScopeFail, "growth", "landing"), { recursive: true });
   writeFileSync(path.join(landingInScopeFail, "growth", "landing", "index.html"), "<h1>Launch page</h1>\n", "utf8");
-  writeFileSync(path.join(landingInScopeFail, "growth", "landing", "README.md"), "# Landing\nDeployed.\n", "utf8");
+  writeFileSync(path.join(landingInScopeFail, "growth", "landing", "README.md"), "# Landing\nwrangler deploy completed.\n", "utf8");
+  mkdirSync(path.join(landingInScopeFail, "public"), { recursive: true });
+  for (const staticFile of ["robots.txt", "llms.txt", "sitemap.xml"]) {
+    writeFileSync(path.join(landingInScopeFail, "public", staticFile), "seeded by fixture\n", "utf8");
+  }
   runFixture("landing funnel in scope without gate evidence fails", landingInScopeFail, "check-landing-funnel.ts", 1, "landing_funnel.git_clean_gate.missing");
+
+  const acceptedDesignNoLanding = makeFixture("accepted-design-without-landing");
+  const acceptedDesignState = readState(acceptedDesignNoLanding);
+  Object.assign(getLane(acceptedDesignState, "design"), { status: "done", evidence: ["design/design.md"] });
+  writeState(acceptedDesignNoLanding, acceptedDesignState);
+  rmSync(path.join(acceptedDesignNoLanding, "growth", "landing"), { recursive: true, force: true });
+  runFixture(
+    "accepted design without a runnable landing baseline fails",
+    acceptedDesignNoLanding,
+    "check-landing-funnel.ts",
+    1,
+    "landing_funnel.design_lock.site_missing",
+  );
 
   // A copied-in section library (no index.html/public/wrangler.toml) is not a
   // deployed site and must not trigger the deploy gates.
@@ -750,9 +817,15 @@ export function register(h: Harness): void {
         app_in_app: { status: "updated", evidence: "product/ONBOARDING.md" },
         asc_listing: { status: "updated", evidence: "APP_STORE_LISTING.md" },
         google_play_listing: { status: "updated", evidence: "store/GOOGLE_PLAY_RELEASE.md" },
-        asc_products: { status: "updated", evidence: "revenue/REVENUE_OPS.md" },
+        asc_products: { status: "updated", evidence: "revenue/REVENUE_OPS.md", variants: [{ product: "pro_monthly", evidence: "revenue/REVENUE_OPS.md" }] },
+        google_play_products: {
+          status: "updated",
+          evidence: "revenue/REVENUE_OPS.md",
+          variants: [{ product: "pro_monthly", locale: "en-US", evidence: "revenue/REVENUE_OPS.md" }],
+        },
         revenuecat_billing: { status: "updated", evidence: "revenue/REVENUE_OPS.md" },
-        landing_web: { status: "updated", evidence: "growth/landing/index.html" },
+        landing_web: { status: "updated", evidence: "growth/landing/index.html", variants: [{ locale: "en-US", evidence: "growth/landing/index.html" }] },
+        landing_onboarding: { status: "unaffected", reason: "the landing has no qualification flow" },
         lifecycle_email: { status: "updated", evidence: "growth/EMAIL_OPS.md" },
         content_ugc_ads: { status: "unaffected", reason: "no ad creative names the term yet" },
       },
@@ -809,4 +882,44 @@ export function register(h: Harness): void {
     },
   ]);
   runFixture("cascade recording an unknown surface id fails", cascadeTypo, "check-change-cascade.ts", 1, "change_cascade.typo.asc_listng.unknown_surface");
+
+  const cascadeMultiType = makeFixture("cascade-multi-type-union");
+  withCascade(cascadeMultiType, [
+    {
+      id: "rename-onboarding-price",
+      types: ["lexicon_change", "pricing_change", "onboarding_change"],
+      surfaces: { app_in_app: { status: "updated", evidence: "product/ONBOARDING.md" } },
+    },
+  ]);
+  runFixture(
+    "multi-type cascade grades the union of all affected surfaces",
+    cascadeMultiType,
+    "check-change-cascade.ts",
+    1,
+    "change_cascade.rename-onboarding-price.google_play_products.unaccounted",
+  );
+
+  const cascadeVariantless = makeFixture("cascade-variantless-evidence");
+  withCascade(cascadeVariantless, [
+    {
+      id: "generated-assets",
+      types: ["generated_asset_change"],
+      surfaces: {
+        content_ugc_ads: { status: "updated", evidence: "growth/content-assets/CONTENT_ASSETS.md" },
+        asc_listing: { status: "unaffected", reason: "no generated store art" },
+        google_play_listing: { status: "unaffected", reason: "no generated store art" },
+        asc_products: { status: "unaffected", reason: "no promoted product art" },
+        google_play_products: { status: "unaffected", reason: "no generated product art" },
+        lifecycle_email: { status: "unaffected", reason: "no generated email art" },
+        landing_web: { status: "unaffected", reason: "no generated landing art" },
+      },
+    },
+  ]);
+  runFixture(
+    "updated generated assets require asset-keyed evidence",
+    cascadeVariantless,
+    "check-change-cascade.ts",
+    1,
+    "change_cascade.generated-assets.content_ugc_ads.asset_evidence_missing",
+  );
 }

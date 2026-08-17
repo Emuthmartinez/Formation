@@ -10,8 +10,19 @@
  * verifies that the agent has recorded the gate results in the right artifacts.
  */
 import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
-import { asString, collectFiles, getPath, issue, loadProjectState, parseCliArgs, readText, reportAndExit } from "../../../tooling/lib/launch-state.js";
+import {
+  asString,
+  collectFiles,
+  getPath,
+  isRecord,
+  issue,
+  loadProjectState,
+  parseCliArgs,
+  readText,
+  reportAndExit,
+} from "../../../tooling/lib/launch-state.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
@@ -32,7 +43,9 @@ function laneStatus(name: string): string | undefined {
 }
 
 // The funnel lane may be tracked under different names across projects.
-const landingStatus = laneStatus("landing") ?? laneStatus("funnel");
+const landingStatus = laneStatus("landing") ?? laneStatus("funnel") ?? laneStatus("growth");
+const designStatus = laneStatus("design");
+const designAccepted = designStatus === "done" || designStatus === "accepted";
 // Only enforce when a landing site is actually in scope: either a lane explicitly
 // marks it in progress/done, or landing artifacts exist on disk. Skip cleanly
 // otherwise so the validator never false-positives on a non-landing repo.
@@ -48,12 +61,115 @@ const hasLandingArtifacts =
   existsSync(path.join(args.root, "wrangler.toml")) ||
   existsSync(path.join(args.root, "growth", "landing", "wrangler.toml"));
 const explicitlyOut = landingStatus === "not_needed" || landingStatus === "deferred";
-const inScope = !explicitlyOut && (Boolean(landingStatus) || hasLandingArtifacts);
+const landingLaneActive = Boolean(landingStatus) && !["not_started", "not_needed", "deferred"].includes(landingStatus ?? "");
+const inScope = designAccepted || (!explicitlyOut && (landingLaneActive || hasLandingArtifacts));
 
 if (!inScope) {
   reportAndExit("Landing funnel check (skipped — no landing/funnel lane or artifacts in scope)", issues);
   // No argument: honor the exit code reportAndExit set (errors still fail on the skip path).
   process.exit();
+}
+
+if (designAccepted && !hasLandingArtifacts) {
+  issues.push(
+    issue(
+      "error",
+      "landing_funnel.design_lock.site_missing",
+      "The design contract is accepted, but no runnable landing site exists in growth/landing/. The landing baseline must start in the same ready batch as app implementation.",
+      "growth/landing/",
+    ),
+  );
+}
+
+// The surface contract makes cross-document consistency machine-readable. It
+// stores source digests instead of relying on prose that says the files were read.
+const surfaceContractPath = "growth/landing/surface-contract.json";
+if (designAccepted) {
+  if (!existsSync(path.join(args.root, surfaceContractPath))) {
+    issues.push(
+      issue(
+        "error",
+        "landing_funnel.surface_contract.missing",
+        "Accepted design requires growth/landing/surface-contract.json with canonical-source digests, locales, analytics events, pricing, onboarding, and screenshot evidence.",
+        surfaceContractPath,
+      ),
+    );
+  } else {
+    let contract: unknown;
+    try {
+      contract = JSON.parse(readFileSync(path.join(args.root, surfaceContractPath), "utf8"));
+    } catch (error) {
+      issues.push(
+        issue("error", "landing_funnel.surface_contract.invalid_json", `surface-contract.json is invalid JSON: ${String(error)}`, surfaceContractPath),
+      );
+    }
+    if (isRecord(contract)) {
+      const sources = Array.isArray(contract.sources) ? contract.sources : [];
+      const canonicalCandidates = [
+        "design/design.md",
+        "product/copy/COPY_DECK.md",
+        "product/copy/COPY_BRIEF.md",
+        "product/ONBOARDING.md",
+        "analytics/ANALYTICS.md",
+        "GEO_SEO.md",
+        "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
+        "revenue/REVENUE_OPS.md",
+      ].filter((relativePath) => existsSync(path.join(args.root, relativePath)));
+      for (const relativePath of canonicalCandidates) {
+        const row = sources.find((value) => isRecord(value) && asString(value.path) === relativePath);
+        const expected = createHash("sha256")
+          .update(readFileSync(path.join(args.root, relativePath)))
+          .digest("hex");
+        if (!isRecord(row) || asString(row.sha256) !== expected) {
+          issues.push(
+            issue(
+              "error",
+              "landing_funnel.surface_contract.source_stale",
+              `${relativePath} is absent from the landing surface contract or its sha256 is stale. Reconcile the landing against the current canonical artifact.`,
+              surfaceContractPath,
+            ),
+          );
+        }
+      }
+
+      const events = Array.isArray(contract.analytics_events) ? contract.analytics_events.map(asString) : [];
+      for (const event of ["landing_viewed", "landing_cta_clicked", "waitlist_submitted"]) {
+        if (!events.includes(event)) {
+          issues.push(
+            issue("error", `landing_funnel.surface_contract.event.${event}.missing`, `surface-contract.json must declare ${event}.`, surfaceContractPath),
+          );
+        }
+      }
+      const locales = Array.isArray(contract.locales) ? contract.locales : [];
+      if (!locales.some((row) => isRecord(row) && asString(row.locale)?.trim() && asString(row.evidence)?.trim())) {
+        issues.push(issue("error", "landing_funnel.surface_contract.locales.missing", "Record each Tier 1 locale with landing evidence.", surfaceContractPath));
+      }
+      for (const section of ["pricing", "onboarding"] as const) {
+        const value = contract[section];
+        if (!isRecord(value) || typeof value.applicable !== "boolean" || !asString(value.evidence)?.trim()) {
+          issues.push(
+            issue(
+              "error",
+              `landing_funnel.surface_contract.${section}.decision_missing`,
+              `surface-contract.json must record whether ${section} is applicable and cite the decision evidence.`,
+              surfaceContractPath,
+            ),
+          );
+        }
+      }
+      const screenshots = Array.isArray(contract.screenshots) ? contract.screenshots : [];
+      if (!screenshots.some((row) => isRecord(row) && asString(row.locale)?.trim() && asString(row.evidence)?.trim() && asString(row.source_kind)?.trim())) {
+        issues.push(
+          issue(
+            "error",
+            "landing_funnel.surface_contract.screenshots.missing",
+            "Record landing screenshot slots per locale with evidence and source_kind (preview or real_app).",
+            surfaceContractPath,
+          ),
+        );
+      }
+    }
+  }
 }
 
 // Collect the candidate docs where gate evidence should be recorded
@@ -75,6 +191,8 @@ for (const rel of candidateDocs) {
 
 const combinedText = docTexts.map((d) => d.text).join("\n");
 const primaryDoc = docTexts.find((d) => d.path === "README.md" || d.path === "growth/landing/README.md")?.path ?? candidateDocs[0];
+const landingPublicUrl = state ? asString(getPath(state, "project.public_urls.landing")) : undefined;
+const publicationInScope = Boolean(landingPublicUrl?.trim()) || /\b(production url\s*:|live url\s*:|wrangler deploy)\b/i.test(combinedText);
 
 if (docTexts.length === 0) {
   issues.push(
@@ -89,7 +207,7 @@ if (docTexts.length === 0) {
 }
 
 // ── Gate 1: git clean before deploy ──────────────────────────────────────────
-if (!mentionsAny(combinedText, ["git clean", "uncommitted", "working tree", "git status", "committed before deploy", "no uncommitted"])) {
+if (publicationInScope && !mentionsAny(combinedText, ["git clean", "uncommitted", "working tree", "git status", "committed before deploy", "no uncommitted"])) {
   issues.push(
     issue(
       "error",
@@ -102,7 +220,10 @@ if (!mentionsAny(combinedText, ["git clean", "uncommitted", "working tree", "git
 }
 
 // ── Gate 2: wrangler version current ─────────────────────────────────────────
-if (!mentionsAny(combinedText, ["wrangler version", "wrangler v4", "wrangler@4", "wrangler upgrade", "wrangler current", "updated wrangler"])) {
+if (
+  publicationInScope &&
+  !mentionsAny(combinedText, ["wrangler version", "wrangler v4", "wrangler@4", "wrangler upgrade", "wrangler current", "updated wrangler"])
+) {
   issues.push(
     issue(
       "error",
@@ -115,7 +236,7 @@ if (!mentionsAny(combinedText, ["wrangler version", "wrangler v4", "wrangler@4",
 }
 
 // ── Gate 3: wrangler whoami / token scope ─────────────────────────────────────
-if (!mentionsAny(combinedText, ["wrangler whoami", "pages:edit", "workers:edit", "api token", "token scope", "cloudflare token"])) {
+if (publicationInScope && !mentionsAny(combinedText, ["wrangler whoami", "pages:edit", "workers:edit", "api token", "token scope", "cloudflare token"])) {
   issues.push(
     issue(
       "error",
@@ -160,6 +281,7 @@ if (
 
 // ── Gate 5: browser-rendered form smoke test ─────────────────────────────────
 if (
+  publicationInScope &&
   !mentionsAny(combinedText, [
     "browser",
     "playwright",

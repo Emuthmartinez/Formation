@@ -18,8 +18,10 @@ The full set of surfaces a B2C mobile launch maintains. A cascade check walks th
 - **App Store Connect listing:** name, subtitle, promotional text, description, keywords, What's New, screenshots, App Preview, App Icon, events, custom product pages, and localizations.
 - **Google Play listing:** name, short and full descriptions, screenshots, feature graphic, promo video, custom store listings, events, and localizations.
 - **App Store Connect products:** IAP/subscription **display names + descriptions**, **promoted-IAP promotional images** (unique per product, never the app icon — see `app-store-connect-cli.md`), pricing, intro/trial offers, **App Review Information notes**.
+- **Google Play products:** one-time products, subscriptions, base plans, offers, localized names and descriptions, prices, tags, and review notes.
 - **RevenueCat / billing:** offering/package/product display names, paywall configuration, entitlement identifiers, Stripe/web-funnel product copy and prices.
 - **Landing / web:** hero, method, optional web onboarding, FAQ, prices, footer, metadata, Open Graph, JSON-LD, crawler files, and app screenshots.
+- **Landing onboarding:** qualification questions, branches, consent, completion state, and install, waitlist, or purchase handoff when applicable.
 - **SEO / GEO:** target keywords, citability content, brand-entity signals.
 - **Lifecycle email:** transactional + lifecycle templates, brand tokens, plan/price/feature mentions.
 - **Analytics:** event names, funnel/dashboard definitions, attribution sources.
@@ -37,15 +39,19 @@ Record what you actually touched in `state/PROJECT_STATE.yaml`:
 ```yaml
 change_cascade:
   - id: "rename-streaks-to-runs"
-    type: "lexicon_change"          # a change_types key in cascade-edges.yaml
+    types: ["lexicon_change", "onboarding_change"] # every applicable change_types key
     recorded_at: "2026-07-25"
     surfaces:
       app_in_app: { status: "updated", evidence: "product/ONBOARDING.md" }
-      asc_listing: { status: "updated", evidence: "APP_STORE_LISTING.md" }
+      asc_listing:
+        status: "updated"
+        evidence: "store/app-store-listing/APP_STORE_LISTING.md"
+        variants:
+          - { locale: "en-US", evidence: "store/app-store-listing/en-US.json" }
       content_ugc_ads: { status: "unaffected", reason: "no ad creative names the term yet" }
 ```
 
-Every surface the map says the change type touches must be accounted for: `updated` needs `evidence`, `unaffected` needs a `reason`, `blocked` needs a `blocker`. A surface left out by omission fails the gate as `change_cascade.<id>.<surface>.unaccounted` — which is the `change-cascade-incomplete` failure card, caught mechanically instead of at review time. The edge set ships with the skill and is never copied into a business repo, so a launch run records against the map but cannot edit it.
+Every surface in the union of all recorded change types must be accounted for: `updated` needs `evidence`, `unaffected` needs a `reason`, and `blocked` needs a `blocker`. Surfaces with locale, product, device, product-page, or asset dimensions need one `variants` evidence row for each applicable value. A surface left out by omission fails the gate as `change_cascade.<id>.<surface>.unaccounted` — which is the `change-cascade-incomplete` failure card, caught mechanically instead of at review time. The edge set ships with the skill and is never copied into a business repo, so a launch run records against the map but cannot edit it.
 
 | Change type | Cascade to |
 | --- | --- |
@@ -88,7 +94,7 @@ Higgsfield-generated assets embed design tokens, feature names, copy, and pricin
 
 ## Process
 
-1. Classify the change. A change can have more than one type.
+1. Classify the change with `types`. Use every applicable type and the union of their edges; never choose a convenient primary type to reduce the work.
 2. Start a read-only surface audit before the changed app slice merges.
 3. List each affected surface. Include each Tier 1 locale and each required store device size.
 4. Assign update tasks with disjoint file paths. Run them while the next app slice continues.
