@@ -468,6 +468,25 @@ export interface Lane {
 
 export type LanesMap = Record<LaneKey, Lane>;
 
+/**
+ * A provider's durable per-business state (the typed successor to v1's tools.<name> YAML
+ * entries; keys stay the v1 snake_case tool names). accessRoute is the route in use — the
+ * reducer's schema step rejects values outside the enum, and its cross-document step rejects
+ * a route the provider's provisioning-manifest entry does not declare. Like Lane, entries
+ * carry typed core fields plus whatever provider-specific extras v1 recorded (identity
+ * blocks, route_options, tier fields), so migration never drops data.
+ */
+export interface ProviderStateEntry {
+  accessRoute: AccessRoute | "not_selected";
+  route?: string;
+  docsCheckedAt?: string;
+  requiredSecrets?: string[];
+  preflight?: string;
+  validation?: string;
+  fallback?: string;
+  [extra: string]: unknown;
+}
+
 export interface PendingFounderGate {
   id: string;
   category: ProtectedCategory | "other";
@@ -493,6 +512,8 @@ export interface BusinessStateV2 {
   };
   lanes: LanesMap;
   founderGates: { pending: PendingFounderGate[] };
+  /** Optional so pre-providers documents and the bootstrap patch stay valid; migrate-v1 carries the v1 tools: block in here. */
+  providers?: Record<string, ProviderStateEntry>;
   continuity?: { lastStateReview?: string; sourceFiles?: string[]; gitStatusReviewed?: boolean; nextAction?: string };
   workflowApplicability?: Record<
     string,

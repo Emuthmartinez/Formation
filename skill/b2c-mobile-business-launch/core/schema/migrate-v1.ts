@@ -3,7 +3,19 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { isMainModule, parseArgs } from "../lib/cli.js";
 import { parse as parseYaml } from "yaml";
-import { laneKeys, mapV1LaneStatus, type BusinessStateV2, type ControlFile, type Lane, type PendingFounderGate, type ProtectedCategory, type Status, type V1LaneStatus } from "./types.js";
+import {
+  accessRouteValues,
+  laneKeys,
+  mapV1LaneStatus,
+  type BusinessStateV2,
+  type ControlFile,
+  type Lane,
+  type PendingFounderGate,
+  type ProtectedCategory,
+  type ProviderStateEntry,
+  type Status,
+  type V1LaneStatus,
+} from "./types.js";
 
 export interface MigrationResult {
   businessState: BusinessStateV2;
@@ -62,6 +74,28 @@ function migrateLane(source: unknown): Lane {
     status: migrateLaneStatus(record.status),
     evidence: asStringArray(record.evidence),
     blockers: asStringArray(record.blockers),
+    ...rest,
+  };
+}
+
+function migrateProviderEntry(toolName: string, source: unknown, warnings: string[]): ProviderStateEntry {
+  const record = isRecord(source) ? source : {};
+  const { access_route: _accessRoute, route: _route, docs_checked_at: _docs, required_secrets: _secrets, preflight: _preflight, validation: _validation, fallback: _fallback, ...rest } = record;
+  const rawAccessRoute = asString(record.access_route).trim();
+  let accessRoute: ProviderStateEntry["accessRoute"] = "not_selected";
+  if ((accessRouteValues as readonly string[]).includes(rawAccessRoute)) {
+    accessRoute = rawAccessRoute as ProviderStateEntry["accessRoute"];
+  } else if (rawAccessRoute && rawAccessRoute !== "not_selected") {
+    warnings.push(`v1 tools.${toolName}.access_route "${rawAccessRoute}" is not a known access route; migration records not_selected instead`);
+  }
+  return {
+    accessRoute,
+    route: asString(record.route),
+    docsCheckedAt: asString(record.docs_checked_at),
+    requiredSecrets: asStringArray(record.required_secrets),
+    preflight: asString(record.preflight),
+    validation: asString(record.validation),
+    fallback: asString(record.fallback),
     ...rest,
   };
 }
@@ -150,6 +184,7 @@ export function migrateProjectStateV1(v1State: unknown, now: string = new Date()
   const autonomySource = isRecord(v1State.autonomy) ? v1State.autonomy : {};
   const operatorSource = isRecord(v1State.business_operator) ? v1State.business_operator : {};
   const continuitySource = isRecord(v1State.continuity) ? v1State.continuity : {};
+  const toolsSource = isRecord(v1State.tools) ? v1State.tools : undefined;
   const bundleIdsSource = isRecord(projectSource.bundle_ids) ? projectSource.bundle_ids : {};
   const publicUrlsSource = isRecord(projectSource.public_urls) ? projectSource.public_urls : {};
 
@@ -211,6 +246,16 @@ export function migrateProjectStateV1(v1State: unknown, now: string = new Date()
       nextAction: asString(continuitySource.next_action),
     },
   };
+
+  // The v1 tools: map used to be dropped by this migration with no warning — the one provider
+  // block a business spent phases 0/0b/0c filling in. It carries forward as the typed providers
+  // region (keys stay v1 snake_case tool names); omitted entirely when v1 had no tools block, so
+  // the optional region stays optional end-to-end.
+  if (toolsSource) {
+    businessState.providers = Object.fromEntries(
+      Object.entries(toolsSource).map(([toolName, entry]) => [toolName, migrateProviderEntry(toolName, entry, warnings)]),
+    );
+  }
 
   const control: ControlFile = {
     schemaVersion: "1.0.0",

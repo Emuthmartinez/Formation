@@ -318,6 +318,56 @@ export function register(harness: Harness): void {
     assert(Object.keys(migrated.control.grants).length === 0, "migration must not carry forward any auto-granted domain");
     assert(migrated.control.waivers.length === 0, "migration must not carry forward any auto-approved waiver");
     assert(migrated.control.killSwitch.engaged === false, "migration must not silently engage the kill switch");
+
+    // The tools: block used to be dropped silently — the providers region is its carrier now.
+    const providers = migrated.businessState.providers;
+    assert(providers !== undefined, "migration dropped the v1 tools: block instead of carrying it into providers");
+    assert(Object.keys(providers!).length === 21, `expected 21 migrated provider entries, got ${Object.keys(providers!).length}`);
+    assert(providers!.higgsfield!.accessRoute === "mcp", `higgsfield's pre-filled access_route should carry forward as mcp, got "${providers!.higgsfield!.accessRoute}"`);
+    assert(providers!.posthog!.accessRoute === "not_selected", `posthog's unselected access_route should stay not_selected, got "${providers!.posthog!.accessRoute}"`);
+  });
+
+  harness.check("migration: v1 without a tools block omits the providers region entirely", () => {
+    const migrated = migrateProjectStateV1({ project: { name: "App", slug: "app" }, lanes: {} }, now);
+    assert(!("providers" in migrated.businessState), "a v1 state with no tools: must not invent an empty providers region");
+  });
+
+  harness.check("migration: an unknown v1 access_route coerces to not_selected with a warning naming the tool", () => {
+    const v1State = { project: { name: "App", slug: "app" }, lanes: {}, tools: { posthog: { access_route: "carrier_pigeon", route: "intended_account_tool" } } };
+    const migrated = migrateProjectStateV1(v1State, now);
+    assert(migrated.businessState.providers!.posthog!.accessRoute === "not_selected", "unknown access_route must coerce to not_selected");
+    assert(
+      migrated.warnings.some((w) => w.includes("tools.posthog.access_route")),
+      `expected a warning naming tools.posthog.access_route, got: ${migrated.warnings.join(" | ")}`,
+    );
+    const valid = checkSchema(BUSINESS_STATE_SCHEMA, migrated.businessState);
+    assertSchemaValid(valid, "migrated state with a coerced access route");
+  });
+
+  harness.check("migration: provider-specific extras survive verbatim", () => {
+    const v1State = {
+      project: { name: "App", slug: "app" },
+      lanes: {},
+      tools: { higgsfield: { access_route: "mcp", identity: { soul_reference_id: "soul-1" }, route_options: ["a", "b"] } },
+    };
+    const migrated = migrateProjectStateV1(v1State, now);
+    const entry = migrated.businessState.providers!.higgsfield!;
+    assert(JSON.stringify(entry.identity) === JSON.stringify({ soul_reference_id: "soul-1" }), "identity block must survive migration verbatim");
+    assert(JSON.stringify(entry.route_options) === JSON.stringify(["a", "b"]), "route_options must survive migration verbatim");
+  });
+
+  harness.check("business state: providers region enforces the accessRoute enum", () => {
+    const good = validBusinessStateDoc();
+    (good as Record<string, unknown>).providers = { higgsfield: { accessRoute: "mcp" } };
+    assertSchemaValid(checkSchema(BUSINESS_STATE_SCHEMA, good), "providers entry with a known accessRoute");
+
+    const bad = validBusinessStateDoc();
+    (bad as Record<string, unknown>).providers = { higgsfield: { accessRoute: "nonsense" } };
+    assertSchemaInvalid(checkSchema(BUSINESS_STATE_SCHEMA, bad), "accessRoute", "providers entry with an unknown accessRoute");
+
+    const missing = validBusinessStateDoc();
+    (missing as Record<string, unknown>).providers = { higgsfield: { route: "optional_paid_or_account_tool" } };
+    assertSchemaInvalid(checkSchema(BUSINESS_STATE_SCHEMA, missing), "accessRoute", "providers entry missing accessRoute");
   });
 
   harness.check("migration: every lane status round-trips through the shared vocabulary", () => {
