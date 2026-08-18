@@ -31,6 +31,7 @@ Do not collapse their state models or expose engine files as founder navigation.
 | `skill/b2c-mobile-business-launch/tooling/` | Renderers, probes, migrations, and engine mechanics | Untestable durable policy |
 | `skill/b2c-mobile-business-launch/studio/` | Maintainer visual QA, seed state, and generated output | Founder product state or primary navigation |
 | `skill/b2c-mobile-business-launch/starters/` | Runnable product-archetype foundations | Alternate orchestration systems |
+| `skill/b2c-mobile-business-launch/agents/` | Agent-runtime interface manifests (for example the OpenAI surface descriptor) | Orchestration logic or launch state |
 
 The platform may request engine execution through a typed adapter. It must not read or mutate engine state files directly. The engine may return verified results through that adapter. It must not mutate platform persistence directly.
 

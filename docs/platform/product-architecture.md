@@ -28,7 +28,11 @@ A tenant boundary representing one company. It owns company context, membership,
 
 ### Membership
 
-A user's role in a workspace. The current implementation supports the owner role and enforces membership on every server operation. Editor, reviewer, and viewer roles can extend the same boundary.
+A user's role in a workspace: viewer, reviewer, editor, or owner. The roles form a ladder — each role holds every capability of the roles below it. Every server operation checks the caller's role against a named capability (`platform/server/domain/capabilities.mjs`), not bare membership. A company always keeps at least one owner; the last owner must promote a successor before stepping down or leaving.
+
+### Invitation
+
+A pending offer of a role in a workspace, scoped to one email address. It carries a single-use accept token and a 14-day expiry, and only an owner creates or revokes it. A cancelled, expired, spent, or never-existed invitation link returns one indistinguishable answer.
 
 ### Founder profile
 
@@ -107,6 +111,20 @@ A durable business call containing:
 
 A decision is a first-class object rather than a paragraph hidden inside a document.
 
+Some decisions are mirrored from the launch engine's own approval requests rather than authored by a founder. These carry the originating workflow, run, and plan, and only an owner may answer them; the answer travels back through the engine's own session runner.
+
+### Comment
+
+Conversation about a record — a claim, decision, deliverable, or workstream. Comments are attributed and threaded, and they are deliberately inert: they never affect readiness, contradictions, generation context, or shared views.
+
+### Review
+
+A targeted ask: will you look at this claim, decision, deliverable, or workstream. Only the named assignee can answer (approved or changes requested), and only the requester can withdraw it. A review is an opinion; acting on it is a separate act by whoever holds the capability to act.
+
+### Share
+
+A revocable, tokenized read-only link into one deliverable, created only by an owner. It is viewable without an account, built by naming the fields that may leave, and excluded from search indexing.
+
 ### Task
 
 A concrete next action connected to a workstream, owner, priority, due date, and status. Tasks are intentionally subordinate to workstreams and decisions so the product does not become a generic project manager.
@@ -127,9 +145,21 @@ An editable business deliverable containing:
 
 Generated artifacts begin as drafts and are never promoted to accepted facts automatically.
 
+### Economics
+
+Derived unit-economics figures — gross margin, LTV, payback, runway, customers to break even — computed on read from the company's pricing and cost scenarios, never stored. A missing input makes the figure absent and names the input, never zero. Shown on Business and Launch.
+
 ### Generation job
 
 A durable request to create a structured artifact from scoped company context. Jobs survive the page that initiated them and expose queued, processing, completed, or failed state.
+
+### Execution
+
+A durable record of asking the launch engine to run one workflow. It carries the scoped context fingerprint, founder-readable engine state (queued, running, completed, failed), and the verified results imported when the run completes. Retrying the same request against the same context resumes the same run.
+
+### Import
+
+A founder-reviewed transfer of an existing launch workspace's recorded work into the company. An owner previews the plan, then applies it; everything enters as drafts and questions, never as facts, and re-importing the same source is idempotent.
 
 ### Activity
 
@@ -144,7 +174,11 @@ A plain-language history of important workspace changes.
 | Workstreams | Advance one connected area of business formation | Generic department dashboards |
 | Decisions | Make calls explicit, reviewable, and durable | Hiding choices inside generated prose |
 | Deliverables | Edit, version, review, and export reusable work | Treating AI responses as immutable answers |
-| Launch | Show what is ready, blocked, and still undecided | A vanity percentage detached from evidence |
+| Launch | Show what is ready, blocked, and still undecided; show the engine's launch matrix, run engine workflows, and import existing launch work | A vanity percentage detached from evidence |
+| People | See and change who is in the company, and invite someone in | A generic admin panel |
+| Account | Manage password and active device sessions | Company-scoped settings bleeding into personal security |
+| Shared | Show one deliverable to someone without an account | Any navigation into the rest of the workspace |
+| Sign in / Join | Enter the product, or accept an invitation into a company | Marketing content or a second registration path |
 | New workspace | Establish the minimum useful company context | A long setup wizard or premature provider configuration |
 
 ## Today ranking model
