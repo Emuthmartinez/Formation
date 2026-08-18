@@ -10,6 +10,16 @@ bindings:
   workflow_ids:
     - workflow.words.writing-quality-no-slop
     - workflow.growth.pre-launch-funnel-landing-waitlist
+    - workflow.growth.landing-funnel-publication-and-live-proof
+    - workflow.growth.viral-growth-loop
+    - workflow.store.aso-and-store-ops
+    - workflow.store.app-store-listing-prep-packet
+    - workflow.store.store-screenshots-production
+    - workflow.store.google-play-metadata-standing-envelope
+    - workflow.store.asc-cli-automation
+    - workflow.money.revenue-monetization
+    - workflow.operations.resend-email-ops
+    - workflow.experience.onboarding-conversion
   context_pack_ids:
     - context.words
     - context.launch-surfaces

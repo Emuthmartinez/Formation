@@ -31,6 +31,12 @@ const skeleton = {
   typographyMood: "",
   keyEffects: [] as string[],
   antiPatterns: [] as string[],
+  // Audience derivation (knowledge/design/audience-derived-identity.md): fill
+  // from strategy/RESEARCH.md, not from the style query — a brief with empty
+  // audience fields is a trend pick, not a derivation.
+  audienceFacts: [] as string[],
+  appsTheyLove: [] as string[],
+  antiReferences: [] as string[],
   motionNotes: "Web surfaces animate with framer-motion from the motion.* tokens; the mobile binary uses native animation; honor reduced motion.",
   generatedAt: "",
   notes: "Adapted from ui-ux-pro-max guidance; reference-only.",
@@ -40,7 +46,9 @@ console.log("Design Brief seeder (advisory; reference-only adaptation of ui-ux-p
 console.log("1) Run the ui-ux-pro-max skill with a query derived from state:");
 console.log(`   /ui-ux-pro-max design system for: ${query}`);
 console.log(`   (or: search.py "${query}" --design-system -p "${name}")\n`);
-console.log("2) Adapt the recommendation into state.designBrief (do not paste raw data):");
+console.log("2) Adapt the recommendation into state.designBrief (do not paste raw data).");
+console.log("   Fill audienceFacts/appsTheyLove/antiReferences from strategy/RESEARCH.md —");
+console.log("   the derivation chain is knowledge/design/audience-derived-identity.md:");
 console.log(JSON.stringify({ designBrief: skeleton }, null, 2));
 console.log("\n3) Then: npm run validate:design-state, npm run render:design-room, and commit.");
 

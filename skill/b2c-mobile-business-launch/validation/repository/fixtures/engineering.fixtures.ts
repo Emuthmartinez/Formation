@@ -231,6 +231,37 @@ export function register(h: Harness): void {
   rmSync(path.join(designRoomMissingRender, "design/design-room.html"), { force: true });
   runFixture("Design Room state without render fails", designRoomMissingRender, "check-design-room-contract.ts", 1, "design_room.render_missing");
 
+  // The audience-derivation contract: a design.md without the Audience And
+  // Identity section, or one whose section never cites strategy/RESEARCH.md,
+  // is the generic-template failure the section exists to block.
+  const designRoomAudienceMissing = makeFixture("design-room-audience-section-missing");
+  {
+    const contractPath = path.join(designRoomAudienceMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(/^## Audience And Identity$/m, "## Audience Notes");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "design.md without the Audience And Identity section fails",
+    designRoomAudienceMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_section_missing",
+  );
+
+  const designRoomAudienceUntraced = makeFixture("design-room-audience-untraced");
+  {
+    const contractPath = path.join(designRoomAudienceUntraced, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replaceAll("strategy/RESEARCH.md", "the team's taste");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "Audience And Identity section without research evidence fails",
+    designRoomAudienceUntraced,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.audience_research_missing",
+  );
+
   const designRoomFreeform = makeFixture("design-room-freeform-proposal");
   writeFileSync(path.join(designRoomFreeform, "design-proposal.html"), "<!doctype html><html><body>New idea</body></html>", "utf8");
   runFixture(

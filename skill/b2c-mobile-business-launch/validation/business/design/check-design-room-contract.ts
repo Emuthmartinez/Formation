@@ -33,6 +33,7 @@ if (hasDesignState) {
     const requiredSections = [
       "Source Ownership",
       "Product Experience",
+      "Audience And Identity",
       "Visual Direction",
       "Interaction System",
       "Onboarding",
@@ -55,6 +56,22 @@ if (hasDesignState) {
           issue("error", "design_room.contract_source_missing", `design/design.md must name its source: ${sourcePath}.`, rel(args.root, contractPath)),
         );
       }
+    }
+
+    // The Audience And Identity section is only real when it derives from the
+    // research artifact: a section that never cites strategy/RESEARCH.md is a
+    // taste statement, not a derivation, and the generic-template failure this
+    // section exists to block would pass silently.
+    const audienceBody = contract.match(/^##\s+Audience And Identity\s*\n([\s\S]*?)(?=\n##\s|$)/im)?.[1];
+    if (audienceBody !== undefined && !audienceBody.includes("strategy/RESEARCH.md")) {
+      issues.push(
+        issue(
+          "error",
+          "design_room.audience_research_missing",
+          "design/design.md's Audience And Identity section must cite strategy/RESEARCH.md evidence — visual decisions derive from the target user, not from a trend or template default.",
+          rel(args.root, contractPath),
+        ),
+      );
     }
 
     const designRoom = loaded.state && isRecord(loaded.state) && isRecord(loaded.state.designRoom) ? loaded.state.designRoom : {};
