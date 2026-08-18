@@ -52,7 +52,7 @@ Before a design state mutation is accepted:
 - app and store claims match real implementation scope
 - generated visuals support real app UI instead of replacing it
 - edge states are represented when they affect conversion or trust
-- every visual decision traces to an audience fact in `strategy/RESEARCH.md`, and the direction shows none of the generic-template tells — [`audience-derived-identity.md`](./audience-derived-identity.md) carries the tells table, the derivation chain, and the logo-swap test
+- every visual decision traces to an audience fact in `strategy/RESEARCH.md`, and the direction shows no generic-template tell. [`audience-derived-identity.md`](./audience-derived-identity.md) carries the tells table, the derivation chain, and the logo-swap test.
 
 If the mutation cannot pass these checks, keep the state in `draft` or `blocked`.
 

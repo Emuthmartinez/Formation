@@ -24,9 +24,10 @@ Two ground rules:
 
 Re-tear down these surfaces on the manifest cadence; update exemplars and, when a new tell earns hard-ban confidence, promote it into `conversion-copy.md` §Banned In App Copy so `check:app-copy` follows:
 
-- Wellness/habit cohort: `https://www.headspace.com`, `https://www.calm.com`, `https://www.duolingo.com`, `https://www.strava.com`
-- Consumer/social cohort: `https://partiful.com`, `https://bereal.com`, `https://flighty.com`
-- Utility/fintech cohort: `https://cash.app`, `https://copilot.money`, `https://www.monarch.com`, `https://1password.com`
+- Wellness/habit cohort: `https://www.headspace.com`, `https://www.calm.com`, `https://www.duolingo.com`, `https://www.strava.com`, `https://www.thefabulous.co`
+- Consumer/social cohort: `https://partiful.com`, `https://bereal.com`, `https://locket.camera`, `https://retro.app`, `https://flighty.com`
+- Utility/fintech cohort: `https://cash.app`, `https://copilot.money`, `https://www.monarch.com`, `https://1password.com`, `https://www.alltrails.com`
+- Store-listing exemplars beyond the cohorts: `https://flo.health` (Flo's listing grounds the description-opening rule)
 - Onboarding/paywall teardowns: `https://growth.design/case-studies`
 - In-app writing standards (already carried by `conversion-copy.md`'s manifest): Apple HIG Writing, Material 3 content design
 
@@ -37,7 +38,7 @@ Cross-cohort patterns every fifteen sites share. Each is a pass/fail review ques
 1. **Hero headline under 8 words; the subject is the user or the outcome.** "Calm your mind. Change your life." (Calm); "Find your next adventure" (AllTrails); "The way money should work" (Cash App). Never a category noun as subject ("Meditation Content Library").
 2. **Subhead is one sentence that operationalizes the promise in plain words**, often with a hard number: "Join over 100 million active people on Strava for free." Headline sells the feeling; subhead sells the mechanism without technical words.
 3. **Outcome before feature, everywhere above the fold.** No site leads with a mechanism. Mechanism explanation (encryption, algorithms, data sources) is deferred below the fold or into an FAQ — 1Password holds "Secret Key" until trust is already earned.
-4. **CTA = verb + what the user gets, with friction named away.** "Try for $0" (Headspace), "Create invite" (Partiful), "Try FREE for 14 days" (1Password). Never a bare system verb. The strongest CTAs name the object created, not the funnel step.
+4. **CTA = verb + what the user gets, with friction named away.** The deck-level contract already in `conversion-copy.md` §App Surface Recipes, confirmed on every landing hero studied: "Try for $0" (Headspace), "Create invite" (Partiful), "Try FREE for 14 days" (1Password). Never a bare system verb. The strongest CTAs name the object created, not the funnel step.
 5. **Social proof is either a specific large number or unpolished real voices — not both, and never vague.** "Over 2 million 5-star reviews" (Calm); Partiful ships App Store reviews with usernames, dates, and a typo intact, because the imperfection is the credibility signal. "Loved by users everywhere" is the failure mode.
 6. **Named features never stand alone.** Every proper noun (Beacon, Ebb, HabitatZero) gets a same-breath plain-language gloss. A feature name with no gloss is roadmap vocabulary leaking.
 7. **Section headers keep the hero's rhythm.** "Stress less." / "Sleep more." / "Live mindfully." (Calm). A page that switches to descriptive-spec register below the fold was written by two different mindsets, and the reader feels the seam.
@@ -63,7 +64,7 @@ From the live App Store listings of Headspace, Duolingo, Flo, Strava, and Cash A
 3. **Feature bullets: `[imperative verb + 2-4 words] – [one-sentence payoff]`.** "Move safer – share your real-time location with loved ones while outdoors." (Strava).
 4. **Section headers name the job, not the module.** "SIMPLIFIED BANKING SERVICES" (Cash App), never "Banking Module". If a header could survive unchanged inside the tech spec, it is wrong for the listing.
 5. **Close claims with a quantified, time-boxed proof point.** "Just 2 weeks of Headspace reduces anxiety." Unverified superlatives appear nowhere on top listings; specific numbers do. Every such claim needs a claims-ledger row (`conversion-copy.md`).
-6. **Screenshot captions: verb + benefit, 3-7 words, one message per frame, legible at thumbnail size.** Cut "powerful", "seamless", "all-in-one" — unearned intensifiers. A caption that only lands zoomed-in is not ready.
+6. **Screenshot captions: verb + benefit, one message per frame, legible at thumbnail size.** The house length rule is `conversion-copy.md` §Surface Recipes' 3-5 words (ASO sources tolerate up to 7; hold the tighter bar). Cut "powerful", "seamless", "all-in-one" — unearned intensifiers. A caption that only lands zoomed-in is not ready.
 
 ## Onboarding And Paywall Rules
 
@@ -78,7 +79,7 @@ From the growth.design teardowns (Headspace onboarding, Strava premium preview, 
 
 ## The Internal-Voice Tells (Review Layer)
 
-The judgment-layer companion to the machine-parsed ban list in `conversion-copy.md` §Banned In App Copy. These need a reader; run them as the review pass on every user-facing surface before handoff. A surface showing two or more tells goes back to the deck.
+The judgment-layer companion to the machine-parsed ban list in `conversion-copy.md` §Banned In App Copy. These need a reader; run them as the review pass on every user-facing surface before handoff. A surface showing two or more tells goes back to the deck. Some tells restate Consumer Register rules or `no-slop-writing.md` principles on purpose — this list is the one flat checklist a reviewer runs, so it does not make the reviewer cross-reference three files mid-pass.
 
 1. The grammatical subject of a headline or section header is the system or category, not the user or outcome.
 2. The copy names its own audience by segment ("for Gen Z creators") on a consumer surface.
@@ -86,16 +87,15 @@ The judgment-layer companion to the machine-parsed ban list in `conversion-copy.
 4. Access language stands in for a named outcome: "unlock premium features", "get full access", "upgrade to premium". Test: delete the sentence — if no information about what the user gets is lost, it was internal-facing.
 5. A question is shaped like the backend field it fills ("Select experience level").
 6. An answer the user gave is never referenced again on any later screen.
-7. Hedge stacks with no regulatory reason: "designed to help support your goals".
-8. Every feature gets equal-length treatment — a completeness checklist, not a point of view. Real pages give wildly uneven space to what the team actually cares about.
-9. Testimonials are polished, unattributed, and interchangeable. Real ones keep usernames, dates, and imperfections.
-10. CTA verbs name the billing or system event ("Subscribe now", "Submit") instead of the user's next experience ("See my plan", "Continue").
-11. Proof points are internal metrics ("99.9% uptime", "50+ sport types") instead of user-relevant outcomes.
-12. Person and address drift within one surface — "the user", "customers", and "you" in the same paragraph.
+7. Every feature gets equal-length treatment — a completeness checklist, not a point of view. Real pages give wildly uneven space to what the team actually cares about.
+8. Testimonials are polished, unattributed, and interchangeable. Real ones keep usernames, dates, and imperfections.
+9. CTA verbs name the billing or system event ("Subscribe now", "Submit") instead of the user's next experience ("See my plan", "Continue").
+10. Proof points are internal metrics ("99.9% uptime", "50+ sport types") instead of user-relevant outcomes.
+11. Person and address drift within one surface — "the user", "customers", and "you" in the same paragraph.
 
 ## Voice Benchmarks In The Copy Brief
 
-Every new app's brand guidance anchors its voice to real, current consumer benchmarks — that is what keeps an agent from improvising internal-flavored copy when no examples are in view. `product/copy/COPY_BRIEF.md` carries a required **Voice benchmarks** section (enforced by `check:app-copy`):
+Every new app's brand guidance anchors its voice to real, current consumer benchmarks — that is what keeps an agent from improvising internal-flavored copy when no examples are in view. The gated section lives in `product/copy/COPY_BRIEF.md` because that is the artifact `check:app-copy` already holds; `strategy/BRAND.md` stays the home of the voice and owned-vocabulary tables, and its Voice table should agree with the benchmarks chosen here. `product/copy/COPY_BRIEF.md` carries the required **Voice benchmarks** section (enforced by `check:app-copy`):
 
 - Name 2-3 live consumer apps adjacent to this product's category whose current voice this product borrows from, each with 1-2 borrowed attributes grounded in words actually on their surfaces today (re-check them; do not quote this file from memory).
 - Name at least one **anti-benchmark**: a voice this product must not sound like, with the attribute being rejected.
@@ -105,7 +105,7 @@ Pick benchmarks from this file's cohorts when the category fits, or tear down cl
 
 ## Gates
 
-- `check:app-copy` — the machine-parsed floor: banned internal vocabulary and placeholder shapes in the deck, onboarding copy column, and brief (rule lists live in `conversion-copy.md` §Banned In App Copy; extend the list there when a tell from this file earns hard-ban confidence).
+- `check:app-copy` — the machine-parsed floor: banned internal vocabulary and placeholder shapes in the deck's copy cells and the onboarding copy column, plus the brief's required sections (presence and non-hollowness — the brief is builder-facing planning prose, so its text is not banned-term-scanned). Rule lists live in `conversion-copy.md` §Banned In App Copy; extend the list there when a tell from this file earns hard-ban confidence.
 - The Internal-Voice Tells above — the judgment ceiling: run as a review pass; the gate catches shapes, the reviewer catches voice.
 - `check:landing-funnel` — truthful-claims patterns on the public funnel.
 - Claims ledger (`conversion-copy.md`) — every quantified or comparative claim, substantiated or removed.

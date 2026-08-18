@@ -117,6 +117,46 @@ sources:
       precision contained in FAQ/deep sections).
     last_review_date: 2026-08-17
     reviewer: formation-maintainers
+  - id: thefabulous-co-marketing-site
+    name: thefabulous.co
+    source_type: inspiration_benchmark
+    url: https://www.thefabulous.co
+    review_cadence_days: 90
+    claim_scope: Live wellness/habit-cohort exemplar (science-origin credibility story, aspirational register, context-adaptive hero).
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: locket-camera-marketing-site
+    name: locket.camera
+    source_type: inspiration_benchmark
+    url: https://locket.camera
+    review_cadence_days: 90
+    claim_scope: Live consumer/social-cohort exemplar (near-copy-free hero, visual collage as pitch, audience named only on partner-facing corners).
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: retro-app-marketing-site
+    name: retro.app
+    source_type: inspiration_benchmark
+    url: https://retro.app
+    review_cadence_days: 90
+    claim_scope: Live consumer/social-cohort exemplar (one-sentence homepage, persuasion displaced to a manifesto page, restraint as strategy).
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: alltrails-com-marketing-site
+    name: alltrails.com
+    source_type: inspiration_benchmark
+    url: https://www.alltrails.com
+    review_cadence_days: 90
+    claim_scope: Live consumer-utility exemplar (community-as-authority trust, photography-led credibility, minimal functional body copy).
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: flo-health-store-listing
+    name: flo.health
+    source_type: inspiration_benchmark
+    url: https://flo.health
+    review_cadence_days: 90
+    claim_scope: Store-listing exemplar (category+differentiator opening description line with quantified reach), grounding the Store Listing Rules.
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers
   - id: growth-design-case-studies
     name: growth.design
     source_type: inspiration_benchmark

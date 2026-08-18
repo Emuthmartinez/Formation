@@ -42,7 +42,7 @@ The one-line diagnostic: each brand made at least one choice that would look wro
 
 Run this chain when design.md's direction is drafted. Record the results in design.md's Audience And Identity section.
 
-1. **Collect the audience facts** from `strategy/RESEARCH.md`: who the user is, what they aspire to feel or be seen as, and the 2-3 apps they already love. Those loved apps are the audience's native visual language.
+1. **Collect the audience facts** from `strategy/RESEARCH.md`: who the user is, and what they aspire to feel or be seen as. Add the 2-3 apps they already love. Those loved apps are the audience's native visual language.
 2. **Name the category default to avoid.** State what every competitor already looks like. A design.md without an anti-reference did no differentiation work.
 3. **Pick one physical or sensory metaphor from the audience's real world.** An owl playing a game. Breath. A cockpit. A departure board. A party flyer. Trends are not metaphors.
 4. **Derive the palette from the metaphor**, not from a trend board. State the derivation in one sentence.

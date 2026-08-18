@@ -158,7 +158,7 @@ matching knowledge manifest, which carries its authored `loadWhen` text
 |---|---|---|
 | knowledge/data/analytics-attribution.md | keep | event-catalog/attribution reference gating multiple downstream lanes |
 
-### domain.design (9 files, all keep)
+### domain.design (10 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
@@ -299,7 +299,7 @@ the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge
 | knowledge/trust/community-safety.md | keep | conditional moderation, reporting, blocking, and age-control proof |
 | knowledge/trust/generative-ai-safety.md | keep | conditional generative-AI abuse-control proof |
 
-### domain.words (2 files, all keep)
+### domain.words (3 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|

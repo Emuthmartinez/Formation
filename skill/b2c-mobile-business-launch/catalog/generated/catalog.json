@@ -5900,6 +5900,56 @@
           "reviewer": "formation-maintainers"
         },
         {
+          "id": "thefabulous-co-marketing-site",
+          "name": "thefabulous.co",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.thefabulous.co",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live wellness/habit-cohort exemplar (science-origin credibility story, aspirational register, context-adaptive hero).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "locket-camera-marketing-site",
+          "name": "locket.camera",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://locket.camera",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live consumer/social-cohort exemplar (near-copy-free hero, visual collage as pitch, audience named only on partner-facing corners).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "retro-app-marketing-site",
+          "name": "retro.app",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://retro.app",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live consumer/social-cohort exemplar (one-sentence homepage, persuasion displaced to a manifesto page, restraint as strategy).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "alltrails-com-marketing-site",
+          "name": "alltrails.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.alltrails.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live consumer-utility exemplar (community-as-authority trust, photography-led credibility, minimal functional body copy).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "flo-health-store-listing",
+          "name": "flo.health",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://flo.health",
+          "reviewCadenceDays": 90,
+          "claimScope": "Store-listing exemplar (category+differentiator opening description line with quantified reach), grounding the Store Listing Rules.",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
           "id": "growth-design-case-studies",
           "name": "growth.design",
           "sourceType": "inspiration_benchmark",

@@ -118,6 +118,24 @@
             "type": "string"
           }
         },
+        "audienceFacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "appsTheyLove": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "antiReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "motionNotes": {
           "type": "string"
         },
