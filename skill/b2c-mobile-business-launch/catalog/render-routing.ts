@@ -2,6 +2,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DELIBERATELY_UNDECLARED_PROVIDER_IDS, findProvisioningProvider, PROVISIONING_MANIFEST } from "../core/provisioning/requirements.js";
+import { accessRouteValues } from "../core/schema/types.js";
 import { composeCatalog } from "./index.js";
 import type { Catalog } from "./types.js";
 
@@ -174,6 +176,102 @@ export function renderPhaseAreaMatrix(catalog: Catalog): string {
   ].join("\n");
 }
 
+/**
+ * The per-node contract sheet: what each workflow node consumes, produces, knows, and touches.
+ * routing.md answers "what do I load when" and spine.md answers "what comes next"; before this
+ * projection, the only ways to see a node's full contract were reading catalog/workflows/*.ts
+ * or running plan:frontier. Providers render with the access routes their provisioning-manifest
+ * entry declares (a TS import, not a filesystem read — the render-drift fixture's scratch skill
+ * root ships no manifest). An empty field renders as "—" deliberately: "no providers" is itself
+ * contract information, not a gap.
+ */
+export function renderNodeContracts(catalog: Catalog): string {
+  const domainsById = new Map(catalog.domains.map((domain) => [domain.id, domain]));
+  const rolesById = new Map(catalog.roles.map((role) => [role.id, role]));
+  const phasesById = new Map(catalog.phases.map((phase) => [phase.id, phase]));
+  const referencesById = new Map(catalog.references.map((reference) => [reference.id, reference]));
+  const undeclaredIds = new Set(DELIBERATELY_UNDECLARED_PROVIDER_IDS);
+  const codeList = (values: readonly string[]): string => (values.length ? values.map((value) => `\`${value}\``).join(", ") : "—");
+  const providerCell = (providerId: string): string => {
+    if (undeclaredIds.has(providerId)) return `\`${providerId}\` (local tooling — deliberately undeclared, see core/provisioning/requirements.ts)`;
+    const provider = findProvisioningProvider(providerId);
+    return provider ? `\`${providerId}\` (${provider.accessRoutes.join(", ")})` : `\`${providerId}\``;
+  };
+  const sections = [...catalog.domains]
+    .sort((a, b) => a.order - b.order)
+    .map((domain) => {
+      const workflows = catalog.workflows.filter((workflow) => workflow.domainId === domain.id);
+      if (workflows.length === 0) return "";
+      const nodes = workflows.map((workflow) => {
+        const phases = workflow.phaseIds.length
+          ? workflow.phaseIds.map((phaseId) => phasesById.get(phaseId)?.label ?? phaseId).join(", ")
+          : "Cross-phase (always-on)";
+        const knowledge = workflow.referenceIds.length
+          ? workflow.referenceIds
+              .map((referenceId) => referencesById.get(referenceId))
+              .filter((reference): reference is NonNullable<typeof reference> => reference !== undefined)
+              .map((reference) => `[${reference.title}](../../${reference.path})`)
+              .join(", ")
+          : "—";
+        return [
+          `### ${workflow.title}`,
+          "",
+          `_${workflow.trigger}_`,
+          "",
+          `- **Role:** ${rolesById.get(workflow.roleId)?.name ?? workflow.roleId}`,
+          `- **Phases:** ${phases}`,
+          `- **Providers:** ${workflow.providerIds.length ? workflow.providerIds.map(providerCell).join(", ") : "—"}`,
+          `- **Reads:** ${codeList(workflow.reads)}`,
+          `- **Consults:** ${codeList(workflow.consults)}`,
+          `- **Produces:** ${codeList(workflow.outputPaths)}`,
+          `- **Gates:** ${codeList(workflow.gateCommands)}`,
+          `- **Knowledge:** ${knowledge}`,
+        ].join("\n");
+      });
+      return `## ${domain.name}\n\n${nodes.join("\n\n")}`;
+    })
+    .filter((section) => section.length > 0)
+    .join("\n\n");
+  return [
+    generatedStart("node-contracts"),
+    "# Node Contracts",
+    "",
+    "Generated from catalog/workflows and core/provisioning/requirements.ts. Edit the catalog, not this file.",
+    "",
+    "One entry per workflow node: what it consumes (Reads blocks readiness; Consults is open-if-present),",
+    "what it produces, the knowledge bound to it, and the providers it touches with the access routes each",
+    "provider declares. The chosen route for a running business lives in state, not here.",
+    "",
+    sections,
+    "",
+    generatedEnd("node-contracts"),
+  ].join("\n");
+}
+
+/** Provider × access-route matrix from the provisioning manifest: what each provider supports. */
+export function renderProviderRouteMatrix(): string {
+  const rows = PROVISIONING_MANIFEST.map((provider) => {
+    const cells = accessRouteValues.map((route) => (provider.accessRoutes.includes(route) ? "✓" : "")).join(" | ");
+    return `| \`${provider.providerId}\` | ${provider.capability} | ${cells} |`;
+  });
+  return [
+    generatedStart("provider-route-matrix"),
+    "# Provider Access Routes",
+    "",
+    "Generated from core/provisioning/requirements.ts. Edit the manifest, not this file.",
+    "",
+    `| Provider | Capability | ${accessRouteValues.join(" | ")} |`,
+    `| --- | --- | ${accessRouteValues.map(() => "---").join(" | ")} |`,
+    ...rows,
+    "",
+    `Not listed: ${DELIBERATELY_UNDECLARED_PROVIDER_IDS.map((id) => `\`${id}\``).join(", ")} — deliberately`,
+    "undeclared local tooling sharing `provider.in-app-ios-simulator`'s no-secret shape (see",
+    "core/provisioning/requirements.ts).",
+    "",
+    generatedEnd("provider-route-matrix"),
+  ].join("\n");
+}
+
 /** The generated orientation stub for readers who land in knowledge/ directly. */
 export function renderKnowledgeReadme(): string {
   return [
@@ -196,6 +294,7 @@ export function renderGeneratedFiles(catalog: Catalog): Record<string, string> {
   return {
     "catalog/generated/routing.md": `${renderDomainRouting(catalog)}\n\n${renderReferenceIndex(catalog)}\n`,
     "catalog/generated/spine.md": `${renderPhaseSpine(catalog)}\n\n${renderPhaseAreaMatrix(catalog)}\n`,
+    "catalog/generated/contracts.md": `${renderNodeContracts(catalog)}\n\n${renderProviderRouteMatrix()}\n`,
     "catalog/generated/catalog.json": `${JSON.stringify(catalog, null, 2)}\n`,
     "knowledge/README.md": `${renderKnowledgeReadme()}\n`,
   };

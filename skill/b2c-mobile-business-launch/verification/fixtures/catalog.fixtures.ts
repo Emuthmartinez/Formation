@@ -3,6 +3,7 @@ import path from "node:path";
 import { assert, repoCheckoutPresent, repoRoot, skillRoot, type Harness } from "./_harness.js";
 import { toCatalogInput } from "../../catalog/bridge.js";
 import { composeCatalog } from "../../catalog/index.js";
+import { renderGeneratedFiles } from "../../catalog/render-routing.js";
 import type { Catalog, CatalogWorkflowDef } from "../../catalog/types.js";
 import { validateCatalog } from "../../catalog/validate.js";
 import { compilePlan } from "../../core/engine/compile.js";
@@ -581,6 +582,20 @@ export function register(harness: Harness): void {
 
   harness.check("render: --check is green against the freshly rendered real catalog", () => {
     harness.runScript("render-routing --check (clean)", "catalog/render-routing.ts", ["--check"], 0);
+  });
+
+  harness.check("render: contracts.md carries a real node contract and the provider route matrix", () => {
+    const rendered = renderGeneratedFiles(composeCatalog(skillRoot))["catalog/generated/contracts.md"]!;
+    assert(rendered.includes("# Node Contracts"), "contracts.md is missing its Node Contracts section");
+    assert(
+      rendered.includes("`provider.higgsfield` (mcp)"),
+      "contracts.md should annotate provider.higgsfield with its declared mcp route on the nodes that touch it",
+    );
+    assert(
+      /\| `provider\.higgsfield` \| ai-generated-marketing-visuals \| ✓ \|/.test(rendered),
+      "the provider route matrix should mark provider.higgsfield's mcp column",
+    );
+    assert(rendered.includes("`provider.serve-sim` (local tooling"), "deliberately-undeclared ids should render as local tooling, not silently as unknown");
   });
 
   harness.check("render: --check fails on a mutated generated file — exercised against a scratch skill root, never the checked-in repo file", () => {

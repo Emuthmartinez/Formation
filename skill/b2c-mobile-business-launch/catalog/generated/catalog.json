@@ -9100,7 +9100,8 @@
       "instructions": "Edit the authored catalog data when adding, renaming, or rewiring graph definitions. Add knowledge through catalog/knowledge manifests and the knowledge commands. Keep every existing catalog ID stable when a path moves. Never hand-edit generated routing or spine files. Run knowledge:check and check:catalog. Regenerate routing, then confirm catalog:render-routing -- --check passes.",
       "reads": [
         "catalog/generated/routing.md",
-        "catalog/generated/spine.md"
+        "catalog/generated/spine.md",
+        "catalog/generated/contracts.md"
       ],
       "consults": [],
       "referenceIds": [],
@@ -9110,7 +9111,8 @@
       "dependencies": [],
       "outputPaths": [
         "catalog/generated/routing.md",
-        "catalog/generated/spine.md"
+        "catalog/generated/spine.md",
+        "catalog/generated/contracts.md"
       ],
       "gateCommands": [
         "check:catalog",
@@ -9197,6 +9199,13 @@
         "engineering"
       ],
       "generated": false
+    },
+    {
+      "id": "artifact.catalog-generated-contracts-md",
+      "path": "catalog/generated/contracts.md",
+      "ownerDomainId": "domain.machine",
+      "laneIds": [],
+      "generated": true
     },
     {
       "id": "artifact.catalog-generated-routing-md",
