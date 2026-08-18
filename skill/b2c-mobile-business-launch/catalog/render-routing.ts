@@ -186,7 +186,6 @@ export function renderPhaseAreaMatrix(catalog: Catalog): string {
  * contract information, not a gap.
  */
 export function renderNodeContracts(catalog: Catalog): string {
-  const domainsById = new Map(catalog.domains.map((domain) => [domain.id, domain]));
   const rolesById = new Map(catalog.roles.map((role) => [role.id, role]));
   const phasesById = new Map(catalog.phases.map((phase) => [phase.id, phase]));
   const referencesById = new Map(catalog.references.map((reference) => [reference.id, reference]));
