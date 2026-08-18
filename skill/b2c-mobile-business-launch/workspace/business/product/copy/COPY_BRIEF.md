@@ -26,6 +26,17 @@ _Replace this line with this product's content — the gate fails a brief that s
 - Words we own: the product's coined terms, with one line on what each means.
 - Words we never use: jargon, internal vocabulary, and any term from the banned lists in `knowledge/words/conversion-copy.md`.
 
+## Voice benchmarks
+
+_Replace this line with this product's content — the gate fails a brief that still carries it._
+
+2-3 live consumer apps adjacent to this category whose current voice this product borrows from, and one anti-benchmark it must not sound like. Ground each borrowed attribute in words on their surfaces today, and date the teardown — `knowledge/words/consumer-copy-benchmarks.md` carries the method and starting cohorts.
+
+| App | Borrow or reject | Attribute, grounded in their current copy | Checked |
+| --- | --- | --- | --- |
+| | borrow | | |
+| | reject | | |
+
 ## Voice-of-customer phrase bank
 
 _Replace this line with this product's content — the gate fails a brief that still carries it._

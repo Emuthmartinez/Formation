@@ -60,6 +60,13 @@ const AUTHORED_BRIEF = [
   "",
   "Second person, plain words, sentence case everywhere except proper nouns.",
   "",
+  "## Voice benchmarks",
+  "",
+  "| App | Borrow or reject | Attribute, grounded in their current copy | Checked |",
+  "| --- | --- | --- | --- |",
+  "| Strava | borrow | verb-first fragments with a plain payoff after the dash | 2026-08-17 |",
+  "| Generic SaaS voice | reject | feature-name headers with no outcome | 2026-08-17 |",
+  "",
   "## Voice-of-customer phrase bank",
   "",
   "| Their words | Where it came from | Cluster |",
@@ -931,6 +938,18 @@ export function register(h: Harness): void {
   writeFileSync(path.join(briefHollow, "state/PROJECT_STATE.yaml"), stateWith("phase_2", { revenue: "done" }), "utf8");
   writeFileSync(path.join(briefHollow, "product/copy/COPY_BRIEF.md"), "# Copy Brief\n\nStatus: authored 2026-07-29\n", "utf8");
   runFixture("App copy: hollow authored brief fails", briefHollow, "check-app-copy.ts", 1, "app_copy.brief_hollow");
+
+  // A brief with every legacy section filled but no Voice benchmarks never
+  // anchored its voice to a real consumer surface — the improvised-internal-voice
+  // failure the benchmarks section exists to block.
+  const briefNoBenchmarks = makeFixture("app-copy-brief-no-voice-benchmarks");
+  writeFileSync(path.join(briefNoBenchmarks, "state/PROJECT_STATE.yaml"), stateWith("phase_2", { revenue: "done" }), "utf8");
+  writeFileSync(
+    path.join(briefNoBenchmarks, "product/copy/COPY_BRIEF.md"),
+    AUTHORED_BRIEF.replace(/## Voice benchmarks[\s\S]*?(?=## Voice-of-customer phrase bank)/, ""),
+    "utf8",
+  );
+  runFixture("App copy: authored brief without Voice benchmarks fails", briefNoBenchmarks, "check-app-copy.ts", 1, "Voice benchmarks");
 
   // Engineering underway with NO plan at all is the same missing-route failure.
   const planMissing = makeFixture("app-copy-plan-missing");

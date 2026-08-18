@@ -1509,6 +1509,7 @@
       "id": "context.design",
       "title": "Design",
       "referenceIds": [
+        "reference.design.audience-derived-identity",
         "reference.design.design-room",
         "reference.design.design-visual-system",
         "reference.design.premium-mobile-craft",
@@ -1538,6 +1539,7 @@
       "id": "context.words",
       "title": "Words",
       "referenceIds": [
+        "reference.words.consumer-copy-benchmarks",
         "reference.words.conversion-copy",
         "reference.words.no-slop-writing"
       ]
@@ -1599,6 +1601,7 @@
         "reference.money.paywall-pricing-and-experiments",
         "reference.store.app-store-listing-prep",
         "reference.store.store-console-workflow",
+        "reference.words.consumer-copy-benchmarks",
         "reference.words.conversion-copy"
       ]
     },
@@ -1836,6 +1839,68 @@
           "url": "https://posthog.com/tutorials/performance-marketing",
           "reviewCadenceDays": 7,
           "claimScope": "Auto-discovered from recently added repository content.",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        }
+      ],
+      "replacementIds": []
+    },
+    {
+      "id": "reference.design.audience-derived-identity",
+      "title": "Audience-Derived Identity",
+      "domainId": "domain.design",
+      "path": "knowledge/design/audience-derived-identity.md",
+      "loadWhen": "when design/design.md is created or revised, when a visual direction is drafted or reviewed, and when the Design Room needs the anti-generic review — derives palette/type/motion/imagery from strategy/RESEARCH.md audience facts and names the generic-template tells",
+      "lifecycle": "active",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "sources": [
+        {
+          "id": "design-duolingo-com-identity-color",
+          "name": "design.duolingo.com",
+          "sourceType": "official_docs",
+          "url": "https://design.duolingo.com/identity/color",
+          "reviewCadenceDays": 90,
+          "claimScope": "Duolingo's published brand color system, grounding the character-led case study (palette values and the against-category-default rationale).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "developer-whoop-com-design-guidelines",
+          "name": "developer.whoop.com",
+          "sourceType": "official_docs",
+          "url": "https://developer.whoop.com/docs/developing/design-guidelines/",
+          "reviewCadenceDays": 90,
+          "claimScope": "WHOOP's published design guidelines, grounding the performance/dark/data-dense case study (locked semantic color system, numeral typeface split, dark-canvas usage rationale).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "styles-refero-design-flighty",
+          "name": "styles.refero.design",
+          "sourceType": "website",
+          "url": "https://styles.refero.design/",
+          "reviewCadenceDays": 90,
+          "claimScope": "Refero's captured design-system records, grounding the Flighty case study (achromatic ramp, single action color, platform-native type rule, pill radius system).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "developer-apple-com-behind-the-design-flighty",
+          "name": "developer.apple.com",
+          "sourceType": "official_docs",
+          "url": "https://developer.apple.com/news/?id=970ncww4",
+          "reviewCadenceDays": 90,
+          "claimScope": "Apple's Behind the Design interview on Flighty, grounding the aviation-insider audience framing of that case study.",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "dev-to-tailwind-indigo-default-analysis",
+          "name": "dev.to",
+          "sourceType": "website",
+          "url": "https://dev.to/alanwest/why-every-ai-built-website-looks-the-same-blame-tailwinds-indigo-500-3h2p",
+          "reviewCadenceDays": 90,
+          "claimScope": "The documented mechanism behind the indigo/purple-gradient generic-AI tell (Tailwind UI default propagating through training corpora), grounding the Generic-Design Tells table.",
           "lastReviewDate": "2026-08-17",
           "reviewer": "formation-maintainers"
         }
@@ -5716,6 +5781,188 @@
       "replacementIds": []
     },
     {
+      "id": "reference.words.consumer-copy-benchmarks",
+      "title": "Consumer Copy Benchmarks",
+      "domainId": "domain.words",
+      "path": "knowledge/words/consumer-copy-benchmarks.md",
+      "loadWhen": "when any surface a user reads is authored or reviewed — landing, store listing, screenshot captions, paywall, onboarding, lifecycle email, share text — and when a new app's voice is established in COPY_BRIEF.md / BRAND.md (the Voice benchmarks section writes from this file's method)",
+      "lifecycle": "active",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "sources": [
+        {
+          "id": "headspace-com-marketing-site",
+          "name": "headspace.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.headspace.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live wellness-cohort landing exemplar (hero/subhead/CTA register, HSA/insurance credibility weave). Verbatim exemplars in the benchmarks doc are point-in-time; re-tear down on cadence.",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "calm-com-marketing-site",
+          "name": "calm.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.calm.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live wellness-cohort landing exemplar (two-clause imperative hero, named-person social proof, benefit-pillar rhythm).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "duolingo-com-marketing-site",
+          "name": "duolingo.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.duolingo.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live wellness/habit-cohort landing and App Store listing exemplar (playful register, declarative claims, lowercase micro-headers, store description bullet structure).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "strava-com-marketing-site",
+          "name": "strava.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.strava.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live fitness-cohort landing and listing exemplar (identity/community framing, verb-first bullets, casual register).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "partiful-com-marketing-site",
+          "name": "partiful.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://partiful.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live consumer/social-cohort exemplar (unedited-review social proof, emoji-as-punctuation headers, incumbent jab).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "bereal-com-marketing-site",
+          "name": "bereal.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://bereal.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live consumer/social-cohort exemplar (near-zero hero copy, manifesto register, restraint as persuasion).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "flighty-com-marketing-site",
+          "name": "flighty.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://flighty.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live consumer-utility exemplar (data product in relational/emotional register, feature-effect renaming, adversarial incumbent positioning).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "cash-app-marketing-site",
+          "name": "cash.app",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://cash.app",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live fintech-cohort exemplar (complex financial stack in plain consumer verbs, fee-negative framing, job-named listing section headers).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "copilot-money-marketing-site",
+          "name": "copilot.money",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://copilot.money",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live fintech-cohort exemplar (craft-as-trust-signal, possessive user-first framing, privacy as business-model disclosure).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "monarch-com-marketing-site",
+          "name": "monarch.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.monarch.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live fintech-cohort exemplar (metaphor-led positioning, trust-as-absence phrasing, unpolished migration testimonials).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "onepassword-com-marketing-site",
+          "name": "1password.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://1password.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live trust-heavy exemplar (two-tier vocabulary strategy — plain outcome words above the fold, technical precision contained in FAQ/deep sections).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "thefabulous-co-marketing-site",
+          "name": "thefabulous.co",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.thefabulous.co",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live wellness/habit-cohort exemplar (science-origin credibility story, aspirational register, context-adaptive hero).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "locket-camera-marketing-site",
+          "name": "locket.camera",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://locket.camera",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live consumer/social-cohort exemplar (near-copy-free hero, visual collage as pitch, audience named only on partner-facing corners).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "retro-app-marketing-site",
+          "name": "retro.app",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://retro.app",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live consumer/social-cohort exemplar (one-sentence homepage, persuasion displaced to a manifesto page, restraint as strategy).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "alltrails-com-marketing-site",
+          "name": "alltrails.com",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.alltrails.com",
+          "reviewCadenceDays": 90,
+          "claimScope": "Live consumer-utility exemplar (community-as-authority trust, photography-led credibility, minimal functional body copy).",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "flo-health-store-listing",
+          "name": "flo.health",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://flo.health",
+          "reviewCadenceDays": 90,
+          "claimScope": "Store-listing exemplar (category+differentiator opening description line with quantified reach), grounding the Store Listing Rules.",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "growth-design-case-studies",
+          "name": "growth.design",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://growth.design/case-studies",
+          "reviewCadenceDays": 90,
+          "claimScope": "Documented onboarding/paywall teardowns (Headspace JTBD disconnect, Strava premium-preview framing failure, Blinkist fear-first paywall win) grounding the onboarding and paywall rules. Conversion figures cited are the case studies' own point-in-time numbers, never evidence for external claims.",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        }
+      ],
+      "replacementIds": []
+    },
+    {
       "id": "reference.words.conversion-copy",
       "title": "Conversion Copy",
       "domainId": "domain.words",
@@ -6319,6 +6566,8 @@
         "reference.data.analytics-attribution",
         "reference.operations.resend-email-ops",
         "reference.process.tool-recipes.revenue-email-analytics",
+        "reference.words.consumer-copy-benchmarks",
+        "reference.words.conversion-copy",
         "reference.words.no-slop-writing"
       ],
       "roleId": "role.customer-success",
@@ -6849,15 +7098,17 @@
         "area.product-experience"
       ],
       "trigger": "Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work",
-      "instructions": "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
+      "instructions": "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. Derive design/design.md's Audience And Identity section from strategy/RESEARCH.md before locking any visual direction: audience facts, apps they love, category convention followed/broken, anti-references, and the fact→decision table with evidence — the derivation chain lives in audience-derived-identity.md, and a direction that only cites a trend is not a decision. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
       "reads": [
         "design/design.md",
         "studio/seed/business.json",
         "studio/seed/theme.tokens.json",
-        "state/LAUNCH_TRACE.md"
+        "state/LAUNCH_TRACE.md",
+        "strategy/RESEARCH.md"
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.audience-derived-identity",
         "reference.design.design-room",
         "reference.design.landing-motion-craft",
         "reference.design.quality-lens",
@@ -6997,7 +7248,9 @@
       "referenceIds": [
         "reference.experience.eleven-star-experience",
         "reference.experience.onboarding-conversion",
-        "reference.experience.push-notification-lifecycle"
+        "reference.experience.push-notification-lifecycle",
+        "reference.words.consumer-copy-benchmarks",
+        "reference.words.conversion-copy"
       ],
       "roleId": "role.product-leader",
       "laneIds": [
@@ -7128,6 +7381,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.words.consumer-copy-benchmarks",
         "reference.words.conversion-copy",
         "reference.words.no-slop-writing"
       ],
@@ -7169,6 +7423,8 @@
         "reference.process.tool-recipes.growth-and-store-routing",
         "reference.research.localization-market-research",
         "reference.store.aso-store-ops",
+        "reference.words.consumer-copy-benchmarks",
+        "reference.words.conversion-copy",
         "reference.words.no-slop-writing"
       ],
       "roleId": "role.marketing-guru",
@@ -7214,6 +7470,8 @@
         "reference.experience.eleven-star-experience",
         "reference.money.revenue-monetization",
         "reference.store.app-store-listing-prep",
+        "reference.words.consumer-copy-benchmarks",
+        "reference.words.conversion-copy",
         "reference.words.no-slop-writing"
       ],
       "roleId": "role.marketing-guru",
@@ -7415,7 +7673,8 @@
       "referenceIds": [
         "reference.operations.secrets-management",
         "reference.store.app-store-connect-cli",
-        "reference.store.store-console-workflow"
+        "reference.store.store-console-workflow",
+        "reference.words.conversion-copy"
       ],
       "roleId": "role.engineering-leader",
       "laneIds": [
@@ -7468,7 +7727,9 @@
         "reference.design.quality-lens",
         "reference.engineering.mobai-toolbelt",
         "reference.process.tool-recipes.device-capture-and-proof",
-        "reference.store.aso-store-ops"
+        "reference.store.aso-store-ops",
+        "reference.words.consumer-copy-benchmarks",
+        "reference.words.conversion-copy"
       ],
       "roleId": "role.design-guru",
       "laneIds": [
@@ -7564,7 +7825,8 @@
       "consults": [],
       "referenceIds": [
         "reference.store.google-play-release",
-        "reference.store.store-console-workflow"
+        "reference.store.store-console-workflow",
+        "reference.words.conversion-copy"
       ],
       "roleId": "role.marketing-guru",
       "laneIds": [
@@ -8246,7 +8508,9 @@
         "reference.experience.ethics-guardrail",
         "reference.experience.onboarding-conversion",
         "reference.growth.viral-growth-loops",
-        "reference.money.revenue-monetization"
+        "reference.money.revenue-monetization",
+        "reference.words.consumer-copy-benchmarks",
+        "reference.words.conversion-copy"
       ],
       "roleId": "role.marketing-guru",
       "laneIds": [
@@ -8291,6 +8555,7 @@
         "reference.experience.ethics-guardrail",
         "reference.growth.launch-narrative-cadence",
         "reference.growth.viral-growth-loops",
+        "reference.words.consumer-copy-benchmarks",
         "reference.words.no-slop-writing"
       ],
       "roleId": "role.marketing-guru",
@@ -8341,7 +8606,9 @@
         "reference.money.paywall-pricing-and-experiments",
         "reference.money.revenue-monetization",
         "reference.money.revenuecat-and-store-products",
-        "reference.money.stripe-and-web-billing"
+        "reference.money.stripe-and-web-billing",
+        "reference.words.consumer-copy-benchmarks",
+        "reference.words.conversion-copy"
       ],
       "roleId": "role.engineering-leader",
       "laneIds": [
@@ -8445,6 +8712,7 @@
         "reference.design.landing-motion-craft",
         "reference.growth.cro-landing",
         "reference.process.tool-recipes.funnel-domain-and-privacy",
+        "reference.words.consumer-copy-benchmarks",
         "reference.words.conversion-copy"
       ],
       "roleId": "role.launch-surface-producer",
@@ -8490,7 +8758,8 @@
       "referenceIds": [
         "reference.growth.cro-landing",
         "reference.growth.geo-seo",
-        "reference.process.tool-recipes.funnel-domain-and-privacy"
+        "reference.process.tool-recipes.funnel-domain-and-privacy",
+        "reference.words.conversion-copy"
       ],
       "roleId": "role.launch-surface-producer",
       "laneIds": [

@@ -175,6 +175,7 @@ if (briefRequired) {
     "Value proposition",
     "Message hierarchy",
     "Voice and tone",
+    "Voice benchmarks",
     "Voice-of-customer phrase bank",
     "Per-surface copy blocks",
     "Claims ledger",
