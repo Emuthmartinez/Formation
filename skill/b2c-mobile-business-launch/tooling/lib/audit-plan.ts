@@ -95,6 +95,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:catalog", kind: "script", args: ["--skill-root", S] },
     { id: "catalog:render-routing", kind: "script", args: ["--check", "--skill-root", S] },
     { id: "check:gates-layout", kind: "script", args: ["--skill-root", S] },
+    { id: "check:validator-docs", kind: "script", args: ["--repo-root", "."], repoOnly: true },
     { id: "check:agent-evals", kind: "script" },
     { id: "launchbench", kind: "script", serial: true },
     // U9's v2 verification surface (fixture suites, capability-boundary suites, cross-runtime

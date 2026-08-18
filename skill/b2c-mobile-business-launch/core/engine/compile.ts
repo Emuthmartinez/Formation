@@ -59,6 +59,13 @@ export interface NodeReference {
   title: string;
   loadWhen: string;
   freshness?: string;
+  /**
+   * The earliest date any of the reference's sources is due for re-review (lastReviewDate +
+   * reviewCadenceDays, minimum across sources). Derived from source bytes only, so the compiled
+   * plan stays stable; projections compare it against their own `now` to report a verdict.
+   * Absent for references with no external sources.
+   */
+  reviewDueBy?: string;
 }
 
 /** The specialist role that owns a node's work; promptPath is workspace-relative (the roster ships with the business). */

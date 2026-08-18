@@ -111,16 +111,47 @@ export interface LaunchMatrixWorkflow {
   readonly dependencyWorkflowIds: string[];
   readonly dependentWorkflowIds: string[];
   readonly role?: { id: string; name: string };
-  readonly knowledge: Array<{ id: string; title: string; loadWhen: string; freshness: string }>;
+  readonly knowledge: LaunchMatrixKnowledge[];
+  /**
+   * Role-attached conditional knowledge (context packs), deduplicated against the mandatory
+   * `knowledge` list the same way composeNodeBrief splits load/route. Dispatched workers receive
+   * both; a matrix that showed only the mandatory list under-reported the knowledge surface.
+   */
+  readonly conditionalKnowledge: Array<LaunchMatrixKnowledge & { packId: string; packTitle: string }>;
   readonly services: Array<{ id: string; name: string; purpose: string; state: string; checkedAt?: string }>;
   readonly agentTools: Array<{ id: string; when: string }>;
   readonly outputs: Array<{ artifactId: string; title: string; state: string }>;
   readonly verification: { kind: string; state: string; evidenceCount: number };
 }
 
+export interface LaunchMatrixKnowledge {
+  readonly id: string;
+  readonly title: string;
+  readonly path: string;
+  readonly loadWhen: string;
+  readonly freshness: string;
+  /** Read-time verdict on source review cadence: sources overdue, current, or none declared. */
+  readonly reviewStatus: "review-due" | "current" | "internal";
+}
+
+/**
+ * One cross-cutting integrity workflow (domain.process / domain.orchestration) with its live
+ * status and verification state. These never join a founder presentation group — they are not
+ * founder-grantable work — but their outcomes (provider proof, coverage audits, change cascades)
+ * are launch-readiness evidence a founder may see, so they cross the boundary as their own list
+ * instead of dissolving into an unlabeled count.
+ */
+export interface LaunchMatrixIntegrityStep {
+  readonly workflowId: string;
+  readonly title: string;
+  readonly status: string;
+  readonly verification: { kind: string; state: string };
+}
+
 export interface LaunchMatrixProjection {
   readonly groups: Array<{ id: string; title: string; order: number }>;
   readonly workflows: LaunchMatrixWorkflow[];
+  readonly launchIntegrity: LaunchMatrixIntegrityStep[];
   readonly systemSummary: { total: number; counts: Record<string, number> };
 }
 
@@ -374,6 +405,7 @@ export function buildLaunchMatrix(
   workflowStates: readonly ExecutionWorkflowState[],
   businessState: BusinessStateV2,
   agentOperations: SanitizedAgentOperations,
+  now: string,
 ): LaunchMatrixProjection {
   const stateByWorkflow = new Map(workflowStates.map((item) => [item.workflowId, item]));
   const workflowByNode = new Map(plan.nodes.map((node) => [node.id, node.workflowId]));
@@ -381,6 +413,15 @@ export function buildLaunchMatrix(
   for (const node of plan.nodes) {
     for (const dependency of node.dependencies) dependents.set(dependency, [...(dependents.get(dependency) ?? []), node.workflowId]);
   }
+  const today = now.slice(0, 10);
+  const presentKnowledge = (reference: NonNullable<CompiledRunNode["references"]>[number]): LaunchMatrixKnowledge => ({
+    id: reference.id,
+    title: reference.title,
+    path: reference.path,
+    loadWhen: reference.loadWhen,
+    freshness: reference.freshness ?? "unknown",
+    reviewStatus: reference.reviewDueBy ? (reference.reviewDueBy < today ? "review-due" : "current") : "internal",
+  });
   const groups = plan.presentationGroups ?? [];
   const systemNodes = plan.nodes.filter((node) => node.domainId === "domain.process" || node.domainId === "domain.orchestration");
   const systemCounts: Record<string, number> = {};
@@ -388,6 +429,15 @@ export function buildLaunchMatrix(
     const status = stateByWorkflow.get(node.workflowId)?.status ?? "upcoming";
     systemCounts[status] = (systemCounts[status] ?? 0) + 1;
   }
+  const launchIntegrity = systemNodes.map((node): LaunchMatrixIntegrityStep => ({
+    workflowId: node.workflowId,
+    title: node.title,
+    status: stateByWorkflow.get(node.workflowId)?.status ?? "upcoming",
+    verification: {
+      kind: node.verification.kind,
+      state: run.nodes[node.id]?.status === "succeeded" ? "verified" : run.nodes[node.id]?.status === "failed" ? "failed" : "pending",
+    },
+  }));
   const workflows = plan.nodes.filter((node) => node.groupId).map((node): LaunchMatrixWorkflow => {
     const state = stateByWorkflow.get(node.workflowId)!;
     const scope = businessState.workflowApplicability?.[node.workflowId];
@@ -418,7 +468,21 @@ export function buildLaunchMatrix(
       dependencyWorkflowIds: node.dependencies.map((id) => workflowByNode.get(id)!).filter(Boolean),
       dependentWorkflowIds: dependents.get(node.id) ?? [],
       ...(node.role ? { role: { id: node.role.id, name: node.role.name } } : {}),
-      knowledge: (node.references ?? []).map((reference) => ({ id: reference.id, title: reference.title, loadWhen: reference.loadWhen, freshness: reference.freshness ?? "unknown" })),
+      knowledge: (node.references ?? []).map(presentKnowledge),
+      conditionalKnowledge: (() => {
+        // Same load/route split and path-level dedupe as composeNodeBrief: mandatory references
+        // win, and a reference shared by two packs appears once, under the first pack.
+        const seen = new Set((node.references ?? []).map((reference) => reference.path));
+        return (
+          node.role?.contextPacks.flatMap((pack) =>
+            pack.references.flatMap((reference) => {
+              if (seen.has(reference.path)) return [];
+              seen.add(reference.path);
+              return [{ ...presentKnowledge(reference), packId: pack.id, packTitle: pack.title }];
+            }),
+          ) ?? []
+        );
+      })(),
       services,
       agentTools: node.role?.toolRoutes.map((tool) => ({ id: tool.id, when: tool.when })) ?? [],
       outputs: node.outputs.map((artifactId) => {
@@ -432,7 +496,7 @@ export function buildLaunchMatrix(
       },
     };
   });
-  return { groups, workflows, systemSummary: { total: systemNodes.length, counts: systemCounts } };
+  return { groups, workflows, launchIntegrity, systemSummary: { total: systemNodes.length, counts: systemCounts } };
 }
 
 export function describeWorkspace(
@@ -503,7 +567,7 @@ export function describeWorkspace(
     approvals: durable ? buildBoundaryApprovals(plan, durable) : [],
     results: durable ? buildBoundaryResults(plan, scratch) : [],
     artifacts: durable ? buildBoundaryArtifacts(plan, scratch) : [],
-    launchMatrix: buildLaunchMatrix(plan, scratch, boundaryWorkflows, businessState, readAgentOperations(paths.agentOperations)),
+    launchMatrix: buildLaunchMatrix(plan, scratch, boundaryWorkflows, businessState, readAgentOperations(paths.agentOperations), now),
   };
 }
 

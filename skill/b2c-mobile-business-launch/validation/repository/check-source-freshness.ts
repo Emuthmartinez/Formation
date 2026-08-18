@@ -308,8 +308,54 @@ if (missing.length > 0 && args.writeDiscovered) {
   }
 }
 
+// Overdue detection is split from registration on purpose: verifying a source's content needs
+// the network (refresh-source-freshness.ts, the scheduled refresh), while this gate must stay
+// deterministic and offline. The refresh writes per-source checked_at snapshots; when that
+// state exists, cadence-overdue sources surface here as warnings — visible in every audit run,
+// never a red build purely because time passed between scheduled refreshes. Founder-facing
+// knowledge sources have their own hard gate (knowledge.source.stale in check:catalog).
+const snapshotPath = path.join(args.root, "docs/source-freshness/source-snapshots/current.json");
+const snapshotByUrl = new Map<string, { checkedAt: string }>();
+if (existsSync(snapshotPath)) {
+  try {
+    const parsed = JSON.parse(readFileSync(snapshotPath, "utf8"));
+    for (const item of (Array.isArray(parsed.sources) ? parsed.sources : []).filter(isRecord)) {
+      const url = normalizeUrl(String(item.url ?? ""));
+      const checkedAt = String(item.checked_at ?? "");
+      if (url && checkedAt) snapshotByUrl.set(url, { checkedAt });
+    }
+  } catch {
+    issues.push(
+      issue(
+        "warning",
+        "source_freshness.snapshot.unreadable",
+        `Snapshot state exists but could not be parsed: ${path.relative(args.root, snapshotPath)}`,
+        path.relative(args.root, snapshotPath),
+      ),
+    );
+  }
+}
+
 for (const [index, source] of sourceRecords(registry).entries()) {
   const prefix = `sources.${index}`;
+  if (snapshotByUrl.size > 0) {
+    const url = normalizeUrl(String(source.url ?? ""));
+    const cadence = typeof source.refresh_cadence_days === "number" ? source.refresh_cadence_days : undefined;
+    const snapshot = url ? snapshotByUrl.get(url) : undefined;
+    if (url && cadence && snapshot) {
+      const ageDays = Math.floor((Date.now() - new Date(snapshot.checkedAt).valueOf()) / 86_400_000);
+      if (Number.isFinite(ageDays) && ageDays > cadence) {
+        issues.push(
+          issue(
+            "warning",
+            `source_freshness.${prefix}.overdue`,
+            `${String(source.id)} was last verified ${ageDays} days ago (cadence ${cadence}); run refresh:source-freshness.`,
+            path.relative(args.root, args.registryPath),
+          ),
+        );
+      }
+    }
+  }
   for (const field of ["id", "name", "source_type", "url", "owner"]) {
     if (typeof source[field] !== "string" || !String(source[field]).trim()) {
       issues.push(

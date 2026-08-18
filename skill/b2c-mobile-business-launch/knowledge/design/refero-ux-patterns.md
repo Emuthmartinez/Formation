@@ -34,7 +34,7 @@ Current Refero screen and flow filters are `web` and `ios`. For Android launches
 Refero is paid/account-gated. Missing runtime access is not permission to switch to a weaker route.
 
 Before using any fallback:
-1. Load `paid-tool-routing.md`.
+1. Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md).
 2. Ask the founder whether they have Refero, will provide an export/screenshots, want to sign up, or approve the free baseline route.
 3. Record the answer in `strategy/TOOL_DECISIONS.md` and `state/PROJECT_STATE.yaml.tools.refero`.
 4. If approved fallback is used, copy or adapt `business/product/experience/ux-patterns/UX_PATTERNS.md` and `business/product/experience/ux-patterns/ux-patterns.html`.

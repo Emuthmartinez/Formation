@@ -39,7 +39,7 @@ Deprioritize sponsorships when there is no visible product moment, the audience 
 
 A sponsorship buys 10-15 seconds inside someone else's video. The unit being sold is not the app; it is one moment that makes a viewer stop and want to try it without a word of explanation. The playbook's examples all share the shape: perform one obvious action, receive personalized feedback the viewer cannot get anywhere else (photograph food → calories; upload a match → what you did wrong).
 
-This is the sponsorship-facing test of the magical moment in `eleven-star-experience.md`: if the V1 magical moment cannot be shown convincingly in five seconds of screen time inside a creator's normal content, either the moment needs redesign before creator spend starts, or sponsorships are the wrong first channel. Work the test backward during ideation: before the spec hardens, describe the 5-second clip a creator would drop into their content, then confirm the product actually produces that clip truthfully. A moment that only demos with staged data fails the fit gate.
+This is the sponsorship-facing test of the magical moment in [`eleven-star-experience.md`](../experience/eleven-star-experience.md): if the V1 magical moment cannot be shown convincingly in five seconds of screen time inside a creator's normal content, either the moment needs redesign before creator spend starts, or sponsorships are the wrong first channel. Work the test backward during ideation: before the spec hardens, describe the 5-second clip a creator would drop into their content, then confirm the product actually produces that clip truthfully. A moment that only demos with staged data fails the fit gate.
 
 Push the demo moment in roughly nine of ten sponsored posts. Rotate a secondary feature only when a specific creator's audience saturates (per-creator returns dip across consecutive posts), and expect the secondary uptick to be smaller. The headline stays the headline.
 
@@ -55,7 +55,7 @@ Setup checklist:
 - clean bio: who this is, what the app does, one CTA link
 - 3 pinned product demos built from the five-second demo moment
 - collab-post every sponsored video with the creator so both audiences see it and the page accumulates visible partnerships
-- platform verification is a paid decision — route through `paid-tool-routing.md` and check the current price; do not quote it from memory
+- platform verification is a paid decision — route through [`paid-tool-routing.md`](../operations/paid-tool-routing.md) and check the current price; do not quote it from memory
 - grow followers with content and collab posts only; purchased followers are a Rejected Tactic
 
 ## Prospecting: Engineer The Feed

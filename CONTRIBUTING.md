@@ -132,4 +132,4 @@ By contributing, you agree that your contributions are licensed under the [MIT L
 
 ## Documentation synchronization
 
-A behavior or schema change is incomplete until the repository README, `SKILL.md`, graph README, architecture guide, implementation guide, validator reference, affected domain README indexes, generated projections, and `skill-version.json` agree. Review every README even when only canonical surfaces need edits. Generated blocks are changed through definitions and renderers, never by hand.
+A behavior or schema change is incomplete until the repository README, `SKILL.md`, architecture guide, implementation guide, validator reference, generated projections, and `skill-version.json` agree. Review every README even when only canonical surfaces need edits. Generated blocks are changed through definitions and renderers, never by hand — routing tables come from the catalog (`npm run catalog:render-routing`), and `check:validator-docs` fails when the validator reference and `package.json` scripts disagree.

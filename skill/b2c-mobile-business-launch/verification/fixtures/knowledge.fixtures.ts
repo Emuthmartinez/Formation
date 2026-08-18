@@ -50,4 +50,19 @@ export function register(harness: Harness): void {
     assert(codes([knowledge({ lifecycle: "deprecated", workflowIds: [] })]).includes("knowledge.deprecated.replacement_missing"), "expected missing replacement");
     assert(codes([knowledge({ lifecycle: "deprecated", workflowIds: [], replacementIds: ["reference.research.absent"] })]).includes("knowledge.deprecated.replacement_invalid"), "expected invalid replacement");
   });
+  harness.check("knowledge: two active packages sharing a load_when trigger fail, and normalization defeats whitespace disguises", () => {
+    const twin = knowledge({ id: "reference.research.twin", path: "package-lock.json" });
+    assert(codes([knowledge(), twin]).includes("knowledge.load_when.duplicate"), "expected duplicate trigger error");
+    const rewrapped = knowledge({ id: "reference.research.rewrapped", path: "package-lock.json", loadWhen: "  During   Fixture\nwork " });
+    assert(codes([knowledge(), rewrapped]).includes("knowledge.load_when.duplicate"), "a re-wrapped trigger must still count as a duplicate");
+    // A deprecated twin no longer competes for the trigger.
+    assert(!codes([knowledge(), { ...twin, lifecycle: "deprecated" as const, workflowIds: [], replacementIds: [knowledge().id] }]).includes("knowledge.load_when.duplicate"), "deprecated packages must not trip the duplicate gate");
+    // Distinct triggers pass.
+    assert(!codes([knowledge(), knowledge({ id: "reference.research.other", path: "package-lock.json", loadWhen: "during other fixture work" })]).includes("knowledge.load_when.duplicate"), "distinct triggers were flagged");
+  });
+  harness.check("knowledge: a paragraph-length load_when fails the word cap while a scannable one passes", () => {
+    const words = Array.from({ length: 46 }, (_unused, index) => `word${index}`).join(" ");
+    assert(codes([knowledge({ loadWhen: words })]).includes("knowledge.load_when.over_length"), "expected over-length trigger error");
+    assert(!codes([knowledge()]).includes("knowledge.load_when.over_length"), "a short trigger was flagged");
+  });
 }

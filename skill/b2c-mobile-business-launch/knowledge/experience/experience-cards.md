@@ -102,7 +102,7 @@ repo; the maintained deck is versioned per card):
 | **Mobile implementation + reduced-motion** | Platform-specific code notes; OS reduce-motion fallback is mandatory |
 | **Bright line / Dark line / Guardrail** | Ethics contract; deterministic ship-gate |
 | **Pairs with** | Other cards or references this card composes with |
-| **11-star level** | Star-ladder position from `eleven-star-experience.md` |
+| **11-star level** | Star-ladder position from [`eleven-star-experience.md`](eleven-star-experience.md) |
 
 ---
 

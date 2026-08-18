@@ -93,6 +93,11 @@
 
 @media (max-width: 680px) {
   .matrix-scroll { overflow: visible; }
+  /* The phase cross-tab stays a table on small screens — it needs its scroll container, which
+     the block conversion above would otherwise remove (the phase view used to overflow the
+     viewport with no way to reach the cut-off columns). */
+  .matrix-scroll--phases { overflow-x: auto; }
+  .matrix-scroll--phases .launch-phase-matrix { min-width: 640px; }
   .launch-matrix-table { min-width: 0; display: block; }
   .launch-matrix-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .launch-matrix-table tbody, .launch-matrix-table tr, .launch-matrix-table th, .launch-matrix-table td { display: block; width: auto; }

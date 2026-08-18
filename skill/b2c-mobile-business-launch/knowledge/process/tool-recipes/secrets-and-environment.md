@@ -8,7 +8,7 @@ Part of the [Tool Recipes](../tool-recipes.md) index. Before using any paid or a
 
 ## Doppler And Secret Routing
 
-Load `secrets-management.md` before adding or using secrets. Default to Doppler unless the founder selected another provider.
+Load [`secrets-management.md`](../../operations/secrets-management.md) before adding or using secrets. Default to Doppler unless the founder selected another provider.
 
 Refresh current Doppler official docs and `https://docs.doppler.com/llms.txt` before installation, setup, service-token, or CI/live-environment instructions. Record docs checked date, docs URLs, observed CLI version/install route, and any docs-vs-local mismatch in `SECRETS.md`.
 

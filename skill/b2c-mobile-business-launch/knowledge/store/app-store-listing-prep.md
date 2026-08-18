@@ -1,10 +1,12 @@
 # App Store Listing Preparation
 
+Part of the [ASO And Store Operations](./aso-store-ops.md) hub — it decides which store lane runs and what evidence each lane must leave behind.
+
 Use this before preparing Apple App Store listing fields, App Privacy answers, subscription/IAP pricing, App Store Connect screenshots/previews, In-App Events, custom product pages, promotional pages, localization, Apple Search Ads routing, or App Store marketing assets.
 
 This is the bridge between marketing and engineering. The listing packet must be persuasive, policy-aligned, tied to real App Store Connect state, and synchronized with RevenueCat, Stripe/web funnels, analytics, legal pages, screenshots, and the product build.
 
-Load `eleven-star-experience.md` before screenshot, app-preview, ad, custom product page, or In-App Event concepts are locked. Store marketing should show the V1 scalable slice truthfully instead of inventing a different promise for the listing.
+Load [`eleven-star-experience.md`](../experience/eleven-star-experience.md) before screenshot, app-preview, ad, custom product page, or In-App Event concepts are locked. Store marketing should show the V1 scalable slice truthfully instead of inventing a different promise for the listing.
 
 ## Contents
 

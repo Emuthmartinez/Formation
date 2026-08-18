@@ -2,7 +2,7 @@
 
 Use this before designing onboarding, quizzes, personalization, attribution capture, mascot guidance, demo videos, review prompts, paywall timing, closing offers, trials, or first-session activation.
 
-Load `paid-tool-routing.md` before replacing Higgsfield, MobAI Plus/Pro or intended cross-platform coverage, XcodeBuildMCP-approved fallback, RevenueCat experiments, PostHog experiments/surveys/replay, or any paid/account-gated onboarding tool with a free/manual route. MobAI Free needs no spend gate when it covers the lane. Load `remotion-content-assets.md` before using Remotion for onboarding demo clips, animated explainers, app-preview cuts, social hook clips, or local rendered assets. Load [`motion-craft-benchmarks.md`](../design/motion-craft-benchmarks.md)'s R11–R14 recipes before designing the cold-launch splash, loading, or welcome-screen sequence that precedes this file's screen-by-screen table — the numeric, checkable acceptance criteria for that moment live there, not here.
+Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before replacing Higgsfield, MobAI Plus/Pro or intended cross-platform coverage, XcodeBuildMCP-approved fallback, RevenueCat experiments, PostHog experiments/surveys/replay, or any paid/account-gated onboarding tool with a free/manual route. MobAI Free needs no spend gate when it covers the lane. Load `remotion-content-assets.md` before using Remotion for onboarding demo clips, animated explainers, app-preview cuts, social hook clips, or local rendered assets. Load [`motion-craft-benchmarks.md`](../design/motion-craft-benchmarks.md)'s R11–R14 recipes before designing the cold-launch splash, loading, or welcome-screen sequence that precedes this file's screen-by-screen table — the numeric, checkable acceptance criteria for that moment live there, not here.
 
 ## Contents
 
@@ -28,7 +28,7 @@ Refresh current platform and monetization sources before locking a flow:
 
 Load `analytics-attribution.md` before locking onboarding event names, attribution-source options, paywall variants, or the dashboard plan. Onboarding should implement the approved analytics catalog, not invent events while building screens.
 
-Load `eleven-star-experience.md` before locking onboarding. The onboarding sequence should carry the product's 11-star V1 scalable slice: the user should see why the product is personally relevant before the flow asks for payment, long setup, or sensitive data.
+Load [`eleven-star-experience.md`](eleven-star-experience.md) before locking onboarding. The onboarding sequence should carry the product's 11-star V1 scalable slice: the user should see why the product is personally relevant before the flow asks for payment, long setup, or sensitive data.
 
 Load `viral-growth-loops.md` before using referral unlocks, share-to-unlock mechanics, creator-code CTAs, social-comment loops, or viral paywall/onboarding sequences. Onboarding can create growth momentum, but the loop needs a fair fallback, abuse controls, analytics proof, and traceability before build handoff.
 

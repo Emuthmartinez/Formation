@@ -98,7 +98,7 @@ V1 scalable slice" — without a procedure for a non-archetype product. Here is 
 
 ## 5. Threading Into The Workflow
 
-- **The core loop is the 11-star magical moment's subject.** Run `eleven-star-experience.md`
+- **The core loop is the 11-star magical moment's subject.** Run [`eleven-star-experience.md`](../experience/eleven-star-experience.md)
   over the loop named in §2 — the ladder, the line of feasibility, and the scenes all describe
   this loop, exactly as an archetype's "How This Lane Threads Into The Launch Workflow" section
   points its magical moment at its own named loop.

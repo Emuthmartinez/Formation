@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { createId } from "./domain.mjs";
 import { listEngineApprovals, recordApprovalActivity, syncEngineApprovals } from "./domain/approvals.mjs";
 import { denialMessage, resolveAccess } from "./domain/capabilities.mjs";
-import { boardStepTitle, presentApprovalAsk, presentMatrixService, presentMatrixTool, presentStep } from "./domain/presentation.mjs";
+import { boardStepTitle, presentApprovalAsk, presentMatrixKnowledge, presentMatrixService, presentMatrixTool, presentStep } from "./domain/presentation.mjs";
 import { recordResultActivity, syncEngineResults } from "./domain/results.mjs";
 
 /**
@@ -362,10 +362,24 @@ export class ExecutionWorker {
         summary: step.summary ?? workflow.summary,
         services: (workflow.services ?? []).map((service) => presentMatrixService(service, step.title)),
         agentTools: (workflow.agentTools ?? []).map((tool) => presentMatrixTool(tool, step.title)),
+        knowledge: (workflow.knowledge ?? []).map((guide) => presentMatrixKnowledge(guide, step.title)),
+        conditionalKnowledge: (workflow.conditionalKnowledge ?? []).map((guide) => presentMatrixKnowledge(guide, step.title)),
         technical: { workflowId: workflow.workflowId, title: step.technical, phaseIds: workflow.phaseIds ?? [] },
       };
     });
-    return { available: true, checkedAt, generatedAt: view.report.generatedAt, ...matrix, workflows };
+    // Cross-cutting integrity steps present by board name; their raw titles stay technical.
+    const launchIntegrity = (matrix.launchIntegrity ?? []).map((item) => {
+      const step = presentStep(item.workflowId, item.title);
+      return {
+        workflowId: item.workflowId,
+        title: step.title,
+        summary: step.summary,
+        status: item.status,
+        verification: item.verification,
+        technical: step.technical,
+      };
+    });
+    return { available: true, checkedAt, generatedAt: view.report.generatedAt, ...matrix, workflows, launchIntegrity };
   }
 
   /**

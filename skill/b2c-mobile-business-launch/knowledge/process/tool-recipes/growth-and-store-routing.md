@@ -26,7 +26,7 @@ Use `aso-store-ops.md` as the router. Load `app-store-listing-prep.md` for Apple
 Fallback:
 - If the ASO skills are installed but not discoverable in the current runtime, search local skill/plugin directories for the skill name and read its `SKILL.md`.
 - If the Eronred ASO skill set is relevant, refresh `https://github.com/Eronred/aso-skills` and prefer installed or vendored skill docs over memory.
-- If no ASO skill pack is installed, use `paid-tool-routing.md` before replacing paid ASO tooling with AppKittie, public App Store/Play Console research, manual keyword sheets, and the same outputs: context, keyword map, metadata variants, `APP_STORE_LISTING.md`, `store/STORE_CONSOLE.md`, `app-store-listing.html`, `store/store-console.html`, `SCREENSHOTS.md`, launch calendar, and post-launch monitoring loop.
+- If no ASO skill pack is installed, use [`paid-tool-routing.md`](../../operations/paid-tool-routing.md) before replacing paid ASO tooling with AppKittie, public App Store/Play Console research, manual keyword sheets, and the same outputs: context, keyword map, metadata variants, `APP_STORE_LISTING.md`, `store/STORE_CONSOLE.md`, `app-store-listing.html`, `store/store-console.html`, `SCREENSHOTS.md`, launch calendar, and post-launch monitoring loop.
 
 ## Paid User Acquisition Routing
 

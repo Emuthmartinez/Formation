@@ -2,7 +2,18 @@
 
 Use this before writing App Store or Google Play metadata, producing screenshots, running paid-search experiments, submitting builds, handling review issues, or monitoring growth after launch.
 
-This is an orchestration reference. Prefer specialist ASO skills and live store data when available; use this file to decide which lane to run and what evidence must be left behind.
+This is an orchestration reference and the store domain's hub. Prefer specialist ASO skills and live store data when available; use this file to decide which lane to run and what evidence must be left behind.
+
+## Store Lane Spokes
+
+| Load | When |
+| --- | --- |
+| [`app-store-listing-prep.md`](./app-store-listing-prep.md) | Apple listing fields, App Privacy, subscription pricing maps, custom product pages, In-App Events, localization matrices |
+| [`store-console-workflow.md`](./store-console-workflow.md) | founder-facing App Store Connect or Play Console walkthroughs: where to click, what to paste, which screenshots satisfy each upload well |
+| [`apple-signing-release.md`](./apple-signing-release.md) | Apple Developer account triage, signing, certificates/profiles, archive/export/upload, TestFlight |
+| [`google-play-release.md`](./google-play-release.md) | Android distribution readiness: Play account, Data safety, Play App Signing, testing tracks, production release |
+| [`app-store-connect-cli.md`](./app-store-connect-cli.md) | automating App Store Connect with the Rork `asc` CLI: metadata, screenshots, TestFlight, RevenueCat catalog sync |
+| [`marketplace-regional-compliance.md`](./marketplace-regional-compliance.md) | store distribution in any selected region: regional content, rating, and disclosure rules |
 
 For App Store listing preparation, load `app-store-listing-prep.md` too. ASO decides what to say; App Store listing prep connects that message to Apple pre-ASC requirements, App Privacy, subscriptions/pricing, RevenueCat/Stripe/web funnels, custom product pages, In-App Events, localization, screenshots, and App Store Connect policy constraints. For founder-facing App Store Connect or Google Play Console work, load `store-console-workflow.md` too; the store-console workflow decides exactly where the user clicks, what they paste, which privacy answers are selected, and which screenshots/assets satisfy each upload well.
 
@@ -10,7 +21,7 @@ Load `paid-user-acquisition.md` before Apple Search Ads, paid campaign custom pr
 
 Load `localization-market-research.md` before any localization work. Localization is a market-selection decision made from search-demand evidence, not a translation task: research keyword popularity, difficulty, and demand per storefront, rank markets into priority tiers, and produce `LOCALIZATION_MARKET_RESEARCH.md` before localizing metadata, keywords, screenshots, paywalls, landing, or email. Localize based on search demand, not language.
 
-Load `paid-tool-routing.md` before replacing paid ASO, AppKittie, MobAI Plus/Pro or intended cross-platform coverage, creator-marketplace, or MMP/ad tooling with a free fallback. MobAI Free needs no spend gate when it satisfies the lane. Load `apple-signing-release.md` before Apple Developer account triage, bundle IDs/App IDs, signing, certificates/profiles, archive/export/upload, TestFlight, or distribution-readiness claims. Load `app-store-connect-cli.md` before using the Rork `asc` CLI or App Store Connect CLI skills for metadata, screenshots, TestFlight, release validation, signing, subscriptions, or RevenueCat catalog sync.
+Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before replacing paid ASO, AppKittie, MobAI Plus/Pro or intended cross-platform coverage, creator-marketplace, or MMP/ad tooling with a free fallback. MobAI Free needs no spend gate when it satisfies the lane. Load `apple-signing-release.md` before Apple Developer account triage, bundle IDs/App IDs, signing, certificates/profiles, archive/export/upload, TestFlight, or distribution-readiness claims. Load `app-store-connect-cli.md` before using the Rork `asc` CLI or App Store Connect CLI skills for metadata, screenshots, TestFlight, release validation, signing, subscriptions, or RevenueCat catalog sync.
 
 ## Contents
 

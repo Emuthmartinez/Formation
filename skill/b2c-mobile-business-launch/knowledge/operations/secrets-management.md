@@ -2,9 +2,11 @@
 
 Use this before adding API keys, tokens, OAuth credentials, webhook signing secrets, service-account files, store credentials, CI/deploy environment variables, `.env` files, or secret-bearing provider setup. Load `provider-state-recipes.md` when the secret belongs to a third-party service setup.
 
+Before marking this lane done, load [`provider-proof.md`](../process/provider-proof.md): provider-backed readiness needs live proof or a recorded founder-only decision in `operations/PROVIDER_PROOF.md`, never setup prose alone.
+
 During broad business setup, load `founder-zero-operator.md` first. Explain Doppler in plain language, ask for only the login/approval step the founder must perform, then let the agent inventory projects/configs, route secret names, run safe proof, and continue. Doppler manages automation secrets; interactive browser passwords/passkeys stay with platform delegation, the founder's password manager, or a founder-authenticated session.
 
-Default to Doppler when the founder has not selected another secret manager. Load `paid-tool-routing.md` before replacing Doppler or another paid/account-gated secret manager with Apple Keychain, platform secrets, local `.env`, or manual exports.
+Default to Doppler when the founder has not selected another secret manager. Load [`paid-tool-routing.md`](paid-tool-routing.md) before replacing Doppler or another paid/account-gated secret manager with Apple Keychain, platform secrets, local `.env`, or manual exports.
 
 ## Contents
 

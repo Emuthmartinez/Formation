@@ -395,22 +395,78 @@ export function register(harness: Harness): void {
   });
 
   harness.check("boundary matrix: non-ready work keeps compact graph metadata and declarations stay planned without proof", () => {
+    const researchShape = testWorkflows().find((item) => item.id === "workflow.research-scan")!;
     const matrixWorkflow: CatalogWorkflowNode = {
       ...testWorkflows().find((item) => item.id === "workflow.growth-post")!,
       groupId: "revenue-growth",
       phaseIds: ["phase.4"],
       applicability: { mode: "always" },
+      references: [
+        // One sourced reference already past its review-due date, one never due (internal).
+        { id: "reference.growth.sourced", path: "knowledge/growth/sourced.md", title: "Sourced Growth", loadWhen: "before spend", freshness: "reviewed 2026-01-01", reviewDueBy: "2026-04-01" },
+        { id: "reference.growth.internal", path: "knowledge/growth/internal.md", title: "Internal Growth", loadWhen: "always", freshness: "internal" },
+      ],
+      role: {
+        ...researchShape.role!,
+        contextPacks: [
+          {
+            id: "context.growth",
+            title: "Growth",
+            references: [
+              // Duplicates a mandatory reference by path — must not appear twice.
+              { id: "reference.growth.sourced", path: "knowledge/growth/sourced.md", title: "Sourced Growth", loadWhen: "before spend", freshness: "reviewed 2026-01-01", reviewDueBy: "2026-04-01" },
+              { id: "reference.growth.conditional", path: "knowledge/growth/conditional.md", title: "Conditional Growth", loadWhen: "a creator deal is in play", freshness: "internal" },
+            ],
+          },
+        ],
+      },
     };
-    const plan = compilePlan({ version: "catalog.matrix", artifacts: testArtifacts().filter((item) => item.path === "growth/post.md"), workflows: [matrixWorkflow] }, now);
+    const integrityWorkflow: CatalogWorkflowNode = {
+      ...testWorkflows().find((item) => item.id === "workflow.product-spec")!,
+      id: "workflow.process.fixture-proof",
+      title: "Provider-proof verification (fixture)",
+      domainId: "domain.process",
+      dependencies: [],
+      gateCommands: [],
+      outputPaths: ["research/brief.md"],
+      laneIds: ["research"],
+    };
+    const plan = compilePlan(
+      { version: "catalog.matrix", artifacts: testArtifacts().filter((item) => ["growth/post.md", "research/brief.md"].includes(item.path)), workflows: [matrixWorkflow, integrityWorkflow] },
+      now,
+    );
     const state = baseBusinessState();
     const run = seedRunState(plan, state, { ownerSessionId: "matrix", ttlSeconds: 60, wallClockCapSeconds: 60, now });
-    const projection = buildLaunchMatrix(plan, run, [{ workflowId: matrixWorkflow.id, title: matrixWorkflow.title, status: "upcoming" }], state, {});
-    assert(projection.workflows.length === 1, "matrix omitted non-ready work");
+    const projection = buildLaunchMatrix(
+      plan,
+      run,
+      [
+        { workflowId: matrixWorkflow.id, title: matrixWorkflow.title, status: "upcoming" },
+        { workflowId: integrityWorkflow.id, title: integrityWorkflow.title, status: "ready" },
+      ],
+      state,
+      {},
+      now,
+    );
+    assert(projection.workflows.length === 1, "matrix omitted non-ready work or leaked a system node into the founder rows");
     const item = projection.workflows[0]!;
     assert(item.groupId === "revenue-growth" && item.phaseIds.includes("phase.4"), "matrix lost presentation or phase metadata");
     assert(item.services[0]?.state === "planned", "a catalog provider declaration was overclaimed as connected");
-    assert(item.agentTools.some((tool) => tool.id === "fixture-product-tool") === false, "matrix invented role tools");
+    // The node's role declares exactly one tool route; the matrix carries it and nothing more.
+    assert(item.agentTools.length === 1 && item.agentTools[0]!.id === "fixture-product-tool", "matrix dropped or invented role tools");
     assert(!JSON.stringify(item.services).match(/token|secret|password/iu), "service projection leaked credential-shaped fields");
+    // Knowledge crosses with its document path and a read-time review verdict, never dates alone.
+    const sourced = item.knowledge.find((guide) => guide.id === "reference.growth.sourced");
+    assert(sourced?.path === "knowledge/growth/sourced.md", "knowledge lost its document path at the boundary");
+    assert(sourced?.reviewStatus === "review-due", "an overdue source review was not reported as review-due");
+    assert(item.knowledge.find((guide) => guide.id === "reference.growth.internal")?.reviewStatus === "internal", "a source-less reference must report internal");
+    // Role context packs cross as conditional knowledge, deduplicated against the mandatory list.
+    assert(item.conditionalKnowledge.length === 1, "conditional knowledge missed the pack reference or kept a duplicate");
+    assert(item.conditionalKnowledge[0]!.id === "reference.growth.conditional" && item.conditionalKnowledge[0]!.packId === "context.growth", "conditional knowledge lost its pack provenance");
+    // System-domain work crosses as named launch-integrity steps, not only a count.
+    assert(projection.launchIntegrity.length === 1, "process/orchestration work did not surface as launch integrity");
+    assert(projection.launchIntegrity[0]!.workflowId === "workflow.process.fixture-proof" && projection.launchIntegrity[0]!.status === "ready", "launch integrity lost workflow identity or live status");
+    assert(projection.systemSummary.total === 1, "system summary count drifted from the integrity list");
   });
 
   harness.check("frontier: mid-launch seeding excludes completed work but still surfaces next work", () => {

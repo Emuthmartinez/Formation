@@ -27,7 +27,7 @@ One line per lane: when to load it, and where the bodies live.
 
 ## Paid Tool Decision Protocol
 
-Before using a free fallback for any paid or account-gated tool, load `paid-tool-routing.md` and ask the founder to confirm the route. Missing runtime access is not evidence that the founder lacks the paid tool or does not want to use it.
+Before using a free fallback for any paid or account-gated tool, load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) and ask the founder to confirm the route. Missing runtime access is not evidence that the founder lacks the paid tool or does not want to use it.
 
 Paid/account-gated lanes in this skill include AppKittie, XPOZ, Firecrawl, Refero, Higgsfield, MobAI Plus/Pro capabilities, Fastlane AI, paid ASO/MMP/ad tools, Sideshift or creator marketplaces, and paid/account features of RevenueCat, Stripe, PostHog, and Resend. MobAI's free tier does not require spend approval; replacing its cross-platform route still requires a recorded coverage decision.
 

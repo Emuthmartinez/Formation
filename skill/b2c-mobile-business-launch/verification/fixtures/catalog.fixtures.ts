@@ -20,7 +20,9 @@ function baseWorkflow(overrides: Partial<CatalogWorkflowDef> = {}): CatalogWorkf
     instructions: "Produce the fixture output artifact and stop; this synthetic contract exists only to satisfy validation.",
     reads: [],
     consults: [],
-    referenceIds: [],
+    // Bound by default: every non-machine workflow must carry knowledge (workflow.no_knowledge),
+    // so per-scenario defects stay singular. Scenarios testing the gate override this to [].
+    referenceIds: ["reference.research.fixture"],
     roleId: "role.fixture",
     laneIds: [],
     phaseIds: [],
@@ -102,6 +104,29 @@ export function register(harness: Harness): void {
     const catalog = baseFixtureCatalog();
     const issues = validateCatalog(catalog, skillRoot).filter((issue) => issue.severity === "error");
     assert(issues.length === 0, `expected no errors, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
+  });
+
+  harness.check("validate: a knowledge-less business workflow fails while a machine workflow stays exempt", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.workflows = [baseWorkflow({ referenceIds: [] })];
+    const issues = validateCatalog(catalog, skillRoot);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.workflow.no_knowledge"),
+      `expected catalog_graph.workflow.no_knowledge, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+
+    const exempt = baseFixtureCatalog();
+    exempt.areas = [{ id: "area.product-experience", name: "Product And Experience", description: "fixture", domainIds: ["domain.research", "domain.machine"] }];
+    exempt.domains = [
+      ...exempt.domains,
+      { id: "domain.machine", slug: "machine", name: "Machine", areaIds: ["area.product-experience"], routeLabel: "Machine", routeWhen: "fixture", order: 99 },
+    ];
+    exempt.workflows = [baseWorkflow({ id: "workflow.machine.fixture", domainId: "domain.machine", referenceIds: [] })];
+    const exemptIssues = validateCatalog(exempt, skillRoot);
+    assert(
+      !exemptIssues.some((issue) => issue.code === "catalog_graph.workflow.no_knowledge"),
+      "a machine-domain workflow must stay exempt from the knowledge requirement",
+    );
   });
 
   harness.check("validate: workflow providers must be executable by the assigned role", () => {
@@ -562,6 +587,10 @@ export function register(harness: Harness): void {
       [...parseLedgerRowsWithDisposition(text)].filter((row) => row.path.startsWith("knowledge/") && row.disposition !== "drop").map((row) => row.path),
     );
     const onDisk = walkKnowledgeFiles(path.join(skillRoot, "knowledge"));
+    // knowledge/README.md is the generated orientation stub render-routing.ts writes and
+    // drift-checks — not ported content, so it never earns a ledger row (same class as the
+    // generated projections under catalog/generated/).
+    onDisk.delete("knowledge/README.md");
     assertOneToOne(onDisk, ledgerRows, "knowledge file");
   });
 

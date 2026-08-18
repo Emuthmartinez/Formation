@@ -78,7 +78,7 @@ are ground truth, not hand arithmetic.
 | Knowledge content files | 102 | 0 | 0 | 1 | 103 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
 | Validators (67) | 28 | 25 | 0 | 16 | 69 |
-| **Total** | **135** | **25** | **1** | **32** | **193** |
+| **Total** | **136** | **25** | **1** | **32** | **194** |
 
 ---
 
@@ -452,6 +452,7 @@ split noted).
 | validation/repository/check-autopilot-contract.ts | port | HYBRID — eval-object shape validation is structural; keyword-grepping SKILL.md description/body prose is WORD-PATTERN |
 | validation/repository/check-gates-layout.ts | keep | STRUCTURAL — pure filesystem/shape check: validation/business/ mirrors knowledge/ domains 1:1, no ungrouped gates, no duplicate script basenames |
 | validation/repository/check-hub-spoke.ts | keep | STRUCTURAL — no v1 precedent, added with the 2026-08 graph-consolidation audit's money-domain hub-and-spoke split; verifies every knowledge/ spoke's "Part of the [Hub]" backlink is reciprocated by a link back from the hub |
+| validation/repository/check-validator-docs.ts | keep | STRUCTURAL — no v1 precedent, added with the 2026-08-18 knowledge-matrix audit; two-way drift check that every command documented in docs/validators.md exists as an npm script and every check:*/validate:* script has a documented row |
 | validation/repository/check-package-parity.ts | keep | STRUCTURAL — compares the two package manifests/lockfiles against skill-version.json; wired only via the repo-root package.json's `check:package-parity` script (absent from the skill-scoped manifest, which is exactly why literal-scope discovery would have missed it) |
 | validation/repository/check-reference-size.ts | keep | STRUCTURAL — per-file byte budgets on knowledge/, link-graph regex only extracts targets (doesn't grade content) |
 | validation/repository/check-skill-graph.ts | port | confirmed by full read: the checking *pattern* (referential integrity across 11 node categories + generated-projection drift-check) is exactly right and worth preserving, but the file is hardcoded one-to-one against the current `runtime/graph/*.ts` module layout (4 specific relative imports, 2 specific generated-file block markers) that this rebuild is restructuring. This same unit (U8) ships its replacement: `catalog/validate.ts` (referential integrity, cycles, load-when presence) + `catalog/render-routing.ts --check` (drift). |

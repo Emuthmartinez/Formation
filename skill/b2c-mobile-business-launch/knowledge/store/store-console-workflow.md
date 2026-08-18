@@ -1,5 +1,9 @@
 # Store Console Workflow And User Handoff
 
+Part of the [ASO And Store Operations](./aso-store-ops.md) hub — it decides which store lane runs and what evidence each lane must leave behind.
+
+Before marking this lane done, load [`provider-proof.md`](../process/provider-proof.md): provider-backed readiness needs live proof or a recorded founder-only decision in `operations/PROVIDER_PROOF.md`, never setup prose alone.
+
 Use this before App Store Connect or Google Play Console setup, Apple app-record setup, store submission, privacy labels, Data safety, screenshot capture, screenshot upload, app review notes, or founder-facing store-console guidance.
 
 The goal is to produce a console-ready packet that tells the user exactly where to click, what to paste, what still needs their approval, and what was verified.
@@ -390,7 +394,7 @@ Founder approval required:
 - manual App Store Connect pages still required
 - whether app creation is CLI/skill-pack ready, blocked by auth/account/agreement, or waiting on founder approval for sticky fields
 
-Use `paid-tool-routing.md` if the CLI or skill pack is unavailable. The founder may prefer installing or authorizing the CLI over receiving a manual-only packet.
+Use [`paid-tool-routing.md`](../operations/paid-tool-routing.md) if the CLI or skill pack is unavailable. The founder may prefer installing or authorizing the CLI over receiving a manual-only packet.
 
 ## Apple Signing And First Upload Route
 
@@ -417,6 +421,8 @@ For first-time builders, show founder-facing instructions for:
 Do not call the launch "TestFlight-ready" from a simulator build alone.
 
 ## Google Play Packet
+
+This section is the Play Console click-path only. Distribution readiness — Play account setup, Data safety derivation, Play App Signing, testing tracks, staged rollout — lives in [`google-play-release.md`](./google-play-release.md); load it before acting on this packet.
 
 ### App Creation
 

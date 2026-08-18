@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { presentApprovalAsk, presentMatrixService, presentMatrixTool, presentStep } from "../domain/presentation.mjs";
+import { presentApprovalAsk, presentMatrixKnowledge, presentMatrixService, presentMatrixTool, presentStep } from "../domain/presentation.mjs";
 import { syncEngineApprovals } from "../domain/approvals.mjs";
 import { founderRunView } from "../execution.mjs";
 import { createSeedDatabase } from "../seed.mjs";
@@ -50,6 +50,65 @@ test("matrix services and specialist routes keep raw engine copy inside technica
   assert.equal(tool.technical.id, "xcode-device-route");
   assert.equal("id" in tool, false);
   assert.equal("when" in tool, false);
+});
+
+test("board tables never carry internal vocabulary a founder should not have to parse", () => {
+  // check:founder-copy scans the engine's generated business surfaces, not this module — so the
+  // board tables get their own scan here. These are the internal words the house style bans from
+  // founder-visible text (tooling/lib/founder-copy.ts); titles and summaries must not use them.
+  const banned = /\b(proof|proven|gate|lane|workflow|pipeline|CLI|repo|ASO|SEO|UGC|MCP)\b/u;
+  for (const id of [
+    "workflow.process.provider-proof-verification",
+    "workflow.process.launchbench-failure-cards-coverage-audit",
+    "workflow.process.change-cascade",
+    "workflow.process.launch-trace-and-build-contracts",
+    "workflow.process.business-control-plane-extension",
+    "workflow.orchestration.session-continuity-resume",
+    "workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep",
+  ]) {
+    const step = presentStep(id, "Engine title");
+    assert.doesNotMatch(step.title, banned, `${id} title leaks internal vocabulary`);
+    if (step.summary) assert.doesNotMatch(step.summary, banned, `${id} summary leaks internal vocabulary`);
+  }
+});
+
+test("matrix knowledge guides never leak agent-routing prose above technical detail", () => {
+  const guide = presentMatrixKnowledge(
+    {
+      id: "reference.experience.experience-cards.streak",
+      title: "Streak And Loss Aversion Card",
+      path: "knowledge/experience/experience-cards/streak-and-loss-aversion-card.md",
+      loadWhen: "HIGH-risk: a streak mechanic is in play — routed from experience-cards.md; see check:emotional-design",
+      freshness: "reviewed 2026-05-14",
+      reviewStatus: "current",
+    },
+    "Emotional design of the product",
+  );
+  // The agent-facing trigger — file routing, check names, risk labels — stays in technical detail.
+  assert.equal("loadWhen" in guide, false);
+  assert.doesNotMatch(guide.name, /routed from|check:|HIGH-risk/);
+  assert.doesNotMatch(guide.purpose, /routed from|check:|HIGH-risk/);
+  assert.doesNotMatch(guide.freshness, /routed from|check:|HIGH-risk/);
+  assert.equal(guide.purpose, "The playbook the team follows for Emotional design of the product.");
+  assert.equal(guide.freshness, "Sources checked 2026-05-14");
+  assert.equal(guide.technical.loadWhen.includes("routed from experience-cards.md"), true);
+  assert.equal(guide.technical.path, "knowledge/experience/experience-cards/streak-and-loss-aversion-card.md");
+
+  // An overdue source review reads as a verdict, not a date the founder must interpret.
+  const overdue = presentMatrixKnowledge(
+    { id: "reference.x", title: "ASO store ops", path: "knowledge/store/aso-store-ops.md", loadWhen: "before ASO audits", freshness: "reviewed 2026-01-01", reviewStatus: "review-due" },
+    "App store visibility",
+  );
+  assert.equal(overdue.freshness, "A source check is due");
+  assert.equal(overdue.reviewStatus, "review-due");
+  assert.doesNotMatch(overdue.name, /\bASO\b/);
+
+  // Internal references say so in plain words.
+  const internal = presentMatrixKnowledge(
+    { id: "reference.y", title: "Launch phases", path: "knowledge/process/launch-phases.md", loadWhen: "any multi-phase launch", freshness: "internal", reviewStatus: "internal" },
+    "Launch planning",
+  );
+  assert.equal(internal.freshness, "Maintained with the product");
 });
 
 test("the founder run view presents steps board-first and carries the technical name alongside", () => {

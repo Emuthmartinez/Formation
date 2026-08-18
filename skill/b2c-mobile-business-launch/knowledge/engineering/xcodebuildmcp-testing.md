@@ -29,7 +29,7 @@ For Apple distribution, TestFlight, physical-device signing, archives, exports, 
 
 ## Route Ladder: Start With The In-App Simulator
 
-Pick the lightest rung that can actually produce the evidence the lane needs, then record the rung and the reason in `strategy/TOOL_DECISIONS.md`. Escalating is normal; skipping straight to rung 3 for a "let me see the app" request is wasted founder time, and staying on rung 0 when the lane needs Android, a repeatable suite, CI, or distribution proof is a silent coverage downgrade under `paid-tool-routing.md`.
+Pick the lightest rung that can actually produce the evidence the lane needs, then record the rung and the reason in `strategy/TOOL_DECISIONS.md`. Escalating is normal; skipping straight to rung 3 for a "let me see the app" request is wasted founder time, and staying on rung 0 when the lane needs Android, a repeatable suite, CI, or distribution proof is a silent coverage downgrade under [`paid-tool-routing.md`](../operations/paid-tool-routing.md).
 
 | Rung | Route | Setup cost | Covers | Cannot cover |
 | --- | --- | --- | --- | --- |

@@ -11,7 +11,7 @@ Part of the [Tool Recipes](../tool-recipes.md) index. Before using any paid or a
 Purpose: choose the market/category by revenue and downloads, then position inside or against it. Also use AppKittie to monitor competitors, ads, creators, screenshots, keywords, reviews, and post-launch deltas.
 
 Access:
-- AppKittie is a paid/account-gated intelligence path. If unavailable in the runtime, use `paid-tool-routing.md` before substituting public store research.
+- AppKittie is a paid/account-gated intelligence path. If unavailable in the runtime, use [`paid-tool-routing.md`](../../operations/paid-tool-routing.md) before substituting public store research.
 
 Run:
 - `search_apps` across 3-5 plausible categories or query clusters

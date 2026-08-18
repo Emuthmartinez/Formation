@@ -1,6 +1,6 @@
 # Compound Engineering Routing
 
-Use this before any core engineering work: app implementation, backend/frontend edits, generated builder handoff, production-readiness review, or a request to "build/refactor/fix the app" from a launch package.
+Use this when choosing which Compound Engineering (CE) skill to invoke for a build stage: app implementation, backend/frontend edits, generated builder handoff, or a request to "build/refactor/fix the app" from a launch package. Production-readiness substance and mobile quality bars live in [`engineering-orchestration.md`](../engineering/engineering-orchestration.md); this file routes the CE loop itself.
 
 Compound Engineering is the default engineering operating system for this skill. Do not use a generic implementation checklist for non-trivial app work when CE skills are available.
 

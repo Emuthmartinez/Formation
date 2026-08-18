@@ -4,7 +4,7 @@ title: Funnel Domain And Privacy
 domain_id: domain.process
 document_path: knowledge/process/tool-recipes/funnel-domain-and-privacy.md
 load_when: privacy/terms research minimums, domain/email routing setup, or landing-funnel verification — routed from
-  tool-recipes.md
+  tool-recipes.md; complements the trust and growth rows
 lifecycle: active
 bindings:
   workflow_ids:

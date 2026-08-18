@@ -12,6 +12,19 @@ function daysSince(date: string, now: Date): number {
   return Number.isNaN(reviewed.valueOf()) ? Number.POSITIVE_INFINITY : Math.floor((now.valueOf() - reviewed.valueOf()) / 86_400_000);
 }
 
+/**
+ * An agent routes by matching work against load_when text, so two active packages carrying the
+ * same trigger are indistinguishable in the generated Reference Index — the reader cannot tell
+ * which file to load. Comparison is whitespace/case-normalized so a re-wrap does not hide a
+ * duplicate.
+ */
+function normalizedTrigger(loadWhen: string): string {
+  return loadWhen.toLowerCase().replace(/\s+/gu, " ").trim();
+}
+
+/** Triggers are matrix cells, not prose; past this many words they defeat scanning. */
+export const LOAD_WHEN_WORD_LIMIT = 45;
+
 export function validateKnowledgePackages(
   packages: readonly CatalogKnowledgePackage[],
   skillRoot: string,
@@ -54,6 +67,29 @@ export function validateKnowledgePackages(
     for (const source of item.sources) {
       if (daysSince(source.lastReviewDate, now) > source.reviewCadenceDays)
         issues.push({ code: "knowledge.source.stale", message: `${item.id} source ${source.id} needs review.` });
+    }
+    if (item.lifecycle === "active") {
+      const words = item.loadWhen.trim().split(/\s+/u).length;
+      if (words > LOAD_WHEN_WORD_LIMIT) {
+        issues.push({
+          code: "knowledge.load_when.over_length",
+          message: `${item.id} load_when runs ${words} words (limit ${LOAD_WHEN_WORD_LIMIT}); move cross-references into applicability_notes or the document body.`,
+        });
+      }
+    }
+  }
+  const triggerOwners = new Map<string, string>();
+  for (const item of packages) {
+    if (item.lifecycle !== "active") continue;
+    const key = normalizedTrigger(item.loadWhen);
+    const owner = triggerOwners.get(key);
+    if (owner) {
+      issues.push({
+        code: "knowledge.load_when.duplicate",
+        message: `${owner} and ${item.id} share an identical load_when trigger; an agent scanning the Reference Index cannot tell which to load. Differentiate the triggers, or state an explicit co-load in one of them.`,
+      });
+    } else {
+      triggerOwners.set(key, item.id);
     }
   }
   return issues;

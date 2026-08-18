@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.131.1",
+  "version": "0.132.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -75,6 +75,7 @@
     "check:reference-size": "tsx skill/b2c-mobile-business-launch/validation/repository/check-reference-size.ts",
     "check:hub-spoke": "tsx skill/b2c-mobile-business-launch/validation/repository/check-hub-spoke.ts",
     "check:gates-layout": "tsx skill/b2c-mobile-business-launch/validation/repository/check-gates-layout.ts --skill-root skill/b2c-mobile-business-launch",
+    "check:validator-docs": "tsx skill/b2c-mobile-business-launch/validation/repository/check-validator-docs.ts --repo-root .",
     "check:agent-evals": "tsx skill/b2c-mobile-business-launch/validation/repository/run-agent-evals.ts",
     "check:token-promotion": "tsx skill/b2c-mobile-business-launch/validation/business/design/check-token-promotion.ts",
     "check:template-safety": "tsx skill/b2c-mobile-business-launch/validation/business/engineering/check-template-safety.ts",

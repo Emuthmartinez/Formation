@@ -3,8 +3,8 @@ id: reference.orchestration.compound-engineering-routing
 title: Compound Engineering Routing
 domain_id: domain.orchestration
 document_path: knowledge/orchestration/compound-engineering-routing.md
-load_when: before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees,
-  engineering/ENGINEERING_PLAN.md, engineering/PRODUCTION_READINESS.md, or production-readiness claims
+load_when: choosing which compound-engineering (CE) skill to invoke for a build stage — the freshness/plan/work/review/
+  test/proof loop, generated builder prompts, parallel agents, and worktrees
 lifecycle: active
 bindings:
   workflow_ids:

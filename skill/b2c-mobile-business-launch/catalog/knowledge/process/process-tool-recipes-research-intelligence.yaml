@@ -3,8 +3,8 @@ id: reference.process.tool-recipes.research-intelligence
 title: Research Intelligence
 domain_id: domain.process
 document_path: knowledge/process/tool-recipes/research-intelligence.md
-load_when: AppKittie store intelligence, XPOZ social-language research, Firecrawl web intelligence, Refero UX pattern
-  research, or name/keyword collision checks — routed from tool-recipes.md
+load_when: delegating AppKittie store intelligence, XPOZ social-language, Firecrawl web intelligence, Refero UX pattern
+  research, or name/keyword collision checks — routed from tool-recipes.md; complements the Market research rows
 lifecycle: active
 bindings:
   workflow_ids:

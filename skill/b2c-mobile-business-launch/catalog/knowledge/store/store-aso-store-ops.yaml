@@ -6,6 +6,7 @@ document_path: knowledge/store/aso-store-ops.md
 load_when: before App Store/Play metadata, screenshot planning, ASO audits, keyword research, Apple Search Ads,
   release/rejection handling, ratings/reviews, or post-launch monitoring
 lifecycle: active
+hub: true
 bindings:
   workflow_ids:
     - workflow.operations.post-launch-operations

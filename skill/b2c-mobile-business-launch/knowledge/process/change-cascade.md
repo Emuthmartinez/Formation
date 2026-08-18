@@ -88,7 +88,7 @@ Higgsfield-generated assets embed design tokens, feature names, copy, and pricin
 
 - Higgsfield output is supporting art only. It must **never substitute** for truthful real app UI in store screenshots or App Preview footage.
 - Every generation prompt must carry current `design/design.md` tokens. Regenerating without an updated brief defeats the purpose of a cascade.
-- Confirm spend with the founder per `paid-tool-routing.md` before each generation run. Surface current credit balance (`mcp__claude_ai_Higgsfield__balance`) at the confirmation prompt.
+- Confirm spend with the founder per [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before each generation run. Surface current credit balance (`mcp__claude_ai_Higgsfield__balance`) at the confirmation prompt.
 - Record every new asset in `CONTENT_ASSETS.md` with updated `prompt_brief`, `source_job_id`, and `virality_score` fields, and mark prior entries `status:superseded`.
 - Store uploads, ad launches, and public posting remain **founder-gated** regardless of regeneration trigger.
 

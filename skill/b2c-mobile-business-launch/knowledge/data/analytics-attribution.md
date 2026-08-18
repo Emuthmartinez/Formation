@@ -2,11 +2,13 @@
 
 Use this before PostHog setup, event catalogs, attribution, dashboards, campaign links, onboarding questions, paywall experiments, referral loops, web funnels, paid UA, Fastlane campaigns, or builder prompts that mention analytics.
 
+Before marking this lane done, load [`provider-proof.md`](../process/provider-proof.md): provider-backed readiness needs live proof or a recorded founder-only decision in `operations/PROVIDER_PROOF.md`, never setup prose alone.
+
 The goal is to give the founder a visible measurement plan before launch work hardens. Do not bolt analytics on after the landing page, onboarding, paywall, or store CTAs are already built.
 
 Load `paid-user-acquisition.md` before paid ads, Apple Search Ads, Meta/TikTok/Google campaigns, paid creative tests, ad-network SDK choices, MMP decisions, or paid spend-readiness claims.
 
-Load `paid-tool-routing.md` before replacing PostHog paid/account features, GA4/ad-network tooling, MMP tooling, RevenueCat experiments, ad-network account data, or Fastlane campaign analytics with a free/manual plan. Local event logs are not proof that analytics is live.
+Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before replacing PostHog paid/account features, GA4/ad-network tooling, MMP tooling, RevenueCat experiments, ad-network account data, or Fastlane campaign analytics with a free/manual plan. Local event logs are not proof that analytics is live.
 
 ## Contents
 

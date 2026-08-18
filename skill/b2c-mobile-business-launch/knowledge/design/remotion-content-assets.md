@@ -39,7 +39,7 @@ Do not create the asset yet when:
 
 ## Founder And License Gates
 
-Load `paid-tool-routing.md` before replacing Higgsfield with Remotion. Missing Higgsfield runtime access is not approval to use Remotion or another fallback.
+Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before replacing Higgsfield with Remotion. Missing Higgsfield runtime access is not approval to use Remotion or another fallback.
 
 Record the decision in `strategy/TOOL_DECISIONS.md`, `CONTENT_ASSETS.md`, or the relevant ops doc:
 - intended route: Higgsfield, Remotion, founder-owned media, raw screenshots, or blocked

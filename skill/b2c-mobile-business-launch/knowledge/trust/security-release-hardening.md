@@ -2,6 +2,8 @@
 
 Use this before app architecture is frozen, before beta/TestFlight/store submission, before provider webhooks mutate state, or when the user asks about security hardening, Claude Security, Codex Security, OWASP MASVS, MobSF, Sentry, app integrity, threat modeling, or release readiness.
 
+Before marking this lane done, load [`provider-proof.md`](../process/provider-proof.md): provider-backed readiness needs live proof or a recorded founder-only decision in `operations/PROVIDER_PROOF.md`, never setup prose alone.
+
 Security is a launch lane, not a cleanup pass. Create or refresh `trust/SECURITY.md` early enough to influence `engineering/TECH_SPEC.md`, `engineering/ENGINEERING_PLAN.md`, `trust/PRIVACY.md`, `analytics/ANALYTICS.md`, `revenue/REVENUE_OPS.md`, `store/APPLE_SIGNING.md`, `store/STORE_CONSOLE.md`, and `engineering/PRODUCTION_READINESS.md`.
 
 ## Default Output

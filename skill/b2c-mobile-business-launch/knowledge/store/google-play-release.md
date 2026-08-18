@@ -1,5 +1,7 @@
 # Google Play Release
 
+Part of the [ASO And Store Operations](./aso-store-ops.md) hub — it decides which store lane runs and what evidence each lane must leave behind.
+
 Use this before any Android distribution-readiness claim: Google Play developer account, app record, content declarations, Play App Signing, testing tracks, or production release. This is the Android parity lane to `apple-signing-release.md`. Play shares the store lane: state lives in `state/PROJECT_STATE.yaml` under `lanes.store_console` and `tools.google_play`, and the artifact is `store/GOOGLE_PLAY_RELEASE.md`.
 
 ## Contents
@@ -74,7 +76,7 @@ Never answer Data safety from generic policy text. Use the SDK list, backend sch
 Play App Signing is the default and effectively mandatory for new apps: Google holds the app signing key and signs what users download; the developer holds an upload key used only to sign artifacts sent to Play.
 
 - Enroll in Play App Signing at app creation; let Google generate the app signing key unless the founder has a hard reason to provide one.
-- Keep the upload keystore and its passwords out of the repo. Route them through `SECRETS.md` and the approved secret provider per `secrets-management.md`. A committed keystore is a security incident, not a convenience.
+- Keep the upload keystore and its passwords out of the repo. Route them through `SECRETS.md` and the approved secret provider per [`secrets-management.md`](../operations/secrets-management.md). A committed keystore is a security incident, not a convenience.
 - If the upload key is lost or compromised, there is an upload-key reset path through Play Console support — slow but recoverable. This is precisely why Play App Signing enrollment matters: without it, a lost signing key can strand the app permanently.
 - Record key fingerprints (SHA-1/SHA-256 of the app signing key) in `store/GOOGLE_PLAY_RELEASE.md` when Firebase, Google Sign-In, App Links, or API restrictions need them.
 - Upload Android App Bundles (`.aab`), not APKs. Play requires AABs for new apps; an APK build is engineering proof, not distribution readiness — the same distinction as a simulator build on iOS.

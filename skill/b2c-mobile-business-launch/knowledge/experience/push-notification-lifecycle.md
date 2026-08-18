@@ -17,8 +17,8 @@ The ethics line up front: push serves the user's stated goal, never the app's ne
 ## 1. Provider Setup
 
 - **Native default:** APNs (iOS) and FCM (Android) direct, via the app's backend. The archetype starters' Supabase backend can schedule and send through an edge function; record the route in `engineering/TECH_SPEC.md`'s data contract.
-- **Provider route:** OneSignal or a comparable push provider is a paid/account-gated tool decision — route it through `paid-tool-routing.md` before adopting, and record the choice in `strategy/TOOL_DECISIONS.md`. A provider earns its keep at segmentation/scheduling scale; day one usually does not need one.
-- Keys and certificates (APNs key, FCM service account) are server secrets: route through `secrets-management.md`, names-only in `SECRETS.md`.
+- **Provider route:** OneSignal or a comparable push provider is a paid/account-gated tool decision — route it through [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before adopting, and record the choice in `strategy/TOOL_DECISIONS.md`. A provider earns its keep at segmentation/scheduling scale; day one usually does not need one.
+- Keys and certificates (APNs key, FCM service account) are server secrets: route through [`secrets-management.md`](../operations/secrets-management.md), names-only in `SECRETS.md`.
 - Token lifecycle: capture the push token post-permission, refresh on app start, delete on logout and account deletion (the deletion path in `privacy-terms.md` includes push tokens).
 
 ## 2. Permission Priming
@@ -68,7 +68,7 @@ The funnel that matters weekly: primed → granted rate, per-trigger open rate, 
 
 ## 6. Weekly Operation
 
-In the Weekly Ops Review (`post-launch-operations.md` §2), push rides the retention step: read per-trigger open and disable rates alongside the D7/D30 cohorts, and treat a retention drop at a known step as a candidate for a new earned trigger — through `change-cascade.md` like any product change. One trigger experiment at a time; measure against the cohort, not gross opens.
+In the Weekly Ops Review (`post-launch-operations.md` §2), push rides the retention step: read per-trigger open and disable rates alongside the D7/D30 cohorts, and treat a retention drop at a known step as a candidate for a new earned trigger — through [`change-cascade.md`](../process/change-cascade.md) like any product change. One trigger experiment at a time; measure against the cohort, not gross opens.
 
 ## 7. Anti-Patterns
 
