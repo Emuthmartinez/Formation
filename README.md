@@ -21,6 +21,10 @@ Formation helps a founder:
 - edit, inspect, and restore immutable deliverable versions instead of replacing work with another AI response
 - turn analysis into a small, prioritized work queue
 - evaluate launch readiness using blockers and decision quality, not decorative metrics
+- bring collaborators into the company with owner, editor, reviewer, and viewer roles, plus comment threads and named review requests
+- import an existing launch repository's recorded work as drafts and questions, never as facts
+- ask the built-in launch engine to run launch workflows and review the verified results
+- share one deliverable through a revocable read-only link, and export the workspace as Markdown, JSON, or CSV
 
 ## Run Formation
 
@@ -57,7 +61,8 @@ Production sessions require HTTPS. When TLS terminates at a trusted reverse prox
 4. **Advance a workstream.** Each workstream has evidence, assumptions, open questions, tasks, deliverables, confidence, and one current next action.
 5. **Make the call.** Decisions retain their rationale and review date and remain visible to downstream work.
 6. **Create and edit deliverables.** Generated drafts are structured, versioned, editable, exportable, and connected to claims and decisions.
-7. **Inspect launch readiness.** Formation shows what is ready, what is blocked, and which calls or critical tasks prevent a clean launch claim.
+7. **Inspect launch readiness.** Formation shows what is ready, what is blocked, and which calls or critical tasks prevent a clean launch claim. The Launch page also shows the engine's launch matrix and lets a founder run engine workflows and import existing launch work.
+8. **Work with others.** The People page manages roles and invitations; comment threads and review requests sit beside the records they discuss; a share link shows one deliverable to someone without an account.
 
 A detailed walkthrough is in [`docs/platform/founder-journey.md`](docs/platform/founder-journey.md).
 
@@ -71,7 +76,7 @@ Founder browser
   -> atomic local persistence adapter
   -> durable generation queue
   -> optional structured AI provider
-  -> graph-native launch engine adapter (next integration boundary)
+  -> graph-native launch engine execution and import adapters
 ```
 
 The platform is intentionally separated from the launch engine:
@@ -84,11 +89,13 @@ platform/                              founder product
   run.mjs                              dev, build, start, check, and test entrypoint
 
 skill/b2c-mobile-business-launch/      internal launch automation engine
-  core/                                durable execution, reducer, autonomy, sessions
-  catalog/                             graph definitions and workflow contracts
+  core/                                durable execution, reducer, autonomy, sessions, adapters
+  catalog/                             graph definitions, workflow contracts, generated routing
   knowledge/                           reusable domain guidance
-  workspace/                           engine artifact contracts and export sources
+  content/ + starters/ + studio/       onboarding content, archetype foundations, Design Room
+  workspace/ + workspace-template/     engine artifact contracts, exports, repo templates
   validation/ + verification/          deterministic engine and business checks
+  tooling/ + agents/                   renderers, probes, migrations, runtime manifests
 ```
 
 The platform domain model is documented in [`docs/platform/product-architecture.md`](docs/platform/product-architecture.md). Technical boundaries are documented in [`docs/platform/technical-architecture.md`](docs/platform/technical-architecture.md).
@@ -104,7 +111,7 @@ node platform/run.mjs start       # serve API and production bundle
 node platform/run.mjs reset-data  # restore the realistic seed workspace
 ```
 
-The platform CI workflow runs strict checks, the 25-test server and domain suite, and a production build on every relevant pull request.
+The platform CI workflow runs strict checks, the full server and domain test suite, and a production build on every relevant pull request.
 
 ## Generation contract
 
@@ -126,7 +133,7 @@ The provider must return a title, summary, confidence score, and editable sectio
 
 - credential passwords use salted, memory-hard scrypt hashes and are never returned by the API
 - failed sign-ins use generic responses and are rate limited
-- successful sign-in rotates to one random session token stored as a SHA-256 hash
+- successful sign-in issues a random session token stored only as a SHA-256 hash; each account keeps a bounded set of device sessions, and any device can be signed out from any other
 - session cookies are HTTP-only and SameSite=Lax
 - every workspace read and mutation checks membership server-side
 - cross-origin mutations are rejected
@@ -136,7 +143,7 @@ The provider must return a title, summary, confidence score, and editable sectio
 - credential registration can be explicitly disabled when an external identity provider owns provisioning
 - demo authentication is disabled in production unless explicitly enabled
 
-The included atomic file adapter supports local development, evaluation, and a single-process deployment with persistent storage. Transactional PostgreSQL persistence, complete account recovery and invitation flows, and the platform-to-engine execution adapter are the highest-impact remaining public-SaaS gaps. They are explicitly ranked in [`docs/platform/remaining-gaps.md`](docs/platform/remaining-gaps.md).
+The included atomic file adapter supports local development, evaluation, and a single-process deployment with persistent storage. Transactional PostgreSQL persistence, email verification and password recovery (both waiting on a mail transport), and the engine's own per-node executor are the highest-impact remaining public-SaaS gaps. They are explicitly ranked in [`docs/platform/remaining-gaps.md`](docs/platform/remaining-gaps.md). Workspace invitations, scoped roles, session management, and the platform-to-engine execution adapter have shipped.
 
 ## Documentation
 

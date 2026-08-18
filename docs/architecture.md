@@ -43,7 +43,11 @@ Founder and collaborators
 - Workstreams
 - Decisions
 - Deliverables and editing
-- Launch readiness
+- Launch readiness, the launch matrix, engine executions, and existing-work import
+- People membership, roles, and invitations
+- Account password and device sessions
+- comment threads and review requests beside records
+- the read-only shared deliverable view and the join-by-invitation flow
 - new-company onboarding
 - responsive navigation and design system
 
@@ -64,8 +68,17 @@ It communicates only through the typed JSON API.
 - onboarding bundle creation
 - artifact editing and versioning
 - task, claim, and decision mutations
-- generation job lifecycle
+- membership roles, capability enforcement, invitations, and ownership transfer
+- comment threads and review requests
+- share links and the token-authenticated public read
+- unit-economics scenarios computed on read, never stored
+- workspace export bundles in Markdown, JSON, and CSV
+- generation job lifecycle, provider outcome classification, and trust screening of imported text
 - engine execution requests, durable run resumption, and founder-readable run state
+- engine approval mirroring into the decision log
+- launch-repository import discovery, preview, and apply
+- the board-ready presentation boundary for engine- and system-authored text
+- the health probe
 - static application serving
 
 ### Persistence
@@ -75,6 +88,7 @@ The included atomic adapter persists:
 - users
 - sessions
 - memberships
+- invitations
 - workspaces
 - claims
 - decisions
@@ -82,6 +96,10 @@ The included atomic adapter persists:
 - immutable artifact versions
 - tasks
 - jobs
+- executions
+- shares
+- comments
+- reviews
 - activity
 
 The adapter is replaceable through its read and transaction boundary. Multi-instance deployment requires a transactional database implementation.
@@ -189,12 +207,18 @@ Nothing in that report is a fact. A launch repository is an agent's working reco
 ```text
 .github/workflows/
   platform-ci.yml               founder platform checks, tests, and build
+  source-freshness.yml          engine source-registry and knowledge freshness audit
+  behavioral-evals.yml          manual live LaunchBench behavioral eval run
 
 docs/
   architecture.md               combined architecture
+  validators.md                 full validator and gate reference
   platform/                     audit, product, technical, migration, design, journey, gaps
   implementation/               engine implementation guidance
   method/                       engine operating methods
+  brainstorms/                  exploratory scope documents
+  plans/                        dated implementation plans
+  prototypes/                   HTML design and engineering prototypes
   history/                      completed historical proposals and audits
 
 platform/

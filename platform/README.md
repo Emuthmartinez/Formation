@@ -26,14 +26,18 @@ web/src/styles/                 layered foundation, workspace, document, and res
 web/src/pages/                  founder journeys by page job
 web/src/types.ts                client domain contracts
 web/src/api.ts                  typed API boundary
-server/app.mjs                  HTTP composition and generation worker lifecycle
+server/index.mjs                process entrypoint wiring the store, seed, and server together
+server/app.mjs                  HTTP composition and worker lifecycle (generation, execution, import)
 server/api.mjs                  authenticated API boundary and route dispatch
 server/routes/                  workspace-authorized route handlers
-server/domain/                  readiness, contradictions, onboarding, artifact and version behavior
+server/domain/                  readiness, contradictions, onboarding, artifacts, members, capabilities, sharing, comments, reviews, economics, trust, presentation
 server/http.mjs                 response security, errors, and static application serving
 server/validation.mjs           request schemas and bounded input normalization
-server/auth.mjs                 credential authentication, sessions, cookies, and same-origin protection
-server/generation.mjs           durable generation queue and provider adapter
+server/auth.mjs                 credential authentication, device sessions, cookies, and same-origin protection
+server/generation.mjs           durable generation queue and job rate limiting
+server/provider.mjs             the external provider call, its budget, retries, and outcome classification
+server/execution.mjs            platform half of the engine execution adapter and its durable worker
+server/imports.mjs              launch-repository import service (discover, preview, apply)
 server/store.mjs                atomic persistence adapter and schema migration
 server/seed/                    realistic sample company data
 server/test/                    domain, storage, authorization, and API coverage
@@ -61,4 +65,4 @@ Set `FORMATION_ENGINE_ROOT` to the directory that holds one engine workspace per
 
 The server serves the built web application and API from one origin. This keeps cookie, CSRF, and deployment behavior simple. Credential registration and login work without an external service; the Storywell demo login is a separate development-only path. Production must be exposed through HTTPS. Set `TRUST_PROXY=true` only when the immediate proxy is trusted and owns the forwarded headers.
 
-The default store is intentionally dependency-free and atomic. It is appropriate for local evaluation and one server with persistent storage. Do not run multiple writers against the same data file. Before a multi-instance SaaS launch, implement the documented PostgreSQL store contract and add email verification, account recovery, invitations, and enterprise identity as required by the deployment.
+The default store is intentionally dependency-free and atomic. It is appropriate for local evaluation and one server with persistent storage. Do not run multiple writers against the same data file. Before a multi-instance SaaS launch, implement the documented PostgreSQL store contract and add email verification, account recovery, and enterprise identity as required by the deployment.

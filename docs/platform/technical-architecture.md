@@ -12,8 +12,8 @@ React application
   -> workspace authorization
   -> domain services
   -> atomic store transaction
-  -> durable generation worker
-  -> optional external AI provider
+  -> durable generation, execution, and import workers
+  -> optional external AI provider and the launch engine adapters
 ```
 
 The platform and engine are separate bounded contexts. The platform owns founder product state. The engine owns durable automated execution.
@@ -41,37 +41,39 @@ The client never reads repository files or the engine workspace directly.
 
 ## API
 
-`server/app.mjs` exposes a small JSON API.
+`server/app.mjs` composes the HTTP server and owns the worker lifecycle. `server/api.mjs` dispatches each request to one route module per feature area under `server/routes/`.
 
 ### Public routes
 
-- `GET /api/health`
+- `GET /api/health` — fails only on the store, answers before authentication, and carries no internal detail
 - `GET /api/config`
 - `POST /api/auth/register` when registration is enabled
 - `POST /api/auth/login`
+- `POST /api/auth/logout` — a no-op without a session cookie
 - `POST /api/auth/demo` when preview authentication is enabled
+- `GET /api/shared/:token` — the one token-authenticated read, for a person who holds a share link and has no account; it has its own rate limiter
 
-### Authenticated routes
+### Authenticated route modules
 
-- `GET /api/session`
-- `POST /api/auth/logout`
-- `GET /api/workspaces`
-- `POST /api/workspaces`
-- `GET /api/workspaces/:workspaceId`
-- `PATCH /api/workspaces/:workspaceId`
-- `PATCH /api/workspaces/:workspaceId/company`
-- `PATCH /api/workspaces/:workspaceId/workstreams/:workstreamId`
-- `POST /api/workspaces/:workspaceId/claims`
-- `PATCH /api/workspaces/:workspaceId/claims/:claimId`
-- `POST /api/workspaces/:workspaceId/decisions`
-- `PATCH /api/workspaces/:workspaceId/decisions/:decisionId`
-- `POST /api/workspaces/:workspaceId/tasks`
-- `PATCH /api/workspaces/:workspaceId/tasks/:taskId`
-- `PATCH /api/workspaces/:workspaceId/artifacts/:artifactId`
-- `POST /api/workspaces/:workspaceId/generate`
-- `GET /api/workspaces/:workspaceId/jobs/:jobId`
+Every other route requires a session. `server/api.mjs` wires one module per feature area:
 
-Every workspace route verifies the current user has membership in the requested workspace. Workspace IDs supplied by the client never imply access.
+| Module | Surface |
+| --- | --- |
+| `routes/account.mjs` | password change, device-session listing and revocation |
+| `routes/workspaces.mjs` | session read, workspace list/create/read/update, company, workstreams, claims, decisions, tasks, generation jobs |
+| `routes/members.mjs` | member roles, removal, ownership transfer, invitations, invitation preview and accept |
+| `routes/sharing.mjs` | share-link create, list, and revoke |
+| `routes/artifacts.mjs` | deliverable edits, version history, and restore |
+| `routes/comments.mjs` | comment threads on claims, decisions, deliverables, and workstreams |
+| `routes/reviews.mjs` | review requests, answers, and withdrawal |
+| `routes/economics.mjs` | economics scenarios and the primary-scenario choice |
+| `routes/exports.mjs` | full-workspace export bundles in Markdown, JSON, and CSV |
+| `routes/executions.mjs` | engine execution requests, run state, and the launch matrix |
+| `routes/imports.mjs` | launch-repository import sources, preview, and apply |
+| `routes/approvals.mjs` | engine approval listing and owner-only answers |
+| `routes/evidence.mjs` | evidence reads for verified engine results |
+
+Every workspace route resolves the caller's membership role against a named capability and refuses requests below that capability's minimum role (viewer, reviewer, editor, owner). The ladder lives in `server/domain/capabilities.mjs`, and `server/test/capabilities.test.mjs` fails on any route in source that is not declared with a capability. Workspace IDs supplied by the client never imply access.
 
 ## Persistence
 
@@ -113,9 +115,20 @@ Formation includes a self-contained credential path so production mode is usable
 - only a SHA-256 token hash is stored
 - user responses never include credential hashes
 - cookies are HTTP-only, SameSite=Lax, and secure in production or HTTPS
-- sessions expire after seven days and are revoked on logout
+- sessions expire after seven days of disuse and are revoked on logout
+- one account keeps a bounded set of concurrent device sessions; when the bound is reached, the longest-unused session is evicted
+- each session carries a coarse device label, never the raw user-agent
+- the Account page lists active sessions, and any device can be signed out from any other
 
-The Storywell demo route remains a separate development convenience and must stay disabled in production. Public SaaS deployments still need email verification, recovery, invitations, and optionally OIDC or SAML, but those can replace or extend the isolated authentication boundary without changing product pages.
+### Roles and capabilities
+
+Membership carries one of four roles: viewer, reviewer, editor, or owner. Each server capability names the minimum role that may use it (`server/domain/capabilities.mjs`), and the client gates controls on `snapshot.capabilities` rather than a copy of the rules. A company always keeps at least one owner; the last owner must promote a successor before stepping down.
+
+### Invitations
+
+An owner invites a person by email with a role. The invitation token is single-use, hashed like a session token, shown to the inviter exactly once, and expires after 14 days. A cancelled, expired, spent, or never-existed link returns one indistinguishable answer. Accepting requires a signed-in account (`POST /api/invitations/accept`); access changes are recorded in the company's activity.
+
+The Storywell demo route remains a separate development convenience and must stay disabled in production. Public SaaS deployments still need email verification, password recovery, and optionally OIDC or SAML — all waiting on a mail transport — but those can extend the isolated authentication boundary without changing product pages.
 
 ## Same-origin and request security
 
@@ -132,15 +145,16 @@ The Storywell demo route remains a separate development convenience and must sta
 
 Generation is a durable job, not a synchronous chat response.
 
-1. The API validates workspace access and creates a queued job.
+1. The API validates workspace access, enforces a per-company hourly draft limit, and creates a queued job.
 2. The worker claims one job and marks it processing.
-3. It builds scoped context from the company, workstream, claims, decisions, and existing artifacts.
-4. It calls the configured provider or deterministic local generator.
-5. The response must match an explicit artifact schema.
-6. The artifact is persisted as a draft.
-7. The artifact is linked to the workstream.
-8. A recommendation claim records that the output requires founder review.
-9. The job completes with an artifact ID.
+3. It builds scoped context from the company, workstream, claims, decisions, and existing artifacts. Only `server/domain/prompts.mjs` builds provider requests, by naming the fields that may leave; records are never serialized wholesale.
+4. Text that did not come from a member of the company is screened by `server/domain/trust.mjs`; anything that reads as an instruction is withheld from the request and reported, never edited or dropped from the founder's record.
+5. It calls the configured provider through `server/provider.mjs`, which owns the call, its budget, and its retries, and reports four distinguishable failure outcomes instead of papering over them with the deterministic draft.
+6. The response must match an explicit artifact schema.
+7. The artifact is persisted as a draft.
+8. The artifact is linked to the workstream.
+9. A recommendation claim records that the output requires founder review.
+10. The job completes with an artifact ID.
 
 Malformed provider output fails the job and cannot corrupt workspace state.
 
@@ -157,7 +171,7 @@ The founder can inspect retained snapshots and restore an earlier version. Resto
 
 ## Engine integration boundary
 
-The next adapter should translate platform intent into engine work without exposing engine state directly.
+The execution adapter is shipped. `server/execution.mjs` implements the platform half: `EngineBridge` talks to the engine's read-only CLI adapters, and `ExecutionWorker` durably creates or resumes engine runs. `routes/executions.mjs` exposes execution requests, run state, and the launch matrix; `server/domain/results.mjs` imports verified results.
 
 ```text
 platform workstream or task
@@ -168,14 +182,25 @@ platform workstream or task
   -> platform claims, artifact versions, task updates, and activity
 ```
 
-The adapter must:
+The adapter:
 
-- preserve workspace authorization
-- map stable platform IDs to engine run IDs
-- keep platform state authoritative for founder-facing content
-- accept only verified engine outputs
-- translate engine states into founder vocabulary
-- avoid direct browser access to engine files
+- preserves workspace authorization (`requireMembership` with a named capability)
+- fingerprints the scoped company context and maps stable platform IDs to engine run IDs; retrying the same request against the same context resumes the same run
+- keeps platform state authoritative for founder-facing content
+- accepts only verified engine outputs
+- translates engine states into founder vocabulary through the presentation boundary
+- never gives the browser access to engine files
+- reports an unreachable engine as unreachable, never as "no work ready"
+
+Engine founder approvals mirror into the decision log keyed by approval and run (`server/domain/approvals.mjs`); only an owner may answer, and the answer round-trips through the engine's own `core/session/approve.ts`. The engine's remaining half is its own per-node executor, which still selects fixture and no-op executors — ranked in `remaining-gaps.md`.
+
+## Import boundary
+
+`server/imports.mjs`, `server/domain/imports.mjs`, and `routes/imports.mjs` bring an existing launch repository's recorded work into a company. The service discovers import sources through the engine's read-only import CLI (`core/adapters/platform-import.ts`), previews a founder-readable plan, and applies it idempotently through content-derived import keys. Nothing imported is a fact: records enter as drafts and questions, and imported text passes trust screening before it can reach a provider request. The importer opens no write handle on the launch repository.
+
+## Presentation boundary
+
+`server/domain/presentation.mjs` translates engine- and system-authored text into founder-facing board language before it reaches product pages, preserving the original wording for technical disclosure. Run steps, approval mirrors, blocker tasks, imported deliverables, and activity entries all route through it. Founder-authored words are never rewritten.
 
 ## Observability
 
@@ -219,8 +244,16 @@ The platform test suite covers:
 - strict calendar dates and bounded integer inputs
 - malformed-cookie and cross-site mutation handling
 - static application fallback, asset 404 behavior, cache policy, and security headers
+- capability enforcement: every route is declared with a capability, then called as a member of every role
+- membership, invitation, and ownership-transfer rules
+- sharing links, comments, and review requests
+- trust screening of imported and non-member text
+- provider retry, budget, and outcome classification
+- the execution adapter, approval mirroring, result import, and the health probe
+- economics derivations and export bundles
+- board-presentation translation
 
-CI also runs strict TypeScript checking and a production Vite build. The current suite contains 25 deterministic tests.
+CI also runs strict TypeScript checking and a production Vite build. The suite is deterministic; `node platform/run.mjs test` reports the current count (25 files, roughly 250 tests).
 
 ## Deployment
 
