@@ -16,9 +16,11 @@
  * is invented. Three catalog providerIds that this pass's own evidence describes as sharing the
  * exact same no-secret, local-tooling shape as provider.in-app-ios-simulator — provider.codex-
  * native-ios, provider.snapshot-previews, provider.serve-sim — are deliberately NOT declared as
- * separate entries; that decision, and how a completeness check should treat them, is recorded
- * where the manifest-completeness fixture lives, not here.
+ * separate entries; that decision is enforced as typed catalog validation in catalog/validate.ts
+ * (catalog_graph.workflow.provider_unknown / catalog_graph.provider.exception_stale), not here.
  */
+
+import type { AccessRoute } from "../schema/types.js";
 
 export type RequirementKind = "secret" | "config" | "external";
 
@@ -38,6 +40,13 @@ export interface ProvisioningProvider {
   readonly providerId: string;
   /** Short slug naming what connecting this provider turns on. */
   readonly capability: string;
+  /**
+   * How an agent can actually reach and operate this provider — the routes the provider
+   * supports, not the one a business chose (that lives in business state as
+   * tools.<name>.access_route / providers.<name>.accessRoute). Coarsened into the shipped
+   * agent-operations ledger vocabulary by ledgerRouteFor().
+   */
+  readonly accessRoutes: readonly AccessRoute[];
   /** Founder-facing: the concrete thing this unlocks, in one or two sentences. */
   readonly unlocks: string;
   readonly requirements: readonly ProvisioningRequirement[];
@@ -47,6 +56,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.doppler",
     capability: "secret-storage-and-injection",
+    // `doppler run --`/service tokens are the working route; first login is interactive browser auth.
+    accessRoutes: ["cli", "browser"],
     unlocks: "Lets the agent store and safely inject every other provider's API keys/tokens without raw values ever touching chat, git, or logs.",
     requirements: [
       { kind: "secret", name: "DOPPLER_TOKEN", why: "CI/production service token used to inject secrets non-interactively.", verifiable: true },
@@ -67,6 +78,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.resend",
     capability: "founder-digest-email",
+    // REST send/webhook API; domain verification lives in the Resend dashboard.
+    accessRoutes: ["api", "browser"],
     unlocks:
       "Lets the app send real transactional/lifecycle email to users, and lets the autonomous runtime email the founder a session digest after every scheduled work session.",
     requirements: [
@@ -106,6 +119,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.posthog",
     capability: "product-analytics-and-attribution",
+    // Live query probe reads the API; region/replay/project posture is set in the console.
+    accessRoutes: ["api", "browser"],
     unlocks: "Lets the app record events and lets the agent prove real users are doing something (funnels, activation, attribution) instead of asserting it.",
     requirements: [
       { kind: "secret", name: "POSTHOG_PERSONAL_API_KEY", why: "Used by the live query probe to read event counts from the PostHog API.", verifiable: true },
@@ -127,6 +142,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.revenuecat",
     capability: "subscription-entitlements",
+    // Secret-key probe and entitlement checks are API; offerings/entitlements exist in the dashboard.
+    accessRoutes: ["api", "browser"],
     unlocks: "Lets the app sell subscriptions/IAP and lets the agent prove a real purchase actually grants access, not just that a paywall renders.",
     requirements: [
       {
@@ -177,6 +194,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.stripe",
     capability: "web-checkout-billing",
+    // Server API keys, Stripe CLI lifecycle tests, and dashboard-only profile/payout setup.
+    accessRoutes: ["api", "cli", "browser"],
     unlocks: "Lets the app sell on the web and reconcile a successful Stripe payment into the same entitlement the mobile app checks.",
     requirements: [
       { kind: "secret", name: "STRIPE_SECRET_KEY", why: "Server-side API key for checkout/session/product calls.", verifiable: true },
@@ -217,6 +236,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.sentry",
     capability: "crash-and-error-monitoring",
+    // DSN ingestion is API; sentry-cli uploads mappings; alert routes are configured in the console.
+    accessRoutes: ["api", "cli", "browser"],
     unlocks: "Lets the founder learn about real crashes/errors from the live app instead of finding out from a 1-star review.",
     requirements: [
       { kind: "secret", name: "SENTRY_DSN", why: "Client/server ingestion endpoint identifier.", verifiable: true },
@@ -243,6 +264,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.app-store-connect",
     capability: "ios-distribution-and-testflight",
+    // xcodebuild/asc CLI over the ASC API key; agreements and some app-record steps are ASC-web-only.
+    accessRoutes: ["cli", "api", "browser"],
     unlocks: "Lets the agent create the App Store Connect app record, sign builds, and submit to TestFlight/App Store.",
     requirements: [
       {
@@ -305,6 +328,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.google-play",
     capability: "android-distribution",
+    // Service-account Play Developer API; data-safety/IARC and account setup are Play-Console-only.
+    accessRoutes: ["api", "browser"],
     unlocks: "Lets the agent create the Play Console app record and release Android builds.",
     requirements: [
       {
@@ -348,6 +373,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.paid-ad-channels",
     capability: "paid-user-acquisition-spend",
+    // Zero named secrets; account existence, funding, and spend are founder attestation.
+    accessRoutes: ["manual"],
     unlocks: "Lets the founder run paid ad campaigns (Meta/TikTok/Google/Apple Search Ads) and lets the agent measure return against RevenueCat/PostHog truth.",
     requirements: [
       {
@@ -373,6 +400,7 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.refero",
     capability: "ux-pattern-research",
+    accessRoutes: ["api"],
     unlocks: "Lets the agent pull real competitor UX flow/state patterns instead of guessing screen structure from memory.",
     requirements: [
       { kind: "secret", name: "REFERO_API_TOKEN", why: "OAuth or bearer token for the Refero API.", verifiable: true },
@@ -387,6 +415,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.higgsfield",
     capability: "ai-generated-marketing-visuals",
+    // Auth and generation ride the connected Higgsfield MCP tool, outside Doppler routing.
+    accessRoutes: ["mcp"],
     unlocks: "Lets the agent generate on-brand product photos, ads, and video for store/marketing/email surfaces.",
     requirements: [
       {
@@ -406,6 +436,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.mobai",
     capability: "device-automation-and-demo-capture",
+    // Its own MCP connection carries auth; the desktop tier also ships a CLI.
+    accessRoutes: ["mcp", "cli"],
     unlocks:
       "Lets the agent drive a real iOS/Android device or simulator to prove flows work and produce demo videos/screenshots, instead of narrating an untested claim.",
     requirements: [
@@ -427,6 +459,8 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.security-review",
     capability: "security-scanning-and-release-gate",
+    // Local/free scanners run as CLIs; which paid scanner (if any) is a founder routing decision.
+    accessRoutes: ["cli", "manual"],
     unlocks:
       "Runs automated security scans (Claude Security / Codex Security / GitHub Advanced Security / Snyk / MobSF, or an approved free fallback) before release is called ready.",
     requirements: [
@@ -441,6 +475,7 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.app-store-screenshots",
     capability: "store-screenshot-composition",
+    accessRoutes: ["skill_pack"],
     unlocks: "Composes final App Store/Play screenshot images at the exact required device sizes from raw captures.",
     requirements: [
       {
@@ -454,6 +489,7 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.aso-skills",
     capability: "aso-specialist-guidance",
+    accessRoutes: ["skill_pack"],
     unlocks:
       "Gives the agent a specialist ASO skill pack (keyword research, screenshot optimization, localization, apple-search-ads, etc.) instead of improvising ASO from general knowledge.",
     requirements: [
@@ -468,6 +504,7 @@ export const PROVISIONING_MANIFEST: readonly ProvisioningProvider[] = [
   {
     providerId: "provider.in-app-ios-simulator",
     capability: "local-device-proof",
+    accessRoutes: ["native_device"],
     unlocks: "Lets the agent capture real simulator/device screenshots as build evidence on the founder's own Mac, without any third-party account.",
     requirements: [
       {
@@ -496,12 +533,44 @@ export function provisioningProviderIds(): readonly string[] {
   return PROVISIONING_MANIFEST.map((provider) => provider.providerId);
 }
 
+/** Mirror of workspace/business/operations/agent-operations.schema.json's $defs capability.kind / action.route enum. */
+export type LedgerRoute = "connector" | "api_or_cli" | "browser" | "native_device" | "manual";
+
+/**
+ * Total coarsening from the manifest's fine-grained access routes into the agent-operations
+ * ledger vocabulary. "skill_pack" maps to "no_ledger_action": a local skill pack performs no
+ * external action, so nothing it does ever lands in the ledger. The provisioning fixture asserts
+ * every other result is a member of the schema's enum, so ledger-enum drift fails loudly here
+ * rather than silently diverging.
+ */
+export function ledgerRouteFor(route: AccessRoute): LedgerRoute | "no_ledger_action" {
+  switch (route) {
+    case "mcp":
+      return "connector";
+    case "api":
+    case "cli":
+      return "api_or_cli";
+    case "browser":
+      return "browser";
+    case "native_device":
+      return "native_device";
+    case "manual":
+      return "manual";
+    case "skill_pack":
+      return "no_ledger_action";
+    default: {
+      const never: never = route;
+      throw new Error(`unmapped access route ${String(never)}`);
+    }
+  }
+}
+
 /**
  * catalog/workflows/*.ts providerIds that intentionally have no manifest entry: this pass's own
  * evidence (workspace/business/state/PROJECT_STATE.yaml's in_app_ios_simulator/codex_native_ios/
  * snapshot_previews/serve_sim entries) describes all four as the same local-tooling shape — no
  * secret, external/config only — and provider.in-app-ios-simulator above already carries that
- * shape's one real entry. Exported so the manifest-completeness fixture can name this exclusion
- * instead of silently special-casing three ids.
+ * shape's one real entry. Exported so catalog/validate.ts's provider rules can name this
+ * exclusion (and flag it when stale) instead of silently special-casing three ids.
  */
 export const DELIBERATELY_UNDECLARED_PROVIDER_IDS: readonly string[] = ["provider.codex-native-ios", "provider.snapshot-previews", "provider.serve-sim"];

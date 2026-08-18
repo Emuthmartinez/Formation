@@ -127,6 +127,9 @@ The ordered walk lives in [`catalog/generated/spine.md`](./catalog/generated/spi
 output per phase. Load it when the question is _what comes next_; this file
 answers _what governs this_. Entry and exit criteria per phase are in
 [`knowledge/process/launch-phases.md`](./knowledge/process/launch-phases.md).
+Per-node contracts — trigger, inputs, outputs, role, providers with their
+access routes, gates, knowledge — are generated into
+[`catalog/generated/contracts.md`](./catalog/generated/contracts.md).
 
 ## What Counts As Done
 

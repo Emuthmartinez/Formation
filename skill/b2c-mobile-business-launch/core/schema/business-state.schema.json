@@ -107,6 +107,11 @@
         "pending": { "type": "array", "items": { "$ref": "#/$defs/pendingFounderGate" } }
       }
     },
+    "providers": {
+      "$comment": "Optional so pre-providers documents and the bootstrap patch stay valid; migrate-v1 carries the v1 tools: block in here, keys stay the v1 snake_case tool names. accessRoute's enum makes the reducer's schema step reject bad values; the per-provider declared-routes cross-check is a reducer step, not schema.",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/providerStateEntry" }
+    },
     "continuity": {
       "type": "object",
       "additionalProperties": true,
@@ -141,6 +146,21 @@
         "status": { "$ref": "urn:b2c-mobile-business-launch:core:status-schema#/$defs/status" },
         "evidence": { "type": "array", "items": { "type": "string" } },
         "blockers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "providerStateEntry": {
+      "$comment": "Like lane: typed core fields plus provider-specific extras (identity blocks, route_options, tier fields) v1 entries carry, so migration never drops data.",
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["accessRoute"],
+      "properties": {
+        "accessRoute": { "enum": ["mcp", "api", "cli", "browser", "native_device", "skill_pack", "manual", "not_selected"] },
+        "route": { "type": "string" },
+        "docsCheckedAt": { "type": "string" },
+        "requiredSecrets": { "type": "array", "items": { "type": "string" } },
+        "preflight": { "type": "string" },
+        "validation": { "type": "string" },
+        "fallback": { "type": "string" }
       }
     },
     "pendingFounderGate": {

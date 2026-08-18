@@ -110,12 +110,12 @@ export const workflows = [
     trigger: "Changing a domain, workflow, phase, lane, artifact, gate, reference, or generated catalog projection",
     instructions:
       "Edit the authored catalog data when adding, renaming, or rewiring graph definitions. Add knowledge through catalog/knowledge manifests and the knowledge commands. Keep every existing catalog ID stable when a path moves. Never hand-edit generated routing or spine files. Run knowledge:check and check:catalog. Regenerate routing, then confirm catalog:render-routing -- --check passes.",
-    reads: ["catalog/generated/routing.md", "catalog/generated/spine.md"],
+    reads: ["catalog/generated/routing.md", "catalog/generated/spine.md", "catalog/generated/contracts.md"],
     // No referenceIds: this node edits structured catalog TS data and regenerates projections;
     // its doctrine lives in the validators it must pass, and the documentation-register
     // reference belongs to the nodes that write prose surfaces, not this one.
     roleId: "role.orchestrator",
-    outputPaths: ["catalog/generated/routing.md", "catalog/generated/spine.md"],
+    outputPaths: ["catalog/generated/routing.md", "catalog/generated/spine.md", "catalog/generated/contracts.md"],
     // Points at THIS unit's own gates (check:catalog / catalog:render-routing), not v1's
     // check:skill-graph / render:skill-graph — the port ledger marks check-skill-graph.ts
     // "port" precisely because catalog/validate.ts + catalog/render-routing.ts is its

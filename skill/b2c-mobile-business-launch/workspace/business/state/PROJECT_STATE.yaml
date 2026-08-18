@@ -347,6 +347,10 @@ lanes:
 tools:
   doppler:
     route: "intended_paid_or_account_tool"
+    # Typed route in use — one of: mcp | api | cli | browser | native_device | skill_pack | manual,
+    # or not_selected until chosen. Must be a route the provider's provisioning-manifest entry
+    # declares (core/provisioning/requirements.ts accessRoutes); validate:launch-state enforces both.
+    access_route: "not_selected"
     docs_checked_at: ""
     cli_version: ""
     required_secrets:
@@ -356,6 +360,7 @@ tools:
     fallback: "Apple Keychain, platform secrets, or names-only .env after founder approval."
   posthog:
     route: "intended_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets:
       - "POSTHOG_PROJECT_API_KEY"
@@ -365,6 +370,7 @@ tools:
     fallback: "Local event log or open-source analytics only after founder approval."
   refero:
     route: "optional_paid_or_account_tool"
+    access_route: "api"
     docs_checked_at: ""
     required_secrets:
       - "REFERO_API_TOKEN"
@@ -373,6 +379,7 @@ tools:
     fallback: "Bundled business/product/experience/ux-patterns pattern pack, founder-provided references, or public UX libraries only after founder approval."
   revenuecat:
     route: "intended_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets:
       - "REVENUECAT_PUBLIC_IOS_KEY"
@@ -383,6 +390,7 @@ tools:
     fallback: "StoreKit/TestFlight sandbox notes only after founder approval."
   paid_ad_channels:
     route: "optional_paid_or_account_tool"
+    access_route: "manual"
     docs_checked_at: ""
     required_secrets: []
     preflight: "Use paid-user-acquisition.md before spend. Confirm one-channel choice, target event, baseline, creative cadence, tracking stack, RevenueCat LTV/CPA source, store destination, privacy/ATT implications, and founder-approved budget."
@@ -390,6 +398,7 @@ tools:
     fallback: "Use organic, ASO, waitlist, or manual spreadsheet planning only after paid spend or ad-account access is blocked, deferred, or not needed."
   stripe:
     route: "optional_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets:
       - "STRIPE_SECRET_KEY"
@@ -399,6 +408,7 @@ tools:
     fallback: "Defer web checkout and use app-store purchase only after founder approval."
   resend:
     route: "intended_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets:
       - "RESEND_API_KEY"
@@ -408,6 +418,7 @@ tools:
     fallback: "Cloudflare routing plus manual Gmail responses after founder approval."
   sentry:
     route: "optional_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets:
       - "SENTRY_DSN"
@@ -417,6 +428,7 @@ tools:
     fallback: "Store crash reports and local logs after founder approval."
   security_review:
     route: "optional_paid_or_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets: []
     preflight: "Confirm whether Claude Security, Codex Security, GitHub Advanced Security, Snyk/Semgrep/Socket, MobSF Cloud, or a free local route is approved before running scans."
@@ -424,6 +436,7 @@ tools:
     fallback: "Use local security skills, OWASP MASVS/ASVS, MobSF local, gitleaks/trufflehog, npm audit/osv-scanner, semgrep community rules, Xcode/Android static checks only after founder approval when replacing paid tools."
   app_store_connect:
     route: "intended_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets:
       - "ASC_KEY_ID"
@@ -434,6 +447,7 @@ tools:
     fallback: "Manual ASC click-path packet only after CLI/auth/account/skill-route blocker or founder-approved non-CLI route is recorded."
   aso_skills:
     route: "optional_local_skill_pack"
+    access_route: "skill_pack"
     docs_checked_at: ""
     required_secrets: []
     preflight: "Refresh the Eronred ASO skill pack or installed local equivalents before ASO, icon, screenshot, CPP, event, paid UA, or post-launch metric guidance."
@@ -441,6 +455,7 @@ tools:
     fallback: "Apply equivalent frameworks manually only after paid/account-gated ASO routes and missing runtime access are recorded."
   app_store_screenshots:
     route: "optional_local_skill_pack"
+    access_route: "skill_pack"
     docs_checked_at: ""
     required_secrets: []
     # One value, not a pipe-delimited triple. The old form rendered a GitHub username and
@@ -468,6 +483,7 @@ tools:
     fallback: "Use Remotion, HTML/CSS composition, or designer-owned files only after the app-store-screenshots route is unavailable or not fit and the limitation is recorded."
   higgsfield:
     route: "optional_paid_or_account_tool"
+    access_route: "mcp"
     docs_checked_at: ""
     required_secrets: []
     preflight: "Confirm design/design.md tokens, asset family, prompt brief, source rights, and whether the output is screenshot support, App Icon, CPP/event art, preview thumbnail, or UGC/ad creative."
@@ -484,6 +500,7 @@ tools:
       training_manifest_path: ""
   in_app_ios_simulator:
     route: "built_in_agent_simulator_when_local_mac"
+    access_route: "native_device"
     docs_checked_at: ""
     runtime: "claude_code_desktop_pane | claude_code_cli_computer_use | codex_build_ios_apps | blocked | not_needed"
     runtime_version: ""
@@ -494,6 +511,7 @@ tools:
     fallback: "Escalate to XcodeBuildMCP for scripted/CI or physical-device Apple work, serve-sim for browser-visible simulators, or MobAI for Android and repeatable suites; record the rung change in strategy/TOOL_DECISIONS.md. When no local Mac is reachable, mark device proof blocked rather than narrating a simulator run that did not happen."
   mobai:
     route: "intended_free_or_paid_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     selected_tier: "free | plus | pro | blocked | not_needed"
     desktop_version: ""
@@ -505,6 +523,7 @@ tools:
     fallback: "Use MobAI Free without a spend gate when it fits. Ask before Plus/Pro spend or an XcodeBuildMCP Apple-only substitution; record missing Android/cross-platform proof and use Android emulator/ADB or a dated blocker."
   codex_native_ios:
     route: "codex_desktop_native_tooling_when_exposed"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets: []
     preflight: "When Codex Desktop exposes native Apple/XcodeBuildMCP tools, load xcodebuildmcp-testing.md, call session_show_defaults before the first build/run/test, and confirm project/workspace, scheme, simulator/device, OS/runtime, and configuration."
@@ -512,6 +531,7 @@ tools:
     fallback: "Use XcodeBuildMCP CLI, serve-sim, SnapshotPreviews preview proof, MobAI, or mark proof blocked according to the lane and paid-tool approval state."
   snapshot_previews:
     route: "optional_open_source_cli_preview_proof"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets: []
     preflight: "Refresh getsentry/SnapshotPreviews, confirm SwiftUI/UIKit/AppKit previews exist, link SnapshottingTests, and decide SnapshotTest vs PreviewLayoutTest."
@@ -519,6 +539,7 @@ tools:
     fallback: "Use XcodeBuildMCP/Codex Desktop screenshots, serve-sim, MobAI, or manual preview review; do not call preview proof runtime E2E."
   serve_sim:
     route: "optional_open_source_cli_simulator_stream"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets: []
     preflight: "Refresh EvanBacon/serve-sim, confirm macOS + Xcode command line tools + Node 18+, boot the intended iOS Simulator, and choose URL/port."
@@ -526,6 +547,7 @@ tools:
     fallback: "Use Codex Desktop native iOS/XcodeBuildMCP tools, MobAI, founder-provided captures, or mark simulator proof blocked."
   google_play:
     route: "intended_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets:
       - "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
@@ -534,6 +556,7 @@ tools:
     fallback: "Manual Play Console packet after founder approval."
   cloudflare:
     route: "optional_account_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets:
       - "CLOUDFLARE_API_TOKEN"
@@ -542,6 +565,7 @@ tools:
     fallback: "Existing registrar/host after founder approval."
   remotion:
     route: "optional_local_render_tool"
+    access_route: "not_selected"
     docs_checked_at: ""
     required_secrets: []
     license_status: "Check current Remotion license before commercial use; record eligibility or founder approval."

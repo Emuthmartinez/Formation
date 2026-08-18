@@ -36,6 +36,19 @@ export const statusValues: readonly Status[] = [
   "cancelled",
 ];
 
+/**
+ * How an agent reaches and operates a provider: the typed vocabulary behind the prose
+ * "setup route" in knowledge/operations/provider-state-recipes.md. Each provisioning
+ * manifest entry declares the routes its provider supports (core/provisioning/requirements.ts
+ * accessRoutes); business state records the one in use (v1 tools.<name>.access_route, v2
+ * providers.<name>.accessRoute — "not_selected" until chosen). Finer-grained than the
+ * agent-operations ledger's capability/action vocabulary; ledgerRouteFor() in
+ * core/provisioning/requirements.ts is the total coarsening map between the two.
+ */
+export type AccessRoute = "mcp" | "api" | "cli" | "browser" | "native_device" | "skill_pack" | "manual";
+
+export const accessRouteValues: readonly AccessRoute[] = ["mcp", "api", "cli", "browser", "native_device", "skill_pack", "manual"];
+
 /** v1 business-state lane status (tooling/lib/launch-state.ts statusValues). */
 export type V1LaneStatus = "not_started" | "partial" | "blocked" | "not_needed" | "deferred" | "done";
 
@@ -455,6 +468,25 @@ export interface Lane {
 
 export type LanesMap = Record<LaneKey, Lane>;
 
+/**
+ * A provider's durable per-business state (the typed successor to v1's tools.<name> YAML
+ * entries; keys stay the v1 snake_case tool names). accessRoute is the route in use — the
+ * reducer's schema step rejects values outside the enum, and its cross-document step rejects
+ * a route the provider's provisioning-manifest entry does not declare. Like Lane, entries
+ * carry typed core fields plus whatever provider-specific extras v1 recorded (identity
+ * blocks, route_options, tier fields), so migration never drops data.
+ */
+export interface ProviderStateEntry {
+  accessRoute: AccessRoute | "not_selected";
+  route?: string;
+  docsCheckedAt?: string;
+  requiredSecrets?: string[];
+  preflight?: string;
+  validation?: string;
+  fallback?: string;
+  [extra: string]: unknown;
+}
+
 export interface PendingFounderGate {
   id: string;
   category: ProtectedCategory | "other";
@@ -480,6 +512,8 @@ export interface BusinessStateV2 {
   };
   lanes: LanesMap;
   founderGates: { pending: PendingFounderGate[] };
+  /** Optional so pre-providers documents and the bootstrap patch stay valid; migrate-v1 carries the v1 tools: block in here. */
+  providers?: Record<string, ProviderStateEntry>;
   continuity?: { lastStateReview?: string; sourceFiles?: string[]; gitStatusReviewed?: boolean; nextAction?: string };
   workflowApplicability?: Record<
     string,

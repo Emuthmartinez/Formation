@@ -1,11 +1,12 @@
-import { chmodSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { chmodSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { assert, skillRoot, type Harness } from "./_harness.js";
 import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 import { internalVocabularyBlocklist } from "../../core/session/digest.js";
-import { DELIBERATELY_UNDECLARED_PROVIDER_IDS, PROVISIONING_MANIFEST, provisioningProviderIds } from "../../core/provisioning/requirements.js";
+import { ledgerRouteFor, PROVISIONING_MANIFEST } from "../../core/provisioning/requirements.js";
+import { accessRouteValues } from "../../core/schema/types.js";
 import {
   lookupDopplerSecretNames,
   lookupEnvFileKeys,
@@ -33,51 +34,14 @@ function emptySources(overrides: Partial<ResolveSources> = {}): ResolveSources {
   return { dopplerNames: new Set(), dopplerReachable: true, envKeys: new Set(), envFileFound: false, ...overrides };
 }
 
-function scanCatalogProviderIds(): ReadonlySet<string> {
-  const dir = path.join(skillRoot, "catalog/workflows");
-  const ids = new Set<string>();
-  for (const fileName of readdirSync(dir)) {
-    if (!fileName.endsWith(".ts")) continue;
-    const source = readFileSync(path.join(dir, fileName), "utf8");
-    for (const arrayMatch of source.matchAll(/providers:\s*\[([^\]]*)\]/g)) {
-      const inner = arrayMatch[1] ?? "";
-      for (const idMatch of inner.matchAll(/"([\w.-]+)"/g)) ids.add(idMatch[1]!);
-    }
-  }
-  return ids;
-}
-
 export function register(harness: Harness): void {
   // --- manifest completeness ------------------------------------------------------------------
-
-  harness.check("provisioning/requirements: the catalog-provider scan itself finds providers (the completeness check below is not vacuous)", () => {
-    const catalogIds = scanCatalogProviderIds();
-    assert(
-      catalogIds.size >= 15,
-      `expected the catalog/workflows/*.ts scan to find at least 15 provider ids, found ${catalogIds.size} — the scan regex likely broke`,
-    );
-    assert(
-      catalogIds.has("provider.doppler") && catalogIds.has("provider.revenuecat"),
-      "the scan missed providers known to be in catalog/workflows/operations-trust.ts and growth-revenue.ts",
-    );
-  });
-
-  harness.check("provisioning/requirements: every catalog providerId either has a manifest entry or is a named, documented exception", () => {
-    const catalogIds = scanCatalogProviderIds();
-    const manifestIds = new Set(provisioningProviderIds());
-    const exceptions = new Set(DELIBERATELY_UNDECLARED_PROVIDER_IDS);
-    const undeclared = [...catalogIds].filter((id) => !manifestIds.has(id) && !exceptions.has(id));
-    assert(undeclared.length === 0, `catalog providerId(s) with no manifest entry and no documented exception: ${undeclared.join(", ")}`);
-  });
-
-  harness.check("provisioning/requirements: the documented exceptions are real catalog ids, not stale placeholders", () => {
-    const catalogIds = scanCatalogProviderIds();
-    const stale = DELIBERATELY_UNDECLARED_PROVIDER_IDS.filter((id) => !catalogIds.has(id));
-    assert(
-      stale.length === 0,
-      `DELIBERATELY_UNDECLARED_PROVIDER_IDS names id(s) the catalog scan no longer finds: ${stale.join(", ")} — the exception list has drifted`,
-    );
-  });
+  // The catalog↔manifest join (every workflow providerId has a manifest entry or a documented
+  // exception, and no exception is stale) is enforced as typed rules in catalog/validate.ts —
+  // catalog_graph.workflow.provider_unknown and catalog_graph.provider.exception_stale — with
+  // fixture coverage in catalog.fixtures.ts. The regex source-scan that used to guard it here
+  // was retired when the typed rules landed: they read composed catalog data, which the scan's
+  // own comment noted a variable/spread-built providers array could evade.
 
   harness.check(
     "provisioning/requirements: every manifest provider has at least one requirement, and every requirement has non-empty founder-facing text",
@@ -91,6 +55,30 @@ export function register(harness: Harness): void {
       }
     },
   );
+
+  harness.check("provisioning/requirements: every manifest provider declares at least one known access route", () => {
+    const known = new Set<string>(accessRouteValues);
+    for (const provider of PROVISIONING_MANIFEST) {
+      assert(provider.accessRoutes.length > 0, `${provider.providerId} declares zero access routes`);
+      for (const route of provider.accessRoutes) {
+        assert(known.has(route), `${provider.providerId} declares unknown access route "${route}"`);
+      }
+    }
+  });
+
+  harness.check("provisioning/requirements: ledgerRouteFor stays inside the agent-operations schema's route enum", () => {
+    const schema = JSON.parse(readFileSync(path.join(skillRoot, "workspace/business/operations/agent-operations.schema.json"), "utf8")) as {
+      $defs: { capability: { properties: { kind: { enum: string[] } } }; action: { properties: { route: { enum: string[] } } } };
+    };
+    const capabilityKinds = new Set(schema.$defs.capability.properties.kind.enum);
+    const actionRoutes = new Set(schema.$defs.action.properties.route.enum);
+    for (const route of accessRouteValues) {
+      const ledgerRoute = ledgerRouteFor(route);
+      if (ledgerRoute === "no_ledger_action") continue;
+      assert(capabilityKinds.has(ledgerRoute), `ledgerRouteFor("${route}") = "${ledgerRoute}" is not a capability.kind enum member — the ledger enum drifted`);
+      assert(actionRoutes.has(ledgerRoute), `ledgerRouteFor("${route}") = "${ledgerRoute}" is not an action.route enum member — the ledger enum drifted`);
+    }
+  });
 
   // --- external requirements are never satisfied by presence alone ---------------------------
 

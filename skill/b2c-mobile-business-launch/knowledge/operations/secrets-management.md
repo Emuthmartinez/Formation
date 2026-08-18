@@ -39,7 +39,7 @@ Record in `SECRETS.md`:
 - command differences between live docs, local CLI help, this skill, or old project docs
 - live-environment auth model: service token, provider integration, OIDC, or platform-native secret store
 
-Also record the matching provider state in `state/PROJECT_STATE.yaml`: docs checked date, required secret names, preflight, validation command/proof, fallback limitation, and blocked founder actions.
+Also record the matching provider state in `state/PROJECT_STATE.yaml`: docs checked date, required secret names, access route in use (`access_route`), preflight, validation command/proof, fallback limitation, and blocked founder actions.
 
 If current official docs or CLI help cannot be reached, mark setup as `blocked: docs refresh needed` or `provisional: docs unavailable`. Do not invent install, login, service-token, or deploy commands from memory.
 

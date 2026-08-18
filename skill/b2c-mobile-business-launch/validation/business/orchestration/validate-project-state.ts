@@ -20,6 +20,8 @@ import {
   requireString,
   validateReason,
 } from "../../../tooling/lib/launch-state.js";
+import { findProvisioningProvider } from "../../../core/provisioning/requirements.js";
+import { accessRouteValues } from "../../../core/schema/types.js";
 
 const args = parseCliArgs(process.argv.slice(2));
 const loaded = loadProjectState(args);
@@ -267,6 +269,42 @@ if (state) {
       for (const field of ["route", "preflight", "validation", "fallback"]) {
         if (!asString(value[field])?.trim()) {
           issues.push(issue("warning", `tools.${toolName}.${field}.missing`, `tools.${toolName}.${field} should be recorded.`, "state/PROJECT_STATE.yaml"));
+        }
+      }
+      // access_route is the typed mechanism vocabulary (distinct from `route`, the sourcing/
+      // economics classification above): which of the provider's declared access routes this
+      // business is actually using. Data-only imports back both checks — the enum comes from
+      // core/schema/types.ts, the per-provider declarations from the provisioning manifest.
+      const accessRoute = asString(value.access_route)?.trim() ?? "";
+      if (!accessRoute || accessRoute === "not_selected") {
+        issues.push(
+          issue(
+            "warning",
+            `tools.${toolName}.access_route.missing`,
+            `tools.${toolName}.access_route should record the route in use.`,
+            "state/PROJECT_STATE.yaml",
+          ),
+        );
+      } else if (!(accessRouteValues as readonly string[]).includes(accessRoute)) {
+        issues.push(
+          issue(
+            "error",
+            `tools.${toolName}.access_route.invalid`,
+            `tools.${toolName}.access_route must be one of ${accessRouteValues.join(", ")} or not_selected.`,
+            "state/PROJECT_STATE.yaml",
+          ),
+        );
+      } else {
+        const provider = findProvisioningProvider(`provider.${toolName.replace(/_/g, "-")}`);
+        if (provider && !(provider.accessRoutes as readonly string[]).includes(accessRoute)) {
+          issues.push(
+            issue(
+              "error",
+              `tools.${toolName}.access_route.undeclared`,
+              `tools.${toolName}.access_route is "${accessRoute}", but ${provider.providerId} declares only ${provider.accessRoutes.join(", ")}.`,
+              "state/PROJECT_STATE.yaml",
+            ),
+          );
         }
       }
       const requiredSecrets = asArray(value.required_secrets);
