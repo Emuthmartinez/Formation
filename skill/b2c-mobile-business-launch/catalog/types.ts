@@ -192,6 +192,12 @@ export interface CatalogWorkflowDef {
   dependencies: WorkflowId[];
   outputPaths: string[];
   gateCommands: string[];
+  /**
+   * Provider ids this node exercises. Every id must have a PROVISIONING_MANIFEST entry or sit
+   * in DELIBERATELY_UNDECLARED_PROVIDER_IDS (core/provisioning/requirements.ts) —
+   * catalog_graph.workflow.provider_unknown / catalog_graph.provider.exception_stale — and be a
+   * subset of the owning role's capabilityIds (catalog_graph.workflow.role_capability_missing).
+   */
   providerIds: string[];
   founderOnlyActions: string[];
   /** v2: dispatch/autonomy fields the v1 graph had no execution half to need (KTD6). */

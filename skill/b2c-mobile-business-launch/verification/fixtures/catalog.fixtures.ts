@@ -132,10 +132,68 @@ export function register(harness: Harness): void {
   harness.check("validate: workflow providers must be executable by the assigned role", () => {
     const catalog = baseFixtureCatalog();
     catalog.workflows = [baseWorkflow({ providerIds: ["provider.fixture"] })];
-    const issues = validateCatalog(catalog, skillRoot);
+    // A fixture registry blesses provider.fixture so this case keeps exactly one defect (the
+    // role capability), doubling as the clearing test for the injectable-registry rule.
+    const issues = validateCatalog(catalog, skillRoot, { providerIds: ["provider.fixture"], deliberatelyUndeclared: [] });
     assert(
       issues.some((issue) => issue.code === "catalog_graph.workflow.role_capability_missing"),
       `expected catalog_graph.workflow.role_capability_missing, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+    assert(
+      !issues.some((issue) => issue.code === "catalog_graph.workflow.provider_unknown"),
+      "a registry-blessed provider id must not trip catalog_graph.workflow.provider_unknown",
+    );
+  });
+
+  harness.check("validate: workflow providers must exist in the provider registry or its documented exceptions", () => {
+    const failing = baseFixtureCatalog();
+    // The role declares the capability so the only defect is the missing registry entry.
+    failing.roles = failing.roles.map((role) => ({ ...role, capabilityIds: ["provider.not-registered"] }));
+    failing.workflows = [baseWorkflow({ providerIds: ["provider.not-registered"] })];
+    const failingIssues = validateCatalog(failing, skillRoot);
+    assert(
+      failingIssues.some((issue) => issue.code === "catalog_graph.workflow.provider_unknown"),
+      `expected catalog_graph.workflow.provider_unknown, got: ${failingIssues.map((i) => i.code).join(", ")}`,
+    );
+
+    const cleared = validateCatalog(failing, skillRoot, { providerIds: ["provider.not-registered"], deliberatelyUndeclared: [] });
+    assert(
+      !cleared.some((issue) => issue.code === "catalog_graph.workflow.provider_unknown"),
+      "registering the provider id must clear catalog_graph.workflow.provider_unknown",
+    );
+  });
+
+  harness.check("validate: a deliberately-undeclared provider id no workflow references is flagged stale", () => {
+    const catalog = baseFixtureCatalog();
+    catalog.roles = catalog.roles.map((role) => ({ ...role, capabilityIds: ["provider.known"] }));
+    catalog.workflows = [baseWorkflow({ providerIds: ["provider.known"] })];
+    const registry = { providerIds: ["provider.known"], deliberatelyUndeclared: ["provider.ghost"] };
+    const issues = validateCatalog(catalog, skillRoot, registry);
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.provider.exception_stale"),
+      `expected catalog_graph.provider.exception_stale, got: ${issues.map((i) => i.code).join(", ")}`,
+    );
+
+    // Referencing the exception id clears the staleness flag.
+    const cleared = baseFixtureCatalog();
+    cleared.roles = cleared.roles.map((role) => ({ ...role, capabilityIds: ["provider.known", "provider.ghost"] }));
+    cleared.workflows = [
+      baseWorkflow({ providerIds: ["provider.known"] }),
+      baseWorkflow({ id: "workflow.research.fixture-ghost", title: "Fixture ghost", providerIds: ["provider.ghost"], outputPaths: [] }),
+    ];
+    const clearedIssues = validateCatalog(cleared, skillRoot, registry);
+    assert(
+      !clearedIssues.some((issue) => issue.code === "catalog_graph.provider.exception_stale"),
+      "an exception id a workflow references must not be flagged stale",
+    );
+
+    // Scope guard: a catalog referencing no registry provider is never judged against the
+    // exception list (minimal fixture catalogs stay one-defect-per-case).
+    const unscoped = baseFixtureCatalog();
+    const unscopedIssues = validateCatalog(unscoped, skillRoot, { providerIds: ["provider.known"], deliberatelyUndeclared: ["provider.ghost"] });
+    assert(
+      !unscopedIssues.some((issue) => issue.code === "catalog_graph.provider.exception_stale"),
+      "the staleness rule must stay silent for a catalog that references no registry provider",
     );
   });
 

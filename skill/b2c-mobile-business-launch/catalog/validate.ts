@@ -2,6 +2,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DELIBERATELY_UNDECLARED_PROVIDER_IDS, provisioningProviderIds } from "../core/provisioning/requirements.js";
 import { businessUnitCoversAllGrantableDomains } from "./business-units.js";
 import { GATE_OWNER_OVERRIDES, inferGateDomain } from "./gates.js";
 import { isCatalogId, type CatalogId } from "./ids.js";
@@ -10,14 +11,32 @@ import { operators } from "./operators.js";
 import type { Catalog, CatalogIssue } from "./types.js";
 
 /**
+ * The provider registry workflow providerIds are validated against. Injectable so fixture
+ * catalogs stay one-defect-per-case (a fixture registry can bless `provider.fixture`); real
+ * call sites pass nothing and get the provisioning manifest plus its documented exceptions —
+ * the typed successor to the regex-scraping completeness fixture that previously guarded
+ * this join from verification/fixtures/provisioning.fixtures.ts.
+ */
+export interface ProviderRegistry {
+  readonly providerIds: readonly string[];
+  readonly deliberatelyUndeclared: readonly string[];
+}
+
+export function defaultProviderRegistry(): ProviderRegistry {
+  return { providerIds: provisioningProviderIds(), deliberatelyUndeclared: DELIBERATELY_UNDECLARED_PROVIDER_IDS };
+}
+
+/**
  * Structural validation for the v2 catalog (U8). Ported from runtime/graph/validate.ts's
  * checks — duplicate/invalid IDs, dangling references, cycles, missing files — restructured
  * against the catalog/types.ts shape. Named issue codes throughout (never a bare boolean),
  * matching the `catalog_graph.*` family so a future capability-boundary or fixture test can
  * assert on a specific code rather than "did it exit non-zero".
  */
-export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIssue[] {
+export function validateCatalog(catalog: Catalog, skillRoot: string, providerRegistry: ProviderRegistry = defaultProviderRegistry()): CatalogIssue[] {
   const issues: CatalogIssue[] = [];
+  const registeredProviderIds = new Set(providerRegistry.providerIds);
+  const undeclaredProviderIds = new Set(providerRegistry.deliberatelyUndeclared);
   const groups = [
     catalog.areas,
     catalog.domains,
@@ -256,6 +275,16 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
         issues.push(error("catalog_graph.workflow.reference_unknown", `${workflow.id} binds unregistered reference ${referenceId}.`));
       }
     }
+    for (const providerId of workflow.providerIds) {
+      if (!registeredProviderIds.has(providerId) && !undeclaredProviderIds.has(providerId)) {
+        issues.push(
+          error(
+            "catalog_graph.workflow.provider_unknown",
+            `${workflow.id} names ${providerId}, which has no PROVISIONING_MANIFEST entry and is not in DELIBERATELY_UNDECLARED_PROVIDER_IDS (core/provisioning/requirements.ts).`,
+          ),
+        );
+      }
+    }
     // reads is the authored input contract: every entry must be a path some workflow produces or
     // a durable workspace file the template ships — an unresolvable read is a worker sent to open
     // a file that will never exist. consults follows the same resolvability rule, and a path may
@@ -301,6 +330,23 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
       issues.push(
         error("catalog_graph.workflow.ambiguous_write", `${outputPath} is declared as an output by ${count} workflows (single-writer rule).`, outputPath),
       );
+  }
+
+  // An exception id no workflow references is a stale entry inviting silent drift. Checked only
+  // when this catalog references a registry provider at all — same scoping as the knowledge
+  // disk-sweep above, so minimal fixture catalogs are not judged against the real manifest.
+  const referencedProviderIds = new Set(catalog.workflows.flatMap((workflow) => workflow.providerIds));
+  if ([...referencedProviderIds].some((providerId) => registeredProviderIds.has(providerId))) {
+    for (const exceptionId of providerRegistry.deliberatelyUndeclared) {
+      if (!referencedProviderIds.has(exceptionId)) {
+        issues.push(
+          error(
+            "catalog_graph.provider.exception_stale",
+            `DELIBERATELY_UNDECLARED_PROVIDER_IDS names ${exceptionId}, but no workflow references it — the exception list has drifted.`,
+          ),
+        );
+      }
+    }
   }
 
   uniqueBy(catalog.artifacts, (item) => item.path, "catalog_graph.artifact.path_duplicate", issues);

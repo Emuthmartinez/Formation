@@ -16,8 +16,8 @@
  * is invented. Three catalog providerIds that this pass's own evidence describes as sharing the
  * exact same no-secret, local-tooling shape as provider.in-app-ios-simulator — provider.codex-
  * native-ios, provider.snapshot-previews, provider.serve-sim — are deliberately NOT declared as
- * separate entries; that decision, and how a completeness check should treat them, is recorded
- * where the manifest-completeness fixture lives, not here.
+ * separate entries; that decision is enforced as typed catalog validation in catalog/validate.ts
+ * (catalog_graph.workflow.provider_unknown / catalog_graph.provider.exception_stale), not here.
  */
 
 import type { AccessRoute } from "../schema/types.js";
@@ -570,7 +570,7 @@ export function ledgerRouteFor(route: AccessRoute): LedgerRoute | "no_ledger_act
  * evidence (workspace/business/state/PROJECT_STATE.yaml's in_app_ios_simulator/codex_native_ios/
  * snapshot_previews/serve_sim entries) describes all four as the same local-tooling shape — no
  * secret, external/config only — and provider.in-app-ios-simulator above already carries that
- * shape's one real entry. Exported so the manifest-completeness fixture can name this exclusion
- * instead of silently special-casing three ids.
+ * shape's one real entry. Exported so catalog/validate.ts's provider rules can name this
+ * exclusion (and flag it when stale) instead of silently special-casing three ids.
  */
 export const DELIBERATELY_UNDECLARED_PROVIDER_IDS: readonly string[] = ["provider.codex-native-ios", "provider.snapshot-previews", "provider.serve-sim"];
