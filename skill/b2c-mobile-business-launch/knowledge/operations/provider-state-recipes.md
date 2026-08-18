@@ -8,7 +8,7 @@ Each provider entry in `state/PROJECT_STATE.yaml` should include:
 - docs checked date and URL basis when docs/CLIs are fast-moving
 - required secret names only
 - preflight packet: account, project, region, app ID, bundle/package ID, environment, pricing, and approval scope
-- setup route: CLI, API, browser console, MCP, or manual user action
+- access_route: the typed route in use — mcp, api, cli, browser, native_device, skill_pack, or manual, and not_selected until chosen. It must be a route the provider's provisioning manifest declares; `validate:launch-state` enforces the vocabulary and that cross-check. `route` above records sourcing/economics; `access_route` records mechanism — they are different fields.
 - validation command or dashboard proof
 - fallback and limitation
 

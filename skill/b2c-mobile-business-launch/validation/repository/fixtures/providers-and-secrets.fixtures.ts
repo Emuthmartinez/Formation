@@ -35,6 +35,46 @@ export function register(h: Harness): void {
     "secrets.RESEND_API_KEY.unrouted",
   );
 
+  // access_route: the typed mechanism vocabulary on provider entries. Enum membership is an
+  // error, the manifest cross-check (chosen route must be one the provider declares) is an
+  // error, missing/not_selected is a warning, and a tool with no provisioning-manifest entry
+  // (cloudflare) skips the cross-check entirely.
+  const invalidAccessRoute = makeFixture("invalid-access-route");
+  const invalidAccessRouteState = readState(invalidAccessRoute);
+  expectRecord(getTools(invalidAccessRouteState)["posthog"], "tools.posthog")["access_route"] = "carrier_pigeon";
+  writeState(invalidAccessRoute, invalidAccessRouteState);
+  runFixture("unknown access_route value fails", invalidAccessRoute, "validate-project-state.ts", 1, "tools.posthog.access_route.invalid");
+
+  const undeclaredAccessRoute = makeFixture("undeclared-access-route");
+  const undeclaredAccessRouteState = readState(undeclaredAccessRoute);
+  expectRecord(getTools(undeclaredAccessRouteState)["higgsfield"], "tools.higgsfield")["access_route"] = "browser";
+  writeState(undeclaredAccessRoute, undeclaredAccessRouteState);
+  runFixture(
+    "access_route the provider does not declare fails",
+    undeclaredAccessRoute,
+    "validate-project-state.ts",
+    1,
+    "tools.higgsfield.access_route.undeclared",
+  );
+
+  const unselectedAccessRoute = makeFixture("unselected-access-route");
+  runFixture("not_selected access_route passes with a warning", unselectedAccessRoute, "validate-project-state.ts", 0, "tools.doppler.access_route.missing");
+
+  const nonManifestAccessRoute = makeFixture("non-manifest-access-route");
+  const nonManifestAccessRouteState = readState(nonManifestAccessRoute);
+  expectRecord(getTools(nonManifestAccessRouteState)["cloudflare"], "tools.cloudflare")["access_route"] = "api";
+  writeState(nonManifestAccessRoute, nonManifestAccessRouteState);
+  runFixture(
+    "a concrete route on a tool with no manifest entry skips the cross-check",
+    nonManifestAccessRoute,
+    "validate-project-state.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "access_route.undeclared",
+  );
+
   // The credential-extraction scan matches command names, and the command names
   // have to be word-bounded. Unanchored, `sed` matched inside ordinary prose —
   // "closed", "exposed", "compromised" — so any incident write-up that also said
