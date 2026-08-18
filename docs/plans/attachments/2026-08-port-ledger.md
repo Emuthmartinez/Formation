@@ -75,10 +75,10 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 102 | 0 | 0 | 1 | 103 |
+| Knowledge content files | 103 | 0 | 0 | 1 | 104 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
-| Validators (67) | 28 | 25 | 0 | 16 | 69 |
-| **Total** | **136** | **25** | **1** | **32** | **194** |
+| Validators (68) | 29 | 25 | 0 | 16 | 70 |
+| **Total** | **138** | **25** | **1** | **32** | **196** |
 
 ---
 
@@ -158,12 +158,13 @@ matching knowledge manifest, which carries its authored `loadWhen` text
 |---|---|---|
 | knowledge/data/analytics-attribution.md | keep | event-catalog/attribution reference gating multiple downstream lanes |
 
-### domain.design (10 files, all keep)
+### domain.design (11 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
 | knowledge/design/design-room.md | keep | the real hub — STATE→MUTATE→VERSION→RENDER protocol; explicitly cross-refs surfaces-b2c.md |
 | knowledge/design/audience-derived-identity.md | keep | post-cutover addition (2026-08-17): audience-facts-to-design-decisions derivation chain and generic-template tells; drives design.md's Audience And Identity section, `check:design-room` |
+| knowledge/design/vibecoded-tells.md | keep | post-cutover addition (2026-08-18): the 30-item vibecoded smell list as Tier 1 trust breakers and Tier 2 default tells with earned exceptions; drives the vibecode audit pass and `check:vibecoded-tells` |
 | knowledge/design/design-visual-system.md | keep | visual-system/brand reference, `check:token-promotion` |
 | knowledge/design/landing-motion-craft.md | keep | landing/funnel motion-craft reference, `check:landing-funnel` |
 | knowledge/design/motion-craft-benchmarks.md | keep | unique numeric R1–R10 motion recipes bound to shipped tokens; found nowhere else |
@@ -340,6 +341,7 @@ split noted).
 | validation/business/design/check-design-room-contract.ts | keep | STRUCTURAL — real WCAG contrast math + hash-drift check against rendered HTML |
 | validation/business/design/check-motion-contract.ts | keep | STRUCTURAL — numeric cross-referencing of duration/spring values across tokens.json/Swift/TS/markdown; strongest structural validator in its batch |
 | validation/business/design/check-token-promotion.ts | keep | STRUCTURAL — content-hash drift detection between tokens.json/css/Swift and the seed theme |
+| validation/business/design/check-vibecoded-tells.ts | keep | post-cutover addition (2026-08-18): mechanical subset of vibecoded-tells.md over landing/web-surface source — icon-pack imports and missing legal links error, default tells warn |
 | validation/business/design/validate-state.ts | keep | thin (15-line) diagnostic wrapper around the design-state loader; trivial to keep as-is |
 
 ### validation/business/engineering/
