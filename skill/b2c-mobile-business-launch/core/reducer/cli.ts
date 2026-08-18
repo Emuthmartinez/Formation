@@ -2,6 +2,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { isMainModule, parseArgs } from "../lib/cli.js";
+import { findProvisioningProvider } from "../provisioning/requirements.js";
 import { appendAuditEntry, verifyAuditChain } from "./audit.js";
 import { acquireLock, releaseLock, type AcquireResult } from "./lock.js";
 import {
@@ -79,6 +80,29 @@ function requireArgs(args: Record<string, string>, names: readonly string[]): st
   const missing = names.filter((name) => !args[name]);
   if (missing.length === 0) return undefined;
   return `reducer.missing_argument: --${missing.join(", --")} ${missing.length === 1 ? "is" : "are"} required`;
+}
+
+function accessRouteCrossCheckIssues(candidate: Record<string, unknown>): PatchIssue[] {
+  const issues: PatchIssue[] = [];
+  const providers = candidate.providers;
+  if (typeof providers !== "object" || providers === null || Array.isArray(providers)) return issues;
+  for (const [toolName, entry] of Object.entries(providers as Record<string, unknown>)) {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) continue;
+    const accessRoute = (entry as Record<string, unknown>).accessRoute;
+    if (typeof accessRoute !== "string" || accessRoute === "not_selected") continue;
+    // Keys stay v1 snake_case tool names; manifest ids are provider.<kebab>. Tools with no
+    // manifest entry (cloudflare, remotion, the deliberately-undeclared local tooling) skip
+    // the cross-check — there is no declaration to check against.
+    const provider = findProvisioningProvider(`provider.${toolName.replace(/_/g, "-")}`);
+    if (provider && !(provider.accessRoutes as readonly string[]).includes(accessRoute)) {
+      issues.push({
+        code: "reducer.access_route_undeclared",
+        message: `providers.${toolName} selects access route "${accessRoute}", but ${provider.providerId} declares only ${provider.accessRoutes.join(", ")}`,
+        path: `providers.${toolName}.accessRoute`,
+      });
+    }
+  }
+  return issues;
 }
 
 function runCommit(args: Record<string, string>): number {
@@ -202,6 +226,19 @@ function runCommit(args: Record<string, string>): number {
       printIssues(schemaIssues);
       console.log("RESULT: rejected");
       return 1; // nothing written: the file on disk is untouched (transactional apply)
+    }
+
+    // Cross-document check the JSON schema cannot express: a chosen provider access route must
+    // be one the provider's provisioning-manifest entry declares. Runs after the schema step so
+    // it can assume shape. validateTargetDocument stays strictly single-document — the manifest
+    // is static data shipped with the runtime, not a second mutable document.
+    if (patch.targetDoc === "business-state") {
+      const routeIssues = accessRouteCrossCheckIssues(candidate);
+      if (routeIssues.length > 0) {
+        printIssues(routeIssues);
+        console.log("RESULT: rejected");
+        return 1; // nothing written: the file on disk is untouched (transactional apply)
+      }
     }
 
     const bytes = `${JSON.stringify(candidate, null, 2)}\n`;

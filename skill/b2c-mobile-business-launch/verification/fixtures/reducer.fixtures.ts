@@ -207,6 +207,42 @@ export function register(harness: Harness): void {
     assert(!existsSync(p.lock), "the lock file was not released after a successful commit");
   });
 
+  // --- providers access-route cross-check: schema enum + manifest declaration --------------
+
+  harness.check("reducer: a providers patch selecting a route the manifest does not declare is rejected, file untouched", () => {
+    const p = scenarioPaths(harness, "access-route-undeclared");
+    const bootstrap = commit(p.dir, p, businessStateBootstrapPatch());
+    assert(bootstrap.code === 0, `bootstrap failed: ${bootstrap.output}`);
+    const before = readFileSync(p.file, "utf8");
+
+    const rejected = commit(p.dir, p, buildPatch("business-state", [{ op: "set", path: ["providers"], value: { higgsfield: { accessRoute: "browser" } } }], [["providers"]]));
+    assert(rejected.code === 1, `expected exit 1 (rejected), got ${rejected.code}: ${rejected.output}`);
+    assert(rejected.output.includes("reducer.access_route_undeclared"), `expected reducer.access_route_undeclared, got: ${rejected.output}`);
+    assert(readFileSync(p.file, "utf8") === before, "the document changed on disk despite the cross-check rejection (transactional guarantee broken)");
+
+    const committed = commit(p.dir, p, buildPatch("business-state", [{ op: "set", path: ["providers"], value: { higgsfield: { accessRoute: "mcp" } } }], [["providers"]]));
+    assert(committed.code === 0, `expected the declared route to commit, got ${committed.code}: ${committed.output}`);
+    assert(committed.output.includes("RESULT: committed"), `expected a committed result, got: ${committed.output}`);
+  });
+
+  harness.check("reducer: a providers patch with a value outside the accessRoute enum is rejected at the schema layer", () => {
+    const p = scenarioPaths(harness, "access-route-enum");
+    const bootstrap = commit(p.dir, p, businessStateBootstrapPatch());
+    assert(bootstrap.code === 0, `bootstrap failed: ${bootstrap.output}`);
+    const rejected = commit(p.dir, p, buildPatch("business-state", [{ op: "set", path: ["providers"], value: { higgsfield: { accessRoute: "carrier_pigeon" } } }], [["providers"]]));
+    assert(rejected.code === 1, `expected exit 1 (rejected), got ${rejected.code}: ${rejected.output}`);
+    assert(!rejected.output.includes("reducer.access_route_undeclared"), "an enum violation must be caught by the schema step, not reach the cross-check");
+    assert(rejected.output.includes("accessRoute"), `expected a schema issue naming accessRoute, got: ${rejected.output}`);
+  });
+
+  harness.check("reducer: a providers patch for a tool with no manifest entry skips the cross-check and commits", () => {
+    const p = scenarioPaths(harness, "access-route-non-manifest");
+    const bootstrap = commit(p.dir, p, businessStateBootstrapPatch());
+    assert(bootstrap.code === 0, `bootstrap failed: ${bootstrap.output}`);
+    const committed = commit(p.dir, p, buildPatch("business-state", [{ op: "set", path: ["providers"], value: { cloudflare: { accessRoute: "api" } } }], [["providers"]]));
+    assert(committed.code === 0, `expected the non-manifest tool to commit, got ${committed.code}: ${committed.output}`);
+  });
+
   harness.check("reducer: a patch omitting a declared output is rejected, and no partial write lands", () => {
     const p = scenarioPaths(harness, "declared-output-missing", "budget-ledger.json");
     const boot = commit(p.dir, p, budgetLedgerBootstrapPatch());
