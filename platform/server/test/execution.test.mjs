@@ -199,7 +199,7 @@ test("launch matrix is returned only from a ready 1.1 engine", async () => {
   assert.equal(conditional.packTitle, "Research");
   assert.equal("loadWhen" in conditional, false);
   // Cross-cutting integrity steps present by board name, with the engine's own name alongside.
-  assert.equal(available.launchIntegrity[0].title, "Proof the business services really work");
+  assert.equal(available.launchIntegrity[0].title, "Live checks on business services");
   assert.equal(available.launchIntegrity[0].technical, "Provider-proof verification");
   assert.equal(available.launchIntegrity[0].status, "ready");
 });

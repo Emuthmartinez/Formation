@@ -6,7 +6,7 @@ Keep a third-party SDK inventory. Record the owner, version, purpose, permission
 
 Test adaptive layouts, offline behavior, startup time, app size, and battery use on supported devices. Record measured evidence in `engineering/APP_QUALITY.md`. Do not use a simulator-only build as proof for battery or production-vitals claims.
 
-Use this before building the actual app, coordinating frontend/backend work, writing `AGENTS.md` or `CLAUDE.md`, creating `engineering/TECH_SPEC.md` or `engineering/ENGINEERING_PLAN.md`, dispatching subagents, using Compound Engineering skills, or declaring production readiness.
+Use this before building the actual app, coordinating frontend/backend work, writing `AGENTS.md` or `CLAUDE.md`, creating `engineering/TECH_SPEC.md` or `engineering/ENGINEERING_PLAN.md`, or declaring production readiness. For subagent dispatch load `../orchestration/parallel-agent-orchestration.md`; for choosing which Compound Engineering skill to invoke load `../orchestration/compound-engineering-routing.md`.
 
 Load `parallel-agent-orchestration.md` alongside this file before multi-lane work, subagent dispatch, worktree routing, `operations/ORCHESTRATION.md`, or any claim that parallel agents were used safely.
 

@@ -63,7 +63,7 @@ Generated from catalog/knowledge/**/*.yaml.
 
 | Load when | Reference |
 | --- | --- |
-| deciding which project or config a credential belongs in; adding a second business to an existing secret store; splitting secrets across web, mobile, backend, and CI — the portfolio-shape companion to secrets-management.md, which covers one secret at a time | [`knowledge/operations/doppler-organization.md`](../../knowledge/operations/doppler-organization.md) |
+| deciding which project or config a credential belongs in; setting up secrets for a new business; adding a second business to an existing secret store; splitting secrets across web, mobile, backend, and CI — the portfolio-shape companion to secrets-management.md | [`knowledge/operations/doppler-organization.md`](../../knowledge/operations/doppler-organization.md) |
 | always for dispatched business workers; especially every broad launch start, account/social/Doppler bootstrap, founder uncertainty, or attempted checklist handoff | [`knowledge/operations/founder-zero-operator.md`](../../knowledge/operations/founder-zero-operator.md) |
 | before authenticated browser/API/CLI/native action on any provider, social, or store account | [`knowledge/operations/frontier-agent-operations.md`](../../knowledge/operations/frontier-agent-operations.md) |
 | before using or replacing any paid/account-gated tool, before running a free fallback, or when a service is missing from the runtime | [`knowledge/operations/paid-tool-routing.md`](../../knowledge/operations/paid-tool-routing.md) |

@@ -30,10 +30,12 @@ function referenceFreshness(reference: Catalog["references"][number]): string {
  */
 function referenceReviewDueBy(reference: Catalog["references"][number]): string | undefined {
   if (reference.sources.length === 0) return undefined;
-  const dueDates = reference.sources.map((source) => {
+  const dueDates = reference.sources.flatMap((source) => {
     const reviewed = new Date(`${source.lastReviewDate}T00:00:00.000Z`);
     reviewed.setUTCDate(reviewed.getUTCDate() + source.reviewCadenceDays);
-    return reviewed.toISOString().slice(0, 10);
+    // A malformed date or absurd cadence must degrade to "no verdict", never crash the bridge;
+    // knowledge-validation.ts's stale gate is where bad source data gets reported.
+    return Number.isNaN(reviewed.valueOf()) ? [] : [reviewed.toISOString().slice(0, 10)];
   });
   return dueDates.sort()[0];
 }

@@ -35,7 +35,8 @@ function list(value: unknown, field: string, manifestPath: string): string[] {
 function source(value: unknown, manifestPath: string): CatalogKnowledgeSource {
   const item = record(value, "sources[]", manifestPath);
   const cadence = Number(item.review_cadence_days);
-  if (!Number.isInteger(cadence) || cadence < 1) throw new Error(`${manifestPath}: source review_cadence_days must be a positive integer.`);
+  if (!Number.isInteger(cadence) || cadence < 1 || cadence > 3650)
+    throw new Error(`${manifestPath}: source review_cadence_days must be an integer between 1 and 3650.`);
   return {
     id: text(item.id, "sources[].id", manifestPath),
     name: text(item.name, "sources[].name", manifestPath),

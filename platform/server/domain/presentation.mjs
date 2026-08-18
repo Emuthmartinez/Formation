@@ -208,8 +208,8 @@ const BOARD_STEPS = Object.freeze({
     summary: "Keeps the company's operating records and status view current.",
   },
   "workflow.process.provider-proof-verification": {
-    title: "Proof the business services really work",
-    summary: "Verifies payments, analytics, email, and store connections with live evidence before they count as done.",
+    title: "Live checks on business services",
+    summary: "Confirms payments, analytics, email, and store connections with live evidence before they count as done.",
   },
   "workflow.process.change-cascade": {
     title: "Keeping public surfaces consistent",
@@ -398,7 +398,7 @@ const polishCache = new Map();
 export async function polishForBoard(text, context = "") {
   const endpoint = process.env.FORMATION_AI_PRESENTER_ENDPOINT;
   if (!endpoint || !text) return text;
-  const key = `${context} ${text}`;
+  const key = `${context}\u0000${text}`;
   if (polishCache.has(key)) return polishCache.get(key);
   try {
     const controller = new AbortController();

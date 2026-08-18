@@ -52,6 +52,26 @@ test("matrix services and specialist routes keep raw engine copy inside technica
   assert.equal("when" in tool, false);
 });
 
+test("board tables never carry internal vocabulary a founder should not have to parse", () => {
+  // check:founder-copy scans the engine's generated business surfaces, not this module — so the
+  // board tables get their own scan here. These are the internal words the house style bans from
+  // founder-visible text (tooling/lib/founder-copy.ts); titles and summaries must not use them.
+  const banned = /\b(proof|proven|gate|lane|workflow|pipeline|CLI|repo|ASO|SEO|UGC|MCP)\b/u;
+  for (const id of [
+    "workflow.process.provider-proof-verification",
+    "workflow.process.launchbench-failure-cards-coverage-audit",
+    "workflow.process.change-cascade",
+    "workflow.process.launch-trace-and-build-contracts",
+    "workflow.process.business-control-plane-extension",
+    "workflow.orchestration.session-continuity-resume",
+    "workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep",
+  ]) {
+    const step = presentStep(id, "Engine title");
+    assert.doesNotMatch(step.title, banned, `${id} title leaks internal vocabulary`);
+    if (step.summary) assert.doesNotMatch(step.summary, banned, `${id} summary leaks internal vocabulary`);
+  }
+});
+
 test("matrix knowledge guides never leak agent-routing prose above technical detail", () => {
   const guide = presentMatrixKnowledge(
     {

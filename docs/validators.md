@@ -171,8 +171,8 @@ These run against this repo rather than a target app.
 | `launchbench` | Lints the regression scenario definitions under `evals/launchbench/` (required fields, known-validator references), then runs the deterministic validator fixtures. Scenario prompts are definitions for agents and reviewers, not live executions |
 | `test:validators` | Positive and negative fixtures, so validator false negatives become audit failures |
 | `test:fixtures` | Engine fixtures: compile/frontier/dispatch/run-state/boundary behavior, the launch-matrix projection, knowledge-package rules, and port-ledger completeness |
-| `test:boundaries` | Boundary contracts between the engine and the platform adapter |
-| `test:parity` | Source-vs-installed-runtime parity |
+| `test:boundaries` | Capability-boundary suites: each attempts a forbidden action through the real autonomy modules (grants, budget, waivers, kill switch, prerequisites, producer-never-writes) and asserts rejection with a recorded reason |
+| `test:parity` | Cross-runtime adapter parity: one fixture scenario through every capability profile must yield identical node reachability, approval/waiver requirements, and parked reasons |
 | `check:agent-evals` | Validates behavior eval definitions for routing choices deterministic validators cannot simulate |
 | `evals:behavioral` | Runs the opt-in `behavioral: true` scenarios against a live agent and grades must_catch, should_say, and forbidden with a structured grader. Outside the PR gate by design |
 
