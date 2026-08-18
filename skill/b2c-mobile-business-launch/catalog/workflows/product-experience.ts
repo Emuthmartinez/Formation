@@ -131,8 +131,8 @@ export const workflows = [
     areaIds: ["area.product-experience"],
     trigger: "Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work",
     instructions:
-      "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
-    reads: ["design/design.md", "studio/seed/business.json", "studio/seed/theme.tokens.json", "state/LAUNCH_TRACE.md"],
+      "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. Derive design/design.md's Audience And Identity section from strategy/RESEARCH.md before locking any visual direction: audience facts, apps they love, category convention followed/broken, anti-references, and the fact→decision table with evidence — the derivation chain lives in audience-derived-identity.md, and a direction that only cites a trend is not a decision. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
+    reads: ["design/design.md", "studio/seed/business.json", "studio/seed/theme.tokens.json", "state/LAUNCH_TRACE.md", "strategy/RESEARCH.md"],
     roleId: "role.design-guru",
     laneIds: ["design"],
     phaseIds: ["phase.2"],

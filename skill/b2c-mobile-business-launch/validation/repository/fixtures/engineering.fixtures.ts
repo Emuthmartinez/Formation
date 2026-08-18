@@ -231,6 +231,73 @@ export function register(h: Harness): void {
   rmSync(path.join(designRoomMissingRender, "design/design-room.html"), { force: true });
   runFixture("Design Room state without render fails", designRoomMissingRender, "check-design-room-contract.ts", 1, "design_room.render_missing");
 
+  // The audience-derivation contract: a design.md without the Audience And
+  // Identity section, or one whose section never cites strategy/RESEARCH.md,
+  // is the generic-template failure the section exists to block.
+  const designRoomAudienceMissing = makeFixture("design-room-audience-section-missing");
+  {
+    const contractPath = path.join(designRoomAudienceMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(/^## Audience And Identity$/m, "## Audience Notes");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "design.md without the Audience And Identity section fails",
+    designRoomAudienceMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_section_missing",
+  );
+
+  // The realistic middle case: the template's boilerplate sentence (which
+  // itself names strategy/RESEARCH.md) stays intact while a real derivation
+  // row is authored WITHOUT a research citation — the check must read the
+  // table's Evidence cells, not the section prose, or untouched boilerplate
+  // satisfies it forever.
+  const audienceTemplateRow = "| Not defined | Not defined | Not defined | Not captured |";
+  const designRoomAudienceUntraced = makeFixture("design-room-audience-untraced");
+  {
+    const contractPath = path.join(designRoomAudienceUntraced, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(
+      audienceTemplateRow,
+      "| Runners check pace at arm's length | Dark canvas, large numerals | color.background | the team's taste |",
+    );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "authored audience row without research evidence fails",
+    designRoomAudienceUntraced,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.audience_research_missing",
+  );
+
+  const designRoomAudienceTraced = makeFixture("design-room-audience-traced");
+  {
+    const contractPath = path.join(designRoomAudienceTraced, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(
+      audienceTemplateRow,
+      "| Runners check pace at arm's length | Dark canvas, large numerals | color.background | strategy/RESEARCH.md R4 |",
+    );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture("authored audience row citing research passes", designRoomAudienceTraced, "check-design-room-contract.ts", 0);
+
+  const designRoomAudienceTableGone = makeFixture("design-room-audience-table-gone");
+  {
+    const contractPath = path.join(designRoomAudienceTableGone, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("| Audience fact | Decision it produced | Token or direction | Evidence |", "")
+      .replace("| --- | --- | --- | --- |\n| Not defined | Not defined | Not defined | Not captured |", "");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "Audience And Identity without a derivation table fails",
+    designRoomAudienceTableGone,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.audience_research_missing",
+  );
+
   const designRoomFreeform = makeFixture("design-room-freeform-proposal");
   writeFileSync(path.join(designRoomFreeform, "design-proposal.html"), "<!doctype html><html><body>New idea</body></html>", "utf8");
   runFixture(

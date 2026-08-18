@@ -120,6 +120,7 @@ Generated from catalog/knowledge/**/*.yaml.
 
 | Load when | Reference |
 | --- | --- |
+| when design/design.md is created or revised, when a visual direction is drafted or reviewed, and when the Design Room needs the anti-generic review — derives palette/type/motion/imagery from strategy/RESEARCH.md audience facts and names the generic-template tells | [`knowledge/design/audience-derived-identity.md`](../../knowledge/design/audience-derived-identity.md) |
 | designing, versioning, baselining, restoring, wiping, or rendering B2C design state; custom product page, PPO, In-App Event, landing, onboarding, paywall, or marketing-surface proposals; whenever a design output would otherwise be freeform — the STATE→MUTATE→VERSION→RENDER hub; see surfaces-b2c.md for App Store surface schemas and quality-lens.md for the taste filter applied during a mutation | [`knowledge/design/design-room.md`](../../knowledge/design/design-room.md) |
 | creating or changing the canonical design/design.md contract, visual systems, UI mockups, generated visual concepts, Higgsfield-backed visuals/motion/icons/mascots, mobile screen specs, App Store creative, screenshot frames, design audits, or HTML visual artifacts | [`knowledge/design/design-visual-system.md`](../../knowledge/design/design-visual-system.md) |
 | before building or animating any landing page, funnel page, or web marketing surface | [`knowledge/design/landing-motion-craft.md`](../../knowledge/design/landing-motion-craft.md) |
@@ -134,6 +135,7 @@ Generated from catalog/knowledge/**/*.yaml.
 
 | Load when | Reference |
 | --- | --- |
+| when any surface a user reads is authored or reviewed — landing, store listing, screenshot captions, paywall, onboarding, lifecycle email, share text — and when a new app's voice is established in COPY_BRIEF.md / BRAND.md (the Voice benchmarks section writes from this file's method) | [`knowledge/words/consumer-copy-benchmarks.md`](../../knowledge/words/consumer-copy-benchmarks.md) |
 | before writing any words a user reads: conversion copy (hero/CTA, store, paywall) and every in-app string (buttons, empty states, errors, settings); and l10n readiness | [`knowledge/words/conversion-copy.md`](../../knowledge/words/conversion-copy.md) |
 | always for dispatched business workers; apply directly before founder-facing or marketing copy — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO | [`knowledge/words/no-slop-writing.md`](../../knowledge/words/no-slop-writing.md) |
 

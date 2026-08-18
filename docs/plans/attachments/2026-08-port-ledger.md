@@ -78,7 +78,7 @@ are ground truth, not hand arithmetic.
 | Knowledge content files | 102 | 0 | 0 | 1 | 103 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
 | Validators (67) | 28 | 25 | 0 | 16 | 69 |
-| **Total** | **133** | **25** | **1** | **32** | **191** |
+| **Total** | **135** | **25** | **1** | **32** | **193** |
 
 ---
 
@@ -158,11 +158,12 @@ matching knowledge manifest, which carries its authored `loadWhen` text
 |---|---|---|
 | knowledge/data/analytics-attribution.md | keep | event-catalog/attribution reference gating multiple downstream lanes |
 
-### domain.design (9 files, all keep)
+### domain.design (10 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
 | knowledge/design/design-room.md | keep | the real hub — STATE→MUTATE→VERSION→RENDER protocol; explicitly cross-refs surfaces-b2c.md |
+| knowledge/design/audience-derived-identity.md | keep | post-cutover addition (2026-08-17): audience-facts-to-design-decisions derivation chain and generic-template tells; drives design.md's Audience And Identity section, `check:design-room` |
 | knowledge/design/design-visual-system.md | keep | visual-system/brand reference, `check:token-promotion` |
 | knowledge/design/landing-motion-craft.md | keep | landing/funnel motion-craft reference, `check:landing-funnel` |
 | knowledge/design/motion-craft-benchmarks.md | keep | unique numeric R1–R10 motion recipes bound to shipped tokens; found nowhere else |
@@ -298,10 +299,11 @@ the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge
 | knowledge/trust/community-safety.md | keep | conditional moderation, reporting, blocking, and age-control proof |
 | knowledge/trust/generative-ai-safety.md | keep | conditional generative-AI abuse-control proof |
 
-### domain.words (2 files, all keep)
+### domain.words (3 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
+| knowledge/words/consumer-copy-benchmarks.md | keep | post-cutover addition (2026-08-17): live-site consumer-copy swipe-file, evidence layer under conversion-copy.md; sources on 90-day cadence |
 | knowledge/words/conversion-copy.md | keep | conversion-copy reference, `check:app-copy`, `check:no-slop` |
 | knowledge/words/no-slop-writing.md | keep | brand-voice/banned-pattern reference, `check:no-slop` |
 

@@ -33,6 +33,7 @@ if (hasDesignState) {
     const requiredSections = [
       "Source Ownership",
       "Product Experience",
+      "Audience And Identity",
       "Visual Direction",
       "Interaction System",
       "Onboarding",
@@ -53,6 +54,51 @@ if (hasDesignState) {
       if (!contract.includes(sourcePath)) {
         issues.push(
           issue("error", "design_room.contract_source_missing", `design/design.md must name its source: ${sourcePath}.`, rel(args.root, contractPath)),
+        );
+      }
+    }
+
+    // The Audience And Identity section is only real when its derivation table
+    // carries research-cited rows. The citation is checked on the table's
+    // Evidence cells, not on the section prose: the template's own boilerplate
+    // sentence names strategy/RESEARCH.md, so a prose-substring check would be
+    // satisfied by untouched boilerplate and never fire on an underived
+    // direction — the exact words-not-work trap check-research-evidence.ts
+    // documents for its own section. Placeholder rows are the template's, so
+    // they carry no obligation here; once a real row exists, the derivation
+    // must trace, and the ready-status placeholder gate below forces real rows.
+    const audienceBody = audienceSectionBody(contract);
+    if (audienceBody !== undefined) {
+      const tableRows = audienceBody
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith("|"))
+        .map((line) =>
+          line
+            .split("|")
+            .map((cell) => cell.trim())
+            .filter((cell) => cell.length > 0),
+        )
+        .filter((cells) => cells.length >= 2 && !cells.every((cell) => /^:?-+:?$/.test(cell)));
+      const dataRows = tableRows.slice(1);
+      const realRows = dataRows.filter((cells) => !containsTemplatePlaceholder(cells.join(" ")));
+      if (tableRows.length === 0) {
+        issues.push(
+          issue(
+            "error",
+            "design_room.audience_research_missing",
+            "design/design.md's Audience And Identity section has no derivation table — every visual decision must trace to a strategy/RESEARCH.md audience fact in a fact→decision row.",
+            rel(args.root, contractPath),
+          ),
+        );
+      } else if (realRows.length > 0 && !realRows.some((cells) => (cells.at(-1) ?? "").includes("strategy/RESEARCH.md"))) {
+        issues.push(
+          issue(
+            "error",
+            "design_room.audience_research_missing",
+            "design/design.md's Audience And Identity derivation table carries authored rows but no Evidence cell cites strategy/RESEARCH.md — visual decisions derive from the target user, not from a trend or the team's taste.",
+            rel(args.root, contractPath),
+          ),
         );
       }
     }
@@ -218,6 +264,27 @@ for (const artifact of designArtifacts) {
 }
 
 reportAndExit("Design Room contract validation", issues);
+
+/**
+ * Full body of the "## Audience And Identity" section: heading line to the next
+ * H2 or end of file. Line-based on purpose — a lazy regex with the m flag lets
+ * `$` match the first line end, silently truncating the body to one line.
+ */
+function audienceSectionBody(contract: string): string | undefined {
+  const lines = contract.split("\n");
+  const start = lines.findIndex((line) => /^##\s+Audience And Identity\s*$/.test(line.trim()));
+  if (start === -1) {
+    return undefined;
+  }
+  let end = lines.length;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    if (/^##\s/.test(lines[index] ?? "")) {
+      end = index;
+      break;
+    }
+  }
+  return lines.slice(start + 1, end).join("\n");
+}
 
 function containsTemplatePlaceholder(value: string): boolean {
   return /\bApp Name\b|One-sentence promise still to be defined|Primary consumer segment still to be defined|Empty Design Room state seeded|\bNot defined\b|\bNot captured\b|\bNot recorded\b|\bPending\b|\bTBD\b|\bTODO\b/i.test(
