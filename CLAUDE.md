@@ -25,6 +25,7 @@ For engine work:
 - Artifact changes append immutable versions.
 - Do not make product pages depend on repository paths or generated HTML.
 - Add API and domain tests with every new mutation or readiness rule.
+- After building or restyling a landing, web marketing, or founder-facing surface, dispatch the `vibecode-auditor` subagent pass (`skill/b2c-mobile-business-launch/knowledge/design/vibecoded-tells.md`) before calling it done.
 
 ## Engine execution
 

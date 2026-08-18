@@ -130,6 +130,7 @@ Generated from catalog/knowledge/**/*.yaml.
 | before using Refero, replacing Refero with a free pattern route, creating UX_PATTERNS.md, drawing web/mobile flow maps, or auditing pattern coverage | [`knowledge/design/refero-ux-patterns.md`](../../knowledge/design/refero-ux-patterns.md) |
 | replacing Higgsfield with Remotion; scaffolding a Remotion project; code-rendered videos/stills; app-preview clips; social/ad/content variants; any "local rendered assets are ready" claim | [`knowledge/design/remotion-content-assets.md`](../../knowledge/design/remotion-content-assets.md) |
 | modeling Custom Product Page, Product Page Optimization, or In-App Event state with Apple's numeric limits (70 CPPs, 3 PPO treatments/90 days, 10 published/15 approved In-App Events); cross-surface consistency checks across web/landing/mobile-app/store families | [`knowledge/design/surfaces-b2c.md`](../../knowledge/design/surfaces-b2c.md) |
+| when a landing page, funnel page, web marketing surface, or app screen needs the vibecoded-tells smell review — the trust-breaker/default-tell checklist, its scoring rule, and the vibecode audit pass dispatch prompt — and before any such surface is marked review-ready | [`knowledge/design/vibecoded-tells.md`](../../knowledge/design/vibecoded-tells.md) |
 
 ## Every Word A User Reads
 

@@ -28,6 +28,8 @@ Build `growth/landing/` while the mobile engineer builds the app.
 - Show a price only when `revenue/REVENUE_OPS.md` records the approved price.
 - Create screenshot slots for real app captures. Label design renders as previews.
 - Add the defined analytics events, crawler files, metadata, social cards, and valid JSON-LD.
+- Link the published terms and privacy pages from the footer before the build is called done.
+- Review the build against `vibecoded-tells.md` and run `check:vibecoded-tells`. A Tier 1 hit, or two Tier 2 tells without recorded derivations, blocks handoff.
 - Run the local build and focused checks. Do not deploy.
 
 ## Impact Audit Mode

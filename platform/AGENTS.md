@@ -37,6 +37,7 @@ The historical skill runtime is an internal engine. Do not make the web applicat
 - Keep controls visible near the work they change.
 - Preserve keyboard focus, labels, semantic headings, and reduced-motion behavior.
 - Empty states must explain the next useful action.
+- Avoid the vibecoded defaults named in `../skill/b2c-mobile-business-launch/knowledge/design/vibecoded-tells.md`: no default icon packs, sparkle-AI garnish, indigo-purple gradients, glass panels, decorative orbs, or emoji as icons without a recorded design decision. Async surfaces keep designed loading, empty, and error states. After building or restyling founder-facing UI, run the vibecode audit pass that file defines.
 - Gate controls on `snapshot.capabilities`, never on a client-side copy of the role rules. State what a member cannot do once, in plain words, instead of showing a disabled control beside every action.
 
 ## Verification

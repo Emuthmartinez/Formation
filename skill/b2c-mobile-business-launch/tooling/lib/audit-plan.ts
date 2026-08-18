@@ -111,6 +111,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:control-plane", kind: "script", args: rootArgs },
     { id: "check:business-control-plane-workspace", kind: "script" },
     { id: "check:token-promotion", kind: "script", args: rootArgs },
+    { id: "check:vibecoded-tells", kind: "script", args: rootArgs },
     { id: "check:template-safety", kind: "script" },
     { id: "check:founder-copy", kind: "script", args: [...rootArgs, "--skill-root", S] },
     { id: "check:app-copy", kind: "script", args: [...stateArgs, "--skill-root", S] },

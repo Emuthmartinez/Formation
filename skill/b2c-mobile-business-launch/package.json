@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.132.0",
+  "version": "0.133.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -49,6 +49,7 @@
     "check:gates-layout": "tsx validation/repository/check-gates-layout.ts --skill-root .",
     "check:agent-evals": "tsx validation/repository/run-agent-evals.ts",
     "check:token-promotion": "tsx validation/business/design/check-token-promotion.ts",
+    "check:vibecoded-tells": "tsx validation/business/design/check-vibecoded-tells.ts",
     "check:template-safety": "tsx validation/business/engineering/check-template-safety.ts",
     "seed:design-brief": "tsx tooling/seed-design-brief.ts",
     "promote:design-tokens": "tsx tooling/promote-design-tokens.ts",
