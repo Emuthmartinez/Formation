@@ -306,6 +306,16 @@ sources:
       - docs/brainstorms/landing-motion-craft.md
     notes: Visual quality benchmark for the landing motion craft lane (animated landing-page section gallery). Inspiration reference only, never
       a command-syntax source.
+  - id: instagram-aj-on-ai-vibecoded-checklist
+    name: instagram.com/aj.on.ai
+    source_type: inspiration_benchmark
+    url: https://www.instagram.com/aj.on.ai/
+    refresh_cadence_days: 180
+    owner: source-freshness
+    locations:
+      - skill/b2c-mobile-business-launch/catalog/knowledge/design/design-vibecoded-tells.yaml
+    notes: Origin of the widely shared 30-item "reasons your site looks vibecoded" checklist adapted by knowledge/design/vibecoded-tells.md.
+      Inspiration reference only, never a command-syntax source.
   - id: posthog-com-docs-api-events
     name: PostHog — Events REST API
     source_type: official_docs

@@ -19,6 +19,7 @@ Own:
 - onboarding, paywall, empty/loading/error/offline, and support/settings states
 
 Audit gates:
+- every customer-facing surface passes the `vibecoded-tells.md` review: no Tier 1 trust breaker, every present Tier 2 default tell has a `design/design.md` derivation row, and `check:vibecoded-tells` reports no error
 - visuals render in HTML using `design/design.md`
 - `product/experience/11-star-experience/11-star-experience.html` makes the V1 scalable slice inspectable before screen handoff
 - `product/experience/emotional-design/EMOTIONAL_DESIGN.md` maps card moments to PostHog events, bright-line guardrails, reduced-motion fallbacks, and counter-metrics; `check:emotional-design` passes

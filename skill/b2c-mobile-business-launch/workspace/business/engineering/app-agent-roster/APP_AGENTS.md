@@ -44,6 +44,7 @@
 - Use parallel agents only for independent audits or isolated work with recorded file ownership; serialize shared files, migrations, provider/account mutations, device automation, git, releases, pricing/legal/public posting/submission decisions, and final readiness calls.
 - When independent specialist reviews are ready, dispatch them together. Do not claim the manager pattern unless `spawned_agents` records a dispatch or `dispatch_reason` explains why no dispatch occurred.
 - When `design/design.md` is accepted, dispatch the mobile build and local landing build together. Use `agents/launch-surface-producer.md` for the landing unit.
+- When a landing, funnel, or web marketing surface is first built or meaningfully restyled, dispatch the vibecode audit pass from `vibecoded-tells.md` §Audit Pass with fresh context before that surface's lane advances.
 - Before each accepted app slice merges, dispatch the launch-surface producer in `impact-audit` mode. Run bounded updates beside the next app slice.
 - Run deterministic validators or LaunchBench scenarios where available before declaring launch-ready, and reconcile the outcome through the reducer into `state/business-state.json`.
 
@@ -67,7 +68,7 @@ Every specialist returns only these headings so the orchestrator can compare and
 - Emotional design: `product/experience/emotional-design/EMOTIONAL_DESIGN.md` or `product/experience/emotional-design/EMOTIONAL_AUDIT.md` maps applicable moments to Experience Cards, events, bright-line guardrails, reduced-motion fallbacks, and counter-metrics; `check:emotional-design` passes.
 - Marketing: ASO, store console, Apple pre-ASC requirements, claims, UGC/Fastlane, GEO/SEO, and attribution channels are ready.
 - Design: HTML proofs match `design/design.md`, no mobile clipping/overlap, `store/app-store-listing/SCREENSHOTS.md` separates raw captures from composed iPhone/iPad/Play assets, and generated/rendered content assets are traceable in `growth/content-assets/CONTENT_ASSETS.md`.
-- Launch surfaces: the landing build exists, optional web onboarding matches the product, prices match approved revenue state, and Apple/Google product pages stay synchronized.
+- Launch surfaces: the landing build exists, optional web onboarding matches the product, prices match approved revenue state, Apple/Google product pages stay synchronized, and the vibecode audit pass (`vibecoded-tells.md`) is clean: no Tier 1 trust breaker, terms and privacy linked, every present Tier 2 default tell carries a `design/design.md` derivation row, and `check:vibecoded-tells` reports no error.
 - Engineering: app, backend, revenue, email, analytics, provider, Apple signing/release, and device paths are verified.
 - Secrets: new env vars, webhook secrets, provider keys, CI/deploy secrets, and store credentials are listed in `trust/secrets/SECRETS.md` and injected through Doppler or the approved provider.
 - Security: `trust/SECURITY.md`, `trust/security-review.html`, threat model, paid/free security-tool route, platform hardening, app integrity, Apple privacy manifest/purpose-string/ATT checks, revenue/webhook abuse controls, supply-chain checks, Sentry/release health, public reporting route, and accepted risks are current.

@@ -60,6 +60,7 @@ const knownValidators = new Set([
   "run-behavioral-evals",
   "run-agent-evals",
   "check-token-promotion",
+  "check-vibecoded-tells",
   "render-launch-cockpit",
   "render-business-control-plane-workspace",
   "check-research-evidence",

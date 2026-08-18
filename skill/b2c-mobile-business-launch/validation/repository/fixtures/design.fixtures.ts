@@ -892,4 +892,57 @@ experience_card:
     1,
     "emotional_design.card_stub_missing",
   );
+
+  // --- check-vibecoded-tells ---------------------------------------------------------------
+
+  // Negative control: the shipped section library is deliberately clean of every mechanical
+  // tell, so the untouched template must produce zero findings — a false positive here would
+  // put permanent noise on every audit run.
+  runFixture(
+    "clean landing template carries no vibecoded tells",
+    makeFixture("vibecode-clean"),
+    "check-vibecoded-tells.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "vibecode.",
+  );
+
+  const vibecodeIconPack = makeFixture("vibecode-icon-pack");
+  writeFileSync(
+    path.join(vibecodeIconPack, "growth", "landing", "sections", "IconBar.tsx"),
+    'import { Sparkles } from "lucide-react";\nexport function IconBar() {\n  return <Sparkles />;\n}\n',
+    "utf8",
+  );
+  runFixture("default icon pack import fails the gate", vibecodeIconPack, "check-vibecoded-tells.ts", 1, "vibecode.default_icon_pack");
+
+  // A site-shaped landing (index.html present) owes the Tier 1 legal links.
+  const vibecodeNoLegal = makeFixture("vibecode-no-legal");
+  writeFileSync(
+    path.join(vibecodeNoLegal, "growth", "landing", "index.html"),
+    '<main><h1>Launch</h1><footer><a href="/about">About</a></footer></main>\n',
+    "utf8",
+  );
+  runFixture("site-shaped landing without terms/privacy links fails", vibecodeNoLegal, "check-vibecoded-tells.ts", 1, "vibecode.legal_links_missing");
+
+  // The same site shape with both links passes — the scope check must not demand legal pages
+  // from the bare section component library.
+  const vibecodeLegalOk = makeFixture("vibecode-legal-ok");
+  writeFileSync(
+    path.join(vibecodeLegalOk, "growth", "landing", "index.html"),
+    '<main><h1>Launch</h1><footer><a href="/terms">Terms</a><a href="/privacy">Privacy</a></footer></main>\n',
+    "utf8",
+  );
+  runFixture("site-shaped landing with legal links passes", vibecodeLegalOk, "check-vibecoded-tells.ts", 0);
+
+  // Tier 2 default tells surface as warnings — visible, exit 0 — per the reference's scoring
+  // rule: a warning demands a derivation row, it does not block the build on its own.
+  const vibecodeWarningTier = makeFixture("vibecode-warning-tier");
+  writeFileSync(
+    path.join(vibecodeWarningTier, "growth", "landing", "sections", "Glass.tsx"),
+    'export function Glass() {\n  return <div className="backdrop-blur-md">glass panel</div>;\n}\n',
+    "utf8",
+  );
+  runFixture("warning-tier tell reports without failing", vibecodeWarningTier, "check-vibecoded-tells.ts", 0, "vibecode.glassmorphism");
 }
