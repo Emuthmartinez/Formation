@@ -3,16 +3,15 @@ id: reference.engineering.xcodebuildmcp-testing
 title: XcodeBuildMCP Testing
 domain_id: domain.engineering
 document_path: knowledge/engineering/xcodebuildmcp-testing.md
-load_when: first for any "run the app", "check this screen", "walk this flow", or "reproduce this bug" request on a
-  local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP; also Codex
-  Desktop native iOS tools, SnapshotPreviews exports, serve-sim streaming, or simulator/device screenshots
+load_when: first for any "run the app", "check this screen", "walk this flow", or "reproduce this bug" request on
+  a local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP
 lifecycle: active
 bindings:
   workflow_ids:
     - workflow.engineering.native-ios-proof-route-ladder
   context_pack_ids:
     - context.device
-applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies. Also covers Codex Desktop native iOS tools, SnapshotPreviews exports, serve-sim streaming, and simulator/device screenshots.
 sources:
   - id: code-claude-com-docs-en-desktop-ios-simulator
     name: Claude Code Desktop iOS Simulator pane

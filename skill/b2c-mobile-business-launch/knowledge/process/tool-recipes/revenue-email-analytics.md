@@ -23,7 +23,7 @@ Rules:
 - Stripe may process web payments, but web payment success must be mapped into RevenueCat entitlement or backend access before launch-ready.
 - App Store/Google Play product setup, web billing, pricing, taxes, subscription terms, and live checkout are founder-only gates.
 - Use sandbox/Test Store first; do not publish production purchase links or live prices until validation passes and the founder approves.
-- RevenueCat, Stripe, tax, and store-account features can be paid/account-gated. Use `paid-tool-routing.md` before replacing provider setup with local mocks or free-tier planning, and never call mocks live entitlement proof.
+- RevenueCat, Stripe, tax, and store-account features can be paid/account-gated. Use [`paid-tool-routing.md`](../../operations/paid-tool-routing.md) before replacing provider setup with local mocks or free-tier planning, and never call mocks live entitlement proof.
 
 ### Recipe: RevenueCat Economics Pull
 

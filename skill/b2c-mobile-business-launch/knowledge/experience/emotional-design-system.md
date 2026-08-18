@@ -156,7 +156,7 @@ This protocol produces `EMOTIONAL_DESIGN.md` updates, card applications, measure
 
 ### Ordered Steps
 
-1. **Load context.** Read `eleven-star-experience.md`, `analytics-attribution.md`, `onboarding-conversion.md`, and `design-visual-system.md` if not already loaded. Read `product/SPEC.md` and `product/ONBOARDING.md` for the target feature.
+1. **Load context.** Read [`eleven-star-experience.md`](eleven-star-experience.md), `analytics-attribution.md`, `onboarding-conversion.md`, and `design-visual-system.md` if not already loaded. Read `product/SPEC.md` and `product/ONBOARDING.md` for the target feature.
 
 2. **Name the JTBD.** Write one JTBD sentence for the feature being charged. If it does not exist in `product/SPEC.md`, add it before proceeding.
 

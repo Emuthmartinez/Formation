@@ -24,6 +24,21 @@ function referenceFreshness(reference: Catalog["references"][number]): string {
 }
 
 /**
+ * The earliest date any source is due for re-review — lastReviewDate + reviewCadenceDays,
+ * minimum across sources. Pure source-byte arithmetic (no current date), so the compiled plan
+ * stays stable; read-time projections compare this against their own clock.
+ */
+function referenceReviewDueBy(reference: Catalog["references"][number]): string | undefined {
+  if (reference.sources.length === 0) return undefined;
+  const dueDates = reference.sources.map((source) => {
+    const reviewed = new Date(`${source.lastReviewDate}T00:00:00.000Z`);
+    reviewed.setUTCDate(reviewed.getUTCDate() + source.reviewCadenceDays);
+    return reviewed.toISOString().slice(0, 10);
+  });
+  return dueDates.sort()[0];
+}
+
+/**
  * The v2 catalog -> core/engine/compile.ts CatalogInput bridge (U8; U2 built compile.ts
  * against a small fixture catalog and left this real bridge for U8 to deliver).
  *
@@ -65,7 +80,15 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
     references: wf.referenceIds.map((referenceId) => {
       const reference = referencesById.get(referenceId);
       if (!reference) throw new Error(`${wf.id} binds unknown reference ${referenceId}`);
-      return { id: reference.id, path: reference.path, title: reference.title, loadWhen: reference.loadWhen, freshness: referenceFreshness(reference) };
+      const reviewDueBy = referenceReviewDueBy(reference);
+      return {
+        id: reference.id,
+        path: reference.path,
+        title: reference.title,
+        loadWhen: reference.loadWhen,
+        freshness: referenceFreshness(reference),
+        ...(reviewDueBy ? { reviewDueBy } : {}),
+      };
     }),
     role: (() => {
       const role = rolesById.get(wf.roleId);
@@ -84,7 +107,15 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
             references: pack.referenceIds.map((referenceId) => {
               const reference = referencesById.get(referenceId);
               if (!reference) throw new Error(`${pack.id} binds unknown reference ${referenceId}`);
-              return { id: reference.id, path: reference.path, title: reference.title, loadWhen: reference.loadWhen, freshness: referenceFreshness(reference) };
+              const reviewDueBy = referenceReviewDueBy(reference);
+              return {
+                id: reference.id,
+                path: reference.path,
+                title: reference.title,
+                loadWhen: reference.loadWhen,
+                freshness: referenceFreshness(reference),
+                ...(reviewDueBy ? { reviewDueBy } : {}),
+              };
             }),
           };
         }),

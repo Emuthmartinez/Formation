@@ -1,6 +1,6 @@
 # Product Moat And Core-Loop Innovation
 
-The skill's deepest library makes a chosen feature set feel premium, ethical, and sticky. This reference governs the prior question: whether the feature set itself deserves to exist. Load it with `eleven-star-experience.md` — before the 11-star ladder locks the magical moment — and again whenever a wedge claim needs pressure-testing. Polish on a commodity idea produces a beautiful app nobody switches to; the moat work is what gives the polish something to compound on.
+The skill's deepest library makes a chosen feature set feel premium, ethical, and sticky. This reference governs the prior question: whether the feature set itself deserves to exist. Load it with [`eleven-star-experience.md`](../experience/eleven-star-experience.md) — before the 11-star ladder locks the magical moment — and again whenever a wedge claim needs pressure-testing. Polish on a commodity idea produces a beautiful app nobody switches to; the moat work is what gives the polish something to compound on.
 
 ## Contents
 

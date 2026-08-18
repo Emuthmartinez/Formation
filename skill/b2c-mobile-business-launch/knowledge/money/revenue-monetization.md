@@ -8,7 +8,7 @@ Use this before setting up RevenueCat, Stripe, App Store/Google Play products, w
 
 This is not a payment approval. Founder approval is required before changing prices, creating live billing products, enabling paid checkout, spending on ads, publishing subscription terms, or submitting store builds with monetization changes.
 
-Load `paid-tool-routing.md` before replacing RevenueCat, Stripe, app-store product setup, paid RevenueCat features, tax tooling, or provider dashboards with local mocks or free-tier-only planning. Mock purchases are implementation proof only; they are not live entitlement proof.
+Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before replacing RevenueCat, Stripe, app-store product setup, paid RevenueCat features, tax tooling, or provider dashboards with local mocks or free-tier-only planning. Mock purchases are implementation proof only; they are not live entitlement proof.
 
 Load `viral-growth-loops.md` before using referral unlocks, share rewards, creator codes, closing offers, or viral paywall timing as part of monetization. A growth spike is only useful if the paywall, entitlement, analytics, refund/restore, and abuse controls are ready to catch it.
 

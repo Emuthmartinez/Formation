@@ -16,7 +16,7 @@ The quality bar is not "pretty." It is whether the design makes the product's V1
 
 ## 11-Star Lens
 
-Apply the 11-star material from `eleven-star-experience.md` as a filter over state:
+Apply the 11-star material from [`eleven-star-experience.md`](../experience/eleven-star-experience.md) as a filter over state:
 
 - Which modeled surface proves the magical V1 moment fastest?
 - Which 10-star or 11-star idea should remain inspiration, not scope?

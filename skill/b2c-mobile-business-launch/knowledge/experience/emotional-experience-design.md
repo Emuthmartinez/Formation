@@ -2,7 +2,7 @@
 
 Use this reference before any product, onboarding, paywall, or core-loop work where the goal is to make interactions feel charged with meaning — not merely functional. Apps that anticipate, solve, and reward action retain users because they create emotional memory, not just utility.
 
-Load `eleven-star-experience.md` first. The star ladder defines the target emotional state; this reference defines the mechanics and verification to reach it. Load `analytics-attribution.md` before implementation: every emotional moment named here must emit a named PostHog event or it is unmeasurable.
+Load [`eleven-star-experience.md`](eleven-star-experience.md) first. The star ladder defines the target emotional state; this reference defines the mechanics and verification to reach it. Load `analytics-attribution.md` before implementation: every emotional moment named here must emit a named PostHog event or it is unmeasurable.
 
 ## Contents
 

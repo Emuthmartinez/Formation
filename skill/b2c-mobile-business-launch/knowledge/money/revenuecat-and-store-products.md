@@ -2,6 +2,8 @@
 
 Part of the [Revenue, Monetization, And Purchase Funnels](./revenue-monetization.md) hub. Honor the **Founder-Only Gates** there before creating live products, changing prices, or submitting for review.
 
+Before marking this lane done, load [`provider-proof.md`](../process/provider-proof.md): provider-backed readiness needs live proof or a recorded founder-only decision in `operations/PROVIDER_PROOF.md`, never setup prose alone.
+
 Use this for RevenueCat project/product/entitlement/offering setup, App Store and Google Play product gates, the MISSING_METADATA/product-type/paywall-smoke-proof failure modes that have repeatedly shipped broken paywalls, and promotional IAP/subscription art.
 
 ## Contents
@@ -95,7 +97,7 @@ Apple requires a **unique 1024x1024 promotional image** for each promoted IAP an
 
 Production route:
 - Write a design/design.md brief for each product's promotional image (palette, mood, banned aesthetics, intended surface: App Store promoted IAP).
-- Generate via `higgsfield generate create gpt_image_2 --prompt "<design/design.md brief>" --aspect_ratio 1:1 --wait`. See the **Cheap-First Direction (z_image → production model)** recipe in `tool-recipes/visual-and-motion-production.md` if spend-reduction drafts are needed first; cheap-first must be offered as an explicit spend option, never applied silently — confirm spend per `paid-tool-routing.md`.
+- Generate via `higgsfield generate create gpt_image_2 --prompt "<design/design.md brief>" --aspect_ratio 1:1 --wait`. See the **Cheap-First Direction (z_image → production model)** recipe in `tool-recipes/visual-and-motion-production.md` if spend-reduction drafts are needed first; cheap-first must be offered as an explicit spend option, never applied silently — confirm spend per [`paid-tool-routing.md`](../operations/paid-tool-routing.md).
 - Record every generated asset in `CONTENT_ASSETS.md` with `prompt_brief`, `source_job_id`, QA status, and approval gate. Cross-reference `app-store-listing-prep.md` for upload and metadata sequencing.
 - Gate: founder must approve each promotional image before upload. Do not upload while the product is still in `MISSING_METADATA` (see §3a above).
 

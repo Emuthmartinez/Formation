@@ -1,5 +1,7 @@
 # Marketplace And Regional Compliance
 
+Part of the [ASO And Store Operations](./aso-store-ops.md) hub — it decides which store lane runs and what evidence each lane must leave behind.
+
 ## Purpose
 
 Use this guide for every selected store and distribution region.

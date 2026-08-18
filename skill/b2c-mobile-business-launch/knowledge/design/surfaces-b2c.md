@@ -71,7 +71,7 @@ Before rendering, check:
 - App Store claims are supported by app behavior and legal/privacy docs
 - tokens come from `studio/seed/theme.tokens.json`, not copied literal values
 
-When a design mutation changes copy, pricing, products, feature scope, brand vocabulary, or data behavior, load `change-cascade.md` before calling the mutation done.
+When a design mutation changes copy, pricing, products, feature scope, brand vocabulary, or data behavior, load [`change-cascade.md`](../process/change-cascade.md) before calling the mutation done.
 
 ## Source Freshness
 

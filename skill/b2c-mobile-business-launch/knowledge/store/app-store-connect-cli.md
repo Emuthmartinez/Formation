@@ -1,5 +1,7 @@
 # App Store Connect CLI Routing
 
+Part of the [ASO And Store Operations](./aso-store-ops.md) hub — it decides which store lane runs and what evidence each lane must leave behind.
+
 Use this before automating App Store Connect work with the Rork `asc` CLI or the Rork App Store Connect CLI skills.
 
 The goal is to reduce App Store Connect clicking while preserving founder control over credentials, pricing, products, privacy answers, screenshots, and final submission.
@@ -166,7 +168,7 @@ A live App Store URL can seed a Higgsfield Marketing Studio webproduct entity, w
 higgsfield marketing-studio webproducts fetch --url <app store url> --wait
 ```
 
-The `--url` Click-to-Ad shortcut bypasses design/design.md brief injection by default — always pass `--prompt` with explicit design/design.md tokens, and confirm spend per `paid-tool-routing.md` before generation. See the **App Store URL → UGC Ad Batch (Click-to-Ad)** recipe in `tool-recipes/visual-and-motion-production.md` for the full sequence (webproduct fetch → avatar pick → spend confirm → parallel `marketing_studio_video` modes → virality scoring → CONTENT_ASSETS.md → founder approval). For paid campaign context, see `paid-user-acquisition.md`.
+The `--url` Click-to-Ad shortcut bypasses design/design.md brief injection by default — always pass `--prompt` with explicit design/design.md tokens, and confirm spend per [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before generation. See the **App Store URL → UGC Ad Batch (Click-to-Ad)** recipe in `tool-recipes/visual-and-motion-production.md` for the full sequence (webproduct fetch → avatar pick → spend confirm → parallel `marketing_studio_video` modes → virality scoring → CONTENT_ASSETS.md → founder approval). For paid campaign context, see `paid-user-acquisition.md`.
 
 ## Post-Action State Update
 

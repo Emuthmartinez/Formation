@@ -3,8 +3,8 @@ id: reference.product.product-moat
 title: Product Moat
 domain_id: domain.product
 document_path: knowledge/product/product-moat.md
-load_when: before product/SPEC.md, design/design.md, onboarding, ads, store screenshots, content assets, or engineering
-  plans are treated as ready; on "11-star run"/"11-star pass" — follow the 11-Star Run Protocol before any other output
+load_when: before the spec or launch surfaces harden — the moat and defensibility test for what makes this app hard
+  to copy; see eleven-star-experience.md for the 11-Star Run Protocol itself
 lifecycle: active
 bindings:
   workflow_ids:

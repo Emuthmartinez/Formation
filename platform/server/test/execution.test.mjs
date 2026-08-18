@@ -169,9 +169,12 @@ test("launch matrix is returned only from a ready 1.1 engine", async () => {
     phaseIds: ["phase.1"],
     services: [{ id: "provider.fixture", name: "Fixture API", purpose: "Supports provider workflow proof.", state: "verified" }],
     agentTools: [{ id: "research-internal-route", when: "Use the research tool." }],
+    knowledge: [{ id: "reference.research.fixture", title: "AppKittie category economics via CLI", path: "knowledge/research/fixture.md", loadWhen: "before the spec hardens — routed from tool-recipes.md; see check:catalog", freshness: "reviewed 2026-06-01", reviewStatus: "review-due" }],
+    conditionalKnowledge: [{ id: "reference.research.role", title: "Role research", path: "knowledge/research/role.md", loadWhen: "competitor evidence is needed", freshness: "internal", reviewStatus: "internal", packId: "context.research", packTitle: "Research" }],
   }];
+  const launchIntegrity = [{ workflowId: "workflow.process.provider-proof-verification", title: "Provider-proof verification", status: "ready", verification: { kind: "gate", state: "pending" } }];
   const current = new ExecutionWorker(store, {
-    engine: { describe: async () => ({ reachable: true, report: { schemaVersion: "1.1.0", workspaceReady: true, generatedAt: "2026-08-17T00:00:00.000Z", launchMatrix: { groups, workflows, systemSummary: { total: 1, counts: { ready: 1 } } } } }) },
+    engine: { describe: async () => ({ reachable: true, report: { schemaVersion: "1.1.0", workspaceReady: true, generatedAt: "2026-08-17T00:00:00.000Z", launchMatrix: { groups, workflows, launchIntegrity, systemSummary: { total: 1, counts: { ready: 1 } } } } }) },
     resolveEngineWorkspace: () => directory,
   });
   const available = await current.launchMatrix(workspace);
@@ -184,6 +187,21 @@ test("launch matrix is returned only from a ready 1.1 engine", async () => {
   assert.equal(available.workflows[0].technical.workflowId, "workflow.research.fixture");
   assert.equal("id" in available.workflows[0].services[0], false);
   assert.equal("id" in available.workflows[0].agentTools[0], false);
+  // Knowledge is the one matrix field that used to bypass the presentation boundary; now the
+  // agent-facing trigger and raw identifiers live only in technical detail.
+  const guide = available.workflows[0].knowledge[0];
+  assert.equal("loadWhen" in guide, false);
+  assert.doesNotMatch(guide.name, /\bCLI\b/);
+  assert.equal(guide.freshness, "A source check is due");
+  assert.equal(guide.technical.id, "reference.research.fixture");
+  assert.equal(guide.technical.loadWhen.includes("routed from"), true);
+  const conditional = available.workflows[0].conditionalKnowledge[0];
+  assert.equal(conditional.packTitle, "Research");
+  assert.equal("loadWhen" in conditional, false);
+  // Cross-cutting integrity steps present by board name, with the engine's own name alongside.
+  assert.equal(available.launchIntegrity[0].title, "Proof the business services really work");
+  assert.equal(available.launchIntegrity[0].technical, "Provider-proof verification");
+  assert.equal(available.launchIntegrity[0].status, "ready");
 });
 
 // ---------------------------------------------------------------------------

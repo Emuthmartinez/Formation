@@ -99,7 +99,7 @@ Do not skip landing work because final app captures do not exist. Build screensh
 Run this loop for each accepted app slice:
 
 1. Dispatch `agents/launch-surface-producer.md` in `impact-audit` mode before the slice merges.
-2. Classify the change with `change-cascade.md`.
+2. Classify the change with [`change-cascade.md`](../process/change-cascade.md).
 3. Assign each affected path set to a separate bounded-update unit.
 4. Continue the next app slice while those update units run.
 5. Serialize shared store documents, provider changes, device capture, and public actions.

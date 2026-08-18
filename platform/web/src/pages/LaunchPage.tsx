@@ -217,6 +217,7 @@ function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
   const [filter, setFilter] = useState<MatrixFilter>("all");
   const [view, setView] = useState<"areas" | "phases">("areas");
   const [expanded, setExpanded] = useState<{ groupId: string; detail: MatrixDetail } | null>(null);
+  const [expandedPhase, setExpandedPhase] = useState<{ groupId: string; phaseId: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -243,7 +244,9 @@ function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
   const groups = [...(matrix?.groups ?? [])].sort((left, right) => left.order - right.order);
   const visible = workflows.filter((workflow) => {
     if (filter === "all") return true;
-    if (filter === "working") return ["ready", "in-progress", "held", "upcoming"].includes(workflow.status);
+    if (filter === "working") return ["ready", "in-progress", "upcoming"].includes(workflow.status);
+    // "held" and "needs-founder" both mean the same thing to the founder: it waits on them.
+    if (filter === "needs-founder") return workflow.status === "needs-founder" || workflow.status === "held";
     return workflow.status === filter;
   });
   const byId = new Map(workflows.map((workflow) => [workflow.workflowId, workflow]));
@@ -272,16 +275,39 @@ function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
       </div>
 
       {view === "phases" ? (
-        <div className="matrix-scroll">
+        <div className="matrix-scroll matrix-scroll--phases">
           <table className="launch-phase-matrix">
             <caption className="sr-only">Work areas by launch phase</caption>
             <thead><tr><th scope="col">Work area</th>{phaseIds.map((phase) => <th scope="col" key={phase}>{phase.replace("phase.", "Phase ")}</th>)}</tr></thead>
-            <tbody>{groups.map((group) => {
+            <tbody>{groups.flatMap((group) => {
               const groupWork = visible.filter((workflow) => workflow.groupId === group.id);
-              return <tr key={group.id}><th scope="row">{group.title}</th>{phaseIds.map((phase) => {
-                const count = groupWork.filter((workflow) => workflow.phaseIds.includes(phase)).length;
-                return <td key={phase}>{count ? `${count} item${count === 1 ? "" : "s"}` : "—"}</td>;
-              })}</tr>;
+              const activePhase = expandedPhase?.groupId === group.id ? expandedPhase.phaseId : null;
+              const cellWork = activePhase ? groupWork.filter((workflow) => workflow.phaseIds.includes(activePhase)) : [];
+              return [
+                <tr key={group.id}><th scope="row">{group.title}</th>{phaseIds.map((phase) => {
+                  const phaseWork = groupWork.filter((workflow) => workflow.phaseIds.includes(phase));
+                  if (!phaseWork.length) return <td key={phase}>—</td>;
+                  const counts = matrixStatusCounts(phaseWork);
+                  const open = activePhase === phase;
+                  return (
+                    <td key={phase}>
+                      <button aria-expanded={open} onClick={() => setExpandedPhase((current) => current?.groupId === group.id && current.phaseId === phase ? null : { groupId: group.id, phaseId: phase })}>
+                        {phaseWork.length} item{phaseWork.length === 1 ? "" : "s"}
+                      </button>
+                      <small>{matrixCountLine(counts)}</small>
+                    </td>
+                  );
+                })}</tr>,
+                activePhase ? (
+                  <tr key={`${group.id}-phase-detail`} className="launch-matrix-detail">
+                    <td colSpan={phaseIds.length + 1}>
+                      {cellWork.length
+                        ? cellWork.map((workflow) => <MatrixWorkflowDetail key={workflow.workflowId} workflow={workflow} detail="work" workflows={byId} />)
+                        : <p>No work in this area and phase matches the current filter.</p>}
+                    </td>
+                  </tr>
+                ) : null,
+              ];
             })}</tbody>
           </table>
         </div>
@@ -301,7 +327,7 @@ function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
                   <td data-label="State"><span className="matrix-state">{matrixGroupStatus(counts)}</span><small>{matrixCountLine(counts)}</small></td>
                   <td data-label="Current work"><button aria-expanded={active && expanded?.detail === "work"} onClick={() => toggle(group.id, "work")}>{groupWork.length} visible</button></td>
                   <td data-label="Dependencies"><button aria-expanded={active && expanded?.detail === "dependencies"} onClick={() => toggle(group.id, "dependencies")}>{new Set(groupWork.flatMap((item) => item.dependencyWorkflowIds)).size} upstream</button></td>
-                  <td data-label="Knowledge"><button aria-expanded={active && expanded?.detail === "knowledge"} onClick={() => toggle(group.id, "knowledge")}>{new Set(groupWork.flatMap((item) => item.knowledge.map((guide) => guide.id))).size} guides</button></td>
+                  <td data-label="Knowledge"><button aria-expanded={active && expanded?.detail === "knowledge"} onClick={() => toggle(group.id, "knowledge")}>{new Set(groupWork.flatMap((item) => item.knowledge.map((guide) => guide.technical.id))).size} guides{groupWork.some((item) => item.knowledge.some((guide) => guide.reviewStatus === "review-due")) ? <em className="matrix-flag"> · check due</em> : null}</button></td>
                   <td data-label="Tools"><button aria-expanded={active && expanded?.detail === "tools"} onClick={() => toggle(group.id, "tools")}>{new Set(groupWork.flatMap((item) => [...item.services.map((service) => service.technical.id), ...item.agentTools.map((tool) => tool.technical.id)])).size} tools</button></td>
                   <td data-label="Result and proof"><button aria-expanded={active && expanded?.detail === "results"} onClick={() => toggle(group.id, "results")}>{groupWork.filter((item) => item.verification.state === "verified").length} verified</button></td>
                 </tr>,
@@ -311,7 +337,23 @@ function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
           </table>
         </div>
       )}
-      {matrix.systemSummary ? <p className="matrix-system-summary">Launch coordination: {matrix.systemSummary.total} system steps. Maintenance work is hidden.</p> : null}
+      {matrix.launchIntegrity?.length ? (
+        <div className="matrix-integrity">
+          <h3>Launch integrity</h3>
+          <p className="muted-copy">Cross-cutting checks the engine runs on its own launch work — continuity, live service proof, consistency, and completeness audits.</p>
+          <ul>
+            {matrix.launchIntegrity.map((step) => (
+              <li key={step.workflowId}>
+                <strong>{step.title}</strong>
+                <span>{engineStepLabels[step.status] ?? step.status}{step.verification.state === "verified" ? " · proven" : step.verification.state === "failed" ? " · check failed" : ""}</span>
+                {step.summary ? <p>{step.summary}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : matrix.systemSummary ? (
+        <p className="matrix-system-summary">Launch coordination: {matrix.systemSummary.total} cross-cutting steps keeping the launch consistent.</p>
+      ) : null}
     </Section>
   );
 }
@@ -321,7 +363,36 @@ function MatrixWorkflowDetail({ workflow, detail, workflows }: { workflow: Launc
     <header><div><StatusText status={workflow.status} /><h3>{workflow.title}</h3></div><span>{workflow.applicability === "unknown" ? "Scope answer needed" : workflow.applicability === "not-needed" ? "Not needed" : "Required"}</span></header>
     {detail === "work" ? <><p>{workflow.summary}</p>{workflow.founderReason ? <p className="matrix-note">{workflow.founderReason}</p> : null}{workflow.role ? <p>Owner: {workflow.role.name}</p> : null}</> : null}
     {detail === "dependencies" ? <div className="matrix-detail-grid"><div><h4>Waiting on</h4>{workflow.dependencyWorkflowIds.length ? <ul>{workflow.dependencyWorkflowIds.map((id) => { const item = workflows.get(id); return <li key={id}>{item?.title ?? id} — {item?.founderReason ?? engineStepLabels[item?.status ?? ""] ?? item?.status ?? "state unavailable"}</li>; })}</ul> : <p>Nothing upstream.</p>}</div><div><h4>Unlocks</h4>{workflow.dependentWorkflowIds.length ? <ul>{workflow.dependentWorkflowIds.map((id) => { const item = workflows.get(id); return <li key={id}>{item?.title ?? id} — {engineStepLabels[item?.status ?? ""] ?? item?.status ?? "state unavailable"}</li>; })}</ul> : <p>No downstream work.</p>}</div></div> : null}
-    {detail === "knowledge" ? workflow.knowledge.length ? <ul className="matrix-card-list">{workflow.knowledge.map((guide) => <li key={guide.id}><strong>{guide.title}</strong><span>{guide.freshness}</span><p>{guide.loadWhen}</p><p>Affects: {workflow.outputs.map((output) => output.title).join(", ") || workflow.title}</p></li>)}</ul> : <p>No guide is bound to this work.</p> : null}
+    {detail === "knowledge" ? (
+      <>
+        {workflow.knowledge.length ? (
+          <ul className="matrix-card-list">
+            {workflow.knowledge.map((guide) => (
+              <li key={guide.technical.id}>
+                <strong>{guide.name}</strong>
+                <span>{guide.reviewStatus === "review-due" ? <em className="matrix-flag">{guide.freshness}</em> : guide.freshness}</span>
+                <p>{guide.purpose}</p>
+                <p>Affects: {workflow.outputs.map((output) => output.title).join(", ") || workflow.title}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No guide is bound to this work.</p>
+        )}
+        {workflow.conditionalKnowledge.length ? (
+          <div className="matrix-conditional-knowledge">
+            <h4>On hand for this role</h4>
+            <p className="muted-copy">Guidance the team keeps ready and opens only when its moment comes up during this work.</p>
+            <ul>{workflow.conditionalKnowledge.map((guide) => <li key={guide.technical.id}><strong>{guide.name}</strong>{guide.reviewStatus === "review-due" ? <em className="matrix-flag"> · {guide.freshness}</em> : null}</li>)}</ul>
+          </div>
+        ) : null}
+        <TechnicalDisclosure label="Technical detail">
+          {[...workflow.knowledge, ...workflow.conditionalKnowledge].map((guide) => (
+            <p key={guide.technical.id}>{guide.technical.id} · {guide.technical.path} · load when: {guide.technical.loadWhen}</p>
+          ))}
+        </TechnicalDisclosure>
+      </>
+    ) : null}
     {detail === "tools" ? <div className="matrix-detail-grid"><div><h4>Business services</h4>{workflow.services.length ? <ul className="matrix-card-list">{workflow.services.map((service) => <li key={service.technical.id}><strong>{service.name}</strong><span>{service.access}{service.checkedAt ? ` · checked ${timeAgo(service.checkedAt)}` : ""}</span><p>{service.purpose}</p></li>)}</ul> : <p>No external service is required.</p>}</div><div><h4>Specialist support</h4>{workflow.agentTools.length ? <ul>{workflow.agentTools.map((tool) => <li key={tool.technical.id}><strong>{tool.name}</strong> — {tool.purpose}</li>)}</ul> : <p>No additional specialist support is declared.</p>}</div></div> : null}
     {detail === "results" ? <><p>Verification: {workflow.verification.state} · {workflow.verification.kind} · {workflow.verification.evidenceCount} evidence items</p>{workflow.outputs.length ? <ul className="matrix-card-list">{workflow.outputs.map((output) => <li key={output.artifactId}><button onClick={() => navigate("/deliverables")}><strong>{output.title}</strong><span>{output.state}</span></button></li>)}</ul> : <p>This work has no separate deliverable.</p>}</> : null}
     <TechnicalDisclosure label="Technical detail"><p>{workflow.technical.workflowId}</p>{workflow.technical.title ? <p>Engine title: {workflow.technical.title}</p> : null}<p>Phases: {workflow.technical.phaseIds.join(", ") || "none"}</p>{workflow.services.map((service) => <p key={service.technical.id}>Service: {service.technical.id} · {service.technical.state} · {service.technical.purpose}</p>)}{workflow.agentTools.map((tool) => <p key={tool.technical.id}>Route: {tool.technical.id} · {tool.technical.when}</p>)}</TechnicalDisclosure>
@@ -334,7 +405,8 @@ function matrixStatusCounts(workflows: LaunchMatrixWorkflow[]) {
 
 function matrixGroupStatus(counts: Record<string, number>) {
   if (counts.failed) return "Failed work needs attention";
-  if (counts["needs-founder"]) return "Needs founder";
+  // "held" is the engine's own "Needs your go-ahead" — an all-held area must never read as merely upcoming.
+  if ((counts["needs-founder"] ?? 0) + (counts.held ?? 0) > 0) return "Needs your go-ahead";
   if (counts["in-progress"] || counts.ready) return "Working";
   if ((counts.finished ?? 0) > 0 && Object.values(counts).reduce((sum, count) => sum + count, 0) === counts.finished) return "Finished";
   return "Upcoming";

@@ -3,8 +3,8 @@ id: reference.orchestration.parallel-agent-orchestration
 title: Parallel Agent Orchestration
 domain_id: domain.orchestration
 document_path: knowledge/orchestration/parallel-agent-orchestration.md
-load_when: start of multi-lane work; resuming a prior session; before provider/store mutations, handoff, or subagent
-  dispatch; when rendering the cockpit
+load_when: dispatching or coordinating subagents — lane ownership, worktree isolation, budgets, quarantine, reconciliation,
+  and rendering the cockpit; before provider/store mutations or handoff in multi-lane work
 lifecycle: active
 bindings:
   workflow_ids:

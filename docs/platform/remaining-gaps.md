@@ -93,6 +93,15 @@ This P0 is complete at the API, record, and founder-page level. Nothing the adap
 
 `core/session/run.ts` still selects only fixture/no-op executors: a scheduled or platform-queued session plans, batches, syncs approvals, and imports honestly, but no node's real work is performed by the engine itself. The read surfaces now say this up front (`selfServeExecution` on every engine view, and completion copy that distinguishes "checked the plan" from "completed a step"). The v0.120.0 node-contract work removed the blocker on this arc's input side: every catalog node now carries authored instructions, reads, bound knowledge references, and an owning role, composed by `core/engine/node-brief.ts` into exactly the worker brief a real executor must hand a runtime CLI. What remains is the executor itself — per-node runtime invocation under the adapter tool-allowlists, spend recording against real usage, and the wall-clock/heartbeat discipline `executor.ts`'s interface already specifies — reviewed as its own arc because it moves the trust boundary.
 
+### Follow-ons the 2026-08-18 knowledge-matrix audit added to this arc
+
+- **Result-to-knowledge traceability.** `ExecutionVerifiedResult` carries no knowledge reference, so imported claims and deliverables cannot show which guidance shaped them. The field can only be honest once the real per-node executor exists to report what an attempt actually consulted; when that arc lands, populate a `knowledge` field from the attempt's brief, copy it onto claim provenance by explicit name in `results.mjs`, and render it in the deliverable's context lineage.
+- **Interactive-path knowledge receipts.** The sha256 fail-closed receipt check lives only in the headless executor (`core/session/executor.ts`); the interactive Task-subagent path relies on the orchestrating session honoring the contract in `app-agent-roster.md`. Mechanical enforcement there means the reducer rejecting a dispatched worker's patch without a receipt matching the brief — same trust-boundary review class as the executor arc.
+
+## P1: Founder knowledge library
+
+The launch matrix's per-work Knowledge cell is currently the only founder-facing knowledge surface. A read-only library page — every guide grouped by the six presentation groups, with board names, freshness verdicts, and the same technical disclosures — is an unbuilt surface, not a boundary exclusion: knowledge already crosses the adapter read-only. If built, it must consume the same adapter projection (`presentMatrixKnowledge` output), never platform-side reads of engine files. Reading a guide's full document from the platform would need a new read-only adapter surface and its own review.
+
 ## P1: Existing launch repository importer
 
 ### Why it matters

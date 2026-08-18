@@ -197,6 +197,36 @@ const BOARD_STEPS = Object.freeze({
     title: "Social media operations",
     summary: "Runs the accounts and posting schedule — nothing posts without your approval.",
   },
+  // Cross-cutting launch-integrity work (the engine checking its own work). These never join a
+  // founder work area, but their outcomes are readiness evidence, so they present by name.
+  "workflow.orchestration.session-continuity-resume": {
+    title: "Continuity between work sessions",
+    summary: "Each session picks up exactly where the last one stopped, from durable records.",
+  },
+  "workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep": {
+    title: "Business records and status upkeep",
+    summary: "Keeps the company's operating records and status view current.",
+  },
+  "workflow.process.provider-proof-verification": {
+    title: "Proof the business services really work",
+    summary: "Verifies payments, analytics, email, and store connections with live evidence before they count as done.",
+  },
+  "workflow.process.change-cascade": {
+    title: "Keeping public surfaces consistent",
+    summary: "When the product changes, every page, listing, and document that mentions it is updated to match.",
+  },
+  "workflow.process.launch-trace-and-build-contracts": {
+    title: "Traceability from research to build",
+    summary: "Keeps the record of how research decisions became the product being built.",
+  },
+  "workflow.process.business-control-plane-extension": {
+    title: "Workspace dashboard extensions",
+    summary: "Adds new panels to your business workspace as the launch grows.",
+  },
+  "workflow.process.launchbench-failure-cards-coverage-audit": {
+    title: "Launch completeness audit",
+    summary: "An independent audit that nothing on the launch checklist was silently skipped.",
+  },
 });
 
 /** The engine's short approval asks, restated as what the founder is actually deciding. */
@@ -298,6 +328,32 @@ export function presentMatrixService(service, workTitle) {
     access: SERVICE_ACCESS[service.state] ?? "Access not checked",
     ...(service.checkedAt ? { checkedAt: service.checkedAt } : {}),
     technical: { id: service.id, state: service.state, purpose: service.purpose },
+  };
+}
+
+/**
+ * Founder-safe knowledge-guide copy. The engine's load_when trigger is written for agents
+ * deciding what to read, not for founders — it names files, checks, and routing hubs — so it
+ * never crosses at the top level. The guide presents as what it is to the founder: the playbook
+ * behind this work, with a plain freshness verdict. Raw id, document path, and the agent-facing
+ * trigger survive as technical detail.
+ */
+export function presentMatrixKnowledge(guide, workTitle) {
+  const freshness =
+    guide.reviewStatus === "review-due"
+      ? "A source check is due"
+      : guide.freshness === "internal"
+        ? "Maintained with the product"
+        : guide.freshness && guide.freshness.startsWith("reviewed ")
+          ? `Sources checked ${guide.freshness.slice("reviewed ".length)}`
+          : "Freshness not reported";
+  return {
+    name: scrubTitle(guide.title || "Working guide"),
+    purpose: `The playbook the team follows for ${workTitle}.`,
+    freshness,
+    ...(guide.reviewStatus ? { reviewStatus: guide.reviewStatus } : {}),
+    ...(guide.packTitle ? { packTitle: scrubTitle(guide.packTitle) } : {}),
+    technical: { id: guide.id, path: guide.path, loadWhen: guide.loadWhen },
   };
 }
 

@@ -1,6 +1,6 @@
 # Consumer Product Design Agency
 
-Use this reference when building or auditing the emotional and behavioral layer of a B2C mobile app. It translates five academic design tiers into operational decisions, artifacts, and failure modes for this skill. It is a peer reference to `eleven-star-experience.md`, `quality-lens.md`, `onboarding-conversion.md`, `analytics-attribution.md`, `design-visual-system.md`, and `failure-cards.md`. Do not duplicate those; cross-reference them.
+Use this reference when building or auditing the emotional and behavioral layer of a B2C mobile app. It translates five academic design tiers into operational decisions, artifacts, and failure modes for this skill. It is a peer reference to [`eleven-star-experience.md`](eleven-star-experience.md), `quality-lens.md`, `onboarding-conversion.md`, `analytics-attribution.md`, `design-visual-system.md`, and `failure-cards.md`. Do not duplicate those; cross-reference them.
 
 ## Contents
 

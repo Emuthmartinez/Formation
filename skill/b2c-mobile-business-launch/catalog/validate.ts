@@ -113,6 +113,16 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     for (const referenceId of pack.referenceIds) checkKnown(issues, referenceIds, referenceId, "catalog_graph.context_pack.reference_unknown", pack.id);
   }
 
+  // Every business-runtime workflow must bind knowledge (mirrors context_pack.empty). Machine
+  // workflows are maintainer procedures whose contract is their own instructions; the exemption
+  // is declared here, not an accident of a domain filter elsewhere.
+  for (const workflow of catalog.workflows) {
+    if (workflow.domainId === "domain.machine") continue;
+    if (workflow.referenceIds.length === 0) {
+      issues.push(error("catalog_graph.workflow.no_knowledge", `${workflow.id} binds no knowledge reference; a dispatched worker would receive a bare title.`));
+    }
+  }
+
   for (const role of catalog.roles) {
     if (role.parentPromptPaths.length === 0) issues.push(error("catalog_graph.role.parent_contract_missing", `${role.id} has no parent prompt contract.`));
     if (!role.parentPromptPaths.includes("AGENTS.md") || !role.parentPromptPaths.includes("APP_AGENTS.md")) {
@@ -178,6 +188,9 @@ export function validateCatalog(catalog: Catalog, skillRoot: string): CatalogIss
     const registeredPaths = new Set(catalog.references.map((reference) => reference.path));
     for (const filePath of walkFiles(path.join(skillRoot, "knowledge"))) {
       const relative = path.relative(skillRoot, filePath).split(path.sep).join("/");
+      // The one non-reference file allowed in knowledge/: the generated orientation stub
+      // render-routing.ts writes (and drift-checks) pointing readers at the Reference Index.
+      if (relative === "knowledge/README.md") continue;
       if (!registeredPaths.has(relative)) {
         issues.push(
           error(

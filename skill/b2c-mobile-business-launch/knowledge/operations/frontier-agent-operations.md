@@ -151,7 +151,7 @@ The in-app simulator adds three approval-envelope items that no other device rou
 
 ## Secrets And Authentication
 
-Use `secrets-management.md` before any credential flow. Doppler is the default for API keys, OAuth/refresh tokens, service credentials, and automation secrets; it is not browser password/passkey storage or a channel for copying passwords, recovery codes, or 2FA into the transcript.
+Use [`secrets-management.md`](secrets-management.md) before any credential flow. Doppler is the default for API keys, OAuth/refresh tokens, service credentials, and automation secrets; it is not browser password/passkey storage or a channel for copying passwords, recovery codes, or 2FA into the transcript.
 
 Record secret names and storage routes only. Never capture raw secrets in `operations/AGENT_OPERATIONS.md`, JSON state, screenshots, browser exports, console logs, shell history, or proof files. Device screenshots taken by the agent leave the machine, so a real account, real payment method, or live credential must never be placed on a device the agent drives. Prefer existing signed-in sessions, keychain/provider profiles, scoped service tokens, OAuth, and secure founder entry.
 

@@ -171,7 +171,7 @@ A verified result contains:
 - verifier result
 - cost and provider metadata where permitted
 
-The read-only execution boundary uses schema `1.1.0`. It also returns a compact launch-matrix projection. The projection contains display metadata for every business workflow. It keeps full node briefs only for ready work. It reports process and orchestration counts separately. It does not include maintenance workflows.
+The read-only execution boundary uses schema `1.1.0`. It also returns a compact launch-matrix projection. The projection contains display metadata for every business workflow. It keeps full node briefs only for ready work. Each workflow carries its bound knowledge (id, title, document path, load condition, freshness, and a read-time review verdict) and the role's conditional context-pack knowledge, deduplicated the same way node briefs split load/route. Process and orchestration workflows cross as named launch-integrity steps with live status and verification state, beside the summary counts. Machine workflows do not cross. On the platform, every knowledge field passes through `presentMatrixKnowledge` in `presentation.mjs` before a founder sees it — the agent-facing load condition survives only as technical detail.
 
 Formation reads the projection through `GET /api/workspaces/:workspaceId/launch-matrix`. The route verifies workspace membership. An older or unavailable engine returns `available: false` with a reason. It does not return an empty matrix.
 

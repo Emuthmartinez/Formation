@@ -3,8 +3,8 @@ id: reference.words.no-slop-writing
 title: No-Slop Writing
 domain_id: domain.words
 document_path: knowledge/words/no-slop-writing.md
-load_when: always for dispatched business workers; apply directly before founder-facing or marketing copy — onboarding,
-  store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO
+load_when: always for dispatched business workers — the voice and writing-quality bar applied to whatever other lanes
+  produce, covering onboarding, store listing, landing, paywall, email, ads, launch-post wording, UGC scripts, GEO/SEO
 lifecycle: active
 bindings:
   workflow_ids:

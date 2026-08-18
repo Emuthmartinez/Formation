@@ -1,5 +1,7 @@
 # Apple Signing And First Upload
 
+Part of the [ASO And Store Operations](./aso-store-ops.md) hub — it decides which store lane runs and what evidence each lane must leave behind.
+
 Use this before any iOS, iPadOS, macOS, tvOS, watchOS, or visionOS TestFlight, App Store, physical-device, or distribution-signing claim. Simulator builds are useful engineering proof, but they are not distribution readiness.
 
 ## Contents

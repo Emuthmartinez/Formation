@@ -105,7 +105,7 @@ Acceptance:
 Goal: avoid wasting tokens on weak free fallbacks when the founder may have, want, or be willing to buy the intended tool.
 
 Do:
-- Load `paid-tool-routing.md`.
+- Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md).
 - List paid/account-gated lanes that affect the launch: AppKittie, XPOZ, Firecrawl, Higgsfield, MobAI Plus/Pro capabilities, Fastlane AI, ASO/MMP/ad tools, Sideshift/creator marketplaces, RevenueCat, Stripe, PostHog, Resend, and App Store/Play accounts. Record when MobAI Free covers the lane and when a fallback narrows cross-platform proof.
 - Check current runtime access, local installs, user-provided exports, screenshots, PDFs, CSVs, API keys, and account sessions.
 - Ask before replacing any paid/account-gated tool with a free fallback.
@@ -127,7 +127,7 @@ Acceptance:
 Goal: prevent secret sprawl before service setup, CI, deploys, webhooks, and provider CLIs start depending on hidden local state.
 
 Do:
-- Load `secrets-management.md`.
+- Load [`secrets-management.md`](../operations/secrets-management.md).
 - Continue the founder-zero handoff: explain Doppler simply, ask only for login or secure value entry, and let the agent perform project/config inventory, setup, and proof.
 - Load `provider-state-recipes.md`.
 - Default to Doppler unless the founder selected a different secret manager.
@@ -218,7 +218,7 @@ Acceptance:
 Goal: use the research to resolve the product's magical moment, line of feasibility, and product shape before engineering specs are built and actioned.
 
 Do:
-- Load `eleven-star-experience.md`.
+- Load [`eleven-star-experience.md`](../experience/eleven-star-experience.md).
 - Load `parallel-agent-orchestration.md` and `engineering-orchestration.md`.
 - Create `11_STAR_EXPERIENCE.md` and `11-star-experience.html`.
 - Define the 1/2/5/6/7/10/11-star ladder with product-specific labels, scenes, emotional reactions, implied behavior, and learnings.

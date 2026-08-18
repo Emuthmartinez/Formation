@@ -330,6 +330,16 @@ export interface ExecutionList {
   selfServeExecution: SelfServeExecution;
 }
 
+/** One knowledge guide as the presentation boundary ships it: board copy first, raw routing in technical. */
+export interface LaunchMatrixKnowledge {
+  name: string;
+  purpose: string;
+  freshness: string;
+  reviewStatus?: "review-due" | "current" | "internal";
+  packTitle?: string;
+  technical: { id: string; path: string; loadWhen: string };
+}
+
 export interface LaunchMatrixWorkflow {
   workflowId: string;
   groupId: string;
@@ -342,7 +352,9 @@ export interface LaunchMatrixWorkflow {
   dependencyWorkflowIds: string[];
   dependentWorkflowIds: string[];
   role?: { id: string; name: string };
-  knowledge: Array<{ id: string; title: string; loadWhen: string; freshness: string }>;
+  knowledge: LaunchMatrixKnowledge[];
+  /** Role-attached guidance the team keeps on hand for this work, loaded only when its moment comes. */
+  conditionalKnowledge: LaunchMatrixKnowledge[];
   services: Array<{
     name: string;
     purpose: string;
@@ -356,6 +368,16 @@ export interface LaunchMatrixWorkflow {
   technical: { workflowId: string; title: string | null; phaseIds: string[] };
 }
 
+/** One cross-cutting integrity step: the engine checking its own launch work. */
+export interface LaunchIntegrityStep {
+  workflowId: string;
+  title: string;
+  summary: string | null;
+  status: string;
+  verification: { kind: string; state: string };
+  technical: string | null;
+}
+
 export interface LaunchMatrixResponse {
   available: boolean;
   reason?: string;
@@ -363,6 +385,7 @@ export interface LaunchMatrixResponse {
   generatedAt?: string;
   groups?: Array<{ id: string; title: string; order: number }>;
   workflows?: LaunchMatrixWorkflow[];
+  launchIntegrity?: LaunchIntegrityStep[];
   systemSummary?: { total: number; counts: Record<string, number> };
 }
 

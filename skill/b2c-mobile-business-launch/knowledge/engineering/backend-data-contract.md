@@ -43,7 +43,7 @@ Record the selection in `engineering/TECH_SPEC.md` under "Backend Selection" wit
 
 Mirror the provider status in `state/PROJECT_STATE.yaml` and the decision in `strategy/TOOL_DECISIONS.md` when that file exists. A selection without a reason is the backend-by-default anti-pattern, not a decision.
 
-Switching backends after implementation starts is a **change-cascade event** (`change-cascade.md`): re-walk the data contract, the archetype prompt adaptations, `SECRETS.md`, `trust/SECURITY.md`, and every client that touches data. Switching is also a founder-only gate — never migrate routes on inference.
+Switching backends after implementation starts is a **change-cascade event** ([`change-cascade.md`](../process/change-cascade.md)): re-walk the data contract, the archetype prompt adaptations, `SECRETS.md`, `trust/SECURITY.md`, and every client that touches data. Switching is also a founder-only gate — never migrate routes on inference.
 
 ## Data Model
 
@@ -80,7 +80,7 @@ Rules for every route:
 
 - **Deny by default.** Start from "no access" and grant explicitly. Never ship permissive defaults intending to tighten later.
 - **Every table/collection gets an owner, read, and write rule** derived from the matrix. If an entity has no sensible rule, the data model is wrong — fix it there.
-- **Service-role and admin keys never ship in clients.** The Supabase service-role key, Firebase Admin SDK credentials, and custom-backend admin tokens are server-only secrets routed per `secrets-management.md`. Client builds get only publishable/anon keys, and those keys must be safe precisely because the authorization rules hold.
+- **Service-role and admin keys never ship in clients.** The Supabase service-role key, Firebase Admin SDK credentials, and custom-backend admin tokens are server-only secrets routed per [`secrets-management.md`](../operations/secrets-management.md). Client builds get only publishable/anon keys, and those keys must be safe precisely because the authorization rules hold.
 - **Untested rules are a launch blocker.** Per `security-release-hardening.md`, RLS policies and security rules that have never been exercised by a test count as absent. See Proof below.
 
 ## Migrations And Environments

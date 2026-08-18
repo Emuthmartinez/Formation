@@ -100,7 +100,7 @@ Personalized share cards (score result, milestone badge, referral-unlock reveal)
 
 Guardrails:
 - `design/design.md` brief is required on every generation; generating without it is a named failure mode.
-- Confirm spend with the founder before every paid generation run (reframe included) per `paid-tool-routing.md`; surface current credit balance first.
+- Confirm spend with the founder before every paid generation run (reframe included) per [`paid-tool-routing.md`](../operations/paid-tool-routing.md); surface current credit balance first.
 - Record every generated share card in `CONTENT_ASSETS.md` with route, `prompt_brief`, output paths, and QA/approval status.
 - Public posting stays founder-gated; generating share cards for in-app display does not constitute posting.
 

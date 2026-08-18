@@ -2,7 +2,9 @@
 
 Use this before setting up Resend for transactional email, lifecycle automations, broadcasts, waitlist/contact sync, sender-domain DNS, webhooks, inbound email, unsubscribe handling, or deliverability monitoring.
 
-Load `paid-tool-routing.md` before replacing Resend account/domain features, broadcasts, automations, webhooks, inbound email, or paid deliverability needs with local email previews, logs, Gmail, Cloudflare Email Routing, or another provider.
+Before marking this lane done, load [`provider-proof.md`](../process/provider-proof.md): provider-backed readiness needs live proof or a recorded founder-only decision in `operations/PROVIDER_PROOF.md`, never setup prose alone.
+
+Load [`paid-tool-routing.md`](paid-tool-routing.md) before replacing Resend account/domain features, broadcasts, automations, webhooks, inbound email, or paid deliverability needs with local email previews, logs, Gmail, Cloudflare Email Routing, or another provider.
 
 ## Contents
 

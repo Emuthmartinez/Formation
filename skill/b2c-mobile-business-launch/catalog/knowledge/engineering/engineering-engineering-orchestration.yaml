@@ -3,8 +3,8 @@ id: reference.engineering.engineering-orchestration
 title: Engineering Orchestration
 domain_id: domain.engineering
 document_path: knowledge/engineering/engineering-orchestration.md
-load_when: before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees,
-  engineering/ENGINEERING_PLAN.md, engineering/PRODUCTION_READINESS.md, or production-readiness claims
+load_when: before app implementation, backend/frontend work, or production-readiness claims — mobile quality bars,
+  engineering/ENGINEERING_PLAN.md, engineering/PRODUCTION_READINESS.md, and device-proof expectations
 lifecycle: active
 bindings:
   workflow_ids:

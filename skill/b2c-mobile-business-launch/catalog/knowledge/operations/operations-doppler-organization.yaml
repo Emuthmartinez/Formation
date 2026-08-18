@@ -3,9 +3,9 @@ id: reference.operations.doppler-organization
 title: Doppler Organization Across A Portfolio
 domain_id: domain.operations
 document_path: knowledge/operations/doppler-organization.md
-load_when: deciding which project or config a credential belongs in; setting up secrets for a new business; adding a
-  second business to an existing secret store; or splitting secrets across web, mobile, backend, and CI — the
-  portfolio-shape companion to secrets-management.md, which covers one secret at a time
+load_when: deciding which project or config a credential belongs in; adding a second business to an existing secret
+  store; splitting secrets across web, mobile, backend, and CI — the portfolio-shape companion to
+  secrets-management.md, which covers one secret at a time
 lifecycle: active
 bindings:
   workflow_ids:

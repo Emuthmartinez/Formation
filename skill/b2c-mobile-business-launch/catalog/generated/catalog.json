@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.131.1",
+  "skillVersion": "0.132.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1912,9 +1912,9 @@
       "title": "Design Room",
       "domainId": "domain.design",
       "path": "knowledge/design/design-room.md",
-      "loadWhen": "designing, versioning, baselining, restoring, wiping, or rendering B2C design state; custom product page, PPO, In-App Event, landing, onboarding, paywall, or marketing-surface proposals; whenever a design output would otherwise be freeform — the STATE→MUTATE→VERSION→RENDER hub; see surfaces-b2c.md for App Store surface schemas and quality-lens.md for the taste filter applied during a mutation",
+      "loadWhen": "designing, versioning, baselining, restoring, wiping, or rendering B2C design state; store, landing, onboarding, paywall, or marketing-surface proposals; whenever a design output would otherwise be freeform — the STATE→MUTATE→VERSION→RENDER hub",
       "lifecycle": "active",
-      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies. See surfaces-b2c.md for App Store surface schemas and quality-lens.md for the taste filter applied during a mutation.",
       "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
       "sources": [],
       "replacementIds": []
@@ -2418,7 +2418,7 @@
       "title": "Engineering Orchestration",
       "domainId": "domain.engineering",
       "path": "knowledge/engineering/engineering-orchestration.md",
-      "loadWhen": "before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees, engineering/ENGINEERING_PLAN.md, engineering/PRODUCTION_READINESS.md, or production-readiness claims",
+      "loadWhen": "before app implementation, backend/frontend work, or production-readiness claims — mobile quality bars, engineering/ENGINEERING_PLAN.md, engineering/PRODUCTION_READINESS.md, and device-proof expectations",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
@@ -2594,9 +2594,9 @@
       "title": "XcodeBuildMCP Testing",
       "domainId": "domain.engineering",
       "path": "knowledge/engineering/xcodebuildmcp-testing.md",
-      "loadWhen": "first for any \"run the app\", \"check this screen\", \"walk this flow\", or \"reproduce this bug\" request on a local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP; also Codex Desktop native iOS tools, SnapshotPreviews exports, serve-sim streaming, or simulator/device screenshots",
+      "loadWhen": "first for any \"run the app\", \"check this screen\", \"walk this flow\", or \"reproduce this bug\" request on a local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP",
       "lifecycle": "active",
-      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies. Also covers Codex Desktop native iOS tools, SnapshotPreviews exports, serve-sim streaming, and simulator/device screenshots.",
       "sources": [
         {
           "id": "code-claude-com-docs-en-desktop-ios-simulator",
@@ -2842,98 +2842,6 @@
       "replacementIds": []
     },
     {
-      "id": "reference.experience.consumer-product-design-agency",
-      "title": "Consumer Product Design Agency",
-      "domainId": "domain.experience",
-      "path": "knowledge/experience/consumer-product-design-agency.md",
-      "loadWhen": "grounding the emotional/behavioral layer in its research tiers, or auditing whether the four required Experience Cards are implemented",
-      "lifecycle": "active",
-      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
-      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
-      "sources": [],
-      "replacementIds": []
-    },
-    {
-      "id": "reference.experience.eleven-star-experience",
-      "title": "Eleven-Star Experience",
-      "domainId": "domain.experience",
-      "path": "knowledge/experience/eleven-star-experience.md",
-      "loadWhen": "before product/SPEC.md, design/design.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on \"11-star run\"/\"11-star pass\" — follow the reference's 11-Star Run Protocol before any other output",
-      "lifecycle": "active",
-      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
-      "sources": [
-        {
-          "id": "reid-medium-com-how-to-scale-a-magical-experience",
-          "name": "Reid Hoffman on Brian Chesky's 11-star framework",
-          "sourceType": "website",
-          "url": "https://reid.medium.com/how-to-scale-a-magical-experience-4-lessons-from-airbnbs-brian-chesky-eca0a182f3e3",
-          "reviewCadenceDays": 30,
-          "claimScope": "Source basis for the 11-star experience ladder and backsolving guidance.",
-          "lastReviewDate": "2026-08-17",
-          "reviewer": "formation-maintainers"
-        }
-      ],
-      "replacementIds": []
-    },
-    {
-      "id": "reference.experience.emotional-design-system",
-      "title": "Emotional Design System",
-      "domainId": "domain.experience",
-      "path": "knowledge/experience/emotional-design-system.md",
-      "loadWhen": "any product, onboarding, core-loop, paywall, or return-session work targeting 6-star (\"better than expected\") or higher; \"charge this feature with emotion\", \"make users stick / build a habit\", \"apply the <name> card\", \"emotional UX audit\" — the methodology hub; see experience-cards.md for the card deck, emotional-experience-design.md for full producer detail, emotional-experience-measurement.md for instrumentation, and ethics-guardrail.md for the regulatory/legal contract",
-      "lifecycle": "active",
-      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
-      "sources": [
-        {
-          "id": "retention-mechanics-mcp",
-          "name": "Retention Mechanics MCP server",
-          "sourceType": "api",
-          "url": "https://github.com/Emuthmartinez/retention-mechanics-mcp",
-          "reviewCadenceDays": 30,
-          "claimScope": "First-party MCP over the Experience Card deck (mechanic search with risk ceilings, versioned card content, ethics attestation scaffolds). Optional tooling - the bundled deck under knowledge/experience/experience-cards/ is the frozen offline contract and every validator reads it; the server is preferred only when connected. Private repo; local stdio during development.",
-          "lastReviewDate": "2026-08-17",
-          "reviewer": "formation-maintainers"
-        }
-      ],
-      "replacementIds": []
-    },
-    {
-      "id": "reference.experience.emotional-experience-design",
-      "title": "Emotional Experience Design",
-      "domainId": "domain.experience",
-      "path": "knowledge/experience/emotional-experience-design.md",
-      "loadWhen": "implementing one of the four required Experience Cards (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring) — full psychological basis, trigger timing, deterministic guardrail tests, named PostHog events, and the Six-Lens Design Review Framework in full",
-      "lifecycle": "active",
-      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
-      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
-      "sources": [],
-      "replacementIds": []
-    },
-    {
-      "id": "reference.experience.emotional-experience-measurement",
-      "title": "Emotional Experience Measurement",
-      "domainId": "domain.experience",
-      "path": "knowledge/experience/emotional-experience-measurement.md",
-      "loadWhen": "instrumenting an emotional-design or Experience Card feature — system-level events/metrics, per-card PostHog events, leading behavioral metrics, dark-pattern counter-metrics, and A/B experiment design (measurement only; see emotional-design-system.md for the psychology)",
-      "lifecycle": "active",
-      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
-      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
-      "sources": [],
-      "replacementIds": []
-    },
-    {
-      "id": "reference.experience.ethics-guardrail",
-      "title": "Ethics Guardrail",
-      "domainId": "domain.experience",
-      "path": "knowledge/experience/ethics-guardrail.md",
-      "loadWhen": "a HIGH-risk Experience Card (variable reward, streak, scarcity, urgency, social proof) is in play, or before any regulatory/platform-compliance claim about an engagement mechanic — Bright-Line/Dark-Line test, FTC/EU DSA/Apple/Google Play/COPPA landscape, the guardrail attestation-block contract consumed by check:emotional-design",
-      "lifecycle": "active",
-      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
-      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
-      "sources": [],
-      "replacementIds": []
-    },
-    {
       "id": "reference.experience.experience-cards.commitment-card",
       "title": "Commitment Card",
       "domainId": "domain.experience",
@@ -3101,6 +3009,98 @@
       "replacementIds": []
     },
     {
+      "id": "reference.experience.consumer-product-design-agency",
+      "title": "Consumer Product Design Agency",
+      "domainId": "domain.experience",
+      "path": "knowledge/experience/consumer-product-design-agency.md",
+      "loadWhen": "grounding the emotional/behavioral layer in its research tiers, or auditing whether the four required Experience Cards are implemented",
+      "lifecycle": "active",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
+      "sources": [],
+      "replacementIds": []
+    },
+    {
+      "id": "reference.experience.eleven-star-experience",
+      "title": "Eleven-Star Experience",
+      "domainId": "domain.experience",
+      "path": "knowledge/experience/eleven-star-experience.md",
+      "loadWhen": "before product/SPEC.md, design/design.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on \"11-star run\"/\"11-star pass\" — follow the reference's 11-Star Run Protocol before any other output",
+      "lifecycle": "active",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "sources": [
+        {
+          "id": "reid-medium-com-how-to-scale-a-magical-experience",
+          "name": "Reid Hoffman on Brian Chesky's 11-star framework",
+          "sourceType": "website",
+          "url": "https://reid.medium.com/how-to-scale-a-magical-experience-4-lessons-from-airbnbs-brian-chesky-eca0a182f3e3",
+          "reviewCadenceDays": 30,
+          "claimScope": "Source basis for the 11-star experience ladder and backsolving guidance.",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        }
+      ],
+      "replacementIds": []
+    },
+    {
+      "id": "reference.experience.emotional-design-system",
+      "title": "Emotional Design System",
+      "domainId": "domain.experience",
+      "path": "knowledge/experience/emotional-design-system.md",
+      "loadWhen": "any product, onboarding, core-loop, paywall, or return-session work targeting 6-star (\"better than expected\") or higher; \"charge this feature with emotion\", \"apply the <name> card\", \"emotional UX audit\" — the methodology hub",
+      "lifecycle": "active",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies. See experience-cards.md for the card deck, emotional-experience-design.md for full producer detail, emotional-experience-measurement.md for instrumentation, and ethics-guardrail.md for the regulatory/legal contract.",
+      "sources": [
+        {
+          "id": "retention-mechanics-mcp",
+          "name": "Retention Mechanics MCP server",
+          "sourceType": "api",
+          "url": "https://github.com/Emuthmartinez/retention-mechanics-mcp",
+          "reviewCadenceDays": 30,
+          "claimScope": "First-party MCP over the Experience Card deck (mechanic search with risk ceilings, versioned card content, ethics attestation scaffolds). Optional tooling - the bundled deck under knowledge/experience/experience-cards/ is the frozen offline contract and every validator reads it; the server is preferred only when connected. Private repo; local stdio during development.",
+          "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        }
+      ],
+      "replacementIds": []
+    },
+    {
+      "id": "reference.experience.emotional-experience-design",
+      "title": "Emotional Experience Design",
+      "domainId": "domain.experience",
+      "path": "knowledge/experience/emotional-experience-design.md",
+      "loadWhen": "implementing one of the four required Experience Cards (Commitment, Variable Reward, Perceived Effort Delay, Intent Mirroring) — full psychological basis, trigger timing, deterministic guardrail tests, named PostHog events, and the Six-Lens Design Review Framework in full",
+      "lifecycle": "active",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
+      "sources": [],
+      "replacementIds": []
+    },
+    {
+      "id": "reference.experience.emotional-experience-measurement",
+      "title": "Emotional Experience Measurement",
+      "domainId": "domain.experience",
+      "path": "knowledge/experience/emotional-experience-measurement.md",
+      "loadWhen": "instrumenting an emotional-design or Experience Card feature — system-level events/metrics, per-card PostHog events, leading behavioral metrics, dark-pattern counter-metrics, and A/B experiment design (measurement only; see emotional-design-system.md for the psychology)",
+      "lifecycle": "active",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
+      "sources": [],
+      "replacementIds": []
+    },
+    {
+      "id": "reference.experience.ethics-guardrail",
+      "title": "Ethics Guardrail",
+      "domainId": "domain.experience",
+      "path": "knowledge/experience/ethics-guardrail.md",
+      "loadWhen": "a HIGH-risk Experience Card (variable reward, streak, scarcity, urgency, social proof) is in play, or before any regulatory/platform-compliance claim about an engagement mechanic — Bright-Line/Dark-Line test, FTC/EU DSA/Apple/Google Play/COPPA landscape, the guardrail attestation-block contract consumed by check:emotional-design",
+      "lifecycle": "active",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
+      "sources": [],
+      "replacementIds": []
+    },
+    {
       "id": "reference.experience.onboarding-conversion",
       "title": "Onboarding Conversion",
       "domainId": "domain.experience",
@@ -3167,7 +3167,7 @@
       "title": "Push Notification Lifecycle",
       "domainId": "domain.experience",
       "path": "knowledge/experience/push-notification-lifecycle.md",
-      "loadWhen": "before push permission priming or notification lifecycle work; before Resend, API keys, transactional email, lifecycle automations, broadcasts, contacts/topics, webhooks, inbound email, unsubscribe, deliverability, or templates",
+      "loadWhen": "before push permission priming, opt-in timing, or notification lifecycle design; for transactional and lifecycle email mechanics load operations/resend-email-ops.md instead",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
@@ -3616,7 +3616,7 @@
       "title": "Doppler Organization Across A Portfolio",
       "domainId": "domain.operations",
       "path": "knowledge/operations/doppler-organization.md",
-      "loadWhen": "deciding which project or config a credential belongs in; setting up secrets for a new business; adding a second business to an existing secret store; or splitting secrets across web, mobile, backend, and CI — the portfolio-shape companion to secrets-management.md, which covers one secret at a time",
+      "loadWhen": "deciding which project or config a credential belongs in; adding a second business to an existing secret store; splitting secrets across web, mobile, backend, and CI — the portfolio-shape companion to secrets-management.md, which covers one secret at a time",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
@@ -4072,7 +4072,7 @@
       "title": "Compound Engineering Routing",
       "domainId": "domain.orchestration",
       "path": "knowledge/orchestration/compound-engineering-routing.md",
-      "loadWhen": "before app implementation, backend/frontend work, generated builder prompts, parallel agents, worktrees, engineering/ENGINEERING_PLAN.md, engineering/PRODUCTION_READINESS.md, or production-readiness claims",
+      "loadWhen": "choosing which compound-engineering (CE) skill to invoke for a build stage — the freshness/plan/work/review/ test/proof loop, generated builder prompts, parallel agents, and worktrees",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sources": [
@@ -4136,7 +4136,7 @@
       "title": "Parallel Agent Orchestration",
       "domainId": "domain.orchestration",
       "path": "knowledge/orchestration/parallel-agent-orchestration.md",
-      "loadWhen": "start of multi-lane work; resuming a prior session; before provider/store mutations, handoff, or subagent dispatch; when rendering the cockpit",
+      "loadWhen": "dispatching or coordinating subagents — lane ownership, worktree isolation, budgets, quarantine, reconciliation, and rendering the cockpit; before provider/store mutations or handoff in multi-lane work",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sources": [
@@ -4238,7 +4238,7 @@
       "title": "Project State",
       "domainId": "domain.orchestration",
       "path": "knowledge/orchestration/project-state.md",
-      "loadWhen": "start of multi-lane work; resuming a prior session; before provider/store mutations, handoff, or subagent dispatch; when rendering the cockpit",
+      "loadWhen": "creating, reading, or patching state/PROJECT_STATE.yaml — the durable state schema, reducer contract, and resume-from-state rules; load together with parallel-agent-orchestration.md when dispatching subagents",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
@@ -4432,7 +4432,7 @@
       "title": "Funnel Domain And Privacy",
       "domainId": "domain.process",
       "path": "knowledge/process/tool-recipes/funnel-domain-and-privacy.md",
-      "loadWhen": "privacy/terms research minimums, domain/email routing setup, or landing-funnel verification — routed from tool-recipes.md",
+      "loadWhen": "privacy/terms research minimums, domain/email routing setup, or landing-funnel verification — routed from tool-recipes.md; complements the trust and growth rows",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
@@ -4444,7 +4444,7 @@
       "title": "Growth And Store Routing",
       "domainId": "domain.process",
       "path": "knowledge/process/tool-recipes/growth-and-store-routing.md",
-      "loadWhen": "routing ASO/paid-UA/viral-loop/UGC/Fastlane/GEO work to the right specialist reference — routed from tool-recipes.md",
+      "loadWhen": "delegating ASO/paid-UA/viral-loop/UGC/Fastlane/GEO work to a specialist skill — routed from tool-recipes.md; complements the Marketing and growth rows, never replaces them",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sources": [
@@ -4466,7 +4466,7 @@
       "title": "Research Intelligence",
       "domainId": "domain.process",
       "path": "knowledge/process/tool-recipes/research-intelligence.md",
-      "loadWhen": "AppKittie store intelligence, XPOZ social-language research, Firecrawl web intelligence, Refero UX pattern research, or name/keyword collision checks — routed from tool-recipes.md",
+      "loadWhen": "delegating AppKittie store intelligence, XPOZ social-language, Firecrawl web intelligence, Refero UX pattern research, or name/keyword collision checks — routed from tool-recipes.md; complements the Market research rows",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sources": [
@@ -4498,7 +4498,7 @@
       "title": "Revenue Email Analytics",
       "domainId": "domain.process",
       "path": "knowledge/process/tool-recipes/revenue-email-analytics.md",
-      "loadWhen": "routing RevenueCat/Stripe, Resend, or PostHog setup work, including the RevenueCat Economics Pull recipe — routed from tool-recipes.md",
+      "loadWhen": "delegating RevenueCat/Stripe, Resend, or PostHog setup to a specialist skill, including the RevenueCat Economics Pull recipe — routed from tool-recipes.md; complements the money and analytics rows",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
@@ -4605,7 +4605,7 @@
       "title": "Product Moat",
       "domainId": "domain.product",
       "path": "knowledge/product/product-moat.md",
-      "loadWhen": "before product/SPEC.md, design/design.md, onboarding, ads, store screenshots, content assets, or engineering plans are treated as ready; on \"11-star run\"/\"11-star pass\" — follow the 11-Star Run Protocol before any other output",
+      "loadWhen": "before the spec or launch surfaces harden — the moat and defensibility test for what makes this app hard to copy; see eleven-star-experience.md for the 11-Star Run Protocol itself",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
@@ -5151,6 +5151,7 @@
       "path": "knowledge/store/aso-store-ops.md",
       "loadWhen": "before App Store/Play metadata, screenshot planning, ASO audits, keyword research, Apple Search Ads, release/rejection handling, ratings/reviews, or post-launch monitoring",
       "lifecycle": "active",
+      "hub": true,
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
       "sources": [],
@@ -6049,7 +6050,7 @@
       "title": "No-Slop Writing",
       "domainId": "domain.words",
       "path": "knowledge/words/no-slop-writing.md",
-      "loadWhen": "always for dispatched business workers; apply directly before founder-facing or marketing copy — onboarding, store listing, landing, paywall, email, ads, launch posts, UGC scripts, GEO/SEO",
+      "loadWhen": "always for dispatched business workers — the voice and writing-quality bar applied to whatever other lanes produce, covering onboarding, store listing, landing, paywall, email, ads, launch-post wording, UGC scripts, GEO/SEO",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sources": [
@@ -7016,11 +7017,11 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.experience.experience-cards",
         "reference.experience.emotional-design-system",
         "reference.experience.emotional-experience-design",
         "reference.experience.emotional-experience-measurement",
-        "reference.experience.ethics-guardrail",
-        "reference.experience.experience-cards"
+        "reference.experience.ethics-guardrail"
       ],
       "roleId": "role.product-leader",
       "laneIds": [
@@ -7061,10 +7062,10 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.experience.experience-cards",
         "reference.experience.consumer-product-design-agency",
         "reference.experience.emotional-design-system",
-        "reference.experience.ethics-guardrail",
-        "reference.experience.experience-cards"
+        "reference.experience.ethics-guardrail"
       ],
       "roleId": "role.security-architect",
       "laneIds": [

@@ -39,7 +39,7 @@ Format caution — Veo 3.1: hard format limits are 16:9 or 9:16 only, and durati
 
 Ad-reference caution: ad references (`--ad-reference-id`) are MUTUALLY EXCLUSIVE with `--hook_id`/`--setting_id` at generation time. Pick reference-driven OR composed-from-blocks, never both in the same call.
 
-Cost-Tier Discipline: by default, use the quality-first model for each task (matching the upstream `higgsfield-generate` skill default). The cheap-first z_image → production-model path (Recipe 6 below) is a spend-reduction option offered ONLY at the `paid-tool-routing.md` spend-confirmation prompt, never applied silently. This intentionally overrides the upstream quality-first default because this skill is spend-sensitive and founder-gated.
+Cost-Tier Discipline: by default, use the quality-first model for each task (matching the upstream `higgsfield-generate` skill default). The cheap-first z_image → production-model path (Recipe 6 below) is a spend-reduction option offered ONLY at the [`paid-tool-routing.md`](../../operations/paid-tool-routing.md) spend-confirmation prompt, never applied silently. This intentionally overrides the upstream quality-first default because this skill is spend-sensitive and founder-gated.
 
 Rules:
 - Put `design/design.md` constraints into the generation brief: palette, typography mood, shapes, texture, motion energy, banned aesthetics, and intended surface.
@@ -189,7 +189,17 @@ Rules that hold across a batch:
 
 ## Higgsfield Chained Recipes
 
-These are the canonical recipe bodies. Other files route to a recipe by name and add only their surface-specific note.
+These are the canonical recipe bodies. Other files route to a recipe by name and add only their surface-specific note. Pick from this table; run only the matching recipe.
+
+| Recipe | Run when |
+| --- | --- |
+| [1: Soul-Once Founder-Face Ads](#recipe-1-soul-once-founder-face-ads) | the founder's own face should front ads or editorial content |
+| [2: App Store URL → UGC Ad Batch](#recipe-2-app-store-url--ugc-ad-batch-click-to-ad) | a live store listing exists and the ask is a batch of UGC-style ads from it |
+| [3: Virality Closed Loop](#recipe-3-virality-closed-loop) | published clips need scoring and the next batch should learn from the winners |
+| [4: Master → All Platforms](#recipe-4-master--all-platforms-reframe--personal_clipper) | one master asset must fan out to every aspect ratio and platform cut |
+| [5: Seasonal Restyle Refresh](#recipe-5-seasonal-restyle-refresh) | existing creative needs a holiday or seasonal reskin without a new concept |
+| [6: Cheap-First Direction](#recipe-6-cheap-first-direction-z_image--production-model) | direction is unproven — explore cheaply before spending on a production model |
+| [7: Script-First Believable-Person UGC](#recipe-7-script-first-believable-person-ugc-first-frame--seedance-25) | the clip must pass as a real person filming themselves; script and believability gates apply |
 
 ### Recipe 1: Soul-Once Founder-Face Ads
 

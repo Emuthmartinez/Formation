@@ -218,6 +218,20 @@
 .matrix-system-summary { margin: 12px 0 0; color: var(--muted); font-size: 11px; }
 .launch-phase-matrix tbody th { font-size: 13px; }
 .launch-phase-matrix td { color: var(--muted); font-size: 11px; }
+.launch-phase-matrix td button { border: 0; background: transparent; font: inherit; color: var(--forest); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 0; display: block; }
+.launch-phase-matrix td small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+.matrix-flag { color: var(--amber); font-style: normal; font-weight: 700; }
+.matrix-conditional-knowledge { margin-top: 16px; }
+.matrix-conditional-knowledge ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.matrix-conditional-knowledge li { color: var(--ink-soft); font-size: 12px; }
+.matrix-integrity { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+.matrix-integrity h3 { margin: 0 0 4px; font-size: 13px; }
+.matrix-integrity > p { margin: 0 0 10px; font-size: 12px; }
+.matrix-integrity ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.matrix-integrity li { border: 1px solid var(--line); background: var(--paper); border-radius: 6px; padding: 9px 11px; }
+.matrix-integrity li strong { display: block; font-size: 12px; }
+.matrix-integrity li span { color: var(--muted); font-size: 10px; }
+.matrix-integrity li p { margin: 5px 0 0; color: var(--ink-soft); font-size: 11px; line-height: 1.45; }
 .engine-session__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
 .engine-session__head h3 { margin: 8px 0 6px; font-size: 21px; font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
 .engine-session__headline { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.55; max-width: 640px; }

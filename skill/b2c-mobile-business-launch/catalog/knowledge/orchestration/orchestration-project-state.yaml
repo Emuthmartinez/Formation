@@ -3,8 +3,8 @@ id: reference.orchestration.project-state
 title: Project State
 domain_id: domain.orchestration
 document_path: knowledge/orchestration/project-state.md
-load_when: start of multi-lane work; resuming a prior session; before provider/store mutations, handoff, or subagent
-  dispatch; when rendering the cockpit
+load_when: creating, reading, or patching state/PROJECT_STATE.yaml — the durable state schema, reducer contract, and
+  resume-from-state rules; load together with parallel-agent-orchestration.md when dispatching subagents
 lifecycle: active
 bindings:
   workflow_ids:

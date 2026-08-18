@@ -2,7 +2,7 @@
 
 Use this before MobAI device automation, screenshots, screen recordings, polished demo videos, app-preview clips, bug reproductions, mobile harness work, or MobAI-adjacent build/test tooling.
 
-MobAI has a free tier for one device and limited daily AI usage. Plus/Pro capabilities are paid/account-gated, including unlimited daily usage, parallel suites, multi-device runs, and offline mode. Load `paid-tool-routing.md` before spending, assuming a paid plan, or replacing an intended MobAI cross-platform route with an Apple-only or otherwise narrower fallback. Missing runtime access is not evidence that the founder lacks a MobAI account or wants reduced coverage.
+MobAI has a free tier for one device and limited daily AI usage. Plus/Pro capabilities are paid/account-gated, including unlimited daily usage, parallel suites, multi-device runs, and offline mode. Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before spending, assuming a paid plan, or replacing an intended MobAI cross-platform route with an Apple-only or otherwise narrower fallback. Missing runtime access is not evidence that the founder lacks a MobAI account or wants reduced coverage.
 
 ## Contents
 

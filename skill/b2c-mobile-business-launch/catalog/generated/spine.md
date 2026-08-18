@@ -26,3 +26,33 @@ Generated from catalog/phases.ts. Edit the catalog, not this file.
 | 6b | Post-launch operations | operations/POST_LAUNCH_OPS.md, operations/LAUNCH_RETRO.md, day-30 scope revisit |
 
 <!-- catalog-generated:end phase-spine -->
+
+<!-- catalog-generated:start phase-area-matrix -->
+# Work By Phase And Area
+
+Generated from catalog/workflows and catalog/domains.ts. Each cell links to the area's Reference Index section.
+
+| Phase | Areas with work |
+| --- | --- |
+| 0 | [Driving the work](routing.md#driving-the-work) (1) |
+| 0b | [Running the business](routing.md#running-the-business) (1) |
+| 0c | [Running the business](routing.md#running-the-business) (1) |
+| 1 | [Market research](routing.md#market-research) (2) |
+| 1b | [Analytics and tracking](routing.md#analytics-and-tracking) (1) |
+| 1c | [How the app feels](routing.md#how-the-app-feels) (4) |
+| 1d | [Marketing and growth](routing.md#marketing-and-growth) (1) |
+| 1e | [Marketing and growth](routing.md#marketing-and-growth) (2) |
+| 1f | [Running the launch](routing.md#running-the-launch) (1) · [Building the app](routing.md#building-the-app) (1) |
+| 1g | [Privacy, security, and legal](routing.md#privacy-security-and-legal) (1) |
+| 2 | [How the app feels](routing.md#how-the-app-feels) (1) · [Look and feel](routing.md#look-and-feel) (4) |
+| 3 | [Look and feel](routing.md#look-and-feel) (1) · [Building the app](routing.md#building-the-app) (1) · [App Store and Google Play](routing.md#app-store-and-google-play) (11) · [Marketing and growth](routing.md#marketing-and-growth) (1) · [Privacy, security, and legal](routing.md#privacy-security-and-legal) (3) |
+| 3b | [Pricing and getting paid](routing.md#pricing-and-getting-paid) (1) |
+| 4 | [Running the business](routing.md#running-the-business) (1) · [Marketing and growth](routing.md#marketing-and-growth) (3) |
+| 5 | [Building the app](routing.md#building-the-app) (1) |
+| 5b | [Building the app](routing.md#building-the-app) (6) · [App Store and Google Play](routing.md#app-store-and-google-play) (1) |
+| 5c | [App Store and Google Play](routing.md#app-store-and-google-play) (1) · [Privacy, security, and legal](routing.md#privacy-security-and-legal) (3) |
+| 6 | [Running the business](routing.md#running-the-business) (1) · [Marketing and growth](routing.md#marketing-and-growth) (3) |
+| 6b | [Running the business](routing.md#running-the-business) (1) |
+| Cross-phase (always-on) | [Running the launch](routing.md#running-the-launch) (4) · [Driving the work](routing.md#driving-the-work) (1) · [Running the business](routing.md#running-the-business) (2) · [What you're building](routing.md#what-youre-building) (1) · [Look and feel](routing.md#look-and-feel) (1) · [Every word a user reads](routing.md#every-word-a-user-reads) (1) |
+
+<!-- catalog-generated:end phase-area-matrix -->

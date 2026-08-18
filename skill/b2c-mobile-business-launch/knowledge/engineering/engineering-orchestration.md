@@ -178,7 +178,7 @@ Parallel safety check:
 
 Use `ce-worktree` when parallel engineering lanes need isolation. Prefer meaningful branch/worktree names such as `feat/onboarding-analytics` or `fix/revenuecat-entitlement-sync`.
 
-MobAI is serialized: one orchestrator owns the device flow, while other agents may inspect code, prepare fixtures, or analyze logs in parallel. Its free tier needs no spend approval; Plus/Pro-only capabilities do. If MobAI is unavailable, use `paid-tool-routing.md` before substituting XcodeBuildMCP or another device/simulator route because the replacement changes platform coverage and proof quality.
+MobAI is serialized: one orchestrator owns the device flow, while other agents may inspect code, prepare fixtures, or analyze logs in parallel. Its free tier needs no spend approval; Plus/Pro-only capabilities do. If MobAI is unavailable, use [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before substituting XcodeBuildMCP or another device/simulator route because the replacement changes platform coverage and proof quality.
 
 ## 6. `engineering/ENGINEERING_PLAN.md` Requirements
 

@@ -11,7 +11,7 @@ One brand timing system, two delivery lanes. Both read the same promoted `--moti
 | **Baked** | Remotion (`remotion-content-assets.md`) | hero loop `.webm`/`.mp4` + poster, section media tiles, ad/store art — render once, embed | live scroll/hover/cursor behavior |
 | **Live** | `motion/react` (`https://motion.dev/docs/react`) | in-view stagger reveals, scroll-linked parallax, sticky scrollytelling, count-up, cursor spotlight, 3D tilt, marquee | frame-exact video output |
 
-Remotion is the wrong *primary* tool for landing motion: it renders frames, not live DOM behavior. The "wow" of a motionsites-grade page is ~85% the live lane. Do not re-litigate this split per launch; record the baked-video opt-in (license-gated per `paid-tool-routing.md`) in `strategy/TOOL_DECISIONS.md`.
+Remotion is the wrong *primary* tool for landing motion: it renders frames, not live DOM behavior. The "wow" of a motionsites-grade page is ~85% the live lane. Do not re-litigate this split per launch; record the baked-video opt-in (license-gated per [`paid-tool-routing.md`](../operations/paid-tool-routing.md)) in `strategy/TOOL_DECISIONS.md`.
 
 ## The section library
 
