@@ -5,7 +5,8 @@ import { pathToFileURL } from "node:url";
 import { assert, skillRoot, type Harness } from "./_harness.js";
 import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 import { internalVocabularyBlocklist } from "../../core/session/digest.js";
-import { DELIBERATELY_UNDECLARED_PROVIDER_IDS, PROVISIONING_MANIFEST, provisioningProviderIds } from "../../core/provisioning/requirements.js";
+import { DELIBERATELY_UNDECLARED_PROVIDER_IDS, ledgerRouteFor, PROVISIONING_MANIFEST, provisioningProviderIds } from "../../core/provisioning/requirements.js";
+import { accessRouteValues } from "../../core/schema/types.js";
 import {
   lookupDopplerSecretNames,
   lookupEnvFileKeys,
@@ -91,6 +92,30 @@ export function register(harness: Harness): void {
       }
     },
   );
+
+  harness.check("provisioning/requirements: every manifest provider declares at least one known access route", () => {
+    const known = new Set<string>(accessRouteValues);
+    for (const provider of PROVISIONING_MANIFEST) {
+      assert(provider.accessRoutes.length > 0, `${provider.providerId} declares zero access routes`);
+      for (const route of provider.accessRoutes) {
+        assert(known.has(route), `${provider.providerId} declares unknown access route "${route}"`);
+      }
+    }
+  });
+
+  harness.check("provisioning/requirements: ledgerRouteFor stays inside the agent-operations schema's route enum", () => {
+    const schema = JSON.parse(readFileSync(path.join(skillRoot, "workspace/business/operations/agent-operations.schema.json"), "utf8")) as {
+      $defs: { capability: { properties: { kind: { enum: string[] } } }; action: { properties: { route: { enum: string[] } } } };
+    };
+    const capabilityKinds = new Set(schema.$defs.capability.properties.kind.enum);
+    const actionRoutes = new Set(schema.$defs.action.properties.route.enum);
+    for (const route of accessRouteValues) {
+      const ledgerRoute = ledgerRouteFor(route);
+      if (ledgerRoute === "no_ledger_action") continue;
+      assert(capabilityKinds.has(ledgerRoute), `ledgerRouteFor("${route}") = "${ledgerRoute}" is not a capability.kind enum member — the ledger enum drifted`);
+      assert(actionRoutes.has(ledgerRoute), `ledgerRouteFor("${route}") = "${ledgerRoute}" is not an action.route enum member — the ledger enum drifted`);
+    }
+  });
 
   // --- external requirements are never satisfied by presence alone ---------------------------
 

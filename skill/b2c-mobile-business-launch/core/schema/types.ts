@@ -36,6 +36,19 @@ export const statusValues: readonly Status[] = [
   "cancelled",
 ];
 
+/**
+ * How an agent reaches and operates a provider: the typed vocabulary behind the prose
+ * "setup route" in knowledge/operations/provider-state-recipes.md. Each provisioning
+ * manifest entry declares the routes its provider supports (core/provisioning/requirements.ts
+ * accessRoutes); business state records the one in use (v1 tools.<name>.access_route, v2
+ * providers.<name>.accessRoute — "not_selected" until chosen). Finer-grained than the
+ * agent-operations ledger's capability/action vocabulary; ledgerRouteFor() in
+ * core/provisioning/requirements.ts is the total coarsening map between the two.
+ */
+export type AccessRoute = "mcp" | "api" | "cli" | "browser" | "native_device" | "skill_pack" | "manual";
+
+export const accessRouteValues: readonly AccessRoute[] = ["mcp", "api", "cli", "browser", "native_device", "skill_pack", "manual"];
+
 /** v1 business-state lane status (tooling/lib/launch-state.ts statusValues). */
 export type V1LaneStatus = "not_started" | "partial" | "blocked" | "not_needed" | "deferred" | "done";
 
