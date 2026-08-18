@@ -262,6 +262,10 @@ export function register(h: Harness): void {
   const ascContract = makeEmptyFixture("asc-command-contract");
   mkdirSync(path.join(ascContract, "knowledge", "store"), { recursive: true });
   const currentAscCommands = [
+    "asc install-skills",
+    "asc telemetry status",
+    "asc-analytics-reports",
+    "asc-ad-hoc-distribution",
     "asc apps view --id APP_ID",
     "asc status --app APP_ID",
     "asc review status --app APP_ID",

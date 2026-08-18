@@ -31,7 +31,7 @@ Refresh these before running or writing commands:
 - Official Apple App Store Connect docs referenced in `store-console-workflow.md`
 - Official Apple signing/account docs referenced in `apple-signing-release.md`
 
-As of the July 13, 2026 GitHub source and local `asc` 2.8.1 help, the CLI is a scriptable, JSON-first App Store Connect API tool for TestFlight, builds, submissions, signing, analytics, screenshots, subscriptions, and related workflows. The 2.x app-detail read is `asc apps view`; `asc apps get` is a pre-2.x command and must not be copied into executable guidance. The skills repo is a community-maintained, unofficial agent-skill pack and is not affiliated with Apple.
+As of the August 17, 2026 GitHub source and local `asc` 4.4.3 help, the CLI is a scriptable, JSON-first App Store Connect API tool for TestFlight, builds, submissions, signing, analytics, screenshots, subscriptions, Apple Ads, and related workflows. The app-detail read is `asc apps view --id`; `asc apps get` is a legacy command and must not be copied into executable guidance. The skills repo is a community-maintained, unofficial agent-skill pack and is not affiliated with Apple.
 
 ## When To Use
 
@@ -51,9 +51,12 @@ Still create `store/STORE_CONSOLE.md` and `store/store-console.html`. The CLI ca
 
 When installed, route to these skill areas:
 - `asc-cli-usage`: canonical commands, flags, output, pagination, auth
+- `asc-analytics-reports`: private analytics report discovery, download, and integrity verification
+- `asc-apple-ads`: Apple Ads auth, reporting, guarded campaign operations, and v5 migration
 - `asc-workflow`: repo-local `.asc/workflow.json`, dry-run, validation, hooks, conditionals
 - `asc-app-create-ui`: app record creation by browser automation when API coverage is missing
 - `asc-xcode-build`: archive/export/build-number workflows
+- `asc-ad-hoc-distribution`: experimental private iOS distribution with plan-hash approval and live verification
 - `asc-shots-pipeline`: simulator screenshot capture, framing, staged upload
 - `asc-release-flow`: readiness, staging, validation, submission blockers
 - `asc-signing-setup`: bundle IDs, capabilities, certificates, profiles
@@ -77,10 +80,11 @@ For App Store listing work, also load `app-store-listing-prep.md`. CLI automatio
 
 Treat `asc-app-create-ui` as the expected app-record creation route when the API route is missing or the upstream skill pack says browser automation is required. That still counts as ASC CLI skill-pack routing; it is not a reason to declare the task impossible.
 
-Install only with founder approval if it is not already available:
+Install only with founder approval if it is not already available. `asc install-skills` installs the CLI's reviewed, commit-pinned core pack. To install the current full pack for Cursor, Claude Code, and Codex, use the explicit global agent selection:
 
 ```bash
-npx skills add rorkai/app-store-connect-cli-skills
+asc install-skills
+npx skills add rorkai/app-store-connect-cli-skills --global --agent cursor claude-code codex --skill '*' --yes
 ```
 
 ## CLI Routing
@@ -90,6 +94,7 @@ Use JSON output for agent automation:
 ```bash
 asc auth status --validate
 asc auth doctor
+asc telemetry status
 asc apps list --output json --pretty
 asc apps view --id "123456789" --output json --pretty
 asc account status --app "123456789" --output table
@@ -142,7 +147,7 @@ These notes exist because agents repeatedly burned live-store cycles guessing fl
 
 - **Pre-use `--help` rule.** Before the first use of any `asc` subcommand not shown in this file, run `asc <subcommand> --help` and record the confirmed flags. If a command errors on a flag, run `asc <cmd> --help` before retrying — never retry a mutating command with a guessed alternate flag. (Failure card: `asc-flag-drift`.)
 - **`--confirm` is a CLI-required gate, not just a founder gate.** Destructive/mutating commands (`asc review cancel`, `asc review submit`, `asc subscriptions review submit`, release actions) error and do nothing unless `--confirm` is passed. So they need *both* the CLI `--confirm` flag *and* explicit founder approval before you run them. Omitting `--confirm` does not "safely no-op into a dry run" — it just errors; check `--help` for the required flags before the first live call.
-- **`validate` form.** In `asc 0.38.1`, validation accepts either `--version <VERSION_STRING>` or `--version-id <VERSION_ID>` with `--app`; there is no `asc validate app-store-version` subcommand. Always confirm current local help before use.
+- **`validate` form.** In `asc 4.4.3`, validation accepts either `--version <VERSION_STRING>` or `--version-id <VERSION_ID>` with `--app`; there is no `asc validate app-store-version` subcommand. Always confirm current local help before use.
 - **Auth env vars.** The `asc` CLI reads `ASC_KEY_ID`, `ASC_ISSUER_ID`, and `ASC_PRIVATE_KEY_PATH` (the **path** to the `.p8`, confirmed from the CLI's own auth hint — not the key contents). Keep these names consistent with `state/PROJECT_STATE.yaml`. See "ASC Auth Setup And Recovery" above for the full auth ladder (keychain profiles, account-level keys, `asc auth init/login`). Do not `source` a `.env`/`clueless.env` that contains comments or unquoted values — that throws `command not found` on every invocation; extract single values with the awk pattern in [`secrets-management.md`](../operations/secrets-management.md) ("Env file extraction — never `source`").
 - **Internal TestFlight groups auto-distribute.** Internal groups deliver to all internal testers automatically; do not pass a skip flag unless you intend to block internal delivery. External distribution always needs founder approval.
 - **Test notes are idempotent updates.** Updating a build's test notes is an update, not a create — do not create a second build record when one already exists.
