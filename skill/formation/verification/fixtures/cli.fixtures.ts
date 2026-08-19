@@ -117,8 +117,27 @@ export function register(harness: Harness): void {
     const badSlug = runBin(["new", "Corner_Bakery"], { cwd: temp });
     assert(badSlug.code === 1, `a non-slug name must be refused, got exit ${badSlug.code}`);
 
+    // `update` is honest about where it runs: a git checkout dry-runs; an installed runtime
+    // (the synced ~/.agents copy has no .git anywhere above it) refuses by name. Both are the
+    // command working — the fixture asserts whichever contract applies to THIS install.
     const update = runBin(["update"]);
-    assert(update.code === 0, `update dry-run must exit 0 in a checkout, got ${update.code}: ${update.output.slice(-300)}`);
-    assert(update.output.includes("Engine version:") && update.output.includes("Dry run only"), "update dry-run must report the version and stop");
+    if (gitCheckoutAbove(skillRoot)) {
+      assert(update.code === 0, `update dry-run must exit 0 in a checkout, got ${update.code}: ${update.output.slice(-300)}`);
+      assert(update.output.includes("Engine version:") && update.output.includes("Dry run only"), "update dry-run must report the version and stop");
+    } else {
+      assert(update.code === 1, `update outside a checkout must exit 1, got ${update.code}: ${update.output.slice(-300)}`);
+      assert(update.output.includes("update.not_a_checkout"), "an installed runtime must refuse self-update by name with the tag-pinning guidance");
+    }
   });
+}
+
+/** Mirrors update.ts's own detection: any .git (dir or worktree file) on the path above. */
+function gitCheckoutAbove(start: string): boolean {
+  let current = start;
+  for (;;) {
+    if (existsSync(path.join(current, ".git"))) return true;
+    const parent = path.dirname(current);
+    if (parent === current) return false;
+    current = parent;
+  }
 }
