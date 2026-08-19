@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.148.0",
+  "skillVersion": "0.149.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -11514,6 +11514,13 @@
       "command": "catalog:render-routing",
       "scriptPath": "catalog/render-routing.ts",
       "ownerDomainId": "domain.process",
+      "audit": "required"
+    },
+    {
+      "id": "gate.check-adapter-contract",
+      "command": "check:adapter-contract",
+      "scriptPath": "validation/repository/check-adapter-contract.ts",
+      "ownerDomainId": "domain.machine",
       "audit": "required"
     },
     {

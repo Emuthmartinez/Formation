@@ -17,6 +17,8 @@ import { loadBusinessStateFile, loadCatalogFile, loadControlFile, loadLedgerFile
 import { buildPlanReport, type HeldNode, type PlanReport } from "../session/plan.js";
 import { translateParkReason } from "../session/digest.js";
 import { PROVISIONING_MANIFEST } from "../provisioning/requirements.js";
+import { ADAPTER_CONTRACT_VERSION } from "./contract.js";
+import { validateBoundaryReport } from "../schema/index.js";
 
 /**
  * The engine half of the platform-to-engine execution boundary (docs/architecture.md,
@@ -61,6 +63,8 @@ export interface ExecutionWorkflowState {
 
 export interface ExecutionBoundaryReport {
   readonly schemaVersion: "1.1.0";
+  /** Adapter contract A version (core/adapters/contract.ts) — consumers accept on major match. */
+  readonly contractVersion: string;
   readonly generatedAt: string;
   readonly workspaceReady: boolean;
   /** Present when workspaceReady is false: why the engine cannot plan against this workspace. */
@@ -371,7 +375,7 @@ export function buildBoundaryWorkflows(plan: CompiledPlan, report: PlanReport, n
 }
 
 function notReady(reason: string, now: string): ExecutionBoundaryReport {
-  return { schemaVersion: "1.1.0", generatedAt: now, workspaceReady: false, reason };
+  return { schemaVersion: "1.1.0", contractVersion: ADAPTER_CONTRACT_VERSION, generatedAt: now, workspaceReady: false, reason };
 }
 
 interface SanitizedAgentOperations {
@@ -390,11 +394,18 @@ function readAgentOperations(filePath: string): SanitizedAgentOperations {
 }
 
 function serviceName(providerId: string): string {
-  return providerId.replace(/^provider\./u, "").split(/[.-]/u).map((part) => part ? `${part[0]!.toUpperCase()}${part.slice(1)}` : part).join(" ");
+  return providerId
+    .replace(/^provider\./u, "")
+    .split(/[.-]/u)
+    .map((part) => (part ? `${part[0]!.toUpperCase()}${part.slice(1)}` : part))
+    .join(" ");
 }
 
 function providerMatches(providerId: string, label = ""): boolean {
-  const needle = providerId.replace(/^provider\./u, "").replaceAll("-", " ").toLowerCase();
+  const needle = providerId
+    .replace(/^provider\./u, "")
+    .replaceAll("-", " ")
+    .toLowerCase();
   const candidate = label.trim().toLowerCase();
   return candidate.length > 0 && (candidate.includes(needle) || needle.includes(candidate));
 }
@@ -438,64 +449,78 @@ export function buildLaunchMatrix(
       state: run.nodes[node.id]?.status === "succeeded" ? "verified" : run.nodes[node.id]?.status === "failed" ? "failed" : "pending",
     },
   }));
-  const workflows = plan.nodes.filter((node) => node.groupId).map((node): LaunchMatrixWorkflow => {
-    const state = stateByWorkflow.get(node.workflowId)!;
-    const scope = businessState.workflowApplicability?.[node.workflowId];
-    const applicability = node.applicability.mode === "always" ? "required" : scope?.verdict ?? "unknown";
-    const latestAttempt = run.nodes[node.id]?.attempts.at(-1);
-    const services = node.providerIds.map((providerId) => {
-      const declaration = PROVISIONING_MANIFEST.find((item) => item.providerId === providerId);
-      const capability = agentOperations.capabilities?.find((item) => providerMatches(providerId, `${item.provider ?? ""} ${item.id ?? ""}`));
-      const proof = agentOperations.actions?.find((item) => providerMatches(providerId, item.provider) && item.result?.status === "succeeded" && item.redactionAttested === true);
-      const attemptProof = latestAttempt?.status === "succeeded" && latestAttempt.evidence.some((entry) => entry.toLowerCase().includes(providerId.toLowerCase()));
+  const workflows = plan.nodes
+    .filter((node) => node.groupId)
+    .map((node): LaunchMatrixWorkflow => {
+      const state = stateByWorkflow.get(node.workflowId)!;
+      const scope = businessState.workflowApplicability?.[node.workflowId];
+      const applicability = node.applicability.mode === "always" ? "required" : (scope?.verdict ?? "unknown");
+      const latestAttempt = run.nodes[node.id]?.attempts.at(-1);
+      const services = node.providerIds.map((providerId) => {
+        const declaration = PROVISIONING_MANIFEST.find((item) => item.providerId === providerId);
+        const capability = agentOperations.capabilities?.find((item) => providerMatches(providerId, `${item.provider ?? ""} ${item.id ?? ""}`));
+        const proof = agentOperations.actions?.find(
+          (item) => providerMatches(providerId, item.provider) && item.result?.status === "succeeded" && item.redactionAttested === true,
+        );
+        const attemptProof =
+          latestAttempt?.status === "succeeded" && latestAttempt.evidence.some((entry) => entry.toLowerCase().includes(providerId.toLowerCase()));
+        return {
+          id: providerId,
+          name: serviceName(providerId),
+          purpose: declaration?.unlocks ?? `Supports ${node.title}.`,
+          state:
+            proof || attemptProof
+              ? "verified"
+              : capability?.status === "available"
+                ? "connected"
+                : capability?.status === "unavailable" || capability?.status === "blocked"
+                  ? capability.status
+                  : "planned",
+          ...(proof?.occurredAt || (attemptProof ? latestAttempt?.finishedAt : undefined) || capability?.checkedAt
+            ? { checkedAt: proof?.occurredAt || (attemptProof ? latestAttempt?.finishedAt : undefined) || capability?.checkedAt }
+            : {}),
+        };
+      });
       return {
-        id: providerId,
-        name: serviceName(providerId),
-        purpose: declaration?.unlocks ?? `Supports ${node.title}.`,
-        state: proof || attemptProof ? "verified" : capability?.status === "available" ? "connected" : capability?.status === "unavailable" || capability?.status === "blocked" ? capability.status : "planned",
-        ...(proof?.occurredAt || (attemptProof ? latestAttempt?.finishedAt : undefined) || capability?.checkedAt ? { checkedAt: proof?.occurredAt || (attemptProof ? latestAttempt?.finishedAt : undefined) || capability?.checkedAt } : {}),
+        workflowId: node.workflowId,
+        groupId: node.groupId!,
+        title: node.title,
+        summary: node.trigger ?? `Complete ${node.title}.`,
+        status: state.status,
+        ...(state.founderReason ? { founderReason: state.founderReason } : {}),
+        applicability,
+        phaseIds: [...node.phaseIds],
+        dependencyWorkflowIds: node.dependencies.map((id) => workflowByNode.get(id)!).filter(Boolean),
+        dependentWorkflowIds: dependents.get(node.id) ?? [],
+        ...(node.role ? { role: { id: node.role.id, name: node.role.name } } : {}),
+        knowledge: (node.references ?? []).map(presentKnowledge),
+        conditionalKnowledge: (() => {
+          // Same load/route split and path-level dedupe as composeNodeBrief: mandatory references
+          // win, and a reference shared by two packs appears once, under the first pack.
+          const seen = new Set((node.references ?? []).map((reference) => reference.path));
+          return (
+            node.role?.contextPacks.flatMap((pack) =>
+              pack.references.flatMap((reference) => {
+                if (seen.has(reference.path)) return [];
+                seen.add(reference.path);
+                return [{ ...presentKnowledge(reference), packId: pack.id, packTitle: pack.title }];
+              }),
+            ) ?? []
+          );
+        })(),
+        services,
+        agentTools: node.role?.toolRoutes.map((tool) => ({ id: tool.id, when: tool.when })) ?? [],
+        outputs: node.outputs.map((artifactId) => {
+          const binding = run.artifactBindings.find((item) => item.artifactId === artifactId);
+          return { artifactId, title: binding?.path ?? artifactId, state: binding?.accepted ? "accepted" : binding?.fingerprint ? "produced" : "pending" };
+        }),
+        verification: {
+          kind: node.verification.kind,
+          state: run.nodes[node.id]?.status === "succeeded" ? "verified" : run.nodes[node.id]?.status === "failed" ? "failed" : "pending",
+          evidenceCount: latestAttempt?.evidence.length ?? 0,
+        },
       };
     });
-    return {
-      workflowId: node.workflowId,
-      groupId: node.groupId!,
-      title: node.title,
-      summary: node.trigger ?? `Complete ${node.title}.`,
-      status: state.status,
-      ...(state.founderReason ? { founderReason: state.founderReason } : {}),
-      applicability,
-      phaseIds: [...node.phaseIds],
-      dependencyWorkflowIds: node.dependencies.map((id) => workflowByNode.get(id)!).filter(Boolean),
-      dependentWorkflowIds: dependents.get(node.id) ?? [],
-      ...(node.role ? { role: { id: node.role.id, name: node.role.name } } : {}),
-      knowledge: (node.references ?? []).map(presentKnowledge),
-      conditionalKnowledge: (() => {
-        // Same load/route split and path-level dedupe as composeNodeBrief: mandatory references
-        // win, and a reference shared by two packs appears once, under the first pack.
-        const seen = new Set((node.references ?? []).map((reference) => reference.path));
-        return (
-          node.role?.contextPacks.flatMap((pack) =>
-            pack.references.flatMap((reference) => {
-              if (seen.has(reference.path)) return [];
-              seen.add(reference.path);
-              return [{ ...presentKnowledge(reference), packId: pack.id, packTitle: pack.title }];
-            }),
-          ) ?? []
-        );
-      })(),
-      services,
-      agentTools: node.role?.toolRoutes.map((tool) => ({ id: tool.id, when: tool.when })) ?? [],
-      outputs: node.outputs.map((artifactId) => {
-        const binding = run.artifactBindings.find((item) => item.artifactId === artifactId);
-        return { artifactId, title: binding?.path ?? artifactId, state: binding?.accepted ? "accepted" : binding?.fingerprint ? "produced" : "pending" };
-      }),
-      verification: {
-        kind: node.verification.kind,
-        state: run.nodes[node.id]?.status === "succeeded" ? "verified" : run.nodes[node.id]?.status === "failed" ? "failed" : "pending",
-        evidenceCount: latestAttempt?.evidence.length ?? 0,
-      },
-    };
-  });
   return { groups, workflows, launchIntegrity, systemSummary: { total: systemNodes.length, counts: systemCounts } };
 }
 
@@ -556,6 +581,7 @@ export function describeWorkspace(
   const boundaryWorkflows = buildBoundaryWorkflows(plan, report, nodeStatuses);
   return {
     schemaVersion: "1.1.0",
+    contractVersion: ADAPTER_CONTRACT_VERSION,
     generatedAt: now,
     workspaceReady: true,
     planId: plan.planId,
@@ -585,6 +611,13 @@ function main(): number {
     dopplerConfig: args["doppler-config"],
     secretsMd: args["secrets-md"],
   });
+  // Contract A fail-closed at the emitter: an invalid report is never printed. A consumer that
+  // receives ANY output can trust it validated against core/schema/boundary-report.schema.json.
+  const contractCheck = validateBoundaryReport<ExecutionBoundaryReport>(report);
+  if (!contractCheck.valid) {
+    for (const issue of contractCheck.issues) console.error(`ISSUE boundary.contract_invalid: ${issue.message} (${issue.path})`);
+    return 1;
+  }
   console.log(JSON.stringify(report, null, 2));
   return 0;
 }

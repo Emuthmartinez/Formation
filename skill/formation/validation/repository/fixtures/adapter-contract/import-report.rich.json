@@ -1,0 +1,84 @@
+{
+ "schemaVersion": "1.0.0",
+ "contractVersion": "1.0.0",
+ "generatedAt": "2026-08-19T12:00:00.000Z",
+ "workspaceReady": true,
+ "company": {
+  "name": "Sunset Cafe Deluxe",
+  "slug": "sunset-cafe-deluxe",
+  "stage": "building",
+  "founderName": "A. Founder",
+  "oneLiner": "One promise.",
+  "targetCustomer": "People.",
+  "enginePhase": "phase_2",
+  "launchScope": "essentials",
+  "platforms": [
+   "ios"
+  ]
+ },
+ "claims": [
+  {
+   "importKey": "claim:lane:research",
+   "kind": "recommendation",
+   "statement": "Research recorded finished.",
+   "evidence": [
+    "strategy/RESEARCH.md"
+   ],
+   "origin": {
+    "sourcePath": "state/PROJECT_STATE.yaml",
+    "laneKey": "research",
+    "laneLabel": "Market research"
+   }
+  }
+ ],
+ "decisions": [
+  {
+   "importKey": "decision:go",
+   "title": "Go decision",
+   "decision": "go",
+   "rationale": "Evidence supported it.",
+   "status": "decided",
+   "decidedAt": "2026-08-01",
+   "origin": {
+    "sourcePath": "state/PROJECT_STATE.yaml"
+   }
+  }
+ ],
+ "tasks": [
+  {
+   "importKey": "task:blocker-1",
+   "title": "Fix signing",
+   "urgency": "high",
+   "blocked": true,
+   "origin": {
+    "sourcePath": "state/PROJECT_STATE.yaml"
+   }
+  }
+ ],
+ "deliverables": [
+  {
+   "importKey": "deliverable:brand",
+   "title": "Brand",
+   "sections": [
+    {
+     "title": "Voice",
+     "body": "Short."
+    }
+   ],
+   "fingerprint": "abc123",
+   "origin": {
+    "sourcePath": "strategy/BRAND.md"
+   }
+  }
+ ],
+ "contradictions": [
+  {
+   "code": "import.template_values",
+   "severity": "advisory",
+   "message": "Template example values are still in place.",
+   "origin": {
+    "sourcePath": "state/PROJECT_STATE.yaml"
+   }
+  }
+ ]
+}

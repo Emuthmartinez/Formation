@@ -1,0 +1,357 @@
+{
+ "schemaVersion": "1.1.0",
+ "contractVersion": "1.0.0",
+ "generatedAt": "2026-08-19T12:00:00.000Z",
+ "workspaceReady": true,
+ "planId": "plan.f7ff270aac78b4c4",
+ "catalogVersion": "2.0.0+0.148.0",
+ "runId": "run.f7ff270aac78b4c4.a0de5557",
+ "hasDurableRun": true,
+ "autonomyUnset": false,
+ "workflows": [
+  {
+   "workflowId": "workflow.orchestration.session-continuity-resume",
+   "title": "Session continuity / resume",
+   "status": "upcoming",
+   "founderReason": "Earlier work it was built on changed, so this will be redone."
+  },
+  {
+   "workflowId": "workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep",
+   "title": "Orient, scaffold & state/cockpit upkeep",
+   "status": "finished"
+  }
+ ],
+ "approvals": [
+  {
+   "approvalId": "workflow.operations.paid-tool-routing-and-fallback.approval.1",
+   "workflowId": "workflow.operations.paid-tool-routing-and-fallback",
+   "workflowTitle": "Paid-tool routing & fallback",
+   "description": "approve a paid or constrained fallback",
+   "status": "pending"
+  },
+  {
+   "approvalId": "workflow.operations.secrets-baseline-and-routing.approval.1",
+   "workflowId": "workflow.operations.secrets-baseline-and-routing",
+   "workflowTitle": "Secrets baseline & routing",
+   "description": "provide or authorize credentials",
+   "status": "pending",
+   "protectedCategory": "credentials_access"
+  }
+ ],
+ "results": [
+  {
+   "workflowId": "workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep",
+   "workflowTitle": "Orient, scaffold & state/cockpit upkeep",
+   "attemptId": "run.orchestration.orient-scaffold-and-state-cockpit-upkeep.attempt.1",
+   "attemptNumber": 1,
+   "finishedAt": "2026-08-19T20:43:54.814Z",
+   "verification": "deterministic",
+   "evidence": [
+    "fixture executor: synthetic completion of run.orchestration.orient-scaffold-and-state-cockpit-upkeep for attempt run.orchestration.orient-scaffold-and-state-cockpit-upkeep.attempt.1",
+    "fixture executor: synthetic completion of run.orchestration.orient-scaffold-and-state-cockpit-upkeep for attempt run.orchestration.orient-scaffold-and-state-cockpit-upkeep.attempt.1",
+    "gate:validate:launch-state=passed",
+    "gate:render:launch-cockpit=passed"
+   ],
+   "artifacts": [
+    {
+     "artifactId": "artifact.state-project-state-yaml",
+     "fingerprint": "fixture-fp:run.orchestration.orient-scaffold-and-state-cockpit-upkeep:artifact.state-project-state-yaml"
+    },
+    {
+     "artifactId": "artifact.state-launch-cockpit-html",
+     "fingerprint": "fixture-fp:run.orchestration.orient-scaffold-and-state-cockpit-upkeep:artifact.state-launch-cockpit-html"
+    }
+   ],
+   "declaredTokenBudget": 8000,
+   "producedBySessionId": "golden-1",
+   "verifiedBySessionId": "golden-1"
+  }
+ ],
+ "artifacts": [
+  {
+   "artifactId": "artifact.agents-md",
+   "accepted": false,
+   "fingerprint": "819e9b0f52600831189efebca6a0cfa09cc62eb9e11feed373328f4567076c7a"
+  },
+  {
+   "artifactId": "artifact.analytics-analytics-plan-html",
+   "accepted": false,
+   "fingerprint": "fe92eb8cb3d5309bfb56ab77660e1d56fbf946b03a6d732ba11a11e0aa51107d"
+  },
+  {
+   "artifactId": "artifact.analytics-analytics-md",
+   "accepted": false,
+   "fingerprint": "18718845060cd2c39ad52782582b7d4787d684049bf58921068ff322872ceadf"
+  }
+ ],
+ "launchMatrix": {
+  "groups": [
+   {
+    "id": "market-product",
+    "title": "Market and product",
+    "order": 1
+   },
+   {
+    "id": "experience-brand",
+    "title": "Experience and brand",
+    "order": 2
+   }
+  ],
+  "workflows": [
+   {
+    "workflowId": "workflow.operations.paid-tool-routing-and-fallback",
+    "groupId": "operate-improve",
+    "title": "Paid-tool routing & fallback",
+    "summary": "Before using or replacing any paid/account-gated tool, or before a free fallback",
+    "status": "needs-founder",
+    "founderReason": "approve a paid or constrained fallback",
+    "applicability": "required",
+    "phaseIds": [
+     "phase.0b"
+    ],
+    "dependencyWorkflowIds": [],
+    "dependentWorkflowIds": [
+     "workflow.operations.agent-operations-ledger"
+    ],
+    "role": {
+     "id": "role.operator-readiness",
+     "name": "Operator readiness"
+    },
+    "knowledge": [
+     {
+      "id": "reference.operations.paid-tool-routing",
+      "title": "Paid Tool Routing",
+      "path": "knowledge/operations/paid-tool-routing.md",
+      "loadWhen": "before using or replacing any paid/account-gated tool, before running a free fallback, or when a service is missing from the runtime",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current"
+     }
+    ],
+    "conditionalKnowledge": [
+     {
+      "id": "reference.operations.founder-zero-operator",
+      "title": "Founder-Zero Operator",
+      "path": "knowledge/operations/founder-zero-operator.md",
+      "loadWhen": "always for dispatched business workers; especially every broad launch start, account/social/Doppler bootstrap, founder uncertainty, or attempted checklist handoff",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.founder-language",
+      "packTitle": "Always-on founder language"
+     },
+     {
+      "id": "reference.words.no-slop-writing",
+      "title": "No-Slop Writing",
+      "path": "knowledge/words/no-slop-writing.md",
+      "loadWhen": "always for dispatched business workers \u2014 the voice and writing-quality bar applied to whatever other lanes produce, covering onboarding, store listing, landing, paywall, email, ads, launch-post wording, UGC scripts, GEO/SEO",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.founder-language",
+      "packTitle": "Always-on founder language"
+     },
+     {
+      "id": "reference.operations.frontier-agent-operations",
+      "title": "Frontier Agent Operations",
+      "path": "knowledge/operations/frontier-agent-operations.md",
+      "loadWhen": "before authenticated browser/API/CLI/native action on any provider, social, or store account",
+      "freshness": "internal",
+      "reviewStatus": "internal",
+      "packId": "context.operations",
+      "packTitle": "Founder-zero operations"
+     },
+     {
+      "id": "reference.operations.secrets-management",
+      "title": "Secrets Management",
+      "path": "knowledge/operations/secrets-management.md",
+      "loadWhen": "before any new secret, key, token, env var, webhook secret, or .env; classifying a discovered secret; Doppler config preflight, shell-safety patterns, or production-readiness secret gates \u2014 the deep reference tool-recipes/secrets-and-environment.md routes into",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.operations",
+      "packTitle": "Founder-zero operations"
+     },
+     {
+      "id": "reference.process.provider-proof",
+      "title": "Provider Proof",
+      "path": "knowledge/process/provider-proof.md",
+      "loadWhen": "before marking any provider-backed lane (analytics/revenue/email/store/security/eng) done \u2014 evidence rules and the minimum PROVIDER_PROOF.md ledger row shape",
+      "freshness": "internal",
+      "reviewStatus": "internal",
+      "packId": "context.operations",
+      "packTitle": "Founder-zero operations"
+     },
+     {
+      "id": "reference.store.app-store-connect-cli",
+      "title": "App Store Connect CLI",
+      "path": "knowledge/store/app-store-connect-cli.md",
+      "loadWhen": "before automating App Store Connect with the Rork asc CLI or CLI skill pack \u2014 app creation, metadata, screenshots, TestFlight, review status, RevenueCat catalog sync",
+      "freshness": "reviewed 2026-08-18",
+      "reviewStatus": "current",
+      "packId": "context.store",
+      "packTitle": "Stores"
+     },
+     {
+      "id": "reference.store.app-store-listing-prep",
+      "title": "App Store Listing Prep",
+      "path": "knowledge/store/app-store-listing-prep.md",
+      "loadWhen": "before listing packets, privacy questionnaires, pricing/subscription field maps, custom product pages, in-app events, promotion pages, localization matrices, App Icon/App Preview work, or App Store marketing material",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.store",
+      "packTitle": "Stores"
+     },
+     {
+      "id": "reference.store.apple-signing-release",
+      "title": "Apple Signing Release",
+      "path": "knowledge/store/apple-signing-release.md",
+      "loadWhen": "before ASC upload readiness on any iOS submission path",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.store",
+      "packTitle": "Stores"
+     },
+     {
+      "id": "reference.store.aso-store-ops",
+      "title": "ASO Store Ops",
+      "path": "knowledge/store/aso-store-ops.md",
+      "loadWhen": "before App Store/Play metadata, screenshot planning, ASO audits, keyword research, Apple Search Ads, release/rejection handling, ratings/reviews, or post-launch monitoring",
+      "freshness": "internal",
+      "reviewStatus": "internal",
+      "packId": "context.store",
+      "packTitle": "Stores"
+     },
+     {
+      "id": "reference.store.google-play-release",
+      "title": "Google Play Release",
+      "path": "knowledge/store/google-play-release.md",
+      "loadWhen": "Android is in scope (platforms include android, or an android bundle id exists); before Play Console setup, Data Safety answers, content rating, Play App Signing, release tracks, closed testing, or pre-launch report triage",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.store",
+      "packTitle": "Stores"
+     },
+     {
+      "id": "reference.store.marketplace-regional-compliance",
+      "title": "Marketplace And Regional Compliance",
+      "path": "knowledge/store/marketplace-regional-compliance.md",
+      "loadWhen": "before store distribution in any selected region",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.store",
+      "packTitle": "Stores"
+     },
+     {
+      "id": "reference.store.store-console-workflow",
+      "title": "Store Console Workflow",
+      "path": "knowledge/store/store-console-workflow.md",
+      "loadWhen": "before App Store Connect or Play Console setup, privacy labels/Data safety, screenshot capture/upload, reviewer notes, account-deletion console work, or any \"where do I click and what do I paste\" handoff",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.store",
+      "packTitle": "Stores"
+     },
+     {
+      "id": "reference.engineering.accessibility-readiness",
+      "title": "Accessibility Readiness",
+      "path": "knowledge/engineering/accessibility-readiness.md",
+      "loadWhen": "before accessibility declarations, beta readiness, or store submission",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.device",
+      "packTitle": "Device and accessibility proof"
+     },
+     {
+      "id": "reference.engineering.app-quality",
+      "title": "App Quality And Vitals",
+      "path": "knowledge/engineering/app-quality.md",
+      "loadWhen": "before beta, store submission, production-readiness, or mobile performance claims",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.device",
+      "packTitle": "Device and accessibility proof"
+     },
+     {
+      "id": "reference.engineering.mobai-toolbelt",
+      "title": "MobAI Toolbelt",
+      "path": "knowledge/engineering/mobai-toolbelt.md",
+      "loadWhen": "after the Route Ladder in xcodebuildmcp-testing.md routes device work to MobAI \u2014 before MobAI device automation, .mob generation/healing, repeat or host-script actions, Sync Mode/multi-device work, Android coverage, performance gates, MobAI screenshots/recordings, recorder-skill demo videos and app previews, MobAI CI, or recorder-skill setup",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.device",
+      "packTitle": "Device and accessibility proof"
+     },
+     {
+      "id": "reference.engineering.xcodebuildmcp-testing",
+      "title": "XcodeBuildMCP Testing",
+      "path": "knowledge/engineering/xcodebuildmcp-testing.md",
+      "loadWhen": "first for any \"run the app\", \"check this screen\", \"walk this flow\", \"reproduce this bug\", screenshot, screen-recording, or device-automation request on a local Mac \u2014 the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP or MobAI",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.device",
+      "packTitle": "Device and accessibility proof"
+     },
+     {
+      "id": "reference.process.tool-recipes.device-capture-and-proof",
+      "title": "Device Capture And Proof",
+      "path": "knowledge/process/tool-recipes/device-capture-and-proof.md",
+      "loadWhen": "capturing truthful app UI proof \u2014 the Route Ladder from the in-app iOS Simulator through XcodeBuildMCP/SnapshotPreviews/serve-sim \u2014 routed from tool-recipes.md",
+      "freshness": "reviewed 2026-08-17",
+      "reviewStatus": "current",
+      "packId": "context.device",
+      "packTitle": "Device and accessibility proof"
+     }
+    ],
+    "services": [
+     {
+      "id": "provider.doppler",
+      "name": "Doppler",
+      "purpose": "Lets the agent store and safely inject every other provider's API keys/tokens without raw values ever touching chat, git, or logs.",
+      "state": "planned"
+     }
+    ],
+    "agentTools": [
+     {
+      "id": "connector and plugin inventory",
+      "when": "always before requesting access"
+     },
+     {
+      "id": "provider API/CLI auth probes",
+      "when": "the launch scope names that provider"
+     },
+     {
+      "id": "native device/simulator inventory",
+      "when": "mobile build, screenshots, or store upload is in scope"
+     }
+    ],
+    "outputs": [
+     {
+      "artifactId": "artifact.strategy-tool-decisions-md",
+      "title": "strategy/TOOL_DECISIONS.md",
+      "state": "produced"
+     }
+    ],
+    "verification": {
+     "kind": "fresh_context",
+     "state": "pending",
+     "evidenceCount": 0
+    }
+   }
+  ],
+  "launchIntegrity": [
+   {
+    "workflowId": "workflow.orchestration.session-continuity-resume",
+    "title": "Session continuity / resume",
+    "status": "upcoming",
+    "verification": {
+     "kind": "deterministic",
+     "state": "pending"
+    }
+   }
+  ],
+  "systemSummary": {
+   "total": 7,
+   "counts": {
+    "upcoming": 4,
+    "finished": 3
+   }
+  }
+ }
+}
