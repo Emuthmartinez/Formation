@@ -138,6 +138,7 @@ const BLOCKER_TEXT_EXACT: Record<string, string> = {
   "Founder approval required": "This needs your yes before I go ahead.",
   "A required founder approval was rejected.": "You said no to this, so I'm leaving it alone.",
   "Verification required": "I finished the work here and I'm double-checking it before calling it done.",
+  "Verification rejected.": "I had this work double-checked and the check didn't agree it's finished, so it's parked for another look.",
   "Ran out of attempts for this session.": "This didn't go through after a few tries, so I stopped trying it automatically and I'm flagging it for you.",
 };
 

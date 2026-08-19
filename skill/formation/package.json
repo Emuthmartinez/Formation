@@ -1,6 +1,6 @@
 {
   "name": "formation-skill-runtime",
-  "version": "0.141.0",
+  "version": "0.142.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -36,6 +36,7 @@
     "check:autopilot": "tsx validation/repository/check-autopilot-contract.ts",
     "check:skill-version": "tsx validation/repository/check-skill-version.ts",
     "check:version-discipline": "tsx validation/repository/check-version-discipline.ts",
+    "session:bootstrap": "tsx core/session/bootstrap.ts",
     "check:compound-engineering": "tsx validation/business/engineering/check-compound-engineering-routing.ts",
     "validate:design-state": "tsx validation/business/design/validate-state.ts",
     "check:design-room": "tsx validation/business/design/check-design-room-contract.ts",

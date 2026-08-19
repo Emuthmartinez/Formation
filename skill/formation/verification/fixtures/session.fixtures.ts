@@ -904,7 +904,10 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const handle = bootstrapWorkspace(harness, "unverified-results", researchCatalog, {
       grants: { "domain.research": grant("domain.research", "run-with-guardrails") },
     });
-    const sessionResult = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-unverified-1", "--executor", "fixture"]);
+    // --verifier off: this case pins the OPERATOR acceptance path (core/session/verify.ts), so
+    // the session's own verification sweep — which would accept the node before the boundary
+    // check could observe the withheld state — is deliberately disabled.
+    const sessionResult = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-unverified-1", "--executor", "fixture", "--verifier", "off"]);
     assert(sessionResult.code === 0, `expected exit 0 for the session, got ${sessionResult.code}: ${sessionResult.output}`);
 
     const boundary = runBoundary(["--workspace", handle.dir]);

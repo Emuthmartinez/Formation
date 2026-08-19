@@ -112,10 +112,17 @@ function skillRoot(layout: AuditLayout): string {
  * Ordered audit pipeline. The order mirrors the original audit script chains:
  * typecheck first, repo/skill structure gates, scenario lint + fixtures, then
  * the template-state gates, then renderers.
+ *
+ * `roots` overrides where the business artifacts and skill live — the session runner
+ * (core/session/run.ts) reuses this plan as the single source of truth for each gate's
+ * canonical argument shape when it runs a node's gates against a real business workspace.
+ * Before that reuse existed, the runner passed only a BUSINESS_ROOT env var, and every gate
+ * whose CLI takes --root/--state either failed against the wrong directory or — worse —
+ * silently validated the skill's own reference workspace instead of the business under test.
  */
-export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
-  const T = templatesRoot(layout);
-  const S = skillRoot(layout);
+export function buildAuditPlan(layout: AuditLayout, roots?: { businessRoot?: string; skillRoot?: string }): AuditStep[] {
+  const T = roots?.businessRoot ?? templatesRoot(layout);
+  const S = roots?.skillRoot ?? skillRoot(layout);
   const stateArgs = ["--root", T, "--state", "state/PROJECT_STATE.yaml"];
   const rootArgs = ["--root", T];
 
@@ -158,6 +165,12 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "test:fixtures", kind: "script", serial: true },
     { id: "test:boundaries", kind: "script", serial: true },
     { id: "test:parity", kind: "script", serial: true },
+    // The engine's crash-test dummy: bootstrap a throwaway copy of the reference business, drive
+    // two fixture-executor sessions (with the founder-approval edge between them), prove the
+    // fresh-context verifier sweep accepts work, and prove the verifier-off control still parks
+    // it. Spawns its own session subprocesses, so it runs serially like the suites above; repo
+    // layout only, since it copies workspace/business out of the source tree.
+    { id: "check:engine-e2e", kind: "script", serial: true, repoOnly: true },
     { id: "validate:launch-state", kind: "script", args: stateArgs },
     { id: "validate:design-state", kind: "script", args: rootArgs },
     { id: "check:design-room", kind: "script", args: rootArgs },

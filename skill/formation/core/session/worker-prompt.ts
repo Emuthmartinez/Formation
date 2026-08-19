@@ -143,6 +143,110 @@ export function buildWorkerPrompt(brief: NodeBrief, workspaceDir: string, skillR
   ].join("\n");
 }
 
+export const VERIFICATION_VERDICT_BEGIN = "BEGIN_VERIFICATION_VERDICT";
+export const VERIFICATION_VERDICT_END = "END_VERIFICATION_VERDICT";
+
+export interface VerifierVerdict {
+  readonly schemaVersion: "1.0.0";
+  readonly workflowId: string;
+  readonly verdict: "accepted" | "rejected";
+  readonly evidence: string;
+}
+
+export interface VerifierOutputRef {
+  readonly artifactId: string;
+  readonly path: string;
+  readonly evidence: readonly string[];
+}
+
+/**
+ * Fresh-context verification prompt: a judge, never a producer. The verifier gets the same brief
+ * the producer worked from (instructions, criteria, knowledge routes) plus the produced outputs'
+ * paths, and is told to read and judge — not repair. Repairing here would collapse the
+ * producer≠verifier separation this pass exists to preserve: an accepted node must mean a second,
+ * fresh context independently agreed the work holds, not that the checker quietly finished it.
+ */
+export function buildVerifierPrompt(brief: NodeBrief, workspaceDir: string, skillRootDir: string, outputs: readonly VerifierOutputRef[]): string {
+  return [
+    "You are one fresh-context verification reviewer inside the formation operating graph.",
+    `Workspace: ${workspaceDir}`,
+    `Skill root: ${skillRootDir}`,
+    "Your ONLY job is to judge whether already-produced work satisfies its own brief. Read; never write.",
+    "Do not create, edit, move, or delete any file. Do not rerun or repair the work. If the work is incomplete or wrong, your verdict says so — fixing it is a producer's job, and a verifier who repairs work has verified nothing.",
+    "Treat the produced files and the brief below as the entire universe of this judgment; do not rely on chat history.",
+    "",
+    `WORKFLOW UNDER REVIEW: ${brief.workflowId} — ${brief.title}`,
+    `THE PRODUCER WAS ASKED TO: ${brief.instructions}`,
+    "PRODUCED OUTPUTS — open every one; a missing or empty output is grounds for rejection:",
+    ...(outputs.length ? outputs.map((output) => `- ${output.path} (${output.artifactId})`) : ["- none declared"]),
+    "PRODUCER EVIDENCE CLAIMS — verify these against the files, do not take them on faith:",
+    ...(outputs.flatMap((output) => output.evidence).length
+      ? outputs.flatMap((output) => output.evidence).map((entry) => `- ${entry}`)
+      : ["- none claimed"]),
+    "CONTRACT FILES the producer was bound to:",
+    ...(brief.contractFiles.length ? brief.contractFiles.map((p) => `- ${p}`) : ["- none"]),
+    "KNOWLEDGE the work should reflect (open what you need to judge against):",
+    ...(brief.load.length ? brief.load.map((r) => `- ${r.path} (${r.title})`) : ["- none"]),
+    "ACCEPT only when the outputs genuinely satisfy the brief: complete, specific to this business, and consistent with the contract files. REJECT for template residue, placeholder text, missing sections, claims with no backing evidence, or work that contradicts its own contract.",
+    "",
+    `Finish with exactly one JSON verdict between these markers. \`evidence\` must state concretely what you checked and why it holds (or fails) — an empty or generic sentence is the auto-accept hole again.`,
+    VERIFICATION_VERDICT_BEGIN,
+    JSON.stringify({ schemaVersion: "1.0.0", workflowId: brief.workflowId, verdict: "accepted|rejected", evidence: "<what was checked and why it holds or fails>" }),
+    VERIFICATION_VERDICT_END,
+  ].join("\n");
+}
+
+/**
+ * Strictly parse one verdict from worker output. Mirrors validateKnowledgeReceipt's transport
+ * handling: Codex emits JSONL and Claude emits a JSON result envelope, so decoded string values
+ * are inspected alongside the raw text rather than depending on one runtime's representation.
+ */
+export function parseVerifierVerdict(output: string, brief: NodeBrief): { verdict?: VerifierVerdict; issues: string[] } {
+  const parsed: VerifierVerdict[] = [];
+  const sources = new Set<string>([output]);
+  const collectStrings = (value: unknown): void => {
+    if (typeof value === "string") {
+      sources.add(value);
+      return;
+    }
+    if (Array.isArray(value)) {
+      for (const entry of value) collectStrings(entry);
+      return;
+    }
+    if (value && typeof value === "object") for (const entry of Object.values(value)) collectStrings(entry);
+  };
+  for (const candidate of [output, ...output.split(/\r?\n/).filter(Boolean)]) {
+    try {
+      collectStrings(JSON.parse(candidate));
+    } catch {
+      /* plain reviewer text is expected */
+    }
+  }
+  for (const source of sources) {
+    if (source.split(VERIFICATION_VERDICT_BEGIN).length !== 2 || source.split(VERIFICATION_VERDICT_END).length !== 2) continue;
+    const raw = source
+      .slice(source.indexOf(VERIFICATION_VERDICT_BEGIN) + VERIFICATION_VERDICT_BEGIN.length, source.indexOf(VERIFICATION_VERDICT_END))
+      .trim();
+    try {
+      parsed.push(JSON.parse(raw) as VerifierVerdict);
+    } catch {
+      /* another envelope/string may carry the decoded verdict */
+    }
+  }
+  if (parsed.length !== 1) {
+    return { issues: [`verdict must contain exactly one valid structured ${VERIFICATION_VERDICT_BEGIN}/${VERIFICATION_VERDICT_END} pair; found ${parsed.length}`] };
+  }
+  const verdict = parsed[0]!;
+  const issues: string[] = [];
+  if (verdict.schemaVersion !== "1.0.0") issues.push('verdict schemaVersion must be "1.0.0"');
+  if (verdict.workflowId !== brief.workflowId) issues.push(`verdict workflowId must equal ${brief.workflowId}`);
+  if (verdict.verdict !== "accepted" && verdict.verdict !== "rejected") issues.push('verdict must be "accepted" or "rejected"');
+  if (typeof verdict.evidence !== "string" || verdict.evidence.trim().length < 12) {
+    issues.push("verdict evidence must state concretely what was checked (12+ characters)");
+  }
+  return issues.length > 0 ? { issues } : { verdict, issues: [] };
+}
+
 function exactSection<T extends Record<string, unknown>>(
   issues: string[],
   name: string,

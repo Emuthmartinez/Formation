@@ -1,12 +1,15 @@
-import { closeSync, fsyncSync, mkdirSync, openSync, readFileSync, renameSync, writeSync } from "node:fs";
-import { dirname } from "node:path";
-import { randomUUID } from "node:crypto";
+import { closeSync, existsSync, fsyncSync, lstatSync, mkdirSync, openSync, readFileSync, readdirSync, renameSync, writeSync } from "node:fs";
+import path, { dirname } from "node:path";
+import { createHash, randomUUID } from "node:crypto";
 import { validateCheckpoint, validateRunState } from "../schema/index.js";
 import type { ArtifactBindingV2, AttemptRecordV2, BusinessStateV2, CheckpointDocument, RunNodeStateV2, RunStateDocument, Status } from "../schema/types.js";
 import { sha256, type CompiledPlan, type RunNodeId } from "./compile.js";
 
 /** A lane in one of these states means the workflows that own it are already done. */
 const DONE_LANE_STATUSES: readonly Status[] = ["succeeded", "not_needed", "skipped"];
+
+/** Statuses the frontier would re-examine — the ones an unanswered scope question must not reach dispatch from. */
+const READY_ELIGIBLE_APPLICABILITY: readonly Status[] = ["pending", "ready", "stale"];
 
 export interface SeedRunStateOptions {
   ownerSessionId: string;
@@ -70,7 +73,19 @@ export function reconcileWorkflowApplicability(plan: CompiledPlan, run: RunState
     // Reason, evidence, and timestamp edits explain the verdict but do not change scope. Only a
     // verdict transition can retire or reopen work and invalidate its accepted output.
     const fingerprint = sha256(record?.verdict ?? "unknown");
-    if (state.applicabilityFingerprint === fingerprint) continue;
+    if (state.applicabilityFingerprint === fingerprint) {
+      // The unchanged-fingerprint fast path must still re-park an UNANSWERED question: staleness
+      // invalidation resets a node to a ready-eligible status without touching the applicability
+      // fingerprint, and before this guard a scope-gated node could ride that reset straight into
+      // dispatch with its founder question still open (caught by check:engine-e2e, 2026-08-19 —
+      // both conditional-safety nodes ran with no workflowApplicability record on file).
+      if (!record && READY_ELIGIBLE_APPLICABILITY.includes(state.status)) {
+        state.status = "waiting_founder";
+        state.blocker = `Scope answer needed: ${node.applicability.question}`;
+        run.updatedAt = now;
+      }
+      continue;
+    }
 
     for (const binding of run.artifactBindings.filter((item) => node.outputs.some((artifactId) => artifactId === item.artifactId))) {
       binding.accepted = false;
@@ -278,6 +293,68 @@ export function acceptVerification(
   run.updatedAt = now;
 }
 
+/** Content fingerprint for an environmental artifact: file bytes, or a sorted walk for a directory. */
+function fingerprintWorkspacePath(target: string): string {
+  const hash = createHash("sha256");
+  const visit = (current: string, relative: string): void => {
+    const stat = lstatSync(current);
+    if (stat.isSymbolicLink()) return;
+    hash.update(`${relative}\0${stat.size}\0`);
+    if (stat.isDirectory()) {
+      for (const name of readdirSync(current).sort()) visit(path.join(current, name), path.posix.join(relative, name));
+    } else if (stat.isFile()) hash.update(readFileSync(current));
+  };
+  visit(target, ".");
+  return hash.digest("hex");
+}
+
+/**
+ * Pre-existing material acceptance. Compile.ts turns declared reads into readiness inputs (the
+ * 2026-08 reads-gate-readiness flip), and acceptance previously came only from a producing
+ * attempt inside THIS run (reconcilePatch) or from lane-done seeding. That conflated two
+ * different questions — "was this produced and verified during this run" and "does usable input
+ * material exist" — and the conflation made a fresh business unstartable: the graph's base is an
+ * artifact-level knot (orient-scaffold produces state/PROJECT_STATE.yaml but reads files whose
+ * producers read state/PROJECT_STATE.yaml), so the compiled plan for the reference business had
+ * ZERO ready nodes out of 82 on a clean bootstrap (found empirically 2026-08-19; the zero-callers
+ * gap had hidden it — no session had ever run against a real business).
+ *
+ * The rule: a binding with NO producing attempt recorded in this run (`producedBy` unset), whose
+ * bound file actually exists in the workspace, is pre-existing material — accepted, with a
+ * content fingerprint, exactly as if the launch flow that authored it were an upstream run.
+ * Invariants preserved, in the same spirit as reconcilePatch:
+ * - acceptance is grounded in the file existing, never in anyone's prose claim about it;
+ * - absent material stays unaccepted, and the reading node waits honestly;
+ * - the moment a producer re-produces the artifact IN this run, reconcilePatch retakes the
+ *   binding (producedBy set, acceptance false pending that node's own verification) — in-run
+ *   production never rides in on this rule;
+ * - pre-existing material that changed between sessions invalidates descendants transitively,
+ *   the same staleness event as a re-produced output;
+ * - a binding path that escapes the workspace is never accepted.
+ *
+ * Idempotent per session start; run.ts calls it after seeding or resuming, and the read-only
+ * planner applies the same reconciliation in memory so its report matches what a session would do.
+ */
+export function reconcileEnvironmentalArtifacts(plan: CompiledPlan, run: RunStateDocument, workspaceRoot: string, now: string): RunNodeId[] {
+  const resolvedRoot = path.resolve(workspaceRoot);
+  const changed: string[] = [];
+  let touched = false;
+  for (const binding of run.artifactBindings) {
+    if (binding.producedBy !== undefined) continue;
+    const absolute = path.resolve(resolvedRoot, binding.path);
+    if (absolute !== resolvedRoot && !absolute.startsWith(`${resolvedRoot}${path.sep}`)) continue;
+    if (!existsSync(absolute)) continue;
+    const fingerprint = fingerprintWorkspacePath(absolute);
+    if (binding.accepted && binding.fingerprint === fingerprint) continue;
+    if (binding.accepted && binding.fingerprint !== undefined && binding.fingerprint !== fingerprint) changed.push(binding.artifactId);
+    binding.accepted = true;
+    binding.fingerprint = fingerprint;
+    touched = true;
+  }
+  if (touched) run.updatedAt = now;
+  return changed.length > 0 ? invalidateDescendants(plan, run, changed, now) : [];
+}
+
 /** Staleness invalidation: a changed accepted input invalidates descendants transitively. */
 export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument, changedArtifactIds: readonly string[], now: string): RunNodeId[] {
   const changed = new Set<string>(changedArtifactIds);
@@ -291,6 +368,10 @@ export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument,
       if (!state || state.status === "stale") continue;
       if (node.inputs.some((artifactId) => changed.has(artifactId))) {
         state.status = "stale";
+        // A stale node will be re-examined and re-run; a blocker string from its previous life
+        // ("Verification required", a park reason) would otherwise survive into digests and
+        // pending-verification listings that key on blocker text.
+        state.blocker = undefined;
         state.acceptedOutputFingerprint = undefined;
         for (const artifactId of node.outputs) {
           changed.add(artifactId);
