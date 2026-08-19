@@ -106,6 +106,13 @@ export interface CatalogKnowledgePackage extends CatalogReference {
   workflowIds: WorkflowId[];
   contextPackIds: ContextPackId[];
   manifestPath: string;
+  /**
+   * True for a terminal deprecation: the package is deprecated with no
+   * successor (a retired learning, a withdrawn contract). Exempts the package
+   * from knowledge.deprecated.replacement_missing — pointing a reader at an
+   * unrelated "replacement" would mislead more than pointing nowhere.
+   */
+  retired?: boolean;
 }
 
 /**

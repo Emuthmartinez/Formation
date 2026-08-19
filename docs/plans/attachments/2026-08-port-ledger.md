@@ -75,10 +75,10 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 103 | 0 | 0 | 1 | 104 |
+| Knowledge content files | 105 | 0 | 0 | 1 | 106 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
-| Validators (68) | 30 | 25 | 0 | 15 | 70 |
-| **Total** | **139** | **25** | **1** | **31** | **196** |
+| Validators (68) | 31 | 25 | 0 | 15 | 71 |
+| **Total** | **142** | **25** | **1** | **31** | **199** |
 
 ---
 
@@ -140,6 +140,8 @@ matching knowledge manifest, which carries its authored `loadWhen` text
 | knowledge/process/failure-cards.md | keep | LaunchBench/failure-card authoring reference |
 | knowledge/process/flow-traceability.md | keep | phase-boundary and traceability reference |
 | knowledge/process/launch-coverage.md | keep | lane-status reconciliation reference |
+| knowledge/process/learning-capture.md | keep | post-cutover addition (2026-08-18): the captured-learning contract — capture triggers, the four document sections, grounding rules, refresh verdicts; bound to the two learning maintenance nodes, enforced by `check:learning-grounding` |
+| knowledge/process/learnings/audit-runs-from-repo-root.md | keep | post-cutover addition (2026-08-18): first captured learning — the maintainer audit must run from the repo root, repo-only steps drop silently in the skill layout; grounded in audit-plan.ts citations |
 | knowledge/process/launch-phases.md | keep | phase-scope decision reference |
 | knowledge/process/provider-proof.md | keep | short but complete evidence-rule reference; not a neglected stub |
 | knowledge/process/tool-recipes.md | keep | hub file; Recipe Routing table explicitly links all 8 children below (verified: none are unreferenced by the hub) |
@@ -454,6 +456,7 @@ split noted).
 | validation/repository/check-autopilot-contract.ts | port | HYBRID — eval-object shape validation is structural; keyword-grepping SKILL.md description/body prose is WORD-PATTERN |
 | validation/repository/check-gates-layout.ts | keep | STRUCTURAL — pure filesystem/shape check: validation/business/ mirrors knowledge/ domains 1:1, no ungrouped gates, no duplicate script basenames |
 | validation/repository/check-hub-spoke.ts | keep | STRUCTURAL — no v1 precedent, added with the 2026-08 graph-consolidation audit's money-domain hub-and-spoke split; verifies every knowledge/ spoke's "Part of the [Hub]" backlink is reciprocated by a link back from the hub |
+| validation/repository/check-learning-grounding.ts | keep | post-cutover addition (2026-08-18): grounding contract for knowledge/*/learnings/ — required sections, resolvable path:line citations, date order, verdict-lifecycle pairing, 180-day review-overdue warnings |
 | validation/repository/check-validator-docs.ts | keep | STRUCTURAL — no v1 precedent, added with the 2026-08-18 knowledge-matrix audit; two-way drift check that every command documented in docs/validators.md exists as an npm script and every check:*/validate:* script has a documented row |
 | validation/repository/check-package-parity.ts | keep | STRUCTURAL — compares the two package manifests/lockfiles against skill-version.json; wired only via the repo-root package.json's `check:package-parity` script (absent from the skill-scoped manifest, which is exactly why literal-scope discovery would have missed it) |
 | validation/repository/check-reference-size.ts | keep | STRUCTURAL — per-file byte budgets on knowledge/, link-graph regex only extracts targets (doesn't grade content) |

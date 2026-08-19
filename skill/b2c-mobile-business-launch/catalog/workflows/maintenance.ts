@@ -44,7 +44,7 @@ export const workflows = [
     areaIds: ["area.skill-maintenance"],
     trigger: "After any skill change — bump version, sync the installed runtime, run the readiness gate",
     instructions:
-      "After any meaningful skill-behavior edit, bump skill-version.json and write matching release notes in the same change — check:version-discipline fails a change that edits behavior without moving the version alongside it. On a founder-approved sync, rsync (excluding node_modules, with --delete) the skill directory into the installed runtime copy, run npm install and npm run audit inside that runtime, then diff -qr the two trees to prove they match. check:skill-version must report installed == source afterward; also verify the ~/.claude and ~/.agents skill symlinks still resolve to the same synced Codex runtime copy on this machine.",
+      "After any meaningful skill-behavior edit, bump skill-version.json and write matching release notes in the same change — check:version-discipline fails a change that edits behavior without moving the version alongside it. On a founder-approved sync, run `npm run runtime:sync` from the source checkout (never raw rsync): the tool computes an ownership-tracked plan from git-tracked source files against the installed runtime's manifest, refuses to clobber runtime files edited since the last sync (surface those as conflicts and commit them to source instead), preserves unowned files, deletes only files a previous sync wrote, then runs npm install (when dependencies changed) and npm run audit inside the runtime and reports the ~/.claude and ~/.agents alias symlinks. Use `npm run runtime:check` to inspect drift without writing. check:skill-version must report installed == source afterward.",
     reads: ["skill-version.json"],
     roleId: "role.engineering-leader",
     dependencies: ["workflow.machine.source-freshness-maintenance-maintainer"],
@@ -146,6 +146,41 @@ export const workflows = [
     outputPaths: ["validation/repository/evals/launchbench/", "validation/repository/evals/agent-behavior/"],
     gates: ["check:agent-evals"],
     actionClass: "observe",
+    idempotent: true,
+  }),
+  workflow({
+    id: "workflow.machine.learning-capture-maintainer",
+    title: "Learning capture (maintainer)",
+    domainId: "domain.machine",
+    areaIds: ["area.skill-maintenance"],
+    trigger: "After a solved and verified problem, a closed audit, or a post-merge lesson produces operating knowledge future runs should load",
+    instructions:
+      "Capture one learning per solved problem as an ordinary knowledge package: scaffold the document and draft manifest with `npm run knowledge:capture`, write the four contract sections (Learning, Evidence, Captured, Refresh) per knowledge/process/learning-capture.md, and ground every claim in a backticked repo-relative citation that resolves — a code-behavior claim needs a code citation, never conversation memory alone. Bind the package to the workflow nodes that would have needed the lesson, then promote draft to active only after check:learning-grounding passes. Do not capture unverified hunches, session-local trivia, or facts an existing gate already enforces; do not batch several lessons into one document.",
+    // No reads: the learning-capture contract routes here as bound knowledge
+    // (catalog/knowledge/process/process-learning-capture.yaml), not as a
+    // workflow-produced artifact.
+    roleId: "role.orchestrator",
+    // outputPaths intentionally empty: each capture writes a new
+    // knowledge/<domain>/learnings/<slug>.md + catalog/knowledge/<domain>/learning-<slug>.yaml
+    // pair; there is no stable single artifact path for this node to own.
+    gates: ["check:learning-grounding"],
+    actionClass: "draft",
+    idempotent: true,
+  }),
+  workflow({
+    id: "workflow.machine.learning-corpus-refresh-maintainer",
+    title: "Learning corpus refresh (maintainer)",
+    domainId: "domain.machine",
+    areaIds: ["area.skill-maintenance"],
+    trigger: "A learning_grounding.review_overdue warning, a change to files a learning cites, or a scheduled corpus pass over knowledge/*/learnings/",
+    instructions:
+      "Audit each learning under knowledge/*/learnings/ against current repository reality and record exactly one verdict in its Refresh section: kept, updated, consolidated, replaced, or retired. Match the document to reality, never reality to the document. replaced/retired require flipping the manifest lifecycle to deprecated (replaced also names replacement_ids) — check:learning-grounding enforces the pairing, and knowledge-validation already requires a replacement target for deprecated packages. When evidence is ambiguous, keep the learning and record the doubt in the document rather than deleting on a guess. Work learning_grounding.review_overdue warnings down to zero, update the Last reviewed date on every touched document, and re-anchor citations whose files or line numbers moved.",
+    // No reads: same as learning capture — the contract arrives as bound knowledge.
+    roleId: "role.engineering-leader",
+    // outputPaths intentionally empty: this node edits existing learning documents and
+    // their manifests in place across every domain's learnings/ directory.
+    gates: ["check:learning-grounding"],
+    actionClass: "mutate",
     idempotent: true,
   }),
 ] as const;

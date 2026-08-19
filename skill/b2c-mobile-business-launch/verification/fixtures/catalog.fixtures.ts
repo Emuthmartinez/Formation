@@ -461,8 +461,8 @@ export function register(harness: Harness): void {
     const issues = validateCatalog(catalog, skillRoot).filter((issue) => issue.severity === "error");
     assert(issues.length === 0, `expected the real catalog to be clean, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
     assert(catalog.domains.length === 15, `expected 15 domains, got ${catalog.domains.length}`);
-    assert(catalog.workflows.length === 68, `expected 68 workflows, got ${catalog.workflows.length}`);
-    assert(catalog.references.length === 106, `expected 106 references, got ${catalog.references.length}`);
+    assert(catalog.workflows.length === 70, `expected 70 workflows, got ${catalog.workflows.length}`);
+    assert(catalog.references.length === 108, `expected 108 references, got ${catalog.references.length}`);
 
     const landingBuild = catalog.workflows.find((wf) => wf.id === "workflow.growth.pre-launch-funnel-landing-waitlist");
     const landingPublish = catalog.workflows.find((wf) => wf.id === "workflow.growth.landing-funnel-publication-and-live-proof");
@@ -490,7 +490,7 @@ export function register(harness: Harness): void {
     const input = toCatalogInput(catalog);
     assert(input.workflows.length < catalog.workflows.length, "the bridged input should exclude maintenance-only machine workflows");
     const excludedCount = catalog.workflows.length - input.workflows.length;
-    assert(excludedCount === 8, `expected exactly 8 excluded machine-domain workflows, got ${excludedCount}`);
+    assert(excludedCount === 10, `expected exactly 10 excluded machine-domain workflows, got ${excludedCount}`);
     assert(
       input.workflows.some((workflow) => workflow.id === "workflow.process.change-cascade") &&
         input.workflows.some((workflow) => workflow.id === "workflow.orchestration.session-continuity-resume"),

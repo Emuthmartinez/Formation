@@ -41,24 +41,19 @@ cd ~/.codex/skills/b2c-mobile-business-launch
 npm run check:skill-version -- --source "$HOME/code/Formation/skill/b2c-mobile-business-launch" --installed .
 ```
 
-When the founder approves an upgrade on this machine:
+When the founder approves an upgrade on this machine, run the ownership-tracked sync from the repo root:
 
 ```bash
-repo_root="$HOME/code/Formation"  # path to your local clone of this repo
-rsync -a --delete --exclude node_modules \
-  "$repo_root/skill/b2c-mobile-business-launch/" \
-  ~/.codex/skills/b2c-mobile-business-launch/
-(
-  cd ~/.codex/skills/b2c-mobile-business-launch
-  npm install
-  npm run audit
-)
-diff -qr --exclude node_modules \
-  "$repo_root/skill/b2c-mobile-business-launch" \
-  ~/.codex/skills/b2c-mobile-business-launch
+npm run runtime:check
 ```
 
-`~/.claude/skills/b2c-mobile-business-launch` and `~/.agents/skills/b2c-mobile-business-launch` should point at the same Codex runtime copy on this machine. Verify symlinks after every runtime sync.
+```bash
+npm run runtime:sync
+```
+
+`runtime:sync` computes its plan from git-tracked source files against the manifest the previous sync wrote (`.runtime-sync-manifest.json` in the runtime). It copies changed files, deletes only files a previous sync wrote that the source no longer ships, preserves unowned files, and refuses to overwrite runtime files edited since the last sync — those conflicts must be committed to source or discarded deliberately with `--force`. On the first run without a manifest, pass `--adopt` after confirming no runtime-only fixes need to come back to source. After writing, it runs `npm install` (when dependencies changed) and `npm run audit` inside the runtime, and reports whether the `~/.claude/skills/b2c-mobile-business-launch` and `~/.agents/skills/b2c-mobile-business-launch` symlinks resolve to the synced runtime.
+
+Never sync with raw `rsync --delete`: it clobbers runtime edits silently and deletes unowned files.
 
 ## Rules
 
@@ -67,4 +62,4 @@ diff -qr --exclude node_modules \
 - `check-version-discipline.ts` must pass before committing skill behavior changes; it enforces that meaningful skill edits and `skill-version.json` move together.
 - A stale installed runtime is a founder decision gate, not a silent warning.
 - If the source copy or remote manifest is unavailable, continue with the installed copy but report that latest-version verification could not be completed.
-- Runtime upgrades must preserve user work: sync the skill directory only, exclude `node_modules`, reinstall dependencies, run audit, and verify the runtime diff.
+- Runtime upgrades must preserve user work. `runtime:sync` writes only git-tracked source files and never touches unowned runtime files. It stops on conflicting runtime edits instead of overwriting them.

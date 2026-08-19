@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.135.0",
+  "version": "0.136.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -47,6 +47,7 @@
     "check:archetype-starter": "tsx validation/business/engineering/check-archetype-starter.ts",
     "check:reference-size": "tsx validation/repository/check-reference-size.ts",
     "check:hub-spoke": "tsx validation/repository/check-hub-spoke.ts",
+    "check:learning-grounding": "tsx validation/repository/check-learning-grounding.ts --skill-root .",
     "check:gates-layout": "tsx validation/repository/check-gates-layout.ts --skill-root .",
     "check:agent-evals": "tsx validation/repository/run-agent-evals.ts",
     "check:token-promotion": "tsx validation/business/design/check-token-promotion.ts",
@@ -91,6 +92,7 @@
     "check:catalog": "tsx validation/repository/check-catalog.ts",
     "catalog:render-routing": "tsx catalog/render-routing.ts",
     "knowledge:add": "tsx tooling/knowledge.ts add",
+    "knowledge:capture": "tsx tooling/knowledge.ts capture",
     "knowledge:refresh": "tsx tooling/knowledge.ts refresh",
     "knowledge:promote": "tsx tooling/knowledge.ts promote",
     "knowledge:check": "tsx tooling/knowledge.ts check",
