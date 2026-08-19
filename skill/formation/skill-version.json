@@ -1,10 +1,10 @@
 {
   "skill": "formation",
-  "version": "0.146.0",
+  "version": "0.147.0",
   "updatedAt": "2026-08-19",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "Packaged the engine's command-line face. The skill package now carries a bin: `formation` — one installable dispatcher over the session CLIs in the order a business meets them (bootstrap, plan, run, approve, verify, onboard, schedule). Every subcommand execs the exact TypeScript CLI the audit and fixtures already prove, with exit codes passed through untouched: the bin adds an address, never a second implementation. Before this, an external agent had to know the repository's internal tsx paths to invoke anything (the audit's no-installable-CLI finding).",
-    "A new cli fixture suite proves the dispatcher itself: --help lists every command and exits 0, an unknown command is refused by name, and a subcommand demonstrably reaches the real underlying CLI in both directions — a bootstrap dry-run against a throwaway copy of the reference business returns the real plan, and run.ts's own missing-argument error passes through as exit 1."
+    "The engine as a Model Context Protocol server. core/mcp/server.ts (launched by the new formation-mcp bin) exposes six typed tools over stdio — formation_bootstrap, formation_plan, formation_run, formation_approvals, formation_verify, formation_schedule — each exec-ing the exact CLI the packaged formation bin dispatches to and the audit proves. Exit codes map to isError; stdout comes back verbatim because those CLIs already speak in complete, founder-plain sentences. The trust boundary is unchanged by the surface: state moves only through the reducer, approvals only through approve.ts, verification only under producer-never-verifies rules — the server holds no state and grants no authority; it is a calling convention.",
+    "The mcp fixture drives one real client conversation over stdio: the initialize handshake (server name and skill-synced version), tools/list naming all six tools, a tools/call whose dry-run bootstrap returns the real CLI plan for a throwaway copy of the reference business, and a failing call whose underlying CLI error and exit code surface as isError — no network, no worker CLIs. New runtime dependencies: @modelcontextprotocol/sdk and zod, in the skill package."
   ]
 }

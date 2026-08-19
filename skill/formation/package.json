@@ -1,9 +1,10 @@
 {
   "name": "formation-skill-runtime",
-  "version": "0.146.0",
+  "version": "0.147.0",
   "private": true,
   "bin": {
-    "formation": "bin/formation.mjs"
+    "formation": "bin/formation.mjs",
+    "formation-mcp": "bin/formation-mcp.mjs"
   },
   "type": "module",
   "scripts": {
@@ -145,5 +146,9 @@
     "typescript": "^7.0.2",
     "vite": "^8.2.0",
     "yaml": "^2.6.1"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.4.3"
   }
 }
