@@ -1,5 +1,10 @@
 # Major decisions and tradeoffs
 
+> **Direction note (2026-08-19).** This repository is engine-first: `skill/formation/` is the
+> typed workflow-graph engine and the center of the repository; the platform described below is
+> one consumer of it through the typed adapter boundary. This document's mechanics remain
+> accurate for the platform itself; for the system's architecture start at `docs/architecture.md`.
+
 ## Decision 1: Preserve the graph runtime, replace the founder interaction model
 
 **Decision:** Keep `core/`, `catalog/`, domain knowledge, verification, and strong artifact contracts. Build a separate founder platform above them.

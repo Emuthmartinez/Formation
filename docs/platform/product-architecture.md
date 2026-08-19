@@ -1,5 +1,10 @@
 # Product architecture
 
+> **Direction note (2026-08-19).** This repository is engine-first: `skill/formation/` is the
+> typed workflow-graph engine and the center of the repository; the platform described below is
+> one consumer of it through the typed adapter boundary. This document's mechanics remain
+> accurate for the platform itself; for the system's architecture start at `docs/architecture.md`.
+
 ## Product promise
 
 Formation helps a founder move from an idea to the next defensible business decision, then carries those decisions forward into launch-ready work.

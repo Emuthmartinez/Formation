@@ -9,7 +9,7 @@ import { lanes as catalogLanes } from "../../catalog/lanes.js";
 import { laneDependencies, satisfiedDependencyStatuses, statusValues } from "../../tooling/lib/launch-state.js";
 
 /**
- * The engine half of the existing-launch-repository importer (docs/platform/remaining-gaps.md,
+ * The engine half of the existing-launch-repository importer (docs/history/platform-remaining-gaps-2026-08-v0.147.0.md,
  * "Existing launch repository importer"): one read-only CLI the Formation server can spawn to
  * learn, in a typed shape, what business already exists inside a launch workspace — the
  * `state/PROJECT_STATE.yaml` shape the skill has produced since long before Formation existed,

@@ -1,6 +1,6 @@
 {
   "name": "formation-skill-runtime",
-  "version": "0.147.0",
+  "version": "0.148.0",
   "private": true,
   "bin": {
     "formation": "bin/formation.mjs",

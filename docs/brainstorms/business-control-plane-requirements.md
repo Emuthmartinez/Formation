@@ -1,7 +1,7 @@
 # Business Control Plane Requirements
 
 Created: 2026-05-31
-Status: exploratory
+Status: superseded — shipped as the Business Control Plane (design room + control-plane validators); the open-source positioning section is superseded by the 2026-08-19 engine-first direction (docs/engine-backlog.md)
 Workflow: Compound Engineering brainstorm
 
 ## Product Frame

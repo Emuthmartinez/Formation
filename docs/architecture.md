@@ -1,269 +1,299 @@
 # Repository architecture
 
-This repository now contains two explicit systems:
+This repository is a backend: a typed workflow-graph engine that takes a consumer mobile-app
+business from idea to shipped, then into ongoing autonomous operation. Agents drive it — through
+the packaged `formation` CLI and the `formation-mcp` Model Context Protocol server. The engine lives in `skill/formation/`. `platform/`, the
+Formation founder web application, is one consumer of the engine, not the product this repository
+exists to build.
 
-1. **Formation**, the founder-facing B2B platform in `platform/`.
-2. **The launch skill**, the graph-native automation and verification system in `skill/formation/`.
-
-The platform is the product. The skill is a differentiated internal capability.
+The project's history runs the other direction. It began as an agent skill, then grew a founder
+web product on top of it, and for a while that product was described as the point and the skill
+as its internal automation. The 2026-08-19 audit reversed that: the engine was real, tested code
+with **zero real callers** — nothing wired bootstrap to a session, verification acceptance was
+unreachable from `run.ts`, and a fresh business's plan had no root nodes at all. The work since
+then (v0.142.0–v0.146.0) closed that gap end to end and is what this document describes.
 
 ## Architectural principles
 
-1. **Founder state and skill state are different bounded contexts.** The platform owns editable company context, membership, claims, decisions, tasks, deliverables, and product navigation. The skill owns executable graph state, attempts, evidence, verification, and autonomy controls.
-2. **Founders never navigate the filesystem.** Repository paths and generated files are implementation details or exports.
-3. **One durable company context.** Product generation and recommendations use accumulated workspace state rather than repeatedly asking for the same information.
-4. **Claims remain typed.** Facts, assumptions, recommendations, and questions cannot silently collapse into generic prose.
-5. **Decisions are first-class.** Important choices retain rationale, ownership, status, and review date.
-6. **Generated work is a draft.** Model output becomes an editable artifact and never self-promotes to accepted truth.
-7. **Execution remains graph-native.** Automated launch work compiles into a durable run and is independently verified.
-8. **Boundaries fail closed.** Missing membership, malformed data, invalid provider output, stale evidence, or failed verification cannot silently become success.
+1. **The engine is graph-native, not prompt-native.** A business's launch and operation compile
+   into a typed dependency graph — nodes, predicates, approvals, resource claims, retries,
+   verification policy — and a session dispatches only the current ready frontier.
+2. **Durable truth is reducer-owned.** Five documents — business state, control, grants, waivers,
+   and the budget ledger — have exactly one writer. Every other component reads them or proposes
+   patches; none writes them directly.
+3. **Producer never verifies its own work.** Deterministic gates run inside the session that
+   produced the work. Judgment work needs a second, independently-invoked session; the acceptance
+   is refused mechanically if the accepting session id matches the producing one.
+4. **Boundaries fail closed.** A missing document, a tampered file, an unreachable verifier, or a
+   stale fingerprint blocks progress; none of them are silently treated as success.
+5. **Autonomy is granted, not assumed.** A workflow runs unattended only inside a founder-set
+   grant, waiver, or budget. Everything else parks for a decision.
+6. **Standing operation is a calendar, not a one-time finish line.** Recurring nodes reopen on
+   their own cadence — a session that runs on schedule finds the week's work waiting for it.
+7. **Consumers integrate through typed adapters, never shared state.** A consumer such as the
+   platform reads a read-only boundary report and submits typed execution requests; it holds no
+   handle onto engine files.
 
 ## System context
 
 ```text
-Founder and collaborators
-  -> Formation web application
-  -> Formation API and workspace authorization
-  -> platform domain services and persistence
-  -> execution adapter
-  -> launch skill catalog and durable run
-  -> verified evidence and outputs
-  -> platform claims, decisions, tasks, and deliverable versions
+Agent (the formation CLI or the formation-mcp server) or a scheduled OS trigger
+  -> formation bin / adapter CLI
+  -> core/session/run.ts (one bounded session)
+  -> core/reducer (the only writer of durable truth)
+  -> catalog-compiled dependency graph, dispatched within grants/waivers/budgets
+  -> deterministic gates + fresh-context verification
+  -> hash-chained audit log + founder-plain digest
+
+Consumers read the engine through typed adapters:
+  platform/  -> core/adapters/platform-execution.ts (read) + platform-import.ts (existing-repo read)
+             -> founder-facing execution requests, verified results, launch-matrix projection
 ```
 
-## Formation platform
+## The execution loop
 
-### Web application
+The loop below is the engine's real, audit-proven behavior. Every stage names the file that
+implements it.
 
-`platform/web/` owns:
+### 1. Bootstrap (`core/session/bootstrap.ts`)
 
-- session and active-workspace state
-- Today command center
-- Business source of truth
-- Workstreams
-- Decisions
-- Deliverables and editing
-- Launch readiness, the launch matrix, skill executions, and existing-work import
-- People membership, roles, and invitations
-- Account password and device sessions
-- comment threads and review requests beside records
-- the read-only shared deliverable view and the join-by-invitation flow
-- new-company onboarding
-- responsive navigation and design system
+One idempotent command that takes a workspace from "the engine cannot see this business" to
+"`run.ts` runs against it." It composes four steps, each skipping cleanly if its outcome already
+exists:
 
-It communicates only through the typed JSON API.
+1. **install-entrypoints** (`core/adapters/install-entrypoints.ts`) — writes the executable
+   `catalog.json` and the `.b2c-launch/runtime.json` runtime binding into the workspace.
+2. **migrate-v1** (`core/schema/migrate-v1.ts`) — converts `state/PROJECT_STATE.yaml` (v1) into
+   `state/business-state.json` (v2), plus a control-file scaffold when none exists.
+3. **reducer adopt** — records both documents as the reducer's disclosed baseline in
+   `control/manifest.json` and the hash-chained audit log, so the first session's tamper preflight
+   has a truthful "before" to compare against.
+4. **onboard.ts** (optional, `--answers`) — commits the founder's grants, waivers, and budgets
+   through the reducer, the same path every other control write uses.
 
-### API and domain services
+Default is dry-run; `--apply` is required to write. Re-running against a bootstrapped workspace
+prints a no-op report rather than a second baseline.
 
-`platform/server/` owns:
+### 2. Session (`core/session/run.ts`)
 
-- credential registration, sign-in, session cookies, and development-only preview access
-- same-origin protection
-- workspace membership enforcement
-- request validation
-- workspace snapshot composition
-- contradiction detection
-- recommendation ranking
-- launch-readiness calculation
-- onboarding bundle creation
-- artifact editing and versioning
-- task, claim, and decision mutations
-- membership roles, capability enforcement, invitations, and ownership transfer
-- comment threads and review requests
-- share links and the token-authenticated public read
-- unit-economics scenarios computed on read, never stored
-- workspace export bundles in Markdown, JSON, and CSV
-- generation job lifecycle, provider outcome classification, and trust screening of imported text
-- skill execution requests, durable run resumption, and founder-readable run state
-- skill approval mirroring into the decision log
-- launch-repository import discovery, preview, and apply
-- the board-ready presentation boundary for skill- and system-authored text
-- the health probe
-- static application serving
+One bounded, single-run session. In order:
 
-### Persistence
+- **Advisory lock** — a workspace-wide lock so two sessions never dispatch against the same
+  workspace at once.
+- **Tamper preflight** — the reducer's manifest preflight confirms none of the five reducer-owned
+  documents changed outside the reducer, and audit-chain verification confirms the hash chain is
+  intact. This re-runs at every batch boundary, not just session start, so a same-session
+  out-of-band edit is caught before the next batch.
+- **Seed or resume run-state** — a fresh workspace seeds run state from the compiled plan; an
+  existing one resumes exactly where the last session left it.
+- **Pre-existing-material acceptance** — a binding with no in-run producer accepts from the file
+  already on disk, fingerprinted at acceptance time. Changed material invalidates its
+  descendants, so a business that already has real files does not have to re-produce them to make
+  the graph proceed.
+- **Calendar reopening** — a node with `recurrenceDays` whose last succeeded attempt is older than
+  that cadence reopens before the frontier is computed, so a scheduled session finds standing
+  operating work on its own calendar instead of the founder re-asking for it.
+- **Frontier dispatch** — `computeFrontier` returns the current ready set; each dispatch runs
+  within the founder's autonomy grants, waivers, and budgets, and the kill switch and cooperative
+  yield are re-read fresh at every batch boundary.
+- **Deterministic gates** — a node's `check:*`/`validate:*` gates run with the exact arguments the
+  audit plan already knows for that gate, against this workspace. A gate that exits non-zero, or
+  cannot run, counts as not-passed — never as accepted.
+- **Fresh-context verification sweep** — run at every empty-frontier point inside the dispatch
+  loop. A separate, independently-invoked verifier session judges produced work under the same
+  producer≠verifier rule `core/session/verify.ts` enforces; the acceptance is attested in the
+  hash-chained audit log. An acceptance re-opens the frontier, so downstream work dispatches in
+  the same session instead of parking until the next one.
+- **Founder-plain digest** — written on every exit path, success or failure, before the lock
+  releases. Exit codes mirror the reducer's own convention: `0` ran (the digest tells the real
+  story), `1` the workspace isn't usable, `2` did not run (lock contention), `3` preflight/tamper
+  failure.
 
-The included atomic adapter persists:
+### 3. Founder edges
 
-- users
-- sessions
-- memberships
-- invitations
-- workspaces
-- claims
-- decisions
-- artifacts
-- immutable artifact versions
-- tasks
-- jobs
-- executions
-- shares
-- comments
-- reviews
-- activity
+Three CLIs are the sanctioned paths from an engine-internal wait state back to schedulable work,
+each writing through the engine's atomic writer and attesting the decision in the audit log:
 
-The adapter is replaceable through its read and transaction boundary. Multi-instance deployment requires a transactional database implementation.
+- **`core/session/approve.ts`** — the founder edge: grant or reject a pending approval.
+- **`core/session/verify.ts`** — the operator edge: fresh-context acceptance for produced work,
+  mechanically refused if the accepting session matches the producing one.
+- **The kill switch** — `control/control.json`'s `killSwitch.engaged` flag, re-read fresh on every
+  dispatch-batch boundary, stops scheduled sessions cold even while the OS trigger keeps firing.
 
-### Generation
+### 4. Standing operation
 
-Generation receives scoped product context and returns a structured artifact schema. The deterministic local generator keeps development and evaluation fully runnable. A configured provider uses the same contract.
+`workflow.operations.scheduled-autonomy-installation` installs the OS-level trigger
+(`core/adapters/install-schedule.ts` — crontab or launchd, dry-run by default, `--apply` required
+to touch the real system) that keeps the operating loop alive without anyone starting sessions by
+hand. Once installed, the recurring nodes are self-ordering: support-queue operations, retention
+intervention, and financial health review are each separately gated, seven-day-recurrence
+workflows that write their own dated artifacts, and the weekly Post-launch Operations review reads
+all three (plus its own) as inputs. Because recurrence reopens all four nodes each cycle and the
+three lane nodes have no ordering dependency on the review beyond "run first," the lane artifacts
+are current by the time the review reads them within the same session — no hand-authored ordering
+required, just the reads-gate-readiness contract the calendar reopening enforces.
 
-## The Formation skill
+### 5. Surfaces
 
-The skill remains under `skill/formation/`.
+- **The packaged `formation` bin** (`skill/formation/bin/formation.mjs`) — an installable
+  dispatcher over `bootstrap`, `plan`, `run`, `approve`, `verify`, `onboard`, and `schedule`. It
+  execs the same TypeScript CLIs the audit and fixtures prove; it adds an address, not a second
+  implementation. Before this existed, driving the engine required knowing the repository's
+  internal `tsx` paths from inside a checkout.
+- **An MCP server** is planned to expose the same subcommands over MCP, so an agent runtime can
+  drive a workspace without shelling out to the CLI. It has not landed in this repository yet.
+- **The platform HTTP adapter** (`core/adapters/platform-execution.ts` and
+  `platform-import.ts`) — see below.
 
-### Definition graph
+## Trust boundary
 
-`catalog/` contains stable definitions for business areas, domains, workflows, phases, lanes, artifacts, gates, operators, providers, and presentation groups.
+- **Reducer-only writes.** `core/reducer/` is the single writer for the five reducer-owned
+  documents (`business-state`, `control`, `grants`, `waivers`, `budget-ledger`). Every write is a
+  manifest-preflighted patch: the reducer refuses to write over a document whose on-disk hash does
+  not match what the manifest last recorded.
+- **Hash-chained audit log.** Every reducer commit, adoption, approval, and verification
+  acceptance appends to `control/audit.jsonl`, chained by hash. `verify-audit` confirms the chain
+  is intact; a broken chain fails the session's tamper preflight.
+- **Producer≠verifier.** Deterministic nodes are verified by their own gates, run by the producing
+  session — that is what the gates are for. Judgment nodes require a second, freshly-invoked
+  session whose session id differs from the producer's; the engine enforces this mechanically, not
+  by convention.
+- **Deterministic validators.** `npm run audit` runs a 72-step plan (`tooling/lib/audit-plan.ts`)
+  covering catalog integrity, schema validation, business gates, and repository checks.
+  `check:engine-e2e` is the engine's own crash test: it bootstraps a throwaway copy of the
+  reference business, runs a headless session against real frontier work, confirms fresh-context
+  verification is actually reachable, resumes a second session cleanly, and proves its own
+  detector by confirming a verifier-off control session leaves work correctly parked.
+- **Knowledge receipts.** A dispatched worker's output is checked against a SHA-256 file digest
+  recorded in its receipt (`receiptFileDigest` in `core/session/executor.ts`). A receipt that
+  fails validation fails the node closed — the worker's claimed output is never trusted without a
+  matching digest.
 
-Each knowledge document has one YAML manifest under `catalog/knowledge/`. The manifest owns its stable reference ID. It also owns lifecycle, graph bindings, applicability, sources, review data, and replacements. Catalog composition discovers the manifests. It includes only active packages in runtime routing.
+## Definition graph
 
-The manifest model uses two established graph principles. Provenance records identify the source, claim scope, review time, and reviewer. Shape validation rejects invalid nodes and edges before graph composition. These principles follow [W3C PROV-O](https://www.w3.org/TR/prov-o/) and [SHACL](https://www.w3.org/TR/shacl/). The implementation uses the existing YAML and TypeScript stack. It does not add RDF infrastructure.
+`catalog/` holds the typed, stable definitions the engine compiles from: business areas, domains,
+workflows, phases, lanes, artifacts, gates, operators, providers, roles, and presentation groups.
+Each knowledge document has one YAML manifest under `catalog/knowledge/`, owning its stable
+reference id, lifecycle, graph bindings, applicability, sources, review data, and replacements.
+Provenance and shape-validation follow the same principles as W3C PROV-O and SHACL, implemented in
+the existing YAML/TypeScript stack — no RDF infrastructure. `core/engine/compile.ts` turns the
+catalog plus a business's accepted state into the durable, executable dependency graph a session
+dispatches against. Stable catalog IDs survive path moves; edit catalog definitions, never
+`catalog/generated/`.
 
-### Business instance graph
+## The platform: one consumer
 
-The skill resolves the subset applicable to one launch using scope, archetype, accepted decisions, current state, provider availability, and autonomy policy.
+`platform/` is a founder-facing web application built on top of the engine, not the engine itself.
+It never reads or writes engine workspace files directly — it exchanges typed documents across two
+read-only CLIs:
 
-### Durable run graph
+### Execution boundary (`core/adapters/platform-execution.ts`)
 
-`core/engine/` compiles executable nodes with dependencies, accepted inputs, outputs, predicates, approvals, resource claims, retries, timeouts, context, and verification policy.
+A read-only CLI the platform server spawns to learn, in a typed shape (schema `1.1.0`), what a
+workspace's durable run looks like right now: per-workflow status keyed by stable catalog id,
+founder-plain reasons drawn from the digest's own translation table, whether a durable run exists
+yet, its founder approvals, and a compact launch-matrix projection with full node briefs only for
+ready work. It never writes — submitting or resuming a run is `core/session/run.ts`'s job, invoked
+by the platform through the same adapter contract, not this file. `GET
+/api/workspaces/:workspaceId/launch-matrix` on the platform serves this projection after verifying
+workspace membership; an older or unavailable engine returns `available: false` with a reason,
+never an empty matrix.
 
-### Reducer and durable truth
+### Existing-repository import (`core/adapters/platform-import.ts`)
 
-`core/reducer/` remains the single writer for skill-owned mutable documents. Attempts, approvals, accepted artifact fingerprints, evidence, grants, waivers, and run state survive individual sessions.
-
-### Autonomy and sessions
-
-`core/autonomy/` and `core/session/` evaluate grants, waivers, budgets, prerequisites, kill switches, scheduled work, founder approvals, and session boundaries.
-
-### Verification
-
-`validation/` and `verification/` provide structural checks, live proof, fixtures, boundary tests, parity, rehearsals, and audit runners. Verified output is required before skill work may update trusted platform context.
-
-## Integration contract
-
-The platform and skill must integrate through a typed service boundary.
-
-### Platform to skill
-
-An execution request contains:
-
-- workspace and user authority
-- workstream and requested outcome
-- scoped company context
-- relevant claims and decisions
-- accepted artifact versions
-- constraints, budget, and approval policy
-- idempotency key
-
-### Skill to platform
-
-A verified result contains:
-
-- execution and attempt IDs
-- workflow ID
-- status in founder vocabulary
-- proposed claims and confidence
-- evidence references
-- artifact candidate and schema version
-- affected tasks or blockers
-- staleness implications
-- verifier result
-- cost and provider metadata where permitted
-
-The read-only execution boundary uses schema `1.1.0`. It also returns a compact launch-matrix projection. The projection contains display metadata for every business workflow. It keeps full node briefs only for ready work. Each workflow carries its bound knowledge (id, title, document path, load condition, freshness, and a read-time review verdict) and the role's conditional context-pack knowledge, deduplicated the same way node briefs split load/route. Process and orchestration workflows cross as named launch-integrity steps with live status and verification state, beside the summary counts. Machine workflows do not cross. On the platform, every knowledge field passes through `presentMatrixKnowledge` in `presentation.mjs` before a founder sees it — the agent-facing load condition survives only as technical detail.
-
-Formation reads the projection through `GET /api/workspaces/:workspaceId/launch-matrix`. The route verifies workspace membership. An older or unavailable skill returns `available: false` with a reason. It does not return an empty matrix.
-
-### Skill to platform, for an existing launch repository
-
-A launch repository predating Formation is read across the same boundary, by a second read-only CLI (`core/adapters/platform-import.ts`). Its report contains:
-
-- company context: name, founder, promise, primary customer, launch phase, platforms, go-live date
-- proposed claims, each classified as a recommendation to confirm or an open question
-- decisions, including the recorded founder verdicts with the dates they were made
-- outstanding work, with whether the workspace records it as stuck
-- documents, split on their own headings, with a content fingerprint
-- contradictions, each naming the record it undermines
-- a stable, content-derived import key per record, so the platform can re-import idempotently
-
-Nothing in that report is a fact. A launch repository is an agent's working record, and it enters the platform as drafts and questions for the founder.
+A second read-only CLI for a launch workspace that predates the platform. Its report classifies
+everything it finds as a candidate, never a fact: company context, proposed claims split into
+recommendations and open questions, decisions with recorded verdicts, outstanding work, documents
+fingerprinted per section, and named contradictions. It opens no handle for writing — a launch
+repository can be imported and still be run by the engine afterward, unchanged.
 
 ### Authority rules
 
-- the browser cannot read or write skill files
-- importing a launch repository never writes to it: the skill's import CLI opens no handle for writing, and the platform has no path back into the workspace
-- the skill cannot bypass platform workspace authorization
-- skill output enters as proposed or reviewed product state according to policy
-- founder decisions remain authoritative for product-facing strategy
-- accepted platform context is fingerprinted when sent to a skill run
-- changed upstream context can mark downstream deliverables stale
-- the launch matrix is a read model and does not store separate graph state
-- a conditional workflow requires a durable `required` or `not-needed` verdict
-- a changed applicability verdict invalidates prior output proof when the scope changes
+- The browser cannot read or write engine files.
+- Importing a launch repository never writes to it.
+- The engine cannot bypass platform workspace authorization, and the platform cannot bypass the
+  engine's autonomy grants.
+- Accepted platform context is fingerprinted when sent into an engine run; changed upstream
+  context can mark downstream deliverables stale.
+- A conditional workflow requires a durable `required` or `not-needed` verdict; a changed
+  applicability verdict invalidates prior output proof when scope changes.
 
 ## Repository layout
 
 ```text
 .github/workflows/
-  platform-ci.yml               founder platform checks, tests, and build
-  source-freshness.yml          skill source-registry and knowledge freshness audit
-  behavioral-evals.yml          manual live LaunchBench behavioral eval run
+  platform-ci.yml              founder platform checks, tests, and build
+  source-freshness.yml         engine source-registry and knowledge freshness audit
+  behavioral-evals.yml         manual live LaunchBench behavioral eval run
 
 docs/
-  architecture.md               combined architecture
+  architecture.md               this document
   validators.md                 full validator and gate reference
-  platform/                     audit, product, technical, migration, design, journey, gaps
-  implementation/               skill implementation guidance
-  method/                       skill operating methods
+  platform/                     platform-consumer audit, product, technical, migration, design, journey, gaps
+  implementation/               engine implementation guidance
+  method/                       engine operating methods
   brainstorms/                  exploratory scope documents
   plans/                        dated implementation plans
   prototypes/                   HTML design and engineering prototypes
   history/                      completed historical proposals and audits
 
-platform/
-  web/                          founder application
-  server/                       API, auth, domain, persistence, generation
-  data/                         ignored local data
-  run.mjs                       platform command entrypoint
-  README.md                     developer guide
-  AGENTS.md                     platform contribution contract
+platform/                       one consumer of the engine
+  web/                           founder application
+  server/                        API, auth, domain, persistence, generation, execution/import adapters
+  data/                          ignored local data
+  run.mjs                        platform command entrypoint
+  README.md                      developer guide
+  AGENTS.md                      platform contribution contract
 
-skill/formation/
-  SKILL.md                      internal runtime entrypoint
-  core/                         execution core, reducer, autonomy, sessions, adapters
-  catalog/                      typed definition graph and generated routing
-  content/                      skill conversation content
-  knowledge/                    domain guidance
-  workspace/                    launch artifact and export contracts
-  workspace-template/           generated launch repository templates
-  starters/                     runnable app archetypes
-  studio/                       maintainer Design Room
-  validation/                   business and repository validators
-  verification/                 skill proof suites
-  tooling/                      renderers, probes, migrations, and audit tools
-  agents/                       runtime manifests
+skill/formation/                 the engine
+  bin/                            the packaged `formation` CLI
+  core/                           execution engine, reducer, autonomy, sessions, adapters
+  catalog/                        typed definition graph and generated routing
+  content/                        skill conversation content
+  knowledge/                      domain guidance
+  workspace/                      launch artifact and export contracts
+  workspace-template/             generated launch repository templates
+  starters/                       runnable app archetypes
+  studio/                         maintainer Design Room
+  validation/                     business and repository validators
+  verification/                   engine proof suites
+  tooling/                        renderers, probes, migrations, and audit tools
+  agents/                         runtime manifests
 ```
 
 ## Source-of-truth ownership
 
 | Concern | Authoritative owner |
 | --- | --- |
+| workflow definitions | engine catalog |
+| executable dependency graph | engine core |
+| attempts and checkpoints | engine core |
+| autonomy grants and waivers | engine control state |
+| verification evidence | engine verification layer |
+| durable business state, control, budget ledger | engine reducer (sole writer) |
 | user identity and membership | platform |
-| company context | platform |
-| claim classification and contradiction state | platform |
-| founder decision log | platform |
-| tasks and product next actions | platform |
+| company context, claims, decisions, tasks | platform |
 | editable deliverables and product versions | platform |
 | product navigation and page state | platform |
-| workflow definitions | skill catalog |
-| executable dependency graph | skill core |
-| attempts and checkpoints | skill core |
-| autonomy grants and waivers | skill control state |
-| verification evidence | skill verification layer |
-| static repository artifacts | skill export or compatibility layer |
+| static repository artifacts | engine export or compatibility layer |
 
 ## Development and verification
+
+Engine:
+
+```bash
+npm run session:bootstrap -- --workspace <dir> --apply
+npm run check:catalog
+npm run test:fixtures
+npm run test:boundaries
+npm run test:parity
+npm run audit
+npm run audit:ci
+```
+
+`npm run audit` (`tooling/run-audit.ts`) runs the full 72-step plan, including
+`check:engine-e2e`, the repo-only crash test. Run it from the repository root — running the
+equivalent command from inside `skill/formation/` silently skips `repoOnly` steps.
 
 Platform:
 
@@ -273,27 +303,17 @@ node platform/run.mjs test
 node platform/run.mjs build
 ```
 
-Skill:
-
-```bash
-npm run check:catalog
-npm run test:fixtures
-npm run test:boundaries
-npm run test:parity
-npm run audit:ci
-```
-
 A change that crosses both systems must run both verification paths.
 
 ## Evolution rules
 
-- New founder behavior belongs in `platform/`.
-- New execution topology belongs in the skill catalog and core.
-- Do not add founder pages for individual skill files.
+- New execution topology belongs in the engine catalog and core.
+- New founder behavior belongs in `platform/`, and must integrate through the typed adapter
+  contract — never a direct read of engine workspace files.
+- Do not add founder pages for individual engine files.
 - Do not let product pages read static seed state in production.
 - Do not duplicate company context inside prompts or renderer templates.
-- New high-impact recommendations require a rationale and inspectable supporting context.
-- New artifact mutations must preserve versioning.
-- New workspace routes require membership tests.
+- New reducer-owned document mutations must go through `core/reducer/`, never a direct write.
+- New autonomy-affecting changes require a founder-authority patch, not a bare state edit.
 - New automation capabilities require an adapter contract and founder-facing failure language.
-- Retire old static renderers only after their named skill consumers migrate.
+- Retire old static renderers only after their named consumers migrate.

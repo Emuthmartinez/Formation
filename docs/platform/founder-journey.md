@@ -1,5 +1,10 @@
 # Primary founder journey
 
+> **Direction note (2026-08-19).** This repository is engine-first: `skill/formation/` is the
+> typed workflow-graph engine and the center of the repository; the platform described below is
+> one consumer of it through the typed adapter boundary. This document's mechanics remain
+> accurate for the platform itself; for the system's architecture start at `docs/architecture.md`.
+
 ## Journey objective
 
 A founder should be able to move from an initial idea to a coherent, evidence-backed launch plan without learning graph terminology, navigating repository files, or repeatedly restating the company.
