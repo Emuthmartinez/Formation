@@ -3,6 +3,8 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { assert, createHarness, repoCheckoutPresent, repoRoot, skillRoot, type Harness } from "./_harness.js";
 import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
+import { buildAuditPlan } from "../../tooling/lib/audit-plan.js";
+import { SHARD_RESULT_MARKER, parseShardOutput } from "../../tooling/lib/shard-pool.js";
 
 /**
  * U9 meta-tests for the audit pipeline itself (KTD10's "single-source audit plan + parity
@@ -63,46 +65,64 @@ export function register(harness: Harness): void {
     assert(result.code === 0, `expected a faithful, unmutated copy of the real manifests to pass check-package-parity, got ${result.code}:\n${result.output}`);
   });
 
-  parityCase("audit-plan parity: a check:* script not in tooling/lib/audit-plan.ts's plan (and not explicitly excluded) fails check-package-parity with a named reason", () => {
-    const fixture = buildFaithfulParityFixture(harness);
-    const rootPackagePath = path.join(fixture.repoRoot, "package.json");
-    const rootPackage = JSON.parse(readFileSync(rootPackagePath, "utf8")) as { scripts: Record<string, string> };
-    // A script name that cannot already exist in the real plan/exclusion list, so this can never
-    // pass by accident of the real audit-plan.ts's own current contents.
-    rootPackage.scripts["check:u9-audit-plan-parity-fixture-probe"] = "tsx tooling/does-not-exist.ts";
-    writeFileSync(rootPackagePath, `${JSON.stringify(rootPackage, null, 2)}\n`, "utf8");
+  parityCase(
+    "audit-plan parity: a check:* script not in tooling/lib/audit-plan.ts's plan (and not explicitly excluded) fails check-package-parity with a named reason",
+    () => {
+      const fixture = buildFaithfulParityFixture(harness);
+      const rootPackagePath = path.join(fixture.repoRoot, "package.json");
+      const rootPackage = JSON.parse(readFileSync(rootPackagePath, "utf8")) as { scripts: Record<string, string> };
+      // A script name that cannot already exist in the real plan/exclusion list, so this can never
+      // pass by accident of the real audit-plan.ts's own current contents.
+      rootPackage.scripts["check:u9-audit-plan-parity-fixture-probe"] = "tsx tooling/does-not-exist.ts";
+      writeFileSync(rootPackagePath, `${JSON.stringify(rootPackage, null, 2)}\n`, "utf8");
 
-    const result = runCheckPackageParity(["--repo-root", fixture.repoRoot, "--skill-root", fixture.skillRoot]);
-    assert(result.code !== 0, `expected the parity check to fail once an unregistered check:* script was added, got exit ${result.code}`);
-    assert(result.output.includes("package_parity.root_audit_plan_gap"), `expected the specific audit_plan_gap issue code, got:\n${result.output}`);
-    assert(result.output.includes("check:u9-audit-plan-parity-fixture-probe"), `expected the offending script name to be named in the output, got:\n${result.output}`);
-  });
+      const result = runCheckPackageParity(["--repo-root", fixture.repoRoot, "--skill-root", fixture.skillRoot]);
+      assert(result.code !== 0, `expected the parity check to fail once an unregistered check:* script was added, got exit ${result.code}`);
+      assert(result.output.includes("package_parity.root_audit_plan_gap"), `expected the specific audit_plan_gap issue code, got:\n${result.output}`);
+      assert(
+        result.output.includes("check:u9-audit-plan-parity-fixture-probe"),
+        `expected the offending script name to be named in the output, got:\n${result.output}`,
+      );
+    },
+  );
 
   // --- the issue-code-checking trap: prove the harness's own mechanism discriminates -------------
 
-  harness.check("harness/runScript: genuinely discriminates on issue TEXT, not just exit code — the recorded 'fixture exit-code vs issue-code assertions' trap, proven non-vacuous here", () => {
-    // A throwaway harness, not the shared one: this deliberately runs one case with the WRONG
-    // expected text so it can inspect the *result*, not let a deliberate mismatch count as a real
-    // suite failure.
-    const probe = createHarness(path.join(skillRoot, "core/schema"));
-    try {
-      const script = path.join(skillRoot, "catalog/render-routing.ts");
-      // Right exit code (0), right text expectation: should read as ok.
-      probe.runScript("control: --check should pass with a correct expectation", script, ["--check"], 0, "current");
-      // Right exit code (0), WRONG text expectation: must read as a FAILURE — this is exactly the
-      // trap. A harness that only compared exit codes would call this "ok" too, which would mean a
-      // validator failing for the wrong reason could still satisfy a fixture that only checks exit
-      // code. Real tests never assert this shape (its whole job is to prove the discrimination
-      // exists), so this doesn't count as suite coverage of --check itself.
-      probe.runScript("control: --check with a deliberately wrong expectation must be reported as a failure", script, ["--check"], 0, "this text will never appear in render-routing's output");
+  harness.check(
+    "harness/runScript: genuinely discriminates on issue TEXT, not just exit code — the recorded 'fixture exit-code vs issue-code assertions' trap, proven non-vacuous here",
+    () => {
+      // A throwaway harness, not the shared one: this deliberately runs one case with the WRONG
+      // expected text so it can inspect the *result*, not let a deliberate mismatch count as a real
+      // suite failure.
+      const probe = createHarness(path.join(skillRoot, "core/schema"));
+      try {
+        const script = path.join(skillRoot, "catalog/render-routing.ts");
+        // Right exit code (0), right text expectation: should read as ok.
+        probe.runScript("control: --check should pass with a correct expectation", script, ["--check"], 0, "current");
+        // Right exit code (0), WRONG text expectation: must read as a FAILURE — this is exactly the
+        // trap. A harness that only compared exit codes would call this "ok" too, which would mean a
+        // validator failing for the wrong reason could still satisfy a fixture that only checks exit
+        // code. Real tests never assert this shape (its whole job is to prove the discrimination
+        // exists), so this doesn't count as suite coverage of --check itself.
+        probe.runScript(
+          "control: --check with a deliberately wrong expectation must be reported as a failure",
+          script,
+          ["--check"],
+          0,
+          "this text will never appear in render-routing's output",
+        );
 
-      assert(probe.results.length === 2, `expected exactly 2 probe results, got ${probe.results.length}`);
-      assert(probe.results[0]!.ok === true, `expected the correctly-expected case to read ok, got: ${JSON.stringify(probe.results[0])}`);
-      assert(probe.results[1]!.ok === false, `expected the wrongly-expected case to read as a failure even though the exit code matched — if this is true, the harness is NOT vacuously trusting exit codes`);
-    } finally {
-      probe.cleanup();
-    }
-  });
+        assert(probe.results.length === 2, `expected exactly 2 probe results, got ${probe.results.length}`);
+        assert(probe.results[0]!.ok === true, `expected the correctly-expected case to read ok, got: ${JSON.stringify(probe.results[0])}`);
+        assert(
+          probe.results[1]!.ok === false,
+          `expected the wrongly-expected case to read as a failure even though the exit code matched — if this is true, the harness is NOT vacuously trusting exit codes`,
+        );
+      } finally {
+        probe.cleanup();
+      }
+    },
+  );
 
   // --- all suites registered: every runner-discoverable file exports register(), and every ------
   // --- verification/scenarios/ file is actually wired into scenarios.fixtures.ts -----------------
@@ -119,20 +139,65 @@ export function register(harness: Harness): void {
         if (!fileName.endsWith(suffix)) continue;
         checkedCount += 1;
         const source = readFileSync(path.join(dir, fileName), "utf8");
-        assert(/export function register\(/.test(source), `${path.join(path.basename(dir), fileName)} does not export register(harness) — the runner's auto-discovery would silently error at import time instead of registering real coverage`);
+        assert(
+          /export function register\(/.test(source),
+          `${path.join(path.basename(dir), fileName)} does not export register(harness) — the runner's auto-discovery would silently error at import time instead of registering real coverage`,
+        );
       }
     }
     assert(checkedCount >= 3, `expected to check at least 3 suite files across fixtures/boundaries/parity, checked ${checkedCount}`);
   });
 
-  harness.check("all suites registered: every file under verification/scenarios/ (the LaunchBench port) is imported and registered by verification/fixtures/scenarios.fixtures.ts", () => {
-    const scenariosDir = path.join(skillRoot, "verification/scenarios");
-    const registrySource = readFileSync(path.join(skillRoot, "verification/fixtures/scenarios.fixtures.ts"), "utf8");
-    const scenarioFiles = readdirSync(scenariosDir).filter((name) => name.endsWith(".ts") && !name.startsWith("_"));
-    assert(scenarioFiles.length > 0, "expected at least one ported scenario file under verification/scenarios/");
-    for (const fileName of scenarioFiles) {
-      const moduleStem = fileName.replace(/\.ts$/, "");
-      assert(registrySource.includes(`../scenarios/${moduleStem}.js`), `verification/scenarios/${fileName} exists but is not imported by scenarios.fixtures.ts — it would silently never run`);
-    }
-  });
+  harness.check(
+    "all suites registered: every file under verification/scenarios/ (the LaunchBench port) is imported and registered by verification/fixtures/scenarios.fixtures.ts",
+    () => {
+      const scenariosDir = path.join(skillRoot, "verification/scenarios");
+      const registrySource = readFileSync(path.join(skillRoot, "verification/fixtures/scenarios.fixtures.ts"), "utf8");
+      const scenarioFiles = readdirSync(scenariosDir).filter((name) => name.endsWith(".ts") && !name.startsWith("_"));
+      assert(scenarioFiles.length > 0, "expected at least one ported scenario file under verification/scenarios/");
+      for (const fileName of scenarioFiles) {
+        const moduleStem = fileName.replace(/\.ts$/, "");
+        assert(
+          registrySource.includes(`../scenarios/${moduleStem}.js`),
+          `verification/scenarios/${fileName} exists but is not imported by scenarios.fixtures.ts — it would silently never run`,
+        );
+      }
+    },
+  );
+
+  // --- shard-pool: the audit's two slow steps parallelize INSIDE their runners ------------------
+
+  harness.check(
+    "shard-pool: launchbench and test:fixtures stay serial:true in both audit-plan layouts — their parallelism lives inside the runner (tooling/lib/shard-pool.ts), and letting them also ride the 4-wide audit pool would multiply the process fan-out",
+    () => {
+      for (const layout of ["repo", "skill"] as const) {
+        for (const id of ["launchbench", "test:fixtures"]) {
+          const step = buildAuditPlan(layout).find((candidate) => candidate.id === id);
+          assert(step !== undefined, `expected ${id} to be a step in the ${layout} audit plan`);
+          assert(step.serial === true, `${id} must stay serial:true in the ${layout} plan — see the shard-pool doc comment before "fixing" this`);
+        }
+      }
+    },
+  );
+
+  harness.check(
+    "shard-pool: parseShardOutput distinguishes crashed-before-reporting (results undefined) from reported results — the load-bearing crash-representation property of the sharded runners",
+    () => {
+      const reported = parseShardOutput(`stray diagnostics\n${SHARD_RESULT_MARKER}[{"label":"x","ok":true}]\ntrailing noise`);
+      assert(Array.isArray(reported.results) && reported.results.length === 1, "expected the marker payload to parse to exactly one result");
+      assert(!reported.output.includes(SHARD_RESULT_MARKER), "expected the marker line to be stripped from the diagnostic output");
+      const crashed = parseShardOutput("boom: a stack trace and no marker line\n");
+      assert(crashed.results === undefined, "a shard with no marker line must parse as crashed (undefined results), never as empty-and-passing");
+      const malformed = parseShardOutput(`${SHARD_RESULT_MARKER}{not json]`);
+      assert(malformed.results === undefined, "a malformed marker payload must parse as crashed (undefined results), never as empty-and-passing");
+    },
+  );
+
+  harness.runScript(
+    "shard-pool: the validator-fixture runner rejects an unknown --shard name with a named error instead of reporting an empty pass",
+    path.join(skillRoot, "validation/repository/run-validator-fixtures.ts"),
+    ["--shard", "no-such-module"],
+    1,
+    "Unknown fixture module",
+  );
 }
