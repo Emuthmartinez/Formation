@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { spawnSync } from "node:child_process";
 
 import { isMainModule, parseArgs } from "../lib/cli.js";
+import { buildAuditPlan } from "../../tooling/lib/audit-plan.js";
 import { runReducer, skillRoot, type ReducerResult } from "./reducer-cli.js";
 import { acquireLock, heartbeat, releaseLock, type AcquireResult } from "../reducer/lock.js";
 import type { PatchOp, PatchPath, StatePatch } from "../reducer/patch.js";
@@ -20,6 +21,7 @@ import {
   detectOrphans,
   isWallClockExceeded,
   loadRunState,
+  reconcileEnvironmentalArtifacts,
   reconcilePatch,
   refreshHeartbeat,
   seedRunState,
@@ -37,8 +39,21 @@ import { createBudgetFundedVerifier } from "../autonomy/probes/budget.js";
 import { verifyControlBoundary, type ControlBoundaryVerdict } from "../adapters/install-control-permissions.js";
 import { applyStandingApprovals } from "../autonomy/standing-approvals.js";
 
+import { listPendingFreshContext, refuseFreshContextAcceptance, VERIFICATION_REJECTED_BLOCKER } from "../engine/verification.js";
+import { appendAuditEntry } from "../reducer/audit.js";
 import { BriefInvalid, loadBrief, nodeInScope, type SessionBrief } from "./brief.js";
-import { createCliExecutor, createFixtureExecutor, createSlowSilentExecutor, noOpExecutor, type NodeExecutor, type WorkerRuntime } from "./executor.js";
+import {
+  createCliExecutor,
+  createCliVerifier,
+  createFixtureExecutor,
+  createFixtureVerifier,
+  createSlowSilentExecutor,
+  noOpExecutor,
+  type NodeExecutor,
+  type NodeVerifier,
+  type WorkerRuntime,
+} from "./executor.js";
+import type { VerifierOutputRef } from "./worker-prompt.js";
 import {
   formatAge,
   pushDigest,
@@ -127,13 +142,42 @@ interface GateOutcome {
 
 /**
  * Run a node's deterministic gates (npm `check:*`/`validate:*` scripts from the skill package)
- * against the business workspace. BUSINESS_ROOT points the validator at the workspace; a gate
- * that exits non-zero — or cannot run at all — counts as not-passed, never as accepted.
+ * against the business workspace. A gate that exits non-zero — or cannot run at all — counts as
+ * not-passed, never as accepted.
+ *
+ * Argument shapes come from the audit plan, the one place that already knows how every gate's
+ * CLI is invoked (--root/--state/--skill-root and friends), with the business root swapped for
+ * this workspace as absolute paths. A bare BUSINESS_ROOT env var is still set, but it is no
+ * longer the only signal: gates like check:design-room take --root argv only, and before this
+ * they either failed against the wrong directory or silently validated the skill's own
+ * reference workspace instead of the business under test (caught by check:engine-e2e,
+ * 2026-08-19). A gate the audit plan does not know keeps the env-only behavior.
  */
 function runDeterministicGates(gateIds: readonly string[], workspaceDir: string): GateOutcome {
+  // The audit's own renderer steps redirect output to /tmp scratch (--out) and skip the full
+  // build (--static-only) because the audit only proves the render works. As a NODE's gate the
+  // render IS the node's output, so those audit-only redirections are stripped and the gate
+  // writes into the workspace exactly as it did before this reuse.
+  const stripAuditOnlyFlags = (args: readonly string[]): string[] => {
+    const kept: string[] = [];
+    for (let index = 0; index < args.length; index += 1) {
+      const arg = args[index]!;
+      if (arg === "--out") {
+        index += 1;
+        continue;
+      }
+      if (arg === "--static-only") continue;
+      kept.push(arg);
+    }
+    return kept;
+  };
+  const planArgs = new Map(
+    buildAuditPlan("repo", { businessRoot: path.resolve(workspaceDir), skillRoot: skillRoot() }).map((step) => [step.id, stripAuditOnlyFlags(step.args ?? [])]),
+  );
   const evidence: string[] = [];
   for (const gate of gateIds) {
-    const result = spawnSync("npm", ["run", "--prefix", skillRoot(), gate], {
+    const gateArgs = planArgs.get(gate);
+    const result = spawnSync("npm", ["run", "--prefix", skillRoot(), gate, ...(gateArgs && gateArgs.length > 0 ? ["--", ...gateArgs] : [])], {
       cwd: workspaceDir,
       encoding: "utf8",
       env: { ...process.env, BUSINESS_ROOT: workspaceDir },
@@ -494,6 +538,7 @@ async function main(): Promise<number> {
     }
 
     const executorMode = args.executor ?? "auto";
+    const workerRuntime = (args["worker-runtime"] ?? brief.workerRuntime ?? process.env.B2C_WORKER_RUNTIME ?? "auto") as WorkerRuntime;
     executor =
       executorMode === "fixture"
         ? createFixtureExecutor()
@@ -501,7 +546,25 @@ async function main(): Promise<number> {
           ? createSlowSilentExecutor(Number(args["slow-delay-ms"] ?? 2000))
           : executorMode === "noop"
             ? noOpExecutor
-            : createCliExecutor((args["worker-runtime"] ?? brief.workerRuntime ?? process.env.B2C_WORKER_RUNTIME ?? "auto") as WorkerRuntime);
+            : createCliExecutor(workerRuntime);
+    // Fresh-context verification is part of a session, not a separate ceremony someone must
+    // remember: the sweep below dispatches an independent judge for produced-but-unaccepted work.
+    // "off" is an explicit diagnostic override and is reported honestly in the digest — before
+    // this seam existed, every fresh-context node was a structural dead end (produced, parked
+    // "Verification required" forever) while the digest implied a check was underway.
+    // The default FOLLOWS the executor mode: a diagnostic session (fixture/slow-silent/noop
+    // executor) must never quietly spawn a real worker CLI to judge synthetic work — on a
+    // machine with codex/claude installed that would make fixture runs slow, nondeterministic,
+    // and silently expensive. Only a real session defaults to the real verifier.
+    const verifierMode = args.verifier ?? (executorMode === "fixture" ? "fixture" : executorMode === "auto" ? "cli" : "off");
+    const verifier: NodeVerifier | undefined =
+      verifierMode === "off"
+        ? undefined
+        : verifierMode === "fixture"
+          ? createFixtureVerifier()
+          : verifierMode === "fixture-reject"
+            ? createFixtureVerifier("rejected")
+            : createCliVerifier(workerRuntime);
 
     const lockTtlSeconds = Number(args["lock-ttl-seconds"] ?? 120);
     const acquireResult: AcquireResult = acquireLock(paths.sessionLock, {
@@ -608,6 +671,10 @@ async function main(): Promise<number> {
     } else {
       run = seedRunState(plan, businessState, { ownerSessionId: sessionId, ttlSeconds: 300, wallClockCapSeconds, now: startedAt });
     }
+    // Producer-less artifacts (the workspace's own files) accept from disk presence — without
+    // this, a fresh business's plan has no root nodes at all. Runs on resume too, so a
+    // precondition that changed between sessions invalidates its descendants before dispatch.
+    reconcileEnvironmentalArtifacts(plan, run, workspace, startedAt);
     observeAppSourceFingerprint(plan, run, workspace, startedAt);
     writeRunState(paths.runState, run);
 
@@ -632,6 +699,95 @@ async function main(): Promise<number> {
     const advanced: DigestAdvancedItem[] = [];
     let haltReason: BatchHaltReason | undefined;
     let timedOut = false;
+
+    /**
+     * Fresh-context verification sweep, run at every empty-frontier point inside the dispatch
+     * loop: an accepted node re-opens the frontier, so downstream work dispatches in THIS
+     * session instead of parking until the next one. The judge is a separate verifier session
+     * id that owns no attempts (the same refusal rules core/session/verify.ts enforces, from the
+     * shared module), its worker runs in a fresh subprocess context, and every acceptance is
+     * attested in the hash-chained audit log exactly like the operator CLI's. Terminates: an
+     * accepted node leaves the pending pool; rejected and unavailable nodes don't count as
+     * progress, so the caller breaks rather than sweeping again.
+     */
+    const verifierSessionId = `${sessionId}.verifier`;
+    const runVerificationSweep = async (): Promise<number> => {
+      if (!verifier) return 0;
+      const pending = listPendingFreshContext(plan, run).filter((nodeId) => {
+        const node = plan.nodes.find((candidate) => candidate.id === nodeId)!;
+        return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId);
+      });
+      let accepted = 0;
+      for (const nodeId of pending) {
+        if (isWallClockExceeded(run, sessionNow(), startedAt)) {
+          timedOut = true;
+          break;
+        }
+        let boundary;
+        try {
+          boundary = checkBatchBoundary(dispatchHooks);
+        } catch {
+          haltReason = "kill_switch";
+          break;
+        }
+        if (boundary.halt) {
+          haltReason = boundary.reason;
+          break;
+        }
+        heartbeat(paths.sessionLock, sessionId);
+        const node = plan.nodes.find((candidate) => candidate.id === nodeId)!;
+        const state = run.nodes[nodeId]!;
+        const attempt = state.attempts.at(-1);
+        const refusal = refuseFreshContextAcceptance(plan, run, nodeId, verifierSessionId);
+        if (refusal) {
+          // The sweep listed this node moments ago, so a refusal here is an internal
+          // inconsistency worth an operator's eyes — never silently skipped.
+          console.error(`session.verify_refused ${nodeId}: ${refusal.code}: ${refusal.message}`);
+          continue;
+        }
+        const outputs: VerifierOutputRef[] = node.outputs.map((artifactId) => {
+          const binding = run.artifactBindings.find((candidate) => candidate.artifactId === artifactId);
+          return { artifactId, path: binding?.path ?? "", evidence: attempt?.evidence ?? [] };
+        });
+        const outcome = await verifier.verify(node, { workspaceDir: workspace, skillRootDir: skillRoot(), outputs, now: sessionNow() });
+        const judgedAt = sessionNow();
+        if (outcome.status === "accepted") {
+          try {
+            acceptVerification(plan, run, nodeId, [outcome.evidence], judgedAt, verifierSessionId);
+          } catch (error) {
+            console.error(`session.verify_accept_failed ${nodeId}: ${error instanceof Error ? error.message : String(error)}`);
+            continue;
+          }
+          appendAuditEntry(paths.audit, {
+            sessionId: verifierSessionId,
+            targetDoc: "run-state",
+            patchId: `verify:${verifierSessionId}:${nodeId}`,
+            action: "verification_accepted",
+            summary: `${nodeId}: ${outcome.evidence}`,
+            stateHash: "",
+            issueCodes: [],
+          });
+          advanced.push({ nodeId, title: node.title, unit: domainBusinessUnit(node.domainId) });
+          accepted += 1;
+        } else if (outcome.status === "rejected") {
+          attempt?.evidence.push(outcome.evidence);
+          state.blocker = VERIFICATION_REJECTED_BLOCKER;
+          run.updatedAt = judgedAt;
+          anomalies.push({
+            message: `I had "${node.title}" double-checked and the check didn't agree it's finished, so I'm leaving it parked for another look.`,
+          });
+        } else {
+          // Unavailable judged nothing: the node keeps its "Verification required" blocker so a
+          // future session's sweep (or the operator CLI) picks it up, and this session says so.
+          console.error(`session.verifier_unavailable ${nodeId}: ${outcome.error ?? "unknown"}`);
+          anomalies.push({
+            message: `I finished "${node.title}" but couldn't run the independent double-check on it this session, so I'm not calling it done yet.`,
+          });
+        }
+        writeRunState(paths.runState, run);
+      }
+      return accepted;
+    };
 
     dispatchLoop: while (true) {
       const now = sessionNow();
@@ -695,7 +851,16 @@ async function main(): Promise<number> {
         }
         readyIds = inScope;
       }
-      if (readyIds.length === 0) break;
+      if (readyIds.length === 0) {
+        // Nothing dispatchable — but produced work may be parked pending its fresh-context
+        // check. Judge it now; an acceptance re-opens the frontier, so loop again. No
+        // acceptance (nothing pending, rejected, or verifier unavailable) means the session
+        // is genuinely done. A sweep that set a halt/timeout flag falls through to the loop's
+        // own top-of-iteration checks via the same break below.
+        const acceptedCount = await runVerificationSweep();
+        if (acceptedCount > 0 && !timedOut && !haltReason) continue;
+        break;
+      }
 
       const batches = buildDispatchBatches(plan, readyIds, maxConcurrency);
       for (const batch of batches) {
@@ -912,6 +1077,18 @@ async function main(): Promise<number> {
           }
           writeRunState(paths.runState, run);
         }
+      }
+    }
+
+    if (!verifier) {
+      const unverified = listPendingFreshContext(plan, run).length;
+      if (unverified > 0) {
+        anomalies.push({
+          message:
+            unverified === 1
+              ? "Independent double-checks were turned off for this session, so one piece of finished work is waiting on a check rather than done."
+              : `Independent double-checks were turned off for this session, so ${unverified} pieces of finished work are waiting on a check rather than done.`,
+        });
       }
     }
 

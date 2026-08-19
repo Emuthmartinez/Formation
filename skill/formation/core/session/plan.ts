@@ -6,7 +6,7 @@ import { buildDispatchBatches } from "../engine/dispatch.js";
 import { compilePlan, type CompiledPlan, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
 import { composeNodeBrief, renderNodeBrief, type NodeBrief } from "../engine/node-brief.js";
 import { computeFrontier } from "../engine/frontier.js";
-import { loadRunState, seedRunState } from "../engine/runstate.js";
+import { loadRunState, reconcileEnvironmentalArtifacts, seedRunState } from "../engine/runstate.js";
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
 import { createCompositeVerifier } from "../autonomy/prerequisites.js";
 import { createDopplerAuthVerifier } from "../autonomy/probes/doppler.js";
@@ -237,6 +237,10 @@ function main(): number {
     }
     return seedRunState(plan, businessState, { ownerSessionId: "planner", ttlSeconds: 300, wallClockCapSeconds: 0, now });
   })();
+  // Same environmental-artifact acceptance a real session applies (in memory only — the planner
+  // never writes run state). Skipping it here would report a fresh business as having no ready
+  // work when a session run moments later would find plenty.
+  reconcileEnvironmentalArtifacts(plan, run, workspace, now);
 
   const prerequisiteVerifier = createCompositeVerifier({
     doppler_auth: createDopplerAuthVerifier({

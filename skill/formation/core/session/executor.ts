@@ -4,7 +4,14 @@ import { existsSync, lstatSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import type { CompiledRunNode } from "../engine/compile.js";
 import { composeNodeBrief } from "../engine/node-brief.js";
-import { buildWorkerPrompt, validateKnowledgeReceipt, type WorkerAuthorization } from "./worker-prompt.js";
+import {
+  buildVerifierPrompt,
+  buildWorkerPrompt,
+  parseVerifierVerdict,
+  validateKnowledgeReceipt,
+  type VerifierOutputRef,
+  type WorkerAuthorization,
+} from "./worker-prompt.js";
 
 /**
  * The seam real runtime execution (U6) plugs into. A session (U5) never knows HOW a node's work
@@ -252,8 +259,13 @@ export interface NodeExecutor {
 
 /**
  * Deterministic stand-in for fixtures and rehearsal dry-runs (KTD1's `inline` adapter shape):
- * every declared output "succeeds" with a fingerprint derived from the node id, attempt id, and
- * output path — same inputs, same fingerprint, so fixture assertions stay stable across runs.
+ * every declared output "succeeds" with a fingerprint derived from the node id and output path —
+ * same inputs, same fingerprint, so fixture assertions stay stable across runs. The attempt id is
+ * deliberately NOT part of the fingerprint: a real deterministic producer re-emitting unchanged
+ * content yields an unchanged content hash, and modeling it otherwise made every fixture re-run
+ * of a stale node "change" its outputs, re-invalidating the entire downstream graph each session
+ * (found 2026-08-19 by check:engine-e2e — session 2 finished with FEWER succeeded nodes than
+ * session 1, and the staleness churn never converged).
  */
 export function createFixtureExecutor(): NodeExecutor {
   return {
@@ -261,7 +273,7 @@ export function createFixtureExecutor(): NodeExecutor {
       const outputs: NodeExecutionOutput[] = node.outputs.map((artifactId) => ({
         artifactId,
         path: `fixture://${node.id}/${artifactId}`,
-        fingerprint: `fixture-fp:${node.id}:${context.attemptId}:${artifactId}`,
+        fingerprint: `fixture-fp:${node.id}:${artifactId}`,
         evidence: [`fixture executor: synthetic completion of ${node.id} for attempt ${context.attemptId}`],
       }));
       return { status: "succeeded", outputs, evidence: [`fixture executor: ${node.id} completed synthetically`] };
@@ -280,6 +292,94 @@ export const noOpExecutor: NodeExecutor = {
     return { status: "failed", outputs: [], evidence: [], error: `no-op executor: real execution for "${node.id}" is not wired yet (arrives in U6)` };
   },
 };
+
+// --- fresh-context verification seam --------------------------------------------------------------
+
+/**
+ * "unavailable" is deliberately distinct from "rejected": a verifier that could not run (no CLI
+ * installed, timeout, malformed verdict) has judged nothing, and treating silence as a rejection
+ * would be as dishonest as treating it as acceptance. The caller reports it as an unrun check.
+ */
+export interface VerificationOutcome {
+  readonly status: "accepted" | "rejected" | "unavailable";
+  readonly evidence: string;
+  readonly error?: string;
+}
+
+export interface NodeVerificationContext {
+  readonly workspaceDir: string;
+  readonly skillRootDir: string;
+  readonly outputs: readonly VerifierOutputRef[];
+  readonly now: string;
+}
+
+export interface NodeVerifier {
+  verify(node: CompiledRunNode, context: NodeVerificationContext): Promise<VerificationOutcome>;
+}
+
+/**
+ * Read-only where the runtime can enforce it: the verifier judges, never repairs, and a sandbox
+ * that cannot write makes that rule mechanical rather than a prompt request. Claude's CLI has no
+ * read-only sandbox flag, so its verifier invocation relies on the prompt contract alone — the
+ * same trust position as a human reviewer with a writable checkout.
+ */
+export function buildVerifierCommand(runtime: Exclude<WorkerRuntime, "auto">, prompt: string): WorkerCommand {
+  if (runtime === "codex") return { runtime, command: "codex", args: ["exec", "--sandbox", "read-only", "--json", prompt], prompt };
+  if (runtime === "claude") return { runtime, command: "claude", args: ["-p", "--bare", "--output-format", "json", "--max-turns", "15", prompt], prompt };
+  return { runtime, command: "cursor-agent", args: ["agent", "-p", prompt, "--sandbox", "enabled"], prompt };
+}
+
+/** Real fresh-context verifier: a separate worker-CLI subprocess judges the produced outputs against the same brief the producer worked from. */
+export function createCliVerifier(requestedRuntime: WorkerRuntime = "auto"): NodeVerifier {
+  return {
+    async verify(node, context): Promise<VerificationOutcome> {
+      const runtimes = workerRuntimeCandidates(requestedRuntime);
+      if (runtimes.length === 0) {
+        return { status: "unavailable", evidence: "", error: `no worker CLI is installed for requested runtime ${requestedRuntime}` };
+      }
+      const brief = composeNodeBrief(node, {
+        planId: `verify:${context.now}`,
+        planRevision: 0,
+        catalogVersion: "runtime",
+        compiledAt: context.now,
+        nodes: [node],
+        artifactBindings: context.outputs.map((output) => ({ artifactId: output.artifactId, path: output.path, accepted: false })),
+      });
+      const prompt = buildVerifierPrompt(brief, context.workspaceDir, context.skillRootDir, context.outputs);
+      let runtime = runtimes[0]!;
+      let result: Awaited<ReturnType<typeof runWorker>> | undefined;
+      for (const candidate of runtimes) {
+        runtime = candidate;
+        result = await runWorker(buildVerifierCommand(candidate, prompt), context.workspaceDir, node.ttlSeconds * 1000);
+        const failureText = `${result.stdout}\n${result.stderr}`;
+        if (result.status === 0 || requestedRuntime !== "auto" || !/(auth|log[ -]?in|api[_ -]?key|unauthori[sz]ed|credential)/i.test(failureText)) break;
+      }
+      if (!result) return { status: "unavailable", evidence: "", error: "verifier runtime selection produced no invocation" };
+      if (result.timedOut) return { status: "unavailable", evidence: "", error: `${runtime} verifier exceeded ${node.ttlSeconds}s TTL` };
+      if (result.status !== 0) {
+        return { status: "unavailable", evidence: "", error: `${runtime} verifier exited ${String(result.status)}: ${result.stderr.trim().slice(-800)}` };
+      }
+      const parsed = parseVerifierVerdict(`${result.stdout}\n${result.stderr}`, brief);
+      if (!parsed.verdict) {
+        // A malformed verdict is not a judgment. Refusing to guess here is what keeps "accepted"
+        // meaning a fresh context actually said so.
+        return { status: "unavailable", evidence: "", error: `verifier verdict rejected: ${parsed.issues.join("; ")}` };
+      }
+      return { status: parsed.verdict.verdict, evidence: `${runtime} verifier: ${parsed.verdict.evidence}` };
+    },
+  };
+}
+
+/** Deterministic stand-in for fixtures and the e2e gate — accepts (or rejects) every node with synthetic evidence. */
+export function createFixtureVerifier(verdict: "accepted" | "rejected" = "accepted"): NodeVerifier {
+  return {
+    async verify(node): Promise<VerificationOutcome> {
+      return verdict === "accepted"
+        ? { status: "accepted", evidence: `fixture verifier: independently reviewed ${node.id} and accepted it (synthetic)` }
+        : { status: "rejected", evidence: `fixture verifier: independently reviewed ${node.id} and rejected it (synthetic)` };
+    },
+  };
+}
 
 /**
  * Test-only stand-in for a slow-but-alive real executor (U6's shape): waits `delayMs` and never

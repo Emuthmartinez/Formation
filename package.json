@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.141.0",
+  "version": "0.142.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch skill and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -63,6 +63,8 @@
     "check:autopilot": "tsx skill/formation/validation/repository/check-autopilot-contract.ts",
     "check:skill-version": "tsx skill/formation/validation/repository/check-skill-version.ts",
     "check:version-discipline": "tsx skill/formation/validation/repository/check-version-discipline.ts",
+    "check:engine-e2e": "tsx skill/formation/validation/repository/check-engine-e2e.ts",
+    "session:bootstrap": "tsx skill/formation/core/session/bootstrap.ts",
     "check:package-parity": "tsx skill/formation/validation/repository/check-package-parity.ts --repo-root . --skill-root skill/formation",
     "check:compound-engineering": "tsx skill/formation/validation/business/engineering/check-compound-engineering-routing.ts",
     "validate:design-state": "tsx skill/formation/validation/business/design/validate-state.ts",

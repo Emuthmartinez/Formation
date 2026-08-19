@@ -78,7 +78,7 @@ are ground truth, not hand arithmetic.
 | Knowledge content files | 105 | 0 | 0 | 1 | 106 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
 | Validators (68) | 34 | 25 | 0 | 15 | 74 |
-| **Total** | **145** | **25** | **1** | **31** | **202** |
+| **Total** | **146** | **25** | **1** | **31** | **203** |
 
 ---
 
@@ -474,6 +474,7 @@ split noted).
 | validation/repository/check-skill-version.ts | port | HYBRID — JSON/semver comparison is structural; the `--remote-url` branch is a genuine LIVE-PROOF `https.get` call |
 | validation/repository/check-source-freshness.ts | keep | STRUCTURAL — despite its name, only ever compares local repo text against source-registry.yaml via `git log`/`diff`; no live fetch, so no live-proof upgrade needed to stay honest about what it does |
 | validation/repository/check-version-discipline.ts | keep | STRUCTURAL — skill-version.json field-format checks plus a git-based "manifest bumped alongside changes" rule; distinct concern from check-skill-version.ts |
+| validation/repository/check-engine-e2e.ts | keep | no v1 precedent — new post-U8 file (2026-08-19), not a port; the engine's end-to-end crash-test gate: bootstraps a throwaway copy of the reference business, drives fixture-executor sessions across the founder-approval edge, proves the fresh-context verifier sweep clears a deliberately parked backlog with audit-log attestations, and keeps a verifier-off control session that must leave work parked — the detector proving it detects. Wired only via the repo-root package.json (repoOnly audit step), the same manifest shape as check-package-parity.ts above |
 | validation/repository/run-agent-evals.ts | port | HYBRID — eval YAML shape validation is structural; the `--responses` branch greps static fixture files for phrases despite the name suggesting a live agent call (no live LLM call exists anywhere in the file) — port the shape validation, do not port the illusion of live evaluation |
 
 ---

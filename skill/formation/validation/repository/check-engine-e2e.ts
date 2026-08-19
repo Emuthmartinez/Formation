@@ -1,0 +1,242 @@
+#!/usr/bin/env node
+/**
+ * check:engine-e2e — the engine's crash-test dummy. Proves, on every audit, that the graph
+ * engine can actually be driven end to end against this repository's own reference business:
+ *
+ *   bootstrap (install-entrypoints -> migrate-v1 -> reducer adopt -> onboarding answers)
+ *   -> a headless session (core/session/run.ts) that dispatches real frontier work
+ *   -> fresh-context verification accepted by the session's own verifier sweep
+ *   -> a resumed second session that picks the run state back up cleanly.
+ *
+ * Every step runs against a throwaway copy of skill/formation/workspace/business with the
+ * fixture executor and fixture verifier, so the check is deterministic and needs no worker CLI.
+ *
+ * Why this exists (2026-08-19 audit): the engine was real, tested code with ZERO real callers —
+ * nothing in the documented flow produced the state/control documents run.ts requires, run.ts
+ * never invoked verification acceptance so fresh-context nodes dead-ended after producing work,
+ * and the fresh-business plan had no root nodes at all. Each of those was invisible to the
+ * fixture suites because no check drove the real catalog against the real reference workspace.
+ * This one does, and it also proves its own detector: a control session with the verifier
+ * deliberately off MUST leave work parked pending verification — if that control stops failing
+ * the way it should, the assertion mechanism itself has rotted.
+ *
+ * Run directly: npm run check:engine-e2e (from the repository root).
+ */
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
+import type { RunStateDocument } from "../../core/schema/types.js";
+
+const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const tsxBin = resolveTsxBin(skillRoot);
+const referenceWorkspace = path.join(skillRoot, "workspace", "business");
+
+const SESSION_ONE = "engine-e2e-session-1";
+const SESSION_TWO = "engine-e2e-session-2";
+const CONTROL_SESSION = "engine-e2e-control";
+
+interface CliResult {
+  readonly code: number;
+  readonly output: string;
+}
+
+function runCli(relativePath: string, args: string[]): CliResult {
+  const result = spawnSync(tsxBin, [path.join(skillRoot, relativePath), ...args], {
+    cwd: skillRoot,
+    encoding: "utf8",
+    env: { ...process.env, RESEND_API_KEY: "" },
+    timeout: 900_000,
+  });
+  return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
+}
+
+const failures: string[] = [];
+function check(condition: boolean, label: string, detail?: string): void {
+  if (condition) return;
+  failures.push(detail ? `${label} — ${detail}` : label);
+  console.error(`FAIL ${label}${detail ? `\n     ${detail}` : ""}`);
+}
+
+function loadRun(workspace: string): RunStateDocument {
+  return JSON.parse(readFileSync(path.join(workspace, "run", "run-state.json"), "utf8")) as RunStateDocument;
+}
+
+function pendingVerification(run: RunStateDocument): string[] {
+  return Object.values(run.nodes)
+    .filter((node) => node.status === "blocked" && node.blocker === "Verification required")
+    .map((node) => `${node.nodeId} (attempts: ${node.attempts.length}, last owner: ${node.attempts.at(-1)?.ownerSessionId ?? "none"})`);
+}
+
+function pendingVerificationCount(run: RunStateDocument): number {
+  return pendingVerification(run).length;
+}
+
+function fullGrantAnswers(slug: string): string {
+  const units = ["Product", "Design", "Engineering", "Growth", "Analytics", "Revenue", "Store", "Trust", "Operations"];
+  return JSON.stringify({
+    schemaVersion: "1.0.0",
+    businessSlug: slug,
+    founderContact: { email: "engine-e2e@example.invalid" },
+    units: Object.fromEntries(units.map((unit) => [unit, { level: "full" }])),
+  });
+}
+
+/**
+ * Deliberately unscoped: the journey's early chains cross domains (orchestration reads what
+ * engineering produces, product reads what experience produces), so a scoped session stalls on
+ * out-of-scope producers by design and never reaches the fresh-context wave this check exists to
+ * prove. The fixture executor keeps an unscoped run cheap; the wall clock bounds it regardless.
+ */
+function briefFor(slug: string): string {
+  return JSON.stringify({
+    schemaVersion: "1.0.0",
+    businessSlug: slug,
+    founderContact: { email: "engine-e2e@example.invalid" },
+  });
+}
+
+/** Answer every pending founder approval on the run — the founder edge, exercised through its own CLI. */
+function approveAllPending(workspace: string, name: string): number {
+  const list = runCli("core/session/approve.ts", ["--workspace", workspace, "--list"]);
+  check(list.code === 0, `${name}: approve.ts --list exits 0`, list.output.trim().slice(-200));
+  const ids = [...list.output.matchAll(/^PENDING (.+)$/gm)].map((match) => match[1]!.trim());
+  for (const id of ids) {
+    const result = runCli("core/session/approve.ts", ["--workspace", workspace, "--approval", id, "--decision", "approved", "--session", "engine-e2e-founder"]);
+    check(result.code === 0, `${name}: approval ${id} recorded`, result.output.trim().slice(-200));
+  }
+  return ids.length;
+}
+
+function prepareWorkspace(scratch: string, name: string): { workspace: string; brief: string } {
+  const workspace = path.join(scratch, name);
+  cpSync(referenceWorkspace, workspace, { recursive: true });
+
+  const dryRun = runCli("core/session/bootstrap.ts", ["--workspace", workspace]);
+  check(dryRun.code === 0, `${name}: bootstrap dry-run exits 0`, dryRun.output.trim().slice(-400));
+
+  // The reference workspace's v1 slug is read post-migration; run bootstrap first with answers
+  // built from the v1 file's own slug so onboarding matches the control document.
+  const projectState = readFileSync(path.join(workspace, "state", "PROJECT_STATE.yaml"), "utf8");
+  const slugMatch = projectState.match(/^\s*slug:\s*"?([A-Za-z0-9._-]+)"?\s*$/m);
+  check(Boolean(slugMatch), `${name}: reference PROJECT_STATE.yaml declares a project slug`);
+  const slug = slugMatch?.[1] ?? "app-name";
+
+  const answersPath = path.join(scratch, `${name}-answers.json`);
+  writeFileSync(answersPath, fullGrantAnswers(slug), "utf8");
+  const apply = runCli("core/session/bootstrap.ts", ["--workspace", workspace, "--apply", "--answers", answersPath]);
+  check(apply.code === 0, `${name}: bootstrap --apply exits 0`, apply.output.trim().slice(-400));
+  check(existsSync(path.join(workspace, "state", "business-state.json")), `${name}: bootstrap produced state/business-state.json`);
+  check(existsSync(path.join(workspace, "control", "control.json")), `${name}: bootstrap produced control/control.json`);
+  check(existsSync(path.join(workspace, "catalog.json")), `${name}: bootstrap installed catalog.json`);
+  check(existsSync(path.join(workspace, "control", "manifest.json")), `${name}: adoption recorded a reducer manifest`);
+
+  const again = runCli("core/session/bootstrap.ts", ["--workspace", workspace, "--apply"]);
+  check(again.code === 0, `${name}: re-running bootstrap is a clean no-op`, again.output.trim().slice(-400));
+  check(!again.output.includes("DONE adopt:"), `${name}: re-run adopts nothing a second time`, again.output.trim().slice(-400));
+
+  const briefPath = path.join(scratch, `${name}-brief.json`);
+  writeFileSync(briefPath, briefFor(slug), "utf8");
+  return { workspace, brief: briefPath };
+}
+
+function main(): number {
+  const scratch = mkdtempSync(path.join(tmpdir(), "formation-engine-e2e-"));
+  try {
+    // --- the real path: bootstrap, run, verify, resume ------------------------------------------
+    const primary = prepareWorkspace(scratch, "primary");
+    const sessionArgs = ["--workspace", primary.workspace, "--brief", primary.brief, "--executor", "fixture", "--wall-clock-seconds", "600"];
+    const first = runCli("core/session/run.ts", [...sessionArgs, "--session", SESSION_ONE, "--verifier", "fixture"]);
+    check(first.code === 0, "session 1 exits 0", first.output.trim().slice(-400));
+    check(existsSync(path.join(primary.workspace, "digests", `${SESSION_ONE}.md`)), "session 1 wrote a digest");
+
+    const run = loadRun(primary.workspace);
+    const succeededFirst = Object.values(run.nodes).filter((node) => node.status === "succeeded").length;
+    check(succeededFirst > 0, "session 1 completed at least one node", `succeeded=${succeededFirst}`);
+    const attemptedFirst = Object.values(run.nodes).filter((node) => node.attempts.length > 0).length;
+    const scopeParked = Object.values(run.nodes).filter((node) => node.status === "waiting_founder" && (node.blocker ?? "").startsWith("Scope answer needed"));
+    check(scopeParked.length > 0, "unanswered scope questions stay parked for the founder", `waiting: ${scopeParked.length}`);
+
+    // The founder edge: a fresh business's second wave sits behind founder-only approvals by
+    // design. Grant them all through approve.ts, exactly as a founder (or the platform's
+    // approvals mirror) would, then resume.
+    const approvedCount = approveAllPending(primary.workspace, "primary");
+    check(approvedCount > 0, "session 1 parked founder approvals to grant", `approved=${approvedCount}`);
+
+    // --- control leg: verifier off MUST leave a dead end (the gate proving its own detector).
+    // If this stops failing-as-expected, either fresh-context work no longer parks (the
+    // verification contract changed) or the assertions below can no longer see parked work —
+    // both need eyes, so both fail the check.
+    const off = runCli("core/session/run.ts", [...sessionArgs, "--session", CONTROL_SESSION, "--verifier", "off"]);
+    check(off.code === 0, "control session (verifier off) exits 0", off.output.trim().slice(-400));
+    const controlRun = loadRun(primary.workspace);
+    check(controlRun.runId === run.runId, "control session resumed the durable run rather than reseeding", `${controlRun.runId} vs ${run.runId}`);
+    const parked = pendingVerificationCount(controlRun);
+    check(parked > 0, "verifier-off control left fresh-context work parked pending verification (detector works)", `pending: ${parked}`);
+    const controlDigest = readFileSync(path.join(primary.workspace, "digests", `${CONTROL_SESSION}.md`), "utf8");
+    check(controlDigest.includes("double-checks were turned off"), "control session's digest says out loud that checks were off");
+
+    // --- verified leg: the sweep clears the prior session's backlog and the run advances ---------
+    const second = runCli("core/session/run.ts", [...sessionArgs, "--session", SESSION_TWO, "--verifier", "fixture"]);
+    check(second.code === 0, "verified session resumes and exits 0", second.output.trim().slice(-400));
+    const resumed = loadRun(primary.workspace);
+    check(resumed.runId === run.runId, "verified session resumed the durable run rather than reseeding", `${resumed.runId} vs ${run.runId}`);
+    const succeeded = Object.values(resumed.nodes).filter((node) => node.status === "succeeded").length;
+    check(succeeded > 0, "the journey still has completed work at the end", `final succeeded=${succeeded}`);
+    // "succeeded" is a moving population mid-journey — a first-time production legitimately
+    // re-stales work accepted on top of the file it replaced — so the monotonic progress metric
+    // is graph coverage: nodes that have ever been attempted only ever grows.
+    const attemptedFinal = Object.values(resumed.nodes).filter((node) => node.attempts.length > 0).length;
+    check(
+      attemptedFinal > attemptedFirst,
+      "the journey advanced past session 1 (more of the graph attempted)",
+      `session1=${attemptedFirst} final=${attemptedFinal}`,
+    );
+
+    const verifierAccepted = Object.values(resumed.nodes).filter((node) => node.verifiedBySessionId === `${SESSION_TWO}.verifier`);
+    check(
+      verifierAccepted.length > 0,
+      "the session's verifier sweep independently accepted fresh-context work (including the control's backlog)",
+      `nodes with verifiedBySessionId=${SESSION_TWO}.verifier: ${verifierAccepted.length}`,
+    );
+    check(
+      pendingVerificationCount(resumed) === 0,
+      "no produced work is left dead-ended pending verification",
+      `pending: ${pendingVerification(resumed).join("; ") || "none"}\n     session output tail: ${second.output.trim().slice(-600)}`,
+    );
+    const stillUnanswered = Object.values(resumed.nodes).filter(
+      (node) => node.status === "waiting_founder" && (node.blocker ?? "").startsWith("Scope answer needed"),
+    );
+    check(
+      stillUnanswered.length === scopeParked.length,
+      "unanswered scope questions never rode staleness into dispatch",
+      `before: ${scopeParked.length} after: ${stillUnanswered.length}`,
+    );
+
+    const audit = readFileSync(path.join(primary.workspace, "control", "audit.jsonl"), "utf8");
+    check(audit.includes("verification_accepted"), "verification acceptance is attested in the audit log");
+    check(audit.includes("founder_approval_granted"), "founder approvals are attested in the audit log");
+
+    const list = runCli("core/session/verify.ts", ["--workspace", primary.workspace, "--list"]);
+    check(
+      list.code === 0 && list.output.includes("No nodes waiting on verification."),
+      "verify.ts --list agrees nothing is waiting",
+      list.output.trim().slice(-200),
+    );
+
+    if (failures.length > 0) {
+      console.error(`\ncheck:engine-e2e — ${failures.length} failure(s).`);
+      return 1;
+    }
+    console.log(
+      `check:engine-e2e ok — bootstrap, ${succeeded} node(s) completed, ${verifierAccepted.length} fresh-context acceptance(s) after a parked backlog of ${parked}, and the verifier-off control behaved.`,
+    );
+    return 0;
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
+}
+
+process.exitCode = main();
