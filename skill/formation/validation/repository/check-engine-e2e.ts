@@ -226,6 +226,60 @@ function main(): number {
       list.output.trim().slice(-200),
     );
 
+    // --- re-pin leg (layering plan R4): a workspace pinned to an older catalog adopts the newer
+    // one ONLY through an explicit bootstrap --apply, mid-journey, without losing its run. The
+    // older pin is simulated by rewriting the runtime binding's recorded version — exactly the
+    // state a real workspace is in after the engine updates underneath it.
+    const runtimeManifestPath = path.join(primary.workspace, ".b2c-launch", "runtime.json");
+    const runtimeManifest = JSON.parse(readFileSync(runtimeManifestPath, "utf8")) as { skillVersion: string };
+    const realVersion = runtimeManifest.skillVersion;
+    writeFileSync(runtimeManifestPath, JSON.stringify({ ...runtimeManifest, skillVersion: "0.0.1" }, null, 2), "utf8");
+
+    const repinDry = runCli("core/session/bootstrap.ts", ["--workspace", primary.workspace]);
+    check(repinDry.code === 0, "re-pin dry-run exits 0", repinDry.output.trim().slice(-300));
+    check(
+      repinDry.output.includes("re-pin the workspace catalog from 0.0.1"),
+      "the version drift is NAMED in the dry-run, never silently skipped",
+      repinDry.output.trim().slice(-300),
+    );
+
+    const repin = runCli("core/session/bootstrap.ts", ["--workspace", primary.workspace, "--apply"]);
+    check(repin.code === 0, "re-pin --apply exits 0", repin.output.trim().slice(-300));
+    check(
+      repin.output.includes(`re-pinned the workspace catalog from 0.0.1 to ${realVersion}`),
+      "bootstrap --apply re-pins to the engine's version",
+      repin.output.trim().slice(-300),
+    );
+    const repinned = JSON.parse(readFileSync(runtimeManifestPath, "utf8")) as { skillVersion: string };
+    check(repinned.skillVersion === realVersion, "the runtime binding records the new pin", `pinned: ${repinned.skillVersion}`);
+    const afterRepin = loadRun(primary.workspace);
+    check(afterRepin.runId === run.runId, "the durable run survives a re-pin untouched", `${afterRepin.runId} vs ${run.runId}`);
+
+    // --- fresh-business leg (layering plan R5): a business born from `formation new` — not a copy
+    // of the reference workspace — bootstraps and plans. This is the forwarded-repo user's actual
+    // first journey; before new.ts existed there was no birthplace to test.
+    const freshDir = path.join(scratch, "fresh-born");
+    const born = runCli("core/session/new.ts", ["fresh-e2e", "--dir", freshDir, "--name", "Fresh E2E"]);
+    check(born.code === 0, "formation new scaffolds a fresh workspace", born.output.trim().slice(-300));
+    const freshState = readFileSync(path.join(freshDir, "state", "PROJECT_STATE.yaml"), "utf8");
+    check(freshState.includes('slug: "fresh-e2e"') && freshState.includes('name: "Fresh E2E"'), "the fresh workspace carries the founder's slug and name");
+    check(existsSync(path.join(freshDir, "AGENTS.md")), "the fresh workspace has repo agent entrypoints");
+    check(!existsSync(path.join(freshDir, "dist")), "generated projections are not inherited from the seed");
+
+    const bornAgain = runCli("core/session/new.ts", ["fresh-e2e", "--dir", freshDir]);
+    check(
+      bornAgain.code === 1 && bornAgain.output.includes("new.target_occupied"),
+      "new refuses an occupied target by name",
+      bornAgain.output.trim().slice(-200),
+    );
+
+    const freshAnswers = path.join(scratch, "fresh-answers.json");
+    writeFileSync(freshAnswers, fullGrantAnswers("fresh-e2e"), "utf8");
+    const freshApply = runCli("core/session/bootstrap.ts", ["--workspace", freshDir, "--apply", "--answers", freshAnswers]);
+    check(freshApply.code === 0, "a new-born workspace bootstraps", freshApply.output.trim().slice(-400));
+    const freshPlan = runCli("core/session/plan.ts", ["--workspace", freshDir]);
+    check(freshPlan.code === 0, "a new-born workspace plans", freshPlan.output.trim().slice(-300));
+
     if (failures.length > 0) {
       console.error(`\ncheck:engine-e2e — ${failures.length} failure(s).`);
       return 1;

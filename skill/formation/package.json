@@ -1,11 +1,25 @@
 {
   "name": "formation-skill-runtime",
-  "version": "0.150.0",
+  "version": "0.151.0",
   "private": true,
   "bin": {
     "formation": "bin/formation.mjs",
     "formation-mcp": "bin/formation-mcp.mjs"
   },
+  "files": [
+    "bin",
+    "core",
+    "catalog",
+    "knowledge",
+    "validation",
+    "tooling",
+    "starters",
+    "workspace",
+    "workspace-template",
+    "SKILL.md",
+    "skill-version.json",
+    "tsconfig.json"
+  ],
   "type": "module",
   "scripts": {
     "validate:skill": "f=\"$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py\"; if [ -f \"$f\" ]; then uv run --with pyyaml python \"$f\" .; else echo 'skill-creator quick_validate not installed; skipping maintainer-only skill lint (expected outside the author machine)'; fi",
@@ -143,13 +157,13 @@
     "prettier": "^3.9.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "tsx": "^4.23.1",
     "typescript": "^7.0.2",
-    "vite": "^8.2.0",
-    "yaml": "^2.6.1"
+    "vite": "^8.2.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "tsx": "^4.23.1",
+    "yaml": "^2.6.1",
     "zod": "^4.4.3"
   }
 }

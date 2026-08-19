@@ -159,10 +159,12 @@ required, just the reads-gate-readiness contract the calendar reopening enforces
 ### 5. Surfaces
 
 - **The packaged `formation` bin** (`skill/formation/bin/formation.mjs`) — an installable
-  dispatcher over `bootstrap`, `plan`, `run`, `approve`, `verify`, `onboard`, `schedule`, and
-  `workspaces`. It execs the same TypeScript CLIs the audit and fixtures prove; it adds an
-  address, not a second implementation. Before this existed, driving the engine required knowing
-  the repository's internal `tsx` paths from inside a checkout.
+  dispatcher over the whole consumer journey: `setup`, `doctor`, `new`, `bootstrap`, `plan`,
+  `run`, `approve`, `verify`, `onboard`, `schedule`, `workspaces`, `list`, and `update`. It execs
+  the same TypeScript CLIs the audit and fixtures prove; it adds an address, not a second
+  implementation. `npm pack` of the skill package is standalone (smoke-tested in
+  `check:package-parity`); a workspace pins its own catalog, and `bootstrap --apply` is the
+  explicit per-business re-pin when the engine has moved.
 - **The `formation-mcp` server** (`core/mcp/server.ts`) exposes the same subcommands over MCP
   stdio. It resolves workspaces only through the machine's registry
   (`~/.formation/workspaces.json`, managed by `formation workspaces`) — an unregistered path is

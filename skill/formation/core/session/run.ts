@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { spawnSync } from "node:child_process";
 
-import { isMainModule, parseArgs } from "../lib/cli.js";
+import { isMainModule, parseArgs, resolveCallerPath } from "../lib/cli.js";
 import { buildAuditPlan } from "../../tooling/lib/audit-plan.js";
 import { runReducer, skillRoot, type ReducerResult } from "./reducer-cli.js";
 import { acquireLock, heartbeat, releaseLock, type AcquireResult } from "../reducer/lock.js";
@@ -474,7 +474,7 @@ async function main(): Promise<number> {
     return 1;
   }
 
-  const workspace = path.resolve(args.workspace!);
+  const workspace = resolveCallerPath(args.workspace!);
   const paths = resolveWorkspacePaths(workspace, args.catalog ? path.resolve(args.catalog) : undefined);
   // runstate.ts's writeAtomic (unlike the reducer's writer) does not create parent directories.
   mkdirSync(path.dirname(paths.runState), { recursive: true });
@@ -531,7 +531,7 @@ async function main(): Promise<number> {
 
   try {
     try {
-      brief = loadBrief(path.resolve(args.brief!));
+      brief = loadBrief(resolveCallerPath(args.brief!));
     } catch (error) {
       const reason = error instanceof BriefInvalid ? error.issues.join("; ") : error instanceof Error ? error.message : String(error);
       anomalies.push({ message: `I couldn't read the session instructions I was given (${reason}), so I stopped before touching anything.` });

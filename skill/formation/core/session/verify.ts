@@ -20,7 +20,7 @@
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { isMainModule, parseArgs } from "../lib/cli.js";
+import { isMainModule, parseArgs, resolveCallerPath } from "../lib/cli.js";
 import { appendAuditEntry } from "../reducer/audit.js";
 import { compilePlan, type CatalogInput, type RunNodeId } from "../engine/compile.js";
 import { acceptVerification, loadRunState, writeRunState } from "../engine/runstate.js";
@@ -33,7 +33,7 @@ function main(): number {
     console.error("Usage: tsx core/session/verify.ts --workspace <dir> [--list] --node <id> --session <id> --evidence <text>");
     return 1;
   }
-  const workspace = path.resolve(args.workspace);
+  const workspace = resolveCallerPath(args.workspace);
   const runStatePath = path.join(workspace, "run", "run-state.json");
   let run: RunStateDocument;
   try {

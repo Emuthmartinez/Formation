@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
 
-import { isMainModule, parseArgs } from "../lib/cli.js";
+import { isMainModule, parseArgs, resolveCallerPath } from "../lib/cli.js";
 import { runReducer } from "./reducer-cli.js";
 import { resolveWorkspacePaths } from "./run.js";
 import { periodKeyFor } from "../autonomy/budget.js";
@@ -329,14 +328,14 @@ function main(): number {
     return 1;
   }
 
-  const workspace = path.resolve(args.workspace!);
+  const workspace = resolveCallerPath(args.workspace!);
   const paths = resolveWorkspacePaths(workspace);
   const now = args.now ?? new Date().toISOString();
   const dryRun = args["dry-run"] === "true";
 
   let answers: OnboardingAnswers;
   try {
-    answers = loadAnswers(path.resolve(args.answers!));
+    answers = loadAnswers(resolveCallerPath(args.answers!));
   } catch (error) {
     const message = error instanceof AnswersInvalid ? error.issues.join("; ") : error instanceof Error ? error.message : String(error);
     console.error(`ISSUE onboard.answers_invalid: ${message}`);

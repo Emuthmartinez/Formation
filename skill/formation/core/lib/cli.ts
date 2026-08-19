@@ -1,3 +1,4 @@
+import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 /**
@@ -30,4 +31,14 @@ export function parseArgs(argv: string[]): Record<string, string> {
  */
 export function isMainModule(moduleUrl: string): boolean {
   return process.argv[1] !== undefined && moduleUrl === pathToFileURL(process.argv[1]).href;
+}
+
+/**
+ * Resolve a user-supplied path against the directory the user typed it in. The packaged bin
+ * spawns every CLI with cwd at the package root (relative reads inside the CLIs depend on that)
+ * and passes the invoking shell's directory as FORMATION_CALLER_CWD — without this, a consumer's
+ * `--workspace ./my-app` would silently resolve inside the engine package.
+ */
+export function resolveCallerPath(input: string): string {
+  return path.resolve(process.env.FORMATION_CALLER_CWD?.trim() || process.cwd(), input);
 }
