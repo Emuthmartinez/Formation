@@ -159,12 +159,16 @@ required, just the reads-gate-readiness contract the calendar reopening enforces
 ### 5. Surfaces
 
 - **The packaged `formation` bin** (`skill/formation/bin/formation.mjs`) — an installable
-  dispatcher over `bootstrap`, `plan`, `run`, `approve`, `verify`, `onboard`, and `schedule`. It
-  execs the same TypeScript CLIs the audit and fixtures prove; it adds an address, not a second
-  implementation. Before this existed, driving the engine required knowing the repository's
-  internal `tsx` paths from inside a checkout.
-- **An MCP server** is planned to expose the same subcommands over MCP, so an agent runtime can
-  drive a workspace without shelling out to the CLI. It has not landed in this repository yet.
+  dispatcher over `bootstrap`, `plan`, `run`, `approve`, `verify`, `onboard`, `schedule`, and
+  `workspaces`. It execs the same TypeScript CLIs the audit and fixtures prove; it adds an
+  address, not a second implementation. Before this existed, driving the engine required knowing
+  the repository's internal `tsx` paths from inside a checkout.
+- **The `formation-mcp` server** (`core/mcp/server.ts`) exposes the same subcommands over MCP
+  stdio. It resolves workspaces only through the machine's registry
+  (`~/.formation/workspaces.json`, managed by `formation workspaces`) — an unregistered path is
+  refused, never probed. Approval decisions and schedule installs require an explicit `asFounder`
+  assertion, and `FORMATION_MCP_READONLY=1` narrows the surface to `formation_plan` and
+  `formation_status`.
 - **The platform HTTP adapter** (`core/adapters/platform-execution.ts` and
   `platform-import.ts`) — see below.
 

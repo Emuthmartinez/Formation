@@ -34,6 +34,7 @@ const COMMANDS = new Map([
   ["verify", { script: "core/session/verify.ts", summary: "fresh-context acceptance for produced work (producer never verifies its own)" }],
   ["onboard", { script: "core/session/onboard.ts", summary: "apply founder grants, waivers, and budgets through the reducer" }],
   ["schedule", { script: "core/adapters/install-schedule.ts", summary: "install or remove the OS-level trigger for recurring sessions (dry-run by default)" }],
+  ["workspaces", { script: "core/session/workspaces.ts", summary: "the machine's registry of its businesses: list, register, remove (the MCP allowlist)" }],
 ]);
 
 function usage(code) {
