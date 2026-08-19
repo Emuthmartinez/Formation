@@ -84,6 +84,7 @@ export function loadKnowledgePackages(skillRoot: string): CatalogKnowledgePackag
         applicabilityNotes: text(parsed.applicability_notes, "applicability_notes", manifestPath),
         sourceExemption,
         sources,
+        retired: parsed.retired === true || undefined,
         replacementIds: list(parsed.replacement_ids, "replacement_ids", manifestPath) as ReferenceId[],
         workflowIds: list(bindings.workflow_ids, "bindings.workflow_ids", manifestPath) as WorkflowId[],
         contextPackIds: list(bindings.context_pack_ids, "bindings.context_pack_ids", manifestPath) as ContextPackId[],

@@ -26,6 +26,8 @@ import { register as registerAgentOperations } from "./fixtures/agent-operations
 import { register as registerFounderOperator } from "./fixtures/founder-operator.fixtures.js";
 import { register as registerMobai } from "./fixtures/mobai.fixtures.js";
 import { register as registerCopy } from "./fixtures/copy.fixtures.js";
+import { register as registerLearning } from "./fixtures/learning.fixtures.js";
+import { register as registerRuntimeSync } from "./fixtures/runtime-sync.fixtures.js";
 
 const keepTemp = process.argv.includes("--keep-temp");
 const harness = createHarness();
@@ -48,6 +50,8 @@ try {
     registerFounderOperator,
     registerMobai,
     registerCopy,
+    registerLearning,
+    registerRuntimeSync,
   ]) {
     register(harness);
     harness.cleanupFixtures();
