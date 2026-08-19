@@ -145,7 +145,9 @@ export const roles: CatalogRole[] = [
       route("Design Room renderer", "design state or tokens change"),
     ],
     ["provider.refero", "provider.higgsfield", "provider.app-store-screenshots"],
-    ["design/", "studio/", "product/experience/ux-patterns/", "growth/content-assets/", "store/app-store-listing/SCREENSHOTS.md"],
+    // strategy/BRAND.md joined this scope with the brand-definition node (2026-08-19): the brand
+    // voice contract is Design Room material even though it lives under strategy/.
+    ["design/", "studio/", "product/experience/ux-patterns/", "growth/content-assets/", "store/app-store-listing/SCREENSHOTS.md", "strategy/BRAND.md"],
   ),
   role(
     "role.copy-specialist",
@@ -180,7 +182,10 @@ export const roles: CatalogRole[] = [
     ],
     [route("current ASO, analytics, ad, and social provider tools", "the relevant channel is in scope")],
     ["provider.app-store-connect", "provider.google-play", "provider.paid-ad-channels", "provider.posthog", "provider.revenuecat"],
-    ["STORE_OPS.md", "store/", "growth/", "GEO_SEO.md"],
+    // ugc/ joined this scope when ugc/script-bank.md gained its producer of record (2026-08-19
+    // phantom-read fix): the UGC creator engine is this role's node, so its artifact family is
+    // this role's write scope.
+    ["STORE_OPS.md", "store/", "growth/", "GEO_SEO.md", "ugc/"],
   ),
   role(
     "role.launch-surface-producer",

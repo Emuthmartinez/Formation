@@ -56,7 +56,7 @@ function knowledge(overrides: Partial<CatalogKnowledgePackage> = {}): CatalogKno
 }
 
 function codes(packages: CatalogKnowledgePackage[]): string[] {
-  return validateKnowledgePackages(packages, skillRoot, [domain], [workflow], [contextPack], new Date("2026-08-17T00:00:00Z")).map((issue) => issue.code);
+  return validateKnowledgePackages(packages, skillRoot, [domain], [workflow], [contextPack], [], new Date("2026-08-17T00:00:00Z")).map((issue) => issue.code);
 }
 
 export function register(harness: Harness): void {
@@ -76,6 +76,17 @@ export function register(harness: Harness): void {
     for (const code of ["knowledge.document.missing", "knowledge.domain.invalid", "knowledge.workflow.invalid", "knowledge.context.invalid"])
       assert(result.includes(code), `missing ${code}`);
   });
+  harness.check("knowledge: a context-pack binding with no subscribing role or operator fails; a carried pack and the legacy no-subscribers call both pass", () => {
+    const bound = knowledge({ workflowIds: [], contextPackIds: ["context.fixture"] });
+    const withSubscribers = (subscribers: ReadonlyArray<{ contextPackIds: readonly string[] }>): string[] =>
+      validateKnowledgePackages([bound], skillRoot, [domain], [workflow], [contextPack], subscribers, new Date("2026-08-17T00:00:00Z")).map(
+        (issue) => issue.code,
+      );
+    assert(withSubscribers([{ contextPackIds: [] }]).includes("knowledge.context.unsubscribed"), "an uncarried pack binding must fail");
+    assert(!withSubscribers([{ contextPackIds: ["context.fixture"] }]).includes("knowledge.context.unsubscribed"), "a carried pack binding must pass");
+    assert(!withSubscribers([]).includes("knowledge.context.unsubscribed"), "the legacy no-subscribers call skips the check rather than failing closed");
+  });
+
   harness.check("knowledge: an unbound active package fails, while a draft stays out of the resolved graph", () => {
     assert(codes([knowledge({ workflowIds: [] })]).includes("knowledge.active.unbound"), "expected unbound active error");
     const resolved = resolveKnowledgeGraph([knowledge({ lifecycle: "draft" })], [workflow], [contextPack]);

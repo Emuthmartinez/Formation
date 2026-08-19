@@ -12,9 +12,15 @@ import { phases } from "./phases.js";
  */
 export const phaseOrder: string[] = [...phases].sort((a, b) => a.order - b.order).map((phase) => phase.key);
 
-/** Index in phaseOrder at which the orient/scaffold window ends. */
+/**
+ * Index in phaseOrder at which the orient/scaffold window ends. Computed as a POSITION in
+ * phaseOrder, never as a phase's `order` value: order values may carry gaps (deleting dead
+ * phase.0a left 0,2,3,…), and the previous max-of-orders version only worked while the two
+ * happened to coincide — the gap silently widened the orient window by one phase and two
+ * founder-copy fixtures caught the drift (2026-08-19).
+ */
 export const PHASE_ORIENT_LAST_INDEX: number = Math.max(
-  ...phases.filter((phase) => "orientWindow" in phase && phase.orientWindow === true).map((phase) => phase.order),
+  ...phases.filter((phase) => "orientWindow" in phase && phase.orientWindow === true).map((phase) => phaseOrder.indexOf(phase.key)),
 );
 
 export const requiredLanes: string[] = lanes.map((lane) => lane.key);

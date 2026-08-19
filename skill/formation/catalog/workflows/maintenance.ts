@@ -1,7 +1,7 @@
 import { workflow } from "./helpers.js";
 
 /**
- * Ported from runtime/graph/workflows/maintenance.ts. All seven are domain.machine —
+ * Ported from runtime/graph/workflows/maintenance.ts. All are domain.machine —
  * skill-maintenance, never founder-grantable (operator.maintainer is a human role, not a
  * business unit) — so catalog/bridge.ts's toCatalogInput() excludes them from the
  * dispatchable CatalogInput for the same reason it excludes domain.process/orchestration.

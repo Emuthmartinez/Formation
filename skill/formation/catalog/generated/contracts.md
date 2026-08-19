@@ -619,6 +619,19 @@ _Implement or finalize the accepted onboarding graph, verify the canonical artif
 
 ## Look And Feel
 
+### Brand definition
+
+_Crossing research into design: before the Design Room locks visual identity, and before any marketing or store copy claims a brand voice_
+
+- **Role:** Design guru
+- **Phases:** 2
+- **Providers:** —
+- **Reads:** `strategy/RESEARCH.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`
+- **Consults:** —
+- **Produces:** `strategy/BRAND.md`
+- **Gates:** —
+- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md)
+
 ### Design Room (state→mutate→version→render)
 
 _Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work_
@@ -1067,7 +1080,7 @@ _Before founder-led organic social, creator sourcing/contracts, format-discovery
 - **Providers:** —
 - **Reads:** `design/design.md`, `growth/VIRAL_GROWTH.md`, `growth/LAUNCH_NARRATIVE.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`
 - **Consults:** —
-- **Produces:** `growth/UGC_PLAYBOOK.md`
+- **Produces:** `growth/UGC_PLAYBOOK.md`, `ugc/script-bank.md`
 - **Gates:** —
 - **Knowledge:** [Influencer Sponsorship Engine](../../knowledge/growth/influencer-sponsorship-engine.md), [UGC Creator Engine](../../knowledge/growth/ugc-creator-engine.md), [Viral Growth Loops](../../knowledge/growth/viral-growth-loops.md), [No-Slop Writing](../../knowledge/words/no-slop-writing.md)
 

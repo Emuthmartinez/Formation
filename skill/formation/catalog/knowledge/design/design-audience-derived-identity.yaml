@@ -9,6 +9,7 @@ load_when: "when design/design.md is created or revised, when a visual direction
 lifecycle: active
 bindings:
   workflow_ids:
+    - workflow.design.brand-definition
     - workflow.design.design-room-state-mutate-version-render
   context_pack_ids:
     - context.design

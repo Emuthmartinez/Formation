@@ -7,6 +7,8 @@ import YAML from "yaml";
 import { contextPacks } from "../catalog/context-packs.js";
 import { domains } from "../catalog/domains.js";
 import { loadKnowledgePackages } from "../catalog/knowledge-packages.js";
+import { operators } from "../catalog/operators.js";
+import { roles } from "../catalog/roles.js";
 import { validateKnowledgePackages } from "../catalog/knowledge-validation.js";
 import { workflows } from "../catalog/workflows/index.js";
 
@@ -26,7 +28,7 @@ function required(values: Map<string, string>, name: string): string {
 }
 
 function issues(now = new Date()) {
-  return validateKnowledgePackages(loadKnowledgePackages(skillRoot), skillRoot, domains, workflows, contextPacks, now);
+  return validateKnowledgePackages(loadKnowledgePackages(skillRoot), skillRoot, domains, workflows, contextPacks, [...roles, ...operators], now);
 }
 
 function check(): void {

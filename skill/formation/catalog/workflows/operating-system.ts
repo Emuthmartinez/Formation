@@ -1,7 +1,7 @@
 import { workflow } from "./helpers.js";
 
 /**
- * Ported from runtime/graph/workflows/operating-system.ts. All seven are domain.process /
+ * Ported from runtime/graph/workflows/operating-system.ts. All are domain.process /
  * domain.orchestration — system-domain, never founder-grantable (KTD3) — so
  * catalog/bridge.ts's toCatalogInput() excludes them from the dispatchable CatalogInput:
  * they represent session-level machinery (continuity, provider-proof verification, change

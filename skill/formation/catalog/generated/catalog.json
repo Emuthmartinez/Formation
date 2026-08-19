@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.144.0",
+  "skillVersion": "0.145.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -241,15 +241,6 @@
       "focus": "Founder-zero orient and scaffold",
       "primaryOutput": "operations/BUSINESS_ACCESS.md + ledger, state/PROJECT_STATE.yaml, autonomy/scope, first cockpit",
       "order": 0,
-      "orientWindow": true
-    },
-    {
-      "id": "phase.0a",
-      "key": "phase_0a",
-      "label": "0a",
-      "focus": "Access and account orientation",
-      "primaryOutput": "Business identity, account inventory, and one-next-action handoff",
-      "order": 1,
       "orientWindow": true
     },
     {
@@ -904,7 +895,8 @@
         "studio/",
         "product/experience/ux-patterns/",
         "growth/content-assets/",
-        "store/app-store-listing/SCREENSHOTS.md"
+        "store/app-store-listing/SCREENSHOTS.md",
+        "strategy/BRAND.md"
       ]
     },
     {
@@ -1015,7 +1007,8 @@
         "STORE_OPS.md",
         "store/",
         "growth/",
-        "GEO_SEO.md"
+        "GEO_SEO.md",
+        "ugc/"
       ]
     },
     {
@@ -7343,6 +7336,46 @@
       }
     },
     {
+      "id": "workflow.design.brand-definition",
+      "title": "Brand definition",
+      "domainId": "domain.design",
+      "areaIds": [
+        "area.product-experience"
+      ],
+      "trigger": "Crossing research into design: before the Design Room locks visual identity, and before any marketing or store copy claims a brand voice",
+      "instructions": "Write `strategy/BRAND.md` as the voice and identity contract every downstream copy and design surface answers to: name, one-line promise, the audience it speaks to (from `strategy/RESEARCH.md`'s evidence, not aspiration), voice register with three do/don't example pairs, vocabulary the brand owns and words it never uses, and the visual-identity intent the Design Room turns into tokens. Derive it from the research and the 11-star experience bar — a brand document that could describe any app in the category is template residue, not a brand. This file is the standard `writing-quality-no-slop` protects and the store listing speaks in; it existed as a phase-2 promise with no producing node until now (2026-08-19 audit's phantom-read finding), which meant a run could reach store submission with a template brand and nothing would flag it.",
+      "reads": [
+        "strategy/RESEARCH.md",
+        "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
+      ],
+      "consults": [],
+      "referenceIds": [
+        "reference.design.audience-derived-identity"
+      ],
+      "roleId": "role.design-guru",
+      "laneIds": [
+        "design"
+      ],
+      "phaseIds": [
+        "phase.2"
+      ],
+      "dependencies": [
+        "workflow.research.research-backed-spec",
+        "workflow.experience.11-star-experience"
+      ],
+      "outputPaths": [
+        "strategy/BRAND.md"
+      ],
+      "gateCommands": [],
+      "providerIds": [],
+      "founderOnlyActions": [],
+      "actionClass": "draft",
+      "idempotent": true,
+      "applicability": {
+        "mode": "always"
+      }
+    },
+    {
       "id": "workflow.design.design-room-state-mutate-version-render",
       "title": "Design Room (state→mutate→version→render)",
       "domainId": "domain.design",
@@ -7375,7 +7408,8 @@
         "phase.2"
       ],
       "dependencies": [
-        "workflow.process.launch-trace-and-build-contracts"
+        "workflow.process.launch-trace-and-build-contracts",
+        "workflow.design.brand-definition"
       ],
       "outputPaths": [
         "design/design.md",
@@ -10032,7 +10066,8 @@
         "workflow.growth.launch-narrative-and-cadence"
       ],
       "outputPaths": [
-        "growth/UGC_PLAYBOOK.md"
+        "growth/UGC_PLAYBOOK.md",
+        "ugc/script-bank.md"
       ],
       "gateCommands": [],
       "providerIds": [],
@@ -11291,6 +11326,15 @@
       "generated": true
     },
     {
+      "id": "artifact.strategy-brand-md",
+      "path": "strategy/BRAND.md",
+      "ownerDomainId": "domain.design",
+      "laneIds": [
+        "design"
+      ],
+      "generated": false
+    },
+    {
       "id": "artifact.strategy-localization-market-research-localization-market-research-md",
       "path": "strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md",
       "ownerDomainId": "domain.research",
@@ -11423,6 +11467,15 @@
       "ownerDomainId": "domain.trust",
       "laneIds": [
         "privacy_legal"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.ugc-script-bank-md",
+      "path": "ugc/script-bank.md",
+      "ownerDomainId": "domain.growth",
+      "laneIds": [
+        "growth"
       ],
       "generated": false
     },
