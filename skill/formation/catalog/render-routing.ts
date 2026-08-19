@@ -120,7 +120,6 @@ export function renderReferenceIndex(catalog: Catalog): string {
 export function renderPhaseSpine(catalog: Catalog): string {
   const rows = [...catalog.phases]
     .sort((a, b) => a.order - b.order)
-    .filter((phase) => phase.key !== "phase_0a")
     .map((phase) => `| ${phase.label} | ${phase.focus} | ${phase.primaryOutput} |`)
     .join("\n");
   return [
@@ -158,7 +157,6 @@ export function renderPhaseAreaMatrix(catalog: Catalog): string {
   const businessWorkflows = catalog.workflows.filter((workflow) => domainsById.get(workflow.domainId)?.slug !== "machine");
   const phaseRows = [...catalog.phases]
     .sort((a, b) => a.order - b.order)
-    .filter((phase) => phase.key !== "phase_0a")
     .map((phase) => `| ${phase.label} | ${areaCell(businessWorkflows.filter((workflow) => workflow.phaseIds.includes(phase.id)))} |`);
   const crossPhase = businessWorkflows.filter((workflow) => workflow.phaseIds.length === 0);
   return [

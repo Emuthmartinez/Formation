@@ -83,6 +83,15 @@ export function validateCatalog(catalog: Catalog, skillRoot: string, providerReg
 
   uniqueBy(catalog.phases, (item) => item.key, "catalog_graph.phase.key_duplicate", issues);
   uniqueBy(catalog.phases, (item) => String(item.order), "catalog_graph.phase.order_duplicate", issues);
+  // A phase no workflow carries is dead catalog data. The historical instance (phase.0a) was
+  // hidden from the generated docs by a silent render filter instead of being deleted — the
+  // projection quietly diverged from its own source, and nothing said so (2026-08-19 audit).
+  const referencedPhaseIds = new Set(catalog.workflows.flatMap((workflow) => workflow.phaseIds));
+  for (const phase of catalog.phases) {
+    if (!referencedPhaseIds.has(phase.id)) {
+      issues.push(error("catalog_graph.phase.unreferenced", `${phase.id} is carried by no workflow — delete the phase or assign it real work.`));
+    }
+  }
 
   uniqueBy(catalog.lanes, (item) => item.key, "catalog_graph.lane.key_duplicate", issues);
   for (const lane of catalog.lanes) {

@@ -31,9 +31,18 @@ export function validateKnowledgePackages(
   domains: readonly CatalogDomain[],
   workflows: readonly CatalogWorkflowDef[],
   contextPacks: readonly Omit<CatalogContextPack, "referenceIds">[],
+  subscribers: ReadonlyArray<{ contextPackIds: readonly string[] }> = [],
   now = new Date(),
 ): KnowledgeIssue[] {
   const issues: KnowledgeIssue[] = [];
+  // A context-pack binding only delivers knowledge through something that carries the pack — a
+  // worker role (the bridge/brief path) or a control-plane operator (the maintainer path). A pack
+  // nobody subscribes to is dead configuration that reads as wiring: the 2026-08-19 audit found
+  // exactly that shape and the follow-up nearly deleted context.machine before noticing the
+  // maintainer OPERATORS carry it — which is why this check unions both subscriber kinds instead
+  // of assuming roles are the only delivery path. Empty `subscribers` (an older caller) skips the
+  // check rather than failing everything closed.
+  const subscribedPackIds = new Set(subscribers.flatMap((subscriber) => [...subscriber.contextPackIds]));
   const ids = new Set<string>();
   const paths = new Set<string>();
   const domainIds = new Set(domains.map((item) => item.id));
@@ -53,6 +62,11 @@ export function validateKnowledgePackages(
     for (const contextPackId of item.contextPackIds) {
       if (!contextPackIds.has(contextPackId))
         issues.push({ code: "knowledge.context.invalid", message: `${item.id} uses unknown context pack ${contextPackId}.` });
+      else if (subscribers.length > 0 && !subscribedPackIds.has(contextPackId))
+        issues.push({
+          code: "knowledge.context.unsubscribed",
+          message: `${item.id} binds ${contextPackId}, but no role or operator subscribes to that pack — the binding delivers nothing. Subscribe a carrier or remove the binding.`,
+        });
     }
     if (item.lifecycle === "active" && !item.sessionScoped && item.workflowIds.length === 0 && item.contextPackIds.length === 0) {
       issues.push({ code: "knowledge.active.unbound", message: `${item.id} is active but has no graph binding.` });

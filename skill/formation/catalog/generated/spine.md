@@ -44,7 +44,7 @@ Generated from catalog/workflows and catalog/domains.ts. Each cell links to the 
 | 1e | [Marketing and growth](routing.md#marketing-and-growth) (2) |
 | 1f | [Running the launch](routing.md#running-the-launch) (1) · [Building the app](routing.md#building-the-app) (1) |
 | 1g | [Privacy, security, and legal](routing.md#privacy-security-and-legal) (1) |
-| 2 | [How the app feels](routing.md#how-the-app-feels) (7) · [Look and feel](routing.md#look-and-feel) (4) |
+| 2 | [How the app feels](routing.md#how-the-app-feels) (7) · [Look and feel](routing.md#look-and-feel) (5) |
 | 3 | [Look and feel](routing.md#look-and-feel) (1) · [Building the app](routing.md#building-the-app) (1) · [App Store and Google Play](routing.md#app-store-and-google-play) (11) · [Marketing and growth](routing.md#marketing-and-growth) (1) · [Privacy, security, and legal](routing.md#privacy-security-and-legal) (3) |
 | 3b | [Pricing and getting paid](routing.md#pricing-and-getting-paid) (1) |
 | 4 | [Running the business](routing.md#running-the-business) (1) · [Marketing and growth](routing.md#marketing-and-growth) (3) |

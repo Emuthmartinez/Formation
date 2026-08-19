@@ -1,6 +1,6 @@
 import { workflow } from "./helpers.js";
 
-/** Ported from runtime/graph/workflows/growth-revenue.ts. All nine are grantable-domain. */
+/** Ported from runtime/graph/workflows/growth-revenue.ts. All are grantable-domain. */
 export const workflows = [
   workflow({
     id: "workflow.data.analytics-and-attribution-blueprint",
@@ -193,7 +193,10 @@ export const workflows = [
     laneIds: ["growth"],
     phaseIds: ["phase.6"],
     dependencies: ["workflow.growth.viral-growth-loop", "workflow.growth.launch-narrative-and-cadence"],
-    outputPaths: ["growth/UGC_PLAYBOOK.md"],
+    // ugc/script-bank.md was read downstream (fastlane-growth-ops) with no producer of record —
+    // the compiler's read-as-readiness rule silently defeated (2026-08-19 audit). The engine
+    // produces it here, where the doctrine always said it came from.
+    outputPaths: ["growth/UGC_PLAYBOOK.md", "ugc/script-bank.md"],
     actionClass: "draft",
     idempotent: true,
   }),

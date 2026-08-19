@@ -12,15 +12,6 @@ export const phases: readonly CatalogPhase[] = [
     orientWindow: true,
   },
   {
-    id: "phase.0a",
-    key: "phase_0a",
-    label: "0a",
-    focus: "Access and account orientation",
-    primaryOutput: "Business identity, account inventory, and one-next-action handoff",
-    order: 1,
-    orientWindow: true,
-  },
-  {
     id: "phase.0b",
     key: "phase_0b",
     label: "0b",

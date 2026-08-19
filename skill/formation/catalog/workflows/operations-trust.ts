@@ -1,7 +1,7 @@
 import { workflow } from "./helpers.js";
 
 /**
- * Ported from runtime/graph/workflows/operations-trust.ts. All eight are grantable-domain
+ * Ported from runtime/graph/workflows/operations-trust.ts. All are grantable-domain
  * (domain.operations / domain.trust) and appear in catalog/bridge.ts's toCatalogInput().
  *
  * protectedCategory assignment follows the KTD4 rule verbatim: spend/release/destructive

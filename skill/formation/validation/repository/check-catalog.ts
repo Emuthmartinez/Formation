@@ -2,6 +2,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { composeCatalog } from "../../catalog/index.js";
+import { operators } from "../../catalog/operators.js";
 import { validateCatalog } from "../../catalog/validate.js";
 import { loadKnowledgePackages } from "../../catalog/knowledge-packages.js";
 import { validateKnowledgePackages } from "../../catalog/knowledge-validation.js";
@@ -26,7 +27,7 @@ const skillRoot = parseSkillRoot(process.argv.slice(2));
 const catalog = composeCatalog(skillRoot);
 const issues = [
   ...validateCatalog(catalog, skillRoot),
-  ...validateKnowledgePackages(loadKnowledgePackages(skillRoot), skillRoot, domains, workflows, contextPacks).map((item) => ({
+  ...validateKnowledgePackages(loadKnowledgePackages(skillRoot), skillRoot, domains, workflows, contextPacks, [...catalog.roles, ...operators]).map((item) => ({
     severity: "error" as const,
     code: item.code,
     message: item.message,
