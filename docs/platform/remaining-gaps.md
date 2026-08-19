@@ -57,7 +57,7 @@ Add:
 
 Every route should enforce role-level permissions in addition to membership — **shipped**. The capability is a required argument to the membership lookup, so a route that does not name what it is doing cannot resolve a member at all, and `platform/server/test/capabilities.test.mjs` fails on any route in source that is not declared with a capability before calling each declared surface as a member of every role.
 
-Two surfaces that previously trusted their caller now check for themselves: the execution worker's approval sync (a read that mirrors engine state into durable records) and the workspace snapshot builder. The founder-facing half reads the same answer the server enforces with — `snapshot.capabilities` — rather than keeping a second copy of the rules in the web app.
+Two surfaces that previously trusted their caller now check for themselves: the execution worker's approval sync (a read that mirrors skill state into durable records) and the workspace snapshot builder. The founder-facing half reads the same answer the server enforces with — `snapshot.capabilities` — rather than keeping a second copy of the rules in the web app.
 
 An instance that has closed open registration still admits the people it invited: `POST /api/auth/register` accepts an invitation token, which opens the door for that one email address. Closing `ALLOW_REGISTRATION` is therefore a usable setting rather than one that silently breaks the invite flow.
 
@@ -65,11 +65,11 @@ Changing a password is part of the same surface: the current password is require
 
 What remains here needs something Formation does not have: a mail transport. Email verification, password recovery, and SSO all depend on reaching a person outside the product. Until that exists, the honest position is the one the invitation flow already takes — say so, and hand the founder the link rather than pretending to send it. Building a password-reset flow whose email cannot be delivered would be worse than not having one, because it would look like a way back into a locked-out account and would not be.
 
-## P0: Platform-to-engine execution adapter
+## P0: Platform-to-skill execution adapter
 
 ### Why it matters
 
-The graph-native launch engine is the repository's major differentiator. Formation currently has the product model and structured generation boundary, but it does not yet import independently verified results.
+The graph-native launch skill is the repository's major differentiator. Formation currently has the product model and structured generation boundary, but it does not yet import independently verified results.
 
 ### Required outcome
 
@@ -78,16 +78,33 @@ Implement a typed adapter that:
 - receives an authorized Formation execution request — **shipped** (`platform/server/execution.mjs`, `platform/server/routes/executions.mjs`)
 - selects or accepts a stable catalog workflow — **shipped** (validated against the live boundary report from `core/adapters/platform-execution.ts`)
 - fingerprints scoped company context — **shipped** (`computeContextFingerprint`)
-- creates or resumes a durable engine run — **shipped** (the worker invokes `core/session/run.ts`; the engine's plan-matched run state is the durable identity)
-- exposes founder-readable run state — **shipped** (API-level, and surfaced on the Launch page: "The launch engine at work" renders each execution's step procession, session state, and imported-result totals, with an explainer flow when no session has run)
+- creates or resumes a durable skill run — **shipped** (the worker invokes `core/session/run.ts`; the skill's plan-matched run state is the durable identity)
+- exposes founder-readable run state — **shipped** (API-level, and surfaced on the Launch page: "The launch skill at work" renders each execution's step procession, session state, and imported-result totals, with an explainer flow when no session has run)
 - is idempotent across retries — **shipped** (one execution record per workspace, workflow, and context fingerprint; retries resume it)
-- preserves engine approvals and protected actions — **shipped** (a parked founder gate mirrors into `decisions` with engine provenance; answers travel only through `core/session/approve.ts` via `platform/server/execution.mjs`, owner-role required, and the mirror cannot be edited into "decided". No mode or timeout auto-answers a gate)
+- preserves skill approvals and protected actions — **shipped** (a parked founder gate mirrors into `decisions` with skill provenance; answers travel only through `core/session/approve.ts` via `platform/server/execution.mjs`, owner-role required, and the mirror cannot be edited into "decided". No mode or timeout auto-answers a gate)
 - imports only verified results — **shipped** (the boundary report's `results[]` carries only settled, accepted attempts from the durable run; a node pending verification, a partially-accepted node, or a lane-seeded completion exports nothing, and `platform/server/domain/results.mjs` never reaches past the report into run internals)
-- maps proposed claims, evidence, tasks, blockers, and artifact candidates into Formation — **shipped** (each verified result becomes a `recommendation` claim carrying the attempt's evidence — never a fact — plus a `draft` deliverable per artifact candidate with an immutable version; failed steps mirror as founder tasks that close when the engine recovers)
-- marks affected downstream artifacts stale when accepted input context changes — **shipped** (`reconcilePatch` now runs the engine's own `invalidateDescendants` whenever a re-produced output replaces an accepted fingerprint, and Formation mirrors those conclusions off the report's per-artifact acceptance state — exactly the engine-identified descendants, cleared again when acceptance returns, never a second graph-walk)
+- maps proposed claims, evidence, tasks, blockers, and artifact candidates into Formation — **shipped** (each verified result becomes a `recommendation` claim carrying the attempt's evidence — never a fact — plus a `draft` deliverable per artifact candidate with an immutable version; failed steps mirror as founder tasks that close when the skill recovers)
+- marks affected downstream artifacts stale when accepted input context changes — **shipped** (`reconcilePatch` now runs the skill's own `invalidateDescendants` whenever a re-produced output replaces an accepted fingerprint, and Formation mirrors those conclusions off the report's per-artifact acceptance state — exactly the skill-identified descendants, cleared again when acceptance returns, never a second graph-walk)
 - carries trace and cost metadata without leaking secrets — **shipped** (run, plan, and attempt ids plus declared token budgets and cost estimates, copied field-by-field onto claim provenance and the execution record's rollup; undeclared report fields never reach the store)
 
-This P0 is complete at the API, record, and founder-page level. Nothing the adapter does writes engine-owned state: the reducer, the session runner, and the founder-decision CLI remain the engine's only writers, and an unreachable engine is always reported as unreachable, never as an empty plan, "no approvals waiting", or "nothing to import".
+This P0 is complete at the API, record, and founder-page level. Nothing the adapter does writes skill-owned state: the reducer, the session runner, and the founder-decision CLI remain the skill's only writers, and an unreachable skill is always reported as unreachable, never as an empty plan, "no approvals waiting", or "nothing to import".
+
+### Remaining half: the real per-node executor (the skill's own U6 arc)
+
+`core/session/run.ts` still selects only fixture/no-op executors: a scheduled or platform-queued session plans, batches, syncs approvals, and imports honestly, but no node's real work is performed by the skill itself. The read surfaces now say this up front (`selfServeExecution` on every launch view, and completion copy that distinguishes "checked the plan" from "completed a step"). The v0.120.0 node-contract work removed the blocker on this arc's input side: every catalog node now carries authored instructions, reads, bound knowledge references, and an owning role, composed by `core/engine/node-brief.ts` into exactly the worker brief a real executor must hand a runtime CLI. What remains is the executor itself — per-node runtime invocation under the adapter tool-allowlists, spend recording against real usage, and the wall-clock/heartbeat discipline `executor.ts`'s interface already specifies — reviewed as its own arc because it moves the trust boundary.
+
+### Follow-ons the 2026-08-18 knowledge-matrix audit added to this arc
+
+- **Result-to-knowledge traceability.** `ExecutionVerifiedResult` carries no knowledge reference, so imported claims and deliverables cannot show which guidance shaped them. The field can only be honest once the real per-node executor exists to report what an attempt actually consulted; when that arc lands, populate a `knowledge` field from the attempt's brief, copy it onto claim provenance by explicit name in `results.mjs`, and render it in the deliverable's context lineage.
+- **Interactive-path knowledge receipts.** The sha256 fail-closed receipt check lives only in the headless executor (`core/session/executor.ts`); the interactive Task-subagent path relies on the orchestrating session honoring the contract in `app-agent-roster.md`. Mechanical enforcement there means the reducer rejecting a dispatched worker's patch without a receipt matching the brief — same trust-boundary review class as the executor arc.
+
+## P1: Founder-copy gate for platform surfaces
+
+`check:founder-copy` scans the skill's generated business surfaces; nothing scans `platform/server/domain/presentation.mjs` or the pages for banned founder vocabulary, so a violation there ships with a green audit (the 2026-08-18 review caught one by hand). `presentation.test.mjs` now scans the board tables for the worst offenders, but the durable fix is a platform-side vocabulary gate sharing the skill's banned-word source.
+
+## P1: Founder knowledge library
+
+The launch matrix's per-work Knowledge cell is currently the only founder-facing knowledge surface. A read-only library page — every guide grouped by the six presentation groups, with board names, freshness verdicts, and the same technical disclosures — is an unbuilt surface, not a boundary exclusion: knowledge already crosses the adapter read-only. If built, it must consume the same adapter projection (`presentMatrixKnowledge` output), never platform-side reads of skill files. Reading a guide's full document from the platform would need a new read-only adapter surface and its own review.
 
 ## P1: Existing launch repository importer
 
@@ -99,16 +116,16 @@ The repository already has businesses represented by `PROJECT_STATE.yaml`, Markd
 
 Build a dry-run-first importer that:
 
-- reads current engine state and artifact manifests — **shipped** (`core/adapters/platform-import.ts`: the launch workspace's `state/PROJECT_STATE.yaml`, `state/business.json`, `state/LAUNCH_TRACE.md`, every lane's evidence list, and the Markdown documents those lists name)
+- reads current skill state and artifact manifests — **shipped** (`core/adapters/platform-import.ts`: the launch workspace's `state/PROJECT_STATE.yaml`, `state/business.json`, `state/LAUNCH_TRACE.md`, every lane's evidence list, and the Markdown documents those lists name)
 - maps business context to Formation company fields — **shipped** (only where Formation has nothing recorded; see below)
 - classifies claims — **shipped** (a lane recorded finished becomes a `recommendation` to confirm, an open question becomes a `question`; nothing becomes a fact)
 - extracts decisions and approvals — **shipped** (the go/pivot/kill and kill-or-scale verdicts with the dates they were made, the launch trace's rejected routes as superseded decisions, and its founder-only gates as decided or still proposed)
 - creates tasks from real blockers and next actions — **shipped** (lane blockers, part-done and stuck lanes, the trace's blocker table, open failure cards, and the workspace's own `next_founder_action`)
 - initializes immutable artifact versions — **shipped** (each document arrives as a `draft` deliverable, split on its own headings, with version 1 attributed to the launch work rather than to a founder)
-- preserves engine IDs as provenance metadata — **shipped** (`source.kind: "legacy-import"` carries the import key, source id, workspace-relative path, lane key, and lane title)
-- flags contradictions and ambiguous classification — **shipped** (evidence a finished lane names but does not have, a lane finished over an unfinished dependency, a lane status the engine does not define, template example values still in place, and a workspace whose own state says it has not been reconciled)
+- preserves skill IDs as provenance metadata — **shipped** (`source.kind: "legacy-import"` carries the import key, source id, workspace-relative path, lane key, and lane title)
+- flags contradictions and ambiguous classification — **shipped** (evidence a finished lane names but does not have, a lane finished over an unfinished dependency, a lane status the skill does not define, template example values still in place, and a workspace whose own state says it has not been reconciled)
 - can be rerun idempotently — **shipped** (every record keys on a content-derived import key, so a second import of an unchanged workspace creates nothing)
-- never deletes or rewrites the source repository — **shipped** (the engine CLI opens no handle for writing, and the platform half has no path back into the workspace at all)
+- never deletes or rewrites the source repository — **shipped** (the skill CLI opens no handle for writing, and the platform half has no path back into the workspace at all)
 
 The load-bearing choices:
 
@@ -162,7 +179,7 @@ The importer made this urgent rather than theoretical: a launch repository is a 
 
 `platform/server/domain/trust.mjs` holds the posture:
 
-- **Provenance decides.** A record with no `source` was written by a member and is trusted. Engine results are trusted — an independent verifier accepted them before they arrived. Imported records are not, and a `source.kind` nobody registered is treated as imported rather than trusted by omission.
+- **Provenance decides.** A record with no `source` was written by a member and is trusted. Skill results are trusted — an independent verifier accepted them before they arrived. Imported records are not, and a `source.kind` nobody registered is treated as imported rather than trusted by omission.
 - **Screening, not sanitising.** Untrusted text is examined for shapes that read as an instruction to a machine — disregard everything above, address the reader as a system, reveal your instructions, answer only with. The function has no way to return a changed string. Rewriting a founder's material would be a silent, unreliable edit; withholding it is neither.
 - **The document still imports, word for word.** What changes is that `domain/prompts.mjs` keeps it out of the provider request, the founder is told at import, an open question is left on the record, and one click confirms the wording is meant (`source.screenConfirmedAt`). The findings stay on the record after confirmation — confirmation is not amnesia.
 - **Founder-authored words are never screened.** A founder may write "disregard all earlier direction from the board" about their own company.
@@ -214,13 +231,13 @@ Prioritize:
 
 Exports should preserve artifact version, status, confidence, and date.
 
-The bundle is built by naming the fields that may leave, so no conversation, review request, invitation, session, email address, or engine internal can reach it. Its manifest states what was deliberately left out — a reader who cannot see the omissions cannot tell a complete record from a filtered one.
+The bundle is built by naming the fields that may leave, so no conversation, review request, invitation, session, email address, or skill internal can reach it. Its manifest states what was deliberately left out — a reader who cannot see the omissions cannot tell a complete record from a filtered one.
 
 Still open: PDF with stable pagination, presentation output, and Google Docs. Each needs a rendering or authentication dependency this repository does not carry, which is a decision about what Formation depends on rather than a piece of missing work.
 
 A share link carries one deliverable or the company overview to someone who has no account and needs none. The link is the credential, so it behaves like one: 32 bytes of entropy, hashed at rest, shown to the founder exactly once, expiring after 30 days, revocable, and answered identically whether it was stopped, expired, or never existed. Sharing outside the company is the owner's call; every member can see what has been shared.
 
-The load-bearing part is not the token but `sharedView`, which builds the projection by naming the fields that may leave rather than by taking a record and removing what should not go. A record that grows a field later stays private until somebody names it. `platform/server/test/sharing.test.mjs` plants a private task, decision, and invited address in the workspace and asserts none of them — nor any member, email address, activity entry, engine id, or unattached claim — appears in either projection.
+The load-bearing part is not the token but `sharedView`, which builds the projection by naming the fields that may leave rather than by taking a record and removing what should not go. A record that grows a field later stays private until somebody names it. `platform/server/test/sharing.test.mjs` plants a private task, decision, and invited address in the workspace and asserts none of them — nor any member, email address, activity entry, skill id, or unattached claim — appears in either projection.
 
 ## P1: Financial assumptions and model
 
@@ -287,11 +304,11 @@ Add:
 - route latency and error metrics
 - job queue duration and retry metrics
 - provider cost and failure metrics
-- trace IDs propagated into engine runs
+- trace IDs propagated into skill runs
 - workspace audit log export
 - support impersonation with explicit controls and audit
 - feature flags
-- health and dependency probes — **shipped** (`platform/server/domain/health.mjs`): `GET /api/health` reports the store, the launch engine, the drafting provider, and the import source, and answers 503 when the store cannot be read. It previously returned `{ ok: true }` unconditionally — a probe that cannot report failure tells an operator nothing and keeps a load balancer pointed at an instance that cannot serve a request. Only the store decides fitness for traffic: a capability a deployment deliberately does not have is `not-configured`, not a fault, because reporting an instance as broken for being configured the way its operator configured it teaches them to ignore the probe. "Absent" and "misconfigured" are different answers. Nothing in the response names a path, an environment value, or an error from inside the process.
+- health and dependency probes — **shipped** (`platform/server/domain/health.mjs`): `GET /api/health` reports the store, the launch skill, the drafting provider, and the import source, and answers 503 when the store cannot be read. It previously returned `{ ok: true }` unconditionally — a probe that cannot report failure tells an operator nothing and keeps a load balancer pointed at an instance that cannot serve a request. Only the store decides fitness for traffic: a capability a deployment deliberately does not have is `not-configured`, not a fault, because reporting an instance as broken for being configured the way its operator configured it teaches them to ignore the probe. "Absent" and "misconfigured" are different answers. Nothing in the response names a path, an environment value, or an error from inside the process.
 - retention and deletion operations
 
 ## P2: Notifications and operating cadence
@@ -331,7 +348,7 @@ Measure:
 - time spent blocked
 - launch-readiness movement
 - repeated weekly use
-- imported engine work accepted or rejected
+- imported skill work accepted or rejected
 - launch outcomes and post-launch corrections
 
 Do not optimize for generated documents or raw session count.
@@ -346,7 +363,7 @@ Legacy cockpit, artifact-page, and control-plane renderers are no longer the pro
 
 For each renderer:
 
-- inventory active engine, test, and migration consumers
+- inventory active skill, test, and migration consumers
 - replace founder links with Formation routes
 - retain export behavior where needed
 - migrate validators and fixtures
@@ -370,13 +387,13 @@ After the single-company product is proven, consider:
 - organization-level identity and billing
 - aggregate risk and launch portfolio views
 
-Do not build this before collaboration, persistence, and engine integration are production-ready.
+Do not build this before collaboration, persistence, and skill integration are production-ready.
 
 ## Suggested delivery sequence
 
 1. PostgreSQL store and durable shared queue
 2. identity lifecycle and workspace roles
-3. platform-to-engine adapter
+3. platform-to-skill adapter
 4. existing launch importer
 5. AI evaluation and safety suite
 6. collaboration and review

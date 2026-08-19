@@ -6,7 +6,7 @@ node_modules/
 dist/
 build/
 behavioral-results/
-skill/b2c-mobile-business-launch/evals/behavioral-results/
+skill/formation/evals/behavioral-results/
 platform/data/*.json
 !platform/data/.gitkeep
 platform/dist/

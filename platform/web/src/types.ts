@@ -104,7 +104,7 @@ export interface Decision {
   reviewAt: string | null;
   createdAt: string;
   updatedAt: string;
-  /** Present on decisions mirrored from the launch engine's founder approvals. */
+  /** Present on decisions mirrored from the launch skill's founder approvals. */
   source?: {
     kind: "engine-approval";
     approvalId: string;
@@ -275,7 +275,7 @@ export interface ExecutionRunStep {
   title: string;
   /** Board-language one-liner: what this step gives the company. */
   summary?: string;
-  /** The engine's own step name, when it differs from the board title. */
+  /** The skill's own step name, when it differs from the board title. */
   technical?: string;
   status: "finished" | "ready" | "in-progress" | "needs-founder" | "held" | "failed" | "upcoming" | string;
   reason?: string;
@@ -303,7 +303,7 @@ export interface FounderExecution {
   id: string;
   workflowId: string | null;
   title: string | null;
-  /** The engine's own name for the work, when it differs from the board title. */
+  /** The skill's own name for the work, when it differs from the board title. */
   technicalTitle?: string;
   status: "queued" | "running" | "completed" | "failed" | string;
   failureKind: string | null;
@@ -317,6 +317,76 @@ export interface FounderExecution {
   lastSessionAt: string | null;
   report: ExecutionRunView | null;
   importedResults: { verifiedResults: number } | null;
+}
+
+/** Whether the skill can do hands-on steps itself, said before work is requested — with the plain-language reason when it cannot. */
+export interface SelfServeExecution {
+  available: boolean;
+  reason?: string;
+}
+
+export interface ExecutionList {
+  executions: FounderExecution[];
+  selfServeExecution: SelfServeExecution;
+}
+
+/** One knowledge guide as the presentation boundary ships it: board copy first, raw routing in technical. */
+export interface LaunchMatrixKnowledge {
+  name: string;
+  purpose: string;
+  freshness: string;
+  reviewStatus?: "review-due" | "current" | "internal";
+  packTitle?: string;
+  technical: { id: string; path: string; loadWhen: string };
+}
+
+export interface LaunchMatrixWorkflow {
+  workflowId: string;
+  groupId: string;
+  title: string;
+  summary: string;
+  status: string;
+  founderReason?: string;
+  applicability: "required" | "not-needed" | "unknown";
+  phaseIds: string[];
+  dependencyWorkflowIds: string[];
+  dependentWorkflowIds: string[];
+  role?: { id: string; name: string };
+  knowledge: LaunchMatrixKnowledge[];
+  /** Role-attached guidance the team keeps on hand for this work, loaded only when its moment comes. */
+  conditionalKnowledge: LaunchMatrixKnowledge[];
+  services: Array<{
+    name: string;
+    purpose: string;
+    access: string;
+    checkedAt?: string;
+    technical: { id: string; state: string; purpose: string };
+  }>;
+  agentTools: Array<{ name: string; purpose: string; technical: { id: string; when: string } }>;
+  outputs: Array<{ artifactId: string; title: string; state: string }>;
+  verification: { kind: string; state: string; evidenceCount: number };
+  technical: { workflowId: string; title: string | null; phaseIds: string[] };
+}
+
+/** One cross-cutting integrity step: the skill checking its own launch work. */
+export interface LaunchIntegrityStep {
+  workflowId: string;
+  title: string;
+  summary: string | null;
+  status: string;
+  verification: { kind: string; state: string };
+  technical: string | null;
+}
+
+export interface LaunchMatrixResponse {
+  available: boolean;
+  reason?: string;
+  checkedAt?: string;
+  generatedAt?: string;
+  groups?: Array<{ id: string; title: string; order: number }>;
+  workflows?: LaunchMatrixWorkflow[];
+  launchIntegrity?: LaunchIntegrityStep[];
+  systemSummary?: { total: number; counts: Record<string, number> };
 }
 
 export interface Recommendation {

@@ -6,7 +6,7 @@ export function createId(prefix) {
 
 /**
  * The workstream launch-engine records file under: the launch plan when the workspace has one.
- * Shared by the approvals mirror and the results import so both halves of the engine boundary
+ * Shared by the approvals mirror and the results import so both halves of the skill boundary
  * file into the same stream.
  */
 export function launchWorkstreamId(workspace) {

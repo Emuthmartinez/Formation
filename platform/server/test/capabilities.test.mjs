@@ -61,6 +61,7 @@ const WORKSPACE_SURFACES = [
   },
   { method: "GET", path: "/api/workspaces/:workspaceId/jobs/:jobId", capability: "workspace-read" },
   { method: "GET", path: "/api/workspaces/:workspaceId/executions", capability: "workspace-read" },
+  { method: "GET", path: "/api/workspaces/:workspaceId/launch-matrix", capability: "workspace-read" },
   { method: "GET", path: "/api/workspaces/:workspaceId/executions/:executionId", capability: "workspace-read" },
   { method: "POST", path: "/api/workspaces/:workspaceId/executions", capability: "launch-engine-advance", body: {} },
   // Which launch workspaces this server holds is not company data — it is a fact about the host.

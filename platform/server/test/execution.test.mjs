@@ -75,7 +75,12 @@ test("submitting for a company with no engine binding is refused, not queued", a
   assert.ok(payload.error.includes("not connected"));
 
   const list = await request(app.baseUrl, "/api/workspaces/wrk_storywell/executions", { cookie });
-  assert.deepEqual(await list.json(), []);
+  const listPayload = await list.json();
+  assert.deepEqual(listPayload.executions, []);
+  // The capability rides the page's actual read path: a founder learns the skill cannot yet do
+  // hands-on steps itself BEFORE asking for work, with a plain-language reason.
+  assert.equal(listPayload.selfServeExecution.available, false);
+  assert.ok(listPayload.selfServeExecution.reason.length > 0);
 });
 
 test("an unreachable engine is reported as unreachable, never as no work ready", async (t) => {
@@ -126,6 +131,77 @@ test("worker inspect distinguishes unreachable from unready", async () => {
   assert.equal(unreadyView.reachable, true);
   assert.equal(unreadyView.ready, false);
   assert.ok(unreadyView.reason.length > 0);
+
+  // Every connected view says up front whether the skill can do hands-on steps itself. In
+  // production it cannot (no real executor is wired yet); only tests injecting the fixture
+  // executor report otherwise. The founder learns this before asking for work, not after.
+  assert.equal(unreachableView.selfServeExecution.available, false);
+  assert.ok(unreachableView.selfServeExecution.reason.length > 0);
+  assert.equal(unreadyView.selfServeExecution.available, false);
+  const fixtureBacked = new ExecutionWorker(store, {
+    engine: new EngineBridge({ skillDir }),
+    resolveEngineWorkspace: () => directory,
+    executor: "fixture",
+  });
+  assert.equal(fixtureBacked.selfServeExecution().available, true);
+});
+
+test("launch matrix is returned only from a ready 1.1 engine", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "formation-matrix-"));
+  const store = new JsonStore({ filePath: path.join(directory, "formation.json"), seedFactory: createSeedDatabase });
+  await store.initialize();
+  const workspace = { id: "wrk_storywell", slug: "storywell" };
+  const older = new ExecutionWorker(store, {
+    engine: { describe: async () => ({ reachable: true, report: { schemaVersion: "1.0.0", workspaceReady: true } }) },
+    resolveEngineWorkspace: () => directory,
+  });
+  const unavailable = await older.launchMatrix(workspace);
+  assert.equal(unavailable.available, false);
+  assert.ok(unavailable.reason.includes("does not support"));
+
+  const groups = [{ id: "market-product", title: "Market and product", order: 1 }];
+  const workflows = [{
+    workflowId: "workflow.research.fixture",
+    groupId: "market-product",
+    title: "Research",
+    summary: "Run research tooling.",
+    status: "ready",
+    phaseIds: ["phase.1"],
+    services: [{ id: "provider.fixture", name: "Fixture API", purpose: "Supports provider workflow proof.", state: "verified" }],
+    agentTools: [{ id: "research-internal-route", when: "Use the research tool." }],
+    knowledge: [{ id: "reference.research.fixture", title: "AppKittie category economics via CLI", path: "knowledge/research/fixture.md", loadWhen: "before the spec hardens — routed from tool-recipes.md; see check:catalog", freshness: "reviewed 2026-06-01", reviewStatus: "review-due" }],
+    conditionalKnowledge: [{ id: "reference.research.role", title: "Role research", path: "knowledge/research/role.md", loadWhen: "competitor evidence is needed", freshness: "internal", reviewStatus: "internal", packId: "context.research", packTitle: "Research" }],
+  }];
+  const launchIntegrity = [{ workflowId: "workflow.process.provider-proof-verification", title: "Provider-proof verification", status: "ready", verification: { kind: "gate", state: "pending" } }];
+  const current = new ExecutionWorker(store, {
+    engine: { describe: async () => ({ reachable: true, report: { schemaVersion: "1.1.0", workspaceReady: true, generatedAt: "2026-08-17T00:00:00.000Z", launchMatrix: { groups, workflows, launchIntegrity, systemSummary: { total: 1, counts: { ready: 1 } } } } }) },
+    resolveEngineWorkspace: () => directory,
+  });
+  const available = await current.launchMatrix(workspace);
+  assert.equal(available.available, true);
+  assert.deepEqual(available.groups, groups);
+  assert.equal(available.workflows[0].services[0].purpose, "Helps complete Research.");
+  assert.equal(available.workflows[0].services[0].access, "Access proven");
+  assert.equal(available.workflows[0].services[0].technical.id, "provider.fixture");
+  assert.equal(available.workflows[0].agentTools[0].name, "Research support");
+  assert.equal(available.workflows[0].technical.workflowId, "workflow.research.fixture");
+  assert.equal("id" in available.workflows[0].services[0], false);
+  assert.equal("id" in available.workflows[0].agentTools[0], false);
+  // Knowledge is the one matrix field that used to bypass the presentation boundary; now the
+  // agent-facing trigger and raw identifiers live only in technical detail.
+  const guide = available.workflows[0].knowledge[0];
+  assert.equal("loadWhen" in guide, false);
+  assert.doesNotMatch(guide.name, /\bCLI\b/);
+  assert.equal(guide.freshness, "A source check is due");
+  assert.equal(guide.technical.id, "reference.research.fixture");
+  assert.equal(guide.technical.loadWhen.includes("routed from"), true);
+  const conditional = available.workflows[0].conditionalKnowledge[0];
+  assert.equal(conditional.packTitle, "Research");
+  assert.equal("loadWhen" in conditional, false);
+  // Cross-cutting integrity steps present by board name, with the skill's own name alongside.
+  assert.equal(available.launchIntegrity[0].title, "Live checks on business services");
+  assert.equal(available.launchIntegrity[0].technical, "Provider-proof verification");
+  assert.equal(available.launchIntegrity[0].status, "ready");
 });
 
 // ---------------------------------------------------------------------------
@@ -134,7 +210,7 @@ test("worker inspect distinguishes unreachable from unready", async () => {
 // ---------------------------------------------------------------------------
 
 test("execution adapter creates and resumes one durable engine run per request and context", { timeout: 300_000 }, async (t) => {
-  assert.ok(tsxBin, "the engine's tsx runtime must be installed for this suite");
+  assert.ok(tsxBin, "the skill's tsx runtime must be installed for this suite");
   const engineRoot = await mkdtemp(path.join(os.tmpdir(), "formation-engine-root-"));
   bootstrapEngineWorkspace(engineRoot, "storywell");
 
@@ -146,7 +222,7 @@ test("execution adapter creates and resumes one durable engine run per request a
   t.after(app.close);
   const cookie = await login(app.baseUrl);
 
-  // Unauthenticated and unauthorized requests never reach the engine.
+  // Unauthenticated and unauthorized requests never reach the skill.
   assert.equal((await request(app.baseUrl, "/api/workspaces/wrk_storywell/executions")).status, 401);
   const registered = await request(app.baseUrl, "/api/auth/register", {
     method: "POST",
@@ -190,7 +266,7 @@ test("execution adapter creates and resumes one durable engine run per request a
   assert.equal(completed.sessions.length, 1);
 
   const runStatePath = path.join(engineRoot, "storywell", "run", "run-state.json");
-  assert.ok(existsSync(runStatePath), "the engine must own a durable run state file");
+  assert.ok(existsSync(runStatePath), "the skill must own a durable run state file");
   const runState = JSON.parse(readFileSync(runStatePath, "utf8"));
   assert.equal(runState.runId, completed.engine.runId);
 
@@ -266,14 +342,19 @@ test("execution adapter creates and resumes one durable engine run per request a
   const allArtifacts = afterAllImports.artifacts.filter((entry) => entry.workspaceId === "wrk_storywell" && entry.source?.kind === "engine-artifact");
   assert.equal(allArtifacts.length, 2);
   assert.ok(allArtifacts.every((entry) => entry.status === "draft" && entry.stale === false));
-  assert.equal(afterAllImports.artifactVersions.filter((entry) => entry.createdBy === "Launch engine").length, 2);
+  // createdBy no longer distinguishes import from platform authorship (one founder-visible actor:
+  // Formation), so idempotency is asserted on the imported deliverables' own version counts.
+  const importedArtifactIds = new Set(allArtifacts.map((entry) => entry.id));
+  assert.equal(afterAllImports.artifactVersions.filter((entry) => importedArtifactIds.has(entry.artifactId)).length, 2);
 
-  // The list route reports both executions, newest first, in founder shape.
+  // The list route reports both executions, newest first, in founder shape — alongside the
+  // self-serve capability the page reads before requesting work.
   const list = await request(app.baseUrl, "/api/workspaces/wrk_storywell/executions", { cookie });
   const listPayload = await list.json();
-  assert.equal(listPayload.length, 2);
-  assert.equal(listPayload[0].id, followup.id);
-  assert.ok(listPayload.every((entry) => entry.title && entry.status && entry.contextFingerprint));
+  assert.equal(listPayload.executions.length, 2);
+  assert.equal(listPayload.executions[0].id, followup.id);
+  assert.ok(listPayload.executions.every((entry) => entry.title && entry.status && entry.contextFingerprint));
+  assert.equal(typeof listPayload.selfServeExecution.available, "boolean");
 });
 
 // ---------------------------------------------------------------------------
@@ -282,11 +363,11 @@ test("execution adapter creates and resumes one durable engine run per request a
 // ---------------------------------------------------------------------------
 
 test("an unverified session imports nothing — failed steps become founder tasks, never claims or deliverables", { timeout: 300_000 }, async (t) => {
-  assert.ok(tsxBin, "the engine's tsx runtime must be installed for this suite");
+  assert.ok(tsxBin, "the skill's tsx runtime must be installed for this suite");
   const engineRoot = await mkdtemp(path.join(os.tmpdir(), "formation-engine-noop-"));
   bootstrapEngineWorkspace(engineRoot, "storywell");
 
-  // No executor override: the engine's default no-op executor runs, which fails every attempt
+  // No executor override: the skill's default no-op executor runs, which fails every attempt
   // honestly rather than fabricating progress.
   const app = await startTestServer({
     resolveEngineWorkspace: (workspace) => path.join(engineRoot, workspace.slug),
@@ -310,6 +391,12 @@ test("an unverified session imports nothing — failed steps become founder task
   assert.equal(blockerTasks.length, 1);
   assert.equal(blockerTasks[0].status, "next");
   assert.match(blockerTasks[0].title, /Update the onboarding copy/);
+
+  // The completion notice must not read as progress when nothing verified: the founder is told
+  // the session checked the plan and the undone work landed in tasks.
+  const completedActivity = database.activity.filter((entry) => entry.workspaceId === "wrk_storywell" && entry.type === "execution-completed");
+  assert.equal(completedActivity.length, 1);
+  assert.match(completedActivity[0].detail, /no step was completed and verified/);
 
   // The approvals view re-runs the import; the mirror stays exact instead of duplicating.
   assert.equal((await request(app.baseUrl, "/api/workspaces/wrk_storywell/approvals", { cookie })).status, 200);

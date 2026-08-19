@@ -20,7 +20,7 @@
 
 set -euo pipefail
 
-SKILL_NAME="b2c-mobile-business-launch"
+SKILL_NAME="formation"
 SOURCE_REL="skill/${SKILL_NAME}"
 RUNTIME="${HOME}/.codex/skills/${SKILL_NAME}"
 # Every tool that reads this skill points at the one Codex runtime copy, so a
@@ -122,7 +122,11 @@ echo "Runtime version: $(node -p "require('${RUNTIME}/skill-version.json').versi
 
 # --- 3. Prove the source is green before mirroring anything ------------------
 step "Auditing source"
-npm install --silent
+# `npm install` may rewrite optional-platform metadata when the maintainer's
+# npm version differs from the one that produced the committed lockfile. A
+# runtime sync must preserve byte parity, so install exactly from the lockfile
+# and fail instead of updating it.
+npm ci --silent --no-audit --no-fund
 npm run audit
 
 # --- 4. Mirror source -> runtime --------------------------------------------
@@ -164,7 +168,7 @@ echo "mirrored."
 # The runtime legitimately runs one fewer gate than the repo: check:package-parity
 # compares the repo root package.json to the skill's, and there is no repo root here.
 step "Auditing installed runtime"
-( cd "$RUNTIME" && npm install --silent && npm run audit )
+( cd "$RUNTIME" && npm ci --silent --no-audit --no-fund && npm run audit )
 
 # --- 6. Prove byte parity ----------------------------------------------------
 step "Verifying parity"
@@ -201,7 +205,43 @@ for link in "${CONSUMER_LINKS[@]}"; do
   fi
 done
 
-# --- 8. Freshness gate -------------------------------------------------------
+# --- 8. Legacy aliases (pre-rename name) --------------------------------------
+# Repos shipped before the formation rename invoke the skill as
+# b2c-mobile-business-launch and read it through same-named paths. Skill
+# resolution follows the directory/symlink basename, so a compat symlink under
+# the old name keeps every one of those references working. Repoint or create
+# symlinks freely; never delete a real directory unattended (the pre-cutover
+# ~/.codex/skills runtime is one until it is deliberately replaced).
+LEGACY_NAME="b2c-mobile-business-launch"
+step "Maintaining legacy '${LEGACY_NAME}' aliases"
+LEGACY_LINKS=(
+  "${HOME}/.codex/skills/${LEGACY_NAME}"
+  "${HOME}/.claude/skills/${LEGACY_NAME}"
+  "${HOME}/.agents/skills/${LEGACY_NAME}"
+  "${HOME}/.cursor/skills/${LEGACY_NAME}"
+)
+for link in "${LEGACY_LINKS[@]}"; do
+  if [ -L "$link" ]; then
+    target="$(readlink "$link")"
+    if [ "$target" = "$RUNTIME" ]; then
+      echo "OK    ${link} -> ${target}"
+    else
+      warn "repointing legacy alias ${link} (was -> ${target})"
+      ln -sfn "$RUNTIME" "$link"
+      echo "OK    ${link} -> ${RUNTIME}"
+    fi
+  elif [ -d "$link" ]; then
+    warn "${link} is still a real directory (pre-rename runtime). Cut over deliberately:
+        rm -rf '${link}' && ln -s '${RUNTIME}' '${link}'"
+  else
+    echo "creating legacy alias ${link}"
+    mkdir -p "$(dirname "$link")"
+    ln -s "$RUNTIME" "$link"
+    echo "OK    ${link} -> ${RUNTIME}"
+  fi
+done
+
+# --- 9. Freshness gate -------------------------------------------------------
 step "Skill version freshness"
 npm run check:skill-version --silent -- --source "$SOURCE_REL" --installed "$RUNTIME"
 

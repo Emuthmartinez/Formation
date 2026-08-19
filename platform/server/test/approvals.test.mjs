@@ -21,7 +21,7 @@ import {
 } from "./_engine.mjs";
 
 // ---------------------------------------------------------------------------
-// The engine catalog for these suites: two independent spend steps, each parked
+// The skill catalog for these suites: two independent spend steps, each parked
 // behind an explicit founder approval even though autonomy (grant + waiver +
 // budget) is fully satisfied — protected actions always need the founder's yes.
 // ---------------------------------------------------------------------------
@@ -39,7 +39,10 @@ function approvalGatedCatalog() {
     providerIds: [],
     laneIds: [],
     founderOnlyActions: [ask],
-    gateCommands: [],
+    // check:gates-layout is a real, workspace-independent engine gate: gateless outputs no
+    // longer auto-accept (the 2026-08 verification flip), and this suite needs the freed step
+    // to genuinely reach "finished" — it is testing the approval round-trip, not verification.
+    gateCommands: ["check:gates-layout"],
     idempotent: false,
   });
   return {
@@ -106,7 +109,7 @@ test("syncEngineApprovals mirrors pending approvals as open decisions, idempoten
   const mirror = database.decisions.find((entry) => entry.source?.approvalId === "workflow.money-report.approval.1");
   assert.equal(mirror.status, "open");
   assert.equal(mirror.workstreamId, "launch");
-  // The mirror surfaces board-ready copy; the engine's own wording stays in `source` for
+  // The mirror surfaces board-ready copy; the skill's own wording stays in `source` for
   // technical disclosure. An unknown workflow keeps its (scrubbed) title in the ask's context.
   assert.equal(mirror.title, "Your go-ahead: Pull this week's revenue report");
   assert.equal(mirror.decision, "Give your go-ahead on a step that spends money.");
@@ -125,12 +128,12 @@ test("syncEngineApprovals mirrors pending approvals as open decisions, idempoten
   assert.equal(database.decisions.length, before + 2);
 });
 
-test("syncEngineApprovals closes a mirror the engine already answered and supersedes mirrors from a replaced run", () => {
+test("syncEngineApprovals closes a mirror the skill already answered and supersedes mirrors from a replaced run", () => {
   const database = createSeedDatabase();
   const workspace = database.workspaces[0];
   syncEngineApprovals(database, workspace, pendingReport(), "2026-08-05T01:00:00.000Z");
 
-  // Answered directly with the engine's own CLI: the mirror closes, honestly attributed.
+  // Answered directly with the skill's own CLI: the mirror closes, honestly attributed.
   const answered = syncEngineApprovals(
     database,
     workspace,
@@ -143,7 +146,7 @@ test("syncEngineApprovals closes a mirror the engine already answered and supers
   assert.equal(closed.answer.recordedVia, "engine");
   assert.ok(closed.decision.startsWith("Approved:"));
 
-  // The engine re-seeded its run: the remaining open mirror is retired without being answered,
+  // The skill re-seeded its run: the remaining open mirror is retired without being answered,
   // and the re-asked question gets a fresh open record.
   const reseeded = syncEngineApprovals(database, workspace, pendingReport({ runId: "run_test_2" }), "2026-08-05T03:00:00.000Z");
   assert.equal(reseeded.superseded.length, 1);
@@ -178,7 +181,7 @@ async function storeWithMirroredApproval() {
 test("an unreachable engine leaves mirrored approvals untouched and is reported as unreachable", async () => {
   const { store, decisionId } = await storeWithMirroredApproval();
   const worker = new ExecutionWorker(store, {
-    engine: { describe: async () => ({ reachable: false, reason: "The launch engine is not installed on this server." }) },
+    engine: { describe: async () => ({ reachable: false, reason: "Formation's launch automation is not installed on this server." }) },
     resolveEngineWorkspace: () => "/nonexistent/engine/workspace",
   });
 
@@ -194,13 +197,13 @@ test("an unreachable engine leaves mirrored approvals untouched and is reported 
   assert.equal(mirror.status, "open");
 });
 
-test("an approval answer that cannot reach the engine records nothing and stays open", async () => {
+test("an approval answer that cannot reach the skill records nothing and stays open", async () => {
   const { store, decisionId } = await storeWithMirroredApproval();
   const user = { id: "usr_demo_founder", name: "Maya Chen", email: "founder@formation.local" };
   const worker = new ExecutionWorker(store, {
     engine: {
       describe: async () => ({ reachable: true, report: pendingReport() }),
-      approve: async () => ({ recorded: false, kind: "unreachable", reason: "The launch engine could not be started on this server." }),
+      approve: async () => ({ recorded: false, kind: "unreachable", reason: "Formation's launch automation could not be started on this server." }),
     },
     resolveEngineWorkspace: () => "/nonexistent/engine/workspace",
   });
@@ -213,14 +216,14 @@ test("an approval answer that cannot reach the engine records nothing and stays 
   assert.equal(database.decisions.find((entry) => entry.id === decisionId).status, "open");
 });
 
-test("an answer against a run the engine replaced is refused and the stale mirror is retired", async () => {
+test("an answer against a run the skill replaced is refused and the stale mirror is retired", async () => {
   const { store, decisionId } = await storeWithMirroredApproval();
   const user = { id: "usr_demo_founder", name: "Maya Chen", email: "founder@formation.local" };
   const worker = new ExecutionWorker(store, {
     engine: {
       describe: async () => ({ reachable: true, report: pendingReport({ runId: "run_test_2" }) }),
       approve: async () => {
-        throw new Error("approve must never be attempted for a question the engine is no longer asking");
+        throw new Error("approve must never be attempted for a question the skill is no longer asking");
       },
     },
     resolveEngineWorkspace: () => "/nonexistent/engine/workspace",
@@ -259,8 +262,8 @@ test("a reviewer can see approvals but never answer them", async () => {
 // and silence never becomes consent.
 // ---------------------------------------------------------------------------
 
-test("engine founder gates surface in Formation and answers travel back through the engine's sanctioned path", { timeout: 300_000 }, async (t) => {
-  assert.ok(tsxBin, "the engine's tsx runtime must be installed for this suite");
+test("engine founder gates surface in Formation and answers travel back through the skill's sanctioned path", { timeout: 300_000 }, async (t) => {
+  assert.ok(tsxBin, "the skill's tsx runtime must be installed for this suite");
   const engineRoot = await mkdtemp(path.join(os.tmpdir(), "formation-approvals-engine-"));
   bootstrapEngineWorkspace(engineRoot, "storywell", moneyEngineOptions());
   const runStatePath = path.join(engineRoot, "storywell", "run", "run-state.json");
@@ -276,7 +279,7 @@ test("engine founder gates surface in Formation and answers travel back through 
   t.after(app.close);
   const cookie = await login(app.baseUrl);
 
-  // Before any engine run exists there is nothing answerable: the engine predicts the gates,
+  // Before any engine run exists there is nothing answerable: the skill predicts the gates,
   // but no durable run holds them yet, so Formation mirrors nothing.
   const beforeRun = await request(app.baseUrl, "/api/workspaces/wrk_storywell/approvals", { cookie });
   assert.equal(beforeRun.status, 200);
@@ -360,7 +363,7 @@ test("engine founder gates surface in Formation and answers travel back through 
   });
   assert.equal(advisorAnswer.status, 403);
 
-  // The mirrored decision cannot be "decided" by editing it: the engine's gate would stay parked
+  // The mirrored decision cannot be "decided" by editing it: the skill's gate would stay parked
   // while Formation claimed otherwise.
   const patched = await request(app.baseUrl, `/api/workspaces/wrk_storywell/decisions/${reportDecision.id}`, {
     cookie,
@@ -371,13 +374,13 @@ test("engine founder gates surface in Formation and answers travel back through 
   runState = JSON.parse(readFileSync(runStatePath, "utf8"));
   assert.equal(runState.approvals["workflow.money-report.approval.1"], "pending");
 
-  // Invalid answers never reach the engine.
+  // Invalid answers never reach the skill.
   assert.equal(
     (await request(app.baseUrl, `/api/workspaces/wrk_storywell/approvals/${reportDecision.id}`, { cookie, method: "POST", body: { answer: "maybe" } })).status,
     400,
   );
 
-  // Declining travels through approve.ts: the engine records the rejection and blocks the step.
+  // Declining travels through approve.ts: the skill records the rejection and blocks the step.
   const declined = await request(app.baseUrl, `/api/workspaces/wrk_storywell/approvals/${renewalDecision.id}`, {
     cookie,
     method: "POST",

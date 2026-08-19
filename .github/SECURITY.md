@@ -1,8 +1,8 @@
 # Reporting a vulnerability in this repo
 
-This policy covers **this repository**: the Formation platform under `platform/` (its API, authentication, sessions, and persistence), the launch engine's TypeScript validators and tooling under `skill/b2c-mobile-business-launch/`, the templates and references the engine ships, the GitHub Actions workflows, and the npm dependency chain behind them.
+This policy covers **this repository**: the Formation platform under `platform/` (its API, authentication, sessions, and persistence), the Formation skill's TypeScript validators and tooling under `skill/formation/`, the templates and references the skill ships, the GitHub Actions workflows, and the npm dependency chain behind them.
 
-It does not cover apps launched with the engine. Those get their own security plan from `business/trust/SECURITY.md`, which is a different document for a different audience: the threat model, hardening, and release gates of a shipped consumer app.
+It does not cover apps launched with the skill. Those get their own security plan from `business/trust/SECURITY.md`, which is a different document for a different audience: the threat model, hardening, and release gates of a shipped consumer app.
 
 ## How to report
 
@@ -12,7 +12,7 @@ Include, as far as you have it:
 
 - What an attacker gains, and what access they need to start.
 - The file or command involved, and a reproduction.
-- Which version you tested against (`skill/b2c-mobile-business-launch/skill-version.json`).
+- Which version you tested against (`skill/formation/skill-version.json`).
 
 Expect an acknowledgement within a few days. This is a small project, so please allow reasonable time for a fix before public disclosure.
 
@@ -22,8 +22,8 @@ Fixes land on `main` and go out in the next version bump. Older releases are not
 
 ```bash
 npm run check:skill-version -- \
-  --source skill/b2c-mobile-business-launch \
-  --installed ~/.codex/skills/b2c-mobile-business-launch
+  --source skill/formation \
+  --installed ~/.codex/skills/formation
 ```
 
 ## In scope
@@ -38,7 +38,7 @@ npm run check:skill-version -- \
 
 ## Out of scope
 
-- Security issues in an app you launched with the engine. Those belong to that app.
+- Security issues in an app you launched with the skill. Those belong to that app.
 - Vulnerabilities in third-party services the playbooks reference (RevenueCat, Doppler, PostHog, Stripe, Resend, Apple, Google). Report those to the vendor.
 - Findings that require an attacker to already control your machine, your agent runtime, or your shell.
 - Missing hardening with no demonstrated impact.

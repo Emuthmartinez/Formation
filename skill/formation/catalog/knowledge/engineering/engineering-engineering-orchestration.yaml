@@ -1,0 +1,16 @@
+schema_version: 1.0.0
+id: reference.engineering.engineering-orchestration
+title: Engineering Orchestration
+domain_id: domain.engineering
+document_path: knowledge/engineering/engineering-orchestration.md
+load_when: before app implementation, backend/frontend work, or production-readiness claims — mobile quality bars,
+  engineering/ENGINEERING_PLAN.md, engineering/PRODUCTION_READINESS.md, and device-proof expectations
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.engineering.engineering-orchestration-ce-production-readiness
+  context_pack_ids:
+    - context.engineering
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

@@ -1,0 +1,529 @@
+schema_version: 1
+sources:
+  - id: github-raw-b2c-launch-skill-version-main
+    name: formation skill version manifest
+    source_type: raw_manifest
+    url: https://raw.githubusercontent.com/Emuthmartinez/Formation/main/skill/formation/skill-version.json
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/validation/repository/skill-versioning.md
+    notes: Remote manifest used when comparing installed runtime freshness against the pushed main branch. The repo was renamed to Formation on
+      2026-08-05; the skill's path inside it moved from skill/b2c-mobile-business-launch/ to skill/formation/ on 2026-08-18.
+  - id: resend-api-emails
+    name: Resend email send API
+    source_type: official_docs
+    url: https://api.resend.com/emails
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/formation/core/session/digest.ts
+    notes: HTTP endpoint the digest push transport posts to; verify request shape against Resend docs before changing the transport.
+  - id: claude-com-claude-code
+    name: Claude Code product page
+    source_type: official_docs
+    url: https://claude.com/claude-code
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - README.md
+    notes: Claude Code is one of the supported agent runtimes for installing and running this skill.
+  - id: openai-com-index-harness-engineering
+    name: OpenAI harness engineering
+    source_type: official_docs
+    url: https://openai.com/index/harness-engineering/
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - AGENTS.md
+      - CLAUDE.md
+      - skill/formation/workspace/business/engineering/repo-agent-entrypoints/AGENTS.md
+      - skill/formation/workspace/business/engineering/repo-agent-entrypoints/CLAUDE.md
+    notes: Official OpenAI writeup informing short AGENTS.md maps, repo-local instructions, and mechanical harness checks.
+  - id: www-apple-com-dtds-propertylist-1-0-dtd
+    name: Apple Property List DTD
+    source_type: website
+    url: http://www.apple.com/DTDs/PropertyList-1.0.dtd
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/formation/tooling/run-validator-fixtures.ts
+    notes: Standard plist DOCTYPE used by the PrivacyInfo.xcprivacy validator fixture.
+  - id: developer-apple-com-app-store-app-privacy-details
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/app-store/app-privacy-details
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: developer-apple-com-app-store-review-guidelines
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/app-store/review/guidelines
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: developer-apple-com-documentation-bundleresources-adding-a-privacy-manifest-to
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/bundleresources/adding-a-privacy-manifest-to-your-app-or-third-party-sdk
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Official Apple documentation for adding privacy manifest files to apps and third-party SDKs.
+  - id: developer-apple-com-documentation-bundleresources-describing-data-use-in-privac
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/bundleresources/describing-data-use-in-privacy-manifests
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Official Apple documentation for privacy manifest data-use declarations.
+  - id: developer-apple-com-documentation-bundleresources-describing-use-of-required-rea
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: developer-apple-com-documentation-bundleresources-protected-resources
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/bundleresources/protected-resources
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Official Apple documentation for protected-resource purpose strings and related Info.plist keys.
+  - id: developer-apple-com-documentation-bundleresources-privacy-manifest-files
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/bundleresources/privacy-manifest-files
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: developer-apple-com-documentation-bundleresources-information-property-list-nsu
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/BundleResources/Information-Property-List/NSUserTrackingUsageDescription
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Official Apple Info.plist key documentation for ATT tracking usage description copy.
+  - id: developer-apple-com-support-third-party-sdk-requirements
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/support/third-party-SDK-requirements
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Official Apple list of third-party SDKs requiring privacy manifests and SDK signatures.
+  - id: developer-apple-com-help-app-store-connect-manage-builds-upload-builds
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Official App Store Connect documentation for uploading and processing builds.
+  - id: doc-refero-design-llms-txt
+    name: doc.refero.design
+    source_type: website
+    url: https://doc.refero.design/llms.txt
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/product/experience/ux-patterns/UX_PATTERNS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: doc-refero-design-mcp-data-model
+    name: doc.refero.design
+    source_type: website
+    url: https://doc.refero.design/mcp/data-model
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/product/experience/ux-patterns/UX_PATTERNS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: doc-refero-design-mcp-examples
+    name: doc.refero.design
+    source_type: website
+    url: https://doc.refero.design/mcp/examples
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/product/experience/ux-patterns/UX_PATTERNS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: doc-refero-design-mcp-getting-started
+    name: doc.refero.design
+    source_type: website
+    url: https://doc.refero.design/mcp/getting-started
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/product/experience/ux-patterns/UX_PATTERNS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: doc-refero-design-mcp-tools
+    name: doc.refero.design
+    source_type: website
+    url: https://doc.refero.design/mcp/tools
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/product/experience/ux-patterns/UX_PATTERNS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: docs-doppler-com-docs-cli
+    name: docs.doppler.com
+    source_type: docs
+    url: https://docs.doppler.com/docs/cli
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/trust/secrets/SECRETS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: docs-doppler-com-docs-install-cli
+    name: docs.doppler.com
+    source_type: docs
+    url: https://docs.doppler.com/docs/install-cli
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/trust/secrets/SECRETS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: docs-doppler-com-docs-secrets-setup-guide
+    name: docs.doppler.com
+    source_type: docs
+    url: https://docs.doppler.com/docs/secrets-setup-guide
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/trust/secrets/SECRETS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: docs-doppler-com-docs-service-tokens
+    name: docs.doppler.com
+    source_type: docs
+    url: https://docs.doppler.com/docs/service-tokens
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/trust/secrets/SECRETS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: docs-doppler-com-llms-txt
+    name: docs.doppler.com
+    source_type: docs
+    url: https://docs.doppler.com/llms.txt
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/trust/secrets/SECRETS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: json-schema-org-draft-2020-12-schema
+    name: json-schema.org
+    source_type: docs
+    url: https://json-schema.org/draft/2020-12/schema
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/formation/studio/seed/schema/business.schema.json
+    notes: JSON Schema dialect used by the Design Room business state schema.
+  - id: github-com-parthjadhav-app-store-screenshots
+    name: github.com
+    source_type: github
+    url: https://github.com/ParthJadhav/app-store-screenshots
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/store/app-store-listing/SCREENSHOTS.md
+      - skill/formation/tooling/check-store-screenshots.ts
+      - skill/formation/evals/launchbench/app-store-screenshots-unvalidated.yaml
+    notes: AI-agent screenshot editor/export skill used for App Store and Play screenshot composition; verify current iPad and export behavior
+      before relying on final upload assets.
+  - id: github-com-peter-evans-create-pull-request
+    name: github.com
+    source_type: github
+    url: https://github.com/peter-evans/create-pull-request
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - .github/workflows/source-freshness.yml
+    notes: Auto-discovered from repository content.
+  - id: github-com-remotion-dev-remotion
+    name: github.com
+    source_type: github
+    url: https://github.com/remotion-dev/remotion
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - docs/prototypes/remotion-content-assets-plan.html
+    notes: Auto-discovered from recently added repository content.
+  - id: github-com-remotion-dev-skills
+    name: github.com
+    source_type: github
+    url: https://github.com/remotion-dev/skills
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - docs/prototypes/remotion-content-assets-plan.html
+    notes: Auto-discovered from recently added repository content.
+  - id: posthog-us-ingestion-endpoint
+    name: PostHog US ingestion endpoint
+    source_type: service_endpoint
+    url: https://us.i.posthog.com/
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/formation/starters/social-network/starter/lib/analytics/posthog-client.ts
+      - skill/formation/starters/ai-chat-companion/starter/lib/analytics/posthog-client.ts
+    notes: Default api_host fallback in the archetype starter PostHog clients; overridden by NEXT_PUBLIC_POSTHOG_HOST.
+  - id: raw-githubusercontent-com-remotion-dev-remotion-main-license-md
+    name: raw.githubusercontent.com
+    source_type: website
+    url: https://raw.githubusercontent.com/remotion-dev/remotion/main/LICENSE.md
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - docs/prototypes/remotion-content-assets-plan.html
+    notes: Auto-discovered from recently added repository content.
+  - id: motionsites-ai
+    name: motionsites.ai
+    source_type: inspiration_benchmark
+    url: https://motionsites.ai/
+    refresh_cadence_days: 90
+    owner: source-freshness
+    locations:
+      - docs/brainstorms/landing-motion-craft.md
+    notes: Visual quality benchmark for the landing motion craft lane (animated landing-page section gallery). Inspiration reference only, never
+      a command-syntax source.
+  - id: instagram-aj-on-ai-vibecoded-checklist
+    name: instagram.com/aj.on.ai
+    source_type: inspiration_benchmark
+    url: https://www.instagram.com/aj.on.ai/
+    refresh_cadence_days: 180
+    owner: source-freshness
+    locations:
+      - skill/formation/catalog/knowledge/design/design-vibecoded-tells.yaml
+    notes: Origin of the widely shared 30-item "reasons your site looks vibecoded" checklist adapted by knowledge/design/vibecoded-tells.md.
+      Inspiration reference only, never a command-syntax source.
+  - id: posthog-com-docs-api-events
+    name: PostHog — Events REST API
+    source_type: official_docs
+    url: https://posthog.com/docs/api/events
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/formation/tooling/probe-posthog.ts
+    notes: PostHog GET /api/projects/:project_id/events endpoint used by probe-posthog.ts as the fallback event-count method when HogQL query is
+      unavailable.
+  - id: posthog-com-docs-api-query
+    name: PostHog — Query REST API (HogQL)
+    source_type: official_docs
+    url: https://posthog.com/docs/api/query
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/formation/tooling/probe-posthog.ts
+    notes: PostHog POST /api/projects/:project_id/query endpoint used by probe-posthog.ts to run HogQL aggregate queries for attribution event
+      counts.
+  - id: app-posthog-com
+    name: PostHog Cloud — app host
+    source_type: api
+    url: https://app.posthog.com
+    refresh_cadence_days: 90
+    owner: source-freshness
+    locations:
+      - skill/formation/tooling/probe-posthog.ts
+    notes: Default POSTHOG_HOST value used by probe-posthog.ts when no custom self-hosted URL is provided. Cloud host for PostHog REST API calls.
+  - id: posthog-your-domain-com
+    name: PostHog self-hosted placeholder
+    source_type: docs
+    url: https://posthog.your-domain.com
+    refresh_cadence_days: 365
+    owner: source-freshness
+    locations:
+      - skill/formation/workspace/business/analytics/ANALYTICS.md
+    notes: Template placeholder URL illustrating the POSTHOG_HOST variable for self-hosted PostHog deployments. Not a real endpoint — founder
+      replaces with their actual self-hosted host.
+  - id: api-revenuecat-com
+    name: RevenueCat REST API v2 — API host
+    source_type: api
+    url: https://api.revenuecat.com
+    refresh_cadence_days: 90
+    owner: source-freshness
+    locations:
+      - skill/formation/tooling/probe-revenuecat.ts
+    notes: Base host for RevenueCat REST API v2 calls in probe-revenuecat.ts (GET /v2/projects/{project_id}/offerings and /entitlements).
+  - id: www-revenuecat-com-docs-api-v1
+    name: RevenueCat REST API v1 reference
+    source_type: official_docs
+    url: https://www.revenuecat.com/docs/api-v1
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - skill/formation/tooling/probe-revenuecat.ts
+    notes: RevenueCat v1 REST API reference cited in probe-revenuecat.ts header documentation explaining the v1 vs v2 endpoint difference.
+  - id: github-repo-b2c-launch-skill
+    name: This repository on GitHub
+    source_type: repository
+    url: https://github.com/Emuthmartinez/Formation
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - README.md
+      - package.json
+    notes: Canonical repo URL used by the README clone command and the package.json homepage field. Self-referential; tracked so the registry
+      stays exhaustive rather than because it can drift upstream. Renamed from b2c-mobile-business-launch-skill on 2026-08-05; GitHub
+      redirects the old URL.
+  - id: github-repo-b2c-launch-skill-git
+    name: This repository, git clone URL
+    source_type: repository
+    url: https://github.com/Emuthmartinez/Formation.git
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - package.json
+    notes: package.json repository.url. Update alongside github-repo-b2c-launch-skill if the repo is ever renamed or transferred.
+  - id: github-repo-b2c-launch-skill-issues
+    name: This repository, issue tracker
+    source_type: repository
+    url: https://github.com/Emuthmartinez/Formation/issues
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - package.json
+    notes: package.json bugs.url, so npm surfaces the right place to file a report.
+  - id: github-repo-b2c-launch-skill-ci-workflow
+    name: This repository, audit workflow run history
+    source_type: repository
+    url: https://github.com/Emuthmartinez/Formation/actions/workflows/source-freshness.yml
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Target of the README audit:ci badge. The audit job inside this workflow runs npm run audit:ci on every push and pull request; rename
+      the workflow file and this URL and the badge both need updating.
+  - id: github-repo-b2c-launch-skill-security-advisory
+    name: This repository, private vulnerability reporting
+    source_type: repository
+    url: https://github.com/Emuthmartinez/Formation/security/advisories/new
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - .github/SECURITY.md
+      - .github/CODE_OF_CONDUCT.md
+      - .github/ISSUE_TEMPLATE/config.yml
+    notes: The private disclosure channel for both security reports and code-of-conduct reports. Requires GitHub private vulnerability reporting
+      to stay enabled on the repo.
+  - id: github-repo-b2c-launch-skill-contributing
+    name: This repository, CONTRIBUTING.md on main
+    source_type: repository
+    url: https://github.com/Emuthmartinez/Formation/blob/main/CONTRIBUTING.md
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - .github/ISSUE_TEMPLATE/config.yml
+      - .github/ISSUE_TEMPLATE/feature_request.yml
+    notes: Issue forms cannot use repo-relative links, so they need the absolute blob URL.
+  - id: github-repo-b2c-launch-skill-validators-doc
+    name: This repository, docs/validators.md on main
+    source_type: repository
+    url: https://github.com/Emuthmartinez/Formation/blob/main/docs/validators.md
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - .github/ISSUE_TEMPLATE/config.yml
+    notes: Linked from the issue-form contact links so a reporter can check what a gate actually asserts before filing.
+  - id: shields-io-badge-audit-ci
+    name: Shields.io badge, audit:ci workflow status
+    source_type: badge_endpoint
+    url: https://img.shields.io/github/actions/workflow/status/Emuthmartinez/Formation/source-freshness.yml?branch=main&label=audit%3Aci
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Uses an explicit label override because the workflow is named "Repository Audit" while the job it gates is the full audit:ci
+      suite. A default GitHub badge would mislabel it.
+  - id: shields-io-badge-package-version
+    name: Shields.io badge, package.json version
+    source_type: badge_endpoint
+    url: https://img.shields.io/github/package-json/v/Emuthmartinez/Formation?label=release
+    refresh_cadence_days: 90
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Reads the version straight from package.json on main, so it cannot drift from the release the way a hardcoded badge would.
+  - id: shields-io-badge-node-version
+    name: Shields.io badge, Node 22
+    source_type: badge_endpoint
+    url: https://img.shields.io/badge/node-22-informational
+    refresh_cadence_days: 180
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Static badge. Update it in the same change that moves the Node version in CI and CONTRIBUTING.md.
+  - id: shields-io-badge-license
+    name: Shields.io badge, repository license
+    source_type: badge_endpoint
+    url: https://img.shields.io/github/license/Emuthmartinez/Formation
+    refresh_cadence_days: 180
+    owner: maintainer
+    locations:
+      - README.md
+    notes: Reads the detected license from the repo, so it tracks LICENSE automatically.
+  - id: contributor-covenant-2-1
+    name: Contributor Covenant 2.1
+    source_type: official_docs
+    url: https://www.contributor-covenant.org/version/2/1/code_of_conduct
+    refresh_cadence_days: 180
+    owner: maintainer
+    locations:
+      - .github/CODE_OF_CONDUCT.md
+    notes: The basis this repo's code of conduct is adapted from. Wording and reporting process were rewritten for a single-maintainer project,
+      so an upstream revision is informational rather than a required sync.
+  - id: formation-clueless-clothing-hosted-instance
+    name: Formation hosted instance
+    source_type: official_docs
+    url: https://formation.clueless.clothing/
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - platform/web/index.html
+    notes: The platform's own hosted origin, referenced as the canonical og:url in social-share metadata. First-party, not an external dependency.
+  - id: formation-clueless-clothing-og-image
+    name: Formation Open Graph card image
+    source_type: official_docs
+    url: https://formation.clueless.clothing/og.jpg
+    refresh_cadence_days: 30
+    owner: source-freshness
+    locations:
+      - platform/web/index.html
+    notes: First-party Open Graph card served from the platform's public assets; the absolute URL is required by social crawlers.
+  - id: w3c-prov-o
+    name: W3C PROV-O
+    source_type: standard
+    url: https://www.w3.org/TR/prov-o/
+    refresh_cadence_days: 180
+    owner: architecture
+    locations:
+      - docs/architecture.md
+    notes: Defines the provenance principles used by knowledge-package source and review records.
+  - id: w3c-shacl
+    name: W3C SHACL
+    source_type: standard
+    url: https://www.w3.org/TR/shacl/
+    refresh_cadence_days: 180
+    owner: architecture
+    locations:
+      - docs/architecture.md
+    notes: Defines the graph-shape validation principles used by knowledge-package checks.

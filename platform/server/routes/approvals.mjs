@@ -3,9 +3,9 @@ import { TEXT_LIMITS, optionalText, readJsonBody } from "../validation.mjs";
 import { requireWorkspace } from "./shared.mjs";
 
 /**
- * Founder approvals: the platform surface of the launch engine's parked founder gates.
- * Listing mirrors what the engine is asking into the decision system; answering travels back
- * through the engine's own sanctioned path (core/session/approve.ts) via the execution worker.
+ * Founder approvals: the platform surface of the launch skill's parked founder gates.
+ * Listing mirrors what the skill is asking into the decision system; answering travels back
+ * through the skill's own sanctioned path (core/session/approve.ts) via the execution worker.
  * Membership is checked server-side for both; answering additionally requires the owner role.
  */
 

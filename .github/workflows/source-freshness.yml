@@ -1,4 +1,4 @@
-name: Skill Source Freshness
+name: Repository Audit
 
 on:
   pull_request:
@@ -26,7 +26,7 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
-      - run: npm ci --prefix skill/b2c-mobile-business-launch
+      - run: npm ci --prefix skill/formation
       - run: npm run audit:ci
       - run: npm pack --dry-run --json
 
@@ -45,7 +45,7 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
-      - run: npm ci --prefix skill/b2c-mobile-business-launch
+      - run: npm ci --prefix skill/formation
       - name: Refresh source registry and snapshots
         run: npm run refresh:source-freshness
       - name: Audit after refresh
@@ -75,5 +75,5 @@ jobs:
 
             Review auto-discovered sources as candidates before treating them as canonical launch policy. If upstream changes affect behavior, update references/templates/validators/evals in this PR before merging.
           add-paths: |
-            skill/b2c-mobile-business-launch/machine/source-registry.yaml
+            skill/formation/validation/repository/source-registry.yaml
             docs/source-freshness/

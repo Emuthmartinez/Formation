@@ -4,7 +4,7 @@
 
 `platform/` is founder-facing. Founder-visible language must use business vocabulary, not graph, lane, agent, gate, validator, provider, filesystem, or prompt vocabulary unless a founder is explicitly configuring automation.
 
-The historical skill runtime is an internal engine. Do not make the web application read its generated Markdown or state files directly. Integration belongs behind a typed adapter and must preserve workspace authorization.
+The Formation skill is internal launch automation. Do not make the web application read its generated Markdown or state files directly. Integration goes through the typed execution adapter (`server/execution.mjs`) and preserves workspace authorization.
 
 ## State rules
 
@@ -30,13 +30,14 @@ The historical skill runtime is an internal engine. Do not make the web applicat
 
 ## UI rules
 
-- Engine- or system-authored text reaches founders only through `server/domain/presentation.mjs`: board language on top, the original wording preserved for technical disclosure. Founder-authored words are never rewritten.
+- Skill- or system-authored text reaches founders only through `server/domain/presentation.mjs`: board language on top, the original wording preserved for technical disclosure. Founder-authored words are never rewritten.
 - Every page has one primary job.
 - Prefer editorial hierarchy and decisive rows over card grids.
 - Do not add decorative metrics.
 - Keep controls visible near the work they change.
 - Preserve keyboard focus, labels, semantic headings, and reduced-motion behavior.
 - Empty states must explain the next useful action.
+- Avoid the vibecoded defaults named in `../skill/formation/knowledge/design/vibecoded-tells.md`: no default icon packs, sparkle-AI garnish, indigo-purple gradients, glass panels, decorative orbs, or emoji as icons without a recorded design decision. Async surfaces keep designed loading, empty, and error states. After building or restyling founder-facing UI, run the vibecode audit pass that file defines.
 - Gate controls on `snapshot.capabilities`, never on a client-side copy of the role rules. State what a member cannot do once, in plain words, instead of showing a disabled control beside every action.
 
 ## Verification

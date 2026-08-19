@@ -1,0 +1,16 @@
+schema_version: 1.0.0
+id: reference.process.tool-recipes.funnel-domain-and-privacy
+title: Funnel Domain And Privacy
+domain_id: domain.process
+document_path: knowledge/process/tool-recipes/funnel-domain-and-privacy.md
+load_when: privacy/terms research minimums, domain/email routing setup, or landing-funnel verification — routed from
+  tool-recipes.md; complements the trust and growth rows
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.growth.pre-launch-funnel-landing-waitlist
+    - workflow.growth.landing-funnel-publication-and-live-proof
+  context_pack_ids: []
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

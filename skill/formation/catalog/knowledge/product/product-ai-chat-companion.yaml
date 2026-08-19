@@ -1,0 +1,15 @@
+schema_version: 1.0.0
+id: reference.product.ai-chat-companion
+title: AI Chat Companion
+domain_id: domain.product
+document_path: knowledge/product/ai-chat-companion.md
+load_when: '"an AI assistant", "a chatbot for <domain>", "an AI companion/character", a coach/tutor chat app; before
+  specing conversation schema, model integration, memory, usage metering, or the safety layer'
+lifecycle: active
+bindings:
+  workflow_ids: []
+  context_pack_ids:
+    - context.archetypes
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

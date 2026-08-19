@@ -1,0 +1,17 @@
+schema_version: 1.0.0
+id: reference.process.learning-capture
+title: Learning Capture
+domain_id: domain.process
+document_path: knowledge/process/learning-capture.md
+load_when: capturing a reusable maintainer learning or refreshing the learning corpus — grounding rules, evidence citations,
+  and refresh verdicts
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.machine.learning-capture-maintainer
+    - workflow.machine.learning-corpus-refresh-maintainer
+  context_pack_ids: []
+applicability_notes: The contract for knowledge/<domain>/learnings documents. Load before writing or auditing a learning;
+  check:learning-grounding enforces the document shape this contract defines.
+sources: []
+source_exemption: Internal operating guidance for this repository's own learning corpus; no external factual claims.

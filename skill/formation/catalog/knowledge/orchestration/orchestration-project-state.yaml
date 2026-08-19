@@ -1,0 +1,19 @@
+schema_version: 1.0.0
+id: reference.orchestration.project-state
+title: Project State
+domain_id: domain.orchestration
+document_path: knowledge/orchestration/project-state.md
+load_when: creating, reading, or patching state/PROJECT_STATE.yaml — the durable state schema, reducer contract, and
+  resume-from-state rules; load together with parallel-agent-orchestration.md when dispatching subagents
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.orchestration.session-continuity-resume
+    - workflow.orchestration.orient-scaffold-and-state-cockpit-upkeep
+    - workflow.process.business-control-plane-extension
+    - workflow.engineering.engineering-orchestration-ce-production-readiness
+  context_pack_ids:
+    - context.orchestration
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

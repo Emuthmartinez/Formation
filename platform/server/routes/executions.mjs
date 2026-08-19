@@ -17,6 +17,16 @@ function normalizeWorkflowId(value) {
 }
 
 export async function handleExecutionRoutes({ request, response, method, pathname, store, executionWorker, user }) {
+  const matrixMatch = pathname.match(/^\/api\/workspaces\/([^/]+)\/launch-matrix$/);
+  if (matrixMatch) {
+    if (method !== "GET") throw new HttpError(405, "Method not allowed.");
+    const workspaceId = decodeURIComponent(matrixMatch[1]);
+    const database = await store.read();
+    const workspace = requireWorkspace(database, workspaceId, user.id, "workspace-read");
+    json(response, 200, await executionWorker.launchMatrix(workspace));
+    return;
+  }
+
   const collectionMatch = pathname.match(/^\/api\/workspaces\/([^/]+)\/executions$/);
   if (collectionMatch) {
     const workspaceId = decodeURIComponent(collectionMatch[1]);
@@ -28,7 +38,10 @@ export async function handleExecutionRoutes({ request, response, method, pathnam
         .filter((entry) => entry.workspaceId === workspaceId)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
         .map(toFounderExecution);
-      json(response, 200, executions);
+      // The capability travels on the page's actual read path (Codex round 2): the founder
+      // learns whether the skill can do hands-on steps itself BEFORE asking for work, not from
+      // a detail view they only reach afterwards.
+      json(response, 200, { executions, selfServeExecution: executionWorker.selfServeExecution() });
       return;
     }
 
@@ -58,7 +71,7 @@ export async function handleExecutionRoutes({ request, response, method, pathnam
     const execution = database.executions.find((entry) => entry.id === executionId && entry.workspaceId === workspaceId);
     if (!execution) throw new HttpError(404, "Execution not found.");
 
-    // The live engine answer travels alongside the durable record. When the engine cannot be
+    // The live skill answer travels alongside the durable record. When the skill cannot be
     // reached, that is said explicitly — the stored report is the last known state, never a
     // stand-in for a fresh one.
     const engine = await executionWorker.inspect(workspace);

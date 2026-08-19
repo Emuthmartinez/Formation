@@ -1,0 +1,51 @@
+schema_version: 1.0.0
+id: reference.process.tool-recipes.device-capture-and-proof
+title: Device Capture And Proof
+domain_id: domain.process
+document_path: knowledge/process/tool-recipes/device-capture-and-proof.md
+load_when: capturing truthful app UI proof — the Route Ladder from the in-app iOS Simulator through
+  XcodeBuildMCP/SnapshotPreviews/serve-sim — routed from tool-recipes.md
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.store.store-screenshots-production
+    - workflow.engineering.mobai-device-automation-and-demo-videos
+    - workflow.engineering.native-ios-proof-route-ladder
+  context_pack_ids:
+    - context.device
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources:
+  - id: github-com-mobai-app-desktop-recorder-skill
+    name: github.com
+    source_type: github
+    url: https://github.com/MobAI-App/desktop-recorder-skill
+    review_cadence_days: 7
+    claim_scope: Auto-discovered from recently added repository content.
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: github-com-mobai-app-mobile-recorder-skill
+    name: github.com
+    source_type: github
+    url: https://github.com/MobAI-App/mobile-recorder-skill
+    review_cadence_days: 7
+    claim_scope: Auto-discovered from recently added repository content.
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: github-com-getsentry-snapshotpreviews
+    name: SnapshotPreviews
+    source_type: github
+    url: https://github.com/getsentry/SnapshotPreviews
+    review_cadence_days: 7
+    claim_scope: Sentry/EmergeTools SnapshotPreviews repository used for SwiftUI/UIKit/AppKit preview snapshot export
+      guidance. Treat output as preview-only proof, not runtime E2E or distribution readiness.
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: github-com-evanbacon-serve-sim
+    name: serve-sim
+    source_type: github
+    url: https://github.com/EvanBacon/serve-sim
+    review_cadence_days: 7
+    claim_scope: Open-source CLI for browser-visible iOS Simulator streaming/control used by CLI agents. Treat output as
+      simulator proof, not provider or App Store signing proof.
+    last_review_date: 2026-08-17
+    reviewer: formation-maintainers

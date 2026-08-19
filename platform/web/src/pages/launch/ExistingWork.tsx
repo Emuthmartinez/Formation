@@ -8,7 +8,7 @@ import type { ImportPlan, ImportSource } from "../../types";
 /**
  * Work the founder already did, before Formation.
  *
- * A founder who has been running a launch with the engine has months of decisions, blockers, and
+ * A founder who has been running a launch with the skill has months of decisions, blockers, and
  * documents sitting in a launch workspace. This section brings it in — but never as a surprise:
  * nothing happens until the founder has read exactly what would arrive, and what arrives is
  * explicitly a draft.

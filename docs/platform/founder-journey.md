@@ -221,7 +221,7 @@ The launch definition is intentionally demanding:
 
 ## 11. Repeat the operating loop
 
-After new research, a founder decision, a product test, or an engine-executed task:
+After new research, a founder decision, a product test, or a skill-executed task:
 
 1. update or import the evidence
 2. adjust claims and confidence

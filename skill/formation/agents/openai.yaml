@@ -1,0 +1,8 @@
+interface:
+  display_name: "Formation"
+  short_description: "Turn a B2C app idea into a running business"
+  brand_color: "#FF6F5C"
+  default_prompt: "Take my B2C mobile app idea, transcript, spec, or repo and run the launch autopilot until a real founder-only gate. Use the predetermined expert prompts in APP_AGENTS.md, dispatch independent bounded reviews in parallel when safe, and keep shared state, git, providers, public actions, and release decisions with the orchestrator. Create durable state, founder-readable design and launch views, launch artifacts, security evidence, validators, and production-readiness proof."
+
+policy:
+  allow_implicit_invocation: true

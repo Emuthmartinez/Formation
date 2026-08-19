@@ -20,7 +20,7 @@ import { ReadinessLedger } from "../components/Readiness";
 import { useCan } from "../capabilities";
 import { runMutation, useWorkspace } from "../context";
 import { navigate } from "../router";
-import type { FounderExecution, Task } from "../types";
+import type { FounderExecution, LaunchMatrixResponse, LaunchMatrixWorkflow, SelfServeExecution, Task } from "../types";
 
 export function LaunchPage() {
   const { snapshot, reload, notify } = useWorkspace();
@@ -103,6 +103,8 @@ export function LaunchPage() {
           ))}
         </div>
       </Section>
+
+      <LaunchMatrixSection workspaceId={workspace.id} />
 
       <EngineWorkSection workspaceId={workspace.id} workspaceName={workspace.name} />
 
@@ -188,7 +190,7 @@ function taskRank(task: Task) {
   return priority * 10 + status;
 }
 
-// The engine's step statuses, said the way a founder would say them.
+// The skill's step statuses, said the way a founder would say them.
 const engineStepLabels: Record<string, string> = {
   finished: "Done",
   "in-progress": "In motion",
@@ -206,13 +208,222 @@ const engineSessionLabels: Record<string, string> = {
   failed: "Stopped",
 };
 
+type MatrixFilter = "all" | "working" | "needs-founder" | "failed" | "finished";
+type MatrixDetail = "work" | "dependencies" | "knowledge" | "tools" | "results";
+
+function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
+  const [matrix, setMatrix] = useState<LaunchMatrixResponse | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [filter, setFilter] = useState<MatrixFilter>("all");
+  const [view, setView] = useState<"areas" | "phases">("areas");
+  const [expanded, setExpanded] = useState<{ groupId: string; detail: MatrixDetail } | null>(null);
+  const [expandedPhase, setExpandedPhase] = useState<{ groupId: string; phaseId: string } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let timer: number | undefined;
+    const load = async () => {
+      try {
+        const value = await api.launchMatrix(workspaceId);
+        if (cancelled) return;
+        setMatrix(value);
+        setFailed(false);
+      } catch {
+        if (!cancelled) setFailed(true);
+      }
+      if (!cancelled) timer = window.setTimeout(load, 12_000);
+    };
+    void load();
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [workspaceId]);
+
+  const workflows = matrix?.workflows ?? [];
+  const groups = [...(matrix?.groups ?? [])].sort((left, right) => left.order - right.order);
+  const visible = workflows.filter((workflow) => {
+    if (filter === "all") return true;
+    if (filter === "working") return ["ready", "in-progress", "upcoming"].includes(workflow.status);
+    // "held" and "needs-founder" both mean the same thing to the founder: it waits on them.
+    if (filter === "needs-founder") return workflow.status === "needs-founder" || workflow.status === "held";
+    return workflow.status === filter;
+  });
+  const byId = new Map(workflows.map((workflow) => [workflow.workflowId, workflow]));
+  const toggle = (groupId: string, detail: MatrixDetail) => setExpanded((current) => current?.groupId === groupId && current.detail === detail ? null : { groupId, detail });
+
+  if (failed) return <Section title="Launch matrix"><EmptyState title="The launch matrix could not be checked" description="Formation did not answer. Existing launch records are unchanged." /></Section>;
+  if (!matrix) return <Section title="Launch matrix"><p className="muted-copy">Loading the current launch graph…</p></Section>;
+  if (!matrix.available) return <Section title="Launch matrix"><EmptyState title="Launch matrix unavailable" description={matrix.reason ?? "Formation does not provide this view for this workspace yet."} /></Section>;
+
+  const phaseIds = [...new Set(visible.flatMap((workflow) => workflow.phaseIds))].sort();
+
+  return (
+    <Section title="Launch matrix" description="Six business areas, read from the same launch graph Formation works from. Open any cell to see the work, guidance, tools, and proof behind it.">
+      <div className="matrix-controls" aria-label="Launch matrix controls">
+        <div className="matrix-filter" role="group" aria-label="Filter work">
+          {(["all", "working", "needs-founder", "failed", "finished"] as MatrixFilter[]).map((value) => (
+            <button key={value} className={filter === value ? "is-active" : ""} aria-pressed={filter === value} onClick={() => setFilter(value)}>
+              {value === "all" ? "All" : value === "needs-founder" ? "Waiting on you" : value[0]!.toUpperCase() + value.slice(1)}
+            </button>
+          ))}
+        </div>
+        <div className="matrix-filter" role="group" aria-label="Matrix view">
+          <button className={view === "areas" ? "is-active" : ""} aria-pressed={view === "areas"} onClick={() => setView("areas")}>Work areas</button>
+          <button className={view === "phases" ? "is-active" : ""} aria-pressed={view === "phases"} onClick={() => setView("phases")}>Launch phases</button>
+        </div>
+      </div>
+
+      {view === "phases" ? (
+        <div className="matrix-scroll matrix-scroll--phases">
+          <table className="launch-phase-matrix">
+            <caption className="sr-only">Work areas by launch phase</caption>
+            <thead><tr><th scope="col">Work area</th>{phaseIds.map((phase) => <th scope="col" key={phase}>{phase.replace("phase.", "Phase ")}</th>)}</tr></thead>
+            <tbody>{groups.flatMap((group) => {
+              const groupWork = visible.filter((workflow) => workflow.groupId === group.id);
+              const activePhase = expandedPhase?.groupId === group.id ? expandedPhase.phaseId : null;
+              const cellWork = activePhase ? groupWork.filter((workflow) => workflow.phaseIds.includes(activePhase)) : [];
+              return [
+                <tr key={group.id}><th scope="row">{group.title}</th>{phaseIds.map((phase) => {
+                  const phaseWork = groupWork.filter((workflow) => workflow.phaseIds.includes(phase));
+                  if (!phaseWork.length) return <td key={phase}>—</td>;
+                  const counts = matrixStatusCounts(phaseWork);
+                  const open = activePhase === phase;
+                  return (
+                    <td key={phase}>
+                      <button aria-expanded={open} onClick={() => setExpandedPhase((current) => current?.groupId === group.id && current.phaseId === phase ? null : { groupId: group.id, phaseId: phase })}>
+                        {phaseWork.length} item{phaseWork.length === 1 ? "" : "s"}
+                      </button>
+                      <small>{matrixCountLine(counts)}</small>
+                    </td>
+                  );
+                })}</tr>,
+                activePhase ? (
+                  <tr key={`${group.id}-phase-detail`} className="launch-matrix-detail">
+                    <td colSpan={phaseIds.length + 1}>
+                      {cellWork.length
+                        ? cellWork.map((workflow) => <MatrixWorkflowDetail key={workflow.workflowId} workflow={workflow} detail="work" workflows={byId} />)
+                        : <p>No work in this area and phase matches the current filter.</p>}
+                    </td>
+                  </tr>
+                ) : null,
+              ];
+            })}</tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="matrix-scroll">
+          <table className="launch-matrix-table">
+            <caption className="sr-only">Launch work areas with state, current work, dependencies, knowledge, tools, and results</caption>
+            <thead><tr><th scope="col">Work area</th><th scope="col">State</th><th scope="col">Current work</th><th scope="col">Dependencies</th><th scope="col">Knowledge</th><th scope="col">Tools</th><th scope="col">Result and proof</th></tr></thead>
+            <tbody>{groups.map((group) => {
+              const allGroupWork = workflows.filter((workflow) => workflow.groupId === group.id);
+              const groupWork = visible.filter((workflow) => workflow.groupId === group.id);
+              const counts = matrixStatusCounts(allGroupWork);
+              const active = expanded?.groupId === group.id;
+              return [
+                <tr key={group.id} className="launch-matrix-row">
+                  <th scope="row" data-label="Work area"><button aria-expanded={active} onClick={() => toggle(group.id, "work")}><strong>{group.title}</strong><span>{allGroupWork.length} work items</span></button></th>
+                  <td data-label="State"><span className="matrix-state">{matrixGroupStatus(counts)}</span><small>{matrixCountLine(counts)}</small></td>
+                  <td data-label="Current work"><button aria-expanded={active && expanded?.detail === "work"} onClick={() => toggle(group.id, "work")}>{groupWork.length} visible</button></td>
+                  <td data-label="Dependencies"><button aria-expanded={active && expanded?.detail === "dependencies"} onClick={() => toggle(group.id, "dependencies")}>{new Set(groupWork.flatMap((item) => item.dependencyWorkflowIds)).size} upstream</button></td>
+                  <td data-label="Knowledge"><button aria-expanded={active && expanded?.detail === "knowledge"} onClick={() => toggle(group.id, "knowledge")}>{new Set(groupWork.flatMap((item) => [...item.knowledge, ...item.conditionalKnowledge].map((guide) => guide.technical.id))).size} guides{groupWork.some((item) => [...item.knowledge, ...item.conditionalKnowledge].some((guide) => guide.reviewStatus === "review-due")) ? <em className="matrix-flag"> · check due</em> : null}</button></td>
+                  <td data-label="Tools"><button aria-expanded={active && expanded?.detail === "tools"} onClick={() => toggle(group.id, "tools")}>{new Set(groupWork.flatMap((item) => [...item.services.map((service) => service.technical.id), ...item.agentTools.map((tool) => tool.technical.id)])).size} tools</button></td>
+                  <td data-label="Result and proof"><button aria-expanded={active && expanded?.detail === "results"} onClick={() => toggle(group.id, "results")}>{groupWork.filter((item) => item.verification.state === "verified").length} verified</button></td>
+                </tr>,
+                active ? <tr key={`${group.id}-detail`} className="launch-matrix-detail"><td colSpan={7}>{groupWork.length ? groupWork.map((workflow) => <MatrixWorkflowDetail key={workflow.workflowId} workflow={workflow} detail={expanded!.detail} workflows={byId} />) : <p>No work in this area matches the current filter.</p>}</td></tr> : null,
+              ];
+            })}</tbody>
+          </table>
+        </div>
+      )}
+      {matrix.launchIntegrity?.length ? (
+        <div className="matrix-integrity">
+          <h3>Launch integrity</h3>
+          <p className="muted-copy">Cross-cutting checks Formation runs on its own launch work — continuity, live service checks, consistency, and completeness audits.</p>
+          <ul>
+            {matrix.launchIntegrity.map((step) => (
+              <li key={step.workflowId}>
+                <strong>{step.title}</strong>
+                <span>{engineStepLabels[step.status] ?? step.status}{step.verification.state === "verified" ? " · confirmed" : step.verification.state === "failed" ? " · check failed" : ""}</span>
+                {step.summary ? <p>{step.summary}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : matrix.systemSummary ? (
+        <p className="matrix-system-summary">Launch coordination: {matrix.systemSummary.total} cross-cutting steps keeping the launch consistent.</p>
+      ) : null}
+    </Section>
+  );
+}
+
+function MatrixWorkflowDetail({ workflow, detail, workflows }: { workflow: LaunchMatrixWorkflow; detail: MatrixDetail; workflows: Map<string, LaunchMatrixWorkflow> }) {
+  return <article className="matrix-workflow">
+    <header><div><StatusText status={workflow.status} /><h3>{workflow.title}</h3></div><span>{workflow.applicability === "unknown" ? "Scope answer needed" : workflow.applicability === "not-needed" ? "Not needed" : "Required"}</span></header>
+    {detail === "work" ? <><p>{workflow.summary}</p>{workflow.founderReason ? <p className="matrix-note">{workflow.founderReason}</p> : null}{workflow.role ? <p>Owner: {workflow.role.name}</p> : null}</> : null}
+    {detail === "dependencies" ? <div className="matrix-detail-grid"><div><h4>Waiting on</h4>{workflow.dependencyWorkflowIds.length ? <ul>{workflow.dependencyWorkflowIds.map((id) => { const item = workflows.get(id); return <li key={id}>{item?.title ?? id} — {item?.founderReason ?? engineStepLabels[item?.status ?? ""] ?? item?.status ?? "state unavailable"}</li>; })}</ul> : <p>Nothing upstream.</p>}</div><div><h4>Unlocks</h4>{workflow.dependentWorkflowIds.length ? <ul>{workflow.dependentWorkflowIds.map((id) => { const item = workflows.get(id); return <li key={id}>{item?.title ?? id} — {engineStepLabels[item?.status ?? ""] ?? item?.status ?? "state unavailable"}</li>; })}</ul> : <p>No downstream work.</p>}</div></div> : null}
+    {detail === "knowledge" ? (
+      <>
+        {workflow.knowledge.length ? (
+          <ul className="matrix-card-list">
+            {workflow.knowledge.map((guide) => (
+              <li key={guide.technical.id}>
+                <strong>{guide.name}</strong>
+                <span>{guide.reviewStatus === "review-due" ? <em className="matrix-flag">{guide.freshness}</em> : guide.freshness}</span>
+                <p>{guide.purpose}</p>
+                <p>Affects: {workflow.outputs.map((output) => output.title).join(", ") || workflow.title}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No guide is bound to this work.</p>
+        )}
+        {workflow.conditionalKnowledge.length ? (
+          <div className="matrix-conditional-knowledge">
+            <h4>On hand for this role</h4>
+            <p className="muted-copy">Guidance the team keeps ready and opens only when its moment comes up during this work.</p>
+            <ul>{workflow.conditionalKnowledge.map((guide) => <li key={guide.technical.id}><strong>{guide.name}</strong>{guide.reviewStatus === "review-due" ? <em className="matrix-flag"> · {guide.freshness}</em> : null}</li>)}</ul>
+          </div>
+        ) : null}
+        <TechnicalDisclosure label="Technical detail">
+          {[...workflow.knowledge, ...workflow.conditionalKnowledge].map((guide) => (
+            <p key={guide.technical.id}>{guide.technical.id} · {guide.technical.path} · load when: {guide.technical.loadWhen}</p>
+          ))}
+        </TechnicalDisclosure>
+      </>
+    ) : null}
+    {detail === "tools" ? <div className="matrix-detail-grid"><div><h4>Business services</h4>{workflow.services.length ? <ul className="matrix-card-list">{workflow.services.map((service) => <li key={service.technical.id}><strong>{service.name}</strong><span>{service.access}{service.checkedAt ? ` · checked ${timeAgo(service.checkedAt)}` : ""}</span><p>{service.purpose}</p></li>)}</ul> : <p>No external service is required.</p>}</div><div><h4>Specialist support</h4>{workflow.agentTools.length ? <ul>{workflow.agentTools.map((tool) => <li key={tool.technical.id}><strong>{tool.name}</strong> — {tool.purpose}</li>)}</ul> : <p>No additional specialist support is declared.</p>}</div></div> : null}
+    {detail === "results" ? <><p>Verification: {workflow.verification.state} · {workflow.verification.kind} · {workflow.verification.evidenceCount} evidence items</p>{workflow.outputs.length ? <ul className="matrix-card-list">{workflow.outputs.map((output) => <li key={output.artifactId}><button onClick={() => navigate("/deliverables")}><strong>{output.title}</strong><span>{output.state}</span></button></li>)}</ul> : <p>This work has no separate deliverable.</p>}</> : null}
+    <TechnicalDisclosure label="Technical detail"><p>{workflow.technical.workflowId}</p>{workflow.technical.title ? <p>Engine title: {workflow.technical.title}</p> : null}<p>Phases: {workflow.technical.phaseIds.join(", ") || "none"}</p>{workflow.services.map((service) => <p key={service.technical.id}>Service: {service.technical.id} · {service.technical.state} · {service.technical.purpose}</p>)}{workflow.agentTools.map((tool) => <p key={tool.technical.id}>Route: {tool.technical.id} · {tool.technical.when}</p>)}</TechnicalDisclosure>
+  </article>;
+}
+
+function matrixStatusCounts(workflows: LaunchMatrixWorkflow[]) {
+  return workflows.reduce<Record<string, number>>((counts, workflow) => ({ ...counts, [workflow.status]: (counts[workflow.status] ?? 0) + 1 }), {});
+}
+
+function matrixGroupStatus(counts: Record<string, number>) {
+  if (counts.failed) return "Failed work needs attention";
+  // "held" is the skill's own "Needs your go-ahead" — an all-held area must never read as merely upcoming.
+  if ((counts["needs-founder"] ?? 0) + (counts.held ?? 0) > 0) return "Waiting on you";
+  if (counts["in-progress"] || counts.ready) return "Working";
+  if ((counts.finished ?? 0) > 0 && Object.values(counts).reduce((sum, count) => sum + count, 0) === counts.finished) return "Finished";
+  return "Upcoming";
+}
+
+function matrixCountLine(counts: Record<string, number>) {
+  return Object.entries(counts).filter(([, count]) => count > 0).map(([status, count]) => `${count} ${engineStepLabels[status]?.toLowerCase() ?? status}`).join(" · ");
+}
+
 /**
- * What the launch engine is actually doing for this company, step by step. The engine reports
+ * What Formation is actually doing for this company, step by step. The skill reports
  * only settled, verified work across the boundary; this section makes that work visible so a
  * founder can follow what is happening and why — without graph or agent vocabulary.
  */
 function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string; workspaceName: string }) {
   const [executions, setExecutions] = useState<FounderExecution[] | null>(null);
+  const [selfServe, setSelfServe] = useState<SelfServeExecution | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -222,10 +433,11 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
       try {
         const list = await api.listExecutions(workspaceId);
         if (cancelled) return;
-        setExecutions(list);
+        setExecutions(list.executions);
+        setSelfServe(list.selfServeExecution);
         setFailed(false);
         // While a session is live, keep the picture current without asking the founder to refresh.
-        if (list.some((entry) => entry.status === "queued" || entry.status === "running")) {
+        if (list.executions.some((entry) => entry.status === "queued" || entry.status === "running")) {
           timer = window.setTimeout(load, 12_000);
         }
       } catch {
@@ -241,14 +453,22 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
 
   const latest = executions?.[0] ?? null;
   const earlier = executions && executions.length > 1 ? executions.slice(1, 4) : [];
+  // Never overclaim: unknown means unavailable. Until the server has SAID the skill can do
+  // hands-on steps itself — not while loading, not after a failed check — this section describes
+  // the plan-check-route reality, using the server's own reason when it has one.
+  const canSelfServe = selfServe?.available === true;
 
   return (
     <Section
-      title="The launch engine at work"
-      description="Formation can execute launch work for this company. Every result is verified before it enters your workspace, and the consequential calls always come back to you."
+      title="Formation at work"
+      description={
+        canSelfServe
+          ? "Formation can execute launch work for this company. Every result is verified before it enters your workspace, and the consequential calls always come back to you."
+          : `${selfServe?.reason ?? "Formation plans and checks this company's launch and routes steps that need doing to you and your team."} Every result is verified before it enters your workspace, and the consequential calls always come back to you.`
+      }
     >
       {failed ? (
-        <p className="muted-copy">Could not check on launch-engine work just now. What you see below may be behind.</p>
+        <p className="muted-copy">Could not check on Formation's launch work just now. What you see below may be behind.</p>
       ) : null}
 
       {latest ? (
@@ -269,32 +489,6 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
               ) : null}
             </div>
           </header>
-
-          {latest.report?.steps.length ? (
-            <>
-              <ol className="engine-steps">
-                {latest.report.steps.map((step) => (
-                  <li key={step.workflowId} className={`engine-step engine-step--${step.status}`}>
-                    <span className="engine-step__marker" aria-hidden="true" />
-                    <div>
-                      <p className="engine-step__title">{step.title}</p>
-                      {step.reason ? <p className="engine-step__reason">{step.reason}</p> : step.summary ? <p className="engine-step__reason">{step.summary}</p> : null}
-                    </div>
-                    <span className="engine-step__status">{engineStepLabels[step.status] ?? step.status}</span>
-                  </li>
-                ))}
-              </ol>
-              {latest.report.steps.some((step) => step.technical) ? (
-                <TechnicalDisclosure label="Technical detail — the team’s own step names">
-                  <ul>
-                    {latest.report.steps.filter((step) => step.technical).map((step) => (
-                      <li key={step.workflowId}><strong>{step.title}</strong> — {step.technical}</li>
-                    ))}
-                  </ul>
-                </TechnicalDisclosure>
-              ) : null}
-            </>
-          ) : null}
 
           {latest.error ? <p className="engine-session__note">{latest.error}</p> : null}
           {latest.notes.length ? <p className="engine-session__note">{latest.notes[latest.notes.length - 1]}</p> : null}
@@ -323,8 +517,17 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
             </li>
             <li>
               <span aria-hidden="true">2</span>
-              <h3>The engine does the work</h3>
-              <p>Launch steps run as real work sessions: research, drafts, checks — not chat answers.</p>
+              {canSelfServe ? (
+                <>
+                  <h3>Formation does the work</h3>
+                  <p>Launch steps run as real work sessions: research, drafts, checks — not chat answers.</p>
+                </>
+              ) : (
+                <>
+                  <h3>The work gets planned and routed</h3>
+                  <p>Each launch step becomes a clear brief with its own checks. Steps that need hands-on work come to you and your team — Formation does not yet do them by itself.</p>
+                </>
+              )}
             </li>
             <li>
               <span aria-hidden="true">3</span>

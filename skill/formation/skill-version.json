@@ -1,0 +1,10 @@
+{
+  "skill": "formation",
+  "version": "0.140.0",
+  "updatedAt": "2026-08-19",
+  "sourcePath": "skill/formation",
+  "releaseNotes": [
+    "Shipped the generalized onboarding system graph: 22 typed catalog nodes (workflow.experience.onboarding-system.onb-00 through onb-21) plus the repurposed ONB-22 executor node (workflow.experience.onboarding-conversion), each carrying the full post-contract-audit node contract (instructions, reads, roleId, and knowledge bindings through the experience-onboarding-conversion reference), with product/ONBOARDING.md rebuilt as the canonical single-writer graph record, product/onboarding.html regenerated as its generated record page, three deterministic validators (check-onboarding-graph, check-onboarding-evidence-packet per node, check-onboarding-cutover-repository), 27 gate scripts, and the onboarding fixture module wired into the sharded validator-fixture runner. ONB-22 is destructive-class with protectedCategory destructive and founder-approved cutover; role.product-leader gained the revenuecat/posthog/app-store-connect/google-play capabilities its provider-bearing nodes declare.",
+    "Closed the two open PR #153 review findings, both proven red-first in the fixture suite: the Deletion Manifest disposition test no longer reads the shipped unresolved option list (Preserve durable data, transform once, recompute, archive legal history, or delete) as a live deletion decision \u2014 a row is a deletion claim only when its cell resolves to exactly the terminal disposition delete, and the new check:onboarding-cutover-repository-complete (--require-resolved) gate on ONB-22 rejects any row that does not resolve to exactly one terminal disposition; and stripNonRenderedMarkdown now strips CommonMark HTML-block-type-7 blocks (complete open/closing tag lines, including hyphenated custom elements like x-proof), so evidence or completion structure hidden inside a custom element can no longer satisfy the packet and cutover validators."
+  ]
+}

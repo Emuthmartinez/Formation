@@ -25,7 +25,7 @@ const EXCLUDED = Object.freeze([
   "conversations and review requests, which are about the work rather than part of it",
   "who has access, their email addresses, and any pending invitations",
   "sign-in sessions and anything that could be used to reach this company",
-  "launch-engine run internals, which live with the engine",
+  "launch-skill run internals, which live with the skill",
 ]);
 
 /** Claims and decisions this deliverable rests on, resolved to what they say. */

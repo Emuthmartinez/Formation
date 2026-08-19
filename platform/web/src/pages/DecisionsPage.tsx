@@ -18,7 +18,7 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
     setNewOpen(openNew);
   }, [openNew]);
 
-  // Ask the launch engine what it is waiting on, so a parked approval shows up here without a
+  // Ask the launch skill what it is waiting on, so a parked approval shows up here without a
   // work session in between. An unreachable engine is said out loud, never shown as "no
   // approvals waiting".
   const workspaceId = snapshot.workspace.id;
@@ -28,12 +28,12 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
       .listApprovals(workspaceId)
       .then((view) => {
         if (cancelled) return;
-        setEngineNote(view.connected && !view.reachable ? "The launch engine could not be reached just now, so approvals shown here may be behind." : null);
+        setEngineNote(view.connected && !view.reachable ? "Formation could not be reached just now, so approvals shown here may be behind." : null);
         return reload();
       })
       .catch(() => {
         // The guarantee above holds even when the check itself fails: say it out loud.
-        if (!cancelled) setEngineNote("Could not check the launch engine for new approvals just now.");
+        if (!cancelled) setEngineNote("Could not check for new launch approvals just now.");
       });
     return () => {
       cancelled = true;
@@ -85,8 +85,8 @@ export function DecisionsPage({ openNew = false, targetId = "" }: { openNew?: bo
         { reload, notify },
         () => api.answerApproval(snapshot.workspace.id, decision.id, { answer }),
         answer === "approve"
-          ? "Approved. The launch engine will pick this step up on its next work session."
-          : "Declined. The launch engine will hold this step.",
+          ? "Approved. Formation will pick this step up on its next work session."
+          : "Declined. Formation will hold this step.",
       );
     } finally {
       setUpdating(null);
@@ -166,7 +166,7 @@ function DecisionRow({
         <StatusText status={decision.status} />
         <span>{workstream?.title ?? decision.workstreamId}</span>
         <span>Owner: {decision.owner}</span>
-        {isEngineApproval ? <span>Launch engine</span> : null}
+        {isEngineApproval ? <span>Launch approval</span> : null}
       </div>
       <div className="decision-row__content">
         <h2>{decision.title}</h2>
@@ -184,7 +184,7 @@ function DecisionRow({
         <div><span>Review</span><DateSignal value={decision.reviewAt} fallback="No review set" /></div>
       </div>
       {isEngineApproval ? (
-        // A launch approval is answered with the engine, never edited in place: the engine
+        // A launch approval is answered with the skill, never edited in place: the skill
         // records the answer first and this record closes only after it confirms.
         decision.status === "open" && can("approval-decide") ? (
           <div className="decision-row__actions">

@@ -1,0 +1,16 @@
+schema_version: 1.0.0
+id: reference.process.control-plane
+title: Control Plane
+domain_id: domain.process
+document_path: knowledge/process/control-plane.md
+load_when: extending the Design Room, or planning future analytics/monetization/store-ops/growth panels over the same
+  state store and theme tokens
+lifecycle: active
+bindings:
+  workflow_ids:
+    - workflow.process.business-control-plane-extension
+  context_pack_ids:
+    - context.machine
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+sources: []
+source_exemption: This package contains internal operating guidance or has no external factual claims.

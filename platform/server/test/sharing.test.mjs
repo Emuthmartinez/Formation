@@ -293,7 +293,7 @@ test("a link shows the evidence that was attached when it was made, not what arr
       workstreamId: "customer",
       kind: "recommendation",
       key: null,
-      statement: "Arrived from the engine after the link was already out.",
+      statement: "Arrived from the skill after the link was already out.",
       value: null,
       confidence: 60,
       status: "active",
@@ -307,7 +307,7 @@ test("a link shows the evidence that was attached when it was made, not what arr
 
   const after = await (await call(app.baseUrl, `/api/shared/${token}`)).text();
   assert.ok(
-    !after.includes("Arrived from the engine after the link was already out."),
+    !after.includes("Arrived from the skill after the link was already out."),
     "an automated import put new words in front of someone who already had the link",
   );
   assert.equal(JSON.parse(after).deliverable.evidence.length, 1);

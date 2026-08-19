@@ -41,7 +41,7 @@ why it has no skill-local script). Excluded from the countable set for the same 
 `check:business-control-plane-workspace` targets `tooling/render-business-control-plane-workspace.ts`,
 not a `validation/` path — it's a renderer, not a validator.
 
-**Two deliberate additions beyond both literal buckets.** `validation/repository/README.md`
+**Three deliberate additions beyond the v1 scope.** `validation/repository/README.md`
 is domain.machine's `indexPath` (`catalog/domains.ts`) and plays the identical routing-table
 role the 14 dropped `knowledge/<domain>/README.md` files play, but it isn't a `.md` under
 `knowledge/` and isn't a validator script — it would fall through both buckets on a literal
@@ -52,6 +52,8 @@ LaunchBench coverage), while `catalog/validate.ts` keeps the real logic and its 
 runnable `tsx catalog/validate.ts` CLI. Neither file is a v1 row being triaged, but both are
 now real files the validator-completeness glob will find — thoroughness over literalism means
 both get a row rather than silently falling outside the ledger's own completeness invariant.
+`validation/business/engineering/check-source-checkpoint.ts` is the third addition. It
+requires a recoverable Git checkpoint before broad build work can claim progress.
 
 Research basis: every `knowledge/<domain>/README.md` load-when table was read in full by
 the implementing session; every file flagged as an orphan (not in any README table),
@@ -73,17 +75,17 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 96 | 0 | 0 | 1 | 97 |
-| Additions beyond literal scope (5) | 4 | 0 | 1 | 0 | 5 |
-| Validators (67) | 27 | 25 | 0 | 16 | 68 |
-| **Total** | **128** | **25** | **1** | **32** | **186** |
+| Knowledge content files | 105 | 0 | 0 | 1 | 106 |
+| Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
+| Validators (68) | 34 | 25 | 0 | 15 | 74 |
+| **Total** | **145** | **25** | **1** | **31** | **202** |
 
 ---
 
 ## 1. Knowledge domain README indexes — all DROP
 
 Superseded by `catalog/generated/routing.md` (rendered by `catalog/render-routing.ts` from
-`catalog/references.ts`'s authored `loadWhen` data). R20 names this inversion directly: the
+the self-registering manifests under `catalog/knowledge/`). R20 names this inversion directly: the
 current shape has `runtime/graph/catalog.ts`'s `loadWhenMap()` *scraping* these
 hand-authored tables; the v2 shape authors the load-when text as catalog data and
 *generates* the table. Once these files' sole job (the routing table plus a short domain
@@ -114,7 +116,7 @@ implementation of R20, and the most consequential single disposition in this led
 ## 2. Knowledge content files
 
 90 keep, 1 drop (91 total). Every "keep" row ports into `content/<domain>/` at U11 keyed by the
-matching `catalog/references.ts` entry, which already carries its authored `loadWhen` text
+matching knowledge manifest, which carries its authored `loadWhen` text
 — the reason column here stays short since the full rationale lives there.
 
 ### domain.orchestration — the one content drop
@@ -138,6 +140,8 @@ matching `catalog/references.ts` entry, which already carries its authored `load
 | knowledge/process/failure-cards.md | keep | LaunchBench/failure-card authoring reference |
 | knowledge/process/flow-traceability.md | keep | phase-boundary and traceability reference |
 | knowledge/process/launch-coverage.md | keep | lane-status reconciliation reference |
+| knowledge/process/learning-capture.md | keep | post-cutover addition (2026-08-18): the captured-learning contract — capture triggers, the four document sections, grounding rules, refresh verdicts; bound to the two learning maintenance nodes, enforced by `check:learning-grounding` |
+| knowledge/process/learnings/audit-runs-from-repo-root.md | keep | post-cutover addition (2026-08-18): first captured learning — the maintainer audit must run from the repo root, repo-only steps drop silently in the skill layout; grounded in audit-plan.ts citations |
 | knowledge/process/launch-phases.md | keep | phase-scope decision reference |
 | knowledge/process/provider-proof.md | keep | short but complete evidence-rule reference; not a neglected stub |
 | knowledge/process/tool-recipes.md | keep | hub file; Recipe Routing table explicitly links all 8 children below (verified: none are unreferenced by the hub) |
@@ -156,11 +160,13 @@ matching `catalog/references.ts` entry, which already carries its authored `load
 |---|---|---|
 | knowledge/data/analytics-attribution.md | keep | event-catalog/attribution reference gating multiple downstream lanes |
 
-### domain.design (9 files, all keep)
+### domain.design (11 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
 | knowledge/design/design-room.md | keep | the real hub — STATE→MUTATE→VERSION→RENDER protocol; explicitly cross-refs surfaces-b2c.md |
+| knowledge/design/audience-derived-identity.md | keep | post-cutover addition (2026-08-17): audience-facts-to-design-decisions derivation chain and generic-template tells; drives design.md's Audience And Identity section, `check:design-room` |
+| knowledge/design/vibecoded-tells.md | keep | post-cutover addition (2026-08-18): the 30-item vibecoded smell list as Tier 1 trust breakers and Tier 2 default tells with earned exceptions; drives the vibecode audit pass and `check:vibecoded-tells` |
 | knowledge/design/design-visual-system.md | keep | visual-system/brand reference, `check:token-promotion` |
 | knowledge/design/landing-motion-craft.md | keep | landing/funnel motion-craft reference, `check:landing-funnel` |
 | knowledge/design/motion-craft-benchmarks.md | keep | unique numeric R1–R10 motion recipes bound to shipped tokens; found nowhere else |
@@ -170,14 +176,17 @@ matching `catalog/references.ts` entry, which already carries its authored `load
 | knowledge/design/remotion-content-assets.md | keep | Remotion content-asset reference, `check:content-assets` |
 | knowledge/design/surfaces-b2c.md | keep | unique CPP/PPO/In-App Event schema content with Apple's numeric limits; not redundant — see design-room.md note |
 
-### domain.engineering (5 files, all keep)
+### domain.engineering (6 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
 | knowledge/engineering/app-agent-roster.md | keep | AGENTS.md/CLAUDE.md handoff-bundle reference |
 | knowledge/engineering/backend-data-contract.md | keep | backend selection/data-model reference, `check:backend-contract` |
+| knowledge/engineering/accessibility-readiness.md | keep | common-task accessibility proof and store declaration reconciliation |
+| knowledge/engineering/app-quality.md | keep | app vitals, adaptive layout, offline, size, battery, and SDK supply-chain proof |
 | knowledge/engineering/engineering-orchestration.md | keep | CE routing / Standalone Engineering Loop reference |
 | knowledge/engineering/mobai-toolbelt.md | keep | device automation reference, `check:mobai-proof` |
+| knowledge/engineering/technical-documentation-ste100.md | keep | ASD-STE100 technical-documentation standard reference, `reference.engineering.technical-documentation-ste100` |
 | knowledge/engineering/xcodebuildmcp-testing.md | keep | Route Ladder proof reference, `check:native-ios` |
 
 ### domain.experience (21 files, all keep)
@@ -243,7 +252,7 @@ established hub-and-spoke pattern.
 | knowledge/operations/post-launch-operations.md | keep | weekly-ops/kill-or-scale reference, `check:post-launch` |
 | knowledge/operations/provider-state-recipes.md | keep | substantial per-provider state checklist (10 providers); distinct from secrets-management.md — Doppler is one entry among ten, not the focus |
 | knowledge/operations/resend-email-ops.md | keep | transactional/lifecycle email reference, `check:email` |
-| knowledge/operations/secrets-management.md | keep | deep secrets reference (discovery loop, classification, Doppler workflow); the file itself is substantial even though its README load-when line was a weak filename-restating placeholder — fixed in `catalog/references.ts`, not a reason to drop the file |
+| knowledge/operations/secrets-management.md | keep | deep secrets reference (discovery loop, classification, Doppler workflow); the file itself is substantial even though its README load-when line was a weak filename-restating placeholder — fixed in its knowledge manifest, not a reason to drop the file |
 | knowledge/operations/doppler-organization.md | keep | portfolio secret-store convention (platform vs per-business projects, configs-not-repos, consumer-side tier composition); written 2026-08-05 from a live multi-business account setup, and carries two constraints found there: cross-project inheritance is a paid feature and a least-privilege read-only subset needs its own project because branch configs inherit their root |
 
 ### domain.product (6 files, all keep)
@@ -282,6 +291,7 @@ the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge
 | knowledge/store/aso-store-ops.md | keep | ASO/store-ops reference, `check:aso-metadata` |
 | knowledge/store/google-play-release.md | keep | Play Console reference, `check:google-play` |
 | knowledge/store/store-console-workflow.md | keep | console walkthrough reference, `check:store-console` |
+| knowledge/store/marketplace-regional-compliance.md | keep | marketplace identity, tax, payout, and regional declaration proof |
 
 ### domain.trust (2 files, all keep)
 
@@ -289,11 +299,14 @@ the research-backed-spec workflow's Go/Pivot/Kill verdict had no owned knowledge
 |---|---|---|
 | knowledge/trust/privacy-terms.md | keep | privacy/terms drafting reference, `check:privacy-terms` |
 | knowledge/trust/security-release-hardening.md | keep | one of the denser files reviewed; OWASP-basis hardening reference, `check:security` |
+| knowledge/trust/community-safety.md | keep | conditional moderation, reporting, blocking, and age-control proof |
+| knowledge/trust/generative-ai-safety.md | keep | conditional generative-AI abuse-control proof |
 
-### domain.words (2 files, all keep)
+### domain.words (3 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
+| knowledge/words/consumer-copy-benchmarks.md | keep | post-cutover addition (2026-08-17): live-site consumer-copy swipe-file, evidence layer under conversion-copy.md; sources on 90-day cadence |
 | knowledge/words/conversion-copy.md | keep | conversion-copy reference, `check:app-copy`, `check:no-slop` |
 | knowledge/words/no-slop-writing.md | keep | brand-voice/banned-pattern reference, `check:no-slop` |
 
@@ -340,6 +353,7 @@ split noted).
 | validation/business/design/check-design-room-contract.ts | keep | STRUCTURAL — real WCAG contrast math + hash-drift check against rendered HTML |
 | validation/business/design/check-motion-contract.ts | keep | STRUCTURAL — numeric cross-referencing of duration/spring values across tokens.json/Swift/TS/markdown; strongest structural validator in its batch |
 | validation/business/design/check-token-promotion.ts | keep | STRUCTURAL — content-hash drift detection between tokens.json/css/Swift and the seed theme |
+| validation/business/design/check-vibecoded-tells.ts | keep | post-cutover addition (2026-08-18): mechanical subset of vibecoded-tells.md over landing/web-surface source — icon-pack imports and missing legal links error, default tells warn |
 | validation/business/design/validate-state.ts | keep | thin (15-line) diagnostic wrapper around the design-state loader; trivial to keep as-is |
 
 ### validation/business/engineering/
@@ -351,6 +365,8 @@ split noted).
 | validation/business/engineering/check-compound-engineering-routing.ts | port | HYBRID — doc-phrase requirement is WORD-PATTERN, PROJECT_STATE enum/field validation is structural |
 | validation/business/engineering/check-mobai-proof.ts | port | HYBRID — readiness-doc field checks are WORD-PATTERN, real `.mob` script static analysis (unbounded repeats, embedded secrets) and evidence-path grounding are real; port the `.mob`-analysis half |
 | validation/business/engineering/check-native-ios-proof.ts | port | HYBRID, WORD-PATTERN-heavy — bulk is keyword-presence grading against PRODUCTION_READINESS.md, but the evidence-path-exists-on-disk requirement for test-matrix rows is real; salvage that half |
+| validation/business/engineering/check-source-checkpoint.ts | keep | STRUCTURAL — checks repository identity, first-commit existence, and untracked source before build progress claims |
+| validation/business/engineering/check-technical-docs-ste100.ts | keep | STRUCTURAL — mechanical two-rule subset (sentence length, present-perfect heuristic) of the ASD-STE100 reference, added 2026-08 alongside knowledge/engineering/technical-documentation-ste100.md; error-tier on the one file this change can currently guarantee compliant, warning-tier across the rest of the governed knowledge/**/*.md surface until each file is individually re-audited and promoted |
 | validation/business/engineering/check-template-safety.ts | keep | STRUCTURAL — regex-lints shipped template code for forbidden imports/hardcoded strings, a real static-analysis check on code syntax |
 
 ### validation/business/experience/
@@ -431,7 +447,7 @@ split noted).
 
 | path | disposition | reason |
 |---|---|---|
-| validation/business/trust/check-privacy-terms.ts | drop | WORD-PATTERN — pure required-phrase checklist, purely self-attestable |
+| validation/business/trust/check-privacy-terms.ts | keep | Reversal of this row's original "drop" (2026-08-19, a ten-risk legal/privacy checklist wired into required auditing). The original reasoning was sound as far as it went — WORD-PATTERN, purely self-attestable, and the drop decision's own §9 explanation ("no mechanism confirms the published policy matches what the checklist graded") is still true and stays true: this gate cannot verify the disclosure is *accurate*, only that it exists. But under the artifact-vs-report test that already reinstated check-no-slop.ts and check-app-copy.ts/check-founder-copy.ts above, that residual gap does not make the check worthless — trust/PRIVACY.md, trust/TERMS.md, and trust/AI_SAFETY.md ARE the shipped legal/trust surface a user or app-store reviewer reads, not a report about some separate offline process, so scanning them for the presence of ten concrete, named disclosure categories (missing privacy policy, no data-collection disclosure, no AI mention, no third-party disclosure, undeleted uploads, a public storage bucket, cancellation harder than signup, no auto-renewal reminder, no self-harm response — knowledge/trust/privacy-terms.md §7) is direct verification of the shipped artifact, exactly like check-security-release.ts's own dozens of required-phrase checks, which this ledger already ports/keeps for the structurally identical reason. The rewritten file explicitly disclaims what it cannot prove ("checks for the presence of each disclosure, not its legal correctness... pair a passing run with the founder/counsel review") rather than posing as compliance sign-off, and per this repo's standing rule that a gate is real only once it has been watched to fail, nine fail-then-catch fixture cases (one clean pass, eight negative controls) in providers-and-secrets.fixtures.ts prove each of the eight enforced risk codes actually fires. |
 | validation/business/trust/check-secret-routing.ts | keep | STRUCTURAL (security) — scans committed files for literal secret-value regex, forbidden filenames, unrouted env-vars; real secret material, not tone — the direct precursor to a capability-boundary "secret never lands in a committed file" test |
 | validation/business/trust/check-security-release.ts | port | HYBRID — trust/security-review.html existence is a small structural sliver; bulk is dozens of required-phrase checks (WORD-PATTERN) |
 
@@ -450,6 +466,8 @@ split noted).
 | validation/repository/check-autopilot-contract.ts | port | HYBRID — eval-object shape validation is structural; keyword-grepping SKILL.md description/body prose is WORD-PATTERN |
 | validation/repository/check-gates-layout.ts | keep | STRUCTURAL — pure filesystem/shape check: validation/business/ mirrors knowledge/ domains 1:1, no ungrouped gates, no duplicate script basenames |
 | validation/repository/check-hub-spoke.ts | keep | STRUCTURAL — no v1 precedent, added with the 2026-08 graph-consolidation audit's money-domain hub-and-spoke split; verifies every knowledge/ spoke's "Part of the [Hub]" backlink is reciprocated by a link back from the hub |
+| validation/repository/check-learning-grounding.ts | keep | post-cutover addition (2026-08-18): grounding contract for knowledge/*/learnings/ — required sections, resolvable path:line citations, date order, verdict-lifecycle pairing, 180-day review-overdue warnings |
+| validation/repository/check-validator-docs.ts | keep | STRUCTURAL — no v1 precedent, added with the 2026-08-18 knowledge-matrix audit; two-way drift check that every command documented in docs/validators.md exists as an npm script and every check:*/validate:* script has a documented row |
 | validation/repository/check-package-parity.ts | keep | STRUCTURAL — compares the two package manifests/lockfiles against skill-version.json; wired only via the repo-root package.json's `check:package-parity` script (absent from the skill-scoped manifest, which is exactly why literal-scope discovery would have missed it) |
 | validation/repository/check-reference-size.ts | keep | STRUCTURAL — per-file byte budgets on knowledge/, link-graph regex only extracts targets (doesn't grade content) |
 | validation/repository/check-skill-graph.ts | port | confirmed by full read: the checking *pattern* (referential integrity across 11 node categories + generated-projection drift-check) is exactly right and worth preserving, but the file is hardcoded one-to-one against the current `runtime/graph/*.ts` module layout (4 specific relative imports, 2 specific generated-file block markers) that this rebuild is restructuring. This same unit (U8) ships its replacement: `catalog/validate.ts` (referential integrity, cycles, load-when presence) + `catalog/render-routing.ts --check` (drift). |
@@ -460,12 +478,14 @@ split noted).
 
 ---
 
-## Nine most consequential drop decisions
+## Eight most consequential drop decisions
 
-(Was ten. `validation/business/words/check-no-slop.ts`, formerly #7 here, was reinstated
-2026-08-07 — see its row above for why "purest word-pattern validator" was not, in
-practice, a consistently-applied reason to drop one validator while leaving its two
-siblings' identical logic untouched.)
+(Was ten, then nine. `validation/business/words/check-no-slop.ts`, formerly #7 here, was
+reinstated 2026-08-07 — see its row above for why "purest word-pattern validator" was not,
+in practice, a consistently-applied reason to drop one validator while leaving its two
+siblings' identical logic untouched. `validation/business/trust/check-privacy-terms.ts`,
+formerly #9 here, was reinstated 2026-08-19 under the same artifact-vs-report test — see
+its row above.)
 
 1. **The 15 knowledge domain README.md index files** (§1) — the direct implementation of
    R20's routing-authority inversion; every one of them is superseded by
@@ -489,6 +509,3 @@ siblings' identical logic untouched.)
    verify anything beyond a document containing the right words.
 8. **`validation/business/store/check-apple-signing-packet.ts`** — a 25-phrase checklist
    with zero file, binary, or live verification anywhere in the file.
-9. **`validation/business/trust/check-privacy-terms.ts`** — a required-phrase checklist on
-    legal text that is, definitionally, purely self-attestable; no mechanism confirms the
-    published policy matches what the checklist graded.
