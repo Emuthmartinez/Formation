@@ -150,11 +150,50 @@ _App live (phase_6/6b), "what now", weekly ops, incident response, retention rev
 - **Role:** Orchestrator
 - **Phases:** 6b
 - **Providers:** —
-- **Reads:** `state/PROJECT_STATE.yaml`, `operations/POST_LAUNCH_OPS.md`, `operations/LAUNCH_RETRO.md`
+- **Reads:** `state/PROJECT_STATE.yaml`, `operations/POST_LAUNCH_OPS.md`, `operations/LAUNCH_RETRO.md`, `operations/SUPPORT_OPS.md`, `operations/RETENTION_OPS.md`, `operations/FINANCE_OPS.md`
 - **Consults:** `growth/PAID_UA.md`
 - **Produces:** `operations/POST_LAUNCH_OPS.md`, `operations/LAUNCH_RETRO.md`
 - **Gates:** `check:post-launch`
 - **Knowledge:** [Paid User Acquisition](../../knowledge/growth/paid-user-acquisition.md), [Billing Health And Reactivation](../../knowledge/money/billing-health-and-reactivation.md), [Post-Launch Operations](../../knowledge/operations/post-launch-operations.md), [Change Cascade](../../knowledge/process/change-cascade.md), [ASO Store Ops](../../knowledge/store/aso-store-ops.md)
+
+### Support queue operations
+
+_App live: the recurring support sweep; an inbox, review queue, or refund/restore request needing a worked answer_
+
+- **Role:** Customer success
+- **Phases:** 6b
+- **Providers:** `provider.resend` (api, browser)
+- **Reads:** `state/PROJECT_STATE.yaml`
+- **Consults:** `operations/POST_LAUNCH_OPS.md`
+- **Produces:** `operations/SUPPORT_OPS.md`
+- **Gates:** `check:post-launch`
+- **Knowledge:** [Post-Launch Operations](../../knowledge/operations/post-launch-operations.md)
+
+### Retention intervention
+
+_App live: the recurring retention pass; a cohort drop, involuntary-churn spike, or cancellation trend needing a worked response_
+
+- **Role:** Customer success
+- **Phases:** 6b
+- **Providers:** —
+- **Reads:** `state/PROJECT_STATE.yaml`
+- **Consults:** `operations/POST_LAUNCH_OPS.md`
+- **Produces:** `operations/RETENTION_OPS.md`
+- **Gates:** `check:post-launch`
+- **Knowledge:** [Billing Health And Reactivation](../../knowledge/money/billing-health-and-reactivation.md), [Post-Launch Operations](../../knowledge/operations/post-launch-operations.md)
+
+### Financial health review
+
+_App live: the recurring financial pulse; a spend change, refund spike, or runway question_
+
+- **Role:** Orchestrator
+- **Phases:** 6b
+- **Providers:** `provider.revenuecat` (api, browser)
+- **Reads:** `state/PROJECT_STATE.yaml`
+- **Consults:** `operations/POST_LAUNCH_OPS.md`, `growth/PAID_UA.md`
+- **Produces:** `operations/FINANCE_OPS.md`
+- **Gates:** `check:post-launch`
+- **Knowledge:** [Post-Launch Operations](../../knowledge/operations/post-launch-operations.md)
 
 ### Scheduled autonomy installation
 

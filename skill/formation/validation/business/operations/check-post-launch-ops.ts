@@ -530,6 +530,186 @@ if (laneDone || postLaunchPhase) {
   }
 }
 
+// ── Check 5: the operating lanes' own artifacts ─────────────────────────────
+// The Weekly Ops Review orchestrates; the support queue, the retention
+// program, and the financial pulse are separately-gated lanes with their own
+// artifacts. Before this check, "support sweep" and "route involuntary churn"
+// were bullets inside one node's prose — an autonomous run had no distinct
+// obligation to prove a ticket was answered, a churn cohort was worked, or the
+// money was actually read (2026-08-19 audit). Same clock and same exemption as
+// the weekly log: the lanes get two weeks from live_since to stand up, and a
+// recorded Kill verdict is the one legitimate way for them to go quiet.
+
+/** Latest strictly-dated table row anywhere in the document (first cell a valid past ISO date). */
+function latestDatedTableRow(text: string): { date: Date; cells: string[]; ageDays: number } | undefined {
+  let latest: { date: Date; cells: string[] } | undefined;
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    const match = trimmed.match(/^\|\s*(\d{4}-\d{2}-\d{2})\s*\|/);
+    const rowDate = match ? parseLiveDate(match[1] ?? "") : undefined;
+    if (!rowDate) continue;
+    if (!latest || rowDate.getTime() > latest.date.getTime()) latest = { date: rowDate, cells: trimmed.split("|").map((cell) => cell.trim()) };
+  }
+  if (!latest) return undefined;
+  return { ...latest, ageDays: Math.floor((Date.now() - latest.date.getTime()) / MS_PER_DAY) };
+}
+
+if (liveSince && !killDecided && daysLive >= WEEKLY_STALE_DAYS) {
+  const laneArtifacts: Array<{
+    file: string;
+    lane: string;
+    stoodUpBy: string;
+    judge: (text: string, artifactPath: string) => void;
+  }> = [
+    {
+      file: "operations/SUPPORT_OPS.md",
+      lane: "support",
+      stoodUpBy: "the support-queue node (knowledge §7): queue state, response SLA, escalation routes",
+      judge: (text, artifactPath) => {
+        if (!includes(text, "sla")) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.support_sla_missing",
+              `${artifactPath} states no response SLA. Support is a contract with a clock — record how fast a ticket gets a first reply.`,
+              artifactPath,
+            ),
+          );
+        }
+        const row = latestDatedTableRow(text);
+        if (!row || row.ageDays > WEEKLY_STALE_DAYS) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.support_log_stale",
+              `${artifactPath} has no dated queue row newer than ${WEEKLY_STALE_DAYS} days. The support sweep records queue depth and oldest-ticket age ` +
+                `every cycle — an unrecorded queue is an unanswered one until proven otherwise.`,
+              artifactPath,
+            ),
+          );
+        } else if (!row.cells.some((cell) => /\d/.test(cell) && !PLACEHOLDER_TEXT.test(cell)) || row.cells.some((cell) => PLACEHOLDER_TEXT.test(cell))) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.support_numbers_missing",
+              `${artifactPath}'s latest queue row holds no counted state (queue depth, oldest ticket age) or carries placeholder text. ` +
+                `"inbox fine" is not a swept queue — count it, or record the dated blocker that stopped the sweep.`,
+              artifactPath,
+            ),
+          );
+        }
+      },
+    },
+    {
+      file: "operations/RETENTION_OPS.md",
+      lane: "retention",
+      stoodUpBy: "the retention node (knowledge §6 + billing-health-and-reactivation.md): cohort source, D7/D30 numbers, the intervention log",
+      judge: (text, artifactPath) => {
+        if (!includes(text, "cohort")) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.retention_cohort_source_missing",
+              `${artifactPath} names no cohort source. Record where D0/D7/D30 comes from (PostHog cohorts plus RevenueCat renewals) — ` +
+                `a retention program with no source argues from memory.`,
+              artifactPath,
+            ),
+          );
+        }
+        const row = latestDatedTableRow(text);
+        if (!row || row.ageDays > WEEKLY_STALE_DAYS) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.retention_log_stale",
+              `${artifactPath} has no dated retention row newer than ${WEEKLY_STALE_DAYS} days. The retention pass reads the cohorts every cycle, ` +
+                `quiet weeks included — a stale log means nobody knows whether the funnel is leaking.`,
+              artifactPath,
+            ),
+          );
+        } else if (!row.cells.some((cell) => MEASURED_RATE.test(cell) || datedBlockerValid(cell)) || row.cells.some((cell) => PLACEHOLDER_TEXT.test(cell))) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.retention_numbers_missing",
+              `${artifactPath}'s latest row holds no measured retention value (a percentage like "D7 31%") or a valid dated blocker, or carries placeholder text. ` +
+                `Directions ("holding", "declining") are not measurements.`,
+              artifactPath,
+            ),
+          );
+        }
+        if (!includes(text, "intervention")) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.retention_intervention_missing",
+              `${artifactPath} carries no Intervention section. Reading the cohorts without a shipped-or-planned intervention log is observation, ` +
+                `not a retention program — record what was tried, when, and what moved (involuntary churn routes through the billing recovery levers).`,
+              artifactPath,
+            ),
+          );
+        }
+      },
+    },
+    {
+      file: "operations/FINANCE_OPS.md",
+      lane: "finance",
+      stoodUpBy: "the financial-health node: MRR, spend, and runway read from the real providers on a cadence",
+      judge: (text, artifactPath) => {
+        const row = latestDatedTableRow(text);
+        if (!row || row.ageDays > WEEKLY_STALE_DAYS) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.finance_log_stale",
+              `${artifactPath} has no dated finance row newer than ${WEEKLY_STALE_DAYS} days. The financial pulse is read on a cadence — ` +
+                `a business whose money was last read a month ago is being operated on vibes.`,
+              artifactPath,
+            ),
+          );
+        } else if (!row.cells.some((cell) => MEASURED_MRR.test(cell) || datedBlockerValid(cell)) || row.cells.some((cell) => PLACEHOLDER_TEXT.test(cell))) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.finance_mrr_missing",
+              `${artifactPath}'s latest row records no MRR-labeled dollar amount ("MRR $412"; "MRR $0" is a legitimate value) or valid dated blocker, ` +
+                `or carries placeholder text. Pull it from RevenueCat — revenue adjectives are the metrics-theater miss with money attached.`,
+              artifactPath,
+            ),
+          );
+        }
+        if (!includesAny(text, ["runway", "burn"])) {
+          issues.push(
+            issue(
+              numbersSeverity,
+              "post_launch_ops.finance_runway_missing",
+              `${artifactPath} never states runway or burn. MRR without the spend side is half a pulse — record monthly spend and the runway it implies.`,
+              artifactPath,
+            ),
+          );
+        }
+      },
+    },
+  ];
+
+  for (const spec of laneArtifacts) {
+    const text = readText(args.root, spec.file);
+    if (!text) {
+      issues.push(
+        issue(
+          numbersSeverity,
+          `post_launch_ops.lane_artifact_missing.${spec.lane}`,
+          `${spec.file} is required once the app has been live past two weeks: ${spec.stoodUpBy}. ` +
+            `Its absence means that lane's work has no evidence surface — the launch-and-vanish miss, one lane at a time.`,
+          spec.file,
+        ),
+      );
+      continue;
+    }
+    spec.judge(text, spec.file);
+  }
+}
+
 reportAndExit("Post-launch operations check", issues);
 
 /** The block from a `## <heading>` line to the next `## ` heading (or EOF). */

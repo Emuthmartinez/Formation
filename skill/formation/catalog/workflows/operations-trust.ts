@@ -124,7 +124,18 @@ export const workflows = [
     trigger: 'App live (phase_6/6b), "what now", weekly ops, incident response, retention reviews',
     instructions:
       "Run the named Weekly Ops Review in fixed order — metrics pull (PostHog/RevenueCat/console numbers, not adjectives), crash/review triage, support sweep, ASO delta, growth/spend review against `growth/PAID_UA.md`'s stop/scale rules, then ship one user-visible improvement — and log a one-line delta per step in `operations/POST_LAUNCH_OPS.md` dated against `lanes.post_launch_ops.live_since`. Route involuntary billing churn through the recovery levers, not written off as normal, and when retention cohorts show a consistent drop at one step, open it through `change-cascade.md` rather than patching only the surface that failed. At the day-30 and day-90 checkpoints, prepare the Kill/Hold/Fix/Scale evidence pack (MRR trajectory, D7/D30 retention trend, CAC/LTV payback, founder hours) in `operations/LAUNCH_RETRO.md` — the agent assembles evidence, the founder makes the verdict. `check:post-launch` fails a checkpoint left uncompleted past its due date or a metric cell holding a placeholder instead of a number.",
-    reads: ["state/PROJECT_STATE.yaml", "operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"],
+    // The three operating-lane artifacts are READS on purpose: recurrence reopens all four nodes
+    // each cycle, the lane nodes re-produce their artifacts first, and the changed inputs
+    // invalidate this review — so within one scheduled session the lanes run before the review
+    // that reads them, with no hand-authored ordering at all.
+    reads: [
+      "state/PROJECT_STATE.yaml",
+      "operations/POST_LAUNCH_OPS.md",
+      "operations/LAUNCH_RETRO.md",
+      "operations/SUPPORT_OPS.md",
+      "operations/RETENTION_OPS.md",
+      "operations/FINANCE_OPS.md",
+    ],
     // PAID_UA.md's producer is the spend node, which parks until the founder funds it — a launch
     // that never buys ads still runs post-launch operations, so this is a consult.
     consults: ["growth/PAID_UA.md"],
@@ -140,6 +151,70 @@ export const workflows = [
     // The Weekly Ops Review's own doctrine: the rhythm stops only on a recorded Kill verdict.
     // This is the field that makes that true — the node reopens on its own calendar
     // (reopenRecurringNodes) instead of `succeeded` being terminal.
+    recurrenceDays: 7,
+  }),
+  workflow({
+    id: "workflow.operations.support-queue-operations",
+    title: "Support queue operations",
+    domainId: "domain.operations",
+    areaIds: ["area.business-operations-trust"],
+    trigger: "App live: the recurring support sweep; an inbox, review queue, or refund/restore request needing a worked answer",
+    instructions:
+      'Work the support queue to zero or to documented escalations every cycle, and prove it in `operations/SUPPORT_OPS.md`: a dated row per sweep with queue depth, oldest-ticket age, and what shipped or escalated — counted state, never "inbox fine". State the response SLA once and honor it (`check:post-launch` fails a runbook with no SLA or a queue row older than two weeks). Route refund/restore and privacy/delete requests through the store-automatic flows first; anything beyond them — goodwill refunds, comped time — is a founder-only gate per knowledge §12. Public replies under the business identity follow the founder-approved pattern; the first occurrences and the standing tone are the founder\'s call, after which routine replies within that pattern proceed. Feed recurring ticket themes into the Weekly Ops Review as improvement candidates — a support queue that never changes the product is a complaint archive.',
+    reads: ["state/PROJECT_STATE.yaml"],
+    consults: ["operations/POST_LAUNCH_OPS.md"],
+    roleId: "role.customer-success",
+    laneIds: ["post_launch_ops"],
+    phaseIds: ["phase.6b"],
+    dependencies: ["workflow.engineering.engineering-orchestration-ce-production-readiness"],
+    outputPaths: ["operations/SUPPORT_OPS.md"],
+    gates: ["check:post-launch"],
+    providers: ["provider.resend"],
+    founderOnlyActions: ["approve the first public replies and the standing reply tone under the business identity"],
+    actionClass: "mutate",
+    idempotent: true,
+    recurrenceDays: 7,
+  }),
+  workflow({
+    id: "workflow.operations.retention-intervention",
+    title: "Retention intervention",
+    domainId: "domain.operations",
+    areaIds: ["area.business-operations-trust"],
+    trigger: "App live: the recurring retention pass; a cohort drop, involuntary-churn spike, or cancellation trend needing a worked response",
+    instructions:
+      "Read the cohorts every cycle and do something about them, and prove both in `operations/RETENTION_OPS.md`: name the cohort source once (PostHog cohorts plus RevenueCat renewals — `check:post-launch` fails a program with no named source), record a dated row with the measured D7/D30 values (percentages, or the dated blocker that stopped the pull), and keep an Intervention section logging what was tried, when, and what moved. Route involuntary billing churn through the recovery levers in `billing-health-and-reactivation.md` — failed payments written off as normal churn is the named anti-pattern. When a cohort shows a consistent drop at one step, open it through `change-cascade.md` rather than patching only the surface that failed. Interventions that change pricing or public messaging are founder-only; everything else ships within the standing autonomy grants and reports in the row it shipped in.",
+    reads: ["state/PROJECT_STATE.yaml"],
+    consults: ["operations/POST_LAUNCH_OPS.md"],
+    roleId: "role.customer-success",
+    laneIds: ["post_launch_ops"],
+    phaseIds: ["phase.6b"],
+    dependencies: ["workflow.engineering.engineering-orchestration-ce-production-readiness"],
+    outputPaths: ["operations/RETENTION_OPS.md"],
+    gates: ["check:post-launch"],
+    founderOnlyActions: ["approve retention interventions that change pricing or public messaging"],
+    actionClass: "mutate",
+    idempotent: true,
+    recurrenceDays: 7,
+  }),
+  workflow({
+    id: "workflow.operations.financial-health-review",
+    title: "Financial health review",
+    domainId: "domain.operations",
+    areaIds: ["area.business-operations-trust"],
+    trigger: "App live: the recurring financial pulse; a spend change, refund spike, or runway question",
+    instructions:
+      'Read the money every cycle and prove it in `operations/FINANCE_OPS.md`: a dated row with the MRR-labeled dollar amount from RevenueCat ("MRR $0" is a legitimate value; an adjective is not), monthly spend across tools and acquisition, and the runway or burn those two imply (`check:post-launch` fails a pulse with no MRR figure or no runway statement). Reconcile against the pricing scenarios and stop/scale rules the strategy docs carry — spend drifting past its stop rule surfaces here first, before the weekly review decides anything. This node assembles the evidence; verdicts stay where they belong: kill/hold/fix/scale is the Weekly Ops Review\'s founder gate, and spend changes route through the paid-acquisition gates.',
+    reads: ["state/PROJECT_STATE.yaml"],
+    consults: ["operations/POST_LAUNCH_OPS.md", "growth/PAID_UA.md"],
+    roleId: "role.orchestrator",
+    laneIds: ["post_launch_ops"],
+    phaseIds: ["phase.6b"],
+    dependencies: ["workflow.engineering.engineering-orchestration-ce-production-readiness"],
+    outputPaths: ["operations/FINANCE_OPS.md"],
+    gates: ["check:post-launch"],
+    providers: ["provider.revenuecat"],
+    actionClass: "observe",
+    idempotent: true,
     recurrenceDays: 7,
   }),
   workflow({

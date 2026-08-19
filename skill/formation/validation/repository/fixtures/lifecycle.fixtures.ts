@@ -34,6 +34,24 @@ export function register(h: Harness): void {
     writeFileSync(path.join(runbookPath), readFileSync(runbookPath, "utf8").replace(header, `${header}\n${row}`), "utf8");
   };
 
+  // The three operating-lane artifacts (2026-08-19 split: support queue, retention program,
+  // financial pulse). Valid by default; each fail-then-catch case below breaks exactly one rule.
+  const writeOperatingLaneArtifacts = (root: string, overrides: { support?: string; retention?: string; finance?: string; daysAgo?: number } = {}): void => {
+    const rowDate = isoDaysAgo(overrides.daysAgo ?? 3);
+    const support =
+      overrides.support ??
+      `# Support Operations\n\nResponse SLA: first reply within 24 hours.\n\n| Date | Open tickets | Oldest ticket age | Shipped/escalated |\n| --- | --- | --- | --- |\n| ${rowDate} | 2 | 1 day | refund routed via App Store; FAQ updated |\n`;
+    const retention =
+      overrides.retention ??
+      `# Retention Program\n\nCohort source: PostHog D0/D7/D30 cohorts plus RevenueCat renewals.\n\n| Date | D7 | D30 | Involuntary churn |\n| --- | --- | --- | --- |\n| ${rowDate} | 31% | 12% | 2 recovered via retry |\n\n## Intervention\n\n| Date | Intervention | Result |\n| --- | --- | --- |\n| ${rowDate} | day-3 win-back email | +2% D7 |\n`;
+    const finance =
+      overrides.finance ??
+      `# Financial Pulse\n\n| Date | MRR | Spend | Runway |\n| --- | --- | --- | --- |\n| ${rowDate} | MRR $412 | $95/mo tools | runway 14 months at current burn |\n`;
+    writeFileSync(path.join(root, "operations/SUPPORT_OPS.md"), support, "utf8");
+    writeFileSync(path.join(root, "operations/RETENTION_OPS.md"), retention, "utf8");
+    writeFileSync(path.join(root, "operations/FINANCE_OPS.md"), finance, "utf8");
+  };
+
   const completeCheckpoint = (
     root: string,
     checkpoint: "Day 30" | "Day 90",
@@ -236,6 +254,7 @@ export function register(h: Harness): void {
     writeState(postLaunchVerdictComplete, state);
     setPostLaunchLive(postLaunchVerdictComplete, 40);
     appendWeeklyLogRow(postLaunchVerdictComplete, { daysAgo: 3 });
+    writeOperatingLaneArtifacts(postLaunchVerdictComplete);
     completeCheckpoint(postLaunchVerdictComplete, "Day 30", {
       daysAgo: 8,
       verdict: "Hold — flat but positive, low founder cost",
@@ -243,6 +262,113 @@ export function register(h: Harness): void {
     });
   }
   runFixture("completed checkpoint with verdict and state mirror passes", postLaunchVerdictComplete, "check-post-launch-ops.ts", 0);
+
+  // ── The operating lanes' own artifacts (support / retention / finance) ─────
+  // One green control past the two-week stand-up window, then one broken rule
+  // per case — a gate is real only once it has been watched to fail.
+
+  const laneArtifactFixture = (name: string, overrides: Parameters<typeof writeOperatingLaneArtifacts>[1] = {}, skipArtifacts = false): string => {
+    const root = makeFixture(name);
+    const state = readState(root);
+    expectRecord(state.project, "project")["phase"] = "phase_6b";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "partial";
+    writeState(root, state);
+    setPostLaunchLive(root, 20);
+    appendWeeklyLogRow(root, { daysAgo: 3 });
+    if (!skipArtifacts) writeOperatingLaneArtifacts(root, overrides);
+    return root;
+  };
+
+  runFixture("operating lanes: all three artifacts valid past two weeks passes", laneArtifactFixture("lanes-green"), "check-post-launch-ops.ts", 0);
+  runFixture(
+    "operating lanes: a live app with no support runbook fails",
+    laneArtifactFixture("lanes-none", {}, true),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.lane_artifact_missing.support",
+  );
+  runFixture(
+    "support: no stated SLA fails",
+    laneArtifactFixture("lanes-support-sla", {
+      support: `# Support Operations\n\n| Date | Open tickets | Oldest ticket age | Shipped/escalated |\n| --- | --- | --- | --- |\n| ${isoDaysAgo(3)} | 2 | 1 day | FAQ updated |\n`,
+    }),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.support_sla_missing",
+  );
+  runFixture(
+    "support: a stale queue row fails",
+    laneArtifactFixture("lanes-support-stale", {
+      support: `# Support Operations\n\nResponse SLA: 24 hours.\n\n| Date | Open tickets | Oldest ticket age | Shipped/escalated |\n| --- | --- | --- | --- |\n| ${isoDaysAgo(20)} | 2 | 1 day | FAQ updated |\n`,
+    }),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.support_log_stale",
+  );
+  runFixture(
+    "support: an uncounted or placeholder queue row fails",
+    laneArtifactFixture("lanes-support-placeholder", {
+      support: `# Support Operations\n\nResponse SLA: 24 hours.\n\n| Date | Open tickets | Oldest ticket age | Shipped/escalated |\n| --- | --- | --- | --- |\n| ${isoDaysAgo(3)} | TBD | pending | inbox fine |\n`,
+    }),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.support_numbers_missing",
+  );
+  runFixture(
+    "retention: no named cohort source fails",
+    laneArtifactFixture("lanes-retention-source", {
+      retention: `# Retention Program\n\n| Date | D7 | D30 | Involuntary churn |\n| --- | --- | --- | --- |\n| ${isoDaysAgo(3)} | 31% | 12% | 2 recovered |\n\n## Intervention\n\n| Date | Intervention | Result |\n| --- | --- | --- |\n| ${isoDaysAgo(3)} | win-back email | +2% D7 |\n`,
+    }),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.retention_cohort_source_missing",
+  );
+  runFixture(
+    "retention: adjectives instead of measured cohort values fail",
+    laneArtifactFixture("lanes-retention-adjectives", {
+      retention: `# Retention Program\n\nCohort source: PostHog cohorts plus RevenueCat renewals.\n\n| Date | D7 | D30 | Involuntary churn |\n| --- | --- | --- | --- |\n| ${isoDaysAgo(3)} | holding | fine | seems normal |\n\n## Intervention\n\n| Date | Intervention | Result |\n| --- | --- | --- |\n| ${isoDaysAgo(3)} | none | — |\n`,
+    }),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.retention_numbers_missing",
+  );
+  runFixture(
+    "retention: no intervention log fails",
+    laneArtifactFixture("lanes-retention-intervention", {
+      retention: `# Retention Program\n\nCohort source: PostHog cohorts plus RevenueCat renewals.\n\n| Date | D7 | D30 | Involuntary churn |\n| --- | --- | --- | --- |\n| ${isoDaysAgo(3)} | 31% | 12% | 2 recovered |\n`,
+    }),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.retention_intervention_missing",
+  );
+  runFixture(
+    "finance: no MRR-labeled dollar amount fails",
+    laneArtifactFixture("lanes-finance-mrr", {
+      finance: `# Financial Pulse\n\n| Date | MRR | Spend | Runway |\n| --- | --- | --- | --- |\n| ${isoDaysAgo(3)} | growing nicely | $95/mo | runway 14 months |\n`,
+    }),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.finance_mrr_missing",
+  );
+  runFixture(
+    "finance: no runway or burn statement fails",
+    laneArtifactFixture("lanes-finance-runway", {
+      finance: `# Financial Pulse\n\n| Date | MRR | Spend |\n| --- | --- | --- |\n| ${isoDaysAgo(3)} | MRR $412 | $95/mo tools |\n`,
+    }),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.finance_runway_missing",
+  );
+  runFixture(
+    "finance: a stale pulse row fails",
+    laneArtifactFixture("lanes-finance-stale", {
+      finance: `# Financial Pulse\n\n| Date | MRR | Spend | Runway |\n| --- | --- | --- | --- |\n| ${isoDaysAgo(20)} | MRR $412 | $95/mo tools | runway 14 months |\n`,
+    }),
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.finance_log_stale",
+  );
 
   // A verdict without its evidence pack is a mood, not a decision.
   const postLaunchVerdictNoEvidence = makeFixture("post-launch-verdict-without-evidence");

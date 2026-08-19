@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.143.0",
+  "skillVersion": "0.144.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1430,7 +1430,9 @@
       "outputPathPrefixes": [
         "trust/",
         "growth/EMAIL_OPS.md",
-        "LEGAL_REVIEW.md"
+        "LEGAL_REVIEW.md",
+        "operations/SUPPORT_OPS.md",
+        "operations/RETENTION_OPS.md"
       ]
     }
   ],
@@ -6677,7 +6679,10 @@
       "reads": [
         "state/PROJECT_STATE.yaml",
         "operations/POST_LAUNCH_OPS.md",
-        "operations/LAUNCH_RETRO.md"
+        "operations/LAUNCH_RETRO.md",
+        "operations/SUPPORT_OPS.md",
+        "operations/RETENTION_OPS.md",
+        "operations/FINANCE_OPS.md"
       ],
       "consults": [
         "growth/PAID_UA.md"
@@ -6711,6 +6716,147 @@
         "decide Kill, Hold, Fix, or Scale"
       ],
       "actionClass": "mutate",
+      "idempotent": true,
+      "applicability": {
+        "mode": "always"
+      },
+      "recurrenceDays": 7
+    },
+    {
+      "id": "workflow.operations.support-queue-operations",
+      "title": "Support queue operations",
+      "domainId": "domain.operations",
+      "areaIds": [
+        "area.business-operations-trust"
+      ],
+      "trigger": "App live: the recurring support sweep; an inbox, review queue, or refund/restore request needing a worked answer",
+      "instructions": "Work the support queue to zero or to documented escalations every cycle, and prove it in `operations/SUPPORT_OPS.md`: a dated row per sweep with queue depth, oldest-ticket age, and what shipped or escalated — counted state, never \"inbox fine\". State the response SLA once and honor it (`check:post-launch` fails a runbook with no SLA or a queue row older than two weeks). Route refund/restore and privacy/delete requests through the store-automatic flows first; anything beyond them — goodwill refunds, comped time — is a founder-only gate per knowledge §12. Public replies under the business identity follow the founder-approved pattern; the first occurrences and the standing tone are the founder's call, after which routine replies within that pattern proceed. Feed recurring ticket themes into the Weekly Ops Review as improvement candidates — a support queue that never changes the product is a complaint archive.",
+      "reads": [
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [
+        "operations/POST_LAUNCH_OPS.md"
+      ],
+      "referenceIds": [
+        "reference.operations.post-launch-operations"
+      ],
+      "roleId": "role.customer-success",
+      "laneIds": [
+        "post_launch_ops"
+      ],
+      "phaseIds": [
+        "phase.6b"
+      ],
+      "dependencies": [
+        "workflow.engineering.engineering-orchestration-ce-production-readiness",
+        "workflow.operations.agent-operations-ledger"
+      ],
+      "outputPaths": [
+        "operations/SUPPORT_OPS.md"
+      ],
+      "gateCommands": [
+        "check:post-launch"
+      ],
+      "providerIds": [
+        "provider.resend"
+      ],
+      "founderOnlyActions": [
+        "approve the first public replies and the standing reply tone under the business identity"
+      ],
+      "actionClass": "mutate",
+      "idempotent": true,
+      "applicability": {
+        "mode": "always"
+      },
+      "recurrenceDays": 7
+    },
+    {
+      "id": "workflow.operations.retention-intervention",
+      "title": "Retention intervention",
+      "domainId": "domain.operations",
+      "areaIds": [
+        "area.business-operations-trust"
+      ],
+      "trigger": "App live: the recurring retention pass; a cohort drop, involuntary-churn spike, or cancellation trend needing a worked response",
+      "instructions": "Read the cohorts every cycle and do something about them, and prove both in `operations/RETENTION_OPS.md`: name the cohort source once (PostHog cohorts plus RevenueCat renewals — `check:post-launch` fails a program with no named source), record a dated row with the measured D7/D30 values (percentages, or the dated blocker that stopped the pull), and keep an Intervention section logging what was tried, when, and what moved. Route involuntary billing churn through the recovery levers in `billing-health-and-reactivation.md` — failed payments written off as normal churn is the named anti-pattern. When a cohort shows a consistent drop at one step, open it through `change-cascade.md` rather than patching only the surface that failed. Interventions that change pricing or public messaging are founder-only; everything else ships within the standing autonomy grants and reports in the row it shipped in.",
+      "reads": [
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [
+        "operations/POST_LAUNCH_OPS.md"
+      ],
+      "referenceIds": [
+        "reference.money.billing-health-and-reactivation",
+        "reference.operations.post-launch-operations"
+      ],
+      "roleId": "role.customer-success",
+      "laneIds": [
+        "post_launch_ops"
+      ],
+      "phaseIds": [
+        "phase.6b"
+      ],
+      "dependencies": [
+        "workflow.engineering.engineering-orchestration-ce-production-readiness"
+      ],
+      "outputPaths": [
+        "operations/RETENTION_OPS.md"
+      ],
+      "gateCommands": [
+        "check:post-launch"
+      ],
+      "providerIds": [],
+      "founderOnlyActions": [
+        "approve retention interventions that change pricing or public messaging"
+      ],
+      "actionClass": "mutate",
+      "idempotent": true,
+      "applicability": {
+        "mode": "always"
+      },
+      "recurrenceDays": 7
+    },
+    {
+      "id": "workflow.operations.financial-health-review",
+      "title": "Financial health review",
+      "domainId": "domain.operations",
+      "areaIds": [
+        "area.business-operations-trust"
+      ],
+      "trigger": "App live: the recurring financial pulse; a spend change, refund spike, or runway question",
+      "instructions": "Read the money every cycle and prove it in `operations/FINANCE_OPS.md`: a dated row with the MRR-labeled dollar amount from RevenueCat (\"MRR $0\" is a legitimate value; an adjective is not), monthly spend across tools and acquisition, and the runway or burn those two imply (`check:post-launch` fails a pulse with no MRR figure or no runway statement). Reconcile against the pricing scenarios and stop/scale rules the strategy docs carry — spend drifting past its stop rule surfaces here first, before the weekly review decides anything. This node assembles the evidence; verdicts stay where they belong: kill/hold/fix/scale is the Weekly Ops Review's founder gate, and spend changes route through the paid-acquisition gates.",
+      "reads": [
+        "state/PROJECT_STATE.yaml"
+      ],
+      "consults": [
+        "operations/POST_LAUNCH_OPS.md",
+        "growth/PAID_UA.md"
+      ],
+      "referenceIds": [
+        "reference.operations.post-launch-operations"
+      ],
+      "roleId": "role.orchestrator",
+      "laneIds": [
+        "post_launch_ops"
+      ],
+      "phaseIds": [
+        "phase.6b"
+      ],
+      "dependencies": [
+        "workflow.engineering.engineering-orchestration-ce-production-readiness",
+        "workflow.operations.agent-operations-ledger"
+      ],
+      "outputPaths": [
+        "operations/FINANCE_OPS.md"
+      ],
+      "gateCommands": [
+        "check:post-launch"
+      ],
+      "providerIds": [
+        "provider.revenuecat"
+      ],
+      "founderOnlyActions": [],
+      "actionClass": "observe",
       "idempotent": true,
       "applicability": {
         "mode": "always"
@@ -10603,6 +10749,15 @@
       "generated": false
     },
     {
+      "id": "artifact.operations-finance-ops-md",
+      "path": "operations/FINANCE_OPS.md",
+      "ownerDomainId": "domain.operations",
+      "laneIds": [
+        "post_launch_ops"
+      ],
+      "generated": false
+    },
+    {
       "id": "artifact.operations-launch-retro-md",
       "path": "operations/LAUNCH_RETRO.md",
       "ownerDomainId": "domain.operations",
@@ -10638,8 +10793,26 @@
       "generated": false
     },
     {
+      "id": "artifact.operations-retention-ops-md",
+      "path": "operations/RETENTION_OPS.md",
+      "ownerDomainId": "domain.operations",
+      "laneIds": [
+        "post_launch_ops"
+      ],
+      "generated": false
+    },
+    {
       "id": "artifact.operations-schedule-md",
       "path": "operations/SCHEDULE.md",
+      "ownerDomainId": "domain.operations",
+      "laneIds": [
+        "post_launch_ops"
+      ],
+      "generated": false
+    },
+    {
+      "id": "artifact.operations-support-ops-md",
+      "path": "operations/SUPPORT_OPS.md",
       "ownerDomainId": "domain.operations",
       "laneIds": [
         "post_launch_ops"

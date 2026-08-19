@@ -9,6 +9,7 @@ lifecycle: active
 bindings:
   workflow_ids:
     - workflow.operations.post-launch-operations
+    - workflow.operations.retention-intervention
     - workflow.money.revenue-monetization
   context_pack_ids: []
 applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.

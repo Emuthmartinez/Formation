@@ -470,7 +470,7 @@ export function register(harness: Harness): void {
     const issues = validateCatalog(catalog, skillRoot).filter((issue) => issue.severity === "error");
     assert(issues.length === 0, `expected the real catalog to be clean, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
     assert(catalog.domains.length === 15, `expected 15 domains, got ${catalog.domains.length}`);
-    assert(catalog.workflows.length === 93, `expected 93 workflows, got ${catalog.workflows.length}`);
+    assert(catalog.workflows.length === 96, `expected 96 workflows, got ${catalog.workflows.length}`);
     assert(catalog.references.length === 108, `expected 108 references, got ${catalog.references.length}`);
 
     const landingBuild = catalog.workflows.find((wf) => wf.id === "workflow.growth.pre-launch-funnel-landing-waitlist");
