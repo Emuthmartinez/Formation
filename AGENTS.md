@@ -52,6 +52,8 @@ A platform change must update the product domain, API, page behavior, tests, and
 
 A change that builds or restyles a landing page, funnel, web marketing surface, or founder-facing UI also gets the vibecode audit pass before it is called done: dispatch the `vibecode-auditor` subagent (`.claude/agents/vibecode-auditor.md`), defined by `skill/b2c-mobile-business-launch/knowledge/design/vibecoded-tells.md` §Audit Pass.
 
+A change that touches privacy, terms, subscriptions, storage/backend data handling, or generative-AI behavior also clears the legal/privacy risk checklist before it is called done: `knowledge/trust/privacy-terms.md` §7 names the ten risks (missing privacy policy, no data-collection disclosure, no AI mention, no third-party disclosure, undeleted uploads, a public storage bucket, fake testimonials, cancellation harder than signup, auto-renewal with no reminder, and AI with no self-harm response) and their owning artifacts. `npm run check:privacy` runs in `audit:ci` and enforces the mechanical subset automatically; fake testimonials stay owned by the vibecode audit pass above so they are judged once.
+
 ## Documentation style
 
 Technical documentation (architecture docs, engineering specs, ADRs, runbooks, API/config references, and the engine's own `knowledge/*.md` files) always uses Simplified Technical English (ASD-STE100) — see `skill/b2c-mobile-business-launch/knowledge/engineering/technical-documentation-ste100.md`, loaded via the engine's catalog reference graph. This file, root `README.md`, and other founder/marketing copy keep following `skill/b2c-mobile-business-launch/knowledge/words/no-slop-writing.md` instead.

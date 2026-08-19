@@ -77,8 +77,8 @@ are ground truth, not hand arithmetic.
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
 | Knowledge content files | 103 | 0 | 0 | 1 | 104 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
-| Validators (68) | 29 | 25 | 0 | 16 | 70 |
-| **Total** | **138** | **25** | **1** | **32** | **196** |
+| Validators (68) | 30 | 25 | 0 | 15 | 70 |
+| **Total** | **139** | **25** | **1** | **31** | **196** |
 
 ---
 
@@ -435,7 +435,7 @@ split noted).
 
 | path | disposition | reason |
 |---|---|---|
-| validation/business/trust/check-privacy-terms.ts | drop | WORD-PATTERN — pure required-phrase checklist, purely self-attestable |
+| validation/business/trust/check-privacy-terms.ts | keep | Reversal of this row's original "drop" (2026-08-19, a ten-risk legal/privacy checklist wired into required auditing). The original reasoning was sound as far as it went — WORD-PATTERN, purely self-attestable, and the drop decision's own §9 explanation ("no mechanism confirms the published policy matches what the checklist graded") is still true and stays true: this gate cannot verify the disclosure is *accurate*, only that it exists. But under the artifact-vs-report test that already reinstated check-no-slop.ts and check-app-copy.ts/check-founder-copy.ts above, that residual gap does not make the check worthless — trust/PRIVACY.md, trust/TERMS.md, and trust/AI_SAFETY.md ARE the shipped legal/trust surface a user or app-store reviewer reads, not a report about some separate offline process, so scanning them for the presence of ten concrete, named disclosure categories (missing privacy policy, no data-collection disclosure, no AI mention, no third-party disclosure, undeleted uploads, a public storage bucket, cancellation harder than signup, no auto-renewal reminder, no self-harm response — knowledge/trust/privacy-terms.md §7) is direct verification of the shipped artifact, exactly like check-security-release.ts's own dozens of required-phrase checks, which this ledger already ports/keeps for the structurally identical reason. The rewritten file explicitly disclaims what it cannot prove ("checks for the presence of each disclosure, not its legal correctness... pair a passing run with the founder/counsel review") rather than posing as compliance sign-off, and per this repo's standing rule that a gate is real only once it has been watched to fail, nine fail-then-catch fixture cases (one clean pass, eight negative controls) in providers-and-secrets.fixtures.ts prove each of the eight enforced risk codes actually fires. |
 | validation/business/trust/check-secret-routing.ts | keep | STRUCTURAL (security) — scans committed files for literal secret-value regex, forbidden filenames, unrouted env-vars; real secret material, not tone — the direct precursor to a capability-boundary "secret never lands in a committed file" test |
 | validation/business/trust/check-security-release.ts | port | HYBRID — trust/security-review.html existence is a small structural sliver; bulk is dozens of required-phrase checks (WORD-PATTERN) |
 
@@ -465,12 +465,14 @@ split noted).
 
 ---
 
-## Nine most consequential drop decisions
+## Eight most consequential drop decisions
 
-(Was ten. `validation/business/words/check-no-slop.ts`, formerly #7 here, was reinstated
-2026-08-07 — see its row above for why "purest word-pattern validator" was not, in
-practice, a consistently-applied reason to drop one validator while leaving its two
-siblings' identical logic untouched.)
+(Was ten, then nine. `validation/business/words/check-no-slop.ts`, formerly #7 here, was
+reinstated 2026-08-07 — see its row above for why "purest word-pattern validator" was not,
+in practice, a consistently-applied reason to drop one validator while leaving its two
+siblings' identical logic untouched. `validation/business/trust/check-privacy-terms.ts`,
+formerly #9 here, was reinstated 2026-08-19 under the same artifact-vs-report test — see
+its row above.)
 
 1. **The 15 knowledge domain README.md index files** (§1) — the direct implementation of
    R20's routing-authority inversion; every one of them is superseded by
@@ -494,6 +496,3 @@ siblings' identical logic untouched.)
    verify anything beyond a document containing the right words.
 8. **`validation/business/store/check-apple-signing-packet.ts`** — a 25-phrase checklist
    with zero file, binary, or live verification anywhere in the file.
-9. **`validation/business/trust/check-privacy-terms.ts`** — a required-phrase checklist on
-    legal text that is, definitionally, purely self-attestable; no mechanism confirms the
-    published policy matches what the checklist graded.

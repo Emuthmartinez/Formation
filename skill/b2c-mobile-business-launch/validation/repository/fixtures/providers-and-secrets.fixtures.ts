@@ -265,6 +265,151 @@ export function register(h: Harness): void {
   );
   runFixture("security packet with unresolved platform gate fails", unresolvedSecurity, "check-security-release.ts", 1, "security.placeholder_or_unknown");
 
+  // --- check-privacy-terms ---
+  const cleanPrivacy = makeFixture("clean-privacy-terms");
+  runFixture("shipped privacy/terms/AI-safety packet passes", cleanPrivacy, "check-privacy-terms.ts", 0);
+
+  const missingPrivacyPolicy = makeFixture("missing-privacy-policy");
+  rmSync(path.join(missingPrivacyPolicy, "trust/PRIVACY.md"), { force: true });
+  runFixture("missing trust/PRIVACY.md fails", missingPrivacyPolicy, "check-privacy-terms.ts", 1, "privacy.policy_missing");
+
+  const missingDataCollectionDisclosure = makeFixture("missing-data-collection-disclosure");
+  writeFileSync(
+    path.join(missingDataCollectionDisclosure, "trust/PRIVACY.md"),
+    [
+      "# Privacy",
+      "",
+      "## Third-Party Recipients And Vendors",
+      "",
+      "We use analytics and payment vendors.",
+      "",
+      "## Retention And Deletion",
+      "",
+      "Deleted on request; retention is 30 days.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "trust/PRIVACY.md with no findable data-collection disclosure fails",
+    missingDataCollectionDisclosure,
+    "check-privacy-terms.ts",
+    1,
+    "privacy.data_collection_disclosure_missing",
+  );
+
+  const missingThirdPartyDisclosure = makeFixture("missing-third-party-disclosure");
+  writeFileSync(
+    path.join(missingThirdPartyDisclosure, "trust/PRIVACY.md"),
+    [
+      "# Privacy",
+      "",
+      "## What We Collect",
+      "",
+      "We collect your email and usage data.",
+      "",
+      "## Retention And Deletion",
+      "",
+      "Deleted on request; retention is 30 days.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "trust/PRIVACY.md naming no third-party/vendor recipients fails",
+    missingThirdPartyDisclosure,
+    "check-privacy-terms.ts",
+    1,
+    "privacy.third_party_disclosure_missing",
+  );
+
+  const cancellationNotSelfService = makeFixture("cancellation-not-self-service");
+  writeFileSync(
+    path.join(cancellationNotSelfService, "trust/TERMS.md"),
+    ["# Terms", "", "## Subscriptions And Refunds", "", "Subscriptions auto-renew monthly. Email support to change your plan."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "trust/TERMS.md with no self-service cancellation path fails",
+    cancellationNotSelfService,
+    "check-privacy-terms.ts",
+    1,
+    "privacy.cancellation_not_self_service",
+  );
+
+  const autoRenewalNoReminder = makeFixture("auto-renewal-no-reminder");
+  writeFileSync(
+    path.join(autoRenewalNoReminder, "trust/TERMS.md"),
+    ["# Terms", "", "## Subscriptions And Refunds", "", "Subscriptions auto-renew monthly at the listed price. Cancel any time in account settings."].join(
+      "\n",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "trust/TERMS.md disclosing auto-renewal with no reminder commitment fails",
+    autoRenewalNoReminder,
+    "check-privacy-terms.ts",
+    1,
+    "privacy.auto_renewal_reminder_missing",
+  );
+
+  const selfHarmResponseMissing = makeFixture("self-harm-response-missing");
+  writeFileSync(
+    path.join(selfHarmResponseMissing, "trust/AI_SAFETY.md"),
+    [
+      "# AI Safety",
+      "",
+      "| Risk | Control | Owner | Test evidence | Status |",
+      "| --- | --- | --- | --- | --- |",
+      "| harassment | filter and block | trust | manual review | done |",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "trust/AI_SAFETY.md with no self-harm/crisis response fails",
+    selfHarmResponseMissing,
+    "check-privacy-terms.ts",
+    1,
+    "privacy.self_harm_response_missing",
+  );
+
+  const publicStorageBucket = makeFixture("public-storage-bucket");
+  mkdirSync(path.join(publicStorageBucket, "engineering"), { recursive: true });
+  writeFileSync(
+    path.join(publicStorageBucket, "engineering", "TECH_SPEC.md"),
+    ["# Tech Spec", "", "## Data Contract", "", "The user-uploads storage bucket is public so the CDN can serve images directly."].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "engineering/TECH_SPEC.md describing a public storage bucket with no mitigation fails",
+    publicStorageBucket,
+    "check-privacy-terms.ts",
+    1,
+    "privacy.public_storage_bucket",
+  );
+
+  const mitigatedStorageBucket = makeFixture("mitigated-storage-bucket");
+  mkdirSync(path.join(mitigatedStorageBucket, "engineering"), { recursive: true });
+  writeFileSync(
+    path.join(mitigatedStorageBucket, "engineering", "TECH_SPEC.md"),
+    [
+      "# Tech Spec",
+      "",
+      "## Data Contract",
+      "",
+      "The user-uploads bucket is not public: every read happens through a signed URL, and Row Level Security denies anonymous access.",
+    ].join("\n"),
+    "utf8",
+  );
+  runFixture(
+    "engineering/TECH_SPEC.md describing a private bucket with signed URLs passes",
+    mitigatedStorageBucket,
+    "check-privacy-terms.ts",
+    0,
+    undefined,
+    [],
+    undefined,
+    "privacy.public_storage_bucket",
+  );
+
   // --- check-revenue ---
   const revenueBaseline = makeFixture("revenue-baseline");
   runFixture("shipped revenue template passes before the lane is claimed", revenueBaseline, "check-revenue.ts", 0);
