@@ -854,7 +854,7 @@ _After any skill change — bump version, sync the installed runtime, run the re
 - **Consults:** —
 - **Produces:** —
 - **Gates:** `check:version-discipline`, `check:skill-version`
-- **Knowledge:** —
+- **Knowledge:** [Run The Maintainer Audit From The Repository Root](../../knowledge/process/learnings/audit-runs-from-repo-root.md)
 
 ### Founder-language translation (maintainer)
 
@@ -920,6 +920,32 @@ _Adding, removing, or renaming a validator, a LaunchBench scenario, or an agent-
 - **Produces:** `validation/repository/evals/launchbench/`, `validation/repository/evals/agent-behavior/`
 - **Gates:** `check:agent-evals`
 - **Knowledge:** [Failure Cards](../../knowledge/process/failure-cards.md)
+
+### Learning capture (maintainer)
+
+_After a solved and verified problem, a closed audit, or a post-merge lesson produces operating knowledge future runs should load_
+
+- **Role:** Orchestrator
+- **Phases:** Cross-phase (always-on)
+- **Providers:** —
+- **Reads:** —
+- **Consults:** —
+- **Produces:** —
+- **Gates:** `check:learning-grounding`
+- **Knowledge:** [Learning Capture](../../knowledge/process/learning-capture.md)
+
+### Learning corpus refresh (maintainer)
+
+_A learning_grounding.review_overdue warning, a change to files a learning cites, or a scheduled corpus pass over knowledge/*/learnings/_
+
+- **Role:** Engineering leader
+- **Phases:** Cross-phase (always-on)
+- **Providers:** —
+- **Reads:** —
+- **Consults:** —
+- **Produces:** —
+- **Gates:** `check:learning-grounding`
+- **Knowledge:** [Learning Capture](../../knowledge/process/learning-capture.md)
 
 <!-- catalog-generated:end node-contracts -->
 

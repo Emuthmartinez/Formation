@@ -57,8 +57,11 @@ export function validateKnowledgePackages(
     if (item.lifecycle === "active" && !item.sessionScoped && item.workflowIds.length === 0 && item.contextPackIds.length === 0) {
       issues.push({ code: "knowledge.active.unbound", message: `${item.id} is active but has no graph binding.` });
     }
-    if (item.lifecycle === "deprecated" && item.replacementIds.length === 0) {
+    if (item.lifecycle === "deprecated" && item.replacementIds.length === 0 && !item.retired) {
       issues.push({ code: "knowledge.deprecated.replacement_missing", message: `${item.id} is deprecated but has no replacement.` });
+    }
+    if (item.retired && item.lifecycle !== "deprecated") {
+      issues.push({ code: "knowledge.retired.lifecycle_invalid", message: `${item.id} sets retired: true but is not deprecated.` });
     }
     for (const replacementId of item.replacementIds) {
       if (!packages.some((candidate) => candidate.id === replacementId))

@@ -130,9 +130,78 @@ function promote(): void {
   console.log(`Promoted ${id} after review by ${reviewer}.`);
 }
 
+function capture(): void {
+  const values = options();
+  const id = required(values, "--id");
+  const title = required(values, "--title");
+  const domainId = required(values, "--domain");
+  if (!id.startsWith("reference.")) throw new Error("--id must start with reference.");
+  if (!domains.some((item) => item.id === domainId)) throw new Error(`Unknown domain: ${domainId}.`);
+  const domain = domainId.replace(/^domain\./u, "");
+  const slug = id.split(".").at(-1) ?? "";
+  if (!slug) throw new Error("--id must end with a learning slug segment.");
+  const documentPath = `knowledge/${domain}/learnings/${slug}.md`;
+  const manifestPath = path.join(skillRoot, "catalog/knowledge", domain, `learning-${slug}.yaml`);
+  const absoluteDocumentPath = path.join(skillRoot, documentPath);
+  const today = new Date().toISOString().slice(0, 10);
+  mkdirSync(path.dirname(manifestPath), { recursive: true });
+  mkdirSync(path.dirname(absoluteDocumentPath), { recursive: true });
+  writeFileSync(
+    absoluteDocumentPath,
+    [
+      `# ${title}`,
+      "",
+      "## Learning",
+      "",
+      "State the lesson as an instruction for the next run. Say what to do, not what happened.",
+      "",
+      "## Evidence",
+      "",
+      "| Claim | Citation |",
+      "| --- | --- |",
+      "| Replace with the grounded claim | Replace with a backticked repo-relative citation, e.g. a path or path:line |",
+      "",
+      "## Captured",
+      "",
+      `Captured: ${today} — name the run, audit, or incident that produced this lesson.`,
+      "",
+      "## Refresh",
+      "",
+      `Last reviewed: ${today}. Verdict: kept.`,
+      "",
+    ].join("\n"),
+    { flag: "wx" },
+  );
+  writeFileSync(
+    manifestPath,
+    YAML.stringify({
+      schema_version: "1.0.0",
+      id,
+      title,
+      domain_id: domainId,
+      document_path: documentPath,
+      load_when: values.get("--load-when") || "Load this learning when the bound work risks repeating the captured mistake.",
+      lifecycle: "draft",
+      bindings: {
+        workflow_ids: (values.get("--workflows") || "").split(",").filter(Boolean),
+        context_pack_ids: (values.get("--contexts") || "").split(",").filter(Boolean),
+      },
+      applicability_notes: "Captured maintainer learning. Confirm the bound work faces the same failure mode.",
+      sources: [],
+      source_exemption: "Remove this scaffold exemption or replace it with a reviewed explanation before promotion.",
+    }),
+    { flag: "wx" },
+  );
+  console.log(`Created draft learning ${id}.`);
+  console.log(path.relative(repoRoot, manifestPath));
+  console.log(path.relative(repoRoot, absoluteDocumentPath));
+  console.log("Fill the Evidence table, bind workflows, then run check:learning-grounding and knowledge:check before promotion.");
+}
+
 const command = process.argv[2];
 if (command === "add") add();
+else if (command === "capture") capture();
 else if (command === "check") check();
 else if (command === "refresh") await refresh();
 else if (command === "promote") promote();
-else throw new Error("Use add, check, refresh, or promote.");
+else throw new Error("Use add, capture, check, refresh, or promote.");

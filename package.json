@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.136.0",
+  "version": "0.137.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -75,6 +75,7 @@
     "check:archetype-starter": "tsx skill/b2c-mobile-business-launch/validation/business/engineering/check-archetype-starter.ts",
     "check:reference-size": "tsx skill/b2c-mobile-business-launch/validation/repository/check-reference-size.ts",
     "check:hub-spoke": "tsx skill/b2c-mobile-business-launch/validation/repository/check-hub-spoke.ts",
+    "check:learning-grounding": "tsx skill/b2c-mobile-business-launch/validation/repository/check-learning-grounding.ts --skill-root skill/b2c-mobile-business-launch",
     "check:gates-layout": "tsx skill/b2c-mobile-business-launch/validation/repository/check-gates-layout.ts --skill-root skill/b2c-mobile-business-launch",
     "check:validator-docs": "tsx skill/b2c-mobile-business-launch/validation/repository/check-validator-docs.ts --repo-root .",
     "check:agent-evals": "tsx skill/b2c-mobile-business-launch/validation/repository/run-agent-evals.ts",
@@ -119,6 +120,9 @@
     "check:catalog": "tsx skill/b2c-mobile-business-launch/validation/repository/check-catalog.ts",
     "catalog:render-routing": "tsx skill/b2c-mobile-business-launch/catalog/render-routing.ts",
     "knowledge:add": "tsx skill/b2c-mobile-business-launch/tooling/knowledge.ts add",
+    "knowledge:capture": "tsx skill/b2c-mobile-business-launch/tooling/knowledge.ts capture",
+    "runtime:check": "tsx skill/b2c-mobile-business-launch/tooling/runtime-sync.ts check --source skill/b2c-mobile-business-launch",
+    "runtime:sync": "tsx skill/b2c-mobile-business-launch/tooling/runtime-sync.ts sync --source skill/b2c-mobile-business-launch",
     "knowledge:refresh": "tsx skill/b2c-mobile-business-launch/tooling/knowledge.ts refresh",
     "knowledge:promote": "tsx skill/b2c-mobile-business-launch/tooling/knowledge.ts promote",
     "knowledge:check": "tsx skill/b2c-mobile-business-launch/tooling/knowledge.ts check",

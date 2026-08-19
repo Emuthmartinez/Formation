@@ -14,6 +14,7 @@ const issues: Issue[] = [];
 
 const knownValidators = new Set([
   "check-gates-layout",
+  "check-learning-grounding",
   "validate-project-state",
   "check-attribution-contract",
   "check-apple-app-store-requirements",
