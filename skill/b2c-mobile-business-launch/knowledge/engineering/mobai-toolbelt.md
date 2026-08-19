@@ -1,6 +1,8 @@
 # MobAI Toolbelt
 
-Use this before MobAI device automation, screenshots, screen recordings, polished demo videos, app-preview clips, bug reproductions, mobile harness work, or MobAI-adjacent build/test tooling.
+Use this before MobAI device automation, MobAI screenshots and screen recordings, recorder-skill demo videos and app-preview clips, `.mob` bug-reproduction suites, mobile harness work, or MobAI-adjacent build/test tooling.
+
+MobAI is rung 4 of the Route Ladder in [`xcodebuildmcp-testing.md`](./xcodebuildmcp-testing.md). Route there first for any plain run-the-app, screen-check, flow-walk, screenshot, or one-off bug-repro request on a local Mac. The in-app iOS Simulator (rung 0) answers those in one turn with no install and no account. Choose MobAI when the lane needs a MobAI delta: Android coverage, a repeatable `.mob` suite, multi-device or physical-hardware runs, performance gates, MobAI CI, or recorder-polished demo output. Starting MobAI for a rung-0 question wastes founder time; record the rung decision in `strategy/TOOL_DECISIONS.md`.
 
 MobAI has a free tier for one device and limited daily AI usage. Plus/Pro capabilities are paid/account-gated, including unlimited daily usage, parallel suites, multi-device runs, and offline mode. Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before spending, assuming a paid plan, or replacing an intended MobAI cross-platform route with an Apple-only or otherwise narrower fallback. Missing runtime access is not evidence that the founder lacks a MobAI account or wants reduced coverage.
 

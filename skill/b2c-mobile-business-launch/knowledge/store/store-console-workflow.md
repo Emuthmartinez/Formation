@@ -543,9 +543,10 @@ Use:
 - `design/design.md` for visual rules
 - `design/design.html` or screenshot HTML for framed concepts
 - ParthJadhav/app-store-screenshots for a reusable local screenshot editor/export board that can combine real app captures, app icon, design-system style, headline/copy overlays, locale variants, iPhone/iPad decks, and bulk PNG export
-- MobAI for real app screenshots from simulator/device
+- the in-app iOS Simulator (rung 0 of the Route Ladder in `xcodebuildmcp-testing.md`) for raw Apple captures on a local Mac
+- MobAI for real app screenshots when the lane needs Android coverage, a repeatable capture matrix, or multi-device runs
 - MobAI `mobile-recorder-skill` for polished iOS/Android app-preview or launch demo videos when video assets are in scope
-- XcodeBuildMCP for Apple-platform screenshots, videos, logs, and UI automation only after the founder confirms fallback from MobAI
+- XcodeBuildMCP for scripted/CI Apple-platform screenshots, videos, logs, and UI automation, or as the founder-confirmed fallback when an intended MobAI delta lane is unavailable
 - Higgsfield for supporting visual assets only after the real UI is clear
 - `SCREENSHOTS.md` for final slot table
 - `screenshots/index.html` or equivalent screenshot HTML for local composition/export proof when final stills are being assembled
@@ -553,7 +554,7 @@ Use:
 
 ### MobAI Capture
 
-Use MobAI when local app testing or screenshot capture is in scope.
+Route capture through the Route Ladder first. A one-off Apple capture on a local Mac starts at the in-app iOS Simulator (rung 0). Use MobAI when the lane needs Android coverage, a repeatable capture matrix, multi-device runs, or recorder-polished video.
 
 Preferred MCP flow when available:
 - read the MobAI device automation reference before device interaction
@@ -580,7 +581,7 @@ MobAI recorder route:
 
 ### XcodeBuildMCP Fallback
 
-MobAI is a freemium third-party tool. Its free tier needs no spend approval when it satisfies the capture lane; Plus/Pro features still require a founder gate. If MobAI is unavailable, do not silently switch platform coverage. Load `paid-tool-routing.md`, ask the founder to confirm XcodeBuildMCP as the Apple-only fallback, then load `xcodebuildmcp-testing.md`.
+MobAI is a freemium third-party tool. Its free tier needs no spend approval when it satisfies the capture lane; Plus/Pro features still require a founder gate. A plain Apple-only capture needs no fallback confirmation — it starts at the in-app iOS Simulator (rung 0). If MobAI is unavailable for a lane that needs a MobAI delta (Android, a repeatable matrix, multi-device runs), do not silently switch platform coverage. Load `paid-tool-routing.md`, ask the founder to confirm XcodeBuildMCP as the Apple-only fallback, then load `xcodebuildmcp-testing.md`.
 
 Use XcodeBuildMCP for:
 - Apple simulator/device build, run, test, logs, screenshots, UI snapshots, and video
@@ -593,7 +594,7 @@ Limitations:
 - physical device workflows still depend on Xcode signing and local hardware
 
 Record in `SCREENSHOTS.md`:
-- selected tool: MobAI, XcodeBuildMCP, manual simulator, or blocked
+- selected tool: in-app simulator (rung 0), MobAI, XcodeBuildMCP, manual simulator, or blocked
 - founder confirmation for fallback
 - raw capture path
 - device/simulator, OS, locale, theme, fixture, screen path

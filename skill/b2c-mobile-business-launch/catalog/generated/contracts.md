@@ -417,7 +417,7 @@ _Before builder handoff bundles, AGENTS.md/CLAUDE.md, APP_AGENTS.md, agents/_
 
 ### MobAI device automation & demo videos
 
-_Before device automation, app-flow demo videos, app previews, bug-repro recordings_
+_Before MobAI-delta device work — Android coverage, repeatable .mob suites, multi-device or physical-hardware runs, performance gates, MobAI CI, or recorder-skill demo videos/app previews — after the Route Ladder (native-ios-proof-route-ladder) routes past the in-app simulator_
 
 - **Role:** Accessibility and device QA
 - **Phases:** 5b
@@ -430,7 +430,7 @@ _Before device automation, app-flow demo videos, app previews, bug-repro recordi
 
 ### Native iOS proof (Route Ladder)
 
-_Before in-app iOS Simulator / Codex Desktop native iOS / XcodeBuildMCP / serve-sim / SnapshotPreviews proof_
+_First for any device automation, run-the-app, screen-check, flow-walk, bug-repro, screenshot, or screen-recording request — pick the rung before picking a tool (in-app iOS Simulator, XcodeBuildMCP, serve-sim, SnapshotPreviews, or MobAI)_
 
 - **Role:** Accessibility and device QA
 - **Phases:** 5b

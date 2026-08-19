@@ -3,9 +3,10 @@ id: reference.engineering.mobai-toolbelt
 title: MobAI Toolbelt
 domain_id: domain.engineering
 document_path: knowledge/engineering/mobai-toolbelt.md
-load_when: before MobAI device automation, .mob generation/healing, repeat or host-script actions, Sync
-  Mode/multi-device work, performance gates, screenshots, polished demo videos, app previews, bug repro recordings,
-  MobAI CI, or recorder-skill setup
+load_when: after the Route Ladder in xcodebuildmcp-testing.md routes device work to MobAI — before MobAI device
+  automation, .mob generation/healing, repeat or host-script actions, Sync Mode/multi-device work, Android coverage,
+  performance gates, MobAI screenshots/recordings, recorder-skill demo videos and app previews, MobAI CI, or
+  recorder-skill setup
 lifecycle: active
 bindings:
   workflow_ids:
@@ -13,7 +14,9 @@ bindings:
     - workflow.engineering.mobai-device-automation-and-demo-videos
   context_pack_ids:
     - context.device
-applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
+applicability_notes: Use the load condition and graph bindings to decide when this guidance applies. MobAI is rung 4
+  of the Route Ladder — a plain run-the-app, screen-check, screenshot, or one-off bug-repro request loads
+  xcodebuildmcp-testing.md first.
 sources:
   - id: api-github-com-orgs-mobai-app-repos
     name: api.github.com
