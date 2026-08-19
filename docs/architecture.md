@@ -34,6 +34,27 @@ then (v0.142.0–v0.146.0) closed that gap end to end and is what this document 
    platform reads a read-only boundary report and submits typed execution requests; it holds no
    handle onto engine files.
 
+## North star (target state)
+
+The committed target this repository converges on — the layering plan at
+`docs/plans/2026-08-19-001-engine-contract-and-consumer-extraction.md` is the path; items below
+are TARGET, not description, until that plan's phases land.
+
+| Layer | What | Lives |
+| --- | --- | --- |
+| L0 content | `catalog/` + `knowledge/` | this repo |
+| L1 kernel | `core/` — compiler, frontier, reducer, sessions, autonomy, verification | this repo |
+| L2 gates | `validation/`, `verification/`, the audit, `check:engine-e2e` | this repo |
+| L3 addresses | SKILL.md routing, the `formation` CLI, `formation-mcp`, consumer front doors | this repo, same version |
+| L4 consumers | platform UI, every future UI, third-party agent stacks | separate repos, contract-bound |
+
+Four published contracts bind L4 to the engine: the adapter (boundary report + execution
+request, schema-checked with a `contractVersion`), the MCP tool surface, the CLI, and the
+workspace on-disk layout. The catalog is managed like source, consumed as a compiled artifact,
+and varied by composition — scope verdicts, named profiles, additive packs — never by mutation.
+Updates are explicit and per-business: a newer engine never silently changes a running operator.
+The standing rule: **L4 never lives in this repository.**
+
 ## System context
 
 ```text
