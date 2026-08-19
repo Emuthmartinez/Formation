@@ -52,7 +52,7 @@ Generated from catalog/workflows and catalog/domains.ts. Each cell links to the 
 | 5b | [How the app feels](routing.md#how-the-app-feels) (4) · [Building the app](routing.md#building-the-app) (6) · [App Store and Google Play](routing.md#app-store-and-google-play) (1) |
 | 5c | [App Store and Google Play](routing.md#app-store-and-google-play) (1) · [Privacy, security, and legal](routing.md#privacy-security-and-legal) (3) |
 | 6 | [Running the business](routing.md#running-the-business) (1) · [Marketing and growth](routing.md#marketing-and-growth) (3) |
-| 6b | [Running the business](routing.md#running-the-business) (2) |
+| 6b | [Running the business](routing.md#running-the-business) (5) |
 | Cross-phase (always-on) | [Running the launch](routing.md#running-the-launch) (4) · [Driving the work](routing.md#driving-the-work) (1) · [Running the business](routing.md#running-the-business) (2) · [What you're building](routing.md#what-youre-building) (1) · [Look and feel](routing.md#look-and-feel) (1) · [Every word a user reads](routing.md#every-word-a-user-reads) (1) |
 
 <!-- catalog-generated:end phase-area-matrix -->

@@ -313,7 +313,11 @@ export const roles: CatalogRole[] = [
     [route("emails", "lifecycle or support email is assigned"), route("churn-prevention", "retention, cancellation, or reactivation work is assigned")],
     [route("support/email provider tools", "live queues or delivery are in scope")],
     ["provider.resend"],
-    ["trust/", "growth/EMAIL_OPS.md", "LEGAL_REVIEW.md"],
+    // operations/SUPPORT_OPS.md and operations/RETENTION_OPS.md joined this scope when the
+    // 2026-08-19 audit's post-launch split gave this role its first operating nodes: the role's
+    // own stated charter ("response queues", the churn-prevention route) previously owned zero
+    // nodes on the operating end of the graph.
+    ["trust/", "growth/EMAIL_OPS.md", "LEGAL_REVIEW.md", "operations/SUPPORT_OPS.md", "operations/RETENTION_OPS.md"],
   ),
 ];
 
