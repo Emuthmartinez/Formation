@@ -79,6 +79,7 @@ Then express the same matrix in the selected route's enforcement mechanism, and 
 Rules for every route:
 
 - **Deny by default.** Start from "no access" and grant explicitly. Never ship permissive defaults intending to tighten later.
+- **Storage buckets are private by default.** Every storage bucket (Supabase Storage, Firebase Cloud Storage, or a custom object store) starts private with no public-read grant; serve files only through storage policies/security rules that match the authorization matrix, or through short-lived signed URLs. A bucket flipped to public — even "just for now" — is a Tier 1 legal/privacy risk (`privacy-terms.md` §7, risk 6), not a convenience; record the bucket's access mode in `engineering/TECH_SPEC.md` and `trust/SECURITY.md`.
 - **Every table/collection gets an owner, read, and write rule** derived from the matrix. If an entity has no sensible rule, the data model is wrong — fix it there.
 - **Service-role and admin keys never ship in clients.** The Supabase service-role key, Firebase Admin SDK credentials, and custom-backend admin tokens are server-only secrets routed per [`secrets-management.md`](../operations/secrets-management.md). Client builds get only publishable/anon keys, and those keys must be safe precisely because the authorization rules hold.
 - **Untested rules are a launch blocker.** Per `security-release-hardening.md`, RLS policies and security rules that have never been exercised by a test count as absent. See Proof below.
@@ -179,6 +180,7 @@ Never perform these on inference; surface them as named founder actions:
 
 - **Backend-by-default.** Supabase chosen by inertia because the archetype prompts say so, with no recorded selection or reason. Two minutes of recorded decision now beats a route migration later.
 - **RLS written but never tested.** Policies or security rules that exist in a migration file but have never been exercised by an authenticated/anonymous/other-user test. Treat as absent; launch blocker per `security-release-hardening.md`.
+- **Public storage bucket.** A bucket or container set to public-read — directly, or through a wildcard storage policy — so any guessed or leaked URL reaches another user's file. Treat exactly like a missing RLS policy: fix before launch, never "harden later."
 - **Service-role key in the client.** Any build where the Supabase service-role key, Firebase Admin credentials, or an admin token reaches a client bundle. Rotate the key, fix the call path, route per `secrets-management.md`.
 - **Supabase prompts against a Firebase decision.** Running the archetype pack's schema/RLS prompts verbatim after the founder selected Firebase or custom, planning to "translate later". Adapt first via the parity table.
 - **Schema drift between environments.** Staging and production schemas that differ with no migration history explaining why — usually from dashboard edits. Every schema change goes through the migration tool or the data-shape changelog.

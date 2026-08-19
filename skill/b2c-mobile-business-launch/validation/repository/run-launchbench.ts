@@ -28,6 +28,7 @@ const knownValidators = new Set([
   "check-asc-command-contract",
   "check-secret-routing",
   "check-security-release",
+  "check-privacy-terms",
   "check-content-assets",
   "check-paid-user-acquisition",
   "check-parallel-orchestration",
