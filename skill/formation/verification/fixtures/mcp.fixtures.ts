@@ -17,6 +17,15 @@ export function register(harness: Harness): void {
     const temp = harness.makeTempDir("mcp-conversation");
     const workspace = path.join(temp, "business");
     cpSync(path.join(skillRoot, "workspace", "business"), workspace, { recursive: true });
+    // A2: the server resolves workspaces ONLY through the registry. The fixture registers the
+    // copy under its own FORMATION_HOME and converses by id; raw paths must be refused.
+    const formationHome = path.join(temp, "formation-home");
+    const registered = spawnSync(resolveTsxBin(skillRoot), [path.join(skillRoot, "core/session/workspaces.ts"), "register", "fixture-business", workspace], {
+      cwd: skillRoot,
+      encoding: "utf8",
+      env: { ...process.env, FORMATION_HOME: formationHome },
+    });
+    assert(registered.status === 0, `workspace registration failed: ${registered.stdout}\n${registered.stderr}`);
     const driverPath = path.join(temp, "drive-mcp.mts");
     const driverSource = `
 import { spawn } from "node:child_process";
@@ -24,6 +33,7 @@ import readline from "node:readline";
 
 const server = spawn(${JSON.stringify(resolveTsxBin(skillRoot))}, [${JSON.stringify(path.join(skillRoot, "core/mcp/server.ts"))}], {
   cwd: ${JSON.stringify(skillRoot)},
+  env: { ...process.env, FORMATION_HOME: ${JSON.stringify(formationHome)} },
   stdio: ["pipe", "pipe", "inherit"],
 });
 const lines = readline.createInterface({ input: server.stdout });
@@ -57,16 +67,26 @@ async function main() {
 
   const list = await request("tools/list", {});
   const names = (list.result?.tools ?? []).map((tool) => tool.name);
-  for (const expected of ["formation_bootstrap", "formation_plan", "formation_run", "formation_approvals", "formation_verify", "formation_schedule"]) {
+  for (const expected of ["formation_bootstrap", "formation_plan", "formation_run", "formation_approvals", "formation_verify", "formation_schedule", "formation_status"]) {
     if (!names.includes(expected)) throw new Error("tools/list is missing " + expected + "; got " + names.join(", "));
   }
 
-  const dryRun = await request("tools/call", { name: "formation_bootstrap", arguments: { workspace: ${JSON.stringify(workspace)} } });
+  const unregistered = await request("tools/call", { name: "formation_plan", arguments: { workspace: "/tmp/not-registered-anywhere" } });
+  if (!unregistered.result?.isError) throw new Error("an unregistered path must be refused: " + JSON.stringify(unregistered.result).slice(0, 200));
+  const refusalText = (unregistered.result?.content ?? []).map((entry) => entry.text).join("");
+  if (!refusalText.includes("not a registered workspace")) throw new Error("refusal must explain registration, got: " + refusalText.slice(0, 200));
+
+  const noAuthority = await request("tools/call", { name: "formation_approvals", arguments: { workspace: "fixture-business", approval: "workflow.x.approval.1", decision: "approved", session: "s-x" } });
+  if (!noAuthority.result?.isError) throw new Error("deciding without asFounder must be refused");
+  const authorityText = (noAuthority.result?.content ?? []).map((entry) => entry.text).join("");
+  if (!authorityText.includes("founder-authority")) throw new Error("the asFounder refusal must name the rule, got: " + authorityText.slice(0, 200));
+
+  const dryRun = await request("tools/call", { name: "formation_bootstrap", arguments: { workspace: "fixture-business" } });
   const dryText = (dryRun.result?.content ?? []).map((entry) => entry.text).join("\\n");
   if (dryRun.result?.isError) throw new Error("dry-run bootstrap must not be an error: " + dryText.slice(-300));
   if (!dryText.includes("Dry run only")) throw new Error("dry-run bootstrap must return the real CLI's plan, got: " + dryText.slice(0, 300));
 
-  const refused = await request("tools/call", { name: "formation_approvals", arguments: { workspace: ${JSON.stringify(path.join(temp, "no-such-workspace"))} } });
+  const refused = await request("tools/call", { name: "formation_approvals", arguments: { workspace: "fixture-business" } });
   if (!refused.result?.isError) throw new Error("a failing CLI must surface as isError: " + JSON.stringify(refused.result).slice(0, 300));
   const refusedText = (refused.result?.content ?? []).map((entry) => entry.text).join("\\n");
   if (!refusedText.includes("approve.no_run_state")) throw new Error("the underlying CLI's own error must reach the caller, got: " + refusedText.slice(0, 300));

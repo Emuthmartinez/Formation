@@ -13,8 +13,8 @@ import { assert, skillRoot, type Harness } from "./_harness.js";
 
 const binPath = path.join(skillRoot, "bin", "formation.mjs");
 
-function runBin(args: string[], cwd = skillRoot): { code: number; output: string } {
-  const result = spawnSync(process.execPath, [binPath, ...args], { cwd, encoding: "utf8" });
+function runBin(args: string[], env: Record<string, string> = {}): { code: number; output: string } {
+  const result = spawnSync(process.execPath, [binPath, ...args], { cwd: skillRoot, encoding: "utf8", env: { ...process.env, ...env } });
   return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
 }
 
@@ -28,7 +28,7 @@ export function register(harness: Harness): void {
   harness.check("cli: --help lists every command and exits 0; no arguments exits 1", () => {
     const help = runBin(["--help"]);
     assert(help.code === 0, `--help must exit 0, got ${help.code}`);
-    for (const command of ["bootstrap", "plan", "run", "approve", "verify", "onboard", "schedule"]) {
+    for (const command of ["bootstrap", "plan", "run", "approve", "verify", "onboard", "schedule", "workspaces"]) {
       assert(help.output.includes(command), `--help must list "${command}"`);
     }
     const bare = runBin([]);
@@ -53,5 +53,26 @@ export function register(harness: Harness): void {
     const failing = runBin(["run"]);
     assert(failing.code === 1, `run without arguments must pass through exit 1, got ${failing.code}`);
     assert(failing.output.includes("session.missing_argument"), "the underlying CLI's own error must reach the caller");
+  });
+
+  harness.check("cli: the workspace registry round-trips register, list, and remove under FORMATION_HOME", () => {
+    // The registry is the MCP server's entire allowlist (A2), so the full lifecycle is pinned
+    // here: register -> visible in list -> remove -> gone, all inside a throwaway home so the
+    // fixture never touches the maintainer's real ~/.formation.
+    const temp = harness.makeTempDir("cli-workspaces");
+    const env = { FORMATION_HOME: path.join(temp, "formation-home") };
+    const workspace = path.join(temp, "business");
+    cpSync(path.join(skillRoot, "workspace", "business"), workspace, { recursive: true });
+
+    const registered = runBin(["workspaces", "register", "fixture-business", workspace], env);
+    assert(registered.code === 0, `register must exit 0, got ${registered.code}: ${registered.output.slice(-300)}`);
+    const badId = runBin(["workspaces", "register", "Not_A_Slug", workspace], env);
+    assert(badId.code === 1, `a non-slug id must be refused, got exit ${badId.code}`);
+    const listed = runBin(["workspaces", "list"], env);
+    assert(listed.code === 0 && listed.output.includes("fixture-business"), `list must show the registered id: ${listed.output.slice(-300)}`);
+    const removed = runBin(["workspaces", "remove", "fixture-business"], env);
+    assert(removed.code === 0, `remove must exit 0, got ${removed.code}`);
+    const emptied = runBin(["workspaces", "list"], env);
+    assert(emptied.code === 0 && !emptied.output.includes("fixture-business"), "a removed workspace must leave the list");
   });
 }
