@@ -1,11 +1,10 @@
 {
   "skill": "formation",
-  "version": "0.145.0",
+  "version": "0.146.0",
   "updatedAt": "2026-08-19",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "Closed the two phantom reads the audit named. strategy/BRAND.md — phase 2's promised primary output, the standard the copy-quality node protects and the store listing speaks in — had no producing node, so a run could reach store submission with a template brand and nothing would flag it. workflow.design.brand-definition (design domain, fresh-context verified, role.design-guru with the one-file scope grant) now derives it from the research evidence and the 11-star bar, and the Design Room depends on it. ugc/script-bank.md, read by fastlane-growth-ops with no producer of record, is now an output of the UGC creator engine where its doctrine always said it came from (role.marketing-guru's scope gains ugc/).",
-    "Deleted dead catalog data instead of hiding it: phase.0a (zero backing workflows) is gone along with the two silent render filters that kept it out of the generated docs, and validate.ts now fails any phase no workflow carries — the projection can no longer quietly diverge from its own source. Four workflow-file header comments that understated their own node counts by up to 54% dropped the hand-maintained counts entirely; the compiled catalog and its count fixture are the source of truth.",
-    "Knowledge reachability: a context-pack binding no role or operator carries is now a named error (knowledge.context.unsubscribed) — the audit found three manifests binding a pack with zero role subscribers, and the fix itself nearly deleted context.machine before noticing the maintainer operators carry it, which is exactly why the check unions both subscriber paths. Fixture cases prove the error fires, a carried pack passes, and legacy callers skip rather than fail closed. Catalog count fixture moves 96 -> 97."
+    "Packaged the engine's command-line face. The skill package now carries a bin: `formation` — one installable dispatcher over the session CLIs in the order a business meets them (bootstrap, plan, run, approve, verify, onboard, schedule). Every subcommand execs the exact TypeScript CLI the audit and fixtures already prove, with exit codes passed through untouched: the bin adds an address, never a second implementation. Before this, an external agent had to know the repository's internal tsx paths to invoke anything (the audit's no-installable-CLI finding).",
+    "A new cli fixture suite proves the dispatcher itself: --help lists every command and exits 0, an unknown command is refused by name, and a subcommand demonstrably reaches the real underlying CLI in both directions — a bootstrap dry-run against a throwaway copy of the reference business returns the real plan, and run.ts's own missing-argument error passes through as exit 1."
   ]
 }
