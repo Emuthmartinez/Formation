@@ -65,6 +65,22 @@ export function register(harness: Harness): void {
     assert(result.code === 0, `expected a faithful, unmutated copy of the real manifests to pass check-package-parity, got ${result.code}:\n${result.output}`);
   });
 
+  parityCase("pack smoke: a package tree whose manifest loses its files declaration fails check-package-parity by name", () => {
+    // The faithful copy has manifests but no tree, so the pack smoke skips there (nothing to
+    // pack). Planting the packaged bin on disk arms the smoke; stripping `files` from the
+    // manifest must then be caught — the detector proving it detects.
+    const fixture = buildFaithfulParityFixture(harness);
+    copyFile(path.join(skillRoot, "bin", "formation.mjs"), path.join(fixture.skillRoot, "bin", "formation.mjs"));
+    const skillPackagePath = path.join(fixture.skillRoot, "package.json");
+    const skillPackage = JSON.parse(readFileSync(skillPackagePath, "utf8")) as { files?: string[] };
+    delete skillPackage.files;
+    writeFileSync(skillPackagePath, `${JSON.stringify(skillPackage, null, 2)}\n`, "utf8");
+
+    const result = runCheckPackageParity(["--repo-root", fixture.repoRoot, "--skill-root", fixture.skillRoot]);
+    assert(result.code !== 0, `expected the pack smoke to fail without a files manifest, got exit ${result.code}`);
+    assert(result.output.includes("package_parity.pack_files_manifest_missing"), `expected pack_files_manifest_missing, got:\n${result.output}`);
+  });
+
   parityCase(
     "audit-plan parity: a check:* script not in tooling/lib/audit-plan.ts's plan (and not explicitly excluded) fails check-package-parity with a named reason",
     () => {

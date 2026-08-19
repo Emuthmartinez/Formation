@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import path from "node:path";
 
-import { isMainModule, parseArgs } from "../lib/cli.js";
+import { isMainModule, parseArgs, resolveCallerPath } from "../lib/cli.js";
 import { buildDispatchBatches } from "../engine/dispatch.js";
 import { compilePlan, type CompiledPlan, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
 import { composeNodeBrief, renderNodeBrief, type NodeBrief } from "../engine/node-brief.js";
@@ -209,7 +209,7 @@ function main(): number {
     return 1;
   }
 
-  const workspace = path.resolve(args.workspace);
+  const workspace = resolveCallerPath(args.workspace);
   const paths = resolveWorkspacePaths(workspace, args.catalog);
   const now = args.now ?? new Date().toISOString();
   const maxConcurrency = Number(args["max-concurrency"] ?? 4);

@@ -77,6 +77,15 @@ export function resolveWorkerRuntime(requested: WorkerRuntime): Exclude<WorkerRu
   return (["codex", "claude", "cursor"] as const).find((runtime) => available(runtimeCommands[runtime]));
 }
 
+/** Every worker runtime the engine can dispatch, with availability probed on THIS machine — doctor's one source of truth for R12. */
+export function detectWorkerRuntimes(): Array<{ runtime: Exclude<WorkerRuntime, "auto">; command: string; available: boolean }> {
+  return (["codex", "claude", "cursor"] as const).map((runtime) => ({
+    runtime,
+    command: runtimeCommands[runtime],
+    available: available(runtimeCommands[runtime]),
+  }));
+}
+
 function workerRuntimeCandidates(requested: WorkerRuntime): Array<Exclude<WorkerRuntime, "auto">> {
   if (requested !== "auto") return available(runtimeCommands[requested]) ? [requested] : [];
   return (["codex", "claude", "cursor"] as const).filter((runtime) => available(runtimeCommands[runtime]));

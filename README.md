@@ -70,7 +70,7 @@ Install a recurring trigger so operating work runs on its own:
 tsx skill/formation/core/adapters/install-schedule.ts --workspace <dir> --runtime <cli> --schedule "<cron>" --apply
 ```
 
-All seven of these are also reachable through the packaged `formation` bin (`skill/formation/bin/formation.mjs`) — `formation bootstrap`, `plan`, `run`, `approve`, `verify`, `onboard`, `schedule` — one installable dispatcher over the same session CLIs, not a second implementation.
+All of these are also reachable through the packaged `formation` bin (`skill/formation/bin/formation.mjs`) — one installable dispatcher over the same session CLIs, not a second implementation. The bin also carries the consumer front doors — `formation setup`, `doctor`, `new`, `workspaces`, `list`, and `update` — and the full journey from a blank machine to a scheduled business is documented in [`skill/formation/README.md`](skill/formation/README.md) ("The consumer journey"). `npm pack` of `skill/formation/` is a standalone artifact, smoke-tested by `check:package-parity` on every audit.
 
 ## How trust works
 

@@ -203,7 +203,9 @@ function buildOptions(argv: string[]): { options: ScheduleOptions; mechanism: Sc
     { flags: ["--uninstall"], key: "uninstall", kind: "boolean" },
   ]);
 
-  const workspaceDir = flagString(flags, "workspace") ? path.resolve(expandHome(flagString(flags, "workspace")!)) : undefined;
+  const workspaceDir = flagString(flags, "workspace")
+    ? path.resolve(process.env.FORMATION_CALLER_CWD?.trim() || process.cwd(), expandHome(flagString(flags, "workspace")!))
+    : undefined;
   if (!workspaceDir) fail("--workspace <business-workspace-dir> is required.");
   const runtime = flagString(flags, "runtime") as RuntimeId | undefined;
   if (!runtime || !founderFacingRuntimeIds.includes(runtime)) fail(`--runtime ${founderFacingRuntimeIds.join("|")} is required (inline is a fixture-only shape, never scheduled).`);

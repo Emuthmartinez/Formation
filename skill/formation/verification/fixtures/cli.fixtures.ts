@@ -13,8 +13,12 @@ import { assert, skillRoot, type Harness } from "./_harness.js";
 
 const binPath = path.join(skillRoot, "bin", "formation.mjs");
 
-function runBin(args: string[], env: Record<string, string> = {}): { code: number; output: string } {
-  const result = spawnSync(process.execPath, [binPath, ...args], { cwd: skillRoot, encoding: "utf8", env: { ...process.env, ...env } });
+function runBin(args: string[], opts: { env?: Record<string, string>; cwd?: string } = {}): { code: number; output: string } {
+  const result = spawnSync(process.execPath, [binPath, ...args], {
+    cwd: opts.cwd ?? skillRoot,
+    encoding: "utf8",
+    env: { ...process.env, ...(opts.env ?? {}) },
+  });
   return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
 }
 
@@ -28,7 +32,7 @@ export function register(harness: Harness): void {
   harness.check("cli: --help lists every command and exits 0; no arguments exits 1", () => {
     const help = runBin(["--help"]);
     assert(help.code === 0, `--help must exit 0, got ${help.code}`);
-    for (const command of ["bootstrap", "plan", "run", "approve", "verify", "onboard", "schedule", "workspaces"]) {
+    for (const command of ["setup", "doctor", "new", "bootstrap", "plan", "run", "approve", "verify", "onboard", "schedule", "workspaces", "list", "update"]) {
       assert(help.output.includes(command), `--help must list "${command}"`);
     }
     const bare = runBin([]);
@@ -64,15 +68,57 @@ export function register(harness: Harness): void {
     const workspace = path.join(temp, "business");
     cpSync(path.join(skillRoot, "workspace", "business"), workspace, { recursive: true });
 
-    const registered = runBin(["workspaces", "register", "fixture-business", workspace], env);
+    const registered = runBin(["workspaces", "register", "fixture-business", workspace], { env });
     assert(registered.code === 0, `register must exit 0, got ${registered.code}: ${registered.output.slice(-300)}`);
-    const badId = runBin(["workspaces", "register", "Not_A_Slug", workspace], env);
+    const badId = runBin(["workspaces", "register", "Not_A_Slug", workspace], { env });
     assert(badId.code === 1, `a non-slug id must be refused, got exit ${badId.code}`);
-    const listed = runBin(["workspaces", "list"], env);
+    const listed = runBin(["workspaces", "list"], { env });
     assert(listed.code === 0 && listed.output.includes("fixture-business"), `list must show the registered id: ${listed.output.slice(-300)}`);
-    const removed = runBin(["workspaces", "remove", "fixture-business"], env);
+    const removed = runBin(["workspaces", "remove", "fixture-business"], { env });
     assert(removed.code === 0, `remove must exit 0, got ${removed.code}`);
-    const emptied = runBin(["workspaces", "list"], env);
+    const emptied = runBin(["workspaces", "list"], { env });
     assert(emptied.code === 0 && !emptied.output.includes("fixture-business"), "a removed workspace must leave the list");
+  });
+
+  harness.check("cli: doctor reports health read-only and exits 0 with warnings allowed", () => {
+    // A hermetic home: doctor must be runnable on a machine that has never run setup. Worker-CLI
+    // absence is a WARNING by design (R12: sessions dispatch the owner's own agent CLIs), so the
+    // exit code stays 0 wherever this fixture runs — including CI, which has no worker CLIs.
+    const env = { FORMATION_HOME: path.join(harness.makeTempDir("cli-doctor"), "formation-home") };
+    const doctor = runBin(["doctor"], { env });
+    assert(doctor.code === 0, `doctor must exit 0 on a healthy install, got ${doctor.code}: ${doctor.output.slice(-400)}`);
+    for (const code of ["doctor.node", "doctor.tsx", "doctor.catalog", "doctor.registry"]) {
+      assert(doctor.output.includes(code), `doctor must report ${code}: ${doctor.output.slice(-400)}`);
+    }
+    assert(!doctor.output.includes("ERROR"), `a healthy repo checkout must produce no doctor errors: ${doctor.output.slice(-400)}`);
+  });
+
+  harness.check("cli: setup creates the formation home and registry, idempotently", () => {
+    const home = path.join(harness.makeTempDir("cli-setup"), "formation-home");
+    const env = { FORMATION_HOME: home };
+    const first = runBin(["setup"], { env });
+    assert(first.code === 0, `setup must exit 0, got ${first.code}: ${first.output.slice(-400)}`);
+    assert(existsSync(path.join(home, "workspaces.json")), "setup must create the empty registry");
+    assert(first.output.includes("Next steps:"), "setup must print the consumer's next steps");
+    assert(first.output.includes("formation-mcp.mjs"), "setup must print the MCP registration command with the real server path");
+    const second = runBin(["setup"], { env });
+    assert(second.code === 0 && !second.output.includes("CREATED"), "a second setup run must change nothing");
+  });
+
+  harness.check("cli: new scaffolds a fresh business where the CALLER stands, and update dry-runs", () => {
+    const temp = harness.makeTempDir("cli-new");
+    // Relative --dir must resolve against the invoking shell's directory (FORMATION_CALLER_CWD),
+    // not the package root — the exact bug a consumer would hit typing `formation new` at home.
+    const born = runBin(["new", "corner-bakery", "--dir", "corner-bakery"], { cwd: temp });
+    assert(born.code === 0, `new must exit 0, got ${born.code}: ${born.output.slice(-400)}`);
+    assert(existsSync(path.join(temp, "corner-bakery", "state", "PROJECT_STATE.yaml")), "new must scaffold where the caller stands, not inside the package");
+    const state = readFileSync(path.join(temp, "corner-bakery", "state", "PROJECT_STATE.yaml"), "utf8");
+    assert(state.includes('slug: "corner-bakery"') && state.includes('name: "Corner Bakery"'), "new must stamp the slug and title-cased name");
+    const badSlug = runBin(["new", "Corner_Bakery"], { cwd: temp });
+    assert(badSlug.code === 1, `a non-slug name must be refused, got exit ${badSlug.code}`);
+
+    const update = runBin(["update"]);
+    assert(update.code === 0, `update dry-run must exit 0 in a checkout, got ${update.code}: ${update.output.slice(-300)}`);
+    assert(update.output.includes("Engine version:") && update.output.includes("Dry run only"), "update dry-run must report the version and stop");
   });
 }

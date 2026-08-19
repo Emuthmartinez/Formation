@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { flagString, isRecord, issue, parseFlags, reportAndExit, type Issue } from "../../tooling/lib/launch-state.js";
 import { auditExcludedScripts, buildAuditPlan, type AuditLayout } from "../../tooling/lib/audit-plan.js";
@@ -9,7 +10,9 @@ import { SCRIPT_ROOTS, findScriptPath, scriptBasenameFromCommand } from "../../t
 interface PackageJson {
   name?: string;
   version?: string;
+  files?: string[];
   scripts?: Record<string, string>;
+  dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
 }
 
@@ -99,7 +102,7 @@ if (rootPackage.value && runtimePackage.value) {
   checkLaunchbenchValidatorParity(runtimeScripts);
 
   const rootDevDeps = rootPackage.value.devDependencies ?? {};
-  const runtimeDevDeps = runtimePackage.value.devDependencies ?? {};
+  const runtimeDevDeps = { ...(runtimePackage.value.devDependencies ?? {}), ...(runtimePackage.value.dependencies ?? {}) };
   for (const [dep, version] of Object.entries(rootDevDeps)) {
     if (!runtimeDevDeps[dep]) {
       issues.push(
@@ -123,8 +126,136 @@ if (rootPackage.value && runtimePackage.value) {
   }
 }
 
+if (runtimePackage.value) checkPackStandalone(runtimePackage.value);
+
 issues.push(...rootPackage.issues, ...runtimePackage.issues, ...rootLock.issues, ...runtimeLock.issues, ...skillVersion.issues);
 reportAndExit("Package parity check", issues);
+
+/**
+ * The npm-pack smoke test (layering plan R3): the skill package must be installable standalone,
+ * so the tarball npm would build has to carry everything the runtime needs — and nothing
+ * development-only. `npm pack --dry-run --json` is purely local (no network, no tarball on disk),
+ * so this runs on every audit. Three failure modes, each watched failing before first green:
+ * a missing `files` manifest (npm would ship the entire tree, node_modules excepted), a runtime
+ * import left in devDependencies (standalone install crashes at first use), and a dev-only
+ * directory leaking into the artifact.
+ */
+function checkPackStandalone(runtimePkg: PackageJson): void {
+  // Synthetic parity fixtures and manifest-only copies have no package tree to pack, so the pack
+  // smoke only runs where the packaged bin exists on disk. This cannot rot into a silent skip on
+  // the real package: the cli fixture suite pins bin/formation.mjs's existence there, so the file
+  // vanishing fails the audit through that gate instead.
+  if (!existsSync(path.join(args.skillRoot, "bin", "formation.mjs"))) return;
+  if (!Array.isArray(runtimePkg.files) || runtimePkg.files.length === 0) {
+    issues.push(
+      issue(
+        "error",
+        "package_parity.pack_files_manifest_missing",
+        "Runtime package.json has no files manifest — npm pack would ship the whole tree (fixtures, studio, businesses) or nothing deliberate. Declare files explicitly.",
+        "skill/formation/package.json",
+      ),
+    );
+    return;
+  }
+
+  // Every package the shipped runtime imports must survive a production install.
+  const runtimeDeps = runtimePkg.dependencies ?? {};
+  for (const dep of ["tsx", "yaml", "@modelcontextprotocol/sdk", "zod"]) {
+    if (!runtimeDeps[dep]) {
+      issues.push(
+        issue(
+          "error",
+          "package_parity.pack_runtime_dep_misfiled",
+          `${dep} is imported (or execed) by shipped runtime code but is not in dependencies — a standalone install would not receive it.`,
+          "skill/formation/package.json",
+        ),
+      );
+    }
+  }
+
+  const pack = spawnSync("npm", ["pack", "--dry-run", "--json"], { cwd: args.skillRoot, encoding: "utf8", timeout: 120_000 });
+  if (pack.status !== 0) {
+    issues.push(
+      issue(
+        "error",
+        "package_parity.pack_dry_run_failed",
+        `npm pack --dry-run exited ${pack.status ?? "signal"}: ${(pack.stderr ?? "").trim().slice(-300)}`,
+        "skill/formation/package.json",
+      ),
+    );
+    return;
+  }
+  let packed: string[] = [];
+  try {
+    const parsed = JSON.parse(pack.stdout) as Array<{ files?: Array<{ path: string }> }>;
+    packed = (parsed[0]?.files ?? []).map((file) => file.path);
+  } catch {
+    issues.push(
+      issue("error", "package_parity.pack_output_unparseable", "npm pack --dry-run --json did not print parseable JSON.", "skill/formation/package.json"),
+    );
+    return;
+  }
+
+  // The artifact's load-bearing files: one representative per shipped layer, plus every address.
+  const required = [
+    "bin/formation.mjs",
+    "bin/formation-mcp.mjs",
+    "SKILL.md",
+    "skill-version.json",
+    "tsconfig.json",
+    "catalog/generated/catalog.json",
+    "core/mcp/server.ts",
+    "core/session/run.ts",
+    "tooling/lib/audit-plan.ts",
+    "workspace/business/state/PROJECT_STATE.yaml",
+    "workspace-template/repo-agent-entrypoints/AGENTS.md",
+  ];
+  const packedSet = new Set(packed);
+  for (const file of required) {
+    if (!packedSet.has(file)) {
+      issues.push(
+        issue(
+          "error",
+          "package_parity.pack_missing_file",
+          `npm pack would not include ${file} — the standalone artifact is incomplete.`,
+          "skill/formation/package.json",
+        ),
+      );
+    }
+  }
+  for (const prefix of ["knowledge/", "validation/", "starters/"]) {
+    if (!packed.some((file) => file.startsWith(prefix))) {
+      issues.push(
+        issue(
+          "error",
+          "package_parity.pack_missing_layer",
+          `npm pack includes nothing under ${prefix} — a shipped layer is absent from the artifact.`,
+          "skill/formation/package.json",
+        ),
+      );
+    }
+  }
+
+  // Development-only surfaces must never ride along.
+  for (const prefix of ["verification/", "content/", "studio/", "business/", "agents/", "dist/", "node_modules/"]) {
+    const leaked = packed.find((file) => file.startsWith(prefix));
+    if (leaked) {
+      issues.push(
+        issue(
+          "error",
+          "package_parity.pack_dev_leak",
+          `npm pack would ship development-only ${leaked} — tighten the files manifest.`,
+          "skill/formation/package.json",
+        ),
+      );
+    }
+  }
+  if (packedSet.has("design-room.html")) {
+    issues.push(
+      issue("error", "package_parity.pack_dev_leak", "npm pack would ship design-room.html — tighten the files manifest.", "skill/formation/package.json"),
+    );
+  }
+}
 
 function parseArgs(argv: string[]): Args {
   const flags = parseFlags(argv, [

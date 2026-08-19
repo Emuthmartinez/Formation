@@ -32,7 +32,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { parse as parseYaml } from "yaml";
 
-import { isMainModule, parseArgs } from "../lib/cli.js";
+import { isMainModule, parseArgs, resolveCallerPath } from "../lib/cli.js";
 import { runReducer, skillRoot } from "./reducer-cli.js";
 import { resolveWorkspacePaths, type WorkspacePaths } from "./run.js";
 import { migrateProjectStateV1 } from "../schema/migrate-v1.js";
@@ -59,6 +59,21 @@ function runSkillCli(relativePath: string, cliArgs: string[]): { code: number; o
     encoding: "utf8",
   });
   return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
+}
+
+/** The skill version a workspace's runtime binding was installed at; undefined when unreadable. */
+function readPinnedSkillVersion(runtimeManifestPath: string): string | undefined {
+  if (!existsSync(runtimeManifestPath)) return undefined;
+  try {
+    const manifest = JSON.parse(readFileSync(runtimeManifestPath, "utf8")) as { skillVersion?: string };
+    return typeof manifest.skillVersion === "string" ? manifest.skillVersion : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function readEngineVersion(): string {
+  return (JSON.parse(readFileSync(path.join(skillRoot(), "skill-version.json"), "utf8")) as { version: string }).version;
 }
 
 /** control/manifest.json's entries are keyed by resolved file path; a missing manifest tracks nothing. */
@@ -101,8 +116,23 @@ export function bootstrapWorkspace(workspace: string, options: { apply: boolean;
   const apply = options.apply;
 
   // --- 1. executable catalog + runtime binding ---------------------------------------------------
-  if (existsSync(paths.catalog) && existsSync(runtimeManifestPath)) {
-    report(reports, "entrypoints", "skip", "catalog.json and .b2c-launch/runtime.json already installed");
+  // A workspace pins its own catalog; the engine moving forward never changes it silently. When
+  // the pin differs from the engine, the drift is NAMED here (layering plan R4), and --apply is
+  // the founder's explicit re-pin — install-entrypoints rewrites the catalog and binding while
+  // preserving any locally modified managed entrypoints.
+  const pinnedVersion = readPinnedSkillVersion(runtimeManifestPath);
+  const currentVersion = readEngineVersion();
+  if (existsSync(paths.catalog) && existsSync(runtimeManifestPath) && pinnedVersion === currentVersion) {
+    report(reports, "entrypoints", "skip", `catalog.json and .b2c-launch/runtime.json already installed at ${currentVersion}`);
+  } else if (existsSync(paths.catalog) && existsSync(runtimeManifestPath) && !apply) {
+    report(reports, "entrypoints", "would", `re-pin the workspace catalog from ${pinnedVersion ?? "(unversioned)"} to ${currentVersion} (install-entrypoints --apply)`);
+  } else if (existsSync(paths.catalog) && existsSync(runtimeManifestPath)) {
+    const result = runSkillCli("core/adapters/install-entrypoints.ts", ["--target", workspace, "--apply"]);
+    if (result.code !== 0) {
+      report(reports, "entrypoints", "fail", `install-entrypoints exited ${result.code}: ${result.output.trim().slice(-400)}`);
+      return { code: 1, reports };
+    }
+    report(reports, "entrypoints", "did", `re-pinned the workspace catalog from ${pinnedVersion ?? "(unversioned)"} to ${currentVersion}`);
   } else if (!apply) {
     report(reports, "entrypoints", "would", "install catalog.json, .b2c-launch/runtime.json, and repo agent entrypoints (install-entrypoints --apply)");
   } else {
@@ -236,7 +266,7 @@ function main(): number {
     console.error("Usage: tsx core/session/bootstrap.ts --workspace <dir> [--apply] [--answers <file>] [--now <iso>]");
     return 1;
   }
-  const workspace = path.resolve(args.workspace);
+  const workspace = resolveCallerPath(args.workspace);
   if (!existsSync(workspace)) {
     console.error(`ISSUE bootstrap.workspace_missing: ${workspace} does not exist`);
     return 1;
@@ -244,7 +274,7 @@ function main(): number {
   const apply = args.apply === "true";
   const result = bootstrapWorkspace(workspace, {
     apply,
-    answersPath: args.answers ? path.resolve(args.answers) : undefined,
+    answersPath: args.answers ? resolveCallerPath(args.answers) : undefined,
     now: args.now,
   });
   if (result.code === 0) {

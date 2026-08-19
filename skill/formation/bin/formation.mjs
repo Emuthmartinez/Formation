@@ -27,6 +27,9 @@ import { fileURLToPath } from "node:url";
 const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const COMMANDS = new Map([
+  ["setup", { script: "core/session/setup.ts", summary: "one-time machine preparation: formation home, empty registry, health checks, next steps" }],
+  ["doctor", { script: "core/session/doctor.ts", summary: "read-only health report: node, tsx, compiled catalog, registry, and YOUR worker CLIs" }],
+  ["new", { script: "core/session/new.ts", summary: "scaffold a fresh business workspace from the reference seed: formation new <slug> [--dir <path>]" }],
   ["bootstrap", { script: "core/session/bootstrap.ts", summary: "compose entrypoints, state migration, reducer baseline, and onboarding into a runnable workspace (dry-run by default)" }],
   ["plan", { script: "core/session/plan.ts", summary: "read-only frontier report: what would run, what is parked, and why" }],
   ["run", { script: "core/session/run.ts", summary: "one bounded headless session: resume durable state, dispatch, verify, digest" }],
@@ -35,6 +38,8 @@ const COMMANDS = new Map([
   ["onboard", { script: "core/session/onboard.ts", summary: "apply founder grants, waivers, and budgets through the reducer" }],
   ["schedule", { script: "core/adapters/install-schedule.ts", summary: "install or remove the OS-level trigger for recurring sessions (dry-run by default)" }],
   ["workspaces", { script: "core/session/workspaces.ts", summary: "the machine's registry of its businesses: list, register, remove (the MCP allowlist)" }],
+  ["list", { script: "core/session/workspaces.ts", prefixArgs: ["list"], summary: "every registered business with its live run status" }],
+  ["update", { script: "core/session/update.ts", summary: "update the engine install (dry-run by default); businesses re-pin separately via bootstrap --apply" }],
 ]);
 
 function usage(code) {
@@ -59,5 +64,11 @@ if (!target) {
   console.error(`formation: unknown command "${command}"\n`);
   process.exit(usage(1));
 }
-const result = spawnSync(resolveTsx(), [path.join(skillRoot, target.script), ...rest], { stdio: "inherit", cwd: skillRoot });
+// The CLIs run with cwd at the package root (their own relative reads depend on it); the
+// caller's directory rides along so path arguments can resolve where the user typed them.
+const result = spawnSync(resolveTsx(), [path.join(skillRoot, target.script), ...(target.prefixArgs ?? []), ...rest], {
+  stdio: "inherit",
+  cwd: skillRoot,
+  env: { ...process.env, FORMATION_CALLER_CWD: process.cwd() },
+});
 process.exit(result.status ?? 1);

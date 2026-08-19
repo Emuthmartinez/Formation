@@ -16,7 +16,7 @@
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { isMainModule, parseArgs } from "../lib/cli.js";
+import { isMainModule, parseArgs, resolveCallerPath } from "../lib/cli.js";
 import { appendAuditEntry } from "../reducer/audit.js";
 import { compilePlan, type CatalogInput, type RunNodeId } from "../engine/compile.js";
 import { loadRunState, writeRunState } from "../engine/runstate.js";
@@ -40,7 +40,7 @@ function main(): number {
     );
     return 1;
   }
-  const workspace = path.resolve(args.workspace);
+  const workspace = resolveCallerPath(args.workspace);
   const runStatePath = path.join(workspace, "run", "run-state.json");
   // loadRunState throws (readFileSync ENOENTs, or schema validation fails) rather than ever
   // returning a falsy value — an `if (!run)` check after a bare call is dead code that can never
