@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.134.0",
+  "skillVersion": "0.135.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -2463,9 +2463,9 @@
       "title": "MobAI Toolbelt",
       "domainId": "domain.engineering",
       "path": "knowledge/engineering/mobai-toolbelt.md",
-      "loadWhen": "before MobAI device automation, .mob generation/healing, repeat or host-script actions, Sync Mode/multi-device work, performance gates, screenshots, polished demo videos, app previews, bug repro recordings, MobAI CI, or recorder-skill setup",
+      "loadWhen": "after the Route Ladder in xcodebuildmcp-testing.md routes device work to MobAI — before MobAI device automation, .mob generation/healing, repeat or host-script actions, Sync Mode/multi-device work, Android coverage, performance gates, MobAI screenshots/recordings, recorder-skill demo videos and app previews, MobAI CI, or recorder-skill setup",
       "lifecycle": "active",
-      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
+      "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies. MobAI is rung 4 of the Route Ladder — a plain run-the-app, screen-check, screenshot, or one-off bug-repro request loads xcodebuildmcp-testing.md first.",
       "sources": [
         {
           "id": "api-github-com-orgs-mobai-app-repos",
@@ -2627,7 +2627,7 @@
       "title": "XcodeBuildMCP Testing",
       "domainId": "domain.engineering",
       "path": "knowledge/engineering/xcodebuildmcp-testing.md",
-      "loadWhen": "first for any \"run the app\", \"check this screen\", \"walk this flow\", or \"reproduce this bug\" request on a local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP",
+      "loadWhen": "first for any \"run the app\", \"check this screen\", \"walk this flow\", \"reproduce this bug\", screenshot, screen-recording, or device-automation request on a local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP or MobAI",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies. Also covers Codex Desktop native iOS tools, SnapshotPreviews exports, serve-sim streaming, and simulator/device screenshots.",
       "sources": [
@@ -8198,8 +8198,8 @@
       "areaIds": [
         "area.build-release"
       ],
-      "trigger": "Before device automation, app-flow demo videos, app previews, bug-repro recordings",
-      "instructions": "Run the MobAI session-startup checklist (refresh the live MCP surface, verify device discovery, start the bridge, pin the device ID) before any automation command — most 'device not found' failures come from skipping it. Use MobAI's free tier without a spend gate for one device/current quota; load paid-tool-routing.md and ask the founder before any Plus/Pro spend or before narrowing an intended cross-platform route to Apple-only. For demo videos, follow the recorder's explore -> script -> dry-run -> record -> edit/export sequence exactly — never improvise during final recording — and write the choreography path, raw capture, final export, and privacy/sensitive-screen review to growth/DEMO_VIDEO.md. Pass `npm run check:mobai-proof -- --root .`; pair every action sequence with backend/provider verification (the onboarding answer actually lands in profile state) because a clean UI pass is not proof the mutation landed.",
+      "trigger": "Before MobAI-delta device work — Android coverage, repeatable .mob suites, multi-device or physical-hardware runs, performance gates, MobAI CI, or recorder-skill demo videos/app previews — after the Route Ladder (native-ios-proof-route-ladder) routes past the in-app simulator",
+      "instructions": "First confirm the lane needs a MobAI delta: Android, a repeatable .mob suite, multi-device or physical hardware, performance gates, MobAI CI, or recorder-polished demo output. A run-the-app, screen-check, flow-walk, or one-off bug-repro request on a local Mac belongs at rung 0 of the Route Ladder (workflow.engineering.native-ios-proof-route-ladder) — starting MobAI there wastes founder time exactly the way silently downgrading coverage loses proof, so record the rung decision in strategy/TOOL_DECISIONS.md. Run the MobAI session-startup checklist (refresh the live MCP surface, verify device discovery, start the bridge, pin the device ID) before any automation command — most 'device not found' failures come from skipping it. Use MobAI's free tier without a spend gate for one device/current quota; load paid-tool-routing.md and ask the founder before any Plus/Pro spend or before narrowing an intended cross-platform route to Apple-only. For demo videos, follow the recorder's explore -> script -> dry-run -> record -> edit/export sequence exactly — never improvise during final recording — and write the choreography path, raw capture, final export, and privacy/sensitive-screen review to growth/DEMO_VIDEO.md. Pass `npm run check:mobai-proof -- --root .`; pair every action sequence with backend/provider verification (the onboarding answer actually lands in profile state) because a clean UI pass is not proof the mutation landed.",
       "reads": [
         "engineering/ENGINEERING_PLAN.md",
         "engineering/PRODUCTION_READINESS.md",
@@ -8246,7 +8246,7 @@
       "areaIds": [
         "area.build-release"
       ],
-      "trigger": "Before in-app iOS Simulator / Codex Desktop native iOS / XcodeBuildMCP / serve-sim / SnapshotPreviews proof",
+      "trigger": "First for any device automation, run-the-app, screen-check, flow-walk, bug-repro, screenshot, or screen-recording request — pick the rung before picking a tool (in-app iOS Simulator, XcodeBuildMCP, serve-sim, SnapshotPreviews, or MobAI)",
       "instructions": "Start at rung 0 (the in-app iOS Simulator — Claude Code Desktop's pane, or Codex's build-ios-apps plugin) for any 'run the app / check this screen / walk this flow' request; it needs no install and no account, and escalating straight to XcodeBuildMCP or MobAI for a single screen check wastes founder time. Escalate only for what rung 0 cannot cover: physical devices or CI need XcodeBuildMCP (rung 2), deterministic preview PNG/JSON needs SnapshotPreviews, a browser-visible stream for a remote/CLI session needs serve-sim — record the rung chosen and why in strategy/TOOL_DECISIONS.md. Use fixture or sandbox accounts only on any device the agent drives, since device screenshots leave the machine and are retained under normal conversation policy; never sign a real founder/customer/store account into an agent-driven simulator. Attach the exact simulator/device, OS, tool route, and screenshot/log paths as evidence in engineering/PRODUCTION_READINESS.md and pass `npm run check:native-ios -- --root .`; a cloud/SSH session cannot reach a local Mac's simulators at all, so record that as a named blocker rather than narrating a run that did not happen.",
       "reads": [
         "engineering/PRODUCTION_READINESS.md",
@@ -8876,7 +8876,7 @@
         "area.growth-revenue"
       ],
       "trigger": "After launch approval/public beta, or usefastlane.ai/Blitz setup, scheduling, social analytics",
-      "instructions": "Write growth/FASTLANE_OPS.md and the fastlane/ artifact set (campaign-brief.md, prompts.md, angles.json, preferences.json, schedule.json) only after the Launch Readiness Gate is true: live store/TestFlight URL, current brand/onboarding/design docs, and product claims matching store/legal/revenue docs. Run safe API reads (GET /connections, /blitz/preferences, /blitz/angles, /content, /posts) before any mutation, keep format weights summing to 100 and angle weights covering every active angle exactly once, and never write FASTLANE_API_KEY to a committed file. Source real app media (MobAI or the Apple-only XcodeBuildMCP fallback) before generic generated visuals, and run the weekly Analytics And Iteration loop tying posts back to installs/trials/purchases/attribution rather than vanity engagement. Connecting accounts, first public post, and any scheduling change are founder-only gates; check:post-launch is the pass signal.",
+      "instructions": "Write growth/FASTLANE_OPS.md and the fastlane/ artifact set (campaign-brief.md, prompts.md, angles.json, preferences.json, schedule.json) only after the Launch Readiness Gate is true: live store/TestFlight URL, current brand/onboarding/design docs, and product claims matching store/legal/revenue docs. Run safe API reads (GET /connections, /blitz/preferences, /blitz/angles, /content, /posts) before any mutation, keep format weights summing to 100 and angle weights covering every active angle exactly once, and never write FASTLANE_API_KEY to a committed file. Source real app media through the Route Ladder — in-app iOS Simulator (rung 0) first on a local Mac, MobAI for Android coverage, a repeatable capture cadence, or recorder-polished demo output — before generic generated visuals, and run the weekly Analytics And Iteration loop tying posts back to installs/trials/purchases/attribution rather than vanity engagement. Connecting accounts, first public post, and any scheduling change are founder-only gates; check:post-launch is the pass signal.",
       "reads": [
         "design/design.md",
         "growth/LAUNCH_NARRATIVE.md",

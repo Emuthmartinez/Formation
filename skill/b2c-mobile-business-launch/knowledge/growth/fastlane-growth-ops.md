@@ -191,12 +191,12 @@ Preference rules:
 
 ### 7. Media Inputs From The App
 
-Use real app media before generic generated visuals:
-- MobAI full-quality screenshots for still UI proof
-- MobAI screen recordings for actual flows and app demos
+Use real app media before generic generated visuals. Route capture through the Route Ladder in `xcodebuildmcp-testing.md` first:
+- in-app iOS Simulator screenshots, recordings, and logs (rung 0, either runtime) first when the session is on a local Mac and the lane is a one-off Apple capture
+- XcodeBuildMCP captures for scripted/CI or physical-device Apple work
+- MobAI full-quality screenshots and screen recordings when the lane needs Android coverage or a repeatable capture cadence; record the coverage decision when an Apple-only rung replaces an intended MobAI route
 - MobAI `mobile-recorder-skill` for polished iOS/Android app-flow videos with `.mob` choreography, tap ripples, finger overlay, phone bezel/background, zoom, variable speed, captions, final mp4, and upload copy
 - MobAI `desktop-recorder-skill` for polished macOS/web app-flow videos with `screenplay.json`, click ripples, cursor sprite, captions, zoom, variable speed, final mp4, and upload copy
-- in-app iOS Simulator screenshots, recordings, and logs (rung 0, either runtime) when the session is on a local Mac, or XcodeBuildMCP captures for scripted/CI work; record the coverage decision when an Apple-only rung replaces MobAI
 - serve-sim browser-visible simulator streams for CLI proof, with URL/port, actions, logs, and limitations recorded
 - SnapshotPreviews PNG/JSON preview exports for component/preview evidence only; do not treat them as runtime app-demo footage
 - app preview clips and store screenshots from `SCREENSHOTS.md`
@@ -216,7 +216,7 @@ MobAI capture rules:
 
 Native iOS fallback/proof:
 - load `xcodebuildmcp-testing.md` before Codex Desktop native iOS/XcodeBuildMCP, SnapshotPreviews, or serve-sim proof
-- use XcodeBuildMCP as a MobAI replacement only after `paid-tool-routing.md` confirmation
+- a plain Apple-only capture starts at rung 0 with no confirmation; when a lane needs a MobAI delta (Android, repeatable cadence, recorder polish) and MobAI is unavailable, confirm the XcodeBuildMCP replacement through `paid-tool-routing.md`
 - record Apple-only coverage limits, preview-only limits, provider-proof pairing, and signing/distribution limits in `growth/FASTLANE_OPS.md`, `SCREENSHOTS.md`, and `engineering/PRODUCTION_READINESS.md`
 
 ### Multi-Format Delivery

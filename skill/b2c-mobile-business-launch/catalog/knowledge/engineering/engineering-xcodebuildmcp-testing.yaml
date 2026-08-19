@@ -3,8 +3,9 @@ id: reference.engineering.xcodebuildmcp-testing
 title: XcodeBuildMCP Testing
 domain_id: domain.engineering
 document_path: knowledge/engineering/xcodebuildmcp-testing.md
-load_when: first for any "run the app", "check this screen", "walk this flow", or "reproduce this bug" request on
-  a local Mac — the Route Ladder starts at the zero-setup in-app iOS Simulator before XcodeBuildMCP CLI/MCP
+load_when: first for any "run the app", "check this screen", "walk this flow", "reproduce this bug", screenshot,
+  screen-recording, or device-automation request on a local Mac — the Route Ladder starts at the zero-setup in-app
+  iOS Simulator before XcodeBuildMCP CLI/MCP or MobAI
 lifecycle: active
 bindings:
   workflow_ids:
