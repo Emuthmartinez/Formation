@@ -71,7 +71,7 @@ test("nothing an anonymous caller should not know reaches the answer", async () 
 test("a capability this deployment does not have is a fact, not a fault", async () => {
   const report = await checkHealth(
     healthy({
-      engineAvailability: () => "The launch engine is not installed on this server.",
+      engineAvailability: () => "Formation's launch automation is not installed on this server.",
       providerEndpoint: "",
       importRoot: null,
     }),

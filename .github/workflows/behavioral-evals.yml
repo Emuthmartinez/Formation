@@ -35,7 +35,7 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
-      - run: npm ci --prefix skill/b2c-mobile-business-launch
+      - run: npm ci --prefix skill/formation
       - name: List behavioral subset
         run: npm run evals:behavioral -- --list
       - name: Run behavioral evals against a live agent

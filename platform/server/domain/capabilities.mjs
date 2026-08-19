@@ -42,7 +42,7 @@ export const ROLE_DESCRIPTIONS = {
   owner: {
     title: "Owner",
     summary: "Everything, including what the company is and what it commits to.",
-    detail: "Owners change the company's source of truth and answer the launch engine's approvals. Every company keeps at least one.",
+    detail: "Owners change the company's source of truth and answer Formation's launch approvals. Every company keeps at least one.",
   },
 };
 
@@ -85,7 +85,7 @@ export const CAPABILITIES = {
   },
   "launch-engine-advance": {
     minimumRole: "editor",
-    covers: "Asking the launch engine to take the next step on this company's plan.",
+    covers: "Asking Formation to take the next step on this company's plan.",
     denial: "Only this company's editors and owners can advance the launch plan.",
   },
   "company-write": {

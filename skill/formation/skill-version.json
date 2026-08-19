@@ -1,0 +1,10 @@
+{
+  "skill": "formation",
+  "version": "0.138.0",
+  "updatedAt": "2026-08-18",
+  "sourcePath": "skill/formation",
+  "releaseNotes": [
+    "Renamed the skill to formation: the directory moved from skill/b2c-mobile-business-launch to skill/formation, the frontmatter name, package name (formation-skill-runtime), schema URNs (urn:formation:*), catalog skillRoutes, and installed-runtime default (~/.codex/skills/formation) all follow, and both sync tools now maintain compat symlinks under the legacy b2c-mobile-business-launch name so repos shipped before the rename keep resolving the skill.",
+    "Retired the engine vocabulary across founder-visible copy and living docs per the owner's ruling: founder surfaces name exactly one actor, Formation (results, approvals, execution reasons, Launch and Decisions pages), maintainer prose says the Formation platform and the Formation skill, and the schedule/hook installers keep legacy crontab signatures, launchd labels, and managed-hook markers removable."
+  ]
+}

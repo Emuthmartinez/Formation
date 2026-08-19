@@ -48,7 +48,7 @@ export const ORIGINS = Object.freeze({
   },
   launchEngine: {
     id: "launch-engine",
-    label: "Produced by the launch engine and independently verified before it arrived",
+    label: "Produced by Formation and independently verified before it arrived",
     trusted: true,
   },
   imported: {

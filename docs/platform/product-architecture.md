@@ -111,7 +111,7 @@ A durable business call containing:
 
 A decision is a first-class object rather than a paragraph hidden inside a document.
 
-Some decisions are mirrored from the launch engine's own approval requests rather than authored by a founder. These carry the originating workflow, run, and plan, and only an owner may answer them; the answer travels back through the engine's own session runner.
+Some decisions are mirrored from the launch skill's own approval requests rather than authored by a founder. These carry the originating workflow, run, and plan, and only an owner may answer them; the answer travels back through the skill's own session runner.
 
 ### Comment
 
@@ -155,7 +155,7 @@ A durable request to create a structured artifact from scoped company context. J
 
 ### Execution
 
-A durable record of asking the launch engine to run one workflow. It carries the scoped context fingerprint, founder-readable engine state (queued, running, completed, failed), and the verified results imported when the run completes. Retrying the same request against the same context resumes the same run.
+A durable record of asking the launch skill to run one workflow. It carries the scoped context fingerprint, founder-readable skill state (queued, running, completed, failed), and the verified results imported when the run completes. Retrying the same request against the same context resumes the same run.
 
 ### Import
 
@@ -174,7 +174,7 @@ A plain-language history of important workspace changes.
 | Workstreams | Advance one connected area of business formation | Generic department dashboards |
 | Decisions | Make calls explicit, reviewable, and durable | Hiding choices inside generated prose |
 | Deliverables | Edit, version, review, and export reusable work | Treating AI responses as immutable answers |
-| Launch | Show what is ready, blocked, and still undecided; show the engine's launch matrix, run engine workflows, and import existing launch work | A vanity percentage detached from evidence |
+| Launch | Show what is ready, blocked, and still undecided; show the skill's launch matrix, run launch workflows, and import existing launch work | A vanity percentage detached from evidence |
 | People | See and change who is in the company, and invite someone in | A generic admin panel |
 | Account | Manage password and active device sessions | Company-scoped settings bleeding into personal security |
 | Shared | Show one deliverable to someone without an account | Any navigation into the rest of the workspace |
@@ -222,7 +222,7 @@ founder brief
   -> workstream confidence
   -> structured deliverables
   -> launch readiness
-  -> engine-executed work and measured outcomes
+  -> skill-executed work and measured outcomes
 ```
 
 New information should refine prior work. It should not silently replace the company with a new interpretation.

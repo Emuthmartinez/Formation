@@ -6,15 +6,15 @@
 
 **Why:** The repository's execution and verification capabilities are differentiating. Rewriting them as ordinary request handlers would discard years of domain logic. The product failure was not the graph. It was making founders interact with graph outputs and filesystem projections.
 
-**Tradeoff:** The repository temporarily contains two presentation modes: the new product and internal static engine projections. The migration document defines which one is authoritative for founders.
+**Tradeoff:** The repository temporarily contains two presentation modes: the new product and internal static skill projections. The migration document defines which one is authoritative for founders.
 
 ## Decision 2: Make `platform/` a bounded product context
 
 **Decision:** Place the founder application at `platform/` instead of extending the maintainer Design Room.
 
-**Why:** The Design Room reads static seed state and is intentionally a maintainer tool. Expanding it would preserve the wrong ownership boundary and mix product behavior with engine visual review.
+**Why:** The Design Room reads static seed state and is intentionally a maintainer tool. Expanding it would preserve the wrong ownership boundary and mix product behavior with skill visual review.
 
-**Tradeoff:** Some shared visual tokens are not reused directly. The new product documents its own design system and can later publish compatible tokens back to the engine.
+**Tradeoff:** Some shared visual tokens are not reused directly. The new product documents its own design system and can later publish compatible tokens back to the skill.
 
 ## Decision 3: Use a stable, opinionated information architecture
 
@@ -22,7 +22,7 @@
 
 **Why:** These map to recurring founder jobs. They are easier to learn than generated pages, graph phases, or a directory tree.
 
-**Tradeoff:** Not every engine artifact receives a dedicated page. Artifacts are consolidated into workstreams and the deliverable library.
+**Tradeoff:** Not every skill artifact receives a dedicated page. Artifacts are consolidated into workstreams and the deliverable library.
 
 ## Decision 4: Treat company context as product data
 
@@ -30,7 +30,7 @@
 
 **Why:** Files and conversations are not sufficient for tenancy, editing, contradiction detection, collaboration, or consistent generation.
 
-**Tradeoff:** Engine state and product state require an adapter and reconciliation policy. Directly sharing one schema would couple founder experience to execution internals.
+**Tradeoff:** Skill state and product state require an adapter and reconciliation policy. Directly sharing one schema would couple founder experience to execution internals.
 
 ## Decision 5: Keep facts, assumptions, recommendations, and questions separate
 
@@ -44,7 +44,7 @@
 
 **Decision:** Generation produces a versioned artifact with explicit sections and confidence through a queued job.
 
-**Why:** Long-form synchronous prose is difficult to edit, reuse, retry, or trace. Durable jobs survive navigation and provide a clean future integration point for the graph engine.
+**Why:** Long-form synchronous prose is difficult to edit, reuse, retry, or trace. Durable jobs survive navigation and provide a clean future integration point for the launch graph.
 
 **Tradeoff:** The first implementation uses a single in-process worker. Horizontal workers require a database-backed claim or queue.
 
@@ -90,8 +90,8 @@
 
 ## Decision 12: Demote rather than immediately delete internal static renderers
 
-**Decision:** Keep the cockpit, autonomy console, artifact pages, and Design Room as engine-internal compatibility and maintainer surfaces.
+**Decision:** Keep the cockpit, autonomy console, artifact pages, and Design Room as skill-internal compatibility and maintainer surfaces.
 
-**Why:** Current validators, migration paths, and engine workflows still depend on them. Deleting them in the same change would create a half-migrated runtime and break existing launches.
+**Why:** Current validators, migration paths, and skill workflows still depend on them. Deleting them in the same change would create a half-migrated runtime and break existing launches.
 
-**Tradeoff:** The repository still contains old presentation code. Its status is now explicit, and it should be removed only after engine consumers migrate to platform APIs or export adapters.
+**Tradeoff:** The repository still contains old presentation code. Its status is now explicit, and it should be removed only after skill consumers migrate to platform APIs or export adapters.

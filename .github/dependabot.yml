@@ -15,7 +15,7 @@ updates:
   # The shipped runtime copy. check:package-parity requires both to move together,
   # so these PRs usually need the root one merged alongside.
   - package-ecosystem: npm
-    directory: /skill/b2c-mobile-business-launch
+    directory: /skill/formation
     schedule:
       interval: weekly
       day: monday

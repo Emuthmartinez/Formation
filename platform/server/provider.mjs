@@ -15,7 +15,7 @@
  *
  * **There is no silent fallback.** When an endpoint is configured and the provider cannot answer,
  * this throws. Substituting the built-in deterministic draft would hand the founder a document
- * that looks like the one they asked for and is not — the same dishonesty the engine boundary
+ * that looks like the one they asked for and is not — the same dishonesty the skill boundary
  * refuses when it reports "unreachable" instead of "no work ready".
  */
 

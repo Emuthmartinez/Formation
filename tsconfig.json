@@ -11,11 +11,11 @@
     "noUnusedLocals": true
   },
   "include": [
-    "skill/b2c-mobile-business-launch/core/**/*.ts",
-    "skill/b2c-mobile-business-launch/verification/**/*.ts",
-    "skill/b2c-mobile-business-launch/validation/business/**/*.ts",
-    "skill/b2c-mobile-business-launch/validation/repository/**/*.ts",
-    "skill/b2c-mobile-business-launch/tooling/**/*.ts",
-    "skill/b2c-mobile-business-launch/catalog/**/*.ts"
+    "skill/formation/core/**/*.ts",
+    "skill/formation/verification/**/*.ts",
+    "skill/formation/validation/business/**/*.ts",
+    "skill/formation/validation/repository/**/*.ts",
+    "skill/formation/tooling/**/*.ts",
+    "skill/formation/catalog/**/*.ts"
   ]
 }

@@ -2,12 +2,12 @@ import { createId, launchWorkstreamId } from "./shared.mjs";
 import { boardStepTitle } from "./presentation.mjs";
 
 /**
- * Imports the launch engine's verified results into Formation's product records — the import half
- * of the platform-to-engine execution adapter (docs/platform/remaining-gaps.md, "Platform-to-engine
+ * Imports the launch skill's verified results into Formation's product records — the import half
+ * of the platform-to-skill execution adapter (docs/platform/remaining-gaps.md, "Platform-to-skill
  * execution adapter", slice 3).
  *
  * The rules this module holds by construction:
- * - Only verified results import. The engine's boundary report already exports only settled,
+ * - Only verified results import. The skill's boundary report already exports only settled,
  *   accepted work (`results[]`); this module never reaches past it into run internals, so an
  *   unverified or partially-verified node contributes nothing — not "contributes provisionally".
  * - Imported content enters as a draft, never as accepted fact: results become `recommendation`
@@ -15,20 +15,20 @@ import { boardStepTitle } from "./presentation.mjs";
  *   creates a fact, answers a decision, or overwrites founder-authored content — a re-imported
  *   deliverable appends an immutable version and updates provenance, leaving the founder's own
  *   sections, title, and status alone.
- * - Staleness mirrors the engine's own conclusions. The engine's invalidateDescendants pass flips
+ * - Staleness mirrors the skill's own conclusions. The skill's invalidateDescendants pass flips
  *   `accepted` off on every affected descendant binding; this module marks exactly the imported
  *   deliverables whose bindings report `accepted: false` and clears the mark when acceptance
- *   returns — never a second graph-walk that could disagree with the engine, and honest in both
+ *   returns — never a second graph-walk that could disagree with the skill, and honest in both
  *   directions.
  * - Trace and cost metadata carry names, ids, and declared totals only. Every stored field is
- *   copied by explicit name from the typed report — an engine document is never spread into a
+ *   copied by explicit name from the typed report — a skill document is never spread into a
  *   Formation record, so a value that isn't part of the contract cannot leak into the store.
  * - Idempotent across retries: claims key on (runId, attemptId), deliverables on the stable
- *   engine artifact id plus its fingerprint, blocker tasks on the workflow id. Re-importing the
+ *   skill artifact id plus its fingerprint, blocker tasks on the workflow id. Re-importing the
  *   same report changes nothing.
  */
 
-/** Founder-plain phrasing for the engine's verification kinds (engine vocabulary stays behind the boundary). */
+/** Founder-plain phrasing for the skill's verification kinds (skill vocabulary stays behind the boundary). */
 const VERIFICATION_PHRASES = Object.freeze({
   deterministic: "passed its checks",
   fresh_context: "was reviewed with fresh eyes before being accepted",
@@ -52,7 +52,7 @@ const VERIFICATION_CONFIDENCE = Object.freeze({
 const EVIDENCE_ITEM_LIMIT = 20;
 const EVIDENCE_ITEM_LENGTH = 2_000;
 
-const STALE_REASON = "Earlier launch work this was built on changed, so the engine plans to redo it.";
+const STALE_REASON = "Earlier launch work this was built on changed, so Formation plans to redo it.";
 
 function verificationPhrase(kind) {
   return VERIFICATION_PHRASES[kind] ?? VERIFICATION_PHRASES.none;
@@ -109,14 +109,14 @@ export function buildResultTotals(report) {
 }
 
 /**
- * Reconciles the store's imported records with a live engine boundary report. Mutates `database`
+ * Reconciles the store's imported records with a live skill boundary report. Mutates `database`
  * (call inside a store transaction) and returns what changed so the caller can write activity
  * entries. The report must be reachable and ready — callers guard that; this function refuses to
  * run otherwise rather than import from silence.
  */
 export function syncEngineResults(database, workspace, report, now) {
   if (report?.workspaceReady !== true) {
-    throw new Error("syncEngineResults requires a ready engine report; callers must not import from an unreachable or unready engine.");
+    throw new Error("syncEngineResults requires a ready skill report; callers must not import from an unreachable or unready skill.");
   }
   const changes = {
     claimsCreated: [],
@@ -164,7 +164,7 @@ function importVerifiedResults(database, workspace, report, now, changes) {
         workstreamId: launchWorkstreamId(workspace),
         kind: "recommendation",
         key: null,
-        statement: `The launch engine finished “${boardStepTitle(result.workflowId, result.workflowTitle)}” and the work ${phrase}. Review the result before treating it as fact.`,
+        statement: `Formation finished “${boardStepTitle(result.workflowId, result.workflowTitle)}” and the work ${phrase}. Review the result before treating it as fact.`,
         value: null,
         confidence: verificationConfidence(result.verification),
         status: "active",
@@ -212,12 +212,12 @@ function importArtifactCandidates(database, workspace, report, result, resultCla
         status: "draft",
         version: 1,
         confidence: verificationConfidence(result.verification),
-        summary: `The launch engine produced this while working on “${boardTitle}”, and the work ${phrase} before arriving here. It stays a draft until you review it.`,
+        summary: `Formation produced this while working on “${boardTitle}”, and the work ${phrase} before arriving here. It stays a draft until you review it.`,
         sections: [
           {
             id: `sec_${createId("x").slice(2, 10)}`,
             title: "Where this came from",
-            body: `The launch engine completed “${boardTitle}” and the work ${phrase}. Formation imported the result as an editable draft — review it, adjust it, and approve it when it matches your intent. Nothing downstream should rely on it until you do.` + (result.workflowTitle && result.workflowTitle !== boardTitle ? ` (Technical step name: ${result.workflowTitle}.)` : ""),
+            body: `Formation completed “${boardTitle}” and the work ${phrase}. The result arrives as an editable draft — review it, adjust it, and approve it when it matches your intent. Nothing downstream should rely on it until you do.` + (result.workflowTitle && result.workflowTitle !== boardTitle ? ` (Technical step name: ${result.workflowTitle}.)` : ""),
           },
         ],
         sourceClaimIds: resultClaim ? [resultClaim.id] : [],
@@ -246,7 +246,7 @@ function importArtifactCandidates(database, workspace, report, result, resultCla
 
     if (existing.source.fingerprint === candidate.fingerprint) continue;
 
-    // A newer verified result replaced the engine's output. Provenance and version history move
+    // A newer verified result replaced the skill's output. Provenance and version history move
     // forward; the founder's own title, status, and sections are never touched.
     existing.version = Number.isInteger(existing.version) ? existing.version + 1 : 1;
     existing.stale = false;
@@ -270,7 +270,7 @@ function importArtifactCandidates(database, workspace, report, result, resultCla
   }
 }
 
-/** An immutable version snapshot for an imported change, attributed to the engine, never a founder. */
+/** An immutable version snapshot for an imported change, attributed to the skill, never a founder. */
 function buildImportedVersion(artifact, now) {
   return {
     id: createId("ver"),
@@ -286,13 +286,13 @@ function buildImportedVersion(artifact, now) {
     sourceClaimIds: [...(artifact.sourceClaimIds ?? [])],
     linkedDecisionIds: [...(artifact.linkedDecisionIds ?? [])],
     createdAt: now,
-    createdBy: "Launch engine",
+    createdBy: "Formation",
   };
 }
 
 /**
- * Mirrors the engine's per-artifact acceptance conclusions onto imported deliverables. Marking is
- * exact in both directions: only a binding the engine reports as no longer accepted marks its
+ * Mirrors the skill's per-artifact acceptance conclusions onto imported deliverables. Marking is
+ * exact in both directions: only a binding the skill reports as no longer accepted marks its
  * deliverable stale, and only restored acceptance of the very fingerprint we imported clears it.
  * A binding missing from the report (the plan moved on) changes nothing — absence is not evidence.
  * The stale mark is currency metadata, not a content change, so it does not consume a version.
@@ -321,10 +321,10 @@ function mirrorArtifactStaleness(database, workspace, report, now, changes) {
 }
 
 /**
- * Mirrors the engine's failed steps as founder tasks. Only "failed" mirrors — an autonomy park is
+ * Mirrors the skill's failed steps as founder tasks. Only "failed" mirrors — an autonomy park is
  * configuration the run view already reports, and mirroring every parked step of an ungranted
- * workspace would bury the founder in tasks the engine never asked for. A task closes when the
- * engine stops reporting its step as failed; if the step fails again later, a fresh task opens.
+ * workspace would bury the founder in tasks the skill never asked for. A task closes when the
+ * skill stops reporting its step as failed; if the step fails again later, a fresh task opens.
  */
 function syncBlockerTasks(database, workspace, report, now, changes) {
   const failedSteps = new Map((report.workflows ?? []).filter((entry) => entry.status === "failed").map((entry) => [entry.workflowId, entry]));
@@ -373,10 +373,10 @@ export function recordResultActivity(database, workspaceId, changes, now) {
     push("result-imported", `Launch result imported: ${claim.source.workflowTitle}`, claim.statement);
   }
   for (const artifact of changes.artifactsCreated) {
-    push("deliverable-imported", `New draft deliverable from the launch engine: ${artifact.title}`, artifact.summary);
+    push("deliverable-imported", `New draft deliverable from Formation: ${artifact.title}`, artifact.summary);
   }
   for (const artifact of changes.artifactsUpdated) {
-    push("deliverable-updated", `Deliverable refreshed by the launch engine: ${artifact.title}`, "A newer verified result replaced the previous engine output. Your own edits were not touched.");
+    push("deliverable-updated", `Deliverable refreshed by Formation: ${artifact.title}`, "A newer verified result replaced the previous version. Your own edits were not touched.");
   }
   for (const artifact of changes.markedStale) {
     push("deliverable-stale", `Needs a refresh: ${artifact.title}`, artifact.staleReason ?? STALE_REASON);
@@ -385,9 +385,9 @@ export function recordResultActivity(database, workspaceId, changes, now) {
     push("deliverable-fresh", `Up to date again: ${artifact.title}`, "The launch work this deliverable was built on is settled again.");
   }
   for (const task of changes.tasksOpened) {
-    push("engine-blocker-opened", `The launch engine could not finish: ${task.source.workflowTitle}`, task.source.reason ?? "The engine kept its own record of what happened.");
+    push("engine-blocker-opened", `Formation could not finish: ${task.source.workflowTitle}`, task.source.reason ?? "Formation kept its own record of what happened.");
   }
   for (const task of changes.tasksClosed) {
-    push("engine-blocker-closed", `No longer stuck: ${task.source.workflowTitle}`, "The launch engine is no longer reporting this step as failed.");
+    push("engine-blocker-closed", `No longer stuck: ${task.source.workflowTitle}`, "Formation is no longer reporting this step as failed.");
   }
 }

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Formation is a same-origin React application and Node API layered above the repository's graph-native launch engine.
+Formation is a same-origin React application and Node API layered above the repository's graph-native launch skill.
 
 ```text
 React application
@@ -13,10 +13,10 @@ React application
   -> domain services
   -> atomic store transaction
   -> durable generation, execution, and import workers
-  -> optional external AI provider and the launch engine adapters
+  -> optional external AI provider and the launch skill adapters
 ```
 
-The platform and engine are separate bounded contexts. The platform owns founder product state. The engine owns durable automated execution.
+The platform and skill are separate bounded contexts. The platform owns founder product state. The skill owns durable automated execution.
 
 ## Frontend
 
@@ -37,7 +37,7 @@ The platform and engine are separate bounded contexts. The platform owns founder
 - `context.tsx`: scoped workspace state and mutations
 - `pages/`: one module per founder job
 
-The client never reads repository files or the engine workspace directly.
+The client never reads repository files or the skill workspace directly.
 
 ## API
 
@@ -68,10 +68,10 @@ Every other route requires a session. `server/api.mjs` wires one module per feat
 | `routes/reviews.mjs` | review requests, answers, and withdrawal |
 | `routes/economics.mjs` | economics scenarios and the primary-scenario choice |
 | `routes/exports.mjs` | full-workspace export bundles in Markdown, JSON, and CSV |
-| `routes/executions.mjs` | engine execution requests, run state, and the launch matrix |
+| `routes/executions.mjs` | skill execution requests, run state, and the launch matrix |
 | `routes/imports.mjs` | launch-repository import sources, preview, and apply |
-| `routes/approvals.mjs` | engine approval listing and owner-only answers |
-| `routes/evidence.mjs` | evidence reads for verified engine results |
+| `routes/approvals.mjs` | skill approval listing and owner-only answers |
+| `routes/evidence.mjs` | evidence reads for verified skill results |
 
 Every workspace route resolves the caller's membership role against a named capability and refuses requests below that capability's minimum role (viewer, reviewer, editor, owner). The ladder lives in `server/domain/capabilities.mjs`, and `server/test/capabilities.test.mjs` fails on any route in source that is not declared with a capability. Workspace IDs supplied by the client never imply access.
 
@@ -169,15 +169,15 @@ Every generated artifact starts with an immutable version snapshot. A deliverabl
 
 The founder can inspect retained snapshots and restore an earlier version. Restoration writes a new draft version rather than deleting or mutating later history. A PostgreSQL implementation should map these records to an append-only `artifact_versions` table and enforce uniqueness on `(artifact_id, version)`.
 
-## Engine integration boundary
+## Skill integration boundary
 
-The execution adapter is shipped. `server/execution.mjs` implements the platform half: `EngineBridge` talks to the engine's read-only CLI adapters, and `ExecutionWorker` durably creates or resumes engine runs. `routes/executions.mjs` exposes execution requests, run state, and the launch matrix; `server/domain/results.mjs` imports verified results.
+The execution adapter is shipped. `server/execution.mjs` implements the platform half: `EngineBridge` talks to the skill's read-only CLI adapters, and `ExecutionWorker` durably creates or resumes skill runs. `routes/executions.mjs` exposes execution requests, run state, and the launch matrix; `server/domain/results.mjs` imports verified results.
 
 ```text
 platform workstream or task
   -> execution request with workspace ID and scoped context
   -> catalog workflow selection
-  -> durable engine run
+  -> durable skill run
   -> verified outputs and evidence
   -> platform claims, artifact versions, task updates, and activity
 ```
@@ -185,22 +185,22 @@ platform workstream or task
 The adapter:
 
 - preserves workspace authorization (`requireMembership` with a named capability)
-- fingerprints the scoped company context and maps stable platform IDs to engine run IDs; retrying the same request against the same context resumes the same run
+- fingerprints the scoped company context and maps stable platform IDs to skill run IDs; retrying the same request against the same context resumes the same run
 - keeps platform state authoritative for founder-facing content
-- accepts only verified engine outputs
-- translates engine states into founder vocabulary through the presentation boundary
-- never gives the browser access to engine files
-- reports an unreachable engine as unreachable, never as "no work ready"
+- accepts only verified skill outputs
+- translates skill states into founder vocabulary through the presentation boundary
+- never gives the browser access to skill files
+- reports an unreachable skill as unreachable, never as "no work ready"
 
-Engine founder approvals mirror into the decision log keyed by approval and run (`server/domain/approvals.mjs`); only an owner may answer, and the answer round-trips through the engine's own `core/session/approve.ts`. The engine's remaining half is its own per-node executor, which still selects fixture and no-op executors — ranked in `remaining-gaps.md`.
+Skill founder approvals mirror into the decision log keyed by approval and run (`server/domain/approvals.mjs`); only an owner may answer, and the answer round-trips through the skill's own `core/session/approve.ts`. The skill's remaining half is its own per-node executor, which still selects fixture and no-op executors — ranked in `remaining-gaps.md`.
 
 ## Import boundary
 
-`server/imports.mjs`, `server/domain/imports.mjs`, and `routes/imports.mjs` bring an existing launch repository's recorded work into a company. The service discovers import sources through the engine's read-only import CLI (`core/adapters/platform-import.ts`), previews a founder-readable plan, and applies it idempotently through content-derived import keys. Nothing imported is a fact: records enter as drafts and questions, and imported text passes trust screening before it can reach a provider request. The importer opens no write handle on the launch repository.
+`server/imports.mjs`, `server/domain/imports.mjs`, and `routes/imports.mjs` bring an existing launch repository's recorded work into a company. The service discovers import sources through the skill's read-only import CLI (`core/adapters/platform-import.ts`), previews a founder-readable plan, and applies it idempotently through content-derived import keys. Nothing imported is a fact: records enter as drafts and questions, and imported text passes trust screening before it can reach a provider request. The importer opens no write handle on the launch repository.
 
 ## Presentation boundary
 
-`server/domain/presentation.mjs` translates engine- and system-authored text into founder-facing board language before it reaches product pages, preserving the original wording for technical disclosure. Run steps, approval mirrors, blocker tasks, imported deliverables, and activity entries all route through it. Founder-authored words are never rewritten.
+`server/domain/presentation.mjs` translates skill- and system-authored text into founder-facing board language before it reaches product pages, preserving the original wording for technical disclosure. Run steps, approval mirrors, blocker tasks, imported deliverables, and activity entries all route through it. Founder-authored words are never rewritten.
 
 ## Observability
 
@@ -218,7 +218,7 @@ Production extension:
 - latency and error metrics by route
 - job queue duration and provider failure metrics
 - audit events for membership and artifact approval
-- trace IDs propagated into engine runs
+- trace IDs propagated into skill runs
 - redaction policy for founder content
 
 ## Testing

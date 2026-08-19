@@ -12,13 +12,13 @@ import { JsonStore } from "../store.mjs";
 /**
  * Shared engine-workspace and server harness for the execution-adapter test suites
  * (execution.test.mjs, approvals.test.mjs). Tests build a real engine workspace the same way
- * the engine's own fixture suite does: every reducer-owned document is created through the
+ * the skill's own fixture suite does: every reducer-owned document is created through the
  * reducer CLI with founder authority, never written directly.
  */
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 export const repoRoot = path.resolve(moduleDir, "../../..");
-export const skillDir = path.join(repoRoot, "skill/b2c-mobile-business-launch");
+export const skillDir = path.join(repoRoot, "skill/formation");
 export const tsxBin = [path.join(skillDir, "node_modules/.bin/tsx"), path.join(repoRoot, "node_modules/.bin/tsx")].find((candidate) => existsSync(candidate));
 
 const LANE_KEYS = [

@@ -20,7 +20,7 @@
 
 set -euo pipefail
 
-SKILL_NAME="b2c-mobile-business-launch"
+SKILL_NAME="formation"
 SOURCE_REL="skill/${SKILL_NAME}"
 RUNTIME="${HOME}/.codex/skills/${SKILL_NAME}"
 # Every tool that reads this skill points at the one Codex runtime copy, so a
@@ -205,7 +205,43 @@ for link in "${CONSUMER_LINKS[@]}"; do
   fi
 done
 
-# --- 8. Freshness gate -------------------------------------------------------
+# --- 8. Legacy aliases (pre-rename name) --------------------------------------
+# Repos shipped before the formation rename invoke the skill as
+# b2c-mobile-business-launch and read it through same-named paths. Skill
+# resolution follows the directory/symlink basename, so a compat symlink under
+# the old name keeps every one of those references working. Repoint or create
+# symlinks freely; never delete a real directory unattended (the pre-cutover
+# ~/.codex/skills runtime is one until it is deliberately replaced).
+LEGACY_NAME="b2c-mobile-business-launch"
+step "Maintaining legacy '${LEGACY_NAME}' aliases"
+LEGACY_LINKS=(
+  "${HOME}/.codex/skills/${LEGACY_NAME}"
+  "${HOME}/.claude/skills/${LEGACY_NAME}"
+  "${HOME}/.agents/skills/${LEGACY_NAME}"
+  "${HOME}/.cursor/skills/${LEGACY_NAME}"
+)
+for link in "${LEGACY_LINKS[@]}"; do
+  if [ -L "$link" ]; then
+    target="$(readlink "$link")"
+    if [ "$target" = "$RUNTIME" ]; then
+      echo "OK    ${link} -> ${target}"
+    else
+      warn "repointing legacy alias ${link} (was -> ${target})"
+      ln -sfn "$RUNTIME" "$link"
+      echo "OK    ${link} -> ${RUNTIME}"
+    fi
+  elif [ -d "$link" ]; then
+    warn "${link} is still a real directory (pre-rename runtime). Cut over deliberately:
+        rm -rf '${link}' && ln -s '${RUNTIME}' '${link}'"
+  else
+    echo "creating legacy alias ${link}"
+    mkdir -p "$(dirname "$link")"
+    ln -s "$RUNTIME" "$link"
+    echo "OK    ${link} -> ${RUNTIME}"
+  fi
+done
+
+# --- 9. Freshness gate -------------------------------------------------------
 step "Skill version freshness"
 npm run check:skill-version --silent -- --source "$SOURCE_REL" --installed "$RUNTIME"
 

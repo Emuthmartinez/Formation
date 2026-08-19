@@ -5,8 +5,8 @@ import { createSeedDatabase } from "../seed.mjs";
 
 /**
  * Domain tests for the verified-result import (execution adapter slice 3). These feed the sync
- * exactly what the engine boundary CLI emits — a typed ready report — so every mapping rule is
- * provable without spawning an engine: the engine's own fixture suite proves what enters
+ * exactly what the skill boundary CLI emits — a typed ready report — so every mapping rule is
+ * provable without spawning an engine: the skill's own fixture suite proves what enters
  * `results[]` (verified work only), and this suite proves what Formation does with it.
  */
 
@@ -68,15 +68,15 @@ function blockerTasks(database, workspaceId) {
 
 test("results import refuses an unready report instead of importing from silence", () => {
   const { database, workspace } = makeDatabase();
-  assert.throws(() => syncEngineResults(database, workspace, { workspaceReady: false, reason: "not set up" }, NOW), /ready engine report/);
-  assert.throws(() => syncEngineResults(database, workspace, undefined, NOW), /ready engine report/);
+  assert.throws(() => syncEngineResults(database, workspace, { workspaceReady: false, reason: "not set up" }, NOW), /ready skill report/);
+  assert.throws(() => syncEngineResults(database, workspace, undefined, NOW), /ready skill report/);
   assert.equal(engineClaims(database, workspace.id).length, 0);
 });
 
 test("a ready report with no verified results imports nothing — unverified work contributes nothing, not provisionally", () => {
   const { database, workspace } = makeDatabase();
   const report = readyReport({
-    // A step that finished but is still being verified, and one still running: the engine
+    // A step that finished but is still being verified, and one still running: the skill
     // exports no result for either, and its unaccepted binding must not become a deliverable.
     workflows: [
       { workflowId: "workflow.research-scan", title: "Research what people need", status: "held", founderReason: "This is being double-checked before it's called done." },
@@ -135,7 +135,7 @@ test("a verified result maps to a recommendation claim, a draft deliverable with
   assert.equal(versions.length, 1);
   assert.equal(versions[0].artifactId, artifact.id);
   assert.equal(versions[0].version, 1);
-  assert.equal(versions[0].createdBy, "Launch engine");
+  assert.equal(versions[0].createdBy, "Formation");
 
   assert.deepEqual(changes.totals, { verifiedResults: 1, declaredTokenBudget: 8_000, declaredCostEstimates: [{ currency: "USD", amount: 25 }] });
   assert.ok(database.activity.some((entry) => entry.type === "result-imported" && entry.workspaceId === workspace.id));
@@ -163,7 +163,7 @@ test("a newer verified attempt supersedes the old claim and appends a version wi
   const { database, workspace } = makeDatabase();
   syncEngineResults(database, workspace, readyReport({ results: [verifiedResult()], artifacts: [{ artifactId: "artifact.eng-change", workflowId: "workflow.eng-change", accepted: true, fingerprint: "fp-v1" }] }), NOW);
 
-  // The founder makes the draft their own before the engine re-runs the step.
+  // The founder makes the draft their own before the skill re-runs the step.
   const artifact = engineArtifacts(database, workspace.id)[0];
   artifact.title = "Onboarding copy (founder edit)";
   artifact.sections = [{ id: "sec_founder", title: "My notes", body: "Rewrote the second screen myself." }];
@@ -193,7 +193,7 @@ test("a newer verified attempt supersedes the old claim and appends a version wi
   assert.deepEqual(versions.map((entry) => entry.version), [1, 2]);
 });
 
-test("staleness mirrors the engine's conclusions exactly — the identified deliverable and nothing else, in both directions", () => {
+test("staleness mirrors the skill's conclusions exactly — the identified deliverable and nothing else, in both directions", () => {
   const { database, workspace } = makeDatabase();
   const firstImport = readyReport({
     results: [
@@ -208,7 +208,7 @@ test("staleness mirrors the engine's conclusions exactly — the identified deli
   syncEngineResults(database, workspace, firstImport, NOW);
   assert.equal(engineArtifacts(database, workspace.id).length, 2);
 
-  // The engine invalidated the follow-up's inputs: its binding is no longer accepted. A third
+  // The skill invalidated the follow-up's inputs: its binding is no longer accepted. A third
   // binding Formation never imported also reports unaccepted — it must not invent a record.
   const invalidated = readyReport({
     artifacts: [
@@ -223,7 +223,7 @@ test("staleness mirrors the engine's conclusions exactly — the identified deli
   const unchanged = engineArtifacts(database, workspace.id).find((entry) => entry.source.engineArtifactId === "artifact.eng-change");
   assert.equal(followup.stale, true);
   assert.ok(followup.staleReason.length > 0);
-  assert.equal(unchanged.stale, false, "a deliverable the engine did not identify must never be marked stale");
+  assert.equal(unchanged.stale, false, "a deliverable the skill did not identify must never be marked stale");
   assert.equal(engineArtifacts(database, workspace.id).length, 2, "an unimported binding must not become a record");
 
   // Re-reporting the same conclusions changes nothing further.
@@ -242,7 +242,7 @@ test("staleness mirrors the engine's conclusions exactly — the identified deli
   assert.equal(engineArtifacts(database, workspace.id).find((entry) => entry.source.engineArtifactId === "artifact.eng-followup").stale, false);
 });
 
-test("failed steps mirror as founder tasks that close when the engine recovers, and never duplicate", () => {
+test("failed steps mirror as founder tasks that close when the skill recovers, and never duplicate", () => {
   const { database, workspace } = makeDatabase();
   const failing = readyReport({
     workflows: [{ workflowId: "workflow.eng-change", title: "Update the onboarding copy", status: "failed", founderReason: "The last attempt at this step didn't go through." }],

@@ -16,7 +16,7 @@ eval that now covers this behavior. If the change genuinely cannot be checked, s
 ## Checklist
 
 - [ ] `npm run audit:ci` passes green locally.
-- [ ] Edited the source under `skill/b2c-mobile-business-launch/`, not an installed runtime copy.
+- [ ] Edited the source under `skill/formation/`, not an installed runtime copy.
 - [ ] Bumped `skill-version.json` in this commit if anything under `skill/` changed, with a concrete release note.
 - [ ] Versions stay in parity across both `package.json` files, `skill-version.json`, and both lockfiles.
 - [ ] Any new external URL is registered in `validation/repository/source-registry.yaml`.

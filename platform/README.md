@@ -36,7 +36,7 @@ server/validation.mjs           request schemas and bounded input normalization
 server/auth.mjs                 credential authentication, device sessions, cookies, and same-origin protection
 server/generation.mjs           durable generation queue and job rate limiting
 server/provider.mjs             the external provider call, its budget, retries, and outcome classification
-server/execution.mjs            platform half of the engine execution adapter and its durable worker
+server/execution.mjs            platform half of the skill execution adapter and its durable worker
 server/imports.mjs              launch-repository import service (discover, preview, apply)
 server/store.mjs                atomic persistence adapter and schema migration
 server/seed/                    realistic sample company data
@@ -51,15 +51,15 @@ server/test/                    domain, storage, authorization, and API coverage
 4. Artifact generation and edits append immutable version snapshots; restoration creates another version.
 5. Readiness is calculated from business state and penalized by blockers.
 6. The platform does not expose graph IDs, agent roles, filesystem paths, or provider commands to founders.
-7. The launch engine may execute work for the platform, but it does not own product navigation or product state.
+7. The launch skill may execute work for the platform, but it does not own product navigation or product state.
 
 ## External generation provider
 
 Set `FORMATION_AI_ENDPOINT` and optionally `FORMATION_AI_API_KEY`. The endpoint receives a JSON body with the full scoped business context and required response schema. A non-conforming response fails the durable job instead of silently writing malformed content.
 
-## Launch engine execution
+## Launch skill execution
 
-Set `FORMATION_ENGINE_ROOT` to the directory that holds one engine workspace per company, named by workspace slug. With it set, `POST /api/workspaces/:id/executions` submits an authorized execution request: the adapter validates the requested catalog workflow against the engine's live answer (or selects the first ready one), fingerprints the scoped company context, and a durable worker creates or resumes the engine run through the engine's own session runner. Retrying the same request against the same context resumes the same execution — it never starts a second run. `GET` on the same routes reports founder-readable run state, and an unreachable engine is reported as unreachable, never as "no work ready". Without `FORMATION_ENGINE_ROOT`, execution requests are refused with a clear message; nothing else changes. Secret-shaped environment variables never cross into the engine process, and the platform never reads or writes engine workspace files itself.
+Set `FORMATION_ENGINE_ROOT` to the directory that holds one skill workspace per company, named by workspace slug. With it set, `POST /api/workspaces/:id/executions` submits an authorized execution request: the adapter validates the requested catalog workflow against the skill's live answer (or selects the first ready one), fingerprints the scoped company context, and a durable worker creates or resumes the skill run through the skill's own session runner. Retrying the same request against the same context resumes the same execution — it never starts a second run. `GET` on the same routes reports founder-readable run state, and an unreachable skill is reported as unreachable, never as "no work ready". Without `FORMATION_ENGINE_ROOT`, execution requests are refused with a clear message; nothing else changes. Secret-shaped environment variables never cross into the skill process, and the platform never reads or writes skill workspace files itself.
 
 ## Deployment posture
 
