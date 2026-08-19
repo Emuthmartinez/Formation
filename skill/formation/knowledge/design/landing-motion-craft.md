@@ -19,6 +19,8 @@ Remotion is the wrong *primary* tool for landing motion: it renders frames, not 
 
 Two web-lane recipes live in the in-app benchmark file [`motion-craft-benchmarks.md`](./motion-craft-benchmarks.md): R9, the contained edge-warp scroll transition (margin, channel-split, and edge-proximity rules), and R1, asynchronous-grid hero liveness. Load it when a landing hero or scroll moment calls for either.
 
+When the 60fps.design MCP is connected, the landing lane can ground a hero, scroll moment, or micro-interaction in a live exemplar the same way the in-app lane does — `60fps_search_shots` to find the pattern, `60fps_get_motion_breakdown` for its trigger/start→transition→end anatomy (tools and ground rules in `motion-craft-benchmarks.md` §Live Catalog Access). The shots are iOS in-app clips: adopt the mechanic, re-express it in `motion/react` on the `--motion-*` scale, and skip `60fps_get_motion_code` on this lane — its SwiftUI starter has no web target. motionsites.ai stays the landing benchmark; when the MCP is not connected, the section library plus R9/R1 remain the contract and searching is not required.
+
 Before drafting copy for any section slot — hero headline/subhead, testimonial spotlight quotes, stats captions, or CTA button/microcopy — load `knowledge/words/no-slop-writing.md`; keep the brand's voice from `strategy/BRAND.md`/`11_STAR_EXPERIENCE.md`, not a flattened landing-page register.
 
 Host: a Next.js App Router project (the archetype starters are the expected hosts) or any React SSR site; Astro via client islands. `motion/react` is mandated for the web surface and **must never be imported by the mobile binary** — `check:template-safety` enforces the boundary (the `business/growth/landing/` exception is deliberate and web-only).
