@@ -195,7 +195,12 @@ export class EngineBridge {
       return { reachable: false, reason: "Formation could not answer for this company." };
     }
     try {
-      return { reachable: true, report: JSON.parse(result.stdout) };
+      const report = JSON.parse(result.stdout);
+      if (!contractAccepted(report)) {
+        console.error(`Formation execution adapter: engine contract version ${report?.contractVersion ?? "(absent)"} is not compatible with major ${ENGINE_CONTRACT_MAJOR}.`);
+        return { reachable: false, reason: "Formation and this product are on incompatible versions. Update whichever is older, then try again." };
+      }
+      return { reachable: true, report };
     } catch {
       console.error(`Formation execution adapter: engine describe returned unparseable output: ${result.stdout.slice(0, 2_000)}`);
       return { reachable: false, reason: "Formation returned an answer that could not be read." };
@@ -216,7 +221,12 @@ export class EngineBridge {
       return { reachable: false, reason: "Formation could not read that launch workspace." };
     }
     try {
-      return { reachable: true, report: JSON.parse(result.stdout) };
+      const report = JSON.parse(result.stdout);
+      if (!contractAccepted(report)) {
+        console.error(`Formation execution adapter: engine contract version ${report?.contractVersion ?? "(absent)"} is not compatible with major ${ENGINE_CONTRACT_MAJOR}.`);
+        return { reachable: false, reason: "Formation and this product are on incompatible versions. Update whichever is older, then try again." };
+      }
+      return { reachable: true, report };
     } catch {
       console.error(`Formation import adapter: engine read returned unparseable output: ${result.stdout.slice(0, 2_000)}`);
       return { reachable: false, reason: "Formation returned an answer that could not be read." };
@@ -256,6 +266,18 @@ export class EngineBridge {
     if (result.stderr.includes("approve.no_run_state")) return { recorded: false, kind: "no_run" };
     return { recorded: false, kind: "error" };
   }
+}
+
+
+/**
+ * Adapter contract A (engine: core/adapters/contract.ts): a report is usable only when its
+ * contract major matches what this consumer was built against. A missing or mismatched version
+ * is reported as unreachable-with-reason, never silently interpreted.
+ */
+const ENGINE_CONTRACT_MAJOR = "1";
+function contractAccepted(report) {
+  const match = /^(\d+)\.\d+\.\d+$/.exec(report?.contractVersion ?? "");
+  return Boolean(match && match[1] === ENGINE_CONTRACT_MAJOR);
 }
 
 function defaultResolveEngineWorkspace(workspace) {

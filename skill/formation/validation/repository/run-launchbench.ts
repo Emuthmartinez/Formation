@@ -44,6 +44,7 @@ const knownValidators = new Set([
   "check-skill-version",
   "check-version-discipline",
   "check-engine-e2e",
+  "check-adapter-contract",
   "check-package-parity",
   "check-compound-engineering-routing",
   "check-post-launch-ops",

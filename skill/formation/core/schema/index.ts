@@ -3,7 +3,16 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Ajv2020, type AnySchema, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 
-import type { BudgetLedgerDocument, BusinessStateV2, CheckpointDocument, ControlFile, GrantsDocument, RunStateDocument, Waiver, WaiversDocument } from "./types.js";
+import type {
+  BudgetLedgerDocument,
+  BusinessStateV2,
+  CheckpointDocument,
+  ControlFile,
+  GrantsDocument,
+  RunStateDocument,
+  Waiver,
+  WaiversDocument,
+} from "./types.js";
 
 const schemaDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -104,6 +113,15 @@ export function validateControl(value: unknown): ValidationResult<ControlFile> {
 
 export function validateRunState(value: unknown): ValidationResult<RunStateDocument> {
   return validateAgainst<RunStateDocument>("urn:formation:core:run-state-schema", value);
+}
+
+/** Adapter contract A: the emitters call these on their OWN output before printing — an invalid report is never emitted. */
+export function validateBoundaryReport<T>(value: unknown): ValidationResult<T> {
+  return validateAgainst<T>("urn:formation:core:boundary-report-schema", value);
+}
+
+export function validateImportBoundaryReport<T>(value: unknown): ValidationResult<T> {
+  return validateAgainst<T>("urn:formation:core:import-boundary-report-schema", value);
 }
 
 export function validateCheckpoint(value: unknown): ValidationResult<CheckpointDocument> {

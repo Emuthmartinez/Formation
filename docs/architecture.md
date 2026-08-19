@@ -53,7 +53,9 @@ request, schema-checked with a `contractVersion`), the MCP tool surface, the CLI
 workspace on-disk layout. The catalog is managed like source, consumed as a compiled artifact,
 and varied by composition — scope verdicts, named profiles, additive packs — never by mutation.
 Updates are explicit and per-business: a newer engine never silently changes a running operator.
-The standing rule: **L4 never lives in this repository.**
+The standing rule: **L4 never lives in this repository.** Distribution today is git-tag
+pinning; publishing the engine to npm is a recorded founder decision deliberately deferred
+until a third-party consumer asks (2026-08-19).
 
 ## System context
 

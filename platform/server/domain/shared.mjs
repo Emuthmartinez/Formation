@@ -45,7 +45,11 @@ export function humanizeKey(key) {
 }
 
 export function slug(value) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  // Hyphens, not underscores: the engine's workspace resolver
+  // (defaultResolveEngineWorkspace in server/execution.mjs) accepts only ^[a-z0-9][a-z0-9-]*$,
+  // and the underscore variant silently made every multi-word company "unreachable" — the
+  // duplicated-helpers-diverge bug the 2026-08-19 audit named and the adapter contract now pins.
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
 export function unique(values) {

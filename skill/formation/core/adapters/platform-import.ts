@@ -5,6 +5,8 @@ import path from "node:path";
 import { parse as parseYaml } from "yaml";
 
 import { isMainModule, parseArgs } from "../lib/cli.js";
+import { ADAPTER_CONTRACT_VERSION } from "./contract.js";
+import { validateImportBoundaryReport } from "../schema/index.js";
 import { lanes as catalogLanes } from "../../catalog/lanes.js";
 import { laneDependencies, satisfiedDependencyStatuses, statusValues } from "../../tooling/lib/launch-state.js";
 
@@ -140,6 +142,8 @@ export interface ImportContradiction {
 
 export interface ImportBoundaryReport {
   readonly schemaVersion: "1.0.0";
+  /** Adapter contract A version (core/adapters/contract.ts) — consumers accept on major match. */
+  readonly contractVersion: string;
   readonly generatedAt: string;
   readonly workspaceReady: boolean;
   /** Present when workspaceReady is false: why there is nothing here to bring across. */
@@ -206,7 +210,10 @@ function readStringList(source: unknown, key: string): string[] {
   if (!isRecord(source)) return [];
   const value = source[key];
   if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is string => typeof entry === "string").map((entry) => entry.trim()).filter(Boolean);
+  return value
+    .filter((entry): entry is string => typeof entry === "string")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 }
 
 function truncate(text: string, maximum: number): string {
@@ -256,7 +263,7 @@ function stageForPhase(phase: string): string {
 }
 
 function notReady(reason: string, now: string): ImportBoundaryReport {
-  return { schemaVersion: "1.0.0", generatedAt: now, workspaceReady: false, reason };
+  return { schemaVersion: "1.0.0", contractVersion: ADAPTER_CONTRACT_VERSION, generatedAt: now, workspaceReady: false, reason };
 }
 
 function laneOrigin(laneKey: string, sourcePath = STATE_FILE): ImportOrigin {
@@ -470,6 +477,7 @@ export function describeLaunchRepository(root: string, options: { now?: string }
 
   return {
     schemaVersion: "1.0.0",
+    contractVersion: ADAPTER_CONTRACT_VERSION,
     generatedAt: now,
     workspaceReady: true,
     company,
@@ -491,9 +499,10 @@ function buildCompany(
   const name = readString(project, "name");
   const phase = readString(project, "phase") || "phase_0_orient";
   const publicUrls = isRecord(project.public_urls) ? project.public_urls : {};
-  const postLaunch = isRecord(state.lanes) && isRecord((state.lanes as Record<string, unknown>).post_launch_ops)
-    ? ((state.lanes as Record<string, unknown>).post_launch_ops as Record<string, unknown>)
-    : {};
+  const postLaunch =
+    isRecord(state.lanes) && isRecord((state.lanes as Record<string, unknown>).post_launch_ops)
+      ? ((state.lanes as Record<string, unknown>).post_launch_ops as Record<string, unknown>)
+      : {};
 
   const positioning = readString(businessBlock, "positioning");
   const audience = readString(businessBlock, "targetAudience");
@@ -508,7 +517,10 @@ function buildCompany(
     slug: readString(project, "slug") || slugify(name) || "imported-company",
     stage: readString(businessBlock, "stage") === "live" ? "growth" : stageForPhase(phase),
     founderName: readString(project, "owner") || "Founder",
-    oneLiner: positioning && !looksLikeTemplate(positioning) ? truncate(positioning, LIMITS.statement) : `${name} is being brought across from an existing launch workspace.`,
+    oneLiner:
+      positioning && !looksLikeTemplate(positioning)
+        ? truncate(positioning, LIMITS.statement)
+        : `${name} is being brought across from an existing launch workspace.`,
     targetCustomer: audience && !looksLikeTemplate(audience) ? truncate(audience, 4_000) : "The launch workspace has not named a primary customer yet.",
     enginePhase: phase,
     launchScope: readString(project, "launch_scope") || readString(project, "launch_tier") || "essentials",
@@ -804,11 +816,7 @@ function collectPlaceholderContradictions(
  * follows may not match reality. Carrying finished lanes across on that basis without saying so
  * would be the importer inheriting a doubt the workspace was honest enough to record.
  */
-function collectReconciliationContradictions(
-  state: Record<string, unknown>,
-  laneEntries: readonly LaneEntry[],
-  contradictions: ImportContradiction[],
-): void {
+function collectReconciliationContradictions(state: Record<string, unknown>, laneEntries: readonly LaneEntry[], contradictions: ImportContradiction[]): void {
   const finished = laneEntries.filter((lane) => lane.status === "done").length;
   if (finished === 0) return;
   const continuity = isRecord(state.continuity) ? state.continuity : {};
@@ -830,6 +838,12 @@ function main(): number {
     return 1;
   }
   const report = describeLaunchRepository(path.resolve(args.workspace), { now: args.now });
+  // Contract A fail-closed at the emitter — see platform-execution.ts's identical rule.
+  const contractCheck = validateImportBoundaryReport<ImportBoundaryReport>(report);
+  if (!contractCheck.valid) {
+    for (const issue of contractCheck.issues) console.error(`ISSUE import.contract_invalid: ${issue.message} (${issue.path})`);
+    return 1;
+  }
   console.log(JSON.stringify(report, null, 2));
   return 0;
 }

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:formation:core:import-boundary-report-schema",
+  "title": "Import boundary report (adapter contract A)",
+  "description": "The engine's read-only projection of an existing launch workspace: company fields, claims, decisions, tasks, deliverables, and contradictions — everything a consumer imports as drafts and questions, never as facts. Emitted by core/adapters/platform-import.ts, which validates its own output against this schema before printing. contractVersion governs consumer compatibility (major must match).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "contractVersion", "generatedAt", "workspaceReady"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "contractVersion": { "type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "workspaceReady": { "type": "boolean" },
+    "reason": { "type": "string", "minLength": 1 },
+    "company": { "$ref": "#/$defs/company" },
+    "claims": { "type": "array", "items": { "$ref": "#/$defs/claim" } },
+    "decisions": { "type": "array", "items": { "$ref": "#/$defs/decision" } },
+    "tasks": { "type": "array", "items": { "$ref": "#/$defs/task" } },
+    "deliverables": { "type": "array", "items": { "$ref": "#/$defs/deliverable" } },
+    "contradictions": { "type": "array", "items": { "$ref": "#/$defs/contradiction" } }
+  },
+  "$defs": {
+    "origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourcePath"],
+      "properties": {
+        "sourcePath": { "type": "string", "minLength": 1 },
+        "laneKey": { "type": "string" },
+        "laneLabel": { "type": "string" }
+      }
+    },
+    "company": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "slug", "stage", "founderName", "oneLiner", "targetCustomer", "enginePhase", "launchScope", "platforms"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "slug": { "type": "string", "minLength": 1 },
+        "stage": { "type": "string" },
+        "founderName": { "type": "string" },
+        "oneLiner": { "type": "string" },
+        "targetCustomer": { "type": "string" },
+        "enginePhase": { "type": "string" },
+        "launchScope": { "type": "string" },
+        "platforms": { "type": "array", "items": { "type": "string" } },
+        "landingUrl": { "type": "string" },
+        "stateUpdatedAt": { "type": "string" },
+        "liveSince": { "type": "string" }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["importKey", "kind", "statement", "evidence", "origin"],
+      "properties": {
+        "importKey": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["recommendation", "question", "assumption"] },
+        "statement": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "items": { "type": "string" } },
+        "origin": { "$ref": "#/$defs/origin" }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["importKey", "title", "decision", "rationale", "status", "origin"],
+      "properties": {
+        "importKey": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "decision": { "type": "string" },
+        "rationale": { "type": "string" },
+        "status": { "enum": ["proposed", "decided", "superseded"] },
+        "decidedAt": { "type": "string" },
+        "origin": { "$ref": "#/$defs/origin" }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["importKey", "title", "urgency", "blocked", "origin"],
+      "properties": {
+        "importKey": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "urgency": { "enum": ["critical", "high", "medium"] },
+        "blocked": { "type": "boolean" },
+        "origin": { "$ref": "#/$defs/origin" }
+      }
+    },
+    "deliverable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["importKey", "title", "sections", "fingerprint", "origin"],
+      "properties": {
+        "importKey": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["title", "body"],
+            "properties": { "title": { "type": "string" }, "body": { "type": "string" } }
+          }
+        },
+        "fingerprint": { "type": "string", "minLength": 1 },
+        "origin": { "$ref": "#/$defs/origin" }
+      }
+    },
+    "contradiction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message", "origin"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["blocking", "advisory"] },
+        "message": { "type": "string", "minLength": 1 },
+        "relatesTo": { "type": "string" },
+        "origin": { "$ref": "#/$defs/origin" }
+      }
+    }
+  }
+}

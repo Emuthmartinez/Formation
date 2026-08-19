@@ -1,6 +1,6 @@
 {
   "name": "formation-skill-runtime",
-  "version": "0.148.0",
+  "version": "0.149.0",
   "private": true,
   "bin": {
     "formation": "bin/formation.mjs",
@@ -40,6 +40,7 @@
     "check:autopilot": "tsx validation/repository/check-autopilot-contract.ts",
     "check:skill-version": "tsx validation/repository/check-skill-version.ts",
     "check:version-discipline": "tsx validation/repository/check-version-discipline.ts",
+    "check:adapter-contract": "tsx validation/repository/check-adapter-contract.ts",
     "session:bootstrap": "tsx core/session/bootstrap.ts",
     "check:compound-engineering": "tsx validation/business/engineering/check-compound-engineering-routing.ts",
     "validate:design-state": "tsx validation/business/design/validate-state.ts",

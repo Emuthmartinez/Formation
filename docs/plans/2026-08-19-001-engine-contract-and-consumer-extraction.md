@@ -1,7 +1,7 @@
 # Engine contracts and consumer extraction
 
 - Date: 2026-08-19
-- Status: approved plan, execution staged (A1 next)
+- Status: in execution (A1 shipping as v0.149.0); founder decisions recorded 2026-08-19
 - From: v0.148.0 (PRs #184–#190 merged; the engine bootstraps, runs, verifies, recurs, schedules, and exposes the `formation` CLI and `formation-mcp`)
 
 ## North star
@@ -59,12 +59,12 @@ Each is testable and lands with its enforcement; the satisfying phase is named.
 
 The catalog/knowledge/kernel/gates layout; the skill's install and runtime-sync channel; the audit and its registration chains; the five-file version discipline; stable catalog IDs as identity; no telemetry.
 
-## Founder decisions
+## Founder decisions — RECORDED 2026-08-19
 
-1. Create the platform repository (C1). Deferred: extraction waits; A/B/D/E proceed.
-2. Hosted-instance cutover window (C2). Deferred: old checkout keeps serving.
-3. Publish the engine to npm. Deferred: git-tag pinning works.
-4. License / distribution posture — MIT plus private is a contradiction once the repo is forwarded to users. Deferred: keep private, no forwarding.
+1. **Create Formation-Platform, private** — approved. C1 proceeds when the sequence reaches it.
+2. **Cutover ASAP once C1 verifies** — approved; deploy-then-delete ordering protects uptime.
+3. **npm publish deferred** — git-tag pinning is the channel; publishing stays a named future item in the north star, revisited when a third-party consumer asks.
+4. **Keep private for now** — no forwarding until the license posture is settled at the first external consumer.
 
 ## Risks
 

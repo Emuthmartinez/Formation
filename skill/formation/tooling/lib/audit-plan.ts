@@ -144,6 +144,7 @@ export function buildAuditPlan(layout: AuditLayout, roots?: { businessRoot?: str
       kind: "script",
       args: layout === "repo" ? ["--repo-root", ".", "--skill-root", S] : ["--skill-root", S],
     },
+    { id: "check:adapter-contract", kind: "script" },
     { id: "check:package-parity", kind: "script", repoOnly: true },
     { id: "check:artifact-templates", kind: "script", args: ["--skill-root", S] },
     { id: "check:generated-pages", kind: "script", args: rootArgs },

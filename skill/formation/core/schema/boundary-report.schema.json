@@ -1,0 +1,291 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:formation:core:boundary-report-schema",
+  "title": "Execution boundary report (adapter contract A)",
+  "description": "The engine's read-only projection to consumers: run status, approvals, verified results, artifact acceptance, and the launch matrix. Emitted by core/adapters/platform-execution.ts, which validates its own output against this schema before printing — an invalid report is never emitted. contractVersion governs consumer compatibility (major must match); schemaVersion stays the document's internal shape marker.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "contractVersion", "generatedAt", "workspaceReady"],
+  "properties": {
+    "schemaVersion": { "const": "1.1.0" },
+    "contractVersion": { "type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "workspaceReady": { "type": "boolean" },
+    "reason": { "type": "string", "minLength": 1 },
+    "planId": { "type": "string", "minLength": 1 },
+    "catalogVersion": { "type": "string", "minLength": 1 },
+    "runId": { "type": ["string", "null"] },
+    "hasDurableRun": { "type": "boolean" },
+    "autonomyUnset": { "type": "boolean" },
+    "workflows": { "type": "array", "items": { "$ref": "#/$defs/workflowState" } },
+    "approvals": { "type": "array", "items": { "$ref": "#/$defs/approvalState" } },
+    "results": { "type": "array", "items": { "$ref": "#/$defs/verifiedResult" } },
+    "artifacts": { "type": "array", "items": { "$ref": "#/$defs/artifactState" } },
+    "launchMatrix": { "$ref": "#/$defs/launchMatrix" }
+  },
+  "$defs": {
+    "workflowState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflowId", "title", "status"],
+      "properties": {
+        "workflowId": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["finished", "ready", "in-progress", "needs-founder", "held", "failed", "upcoming"] },
+        "founderReason": { "type": "string" },
+        "brief": { "$ref": "#/$defs/nodeBrief" }
+      }
+    },
+    "nodeBrief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflowId", "title", "contractFiles", "instructions", "open", "consult", "load", "route", "skills", "tools", "produce", "verify", "approvals", "tokenBudget"],
+      "properties": {
+        "workflowId": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "role": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "name", "promptPath"],
+          "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "promptPath": { "type": "string" } }
+        },
+        "contractFiles": { "type": "array", "items": { "type": "string" } },
+        "instructions": { "type": "string" },
+        "open": { "type": "array", "items": { "type": "string" } },
+        "consult": { "type": "array", "items": { "type": "string" } },
+        "load": { "type": "array", "items": { "$ref": "#/$defs/knowledgeRef" } },
+        "route": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["packId", "packTitle", "path", "title", "loadWhen"],
+            "properties": {
+              "packId": { "type": "string" },
+              "packTitle": { "type": "string" },
+              "path": { "type": "string" },
+              "title": { "type": "string" },
+              "loadWhen": { "type": "string" }
+            }
+          }
+        },
+        "skills": { "type": "array", "items": { "$ref": "#/$defs/whenRoute" } },
+        "tools": { "type": "array", "items": { "$ref": "#/$defs/whenRoute" } },
+        "produce": { "type": "array", "items": { "type": "string" } },
+        "verify": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "gateCommands", "failClosed"],
+          "properties": {
+            "kind": { "type": "string" },
+            "gateCommands": { "type": "array", "items": { "type": "string" } },
+            "failClosed": { "type": "boolean" }
+          }
+        },
+        "approvals": { "type": "array", "items": { "type": "string" } },
+        "tokenBudget": { "type": "number" }
+      }
+    },
+    "knowledgeRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "title", "loadWhen"],
+      "properties": { "path": { "type": "string" }, "title": { "type": "string" }, "loadWhen": { "type": "string" } }
+    },
+    "whenRoute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "when"],
+      "properties": { "id": { "type": "string" }, "when": { "type": "string" } }
+    },
+    "approvalState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approvalId", "workflowId", "workflowTitle", "description", "status"],
+      "properties": {
+        "approvalId": { "type": "string", "minLength": 1 },
+        "workflowId": { "type": "string", "minLength": 1 },
+        "workflowTitle": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "enum": ["pending", "approved", "rejected"] },
+        "protectedCategory": { "type": "string" }
+      }
+    },
+    "verifiedResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflowId", "workflowTitle", "attemptId", "attemptNumber", "verification", "evidence", "artifacts", "declaredTokenBudget", "producedBySessionId"],
+      "properties": {
+        "workflowId": { "type": "string", "minLength": 1 },
+        "workflowTitle": { "type": "string" },
+        "attemptId": { "type": "string", "minLength": 1 },
+        "attemptNumber": { "type": "integer", "minimum": 1 },
+        "finishedAt": { "type": "string", "format": "date-time" },
+        "verification": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "items": { "type": "string" } },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["artifactId", "fingerprint"],
+            "properties": { "artifactId": { "type": "string" }, "fingerprint": { "type": "string" } }
+          }
+        },
+        "declaredTokenBudget": { "type": "number" },
+        "declaredCostEstimate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["amount", "currency"],
+          "properties": { "amount": { "type": "number" }, "currency": { "type": "string" } }
+        },
+        "producedBySessionId": { "type": "string", "minLength": 1 },
+        "verifiedBySessionId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "artifactState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifactId", "accepted"],
+      "properties": {
+        "artifactId": { "type": "string", "minLength": 1 },
+        "workflowId": { "type": "string" },
+        "accepted": { "type": "boolean" },
+        "fingerprint": { "type": "string" }
+      }
+    },
+    "matrixKnowledge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "path", "loadWhen", "freshness", "reviewStatus"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "path": { "type": "string" },
+        "loadWhen": { "type": "string" },
+        "freshness": { "type": "string" },
+        "reviewStatus": { "enum": ["review-due", "current", "internal"] }
+      }
+    },
+    "launchMatrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["groups", "workflows", "launchIntegrity", "systemSummary"],
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "title", "order"],
+            "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "order": { "type": "number" } }
+          }
+        },
+        "workflows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["workflowId", "groupId", "title", "summary", "status", "applicability", "phaseIds", "dependencyWorkflowIds", "dependentWorkflowIds", "knowledge", "conditionalKnowledge", "services", "agentTools", "outputs", "verification"],
+            "properties": {
+              "workflowId": { "type": "string" },
+              "groupId": { "type": "string" },
+              "title": { "type": "string" },
+              "summary": { "type": "string" },
+              "status": { "type": "string" },
+              "founderReason": { "type": "string" },
+              "applicability": { "enum": ["required", "not-needed", "unknown"] },
+              "phaseIds": { "type": "array", "items": { "type": "string" } },
+              "dependencyWorkflowIds": { "type": "array", "items": { "type": "string" } },
+              "dependentWorkflowIds": { "type": "array", "items": { "type": "string" } },
+              "role": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "name"],
+                "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+              },
+              "knowledge": { "type": "array", "items": { "$ref": "#/$defs/matrixKnowledge" } },
+              "conditionalKnowledge": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["id", "title", "path", "loadWhen", "freshness", "reviewStatus", "packId", "packTitle"],
+                  "properties": {
+                    "id": { "type": "string" },
+                    "title": { "type": "string" },
+                    "path": { "type": "string" },
+                    "loadWhen": { "type": "string" },
+                    "freshness": { "type": "string" },
+                    "reviewStatus": { "enum": ["review-due", "current", "internal"] },
+                    "packId": { "type": "string" },
+                    "packTitle": { "type": "string" }
+                  }
+                }
+              },
+              "services": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["id", "name", "purpose", "state"],
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "purpose": { "type": "string" },
+                    "state": { "type": "string" },
+                    "checkedAt": { "type": "string" }
+                  }
+                }
+              },
+              "agentTools": { "type": "array", "items": { "$ref": "#/$defs/whenRoute" } },
+              "outputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["artifactId", "title", "state"],
+                  "properties": { "artifactId": { "type": "string" }, "title": { "type": "string" }, "state": { "type": "string" } }
+                }
+              },
+              "verification": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind", "state", "evidenceCount"],
+                "properties": { "kind": { "type": "string" }, "state": { "type": "string" }, "evidenceCount": { "type": "number" } }
+              }
+            }
+          }
+        },
+        "launchIntegrity": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["workflowId", "title", "status", "verification"],
+            "properties": {
+              "workflowId": { "type": "string" },
+              "title": { "type": "string" },
+              "status": { "type": "string" },
+              "verification": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind", "state"],
+                "properties": { "kind": { "type": "string" }, "state": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "systemSummary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["total", "counts"],
+          "properties": {
+            "total": { "type": "number" },
+            "counts": { "type": "object", "additionalProperties": { "type": "number" } }
+          }
+        }
+      }
+    }
+  }
+}
