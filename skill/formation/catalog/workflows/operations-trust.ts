@@ -137,6 +137,28 @@ export const workflows = [
     founderOnlyActions: ["decide Kill, Hold, Fix, or Scale"],
     actionClass: "mutate",
     idempotent: true,
+    // The Weekly Ops Review's own doctrine: the rhythm stops only on a recorded Kill verdict.
+    // This is the field that makes that true — the node reopens on its own calendar
+    // (reopenRecurringNodes) instead of `succeeded` being terminal.
+    recurrenceDays: 7,
+  }),
+  workflow({
+    id: "workflow.operations.scheduled-autonomy-installation",
+    title: "Scheduled autonomy installation",
+    domainId: "domain.operations",
+    areaIds: ["area.business-operations-trust"],
+    trigger: "Business live and the founder wants the operating rhythm to run without anyone starting sessions by hand; changing or removing that schedule",
+    instructions:
+      "Install the OS-level trigger that keeps the operating loop alive: run `core/adapters/install-schedule.ts` in its default dry-run first and show the founder the exact crontab line (or launchd plist) it would install — mechanism, cadence, runtime, wrapper path, and log path — then run it with `--apply` only after the founder's approval, because a standing schedule on their machine is their call, every time. Verify the installation with the command the dry-run prints (`crontab -l | grep formation:<slug>` or `launchctl list`), and record the whole arrangement in `operations/SCHEDULE.md`: mechanism, cadence, runtime, brief path, wall-clock cap, the verify command, the exact uninstall command (`--uninstall --apply`), and the note that the kill switch in `control/control.json` stops every scheduled session cold even while the OS keeps firing the trigger. The scheduled session itself reopens recurring work (the weekly ops review, the growth iteration loop) on its own calendar — this node installs the heartbeat, it does not do the week's work.",
+    reads: ["state/PROJECT_STATE.yaml"],
+    consults: ["operations/POST_LAUNCH_OPS.md"],
+    roleId: "role.orchestrator",
+    laneIds: ["post_launch_ops"],
+    phaseIds: ["phase.6b"],
+    outputPaths: ["operations/SCHEDULE.md"],
+    founderOnlyActions: ["approve installing, changing, or removing the recurring session schedule on this machine"],
+    actionClass: "mutate",
+    idempotent: true,
   }),
   workflow({
     id: "workflow.operations.founder-zero-operator-bootstrap",

@@ -12,6 +12,7 @@ import {
   reconcileEnvironmentalArtifacts,
   reconcilePatch,
   reconcileWorkflowApplicability,
+  reopenRecurringNodes,
   seedRunState,
 } from "../../core/engine/runstate.js";
 import { listPendingFreshContext, refuseFreshContextAcceptance, VERIFICATION_REJECTED_BLOCKER } from "../../core/engine/verification.js";
@@ -38,6 +39,7 @@ function testCatalog(): CatalogInput {
       { id: "artifact.draft-note", path: "notes/draft.md" },
       { id: "artifact.review-note", path: "notes/review.md" },
       { id: "artifact.maybe-note", path: "notes/maybe.md" },
+      { id: "artifact.weekly-note", path: "notes/weekly.md" },
     ],
     workflows: [
       {
@@ -82,6 +84,21 @@ function testCatalog(): CatalogInput {
         gateCommands: [],
         idempotent: true,
         applicability: { mode: "conditional", question: "Does the fixture apply?" },
+      },
+      {
+        id: "workflow.weekly-note",
+        title: "Weekly note",
+        domainId: "domain.operations",
+        actionClass: "draft",
+        reads: ["notes/seed.md"],
+        dependencies: [],
+        outputPaths: ["notes/weekly.md"],
+        providerIds: [],
+        laneIds: ["post_launch_ops"],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+        recurrenceDays: 7,
       },
     ],
   };
@@ -218,6 +235,55 @@ export function register(harness: Harness): void {
     const reparked: string = node.status;
     assert(reparked === "waiting_founder", "reconciliation must re-park the unanswered question");
     assert((node.blocker ?? "").startsWith("Scope answer needed"), `blocker must restate the question, got "${node.blocker}"`);
+  });
+
+  // ---------------------------------------------------------------------
+  // calendar reopening (reopenRecurringNodes) — the operating loop
+  // ---------------------------------------------------------------------
+
+  harness.check("recurrence: a succeeded recurring node reopens after its cadence, prior acceptance intact", () => {
+    const workspace = workspaceWithSeed(harness, "recur-due");
+    const plan = compilePlan(testCatalog(), now);
+    const run = seedRunState(plan, emptyBusinessState(), { ownerSessionId: "s1", ttlSeconds: 60, wallClockCapSeconds: 600, now });
+    reconcileEnvironmentalArtifacts(plan, run, workspace, now);
+    const attempt = beginAttempt(plan, run, "run.weekly-note" as never, "s1", now);
+    reconcilePatch(
+      plan,
+      run,
+      { nodeId: "run.weekly-note" as never, attemptId: attempt.id, outputs: [{ artifactId: "artifact.weekly-note", path: "notes/weekly.md", fingerprint: "fp-w1", evidence: [] }] },
+      now,
+    );
+    acceptVerification(plan, run, "run.weekly-note" as never, ["reviewed the weekly pass"], now, "s1.verifier");
+    const state = run.nodes["run.weekly-note"]!;
+    const acceptedFingerprint = state.acceptedOutputFingerprint;
+
+    const threeDays = "2026-08-22T09:00:00.000Z";
+    assert(reopenRecurringNodes(plan, run, threeDays).length === 0, "a cadence not yet elapsed must not reopen anything");
+    assert(state.status === "succeeded", "node stays succeeded inside its cadence");
+
+    const eightDays = "2026-08-27T09:00:00.000Z";
+    const reopened = reopenRecurringNodes(plan, run, eightDays);
+    assert(reopened.includes("run.weekly-note" as never), "an elapsed cadence must reopen the node");
+    const reopenedStatus: string = state.status;
+    assert(reopenedStatus === "stale", `reopened node must be stale, got ${reopenedStatus}`);
+    assert(state.blocker === undefined, "reopening carries no blocker text");
+    assert(state.acceptedOutputFingerprint === acceptedFingerprint, "last cycle's acceptance stays until the re-run replaces it");
+    const binding = run.artifactBindings.find((candidate) => candidate.artifactId === "artifact.weekly-note")!;
+    assert(binding.accepted === true, "last cycle's output binding stays accepted — reopening is not invalidation");
+    const frontier = computeFrontier(plan, run, emptyBusinessState(), allowAllAutonomyEvaluator);
+    assert(frontier.ready.includes("run.weekly-note" as never), "the reopened node must return to the frontier");
+  });
+
+  harness.check("recurrence: non-recurring nodes never reopen; lane-seeded success counts cadence from run creation", () => {
+    const plan = compilePlan(testCatalog(), now);
+    const seededState = { lanes: { post_launch_ops: { status: "succeeded" } }, founderGates: { pending: [] } } as unknown as BusinessStateV2;
+    const run = seedRunState(plan, seededState, { ownerSessionId: "s1", ttlSeconds: 60, wallClockCapSeconds: 600, now });
+    assert(run.nodes["run.weekly-note"]!.status === "succeeded", "lane-done seeding marks the recurring node succeeded with no attempts");
+    const eightDays = "2026-08-27T09:00:00.000Z";
+    const reopened = reopenRecurringNodes(plan, run, eightDays);
+    assert(reopened.includes("run.weekly-note" as never), "a lane-seeded recurring node counts its cadence from the run's creation");
+    assert(!reopened.includes("run.draft-note" as never), "nodes without recurrenceDays never reopen");
+    assert(reopened.length === 1, `only the recurring node reopens, got ${reopened.join(", ")}`);
   });
 
   // ---------------------------------------------------------------------

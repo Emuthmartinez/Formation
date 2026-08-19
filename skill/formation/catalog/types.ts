@@ -211,6 +211,14 @@ export interface CatalogWorkflowDef {
   actionClass: ActionClass;
   protectedCategory?: ProtectedCategory;
   idempotent: boolean;
+  /**
+   * Operating-cadence contract: a succeeded node reopens (goes stale on its own calendar) once
+   * this many days pass since its last completed attempt. This is what makes "actively operating
+   * the business" graph-native rather than a promise in prose — before it, the frontier treated
+   * `succeeded` as terminal, so the weekly post-launch rhythm the knowledge docs demand had no
+   * mechanism to self-trigger (2026-08-19 audit's core structural finding).
+   */
+  recurrenceDays?: number;
   maxAttempts?: number;
   ttlSeconds?: number;
   tokenBudget?: number;

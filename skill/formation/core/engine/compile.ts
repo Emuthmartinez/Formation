@@ -105,6 +105,8 @@ export interface CatalogWorkflowNode {
   founderOnlyActions: string[];
   gateCommands: string[];
   idempotent: boolean;
+  /** Operating cadence: a succeeded node reopens once this many days pass since its last completed attempt (see runstate.ts's reopenRecurringNodes). */
+  recurrenceDays?: number;
   maxAttempts?: number;
   ttlSeconds?: number;
   tokenBudget?: number;
@@ -147,6 +149,7 @@ export interface CompiledRunNode {
   resources: ResourceClaim[];
   verification: VerificationPolicy;
   idempotent: boolean;
+  recurrenceDays?: number;
   maxAttempts: number;
   ttlSeconds: number;
   tokenBudget: number;
@@ -258,6 +261,7 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
         failClosed: gateIds.length > 0 || judgment || outputs.length > 0,
       },
       idempotent: workflow.idempotent,
+      recurrenceDays: workflow.recurrenceDays,
       maxAttempts: workflow.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
       ttlSeconds: workflow.ttlSeconds ?? DEFAULT_TTL_SECONDS,
       tokenBudget: workflow.tokenBudget ?? (judgment ? JUDGMENT_TOKEN_BUDGET : DEFAULT_TOKEN_BUDGET),

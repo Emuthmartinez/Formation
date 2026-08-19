@@ -355,6 +355,46 @@ export function reconcileEnvironmentalArtifacts(plan: CompiledPlan, run: RunStat
   return changed.length > 0 ? invalidateDescendants(plan, run, changed, now) : [];
 }
 
+/**
+ * Calendar-based reopening: the operating loop's missing half. The frontier deliberately treats
+ * `succeeded` as terminal — correct for launch work, but the post-launch operating nodes carry a
+ * standing cadence (weekly ops review, weekly growth iteration) that the knowledge docs demand
+ * and check:post-launch enforces on wall-clock time, while the engine had no mechanism to
+ * re-offer the work (2026-08-19 audit: the one legitimate way for the rhythm to stop is a
+ * recorded Kill verdict, yet a succeeded node could never run again without a founder manually
+ * poking it).
+ *
+ * A node with `recurrenceDays` whose last completed attempt finished more than that many days
+ * before `now` reopens to `stale`. Its accepted output bindings are deliberately NOT touched:
+ * reopening the weekly review must not invalidate everything downstream of last week's review —
+ * if the re-run produces different content, reconcilePatch's ordinary staleness cascade handles
+ * exactly that, and if it produces identical content nothing downstream moves. A node seeded
+ * succeeded with no attempts (lane-done seeding on an imported mid-launch business) uses the
+ * run's own creation time as its "last done", so the cadence starts counting from adoption
+ * rather than never.
+ */
+export function reopenRecurringNodes(plan: CompiledPlan, run: RunStateDocument, now: string): RunNodeId[] {
+  const reopened: RunNodeId[] = [];
+  const nowMs = Date.parse(now);
+  for (const node of plan.nodes) {
+    if (!node.recurrenceDays || node.recurrenceDays <= 0) continue;
+    const state = run.nodes[node.id];
+    if (!state || state.status !== "succeeded") continue;
+    const lastAttempt = state.attempts.at(-1);
+    const lastDone = lastAttempt?.finishedAt ?? lastAttempt?.startedAt ?? run.createdAt;
+    const elapsedDays = (nowMs - Date.parse(lastDone)) / 86_400_000;
+    if (elapsedDays < node.recurrenceDays) continue;
+    state.status = "stale";
+    state.blocker = undefined;
+    // acceptedOutputFingerprint and the output bindings stay: last cycle's accepted work remains
+    // real (the execution boundary keeps exporting it) until the re-run's own acceptance
+    // replaces it. Only the status reopens.
+    reopened.push(node.id);
+  }
+  if (reopened.length > 0) run.updatedAt = now;
+  return reopened;
+}
+
 /** Staleness invalidation: a changed accepted input invalidates descendants transitively. */
 export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument, changedArtifactIds: readonly string[], now: string): RunNodeId[] {
   const changed = new Set<string>(changedArtifactIds);

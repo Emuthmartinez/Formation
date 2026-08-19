@@ -10,6 +10,7 @@ lifecycle: active
 bindings:
   workflow_ids:
     - workflow.operations.post-launch-operations
+    - workflow.operations.scheduled-autonomy-installation
   context_pack_ids: []
 applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
 sources: []
