@@ -4,6 +4,17 @@ What remains between the engine as it runs today and the engine as the direction
 
 Reproduce the ground truth before acting on any item: `npm run audit` (72 steps, including `check:engine-e2e`), `npm run plan:frontier -- --workspace <dir>` against a bootstrapped workspace, and the per-item commands below.
 
+## P0: The layering plan (contracts, front doors, extraction)
+
+The committed path is `docs/plans/2026-08-19-001-engine-contract-and-consumer-extraction.md` — twelve requirements, six phases. The near-term engine work it adds to this backlog:
+
+- **A1 (v0.149.0):** the open slug-divergence bug (platform underscores vs the adapter's hyphen rule) plus the adapter contract — generated schemas, `contractVersion`, fail-closed self-validation, `check:adapter-contract` golden samples.
+- **A2 (v0.150.0):** MCP hardening on the workspace registry (`~/.formation/workspaces.json`): allowlist resolution, `asFounder` assertion, read-only mode, `formation_status`.
+- **B (v0.151.0):** publishability (`npm pack` standalone, smoke-tested) and the consumer front doors — `formation setup`, `doctor`, `new` (a fresh business currently has no birthplace: `bootstrap` only migrates), `update`, `list` — plus the mid-journey catalog re-pin proven in `check:engine-e2e`.
+- **E:** the `catalog add-workflow` scaffolder; named profiles generalizing `launch_scope`; packs as design-first composition.
+
+Reproduce the gaps: `formation bootstrap --workspace <empty-dir>` (no birthplace), `grep -n "slug" platform/server/domain/shared.mjs core/adapters/platform-import.ts` (divergence).
+
 ## P0: A real business through the real executor
 
 `check:engine-e2e` proves the loop with the fixture executor. The loop with the **real** worker CLIs (claude/codex/cursor-agent) has run only in development sessions, never as a standing proof against a live business. The next launch is the forcing test: bootstrap it, schedule it, and let the operating loop run for two weeks with real workers and real founder approvals. What breaks becomes fixture cases; what holds becomes the reference for the exposure story.
