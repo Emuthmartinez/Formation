@@ -1,10 +1,10 @@
 {
   "skill": "formation",
-  "version": "0.147.0",
+  "version": "0.148.0",
   "updatedAt": "2026-08-19",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "The engine as a Model Context Protocol server. core/mcp/server.ts (launched by the new formation-mcp bin) exposes six typed tools over stdio — formation_bootstrap, formation_plan, formation_run, formation_approvals, formation_verify, formation_schedule — each exec-ing the exact CLI the packaged formation bin dispatches to and the audit proves. Exit codes map to isError; stdout comes back verbatim because those CLIs already speak in complete, founder-plain sentences. The trust boundary is unchanged by the surface: state moves only through the reducer, approvals only through approve.ts, verification only under producer-never-verifies rules — the server holds no state and grants no authority; it is a calling convention.",
-    "The mcp fixture drives one real client conversation over stdio: the initialize handshake (server name and skill-synced version), tools/list naming all six tools, a tools/call whose dry-run bootstrap returns the real CLI plan for a throwaway copy of the reference business, and a failing call whose underlying CLI error and exit code surface as isError — no network, no worker CLIs. New runtime dependencies: @modelcontextprotocol/sdk and zod, in the skill package."
+    "Cut the repository's own story over to the engine-first direction. README.md and docs/architecture.md are rewritten around what the repository now demonstrably is: a typed workflow-graph engine (catalog, compiler, frontier, reducer, sessions) driven by agents through the formation CLI and the formation-mcp server, with platform/ as one consumer through the typed adapter boundary. AGENTS.md and CLAUDE.md carry the same reversal, and the no-engine vocabulary rule is scoped to where it always belonged: founder-visible copy never speaks internal vocabulary, while maintainer-facing material calls the engine the engine.",
+    "Point-in-time material moved to docs/history per the repository's own convention: the SaaS-era backlog (replaced by docs/engine-backlog.md, ranked by how much each item changes autonomous operation, with reproduce commands), the original-repository audit, and the pre-rename loop-dryrun log. docs/method/skill-workflow-loops.md — a current-tense method doc pointing at a deleted source tree and two npm scripts that no longer exist — is rewritten against the real catalog loop. The six platform docs gain a direction note rather than a rewrite: their platform mechanics remain accurate; their premise no longer leads the repository."
   ]
 }

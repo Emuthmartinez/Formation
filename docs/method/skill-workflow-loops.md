@@ -1,32 +1,17 @@
-# Workflow Modeling Method
+# Workflow modeling method
 
-The live workflow inventory is generated from the typed definition graph:
+How workflow changes are made in this repository. The live inventory is generated from the catalog; edit definitions, never projections.
 
-- source definitions: `skill/b2c-mobile-business-launch/runtime/graph/workflows/`
-- generated inventory: `skill/b2c-mobile-business-launch/runtime/graph/generated/skill-graph.md`
-- machine-readable graph: `skill/b2c-mobile-business-launch/runtime/graph/generated/skill-graph.json`
-- context budget: `skill/b2c-mobile-business-launch/runtime/graph/generated/context-report.json`
+- source definitions: `skill/formation/catalog/workflows/*.ts` (plus `lanes.ts`, `phases.ts`, `roles.ts`, `gates.ts`)
+- generated projections: `skill/formation/catalog/generated/` (`catalog.json`, `routing.md`, `spine.md`, `contracts.md`)
+- knowledge bindings: `skill/formation/catalog/knowledge/**/*.yaml`
 
-Every workflow keeps the five-part contract established by the original audit:
+## The loop
 
-1. trigger
-2. action
-3. proof
-4. durable memory
-5. observable stopping condition
+1. Edit the workflow definition (a `workflow({...})` seed: trigger, instructions, reads, role, lanes, phases, dependencies, outputs, gates, recurrence).
+2. Bind or update the knowledge manifest that carries the node's guidance.
+3. Run `npm run catalog:render-routing` to regenerate every projection.
+4. Run `npm run check:catalog` — graph integrity, node contracts, knowledge rules.
+5. Run `npm run audit` before any readiness claim; `check:engine-e2e` drives the compiled graph against the reference business on every audit.
 
-The point of the typed graph is not to erase this method. It makes the method executable and prevents the inventory, lane topology, context routing, gates, and Control Plane from maintaining separate versions of the same relationships.
-
-The full v0.64.0 inventory and its stopping-condition audit remain as a dated record in [`../history/skill-workflow-loops-2026-08-v0.64.0.md`](../history/skill-workflow-loops-2026-08-v0.64.0.md). It is evidence for why the graph definitions exist, not current policy.
-
-## Maintenance loop
-
-When a workflow changes:
-
-1. edit the relevant `graph/workflows/*.ts` definition
-2. update domains, contexts, lanes, artifacts, gates, operators, or providers only when their real relationship changed
-3. run `npm run render:skill-graph`
-4. run `npm run check:skill-graph`
-5. run the full audit and LaunchBench
-
-Do not edit generated graph files or generated blocks in `SKILL.md` and `spine.md` directly.
+Rules that hold across every change: stable catalog IDs are identities and survive path moves; a declared read is a readiness input (the compiler wires it); every output path needs exactly one producing workflow and an owning role whose scope covers it; a node count in prose is a bug — the compiled catalog and its count fixture are the source of truth.

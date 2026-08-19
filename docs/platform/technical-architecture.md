@@ -1,5 +1,10 @@
 # Technical architecture
 
+> **Direction note (2026-08-19).** This repository is engine-first: `skill/formation/` is the
+> typed workflow-graph engine and the center of the repository; the platform described below is
+> one consumer of it through the typed adapter boundary. This document's mechanics remain
+> accurate for the platform itself; for the system's architecture start at `docs/architecture.md`.
+
 ## Overview
 
 Formation is a same-origin React application and Node API layered above the repository's graph-native launch skill.
@@ -192,7 +197,7 @@ The adapter:
 - never gives the browser access to skill files
 - reports an unreachable skill as unreachable, never as "no work ready"
 
-Skill founder approvals mirror into the decision log keyed by approval and run (`server/domain/approvals.mjs`); only an owner may answer, and the answer round-trips through the skill's own `core/session/approve.ts`. The skill's remaining half is its own per-node executor, which still selects fixture and no-op executors — ranked in `remaining-gaps.md`.
+Skill founder approvals mirror into the decision log keyed by approval and run (`server/domain/approvals.mjs`); only an owner may answer, and the answer round-trips through the skill's own `core/session/approve.ts`. The engine's per-node executor shipped in v0.142.0 (`core/session/executor.ts` spawns real worker CLIs); what remains engine-side is ranked in `docs/engine-backlog.md`.
 
 ## Import boundary
 

@@ -1,5 +1,10 @@
 # Formation design system
 
+> **Direction note (2026-08-19).** This repository is engine-first: `skill/formation/` is the
+> typed workflow-graph engine and the center of the repository; the platform described below is
+> one consumer of it through the typed adapter boundary. This document's mechanics remain
+> accurate for the platform itself; for the system's architecture start at `docs/architecture.md`.
+
 ## Design position
 
 Formation should feel like a calm, well-edited operating document that happens to be interactive.

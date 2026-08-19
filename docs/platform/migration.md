@@ -1,5 +1,10 @@
 # Migration from skill interfaces to Formation
 
+> **Direction note (2026-08-19).** This repository is engine-first: `skill/formation/` is the
+> typed workflow-graph engine and the center of the repository; the platform described below is
+> one consumer of it through the typed adapter boundary. This document's mechanics remain
+> accurate for the platform itself; for the system's architecture start at `docs/architecture.md`.
+
 ## Goal
 
 Move founder interaction from generated repository files and static HTML into Formation without weakening the graph-native launch skill or breaking existing launches.

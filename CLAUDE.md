@@ -1,21 +1,23 @@
 # Claude Repository Guide
 
-This repository is Formation. Operate through the ownership boundaries in `AGENTS.md`. Formation, in `platform/`, is the founder product; the Formation skill, in `skill/formation/`, is its graph-native launch automation and an independently maintained compatibility surface. The skill installs as `formation`; legacy `b2c-mobile-business-launch` aliases remain as compat symlinks for repos shipped before the rename. Vocabulary: say "the Formation platform" and "the Formation skill" (or "the platform" / "the skill" after first mention) — the skill is never called an engine, and founder-visible copy names exactly one actor, Formation.
+This repository is Formation: a typed workflow-graph engine, in `skill/formation/`, that takes a consumer mobile-app business from idea to shipped and into ongoing autonomous operation. Operate through the ownership boundaries in `AGENTS.md`. `platform/` is the founder web product — one consumer of the engine through the typed adapter, never a co-owner of its state. The engine also installs as the `formation` agent skill; legacy `b2c-mobile-business-launch` aliases remain as compat symlinks for repos shipped before the rename.
+
+Vocabulary, scoped by audience: in maintainer-facing material (this file, code comments, architecture docs) "the engine" is the correct name for `skill/formation/`. In founder-visible copy — digests, product pages, generated business surfaces — internal vocabulary never appears: no "engine", no lane ids, no phase codes, and exactly one named actor, Formation. `check:founder-copy` enforces the founder-visible half; this sentence is what scopes it.
 
 ## Start here
+
+For engine work:
+
+1. Read `skill/formation/README.md`.
+2. Read `skill/formation/SKILL.md`.
+3. Inspect the relevant catalog node and context contract.
+4. Load only the named knowledge references and workspace artifacts.
 
 For founder product work:
 
 1. Read `README.md` and `docs/architecture.md`.
 2. Read `platform/AGENTS.md`.
 3. Inspect the relevant API, domain service, page, and test together.
-
-For skill work:
-
-1. Read `skill/formation/README.md`.
-2. Read `skill/formation/SKILL.md`.
-3. Inspect the relevant catalog node and context contract.
-4. Load only the named knowledge references and workspace artifacts.
 
 ## Product execution
 

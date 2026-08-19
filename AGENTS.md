@@ -1,18 +1,18 @@
 # Formation Repository Agent Guide
 
-This repository is Formation, the founder platform. It contains two bounded systems:
+This repository is Formation: a typed workflow-graph engine that takes a consumer mobile-app business from idea to shipped and into ongoing autonomous operation. It contains two bounded systems:
 
-1. `platform/`, the Formation founder product. This is the product.
-2. `skill/formation/`, the graph-native launch skill used behind the product and by existing agent workflows. The skill keeps its own name, versioning, and installed-runtime contract.
+1. `skill/formation/`, the engine. The catalog, compiler, frontier, reducer, sessions, and agent surfaces (the `formation` CLI bin and the `formation-mcp` server) live here. This is the center of the repository. It also installs as the `formation` agent skill and keeps its own versioning and installed-runtime contract.
+2. `platform/`, the Formation founder web product — one consumer of the engine through the typed adapter boundary, never a co-owner of its state.
 
-Do not collapse their state models or expose skill files as founder navigation.
+Do not collapse their state models or expose engine files as founder navigation.
 
 ## Read order
 
-1. `README.md` for product scope and setup.
-2. `docs/architecture.md` for the platform and skill boundary.
-3. `platform/AGENTS.md` for founder-product changes.
-4. `skill/formation/README.md` and `SKILL.md` for skill changes.
+1. `README.md` for what the engine is and how to drive it.
+2. `docs/architecture.md` for the execution loop, trust boundary, and the platform/engine integration contract.
+3. `skill/formation/README.md` and `SKILL.md` for engine changes.
+4. `platform/AGENTS.md` for founder-product changes.
 5. The owning directory documentation and directly relevant source.
 
 ## Source layers
