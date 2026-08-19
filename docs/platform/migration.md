@@ -2,9 +2,9 @@
 
 ## Goal
 
-Move founder interaction from generated repository files and static HTML into Formation without weakening the graph-native launch engine or breaking existing launches.
+Move founder interaction from generated repository files and static HTML into Formation without weakening the graph-native launch skill or breaking existing launches.
 
-The migration is deliberately staged. Formation becomes authoritative for founder-facing company state immediately. Engine files remain authoritative for automated execution until the typed adapter is complete.
+The migration is deliberately staged. Formation becomes authoritative for founder-facing company state immediately. Skill files remain authoritative for automated execution until the typed adapter is complete.
 
 ## Authority during the transition
 
@@ -16,17 +16,17 @@ The migration is deliberately staged. Formation becomes authoritative for founde
 | Decisions, rationale, and review dates | Formation |
 | Founder tasks and product next actions | Formation |
 | Editable deliverables and version history | Formation |
-| Graph definitions and workflow readiness | Launch engine |
-| Attempts, checkpoints, and resource claims | Launch engine |
-| Autonomy grants, waivers, budgets, and kill switch | Launch engine |
-| Independent verification and execution evidence | Launch engine |
-| Static launch-repository artifacts | Engine export and compatibility layer |
+| Graph definitions and workflow readiness | Formation skill |
+| Attempts, checkpoints, and resource claims | Formation skill |
+| Autonomy grants, waivers, budgets, and kill switch | Formation skill |
+| Independent verification and execution evidence | Formation skill |
+| Static launch-repository artifacts | Skill export and compatibility layer |
 
 Neither side may write directly into the other side's persistence.
 
 ## Systems retained
 
-The migration retains the following engine capabilities:
+The migration retains the following skill capabilities:
 
 - typed catalog identities and workflow contracts
 - durable compilation, frontier calculation, and dispatch
@@ -90,7 +90,7 @@ Inputs should include:
 
 The importer must:
 
-1. Preserve stable engine IDs as provenance metadata, not product navigation.
+1. Preserve stable skill IDs as provenance metadata, not product navigation.
 2. Classify imported statements as facts, assumptions, recommendations, or questions.
 3. Create explicit decisions instead of copying decision prose into generic notes.
 4. Create one current artifact and an initial immutable version for each imported deliverable.
@@ -98,9 +98,9 @@ The importer must:
 6. Produce a dry-run report before writing platform state.
 7. Be idempotent for the same source fingerprint.
 
-### Phase 3: Platform-to-engine execution adapter
+### Phase 3: Platform-to-skill execution adapter
 
-Add a typed adapter that accepts a Formation execution request and creates or resumes an engine run.
+Add a typed adapter that accepts a Formation execution request and creates or resumes a skill run.
 
 A request includes:
 
@@ -115,7 +115,7 @@ A request includes:
 
 A result includes:
 
-- engine run and attempt identifiers
+- skill run and attempt identifiers
 - founder-readable status
 - proposed claim changes
 - verified evidence references
@@ -139,14 +139,14 @@ Add:
 - decision mentions and reminders
 - optimistic concurrency for simultaneous edits
 
-Engine approval interrupts should appear as product decisions or protected actions, while retaining the engine's stronger control state.
+Skill approval interrupts should appear as product decisions or protected actions, while retaining the skill's stronger control state.
 
 ### Phase 5: Retire obsolete founder renderers
 
 A renderer may be removed only after:
 
 - every founder navigation link points to Formation
-- its engine or migration consumers are enumerated
+- its skill or migration consumers are enumerated
 - equivalent export functionality exists when still required
 - validator and fixture references are migrated
 - no installed launch workspace depends on its path
@@ -156,22 +156,22 @@ A renderer may be removed only after:
 
 ### Stable identifiers
 
-Formation owns platform IDs. Imported engine identifiers are stored as external references.
+Formation owns platform IDs. Imported skill identifiers are stored as external references.
 
 ```text
 platform artifact ID        art_...
-engine artifact ID          external.engineArtifactId
+skill artifact ID           external.engineArtifactId
 platform workspace ID       wrk_...
-engine business instance    external.engineBusinessId
+skill business instance     external.engineBusinessId
 platform generation job     job_...
-engine run                   external.engineRunId
+skill run                   external.engineRunId
 ```
 
-This avoids coupling product records to engine path or catalog migrations.
+This avoids coupling product records to skill path or catalog migrations.
 
 ### Artifact history
 
-Imported artifacts begin with an immutable version snapshot. Subsequent engine updates append a candidate version. Founder edits or approvals append product versions. History is never rewritten.
+Imported artifacts begin with an immutable version snapshot. Subsequent skill updates append a candidate version. Founder edits or approvals append product versions. History is never rewritten.
 
 ### Claims and evidence
 
@@ -183,11 +183,11 @@ The adapter fingerprints the scoped platform context sent to a run. When accepte
 
 ## Rollback
 
-Formation and the engine have separate persistence, so rollout can be reversed without corrupting execution state.
+Formation and the skill have separate persistence, so rollout can be reversed without corrupting execution state.
 
-- Disabling the platform-to-engine adapter leaves engine runs intact.
-- Disabling engine result import leaves Formation records intact.
-- Static engine exports remain available during migration.
+- Disabling the platform-to-skill adapter leaves skill runs intact.
+- Disabling skill result import leaves Formation records intact.
+- Static skill exports remain available during migration.
 - Imported product records retain source fingerprints and provenance.
 - No migration step deletes the source launch repository.
 
@@ -197,9 +197,9 @@ The migration is complete when:
 
 - founders can perform every primary journey without opening repository files
 - existing launch repositories can be imported idempotently
-- Formation can request, observe, and accept verified engine work
+- Formation can request, observe, and accept verified skill work
 - all company context has one product-level owner
 - every generated deliverable is editable and versioned
-- protected engine actions appear in founder vocabulary
+- protected skill actions appear in founder vocabulary
 - obsolete founder renderers are removed or explicitly export-only
 - no second navigation or next-action source competes with Formation

@@ -11,7 +11,7 @@ import { applyImportPlan, buildImportPlan, recordImportActivity, toFounderPlan }
  * `/etc` or `../../secrets` and have the contents arrive as deliverables in their own workspace.
  *
  * Requests therefore never carry a path. They carry a **source id**, which is one directory name
- * directly inside a configured root (`FORMATION_IMPORT_ROOT`, defaulting to the engine root the
+ * directly inside a configured root (`FORMATION_IMPORT_ROOT`, defaulting to the skill root the
  * execution adapter already uses). The id is matched against the directory names actually found
  * there, so an id that is not a real entry resolves to nothing at all — traversal is impossible by
  * construction rather than by pattern-matching for `..`. With no root configured, importing is

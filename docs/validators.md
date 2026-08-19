@@ -1,10 +1,10 @@
 # Validator reference
 
-Every gate the launch engine ships, what it checks, and how to run it. This file is the full map; [CONTRIBUTING.md](../CONTRIBUTING.md) has the short version.
+Every gate the launch skill ships, what it checks, and how to run it. This file is the full map; [CONTRIBUTING.md](../CONTRIBUTING.md) has the short version.
 
 ## How the pipeline works
 
-`npm run audit` and `npm run audit:ci` both run [`tooling/run-audit.ts`](../skill/b2c-mobile-business-launch/tooling/run-audit.ts), the single orchestrator over the plan defined in [`tooling/lib/audit-plan.ts`](../skill/b2c-mobile-business-launch/tooling/lib/audit-plan.ts). Typecheck runs first, then every gate, with independent steps sharing a small concurrency pool.
+`npm run audit` and `npm run audit:ci` both run [`tooling/run-audit.ts`](../skill/formation/tooling/run-audit.ts), the single orchestrator over the plan defined in [`tooling/lib/audit-plan.ts`](../skill/formation/tooling/lib/audit-plan.ts). Typecheck runs first, then every gate, with independent steps sharing a small concurrency pool.
 
 ```bash
 npm install
@@ -36,7 +36,7 @@ npm run check:revenue        -- --root /path/to/app
 From an installed runtime copy instead of this repo:
 
 ```bash
-cd ~/.codex/skills/b2c-mobile-business-launch
+cd ~/.codex/skills/formation
 npm install
 npm run validate:launch-state -- --root /path/to/app
 ```
@@ -173,7 +173,7 @@ These run against this repo rather than a target app.
 | --- | --- |
 | `launchbench` | Lints the regression scenario definitions under `evals/launchbench/` (required fields, known-validator references), then runs the deterministic validator fixtures. Scenario prompts are definitions for agents and reviewers, not live executions |
 | `test:validators` | Positive and negative fixtures, so validator false negatives become audit failures |
-| `test:fixtures` | Engine fixtures: compile/frontier/dispatch/run-state/boundary behavior, the launch-matrix projection, knowledge-package rules, and port-ledger completeness |
+| `test:fixtures` | Skill fixtures: compile/frontier/dispatch/run-state/boundary behavior, the launch-matrix projection, knowledge-package rules, and port-ledger completeness |
 | `test:boundaries` | Capability-boundary suites: each attempts a forbidden action through the real autonomy modules (grants, budget, waivers, kill switch, prerequisites, producer-never-writes) and asserts rejection with a recorded reason |
 | `test:parity` | Cross-runtime adapter parity: one fixture scenario through every capability profile must yield identical node reachability, approval/waiver requirements, and parked reasons |
 | `check:agent-evals` | Validates behavior eval definitions for routing choices deterministic validators cannot simulate |

@@ -104,7 +104,7 @@ export interface Decision {
   reviewAt: string | null;
   createdAt: string;
   updatedAt: string;
-  /** Present on decisions mirrored from the launch engine's founder approvals. */
+  /** Present on decisions mirrored from the launch skill's founder approvals. */
   source?: {
     kind: "engine-approval";
     approvalId: string;
@@ -275,7 +275,7 @@ export interface ExecutionRunStep {
   title: string;
   /** Board-language one-liner: what this step gives the company. */
   summary?: string;
-  /** The engine's own step name, when it differs from the board title. */
+  /** The skill's own step name, when it differs from the board title. */
   technical?: string;
   status: "finished" | "ready" | "in-progress" | "needs-founder" | "held" | "failed" | "upcoming" | string;
   reason?: string;
@@ -303,7 +303,7 @@ export interface FounderExecution {
   id: string;
   workflowId: string | null;
   title: string | null;
-  /** The engine's own name for the work, when it differs from the board title. */
+  /** The skill's own name for the work, when it differs from the board title. */
   technicalTitle?: string;
   status: "queued" | "running" | "completed" | "failed" | string;
   failureKind: string | null;
@@ -319,7 +319,7 @@ export interface FounderExecution {
   importedResults: { verifiedResults: number } | null;
 }
 
-/** Whether the engine can do hands-on steps itself, said before work is requested — with the plain-language reason when it cannot. */
+/** Whether the skill can do hands-on steps itself, said before work is requested — with the plain-language reason when it cannot. */
 export interface SelfServeExecution {
   available: boolean;
   reason?: string;
@@ -368,7 +368,7 @@ export interface LaunchMatrixWorkflow {
   technical: { workflowId: string; title: string | null; phaseIds: string[] };
 }
 
-/** One cross-cutting integrity step: the engine checking its own launch work. */
+/** One cross-cutting integrity step: the skill checking its own launch work. */
 export interface LaunchIntegrityStep {
   workflowId: string;
   title: string;

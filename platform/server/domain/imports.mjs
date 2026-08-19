@@ -3,7 +3,7 @@ import { deliverableText, screenUntrustedText } from "./trust.mjs";
 
 /**
  * Brings an existing launch repository's recorded work into Formation — the platform half of the
- * importer (docs/platform/remaining-gaps.md, "Existing launch repository importer"). The engine
+ * importer (docs/platform/remaining-gaps.md, "Existing launch repository importer"). The skill
  * half (`core/adapters/platform-import.ts`) reads the launch workspace and returns a typed report;
  * nothing in this module has, or can obtain, a path back into that workspace.
  *
@@ -20,9 +20,9 @@ import { deliverableText, screenUntrustedText } from "./trust.mjs";
  *   the launch workspace disagrees with what the founder has written, the disagreement becomes a
  *   claim naming both, not a silent replacement. A deliverable the founder has edited is never
  *   rewritten by a later import — it is marked as having drifted from its source instead.
- * - **Idempotent by content, not by order.** Every record keys on the engine's `importKey`, which
+ * - **Idempotent by content, not by order.** Every record keys on the skill's `importKey`, which
  *   is derived from what the record is. Re-importing an unchanged workspace changes nothing.
- * - **Contradictions travel with the records they undermine.** The engine reports them; this
+ * - **Contradictions travel with the records they undermine.** The skill reports them; this
  *   module carries them into the plan and records them as open questions on apply, so the doubt
  *   ends up in front of the founder rather than being resolved on their behalf.
  * - **Imported text that reads as an instruction is flagged, never edited.** A launch repository is

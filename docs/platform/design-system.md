@@ -25,7 +25,7 @@ A page should answer one founder question and make the relevant action obvious.
 
 ### Reveal system detail only when useful
 
-Founder vocabulary stays primary. Engine, provider, and filesystem details belong in technical disclosure, export provenance, or automation configuration.
+Founder vocabulary stays primary. Skill, provider, and filesystem details belong in technical disclosure, export provenance, or automation configuration.
 
 ### Confidence is evidence quality, not visual polish
 
@@ -221,7 +221,7 @@ Founder-facing status language is deliberately small.
 - Completed
 - Failed
 
-Engine status vocabularies must be translated behind an adapter rather than leaked into product controls.
+Skill status vocabularies must be translated behind an adapter rather than leaked into product controls.
 
 ## Content style
 
@@ -332,4 +332,4 @@ The CSS system is intentionally dependency-light. When introducing a formal comp
 - migrate components rather than replacing page structure wholesale
 - keep the founder vocabulary and page jobs stable
 - verify contrast, keyboard behavior, reduced motion, and responsive layouts
-- publish shared tokens to engine exports only after ownership remains unambiguous
+- publish shared tokens to skill exports only after ownership remains unambiguous

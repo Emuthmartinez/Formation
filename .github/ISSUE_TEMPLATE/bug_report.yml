@@ -33,7 +33,7 @@ body:
     id: skill-version
     attributes:
       label: Skill version
-      description: The `version` field in `skill/b2c-mobile-business-launch/skill-version.json`, or the installed runtime copy's.
+      description: The `version` field in `skill/formation/skill-version.json`, or the installed runtime copy's.
       placeholder: "0.26.0"
     validations:
       required: true

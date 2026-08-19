@@ -104,8 +104,8 @@ async function makeStore() {
 /** The typed report, produced by the real engine adapter rather than hand-written here. */
 async function readReport(root, sourceId = "ocho") {
   const view = await new EngineBridge().describeLaunchRepository(path.join(root, sourceId));
-  assert.ok(view.reachable, `the engine could not read the fixture launch workspace: ${view.reason}`);
-  assert.equal(view.report.workspaceReady, true, `the engine reported the fixture as not ready: ${view.report.reason}`);
+  assert.ok(view.reachable, `the skill could not read the fixture launch workspace: ${view.reason}`);
+  assert.equal(view.report.workspaceReady, true, `the skill reported the fixture as not ready: ${view.report.reason}`);
   return view.report;
 }
 
@@ -243,14 +243,14 @@ test("company fields are filled only where Formation is empty, and disagreements
 });
 
 test("a blocking contradiction survives the import as an open question", async () => {
-  // The research lane names evidence that is not on disk: the engine reports it as blocking.
+  // The research lane names evidence that is not on disk: the skill reports it as blocking.
   const { root } = await makeImportRoot("ocho", {
     state: LAUNCH_STATE.replace("      - \"strategy/RESEARCH.md\"", "      - \"strategy/MISSING.md\""),
   });
   const database = createSeedDatabase();
   const workspace = database.workspaces[0];
   const plan = buildImportPlan(database, workspace, await readReport(root), "ocho", NOW);
-  assert.ok(plan.contradictions.some((entry) => entry.severity === "blocking"), "expected the engine to report the missing evidence");
+  assert.ok(plan.contradictions.some((entry) => entry.severity === "blocking"), "expected the skill to report the missing evidence");
 
   applyImportPlan(database, workspace, plan, NOW);
   const question = database.claims.find((claim) => claim.source?.importKey?.startsWith("contradiction:lane_evidence_missing"));
@@ -426,7 +426,7 @@ test("an engine that cannot be reached is reported as unreachable, never as an e
   const { root } = await makeImportRoot();
   const service = new ImportService(await makeStore(), {
     resolveRoot: () => root,
-    engine: { describeLaunchRepository: async () => ({ reachable: false, reason: "The launch engine is not installed on this server." }) },
+    engine: { describeLaunchRepository: async () => ({ reachable: false, reason: "Formation's launch automation is not installed on this server." }) },
   });
   await assert.rejects(
     () => service.preview({ workspace: createSeedDatabase().workspaces[0], sourceId: "ocho" }),
@@ -434,7 +434,7 @@ test("an engine that cannot be reached is reported as unreachable, never as an e
   );
 });
 
-test("a launch workspace with nothing in it is refused with the engine's own reason", async () => {
+test("a launch workspace with nothing in it is refused with the skill's own reason", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "formation-import-root-"));
   write(path.join(root, "blank"), "state/PROJECT_STATE.yaml", 'project:\n  name: "App Name"\n');
   const service = new ImportService(await makeStore(), { resolveRoot: () => root });

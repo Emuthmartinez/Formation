@@ -149,9 +149,9 @@ export async function handleEvidenceRoutes({ request, response, method, pathname
       assertUnchanged(target, { updatedAt: patch.expectedUpdatedAt }, "version of this decision");
       // A launch approval must never be "decided" by editing its mirror — that would leave the
       // engine's gate parked while Formation claims it was answered. The approvals flow records
-      // the answer with the engine first and closes the record only after it confirms.
+      // the answer with the skill first and closes the record only after it confirms.
       if (target.source?.kind === "engine-approval") {
-        throw new HttpError(409, "This is a launch approval. Approve or decline it from the approvals flow so the launch engine records your answer.");
+        throw new HttpError(409, "This is a launch approval. Approve or decline it from the approvals flow so Formation records your answer.");
       }
       if (patch.title !== undefined) target.title = requireText(patch.title, "Decision title", TEXT_LIMITS.title);
       if (patch.decision !== undefined) target.decision = requireText(patch.decision, "Decision statement", TEXT_LIMITS.long);

@@ -190,7 +190,7 @@ function taskRank(task: Task) {
   return priority * 10 + status;
 }
 
-// The engine's step statuses, said the way a founder would say them.
+// The skill's step statuses, said the way a founder would say them.
 const engineStepLabels: Record<string, string> = {
   finished: "Done",
   "in-progress": "In motion",
@@ -252,14 +252,14 @@ function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
   const byId = new Map(workflows.map((workflow) => [workflow.workflowId, workflow]));
   const toggle = (groupId: string, detail: MatrixDetail) => setExpanded((current) => current?.groupId === groupId && current.detail === detail ? null : { groupId, detail });
 
-  if (failed) return <Section title="Launch matrix"><EmptyState title="The launch matrix could not be checked" description="The engine did not answer. Existing launch records are unchanged." /></Section>;
+  if (failed) return <Section title="Launch matrix"><EmptyState title="The launch matrix could not be checked" description="Formation did not answer. Existing launch records are unchanged." /></Section>;
   if (!matrix) return <Section title="Launch matrix"><p className="muted-copy">Loading the current launch graph…</p></Section>;
-  if (!matrix.available) return <Section title="Launch matrix"><EmptyState title="Launch matrix unavailable" description={matrix.reason ?? "The connected engine does not provide this view."} /></Section>;
+  if (!matrix.available) return <Section title="Launch matrix"><EmptyState title="Launch matrix unavailable" description={matrix.reason ?? "Formation does not provide this view for this workspace yet."} /></Section>;
 
   const phaseIds = [...new Set(visible.flatMap((workflow) => workflow.phaseIds))].sort();
 
   return (
-    <Section title="Launch matrix" description="Six business areas, read from the same launch graph the engine uses. Open any cell to see the work, guidance, tools, and proof behind it.">
+    <Section title="Launch matrix" description="Six business areas, read from the same launch graph Formation works from. Open any cell to see the work, guidance, tools, and proof behind it.">
       <div className="matrix-controls" aria-label="Launch matrix controls">
         <div className="matrix-filter" role="group" aria-label="Filter work">
           {(["all", "working", "needs-founder", "failed", "finished"] as MatrixFilter[]).map((value) => (
@@ -340,7 +340,7 @@ function LaunchMatrixSection({ workspaceId }: { workspaceId: string }) {
       {matrix.launchIntegrity?.length ? (
         <div className="matrix-integrity">
           <h3>Launch integrity</h3>
-          <p className="muted-copy">Cross-cutting checks the engine runs on its own launch work — continuity, live service checks, consistency, and completeness audits.</p>
+          <p className="muted-copy">Cross-cutting checks Formation runs on its own launch work — continuity, live service checks, consistency, and completeness audits.</p>
           <ul>
             {matrix.launchIntegrity.map((step) => (
               <li key={step.workflowId}>
@@ -405,7 +405,7 @@ function matrixStatusCounts(workflows: LaunchMatrixWorkflow[]) {
 
 function matrixGroupStatus(counts: Record<string, number>) {
   if (counts.failed) return "Failed work needs attention";
-  // "held" is the engine's own "Needs your go-ahead" — an all-held area must never read as merely upcoming.
+  // "held" is the skill's own "Needs your go-ahead" — an all-held area must never read as merely upcoming.
   if ((counts["needs-founder"] ?? 0) + (counts.held ?? 0) > 0) return "Waiting on you";
   if (counts["in-progress"] || counts.ready) return "Working";
   if ((counts.finished ?? 0) > 0 && Object.values(counts).reduce((sum, count) => sum + count, 0) === counts.finished) return "Finished";
@@ -417,7 +417,7 @@ function matrixCountLine(counts: Record<string, number>) {
 }
 
 /**
- * What the launch engine is actually doing for this company, step by step. The engine reports
+ * What Formation is actually doing for this company, step by step. The skill reports
  * only settled, verified work across the boundary; this section makes that work visible so a
  * founder can follow what is happening and why — without graph or agent vocabulary.
  */
@@ -453,14 +453,14 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
 
   const latest = executions?.[0] ?? null;
   const earlier = executions && executions.length > 1 ? executions.slice(1, 4) : [];
-  // Never overclaim: unknown means unavailable. Until the server has SAID the engine can do
+  // Never overclaim: unknown means unavailable. Until the server has SAID the skill can do
   // hands-on steps itself — not while loading, not after a failed check — this section describes
   // the plan-check-route reality, using the server's own reason when it has one.
   const canSelfServe = selfServe?.available === true;
 
   return (
     <Section
-      title="The launch engine at work"
+      title="Formation at work"
       description={
         canSelfServe
           ? "Formation can execute launch work for this company. Every result is verified before it enters your workspace, and the consequential calls always come back to you."
@@ -468,7 +468,7 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
       }
     >
       {failed ? (
-        <p className="muted-copy">Could not check on launch-engine work just now. What you see below may be behind.</p>
+        <p className="muted-copy">Could not check on Formation's launch work just now. What you see below may be behind.</p>
       ) : null}
 
       {latest ? (
@@ -519,13 +519,13 @@ function EngineWorkSection({ workspaceId, workspaceName }: { workspaceId: string
               <span aria-hidden="true">2</span>
               {canSelfServe ? (
                 <>
-                  <h3>The engine does the work</h3>
+                  <h3>Formation does the work</h3>
                   <p>Launch steps run as real work sessions: research, drafts, checks — not chat answers.</p>
                 </>
               ) : (
                 <>
                   <h3>The work gets planned and routed</h3>
-                  <p>Each launch step becomes a clear brief with its own checks. Steps that need hands-on work come to you and your team — the engine does not yet do them by itself.</p>
+                  <p>Each launch step becomes a clear brief with its own checks. Steps that need hands-on work come to you and your team — Formation does not yet do them by itself.</p>
                 </>
               )}
             </li>

@@ -5,7 +5,7 @@ import { syncEngineApprovals } from "../domain/approvals.mjs";
 import { founderRunView } from "../execution.mjs";
 import { createSeedDatabase } from "../seed.mjs";
 
-test("a known catalog step is presented in board language with the engine's name preserved", () => {
+test("a known catalog step is presented in board language with the skill's name preserved", () => {
   const step = presentStep("workflow.store.asc-cli-automation", "ASC CLI automation");
   assert.equal(step.title, "App Store submission automation");
   assert.ok(step.summary && step.summary.length > 0);
@@ -53,7 +53,7 @@ test("matrix services and specialist routes keep raw engine copy inside technica
 });
 
 test("board tables never carry internal vocabulary a founder should not have to parse", () => {
-  // check:founder-copy scans the engine's generated business surfaces, not this module — so the
+  // check:founder-copy scans the skill's generated business surfaces, not this module — so the
   // board tables get their own scan here. These are the internal words the house style bans from
   // founder-visible text (tooling/lib/founder-copy.ts); titles and summaries must not use them.
   const banned = /\b(proof|proven|gate|lane|workflow|pipeline|CLI|repo|ASO|SEO|UGC|MCP)\b/u;

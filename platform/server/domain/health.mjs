@@ -2,7 +2,7 @@
  * Whether this instance is actually working.
  *
  * The endpoint this replaces answered `{ ok: true }` unconditionally. The store could be
- * unreadable, the launch engine uninstalled, the disk full, and it would still say ok — which
+ * unreadable, the launch skill uninstalled, the disk full, and it would still say ok — which
  * means an operator watching it learned nothing, and a load balancer in front of it would keep
  * sending traffic to an instance that could not serve a request. A probe that cannot report
  * failure is not a probe.
@@ -11,7 +11,7 @@
  *
  * **Only the store can make this fail.** Formation cannot answer a single authenticated request
  * without reading it, so an unreadable store is the one condition that makes the instance unfit
- * for traffic. Everything else — the launch engine, a drafting provider, an import root — is a
+ * for traffic. Everything else — the launch skill, a drafting provider, an import root — is a
  * capability some deployments deliberately do not have, and reporting an instance as broken
  * because it is configured the way its operator configured it teaches them to ignore the probe.
  *
@@ -57,7 +57,7 @@ export async function checkHealth({ readStore, engineAvailability, providerEndpo
   const engine = engineAvailability();
   parts.push(
     engine === null
-      ? part("launch-engine", "ok", "The launch engine is installed and its runtime resolves.")
+      ? part("launch-engine", "ok", "Formation's launch automation is installed and its runtime resolves.")
       : part("launch-engine", "not-configured", engine),
   );
 

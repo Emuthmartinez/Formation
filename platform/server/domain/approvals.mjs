@@ -2,25 +2,25 @@ import { boardStepTitle, presentApprovalAsk } from "./presentation.mjs";
 import { createId, launchWorkstreamId } from "./shared.mjs";
 
 /**
- * Mirrors the launch engine's founder approvals into Formation's decision system (the
- * "preserve engine approvals and protected actions" behaviour of the platform-to-engine
+ * Mirrors the launch skill's founder approvals into Formation's decision system (the
+ * "preserve engine approvals and protected actions" behaviour of the platform-to-skill
  * execution adapter, docs/platform/remaining-gaps.md).
  *
  * The rules this module holds by construction:
- * - The engine's run state is the source of truth. A mirrored decision record never answers,
+ * - The skill's run state is the source of truth. A mirrored decision record never answers,
  *   weakens, or bypasses an engine approval — answering happens only through
  *   core/session/approve.ts, driven by the execution worker, and only after the founder acted.
  * - Silence is never consent. Nothing here runs a clock; an unanswered approval stays an open
- *   decision until the founder answers it or the engine stops asking.
- * - Every transition (create, close, supersede) requires a reachable, ready engine report.
+ *   decision until the founder answers it or the skill stops asking.
+ * - Every transition (create, close, supersede) requires a reachable, ready skill report.
  *   An unreachable engine changes nothing in the store.
- * - Formation's `workspace.founder.operatingMode` shares the engine's grant-level vocabulary,
+ * - Formation's `workspace.founder.operatingMode` shares the skill's grant-level vocabulary,
  *   but it is presentation only on this boundary: no mode auto-answers an approval, because the
  *   engine's grants and waivers — not a platform field — decide what may run without one.
  */
 
 /**
- * Founder-plain phrasing for the engine's protected categories (engine vocabulary stays on the
+ * Founder-plain phrasing for the skill's protected categories (skill vocabulary stays on the
  * engine side of the boundary; founders read these).
  */
 const CATEGORY_PHRASES = Object.freeze({
@@ -39,7 +39,7 @@ export function approvalRationale(boardTitle, category) {
     : `“${boardTitle}” is waiting for your go-ahead. It stays parked until you answer — nothing answers this for you.`;
 }
 
-/** The board-ready text for one engine approval mirror: title, the ask, and the why. */
+/** The board-ready text for one skill approval mirror: title, the ask, and the why. */
 function boardApprovalCopy(approval) {
   const stepTitle = boardStepTitle(approval.workflowId, approval.workflowTitle);
   return {
@@ -54,7 +54,7 @@ function isEngineApproval(decision) {
 }
 
 /**
- * Reconciles the store's mirrored decisions with a live engine boundary report. Mutates
+ * Reconciles the store's mirrored decisions with a live skill boundary report. Mutates
  * `database` (call inside a store transaction) and returns what changed so the caller can write
  * activity entries. The report must be reachable and ready — callers guard that; this function
  * refuses to run otherwise rather than mutate records from silence.
@@ -65,7 +65,7 @@ function isEngineApproval(decision) {
  */
 export function syncEngineApprovals(database, workspace, report, now) {
   if (report?.workspaceReady !== true) {
-    throw new Error("syncEngineApprovals requires a ready engine report; callers must not sync from an unreachable or unready engine.");
+    throw new Error("syncEngineApprovals requires a ready skill report; callers must not sync from an unreachable or unready skill.");
   }
   const runId = report.runId ?? null;
   const engineApprovals = report.approvals ?? [];
@@ -73,13 +73,13 @@ export function syncEngineApprovals(database, workspace, report, now) {
 
   const changes = { created: [], answeredWithEngine: [], superseded: [] };
 
-  // An open record from a run the engine no longer has cannot be answered any more — the engine
+  // An open record from a run the skill no longer has cannot be answered any more — the skill
   // is not asking that question. Retiring the mirror is not answering the gate: if the new run
   // asks again, it gets a fresh open record below.
   for (const record of mirrored) {
     if (record.status !== "open" || record.source.runId === runId) continue;
     record.status = "superseded";
-    record.note = "The launch plan moved on before this was answered, so the engine is no longer asking it.";
+    record.note = "The launch plan moved on before this was answered, so Formation is no longer asking it.";
     record.updatedAt = now;
     changes.superseded.push(record);
   }
@@ -89,13 +89,13 @@ export function syncEngineApprovals(database, workspace, report, now) {
     const open = existing.find((entry) => entry.status === "open");
 
     if (approval.status === "pending") {
-      // If the engine says pending and no open mirror exists, create one — even when an older
-      // record for this run was already resolved. A gate the engine is asking must always be
-      // visible; a record that disagrees with the engine is history, never a reason to hide it.
+      // If the skill says pending and no open mirror exists, create one — even when an older
+      // record for this run was already resolved. A gate the skill is asking must always be
+      // visible; a record that disagrees with the skill is history, never a reason to hide it.
       const board = boardApprovalCopy(approval);
       if (open) {
         // Presentation is a shared, evolving capability: an open mirror created before the
-        // board-language table improved refreshes to the current copy. The engine's own wording
+        // board-language table improved refreshes to the current copy. The skill's own wording
         // stays untouched in `source` — this only re-presents, never re-answers.
         if (open.title !== board.title || open.decision !== board.decision || open.rationale !== board.rationale) {
           open.title = board.title;
@@ -135,7 +135,7 @@ export function syncEngineApprovals(database, workspace, report, now) {
       continue;
     }
 
-    // approved | rejected. An open mirror means the answer was recorded with the engine directly
+    // approved | rejected. An open mirror means the answer was recorded with the skill directly
     // (its CLI is a sanctioned path too) — close the mirror to match, honestly attributed.
     if (open) {
       const approved = approval.status === "approved";
@@ -144,7 +144,7 @@ export function syncEngineApprovals(database, workspace, report, now) {
       open.decision = `${approved ? "Approved" : "Declined"}: ${presentApprovalAsk(approval.description, approval.protectedCategory)}`;
       open.answer = {
         value: approved ? "approved" : "declined",
-        answeredBy: "Recorded with the launch engine",
+        answeredBy: "Recorded with Formation's launch records",
         answeredAt: now,
         reason: null,
         recordedVia: "engine",

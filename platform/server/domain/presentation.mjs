@@ -1,16 +1,16 @@
 /**
  * The board-ready presentation boundary.
  *
- * Every piece of engine- or system-authored text passes through this module before a founder
+ * Every piece of skill- or system-authored text passes through this module before a founder
  * sees it. The founder is the founder — not an engineering architect, a marketer, or a store-ops
  * specialist — so the top level reads the way a chief of staff would present the item to the
- * board: what the work gives the company, and what is being asked. The engine's own wording is
+ * board: what the work gives the company, and what is being asked. The skill's own wording is
  * never lost; it travels alongside as technical detail the founder can expand (design-system.md:
  * "Reveal system detail only when useful"). Founder-authored words are never rewritten.
  *
  * This is a shared capability: any surface that shows non-founder-authored text — run steps,
  * approval mirrors, blocker tasks, imported deliverables, activity entries — calls it. New
- * surfaces must route through here rather than passing engine vocabulary to the client
+ * surfaces must route through here rather than passing skill vocabulary to the client
  * (platform/AGENTS.md).
  *
  * Translation order:
@@ -197,7 +197,7 @@ const BOARD_STEPS = Object.freeze({
     title: "Social media operations",
     summary: "Runs the accounts and posting schedule — nothing posts without your approval.",
   },
-  // Cross-cutting launch-integrity work (the engine checking its own work). These never join a
+  // Cross-cutting launch-integrity work (the skill checking its own work). These never join a
   // founder work area, but their outcomes are readiness evidence, so they present by name.
   "workflow.orchestration.session-continuity-resume": {
     title: "Continuity between work sessions",
@@ -229,7 +229,7 @@ const BOARD_STEPS = Object.freeze({
   },
 });
 
-/** The engine's short approval asks, restated as what the founder is actually deciding. */
+/** The skill's short approval asks, restated as what the founder is actually deciding. */
 const BOARD_ASKS = Object.freeze({
   "approve a paid or constrained fallback": "Approve paying for a backup tool so work keeps moving.",
   "provide or authorize credentials": "Grant the team access to an account it needs.",
@@ -288,7 +288,7 @@ function scrubTitle(title) {
 
 /**
  * Board presentation of one launch step. Returns { title, summary, technical } where
- * `technical` is the engine's own title when it differs from the board title, else null.
+ * `technical` is the skill's own title when it differs from the board title, else null.
  */
 export function presentStep(workflowId, engineTitle) {
   const known = BOARD_STEPS[workflowId];
@@ -320,7 +320,7 @@ const SERVICE_ACCESS = Object.freeze({
   blocked: "Needs attention",
 });
 
-/** Founder-safe service copy. Raw engine fields remain available only as technical detail. */
+/** Founder-safe service copy. Raw skill fields remain available only as technical detail. */
 export function presentMatrixService(service, workTitle) {
   return {
     name: scrubTitle(service.name || "Business service"),
@@ -332,7 +332,7 @@ export function presentMatrixService(service, workTitle) {
 }
 
 /**
- * Founder-safe knowledge-guide copy. The engine's load_when trigger is written for agents
+ * Founder-safe knowledge-guide copy. The skill's load_when trigger is written for agents
  * deciding what to read, not for founders — it names files, checks, and routing hubs — so it
  * never crosses at the top level. The guide presents as what it is to the founder: the playbook
  * behind this work, with a plain freshness verdict. Raw id, document path, and the agent-facing
@@ -377,8 +377,8 @@ export function presentMatrixTool(tool, workTitle) {
 }
 
 /**
- * Board presentation of one engine approval: what the founder is deciding, in one sentence.
- * The engine's raw ask survives in the mirrored decision's `source` for technical disclosure.
+ * Board presentation of one skill approval: what the founder is deciding, in one sentence.
+ * The skill's raw ask survives in the mirrored decision's `source` for technical disclosure.
  */
 export function presentApprovalAsk(description, protectedCategory) {
   if (description && BOARD_ASKS[description]) return BOARD_ASKS[description];
