@@ -1,10 +1,10 @@
 {
   "skill": "formation",
-  "version": "0.138.0",
-  "updatedAt": "2026-08-18",
+  "version": "0.139.0",
+  "updatedAt": "2026-08-19",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "Renamed the skill to formation: the directory moved from skill/b2c-mobile-business-launch to skill/formation, the frontmatter name, package name (formation-skill-runtime), schema URNs (urn:formation:*), catalog skillRoutes, and installed-runtime default (~/.codex/skills/formation) all follow, and both sync tools now maintain compat symlinks under the legacy b2c-mobile-business-launch name so repos shipped before the rename keep resolving the skill.",
-    "Retired the engine vocabulary across founder-visible copy and living docs per the owner's ruling: founder surfaces name exactly one actor, Formation (results, approvals, execution reasons, Launch and Decisions pages), maintainer prose says the Formation platform and the Formation skill, and the schedule/hook installers keep legacy crontab signatures, launchd labels, and managed-hook markers removable."
+    "Sharded the audit's two dominant serial steps inside their own runners. launchbench's validator fixture suite (validation/repository/run-validator-fixtures.ts, 18 domain modules, ~730 spawned validator runs) and test:fixtures (verification/fixtures/run.ts, auto-discovered suites) previously executed every fixture as a one-at-a-time spawnSync tsx child, so ~0.35s of per-process boot per run made them ~90% of the audit's wall time. Each runner now re-spawns itself once per module/suite through a shared worker pool (tooling/lib/shard-pool.ts, width min(cores-2, 8), B2C_FIXTURE_CONCURRENCY overrides, 1 is the kill switch), starts the heaviest module first so a large module registered late cannot extend the tail alone, and prints one combined report in registration order \u2014 the output keeps the serial run's shape and order. Individual fixture executions are never pooled: modules reuse and mutate fixture roots between runs, so the module is the isolation boundary; --serial and --keep-temp preserve the old in-process behavior.",
+    "Made the shard result contract fail-closed and tested. A shard child reports its results as JSON on a marker line; a child that dies before printing the marker is reported as a failed row in the combined report \u2014 never as empty-and-passing. verification/fixtures/audit.fixtures.ts now proves the three load-bearing properties: parseShardOutput distinguishes crashed-before-reporting (results undefined) from reported results, an unknown --shard name exits non-zero with a named error, and launchbench plus test:fixtures stay serial:true in both audit-plan layouts because their parallelism lives inside the runner \u2014 riding the 4-wide audit pool too would multiply the process fan-out."
   ]
 }
