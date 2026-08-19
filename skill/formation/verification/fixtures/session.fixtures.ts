@@ -273,6 +273,45 @@ function comprehensiveCatalog(): CatalogInput {
   };
 }
 
+/** growth-entry's only dependency sits in a different domain, both granted, so an unscoped session could dispatch either -- reproduces a scoped session's entry node being blocked entirely by an out-of-scope, not-yet-succeeded prerequisite. */
+function crossDomainDependencyCatalog(): CatalogInput {
+  return {
+    version: "catalog.session-fixture.cross-domain-dependency",
+    artifacts: [
+      { id: "artifact.money-prereq", path: "money/prereq.md" },
+      { id: "artifact.growth-entry", path: "growth/entry.md" },
+    ],
+    workflows: [
+      {
+        id: "workflow.money-prereq",
+        title: "Confirm the revenue baseline",
+        domainId: "domain.money",
+        actionClass: "observe",
+        dependencies: [],
+        outputPaths: ["money/prereq.md"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
+      {
+        id: "workflow.growth-entry",
+        title: "Scan what people are saying",
+        domainId: "domain.growth",
+        actionClass: "observe",
+        dependencies: ["workflow.money-prereq"],
+        outputPaths: ["growth/entry.md"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
+    ],
+  };
+}
+
 /** eng-change is deliberately capped at maxAttempts: 1 so a single hand-seeded prior attempt puts it at its ceiling. */
 function exhaustibleTwoNodeCatalog(): CatalogInput {
   return {
@@ -717,6 +756,24 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     assert(text.includes("Scan what people are saying"), `expected the in-scope growth node to advance, got:\n${text}`);
     assert(!text.includes("Pull this week's revenue report"), `expected the out-of-scope money node to be left untouched (neither advanced nor parked) this session, got:\n${text}`);
     assertNoInternalVocabulary("scope-hints", text);
+  });
+
+  harness.check("session: a scoped session whose entry node is blocked entirely by an out-of-scope prerequisite reports why instead of exiting silently", () => {
+    const handle = bootstrapWorkspace(harness, "scope-cross-domain", crossDomainDependencyCatalog(), {
+      grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.money": grant("domain.money", "review-first") },
+      scopeHints: ["domain.growth"],
+    });
+
+    const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-scope-2", "--executor", "fixture"]);
+    assert(result.code === 0, `expected exit 0, got ${result.code}: ${result.output}`);
+
+    const text = readDigest(handle, "sess-scope-2");
+    assert(!text.includes("Scan what people are saying"), `expected the growth entry node to NOT advance -- its only dependency never ran, got:\n${text}`);
+    assert(
+      text.includes("Confirm the revenue baseline"),
+      `expected an anomaly naming the blocking out-of-scope prerequisite by title, so the session doesn't exit with no explanation, got:\n${text}`,
+    );
+    assertNoInternalVocabulary("scope-cross-domain", text);
   });
 
   // --- judgment scenario: approve.ts against a workspace with no run yet fails with a friendly message, never an uncaught exception ----

@@ -7,6 +7,9 @@ import {
   phaseOrder as graphPhaseOrder,
   requiredLanes as graphRequiredLanes,
 } from "../../catalog/lane-graph.js";
+// tooling/ already crosses into core/ elsewhere (render-autonomy-console.ts) -- unlike
+// validation/business/*, this layer is not confined to the v1-only side of the migration.
+import { validateBusinessState } from "../../core/schema/index.js";
 
 export type Severity = "error" | "warning";
 
@@ -198,7 +201,13 @@ export function validateLaneDependencyGraph(issues: Issue[]): void {
 const ignoredDirs = new Set([".git", "node_modules", ".next", "dist", "build", "DerivedData", ".expo", ".turbo", "coverage"]);
 
 export function parseCliArgs(argv: string[]): CliArgs {
-  let root = process.cwd();
+  // The durable engine's runDeterministicGates() (core/session/run.ts) invokes every gate via
+  // `npm run --prefix <skillRoot> <gate>`, which npm executes with the skill package as the
+  // process's cwd regardless of the caller's actual working directory -- so process.cwd() alone
+  // can never resolve to the business workspace under engine execution. The engine sets
+  // BUSINESS_ROOT precisely so a gate can recover the real target; honor it here, before an
+  // explicit --root flag (checked below) can still override it for direct CLI invocations.
+  let root = process.env.BUSINESS_ROOT ? path.resolve(process.env.BUSINESS_ROOT) : process.cwd();
   let statePath = "state/PROJECT_STATE.yaml";
   let outputPath: string | undefined;
 
@@ -397,6 +406,68 @@ export function loadProjectState(args: CliArgs): { state?: unknown; raw?: string
       ],
     };
   }
+}
+
+/**
+ * v1 lane status vocabulary (state/PROJECT_STATE.yaml), mirrored by hand from core/schema/
+ * types.ts's V1LaneStatus/v1LaneStatusToStatus -- validation/business/* stays on the v1-only side
+ * of the v1/v2 migration and does not import from core/, so this is a standalone copy, not a
+ * shared import. core/schema/migrate-v1.ts's migrateLaneStatus() guarantees a v2 lane's status is
+ * always exactly one of this map's six keys, so the inverse here is total for this one field.
+ */
+const v1LaneStatusFromCanonicalStatus: Readonly<Record<string, string>> = {
+  pending: "not_started",
+  running: "partial",
+  blocked: "blocked",
+  not_needed: "not_needed",
+  deferred: "deferred",
+  succeeded: "done",
+};
+
+export type LaneFromBusinessStateV2Result =
+  { kind: "absent" } | { kind: "invalid"; message: string } | { kind: "found"; status: string; blockers: string[]; reason?: string };
+
+/**
+ * A durable-engine-managed workspace's canonical state lives at state/business-state.json (v2) --
+ * core/session/run.ts's resolveWorkspacePaths() treats it as canonical, and a v2 workspace may
+ * have no state/PROJECT_STATE.yaml at all, so loadProjectState() alone would report the lane
+ * permanently missing under real engine execution. This bridges exactly one lane's status/
+ * blockers/reason, not the whole v1 document: v2's other sections (project, narrative, autonomy,
+ * continuity, control-plane) live across multiple v2 files with no verified 1:1 v1 shape, and a
+ * wrong silent mapping there would be worse than the current clear "state is missing" error, so
+ * this stays scoped to the one field a lane-status gate actually needs.
+ *
+ * Runs the parsed document through the repository's own validateBusinessState() schema check
+ * before trusting anything in it -- a malformed or partially-written business-state.json (missing
+ * required top-level fields, or the wrong shape) must fail closed here rather than having its one
+ * requested field extracted anyway, since a corrupt canonical document is exactly the case where a
+ * gate must not quietly authorize the destructive ONB-22 cutover on unverified data. The caller
+ * decides what "invalid" means for its own error reporting; this never silently falls back to v1
+ * on an invalid v2 document -- v2 existing at all is itself the signal this workspace is
+ * durable-engine-managed, where v1 may be stale or absent.
+ */
+export function loadLaneFromBusinessStateV2(root: string, lane: string): LaneFromBusinessStateV2Result {
+  const v2Path = path.join(root, "state", "business-state.json");
+  if (!existsSync(v2Path)) return { kind: "absent" };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(v2Path, "utf8"));
+  } catch (error) {
+    return { kind: "invalid", message: `state/business-state.json is not valid JSON: ${error instanceof Error ? error.message : String(error)}` };
+  }
+  const validated = validateBusinessState(parsed);
+  if (!validated.valid || !validated.value) {
+    const detail = validated.issues.map((entry) => `${entry.path}: ${entry.message}`).join("; ") || "schema validation failed";
+    return { kind: "invalid", message: `state/business-state.json failed schema validation (${detail}).` };
+  }
+  const laneState = (validated.value.lanes as unknown as Record<string, { status: string; blockers: string[]; reason?: unknown }>)[lane];
+  if (!laneState) return { kind: "invalid", message: `state/business-state.json's lanes has no entry for "${lane}".` };
+  return {
+    kind: "found",
+    status: v1LaneStatusFromCanonicalStatus[laneState.status] ?? laneState.status,
+    blockers: laneState.blockers.filter((entry): entry is string => typeof entry === "string"),
+    reason: typeof laneState.reason === "string" ? laneState.reason : undefined,
+  };
 }
 
 export function requireString(state: unknown, dottedPath: string, issues: Issue[]): void {
@@ -629,4 +700,296 @@ export function validateReason(reason: string | undefined, lanePath: string, con
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Non-rendered Markdown stripping
+// ---------------------------------------------------------------------------
+
+/**
+ * Strips one fenced-code delimiter character (backtick or tilde) from text, one line at a time.
+ * A fence only opens or closes at the true start of its own line (up to 3 leading spaces of
+ * indentation, matching CommonMark's own tolerance -- 4+ spaces starts an indented code block
+ * instead, a different construct this function does not touch), never mid-line. A backtick
+ * fence's info string (anything trailing the opening run on that same line) additionally cannot
+ * itself contain a backtick, per CommonMark; a tilde fence's info string has no such restriction.
+ * This is what tells a real fence apart from an inline code span using the same character (e.g.
+ * a sentence that displays `TODO` as an example using triple backticks) -- an unanchored,
+ * position-blind match would treat that inline span as a fence and strip real, rendered,
+ * checkable content along with it.
+ *
+ * A qualifying opener's block only closes at a later line consisting of nothing but (up to 3
+ * leading spaces, then) a run of the same character AT LEAST as long as the opener's (a shorter
+ * run is literal fence content, not a closer -- CommonMark's rule). An opener with no qualifying
+ * closer runs to the end of the text, matching how an unterminated fence still renders as code
+ * (never prose) through end of document.
+ */
+function stripFenceChar(text: string, ch: "`" | "~"): string {
+  const infoStringChars = ch === "`" ? "[^`\\n]*" : "[^\\n]*";
+  const openerLine = new RegExp(`^ {0,3}(${ch}{3,})${infoStringChars}$`);
+  const lines = text.split("\n");
+  const kept: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    const openMatch = line.match(openerLine);
+    if (!openMatch) {
+      kept.push(line);
+      i++;
+      continue;
+    }
+    const openerLength = (openMatch[1] ?? "").length;
+    const closerLine = new RegExp(`^ {0,3}${ch}{${openerLength},}\\s*$`);
+    let j = i + 1;
+    while (j < lines.length && !closerLine.test(lines[j] ?? "")) j++;
+    i = j < lines.length ? j + 1 : lines.length;
+  }
+  return kept.join("\n");
+}
+
+/**
+ * Column width of a line's leading whitespace, expanding tabs to CommonMark's own 4-column tab
+ * stop (a tab advances to the next multiple of 4, not a flat 4 columns) rather than treating tabs
+ * as literal characters. Stops at the first non-whitespace character. This is what lets a single
+ * leading tab (or a run of spaces plus a tab that reaches column 4) count as indented-code-block
+ * indentation exactly the way a real renderer would, instead of only ever recognizing four literal
+ * space characters.
+ */
+function leadingWhitespaceColumns(line: string): number {
+  let columns = 0;
+  for (const ch of line) {
+    if (ch === " ") columns += 1;
+    else if (ch === "\t") columns += 4 - (columns % 4);
+    else break;
+  }
+  return columns;
+}
+
+/**
+ * Strips CommonMark indented code blocks: a line whose leading whitespace reaches column 4 (see
+ * leadingWhitespaceColumns -- spaces and tabs both count, tabs expanding to the next 4-column tab
+ * stop) starts a code block only where it cannot interrupt a paragraph -- i.e. only right after a
+ * blank line, or at the very start of the document (CommonMark's own rule; an indented line
+ * immediately after an ordinary paragraph or table line is a lazy continuation of that block, not
+ * code, so it is left untouched here). Once a block opens this way, it absorbs every subsequent
+ * indented line and any blank lines between them; a non-indented, non-blank line ends it, and any
+ * trailing blank lines immediately before that line belong to what follows, not to the code block.
+ * This is what stops a required heading, Graph Run row, checklist item, or evidence-packet
+ * paragraph from being satisfied by content a rendered page shows only as inert code text, never
+ * as live document structure or prose.
+ */
+function stripIndentedCodeBlocks(text: string): string {
+  const lines = text.split("\n");
+  const kept: string[] = [];
+  let previousBlank = true;
+  let i = 0;
+  const isIndentedLine = (line: string): boolean => leadingWhitespaceColumns(line) >= 4 && line.trim().length > 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    const isBlank = line.trim().length === 0;
+    const isIndented = isIndentedLine(line);
+    if (isIndented && previousBlank) {
+      let j = i;
+      while (j < lines.length) {
+        const candidate = lines[j] ?? "";
+        const candidateBlank = candidate.trim().length === 0;
+        if (isIndentedLine(candidate) || candidateBlank) {
+          j++;
+          continue;
+        }
+        break;
+      }
+      let end = j;
+      while (end > i && (lines[end - 1] ?? "").trim().length === 0) end--;
+      i = end;
+      previousBlank = true;
+      continue;
+    }
+    kept.push(line);
+    previousBlank = isBlank;
+    i++;
+  }
+  return kept.join("\n");
+}
+
+/**
+ * Strips content inside raw HTML block elements whose content never functions as live, parseable
+ * Markdown structure -- script, style, template, pre, and textarea. script/style/template are
+ * inert-by-default in every browser (rendering nothing at all); pre and textarea are the opposite
+ * case that matters just as much -- their content DOES render, but only as literal preformatted
+ * text (or a form control's raw value), never as an actual parsed heading, table, or checklist. A
+ * required document structure placed inside either kind of block is equally invisible to
+ * hasHeading()/graphRunRows()/countChecklistItems(): the criterion for this function is "does a
+ * real renderer parse this as Markdown," not "is it visible on the page," and pre/textarea fail
+ * that test exactly like script/style/template do. A block only OPENS at the true start of its own
+ * line (up to 3 leading spaces of indentation, the same tolerance stripFenceChar and
+ * stripIndentedCodeBlocks already use), with the tag name immediately followed by whitespace,
+ * ">", or end of line -- never mid-line. This is what tells a real block apart from a sentence
+ * that mentions one of these tags inside an inline code span (e.g. a worked example showing
+ * `<style>`) -- a position-blind match would treat that mention as an opener and, finding no
+ * closing tag anywhere after it, strip everything through end of document along with it, hiding
+ * whatever real content (including a live placeholder marker) followed. Once a line qualifies as
+ * an opener, the block closes at the first line (checked starting from the opener line itself,
+ * case-insensitively) containing the matching closing tag anywhere in that line -- CommonMark's
+ * own closing condition for this HTML block type is unanchored, unlike its opening condition. An
+ * opener with no closer runs to the end of the document, matching how an unterminated one of
+ * these blocks still hides everything after it on a real page too. This is distinct from
+ * stripIndentedCodeBlocks and stripFenceChar: those hide content because it is a code-like
+ * construct; this hides content because these five tags all suppress real Markdown parsing of
+ * whatever they contain, whether or not that content ends up visible.
+ */
+function stripNonRenderingHtmlBlocks(text: string): string {
+  const openerLine = /^ {0,3}<(script|style|template|pre|textarea)(?=[\s>]|$)/i;
+  const lines = text.split("\n");
+  const kept: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    const openMatch = line.match(openerLine);
+    if (!openMatch) {
+      kept.push(line);
+      i++;
+      continue;
+    }
+    const tag = (openMatch[1] ?? "").toLowerCase();
+    const closerPattern = new RegExp(`</${tag}\\s*>`, "i");
+    let j = closerPattern.test(line) ? i : i + 1;
+    while (j < lines.length && !closerPattern.test(lines[j] ?? "")) j++;
+    i = j < lines.length ? j + 1 : lines.length;
+  }
+  return kept.join("\n");
+}
+
+// The recognized CommonMark HTML-block-type-6 tag names (a curated common subset -- block-level
+// container/structural elements). This is a DIFFERENT closing rule from stripNonRenderingHtmlBlocks'
+// script/style/template/pre/textarea family (CommonMark type 1): a type-6 block is not looking for a matching
+// closing tag at all -- it simply runs until the next blank line (or end of document), regardless
+// of whether any of the lines it absorbs mention a closing tag. Markdown syntax (headings, table
+// rows, checklist items) inside one of these tags -- with no blank line separating it from the
+// tag -- is never parsed as Markdown by a real renderer; it displays as literal, inert text
+// alongside the tag markup, the exact scenario this function exists to catch.
+const GENERIC_HTML_BLOCK_TAGS = new Set([
+  "address",
+  "article",
+  "aside",
+  "blockquote",
+  "body",
+  "caption",
+  "center",
+  "col",
+  "colgroup",
+  "dd",
+  "details",
+  "dialog",
+  "dir",
+  "div",
+  "dl",
+  "dt",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "frame",
+  "frameset",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "head",
+  "header",
+  "hr",
+  "html",
+  "legend",
+  "li",
+  "main",
+  "menu",
+  "menuitem",
+  "nav",
+  "ol",
+  "optgroup",
+  "option",
+  "p",
+  "param",
+  "section",
+  "summary",
+  "table",
+  "tbody",
+  "td",
+  "tfoot",
+  "th",
+  "thead",
+  "title",
+  "tr",
+  "ul",
+]);
+
+/**
+ * Strips CommonMark HTML-block-type-6 content: a line-level block-level container tag (div,
+ * section, table, p, li, ...; see GENERIC_HTML_BLOCK_TAGS). A block only OPENS at the true start
+ * of its own line (up to 3 leading spaces, the same tolerance every other stripper in this file
+ * uses), an opening or closing angle bracket immediately followed by one of the recognized tag
+ * names, itself followed by whitespace, ">", "/", or end of line -- never mid-line, so a sentence
+ * mentioning one of these tags inside an inline code span is never mistaken for a real block.
+ * Unlike stripNonRenderingHtmlBlocks (script/style/template/pre/textarea), this block type's closing condition
+ * is NOT a matching closing tag -- CommonMark simply runs it through the next blank line (or end
+ * of document), whatever content that line carries. A required heading, Graph Run row, or
+ * checklist item placed inside one of these tags with no blank line separating it from the tag is
+ * exactly the content this strips: a real renderer shows it as literal text beside the markup,
+ * never as parsed Markdown structure.
+ */
+function stripGenericHtmlBlocks(text: string): string {
+  const openerLine = new RegExp(`^ {0,3}<\\/?([A-Za-z][A-Za-z0-9]*)(?=[\\s>/]|$)`);
+  // CommonMark HTML-block-type-7 (round 24): a line consisting of a COMPLETE open or closing tag
+  // and nothing else -- ANY tag name, including hyphenated custom elements like <x-proof>, not
+  // just the curated type-6 set below -- opens an HTML block with the same
+  // run-through-the-next-blank-line closing rule as type 6. Open tags of the type-1 family are
+  // excluded: stripNonRenderingHtmlBlocks owns those with its matching-closing-tag rule and runs
+  // first. Without this, evidence or completion structure placed inside a custom-element block
+  // renders as raw HTML in a real renderer but stayed live and findable here.
+  const completeTagOnlyLine = /^ {0,3}<(\/?)([A-Za-z][A-Za-z0-9-]*)(?:\s[^<>]*)?\/?>\s*$/;
+  const type1Tags = new Set(["script", "style", "template", "pre", "textarea"]);
+  const lines = text.split("\n");
+  const kept: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    const openMatch = line.match(openerLine);
+    const tag = (openMatch?.[1] ?? "").toLowerCase();
+    let opensBlock = Boolean(openMatch && GENERIC_HTML_BLOCK_TAGS.has(tag));
+    if (!opensBlock) {
+      const completeMatch = line.match(completeTagOnlyLine);
+      const completeTag = (completeMatch?.[2] ?? "").toLowerCase();
+      opensBlock = Boolean(completeMatch && (completeMatch[1] === "/" || !type1Tags.has(completeTag)));
+    }
+    if (!opensBlock) {
+      kept.push(line);
+      i++;
+      continue;
+    }
+    let j = i;
+    while (j < lines.length && (lines[j] ?? "").trim().length > 0) j++;
+    i = j;
+  }
+  return kept.join("\n");
+}
+
+/**
+ * Strips every form of Markdown (and raw HTML) that a real renderer does not parse as live
+ * document structure: HTML comments (which render nothing at all), script/style/template/pre/
+ * textarea blocks (see stripNonRenderingHtmlBlocks -- some of these render nothing, others render
+ * only as literal preformatted text, but neither case is a parsed heading/table/checklist),
+ * generic block-level HTML container tags (see stripGenericHtmlBlocks), backtick/tilde fenced code
+ * blocks (CommonMark accepts both delimiters equally, and a shorter same-character run than the
+ * opener never closes a fence -- see stripFenceChar), and indented code blocks (see
+ * stripIndentedCodeBlocks). Used by every check that must not mistake hidden, fenced-off, or
+ * code-block-only content for a live, parseable finding, section, or completion signal.
+ */
+export function stripNonRenderedMarkdown(text: string): string {
+  const withoutComments = text.replace(/<!--[\s\S]*?(?:-->|$)/g, "");
+  const withoutHtmlBlocks = stripGenericHtmlBlocks(stripNonRenderingHtmlBlocks(withoutComments));
+  const withoutFences = stripFenceChar(stripFenceChar(withoutHtmlBlocks, "`"), "~");
+  return stripIndentedCodeBlocks(withoutFences);
 }

@@ -197,7 +197,7 @@ The playbook contains tactics this skill rejects. Name them so no agent reinvent
 - **Purchased followers.** Violates platform terms, poisons the engagement signal the qualification filters depend on, and risks the brand account that the whole engine runs through. Credibility comes from collab posts and pinned demos.
 - **Undisclosed planted comments.** Having friends pose as organic viewers asking "what app is that?" is astroturfing. The brand account commenting under its own name achieves the same funnel effect honestly.
 - **Undisclosed or news-framed paid posts.** Every sponsored post and paid repost carries the platform's paid-partnership disclosure. Engagement gained by disguising an ad is liability, not growth.
-- **Incentivized or priming rating screens.** "Support the mission, rate 5 stars" placed before the paywall violates store policy. The compliant version — the native review prompt immediately after first value — is already the default in `onboarding-conversion.md`.
+- **Incentivized or priming rating screens.** "Support the mission, rate 5 stars" placed before the paywall violates store policy. The compliant version — the native review prompt outside first-run onboarding, at a later natural success once eligibility is earned by first value — is already the default in `onboarding-conversion.md`.
 - **Fake-computation FOMO.** An analysis animation must run the real analysis. Gating the reveal of a real result behind the paywall is legitimate suspense (see Held Value Reveal in `onboarding-conversion.md`); animating nothing is deception.
 
 ## Outputs

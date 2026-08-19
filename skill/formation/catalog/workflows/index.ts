@@ -5,5 +5,5 @@ import { workflows as operatingSystem } from "./operating-system.js";
 import { workflows as operationsTrust } from "./operations-trust.js";
 import { workflows as productExperience } from "./product-experience.js";
 
-/** All 57 catalog workflows, ported from runtime/graph/workflows/*.ts (U8). */
+/** All 80 catalog workflows, including the typed ONB-00 through ONB-22 onboarding expansion. */
 export const workflows = [...operatingSystem, ...operationsTrust, ...productExperience, ...buildRelease, ...growthRevenue, ...maintenance];

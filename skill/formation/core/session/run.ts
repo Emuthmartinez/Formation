@@ -9,8 +9,8 @@ import { runReducer, skillRoot, type ReducerResult } from "./reducer-cli.js";
 import { acquireLock, heartbeat, releaseLock, type AcquireResult } from "../reducer/lock.js";
 import type { PatchOp, PatchPath, StatePatch } from "../reducer/patch.js";
 import { validateBudgetLedger, validateBusinessState, validateControl } from "../schema/index.js";
-import { grantableDomainIds, type BudgetLedgerDocument, type BusinessStateV2, type ControlFile } from "../schema/types.js";
-import { compilePlan, type CatalogInput, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
+import { grantableDomainIds, type BudgetLedgerDocument, type BusinessStateV2, type ControlFile, type RunStateDocument } from "../schema/types.js";
+import { compilePlan, type CatalogInput, type CompiledPlan, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
 import { computeFrontier } from "../engine/frontier.js";
 import { observeAppSourceFingerprint } from "../engine/source-fingerprint.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
@@ -353,6 +353,51 @@ function orphanSentence(event: OrphanEvent, title: string): string {
 }
 
 /**
+ * computeFrontier() only ever returns the current ready frontier, not the full dependency
+ * closure, so a scoped session's own entry chain can be permanently stuck: an in-scope node
+ * whose only unmet dependency sits in a different, out-of-scope domain never becomes ready at
+ * all, and the dispatch loop used to just break with no explanation once scope-filtering emptied
+ * readyIds. This walks the dependency chain from every not-yet-succeeded in-scope node (not just
+ * the current ready set) to find the titles of out-of-scope nodes actually blocking it, so that
+ * case can be reported by name instead of silently doing nothing.
+ *
+ * This deliberately does NOT flag an out-of-scope node that happens to be ready but isn't a
+ * dependency of anything in scope -- that is ordinary parallel work for a different session, not
+ * a blocker, and a scoped session correctly leaves it untouched without comment (see
+ * "session: scope hints restrict this session..." in verification/fixtures/session.fixtures.ts).
+ */
+function findOutOfScopeBlockers(plan: CompiledPlan, run: RunStateDocument, scopeHints: readonly string[]): string[] {
+  const nodesById = new Map(plan.nodes.map((node) => [node.id, node]));
+  const blockingTitles = new Set<string>();
+  const visited = new Set<string>();
+
+  const walk = (nodeId: RunNodeId): void => {
+    if (visited.has(nodeId)) return;
+    visited.add(nodeId);
+    const node = nodesById.get(nodeId);
+    if (!node) return;
+    for (const dependencyId of node.dependencies) {
+      if (run.nodes[dependencyId]?.status === "succeeded") continue;
+      const dependencyNode = nodesById.get(dependencyId);
+      if (!dependencyNode) continue;
+      if (nodeInScope(scopeHints, dependencyNode.domainId, dependencyNode.workflowId)) {
+        walk(dependencyId);
+      } else {
+        blockingTitles.add(dependencyNode.title);
+      }
+    }
+  };
+
+  for (const node of plan.nodes) {
+    if (run.nodes[node.id]?.status === "succeeded") continue;
+    if (!nodeInScope(scopeHints, node.domainId, node.workflowId)) continue;
+    walk(node.id);
+  }
+
+  return [...blockingTitles];
+}
+
+/**
  * Layer 3 disclosure, never a gate (R14/AGENTS.md "Autonomy Trust Boundary"): once any granted
  * business unit sits above the lowest level, the founder is relying on control/'s OS write
  * protection to make that grant a real limit rather than a suggestion. If verifyControlBoundary
@@ -626,10 +671,29 @@ async function main(): Promise<number> {
       const frontier = computeFrontier(plan, run, businessState, captured);
       let readyIds: RunNodeId[] = frontier.ready;
       if (brief.scopeHints && brief.scopeHints.length > 0) {
-        readyIds = readyIds.filter((id) => {
+        const inScope = readyIds.filter((id) => {
           const node = plan.nodes.find((candidate) => candidate.id === id)!;
           return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId);
         });
+        // A scoped session only ever dispatches nodes matching its own scopeHints -- it must
+        // never silently reach across that boundary to run an out-of-scope prerequisite the
+        // founder did not grant this session. When nothing in scope is currently ready, check
+        // whether that's ordinary (an out-of-scope ready node with no bearing on this scope, or
+        // the in-scope work is simply done -- both silent by design) or whether an in-scope node
+        // is stuck behind an out-of-scope prerequisite that hasn't succeeded yet, in which case
+        // the loop used to just break with no explanation. Report the blocker by title, not its
+        // raw domainId -- an anomaly message reaches the founder through the same digest as
+        // "advanced"/"parked" entries, and domainId values (e.g. "domain.money") are exactly what
+        // the founder-copy internal-vocabulary blocklist exists to keep out of that surface.
+        if (inScope.length === 0) {
+          const blockingTitles = findOutOfScopeBlockers(plan, run, brief.scopeHints);
+          if (blockingTitles.length > 0) {
+            anomalies.push({
+              message: `Nothing in this session's current scope is ready to run yet. Progress is waiting on other work outside this session's scope: ${blockingTitles.join(", ")}. Widen this session's scope, or run a session covering that work first, before retrying.`,
+            });
+          }
+        }
+        readyIds = inScope;
       }
       if (readyIds.length === 0) break;
 

@@ -117,7 +117,9 @@ export function register(harness: Harness): void {
     );
 
     const exempt = baseFixtureCatalog();
-    exempt.areas = [{ id: "area.product-experience", name: "Product And Experience", description: "fixture", domainIds: ["domain.research", "domain.machine"] }];
+    exempt.areas = [
+      { id: "area.product-experience", name: "Product And Experience", description: "fixture", domainIds: ["domain.research", "domain.machine"] },
+    ];
     exempt.domains = [
       ...exempt.domains,
       { id: "domain.machine", slug: "machine", name: "Machine", areaIds: ["area.product-experience"], routeLabel: "Machine", routeWhen: "fixture", order: 99 },
@@ -262,12 +264,19 @@ export function register(harness: Harness): void {
 
   harness.check("validate: an always workflow cannot depend ambiguously on conditional work", () => {
     const catalog = baseFixtureCatalog();
-    const conditional = baseWorkflow({ id: "workflow.research.conditional", outputPaths: [], applicability: { mode: "conditional", question: "Is this work required?" } });
+    const conditional = baseWorkflow({
+      id: "workflow.research.conditional",
+      outputPaths: [],
+      applicability: { mode: "conditional", question: "Is this work required?" },
+    });
     const dependent = baseWorkflow({ id: "workflow.research.dependent", dependencies: [conditional.id], outputPaths: [] });
     catalog.workflows = [conditional, dependent];
     catalog.artifacts = [];
     const issues = validateCatalog(catalog, skillRoot);
-    assert(issues.some((issue) => issue.code === "catalog_graph.workflow.conditional_dependency_ambiguous"), "expected conditional dependency error");
+    assert(
+      issues.some((issue) => issue.code === "catalog_graph.workflow.conditional_dependency_ambiguous"),
+      "expected conditional dependency error",
+    );
   });
 
   harness.check("validate: two workflows declaring the same output is caught with a named issue code", () => {
@@ -461,7 +470,7 @@ export function register(harness: Harness): void {
     const issues = validateCatalog(catalog, skillRoot).filter((issue) => issue.severity === "error");
     assert(issues.length === 0, `expected the real catalog to be clean, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
     assert(catalog.domains.length === 15, `expected 15 domains, got ${catalog.domains.length}`);
-    assert(catalog.workflows.length === 70, `expected 70 workflows, got ${catalog.workflows.length}`);
+    assert(catalog.workflows.length === 92, `expected 92 workflows, got ${catalog.workflows.length}`);
     assert(catalog.references.length === 108, `expected 108 references, got ${catalog.references.length}`);
 
     const landingBuild = catalog.workflows.find((wf) => wf.id === "workflow.growth.pre-launch-funnel-landing-waitlist");
@@ -551,7 +560,10 @@ export function register(harness: Harness): void {
   harness.check("dispatch registry: prompts use the v2 state model, canonical artifact paths, and complete launch-surface nesting", () => {
     const catalog = composeCatalog(skillRoot);
     const promptRoot = path.join(skillRoot, "workspace", "business", "engineering", "app-agent-roster");
-    const promptText = [path.join(promptRoot, "APP_AGENTS.md"), ...readdirSync(path.join(promptRoot, "agents")).map((name) => path.join(promptRoot, "agents", name))]
+    const promptText = [
+      path.join(promptRoot, "APP_AGENTS.md"),
+      ...readdirSync(path.join(promptRoot, "agents")).map((name) => path.join(promptRoot, "agents", name)),
+    ]
       .map((filePath) => readFileSync(filePath, "utf8"))
       .join("\n");
     for (const stale of [
@@ -569,7 +581,10 @@ export function register(harness: Harness): void {
     const producer = catalog.roles.find((role) => role.id === "role.launch-surface-producer")!;
     assert(producer.contextPackIds.includes("context.process"), "launch-surface work must load the executable change-process doctrine");
     for (const skillId of ["ios-screenshots", "pricing", "paywalls", "analytics", "video", "remotion", "usefastlane-ai"]) {
-      assert(producer.skillRoutes.some((route) => route.id === skillId), `launch-surface producer must route nested skill ${skillId}`);
+      assert(
+        producer.skillRoutes.some((route) => route.id === skillId),
+        `launch-surface producer must route nested skill ${skillId}`,
+      );
     }
     for (const role of catalog.roles) {
       assert(role.contextPackIds.includes("context.founder-language"), `${role.id} must carry always-on founder-language knowledge`);

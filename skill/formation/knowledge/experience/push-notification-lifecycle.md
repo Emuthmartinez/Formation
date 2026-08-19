@@ -26,7 +26,7 @@ The ethics line up front: push serves the user's stated goal, never the app's ne
 The raw iOS permission dialog converts poorly when it appears cold; a primed ask converts at multiples of an unprimed one, and a denial is nearly permanent (the user must dig through Settings to reverse it). Treat the ask as a conversion surface with one canonical placement:
 
 - **Prime first.** A pre-permission screen in the app's own UI explains the one concrete job pushes do for this user ("your Wednesday reminder, nothing else") with the user's own goal named. Only after an affirmative tap does the system dialog appear.
-- **Canonical placement:** immediately after the first value moment — the same after-first-value slot the App Review popup contract uses in `onboarding-conversion.md`, but never in the same session step; value moment → review prompt OR push prime, the other waits for the next natural moment. Never on cold start, never before the value reveal.
+- **Canonical placement:** after the first value moment at an earned point where the benefit is concrete. First-run onboarding may use the push prime when it directly supports the next user action. Native App Review requests are separate: earn eligibility after value, finish first-run onboarding, and request later at a natural success in normal product use. Never stack both interruptions in one step or session moment.
 - **Denial handling:** a soft-prime decline is re-askable at the next earned moment (a streak at risk, a feature that plainly needs it); a hard system-dialog denial is not — record it and fall back to email for lifecycle sends.
 - Provisional/quiet delivery (iOS) is a legitimate first rung for content apps: deliver quietly, earn the upgrade to alerts.
 

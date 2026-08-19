@@ -462,24 +462,52 @@ function escapeRegExpFreeHtml(value: string): string {
  * sanctioned home for technical detail.
  */
 function founderVisibleHtmlText(source: string): string {
-  return (
-    source
-      .replace(/<details[\s\S]*?<\/details>/gi, " ")
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      // <code> marks a value AS an identifier, the same way backticks do in markdown. A
-      // secret name a founder must paste into a provider belongs there; the same string
-      // dropped into a sentence does not.
-      .replace(/<code[\s\S]*?<\/code>/gi, " ")
-      // Mustache placeholders are substituted before a founder ever sees the page.
-      .replace(/\{\{[^}]*\}\}/g, " ")
-      .replace(/<!--[\s\S]*?-->/g, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replaceAll("&amp;", "&")
-      .replaceAll("&lt;", "<")
-      .replaceAll("&gt;", ">")
-      .replaceAll("&quot;", '"')
-  );
+  const stripped = source
+    .replace(/<details[\s\S]*?<\/details>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    // <code> marks a value AS an identifier, the same way backticks do in markdown. A
+    // secret name a founder must paste into a provider belongs there; the same string
+    // dropped into a sentence does not.
+    .replace(/<code[\s\S]*?<\/code>/gi, " ")
+    // Mustache placeholders are substituted before a founder ever sees the page.
+    .replace(/\{\{[^}]*\}\}/g, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"');
+
+  // A <script> body is dropped above as code, not prose -- but some pages (renderSourceArtifactPage
+  // in tooling/lib/artifact-pages.ts) base64-embed real Markdown in a script and decode it
+  // client-side into a target element by id, specifically so the *encoded* string in the source
+  // never contains raw identifiers for the naive scan above to trip on. That decoded text is
+  // exactly the founder-visible prose this gate exists to check, so decode it here too. A payload
+  // whose target element sits inside the sanctioned <details> disclosure is exempt like any other
+  // technical detail; one that lands outside it is scanned like any other founder-visible text.
+  const detailsBlocks = source.match(/<details[\s\S]*?<\/details>/gi) ?? [];
+  const decodedOutsideDetails = decodedScriptPayloads(source)
+    .filter(({ elementId }) => !detailsBlocks.some((block) => block.includes(`id="${elementId}"`)))
+    .map(({ text }) => text);
+
+  return [stripped, ...decodedOutsideDetails].join(" ");
+}
+
+function decodedScriptPayloads(source: string): Array<{ elementId: string; text: string }> {
+  const results: Array<{ elementId: string; text: string }> = [];
+  for (const scriptMatch of source.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)) {
+    const scriptBody = scriptMatch[1] ?? "";
+    const base64 = /atob\(\s*"([A-Za-z0-9+/=]+)"\s*\)/.exec(scriptBody)?.[1];
+    const elementId = /getElementById\(\s*"([^"]+)"\s*\)/.exec(scriptBody)?.[1];
+    if (!base64 || !elementId) continue;
+    try {
+      results.push({ elementId, text: Buffer.from(base64, "base64").toString("utf8") });
+    } catch {
+      // Malformed base64 is not this gate's concern; whatever renders the page will fail first.
+    }
+  }
+  return results;
 }
 
 /**

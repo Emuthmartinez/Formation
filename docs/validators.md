@@ -48,6 +48,34 @@ npm run validate:launch-state -- --root /path/to/app
 | `validate:launch-state` | `state/PROJECT_STATE.yaml` structure, statuses, provider fields, evidence, blockers, and failure cards |
 | `check:lane-coverage` | Every lane is represented, its dependency edges are satisfied, and founder-gated blockers carry a dated presentation that is re-presented past 30 days (warnings pre-launch, errors on a live app) |
 | `check:change-cascade` | A change in one lane propagates to the lanes the Change Cascade Map says it must |
+| `check:onboarding-graph` | `product/ONBOARDING.md` is the canonical onboarding graph record: required sections, Graph Run rows for ONB-00..ONB-22, and live (non-hidden) structure |
+| `check:onboarding-graph-complete` | The `--require-done` wrapper ONB-22 gates on: every Graph Run row must be done |
+| `check:onboarding-cutover-repository` | Every Deletion Manifest row resolved to `delete` names artifacts genuinely absent from the repository — filesystem truth, not prose |
+| `check:onboarding-cutover-repository-complete` | The `--require-resolved` wrapper ONB-22 gates on: every Deletion Manifest row must resolve to exactly one terminal disposition |
+| `check:onboarding-page-fresh` | `product/onboarding.html` byte-matches a fresh render of `product/ONBOARDING.md` (a `--page`-scoped `check:generated-pages`) |
+| `check:provider-proof-onboarding` | ONB-22's provider rows (PostHog/RevenueCat) are backed by `operations/PROVIDER_PROOF.md` evidence (a `--providers`-scoped `check:provider-proof`) |
+| `check:onboarding-evidence-onb-00` | ONB-00's own output packet (`product/onboarding/graph/`) exists with real, non-templated resume/scope classification content |
+| `check:onboarding-evidence-onb-01` | ONB-01's own output packet (`product/onboarding/graph/`) exists with real, non-templated current-state trace content |
+| `check:onboarding-evidence-onb-02` | ONB-02's own output packet (`product/onboarding/graph/`) exists with real, non-templated evidence plan content |
+| `check:onboarding-evidence-onb-03` | ONB-03's own output packet (`product/onboarding/graph/`) exists with real, non-templated current guidance research content |
+| `check:onboarding-evidence-onb-04` | ONB-04's own output packet (`product/onboarding/graph/`) exists with real, non-templated competitor review mining content |
+| `check:onboarding-evidence-onb-05` | ONB-05's own output packet (`product/onboarding/graph/`) exists with real, non-templated authorized Onbo Hub atlas content |
+| `check:onboarding-evidence-onb-06` | ONB-06's own output packet (`product/onboarding/graph/`) exists with real, non-templated internal guidance audit content |
+| `check:onboarding-evidence-onb-07` | ONB-07's own output packet (`product/onboarding/graph/`) exists with real, non-templated provider and policy landscape content |
+| `check:onboarding-evidence-onb-08` | ONB-08's own output packet (`product/onboarding/graph/`) exists with real, non-templated 60fps motion research content |
+| `check:onboarding-evidence-onb-09` | ONB-09's own output packet (`product/onboarding/graph/`) exists with real, non-templated evidence join and decisions content |
+| `check:onboarding-evidence-onb-10` | ONB-10's own output packet (`product/onboarding/graph/`) exists with real, non-templated first-value and activation milestones content |
+| `check:onboarding-evidence-onb-11` | ONB-11's own output packet (`product/onboarding/graph/`) exists with real, non-templated effort and question audit content |
+| `check:onboarding-evidence-onb-12` | ONB-12's own output packet (`product/onboarding/graph/`) exists with real, non-templated state and identity contract content |
+| `check:onboarding-evidence-onb-13` | ONB-13's own output packet (`product/onboarding/graph/`) exists with real, non-templated analytics and experiment contract content |
+| `check:onboarding-evidence-onb-14` | ONB-14's own output packet (`product/onboarding/graph/`) exists with real, non-templated trust, lifecycle, and policy contract content |
+| `check:onboarding-evidence-onb-15` | ONB-15's own output packet (`product/onboarding/graph/`) exists with real, non-templated architecture decision content |
+| `check:onboarding-evidence-onb-16` | ONB-16's own output packet (`product/onboarding/graph/`) exists with real, non-templated journey graph content |
+| `check:onboarding-evidence-onb-17` | ONB-17's own output packet (`product/onboarding/graph/`) exists with real, non-templated screen/control/paywall contract content |
+| `check:onboarding-evidence-onb-18` | ONB-18's own output packet (`product/onboarding/graph/`) exists with real, non-templated visual design and prototype proof content |
+| `check:onboarding-evidence-onb-19` | ONB-19's own output packet (`product/onboarding/graph/`) exists with real, non-templated implementation and cutover contract content |
+| `check:onboarding-evidence-onb-20` | ONB-20's own output packet (`product/onboarding/graph/`) exists with real, non-templated adversarial QA and pre-mortem content |
+| `check:onboarding-evidence-onb-21` | ONB-21's own output packet (`product/onboarding/graph/`) exists with real, non-templated Compound Engineering plan content |
 | `check:continuity-contract` | A run can be picked up by a different agent without losing state |
 | `check:autopilot` | Trigger coverage, negative-trigger guards, and the hands-off run contract |
 | `render:launch-cockpit` | Renders `state/launch-cockpit.html` from `state/PROJECT_STATE.yaml` |

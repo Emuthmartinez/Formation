@@ -9,6 +9,28 @@ lifecycle: active
 bindings:
   workflow_ids:
     - workflow.experience.onboarding-conversion
+    - workflow.experience.onboarding-system.onb-00-resume-scope
+    - workflow.experience.onboarding-system.onb-01-current-state-trace
+    - workflow.experience.onboarding-system.onb-02-evidence-plan
+    - workflow.experience.onboarding-system.onb-03-current-guidance
+    - workflow.experience.onboarding-system.onb-04-competitor-reviews
+    - workflow.experience.onboarding-system.onb-05-onbo-hub-atlas
+    - workflow.experience.onboarding-system.onb-06-internal-guidance-audit
+    - workflow.experience.onboarding-system.onb-07-provider-policy-landscape
+    - workflow.experience.onboarding-system.onb-08-motion-research
+    - workflow.experience.onboarding-system.onb-09-evidence-join
+    - workflow.experience.onboarding-system.onb-10-first-value-activation
+    - workflow.experience.onboarding-system.onb-11-effort-question-audit
+    - workflow.experience.onboarding-system.onb-12-state-identity-contract
+    - workflow.experience.onboarding-system.onb-13-analytics-experiments
+    - workflow.experience.onboarding-system.onb-14-trust-lifecycle-policy
+    - workflow.experience.onboarding-system.onb-15-architecture-decision
+    - workflow.experience.onboarding-system.onb-16-journey-graph
+    - workflow.experience.onboarding-system.onb-17-screen-control-paywall-contract
+    - workflow.experience.onboarding-system.onb-18-visual-design-prototype
+    - workflow.experience.onboarding-system.onb-19-implementation-cutover-contract
+    - workflow.experience.onboarding-system.onb-20-adversarial-qa
+    - workflow.experience.onboarding-system.onb-21-compound-engineering-plan
     - workflow.growth.viral-growth-loop
   context_pack_ids:
     - context.experience

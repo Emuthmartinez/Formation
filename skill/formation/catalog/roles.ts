@@ -123,7 +123,7 @@ export const roles: CatalogRole[] = [
       route("paywalls", "designing the product paywall"),
     ],
     [route("simulator/browser product inspection", "auditing an implemented flow")],
-    [],
+    ["provider.revenuecat", "provider.posthog", "provider.app-store-connect", "provider.google-play"],
     ["state/LAUNCH_TRACE.md", "engineering/TECH_SPEC.md", "product/", "SKILL.md"],
   ),
   role(

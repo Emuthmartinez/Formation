@@ -450,6 +450,193 @@ export function register(h: Harness): void {
     "provider_proof.posthog.status_unproven",
   );
 
+  // Regression: "onboarding" was absent from proofRequiredLanes and providerLaneMap, so a
+  // done onboarding lane (ONB-22's own lane) never required operations/PROVIDER_PROOF.md to
+  // exist at all, even though ONB-22 declares provider.revenuecat and provider.posthog.
+  const providerProofOnboardingMissing = makeFixture("provider-proof-onboarding-missing");
+  {
+    const state = readState(providerProofOnboardingMissing);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofOnboardingMissing, state);
+    rmSync(path.join(providerProofOnboardingMissing, "operations/PROVIDER_PROOF.md"), { force: true });
+  }
+  runFixture(
+    "done onboarding lane without proof now fails, same as any other provider-backed lane",
+    providerProofOnboardingMissing,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.file_missing",
+  );
+
+  // The onboarding lane maps to both PostHog and RevenueCat: grounding only one must not
+  // silence the other.
+  const providerProofOnboardingRevenueCatUngrounded = makeFixture("provider-proof-onboarding-revenuecat-ungrounded");
+  {
+    const state = readState(providerProofOnboardingRevenueCatUngrounded);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofOnboardingRevenueCatUngrounded, state);
+    writeCompleteProviderProof(providerProofOnboardingRevenueCatUngrounded);
+    mkdirSync(path.join(providerProofOnboardingRevenueCatUngrounded, "analytics"), { recursive: true });
+    writeFileSync(
+      path.join(providerProofOnboardingRevenueCatUngrounded, "analytics", "posthog-proof.md"),
+      "Captured live event and person property on 2026-08-08.\n",
+      "utf8",
+    );
+    // The shipped workspace template ships an (unfilled) revenue/revenuecat-proof.md stub, so
+    // "ungrounded" has to remove it explicitly -- its mere presence would otherwise satisfy the
+    // existsSync check regardless of content.
+    rmSync(path.join(providerProofOnboardingRevenueCatUngrounded, "revenue", "revenuecat-proof.md"), { force: true });
+  }
+  runFixture(
+    "done onboarding lane with PostHog grounded but RevenueCat evidence missing still fails",
+    providerProofOnboardingRevenueCatUngrounded,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.revenuecat.evidence_path_missing",
+  );
+
+  const providerProofOnboardingGrounded = makeFixture("provider-proof-onboarding-grounded");
+  {
+    const state = readState(providerProofOnboardingGrounded);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofOnboardingGrounded, state);
+    writeCompleteProviderProof(providerProofOnboardingGrounded);
+    mkdirSync(path.join(providerProofOnboardingGrounded, "analytics"), { recursive: true });
+    writeFileSync(
+      path.join(providerProofOnboardingGrounded, "analytics", "posthog-proof.md"),
+      "Captured live event and person property on 2026-08-08.\n",
+      "utf8",
+    );
+    mkdirSync(path.join(providerProofOnboardingGrounded, "revenue"), { recursive: true });
+    writeFileSync(
+      path.join(providerProofOnboardingGrounded, "revenue", "revenuecat-proof.md"),
+      "Sandbox purchase confirmed: entitlement active and access granted inside the app.\n",
+      "utf8",
+    );
+  }
+  runFixture(
+    "done onboarding lane with both PostHog and RevenueCat evidence on disk passes",
+    providerProofOnboardingGrounded,
+    "check-live-provider-proof.ts",
+    0,
+  );
+
+  // Regression: the ready-claim/open-blocker check scanned the whole PROVIDER_PROOF.md document,
+  // so an unrelated provider's still-pending row could block ONB-22 even though its own declared
+  // providers (PostHog, RevenueCat) are genuinely ready. --providers scopes that specific check to
+  // the named providers' own rows; every other check in this file (keyword presence, per-provider
+  // ledger grounding) is unaffected and still runs against the whole document either way.
+  const providerProofUnrelatedBlockerScoped = makeFixture("provider-proof-unrelated-blocker-scoped");
+  {
+    const state = readState(providerProofUnrelatedBlockerScoped);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofUnrelatedBlockerScoped, state);
+    writeFileSync(
+      path.join(providerProofUnrelatedBlockerScoped, "operations/PROVIDER_PROOF.md"),
+      [
+        "# Provider Proof",
+        "Status: PostHog and RevenueCat are verified.",
+        "Proof Ledger",
+        "| Provider | current status | proof command | evidence path | founder-only gate |",
+        "| --- | --- | --- | --- | --- |",
+        "| PostHog | event and person property captured | inspect dashboard/API | analytics/posthog-proof.md | founder-only account access |",
+        "| RevenueCat | sandbox purchase grants entitlement | sandbox purchase and entitlement check | revenue/revenuecat-proof.md | founder-only store product setup |",
+        "| Resend | domain verification pending | send test email | email/resend-proof.md | founder-only DNS access |",
+        "| App Store Connect | app record and metadata inspected | asc validation commands | store/asc-proof.md | founder-only submission access |",
+        "| Sentry | release event captured | trigger handled test event | security/sentry-proof.md | founder-only project access |",
+        "| MobAI | target-user onboarding walkthrough captured | run mobile walkthrough | mobile/mobai-proof.md | founder-only device access |",
+        "| Doppler | runtime injection captured | doppler run -- printenv APP_ENV | secrets/doppler-proof.md | founder-only secrets access |",
+        "No raw secrets, private account screenshots, signing material, or credential screenshots are stored in proof artifacts.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    mkdirSync(path.join(providerProofUnrelatedBlockerScoped, "analytics"), { recursive: true });
+    writeFileSync(path.join(providerProofUnrelatedBlockerScoped, "analytics", "posthog-proof.md"), "Captured live event on 2026-08-09.\n", "utf8");
+    mkdirSync(path.join(providerProofUnrelatedBlockerScoped, "revenue"), { recursive: true });
+    writeFileSync(
+      path.join(providerProofUnrelatedBlockerScoped, "revenue", "revenuecat-proof.md"),
+      "Sandbox purchase confirmed: entitlement active on 2026-08-09.\n",
+      "utf8",
+    );
+  }
+  runFixture(
+    "the unscoped provider-proof check fails on an unrelated pending provider row",
+    providerProofUnrelatedBlockerScoped,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.ready_claim_with_blocker",
+  );
+  runFixture(
+    "the --providers-scoped provider-proof check ignores that same unrelated pending row",
+    providerProofUnrelatedBlockerScoped,
+    "check-live-provider-proof.ts",
+    0,
+    undefined,
+    ["--providers", "PostHog,RevenueCat"],
+  );
+
+  // The scope must not become a blanket bypass: a blocker inside one of the NAMED providers' own
+  // rows still fails even under --providers.
+  const providerProofOwnBlockerStillScoped = makeFixture("provider-proof-own-blocker-still-scoped");
+  {
+    const state = readState(providerProofOwnBlockerStillScoped);
+    getLane(state, "onboarding")["status"] = "done";
+    writeState(providerProofOwnBlockerStillScoped, state);
+    writeFileSync(
+      path.join(providerProofOwnBlockerStillScoped, "operations/PROVIDER_PROOF.md"),
+      [
+        "# Provider Proof",
+        "Status: PostHog and RevenueCat are verified.",
+        "Proof Ledger",
+        "| Provider | current status | proof command | evidence path | founder-only gate |",
+        "| --- | --- | --- | --- | --- |",
+        "| PostHog | event capture pending | inspect dashboard/API | analytics/posthog-proof.md | founder-only account access |",
+        "| RevenueCat | sandbox purchase grants entitlement | sandbox purchase and entitlement check | revenue/revenuecat-proof.md | founder-only store product setup |",
+        "| Resend | domain and test send captured | send test email | email/resend-proof.md | founder-only DNS access |",
+        "| App Store Connect | app record and metadata inspected | asc validation commands | store/asc-proof.md | founder-only submission access |",
+        "| Sentry | release event captured | trigger handled test event | security/sentry-proof.md | founder-only project access |",
+        "| MobAI | target-user onboarding walkthrough captured | run mobile walkthrough | mobile/mobai-proof.md | founder-only device access |",
+        "| Doppler | runtime injection captured | doppler run -- printenv APP_ENV | secrets/doppler-proof.md | founder-only secrets access |",
+        "No raw secrets, private account screenshots, signing material, or credential screenshots are stored in proof artifacts.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+  }
+  runFixture(
+    "the --providers-scoped provider-proof check still fails on a blocker inside a named provider's own row",
+    providerProofOwnBlockerStillScoped,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.ready_claim_with_blocker",
+    ["--providers", "PostHog,RevenueCat"],
+  );
+
+  // Regression (round 23): the per-provider ledger-grounding loop above still only ran once one
+  // of a provider's mapped lanes read "done" -- but check:provider-proof-onboarding is invoked as
+  // the PRECONDITION for marking the onboarding lane done, so at the point it actually needs to
+  // run, the onboarding lane cannot yet be "done", and neither analytics_attribution nor revenue
+  // is guaranteed done either. Against the untouched shipped workspace (no lane done anywhere,
+  // PostHog/RevenueCat rows still reading their own shipped "needs ... evidence" status), the
+  // scoped invocation used to pass trivially, letting ONB-22's destructive cutover proceed
+  // without ever grounding its own declared providers.
+  const providerProofScopedRequiresEvidenceBeforeLaneDone = makeFixture("provider-proof-scoped-requires-evidence-before-lane-done");
+  runFixture(
+    "the unscoped provider-proof check still passes against the untouched workspace with no lane done",
+    providerProofScopedRequiresEvidenceBeforeLaneDone,
+    "check-live-provider-proof.ts",
+    0,
+  );
+  runFixture(
+    "the --providers-scoped provider-proof check requires named-provider evidence even before any lane is done",
+    providerProofScopedRequiresEvidenceBeforeLaneDone,
+    "check-live-provider-proof.ts",
+    1,
+    "provider_proof.posthog.status_unproven",
+    ["--providers", "PostHog,RevenueCat"],
+  );
+
   const artifactTemplateGap = makeFixture("artifact-template-gap");
   {
     const state = readState(artifactTemplateGap);

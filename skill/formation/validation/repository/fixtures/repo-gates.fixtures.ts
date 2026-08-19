@@ -265,6 +265,50 @@ export function register(h: Harness): void {
     "generated_pages.unsupported_markdown",
   );
 
+  // --page scopes assertions 2 and 3 to one declared page -- used by ONB-22's own gate
+  // (check:onboarding-page-fresh) so its acceptance does not depend on an unrelated page
+  // elsewhere in the manifest being fresh too.
+  runScriptArgs(
+    "a --page-scoped check passes on the shipped business documents",
+    "check-generated-pages.ts",
+    ["--root", path.join(skillRoot, "workspace", "business"), "--page", "product/onboarding.html"],
+    0,
+  );
+
+  const pagesScopedDriftElsewhere = pagesRoot("generated-pages-scoped-drift-elsewhere", (root) => {
+    const source = path.join(root, "operations/ORCHESTRATION.md");
+    writeFileSync(source, `${readFileSync(source, "utf8")}\nAn unrelated stale line the rendered page no longer carries.\n`, "utf8");
+  });
+  runScriptArgs(
+    "--page product/onboarding.html passes even though an unrelated declared page has drifted",
+    "check-generated-pages.ts",
+    ["--root", pagesScopedDriftElsewhere, "--page", "product/onboarding.html"],
+    0,
+  );
+  runScriptArgs(
+    "the unscoped check still fails on that same unrelated drift",
+    "check-generated-pages.ts",
+    ["--root", pagesScopedDriftElsewhere],
+    1,
+    "generated_pages.drift",
+  );
+
+  runScriptArgs(
+    "--page product/onboarding.html still fails when onboarding.html itself has drifted",
+    "check-generated-pages.ts",
+    ["--root", pagesDrift, "--page", "product/onboarding.html"],
+    1,
+    "generated_pages.drift",
+  );
+
+  runScriptArgs(
+    "a --page value with no matching manifest entry fails loudly instead of passing vacuously",
+    "check-generated-pages.ts",
+    ["--root", pagesClean, "--page", "product/does-not-exist.html"],
+    1,
+    "generated_pages.page_not_declared",
+  );
+
   // --- check-package-parity ---
   const parityClean = makeEmptyFixture("package-parity-clean");
   const cleanPair = writeParityPair(parityClean, { rootVersion: "0.0.1", skillVersion: "0.0.1" });
@@ -548,6 +592,56 @@ export function register(h: Harness): void {
     ["--root", founderCopyBannedVocabulary, "--skill-root", skillRoot],
     1,
     "founder_copy.internal_vocabulary",
+  );
+
+  // tooling/lib/artifact-pages.ts's renderSourceArtifactPage base64-embeds real Markdown in a
+  // <script> and decodes it client-side into a target element by id -- a raw <script> body is
+  // dropped from the scan as code, not prose, so without decoding it here too, that payload
+  // could carry any internal vocabulary straight past this gate. These two fixtures prove the
+  // decode step actually runs: a payload landing outside the sanctioned <details> disclosure
+  // must still fail, and the identical payload landing inside it must still pass.
+  const decodedPayload = Buffer.from("Your onboarding lane is almost done.", "utf8").toString("base64");
+  const founderCopyDecodedScriptLeak = makeEmptyFixture("founder-copy-decoded-script-leak");
+  writeFileSync(
+    path.join(founderCopyDecodedScriptLeak, "product/onboarding.html"),
+    [
+      "<html><body>",
+      '<section><pre id="source"></pre></section>',
+      "<script>",
+      `document.getElementById("source").textContent = atob("${decodedPayload}");`,
+      "</script>",
+      "</body></html>",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runScriptArgs(
+    "a base64-decoded script payload outside the technical-details disclosure fails founder copy",
+    "check-founder-copy.ts",
+    ["--root", founderCopyDecodedScriptLeak, "--skill-root", skillRoot],
+    1,
+    "founder_copy.internal_vocabulary",
+  );
+
+  const founderCopyDecodedScriptInDetails = makeEmptyFixture("founder-copy-decoded-script-in-details");
+  writeFileSync(
+    path.join(founderCopyDecodedScriptInDetails, "product/onboarding.html"),
+    [
+      "<html><body>",
+      '<details><summary>Technical details</summary><pre id="source"></pre></details>',
+      "<script>",
+      `document.getElementById("source").textContent = atob("${decodedPayload}");`,
+      "</script>",
+      "</body></html>",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  runScriptArgs(
+    "the identical decoded payload passes founder copy once its target sits inside the technical-details disclosure",
+    "check-founder-copy.ts",
+    ["--root", founderCopyDecodedScriptInDetails, "--skill-root", skillRoot],
+    0,
   );
 
   // The narrative-freshness rule the PROJECT_STATE template comment has

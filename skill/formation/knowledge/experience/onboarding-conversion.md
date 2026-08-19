@@ -1,42 +1,71 @@
-# Onboarding Conversion And Paywall Flow
+# Onboarding System Graph
 
-Use this before designing onboarding, quizzes, personalization, attribution capture, mascot guidance, demo videos, review prompts, paywall timing, closing offers, trials, or first-session activation.
+Use this reference for consumer onboarding, first-value, activation, paywall, trial, review timing, cross-surface continuity, or replacement work. Onboarding is one system:
 
-Load [`paid-tool-routing.md`](../operations/paid-tool-routing.md) before replacing Higgsfield, MobAI Plus/Pro or intended cross-platform coverage, XcodeBuildMCP-approved fallback, RevenueCat experiments, PostHog experiments/surveys/replay, or any paid/account-gated onboarding tool with a free/manual route. MobAI Free needs no spend gate when it covers the lane. Load `remotion-content-assets.md` before using Remotion for onboarding demo clips, animated explainers, app-preview cuts, social hook clips, or local rendered assets. Load [`motion-craft-benchmarks.md`](../design/motion-craft-benchmarks.md)'s R11–R14 recipes before designing the cold-launch splash, loading, or welcome-screen sequence that precedes this file's screen-by-screen table — the numeric, checkable acceptance criteria for that moment live there, not here.
+`acquisition -> first open -> minimum useful input -> first value -> engagement -> activation -> monetization -> identity -> normal product use -> retention -> reactivation`
 
-## Contents
+Load `paid-tool-routing.md` before replacing Higgsfield, MobAI Plus/Pro or intended cross-platform coverage, XcodeBuildMCP-approved fallback, RevenueCat experiments, PostHog experiments/surveys/replay, or any paid/account-gated onboarding tool with a free/manual route. MobAI Free needs no spend gate when it covers the lane. Load `remotion-content-assets.md` before using Remotion for onboarding demo clips, animated explainers, app-preview cuts, social hook clips, or local rendered assets. Load [`motion-craft-benchmarks.md`](../design/motion-craft-benchmarks.md)'s R11–R14 recipes before designing the cold-launch splash, loading, or welcome-screen sequence that precedes `product/ONBOARDING.md`'s screen-sequence rows — the numeric, checkable acceptance criteria for that moment live there, not here.
 
-- Sources To Refresh
-- Required Artifacts
-- Out-Of-Box Attribution Data Contract
-- Conversion Patterns
-- Analytics Events
-- Gates Before Build Handoff
+Do not optimize for a small diff. Optimize for early real value, low cognitive load, progressive profiling, visible personalization, trustworthy monetization, one state and analytics model, remote experimentability, accessibility, privacy, recovery, and deletion of obsolete architecture.
 
-## Sources To Refresh
+## Execution modes
 
-Refresh current platform and monetization sources before locking a flow:
-- RevenueCat State of Subscription Apps 2026: `https://www.revenuecat.com/state-of-subscription-apps/`
-- RevenueCat paywall, experiment, and offerings docs when using RevenueCat UI or experiments
-- Apple ratings and reviews: `https://developer.apple.com/app-store/ratings-and-reviews/`
-- Apple App Review Guidelines: `https://developer.apple.com/app-store/review/guidelines/`
-- Google Play In-App Reviews API: `https://developer.android.com/guide/playcore/in-app-review`
-- Refero MCP docs and tools when researching current shipped onboarding, paywall, upgrade, cancellation, restore, and permissions flows: `https://doc.refero.design/llms.txt`
-- User-provided Cesar Alvarez onboarding teardown links when the task references that research thread
+| Mode | Use when | Legacy rule |
+| --- | --- | --- |
+| `greenfield` | No production onboarding exists | Build only the target system |
+| `replacement` | Existing onboarding is rebuilt from first principles | Hard cutover; no permanent coexistence |
+| `audit_only` | Findings are requested without implementation | Produce evidence, target graph, and plan |
+| `incremental` | The founder explicitly limits scope | Preserve only the named boundary |
 
-## Required Artifacts
+Rebuild, replace, standardize, and rethink requests default to `replacement`. Preserve durable user value through an isolated, rehearsed, one-time transformation, then delete the transformation and every obsolete route, state, event, provider object, test, and document.
 
-Load `analytics-attribution.md` before locking onboarding event names, attribution-source options, paywall variants, or the dashboard plan. Onboarding should implement the approved analytics catalog, not invent events while building screens.
+## Ownership and dispatch
+
+`workflow.experience.onboarding-conversion` owns the nested graph. The orchestrator is the single writer for `product/ONBOARDING.md`, `product/onboarding.html`, state, canonical IDs, pricing, provider mutations, cutover, and final readiness.
 
 Load [`eleven-star-experience.md`](eleven-star-experience.md) before locking onboarding. The onboarding sequence should carry the product's 11-star V1 scalable slice: the user should see why the product is personally relevant before the flow asks for payment, long setup, or sensitive data.
 
-Load `viral-growth-loops.md` before using referral unlocks, share-to-unlock mechanics, creator-code CTAs, social-comment loops, or viral paywall/onboarding sequences. Onboarding can create growth momentum, but the loop needs a fair fallback, abuse controls, analytics proof, and traceability before build handoff.
+Specialists may parallelize read-only research or disjoint implementation packets. Evidence branches may fan out. State, IDs, provider mutations, migrations, release actions, and final decisions serialize through the orchestrator.
 
-Create or update `product/ONBOARDING.md` when an app has more than one setup screen, asks personalization questions, uses a mascot/demo, has a paywall, or relies on first-session conversion.
+Every node returns status, inputs and freshness, evidence or implementation checks, decisions and rejected alternatives, artifact paths, blockers, and newly eligible nodes. A prose artifact is not completion; the node exit gate must pass.
 
-Use Refero as evidence, not as replacement doctrine. The onboarding playbook in this file remains the default conversion contract. Refero should help find concrete examples for sequencing, copy density, state handling, and recovery paths; it should not remove early self-reported attribution, the native App Review popup immediately after first value, paywall proof, restore purchases, privacy/terms links, or backend attribution persistence unless a deliberate experiment is documented.
+## Canonical graph
 
-Before drafting any onboarding question copy, mascot line, demo-video caption, paywall headline, or closing-offer copy, load [`conversion-copy.md`](../words/conversion-copy.md) and `knowledge/words/no-slop-writing.md`; keep the tone `11_STAR_EXPERIENCE.md` and `strategy/BRAND.md` set for this product, not generic onboarding copy. The final words for every onboarding screen — headlines, questions, buttons, primes, loading lines — are authored in `product/copy/COPY_DECK.md` before the build consumes them; the screen-sequence table in `product/ONBOARDING.md` names the deck keys, and `check:app-copy` fails a flow whose deck rows are missing or still placeholder-shaped.
+```text
+ONB-00 -> ONB-01 -> ONB-02
+ONB-02 -> [ONB-03, ONB-04, ONB-05, ONB-06, ONB-07, ONB-08]
+[ONB-03..08] -> ONB-09
+ONB-09 -> [ONB-10, ONB-11, ONB-12, ONB-13, ONB-14]
+[ONB-10..14] -> ONB-15 -> ONB-16
+ONB-16 -> [ONB-17, ONB-18, ONB-19]
+[ONB-17..19] -> ONB-20 -> ONB-21 -> ONB-22
+```
+
+| Node | Contract |
+| --- | --- |
+| `ONB-00` | Resume state, classify mode, identify surfaces and founder-only actions |
+| `ONB-01` | Trace real code, documents, providers, state, routes, events, tests, failures, and legacy items |
+| `ONB-02` | Set source hierarchy, sampling, access limits, and freshness cutoff |
+| `ONB-03` | Research current platform guidance, evidence, benchmarks, and practitioner heuristics |
+| `ONB-04` | Mine negative competitor reviews plus a positive-review control and code root causes |
+| `ONB-05` | Build an authorized Onbo Hub flow atlas without scraping or inferring locked screens |
+| `ONB-06` | Audit applicable Formation and internal B2C guidance; resolve outdated rules |
+| `ONB-07` | Refresh provider, RevenueCat, billing, identity, analytics, policy, and regional capability facts |
+| `ONB-08` | Research interaction and motion using 60fps references and target-framework translation |
+| `ONB-09` | Join evidence into adopted, test, rejected, and investigate decisions |
+| `ONB-10` | Define first value rendered, first value engaged, activation, habit, and retention hypotheses |
+| `ONB-11` | Audit effort, questions, permissions, interruption budget, and personalization proof |
+| `ONB-12` | Define canonical identity, journey, profile, activation, entitlement, experiment, review, permission, and lifecycle state |
+| `ONB-13` | Define typed analytics, authoritative emitters, stitching, deduplication, exposure, and expected sequences |
+| `ONB-14` | Define review timing, permissions, lifecycle, privacy, security, and policy behavior |
+| `ONB-15` | Compare native-first, funnel-first, hybrid, web-first, and evidence-backed alternatives; choose one |
+| `ONB-16` | Produce acquisition-specific journeys that converge on one semantic model |
+| `ONB-17` | Specify every screen, copy key, control, action, paywall state, error, and recovery path |
+| `ONB-18` | Produce actual high-fidelity design, motion, interactive prototype, and design QA |
+| `ONB-19` | Define implementation, reliability, accessibility, localization, privacy, performance, and cutover units |
+| `ONB-20` | Run adversarial review, synthetic one-star pre-mortem, policy review, and instrumentation QA |
+| `ONB-21` | Run Compound Engineering planning when available, preserving graph IDs and deletion work |
+| `ONB-22` | Implement, review, test, cut over, delete legacy, and verify the target is the only runtime |
 
 Onboarding is where most of the Experience Cards fire. When the 11-star target is 6-star or higher, load [`emotional-design-system.md`](./emotional-design-system.md) for the card-timing contract and reflect it here: the Commitment Card fires at the first personalization/goal question; the Perceived Effort Delay Card fires at plan/result generation; the Intent Mirroring Card fires after first value and immediately before the paywall (never on the paywall screen itself or any cancel flow); the native App Review popup fires at or just after the emotional peak. These moments belong in `EMOTIONAL_DESIGN.md`'s Card Application Map with a PostHog event each, and the onboarding curve must cross positive before the paywall.
 
@@ -44,30 +73,6 @@ Recommended Refero searches when access is available:
 - `refero_search_flows`: `signup onboarding`, `subscription onboarding paywall`, `permission request onboarding`, `subscription cancellation with retention offer`, `restore purchases`
 - `refero_search_screens`: `ios onboarding progress question`, `ios paywall annual weekly lifetime`, `ios restore purchases settings`, `web pricing annual monthly toggle`
 - `refero_get_flow` for 2-4 strongest flows, then summarize step count, friction, recovery, and system response in `UX_PATTERNS.md`
-
-`product/ONBOARDING.md` must include:
-- target user state before onboarding and desired state after onboarding
-- 11-star experience mapping: which step delivers or previews the magical moment from `11_STAR_EXPERIENCE.md`
-- screen-by-screen sequence with purpose, question/copy, state, visual asset, animation, analytics event, and skip/back rules
-- mascot/guide behavior if used: personality, reactions, emotion states, source assets, Higgsfield model/tool, and accessibility fallback
-- demo-video plan: clip length, aha moment, source UI, visual treatment, no-audio fallback, Higgsfield or Remotion route, and where it appears
-- data collection matrix: question, answer options, personalization use, attribution use, lifecycle-message use, privacy/legal note, and whether it is required
-- attribution question: "How did you hear about us?" options, UTM/referrer capture, and free-text/other handling
-- attribution source mapping to `analytics/ANALYTICS.md`: stored key, display label, PostHog person property, event property, lifecycle-message use, and privacy note
-- App Review popup gate: first-value/value-reveal trigger, native platform API, automatic mounted-screen timing, cooldown, analytics, and fallback if the platform does not show the prompt
-- push permission priming: the soft-prime screen and system-dialog placement per `push-notification-lifecycle.md` — after a first value moment, never cold on launch, and never in the same step as the review popup (value moment → one of the two; the other waits for the next earned moment)
-- paywall placement and access model: hard paywall, soft paywall, reverse trial, freemium limit, or no paywall yet
-- closing-offer behavior after paywall dismissal, if any
-- pricing/trial package matrix and RevenueCat offering/experiment names
-- first-session activation task after payment or before payment, depending on the model
-- viral growth loop mapping when relevant: referral/share trigger, reward, recipient value, fallback, abuse controls, backend/provider proof, and related `VIRAL_GROWTH.md` trace IDs
-- privacy/terms/support links shown before data collection or purchase
-
-Create `product/onboarding.html` or include an onboarding section in `design/design.html`:
-- render every onboarding screen at mobile dimensions
-- include mascot states, data question UI, demo-video placeholder or clip, Remotion-rendered asset placeholder when selected, plan summary, paywall, closing offer, review prompt placeholder, loading/error/offline states, and post-paywall activation
-- use CSS variables from `design/design.md`
-- include reduced-motion behavior and no-video fallback
 
 ## Out-Of-Box Attribution Data Contract
 
@@ -145,6 +150,78 @@ Ask questions only when the answer changes personalization, attribution, segment
 - for utility apps, keep the sequence shorter and reach the product quickly
 - always include an attribution question early enough that users remember the answer
 - do not collect sensitive categories unless the product genuinely needs them and privacy terms cover them
+
+
+## Evidence contract
+
+Use current official policy and provider documentation first, followed by implementation truth, reliable product data, direct research, current first-party reviews, disclosed-method quantitative work, direct flow observation, original practitioner sources, and secondary commentary.
+
+Classify each recommendation as platform requirement, evidence-backed guidance, benchmark, direct user finding, competitor pattern, practitioner heuristic, product hypothesis, or experiment question. Record source, date, market, version, method, confidence, and implication.
+
+Competitor review analysis separates onboarding, expectation, monetization, identity, lifecycle, core product, support, platform limitation, and insufficient evidence. Never present sample frequency as population prevalence. Never onboarding-wash a product defect.
+
+Onbo Hub is authorized access only. Revenue estimates remain estimates. Record screens reviewed, effort, first-value class, account, permissions, paywall, trial, restore, close, accessibility, trust, and related positive and negative review evidence.
+
+For subscription products, refresh the full relevant RevenueCat surface: SDK, products, packages, offerings, placements, entitlements, identity, paywalls, targeting, experiments, Funnels, Web, Purchases.js, purchase links and buttons, Billing, Stripe, Paddle, Redemption Links, Customer Center, webhooks, analytics, lifecycle, refunds, grace, pending purchases, restore, and newer official capabilities. Separate technically possible, policy permitted, and recommended by platform and region.
+
+Use the 60fps MCP with `search_shots`, `get_shot`, `get_motion_breakdown`, and `get_related_shots`; use motion code only when useful. Translate interaction principles, never another product's brand, assets, copy, exact layout, or implementation.
+
+Audit the seven-principle heuristic: define activation, show value before disproportionate effort, ask only useful questions, keep one dominant action, use purposeful motion, show visible personalization, and finish with meaningful value in a populated normal product state. Record pass, partial, or fail with evidence, not a fake score.
+
+## Product and architecture contract
+
+First value rendered, first value engaged, activation, retention, monetization, review eligibility, and onboarding completion are distinct. A render is not activation. First value must be real, understandable, actionable, persistent, recoverable, and connected to the acquisition promise.
+
+Every required question identifies the behavior it changes and the screen where the user sees personalization proof. Every required effort has an explicit value exchange. A name inserted into generic copy is not personalization.
+
+Separate identity, journey, profile completeness, activation, entitlement, experiment assignment and exposure, review eligibility, permission and consent, and lifecycle state. Define authoritative owner, persistence, transition trigger, event, idempotency, retry, failure, compensation, and consumers. Support anonymous-to-authenticated linking, purchase before account, web-to-app redemption, reinstall, cross-device, restore, entitlement delay, interrupted journeys, churn, win-back, and identity collision without repeating successful work.
+
+Analytics uses one machine-readable schema and typed clients. Distinguish client interaction, backend-confirmed product outcome, provider-confirmed monetization, and derived metrics. One business outcome has one authoritative emitter. Define event IDs, identity stitching, offline queueing, ordering, deduplication, replay, webhook idempotency, experiment exposure, privacy, and expected event-sequence tests. Analytics failure never blocks first value.
+
+Earn review eligibility after real value and engagement. Request through native platform APIs outside first-run onboarding at a later natural success. No custom star screen, sentiment gate, incentive, or happy-user routing. Record only observable eligibility, suppression, request attempt, and API return facts.
+
+Request protected permissions only after a user action with visible benefit. Define denial, limited access, retry, settings, privacy, and fallback. One lifecycle strategy owns onboarding recovery, progressive profiling, trial, post-purchase activation, habit, billing recovery, dormancy, churn, and win-back suppression.
+
+Compare architecture models using conversion, retention, first-value fidelity, file or image needs, resume, identity, experimentation, analytics, policy, economics, accessibility, localization, latency, offline behavior, operations, and lock-in. Different acquisition surfaces may render differently but converge on one semantic state graph.
+
+## Design and delivery contract
+
+### Cold-Launch / Splash Entrance
+
+Before any onboarding question, mascot, or demo, most apps need a genuine cold-launch moment: a hold while fonts, images, or first data load, then either a hard cut or an authored dissolve into the first real screen. This is a distinct beat from the onboarding sequence itself — it has no question, no copy decision, and no paywall stake — so its acceptance criteria live in [`motion-craft-benchmarks.md`](../design/motion-craft-benchmarks.md)'s R11–R14 (splash hold-and-cut, staggered multi-asset entrance, honest loader state-switch and skeleton reveal, paged cold-open with a deterministic final state), not here.
+
+Do not invent an entrance the product has no real content for: a product with no distinct cold-launch moment renders its first real screen immediately, per R14's restraint. When a cold-launch sequence exists, name the recipe it follows (R11–R14) in `product/ONBOARDING.md`'s screen-sequence row for that screen instead of describing it as a generic "fade in."
+
+Every screen and control has a stable semantic ID. Specify exact copy keys, hierarchy, states, local and canonical mutations, API or provider action, idempotency, analytics, navigation, repeated taps, errors, retries, offline and interruption behavior, accessibility, localization, haptics, motion, and reduced-motion behavior.
+
+Produce actual high-fidelity design and an interactive prototype. Contract HTML is not visual design. Cover trial eligibility, packages, restore, existing subscriber, unavailable product, offline, pending, canceled, failed, success, delayed entitlement, web handoff, and regional variants. Motion clarifies state and never disguises latency.
+
+Use a mascot when the product benefits from warmth, reassurance, habit formation, play, coaching, or repeated progress. The mascot should:
+- react to answers and progress
+- soften friction without hiding cost, privacy, or limitations
+- have 4-8 reusable emotion states before implementation
+- be generated or refined with Higgsfield against `design/design.md`
+- appear in HTML proofs before app implementation
+
+Define behavior and observability for termination, network loss, slow or malformed generation, upload failure, analytics or config outage, provider outage, pending purchase, delayed webhook, restore or redemption failure, deep-link failure, identity collision, unsupported client, and review API unavailability.
+
+The implementation plan maps every screen, control, state, event, provider configuration, test, and legacy item to exact repository paths, dependencies, acceptance criteria, deletion, roll-forward behavior, parallel safety, and owner.
+
+Replacement mode uses hard cutover: freeze legacy changes, build and verify the target, rehearse the one-time transformation, enforce a minimum client when required, cut traffic, verify production, delete every old runtime and configuration surface, delete transformation tooling, run a repository-wide zero-legacy search, and roll forward on defects. Do not keep the old runtime as a standing fallback.
+
+Use a short looping product demo to answer "what does it actually do?"
+- keep it under 15 seconds unless there is a specific reason
+- show the actual product state or a truthful prototype, not abstract feature bullets
+- center the aha moment
+- design for muted playback with captions or visible UI states
+- generate/refine clips with Higgsfield Seedance 2.5 (or the newest Seedance available) or Marketing Studio when no real capture exists
+- score finished ad/demo clips with Higgsfield Virality Predictor when used for paid/social acquisition
+
+## Completion
+
+The lane cannot be done until `ONB-00` through `ONB-22` are done, `product/ONBOARDING.md` carries the joined decisions and implementation checks, actual design and prototype artifacts exist, analytics and provider contracts reconcile, review behavior is policy safe, and replacement mode leaves zero legacy runtime or transformation tooling.
+
+Run `validation/business/experience/check-onboarding-graph.ts` before any readiness claim.
 
 The plan summary should reflect the user's own answers back to them. This is not magic personalization; it is commitment and clarity.
 
@@ -278,7 +355,7 @@ Include dimensions: step_id, answer_key, attribution_source, source_key, source_
 
 - `product/ONBOARDING.md` exists and maps every question to a real use.
 - `product/ONBOARDING.md` references `11_STAR_EXPERIENCE.md` and shows where the V1 scalable slice appears.
-- `product/onboarding.html` or `design/design.html` renders the full onboarding/paywall/review/closing-offer path.
+- `design/design.html` or the design-proof artifacts recorded in `product/ONBOARDING.md`'s Prototype And Design Proof section render the full onboarding/paywall/review/closing-offer path (`product/onboarding.html` is the generated canonical record, not the visual proof).
 - Higgsfield asset plan exists for mascot, icons, demo video, screenshot frames, and animations when visuals are not already final.
 - If Higgsfield is unavailable, the founder confirmed the free/local visual fallback and limitations are recorded.
 - `growth/EMAIL_OPS.md` covers any onboarding resume, welcome, trial, payment recovery, or win-back emails triggered by the flow.

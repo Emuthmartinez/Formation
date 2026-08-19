@@ -266,17 +266,303 @@ _"Audit this app's emotional design" / "emotional UX audit"_
 - **Gates:** `check:emotional-design`
 - **Knowledge:** [Experience Cards](../../knowledge/experience/experience-cards.md), [Consumer Product Design Agency](../../knowledge/experience/consumer-product-design-agency.md), [Emotional Design System](../../knowledge/experience/emotional-design-system.md), [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md)
 
-### Onboarding conversion
+### Onboarding ONB-00: resume and classify scope
 
-_Before onboarding quizzes, review-prompt timing, paywall timing, or first-session activation_
+_Consumer onboarding work begins or resumes; classify greenfield, replacement, audit-only, or explicitly bounded incremental mode_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `analytics/ANALYTICS.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-00-resume-scope.md`
+- **Gates:** `check:onboarding-evidence-onb-00`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-01: current-state trace
+
+_Trace the actual onboarding implementation, documents, routes, state, providers, events, failures, tests, and legacy surfaces_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-00-resume-scope.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-01-current-state-trace.md`
+- **Gates:** `check:onboarding-evidence-onb-01`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-02: evidence plan
+
+_Define the onboarding evidence hierarchy, access constraints, sample plan, and freshness cutoff_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-01-current-state-trace.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-02-evidence-plan.md`
+- **Gates:** `check:onboarding-evidence-onb-02`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-03: current guidance research
+
+_Research current consumer onboarding evidence, platform guidance, benchmarks, and practitioner heuristics_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-02-evidence-plan.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-03-current-guidance.md`
+- **Gates:** `check:onboarding-evidence-onb-03`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-04: competitor review analysis
+
+_Mine direct and adjacent competitor reviews, including negative themes and a positive-review control_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-02-evidence-plan.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-04-competitor-reviews.md`
+- **Gates:** `check:onboarding-evidence-onb-04`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-05: authorized flow atlas
+
+_Build an authorized Onbo Hub flow atlas without scraping, bypassing access controls, or inferring locked screens_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-02-evidence-plan.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-05-onbo-hub-atlas.md`
+- **Gates:** `check:onboarding-evidence-onb-05`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-06: internal guidance audit
+
+_Audit applicable Formation and internal B2C guidance and resolve conflicts or outdated rules_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-02-evidence-plan.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-06-internal-guidance-audit.md`
+- **Gates:** `check:onboarding-evidence-onb-06`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-07: provider and policy landscape
+
+_Refresh monetization, identity, analytics, RevenueCat, billing, platform-policy, and regional capability facts_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** `provider.revenuecat` (api, browser), `provider.posthog` (api, browser), `provider.app-store-connect` (cli, api, browser), `provider.google-play` (api, browser)
+- **Reads:** `product/onboarding/graph/ONB-02-evidence-plan.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-07-provider-policy-landscape.md`
+- **Gates:** `check:onboarding-evidence-onb-07`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-08: motion research
+
+_Research interaction and motion references with 60fps and translate them into the target framework_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-02-evidence-plan.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-08-motion-research.md`
+- **Gates:** `check:onboarding-evidence-onb-08`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-09: evidence join
+
+_Join guidance, reviews, flow evidence, internal doctrine, provider facts, policy, and motion research into explicit decisions_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-03-current-guidance.md`, `product/onboarding/graph/ONB-04-competitor-reviews.md`, `product/onboarding/graph/ONB-05-onbo-hub-atlas.md`, `product/onboarding/graph/ONB-06-internal-guidance-audit.md`, `product/onboarding/graph/ONB-07-provider-policy-landscape.md`, `product/onboarding/graph/ONB-08-motion-research.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-09-evidence-join.md`
+- **Gates:** `check:onboarding-evidence-onb-09`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-10: first value and activation
+
+_Define first value rendered, first value engaged, activation, habit, and retention hypotheses_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-09-evidence-join.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-10-first-value-activation.md`
+- **Gates:** `check:onboarding-evidence-onb-10`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-11: effort and question audit
+
+_Audit effort before value, question usefulness, permissions, interruption budget, and visible personalization proof_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-09-evidence-join.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-11-effort-question-audit.md`
+- **Gates:** `check:onboarding-evidence-onb-11`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-12: state and identity contract
+
+_Define canonical journey, profile, identity, entitlement, continuity, and cross-surface state transitions_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** `provider.revenuecat` (api, browser)
+- **Reads:** `product/onboarding/graph/ONB-09-evidence-join.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-12-state-identity-contract.md`
+- **Gates:** `check:onboarding-evidence-onb-12`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-13: analytics and experiments
+
+_Define typed analytics, authoritative emitters, identity stitching, deduplication, experiment assignment, exposure, and expected sequences_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** `provider.posthog` (api, browser), `provider.revenuecat` (api, browser)
+- **Reads:** `product/onboarding/graph/ONB-09-evidence-join.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-13-analytics-experiments.md`
+- **Gates:** `check:onboarding-evidence-onb-13`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-14: trust, lifecycle, and policy
+
+_Define review timing, permissions, lifecycle, privacy, security, accessibility, and policy behavior_
+
+- **Role:** Product leader
+- **Phases:** 1c
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-09-evidence-join.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-14-trust-lifecycle-policy.md`
+- **Gates:** `check:onboarding-evidence-onb-14`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-15: architecture decision
+
+_Compare native-first, hosted-funnel-first, hybrid, web-first, and evidence-backed alternatives and select one target architecture_
 
 - **Role:** Product leader
 - **Phases:** 1c, 2
 - **Providers:** —
-- **Reads:** `design/design.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`, `analytics/ANALYTICS.md`, `product/copy/COPY_DECK.md`
+- **Reads:** `product/onboarding/graph/ONB-10-first-value-activation.md`, `product/onboarding/graph/ONB-11-effort-question-audit.md`, `product/onboarding/graph/ONB-12-state-identity-contract.md`, `product/onboarding/graph/ONB-13-analytics-experiments.md`, `product/onboarding/graph/ONB-14-trust-lifecycle-policy.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-15-architecture-decision.md`
+- **Gates:** `check:onboarding-evidence-onb-15`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-16: canonical journey graph
+
+_Define acquisition-specific journeys that converge on one semantic onboarding state graph_
+
+- **Role:** Product leader
+- **Phases:** 2
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-15-architecture-decision.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-16-journey-graph.md`
+- **Gates:** `check:onboarding-evidence-onb-16`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-17: screen, control, and paywall contract
+
+_Specify every onboarding screen, copy key, control, action, paywall state, failure, recovery, accessibility, and localization behavior_
+
+- **Role:** Product leader
+- **Phases:** 2
+- **Providers:** `provider.revenuecat` (api, browser)
+- **Reads:** `product/onboarding/graph/ONB-16-journey-graph.md`, `product/copy/COPY_DECK.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-17-screen-control-paywall-contract.md`
+- **Gates:** `check:onboarding-evidence-onb-17`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-18: visual design and prototype
+
+_Produce actual high-fidelity onboarding design, motion, an interactive prototype, and design QA_
+
+- **Role:** Product leader
+- **Phases:** 2
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-16-journey-graph.md`, `design/design.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-18-visual-design-prototype.md`
+- **Gates:** `check:onboarding-evidence-onb-18`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-19: implementation and cutover contract
+
+_Define implementation units, reliability, performance, observability, privacy, migration, hard cutover, and deletion work_
+
+- **Role:** Product leader
+- **Phases:** 2, 5b
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-16-journey-graph.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-19-implementation-cutover-contract.md`
+- **Gates:** `check:onboarding-evidence-onb-19`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-20: adversarial QA
+
+_Run the synthetic one-star pre-mortem, policy review, instrumentation QA, accessibility review, and provider-realism review_
+
+- **Role:** Product leader
+- **Phases:** 2, 5b
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-17-screen-control-paywall-contract.md`, `product/onboarding/graph/ONB-18-visual-design-prototype.md`, `product/onboarding/graph/ONB-19-implementation-cutover-contract.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-20-adversarial-qa.md`
+- **Gates:** `check:onboarding-evidence-onb-20`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-21: Compound Engineering plan
+
+_Translate the accepted onboarding graph into an implementation-ready Compound Engineering plan, or the Formation-equivalent fallback_
+
+- **Role:** Product leader
+- **Phases:** 5b
+- **Providers:** —
+- **Reads:** `product/onboarding/graph/ONB-20-adversarial-qa.md`
+- **Consults:** —
+- **Produces:** `product/onboarding/graph/ONB-21-compound-engineering-plan.md`
+- **Gates:** `check:onboarding-evidence-onb-21`
+- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+
+### Onboarding ONB-22: execute, cut over, and verify
+
+_Implement or finalize the accepted onboarding graph, verify the canonical artifacts, cut over, and prove zero legacy_
+
+- **Role:** Product leader
+- **Phases:** 2, 5b
+- **Providers:** `provider.revenuecat` (api, browser), `provider.posthog` (api, browser)
+- **Reads:** `product/onboarding/graph/ONB-00-resume-scope.md`, `product/onboarding/graph/ONB-01-current-state-trace.md`, `product/onboarding/graph/ONB-02-evidence-plan.md`, `product/onboarding/graph/ONB-03-current-guidance.md`, `product/onboarding/graph/ONB-04-competitor-reviews.md`, `product/onboarding/graph/ONB-05-onbo-hub-atlas.md`, `product/onboarding/graph/ONB-06-internal-guidance-audit.md`, `product/onboarding/graph/ONB-07-provider-policy-landscape.md`, `product/onboarding/graph/ONB-08-motion-research.md`, `product/onboarding/graph/ONB-09-evidence-join.md`, `product/onboarding/graph/ONB-10-first-value-activation.md`, `product/onboarding/graph/ONB-11-effort-question-audit.md`, `product/onboarding/graph/ONB-12-state-identity-contract.md`, `product/onboarding/graph/ONB-13-analytics-experiments.md`, `product/onboarding/graph/ONB-14-trust-lifecycle-policy.md`, `product/onboarding/graph/ONB-15-architecture-decision.md`, `product/onboarding/graph/ONB-16-journey-graph.md`, `product/onboarding/graph/ONB-17-screen-control-paywall-contract.md`, `product/onboarding/graph/ONB-18-visual-design-prototype.md`, `product/onboarding/graph/ONB-19-implementation-cutover-contract.md`, `product/onboarding/graph/ONB-20-adversarial-qa.md`, `product/onboarding/graph/ONB-21-compound-engineering-plan.md`, `product/copy/COPY_DECK.md`, `operations/PROVIDER_PROOF.md`
 - **Consults:** —
 - **Produces:** `product/ONBOARDING.md`, `product/onboarding.html`
-- **Gates:** —
+- **Gates:** `check:onboarding-graph-complete`, `check:onboarding-page-fresh`, `check:onboarding-cutover-repository-complete`, `check:provider-proof-onboarding`
 - **Knowledge:** [Eleven-Star Experience](../../knowledge/experience/eleven-star-experience.md), [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md), [Push Notification Lifecycle](../../knowledge/experience/push-notification-lifecycle.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
 
 ## Look And Feel

@@ -43,7 +43,59 @@ export const auditExcludedScripts: Record<string, string> = {
   "check:landing-funnel":
     "requires a generated business repo with a deployed landing funnel; the shipped templates contain no deployable funnel (workspace/business/growth/landing/ is a section component library, deliberately not site-shaped, and the validator's scope check ignores it)",
   "check:source-freshness": "alias of check:source-registry (same script and registry); running both would duplicate the step",
+  "check:onboarding-page-fresh":
+    "a --page-scoped invocation of check:generated-pages (already an audit step) for product/onboarding.html only, used as ONB-22's own catalog gate so its acceptance does not depend on an unrelated page elsewhere in the manifest; running the repo-wide check:generated-pages step already covers this page too, so running both in the general audit would duplicate the step",
   "test:validators": "executed by the launchbench step, which lints scenario definitions and then runs the validator fixture suite",
+  "check:onboarding-cutover-repository-complete":
+    "a strict --require-resolved wrapper around check:onboarding-cutover-repository (already an audit step), used only as ONB-22's own catalog gate; the shipped template's Deletion Manifest row deliberately keeps the unresolved disposition option list, so running this in the general audit would always fail",
+  "check:onboarding-graph-complete":
+    "a strict --require-done wrapper around check:onboarding-graph (already an audit step), used only as ONB-22's own catalog gate; the shipped onboarding template is deliberately not marked done, so running this in the general audit would always fail",
+  "check:provider-proof-onboarding":
+    "a --providers-scoped invocation of check:provider-proof (already an audit step) for PostHog/RevenueCat only, used as ONB-22's own catalog gate so its acceptance does not depend on an unrelated provider row (Resend, App Store Connect, Sentry, ...) elsewhere in operations/PROVIDER_PROOF.md; running the repo-wide check:provider-proof step already covers this file too, so running both in the general audit would duplicate the step",
+  "check:onboarding-evidence-onb-00":
+    "ONB-00's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-01":
+    "ONB-01's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-02":
+    "ONB-02's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-03":
+    "ONB-03's own catalog gate: verifies that specific node's own output packet (product/onboarding/graph/ONB-03-current-guidance.md), which only exists once a durable run has actually produced it; the shipped template has never run the onboarding graph, so this always fails in the general audit",
+  "check:onboarding-evidence-onb-04":
+    "ONB-04's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-05":
+    "ONB-05's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-06":
+    "ONB-06's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-07":
+    "ONB-07's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-08":
+    "ONB-08's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-20":
+    "ONB-20's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-21":
+    "ONB-21's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-09":
+    "ONB-09's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-10":
+    "ONB-10's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-11":
+    "ONB-11's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-12":
+    "ONB-12's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-13":
+    "ONB-13's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-14":
+    "ONB-14's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-15":
+    "ONB-15's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-16":
+    "ONB-16's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-18":
+    "ONB-18's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-17":
+    "ONB-17's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
+  "check:onboarding-evidence-onb-19":
+    "ONB-19's own catalog gate; same rationale as check:onboarding-evidence-onb-03 -- its output packet does not exist until a durable run produces it",
 };
 
 /** Relative business-artifact root for the layout. */
@@ -139,6 +191,8 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:native-ios", kind: "script", args: stateArgs },
     { id: "check:orchestration", kind: "script", args: stateArgs },
     { id: "check:emotional-design", kind: "script", args: stateArgs },
+    { id: "check:onboarding-graph", kind: "script", args: stateArgs },
+    { id: "check:onboarding-cutover-repository", kind: "script", args: rootArgs },
     { id: "check:attribution", kind: "script", args: stateArgs },
     { id: "check:secrets", kind: "script", args: stateArgs },
     { id: "check:lane-coverage", kind: "script", args: stateArgs },
