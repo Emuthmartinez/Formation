@@ -1,6 +1,6 @@
 {
   "name": "b2c-mobile-business-launch-skill-runtime",
-  "version": "0.135.0",
+  "version": "0.136.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -24,6 +24,7 @@
     "check:mobai-proof": "tsx validation/business/engineering/check-mobai-proof.ts",
     "check:secrets": "tsx validation/business/trust/check-secret-routing.ts",
     "check:security": "tsx validation/business/trust/check-security-release.ts",
+    "check:privacy": "tsx validation/business/trust/check-privacy-terms.ts",
     "check:content-assets": "tsx validation/business/design/check-content-assets.ts",
     "check:paid-ua": "tsx validation/business/growth/check-paid-user-acquisition.ts",
     "check:orchestration": "tsx validation/business/orchestration/check-parallel-orchestration.ts",

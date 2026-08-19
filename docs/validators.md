@@ -93,6 +93,7 @@ npm run validate:launch-state -- --root /path/to/app
 | --- | --- |
 | `check:secrets` | `SECRETS.md`, names-only routing, forbidden local secret files, and raw secret patterns |
 | `check:security` | `trust/SECURITY.md`, security-review routing, OWASP and platform basis, mobile hardening, entitlement and webhook abuse controls, supply-chain checks, incident response, and accepted risks |
+| `check:privacy` | The mechanical subset of the ten-risk legal/privacy checklist in `knowledge/trust/privacy-terms.md` §7: `trust/PRIVACY.md`/`trust/TERMS.md` existence, data-collection/third-party/AI/deletion disclosures, cancellation-as-easy-as-signup and auto-renewal-reminder terms, a public-storage-bucket smell in `engineering/TECH_SPEC.md`/`trust/SECURITY.md`, and a self-harm/crisis response in `trust/AI_SAFETY.md` |
 | `check:template-safety` | Templates carry no real or real-looking secret values |
 
 ## Revenue, growth, and email

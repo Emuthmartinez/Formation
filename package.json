@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.135.0",
+  "version": "0.136.0",
   "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch engine and deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -50,6 +50,7 @@
     "check:mobai-proof": "tsx skill/b2c-mobile-business-launch/validation/business/engineering/check-mobai-proof.ts",
     "check:secrets": "tsx skill/b2c-mobile-business-launch/validation/business/trust/check-secret-routing.ts",
     "check:security": "tsx skill/b2c-mobile-business-launch/validation/business/trust/check-security-release.ts",
+    "check:privacy": "tsx skill/b2c-mobile-business-launch/validation/business/trust/check-privacy-terms.ts",
     "check:content-assets": "tsx skill/b2c-mobile-business-launch/validation/business/design/check-content-assets.ts",
     "check:paid-ua": "tsx skill/b2c-mobile-business-launch/validation/business/growth/check-paid-user-acquisition.ts",
     "check:emotional-design": "tsx skill/b2c-mobile-business-launch/validation/business/experience/check-emotional-design.ts",

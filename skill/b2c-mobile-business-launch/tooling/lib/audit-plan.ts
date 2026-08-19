@@ -129,6 +129,7 @@ export function buildAuditPlan(layout: AuditLayout): AuditStep[] {
     { id: "check:provider-proof", kind: "script", args: stateArgs },
     { id: "check:compound-engineering", kind: "script", args: stateArgs },
     { id: "check:security", kind: "script", args: stateArgs },
+    { id: "check:privacy", kind: "script", args: stateArgs },
     { id: "check:content-assets", kind: "script", args: stateArgs },
     { id: "check:paid-ua", kind: "script", args: stateArgs },
     { id: "check:apple-requirements", kind: "script", args: stateArgs },

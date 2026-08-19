@@ -786,7 +786,7 @@ _Before privacy policy, terms, EULA, subscription terms, account-deletion, store
 - **Reads:** `state/LAUNCH_TRACE.md`, `engineering/TECH_SPEC.md`
 - **Consults:** —
 - **Produces:** `trust/PRIVACY.md`, `trust/TERMS.md`, `LEGAL_REVIEW.md`
-- **Gates:** —
+- **Gates:** `check:privacy`
 - **Knowledge:** [Privacy Terms](../../knowledge/trust/privacy-terms.md)
 
 ### Community and user safety

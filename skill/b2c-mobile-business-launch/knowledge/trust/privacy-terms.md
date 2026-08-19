@@ -14,6 +14,7 @@ When store submission is in scope, also load `store-console-workflow.md`. For Ap
 - 4. Terms/EULA Drafting Rules
 - 5. Public Pages And App Links
 - 6. Review Packet
+- 7. Legal & Privacy Risk Checklist
 
 ## 1. Refresh Official Sources
 
@@ -71,7 +72,7 @@ The policy must reflect actual practices, not aspirations. Include:
 - web checkout, web funnels, redemption links, billing portal/customer portal, tax collection, invoices/receipts, refunds, and subscription lifecycle emails when used
 - Resend or other email-provider behavior: transactional email, lifecycle automations, broadcasts/newsletters, contacts/topics/segments, unsubscribe/preference handling, open/click tracking if enabled, inbound email and attachments if used, and retention/deletion behavior
 - device permissions and just-in-time notices for sensitive/unexpected data
-- retention and deletion
+- retention and deletion, stated so it is clear that account/content deletion purges stored uploads (photos, files, media) in the object store alongside the database rows, not just a hidden flag
 - account deletion and data request URL if accounts exist
 - children/age posture
 - health, biometrics, precise location, contacts, calendar, or other sensitive data sections when relevant
@@ -111,6 +112,8 @@ Apple-specific:
 Subscription-specific:
 - Paywall, App Store/Play listing, terms, and in-app subscription management copy must agree on price, trial length, renewal cadence, cancellation, and what happens after cancellation.
 - Do not bury trial-to-paid conversion or cancellation mechanics only in terms.
+- Cancellation must be self-service and at least as easy as signing up — in-app or through the same platform (App Store, Google Play, or the account settings a subscriber already has access to) and never gated behind contacting support, a phone call, or a retention flow. This is the FTC "click to cancel" rule; several states mirror it.
+- Auto-renewal disclosure states the renewal cadence and price and commits to sending a renewal-reminder notice before the charge for any trial or renewal term state auto-renewal law covers (commonly annual-or-longer terms; California and several other states require advance notice). Do not disclose auto-renewal only in terms and skip the reminder commitment.
 - Web checkout/funnel pages must disclose the billing provider, renewal price, cancellation path, refund/support contact, and whether access is redeemed in app through RevenueCat or another entitlement system.
 
 ## 5. Public Pages And App Links
@@ -148,3 +151,30 @@ Before publishing final legal pages, produce `LEGAL_REVIEW.md` with:
 - approval checkbox for founder/counsel
 
 Never mark legal pages final without approval. If the founder wants a fast pre-launch page, label it as a draft pending counsel review in internal docs, but do not put that disclaimer on the public policy unless counsel approves.
+
+## 7. Legal & Privacy Risk Checklist
+
+These are the concrete rejection and legal-exposure risks reviewers, app-store review, and regulators actually flag against consumer apps. Each has an owning artifact and, where it is mechanically checkable, a validator code. `check:privacy` enforces the checkable subset (rows 1, 2, 4, 5, 6, and — when the row's condition is in scope — 3, 8, 9, 10); everything else, including row 7, stays a judgment call owned by another audit pass so it is judged once, not twice.
+
+| # | Risk | Requirement | Owning artifact | Validator code |
+| --- | --- | --- | --- | --- |
+| 1 | No privacy policy | Publish `trust/PRIVACY.md` and `trust/TERMS.md` before launch | `trust/PRIVACY.md`, `trust/TERMS.md` | `privacy.policy_missing`, `privacy.terms_missing` |
+| 2 | No "we collect user data" disclosure | State plainly, in a section a reader can find, what data is collected | `trust/PRIVACY.md` | `privacy.data_collection_disclosure_missing` |
+| 3 | No AI mention in the privacy policy | When the product generates content, disclose AI/model processing and whether user content trains a model | `trust/PRIVACY.md` | `privacy.ai_disclosure_missing` |
+| 4 | No third-party data collectors named | Name vendor/processor/third-party categories and what they receive | `trust/PRIVACY.md` | `privacy.third_party_disclosure_missing` |
+| 5 | Not deleting user uploads | State the retention window, and that account/content deletion purges stored uploads, not just hides them | `trust/PRIVACY.md`; `engineering/TECH_SPEC.md` Data Contract retention column | `privacy.deletion_retention_missing` |
+| 6 | Storage bucket set to public | Every storage bucket is private by default, served through RLS/security rules or signed URLs — never a bare public-read bucket (see `backend-data-contract.md` §Anti-Patterns) | `engineering/TECH_SPEC.md` Data Contract, `trust/SECURITY.md` | `privacy.public_storage_bucket` |
+| 7 | Fake testimonials | Only real, sourced quotes with permission | `product/experience/emotional-design/EMOTIONAL_DESIGN.md` | owned by `check:emotional-design` and `check:vibecoded-tells` (Tier 1) — not re-checked here |
+| 8 | Cancellation harder than signup | Cancellation is self-service and at least as easy as signup, per §4 above | `trust/TERMS.md` | `privacy.cancellation_not_self_service` |
+| 9 | Auto-renewal with no reminder | Disclose auto-renewal terms and commit to a renewal-reminder notice before the charge, per §4 above | `trust/TERMS.md` | `privacy.auto_renewal_reminder_missing` |
+| 10 | AI with no self-harm response | A product with generative or conversational AI defines a self-harm/crisis detection and response path with a real crisis resource, not a generic refusal (see `generative-ai-safety.md`) | `trust/AI_SAFETY.md` | `privacy.self_harm_response_missing` |
+
+Rows 8-9 apply only once the product sells a subscription (`lanes.revenue` in scope). Rows 3 and 10 apply only once the product generates text, images, audio, or video (`trust/AI_SAFETY.md` exists per `generative-ai-safety.md`).
+
+Run the validator:
+
+```bash
+npm run check:privacy -- --root /path/to/app
+```
+
+`check:privacy` checks for the presence of each disclosure, not its legal correctness — pair a passing run with the founder/counsel review in `LEGAL_REVIEW.md` §6. A green gate is not legal sign-off.
