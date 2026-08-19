@@ -156,6 +156,19 @@ _App live (phase_6/6b), "what now", weekly ops, incident response, retention rev
 - **Gates:** `check:post-launch`
 - **Knowledge:** [Paid User Acquisition](../../knowledge/growth/paid-user-acquisition.md), [Billing Health And Reactivation](../../knowledge/money/billing-health-and-reactivation.md), [Post-Launch Operations](../../knowledge/operations/post-launch-operations.md), [Change Cascade](../../knowledge/process/change-cascade.md), [ASO Store Ops](../../knowledge/store/aso-store-ops.md)
 
+### Scheduled autonomy installation
+
+_Business live and the founder wants the operating rhythm to run without anyone starting sessions by hand; changing or removing that schedule_
+
+- **Role:** Orchestrator
+- **Phases:** 6b
+- **Providers:** —
+- **Reads:** `state/PROJECT_STATE.yaml`
+- **Consults:** `operations/POST_LAUNCH_OPS.md`
+- **Produces:** `operations/SCHEDULE.md`
+- **Gates:** —
+- **Knowledge:** [Post-Launch Operations](../../knowledge/operations/post-launch-operations.md)
+
 ### Founder-zero operator bootstrap
 
 _Every broad launch start; before account/social/Doppler bootstrap; when an agent is about to hand back a checklist_

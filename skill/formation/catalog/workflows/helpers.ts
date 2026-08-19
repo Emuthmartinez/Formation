@@ -27,6 +27,7 @@ export interface WorkflowSeed {
   tokenBudget?: number;
   costEstimate?: CatalogWorkflowDef["costEstimate"];
   applicability?: CatalogWorkflowDef["applicability"];
+  recurrenceDays?: number;
 }
 
 const READINESS_WORKFLOW: WorkflowId = "workflow.operations.agent-operations-ledger";
@@ -78,5 +79,6 @@ export function workflow(seed: WorkflowSeed): CatalogWorkflowDef {
     tokenBudget: seed.tokenBudget,
     costEstimate: seed.costEstimate,
     applicability: seed.applicability ?? { mode: "always" },
+    recurrenceDays: seed.recurrenceDays,
   };
 }

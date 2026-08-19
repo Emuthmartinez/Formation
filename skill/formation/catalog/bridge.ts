@@ -132,6 +132,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
     founderOnlyActions: wf.founderOnlyActions,
     gateCommands: wf.gateCommands,
     idempotent: wf.idempotent,
+    recurrenceDays: wf.recurrenceDays,
     maxAttempts: wf.maxAttempts,
     ttlSeconds: wf.ttlSeconds,
     tokenBudget: wf.tokenBudget,

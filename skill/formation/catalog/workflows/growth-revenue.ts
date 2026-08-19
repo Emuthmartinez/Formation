@@ -219,5 +219,8 @@ export const workflows = [
     actionClass: "publish",
     protectedCategory: "public_actions",
     idempotent: false,
+    // The weekly Analytics And Iteration loop this node's own instructions demand: reopens on
+    // its own calendar (reopenRecurringNodes) rather than treating one pass as done forever.
+    recurrenceDays: 7,
   }),
 ] as const;

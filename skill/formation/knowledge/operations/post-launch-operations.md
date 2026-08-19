@@ -21,6 +21,7 @@ This lane covers the `launch-coverage.md` rows "Crash/performance", "Support/rep
 - 11. Artifact Contract
 - 12. Founder-Only Gates
 - 13. Anti-Patterns
+- 14. The Standing Session
 
 ## 1. When To Load
 
@@ -224,3 +225,12 @@ Pause and obtain explicit founder approval before:
 - **Involuntary churn treated as inevitable.** Failed payments written off as normal churn instead of routed through the recovery levers in `billing-health-and-reactivation.md` §2.
 - **Skipping the retro.** No `operations/LAUNCH_RETRO.md`, so the next launch repeats the same stalls and misses — the one failure mode that makes every future launch worse, because nothing feeds back into failure cards or LaunchBench.
 - **Scaling spend against a leaking cohort.** Increasing acquisition while D7/D30 trends deteriorate, buying churn instead of a business (§8).
+
+## 14. The Standing Session
+
+The weekly rhythm needs a trigger nobody has to remember. Two pieces make it real:
+
+- **The OS schedule.** `core/adapters/install-schedule.ts` writes a crontab entry (or a launchd plist on macOS) that starts a headless session on a cadence: `tsx core/adapters/install-schedule.ts --workspace <dir> --runtime claude|codex|cursor --schedule "0 9 * * 1" --brief <brief.json>`. The default is a dry run that prints the exact line it would install. Installing, changing, or removing the schedule is a founder-only gate — it is a standing change to their machine. Record the arrangement in `operations/SCHEDULE.md`: mechanism, cadence, runtime, the verify command the dry run prints, and the exact uninstall command (`--uninstall --apply`).
+- **Calendar reopening.** The graph reopens recurring nodes on its own clock: the Weekly Ops Review and the growth iteration loop go stale seven days after their last completed pass, so the scheduled session finds the standing work ready without anyone re-asking for it. The rhythm stops in exactly two ways: a recorded Kill verdict, or the kill switch in `control/control.json` — which stops every scheduled session cold even while the OS keeps firing the trigger.
+
+A live business with a green cockpit and no standing session is §13's launch-and-vanish failure mode with better paperwork.

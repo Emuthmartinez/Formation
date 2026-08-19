@@ -24,6 +24,7 @@ import {
   reconcileEnvironmentalArtifacts,
   reconcilePatch,
   refreshHeartbeat,
+  reopenRecurringNodes,
   seedRunState,
   writeRunState,
   buildCheckpoint,
@@ -675,6 +676,10 @@ async function main(): Promise<number> {
     // this, a fresh business's plan has no root nodes at all. Runs on resume too, so a
     // precondition that changed between sessions invalidates its descendants before dispatch.
     reconcileEnvironmentalArtifacts(plan, run, workspace, startedAt);
+    // The operating loop: recurring nodes (weekly ops review, growth iteration) whose cadence
+    // has elapsed reopen before the frontier is computed, so a scheduled session finds the
+    // standing work on its own calendar instead of the founder having to re-ask for it.
+    reopenRecurringNodes(plan, run, startedAt);
     observeAppSourceFingerprint(plan, run, workspace, startedAt);
     writeRunState(paths.runState, run);
 
