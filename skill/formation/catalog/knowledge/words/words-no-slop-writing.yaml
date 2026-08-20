@@ -27,8 +27,8 @@ sources:
     url: https://github.com/petergyang/no-ai-slop
     review_cadence_days: 30
     claim_scope: MIT-licensed AI-slop editing skill. Source basis for no-slop-writing.md's banned-word list,
-      empty-adverb/phrase lists, named patterns, and eval.md self-check, adapted for this skill's founder-facing copy
-      and generated marketing copy. Stable rules repo; recheck for drift on the normal cadence rather than a fast-moving
-      one.
-    last_review_date: 2026-08-17
+      empty-adverb/phrase lists, portability test, named patterns, and eval.md self-check, adapted for this skill's
+      founder-facing copy and generated marketing copy. Stable rules repo; recheck for drift on the normal cadence
+      rather than a fast-moving one. Reviewed at upstream commit d30eddb9e04562234f2070b5ee63ca4649d9a05e.
+    last_review_date: 2026-08-20
     reviewer: formation-maintainers

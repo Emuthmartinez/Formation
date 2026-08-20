@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.156.0",
+  "skillVersion": "0.157.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -6117,8 +6117,8 @@
           "sourceType": "github",
           "url": "https://github.com/petergyang/no-ai-slop",
           "reviewCadenceDays": 30,
-          "claimScope": "MIT-licensed AI-slop editing skill. Source basis for no-slop-writing.md's banned-word list, empty-adverb/phrase lists, named patterns, and eval.md self-check, adapted for this skill's founder-facing copy and generated marketing copy. Stable rules repo; recheck for drift on the normal cadence rather than a fast-moving one.",
-          "lastReviewDate": "2026-08-17",
+          "claimScope": "MIT-licensed AI-slop editing skill. Source basis for no-slop-writing.md's banned-word list, empty-adverb/phrase lists, portability test, named patterns, and eval.md self-check, adapted for this skill's founder-facing copy and generated marketing copy. Stable rules repo; recheck for drift on the normal cadence rather than a fast-moving one. Reviewed at upstream commit d30eddb9e04562234f2070b5ee63ca4649d9a05e.",
+          "lastReviewDate": "2026-08-20",
           "reviewer": "formation-maintainers"
         }
       ],
@@ -8618,7 +8618,7 @@
         "area.product-experience"
       ],
       "trigger": "Before writing or reviewing any founder-facing copy or any marketing copy the skill generates",
-      "instructions": "Before any founder-facing or marketing copy ships, identify which voice you are protecting — this skill's own direct/no-filler voice for founder-facing surfaces, or the launched business's strategy/BRAND.md voice and the tone 11_STAR_EXPERIENCE.md set for marketing copy — and make the minimum effective edit: strip filler, hedging, and importance-inflation without flattening a brand's playful or clinical register into generic 'clean' English. Author every user-facing string as a keyed row in product/copy/COPY_DECK.md (with product/copy/COPY_BRIEF.md as the brief that precedes it) before any builder consumes it — builders read deck keys, they do not invent strings from the spec. Run the banned-words/patterns self-check and channel-specific limits (store character counts, push/email subject limits) before handoff; check:app-copy is the gate that fails a placeholder-shaped or missing deck row.",
+      "instructions": "Before any founder-facing or marketing copy ships, identify which voice you are protecting — this skill's own direct/no-filler voice for founder-facing surfaces, or the launched business's strategy/BRAND.md voice and the tone 11_STAR_EXPERIENCE.md set for marketing copy — and make the minimum effective edit: strip filler, hedging, importance-inflation, and interpretive asides without flattening a brand's playful or clinical register into generic 'clean' English. Apply the portability test to each generic sentence: if it can move unchanged to another person, company, country, or product, replace it with a specific fact, mechanism, consequence, or judgment. Author every user-facing string as a keyed row in product/copy/COPY_DECK.md (with product/copy/COPY_BRIEF.md as the brief that precedes it) before any builder consumes it — builders read deck keys, they do not invent strings from the spec. Run the banned-words/patterns self-check and channel-specific limits (store character counts, push/email subject limits) before handoff; check:app-copy is the gate that fails a placeholder-shaped or missing deck row.",
       "reads": [
         "strategy/BRAND.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"

@@ -1,10 +1,10 @@
 {
   "skill": "formation",
-  "version": "0.156.0",
+  "version": "0.157.0",
   "updatedAt": "2026-08-20",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "Named launch profiles are now engine-enforced (layering plan phase E, requirement R7 \u2014 the plan's last open item). project.launchScope previously had ZERO behavioral consumers in the typed engine: compile, frontier, and run-state never read it, so an essentials business relied entirely on an agent hand-marking lanes deferred. The catalog now carries a profile registry (catalog/profiles.ts: full defers nothing; essentials defers the wholly-breadth lanes paid_user_acquisition, growth, and email), the compiler records profile membership on every node as fact (deferredByProfiles: a node parks only when EVERY lane it carries is deferred), and reconcileWorkflowApplicability parks those nodes as not_needed at seed time and every frontier pass \u2014 with the same fingerprint invalidation on change, so widening essentials to full mid-journey reopens the parked work and retires its old proof. A recorded founder verdict outranks the profile in both directions; the new `formation scope` bin command is the front door for both conditional answers and profile overrides.",
-    "The fences validate fail-closed: validateCatalog refuses a profile that defers revenue, privacy_legal, security, apple_signing, or store_console (launch-phases.md's never-deferred rule made mechanical), unknown lanes, duplicate ids, and a declaring registry missing the built-ins; a fixture pins the business-state schema's launchScope enum to the registry's exact ids so the reducer's value check and the registry can never drift apart; and catalogs pinned before profiles existed defer nothing \u2014 proven by a control fixture \u2014 so no running business changes behavior until its own explicit bootstrap --apply re-pin. Eight real nodes park under essentials on the shipped catalog, matching the launch-phases prose list at lane granularity."
+    "Updated the foundational no-slop writing capability from petergyang/no-ai-slop at commit d30eddb9e04562234f2070b5ee63ca4649d9a05e. All dispatched business workers already receive this reference through the always-on founder-language context pack.",
+    "Added the portability test and interpretive-metadiscourse rule to Formation's doctrine. The repository and generated-copy validators now reject mechanically detectable interpretive asides. A negative fixture proves that the gate fails closed."
   ]
 }

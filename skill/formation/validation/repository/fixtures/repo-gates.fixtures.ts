@@ -1506,6 +1506,17 @@ export function register(h: Harness): void {
     "no_slop.pattern.throat_clearing",
   );
 
+  const noSlopMetadiscourse = writeNoSlopRoot("no-slop-pattern-interpretive-metadiscourse", {
+    "README.md": "# Example\n\nThe key point is that this command writes the report to disk.\n",
+  });
+  runScriptArgs(
+    "no-slop fails when interpretive metadiscourse replaces direct support",
+    "check-no-slop.ts",
+    ["--repo-root", noSlopMetadiscourse.repoRoot, "--skill-root", noSlopMetadiscourse.skillRoot],
+    1,
+    "no_slop.pattern.interpretive_metadiscourse",
+  );
+
   // AGENTS.md and CLAUDE.md are maintainer-only guidance: the same banned word
   // that fails the gate on README.md only warns here, per no-slop-writing.md
   // §2's own documented tier split.
