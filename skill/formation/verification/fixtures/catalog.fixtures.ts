@@ -1,6 +1,8 @@
 import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { assert, repoCheckoutPresent, repoRoot, skillRoot, type Harness } from "./_harness.js";
+import { resolveTsxBin } from "../../tooling/lib/tsx-bin.js";
 import { toCatalogInput } from "../../catalog/bridge.js";
 import { composeCatalog } from "../../catalog/index.js";
 import { renderGeneratedFiles } from "../../catalog/render-routing.js";
@@ -722,6 +724,68 @@ export function register(harness: Harness): void {
     assert(counts.merge === merge, `merge count mismatch: table rows=${counts.merge}, summary=${merge}`);
     assert(counts.drop === drop, `drop count mismatch: table rows=${counts.drop}, summary=${drop}`);
     assert(rows.length === total, `total row count mismatch: parsed=${rows.length}, summary=${total}`);
+  });
+
+  harness.check("scaffolder: add-workflow inserts the seed, bumps the count fixture, and refuses duplicates and unknown vocabulary", () => {
+    // A synthetic skill root carrying only what the scaffolder writes to: one workflow file and
+    // the count fixture. --no-render because the synthetic root has no renderer; the real root's
+    // render path is proven by the audit's own catalog:render-routing --check step.
+    const scaffoldRoot = harness.makeTempDir("catalog-scaffold");
+    const workflowsDir = path.join(scaffoldRoot, "catalog", "workflows");
+    mkdirSync(workflowsDir, { recursive: true });
+    writeFileSync(path.join(workflowsDir, "maintenance.ts"), readFileSync(path.join(skillRoot, "catalog", "workflows", "maintenance.ts")), "utf8");
+    const fixtureRel = path.join("verification", "fixtures", "catalog.fixtures.ts");
+    mkdirSync(path.dirname(path.join(scaffoldRoot, fixtureRel)), { recursive: true });
+    writeFileSync(path.join(scaffoldRoot, fixtureRel), "assert(catalog.workflows.length === 97, `expected 97 workflows, got x`);\n", "utf8");
+
+    const run = (args: string[]): { code: number; output: string } => {
+      const result = spawnSync(resolveTsxBin(skillRoot), [path.join(skillRoot, "tooling", "catalog-scaffold.ts"), "add-workflow", ...args], {
+        cwd: skillRoot,
+        encoding: "utf8",
+      });
+      return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
+    };
+    const base = [
+      "--skill-root",
+      scaffoldRoot,
+      "--no-render",
+      "true",
+      "--title",
+      "Weekly changelog sweep",
+      "--domain",
+      "domain.machine",
+      "--areas",
+      "area.skill-maintenance",
+      "--role",
+      "role.orchestrator",
+      "--trigger",
+      "Weekly, when the changelog needs its operating sweep",
+      "--file",
+      "maintenance.ts",
+      "--gates",
+      "check:skill-version",
+    ];
+
+    const created = run(["--id", "workflow.machine.fixture-scaffold-sweep", ...base]);
+    assert(created.code === 0, `scaffold must exit 0, got ${created.code}: ${created.output.slice(-400)}`);
+    const written = readFileSync(path.join(workflowsDir, "maintenance.ts"), "utf8");
+    assert(written.includes('"workflow.machine.fixture-scaffold-sweep"'), "the seed must be inserted into the chosen file");
+    assert(written.trimEnd().endsWith("] as const;"), "the insertion must preserve the file's closing anchor");
+    const bumped = readFileSync(path.join(scaffoldRoot, fixtureRel), "utf8");
+    assert(
+      bumped.includes("catalog.workflows.length === 98") && bumped.includes("expected 98 workflows"),
+      `the count fixture must be bumped by one: ${bumped.trim()}`,
+    );
+    assert(created.output.includes("did NOT do"), "the scaffold must name what remains manual");
+
+    const duplicate = run(["--id", "workflow.machine.fixture-scaffold-sweep", ...base]);
+    assert(duplicate.code !== 0 && duplicate.output.includes("workflow.id_taken"), `a duplicate id must be refused by name, got exit ${duplicate.code}`);
+    const badDomain = run([
+      "--id",
+      "workflow.machine.fixture-scaffold-two",
+      ...base.map((entry, index) => (base[index - 1] === "--domain" ? "domain.does-not-exist" : entry)),
+    ]);
+    assert(badDomain.code !== 0 && badDomain.output.includes("Unknown domain"), `an unknown domain must be refused by name, got exit ${badDomain.code}`);
   });
 }
 

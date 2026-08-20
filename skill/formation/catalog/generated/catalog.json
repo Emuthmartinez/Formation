@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.154.0",
+  "skillVersion": "0.155.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -11508,6 +11508,13 @@
       "scriptPath": "validation/repository/audit-skill-links.ts",
       "ownerDomainId": "domain.machine",
       "audit": "required"
+    },
+    {
+      "id": "gate.catalog-add-workflow",
+      "command": "catalog:add-workflow",
+      "scriptPath": "tooling/catalog-scaffold.ts",
+      "ownerDomainId": "domain.process",
+      "audit": "manual"
     },
     {
       "id": "gate.catalog-render-routing",

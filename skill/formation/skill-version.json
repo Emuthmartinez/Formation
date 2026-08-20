@@ -1,10 +1,10 @@
 {
   "skill": "formation",
-  "version": "0.154.0",
+  "version": "0.155.0",
   "updatedAt": "2026-08-20",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "Made the repository agent-installable end to end: `npm run setup` at the root installs the engine package and runs formation setup, which now prints the MCP registration for all three agent runtimes the engine dispatches \u2014 the claude mcp add command, the ~/.cursor/mcp.json entry, and the ~/.codex/config.toml block \u2014 each with this checkout's real server path filled in, plus the optional npm link for a global formation command. The root README quickstart is the recipient's journey (clone, npm ci, npm run setup, five commands to a scheduled business) and includes the paste-to-your-agent handoff paragraph; nothing in it names an internal tsx path anymore.",
-    "Proven on a genuinely fresh clone, not the maintainer checkout: clone -> npm ci -> npm run setup (all three registrations printed) -> formation new -> bootstrap --apply -> workspaces register -> plan (87 steps, 6 ready) -> list, under a throwaway FORMATION_HOME. bootstrap's own success message now points at formation run and the registry step instead of the internal tsx invocation, and the cli fixture pins the three-runtime registration output so setup cannot silently drop one."
+    "Added the workflow scaffolder (layering plan phase E, requirement R8): npm run catalog:add-workflow inserts a typed workflow() seed into the chosen catalog/workflows file, validates id shape, domain, areas, and role against the real catalog vocabularies, refuses duplicate ids by name, bumps the count fixture that pins the catalog's totals, re-renders the generated projections, and then NAMES everything it deliberately did not do \u2014 the placeholder instructions to replace, the contract_empty failure a workflow with no outputs and no gates will earn, the five registration points a NEW gate script needs, and the knowledge:add front door for bindings. The fixture proves the insert, the count bump, the duplicate refusal, and the unknown-domain refusal against a synthetic skill root.",
+    "Committed the packs design (docs/plans/2026-08-20-001-packs-composition.md) without implementing it: additive-only composition under the unchanged validators, with ambiguous_write and unknown_dependency as the existing fail-closed composition safety, pack pins riding the same per-business re-pin as the catalog, and profiles selecting breadth over whatever packs supply. Implementation waits for a real second pack \u2014 capability without a caller is the exact failure the 2026-08-19 audit closed, and it does not get reintroduced by scaffolding a loader nothing loads."
   ]
 }
