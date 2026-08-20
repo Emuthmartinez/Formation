@@ -491,24 +491,19 @@ sources:
       - .github/CODE_OF_CONDUCT.md
     notes: The basis this repo's code of conduct is adapted from. Wording and reporting process were rewritten for a single-maintainer project,
       so an upstream revision is informational rather than a required sync.
-  - id: formation-clueless-clothing-hosted-instance
-    name: Formation hosted instance
+  - id: formation-platform-repository
+    name: Formation-Platform repository
     source_type: official_docs
-    url: https://formation.clueless.clothing/
-    refresh_cadence_days: 30
+    url: https://github.com/Emuthmartinez/Formation-Platform
+    refresh_cadence_days: 90
     owner: source-freshness
     locations:
-      - platform/web/index.html
-    notes: The platform's own hosted origin, referenced as the canonical og:url in social-share metadata. First-party, not an external dependency.
-  - id: formation-clueless-clothing-og-image
-    name: Formation Open Graph card image
-    source_type: official_docs
-    url: https://formation.clueless.clothing/og.jpg
-    refresh_cadence_days: 30
-    owner: source-freshness
-    locations:
-      - platform/web/index.html
-    notes: First-party Open Graph card served from the platform's public assets; the absolute URL is required by social crawlers.
+      - AGENTS.md
+      - README.md
+      - CLAUDE.md
+      - docs/architecture.md
+      - docs/engine-backlog.md
+    notes: First-party. The founder web application's own private repository, extracted from this monorepo on 2026-08-19 (layering plan phase C); referenced wherever the docs name the L4 consumer.
   - id: w3c-prov-o
     name: W3C PROV-O
     source_type: standard

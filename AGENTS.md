@@ -1,27 +1,21 @@
 # Formation Repository Agent Guide
 
-This repository is Formation: a typed workflow-graph engine that takes a consumer mobile-app business from idea to shipped and into ongoing autonomous operation. It contains two bounded systems:
+This repository is Formation: a typed workflow-graph engine that takes a consumer mobile-app business from idea to shipped and into ongoing autonomous operation. `skill/formation/` is the product — the catalog, compiler, frontier, reducer, sessions, and agent surfaces (the `formation` CLI bin and the `formation-mcp` server). It also installs as the `formation` agent skill and keeps its own versioning and installed-runtime contract.
 
-1. `skill/formation/`, the engine. The catalog, compiler, frontier, reducer, sessions, and agent surfaces (the `formation` CLI bin and the `formation-mcp` server) live here. This is the center of the repository. It also installs as the `formation` agent skill and keeps its own versioning and installed-runtime contract.
-2. `platform/`, the Formation founder web product — one consumer of the engine through the typed adapter boundary, never a co-owner of its state.
-
-Do not collapse their state models or expose engine files as founder navigation.
+Every UI is an external consumer in its own repository, bound by the adapter contract (schema-checked boundary reports with a `contractVersion`; golden samples gated by `check:adapter-contract`). The founder web application lives at [Emuthmartinez/Formation-Platform](https://github.com/Emuthmartinez/Formation-Platform). The standing rule: **L4 never lives in this repository.** Do not expose engine files as consumer navigation.
 
 ## Read order
 
 1. `README.md` for what the engine is and how to drive it.
-2. `docs/architecture.md` for the execution loop, trust boundary, and the platform/engine integration contract.
+2. `docs/architecture.md` for the execution loop, trust boundary, and the consumer integration contract.
 3. `skill/formation/README.md` and `SKILL.md` for engine changes.
-4. `platform/AGENTS.md` for founder-product changes.
-5. The owning directory documentation and directly relevant source.
+4. The owning directory documentation and directly relevant source.
 
 ## Source layers
 
 | Layer | Owns | Must not own |
 | --- | --- | --- |
-| `platform/web/` | Founder navigation, product pages, editing, responsive interaction, and the design system | Direct filesystem access, skill state, provider secrets, or authorization decisions |
-| `platform/server/` | Authentication, workspace tenancy, product domain state, persistence, structured generation, and product APIs | Graph execution internals or browser-only presentation state |
-| `skill/formation/core/` | Typed schemas, durable execution, reducer, autonomy, sessions, and runtime adapters | Founder product navigation or platform membership state |
+| `skill/formation/core/` | Typed schemas, durable execution, reducer, autonomy, sessions, and runtime adapters | Consumer navigation or consumer membership state |
 | `skill/formation/catalog/` | Definition graph, workflows, gates, references, and routing projections | Run state or founder-facing application state |
 | `skill/formation/knowledge/` | Bounded reasoning guidance and source-backed doctrine | Scheduling or mutable business records |
 | `skill/formation/content/` | Skill-rendered conversation content | Platform page structure or generated artifacts |
@@ -33,12 +27,11 @@ Do not collapse their state models or expose engine files as founder navigation.
 | `skill/formation/starters/` | Runnable product-archetype foundations | Alternate orchestration systems |
 | `skill/formation/agents/` | Agent-runtime interface manifests (for example the OpenAI surface descriptor) | Orchestration logic or launch state |
 
-The platform may request skill execution through a typed adapter. It must not read or mutate skill state files directly. The skill may return verified results through that adapter. It must not mutate platform persistence directly.
+A consumer may request skill execution through the typed adapter. It must not read or mutate skill state files directly. The skill may return verified results through that adapter. It must not mutate any consumer's persistence directly.
 
 ## Authored and generated boundaries
 
-- Founder product behavior belongs in `platform/`; follow `platform/AGENTS.md`.
-- All durable platform mutations use the server store transaction and verify workspace membership.
+- Founder product behavior belongs in the consumer repositories, never here.
 - Edit catalog definitions, not `catalog/generated/`.
 - Edit authored Markdown, JSON, or source components, not generated HTML.
 - Every generated skill file needs an owning renderer and freshness check.
@@ -48,7 +41,7 @@ The platform may request skill execution through a typed adapter. It must not re
 
 ## Change contract
 
-A platform change must update the product domain, API, page behavior, tests, and current documentation together. A skill change must update definitions, workspace artifacts, validators, fixtures or LaunchBench scenarios, generated projections, version metadata, and current documentation together. Cross-boundary changes require an explicit adapter contract and tests on both sides.
+A skill change must update definitions, workspace artifacts, validators, fixtures or LaunchBench scenarios, generated projections, version metadata, and current documentation together. A change to the adapter boundary bumps `ADAPTER_CONTRACT_VERSION` by its rules, regenerates the golden samples in the same commit, and is replayed by each consumer repository's CI against those goldens.
 
 A change that builds or restyles a landing page, funnel, web marketing surface, or founder-facing UI also gets the vibecode audit pass before it is called done: dispatch the `vibecode-auditor` subagent (`.claude/agents/vibecode-auditor.md`), defined by `skill/formation/knowledge/design/vibecoded-tells.md` §Audit Pass.
 
@@ -62,9 +55,6 @@ Technical documentation (architecture docs, engineering specs, ADRs, runbooks, A
 
 ```bash
 npm ci
-node platform/run.mjs check
-node platform/run.mjs test
-node platform/run.mjs build
 npm run audit:ci
 npm run launchbench
 npm run check:catalog

@@ -7,9 +7,6 @@ dist/
 build/
 behavioral-results/
 skill/formation/evals/behavioral-results/
-platform/data/*.json
-!platform/data/.gitkeep
-platform/dist/
 
 # Superdesign local design-context artifacts
 .superdesign/

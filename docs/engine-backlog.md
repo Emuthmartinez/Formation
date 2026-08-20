@@ -8,12 +8,13 @@ Reproduce the ground truth before acting on any item: `npm run audit` (72 steps,
 
 The committed path is `docs/plans/2026-08-19-001-engine-contract-and-consumer-extraction.md` — twelve requirements, six phases. The near-term engine work it adds to this backlog:
 
-- **A1 (v0.149.0):** the open slug-divergence bug (platform underscores vs the adapter's hyphen rule) plus the adapter contract — generated schemas, `contractVersion`, fail-closed self-validation, `check:adapter-contract` golden samples.
-- **A2 (v0.150.0):** MCP hardening on the workspace registry (`~/.formation/workspaces.json`): allowlist resolution, `asFounder` assertion, read-only mode, `formation_status`.
-- **B (v0.151.0):** publishability (`npm pack` standalone, smoke-tested) and the consumer front doors — `formation setup`, `doctor`, `new` (a fresh business currently has no birthplace: `bootstrap` only migrates), `update`, `list` — plus the mid-journey catalog re-pin proven in `check:engine-e2e`.
-- **E:** the `catalog add-workflow` scaffolder; named profiles generalizing `launch_scope`; packs as design-first composition.
+- **A1 (v0.149.0) — SHIPPED:** the slug-divergence fix plus the adapter contract: generated schemas, `contractVersion`, fail-closed self-validation, `check:adapter-contract` golden samples.
+- **A2 (v0.150.0) — SHIPPED:** MCP hardening on the workspace registry (`~/.formation/workspaces.json`): allowlist resolution, `asFounder` assertion, read-only mode, `formation_status`.
+- **B (v0.151.0/.1) — SHIPPED:** `npm pack` standalone (smoke-tested) and the consumer front doors — `formation setup`, `doctor`, `new`, `update`, `list` — plus the mid-journey catalog re-pin proven in `check:engine-e2e`. Tagged `v0.151.1`; consumers pin by tag.
+- **C — SHIPPED (2026-08-19):** the founder web product extracted to the private Formation-Platform repository (history preserved) with an engine pin, contract-golden replay in its CI, and the hosted instance cut over before `platform/` was deleted here.
+- **D/E — remaining:** docs finalization; the `catalog add-workflow` scaffolder; named profiles generalizing `launch_scope`; packs as design-first composition.
 
-Reproduce the gaps: `formation bootstrap --workspace <empty-dir>` (no birthplace), `grep -n "slug" platform/server/domain/shared.mjs core/adapters/platform-import.ts` (divergence).
+Reproduce what remains: `ls skill/formation/tooling | grep -i add-workflow` (no scaffolder yet), `grep -rn "launch_scope" skill/formation/catalog/*.yaml | head` (scope verdicts exist; named profiles do not).
 
 ## P0: A real business through the real executor
 
@@ -29,9 +30,9 @@ The sha256 fail-closed knowledge receipt lives in the headless executor (`core/s
 
 `buildActualPatch` records actuals equal to estimates (a deliberate, named placeholder) because fixture executors report no cost. The real executor can report usage; wire actual token/wall-clock cost into the ledger entry so budget balances reflect reality, not plans. The `authorizationDigest` receipt field is also still echo-able by the worker (`core/session/worker-prompt.ts`) — replace it with something the worker cannot see verbatim, or drop it.
 
-## P1: MCP surface hardening
+## P1: MCP surface hardening — SHIPPED (v0.150.0)
 
-The `formation-mcp` server is a local stdio surface with filesystem-level trust. Before any remote exposure: workspace-path allowlisting (a caller should name registered workspaces, not arbitrary paths — the same traversal-by-construction rule the platform importer follows), founder-authority separation for `formation_approvals` and `formation_schedule` (today the caller asserts authority by calling), and a read-only mode. None of this blocks local use; all of it blocks giving the address to anything untrusted.
+The `formation-mcp` server now resolves workspaces only through the registry allowlist, requires an explicit `asFounder` assertion on `formation_approvals` and `formation_schedule`, and narrows to `formation_plan` + `formation_status` under `FORMATION_MCP_READONLY=1`. What remains before REMOTE exposure (it is still a local stdio surface): transport auth and an audit trail of tool calls per caller identity.
 
 ## P1: Verification rejection recovery
 
@@ -39,7 +40,7 @@ A fresh-context rejection parks a node under `Verification rejected.` durably �
 
 ## P2: Platform-as-consumer follow-ons
 
-The platform remains a working founder product consuming the engine. Its engine-relevant residue from the retired backlog: result-to-knowledge traceability once real attempts report what they consulted (`ExecutionVerifiedResult.knowledge`), and a service-account auth lane if its HTTP API is ever offered to non-browser callers. Its product-side items (mail transport, exports, evidence library, observability) stay in the platform's own scope and move only when the founder product needs them.
+The founder web product consumes the engine from its own repository ([Emuthmartinez/Formation-Platform](https://github.com/Emuthmartinez/Formation-Platform)). Its engine-relevant residue from the retired backlog: result-to-knowledge traceability once real attempts report what they consulted (`ExecutionVerifiedResult.knowledge`), and a service-account auth lane if its HTTP API is ever offered to non-browser callers. Product-side items live in that repository's scope entirely.
 
 ## P2: Portfolio operation
 
