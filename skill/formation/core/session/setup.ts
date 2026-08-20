@@ -34,6 +34,7 @@ function main(): number {
   const code = printFindings(runDoctor());
 
   const mcpServer = path.join(skillRoot, "bin", "formation-mcp.mjs");
+  const cli = path.join(skillRoot, "bin", "formation.mjs");
   console.log(
     [
       "",
@@ -42,8 +43,25 @@ function main(): number {
       `  2. Make it runnable:             formation bootstrap --workspace <where> --apply --answers <answers.json>`,
       `  3. Let this machine address it:  formation workspaces register <slug> <where>`,
       `  4. See every business:           formation list`,
-      `  5. Register the MCP server:      claude mcp add formation -- node ${mcpServer}`,
-      "     (any MCP-capable agent runtime works; the command and args are the same)",
+      "",
+      `Global \`formation\` command (optional): npm link --prefix ${skillRoot}`,
+      `Without linking, the command is: node ${cli}`,
+      "",
+      "Register the MCP server with the agent runtime(s) on this machine — same server, three configs:",
+      "",
+      `  Claude Code:  claude mcp add --scope user formation -- node ${mcpServer}`,
+      "",
+      "  Cursor — merge into ~/.cursor/mcp.json under \"mcpServers\":",
+      `    "formation": { "command": "node", "args": ["${mcpServer}"] }`,
+      "",
+      "  Codex CLI (ChatGPT) — append to ~/.codex/config.toml:",
+      "    [mcp_servers.formation]",
+      '    command = "node"',
+      `    args = ["${mcpServer}"]`,
+      "",
+      "The server only addresses workspaces registered in step 3; approval decisions and schedule",
+      "installs additionally require an explicit asFounder assertion. FORMATION_MCP_READONLY=1",
+      "narrows the surface to formation_plan and formation_status.",
     ].join("\n"),
   );
   return code;

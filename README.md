@@ -30,47 +30,34 @@ Operating work does not stop after phase 6. Catalog nodes carry `recurrenceDays`
 
 ## Quickstart
 
-Requirements: Node.js 22 or later, dependencies installed from the root lockfile.
+Requirements: Node.js 22 or later and at least one agent CLI you already pay for (`claude`, `codex`, or `cursor-agent`) — the engine orchestrates YOUR agents, on your subscriptions.
 
 ```bash
 git clone https://github.com/Emuthmartinez/Formation.git
 cd Formation
 npm ci
+npm run setup
 ```
 
-Bootstrap a workspace once — this installs the executable catalog, migrates state to v2, seeds the reducer, and records onboarding answers. Dry run by default:
+`npm run setup` installs the engine package, creates `~/.formation` with an empty workspace registry, runs the same health report as `formation doctor`, and prints your next steps — including the exact MCP registration lines for Claude Code, Cursor, and the Codex CLI, with this checkout's real paths filled in. From there the whole journey is five commands:
 
 ```bash
-npm run session:bootstrap -- --workspace <dir>
-npm run session:bootstrap -- --workspace <dir> --apply
+formation new my-app --dir ~/biz/my-app          # a fresh business's birthplace
+formation bootstrap --workspace ~/biz/my-app --apply --answers answers.json
+formation workspaces register my-app ~/biz/my-app # the machine's registry = the MCP allowlist
+formation run --workspace ~/biz/my-app --brief brief.json --session s-001
+formation schedule --workspace ~/biz/my-app --runtime claude --schedule "0 9 * * *" --apply
 ```
 
-See what is ready to run and what is parked on a founder decision:
+(`formation` is global after `npm link --prefix skill/formation`; without linking, use `node skill/formation/bin/formation.mjs`.) `plan` shows the frontier read-only, `approve` and `verify` are the founder and verification edges, `list` shows every registered business with live status, and `update` moves the engine — never a running business, which re-pins only through its own explicit `bootstrap --apply`. The full journey is documented in [`skill/formation/README.md`](skill/formation/README.md) ("The consumer journey").
 
-```bash
-npm run plan:frontier -- --workspace <dir>
-```
+### Handing it to an agent
 
-Run one bounded headless session against the ready frontier:
+The setup is agent-runnable end to end — if someone shared this repository with you, paste this to the agent of your choice:
 
-```bash
-tsx skill/formation/core/session/run.ts --workspace <dir> --brief <brief.json> --session <id>
-```
+> Clone https://github.com/Emuthmartinez/Formation.git, run `npm ci` and `npm run setup` in it, follow the printed steps to register the `formation` MCP server with yourself, then create my first business with `formation new`, walk me through the bootstrap answers it needs, register the workspace, and show me the plan.
 
-Grant or reject a pending founder approval, and accept verified work with fresh-context evidence:
-
-```bash
-tsx skill/formation/core/session/approve.ts --workspace <dir> --approval <id> --decision approved --session <id>
-tsx skill/formation/core/session/verify.ts --workspace <dir> --node <id> --session <id> --evidence <text>
-```
-
-Install a recurring trigger so operating work runs on its own:
-
-```bash
-tsx skill/formation/core/adapters/install-schedule.ts --workspace <dir> --runtime <cli> --schedule "<cron>" --apply
-```
-
-All of these are also reachable through the packaged `formation` bin (`skill/formation/bin/formation.mjs`) — one installable dispatcher over the same session CLIs, not a second implementation. The bin also carries the consumer front doors — `formation setup`, `doctor`, `new`, `workspaces`, `list`, and `update` — and the full journey from a blank machine to a scheduled business is documented in [`skill/formation/README.md`](skill/formation/README.md) ("The consumer journey"). `npm pack` of `skill/formation/` is a standalone artifact, smoke-tested by `check:package-parity` on every audit.
+Everything the agent needs beyond that is discoverable: `formation --help` lists every command, each command prints its own usage, `formation doctor` names anything missing on the machine, and `skill/formation/SKILL.md` is the skill entrypoint for runtimes that route skills. `npm pack` of `skill/formation/` is a standalone artifact, smoke-tested by `check:package-parity` on every audit; distribution is git-tag pinning (`v0.151.1` onward).
 
 ## How trust works
 
