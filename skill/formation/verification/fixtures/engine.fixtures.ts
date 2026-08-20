@@ -348,34 +348,123 @@ export function register(harness: Harness): void {
       ...testWorkflows().find((item) => item.id === "workflow.growth-post")!,
       applicability: { mode: "conditional", question: "Does this app generate content?" },
     };
-    const plan = compilePlan({ version: "catalog.applicability", artifacts: testArtifacts().filter((item) => item.path === "growth/post.md"), workflows: [conditional] }, now);
+    const plan = compilePlan(
+      { version: "catalog.applicability", artifacts: testArtifacts().filter((item) => item.path === "growth/post.md"), workflows: [conditional] },
+      now,
+    );
     const unknownState = baseBusinessState();
     const unknownRun = seedRunState(plan, unknownState, { ownerSessionId: "scope", ttlSeconds: 60, wallClockCapSeconds: 60, now });
     assert(getStatus(unknownRun, nodeId("growth-post")) === "waiting_founder", "unknown conditional scope did not wait for founder");
     assert(unknownRun.nodes[nodeId("growth-post")]!.blocker?.includes("Scope answer needed"), "unknown scope did not name the question");
 
     const requiredState = baseBusinessState();
-    requiredState.workflowApplicability = { "workflow.growth-post": { verdict: "required", reason: "The accepted spec includes generation.", evidence: ["product/spec.md"], updatedAt: now } };
+    requiredState.workflowApplicability = {
+      "workflow.growth-post": { verdict: "required", reason: "The accepted spec includes generation.", evidence: ["product/spec.md"], updatedAt: now },
+    };
     const requiredRun = seedRunState(plan, requiredState, { ownerSessionId: "scope", ttlSeconds: 60, wallClockCapSeconds: 60, now });
-    assert(computeFrontier(plan, requiredRun, requiredState, allowAllAutonomyEvaluator).ready.includes(nodeId("growth-post")), "required conditional scope did not reach ready");
+    assert(
+      computeFrontier(plan, requiredRun, requiredState, allowAllAutonomyEvaluator).ready.includes(nodeId("growth-post")),
+      "required conditional scope did not reach ready",
+    );
 
     const notNeededState = baseBusinessState();
-    notNeededState.workflowApplicability = { "workflow.growth-post": { verdict: "not-needed", reason: "The accepted spec has no generated content.", evidence: ["product/spec.md"], updatedAt: now } };
+    notNeededState.workflowApplicability = {
+      "workflow.growth-post": { verdict: "not-needed", reason: "The accepted spec has no generated content.", evidence: ["product/spec.md"], updatedAt: now },
+    };
     const notNeededRun = seedRunState(plan, notNeededState, { ownerSessionId: "scope", ttlSeconds: 60, wallClockCapSeconds: 60, now });
     assert(getStatus(notNeededRun, nodeId("growth-post")) === "not_needed", "not-needed conditional scope did not retire the workflow");
   });
 
+  harness.check(
+    "profiles: a business's launch profile parks whole-lane breadth work, the founder verdict overrides, and a profile switch reopens with invalidated proof",
+    () => {
+      // growth-post carries laneIds ["growth"]; the profile defers that lane. research-scan carries
+      // ["research"], untouched. The plan compiles the deferral as fact (deferredByProfiles), so an
+      // old catalog pin without profiles keeps behaving exactly as before — that absence is the
+      // control at the end.
+      const catalogWithProfiles = {
+        ...testCatalog(),
+        version: "catalog.profiles",
+        profiles: [
+          { id: "essentials", defersLaneKeys: ["growth" as LaneKey] },
+          { id: "full", defersLaneKeys: [] },
+        ],
+      };
+      const plan = compilePlan(catalogWithProfiles, now);
+      const growthNode = plan.nodes.find((node) => node.workflowId === "workflow.growth-post")!;
+      assert(
+        growthNode.deferredByProfiles.includes("essentials") && !growthNode.deferredByProfiles.includes("full"),
+        "compile must record which profiles defer the node",
+      );
+
+      const essentialsState = baseBusinessState();
+      const run = seedRunState(plan, essentialsState, { ownerSessionId: "profile", ttlSeconds: 60, wallClockCapSeconds: 60, now });
+      assert(getStatus(run, nodeId("growth-post")) === "not_needed", "an essentials business must park whole-lane breadth work as not needed");
+      assert(run.nodes[nodeId("growth-post")]!.blocker?.includes("Deferred by the essentials profile"), "the parking reason must name the profile");
+      assert(getStatus(run, nodeId("research-scan")) !== "not_needed", "a lane the profile keeps must not park");
+
+      // The founder's recorded verdict outranks the profile.
+      const overriddenState = baseBusinessState();
+      overriddenState.workflowApplicability = {
+        "workflow.growth-post": { verdict: "required", reason: "This launch bets on the growth loop.", evidence: ["product/spec.md"], updatedAt: now },
+      };
+      const overriddenRun = seedRunState(plan, overriddenState, { ownerSessionId: "profile", ttlSeconds: 60, wallClockCapSeconds: 60, now });
+      assert(getStatus(overriddenRun, nodeId("growth-post")) !== "not_needed", "a recorded required verdict must beat the profile deferral");
+
+      // Widening the profile mid-journey reopens the parked node and invalidates any old proof.
+      const binding = run.artifactBindings.find((item) => growthNode.outputs.some((artifactId) => artifactId === item.artifactId))!;
+      binding.accepted = true;
+      binding.fingerprint = "old-proof";
+      essentialsState.project.launchScope = "full";
+      reconcileWorkflowApplicability(plan, run, essentialsState, plusSeconds(now, 60));
+      assert(getStatus(run, nodeId("growth-post")) === "pending", "switching to the full profile must reopen the deferred node");
+      assert(!binding.accepted && binding.fingerprint === undefined, "the profile switch must invalidate the parked node's old proof");
+
+      // A workflow serving any non-deferred lane never parks: multi-lane membership is an AND.
+      const partial = compilePlan(
+        {
+          ...catalogWithProfiles,
+          version: "catalog.profiles-partial",
+          workflows: testWorkflows().map((item) => (item.id === "workflow.growth-post" ? { ...item, laneIds: ["growth", "revenue"] as LaneKey[] } : item)),
+        },
+        now,
+      );
+      assert(
+        partial.nodes.find((node) => node.workflowId === "workflow.growth-post")!.deferredByProfiles.length === 0,
+        "a node with any kept lane must not be profile-deferred",
+      );
+
+      // Control: a catalog pinned before profiles existed defers nothing.
+      const legacyPlan = compilePlan(testCatalog(), now);
+      const legacyRun = seedRunState(legacyPlan, baseBusinessState(), { ownerSessionId: "profile", ttlSeconds: 60, wallClockCapSeconds: 60, now });
+      assert(getStatus(legacyRun, nodeId("growth-post")) !== "not_needed", "a profile-less catalog pin must behave exactly as before profiles existed");
+    },
+  );
+
   harness.check("applicability: a changed verdict reopens work and invalidates accepted output", () => {
-    const conditional: CatalogWorkflowNode = { ...testWorkflows().find((item) => item.id === "workflow.growth-post")!, applicability: { mode: "conditional", question: "Is growth publishing needed?" } };
-    const plan = compilePlan({ version: "catalog.applicability-change", artifacts: testArtifacts().filter((item) => item.path === "growth/post.md"), workflows: [conditional] }, now);
+    const conditional: CatalogWorkflowNode = {
+      ...testWorkflows().find((item) => item.id === "workflow.growth-post")!,
+      applicability: { mode: "conditional", question: "Is growth publishing needed?" },
+    };
+    const plan = compilePlan(
+      { version: "catalog.applicability-change", artifacts: testArtifacts().filter((item) => item.path === "growth/post.md"), workflows: [conditional] },
+      now,
+    );
     const state = baseBusinessState();
-    state.workflowApplicability = { "workflow.growth-post": { verdict: "not-needed", reason: "Initial scope.", evidence: ["product/spec.md"], updatedAt: now } };
+    state.workflowApplicability = {
+      "workflow.growth-post": { verdict: "not-needed", reason: "Initial scope.", evidence: ["product/spec.md"], updatedAt: now },
+    };
     const run = seedRunState(plan, state, { ownerSessionId: "scope", ttlSeconds: 60, wallClockCapSeconds: 60, now });
     const binding = run.artifactBindings[0]!;
     binding.accepted = true;
     binding.fingerprint = "old-proof";
     run.nodes[nodeId("growth-post")]!.acceptedOutputFingerprint = "old-proof";
-    state.workflowApplicability["workflow.growth-post"] = { verdict: "required", reason: "The product scope changed.", evidence: ["product/spec.md#change"], updatedAt: plusSeconds(now, 60) };
+    state.workflowApplicability["workflow.growth-post"] = {
+      verdict: "required",
+      reason: "The product scope changed.",
+      evidence: ["product/spec.md#change"],
+      updatedAt: plusSeconds(now, 60),
+    };
     reconcileWorkflowApplicability(plan, run, state, plusSeconds(now, 60));
     assert(getStatus(run, nodeId("growth-post")) === "pending", "required verdict did not reopen the workflow");
     assert(!run.artifactBindings[0]!.accepted && run.artifactBindings[0]!.fingerprint === undefined, "changed verdict did not invalidate old output proof");
@@ -403,7 +492,14 @@ export function register(harness: Harness): void {
       applicability: { mode: "always" },
       references: [
         // One sourced reference already past its review-due date, one never due (internal).
-        { id: "reference.growth.sourced", path: "knowledge/growth/sourced.md", title: "Sourced Growth", loadWhen: "before spend", freshness: "reviewed 2026-01-01", reviewDueBy: "2026-04-01" },
+        {
+          id: "reference.growth.sourced",
+          path: "knowledge/growth/sourced.md",
+          title: "Sourced Growth",
+          loadWhen: "before spend",
+          freshness: "reviewed 2026-01-01",
+          reviewDueBy: "2026-04-01",
+        },
         { id: "reference.growth.internal", path: "knowledge/growth/internal.md", title: "Internal Growth", loadWhen: "always", freshness: "internal" },
       ],
       role: {
@@ -414,8 +510,21 @@ export function register(harness: Harness): void {
             title: "Growth",
             references: [
               // Duplicates a mandatory reference by path — must not appear twice.
-              { id: "reference.growth.sourced", path: "knowledge/growth/sourced.md", title: "Sourced Growth", loadWhen: "before spend", freshness: "reviewed 2026-01-01", reviewDueBy: "2026-04-01" },
-              { id: "reference.growth.conditional", path: "knowledge/growth/conditional.md", title: "Conditional Growth", loadWhen: "a creator deal is in play", freshness: "internal" },
+              {
+                id: "reference.growth.sourced",
+                path: "knowledge/growth/sourced.md",
+                title: "Sourced Growth",
+                loadWhen: "before spend",
+                freshness: "reviewed 2026-01-01",
+                reviewDueBy: "2026-04-01",
+              },
+              {
+                id: "reference.growth.conditional",
+                path: "knowledge/growth/conditional.md",
+                title: "Conditional Growth",
+                loadWhen: "a creator deal is in play",
+                freshness: "internal",
+              },
             ],
           },
         ],
@@ -432,7 +541,11 @@ export function register(harness: Harness): void {
       laneIds: ["research"],
     };
     const plan = compilePlan(
-      { version: "catalog.matrix", artifacts: testArtifacts().filter((item) => ["growth/post.md", "research/brief.md"].includes(item.path)), workflows: [matrixWorkflow, integrityWorkflow] },
+      {
+        version: "catalog.matrix",
+        artifacts: testArtifacts().filter((item) => ["growth/post.md", "research/brief.md"].includes(item.path)),
+        workflows: [matrixWorkflow, integrityWorkflow],
+      },
       now,
     );
     const state = baseBusinessState();
@@ -459,13 +572,22 @@ export function register(harness: Harness): void {
     const sourced = item.knowledge.find((guide) => guide.id === "reference.growth.sourced");
     assert(sourced?.path === "knowledge/growth/sourced.md", "knowledge lost its document path at the boundary");
     assert(sourced?.reviewStatus === "review-due", "an overdue source review was not reported as review-due");
-    assert(item.knowledge.find((guide) => guide.id === "reference.growth.internal")?.reviewStatus === "internal", "a source-less reference must report internal");
+    assert(
+      item.knowledge.find((guide) => guide.id === "reference.growth.internal")?.reviewStatus === "internal",
+      "a source-less reference must report internal",
+    );
     // Role context packs cross as conditional knowledge, deduplicated against the mandatory list.
     assert(item.conditionalKnowledge.length === 1, "conditional knowledge missed the pack reference or kept a duplicate");
-    assert(item.conditionalKnowledge[0]!.id === "reference.growth.conditional" && item.conditionalKnowledge[0]!.packId === "context.growth", "conditional knowledge lost its pack provenance");
+    assert(
+      item.conditionalKnowledge[0]!.id === "reference.growth.conditional" && item.conditionalKnowledge[0]!.packId === "context.growth",
+      "conditional knowledge lost its pack provenance",
+    );
     // System-domain work crosses as named launch-integrity steps, not only a count.
     assert(projection.launchIntegrity.length === 1, "process/orchestration work did not surface as launch integrity");
-    assert(projection.launchIntegrity[0]!.workflowId === "workflow.process.fixture-proof" && projection.launchIntegrity[0]!.status === "ready", "launch integrity lost workflow identity or live status");
+    assert(
+      projection.launchIntegrity[0]!.workflowId === "workflow.process.fixture-proof" && projection.launchIntegrity[0]!.status === "ready",
+      "launch integrity lost workflow identity or live status",
+    );
     assert(projection.systemSummary.total === 1, "system summary count drifted from the integrity list");
   });
 

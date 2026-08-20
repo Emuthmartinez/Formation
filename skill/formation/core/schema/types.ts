@@ -504,7 +504,8 @@ export interface BusinessStateV2 {
     slug: string;
     owner: string;
     phase: string;
-    launchScope: "essentials" | "full";
+    /** The business's launch profile id (R7); "essentials" and "full" are the built-ins, validated against the catalog's profile registry. */
+    launchScope: string;
     kickoffDate: string;
     platforms: Array<"ios" | "android">;
     bundleIds: { ios: string; android: string };

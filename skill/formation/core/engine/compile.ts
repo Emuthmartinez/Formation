@@ -122,6 +122,8 @@ export interface CatalogInput {
   artifacts: CatalogArtifact[];
   workflows: CatalogWorkflowNode[];
   presentationGroups?: Array<{ id: string; title: string; order: number }>;
+  /** Named launch profiles (R7). Absent on catalogs pinned before profiles existed — those plans defer nothing by profile, exactly as they always did. */
+  profiles?: Array<{ id: string; defersLaneKeys: LaneKey[] }>;
 }
 
 export interface CompiledRunNode {
@@ -145,6 +147,8 @@ export interface CompiledRunNode {
   dependencies: RunNodeId[];
   statePredicates: StatePredicate[];
   laneIds: LaneKey[];
+  /** Profiles under which this node parks as not_needed (computed at compile from lane membership). */
+  deferredByProfiles: string[];
   approvals: ApprovalRequirement[];
   resources: ResourceClaim[];
   verification: VerificationPolicy;
@@ -246,6 +250,12 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
       dependencies: workflow.dependencies.map((id) => runIdByWorkflow.get(id)!),
       statePredicates: workflow.laneIds.map((laneKey) => ({ path: `lanes.${laneKey}.status`, operator: "not_in" as const, value: ["blocked"] })),
       laneIds: workflow.laneIds,
+      // Profile deferral is compiled fact, not a runtime lookup: a node parks for a profile only
+      // when EVERY lane it carries sits in that profile's deferred set — a workflow serving any
+      // non-deferred lane still runs, and a lane-less workflow never parks by profile.
+      deferredByProfiles: (catalog.profiles ?? [])
+        .filter((profile) => workflow.laneIds.length > 0 && workflow.laneIds.every((laneKey) => profile.defersLaneKeys.includes(laneKey)))
+        .map((profile) => profile.id),
       approvals: workflow.founderOnlyActions.map((description, index) => ({ id: `${workflow.id}.approval.${index + 1}`, description })),
       resources: dedupeClaims(resources),
       // A node that declares outputs but no gate used to compile to kind "none", which

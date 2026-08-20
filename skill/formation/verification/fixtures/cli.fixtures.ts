@@ -32,7 +32,7 @@ export function register(harness: Harness): void {
   harness.check("cli: --help lists every command and exits 0; no arguments exits 1", () => {
     const help = runBin(["--help"]);
     assert(help.code === 0, `--help must exit 0, got ${help.code}`);
-    for (const command of ["setup", "doctor", "new", "bootstrap", "plan", "run", "approve", "verify", "onboard", "schedule", "workspaces", "list", "update"]) {
+    for (const command of ["setup", "doctor", "new", "bootstrap", "plan", "run", "approve", "verify", "scope", "onboard", "schedule", "workspaces", "list", "update"]) {
       assert(help.output.includes(command), `--help must list "${command}"`);
     }
     const bare = runBin([]);

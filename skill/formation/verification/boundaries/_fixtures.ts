@@ -52,6 +52,7 @@ export function makeNode(overrides: NodeOverrides = {}): CompiledRunNode {
     id: `run.${slug}`,
     workflowId: `workflow.${slug}`,
     title: `Fixture node ${slug}`,
+    deferredByProfiles: [],
     domainId: overrides.domainId ?? "domain.engineering",
     actionClass: overrides.actionClass ?? "mutate",
     protectedCategory: overrides.protectedCategory,

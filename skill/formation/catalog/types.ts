@@ -253,6 +253,18 @@ export interface CatalogArtifact {
   generated: boolean;
 }
 
+/**
+ * A named launch profile (R7): breadth selection as data. A workflow whose every lane sits in
+ * `defersLaneKeys` parks as not_needed for a business running this profile — enforced by
+ * reconcileWorkflowApplicability, overridable per workflow by a recorded founder verdict.
+ */
+export interface CatalogProfile {
+  id: string;
+  title: string;
+  description: string;
+  defersLaneKeys: LaneKey[];
+}
+
 export interface Catalog {
   schemaVersion: "2.0.0";
   skillVersion: string;
@@ -266,6 +278,7 @@ export interface Catalog {
   workflows: CatalogWorkflowDef[];
   artifacts: CatalogArtifact[];
   gates: CatalogGate[];
+  profiles: CatalogProfile[];
   presentationGroups: LaunchMatrixGroup[];
 }
 

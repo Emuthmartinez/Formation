@@ -1,7 +1,7 @@
 # Engine contracts and consumer extraction
 
 - Date: 2026-08-19
-- Status: A1 (v0.149.0), A2 (v0.150.0), B (v0.151.0/.1, tagged), and C (extraction + cutover, 2026-08-19) shipped; D and E remain; founder decisions recorded 2026-08-19
+- Status: COMPLETE — A1 (v0.149.0), A2 (v0.150.0), B (v0.151.0/.1), C (extraction + cutover), D (v0.153.0), E (scaffolder + packs design v0.155.0; named profiles v0.156.0) all shipped 2026-08-19/20; packs implementation deliberately waits for a real second pack; founder decisions recorded 2026-08-19
 - From: v0.148.0 (PRs #184–#190 merged; the engine bootstraps, runs, verifies, recurs, schedules, and exposes the `formation` CLI and `formation-mcp`)
 
 ## North star

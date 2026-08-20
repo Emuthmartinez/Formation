@@ -35,6 +35,7 @@ const COMMANDS = new Map([
   ["run", { script: "core/session/run.ts", summary: "one bounded headless session: resume durable state, dispatch, verify, digest" }],
   ["approve", { script: "core/session/approve.ts", summary: "grant or reject a pending founder approval on the durable run" }],
   ["verify", { script: "core/session/verify.ts", summary: "fresh-context acceptance for produced work (producer never verifies its own)" }],
+  ["scope", { script: "core/session/scope.ts", summary: "record a founder applicability verdict: answer a conditional question or override a profile deferral" }],
   ["onboard", { script: "core/session/onboard.ts", summary: "apply founder grants, waivers, and budgets through the reducer" }],
   ["schedule", { script: "core/adapters/install-schedule.ts", summary: "install or remove the OS-level trigger for recurring sessions (dry-run by default)" }],
   ["workspaces", { script: "core/session/workspaces.ts", summary: "the machine's registry of its businesses: list, register, remove (the MCP allowlist)" }],
