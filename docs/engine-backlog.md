@@ -12,7 +12,8 @@ The committed path is `docs/plans/2026-08-19-001-engine-contract-and-consumer-ex
 - **A2 (v0.150.0) — SHIPPED:** MCP hardening on the workspace registry (`~/.formation/workspaces.json`): allowlist resolution, `asFounder` assertion, read-only mode, `formation_status`.
 - **B (v0.151.0/.1) — SHIPPED:** `npm pack` standalone (smoke-tested) and the consumer front doors — `formation setup`, `doctor`, `new`, `update`, `list` — plus the mid-journey catalog re-pin proven in `check:engine-e2e`. Tagged `v0.151.1`; consumers pin by tag.
 - **C — SHIPPED (2026-08-19):** the founder web product extracted to the private Formation-Platform repository (history preserved) with an engine pin, contract-golden replay in its CI, and the hosted instance cut over before `platform/` was deleted here.
-- **D/E — remaining:** docs finalization; the `catalog add-workflow` scaffolder; named profiles generalizing `launch_scope`; packs as design-first composition.
+- **D — SHIPPED (v0.153.0):** engine-only CONTRIBUTING with the adapter-contract bump rules; the architecture layer table is description, not target.
+- **E — in flight:** the `catalog:add-workflow` scaffolder (v0.155.0) and the packs design (`docs/plans/2026-08-20-001-packs-composition.md`, implementation deliberately deferred until a real second pack exists) are done; named profiles generalizing `launch_scope` remain — today the scope value has no engine-side teeth (no compile/frontier consumer), which is exactly what profiles fix.
 
 Reproduce what remains: `ls skill/formation/tooling | grep -i add-workflow` (no scaffolder yet), `grep -rn "launch_scope" skill/formation/catalog/*.yaml | head` (scope verdicts exist; named profiles do not).
 

@@ -1,6 +1,6 @@
 {
   "name": "formation",
-  "version": "0.154.0",
+  "version": "0.155.0",
   "description": "Formation: a typed workflow-graph engine that takes a consumer mobile-app business from idea to shipped and into autonomous operation, with deterministic validators between every claim and done.",
   "keywords": [
     "formation",
@@ -122,6 +122,7 @@
     "format": "prettier --write \"skill/formation/catalog/**/*.ts\" \"skill/formation/validation/business/**/*.ts\" \"skill/formation/validation/repository/**/*.ts\" \"skill/formation/tooling/**/*.ts\"",
     "check:catalog": "tsx skill/formation/validation/repository/check-catalog.ts",
     "catalog:render-routing": "tsx skill/formation/catalog/render-routing.ts",
+    "catalog:add-workflow": "tsx skill/formation/tooling/catalog-scaffold.ts add-workflow",
     "knowledge:add": "tsx skill/formation/tooling/knowledge.ts add",
     "knowledge:capture": "tsx skill/formation/tooling/knowledge.ts capture",
     "runtime:check": "tsx skill/formation/tooling/runtime-sync.ts check --source skill/formation",
