@@ -101,6 +101,11 @@ export function register(harness: Harness): void {
     assert(existsSync(path.join(home, "workspaces.json")), "setup must create the empty registry");
     assert(first.output.includes("Next steps:"), "setup must print the consumer's next steps");
     assert(first.output.includes("formation-mcp.mjs"), "setup must print the MCP registration command with the real server path");
+    // The three agent runtimes the engine dispatches are the three the machine owner will want
+    // the MCP server registered with — setup prints each runtime's own config shape.
+    for (const runtime of ["claude mcp add", "~/.cursor/mcp.json", "~/.codex/config.toml"]) {
+      assert(first.output.includes(runtime), `setup must print the ${runtime} registration`);
+    }
     const second = runBin(["setup"], { env });
     assert(second.code === 0 && !second.output.includes("CREATED"), "a second setup run must change nothing");
   });

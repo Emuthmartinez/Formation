@@ -1,10 +1,10 @@
 {
   "skill": "formation",
-  "version": "0.153.0",
-  "updatedAt": "2026-08-19",
+  "version": "0.154.0",
+  "updatedAt": "2026-08-20",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "Finished the docs cutover the extraction started (layering plan phase D; R10). CONTRIBUTING now describes the engine-only repository \u2014 founder-product work is routed to the Formation-Platform repository \u2014 and gains the adapter-contract versioning section: what a contract change must move together in one commit (types + schemas, ADAPTER_CONTRACT_VERSION by its bump rules, regenerated golden samples with negative controls still failing) and what a major bump demands of every consumer pin.",
-    "docs/architecture.md's layer table is no longer labeled a target: phases A1-C landed 2026-08-19, so L0-L4 with the four contracts is current description, with composition by named profiles and packs (phase E) the one part still marked in flight."
+    "Made the repository agent-installable end to end: `npm run setup` at the root installs the engine package and runs formation setup, which now prints the MCP registration for all three agent runtimes the engine dispatches \u2014 the claude mcp add command, the ~/.cursor/mcp.json entry, and the ~/.codex/config.toml block \u2014 each with this checkout's real server path filled in, plus the optional npm link for a global formation command. The root README quickstart is the recipient's journey (clone, npm ci, npm run setup, five commands to a scheduled business) and includes the paste-to-your-agent handoff paragraph; nothing in it names an internal tsx path anymore.",
+    "Proven on a genuinely fresh clone, not the maintainer checkout: clone -> npm ci -> npm run setup (all three registrations printed) -> formation new -> bootstrap --apply -> workspaces register -> plan (87 steps, 6 ready) -> list, under a throwaway FORMATION_HOME. bootstrap's own success message now points at formation run and the registry step instead of the internal tsx invocation, and the cli fixture pins the three-runtime registration output so setup cannot silently drop one."
   ]
 }

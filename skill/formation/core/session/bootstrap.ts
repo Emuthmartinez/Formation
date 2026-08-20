@@ -283,9 +283,10 @@ function main(): number {
       console.log("Dry run only — nothing was written. Re-run with --apply to perform the steps above.");
     } else {
       console.log("");
-      console.log("Workspace is bootstrapped. A scheduled session needs a brief file, for example:");
+      console.log("Workspace is bootstrapped. A session needs a brief file, for example:");
       console.log('  { "schemaVersion": "1.0.0", "businessSlug": "<slug from state/business-state.json>", "founderContact": { "email": "founder@example.com" } }');
-      console.log(`Then: tsx core/session/run.ts --workspace ${workspace} --brief <brief.json> --session <session-id>`);
+      console.log(`Then: formation run --workspace ${workspace} --brief <brief.json> --session <session-id>`);
+      console.log(`And to let this machine's MCP server address it: formation workspaces register <slug> ${workspace}`);
     }
   }
   return result.code;
