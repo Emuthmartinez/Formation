@@ -2,15 +2,15 @@
 
 Thanks for wanting to improve **Formation**. Humans and AI agents are both first-class contributors here, and both are held to the same gates.
 
-This repo contains two bounded systems: the Formation founder platform under `platform/` (a real application: web client, API, auth, persistence) and the graph-native launch skill under `skill/formation/` (launch playbooks plus deterministic TypeScript validators). The validators and tests are the contract. If your change matters, it should show up in a validator, a test, a LaunchBench eval, a template, or a reference, not only in prose.
+This repo is the Formation engine: the graph-native business-launch-and-operation system under `skill/formation/` (a typed workflow catalog, an execution core, and deterministic TypeScript validators). Every UI is an external consumer in its own repository — the founder web application lives at [Emuthmartinez/Formation-Platform](https://github.com/Emuthmartinez/Formation-Platform) and integrates only through the versioned adapter contract. The validators and tests are the contract. If your change matters, it should show up in a validator, a test, a LaunchBench eval, a template, or a reference, not only in prose.
 
 ## TL;DR
 
 1. Fork or branch from `main`.
 2. `npm install` and `npm install --prefix skill/formation`.
-3. Make your change. Platform work lives under `platform/`; skill work lives under `skill/formation/`, never in an installed runtime copy.
+3. Make your change under `skill/formation/`, never in an installed runtime copy. Founder-product work belongs in the Formation-Platform repository, not here.
 4. If you touched anything under `skill/`, bump the version manifest. See [Versioning discipline](#versioning-discipline).
-5. Run the gate. `npm run audit:ci` must pass green. Platform changes also need `node platform/run.mjs check` and `node platform/run.mjs test` green.
+5. Run the gate. `npm run audit:ci` must pass green.
 6. Open a **draft PR** and fill in the template. Mark it ready once CI is green.
 
 ## Project layout
@@ -21,10 +21,10 @@ Read these first, in order:
 2. [`AGENTS.md`](AGENTS.md): the maintainer guide and repo map, canonical for how the repo is organized and maintained.
 3. [`CLAUDE.md`](CLAUDE.md): Claude-specific maintainer notes.
 4. [`docs/validators.md`](docs/validators.md): every gate and what it checks.
-5. `platform/AGENTS.md` for platform changes, or `skill/formation/SKILL.md` for the skill entrypoint and routing.
-6. The specific page, service, `references/`, `business/`, `tooling/`, or `evals/` file you intend to change.
+5. `skill/formation/SKILL.md` for the skill entrypoint and routing.
+6. The specific `references/`, `business/`, `tooling/`, or `evals/` file you intend to change.
 
-Platform code lives under `platform/`. Skill content lives under `skill/formation/`. The author's machine mirrors the skill into an installed runtime at `~/.codex/skills/...`; that sync is maintainer-only and external contributors never need to do it. Always edit the repo source.
+Engine content lives under `skill/formation/`. The author's machine mirrors the skill into an installed runtime; that sync is maintainer-only and external contributors never need to do it. Always edit the repo source.
 
 ## Local setup
 
@@ -71,6 +71,15 @@ Any change under `skill/formation/` must bump `skill/formation/skill-version.jso
 - `releaseNotes`: at least one concrete note for what changed. The file requires two notes total.
 
 Keep versions in parity across `package.json` (root), `skill/formation/package.json`, `skill-version.json`, and both `package-lock.json` files. After bumping, run `npm install --package-lock-only` in both locations so the lockfiles match. `check:package-parity` and `check:version-discipline` verify this.
+
+### Adapter contract versioning
+
+The adapter boundary (the boundary report and import report emitted by `core/adapters/platform-execution.ts` and `platform-import.ts`) is versioned by `ADAPTER_CONTRACT_VERSION` in `skill/formation/core/adapters/contract.ts`, with the bump rules documented there: an additive, backward-compatible field is a **minor** bump; a removed, renamed, retyped, or re-required field is a **major** bump. A contract change is one commit that moves together:
+
+1. The TypeScript types and the JSON Schemas under `core/schema/` that validate them.
+2. `ADAPTER_CONTRACT_VERSION` itself, by the rules above.
+3. The golden samples under `validation/repository/fixtures/adapter-contract/` — regenerate positives from a real emission, keep the negative controls failing. `check:adapter-contract` fails a version bump without regenerated goldens, and vice versa.
+4. A heads-up to consumers: each consumer repository (for example Formation-Platform) pins an engine tag and replays these goldens in its own CI; a **major** bump means every consumer updates its acceptance logic and pin deliberately.
 
 ### Source freshness
 
