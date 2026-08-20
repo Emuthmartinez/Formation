@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.155.0",
+  "skillVersion": "0.156.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -12193,6 +12193,24 @@
       "command": "validate:skill",
       "ownerDomainId": "domain.process",
       "audit": "required"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "full",
+      "title": "Full launch",
+      "description": "Every lane runs; the Deliverable Standard applies in full. A deliberate flagship choice, never a default.",
+      "defersLaneKeys": []
+    },
+    {
+      "id": "essentials",
+      "title": "Essentials launch",
+      "description": "The core spine runs; the wholly-breadth lanes (paid user acquisition, the viral growth loop, lifecycle email) park as not needed until the founder widens scope. Market contact beats artifact completeness.",
+      "defersLaneKeys": [
+        "paid_user_acquisition",
+        "growth",
+        "email"
+      ]
     }
   ],
   "presentationGroups": [

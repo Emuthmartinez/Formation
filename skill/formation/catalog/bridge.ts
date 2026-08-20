@@ -147,6 +147,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
     artifacts,
     workflows,
     presentationGroups: catalog.presentationGroups.map(({ id, title, order }) => ({ id, title, order })),
+    profiles: catalog.profiles.map(({ id, defersLaneKeys }) => ({ id, defersLaneKeys: [...defersLaneKeys] })),
   };
 }
 

@@ -63,25 +63,47 @@ export function seedRunState(plan: CompiledPlan, businessState: BusinessStateV2,
   return run;
 }
 
-/** Apply durable scope verdicts before frontier selection. A verdict change invalidates old proof. */
+/**
+ * Apply durable scope verdicts AND the business's launch profile before frontier selection. A
+ * verdict or profile transition invalidates old proof. Precedence per node: a recorded founder
+ * verdict wins; then the profile (a node whose every lane the profile defers parks not_needed);
+ * then the node's own applicability mode. Profiles arrive as compiled fact
+ * (CompiledRunNode.deferredByProfiles), so a catalog pinned before profiles existed defers
+ * nothing — per-business re-pin semantics, same as every other catalog change (R4/R7).
+ */
 export function reconcileWorkflowApplicability(plan: CompiledPlan, run: RunStateDocument, businessState: BusinessStateV2, now: string): void {
+  // Optional-chained on purpose: minimal fixture states omit project entirely, and a missing
+  // scope must mean "no profile parking", never a crash before the frontier.
+  const profileId = businessState.project?.launchScope ?? "";
   for (const node of plan.nodes) {
-    if (node.applicability.mode === "always") continue;
+    const profileDeferred = node.deferredByProfiles.includes(profileId);
+    // Fast exit for the overwhelmingly common case: an unconditional node no profile touches,
+    // with no prior applicability history to unwind. Zero behavior change from before profiles.
+    if (node.applicability.mode === "always" && !profileDeferred) {
+      const priorState = run.nodes[node.id];
+      if (!priorState || priorState.applicabilityFingerprint === undefined) continue;
+    }
     const state = run.nodes[node.id];
     if (!state) continue;
     const record = businessState.workflowApplicability?.[node.workflowId];
     // Reason, evidence, and timestamp edits explain the verdict but do not change scope. Only a
-    // verdict transition can retire or reopen work and invalidate its accepted output.
-    const fingerprint = sha256(record?.verdict ?? "unknown");
+    // verdict or profile transition can retire or reopen work and invalidate its accepted output.
+    const fingerprint = sha256(`${record?.verdict ?? "unknown"}|${profileDeferred ? profileId : "none"}`);
     if (state.applicabilityFingerprint === fingerprint) {
       // The unchanged-fingerprint fast path must still re-park an UNANSWERED question: staleness
       // invalidation resets a node to a ready-eligible status without touching the applicability
       // fingerprint, and before this guard a scope-gated node could ride that reset straight into
       // dispatch with its founder question still open (caught by check:engine-e2e, 2026-08-19 —
       // both conditional-safety nodes ran with no workflowApplicability record on file).
-      if (!record && READY_ELIGIBLE_APPLICABILITY.includes(state.status)) {
+      if (!record && node.applicability.mode === "conditional" && READY_ELIGIBLE_APPLICABILITY.includes(state.status)) {
         state.status = "waiting_founder";
         state.blocker = `Scope answer needed: ${node.applicability.question}`;
+        run.updatedAt = now;
+      }
+      // The same reset hazard applies to a profile-parked node: re-park it after staleness resets.
+      if (!record && profileDeferred && node.applicability.mode === "always" && READY_ELIGIBLE_APPLICABILITY.includes(state.status)) {
+        state.status = "not_needed";
+        state.blocker = `Deferred by the ${profileId} profile; widen scope or record a required verdict to include it.`;
         run.updatedAt = now;
       }
       continue;
@@ -96,12 +118,21 @@ export function reconcileWorkflowApplicability(plan: CompiledPlan, run: RunState
     state.acceptedOutputFingerprint = undefined;
     state.verifiedBySessionId = undefined;
     state.applicabilityFingerprint = fingerprint;
-    if (!record) {
+    if (record) {
+      // The founder's recorded verdict outranks the profile in both directions.
+      if (record.verdict === "not-needed") {
+        state.status = "not_needed";
+        state.blocker = `Not needed: ${record.reason}`;
+      } else {
+        state.status = "pending";
+        state.blocker = undefined;
+      }
+    } else if (profileDeferred) {
+      state.status = "not_needed";
+      state.blocker = `Deferred by the ${profileId} profile; widen scope or record a required verdict to include it.`;
+    } else if (node.applicability.mode === "conditional") {
       state.status = "waiting_founder";
       state.blocker = `Scope answer needed: ${node.applicability.question}`;
-    } else if (record.verdict === "not-needed") {
-      state.status = "not_needed";
-      state.blocker = `Not needed: ${record.reason}`;
     } else {
       state.status = "pending";
       state.blocker = undefined;

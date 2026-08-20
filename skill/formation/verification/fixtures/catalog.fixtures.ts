@@ -94,6 +94,7 @@ function baseFixtureCatalog(): Catalog {
     workflows: [baseWorkflow()],
     artifacts: [{ id: "artifact.fixture.output.md", path: "fixture/output.md", ownerDomainId: "domain.research", laneIds: [], generated: false }],
     gates: [],
+    profiles: [],
     presentationGroups: [],
   };
 }
@@ -725,6 +726,56 @@ export function register(harness: Harness): void {
     assert(counts.drop === drop, `drop count mismatch: table rows=${counts.drop}, summary=${drop}`);
     assert(rows.length === total, `total row count mismatch: parsed=${rows.length}, summary=${total}`);
   });
+
+  harness.check(
+    "profiles: the registry validates fail-closed — protected lanes, unknown lanes, duplicates, missing built-ins — and the schema enum never drifts from it",
+    () => {
+      // A profile that defers a protected lane must fail by name (launch-phases.md's rule made mechanical).
+      const protectedDeferral = baseFixtureCatalog();
+      protectedDeferral.profiles = [
+        { id: "essentials", title: "E", description: "fixture", defersLaneKeys: ["revenue"] },
+        { id: "full", title: "F", description: "fixture", defersLaneKeys: [] },
+      ];
+      const protectedIssues = validateCatalog(protectedDeferral, skillRoot);
+      assert(
+        protectedIssues.some((issue) => issue.code === "catalog_graph.profile.protected_lane_deferred"),
+        `expected profile.protected_lane_deferred, got: ${protectedIssues.map((issue) => issue.code).join(", ")}`,
+      );
+
+      // Missing built-ins must fail: existing businesses record essentials/full as their scope.
+      const missingBuiltin = baseFixtureCatalog();
+      missingBuiltin.profiles = [{ id: "flagship", title: "X", description: "fixture", defersLaneKeys: [] }];
+      const builtinIssues = validateCatalog(missingBuiltin, skillRoot);
+      assert(
+        builtinIssues.filter((issue) => issue.code === "catalog_graph.profile.builtin_missing").length === 2,
+        `expected two builtin_missing errors, got: ${builtinIssues.map((issue) => issue.code).join(", ")}`,
+      );
+
+      // The REAL registry: valid, and the business-state schema's launchScope enum matches it
+      // exactly — adding a profile without widening the schema (or vice versa) fails here, so the
+      // reducer's fail-closed value check and the registry can never disagree.
+      const real = composeCatalog(skillRoot);
+      const realIssues = validateCatalog(real, skillRoot).filter((issue) => issue.code.startsWith("catalog_graph.profile."));
+      assert(
+        realIssues.length === 0,
+        `the shipped profile registry must be clean, got: ${realIssues.map((issue) => `${issue.code}: ${issue.message}`).join("; ")}`,
+      );
+      const essentials = real.profiles.find((profile) => profile.id === "essentials")!;
+      assert(
+        [...essentials.defersLaneKeys].sort().join(",") === "email,growth,paid_user_acquisition",
+        `essentials must defer exactly the wholly-breadth lanes, got: ${essentials.defersLaneKeys.join(", ")}`,
+      );
+      const schema = JSON.parse(readFileSync(path.join(skillRoot, "core", "schema", "business-state.schema.json"), "utf8")) as {
+        properties: { project: { properties: { launchScope: { enum?: string[] } } } };
+      };
+      const schemaEnum = [...(schema.properties.project.properties.launchScope.enum ?? [])].sort();
+      const registryIds = real.profiles.map((profile) => profile.id).sort();
+      assert(
+        schemaEnum.join(",") === registryIds.join(","),
+        `business-state.schema.json launchScope enum [${schemaEnum.join(", ")}] must equal the profile registry [${registryIds.join(", ")}]`,
+      );
+    },
+  );
 
   harness.check("scaffolder: add-workflow inserts the seed, bumps the count fixture, and refuses duplicates and unknown vocabulary", () => {
     // A synthetic skill root carrying only what the scaffolder writes to: one workflow file and

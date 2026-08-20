@@ -404,7 +404,54 @@ export function validateCatalog(catalog: Catalog, skillRoot: string, providerReg
     issues.push(error("catalog_graph.business_unit.coverage_gap", "businessUnitDomains (core/schema/types.ts) does not cover every grantable domain."));
   }
 
+  validateProfiles(catalog, issues);
+
   return issues;
+}
+
+/** R7: profiles are additive breadth selection, never a bypass of the never-deferred safety rails. */
+function validateProfiles(catalog: Catalog, issues: CatalogIssue[]): void {
+  const NEVER_DEFERRED: readonly string[] = ["revenue", "privacy_legal", "security", "apple_signing", "store_console"];
+  const laneKeys = new Set(catalog.lanes.map((lane) => lane.key));
+  const seen = new Set<string>();
+  // The built-in requirement binds a catalog that DECLARES profiles (synthetic fixture catalogs
+  // pass an empty list and stay exempt); the shipped registry's own fixture pins the real two.
+  if (catalog.profiles.length > 0) {
+    for (const builtin of ["essentials", "full"]) {
+      if (!catalog.profiles.some((profile) => profile.id === builtin)) {
+        issues.push({
+          severity: "error",
+          code: "catalog_graph.profile.builtin_missing",
+          message: `Profile registry must carry the built-in "${builtin}" — existing businesses record it as their launch scope.`,
+        });
+      }
+    }
+  }
+  for (const profile of catalog.profiles) {
+    if (seen.has(profile.id)) {
+      issues.push({ severity: "error", code: "catalog_graph.profile.duplicate", message: `Profile id "${profile.id}" is declared more than once.` });
+    }
+    seen.add(profile.id);
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(profile.id)) {
+      issues.push({
+        severity: "error",
+        code: "catalog_graph.profile.invalid_id",
+        message: `Profile id "${profile.id}" must be lowercase letters, digits, and hyphens.`,
+      });
+    }
+    for (const laneKey of profile.defersLaneKeys) {
+      if (catalog.lanes.length > 0 && !laneKeys.has(laneKey)) {
+        issues.push({ severity: "error", code: "catalog_graph.profile.unknown_lane", message: `Profile "${profile.id}" defers unknown lane "${laneKey}".` });
+      }
+      if (NEVER_DEFERRED.includes(laneKey)) {
+        issues.push({
+          severity: "error",
+          code: "catalog_graph.profile.protected_lane_deferred",
+          message: `Profile "${profile.id}" defers "${laneKey}" — revenue, privacy/legal, security, signing, and store-console lanes are never deferred by scope (launch-phases.md).`,
+        });
+      }
+    }
+  }
 }
 
 /** Protected action classes: real-world consequences, so every node must name the protected category that authorizes it (grants/waivers) — verification gates are a separate, after-the-fact control. */

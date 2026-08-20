@@ -12,6 +12,7 @@ import { presentationGroups } from "./presentation.js";
 import { roles } from "./roles.js";
 import type { Catalog } from "./types.js";
 import { workflows } from "./workflows/index.js";
+import { profiles } from "./profiles.js";
 
 export function readSkillVersion(skillRoot: string): string {
   const parsed = JSON.parse(readFileSync(path.join(skillRoot, "skill-version.json"), "utf8")) as { version?: string };
@@ -40,6 +41,7 @@ export function composeCatalog(skillRoot: string): Catalog {
     workflows: knowledge.workflows,
     artifacts: buildArtifacts(knowledge.workflows),
     gates: discoverGates(skillRoot, domains),
+    profiles: [...profiles],
     presentationGroups: [...presentationGroups],
   };
 }
