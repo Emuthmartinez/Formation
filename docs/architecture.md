@@ -36,11 +36,12 @@ then (v0.142.0–v0.146.0) closed that gap end to end and is what this document 
    Formation-Platform repository reads a read-only boundary report and submits typed execution
    requests; it holds no handle onto engine files.
 
-## North star (target state)
+## The layer model
 
-The committed target this repository converges on — the layering plan at
-`docs/plans/2026-08-19-001-engine-contract-and-consumer-extraction.md` is the path; items below
-are TARGET, not description, until that plan's phases land.
+The layering plan at `docs/plans/2026-08-19-001-engine-contract-and-consumer-extraction.md`
+committed this model on 2026-08-19; phases A1–C landed the same day (contract freeze, MCP
+hardening, front doors, platform extraction), so the table below is current description, with
+composition-by-profiles-and-packs (phase E) the one part still in flight.
 
 | Layer | What | Lives |
 | --- | --- | --- |
