@@ -99,21 +99,17 @@ skill/formation/                       the engine
   workspace/, workspace-template/       business artifact contracts and repo templates
   bin/                                  the packaged `formation` command
 
-platform/                              a founder-facing web product, one consumer of the engine
-  web/                                  application shell and product pages
-  server/                               API, auth, persistence, domain logic
-
-docs/                                  architecture, validators, and platform-specific docs
+docs/                                  architecture, validators, plans, and history
 ```
 
-`platform/` never reads engine files directly. It calls two read-only CLIs — `skill/formation/core/adapters/platform-execution.ts` for durable-run status and approvals, `skill/formation/core/adapters/platform-import.ts` for reading an existing launch repository as drafts and questions — and writes nothing back into the engine's workspace. The platform and the engine keep separate writable state on purpose; see "Integration contract" in [`docs/architecture.md`](docs/architecture.md).
+Consumers never read engine files directly. The founder web application lives in its own private repository — [Emuthmartinez/Formation-Platform](https://github.com/Emuthmartinez/Formation-Platform) (extracted from this monorepo on 2026-08-19, history preserved) — and integrates through two read-only CLIs it spawns from a pinned engine checkout: `skill/formation/core/adapters/platform-execution.ts` for durable-run status and approvals, and `skill/formation/core/adapters/platform-import.ts` for reading an existing launch repository as drafts and questions. Both emit schema-checked boundary reports carrying a `contractVersion`; the consumer refuses an incompatible major rather than interpreting it, and replays this repository's golden contract samples in its own CI. The standing rule from the layering plan: **L4 never lives in this repository.**
 
 ## Documentation
 
-- [`docs/architecture.md`](docs/architecture.md) — combined system architecture and the platform/engine integration contract
+- [`docs/architecture.md`](docs/architecture.md) — system architecture and the consumer integration contract
 - [`docs/engine-backlog.md`](docs/engine-backlog.md) — what remains, ranked by how much it changes autonomous operation
 - [`docs/validators.md`](docs/validators.md) — every validator and gate, what it checks, how to run it
 - [`skill/formation/README.md`](skill/formation/README.md) — the engine's source map
 - [`skill/formation/catalog/generated/spine.md`](skill/formation/catalog/generated/spine.md) — the phase-by-phase walk, generated from the catalog
 
-The root manifest is `formation`. Its version moves in lockstep with `skill/formation/skill-version.json` under one release discipline; the platform's private manifest is `platform/package.json`, using the root lockfile.
+The root manifest is `formation`. Its version moves in lockstep with `skill/formation/skill-version.json` under one release discipline. Releases are tagged (`v0.151.1` onward); consumers pin the engine by tag.

@@ -1,10 +1,9 @@
 {
   "name": "formation",
-  "version": "0.151.1",
-  "description": "Formation, the founder platform that turns an idea into a decision-grade, launch-ready business, with a graph-native launch skill and deterministic validators between every claim and done.",
+  "version": "0.152.0",
+  "description": "Formation: a typed workflow-graph engine that takes a consumer mobile-app business from idea to shipped and into autonomous operation, with deterministic validators between every claim and done.",
   "keywords": [
     "formation",
-    "founder-platform",
     "startup",
     "mobile",
     "ios",

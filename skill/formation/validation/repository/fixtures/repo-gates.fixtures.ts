@@ -1725,22 +1725,22 @@ export function register(h: Harness): void {
     0,
   );
 
-  // A real gap Codex caught: docs/platform/decisions-and-tradeoffs.md (an ADR, current and
-  // real, same as the two architecture docs already governed) was outside the hardcoded docs/
-  // list, so an edit to it got no signal despite the repo policy governing architecture docs.
+  // A real gap Codex caught (originally via a platform ADR, since moved out with the platform):
+  // a governed doc named only in the repo-root allowlist — not under the knowledge/ walk — must
+  // really be scanned, or an edit to it gets no signal despite the repo policy governing it.
   const ste100Adr = writeSte100Root("ste100-adr-scanned");
-  mkdirSync(path.join(ste100Adr.repoRoot, "docs", "platform"), { recursive: true });
+  mkdirSync(path.join(ste100Adr.repoRoot, "docs", "implementation"), { recursive: true });
   writeFileSync(
-    path.join(ste100Adr.repoRoot, "docs", "platform", "decisions-and-tradeoffs.md"),
-    "# Decisions And Tradeoffs\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
+    path.join(ste100Adr.repoRoot, "docs", "implementation", "graph-execution-v2.md"),
+    "# Graph Execution\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
     "utf8",
   );
   runScriptArgs(
-    "ste100 scans docs/platform/decisions-and-tradeoffs.md, an ADR outside the prior docs/ list",
+    "ste100 scans a doc named only in the repo-root allowlist (not found by the knowledge walk)",
     "check-technical-docs-ste100.ts",
     ["--repo-root", ste100Adr.repoRoot, "--skill-root", ste100Adr.skillRoot],
     0,
-    "WARNING ste100.sentence_too_long [docs/platform/decisions-and-tradeoffs.md]",
+    "WARNING ste100.sentence_too_long [docs/implementation/graph-execution-v2.md]",
   );
 
   // A real gap Codex caught: the prior blanket double-quote strip erased ANY quoted span before
@@ -1966,24 +1966,6 @@ export function register(h: Harness): void {
     "check-technical-docs-ste100.ts",
     ["--repo-root", ste100ListContinuationStopsAtBlankLine.repoRoot, "--skill-root", ste100ListContinuationStopsAtBlankLine.skillRoot],
     0,
-  );
-
-  // A real gap Codex caught: platform/README.md documents provider configuration, execution API
-  // routes, environment variables, and deployment requirements -- a current API/config
-  // reference -- but was outside every discovery path (not under docs/, not under skill/).
-  const ste100PlatformReadme = writeSte100Root("ste100-platform-readme-scanned");
-  mkdirSync(path.join(ste100PlatformReadme.repoRoot, "platform"), { recursive: true });
-  writeFileSync(
-    path.join(ste100PlatformReadme.repoRoot, "platform", "README.md"),
-    "# Platform\n\nThis sentence intentionally runs on for quite a long while with many extra words strung together well past the twenty word ceiling this rule enforces.\n",
-    "utf8",
-  );
-  runScriptArgs(
-    "ste100 scans platform/README.md, the platform's own API/config developer guide",
-    "check-technical-docs-ste100.ts",
-    ["--repo-root", ste100PlatformReadme.repoRoot, "--skill-root", ste100PlatformReadme.skillRoot],
-    0,
-    "WARNING ste100.sentence_too_long [platform/README.md]",
   );
 
   // A real gap Codex caught: the previous round's continuation grouping required the follow-on

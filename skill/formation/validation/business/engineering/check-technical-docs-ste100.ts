@@ -125,20 +125,13 @@ interface GovernedFile {
 const governed: GovernedFile[] = [];
 
 // This repo-root-relative allowlist stays explicit rather than a scanned directory like
-// ADDITIONAL_GOVERNED_DIRECTORIES below: docs/platform/ also holds exploratory and
-// point-in-time content (a historical repo audit, a founder-journey narrative, an open
-// backlog) this repo's own conventions already keep outside every gate, so a blanket scan
-// would govern files that were never meant to be governed. Add a new architecture doc, ADR,
-// validator reference, or top-level product/platform README here by name once it exists.
-for (const relative of [
-  "docs/architecture.md",
-  "docs/validators.md",
-  "docs/platform/technical-architecture.md",
-  "docs/platform/product-architecture.md",
-  "docs/platform/decisions-and-tradeoffs.md",
-  "docs/implementation/graph-execution-v2.md",
-  "platform/README.md",
-]) {
+// ADDITIONAL_GOVERNED_DIRECTORIES below: docs/ also holds exploratory and point-in-time
+// content (plans, history, an open backlog) this repo's own conventions already keep outside
+// every gate, so a blanket scan would govern files that were never meant to be governed. Add a
+// new architecture doc, ADR, or validator reference here by name once it exists. (The platform
+// docs governed here before 2026-08-19 moved to the Formation-Platform repository with the
+// platform itself.)
+for (const relative of ["docs/architecture.md", "docs/validators.md", "docs/implementation/graph-execution-v2.md"]) {
   const absolute = path.join(repoRoot, relative);
   if (!existsSync(absolute)) continue;
   governed.push({ displayPath: relative, absolute, tier: "warning" });

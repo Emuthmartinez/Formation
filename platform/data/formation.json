@@ -1,0 +1,828 @@
+{
+  "schemaVersion": 5,
+  "users": [
+    {
+      "id": "usr_demo_founder",
+      "email": "founder@formation.local",
+      "name": "Maya Chen",
+      "createdAt": "2026-08-05T23:30:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "ses_0f49b5c3f4334f33",
+      "userId": "usr_demo_founder",
+      "tokenHash": "14ee7e29e043ba567f766f41c97d20f80a66a2ef6e3a8bcba1e9c26f8ac8d093",
+      "createdAt": "2026-08-07T01:06:29.232Z",
+      "expiresAt": "2026-08-14T01:06:29.232Z",
+      "lastSeenAt": "2026-08-07T01:41:17.222Z"
+    },
+    {
+      "id": "ses_3b9e7d4c683c444e",
+      "userId": "usr_demo_founder",
+      "tokenHash": "609f9705d0ec330f29b9491cf8696aa33faf2aeb7133c76a6fe85001c6f29e80",
+      "createdAt": "2026-08-07T07:03:53.399Z",
+      "expiresAt": "2026-08-14T07:03:53.399Z",
+      "lastSeenAt": "2026-08-07T07:03:53.399Z",
+      "device": "An unrecognised device"
+    },
+    {
+      "id": "ses_63b9d8a8b379456d",
+      "userId": "usr_demo_founder",
+      "tokenHash": "22f3ac3ee931a1655968ed7966f0ca8865c053fe2547fa12d597d7d51b619ba9",
+      "createdAt": "2026-08-07T07:04:45.293Z",
+      "expiresAt": "2026-08-14T07:04:45.293Z",
+      "lastSeenAt": "2026-08-07T07:04:45.293Z",
+      "device": "Chrome on macOS"
+    }
+  ],
+  "memberships": [
+    {
+      "id": "mem_storywell_owner",
+      "userId": "usr_demo_founder",
+      "workspaceId": "wrk_storywell",
+      "role": "owner",
+      "createdAt": "2026-08-05T23:30:00.000Z"
+    }
+  ],
+  "workspaces": [
+    {
+      "id": "wrk_storywell",
+      "slug": "storywell",
+      "name": "Storywell",
+      "stage": "validation",
+      "launchTarget": "2026-10-01",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z",
+      "founder": {
+        "name": "Maya Chen",
+        "role": "Founder",
+        "operatingMode": "review-first",
+        "weeklyHours": 18
+      },
+      "company": {
+        "oneLiner": "Storywell turns guided family conversations into a private, searchable audio archive.",
+        "thesis": "Families value the stories of older relatives, but recording them feels awkward, time-consuming, and technically intimidating. A guided mobile experience can make preservation feel natural enough to become a habit.",
+        "targetCustomer": "Adult children ages 35 to 55 who live apart from a parent or grandparent and feel urgency about preserving family stories.",
+        "problem": "People postpone meaningful family interviews until it is too late because they do not know what to ask, how to record well, or how to organize the result.",
+        "solution": "A private mobile app that schedules short guided prompts, records calls or in-person conversations, transcribes them, and organizes the archive by person, topic, and era.",
+        "positioning": "The easiest way to preserve the voice and stories of the people who made your family.",
+        "differentiation": "Storywell combines guided interviewing, family participation, and a durable private archive. It is not a generic recorder, genealogy database, or public social network.",
+        "businessModel": "Consumer subscription with one family workspace and up to eight contributors.",
+        "pricing": "$79 per year after a 14-day trial; founding-family price under review.",
+        "northStarMetric": "Families that save three meaningful stories in their first 14 days.",
+        "currentGoal": "Reach a decision-grade beta with 20 active families and evidence of repeat recording behavior.",
+        "constraints": [
+          "Two-person team",
+          "iOS first",
+          "No public sharing at launch",
+          "Must earn trust with older participants"
+        ]
+      },
+      "workstreams": [
+        {
+          "id": "strategy",
+          "title": "Business thesis",
+          "group": "Foundation",
+          "summary": "Define the wedge, strategic choices, and what the company will not be.",
+          "status": "on-track",
+          "progress": 82,
+          "confidence": 78,
+          "nextAction": "Lock the first-year wedge around adult-child initiated family interviews.",
+          "rationale": "The thesis is coherent, but the product still carries traces of three adjacent businesses: genealogy, podcasting, and family social networking.",
+          "facts": [
+            "The founder is building iOS first.",
+            "The launch team is two people."
+          ],
+          "assumptions": [
+            "Adult children will initiate and pay for the family archive.",
+            "Private preservation is a stronger wedge than public storytelling."
+          ],
+          "questions": [
+            "Should the paying customer be the interviewer, the family, or a gift purchaser?"
+          ],
+          "deliverableIds": [
+            "art_business_thesis"
+          ]
+        },
+        {
+          "id": "customer",
+          "title": "Customer and problem",
+          "group": "Foundation",
+          "summary": "Choose a primary buyer and understand the moment that creates urgency.",
+          "status": "needs-attention",
+          "progress": 69,
+          "confidence": 61,
+          "nextAction": "Interview five people who recently lost or moved a parent into care.",
+          "rationale": "The emotional problem is strong, but the current evidence over-indexes on friends who already value family history.",
+          "facts": [
+            "Seven exploratory interviews are complete."
+          ],
+          "assumptions": [
+            "A recent health event or milestone creates enough urgency to overcome interview discomfort.",
+            "The adult child is willing to coordinate other relatives."
+          ],
+          "questions": [
+            "Which trigger produces the shortest path from interest to first recording?"
+          ],
+          "deliverableIds": [
+            "art_customer_brief"
+          ]
+        },
+        {
+          "id": "market",
+          "title": "Market and competition",
+          "group": "Evidence",
+          "summary": "Understand substitutes, category language, and credible market size.",
+          "status": "on-track",
+          "progress": 63,
+          "confidence": 66,
+          "nextAction": "Complete a substitute map using voice recorder, Storyworth, and genealogy workflows.",
+          "rationale": "Competitor feature tables exist, but the more useful question is what people do instead of buying anything.",
+          "facts": [
+            "The category includes interview services, prompt subscriptions, genealogy products, and generic recorders."
+          ],
+          "assumptions": [
+            "Trust and ease of contribution matter more than transcription novelty."
+          ],
+          "questions": [
+            "How often does the customer choose a one-time gift instead of an ongoing archive?"
+          ],
+          "deliverableIds": [
+            "art_market_map"
+          ]
+        },
+        {
+          "id": "product",
+          "title": "Product and offer",
+          "group": "Build",
+          "summary": "Define the smallest product that delivers the promised outcome.",
+          "status": "on-track",
+          "progress": 72,
+          "confidence": 74,
+          "nextAction": "Cut public sharing and AI-written memoir features from the beta scope.",
+          "rationale": "The core capture and archive loop is clear. Secondary delight features are diluting the first-value path.",
+          "facts": [
+            "Clickable prototype testing is complete with six participants."
+          ],
+          "assumptions": [
+            "A guided prompt is enough to start a 10-minute recording."
+          ],
+          "questions": [
+            "Does asynchronous contribution outperform scheduled live interviews?"
+          ],
+          "deliverableIds": [
+            "art_product_brief"
+          ]
+        },
+        {
+          "id": "business-model",
+          "title": "Business model and pricing",
+          "group": "Economics",
+          "summary": "Choose the offer, pricing logic, and unit-economic assumptions.",
+          "status": "blocked",
+          "progress": 46,
+          "confidence": 42,
+          "nextAction": "Choose annual subscription versus one-time family archive before paywall design begins.",
+          "rationale": "The current pricing language mixes a recurring service with a finite preservation project. That contradiction will confuse both acquisition and retention.",
+          "facts": [
+            "Storage and transcription costs are low at the current expected usage."
+          ],
+          "assumptions": [
+            "Families will accept annual pricing for continued access and contributions."
+          ],
+          "questions": [
+            "Is the natural purchase a subscription, gift, or lifetime archive?"
+          ],
+          "deliverableIds": []
+        },
+        {
+          "id": "brand",
+          "title": "Brand and positioning",
+          "group": "Expression",
+          "summary": "Create a credible promise and a consistent verbal and visual system.",
+          "status": "needs-attention",
+          "progress": 51,
+          "confidence": 58,
+          "nextAction": "Replace nostalgic category language with a more active preservation promise.",
+          "rationale": "The current brand is warm, but some copy sounds like memorial software rather than a living family ritual.",
+          "facts": [
+            "The working name is Storywell."
+          ],
+          "assumptions": [
+            "Calm and private will convert better than playful and social."
+          ],
+          "questions": [
+            "Can the brand communicate urgency without becoming morbid?"
+          ],
+          "deliverableIds": []
+        },
+        {
+          "id": "go-to-market",
+          "title": "Go-to-market",
+          "group": "Launch",
+          "summary": "Build a repeatable path to the first qualified families.",
+          "status": "needs-attention",
+          "progress": 37,
+          "confidence": 44,
+          "nextAction": "Recruit the first 20 families through caregiving and family-history communities.",
+          "rationale": "A channel list exists, but there is no narrow launch motion with a named audience, message, and conversion event.",
+          "facts": [
+            "The founder has access to two local caregiver communities."
+          ],
+          "assumptions": [
+            "Community partnerships will outperform paid social for the first cohort."
+          ],
+          "questions": [
+            "What event or resource earns enough trust for a family to upload its first voice recording?"
+          ],
+          "deliverableIds": []
+        },
+        {
+          "id": "launch",
+          "title": "Launch plan",
+          "group": "Launch",
+          "summary": "Turn the strategy into sequenced milestones, proof, and owner accountability.",
+          "status": "blocked",
+          "progress": 31,
+          "confidence": 49,
+          "nextAction": "Resolve pricing and privacy blockers before committing the App Store date.",
+          "rationale": "Product progress is ahead of the business decisions required to launch it responsibly.",
+          "facts": [
+            "The target beta date is October 1, 2026."
+          ],
+          "assumptions": [
+            "Twenty active families are enough for a launch decision."
+          ],
+          "questions": [
+            "Which launch gates are mandatory for a private family archive?"
+          ],
+          "deliverableIds": [
+            "art_launch_brief"
+          ]
+        }
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "clm_01",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "customer",
+      "kind": "fact",
+      "key": "research.interviews.completed",
+      "statement": "Seven exploratory customer interviews are complete.",
+      "value": 7,
+      "confidence": 100,
+      "status": "active",
+      "evidence": [
+        "Interview notes from July 2026"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "clm_02",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "business-model",
+      "kind": "assumption",
+      "key": "pricing.model",
+      "statement": "The business should charge an annual family subscription.",
+      "value": "annual-subscription",
+      "confidence": 42,
+      "status": "active",
+      "evidence": [],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "clm_03",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "strategy",
+      "kind": "assumption",
+      "key": "pricing.model",
+      "statement": "The clearest offer may be a one-time family archive purchase.",
+      "value": "one-time-archive",
+      "confidence": 38,
+      "status": "active",
+      "evidence": [
+        "Interview 4 gift-purchase language"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "clm_04",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "product",
+      "kind": "recommendation",
+      "key": "beta.scope.public-sharing",
+      "statement": "Keep public sharing out of the beta.",
+      "value": false,
+      "confidence": 86,
+      "status": "active",
+      "evidence": [
+        "Prototype sessions 2, 3, and 6"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "clm_05",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "go-to-market",
+      "kind": "question",
+      "key": "gtm.trust-event",
+      "statement": "What earns enough trust for a family to upload its first voice recording?",
+      "value": null,
+      "confidence": 0,
+      "status": "open",
+      "evidence": [],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "dec_01",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "product",
+      "title": "Keep the beta private by default",
+      "decision": "No public profiles, feeds, or open sharing links in the beta.",
+      "rationale": "Privacy is central to the promise and public mechanics add risk before the core recording loop is proven.",
+      "status": "decided",
+      "owner": "Maya Chen",
+      "decidedAt": "2026-07-29",
+      "reviewAt": "2026-11-01",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "dec_02",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "strategy",
+      "title": "Adult child is the launch buyer",
+      "decision": "Design onboarding and acquisition around the adult child who starts the family archive.",
+      "rationale": "This person feels the urgency, coordinates relatives, and is most likely to pay.",
+      "status": "decided",
+      "owner": "Maya Chen",
+      "decidedAt": "2026-07-31",
+      "reviewAt": "2026-09-15",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "dec_03",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "business-model",
+      "title": "Choose the commercial model",
+      "decision": "Annual subscription versus one-time archive remains unresolved.",
+      "rationale": "The product creates ongoing value, but the customer may perceive the job as finite.",
+      "status": "open",
+      "owner": "Maya Chen",
+      "decidedAt": null,
+      "reviewAt": "2026-08-12",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "dec_04",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "launch",
+      "title": "Set the beta success threshold",
+      "decision": "A decision-grade beta needs 20 families, 12 with repeat recording, and 8 with a second contributor.",
+      "rationale": "Activation alone is not enough; repeat capture and collaboration are the core behavior hypotheses.",
+      "status": "proposed",
+      "owner": "Maya Chen",
+      "decidedAt": null,
+      "reviewAt": "2026-08-19",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "art_business_thesis",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "strategy",
+      "type": "business-thesis",
+      "title": "Business thesis",
+      "status": "reviewed",
+      "version": 3,
+      "confidence": 78,
+      "summary": "The strategic case for Storywell and the choices that keep it focused.",
+      "sections": [
+        {
+          "id": "sec_thesis",
+          "title": "Thesis",
+          "body": "Families want the voices and stories of older relatives, but the work feels emotionally and technically difficult. Storywell can win by making the first interview feel easy, private, and worth repeating."
+        },
+        {
+          "id": "sec_wedge",
+          "title": "Initial wedge",
+          "body": "Adult children initiating guided interviews with a parent or grandparent after a milestone, health scare, or family-history trigger."
+        },
+        {
+          "id": "sec_no",
+          "title": "What we will not build yet",
+          "body": "A public social network, genealogy database, automated memoir publisher, or generic podcast editor."
+        }
+      ],
+      "sourceClaimIds": [
+        "clm_01",
+        "clm_04"
+      ],
+      "linkedDecisionIds": [
+        "dec_01",
+        "dec_02"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "art_customer_brief",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "customer",
+      "type": "customer-brief",
+      "title": "Primary customer brief",
+      "status": "draft",
+      "version": 2,
+      "confidence": 61,
+      "summary": "The buyer, trigger, anxieties, and first-value requirement.",
+      "sections": [
+        {
+          "id": "sec_customer",
+          "title": "Primary customer",
+          "body": "An adult child who lives apart from a parent or grandparent and feels that important stories are at risk of disappearing."
+        },
+        {
+          "id": "sec_trigger",
+          "title": "Trigger moment",
+          "body": "A health scare, birthday, move into care, family reunion, or recent loss in the wider family creates urgency."
+        },
+        {
+          "id": "sec_anxiety",
+          "title": "Anxieties",
+          "body": "Making the conversation feel forced, asking the wrong questions, losing the recording, and asking an older relative to learn complicated software."
+        }
+      ],
+      "sourceClaimIds": [
+        "clm_01"
+      ],
+      "linkedDecisionIds": [
+        "dec_02"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "art_product_brief",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "product",
+      "type": "product-brief",
+      "title": "Beta product brief",
+      "status": "reviewed",
+      "version": 4,
+      "confidence": 74,
+      "summary": "The first-value path and deliberately narrow beta scope.",
+      "sections": [
+        {
+          "id": "sec_outcome",
+          "title": "Promised outcome",
+          "body": "Save one meaningful family story in less than 15 minutes, then make the next conversation easier to start."
+        },
+        {
+          "id": "sec_loop",
+          "title": "Core loop",
+          "body": "Choose a prompt, invite or call a relative, record, review the transcript, save it to the family archive, and schedule the next prompt."
+        },
+        {
+          "id": "sec_scope",
+          "title": "Beta scope",
+          "body": "Guided prompts, recording, transcription, private archive, family invitations, contributor permissions, and lightweight reminders."
+        }
+      ],
+      "sourceClaimIds": [
+        "clm_04"
+      ],
+      "linkedDecisionIds": [
+        "dec_01"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "art_launch_brief",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "launch",
+      "type": "launch-brief",
+      "title": "Beta launch brief",
+      "status": "draft",
+      "version": 1,
+      "confidence": 49,
+      "summary": "The launch audience, proof threshold, milestones, and unresolved blockers.",
+      "sections": [
+        {
+          "id": "sec_cohort",
+          "title": "Launch cohort",
+          "body": "Twenty families recruited through trusted caregiving and family-history communities."
+        },
+        {
+          "id": "sec_proof",
+          "title": "Proof threshold",
+          "body": "At least 12 families record twice and 8 add a second contributor within the first 14 days."
+        },
+        {
+          "id": "sec_blockers",
+          "title": "Blockers",
+          "body": "Commercial model, privacy language, account recovery, elder-friendly participation flow, and a precise support promise."
+        }
+      ],
+      "sourceClaimIds": [],
+      "linkedDecisionIds": [
+        "dec_03",
+        "dec_04"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    }
+  ],
+  "artifactVersions": [
+    {
+      "id": "ver_seed_01",
+      "artifactId": "art_business_thesis",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "strategy",
+      "version": 3,
+      "title": "Business thesis",
+      "status": "reviewed",
+      "confidence": 78,
+      "summary": "The strategic case for Storywell and the choices that keep it focused.",
+      "sections": [
+        {
+          "id": "sec_thesis",
+          "title": "Thesis",
+          "body": "Families want the voices and stories of older relatives, but the work feels emotionally and technically difficult. Storywell can win by making the first interview feel easy, private, and worth repeating."
+        },
+        {
+          "id": "sec_wedge",
+          "title": "Initial wedge",
+          "body": "Adult children initiating guided interviews with a parent or grandparent after a milestone, health scare, or family-history trigger."
+        },
+        {
+          "id": "sec_no",
+          "title": "What we will not build yet",
+          "body": "A public social network, genealogy database, automated memoir publisher, or generic podcast editor."
+        }
+      ],
+      "sourceClaimIds": [
+        "clm_01",
+        "clm_04"
+      ],
+      "linkedDecisionIds": [
+        "dec_01",
+        "dec_02"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "createdBy": "Maya Chen"
+    },
+    {
+      "id": "ver_seed_02",
+      "artifactId": "art_customer_brief",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "customer",
+      "version": 2,
+      "title": "Primary customer brief",
+      "status": "draft",
+      "confidence": 61,
+      "summary": "The buyer, trigger, anxieties, and first-value requirement.",
+      "sections": [
+        {
+          "id": "sec_customer",
+          "title": "Primary customer",
+          "body": "An adult child who lives apart from a parent or grandparent and feels that important stories are at risk of disappearing."
+        },
+        {
+          "id": "sec_trigger",
+          "title": "Trigger moment",
+          "body": "A health scare, birthday, move into care, family reunion, or recent loss in the wider family creates urgency."
+        },
+        {
+          "id": "sec_anxiety",
+          "title": "Anxieties",
+          "body": "Making the conversation feel forced, asking the wrong questions, losing the recording, and asking an older relative to learn complicated software."
+        }
+      ],
+      "sourceClaimIds": [
+        "clm_01"
+      ],
+      "linkedDecisionIds": [
+        "dec_02"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "createdBy": "Maya Chen"
+    },
+    {
+      "id": "ver_seed_03",
+      "artifactId": "art_product_brief",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "product",
+      "version": 4,
+      "title": "Beta product brief",
+      "status": "reviewed",
+      "confidence": 74,
+      "summary": "The first-value path and deliberately narrow beta scope.",
+      "sections": [
+        {
+          "id": "sec_outcome",
+          "title": "Promised outcome",
+          "body": "Save one meaningful family story in less than 15 minutes, then make the next conversation easier to start."
+        },
+        {
+          "id": "sec_loop",
+          "title": "Core loop",
+          "body": "Choose a prompt, invite or call a relative, record, review the transcript, save it to the family archive, and schedule the next prompt."
+        },
+        {
+          "id": "sec_scope",
+          "title": "Beta scope",
+          "body": "Guided prompts, recording, transcription, private archive, family invitations, contributor permissions, and lightweight reminders."
+        }
+      ],
+      "sourceClaimIds": [
+        "clm_04"
+      ],
+      "linkedDecisionIds": [
+        "dec_01"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "createdBy": "Maya Chen"
+    },
+    {
+      "id": "ver_seed_04",
+      "artifactId": "art_launch_brief",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "launch",
+      "version": 1,
+      "title": "Beta launch brief",
+      "status": "draft",
+      "confidence": 49,
+      "summary": "The launch audience, proof threshold, milestones, and unresolved blockers.",
+      "sections": [
+        {
+          "id": "sec_cohort",
+          "title": "Launch cohort",
+          "body": "Twenty families recruited through trusted caregiving and family-history communities."
+        },
+        {
+          "id": "sec_proof",
+          "title": "Proof threshold",
+          "body": "At least 12 families record twice and 8 add a second contributor within the first 14 days."
+        },
+        {
+          "id": "sec_blockers",
+          "title": "Blockers",
+          "body": "Commercial model, privacy language, account recovery, elder-friendly participation flow, and a precise support promise."
+        }
+      ],
+      "sourceClaimIds": [],
+      "linkedDecisionIds": [
+        "dec_03",
+        "dec_04"
+      ],
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "createdBy": "Formation"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "tsk_01",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "business-model",
+      "title": "Run five pricing interviews using subscription and archive offers",
+      "status": "next",
+      "priority": "critical",
+      "owner": "Maya Chen",
+      "dueAt": "2026-08-12",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "tsk_02",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "customer",
+      "title": "Recruit five participants after a recent family health event",
+      "status": "in-progress",
+      "priority": "high",
+      "owner": "Maya Chen",
+      "dueAt": "2026-08-14",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "tsk_03",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "product",
+      "title": "Remove public sharing and memoir generation from beta scope",
+      "status": "next",
+      "priority": "high",
+      "owner": "Product",
+      "dueAt": "2026-08-09",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "tsk_04",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "launch",
+      "title": "Draft privacy and family consent model",
+      "status": "blocked",
+      "priority": "critical",
+      "owner": "Maya Chen",
+      "dueAt": "2026-08-19",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    },
+    {
+      "id": "tsk_05",
+      "workspaceId": "wrk_storywell",
+      "workstreamId": "go-to-market",
+      "title": "Create the founding-family recruitment brief",
+      "status": "backlog",
+      "priority": "medium",
+      "owner": "Growth",
+      "dueAt": "2026-08-21",
+      "createdAt": "2026-08-05T23:30:00.000Z",
+      "updatedAt": "2026-08-05T23:30:00.000Z"
+    }
+  ],
+  "jobs": [],
+  "executions": [],
+  "activity": [
+    {
+      "id": "act_01",
+      "workspaceId": "wrk_storywell",
+      "actor": "Formation",
+      "type": "contradiction",
+      "title": "Pricing assumptions conflict",
+      "detail": "Strategy suggests a one-time archive while the business model assumes annual subscription.",
+      "createdAt": "2026-08-05T21:10:00.000Z"
+    },
+    {
+      "id": "act_02",
+      "workspaceId": "wrk_storywell",
+      "actor": "Maya Chen",
+      "type": "decision",
+      "title": "Beta kept private by default",
+      "detail": "Public profiles, feeds, and open links were removed from the launch scope.",
+      "createdAt": "2026-08-05T18:40:00.000Z"
+    },
+    {
+      "id": "act_03",
+      "workspaceId": "wrk_storywell",
+      "actor": "Formation",
+      "type": "artifact",
+      "title": "Customer brief moved back to draft",
+      "detail": "New evidence weakened confidence in the current trigger-moment assumption.",
+      "createdAt": "2026-08-04T16:20:00.000Z"
+    },
+    {
+      "id": "act_04",
+      "workspaceId": "wrk_storywell",
+      "actor": "Maya Chen",
+      "type": "research",
+      "title": "Interview evidence added",
+      "detail": "Seven exploratory interviews are now attached to the customer workstream.",
+      "createdAt": "2026-08-03T14:05:00.000Z"
+    },
+    {
+      "id": "act_2f78133f17e244cc",
+      "workspaceId": "wrk_storywell",
+      "type": "share-created",
+      "title": "Company overview shared by link",
+      "detail": "Anyone with the link can read it until 2026-09-06. It can be stopped at any time.",
+      "actor": "Maya Chen",
+      "createdAt": "2026-08-07T07:03:56.746Z"
+    }
+  ],
+  "updatedAt": "2026-08-07T07:05:03.777Z",
+  "invitations": [],
+  "shares": [
+    {
+      "id": "shr_aa46ded5d5654ae4",
+      "workspaceId": "wrk_storywell",
+      "scope": "company",
+      "artifactId": null,
+      "label": "Company overview",
+      "tokenHash": "ac9bc89149026a080dda317bf5c800807677fce7576e50d596aa5378cf784959",
+      "createdByUserId": "usr_demo_founder",
+      "createdByName": "Maya Chen",
+      "createdAt": "2026-08-07T07:03:56.746Z",
+      "expiresAt": "2026-09-06T07:03:56.746Z",
+      "revokedAt": null,
+      "revokedByUserId": null,
+      "viewCount": 1,
+      "lastViewedAt": "2026-08-07T07:04:04.269Z"
+    }
+  ]
+}

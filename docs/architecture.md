@@ -2,9 +2,11 @@
 
 This repository is a backend: a typed workflow-graph engine that takes a consumer mobile-app
 business from idea to shipped, then into ongoing autonomous operation. Agents drive it — through
-the packaged `formation` CLI and the `formation-mcp` Model Context Protocol server. The engine lives in `skill/formation/`. `platform/`, the
-Formation founder web application, is one consumer of the engine, not the product this repository
-exists to build.
+the packaged `formation` CLI and the `formation-mcp` Model Context Protocol server. The engine lives in `skill/formation/`. The
+Formation founder web application is one consumer of the engine in its own private repository
+([Emuthmartinez/Formation-Platform](https://github.com/Emuthmartinez/Formation-Platform),
+extracted from this monorepo on 2026-08-19 with history preserved), not the product this
+repository exists to build.
 
 The project's history runs the other direction. It began as an agent skill, then grew a founder
 web product on top of it, and for a while that product was described as the point and the skill
@@ -31,8 +33,8 @@ then (v0.142.0–v0.146.0) closed that gap end to end and is what this document 
 6. **Standing operation is a calendar, not a one-time finish line.** Recurring nodes reopen on
    their own cadence — a session that runs on schedule finds the week's work waiting for it.
 7. **Consumers integrate through typed adapters, never shared state.** A consumer such as the
-   platform reads a read-only boundary report and submits typed execution requests; it holds no
-   handle onto engine files.
+   Formation-Platform repository reads a read-only boundary report and submits typed execution
+   requests; it holds no handle onto engine files.
 
 ## North star (target state)
 
@@ -46,7 +48,7 @@ are TARGET, not description, until that plan's phases land.
 | L1 kernel | `core/` — compiler, frontier, reducer, sessions, autonomy, verification | this repo |
 | L2 gates | `validation/`, `verification/`, the audit, `check:engine-e2e` | this repo |
 | L3 addresses | SKILL.md routing, the `formation` CLI, `formation-mcp`, consumer front doors | this repo, same version |
-| L4 consumers | platform UI, every future UI, third-party agent stacks | separate repos, contract-bound |
+| L4 consumers | the Formation-Platform web app, every future UI, third-party agent stacks | separate repos, contract-bound |
 
 Four published contracts bind L4 to the engine: the adapter (boundary report + execution
 request, schema-checked with a `contractVersion`), the MCP tool surface, the CLI, and the
@@ -68,9 +70,10 @@ Agent (the formation CLI or the formation-mcp server) or a scheduled OS trigger
   -> deterministic gates + fresh-context verification
   -> hash-chained audit log + founder-plain digest
 
-Consumers read the engine through typed adapters:
-  platform/  -> core/adapters/platform-execution.ts (read) + platform-import.ts (existing-repo read)
-             -> founder-facing execution requests, verified results, launch-matrix projection
+Consumers read the engine through typed adapters (from their own repositories, off a pinned
+engine checkout):
+  Formation-Platform -> core/adapters/platform-execution.ts (read) + platform-import.ts (existing-repo read)
+                     -> founder-facing execution requests, verified results, launch-matrix projection
 ```
 
 ## The execution loop
@@ -210,27 +213,30 @@ catalog plus a business's accepted state into the durable, executable dependency
 dispatches against. Stable catalog IDs survive path moves; edit catalog definitions, never
 `catalog/generated/`.
 
-## The platform: one consumer
+## Consumers
 
-`platform/` is a founder-facing web application built on top of the engine, not the engine itself.
-It never reads or writes engine workspace files directly — it exchanges typed documents across two
-read-only CLIs:
+The founder web application lives in its own private repository,
+[Emuthmartinez/Formation-Platform](https://github.com/Emuthmartinez/Formation-Platform). It pins
+an exact engine tag (`engine.pin.json` there), vendors that checkout, replays this repository's
+golden contract samples in its own CI, and never reads or writes engine workspace files directly
+— it exchanges typed documents across two read-only CLIs that stay engine-side:
 
 ### Execution boundary (`core/adapters/platform-execution.ts`)
 
-A read-only CLI the platform server spawns to learn, in a typed shape (schema `1.1.0`), what a
+A read-only CLI the consumer's server spawns to learn, in a typed shape (schema `1.1.0`), what a
 workspace's durable run looks like right now: per-workflow status keyed by stable catalog id,
 founder-plain reasons drawn from the digest's own translation table, whether a durable run exists
 yet, its founder approvals, and a compact launch-matrix projection with full node briefs only for
 ready work. It never writes — submitting or resuming a run is `core/session/run.ts`'s job, invoked
-by the platform through the same adapter contract, not this file. `GET
-/api/workspaces/:workspaceId/launch-matrix` on the platform serves this projection after verifying
-workspace membership; an older or unavailable engine returns `available: false` with a reason,
-never an empty matrix.
+by the consumer through the same adapter contract, not this file. The platform serves this
+projection at `GET /api/workspaces/:workspaceId/launch-matrix` after verifying workspace
+membership; an older or unavailable engine returns `available: false` with a reason, never an
+empty matrix, and a report whose `contractVersion` major is incompatible is answered as
+unreachable-with-a-reason rather than interpreted.
 
 ### Existing-repository import (`core/adapters/platform-import.ts`)
 
-A second read-only CLI for a launch workspace that predates the platform. Its report classifies
+A second read-only CLI for a launch workspace that predates the consumer. Its report classifies
 everything it finds as a candidate, never a fact: company context, proposed claims split into
 recommendations and open questions, decisions with recorded verdicts, outstanding work, documents
 fingerprinted per section, and named contradictions. It opens no handle for writing — a launch
@@ -240,9 +246,9 @@ repository can be imported and still be run by the engine afterward, unchanged.
 
 - The browser cannot read or write engine files.
 - Importing a launch repository never writes to it.
-- The engine cannot bypass platform workspace authorization, and the platform cannot bypass the
+- The engine cannot bypass a consumer's workspace authorization, and no consumer can bypass the
   engine's autonomy grants.
-- Accepted platform context is fingerprinted when sent into an engine run; changed upstream
+- Accepted consumer context is fingerprinted when sent into an engine run; changed upstream
   context can mark downstream deliverables stale.
 - A conditional workflow requires a durable `required` or `not-needed` verdict; a changed
   applicability verdict invalidates prior output proof when scope changes.
@@ -251,28 +257,18 @@ repository can be imported and still be run by the engine afterward, unchanged.
 
 ```text
 .github/workflows/
-  platform-ci.yml              founder platform checks, tests, and build
   source-freshness.yml         engine source-registry and knowledge freshness audit
   behavioral-evals.yml         manual live LaunchBench behavioral eval run
 
 docs/
   architecture.md               this document
   validators.md                 full validator and gate reference
-  platform/                     platform-consumer audit, product, technical, migration, design, journey, gaps
   implementation/               engine implementation guidance
   method/                       engine operating methods
   brainstorms/                  exploratory scope documents
   plans/                        dated implementation plans
   prototypes/                   HTML design and engineering prototypes
   history/                      completed historical proposals and audits
-
-platform/                       one consumer of the engine
-  web/                           founder application
-  server/                        API, auth, domain, persistence, generation, execution/import adapters
-  data/                          ignored local data
-  run.mjs                        platform command entrypoint
-  README.md                      developer guide
-  AGENTS.md                      platform contribution contract
 
 skill/formation/                 the engine
   bin/                            the packaged `formation` CLI
@@ -324,21 +320,16 @@ npm run audit:ci
 `check:engine-e2e`, the repo-only crash test. Run it from the repository root — running the
 equivalent command from inside `skill/formation/` silently skips `repoOnly` steps.
 
-Platform:
-
-```bash
-node platform/run.mjs check
-node platform/run.mjs test
-node platform/run.mjs build
-```
-
-A change that crosses both systems must run both verification paths.
+A change that touches the adapter boundary also runs the consumer side: the Formation-Platform
+repository's `npm run check` and `npm test` replay the golden contract samples against its
+pinned engine.
 
 ## Evolution rules
 
 - New execution topology belongs in the engine catalog and core.
-- New founder behavior belongs in `platform/`, and must integrate through the typed adapter
-  contract — never a direct read of engine workspace files.
+- New founder behavior belongs in a consumer repository (the Formation-Platform repo for the web
+  app), and must integrate through the typed adapter contract — never a direct read of engine
+  workspace files.
 - Do not add founder pages for individual engine files.
 - Do not let product pages read static seed state in production.
 - Do not duplicate company context inside prompts or renderer templates.

@@ -1,10 +1,10 @@
 {
   "skill": "formation",
-  "version": "0.151.1",
+  "version": "0.152.0",
   "updatedAt": "2026-08-19",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "Fixed the update-command fixture to assert the contract that applies to the install it runs in: a git checkout dry-runs (exit 0, version + position report), while an installed runtime \u2014 the synced ~/.agents copy has no .git above it \u2014 refuses self-update by name (update.not_a_checkout) with the tag-pinning guidance. Both are the command working; the fixture previously demanded checkout behavior everywhere, which failed every runtime sync's audit at v0.151.0.",
-    "The fixture now mirrors update.ts's own environment detection (a .git directory or worktree file anywhere above the skill root) instead of guessing from context, so the same suite is honest in the repository, in CI, and in a synced runtime \u2014 the three places the audit actually runs."
+    "Extracted the founder web product to its own private repository (layering plan phase C; R2, R9; founder decisions 1-2). Formation-Platform now carries the platform with full history (git subtree split), its own toolchain, the six platform docs, an engine pin (engine.pin.json at v0.151.1 with scripts/sync-engine.sh + check-engine-version.mjs failing on pin drift or a contract-major mismatch), and a CI that replays this repository's golden adapter-contract samples against the consumer's own acceptance logic \u2014 258/258 tests green against the vendored engine before cutover. The hosted instance at formation.clueless.clothing was repointed to the new checkout and verified serving (local and public health 200) BEFORE platform/ was deleted here \u2014 deploy-then-delete, uptime preserved.",
+    "This repository is now engine-only: platform/, docs/platform/, and the platform CI workflow are gone; README, AGENTS.md, CLAUDE.md, docs/architecture.md, and the engine backlog describe the platform as an external, contract-bound consumer; the source registry retires the two entries served from the platform's public assets; the ste100 governed-doc list keeps only engine-side docs, with its scans-the-allowlist fixture repointed at a doc that stays. The adapter CLIs (core/adapters/platform-execution.ts, platform-import.ts) remain engine-side, proven by the golden samples. The standing rule holds mechanically now: L4 never lives in this repository."
   ]
 }
