@@ -114,7 +114,7 @@ if (designContract !== undefined) {
       );
     }
   }
-  if (workspaceIsLaunched(workspaceRoot)) {
+  if (workspaceNeedsLiveEffectValidation(workspaceRoot)) {
     const liveEffectBody = sectionBody(designContract, "Live-surface effects");
     const liveEffectHeaders = [
       "Surface",
@@ -140,7 +140,7 @@ if (designContract !== undefined) {
         issue(
           "error",
           "motion_contract.live_surface.workspace_incomplete",
-          "A launched workspace needs one complete live-surface row, including a none row when the product uses no live effect.",
+          "An active workspace needs one complete live-surface row, including a none row when the product uses no live effect.",
           path.relative(workspaceRoot, designContractPath),
         ),
       );
@@ -160,6 +160,11 @@ function workspaceIsLaunched(root: string): boolean {
   } catch {
     return false;
   }
+}
+
+function workspaceNeedsLiveEffectValidation(root: string): boolean {
+  const packagedStarterRoot = path.resolve(skillRoot, "workspace/business");
+  return path.resolve(root) !== packagedStarterRoot || workspaceIsLaunched(root);
 }
 
 function sectionBody(document: string, headingName: string): string | undefined {

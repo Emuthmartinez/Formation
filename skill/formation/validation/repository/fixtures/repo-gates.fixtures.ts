@@ -980,6 +980,24 @@ export function register(h: Harness): void {
     1,
     "motion_contract.live_surface.workspace_incomplete",
   );
+  const motionPrelaunchActiveWorkspace = writeMotionContractRoot("motion-contract-prelaunch-active-workspace");
+  const prelaunchBusinessRoot = path.join(motionPrelaunchActiveWorkspace, "active-business");
+  cpSync(path.join(motionPrelaunchActiveWorkspace, "workspace/business"), prelaunchBusinessRoot, { recursive: true });
+  {
+    const contractPath = path.join(prelaunchBusinessRoot, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(
+      "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+      "| AI status | Processing state | R19 | Active orb | Processing ends | Static status text | Static status text |",
+    );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runScriptArgs(
+    "motion contract validates an explicit active workspace before phase 6",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPrelaunchActiveWorkspace, "--workspace-root", prelaunchBusinessRoot],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
   const motionLiveWorkspaceEscapedPipe = writeMotionContractRoot("motion-contract-live-workspace-escaped-pipe", (rel, text) => {
     if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
     if (rel === "workspace/business/design/design.md") {
