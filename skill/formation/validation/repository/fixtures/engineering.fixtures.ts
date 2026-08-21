@@ -374,6 +374,30 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_triage_incomplete",
   );
 
+  for (const [label, evidenceDate] of [
+    ["impossible", "2026-99-99"],
+    ["future", "2999-01-01"],
+  ] as const) {
+    const designRoomEvidenceInvalidDate = makeFixture(`design-room-reference-evidence-${label}-date`);
+    const statePath = path.join(designRoomEvidenceInvalidDate, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomEvidenceInvalidDate, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, `| 60fps.design | required | Motion proof is needed. | success transition | ${evidenceDate} |`);
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `required Reference Evidence rejects an ${label} date`,
+      designRoomEvidenceInvalidDate,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_triage_incomplete",
+    );
+  }
+
   const designRoomEvidenceAdoptionMissing = makeFixture("design-room-reference-evidence-adoption-missing");
   {
     const statePath = path.join(designRoomEvidenceAdoptionMissing, "studio/seed/business.json");

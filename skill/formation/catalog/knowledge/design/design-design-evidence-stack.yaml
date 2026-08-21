@@ -14,6 +14,9 @@ bindings:
     - workflow.design.ux-patterns-refero
     - workflow.design.premium-mobile-craft
     - workflow.design.content-assets-remotion-generated-visuals
+    - workflow.experience.onboarding-system.onb-16-journey-graph
+    - workflow.experience.onboarding-system.onb-17-screen-control-paywall-contract
+    - workflow.experience.onboarding-system.onb-18-visual-design-prototype
   context_pack_ids:
     - context.design
 applicability_notes: This is the mandatory design-source router. Open only relevant sources. High-impact and high-risk surfaces require two complementary source lanes.

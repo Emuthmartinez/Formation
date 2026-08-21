@@ -537,7 +537,7 @@ _Define acquisition-specific journeys that converge on one semantic onboarding s
 - **Consults:** —
 - **Produces:** `product/onboarding/graph/ONB-16-journey-graph.md`
 - **Gates:** `check:onboarding-evidence-onb-16`
-- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
 
 ### Onboarding ONB-17: screen, control, and paywall contract
 
@@ -550,7 +550,7 @@ _Specify every onboarding screen, copy key, control, action, paywall state, fail
 - **Consults:** —
 - **Produces:** `product/onboarding/graph/ONB-17-screen-control-paywall-contract.md`
 - **Gates:** `check:onboarding-evidence-onb-17`
-- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
 
 ### Onboarding ONB-18: visual design and prototype
 
@@ -563,7 +563,7 @@ _Produce actual high-fidelity onboarding design, motion, an interactive prototyp
 - **Consults:** —
 - **Produces:** `product/onboarding/graph/ONB-18-visual-design-prototype.md`
 - **Gates:** `check:onboarding-evidence-onb-18`
-- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
 
 ### Onboarding ONB-19: implementation and cutover contract
 

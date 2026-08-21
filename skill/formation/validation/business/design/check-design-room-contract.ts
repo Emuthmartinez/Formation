@@ -145,13 +145,13 @@ if (hasDesignState) {
           const query = normalizedCell(sourceRow[triageTable!.headers.indexOf("query or pattern")]);
           const evidenceDate = normalizedCell(sourceRow[triageTable!.headers.indexOf("evidence date")]);
           const missingReason = !isAuthoredEvidenceCell(why);
-          const missingRequiredEvidence = statusCell === "required" && (!isAuthoredEvidenceCell(query) || !/^\d{4}-\d{2}-\d{2}$/.test(evidenceDate));
+          const missingRequiredEvidence = statusCell === "required" && (!isAuthoredEvidenceCell(query) || !isValidEvidenceDate(evidenceDate));
           if (missingReason || missingRequiredEvidence) {
             issues.push(
               issue(
                 "error",
                 "design_room.reference_evidence_triage_incomplete",
-                `design/design.md must give ${source} a reason. A required source also needs a query or pattern and an ISO evidence date.`,
+                `design/design.md must give ${source} a reason. A required source also needs a query or pattern and a real, non-future ISO evidence date.`,
                 rel(args.root, contractPath),
               ),
             );
@@ -478,6 +478,12 @@ function normalizedCell(value: string | undefined): string {
 
 function isAuthoredEvidenceCell(value: string): boolean {
   return value.length > 0 && !containsTemplatePlaceholder(value) && !/^not reviewed$/i.test(value);
+}
+
+function isValidEvidenceDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value && date.getTime() <= Date.now();
 }
 
 function highImpactCategory(value: string): string | undefined {
