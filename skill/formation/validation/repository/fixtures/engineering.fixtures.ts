@@ -1157,6 +1157,34 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_change_sources_missing",
   );
 
+  const designRoomRequiredSourceOutsideScope = makeFixture("design-room-reference-evidence-required-source-outside-scope");
+  {
+    const statePath = path.join(designRoomRequiredSourceOutsideScope, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomRequiredSourceOutsideScope, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Settings component proof is needed. | settings controls | 2026-08-20 |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Settings craft proof is needed. | success feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Profile settings | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation control tokens. | surfaces.mobileApp.profile | Device review | profile.settings |\n| Historical success | Design Spells | An older success state used earned feedback. | Adopt | Preserve its existing treatment. | surfaces.mobileApp.success | Audience review | success.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a required source row outside the current change scope receives no credit",
+    designRoomRequiredSourceOutsideScope,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_required_source_missing",
+  );
+
   const designRoomDelightUnavailableFallback = makeFixture("design-room-reference-evidence-delight-unavailable-fallback");
   {
     const statePath = path.join(designRoomDelightUnavailableFallback, "studio/seed/business.json");

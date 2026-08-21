@@ -246,7 +246,12 @@ if (hasDesignState) {
             ),
           );
         }
-        const adoptedSources = new Set(authoredAdoptionRows.map((row) => normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase()));
+        const scopedSurfaceKeySet = new Set(scopedSurfaceKeys);
+        const adoptedSources = new Set(
+          authoredAdoptionRows
+            .filter((row) => scopedSurfaceKeySet.has(normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase()))
+            .map((row) => normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase()),
+        );
         for (const requiredSource of requiredEvidenceSources) {
           if (!adoptedSources.has(requiredSource)) {
             issues.push(
