@@ -668,7 +668,7 @@ function requiredSourcesForSurface(surface: string): string[] {
     sources.add("design spells");
   }
   if (
-    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|checkboxes?|radios?|text[. -]?fields?|selects?|pickers?|menus?|tabs?|sheets?)\b/i.test(
+    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|checkboxes?|radios?|sliders?|steppers?|segments?|segmented[. -]controls?|progress[. -]bars?|search[. -]bars?|text[. -]?fields?|selects?|pickers?|menus?|tabs?|sheets?)\b/i.test(
       surface,
     )
   ) {

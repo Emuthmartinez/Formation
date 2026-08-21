@@ -1127,7 +1127,15 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
-  for (const componentScope of ["button.primary", "modal.confirm", "toggle.notifications", "dialog.delete", "checkbox.terms", "radio.plan"] as const) {
+  for (const componentScope of [
+    "button.primary",
+    "modal.confirm",
+    "toggle.notifications",
+    "dialog.delete",
+    "checkbox.terms",
+    "radio.plan",
+    "slider.volume",
+  ] as const) {
     const designRoomConcreteComponentWrongSource = makeFixture(`design-room-reference-evidence-${componentScope.replaceAll(".", "-")}-wrong-source`);
     const statePath = path.join(designRoomConcreteComponentWrongSource, "studio/seed/business.json");
     const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
