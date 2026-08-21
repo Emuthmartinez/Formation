@@ -27,7 +27,9 @@ Do not produce a 20-section ladder every time. Use the ladder to mutate the stat
 
 ## Inspiration Sources
 
-When the design needs stronger direction, inspect the relevant source and summarize the effect on state:
+Use [`design-evidence-stack.md`](./design-evidence-stack.md) to classify the design question and select evidence sources. Do not browse sources only because they match the team's taste. Record the source triage and adopted evidence in `design/design.md`.
+
+After that evidence pass, use these additional routes when they apply:
 
 - Google Labs `design.md` for token/prose design-system structure
 - Refero for current UX patterns when available
@@ -35,7 +37,7 @@ When the design needs stronger direction, inspect the relevant source and summar
 - Layers-style product clarity before surface polish
 - Impeccable-style visual QA for typography, spacing, contrast, motion, responsive behavior, and UX writing
 - `ui-ux-pro-max` skill for senior-grade UI direction, palette/typography pairings, and motion/anti-pattern checklists when web-surface or design-system direction needs a stronger start (reference-only; adapt, do not copy its data). Capture the adapted result in `state.designBrief` via `npm run seed:design-brief` so the theme stops being provisional.
-- 60fps.design catalog via `motion-craft-benchmarks.md` for named, numeric in-app motion recipes — celebrations, reveals, gesture physics — when a magical-moment surface needs motion direction beyond adjectives
+- `motion-craft-benchmarks.md` for named, numeric in-app motion recipes after the 60fps.design evidence lane identifies the relevant mechanic
 - Higgsfield for production-quality visuals when the founder approves paid/account-gated generation
 - Remotion for repeatable local rendered assets from real UI, captions, and tokens
 

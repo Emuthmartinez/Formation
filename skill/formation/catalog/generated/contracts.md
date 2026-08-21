@@ -630,7 +630,7 @@ _Crossing research into design: before the Design Room locks visual identity, an
 - **Consults:** —
 - **Produces:** `strategy/BRAND.md`
 - **Gates:** —
-- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md)
+- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md)
 
 ### Design Room (state→mutate→version→render)
 
@@ -643,7 +643,7 @@ _Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywal
 - **Consults:** —
 - **Produces:** `design/design.md`, `studio/seed/business.json`, `studio/seed/theme.tokens.json`, `design/design-room.html`
 - **Gates:** `validate:design-state`, `check:design-room`, `render:design-room`
-- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md), [Design Room](../../knowledge/design/design-room.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Quality Lens](../../knowledge/design/quality-lens.md), [Surfaces B2C](../../knowledge/design/surfaces-b2c.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md)
+- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Design Room](../../knowledge/design/design-room.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Quality Lens](../../knowledge/design/quality-lens.md), [Surfaces B2C](../../knowledge/design/surfaces-b2c.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md)
 
 ### Token promotion
 
@@ -669,11 +669,11 @@ _Before flow maps, state matrices, UX_PATTERNS.md, or bug-trap coverage_
 - **Consults:** —
 - **Produces:** `product/experience/ux-patterns/UX_PATTERNS.md`
 - **Gates:** —
-- **Knowledge:** [Refero UX Patterns](../../knowledge/design/refero-ux-patterns.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Refero UX Patterns](../../knowledge/design/refero-ux-patterns.md)
 
 ### Premium mobile craft
 
-_Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or "premium feel"_
+_Before in-app UI build/polish, press-state/haptics/loading-empty wiring, live-state effects, or "premium feel"_
 
 - **Role:** Design guru
 - **Phases:** Cross-phase (always-on)
@@ -682,7 +682,7 @@ _Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or "pr
 - **Consults:** `product/experience/ux-patterns/UX_PATTERNS.md`
 - **Produces:** —
 - **Gates:** `check:motion-contract`
-- **Knowledge:** [Motion Craft Benchmarks](../../knowledge/design/motion-craft-benchmarks.md), [Premium Mobile Craft](../../knowledge/design/premium-mobile-craft.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Motion Craft Benchmarks](../../knowledge/design/motion-craft-benchmarks.md), [Premium Mobile Craft](../../knowledge/design/premium-mobile-craft.md)
 
 ### Content assets / Remotion / generated visuals
 
@@ -695,7 +695,7 @@ _Before rendered videos/stills, app previews, ad/social variants_
 - **Consults:** —
 - **Produces:** `growth/content-assets/CONTENT_ASSETS.md`, `growth/content-assets/content-assets.html`
 - **Gates:** `check:content-assets`
-- **Knowledge:** [Design Visual System](../../knowledge/design/design-visual-system.md), [Remotion Content Assets](../../knowledge/design/remotion-content-assets.md), [Visual And Motion Production](../../knowledge/process/tool-recipes/visual-and-motion-production.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Design Visual System](../../knowledge/design/design-visual-system.md), [Remotion Content Assets](../../knowledge/design/remotion-content-assets.md), [Visual And Motion Production](../../knowledge/process/tool-recipes/visual-and-motion-production.md)
 
 ## Every Word A User Reads
 

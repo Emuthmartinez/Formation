@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.157.0",
+  "skillVersion": "0.159.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1510,6 +1510,7 @@
       "title": "Design",
       "referenceIds": [
         "reference.design.audience-derived-identity",
+        "reference.design.design-evidence-stack",
         "reference.design.design-room",
         "reference.design.design-visual-system",
         "reference.design.premium-mobile-craft",
@@ -1909,6 +1910,78 @@
       "replacementIds": []
     },
     {
+      "id": "reference.design.design-evidence-stack",
+      "title": "Design Evidence Stack",
+      "domainId": "domain.design",
+      "path": "knowledge/design/design-evidence-stack.md",
+      "loadWhen": "before planning, creating, revising, auditing, or implementing any user-facing surface, component, interaction, onboarding flow, paywall, store frame, or marketing design; use it to classify the decision, select evidence sources, and record the evidence pass before mutation",
+      "lifecycle": "active",
+      "applicabilityNotes": "This is the mandatory design-source router. Open only relevant sources. High-impact and high-risk surfaces require two complementary source lanes.",
+      "sources": [
+        {
+          "id": "design-evidence-60fps",
+          "name": "60fps.design",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://60fps.design/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Curated examples of motion and interaction details from shipped apps. Use examples to study mechanics. Do not copy source branding, assets, copy, exact layouts, or unadapted code.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "projectsbyif-patterns-catalogue",
+          "name": "IF Design Patterns Catalogue",
+          "sourceType": "pattern_catalog",
+          "url": "https://catalogue.projectsbyif.com/",
+          "reviewCadenceDays": 90,
+          "claimScope": "Trustworthy-service patterns for AI decisions, consent, authentication, data access, security, user control, and recovery. Pattern pages describe advantages and limitations. The catalog states a CC BY 4.0 license.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "abtest-design-library",
+          "name": "abtest.design",
+          "sourceType": "experiment_library",
+          "url": "https://abtest.design/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Curated experiment examples for conversion, onboarding, checkout, engagement, retention, monetization, and referral. Treat results as hypothesis seeds. Verify each cited source before using a result or number.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "design-spells-gallery",
+          "name": "Design Spells",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.designspells.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Gallery of small design details, interactions, motion, and moments of delight. Use emotional principles and mechanics as inspiration. Do not copy branded assets or exact compositions.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "uxsnaps-breakdowns",
+          "name": "UXSnaps",
+          "sourceType": "design_breakdown",
+          "url": "https://www.uxsnaps.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Product and flow breakdowns from real apps. Use them as critique and hypothesis input. Do not treat a breakdown as authority or causal proof.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "ui-playbook-components",
+          "name": "UI Playbook",
+          "sourceType": "component_reference",
+          "url": "https://uiplaybook.dev/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Documented UI component guidance for function, states, implementation, and accessibility. Use it as a component specification seed. Confirm platform and accessibility details in current official documentation.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        }
+      ],
+      "replacementIds": []
+    },
+    {
       "id": "reference.design.design-room",
       "title": "Design Room",
       "domainId": "domain.design",
@@ -2079,7 +2152,7 @@
       "title": "Motion Craft Benchmarks",
       "domainId": "domain.design",
       "path": "knowledge/design/motion-craft-benchmarks.md",
-      "loadWhen": "implementing or auditing a specific motion recipe against check:motion-contract's numeric spring/duration tokens, tying a micro-interaction to the Experience Card it serves, or designing a cold-launch splash/loading/welcome-screen entrance (R11-R14)",
+      "loadWhen": "implementing or auditing a specific motion recipe against check:motion-contract's numeric spring/duration tokens, tying a micro-interaction to the Experience Card it serves, or designing a cold-launch splash/loading/welcome-screen entrance (R11-R14), live-state effect, liquid morph, perimeter beam, liquid-metal ring, or semantic thinking orb (R15-R18)",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sources": [
@@ -2111,6 +2184,46 @@
           "reviewCadenceDays": 30,
           "claimScope": "Live MCP endpoint over the 60fps.design catalog (shot search, motion breakdowns, SwiftUI starter code). Optional tooling — the distilled recipes in motion-craft-benchmarks.md remain the contract when the server is not connected. Generated code must be rewritten onto the token scale before shipping.",
           "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "jakubantalik-liquid-gooey",
+          "name": "Liquid Gooey",
+          "sourceType": "component_reference",
+          "url": "https://gooey.jakubantalik.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "MIT-licensed React reference for liquid morph, move, and dissolve effects. Formation transfers its two-layer interaction model, reduced-motion behavior, and idle-cost controls through recipe R15.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "jakubantalik-border-beam",
+          "name": "Border Beam",
+          "sourceType": "component_reference",
+          "url": "https://beam.jakubantalik.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "MIT-licensed React reference for traveling and breathing perimeter effects. Formation transfers its state binding, decorative-layer isolation, visibility pausing, and reduced-motion behavior through recipe R16.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "jakubantalik-metal-fx",
+          "name": "Metal FX",
+          "sourceType": "component_reference",
+          "url": "https://metal.jakubantalik.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "MIT-licensed React and WebGL reference for animated liquid-metal rings. Formation transfers its shared render-loop, context reuse, offscreen pause, context-failure fallback, and hierarchy limits through recipe R17.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "jakubantalik-thinking-orbs",
+          "name": "Thinking Orbs",
+          "sourceType": "component_reference",
+          "url": "https://orbs.jakubantalik.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "MIT-licensed React and Canvas reference for semantic AI activity states. Formation transfers its state mapping, tuned sizes, accessible status, visibility pause, and static reduced-motion frame through recipe R18.",
+          "lastReviewDate": "2026-08-20",
           "reviewer": "formation-maintainers"
         }
       ],
@@ -5822,8 +5935,18 @@
       "loadWhen": "before drafting or publishing privacy policy, terms, EULA, subscription terms, account/data deletion flows, or app-store privacy/Data safety disclosures",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
-      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
-      "sources": [],
+      "sources": [
+        {
+          "id": "general-legal-template-collection",
+          "name": "General Legal template collection",
+          "sourceType": "attorney_template_repository",
+          "url": "https://github.com/General-Legal/legal-templates",
+          "reviewCadenceDays": 30,
+          "claimScope": "Optional CC0 drafting benchmark for privacy policies, terms, cookie notices, and data-processing addenda. It is not legal authority.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        }
+      ],
       "replacementIds": []
     },
     {
@@ -7350,7 +7473,8 @@
       ],
       "consults": [],
       "referenceIds": [
-        "reference.design.audience-derived-identity"
+        "reference.design.audience-derived-identity",
+        "reference.design.design-evidence-stack"
       ],
       "roleId": "role.design-guru",
       "laneIds": [
@@ -7383,7 +7507,7 @@
         "area.product-experience"
       ],
       "trigger": "Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work",
-      "instructions": "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. Derive design/design.md's Audience And Identity section from strategy/RESEARCH.md before locking any visual direction: audience facts, apps they love, category convention followed/broken, anti-references, and the fact→decision table with evidence — the derivation chain lives in audience-derived-identity.md, and a direction that only cites a trend is not a decision. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. When the 60fps.design MCP is connected, ground screen and interaction direction in real exemplars before locking states (60fps_search_shots, 60fps_get_shot, 60fps_get_motion_breakdown) and record each adopted principle in design/design.md — translate mechanics only, never another product's brand, assets, copy, or exact layout; when it is not connected, motion-craft-benchmarks.md's distilled recipes remain the contract. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
+      "instructions": "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. During STATE, load design-evidence-stack.md, classify the decision, mark all six evidence sources required, not applicable, or unavailable with a reason, and record the evidence pass in design/design.md before mutation. Open only relevant sources. Use one relevant source for every new or materially changed surface, and two complementary sources for onboarding, paywall, core-loop, AI-trust, and store-first-frame decisions. Treat abtest.design results as hypothesis seeds, not transferable causal proof. Derive design/design.md's Audience And Identity section from strategy/RESEARCH.md before locking any visual direction: audience facts, apps they love, category convention followed/broken, anti-references, and the fact→decision table with evidence — the derivation chain lives in audience-derived-identity.md, and a direction that only cites a trend is not a decision. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. When the 60fps.design MCP is connected, ground screen and interaction direction in real exemplars before locking states (60fps_search_shots, 60fps_get_shot, 60fps_get_motion_breakdown, 60fps_get_related_shots) and record each adopted principle in design/design.md — translate mechanics only, never another product's brand, assets, copy, or exact layout; when it is not connected, motion-craft-benchmarks.md's distilled recipes remain the contract. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
       "reads": [
         "design/design.md",
         "studio/seed/business.json",
@@ -7394,6 +7518,7 @@
       "consults": [],
       "referenceIds": [
         "reference.design.audience-derived-identity",
+        "reference.design.design-evidence-stack",
         "reference.design.design-room",
         "reference.design.landing-motion-craft",
         "reference.design.quality-lens",
@@ -7489,6 +7614,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.design.refero-ux-patterns"
       ],
       "roleId": "role.design-guru",
@@ -8528,8 +8654,8 @@
       "areaIds": [
         "area.product-experience"
       ],
-      "trigger": "Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or \"premium feel\"",
-      "instructions": "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give (celebration choreography, gesture physics, hero transitions), route to motion-craft-benchmarks.md's numbered recipes for the checkable acceptance criteria — grounding the recipe in a live exemplar first via the 60fps MCP when it is connected (60fps_search_shots, 60fps_get_motion_breakdown; rewrite any 60fps_get_motion_code output onto DesignTokens.Motion before it ships); check:motion-contract is what proves the tokens were actually used, not adjectives in design/design.md.",
+      "trigger": "Before in-app UI build/polish, press-state/haptics/loading-empty wiring, live-state effects, or \"premium feel\"",
+      "instructions": "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give, route to motion-craft-benchmarks.md's numbered recipes. Use R15-R18 for liquid morphs, state-bound beams, liquid-metal rings, and semantic thinking orbs. Bind every live effect to a real state, a plain fallback, and a reduced-motion result. Ground catalog recipes in a live exemplar first via the 60fps MCP when it is connected (60fps_search_shots, 60fps_get_motion_breakdown; rewrite any 60fps_get_motion_code output onto DesignTokens.Motion before it ships). check:motion-contract proves the contract was applied; adjectives in design/design.md do not.",
       "reads": [
         "design/design.md",
         "studio/seed/business.json",
@@ -8539,6 +8665,7 @@
         "product/experience/ux-patterns/UX_PATTERNS.md"
       ],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.design.motion-craft-benchmarks",
         "reference.design.premium-mobile-craft"
       ],
@@ -8577,6 +8704,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.design.design-visual-system",
         "reference.design.remotion-content-assets",
         "reference.process.tool-recipes.visual-and-motion-production"

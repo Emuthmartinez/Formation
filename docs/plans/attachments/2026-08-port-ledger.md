@@ -75,10 +75,10 @@ are ground truth, not hand arithmetic.
 | Bucket | keep | port | merge | drop | total |
 |---|---|---|---|---|---|
 | Knowledge domain README indexes (14) + top-level `knowledge/README.md` | 0 | 0 | 0 | 15 | 15 |
-| Knowledge content files | 105 | 0 | 0 | 1 | 106 |
+| Knowledge content files | 106 | 0 | 0 | 1 | 107 |
 | Additions beyond v1 scope (3) | 2 | 0 | 1 | 0 | 3 |
 | Validators (68) | 34 | 25 | 0 | 15 | 74 |
-| **Total** | **147** | **25** | **1** | **31** | **204** |
+| **Total** | **148** | **25** | **1** | **31** | **205** |
 
 ---
 
@@ -160,11 +160,12 @@ matching knowledge manifest, which carries its authored `loadWhen` text
 |---|---|---|
 | knowledge/data/analytics-attribution.md | keep | event-catalog/attribution reference gating multiple downstream lanes |
 
-### domain.design (11 files, all keep)
+### domain.design (12 files, all keep)
 
 | path | disposition | reason |
 |---|---|---|
 | knowledge/design/design-room.md | keep | the real hub — STATE→MUTATE→VERSION→RENDER protocol; explicitly cross-refs surfaces-b2c.md |
+| knowledge/design/design-evidence-stack.md | keep | post-cutover addition (2026-08-20): mandatory source router and evidence contract for all user-facing design work; drives design.md's Reference Evidence section and `check:design-room` |
 | knowledge/design/audience-derived-identity.md | keep | post-cutover addition (2026-08-17): audience-facts-to-design-decisions derivation chain and generic-template tells; drives design.md's Audience And Identity section, `check:design-room` |
 | knowledge/design/vibecoded-tells.md | keep | post-cutover addition (2026-08-18): the 30-item vibecoded smell list as Tier 1 trust breakers and Tier 2 default tells with earned exceptions; drives the vibecode audit pass and `check:vibecoded-tells` |
 | knowledge/design/design-visual-system.md | keep | visual-system/brand reference, `check:token-promotion` |

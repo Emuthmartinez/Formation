@@ -298,6 +298,23 @@ export function register(h: Harness): void {
     "design_room.audience_research_missing",
   );
 
+  const designRoomEvidenceSourceMissing = makeFixture("design-room-reference-evidence-source-missing");
+  {
+    const contractPath = path.join(designRoomEvidenceSourceMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(
+      /^\| UI Playbook \|.*$/m,
+      "| Component reference omitted | Not reviewed | Not defined | Not defined | Not recorded |",
+    );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "Reference Evidence without all six source rows fails",
+    designRoomEvidenceSourceMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_source_missing",
+  );
+
   const designRoomFreeform = makeFixture("design-room-freeform-proposal");
   writeFileSync(path.join(designRoomFreeform, "design-proposal.html"), "<!doctype html><html><body>New idea</body></html>", "utf8");
   runFixture(

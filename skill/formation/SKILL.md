@@ -43,7 +43,7 @@ Before browser, provider, social, or device work: load [`knowledge/operations/fr
 
 ### Design Runs Through State And One Contract
 
-All user-facing design follows **STATE → MUTATE → CONTRACT → VERSION → RENDER**. Read `design/design.md`, `studio/seed/business.json`, and `studio/seed/theme.tokens.json`. Make one state mutation. Update `design/design.md` when intent or guidance changes; never create another design proposal. Version state, tokens, contract, and render together. Show `design/design-room.html` or `dist/design-room/`. Promote tokens into `design/system/` before build.
+All user-facing design follows **STATE → MUTATE → CONTRACT → VERSION → RENDER**. Read `design/design.md`, `studio/seed/business.json`, and `studio/seed/theme.tokens.json`. During STATE, load [`knowledge/design/design-evidence-stack.md`](./knowledge/design/design-evidence-stack.md), complete its selective source triage, and record the evidence pass in `design/design.md`. Make one state mutation. Update `design/design.md` when intent or guidance changes; never create another design proposal. Version state, tokens, contract, and render together. Show `design/design-room.html` or `dist/design-room/`. Promote tokens into `design/system/` before build.
 
 ### Specialist Delegation Contract
 

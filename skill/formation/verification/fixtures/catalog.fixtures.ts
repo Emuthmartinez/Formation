@@ -474,7 +474,7 @@ export function register(harness: Harness): void {
     assert(issues.length === 0, `expected the real catalog to be clean, got: ${issues.map((i) => `${i.code}: ${i.message}`).join("; ")}`);
     assert(catalog.domains.length === 15, `expected 15 domains, got ${catalog.domains.length}`);
     assert(catalog.workflows.length === 97, `expected 97 workflows, got ${catalog.workflows.length}`);
-    assert(catalog.references.length === 108, `expected 108 references, got ${catalog.references.length}`);
+    assert(catalog.references.length === 109, `expected 109 references, got ${catalog.references.length}`);
 
     const landingBuild = catalog.workflows.find((wf) => wf.id === "workflow.growth.pre-launch-funnel-landing-waitlist");
     const landingPublish = catalog.workflows.find((wf) => wf.id === "workflow.growth.landing-funnel-publication-and-live-proof");

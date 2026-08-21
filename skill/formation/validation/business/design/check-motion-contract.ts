@@ -64,6 +64,52 @@ const swiftTokens = read(SWIFT_TOKENS);
 const templateTokensRaw = read(TEMPLATE_TOKENS);
 const templateSwiftTokens = read(TEMPLATE_SWIFT_TOKENS);
 
+// The live-surface family is one contract. If one recipe disappears, builders can
+// route a visual effect without its state, accessibility, or performance limits.
+if (bench !== undefined) {
+  const requiredLiveSurfaceRecipes = [
+    "### R15 — Liquid relationship morph",
+    "### R16 — State-bound perimeter beam",
+    "### R17 — Liquid-metal priority ring",
+    "### R18 — Semantic thinking orb",
+  ];
+  for (const heading of requiredLiveSurfaceRecipes) {
+    if (!bench.includes(heading)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.live_surface.recipe_missing",
+          `${BENCH} is missing ${heading}; the live-surface effect family must ship as one bounded contract.`,
+          BENCH,
+        ),
+      );
+    }
+  }
+}
+
+const designContract = read("workspace/business/design/design.md");
+if (designContract !== undefined) {
+  const requiredLiveEffectFields = [
+    "Real state or relationship",
+    "Visible or semantic signal",
+    "Stop condition",
+    "Reduced-motion result",
+    "Low-power fallback",
+  ];
+  for (const field of requiredLiveEffectFields) {
+    if (!designContract.includes(field)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.live_surface.template_field_missing",
+          `workspace/business/design/design.md is missing the ${field} field from its live-surface effect contract.`,
+          "workspace/business/design/design.md",
+        ),
+      );
+    }
+  }
+}
+
 // PremiumCraft.swift ships from business/design/system/ next to its own copies of the
 // token artifacts; a generated app compiles against THOSE, not the top-level pair. The
 // two copies must agree on every motion value or the doc-side checks are checking the

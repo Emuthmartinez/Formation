@@ -923,6 +923,17 @@ export function register(h: Harness): void {
 
   runScriptArgs("motion contract passes on the shipped skill", "check-motion-contract.ts", ["--skill-root", skillRoot], 0);
 
+  const motionLiveSurfaceMissing = writeMotionContractRoot("motion-contract-live-surface-missing", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("### R18 — Semantic thinking orb", "### Removed semantic thinking orb") : text,
+  );
+  runScriptArgs(
+    "motion contract fails when one live-surface recipe disappears",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveSurfaceMissing],
+    1,
+    "motion_contract.live_surface.recipe_missing",
+  );
+
   const motionMirrorDrift = writeMotionContractRoot("motion-contract-mirror-drift", (rel, text) =>
     rel.endsWith("motion-craft-benchmarks.md")
       ? text.replace("celebrate (response 0.45–0.5 / damping 0.5–0.7)", "celebrate (response 0.45–0.6 / damping 0.5–0.7)")

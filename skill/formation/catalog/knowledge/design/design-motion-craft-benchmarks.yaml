@@ -5,7 +5,8 @@ domain_id: domain.design
 document_path: knowledge/design/motion-craft-benchmarks.md
 load_when: implementing or auditing a specific motion recipe against check:motion-contract's numeric spring/duration
   tokens, tying a micro-interaction to the Experience Card it serves, or designing a cold-launch
-  splash/loading/welcome-screen entrance (R11-R14)
+  splash/loading/welcome-screen entrance (R11-R14), live-state effect, liquid morph, perimeter beam, liquid-metal ring,
+  or semantic thinking orb (R15-R18)
 lifecycle: active
 bindings:
   workflow_ids:
@@ -44,4 +45,40 @@ sources:
       Optional tooling — the distilled recipes in motion-craft-benchmarks.md remain the contract when the server is not
       connected. Generated code must be rewritten onto the token scale before shipping.
     last_review_date: 2026-08-17
+    reviewer: formation-maintainers
+  - id: jakubantalik-liquid-gooey
+    name: Liquid Gooey
+    source_type: component_reference
+    url: https://gooey.jakubantalik.com/
+    review_cadence_days: 30
+    claim_scope: MIT-licensed React reference for liquid morph, move, and dissolve effects. Formation transfers its
+      two-layer interaction model, reduced-motion behavior, and idle-cost controls through recipe R15.
+    last_review_date: 2026-08-20
+    reviewer: formation-maintainers
+  - id: jakubantalik-border-beam
+    name: Border Beam
+    source_type: component_reference
+    url: https://beam.jakubantalik.com/
+    review_cadence_days: 30
+    claim_scope: MIT-licensed React reference for traveling and breathing perimeter effects. Formation transfers its
+      state binding, decorative-layer isolation, visibility pausing, and reduced-motion behavior through recipe R16.
+    last_review_date: 2026-08-20
+    reviewer: formation-maintainers
+  - id: jakubantalik-metal-fx
+    name: Metal FX
+    source_type: component_reference
+    url: https://metal.jakubantalik.com/
+    review_cadence_days: 30
+    claim_scope: MIT-licensed React and WebGL reference for animated liquid-metal rings. Formation transfers its shared
+      render-loop, context reuse, offscreen pause, context-failure fallback, and hierarchy limits through recipe R17.
+    last_review_date: 2026-08-20
+    reviewer: formation-maintainers
+  - id: jakubantalik-thinking-orbs
+    name: Thinking Orbs
+    source_type: component_reference
+    url: https://orbs.jakubantalik.com/
+    review_cadence_days: 30
+    claim_scope: MIT-licensed React and Canvas reference for semantic AI activity states. Formation transfers its state
+      mapping, tuned sizes, accessible status, visibility pause, and static reduced-motion frame through recipe R18.
+    last_review_date: 2026-08-20
     reviewer: formation-maintainers

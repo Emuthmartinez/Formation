@@ -213,6 +213,71 @@ A cold-launch splash reads as intentional when the hold has a real reason and th
 
 **Exemplars:** paged cold-open with final-CTA fade (top-welcome-screens research set, Speak: Language Learning and Speak & Learn-inspired references); final-state-only welcome screen with no invented entrance (top-welcome-screens research set, Perplexity-inspired reference) — the same restraint R14's fourth checklist item generalizes.
 
+## Live-Surface Effect Recipes (R15–R18)
+
+These recipes come from four MIT-licensed React component references by Jakub Antalik. A web app can use the packages after a dependency review. Native apps transfer the behavior contract and use native rendering. Do not port React, SVG, Canvas, or WebGL code into a native binary.
+
+### R15 — Liquid relationship morph
+
+**Serves:** expanding action groups, connected chips, drag targets, and shape changes that explain a spatial relationship. **Rides:** `PremiumMotion.standard` for state changes. A larger authored morph can use `PremiumMotion.emphasized`.
+
+The liquid layer shows that separate controls belong to one temporary group. The content layer stays sharp and interactive.
+
+- [ ] A user action starts each merge, split, or trail. The effect never runs while the surface is idle.
+- [ ] The effect uses a separate silhouette layer. Text, images, focus rings, hit targets, and accessibility nodes stay unfiltered.
+- [ ] Each liquid group reserves the full travel area. The effect causes no layout shift.
+- [ ] The merged surface uses design tokens for fill, shadow, and radius. It does not add a second visual system.
+- [ ] Reduce Motion replaces the morph with an instant state change. The final grouping stays clear without motion.
+- [ ] The effect never represents progress, loading, or successful completion.
+
+**Exemplar:** Liquid Gooey (`liquid-gooey`). Its two-layer model keeps the real interface above the filtered silhouette.
+
+### R16 — State-bound perimeter beam
+
+**Serves:** one active agent task, one selected live card, or one temporary focus target. **Rides:** the web/brand lane with `motion.durationCinematic` for each half-cycle. Use a static token border when motion is not permitted.
+
+The beam shows that one bounded element is active. It does not make an ordinary card look important without a state reason.
+
+- [ ] A real active, selected, or processing state controls the beam. The beam stops when that state ends.
+- [ ] Only one primary element in a viewport uses the beam at a time.
+- [ ] The beam layer ignores pointer events. It does not replace the platform focus indicator.
+- [ ] The component exposes the same state through text, semantics, or both. Color and motion are not the only signals.
+- [ ] The loop pauses when the element is offscreen, the page is hidden, or the state is inactive.
+- [ ] Reduce Motion shows a static border with the same contrast and state meaning.
+
+**Exemplar:** Border Beam (`border-beam`). Its rotating and pulse variants separate decorative layers from interactive content.
+
+### R17 — Liquid-metal priority ring
+
+**Serves:** one rare premium action, one selected creative tool, or one branded hero control. **Rides:** the web brand-motion lane. Native apps use a token-based static or platform-native material.
+
+The metal ring can make a control look scarce or high-value. Use it only when product hierarchy already gives that control the same priority.
+
+- [ ] One screen uses no more than one liquid-metal ring.
+- [ ] The ring does not create false urgency, false scarcity, or a stronger purchase claim than the copy supports.
+- [ ] The wrapped control keeps its normal hit target, label, focus state, and pressed state.
+- [ ] WebGL work shares one render loop and one context. Offscreen instances stop drawing.
+- [ ] The oldest supported device meets the frame budget. A static token border appears after a context failure.
+- [ ] Reduce Motion freezes the material. It also removes proximity reflections and other ambient response.
+
+**Exemplar:** Metal FX (`metal-fx`). Its shared WebGL context and static paused state define the minimum performance fallback.
+
+### R18 — Semantic thinking orb
+
+**Serves:** an AI or agent interface with a real working, searching, solving, listening, composing, or shaping state. **Rides:** one continuous low-intensity loop. State changes use `motion.durationBase`.
+
+The orb communicates the kind of work in progress. It is indeterminate feedback and never a percentage or completion signal.
+
+- [ ] Each orb state maps to a real runtime state. Prefer a truthful generic working state to an inaccurate specific state.
+- [ ] Visible status text names the task when the wait affects the user.
+- [ ] An accessible live status announces meaningful state changes. Hide a decorative orb when adjacent text already provides the same announcement.
+- [ ] The UI shows cancel, retry, elapsed time, or determinate progress when the underlying operation supports it. The orb does not hide those controls.
+- [ ] The renderer pauses offscreen and in a hidden tab. It caps pixel density and avoids an unbounded instance loop.
+- [ ] Reduce Motion renders a static representative frame. The text status continues to update.
+- [ ] A stalled operation becomes an error or retry state. The orb never loops forever after the task stops.
+
+**Exemplar:** Thinking Orbs (`thinking-orbs`). Its tuned 20px and 64px Canvas variants pair semantic states with reduced-motion and visibility handling.
+
 ## Gesture & Scroll Physics
 
 The catalog's hardest-bookmarked family per post (rollout wheel scrub eng 3,037; pinch-to-close thread 601; Good Air scrub 1,804) — mechanics designers save to reuse. These rules govern any in-app gesture surface and read the same tokens as everything above.
@@ -271,3 +336,5 @@ Runnable reproductions of these recipes ship in [`business/design/motion-catalog
 - The Gesture & Scroll Physics numbers (rubber-band ≈0.55, 60–80pt refresh threshold, ~1,000pt/s dismiss velocity, 1/3 displacement) are platform-behavior defaults from iOS convention, stated here as the baseline to match; the catalog motivates the section but did not produce those constants.
 - Engagement numbers rank patterns within this catalog only; never repeat them as external claims.
 - Exemplar apps' branded assets stay theirs. Recipes transfer mechanics only.
+- R15–R18 sources: Liquid Gooey, Border Beam, Metal FX, and Thinking Orbs. The source projects use the MIT license.
+- The R15–R18 package APIs apply only to React web projects. Other targets transfer the behavior and fallback rules.

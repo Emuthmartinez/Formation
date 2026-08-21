@@ -44,6 +44,25 @@ Every visual decision derives from the target user in `strategy/RESEARCH.md`, no
 
 Logo-swap test: strip the wordmark from five screens and state whether the target user would still recognize their app. Record the result in the Decision Log when the direction is accepted.
 
+## Reference Evidence
+
+Complete this evidence pass before a design mutation. Triage every source. Open only the sources that fit the decision. Use two complementary sources for onboarding, a paywall, the core loop, an AI trust surface, or the first frames of a store listing.
+
+| Source | Status | Why | Query or pattern | Evidence date |
+| --- | --- | --- | --- | --- |
+| 60fps.design | Not reviewed | Classify motion, transition, gesture, loading, success, and magical-moment needs. | Not defined | Not recorded |
+| catalogue.projectsbyif.com | Not reviewed | Classify AI, automation, trust, consent, sign-in, permission, data, and recovery needs. | Not defined | Not recorded |
+| abtest.design | Not reviewed | Classify conversion, onboarding, paywall, checkout, retention, and referral hypotheses. | Not defined | Not recorded |
+| Design Spells | Not reviewed | Classify delight, personality, empty-state, success-state, and micro-interaction needs. | Not defined | Not recorded |
+| UXSnaps | Not reviewed | Classify journey, hierarchy, onboarding, dashboard, and content-discovery critique needs. | Not defined | Not recorded |
+| UI Playbook | Not reviewed | Classify standard component, state, focus, keyboard, and accessibility needs. | Not defined | Not recorded |
+
+Use only `required`, `not applicable`, or `unavailable` for an authored status. Give a reason. Treat an experiment result or breakdown as a hypothesis until local evidence supports it.
+
+| Surface or decision | Source | Observation | Adopt or reject | Adaptation | State path | Validation |
+| --- | --- | --- | --- | --- | --- | --- |
+| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |
+
 ## Visual Direction
 
 Describe the visual idea with concrete nouns and verbs. Explain how it differs from the closest products in the category.
@@ -80,6 +99,16 @@ Use `motion.*` tokens for timing and easing. Define the purpose, trigger, interr
 | Moment | Purpose | Token or preset | Haptic | Reduced-motion result |
 | --- | --- | --- | --- | --- |
 | First-value moment | Not defined | Not defined | Not defined | Not defined |
+
+### Live-surface effects
+
+Use a live effect only when it explains a real state or relationship. Do not add one only to make a surface look active.
+
+| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |
+| --- | --- | --- | --- | --- | --- | --- |
+| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |
+
+Thinking orbs show indeterminate AI activity. They do not show progress. Beams and metal rings do not replace focus, selection, or purchase disclosures.
 
 ### Card motion spec
 

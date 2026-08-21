@@ -34,6 +34,7 @@ if (hasDesignState) {
       "Source Ownership",
       "Product Experience",
       "Audience And Identity",
+      "Reference Evidence",
       "Visual Direction",
       "Interaction System",
       "Onboarding",
@@ -67,7 +68,7 @@ if (hasDesignState) {
     // documents for its own section. Placeholder rows are the template's, so
     // they carry no obligation here; once a real row exists, the derivation
     // must trace, and the ready-status placeholder gate below forces real rows.
-    const audienceBody = audienceSectionBody(contract);
+    const audienceBody = sectionBody(contract, "Audience And Identity");
     if (audienceBody !== undefined) {
       const tableRows = audienceBody
         .split("\n")
@@ -100,6 +101,48 @@ if (hasDesignState) {
             rel(args.root, contractPath),
           ),
         );
+      }
+    }
+
+    const evidenceBody = sectionBody(contract, "Reference Evidence");
+    if (evidenceBody !== undefined) {
+      const requiredSources = ["60fps.design", "catalogue.projectsbyif.com", "abtest.design", "Design Spells", "UXSnaps", "UI Playbook"];
+      for (const source of requiredSources) {
+        if (!evidenceBody.includes(source)) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_source_missing",
+              `design/design.md's Reference Evidence section must triage ${source}.`,
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+      }
+      const requiredFields = [
+        "Source",
+        "Status",
+        "Why",
+        "Query or pattern",
+        "Evidence date",
+        "Surface or decision",
+        "Observation",
+        "Adopt or reject",
+        "Adaptation",
+        "State path",
+        "Validation",
+      ];
+      for (const field of requiredFields) {
+        if (!evidenceBody.includes(field)) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_field_missing",
+              `design/design.md's Reference Evidence section must include the field: ${field}.`,
+              rel(args.root, contractPath),
+            ),
+          );
+        }
       }
     }
 
@@ -266,13 +309,14 @@ for (const artifact of designArtifacts) {
 reportAndExit("Design Room contract validation", issues);
 
 /**
- * Full body of the "## Audience And Identity" section: heading line to the next
+ * Full body of an H2 section: heading line to the next
  * H2 or end of file. Line-based on purpose — a lazy regex with the m flag lets
  * `$` match the first line end, silently truncating the body to one line.
  */
-function audienceSectionBody(contract: string): string | undefined {
+function sectionBody(contract: string, section: string): string | undefined {
   const lines = contract.split("\n");
-  const start = lines.findIndex((line) => /^##\s+Audience And Identity\s*$/.test(line.trim()));
+  const pattern = new RegExp(`^##\\s+${escapeRegExp(section)}\\s*$`);
+  const start = lines.findIndex((line) => pattern.test(line.trim()));
   if (start === -1) {
     return undefined;
   }

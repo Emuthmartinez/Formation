@@ -1,10 +1,11 @@
 {
   "skill": "formation",
-  "version": "0.157.0",
+  "version": "0.159.0",
   "updatedAt": "2026-08-20",
   "sourcePath": "skill/formation",
   "releaseNotes": [
-    "Updated the foundational no-slop writing capability from petergyang/no-ai-slop at commit d30eddb9e04562234f2070b5ee63ca4649d9a05e. All dispatched business workers already receive this reference through the always-on founder-language context pack.",
-    "Added the portability test and interpretive-metadiscourse rule to Formation's doctrine. The repository and generated-copy validators now reject mechanically detectable interpretive asides. A negative fixture proves that the gate fails closed."
+    "Added an always-on Design Evidence Stack that routes motion, trust, conversion, delight, flow, and component questions to six bounded design sources.",
+    "Required source triage and adopted evidence in the Design Room contract. Added validator coverage and a LaunchBench case for copied patterns and unsupported experiment claims.",
+    "Added General Legal's CC0 template collection as an optional privacy and terms drafting benchmark, with official-source and counsel-review boundaries."
   ]
 }
