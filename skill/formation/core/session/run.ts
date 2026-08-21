@@ -27,7 +27,7 @@ import {
   refreshHeartbeat,
   reopenRecurringNodes,
   refreshDependenciesBeforeFrontier,
-  restoreDependencyRefreshAfterFailure,
+  deferDependencyRefreshAfterFailure,
   seedRunState,
   writeRunState,
   buildCheckpoint,
@@ -854,7 +854,7 @@ async function main(): Promise<number> {
         for (const consumerId of scopedRefreshConsumers) {
           const consumerNode = plan.nodes.find((node) => node.id === consumerId);
           const consumerState = run.nodes[consumerId];
-          if (!consumerNode || !consumerState) continue;
+          if (!consumerNode || !consumerState || !["pending", "ready", "stale"].includes(consumerState.status)) continue;
           const cycles = new Set(consumerState.dependencyRefreshCycles ?? []);
           for (const refresh of consumerNode.refreshDependencies) {
             const token = `${refresh.nodeId}@${consumerState.attempts.length}`;
@@ -1069,9 +1069,12 @@ async function main(): Promise<number> {
             attempt.status = "failed";
             attempt.finishedAt = finishedAt;
             attempt.error = result.error;
-            const restoredRefresh = restoreDependencyRefreshAfterFailure(plan, run, nodeId, finishedAt);
-            if (restoredRefresh) failedScopedRefreshDependencyIds.add(nodeId);
-            if (!restoredRefresh && failedState) {
+            const deferredRefresh = deferDependencyRefreshAfterFailure(plan, run, nodeId, finishedAt);
+            if (deferredRefresh) {
+              failedScopedRefreshDependencyIds.add(nodeId);
+              scopedRefreshDependencyIds.delete(nodeId);
+            }
+            if (!deferredRefresh && failedState) {
               failedState.refreshInstructions = undefined;
               failedState.status = "failed";
               failedState.blocker = result.error ?? "The work didn't complete.";

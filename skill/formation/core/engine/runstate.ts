@@ -292,7 +292,21 @@ export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch:
   state.refreshInstructions = undefined;
   run.updatedAt = now;
 
-  if (changedAcceptedInputs.length > 0) invalidateDescendants(plan, run, changedAcceptedInputs, now);
+  if (changedAcceptedInputs.length > 0) {
+    const preservedScopedConsumers = new Set(
+      plan.nodes
+        .filter((candidate) => {
+          const candidateState = run.nodes[candidate.id];
+          return (
+            candidateState?.status === "succeeded" &&
+            candidate.refreshDependencies.some((refresh) => refresh.nodeId === patch.nodeId) &&
+            candidateState.dependencyRefreshCycles?.some((cycle) => cycle.startsWith(`${patch.nodeId}@`))
+          );
+        })
+        .map((candidate) => candidate.id),
+    );
+    invalidateDescendants(plan, run, changedAcceptedInputs, now, preservedScopedConsumers);
+  }
 }
 
 /** Producer never verifies its own work (R15): a separate acceptance step promotes a reconciled-but-blocked node to succeeded. */
@@ -493,34 +507,24 @@ export function refreshDependenciesBeforeFrontier(
   return reopened;
 }
 
-/** Roll a failed scoped refresh back to its last accepted proof and reopen its consumers for a later scoped retry. */
-export function restoreDependencyRefreshAfterFailure(plan: CompiledPlan, run: RunStateDocument, dependencyId: RunNodeId, now: string): boolean {
-  const dependencyNode = plan.nodes.find((node) => node.id === dependencyId);
+/** Keep a failed scoped refresh unaccepted and retry-eligible for a later authorized session. */
+export function deferDependencyRefreshAfterFailure(plan: CompiledPlan, run: RunStateDocument, dependencyId: RunNodeId, now: string): boolean {
   const dependency = run.nodes[dependencyId];
-  if (!dependencyNode || !dependency?.refreshInstructions?.length) return false;
-
-  dependency.status = "succeeded";
+  if (!plan.nodes.some((node) => node.id === dependencyId) || !dependency?.refreshInstructions?.length) return false;
+  dependency.status = "stale";
   dependency.blocker = undefined;
-  dependency.refreshInstructions = undefined;
-  for (const artifactId of dependencyNode.outputs) {
-    const binding = run.artifactBindings.find((candidate) => candidate.artifactId === artifactId);
-    if (!binding || binding.refreshBaselineFingerprint === undefined) continue;
-    binding.fingerprint = binding.refreshBaselineFingerprint;
-    binding.accepted = true;
-    binding.refreshBaselineFingerprint = undefined;
-  }
-  for (const consumerNode of plan.nodes) {
-    if (!consumerNode.refreshDependencies.some((refresh) => refresh.nodeId === dependencyId)) continue;
-    const consumer = run.nodes[consumerNode.id];
-    if (!consumer?.dependencyRefreshCycles) continue;
-    consumer.dependencyRefreshCycles = consumer.dependencyRefreshCycles.filter((cycle) => !cycle.startsWith(`${dependencyId}@`));
-  }
   run.updatedAt = now;
   return true;
 }
 
 /** Staleness invalidation: a changed accepted input invalidates descendants transitively. */
-export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument, changedArtifactIds: readonly string[], now: string): RunNodeId[] {
+export function invalidateDescendants(
+  plan: CompiledPlan,
+  run: RunStateDocument,
+  changedArtifactIds: readonly string[],
+  now: string,
+  preservedNodeIds: ReadonlySet<RunNodeId> = new Set(),
+): RunNodeId[] {
   const changed = new Set<string>(changedArtifactIds);
   const invalidated: RunNodeId[] = [];
   let advanced = true;
@@ -528,6 +532,7 @@ export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument,
   while (advanced) {
     advanced = false;
     for (const node of plan.nodes) {
+      if (preservedNodeIds.has(node.id)) continue;
       const state = run.nodes[node.id];
       if (!state || state.status === "stale") continue;
       if (node.inputs.some((artifactId) => changed.has(artifactId))) {
