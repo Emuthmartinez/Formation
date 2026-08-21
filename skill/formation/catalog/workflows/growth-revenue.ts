@@ -157,6 +157,7 @@ export const workflows = [
       "workflow.design.design-room-state-mutate-version-render",
       "workflow.operations.agent-operations-ledger",
     ],
+    refreshDependencies: ["workflow.design.design-room-state-mutate-version-render"],
     outputPaths: ["growth/landing/"],
     gates: ["check:design-room"],
     actionClass: "mutate",

@@ -99,7 +99,8 @@
         "attempts": { "type": "array", "items": { "$ref": "#/$defs/attempt" } },
         "blocker": { "type": "string" },
         "verifiedBySessionId": { "type": "string", "minLength": 1 },
-        "applicabilityFingerprint": { "type": "string", "minLength": 1 }
+        "applicabilityFingerprint": { "type": "string", "minLength": 1 },
+        "dependencyRefreshCycles": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
       }
     }
   }

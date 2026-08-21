@@ -37,6 +37,7 @@ import {
   reconcilePatch,
   refreshHeartbeat,
   reconcileWorkflowApplicability,
+  refreshDependenciesBeforeFrontier,
   seedRunState,
   wallClockDeadline,
   writeCheckpoint,
@@ -280,6 +281,23 @@ export function register(harness: Harness): void {
     const productSpec = plan.nodes.find((node) => node.id === nodeId("product-spec"))!;
     assert(productSpec.dependencies.includes(nodeId("research-scan")), "product-spec should depend on research-scan");
     assert(productSpec.inputs.includes("artifact.research-brief"), "product-spec should consume artifact.research-brief");
+  });
+
+  harness.check("runstate: fresh dependency cycles reopen a succeeded dependency exactly once before frontier selection", () => {
+    const catalog = testCatalog();
+    catalog.workflows[1]!.refreshDependencies = ["workflow.research-scan"];
+    const plan = compilePlan(catalog, now);
+    const { businessState, run } = seedFor(["research"], plan);
+    const researchId = nodeId("research-scan");
+    const productId = nodeId("product-spec");
+    const reopened = refreshDependenciesBeforeFrontier(plan, run, now);
+    assert(reopened.includes(researchId), "the succeeded research dependency must reopen before product dispatch");
+    assert(run.nodes[researchId]!.status === "stale", "the refreshed dependency must be frontier-eligible as stale");
+    assert(!run.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted, "refresh must invalidate old output proof");
+    assert(!computeFrontier(plan, run, businessState, allowAllAutonomyEvaluator).ready.includes(productId), "the consumer must wait for refreshed proof");
+    run.nodes[researchId]!.status = "succeeded";
+    run.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted = true;
+    assert(refreshDependenciesBeforeFrontier(plan, run, plusSeconds(now, 1)).length === 0, "the same consumer attempt cycle must not reopen twice");
   });
 
   harness.check("compile/autonomy: internal system workflows preserve edges and run without founder grants, but external actions fail closed", () => {

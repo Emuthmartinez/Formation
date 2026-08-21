@@ -237,6 +237,18 @@ export function validateCatalog(catalog: Catalog, skillRoot: string, providerReg
     for (const areaId of workflow.areaIds) checkKnown(issues, areaIds, areaId, "catalog_graph.workflow.unknown_area", workflow.id);
     for (const phaseId of workflow.phaseIds) checkKnown(issues, phaseIds, phaseId, "catalog_graph.workflow.unknown_phase", workflow.id);
     for (const dependencyId of workflow.dependencies) checkKnown(issues, workflowIds, dependencyId, "catalog_graph.workflow.unknown_dependency", workflow.id);
+    for (const dependencyId of workflow.refreshDependencies ?? []) {
+      checkKnown(issues, workflowIds, dependencyId, "catalog_graph.workflow.unknown_refresh_dependency", workflow.id);
+      if (!workflow.dependencies.includes(dependencyId)) {
+        issues.push(
+          error(
+            "catalog_graph.workflow.refresh_dependency_not_dependency",
+            `${workflow.id} refreshes ${dependencyId}, but it is not a declared dependency.`,
+            workflow.id,
+          ),
+        );
+      }
+    }
     for (const dependencyId of workflow.dependencies) {
       const dependency = catalog.workflows.find((candidate) => candidate.id === dependencyId);
       if (!dependency || dependency.applicability?.mode !== "conditional") continue;

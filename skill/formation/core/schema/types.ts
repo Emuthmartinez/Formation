@@ -424,6 +424,8 @@ export interface RunNodeStateV2 {
    */
   verifiedBySessionId?: string;
   applicabilityFingerprint?: string;
+  /** Dependency-id/attempt-cycle tokens already refreshed before this node's next dispatch. */
+  dependencyRefreshCycles?: string[];
 }
 
 export interface RunStateDocument {
@@ -516,8 +518,5 @@ export interface BusinessStateV2 {
   /** Optional so pre-providers documents and the bootstrap patch stay valid; migrate-v1 carries the v1 tools: block in here. */
   providers?: Record<string, ProviderStateEntry>;
   continuity?: { lastStateReview?: string; sourceFiles?: string[]; gitStatusReviewed?: boolean; nextAction?: string };
-  workflowApplicability?: Record<
-    string,
-    { verdict: "required" | "not-needed"; reason: string; evidence: string[]; updatedAt: string }
-  >;
+  workflowApplicability?: Record<string, { verdict: "required" | "not-needed"; reason: string; evidence: string[]; updatedAt: string }>;
 }

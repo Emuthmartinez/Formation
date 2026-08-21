@@ -15,6 +15,7 @@ export interface WorkflowSeed {
   laneIds?: LaneKey[];
   phaseIds?: PhaseId[];
   dependencies?: WorkflowId[];
+  refreshDependencies?: WorkflowId[];
   outputPaths?: string[];
   gates?: string[];
   providers?: string[];
@@ -67,6 +68,7 @@ export function workflow(seed: WorkflowSeed): CatalogWorkflowDef {
     laneIds: seed.laneIds ?? [],
     phaseIds: seed.phaseIds ?? [],
     dependencies: dependenciesFor(seed),
+    ...(seed.refreshDependencies?.length ? { refreshDependencies: seed.refreshDependencies } : {}),
     outputPaths: seed.outputPaths ?? [],
     gateCommands: seed.gates ?? [],
     providerIds: seed.providers ?? [],

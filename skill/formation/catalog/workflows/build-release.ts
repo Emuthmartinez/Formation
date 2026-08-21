@@ -182,6 +182,7 @@ export const workflows = [
     laneIds: ["store_console", "content_assets"],
     phaseIds: ["phase.3"],
     dependencies: ["workflow.design.design-room-state-mutate-version-render", "workflow.store.app-store-listing-prep-packet"],
+    refreshDependencies: ["workflow.design.design-room-state-mutate-version-render"],
     outputPaths: ["store/app-store-listing/SCREENSHOTS.md"],
     gates: ["check:design-room", "check:store-screenshots"],
     providers: ["provider.app-store-screenshots"],

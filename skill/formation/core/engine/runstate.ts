@@ -426,6 +426,41 @@ export function reopenRecurringNodes(plan: CompiledPlan, run: RunStateDocument, 
   return reopened;
 }
 
+/** Reopen dependencies that a downstream node requires fresh for each of its attempt cycles. */
+export function refreshDependenciesBeforeFrontier(plan: CompiledPlan, run: RunStateDocument, now: string): RunNodeId[] {
+  const reopened: RunNodeId[] = [];
+  const eligible = new Set<Status>(["pending", "ready", "stale"]);
+  for (const node of plan.nodes) {
+    if (node.refreshDependencies.length === 0) continue;
+    const consumer = run.nodes[node.id];
+    if (!consumer || !eligible.has(consumer.status)) continue;
+    const cycles = new Set(consumer.dependencyRefreshCycles ?? []);
+    for (const dependencyId of node.refreshDependencies) {
+      const token = `${dependencyId}@${consumer.attempts.length}`;
+      if (cycles.has(token)) continue;
+      cycles.add(token);
+      const dependency = run.nodes[dependencyId];
+      if (!dependency || dependency.status !== "succeeded") continue;
+      dependency.status = "stale";
+      dependency.blocker = undefined;
+      dependency.acceptedOutputFingerprint = undefined;
+      dependency.verifiedBySessionId = undefined;
+      const dependencyNode = plan.nodes.find((candidate) => candidate.id === dependencyId);
+      for (const binding of run.artifactBindings) {
+        if (!dependencyNode?.outputs.includes(binding.artifactId)) continue;
+        binding.accepted = false;
+        binding.fingerprint = undefined;
+        binding.producedBy = undefined;
+        binding.attemptId = undefined;
+      }
+      reopened.push(dependencyId);
+    }
+    consumer.dependencyRefreshCycles = [...cycles];
+  }
+  if (reopened.length > 0) run.updatedAt = now;
+  return reopened;
+}
+
 /** Staleness invalidation: a changed accepted input invalidates descendants transitively. */
 export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument, changedArtifactIds: readonly string[], now: string): RunNodeId[] {
   const changed = new Set<string>(changedArtifactIds);

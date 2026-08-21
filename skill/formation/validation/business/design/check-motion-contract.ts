@@ -226,6 +226,7 @@ function stripNonRenderedMarkdown(markdown: string): string {
       fence = { kind: marker[0] as "`" | "~", length: marker.length };
       continue;
     }
+    if (/^(?: {4}|\t)/u.test(line)) continue;
     renderedLines.push(line);
   }
   return renderedLines.join("\n");

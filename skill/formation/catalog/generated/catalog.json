@@ -9122,6 +9122,9 @@
         "workflow.store.app-store-listing-prep-packet",
         "workflow.operations.agent-operations-ledger"
       ],
+      "refreshDependencies": [
+        "workflow.design.design-room-state-mutate-version-render"
+      ],
       "outputPaths": [
         "store/app-store-listing/SCREENSHOTS.md"
       ],
@@ -10107,6 +10110,9 @@
         "workflow.growth.geo-seo-public-visibility",
         "workflow.design.design-room-state-mutate-version-render",
         "workflow.operations.agent-operations-ledger"
+      ],
+      "refreshDependencies": [
+        "workflow.design.design-room-state-mutate-version-render"
       ],
       "outputPaths": [
         "growth/landing/"

@@ -25,6 +25,7 @@ import {
   reconcilePatch,
   refreshHeartbeat,
   reopenRecurringNodes,
+  refreshDependenciesBeforeFrontier,
   seedRunState,
   writeRunState,
   buildCheckpoint,
@@ -827,6 +828,7 @@ async function main(): Promise<number> {
       heartbeat(paths.sessionLock, sessionId);
 
       observeAppSourceFingerprint(plan, run, workspace, sessionNow());
+      refreshDependenciesBeforeFrontier(plan, run, sessionNow());
       writeRunState(paths.runState, run);
       applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const frontier = computeFrontier(plan, run, businessState, captured);

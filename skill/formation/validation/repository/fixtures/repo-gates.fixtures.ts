@@ -1041,6 +1041,27 @@ export function register(h: Harness): void {
     1,
     "motion_contract.live_surface.workspace_incomplete",
   );
+  const motionIndentedCodeTable = writeMotionContractRoot("motion-contract-live-workspace-indented-code-table", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      const hiddenTable = [
+        "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| AI status | Processing state | R18 | Active orb and status text | Processing ends | Static status text | Static status text |",
+      ]
+        .map((line) => `    ${line}`)
+        .join("\n");
+      return text.replace("### Live-surface effects", `### Live-surface effects\n\n${hiddenTable}`);
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract ignores an indented-code live-effect table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionIndentedCodeTable, "--workspace-root", path.join(motionIndentedCodeTable, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
   const motionLiveWorkspaceUnsupportedRecipe = writeMotionContractRoot("motion-contract-live-workspace-unsupported-recipe", (rel, text) => {
     if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
     if (rel === "workspace/business/design/design.md") {
