@@ -210,7 +210,7 @@ function sectionBody(document: string, headingName: string): string | undefined 
 }
 
 function stripNonRenderedMarkdown(markdown: string): string {
-  const withoutComments = stripHtmlComments(markdown);
+  const withoutComments = stripHtmlComments(stripNonRenderedHtmlBlocks(markdown));
   const renderedLines: string[] = [];
   let fence: { kind: "`" | "~"; length: number } | undefined;
   for (const line of withoutComments.split("\n")) {
@@ -230,6 +230,10 @@ function stripNonRenderedMarkdown(markdown: string): string {
     renderedLines.push(line);
   }
   return renderedLines.join("\n");
+}
+
+function stripNonRenderedHtmlBlocks(markdown: string): string {
+  return markdown.replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1\s*>/giu, "");
 }
 
 function stripHtmlComments(markdown: string): string {

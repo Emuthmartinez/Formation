@@ -10,7 +10,7 @@ import {
   type CompiledPlan,
   type RunNodeId,
 } from "../../core/engine/compile.js";
-import { allowAllAutonomyEvaluator, computeFrontier, type AutonomyEvaluator } from "../../core/engine/frontier.js";
+import { allowAllAutonomyEvaluator, computeFrontier, isNodeAuthorized, type AutonomyEvaluator } from "../../core/engine/frontier.js";
 import { buildDispatchBatches, checkBatchBoundary, neverHaltDispatchHooks } from "../../core/engine/dispatch.js";
 import { composeNodeBrief, renderNodeBrief } from "../../core/engine/node-brief.js";
 import { buildBoundaryResults, buildLaunchMatrix } from "../../core/adapters/platform-execution.js";
@@ -307,6 +307,11 @@ export function register(harness: Harness): void {
     const { businessState, run } = seedFor(["research"], plan);
     const researchId = nodeId("research-scan");
     const productId = nodeId("product-spec");
+    const productNode = plan.nodes.find((node) => node.id === productId)!;
+    assert(
+      !isNodeAuthorized(productNode, run, businessState, { evaluate: () => ({ allowed: false, parkReason: "fixture denial" }) }),
+      "a consumer denied by autonomy must not be admitted for dependency refresh",
+    );
     const reopened = refreshDependenciesBeforeFrontier(plan, run, now);
     assert(reopened.includes(researchId), "the succeeded research dependency must reopen before product dispatch");
     assert(run.nodes[researchId]!.status === "stale", "the refreshed dependency must be frontier-eligible as stale");

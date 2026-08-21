@@ -12,7 +12,7 @@ import type { PatchOp, PatchPath, StatePatch } from "../reducer/patch.js";
 import { validateBudgetLedger, validateBusinessState, validateControl } from "../schema/index.js";
 import { grantableDomainIds, type BudgetLedgerDocument, type BusinessStateV2, type ControlFile, type RunStateDocument } from "../schema/types.js";
 import { compilePlan, type CatalogInput, type CompiledPlan, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
-import { computeFrontier } from "../engine/frontier.js";
+import { computeFrontier, isNodeAuthorized, isNodeDispatchAdmissible } from "../engine/frontier.js";
 import { observeAppSourceFingerprint } from "../engine/source-fingerprint.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
 import {
@@ -842,13 +842,22 @@ async function main(): Promise<number> {
           abandonDependencyRefreshesForConsumer(plan, run, node.id, sessionNow());
         }
       }
+      applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const activeScopeHints = brief?.scopeHints;
-      const scopedRefreshConsumers: Set<RunNodeId> | undefined =
-        activeScopeHints && activeScopeHints.length > 0
-          ? new Set(plan.nodes.filter((node) => nodeInScope(activeScopeHints, node.domainId, node.workflowId)).map((node) => node.id))
-          : failedScopedRefreshDependencyIds.size > 0
-            ? new Set(plan.nodes.map((node) => node.id))
-            : undefined;
+      const scopedRefreshConsumers = new Set(
+        plan.nodes
+          .filter((node) => !activeScopeHints?.length || nodeInScope(activeScopeHints, node.domainId, node.workflowId))
+          .filter((node) => {
+            const state = run.nodes[node.id];
+            if (!state || !["pending", "ready", "stale"].includes(state.status)) return false;
+            if (!isNodeAuthorized(node, run, businessState, captured)) return false;
+            return node.refreshDependencies.every((refresh) => {
+              const dependency = plan.nodes.find((candidate) => candidate.id === refresh.nodeId);
+              return Boolean(dependency && isNodeDispatchAdmissible(dependency, run, businessState, captured));
+            });
+          })
+          .map((node) => node.id),
+      );
       if (scopedRefreshConsumers && failedScopedRefreshDependencyIds.size > 0) {
         for (const consumerId of [...scopedRefreshConsumers]) {
           const consumerNode = plan.nodes.find((node) => node.id === consumerId);
@@ -872,7 +881,6 @@ async function main(): Promise<number> {
       const reopenedRefreshDependencies = refreshDependenciesBeforeFrontier(plan, run, sessionNow(), scopedRefreshConsumers);
       for (const nodeId of reopenedRefreshDependencies) scopedRefreshDependencyIds.add(nodeId);
       writeRunState(paths.runState, run);
-      applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const frontier = computeFrontier(plan, run, businessState, captured);
       let readyIds: RunNodeId[] = frontier.ready.filter((nodeId) => !failedScopedRefreshDependencyIds.has(nodeId));
       if (brief.scopeHints && brief.scopeHints.length > 0) {
