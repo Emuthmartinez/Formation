@@ -227,12 +227,12 @@ if (hasDesignState) {
         const highImpactSourcesByDecision = new Map<string, Set<string>>();
         for (const row of authoredAdoptionRows) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
-          const category = highImpactCategory(decision);
-          if (category === undefined) continue;
-          const sources = highImpactSourcesByDecision.get(category) ?? new Set<string>();
           const source = normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase();
-          if (requiredEvidenceSources.has(source)) sources.add(source);
-          highImpactSourcesByDecision.set(category, sources);
+          for (const category of highImpactCategories(decision)) {
+            const sources = highImpactSourcesByDecision.get(category) ?? new Set<string>();
+            if (requiredEvidenceSources.has(source)) sources.add(source);
+            highImpactSourcesByDecision.set(category, sources);
+          }
         }
         for (const [category, sources] of highImpactSourcesByDecision) {
           if (!hasComplementaryEvidence(category, sources)) {
@@ -511,16 +511,17 @@ function isValidEvidenceDate(value: string): boolean {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value && date.getTime() <= Date.now();
 }
 
-function highImpactCategory(value: string): string | undefined {
-  if (/\bonboarding\b/i.test(value)) return "onboarding";
-  if (/\bpaywall\b/i.test(value)) return "paywall";
-  if (/\bcheckout\b/i.test(value)) return "checkout";
-  if (/\bretention\b/i.test(value)) return "retention";
-  if (/\breferral\b/i.test(value)) return "referral";
-  if (/\bcore[- ]loop\b/i.test(value)) return "core loop";
-  if (/\bai[- ]trust\b/i.test(value)) return "AI trust";
-  if (/\bstore\b.*\bfirst[- ]frames?\b|\bfirst[- ]frames?\b.*\bstore\b/i.test(value)) return "store first frame";
-  return undefined;
+function highImpactCategories(value: string): string[] {
+  const categories: string[] = [];
+  if (/\bonboarding\b/i.test(value)) categories.push("onboarding");
+  if (/\bpaywall\b/i.test(value)) categories.push("paywall");
+  if (/\bcheckout\b/i.test(value)) categories.push("checkout");
+  if (/\bretention\b/i.test(value)) categories.push("retention");
+  if (/\breferral\b/i.test(value)) categories.push("referral");
+  if (/\bcore[- ]loop\b/i.test(value)) categories.push("core loop");
+  if (/\b(?:ai|consent|authentication|permissions?)\b|\bsensitive[- ]data\b/i.test(value)) categories.push("AI trust");
+  if (/\bstore\b.*\bfirst[- ]frames?\b|\bfirst[- ]frames?\b.*\bstore\b/i.test(value)) categories.push("store first frame");
+  return categories;
 }
 
 function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {

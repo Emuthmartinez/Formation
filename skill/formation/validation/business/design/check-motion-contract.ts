@@ -125,8 +125,9 @@ if (designContract !== undefined) {
       "Reduced-motion result",
       "Low-power fallback",
     ];
-    const liveEffectRows = markdownTableRows(liveEffectBody ?? "", liveEffectHeaders);
-    const recipeIndex = liveEffectHeaders.indexOf("Recipe");
+    const liveEffectTable = markdownTable(liveEffectBody ?? "", liveEffectHeaders);
+    const liveEffectRows = liveEffectTable?.rows ?? [];
+    const recipeIndex = liveEffectTable?.headers.indexOf("Recipe") ?? -1;
     if (
       liveEffectRows.length === 0 ||
       liveEffectRows.some(
@@ -177,7 +178,7 @@ function sectionBody(document: string, headingName: string): string | undefined 
   return lines.slice(start + 1, end < 0 ? undefined : end).join("\n");
 }
 
-function markdownTableRows(body: string, requiredHeaders: string[]): string[][] {
+function markdownTable(body: string, requiredHeaders: string[]): { headers: string[]; rows: string[][] } | undefined {
   const lines = body
     .split("\n")
     .map((line) => line.trim())
@@ -187,9 +188,9 @@ function markdownTableRows(body: string, requiredHeaders: string[]): string[][] 
     if (!requiredHeaders.every((header) => headers.includes(header))) continue;
     const rows: string[][] = [];
     for (let rowIndex = index + 2; rowIndex < lines.length; rowIndex += 1) rows.push(parseMarkdownRow(lines[rowIndex]!));
-    return rows;
+    return { headers, rows };
   }
-  return [];
+  return undefined;
 }
 
 function parseMarkdownRow(line: string): string[] {

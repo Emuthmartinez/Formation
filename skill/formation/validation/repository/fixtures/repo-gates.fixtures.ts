@@ -980,6 +980,28 @@ export function register(h: Harness): void {
     1,
     "motion_contract.live_surface.workspace_incomplete",
   );
+  const motionLiveWorkspaceReorderedRecipe = writeMotionContractRoot("motion-contract-live-workspace-reordered-recipe", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text
+        .replace(
+          "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+          "| Surface | Real state or relationship | Low-power fallback | Visible or semantic signal | Stop condition | Reduced-motion result | Recipe |",
+        )
+        .replace(
+          "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+          "| AI status | Processing state | none | Active orb | Processing ends | Static status text | R19 |",
+        );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract resolves Recipe from reordered live-effect headers",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceReorderedRecipe, "--workspace-root", path.join(motionLiveWorkspaceReorderedRecipe, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
   const motionPrelaunchActiveWorkspace = writeMotionContractRoot("motion-contract-prelaunch-active-workspace");
   const prelaunchBusinessRoot = path.join(motionPrelaunchActiveWorkspace, "active-business");
   cpSync(path.join(motionPrelaunchActiveWorkspace, "workspace/business"), prelaunchBusinessRoot, { recursive: true });

@@ -590,6 +590,36 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
+  for (const [label, decision] of [
+    ["consent", "Consent decision"],
+    ["authentication", "Authentication decision"],
+    ["permissions", "Permissions decision"],
+    ["sensitive-data", "Sensitive data decision"],
+  ] as const) {
+    const designRoomTrustWithoutIf = makeFixture(`design-room-reference-evidence-${label}-without-if`);
+    const statePath = path.join(designRoomTrustWithoutIf, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomTrustWithoutIf, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, `| UI Playbook | required | ${decision} component proof is needed. | trust component | 2026-08-20 |`)
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        `| ${decision} | UI Playbook | The component exposes the current state. | Adopt | Keep the state explicit. | designRoom.surfaces.core | Scenario review |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${decision} evidence requires the IF Design Patterns Catalogue`,
+      designRoomTrustWithoutIf,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_high_impact_sources_missing",
+    );
+  }
+
   const designRoomIncompleteEvidenceRow = makeFixture("design-room-reference-evidence-incomplete-row");
   {
     const statePath = path.join(designRoomIncompleteEvidenceRow, "studio/seed/business.json");
