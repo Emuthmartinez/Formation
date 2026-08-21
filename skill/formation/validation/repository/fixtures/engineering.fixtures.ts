@@ -428,6 +428,31 @@ export function register(h: Harness): void {
     );
   }
 
+  {
+    const nestedFence = makeFixture("design-room-reference-evidence-nested-fence");
+    const statePath = path.join(nestedFence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(nestedFence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8");
+    const referenceSection = contract.match(/## Reference Evidence[\s\S]*?(?=\n## Visual Direction)/)?.[0] ?? "";
+    const authoredExample = referenceSection
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    const hiddenExample = `\`\`\`\`markdown\n\`\`\`text\n${authoredExample}\n\`\`\`\n\`\`\`\``;
+    writeFileSync(contractPath, contract.replace("## Reference Evidence", `${hiddenExample}\n\n## Reference Evidence`), "utf8");
+    runFixture(
+      "a nested shorter fence cannot expose hidden Reference Evidence",
+      nestedFence,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_change_classification_invalid",
+    );
+  }
+
   for (const [label, open, close] of [
     ["fenced-section", "```markdown\n", "\n```"],
     ["commented-section", "<!--\n", "\n-->"],

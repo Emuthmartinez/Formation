@@ -558,13 +558,13 @@ function sectionBody(contract: string, section: string): string | undefined {
 function stripNonRenderedMarkdown(markdown: string): string {
   const withoutComments = markdown.replace(/<!--[\s\S]*?-->/g, "");
   const renderedLines: string[] = [];
-  let fence: "`" | "~" | undefined;
+  let fence: { kind: "`" | "~"; length: number } | undefined;
   for (const line of withoutComments.split("\n")) {
     const marker = line.match(/^\s*(`{3,}|~{3,})/u)?.[1];
     if (marker !== undefined) {
       const kind = marker[0] as "`" | "~";
-      if (fence === undefined) fence = kind;
-      else if (fence === kind) fence = undefined;
+      if (fence === undefined) fence = { kind, length: marker.length };
+      else if (fence.kind === kind && marker.length >= fence.length) fence = undefined;
       continue;
     }
     if (fence === undefined) renderedLines.push(line);

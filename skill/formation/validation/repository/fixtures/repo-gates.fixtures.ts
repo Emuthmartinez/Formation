@@ -1021,6 +1021,26 @@ export function register(h: Harness): void {
       "motion_contract.live_surface.workspace_incomplete",
     );
   }
+  const motionNestedFenceTable = writeMotionContractRoot("motion-contract-live-workspace-nested-fence-table", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      const completeTable = [
+        "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| AI status | Processing state | R18 | Active orb and status text | Processing ends | Static status text | Static status text |",
+      ].join("\n");
+      const hiddenTable = `\`\`\`\`markdown\n\`\`\`text\n${completeTable}\n\`\`\`\n\`\`\`\``;
+      return text.replace("### Live-surface effects", `### Live-surface effects\n\n${hiddenTable}`);
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract honors a longer outer fence around a hidden table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionNestedFenceTable, "--workspace-root", path.join(motionNestedFenceTable, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
   const motionLiveWorkspaceUnsupportedRecipe = writeMotionContractRoot("motion-contract-live-workspace-unsupported-recipe", (rel, text) => {
     if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
     if (rel === "workspace/business/design/design.md") {
