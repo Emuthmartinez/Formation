@@ -152,7 +152,9 @@ if (hasDesignState) {
       const requiredEvidenceSources = new Set<string>();
       const evidenceSourceStatuses = new Map<string, string>();
       for (const source of requiredSources) {
-        const sourceRow = triageTable?.rows.find((row) => normalizedCell(row[triageTable.headers.indexOf("source")]).toLowerCase() === source.toLowerCase());
+        const sourceRows =
+          triageTable?.rows.filter((row) => normalizedCell(row[triageTable.headers.indexOf("source")]).toLowerCase() === source.toLowerCase()) ?? [];
+        const sourceRow = sourceRows[0];
         if (!sourceRow) {
           issues.push(
             issue(
@@ -163,6 +165,16 @@ if (hasDesignState) {
             ),
           );
           continue;
+        }
+        if (sourceRows.length > 1) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_source_duplicate",
+              `design/design.md's Reference Evidence section must contain exactly one triage row for ${source}.`,
+              rel(args.root, contractPath),
+            ),
+          );
         }
         if (evidenceRequired) {
           const statusCell = normalizedCell(sourceRow[triageTable!.headers.indexOf("status")]).toLowerCase();
@@ -648,8 +660,10 @@ function requiredSourcesForSurface(surface: string): string[] {
 }
 
 function isTrustSurface(value: string): boolean {
-  return /\b(?:ai|automations?|trust|security|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|register|registrations?|passwords?|sessions?|permissions?|data[-. ]access(?:es)?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
-    value,
+  return (
+    /\b(?:ai|automations?|trust|security|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|register|registrations?|passwords?|permissions?|data[-. ]access(?:es)?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
+      value,
+    ) || /\b(?:sessions?[. -]management|management[. -]sessions?)\b/i.test(value)
   );
 }
 

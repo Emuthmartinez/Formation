@@ -355,6 +355,32 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_status_invalid",
   );
 
+  const designRoomDuplicateTriageSource = makeFixture("design-room-reference-evidence-duplicate-triage-source");
+  {
+    const statePath = path.join(designRoomDuplicateTriageSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDuplicateTriageSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| UI Playbook \|.*$/m,
+        "| UI Playbook | not applicable | The current correction does not change component behavior. | Not applicable | Not applicable |\n| UI Playbook | required | A contradictory newer row requests component proof. | settings controls | 2026-08-20 |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "duplicate source-triage rows fail instead of silently choosing one status",
+    designRoomDuplicateTriageSource,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_source_duplicate",
+  );
+
   const designRoomSeededTriageReasons = makeFixture("design-room-reference-evidence-seeded-triage-reasons");
   {
     const statePath = path.join(designRoomSeededTriageReasons, "studio/seed/business.json");
@@ -1259,9 +1285,11 @@ export function register(h: Harness): void {
 
   for (const [scope, decision] of [
     ["account.recovery", "Account recovery"],
+    ["auth.session", "Authentication session"],
     ["automation.takeover", "Automation takeover"],
     ["security.access", "Security access"],
     ["data.access", "Data access"],
+    ["session.management", "Session management"],
     ["user-control.permissions", "User control permissions"],
   ] as const) {
     const designRoomTrustRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
@@ -1289,6 +1317,36 @@ export function register(h: Harness): void {
       "design_room.reference_evidence_routed_sources_missing",
     );
   }
+
+  const designRoomOrdinarySession = makeFixture("design-room-reference-evidence-ordinary-session");
+  {
+    const statePath = path.join(designRoomOrdinarySession, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomOrdinarySession, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: workout.session")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Workout component proof is needed. | workout summary | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Workout session | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation control tokens. | surfaces.mobileApp.workout | Device review | workout.session |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an ordinary product session is not routed as authentication evidence",
+    designRoomOrdinarySession,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
 
   for (const [scope, decision] of [
     ["engagement.streak", "Engagement streak"],
