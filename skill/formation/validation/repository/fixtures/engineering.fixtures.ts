@@ -680,17 +680,17 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
-  const designRoomAuthWithOnlyIf = makeFixture("design-room-reference-evidence-auth-with-only-if");
-  {
-    const statePath = path.join(designRoomAuthWithOnlyIf, "studio/seed/business.json");
+  for (const trustScope of ["auth.login", "security.access", "data.access"] as const) {
+    const designRoomTrustWithOnlyIf = makeFixture(`design-room-reference-evidence-${trustScope.replaceAll(".", "-")}-with-only-if`);
+    const statePath = path.join(designRoomTrustWithOnlyIf, "studio/seed/business.json");
     const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
     const designRoom = expectRecord(designState["designRoom"], "designRoom");
     designRoom["status"] = "rendered";
     writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
-    const contractPath = path.join(designRoomAuthWithOnlyIf, "design/design.md");
+    const contractPath = path.join(designRoomTrustWithOnlyIf, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
-      .replace("Change scope: Not defined", "Change scope: auth.login")
+      .replace("Change scope: Not defined", `Change scope: ${trustScope}`)
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(
         /^\| catalogue\.projectsbyif\.com \|.*$/m,
@@ -698,17 +698,17 @@ export function register(h: Harness): void {
       )
       .replace(
         "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
-        "| Authentication | catalogue.projectsbyif.com | The login flow preserves user control. | Adopt | Keep recovery and consent explicit. | surfaces.mobileApp.auth | Scenario review | auth.login |",
+        `| Trust surface | catalogue.projectsbyif.com | The flow preserves user control. | Adopt | Keep recovery and consent explicit. | surfaces.mobileApp.trust | Scenario review | ${trustScope} |`,
       );
     writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${trustScope} requires complementary craft or validation evidence`,
+      designRoomTrustWithOnlyIf,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_high_impact_sources_missing",
+    );
   }
-  runFixture(
-    "a routed authentication surface requires complementary craft or validation evidence",
-    designRoomAuthWithOnlyIf,
-    "check-design-room-contract.ts",
-    1,
-    "design_room.reference_evidence_high_impact_sources_missing",
-  );
 
   for (const coreLoopScope of ["core-loop.primary", "core.loop"] as const) {
     const designRoomCoreLoopWithoutUxSnaps = makeFixture(`design-room-reference-evidence-${coreLoopScope.replaceAll(".", "-")}-without-uxsnaps`);
@@ -1232,6 +1232,8 @@ export function register(h: Harness): void {
   for (const [scope, decision] of [
     ["account.recovery", "Account recovery"],
     ["automation.takeover", "Automation takeover"],
+    ["security.access", "Security access"],
+    ["data.access", "Data access"],
     ["user-control.permissions", "User control permissions"],
   ] as const) {
     const designRoomTrustRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
