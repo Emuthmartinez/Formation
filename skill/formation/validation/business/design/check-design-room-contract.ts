@@ -415,8 +415,7 @@ function sectionBody(contract: string, section: string): string | undefined {
   let end = lines.length;
   for (let index = start + 1; index < lines.length; index += 1) {
     const heading = (lines[index] ?? "").trim().match(/^(#{2,6})\s+(.+?)\s*$/);
-    const startsRequiredSection =
-      heading !== null && requiredContractSections.some((required) => required.toLowerCase() === heading[2]!.toLowerCase());
+    const startsRequiredSection = heading !== null && requiredContractSections.some((required) => required.toLowerCase() === heading[2]!.toLowerCase());
     if (heading && (heading[1]!.length <= depth || startsRequiredSection)) {
       end = index;
       break;

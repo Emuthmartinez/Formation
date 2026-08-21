@@ -288,12 +288,7 @@ export function register(h: Harness): void {
     const contract = readFileSync(contractPath, "utf8").replace("## Reference Evidence", "### Reference Evidence");
     writeFileSync(contractPath, contract, "utf8");
   }
-  runFixture(
-    "nested Reference Evidence does not become an authored audience row",
-    designRoomNestedEvidence,
-    "check-design-room-contract.ts",
-    0,
-  );
+  runFixture("nested Reference Evidence does not become an authored audience row", designRoomNestedEvidence, "check-design-room-contract.ts", 0);
 
   const designRoomAudienceTableGone = makeFixture("design-room-audience-table-gone");
   {
