@@ -6,6 +6,7 @@
   "releaseNotes": [
     "Added an always-on Design Evidence Stack that routes motion, trust, conversion, delight, flow, and component questions to six bounded design sources.",
     "Required source triage and adopted evidence in the Design Room contract. Added validator coverage and a LaunchBench case for copied patterns and unsupported experiment claims.",
-    "Added General Legal's CC0 template collection as an optional privacy and terms drafting benchmark, with official-source and counsel-review boundaries."
+    "Added General Legal's CC0 template collection as an optional privacy and terms drafting benchmark, with official-source and counsel-review boundaries.",
+    "Hardened Design Evidence validation for scoped rows, canonical source links, stable-key routing, duplicate triage, and ambiguous product terminology."
   ]
 }
