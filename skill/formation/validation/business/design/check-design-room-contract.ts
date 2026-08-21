@@ -604,14 +604,14 @@ function isValidEvidenceDate(value: string): boolean {
 
 function highImpactCategories(value: string): string[] {
   const categories: string[] = [];
-  if (/\bonboarding\b/i.test(value)) categories.push("onboarding");
-  if (/\bpaywall\b/i.test(value)) categories.push("paywall");
-  if (/\bcheckout\b/i.test(value)) categories.push("checkout");
-  if (/\bretention\b/i.test(value)) categories.push("retention");
-  if (/\breferral\b/i.test(value)) categories.push("referral");
-  if (/\bcore[. -]loop\b/i.test(value)) categories.push("core loop");
-  if (/\b(?:ai|consent|authentication|permissions?)\b|\bsensitive[- ]data\b/i.test(value)) categories.push("AI trust");
-  if (/\bstore\b.*\bfirst[- ]frames?\b|\bfirst[- ]frames?\b.*\bstore\b/i.test(value)) categories.push("store first frame");
+  if (/\bonboardings?\b/i.test(value)) categories.push("onboarding");
+  if (/\bpaywalls?\b/i.test(value)) categories.push("paywall");
+  if (/\bcheckouts?\b/i.test(value)) categories.push("checkout");
+  if (/\bretentions?\b/i.test(value)) categories.push("retention");
+  if (/\breferrals?\b/i.test(value)) categories.push("referral");
+  if (/\bcore[. -]loops?\b/i.test(value)) categories.push("core loop");
+  if (isTrustSurface(value)) categories.push("AI trust");
+  if (/\bstore\b.*\bfirst[. -]frames?\b|\bfirst[. -]frames?\b.*\bstore\b/i.test(value)) categories.push("store first frame");
   return categories;
 }
 
@@ -626,13 +626,7 @@ function parseSurfaceKeys(value: string): string[] {
 function requiredSourcesForSurface(surface: string): string[] {
   const sources = new Set<string>();
   if (/\b(?:motions?|animations?|gestures?|transitions?|loadings?)\b/i.test(surface)) sources.add("60fps.design");
-  if (
-    /\b(?:ai|automations?|trust|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|register|registrations?|passwords?|sessions?|permissions?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
-      surface,
-    )
-  ) {
-    sources.add("catalogue.projectsbyif.com");
-  }
+  if (isTrustSurface(surface)) sources.add("catalogue.projectsbyif.com");
   if (/\b(?:onboardings?|paywalls?|checkouts?|retentions?|referrals?)\b/i.test(surface)) {
     sources.add("abtest.design");
     sources.add("uxsnaps");
@@ -646,6 +640,12 @@ function requiredSourcesForSurface(surface: string): string[] {
   }
   if (/\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?)\b/i.test(surface)) sources.add("ui playbook");
   return [...sources];
+}
+
+function isTrustSurface(value: string): boolean {
+  return /\b(?:ai|automations?|trust|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|register|registrations?|passwords?|sessions?|permissions?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
+    value,
+  );
 }
 
 function isAcceptedFallbackSource(routedSource: string, evidenceSource: string): boolean {
