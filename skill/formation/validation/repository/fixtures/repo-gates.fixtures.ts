@@ -924,6 +924,23 @@ export function register(h: Harness): void {
 
   runScriptArgs("motion contract passes on the shipped skill", "check-motion-contract.ts", ["--skill-root", skillRoot], 0);
 
+  const motionStarterHeaderMissing = writeMotionContractRoot("motion-contract-starter-live-surface-header-missing", (rel, text) => {
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+        "| Surface omitted | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract validates the packaged starter live-effect table structure",
+    "check-motion-contract.ts",
+    ["--skill-root", motionStarterHeaderMissing],
+    1,
+    "motion_contract.live_surface.template_incomplete",
+  );
+
   const motionLiveSurfaceMissing = writeMotionContractRoot("motion-contract-live-surface-missing", (rel, text) =>
     rel.endsWith("motion-craft-benchmarks.md") ? text.replace("### R18 — Semantic thinking orb", "### Removed semantic thinking orb") : text,
   );

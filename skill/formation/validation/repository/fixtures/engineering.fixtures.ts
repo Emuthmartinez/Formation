@@ -849,6 +849,34 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
+  const designRoomSameCategorySeparateSurfaces = makeFixture("design-room-reference-evidence-same-category-separate-surfaces");
+  {
+    const statePath = path.join(designRoomSameCategorySeparateSurfaces, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSameCategorySeparateSurfaces, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: Paywall")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Paywall proof is needed. | offer framing | 2026-08-20 |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Paywall journey proof is needed. | upgrade flow | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Initial paywall | abtest.design | Offer framing supplies a local hypothesis. | Adopt | Test the initial offer. | designRoom.surfaces.initialPaywall | Conversion experiment |\n| Upgrade paywall | UXSnaps | The upgrade journey keeps context. | Adopt | Preserve the upgrade origin. | designRoom.surfaces.upgradePaywall | Journey review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "two paywall surfaces each need their own complementary evidence pair",
+    designRoomSameCategorySeparateSurfaces,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
   const designRoomEscapedEvidencePipe = makeFixture("design-room-reference-evidence-escaped-pipe");
   {
     const statePath = path.join(designRoomEscapedEvidencePipe, "studio/seed/business.json");

@@ -114,18 +114,28 @@ if (designContract !== undefined) {
       );
     }
   }
+  const liveEffectBody = sectionBody(designContract, "Live-surface effects");
+  const liveEffectHeaders = [
+    "Surface",
+    "Real state or relationship",
+    "Recipe",
+    "Visible or semantic signal",
+    "Stop condition",
+    "Reduced-motion result",
+    "Low-power fallback",
+  ];
+  const liveEffectTable = markdownTable(liveEffectBody ?? "", liveEffectHeaders);
+  if (liveEffectTable === undefined) {
+    issues.push(
+      issue(
+        "error",
+        "motion_contract.live_surface.template_incomplete",
+        "The live-surface effect table needs all contract headers and a valid Markdown separator.",
+        path.relative(workspaceRoot, designContractPath),
+      ),
+    );
+  }
   if (workspaceNeedsLiveEffectValidation(workspaceRoot)) {
-    const liveEffectBody = sectionBody(designContract, "Live-surface effects");
-    const liveEffectHeaders = [
-      "Surface",
-      "Real state or relationship",
-      "Recipe",
-      "Visible or semantic signal",
-      "Stop condition",
-      "Reduced-motion result",
-      "Low-power fallback",
-    ];
-    const liveEffectTable = markdownTable(liveEffectBody ?? "", liveEffectHeaders);
     const liveEffectRows = liveEffectTable?.rows ?? [];
     const recipeIndex = liveEffectTable?.headers.indexOf("Recipe") ?? -1;
     if (

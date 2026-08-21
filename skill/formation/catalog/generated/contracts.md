@@ -1056,7 +1056,7 @@ _Immediately after design/design.md is accepted — build the local landing site
 - **Consults:** `revenue/REVENUE_OPS.md`, `store/app-store-listing/SCREENSHOTS.md`, `growth/content-assets/CONTENT_ASSETS.md`
 - **Produces:** `growth/landing/`
 - **Gates:** —
-- **Knowledge:** [Analytics And Attribution](../../knowledge/data/analytics-attribution.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md), [CRO Landing](../../knowledge/growth/cro-landing.md), [Funnel Domain And Privacy](../../knowledge/process/tool-recipes/funnel-domain-and-privacy.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
+- **Knowledge:** [Analytics And Attribution](../../knowledge/data/analytics-attribution.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md), [CRO Landing](../../knowledge/growth/cro-landing.md), [Funnel Domain And Privacy](../../knowledge/process/tool-recipes/funnel-domain-and-privacy.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
 
 ### Landing funnel publication and live proof
 

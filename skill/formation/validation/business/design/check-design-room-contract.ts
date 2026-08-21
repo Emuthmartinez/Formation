@@ -246,30 +246,30 @@ if (hasDesignState) {
             );
           }
         }
-        const highImpactSourcesByDecision = new Map<string, Set<string>>();
+        const highImpactSourcesBySurface = new Map<string, { category: string; surface: string; sources: Set<string> }>();
         const scopedCategories = externalEvidenceRequired ? highImpactCategories(changeScope) : [];
-        if (externalEvidenceRequired) {
-          if (changeClassification === "high-impact or high-risk surface" && scopedCategories.length === 0) scopedCategories.push("high impact");
-          for (const category of scopedCategories) highImpactSourcesByDecision.set(category, new Set<string>());
-        }
+        if (changeClassification === "high-impact or high-risk surface" && scopedCategories.length === 0) scopedCategories.push("high impact");
         for (const row of authoredAdoptionRows) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
           const source = normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase();
+          const statePath = normalizedCell(row[adoptionTable!.headers.indexOf("state path")]);
           const decisionCategories = highImpactCategories(decision);
           const applicableCategories = decisionCategories.length > 0 ? decisionCategories : scopedCategories.length === 1 ? scopedCategories : [];
           for (const category of applicableCategories) {
-            const sources = highImpactSourcesByDecision.get(category) ?? new Set<string>();
-            if (requiredEvidenceSources.has(source)) sources.add(source);
-            highImpactSourcesByDecision.set(category, sources);
+            const surface = stableEvidenceSurface(decision, statePath);
+            const key = `${category}\u0000${surface}`;
+            const entry = highImpactSourcesBySurface.get(key) ?? { category, surface, sources: new Set<string>() };
+            if (requiredEvidenceSources.has(source)) entry.sources.add(source);
+            highImpactSourcesBySurface.set(key, entry);
           }
         }
-        for (const [category, sources] of highImpactSourcesByDecision) {
+        for (const { category, surface, sources } of highImpactSourcesBySurface.values()) {
           if (!hasComplementaryEvidence(category, sources)) {
             issues.push(
               issue(
                 "error",
                 "design_room.reference_evidence_high_impact_sources_missing",
-                `The ${category} design decision needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps. AI trust decisions need catalogue.projectsbyif.com plus a craft or validation source.`,
+                `The ${category} design decision for ${surface} needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps. AI trust decisions need catalogue.projectsbyif.com plus a craft or validation source.`,
                 rel(args.root, contractPath),
               ),
             );
@@ -566,6 +566,15 @@ function hasComplementaryEvidence(category: string, sources: Set<string>): boole
   }
   const behaviorOrStructure = ["catalogue.projectsbyif.com", "uxsnaps"];
   return behaviorOrStructure.some((source) => sources.has(source)) && craftOrValidation.some((source) => sources.has(source));
+}
+
+function stableEvidenceSurface(decision: string, statePath: string): string {
+  if (isAuthoredEvidenceCell(statePath)) {
+    const normalizedPath = normalizedCell(statePath).toLowerCase();
+    const designSurface = normalizedPath.match(/^designroom\.surfaces\.[^.\s]+/i)?.[0];
+    return designSurface ?? normalizedPath;
+  }
+  return decision;
 }
 
 function containsTemplatePlaceholder(value: string): boolean {
