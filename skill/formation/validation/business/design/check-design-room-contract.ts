@@ -215,17 +215,21 @@ if (hasDesignState) {
             );
           }
         }
-        const highImpactRows = authoredAdoptionRows.filter((row) =>
-          isHighImpactDecision(normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")])),
-        );
-        if (highImpactRows.length > 0) {
-          const highImpactSources = new Set(highImpactRows.map((row) => normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase()));
-          if (highImpactSources.size < 2) {
+        const highImpactSourcesByDecision = new Map<string, Set<string>>();
+        for (const row of authoredAdoptionRows) {
+          const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
+          if (!isHighImpactDecision(decision)) continue;
+          const sources = highImpactSourcesByDecision.get(decision) ?? new Set<string>();
+          sources.add(normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase());
+          highImpactSourcesByDecision.set(decision, sources);
+        }
+        for (const [decision, sources] of highImpactSourcesByDecision) {
+          if (sources.size < 2) {
             issues.push(
               issue(
                 "error",
                 "design_room.reference_evidence_high_impact_sources_missing",
-                "Onboarding, paywall, core-loop, AI-trust, and store-first-frame decisions need complete evidence rows from two complementary sources.",
+                `The high-impact decision "${decision}" needs complete evidence rows from two complementary sources.`,
                 rel(args.root, contractPath),
               ),
             );

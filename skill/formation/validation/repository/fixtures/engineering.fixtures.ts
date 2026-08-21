@@ -439,6 +439,32 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
+  const designRoomHighImpactSourcesCannotCrossSurface = makeFixture("design-room-reference-evidence-high-impact-cross-surface");
+  {
+    const statePath = path.join(designRoomHighImpactSourcesCannotCrossSurface, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHighImpactSourcesCannotCrossSurface, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^| 60fps\.design |.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace(/^| abtest\.design |.*$/m, "| abtest.design | required | Conversion proof is needed. | price framing | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.onboarding | Device motion review |\n| Paywall choice | abtest.design | Price framing is a local hypothesis. | Adopt | Test with the target audience. | designRoom.surfaces.paywall | Conversion experiment |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "high-impact evidence sources cannot be pooled across different decisions",
+    designRoomHighImpactSourcesCannotCrossSurface,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
   const designRoomFreeform = makeFixture("design-room-freeform-proposal");
   writeFileSync(path.join(designRoomFreeform, "design-proposal.html"), "<!doctype html><html><body>New idea</body></html>", "utf8");
   runFixture(

@@ -116,8 +116,20 @@ if (designContract !== undefined) {
   }
   if (workspaceIsLaunched(workspaceRoot)) {
     const liveEffectBody = sectionBody(designContract, "Live-surface effects");
-    const liveEffectRows = markdownTableRows(liveEffectBody ?? "", requiredLiveEffectFields);
-    if (liveEffectRows.length === 0 || !liveEffectRows.some((row) => row.every(isAuthoredLiveEffectCell))) {
+    const liveEffectHeaders = [
+      "Surface",
+      "Real state or relationship",
+      "Recipe",
+      "Visible or semantic signal",
+      "Stop condition",
+      "Reduced-motion result",
+      "Low-power fallback",
+    ];
+    const liveEffectRows = markdownTableRows(liveEffectBody ?? "", liveEffectHeaders);
+    if (
+      liveEffectRows.length === 0 ||
+      liveEffectRows.some((row) => row.length !== liveEffectHeaders.length || row.some((cell) => !isAuthoredLiveEffectCell(cell)))
+    ) {
       issues.push(
         issue(
           "error",
@@ -138,7 +150,7 @@ function workspaceIsLaunched(root: string): boolean {
   try {
     const state = parseYaml(readFileSync(statePath, "utf8")) as { project?: { phase?: unknown }; state?: { current_phase?: unknown } };
     const phase = String(state.state?.current_phase ?? state.project?.phase ?? "");
-    return /^phase_6(?:_|$)/.test(phase);
+    return /^phase_6(?:b|_|$)/.test(phase);
   } catch {
     return false;
   }

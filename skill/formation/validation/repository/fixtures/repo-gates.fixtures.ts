@@ -929,7 +929,7 @@ export function register(h: Harness): void {
   );
 
   const motionLiveWorkspaceIncomplete = writeMotionContractRoot("motion-contract-live-workspace-incomplete", (rel, text) => {
-    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6b");
     if (rel === "workspace/business/design/design.md") {
       return text.replace(
         "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
@@ -942,6 +942,24 @@ export function register(h: Harness): void {
     "motion contract validates the launched active workspace live-effect rows",
     "check-motion-contract.ts",
     ["--skill-root", motionLiveWorkspaceIncomplete, "--workspace-root", path.join(motionLiveWorkspaceIncomplete, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+
+  const motionLiveWorkspacePartialRow = writeMotionContractRoot("motion-contract-live-workspace-partial-row", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "| AI status | Processing state | R18 | Active orb | Processing ends | Static status text | Static status text |\n| Relationship | Connected state |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract rejects any truncated live-effect row in a launched workspace",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspacePartialRow, "--workspace-root", path.join(motionLiveWorkspacePartialRow, "workspace/business")],
     1,
     "motion_contract.live_surface.workspace_incomplete",
   );
