@@ -605,7 +605,11 @@ function parseSurfaceKeys(value: string): string[] {
 function requiredSourcesForSurface(surface: string): string[] {
   const sources = new Set<string>();
   if (/\b(?:motions?|gestures?|transitions?|loading)\b/i.test(surface)) sources.add("60fps.design");
-  if (/\b(?:ai|automation|trust|consent|authentication|sign[-.]?in|permissions?|sensitive[-.]data|user[-.]control|takeover|recovery|agency)\b/i.test(surface)) {
+  if (
+    /\b(?:ai|automation|trust|consent|auth|authentication|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|register|registration|password|session|permissions?|sensitive[-.]data|user[-.]control|takeover|recovery|agency)\b/i.test(
+      surface,
+    )
+  ) {
     sources.add("catalogue.projectsbyif.com");
   }
   if (/\b(?:onboarding|paywall|checkout|retention|referral)\b/i.test(surface)) {

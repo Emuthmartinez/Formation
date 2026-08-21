@@ -1016,6 +1016,33 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
+  const designRoomLoginWrongSource = makeFixture("design-room-reference-evidence-login-wrong-source");
+  {
+    const statePath = path.join(designRoomLoginWrongSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomLoginWrongSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: auth.login")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard input proof is needed. | login form | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Login form | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation input tokens. | surfaces.mobileApp.login | Device review | auth.login |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "login surfaces require their routed trust catalogue evidence",
+    designRoomLoginWrongSource,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
   const designRoomUnroutedSurfaceMismatch = makeFixture("design-room-reference-evidence-unrouted-surface-mismatch");
   {
     const statePath = path.join(designRoomUnroutedSurfaceMismatch, "studio/seed/business.json");
