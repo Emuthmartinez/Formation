@@ -150,6 +150,7 @@ if (hasDesignState) {
         }
       }
       const requiredEvidenceSources = new Set<string>();
+      const evidenceSourceStatuses = new Map<string, string>();
       for (const source of requiredSources) {
         const sourceRow = triageTable?.rows.find((row) => normalizedCell(row[triageTable.headers.indexOf("source")]).toLowerCase() === source.toLowerCase());
         if (!sourceRow) {
@@ -165,6 +166,7 @@ if (hasDesignState) {
         }
         if (evidenceRequired) {
           const statusCell = normalizedCell(sourceRow[triageTable!.headers.indexOf("status")]).toLowerCase();
+          evidenceSourceStatuses.set(source.toLowerCase(), statusCell);
           if (statusCell === "required") requiredEvidenceSources.add(source.toLowerCase());
           if (!["required", "not applicable", "unavailable"].includes(statusCell)) {
             issues.push(
@@ -214,16 +216,6 @@ if (hasDesignState) {
             ),
           );
         }
-        if (externalEvidenceRequired && requiredEvidenceSources.size === 0) {
-          issues.push(
-            issue(
-              "error",
-              "design_room.reference_evidence_change_sources_missing",
-              "A new, materially changed, high-impact, or high-risk surface must mark at least one routed source required.",
-              rel(args.root, contractPath),
-            ),
-          );
-        }
         if ((requiredEvidenceSources.size > 0 || externalEvidenceRequired) && authoredAdoptionRows.length === 0) {
           issues.push(
             issue(
@@ -255,16 +247,23 @@ if (hasDesignState) {
           const surface = normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase();
           const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
           if (requiredEvidenceSources.has(source)) sources.add(source);
+          for (const routedSource of requiredSourcesForSurface(surface)) {
+            if (evidenceSourceStatuses.get(routedSource) === "unavailable" && isAcceptedFallbackSource(routedSource, source)) {
+              sources.add(routedSource);
+            }
+          }
           evidenceSourcesBySurface.set(surface, sources);
           const categories = categoriesBySurface.get(surface) ?? new Set<string>();
           for (const category of highImpactCategories(`${surface} ${decision}`)) categories.add(category);
           categoriesBySurface.set(surface, categories);
         }
         if (externalEvidenceRequired) {
+          let hasScopedRoutedEvidence = requiredEvidenceSources.size > 0;
           for (const surface of scopedSurfaceKeys) {
             const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
             const routedSources = requiredSourcesForSurface(surface);
             const missingRoutedSources = routedSources.filter((source) => !sources.has(source));
+            if (routedSources.some((source) => sources.has(source))) hasScopedRoutedEvidence = true;
             if (missingRoutedSources.length > 0) {
               issues.push(
                 issue(
@@ -279,6 +278,16 @@ if (hasDesignState) {
             for (const category of highImpactCategories(surface)) categories.add(category);
             if (changeClassification === "high-impact or high-risk surface" && categories.size === 0) categories.add("high impact");
             categoriesBySurface.set(surface, categories);
+          }
+          if (!hasScopedRoutedEvidence) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.reference_evidence_change_sources_missing",
+                "A new, materially changed, high-impact, or high-risk surface must record evidence from a routed source or an accepted fallback for a routed source marked unavailable.",
+                rel(args.root, contractPath),
+              ),
+            );
           }
         }
         for (const [surface, categories] of categoriesBySurface) {
@@ -585,7 +594,7 @@ function parseSurfaceKeys(value: string): string[] {
 function requiredSourcesForSurface(surface: string): string[] {
   const sources = new Set<string>();
   if (/\b(?:motion|gesture|transition|loading)\b/i.test(surface)) sources.add("60fps.design");
-  if (/\b(?:ai|consent|authentication|permissions?|sensitive[-.]data)\b/i.test(surface)) sources.add("catalogue.projectsbyif.com");
+  if (/\b(?:ai|consent|authentication|sign[-.]?in|permissions?|sensitive[-.]data)\b/i.test(surface)) sources.add("catalogue.projectsbyif.com");
   if (/\b(?:onboarding|paywall|checkout|retention|referral)\b/i.test(surface)) {
     sources.add("abtest.design");
     sources.add("uxsnaps");
@@ -594,6 +603,13 @@ function requiredSourcesForSurface(surface: string): string[] {
   if (/\b(?:delight|success|empty[-.]state|magical[-.]moment)\b/i.test(surface)) sources.add("design spells");
   if (/\b(?:standard|control|overlay|input|notification|component)\b/i.test(surface)) sources.add("ui playbook");
   return [...sources];
+}
+
+function isAcceptedFallbackSource(routedSource: string, evidenceSource: string): boolean {
+  if (routedSource === "60fps.design") {
+    return /(?:^|\/)motion-craft-benchmarks\.md$/i.test(evidenceSource);
+  }
+  return false;
 }
 
 function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {

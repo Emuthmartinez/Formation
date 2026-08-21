@@ -934,6 +934,62 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
+  const designRoomMotionUnavailableFallback = makeFixture("design-room-reference-evidence-motion-unavailable-fallback");
+  {
+    const statePath = path.join(designRoomMotionUnavailableFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomMotionUnavailableFallback, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: motion.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| 60fps\.design \|.*$/m,
+        "| 60fps.design | unavailable | The live catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Result transition | motion-craft-benchmarks.md | The distilled recipe preserves context during the state change. | Adopt | Use Formation motion tokens and reduced motion. | surfaces.mobileApp.result | Device motion review | motion.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unavailable 60fps.design route accepts the documented distilled motion fallback",
+    designRoomMotionUnavailableFallback,
+    "check-design-room-contract.ts",
+    0,
+  );
+
+  const designRoomSignInWrongSource = makeFixture("design-room-reference-evidence-sign-in-wrong-source");
+  {
+    const statePath = path.join(designRoomSignInWrongSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSignInWrongSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: sign-in.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard input proof is needed. | sign-in form | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Sign-in form | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation input tokens. | surfaces.mobileApp.signIn | Device review | sign-in.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "sign-in surfaces require their routed trust catalogue evidence",
+    designRoomSignInWrongSource,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
   const designRoomScopedSurfaceMismatch = makeFixture("design-room-reference-evidence-scoped-surface-mismatch");
   {
     const statePath = path.join(designRoomScopedSurfaceMismatch, "studio/seed/business.json");
