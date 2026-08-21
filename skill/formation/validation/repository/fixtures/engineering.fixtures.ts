@@ -1148,6 +1148,64 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
+  const designRoomOneFallbackTwoLanes = makeFixture("design-room-reference-evidence-one-fallback-two-lanes");
+  {
+    const statePath = path.join(designRoomOneFallbackTwoLanes, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomOneFallbackTwoLanes, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| abtest\.design \|.*$/m,
+        "| abtest.design | unavailable | The experiment catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | unavailable | The journey catalogue cannot be reached in this runtime. | Not applicable | Not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding input | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "one official fallback row cannot satisfy two complementary unavailable lanes",
+    designRoomOneFallbackTwoLanes,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  for (const scope of ["micro-interactions.button", "empty-states.search", "magical-moments.reward"] as const) {
+    const designRoomPluralDelightRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomPluralDelightRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomPluralDelightRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard component proof is needed. | control states | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Delight surface | UI Playbook | Standard controls expose their state. | Adopt | Keep the control contract explicit. | surfaces.mobileApp.delight | Device review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${scope} requires its routed Design Spells evidence`,
+      designRoomPluralDelightRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
   const designRoomScopedSurfaceMismatch = makeFixture("design-room-reference-evidence-scoped-surface-mismatch");
   {
     const statePath = path.join(designRoomScopedSurfaceMismatch, "studio/seed/business.json");

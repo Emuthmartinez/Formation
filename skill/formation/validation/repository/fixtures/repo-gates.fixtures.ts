@@ -1100,6 +1100,19 @@ export function register(h: Harness): void {
     "motion_contract.live_surface.recipe_missing",
   );
 
+  const motionLiveSurfaceHeadingOnly = writeMotionContractRoot("motion-contract-live-surface-heading-only", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text.replace(/### R16 — State-bound perimeter beam[\s\S]*?(?=\n### R17 — Liquid-metal priority ring)/, "### R16 — State-bound perimeter beam\n")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a live-surface recipe keeps only its heading",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveSurfaceHeadingOnly],
+    1,
+    "motion_contract.live_surface.recipe_incomplete",
+  );
+
   const motionMirrorDrift = writeMotionContractRoot("motion-contract-mirror-drift", (rel, text) =>
     rel.endsWith("motion-craft-benchmarks.md")
       ? text.replace("celebrate (response 0.45–0.5 / damping 0.5–0.7)", "celebrate (response 0.45–0.6 / damping 0.5–0.7)")

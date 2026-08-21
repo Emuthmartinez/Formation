@@ -88,6 +88,26 @@ if (bench !== undefined) {
           BENCH,
         ),
       );
+      continue;
+    }
+    const body = sectionBody(bench, heading.replace(/^###\s+/, ""));
+    const checklistCount = body?.match(/^- \[ \] /gm)?.length ?? 0;
+    const requiredBodySignals = [
+      /\b(?:state|relationship|user action|product hierarchy)\b/i,
+      /\b(?:accessibility|accessible|focus|semantics?|status text)\b/i,
+      /\b(?:stop|stops|pause|pauses|inactive|idle|offscreen|hidden|stalled)\b/i,
+      /\b(?:layout shift|render loop|frame budget|context failure|pixel density|unbounded|static)\b/i,
+      /\bReduce Motion\b/i,
+    ];
+    if (body === undefined || checklistCount < 5 || requiredBodySignals.some((signal) => !signal.test(body))) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.live_surface.recipe_incomplete",
+          `${heading} must keep its state, accessibility, stop, performance or fallback, and Reduce Motion guidance with at least five checklist items.`,
+          BENCH,
+        ),
+      );
     }
   }
 }

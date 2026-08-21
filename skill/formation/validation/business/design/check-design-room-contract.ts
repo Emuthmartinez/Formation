@@ -240,6 +240,7 @@ if (hasDesignState) {
           }
         }
         const evidenceSourcesBySurface = new Map<string, Set<string>>();
+        const fallbackIdentitiesBySurface = new Map<string, Set<string>>();
         const categoriesBySurface = new Map<string, Set<string>>();
         for (const row of authoredAdoptionRows) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
@@ -247,12 +248,21 @@ if (hasDesignState) {
           const surface = normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase();
           const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
           if (requiredEvidenceSources.has(source)) sources.add(source);
+          const fallbackIdentities = fallbackIdentitiesBySurface.get(surface) ?? new Set<string>();
           for (const routedSource of requiredSourcesForSurface(surface)) {
-            if (evidenceSourceStatuses.get(routedSource) === "unavailable" && isAcceptedFallbackSource(routedSource, source)) {
+            if (
+              !sources.has(routedSource) &&
+              !fallbackIdentities.has(source) &&
+              evidenceSourceStatuses.get(routedSource) === "unavailable" &&
+              isAcceptedFallbackSource(routedSource, source)
+            ) {
               sources.add(routedSource);
+              fallbackIdentities.add(source);
+              break;
             }
           }
           evidenceSourcesBySurface.set(surface, sources);
+          fallbackIdentitiesBySurface.set(surface, fallbackIdentities);
           const categories = categoriesBySurface.get(surface) ?? new Set<string>();
           for (const category of highImpactCategories(`${surface} ${decision}`)) categories.add(category);
           categoriesBySurface.set(surface, categories);
@@ -603,7 +613,7 @@ function requiredSourcesForSurface(surface: string): string[] {
   }
   if (/\b(?:conversion|engagement|monetization)\b/i.test(surface)) sources.add("abtest.design");
   if (/\b(?:journey|dashboard|content[-.]discovery|flow[-.]critique)\b|\binformation[-.]hierarchy\b/i.test(surface)) sources.add("uxsnaps");
-  if (/\b(?:delight|personality|micro[-.]interaction|success|empty[-.]state|magical[-.]moment|surprise)\b/i.test(surface)) {
+  if (/\b(?:delight|personality|micro[-.]interactions?|success|empty[-.]states?|magical[-.]moments?|surprise)\b/i.test(surface)) {
     sources.add("design spells");
   }
   if (/\b(?:standard|control|overlay|input|notification|component)\b/i.test(surface)) sources.add("ui playbook");
