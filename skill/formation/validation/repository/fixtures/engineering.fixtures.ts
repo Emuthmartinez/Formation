@@ -1135,6 +1135,7 @@ export function register(h: Harness): void {
     "checkbox.terms",
     "radio.plan",
     "slider.volume",
+    "textarea.feedback",
   ] as const) {
     const designRoomConcreteComponentWrongSource = makeFixture(`design-room-reference-evidence-${componentScope.replaceAll(".", "-")}-wrong-source`);
     const statePath = path.join(designRoomConcreteComponentWrongSource, "studio/seed/business.json");
