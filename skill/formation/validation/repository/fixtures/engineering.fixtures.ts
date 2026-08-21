@@ -765,6 +765,32 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_adoption_incomplete",
   );
 
+  const designRoomMalformedEvidenceSurfaceKey = makeFixture("design-room-reference-evidence-malformed-surface-key");
+  {
+    const statePath = path.join(designRoomMalformedEvidenceSurfaceKey, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomMalformedEvidenceSurfaceKey, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: controls.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Primary button | UI Playbook | The control keeps a visible pressed state. | Adopt | Use Formation control tokens. | surfaces.mobileApp.button | Device review | primary button |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "every evidence row requires one category-prefixed stable surface key",
+    designRoomMalformedEvidenceSurfaceKey,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_surface_key_invalid",
+  );
+
   const designRoomRejectedEvidence = makeFixture("design-room-reference-evidence-rejected-row");
   {
     const statePath = path.join(designRoomRejectedEvidence, "studio/seed/business.json");

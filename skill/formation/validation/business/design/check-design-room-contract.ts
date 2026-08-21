@@ -197,14 +197,34 @@ if (hasDesignState) {
       }
       if (evidenceRequired) {
         const declaredAdoptionRows = adoptionTable?.rows.filter((row) => row.some((cell) => isAuthoredEvidenceCell(normalizedCell(cell)))) ?? [];
+        const surfaceKeyIndex = adoptionTable?.headers.indexOf("surface key") ?? -1;
+        const invalidSurfaceKeyRows = declaredAdoptionRows.filter((row) => {
+          const value = normalizedCell(row[surfaceKeyIndex]);
+          return value.includes(",") || parseSurfaceKeys(value).length !== 1;
+        });
+        if (invalidSurfaceKeyRows.length > 0) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_surface_key_invalid",
+              "Every Reference Evidence row needs one category-prefixed stable Surface key such as onboarding.primary or paywall.upgrade.",
+              rel(args.root, contractPath),
+            ),
+          );
+        }
         const authoredAdoptionRows = declaredAdoptionRows.filter((row) => {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("adopt or reject")]);
           const commonFields = ["surface or decision", "source", "observation", "validation", "surface key"];
           const commonFieldsComplete = commonFields.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header)])));
+          const surfaceKey = normalizedCell(row[surfaceKeyIndex]);
+          const surfaceKeyValid = !surfaceKey.includes(",") && parseSurfaceKeys(surfaceKey).length === 1;
           if (/^adopt$/i.test(decision)) {
-            return adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header.toLowerCase())])));
+            return (
+              surfaceKeyValid &&
+              adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header.toLowerCase())])))
+            );
           }
-          return commonFieldsComplete && /^reject\b[\s:—-]+\S/i.test(decision);
+          return surfaceKeyValid && commonFieldsComplete && /^reject\b[\s:—-]+\S/i.test(decision);
         });
         if (declaredAdoptionRows.length !== authoredAdoptionRows.length) {
           issues.push(
