@@ -657,16 +657,24 @@ function requiredSourcesForSurface(surface: string): string[] {
   if (/\b(?:delights?|personalit(?:y|ies)|micro[-.]interactions?|success(?:es)?|empty[-.]states?|magical[-.]moments?|surprises?)\b/i.test(surface)) {
     sources.add("design spells");
   }
-  if (/\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?)\b/i.test(surface)) sources.add("ui playbook");
+  if (
+    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|text[-.]?fields?|selects?|pickers?|menus?|tabs?|sheets?)\b/i.test(
+      surface,
+    )
+  ) {
+    sources.add("ui playbook");
+  }
   return [...sources];
 }
 
 function isTrustSurface(value: string): boolean {
   return (
-    /\b(?:ai|automations?|trust|security|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|passwords?|permissions?|data[-. ]access(?:es)?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
+    /\b(?:ai|automations?|trust|security|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|passwords?|permissions?|data[-. ]access(?:es)?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
       value,
     ) ||
-    /\b(?:sessions?[. -]management|management[. -]sessions?|accounts?[. -](?:register|registrations?)|(?:register|registrations?)[. -]accounts?)\b/i.test(value)
+    /\b(?:sessions?[. -]management|management[. -]sessions?|accounts?[. -](?:register|registrations?|sign[-.]?ups?)|(?:register|registrations?|sign[-.]?ups?)[. -]accounts?)\b/i.test(
+      value,
+    )
   );
 }
 
@@ -773,7 +781,7 @@ function evidenceSourceLane(evidenceSource: string): string {
   if (label !== undefined) return label;
   try {
     const parsed = new URL(target);
-    if (parsed.username !== "" || parsed.password !== "") return normalized;
+    if (!["http:", "https:"].includes(parsed.protocol) || parsed.username !== "" || parsed.password !== "") return normalized;
     const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
     return (
       new Map<string, string>([

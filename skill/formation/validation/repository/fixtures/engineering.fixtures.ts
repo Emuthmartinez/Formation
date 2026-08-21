@@ -1102,6 +1102,33 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
+  for (const componentScope of ["button.primary", "modal.confirm", "toggle.notifications", "dialog.delete"] as const) {
+    const designRoomConcreteComponentWrongSource = makeFixture(`design-room-reference-evidence-${componentScope.replaceAll(".", "-")}-wrong-source`);
+    const statePath = path.join(designRoomConcreteComponentWrongSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomConcreteComponentWrongSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${componentScope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Component craft proof is needed. | interaction detail | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Concrete component | Design Spells | A small interaction detail adds clarity. | Adopt | Keep it within Formation tokens. | surfaces.mobileApp.component | Device review | ${componentScope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${componentScope} requires UI Playbook evidence`,
+      designRoomConcreteComponentWrongSource,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
   const designRoomSignInWrongSource = makeFixture("design-room-reference-evidence-sign-in-wrong-source");
   {
     const statePath = path.join(designRoomSignInWrongSource, "studio/seed/business.json");
@@ -1244,6 +1271,34 @@ export function register(h: Harness): void {
     );
   }
 
+  const designRoomNonHttpCatalogueLink = makeFixture("design-room-reference-evidence-non-http-catalogue-link");
+  {
+    const statePath = path.join(designRoomNonHttpCatalogueLink, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomNonHttpCatalogueLink, "design/design.md");
+    const unsafeAbtestUrl = "javascript" + "://abtest.design/example";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: conversion.offer")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Conversion experiment proof is needed. | offer framing | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Conversion offer | [Experiment](${unsafeAbtestUrl}) | A non-web target is not usable evidence. | Reject — use a reachable web citation. | | | Source review | conversion.offer |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a non-HTTP catalogue link receives no canonical lane credit",
+    designRoomNonHttpCatalogueLink,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_required_source_missing",
+  );
+
   const designRoomHistoricalHighImpactOutsideScope = makeFixture("design-room-reference-evidence-historical-high-impact-outside-scope");
   {
     const statePath = path.join(designRoomHistoricalHighImpactOutsideScope, "studio/seed/business.json");
@@ -1348,6 +1403,7 @@ export function register(h: Harness): void {
   for (const [scope, decision] of [
     ["account.recovery", "Account recovery"],
     ["account.registration", "Account registration"],
+    ["account.signup", "Account signup"],
     ["auth.session", "Authentication session"],
     ["automation.takeover", "Automation takeover"],
     ["security.access", "Security access"],
@@ -1381,7 +1437,7 @@ export function register(h: Harness): void {
     );
   }
 
-  for (const ordinaryScope of ["workout.session", "event.registration", "class.register"] as const) {
+  for (const ordinaryScope of ["workout.session", "event.registration", "class.register", "newsletter.signup", "event.sign-up"] as const) {
     const designRoomOrdinaryLifecycle = makeFixture(`design-room-reference-evidence-ordinary-${ordinaryScope.replaceAll(".", "-")}`);
     const statePath = path.join(designRoomOrdinaryLifecycle, "studio/seed/business.json");
     const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
