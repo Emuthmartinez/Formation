@@ -48,6 +48,11 @@ Logo-swap test: strip the wordmark from five screens and state whether the targe
 
 Complete this evidence pass before a design mutation. Triage every source. Open only the sources that fit the decision. Use two complementary sources for onboarding, a paywall, the core loop, an AI trust surface, or the first frames of a store listing.
 
+Change classification: Not defined
+Change scope: Not defined
+
+Use `small token-preserving correction`, `new or materially changed surface`, or `high-impact or high-risk surface` for the change classification. Name the affected surface or decision in the change scope.
+
 | Source | Status | Why | Query or pattern | Evidence date |
 | --- | --- | --- | --- | --- |
 | 60fps.design | Not reviewed | Classify motion, transition, gesture, loading, success, and magical-moment needs. | Not defined | Not recorded |

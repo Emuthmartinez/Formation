@@ -106,6 +106,27 @@ if (hasDesignState) {
 
     const evidenceBody = sectionBody(contract, "Reference Evidence");
     if (evidenceBody !== undefined) {
+      const changeClassification = normalizedCell(evidenceBody.match(/^Change classification:\s*(.+)$/im)?.[1]).toLowerCase();
+      const changeScope = normalizedCell(evidenceBody.match(/^Change scope:\s*(.+)$/im)?.[1]);
+      const allowedChangeClassifications = new Set([
+        "small token-preserving correction",
+        "new or materially changed surface",
+        "high-impact or high-risk surface",
+      ]);
+      const changeClassificationValid = allowedChangeClassifications.has(changeClassification) && isAuthoredEvidenceCell(changeScope);
+      const externalEvidenceRequired =
+        changeClassificationValid &&
+        (changeClassification === "new or materially changed surface" || changeClassification === "high-impact or high-risk surface");
+      if (evidenceRequired && !changeClassificationValid) {
+        issues.push(
+          issue(
+            "error",
+            "design_room.reference_evidence_change_classification_invalid",
+            "A mutating or review-ready design/design.md must record an authored Change classification and Change scope. Use small token-preserving correction, new or materially changed surface, or high-impact or high-risk surface.",
+            rel(args.root, contractPath),
+          ),
+        );
+      }
       const requiredSources = ["60fps.design", "catalogue.projectsbyif.com", "abtest.design", "Design Spells", "UXSnaps", "UI Playbook"];
       const tables = markdownTables(evidenceBody);
       const triageHeaders = ["Source", "Status", "Why", "Query or pattern", "Evidence date"];
@@ -192,7 +213,17 @@ if (hasDesignState) {
             ),
           );
         }
-        if (requiredEvidenceSources.size > 0 && authoredAdoptionRows.length === 0) {
+        if (externalEvidenceRequired && requiredEvidenceSources.size === 0) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_change_sources_missing",
+              "A new, materially changed, high-impact, or high-risk surface must mark at least one routed source required.",
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+        if ((requiredEvidenceSources.size > 0 || externalEvidenceRequired) && authoredAdoptionRows.length === 0) {
           issues.push(
             issue(
               "error",
@@ -216,10 +247,17 @@ if (hasDesignState) {
           }
         }
         const highImpactSourcesByDecision = new Map<string, Set<string>>();
+        const scopedCategories = externalEvidenceRequired ? highImpactCategories(changeScope) : [];
+        if (externalEvidenceRequired) {
+          if (changeClassification === "high-impact or high-risk surface" && scopedCategories.length === 0) scopedCategories.push("high impact");
+          for (const category of scopedCategories) highImpactSourcesByDecision.set(category, new Set<string>());
+        }
         for (const row of authoredAdoptionRows) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
           const source = normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase();
-          for (const category of highImpactCategories(decision)) {
+          const decisionCategories = highImpactCategories(decision);
+          const applicableCategories = decisionCategories.length > 0 ? decisionCategories : scopedCategories.length === 1 ? scopedCategories : [];
+          for (const category of applicableCategories) {
             const sources = highImpactSourcesByDecision.get(category) ?? new Set<string>();
             if (requiredEvidenceSources.has(source)) sources.add(source);
             highImpactSourcesByDecision.set(category, sources);
@@ -522,6 +560,9 @@ function hasComplementaryEvidence(category: string, sources: Set<string>): boole
   const craftOrValidation = ["60fps.design", "abtest.design", "design spells", "ui playbook"];
   if (category === "AI trust") {
     return sources.has("catalogue.projectsbyif.com") && craftOrValidation.some((source) => sources.has(source));
+  }
+  if (category === "core loop") {
+    return sources.has("uxsnaps") && craftOrValidation.some((source) => sources.has(source));
   }
   const behaviorOrStructure = ["catalogue.projectsbyif.com", "uxsnaps"];
   return behaviorOrStructure.some((source) => sources.has(source)) && craftOrValidation.some((source) => sources.has(source));

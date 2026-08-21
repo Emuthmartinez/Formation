@@ -392,6 +392,53 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_status_invalid",
   );
 
+  const designRoomHighImpactWithoutEvidence = makeFixture("design-room-high-impact-without-evidence");
+  {
+    const statePath = path.join(designRoomHighImpactWithoutEvidence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHighImpactWithoutEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: Paywall")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a classified high-impact change cannot pass with every source not applicable",
+    designRoomHighImpactWithoutEvidence,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_change_sources_missing",
+  );
+
+  const designRoomSmallCorrectionWithoutEvidence = makeFixture("design-room-small-correction-without-evidence");
+  {
+    const statePath = path.join(designRoomSmallCorrectionWithoutEvidence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSmallCorrectionWithoutEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: Success-state color token")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a classified small token correction can skip live evidence",
+    designRoomSmallCorrectionWithoutEvidence,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_change_sources_missing",
+  );
+
   const designRoomEvidenceRequiredIncomplete = makeFixture("design-room-reference-evidence-required-incomplete");
   {
     const statePath = path.join(designRoomEvidenceRequiredIncomplete, "studio/seed/business.json");
@@ -606,6 +653,37 @@ export function register(h: Harness): void {
   runFixture(
     "AI trust evidence requires the IF Design Patterns Catalogue plus a complementary source",
     designRoomAiTrustWithoutIf,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomCoreLoopWithoutUxSnaps = makeFixture("design-room-reference-evidence-core-loop-without-uxsnaps");
+  {
+    const statePath = path.join(designRoomCoreLoopWithoutUxSnaps, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomCoreLoopWithoutUxSnaps, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: Core loop")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Core-loop motion proof is needed. | state transition | 2026-08-20 |")
+      .replace(
+        /^\| catalogue\.projectsbyif\.com \|.*$/m,
+        "| catalogue.projectsbyif.com | required | Core-loop structure proof is needed. | user control | 2026-08-20 |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Core loop | catalogue.projectsbyif.com | The flow keeps user control visible. | Adopt | Keep the state boundary explicit. | designRoom.surfaces.core | Scenario review |\n| Core loop | 60fps.design | The transition preserves context. | Adopt | Use Formation motion tokens. | designRoom.surfaces.core | Device review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "core-loop evidence requires UXSnaps plus a complementary source",
+    designRoomCoreLoopWithoutUxSnaps,
     "check-design-room-contract.ts",
     1,
     "design_room.reference_evidence_high_impact_sources_missing",
