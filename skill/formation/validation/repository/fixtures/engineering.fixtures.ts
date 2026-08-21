@@ -473,6 +473,83 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
+  const designRoomIncompleteEvidenceRow = makeFixture("design-room-reference-evidence-incomplete-row");
+  {
+    const statePath = path.join(designRoomIncompleteEvidenceRow, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomIncompleteEvidenceRow, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Paywall choice | abtest.design | Price framing is a local hypothesis. | Adopt | Test with the target audience. | designRoom.surfaces.paywall | |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a declared evidence row cannot omit a required field",
+    designRoomIncompleteEvidenceRow,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_adoption_incomplete",
+  );
+
+  const designRoomStaleEvidenceRows = makeFixture("design-room-reference-evidence-stale-rows");
+  {
+    const statePath = path.join(designRoomStaleEvidenceRows, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomStaleEvidenceRows, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding sequence | abtest.design | A shorter sequence improved activation elsewhere. | Adopt | Test locally. | designRoom.surfaces.onboarding | Conversion experiment |\n| Onboarding first-value step | UXSnaps | The first value arrives before permission. | Adopt | Preserve that order. | designRoom.surfaces.onboarding | Journey review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "stale evidence rows do not count when their sources are not required",
+    designRoomStaleEvidenceRows,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomStableSurfaceCategory = makeFixture("design-room-reference-evidence-stable-surface-category");
+  {
+    const statePath = path.join(designRoomStableSurfaceCategory, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomStableSurfaceCategory, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Conversion proof is needed. | first value | 2026-08-20 |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Journey proof is needed. | onboarding order | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding sequence | abtest.design | A shorter sequence improved activation elsewhere. | Adopt | Test locally. | designRoom.surfaces.onboarding | Conversion experiment |\n| Onboarding first-value step | UXSnaps | The first value arrives before permission. | Adopt | Preserve that order. | designRoom.surfaces.onboarding | Journey review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "different descriptions for one high-impact surface share a stable category",
+    designRoomStableSurfaceCategory,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
   const designRoomHighImpactSourcesCannotCrossSurface = makeFixture("design-room-reference-evidence-high-impact-cross-surface");
   {
     const statePath = path.join(designRoomHighImpactSourcesCannotCrossSurface, "studio/seed/business.json");

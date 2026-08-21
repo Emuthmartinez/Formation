@@ -184,14 +184,24 @@ if (hasDesignState) {
         }
       }
       if (reviewReady) {
-        const authoredAdoptionRows =
-          adoptionTable?.rows.filter((row) => {
-            const decision = normalizedCell(row[adoptionTable.headers.indexOf("adopt or reject")]);
-            return (
-              adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable.headers.indexOf(header.toLowerCase())]))) &&
-              /^(adopt|reject)\b/i.test(decision)
-            );
-          }) ?? [];
+        const declaredAdoptionRows = adoptionTable?.rows.filter((row) => row.some((cell) => isAuthoredEvidenceCell(normalizedCell(cell)))) ?? [];
+        const authoredAdoptionRows = declaredAdoptionRows.filter((row) => {
+          const decision = normalizedCell(row[adoptionTable!.headers.indexOf("adopt or reject")]);
+          return (
+            adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header.toLowerCase())]))) &&
+            /^(adopt|reject)\b/i.test(decision)
+          );
+        });
+        if (declaredAdoptionRows.length !== authoredAdoptionRows.length) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_adoption_incomplete",
+              "Every declared Reference Evidence row needs all seven authored fields and an Adopt or Reject decision.",
+              rel(args.root, contractPath),
+            ),
+          );
+        }
         if (requiredEvidenceSources.size > 0 && authoredAdoptionRows.length === 0) {
           issues.push(
             issue(
@@ -218,18 +228,20 @@ if (hasDesignState) {
         const highImpactSourcesByDecision = new Map<string, Set<string>>();
         for (const row of authoredAdoptionRows) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
-          if (!isHighImpactDecision(decision)) continue;
-          const sources = highImpactSourcesByDecision.get(decision) ?? new Set<string>();
-          sources.add(normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase());
-          highImpactSourcesByDecision.set(decision, sources);
+          const category = highImpactCategory(decision);
+          if (category === undefined) continue;
+          const sources = highImpactSourcesByDecision.get(category) ?? new Set<string>();
+          const source = normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase();
+          if (requiredEvidenceSources.has(source)) sources.add(source);
+          highImpactSourcesByDecision.set(category, sources);
         }
-        for (const [decision, sources] of highImpactSourcesByDecision) {
-          if (!hasComplementaryEvidence(decision, sources)) {
+        for (const [category, sources] of highImpactSourcesByDecision) {
+          if (!hasComplementaryEvidence(category, sources)) {
             issues.push(
               issue(
                 "error",
                 "design_room.reference_evidence_high_impact_sources_missing",
-                `The high-impact decision "${decision}" needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding and paywall decisions need abtest.design plus UXSnaps.`,
+                `The high-impact ${category} surface needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding and paywall decisions need abtest.design plus UXSnaps.`,
                 rel(args.root, contractPath),
               ),
             );
@@ -468,12 +480,17 @@ function isAuthoredEvidenceCell(value: string): boolean {
   return value.length > 0 && !containsTemplatePlaceholder(value) && !/^not reviewed$/i.test(value);
 }
 
-function isHighImpactDecision(value: string): boolean {
-  return /\bonboarding\b|\bpaywall\b|\bcore[- ]loop\b|\bai[- ]trust\b|\bstore\b.*\bfirst[- ]frame\b|\bfirst[- ]frame\b.*\bstore\b/i.test(value);
+function highImpactCategory(value: string): string | undefined {
+  if (/\bonboarding\b/i.test(value)) return "onboarding";
+  if (/\bpaywall\b/i.test(value)) return "paywall";
+  if (/\bcore[- ]loop\b/i.test(value)) return "core loop";
+  if (/\bai[- ]trust\b/i.test(value)) return "AI trust";
+  if (/\bstore\b.*\bfirst[- ]frame\b|\bfirst[- ]frame\b.*\bstore\b/i.test(value)) return "store first frame";
+  return undefined;
 }
 
-function hasComplementaryEvidence(decision: string, sources: Set<string>): boolean {
-  if (/\bonboarding\b|\bpaywall\b/i.test(decision)) {
+function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {
+  if (category === "onboarding" || category === "paywall") {
     return sources.has("abtest.design") && sources.has("uxsnaps");
   }
   const behaviorOrStructure = ["catalogue.projectsbyif.com", "uxsnaps"];
