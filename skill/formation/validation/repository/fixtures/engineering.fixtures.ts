@@ -493,7 +493,7 @@ export function register(h: Harness): void {
     const contract = readFileSync(contractPath, "utf8")
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
-      .replace("| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |", "");
+      .replace("| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |", "");
     writeFileSync(contractPath, contract, "utf8");
   }
   runFixture(
@@ -517,8 +517,8 @@ export function register(h: Harness): void {
       .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
       .replace(/^\| catalogue\.projectsbyif\.com \|.*$/m, "| catalogue.projectsbyif.com | required | Trust proof is needed. | consent recovery | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use the timing but keep Formation tokens. | designRoom.surfaces.onboarding | Device motion review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use the timing but keep Formation tokens. | designRoom.surfaces.onboarding | Device motion review | onboarding.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -542,8 +542,8 @@ export function register(h: Harness): void {
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use the timing but keep Formation tokens. | designRoom.surfaces.onboarding | Device motion review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use the timing but keep Formation tokens. | designRoom.surfaces.onboarding | Device motion review | onboarding.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -567,8 +567,8 @@ export function register(h: Harness): void {
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Store craft proof is needed. | first frames | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| First frames of a store listing | Design Spells | The opening composition shows the product outcome. | Adopt | Use the product's own visual language. | designRoom.surfaces.store | Store frame review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| First frames of a store listing | Design Spells | The opening composition shows the product outcome. | Adopt | Use the product's own visual language. | designRoom.surfaces.store | Store frame review | store.first-frame |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -593,8 +593,8 @@ export function register(h: Harness): void {
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| abtest\.design \|.*$/m, `| abtest.design | required | ${conversionTask} proof is needed. | ${slug} pattern | 2026-08-20 |`)
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        `| ${conversionTask} decision | abtest.design | An external result suggests a hypothesis. | Adopt | Test it locally. | designRoom.surfaces.${slug} | Conversion experiment |`,
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${conversionTask} decision | abtest.design | An external result suggests a hypothesis. | Adopt | Test it locally. | designRoom.surfaces.${slug} | Conversion experiment | ${slug}.primary |`,
       );
     writeFileSync(contractPath, contract, "utf8");
     runFixture(
@@ -619,8 +619,8 @@ export function register(h: Harness): void {
       .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
       .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Delight proof is needed. | success feedback | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Onboarding success | 60fps.design | A short transition preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.onboarding | Device motion review |\n| Onboarding success | Design Spells | A small success moment adds personality. | Adopt | Use the product's own visual language. | designRoom.surfaces.onboarding | Audience review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short transition preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.onboarding | Device motion review | onboarding.primary |\n| Onboarding success | Design Spells | A small success moment adds personality. | Adopt | Use the product's own visual language. | designRoom.surfaces.onboarding | Audience review | onboarding.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -645,8 +645,8 @@ export function register(h: Harness): void {
       .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | AI trust flow proof is needed. | consent recovery | 2026-08-20 |")
       .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | AI trust craft proof is needed. | consent feedback | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| AI trust decision | UXSnaps | A recovery flow preserves context. | Adopt | Keep the recovery path explicit. | designRoom.surfaces.core | Scenario review |\n| AI trust decision | Design Spells | Feedback makes the state change visible. | Adopt | Use restrained product feedback. | designRoom.surfaces.core | Audience review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| AI trust decision | UXSnaps | A recovery flow preserves context. | Adopt | Keep the recovery path explicit. | designRoom.surfaces.core | Scenario review | ai-trust.primary |\n| AI trust decision | Design Spells | Feedback makes the state change visible. | Adopt | Use restrained product feedback. | designRoom.surfaces.core | Audience review | ai-trust.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -676,8 +676,8 @@ export function register(h: Harness): void {
         "| catalogue.projectsbyif.com | required | Core-loop structure proof is needed. | user control | 2026-08-20 |",
       )
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Core loop | catalogue.projectsbyif.com | The flow keeps user control visible. | Adopt | Keep the state boundary explicit. | designRoom.surfaces.core | Scenario review |\n| Core loop | 60fps.design | The transition preserves context. | Adopt | Use Formation motion tokens. | designRoom.surfaces.core | Device review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Core loop | catalogue.projectsbyif.com | The flow keeps user control visible. | Adopt | Keep the state boundary explicit. | designRoom.surfaces.core | Scenario review | core-loop.primary |\n| Core loop | 60fps.design | The transition preserves context. | Adopt | Use Formation motion tokens. | designRoom.surfaces.core | Device review | core-loop.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -706,8 +706,8 @@ export function register(h: Harness): void {
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| UI Playbook \|.*$/m, `| UI Playbook | required | ${decision} component proof is needed. | trust component | 2026-08-20 |`)
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        `| ${decision} | UI Playbook | The component exposes the current state. | Adopt | Keep the state explicit. | designRoom.surfaces.core | Scenario review |`,
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${decision} | UI Playbook | The component exposes the current state. | Adopt | Keep the state explicit. | designRoom.surfaces.core | Scenario review | ai-trust.primary |`,
       );
     writeFileSync(contractPath, contract, "utf8");
     runFixture(
@@ -730,8 +730,8 @@ export function register(h: Harness): void {
     const contract = readFileSync(contractPath, "utf8")
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Paywall choice | abtest.design | Price framing is a local hypothesis. | Adopt | Test with the target audience. | designRoom.surfaces.paywall | |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Paywall choice | abtest.design | Price framing is a local hypothesis. | Adopt | Test with the target audience. | designRoom.surfaces.paywall | | paywall.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -755,8 +755,8 @@ export function register(h: Harness): void {
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Delight proof is needed. | success flourish | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Success feedback | Design Spells | A decorative flourish competes with the result. | Reject — it delays comprehension. | | | Audience review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Success feedback | Design Spells | A decorative flourish competes with the result. | Reject — it delays comprehension. | | | Audience review | success.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -783,8 +783,8 @@ export function register(h: Harness): void {
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Delight proof is needed. | success flourish | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Success feedback | Design Spells | A small flourish could reinforce completion. | Adopt later | Use a short flourish. | designRoom.surfaces.success | Audience review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Success feedback | Design Spells | A small flourish could reinforce completion. | Adopt later | Use a short flourish. | designRoom.surfaces.success | Audience review | success.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -807,8 +807,8 @@ export function register(h: Harness): void {
     const contract = readFileSync(contractPath, "utf8")
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Onboarding sequence | abtest.design | A shorter sequence improved activation elsewhere. | Adopt | Test locally. | designRoom.surfaces.onboarding | Conversion experiment |\n| Onboarding first-value step | UXSnaps | The first value arrives before permission. | Adopt | Preserve that order. | designRoom.surfaces.onboarding | Journey review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding sequence | abtest.design | A shorter sequence improved activation elsewhere. | Adopt | Test locally. | designRoom.surfaces.onboarding | Conversion experiment | onboarding.primary |\n| Onboarding first-value step | UXSnaps | The first value arrives before permission. | Adopt | Preserve that order. | designRoom.surfaces.onboarding | Journey review | onboarding.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -833,8 +833,8 @@ export function register(h: Harness): void {
       .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Conversion proof is needed. | first value | 2026-08-20 |")
       .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Journey proof is needed. | onboarding order | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Onboarding sequence | abtest.design | A shorter sequence improved activation elsewhere. | Adopt | Test locally. | designRoom.surfaces.onboarding | Conversion experiment |\n| Onboarding first-value step | UXSnaps | The first value arrives before permission. | Adopt | Preserve that order. | designRoom.surfaces.onboarding | Journey review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding sequence | abtest.design | A shorter sequence improved activation elsewhere. | Adopt | Test locally. | designRoom.surfaces.onboarding | Conversion experiment | onboarding.primary |\n| Onboarding first-value step | UXSnaps | The first value arrives before permission. | Adopt | Preserve that order. | designRoom.surfaces.onboarding | Journey review | onboarding.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -846,6 +846,64 @@ export function register(h: Harness): void {
     "design_room.contract_placeholder",
     [],
     undefined,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomSameSurfaceDifferentPaths = makeFixture("design-room-reference-evidence-same-surface-different-paths");
+  {
+    const statePath = path.join(designRoomSameSurfaceDifferentPaths, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSameSurfaceDifferentPaths, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: Onboarding")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Onboarding proof is needed. | first value | 2026-08-20 |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Journey proof is needed. | onboarding order | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| First-value sequence | abtest.design | A shorter sequence supplies a hypothesis. | Adopt | Test the sequence locally. | surfaces.mobileApp.flows[0].steps | Conversion experiment | onboarding.primary |\n| First-value sequence | UXSnaps | The journey preserves context. | Adopt | Preserve the screen order. | surfaces.mobileApp.flows[0].screens | Journey review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "one surface key groups complementary evidence across exact mutation paths",
+    designRoomSameSurfaceDifferentPaths,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomMultiSurfaceScope = makeFixture("design-room-reference-evidence-multi-surface-scope");
+  {
+    const statePath = path.join(designRoomMultiSurfaceScope, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomMultiSurfaceScope, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: Onboarding and paywall")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Transition proof is needed. | first value | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| First-value sequence | 60fps.design | The transition preserves context. | Adopt | Use Formation motion tokens. | surfaces.mobileApp.flows[0].steps | Device review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "each category in a multi-surface scope needs its own routed evidence",
+    designRoomMultiSurfaceScope,
+    "check-design-room-contract.ts",
+    1,
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
@@ -864,8 +922,8 @@ export function register(h: Harness): void {
       .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Paywall proof is needed. | offer framing | 2026-08-20 |")
       .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Paywall journey proof is needed. | upgrade flow | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Initial paywall | abtest.design | Offer framing supplies a local hypothesis. | Adopt | Test the initial offer. | designRoom.surfaces.initialPaywall | Conversion experiment |\n| Upgrade paywall | UXSnaps | The upgrade journey keeps context. | Adopt | Preserve the upgrade origin. | designRoom.surfaces.upgradePaywall | Journey review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Initial paywall | abtest.design | Offer framing supplies a local hypothesis. | Adopt | Test the initial offer. | designRoom.surfaces.initialPaywall | Conversion experiment | paywall.initial |\n| Upgrade paywall | UXSnaps | The upgrade journey keeps context. | Adopt | Preserve the upgrade origin. | designRoom.surfaces.upgradePaywall | Journey review | paywall.upgrade |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -889,8 +947,8 @@ export function register(h: Harness): void {
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Success transition | 60fps.design | Loading \\| complete preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.success | Device motion review |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Success transition | 60fps.design | Loading \\| complete preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.success | Device motion review | success.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -918,8 +976,8 @@ export function register(h: Harness): void {
       .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
       .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Conversion proof is needed. | price framing | 2026-08-20 |")
       .replace(
-        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
-        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.onboarding | Device motion review |\n| Paywall choice | abtest.design | Price framing is a local hypothesis. | Adopt | Test with the target audience. | designRoom.surfaces.paywall | Conversion experiment |",
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.onboarding | Device motion review | onboarding.primary |\n| Paywall choice | abtest.design | Price framing is a local hypothesis. | Adopt | Test with the target audience. | designRoom.surfaces.paywall | Conversion experiment | paywall.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }

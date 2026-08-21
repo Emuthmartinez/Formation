@@ -62,7 +62,9 @@ The source-triage table uses these fields:
 
 The adopted-evidence table uses these fields:
 
-`Surface or decision | Source | Observation | Adopt or reject | Adaptation | State path | Validation`
+`Surface or decision | Source | Observation | Adopt or reject | Adaptation | State path | Validation | Surface key`
+
+Use one stable `Surface key` for all evidence about the same surface. Use a category prefix such as `onboarding.primary` or `paywall.upgrade`. Keep each principle's exact mutation path in `State path`.
 
 Source use is not acceptance. Audience research, product constraints, accessibility, trust, and local validation can reject a popular pattern.
 
@@ -71,6 +73,7 @@ Source use is not acceptance. Audience research, product constraints, accessibil
 - All six sources have a triage status and a reason.
 - Every required source has a query or named pattern and an evidence date.
 - Every adopted principle has an adaptation, state path, and validation method.
+- Every evidence row has a stable surface key.
 - A high-impact or high-risk surface uses two complementary sources.
 - A cited experiment is a hypothesis unless local evidence proves it.
 - No row copies source branding, assets, copy, or an exact layout.

@@ -64,9 +64,9 @@ Use `small token-preserving correction`, `new or materially changed surface`, or
 
 Use only `required`, `not applicable`, or `unavailable` for an authored status. Give a reason. Treat an experiment result or breakdown as a hypothesis until local evidence supports it.
 
-| Surface or decision | Source | Observation | Adopt or reject | Adaptation | State path | Validation |
-| --- | --- | --- | --- | --- | --- | --- |
-| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |
+| Surface or decision | Source | Observation | Adopt or reject | Adaptation | State path | Validation | Surface key |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |
 
 ## Visual Direction
 

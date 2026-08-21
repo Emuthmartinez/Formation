@@ -131,7 +131,7 @@ if (hasDesignState) {
       const tables = markdownTables(evidenceBody);
       const triageHeaders = ["Source", "Status", "Why", "Query or pattern", "Evidence date"];
       const triageTable = tables.find((table) => tableHasHeaders(table, triageHeaders));
-      const adoptionHeaders = ["Surface or decision", "Source", "Observation", "Adopt or reject", "Adaptation", "State path", "Validation"];
+      const adoptionHeaders = ["Surface or decision", "Source", "Observation", "Adopt or reject", "Adaptation", "State path", "Validation", "Surface key"];
       const adoptionTable = tables.find((table) => tableHasHeaders(table, adoptionHeaders));
       for (const [name, table, headers] of [
         ["source triage", triageTable, triageHeaders],
@@ -196,7 +196,7 @@ if (hasDesignState) {
         const declaredAdoptionRows = adoptionTable?.rows.filter((row) => row.some((cell) => isAuthoredEvidenceCell(normalizedCell(cell)))) ?? [];
         const authoredAdoptionRows = declaredAdoptionRows.filter((row) => {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("adopt or reject")]);
-          const commonFields = ["surface or decision", "source", "observation", "validation"];
+          const commonFields = ["surface or decision", "source", "observation", "validation", "surface key"];
           const commonFieldsComplete = commonFields.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header)])));
           if (/^adopt$/i.test(decision)) {
             return adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header.toLowerCase())])));
@@ -208,7 +208,7 @@ if (hasDesignState) {
             issue(
               "error",
               "design_room.reference_evidence_adoption_incomplete",
-              "Every declared Reference Evidence row needs its surface, source, observation, decision, and validation. Adopted rows also need an adaptation and state path. Rejected rows need a rationale after Reject.",
+              "Every declared Reference Evidence row needs its stable surface key, surface or decision, source, observation, decision, and validation. Adopted rows also need an adaptation and state path. Rejected rows need a rationale after Reject.",
               rel(args.root, contractPath),
             ),
           );
@@ -252,15 +252,19 @@ if (hasDesignState) {
         for (const row of authoredAdoptionRows) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
           const source = normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase();
-          const statePath = normalizedCell(row[adoptionTable!.headers.indexOf("state path")]);
-          const decisionCategories = highImpactCategories(decision);
-          const applicableCategories = decisionCategories.length > 0 ? decisionCategories : scopedCategories.length === 1 ? scopedCategories : [];
+          const surface = normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase();
+          const applicableCategories = highImpactCategories(`${surface} ${decision}`);
           for (const category of applicableCategories) {
-            const surface = stableEvidenceSurface(decision, statePath);
             const key = `${category}\u0000${surface}`;
             const entry = highImpactSourcesBySurface.get(key) ?? { category, surface, sources: new Set<string>() };
             if (requiredEvidenceSources.has(source)) entry.sources.add(source);
             highImpactSourcesBySurface.set(key, entry);
+          }
+        }
+        for (const category of scopedCategories) {
+          if (![...highImpactSourcesBySurface.values()].some((entry) => entry.category === category)) {
+            const surface = changeScope.toLowerCase();
+            highImpactSourcesBySurface.set(`${category}\u0000${surface}`, { category, surface, sources: new Set<string>() });
           }
         }
         for (const { category, surface, sources } of highImpactSourcesBySurface.values()) {
@@ -269,7 +273,7 @@ if (hasDesignState) {
               issue(
                 "error",
                 "design_room.reference_evidence_high_impact_sources_missing",
-                `The ${category} design decision for ${surface} needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps. AI trust decisions need catalogue.projectsbyif.com plus a craft or validation source.`,
+                `The ${category} design decision for ${surface} needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps. AI trust decisions need catalogue.projectsbyif.com plus a craft or validation source. Core-loop decisions need UXSnaps plus a craft or validation source.`,
                 rel(args.root, contractPath),
               ),
             );
@@ -566,15 +570,6 @@ function hasComplementaryEvidence(category: string, sources: Set<string>): boole
   }
   const behaviorOrStructure = ["catalogue.projectsbyif.com", "uxsnaps"];
   return behaviorOrStructure.some((source) => sources.has(source)) && craftOrValidation.some((source) => sources.has(source));
-}
-
-function stableEvidenceSurface(decision: string, statePath: string): string {
-  if (isAuthoredEvidenceCell(statePath)) {
-    const normalizedPath = normalizedCell(statePath).toLowerCase();
-    const designSurface = normalizedPath.match(/^designroom\.surfaces\.[^.\s]+/i)?.[0];
-    return designSurface ?? normalizedPath;
-  }
-  return decision;
 }
 
 function containsTemplatePlaceholder(value: string): boolean {
