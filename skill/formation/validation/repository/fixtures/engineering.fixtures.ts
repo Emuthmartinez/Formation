@@ -428,6 +428,33 @@ export function register(h: Harness): void {
     );
   }
 
+  for (const [label, open, close] of [
+    ["fenced-section", "```markdown\n", "\n```"],
+    ["commented-section", "<!--\n", "\n-->"],
+  ] as const) {
+    const hiddenSection = makeFixture(`design-room-reference-evidence-${label}`);
+    const statePath = path.join(hiddenSection, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(hiddenSection, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8");
+    const referenceSection = contract.match(/## Reference Evidence[\s\S]*?(?=\n## Visual Direction)/)?.[0] ?? "";
+    const authoredExample = referenceSection
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract.replace("## Reference Evidence", `${open}${authoredExample}${close}\n\n## Reference Evidence`), "utf8");
+    runFixture(
+      `${label} before the live section does not satisfy Reference Evidence`,
+      hiddenSection,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_change_classification_invalid",
+    );
+  }
+
   const designRoomSeededTriageReasons = makeFixture("design-room-reference-evidence-seeded-triage-reasons");
   {
     const statePath = path.join(designRoomSeededTriageReasons, "studio/seed/business.json");

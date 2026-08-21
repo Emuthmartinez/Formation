@@ -997,6 +997,30 @@ export function register(h: Harness): void {
     1,
     "motion_contract.live_surface.workspace_incomplete",
   );
+  for (const [label, open, close] of [
+    ["fenced", "```markdown\n", "\n```"],
+    ["commented", "<!--\n", "\n-->"],
+  ] as const) {
+    const hiddenLiveEffectTable = writeMotionContractRoot(`motion-contract-live-workspace-${label}-table`, (rel, text) => {
+      if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+      if (rel === "workspace/business/design/design.md") {
+        const completeTable = [
+          "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+          "| --- | --- | --- | --- | --- | --- | --- |",
+          "| AI status | Processing state | R18 | Active orb and status text | Processing ends | Static status text | Static status text |",
+        ].join("\n");
+        return text.replace("### Live-surface effects", `### Live-surface effects\n\n${open}${completeTable}${close}`);
+      }
+      return text;
+    });
+    runScriptArgs(
+      `motion contract ignores a ${label} live-effect table`,
+      "check-motion-contract.ts",
+      ["--skill-root", hiddenLiveEffectTable, "--workspace-root", path.join(hiddenLiveEffectTable, "workspace/business")],
+      1,
+      "motion_contract.live_surface.workspace_incomplete",
+    );
+  }
   const motionLiveWorkspaceUnsupportedRecipe = writeMotionContractRoot("motion-contract-live-workspace-unsupported-recipe", (rel, text) => {
     if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
     if (rel === "workspace/business/design/design.md") {

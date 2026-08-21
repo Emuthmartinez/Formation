@@ -48,7 +48,7 @@ if (hasDesignState) {
   if (!existsSync(contractPath)) {
     issues.push(issue("error", "design_room.contract_missing", "design/design.md is required for all product design work.", rel(args.root, contractPath)));
   } else {
-    const contract = readFileSync(contractPath, "utf8");
+    const contract = stripNonRenderedMarkdown(readFileSync(contractPath, "utf8"));
     for (const section of requiredContractSections) {
       if (!new RegExp(`^#{2,3} ${escapeRegExp(section)}\\s*$`, "im").test(contract)) {
         issues.push(
@@ -106,9 +106,8 @@ if (hasDesignState) {
 
     const evidenceBody = sectionBody(contract, "Reference Evidence");
     if (evidenceBody !== undefined) {
-      const renderedEvidenceBody = stripNonRenderedMarkdown(evidenceBody);
-      const changeClassificationMatches = [...renderedEvidenceBody.matchAll(/^Change classification:\s*(.+)$/gim)];
-      const changeScopeMatches = [...renderedEvidenceBody.matchAll(/^Change scope:\s*(.+)$/gim)];
+      const changeClassificationMatches = [...evidenceBody.matchAll(/^Change classification:\s*(.+)$/gim)];
+      const changeScopeMatches = [...evidenceBody.matchAll(/^Change scope:\s*(.+)$/gim)];
       const changeClassification = normalizedCell(changeClassificationMatches[0]?.[1]).toLowerCase();
       const changeScope = normalizedCell(changeScopeMatches[0]?.[1]);
       const allowedChangeClassifications = new Set([
@@ -136,7 +135,7 @@ if (hasDesignState) {
         );
       }
       const requiredSources = ["60fps.design", "catalogue.projectsbyif.com", "abtest.design", "Design Spells", "UXSnaps", "UI Playbook"];
-      const tables = markdownTables(renderedEvidenceBody);
+      const tables = markdownTables(evidenceBody);
       const triageHeaders = ["Source", "Status", "Why", "Query or pattern", "Evidence date"];
       const triageTable = tables.find((table) => tableHasHeaders(table, triageHeaders));
       const adoptionHeaders = ["Surface or decision", "Source", "Observation", "Adopt or reject", "Adaptation", "State path", "Validation", "Surface key"];

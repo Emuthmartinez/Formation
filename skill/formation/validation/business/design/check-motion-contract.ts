@@ -115,6 +115,7 @@ if (bench !== undefined) {
 const designContractPath = path.join(workspaceRoot, "design/design.md");
 const designContract = existsSync(designContractPath) ? readFileSync(designContractPath, "utf8") : undefined;
 if (designContract !== undefined) {
+  const renderedDesignContract = stripNonRenderedMarkdown(designContract);
   const requiredLiveEffectFields = [
     "Real state or relationship",
     "Visible or semantic signal",
@@ -123,7 +124,7 @@ if (designContract !== undefined) {
     "Low-power fallback",
   ];
   for (const field of requiredLiveEffectFields) {
-    if (!designContract.includes(field)) {
+    if (!renderedDesignContract.includes(field)) {
       issues.push(
         issue(
           "error",
@@ -134,7 +135,7 @@ if (designContract !== undefined) {
       );
     }
   }
-  const liveEffectBody = sectionBody(designContract, "Live-surface effects");
+  const liveEffectBody = sectionBody(renderedDesignContract, "Live-surface effects");
   const liveEffectHeaders = [
     "Surface",
     "Real state or relationship",
@@ -206,6 +207,23 @@ function sectionBody(document: string, headingName: string): string | undefined 
   const depth = lines[start]!.trim().match(pattern)![1]!.length;
   const end = lines.findIndex((line, index) => index > start && /^(#{2,6})\s+/.test(line.trim()) && line.trim().match(/^(#{2,6})/)![1]!.length <= depth);
   return lines.slice(start + 1, end < 0 ? undefined : end).join("\n");
+}
+
+function stripNonRenderedMarkdown(markdown: string): string {
+  const withoutComments = markdown.replace(/<!--[\s\S]*?-->/g, "");
+  const renderedLines: string[] = [];
+  let fence: "`" | "~" | undefined;
+  for (const line of withoutComments.split("\n")) {
+    const marker = line.match(/^\s*(`{3,}|~{3,})/u)?.[1];
+    if (marker !== undefined) {
+      const kind = marker[0] as "`" | "~";
+      if (fence === undefined) fence = kind;
+      else if (fence === kind) fence = undefined;
+      continue;
+    }
+    if (fence === undefined) renderedLines.push(line);
+  }
+  return renderedLines.join("\n");
 }
 
 function markdownTable(body: string, requiredHeaders: string[]): { headers: string[]; rows: string[][] } | undefined {
