@@ -1489,6 +1489,7 @@ export function register(h: Harness): void {
     ["data.access", "Data access"],
     ["session.management", "Session management"],
     ["user-control.permissions", "User control permissions"],
+    ["user.agency", "User agency"],
   ] as const) {
     const designRoomTrustRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
     const statePath = path.join(designRoomTrustRouteMissing, "studio/seed/business.json");
@@ -1516,7 +1517,7 @@ export function register(h: Harness): void {
     );
   }
 
-  for (const ordinaryScope of ["workout.session", "event.registration", "class.register", "newsletter.signup", "event.sign-up"] as const) {
+  for (const ordinaryScope of ["workout.session", "event.registration", "class.register", "newsletter.signup", "event.sign-up", "travel.agency"] as const) {
     const designRoomOrdinaryLifecycle = makeFixture(`design-room-reference-evidence-ordinary-${ordinaryScope.replaceAll(".", "-")}`);
     const statePath = path.join(designRoomOrdinaryLifecycle, "studio/seed/business.json");
     const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
