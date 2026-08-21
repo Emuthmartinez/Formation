@@ -210,6 +210,8 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
   const nodes: CompiledRunNode[] = catalog.workflows.map((workflow): CompiledRunNode => {
     const unknownDependency = workflow.dependencies.find((dependency) => !knownWorkflowIds.has(dependency));
     if (unknownDependency) throw new Error(`${workflow.id} depends on unknown workflow ${unknownDependency}`);
+    const unknownRefreshDependency = workflow.refreshDependencies?.find((dependency) => !knownWorkflowIds.has(dependency.workflowId));
+    if (unknownRefreshDependency) throw new Error(`${workflow.id} refreshes unknown workflow ${unknownRefreshDependency.workflowId}`);
 
     const outputs = outputsByWorkflow.get(workflow.id) ?? [];
     // Inputs are the union of dependency outputs (edge topology) and authored reads that name

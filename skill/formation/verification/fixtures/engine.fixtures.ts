@@ -252,6 +252,19 @@ export function register(harness: Harness): void {
     assert(threw, "expected compilePlan to throw on an unknown dependency");
   });
 
+  harness.check("compile: unknown refresh dependency reference fails closed", () => {
+    const catalog = testCatalog();
+    catalog.workflows[1]!.refreshDependencies = [{ workflowId: "workflow.does-not-exist" as never, instructions: "Invalid refresh target." }];
+    let threw = false;
+    try {
+      compilePlan(catalog, now);
+    } catch (error) {
+      threw = true;
+      assert(String(error).includes("workflow.does-not-exist"), `expected error to name the unknown refresh dependency, got: ${error}`);
+    }
+    assert(threw, "expected compilePlan to throw on an unknown refresh dependency");
+  });
+
   harness.check("compile: ambiguous shared write (two workflows, one declared output) fails closed", () => {
     const catalog = testCatalog();
     catalog.workflows[3]!.outputPaths = ["foo"]; // now collides with workflow.engineering-build's "foo"

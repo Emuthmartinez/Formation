@@ -838,7 +838,7 @@ async function main(): Promise<number> {
       reconcileWorkflowApplicability(plan, run, businessState, sessionNow());
       for (const node of plan.nodes) {
         const state = run.nodes[node.id];
-        if (state && !["pending", "ready", "stale"].includes(state.status)) {
+        if (state && ["not_needed", "skipped"].includes(state.status)) {
           abandonDependencyRefreshesForConsumer(plan, run, node.id, sessionNow());
         }
       }
