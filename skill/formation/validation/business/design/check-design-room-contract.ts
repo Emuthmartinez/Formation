@@ -249,16 +249,17 @@ if (hasDesignState) {
           const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
           if (requiredEvidenceSources.has(source)) sources.add(source);
           const fallbackIdentities = fallbackIdentitiesBySurface.get(surface) ?? new Set<string>();
+          const fallbackIdentity = canonicalEvidenceSource(source);
           const fallbackCandidateSources = [...new Set([...requiredSourcesForSurface(surface), ...evidenceSourceStatuses.keys()])];
           for (const routedSource of fallbackCandidateSources) {
             if (
               !sources.has(routedSource) &&
-              !fallbackIdentities.has(source) &&
+              !fallbackIdentities.has(fallbackIdentity) &&
               evidenceSourceStatuses.get(routedSource) === "unavailable" &&
               isAcceptedFallbackSource(routedSource, source)
             ) {
               sources.add(routedSource);
-              fallbackIdentities.add(source);
+              fallbackIdentities.add(fallbackIdentity);
               break;
             }
           }
@@ -667,6 +668,26 @@ function isOfficialPlatformGuidance(evidenceSource: string): boolean {
   return /https?:\/\/(?:developer\.apple\.com|developer\.android\.com|m3\.material\.io|material\.io|learn\.microsoft\.com|www\.w3\.org\/wai\/(?:aria|apg))(?:[)/]|$)/i.test(
     evidenceSource,
   );
+}
+
+function canonicalEvidenceSource(evidenceSource: string): string {
+  const markdownUrl = evidenceSource.match(/\]\((https?:\/\/[^)\s]+)\)/i)?.[1];
+  const plainUrl = evidenceSource.match(/https?:\/\/[^)\s]+/i)?.[0];
+  const rawUrl = markdownUrl ?? plainUrl;
+  if (rawUrl !== undefined) {
+    try {
+      const parsed = new URL(rawUrl);
+      parsed.hash = "";
+      parsed.search = "";
+      parsed.hostname = parsed.hostname.toLowerCase();
+      parsed.pathname = parsed.pathname === "/" ? "/" : parsed.pathname.replace(/\/+$/, "");
+      return parsed.toString().replace(/\/$/, parsed.pathname === "/" ? "/" : "");
+    } catch {
+      // Fall through to normalized text when a source cell contains a malformed URL.
+    }
+  }
+  const normalized = normalizedCell(evidenceSource).toLowerCase().replaceAll("\\", "/").replace(/^\.\//, "");
+  return normalized.endsWith(".md") ? normalized.split("/").at(-1)! : normalized;
 }
 
 function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {
