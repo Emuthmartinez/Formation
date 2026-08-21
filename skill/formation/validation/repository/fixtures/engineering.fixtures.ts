@@ -1354,6 +1354,33 @@ export function register(h: Harness): void {
     );
   }
 
+  for (const scope of ["controls.toggle", "overlays.sheet", "inputs.search", "notifications.push", "components.modal"] as const) {
+    const designRoomPluralComponentRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomPluralComponentRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomPluralComponentRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Surface craft proof is needed. | visual treatment | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Component surface | Design Spells | Visual feedback can support comprehension. | Adopt | Keep feedback subordinate to function. | surfaces.mobileApp.component | Audience review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${scope} requires its routed UI Playbook evidence`,
+      designRoomPluralComponentRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
   const designRoomScopedSurfaceMismatch = makeFixture("design-room-reference-evidence-scoped-surface-mismatch");
   {
     const statePath = path.join(designRoomScopedSurfaceMismatch, "studio/seed/business.json");

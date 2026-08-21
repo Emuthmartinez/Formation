@@ -604,24 +604,26 @@ function parseSurfaceKeys(value: string): string[] {
 
 function requiredSourcesForSurface(surface: string): string[] {
   const sources = new Set<string>();
-  if (/\b(?:motions?|gestures?|transitions?|loading)\b/i.test(surface)) sources.add("60fps.design");
+  if (/\b(?:motions?|gestures?|transitions?|loadings?)\b/i.test(surface)) sources.add("60fps.design");
   if (
-    /\b(?:ai|automation|trust|consent|auth|authentication|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|register|registration|password|session|permissions?|sensitive[-.]data|user[-.]control|takeover|recovery|agency)\b/i.test(
+    /\b(?:ai|automations?|trust|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|register|registrations?|passwords?|sessions?|permissions?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
       surface,
     )
   ) {
     sources.add("catalogue.projectsbyif.com");
   }
-  if (/\b(?:onboarding|paywall|checkout|retention|referral)\b/i.test(surface)) {
+  if (/\b(?:onboardings?|paywalls?|checkouts?|retentions?|referrals?)\b/i.test(surface)) {
     sources.add("abtest.design");
     sources.add("uxsnaps");
   }
-  if (/\b(?:conversion|engagement|monetization)\b/i.test(surface)) sources.add("abtest.design");
-  if (/\b(?:journey|dashboard|content[-.]discovery|flow[-.]critique)\b|\binformation[-.]hierarchy\b/i.test(surface)) sources.add("uxsnaps");
-  if (/\b(?:delight|personality|micro[-.]interactions?|success|empty[-.]states?|magical[-.]moments?|surprise)\b/i.test(surface)) {
+  if (/\b(?:conversions?|engagements?|monetizations?)\b/i.test(surface)) sources.add("abtest.design");
+  if (/\b(?:journeys?|dashboards?|content[-.]discover(?:y|ies)|flow[-.]critiques?)\b|\binformation[-.]hierarch(?:y|ies)\b/i.test(surface)) {
+    sources.add("uxsnaps");
+  }
+  if (/\b(?:delights?|personalit(?:y|ies)|micro[-.]interactions?|success(?:es)?|empty[-.]states?|magical[-.]moments?|surprises?)\b/i.test(surface)) {
     sources.add("design spells");
   }
-  if (/\b(?:standard|control|overlay|input|notification|component)\b/i.test(surface)) sources.add("ui playbook");
+  if (/\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?)\b/i.test(surface)) sources.add("ui playbook");
   return [...sources];
 }
 
