@@ -1359,6 +1359,38 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
+  const designRoomEncodedFallbackAliases = makeFixture("design-room-reference-evidence-encoded-fallback-aliases");
+  {
+    const statePath = path.join(designRoomEncodedFallbackAliases, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomEncodedFallbackAliases, "design/design.md");
+    const encodedFallbackUrl = "https" + "://www.w3.org/WAI/ARIA/apg/patterns/%63ombobox/";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| abtest\.design \|.*$/m,
+        "| abtest.design | unavailable | The experiment catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | unavailable | The journey catalogue cannot be reached in this runtime. | Not applicable | Not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Onboarding input | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n| Onboarding input | ${encodedFallbackUrl} | A percent-encoded alias cannot satisfy a second evidence lane. | Reject | Keep one canonical source identity. | surfaces.mobileApp.onboarding | Source identity review | onboarding.primary |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "percent-encoded URL aliases cannot satisfy complementary unavailable evidence lanes",
+    designRoomEncodedFallbackAliases,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
   const designRoomUnroutedUnavailableFallback = makeFixture("design-room-reference-evidence-unrouted-unavailable-fallback");
   {
     const statePath = path.join(designRoomUnroutedUnavailableFallback, "studio/seed/business.json");
@@ -1392,7 +1424,7 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_change_sources_missing",
   );
 
-  for (const scope of ["gestures.swipe", "transitions.success"] as const) {
+  for (const scope of ["gestures.swipe", "transitions.success", "success.animation", "magical-moment.animation"] as const) {
     const designRoomPluralMotionRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
     const statePath = path.join(designRoomPluralMotionRouteMissing, "studio/seed/business.json");
     const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;

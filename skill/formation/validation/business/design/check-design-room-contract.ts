@@ -625,7 +625,7 @@ function parseSurfaceKeys(value: string): string[] {
 
 function requiredSourcesForSurface(surface: string): string[] {
   const sources = new Set<string>();
-  if (/\b(?:motions?|gestures?|transitions?|loadings?)\b/i.test(surface)) sources.add("60fps.design");
+  if (/\b(?:motions?|animations?|gestures?|transitions?|loadings?)\b/i.test(surface)) sources.add("60fps.design");
   if (
     /\b(?:ai|automations?|trust|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|register|registrations?|passwords?|sessions?|permissions?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
       surface,
@@ -720,6 +720,7 @@ function canonicalEvidenceSource(evidenceSource: string): string {
       parsed.username = "";
       parsed.password = "";
       parsed.hostname = parsed.hostname.toLowerCase();
+      parsed.pathname = decodeURI(parsed.pathname).replace(/%[0-9a-f]{2}/gi, (escape) => escape.toUpperCase());
       parsed.pathname = parsed.pathname === "/" ? "/" : parsed.pathname.replace(/\/+$/, "");
       return parsed.toString().replace(/\/$/, parsed.pathname === "/" ? "/" : "");
     } catch {
