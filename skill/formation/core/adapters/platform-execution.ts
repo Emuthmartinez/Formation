@@ -262,8 +262,8 @@ export function buildBoundaryResults(plan: CompiledPlan, run: RunStateDocument):
     );
     if (bindings.some((binding) => binding === undefined || !binding.fingerprint)) continue;
     const acceptedAttemptIds = new Set(bindings.map((binding) => binding!.attemptId).filter((attemptId): attemptId is string => Boolean(attemptId)));
-    if (acceptedAttemptIds.size !== 1) continue;
-    const acceptedAttemptId = [...acceptedAttemptIds][0]!;
+    if (node.outputs.length > 0 && acceptedAttemptIds.size !== 1) continue;
+    const acceptedAttemptId = node.outputs.length === 0 ? state.attempts.at(-1)?.id : [...acceptedAttemptIds][0];
     const attempt = state.attempts.find((candidate) => candidate.id === acceptedAttemptId);
     if (!attempt || attempt.status !== "succeeded") continue;
 

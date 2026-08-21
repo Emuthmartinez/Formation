@@ -867,7 +867,7 @@ async function main(): Promise<number> {
       writeRunState(paths.runState, run);
       applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const frontier = computeFrontier(plan, run, businessState, captured);
-      let readyIds: RunNodeId[] = frontier.ready;
+      let readyIds: RunNodeId[] = frontier.ready.filter((nodeId) => !failedScopedRefreshDependencyIds.has(nodeId));
       if (brief.scopeHints && brief.scopeHints.length > 0) {
         const inScope = readyIds.filter((id) => {
           const node = plan.nodes.find((candidate) => candidate.id === id)!;

@@ -442,6 +442,25 @@ export function register(harness: Harness): void {
     assert(refreshDependenciesBeforeFrontier(exhaustedPlan, exhaustedRun, plusSeconds(now, 4)).length === 0, "an exhausted dependency cannot reopen");
     assert(exhaustedDependency.status === "succeeded" && exhaustedBinding.accepted, "failed refresh admission must preserve accepted dependency state");
     assert(exhaustedRun.nodes[productId]!.status === "blocked", "the consumer must park explicitly when its required refresh cannot run");
+
+    const { run: exhaustedConsumerRun } = seedFor(["research"], exhaustedPlan);
+    const exhaustedConsumer = exhaustedConsumerRun.nodes[productId]!;
+    const consumerNode = exhaustedPlan.nodes.find((node) => node.id === productId)!;
+    for (let index = 0; index < consumerNode.maxAttempts; index += 1) {
+      const attempt = beginAttempt(exhaustedPlan, exhaustedConsumerRun, productId, `session-consumer-exhaust-${index}`, plusSeconds(now, index));
+      attempt.status = "failed";
+      exhaustedConsumer.status = "stale";
+    }
+    const preservedDependencyBinding = exhaustedConsumerRun.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!;
+    assert(
+      refreshDependenciesBeforeFrontier(exhaustedPlan, exhaustedConsumerRun, plusSeconds(now, 5)).length === 0,
+      "an exhausted consumer cannot reopen a dependency",
+    );
+    assert(
+      exhaustedConsumerRun.nodes[researchId]!.status === "succeeded" && preservedDependencyBinding.accepted,
+      "consumer budget exhaustion must preserve the dependency's accepted proof",
+    );
+    assert(exhaustedConsumer.status === "blocked", "an exhausted refresh consumer must park explicitly");
   });
 
   harness.check("runstate: refreshed output fingerprints still invalidate already-succeeded descendants when content changes", () => {

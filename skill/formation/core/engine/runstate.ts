@@ -471,6 +471,11 @@ export function refreshDependenciesBeforeFrontier(
     if (node.refreshDependencies.length === 0) continue;
     const consumer = run.nodes[node.id];
     if (!consumer || !eligible.has(consumer.status)) continue;
+    if (consumer.attempts.length >= node.maxAttempts) {
+      consumer.status = "blocked";
+      consumer.blocker = "Required dependency refresh skipped because this work has no attempts remaining.";
+      continue;
+    }
     const refreshIds = new Set(node.refreshDependencies.map((entry) => entry.nodeId));
     if (node.dependencies.some((dependencyId) => !refreshIds.has(dependencyId) && run.nodes[dependencyId]?.status !== "succeeded")) continue;
     const refreshOutputs = new Set(plan.nodes.filter((candidate) => refreshIds.has(candidate.id)).flatMap((candidate) => candidate.outputs));
