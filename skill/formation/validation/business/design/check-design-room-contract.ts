@@ -114,6 +114,7 @@ if (hasDesignState) {
       const triageTable = tables.find((table) => tableHasHeaders(table, ["Source", "Status", "Why", "Query or pattern", "Evidence date"]));
       const adoptionHeaders = ["Surface or decision", "Source", "Observation", "Adopt or reject", "Adaptation", "State path", "Validation"];
       const adoptionTable = tables.find((table) => tableHasHeaders(table, adoptionHeaders));
+      const requiredEvidenceSources = new Set<string>();
       for (const source of requiredSources) {
         const sourceRow = triageTable?.rows.find((row) => normalizedCell(row[triageTable.headers.indexOf("source")]).toLowerCase() === source.toLowerCase());
         if (!sourceRow) {
@@ -129,6 +130,7 @@ if (hasDesignState) {
         }
         if (reviewReady) {
           const statusCell = normalizedCell(sourceRow[triageTable!.headers.indexOf("status")]).toLowerCase();
+          if (statusCell === "required") requiredEvidenceSources.add(source.toLowerCase());
           if (!["required", "not applicable", "unavailable"].includes(statusCell)) {
             issues.push(
               issue(
@@ -199,6 +201,19 @@ if (hasDesignState) {
               rel(args.root, contractPath),
             ),
           );
+        }
+        const adoptedSources = new Set(authoredAdoptionRows.map((row) => normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase()));
+        for (const requiredSource of requiredEvidenceSources) {
+          if (!adoptedSources.has(requiredSource)) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.reference_evidence_required_source_missing",
+                `A source marked required needs its own complete adopted-or-rejected evidence row: ${requiredSource}.`,
+                rel(args.root, contractPath),
+              ),
+            );
+          }
         }
       }
     }

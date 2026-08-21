@@ -387,6 +387,32 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_adoption_missing",
   );
 
+  const designRoomRequiredSourceMissing = makeFixture("design-room-reference-evidence-required-source-missing");
+  {
+    const statePath = path.join(designRoomRequiredSourceMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomRequiredSourceMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace(/^\| catalogue\.projectsbyif\.com \|.*$/m, "| catalogue.projectsbyif.com | required | Trust proof is needed. | consent recovery | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use the timing but keep Formation tokens. | designRoom.surfaces.onboarding | Device motion review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "each required Reference Evidence source needs a complete adoption row",
+    designRoomRequiredSourceMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_required_source_missing",
+  );
+
   const designRoomFreeform = makeFixture("design-room-freeform-proposal");
   writeFileSync(path.join(designRoomFreeform, "design-proposal.html"), "<!doctype html><html><body>New idea</body></html>", "utf8");
   runFixture(
