@@ -27,6 +27,7 @@ import { createAutonomyEvaluator } from "../../core/autonomy/evaluator.js";
 import { applyStandingApprovals } from "../../core/autonomy/standing-approvals.js";
 import {
   acceptVerification,
+  abandonDependencyRefreshesForConsumer,
   beginAttempt,
   buildCheckpoint,
   detectOrphans,
@@ -314,6 +315,14 @@ export function register(harness: Harness): void {
       (run.nodes[productId]!.dependencyRefreshCycles?.length ?? 0) === 1,
       "a failed scoped refresh must retain durable authorization for a later-session retry",
     );
+    run.nodes[productId]!.status = "not_needed";
+    assert(
+      abandonDependencyRefreshesForConsumer(plan, run, productId, plusSeconds(now, 4)).includes(researchId),
+      "parking a refresh consumer must abandon its durable scope",
+    );
+    assert((run.nodes[productId]!.dependencyRefreshCycles?.length ?? 0) === 0, "abandonment must clear the parked consumer's refresh token");
+    assert(run.nodes[researchId]!.refreshInstructions === undefined, "abandonment must clear obsolete dependency instructions");
+    assert(String(run.nodes[researchId]!.status) === "stale", "abandonment must leave unknown dependency bytes eligible for generic repair");
 
     const { run: verifiedRollbackRun } = seedFor([], plan);
     const acceptedAttempt = beginAttempt(plan, verifiedRollbackRun, researchId, "session-original-producer", plusSeconds(now, 4));

@@ -522,6 +522,31 @@ export function deferDependencyRefreshAfterFailure(plan: CompiledPlan, run: RunS
   return true;
 }
 
+/** Remove obsolete scoped instructions when applicability parks the consumer that requested them. */
+export function abandonDependencyRefreshesForConsumer(plan: CompiledPlan, run: RunStateDocument, consumerId: RunNodeId, now: string): RunNodeId[] {
+  const consumerNode = plan.nodes.find((node) => node.id === consumerId);
+  const consumer = run.nodes[consumerId];
+  if (!consumerNode || !consumer?.dependencyRefreshCycles?.length) return [];
+  const abandoned: RunNodeId[] = [];
+  for (const refresh of consumerNode.refreshDependencies) {
+    const prefix = `${refresh.nodeId}@`;
+    if (!consumer.dependencyRefreshCycles.some((cycle) => cycle.startsWith(prefix))) continue;
+    consumer.dependencyRefreshCycles = consumer.dependencyRefreshCycles.filter((cycle) => !cycle.startsWith(prefix));
+    const stillClaimed = plan.nodes.some((candidate) => {
+      if (candidate.id === consumerId || !candidate.refreshDependencies.some((entry) => entry.nodeId === refresh.nodeId)) return false;
+      const state = run.nodes[candidate.id];
+      return Boolean(state && ["pending", "ready", "stale"].includes(state.status) && state.dependencyRefreshCycles?.some((cycle) => cycle.startsWith(prefix)));
+    });
+    if (!stillClaimed) {
+      const dependency = run.nodes[refresh.nodeId];
+      if (dependency) dependency.refreshInstructions = undefined;
+    }
+    abandoned.push(refresh.nodeId);
+  }
+  if (abandoned.length > 0) run.updatedAt = now;
+  return abandoned;
+}
+
 /** Staleness invalidation: a changed accepted input invalidates descendants transitively. */
 export function invalidateDescendants(
   plan: CompiledPlan,

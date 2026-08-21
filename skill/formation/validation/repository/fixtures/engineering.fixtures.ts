@@ -410,6 +410,8 @@ export function register(h: Harness): void {
     ["fenced", "```markdown\n", "\n```"],
     ["commented", "<!--\n", "\n-->"],
     ["unterminated-comment", "<!--\n", ""],
+    ["script-block", '<script type="text/plain">\n', "\n</script>"],
+    ["style-block", "<style>\n", "\n</style>"],
   ] as const) {
     const hiddenEvidence = makeFixture(`design-room-reference-evidence-${label}`);
     const statePath = path.join(hiddenEvidence, "studio/seed/business.json");

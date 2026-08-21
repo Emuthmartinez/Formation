@@ -17,6 +17,7 @@ import { observeAppSourceFingerprint } from "../engine/source-fingerprint.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
 import {
   acceptVerification,
+  abandonDependencyRefreshesForConsumer,
   beginAttempt,
   detectOrphans,
   isWallClockExceeded,
@@ -835,6 +836,12 @@ async function main(): Promise<number> {
       // Applicability can change between sessions. Settle it before refresh mutates any accepted
       // dependency proof, so a newly deferred/not-needed consumer cannot spend a refresh attempt.
       reconcileWorkflowApplicability(plan, run, businessState, sessionNow());
+      for (const node of plan.nodes) {
+        const state = run.nodes[node.id];
+        if (state && !["pending", "ready", "stale"].includes(state.status)) {
+          abandonDependencyRefreshesForConsumer(plan, run, node.id, sessionNow());
+        }
+      }
       const activeScopeHints = brief?.scopeHints;
       const scopedRefreshConsumers: Set<RunNodeId> | undefined =
         activeScopeHints && activeScopeHints.length > 0
