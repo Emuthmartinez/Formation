@@ -52,6 +52,8 @@ export function computeFrontier(plan: CompiledPlan, run: RunStateDocument, busin
   for (const node of plan.nodes) {
     const state = run.nodes[node.id];
     if (!state || !READY_ELIGIBLE_STATUSES.includes(state.status)) continue;
+    const refreshCycles = new Set(state.dependencyRefreshCycles ?? []);
+    if (node.refreshDependencies.some((refresh) => !refreshCycles.has(`${refresh.nodeId}@${state.attempts.length}`))) continue;
     if (node.dependencies.some((dependency) => run.nodes[dependency]?.status !== "succeeded")) continue;
     if (node.inputs.some((artifactId) => !accepted.has(artifactId))) continue;
 

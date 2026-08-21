@@ -556,7 +556,7 @@ function sectionBody(contract: string, section: string): string | undefined {
 }
 
 function stripNonRenderedMarkdown(markdown: string): string {
-  const withoutComments = markdown.replace(/<!--[\s\S]*?-->/g, "");
+  const withoutComments = stripHtmlComments(markdown);
   const renderedLines: string[] = [];
   let fence: { kind: "`" | "~"; length: number } | undefined;
   for (const line of withoutComments.split("\n")) {
@@ -576,6 +576,20 @@ function stripNonRenderedMarkdown(markdown: string): string {
     renderedLines.push(line);
   }
   return renderedLines.join("\n");
+}
+
+function stripHtmlComments(markdown: string): string {
+  let rendered = "";
+  let cursor = 0;
+  while (cursor < markdown.length) {
+    const start = markdown.indexOf("<!--", cursor);
+    if (start < 0) return rendered + markdown.slice(cursor);
+    rendered += markdown.slice(cursor, start);
+    const end = markdown.indexOf("-->", start + 4);
+    if (end < 0) return rendered;
+    cursor = end + 3;
+  }
+  return rendered;
 }
 
 type MarkdownTable = { headers: string[]; rows: string[][] };

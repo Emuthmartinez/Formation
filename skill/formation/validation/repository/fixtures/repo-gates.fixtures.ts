@@ -1000,6 +1000,7 @@ export function register(h: Harness): void {
   for (const [label, open, close] of [
     ["fenced", "```markdown\n", "\n```"],
     ["commented", "<!--\n", "\n-->"],
+    ["unterminated-comment", "<!--\n", ""],
   ] as const) {
     const hiddenLiveEffectTable = writeMotionContractRoot(`motion-contract-live-workspace-${label}-table`, (rel, text) => {
       if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");

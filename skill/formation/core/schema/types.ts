@@ -390,6 +390,8 @@ export interface ArtifactBindingV2 {
   accepted: boolean;
   producedBy?: string;
   attemptId?: string;
+  /** Last accepted fingerprint retained while a producer is reopened for scoped refresh. */
+  refreshBaselineFingerprint?: string;
 }
 
 export interface AttemptRecordV2 {

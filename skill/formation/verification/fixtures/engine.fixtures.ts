@@ -317,6 +317,51 @@ export function register(harness: Harness): void {
       initiallyPending.nodes[researchId]!.refreshInstructions?.some((entry) => entry.includes("product-specific evidence scope")),
       "the reopened dependency must carry the consumer's compiled refresh scope",
     );
+
+    const sharedCatalog = testCatalog();
+    sharedCatalog.workflows[1]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh research for the product-specific evidence scope before drafting." },
+    ];
+    sharedCatalog.workflows[5]!.dependencies = ["workflow.research-scan"];
+    sharedCatalog.workflows[5]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh research for the growth-specific evidence scope before publishing." },
+    ];
+    const sharedPlan = compilePlan(sharedCatalog, now);
+    const { businessState: sharedState, run: sharedRun } = seedFor(["research"], sharedPlan);
+    refreshDependenciesBeforeFrontier(sharedPlan, sharedRun, now);
+    sharedRun.nodes[researchId]!.status = "succeeded";
+    sharedRun.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted = true;
+    const sharedReady = computeFrontier(sharedPlan, sharedRun, sharedState, allowAllAutonomyEvaluator).ready;
+    assert(sharedReady.includes(productId), "the consumer owning the current scoped refresh may enter the frontier");
+    assert(!sharedReady.includes(nodeId("growth-post")), "a second consumer must wait for its own scoped refresh cycle");
+  });
+
+  harness.check("runstate: refreshed output fingerprints still invalidate already-succeeded descendants when content changes", () => {
+    const catalog = testCatalog();
+    catalog.workflows[5]!.dependencies = ["workflow.research-scan"];
+    catalog.workflows[5]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh research for a growth-specific evidence scope before publishing." },
+    ];
+    const plan = compilePlan(catalog, now);
+    const { run } = seedFor(["research", "product"], plan);
+    const researchId = nodeId("research-scan");
+    const productId = nodeId("product-spec");
+    const binding = run.artifactBindings.find((candidate) => candidate.artifactId === "artifact.research-brief")!;
+    const baseline = binding.fingerprint;
+    refreshDependenciesBeforeFrontier(plan, run, now);
+    assert(binding.refreshBaselineFingerprint === baseline && binding.fingerprint === baseline, "refresh must retain the accepted comparison baseline");
+    const attempt = beginAttempt(plan, run, researchId, "session-refresh", plusSeconds(now, 1));
+    reconcilePatch(
+      plan,
+      run,
+      {
+        nodeId: researchId,
+        attemptId: attempt.id,
+        outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "sha256:changed", evidence: ["changed refresh"] }],
+      },
+      plusSeconds(now, 2),
+    );
+    assert(run.nodes[productId]!.status === "stale", "a changed refreshed artifact must invalidate its succeeded descendant");
   });
 
   harness.check("compile/autonomy: internal system workflows preserve edges and run without founder grants, but external actions fail closed", () => {

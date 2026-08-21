@@ -64,7 +64,8 @@
         "fingerprint": { "type": "string" },
         "accepted": { "type": "boolean" },
         "producedBy": { "type": "string" },
-        "attemptId": { "type": "string" }
+        "attemptId": { "type": "string" },
+        "refreshBaselineFingerprint": { "type": "string" }
       }
     },
     "attempt": {

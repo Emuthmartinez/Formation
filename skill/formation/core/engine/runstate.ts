@@ -271,12 +271,17 @@ export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch:
     if (!expected.has(output.artifactId)) throw new Error(`${patch.nodeId} returned undeclared output ${output.artifactId}`);
     const binding = run.artifactBindings.find((candidate) => candidate.artifactId === output.artifactId);
     if (!binding) throw new Error(`Missing artifact binding ${output.artifactId}`);
-    if (binding.accepted && binding.fingerprint !== output.fingerprint) changedAcceptedInputs.push(output.artifactId);
+    if (
+      (binding.accepted && binding.fingerprint !== output.fingerprint) ||
+      (binding.refreshBaselineFingerprint !== undefined && binding.refreshBaselineFingerprint !== output.fingerprint)
+    )
+      changedAcceptedInputs.push(output.artifactId);
     binding.path = output.path;
     binding.fingerprint = output.fingerprint;
     binding.accepted = node.verification.kind === "none";
     binding.producedBy = node.id;
     binding.attemptId = attempt.id;
+    binding.refreshBaselineFingerprint = undefined;
     attempt.evidence.push(...output.evidence);
   }
 
@@ -466,8 +471,8 @@ export function refreshDependenciesBeforeFrontier(plan: CompiledPlan, run: RunSt
       const dependencyNode = plan.nodes.find((candidate) => candidate.id === dependencyId);
       for (const binding of run.artifactBindings) {
         if (!dependencyNode?.outputs.some((artifactId) => artifactId === binding.artifactId)) continue;
+        if (binding.accepted && binding.fingerprint) binding.refreshBaselineFingerprint = binding.fingerprint;
         binding.accepted = false;
-        binding.fingerprint = undefined;
         binding.producedBy = undefined;
         binding.attemptId = undefined;
       }
