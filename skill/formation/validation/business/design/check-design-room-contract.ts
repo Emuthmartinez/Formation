@@ -512,7 +512,7 @@ function highImpactCategory(value: string): string | undefined {
   if (/\bpaywall\b/i.test(value)) return "paywall";
   if (/\bcore[- ]loop\b/i.test(value)) return "core loop";
   if (/\bai[- ]trust\b/i.test(value)) return "AI trust";
-  if (/\bstore\b.*\bfirst[- ]frame\b|\bfirst[- ]frame\b.*\bstore\b/i.test(value)) return "store first frame";
+  if (/\bstore\b.*\bfirst[- ]frames?\b|\bfirst[- ]frames?\b.*\bstore\b/i.test(value)) return "store first frame";
   return undefined;
 }
 

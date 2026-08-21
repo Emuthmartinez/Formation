@@ -471,6 +471,31 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
+  const designRoomStoreFirstFrames = makeFixture("design-room-reference-evidence-store-first-frames");
+  {
+    const statePath = path.join(designRoomStoreFirstFrames, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomStoreFirstFrames, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Store craft proof is needed. | first frames | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| First frames of a store listing | Design Spells | The opening composition shows the product outcome. | Adopt | Use the product's own visual language. | designRoom.surfaces.store | Store frame review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "plural store first-frame wording still requires complementary evidence",
+    designRoomStoreFirstFrames,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
   const designRoomHighImpactSameLane = makeFixture("design-room-reference-evidence-high-impact-same-lane");
   {
     const statePath = path.join(designRoomHighImpactSameLane, "studio/seed/business.json");
