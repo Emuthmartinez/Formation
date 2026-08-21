@@ -138,7 +138,7 @@ export const workflows = [
     areaIds: ["area.growth-revenue"],
     trigger: "Immediately after design/design.md is accepted — build the local landing site while app implementation runs",
     instructions:
-      "Build a runnable local landing site in growth/landing/ as soon as design/design.md is accepted. Do this work in parallel with app implementation. Use the launch-surface-producer prompt in agents/launch-surface-producer.md. Include one conversion goal, the approved promise, a mobile CTA, proof, responsive behavior, and a local build check. Include a short web onboarding or qualification flow only when the product contract needs it. Use current COPY_DECK.md strings. Show prices only when revenue/REVENUE_OPS.md records founder-approved prices. Create truthful screenshot slots and an update route, but label design renders as previews until real app captures exist. Declare landing_viewed, landing_cta_clicked, and waitlist_submitted before implementation. Write growth/landing/surface-contract.json with SHA-256 digests for every canonical input, each Tier 1 locale, pricing/onboarding applicability decisions, and screenshot evidence. Keep motion progressive per landing-motion-craft.md, and when the 60fps.design MCP is connected ground hero/scroll/micro-interaction choices in live exemplars (60fps_search_shots, 60fps_get_motion_breakdown) re-expressed on the web --motion-* scale — never port its SwiftUI starter code to a web surface. Do not deploy from this node.",
+      "Build a runnable local landing site in growth/landing/ as soon as design/design.md is accepted. Before this node enters the dispatch frontier, the orchestration manager must invalidate workflow.design.design-room-state-mutate-version-render in run state (mark it stale, clear its blocker and accepted output fingerprint, and mark its output bindings unaccepted), recompute the frontier, redispatch that Design Room node with a landing-specific change classification and affected scope, accept its four refreshed outputs, and only then recompute and dispatch this landing node. The landing worker never writes Design Room outputs. Run check:design-room before changing the landing hero, scroll behavior, micro-interactions, or any other visual surface; an accepted Design Room dependency from an earlier or unrelated scope is not evidence for a later landing mutation. Do this work in parallel with app implementation. Use the launch-surface-producer prompt in agents/launch-surface-producer.md. Include one conversion goal, the approved promise, a mobile CTA, proof, responsive behavior, and a local build check. Include a short web onboarding or qualification flow only when the product contract needs it. Use current COPY_DECK.md strings. Show prices only when revenue/REVENUE_OPS.md records founder-approved prices. Create truthful screenshot slots and an update route, but label design renders as previews until real app captures exist. Declare landing_viewed, landing_cta_clicked, and waitlist_submitted before implementation. Write growth/landing/surface-contract.json with SHA-256 digests for every canonical input, each Tier 1 locale, pricing/onboarding applicability decisions, and screenshot evidence. Keep motion progressive per landing-motion-craft.md, and when the 60fps.design MCP is connected ground hero/scroll/micro-interaction choices in live exemplars (60fps_search_shots, 60fps_get_motion_breakdown) re-expressed on the web --motion-* scale — never port its SwiftUI starter code to a web surface. Do not deploy from this node.",
     reads: [
       "GEO_SEO.md",
       "analytics/ANALYTICS.md",
@@ -157,7 +157,15 @@ export const workflows = [
       "workflow.design.design-room-state-mutate-version-render",
       "workflow.operations.agent-operations-ledger",
     ],
+    refreshDependencies: [
+      {
+        workflowId: "workflow.design.design-room-state-mutate-version-render",
+        instructions:
+          "Record a landing-specific change classification and affected scope, then complete the Design Evidence pass for the landing hero, scroll behavior, micro-interactions, and other visual surfaces.",
+      },
+    ],
     outputPaths: ["growth/landing/"],
+    gates: ["check:design-room"],
     actionClass: "mutate",
     idempotent: false,
   }),

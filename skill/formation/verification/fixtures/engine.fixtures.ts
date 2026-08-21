@@ -10,7 +10,7 @@ import {
   type CompiledPlan,
   type RunNodeId,
 } from "../../core/engine/compile.js";
-import { allowAllAutonomyEvaluator, computeFrontier, type AutonomyEvaluator } from "../../core/engine/frontier.js";
+import { allowAllAutonomyEvaluator, computeFrontier, isNodeAuthorized, type AutonomyEvaluator } from "../../core/engine/frontier.js";
 import { buildDispatchBatches, checkBatchBoundary, neverHaltDispatchHooks } from "../../core/engine/dispatch.js";
 import { composeNodeBrief, renderNodeBrief } from "../../core/engine/node-brief.js";
 import { buildBoundaryResults, buildLaunchMatrix } from "../../core/adapters/platform-execution.js";
@@ -27,6 +27,7 @@ import { createAutonomyEvaluator } from "../../core/autonomy/evaluator.js";
 import { applyStandingApprovals } from "../../core/autonomy/standing-approvals.js";
 import {
   acceptVerification,
+  abandonDependencyRefreshesForConsumer,
   beginAttempt,
   buildCheckpoint,
   detectOrphans,
@@ -37,6 +38,8 @@ import {
   reconcilePatch,
   refreshHeartbeat,
   reconcileWorkflowApplicability,
+  refreshDependenciesBeforeFrontier,
+  deferDependencyRefreshAfterFailure,
   seedRunState,
   wallClockDeadline,
   writeCheckpoint,
@@ -249,6 +252,19 @@ export function register(harness: Harness): void {
     assert(threw, "expected compilePlan to throw on an unknown dependency");
   });
 
+  harness.check("compile: unknown refresh dependency reference fails closed", () => {
+    const catalog = testCatalog();
+    catalog.workflows[1]!.refreshDependencies = [{ workflowId: "workflow.does-not-exist" as never, instructions: "Invalid refresh target." }];
+    let threw = false;
+    try {
+      compilePlan(catalog, now);
+    } catch (error) {
+      threw = true;
+      assert(String(error).includes("workflow.does-not-exist"), `expected error to name the unknown refresh dependency, got: ${error}`);
+    }
+    assert(threw, "expected compilePlan to throw on an unknown refresh dependency");
+  });
+
   harness.check("compile: ambiguous shared write (two workflows, one declared output) fails closed", () => {
     const catalog = testCatalog();
     catalog.workflows[3]!.outputPaths = ["foo"]; // now collides with workflow.engineering-build's "foo"
@@ -280,6 +296,244 @@ export function register(harness: Harness): void {
     const productSpec = plan.nodes.find((node) => node.id === nodeId("product-spec"))!;
     assert(productSpec.dependencies.includes(nodeId("research-scan")), "product-spec should depend on research-scan");
     assert(productSpec.inputs.includes("artifact.research-brief"), "product-spec should consume artifact.research-brief");
+  });
+
+  harness.check("runstate: fresh dependency cycles reopen a succeeded dependency exactly once before frontier selection", () => {
+    const catalog = testCatalog();
+    catalog.workflows[1]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh the research brief for the product-specific evidence scope before drafting." },
+    ];
+    const plan = compilePlan(catalog, now);
+    const { businessState, run } = seedFor(["research"], plan);
+    const researchId = nodeId("research-scan");
+    const productId = nodeId("product-spec");
+    const productNode = plan.nodes.find((node) => node.id === productId)!;
+    assert(
+      !isNodeAuthorized(productNode, run, businessState, { evaluate: () => ({ allowed: false, parkReason: "fixture denial" }) }),
+      "a consumer denied by autonomy must not be admitted for dependency refresh",
+    );
+    const reopened = refreshDependenciesBeforeFrontier(plan, run, now);
+    assert(reopened.includes(researchId), "the succeeded research dependency must reopen before product dispatch");
+    assert(run.nodes[researchId]!.status === "stale", "the refreshed dependency must be frontier-eligible as stale");
+    assert(!run.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted, "refresh must invalidate old output proof");
+    assert(!computeFrontier(plan, run, businessState, allowAllAutonomyEvaluator).ready.includes(productId), "the consumer must wait for refreshed proof");
+    run.nodes[researchId]!.status = "succeeded";
+    run.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted = true;
+    assert(refreshDependenciesBeforeFrontier(plan, run, plusSeconds(now, 1)).length === 0, "the same consumer attempt cycle must not reopen twice");
+    run.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted = false;
+    const failedRefreshAttempt = beginAttempt(plan, run, researchId, "session-refresh-failure", plusSeconds(now, 2));
+    failedRefreshAttempt.status = "failed";
+    assert(deferDependencyRefreshAfterFailure(plan, run, researchId, plusSeconds(now, 3)), "a scoped refresh failure must be recognized");
+    assert(String(run.nodes[researchId]!.status) === "stale", "a failed scoped refresh must remain retry-eligible");
+    assert(
+      !run.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted,
+      "a failed scoped refresh must not attest bytes the engine did not restore",
+    );
+    assert(
+      (run.nodes[productId]!.dependencyRefreshCycles?.length ?? 0) === 1,
+      "a failed scoped refresh must retain durable authorization for a later-session retry",
+    );
+    run.nodes[productId]!.status = "not_needed";
+    assert(
+      abandonDependencyRefreshesForConsumer(plan, run, productId, plusSeconds(now, 4)).includes(researchId),
+      "parking a refresh consumer must abandon its durable scope",
+    );
+    assert((run.nodes[productId]!.dependencyRefreshCycles?.length ?? 0) === 0, "abandonment must clear the parked consumer's refresh token");
+    assert(run.nodes[researchId]!.refreshInstructions === undefined, "abandonment must clear obsolete dependency instructions");
+    assert(String(run.nodes[researchId]!.status) === "stale", "abandonment must leave unknown dependency bytes eligible for generic repair");
+
+    const { run: verifiedRollbackRun } = seedFor([], plan);
+    const acceptedAttempt = beginAttempt(plan, verifiedRollbackRun, researchId, "session-original-producer", plusSeconds(now, 4));
+    reconcilePatch(
+      plan,
+      verifiedRollbackRun,
+      {
+        nodeId: researchId,
+        attemptId: acceptedAttempt.id,
+        outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "sha256:accepted", evidence: ["accepted original"] }],
+      },
+      plusSeconds(now, 5),
+    );
+    acceptVerification(plan, verifiedRollbackRun, researchId, ["independent review"], plusSeconds(now, 6), "session-original-reviewer");
+    assert(
+      refreshDependenciesBeforeFrontier(plan, verifiedRollbackRun, plusSeconds(now, 7)).includes(researchId),
+      "verified proof must enter a scoped refresh",
+    );
+    const rejectedRefresh = beginAttempt(plan, verifiedRollbackRun, researchId, "session-refresh-producer", plusSeconds(now, 8));
+    rejectedRefresh.status = "failed";
+    deferDependencyRefreshAfterFailure(plan, verifiedRollbackRun, researchId, plusSeconds(now, 9));
+    assert(
+      !buildBoundaryResults(plan, verifiedRollbackRun).some((result) => result.workflowId === "workflow.research-scan"),
+      "a failed refresh must suppress boundary export until a later scoped retry accepts the actual bytes",
+    );
+
+    const { run: initiallyPending } = seedFor([], plan);
+    assert(refreshDependenciesBeforeFrontier(plan, initiallyPending, now).length === 0, "a dependency that has not run yet must not consume the refresh cycle");
+    assert(
+      (initiallyPending.nodes[productId]!.dependencyRefreshCycles?.length ?? 0) === 0,
+      "the pending dependency must leave the consumer refresh token unrecorded",
+    );
+    initiallyPending.nodes[researchId]!.status = "succeeded";
+    initiallyPending.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted = true;
+    assert(
+      refreshDependenciesBeforeFrontier(plan, initiallyPending, plusSeconds(now, 1)).includes(researchId),
+      "the dependency must reopen after its generic first pass succeeds",
+    );
+    assert(
+      initiallyPending.nodes[researchId]!.refreshInstructions?.some((entry) => entry.includes("product-specific evidence scope")),
+      "the reopened dependency must carry the consumer's compiled refresh scope",
+    );
+    const excludedRun = seedFor(["research"], plan).run;
+    assert(
+      refreshDependenciesBeforeFrontier(plan, excludedRun, now, new Set<RunNodeId>()).length === 0 && excludedRun.nodes[researchId]!.status === "succeeded",
+      "an out-of-scope refresh consumer must not mutate its dependency",
+    );
+
+    const sharedCatalog = testCatalog();
+    sharedCatalog.workflows[1]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh research for the product-specific evidence scope before drafting." },
+    ];
+    sharedCatalog.workflows[5]!.dependencies = ["workflow.research-scan"];
+    sharedCatalog.workflows[5]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh research for the growth-specific evidence scope before publishing." },
+    ];
+    const sharedPlan = compilePlan(sharedCatalog, now);
+    const { businessState: sharedState, run: sharedRun } = seedFor(["research"], sharedPlan);
+    refreshDependenciesBeforeFrontier(sharedPlan, sharedRun, now);
+    sharedRun.nodes[researchId]!.status = "succeeded";
+    sharedRun.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted = true;
+    const sharedReady = computeFrontier(sharedPlan, sharedRun, sharedState, allowAllAutonomyEvaluator).ready;
+    assert(sharedReady.includes(productId), "the consumer owning the current scoped refresh may enter the frontier");
+    assert(!sharedReady.includes(nodeId("growth-post")), "a second consumer must wait for its own scoped refresh cycle");
+    sharedRun.nodes[productId]!.status = "succeeded";
+    sharedRun.artifactBindings.find((binding) => binding.artifactId === "artifact.product-spec")!.accepted = true;
+    assert(
+      refreshDependenciesBeforeFrontier(sharedPlan, sharedRun, plusSeconds(now, 1)).includes(researchId),
+      "the second consumer must receive its own serialized scoped refresh",
+    );
+    const siblingRefresh = beginAttempt(sharedPlan, sharedRun, researchId, "session-sibling-refresh", plusSeconds(now, 2));
+    reconcilePatch(
+      sharedPlan,
+      sharedRun,
+      {
+        nodeId: researchId,
+        attemptId: siblingRefresh.id,
+        outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "sha256:growth-scope", evidence: ["growth scope"] }],
+      },
+      plusSeconds(now, 3),
+    );
+    assert(sharedRun.nodes[productId]!.status === "succeeded", "a later sibling refresh must preserve the first scoped consumer's completed result");
+    assert(
+      sharedRun.artifactBindings.find((binding) => binding.artifactId === "artifact.product-spec")!.accepted,
+      "a later sibling refresh must preserve the first scoped consumer's accepted output",
+    );
+
+    const staleCatalog = testCatalog();
+    staleCatalog.workflows[5]!.dependencies = ["workflow.product-spec"];
+    staleCatalog.workflows[5]!.refreshDependencies = [
+      { workflowId: "workflow.product-spec", instructions: "Refresh the product spec for the growth-specific evidence scope before publishing." },
+    ];
+    const stalePlan = compilePlan(staleCatalog, now);
+    const { run: staleRun } = seedFor(["research", "product"], stalePlan);
+    const growthId = nodeId("growth-post");
+    refreshDependenciesBeforeFrontier(stalePlan, staleRun, now);
+    assert((staleRun.nodes[growthId]!.dependencyRefreshCycles?.length ?? 0) === 1, "the scoped product refresh must record its consumer token");
+    staleRun.nodes[productId]!.status = "succeeded";
+    staleRun.artifactBindings.find((binding) => binding.artifactId === "artifact.product-spec")!.accepted = true;
+    invalidateDescendants(stalePlan, staleRun, ["artifact.research-brief"], plusSeconds(now, 1));
+    assert(
+      (staleRun.nodes[growthId]!.dependencyRefreshCycles?.length ?? 0) === 0,
+      "invalidating a refreshed dependency must clear every consumer token bound to its obsolete result",
+    );
+    staleRun.nodes[productId]!.status = "succeeded";
+    staleRun.artifactBindings.find((binding) => binding.artifactId === "artifact.product-spec")!.accepted = true;
+    assert(
+      refreshDependenciesBeforeFrontier(stalePlan, staleRun, plusSeconds(now, 2)).includes(productId),
+      "a generic dependency rerun must be followed by a fresh scoped cycle before consumer dispatch",
+    );
+
+    const exhaustedCatalog = testCatalog();
+    exhaustedCatalog.workflows[1]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh exhausted research before drafting." },
+    ];
+    const exhaustedPlan = compilePlan(exhaustedCatalog, now);
+    const { run: exhaustedRun } = seedFor(["research"], exhaustedPlan);
+    const exhaustedDependency = exhaustedRun.nodes[researchId]!;
+    const exhaustedNode = exhaustedPlan.nodes.find((node) => node.id === researchId)!;
+    for (let index = 0; index < exhaustedNode.maxAttempts; index += 1) {
+      const attempt = beginAttempt(exhaustedPlan, exhaustedRun, researchId, `session-exhaust-${index}`, plusSeconds(now, index));
+      attempt.status = "succeeded";
+      exhaustedDependency.status = "succeeded";
+    }
+    const exhaustedBinding = exhaustedRun.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!;
+    assert(refreshDependenciesBeforeFrontier(exhaustedPlan, exhaustedRun, plusSeconds(now, 4)).length === 0, "an exhausted dependency cannot reopen");
+    assert(exhaustedDependency.status === "succeeded" && exhaustedBinding.accepted, "failed refresh admission must preserve accepted dependency state");
+    assert(exhaustedRun.nodes[productId]!.status === "blocked", "the consumer must park explicitly when its required refresh cannot run");
+
+    const { run: exhaustedConsumerRun } = seedFor(["research"], exhaustedPlan);
+    const exhaustedConsumer = exhaustedConsumerRun.nodes[productId]!;
+    const consumerNode = exhaustedPlan.nodes.find((node) => node.id === productId)!;
+    for (let index = 0; index < consumerNode.maxAttempts; index += 1) {
+      const attempt = beginAttempt(exhaustedPlan, exhaustedConsumerRun, productId, `session-consumer-exhaust-${index}`, plusSeconds(now, index));
+      attempt.status = "failed";
+      exhaustedConsumer.status = "stale";
+    }
+    const preservedDependencyBinding = exhaustedConsumerRun.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!;
+    assert(
+      refreshDependenciesBeforeFrontier(exhaustedPlan, exhaustedConsumerRun, plusSeconds(now, 5)).length === 0,
+      "an exhausted consumer cannot reopen a dependency",
+    );
+    assert(
+      exhaustedConsumerRun.nodes[researchId]!.status === "succeeded" && preservedDependencyBinding.accepted,
+      "consumer budget exhaustion must preserve the dependency's accepted proof",
+    );
+    assert(exhaustedConsumer.status === "blocked", "an exhausted refresh consumer must park explicitly");
+
+    const { run: finalFailureRun } = seedFor(["research"], exhaustedPlan);
+    const finalDependency = finalFailureRun.nodes[researchId]!;
+    for (let index = 0; index < exhaustedNode.maxAttempts - 1; index += 1) {
+      const prior = beginAttempt(exhaustedPlan, finalFailureRun, researchId, `session-prior-refresh-${index}`, plusSeconds(now, index));
+      prior.status = "succeeded";
+      finalDependency.status = "succeeded";
+    }
+    assert(
+      refreshDependenciesBeforeFrontier(exhaustedPlan, finalFailureRun, plusSeconds(now, 6)).includes(researchId),
+      "one remaining dependency attempt may be admitted",
+    );
+    const finalAttempt = beginAttempt(exhaustedPlan, finalFailureRun, researchId, "session-final-refresh", plusSeconds(now, 7));
+    finalAttempt.status = "failed";
+    deferDependencyRefreshAfterFailure(exhaustedPlan, finalFailureRun, researchId, plusSeconds(now, 8));
+    assert(finalDependency.status === "blocked", "a failed final refresh attempt must not remain falsely retry-eligible");
+    assert(finalFailureRun.nodes[productId]!.status === "blocked", "the requesting consumer must park when its refresh exhausts the dependency");
+  });
+
+  harness.check("runstate: refreshed output fingerprints still invalidate already-succeeded descendants when content changes", () => {
+    const catalog = testCatalog();
+    catalog.workflows[5]!.dependencies = ["workflow.research-scan"];
+    catalog.workflows[5]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh research for a growth-specific evidence scope before publishing." },
+    ];
+    const plan = compilePlan(catalog, now);
+    const { run } = seedFor(["research", "product"], plan);
+    const researchId = nodeId("research-scan");
+    const productId = nodeId("product-spec");
+    const binding = run.artifactBindings.find((candidate) => candidate.artifactId === "artifact.research-brief")!;
+    const baseline = binding.fingerprint;
+    refreshDependenciesBeforeFrontier(plan, run, now);
+    assert(binding.refreshBaselineFingerprint === baseline && binding.fingerprint === baseline, "refresh must retain the accepted comparison baseline");
+    const attempt = beginAttempt(plan, run, researchId, "session-refresh", plusSeconds(now, 1));
+    reconcilePatch(
+      plan,
+      run,
+      {
+        nodeId: researchId,
+        attemptId: attempt.id,
+        outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "sha256:changed", evidence: ["changed refresh"] }],
+      },
+      plusSeconds(now, 2),
+    );
+    assert(run.nodes[productId]!.status === "stale", "a changed refreshed artifact must invalidate its succeeded descendant");
+    assert(run.nodes[researchId]!.refreshInstructions === undefined, "refresh scope must clear when the scoped attempt finishes");
   });
 
   harness.check("compile/autonomy: internal system workflows preserve edges and run without founder grants, but external actions fail closed", () => {

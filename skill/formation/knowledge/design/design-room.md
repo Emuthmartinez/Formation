@@ -6,7 +6,7 @@ Use this reference before designing, changing, comparing, baselining, restoring,
 
 **STATE -> MUTATE -> CONTRACT -> VERSION -> RENDER** is mandatory for design work.
 
-1. **STATE**: read `studio/seed/business.json` and `studio/seed/theme.tokens.json` in the app repo.
+1. **STATE**: read `studio/seed/business.json` and `studio/seed/theme.tokens.json` in the app repo. Load `design-evidence-stack.md`. Complete its selective source triage and record the evidence in `design/design.md` before mutation.
 2. **MUTATE**: make one coherent change to the JSON state. Keep the mutation small enough to review: one audience, one surface cluster, one token pass, one store experiment, or one wipe.
 3. **CONTRACT**: update `design/design.md` when the change affects design intent or implementation guidance.
 4. **VERSION**: validate and commit the state, contract, tokens, and render together.
@@ -115,6 +115,7 @@ Design work is ready for review only when:
 
 - `studio/seed/business.json` and `studio/seed/theme.tokens.json` validate.
 - `design/design.md` exists and contains all required sections.
+- The `Reference Evidence` section has a status and reason for all six evidence sources. Each adopted principle has an adaptation, state path, and validation method.
 - `designRoom.versionLog` names the mutation and rendered artifacts.
 - `design/design-room.html` hash matches the current state.
 - The rendered name, positioning, audience, mutation summary, and surface totals match the current state.

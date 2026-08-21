@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "skillVersion": "0.156.0",
+  "skillVersion": "0.159.0",
   "areas": [
     {
       "id": "area.operating-system",
@@ -1510,6 +1510,7 @@
       "title": "Design",
       "referenceIds": [
         "reference.design.audience-derived-identity",
+        "reference.design.design-evidence-stack",
         "reference.design.design-room",
         "reference.design.design-visual-system",
         "reference.design.premium-mobile-craft",
@@ -1909,6 +1910,78 @@
       "replacementIds": []
     },
     {
+      "id": "reference.design.design-evidence-stack",
+      "title": "Design Evidence Stack",
+      "domainId": "domain.design",
+      "path": "knowledge/design/design-evidence-stack.md",
+      "loadWhen": "before planning, creating, revising, auditing, or implementing any user-facing surface, component, interaction, onboarding flow, paywall, store frame, or marketing design; use it to classify the decision, select evidence sources, and record the evidence pass before mutation",
+      "lifecycle": "active",
+      "applicabilityNotes": "This is the mandatory design-source router. Open only relevant sources. High-impact and high-risk surfaces require two complementary source lanes.",
+      "sources": [
+        {
+          "id": "design-evidence-60fps",
+          "name": "60fps.design",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://60fps.design/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Curated examples of motion and interaction details from shipped apps. Use examples to study mechanics. Do not copy source branding, assets, copy, exact layouts, or unadapted code.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "projectsbyif-patterns-catalogue",
+          "name": "IF Design Patterns Catalogue",
+          "sourceType": "pattern_catalog",
+          "url": "https://catalogue.projectsbyif.com/",
+          "reviewCadenceDays": 90,
+          "claimScope": "Trustworthy-service patterns for AI decisions, consent, authentication, data access, security, user control, and recovery. Pattern pages describe advantages and limitations. The catalog states a CC BY 4.0 license.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "abtest-design-library",
+          "name": "abtest.design",
+          "sourceType": "experiment_library",
+          "url": "https://abtest.design/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Curated experiment examples for conversion, onboarding, checkout, engagement, retention, monetization, and referral. Treat results as hypothesis seeds. Verify each cited source before using a result or number.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "design-spells-gallery",
+          "name": "Design Spells",
+          "sourceType": "inspiration_benchmark",
+          "url": "https://www.designspells.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Gallery of small design details, interactions, motion, and moments of delight. Use emotional principles and mechanics as inspiration. Do not copy branded assets or exact compositions.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "uxsnaps-breakdowns",
+          "name": "UXSnaps",
+          "sourceType": "design_breakdown",
+          "url": "https://www.uxsnaps.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Product and flow breakdowns from real apps. Use them as critique and hypothesis input. Do not treat a breakdown as authority or causal proof.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "ui-playbook-components",
+          "name": "UI Playbook",
+          "sourceType": "component_reference",
+          "url": "https://uiplaybook.dev/",
+          "reviewCadenceDays": 30,
+          "claimScope": "Documented UI component guidance for function, states, implementation, and accessibility. Use it as a component specification seed. Confirm platform and accessibility details in current official documentation.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        }
+      ],
+      "replacementIds": []
+    },
+    {
       "id": "reference.design.design-room",
       "title": "Design Room",
       "domainId": "domain.design",
@@ -2079,7 +2152,7 @@
       "title": "Motion Craft Benchmarks",
       "domainId": "domain.design",
       "path": "knowledge/design/motion-craft-benchmarks.md",
-      "loadWhen": "implementing or auditing a specific motion recipe against check:motion-contract's numeric spring/duration tokens, tying a micro-interaction to the Experience Card it serves, or designing a cold-launch splash/loading/welcome-screen entrance (R11-R14)",
+      "loadWhen": "implementing or auditing a specific motion recipe against check:motion-contract's numeric spring/duration tokens, tying a micro-interaction to the Experience Card it serves, or designing a cold-launch splash/loading/welcome-screen entrance (R11-R14), live-state effect, liquid morph, perimeter beam, liquid-metal ring, or semantic thinking orb (R15-R18)",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
       "sources": [
@@ -2111,6 +2184,46 @@
           "reviewCadenceDays": 30,
           "claimScope": "Live MCP endpoint over the 60fps.design catalog (shot search, motion breakdowns, SwiftUI starter code). Optional tooling — the distilled recipes in motion-craft-benchmarks.md remain the contract when the server is not connected. Generated code must be rewritten onto the token scale before shipping.",
           "lastReviewDate": "2026-08-17",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "jakubantalik-liquid-gooey",
+          "name": "Liquid Gooey",
+          "sourceType": "component_reference",
+          "url": "https://gooey.jakubantalik.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "MIT-licensed React reference for liquid morph, move, and dissolve effects. Formation transfers its two-layer interaction model, reduced-motion behavior, and idle-cost controls through recipe R15.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "jakubantalik-border-beam",
+          "name": "Border Beam",
+          "sourceType": "component_reference",
+          "url": "https://beam.jakubantalik.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "MIT-licensed React reference for traveling and breathing perimeter effects. Formation transfers its state binding, decorative-layer isolation, visibility pausing, and reduced-motion behavior through recipe R16.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "jakubantalik-metal-fx",
+          "name": "Metal FX",
+          "sourceType": "component_reference",
+          "url": "https://metal.jakubantalik.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "MIT-licensed React and WebGL reference for animated liquid-metal rings. Formation transfers its shared render-loop, context reuse, offscreen pause, context-failure fallback, and hierarchy limits through recipe R17.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        },
+        {
+          "id": "jakubantalik-thinking-orbs",
+          "name": "Thinking Orbs",
+          "sourceType": "component_reference",
+          "url": "https://orbs.jakubantalik.com/",
+          "reviewCadenceDays": 30,
+          "claimScope": "MIT-licensed React and Canvas reference for semantic AI activity states. Formation transfers its state mapping, tuned sizes, accessible status, visibility pause, and static reduced-motion frame through recipe R18.",
+          "lastReviewDate": "2026-08-20",
           "reviewer": "formation-maintainers"
         }
       ],
@@ -5822,8 +5935,18 @@
       "loadWhen": "before drafting or publishing privacy policy, terms, EULA, subscription terms, account/data deletion flows, or app-store privacy/Data safety disclosures",
       "lifecycle": "active",
       "applicabilityNotes": "Use the load condition and graph bindings to decide when this guidance applies.",
-      "sourceExemption": "This package contains internal operating guidance or has no external factual claims.",
-      "sources": [],
+      "sources": [
+        {
+          "id": "general-legal-template-collection",
+          "name": "General Legal template collection",
+          "sourceType": "attorney_template_repository",
+          "url": "https://github.com/General-Legal/legal-templates",
+          "reviewCadenceDays": 30,
+          "claimScope": "Optional CC0 drafting benchmark for privacy policies, terms, cookie notices, and data-processing addenda. It is not legal authority.",
+          "lastReviewDate": "2026-08-20",
+          "reviewer": "formation-maintainers"
+        }
+      ],
       "replacementIds": []
     },
     {
@@ -6117,8 +6240,8 @@
           "sourceType": "github",
           "url": "https://github.com/petergyang/no-ai-slop",
           "reviewCadenceDays": 30,
-          "claimScope": "MIT-licensed AI-slop editing skill. Source basis for no-slop-writing.md's banned-word list, empty-adverb/phrase lists, named patterns, and eval.md self-check, adapted for this skill's founder-facing copy and generated marketing copy. Stable rules repo; recheck for drift on the normal cadence rather than a fast-moving one.",
-          "lastReviewDate": "2026-08-17",
+          "claimScope": "MIT-licensed AI-slop editing skill. Source basis for no-slop-writing.md's banned-word list, empty-adverb/phrase lists, portability test, named patterns, and eval.md self-check, adapted for this skill's founder-facing copy and generated marketing copy. Stable rules repo; recheck for drift on the normal cadence rather than a fast-moving one. Reviewed at upstream commit d30eddb9e04562234f2070b5ee63ca4649d9a05e.",
+          "lastReviewDate": "2026-08-20",
           "reviewer": "formation-maintainers"
         }
       ],
@@ -7261,6 +7384,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.experience.experience-cards",
         "reference.experience.emotional-design-system",
         "reference.experience.emotional-experience-design",
@@ -7306,6 +7430,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.experience.experience-cards",
         "reference.experience.consumer-product-design-agency",
         "reference.experience.emotional-design-system",
@@ -7350,7 +7475,8 @@
       ],
       "consults": [],
       "referenceIds": [
-        "reference.design.audience-derived-identity"
+        "reference.design.audience-derived-identity",
+        "reference.design.design-evidence-stack"
       ],
       "roleId": "role.design-guru",
       "laneIds": [
@@ -7383,7 +7509,7 @@
         "area.product-experience"
       ],
       "trigger": "Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywall work",
-      "instructions": "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. Derive design/design.md's Audience And Identity section from strategy/RESEARCH.md before locking any visual direction: audience facts, apps they love, category convention followed/broken, anti-references, and the fact→decision table with evidence — the derivation chain lives in audience-derived-identity.md, and a direction that only cites a trend is not a decision. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. When the 60fps.design MCP is connected, ground screen and interaction direction in real exemplars before locking states (60fps_search_shots, 60fps_get_shot, 60fps_get_motion_breakdown) and record each adopted principle in design/design.md — translate mechanics only, never another product's brand, assets, copy, or exact layout; when it is not connected, motion-craft-benchmarks.md's distilled recipes remain the contract. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
+      "instructions": "Follow the mandatory STATE→MUTATE→CONTRACT→VERSION→RENDER loop. Read design/design.md, studio/seed/business.json, and studio/seed/theme.tokens.json before any design work. During STATE, load design-evidence-stack.md, record the change classification and affected scope, classify the decision, mark all six evidence sources required, not applicable, or unavailable with a reason, and record the evidence pass in design/design.md before mutation. Open only relevant sources. Use one relevant source for every new or materially changed surface, and two complementary sources for onboarding, paywall, core-loop, AI-trust, and store-first-frame decisions. Treat abtest.design results as hypothesis seeds, not transferable causal proof. Derive design/design.md's Audience And Identity section from strategy/RESEARCH.md before locking any visual direction: audience facts, apps they love, category convention followed/broken, anti-references, and the fact→decision table with evidence — the derivation chain lives in audience-derived-identity.md, and a direction that only cites a trend is not a decision. Make one coherent state mutation. Update design/design.md in the same change when design intent or implementation guidance changes. When the 60fps.design MCP is connected, ground screen and interaction direction in real exemplars before locking states (60fps_search_shots, 60fps_get_shot, 60fps_get_motion_breakdown, 60fps_get_related_shots) and record each adopted principle in design/design.md — translate mechanics only, never another product's brand, assets, copy, or exact layout; when it is not connected, motion-craft-benchmarks.md's distilled recipes remain the contract. Validate the state and contract. Render the Design Room. Version the state, contract, tokens, and render together. Never create a separate design proposal, mood board, or HTML proof. Use surfaces-b2c.md for surface rules. Apply quality-lens.md before review. The founder approves the final brand direction.",
       "reads": [
         "design/design.md",
         "studio/seed/business.json",
@@ -7394,6 +7520,7 @@
       "consults": [],
       "referenceIds": [
         "reference.design.audience-derived-identity",
+        "reference.design.design-evidence-stack",
         "reference.design.design-room",
         "reference.design.landing-motion-craft",
         "reference.design.quality-lens",
@@ -7489,6 +7616,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.design.refero-ux-patterns"
       ],
       "roleId": "role.design-guru",
@@ -8204,6 +8332,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.experience.onboarding-conversion"
       ],
       "roleId": "role.product-leader",
@@ -8245,6 +8374,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.experience.onboarding-conversion"
       ],
       "roleId": "role.product-leader",
@@ -8289,6 +8419,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.experience.onboarding-conversion"
       ],
       "roleId": "role.product-leader",
@@ -8528,8 +8659,8 @@
       "areaIds": [
         "area.product-experience"
       ],
-      "trigger": "Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or \"premium feel\"",
-      "instructions": "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give (celebration choreography, gesture physics, hero transitions), route to motion-craft-benchmarks.md's numbered recipes for the checkable acceptance criteria — grounding the recipe in a live exemplar first via the 60fps MCP when it is connected (60fps_search_shots, 60fps_get_motion_breakdown; rewrite any 60fps_get_motion_code output onto DesignTokens.Motion before it ships); check:motion-contract is what proves the tokens were actually used, not adjectives in design/design.md.",
+      "trigger": "Before in-app UI build/polish, press-state/haptics/loading-empty wiring, live-state effects, or \"premium feel\"",
+      "instructions": "Wire the five invisible premium details into every screen — press states with the press spring family (response 0.3-0.4, damping 0.7-0.8, PremiumMotion.press), subtle motion, semantic haptics, keyboard behavior, and loading/empty states — using PremiumCraft.swift on SwiftUI (React Native/Flutter parity via the same DesignTokens.Motion tokens) as the primary target, honoring Reduce Motion throughout. Never hand-type a spring literal in view code: read the preset layer, and reserve the celebrate family (response 0.45-0.5, damping 0.5-0.7) for celebrations and earned-object reveals only — a celebrate-grade spring on an ordinary state change is as wrong as a flat ease on a celebration. When a surface needs stronger direction than the five details give, route to motion-craft-benchmarks.md's numbered recipes. Use R15-R18 for liquid morphs, state-bound beams, liquid-metal rings, and semantic thinking orbs. Bind every live effect to a real state, a plain fallback, and a reduced-motion result. Ground catalog recipes in a live exemplar first via the 60fps MCP when it is connected (60fps_search_shots, 60fps_get_motion_breakdown; rewrite any 60fps_get_motion_code output onto DesignTokens.Motion before it ships). check:motion-contract proves the contract was applied; adjectives in design/design.md do not.",
       "reads": [
         "design/design.md",
         "studio/seed/business.json",
@@ -8539,6 +8670,7 @@
         "product/experience/ux-patterns/UX_PATTERNS.md"
       ],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.design.motion-craft-benchmarks",
         "reference.design.premium-mobile-craft"
       ],
@@ -8577,6 +8709,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.design.design-visual-system",
         "reference.design.remotion-content-assets",
         "reference.process.tool-recipes.visual-and-motion-production"
@@ -8618,7 +8751,7 @@
         "area.product-experience"
       ],
       "trigger": "Before writing or reviewing any founder-facing copy or any marketing copy the skill generates",
-      "instructions": "Before any founder-facing or marketing copy ships, identify which voice you are protecting — this skill's own direct/no-filler voice for founder-facing surfaces, or the launched business's strategy/BRAND.md voice and the tone 11_STAR_EXPERIENCE.md set for marketing copy — and make the minimum effective edit: strip filler, hedging, and importance-inflation without flattening a brand's playful or clinical register into generic 'clean' English. Author every user-facing string as a keyed row in product/copy/COPY_DECK.md (with product/copy/COPY_BRIEF.md as the brief that precedes it) before any builder consumes it — builders read deck keys, they do not invent strings from the spec. Run the banned-words/patterns self-check and channel-specific limits (store character counts, push/email subject limits) before handoff; check:app-copy is the gate that fails a placeholder-shaped or missing deck row.",
+      "instructions": "Before any founder-facing or marketing copy ships, identify which voice you are protecting — this skill's own direct/no-filler voice for founder-facing surfaces, or the launched business's strategy/BRAND.md voice and the tone 11_STAR_EXPERIENCE.md set for marketing copy — and make the minimum effective edit: strip filler, hedging, importance-inflation, and interpretive asides without flattening a brand's playful or clinical register into generic 'clean' English. Apply the portability test to each generic sentence: if it can move unchanged to another person, company, country, or product, replace it with a specific fact, mechanism, consequence, or judgment. Author every user-facing string as a keyed row in product/copy/COPY_DECK.md (with product/copy/COPY_BRIEF.md as the brief that precedes it) before any builder consumes it — builders read deck keys, they do not invent strings from the spec. Run the banned-words/patterns self-check and channel-specific limits (store character counts, push/email subject limits) before handoff; check:app-copy is the gate that fails a placeholder-shaped or missing deck row.",
       "reads": [
         "strategy/BRAND.md",
         "product/experience/11-star-experience/11_STAR_EXPERIENCE.md"
@@ -8956,7 +9089,7 @@
         "area.build-release"
       ],
       "trigger": "Store screenshots needed (raw capture → composed iPhone/iPad/Play assets)",
-      "instructions": "Capture raw app UI first — in-app iOS Simulator (rung 0) for a local Mac, MobAI for Android or a repeatable matrix — and treat those raw captures as proof inputs, never final store creative. Compose final assets from the Asset Knowledge Brief (strategy/RESEARCH.md's user/problem, 11_STAR_EXPERIENCE.md's magical moment, the emotion/card from EMOTIONAL_DESIGN.md, design/design.md's tokens) with headline, copy overlay, device frame, and export every required iPhone/iPad/Play well — never a generic, knowledge-free hook. Run every composed frame through quality-lens.md's Anti-Generic Checks before calling the deck done, and write the raw-path/composition-path/upload-status table to SCREENSHOTS.md. Pass `npm run check:store-screenshots -- --root .`; a technically correct, on-brand screenshot that still reads as generic fails the done bar.",
+      "instructions": "Capture raw app UI first — in-app iOS Simulator (rung 0) for a local Mac, MobAI for Android or a repeatable matrix — and treat those raw captures as proof inputs, never final store creative. Before this node enters the dispatch frontier, the orchestration manager must invalidate workflow.design.design-room-state-mutate-version-render in run state (mark it stale, clear its blocker and accepted output fingerprint, and mark its output bindings unaccepted), recompute the frontier, redispatch that Design Room node with a store-first-frame change classification and affected scope, accept its four refreshed outputs, and only then recompute and dispatch this screenshot node. The screenshot worker never writes Design Room outputs. Run check:design-room before composing or materially changing a store frame; an accepted Design Room dependency from an earlier or unrelated scope is not evidence for new store creative. Compose final assets from the Asset Knowledge Brief (strategy/RESEARCH.md's user/problem, 11_STAR_EXPERIENCE.md's magical moment, the emotion/card from EMOTIONAL_DESIGN.md, design/design.md's tokens) with headline, copy overlay, device frame, and export every required iPhone/iPad/Play well — never a generic, knowledge-free hook. Run every composed frame through quality-lens.md's Anti-Generic Checks before calling the deck done, and write the raw-path/composition-path/upload-status table to SCREENSHOTS.md. Pass `npm run check:store-screenshots -- --root .`; a technically correct, on-brand screenshot that still reads as generic fails the done bar.",
       "reads": [
         "design/design.md",
         "store/app-store-listing/APP_STORE_LISTING.md",
@@ -8967,6 +9100,7 @@
       ],
       "consults": [],
       "referenceIds": [
+        "reference.design.design-evidence-stack",
         "reference.design.design-visual-system",
         "reference.design.quality-lens",
         "reference.engineering.mobai-toolbelt",
@@ -8988,10 +9122,17 @@
         "workflow.store.app-store-listing-prep-packet",
         "workflow.operations.agent-operations-ledger"
       ],
+      "refreshDependencies": [
+        {
+          "workflowId": "workflow.design.design-room-state-mutate-version-render",
+          "instructions": "Record a store-first-frame change classification and affected scope, then complete the Design Evidence pass for every composed or materially changed store frame."
+        }
+      ],
       "outputPaths": [
         "store/app-store-listing/SCREENSHOTS.md"
       ],
       "gateCommands": [
+        "check:design-room",
         "check:store-screenshots"
       ],
       "providerIds": [
@@ -9936,7 +10077,7 @@
         "area.growth-revenue"
       ],
       "trigger": "Immediately after design/design.md is accepted — build the local landing site while app implementation runs",
-      "instructions": "Build a runnable local landing site in growth/landing/ as soon as design/design.md is accepted. Do this work in parallel with app implementation. Use the launch-surface-producer prompt in agents/launch-surface-producer.md. Include one conversion goal, the approved promise, a mobile CTA, proof, responsive behavior, and a local build check. Include a short web onboarding or qualification flow only when the product contract needs it. Use current COPY_DECK.md strings. Show prices only when revenue/REVENUE_OPS.md records founder-approved prices. Create truthful screenshot slots and an update route, but label design renders as previews until real app captures exist. Declare landing_viewed, landing_cta_clicked, and waitlist_submitted before implementation. Write growth/landing/surface-contract.json with SHA-256 digests for every canonical input, each Tier 1 locale, pricing/onboarding applicability decisions, and screenshot evidence. Keep motion progressive per landing-motion-craft.md, and when the 60fps.design MCP is connected ground hero/scroll/micro-interaction choices in live exemplars (60fps_search_shots, 60fps_get_motion_breakdown) re-expressed on the web --motion-* scale — never port its SwiftUI starter code to a web surface. Do not deploy from this node.",
+      "instructions": "Build a runnable local landing site in growth/landing/ as soon as design/design.md is accepted. Before this node enters the dispatch frontier, the orchestration manager must invalidate workflow.design.design-room-state-mutate-version-render in run state (mark it stale, clear its blocker and accepted output fingerprint, and mark its output bindings unaccepted), recompute the frontier, redispatch that Design Room node with a landing-specific change classification and affected scope, accept its four refreshed outputs, and only then recompute and dispatch this landing node. The landing worker never writes Design Room outputs. Run check:design-room before changing the landing hero, scroll behavior, micro-interactions, or any other visual surface; an accepted Design Room dependency from an earlier or unrelated scope is not evidence for a later landing mutation. Do this work in parallel with app implementation. Use the launch-surface-producer prompt in agents/launch-surface-producer.md. Include one conversion goal, the approved promise, a mobile CTA, proof, responsive behavior, and a local build check. Include a short web onboarding or qualification flow only when the product contract needs it. Use current COPY_DECK.md strings. Show prices only when revenue/REVENUE_OPS.md records founder-approved prices. Create truthful screenshot slots and an update route, but label design renders as previews until real app captures exist. Declare landing_viewed, landing_cta_clicked, and waitlist_submitted before implementation. Write growth/landing/surface-contract.json with SHA-256 digests for every canonical input, each Tier 1 locale, pricing/onboarding applicability decisions, and screenshot evidence. Keep motion progressive per landing-motion-craft.md, and when the 60fps.design MCP is connected ground hero/scroll/micro-interaction choices in live exemplars (60fps_search_shots, 60fps_get_motion_breakdown) re-expressed on the web --motion-* scale — never port its SwiftUI starter code to a web surface. Do not deploy from this node.",
       "reads": [
         "GEO_SEO.md",
         "analytics/ANALYTICS.md",
@@ -9953,6 +10094,7 @@
       ],
       "referenceIds": [
         "reference.data.analytics-attribution",
+        "reference.design.design-evidence-stack",
         "reference.design.landing-motion-craft",
         "reference.design.vibecoded-tells",
         "reference.growth.cro-landing",
@@ -9972,10 +10114,18 @@
         "workflow.design.design-room-state-mutate-version-render",
         "workflow.operations.agent-operations-ledger"
       ],
+      "refreshDependencies": [
+        {
+          "workflowId": "workflow.design.design-room-state-mutate-version-render",
+          "instructions": "Record a landing-specific change classification and affected scope, then complete the Design Evidence pass for the landing hero, scroll behavior, micro-interactions, and other visual surfaces."
+        }
+      ],
       "outputPaths": [
         "growth/landing/"
       ],
-      "gateCommands": [],
+      "gateCommands": [
+        "check:design-room"
+      ],
       "providerIds": [],
       "founderOnlyActions": [],
       "actionClass": "mutate",

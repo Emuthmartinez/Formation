@@ -5,8 +5,8 @@ import { isMainModule, parseArgs, resolveCallerPath } from "../lib/cli.js";
 import { buildDispatchBatches } from "../engine/dispatch.js";
 import { compilePlan, type CompiledPlan, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
 import { composeNodeBrief, renderNodeBrief, type NodeBrief } from "../engine/node-brief.js";
-import { computeFrontier } from "../engine/frontier.js";
-import { loadRunState, reconcileEnvironmentalArtifacts, reopenRecurringNodes, seedRunState } from "../engine/runstate.js";
+import { computeFrontier, refreshAdmissibleConsumerIds } from "../engine/frontier.js";
+import { loadRunState, reconcileEnvironmentalArtifacts, refreshDependenciesBeforeFrontier, reopenRecurringNodes, seedRunState } from "../engine/runstate.js";
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
 import { createCompositeVerifier } from "../autonomy/prerequisites.js";
 import { createDopplerAuthVerifier } from "../autonomy/probes/doppler.js";
@@ -271,6 +271,7 @@ function main(): number {
   // The clone is the no-write guarantee: computeFrontier promotes and demotes node statuses in
   // place, and the copy it edits is thrown away when this process exits.
   const scratch: RunStateDocument = structuredClone(run);
+  refreshDependenciesBeforeFrontier(plan, scratch, new Date().toISOString(), refreshAdmissibleConsumerIds(plan, scratch, businessState, evaluator));
   const frontier = computeFrontier(plan, scratch, businessState, evaluator);
   const parked = new Map(frontier.parked.map((entry) => [entry.nodeId, entry.reason]));
 

@@ -99,6 +99,7 @@ export interface CatalogWorkflowNode {
   references?: NodeReference[];
   role?: NodeRole;
   dependencies: CatalogWorkflowId[];
+  refreshDependencies?: Array<{ workflowId: CatalogWorkflowId; instructions: string }>;
   outputPaths: string[];
   providerIds: string[];
   laneIds: LaneKey[];
@@ -145,6 +146,7 @@ export interface CompiledRunNode {
   outputPaths: string[];
   providerIds: string[];
   dependencies: RunNodeId[];
+  refreshDependencies: Array<{ nodeId: RunNodeId; instructions: string }>;
   statePredicates: StatePredicate[];
   laneIds: LaneKey[];
   /** Profiles under which this node parks as not_needed (computed at compile from lane membership). */
@@ -208,6 +210,8 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
   const nodes: CompiledRunNode[] = catalog.workflows.map((workflow): CompiledRunNode => {
     const unknownDependency = workflow.dependencies.find((dependency) => !knownWorkflowIds.has(dependency));
     if (unknownDependency) throw new Error(`${workflow.id} depends on unknown workflow ${unknownDependency}`);
+    const unknownRefreshDependency = workflow.refreshDependencies?.find((dependency) => !knownWorkflowIds.has(dependency.workflowId));
+    if (unknownRefreshDependency) throw new Error(`${workflow.id} refreshes unknown workflow ${unknownRefreshDependency.workflowId}`);
 
     const outputs = outputsByWorkflow.get(workflow.id) ?? [];
     // Inputs are the union of dependency outputs (edge topology) and authored reads that name
@@ -248,6 +252,10 @@ export function compilePlan(catalog: CatalogInput, now = "1970-01-01T00:00:00.00
       outputPaths: workflow.outputPaths,
       providerIds: workflow.providerIds,
       dependencies: workflow.dependencies.map((id) => runIdByWorkflow.get(id)!),
+      refreshDependencies: (workflow.refreshDependencies ?? []).map((entry) => ({
+        nodeId: runIdByWorkflow.get(entry.workflowId)!,
+        instructions: entry.instructions,
+      })),
       statePredicates: workflow.laneIds.map((laneKey) => ({ path: `lanes.${laneKey}.status`, operator: "not_in" as const, value: ["blocked"] })),
       laneIds: workflow.laneIds,
       // Profile deferral is compiled fact, not a runtime lookup: a node parks for a profile only

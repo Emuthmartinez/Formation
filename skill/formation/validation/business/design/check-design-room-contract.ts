@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { getToken, loadDesignState, parseDesignCliArgs, rel, summarizeSurfaces } from "../../../tooling/lib/design-state.js";
+import { getToken, loadDesignState, parseDesignCliArgs, rel, skillRoot, summarizeSurfaces } from "../../../tooling/lib/design-state.js";
 import { collectAllFiles, issue, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
 import { asArray, asString, isRecord } from "../../../tooling/lib/launch-state.js";
 
@@ -9,6 +9,20 @@ const args = parseDesignCliArgs(process.argv.slice(2));
 const issues: Issue[] = [];
 const designArtifacts = collectDesignArtifacts(args.root);
 const hasDesignState = existsSync(args.statePath) && existsSync(args.tokensPath);
+const requiredContractSections = [
+  "Source Ownership",
+  "Product Experience",
+  "Audience And Identity",
+  "Reference Evidence",
+  "Visual Direction",
+  "Interaction System",
+  "Onboarding",
+  "Motion and haptics",
+  "Cross-Surface Direction",
+  "Accessibility",
+  "Implementation Rules",
+  "Decision Log",
+];
 
 if (designArtifacts.length > 0 && !hasDesignState) {
   issues.push(
@@ -24,26 +38,18 @@ if (designArtifacts.length > 0 && !hasDesignState) {
 if (hasDesignState) {
   const loaded = loadDesignState(args);
   issues.push(...loaded.issues);
+  const designRoom = loaded.state && isRecord(loaded.state) && isRecord(loaded.state.designRoom) ? loaded.state.designRoom : {};
+  const status = asString(designRoom.status);
+  const reviewReady = status === "rendered" || status === "baselined";
+  const isPackagedStarter = path.resolve(args.root) === path.resolve(skillRoot, "workspace/business");
+  const evidenceRequired = reviewReady || (status === "mutating" && !isPackagedStarter);
 
   const contractPath = path.join(args.root, "design/design.md");
   if (!existsSync(contractPath)) {
     issues.push(issue("error", "design_room.contract_missing", "design/design.md is required for all product design work.", rel(args.root, contractPath)));
   } else {
-    const contract = readFileSync(contractPath, "utf8");
-    const requiredSections = [
-      "Source Ownership",
-      "Product Experience",
-      "Audience And Identity",
-      "Visual Direction",
-      "Interaction System",
-      "Onboarding",
-      "Motion and haptics",
-      "Cross-Surface Direction",
-      "Accessibility",
-      "Implementation Rules",
-      "Decision Log",
-    ];
-    for (const section of requiredSections) {
+    const contract = stripNonRenderedMarkdown(readFileSync(contractPath, "utf8"));
+    for (const section of requiredContractSections) {
       if (!new RegExp(`^#{2,3} ${escapeRegExp(section)}\\s*$`, "im").test(contract)) {
         issues.push(
           issue("error", "design_room.contract_section_missing", `design/design.md must include the section: ${section}.`, rel(args.root, contractPath)),
@@ -67,18 +73,13 @@ if (hasDesignState) {
     // documents for its own section. Placeholder rows are the template's, so
     // they carry no obligation here; once a real row exists, the derivation
     // must trace, and the ready-status placeholder gate below forces real rows.
-    const audienceBody = audienceSectionBody(contract);
+    const audienceBody = sectionBody(contract, "Audience And Identity");
     if (audienceBody !== undefined) {
       const tableRows = audienceBody
         .split("\n")
         .map((line) => line.trim())
         .filter((line) => line.startsWith("|"))
-        .map((line) =>
-          line
-            .split("|")
-            .map((cell) => cell.trim())
-            .filter((cell) => cell.length > 0),
-        )
+        .map((line) => parseMarkdownRow(line).filter((cell) => cell.length > 0))
         .filter((cells) => cells.length >= 2 && !cells.every((cell) => /^:?-+:?$/.test(cell)));
       const dataRows = tableRows.slice(1);
       const realRows = dataRows.filter((cells) => !containsTemplatePlaceholder(cells.join(" ")));
@@ -103,9 +104,272 @@ if (hasDesignState) {
       }
     }
 
-    const designRoom = loaded.state && isRecord(loaded.state) && isRecord(loaded.state.designRoom) ? loaded.state.designRoom : {};
-    const status = asString(designRoom.status);
-    if ((status === "rendered" || status === "baselined") && containsTemplatePlaceholder(contract)) {
+    const evidenceBody = sectionBody(contract, "Reference Evidence");
+    if (evidenceBody !== undefined) {
+      const changeClassificationMatches = [...evidenceBody.matchAll(/^Change classification:\s*(.+)$/gim)];
+      const changeScopeMatches = [...evidenceBody.matchAll(/^Change scope:\s*(.+)$/gim)];
+      const changeClassification = normalizedCell(changeClassificationMatches[0]?.[1]).toLowerCase();
+      const changeScope = normalizedCell(changeScopeMatches[0]?.[1]);
+      const allowedChangeClassifications = new Set([
+        "small token-preserving correction",
+        "new or materially changed surface",
+        "high-impact or high-risk surface",
+      ]);
+      const scopedSurfaceKeys = parseSurfaceKeys(changeScope);
+      const changeClassificationValid =
+        changeClassificationMatches.length === 1 &&
+        changeScopeMatches.length === 1 &&
+        allowedChangeClassifications.has(changeClassification) &&
+        scopedSurfaceKeys.length > 0;
+      const externalEvidenceRequired =
+        changeClassificationValid &&
+        (changeClassification === "new or materially changed surface" || changeClassification === "high-impact or high-risk surface");
+      if (evidenceRequired && !changeClassificationValid) {
+        issues.push(
+          issue(
+            "error",
+            "design_room.reference_evidence_change_classification_invalid",
+            "A mutating or review-ready design/design.md must record an authored Change classification and a comma-separated Change scope of stable surface keys. Use small token-preserving correction, new or materially changed surface, or high-impact or high-risk surface.",
+            rel(args.root, contractPath),
+          ),
+        );
+      }
+      const requiredSources = ["60fps.design", "catalogue.projectsbyif.com", "abtest.design", "Design Spells", "UXSnaps", "UI Playbook"];
+      const tables = markdownTables(evidenceBody);
+      const triageHeaders = ["Source", "Status", "Why", "Query or pattern", "Evidence date"];
+      const triageTable = tables.find((table) => tableHasHeaders(table, triageHeaders));
+      const adoptionHeaders = ["Surface or decision", "Source", "Observation", "Adopt or reject", "Adaptation", "State path", "Validation", "Surface key"];
+      const adoptionTable = tables.find((table) => tableHasHeaders(table, adoptionHeaders));
+      for (const [name, table, headers] of [
+        ["source triage", triageTable, triageHeaders],
+        ["adoption", adoptionTable, adoptionHeaders],
+      ] as const) {
+        if (table === undefined) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_table_invalid",
+              `design/design.md's Reference Evidence ${name} table must have these headers: ${headers.join(", ")}.`,
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+      }
+      const requiredEvidenceSources = new Set<string>();
+      const evidenceSourceStatuses = new Map<string, string>();
+      for (const source of requiredSources) {
+        const sourceRows =
+          triageTable?.rows.filter((row) => normalizedCell(row[triageTable.headers.indexOf("source")]).toLowerCase() === source.toLowerCase()) ?? [];
+        const sourceRow = sourceRows[0];
+        if (!sourceRow) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_source_missing",
+              `design/design.md's Reference Evidence section must triage ${source}.`,
+              rel(args.root, contractPath),
+            ),
+          );
+          continue;
+        }
+        if (sourceRows.length > 1) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_source_duplicate",
+              `design/design.md's Reference Evidence section must contain exactly one triage row for ${source}.`,
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+        if (evidenceRequired) {
+          const statusCell = normalizedCell(sourceRow[triageTable!.headers.indexOf("status")]).toLowerCase();
+          evidenceSourceStatuses.set(source.toLowerCase(), statusCell);
+          if (statusCell === "required") requiredEvidenceSources.add(source.toLowerCase());
+          if (!["required", "not applicable", "unavailable"].includes(statusCell)) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.reference_evidence_status_invalid",
+                `design/design.md must give ${source} one authored status: required, not applicable, or unavailable.`,
+                rel(args.root, contractPath),
+              ),
+            );
+          }
+          const why = normalizedCell(sourceRow[triageTable!.headers.indexOf("why")]);
+          const query = normalizedCell(sourceRow[triageTable!.headers.indexOf("query or pattern")]);
+          const evidenceDate = normalizedCell(sourceRow[triageTable!.headers.indexOf("evidence date")]);
+          const missingReason = !isAuthoredEvidenceReason(why);
+          const missingRequiredEvidence = statusCell === "required" && (!isAuthoredEvidenceCell(query) || !isValidEvidenceDate(evidenceDate));
+          if (missingReason || missingRequiredEvidence) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.reference_evidence_triage_incomplete",
+                `design/design.md must give ${source} a reason. A required source also needs a query or pattern and a real, non-future ISO evidence date.`,
+                rel(args.root, contractPath),
+              ),
+            );
+          }
+        }
+      }
+      if (evidenceRequired) {
+        const declaredAdoptionRows = adoptionTable?.rows.filter((row) => row.some((cell) => isAuthoredEvidenceCell(normalizedCell(cell)))) ?? [];
+        const surfaceKeyIndex = adoptionTable?.headers.indexOf("surface key") ?? -1;
+        const invalidSurfaceKeyRows = declaredAdoptionRows.filter((row) => {
+          const value = normalizedCell(row[surfaceKeyIndex]);
+          return value.includes(",") || parseSurfaceKeys(value).length !== 1;
+        });
+        if (invalidSurfaceKeyRows.length > 0) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_surface_key_invalid",
+              "Every Reference Evidence row needs one category-prefixed stable Surface key such as onboarding.primary or paywall.upgrade.",
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+        const authoredAdoptionRows = declaredAdoptionRows.filter((row) => {
+          const decision = normalizedCell(row[adoptionTable!.headers.indexOf("adopt or reject")]);
+          const commonFields = ["surface or decision", "source", "observation", "validation", "surface key"];
+          const commonFieldsComplete = commonFields.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header)])));
+          const surfaceKey = normalizedCell(row[surfaceKeyIndex]);
+          const surfaceKeyValid = !surfaceKey.includes(",") && parseSurfaceKeys(surfaceKey).length === 1;
+          if (/^adopt$/i.test(decision)) {
+            return (
+              surfaceKeyValid &&
+              adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header.toLowerCase())])))
+            );
+          }
+          return surfaceKeyValid && commonFieldsComplete && /^reject\b[\s:—-]+\S/i.test(decision);
+        });
+        if (declaredAdoptionRows.length !== authoredAdoptionRows.length) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_adoption_incomplete",
+              "Every declared Reference Evidence row needs its stable surface key, surface or decision, source, observation, decision, and validation. Adopted rows also need an adaptation and state path. Rejected rows need a rationale after Reject.",
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+        if ((requiredEvidenceSources.size > 0 || externalEvidenceRequired) && authoredAdoptionRows.length === 0) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_adoption_missing",
+              "A review-ready design/design.md needs at least one complete evidence row. Adopted rows need an adaptation and state path; rejected rows need a rationale.",
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+        const scopedSurfaceKeySet = new Set(scopedSurfaceKeys);
+        const adoptedSources = new Set(
+          authoredAdoptionRows
+            .filter((row) => scopedSurfaceKeySet.has(normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase()))
+            .map((row) => evidenceSourceLane(normalizedCell(row[adoptionTable!.headers.indexOf("source")]))),
+        );
+        for (const requiredSource of requiredEvidenceSources) {
+          if (!adoptedSources.has(requiredSource)) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.reference_evidence_required_source_missing",
+                `A source marked required needs its own complete adopted-or-rejected evidence row: ${requiredSource}.`,
+                rel(args.root, contractPath),
+              ),
+            );
+          }
+        }
+        const evidenceSourcesBySurface = new Map<string, Set<string>>();
+        const fallbackIdentitiesBySurface = new Map<string, Set<string>>();
+        const categoriesBySurface = new Map<string, Set<string>>();
+        const routedSourcesBySurface = new Map<string, Set<string>>();
+        for (const row of authoredAdoptionRows) {
+          const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
+          const evidenceSource = normalizedCell(row[adoptionTable!.headers.indexOf("source")]);
+          const source = evidenceSourceLane(evidenceSource);
+          const surface = normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase();
+          const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
+          if (requiredEvidenceSources.has(source)) sources.add(source);
+          const routedSources = routedSourcesBySurface.get(surface) ?? new Set<string>();
+          for (const routedSource of requiredSourcesForSurface(`${surface} ${decision}`)) routedSources.add(routedSource);
+          routedSourcesBySurface.set(surface, routedSources);
+          const fallbackIdentities = fallbackIdentitiesBySurface.get(surface) ?? new Set<string>();
+          const fallbackIdentity = canonicalEvidenceSource(evidenceSource);
+          const fallbackCandidateSources = [...new Set([...routedSources, ...evidenceSourceStatuses.keys()])];
+          for (const routedSource of fallbackCandidateSources) {
+            if (
+              !sources.has(routedSource) &&
+              !fallbackIdentities.has(fallbackIdentity) &&
+              evidenceSourceStatuses.get(routedSource) === "unavailable" &&
+              isAcceptedFallbackSource(routedSource, evidenceSource)
+            ) {
+              sources.add(routedSource);
+              fallbackIdentities.add(fallbackIdentity);
+              break;
+            }
+          }
+          evidenceSourcesBySurface.set(surface, sources);
+          fallbackIdentitiesBySurface.set(surface, fallbackIdentities);
+          const categories = categoriesBySurface.get(surface) ?? new Set<string>();
+          for (const category of highImpactCategories(`${surface} ${decision}`)) categories.add(category);
+          categoriesBySurface.set(surface, categories);
+        }
+        if (externalEvidenceRequired) {
+          let allScopedSurfacesHaveEvidence = true;
+          for (const surface of scopedSurfaceKeys) {
+            const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
+            const routedSources = [...new Set([...requiredSourcesForSurface(surface), ...(routedSourcesBySurface.get(surface) ?? [])])];
+            const missingRoutedSources = routedSources.filter((source) => !sources.has(source));
+            if (sources.size === 0) allScopedSurfacesHaveEvidence = false;
+            if (missingRoutedSources.length > 0) {
+              issues.push(
+                issue(
+                  "error",
+                  "design_room.reference_evidence_routed_sources_missing",
+                  `The scoped surface ${surface} needs complete evidence rows from its routed sources: ${missingRoutedSources.join(", ")}.`,
+                  rel(args.root, contractPath),
+                ),
+              );
+            }
+            const categories = categoriesBySurface.get(surface) ?? new Set<string>();
+            for (const category of highImpactCategories(surface)) categories.add(category);
+            if (changeClassification === "high-impact or high-risk surface" && categories.size === 0) categories.add("high impact");
+            categoriesBySurface.set(surface, categories);
+          }
+          if (!allScopedSurfacesHaveEvidence) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.reference_evidence_change_sources_missing",
+                "Each scoped new, materially changed, high-impact, or high-risk surface must have its own complete evidence row from a required source or an accepted fallback for a routed source marked unavailable.",
+                rel(args.root, contractPath),
+              ),
+            );
+          }
+        }
+        for (const [surface, categories] of categoriesBySurface) {
+          if (changeClassificationValid && !scopedSurfaceKeySet.has(surface)) continue;
+          const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
+          for (const category of categories) {
+            if (!hasComplementaryEvidence(category, sources)) {
+              issues.push(
+                issue(
+                  "error",
+                  "design_room.reference_evidence_high_impact_sources_missing",
+                  `The ${category} design decision for ${surface} needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps. AI trust decisions need catalogue.projectsbyif.com plus a craft or validation source. Core-loop decisions need UXSnaps plus a craft or validation source.`,
+                  rel(args.root, contractPath),
+                ),
+              );
+            }
+          }
+        }
+      }
+    }
+
+    if (reviewReady && containsTemplatePlaceholder(contract)) {
       issues.push(
         issue(
           "error",
@@ -266,24 +530,338 @@ for (const artifact of designArtifacts) {
 reportAndExit("Design Room contract validation", issues);
 
 /**
- * Full body of the "## Audience And Identity" section: heading line to the next
- * H2 or end of file. Line-based on purpose — a lazy regex with the m flag lets
+ * Full body of an H2 or H3 section: heading line to the next required contract
+ * section or heading at the same or a higher level, or end of file. Line-based on purpose — a lazy regex with the m flag lets
  * `$` match the first line end, silently truncating the body to one line.
  */
-function audienceSectionBody(contract: string): string | undefined {
+function sectionBody(contract: string, section: string): string | undefined {
   const lines = contract.split("\n");
-  const start = lines.findIndex((line) => /^##\s+Audience And Identity\s*$/.test(line.trim()));
+  const pattern = new RegExp(`^(#{2,3})\\s+${escapeRegExp(section)}\\s*$`, "i");
+  const start = lines.findIndex((line) => pattern.test(line.trim()));
   if (start === -1) {
     return undefined;
   }
+  const startMatch = lines[start]!.trim().match(pattern)!;
+  const depth = startMatch[1]!.length;
   let end = lines.length;
   for (let index = start + 1; index < lines.length; index += 1) {
-    if (/^##\s/.test(lines[index] ?? "")) {
+    const heading = (lines[index] ?? "").trim().match(/^(#{2,6})\s+(.+?)\s*$/);
+    const startsRequiredSection = heading !== null && requiredContractSections.some((required) => required.toLowerCase() === heading[2]!.toLowerCase());
+    if (heading && (heading[1]!.length <= depth || startsRequiredSection)) {
       end = index;
       break;
     }
   }
   return lines.slice(start + 1, end).join("\n");
+}
+
+function stripNonRenderedMarkdown(markdown: string): string {
+  const withoutComments = stripHtmlComments(stripNonRenderedHtmlBlocks(markdown));
+  const renderedLines: string[] = [];
+  let fence: { kind: "`" | "~"; length: number } | undefined;
+  for (const line of withoutComments.split("\n")) {
+    const markerMatch = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
+    const marker = markerMatch?.[1];
+    if (fence !== undefined) {
+      if (marker !== undefined && fence.kind === marker[0] && marker.length >= fence.length && (markerMatch?.[2] ?? "").trim() === "") {
+        fence = undefined;
+      }
+      continue;
+    }
+    if (marker !== undefined) {
+      fence = { kind: marker[0] as "`" | "~", length: marker.length };
+      continue;
+    }
+    if (/^(?: {4}|\t)/u.test(line)) continue;
+    renderedLines.push(line);
+  }
+  return renderedLines.join("\n");
+}
+
+function stripNonRenderedHtmlBlocks(markdown: string): string {
+  return markdown.replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1\s*>/giu, "");
+}
+
+function stripHtmlComments(markdown: string): string {
+  let rendered = "";
+  let cursor = 0;
+  while (cursor < markdown.length) {
+    const start = markdown.indexOf("<!--", cursor);
+    if (start < 0) return rendered + markdown.slice(cursor);
+    rendered += markdown.slice(cursor, start);
+    const end = markdown.indexOf("-->", start + 4);
+    if (end < 0) return rendered;
+    cursor = end + 3;
+  }
+  return rendered;
+}
+
+type MarkdownTable = { headers: string[]; rows: string[][] };
+
+function markdownTables(body: string): MarkdownTable[] {
+  const tables: MarkdownTable[] = [];
+  let block: string[] = [];
+  const flush = (): void => {
+    if (block.length >= 2) {
+      const parsed = block.map(parseMarkdownRow);
+      const headers = parsed[0]!.map((cell) => normalizedCell(cell).toLowerCase());
+      const separator = parsed[1] ?? [];
+      if (separator.length === headers.length && separator.every((cell) => /^:?-{3,}:?$/.test(normalizedCell(cell)))) {
+        tables.push({ headers, rows: parsed.slice(2).filter((row) => row.some((cell) => normalizedCell(cell).length > 0)) });
+      }
+    }
+    block = [];
+  };
+  for (const line of body.split("\n")) {
+    if (line.trim().startsWith("|")) block.push(line.trim());
+    else flush();
+  }
+  flush();
+  return tables;
+}
+
+function parseMarkdownRow(line: string): string[] {
+  const source = line.replace(/^\|/, "").replace(/\|$/, "");
+  const cells: string[] = [];
+  let cell = "";
+  for (let index = 0; index < source.length; index += 1) {
+    if (source[index] === "\\") {
+      let end = index;
+      while (source[end] === "\\") end += 1;
+      const count = end - index;
+      if (source[end] === "|") {
+        cell += "\\".repeat(Math.floor(count / 2));
+        if (count % 2 === 1) {
+          cell += "|";
+          index = end;
+          continue;
+        }
+        index = end - 1;
+        continue;
+      }
+      cell += "\\".repeat(count);
+      index = end - 1;
+      continue;
+    }
+    if (source[index] === "|") {
+      cells.push(cell.trim());
+      cell = "";
+    } else {
+      cell += source[index];
+    }
+  }
+  cells.push(cell.trim());
+  return cells;
+}
+
+function tableHasHeaders(table: MarkdownTable, required: string[]): boolean {
+  return required.every((header) => table.headers.includes(header.toLowerCase()));
+}
+
+function normalizedCell(value: string | undefined): string {
+  return (value ?? "").replace(/`/g, "").replace(/\s+/g, " ").trim();
+}
+
+function isAuthoredEvidenceCell(value: string): boolean {
+  return value.length > 0 && !containsTemplatePlaceholder(value) && !/^not reviewed$/i.test(value);
+}
+
+function isValidEvidenceDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value && date.getTime() <= Date.now();
+}
+
+function highImpactCategories(value: string): string[] {
+  const categories: string[] = [];
+  if (/\bonboardings?\b/i.test(value)) categories.push("onboarding");
+  if (/\bpaywalls?\b/i.test(value)) categories.push("paywall");
+  if (/\bcheckouts?\b/i.test(value)) categories.push("checkout");
+  if (/\bretentions?\b/i.test(value)) categories.push("retention");
+  if (/\breferrals?\b/i.test(value)) categories.push("referral");
+  if (/\bcore[. -]loops?\b/i.test(value)) categories.push("core loop");
+  if (isTrustSurface(value)) categories.push("AI trust");
+  if (/\bstore\b.*\bfirst[. -]frames?\b|\bfirst[. -]frames?\b.*\bstore\b/i.test(value)) categories.push("store first frame");
+  return categories;
+}
+
+function parseSurfaceKeys(value: string): string[] {
+  const keys = value
+    .split(",")
+    .map((entry) => normalizedCell(entry).toLowerCase())
+    .filter((entry) => entry.length > 0);
+  return keys.length > 0 && keys.every((entry) => /^[a-z0-9]+(?:[.-][a-z0-9]+)+$/.test(entry)) ? [...new Set(keys)] : [];
+}
+
+function requiredSourcesForSurface(surface: string): string[] {
+  const sources = new Set<string>();
+  if (/\b(?:motions?|animations?|gestures?|transitions?|loadings?)\b/i.test(surface)) sources.add("60fps.design");
+  if (isTrustSurface(surface)) sources.add("catalogue.projectsbyif.com");
+  if (/\b(?:onboardings?|paywalls?|checkouts?|retentions?|referrals?)\b/i.test(surface)) {
+    sources.add("abtest.design");
+    sources.add("uxsnaps");
+  }
+  if (/\b(?:conversions?|engagements?|monetizations?)\b/i.test(surface)) sources.add("abtest.design");
+  if (/\b(?:journeys?|dashboards?|content[. -]discover(?:y|ies)|flow[. -]critiques?)\b|\binformation[. -]hierarch(?:y|ies)\b/i.test(surface)) {
+    sources.add("uxsnaps");
+  }
+  if (/\b(?:delights?|personalit(?:y|ies)|micro[. -]interactions?|success(?:es)?|empty[. -]states?|magical[. -]moments?|surprises?)\b/i.test(surface)) {
+    sources.add("design spells");
+  }
+  if (
+    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|checkboxes?|radios?|sliders?|steppers?|segments?|segmented[. -]controls?|progress[. -]bars?|search[. -]bars?|navigation[. -]bars?|nav[. -]bars?|text[. -]?(?:fields?|areas?)|date[. -]?pickers?|time[. -]?pickers?|combo[. -]?boxes?|list[. -]?boxes?|dropdowns?|selects?|pickers?|menus?|tabs?|sheets?|breadcrumbs?|pagination|tooltips?|popovers?|accordions?|carousels?|chips?|badges?|avatars?|cards?|tables?|alerts?|toasts?|snackbars?|banners?)\b/i.test(
+      surface,
+    )
+  ) {
+    sources.add("ui playbook");
+  }
+  return [...sources];
+}
+
+function isTrustSurface(value: string): boolean {
+  return (
+    /\b(?:ai|automations?|trust|security|consents?|auth|authentications?|log[. -]?ins?|log[. -]?outs?|sign[. -]?in|passwords?|permissions?|data[. -]access(?:es)?|sensitive[. -]data|user[. -]controls?|takeovers?|recover(?:y|ies))\b/i.test(
+      value,
+    ) ||
+    /\b(?:sessions?[. -]management|management[. -]sessions?|accounts?[. -](?:register|registrations?|sign[. -]?ups?)|(?:register|registrations?|sign[. -]?ups?)[. -]accounts?|users?[. -]agenc(?:y|ies)|agenc(?:y|ies)[. -]users?)\b/i.test(
+      value,
+    )
+  );
+}
+
+function isAcceptedFallbackSource(routedSource: string, evidenceSource: string): boolean {
+  const target = evidenceSourceTarget(evidenceSource);
+  if (routedSource === "ui playbook" && isOfficialPlatformGuidance(target)) return true;
+  if (routedSource === "60fps.design") {
+    return isKnownDoctrineFallback(target, ["motion-craft-benchmarks.md"]);
+  }
+  if (routedSource === "design spells") {
+    return isKnownDoctrineFallback(target, ["emotional-design-system.md", "emotional-experience-design.md"]);
+  }
+  if (routedSource === "catalogue.projectsbyif.com") {
+    return isKnownDoctrineFallback(target, ["consumer-product-design-agency.md", "privacy-terms.md", "generative-ai-safety.md"]);
+  }
+  if (routedSource === "abtest.design") {
+    return isKnownDoctrineFallback(target, ["paywall-pricing-and-experiments.md", "onboarding-conversion.md"]);
+  }
+  if (routedSource === "uxsnaps") {
+    return isKnownDoctrineFallback(target, ["refero-ux-patterns.md"]);
+  }
+  if (routedSource === "ui playbook") {
+    return isKnownDoctrineFallback(target, ["premium-mobile-craft.md"]);
+  }
+  return false;
+}
+
+function isAuthoredEvidenceReason(value: string): boolean {
+  if (!isAuthoredEvidenceCell(value)) return false;
+  const seededReasons = new Set([
+    "classify motion, transition, gesture, loading, success, and magical-moment needs.",
+    "classify ai, automation, trust, consent, sign-in, permission, data, and recovery needs.",
+    "classify conversion, onboarding, paywall, checkout, retention, and referral hypotheses.",
+    "classify delight, personality, empty-state, success-state, and micro-interaction needs.",
+    "classify journey, hierarchy, onboarding, dashboard, and content-discovery critique needs.",
+    "classify standard component, state, focus, keyboard, and accessibility needs.",
+  ]);
+  return !seededReasons.has(normalizedCell(value).toLowerCase());
+}
+
+function isOfficialPlatformGuidance(evidenceSource: string): boolean {
+  if (!/^https?:\/\/\S+$/i.test(evidenceSource)) return false;
+  try {
+    const parsed = new URL(evidenceSource);
+    if (parsed.username !== "" || parsed.password !== "") return false;
+    const hostname = parsed.hostname.toLowerCase();
+    if (["developer.apple.com", "developer.android.com", "m3.material.io", "material.io", "learn.microsoft.com"].includes(hostname)) return true;
+    return hostname === "www.w3.org" && /^\/wai\/(?:aria|apg)(?:\/|$)/i.test(parsed.pathname);
+  } catch {
+    return false;
+  }
+}
+
+function isKnownDoctrineFallback(target: string, allowedBasenames: string[]): boolean {
+  let normalized = normalizedCell(target).toLowerCase().replaceAll("\\", "/").replace(/^\.\//, "");
+  if (/^[a-z][a-z0-9+.-]*:/i.test(normalized) || normalized.startsWith("/") || /(?:^|\/)\.\.(?:\/|$)/.test(normalized)) return false;
+  normalized = normalized.replace(/^skill\/formation\//, "");
+  const basename = normalized.split("/").at(-1);
+  if (basename === undefined || !allowedBasenames.includes(basename)) return false;
+  if (normalized === basename) return true;
+  return normalized.startsWith("knowledge/") && existsSync(path.join(skillRoot, normalized));
+}
+
+function canonicalEvidenceSource(evidenceSource: string): string {
+  const target = evidenceSourceTarget(evidenceSource);
+  const rawUrl = target.match(/https?:\/\/[^)\s]+/i)?.[0];
+  if (rawUrl !== undefined) {
+    try {
+      const parsed = new URL(rawUrl);
+      parsed.protocol = "https:";
+      parsed.hash = "";
+      parsed.search = "";
+      parsed.username = "";
+      parsed.password = "";
+      parsed.hostname = parsed.hostname.toLowerCase();
+      parsed.pathname = decodeURI(parsed.pathname).replace(/%[0-9a-f]{2}/gi, (escape) => escape.toUpperCase());
+      parsed.pathname = parsed.pathname === "/" ? "/" : parsed.pathname.replace(/\/+$/, "");
+      return parsed.toString().replace(/\/$/, parsed.pathname === "/" ? "/" : "");
+    } catch {
+      // Fall through to normalized text when a source cell contains a malformed URL.
+    }
+  }
+  const normalized = normalizedCell(target).toLowerCase().replaceAll("\\", "/").replace(/^\.\//, "");
+  return normalized.endsWith(".md") ? normalized.split("/").at(-1)! : normalized;
+}
+
+function evidenceSourceTarget(evidenceSource: string): string {
+  const normalized = normalizedCell(evidenceSource);
+  return normalized.match(/^\[[^\]]+\]\(([^)\s]+)\)$/)?.[1] ?? normalized;
+}
+
+function evidenceSourceLane(evidenceSource: string): string {
+  const target = evidenceSourceTarget(evidenceSource);
+  const normalized = normalizedCell(target).toLowerCase();
+  const labels = new Map<string, string>([
+    ["60fps.design", "60fps.design"],
+    ["catalogue.projectsbyif.com", "catalogue.projectsbyif.com"],
+    ["abtest.design", "abtest.design"],
+    ["design spells", "design spells"],
+    ["uxsnaps", "uxsnaps"],
+    ["ui playbook", "ui playbook"],
+  ]);
+  const label = labels.get(normalized);
+  if (label !== undefined) return label;
+  try {
+    const parsed = new URL(target);
+    if (!["http:", "https:"].includes(parsed.protocol) || parsed.username !== "" || parsed.password !== "") return normalized;
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    return (
+      new Map<string, string>([
+        ["60fps.design", "60fps.design"],
+        ["catalogue.projectsbyif.com", "catalogue.projectsbyif.com"],
+        ["abtest.design", "abtest.design"],
+        ["designspells.com", "design spells"],
+        ["uxsnaps.com", "uxsnaps"],
+        ["uiplaybook.dev", "ui playbook"],
+      ]).get(hostname) ?? normalized
+    );
+  } catch {
+    return normalized;
+  }
+}
+
+function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {
+  if (["onboarding", "paywall", "checkout", "retention", "referral"].includes(category)) {
+    return sources.has("abtest.design") && sources.has("uxsnaps");
+  }
+  const craftOrValidation = ["60fps.design", "abtest.design", "design spells", "ui playbook"];
+  if (category === "AI trust") {
+    return sources.has("catalogue.projectsbyif.com") && craftOrValidation.some((source) => sources.has(source));
+  }
+  if (category === "core loop") {
+    return sources.has("uxsnaps") && craftOrValidation.some((source) => sources.has(source));
+  }
+  const behaviorOrStructure = ["catalogue.projectsbyif.com", "uxsnaps"];
+  return behaviorOrStructure.some((source) => sources.has(source)) && craftOrValidation.some((source) => sources.has(source));
 }
 
 function containsTemplatePlaceholder(value: string): boolean {

@@ -80,6 +80,13 @@ export const slopPatterns: SlopPattern[] = [
     severity: "error",
   },
   {
+    id: "interpretive_metadiscourse",
+    problem: "An aside tells the reader how to interpret the text instead of supporting the point.",
+    fix: "Delete the aside, or replace it with a concrete fact or consequence.",
+    pattern: /\b(?:the key point is|as you can see|this distinction matters|that last part matters more than it sounds|the important thing is)\b/i,
+    severity: "error",
+  },
+  {
     id: "weasel_attribution",
     problem: "An unsourced appeal to authority.",
     fix: "Name the source or cut the claim.",

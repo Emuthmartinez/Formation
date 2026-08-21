@@ -1,5 +1,96 @@
 schema_version: 1
 sources:
+  - id: design-evidence-60fps
+    name: 60fps.design
+    source_type: inspiration_benchmark
+    url: https://60fps.design/
+    refresh_cadence_days: 30
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-design-evidence-stack.yaml
+      - skill/formation/catalog/knowledge/design/design-motion-craft-benchmarks.yaml
+    notes: Curated shipped-app motion and interaction examples. Use mechanics as inspiration and adapt them to Formation's state and token contracts.
+  - id: projectsbyif-patterns-catalogue
+    name: IF Design Patterns Catalogue
+    source_type: pattern_catalog
+    url: https://catalogue.projectsbyif.com/
+    refresh_cadence_days: 90
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-design-evidence-stack.yaml
+    notes: Trustworthy-service pattern catalog for AI, consent, authentication, data access, security, user agency, and recovery. The catalog states a CC BY 4.0 license.
+  - id: abtest-design-library
+    name: abtest.design
+    source_type: experiment_library
+    url: https://abtest.design/
+    refresh_cadence_days: 30
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-design-evidence-stack.yaml
+    notes: Curated experiment examples. Results are hypothesis seeds and require cited-source review and local validation.
+  - id: design-spells-gallery
+    name: Design Spells
+    source_type: inspiration_benchmark
+    url: https://www.designspells.com/
+    refresh_cadence_days: 30
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-design-evidence-stack.yaml
+    notes: Inspiration gallery for small interaction, motion, and delight details. Transfer principles and mechanics only.
+  - id: uxsnaps-breakdowns
+    name: UXSnaps
+    source_type: design_breakdown
+    url: https://www.uxsnaps.com/
+    refresh_cadence_days: 30
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-design-evidence-stack.yaml
+    notes: Product and flow breakdowns used as critique and hypothesis input, not authority or causal proof.
+  - id: ui-playbook-components
+    name: UI Playbook
+    source_type: component_reference
+    url: https://uiplaybook.dev/
+    refresh_cadence_days: 30
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-design-evidence-stack.yaml
+    notes: Documented UI component guidance used as a specification seed before current platform and accessibility documentation is checked.
+  - id: jakubantalik-liquid-gooey
+    name: Liquid Gooey
+    source_type: component_reference
+    url: https://gooey.jakubantalik.com/
+    refresh_cadence_days: 30
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-motion-craft-benchmarks.yaml
+    notes: MIT-licensed React reference for the R15 liquid relationship morph and its two-layer accessibility model.
+  - id: jakubantalik-border-beam
+    name: Border Beam
+    source_type: component_reference
+    url: https://beam.jakubantalik.com/
+    refresh_cadence_days: 30
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-motion-craft-benchmarks.yaml
+    notes: MIT-licensed React reference for the R16 state-bound perimeter beam.
+  - id: jakubantalik-metal-fx
+    name: Metal FX
+    source_type: component_reference
+    url: https://metal.jakubantalik.com/
+    refresh_cadence_days: 30
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-motion-craft-benchmarks.yaml
+    notes: MIT-licensed React and WebGL reference for the R17 liquid-metal priority ring.
+  - id: jakubantalik-thinking-orbs
+    name: Thinking Orbs
+    source_type: component_reference
+    url: https://orbs.jakubantalik.com/
+    refresh_cadence_days: 30
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-motion-craft-benchmarks.yaml
+    notes: MIT-licensed React and Canvas reference for the R18 semantic thinking orb.
   - id: github-raw-b2c-launch-skill-version-main
     name: formation skill version manifest
     source_type: raw_manifest
@@ -238,6 +329,16 @@ sources:
     locations:
       - skill/formation/studio/seed/schema/business.schema.json
     notes: JSON Schema dialect used by the Design Room business state schema.
+  - id: github-com-general-legal-legal-templates
+    name: General Legal template collection
+    source_type: attorney_template_repository
+    url: https://github.com/General-Legal/legal-templates
+    refresh_cadence_days: 30
+    owner: trust
+    locations:
+      - skill/formation/catalog/knowledge/trust/trust-privacy-terms.yaml
+      - skill/formation/knowledge/trust/privacy-terms.md
+    notes: CC0 drafting benchmark for privacy policies, terms, cookie notices, and data-processing addenda. Use it only after the product data inventory. Verify current law and final text with official sources and founder or counsel review.
   - id: github-com-parthjadhav-app-store-screenshots
     name: github.com
     source_type: github
@@ -513,6 +614,15 @@ sources:
     locations:
       - docs/architecture.md
     notes: Defines the provenance principles used by knowledge-package source and review records.
+  - id: w3c-wai-aria-apg-combobox
+    name: WAI-ARIA Authoring Practices combobox pattern
+    source_type: standard
+    url: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
+    refresh_cadence_days: 90
+    owner: design
+    locations:
+      - skill/formation/validation/repository/fixtures/engineering.fixtures.ts
+    notes: Official W3C component guidance used to prove the unavailable-source fallback path for keyboard and accessibility semantics.
   - id: w3c-shacl
     name: W3C SHACL
     source_type: standard

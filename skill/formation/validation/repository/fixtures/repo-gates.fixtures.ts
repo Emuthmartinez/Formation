@@ -906,6 +906,7 @@ export function register(h: Harness): void {
     "knowledge/experience/experience-cards/mastery-and-status-card.md",
     "knowledge/experience/experience-cards/variable-reward-card.md",
     "workspace/business/design/design.md",
+    "workspace/business/state/PROJECT_STATE.yaml",
     "workspace/business/product/experience/emotional-design/EMOTIONAL_DESIGN.md",
     "workspace/business/design/motion-catalog/TokenSpring.swift",
     "workspace/business/design/motion-catalog/motion-tokens.ts",
@@ -922,6 +923,280 @@ export function register(h: Harness): void {
   };
 
   runScriptArgs("motion contract passes on the shipped skill", "check-motion-contract.ts", ["--skill-root", skillRoot], 0);
+
+  const motionStarterHeaderMissing = writeMotionContractRoot("motion-contract-starter-live-surface-header-missing", (rel, text) => {
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+        "| Surface omitted | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract validates the packaged starter live-effect table structure",
+    "check-motion-contract.ts",
+    ["--skill-root", motionStarterHeaderMissing],
+    1,
+    "motion_contract.live_surface.template_incomplete",
+  );
+
+  const motionLiveSurfaceMissing = writeMotionContractRoot("motion-contract-live-surface-missing", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md") ? text.replace("### R18 — Semantic thinking orb", "### Removed semantic thinking orb") : text,
+  );
+
+  const motionLiveWorkspaceIncomplete = writeMotionContractRoot("motion-contract-live-workspace-incomplete", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6b");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "| AI status | Processing state | R18 | Active orb | Not defined | Static status text | Static status text |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract validates the launched active workspace live-effect rows",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceIncomplete, "--workspace-root", path.join(motionLiveWorkspaceIncomplete, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+
+  const motionLiveWorkspacePartialRow = writeMotionContractRoot("motion-contract-live-workspace-partial-row", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "| AI status | Processing state | R18 | Active orb | Processing ends | Static status text | Static status text |\n| Relationship | Connected state |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract rejects any truncated live-effect row in a launched workspace",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspacePartialRow, "--workspace-root", path.join(motionLiveWorkspacePartialRow, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+  const motionLiveWorkspaceDiscontiguousTable = writeMotionContractRoot("motion-contract-live-workspace-discontiguous-table", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "This prose ends the Markdown table.\n| AI status | Processing state | R18 | Active orb | Processing ends | Static status text | Static status text |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract does not join discontiguous pipe lines into a live-effect table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceDiscontiguousTable, "--workspace-root", path.join(motionLiveWorkspaceDiscontiguousTable, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+  for (const [label, open, close] of [
+    ["fenced", "```markdown\n", "\n```"],
+    ["commented", "<!--\n", "\n-->"],
+    ["unterminated-comment", "<!--\n", ""],
+    ["script-block", '<script type="text/plain">\n', "\n</script>"],
+    ["style-block", "<style>\n", "\n</style>"],
+  ] as const) {
+    const hiddenLiveEffectTable = writeMotionContractRoot(`motion-contract-live-workspace-${label}-table`, (rel, text) => {
+      if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+      if (rel === "workspace/business/design/design.md") {
+        const completeTable = [
+          "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+          "| --- | --- | --- | --- | --- | --- | --- |",
+          "| AI status | Processing state | R18 | Active orb and status text | Processing ends | Static status text | Static status text |",
+        ].join("\n");
+        return text.replace("### Live-surface effects", `### Live-surface effects\n\n${open}${completeTable}${close}`);
+      }
+      return text;
+    });
+    runScriptArgs(
+      `motion contract ignores a ${label} live-effect table`,
+      "check-motion-contract.ts",
+      ["--skill-root", hiddenLiveEffectTable, "--workspace-root", path.join(hiddenLiveEffectTable, "workspace/business")],
+      1,
+      "motion_contract.live_surface.workspace_incomplete",
+    );
+  }
+  const motionNestedFenceTable = writeMotionContractRoot("motion-contract-live-workspace-nested-fence-table", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      const completeTable = [
+        "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| AI status | Processing state | R18 | Active orb and status text | Processing ends | Static status text | Static status text |",
+      ].join("\n");
+      const hiddenTable = `\`\`\`\`markdown\n\`\`\`text\n\`\`\`\`text\n${completeTable}\n\`\`\`\n\`\`\`\``;
+      return text.replace("### Live-surface effects", `### Live-surface effects\n\n${hiddenTable}`);
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract honors a longer outer fence and rejects info-suffixed closers",
+    "check-motion-contract.ts",
+    ["--skill-root", motionNestedFenceTable, "--workspace-root", path.join(motionNestedFenceTable, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+  const motionIndentedCodeTable = writeMotionContractRoot("motion-contract-live-workspace-indented-code-table", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      const hiddenTable = [
+        "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| AI status | Processing state | R18 | Active orb and status text | Processing ends | Static status text | Static status text |",
+      ]
+        .map((line) => `    ${line}`)
+        .join("\n");
+      return text.replace("### Live-surface effects", `### Live-surface effects\n\n${hiddenTable}`);
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract ignores an indented-code live-effect table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionIndentedCodeTable, "--workspace-root", path.join(motionIndentedCodeTable, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+  const motionLiveWorkspaceUnsupportedRecipe = writeMotionContractRoot("motion-contract-live-workspace-unsupported-recipe", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "| AI status | Processing state | R19 | Active orb | Processing ends | Static status text | Static status text |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract rejects an unsupported live-effect recipe",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceUnsupportedRecipe, "--workspace-root", path.join(motionLiveWorkspaceUnsupportedRecipe, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+  const motionLiveWorkspaceReorderedRecipe = writeMotionContractRoot("motion-contract-live-workspace-reordered-recipe", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text
+        .replace(
+          "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+          "| Surface | Real state or relationship | Low-power fallback | Visible or semantic signal | Stop condition | Reduced-motion result | Recipe |",
+        )
+        .replace(
+          "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+          "| AI status | Processing state | none | Active orb | Processing ends | Static status text | R19 |",
+        );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract resolves Recipe from reordered live-effect headers",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceReorderedRecipe, "--workspace-root", path.join(motionLiveWorkspaceReorderedRecipe, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+  const motionLiveWorkspaceMissingSeparator = writeMotionContractRoot("motion-contract-live-workspace-missing-separator", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text
+        .replace(
+          "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |\n| --- | --- | --- | --- | --- | --- | --- |",
+          "| Surface | Real state or relationship | Recipe | Visible or semantic signal | Stop condition | Reduced-motion result | Low-power fallback |",
+        )
+        .replace(
+          "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+          "| AI status | Processing state | R19 | Active orb | Processing ends | Static status text | Static status text |\n| AI status | Processing state | R18 | Active orb | Processing ends | Static status text | Static status text |",
+        );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract rejects a live-effect table without a Markdown separator",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceMissingSeparator, "--workspace-root", path.join(motionLiveWorkspaceMissingSeparator, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+  const motionPrelaunchActiveWorkspace = writeMotionContractRoot("motion-contract-prelaunch-active-workspace");
+  const prelaunchBusinessRoot = path.join(motionPrelaunchActiveWorkspace, "active-business");
+  cpSync(path.join(motionPrelaunchActiveWorkspace, "workspace/business"), prelaunchBusinessRoot, { recursive: true });
+  {
+    const contractPath = path.join(prelaunchBusinessRoot, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(
+      "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+      "| AI status | Processing state | R19 | Active orb | Processing ends | Static status text | Static status text |",
+    );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runScriptArgs(
+    "motion contract validates an explicit active workspace before phase 6",
+    "check-motion-contract.ts",
+    ["--skill-root", motionPrelaunchActiveWorkspace, "--workspace-root", prelaunchBusinessRoot],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+  const motionLiveWorkspaceEscapedPipe = writeMotionContractRoot("motion-contract-live-workspace-escaped-pipe", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "| AI status | Processing state | R18 | Active \\| idle orb | Processing ends | Static status text | Static status text |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract preserves escaped pipes inside a live-effect cell",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceEscapedPipe, "--workspace-root", path.join(motionLiveWorkspaceEscapedPipe, "workspace/business")],
+    0,
+  );
+  const motionLiveWorkspaceAlternatePlaceholders = writeMotionContractRoot("motion-contract-live-workspace-alternate-placeholders", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "| TBD | TODO | none | Pending | Not reviewed | Not captured | Not recorded |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract rejects alternate placeholders in launched live-effect rows",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceAlternatePlaceholders, "--workspace-root", path.join(motionLiveWorkspaceAlternatePlaceholders, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
+  runScriptArgs(
+    "motion contract fails when one live-surface recipe disappears",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveSurfaceMissing],
+    1,
+    "motion_contract.live_surface.recipe_missing",
+  );
+
+  const motionLiveSurfaceHeadingOnly = writeMotionContractRoot("motion-contract-live-surface-heading-only", (rel, text) =>
+    rel.endsWith("motion-craft-benchmarks.md")
+      ? text.replace(/### R16 — State-bound perimeter beam[\s\S]*?(?=\n### R17 — Liquid-metal priority ring)/, "### R16 — State-bound perimeter beam\n")
+      : text,
+  );
+  runScriptArgs(
+    "motion contract fails when a live-surface recipe keeps only its heading",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveSurfaceHeadingOnly],
+    1,
+    "motion_contract.live_surface.recipe_incomplete",
+  );
 
   const motionMirrorDrift = writeMotionContractRoot("motion-contract-mirror-drift", (rel, text) =>
     rel.endsWith("motion-craft-benchmarks.md")
@@ -1504,6 +1779,17 @@ export function register(h: Harness): void {
     ["--repo-root", noSlopPattern.repoRoot, "--skill-root", noSlopPattern.skillRoot],
     1,
     "no_slop.pattern.throat_clearing",
+  );
+
+  const noSlopMetadiscourse = writeNoSlopRoot("no-slop-pattern-interpretive-metadiscourse", {
+    "README.md": "# Example\n\nThe key point is that this command writes the report to disk.\n",
+  });
+  runScriptArgs(
+    "no-slop fails when interpretive metadiscourse replaces direct support",
+    "check-no-slop.ts",
+    ["--repo-root", noSlopMetadiscourse.repoRoot, "--skill-root", noSlopMetadiscourse.skillRoot],
+    1,
+    "no_slop.pattern.interpretive_metadiscourse",
   );
 
   // AGENTS.md and CLAUDE.md are maintainer-only guidance: the same banned word

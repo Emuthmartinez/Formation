@@ -81,6 +81,12 @@ The policy must reflect actual practices, not aspirations. Include:
 - international transfers where applicable
 - policy changes and contact
 
+### Optional drafting benchmark
+
+Complete the data inventory first. Then, agents may compare the draft with the [General Legal template collection](https://github.com/General-Legal/legal-templates). The collection uses CC0. It includes U.S. and GDPR-enhanced privacy policies, terms of use, cookie notices, and data-processing addenda.
+
+Use the collection to check document structure and find possible clauses. Do not use it as current law or a complete product policy. Do not copy optional text unless the product implements the stated practice. Resolve every `<mark>` placeholder. Check the jurisdiction and each material clause against current official sources. The founder or counsel makes the final legal decision.
+
 Platform must-haves:
 - Apple requires a publicly accessible privacy policy URL and accurate App Privacy responses, including third-party partner practices.
 - Google Play requires a privacy policy link in Play Console and in-app link/text; the policy must include developer/contact info, data accessed/collected/used/shared, parties shared with, secure handling, retention/deletion, and be active, public, non-geofenced, non-editable, and not a PDF.

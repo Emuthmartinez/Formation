@@ -5,8 +5,8 @@ import path from "node:path";
 import { isMainModule, parseArgs } from "../lib/cli.js";
 import { compilePlan, type CompiledPlan, type CompiledRunNode, type CostEstimate, type VerificationKind } from "../engine/compile.js";
 import { composeNodeBrief, type NodeBrief } from "../engine/node-brief.js";
-import { computeFrontier } from "../engine/frontier.js";
-import { loadRunState, seedRunState } from "../engine/runstate.js";
+import { computeFrontier, refreshAdmissibleConsumerIds } from "../engine/frontier.js";
+import { loadRunState, refreshDependenciesBeforeFrontier, seedRunState } from "../engine/runstate.js";
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
 import { createCompositeVerifier } from "../autonomy/prerequisites.js";
 import { createDopplerAuthVerifier } from "../autonomy/probes/doppler.js";
@@ -257,13 +257,15 @@ export function buildBoundaryResults(plan: CompiledPlan, run: RunStateDocument):
   for (const node of plan.nodes) {
     const state = run.nodes[node.id];
     if (!state || state.status !== "succeeded") continue;
-    const attempt = state.attempts.at(-1);
-    if (!attempt || attempt.status !== "succeeded") continue;
-
     const bindings = node.outputs.map((artifactId) =>
-      run.artifactBindings.find((candidate) => candidate.artifactId === artifactId && candidate.attemptId === attempt.id && candidate.accepted === true),
+      run.artifactBindings.find((candidate) => candidate.artifactId === artifactId && candidate.accepted === true),
     );
     if (bindings.some((binding) => binding === undefined || !binding.fingerprint)) continue;
+    const acceptedAttemptIds = new Set(bindings.map((binding) => binding!.attemptId).filter((attemptId): attemptId is string => Boolean(attemptId)));
+    if (node.outputs.length > 0 && acceptedAttemptIds.size !== 1) continue;
+    const acceptedAttemptId = node.outputs.length === 0 ? state.attempts.at(-1)?.id : [...acceptedAttemptIds][0];
+    const attempt = state.attempts.find((candidate) => candidate.id === acceptedAttemptId);
+    if (!attempt || attempt.status !== "succeeded") continue;
 
     // Fresh-context verification is only independent when the recorded verifier is a DIFFERENT
     // session from the producing attempt's owner. A result with no recorded verifier, or one
@@ -573,6 +575,7 @@ export function describeWorkspace(
 
   // Same no-write guarantee as the planner: the frontier pass edits a clone that is dropped.
   const scratch: RunStateDocument = structuredClone(run);
+  refreshDependenciesBeforeFrontier(plan, scratch, now, refreshAdmissibleConsumerIds(plan, scratch, businessState, evaluator));
   const frontier = computeFrontier(plan, scratch, businessState, evaluator);
   const parked = new Map(frontier.parked.map((entry) => [entry.nodeId, entry.reason]));
   const report = buildPlanReport(plan, scratch, frontier.ready, parked, decisions, 4, control === undefined);

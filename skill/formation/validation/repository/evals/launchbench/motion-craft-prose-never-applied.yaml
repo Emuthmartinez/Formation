@@ -21,7 +21,8 @@ expected_guardrail: >
   Motion fallbacks on every animated surface; drag release settles inheriting actual gesture
   velocity; and an Animation Hitches profile recorded on the oldest supported device with a
   zero hitch budget for press feedback and scrolling. The contract's own consistency is gated
-  by check:motion-contract in the skill package (it is not an app-repo script); the on-device
+  by `npm run check:motion-contract -- --workspace-root /path/to/business-workspace` in the skill
+  source checkout or installed runtime; the on-device
   adherence evidence lands in the design/engineering artifacts before any done claim.
 validators:
   - check-motion-contract
@@ -37,4 +38,4 @@ should_say:
   - Press states ride the press family (response 0.3–0.4, damping 0.7–0.8) on every tappable surface; the badge reveal and celebration ride the celebrate family with visible overshoot — a linear tween on an earned moment fails the acceptance criteria.
   - The grid-to-detail morph needs both sides wired — .matchedTransitionSource(id:in:) on the source and .navigationTransition(.zoom(sourceID:in:)) on the destination — or a deliberate cross-fade instead; matchedGeometryEffect alone does not bridge a NavigationStack push.
   - Every animated surface needs its Reduce Motion fallback verified on device before done.
-  - The contract's own consistency is gated in the skill package, not the app repo — check:motion-contract is a skill-repo script with no app-side equivalent; the app-side proof is the acceptance-criteria walk plus a recorded Instruments Animation Hitches pass on the oldest supported device, with zero hitches for press feedback and scrolling.
+  - Run `npm run check:motion-contract -- --workspace-root /path/to/business-workspace` from the skill source checkout or installed runtime. The app-side proof is the acceptance-criteria walk plus a recorded Instruments Animation Hitches pass on the oldest supported device, with zero hitches for press feedback and scrolling.

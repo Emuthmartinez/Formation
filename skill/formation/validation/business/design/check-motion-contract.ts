@@ -18,17 +18,22 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
 import { flagString, issue, parseFlags, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "../../..");
 
-function parseArgs(argv: string[]): { skillRoot: string } {
-  const flags = parseFlags(argv, [{ flags: ["--skill-root", "--root"], key: "skillRoot" }]);
-  return { skillRoot: flagString(flags, "skillRoot") ?? defaultSkillRoot };
+function parseArgs(argv: string[]): { skillRoot: string; workspaceRoot: string } {
+  const flags = parseFlags(argv, [
+    { flags: ["--skill-root", "--root"], key: "skillRoot" },
+    { flags: ["--workspace-root", "--workspace"], key: "workspaceRoot" },
+  ]);
+  const skillRoot = flagString(flags, "skillRoot") ?? defaultSkillRoot;
+  return { skillRoot, workspaceRoot: flagString(flags, "workspaceRoot") ?? path.join(skillRoot, "workspace/business") };
 }
 
-const { skillRoot } = parseArgs(process.argv.slice(2));
+const { skillRoot, workspaceRoot } = parseArgs(process.argv.slice(2));
 
 /** Regex capture groups are typed string|undefined under noUncheckedIndexedAccess; every use below is a group the pattern guarantees. */
 const g = (m: RegExpMatchArray, i: number): string => m[i] ?? "";
@@ -63,6 +68,245 @@ const swift = read(SWIFT);
 const swiftTokens = read(SWIFT_TOKENS);
 const templateTokensRaw = read(TEMPLATE_TOKENS);
 const templateSwiftTokens = read(TEMPLATE_SWIFT_TOKENS);
+
+// The live-surface family is one contract. If one recipe disappears, builders can
+// route a visual effect without its state, accessibility, or performance limits.
+if (bench !== undefined) {
+  const requiredLiveSurfaceRecipes = [
+    "### R15 — Liquid relationship morph",
+    "### R16 — State-bound perimeter beam",
+    "### R17 — Liquid-metal priority ring",
+    "### R18 — Semantic thinking orb",
+  ];
+  for (const heading of requiredLiveSurfaceRecipes) {
+    if (!bench.includes(heading)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.live_surface.recipe_missing",
+          `${BENCH} is missing ${heading}; the live-surface effect family must ship as one bounded contract.`,
+          BENCH,
+        ),
+      );
+      continue;
+    }
+    const body = sectionBody(bench, heading.replace(/^###\s+/, ""));
+    const checklistCount = body?.match(/^- \[ \] /gm)?.length ?? 0;
+    const requiredBodySignals = [
+      /\b(?:state|relationship|user action|product hierarchy)\b/i,
+      /\b(?:accessibility|accessible|focus|semantics?|status text)\b/i,
+      /\b(?:stop|stops|pause|pauses|inactive|idle|offscreen|hidden|stalled)\b/i,
+      /\b(?:layout shift|render loop|frame budget|context failure|pixel density|unbounded|static)\b/i,
+      /\bReduce Motion\b/i,
+    ];
+    if (body === undefined || checklistCount < 5 || requiredBodySignals.some((signal) => !signal.test(body))) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.live_surface.recipe_incomplete",
+          `${heading} must keep its state, accessibility, stop, performance or fallback, and Reduce Motion guidance with at least five checklist items.`,
+          BENCH,
+        ),
+      );
+    }
+  }
+}
+
+const designContractPath = path.join(workspaceRoot, "design/design.md");
+const designContract = existsSync(designContractPath) ? readFileSync(designContractPath, "utf8") : undefined;
+if (designContract !== undefined) {
+  const renderedDesignContract = stripNonRenderedMarkdown(designContract);
+  const requiredLiveEffectFields = [
+    "Real state or relationship",
+    "Visible or semantic signal",
+    "Stop condition",
+    "Reduced-motion result",
+    "Low-power fallback",
+  ];
+  for (const field of requiredLiveEffectFields) {
+    if (!renderedDesignContract.includes(field)) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.live_surface.template_field_missing",
+          `workspace/business/design/design.md is missing the ${field} field from its live-surface effect contract.`,
+          "workspace/business/design/design.md",
+        ),
+      );
+    }
+  }
+  const liveEffectBody = sectionBody(renderedDesignContract, "Live-surface effects");
+  const liveEffectHeaders = [
+    "Surface",
+    "Real state or relationship",
+    "Recipe",
+    "Visible or semantic signal",
+    "Stop condition",
+    "Reduced-motion result",
+    "Low-power fallback",
+  ];
+  const liveEffectTable = markdownTable(liveEffectBody ?? "", liveEffectHeaders);
+  if (liveEffectTable === undefined) {
+    issues.push(
+      issue(
+        "error",
+        "motion_contract.live_surface.template_incomplete",
+        "The live-surface effect table needs all contract headers and a valid Markdown separator.",
+        path.relative(workspaceRoot, designContractPath),
+      ),
+    );
+  }
+  if (workspaceNeedsLiveEffectValidation(workspaceRoot)) {
+    const liveEffectRows = liveEffectTable?.rows ?? [];
+    const recipeIndex = liveEffectTable?.headers.indexOf("Recipe") ?? -1;
+    if (
+      liveEffectRows.length === 0 ||
+      liveEffectRows.some(
+        (row) =>
+          row.length !== liveEffectHeaders.length ||
+          row.some((cell) => !isAuthoredLiveEffectCell(cell)) ||
+          !/^(?:R1[5-8]|none)$/i.test((row[recipeIndex] ?? "").trim()),
+      )
+    ) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.live_surface.workspace_incomplete",
+          "An active workspace needs one complete live-surface row, including a none row when the product uses no live effect.",
+          path.relative(workspaceRoot, designContractPath),
+        ),
+      );
+    }
+  }
+} else {
+  issues.push(issue("error", "motion_contract.live_surface.workspace_missing", "The active workspace is missing design/design.md.", "design/design.md"));
+}
+
+function workspaceIsLaunched(root: string): boolean {
+  const statePath = path.join(root, "state/PROJECT_STATE.yaml");
+  if (!existsSync(statePath)) return false;
+  try {
+    const state = parseYaml(readFileSync(statePath, "utf8")) as { project?: { phase?: unknown }; state?: { current_phase?: unknown } };
+    const phase = String(state.state?.current_phase ?? state.project?.phase ?? "");
+    return /^phase_6(?:b|_|$)/.test(phase);
+  } catch {
+    return false;
+  }
+}
+
+function workspaceNeedsLiveEffectValidation(root: string): boolean {
+  const packagedStarterRoot = path.resolve(skillRoot, "workspace/business");
+  return path.resolve(root) !== packagedStarterRoot || workspaceIsLaunched(root);
+}
+
+function sectionBody(document: string, headingName: string): string | undefined {
+  const lines = document.split("\n");
+  const pattern = new RegExp(`^(#{2,4})\\s+${headingName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "i");
+  const start = lines.findIndex((line) => pattern.test(line.trim()));
+  if (start < 0) return undefined;
+  const depth = lines[start]!.trim().match(pattern)![1]!.length;
+  const end = lines.findIndex((line, index) => index > start && /^(#{2,6})\s+/.test(line.trim()) && line.trim().match(/^(#{2,6})/)![1]!.length <= depth);
+  return lines.slice(start + 1, end < 0 ? undefined : end).join("\n");
+}
+
+function stripNonRenderedMarkdown(markdown: string): string {
+  const withoutComments = stripHtmlComments(stripNonRenderedHtmlBlocks(markdown));
+  const renderedLines: string[] = [];
+  let fence: { kind: "`" | "~"; length: number } | undefined;
+  for (const line of withoutComments.split("\n")) {
+    const markerMatch = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
+    const marker = markerMatch?.[1];
+    if (fence !== undefined) {
+      if (marker !== undefined && fence.kind === marker[0] && marker.length >= fence.length && (markerMatch?.[2] ?? "").trim() === "") {
+        fence = undefined;
+      }
+      continue;
+    }
+    if (marker !== undefined) {
+      fence = { kind: marker[0] as "`" | "~", length: marker.length };
+      continue;
+    }
+    if (/^(?: {4}|\t)/u.test(line)) continue;
+    renderedLines.push(line);
+  }
+  return renderedLines.join("\n");
+}
+
+function stripNonRenderedHtmlBlocks(markdown: string): string {
+  return markdown.replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1\s*>/giu, "");
+}
+
+function stripHtmlComments(markdown: string): string {
+  let rendered = "";
+  let cursor = 0;
+  while (cursor < markdown.length) {
+    const start = markdown.indexOf("<!--", cursor);
+    if (start < 0) return rendered + markdown.slice(cursor);
+    rendered += markdown.slice(cursor, start);
+    const end = markdown.indexOf("-->", start + 4);
+    if (end < 0) return rendered;
+    cursor = end + 3;
+  }
+  return rendered;
+}
+
+function markdownTable(body: string, requiredHeaders: string[]): { headers: string[]; rows: string[][] } | undefined {
+  const lines = body.split("\n").map((line) => line.trim());
+  for (let index = 0; index < lines.length - 1; index += 1) {
+    if (!lines[index]!.startsWith("|")) continue;
+    const headers = parseMarkdownRow(lines[index]!);
+    if (!requiredHeaders.every((header) => headers.includes(header))) continue;
+    if (!lines[index + 1]!.startsWith("|")) return undefined;
+    const separator = parseMarkdownRow(lines[index + 1]!);
+    if (separator.length !== headers.length || !separator.every((cell) => /^:?-{3,}:?$/.test(cell.trim()))) return undefined;
+    const rows: string[][] = [];
+    for (let rowIndex = index + 2; rowIndex < lines.length && lines[rowIndex]!.startsWith("|"); rowIndex += 1) {
+      rows.push(parseMarkdownRow(lines[rowIndex]!));
+    }
+    return { headers, rows };
+  }
+  return undefined;
+}
+
+function parseMarkdownRow(line: string): string[] {
+  const source = line.replace(/^\|/, "").replace(/\|$/, "");
+  const cells: string[] = [];
+  let cell = "";
+  for (let index = 0; index < source.length; index += 1) {
+    if (source[index] === "\\") {
+      let end = index;
+      while (source[end] === "\\") end += 1;
+      const count = end - index;
+      if (source[end] === "|") {
+        cell += "\\".repeat(Math.floor(count / 2));
+        if (count % 2 === 1) {
+          cell += "|";
+          index = end;
+          continue;
+        }
+        index = end - 1;
+        continue;
+      }
+      cell += "\\".repeat(count);
+      index = end - 1;
+      continue;
+    }
+    if (source[index] === "|") {
+      cells.push(cell.trim());
+      cell = "";
+    } else {
+      cell += source[index];
+    }
+  }
+  cells.push(cell.trim());
+  return cells;
+}
+
+function isAuthoredLiveEffectCell(value: string): boolean {
+  return (
+    value.length > 0 && !/^(?:not defined|not captured|not recorded|not reviewed|pending|tbd|todo)$/i.test(value) && !/R15, R16, R17, R18, or none/i.test(value)
+  );
+}
 
 // PremiumCraft.swift ships from business/design/system/ next to its own copies of the
 // token artifacts; a generated app compiles against THOSE, not the top-level pair. The

@@ -126,6 +126,7 @@ export function toCatalogInput(catalog: Catalog): CatalogInput {
       };
     })(),
     dependencies: wf.dependencies.filter((dependencyId): dependencyId is CatalogWorkflowId => runtimeIds.has(dependencyId as CatalogWorkflowId)),
+    refreshDependencies: (wf.refreshDependencies ?? []).filter((entry) => runtimeIds.has(entry.workflowId as CatalogWorkflowId)),
     outputPaths: wf.outputPaths,
     providerIds: wf.providerIds,
     laneIds: wf.laneIds,

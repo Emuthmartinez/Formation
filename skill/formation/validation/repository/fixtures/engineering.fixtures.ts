@@ -282,6 +282,14 @@ export function register(h: Harness): void {
   }
   runFixture("authored audience row citing research passes", designRoomAudienceTraced, "check-design-room-contract.ts", 0);
 
+  const designRoomNestedEvidence = makeFixture("design-room-nested-reference-evidence");
+  {
+    const contractPath = path.join(designRoomNestedEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace("## Reference Evidence", "### Reference Evidence");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture("nested Reference Evidence does not become an authored audience row", designRoomNestedEvidence, "check-design-room-contract.ts", 0);
+
   const designRoomAudienceTableGone = makeFixture("design-room-audience-table-gone");
   {
     const contractPath = path.join(designRoomAudienceTableGone, "design/design.md");
@@ -296,6 +304,1723 @@ export function register(h: Harness): void {
     "check-design-room-contract.ts",
     1,
     "design_room.audience_research_missing",
+  );
+
+  const designRoomEvidenceSourceMissing = makeFixture("design-room-reference-evidence-source-missing");
+  {
+    const contractPath = path.join(designRoomEvidenceSourceMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(
+      /^\| UI Playbook \|.*$/m,
+      "| Component reference omitted | Not reviewed | Not defined | Not defined | Not recorded |",
+    );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "Reference Evidence without all six source rows fails",
+    designRoomEvidenceSourceMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_source_missing",
+  );
+
+  const designRoomEvidenceHeadingVariant = makeFixture("design-room-reference-evidence-heading-variant");
+  {
+    const contractPath = path.join(designRoomEvidenceHeadingVariant, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("## Reference Evidence", "### reference evidence")
+      .replace(/^\| UI Playbook \|.*$/m, "| Component reference omitted | Not reviewed | Not defined | Not defined | Not recorded |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "case-insensitive H3 Reference Evidence still validates source rows",
+    designRoomEvidenceHeadingVariant,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_source_missing",
+  );
+
+  const designRoomEvidenceStatusesUnreviewed = makeFixture("design-room-reference-evidence-statuses-unreviewed");
+  {
+    const statePath = path.join(designRoomEvidenceStatusesUnreviewed, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+  }
+  runFixture(
+    "review-ready Reference Evidence rejects Not reviewed statuses",
+    designRoomEvidenceStatusesUnreviewed,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_status_invalid",
+  );
+
+  const designRoomDuplicateTriageSource = makeFixture("design-room-reference-evidence-duplicate-triage-source");
+  {
+    const statePath = path.join(designRoomDuplicateTriageSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDuplicateTriageSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| UI Playbook \|.*$/m,
+        "| UI Playbook | not applicable | The current correction does not change component behavior. | Not applicable | Not applicable |\n| UI Playbook | required | A contradictory newer row requests component proof. | settings controls | 2026-08-20 |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "duplicate source-triage rows fail instead of silently choosing one status",
+    designRoomDuplicateTriageSource,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_source_duplicate",
+  );
+
+  const designRoomDuplicateChangeDeclaration = makeFixture("design-room-reference-evidence-duplicate-change-declaration");
+  {
+    const statePath = path.join(designRoomDuplicateChangeDeclaration, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDuplicateChangeDeclaration, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace(
+        "Change classification: Not defined",
+        "Change classification: small token-preserving correction\nChange classification: high-impact or high-risk surface",
+      )
+      .replace("Change scope: Not defined", "Change scope: profile.settings\nChange scope: onboarding.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "duplicate change declarations fail instead of selecting stale values",
+    designRoomDuplicateChangeDeclaration,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_change_classification_invalid",
+  );
+
+  for (const [label, open, close] of [
+    ["fenced", "```markdown\n", "\n```"],
+    ["commented", "<!--\n", "\n-->"],
+    ["unterminated-comment", "<!--\n", ""],
+    ["script-block", '<script type="text/plain">\n', "\n</script>"],
+    ["style-block", "<style>\n", "\n</style>"],
+  ] as const) {
+    const hiddenEvidence = makeFixture(`design-room-reference-evidence-${label}`);
+    const statePath = path.join(hiddenEvidence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(hiddenEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(/(Complete this evidence pass[\s\S]*?)(\n## Visual Direction)/, `${open}$1${close}$2`);
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${label} Reference Evidence does not satisfy the live contract`,
+      hiddenEvidence,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_change_classification_invalid",
+    );
+  }
+
+  {
+    const nestedFence = makeFixture("design-room-reference-evidence-nested-fence");
+    const statePath = path.join(nestedFence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(nestedFence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8");
+    const referenceSection = contract.match(/## Reference Evidence[\s\S]*?(?=\n## Visual Direction)/)?.[0] ?? "";
+    const authoredExample = referenceSection
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    const hiddenExample = `\`\`\`\`markdown\n\`\`\`text\n\`\`\`\`text\n${authoredExample}\n\`\`\`\n\`\`\`\``;
+    writeFileSync(contractPath, contract.replace("## Reference Evidence", `${hiddenExample}\n\n## Reference Evidence`), "utf8");
+    runFixture(
+      "nested and info-suffixed fences cannot expose hidden Reference Evidence",
+      nestedFence,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_change_classification_invalid",
+    );
+  }
+
+  for (const [label, open, close] of [
+    ["fenced-section", "```markdown\n", "\n```"],
+    ["commented-section", "<!--\n", "\n-->"],
+  ] as const) {
+    const hiddenSection = makeFixture(`design-room-reference-evidence-${label}`);
+    const statePath = path.join(hiddenSection, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(hiddenSection, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8");
+    const referenceSection = contract.match(/## Reference Evidence[\s\S]*?(?=\n## Visual Direction)/)?.[0] ?? "";
+    const authoredExample = referenceSection
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract.replace("## Reference Evidence", `${open}${authoredExample}${close}\n\n## Reference Evidence`), "utf8");
+    runFixture(
+      `${label} before the live section does not satisfy Reference Evidence`,
+      hiddenSection,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_change_classification_invalid",
+    );
+  }
+
+  const designRoomSeededTriageReasons = makeFixture("design-room-reference-evidence-seeded-triage-reasons");
+  {
+    const statePath = path.join(designRoomSeededTriageReasons, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSeededTriageReasons, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "seeded Reference Evidence triage instructions are not authored reasons",
+    designRoomSeededTriageReasons,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_triage_incomplete",
+  );
+
+  const designRoomAdoptionHeaderMissing = makeFixture("design-room-reference-evidence-adoption-header-missing");
+  {
+    const statePath = path.join(designRoomAdoptionHeaderMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomAdoptionHeaderMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace("| Surface or decision | Source | Observation |", "| Surface or decision | Evidence source | Observation |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "Reference Evidence validates adoption headers against the adoption table",
+    designRoomAdoptionHeaderMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_table_invalid",
+  );
+
+  const designRoomMutatingEvidenceUnreviewed = makeFixture("design-room-mutating-reference-evidence-unreviewed");
+  {
+    const statePath = path.join(designRoomMutatingEvidenceUnreviewed, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "mutating";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+  }
+  runFixture(
+    "an active mutating Design Room validates evidence before mutation",
+    designRoomMutatingEvidenceUnreviewed,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_status_invalid",
+  );
+
+  const designRoomHighImpactWithoutEvidence = makeFixture("design-room-high-impact-without-evidence");
+  {
+    const statePath = path.join(designRoomHighImpactWithoutEvidence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHighImpactWithoutEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: paywall.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a classified high-impact change cannot pass with every source not applicable",
+    designRoomHighImpactWithoutEvidence,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_change_sources_missing",
+  );
+
+  const designRoomSmallCorrectionWithoutEvidence = makeFixture("design-room-small-correction-without-evidence");
+  {
+    const statePath = path.join(designRoomSmallCorrectionWithoutEvidence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSmallCorrectionWithoutEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: success.color-token")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a classified small token correction can skip live evidence",
+    designRoomSmallCorrectionWithoutEvidence,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_change_sources_missing",
+  );
+
+  const designRoomEvidenceRequiredIncomplete = makeFixture("design-room-reference-evidence-required-incomplete");
+  {
+    const statePath = path.join(designRoomEvidenceRequiredIncomplete, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomEvidenceRequiredIncomplete, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replaceAll("| Not reviewed |", "| required |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "required Reference Evidence needs an authored query and ISO evidence date",
+    designRoomEvidenceRequiredIncomplete,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_triage_incomplete",
+  );
+
+  for (const [label, evidenceDate] of [
+    ["impossible", "2026-99-99"],
+    ["future", "2999-01-01"],
+  ] as const) {
+    const designRoomEvidenceInvalidDate = makeFixture(`design-room-reference-evidence-${label}-date`);
+    const statePath = path.join(designRoomEvidenceInvalidDate, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomEvidenceInvalidDate, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, `| 60fps.design | required | Motion proof is needed. | success transition | ${evidenceDate} |`);
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `required Reference Evidence rejects an ${label} date`,
+      designRoomEvidenceInvalidDate,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_triage_incomplete",
+    );
+  }
+
+  const designRoomEvidenceAdoptionMissing = makeFixture("design-room-reference-evidence-adoption-missing");
+  {
+    const statePath = path.join(designRoomEvidenceAdoptionMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "baselined";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomEvidenceAdoptionMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace("| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |", "");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "review-ready Reference Evidence needs a complete adoption row",
+    designRoomEvidenceAdoptionMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_adoption_missing",
+  );
+
+  const designRoomRequiredSourceMissing = makeFixture("design-room-reference-evidence-required-source-missing");
+  {
+    const statePath = path.join(designRoomRequiredSourceMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomRequiredSourceMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace(/^\| catalogue\.projectsbyif\.com \|.*$/m, "| catalogue.projectsbyif.com | required | Trust proof is needed. | consent recovery | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use the timing but keep Formation tokens. | designRoom.surfaces.onboarding | Device motion review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "each required Reference Evidence source needs a complete adoption row",
+    designRoomRequiredSourceMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_required_source_missing",
+  );
+
+  const designRoomHighImpactSecondSourceMissing = makeFixture("design-room-reference-evidence-high-impact-second-source-missing");
+  {
+    const statePath = path.join(designRoomHighImpactSecondSourceMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHighImpactSecondSourceMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use the timing but keep Formation tokens. | designRoom.surfaces.onboarding | Device motion review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a high-impact decision needs two complementary evidence sources",
+    designRoomHighImpactSecondSourceMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomStoreFirstFrames = makeFixture("design-room-reference-evidence-store-first-frames");
+  {
+    const statePath = path.join(designRoomStoreFirstFrames, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomStoreFirstFrames, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Store craft proof is needed. | first frames | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| First frames of a store listing | Design Spells | The opening composition shows the product outcome. | Adopt | Use the product's own visual language. | designRoom.surfaces.store | Store frame review | store.first-frame |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "plural store first-frame wording still requires complementary evidence",
+    designRoomStoreFirstFrames,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  for (const conversionTask of ["Checkout", "Retention", "Referral"]) {
+    const slug = conversionTask.toLowerCase();
+    const designRoomConversionPair = makeFixture(`design-room-reference-evidence-${slug}-pair`);
+    const statePath = path.join(designRoomConversionPair, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomConversionPair, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, `| abtest.design | required | ${conversionTask} proof is needed. | ${slug} pattern | 2026-08-20 |`)
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${conversionTask} decision | abtest.design | An external result suggests a hypothesis. | Adopt | Test it locally. | designRoom.surfaces.${slug} | Conversion experiment | ${slug}.primary |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${conversionTask} decisions require the routed complementary source pair`,
+      designRoomConversionPair,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_high_impact_sources_missing",
+    );
+  }
+
+  const designRoomHighImpactSameLane = makeFixture("design-room-reference-evidence-high-impact-same-lane");
+  {
+    const statePath = path.join(designRoomHighImpactSameLane, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHighImpactSameLane, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Delight proof is needed. | success feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short transition preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.onboarding | Device motion review | onboarding.primary |\n| Onboarding success | Design Spells | A small success moment adds personality. | Adopt | Use the product's own visual language. | designRoom.surfaces.onboarding | Audience review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "two craft sources do not satisfy complementary onboarding evidence",
+    designRoomHighImpactSameLane,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomAiTrustWithoutIf = makeFixture("design-room-reference-evidence-ai-trust-without-if");
+  {
+    const statePath = path.join(designRoomAiTrustWithoutIf, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomAiTrustWithoutIf, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | AI trust flow proof is needed. | consent recovery | 2026-08-20 |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | AI trust craft proof is needed. | consent feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| AI trust decision | UXSnaps | A recovery flow preserves context. | Adopt | Keep the recovery path explicit. | designRoom.surfaces.core | Scenario review | ai-trust.primary |\n| AI trust decision | Design Spells | Feedback makes the state change visible. | Adopt | Use restrained product feedback. | designRoom.surfaces.core | Audience review | ai-trust.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "AI trust evidence requires the IF Design Patterns Catalogue plus a complementary source",
+    designRoomAiTrustWithoutIf,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  for (const trustScope of ["auth.login", "security.access", "data.access"] as const) {
+    const designRoomTrustWithOnlyIf = makeFixture(`design-room-reference-evidence-${trustScope.replaceAll(".", "-")}-with-only-if`);
+    const statePath = path.join(designRoomTrustWithOnlyIf, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomTrustWithOnlyIf, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${trustScope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| catalogue\.projectsbyif\.com \|.*$/m,
+        "| catalogue.projectsbyif.com | required | Authentication trust proof is needed. | login recovery | 2026-08-20 |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Trust surface | catalogue.projectsbyif.com | The flow preserves user control. | Adopt | Keep recovery and consent explicit. | surfaces.mobileApp.trust | Scenario review | ${trustScope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${trustScope} requires complementary craft or validation evidence`,
+      designRoomTrustWithOnlyIf,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_high_impact_sources_missing",
+    );
+  }
+
+  for (const coreLoopScope of ["core-loop.primary", "core.loop"] as const) {
+    const designRoomCoreLoopWithoutUxSnaps = makeFixture(`design-room-reference-evidence-${coreLoopScope.replaceAll(".", "-")}-without-uxsnaps`);
+    const statePath = path.join(designRoomCoreLoopWithoutUxSnaps, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomCoreLoopWithoutUxSnaps, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", `Change scope: ${coreLoopScope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Core-loop motion proof is needed. | state transition | 2026-08-20 |")
+      .replace(
+        /^\| catalogue\.projectsbyif\.com \|.*$/m,
+        "| catalogue.projectsbyif.com | required | Core-loop structure proof is needed. | user control | 2026-08-20 |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Core loop | catalogue.projectsbyif.com | The flow keeps user control visible. | Adopt | Keep the state boundary explicit. | designRoom.surfaces.core | Scenario review | ${coreLoopScope} |\n| Core loop | 60fps.design | The transition preserves context. | Adopt | Use Formation motion tokens. | designRoom.surfaces.core | Device review | ${coreLoopScope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${coreLoopScope} evidence requires UXSnaps plus a complementary source`,
+      designRoomCoreLoopWithoutUxSnaps,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_high_impact_sources_missing",
+    );
+  }
+
+  for (const [label, decision] of [
+    ["consent", "Consent decision"],
+    ["authentication", "Authentication decision"],
+    ["permissions", "Permissions decision"],
+    ["sensitive-data", "Sensitive data decision"],
+  ] as const) {
+    const designRoomTrustWithoutIf = makeFixture(`design-room-reference-evidence-${label}-without-if`);
+    const statePath = path.join(designRoomTrustWithoutIf, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomTrustWithoutIf, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, `| UI Playbook | required | ${decision} component proof is needed. | trust component | 2026-08-20 |`)
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${decision} | UI Playbook | The component exposes the current state. | Adopt | Keep the state explicit. | designRoom.surfaces.core | Scenario review | ai-trust.primary |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${decision} evidence requires the IF Design Patterns Catalogue`,
+      designRoomTrustWithoutIf,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_high_impact_sources_missing",
+    );
+  }
+
+  const designRoomIncompleteEvidenceRow = makeFixture("design-room-reference-evidence-incomplete-row");
+  {
+    const statePath = path.join(designRoomIncompleteEvidenceRow, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomIncompleteEvidenceRow, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Paywall choice | abtest.design | Price framing is a local hypothesis. | Adopt | Test with the target audience. | designRoom.surfaces.paywall | | paywall.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a declared evidence row cannot omit a required field",
+    designRoomIncompleteEvidenceRow,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_adoption_incomplete",
+  );
+
+  const designRoomMalformedEvidenceSurfaceKey = makeFixture("design-room-reference-evidence-malformed-surface-key");
+  {
+    const statePath = path.join(designRoomMalformedEvidenceSurfaceKey, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomMalformedEvidenceSurfaceKey, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: controls.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Primary button | UI Playbook | The control keeps a visible pressed state. | Adopt | Use Formation control tokens. | surfaces.mobileApp.button | Device review | primary button |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "every evidence row requires one category-prefixed stable surface key",
+    designRoomMalformedEvidenceSurfaceKey,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_surface_key_invalid",
+  );
+
+  const designRoomRejectedEvidence = makeFixture("design-room-reference-evidence-rejected-row");
+  {
+    const statePath = path.join(designRoomRejectedEvidence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomRejectedEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Delight proof is needed. | success flourish | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Success feedback | Design Spells | A decorative flourish competes with the result. | Reject — it delays comprehension. | | | Audience review | success.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "rejected evidence needs a rationale but no mutation fields",
+    designRoomRejectedEvidence,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_adoption_incomplete",
+  );
+
+  const designRoomAmbiguousAdopt = makeFixture("design-room-reference-evidence-ambiguous-adopt");
+  {
+    const statePath = path.join(designRoomAmbiguousAdopt, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomAmbiguousAdopt, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Delight proof is needed. | success flourish | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Success feedback | Design Spells | A small flourish could reinforce completion. | Adopt later | Use a short flourish. | designRoom.surfaces.success | Audience review | success.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "ambiguous adopt text is not an explicit decision",
+    designRoomAmbiguousAdopt,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_adoption_incomplete",
+  );
+
+  const designRoomStaleEvidenceRows = makeFixture("design-room-reference-evidence-stale-rows");
+  {
+    const statePath = path.join(designRoomStaleEvidenceRows, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomStaleEvidenceRows, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding sequence | abtest.design | A shorter sequence improved activation elsewhere. | Adopt | Test locally. | designRoom.surfaces.onboarding | Conversion experiment | onboarding.primary |\n| Onboarding first-value step | UXSnaps | The first value arrives before permission. | Adopt | Preserve that order. | designRoom.surfaces.onboarding | Journey review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "stale evidence rows do not count when their sources are not required",
+    designRoomStaleEvidenceRows,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomStableSurfaceCategory = makeFixture("design-room-reference-evidence-stable-surface-category");
+  {
+    const statePath = path.join(designRoomStableSurfaceCategory, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomStableSurfaceCategory, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Conversion proof is needed. | first value | 2026-08-20 |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Journey proof is needed. | onboarding order | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding sequence | abtest.design | A shorter sequence improved activation elsewhere. | Adopt | Test locally. | designRoom.surfaces.onboarding | Conversion experiment | onboarding.primary |\n| Onboarding first-value step | UXSnaps | The first value arrives before permission. | Adopt | Preserve that order. | designRoom.surfaces.onboarding | Journey review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "different descriptions for one high-impact surface share a stable category",
+    designRoomStableSurfaceCategory,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomSameSurfaceDifferentPaths = makeFixture("design-room-reference-evidence-same-surface-different-paths");
+  {
+    const statePath = path.join(designRoomSameSurfaceDifferentPaths, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSameSurfaceDifferentPaths, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Onboarding proof is needed. | first value | 2026-08-20 |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Journey proof is needed. | onboarding order | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| First-value sequence | abtest.design | A shorter sequence supplies a hypothesis. | Adopt | Test the sequence locally. | surfaces.mobileApp.flows[0].steps | Conversion experiment | onboarding.primary |\n| First-value sequence | UXSnaps | The journey preserves context. | Adopt | Preserve the screen order. | surfaces.mobileApp.flows[0].screens | Journey review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "one surface key groups complementary evidence across exact mutation paths",
+    designRoomSameSurfaceDifferentPaths,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomMultiSurfaceScope = makeFixture("design-room-reference-evidence-multi-surface-scope");
+  {
+    const statePath = path.join(designRoomMultiSurfaceScope, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomMultiSurfaceScope, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary, paywall.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Transition proof is needed. | first value | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| First-value sequence | 60fps.design | The transition preserves context. | Adopt | Use Formation motion tokens. | surfaces.mobileApp.flows[0].steps | Device review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "each category in a multi-surface scope needs its own routed evidence",
+    designRoomMultiSurfaceScope,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomMotionWrongSource = makeFixture("design-room-reference-evidence-motion-wrong-source");
+  {
+    const statePath = path.join(designRoomMotionWrongSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomMotionWrongSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: motion.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Motion journey proof is needed. | transition | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Result transition | UXSnaps | The journey preserves context. | Adopt | Preserve the destination. | surfaces.mobileApp.result | Journey review | motion.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "ordinary motion work requires its routed 60fps.design source",
+    designRoomMotionWrongSource,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomMotionUnavailableFallback = makeFixture("design-room-reference-evidence-motion-unavailable-fallback");
+  {
+    const statePath = path.join(designRoomMotionUnavailableFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomMotionUnavailableFallback, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: motion.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| 60fps\.design \|.*$/m,
+        "| 60fps.design | unavailable | The live catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Result transition | [Motion benchmarks](knowledge/design/motion-craft-benchmarks.md) | The distilled recipe preserves context during the state change. | Adopt | Use Formation motion tokens and reduced motion. | surfaces.mobileApp.result | Device motion review | motion.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unavailable 60fps.design route accepts the documented distilled motion fallback",
+    designRoomMotionUnavailableFallback,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomRemoteDoctrineImpostor = makeFixture("design-room-reference-evidence-remote-doctrine-impostor");
+  {
+    const statePath = path.join(designRoomRemoteDoctrineImpostor, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomRemoteDoctrineImpostor, "design/design.md");
+    const remoteSource = "https" + "://example.com/motion-craft-benchmarks.md";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: motion.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| 60fps\.design \|.*$/m,
+        "| 60fps.design | unavailable | The live catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Result transition | ${remoteSource} | A remote file copied Formation's doctrine filename. | Reject — it is not Formation doctrine. | | | Source identity review | motion.primary |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a remote URL cannot impersonate Formation doctrine by copying its filename",
+    designRoomRemoteDoctrineImpostor,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  for (const componentScope of [
+    "button.primary",
+    "modal.confirm",
+    "toggle.notifications",
+    "dialog.delete",
+    "checkbox.terms",
+    "radio.plan",
+    "slider.volume",
+    "textarea.feedback",
+    "alert.delete",
+    "toast.confirmation",
+    "snackbar.error",
+    "banner.warning",
+    "navigation-bar.primary",
+  ] as const) {
+    const designRoomConcreteComponentWrongSource = makeFixture(`design-room-reference-evidence-${componentScope.replaceAll(".", "-")}-wrong-source`);
+    const statePath = path.join(designRoomConcreteComponentWrongSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomConcreteComponentWrongSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${componentScope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Component craft proof is needed. | interaction detail | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Concrete component | Design Spells | A small interaction detail adds clarity. | Adopt | Keep it within Formation tokens. | surfaces.mobileApp.component | Device review | ${componentScope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${componentScope} requires UI Playbook evidence`,
+      designRoomConcreteComponentWrongSource,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  const designRoomGenericSurfaceConcreteDecision = makeFixture("design-room-reference-evidence-generic-surface-concrete-decision");
+  {
+    const statePath = path.join(designRoomGenericSurfaceConcreteDecision, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomGenericSurfaceConcreteDecision, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Settings craft proof is needed. | toggle feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Notification toggle state contract | Design Spells | Feedback makes the setting change visible. | Adopt | Keep it within Formation tokens. | surfaces.mobileApp.profile | Device review | profile.settings |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a concrete component decision routes its generic surface to UI Playbook",
+    designRoomGenericSurfaceConcreteDecision,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomSpaceDelimitedDecision = makeFixture("design-room-reference-evidence-space-delimited-decision");
+  {
+    const statePath = path.join(designRoomSpaceDelimitedDecision, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSpaceDelimitedDecision, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Settings craft proof is needed. | discovery feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Content discovery hierarchy with sensitive data, user control, Account sign up, Text field validation, empty state, magical moment, and micro interaction work | Design Spells | Feedback supports discovery. | Adopt | Keep it within Formation tokens. | surfaces.mobileApp.profile | Journey review | profile.settings |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a space-delimited discovery decision routes its generic surface to UXSnaps",
+    designRoomSpaceDelimitedDecision,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomSignInWrongSource = makeFixture("design-room-reference-evidence-sign-in-wrong-source");
+  {
+    const statePath = path.join(designRoomSignInWrongSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSignInWrongSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: sign-in.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard input proof is needed. | sign-in form | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Sign-in form | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation input tokens. | surfaces.mobileApp.signIn | Device review | sign-in.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "sign-in surfaces require their routed trust catalogue evidence",
+    designRoomSignInWrongSource,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomLoginWrongSource = makeFixture("design-room-reference-evidence-login-wrong-source");
+  {
+    const statePath = path.join(designRoomLoginWrongSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomLoginWrongSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: auth.login")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard input proof is needed. | login form | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Login form | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation input tokens. | surfaces.mobileApp.login | Device review | auth.login |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "login surfaces require their routed trust catalogue evidence",
+    designRoomLoginWrongSource,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomUnroutedSurfaceMismatch = makeFixture("design-room-reference-evidence-unrouted-surface-mismatch");
+  {
+    const statePath = path.join(designRoomUnroutedSurfaceMismatch, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomUnroutedSurfaceMismatch, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard component proof is needed. | banner controls | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Marketing banner | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation control tokens. | surfaces.marketing.banner | Device review | marketing.banner |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unrouted ordinary surface cannot borrow a required row from another surface",
+    designRoomUnroutedSurfaceMismatch,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_change_sources_missing",
+  );
+
+  const designRoomRequiredSourceOutsideScope = makeFixture("design-room-reference-evidence-required-source-outside-scope");
+  {
+    const statePath = path.join(designRoomRequiredSourceOutsideScope, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomRequiredSourceOutsideScope, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Settings component proof is needed. | settings controls | 2026-08-20 |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Settings craft proof is needed. | success feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Profile settings | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation control tokens. | surfaces.mobileApp.profile | Device review | profile.settings |\n| Historical success | Design Spells | An older success state used earned feedback. | Adopt | Preserve its existing treatment. | surfaces.mobileApp.success | Audience review | success.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a required source row outside the current change scope receives no credit",
+    designRoomRequiredSourceOutsideScope,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_required_source_missing",
+  );
+
+  const designRoomDirectCatalogueLink = makeFixture("design-room-reference-evidence-direct-catalogue-link");
+  {
+    const statePath = path.join(designRoomDirectCatalogueLink, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDirectCatalogueLink, "design/design.md");
+    const directAbtestUrl = "https" + "://abtest.design/example";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: conversion.offer")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Conversion experiment proof is needed. | offer framing | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Conversion offer | [Experiment](${directAbtestUrl}) | The example provides a hypothesis for offer framing. | Reject — local evidence is still required. | | | Experiment review | conversion.offer |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  for (const forbiddenError of ["design_room.reference_evidence_required_source_missing", "design_room.reference_evidence_routed_sources_missing"]) {
+    runFixture(
+      `a direct catalogue link receives canonical lane credit without ${forbiddenError}`,
+      designRoomDirectCatalogueLink,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.contract_placeholder",
+      [],
+      undefined,
+      forbiddenError,
+    );
+  }
+
+  const designRoomNonHttpCatalogueLink = makeFixture("design-room-reference-evidence-non-http-catalogue-link");
+  {
+    const statePath = path.join(designRoomNonHttpCatalogueLink, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomNonHttpCatalogueLink, "design/design.md");
+    const unsafeAbtestUrl = "javascript" + "://abtest.design/example";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: conversion.offer")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Conversion experiment proof is needed. | offer framing | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Conversion offer | [Experiment](${unsafeAbtestUrl}) | A non-web target is not usable evidence. | Reject — use a reachable web citation. | | | Source review | conversion.offer |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a non-HTTP catalogue link receives no canonical lane credit",
+    designRoomNonHttpCatalogueLink,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_required_source_missing",
+  );
+
+  const designRoomHistoricalHighImpactOutsideScope = makeFixture("design-room-reference-evidence-historical-high-impact-outside-scope");
+  {
+    const statePath = path.join(designRoomHistoricalHighImpactOutsideScope, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHistoricalHighImpactOutsideScope, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Historical onboarding | UXSnaps | An older journey review established the first-use sequence. | Adopt | Preserve the existing sequence. | surfaces.mobileApp.onboarding | Journey review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a historical high-impact row outside the current scope is not revalidated",
+    designRoomHistoricalHighImpactOutsideScope,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomDelightUnavailableFallback = makeFixture("design-room-reference-evidence-delight-unavailable-fallback");
+  {
+    const statePath = path.join(designRoomDelightUnavailableFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDelightUnavailableFallback, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: delight.success")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| Design Spells \|.*$/m,
+        "| Design Spells | unavailable | The inspiration catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Success feedback | emotional-design-system.md | Earned feedback should support comprehension before decoration. | Adopt | Use the product's own visual language. | surfaces.mobileApp.success | Audience review | delight.success |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unavailable Design Spells route accepts the documented emotional-design fallback",
+    designRoomDelightUnavailableFallback,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  for (const [sourceName, scope, fallbackSource, decision] of [
+    ["catalogue.projectsbyif.com", "account.recovery", "consumer-product-design-agency.md", "Account recovery"],
+    ["abtest.design", "conversion.offer", "paywall-pricing-and-experiments.md", "Conversion offer"],
+    ["UXSnaps", "journey.primary", "refero-ux-patterns.md", "Primary journey"],
+    ["UI Playbook", "standard.input", "premium-mobile-craft.md", "Standard input"],
+  ] as const) {
+    const designRoomDoctrineFallback = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-doctrine-fallback`);
+    const statePath = path.join(designRoomDoctrineFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDoctrineFallback, "design/design.md");
+    const escapedSource = sourceName.replaceAll(".", "\\.");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        new RegExp(`^\\| ${escapedSource} \\|.*$`, "m"),
+        `| ${sourceName} | unavailable | The routed catalogue cannot be reached in this runtime. | Not applicable | Not applicable |`,
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${decision} | ${fallbackSource} | Formation doctrine defines the bounded behavior for this surface. | Adopt | Apply the doctrine with Formation tokens and local validation. | surfaces.mobileApp.primary | Scenario review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${sourceName} unavailable accepts its applicable Formation doctrine fallback`,
+      designRoomDoctrineFallback,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.contract_placeholder",
+      [],
+      undefined,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  for (const [scope, decision] of [
+    ["account.recovery", "Account recovery"],
+    ["account.registration", "Account registration"],
+    ["account.signup", "Account signup"],
+    ["auth.session", "Authentication session"],
+    ["automation.takeover", "Automation takeover"],
+    ["security.access", "Security access"],
+    ["data.access", "Data access"],
+    ["session.management", "Session management"],
+    ["user-control.permissions", "User control permissions"],
+    ["user.agency", "User agency"],
+  ] as const) {
+    const designRoomTrustRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomTrustRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomTrustRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, `| UI Playbook | required | ${decision} component proof is needed. | recovery control | 2026-08-20 |`)
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${decision} | UI Playbook | Standard controls expose the current state. | Adopt | Keep the state explicit. | surfaces.mobileApp.trust | Scenario review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${decision} surfaces require their routed trust catalogue evidence`,
+      designRoomTrustRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  for (const ordinaryScope of ["workout.session", "event.registration", "class.register", "newsletter.signup", "event.sign-up", "travel.agency"] as const) {
+    const designRoomOrdinaryLifecycle = makeFixture(`design-room-reference-evidence-ordinary-${ordinaryScope.replaceAll(".", "-")}`);
+    const statePath = path.join(designRoomOrdinaryLifecycle, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomOrdinaryLifecycle, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${ordinaryScope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Workout component proof is needed. | workout summary | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Ordinary product surface | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation control tokens. | surfaces.mobileApp.product | Device review | ${ordinaryScope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${ordinaryScope} is not routed as authentication evidence`,
+      designRoomOrdinaryLifecycle,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.contract_placeholder",
+      [],
+      undefined,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  for (const [scope, decision] of [
+    ["engagement.streak", "Engagement streak"],
+    ["monetization.offer", "Monetization offer"],
+  ] as const) {
+    const designRoomExperimentRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomExperimentRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomExperimentRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, `| Design Spells | required | ${decision} craft proof is needed. | feedback treatment | 2026-08-20 |`)
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${decision} | Design Spells | Feedback can make progress visible. | Adopt | Keep feedback subordinate to comprehension. | surfaces.mobileApp.growth | Audience review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${decision} surfaces require their routed experiment evidence`,
+      designRoomExperimentRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  const designRoomOfficialGuidanceFallback = makeFixture("design-room-reference-evidence-official-guidance-fallback");
+  {
+    const statePath = path.join(designRoomOfficialGuidanceFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomOfficialGuidanceFallback, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: standard.input")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| UI Playbook \|.*$/m,
+        "| UI Playbook | unavailable | The component catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Standard input | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.input | Keyboard and screen-reader review | standard.input |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unavailable routed source accepts current official platform guidance",
+    designRoomOfficialGuidanceFallback,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomOneFallbackTwoLanes = makeFixture("design-room-reference-evidence-one-fallback-two-lanes");
+  {
+    const statePath = path.join(designRoomOneFallbackTwoLanes, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomOneFallbackTwoLanes, "design/design.md");
+    const firstPrefix = "https" + "://one.example/a";
+    const secondPrefix = "https" + "://two.example/a";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| abtest\.design \|.*$/m,
+        "| abtest.design | unavailable | The experiment catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | unavailable | The journey catalogue cannot be reached in this runtime. | Not applicable | Not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Onboarding input | ${firstPrefix} https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | A prefixed cell also names the official pattern. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n| Onboarding input | ${secondPrefix} https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | Another prefixed cell names the same official pattern. | Reject — the cell does not identify one source. | | | Source identity review | onboarding.primary |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "multi-URL cells cannot reuse one official fallback across complementary unavailable lanes",
+    designRoomOneFallbackTwoLanes,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomCredentialedFallbackAliases = makeFixture("design-room-reference-evidence-credentialed-fallback-aliases");
+  {
+    const statePath = path.join(designRoomCredentialedFallbackAliases, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomCredentialedFallbackAliases, "design/design.md");
+    const firstCredentialedUrl = "https" + "://first@www.w3.org/WAI/ARIA/apg/patterns/combobox/";
+    const secondCredentialedUrl = "https" + "://second@www.w3.org/WAI/ARIA/apg/patterns/combobox/";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| abtest\.design \|.*$/m,
+        "| abtest.design | unavailable | The experiment catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | unavailable | The journey catalogue cannot be reached in this runtime. | Not applicable | Not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Onboarding input | ${firstCredentialedUrl} | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n| Onboarding input | ${secondCredentialedUrl} | The same pattern cannot satisfy a second evidence lane through URL credentials. | Reject | Keep credentialed URLs out of evidence. | surfaces.mobileApp.onboarding | Source identity review | onboarding.primary |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "credentialed URL aliases cannot satisfy complementary unavailable evidence lanes",
+    designRoomCredentialedFallbackAliases,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomEncodedFallbackAliases = makeFixture("design-room-reference-evidence-encoded-fallback-aliases");
+  {
+    const statePath = path.join(designRoomEncodedFallbackAliases, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomEncodedFallbackAliases, "design/design.md");
+    const encodedFallbackUrl = "https" + "://www.w3.org/WAI/ARIA/apg/patterns/%63ombobox/";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| abtest\.design \|.*$/m,
+        "| abtest.design | unavailable | The experiment catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | unavailable | The journey catalogue cannot be reached in this runtime. | Not applicable | Not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Onboarding input | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n| Onboarding input | ${encodedFallbackUrl} | A percent-encoded alias cannot satisfy a second evidence lane. | Reject | Keep one canonical source identity. | surfaces.mobileApp.onboarding | Source identity review | onboarding.primary |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "percent-encoded URL aliases cannot satisfy complementary unavailable evidence lanes",
+    designRoomEncodedFallbackAliases,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomUnroutedUnavailableFallback = makeFixture("design-room-reference-evidence-unrouted-unavailable-fallback");
+  {
+    const statePath = path.join(designRoomUnroutedUnavailableFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomUnroutedUnavailableFallback, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| UI Playbook \|.*$/m,
+        "| UI Playbook | unavailable | The component catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Profile settings | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.profile | Keyboard and screen-reader review | profile.settings |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unrouted surface accepts official guidance for an explicitly unavailable source",
+    designRoomUnroutedUnavailableFallback,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_change_sources_missing",
+  );
+
+  for (const scope of ["gestures.swipe", "transitions.success", "success.animation", "magical-moment.animation"] as const) {
+    const designRoomPluralMotionRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomPluralMotionRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomPluralMotionRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard component proof is needed. | control states | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Motion surface | UI Playbook | Standard controls expose their state. | Adopt | Keep the control contract explicit. | surfaces.mobileApp.motion | Device review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${scope} requires its routed 60fps.design evidence`,
+      designRoomPluralMotionRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  for (const scope of ["micro-interactions.button", "empty-states.search", "magical-moments.reward"] as const) {
+    const designRoomPluralDelightRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomPluralDelightRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomPluralDelightRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard component proof is needed. | control states | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Delight surface | UI Playbook | Standard controls expose their state. | Adopt | Keep the control contract explicit. | surfaces.mobileApp.delight | Device review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${scope} requires its routed Design Spells evidence`,
+      designRoomPluralDelightRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  for (const scope of ["controls.toggle", "overlays.sheet", "inputs.search", "notifications.push", "components.modal"] as const) {
+    const designRoomPluralComponentRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomPluralComponentRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomPluralComponentRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Surface craft proof is needed. | visual treatment | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Component surface | Design Spells | Visual feedback can support comprehension. | Adopt | Keep feedback subordinate to function. | surfaces.mobileApp.component | Audience review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${scope} requires its routed UI Playbook evidence`,
+      designRoomPluralComponentRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  const designRoomScopedSurfaceMismatch = makeFixture("design-room-reference-evidence-scoped-surface-mismatch");
+  {
+    const statePath = path.join(designRoomScopedSurfaceMismatch, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomScopedSurfaceMismatch, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: paywall.upgrade")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Paywall proof is needed. | offer framing | 2026-08-20 |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Paywall journey proof is needed. | upgrade flow | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Initial paywall | abtest.design | Offer framing supplies a hypothesis. | Adopt | Test the initial offer. | surfaces.mobileApp.paywalls.initial | Conversion experiment | paywall.initial |\n| Initial paywall | UXSnaps | The journey preserves context. | Adopt | Preserve the offer origin. | surfaces.mobileApp.paywalls.initial | Journey review | paywall.initial |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "scoped paywall work cannot use evidence from a different paywall key",
+    designRoomScopedSurfaceMismatch,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomSameCategorySeparateSurfaces = makeFixture("design-room-reference-evidence-same-category-separate-surfaces");
+  {
+    const statePath = path.join(designRoomSameCategorySeparateSurfaces, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSameCategorySeparateSurfaces, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: paywall.initial, paywall.upgrade")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Paywall proof is needed. | offer framing | 2026-08-20 |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Paywall journey proof is needed. | upgrade flow | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Initial paywall | abtest.design | Offer framing supplies a local hypothesis. | Adopt | Test the initial offer. | designRoom.surfaces.initialPaywall | Conversion experiment | paywall.initial |\n| Upgrade paywall | UXSnaps | The upgrade journey keeps context. | Adopt | Preserve the upgrade origin. | designRoom.surfaces.upgradePaywall | Journey review | paywall.upgrade |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "two paywall surfaces each need their own complementary evidence pair",
+    designRoomSameCategorySeparateSurfaces,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomEscapedEvidencePipe = makeFixture("design-room-reference-evidence-escaped-pipe");
+  {
+    const statePath = path.join(designRoomEscapedEvidencePipe, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomEscapedEvidencePipe, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Success transition | 60fps.design | Loading \\| complete preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.success | Device motion review | success.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "escaped pipes remain inside an authored evidence cell",
+    designRoomEscapedEvidencePipe,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_adoption_incomplete",
+  );
+
+  const designRoomHighImpactSourcesCannotCrossSurface = makeFixture("design-room-reference-evidence-high-impact-cross-surface");
+  {
+    const statePath = path.join(designRoomHighImpactSourcesCannotCrossSurface, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHighImpactSourcesCannotCrossSurface, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Conversion proof is needed. | price framing | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.onboarding | Device motion review | onboarding.primary |\n| Paywall choice | abtest.design | Price framing is a local hypothesis. | Adopt | Test with the target audience. | designRoom.surfaces.paywall | Conversion experiment | paywall.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "high-impact evidence sources cannot be pooled across different decisions",
+    designRoomHighImpactSourcesCannotCrossSurface,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
   );
 
   const designRoomFreeform = makeFixture("design-room-freeform-proposal");

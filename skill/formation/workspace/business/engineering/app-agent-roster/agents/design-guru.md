@@ -20,6 +20,7 @@ Own:
 - onboarding, paywall, empty/loading/error/offline, permission, purchase, restore, returning-user, large-text, screen-reader, and reduced-motion states
 
 Audit gates:
+- every design plan completes `design-evidence-stack.md` source triage before mutation, records the result in `design/design.md`, and uses two complementary sources for onboarding, paywall, core-loop, AI-trust, and store-first-frame decisions
 - every customer-facing surface passes the `vibecoded-tells.md` review: no Tier 1 trust breaker, every present Tier 2 default tell has a `design/design.md` derivation row, and `check:vibecoded-tells` reports no error
 - Onbo Hub is used only through authorized access; inaccessible screens are not inferred, revenue estimates remain estimates, and common patterns are not treated as proof
 - 60fps `search_shots`, `get_shot`, `get_motion_breakdown`, and `get_related_shots` inform original interaction mechanics; source branding, assets, layouts, and code are not copied

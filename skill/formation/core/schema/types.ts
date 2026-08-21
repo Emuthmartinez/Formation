@@ -390,6 +390,8 @@ export interface ArtifactBindingV2 {
   accepted: boolean;
   producedBy?: string;
   attemptId?: string;
+  /** Last accepted fingerprint retained while a producer is reopened for scoped refresh. */
+  refreshBaselineFingerprint?: string;
 }
 
 export interface AttemptRecordV2 {
@@ -424,6 +426,10 @@ export interface RunNodeStateV2 {
    */
   verifiedBySessionId?: string;
   applicabilityFingerprint?: string;
+  /** Dependency-id/attempt-cycle tokens already refreshed before this node's next dispatch. */
+  dependencyRefreshCycles?: string[];
+  /** Scoped instructions carried into this dependency's current refresh dispatch. */
+  refreshInstructions?: string[];
 }
 
 export interface RunStateDocument {
@@ -516,8 +522,5 @@ export interface BusinessStateV2 {
   /** Optional so pre-providers documents and the bootstrap patch stay valid; migrate-v1 carries the v1 tools: block in here. */
   providers?: Record<string, ProviderStateEntry>;
   continuity?: { lastStateReview?: string; sourceFiles?: string[]; gitStatusReviewed?: boolean; nextAction?: string };
-  workflowApplicability?: Record<
-    string,
-    { verdict: "required" | "not-needed"; reason: string; evidence: string[]; updatedAt: string }
-  >;
+  workflowApplicability?: Record<string, { verdict: "required" | "not-needed"; reason: string; evidence: string[]; updatedAt: string }>;
 }

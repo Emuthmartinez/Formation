@@ -12,19 +12,23 @@ import type { PatchOp, PatchPath, StatePatch } from "../reducer/patch.js";
 import { validateBudgetLedger, validateBusinessState, validateControl } from "../schema/index.js";
 import { grantableDomainIds, type BudgetLedgerDocument, type BusinessStateV2, type ControlFile, type RunStateDocument } from "../schema/types.js";
 import { compilePlan, type CatalogInput, type CompiledPlan, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
-import { computeFrontier } from "../engine/frontier.js";
+import { computeFrontier, refreshAdmissibleConsumerIds } from "../engine/frontier.js";
 import { observeAppSourceFingerprint } from "../engine/source-fingerprint.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
 import {
   acceptVerification,
+  abandonDependencyRefreshesForConsumer,
   beginAttempt,
   detectOrphans,
   isWallClockExceeded,
   loadRunState,
   reconcileEnvironmentalArtifacts,
   reconcilePatch,
+  reconcileWorkflowApplicability,
   refreshHeartbeat,
   reopenRecurringNodes,
+  refreshDependenciesBeforeFrontier,
+  deferDependencyRefreshAfterFailure,
   seedRunState,
   writeRunState,
   buildCheckpoint,
@@ -716,11 +720,13 @@ async function main(): Promise<number> {
      * progress, so the caller breaks rather than sweeping again.
      */
     const verifierSessionId = `${sessionId}.verifier`;
+    const scopedRefreshDependencyIds = new Set<RunNodeId>();
+    const failedScopedRefreshDependencyIds = new Set<RunNodeId>();
     const runVerificationSweep = async (): Promise<number> => {
       if (!verifier) return 0;
       const pending = listPendingFreshContext(plan, run).filter((nodeId) => {
         const node = plan.nodes.find((candidate) => candidate.id === nodeId)!;
-        return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId);
+        return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId) || scopedRefreshDependencyIds.has(nodeId);
       });
       let accepted = 0;
       for (const nodeId of pending) {
@@ -827,18 +833,58 @@ async function main(): Promise<number> {
       heartbeat(paths.sessionLock, sessionId);
 
       observeAppSourceFingerprint(plan, run, workspace, sessionNow());
-      writeRunState(paths.runState, run);
+      // Applicability can change between sessions. Settle it before refresh mutates any accepted
+      // dependency proof, so a newly deferred/not-needed consumer cannot spend a refresh attempt.
+      reconcileWorkflowApplicability(plan, run, businessState, sessionNow());
+      for (const node of plan.nodes) {
+        const state = run.nodes[node.id];
+        if (state && ["not_needed", "skipped"].includes(state.status)) {
+          abandonDependencyRefreshesForConsumer(plan, run, node.id, sessionNow());
+        }
+      }
       applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
+      const activeScopeHints = brief?.scopeHints;
+      const scopedRefreshConsumers = refreshAdmissibleConsumerIds(plan, run, businessState, captured);
+      if (activeScopeHints?.length) {
+        for (const consumerId of [...scopedRefreshConsumers]) {
+          const node = plan.nodes.find((candidate) => candidate.id === consumerId)!;
+          if (!nodeInScope(activeScopeHints, node.domainId, node.workflowId)) scopedRefreshConsumers.delete(consumerId);
+        }
+      }
+      if (scopedRefreshConsumers && failedScopedRefreshDependencyIds.size > 0) {
+        for (const consumerId of [...scopedRefreshConsumers]) {
+          const consumerNode = plan.nodes.find((node) => node.id === consumerId);
+          if (consumerNode?.refreshDependencies.some((refresh) => failedScopedRefreshDependencyIds.has(refresh.nodeId))) {
+            scopedRefreshConsumers.delete(consumerId);
+          }
+        }
+      }
+      if (scopedRefreshConsumers) {
+        for (const consumerId of scopedRefreshConsumers) {
+          const consumerNode = plan.nodes.find((node) => node.id === consumerId);
+          const consumerState = run.nodes[consumerId];
+          if (!consumerNode || !consumerState || !["pending", "ready", "stale"].includes(consumerState.status)) continue;
+          const cycles = new Set(consumerState.dependencyRefreshCycles ?? []);
+          for (const refresh of consumerNode.refreshDependencies) {
+            const token = `${refresh.nodeId}@${consumerState.attempts.length}`;
+            if (cycles.has(token) && run.nodes[refresh.nodeId]?.status !== "succeeded") scopedRefreshDependencyIds.add(refresh.nodeId);
+          }
+        }
+      }
+      const reopenedRefreshDependencies = refreshDependenciesBeforeFrontier(plan, run, sessionNow(), scopedRefreshConsumers);
+      for (const nodeId of reopenedRefreshDependencies) scopedRefreshDependencyIds.add(nodeId);
+      writeRunState(paths.runState, run);
       const frontier = computeFrontier(plan, run, businessState, captured);
-      let readyIds: RunNodeId[] = frontier.ready;
+      let readyIds: RunNodeId[] = frontier.ready.filter((nodeId) => !failedScopedRefreshDependencyIds.has(nodeId));
       if (brief.scopeHints && brief.scopeHints.length > 0) {
         const inScope = readyIds.filter((id) => {
           const node = plan.nodes.find((candidate) => candidate.id === id)!;
-          return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId);
+          return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId) || scopedRefreshDependencyIds.has(id);
         });
-        // A scoped session only ever dispatches nodes matching its own scopeHints -- it must
-        // never silently reach across that boundary to run an out-of-scope prerequisite the
-        // founder did not grant this session. When nothing in scope is currently ready, check
+        // A scoped session dispatches nodes matching its scope plus the exact dependencies it
+        // reopened for an in-scope consumer's declared refresh cycle. It never silently reaches
+        // across that boundary for an ordinary prerequisite the founder did not grant this
+        // session. When nothing in scope is currently ready, check
         // whether that's ordinary (an out-of-scope ready node with no bearing on this scope, or
         // the in-scope work is simply done -- both silent by design) or whether an in-scope node
         // is stuck behind an out-of-scope prerequisite that hasn't succeeded yet, in which case
@@ -1017,6 +1063,7 @@ async function main(): Promise<number> {
               skillRootDir: skillRoot(),
               artifactPaths: Object.fromEntries(plan.artifactBindings.map((binding) => [binding.artifactId, binding.path])),
               authorization,
+              refreshInstructions: run.nodes[nodeId]?.refreshInstructions,
               now: attemptTime,
               heartbeat: refreshAttemptHeartbeat,
             });
@@ -1026,11 +1073,20 @@ async function main(): Promise<number> {
           const finishedAt = sessionNow();
 
           if (result.status === "failed") {
+            const failedState = run.nodes[nodeId];
             attempt.status = "failed";
             attempt.finishedAt = finishedAt;
             attempt.error = result.error;
-            run.nodes[nodeId]!.status = "failed";
-            run.nodes[nodeId]!.blocker = result.error ?? "The work didn't complete.";
+            const deferredRefresh = deferDependencyRefreshAfterFailure(plan, run, nodeId, finishedAt);
+            if (deferredRefresh) {
+              failedScopedRefreshDependencyIds.add(nodeId);
+              scopedRefreshDependencyIds.delete(nodeId);
+            }
+            if (!deferredRefresh && failedState) {
+              failedState.refreshInstructions = undefined;
+              failedState.status = "failed";
+              failedState.blocker = result.error ?? "The work didn't complete.";
+            }
             run.updatedAt = finishedAt;
             // A failed node is neither "advanced" nor "parked" in run-state terms — without this it would
             // vanish from the digest entirely (silence), so a failure is reported as something to watch.

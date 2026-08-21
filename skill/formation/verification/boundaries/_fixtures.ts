@@ -61,6 +61,7 @@ export function makeNode(overrides: NodeOverrides = {}): CompiledRunNode {
     outputPaths: outputs.map((id) => id.slice("artifact.".length)),
     providerIds: [],
     dependencies: [],
+    refreshDependencies: [],
     statePredicates: [],
     laneIds: [],
     approvals: [],

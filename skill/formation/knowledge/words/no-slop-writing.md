@@ -38,6 +38,8 @@ There is a third surface the gate also covers: this repo's own public docs (`REA
 - **Preserve the writer's real voice.** Notice the draft's vocabulary, cadence, bluntness, humor, and level of polish before touching it. Keep what is personal to the writer or the brand; do not make every line equally tidy.
 - **Make the minimum effective edit.** Fix slop, errors, and unclear passages. Leave strong sentences alone.
 - **Lead with the point when the setup adds nothing.** Cut generic throat-clearing; keep a real aside if it creates context or character.
+- **Use the portability test.** A sentence is probably filler if it can move unchanged to another person, company, country, or product. Cut it or replace it with a fact, mechanism, consequence, or judgment that is specific to this subject.
+- **Show the reason.** Do not tell the reader that a point is important, surprising, subtle, or obvious. Use facts and consequences to show why it matters.
 - **Keep the meaning.** Never invent claims, stats, examples, or opinions the founder or the brand did not supply. If a claim needs a source and none exists, flag it instead of inventing one — this matters more in marketing copy, where an invented claim is also a store-policy or legal risk (see `geo-seo.md` §4 and `privacy-terms.md`).
 - **Be concrete.** "The app helps you build better habits" becomes "The app tracks your streak and reminds you at 8pm." Names, numbers, and mechanisms beat abstractions.
 - **Use active voice.** Human or brand subjects doing things, not abstractions doing human verbs.
@@ -71,6 +73,7 @@ Reproduced in full. Each pattern below is banned outright in App Store/Play copy
 - **Colon reveals.** A noun phrase, a colon, a lowercase dramatic reveal. Rewrite as a plain sentence. Colons stay fine for lists, labels, and quotes.
 - **Superficial analysis.** Trailing "-ing" clauses that gesture at meaning without stating it: "highlighting," "underscoring," "reflecting." State the actual mechanism or benefit instead.
 - **Importance puffery.** "Stands as a testament," "marks a pivotal moment," "solidifies its position." State the fact; let the reader judge whether it matters.
+- **Interpretive metadiscourse.** "The key point is," "as you can see," "this distinction matters," and similar asides tell the reader how to interpret the text. Delete the aside when the point is clear. Otherwise, replace it with a fact or consequence.
 - **Weasel attribution.** "Experts agree," "studies show," "many argue." Name the source or cut the claim — in marketing copy this is also a substantiation risk (see `geo-seo.md` §4).
 - **Fake-strong verbs.** Prefer "is" and "has" when clearer. "Serves as a centralized hub for" becomes a plain description of what it does.
 - **Synonym cycling.** Repeat the clear word instead of rotating "app / tool / assistant / platform" for style.
@@ -93,20 +96,21 @@ Run this before marking any founder-facing doc or generated marketing copy ready
 3. Does it leave strong lines alone instead of rewriting them for consistency?
 4. Is the amount of cutting proportional to the actual slop found, with no over-compression that strips out character?
 5. Does it use active voice with real subjects where possible?
+6. Does each generic sentence pass the portability test, or did you replace it with a subject-specific fact, mechanism, consequence, or judgment?
 
 **Words and patterns**
-6. Are the banned-outright words, empty adverbs, and empty phrases from section 4 removed unless they add real emphasis or voice?
-7. Are the patterns in section 5 — binary contrasts, throat-clearing openers, faux-insight setups, colon reveals, superficial analysis, importance puffery, weasel attribution, fake-strong verbs, synonym cycling, negative listing, dramatic fragmentation, robotic rhythm, rhetorical setups, fake-profound kickers, summary-recap endings, formatting slop, em-dash overuse — cut or clearly earning their place?
-8. Are unsupported claims either sourced, cut, or flagged as a founder decision rather than invented?
+7. Are the banned-outright words, empty adverbs, and empty phrases from section 4 removed unless they add real emphasis or voice?
+8. Are the patterns in section 5 — binary contrasts, throat-clearing openers, faux-insight setups, colon reveals, superficial analysis, importance puffery, interpretive metadiscourse, weasel attribution, fake-strong verbs, synonym cycling, negative listing, dramatic fragmentation, robotic rhythm, rhetorical setups, fake-profound kickers, summary-recap endings, formatting slop, em-dash overuse — cut or clearly earning their place?
+9. Are unsupported claims either sourced, cut, or flagged as a founder decision rather than invented?
 
 **Channel fit**
-9. Does the copy fit its channel's character/byte budget (section 7) without the cut making it read as empty puffery instead of substance?
-10. For store metadata, ad headlines, and subject lines specifically: is every word pulling weight, with importance-puffery patterns caught before the character limit forces an even worse cut later?
+10. Does the copy fit its channel's character/byte budget (section 7) without the cut making it read as empty puffery instead of substance?
+11. For store metadata, ad headlines, and subject lines specifically: is every word pulling weight, with importance-puffery patterns caught before the character limit forces an even worse cut later?
 
 **Final read**
-11. Would the founder, or the brand's own voice as defined in `strategy/BRAND.md`, recognize this as itself?
-12. Would it sound natural read aloud to a sharp colleague — not like a press release?
-13. Does the output include a short **What changed** note when this was an edit pass on existing copy, so the founder can see what moved?
+12. Would the founder, or the brand's own voice as defined in `strategy/BRAND.md`, recognize this as itself?
+13. Would it sound natural read aloud to a sharp colleague — not like a press release?
+14. Does the output include a short **What changed** note when this was an edit pass on existing copy, so the founder can see what moved?
 
 ## 7. Channel-Specific Limits — Original
 

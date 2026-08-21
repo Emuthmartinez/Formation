@@ -303,7 +303,7 @@ _Feature whose 11-star target is 6★+ / "charge this with emotion", "build a ha
 - **Consults:** —
 - **Produces:** `product/experience/emotional-design/EMOTIONAL_DESIGN.md`
 - **Gates:** `check:emotional-design`
-- **Knowledge:** [Experience Cards](../../knowledge/experience/experience-cards.md), [Emotional Design System](../../knowledge/experience/emotional-design-system.md), [Emotional Experience Design](../../knowledge/experience/emotional-experience-design.md), [Emotional Experience Measurement](../../knowledge/experience/emotional-experience-measurement.md), [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Experience Cards](../../knowledge/experience/experience-cards.md), [Emotional Design System](../../knowledge/experience/emotional-design-system.md), [Emotional Experience Design](../../knowledge/experience/emotional-experience-design.md), [Emotional Experience Measurement](../../knowledge/experience/emotional-experience-measurement.md), [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md)
 
 ### Emotional design audit (auditor)
 
@@ -316,7 +316,7 @@ _"Audit this app's emotional design" / "emotional UX audit"_
 - **Consults:** —
 - **Produces:** `product/experience/emotional-design/EMOTIONAL_AUDIT.md`
 - **Gates:** `check:emotional-design`
-- **Knowledge:** [Experience Cards](../../knowledge/experience/experience-cards.md), [Consumer Product Design Agency](../../knowledge/experience/consumer-product-design-agency.md), [Emotional Design System](../../knowledge/experience/emotional-design-system.md), [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Experience Cards](../../knowledge/experience/experience-cards.md), [Consumer Product Design Agency](../../knowledge/experience/consumer-product-design-agency.md), [Emotional Design System](../../knowledge/experience/emotional-design-system.md), [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md)
 
 ### Onboarding ONB-00: resume and classify scope
 
@@ -537,7 +537,7 @@ _Define acquisition-specific journeys that converge on one semantic onboarding s
 - **Consults:** —
 - **Produces:** `product/onboarding/graph/ONB-16-journey-graph.md`
 - **Gates:** `check:onboarding-evidence-onb-16`
-- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
 
 ### Onboarding ONB-17: screen, control, and paywall contract
 
@@ -550,7 +550,7 @@ _Specify every onboarding screen, copy key, control, action, paywall state, fail
 - **Consults:** —
 - **Produces:** `product/onboarding/graph/ONB-17-screen-control-paywall-contract.md`
 - **Gates:** `check:onboarding-evidence-onb-17`
-- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
 
 ### Onboarding ONB-18: visual design and prototype
 
@@ -563,7 +563,7 @@ _Produce actual high-fidelity onboarding design, motion, an interactive prototyp
 - **Consults:** —
 - **Produces:** `product/onboarding/graph/ONB-18-visual-design-prototype.md`
 - **Gates:** `check:onboarding-evidence-onb-18`
-- **Knowledge:** [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Onboarding Conversion](../../knowledge/experience/onboarding-conversion.md)
 
 ### Onboarding ONB-19: implementation and cutover contract
 
@@ -630,7 +630,7 @@ _Crossing research into design: before the Design Room locks visual identity, an
 - **Consults:** —
 - **Produces:** `strategy/BRAND.md`
 - **Gates:** —
-- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md)
+- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md)
 
 ### Design Room (state→mutate→version→render)
 
@@ -643,7 +643,7 @@ _Any design/visual-system/cross-surface/store-creative/landing/onboarding/paywal
 - **Consults:** —
 - **Produces:** `design/design.md`, `studio/seed/business.json`, `studio/seed/theme.tokens.json`, `design/design-room.html`
 - **Gates:** `validate:design-state`, `check:design-room`, `render:design-room`
-- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md), [Design Room](../../knowledge/design/design-room.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Quality Lens](../../knowledge/design/quality-lens.md), [Surfaces B2C](../../knowledge/design/surfaces-b2c.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md)
+- **Knowledge:** [Audience-Derived Identity](../../knowledge/design/audience-derived-identity.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Design Room](../../knowledge/design/design-room.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Quality Lens](../../knowledge/design/quality-lens.md), [Surfaces B2C](../../knowledge/design/surfaces-b2c.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md)
 
 ### Token promotion
 
@@ -669,11 +669,11 @@ _Before flow maps, state matrices, UX_PATTERNS.md, or bug-trap coverage_
 - **Consults:** —
 - **Produces:** `product/experience/ux-patterns/UX_PATTERNS.md`
 - **Gates:** —
-- **Knowledge:** [Refero UX Patterns](../../knowledge/design/refero-ux-patterns.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Refero UX Patterns](../../knowledge/design/refero-ux-patterns.md)
 
 ### Premium mobile craft
 
-_Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or "premium feel"_
+_Before in-app UI build/polish, press-state/haptics/loading-empty wiring, live-state effects, or "premium feel"_
 
 - **Role:** Design guru
 - **Phases:** Cross-phase (always-on)
@@ -682,7 +682,7 @@ _Before in-app UI build/polish, press-state/haptics/loading-empty wiring, or "pr
 - **Consults:** `product/experience/ux-patterns/UX_PATTERNS.md`
 - **Produces:** —
 - **Gates:** `check:motion-contract`
-- **Knowledge:** [Motion Craft Benchmarks](../../knowledge/design/motion-craft-benchmarks.md), [Premium Mobile Craft](../../knowledge/design/premium-mobile-craft.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Motion Craft Benchmarks](../../knowledge/design/motion-craft-benchmarks.md), [Premium Mobile Craft](../../knowledge/design/premium-mobile-craft.md)
 
 ### Content assets / Remotion / generated visuals
 
@@ -695,7 +695,7 @@ _Before rendered videos/stills, app previews, ad/social variants_
 - **Consults:** —
 - **Produces:** `growth/content-assets/CONTENT_ASSETS.md`, `growth/content-assets/content-assets.html`
 - **Gates:** `check:content-assets`
-- **Knowledge:** [Design Visual System](../../knowledge/design/design-visual-system.md), [Remotion Content Assets](../../knowledge/design/remotion-content-assets.md), [Visual And Motion Production](../../knowledge/process/tool-recipes/visual-and-motion-production.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Design Visual System](../../knowledge/design/design-visual-system.md), [Remotion Content Assets](../../knowledge/design/remotion-content-assets.md), [Visual And Motion Production](../../knowledge/process/tool-recipes/visual-and-motion-production.md)
 
 ## Every Word A User Reads
 
@@ -908,8 +908,8 @@ _Store screenshots needed (raw capture → composed iPhone/iPad/Play assets)_
 - **Reads:** `design/design.md`, `store/app-store-listing/APP_STORE_LISTING.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`, `strategy/RESEARCH.md`, `product/experience/emotional-design/EMOTIONAL_DESIGN.md`, `state/PROJECT_STATE.yaml`
 - **Consults:** —
 - **Produces:** `store/app-store-listing/SCREENSHOTS.md`
-- **Gates:** `check:store-screenshots`
-- **Knowledge:** [Design Visual System](../../knowledge/design/design-visual-system.md), [Quality Lens](../../knowledge/design/quality-lens.md), [MobAI Toolbelt](../../knowledge/engineering/mobai-toolbelt.md), [Device Capture And Proof](../../knowledge/process/tool-recipes/device-capture-and-proof.md), [ASO Store Ops](../../knowledge/store/aso-store-ops.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
+- **Gates:** `check:design-room`, `check:store-screenshots`
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Design Visual System](../../knowledge/design/design-visual-system.md), [Quality Lens](../../knowledge/design/quality-lens.md), [MobAI Toolbelt](../../knowledge/engineering/mobai-toolbelt.md), [Device Capture And Proof](../../knowledge/process/tool-recipes/device-capture-and-proof.md), [ASO Store Ops](../../knowledge/store/aso-store-ops.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
 
 ### Google Play release
 
@@ -1055,8 +1055,8 @@ _Immediately after design/design.md is accepted — build the local landing site
 - **Reads:** `GEO_SEO.md`, `analytics/ANALYTICS.md`, `product/copy/COPY_BRIEF.md`, `product/copy/COPY_DECK.md`, `product/ONBOARDING.md`, `strategy/localization-market-research/LOCALIZATION_MARKET_RESEARCH.md`, `design/design.md`
 - **Consults:** `revenue/REVENUE_OPS.md`, `store/app-store-listing/SCREENSHOTS.md`, `growth/content-assets/CONTENT_ASSETS.md`
 - **Produces:** `growth/landing/`
-- **Gates:** —
-- **Knowledge:** [Analytics And Attribution](../../knowledge/data/analytics-attribution.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md), [CRO Landing](../../knowledge/growth/cro-landing.md), [Funnel Domain And Privacy](../../knowledge/process/tool-recipes/funnel-domain-and-privacy.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
+- **Gates:** `check:design-room`
+- **Knowledge:** [Analytics And Attribution](../../knowledge/data/analytics-attribution.md), [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Landing Motion Craft](../../knowledge/design/landing-motion-craft.md), [Vibecoded Tells](../../knowledge/design/vibecoded-tells.md), [CRO Landing](../../knowledge/growth/cro-landing.md), [Funnel Domain And Privacy](../../knowledge/process/tool-recipes/funnel-domain-and-privacy.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
 
 ### Landing funnel publication and live proof
 

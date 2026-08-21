@@ -271,12 +271,17 @@ export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch:
     if (!expected.has(output.artifactId)) throw new Error(`${patch.nodeId} returned undeclared output ${output.artifactId}`);
     const binding = run.artifactBindings.find((candidate) => candidate.artifactId === output.artifactId);
     if (!binding) throw new Error(`Missing artifact binding ${output.artifactId}`);
-    if (binding.accepted && binding.fingerprint !== output.fingerprint) changedAcceptedInputs.push(output.artifactId);
+    if (
+      (binding.accepted && binding.fingerprint !== output.fingerprint) ||
+      (binding.refreshBaselineFingerprint !== undefined && binding.refreshBaselineFingerprint !== output.fingerprint)
+    )
+      changedAcceptedInputs.push(output.artifactId);
     binding.path = output.path;
     binding.fingerprint = output.fingerprint;
     binding.accepted = node.verification.kind === "none";
     binding.producedBy = node.id;
     binding.attemptId = attempt.id;
+    binding.refreshBaselineFingerprint = undefined;
     attempt.evidence.push(...output.evidence);
   }
 
@@ -284,9 +289,24 @@ export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch:
   attempt.status = node.verification.kind === "none" ? "succeeded" : "blocked";
   state.status = node.verification.kind === "none" ? "succeeded" : "blocked";
   state.blocker = node.verification.kind === "none" ? undefined : "Verification required";
+  state.refreshInstructions = undefined;
   run.updatedAt = now;
 
-  if (changedAcceptedInputs.length > 0) invalidateDescendants(plan, run, changedAcceptedInputs, now);
+  if (changedAcceptedInputs.length > 0) {
+    const preservedScopedConsumers = new Set(
+      plan.nodes
+        .filter((candidate) => {
+          const candidateState = run.nodes[candidate.id];
+          return (
+            candidateState?.status === "succeeded" &&
+            candidate.refreshDependencies.some((refresh) => refresh.nodeId === patch.nodeId) &&
+            candidateState.dependencyRefreshCycles?.some((cycle) => cycle.startsWith(`${patch.nodeId}@`))
+          );
+        })
+        .map((candidate) => candidate.id),
+    );
+    invalidateDescendants(plan, run, changedAcceptedInputs, now, preservedScopedConsumers);
+  }
 }
 
 /** Producer never verifies its own work (R15): a separate acceptance step promotes a reconciled-but-blocked node to succeeded. */
@@ -426,8 +446,128 @@ export function reopenRecurringNodes(plan: CompiledPlan, run: RunStateDocument, 
   return reopened;
 }
 
+/** Reopen dependencies that a downstream node requires fresh for each of its attempt cycles. */
+export function refreshDependenciesBeforeFrontier(
+  plan: CompiledPlan,
+  run: RunStateDocument,
+  now: string,
+  allowedConsumerIds?: ReadonlySet<RunNodeId>,
+): RunNodeId[] {
+  const reopened: RunNodeId[] = [];
+  const eligible = new Set<Status>(["pending", "ready", "stale"]);
+  const accepted = new Set(run.artifactBindings.filter((binding) => binding.accepted).map((binding) => binding.artifactId));
+  const lockedDependencies = new Set<RunNodeId>();
+  for (const node of plan.nodes) {
+    if (allowedConsumerIds && !allowedConsumerIds.has(node.id)) continue;
+    const consumer = run.nodes[node.id];
+    if (!consumer || !eligible.has(consumer.status)) continue;
+    const cycles = new Set(consumer.dependencyRefreshCycles ?? []);
+    for (const refresh of node.refreshDependencies) {
+      if (cycles.has(`${refresh.nodeId}@${consumer.attempts.length}`)) lockedDependencies.add(refresh.nodeId);
+    }
+  }
+  for (const node of plan.nodes) {
+    if (allowedConsumerIds && !allowedConsumerIds.has(node.id)) continue;
+    if (node.refreshDependencies.length === 0) continue;
+    const consumer = run.nodes[node.id];
+    if (!consumer || !eligible.has(consumer.status)) continue;
+    if (consumer.attempts.length >= node.maxAttempts) {
+      consumer.status = "blocked";
+      consumer.blocker = "Required dependency refresh skipped because this work has no attempts remaining.";
+      continue;
+    }
+    const refreshIds = new Set(node.refreshDependencies.map((entry) => entry.nodeId));
+    if (node.dependencies.some((dependencyId) => !refreshIds.has(dependencyId) && run.nodes[dependencyId]?.status !== "succeeded")) continue;
+    const refreshOutputs = new Set(plan.nodes.filter((candidate) => refreshIds.has(candidate.id)).flatMap((candidate) => candidate.outputs));
+    if (node.inputs.some((artifactId) => !refreshOutputs.has(artifactId) && !accepted.has(artifactId))) continue;
+    const cycles = new Set(consumer.dependencyRefreshCycles ?? []);
+    for (const refresh of node.refreshDependencies) {
+      const dependencyId = refresh.nodeId;
+      const token = `${dependencyId}@${consumer.attempts.length}`;
+      if (cycles.has(token)) continue;
+      if (lockedDependencies.has(dependencyId)) continue;
+      const dependency = run.nodes[dependencyId];
+      if (!dependency || dependency.status !== "succeeded") continue;
+      const dependencyNode = plan.nodes.find((candidate) => candidate.id === dependencyId);
+      if (!dependencyNode || dependency.attempts.length >= dependencyNode.maxAttempts) {
+        consumer.status = "blocked";
+        consumer.blocker = `Required refresh unavailable: "${dependencyNode?.title ?? dependencyId}" has no refresh attempts remaining.`;
+        continue;
+      }
+      cycles.add(token);
+      lockedDependencies.add(dependencyId);
+      dependency.status = "stale";
+      dependency.blocker = undefined;
+      dependency.refreshInstructions = [refresh.instructions];
+      for (const binding of run.artifactBindings) {
+        if (!dependencyNode?.outputs.some((artifactId) => artifactId === binding.artifactId)) continue;
+        if (binding.accepted && binding.fingerprint) binding.refreshBaselineFingerprint = binding.fingerprint;
+        binding.accepted = false;
+      }
+      reopened.push(dependencyId);
+    }
+    consumer.dependencyRefreshCycles = [...cycles];
+  }
+  if (reopened.length > 0) run.updatedAt = now;
+  return reopened;
+}
+
+/** Keep a failed scoped refresh unaccepted and retry-eligible for a later authorized session. */
+export function deferDependencyRefreshAfterFailure(plan: CompiledPlan, run: RunStateDocument, dependencyId: RunNodeId, now: string): boolean {
+  const dependencyNode = plan.nodes.find((node) => node.id === dependencyId);
+  const dependency = run.nodes[dependencyId];
+  if (!dependencyNode || !dependency?.refreshInstructions?.length) return false;
+  const exhausted = dependency.attempts.length >= dependencyNode.maxAttempts;
+  dependency.status = exhausted ? "blocked" : "stale";
+  dependency.blocker = exhausted ? "Scoped refresh failed after the final available attempt." : undefined;
+  if (exhausted) {
+    dependency.refreshInstructions = undefined;
+    for (const consumerNode of plan.nodes) {
+      if (!consumerNode.refreshDependencies.some((refresh) => refresh.nodeId === dependencyId)) continue;
+      const consumer = run.nodes[consumerNode.id];
+      if (!consumer?.dependencyRefreshCycles?.some((cycle) => cycle.startsWith(`${dependencyId}@`))) continue;
+      consumer.dependencyRefreshCycles = consumer.dependencyRefreshCycles.filter((cycle) => !cycle.startsWith(`${dependencyId}@`));
+      consumer.status = "blocked";
+      consumer.blocker = `Required refresh unavailable: "${dependencyNode.title}" exhausted its attempts.`;
+    }
+  }
+  run.updatedAt = now;
+  return true;
+}
+
+/** Remove obsolete scoped instructions when applicability parks the consumer that requested them. */
+export function abandonDependencyRefreshesForConsumer(plan: CompiledPlan, run: RunStateDocument, consumerId: RunNodeId, now: string): RunNodeId[] {
+  const consumerNode = plan.nodes.find((node) => node.id === consumerId);
+  const consumer = run.nodes[consumerId];
+  if (!consumerNode || !consumer?.dependencyRefreshCycles?.length) return [];
+  const abandoned: RunNodeId[] = [];
+  for (const refresh of consumerNode.refreshDependencies) {
+    const prefix = `${refresh.nodeId}@`;
+    if (!consumer.dependencyRefreshCycles.some((cycle) => cycle.startsWith(prefix))) continue;
+    consumer.dependencyRefreshCycles = consumer.dependencyRefreshCycles.filter((cycle) => !cycle.startsWith(prefix));
+    const stillClaimed = plan.nodes.some((candidate) => {
+      if (candidate.id === consumerId || !candidate.refreshDependencies.some((entry) => entry.nodeId === refresh.nodeId)) return false;
+      const state = run.nodes[candidate.id];
+      return Boolean(state && ["pending", "ready", "stale"].includes(state.status) && state.dependencyRefreshCycles?.some((cycle) => cycle.startsWith(prefix)));
+    });
+    if (!stillClaimed) {
+      const dependency = run.nodes[refresh.nodeId];
+      if (dependency) dependency.refreshInstructions = undefined;
+    }
+    abandoned.push(refresh.nodeId);
+  }
+  if (abandoned.length > 0) run.updatedAt = now;
+  return abandoned;
+}
+
 /** Staleness invalidation: a changed accepted input invalidates descendants transitively. */
-export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument, changedArtifactIds: readonly string[], now: string): RunNodeId[] {
+export function invalidateDescendants(
+  plan: CompiledPlan,
+  run: RunStateDocument,
+  changedArtifactIds: readonly string[],
+  now: string,
+  preservedNodeIds: ReadonlySet<RunNodeId> = new Set(),
+): RunNodeId[] {
   const changed = new Set<string>(changedArtifactIds);
   const invalidated: RunNodeId[] = [];
   let advanced = true;
@@ -435,6 +575,7 @@ export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument,
   while (advanced) {
     advanced = false;
     for (const node of plan.nodes) {
+      if (preservedNodeIds.has(node.id)) continue;
       const state = run.nodes[node.id];
       if (!state || state.status === "stale") continue;
       if (node.inputs.some((artifactId) => changed.has(artifactId))) {
@@ -444,6 +585,15 @@ export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument,
         // pending-verification listings that key on blocker text.
         state.blocker = undefined;
         state.acceptedOutputFingerprint = undefined;
+        // A scoped refresh token is valid only for the dependency result it opened. If that
+        // dependency is invalidated and later re-produced generically, every consumer must earn
+        // a new scoped cycle before it can enter the frontier.
+        for (const consumerNode of plan.nodes) {
+          if (!consumerNode.refreshDependencies.some((refresh) => refresh.nodeId === node.id)) continue;
+          const consumerState = run.nodes[consumerNode.id];
+          if (!consumerState?.dependencyRefreshCycles) continue;
+          consumerState.dependencyRefreshCycles = consumerState.dependencyRefreshCycles.filter((cycle) => !cycle.startsWith(`${node.id}@`));
+        }
         for (const artifactId of node.outputs) {
           changed.add(artifactId);
           const binding = run.artifactBindings.find((candidate) => candidate.artifactId === artifactId);

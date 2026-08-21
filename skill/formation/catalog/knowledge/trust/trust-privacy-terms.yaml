@@ -16,5 +16,12 @@ bindings:
   context_pack_ids:
     - context.trust
 applicability_notes: Use the load condition and graph bindings to decide when this guidance applies.
-sources: []
-source_exemption: This package contains internal operating guidance or has no external factual claims.
+sources:
+  - id: general-legal-template-collection
+    name: General Legal template collection
+    source_type: attorney_template_repository
+    url: https://github.com/General-Legal/legal-templates
+    review_cadence_days: 30
+    claim_scope: Optional CC0 drafting benchmark for privacy policies, terms, cookie notices, and data-processing addenda. It is not legal authority.
+    last_review_date: 2026-08-20
+    reviewer: formation-maintainers

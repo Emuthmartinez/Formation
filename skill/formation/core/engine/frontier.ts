@@ -37,6 +37,44 @@ export interface FrontierResult {
  */
 const READY_ELIGIBLE_STATUSES: readonly Status[] = ["pending", "ready", "stale"];
 
+/** Read-only predicate/autonomy/approval admission used before scoped refresh mutation. */
+export function isNodeAuthorized(node: CompiledRunNode, run: RunStateDocument, businessState: BusinessStateV2, evaluator: AutonomyEvaluator): boolean {
+  if (node.statePredicates.some((predicate) => !evaluatePredicate(businessState, predicate))) return false;
+  if (!evaluateAutonomy(evaluator, node).allowed) return false;
+  const approvals = node.approvals.map((approval) => run.approvals[approval.id]);
+  return approvals.every((status) => status === "approved");
+}
+
+/** Authorization plus ordinary dependency/input readiness for a node that may be reopened. */
+export function isNodeDispatchAdmissible(node: CompiledRunNode, run: RunStateDocument, businessState: BusinessStateV2, evaluator: AutonomyEvaluator): boolean {
+  const accepted = new Set(run.artifactBindings.filter((binding) => binding.accepted).map((binding) => binding.artifactId));
+  if (node.dependencies.some((dependency) => run.nodes[dependency]?.status !== "succeeded")) return false;
+  if (node.inputs.some((artifactId) => !accepted.has(artifactId))) return false;
+  return isNodeAuthorized(node, run, businessState, evaluator);
+}
+
+/** Consumers whose scoped dependency refresh could be admitted without mutating run state. */
+export function refreshAdmissibleConsumerIds(
+  plan: CompiledPlan,
+  run: RunStateDocument,
+  businessState: BusinessStateV2,
+  evaluator: AutonomyEvaluator,
+): Set<RunNodeId> {
+  return new Set(
+    plan.nodes
+      .filter((node) => {
+        const state = run.nodes[node.id];
+        if (!state || !READY_ELIGIBLE_STATUSES.includes(state.status)) return false;
+        if (!isNodeAuthorized(node, run, businessState, evaluator)) return false;
+        return node.refreshDependencies.every((refresh) => {
+          const dependency = plan.nodes.find((candidate) => candidate.id === refresh.nodeId);
+          return Boolean(dependency && isNodeDispatchAdmissible(dependency, run, businessState, evaluator));
+        });
+      })
+      .map((node) => node.id),
+  );
+}
+
 /**
  * Readiness = deps succeeded + inputs accepted + state predicates pass + autonomy evaluator
  * allows + (if approvals are required) they're all approved. Order matches the run-node
@@ -52,6 +90,8 @@ export function computeFrontier(plan: CompiledPlan, run: RunStateDocument, busin
   for (const node of plan.nodes) {
     const state = run.nodes[node.id];
     if (!state || !READY_ELIGIBLE_STATUSES.includes(state.status)) continue;
+    const refreshCycles = new Set(state.dependencyRefreshCycles ?? []);
+    if (node.refreshDependencies.some((refresh) => !refreshCycles.has(`${refresh.nodeId}@${state.attempts.length}`))) continue;
     if (node.dependencies.some((dependency) => run.nodes[dependency]?.status !== "succeeded")) continue;
     if (node.inputs.some((artifactId) => !accepted.has(artifactId))) continue;
 
