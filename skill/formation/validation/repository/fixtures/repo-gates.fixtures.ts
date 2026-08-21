@@ -996,6 +996,23 @@ export function register(h: Harness): void {
     ["--skill-root", motionLiveWorkspaceEscapedPipe, "--workspace-root", path.join(motionLiveWorkspaceEscapedPipe, "workspace/business")],
     0,
   );
+  const motionLiveWorkspaceAlternatePlaceholders = writeMotionContractRoot("motion-contract-live-workspace-alternate-placeholders", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "| TBD | TODO | none | Pending | Not reviewed | Not captured | Not recorded |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract rejects alternate placeholders in launched live-effect rows",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceAlternatePlaceholders, "--workspace-root", path.join(motionLiveWorkspaceAlternatePlaceholders, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
   runScriptArgs(
     "motion contract fails when one live-surface recipe disappears",
     "check-motion-contract.ts",

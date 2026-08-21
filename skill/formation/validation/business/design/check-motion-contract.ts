@@ -222,7 +222,9 @@ function parseMarkdownRow(line: string): string[] {
 }
 
 function isAuthoredLiveEffectCell(value: string): boolean {
-  return value.length > 0 && !/^not defined$/i.test(value) && !/R15, R16, R17, R18, or none/i.test(value);
+  return (
+    value.length > 0 && !/^(?:not defined|not captured|not recorded|not reviewed|pending|tbd|todo)$/i.test(value) && !/R15, R16, R17, R18, or none/i.test(value)
+  );
 }
 
 // PremiumCraft.swift ships from business/design/system/ next to its own copies of the
