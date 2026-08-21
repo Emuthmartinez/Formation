@@ -447,7 +447,7 @@ export function refreshDependenciesBeforeFrontier(plan: CompiledPlan, run: RunSt
       dependency.verifiedBySessionId = undefined;
       const dependencyNode = plan.nodes.find((candidate) => candidate.id === dependencyId);
       for (const binding of run.artifactBindings) {
-        if (!dependencyNode?.outputs.includes(binding.artifactId)) continue;
+        if (!dependencyNode?.outputs.some((artifactId) => artifactId === binding.artifactId)) continue;
         binding.accepted = false;
         binding.fingerprint = undefined;
         binding.producedBy = undefined;
