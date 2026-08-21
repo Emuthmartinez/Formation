@@ -1211,6 +1211,35 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_required_source_missing",
   );
 
+  const designRoomHistoricalHighImpactOutsideScope = makeFixture("design-room-reference-evidence-historical-high-impact-outside-scope");
+  {
+    const statePath = path.join(designRoomHistoricalHighImpactOutsideScope, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHistoricalHighImpactOutsideScope, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Historical onboarding | UXSnaps | An older journey review established the first-use sequence. | Adopt | Preserve the existing sequence. | surfaces.mobileApp.onboarding | Journey review | onboarding.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a historical high-impact row outside the current scope is not revalidated",
+    designRoomHistoricalHighImpactOutsideScope,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
   const designRoomDelightUnavailableFallback = makeFixture("design-room-reference-evidence-delight-unavailable-fallback");
   {
     const statePath = path.join(designRoomDelightUnavailableFallback, "studio/seed/business.json");

@@ -340,6 +340,7 @@ if (hasDesignState) {
           }
         }
         for (const [surface, categories] of categoriesBySurface) {
+          if (!scopedSurfaceKeySet.has(surface)) continue;
           const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
           for (const category of categories) {
             if (!hasComplementaryEvidence(category, sources)) {
