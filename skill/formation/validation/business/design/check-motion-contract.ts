@@ -188,11 +188,37 @@ function markdownTableRows(body: string, requiredHeaders: string[]): string[][] 
 }
 
 function parseMarkdownRow(line: string): string[] {
-  return line
-    .replace(/^\|/, "")
-    .replace(/\|$/, "")
-    .split("|")
-    .map((cell) => cell.trim());
+  const source = line.replace(/^\|/, "").replace(/\|$/, "");
+  const cells: string[] = [];
+  let cell = "";
+  for (let index = 0; index < source.length; index += 1) {
+    if (source[index] === "\\") {
+      let end = index;
+      while (source[end] === "\\") end += 1;
+      const count = end - index;
+      if (source[end] === "|") {
+        cell += "\\".repeat(Math.floor(count / 2));
+        if (count % 2 === 1) {
+          cell += "|";
+          index = end;
+          continue;
+        }
+        index = end - 1;
+        continue;
+      }
+      cell += "\\".repeat(count);
+      index = end - 1;
+      continue;
+    }
+    if (source[index] === "|") {
+      cells.push(cell.trim());
+      cell = "";
+    } else {
+      cell += source[index];
+    }
+  }
+  cells.push(cell.trim());
+  return cells;
 }
 
 function isAuthoredLiveEffectCell(value: string): boolean {

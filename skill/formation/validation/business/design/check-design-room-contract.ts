@@ -77,12 +77,7 @@ if (hasDesignState) {
         .split("\n")
         .map((line) => line.trim())
         .filter((line) => line.startsWith("|"))
-        .map((line) =>
-          line
-            .split("|")
-            .map((cell) => cell.trim())
-            .filter((cell) => cell.length > 0),
-        )
+        .map((line) => parseMarkdownRow(line).filter((cell) => cell.length > 0))
         .filter((cells) => cells.length >= 2 && !cells.every((cell) => /^:?-+:?$/.test(cell)));
       const dataRows = tableRows.slice(1);
       const realRows = dataRows.filter((cells) => !containsTemplatePlaceholder(cells.join(" ")));
@@ -461,11 +456,37 @@ function markdownTables(body: string): MarkdownTable[] {
 }
 
 function parseMarkdownRow(line: string): string[] {
-  return line
-    .replace(/^\|/, "")
-    .replace(/\|$/, "")
-    .split("|")
-    .map((cell) => cell.trim());
+  const source = line.replace(/^\|/, "").replace(/\|$/, "");
+  const cells: string[] = [];
+  let cell = "";
+  for (let index = 0; index < source.length; index += 1) {
+    if (source[index] === "\\") {
+      let end = index;
+      while (source[end] === "\\") end += 1;
+      const count = end - index;
+      if (source[end] === "|") {
+        cell += "\\".repeat(Math.floor(count / 2));
+        if (count % 2 === 1) {
+          cell += "|";
+          index = end;
+          continue;
+        }
+        index = end - 1;
+        continue;
+      }
+      cell += "\\".repeat(count);
+      index = end - 1;
+      continue;
+    }
+    if (source[index] === "|") {
+      cells.push(cell.trim());
+      cell = "";
+    } else {
+      cell += source[index];
+    }
+  }
+  cells.push(cell.trim());
+  return cells;
 }
 
 function tableHasHeaders(table: MarkdownTable, required: string[]): boolean {
