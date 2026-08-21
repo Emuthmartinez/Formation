@@ -689,6 +689,7 @@ function isOfficialPlatformGuidance(evidenceSource: string): boolean {
   if (!/^https?:\/\/\S+$/i.test(evidenceSource)) return false;
   try {
     const parsed = new URL(evidenceSource);
+    if (parsed.username !== "" || parsed.password !== "") return false;
     const hostname = parsed.hostname.toLowerCase();
     if (["developer.apple.com", "developer.android.com", "m3.material.io", "material.io", "learn.microsoft.com"].includes(hostname)) return true;
     return hostname === "www.w3.org" && /^\/wai\/(?:aria|apg)(?:\/|$)/i.test(parsed.pathname);
@@ -716,6 +717,8 @@ function canonicalEvidenceSource(evidenceSource: string): string {
       parsed.protocol = "https:";
       parsed.hash = "";
       parsed.search = "";
+      parsed.username = "";
+      parsed.password = "";
       parsed.hostname = parsed.hostname.toLowerCase();
       parsed.pathname = parsed.pathname === "/" ? "/" : parsed.pathname.replace(/\/+$/, "");
       return parsed.toString().replace(/\/$/, parsed.pathname === "/" ? "/" : "");
