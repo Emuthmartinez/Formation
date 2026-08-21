@@ -1211,6 +1211,39 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_required_source_missing",
   );
 
+  const designRoomDirectCatalogueLink = makeFixture("design-room-reference-evidence-direct-catalogue-link");
+  {
+    const statePath = path.join(designRoomDirectCatalogueLink, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDirectCatalogueLink, "design/design.md");
+    const directAbtestUrl = "https" + "://abtest.design/example";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: conversion.offer")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Conversion experiment proof is needed. | offer framing | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Conversion offer | [Experiment](${directAbtestUrl}) | The example provides a hypothesis for offer framing. | Reject — local evidence is still required. | | | Experiment review | conversion.offer |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  for (const forbiddenError of ["design_room.reference_evidence_required_source_missing", "design_room.reference_evidence_routed_sources_missing"]) {
+    runFixture(
+      `a direct catalogue link receives canonical lane credit without ${forbiddenError}`,
+      designRoomDirectCatalogueLink,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.contract_placeholder",
+      [],
+      undefined,
+      forbiddenError,
+    );
+  }
+
   const designRoomHistoricalHighImpactOutsideScope = makeFixture("design-room-reference-evidence-historical-high-impact-outside-scope");
   {
     const statePath = path.join(designRoomHistoricalHighImpactOutsideScope, "studio/seed/business.json");

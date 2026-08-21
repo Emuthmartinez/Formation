@@ -262,7 +262,7 @@ if (hasDesignState) {
         const adoptedSources = new Set(
           authoredAdoptionRows
             .filter((row) => scopedSurfaceKeySet.has(normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase()))
-            .map((row) => normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase()),
+            .map((row) => evidenceSourceLane(normalizedCell(row[adoptionTable!.headers.indexOf("source")]))),
         );
         for (const requiredSource of requiredEvidenceSources) {
           if (!adoptedSources.has(requiredSource)) {
@@ -281,19 +281,20 @@ if (hasDesignState) {
         const categoriesBySurface = new Map<string, Set<string>>();
         for (const row of authoredAdoptionRows) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
-          const source = normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase();
+          const evidenceSource = normalizedCell(row[adoptionTable!.headers.indexOf("source")]);
+          const source = evidenceSourceLane(evidenceSource);
           const surface = normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase();
           const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
           if (requiredEvidenceSources.has(source)) sources.add(source);
           const fallbackIdentities = fallbackIdentitiesBySurface.get(surface) ?? new Set<string>();
-          const fallbackIdentity = canonicalEvidenceSource(source);
+          const fallbackIdentity = canonicalEvidenceSource(evidenceSource);
           const fallbackCandidateSources = [...new Set([...requiredSourcesForSurface(surface), ...evidenceSourceStatuses.keys()])];
           for (const routedSource of fallbackCandidateSources) {
             if (
               !sources.has(routedSource) &&
               !fallbackIdentities.has(fallbackIdentity) &&
               evidenceSourceStatuses.get(routedSource) === "unavailable" &&
-              isAcceptedFallbackSource(routedSource, source)
+              isAcceptedFallbackSource(routedSource, evidenceSource)
             ) {
               sources.add(routedSource);
               fallbackIdentities.add(fallbackIdentity);
@@ -755,6 +756,38 @@ function canonicalEvidenceSource(evidenceSource: string): string {
 function evidenceSourceTarget(evidenceSource: string): string {
   const normalized = normalizedCell(evidenceSource);
   return normalized.match(/^\[[^\]]+\]\(([^)\s]+)\)$/)?.[1] ?? normalized;
+}
+
+function evidenceSourceLane(evidenceSource: string): string {
+  const target = evidenceSourceTarget(evidenceSource);
+  const normalized = normalizedCell(target).toLowerCase();
+  const labels = new Map<string, string>([
+    ["60fps.design", "60fps.design"],
+    ["catalogue.projectsbyif.com", "catalogue.projectsbyif.com"],
+    ["abtest.design", "abtest.design"],
+    ["design spells", "design spells"],
+    ["uxsnaps", "uxsnaps"],
+    ["ui playbook", "ui playbook"],
+  ]);
+  const label = labels.get(normalized);
+  if (label !== undefined) return label;
+  try {
+    const parsed = new URL(target);
+    if (parsed.username !== "" || parsed.password !== "") return normalized;
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    return (
+      new Map<string, string>([
+        ["60fps.design", "60fps.design"],
+        ["catalogue.projectsbyif.com", "catalogue.projectsbyif.com"],
+        ["abtest.design", "abtest.design"],
+        ["designspells.com", "design spells"],
+        ["uxsnaps.com", "uxsnaps"],
+        ["uiplaybook.dev", "ui playbook"],
+      ]).get(hostname) ?? normalized
+    );
+  } catch {
+    return normalized;
+  }
 }
 
 function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {
