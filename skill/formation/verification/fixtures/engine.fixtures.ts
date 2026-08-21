@@ -339,6 +339,30 @@ export function register(harness: Harness): void {
     const sharedReady = computeFrontier(sharedPlan, sharedRun, sharedState, allowAllAutonomyEvaluator).ready;
     assert(sharedReady.includes(productId), "the consumer owning the current scoped refresh may enter the frontier");
     assert(!sharedReady.includes(nodeId("growth-post")), "a second consumer must wait for its own scoped refresh cycle");
+
+    const staleCatalog = testCatalog();
+    staleCatalog.workflows[5]!.dependencies = ["workflow.product-spec"];
+    staleCatalog.workflows[5]!.refreshDependencies = [
+      { workflowId: "workflow.product-spec", instructions: "Refresh the product spec for the growth-specific evidence scope before publishing." },
+    ];
+    const stalePlan = compilePlan(staleCatalog, now);
+    const { run: staleRun } = seedFor(["research", "product"], stalePlan);
+    const growthId = nodeId("growth-post");
+    refreshDependenciesBeforeFrontier(stalePlan, staleRun, now);
+    assert((staleRun.nodes[growthId]!.dependencyRefreshCycles?.length ?? 0) === 1, "the scoped product refresh must record its consumer token");
+    staleRun.nodes[productId]!.status = "succeeded";
+    staleRun.artifactBindings.find((binding) => binding.artifactId === "artifact.product-spec")!.accepted = true;
+    invalidateDescendants(stalePlan, staleRun, ["artifact.research-brief"], plusSeconds(now, 1));
+    assert(
+      (staleRun.nodes[growthId]!.dependencyRefreshCycles?.length ?? 0) === 0,
+      "invalidating a refreshed dependency must clear every consumer token bound to its obsolete result",
+    );
+    staleRun.nodes[productId]!.status = "succeeded";
+    staleRun.artifactBindings.find((binding) => binding.artifactId === "artifact.product-spec")!.accepted = true;
+    assert(
+      refreshDependenciesBeforeFrontier(stalePlan, staleRun, plusSeconds(now, 2)).includes(productId),
+      "a generic dependency rerun must be followed by a fresh scoped cycle before consumer dispatch",
+    );
   });
 
   harness.check("runstate: refreshed output fingerprints still invalidate already-succeeded descendants when content changes", () => {

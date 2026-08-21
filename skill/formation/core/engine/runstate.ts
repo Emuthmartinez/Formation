@@ -510,6 +510,15 @@ export function invalidateDescendants(plan: CompiledPlan, run: RunStateDocument,
         // pending-verification listings that key on blocker text.
         state.blocker = undefined;
         state.acceptedOutputFingerprint = undefined;
+        // A scoped refresh token is valid only for the dependency result it opened. If that
+        // dependency is invalidated and later re-produced generically, every consumer must earn
+        // a new scoped cycle before it can enter the frontier.
+        for (const consumerNode of plan.nodes) {
+          if (!consumerNode.refreshDependencies.some((refresh) => refresh.nodeId === node.id)) continue;
+          const consumerState = run.nodes[consumerNode.id];
+          if (!consumerState?.dependencyRefreshCycles) continue;
+          consumerState.dependencyRefreshCycles = consumerState.dependencyRefreshCycles.filter((cycle) => !cycle.startsWith(`${node.id}@`));
+        }
         for (const artifactId of node.outputs) {
           changed.add(artifactId);
           const binding = run.artifactBindings.find((candidate) => candidate.artifactId === artifactId);
