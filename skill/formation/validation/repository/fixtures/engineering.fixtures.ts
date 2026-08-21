@@ -355,6 +355,28 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_status_invalid",
   );
 
+  const designRoomSeededTriageReasons = makeFixture("design-room-reference-evidence-seeded-triage-reasons");
+  {
+    const statePath = path.join(designRoomSeededTriageReasons, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSeededTriageReasons, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "seeded Reference Evidence triage instructions are not authored reasons",
+    designRoomSeededTriageReasons,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_triage_incomplete",
+  );
+
   const designRoomAdoptionHeaderMissing = makeFixture("design-room-reference-evidence-adoption-header-missing");
   {
     const statePath = path.join(designRoomAdoptionHeaderMissing, "studio/seed/business.json");
@@ -1053,6 +1075,45 @@ export function register(h: Harness): void {
     undefined,
     "design_room.reference_evidence_routed_sources_missing",
   );
+
+  for (const [sourceName, scope, fallbackSource, decision] of [
+    ["catalogue.projectsbyif.com", "account.recovery", "consumer-product-design-agency.md", "Account recovery"],
+    ["abtest.design", "conversion.offer", "paywall-pricing-and-experiments.md", "Conversion offer"],
+    ["UXSnaps", "journey.primary", "refero-ux-patterns.md", "Primary journey"],
+    ["UI Playbook", "standard.input", "premium-mobile-craft.md", "Standard input"],
+  ] as const) {
+    const designRoomDoctrineFallback = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-doctrine-fallback`);
+    const statePath = path.join(designRoomDoctrineFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDoctrineFallback, "design/design.md");
+    const escapedSource = sourceName.replaceAll(".", "\\.");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        new RegExp(`^\\| ${escapedSource} \\|.*$`, "m"),
+        `| ${sourceName} | unavailable | The routed catalogue cannot be reached in this runtime. | Not applicable | Not applicable |`,
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${decision} | ${fallbackSource} | Formation doctrine defines the bounded behavior for this surface. | Adopt | Apply the doctrine with Formation tokens and local validation. | surfaces.mobileApp.primary | Scenario review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${sourceName} unavailable accepts its applicable Formation doctrine fallback`,
+      designRoomDoctrineFallback,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.contract_placeholder",
+      [],
+      undefined,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
 
   for (const [scope, decision] of [
     ["account.recovery", "Account recovery"],

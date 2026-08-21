@@ -181,7 +181,7 @@ if (hasDesignState) {
           const why = normalizedCell(sourceRow[triageTable!.headers.indexOf("why")]);
           const query = normalizedCell(sourceRow[triageTable!.headers.indexOf("query or pattern")]);
           const evidenceDate = normalizedCell(sourceRow[triageTable!.headers.indexOf("evidence date")]);
-          const missingReason = !isAuthoredEvidenceCell(why);
+          const missingReason = !isAuthoredEvidenceReason(why);
           const missingRequiredEvidence = statusCell === "required" && (!isAuthoredEvidenceCell(query) || !isValidEvidenceDate(evidenceDate));
           if (missingReason || missingRequiredEvidence) {
             issues.push(
@@ -629,7 +629,32 @@ function isAcceptedFallbackSource(routedSource: string, evidenceSource: string):
   if (routedSource === "design spells") {
     return /(?:^|\/)(?:emotional-design-system|emotional-experience-design)\.md$/i.test(evidenceSource);
   }
+  if (routedSource === "catalogue.projectsbyif.com") {
+    return /(?:^|\/)(?:consumer-product-design-agency|privacy-terms|generative-ai-safety)\.md$/i.test(evidenceSource);
+  }
+  if (routedSource === "abtest.design") {
+    return /(?:^|\/)(?:paywall-pricing-and-experiments|onboarding-conversion)\.md$/i.test(evidenceSource);
+  }
+  if (routedSource === "uxsnaps") {
+    return /(?:^|\/)refero-ux-patterns\.md$/i.test(evidenceSource);
+  }
+  if (routedSource === "ui playbook") {
+    return /(?:^|\/)premium-mobile-craft\.md$/i.test(evidenceSource);
+  }
   return false;
+}
+
+function isAuthoredEvidenceReason(value: string): boolean {
+  if (!isAuthoredEvidenceCell(value)) return false;
+  const seededReasons = new Set([
+    "classify motion, transition, gesture, loading, success, and magical-moment needs.",
+    "classify ai, automation, trust, consent, sign-in, permission, data, and recovery needs.",
+    "classify conversion, onboarding, paywall, checkout, retention, and referral hypotheses.",
+    "classify delight, personality, empty-state, success-state, and micro-interaction needs.",
+    "classify journey, hierarchy, onboarding, dashboard, and content-discovery critique needs.",
+    "classify standard component, state, focus, keyboard, and accessibility needs.",
+  ]);
+  return !seededReasons.has(normalizedCell(value).toLowerCase());
 }
 
 function isOfficialPlatformGuidance(evidenceSource: string): boolean {
