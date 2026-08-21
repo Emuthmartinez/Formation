@@ -680,8 +680,8 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
-  const designRoomCoreLoopWithoutUxSnaps = makeFixture("design-room-reference-evidence-core-loop-without-uxsnaps");
-  {
+  for (const coreLoopScope of ["core-loop.primary", "core.loop"] as const) {
+    const designRoomCoreLoopWithoutUxSnaps = makeFixture(`design-room-reference-evidence-${coreLoopScope.replaceAll(".", "-")}-without-uxsnaps`);
     const statePath = path.join(designRoomCoreLoopWithoutUxSnaps, "studio/seed/business.json");
     const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
     const designRoom = expectRecord(designState["designRoom"], "designRoom");
@@ -690,7 +690,7 @@ export function register(h: Harness): void {
     const contractPath = path.join(designRoomCoreLoopWithoutUxSnaps, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
-      .replace("Change scope: Not defined", "Change scope: core-loop.primary")
+      .replace("Change scope: Not defined", `Change scope: ${coreLoopScope}`)
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Core-loop motion proof is needed. | state transition | 2026-08-20 |")
       .replace(
@@ -699,17 +699,17 @@ export function register(h: Harness): void {
       )
       .replace(
         "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
-        "| Core loop | catalogue.projectsbyif.com | The flow keeps user control visible. | Adopt | Keep the state boundary explicit. | designRoom.surfaces.core | Scenario review | core-loop.primary |\n| Core loop | 60fps.design | The transition preserves context. | Adopt | Use Formation motion tokens. | designRoom.surfaces.core | Device review | core-loop.primary |",
+        `| Core loop | catalogue.projectsbyif.com | The flow keeps user control visible. | Adopt | Keep the state boundary explicit. | designRoom.surfaces.core | Scenario review | ${coreLoopScope} |\n| Core loop | 60fps.design | The transition preserves context. | Adopt | Use Formation motion tokens. | designRoom.surfaces.core | Device review | ${coreLoopScope} |`,
       );
     writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${coreLoopScope} evidence requires UXSnaps plus a complementary source`,
+      designRoomCoreLoopWithoutUxSnaps,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_high_impact_sources_missing",
+    );
   }
-  runFixture(
-    "core-loop evidence requires UXSnaps plus a complementary source",
-    designRoomCoreLoopWithoutUxSnaps,
-    "check-design-room-contract.ts",
-    1,
-    "design_room.reference_evidence_high_impact_sources_missing",
-  );
 
   for (const [label, decision] of [
     ["consent", "Consent decision"],

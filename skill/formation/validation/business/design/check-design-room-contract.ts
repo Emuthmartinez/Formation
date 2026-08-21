@@ -609,7 +609,7 @@ function highImpactCategories(value: string): string[] {
   if (/\bcheckout\b/i.test(value)) categories.push("checkout");
   if (/\bretention\b/i.test(value)) categories.push("retention");
   if (/\breferral\b/i.test(value)) categories.push("referral");
-  if (/\bcore[- ]loop\b/i.test(value)) categories.push("core loop");
+  if (/\bcore[. -]loop\b/i.test(value)) categories.push("core loop");
   if (/\b(?:ai|consent|authentication|permissions?)\b|\bsensitive[- ]data\b/i.test(value)) categories.push("AI trust");
   if (/\bstore\b.*\bfirst[- ]frames?\b|\bfirst[- ]frames?\b.*\bstore\b/i.test(value)) categories.push("store first frame");
   return categories;
