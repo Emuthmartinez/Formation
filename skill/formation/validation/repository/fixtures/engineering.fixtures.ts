@@ -989,6 +989,37 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
+  const designRoomRemoteDoctrineImpostor = makeFixture("design-room-reference-evidence-remote-doctrine-impostor");
+  {
+    const statePath = path.join(designRoomRemoteDoctrineImpostor, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomRemoteDoctrineImpostor, "design/design.md");
+    const remoteSource = "https" + "://example.com/motion-craft-benchmarks.md";
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: motion.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| 60fps\.design \|.*$/m,
+        "| 60fps.design | unavailable | The live catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Result transition | ${remoteSource} | A remote file copied Formation's doctrine filename. | Reject — it is not Formation doctrine. | | | Source identity review | motion.primary |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a remote URL cannot impersonate Formation doctrine by copying its filename",
+    designRoomRemoteDoctrineImpostor,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
   const designRoomSignInWrongSource = makeFixture("design-room-reference-evidence-sign-in-wrong-source");
   {
     const statePath = path.join(designRoomSignInWrongSource, "studio/seed/business.json");

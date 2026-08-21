@@ -632,22 +632,22 @@ function isAcceptedFallbackSource(routedSource: string, evidenceSource: string):
   const target = evidenceSourceTarget(evidenceSource);
   if (isOfficialPlatformGuidance(target)) return true;
   if (routedSource === "60fps.design") {
-    return /(?:^|\/)motion-craft-benchmarks\.md$/i.test(target);
+    return isKnownDoctrineFallback(target, ["motion-craft-benchmarks.md"]);
   }
   if (routedSource === "design spells") {
-    return /(?:^|\/)(?:emotional-design-system|emotional-experience-design)\.md$/i.test(target);
+    return isKnownDoctrineFallback(target, ["emotional-design-system.md", "emotional-experience-design.md"]);
   }
   if (routedSource === "catalogue.projectsbyif.com") {
-    return /(?:^|\/)(?:consumer-product-design-agency|privacy-terms|generative-ai-safety)\.md$/i.test(target);
+    return isKnownDoctrineFallback(target, ["consumer-product-design-agency.md", "privacy-terms.md", "generative-ai-safety.md"]);
   }
   if (routedSource === "abtest.design") {
-    return /(?:^|\/)(?:paywall-pricing-and-experiments|onboarding-conversion)\.md$/i.test(target);
+    return isKnownDoctrineFallback(target, ["paywall-pricing-and-experiments.md", "onboarding-conversion.md"]);
   }
   if (routedSource === "uxsnaps") {
-    return /(?:^|\/)refero-ux-patterns\.md$/i.test(target);
+    return isKnownDoctrineFallback(target, ["refero-ux-patterns.md"]);
   }
   if (routedSource === "ui playbook") {
-    return /(?:^|\/)premium-mobile-craft\.md$/i.test(target);
+    return isKnownDoctrineFallback(target, ["premium-mobile-craft.md"]);
   }
   return false;
 }
@@ -669,6 +669,16 @@ function isOfficialPlatformGuidance(evidenceSource: string): boolean {
   return /https?:\/\/(?:developer\.apple\.com|developer\.android\.com|m3\.material\.io|material\.io|learn\.microsoft\.com|www\.w3\.org\/wai\/(?:aria|apg))(?:[)/]|$)/i.test(
     evidenceSource,
   );
+}
+
+function isKnownDoctrineFallback(target: string, allowedBasenames: string[]): boolean {
+  let normalized = normalizedCell(target).toLowerCase().replaceAll("\\", "/").replace(/^\.\//, "");
+  if (/^[a-z][a-z0-9+.-]*:/i.test(normalized) || normalized.startsWith("/") || /(?:^|\/)\.\.(?:\/|$)/.test(normalized)) return false;
+  normalized = normalized.replace(/^skill\/formation\//, "");
+  const basename = normalized.split("/").at(-1);
+  if (basename === undefined || !allowedBasenames.includes(basename)) return false;
+  if (normalized === basename) return true;
+  return normalized.startsWith("knowledge/") && existsSync(path.join(skillRoot, normalized));
 }
 
 function canonicalEvidenceSource(evidenceSource: string): string {
