@@ -668,7 +668,7 @@ function requiredSourcesForSurface(surface: string): string[] {
     sources.add("design spells");
   }
   if (
-    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|text[-.]?fields?|selects?|pickers?|menus?|tabs?|sheets?)\b/i.test(
+    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|text[. -]?fields?|selects?|pickers?|menus?|tabs?|sheets?)\b/i.test(
       surface,
     )
   ) {
@@ -682,7 +682,7 @@ function isTrustSurface(value: string): boolean {
     /\b(?:ai|automations?|trust|security|consents?|auth|authentications?|log[. -]?ins?|log[. -]?outs?|sign[. -]?in|passwords?|permissions?|data[. -]access(?:es)?|sensitive[. -]data|user[. -]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
       value,
     ) ||
-    /\b(?:sessions?[. -]management|management[. -]sessions?|accounts?[. -](?:register|registrations?|sign[-.]?ups?)|(?:register|registrations?|sign[-.]?ups?)[. -]accounts?)\b/i.test(
+    /\b(?:sessions?[. -]management|management[. -]sessions?|accounts?[. -](?:register|registrations?|sign[. -]?ups?)|(?:register|registrations?|sign[. -]?ups?)[. -]accounts?)\b/i.test(
       value,
     )
   );
