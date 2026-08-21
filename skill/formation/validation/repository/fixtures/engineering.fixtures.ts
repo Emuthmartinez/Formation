@@ -1179,6 +1179,66 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
+  const designRoomUnroutedUnavailableFallback = makeFixture("design-room-reference-evidence-unrouted-unavailable-fallback");
+  {
+    const statePath = path.join(designRoomUnroutedUnavailableFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomUnroutedUnavailableFallback, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| UI Playbook \|.*$/m,
+        "| UI Playbook | unavailable | The component catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Profile settings | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.profile | Keyboard and screen-reader review | profile.settings |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unrouted surface accepts official guidance for an explicitly unavailable source",
+    designRoomUnroutedUnavailableFallback,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_change_sources_missing",
+  );
+
+  for (const scope of ["gestures.swipe", "transitions.success"] as const) {
+    const designRoomPluralMotionRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomPluralMotionRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomPluralMotionRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard component proof is needed. | control states | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| Motion surface | UI Playbook | Standard controls expose their state. | Adopt | Keep the control contract explicit. | surfaces.mobileApp.motion | Device review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${scope} requires its routed 60fps.design evidence`,
+      designRoomPluralMotionRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
   for (const scope of ["micro-interactions.button", "empty-states.search", "magical-moments.reward"] as const) {
     const designRoomPluralDelightRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
     const statePath = path.join(designRoomPluralDelightRouteMissing, "studio/seed/business.json");

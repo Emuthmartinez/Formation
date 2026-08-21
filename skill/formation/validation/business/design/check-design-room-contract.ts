@@ -249,7 +249,8 @@ if (hasDesignState) {
           const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
           if (requiredEvidenceSources.has(source)) sources.add(source);
           const fallbackIdentities = fallbackIdentitiesBySurface.get(surface) ?? new Set<string>();
-          for (const routedSource of requiredSourcesForSurface(surface)) {
+          const fallbackCandidateSources = [...new Set([...requiredSourcesForSurface(surface), ...evidenceSourceStatuses.keys()])];
+          for (const routedSource of fallbackCandidateSources) {
             if (
               !sources.has(routedSource) &&
               !fallbackIdentities.has(source) &&
@@ -603,7 +604,7 @@ function parseSurfaceKeys(value: string): string[] {
 
 function requiredSourcesForSurface(surface: string): string[] {
   const sources = new Set<string>();
-  if (/\b(?:motion|gesture|transition|loading)\b/i.test(surface)) sources.add("60fps.design");
+  if (/\b(?:motions?|gestures?|transitions?|loading)\b/i.test(surface)) sources.add("60fps.design");
   if (/\b(?:ai|automation|trust|consent|authentication|sign[-.]?in|permissions?|sensitive[-.]data|user[-.]control|takeover|recovery|agency)\b/i.test(surface)) {
     sources.add("catalogue.projectsbyif.com");
   }
