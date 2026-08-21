@@ -184,7 +184,7 @@ if (hasDesignState) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("adopt or reject")]);
           const commonFields = ["surface or decision", "source", "observation", "validation"];
           const commonFieldsComplete = commonFields.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header)])));
-          if (/^adopt\b/i.test(decision)) {
+          if (/^adopt$/i.test(decision)) {
             return adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header.toLowerCase())])));
           }
           return commonFieldsComplete && /^reject\b[\s:—-]+\S/i.test(decision);

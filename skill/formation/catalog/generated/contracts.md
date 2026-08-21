@@ -303,7 +303,7 @@ _Feature whose 11-star target is 6★+ / "charge this with emotion", "build a ha
 - **Consults:** —
 - **Produces:** `product/experience/emotional-design/EMOTIONAL_DESIGN.md`
 - **Gates:** `check:emotional-design`
-- **Knowledge:** [Experience Cards](../../knowledge/experience/experience-cards.md), [Emotional Design System](../../knowledge/experience/emotional-design-system.md), [Emotional Experience Design](../../knowledge/experience/emotional-experience-design.md), [Emotional Experience Measurement](../../knowledge/experience/emotional-experience-measurement.md), [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Experience Cards](../../knowledge/experience/experience-cards.md), [Emotional Design System](../../knowledge/experience/emotional-design-system.md), [Emotional Experience Design](../../knowledge/experience/emotional-experience-design.md), [Emotional Experience Measurement](../../knowledge/experience/emotional-experience-measurement.md), [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md)
 
 ### Emotional design audit (auditor)
 
@@ -316,7 +316,7 @@ _"Audit this app's emotional design" / "emotional UX audit"_
 - **Consults:** —
 - **Produces:** `product/experience/emotional-design/EMOTIONAL_AUDIT.md`
 - **Gates:** `check:emotional-design`
-- **Knowledge:** [Experience Cards](../../knowledge/experience/experience-cards.md), [Consumer Product Design Agency](../../knowledge/experience/consumer-product-design-agency.md), [Emotional Design System](../../knowledge/experience/emotional-design-system.md), [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md)
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Experience Cards](../../knowledge/experience/experience-cards.md), [Consumer Product Design Agency](../../knowledge/experience/consumer-product-design-agency.md), [Emotional Design System](../../knowledge/experience/emotional-design-system.md), [Ethics Guardrail](../../knowledge/experience/ethics-guardrail.md)
 
 ### Onboarding ONB-00: resume and classify scope
 

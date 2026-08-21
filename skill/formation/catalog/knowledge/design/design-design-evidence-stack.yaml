@@ -14,6 +14,8 @@ bindings:
     - workflow.design.ux-patterns-refero
     - workflow.design.premium-mobile-craft
     - workflow.design.content-assets-remotion-generated-visuals
+    - workflow.experience.emotional-experience-design-producer
+    - workflow.experience.emotional-design-audit-auditor
     - workflow.experience.onboarding-system.onb-16-journey-graph
     - workflow.experience.onboarding-system.onb-17-screen-control-paywall-contract
     - workflow.experience.onboarding-system.onb-18-visual-design-prototype

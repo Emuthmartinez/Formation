@@ -1,4 +1,5 @@
 id: live-effect-false-progress
+behavioral: true
 title: Animated live effect hides an unbounded or stalled task
 prompt: >
   The app uses a colorful border beam around every AI card, a liquid-metal upgrade button,
