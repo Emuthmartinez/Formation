@@ -469,6 +469,12 @@ export function refreshDependenciesBeforeFrontier(
       if (lockedDependencies.has(dependencyId)) continue;
       const dependency = run.nodes[dependencyId];
       if (!dependency || dependency.status !== "succeeded") continue;
+      const dependencyNode = plan.nodes.find((candidate) => candidate.id === dependencyId);
+      if (!dependencyNode || dependency.attempts.length >= dependencyNode.maxAttempts) {
+        consumer.status = "blocked";
+        consumer.blocker = `Required refresh unavailable: "${dependencyNode?.title ?? dependencyId}" has no refresh attempts remaining.`;
+        continue;
+      }
       cycles.add(token);
       lockedDependencies.add(dependencyId);
       dependency.status = "stale";
@@ -476,7 +482,6 @@ export function refreshDependenciesBeforeFrontier(
       dependency.acceptedOutputFingerprint = undefined;
       dependency.verifiedBySessionId = undefined;
       dependency.refreshInstructions = [refresh.instructions];
-      const dependencyNode = plan.nodes.find((candidate) => candidate.id === dependencyId);
       for (const binding of run.artifactBindings) {
         if (!dependencyNode?.outputs.some((artifactId) => artifactId === binding.artifactId)) continue;
         if (binding.accepted && binding.fingerprint) binding.refreshBaselineFingerprint = binding.fingerprint;

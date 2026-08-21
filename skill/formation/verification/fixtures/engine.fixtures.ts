@@ -363,6 +363,24 @@ export function register(harness: Harness): void {
       refreshDependenciesBeforeFrontier(stalePlan, staleRun, plusSeconds(now, 2)).includes(productId),
       "a generic dependency rerun must be followed by a fresh scoped cycle before consumer dispatch",
     );
+
+    const exhaustedCatalog = testCatalog();
+    exhaustedCatalog.workflows[1]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh exhausted research before drafting." },
+    ];
+    const exhaustedPlan = compilePlan(exhaustedCatalog, now);
+    const { run: exhaustedRun } = seedFor(["research"], exhaustedPlan);
+    const exhaustedDependency = exhaustedRun.nodes[researchId]!;
+    const exhaustedNode = exhaustedPlan.nodes.find((node) => node.id === researchId)!;
+    for (let index = 0; index < exhaustedNode.maxAttempts; index += 1) {
+      const attempt = beginAttempt(exhaustedPlan, exhaustedRun, researchId, `session-exhaust-${index}`, plusSeconds(now, index));
+      attempt.status = "succeeded";
+      exhaustedDependency.status = "succeeded";
+    }
+    const exhaustedBinding = exhaustedRun.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!;
+    assert(refreshDependenciesBeforeFrontier(exhaustedPlan, exhaustedRun, plusSeconds(now, 4)).length === 0, "an exhausted dependency cannot reopen");
+    assert(exhaustedDependency.status === "succeeded" && exhaustedBinding.accepted, "failed refresh admission must preserve accepted dependency state");
+    assert(exhaustedRun.nodes[productId]!.status === "blocked", "the consumer must park explicitly when its required refresh cannot run");
   });
 
   harness.check("runstate: refreshed output fingerprints still invalidate already-succeeded descendants when content changes", () => {

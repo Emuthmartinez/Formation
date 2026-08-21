@@ -77,7 +77,17 @@ function nextPatchId(): string {
 }
 
 function buildPatch(targetDoc: string, ops: Array<Record<string, unknown>>, declaredOutputs: string[][]): Record<string, unknown> {
-  return { schemaVersion: "1.0.0", patchId: nextPatchId(), targetDoc, reason: "session fixture setup", authoredBy: "session-fixture-setup", authoredAt: "2026-08-05T00:00:00.000Z", preconditions: [], ops, declaredOutputs };
+  return {
+    schemaVersion: "1.0.0",
+    patchId: nextPatchId(),
+    targetDoc,
+    reason: "session fixture setup",
+    authoredBy: "session-fixture-setup",
+    authoredAt: "2026-08-05T00:00:00.000Z",
+    preconditions: [],
+    ops,
+    declaredOutputs,
+  };
 }
 
 function minimalLanes(): Record<string, unknown> {
@@ -103,7 +113,21 @@ function commit(handle: WorkspaceHandle, targetFile: string, patch: Record<strin
   writeJson(patchPath, patch);
   // Workspace bootstrap stands in for the founder-initiated onboarding flow, so it carries
   // --founder-authority (the reducer requires it for control/grants/waivers patches).
-  const result = runReducer(["commit", "--patch", patchPath, "--file", targetFile, "--manifest", handle.manifestPath, "--audit", handle.auditPath, "--session", "session-fixture-setup", "--founder-authority", "true"]);
+  const result = runReducer([
+    "commit",
+    "--patch",
+    patchPath,
+    "--file",
+    targetFile,
+    "--manifest",
+    handle.manifestPath,
+    "--audit",
+    handle.auditPath,
+    "--session",
+    "session-fixture-setup",
+    "--founder-authority",
+    "true",
+  ]);
   assert(result.code === 0, `workspace bootstrap commit failed: ${result.output}`);
   return result;
 }
@@ -141,7 +165,17 @@ function bootstrapWorkspace(harness: Harness, name: string, catalog: CatalogInpu
         {
           op: "set",
           path: ["project"],
-          value: { name: "Fixture App", slug: name, owner: "Founder", phase: "phase_0_orient", launchScope: "essentials", kickoffDate: "", platforms: ["ios"], bundleIds: { ios: "com.example.app", android: "" }, publicUrls: { landing: "", privacy: "", terms: "" } },
+          value: {
+            name: "Fixture App",
+            slug: name,
+            owner: "Founder",
+            phase: "phase_0_orient",
+            launchScope: "essentials",
+            kickoffDate: "",
+            platforms: ["ios"],
+            bundleIds: { ios: "com.example.app", android: "" },
+            publicUrls: { landing: "", privacy: "", terms: "" },
+          },
         },
         { op: "set", path: ["lanes"], value: minimalLanes() },
         { op: "set", path: ["founderGates"], value: { pending: options.pendingGates ?? [] } },
@@ -165,7 +199,18 @@ function bootstrapWorkspace(harness: Harness, name: string, catalog: CatalogInpu
     ),
   );
 
-  commit(handle, handle.ledgerPath, buildPatch("budget-ledger", [{ op: "set", path: ["balances"], value: options.balances ?? [] }, { op: "set", path: ["entries"], value: [] }], [["balances"], ["entries"]]));
+  commit(
+    handle,
+    handle.ledgerPath,
+    buildPatch(
+      "budget-ledger",
+      [
+        { op: "set", path: ["balances"], value: options.balances ?? [] },
+        { op: "set", path: ["entries"], value: [] },
+      ],
+      [["balances"], ["entries"]],
+    ),
+  );
 
   writeJson(handle.catalogPath, catalog);
   writeJson(handle.briefPath, {
@@ -192,7 +237,11 @@ function waiver(id: string, domainId: string, actionClass: string, protectedCate
     caps: { maxPerAction: 1000, maxPerPeriod: 10000, currency: "USD" },
     budgetPeriod: "monthly",
     expiry: "2099-01-01T00:00:00.000Z",
-    undoContract: { kind: "mitigation", irreversibilityAcknowledgment: "This fixture waiver models an irreversible action for the session-runner suite.", mitigationSteps: ["Review the audit log"] },
+    undoContract: {
+      kind: "mitigation",
+      irreversibilityAcknowledgment: "This fixture waiver models an irreversible action for the session-runner suite.",
+      mitigationSteps: ["Review the audit log"],
+    },
     auditRef: "audit.fixture",
     status: "active",
     createdAt: now,
@@ -222,7 +271,19 @@ function singleNodeCatalog(): CatalogInput {
     version: "catalog.session-fixture.single",
     artifacts: [{ id: "artifact.eng-change", path: "engineering/change.log" }],
     workflows: [
-      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
+      {
+        id: "workflow.eng-change",
+        title: "Update the onboarding copy",
+        domainId: "domain.engineering",
+        actionClass: "mutate",
+        dependencies: [],
+        outputPaths: ["engineering/change.log"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
     ],
   };
 }
@@ -252,7 +313,19 @@ function comprehensiveCatalog(): CatalogInput {
       { id: "artifact.eng-change", path: "engineering/change.log" },
     ],
     workflows: [
-      { id: "workflow.growth-scan", title: "Scan what people are saying", domainId: "domain.growth", actionClass: "observe", dependencies: [], outputPaths: ["growth/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
+      {
+        id: "workflow.growth-scan",
+        title: "Scan what people are saying",
+        domainId: "domain.growth",
+        actionClass: "observe",
+        dependencies: [],
+        outputPaths: ["growth/scan.md"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
       {
         id: "workflow.money-report",
         title: "Pull this week's revenue report",
@@ -268,7 +341,19 @@ function comprehensiveCatalog(): CatalogInput {
         gateCommands: [],
         idempotent: false,
       },
-      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
+      {
+        id: "workflow.eng-change",
+        title: "Update the onboarding copy",
+        domainId: "domain.engineering",
+        actionClass: "mutate",
+        dependencies: [],
+        outputPaths: ["engineering/change.log"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
     ],
   };
 }
@@ -321,8 +406,33 @@ function exhaustibleTwoNodeCatalog(): CatalogInput {
       { id: "artifact.eng-change", path: "engineering/change.log" },
     ],
     workflows: [
-      { id: "workflow.growth-scan", title: "Scan what people are saying", domainId: "domain.growth", actionClass: "observe", dependencies: [], outputPaths: ["growth/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
-      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true, maxAttempts: 1 },
+      {
+        id: "workflow.growth-scan",
+        title: "Scan what people are saying",
+        domainId: "domain.growth",
+        actionClass: "observe",
+        dependencies: [],
+        outputPaths: ["growth/scan.md"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
+      {
+        id: "workflow.eng-change",
+        title: "Update the onboarding copy",
+        domainId: "domain.engineering",
+        actionClass: "mutate",
+        dependencies: [],
+        outputPaths: ["engineering/change.log"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+        maxAttempts: 1,
+      },
     ],
   };
 }
@@ -356,7 +466,21 @@ function singleGrowthNodeCatalog(): CatalogInput {
   return {
     version: "catalog.session-fixture.orphan",
     artifacts: [{ id: "artifact.growth-scan", path: "growth/scan.md" }],
-    workflows: [{ id: "workflow.growth-scan", title: "Scan what people are saying", domainId: "domain.growth", actionClass: "observe", dependencies: [], outputPaths: ["growth/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true }],
+    workflows: [
+      {
+        id: "workflow.growth-scan",
+        title: "Scan what people are saying",
+        domainId: "domain.growth",
+        actionClass: "observe",
+        dependencies: [],
+        outputPaths: ["growth/scan.md"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+      },
+    ],
   };
 }
 
@@ -366,7 +490,20 @@ function slowSilentCatalog(): CatalogInput {
     version: "catalog.session-fixture.slow-silent",
     artifacts: [{ id: "artifact.eng-change", path: "engineering/change.log" }],
     workflows: [
-      { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true, ttlSeconds: 1 },
+      {
+        id: "workflow.eng-change",
+        title: "Update the onboarding copy",
+        domainId: "domain.engineering",
+        actionClass: "mutate",
+        dependencies: [],
+        outputPaths: ["engineering/change.log"],
+        providerIds: [],
+        laneIds: [],
+        founderOnlyActions: [],
+        gateCommands: [],
+        idempotent: true,
+        ttlSeconds: 1,
+      },
     ],
   };
 }
@@ -389,37 +526,57 @@ export function register(harness: Harness): void {
 
   // --- scenario 2: digest content (advanced/parked/spend/anomalies), founder vocabulary only -
 
-  harness.check("session: digest content is populated from run state (advanced/parked/spend) in founder vocabulary only, and push-skipped-no-from-address is recorded", () => {
-    const period = currentPeriod();
-    const handle = bootstrapWorkspace(harness, "comprehensive", comprehensiveCatalog(), {
-      grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.money": grant("domain.money", "full") },
-      waivers: [waiver("waiver.money.1", "domain.money", "spend", "spend")],
-      balances: [{ unit: "Revenue", period, currency: "USD", allocated: 1000, committed: 0, spent: 0, remaining: 1000, updatedAt: "2026-08-01T00:00:00.000Z" }],
-      pendingGates: [{ id: "gate.eng-change", category: "other", reason: "Update the onboarding copy", createdAt: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString() }],
-    });
+  harness.check(
+    "session: digest content is populated from run state (advanced/parked/spend) in founder vocabulary only, and push-skipped-no-from-address is recorded",
+    () => {
+      const period = currentPeriod();
+      const handle = bootstrapWorkspace(harness, "comprehensive", comprehensiveCatalog(), {
+        grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.money": grant("domain.money", "full") },
+        waivers: [waiver("waiver.money.1", "domain.money", "spend", "spend")],
+        balances: [
+          { unit: "Revenue", period, currency: "USD", allocated: 1000, committed: 0, spent: 0, remaining: 1000, updatedAt: "2026-08-01T00:00:00.000Z" },
+        ],
+        pendingGates: [
+          {
+            id: "gate.eng-change",
+            category: "other",
+            reason: "Update the onboarding copy",
+            createdAt: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
+          },
+        ],
+      });
 
-    const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-comprehensive-1", "--executor", "fixture"]);
-    assert(result.code === 0, `expected exit 0, got ${result.code}: ${result.output}`);
+      const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-comprehensive-1", "--executor", "fixture"]);
+      assert(result.code === 0, `expected exit 0, got ${result.code}: ${result.output}`);
 
-    const text = readDigest(handle, "sess-comprehensive-1");
-    assert(text.includes("Scan what people are saying"), `expected the observe node in 'advanced', got:\n${text}`);
-    assert(text.includes("Pull this week's revenue report"), `expected the spend node in 'advanced', got:\n${text}`);
-    assert(text.includes("Update the onboarding copy"), `expected the ungranted node in 'parked', got:\n${text}`);
-    assert(text.includes("You haven't told me how much I can do in this area yet."), `expected the translated no-grant reason for the parked node, got:\n${text}`);
-    assert(/waiting 3 days?/.test(text), `expected an age annotation on the parked founder-gate item, got:\n${text}`);
-    assert(text.includes("$25.00 of $1000.00 spent"), `expected the spend section to reflect the recorded actual, got:\n${text}`);
-    assert(text.includes("$975.00 left"), `expected the spend section to reflect the decremented remaining balance, got:\n${text}`);
-    // run.ts calls pushDigest() with no `from` argument (that's the exact integration point the
-    // provisioning layer's from-address config is meant to fill in later — see core/provisioning),
-    // so today this always skips on the from-address check, before the key is even looked at.
-    assert(text.includes("Sent to your inbox: skipped (the digest from-address isn't configured yet"), `expected a push-skipped-no-from-address line, got:\n${text}`);
-    assertNoInternalVocabulary("comprehensive", text);
-  });
+      const text = readDigest(handle, "sess-comprehensive-1");
+      assert(text.includes("Scan what people are saying"), `expected the observe node in 'advanced', got:\n${text}`);
+      assert(text.includes("Pull this week's revenue report"), `expected the spend node in 'advanced', got:\n${text}`);
+      assert(text.includes("Update the onboarding copy"), `expected the ungranted node in 'parked', got:\n${text}`);
+      assert(
+        text.includes("You haven't told me how much I can do in this area yet."),
+        `expected the translated no-grant reason for the parked node, got:\n${text}`,
+      );
+      assert(/waiting 3 days?/.test(text), `expected an age annotation on the parked founder-gate item, got:\n${text}`);
+      assert(text.includes("$25.00 of $1000.00 spent"), `expected the spend section to reflect the recorded actual, got:\n${text}`);
+      assert(text.includes("$975.00 left"), `expected the spend section to reflect the decremented remaining balance, got:\n${text}`);
+      // run.ts calls pushDigest() with no `from` argument (that's the exact integration point the
+      // provisioning layer's from-address config is meant to fill in later — see core/provisioning),
+      // so today this always skips on the from-address check, before the key is even looked at.
+      assert(
+        text.includes("Sent to your inbox: skipped (the digest from-address isn't configured yet"),
+        `expected a push-skipped-no-from-address line, got:\n${text}`,
+      );
+      assertNoInternalVocabulary("comprehensive", text);
+    },
+  );
 
   // --- judgment scenario: a node execution failure is reported, not silently dropped ---------
 
   harness.check("session: a node execution failure is neither 'advanced' nor silently dropped — it shows up as something to watch", () => {
-    const handle = bootstrapWorkspace(harness, "exec-failure", singleNodeCatalog(), { grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") } });
+    const handle = bootstrapWorkspace(harness, "exec-failure", singleNodeCatalog(), {
+      grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
+    });
     // Explicit no-op mode fails every attempt without invoking a real worker CLI.
     const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-exec-failure-1", "--executor", "noop"]);
     assert(result.code === 0, `expected exit 0 (a node failure is not a session crash), got ${result.code}: ${result.output}`);
@@ -429,54 +586,74 @@ export function register(harness: Harness): void {
     assert(text.includes("didn't go through"), `expected the execution failure to be reported as an anomaly rather than silently dropped, got:\n${text}`);
     assert(!text.includes("Nothing out of the ordinary."), `expected the anomalies section to be populated, got:\n${text}`);
     const advancedSection = text.split("## What moved forward")[1]!.split("## Needs your call")[0]!;
-    assert(!advancedSection.includes("Update the onboarding copy"), `a failed node must not be reported as 'advanced', got advanced section:\n${advancedSection}`);
+    assert(
+      !advancedSection.includes("Update the onboarding copy"),
+      `a failed node must not be reported as 'advanced', got advanced section:\n${advancedSection}`,
+    );
     assertNoInternalVocabulary("exec-failure", text);
   });
 
   // --- judgment scenario: a node that already exhausted its retries must park, never crash the whole session ----
 
-  harness.check("session: a node that already exhausted its retry budget is parked for that node only — the session keeps going and other nodes still advance", () => {
-    const handle = bootstrapWorkspace(harness, "exhausted-attempts", exhaustibleTwoNodeCatalog(), {
-      grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
-    });
+  harness.check(
+    "session: a node that already exhausted its retry budget is parked for that node only — the session keeps going and other nodes still advance",
+    () => {
+      const handle = bootstrapWorkspace(harness, "exhausted-attempts", exhaustibleTwoNodeCatalog(), {
+        grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
+      });
 
-    // Pre-seed run-state with workflow.eng-change already at its (maxAttempts: 1) ceiling, status
-    // still "pending" so frontier still offers it as ready — this is exactly the shape beginAttempt
-    // throws on (state.attempts.length >= node.maxAttempts) if the dispatch loop doesn't guard it.
-    const catalog = exhaustibleTwoNodeCatalog();
-    const plan = compilePlan(catalog, "2026-08-01T00:00:00.000Z");
-    const businessState = JSON.parse(readFileSync(handle.statePath, "utf8"));
-    const run = seedRunState(plan, businessState, { ownerSessionId: "prior-session", ttlSeconds: 300, wallClockCapSeconds: 1800, now: "2026-08-01T00:00:00.000Z" });
-    const engNodeId = plan.nodes.find((node) => node.id.includes("eng-change"))!.id;
-    run.nodes[engNodeId]!.attempts.push({
-      id: `${engNodeId}.attempt.1`,
-      nodeId: engNodeId,
-      number: 1,
-      status: "failed",
-      ownerSessionId: "prior-session",
-      heartbeatAt: "2026-08-01T00:00:00.000Z",
-      ttlSeconds: 300,
-      inputFingerprint: "x",
-      startedAt: "2026-08-01T00:00:00.000Z",
-      finishedAt: "2026-08-01T00:00:05.000Z",
-      evidence: [],
-      readbackRequired: false,
-    });
-    mkdirSync(path.join(handle.dir, "run"), { recursive: true });
-    writeRunState(path.join(handle.dir, "run", "run-state.json"), run);
+      // Pre-seed run-state with workflow.eng-change already at its (maxAttempts: 1) ceiling, status
+      // still "pending" so frontier still offers it as ready — this is exactly the shape beginAttempt
+      // throws on (state.attempts.length >= node.maxAttempts) if the dispatch loop doesn't guard it.
+      const catalog = exhaustibleTwoNodeCatalog();
+      const plan = compilePlan(catalog, "2026-08-01T00:00:00.000Z");
+      const businessState = JSON.parse(readFileSync(handle.statePath, "utf8"));
+      const run = seedRunState(plan, businessState, {
+        ownerSessionId: "prior-session",
+        ttlSeconds: 300,
+        wallClockCapSeconds: 1800,
+        now: "2026-08-01T00:00:00.000Z",
+      });
+      const engNodeId = plan.nodes.find((node) => node.id.includes("eng-change"))!.id;
+      run.nodes[engNodeId]!.attempts.push({
+        id: `${engNodeId}.attempt.1`,
+        nodeId: engNodeId,
+        number: 1,
+        status: "failed",
+        ownerSessionId: "prior-session",
+        heartbeatAt: "2026-08-01T00:00:00.000Z",
+        ttlSeconds: 300,
+        inputFingerprint: "x",
+        startedAt: "2026-08-01T00:00:00.000Z",
+        finishedAt: "2026-08-01T00:00:05.000Z",
+        evidence: [],
+        readbackRequired: false,
+      });
+      mkdirSync(path.join(handle.dir, "run"), { recursive: true });
+      writeRunState(path.join(handle.dir, "run", "run-state.json"), run);
 
-    const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-exhausted-1", "--executor", "fixture"]);
-    assert(result.code === 0, `expected exit 0 — an exhausted-attempts node must park, not crash the whole session, got ${result.code}: ${result.output}`);
+      const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-exhausted-1", "--executor", "fixture"]);
+      assert(result.code === 0, `expected exit 0 — an exhausted-attempts node must park, not crash the whole session, got ${result.code}: ${result.output}`);
 
-    const text = readDigest(handle, "sess-exhausted-1");
-    assert(!text.toLowerCase().includes("something went wrong"), `expected no whole-session crash framing, got:\n${text}`);
-    assert(text.includes("Scan what people are saying"), `expected the independent, healthy node to still advance despite the other node's exhausted retries, got:\n${text}`);
-    const advancedSection = text.split("## What moved forward")[1]?.split("## Needs your call")[0] ?? "";
-    assert(!advancedSection.includes("Update the onboarding copy"), `the exhausted-attempts node must not be reported as advanced, got advanced section:\n${advancedSection}`);
-    assert(text.includes("Update the onboarding copy"), `expected the exhausted-attempts node's title to still be named (parked, not vanished), got:\n${text}`);
-    assert(text.includes("stopped trying it automatically"), `expected the translated exhausted-attempts blocker text, got:\n${text}`);
-    assertNoInternalVocabulary("exhausted-attempts", text);
-  });
+      const text = readDigest(handle, "sess-exhausted-1");
+      assert(!text.toLowerCase().includes("something went wrong"), `expected no whole-session crash framing, got:\n${text}`);
+      assert(
+        text.includes("Scan what people are saying"),
+        `expected the independent, healthy node to still advance despite the other node's exhausted retries, got:\n${text}`,
+      );
+      const advancedSection = text.split("## What moved forward")[1]?.split("## Needs your call")[0] ?? "";
+      assert(
+        !advancedSection.includes("Update the onboarding copy"),
+        `the exhausted-attempts node must not be reported as advanced, got advanced section:\n${advancedSection}`,
+      );
+      assert(
+        text.includes("Update the onboarding copy"),
+        `expected the exhausted-attempts node's title to still be named (parked, not vanished), got:\n${text}`,
+      );
+      assert(text.includes("stopped trying it automatically"), `expected the translated exhausted-attempts blocker text, got:\n${text}`);
+      assertNoInternalVocabulary("exhausted-attempts", text);
+    },
+  );
 
   // --- judgment scenario: an internal crash never leaks engine vocabulary into the digest ----
 
@@ -486,7 +663,21 @@ export function register(harness: Harness): void {
     writeJson(handle.catalogPath, {
       version: "catalog.broken",
       artifacts: [{ id: "artifact.eng-change", path: "engineering/change.log" }],
-      workflows: [{ id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: ["workflow.does-not-exist"], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true }],
+      workflows: [
+        {
+          id: "workflow.eng-change",
+          title: "Update the onboarding copy",
+          domainId: "domain.engineering",
+          actionClass: "mutate",
+          dependencies: ["workflow.does-not-exist"],
+          outputPaths: ["engineering/change.log"],
+          providerIds: [],
+          laneIds: [],
+          founderOnlyActions: [],
+          gateCommands: [],
+          idempotent: true,
+        },
+      ],
     });
 
     const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-crash-1"]);
@@ -510,7 +701,10 @@ export function register(harness: Harness): void {
     assert(result.code === 3, `expected exit 3 on preflight failure, got ${result.code}: ${result.output}`);
 
     const text = readDigest(handle, "sess-preflight-fail-1");
-    assert(text.toLowerCase().includes("saved files") || text.toLowerCase().includes("changed them outside"), `expected an anomaly describing the out-of-band edit, got:\n${text}`);
+    assert(
+      text.toLowerCase().includes("saved files") || text.toLowerCase().includes("changed them outside"),
+      `expected an anomaly describing the out-of-band edit, got:\n${text}`,
+    );
     assert(!text.includes("Nothing out of the ordinary."), `expected the anomalies section to be populated, not the empty state, got:\n${text}`);
     assertNoInternalVocabulary("preflight-fail", text);
   });
@@ -525,7 +719,18 @@ export function register(harness: Harness): void {
       balances: [{ unit: "Revenue", period, currency: "USD", allocated: 1000, committed: 0, spent: 0, remaining: 1000, updatedAt: "2026-08-01T00:00:00.000Z" }],
     });
 
-    const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-timeout-1", "--executor", "fixture", "--wall-clock-seconds", "0"]);
+    const result = runSession([
+      "--workspace",
+      handle.dir,
+      "--brief",
+      handle.briefPath,
+      "--session",
+      "sess-timeout-1",
+      "--executor",
+      "fixture",
+      "--wall-clock-seconds",
+      "0",
+    ]);
     assert(result.code === 0, `expected exit 0 for a graceful timeout, got ${result.code}: ${result.output}`);
 
     const text = readDigest(handle, "sess-timeout-1");
@@ -543,11 +748,28 @@ export function register(harness: Harness): void {
     const catalog = singleGrowthNodeCatalog();
     const plan = compilePlan(catalog, "2026-08-01T00:00:00.000Z");
     const businessState = JSON.parse(readFileSync(handle.statePath, "utf8"));
-    const run = seedRunState(plan, businessState, { ownerSessionId: "prior-crashed-session", ttlSeconds: 300, wallClockCapSeconds: 1800, now: "2026-08-01T00:00:00.000Z" });
+    const run = seedRunState(plan, businessState, {
+      ownerSessionId: "prior-crashed-session",
+      ttlSeconds: 300,
+      wallClockCapSeconds: 1800,
+      now: "2026-08-01T00:00:00.000Z",
+    });
     const nodeId = plan.nodes[0]!.id;
     const staleHeartbeat = new Date(Date.now() - 20 * 60 * 1000).toISOString();
     run.nodes[nodeId]!.status = "running";
-    run.nodes[nodeId]!.attempts.push({ id: `${nodeId}.attempt.1`, nodeId, number: 1, status: "running", ownerSessionId: "prior-crashed-session", heartbeatAt: staleHeartbeat, ttlSeconds: 300, inputFingerprint: "x", startedAt: staleHeartbeat, evidence: [], readbackRequired: false });
+    run.nodes[nodeId]!.attempts.push({
+      id: `${nodeId}.attempt.1`,
+      nodeId,
+      number: 1,
+      status: "running",
+      ownerSessionId: "prior-crashed-session",
+      heartbeatAt: staleHeartbeat,
+      ttlSeconds: 300,
+      inputFingerprint: "x",
+      startedAt: staleHeartbeat,
+      evidence: [],
+      readbackRequired: false,
+    });
     mkdirSync(path.join(handle.dir, "run"), { recursive: true });
     writeRunState(path.join(handle.dir, "run", "run-state.json"), run);
 
@@ -556,7 +778,10 @@ export function register(harness: Harness): void {
 
     const text = readDigest(handle, "sess-orphan-2");
     assert(text.includes("didn't finish cleanly last session"), `expected an orphan anomaly, got:\n${text}`);
-    assert(text.includes("Scan what people are saying"), `expected the orphaned (idempotent) node to be retried and appear in 'advanced' this session, got:\n${text}`);
+    assert(
+      text.includes("Scan what people are saying"),
+      `expected the orphaned (idempotent) node to be retried and appear in 'advanced' this session, got:\n${text}`,
+    );
     assertNoInternalVocabulary("orphan", text);
   });
 
@@ -588,20 +813,22 @@ export function register(harness: Harness): void {
   // if a lingering un-cleared timer kept the runner's event loop alive, the child would never emit
   // its own 'exit' and the watchdog would fire, failing the test instead of hanging the suite.
 
-  harness.check("session: a slow, silent executor that never calls context.heartbeat still gets its lock/attempt heartbeat refreshed by the session's own timer, staying fresh past the TTL window, and the runner exits cleanly with no lingering handle", () => {
-    const handle = bootstrapWorkspace(harness, "slow-silent-heartbeat", slowSilentCatalog(), {
-      grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
-    });
-    const lockPath = path.join(handle.dir, "control", "session.lock");
-    const sessionId = "sess-slow-silent-1";
-    const ttlSeconds = 1;
-    // 6s (not 3s): more heartbeat-interval ticks (~333ms each) means a single delayed tick from
-    // host scheduling jitter costs less of the "at least 3 distinct refreshes" budget below.
-    const slowDelayMs = 6000;
-    const watchdogMs = slowDelayMs + 10_000;
+  harness.check(
+    "session: a slow, silent executor that never calls context.heartbeat still gets its lock/attempt heartbeat refreshed by the session's own timer, staying fresh past the TTL window, and the runner exits cleanly with no lingering handle",
+    () => {
+      const handle = bootstrapWorkspace(harness, "slow-silent-heartbeat", slowSilentCatalog(), {
+        grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
+      });
+      const lockPath = path.join(handle.dir, "control", "session.lock");
+      const sessionId = "sess-slow-silent-1";
+      const ttlSeconds = 1;
+      // 6s (not 3s): more heartbeat-interval ticks (~333ms each) means a single delayed tick from
+      // host scheduling jitter costs less of the "at least 3 distinct refreshes" budget below.
+      const slowDelayMs = 6000;
+      const watchdogMs = slowDelayMs + 10_000;
 
-    const driverPath = path.join(harness.makeTempDir("session-heartbeat-driver"), "drive-heartbeat.mts");
-    const driverSource = `
+      const driverPath = path.join(harness.makeTempDir("session-heartbeat-driver"), "drive-heartbeat.mts");
+      const driverSource = `
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 
@@ -686,11 +913,15 @@ async function main() {
 }
 main().catch((error) => { console.error(String((error && error.stack) || error)); process.exit(1); });
 `;
-    writeFileSync(driverPath, driverSource, "utf8");
-    const result = spawnSync(tsxBin, [driverPath], { cwd: skillRoot, encoding: "utf8", timeout: watchdogMs + 15_000 });
-    const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
-    assert(result.status === 0 && output.includes("HEARTBEAT_DRIVER_OK"), `heartbeat-liveness driver failed (exit ${result.status}, signal ${result.signal}):\n${output}`);
-  });
+      writeFileSync(driverPath, driverSource, "utf8");
+      const result = spawnSync(tsxBin, [driverPath], { cwd: skillRoot, encoding: "utf8", timeout: watchdogMs + 15_000 });
+      const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+      assert(
+        result.status === 0 && output.includes("HEARTBEAT_DRIVER_OK"),
+        `heartbeat-liveness driver failed (exit ${result.status}, signal ${result.signal}):\n${output}`,
+      );
+    },
+  );
 
   // --- judgment scenario: founder-vocabulary blocklist is real, not vacuous -------------------
 
@@ -707,10 +938,12 @@ main().catch((error) => { console.error(String((error && error.stack) || error))
   // reportResults() rather than being awaited). A tiny driver script exercises the real,
   // async pushDigest with an injected fake transport; nothing here ever touches the real network.
 
-  harness.check("session/digest: pushDigest requires a configured from-address before it will even check for a key, attempts a send only once both are present, and a push failure never throws", () => {
-    const digestModuleUrl = pathToFileURL(path.join(skillRoot, "core/session/digest.ts")).href;
-    const driverPath = path.join(harness.makeTempDir("session-push-driver"), "drive-push.mts");
-    const driverSource = `
+  harness.check(
+    "session/digest: pushDigest requires a configured from-address before it will even check for a key, attempts a send only once both are present, and a push failure never throws",
+    () => {
+      const digestModuleUrl = pathToFileURL(path.join(skillRoot, "core/session/digest.ts")).href;
+      const driverPath = path.join(harness.makeTempDir("session-push-driver"), "drive-push.mts");
+      const driverSource = `
 import { pushDigest, renderDigest } from ${JSON.stringify(digestModuleUrl)};
 const rendered = renderDigest({ sessionId: "s1", businessSlug: "app", startedAt: "2026-08-05T00:00:00.000Z", endedAt: "2026-08-05T00:05:00.000Z", outcome: "completed", advanced: [], parked: [], spend: [], anomalies: [] });
 async function main() {
@@ -733,11 +966,12 @@ async function main() {
 }
 main().catch((error) => { console.error(String(error)); process.exit(1); });
 `;
-    writeFileSync(driverPath, driverSource, "utf8");
-    const result = spawnSync(tsxBin, [driverPath], { cwd: skillRoot, encoding: "utf8" });
-    const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
-    assert(result.status === 0 && output.includes("PUSH_DRIVER_OK"), `pushDigest driver failed (exit ${result.status}):\n${output}`);
-  });
+      writeFileSync(driverPath, driverSource, "utf8");
+      const result = spawnSync(tsxBin, [driverPath], { cwd: skillRoot, encoding: "utf8" });
+      const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+      assert(result.status === 0 && output.includes("PUSH_DRIVER_OK"), `pushDigest driver failed (exit ${result.status}):\n${output}`);
+    },
+  );
 
   // --- judgment scenario: scope hints restrict what a session dispatches ---------------------
 
@@ -745,7 +979,18 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const handle = bootstrapWorkspace(harness, "scope-hints", comprehensiveCatalog(), {
       grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.money": grant("domain.money", "full") },
       waivers: [waiver("waiver.money.1", "domain.money", "spend", "spend")],
-      balances: [{ unit: "Revenue", period: currentPeriod(), currency: "USD", allocated: 1000, committed: 0, spent: 0, remaining: 1000, updatedAt: "2026-08-01T00:00:00.000Z" }],
+      balances: [
+        {
+          unit: "Revenue",
+          period: currentPeriod(),
+          currency: "USD",
+          allocated: 1000,
+          committed: 0,
+          spent: 0,
+          remaining: 1000,
+          updatedAt: "2026-08-01T00:00:00.000Z",
+        },
+      ],
       scopeHints: ["domain.growth"],
     });
 
@@ -754,26 +999,56 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
 
     const text = readDigest(handle, "sess-scope-1");
     assert(text.includes("Scan what people are saying"), `expected the in-scope growth node to advance, got:\n${text}`);
-    assert(!text.includes("Pull this week's revenue report"), `expected the out-of-scope money node to be left untouched (neither advanced nor parked) this session, got:\n${text}`);
+    assert(
+      !text.includes("Pull this week's revenue report"),
+      `expected the out-of-scope money node to be left untouched (neither advanced nor parked) this session, got:\n${text}`,
+    );
     assertNoInternalVocabulary("scope-hints", text);
   });
 
-  harness.check("session: a scoped session whose entry node is blocked entirely by an out-of-scope prerequisite reports why instead of exiting silently", () => {
-    const handle = bootstrapWorkspace(harness, "scope-cross-domain", crossDomainDependencyCatalog(), {
+  harness.check(
+    "session: a scoped session whose entry node is blocked entirely by an out-of-scope prerequisite reports why instead of exiting silently",
+    () => {
+      const handle = bootstrapWorkspace(harness, "scope-cross-domain", crossDomainDependencyCatalog(), {
+        grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.money": grant("domain.money", "review-first") },
+        scopeHints: ["domain.growth"],
+      });
+
+      const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-scope-2", "--executor", "fixture"]);
+      assert(result.code === 0, `expected exit 0, got ${result.code}: ${result.output}`);
+
+      const text = readDigest(handle, "sess-scope-2");
+      assert(!text.includes("Scan what people are saying"), `expected the growth entry node to NOT advance -- its only dependency never ran, got:\n${text}`);
+      assert(
+        text.includes("Confirm the revenue baseline"),
+        `expected an anomaly naming the blocking out-of-scope prerequisite by title, so the session doesn't exit with no explanation, got:\n${text}`,
+      );
+      assertNoInternalVocabulary("scope-cross-domain", text);
+    },
+  );
+
+  harness.check("session: an in-scope consumer dispatches the exact out-of-scope dependency it reopened for a declared refresh", () => {
+    const catalog = crossDomainDependencyCatalog();
+    catalog.workflows[1]!.refreshDependencies = [
+      { workflowId: "workflow.money-prereq", instructions: "Refresh the revenue baseline for the growth evidence scope before scanning." },
+    ];
+    const handle = bootstrapWorkspace(harness, "scope-refresh-dependency", catalog, {
       grants: { "domain.growth": grant("domain.growth", "review-first"), "domain.money": grant("domain.money", "review-first") },
-      scopeHints: ["domain.growth"],
+      scopeHints: ["domain.money"],
     });
 
-    const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-scope-2", "--executor", "fixture"]);
-    assert(result.code === 0, `expected exit 0, got ${result.code}: ${result.output}`);
+    const seed = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-scope-refresh-seed", "--executor", "fixture"]);
+    assert(seed.code === 0, `expected seed exit 0, got ${seed.code}: ${seed.output}`);
+    const brief = JSON.parse(readFileSync(handle.briefPath, "utf8")) as { scopeHints?: string[] };
+    brief.scopeHints = ["domain.growth"];
+    writeFileSync(handle.briefPath, `${JSON.stringify(brief, null, 2)}\n`, "utf8");
 
-    const text = readDigest(handle, "sess-scope-2");
-    assert(!text.includes("Scan what people are saying"), `expected the growth entry node to NOT advance -- its only dependency never ran, got:\n${text}`);
-    assert(
-      text.includes("Confirm the revenue baseline"),
-      `expected an anomaly naming the blocking out-of-scope prerequisite by title, so the session doesn't exit with no explanation, got:\n${text}`,
-    );
-    assertNoInternalVocabulary("scope-cross-domain", text);
+    const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-scope-refresh", "--executor", "fixture"]);
+    assert(result.code === 0, `expected refresh exit 0, got ${result.code}: ${result.output}`);
+    const text = readDigest(handle, "sess-scope-refresh");
+    assert(text.includes("Confirm the revenue baseline"), `expected the explicitly reopened dependency to advance, got:\n${text}`);
+    assert(text.includes("Scan what people are saying"), `expected the in-scope consumer to advance after its scoped refresh, got:\n${text}`);
+    assertNoInternalVocabulary("scope-refresh-dependency", text);
   });
 
   // --- judgment scenario: approve.ts against a workspace with no run yet fails with a friendly message, never an uncaught exception ----
@@ -781,7 +1056,16 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
   harness.check("session/approve: a workspace with no run state yet produces the friendly no_run_state message and exit 1, not an uncaught exception", () => {
     const handle = bootstrapWorkspace(harness, "approve-no-run", singleNodeCatalog());
     // Deliberately never run a session: run/run-state.json does not exist yet.
-    const result = runApprove(["--workspace", handle.dir, "--approval", "workflow.eng-change.approval.1", "--decision", "approved", "--session", "sess-approve-1"]);
+    const result = runApprove([
+      "--workspace",
+      handle.dir,
+      "--approval",
+      "workflow.eng-change.approval.1",
+      "--decision",
+      "approved",
+      "--session",
+      "sess-approve-1",
+    ]);
     assert(result.code === 1, `expected exit 1 when no run state exists yet, got ${result.code}: ${result.output}`);
     assert(result.output.includes("ISSUE approve.no_run_state"), `expected the named no_run_state ISSUE, got:\n${result.output}`);
     assert(!/at\s+\S+\s+\(.*:\d+:\d+\)/.test(result.output), `expected a friendly message, not a raw stack trace, got:\n${result.output}`);
@@ -795,7 +1079,18 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const handle = bootstrapWorkspace(harness, "approve-happy", approvalGatedCatalog(), {
       grants: { "domain.money": grant("domain.money", "full") },
       waivers: [waiver("waiver.money.1", "domain.money", "spend", "spend")],
-      balances: [{ unit: "Revenue", period: currentPeriod(), currency: "USD", allocated: 1000, committed: 0, spent: 0, remaining: 1000, updatedAt: "2026-08-01T00:00:00.000Z" }],
+      balances: [
+        {
+          unit: "Revenue",
+          period: currentPeriod(),
+          currency: "USD",
+          allocated: 1000,
+          committed: 0,
+          spent: 0,
+          remaining: 1000,
+          updatedAt: "2026-08-01T00:00:00.000Z",
+        },
+      ],
       // Autonomy (grant+waiver+budget) is fully satisfied, but founderOnlyActions is non-empty,
       // so the node still lands waiting_founder pending an explicit approval decision.
     });
@@ -819,7 +1114,18 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const handle = bootstrapWorkspace(harness, "approve-boundary", approvalGatedCatalog(), {
       grants: { "domain.money": grant("domain.money", "full") },
       waivers: [waiver("waiver.money.1", "domain.money", "spend", "spend")],
-      balances: [{ unit: "Revenue", period: currentPeriod(), currency: "USD", allocated: 1000, committed: 0, spent: 0, remaining: 1000, updatedAt: "2026-08-01T00:00:00.000Z" }],
+      balances: [
+        {
+          unit: "Revenue",
+          period: currentPeriod(),
+          currency: "USD",
+          allocated: 1000,
+          committed: 0,
+          spent: 0,
+          remaining: 1000,
+          updatedAt: "2026-08-01T00:00:00.000Z",
+        },
+      ],
     });
 
     // Before any session: the step is predicted as needs-founder, but there is no durable run to
@@ -827,9 +1133,18 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const before = runBoundary(["--workspace", handle.dir]);
     assert(before.code === 0, `expected exit 0 from the boundary before a run, got ${before.code}: ${before.stderr}`);
     const beforeReport = JSON.parse(before.stdout);
-    assert(beforeReport.workspaceReady === true && beforeReport.hasDurableRun === false, `expected a ready workspace with no durable run, got: ${before.stdout}`);
-    assert(Array.isArray(beforeReport.approvals) && beforeReport.approvals.length === 0, `expected no answerable approvals before a durable run, got: ${JSON.stringify(beforeReport.approvals)}`);
-    assert(beforeReport.workflows.some((entry: { status: string }) => entry.status === "needs-founder"), `expected the gated step to report needs-founder, got: ${before.stdout}`);
+    assert(
+      beforeReport.workspaceReady === true && beforeReport.hasDurableRun === false,
+      `expected a ready workspace with no durable run, got: ${before.stdout}`,
+    );
+    assert(
+      Array.isArray(beforeReport.approvals) && beforeReport.approvals.length === 0,
+      `expected no answerable approvals before a durable run, got: ${JSON.stringify(beforeReport.approvals)}`,
+    );
+    assert(
+      beforeReport.workflows.some((entry: { status: string }) => entry.status === "needs-founder"),
+      `expected the gated step to report needs-founder, got: ${before.stdout}`,
+    );
 
     const sessionResult = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-approve-boundary-1", "--executor", "fixture"]);
     assert(sessionResult.code === 0, `expected exit 0 for the setup session, got ${sessionResult.code}: ${sessionResult.output}`);
@@ -842,54 +1157,105 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     const approval = parkedReport.approvals[0];
     assert(approval.approvalId === "workflow.money-report.approval.1", `unexpected approval id: ${JSON.stringify(approval)}`);
     assert(approval.status === "pending", `expected a pending approval, got: ${JSON.stringify(approval)}`);
-    assert(approval.workflowId === "workflow.money-report" && approval.workflowTitle === "Pull this week's revenue report", `approval must carry its workflow identity: ${JSON.stringify(approval)}`);
-    assert(approval.description === "Approve pulling this week's revenue report", `approval must carry the catalog's founder-facing description: ${JSON.stringify(approval)}`);
+    assert(
+      approval.workflowId === "workflow.money-report" && approval.workflowTitle === "Pull this week's revenue report",
+      `approval must carry its workflow identity: ${JSON.stringify(approval)}`,
+    );
+    assert(
+      approval.description === "Approve pulling this week's revenue report",
+      `approval must carry the catalog's founder-facing description: ${JSON.stringify(approval)}`,
+    );
     assert(approval.protectedCategory === "spend", `expected the node's effective protected category, got: ${JSON.stringify(approval)}`);
 
-    const approveResult = runApprove(["--workspace", handle.dir, "--approval", approval.approvalId, "--decision", "approved", "--session", "sess-approve-boundary-2"]);
+    const approveResult = runApprove([
+      "--workspace",
+      handle.dir,
+      "--approval",
+      approval.approvalId,
+      "--decision",
+      "approved",
+      "--session",
+      "sess-approve-boundary-2",
+    ]);
     assert(approveResult.code === 0, `expected exit 0 recording the approval, got ${approveResult.code}: ${approveResult.output}`);
 
     const after = runBoundary(["--workspace", handle.dir]);
     assert(after.code === 0, `expected exit 0 from the boundary after approving, got ${after.code}: ${after.stderr}`);
     const afterReport = JSON.parse(after.stdout);
-    assert(afterReport.approvals.length === 1 && afterReport.approvals[0].status === "approved", `expected the recorded decision to be reflected, got: ${JSON.stringify(afterReport.approvals)}`);
+    assert(
+      afterReport.approvals.length === 1 && afterReport.approvals[0].status === "approved",
+      `expected the recorded decision to be reflected, got: ${JSON.stringify(afterReport.approvals)}`,
+    );
     const step = afterReport.workflows.find((entry: { workflowId: string }) => entry.workflowId === "workflow.money-report");
     assert(step.status === "ready", `expected the approved step to leave needs-founder and become ready, got: ${JSON.stringify(step)}`);
   });
 
   // --- judgment scenario: verified results cross the boundary, and only verified results --------
 
-  harness.check("session/boundary: a verified result crosses the boundary with evidence, artifact candidates, and declared cost — and only from a durable run", () => {
-    const handle = bootstrapWorkspace(harness, "results-boundary", gatedSingleNodeCatalog(), {
-      grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
-    });
+  harness.check(
+    "session/boundary: a verified result crosses the boundary with evidence, artifact candidates, and declared cost — and only from a durable run",
+    () => {
+      const handle = bootstrapWorkspace(harness, "results-boundary", gatedSingleNodeCatalog(), {
+        grants: { "domain.engineering": grant("domain.engineering", "run-with-guardrails") },
+      });
 
-    // Before any session: reachable and ready, but no durable run — results and artifact state
-    // must be empty, never invented from the throwaway seeded run.
-    const before = runBoundary(["--workspace", handle.dir]);
-    assert(before.code === 0, `expected exit 0 from the boundary before a run, got ${before.code}: ${before.stderr}`);
-    const beforeReport = JSON.parse(before.stdout);
-    assert(beforeReport.hasDurableRun === false, `expected no durable run before a session, got: ${before.stdout}`);
-    assert(Array.isArray(beforeReport.results) && beforeReport.results.length === 0, `expected no results before a durable run, got: ${JSON.stringify(beforeReport.results)}`);
-    assert(Array.isArray(beforeReport.artifacts) && beforeReport.artifacts.length === 0, `expected no artifact state before a durable run, got: ${JSON.stringify(beforeReport.artifacts)}`);
+      // Before any session: reachable and ready, but no durable run — results and artifact state
+      // must be empty, never invented from the throwaway seeded run.
+      const before = runBoundary(["--workspace", handle.dir]);
+      assert(before.code === 0, `expected exit 0 from the boundary before a run, got ${before.code}: ${before.stderr}`);
+      const beforeReport = JSON.parse(before.stdout);
+      assert(beforeReport.hasDurableRun === false, `expected no durable run before a session, got: ${before.stdout}`);
+      assert(
+        Array.isArray(beforeReport.results) && beforeReport.results.length === 0,
+        `expected no results before a durable run, got: ${JSON.stringify(beforeReport.results)}`,
+      );
+      assert(
+        Array.isArray(beforeReport.artifacts) && beforeReport.artifacts.length === 0,
+        `expected no artifact state before a durable run, got: ${JSON.stringify(beforeReport.artifacts)}`,
+      );
 
-    const sessionResult = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-results-boundary-1", "--executor", "fixture"]);
-    assert(sessionResult.code === 0, `expected exit 0 for the session, got ${sessionResult.code}: ${sessionResult.output}`);
+      const sessionResult = runSession([
+        "--workspace",
+        handle.dir,
+        "--brief",
+        handle.briefPath,
+        "--session",
+        "sess-results-boundary-1",
+        "--executor",
+        "fixture",
+      ]);
+      assert(sessionResult.code === 0, `expected exit 0 for the session, got ${sessionResult.code}: ${sessionResult.output}`);
 
-    const after = runBoundary(["--workspace", handle.dir]);
-    assert(after.code === 0, `expected exit 0 from the boundary after the session, got ${after.code}: ${after.stderr}`);
-    const report = JSON.parse(after.stdout);
-    assert(report.results.length === 1, `expected exactly one verified result, got: ${JSON.stringify(report.results)}`);
-    const result = report.results[0];
-    assert(result.workflowId === "workflow.eng-change" && result.workflowTitle === "Update the onboarding copy", `result must carry its stable workflow identity: ${JSON.stringify(result)}`);
-    assert(result.attemptId.length > 0 && result.attemptNumber === 1, `result must carry its attempt identity: ${JSON.stringify(result)}`);
-    assert(result.verification === "deterministic", `a gated engineering node verifies deterministically, got: ${JSON.stringify(result)}`);
-    assert(Array.isArray(result.evidence) && result.evidence.some((line: string) => line.includes("gate:check:gates-layout=passed")), `result must carry the gate's own pass evidence: ${JSON.stringify(result)}`);
-    assert(result.artifacts.length === 1 && result.artifacts[0].artifactId === "artifact.eng-change" && result.artifacts[0].fingerprint.length > 0, `result must reference its accepted output: ${JSON.stringify(result)}`);
-    assert(typeof result.declaredTokenBudget === "number" && result.declaredTokenBudget > 0, `result must carry the node's declared token budget: ${JSON.stringify(result)}`);
-    const artifactState = report.artifacts.find((entry: { artifactId: string }) => entry.artifactId === "artifact.eng-change");
-    assert(artifactState.accepted === true && artifactState.workflowId === "workflow.eng-change", `artifact state must report acceptance and its producer: ${JSON.stringify(artifactState)}`);
-  });
+      const after = runBoundary(["--workspace", handle.dir]);
+      assert(after.code === 0, `expected exit 0 from the boundary after the session, got ${after.code}: ${after.stderr}`);
+      const report = JSON.parse(after.stdout);
+      assert(report.results.length === 1, `expected exactly one verified result, got: ${JSON.stringify(report.results)}`);
+      const result = report.results[0];
+      assert(
+        result.workflowId === "workflow.eng-change" && result.workflowTitle === "Update the onboarding copy",
+        `result must carry its stable workflow identity: ${JSON.stringify(result)}`,
+      );
+      assert(result.attemptId.length > 0 && result.attemptNumber === 1, `result must carry its attempt identity: ${JSON.stringify(result)}`);
+      assert(result.verification === "deterministic", `a gated engineering node verifies deterministically, got: ${JSON.stringify(result)}`);
+      assert(
+        Array.isArray(result.evidence) && result.evidence.some((line: string) => line.includes("gate:check:gates-layout=passed")),
+        `result must carry the gate's own pass evidence: ${JSON.stringify(result)}`,
+      );
+      assert(
+        result.artifacts.length === 1 && result.artifacts[0].artifactId === "artifact.eng-change" && result.artifacts[0].fingerprint.length > 0,
+        `result must reference its accepted output: ${JSON.stringify(result)}`,
+      );
+      assert(
+        typeof result.declaredTokenBudget === "number" && result.declaredTokenBudget > 0,
+        `result must carry the node's declared token budget: ${JSON.stringify(result)}`,
+      );
+      const artifactState = report.artifacts.find((entry: { artifactId: string }) => entry.artifactId === "artifact.eng-change");
+      assert(
+        artifactState.accepted === true && artifactState.workflowId === "workflow.eng-change",
+        `artifact state must report acceptance and its producer: ${JSON.stringify(artifactState)}`,
+      );
+    },
+  );
 
   harness.check("session/boundary: a node still pending verification exports no result — finished is not verified", () => {
     // domain.research is a judgment domain: no gates, so verification is fresh_context and the
@@ -898,7 +1264,19 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
       version: "catalog.session-fixture.unverified-research",
       artifacts: [{ id: "artifact.research-scan", path: "research/scan.md" }],
       workflows: [
-        { id: "workflow.research-scan", title: "Research what people need", domainId: "domain.research", actionClass: "draft", dependencies: [], outputPaths: ["research/scan.md"], providerIds: [], laneIds: [], founderOnlyActions: [], gateCommands: [], idempotent: true },
+        {
+          id: "workflow.research-scan",
+          title: "Research what people need",
+          domainId: "domain.research",
+          actionClass: "draft",
+          dependencies: [],
+          outputPaths: ["research/scan.md"],
+          providerIds: [],
+          laneIds: [],
+          founderOnlyActions: [],
+          gateCommands: [],
+          idempotent: true,
+        },
       ],
     };
     const handle = bootstrapWorkspace(harness, "unverified-results", researchCatalog, {
@@ -907,7 +1285,18 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     // --verifier off: this case pins the OPERATOR acceptance path (core/session/verify.ts), so
     // the session's own verification sweep — which would accept the node before the boundary
     // check could observe the withheld state — is deliberately disabled.
-    const sessionResult = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-unverified-1", "--executor", "fixture", "--verifier", "off"]);
+    const sessionResult = runSession([
+      "--workspace",
+      handle.dir,
+      "--brief",
+      handle.briefPath,
+      "--session",
+      "sess-unverified-1",
+      "--executor",
+      "fixture",
+      "--verifier",
+      "off",
+    ]);
     assert(sessionResult.code === 0, `expected exit 0 for the session, got ${sessionResult.code}: ${sessionResult.output}`);
 
     const boundary = runBoundary(["--workspace", handle.dir]);
@@ -925,8 +1314,20 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     // the node, and the boundary then exports the verified result it withheld above.
     const listed = runVerify(["--workspace", handle.dir, "--list"]);
     assert(listed.code === 0 && listed.output.includes("PENDING run.research-scan"), `expected the pending node listed, got: ${listed.output}`);
-    const producerAttempt = runVerify(["--workspace", handle.dir, "--node", "workflow.research-scan", "--session", "sess-unverified-1", "--evidence", "looks right"]);
-    assert(producerAttempt.code === 1 && producerAttempt.output.includes("verify.producer_cannot_verify"), `the producing session must be refused, got: ${producerAttempt.output}`);
+    const producerAttempt = runVerify([
+      "--workspace",
+      handle.dir,
+      "--node",
+      "workflow.research-scan",
+      "--session",
+      "sess-unverified-1",
+      "--evidence",
+      "looks right",
+    ]);
+    assert(
+      producerAttempt.code === 1 && producerAttempt.output.includes("verify.producer_cannot_verify"),
+      `the producing session must be refused, got: ${producerAttempt.output}`,
+    );
     const noEvidence = runVerify(["--workspace", handle.dir, "--node", "workflow.research-scan", "--session", "sess-reviewer-1"]);
     assert(noEvidence.code === 1 && noEvidence.output.includes("verify.evidence_required"), `empty evidence must be refused, got: ${noEvidence.output}`);
     const accepted = runVerify([
@@ -942,7 +1343,10 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     assert(accepted.code === 0 && accepted.output.includes("VERIFIED run.research-scan"), `expected acceptance, got: ${accepted.output}`);
     const afterVerify = JSON.parse(runBoundary(["--workspace", handle.dir]).stdout);
     assert(afterVerify.results.length === 1, `the verified result must now cross the boundary, got: ${JSON.stringify(afterVerify.results)}`);
-    assert(afterVerify.results[0].verification === "fresh_context", `the result must carry its verification kind, got: ${JSON.stringify(afterVerify.results[0])}`);
+    assert(
+      afterVerify.results[0].verification === "fresh_context",
+      `the result must carry its verification kind, got: ${JSON.stringify(afterVerify.results[0])}`,
+    );
     assert(
       afterVerify.results[0].producedBySessionId === "sess-unverified-1" && afterVerify.results[0].verifiedBySessionId === "sess-reviewer-1",
       `the exported result must carry producer and verifier provenance, got: ${JSON.stringify(afterVerify.results[0])}`,
@@ -954,7 +1358,19 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
       version: "catalog.session-fixture.seeded-results",
       artifacts: [{ id: "artifact.eng-change", path: "engineering/change.log" }],
       workflows: [
-        { id: "workflow.eng-change", title: "Update the onboarding copy", domainId: "domain.engineering", actionClass: "mutate", dependencies: [], outputPaths: ["engineering/change.log"], providerIds: [], laneIds: ["engineering"], founderOnlyActions: [], gateCommands: [], idempotent: true },
+        {
+          id: "workflow.eng-change",
+          title: "Update the onboarding copy",
+          domainId: "domain.engineering",
+          actionClass: "mutate",
+          dependencies: [],
+          outputPaths: ["engineering/change.log"],
+          providerIds: [],
+          laneIds: ["engineering"],
+          founderOnlyActions: [],
+          gateCommands: [],
+          idempotent: true,
+        },
       ],
     };
     const plan = compilePlan(seededCatalog, "2026-08-05T00:00:00.000Z");
@@ -964,16 +1380,37 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
       schemaVersion: "2.0.0",
       updatedAt: "2026-08-05T00:00:00.000Z",
       narrative: { sinceLastTime: "", rightNow: "", yourCall: "", lastCelebratedPhase: "" },
-      project: { name: "Fixture App", slug: "seeded-results", owner: "Founder", phase: "phase_0_orient", launchScope: "essentials", kickoffDate: "", platforms: ["ios"], bundleIds: { ios: "com.example.app", android: "" }, publicUrls: { landing: "", privacy: "", terms: "" } },
+      project: {
+        name: "Fixture App",
+        slug: "seeded-results",
+        owner: "Founder",
+        phase: "phase_0_orient",
+        launchScope: "essentials",
+        kickoffDate: "",
+        platforms: ["ios"],
+        bundleIds: { ios: "com.example.app", android: "" },
+        publicUrls: { landing: "", privacy: "", terms: "" },
+      },
       lanes,
       founderGates: { pending: [] },
     } as unknown as BusinessStateV2;
-    const run = seedRunState(plan, businessState, { ownerSessionId: "seeded-results-check", ttlSeconds: 300, wallClockCapSeconds: 0, now: "2026-08-05T00:00:00.000Z" });
+    const run = seedRunState(plan, businessState, {
+      ownerSessionId: "seeded-results-check",
+      ttlSeconds: 300,
+      wallClockCapSeconds: 0,
+      now: "2026-08-05T00:00:00.000Z",
+    });
     assert(run.nodes["run.eng-change"]!.status === "succeeded", "the lane-done node must seed succeeded");
 
     const results = buildBoundaryResults(plan, run);
-    assert(results.length === 0, `a seeded-succeeded node has no attempt, no evidence, and no real output — it must export nothing: ${JSON.stringify(results)}`);
+    assert(
+      results.length === 0,
+      `a seeded-succeeded node has no attempt, no evidence, and no real output — it must export nothing: ${JSON.stringify(results)}`,
+    );
     const artifacts = buildBoundaryArtifacts(plan, run);
-    assert(artifacts.length === 1 && artifacts[0]!.accepted === true, `the seeded binding itself is still reported as accepted state: ${JSON.stringify(artifacts)}`);
+    assert(
+      artifacts.length === 1 && artifacts[0]!.accepted === true,
+      `the seeded binding itself is still reported as accepted state: ${JSON.stringify(artifacts)}`,
+    );
   });
 }

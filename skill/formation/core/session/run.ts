@@ -717,11 +717,12 @@ async function main(): Promise<number> {
      * progress, so the caller breaks rather than sweeping again.
      */
     const verifierSessionId = `${sessionId}.verifier`;
+    const scopedRefreshDependencyIds = new Set<RunNodeId>();
     const runVerificationSweep = async (): Promise<number> => {
       if (!verifier) return 0;
       const pending = listPendingFreshContext(plan, run).filter((nodeId) => {
         const node = plan.nodes.find((candidate) => candidate.id === nodeId)!;
-        return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId);
+        return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId) || scopedRefreshDependencyIds.has(nodeId);
       });
       let accepted = 0;
       for (const nodeId of pending) {
@@ -833,7 +834,8 @@ async function main(): Promise<number> {
         activeScopeHints && activeScopeHints.length > 0
           ? new Set(plan.nodes.filter((node) => nodeInScope(activeScopeHints, node.domainId, node.workflowId)).map((node) => node.id))
           : undefined;
-      refreshDependenciesBeforeFrontier(plan, run, sessionNow(), scopedRefreshConsumers);
+      const reopenedRefreshDependencies = refreshDependenciesBeforeFrontier(plan, run, sessionNow(), scopedRefreshConsumers);
+      for (const nodeId of reopenedRefreshDependencies) scopedRefreshDependencyIds.add(nodeId);
       writeRunState(paths.runState, run);
       applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const frontier = computeFrontier(plan, run, businessState, captured);
@@ -841,11 +843,12 @@ async function main(): Promise<number> {
       if (brief.scopeHints && brief.scopeHints.length > 0) {
         const inScope = readyIds.filter((id) => {
           const node = plan.nodes.find((candidate) => candidate.id === id)!;
-          return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId);
+          return nodeInScope(brief!.scopeHints, node.domainId, node.workflowId) || scopedRefreshDependencyIds.has(id);
         });
-        // A scoped session only ever dispatches nodes matching its own scopeHints -- it must
-        // never silently reach across that boundary to run an out-of-scope prerequisite the
-        // founder did not grant this session. When nothing in scope is currently ready, check
+        // A scoped session dispatches nodes matching its scope plus the exact dependencies it
+        // reopened for an in-scope consumer's declared refresh cycle. It never silently reaches
+        // across that boundary for an ordinary prerequisite the founder did not grant this
+        // session. When nothing in scope is currently ready, check
         // whether that's ordinary (an out-of-scope ready node with no bearing on this scope, or
         // the in-scope work is simply done -- both silent by design) or whether an in-scope node
         // is stuck behind an out-of-scope prerequisite that hasn't succeeded yet, in which case
