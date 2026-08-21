@@ -614,6 +614,15 @@ sources:
     locations:
       - docs/architecture.md
     notes: Defines the provenance principles used by knowledge-package source and review records.
+  - id: w3c-wai-aria-apg-combobox
+    name: WAI-ARIA Authoring Practices combobox pattern
+    source_type: standard
+    url: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
+    refresh_cadence_days: 90
+    owner: design
+    locations:
+      - skill/formation/validation/repository/fixtures/engineering.fixtures.ts
+    notes: Official W3C component guidance used to prove the unavailable-source fallback path for keyboard and accessibility semantics.
   - id: w3c-shacl
     name: W3C SHACL
     source_type: standard

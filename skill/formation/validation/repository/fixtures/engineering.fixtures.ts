@@ -1133,7 +1133,7 @@ export function register(h: Harness): void {
       )
       .replace(
         "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
-        "| Standard input | https://www.w3.org/WAI/ARIA/apg/patterns/textbox/ | The textbox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.input | Keyboard and screen-reader review | standard.input |",
+        "| Standard input | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.input | Keyboard and screen-reader review | standard.input |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
