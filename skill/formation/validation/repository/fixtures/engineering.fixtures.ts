@@ -572,6 +572,34 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_adoption_incomplete",
   );
 
+  const designRoomRejectedEvidence = makeFixture("design-room-reference-evidence-rejected-row");
+  {
+    const statePath = path.join(designRoomRejectedEvidence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomRejectedEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Delight proof is needed. | success flourish | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Success feedback | Design Spells | A decorative flourish competes with the result. | Reject — it delays comprehension. | | | Audience review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "rejected evidence needs a rationale but no mutation fields",
+    designRoomRejectedEvidence,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_adoption_incomplete",
+  );
+
   const designRoomStaleEvidenceRows = makeFixture("design-room-reference-evidence-stale-rows");
   {
     const statePath = path.join(designRoomStaleEvidenceRows, "studio/seed/business.json");

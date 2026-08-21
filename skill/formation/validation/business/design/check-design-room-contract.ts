@@ -182,17 +182,19 @@ if (hasDesignState) {
         const declaredAdoptionRows = adoptionTable?.rows.filter((row) => row.some((cell) => isAuthoredEvidenceCell(normalizedCell(cell)))) ?? [];
         const authoredAdoptionRows = declaredAdoptionRows.filter((row) => {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("adopt or reject")]);
-          return (
-            adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header.toLowerCase())]))) &&
-            /^(adopt|reject)\b/i.test(decision)
-          );
+          const commonFields = ["surface or decision", "source", "observation", "validation"];
+          const commonFieldsComplete = commonFields.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header)])));
+          if (/^adopt\b/i.test(decision)) {
+            return adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable!.headers.indexOf(header.toLowerCase())])));
+          }
+          return commonFieldsComplete && /^reject\b[\s:—-]+\S/i.test(decision);
         });
         if (declaredAdoptionRows.length !== authoredAdoptionRows.length) {
           issues.push(
             issue(
               "error",
               "design_room.reference_evidence_adoption_incomplete",
-              "Every declared Reference Evidence row needs all seven authored fields and an Adopt or Reject decision.",
+              "Every declared Reference Evidence row needs its surface, source, observation, decision, and validation. Adopted rows also need an adaptation and state path. Rejected rows need a rationale after Reject.",
               rel(args.root, contractPath),
             ),
           );
@@ -202,7 +204,7 @@ if (hasDesignState) {
             issue(
               "error",
               "design_room.reference_evidence_adoption_missing",
-              "A review-ready design/design.md needs at least one complete adopted-or-rejected evidence row with an adaptation, state path, and validation method.",
+              "A review-ready design/design.md needs at least one complete evidence row. Adopted rows need an adaptation and state path; rejected rows need a rationale.",
               rel(args.root, contractPath),
             ),
           );
