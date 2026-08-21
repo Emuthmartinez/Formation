@@ -1196,7 +1196,7 @@ export function register(h: Harness): void {
       .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Settings craft proof is needed. | discovery feedback | 2026-08-20 |")
       .replace(
         "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
-        "| Content discovery hierarchy | Design Spells | Feedback supports discovery. | Adopt | Keep it within Formation tokens. | surfaces.mobileApp.profile | Journey review | profile.settings |",
+        "| Content discovery hierarchy with sensitive data, user control, empty state, magical moment, and micro interaction work | Design Spells | Feedback supports discovery. | Adopt | Keep it within Formation tokens. | surfaces.mobileApp.profile | Journey review | profile.settings |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
