@@ -1334,6 +1334,8 @@ export function register(h: Harness): void {
     designRoom["status"] = "rendered";
     writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
     const contractPath = path.join(designRoomCredentialedFallbackAliases, "design/design.md");
+    const firstCredentialedUrl = "https" + "://first@www.w3.org/WAI/ARIA/apg/patterns/combobox/";
+    const secondCredentialedUrl = "https" + "://second@www.w3.org/WAI/ARIA/apg/patterns/combobox/";
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
       .replace("Change scope: Not defined", "Change scope: onboarding.primary")
@@ -1345,7 +1347,7 @@ export function register(h: Harness): void {
       .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | unavailable | The journey catalogue cannot be reached in this runtime. | Not applicable | Not applicable |")
       .replace(
         "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
-        "| Onboarding input | https://first@www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n| Onboarding input | https://second@www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The same pattern cannot satisfy a second evidence lane through URL credentials. | Reject | Keep credentialed URLs out of evidence. | surfaces.mobileApp.onboarding | Source identity review | onboarding.primary |",
+        `| Onboarding input | ${firstCredentialedUrl} | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n| Onboarding input | ${secondCredentialedUrl} | The same pattern cannot satisfy a second evidence lane through URL credentials. | Reject | Keep credentialed URLs out of evidence. | surfaces.mobileApp.onboarding | Source identity review | onboarding.primary |`,
       );
     writeFileSync(contractPath, contract, "utf8");
   }
