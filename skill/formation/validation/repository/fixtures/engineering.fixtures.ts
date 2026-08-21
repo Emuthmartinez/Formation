@@ -960,7 +960,11 @@ export function register(h: Harness): void {
     "an unavailable 60fps.design route accepts the documented distilled motion fallback",
     designRoomMotionUnavailableFallback,
     "check-design-room-contract.ts",
-    0,
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_routed_sources_missing",
   );
 
   const designRoomSignInWrongSource = makeFixture("design-room-reference-evidence-sign-in-wrong-source");
