@@ -479,15 +479,12 @@ export function refreshDependenciesBeforeFrontier(
       lockedDependencies.add(dependencyId);
       dependency.status = "stale";
       dependency.blocker = undefined;
-      dependency.acceptedOutputFingerprint = undefined;
       dependency.verifiedBySessionId = undefined;
       dependency.refreshInstructions = [refresh.instructions];
       for (const binding of run.artifactBindings) {
         if (!dependencyNode?.outputs.some((artifactId) => artifactId === binding.artifactId)) continue;
         if (binding.accepted && binding.fingerprint) binding.refreshBaselineFingerprint = binding.fingerprint;
         binding.accepted = false;
-        binding.producedBy = undefined;
-        binding.attemptId = undefined;
       }
       reopened.push(dependencyId);
     }
@@ -495,6 +492,32 @@ export function refreshDependenciesBeforeFrontier(
   }
   if (reopened.length > 0) run.updatedAt = now;
   return reopened;
+}
+
+/** Roll a failed scoped refresh back to its last accepted proof and reopen its consumers for a later scoped retry. */
+export function restoreDependencyRefreshAfterFailure(plan: CompiledPlan, run: RunStateDocument, dependencyId: RunNodeId, now: string): boolean {
+  const dependencyNode = plan.nodes.find((node) => node.id === dependencyId);
+  const dependency = run.nodes[dependencyId];
+  if (!dependencyNode || !dependency?.refreshInstructions?.length) return false;
+
+  dependency.status = "succeeded";
+  dependency.blocker = undefined;
+  dependency.refreshInstructions = undefined;
+  for (const artifactId of dependencyNode.outputs) {
+    const binding = run.artifactBindings.find((candidate) => candidate.artifactId === artifactId);
+    if (!binding || binding.refreshBaselineFingerprint === undefined) continue;
+    binding.fingerprint = binding.refreshBaselineFingerprint;
+    binding.accepted = true;
+    binding.refreshBaselineFingerprint = undefined;
+  }
+  for (const consumerNode of plan.nodes) {
+    if (!consumerNode.refreshDependencies.some((refresh) => refresh.nodeId === dependencyId)) continue;
+    const consumer = run.nodes[consumerNode.id];
+    if (!consumer?.dependencyRefreshCycles) continue;
+    consumer.dependencyRefreshCycles = consumer.dependencyRefreshCycles.filter((cycle) => !cycle.startsWith(`${dependencyId}@`));
+  }
+  run.updatedAt = now;
+  return true;
 }
 
 /** Staleness invalidation: a changed accepted input invalidates descendants transitively. */

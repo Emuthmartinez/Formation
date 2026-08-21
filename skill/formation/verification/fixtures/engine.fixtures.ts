@@ -38,6 +38,7 @@ import {
   refreshHeartbeat,
   reconcileWorkflowApplicability,
   refreshDependenciesBeforeFrontier,
+  restoreDependencyRefreshAfterFailure,
   seedRunState,
   wallClockDeadline,
   writeCheckpoint,
@@ -300,6 +301,15 @@ export function register(harness: Harness): void {
     run.nodes[researchId]!.status = "succeeded";
     run.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted = true;
     assert(refreshDependenciesBeforeFrontier(plan, run, plusSeconds(now, 1)).length === 0, "the same consumer attempt cycle must not reopen twice");
+    const failedRefreshAttempt = beginAttempt(plan, run, researchId, "session-refresh-failure", plusSeconds(now, 2));
+    failedRefreshAttempt.status = "failed";
+    assert(restoreDependencyRefreshAfterFailure(plan, run, researchId, plusSeconds(now, 3)), "a scoped refresh failure must be recognized");
+    assert(run.nodes[researchId]!.status === "succeeded", "a failed scoped refresh must restore the dependency's succeeded state");
+    assert(
+      run.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted,
+      "a failed scoped refresh must restore the last accepted proof",
+    );
+    assert((run.nodes[productId]!.dependencyRefreshCycles?.length ?? 0) === 0, "a failed scoped refresh must reopen its consumer for a later retry");
 
     const { run: initiallyPending } = seedFor([], plan);
     assert(refreshDependenciesBeforeFrontier(plan, initiallyPending, now).length === 0, "a dependency that has not run yet must not consume the refresh cycle");

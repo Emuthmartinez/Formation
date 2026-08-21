@@ -23,9 +23,11 @@ import {
   loadRunState,
   reconcileEnvironmentalArtifacts,
   reconcilePatch,
+  reconcileWorkflowApplicability,
   refreshHeartbeat,
   reopenRecurringNodes,
   refreshDependenciesBeforeFrontier,
+  restoreDependencyRefreshAfterFailure,
   seedRunState,
   writeRunState,
   buildCheckpoint,
@@ -829,6 +831,9 @@ async function main(): Promise<number> {
       heartbeat(paths.sessionLock, sessionId);
 
       observeAppSourceFingerprint(plan, run, workspace, sessionNow());
+      // Applicability can change between sessions. Settle it before refresh mutates any accepted
+      // dependency proof, so a newly deferred/not-needed consumer cannot spend a refresh attempt.
+      reconcileWorkflowApplicability(plan, run, businessState, sessionNow());
       const activeScopeHints = brief?.scopeHints;
       const scopedRefreshConsumers =
         activeScopeHints && activeScopeHints.length > 0
@@ -1050,12 +1055,15 @@ async function main(): Promise<number> {
 
           if (result.status === "failed") {
             const failedState = run.nodes[nodeId];
-            if (failedState) failedState.refreshInstructions = undefined;
             attempt.status = "failed";
             attempt.finishedAt = finishedAt;
             attempt.error = result.error;
-            run.nodes[nodeId]!.status = "failed";
-            run.nodes[nodeId]!.blocker = result.error ?? "The work didn't complete.";
+            const restoredRefresh = restoreDependencyRefreshAfterFailure(plan, run, nodeId, finishedAt);
+            if (!restoredRefresh && failedState) {
+              failedState.refreshInstructions = undefined;
+              failedState.status = "failed";
+              failedState.blocker = result.error ?? "The work didn't complete.";
+            }
             run.updatedAt = finishedAt;
             // A failed node is neither "advanced" nor "parked" in run-state terms — without this it would
             // vanish from the digest entirely (silence), so a failure is reported as something to watch.
