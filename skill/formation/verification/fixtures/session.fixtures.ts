@@ -1043,6 +1043,20 @@ main().catch((error) => { console.error(String(error)); process.exit(1); });
     brief.scopeHints = ["domain.growth"];
     writeFileSync(handle.briefPath, `${JSON.stringify(brief, null, 2)}\n`, "utf8");
 
+    const interrupted = runSession([
+      "--workspace",
+      handle.dir,
+      "--brief",
+      handle.briefPath,
+      "--session",
+      "sess-scope-refresh-interrupted",
+      "--executor",
+      "fixture",
+      "--verifier",
+      "off",
+    ]);
+    assert(interrupted.code === 0, `expected interrupted refresh exit 0, got ${interrupted.code}: ${interrupted.output}`);
+
     const result = runSession(["--workspace", handle.dir, "--brief", handle.briefPath, "--session", "sess-scope-refresh", "--executor", "fixture"]);
     assert(result.code === 0, `expected refresh exit 0, got ${result.code}: ${result.output}`);
     const text = readDigest(handle, "sess-scope-refresh");

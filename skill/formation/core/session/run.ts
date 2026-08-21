@@ -834,6 +834,18 @@ async function main(): Promise<number> {
         activeScopeHints && activeScopeHints.length > 0
           ? new Set(plan.nodes.filter((node) => nodeInScope(activeScopeHints, node.domainId, node.workflowId)).map((node) => node.id))
           : undefined;
+      if (scopedRefreshConsumers) {
+        for (const consumerId of scopedRefreshConsumers) {
+          const consumerNode = plan.nodes.find((node) => node.id === consumerId);
+          const consumerState = run.nodes[consumerId];
+          if (!consumerNode || !consumerState) continue;
+          const cycles = new Set(consumerState.dependencyRefreshCycles ?? []);
+          for (const refresh of consumerNode.refreshDependencies) {
+            const token = `${refresh.nodeId}@${consumerState.attempts.length}`;
+            if (cycles.has(token) && run.nodes[refresh.nodeId]?.status !== "succeeded") scopedRefreshDependencyIds.add(refresh.nodeId);
+          }
+        }
+      }
       const reopenedRefreshDependencies = refreshDependenciesBeforeFrontier(plan, run, sessionNow(), scopedRefreshConsumers);
       for (const nodeId of reopenedRefreshDependencies) scopedRefreshDependencyIds.add(nodeId);
       writeRunState(paths.runState, run);
