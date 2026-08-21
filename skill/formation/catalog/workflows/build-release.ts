@@ -169,7 +169,7 @@ export const workflows = [
     areaIds: ["area.build-release"],
     trigger: "Store screenshots needed (raw capture → composed iPhone/iPad/Play assets)",
     instructions:
-      "Capture raw app UI first — in-app iOS Simulator (rung 0) for a local Mac, MobAI for Android or a repeatable matrix — and treat those raw captures as proof inputs, never final store creative. Compose final assets from the Asset Knowledge Brief (strategy/RESEARCH.md's user/problem, 11_STAR_EXPERIENCE.md's magical moment, the emotion/card from EMOTIONAL_DESIGN.md, design/design.md's tokens) with headline, copy overlay, device frame, and export every required iPhone/iPad/Play well — never a generic, knowledge-free hook. Run every composed frame through quality-lens.md's Anti-Generic Checks before calling the deck done, and write the raw-path/composition-path/upload-status table to SCREENSHOTS.md. Pass `npm run check:store-screenshots -- --root .`; a technically correct, on-brand screenshot that still reads as generic fails the done bar.",
+      "Capture raw app UI first — in-app iOS Simulator (rung 0) for a local Mac, MobAI for Android or a repeatable matrix — and treat those raw captures as proof inputs, never final store creative. Before composing or materially changing a store frame, rerun workflow.design.design-room-state-mutate-version-render with a store-first-frame change classification and affected scope so the Design Room's single writer records a fresh Design Evidence pass in design/design.md; then run check:design-room. An accepted Design Room dependency from an earlier or unrelated scope is not evidence for new store creative. Compose final assets from the Asset Knowledge Brief (strategy/RESEARCH.md's user/problem, 11_STAR_EXPERIENCE.md's magical moment, the emotion/card from EMOTIONAL_DESIGN.md, design/design.md's tokens) with headline, copy overlay, device frame, and export every required iPhone/iPad/Play well — never a generic, knowledge-free hook. Run every composed frame through quality-lens.md's Anti-Generic Checks before calling the deck done, and write the raw-path/composition-path/upload-status table to SCREENSHOTS.md. Pass `npm run check:store-screenshots -- --root .`; a technically correct, on-brand screenshot that still reads as generic fails the done bar.",
     reads: [
       "design/design.md",
       "store/app-store-listing/APP_STORE_LISTING.md",
@@ -183,7 +183,7 @@ export const workflows = [
     phaseIds: ["phase.3"],
     dependencies: ["workflow.design.design-room-state-mutate-version-render", "workflow.store.app-store-listing-prep-packet"],
     outputPaths: ["store/app-store-listing/SCREENSHOTS.md"],
-    gates: ["check:store-screenshots"],
+    gates: ["check:design-room", "check:store-screenshots"],
     providers: ["provider.app-store-screenshots"],
     actionClass: "mutate",
     idempotent: false,

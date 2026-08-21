@@ -908,8 +908,8 @@ _Store screenshots needed (raw capture → composed iPhone/iPad/Play assets)_
 - **Reads:** `design/design.md`, `store/app-store-listing/APP_STORE_LISTING.md`, `product/experience/11-star-experience/11_STAR_EXPERIENCE.md`, `strategy/RESEARCH.md`, `product/experience/emotional-design/EMOTIONAL_DESIGN.md`, `state/PROJECT_STATE.yaml`
 - **Consults:** —
 - **Produces:** `store/app-store-listing/SCREENSHOTS.md`
-- **Gates:** `check:store-screenshots`
-- **Knowledge:** [Design Visual System](../../knowledge/design/design-visual-system.md), [Quality Lens](../../knowledge/design/quality-lens.md), [MobAI Toolbelt](../../knowledge/engineering/mobai-toolbelt.md), [Device Capture And Proof](../../knowledge/process/tool-recipes/device-capture-and-proof.md), [ASO Store Ops](../../knowledge/store/aso-store-ops.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
+- **Gates:** `check:design-room`, `check:store-screenshots`
+- **Knowledge:** [Design Evidence Stack](../../knowledge/design/design-evidence-stack.md), [Design Visual System](../../knowledge/design/design-visual-system.md), [Quality Lens](../../knowledge/design/quality-lens.md), [MobAI Toolbelt](../../knowledge/engineering/mobai-toolbelt.md), [Device Capture And Proof](../../knowledge/process/tool-recipes/device-capture-and-proof.md), [ASO Store Ops](../../knowledge/store/aso-store-ops.md), [Consumer Copy Benchmarks](../../knowledge/words/consumer-copy-benchmarks.md), [Conversion Copy](../../knowledge/words/conversion-copy.md)
 
 ### Google Play release
 

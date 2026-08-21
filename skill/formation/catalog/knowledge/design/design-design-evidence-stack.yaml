@@ -20,6 +20,7 @@ bindings:
     - workflow.experience.onboarding-system.onb-17-screen-control-paywall-contract
     - workflow.experience.onboarding-system.onb-18-visual-design-prototype
     - workflow.growth.pre-launch-funnel-landing-waitlist
+    - workflow.store.store-screenshots-production
   context_pack_ids:
     - context.design
 applicability_notes: This is the mandatory design-source router. Open only relevant sources. High-impact and high-risk surfaces require two complementary source lanes.
