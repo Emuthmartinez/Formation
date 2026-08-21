@@ -51,7 +51,7 @@ Complete this evidence pass before a design mutation. Triage every source. Open 
 Change classification: Not defined
 Change scope: Not defined
 
-Use `small token-preserving correction`, `new or materially changed surface`, or `high-impact or high-risk surface` for the change classification. Name the affected surface or decision in the change scope.
+Use `small token-preserving correction`, `new or materially changed surface`, or `high-impact or high-risk surface` for the change classification. Set the change scope to the comma-separated stable surface keys affected by the change, such as `onboarding.primary, paywall.upgrade`.
 
 | Source | Status | Why | Query or pattern | Evidence date |
 | --- | --- | --- | --- | --- |

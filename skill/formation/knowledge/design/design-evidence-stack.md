@@ -8,7 +8,7 @@ Complete this evidence pass during the **STATE** step of the Design Room loop. R
 
 Classify the decision before you search. Mark each source as `required`, `not applicable`, or `unavailable`. Give a reason for each status.
 
-Record one change classification and one change scope in `design/design.md`. Use `small token-preserving correction`, `new or materially changed surface`, or `high-impact or high-risk surface`. Name the affected surface or decision in the scope. The validator uses this scope to apply the required source lanes even when the evidence table has no rows yet.
+Record one change classification and one change scope in `design/design.md`. Use `small token-preserving correction`, `new or materially changed surface`, or `high-impact or high-risk surface`. Set the scope to the comma-separated stable surface keys affected by the change. The validator uses each scoped key to apply the required source lane even when the evidence table has no rows yet.
 
 Use at least one relevant source for a new or materially changed user-facing surface. A small token-preserving correction can skip live research if the evidence table gives the reason.
 

@@ -113,7 +113,8 @@ if (hasDesignState) {
         "new or materially changed surface",
         "high-impact or high-risk surface",
       ]);
-      const changeClassificationValid = allowedChangeClassifications.has(changeClassification) && isAuthoredEvidenceCell(changeScope);
+      const scopedSurfaceKeys = parseSurfaceKeys(changeScope);
+      const changeClassificationValid = allowedChangeClassifications.has(changeClassification) && scopedSurfaceKeys.length > 0;
       const externalEvidenceRequired =
         changeClassificationValid &&
         (changeClassification === "new or materially changed surface" || changeClassification === "high-impact or high-risk surface");
@@ -122,7 +123,7 @@ if (hasDesignState) {
           issue(
             "error",
             "design_room.reference_evidence_change_classification_invalid",
-            "A mutating or review-ready design/design.md must record an authored Change classification and Change scope. Use small token-preserving correction, new or materially changed surface, or high-impact or high-risk surface.",
+            "A mutating or review-ready design/design.md must record an authored Change classification and a comma-separated Change scope of stable surface keys. Use small token-preserving correction, new or materially changed surface, or high-impact or high-risk surface.",
             rel(args.root, contractPath),
           ),
         );
@@ -246,37 +247,53 @@ if (hasDesignState) {
             );
           }
         }
-        const highImpactSourcesBySurface = new Map<string, { category: string; surface: string; sources: Set<string> }>();
-        const scopedCategories = externalEvidenceRequired ? highImpactCategories(changeScope) : [];
-        if (changeClassification === "high-impact or high-risk surface" && scopedCategories.length === 0) scopedCategories.push("high impact");
+        const evidenceSourcesBySurface = new Map<string, Set<string>>();
+        const categoriesBySurface = new Map<string, Set<string>>();
         for (const row of authoredAdoptionRows) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
           const source = normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase();
           const surface = normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase();
-          const applicableCategories = highImpactCategories(`${surface} ${decision}`);
-          for (const category of applicableCategories) {
-            const key = `${category}\u0000${surface}`;
-            const entry = highImpactSourcesBySurface.get(key) ?? { category, surface, sources: new Set<string>() };
-            if (requiredEvidenceSources.has(source)) entry.sources.add(source);
-            highImpactSourcesBySurface.set(key, entry);
+          const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
+          if (requiredEvidenceSources.has(source)) sources.add(source);
+          evidenceSourcesBySurface.set(surface, sources);
+          const categories = categoriesBySurface.get(surface) ?? new Set<string>();
+          for (const category of highImpactCategories(`${surface} ${decision}`)) categories.add(category);
+          categoriesBySurface.set(surface, categories);
+        }
+        if (externalEvidenceRequired) {
+          for (const surface of scopedSurfaceKeys) {
+            const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
+            const routedSources = requiredSourcesForSurface(surface);
+            const missingRoutedSources = routedSources.filter((source) => !sources.has(source));
+            if (missingRoutedSources.length > 0) {
+              issues.push(
+                issue(
+                  "error",
+                  "design_room.reference_evidence_routed_sources_missing",
+                  `The scoped surface ${surface} needs complete evidence rows from its routed sources: ${missingRoutedSources.join(", ")}.`,
+                  rel(args.root, contractPath),
+                ),
+              );
+            }
+            const categories = categoriesBySurface.get(surface) ?? new Set<string>();
+            for (const category of highImpactCategories(surface)) categories.add(category);
+            if (changeClassification === "high-impact or high-risk surface" && categories.size === 0) categories.add("high impact");
+            categoriesBySurface.set(surface, categories);
           }
         }
-        for (const category of scopedCategories) {
-          if (![...highImpactSourcesBySurface.values()].some((entry) => entry.category === category)) {
-            const surface = changeScope.toLowerCase();
-            highImpactSourcesBySurface.set(`${category}\u0000${surface}`, { category, surface, sources: new Set<string>() });
-          }
-        }
-        for (const { category, surface, sources } of highImpactSourcesBySurface.values()) {
-          if (!hasComplementaryEvidence(category, sources)) {
-            issues.push(
-              issue(
-                "error",
-                "design_room.reference_evidence_high_impact_sources_missing",
-                `The ${category} design decision for ${surface} needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps. AI trust decisions need catalogue.projectsbyif.com plus a craft or validation source. Core-loop decisions need UXSnaps plus a craft or validation source.`,
-                rel(args.root, contractPath),
-              ),
-            );
+        for (const [surface, categories] of categoriesBySurface) {
+          const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
+          for (const category of categories) {
+            if (!hasComplementaryEvidence(category, sources)) {
+              issues.push(
+                issue(
+                  "error",
+                  "design_room.reference_evidence_high_impact_sources_missing",
+                  `The ${category} design decision for ${surface} needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps. AI trust decisions need catalogue.projectsbyif.com plus a craft or validation source. Core-loop decisions need UXSnaps plus a craft or validation source.`,
+                  rel(args.root, contractPath),
+                ),
+              );
+            }
           }
         }
       }
@@ -555,6 +572,28 @@ function highImpactCategories(value: string): string[] {
   if (/\b(?:ai|consent|authentication|permissions?)\b|\bsensitive[- ]data\b/i.test(value)) categories.push("AI trust");
   if (/\bstore\b.*\bfirst[- ]frames?\b|\bfirst[- ]frames?\b.*\bstore\b/i.test(value)) categories.push("store first frame");
   return categories;
+}
+
+function parseSurfaceKeys(value: string): string[] {
+  const keys = value
+    .split(",")
+    .map((entry) => normalizedCell(entry).toLowerCase())
+    .filter((entry) => entry.length > 0);
+  return keys.length > 0 && keys.every((entry) => /^[a-z0-9]+(?:[.-][a-z0-9]+)+$/.test(entry)) ? [...new Set(keys)] : [];
+}
+
+function requiredSourcesForSurface(surface: string): string[] {
+  const sources = new Set<string>();
+  if (/\b(?:motion|gesture|transition|loading)\b/i.test(surface)) sources.add("60fps.design");
+  if (/\b(?:ai|consent|authentication|permissions?|sensitive[-.]data)\b/i.test(surface)) sources.add("catalogue.projectsbyif.com");
+  if (/\b(?:onboarding|paywall|checkout|retention|referral)\b/i.test(surface)) {
+    sources.add("abtest.design");
+    sources.add("uxsnaps");
+  }
+  if (/\bcore[-.]loop\b|\bcore[-.]journey\b|\binformation[-.]hierarchy\b/i.test(surface)) sources.add("uxsnaps");
+  if (/\b(?:delight|success|empty[-.]state|magical[-.]moment)\b/i.test(surface)) sources.add("design spells");
+  if (/\b(?:standard|control|overlay|input|notification|component)\b/i.test(surface)) sources.add("ui playbook");
+  return [...sources];
 }
 
 function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {

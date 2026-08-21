@@ -402,7 +402,7 @@ export function register(h: Harness): void {
     const contractPath = path.join(designRoomHighImpactWithoutEvidence, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
-      .replace("Change scope: Not defined", "Change scope: Paywall")
+      .replace("Change scope: Not defined", "Change scope: paywall.primary")
       .replaceAll("| Not reviewed |", "| not applicable |");
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -424,7 +424,7 @@ export function register(h: Harness): void {
     const contractPath = path.join(designRoomSmallCorrectionWithoutEvidence, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
-      .replace("Change scope: Not defined", "Change scope: Success-state color token")
+      .replace("Change scope: Not defined", "Change scope: success.color-token")
       .replaceAll("| Not reviewed |", "| not applicable |");
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -668,7 +668,7 @@ export function register(h: Harness): void {
     const contractPath = path.join(designRoomCoreLoopWithoutUxSnaps, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
-      .replace("Change scope: Not defined", "Change scope: Core loop")
+      .replace("Change scope: Not defined", "Change scope: core-loop.primary")
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Core-loop motion proof is needed. | state transition | 2026-08-20 |")
       .replace(
@@ -859,7 +859,7 @@ export function register(h: Harness): void {
     const contractPath = path.join(designRoomSameSurfaceDifferentPaths, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
-      .replace("Change scope: Not defined", "Change scope: Onboarding")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary")
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Onboarding proof is needed. | first value | 2026-08-20 |")
       .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Journey proof is needed. | onboarding order | 2026-08-20 |")
@@ -890,7 +890,7 @@ export function register(h: Harness): void {
     const contractPath = path.join(designRoomMultiSurfaceScope, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
-      .replace("Change scope: Not defined", "Change scope: Onboarding and paywall")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary, paywall.primary")
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Transition proof is needed. | first value | 2026-08-20 |")
       .replace(
@@ -907,6 +907,61 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
+  const designRoomMotionWrongSource = makeFixture("design-room-reference-evidence-motion-wrong-source");
+  {
+    const statePath = path.join(designRoomMotionWrongSource, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomMotionWrongSource, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: motion.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Motion journey proof is needed. | transition | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Result transition | UXSnaps | The journey preserves context. | Adopt | Preserve the destination. | surfaces.mobileApp.result | Journey review | motion.primary |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "ordinary motion work requires its routed 60fps.design source",
+    designRoomMotionWrongSource,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomScopedSurfaceMismatch = makeFixture("design-room-reference-evidence-scoped-surface-mismatch");
+  {
+    const statePath = path.join(designRoomScopedSurfaceMismatch, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomScopedSurfaceMismatch, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
+      .replace("Change scope: Not defined", "Change scope: paywall.upgrade")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Paywall proof is needed. | offer framing | 2026-08-20 |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Paywall journey proof is needed. | upgrade flow | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Initial paywall | abtest.design | Offer framing supplies a hypothesis. | Adopt | Test the initial offer. | surfaces.mobileApp.paywalls.initial | Conversion experiment | paywall.initial |\n| Initial paywall | UXSnaps | The journey preserves context. | Adopt | Preserve the offer origin. | surfaces.mobileApp.paywalls.initial | Journey review | paywall.initial |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "scoped paywall work cannot use evidence from a different paywall key",
+    designRoomScopedSurfaceMismatch,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
   const designRoomSameCategorySeparateSurfaces = makeFixture("design-room-reference-evidence-same-category-separate-surfaces");
   {
     const statePath = path.join(designRoomSameCategorySeparateSurfaces, "studio/seed/business.json");
@@ -917,7 +972,7 @@ export function register(h: Harness): void {
     const contractPath = path.join(designRoomSameCategorySeparateSurfaces, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
-      .replace("Change scope: Not defined", "Change scope: Paywall")
+      .replace("Change scope: Not defined", "Change scope: paywall.initial, paywall.upgrade")
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| abtest\.design \|.*$/m, "| abtest.design | required | Paywall proof is needed. | offer framing | 2026-08-20 |")
       .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | Paywall journey proof is needed. | upgrade flow | 2026-08-20 |")
