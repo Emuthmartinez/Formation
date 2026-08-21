@@ -108,9 +108,25 @@ if (hasDesignState) {
     if (evidenceBody !== undefined) {
       const requiredSources = ["60fps.design", "catalogue.projectsbyif.com", "abtest.design", "Design Spells", "UXSnaps", "UI Playbook"];
       const tables = markdownTables(evidenceBody);
-      const triageTable = tables.find((table) => tableHasHeaders(table, ["Source", "Status", "Why", "Query or pattern", "Evidence date"]));
+      const triageHeaders = ["Source", "Status", "Why", "Query or pattern", "Evidence date"];
+      const triageTable = tables.find((table) => tableHasHeaders(table, triageHeaders));
       const adoptionHeaders = ["Surface or decision", "Source", "Observation", "Adopt or reject", "Adaptation", "State path", "Validation"];
       const adoptionTable = tables.find((table) => tableHasHeaders(table, adoptionHeaders));
+      for (const [name, table, headers] of [
+        ["source triage", triageTable, triageHeaders],
+        ["adoption", adoptionTable, adoptionHeaders],
+      ] as const) {
+        if (table === undefined) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_table_invalid",
+              `design/design.md's Reference Evidence ${name} table must have these headers: ${headers.join(", ")}.`,
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+      }
       const requiredEvidenceSources = new Set<string>();
       for (const source of requiredSources) {
         const sourceRow = triageTable?.rows.find((row) => normalizedCell(row[triageTable.headers.indexOf("source")]).toLowerCase() === source.toLowerCase());
@@ -153,31 +169,6 @@ if (hasDesignState) {
               ),
             );
           }
-        }
-      }
-      const requiredFields = [
-        "Source",
-        "Status",
-        "Why",
-        "Query or pattern",
-        "Evidence date",
-        "Surface or decision",
-        "Observation",
-        "Adopt or reject",
-        "Adaptation",
-        "State path",
-        "Validation",
-      ];
-      for (const field of requiredFields) {
-        if (!evidenceBody.includes(field)) {
-          issues.push(
-            issue(
-              "error",
-              "design_room.reference_evidence_field_missing",
-              `design/design.md's Reference Evidence section must include the field: ${field}.`,
-              rel(args.root, contractPath),
-            ),
-          );
         }
       }
       if (evidenceRequired) {

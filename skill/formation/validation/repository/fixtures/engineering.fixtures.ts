@@ -355,6 +355,27 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_status_invalid",
   );
 
+  const designRoomAdoptionHeaderMissing = makeFixture("design-room-reference-evidence-adoption-header-missing");
+  {
+    const statePath = path.join(designRoomAdoptionHeaderMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomAdoptionHeaderMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace("| Surface or decision | Source | Observation |", "| Surface or decision | Evidence source | Observation |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "Reference Evidence validates adoption headers against the adoption table",
+    designRoomAdoptionHeaderMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_table_invalid",
+  );
+
   const designRoomMutatingEvidenceUnreviewed = makeFixture("design-room-mutating-reference-evidence-unreviewed");
   {
     const statePath = path.join(designRoomMutatingEvidenceUnreviewed, "studio/seed/business.json");

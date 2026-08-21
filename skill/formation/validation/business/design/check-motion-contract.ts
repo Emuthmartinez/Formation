@@ -186,6 +186,8 @@ function markdownTable(body: string, requiredHeaders: string[]): { headers: stri
   for (let index = 0; index < lines.length - 1; index += 1) {
     const headers = parseMarkdownRow(lines[index]!);
     if (!requiredHeaders.every((header) => headers.includes(header))) continue;
+    const separator = parseMarkdownRow(lines[index + 1]!);
+    if (separator.length !== headers.length || !separator.every((cell) => /^:?-{3,}:?$/.test(cell.trim()))) return undefined;
     const rows: string[][] = [];
     for (let rowIndex = index + 2; rowIndex < lines.length; rowIndex += 1) rows.push(parseMarkdownRow(lines[rowIndex]!));
     return { headers, rows };
