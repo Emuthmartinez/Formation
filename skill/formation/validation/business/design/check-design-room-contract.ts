@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { getToken, loadDesignState, parseDesignCliArgs, rel, summarizeSurfaces } from "../../../tooling/lib/design-state.js";
+import { getToken, loadDesignState, parseDesignCliArgs, rel, skillRoot, summarizeSurfaces } from "../../../tooling/lib/design-state.js";
 import { collectAllFiles, issue, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
 import { asArray, asString, isRecord } from "../../../tooling/lib/launch-state.js";
 
@@ -41,6 +41,8 @@ if (hasDesignState) {
   const designRoom = loaded.state && isRecord(loaded.state) && isRecord(loaded.state.designRoom) ? loaded.state.designRoom : {};
   const status = asString(designRoom.status);
   const reviewReady = status === "rendered" || status === "baselined";
+  const isPackagedStarter = path.resolve(args.root) === path.resolve(skillRoot, "workspace/business");
+  const evidenceRequired = reviewReady || (status === "mutating" && !isPackagedStarter);
 
   const contractPath = path.join(args.root, "design/design.md");
   if (!existsSync(contractPath)) {
@@ -123,7 +125,7 @@ if (hasDesignState) {
           );
           continue;
         }
-        if (reviewReady) {
+        if (evidenceRequired) {
           const statusCell = normalizedCell(sourceRow[triageTable!.headers.indexOf("status")]).toLowerCase();
           if (statusCell === "required") requiredEvidenceSources.add(source.toLowerCase());
           if (!["required", "not applicable", "unavailable"].includes(statusCell)) {
@@ -178,7 +180,7 @@ if (hasDesignState) {
           );
         }
       }
-      if (reviewReady) {
+      if (evidenceRequired) {
         const declaredAdoptionRows = adoptionTable?.rows.filter((row) => row.some((cell) => isAuthoredEvidenceCell(normalizedCell(cell)))) ?? [];
         const authoredAdoptionRows = declaredAdoptionRows.filter((row) => {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("adopt or reject")]);
@@ -238,7 +240,7 @@ if (hasDesignState) {
               issue(
                 "error",
                 "design_room.reference_evidence_high_impact_sources_missing",
-                `The ${category} design decision needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps.`,
+                `The ${category} design decision needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps. AI trust decisions need catalogue.projectsbyif.com plus a craft or validation source.`,
                 rel(args.root, contractPath),
               ),
             );
@@ -525,8 +527,11 @@ function hasComplementaryEvidence(category: string, sources: Set<string>): boole
   if (["onboarding", "paywall", "checkout", "retention", "referral"].includes(category)) {
     return sources.has("abtest.design") && sources.has("uxsnaps");
   }
-  const behaviorOrStructure = ["catalogue.projectsbyif.com", "uxsnaps"];
   const craftOrValidation = ["60fps.design", "abtest.design", "design spells", "ui playbook"];
+  if (category === "AI trust") {
+    return sources.has("catalogue.projectsbyif.com") && craftOrValidation.some((source) => sources.has(source));
+  }
+  const behaviorOrStructure = ["catalogue.projectsbyif.com", "uxsnaps"];
   return behaviorOrStructure.some((source) => sources.has(source)) && craftOrValidation.some((source) => sources.has(source));
 }
 

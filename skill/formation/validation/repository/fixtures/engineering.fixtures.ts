@@ -355,6 +355,22 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_status_invalid",
   );
 
+  const designRoomMutatingEvidenceUnreviewed = makeFixture("design-room-mutating-reference-evidence-unreviewed");
+  {
+    const statePath = path.join(designRoomMutatingEvidenceUnreviewed, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "mutating";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+  }
+  runFixture(
+    "an active mutating Design Room validates evidence before mutation",
+    designRoomMutatingEvidenceUnreviewed,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_status_invalid",
+  );
+
   const designRoomEvidenceRequiredIncomplete = makeFixture("design-room-reference-evidence-required-incomplete");
   {
     const statePath = path.join(designRoomEvidenceRequiredIncomplete, "studio/seed/business.json");
@@ -543,6 +559,32 @@ export function register(h: Harness): void {
   runFixture(
     "two craft sources do not satisfy complementary onboarding evidence",
     designRoomHighImpactSameLane,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
+  const designRoomAiTrustWithoutIf = makeFixture("design-room-reference-evidence-ai-trust-without-if");
+  {
+    const statePath = path.join(designRoomAiTrustWithoutIf, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomAiTrustWithoutIf, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | required | AI trust flow proof is needed. | consent recovery | 2026-08-20 |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | AI trust craft proof is needed. | consent feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| AI trust decision | UXSnaps | A recovery flow preserves context. | Adopt | Keep the recovery path explicit. | designRoom.surfaces.core | Scenario review |\n| AI trust decision | Design Spells | Feedback makes the state change visible. | Adopt | Use restrained product feedback. | designRoom.surfaces.core | Audience review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "AI trust evidence requires the IF Design Patterns Catalogue plus a complementary source",
+    designRoomAiTrustWithoutIf,
     "check-design-room-contract.ts",
     1,
     "design_room.reference_evidence_high_impact_sources_missing",
