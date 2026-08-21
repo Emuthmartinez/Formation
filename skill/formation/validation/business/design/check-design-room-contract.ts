@@ -236,7 +236,7 @@ if (hasDesignState) {
               issue(
                 "error",
                 "design_room.reference_evidence_high_impact_sources_missing",
-                `The high-impact ${category} surface needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding and paywall decisions need abtest.design plus UXSnaps.`,
+                `The ${category} design decision needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding, paywall, checkout, retention, and referral decisions need abtest.design plus UXSnaps.`,
                 rel(args.root, contractPath),
               ),
             );
@@ -510,6 +510,9 @@ function isValidEvidenceDate(value: string): boolean {
 function highImpactCategory(value: string): string | undefined {
   if (/\bonboarding\b/i.test(value)) return "onboarding";
   if (/\bpaywall\b/i.test(value)) return "paywall";
+  if (/\bcheckout\b/i.test(value)) return "checkout";
+  if (/\bretention\b/i.test(value)) return "retention";
+  if (/\breferral\b/i.test(value)) return "referral";
   if (/\bcore[- ]loop\b/i.test(value)) return "core loop";
   if (/\bai[- ]trust\b/i.test(value)) return "AI trust";
   if (/\bstore\b.*\bfirst[- ]frames?\b|\bfirst[- ]frames?\b.*\bstore\b/i.test(value)) return "store first frame";
@@ -517,7 +520,7 @@ function highImpactCategory(value: string): string | undefined {
 }
 
 function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {
-  if (category === "onboarding" || category === "paywall") {
+  if (["onboarding", "paywall", "checkout", "retention", "referral"].includes(category)) {
     return sources.has("abtest.design") && sources.has("uxsnaps");
   }
   const behaviorOrStructure = ["catalogue.projectsbyif.com", "uxsnaps"];
