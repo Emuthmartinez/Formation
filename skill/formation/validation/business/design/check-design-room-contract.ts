@@ -661,9 +661,10 @@ function requiredSourcesForSurface(surface: string): string[] {
 
 function isTrustSurface(value: string): boolean {
   return (
-    /\b(?:ai|automations?|trust|security|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|register|registrations?|passwords?|permissions?|data[-. ]access(?:es)?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
+    /\b(?:ai|automations?|trust|security|consents?|auth|authentications?|log[-.]?ins?|log[-.]?outs?|sign[-.]?in|sign[-.]?up|passwords?|permissions?|data[-. ]access(?:es)?|sensitive[-.]data|user[-.]controls?|takeovers?|recover(?:y|ies)|agenc(?:y|ies))\b/i.test(
       value,
-    ) || /\b(?:sessions?[. -]management|management[. -]sessions?)\b/i.test(value)
+    ) ||
+    /\b(?:sessions?[. -]management|management[. -]sessions?|accounts?[. -](?:register|registrations?)|(?:register|registrations?)[. -]accounts?)\b/i.test(value)
   );
 }
 

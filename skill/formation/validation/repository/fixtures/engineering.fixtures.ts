@@ -1285,6 +1285,7 @@ export function register(h: Harness): void {
 
   for (const [scope, decision] of [
     ["account.recovery", "Account recovery"],
+    ["account.registration", "Account registration"],
     ["auth.session", "Authentication session"],
     ["automation.takeover", "Automation takeover"],
     ["security.access", "Security access"],
@@ -1318,35 +1319,35 @@ export function register(h: Harness): void {
     );
   }
 
-  const designRoomOrdinarySession = makeFixture("design-room-reference-evidence-ordinary-session");
-  {
-    const statePath = path.join(designRoomOrdinarySession, "studio/seed/business.json");
+  for (const ordinaryScope of ["workout.session", "event.registration", "class.register"] as const) {
+    const designRoomOrdinaryLifecycle = makeFixture(`design-room-reference-evidence-ordinary-${ordinaryScope.replaceAll(".", "-")}`);
+    const statePath = path.join(designRoomOrdinaryLifecycle, "studio/seed/business.json");
     const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
     const designRoom = expectRecord(designState["designRoom"], "designRoom");
     designRoom["status"] = "rendered";
     writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
-    const contractPath = path.join(designRoomOrdinarySession, "design/design.md");
+    const contractPath = path.join(designRoomOrdinaryLifecycle, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
-      .replace("Change scope: Not defined", "Change scope: workout.session")
+      .replace("Change scope: Not defined", `Change scope: ${ordinaryScope}`)
       .replaceAll("| Not reviewed |", "| not applicable |")
       .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Workout component proof is needed. | workout summary | 2026-08-20 |")
       .replace(
         "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
-        "| Workout session | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation control tokens. | surfaces.mobileApp.workout | Device review | workout.session |",
+        `| Ordinary product surface | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation control tokens. | surfaces.mobileApp.product | Device review | ${ordinaryScope} |`,
       );
     writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${ordinaryScope} is not routed as authentication evidence`,
+      designRoomOrdinaryLifecycle,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.contract_placeholder",
+      [],
+      undefined,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
   }
-  runFixture(
-    "an ordinary product session is not routed as authentication evidence",
-    designRoomOrdinarySession,
-    "check-design-room-contract.ts",
-    1,
-    "design_room.contract_placeholder",
-    [],
-    undefined,
-    "design_room.reference_evidence_routed_sources_missing",
-  );
 
   for (const [scope, decision] of [
     ["engagement.streak", "Engagement streak"],
