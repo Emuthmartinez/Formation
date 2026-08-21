@@ -53,6 +53,28 @@ export function isNodeDispatchAdmissible(node: CompiledRunNode, run: RunStateDoc
   return isNodeAuthorized(node, run, businessState, evaluator);
 }
 
+/** Consumers whose scoped dependency refresh could be admitted without mutating run state. */
+export function refreshAdmissibleConsumerIds(
+  plan: CompiledPlan,
+  run: RunStateDocument,
+  businessState: BusinessStateV2,
+  evaluator: AutonomyEvaluator,
+): Set<RunNodeId> {
+  return new Set(
+    plan.nodes
+      .filter((node) => {
+        const state = run.nodes[node.id];
+        if (!state || !READY_ELIGIBLE_STATUSES.includes(state.status)) return false;
+        if (!isNodeAuthorized(node, run, businessState, evaluator)) return false;
+        return node.refreshDependencies.every((refresh) => {
+          const dependency = plan.nodes.find((candidate) => candidate.id === refresh.nodeId);
+          return Boolean(dependency && isNodeDispatchAdmissible(dependency, run, businessState, evaluator));
+        });
+      })
+      .map((node) => node.id),
+  );
+}
+
 /**
  * Readiness = deps succeeded + inputs accepted + state predicates pass + autonomy evaluator
  * allows + (if approvals are required) they're all approved. Order matches the run-node

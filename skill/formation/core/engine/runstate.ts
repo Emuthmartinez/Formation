@@ -514,10 +514,23 @@ export function refreshDependenciesBeforeFrontier(
 
 /** Keep a failed scoped refresh unaccepted and retry-eligible for a later authorized session. */
 export function deferDependencyRefreshAfterFailure(plan: CompiledPlan, run: RunStateDocument, dependencyId: RunNodeId, now: string): boolean {
+  const dependencyNode = plan.nodes.find((node) => node.id === dependencyId);
   const dependency = run.nodes[dependencyId];
-  if (!plan.nodes.some((node) => node.id === dependencyId) || !dependency?.refreshInstructions?.length) return false;
-  dependency.status = "stale";
-  dependency.blocker = undefined;
+  if (!dependencyNode || !dependency?.refreshInstructions?.length) return false;
+  const exhausted = dependency.attempts.length >= dependencyNode.maxAttempts;
+  dependency.status = exhausted ? "blocked" : "stale";
+  dependency.blocker = exhausted ? "Scoped refresh failed after the final available attempt." : undefined;
+  if (exhausted) {
+    dependency.refreshInstructions = undefined;
+    for (const consumerNode of plan.nodes) {
+      if (!consumerNode.refreshDependencies.some((refresh) => refresh.nodeId === dependencyId)) continue;
+      const consumer = run.nodes[consumerNode.id];
+      if (!consumer?.dependencyRefreshCycles?.some((cycle) => cycle.startsWith(`${dependencyId}@`))) continue;
+      consumer.dependencyRefreshCycles = consumer.dependencyRefreshCycles.filter((cycle) => !cycle.startsWith(`${dependencyId}@`));
+      consumer.status = "blocked";
+      consumer.blocker = `Required refresh unavailable: "${dependencyNode.title}" exhausted its attempts.`;
+    }
+  }
   run.updatedAt = now;
   return true;
 }

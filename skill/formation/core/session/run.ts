@@ -12,7 +12,7 @@ import type { PatchOp, PatchPath, StatePatch } from "../reducer/patch.js";
 import { validateBudgetLedger, validateBusinessState, validateControl } from "../schema/index.js";
 import { grantableDomainIds, type BudgetLedgerDocument, type BusinessStateV2, type ControlFile, type RunStateDocument } from "../schema/types.js";
 import { compilePlan, type CatalogInput, type CompiledPlan, type CompiledRunNode, type RunNodeId } from "../engine/compile.js";
-import { computeFrontier, isNodeAuthorized, isNodeDispatchAdmissible } from "../engine/frontier.js";
+import { computeFrontier, refreshAdmissibleConsumerIds } from "../engine/frontier.js";
 import { observeAppSourceFingerprint } from "../engine/source-fingerprint.js";
 import { buildDispatchBatches, checkBatchBoundary, type BatchHaltReason, type DispatchHooks } from "../engine/dispatch.js";
 import {
@@ -844,20 +844,13 @@ async function main(): Promise<number> {
       }
       applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const activeScopeHints = brief?.scopeHints;
-      const scopedRefreshConsumers = new Set(
-        plan.nodes
-          .filter((node) => !activeScopeHints?.length || nodeInScope(activeScopeHints, node.domainId, node.workflowId))
-          .filter((node) => {
-            const state = run.nodes[node.id];
-            if (!state || !["pending", "ready", "stale"].includes(state.status)) return false;
-            if (!isNodeAuthorized(node, run, businessState, captured)) return false;
-            return node.refreshDependencies.every((refresh) => {
-              const dependency = plan.nodes.find((candidate) => candidate.id === refresh.nodeId);
-              return Boolean(dependency && isNodeDispatchAdmissible(dependency, run, businessState, captured));
-            });
-          })
-          .map((node) => node.id),
-      );
+      const scopedRefreshConsumers = refreshAdmissibleConsumerIds(plan, run, businessState, captured);
+      if (activeScopeHints?.length) {
+        for (const consumerId of [...scopedRefreshConsumers]) {
+          const node = plan.nodes.find((candidate) => candidate.id === consumerId)!;
+          if (!nodeInScope(activeScopeHints, node.domainId, node.workflowId)) scopedRefreshConsumers.delete(consumerId);
+        }
+      }
       if (scopedRefreshConsumers && failedScopedRefreshDependencyIds.size > 0) {
         for (const consumerId of [...scopedRefreshConsumers]) {
           const consumerNode = plan.nodes.find((node) => node.id === consumerId);

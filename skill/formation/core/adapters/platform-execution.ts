@@ -5,8 +5,8 @@ import path from "node:path";
 import { isMainModule, parseArgs } from "../lib/cli.js";
 import { compilePlan, type CompiledPlan, type CompiledRunNode, type CostEstimate, type VerificationKind } from "../engine/compile.js";
 import { composeNodeBrief, type NodeBrief } from "../engine/node-brief.js";
-import { computeFrontier } from "../engine/frontier.js";
-import { loadRunState, seedRunState } from "../engine/runstate.js";
+import { computeFrontier, refreshAdmissibleConsumerIds } from "../engine/frontier.js";
+import { loadRunState, refreshDependenciesBeforeFrontier, seedRunState } from "../engine/runstate.js";
 import { createAutonomyEvaluator, type AutonomyDecisionDetail, type AutonomyEvaluatorV2 } from "../autonomy/evaluator.js";
 import { createCompositeVerifier } from "../autonomy/prerequisites.js";
 import { createDopplerAuthVerifier } from "../autonomy/probes/doppler.js";
@@ -575,6 +575,7 @@ export function describeWorkspace(
 
   // Same no-write guarantee as the planner: the frontier pass edits a clone that is dropped.
   const scratch: RunStateDocument = structuredClone(run);
+  refreshDependenciesBeforeFrontier(plan, scratch, now, refreshAdmissibleConsumerIds(plan, scratch, businessState, evaluator));
   const frontier = computeFrontier(plan, scratch, businessState, evaluator);
   const parked = new Map(frontier.parked.map((entry) => [entry.nodeId, entry.reason]));
   const report = buildPlanReport(plan, scratch, frontier.ready, parked, decisions, 4, control === undefined);

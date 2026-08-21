@@ -488,6 +488,23 @@ export function register(harness: Harness): void {
       "consumer budget exhaustion must preserve the dependency's accepted proof",
     );
     assert(exhaustedConsumer.status === "blocked", "an exhausted refresh consumer must park explicitly");
+
+    const { run: finalFailureRun } = seedFor(["research"], exhaustedPlan);
+    const finalDependency = finalFailureRun.nodes[researchId]!;
+    for (let index = 0; index < exhaustedNode.maxAttempts - 1; index += 1) {
+      const prior = beginAttempt(exhaustedPlan, finalFailureRun, researchId, `session-prior-refresh-${index}`, plusSeconds(now, index));
+      prior.status = "succeeded";
+      finalDependency.status = "succeeded";
+    }
+    assert(
+      refreshDependenciesBeforeFrontier(exhaustedPlan, finalFailureRun, plusSeconds(now, 6)).includes(researchId),
+      "one remaining dependency attempt may be admitted",
+    );
+    const finalAttempt = beginAttempt(exhaustedPlan, finalFailureRun, researchId, "session-final-refresh", plusSeconds(now, 7));
+    finalAttempt.status = "failed";
+    deferDependencyRefreshAfterFailure(exhaustedPlan, finalFailureRun, researchId, plusSeconds(now, 8));
+    assert(finalDependency.status === "blocked", "a failed final refresh attempt must not remain falsely retry-eligible");
+    assert(finalFailureRun.nodes[productId]!.status === "blocked", "the requesting consumer must park when its refresh exhausts the dependency");
   });
 
   harness.check("runstate: refreshed output fingerprints still invalidate already-succeeded descendants when content changes", () => {
