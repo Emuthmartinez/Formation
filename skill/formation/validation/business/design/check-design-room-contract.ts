@@ -668,7 +668,7 @@ function requiredSourcesForSurface(surface: string): string[] {
     sources.add("design spells");
   }
   if (
-    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|text[. -]?fields?|selects?|pickers?|menus?|tabs?|sheets?)\b/i.test(
+    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|checkboxes?|radios?|text[. -]?fields?|selects?|pickers?|menus?|tabs?|sheets?)\b/i.test(
       surface,
     )
   ) {
@@ -690,7 +690,7 @@ function isTrustSurface(value: string): boolean {
 
 function isAcceptedFallbackSource(routedSource: string, evidenceSource: string): boolean {
   const target = evidenceSourceTarget(evidenceSource);
-  if (isOfficialPlatformGuidance(target)) return true;
+  if (routedSource === "ui playbook" && isOfficialPlatformGuidance(target)) return true;
   if (routedSource === "60fps.design") {
     return isKnownDoctrineFallback(target, ["motion-craft-benchmarks.md"]);
   }
