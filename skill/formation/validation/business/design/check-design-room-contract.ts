@@ -24,6 +24,9 @@ if (designArtifacts.length > 0 && !hasDesignState) {
 if (hasDesignState) {
   const loaded = loadDesignState(args);
   issues.push(...loaded.issues);
+  const designRoom = loaded.state && isRecord(loaded.state) && isRecord(loaded.state.designRoom) ? loaded.state.designRoom : {};
+  const status = asString(designRoom.status);
+  const reviewReady = status === "rendered" || status === "baselined";
 
   const contractPath = path.join(args.root, "design/design.md");
   if (!existsSync(contractPath)) {
@@ -107,8 +110,13 @@ if (hasDesignState) {
     const evidenceBody = sectionBody(contract, "Reference Evidence");
     if (evidenceBody !== undefined) {
       const requiredSources = ["60fps.design", "catalogue.projectsbyif.com", "abtest.design", "Design Spells", "UXSnaps", "UI Playbook"];
+      const tables = markdownTables(evidenceBody);
+      const triageTable = tables.find((table) => tableHasHeaders(table, ["Source", "Status", "Why", "Query or pattern", "Evidence date"]));
+      const adoptionHeaders = ["Surface or decision", "Source", "Observation", "Adopt or reject", "Adaptation", "State path", "Validation"];
+      const adoptionTable = tables.find((table) => tableHasHeaders(table, adoptionHeaders));
       for (const source of requiredSources) {
-        if (!evidenceBody.includes(source)) {
+        const sourceRow = triageTable?.rows.find((row) => normalizedCell(row[triageTable.headers.indexOf("source")]).toLowerCase() === source.toLowerCase());
+        if (!sourceRow) {
           issues.push(
             issue(
               "error",
@@ -117,6 +125,35 @@ if (hasDesignState) {
               rel(args.root, contractPath),
             ),
           );
+          continue;
+        }
+        if (reviewReady) {
+          const statusCell = normalizedCell(sourceRow[triageTable!.headers.indexOf("status")]).toLowerCase();
+          if (!["required", "not applicable", "unavailable"].includes(statusCell)) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.reference_evidence_status_invalid",
+                `design/design.md must give ${source} one authored status: required, not applicable, or unavailable.`,
+                rel(args.root, contractPath),
+              ),
+            );
+          }
+          const why = normalizedCell(sourceRow[triageTable!.headers.indexOf("why")]);
+          const query = normalizedCell(sourceRow[triageTable!.headers.indexOf("query or pattern")]);
+          const evidenceDate = normalizedCell(sourceRow[triageTable!.headers.indexOf("evidence date")]);
+          const missingReason = !isAuthoredEvidenceCell(why);
+          const missingRequiredEvidence = statusCell === "required" && (!isAuthoredEvidenceCell(query) || !/^\d{4}-\d{2}-\d{2}$/.test(evidenceDate));
+          if (missingReason || missingRequiredEvidence) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.reference_evidence_triage_incomplete",
+                `design/design.md must give ${source} a reason. A required source also needs a query or pattern and an ISO evidence date.`,
+                rel(args.root, contractPath),
+              ),
+            );
+          }
         }
       }
       const requiredFields = [
@@ -144,11 +181,29 @@ if (hasDesignState) {
           );
         }
       }
+      if (reviewReady) {
+        const authoredAdoptionRows =
+          adoptionTable?.rows.filter((row) => {
+            const decision = normalizedCell(row[adoptionTable.headers.indexOf("adopt or reject")]);
+            return (
+              adoptionHeaders.every((header) => isAuthoredEvidenceCell(normalizedCell(row[adoptionTable.headers.indexOf(header.toLowerCase())]))) &&
+              /^(adopt|reject)\b/i.test(decision)
+            );
+          }) ?? [];
+        if (authoredAdoptionRows.length === 0) {
+          issues.push(
+            issue(
+              "error",
+              "design_room.reference_evidence_adoption_missing",
+              "A review-ready design/design.md needs at least one complete adopted-or-rejected evidence row with an adaptation, state path, and validation method.",
+              rel(args.root, contractPath),
+            ),
+          );
+        }
+      }
     }
 
-    const designRoom = loaded.state && isRecord(loaded.state) && isRecord(loaded.state.designRoom) ? loaded.state.designRoom : {};
-    const status = asString(designRoom.status);
-    if ((status === "rendered" || status === "baselined") && containsTemplatePlaceholder(contract)) {
+    if (reviewReady && containsTemplatePlaceholder(contract)) {
       issues.push(
         issue(
           "error",
@@ -309,25 +364,72 @@ for (const artifact of designArtifacts) {
 reportAndExit("Design Room contract validation", issues);
 
 /**
- * Full body of an H2 section: heading line to the next
- * H2 or end of file. Line-based on purpose — a lazy regex with the m flag lets
+ * Full body of an H2 or H3 section: heading line to the next heading at the
+ * same or a higher level, or end of file. Line-based on purpose — a lazy regex with the m flag lets
  * `$` match the first line end, silently truncating the body to one line.
  */
 function sectionBody(contract: string, section: string): string | undefined {
   const lines = contract.split("\n");
-  const pattern = new RegExp(`^##\\s+${escapeRegExp(section)}\\s*$`);
+  const pattern = new RegExp(`^(#{2,3})\\s+${escapeRegExp(section)}\\s*$`, "i");
   const start = lines.findIndex((line) => pattern.test(line.trim()));
   if (start === -1) {
     return undefined;
   }
+  const startMatch = lines[start]!.trim().match(pattern)!;
+  const depth = startMatch[1]!.length;
   let end = lines.length;
   for (let index = start + 1; index < lines.length; index += 1) {
-    if (/^##\s/.test(lines[index] ?? "")) {
+    const heading = (lines[index] ?? "").trim().match(/^(#{2,6})\s+/);
+    if (heading && heading[1]!.length <= depth) {
       end = index;
       break;
     }
   }
   return lines.slice(start + 1, end).join("\n");
+}
+
+type MarkdownTable = { headers: string[]; rows: string[][] };
+
+function markdownTables(body: string): MarkdownTable[] {
+  const tables: MarkdownTable[] = [];
+  let block: string[] = [];
+  const flush = (): void => {
+    if (block.length >= 2) {
+      const parsed = block.map(parseMarkdownRow);
+      const headers = parsed[0]!.map((cell) => normalizedCell(cell).toLowerCase());
+      const separator = parsed[1] ?? [];
+      if (separator.length === headers.length && separator.every((cell) => /^:?-{3,}:?$/.test(normalizedCell(cell)))) {
+        tables.push({ headers, rows: parsed.slice(2).filter((row) => row.some((cell) => normalizedCell(cell).length > 0)) });
+      }
+    }
+    block = [];
+  };
+  for (const line of body.split("\n")) {
+    if (line.trim().startsWith("|")) block.push(line.trim());
+    else flush();
+  }
+  flush();
+  return tables;
+}
+
+function parseMarkdownRow(line: string): string[] {
+  return line
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function tableHasHeaders(table: MarkdownTable, required: string[]): boolean {
+  return required.every((header) => table.headers.includes(header.toLowerCase()));
+}
+
+function normalizedCell(value: string | undefined): string {
+  return (value ?? "").replace(/`/g, "").replace(/\s+/g, " ").trim();
+}
+
+function isAuthoredEvidenceCell(value: string): boolean {
+  return value.length > 0 && !containsTemplatePlaceholder(value) && !/^not reviewed$/i.test(value);
 }
 
 function containsTemplatePlaceholder(value: string): boolean {

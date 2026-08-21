@@ -315,6 +315,78 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_source_missing",
   );
 
+  const designRoomEvidenceHeadingVariant = makeFixture("design-room-reference-evidence-heading-variant");
+  {
+    const contractPath = path.join(designRoomEvidenceHeadingVariant, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("## Reference Evidence", "### reference evidence")
+      .replace(/^\| UI Playbook \|.*$/m, "| Component reference omitted | Not reviewed | Not defined | Not defined | Not recorded |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "case-insensitive H3 Reference Evidence still validates source rows",
+    designRoomEvidenceHeadingVariant,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_source_missing",
+  );
+
+  const designRoomEvidenceStatusesUnreviewed = makeFixture("design-room-reference-evidence-statuses-unreviewed");
+  {
+    const statePath = path.join(designRoomEvidenceStatusesUnreviewed, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+  }
+  runFixture(
+    "review-ready Reference Evidence rejects Not reviewed statuses",
+    designRoomEvidenceStatusesUnreviewed,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_status_invalid",
+  );
+
+  const designRoomEvidenceRequiredIncomplete = makeFixture("design-room-reference-evidence-required-incomplete");
+  {
+    const statePath = path.join(designRoomEvidenceRequiredIncomplete, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomEvidenceRequiredIncomplete, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replaceAll("| Not reviewed |", "| required |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "required Reference Evidence needs an authored query and ISO evidence date",
+    designRoomEvidenceRequiredIncomplete,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_triage_incomplete",
+  );
+
+  const designRoomEvidenceAdoptionMissing = makeFixture("design-room-reference-evidence-adoption-missing");
+  {
+    const statePath = path.join(designRoomEvidenceAdoptionMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "baselined";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomEvidenceAdoptionMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace("| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |", "");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "review-ready Reference Evidence needs a complete adoption row",
+    designRoomEvidenceAdoptionMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_adoption_missing",
+  );
+
   const designRoomFreeform = makeFixture("design-room-freeform-proposal");
   writeFileSync(path.join(designRoomFreeform, "design-proposal.html"), "<!doctype html><html><body>New idea</body></html>", "utf8");
   runFixture(
