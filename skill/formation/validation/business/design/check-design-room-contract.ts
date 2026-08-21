@@ -668,7 +668,7 @@ function requiredSourcesForSurface(surface: string): string[] {
     sources.add("design spells");
   }
   if (
-    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|checkboxes?|radios?|sliders?|steppers?|segments?|segmented[. -]controls?|progress[. -]bars?|search[. -]bars?|text[. -]?(?:fields?|areas?)|date[. -]?pickers?|time[. -]?pickers?|combo[. -]?boxes?|list[. -]?boxes?|dropdowns?|selects?|pickers?|menus?|tabs?|sheets?|breadcrumbs?|pagination|tooltips?|popovers?|accordions?|carousels?|chips?|badges?|avatars?|cards?|tables?|alerts?|toasts?)\b/i.test(
+    /\b(?:standards?|controls?|overlays?|inputs?|notifications?|components?|buttons?|modals?|toggles?|dialogs?|switches?|checkboxes?|radios?|sliders?|steppers?|segments?|segmented[. -]controls?|progress[. -]bars?|search[. -]bars?|navigation[. -]bars?|nav[. -]bars?|text[. -]?(?:fields?|areas?)|date[. -]?pickers?|time[. -]?pickers?|combo[. -]?boxes?|list[. -]?boxes?|dropdowns?|selects?|pickers?|menus?|tabs?|sheets?|breadcrumbs?|pagination|tooltips?|popovers?|accordions?|carousels?|chips?|badges?|avatars?|cards?|tables?|alerts?|toasts?|snackbars?|banners?)\b/i.test(
       surface,
     )
   ) {
