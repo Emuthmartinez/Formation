@@ -258,12 +258,12 @@ if (hasDesignState) {
           categoriesBySurface.set(surface, categories);
         }
         if (externalEvidenceRequired) {
-          let hasScopedRoutedEvidence = requiredEvidenceSources.size > 0;
+          let allScopedSurfacesHaveEvidence = true;
           for (const surface of scopedSurfaceKeys) {
             const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
             const routedSources = requiredSourcesForSurface(surface);
             const missingRoutedSources = routedSources.filter((source) => !sources.has(source));
-            if (routedSources.some((source) => sources.has(source))) hasScopedRoutedEvidence = true;
+            if (sources.size === 0) allScopedSurfacesHaveEvidence = false;
             if (missingRoutedSources.length > 0) {
               issues.push(
                 issue(
@@ -279,12 +279,12 @@ if (hasDesignState) {
             if (changeClassification === "high-impact or high-risk surface" && categories.size === 0) categories.add("high impact");
             categoriesBySurface.set(surface, categories);
           }
-          if (!hasScopedRoutedEvidence) {
+          if (!allScopedSurfacesHaveEvidence) {
             issues.push(
               issue(
                 "error",
                 "design_room.reference_evidence_change_sources_missing",
-                "A new, materially changed, high-impact, or high-risk surface must record evidence from a routed source or an accepted fallback for a routed source marked unavailable.",
+                "Each scoped new, materially changed, high-impact, or high-risk surface must have its own complete evidence row from a required source or an accepted fallback for a routed source marked unavailable.",
                 rel(args.root, contractPath),
               ),
             );
@@ -608,6 +608,9 @@ function requiredSourcesForSurface(surface: string): string[] {
 function isAcceptedFallbackSource(routedSource: string, evidenceSource: string): boolean {
   if (routedSource === "60fps.design") {
     return /(?:^|\/)motion-craft-benchmarks\.md$/i.test(evidenceSource);
+  }
+  if (routedSource === "design spells") {
+    return /(?:^|\/)(?:emotional-design-system|emotional-experience-design)\.md$/i.test(evidenceSource);
   }
   return false;
 }

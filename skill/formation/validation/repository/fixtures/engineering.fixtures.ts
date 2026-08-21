@@ -994,6 +994,66 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
+  const designRoomUnroutedSurfaceMismatch = makeFixture("design-room-reference-evidence-unrouted-surface-mismatch");
+  {
+    const statePath = path.join(designRoomUnroutedSurfaceMismatch, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomUnroutedSurfaceMismatch, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, "| UI Playbook | required | Standard component proof is needed. | banner controls | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Marketing banner | UI Playbook | Standard controls preserve platform conventions. | Adopt | Use Formation control tokens. | surfaces.marketing.banner | Device review | marketing.banner |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unrouted ordinary surface cannot borrow a required row from another surface",
+    designRoomUnroutedSurfaceMismatch,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_change_sources_missing",
+  );
+
+  const designRoomDelightUnavailableFallback = makeFixture("design-room-reference-evidence-delight-unavailable-fallback");
+  {
+    const statePath = path.join(designRoomDelightUnavailableFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDelightUnavailableFallback, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: delight.success")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| Design Spells \|.*$/m,
+        "| Design Spells | unavailable | The inspiration catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Success feedback | emotional-design-system.md | Earned feedback should support comprehension before decoration. | Adopt | Use the product's own visual language. | surfaces.mobileApp.success | Audience review | delight.success |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unavailable Design Spells route accepts the documented emotional-design fallback",
+    designRoomDelightUnavailableFallback,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
   const designRoomScopedSurfaceMismatch = makeFixture("design-room-reference-evidence-scoped-surface-mismatch");
   {
     const statePath = path.join(designRoomScopedSurfaceMismatch, "studio/seed/business.json");
