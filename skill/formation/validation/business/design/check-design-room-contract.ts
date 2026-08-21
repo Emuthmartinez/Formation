@@ -666,9 +666,15 @@ function isAuthoredEvidenceReason(value: string): boolean {
 }
 
 function isOfficialPlatformGuidance(evidenceSource: string): boolean {
-  return /https?:\/\/(?:developer\.apple\.com|developer\.android\.com|m3\.material\.io|material\.io|learn\.microsoft\.com|www\.w3\.org\/wai\/(?:aria|apg))(?:[)/]|$)/i.test(
-    evidenceSource,
-  );
+  if (!/^https?:\/\/\S+$/i.test(evidenceSource)) return false;
+  try {
+    const parsed = new URL(evidenceSource);
+    const hostname = parsed.hostname.toLowerCase();
+    if (["developer.apple.com", "developer.android.com", "m3.material.io", "material.io", "learn.microsoft.com"].includes(hostname)) return true;
+    return hostname === "www.w3.org" && /^\/wai\/(?:aria|apg)(?:\/|$)/i.test(parsed.pathname);
+  } catch {
+    return false;
+  }
 }
 
 function isKnownDoctrineFallback(target: string, allowedBasenames: string[]): boolean {
@@ -702,7 +708,8 @@ function canonicalEvidenceSource(evidenceSource: string): string {
 }
 
 function evidenceSourceTarget(evidenceSource: string): string {
-  return evidenceSource.match(/\]\(([^)\s]+)\)/)?.[1] ?? normalizedCell(evidenceSource);
+  const normalized = normalizedCell(evidenceSource);
+  return normalized.match(/^\[[^\]]+\]\(([^)\s]+)\)$/)?.[1] ?? normalized;
 }
 
 function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {

@@ -1275,6 +1275,8 @@ export function register(h: Harness): void {
     designRoom["status"] = "rendered";
     writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
     const contractPath = path.join(designRoomOneFallbackTwoLanes, "design/design.md");
+    const firstPrefix = "https" + "://one.example/a";
+    const secondPrefix = "https" + "://two.example/a";
     const contract = readFileSync(contractPath, "utf8")
       .replace("Change classification: Not defined", "Change classification: high-impact or high-risk surface")
       .replace("Change scope: Not defined", "Change scope: onboarding.primary")
@@ -1286,15 +1288,12 @@ export function register(h: Harness): void {
       .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | unavailable | The journey catalogue cannot be reached in this runtime. | Not applicable | Not applicable |")
       .replace(
         "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
-        "| Onboarding input | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n" +
-          "| Onboarding input | [WAI combobox](" +
-          "http" +
-          "://www.w3.org/WAI/ARIA/apg/patterns/combobox) | The same pattern is cited over HTTP without its trailing slash. | Reject — it duplicates the first source. | | | Source identity review | onboarding.primary |",
+        `| Onboarding input | ${firstPrefix} https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | A prefixed cell also names the official pattern. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n| Onboarding input | ${secondPrefix} https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | Another prefixed cell names the same official pattern. | Reject — the cell does not identify one source. | | | Source identity review | onboarding.primary |`,
       );
     writeFileSync(contractPath, contract, "utf8");
   }
   runFixture(
-    "URL variants of one official fallback cannot satisfy two complementary unavailable lanes",
+    "multi-URL cells cannot reuse one official fallback across complementary unavailable lanes",
     designRoomOneFallbackTwoLanes,
     "check-design-room-contract.ts",
     1,
