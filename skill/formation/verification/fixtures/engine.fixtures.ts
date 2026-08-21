@@ -317,6 +317,11 @@ export function register(harness: Harness): void {
       initiallyPending.nodes[researchId]!.refreshInstructions?.some((entry) => entry.includes("product-specific evidence scope")),
       "the reopened dependency must carry the consumer's compiled refresh scope",
     );
+    const excludedRun = seedFor(["research"], plan).run;
+    assert(
+      refreshDependenciesBeforeFrontier(plan, excludedRun, now, new Set<RunNodeId>()).length === 0 && excludedRun.nodes[researchId]!.status === "succeeded",
+      "an out-of-scope refresh consumer must not mutate its dependency",
+    );
 
     const sharedCatalog = testCatalog();
     sharedCatalog.workflows[1]!.refreshDependencies = [
@@ -362,6 +367,7 @@ export function register(harness: Harness): void {
       plusSeconds(now, 2),
     );
     assert(run.nodes[productId]!.status === "stale", "a changed refreshed artifact must invalidate its succeeded descendant");
+    assert(run.nodes[researchId]!.refreshInstructions === undefined, "refresh scope must clear when the scoped attempt finishes");
   });
 
   harness.check("compile/autonomy: internal system workflows preserve edges and run without founder grants, but external actions fail closed", () => {

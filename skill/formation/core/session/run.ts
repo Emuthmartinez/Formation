@@ -828,7 +828,12 @@ async function main(): Promise<number> {
       heartbeat(paths.sessionLock, sessionId);
 
       observeAppSourceFingerprint(plan, run, workspace, sessionNow());
-      refreshDependenciesBeforeFrontier(plan, run, sessionNow());
+      const activeScopeHints = brief?.scopeHints;
+      const scopedRefreshConsumers =
+        activeScopeHints && activeScopeHints.length > 0
+          ? new Set(plan.nodes.filter((node) => nodeInScope(activeScopeHints, node.domainId, node.workflowId)).map((node) => node.id))
+          : undefined;
+      refreshDependenciesBeforeFrontier(plan, run, sessionNow(), scopedRefreshConsumers);
       writeRunState(paths.runState, run);
       applyStandingApprovals(plan, run, paths.agentOperations, sessionNow());
       const frontier = computeFrontier(plan, run, businessState, captured);
@@ -1029,6 +1034,8 @@ async function main(): Promise<number> {
           const finishedAt = sessionNow();
 
           if (result.status === "failed") {
+            const failedState = run.nodes[nodeId];
+            if (failedState) failedState.refreshInstructions = undefined;
             attempt.status = "failed";
             attempt.finishedAt = finishedAt;
             attempt.error = result.error;

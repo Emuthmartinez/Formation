@@ -289,6 +289,7 @@ export function reconcilePatch(plan: CompiledPlan, run: RunStateDocument, patch:
   attempt.status = node.verification.kind === "none" ? "succeeded" : "blocked";
   state.status = node.verification.kind === "none" ? "succeeded" : "blocked";
   state.blocker = node.verification.kind === "none" ? undefined : "Verification required";
+  state.refreshInstructions = undefined;
   run.updatedAt = now;
 
   if (changedAcceptedInputs.length > 0) invalidateDescendants(plan, run, changedAcceptedInputs, now);
@@ -432,12 +433,18 @@ export function reopenRecurringNodes(plan: CompiledPlan, run: RunStateDocument, 
 }
 
 /** Reopen dependencies that a downstream node requires fresh for each of its attempt cycles. */
-export function refreshDependenciesBeforeFrontier(plan: CompiledPlan, run: RunStateDocument, now: string): RunNodeId[] {
+export function refreshDependenciesBeforeFrontier(
+  plan: CompiledPlan,
+  run: RunStateDocument,
+  now: string,
+  allowedConsumerIds?: ReadonlySet<RunNodeId>,
+): RunNodeId[] {
   const reopened: RunNodeId[] = [];
   const eligible = new Set<Status>(["pending", "ready", "stale"]);
   const accepted = new Set(run.artifactBindings.filter((binding) => binding.accepted).map((binding) => binding.artifactId));
   const lockedDependencies = new Set<RunNodeId>();
   for (const node of plan.nodes) {
+    if (allowedConsumerIds && !allowedConsumerIds.has(node.id)) continue;
     const consumer = run.nodes[node.id];
     if (!consumer || !eligible.has(consumer.status)) continue;
     const cycles = new Set(consumer.dependencyRefreshCycles ?? []);
@@ -446,6 +453,7 @@ export function refreshDependenciesBeforeFrontier(plan: CompiledPlan, run: RunSt
     }
   }
   for (const node of plan.nodes) {
+    if (allowedConsumerIds && !allowedConsumerIds.has(node.id)) continue;
     if (node.refreshDependencies.length === 0) continue;
     const consumer = run.nodes[node.id];
     if (!consumer || !eligible.has(consumer.status)) continue;
