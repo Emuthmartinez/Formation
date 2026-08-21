@@ -629,24 +629,25 @@ function requiredSourcesForSurface(surface: string): string[] {
 }
 
 function isAcceptedFallbackSource(routedSource: string, evidenceSource: string): boolean {
-  if (isOfficialPlatformGuidance(evidenceSource)) return true;
+  const target = evidenceSourceTarget(evidenceSource);
+  if (isOfficialPlatformGuidance(target)) return true;
   if (routedSource === "60fps.design") {
-    return /(?:^|\/)motion-craft-benchmarks\.md$/i.test(evidenceSource);
+    return /(?:^|\/)motion-craft-benchmarks\.md$/i.test(target);
   }
   if (routedSource === "design spells") {
-    return /(?:^|\/)(?:emotional-design-system|emotional-experience-design)\.md$/i.test(evidenceSource);
+    return /(?:^|\/)(?:emotional-design-system|emotional-experience-design)\.md$/i.test(target);
   }
   if (routedSource === "catalogue.projectsbyif.com") {
-    return /(?:^|\/)(?:consumer-product-design-agency|privacy-terms|generative-ai-safety)\.md$/i.test(evidenceSource);
+    return /(?:^|\/)(?:consumer-product-design-agency|privacy-terms|generative-ai-safety)\.md$/i.test(target);
   }
   if (routedSource === "abtest.design") {
-    return /(?:^|\/)(?:paywall-pricing-and-experiments|onboarding-conversion)\.md$/i.test(evidenceSource);
+    return /(?:^|\/)(?:paywall-pricing-and-experiments|onboarding-conversion)\.md$/i.test(target);
   }
   if (routedSource === "uxsnaps") {
-    return /(?:^|\/)refero-ux-patterns\.md$/i.test(evidenceSource);
+    return /(?:^|\/)refero-ux-patterns\.md$/i.test(target);
   }
   if (routedSource === "ui playbook") {
-    return /(?:^|\/)premium-mobile-craft\.md$/i.test(evidenceSource);
+    return /(?:^|\/)premium-mobile-craft\.md$/i.test(target);
   }
   return false;
 }
@@ -671,12 +672,12 @@ function isOfficialPlatformGuidance(evidenceSource: string): boolean {
 }
 
 function canonicalEvidenceSource(evidenceSource: string): string {
-  const markdownUrl = evidenceSource.match(/\]\((https?:\/\/[^)\s]+)\)/i)?.[1];
-  const plainUrl = evidenceSource.match(/https?:\/\/[^)\s]+/i)?.[0];
-  const rawUrl = markdownUrl ?? plainUrl;
+  const target = evidenceSourceTarget(evidenceSource);
+  const rawUrl = target.match(/https?:\/\/[^)\s]+/i)?.[0];
   if (rawUrl !== undefined) {
     try {
       const parsed = new URL(rawUrl);
+      parsed.protocol = "https:";
       parsed.hash = "";
       parsed.search = "";
       parsed.hostname = parsed.hostname.toLowerCase();
@@ -686,8 +687,12 @@ function canonicalEvidenceSource(evidenceSource: string): string {
       // Fall through to normalized text when a source cell contains a malformed URL.
     }
   }
-  const normalized = normalizedCell(evidenceSource).toLowerCase().replaceAll("\\", "/").replace(/^\.\//, "");
+  const normalized = normalizedCell(target).toLowerCase().replaceAll("\\", "/").replace(/^\.\//, "");
   return normalized.endsWith(".md") ? normalized.split("/").at(-1)! : normalized;
+}
+
+function evidenceSourceTarget(evidenceSource: string): string {
+  return evidenceSource.match(/\]\(([^)\s]+)\)/)?.[1] ?? normalizedCell(evidenceSource);
 }
 
 function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {

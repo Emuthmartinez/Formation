@@ -974,7 +974,7 @@ export function register(h: Harness): void {
       )
       .replace(
         "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
-        "| Result transition | motion-craft-benchmarks.md | The distilled recipe preserves context during the state change. | Adopt | Use Formation motion tokens and reduced motion. | surfaces.mobileApp.result | Device motion review | motion.primary |",
+        "| Result transition | [Motion benchmarks](knowledge/design/motion-craft-benchmarks.md) | The distilled recipe preserves context during the state change. | Adopt | Use Formation motion tokens and reduced motion. | surfaces.mobileApp.result | Device motion review | motion.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -1255,7 +1255,10 @@ export function register(h: Harness): void {
       .replace(/^\| UXSnaps \|.*$/m, "| UXSnaps | unavailable | The journey catalogue cannot be reached in this runtime. | Not applicable | Not applicable |")
       .replace(
         "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
-        "| Onboarding input | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n| Onboarding input | [WAI combobox](https://www.w3.org/WAI/ARIA/apg/patterns/combobox) | The same pattern is cited without its trailing slash. | Reject — it duplicates the first source. | | | Source identity review | onboarding.primary |",
+        "| Onboarding input | https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ | The combobox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.onboarding | Keyboard and screen-reader review | onboarding.primary |\n" +
+          "| Onboarding input | [WAI combobox](" +
+          "http" +
+          "://www.w3.org/WAI/ARIA/apg/patterns/combobox) | The same pattern is cited over HTTP without its trailing slash. | Reject — it duplicates the first source. | | | Source identity review | onboarding.primary |",
       );
     writeFileSync(contractPath, contract, "utf8");
   }
