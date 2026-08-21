@@ -9123,7 +9123,10 @@
         "workflow.operations.agent-operations-ledger"
       ],
       "refreshDependencies": [
-        "workflow.design.design-room-state-mutate-version-render"
+        {
+          "workflowId": "workflow.design.design-room-state-mutate-version-render",
+          "instructions": "Record a store-first-frame change classification and affected scope, then complete the Design Evidence pass for every composed or materially changed store frame."
+        }
       ],
       "outputPaths": [
         "store/app-store-listing/SCREENSHOTS.md"
@@ -10112,7 +10115,10 @@
         "workflow.operations.agent-operations-ledger"
       ],
       "refreshDependencies": [
-        "workflow.design.design-room-state-mutate-version-render"
+        {
+          "workflowId": "workflow.design.design-room-state-mutate-version-render",
+          "instructions": "Record a landing-specific change classification and affected scope, then complete the Design Evidence pass for the landing hero, scroll behavior, micro-interactions, and other visual surfaces."
+        }
       ],
       "outputPaths": [
         "growth/landing/"

@@ -15,7 +15,7 @@ export interface WorkflowSeed {
   laneIds?: LaneKey[];
   phaseIds?: PhaseId[];
   dependencies?: WorkflowId[];
-  refreshDependencies?: WorkflowId[];
+  refreshDependencies?: Array<{ workflowId: WorkflowId; instructions: string }>;
   outputPaths?: string[];
   gates?: string[];
   providers?: string[];

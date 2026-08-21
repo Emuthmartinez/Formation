@@ -1019,6 +1019,7 @@ async function main(): Promise<number> {
               skillRootDir: skillRoot(),
               artifactPaths: Object.fromEntries(plan.artifactBindings.map((binding) => [binding.artifactId, binding.path])),
               authorization,
+              refreshInstructions: run.nodes[nodeId]?.refreshInstructions,
               now: attemptTime,
               heartbeat: refreshAttemptHeartbeat,
             });

@@ -157,7 +157,13 @@ export const workflows = [
       "workflow.design.design-room-state-mutate-version-render",
       "workflow.operations.agent-operations-ledger",
     ],
-    refreshDependencies: ["workflow.design.design-room-state-mutate-version-render"],
+    refreshDependencies: [
+      {
+        workflowId: "workflow.design.design-room-state-mutate-version-render",
+        instructions:
+          "Record a landing-specific change classification and affected scope, then complete the Design Evidence pass for the landing hero, scroll behavior, micro-interactions, and other visual surfaces.",
+      },
+    ],
     outputPaths: ["growth/landing/"],
     gates: ["check:design-room"],
     actionClass: "mutate",

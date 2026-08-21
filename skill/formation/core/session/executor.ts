@@ -46,6 +46,8 @@ export interface NodeExecutionContext {
   readonly artifactPaths: Readonly<Record<string, string>>;
   /** Exact dispatch-time authority, hashed into the prompt/receipt so a worker cannot widen it. */
   readonly authorization?: WorkerAuthorization;
+  /** Scoped reason supplied by a downstream node that reopened this dependency. */
+  readonly refreshInstructions?: readonly string[];
   /**
    * Refreshes this attempt's own heartbeat (and the session lock's) mid-execution. The fixture/
    * no-op executors resolve instantly and never need it, but a real executor (U6) awaiting a
@@ -192,6 +194,9 @@ export function createCliExecutor(requestedRuntime: WorkerRuntime = "auto"): Nod
         nodes: [node],
         artifactBindings,
       });
+      if (context.refreshInstructions?.length) {
+        brief.instructions = `${brief.instructions}\n\nRefresh scope for this dispatch:\n${context.refreshInstructions.map((entry) => `- ${entry}`).join("\n")}`;
+      }
       const fileDigests: Record<string, string> = {};
       for (const contractPath of brief.contractFiles) {
         const absolute = resolvedInside(context.workspaceDir, contractPath);

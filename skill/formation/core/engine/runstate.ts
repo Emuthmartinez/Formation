@@ -430,21 +430,39 @@ export function reopenRecurringNodes(plan: CompiledPlan, run: RunStateDocument, 
 export function refreshDependenciesBeforeFrontier(plan: CompiledPlan, run: RunStateDocument, now: string): RunNodeId[] {
   const reopened: RunNodeId[] = [];
   const eligible = new Set<Status>(["pending", "ready", "stale"]);
+  const accepted = new Set(run.artifactBindings.filter((binding) => binding.accepted).map((binding) => binding.artifactId));
+  const lockedDependencies = new Set<RunNodeId>();
+  for (const node of plan.nodes) {
+    const consumer = run.nodes[node.id];
+    if (!consumer || !eligible.has(consumer.status)) continue;
+    const cycles = new Set(consumer.dependencyRefreshCycles ?? []);
+    for (const refresh of node.refreshDependencies) {
+      if (cycles.has(`${refresh.nodeId}@${consumer.attempts.length}`)) lockedDependencies.add(refresh.nodeId);
+    }
+  }
   for (const node of plan.nodes) {
     if (node.refreshDependencies.length === 0) continue;
     const consumer = run.nodes[node.id];
     if (!consumer || !eligible.has(consumer.status)) continue;
+    const refreshIds = new Set(node.refreshDependencies.map((entry) => entry.nodeId));
+    if (node.dependencies.some((dependencyId) => !refreshIds.has(dependencyId) && run.nodes[dependencyId]?.status !== "succeeded")) continue;
+    const refreshOutputs = new Set(plan.nodes.filter((candidate) => refreshIds.has(candidate.id)).flatMap((candidate) => candidate.outputs));
+    if (node.inputs.some((artifactId) => !refreshOutputs.has(artifactId) && !accepted.has(artifactId))) continue;
     const cycles = new Set(consumer.dependencyRefreshCycles ?? []);
-    for (const dependencyId of node.refreshDependencies) {
+    for (const refresh of node.refreshDependencies) {
+      const dependencyId = refresh.nodeId;
       const token = `${dependencyId}@${consumer.attempts.length}`;
       if (cycles.has(token)) continue;
-      cycles.add(token);
+      if (lockedDependencies.has(dependencyId)) continue;
       const dependency = run.nodes[dependencyId];
       if (!dependency || dependency.status !== "succeeded") continue;
+      cycles.add(token);
+      lockedDependencies.add(dependencyId);
       dependency.status = "stale";
       dependency.blocker = undefined;
       dependency.acceptedOutputFingerprint = undefined;
       dependency.verifiedBySessionId = undefined;
+      dependency.refreshInstructions = [refresh.instructions];
       const dependencyNode = plan.nodes.find((candidate) => candidate.id === dependencyId);
       for (const binding of run.artifactBindings) {
         if (!dependencyNode?.outputs.some((artifactId) => artifactId === binding.artifactId)) continue;

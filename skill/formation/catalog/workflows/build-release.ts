@@ -182,7 +182,13 @@ export const workflows = [
     laneIds: ["store_console", "content_assets"],
     phaseIds: ["phase.3"],
     dependencies: ["workflow.design.design-room-state-mutate-version-render", "workflow.store.app-store-listing-prep-packet"],
-    refreshDependencies: ["workflow.design.design-room-state-mutate-version-render"],
+    refreshDependencies: [
+      {
+        workflowId: "workflow.design.design-room-state-mutate-version-render",
+        instructions:
+          "Record a store-first-frame change classification and affected scope, then complete the Design Evidence pass for every composed or materially changed store frame.",
+      },
+    ],
     outputPaths: ["store/app-store-listing/SCREENSHOTS.md"],
     gates: ["check:design-room", "check:store-screenshots"],
     providers: ["provider.app-store-screenshots"],

@@ -198,7 +198,7 @@ export interface CatalogWorkflowDef {
   phaseIds: PhaseId[];
   dependencies: WorkflowId[];
   /** Dependencies that must be reopened once per attempt cycle before this node can enter the frontier. */
-  refreshDependencies?: WorkflowId[];
+  refreshDependencies?: Array<{ workflowId: WorkflowId; instructions: string }>;
   outputPaths: string[];
   gateCommands: string[];
   /**

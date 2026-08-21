@@ -237,13 +237,23 @@ export function validateCatalog(catalog: Catalog, skillRoot: string, providerReg
     for (const areaId of workflow.areaIds) checkKnown(issues, areaIds, areaId, "catalog_graph.workflow.unknown_area", workflow.id);
     for (const phaseId of workflow.phaseIds) checkKnown(issues, phaseIds, phaseId, "catalog_graph.workflow.unknown_phase", workflow.id);
     for (const dependencyId of workflow.dependencies) checkKnown(issues, workflowIds, dependencyId, "catalog_graph.workflow.unknown_dependency", workflow.id);
-    for (const dependencyId of workflow.refreshDependencies ?? []) {
+    for (const refresh of workflow.refreshDependencies ?? []) {
+      const dependencyId = refresh.workflowId;
       checkKnown(issues, workflowIds, dependencyId, "catalog_graph.workflow.unknown_refresh_dependency", workflow.id);
       if (!workflow.dependencies.includes(dependencyId)) {
         issues.push(
           error(
             "catalog_graph.workflow.refresh_dependency_not_dependency",
             `${workflow.id} refreshes ${dependencyId}, but it is not a declared dependency.`,
+            workflow.id,
+          ),
+        );
+      }
+      if (refresh.instructions.trim().length < 40) {
+        issues.push(
+          error(
+            "catalog_graph.workflow.refresh_instructions_missing",
+            `${workflow.id} must declare the evidence scope carried into ${dependencyId}'s redispatch.`,
             workflow.id,
           ),
         );

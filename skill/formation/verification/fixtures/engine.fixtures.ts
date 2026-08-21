@@ -285,7 +285,9 @@ export function register(harness: Harness): void {
 
   harness.check("runstate: fresh dependency cycles reopen a succeeded dependency exactly once before frontier selection", () => {
     const catalog = testCatalog();
-    catalog.workflows[1]!.refreshDependencies = ["workflow.research-scan"];
+    catalog.workflows[1]!.refreshDependencies = [
+      { workflowId: "workflow.research-scan", instructions: "Refresh the research brief for the product-specific evidence scope before drafting." },
+    ];
     const plan = compilePlan(catalog, now);
     const { businessState, run } = seedFor(["research"], plan);
     const researchId = nodeId("research-scan");
@@ -298,6 +300,23 @@ export function register(harness: Harness): void {
     run.nodes[researchId]!.status = "succeeded";
     run.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted = true;
     assert(refreshDependenciesBeforeFrontier(plan, run, plusSeconds(now, 1)).length === 0, "the same consumer attempt cycle must not reopen twice");
+
+    const { run: initiallyPending } = seedFor([], plan);
+    assert(refreshDependenciesBeforeFrontier(plan, initiallyPending, now).length === 0, "a dependency that has not run yet must not consume the refresh cycle");
+    assert(
+      (initiallyPending.nodes[productId]!.dependencyRefreshCycles?.length ?? 0) === 0,
+      "the pending dependency must leave the consumer refresh token unrecorded",
+    );
+    initiallyPending.nodes[researchId]!.status = "succeeded";
+    initiallyPending.artifactBindings.find((binding) => binding.artifactId === "artifact.research-brief")!.accepted = true;
+    assert(
+      refreshDependenciesBeforeFrontier(plan, initiallyPending, plusSeconds(now, 1)).includes(researchId),
+      "the dependency must reopen after its generic first pass succeeds",
+    );
+    assert(
+      initiallyPending.nodes[researchId]!.refreshInstructions?.some((entry) => entry.includes("product-specific evidence scope")),
+      "the reopened dependency must carry the consumer's compiled refresh scope",
+    );
   });
 
   harness.check("compile/autonomy: internal system workflows preserve edges and run without founder grants, but external actions fail closed", () => {

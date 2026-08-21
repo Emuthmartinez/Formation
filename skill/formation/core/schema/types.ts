@@ -426,6 +426,8 @@ export interface RunNodeStateV2 {
   applicabilityFingerprint?: string;
   /** Dependency-id/attempt-cycle tokens already refreshed before this node's next dispatch. */
   dependencyRefreshCycles?: string[];
+  /** Scoped instructions carried into this dependency's current refresh dispatch. */
+  refreshInstructions?: string[];
 }
 
 export interface RunStateDocument {
