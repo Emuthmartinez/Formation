@@ -381,6 +381,31 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_source_duplicate",
   );
 
+  const designRoomDuplicateChangeDeclaration = makeFixture("design-room-reference-evidence-duplicate-change-declaration");
+  {
+    const statePath = path.join(designRoomDuplicateChangeDeclaration, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomDuplicateChangeDeclaration, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace(
+        "Change classification: Not defined",
+        "Change classification: small token-preserving correction\nChange classification: high-impact or high-risk surface",
+      )
+      .replace("Change scope: Not defined", "Change scope: profile.settings\nChange scope: onboarding.primary")
+      .replaceAll("| Not reviewed |", "| not applicable |");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "duplicate change declarations fail instead of selecting stale values",
+    designRoomDuplicateChangeDeclaration,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_change_classification_invalid",
+  );
+
   const designRoomSeededTriageReasons = makeFixture("design-room-reference-evidence-seeded-triage-reasons");
   {
     const statePath = path.join(designRoomSeededTriageReasons, "studio/seed/business.json");
@@ -1151,6 +1176,33 @@ export function register(h: Harness): void {
   runFixture(
     "a concrete component decision routes its generic surface to UI Playbook",
     designRoomGenericSurfaceConcreteDecision,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
+  const designRoomSpaceDelimitedDecision = makeFixture("design-room-reference-evidence-space-delimited-decision");
+  {
+    const statePath = path.join(designRoomSpaceDelimitedDecision, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomSpaceDelimitedDecision, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Settings craft proof is needed. | discovery feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Content discovery hierarchy | Design Spells | Feedback supports discovery. | Adopt | Keep it within Formation tokens. | surfaces.mobileApp.profile | Journey review | profile.settings |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a space-delimited discovery decision routes its generic surface to UXSnaps",
+    designRoomSpaceDelimitedDecision,
     "check-design-room-contract.ts",
     1,
     "design_room.reference_evidence_routed_sources_missing",

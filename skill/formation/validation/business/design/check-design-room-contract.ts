@@ -106,15 +106,21 @@ if (hasDesignState) {
 
     const evidenceBody = sectionBody(contract, "Reference Evidence");
     if (evidenceBody !== undefined) {
-      const changeClassification = normalizedCell(evidenceBody.match(/^Change classification:\s*(.+)$/im)?.[1]).toLowerCase();
-      const changeScope = normalizedCell(evidenceBody.match(/^Change scope:\s*(.+)$/im)?.[1]);
+      const changeClassificationMatches = [...evidenceBody.matchAll(/^Change classification:\s*(.+)$/gim)];
+      const changeScopeMatches = [...evidenceBody.matchAll(/^Change scope:\s*(.+)$/gim)];
+      const changeClassification = normalizedCell(changeClassificationMatches[0]?.[1]).toLowerCase();
+      const changeScope = normalizedCell(changeScopeMatches[0]?.[1]);
       const allowedChangeClassifications = new Set([
         "small token-preserving correction",
         "new or materially changed surface",
         "high-impact or high-risk surface",
       ]);
       const scopedSurfaceKeys = parseSurfaceKeys(changeScope);
-      const changeClassificationValid = allowedChangeClassifications.has(changeClassification) && scopedSurfaceKeys.length > 0;
+      const changeClassificationValid =
+        changeClassificationMatches.length === 1 &&
+        changeScopeMatches.length === 1 &&
+        allowedChangeClassifications.has(changeClassification) &&
+        scopedSurfaceKeys.length > 0;
       const externalEvidenceRequired =
         changeClassificationValid &&
         (changeClassification === "new or materially changed surface" || changeClassification === "high-impact or high-risk surface");
@@ -655,7 +661,7 @@ function requiredSourcesForSurface(surface: string): string[] {
     sources.add("uxsnaps");
   }
   if (/\b(?:conversions?|engagements?|monetizations?)\b/i.test(surface)) sources.add("abtest.design");
-  if (/\b(?:journeys?|dashboards?|content[-.]discover(?:y|ies)|flow[-.]critiques?)\b|\binformation[-.]hierarch(?:y|ies)\b/i.test(surface)) {
+  if (/\b(?:journeys?|dashboards?|content[. -]discover(?:y|ies)|flow[. -]critiques?)\b|\binformation[. -]hierarch(?:y|ies)\b/i.test(surface)) {
     sources.add("uxsnaps");
   }
   if (/\b(?:delights?|personalit(?:y|ies)|micro[-.]interactions?|success(?:es)?|empty[-.]states?|magical[-.]moments?|surprises?)\b/i.test(surface)) {
