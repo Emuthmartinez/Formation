@@ -447,6 +447,32 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_high_impact_sources_missing",
   );
 
+  const designRoomHighImpactSameLane = makeFixture("design-room-reference-evidence-high-impact-same-lane");
+  {
+    const statePath = path.join(designRoomHighImpactSameLane, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHighImpactSameLane, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Delight proof is needed. | success feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short transition preserves context. | Adopt | Use Formation timing tokens. | designRoom.surfaces.onboarding | Device motion review |\n| Onboarding success | Design Spells | A small success moment adds personality. | Adopt | Use the product's own visual language. | designRoom.surfaces.onboarding | Audience review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "two craft sources do not satisfy complementary onboarding evidence",
+    designRoomHighImpactSameLane,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
+  );
+
   const designRoomHighImpactSourcesCannotCrossSurface = makeFixture("design-room-reference-evidence-high-impact-cross-surface");
   {
     const statePath = path.join(designRoomHighImpactSourcesCannotCrossSurface, "studio/seed/business.json");

@@ -224,12 +224,12 @@ if (hasDesignState) {
           highImpactSourcesByDecision.set(decision, sources);
         }
         for (const [decision, sources] of highImpactSourcesByDecision) {
-          if (sources.size < 2) {
+          if (!hasComplementaryEvidence(decision, sources)) {
             issues.push(
               issue(
                 "error",
                 "design_room.reference_evidence_high_impact_sources_missing",
-                `The high-impact decision "${decision}" needs complete evidence rows from two complementary sources.`,
+                `The high-impact decision "${decision}" needs complete evidence rows from complementary behavior/structure and craft/validation sources. Onboarding and paywall decisions need abtest.design plus UXSnaps.`,
                 rel(args.root, contractPath),
               ),
             );
@@ -470,6 +470,15 @@ function isAuthoredEvidenceCell(value: string): boolean {
 
 function isHighImpactDecision(value: string): boolean {
   return /\bonboarding\b|\bpaywall\b|\bcore[- ]loop\b|\bai[- ]trust\b|\bstore\b.*\bfirst[- ]frame\b|\bfirst[- ]frame\b.*\bstore\b/i.test(value);
+}
+
+function hasComplementaryEvidence(decision: string, sources: Set<string>): boolean {
+  if (/\bonboarding\b|\bpaywall\b/i.test(decision)) {
+    return sources.has("abtest.design") && sources.has("uxsnaps");
+  }
+  const behaviorOrStructure = ["catalogue.projectsbyif.com", "uxsnaps"];
+  const craftOrValidation = ["60fps.design", "abtest.design", "design spells", "ui playbook"];
+  return behaviorOrStructure.some((source) => sources.has(source)) && craftOrValidation.some((source) => sources.has(source));
 }
 
 function containsTemplatePlaceholder(value: string): boolean {
