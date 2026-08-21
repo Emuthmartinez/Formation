@@ -442,10 +442,10 @@ export function register(h: Harness): void {
       .replace("Change classification: Not defined", "Change classification: small token-preserving correction")
       .replace("Change scope: Not defined", "Change scope: profile.settings")
       .replaceAll("| Not reviewed |", "| not applicable |");
-    const hiddenExample = `\`\`\`\`markdown\n\`\`\`text\n${authoredExample}\n\`\`\`\n\`\`\`\``;
+    const hiddenExample = `\`\`\`\`markdown\n\`\`\`text\n\`\`\`\`text\n${authoredExample}\n\`\`\`\n\`\`\`\``;
     writeFileSync(contractPath, contract.replace("## Reference Evidence", `${hiddenExample}\n\n## Reference Evidence`), "utf8");
     runFixture(
-      "a nested shorter fence cannot expose hidden Reference Evidence",
+      "nested and info-suffixed fences cannot expose hidden Reference Evidence",
       nestedFence,
       "check-design-room-contract.ts",
       1,

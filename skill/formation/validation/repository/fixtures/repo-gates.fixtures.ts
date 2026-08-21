@@ -1029,13 +1029,13 @@ export function register(h: Harness): void {
         "| --- | --- | --- | --- | --- | --- | --- |",
         "| AI status | Processing state | R18 | Active orb and status text | Processing ends | Static status text | Static status text |",
       ].join("\n");
-      const hiddenTable = `\`\`\`\`markdown\n\`\`\`text\n${completeTable}\n\`\`\`\n\`\`\`\``;
+      const hiddenTable = `\`\`\`\`markdown\n\`\`\`text\n\`\`\`\`text\n${completeTable}\n\`\`\`\n\`\`\`\``;
       return text.replace("### Live-surface effects", `### Live-surface effects\n\n${hiddenTable}`);
     }
     return text;
   });
   runScriptArgs(
-    "motion contract honors a longer outer fence around a hidden table",
+    "motion contract honors a longer outer fence and rejects info-suffixed closers",
     "check-motion-contract.ts",
     ["--skill-root", motionNestedFenceTable, "--workspace-root", path.join(motionNestedFenceTable, "workspace/business")],
     1,

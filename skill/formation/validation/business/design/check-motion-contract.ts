@@ -214,14 +214,19 @@ function stripNonRenderedMarkdown(markdown: string): string {
   const renderedLines: string[] = [];
   let fence: { kind: "`" | "~"; length: number } | undefined;
   for (const line of withoutComments.split("\n")) {
-    const marker = line.match(/^\s*(`{3,}|~{3,})/u)?.[1];
-    if (marker !== undefined) {
-      const kind = marker[0] as "`" | "~";
-      if (fence === undefined) fence = { kind, length: marker.length };
-      else if (fence.kind === kind && marker.length >= fence.length) fence = undefined;
+    const markerMatch = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/u);
+    const marker = markerMatch?.[1];
+    if (fence !== undefined) {
+      if (marker !== undefined && fence.kind === marker[0] && marker.length >= fence.length && (markerMatch?.[2] ?? "").trim() === "") {
+        fence = undefined;
+      }
       continue;
     }
-    if (fence === undefined) renderedLines.push(line);
+    if (marker !== undefined) {
+      fence = { kind: marker[0] as "`" | "~", length: marker.length };
+      continue;
+    }
+    renderedLines.push(line);
   }
   return renderedLines.join("\n");
 }
