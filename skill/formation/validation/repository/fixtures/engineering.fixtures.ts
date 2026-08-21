@@ -406,6 +406,28 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_change_classification_invalid",
   );
 
+  for (const [label, open, close] of [
+    ["fenced", "```markdown\n", "\n```"],
+    ["commented", "<!--\n", "\n-->"],
+  ] as const) {
+    const hiddenEvidence = makeFixture(`design-room-reference-evidence-${label}`);
+    const statePath = path.join(hiddenEvidence, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(hiddenEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace(/(Complete this evidence pass[\s\S]*?)(\n## Visual Direction)/, `${open}$1${close}$2`);
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${label} Reference Evidence does not satisfy the live contract`,
+      hiddenEvidence,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_change_classification_invalid",
+    );
+  }
+
   const designRoomSeededTriageReasons = makeFixture("design-room-reference-evidence-seeded-triage-reasons");
   {
     const statePath = path.join(designRoomSeededTriageReasons, "studio/seed/business.json");

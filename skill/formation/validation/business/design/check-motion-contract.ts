@@ -209,17 +209,18 @@ function sectionBody(document: string, headingName: string): string | undefined 
 }
 
 function markdownTable(body: string, requiredHeaders: string[]): { headers: string[]; rows: string[][] } | undefined {
-  const lines = body
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith("|"));
+  const lines = body.split("\n").map((line) => line.trim());
   for (let index = 0; index < lines.length - 1; index += 1) {
+    if (!lines[index]!.startsWith("|")) continue;
     const headers = parseMarkdownRow(lines[index]!);
     if (!requiredHeaders.every((header) => headers.includes(header))) continue;
+    if (!lines[index + 1]!.startsWith("|")) return undefined;
     const separator = parseMarkdownRow(lines[index + 1]!);
     if (separator.length !== headers.length || !separator.every((cell) => /^:?-{3,}:?$/.test(cell.trim()))) return undefined;
     const rows: string[][] = [];
-    for (let rowIndex = index + 2; rowIndex < lines.length; rowIndex += 1) rows.push(parseMarkdownRow(lines[rowIndex]!));
+    for (let rowIndex = index + 2; rowIndex < lines.length && lines[rowIndex]!.startsWith("|"); rowIndex += 1) {
+      rows.push(parseMarkdownRow(lines[rowIndex]!));
+    }
     return { headers, rows };
   }
   return undefined;

@@ -106,8 +106,9 @@ if (hasDesignState) {
 
     const evidenceBody = sectionBody(contract, "Reference Evidence");
     if (evidenceBody !== undefined) {
-      const changeClassificationMatches = [...evidenceBody.matchAll(/^Change classification:\s*(.+)$/gim)];
-      const changeScopeMatches = [...evidenceBody.matchAll(/^Change scope:\s*(.+)$/gim)];
+      const renderedEvidenceBody = stripNonRenderedMarkdown(evidenceBody);
+      const changeClassificationMatches = [...renderedEvidenceBody.matchAll(/^Change classification:\s*(.+)$/gim)];
+      const changeScopeMatches = [...renderedEvidenceBody.matchAll(/^Change scope:\s*(.+)$/gim)];
       const changeClassification = normalizedCell(changeClassificationMatches[0]?.[1]).toLowerCase();
       const changeScope = normalizedCell(changeScopeMatches[0]?.[1]);
       const allowedChangeClassifications = new Set([
@@ -135,7 +136,7 @@ if (hasDesignState) {
         );
       }
       const requiredSources = ["60fps.design", "catalogue.projectsbyif.com", "abtest.design", "Design Spells", "UXSnaps", "UI Playbook"];
-      const tables = markdownTables(evidenceBody);
+      const tables = markdownTables(renderedEvidenceBody);
       const triageHeaders = ["Source", "Status", "Why", "Query or pattern", "Evidence date"];
       const triageTable = tables.find((table) => tableHasHeaders(table, triageHeaders));
       const adoptionHeaders = ["Surface or decision", "Source", "Observation", "Adopt or reject", "Adaptation", "State path", "Validation", "Surface key"];
@@ -553,6 +554,23 @@ function sectionBody(contract: string, section: string): string | undefined {
     }
   }
   return lines.slice(start + 1, end).join("\n");
+}
+
+function stripNonRenderedMarkdown(markdown: string): string {
+  const withoutComments = markdown.replace(/<!--[\s\S]*?-->/g, "");
+  const renderedLines: string[] = [];
+  let fence: "`" | "~" | undefined;
+  for (const line of withoutComments.split("\n")) {
+    const marker = line.match(/^\s*(`{3,}|~{3,})/u)?.[1];
+    if (marker !== undefined) {
+      const kind = marker[0] as "`" | "~";
+      if (fence === undefined) fence = kind;
+      else if (fence === kind) fence = undefined;
+      continue;
+    }
+    if (fence === undefined) renderedLines.push(line);
+  }
+  return renderedLines.join("\n");
 }
 
 type MarkdownTable = { headers: string[]; rows: string[][] };

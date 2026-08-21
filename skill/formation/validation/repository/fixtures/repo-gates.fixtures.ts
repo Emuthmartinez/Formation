@@ -980,6 +980,23 @@ export function register(h: Harness): void {
     1,
     "motion_contract.live_surface.workspace_incomplete",
   );
+  const motionLiveWorkspaceDiscontiguousTable = writeMotionContractRoot("motion-contract-live-workspace-discontiguous-table", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "This prose ends the Markdown table.\n| AI status | Processing state | R18 | Active orb | Processing ends | Static status text | Static status text |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract does not join discontiguous pipe lines into a live-effect table",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceDiscontiguousTable, "--workspace-root", path.join(motionLiveWorkspaceDiscontiguousTable, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
+  );
   const motionLiveWorkspaceUnsupportedRecipe = writeMotionContractRoot("motion-contract-live-workspace-unsupported-recipe", (rel, text) => {
     if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
     if (rel === "workspace/business/design/design.md") {
