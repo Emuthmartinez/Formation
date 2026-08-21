@@ -376,6 +376,7 @@ export function register(h: Harness): void {
     const contractPath = path.join(designRoomEvidenceAdoptionMissing, "design/design.md");
     const contract = readFileSync(contractPath, "utf8")
       .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
       .replace("| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |", "");
     writeFileSync(contractPath, contract, "utf8");
   }
@@ -411,6 +412,31 @@ export function register(h: Harness): void {
     "check-design-room-contract.ts",
     1,
     "design_room.reference_evidence_required_source_missing",
+  );
+
+  const designRoomHighImpactSecondSourceMissing = makeFixture("design-room-reference-evidence-high-impact-second-source-missing");
+  {
+    const statePath = path.join(designRoomHighImpactSecondSourceMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomHighImpactSecondSourceMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| 60fps\.design \|.*$/m, "| 60fps.design | required | Motion proof is needed. | success transition | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined |",
+        "| Onboarding success | 60fps.design | A short state transition preserves context. | Adopt | Use the timing but keep Formation tokens. | designRoom.surfaces.onboarding | Device motion review |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a high-impact decision needs two complementary evidence sources",
+    designRoomHighImpactSecondSourceMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_high_impact_sources_missing",
   );
 
   const designRoomFreeform = makeFixture("design-room-freeform-proposal");

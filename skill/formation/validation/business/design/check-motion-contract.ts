@@ -18,17 +18,22 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
 import { flagString, issue, parseFlags, reportAndExit, type Issue } from "../../../tooling/lib/launch-state.js";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultSkillRoot = path.resolve(scriptDir, "../../..");
 
-function parseArgs(argv: string[]): { skillRoot: string } {
-  const flags = parseFlags(argv, [{ flags: ["--skill-root", "--root"], key: "skillRoot" }]);
-  return { skillRoot: flagString(flags, "skillRoot") ?? defaultSkillRoot };
+function parseArgs(argv: string[]): { skillRoot: string; workspaceRoot: string } {
+  const flags = parseFlags(argv, [
+    { flags: ["--skill-root", "--root"], key: "skillRoot" },
+    { flags: ["--workspace-root", "--workspace"], key: "workspaceRoot" },
+  ]);
+  const skillRoot = flagString(flags, "skillRoot") ?? defaultSkillRoot;
+  return { skillRoot, workspaceRoot: flagString(flags, "workspaceRoot") ?? path.join(skillRoot, "workspace/business") };
 }
 
-const { skillRoot } = parseArgs(process.argv.slice(2));
+const { skillRoot, workspaceRoot } = parseArgs(process.argv.slice(2));
 
 /** Regex capture groups are typed string|undefined under noUncheckedIndexedAccess; every use below is a group the pattern guarantees. */
 const g = (m: RegExpMatchArray, i: number): string => m[i] ?? "";
@@ -87,7 +92,8 @@ if (bench !== undefined) {
   }
 }
 
-const designContract = read("workspace/business/design/design.md");
+const designContractPath = path.join(workspaceRoot, "design/design.md");
+const designContract = existsSync(designContractPath) ? readFileSync(designContractPath, "utf8") : undefined;
 if (designContract !== undefined) {
   const requiredLiveEffectFields = [
     "Real state or relationship",
@@ -108,6 +114,71 @@ if (designContract !== undefined) {
       );
     }
   }
+  if (workspaceIsLaunched(workspaceRoot)) {
+    const liveEffectBody = sectionBody(designContract, "Live-surface effects");
+    const liveEffectRows = markdownTableRows(liveEffectBody ?? "", requiredLiveEffectFields);
+    if (liveEffectRows.length === 0 || !liveEffectRows.some((row) => row.every(isAuthoredLiveEffectCell))) {
+      issues.push(
+        issue(
+          "error",
+          "motion_contract.live_surface.workspace_incomplete",
+          "A launched workspace needs one complete live-surface row, including a none row when the product uses no live effect.",
+          path.relative(workspaceRoot, designContractPath),
+        ),
+      );
+    }
+  }
+} else {
+  issues.push(issue("error", "motion_contract.live_surface.workspace_missing", "The active workspace is missing design/design.md.", "design/design.md"));
+}
+
+function workspaceIsLaunched(root: string): boolean {
+  const statePath = path.join(root, "state/PROJECT_STATE.yaml");
+  if (!existsSync(statePath)) return false;
+  try {
+    const state = parseYaml(readFileSync(statePath, "utf8")) as { project?: { phase?: unknown }; state?: { current_phase?: unknown } };
+    const phase = String(state.state?.current_phase ?? state.project?.phase ?? "");
+    return /^phase_6(?:_|$)/.test(phase);
+  } catch {
+    return false;
+  }
+}
+
+function sectionBody(document: string, headingName: string): string | undefined {
+  const lines = document.split("\n");
+  const pattern = new RegExp(`^(#{2,4})\\s+${headingName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "i");
+  const start = lines.findIndex((line) => pattern.test(line.trim()));
+  if (start < 0) return undefined;
+  const depth = lines[start]!.trim().match(pattern)![1]!.length;
+  const end = lines.findIndex((line, index) => index > start && /^(#{2,6})\s+/.test(line.trim()) && line.trim().match(/^(#{2,6})/)![1]!.length <= depth);
+  return lines.slice(start + 1, end < 0 ? undefined : end).join("\n");
+}
+
+function markdownTableRows(body: string, requiredHeaders: string[]): string[][] {
+  const lines = body
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|"));
+  for (let index = 0; index < lines.length - 1; index += 1) {
+    const headers = parseMarkdownRow(lines[index]!);
+    if (!requiredHeaders.every((header) => headers.includes(header))) continue;
+    const rows: string[][] = [];
+    for (let rowIndex = index + 2; rowIndex < lines.length; rowIndex += 1) rows.push(parseMarkdownRow(lines[rowIndex]!));
+    return rows;
+  }
+  return [];
+}
+
+function parseMarkdownRow(line: string): string[] {
+  return line
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function isAuthoredLiveEffectCell(value: string): boolean {
+  return value.length > 0 && !/^not defined$/i.test(value) && !/R15, R16, R17, R18, or none/i.test(value);
 }
 
 // PremiumCraft.swift ships from business/design/system/ next to its own copies of the

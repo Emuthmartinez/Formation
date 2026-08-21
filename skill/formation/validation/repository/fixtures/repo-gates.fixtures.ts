@@ -906,6 +906,7 @@ export function register(h: Harness): void {
     "knowledge/experience/experience-cards/mastery-and-status-card.md",
     "knowledge/experience/experience-cards/variable-reward-card.md",
     "workspace/business/design/design.md",
+    "workspace/business/state/PROJECT_STATE.yaml",
     "workspace/business/product/experience/emotional-design/EMOTIONAL_DESIGN.md",
     "workspace/business/design/motion-catalog/TokenSpring.swift",
     "workspace/business/design/motion-catalog/motion-tokens.ts",
@@ -925,6 +926,24 @@ export function register(h: Harness): void {
 
   const motionLiveSurfaceMissing = writeMotionContractRoot("motion-contract-live-surface-missing", (rel, text) =>
     rel.endsWith("motion-craft-benchmarks.md") ? text.replace("### R18 — Semantic thinking orb", "### Removed semantic thinking orb") : text,
+  );
+
+  const motionLiveWorkspaceIncomplete = writeMotionContractRoot("motion-contract-live-workspace-incomplete", (rel, text) => {
+    if (rel.endsWith("PROJECT_STATE.yaml")) return text.replaceAll("phase_0_orient", "phase_6_live");
+    if (rel === "workspace/business/design/design.md") {
+      return text.replace(
+        "| Not defined | Not defined | R15, R16, R17, R18, or none | Not defined | Not defined | Not defined | Not defined |",
+        "| AI status | Processing state | R18 | Active orb | Not defined | Static status text | Static status text |",
+      );
+    }
+    return text;
+  });
+  runScriptArgs(
+    "motion contract validates the launched active workspace live-effect rows",
+    "check-motion-contract.ts",
+    ["--skill-root", motionLiveWorkspaceIncomplete, "--workspace-root", path.join(motionLiveWorkspaceIncomplete, "workspace/business")],
+    1,
+    "motion_contract.live_surface.workspace_incomplete",
   );
   runScriptArgs(
     "motion contract fails when one live-surface recipe disappears",

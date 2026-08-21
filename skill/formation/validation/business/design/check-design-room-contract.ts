@@ -192,7 +192,7 @@ if (hasDesignState) {
               /^(adopt|reject)\b/i.test(decision)
             );
           }) ?? [];
-        if (authoredAdoptionRows.length === 0) {
+        if (requiredEvidenceSources.size > 0 && authoredAdoptionRows.length === 0) {
           issues.push(
             issue(
               "error",
@@ -210,6 +210,22 @@ if (hasDesignState) {
                 "error",
                 "design_room.reference_evidence_required_source_missing",
                 `A source marked required needs its own complete adopted-or-rejected evidence row: ${requiredSource}.`,
+                rel(args.root, contractPath),
+              ),
+            );
+          }
+        }
+        const highImpactRows = authoredAdoptionRows.filter((row) =>
+          isHighImpactDecision(normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")])),
+        );
+        if (highImpactRows.length > 0) {
+          const highImpactSources = new Set(highImpactRows.map((row) => normalizedCell(row[adoptionTable!.headers.indexOf("source")]).toLowerCase()));
+          if (highImpactSources.size < 2) {
+            issues.push(
+              issue(
+                "error",
+                "design_room.reference_evidence_high_impact_sources_missing",
+                "Onboarding, paywall, core-loop, AI-trust, and store-first-frame decisions need complete evidence rows from two complementary sources.",
                 rel(args.root, contractPath),
               ),
             );
@@ -445,6 +461,10 @@ function normalizedCell(value: string | undefined): string {
 
 function isAuthoredEvidenceCell(value: string): boolean {
   return value.length > 0 && !containsTemplatePlaceholder(value) && !/^not reviewed$/i.test(value);
+}
+
+function isHighImpactDecision(value: string): boolean {
+  return /\bonboarding\b|\bpaywall\b|\bcore[- ]loop\b|\bai[- ]trust\b|\bstore\b.*\bfirst[- ]frame\b|\bfirst[- ]frame\b.*\bstore\b/i.test(value);
 }
 
 function containsTemplatePlaceholder(value: string): boolean {
