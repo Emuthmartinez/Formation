@@ -9,6 +9,20 @@ const args = parseDesignCliArgs(process.argv.slice(2));
 const issues: Issue[] = [];
 const designArtifacts = collectDesignArtifacts(args.root);
 const hasDesignState = existsSync(args.statePath) && existsSync(args.tokensPath);
+const requiredContractSections = [
+  "Source Ownership",
+  "Product Experience",
+  "Audience And Identity",
+  "Reference Evidence",
+  "Visual Direction",
+  "Interaction System",
+  "Onboarding",
+  "Motion and haptics",
+  "Cross-Surface Direction",
+  "Accessibility",
+  "Implementation Rules",
+  "Decision Log",
+];
 
 if (designArtifacts.length > 0 && !hasDesignState) {
   issues.push(
@@ -33,21 +47,7 @@ if (hasDesignState) {
     issues.push(issue("error", "design_room.contract_missing", "design/design.md is required for all product design work.", rel(args.root, contractPath)));
   } else {
     const contract = readFileSync(contractPath, "utf8");
-    const requiredSections = [
-      "Source Ownership",
-      "Product Experience",
-      "Audience And Identity",
-      "Reference Evidence",
-      "Visual Direction",
-      "Interaction System",
-      "Onboarding",
-      "Motion and haptics",
-      "Cross-Surface Direction",
-      "Accessibility",
-      "Implementation Rules",
-      "Decision Log",
-    ];
-    for (const section of requiredSections) {
+    for (const section of requiredContractSections) {
       if (!new RegExp(`^#{2,3} ${escapeRegExp(section)}\\s*$`, "im").test(contract)) {
         issues.push(
           issue("error", "design_room.contract_section_missing", `design/design.md must include the section: ${section}.`, rel(args.root, contractPath)),
@@ -399,8 +399,8 @@ for (const artifact of designArtifacts) {
 reportAndExit("Design Room contract validation", issues);
 
 /**
- * Full body of an H2 or H3 section: heading line to the next heading at the
- * same or a higher level, or end of file. Line-based on purpose — a lazy regex with the m flag lets
+ * Full body of an H2 or H3 section: heading line to the next required contract
+ * section or heading at the same or a higher level, or end of file. Line-based on purpose — a lazy regex with the m flag lets
  * `$` match the first line end, silently truncating the body to one line.
  */
 function sectionBody(contract: string, section: string): string | undefined {
@@ -414,8 +414,10 @@ function sectionBody(contract: string, section: string): string | undefined {
   const depth = startMatch[1]!.length;
   let end = lines.length;
   for (let index = start + 1; index < lines.length; index += 1) {
-    const heading = (lines[index] ?? "").trim().match(/^(#{2,6})\s+/);
-    if (heading && heading[1]!.length <= depth) {
+    const heading = (lines[index] ?? "").trim().match(/^(#{2,6})\s+(.+?)\s*$/);
+    const startsRequiredSection =
+      heading !== null && requiredContractSections.some((required) => required.toLowerCase() === heading[2]!.toLowerCase());
+    if (heading && (heading[1]!.length <= depth || startsRequiredSection)) {
       end = index;
       break;
     }

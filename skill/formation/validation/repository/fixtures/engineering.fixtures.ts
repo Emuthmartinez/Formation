@@ -282,6 +282,19 @@ export function register(h: Harness): void {
   }
   runFixture("authored audience row citing research passes", designRoomAudienceTraced, "check-design-room-contract.ts", 0);
 
+  const designRoomNestedEvidence = makeFixture("design-room-nested-reference-evidence");
+  {
+    const contractPath = path.join(designRoomNestedEvidence, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8").replace("## Reference Evidence", "### Reference Evidence");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "nested Reference Evidence does not become an authored audience row",
+    designRoomNestedEvidence,
+    "check-design-room-contract.ts",
+    0,
+  );
+
   const designRoomAudienceTableGone = makeFixture("design-room-audience-table-gone");
   {
     const contractPath = path.join(designRoomAudienceTableGone, "design/design.md");

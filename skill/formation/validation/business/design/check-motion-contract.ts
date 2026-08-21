@@ -126,9 +126,15 @@ if (designContract !== undefined) {
       "Low-power fallback",
     ];
     const liveEffectRows = markdownTableRows(liveEffectBody ?? "", liveEffectHeaders);
+    const recipeIndex = liveEffectHeaders.indexOf("Recipe");
     if (
       liveEffectRows.length === 0 ||
-      liveEffectRows.some((row) => row.length !== liveEffectHeaders.length || row.some((cell) => !isAuthoredLiveEffectCell(cell)))
+      liveEffectRows.some(
+        (row) =>
+          row.length !== liveEffectHeaders.length ||
+          row.some((cell) => !isAuthoredLiveEffectCell(cell)) ||
+          !/^(?:R1[5-8]|none)$/i.test((row[recipeIndex] ?? "").trim()),
+      )
     ) {
       issues.push(
         issue(
