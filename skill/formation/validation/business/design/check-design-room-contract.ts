@@ -279,6 +279,7 @@ if (hasDesignState) {
         const evidenceSourcesBySurface = new Map<string, Set<string>>();
         const fallbackIdentitiesBySurface = new Map<string, Set<string>>();
         const categoriesBySurface = new Map<string, Set<string>>();
+        const routedSourcesBySurface = new Map<string, Set<string>>();
         for (const row of authoredAdoptionRows) {
           const decision = normalizedCell(row[adoptionTable!.headers.indexOf("surface or decision")]).toLowerCase();
           const evidenceSource = normalizedCell(row[adoptionTable!.headers.indexOf("source")]);
@@ -286,9 +287,12 @@ if (hasDesignState) {
           const surface = normalizedCell(row[adoptionTable!.headers.indexOf("surface key")]).toLowerCase();
           const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
           if (requiredEvidenceSources.has(source)) sources.add(source);
+          const routedSources = routedSourcesBySurface.get(surface) ?? new Set<string>();
+          for (const routedSource of requiredSourcesForSurface(`${surface} ${decision}`)) routedSources.add(routedSource);
+          routedSourcesBySurface.set(surface, routedSources);
           const fallbackIdentities = fallbackIdentitiesBySurface.get(surface) ?? new Set<string>();
           const fallbackIdentity = canonicalEvidenceSource(evidenceSource);
-          const fallbackCandidateSources = [...new Set([...requiredSourcesForSurface(surface), ...evidenceSourceStatuses.keys()])];
+          const fallbackCandidateSources = [...new Set([...routedSources, ...evidenceSourceStatuses.keys()])];
           for (const routedSource of fallbackCandidateSources) {
             if (
               !sources.has(routedSource) &&
@@ -311,7 +315,7 @@ if (hasDesignState) {
           let allScopedSurfacesHaveEvidence = true;
           for (const surface of scopedSurfaceKeys) {
             const sources = evidenceSourcesBySurface.get(surface) ?? new Set<string>();
-            const routedSources = requiredSourcesForSurface(surface);
+            const routedSources = [...new Set([...requiredSourcesForSurface(surface), ...(routedSourcesBySurface.get(surface) ?? [])])];
             const missingRoutedSources = routedSources.filter((source) => !sources.has(source));
             if (sources.size === 0) allScopedSurfacesHaveEvidence = false;
             if (missingRoutedSources.length > 0) {

@@ -1129,6 +1129,33 @@ export function register(h: Harness): void {
     );
   }
 
+  const designRoomGenericSurfaceConcreteDecision = makeFixture("design-room-reference-evidence-generic-surface-concrete-decision");
+  {
+    const statePath = path.join(designRoomGenericSurfaceConcreteDecision, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomGenericSurfaceConcreteDecision, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: profile.settings")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, "| Design Spells | required | Settings craft proof is needed. | toggle feedback | 2026-08-20 |")
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Notification toggle state contract | Design Spells | Feedback makes the setting change visible. | Adopt | Keep it within Formation tokens. | surfaces.mobileApp.profile | Device review | profile.settings |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a concrete component decision routes its generic surface to UI Playbook",
+    designRoomGenericSurfaceConcreteDecision,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
   const designRoomSignInWrongSource = makeFixture("design-room-reference-evidence-sign-in-wrong-source");
   {
     const statePath = path.join(designRoomSignInWrongSource, "studio/seed/business.json");
