@@ -311,6 +311,31 @@ export function register(harness: Harness): void {
     );
     assert((run.nodes[productId]!.dependencyRefreshCycles?.length ?? 0) === 0, "a failed scoped refresh must reopen its consumer for a later retry");
 
+    const { run: verifiedRollbackRun } = seedFor([], plan);
+    const acceptedAttempt = beginAttempt(plan, verifiedRollbackRun, researchId, "session-original-producer", plusSeconds(now, 4));
+    reconcilePatch(
+      plan,
+      verifiedRollbackRun,
+      {
+        nodeId: researchId,
+        attemptId: acceptedAttempt.id,
+        outputs: [{ artifactId: "artifact.research-brief", path: "research/brief.md", fingerprint: "sha256:accepted", evidence: ["accepted original"] }],
+      },
+      plusSeconds(now, 5),
+    );
+    acceptVerification(plan, verifiedRollbackRun, researchId, ["independent review"], plusSeconds(now, 6), "session-original-reviewer");
+    assert(
+      refreshDependenciesBeforeFrontier(plan, verifiedRollbackRun, plusSeconds(now, 7)).includes(researchId),
+      "verified proof must enter a scoped refresh",
+    );
+    const rejectedRefresh = beginAttempt(plan, verifiedRollbackRun, researchId, "session-refresh-producer", plusSeconds(now, 8));
+    rejectedRefresh.status = "failed";
+    restoreDependencyRefreshAfterFailure(plan, verifiedRollbackRun, researchId, plusSeconds(now, 9));
+    const restoredResults = buildBoundaryResults(plan, verifiedRollbackRun);
+    const restoredResult = restoredResults.find((result) => result.workflowId === "workflow.research-scan");
+    assert(restoredResult?.attemptId === acceptedAttempt.id, "rollback must export the original accepted attempt rather than the later failed refresh");
+    assert(restoredResult?.verifiedBySessionId === "session-original-reviewer", "rollback must preserve the original independent verifier provenance");
+
     const { run: initiallyPending } = seedFor([], plan);
     assert(refreshDependenciesBeforeFrontier(plan, initiallyPending, now).length === 0, "a dependency that has not run yet must not consume the refresh cycle");
     assert(

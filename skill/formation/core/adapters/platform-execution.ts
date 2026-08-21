@@ -257,13 +257,15 @@ export function buildBoundaryResults(plan: CompiledPlan, run: RunStateDocument):
   for (const node of plan.nodes) {
     const state = run.nodes[node.id];
     if (!state || state.status !== "succeeded") continue;
-    const attempt = state.attempts.at(-1);
-    if (!attempt || attempt.status !== "succeeded") continue;
-
     const bindings = node.outputs.map((artifactId) =>
-      run.artifactBindings.find((candidate) => candidate.artifactId === artifactId && candidate.attemptId === attempt.id && candidate.accepted === true),
+      run.artifactBindings.find((candidate) => candidate.artifactId === artifactId && candidate.accepted === true),
     );
     if (bindings.some((binding) => binding === undefined || !binding.fingerprint)) continue;
+    const acceptedAttemptIds = new Set(bindings.map((binding) => binding!.attemptId).filter((attemptId): attemptId is string => Boolean(attemptId)));
+    if (acceptedAttemptIds.size !== 1) continue;
+    const acceptedAttemptId = [...acceptedAttemptIds][0]!;
+    const attempt = state.attempts.find((candidate) => candidate.id === acceptedAttemptId);
+    if (!attempt || attempt.status !== "succeeded") continue;
 
     // Fresh-context verification is only independent when the recorded verifier is a DIFFERENT
     // session from the producing attempt's owner. A result with no recorded verifier, or one

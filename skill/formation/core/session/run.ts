@@ -720,6 +720,7 @@ async function main(): Promise<number> {
      */
     const verifierSessionId = `${sessionId}.verifier`;
     const scopedRefreshDependencyIds = new Set<RunNodeId>();
+    const failedScopedRefreshDependencyIds = new Set<RunNodeId>();
     const runVerificationSweep = async (): Promise<number> => {
       if (!verifier) return 0;
       const pending = listPendingFreshContext(plan, run).filter((nodeId) => {
@@ -835,10 +836,20 @@ async function main(): Promise<number> {
       // dependency proof, so a newly deferred/not-needed consumer cannot spend a refresh attempt.
       reconcileWorkflowApplicability(plan, run, businessState, sessionNow());
       const activeScopeHints = brief?.scopeHints;
-      const scopedRefreshConsumers =
+      const scopedRefreshConsumers: Set<RunNodeId> | undefined =
         activeScopeHints && activeScopeHints.length > 0
           ? new Set(plan.nodes.filter((node) => nodeInScope(activeScopeHints, node.domainId, node.workflowId)).map((node) => node.id))
-          : undefined;
+          : failedScopedRefreshDependencyIds.size > 0
+            ? new Set(plan.nodes.map((node) => node.id))
+            : undefined;
+      if (scopedRefreshConsumers && failedScopedRefreshDependencyIds.size > 0) {
+        for (const consumerId of [...scopedRefreshConsumers]) {
+          const consumerNode = plan.nodes.find((node) => node.id === consumerId);
+          if (consumerNode?.refreshDependencies.some((refresh) => failedScopedRefreshDependencyIds.has(refresh.nodeId))) {
+            scopedRefreshConsumers.delete(consumerId);
+          }
+        }
+      }
       if (scopedRefreshConsumers) {
         for (const consumerId of scopedRefreshConsumers) {
           const consumerNode = plan.nodes.find((node) => node.id === consumerId);
@@ -1059,6 +1070,7 @@ async function main(): Promise<number> {
             attempt.finishedAt = finishedAt;
             attempt.error = result.error;
             const restoredRefresh = restoreDependencyRefreshAfterFailure(plan, run, nodeId, finishedAt);
+            if (restoredRefresh) failedScopedRefreshDependencyIds.add(nodeId);
             if (!restoredRefresh && failedState) {
               failedState.refreshInstructions = undefined;
               failedState.status = "failed";

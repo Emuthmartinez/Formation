@@ -479,7 +479,6 @@ export function refreshDependenciesBeforeFrontier(
       lockedDependencies.add(dependencyId);
       dependency.status = "stale";
       dependency.blocker = undefined;
-      dependency.verifiedBySessionId = undefined;
       dependency.refreshInstructions = [refresh.instructions];
       for (const binding of run.artifactBindings) {
         if (!dependencyNode?.outputs.some((artifactId) => artifactId === binding.artifactId)) continue;
