@@ -594,18 +594,24 @@ function parseSurfaceKeys(value: string): string[] {
 function requiredSourcesForSurface(surface: string): string[] {
   const sources = new Set<string>();
   if (/\b(?:motion|gesture|transition|loading)\b/i.test(surface)) sources.add("60fps.design");
-  if (/\b(?:ai|consent|authentication|sign[-.]?in|permissions?|sensitive[-.]data)\b/i.test(surface)) sources.add("catalogue.projectsbyif.com");
+  if (/\b(?:ai|automation|trust|consent|authentication|sign[-.]?in|permissions?|sensitive[-.]data|user[-.]control|takeover|recovery|agency)\b/i.test(surface)) {
+    sources.add("catalogue.projectsbyif.com");
+  }
   if (/\b(?:onboarding|paywall|checkout|retention|referral)\b/i.test(surface)) {
     sources.add("abtest.design");
     sources.add("uxsnaps");
   }
-  if (/\bcore[-.]loop\b|\bcore[-.]journey\b|\binformation[-.]hierarchy\b/i.test(surface)) sources.add("uxsnaps");
-  if (/\b(?:delight|success|empty[-.]state|magical[-.]moment)\b/i.test(surface)) sources.add("design spells");
+  if (/\b(?:conversion|engagement|monetization)\b/i.test(surface)) sources.add("abtest.design");
+  if (/\b(?:journey|dashboard|content[-.]discovery|flow[-.]critique)\b|\binformation[-.]hierarchy\b/i.test(surface)) sources.add("uxsnaps");
+  if (/\b(?:delight|personality|micro[-.]interaction|success|empty[-.]state|magical[-.]moment|surprise)\b/i.test(surface)) {
+    sources.add("design spells");
+  }
   if (/\b(?:standard|control|overlay|input|notification|component)\b/i.test(surface)) sources.add("ui playbook");
   return [...sources];
 }
 
 function isAcceptedFallbackSource(routedSource: string, evidenceSource: string): boolean {
+  if (isOfficialPlatformGuidance(evidenceSource)) return true;
   if (routedSource === "60fps.design") {
     return /(?:^|\/)motion-craft-benchmarks\.md$/i.test(evidenceSource);
   }
@@ -613,6 +619,12 @@ function isAcceptedFallbackSource(routedSource: string, evidenceSource: string):
     return /(?:^|\/)(?:emotional-design-system|emotional-experience-design)\.md$/i.test(evidenceSource);
   }
   return false;
+}
+
+function isOfficialPlatformGuidance(evidenceSource: string): boolean {
+  return /https?:\/\/(?:developer\.apple\.com|developer\.android\.com|m3\.material\.io|material\.io|learn\.microsoft\.com|www\.w3\.org\/wai\/(?:aria|apg))(?:[)/]|$)/i.test(
+    evidenceSource,
+  );
 }
 
 function hasComplementaryEvidence(category: string, sources: Set<string>): boolean {

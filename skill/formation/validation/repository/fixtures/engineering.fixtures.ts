@@ -1054,6 +1054,100 @@ export function register(h: Harness): void {
     "design_room.reference_evidence_routed_sources_missing",
   );
 
+  for (const [scope, decision] of [
+    ["account.recovery", "Account recovery"],
+    ["automation.takeover", "Automation takeover"],
+    ["user-control.permissions", "User control permissions"],
+  ] as const) {
+    const designRoomTrustRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomTrustRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomTrustRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| UI Playbook \|.*$/m, `| UI Playbook | required | ${decision} component proof is needed. | recovery control | 2026-08-20 |`)
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${decision} | UI Playbook | Standard controls expose the current state. | Adopt | Keep the state explicit. | surfaces.mobileApp.trust | Scenario review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${decision} surfaces require their routed trust catalogue evidence`,
+      designRoomTrustRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  for (const [scope, decision] of [
+    ["engagement.streak", "Engagement streak"],
+    ["monetization.offer", "Monetization offer"],
+  ] as const) {
+    const designRoomExperimentRouteMissing = makeFixture(`design-room-reference-evidence-${scope.replaceAll(".", "-")}-missing`);
+    const statePath = path.join(designRoomExperimentRouteMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomExperimentRouteMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", `Change scope: ${scope}`)
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(/^\| Design Spells \|.*$/m, `| Design Spells | required | ${decision} craft proof is needed. | feedback treatment | 2026-08-20 |`)
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        `| ${decision} | Design Spells | Feedback can make progress visible. | Adopt | Keep feedback subordinate to comprehension. | surfaces.mobileApp.growth | Audience review | ${scope} |`,
+      );
+    writeFileSync(contractPath, contract, "utf8");
+    runFixture(
+      `${decision} surfaces require their routed experiment evidence`,
+      designRoomExperimentRouteMissing,
+      "check-design-room-contract.ts",
+      1,
+      "design_room.reference_evidence_routed_sources_missing",
+    );
+  }
+
+  const designRoomOfficialGuidanceFallback = makeFixture("design-room-reference-evidence-official-guidance-fallback");
+  {
+    const statePath = path.join(designRoomOfficialGuidanceFallback, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "rendered";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomOfficialGuidanceFallback, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: standard.input")
+      .replaceAll("| Not reviewed |", "| not applicable |")
+      .replace(
+        /^\| UI Playbook \|.*$/m,
+        "| UI Playbook | unavailable | The component catalogue cannot be reached in this runtime. | Not applicable | Not applicable |",
+      )
+      .replace(
+        "| Not defined | Not captured | Not captured | Not defined | Not defined | Not defined | Not defined | Not defined |",
+        "| Standard input | https://www.w3.org/WAI/ARIA/apg/patterns/textbox/ | The textbox pattern defines keyboard and semantic behavior. | Adopt | Preserve native semantics and Formation tokens. | surfaces.mobileApp.input | Keyboard and screen-reader review | standard.input |",
+      );
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "an unavailable routed source accepts current official platform guidance",
+    designRoomOfficialGuidanceFallback,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.contract_placeholder",
+    [],
+    undefined,
+    "design_room.reference_evidence_routed_sources_missing",
+  );
+
   const designRoomScopedSurfaceMismatch = makeFixture("design-room-reference-evidence-scoped-surface-mismatch");
   {
     const statePath = path.join(designRoomScopedSurfaceMismatch, "studio/seed/business.json");
