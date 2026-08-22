@@ -86,6 +86,16 @@ sources:
     locations:
       - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Auto-discovered from recently added repository content.
+  - id: developer-apple-com-app-store-submitting
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/app-store/submitting
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/knowledge/store/apple-signing-release.md
+      - skill/formation/workspace/business/store/APPLE_SIGNING.md
+    notes: Auto-discovered from recently added repository content.
   - id: developer-apple-com-documentation-bundleresources-adding-a-privacy-manifest-to
     name: developer.apple.com
     source_type: official_docs
@@ -112,6 +122,24 @@ sources:
     owner: source-freshness
     locations:
       - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
+    notes: Auto-discovered from recently added repository content.
+  - id: developer-apple-com-documentation-bundleresources-information-property-list-cfbu
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleshortversionstring
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/knowledge/store/apple-signing-release.md
+    notes: Auto-discovered from recently added repository content.
+  - id: developer-apple-com-documentation-bundleresources-information-property-list-cfbu-2
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleversion
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/knowledge/store/apple-signing-release.md
     notes: Auto-discovered from recently added repository content.
   - id: developer-apple-com-documentation-bundleresources-information-property-list-nsu
     name: developer.apple.com
@@ -140,6 +168,16 @@ sources:
     locations:
       - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Official Apple documentation for protected-resource purpose strings and related Info.plist keys.
+  - id: developer-apple-com-forums-thread-50931
+    name: Apple Developer Forums version-number thread
+    source_type: website
+    url: https://developer.apple.com/forums/thread/50931
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/knowledge/store/apple-signing-release.md
+      - skill/formation/workspace/business/store/APPLE_SIGNING.md
+    notes: Historical community failure evidence for leading-zero version collisions. It is not policy; current Apple documentation remains authoritative.
   - id: developer-apple-com-help-app-store-connect-manage-builds-upload-builds
     name: developer.apple.com
     source_type: official_docs
@@ -149,6 +187,25 @@ sources:
     locations:
       - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Official App Store Connect documentation for uploading and processing builds.
+  - id: developer-apple-com-help-app-store-connect-update-your-app-create-a-new-version
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/help/app-store-connect/update-your-app/create-a-new-version
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/knowledge/store/apple-signing-release.md
+    notes: Auto-discovered from recently added repository content.
+  - id: developer-apple-com-news-upcoming-requirements
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/news/upcoming-requirements
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/knowledge/store/apple-signing-release.md
+      - skill/formation/workspace/business/store/APPLE_SIGNING.md
+    notes: Auto-discovered from recently added repository content.
   - id: developer-apple-com-support-third-party-sdk-requirements
     name: developer.apple.com
     source_type: official_docs
@@ -158,6 +215,16 @@ sources:
     locations:
       - skill/formation/workspace/business/store/APPLE_APP_STORE_REQUIREMENTS.md
     notes: Official Apple list of third-party SDKs requiring privacy manifests and SDK signatures.
+  - id: developer-apple-com-xcode-system-requirements
+    name: developer.apple.com
+    source_type: official_docs
+    url: https://developer.apple.com/xcode/system-requirements
+    refresh_cadence_days: 7
+    owner: source-freshness
+    locations:
+      - skill/formation/knowledge/store/apple-signing-release.md
+      - skill/formation/workspace/business/store/APPLE_SIGNING.md
+    notes: Auto-discovered from recently added repository content.
   - id: doc-refero-design-llms-txt
     name: doc.refero.design
     source_type: website
@@ -280,18 +347,8 @@ sources:
     owner: design
     locations:
       - skill/formation/catalog/knowledge/design/design-editorial-scrollytelling.yaml
-    notes: Practice evidence for semantic story anchors and code-native visual states. The catalog manifest pins the
-      audited commit; future refreshes must transfer mechanics only.
-  - id: github-eduardomuth-site
-    name: Eduardo Martinez portfolio website repository
-    source_type: github
-    url: https://github.com/Emuthmartinez/eduardomuth-site
-    refresh_cadence_days: 90
-    owner: design
-    locations:
-      - skill/formation/catalog/knowledge/design/design-editorial-scrollytelling.yaml
-    notes: First-party practice evidence for measured step-center control and responsive scrollytelling. The catalog
-      manifest pins the audited commit; future refreshes must transfer mechanics only.
+    notes: Practice evidence for semantic story anchors and code-native visual states. The catalog manifest pins the audited
+      commit; future refreshes must transfer mechanics only.
   - id: github-com-general-legal-legal-templates
     name: General Legal template collection
     source_type: attorney_template_repository
@@ -460,6 +517,16 @@ sources:
     locations:
       - docs/brainstorms/business-lifecycle-graph-north-star.md
     notes: Auto-discovered from recently added repository content.
+  - id: github-eduardomuth-site
+    name: Eduardo Martinez portfolio website repository
+    source_type: github
+    url: https://github.com/Emuthmartinez/eduardomuth-site
+    refresh_cadence_days: 90
+    owner: design
+    locations:
+      - skill/formation/catalog/knowledge/design/design-editorial-scrollytelling.yaml
+    notes: First-party practice evidence for measured step-center control and responsive scrollytelling. The catalog
+      manifest pins the audited commit; future refreshes must transfer mechanics only.
   - id: github-raw-b2c-launch-skill-version-main
     name: formation skill version manifest
     source_type: raw_manifest

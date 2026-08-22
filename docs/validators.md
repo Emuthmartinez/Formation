@@ -151,6 +151,7 @@ npm run validate:launch-state -- --root /path/to/app
 | Command | What it checks |
 | --- | --- |
 | `check:apple-requirements` | Privacy manifests, required-reason APIs, third-party SDK manifests and signatures, Xcode privacy report reconciliation, App Privacy URLs and labels, purpose strings, ATT, account deletion, review notes, and archive gates |
+| `check:apple-release-readiness` | Strict release-node wrapper that also requires current Apple signing evidence, structurally matched bundle/version/build identity, pre-archive items 1–6, and new-archive item 7 before export or upload |
 | `check:store-console` | App Store Connect and Google Play packet coverage and founder-facing console requirements |
 | `check:store-screenshots` | `SCREENSHOTS.md`, raw versus composed separation, export routing, iPhone/iPad/Play wells, App Icon and App Preview routing, copy overlays, and visual QA proof |
 | `check:asc-command-contract` | Rejects known-invalid stored `asc` command forms and, when `asc` is installed, checks the documented contract against live local help |

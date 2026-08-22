@@ -16,6 +16,15 @@
     "Required real non-future calendar dates across new signal and offer-test records, and required superseded signal records to resolve to a distinct declared replacement.",
     "Added a strict research workflow-output gate, bounded whole-number offer measurements by exposure, and required signal supersession chains to be acyclic and terminate at usable evidence.",
     "Added an exact fence-aware Markdown table adapter and required every manual-loop, offer-decision, measurement, and waiver row to stay structurally valid instead of selecting one valid-looking row.",
-    "Limited cooperative-yield verification to exact fresh-context attempts produced by completed batches, and made Signal Corpus not-applicable status parsing fence-aware and fail-closed for duplicate or malformed declarations."
+    "Limited cooperative-yield verification to exact fresh-context attempts produced by completed batches, and made Signal Corpus not-applicable status parsing fence-aware and fail-closed for duplicate or malformed declarations.",
+    "Added a release-date Apple source gate that checks live upcoming requirements, submission baselines, Xcode compatibility, and upload guidance against the local build host before each archive.",
+    "Added compiled-archive bundle, version, and build reconciliation with App Store Connect, including a guard against leading-zero version segments.",
+    "Kept the supplied Apple Developer Forums thread as historical failure evidence while routing policy decisions to current official Apple documentation.",
+    "Extended the Apple signing workspace packet, workflow contract, validator fixtures, and LaunchBench coverage to enforce the seven-item release preflight.",
+    "Rejected unchanged Apple signing scaffolds and required ISO-dated, resolved pass evidence for every release preflight item.",
+    "Split intended pre-archive checks from new-archive inspection, attached the validator to the release workflow, and rejected stale or contradictory sign-off evidence.",
+    "Added a strict release-node gate and structural bundle, version, and build comparison so unresolved or mismatched identity evidence cannot pass by label alone.",
+    "Ordered privacy proof before signing verification and bound post-archive approval to the current archive path, creation timestamp, and Info.plist fingerprint.",
+    "Verified release evidence against the real compiled archive, separated build uniqueness from App Store Connect equality, and rejected negated readiness states."
   ]
 }
