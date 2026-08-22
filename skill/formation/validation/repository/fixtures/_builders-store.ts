@@ -36,21 +36,25 @@ export function writeCompleteAppleSigning(root: string): void {
       "Distribution certificate and provisioning profile are present.",
       "Archive, export, upload, and TestFlight proof are recorded.",
       "A simulator build alone is not distribution readiness.",
-      "Live Apple Release Baseline: Upcoming Requirements, App Store submission, Xcode system requirements, and Upload builds were checked on the archive date.",
+      "Live Apple Release Baseline: Upcoming Requirements (https://developer.apple.com/news/upcoming-requirements/), App Store submission, Xcode system requirements, and Upload builds were checked on 2026-08-21.",
       "Local compatibility was verified with xcodebuild -version and xcodebuild -showsdks.",
       "Version And Build Identity: CFBundleIdentifier, CFBundleShortVersionString, and CFBundleVersion were read from the compiled archive and matched to App Store Connect.",
       "The version uses three integer segments with no leading zeroes; the version/build combination is unique.",
-      "Pre-Archive/Export/Upload Preflight sign-off:",
-      "SDK key injection into Info.plist verified with plutil -p on the compiled archive: pass.",
-      "plutil -lint on PrivacyInfo.xcprivacy: ok.",
-      "exportArchive uses -authenticationKeyPath, -authenticationKeyID, and -authenticationKeyIssuerID: ready.",
-      "Screenshot dimension floor check (raw capture meets device well minimum, no upscaling): pass.",
+      "Pre-archive/export/upload preflight (sign-off recorded 2026-08-21):",
+      "1. Live Apple release sources and local Xcode/SDK compatibility: pass.",
+      "2. Archive bundle ID, version, and build identity against App Store Connect: pass.",
+      "3. SDK keys in Info.plist verified with plutil -p on the compiled archive: pass.",
+      "4. plutil -lint PrivacyInfo.xcprivacy (valid plist, not JSON): ok.",
+      "5. NSPrivacyAccessedAPITypes coverage audited against actual API usage: pass.",
+      "6. exportArchive API key auth flags (-authenticationKeyPath, -authenticationKeyID, -authenticationKeyIssuerID): ready.",
+      "7. Screenshot dimension floor (raw captures meet device-well minimum, no upscaling): pass.",
     ].join("\n"),
     "utf8",
   );
 }
 
 export function writeCompleteAppleRequirements(root: string): void {
+  writeCompleteAppleSigning(root);
   mkdirSync(path.join(root, "ios", "App"), { recursive: true });
   writeFileSync(
     path.join(root, "ios", "App", "PrivacyInfo.xcprivacy"),

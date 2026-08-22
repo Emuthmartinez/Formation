@@ -9,6 +9,7 @@ import {
   writeCompleteStoreConsole,
   writeCompleteStoreScreenshots,
   writeState,
+  skillRoot,
 } from "./_harness.js";
 
 export function register(h: Harness): void {
@@ -252,6 +253,21 @@ export function register(h: Harness): void {
     "check-apple-app-store-requirements.ts",
     1,
     "apple_requirements.privacy_manifest_file_missing",
+  );
+
+  const readyAppleRequirementsScaffoldSigning = makeFixture("apple-requirements-scaffold-signing");
+  writeCompleteAppleRequirements(readyAppleRequirementsScaffoldSigning);
+  writeFileSync(
+    path.join(readyAppleRequirementsScaffoldSigning, "store/APPLE_SIGNING.md"),
+    readFileSync(path.join(skillRoot, "workspace/business/store/APPLE_SIGNING.md"), "utf8"),
+    "utf8",
+  );
+  runFixture(
+    "ready Apple requirements with unchanged signing scaffold fails",
+    readyAppleRequirementsScaffoldSigning,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_unresolved_template",
   );
 
   const iosOnlyStore = makeFixture("store-ios-only");

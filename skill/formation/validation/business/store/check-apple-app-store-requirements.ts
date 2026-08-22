@@ -128,6 +128,73 @@ function checkUnresolvedLines(markdown: string): void {
   }
 }
 
+function hasUnresolvedTemplateState(markdown: string): boolean {
+  return /\{\{[^{}\r\n]+\}\}/.test(markdown) || /^\s*Status\s*:\s*(?:scaffold|draft|template)\s*$/im.test(markdown);
+}
+
+function isValidIsoDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) {
+    return false;
+  }
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+function checkResolvedAppleSignOff(markdown: string): void {
+  if (hasUnresolvedTemplateState(markdown)) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.signing_unresolved_template",
+        "A ready Apple submission cannot use scaffold status or unresolved {{...}} values in store/APPLE_SIGNING.md.",
+        signingRelative,
+      ),
+    );
+  }
+
+  const signOffMatch = /Pre-archive\/export\/upload preflight\s*\(sign-off recorded(?: on)?\s+(\d{4}-\d{2}-\d{2})\)\s*:/i.exec(markdown);
+  const signOffDate = signOffMatch?.[1];
+  if (!signOffDate || !isValidIsoDate(signOffDate)) {
+    issues.push(
+      issue(
+        "error",
+        "apple_requirements.signing_date_missing",
+        "A ready Apple submission needs an ISO-dated pre-archive/export/upload sign-off in store/APPLE_SIGNING.md (YYYY-MM-DD).",
+        signingRelative,
+      ),
+    );
+  }
+
+  const checks = [
+    ["Live Apple release sources", "Xcode/SDK compatibility"],
+    ["Archive bundle ID", "version", "build identity", "App Store Connect"],
+    ["SDK keys", "Info.plist", "compiled archive"],
+    ["plutil -lint", "PrivacyInfo.xcprivacy"],
+    ["NSPrivacyAccessedAPITypes", "actual API usage"],
+    ["exportArchive", "authenticationKeyPath", "authenticationKeyID", "authenticationKeyIssuerID"],
+    ["Screenshot dimension floor", "no upscaling"],
+  ];
+  const lines = markdown.split(/\r?\n/);
+
+  checks.forEach((requiredTerms, index) => {
+    const itemNumber = index + 1;
+    const line = lines.find((candidate) => new RegExp(`^\\s*${itemNumber}\\.\\s+`).test(candidate));
+    const hasRequiredTerms = Boolean(line && requiredTerms.every((term) => normalizedIncludes(line, term)));
+    const hasResolvedResult = Boolean(line && /:\s*(?:pass|ready|ok)\.?\s*$/i.test(line));
+    if (!line || !hasRequiredTerms || !hasResolvedResult || hasUnresolvedTemplateState(line)) {
+      issues.push(
+        issue(
+          "error",
+          `apple_requirements.signing_check_${itemNumber}_unresolved`,
+          `Apple pre-archive check ${itemNumber} needs resolved evidence and a terminal pass, ready, or ok result in store/APPLE_SIGNING.md.`,
+          signingRelative,
+        ),
+      );
+    }
+  });
+}
+
 const platforms = state
   ? asArray(getPath(state, "project.platforms"))
       .map((item) => asString(item)?.toLowerCase())
@@ -225,9 +292,20 @@ if (appleRequirementsSkipped) {
           );
         }
       }
+      checkResolvedAppleSignOff(signingText);
     }
 
     checkUnresolvedLines(text);
+    if (hasUnresolvedTemplateState(text)) {
+      issues.push(
+        issue(
+          "error",
+          "apple_requirements.requirements_unresolved_template",
+          "A ready Apple submission cannot use scaffold status or unresolved {{...}} values in store/APPLE_APP_STORE_REQUIREMENTS.md.",
+          relative,
+        ),
+      );
+    }
     const privacyManifests = findPrivacyManifests();
     if (privacyManifests.length === 0) {
       issues.push(
