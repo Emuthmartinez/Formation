@@ -85,7 +85,7 @@ export const workflows = [
     phaseIds: ["phase.3"],
     dependencies: ["workflow.store.app-store-listing-prep-packet"],
     outputPaths: ["store/APPLE_SIGNING.md"],
-    gates: ["check:apple-requirements"],
+    gates: ["check:apple-release-readiness"],
     providers: ["provider.app-store-connect"],
     founderOnlyActions: ["approve signing, upload, or submission actions not covered by an exact current standing envelope"],
     actionClass: "release",

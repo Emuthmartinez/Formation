@@ -9,6 +9,7 @@
     "Kept the supplied Apple Developer Forums thread as historical failure evidence while routing policy decisions to current official Apple documentation.",
     "Extended the Apple signing workspace packet, workflow contract, validator fixtures, and LaunchBench coverage to enforce the seven-item release preflight.",
     "Rejected unchanged Apple signing scaffolds and required ISO-dated, resolved pass evidence for every release preflight item.",
-    "Split intended pre-archive checks from new-archive inspection, attached the validator to the release workflow, and rejected stale or contradictory sign-off evidence."
+    "Split intended pre-archive checks from new-archive inspection, attached the validator to the release workflow, and rejected stale or contradictory sign-off evidence.",
+    "Added a strict release-node gate and structural bundle, version, and build comparison so unresolved or mismatched identity evidence cannot pass by label alone."
   ]
 }

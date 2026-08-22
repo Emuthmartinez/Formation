@@ -15,6 +15,7 @@ import {
 } from "../../../tooling/lib/launch-state.js";
 
 const args = parseCliArgs(process.argv.slice(2));
+const requireSigningReady = process.argv.slice(2).includes("--require-signing-ready");
 const loaded = loadProjectState(args);
 const issues = [...loaded.issues];
 const state = loaded.state;
@@ -149,6 +150,14 @@ function hasUnresolvedEvidence(value: string): boolean {
   return /\b(?:blocked|TBD|pending|unknown|missing|not configured|not set|placeholder|fill in|to fill|N\/A)\b/i.test(value);
 }
 
+function normalizedTableKey(value: string): string {
+  return value.replaceAll("`", "").trim().toLowerCase();
+}
+
+function isResolvedIdentityValue(value: string): boolean {
+  return Boolean(value.trim()) && !hasUnresolvedEvidence(value) && !hasUnresolvedTemplateState(value);
+}
+
 function checkResolvedAppleSignOff(markdown: string): void {
   if (hasUnresolvedTemplateState(markdown)) {
     issues.push(
@@ -231,9 +240,6 @@ function checkResolvedAppleSignOff(markdown: string): void {
     { terms: ["app-store/submitting"], dated: true },
     { terms: ["xcode/system-requirements"], dated: true },
     { terms: ["manage-builds/upload-builds"], dated: true },
-    { terms: ["CFBundleIdentifier"], dated: false },
-    { terms: ["CFBundleShortVersionString"], dated: false },
-    { terms: ["CFBundleVersion"], dated: false },
   ];
 
   detailedEvidence.forEach(({ terms, dated }, index) => {
@@ -250,6 +256,46 @@ function checkResolvedAppleSignOff(markdown: string): void {
           "error",
           `apple_requirements.signing_detail_${index + 1}_unresolved`,
           `Apple signing detail row ${index + 1} needs current, resolved evidence and a passing result in store/APPLE_SIGNING.md.`,
+          signingRelative,
+        ),
+      );
+    }
+  });
+
+  const tableRows = lines
+    .filter((line) => /^\s*\|/.test(line))
+    .map((line) =>
+      line
+        .split("|")
+        .slice(1, -1)
+        .map((cell) => cell.trim()),
+    );
+  const identitySpecs = [
+    { key: "CFBundleIdentifier", code: "bundle_id", validateFormat: (_value: string) => true },
+    {
+      key: "CFBundleShortVersionString",
+      code: "version",
+      validateFormat: (value: string) => /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/.test(value),
+    },
+    { key: "CFBundleVersion", code: "build", validateFormat: (_value: string) => true },
+  ];
+
+  identitySpecs.forEach(({ key, code, validateFormat }) => {
+    const cells = tableRows.find((row) => normalizedTableKey(row[0] ?? "") === key.toLowerCase());
+    const intended = cells?.[1] ?? "";
+    const compiled = cells?.[2] ?? "";
+    const appStoreConnect = cells?.[3] ?? "";
+    const result = cells?.[4] ?? "";
+    const values = [intended, compiled, appStoreConnect];
+    const valuesResolved = values.every(isResolvedIdentityValue);
+    const valuesMatch = valuesResolved && compiled === intended && appStoreConnect === intended;
+    const resultResolved = /^(?:pass|ready|ok|verified|matched|unique)\.?$/i.test(result) && !hasUnresolvedEvidence(result);
+    if (!cells || cells.length !== 5 || !valuesMatch || !validateFormat(intended) || !resultResolved) {
+      issues.push(
+        issue(
+          "error",
+          `apple_requirements.signing_identity_${code}_invalid`,
+          `${key} must have matching, resolved intended, compiled archive, and App Store Connect values plus a valid result in store/APPLE_SIGNING.md.`,
           signingRelative,
         ),
       );
@@ -346,7 +392,7 @@ if (appleRequirementsSkipped) {
     }
   }
 
-  if (readyClaim) {
+  if (readyClaim || requireSigningReady) {
     const signingReleasePhrases = [
       "Live Apple Release Baseline",
       "upcoming-requirements",

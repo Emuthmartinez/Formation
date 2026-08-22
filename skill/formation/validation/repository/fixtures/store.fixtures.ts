@@ -312,7 +312,7 @@ export function register(h: Harness): void {
     blockedAppleSigning,
     "check-apple-app-store-requirements.ts",
     1,
-    "apple_requirements.signing_detail_6_unresolved",
+    "apple_requirements.signing_identity_version_invalid",
   );
 
   const pendingAppleSigning = makeFixture("apple-requirements-pending-signing-status");
@@ -325,6 +325,66 @@ export function register(h: Harness): void {
     "check-apple-app-store-requirements.ts",
     1,
     "apple_requirements.signing_status_unresolved",
+  );
+
+  const strictCompleteAppleSigning = makeFixture("apple-requirements-strict-complete");
+  writeCompleteAppleRequirements(strictCompleteAppleSigning);
+  runFixture(
+    "strict Apple signing readiness accepts complete resolved evidence",
+    strictCompleteAppleSigning,
+    "check-apple-app-store-requirements.ts",
+    0,
+    undefined,
+    ["--require-signing-ready"],
+  );
+
+  const strictScaffoldAppleSigning = makeFixture("apple-requirements-strict-scaffold");
+  runFixture("default Apple template audit retains scaffold behavior", strictScaffoldAppleSigning, "check-apple-app-store-requirements.ts", 0);
+  runFixture(
+    "strict Apple signing readiness rejects unchanged scaffolds",
+    strictScaffoldAppleSigning,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_unresolved_template",
+    ["--require-signing-ready"],
+  );
+
+  const mismatchedBundleIdentity = makeFixture("apple-requirements-mismatched-bundle-identity");
+  writeCompleteAppleRequirements(mismatchedBundleIdentity);
+  const mismatchedBundleSigningPath = path.join(mismatchedBundleIdentity, "store/APPLE_SIGNING.md");
+  writeFileSync(
+    mismatchedBundleSigningPath,
+    readFileSync(mismatchedBundleSigningPath, "utf8").replace(
+      "| CFBundleIdentifier | com.example.fixture | com.example.fixture | com.example.fixture | matched |",
+      "| CFBundleIdentifier | com.example.fixture | com.example.compiled | com.example.fixture | matched |",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "Apple signing rejects mismatched intended and compiled bundle identity",
+    mismatchedBundleIdentity,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_identity_bundle_id_invalid",
+  );
+
+  const leadingZeroVersionIdentity = makeFixture("apple-requirements-leading-zero-version");
+  writeCompleteAppleRequirements(leadingZeroVersionIdentity);
+  const leadingZeroSigningPath = path.join(leadingZeroVersionIdentity, "store/APPLE_SIGNING.md");
+  writeFileSync(
+    leadingZeroSigningPath,
+    readFileSync(leadingZeroSigningPath, "utf8").replace(
+      "| CFBundleShortVersionString | 1.2.3 | 1.2.3 | 1.2.3 | matched |",
+      "| CFBundleShortVersionString | 1.02.3 | 1.02.3 | 1.02.3 | matched |",
+    ),
+    "utf8",
+  );
+  runFixture(
+    "Apple signing rejects leading zero version segments",
+    leadingZeroVersionIdentity,
+    "check-apple-app-store-requirements.ts",
+    1,
+    "apple_requirements.signing_identity_version_invalid",
   );
 
   const iosOnlyStore = makeFixture("store-ios-only");

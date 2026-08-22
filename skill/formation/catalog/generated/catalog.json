@@ -9015,7 +9015,7 @@
         "store/APPLE_SIGNING.md"
       ],
       "gateCommands": [
-        "check:apple-requirements"
+        "check:apple-release-readiness"
       ],
       "providerIds": [
         "provider.app-store-connect"
@@ -11824,6 +11824,13 @@
       "scriptPath": "validation/business/words/check-app-copy.ts",
       "ownerDomainId": "domain.words",
       "audit": "required"
+    },
+    {
+      "id": "gate.check-apple-release-readiness",
+      "command": "check:apple-release-readiness",
+      "scriptPath": "validation/business/store/check-apple-app-store-requirements.ts",
+      "ownerDomainId": "domain.store",
+      "audit": "excluded"
     },
     {
       "id": "gate.check-apple-requirements",

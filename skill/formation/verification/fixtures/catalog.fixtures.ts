@@ -482,8 +482,8 @@ export function register(harness: Harness): void {
     const appleSigning = catalog.workflows.find((wf) => wf.id === "workflow.store.apple-signing-and-release-readiness");
     assert(Boolean(landingBuild && landingPublish && appBuild && appleSigning), "expected local landing, landing publish, app build, and Apple signing workflows");
     assert(
-      appleSigning!.gateCommands.includes("check:apple-requirements"),
-      "Apple signing and release readiness must fail closed on the Apple requirements validator",
+      appleSigning!.gateCommands.includes("check:apple-release-readiness"),
+      "Apple signing and release readiness must fail closed on the strict Apple release validator",
     );
     assert(
       landingBuild!.dependencies.includes("workflow.design.design-room-state-mutate-version-render") &&
@@ -521,8 +521,8 @@ export function register(harness: Harness): void {
     const appleSigning = plan.nodes.find((node) => node.workflowId === "workflow.store.apple-signing-and-release-readiness");
     assert(Boolean(appleSigning), "compiled plan should include Apple signing and release readiness");
     assert(
-      appleSigning!.verification.kind === "deterministic" && appleSigning!.verification.gateIds.includes("check:apple-requirements"),
-      "Apple signing execution must carry check:apple-requirements as a deterministic gate",
+      appleSigning!.verification.kind === "deterministic" && appleSigning!.verification.gateIds.includes("check:apple-release-readiness"),
+      "Apple signing execution must carry check:apple-release-readiness as a deterministic gate",
     );
   });
 
