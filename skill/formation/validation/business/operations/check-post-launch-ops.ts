@@ -88,6 +88,7 @@ const requiredSections = [
   "Review Responses",
   "Release And Hotfix Cadence",
   "Retention Review",
+  "Manual Loop Proof",
   "Support Operations",
   "Launch Retro",
 ];
@@ -169,6 +170,70 @@ function parseLiveDate(raw: string): Date | undefined {
   if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== raw) return undefined;
   if (date.getTime() > Date.now()) return undefined;
   return date;
+}
+
+// A value-producing process is not safe to automate on a paper design alone. The runbook must
+// either prove one successful manual cycle or state why no such automation applies. This check is
+// separate from the weekly clock because the proof must exist before the first automated run.
+const manualProofSection = markdownSection(runbook, "Manual Loop Proof");
+if (manualProofSection) {
+  const applicability = manualProofSection.match(/^Applicability:\s*(.+)$/im)?.[1]?.trim() ?? "";
+  const notApplicable = applicability.match(/^not applicable\s*(?:—|-|:)\s*(.+)$/i);
+  const notApplicableReason = notApplicable?.[1]?.trim() ?? "";
+  const substantiveNotApplicableReason =
+    notApplicableReason.length >= 15 && !PLACEHOLDER_TEXT.test(notApplicableReason) && !/^(reason|none|not applicable|n\/a)$/i.test(notApplicableReason);
+  const applicable = /^applicable$/i.test(applicability);
+
+  if (!applicable && !substantiveNotApplicableReason) {
+    issues.push(
+      issue(
+        numbersSeverity,
+        "post_launch_ops.manual_loop_applicability_missing",
+        `${runbookPath}'s Manual Loop Proof must record "Applicability: applicable" or "Applicability: not applicable — <authored reason>". ` +
+          "A placeholder or option menu does not decide whether a value-producing process will be automated.",
+        runbookPath,
+      ),
+    );
+  } else if (applicable) {
+    const expectedHeaders = ["date", "process", "input", "output", "result", "cost", "failure mode", "automation decision"];
+    const lines = manualProofSection.split(/\r?\n/);
+    const headerIndex = lines.findIndex((line) => {
+      if (!line.trim().startsWith("|")) return false;
+      const cells = line
+        .split("|")
+        .slice(1, -1)
+        .map((cell) => cell.trim().toLowerCase());
+      return cells.length === expectedHeaders.length && cells.every((cell, index) => cell === expectedHeaders[index]);
+    });
+    const validManualRun =
+      headerIndex >= 0 &&
+      lines.slice(headerIndex + 2).some((line) => {
+        if (!line.trim().startsWith("|")) return false;
+        const cells = line
+          .split("|")
+          .slice(1, -1)
+          .map((cell) => cell.trim());
+        if (cells.length !== expectedHeaders.length) return false;
+        const [date, processName, input, output, result, cost, failureMode, automationDecision] = cells;
+        const evidenceCells = [processName, input, output, result, cost, failureMode, automationDecision];
+        return (
+          Boolean(parseLiveDate(date ?? "")) &&
+          evidenceCells.every((cell) => Boolean(cell) && !PLACEHOLDER_TEXT.test(cell ?? "")) &&
+          /\b(pass(?:ed)?|success(?:ful(?:ly)?)?|completed)\b/i.test(result ?? "")
+        );
+      });
+    if (!validManualRun) {
+      issues.push(
+        issue(
+          numbersSeverity,
+          "post_launch_ops.manual_loop_proof_missing",
+          `${runbookPath} marks Manual Loop Proof applicable but has no complete successful manual-run row. Record the date, process, real input and output, ` +
+            "successful result, cost, observed failure mode, and automation decision before automating the process.",
+          runbookPath,
+        ),
+      );
+    }
+  }
 }
 
 const liveSinceRaw = state ? (asString(getPath(state, "lanes.post_launch_ops.live_since")) ?? "").trim() : "";

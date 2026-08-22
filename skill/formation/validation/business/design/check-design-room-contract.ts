@@ -393,7 +393,7 @@ if (hasDesignState) {
             rel(args.root, contractPath),
           ),
         );
-      } else if (reviewReady && externalEvidenceRequired) {
+      } else if (evidenceRequired && externalEvidenceRequired) {
         const surfaceIndex = craftTable.headers.indexOf("surface");
         const conceptsIndex = craftTable.headers.indexOf("concepts compared");
         const reasoningIndexes = craftHeaders.slice(1).map((header) => craftTable.headers.indexOf(header.toLowerCase()));
@@ -419,7 +419,7 @@ if (hasDesignState) {
             issue(
               "error",
               "design_room.craft_reasoning_incomplete",
-              `A review-ready substantive change needs one complete Formation Craft Lens row for every scoped surface. Concepts compared must name at least three distinct concepts separated by commas. Mandatory reasoning fields cannot use none, not applicable, or N/A. ${details}`,
+              `A mutating or review-ready substantive change needs one complete Formation Craft Lens row for every scoped surface. Concepts compared must name at least three distinct concepts separated by commas. Mandatory reasoning fields cannot use none, not applicable, or N/A. ${details}`,
               rel(args.root, contractPath),
             ),
           );

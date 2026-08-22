@@ -1147,10 +1147,11 @@ async function main(): Promise<number> {
       }
     }
 
-    // A final batch can produce fresh-context work after the loop's last empty-frontier
-    // sweep. Judge that work before the session closes. A cooperative yield still permits
-    // verification of completed work; a timeout or kill switch remains final.
-    if (verifier && !timedOut && haltReason !== "kill_switch") {
+    // A cooperative yield can arrive while a batch is running. That batch may produce
+    // fresh-context work after the loop's last empty-frontier sweep, so judge it before the
+    // session closes. Ordinary empty-frontier completion already ran the sweep above; do not
+    // invoke an unavailable verifier twice. A timeout or kill switch remains final.
+    if (verifier && !timedOut && haltReason === "cooperative_yield") {
       await runVerificationSweep(true);
     }
 

@@ -64,6 +64,8 @@ Record these values by discovery channel when they apply.
 Record one successful manual run before you automate a value-producing process.
 Security, compliance, backup, and monitoring controls do not require this proof.
 
+Applicability: TODO — Record applicable, or not applicable with a specific reason.
+
 | Date | Process | Input | Output | Result | Cost | Failure mode | Automation decision |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 

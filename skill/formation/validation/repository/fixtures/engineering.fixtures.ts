@@ -396,6 +396,27 @@ export function register(h: Harness): void {
     "Missing: paywall.upgrade.",
   );
 
+  const designRoomMutatingCraftMissing = makeFixture("design-room-mutating-craft-missing");
+  {
+    const statePath = path.join(designRoomMutatingCraftMissing, "studio/seed/business.json");
+    const designState = JSON.parse(readFileSync(statePath, "utf8")) as MutableRecord;
+    const designRoom = expectRecord(designState["designRoom"], "designRoom");
+    designRoom["status"] = "mutating";
+    writeFileSync(statePath, `${JSON.stringify(designState, null, 2)}\n`, "utf8");
+    const contractPath = path.join(designRoomMutatingCraftMissing, "design/design.md");
+    const contract = readFileSync(contractPath, "utf8")
+      .replace("Change classification: Not defined", "Change classification: new or materially changed surface")
+      .replace("Change scope: Not defined", "Change scope: onboarding.primary");
+    writeFileSync(contractPath, contract, "utf8");
+  }
+  runFixture(
+    "a mutating substantive surface needs a complete Craft Lens row before implementation",
+    designRoomMutatingCraftMissing,
+    "check-design-room-contract.ts",
+    1,
+    "design_room.craft_reasoning_incomplete",
+  );
+
   const designRoomCraftOneConcept = makeFixture("design-room-craft-one-concept");
   {
     const statePath = path.join(designRoomCraftOneConcept, "studio/seed/business.json");

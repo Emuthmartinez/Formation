@@ -44,8 +44,8 @@ function cleanEnv(): NodeJS.ProcessEnv {
   return env;
 }
 
-function runSession(args: string[]): CliResult {
-  const result = spawnSync(tsxBin, [runCliPath, ...args], { cwd: skillRoot, encoding: "utf8", env: cleanEnv() });
+function runSession(args: string[], envOverrides: NodeJS.ProcessEnv = {}): CliResult {
+  const result = spawnSync(tsxBin, [runCliPath, ...args], { cwd: skillRoot, encoding: "utf8", env: { ...cleanEnv(), ...envOverrides } });
   return { code: result.status ?? -1, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
 }
 
@@ -945,6 +945,35 @@ main().catch((error) => { console.error(String((error && error.stack) || error))
       );
     },
   );
+
+  harness.check("session: ordinary empty-frontier completion invokes an unavailable verifier only once", () => {
+    const handle = bootstrapWorkspace(harness, "unavailable-verifier-single-sweep", slowSilentFreshContextCatalog(), {
+      grants: { "domain.research": grant("domain.research", "run-with-guardrails") },
+    });
+    const sessionId = "sess-unavailable-verifier-single-sweep-1";
+    const result = runSession(
+      [
+        "--workspace",
+        handle.dir,
+        "--brief",
+        handle.briefPath,
+        "--session",
+        sessionId,
+        "--executor",
+        "fixture",
+        "--verifier",
+        "cli",
+        "--worker-runtime",
+        "cursor",
+        "--lock-retries",
+        "0",
+      ],
+      { PATH: `${path.dirname(process.execPath)}:/usr/bin:/bin` },
+    );
+    assert(result.code === 0, `expected exit 0 with an unavailable verifier, got ${result.code}: ${result.output}`);
+    const unavailableCalls = result.output.match(/session\.verifier_unavailable/g)?.length ?? 0;
+    assert(unavailableCalls === 1, `ordinary completion must run the unavailable verifier once, got ${unavailableCalls}:\n${result.output}`);
+  });
 
   harness.check("session: a cooperative yield requested during a fresh-context attempt still verifies the completed batch before yielding", () => {
     const handle = bootstrapWorkspace(harness, "yield-final-verification", slowSilentFreshContextCatalog(), {

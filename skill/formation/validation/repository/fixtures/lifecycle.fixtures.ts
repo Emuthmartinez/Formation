@@ -34,6 +34,24 @@ export function register(h: Harness): void {
     writeFileSync(path.join(runbookPath), readFileSync(runbookPath, "utf8").replace(header, `${header}\n${row}`), "utf8");
   };
 
+  const setManualLoopApplicability = (root: string, value: string): void => {
+    const runbookPath = path.join(root, "operations/POST_LAUNCH_OPS.md");
+    const runbook = readFileSync(runbookPath, "utf8").replace(
+      "Applicability: TODO — Record applicable, or not applicable with a specific reason.",
+      `Applicability: ${value}`,
+    );
+    writeFileSync(runbookPath, runbook, "utf8");
+  };
+
+  const recordSuccessfulManualLoop = (root: string): void => {
+    const runbookPath = path.join(root, "operations/POST_LAUNCH_OPS.md");
+    const header =
+      "| Date | Process | Input | Output | Result | Cost | Failure mode | Automation decision |\n| --- | --- | --- | --- | --- | --- | --- | --- |";
+    const row = `| ${isoDaysAgo(2)} | renewal reminder send | 18 opted-in renewal reminders | 18 delivered reminders | completed successfully | $0 | two stale email addresses observed | keep manual until three clean weekly runs |`;
+    writeFileSync(runbookPath, readFileSync(runbookPath, "utf8").replace(header, `${header}\n${row}`), "utf8");
+    setManualLoopApplicability(root, "applicable");
+  };
+
   // The three operating-lane artifacts (2026-08-19 split: support queue, retention program,
   // financial pulse). Valid by default; each fail-then-catch case below breaks exactly one rule.
   const writeOperatingLaneArtifacts = (root: string, overrides: { support?: string; retention?: string; finance?: string; daysAgo?: number } = {}): void => {
@@ -74,8 +92,59 @@ export function register(h: Harness): void {
     lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
     writeState(postLaunchComplete, state);
     setPostLaunchLive(postLaunchComplete, 10);
+    setManualLoopApplicability(postLaunchComplete, "not applicable — No value-producing process is scheduled for automation.");
   }
   runFixture("post-launch lane done with complete runbook passes", postLaunchComplete, "check-post-launch-ops.ts", 0);
+
+  const postLaunchManualLoopComplete = makeFixture("post-launch-manual-loop-complete");
+  {
+    const state = readState(postLaunchManualLoopComplete);
+    expectRecord(state.project, "project")["phase"] = "phase_6b";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
+    writeState(postLaunchManualLoopComplete, state);
+    setPostLaunchLive(postLaunchManualLoopComplete, 10);
+    recordSuccessfulManualLoop(postLaunchManualLoopComplete);
+  }
+  runFixture("post-launch applicable automation with a successful manual-loop row passes", postLaunchManualLoopComplete, "check-post-launch-ops.ts", 0);
+
+  const postLaunchManualLoopEmpty = makeFixture("post-launch-manual-loop-empty");
+  {
+    const state = readState(postLaunchManualLoopEmpty);
+    expectRecord(state.project, "project")["phase"] = "phase_6b";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
+    writeState(postLaunchManualLoopEmpty, state);
+    setPostLaunchLive(postLaunchManualLoopEmpty, 10);
+    setManualLoopApplicability(postLaunchManualLoopEmpty, "applicable");
+  }
+  runFixture(
+    "post-launch applicable automation without a successful manual-loop row fails",
+    postLaunchManualLoopEmpty,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_proof_missing",
+  );
+
+  const postLaunchManualLoopUndecided = makeFixture("post-launch-manual-loop-undecided");
+  {
+    const state = readState(postLaunchManualLoopUndecided);
+    expectRecord(state.project, "project")["phase"] = "phase_6b";
+    const lane = getLane(state, "post_launch_ops");
+    lane["status"] = "done";
+    lane["evidence"] = ["operations/POST_LAUNCH_OPS.md", "operations/LAUNCH_RETRO.md"];
+    writeState(postLaunchManualLoopUndecided, state);
+    setPostLaunchLive(postLaunchManualLoopUndecided, 10);
+  }
+  runFixture(
+    "post-launch manual-loop proof without an applicability decision fails",
+    postLaunchManualLoopUndecided,
+    "check-post-launch-ops.ts",
+    1,
+    "post_launch_ops.manual_loop_applicability_missing",
+  );
 
   // The live date is the anchor for every due-date and freshness gate; a live
   // app with no recorded live_since has no clock, so nothing can ever be overdue.
@@ -260,6 +329,7 @@ export function register(h: Harness): void {
       verdict: "Hold — flat but positive, low founder cost",
       evidence: ["$412 MRR, flat 4 wks", "D7 31% → 29% → 31%", "n/a — organic only", "6"],
     });
+    setManualLoopApplicability(postLaunchVerdictComplete, "not applicable — No value-producing process is scheduled for automation.");
   }
   runFixture("completed checkpoint with verdict and state mirror passes", postLaunchVerdictComplete, "check-post-launch-ops.ts", 0);
 
@@ -276,6 +346,7 @@ export function register(h: Harness): void {
     writeState(root, state);
     setPostLaunchLive(root, 20);
     appendWeeklyLogRow(root, { daysAgo: 3 });
+    setManualLoopApplicability(root, "not applicable — No value-producing process is scheduled for automation.");
     if (!skipArtifacts) writeOperatingLaneArtifacts(root, overrides);
     return root;
   };
@@ -802,6 +873,7 @@ export function register(h: Harness): void {
       verdict: "Kill",
       evidence: ["$60 MRR declining 4 wks", "D30 under 5% two cohorts", "n/a — organic only", "8"],
     });
+    setManualLoopApplicability(postLaunchKilledQuiet, "not applicable — This business is in wind-down and schedules no value-producing automation.");
   }
   runFixture("killed app in wind-down with a quiet weekly log passes", postLaunchKilledQuiet, "check-post-launch-ops.ts", 0);
 

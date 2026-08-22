@@ -751,8 +751,12 @@ function validateOfferTest(value: string | undefined, target: ReturnType<typeof 
     const conversionsColumn = tableColumnIndex(exposureSection, /cta conversions/i);
     const sourceColumn = tableColumnIndex(exposureSection, /evidence source/i);
     const measured = tableDataRows(exposureSection).some((candidate) => {
-      const exposure = Number((candidate[exposureColumn] ?? "").replace(/,/g, ""));
-      const conversions = Number((candidate[conversionsColumn] ?? "").replace(/,/g, ""));
+      if ([exposureColumn, conversionsColumn, sourceColumn].some((column) => column < 1)) return false;
+      const exposureCell = (candidate[exposureColumn] ?? "").trim();
+      const conversionsCell = (candidate[conversionsColumn] ?? "").trim();
+      if (exposureCell.length === 0 || conversionsCell.length === 0) return false;
+      const exposure = Number(exposureCell.replace(/,/g, ""));
+      const conversions = Number(conversionsCell.replace(/,/g, ""));
       const source = (candidate[sourceColumn] ?? "").trim();
       return Number.isFinite(exposure) && exposure > 0 && Number.isFinite(conversions) && conversions >= 0 && source.length > 0 && !placeholder.test(source);
     });

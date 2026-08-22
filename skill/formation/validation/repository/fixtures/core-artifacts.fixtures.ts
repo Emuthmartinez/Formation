@@ -384,6 +384,37 @@ export function register(h: Harness): void {
     "research.offer_test_measurement_missing",
   );
 
+  const researchOfferBlankConversion = makeCompletedResearch("research-offer-test-blank-conversion");
+  {
+    const offerPath = path.join(researchOfferBlankConversion, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | 31 | 3.69% | 0 | continue |",
+      "| 2026-07-20 | Reddit | PostHog test cohort TRACE-003 | qualified visits | 840 | | 3.69% | 0 | continue |",
+    );
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "run offer test with a blank CTA conversion count fails",
+    researchOfferBlankConversion,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_measurement_missing",
+  );
+
+  const researchOfferMissingConversionColumn = makeCompletedResearch("research-offer-test-missing-conversion-column");
+  {
+    const offerPath = path.join(researchOfferMissingConversionColumn, "strategy/OFFER_TEST.md");
+    const offer = readFileSync(offerPath, "utf8").replace(" | CTA conversions", "").replace(" | 31 | 3.69%", " | 3.69%");
+    writeFileSync(offerPath, offer, "utf8");
+  }
+  runFixture(
+    "run offer test without a CTA conversion column fails",
+    researchOfferMissingConversionColumn,
+    "check-research-evidence.ts",
+    1,
+    "research.offer_test_measurement_missing",
+  );
+
   const researchOfferStarterContract = makeCompletedResearch("research-offer-test-starter-contract");
   {
     const offerPath = path.join(researchOfferStarterContract, "strategy/OFFER_TEST.md");
