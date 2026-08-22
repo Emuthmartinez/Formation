@@ -353,7 +353,7 @@ export function register(h: Harness): void {
 
   const archiveSdkKeyMissing = makeFixture("apple-requirements-archive-sdk-key-missing");
   writeCompleteAppleRequirements(archiveSdkKeyMissing);
-  rewriteFixtureArchiveInfoPlist(archiveSdkKeyMissing, (contents) => contents.replace("<key>POSTHOG_API_KEY</key><string>phc_fixture</string>\n", ""));
+  rewriteFixtureArchiveInfoPlist(archiveSdkKeyMissing, (contents) => contents.replace("<key>POSTHOG_HOST</key><string>fixture-posthog-host</string>\n", ""));
   runFixture(
     "Apple signing rejects item 7 when a named SDK key is absent from the parsed archive Info.plist",
     archiveSdkKeyMissing,
@@ -364,7 +364,7 @@ export function register(h: Harness): void {
 
   const archiveSdkProviderSubstringOnly = makeFixture("apple-requirements-archive-sdk-provider-substring-only");
   writeCompleteAppleRequirements(archiveSdkProviderSubstringOnly);
-  rewriteFixtureArchiveInfoPlist(archiveSdkProviderSubstringOnly, (contents) => contents.replace("POSTHOG_API_KEY", "POSTHOG_HOST"));
+  rewriteFixtureArchiveInfoPlist(archiveSdkProviderSubstringOnly, (contents) => contents.replace("POSTHOG_HOST", "POSTHOG_HOSTNAME"));
   runFixture(
     "Apple signing rejects a partial provider match when the exact item 7 plist key is absent",
     archiveSdkProviderSubstringOnly,

@@ -437,12 +437,12 @@ Keep the evidence on one line in the exact format above. The validator resolves 
 
 After `xcodebuild archive` succeeds, inspect the new archive. Do not inspect an older archive. Confirm that its bundle ID and user-visible version match the intended Release settings and App Store Connect. Confirm that its build matches the intended build and that App Store Connect still reports it as available and not previously received. Then verify that every required runtime `Info.plist` key is present. Keys that come from build variables must be expanded.
 
-List the exact, case-sensitive `Info.plist` key names. The example app uses `REVENUECAT_API_KEY`, `POSTHOG_API_KEY`, and `SUPABASE_URL`. Replace this list with the project's actual required runtime keys when they differ.
+List the exact, case-sensitive `Info.plist` key names. The example app uses `REVENUECAT_ENTITLEMENT_ID`, `POSTHOG_HOST`, and `SUPABASE_URL`. Replace this list with the project's actual required runtime keys when they differ, and route any secret-shaped keys through the project's secret inventory.
 
 ```bash
 # After archive, inspect the archived Info.plist directly
 plutil -p build/MyApp.xcarchive/Products/Applications/MyApp.app/Info.plist \
-  | grep -E 'REVENUECAT_API_KEY|POSTHOG_API_KEY|SUPABASE_URL'
+  | grep -E 'REVENUECAT_ENTITLEMENT_ID|POSTHOG_HOST|SUPABASE_URL'
 ```
 
 The square-bracket list in item 7 is comma-separated. Each entry must be an exact, case-sensitive `Info.plist` key name after trimming. Every listed key must exist with a nonempty value. A value that contains `$(...)`, `${...}`, or `{{...}}` is unresolved. If a listed key is absent, empty, or unresolved, stop. Fix the injection route and re-archive. Do not upload the build.
@@ -450,7 +450,7 @@ The square-bracket list in item 7 is comma-separated. Each entry must be an exac
 Record result:
 
 ```text
-7. New compiled archive Info.plist identity and SDK keys [REVENUECAT_API_KEY, POSTHOG_API_KEY, SUPABASE_URL]; archive path=build/MyApp.xcarchive; Info.plist SHA-256=<same 64-character SHA-256 recorded in archive evidence>: pass.
+7. New compiled archive Info.plist identity and SDK keys [REVENUECAT_ENTITLEMENT_ID, POSTHOG_HOST, SUPABASE_URL]; archive path=build/MyApp.xcarchive; Info.plist SHA-256=<same 64-character SHA-256 recorded in archive evidence>: pass.
 ```
 
 Keep item 7 on one line in the exact format above. Its path and SHA-256 must match the archive evidence record. This correlation binds the validation to the release artifact. Do not export or upload until item 7 passes. If item 7 fails, fix the build input, create a new archive, and regenerate the complete post-archive evidence record.
